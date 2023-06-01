@@ -1,0 +1,31 @@
+{
+  "name": "semantic-ui-web-components",
+  "version": "0.0.1",
+  "title": "Semantic UI Web Components",
+  "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
+  "homepage": "http://www.semantic-ui.com",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "server": "supervisor ./server.cjs",
+    "build": "node ./tasks/build.js",
+    "watch": "node ./tasks/watch.js"
+  },
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "devDependencies": {
+    "esbuild": "^0.17.6",
+    "esbuild-plugin-babel": "^0.2.3",
+    "esbuild-plugin-glob": "^2.2.1",
+    "esbuild-plugin-less": "^1.1.12",
+    "underscore": "^1.13.6"
+  },
+  "dependencies": {
+    "@babel/eslint-parser": "^7.19.1",
+    "glob": "^8.1.0",
+    "glob-promise": "^6.0.2",
+    "mime": "^3.0.0",
+    "snuggsi": "github:devpunks/snuggsi",
+    "supervisor": "^0.12.0"
+  }
+}
