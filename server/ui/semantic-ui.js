@@ -245,8 +245,6 @@
       __publicField(this, "css", button_default2);
     }
     initialize(settings) {
-      console.log(button_default2);
-      console.log(button_default);
     }
   };
   customElements.define("ui-button", UIButton);

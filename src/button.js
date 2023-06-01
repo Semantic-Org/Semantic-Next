@@ -12,8 +12,6 @@ class UIButton extends SUIComponent {
   css = ButtonCSS;
 
   initialize(settings) {
-    console.log(ButtonCSS);
-    console.log(ButtonTemplate);
     // do something with settings
   }
 }
