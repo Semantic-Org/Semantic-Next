@@ -1,0 +1,21 @@
+html,
+body {
+  height: 100%;
+}
+
+html {
+  font-size: var(--em-size);
+}
+
+body {
+  margin: 0px;
+  padding: 0px;
+  overflow-x: var(--page-overflow-x);
+  min-width: var(--page-min-width);
+  background: var(--page-background);
+  font-family: var(--page-font);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--text-color);
+  font-smoothing: var(--font-smoothing);
+}

@@ -232,7 +232,7 @@
   var button_default = '<div class="button">\n  <slot name="text" default></slot>\n</div>\n';
 
   // src/button/button.css
-  var button_default2 = ".button {\n  background-color: red;\n}\n";
+  var button_default2 = ".button {\n  cursor: pointer;\n  display: inline-block;\n\n  min-height: 1em;\n  font-size: var(--medium);\n\n  outline: none;\n  border: none;\n  vertical-align: var(--vertical-align);\n  background: var(--background);\n  color: var(--text-color);\n\n  font-family: var(--font-family);\n\n  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;\n  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));\n\n  text-transform: var(--text-transform);\n  text-shadow: var(--text-shadow);\n  font-weight: var(--font-weight);\n  line-height: var(--line-height);\n  font-style: normal;\n  text-align: center;\n  text-decoration: none;\n\n  border-radius: var(--border-radius);\n  box-shadow: var(--box-shadow);\n\n  user-select: none;\n  transition: var(--transition);\n  will-change: var(--will-change);\n\n  -webkit-tap-highlight-color: var(--tap-color);\n\n  outline: none;\n}\n";
 
   // src/button.js
   var UIButton = class extends SUIComponent {
