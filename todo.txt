@@ -1,11 +1,14 @@
+June 7
+- Set up definition file and use it to read in attr
+- Add primary/secondary variation as attributes
+
+June 2
++ Review inheritance for global / component vars
++ Confirm approach to css variables
++ Confirm approach to attr
+
+
 June 1
 + Get scaffolding of a web component button set up, no abstraction
 + Confirm ES6 compiling
 + Create demo page and confirm component loading
-
-June 2
-- Confirm approach to css variables
-- Review inheritance for global / component vars
-- Set up definition file and use it to read in attr 
-- Confirm approach to attr
-- Add primary/secondary variation as attributes

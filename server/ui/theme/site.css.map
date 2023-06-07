@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/themes/default/site.css"],
+  "sourcesContent": ["html,\nbody {\n  height: 100%;\n}\n\nhtml {\n  font-size: var(--font-size);\n}\n\nbody {\n  margin: 0px;\n  padding: 0px;\n  overflow-x: var(--page-overflow-x);\n  min-width: var(--page-min-width);\n  background: var(--page-background);\n  font-family: var(--page-font);\n  font-size: var(--font-size);\n  line-height: var(--line-height);\n  color: var(--text-color);\n  font-smoothing: var(--font-smoothing);\n}\n"],
+  "mappings": "AAAA;AAAA;AAEE;AAAA;AAGF;AACE;AAAA;AAGF;AACE;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AAAA;",
+  "names": []
+}

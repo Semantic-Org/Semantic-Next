@@ -8,7 +8,7 @@ let context1 = await esbuild.context({
   ],
   bundle: true,
   //minify: true,
-  //sourcemap: true,
+  sourcemap: true,
   target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
   loader: {
     '.html': 'text',
@@ -28,7 +28,7 @@ let context2 = await esbuild.context({
   entryPoints: files,
   bundle: false,
   //minify: true,
-  //sourcemap: true,
+  sourcemap: true,
   target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
   loader: {
     '.css': 'css',

@@ -1,10 +1,12 @@
-import { $ } from './query.js';
+import { $ } from './query';
 
 import {
   extend,
   isString,
   wrapFunction
-} from './utils.js';
+} from './utils';
+
+import { getAttributesFromUIDefinition } from './sui-helpers';
 
 class SUIComponent extends HTMLElement {
 
@@ -23,6 +25,11 @@ class SUIComponent extends HTMLElement {
     this.initializeComponent();
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    console.log(`The attribute ${name} changed from ${oldValue} to ${newValue}`);
+    // Perform any actions needed when the attribute changes
+  }
+
   /*******************************
            Initialization
   *******************************/
@@ -33,22 +40,35 @@ class SUIComponent extends HTMLElement {
     this.bindEvents();
     this.initializeSettings();
 
+    // Handle rendering the Shadow DOM for the component
     if(this.template) {
       this.setTemplate(this.template);
     }
 
+    // Inject CSS for component into a <style> tag
     if(this.css) {
       this.addCSS(this.css);
     }
+
+    // initialize 2 way data bindings
+    if(this.definition) {
+      this.bindAttributes();
+    }
+
 
     // allow each component to specify its own initialize
     if (this.initialize) {
       this.initialize(this.settings);
     }
 
+
     // we allow a slot to be specified as default so it
     // can default to the text node for a simpler use case
     this.handleDefaultSlot();
+  }
+
+  bindAttributes() {
+
   }
 
   handleDefaultSlot() {
@@ -148,6 +168,11 @@ class SUIComponent extends HTMLElement {
     }));
   }
 
+  getAttributesFromUIDefinition(definition) {
+    return getAttributesFromUIDefinition(definition);
+  }
+
 }
 
+export * from './sui-helpers';
 export { SUIComponent };

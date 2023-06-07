@@ -30,6 +30,18 @@ export const keys = function(obj) {
 };
 
 
+
+/* Remove duplicates from an array */
+export const unique = function(arr) {
+  return Array.from(new Set(arr));
+};
+
+/* Remove undefined values from an array */
+export const removeUndefined = function(arr) {
+  return arr.filter(val => val);
+};
+
+
 /*
   Simple Iterator
 */
