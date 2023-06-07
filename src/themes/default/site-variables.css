@@ -58,32 +58,6 @@
 --huge-ratio: 20 / 14;
 --massive-ratio: 24 / 14;
 
-/*
-  These are the pixel values expressed as a ratio of base em
-  This is used to calculate em sizing
-
-*/
-
-/* rem (relative to html/body tag) */
---mini: calc(var(--mini-ratio) * 1rem);
---tiny: calc(var(--tiny-ratio) * 1rem);
---small: calc(var(--small-ratio) * 1rem);
---medium: calc(var(--medium-ratio) * 1rem);
---large: calc(var(--large-ratio) * 1rem);
---big: calc(var(--big-ratio) * 1rem);
---huge: calc(var(--huge-ratio) * 1rem);
---massive: calc(var(--massive-ratio) * 1rem);
-
-/* em (relative to container) */
---relative-mini: calc(var(--mini-ratio) * 1em);
---relative-tiny: calc(var(--tiny-ratio) * 1em);
---relative-small: calc(var(--small-ratio) * 1em);
---relative-medium: calc(var(--medium-ratio) * 1em);
---relative-large: calc(var(--large-ratio) * 1em);
---relative-big: calc(var(--big-ratio) * 1em);
---relative-huge: calc(var(--huge-ratio) * 1em);
---relative-massive: calc(var(--massive-ratio) * 1em);
-
 /*-------------------
     Border Radius
 --------------------*/
@@ -500,7 +474,7 @@
 --header-line-height-offset: (var(--header-line-height) - 1em) / 2;
 
 /* Header Spacing */
---header-top-margin: ~"calc(2rem - "var(--header-line-height-offset)~")";
+--header-top-margin: calc(2rem - var(--header-line-height-offset));
 --header-bottom-margin: 1rem;
 --header-margin: var(--header-top-margin) 0em var(--header-bottom-margin);
 
@@ -527,6 +501,35 @@
 --largest-small-monitor: (var(--large-monitor-breakpoint) - 1px);
 --largest-large-monitor: (var(--widescreen-monitor-breakpoint) - 1px);
 
+/*-------------------
+     Sizing Values
+--------------------*/
+
+/*
+  These are the pixel values expressed as a ratio of base em
+  This is used to calculate em sizing
+
+*/
+
+/* rem (relative to html/body tag) */
+--mini: calc(var(--mini-ratio) * 1rem);
+--tiny: calc(var(--tiny-ratio) * 1rem);
+--small: calc(var(--small-ratio) * 1rem);
+--medium: calc(var(--medium-ratio) * 1rem);
+--large: calc(var(--large-ratio) * 1rem);
+--big: calc(var(--big-ratio) * 1rem);
+--huge: calc(var(--huge-ratio) * 1rem);
+--massive: calc(var(--massive-ratio) * 1rem);
+
+/* em (relative to container) */
+--relative-mini: calc(var(--mini-ratio) * 1em);
+--relative-tiny: calc(var(--tiny-ratio) * 1em);
+--relative-small: calc(var(--small-ratio) * 1em);
+--relative-medium: calc(var(--medium-ratio) * 1em);
+--relative-large: calc(var(--large-ratio) * 1em);
+--relative-big: calc(var(--big-ratio) * 1em);
+--relative-huge: calc(var(--huge-ratio) * 1em);
+--relative-massive: calc(var(--massive-ratio) * 1em);
 
 /*-------------------
   Exact Pixel Values
