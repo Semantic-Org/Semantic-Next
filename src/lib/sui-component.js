@@ -1,12 +1,6 @@
 import { $ } from './query';
-
-import {
-  extend,
-  isString,
-  wrapFunction
-} from './utils';
-
-import { getAttributesFromUIDefinition } from './sui-helpers';
+import { extend, isString, wrapFunction } from './utils';
+import { getUISettings, getAllowedAttributes } from './sui-helpers';
 
 class SUIComponent extends HTMLElement {
 
@@ -40,30 +34,27 @@ class SUIComponent extends HTMLElement {
     this.bindEvents();
     this.initializeSettings();
 
-    // Handle rendering the Shadow DOM for the component
+    // handle rendering the Shadow DOM for the component
     if(this.template) {
       this.setTemplate(this.template);
     }
 
-    // Inject CSS for component into a <style> tag
+    // inject CSS for component
     if(this.css) {
       this.addCSS(this.css);
     }
 
-    // initialize 2 way data bindings
+    // update props when attributes update
     if(this.definition) {
       this.bindAttributes();
     }
-
 
     // allow each component to specify its own initialize
     if (this.initialize) {
       this.initialize(this.settings);
     }
 
-
-    // we allow a slot to be specified as default so it
-    // can default to the text node for a simpler use case
+    // populate default slot with content
     this.handleDefaultSlot();
   }
 
@@ -92,13 +83,7 @@ class SUIComponent extends HTMLElement {
   }
 
   initializeSettings(settings) {
-    if(!settings) {
-      settings = this.getAttribute('settings') || {};
-    }
-    // user specified a global function
-    if(isString(settings)) {
-      wrapFunction(window[settings])();
-    }
+    settings = getUISettings(this);
     this.dispatchCustomEvent('initializeSettings', settings);
   }
 
@@ -108,7 +93,7 @@ class SUIComponent extends HTMLElement {
 
   setTemplate(templateString) {
     /*
-      Not fully implemented eventually will handle
+      Not fully implemented eventually will handle if/else
     */
     this.shadowRoot.innerHTML = templateString;
   }
@@ -116,11 +101,19 @@ class SUIComponent extends HTMLElement {
   /*******************************
               Styles
   *******************************/
-
   addCSS(styleContent) {
-    const style = document.createElement('style');
-    style.textContent = styleContent;
-    this.shadowRoot.appendChild(style);
+    if('adoptedStyleSheets' in Document.prototype && 'replace' in CSSStyleSheet.prototype) {
+      if(!this.stylesheet) {
+        this.stylesheet = new CSSStyleSheet();
+        this.stylesheet.replaceSync(styleContent);
+      }
+      this.shadowRoot.adoptedStyleSheets = [this.stylesheet];
+    }
+    else {
+      const style = document.createElement('style');
+      style.textContent = styleContent;
+      this.shadowRoot.appendChild(style);
+    }
   }
 
   /*******************************
@@ -168,8 +161,8 @@ class SUIComponent extends HTMLElement {
     }));
   }
 
-  getAttributesFromUIDefinition(definition) {
-    return getAttributesFromUIDefinition(definition);
+  getAllowedAttributes(definition) {
+    return getAllowedAttributes(definition);
   }
 
 }

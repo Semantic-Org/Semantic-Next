@@ -21,41 +21,37 @@ export const ButtonDefinition = {
 
     {
       name: 'Emphasis',
+      attribute: 'emphasis',
       description: 'A button can be formatted to show different levels of emphasis',
       adoptionLevel: 1,
       options: [
         {
           name: 'Primary',
-          attribute: 'primary',
+          value: 'primary',
           description: 'This button should appear to be emphasized as the first action that should be taken over other options.'
         },
         {
           name: 'Secondary',
-          attribute: 'secondary',
+          value: 'secondary',
           description: 'This button should appear to be emphasized as a secondary option that should appear after other options'
         },
       ]
     },
 
     {
-      name: 'Icon Only',
-      description: 'A button can appear with only an icon',
+      name: 'Icon',
+      attribute: 'icon',
+      description: 'A button can appear with an icon',
       adoptionLevel: 2,
 
       looseCoupling: true,
       couplesWith: ['icon'],
-
-      options: [
-        {
-          name: 'Icon Only',
-          attribute: 'icon',
-        },
-      ],
       distinctHTML: true,
     },
 
     {
       name: 'Labeled',
+      attribute: 'labeled',
       description: 'A button can appear specially formatted to attach to a label element',
       adoptionLevel: 3,
 
@@ -65,12 +61,12 @@ export const ButtonDefinition = {
       options: [
         {
           name: 'Labeled',
-          attribute: 'labeled',
+          value: ['labeled', 'right-labeled'],
           description: 'A button can be formatted so that a label appears to the right'
         },
         {
           name: 'Left Labeled',
-          attribute: 'left-labeled',
+          value: 'left-labeled',
           description: 'A button can be formatted so that a label appears to the left'
         },
       ],
@@ -85,12 +81,12 @@ export const ButtonDefinition = {
       options: [
         {
           name: 'Labeled',
-          attribute: 'labeled',
+          value: 'labeled',
           description: 'A button can be formatted so that the icon appears to the right'
         },
         {
           name: 'Left Labeled',
-          attribute: 'left-labeled',
+          value: 'left-labeled',
           description: 'A button can be formatted so that the icon appears to the left'
         },
       ],
@@ -104,17 +100,17 @@ export const ButtonDefinition = {
       options: [
         {
           name: 'Animated',
-          attribute: 'animated',
+          value: 'animated',
           description: 'A button can be formatted to animate hidden content horizontally'
         },
         {
           name: 'Vertical Animated',
-          attribute: 'vertical-animated',
+          value: 'vertical-animated',
           description: 'A button can be formatted to animate hidden content vertically'
         },
         {
           name: 'Fade Animated',
-          attribute: 'vertical-animated',
+          value: 'vertical-animated',
           description: 'A button can be formatted to fade in hidden content'
         },
       ],
@@ -151,18 +147,67 @@ export const ButtonDefinition = {
 
   variations: [
     {
-      name: 'Basic',
-      description: 'A button can be formatted to appear deemphasized over other elements in the page.',
+      name: 'Styling',
+      value: 'styling',
+      description: 'A button can be formatted to appear de-emphasized over other elements in the page.',
       options: [
         {
           name: 'Basic',
-          attribute: 'basic',
+          value: 'basic',
           description: 'A button can appear slightly less pronounced.'
         },
         {
           name: 'Very Basic',
-          attribute: 'very-basic',
+          value: 'very-basic',
           description: 'A button can appear to be much less pronounced.'
+        },
+      ]
+    },
+
+    {
+      name: 'Size',
+      value: 'size',
+      description: 'A button can vary in size',
+      options: [
+        {
+          name: 'Mini',
+          value: 'mini',
+          description: 'An element can appear extremely small'
+        },
+        {
+          name: 'Tiny',
+          value: 'tiny',
+          description: 'An element can appear very small'
+        },
+        {
+          name: 'Small',
+          value: 'small',
+          description: 'An element can appear small'
+        },
+        {
+          name: 'Medium',
+          value: 'medium',
+          description: 'An element can appear normal sized'
+        },
+        {
+          name: 'Large',
+          value: 'large',
+          description: 'An element can appear larger than normal'
+        },
+        {
+          name: 'Big',
+          value: 'big',
+          description: 'An element can appear much larger than normal'
+        },
+        {
+          name: 'Huge',
+          value: 'huge',
+          description: 'An element can appear very much larger than normal'
+        },
+        {
+          name: 'Massive',
+          value: 'massive',
+          description: 'An element can appear extremely larger than normal'
         },
       ]
     },
@@ -170,12 +215,7 @@ export const ButtonDefinition = {
     {
       name: 'Inverted',
       description: 'A button can be formatted to appear on dark backgrounds.',
-      options: [
-        {
-          name: 'Inverted',
-          attribute: 'inverted',
-        },
-      ]
+      attribute: 'inverted',
     },
   ],
 

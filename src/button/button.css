@@ -35,3 +35,7 @@
 
   outline: none;
 }
+
+ui-button .button {
+  font-size: var(--large);
+}

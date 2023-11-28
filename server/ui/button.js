@@ -94,24 +94,24 @@
   }
 
   // src/lib/utils.js
-  var keys = (obj) => {
+  var keys = function(obj) {
     return Object.keys(obj);
   };
-  var unique = (arr) => {
+  var unique = function(arr) {
     return Array.from(new Set(arr));
   };
-  var filterEmpty = (arr) => {
+  var removeUndefined = function(arr) {
     return arr.filter((val) => val);
   };
-  var each = (obj, func, context) => {
+  var each = function(obj, func, context) {
     if (obj === null) {
       return obj;
     }
-    let createCallback = (context2, func2) => {
+    let createCallback = function(context2, func2) {
       if (context2 === void 0) {
         return func2;
       } else {
-        return (value, index, collection) => {
+        return function(value, index, collection) {
           return func2.call(context2, value, index, collection);
         };
       }
@@ -130,21 +130,17 @@
     }
     return obj;
   };
-  var firstMatch = (array = [], evaluator) => {
-    let result;
-    each(array, (value, name) => {
-      const shouldReturn = evaluator(value, name);
-      if (!result && shouldReturn == true) {
-        result = value;
-      }
-    });
-    return result;
+  var isString = function(str) {
+    return typeof str == "string";
   };
-  var inArray = (value, array = []) => {
-    return array.indexOf(value) > -1;
+  var isFunction = function(obj) {
+    return typeof obj == "function" || false;
   };
-  var extend = (obj, ...sources) => {
-    sources.forEach((source) => {
+  var wrapFunction = function(x) {
+    return isFunction(x) ? x : () => x;
+  };
+  var extend = function(obj, ...sources) {
+    sources.forEach(function(source) {
       let descriptor, prop;
       if (source) {
         for (prop in source) {
@@ -159,92 +155,23 @@
     });
     return obj;
   };
-  var get = function(object, string = "") {
-    string = string.replace(/^\./, "").replace(/\[(\w+)\]/g, ".$1");
-    const stringParts = string.split(".");
-    for (let index = 0, length = stringParts.length; index < length; ++index) {
-      const part = stringParts[index];
-      if (!!object && part in object) {
-        object = object[part];
-      } else {
-        return;
-      }
-    }
-    return object;
-  };
 
   // src/lib/sui-helpers.js
-  var convertStringifiedSettings = (value, { emptyStringIsTruthy = false } = {}) => {
-    if (emptyStringIsTruthy && value === "") {
-      return true;
-    }
-    if (value === "true" || value === true) {
-      return true;
-    }
-    if (value === "false") {
-      return false;
-    }
-    if (value == "undefined" || value == "null" || value === null) {
-      return void 0;
-    }
-    return value;
-  };
-  var getSettingValue = (element, name = "sizing", definition = element == null ? void 0 : element.definition) => {
-    const attrValue = convertStringifiedSettings(element.getAttribute(name), {
-      emptyStringIsTruthy: true
-    });
-    return attrValue === void 0 ? element[name] : attrValue;
-  };
-  var getDefinitionParts = (type) => {
-    const typeParts = {
-      element: ["types", "variations", "states"]
-    };
-    return get(typeParts, type) || [];
-  };
-  var getUISettings = (element, definition = element == null ? void 0 : element.definition) => {
-    const settings = {};
-    const definitionParts = getDefinitionParts(definition.uiType);
-    each(definitionParts, (part) => {
-      const definitionPart = definition[part];
-      each(definitionPart, (definitionSlice) => {
-        let attribute = definitionSlice.attribute || (definitionSlice.name || "").toLowerCase();
-        let value = getSettingValue(element, attribute);
-        let classNames = [...element.classList];
-        let options = definitionSlice.options || [definitionSlice.options].filter(Boolean);
-        if (value == void 0 && options.length) {
-          const match = firstMatch(options, (option) => getSettingValue(element, option.value));
-          value = match == null ? void 0 : match.value;
-        }
-        if (value == void 0 && classNames.length) {
-          const optionValues = options.map((option) => option.value);
-          if (optionValues.length) {
-            value = firstMatch(classNames, (className) => inArray(className, optionValues));
-          }
-        }
-        if (value) {
-          settings[attribute] = value;
-        }
-      });
-    });
-    return settings;
-  };
-  var getAllowedAttributes = (definition) => {
+  var getAttributesFromUIDefinition = (definition) => {
     let attributes = [];
     let getAttributes = function(type) {
-      if (type.attribute) {
-        attributes.push(type.attribute);
-      }
-      let options = type.options || [type].filter(Boolean);
+      let options = type.options || [type];
       each(options, (option) => {
-        if (option.value) {
-          attributes.push(option.value);
+        if (option.attribute) {
+          attributes.push(option.attribute);
         }
       });
     };
     each(definition.types, getAttributes);
     each(definition.variations, getAttributes);
     each(definition.states, getAttributes);
-    attributes = unique(filterEmpty(attributes));
+    attributes = unique(attributes);
+    attributes = removeUndefined(attributes);
     return attributes;
   };
 
@@ -307,7 +234,12 @@
       });
     }
     initializeSettings(settings) {
-      settings = getUISettings(this);
+      if (!settings) {
+        settings = this.getAttribute("settings") || {};
+      }
+      if (isString(settings)) {
+        wrapFunction(window[settings])();
+      }
       this.dispatchCustomEvent("initializeSettings", settings);
     }
     /*******************************
@@ -320,17 +252,9 @@
                 Styles
     *******************************/
     addCSS(styleContent) {
-      if ("adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype) {
-        if (!this.stylesheet) {
-          this.stylesheet = new CSSStyleSheet();
-          this.stylesheet.replaceSync(styleContent);
-        }
-        this.shadowRoot.adoptedStyleSheets = [this.stylesheet];
-      } else {
-        const style = document.createElement("style");
-        style.textContent = styleContent;
-        this.shadowRoot.appendChild(style);
-      }
+      const style = document.createElement("style");
+      style.textContent = styleContent;
+      this.shadowRoot.appendChild(style);
     }
     /*******************************
            Settings / Attrs
@@ -365,8 +289,8 @@
         detail
       }, eventData)));
     }
-    getAllowedAttributes(definition) {
-      return getAllowedAttributes(definition);
+    getAttributesFromUIDefinition(definition) {
+      return getAttributesFromUIDefinition(definition);
     }
   };
 
@@ -388,34 +312,37 @@
     types: [
       {
         name: "Emphasis",
-        attribute: "emphasis",
         description: "A button can be formatted to show different levels of emphasis",
         adoptionLevel: 1,
         options: [
           {
             name: "Primary",
-            value: "primary",
+            attribute: "primary",
             description: "This button should appear to be emphasized as the first action that should be taken over other options."
           },
           {
             name: "Secondary",
-            value: "secondary",
+            attribute: "secondary",
             description: "This button should appear to be emphasized as a secondary option that should appear after other options"
           }
         ]
       },
       {
-        name: "Icon",
-        attribute: "icon",
-        description: "A button can appear with an icon",
+        name: "Icon Only",
+        description: "A button can appear with only an icon",
         adoptionLevel: 2,
         looseCoupling: true,
         couplesWith: ["icon"],
+        options: [
+          {
+            name: "Icon Only",
+            attribute: "icon"
+          }
+        ],
         distinctHTML: true
       },
       {
         name: "Labeled",
-        attribute: "labeled",
         description: "A button can appear specially formatted to attach to a label element",
         adoptionLevel: 3,
         looseCoupling: true,
@@ -423,12 +350,12 @@
         options: [
           {
             name: "Labeled",
-            value: ["labeled", "right-labeled"],
+            attribute: "labeled",
             description: "A button can be formatted so that a label appears to the right"
           },
           {
             name: "Left Labeled",
-            value: "left-labeled",
+            attribute: "left-labeled",
             description: "A button can be formatted so that a label appears to the left"
           }
         ],
@@ -442,12 +369,12 @@
         options: [
           {
             name: "Labeled",
-            value: "labeled",
+            attribute: "labeled",
             description: "A button can be formatted so that the icon appears to the right"
           },
           {
             name: "Left Labeled",
-            value: "left-labeled",
+            attribute: "left-labeled",
             description: "A button can be formatted so that the icon appears to the left"
           }
         ],
@@ -460,17 +387,17 @@
         options: [
           {
             name: "Animated",
-            value: "animated",
+            attribute: "animated",
             description: "A button can be formatted to animate hidden content horizontally"
           },
           {
             name: "Vertical Animated",
-            value: "vertical-animated",
+            attribute: "vertical-animated",
             description: "A button can be formatted to animate hidden content vertically"
           },
           {
             name: "Fade Animated",
-            value: "vertical-animated",
+            attribute: "vertical-animated",
             description: "A button can be formatted to fade in hidden content"
           }
         ],
@@ -502,73 +429,30 @@
     --------------------*/
     variations: [
       {
-        name: "Styling",
-        value: "styling",
-        description: "A button can be formatted to appear de-emphasized over other elements in the page.",
+        name: "Basic",
+        description: "A button can be formatted to appear deemphasized over other elements in the page.",
         options: [
           {
             name: "Basic",
-            value: "basic",
+            attribute: "basic",
             description: "A button can appear slightly less pronounced."
           },
           {
             name: "Very Basic",
-            value: "very-basic",
+            attribute: "very-basic",
             description: "A button can appear to be much less pronounced."
-          }
-        ]
-      },
-      {
-        name: "Size",
-        value: "size",
-        description: "A button can vary in size",
-        options: [
-          {
-            name: "Mini",
-            value: "mini",
-            description: "An element can appear extremely small"
-          },
-          {
-            name: "Tiny",
-            value: "tiny",
-            description: "An element can appear very small"
-          },
-          {
-            name: "Small",
-            value: "small",
-            description: "An element can appear small"
-          },
-          {
-            name: "Medium",
-            value: "medium",
-            description: "An element can appear normal sized"
-          },
-          {
-            name: "Large",
-            value: "large",
-            description: "An element can appear larger than normal"
-          },
-          {
-            name: "Big",
-            value: "big",
-            description: "An element can appear much larger than normal"
-          },
-          {
-            name: "Huge",
-            value: "huge",
-            description: "An element can appear very much larger than normal"
-          },
-          {
-            name: "Massive",
-            value: "massive",
-            description: "An element can appear extremely larger than normal"
           }
         ]
       },
       {
         name: "Inverted",
         description: "A button can be formatted to appear on dark backgrounds.",
-        attribute: "inverted"
+        options: [
+          {
+            name: "Inverted",
+            attribute: "inverted"
+          }
+        ]
       }
     ],
     /*******************************
@@ -581,10 +465,10 @@
   };
 
   // src/button/button.html
-  var button_default = '<div class="button">\n  <slot name="text" default></slot>\n  <slot name="icon"></slot>\n</div>\n';
+  var button_default = '<div class="button">\n  <slot name="text" default></slot>\n</div>\n';
 
   // src/button/button.css
-  var button_default2 = ".button {\n  cursor: pointer;\n  display: inline-block;\n\n  min-height: 1em;\n  font-size: var(--medium);\n\n  outline: none;\n  border: none;\n  vertical-align: var(--vertical-align);\n  background: var(--background);\n  color: var(--text-color);\n\n  font-family: var(--font-family);\n\n  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;\n  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));\n\n  text-transform: var(--text-transform);\n  text-shadow: var(--text-shadow);\n  font-weight: var(--font-weight);\n  line-height: var(--line-height);\n  font-style: normal;\n  text-align: center;\n  text-decoration: none;\n\n  border-radius: var(--border-radius);\n  box-shadow: var(--box-shadow);\n\n  user-select: none;\n  transition: var(--transition);\n  will-change: var(--will-change);\n\n  -webkit-tap-highlight-color: var(--tap-color);\n\n  outline: none;\n}\n\nui-button .button {\n  font-size: var(--large);\n}\n";
+  var button_default2 = ".button {\n  cursor: pointer;\n  display: inline-block;\n\n  min-height: 1em;\n  font-size: var(--medium);\n\n  outline: none;\n  border: none;\n  vertical-align: var(--vertical-align);\n  background: var(--background);\n  color: var(--text-color);\n\n  font-family: var(--font-family);\n\n  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;\n  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));\n\n  text-transform: var(--text-transform);\n  text-shadow: var(--text-shadow);\n  font-weight: var(--font-weight);\n  line-height: var(--line-height);\n  font-style: normal;\n  text-align: center;\n  text-decoration: none;\n\n  border-radius: var(--border-radius);\n  box-shadow: var(--box-shadow);\n\n  user-select: none;\n  transition: var(--transition);\n  will-change: var(--will-change);\n\n  -webkit-tap-highlight-color: var(--tap-color);\n\n  outline: none;\n}\n";
 
   // src/button.js
   var UIButton = class extends SUIComponent {
@@ -598,11 +482,10 @@
       __publicField(this, "css", button_default2);
     }
     static get observedAttributes() {
-      return getAllowedAttributes(ButtonDefinition);
+      return getAttributesFromUIDefinition(ButtonDefinition);
     }
     initialize(settings) {
     }
   };
   customElements.define("ui-button", UIButton);
 })();
-//# sourceMappingURL=semantic-ui.js.map

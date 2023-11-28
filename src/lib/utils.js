@@ -1,5 +1,5 @@
 /*
-  An underscore like simple utility belt
+  An simple utility belt
   to save time on common boilerplate
 */
 
@@ -7,9 +7,9 @@
 /*
   Create a hash from a string
 */
-export const hashCode = function(str) {
+export const hashCode = (str) => {
   let hash = 0;
-  if (str.length === 0) {
+  if(str.length === 0) {
     return hash;
   }
 
@@ -25,19 +25,18 @@ export const hashCode = function(str) {
 /*
   Shorthand for Keys
 */
-export const keys = function(obj) {
+export const keys = (obj) => {
   return Object.keys(obj);
 };
 
 
-
 /* Remove duplicates from an array */
-export const unique = function(arr) {
+export const unique = (arr) => {
   return Array.from(new Set(arr));
 };
 
 /* Remove undefined values from an array */
-export const removeUndefined = function(arr) {
+export const filterEmpty = (arr) => {
   return arr.filter(val => val);
 };
 
@@ -45,17 +44,17 @@ export const removeUndefined = function(arr) {
 /*
   Simple Iterator
 */
-export const each = function(obj, func, context) {
-  if (obj === null) {
+export const each = (obj, func, context) => {
+  if(obj === null) {
     return obj;
   }
 
-  let createCallback = function(context, func){
-    if (context === void 0) {
+  let createCallback = (context, func) => {
+    if(context === void 0) {
       return func;
     }
     else {
-      return function(value, index, collection){
+      return (value, index, collection) => {
         return func.call(context, value, index, collection);
       };
     }
@@ -64,7 +63,7 @@ export const each = function(obj, func, context) {
   let iteratee = createCallback(context, func);
 
   let i;
-  if (obj.length === +obj.length) {
+  if(obj.length === +obj.length) {
     for (i=0; i < obj.length; ++i){
       iteratee(obj[i], i, obj);
     }
@@ -78,31 +77,51 @@ export const each = function(obj, func, context) {
   return obj;
 };
 
+/*
+ Iterate through returning first value
+*/
+
+export const firstMatch = (array = [], evaluator) => {
+  let result;
+  each(array, (value, name) => {
+    const shouldReturn = evaluator(value, name);
+    if(!result && shouldReturn == true) {
+      result = value;
+    }
+  });
+  return result;
+};
+
+
+export const inArray = (value, array = []) => {
+  return array.indexOf(value) > -1;
+};
+
 
 /*
   Simple Type Checking
 */
-export const isObject = function(obj) {
+export const isObject = (obj) => {
   let type = typeof obj;
-  if (type === 'function' || ((type === 'object') && !!obj)){
+  if(type === 'function' || ((type === 'object') && !!obj)){
     return true;
   }
   return false;
 };
 
-export const isString = function(str) {
+export const isString = (str) => {
   return typeof str == 'string';
 };
 
-export const isFunction = function(obj) {
+export const isFunction = (obj) =>{
   return typeof obj == 'function' || false;
 };
 
-export const isPlainObject = function(x) {
+export const isPlainObject = (x) => {
   return isObject(x) && x.constructor === Object;
 };
 
-export const isPromise = function(p) {
+export const isPromise = (p) => {
   return p && isFunction(p.then);
 };
 
@@ -110,20 +129,20 @@ export const isPromise = function(p) {
 /*
   Call function even if its not defined
 */
-export const wrapFunction = function(x) {
+export const wrapFunction = (x) => {
   return isFunction(x) ? x : () => x;
 };
 
 /*
   Handles properly copying getter/setters
 */
-export const extend = function(obj, ...sources) {
-  sources.forEach(function(source) {
+export const extend = (obj, ...sources) => {
+  sources.forEach((source) => {
     let descriptor, prop;
-    if (source) {
+    if(source) {
       for (prop in source) {
         descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if (descriptor === undefined) {
+        if(descriptor === undefined) {
           obj[prop] = source[prop];
         } else {
           Object.defineProperty(obj, prop, descriptor);
@@ -137,22 +156,31 @@ export const extend = function(obj, ...sources) {
 /*
   HTML Attributes -> JS Properties
 */
-export function kebabToCamel(str) {
+export const kebabToCamel = (str) => {
   return str.replace(/-([a-z])/g, (g) => {
     return g[1].toUpperCase();
   });
-}
-
-export const _ = {
-  hashCode,
-  each,
-  isObject,
-  isFunction,
-  isString,
-  isPlainObject,
-  isPromise,
-  extend,
-  wrapFunction,
-  keys,
-  kebabToCamel,
 };
+
+// Access a nested object field from a string, like 'a.b.c'
+export const get = function(object, string = '') {
+  // prepare string
+  string = string
+    .replace(/^\./, '')
+    .replace(/\[(\w+)\]/g, '.$1')
+  ;
+  const stringParts = string.split('.');
+  for(let index = 0, length = stringParts.length; index < length; ++index) {
+    const part = stringParts[index];
+    if(!!object && part in object) {
+      object = object[part];
+    }
+    else {
+      return;
+    }
+  }
+  return object;
+};
+
+import * as _ from './utils';
+export default _;

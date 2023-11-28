@@ -1,15 +1,25 @@
 import * as esbuild from 'esbuild';
-import { glob } from 'glob-promise';
+import {
+  globSync
+} from 'glob' ;
 
+let
+  target = [
+    'chrome58',
+    'firefox57',
+    'safari11',
+    'edge18'
+  ]
+;
 
 let context1 = await esbuild.context({
   entryPoints: [
-    'src/semantic-ui.js',
+    './src/semantic-ui.js',
   ],
   bundle: true,
   //minify: true,
   sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
+  target,
   loader: {
     '.html': 'text',
     '.css': 'text',
@@ -22,14 +32,14 @@ let context1 = await esbuild.context({
   outdir: 'server/ui',
 });
 
-const files = glob.sync('src/themes/**/*.css');
+const files = globSync('./src/themes/**/*.css');
 
 let context2 = await esbuild.context({
   entryPoints: files,
   bundle: false,
   //minify: true,
   sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
+  target,
   loader: {
     '.css': 'css',
   },

@@ -1,6 +1,7 @@
 import {
   SUIComponent,
-  getAttributesFromUIDefinition
+  getAllowedAttributes,
+  getUISettings
 } from './lib/sui-component.js';
 
 import { ButtonDefinition } from './button/button-definition.js';
@@ -10,7 +11,7 @@ import ButtonCSS from './button/button.css';
 class UIButton extends SUIComponent {
 
   static get observedAttributes() {
-    return getAttributesFromUIDefinition(ButtonDefinition);
+    return getAllowedAttributes(ButtonDefinition);
   }
 
   defaultSettings = {

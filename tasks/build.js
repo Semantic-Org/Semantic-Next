@@ -7,7 +7,7 @@ let
     'es2020',
     'chrome58',
     'ios15',
-    'edge16',
+    'edge18',
     'firefox57',
     'node12',
     'safari11',
@@ -20,7 +20,16 @@ let
     target,
     bundle: true,
     plugins: [globPlugin()],
-    outdir: 'serve/rui',
+    loader: {
+      '.html': 'text',
+      '.css': 'text',
+      '.png': 'file',
+      '.jpg': 'file',
+      '.jpeg': 'file',
+      '.svg': 'file',
+      '.gif': 'file',
+    },
+    outdir: 'server/ui',
   }),
 
   cssBuild = await esbuild.build({
