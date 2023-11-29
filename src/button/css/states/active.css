@@ -1,0 +1,19 @@
+/*--------------
+     Active
+---------------*/
+
+.ui.active.button {
+  background-color: var(--activeBackgroundColor);
+  background-image: var(--activeBackgroundImage);
+  box-shadow: var(--activeBoxShadow);
+  color: var(--activeColor);
+}
+.ui.active.button:hover {
+  background-color: var(--activeHoverBackgroundColor);
+  background-image: var(--activeHoverBackgroundImage);
+  color: var(--activeHoverColor);
+}
+.ui.active.button:active {
+  background-color: var(--activeBackgroundColor);
+  background-image: var(--activeBackgroundImage);
+}

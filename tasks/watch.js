@@ -1,25 +1,31 @@
 import * as esbuild from 'esbuild';
-import {
-  globSync
-} from 'glob' ;
+import { globSync } from 'glob' ;
+import { browserTarget } from './config.js';
+import { logPlugin } from './plugins.js';
 
-let
-  target = [
-    'chrome58',
-    'firefox57',
-    'safari11',
-    'edge18'
-  ]
-;
+const cssConcat = await esbuild.build({
+  entryPoints: [
+    'src/**/*.css'
+  ],
+  target: browserTarget,
+  bundle: true,
+  plugins: [ logPlugin('CSS Concat') ],
+  loader: {
+    '.css': 'css',
+  },
+  entryNames: '[dir]/[name]-inline',
+  outbase: 'src',
+  outdir: 'src',
+});
 
-let context1 = await esbuild.context({
+let jsBuild = await esbuild.context({
   entryPoints: [
     './src/semantic-ui.js',
   ],
   bundle: true,
-  //minify: true,
+  minify: false,
   sourcemap: true,
-  target,
+  target: browserTarget,
   loader: {
     '.html': 'text',
     '.css': 'text',
@@ -29,22 +35,26 @@ let context1 = await esbuild.context({
     '.svg': 'file',
     '.gif': 'file',
   },
+  plugins: [ logPlugin('JS') ],
+  outbase: 'src',
   outdir: 'server/ui',
 });
 
-const files = globSync('./src/themes/**/*.css');
-
-let context2 = await esbuild.context({
-  entryPoints: files,
+let themeBuild = await esbuild.context({
+  entryPoints: globSync('./src/themes/**/*.css'),
   bundle: false,
-  //minify: true,
+  minify: false,
   sourcemap: true,
-  target,
+  target: browserTarget,
+  plugins: [ logPlugin('CSS') ],
   loader: {
     '.css': 'css',
   },
   outdir: 'server/ui/theme',
 });
 
-await Promise.all([context1.watch(), context2.watch()]);
-console.log('watching...');
+await Promise.all([
+  cssConcat.watch(),
+  jsBuild.watch(),
+  themeBuild.watch(),
+]);

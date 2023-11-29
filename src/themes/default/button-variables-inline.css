@@ -1,0 +1,34 @@
+/* src/themes/default/button-variables.css */
+ui-button {
+  --vertical-margin: 0em;
+  --horizontal-margin: 0.25em;
+  --background-color: #E0E1E2;
+  --background-image: none;
+  --background: var(--background-color) var(--background-image);
+  --line-height: 1em;
+  --vertical-padding: var(--input-vertical-padding);
+  --horizontal-padding: 1.5em;
+  --text-transform: none;
+  --tap-color: transparent;
+  --font-family: var(--page-font);
+  --font-weight: var(--bold);
+  --text-color: rgba(0, 0, 0, 0.6);
+  --text-shadow: none;
+  --inverted-text-shadow: var(--text-shadow);
+  --border-radius: var(--default-border-radius);
+  --vertical-align: baseline;
+  --shadow-distance: 0em;
+  --shadow-offset: (var(--shadow-distance) / 2);
+  --shadow-box-shadow: 0px var(---shadow-distance) 0px 0px var(--border-color) inset;
+  --border-box-shadow-color: rgba(0, 0, 0,);
+  --border-box-shadow-width: 1px;
+  --border-box-shadow: 0px 0px 0px var(--border-box-shadow-width) var(--border-box-shadow-color) inset;
+  --box-shadow: var(--border-box-shadow), var(--shadow-box-shadow) ;
+  --transition:
+    opacity var(--default-duration) var(--default-easing),
+    background-color var(--default-duration) var(--default-easing),
+    color var(--default-duration) var(--default-easing),
+    box-shadow var(--default-duration) var(--default-easing),
+    background var(--default-duration) var(--default-easing) ;
+  --will-change: "";
+}

@@ -320,7 +320,7 @@
                 Styles
     *******************************/
     addCSS(styleContent) {
-      if ("adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype) {
+      if (false) {
         if (!this.stylesheet) {
           this.stylesheet = new CSSStyleSheet();
           this.stylesheet.replaceSync(styleContent);
@@ -370,21 +370,12 @@
     }
   };
 
-  // src/button/button-definition.js
-  var ButtonDefinition = {
-    /*******************************
-               Definition
-    *******************************/
+  // src/button/definition/definition.json
+  var definition_default = {
     uiType: "element",
     name: "Button",
     description: "A button indicates possible user action",
     tagName: "button",
-    /*******************************
-               Singular
-    *******************************/
-    /*-------------------
-            Types
-    --------------------*/
     types: [
       {
         name: "Emphasis",
@@ -410,7 +401,9 @@
         description: "A button can appear with an icon",
         adoptionLevel: 2,
         looseCoupling: true,
-        couplesWith: ["icon"],
+        couplesWith: [
+          "icon"
+        ],
         distinctHTML: true
       },
       {
@@ -419,11 +412,16 @@
         description: "A button can appear specially formatted to attach to a label element",
         adoptionLevel: 3,
         looseCoupling: true,
-        couplesWith: ["label"],
+        couplesWith: [
+          "label"
+        ],
         options: [
           {
             name: "Labeled",
-            value: ["labeled", "right-labeled"],
+            value: [
+              "labeled",
+              "right-labeled"
+            ],
             description: "A button can be formatted so that a label appears to the right"
           },
           {
@@ -477,9 +475,6 @@
         distinctHTML: true
       }
     ],
-    /*-------------------
-           States
-    --------------------*/
     states: [
       {
         name: "Active",
@@ -497,9 +492,6 @@
         description: "A button can show a loading indicator"
       }
     ],
-    /*-------------------
-          Variations
-    --------------------*/
     variations: [
       {
         name: "Styling",
@@ -571,9 +563,6 @@
         attribute: "inverted"
       }
     ],
-    /*******************************
-                Plural
-    *******************************/
     supportsPlural: true,
     pluralName: "Buttons",
     pluralTagName: "buttons",
@@ -581,24 +570,25 @@
   };
 
   // src/button/button.html
-  var button_default = '<div class="button">\n  <slot name="text" default></slot>\n  <slot name="icon"></slot>\n</div>\n';
+  var button_default = '<button part="button" tabindex="0">\n  <span class="text" part="text">\n    <slot name="text" default></slot>\n  </span>\n  <slot name="icon"></slot>\n</button>\n';
 
   // src/button/button.css
-  var button_default2 = ".button {\n  cursor: pointer;\n  display: inline-block;\n\n  min-height: 1em;\n  font-size: var(--medium);\n\n  outline: none;\n  border: none;\n  vertical-align: var(--vertical-align);\n  background: var(--background);\n  color: var(--text-color);\n\n  font-family: var(--font-family);\n\n  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;\n  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));\n\n  text-transform: var(--text-transform);\n  text-shadow: var(--text-shadow);\n  font-weight: var(--font-weight);\n  line-height: var(--line-height);\n  font-style: normal;\n  text-align: center;\n  text-decoration: none;\n\n  border-radius: var(--border-radius);\n  box-shadow: var(--box-shadow);\n\n  user-select: none;\n  transition: var(--transition);\n  will-change: var(--will-change);\n\n  -webkit-tap-highlight-color: var(--tap-color);\n\n  outline: none;\n}\n\nui-button .button {\n  font-size: var(--large);\n}\n";
+  var button_default2 = "/* Content */\n@import url('./css/button.css');\n\n/* States */\n@import url('./css/states/focus.css');\n@import url('./css/states/hover.css');\n@import url('./css/states/pressed.css');\n@import url('./css/states/active.css');\n@import url('./css/states/disabled.css');\n@import url('./css/states/loading.css');\n\n/* Types */\n\n/* Variations */\n";
 
   // src/button.js
+  console.log(button_default2);
   var UIButton = class extends SUIComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "defaultSettings", {
-        one: "two"
+        one: "three"
       });
-      __publicField(this, "definition", ButtonDefinition);
+      __publicField(this, "definition", definition_default);
       __publicField(this, "template", button_default);
       __publicField(this, "css", button_default2);
     }
     static get observedAttributes() {
-      return getAllowedAttributes(ButtonDefinition);
+      return getAllowedAttributes(definition_default);
     }
     initialize(settings) {
     }

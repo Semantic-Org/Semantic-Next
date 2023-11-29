@@ -1,12 +1,13 @@
 import {
   SUIComponent,
   getAllowedAttributes,
-  getUISettings
 } from './lib/sui-component.js';
 
-import { ButtonDefinition } from './button/button-definition.js';
+import ButtonDefinition from './button/definition/definition.json';
 import ButtonTemplate from './button/button.html';
 import ButtonCSS from './button/button.css';
+
+console.log(ButtonCSS);
 
 class UIButton extends SUIComponent {
 
@@ -15,7 +16,7 @@ class UIButton extends SUIComponent {
   }
 
   defaultSettings = {
-    one: 'two',
+    one: 'three',
   };
 
   definition = ButtonDefinition;
@@ -23,6 +24,7 @@ class UIButton extends SUIComponent {
   css = ButtonCSS;
 
   initialize(settings) {
+
     // do something with settings
   }
 

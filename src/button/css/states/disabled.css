@@ -1,0 +1,13 @@
+/*--------------
+      Down
+---------------*/
+
+.ui.disabled.button,
+.ui.disabled.button:hover,
+.ui.disabled.active.button {
+  cursor: default;
+  opacity: var(--disabledOpacity) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}

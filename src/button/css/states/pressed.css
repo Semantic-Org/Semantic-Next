@@ -1,0 +1,11 @@
+/*--------------
+      Down
+---------------*/
+
+.ui.button:active,
+.ui.active.button:active {
+  background-color: var(--downBackgroundColor);
+  background-image: var(--downBackgroundImage);
+  color: var(--downColor);
+  box-shadow: var(--downBoxShadow);
+}

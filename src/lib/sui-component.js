@@ -1,5 +1,5 @@
 import { $ } from './query';
-import { extend, isString, wrapFunction } from './utils';
+import { extend } from './utils';
 import { getUISettings, getAllowedAttributes } from './sui-helpers';
 
 class SUIComponent extends HTMLElement {
@@ -102,7 +102,7 @@ class SUIComponent extends HTMLElement {
               Styles
   *******************************/
   addCSS(styleContent) {
-    if('adoptedStyleSheets' in Document.prototype && 'replace' in CSSStyleSheet.prototype) {
+    if(false && 'adoptedStyleSheets' in Document.prototype && 'replace' in CSSStyleSheet.prototype) {
       if(!this.stylesheet) {
         this.stylesheet = new CSSStyleSheet();
         this.stylesheet.replaceSync(styleContent);

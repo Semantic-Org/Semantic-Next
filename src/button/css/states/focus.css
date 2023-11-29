@@ -1,0 +1,14 @@
+/*--------------
+      Focus
+---------------*/
+
+.ui.button:focus {
+  background-color: var(--focusBackgroundColor);
+  color: var(--focusColor);
+  background-image: var(--focusBackgroundImage) !important;
+  box-shadow: var(--focusBoxShadow) !important;
+}
+
+.ui.button:focus .icon {
+  opacity: var(--iconFocusOpacity);
+}

@@ -1,4 +1,6 @@
-<div class="button">
-  <slot name="text" default></slot>
+<button part="button" tabindex="0">
+  <span class="text" part="text">
+    <slot name="text" default></slot>
+  </span>
   <slot name="icon"></slot>
-</div>
+</button>
