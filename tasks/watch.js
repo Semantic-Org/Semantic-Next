@@ -3,9 +3,9 @@ import { globSync } from 'glob' ;
 import { browserTarget } from './config.js';
 import { logPlugin } from './plugins.js';
 
-const cssConcat = await esbuild.build({
+const cssConcat = await esbuild.context({
   entryPoints: [
-    'src/**/*.css'
+    'src/**/css/*.css'
   ],
   target: browserTarget,
   bundle: true,
@@ -13,7 +13,7 @@ const cssConcat = await esbuild.build({
   loader: {
     '.css': 'css',
   },
-  entryNames: '[dir]/[name]-inline',
+  entryNames: '[dir]/../[name]',
   outbase: 'src',
   outdir: 'src',
 });
@@ -22,6 +22,7 @@ let jsBuild = await esbuild.context({
   entryPoints: [
     './src/semantic-ui.js',
   ],
+  format: 'esm',
   bundle: true,
   minify: false,
   sourcemap: true,
@@ -40,13 +41,30 @@ let jsBuild = await esbuild.context({
   outdir: 'server/ui',
 });
 
-let themeBuild = await esbuild.context({
-  entryPoints: globSync('./src/themes/**/*.css'),
-  bundle: false,
+let cssBuild = await esbuild.context({
+  entryPoints: [
+    './src/semantic-ui.css',
+  ],
+  bundle: true,
   minify: false,
   sourcemap: true,
   target: browserTarget,
-  plugins: [ logPlugin('CSS') ],
+  plugins: [ logPlugin('SUI CSS') ],
+  loader: {
+    '.css': 'css',
+  },
+  outdir: 'server/ui/',
+});
+
+let themeBuild = await esbuild.context({
+  entryPoints: [
+    './src/themes/base/base.css',
+  ],
+  bundle: true,
+  minify: false,
+  sourcemap: true,
+  target: browserTarget,
+  plugins: [ logPlugin('Theme CSS') ],
   loader: {
     '.css': 'css',
   },
@@ -56,5 +74,6 @@ let themeBuild = await esbuild.context({
 await Promise.all([
   cssConcat.watch(),
   jsBuild.watch(),
+  cssBuild.watch(),
   themeBuild.watch(),
 ]);

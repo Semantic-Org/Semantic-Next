@@ -102,7 +102,7 @@ class SUIComponent extends HTMLElement {
               Styles
   *******************************/
   addCSS(styleContent) {
-    if(false && 'adoptedStyleSheets' in Document.prototype && 'replace' in CSSStyleSheet.prototype) {
+    if('adoptedStyleSheets' in Document.prototype && 'replace' in CSSStyleSheet.prototype) {
       if(!this.stylesheet) {
         this.stylesheet = new CSSStyleSheet();
         this.stylesheet.replaceSync(styleContent);

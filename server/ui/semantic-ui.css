@@ -1,0 +1,70 @@
+/* src/globals/site.css */
+html,
+body {
+  height: 100%;
+}
+html {
+  font-size: var(--font-size);
+}
+body {
+  margin: 0px;
+  padding: 0px;
+  overflow-x: var(--page-overflow-x);
+  min-width: var(--page-min-width);
+  background: var(--page-background);
+  font-family: var(--page-font);
+  line-height: var(--line-height);
+  color: var(--text-color);
+  font-smoothing: var(--font-smoothing);
+}
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+input[type=text],
+input[type=email],
+input[type=search],
+input[type=password] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* src/globals/initial.css */
+ui-button:not(:defined) {
+  cursor: pointer;
+  display: inline-block;
+  min-height: 1em;
+  font-size: var(--medium);
+  outline: none;
+  border: none;
+  vertical-align: var(--vertical-align);
+  background: var(--background);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;
+  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));
+  text-transform: var(--text-transform);
+  text-shadow: var(--text-shadow);
+  font-weight: var(--font-weight);
+  line-height: var(--line-height);
+  font-style: normal;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  -webkit-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  user-select: none;
+  transition: var(--transition);
+  will-change: var(--will-change);
+  -webkit-tap-highlight-color: var(--tap-color);
+  outline: none;
+}
+
+/* src/semantic-ui.css */
+/*# sourceMappingURL=semantic-ui.css.map */

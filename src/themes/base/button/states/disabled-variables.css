@@ -1,0 +1,5 @@
+ui-button {
+  --disabled-opacity: var(--disabled-opacity, 0.45);
+  --disabled-background-image: none;
+  --disabled-box-shadow: none;
+}

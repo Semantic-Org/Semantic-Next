@@ -3,21 +3,6 @@ import { globPlugin } from 'esbuild-plugin-glob';
 import { lessLoader } from 'esbuild-plugin-less';
 import { browserTarget } from './config.js';
 
-const cssConcat = await esbuild.build({
-  entryPoints: [
-    'src/**/*.css'
-  ],
-  target: browserTarget,
-  bundle: true,
-  plugins: [globPlugin()],
-  loader: {
-    '.css': 'css-global',
-  },
-  entryNames: '[dir]/[name]-inline',
-  outbase: 'src',
-  outdir: 'src',
-});
-
 const jsBuild = await esbuild.build({
   entryPoints: [
     'src/**/*.js'

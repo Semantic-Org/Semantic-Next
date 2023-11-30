@@ -3,17 +3,20 @@
 ---------------*/
 
 .ui.active.button {
-  background-color: var(--activeBackgroundColor);
-  background-image: var(--activeBackgroundImage);
-  box-shadow: var(--activeBoxShadow);
-  color: var(--activeColor);
+  background-color: var(--active-background-color);
+  background-image: var(--active-background-image);
+  box-shadow: var(--active-box-shadow);
+  color: var(--active-color);
 }
 .ui.active.button:hover {
-  background-color: var(--activeHoverBackgroundColor);
-  background-image: var(--activeHoverBackgroundImage);
-  color: var(--activeHoverColor);
+  background-color: var(--active-hover-background-color);
+  background-image: var(--active-hover-background-image);
+  color: var(--active-hover-color);
+  box-shadow: var(--active-hover-box-shadow);
 }
 .ui.active.button:active {
-  background-color: var(--activeBackgroundColor);
-  background-image: var(--activeBackgroundImage);
+  background-color: var(--active-down-background-color);
+  background-image: var(--active-down-background-image);
+  color: var(--active-down-color);
+  box-shadow: var(--active-down-box-shadow);
 }

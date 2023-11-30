@@ -1,14 +1,142 @@
-/* Content */
-@import url('./css/button.css');
+/* src/button/css/content/button.css */
+.button {
+  cursor: pointer;
+  display: inline-block;
+  min-height: 1em;
+  font-size: var(--medium);
+  outline: none;
+  border: none;
+  vertical-align: var(--vertical-align);
+  background: var(--background);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;
+  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));
+  text-transform: var(--text-transform);
+  text-shadow: var(--text-shadow);
+  font-weight: var(--font-weight);
+  line-height: var(--line-height);
+  font-style: normal;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  -webkit-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  user-select: none;
+  transition: var(--transition);
+  will-change: var(--will-change);
+  -webkit-tap-highlight-color: var(--tap-color);
+  outline: none;
+}
 
-/* States */
-@import url('./css/states/focus.css');
-@import url('./css/states/hover.css');
-@import url('./css/states/pressed.css');
-@import url('./css/states/active.css');
-@import url('./css/states/disabled.css');
-@import url('./css/states/loading.css');
+/* src/button/css/states/hover.css */
+.button:hover {
+  background-color: var(--hover-background-color);
+  background-image: var(--hover-background-image);
+  box-shadow: var(--hover-box-shadow);
+  color: var(--hover-color);
+}
+.button:hover .icon {
+  opacity: var(--hover-icon-opacity);
+}
 
-/* Types */
+/* src/button/css/states/focus.css */
+.button:focus {
+  background-color: var(--focus-background-color);
+  color: var(--focus-color);
+  background-image: var(--focus-background-image) !important;
+  box-shadow: var(--focus-box-shadow) !important;
+}
+.button:focus .icon {
+  opacity: var(--icon-focus-opacity);
+}
 
-/* Variations */
+/* src/button/css/states/pressed.css */
+.button:active,
+.active.button:active {
+  background-color: var(--pressed-background-color);
+  background-image: var(--pressed-background-image);
+  color: var(--pressed-color);
+  box-shadow: var(--pressed-box-shadow);
+}
+
+/* src/button/css/states/active.css */
+.ui.active.button {
+  background-color: var(--active-background-color);
+  background-image: var(--active-background-image);
+  box-shadow: var(--active-box-shadow);
+  color: var(--active-color);
+}
+.ui.active.button:hover {
+  background-color: var(--active-hover-background-color);
+  background-image: var(--active-hover-background-image);
+  color: var(--active-hover-color);
+  box-shadow: var(--active-hover-box-shadow);
+}
+.ui.active.button:active {
+  background-color: var(--active-down-background-color);
+  background-image: var(--active-down-background-image);
+  color: var(--active-down-color);
+  box-shadow: var(--active-down-box-shadow);
+}
+
+/* src/button/css/states/disabled.css */
+.disabled.button,
+.disabled.button:hover,
+.disabled.active.button {
+  cursor: default;
+  pointer-events: none !important;
+  opacity: var(--disabled-opacity) !important;
+  background-image: var(--disabled-background-image) !important;
+  box-shadow: var(--disabled-background-image) !important;
+}
+
+/* src/button/css/states/loading.css */
+.loading.button {
+  position: relative;
+  cursor: default;
+  text-shadow: none !important;
+  color: transparent !important;
+  opacity: var(--loading-opacity);
+  pointer-events: var(--loading-pointer-events);
+  transition: var(--loading-transition);
+}
+.loading.button:before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  margin: var(--loader-margin);
+  width: var(--loader-size);
+  height: var(--loader-size);
+  border-radius: var(--circular-radius);
+  border: var(--loader-line-width) solid var(--inverted-loader-fill-color);
+}
+.loading.button:after {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  margin: var(--loader-margin);
+  width: var(--loader-size);
+  height: var(--loader-size);
+  animation: button-spin var(--loader-speed-linear);
+  animation-iteration-count: infinite;
+  border-radius: var(--circular-radius);
+  border-color: var(--inverted-loader-line-color) transparent transparent;
+  border-style: solid;
+  border-width: var(--loader-line-width);
+  box-shadow: 0px 0px 0px 1px transparent;
+}
+@keyframes button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* src/button/css/button.css */

@@ -1,20 +1,17 @@
-/*******************************
-            Button
-*******************************/
-
 ui-button {
 
-  /*-------------------
-         Single
-  --------------------*/
+  --vertical-align: baseline;
+
   --vertical-margin: 0em;
   --horizontal-margin: 0.25em;
+
   --background-color: #E0E1E2;
   --background-image: none;
   --background: var(--background-color) var(--background-image);
+
   --line-height: 1em;
 
-  /* Button defaults to using same height as input globally */
+  /* button same height as input globally */
   --vertical-padding: var(--input-vertical-padding);
   --horizontal-padding: 1.5em;
 
@@ -27,11 +24,10 @@ ui-button {
   --text-shadow: none;
   --inverted-text-shadow: var(--text-shadow);
   --border-radius: var(--default-border-radius);
-  --vertical-align: baseline;
 
   /* Internal Shadow */
   --shadow-distance: 0em;
-  --shadow-offset: (var(--shadow-distance) / 2);
+  --shadow-offset: var(--shadow-distance) / 2;
   --shadow-box-shadow: 0px var(---shadow-distance) 0px 0px var(--border-color) inset;
 
   /* Box Shadow */

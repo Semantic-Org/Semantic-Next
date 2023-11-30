@@ -1,11 +1,11 @@
 /*--------------
-      Down
+  Pressed Down
 ---------------*/
 
-.ui.button:active,
-.ui.active.button:active {
-  background-color: var(--downBackgroundColor);
-  background-image: var(--downBackgroundImage);
-  color: var(--downColor);
-  box-shadow: var(--downBoxShadow);
+.button:active,
+.active.button:active {
+  background-color: var(--pressed-background-color);
+  background-image: var(--pressed-background-image);
+  color: var(--pressed-color);
+  box-shadow: var(--pressed-box-shadow);
 }
