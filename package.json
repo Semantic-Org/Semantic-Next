@@ -26,6 +26,7 @@
   "dependencies": {
     "@babel/eslint-parser": "^7.23.3",
     "glob": "^10.3.10",
+    "lit-html": "^3.1.0",
     "mime": "^3.0.0",
     "snuggsi": "github:devpunks/snuggsi",
     "supervisor": "^0.12.0"

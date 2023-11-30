@@ -1,6 +1,16 @@
 <div class="button" part="button">
-  <span class="text" part="text">
-    <slot name="text" default></slot>
-  </span>
-  <slot name="icon"></slot>
+  {{#if text}}
+    <span class="text" part="text" class="{{getClassNames}}">
+      <slot name="text" default></slot>
+    </span>
+  {{elseif conditionTwo}}
+    <span class="two">
+  {{elseif conditionThree}}
+    <span class="three">
+  {{else}}
+    <span class="four"></span>
+  {{/if}}
+  {{#if icon}}
+    <slot name="icon"></slot>
+  {{/if}}
 </div>

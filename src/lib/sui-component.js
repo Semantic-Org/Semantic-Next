@@ -2,6 +2,8 @@ import { $ } from './query';
 import { extend } from './utils';
 import { getUISettings, getAllowedAttributes } from './sui-helpers';
 
+import { TemplateCompiler} from './templating';
+
 class SUIComponent extends HTMLElement {
 
   /*******************************
@@ -20,8 +22,9 @@ class SUIComponent extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    console.log(`The attribute ${name} changed from ${oldValue} to ${newValue}`);
-    // Perform any actions needed when the attribute changes
+    if(!this[name] || oldValue !== newValue) {
+      this[name] = newValue;
+    }
   }
 
   /*******************************
@@ -34,11 +37,6 @@ class SUIComponent extends HTMLElement {
     this.bindEvents();
     this.initializeSettings();
 
-    // handle rendering the Shadow DOM for the component
-    if(this.template) {
-      this.setTemplate(this.template);
-    }
-
     // inject CSS for component
     if(this.css) {
       this.addCSS(this.css);
@@ -47,6 +45,11 @@ class SUIComponent extends HTMLElement {
     // update props when attributes update
     if(this.definition) {
       this.bindAttributes();
+    }
+
+    // handle rendering the Shadow DOM for the component
+    if(this.template) {
+      this.setTemplate(this.template);
     }
 
     // allow each component to specify its own initialize
@@ -92,10 +95,24 @@ class SUIComponent extends HTMLElement {
   *******************************/
 
   setTemplate(templateString) {
-    /*
-      Not fully implemented eventually will handle if/else
-    */
-    this.shadowRoot.innerHTML = templateString;
+    templateString = `
+  {{#if text}}
+    <span class="text" part="text" class="{{getClassNames}}">
+      <slot name="text" default></slot>
+    </span>
+  {{elseif conditionTwo}}
+    <span class="two">
+  {{elseif conditionThree}}
+    <span class="three">
+  {{else}}
+    <span class="four"></span>
+  {{/if}}
+  {{#if icon}}
+    <slot name="icon"></slot>
+  {{/if}}`;
+    const compiler = new TemplateCompiler(templateString, this);
+    compiler.render(this);
+    //this.shadowRoot.innerHTML = templateString;
   }
 
   /*******************************

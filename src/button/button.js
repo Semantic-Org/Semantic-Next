@@ -19,8 +19,10 @@ class UIButton extends SUIComponent {
   css = ButtonCSS;
 
   initialize(settings) {
-
     // do something with settings
+  }
+
+  render() {
   }
 
 }
