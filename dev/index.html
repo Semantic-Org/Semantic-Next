@@ -8,9 +8,10 @@
   <link rel="stylesheet" href="./ui/semantic-ui.css">
   <link rel="stylesheet" href="./ui/theme/base.css">
   <script src="./ui/semantic-ui.js" type="module"></script>
-  <!-- <script>
+  <script>
     new EventSource('/esbuild').addEventListener('change', e => {
-      console.log('working');
+
+      /* Rebuilds page after JS changes */
       const { added, removed, updated } = JSON.parse(e.data)
       if (!added.length && !removed.length && updated.length === 1) {
         for (const link of document.getElementsByTagName("link")) {
@@ -25,10 +26,9 @@
           }
         }
       }
-
       location.reload()
     });
-  </script> -->
+  </script>
 </head>
 <body>
   <div class="container">

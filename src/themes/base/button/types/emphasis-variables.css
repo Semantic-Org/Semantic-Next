@@ -1,0 +1,18 @@
+/* Hovered */
+/* Hovered */
+
+ui-button {
+  --primary-background-image: var(--colored-background-image);
+  --primary-text-color: var(--inverted-text-color);
+  --primary-text-shadow: var(--inverted-text-shadow);
+  --primary-box-shadow: var(--colored-box-shadow);
+
+  --secondary-background-image: var(--colored-background-image);
+  --secondary-text-color: var(--inverted-text-color);
+  --secondary-text-shadow: var(--inverted-text-shadow);
+  --secondary-box-shadow: var(--colored-box-shadow);
+
+  /* Inverted */
+  --light-primary-text-color: var(--inverted-text-color);
+  --light-secondary-text-color: var(--inverted-text-color);
+}

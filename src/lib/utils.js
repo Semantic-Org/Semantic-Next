@@ -113,6 +113,10 @@ export const isString = (str) => {
   return typeof str == 'string';
 };
 
+export const isArray = (arr) => {
+  return Array.isArray(arr);
+};
+
 export const isFunction = (obj) =>{
   return typeof obj == 'function' || false;
 };

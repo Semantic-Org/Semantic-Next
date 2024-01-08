@@ -1,31 +1,15 @@
 module.exports = {
+/*
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended'
+  ],*/
 
-  parser: '@babel/eslint-parser',
+  parser: '@typescript-eslint/parser',
 
-  parserOptions: {
-    requireConfigFile: false,
-    ecmaVersion : 11,
-    ecmaFeatures: {
-      binaryLiterals                   : true,     // enable binary literals
-      blockBindings                    : true,     // enable let and const (aka block bindings)
-      defaultParams                    : true,     // enable default function parameters
-      forOf                            : true,     // enable for-of loops
-      generators                       : true,     // enable generators
-      jsx                              : true,     // enable JSX
-      modules                          : true,
-      objectLiteralComputedProperties  : true,     // enable computed object literal property names
-      objectLiteralDuplicateProperties : true,     // enable duplicate object literal properties in strict mode
-      objectLiteralShorthandMethods    : true,     // enable object literal shorthand methods
-      objectLiteralShorthandProperties : true,     // enable object literal shorthand properties
-      octalLiterals                    : true,     // enable octal literals
-      regexUFlag                       : true,     // enable the regular expression u flag
-      regexYFlag                       : true,     // enable the regular expression y flag
-      templateStrings                  : true,     // enable template strings
-      unicodeCodePointEscapes          : false,    // enable code point escapes
-      experimentalObjectRestSpread     : true      // enable object spread
-    },
-    sourceType  : 'module'
-  },
+  plugins: ['@typescript-eslint'],
+
+  root: true,
 
   env: {
     browser   : true,
@@ -49,9 +33,6 @@ module.exports = {
     _ : true,
 
   },
-
-
-  plugins: [],
 
   /*******************************
                Rules
@@ -113,7 +94,7 @@ module.exports = {
         BinaryExpression      : true
       }
     }],
-    'no-unused-vars'          : [1, {                          // disallow declaration of variables that are not used in the code
+    'no-unused-vars'          : [0, {                          // disallow declaration of variables that are not used in the code
       argsIgnorePattern: '.*'
     }],
     'no-magic-numbers'        : [0, {                          // prevents use of numbers without variable declarations

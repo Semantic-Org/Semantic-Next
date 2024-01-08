@@ -1,0 +1,37 @@
+/*--- Standard ---*/
+.primary.buttons .button,
+.primary.button {
+  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+  text-shadow: var(--primary-text-shadow);
+  background-image: var(--primary-background-image);
+}
+.primary.button {
+  box-shadow: var(--primary-box-shadow);
+}
+.primary.buttons .button:hover,
+.primary.button:hover {
+  background-color: var(--primary-color-hover);
+  color: var(--primary-text-color);
+  text-shadow: var(--primary-text-shadow);
+}
+.primary.buttons .button:focus,
+.primary.button:focus {
+  background-color: var(--primary-color-focus);
+  color: var(--primary-text-color);
+  text-shadow: var(--primary-text-shadow);
+}
+.primary.buttons .button:active,
+.primary.button:active {
+  background-color: var(--primary-color-down);
+  color: var(--primary-text-color);
+  text-shadow: var(--primary-text-shadow);
+}
+.primary.buttons .active.button,
+.primary.buttons .active.button:active,
+.primary.active.button,
+.primary.button .active.button:active {
+  background-color: var(--primary-color-active);
+  color: var(--primary-text-color);
+  text-shadow: var(--primary-text-shadow);
+}

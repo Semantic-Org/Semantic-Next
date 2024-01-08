@@ -4,22 +4,22 @@
 
 :root {
 
-  /*-------------------
+  /* -------------------
          Fonts
-  --------------------*/
+  -------------------- */
 
   --font-name: 'Lato';
   --font-smoothing: antialiased;
 
-  --header-font: var(--font-name), 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  --page-font: var(--font-name), 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+  --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
 
   --bold: bold;
   --normal: normal;
 
-  /*-------------------
+  /* -------------------
         Global Size
-  --------------------*/
+  -------------------- */
 
   /*
     All UI is RELATIVELY SIZED in EMs
@@ -33,9 +33,9 @@
   --em-size: 14;
   --font-size: 14px;
 
-  /*-------------------
+  /* -------------------
           Sizes
-  --------------------*/
+  -------------------- */
 
   /*
     These are all the other sizes as unitless values expressed relative to the base em
@@ -58,9 +58,9 @@
   --huge-ratio: 20 / 14;
   --massive-ratio: 24 / 14;
 
-  /*-------------------
+  /* -------------------
       Border Radius
-  --------------------*/
+  -------------------- */
 
   /* See Power-user section below
      for explanation of px variables
@@ -70,19 +70,20 @@
 
   --default-border-radius: var(--absolute-border-radius);
 
-  /*-------------------
+  /* -------------------
       Brand Colors
-  --------------------*/
+  -------------------- */
 
   --primary-color: var(--blue);
+
   --secondary-color: var(--black);
 
   --light-primary-color: var(--light-blue);
   --light-secondary-color: var(--light-black);
 
-  /*--------------
+  /* --------------
     Page Heading
-  ---------------*/
+  --------------- */
 
   --header-font-weight: var(--bold);
   --header-line-height: calc((18 / 14) * 1em);
@@ -93,9 +94,9 @@
   --h4: calc(15 / 14 * 1rem);
   --h5: calc(14 / 14 * 1rem);
 
-  /*--------------
+  /* --------------
      Form Input
-  ---------------*/
+  --------------- */
 
   /* This adjusts the default form input across all elements */
   --input-background: var(--white);
@@ -105,15 +106,15 @@
 
   /* Input Text Color */
   --input-color: var(--text-color);
-  --input-placeholder-color: lighten(var(--input-color), 75);
-  --input-placeholder-focus-color: lighten(var(--input-color), 45);
+  --input-placeholder-color: oklch(from var(--input-color) calc(l + 75) c h);
+  --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
 
   /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */
   --input-line-height: calc((17 / 14) * 1em);
 
-  /*-------------------
+  /* -------------------
       Focused Input
-  --------------------*/
+  -------------------- */
 
   /* Used on inputs, textarea etc */
   --focused-form-border-color: #85B7D9;
@@ -123,9 +124,9 @@
 
 
 
-  /*-------------------
+  /* -------------------
           Page
-  --------------------*/
+  -------------------- */
 
   --page-background: #FFFFFF;
   --page-overflow-x: hidden;
@@ -133,25 +134,25 @@
   --line-height: 1.4285em;
   --text-color: rgba(0, 0, 0, 0.87);
 
-  /*-------------------
+  /* -------------------
         Paragraph
-  --------------------*/
+  -------------------- */
 
   --paragraph-margin: 0em 0em 1em;
   --paragraph-line-height: var(--line-height);
 
-  /*-------------------
+  /* -------------------
          Links
-  --------------------*/
+  -------------------- */
 
   --link-color: #4183C4;
   --link-underline: none;
-  --link-hover-color: darken(saturate(var(--link-color), 20), 15, relative);
+  --link-hover-color: oklch(from var(--link-color) calc(l + 20) c calc(h + 15));
   --link-hover-underline: var(--link-underline);
 
-  /*-------------------
+  /* -------------------
       Scroll Bars
-  --------------------*/
+  -------------------- */
 
   --use-custom-scrollbars: true;
 
@@ -174,9 +175,9 @@
   --thumb-inverted-inactive-background: rgba(255, 255, 255, 0.15);
   --thumb-inverted-hover-background: rgba(255, 255, 255, 0.35);
 
-  /*-------------------
+  /* -------------------
     Highlighted Text
-  --------------------*/
+  -------------------- */
 
   --highlight-background: #CCE2FF;
   --highlight-color: var(--text-color);
@@ -185,9 +186,9 @@
   --input-highlight-color: var(--text-color);
 
 
-  /*-------------------
+  /* -------------------
          Loader
-  --------------------*/
+  -------------------- */
 
   --loader-size: var(--relative-big);
   --loader-speed: 0.6s;
@@ -198,22 +199,22 @@
   --inverted-loader-fill-color: rgba(255, 255, 255, 0.15);
   --inverted-loader-line-color: var(--white);
 
-  /*-------------------
+  /* -------------------
           Grid
-  --------------------*/
+  -------------------- */
 
   --column-count: 16;
 
-  /*-------------------
+  /* -------------------
        Transitions
-  --------------------*/
+  -------------------- */
 
   --default-duration: 0.1s;
   --default-easing: ease;
 
-  /*-------------------
+  /* -------------------
        Breakpoints
-  --------------------*/
+  -------------------- */
 
   --mobile-breakpoint: 320px;
   --tablet-breakpoint: 768px;
@@ -221,11 +222,11 @@
   --large-monitor-breakpoint: 1200px;
   --widescreen-monitor-breakpoint: 1920px;
 
-  /*-------------------
+  /* -------------------
         Site Colors
-  --------------------*/
+  -------------------- */
 
-  /*---  Colors  ---*/
+  /* ---  Colors  --- */
   --red: #DB2828;
   --orange: #F2711C;
   --yellow: #FBBD08;
@@ -240,7 +241,7 @@
   --grey: #767676;
   --black: #1B1C1D;
 
-  /*---  Light Colors  ---*/
+  /* ---  Light Colors  --- */
   --light-red: #FF695E;
   --light-orange: #FF851B;
   --light-yellow: #FFE21F;
@@ -255,14 +256,14 @@
   --light-grey: #DCDDDE;
   --light-black: #545454;
 
-  /*---   Neutrals  ---*/
+  /* ---   Neutrals  --- */
   --full-black: #000000;
   --off-white: #F9FAFB;
   --dark-white: #F3F4F5;
   --mid-white: #DCDDDE;
   --white: #FFFFFF;
 
-  /*--- Colored Backgs ---*/
+  /* --- Colored Backgs --- */
   --red-background: #FFE8E6;
   --orange-background: #FFEDDE;
   --yellow-background: #FFF8DB;
@@ -275,20 +276,20 @@
   --pink-background: #FFE3FB;
   --brown-background: #F1E2D3;
 
-  /*--- Colored Headers ---*/
-  --red-header-color: darken(var(--red-text-color), 5);
-  --olive-header-color: darken(var(--olive-text-color), 5);
-  --green-header-color: darken(var(--green-text-color), 5);
-  --yellow-header-color: darken(var(--yellow-text-color), 5);
-  --blue-header-color: darken(var(--blue-text-color), 5);
-  --teal-header-color: darken(var(--teal-text-color), 5);
-  --pink-header-color: darken(var(--pink-text-color), 5);
-  --violet-header-color: darken(var(--violet-text-color), 5);
-  --purple-header-color: darken(var(--purple-text-color), 5);
-  --orange-header-color: darken(var(--orange-text-color), 5);
-  --brown-header-color: darken(var(--brown-text-color), 5);
+  /* --- Colored Headers --- */
+  --red-header-color: oklch(from var(--red-text-color) calc(l - 5) c h);
+  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 5) c h);
+  --green-header-color: oklch(from var(--green-text-color) calc(l - 5) c h);
+  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 5) c h);
+  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 5) c h);
+  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 5) c h);
+  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 5) c h);
+  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 5) c h);
+  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 5) c h);
+  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 5) c h);
+  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 5) c h);
 
-  /*--- Colored Text ---*/
+  /* --- Colored Text --- */
   --red-text-color: var(--red);
   --orange-text-color: var(--orange);
   --yellow-text-color: #B58105; /* Yellow text is difficult to read */
@@ -301,7 +302,7 @@
   --pink-text-color: var(--pink);
   --brown-text-color: var(--brown);
 
-  /*--- Colored Border ---*/
+  /* --- Colored Border --- */
   --red-border-color: var(--red-text-color);
   --orange-border-color: var(--orange-text-color);
   --yellow-border-color: var(--yellow-text-color);
@@ -314,9 +315,9 @@
   --pink-border-color: var(--pink-text-color);
   --brown-border-color: var(--brown-text-color);
 
-  /*-------------------
+  /* -------------------
        Alpha Colors
-  --------------------*/
+  -------------------- */
 
   --subtle-transparent-black: rgba(0, 0, 0, 0.03);
   --transparent-black: rgba(0, 0, 0, 0.05);
@@ -327,9 +328,9 @@
   --transparent-white: rgba(255, 255, 255, 0.08);
   --strong-transparent-white: rgba(255, 255, 255, 0.15);
 
-  /*-------------------
+  /* -------------------
          Accents
-  --------------------*/
+  -------------------- */
 
   /* Differentiating Neutrals */
   --subtle-gradient: linear-gradient(transparent, var(--transparent-black));
@@ -348,9 +349,9 @@
   *******************************/
 
 
-  /*-------------------
+  /* -------------------
       Emotive Colors
-  --------------------*/
+  -------------------- */
 
   /* Positive */
   --positive-color: var(--green);
@@ -380,23 +381,23 @@
   --warning-header-color: #794B02;
   --warning-text-color: #573A08;
 
-  /*-------------------
+  /* -------------------
           Paths
-  --------------------*/
+  -------------------- */
 
   --image-path: '../../themes/default/assets/images';
   --font-path: '../../themes/default/assets/fonts';
 
-  /*-------------------
+  /* -------------------
          Icons
-  --------------------*/
+  -------------------- */
 
   /* Maximum Glyph Width of Icon */
   --icon-width: 1.18em;
 
-  /*-------------------
+  /* -------------------
        Neutral Text
-  --------------------*/
+  -------------------- */
 
   --dark-text-color: rgba(0, 0, 0, 0.85);
   --muted-text-color: rgba(0, 0, 0, 0.6);
@@ -417,9 +418,9 @@
   --inverted-selected-text-color: rgba(255, 255, 255, 1);
   --inverted-disabled-text-color: rgba(255, 255, 255, 0.2);
 
-  /*-------------------
+  /* -------------------
        Brand Colors
-  --------------------*/
+  -------------------- */
 
   --facebook-color: #3B5998;
   --twitter-color: #55ACEE;
@@ -430,9 +431,9 @@
   --vk-color: #4D7198;
   --instagram-color: #49769C;
 
-  /*-------------------
+  /* -------------------
         Borders
-  --------------------*/
+  -------------------- */
 
   --circular-radius: 500rem;
 
@@ -454,9 +455,9 @@
   --selected-solid-white-border-color: #999999;
 
 
-  /*-------------------
+  /* -------------------
       Derived Values
-  --------------------*/
+  -------------------- */
 
   /* Loaders Position Offset */
   --loader-offset: calc(var(--loader-size) / 2 * -1);
@@ -469,8 +470,8 @@
   --glyph-width: 1.1em;
 
   /* Used to match floats with text */
-  --line-height-offset: ((var(--line-height) - 1em) / 2);
-  --header-line-height-offset: (var(--header-line-height) - 1em) / 2;
+  --line-height-offset: calc((var(--line-height) - 1em) / 2);
+  --header-line-height-offset: calc(var(--header-line-height) - 1em) / 2;
 
   /* Header Spacing */
   --header-top-margin: calc(2rem - var(--header-line-height-offset));
@@ -495,14 +496,14 @@
 
 
   /* Responsive */
-  --largest-mobile-screen: (var(--tablet-breakpoint) - 1px);
-  --largest-tablet-screen: (var(--computer-breakpoint) - 1px);
-  --largest-small-monitor: (var(--large-monitor-breakpoint) - 1px);
-  --largest-large-monitor: (var(--widescreen-monitor-breakpoint) - 1px);
+  --largest-mobile-screen: calc(var(--tablet-breakpoint) - 1px);
+  --largest-tablet-screen: calc(var(--computer-breakpoint) - 1px);
+  --largest-small-monitor: calc(var(--large-monitor-breakpoint) - 1px);
+  --largest-large-monitor: calc(var(--widescreen-monitor-breakpoint) - 1px);
 
-  /*-------------------
+  /* -------------------
        Sizing Values
-  --------------------*/
+  -------------------- */
 
   /*
     These are the pixel values expressed as a ratio of base em
@@ -530,9 +531,9 @@
   --relative-huge: calc(var(--huge-ratio) * 1em);
   --relative-massive: calc(var(--massive-ratio) * 1em);
 
-  /*-------------------
+  /* -------------------
     Exact Pixel Values
-  --------------------*/
+  -------------------- */
   /*
     These are used to specify exact pixel values in em
     for things like borders that remain constantly
@@ -674,299 +675,297 @@
   --relative64px: calc((64 / var(--em-size)) * 1em);
 
   /* Columns */
-  --one-wide: (1 / var(--column-count) * 100%);
-  --two-wide: (2 / var(--column-count) * 100%);
-  --three-wide: (3 / var(--column-count) * 100%);
-  --four-wide: (4 / var(--column-count) * 100%);
-  --five-wide: (5 / var(--column-count) * 100%);
-  --six-wide: (6 / var(--column-count) * 100%);
-  --seven-wide: (7 / var(--column-count) * 100%);
-  --eight-wide: (8 / var(--column-count) * 100%);
-  --nine-wide: (9 / var(--column-count) * 100%);
-  --ten-wide: (10 / var(--column-count) * 100%);
-  --eleven-wide: (11 / var(--column-count) * 100%);
-  --twelve-wide: (12 / var(--column-count) * 100%);
-  --thirteen-wide: (13 / var(--column-count) * 100%);
-  --fourteen-wide: (14 / var(--column-count) * 100%);
-  --fifteen-wide: (15 / var(--column-count) * 100%);
-  --sixteen-wide: (16 / var(--column-count) * 100%);
+  --one-wide: calc(1 / var(--column-count) * 100%);
+  --two-wide: calc(2 / var(--column-count) * 100%);
+  --three-wide: calc(3 / var(--column-count) * 100%);
+  --four-wide: calc(4 / var(--column-count) * 100%);
+  --five-wide: calc(5 / var(--column-count) * 100%);
+  --six-wide: calc(6 / var(--column-count) * 100%);
+  --seven-wide: calc(7 / var(--column-count) * 100%);
+  --eight-wide: calc(8 / var(--column-count) * 100%);
+  --nine-wide: calc(9 / var(--column-count) * 100%);
+  --ten-wide: calc(10 / var(--column-count) * 100%);
+  --eleven-wide: calc(11 / var(--column-count) * 100%);
+  --twelve-wide: calc(12 / var(--column-count) * 100%);
+  --thirteen-wide: calc(13 / var(--column-count) * 100%);
+  --fourteen-wide: calc(14 / var(--column-count) * 100%);
+  --fifteen-wide: calc(15 / var(--column-count) * 100%);
+  --sixteen-wide: calc(16 / var(--column-count) * 100%);
 
-  --one-column: (1 / 1 * 100%);
-  --two-column: (1 / 2 * 100%);
-  --three-column: (1 / 3 * 100%);
-  --four-column: (1 / 4 * 100%);
-  --five-column: (1 / 5 * 100%);
-  --six-column: (1 / 6 * 100%);
-  --seven-column: (1 / 7 * 100%);
-  --eight-column: (1 / 8 * 100%);
-  --nine-column: (1 / 9 * 100%);
-  --ten-column: (1 / 10 * 100%);
-  --eleven-column: (1 / 11 * 100%);
-  --twelve-column: (1 / 12 * 100%);
-  --thirteen-column: (1 / 13 * 100%);
-  --fourteen-column: (1 / 14 * 100%);
-  --fifteen-column: (1 / 15 * 100%);
-  --sixteen-column: (1 / 16 * 100%);
+  --one-column: calc(1 / 1 * 100%);
+  --two-column: calc(1 / 2 * 100%);
+  --three-column: calc(1 / 3 * 100%);
+  --four-column: calc(1 / 4 * 100%);
+  --five-column: calc(1 / 5 * 100%);
+  --six-column: calc(1 / 6 * 100%);
+  --seven-column: calc(1 / 7 * 100%);
+  --eight-column: calc(1 / 8 * 100%);
+  --nine-column: calc(1 / 9 * 100%);
+  --ten-column: calc(1 / 10 * 100%);
+  --eleven-column: calc(1 / 11 * 100%);
+  --twelve-column: calc(1 / 12 * 100%);
+  --thirteen-column: calc(1 / 13 * 100%);
+  --fourteen-column: calc(1 / 14 * 100%);
+  --fifteen-column: calc(1 / 15 * 100%);
+  --sixteen-column: calc(1 / 16 * 100%);
 
 
   /*******************************
                States
   *******************************/
 
-  /*-------------------
+  /* -------------------
         Disabled
-  --------------------*/
+  -------------------- */
 
   --disabled-opacity: 0.45;
-  --disabled-text-color: rgba(40, 40, 40, 0.3);
-  --inverted-disabled-text-color: rgba(225, 225, 225, 0.3);
 
-  /*-------------------
+  /* -------------------
           Hover
-  --------------------*/
+  -------------------- */
 
-  /*---  Shadows  ---*/
+  /* ---  Shadows  --- */
   --floating-shadow-hover:
     0px 2px 4px 0px rgba(34, 36, 38, 0.15),
     0px 2px 10px 0px rgba(34, 36, 38, 0.25)
   ;
 
-  /*---  Colors  ---*/
-  --primary-color-hover: saturate(darken(var(--primary-color), 5), 10, relative);
-  --secondary-color-hover: saturate(lighten(var(--secondary-color), 5), 10, relative);
-  --light-primary-color-hover: saturate(darken(var(--light-primary-color), 5), 10, relative);
-  --light-secondary-color-hover: saturate(lighten(var(--light-secondary-color), 5), 10, relative);
+  /* ---  Colors  --- */
+  --primary-color-hover: oklch(from var(--primary-color) calc(l - 5) c calc(h + 10));
+  --secondary-color-hover: oklch(from var(--secondary-color) calc(l - 5) c calc(h + 10));
+  --light-primary-color-hover: oklch(from var(--light-primary-color) calc(l - 5) c calc(h + 10));
+  --light-secondary-color-hover: oklch(from var(--light-secondary-color) calc(l - 5) c calc(h + 10));
 
-  --red-hover: saturate(darken(var(--red), 5), 10, relative);
-  --orange-hover: saturate(darken(var(--orange), 5), 10, relative);
-  --yellow-hover: saturate(darken(var(--yellow), 5), 10, relative);
-  --olive-hover: saturate(darken(var(--olive), 5), 10, relative);
-  --green-hover: saturate(darken(var(--green), 5), 10, relative);
-  --teal-hover: saturate(darken(var(--teal), 5), 10, relative);
-  --blue-hover: saturate(darken(var(--blue), 5), 10, relative);
-  --violet-hover: saturate(darken(var(--violet), 5), 10, relative);
-  --purple-hover: saturate(darken(var(--purple), 5), 10, relative);
-  --pink-hover: saturate(darken(var(--pink), 5), 10, relative);
-  --brown-hover: saturate(darken(var(--brown), 5), 10, relative);
+  --red-hover: oklch(from var(--red) calc(l - 5) c calc(h + 10));
+  --orange-hover: oklch(from var(--orange) calc(l - 5) c calc(h + 10));
+  --yellow-hover: oklch(from var(--yellow) calc(l - 5) c calc(h + 10));
+  --olive-hover: oklch(from var(--olive) calc(l - 5) c calc(h + 10));
+  --green-hover: oklch(from var(--green) calc(l - 5) c calc(h + 10));
+  --teal-hover: oklch(from var(--teal) calc(l - 5) c calc(h + 10));
+  --blue-hover: oklch(from var(--blue) calc(l - 5) c calc(h + 10));
+  --violet-hover: oklch(from var(--violet) calc(l - 5) c calc(h + 10));
+  --purple-hover: oklch(from var(--purple) calc(l - 5) c calc(h + 10));
+  --pink-hover: oklch(from var(--pink) calc(l - 5) c calc(h + 10));
+  --brown-hover: oklch(from var(--brown) calc(l - 5) c calc(h + 10));
 
-  --light-red-hover: saturate(darken(var(--light-red), 5), 10, relative);
-  --light-orange-hover: saturate(darken(var(--light-orange), 5), 10, relative);
-  --light-yellow-hover: saturate(darken(var(--light-yellow), 5), 10, relative);
-  --light-olive-hover: saturate(darken(var(--light-olive), 5), 10, relative);
-  --light-green-hover: saturate(darken(var(--light-green), 5), 10, relative);
-  --light-teal-hover: saturate(darken(var(--light-teal), 5), 10, relative);
-  --light-blue-hover: saturate(darken(var(--light-blue), 5), 10, relative);
-  --light-violet-hover: saturate(darken(var(--light-violet), 5), 10, relative);
-  --light-purple-hover: saturate(darken(var(--light-purple), 5), 10, relative);
-  --light-pink-hover: saturate(darken(var(--light-pink), 5), 10, relative);
-  --light-brown-hover: saturate(darken(var(--light-brown), 5), 10, relative);
-  --light-grey-hover: saturate(darken(var(--light-grey), 5), 10, relative);
-  --light-black-hover: saturate(darken(var(--full-black), 5), 10, relative);
+  --light-red-hover: oklch(from var(--light-red) calc(l - 5) c calc(h + 10));
+  --light-orange-hover: oklch(from var(--light-orange) calc(l - 5) c calc(h + 10));
+  --light-yellow-hover: oklch(from var(--light-yellow) calc(l - 5) c calc(h + 10));
+  --light-olive-hover: oklch(from var(--light-olive) calc(l - 5) c calc(h + 10));
+  --light-green-hover: oklch(from var(--light-green) calc(l - 5) c calc(h + 10));
+  --light-teal-hover: oklch(from var(--light-teal) calc(l - 5) c calc(h + 10));
+  --light-blue-hover: oklch(from var(--light-blue) calc(l - 5) c calc(h + 10));
+  --light-violet-hover: oklch(from var(--light-violet) calc(l - 5) c calc(h + 10));
+  --light-purple-hover: oklch(from var(--light-purple) calc(l - 5) c calc(h + 10));
+  --light-pink-hover: oklch(from var(--light-pink) calc(l - 5) c calc(h + 10));
+  --light-brown-hover: oklch(from var(--light-brown) calc(l - 5) c calc(h + 10));
+  --light-grey-hover: oklch(from var(--light-grey) calc(l - 5) c calc(h + 10));
+  --light-black-hover: oklch(from var(--full-black) calc(l - 5) c calc(h + 10));
 
-  /*---  Emotive  ---*/
-  --positive-color-hover: saturate(darken(var(--positive-color), 5), 10, relative);
-  --negative-color-hover: saturate(darken(var(--negative-color), 5), 10, relative);
+  /* ---  Emotive  --- */
+  --positive-color-hover: oklch(from var(--positive-color) calc(l - 5) c calc(h + 10));
+  --negative-color-hover: oklch(from var(--negative-color) calc(l - 5) c calc(h + 10));
 
-  /*---  Brand   ---*/
-  --facebook-hover-color: saturate(darken(var(--facebook-color), 5), 10, relative);
-  --twitter-hover-color: saturate(darken(var(--twitter-color), 5), 10, relative);
-  --google-plus-hover-color: saturate(darken(var(--google-plus-color), 5), 10, relative);
-  --linked-in-hover-color: saturate(darken(var(--linked-in-color), 5), 10, relative);
-  --youtube-hover-color: saturate(darken(var(--youtube-color), 5), 10, relative);
-  --instagram-hover-color: saturate(darken(var(--instagram-color), 5), 10, relative);
-  --pinterest-hover-color: saturate(darken(var(--pinterest-color), 5), 10, relative);
-  --vk-hover-color: saturate(darken(var(--vk-color), 5), 10, relative);
+  /* ---  Brand   --- */
+  --facebook-hover-color: oklch(from var(--facebook-color) calc(l - 5) c calc(h + 10));
+  --twitter-hover-color: oklch(from var(--twitter-color) calc(l - 5) c calc(h + 10));
+  --google-plus-hover-color: oklch(from var(--google-plus-color) calc(l - 5) c calc(h + 10));
+  --linked-in-hover-color: oklch(from var(--linked-in-color) calc(l - 5) c calc(h + 10));
+  --youtube-hover-color: oklch(from var(--youtube-color) calc(l - 5) c calc(h + 10));
+  --instagram-hover-color: oklch(from var(--instagram-color) calc(l - 5) c calc(h + 10));
+  --pinterest-hover-color: oklch(from var(--pinterest-color) calc(l - 5) c calc(h + 10));
+  --vk-hover-color: oklch(from var(--vk-color) calc(l - 5) c calc(h + 10));
 
-  /*---  Dark Tones  ---*/
-  --full-black-hover: lighten(var(--full-black), 5);
-  --black-hover: lighten(var(--black), 5);
-  --grey-hover: lighten(var(--grey), 5);
+  /* ---  Dark Tones  --- */
+  --full-black-hover: oklch(from var(--full-black) calc(l - 5) c h);
+  --black-hover: oklch(from var(--black) calc(l - 5) c h);
+  --grey-hover: oklch(from var(--grey) calc(l - 5) c h);
 
-  /*---  Light Tones  ---*/
-  --white-hover: darken(var(--white), 5);
-  --off-white-hover: darken(var(--off-white), 5);
-  --dark-white-hover: darken(var(--dark-white), 5);
+  /* ---  Light Tones  --- */
+  --white-hover: oklch(from var(--white) calc(l - 5) c h);
+  --off-white-hover: oklch(from var(--off-white) calc(l - 5) c h);
+  --dark-white-hover: oklch(from var(--dark-white) calc(l - 5) c h);
 
-  /*-------------------
+  /* -------------------
           Focus
-  --------------------*/
+  -------------------- */
 
-  /*---  Colors  ---*/
-  --primary-color-focus: saturate(darken(var(--primary-color), 8), 20, relative);
-  --secondary-color-focus: saturate(lighten(var(--secondary-color), 8), 20, relative);
-  --light-primary-color-focus: saturate(darken(var(--light-primary-color), 8), 20, relative);
-  --light-secondary-color-focus: saturate(lighten(var(--light-secondary-color), 8), 20, relative);
+  /* ---  Colors  --- */
+  --primary-color-focus: oklch(from var(--primary-color) calc(l + 8) c calc(h + 20));
+  --secondary-color-focus: oklch(from var(--secondary-color) calc(l + 8) c calc(h + 20));
+  --light-primary-color-focus: oklch(from var(--light-primary-color) calc(l + 8) c calc(h + 20));
+  --light-secondary-color-focus: oklch(from var(--light-secondary-color) calc(l + 8) c calc(h + 20));
 
-  --red-focus: saturate(darken(var(--red), 8), 20, relative);
-  --orange-focus: saturate(darken(var(--orange), 8), 20, relative);
-  --yellow-focus: saturate(darken(var(--yellow), 8), 20, relative);
-  --olive-focus: saturate(darken(var(--olive), 8), 20, relative);
-  --green-focus: saturate(darken(var(--green), 8), 20, relative);
-  --teal-focus: saturate(darken(var(--teal), 8), 20, relative);
-  --blue-focus: saturate(darken(var(--blue), 8), 20, relative);
-  --violet-focus: saturate(darken(var(--violet), 8), 20, relative);
-  --purple-focus: saturate(darken(var(--purple), 8), 20, relative);
-  --pink-focus: saturate(darken(var(--pink), 8), 20, relative);
-  --brown-focus: saturate(darken(var(--brown), 8), 20, relative);
+  --red-focus: oklch(from var(--red) calc(l + 8) c calc(h + 20));
+  --orange-focus: oklch(from var(--orange) calc(l + 8) c calc(h + 20));
+  --yellow-focus: oklch(from var(--yellow) calc(l + 8) c calc(h + 20));
+  --olive-focus: oklch(from var(--olive) calc(l + 8) c calc(h + 20));
+  --green-focus: oklch(from var(--green) calc(l + 8) c calc(h + 20));
+  --teal-focus: oklch(from var(--teal) calc(l + 8) c calc(h + 20));
+  --blue-focus: oklch(from var(--blue) calc(l + 8) c calc(h + 20));
+  --violet-focus: oklch(from var(--violet) calc(l + 8) c calc(h + 20));
+  --purple-focus: oklch(from var(--purple) calc(l + 8) c calc(h + 20));
+  --pink-focus: oklch(from var(--pink) calc(l + 8) c calc(h + 20));
+  --brown-focus: oklch(from var(--brown) calc(l + 8) c calc(h + 20));
 
-  --light-red-focus: saturate(darken(var(--light-red), 8), 20, relative);
-  --light-orange-focus: saturate(darken(var(--light-orange), 8), 20, relative);
-  --light-yellow-focus: saturate(darken(var(--light-yellow), 8), 20, relative);
-  --light-olive-focus: saturate(darken(var(--light-olive), 8), 20, relative);
-  --light-green-focus: saturate(darken(var(--light-green), 8), 20, relative);
-  --light-teal-focus: saturate(darken(var(--light-teal), 8), 20, relative);
-  --light-blue-focus: saturate(darken(var(--light-blue), 8), 20, relative);
-  --light-violet-focus: saturate(darken(var(--light-violet), 8), 20, relative);
-  --light-purple-focus: saturate(darken(var(--light-purple), 8), 20, relative);
-  --light-pink-focus: saturate(darken(var(--light-pink), 8), 20, relative);
-  --light-brown-focus: saturate(darken(var(--light-brown), 8), 20, relative);
-  --light-grey-focus: saturate(darken(var(--light-grey), 8), 20, relative);
-  --light-black-focus: saturate(darken(var(--full-black), 8), 20, relative);
+  --light-red-focus: oklch(from var(--light-red) calc(l + 8) c calc(h + 20));
+  --light-orange-focus: oklch(from var(--light-orange) calc(l + 8) c calc(h + 20));
+  --light-yellow-focus: oklch(from var(--light-yellow) calc(l + 8) c calc(h + 20));
+  --light-olive-focus: oklch(from var(--light-olive) calc(l + 8) c calc(h + 20));
+  --light-green-focus: oklch(from var(--light-green) calc(l + 8) c calc(h + 20));
+  --light-teal-focus: oklch(from var(--light-teal) calc(l + 8) c calc(h + 20));
+  --light-blue-focus: oklch(from var(--light-blue) calc(l + 8) c calc(h + 20));
+  --light-violet-focus: oklch(from var(--light-violet) calc(l + 8) c calc(h + 20));
+  --light-purple-focus: oklch(from var(--light-purple) calc(l + 8) c calc(h + 20));
+  --light-pink-focus: oklch(from var(--light-pink) calc(l + 8) c calc(h + 20));
+  --light-brown-focus: oklch(from var(--light-brown) calc(l + 8) c calc(h + 20));
+  --light-grey-focus: oklch(from var(--light-grey) calc(l + 8) c calc(h + 20));
+  --light-black-focus: oklch(from var(--full-black) calc(l + 8) c calc(h + 20));
 
-  /*---  Emotive  ---*/
-  --positive-color-focus: saturate(darken(var(--positive-color), 8), 20, relative);
-  --negative-color-focus: saturate(darken(var(--negative-color), 8), 20, relative);
+  /* ---  Emotive  --- */
+  --positive-color-focus: oklch(from var(--positive-color) calc(l + 8) c calc(h + 20));
+  --negative-color-focus: oklch(from var(--negative-color) calc(l + 8) c calc(h + 20));
 
-  /*---  Brand   ---*/
-  --facebook-focus-color: saturate(darken(var(--facebook-color), 8), 20, relative);
-  --twitter-focus-color: saturate(darken(var(--twitter-color), 8), 20, relative);
-  --google-plus-focus-color: saturate(darken(var(--google-plus-color), 8), 20, relative);
-  --linked-in-focus-color: saturate(darken(var(--linked-in-color), 8), 20, relative);
-  --youtube-focus-color: saturate(darken(var(--youtube-color), 8), 20, relative);
-  --instagram-focus-color: saturate(darken(var(--instagram-color), 8), 20, relative);
-  --pinterest-focus-color: saturate(darken(var(--pinterest-color), 8), 20, relative);
-  --vk-focus-color: saturate(darken(var(--vk-color), 8), 20, relative);
+  /* ---  Brand   --- */
+  --facebook-focus-color: oklch(from var(--facebook-color) calc(l + 8) c calc(h + 20));
+  --twitter-focus-color: oklch(from var(--twitter-color) calc(l + 8) c calc(h + 20));
+  --google-plus-focus-color: oklch(from var(--google-plus-color) calc(l + 8) c calc(h + 20));
+  --linked-in-focus-color: oklch(from var(--linked-in-color) calc(l + 8) c calc(h + 20));
+  --youtube-focus-color: oklch(from var(--youtube-color) calc(l + 8) c calc(h + 20));
+  --instagram-focus-color: oklch(from var(--instagram-color) calc(l + 8) c calc(h + 20));
+  --pinterest-focus-color: oklch(from var(--pinterest-color) calc(l + 8) c calc(h + 20));
+  --vk-focus-color: oklch(from var(--vk-color) calc(l + 8) c calc(h + 20));
 
-  /*---  Dark Tones  ---*/
-  --full-black-focus: lighten(var(--full-black), 8);
-  --black-focus: lighten(var(--black), 8);
-  --grey-focus: lighten(var(--grey), 8);
+  /* ---  Dark Tones  --- */
+  --full-black-focus: oklch(from var(--full-black) calc(l + 8) c h);
+  --black-focus: oklch(from var(--black) calc(l + 8) c h);
+  --grey-focus: oklch(from var(--grey) calc(l + 8) c h);
 
-  /*---  Light Tones  ---*/
-  --white-focus: darken(var(--white), 8);
-  --off-white-focus: darken(var(--off-white), 8);
-  --dark-white-focus: darken(var(--dark-white), 8);
-
-
-  /*-------------------
-      --own:active)
-  --------------------*/
-
-  /*---  Colors  ---*/
-  --primary-color-down: darken(var(--primary-color), 10);
-  --secondary-color-down: lighten(var(--secondary-color), 10);
-  --light-primary-color-down: darken(var(--light-primary-color), 10);
-  --light-secondary-color-down: lighten(var(--light-secondary-color), 10);
-
-  --red-down: darken(var(--red), 10);
-  --orange-down: darken(var(--orange), 10);
-  --yellow-down: darken(var(--yellow), 10);
-  --olive-down: darken(var(--olive), 10);
-  --green-down: darken(var(--green), 10);
-  --teal-down: darken(var(--teal), 10);
-  --blue-down: darken(var(--blue), 10);
-  --violet-down: darken(var(--violet), 10);
-  --purple-down: darken(var(--purple), 10);
-  --pink-down: darken(var(--pink), 10);
-  --brown-down: darken(var(--brown), 10);
-
-  --light-red-down: darken(var(--light-red), 10);
-  --light-orange-down: darken(var(--light-orange), 10);
-  --light-yellow-down: darken(var(--light-yellow), 10);
-  --light-olive-down: darken(var(--light-olive), 10);
-  --light-green-down: darken(var(--light-green), 10);
-  --light-teal-down: darken(var(--light-teal), 10);
-  --light-blue-down: darken(var(--light-blue), 10);
-  --light-violet-down: darken(var(--light-violet), 10);
-  --light-purple-down: darken(var(--light-purple), 10);
-  --light-pink-down: darken(var(--light-pink), 10);
-  --light-brown-down: darken(var(--light-brown), 10);
-  --light-grey-down: darken(var(--light-grey), 10);
-  --light-black-down: darken(var(--full-black), 10);
-
-  /*---  Emotive  ---*/
-  --positive-color-down: darken(var(--positive-color), 10);
-  --negative-color-down: darken(var(--negative-color), 10);
-
-  /*---  Brand   ---*/
-  --facebook-down-color: darken(var(--facebook-color), 10);
-  --twitter-down-color: darken(var(--twitter-color), 10);
-  --google-plus-down-color: darken(var(--google-plus-color), 10);
-  --linked-in-down-color: darken(var(--linked-in-color), 10);
-  --youtube-down-color: darken(var(--youtube-color), 10);
-  --instagram-down-color: darken(var(--instagram-color), 10);
-  --pinterest-down-color: darken(var(--pinterest-color), 10);
-  --vk-down-color: darken(var(--vk-color), 10);
-
-  /*---  Dark Tones  ---*/
-  --full-black-down: lighten(var(--full-black), 10);
-  --black-down: lighten(var(--black), 10);
-  --grey-down: lighten(var(--grey), 10);
-
-  /*---  Light Tones  ---*/
-  --white-down: darken(var(--white), 10);
-  --off-white-down: darken(var(--off-white), 10);
-  --dark-white-down: darken(var(--dark-white), 10);
+  /* ---  Light Tones  --- */
+  --white-focus: oklch(from var(--white) calc(l + 8) c h);
+  --off-white-focus: oklch(from var(--off-white) calc(l + 8) c h);
+  --dark-white-focus: oklch(from var(--dark-white) calc(l + 8) c h);
 
 
-  /*-------------------
+  /* -------------------
           Active
-  --------------------*/
+  -------------------- */
 
-  /*---  Colors  ---*/
-  --primary-color-active: saturate(darken(var(--primary-color), 5), 15, relative);
-  --secondary-color-active: saturate(lighten(var(--secondary-color), 5), 15, relative);
-  --light-primary-color-active: saturate(darken(var(--light-primary-color), 5), 15, relative);
-  --light-secondary-color-active: saturate(lighten(var(--light-secondary-color), 5), 15, relative);
+  /* ---  Colors  --- */
+  --primary-color-down: oklch(from var(--primary-color) calc(l - 10) c h);
+  --secondary-color-down: oklch(from var(--secondary-color) calc(l - 10) c h);
+  --light-primary-color-down: oklch(from var(--light-primary-color) calc(l - 10) c h);
+  --light-secondary-color-down: oklch(from var(--light-secondary-color) calc(l - 10) c h);
 
-  --red-active: saturate(darken(var(--red), 5), 15, relative);
-  --orange-active: saturate(darken(var(--orange), 5), 15, relative);
-  --yellow-active: saturate(darken(var(--yellow), 5), 15, relative);
-  --olive-active: saturate(darken(var(--olive), 5), 15, relative);
-  --green-active: saturate(darken(var(--green), 5), 15, relative);
-  --teal-active: saturate(darken(var(--teal), 5), 15, relative);
-  --blue-active: saturate(darken(var(--blue), 5), 15, relative);
-  --violet-active: saturate(darken(var(--violet), 5), 15, relative);
-  --purple-active: saturate(darken(var(--purple), 5), 15, relative);
-  --pink-active: saturate(darken(var(--pink), 5), 15, relative);
-  --brown-active: saturate(darken(var(--brown), 5), 15, relative);
+  --red-down: oklch(from var(--red) calc(l - 10) c h);
+  --orange-down: oklch(from var(--orange) calc(l - 10) c h);
+  --yellow-down: oklch(from var(--yellow) calc(l - 10) c h);
+  --olive-down: oklch(from var(--olive) calc(l - 10) c h);
+  --green-down: oklch(from var(--green) calc(l - 10) c h);
+  --teal-down: oklch(from var(--teal) calc(l - 10) c h);
+  --blue-down: oklch(from var(--blue) calc(l - 10) c h);
+  --violet-down: oklch(from var(--violet) calc(l - 10) c h);
+  --purple-down: oklch(from var(--purple) calc(l - 10) c h);
+  --pink-down: oklch(from var(--pink) calc(l - 10) c h);
+  --brown-down: oklch(from var(--brown) calc(l - 10) c h);
 
-  --light-red-active: saturate(darken(var(--light-red), 5), 15, relative);
-  --light-orange-active: saturate(darken(var(--light-orange), 5), 15, relative);
-  --light-yellow-active: saturate(darken(var(--light-yellow), 5), 15, relative);
-  --light-olive-active: saturate(darken(var(--light-olive), 5), 15, relative);
-  --light-green-active: saturate(darken(var(--light-green), 5), 15, relative);
-  --light-teal-active: saturate(darken(var(--light-teal), 5), 15, relative);
-  --light-blue-active: saturate(darken(var(--light-blue), 5), 15, relative);
-  --light-violet-active: saturate(darken(var(--light-violet), 5), 15, relative);
-  --light-purple-active: saturate(darken(var(--light-purple), 5), 15, relative);
-  --light-pink-active: saturate(darken(var(--light-pink), 5), 15, relative);
-  --light-brown-active: saturate(darken(var(--light-brown), 5), 15, relative);
-  --light-grey-active: saturate(darken(var(--light-grey), 5), 15, relative);
-  --light-black-active: saturate(darken(var(--full-black), 5), 15, relative);
+  --light-red-down: oklch(from var(--light-red) calc(l - 10) c h);
+  --light-orange-down: oklch(from var(--light-orange) calc(l - 10) c h);
+  --light-yellow-down: oklch(from var(--light-yellow) calc(l - 10) c h);
+  --light-olive-down: oklch(from var(--light-olive) calc(l - 10) c h);
+  --light-green-down: oklch(from var(--light-green) calc(l - 10) c h);
+  --light-teal-down: oklch(from var(--light-teal) calc(l - 10) c h);
+  --light-blue-down: oklch(from var(--light-blue) calc(l - 10) c h);
+  --light-violet-down: oklch(from var(--light-violet) calc(l - 10) c h);
+  --light-purple-down: oklch(from var(--light-purple) calc(l - 10) c h);
+  --light-pink-down: oklch(from var(--light-pink) calc(l - 10) c h);
+  --light-brown-down: oklch(from var(--light-brown) calc(l - 10) c h);
+  --light-grey-down: oklch(from var(--light-grey) calc(l - 10) c h);
+  --light-black-down: oklch(from var(--full-black) calc(l - 10) c h);
 
-  /*---  Emotive  ---*/
-  --positive-color-active: saturate(darken(var(--positive-color), 5), 15, relative);
-  --negative-color-active: saturate(darken(var(--negative-color), 5), 15, relative);
+  /* ---  Emotive  --- */
+  --positive-color-down: oklch(from var(--positive-color) calc(l - 10) c h);
+  --negative-color-down: oklch(from var(--negative-color) calc(l - 10) c h);
 
-  /*---  Brand   ---*/
-  --facebook-active-color: saturate(darken(var(--facebook-color), 5), 15, relative);
-  --twitter-active-color: saturate(darken(var(--twitter-color), 5), 15, relative);
-  --google-plus-active-color: saturate(darken(var(--google-plus-color), 5), 15, relative);
-  --linked-in-active-color: saturate(darken(var(--linked-in-color), 5), 15, relative);
-  --youtube-active-color: saturate(darken(var(--youtube-color), 5), 15, relative);
-  --instagram-active-color: saturate(darken(var(--instagram-color), 5), 15, relative);
-  --pinterest-active-color: saturate(darken(var(--pinterest-color), 5), 15, relative);
-  --vk-active-color: saturate(darken(var(--vk-color), 5), 15, relative);
+  /* ---  Brand   --- */
+  --facebook-down-color: oklch(from var(--facebook-color) calc(l - 10) c h);
+  --twitter-down-color: oklch(from var(--twitter-color) calc(l - 10) c h);
+  --google-plus-down-color: oklch(from var(--google-plus-color) calc(l - 10) c h);
+  --linked-in-down-color: oklch(from var(--linked-in-color) calc(l - 10) c h);
+  --youtube-down-color: oklch(from var(--youtube-color) calc(l - 10) c h);
+  --instagram-down-color: oklch(from var(--instagram-color) calc(l - 10) c h);
+  --pinterest-down-color: oklch(from var(--pinterest-color) calc(l - 10) c h);
+  --vk-down-color: oklch(from var(--vk-color) calc(l - 10) c h);
 
-  /*---  Dark Tones  ---*/
-  --full-black-active: darken(var(--full-black), 5);
-  --black-active: darken(var(--black), 5);
-  --grey-active: darken(var(--grey), 5);
+  /* ---  Dark Tones  --- */
+  --full-black-down: oklch(from var(--full - black) calc(l - 10) c h);
+  --black-down: oklch(from var(--black) calc(l - 10) c h);
+  --grey-down: oklch(from var(--grey) calc(l - 10) c h);
 
-  /*---  Light Tones  ---*/
-  --white-active: darken(var(--white), 5);
-  --off-white-active: darken(var(--off-white), 5);
-  --dark-white-active: darken(var(--dark-white), 5);
+  /* ---  Light Tones  --- */
+  --white-down: oklch(from var(--white) calc(l - 10) c h);
+  --off-white-down: oklch(from var(--off-white) calc(l - 10) c h);
+  --dark-white-down: oklch(from var(--dark-white) calc(l - 10) c h);
+
+
+  /* -------------------
+          Active
+  -------------------- */
+
+  /* ---  Colors  --- */
+  --primary-color-active: oklch(from var(--primary-color) calc(l - 5) calc(s + 15) h);
+  --secondary-color-active: oklch(from var(--secondary-color) calc(l - 5) calc(s + 15) h);
+  --light-primary-color-active: oklch(from var(--light-primary-color) calc(l - 5) calc(s + 15) h);
+  --light-secondary-color-active: oklch(from var(--light-secondary-color) calc(l - 5) calc(s + 15) h);
+
+  --red-active: oklch(from var(--red) calc(l - 5) calc(s + 15) h);
+  --orange-active: oklch(from var(--orange) calc(l - 5) calc(s + 15) h);
+  --yellow-active: oklch(from var(--yellow) calc(l - 5) calc(s + 15) h);
+  --olive-active: oklch(from var(--olive) calc(l - 5) calc(s + 15) h);
+  --green-active: oklch(from var(--green) calc(l - 5) calc(s + 15) h);
+  --teal-active: oklch(from var(--teal) calc(l - 5) calc(s + 15) h);
+  --blue-active: oklch(from var(--blue) calc(l - 5) calc(s + 15) h);
+  --violet-active: oklch(from var(--violet) calc(l - 5) calc(s + 15) h);
+  --purple-active: oklch(from var(--purple) calc(l - 5) calc(s + 15) h);
+  --pink-active: oklch(from var(--pink) calc(l - 5) calc(s + 15) h);
+  --brown-active: oklch(from var(--brown) calc(l - 5) calc(s + 15) h);
+
+  --light-red-active: oklch(from var(--light-red) calc(l - 5) calc(s + 15) h);
+  --light-orange-active: oklch(from var(--light-orange) calc(l - 5) calc(s + 15) h);
+  --light-yellow-active: oklch(from var(--light-yellow) calc(l - 5) calc(s + 15) h);
+  --light-olive-active: oklch(from var(--light-olive) calc(l - 5) calc(s + 15) h);
+  --light-green-active: oklch(from var(--light-green) calc(l - 5) calc(s + 15) h);
+  --light-teal-active: oklch(from var(--light-teal) calc(l - 5) calc(s + 15) h);
+  --light-blue-active: oklch(from var(--light-blue) calc(l - 5) calc(s + 15) h);
+  --light-violet-active: oklch(from var(--light-violet) calc(l - 5) calc(s + 15) h);
+  --light-purple-active: oklch(from var(--light-purple) calc(l - 5) calc(s + 15) h);
+  --light-pink-active: oklch(from var(--light-pink) calc(l - 5) calc(s + 15) h);
+  --light-brown-active: oklch(from var(--light-brown) calc(l - 5) calc(s + 15) h);
+  --light-grey-active: oklch(from var(--light-grey) calc(l - 5) calc(s + 15) h);
+  --light-black-active: oklch(from var(--full - black) calc(l - 5) calc(s + 15) h);
+
+  /* ---  Emotive  --- */
+  --positive-color-active: oklch(from var(--positive-color) calc(l - 5) calc(s + 15) h);
+  --negative-color-active: oklch(from var(--negative-color) calc(l - 5) calc(s + 15) h);
+
+  /* ---  Brand   --- */
+  --facebook-active-color: oklch(from var(--facebook-color) calc(l - 5) calc(s + 15) h);
+  --twitter-active-color: oklch(from var(--twitter-color) calc(l - 5) calc(s + 15) h);
+  --google-plus-active-color: oklch(from var(--google-plus-color) calc(l - 5) calc(s + 15) h);
+  --linked-in-active-color: oklch(from var(--linked-in-color) calc(l - 5) calc(s + 15) h);
+  --youtube-active-color: oklch(from var(--youtube-color) calc(l - 5) calc(s + 15) h);
+  --instagram-active-color: oklch(from var(--instagram-color) calc(l - 5) calc(s + 15) h);
+  --pinterest-active-color: oklch(from var(--pinterest-color) calc(l - 5) calc(s + 15) h);
+  --vk-active-color: oklch(from var(--vk-color) calc(l - 5) calc(s + 15) h);
+
+  /* ---  Dark Tones  --- */
+  --full-black-active: oklch(from var(--full - black) calc(l - 5) c h);
+  --black-active: oklch(from var(--black) calc(l - 5) c h);
+  --grey-active: oklch(from var(--grey) calc(l - 5) c h);
+
+  /* ---  Light Tones  --- */
+  --white-active: oklch(from var(--white) calc(l - 5) c h);
+  --off-white-active: oklch(from var(--off-white) calc(l - 5) c h);
+  --dark-white-active: oklch(from var(--dark-white) calc(l - 5) c h);
 
 }

@@ -12,3 +12,6 @@
 @import url('./states/active-variables.css');
 @import url('./states/disabled-variables.css');
 @import url('./states/loading-variables.css');
+
+/* Types */
+@import url('./types/emphasis-variables.css');
