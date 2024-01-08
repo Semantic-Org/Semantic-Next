@@ -1,3 +1,8 @@
+/*--------------
+     Primary
+---------------*/
+
+
 /*--- Standard ---*/
 .primary.buttons .button,
 .primary.button {
@@ -9,24 +14,30 @@
 .primary.button {
   box-shadow: var(--primary-box-shadow);
 }
+
+
+/* States */
 .primary.buttons .button:hover,
 .primary.button:hover {
   background-color: var(--primary-color-hover);
   color: var(--primary-text-color);
   text-shadow: var(--primary-text-shadow);
 }
+
 .primary.buttons .button:focus,
 .primary.button:focus {
   background-color: var(--primary-color-focus);
   color: var(--primary-text-color);
   text-shadow: var(--primary-text-shadow);
 }
+
 .primary.buttons .button:active,
 .primary.button:active {
   background-color: var(--primary-color-down);
   color: var(--primary-text-color);
   text-shadow: var(--primary-text-shadow);
 }
+
 .primary.buttons .active.button,
 .primary.buttons .active.button:active,
 .primary.active.button,

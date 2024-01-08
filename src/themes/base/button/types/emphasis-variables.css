@@ -3,14 +3,14 @@
 
 ui-button {
   --primary-background-image: var(--colored-background-image);
+  --primary-box-shadow: var(--colored-box-shadow);
   --primary-text-color: var(--inverted-text-color);
   --primary-text-shadow: var(--inverted-text-shadow);
-  --primary-box-shadow: var(--colored-box-shadow);
 
   --secondary-background-image: var(--colored-background-image);
+  --secondary-box-shadow: var(--colored-box-shadow);
   --secondary-text-color: var(--inverted-text-color);
   --secondary-text-shadow: var(--inverted-text-shadow);
-  --secondary-box-shadow: var(--colored-box-shadow);
 
   /* Inverted */
   --light-primary-text-color: var(--inverted-text-color);

@@ -54,7 +54,7 @@ class UIButton extends UIComponent {
   render() {
     console.log('html', html);
     return html`
-      <div class="primary button" name="button">
+      <div class="primary button" name="button" tabindex="0">
         <slot name="icon"></slot>
         <span class="text" name="text">
           <slot></slot>

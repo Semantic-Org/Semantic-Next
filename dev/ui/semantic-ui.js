@@ -709,7 +709,7 @@ var UIButton = class extends UIComponent {
   render() {
     console.log("html", x);
     return x`
-      <div class="primary button" name="button">
+      <div class="primary button" name="button" tabindex="0">
         <slot name="icon"></slot>
         <span class="text" name="text">
           <slot></slot>

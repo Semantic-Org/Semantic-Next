@@ -132,7 +132,7 @@
   --page-overflow-x: hidden;
 
   --line-height: 1.4285em;
-  --text-color: rgba(0, 0, 0, 0.87);
+  --text-color: rgb(0 0 0 / 87%);
 
   /* -------------------
         Paragraph
@@ -159,21 +159,21 @@
   --custom-scrollbar-width: 10px;
   --custom-scrollbar-height: 10px;
 
-  --track-background: rgba(0, 0, 0, 0.1);
+  --track-background: rgb(0 0 0 / 10%);
   --track-border-radius: 0px;
 
   --thumb-border-radius: 5px;
-  --thumb-background: rgba(0, 0, 0, 0.25);
+  --thumb-background: rgb(0 0 0 / 25%);
   --thumb-transition: color 0.2s ease;
 
-  --thumb-inactive-background: rgba(0, 0, 0, 0.15);
-  --thumb-hover-background: rgba(128, 135, 139, 0.8);
+  --thumb-inactive-background: rgb(0 0 0 / 15%);
+  --thumb-hover-background: rgb(128 135 139 / 80%);
 
   /* Inverted */
-  --track-inverted-background: rgba(255, 255, 255, 0.1);
-  --thumb-inverted-background: rgba(255, 255, 255, 0.25);
-  --thumb-inverted-inactive-background: rgba(255, 255, 255, 0.15);
-  --thumb-inverted-hover-background: rgba(255, 255, 255, 0.35);
+  --track-inverted-background: rgb(255 255 255 / 10%);
+  --thumb-inverted-background: rgb(255 255 255 / 25%);
+  --thumb-inverted-inactive-background: rgb(255 255 255 / 15%);
+  --thumb-inverted-hover-background: rgb(255 255 255 / 35%);
 
   /* -------------------
     Highlighted Text
@@ -182,7 +182,7 @@
   --highlight-background: #CCE2FF;
   --highlight-color: var(--text-color);
 
-  --input-highlight-background: rgba(100, 100, 100, 0.4);
+  --input-highlight-background: rgb(100 100 100 / 40%);
   --input-highlight-color: var(--text-color);
 
 
@@ -193,10 +193,10 @@
   --loader-size: var(--relative-big);
   --loader-speed: 0.6s;
   --loader-line-width: 0.2em;
-  --loader-fill-color: rgba(0, 0, 0, 0.1);
+  --loader-fill-color: rgb(0 0 0 / 10%);
   --loader-line-color: var(--grey);
 
-  --inverted-loader-fill-color: rgba(255, 255, 255, 0.15);
+  --inverted-loader-fill-color: rgb(255 255 255 / 15%);
   --inverted-loader-line-color: var(--white);
 
   /* -------------------
@@ -319,14 +319,14 @@
        Alpha Colors
   -------------------- */
 
-  --subtle-transparent-black: rgba(0, 0, 0, 0.03);
-  --transparent-black: rgba(0, 0, 0, 0.05);
-  --strong-transparent-black: rgba(0, 0, 0, 0.10);
-  --very-strong-transparent-black: rgba(0, 0, 0, 0.15);
+  --subtle-transparent-black: rgb(0 0 0 / 30%);
+  --transparent-black: rgb(0 0 0 / 50%);
+  --strong-transparent-black: rgb(0 0 0 / 10%);
+  --very-strong-transparent-black: rgb(0 0 0 / 15%);
 
-  --subtle-transparent-white: rgba(255, 255, 255, 0.02);
-  --transparent-white: rgba(255, 255, 255, 0.08);
-  --strong-transparent-white: rgba(255, 255, 255, 0.15);
+  --subtle-transparent-white: rgb(255 255 255 / 20%);
+  --transparent-white: rgb(255 255 255 / 80%);
+  --strong-transparent-white: rgb(255 255 255 / 15%);
 
   /* -------------------
          Accents
@@ -340,8 +340,8 @@
     0px 1px 2px 0 var(--border-color)
   ;
   --floating-shadow:
-    0px 2px 4px 0px rgba(34, 36, 38, 0.12),
-    0px 2px 10px 0px rgba(34, 36, 38, 0.15)
+    0px 2px 4px 0px rgb(34 36 38 12%),
+    0px 2px 10px 0px rgb(34 36 38 15%)
   ;
 
   /*******************************
@@ -399,24 +399,24 @@
        Neutral Text
   -------------------- */
 
-  --dark-text-color: rgba(0, 0, 0, 0.85);
-  --muted-text-color: rgba(0, 0, 0, 0.6);
-  --light-text-color: rgba(0, 0, 0, 0.4);
+  --dark-text-color: rgb(0 0 0 / 85%);
+  --muted-text-color: rgb(0 0 0 / 60%);
+  --light-text-color: rgb(0 0 0 / 40%);
 
-  --unselected-text-color: rgba(0, 0, 0, 0.4);
-  --hovered-text-color: rgba(0, 0, 0, 0.8);
-  --pressed-text-color: rgba(0, 0, 0, 0.9);
-  --selected-text-color: rgba(0, 0, 0, 0.95);
-  --disabled-text-color: rgba(0, 0, 0, 0.2);
+  --unselected-text-color: rgb(0 0 0 / 40%);
+  --hovered-text-color: rgb(0 0 0 / 80%);
+  --pressed-text-color: rgb(0 0 0 / 90%);
+  --selected-text-color: rgb(0 0 0 / 95%);
+  --disabled-text-color: rgb(0 0 0 / 20%);
 
-  --inverted-text-color: rgba(255, 255, 255, 0.9);
-  --inverted-muted-text-color: rgba(255, 255, 255, 0.8);
-  --inverted-light-text-color: rgba(255, 255, 255, 0.7);
-  --inverted-unselected-text-color: rgba(255, 255, 255, 0.5);
-  --inverted-hovered-text-color: rgba(255, 255, 255, 1);
-  --inverted-pressed-text-color: rgba(255, 255, 255, 1);
-  --inverted-selected-text-color: rgba(255, 255, 255, 1);
-  --inverted-disabled-text-color: rgba(255, 255, 255, 0.2);
+  --inverted-text-color: rgb(255 255 255 / 90%);
+  --inverted-muted-text-color: rgb(255 255 255 / 80%);
+  --inverted-light-text-color: rgb(255 255 255 / 70%);
+  --inverted-unselected-text-color: rgb(255 255 255 / 50%);
+  --inverted-hovered-text-color: rgb(255 255 255 / 100%);
+  --inverted-pressed-text-color: rgb(255 255 255 / 100%);
+  --inverted-selected-text-color: rgb(255 255 255 / 100%);
+  --inverted-disabled-text-color: rgb(255 255 255 / 20%);
 
   /* -------------------
        Brand Colors
@@ -437,19 +437,19 @@
 
   --circular-radius: 500rem;
 
-  --border-color: rgba(34, 36, 38, 0.15);
-  --strong-border-color: rgba(34, 36, 38, 0.22);
-  --internal-border-color: rgba(34, 36, 38, 0.1);
-  --selected-border-color: rgba(34, 36, 38, 0.35);
-  --strong-selected-border-color: rgba(34, 36, 38, 0.5);
-  --disabled-border-color: rgba(34, 36, 38, 0.5);
+  --border-color: rgb(34 36 38 15%);
+  --strong-border-color: rgb(34 36 38 22%);
+  --internal-border-color: rgb(34 36 38 10%);
+  --selected-border-color: rgb(34 36 38 35%);
+  --strong-selected-border-color: rgb(34 36 38 50%);
+  --disabled-border-color: rgb(34 36 38 50%);
 
   --solid-internal-border-color: #FAFAFA;
   --solid-border-color: #D4D4D5;
   --solid-selected-border-color: #BCBDBD;
 
-  --white-border-color: rgba(255, 255, 255, 0.1);
-  --selected-white-border-color: rgba(255, 255, 255, 0.8);
+  --white-border-color: rgb(255 255 255 / 10%);
+  --selected-white-border-color: rgb(255 255 255 / 80%);
 
   --solid-white-border-color: #555555;
   --selected-solid-white-border-color: #999999;
@@ -726,8 +726,8 @@
 
   /* ---  Shadows  --- */
   --floating-shadow-hover:
-    0px 2px 4px 0px rgba(34, 36, 38, 0.15),
-    0px 2px 10px 0px rgba(34, 36, 38, 0.25)
+    0px 2px 4px 0px rgb(34 36 38 15%),
+    0px 2px 10px 0px rgb(34 36 38 25%)
   ;
 
   /* ---  Colors  --- */
@@ -791,60 +791,60 @@
   -------------------- */
 
   /* ---  Colors  --- */
-  --primary-color-focus: oklch(from var(--primary-color) calc(l + 8) c calc(h + 20));
-  --secondary-color-focus: oklch(from var(--secondary-color) calc(l + 8) c calc(h + 20));
-  --light-primary-color-focus: oklch(from var(--light-primary-color) calc(l + 8) c calc(h + 20));
-  --light-secondary-color-focus: oklch(from var(--light-secondary-color) calc(l + 8) c calc(h + 20));
+  --primary-color-focus: oklch(from var(--primary-color) calc(l - 8) c calc(h + 15));
+  --secondary-color-focus: oklch(from var(--secondary-color) calc(l - 8) c calc(h + 15));
+  --light-primary-color-focus: oklch(from var(--light-primary-color) calc(l - 8) c calc(h + 15));
+  --light-secondary-color-focus: oklch(from var(--light-secondary-color) calc(l - 8) c calc(h + 15));
 
-  --red-focus: oklch(from var(--red) calc(l + 8) c calc(h + 20));
-  --orange-focus: oklch(from var(--orange) calc(l + 8) c calc(h + 20));
-  --yellow-focus: oklch(from var(--yellow) calc(l + 8) c calc(h + 20));
-  --olive-focus: oklch(from var(--olive) calc(l + 8) c calc(h + 20));
-  --green-focus: oklch(from var(--green) calc(l + 8) c calc(h + 20));
-  --teal-focus: oklch(from var(--teal) calc(l + 8) c calc(h + 20));
-  --blue-focus: oklch(from var(--blue) calc(l + 8) c calc(h + 20));
-  --violet-focus: oklch(from var(--violet) calc(l + 8) c calc(h + 20));
-  --purple-focus: oklch(from var(--purple) calc(l + 8) c calc(h + 20));
-  --pink-focus: oklch(from var(--pink) calc(l + 8) c calc(h + 20));
-  --brown-focus: oklch(from var(--brown) calc(l + 8) c calc(h + 20));
+  --red-focus: oklch(from var(--red) calc(l - 8) c calc(h + 15));
+  --orange-focus: oklch(from var(--orange) calc(l - 8) c calc(h + 15));
+  --yellow-focus: oklch(from var(--yellow) calc(l - 8) c calc(h + 15));
+  --olive-focus: oklch(from var(--olive) calc(l - 8) c calc(h + 15));
+  --green-focus: oklch(from var(--green) calc(l - 8) c calc(h + 15));
+  --teal-focus: oklch(from var(--teal) calc(l - 8) c calc(h + 15));
+  --blue-focus: oklch(from var(--blue) calc(l - 8) c calc(h + 15));
+  --violet-focus: oklch(from var(--violet) calc(l - 8) c calc(h + 15));
+  --purple-focus: oklch(from var(--purple) calc(l - 8) c calc(h + 15));
+  --pink-focus: oklch(from var(--pink) calc(l - 8) c calc(h + 15));
+  --brown-focus: oklch(from var(--brown) calc(l - 8) c calc(h + 15));
 
-  --light-red-focus: oklch(from var(--light-red) calc(l + 8) c calc(h + 20));
-  --light-orange-focus: oklch(from var(--light-orange) calc(l + 8) c calc(h + 20));
-  --light-yellow-focus: oklch(from var(--light-yellow) calc(l + 8) c calc(h + 20));
-  --light-olive-focus: oklch(from var(--light-olive) calc(l + 8) c calc(h + 20));
-  --light-green-focus: oklch(from var(--light-green) calc(l + 8) c calc(h + 20));
-  --light-teal-focus: oklch(from var(--light-teal) calc(l + 8) c calc(h + 20));
-  --light-blue-focus: oklch(from var(--light-blue) calc(l + 8) c calc(h + 20));
-  --light-violet-focus: oklch(from var(--light-violet) calc(l + 8) c calc(h + 20));
-  --light-purple-focus: oklch(from var(--light-purple) calc(l + 8) c calc(h + 20));
-  --light-pink-focus: oklch(from var(--light-pink) calc(l + 8) c calc(h + 20));
-  --light-brown-focus: oklch(from var(--light-brown) calc(l + 8) c calc(h + 20));
-  --light-grey-focus: oklch(from var(--light-grey) calc(l + 8) c calc(h + 20));
-  --light-black-focus: oklch(from var(--full-black) calc(l + 8) c calc(h + 20));
+  --light-red-focus: oklch(from var(--light-red) calc(l - 8) c calc(h + 15));
+  --light-orange-focus: oklch(from var(--light-orange) calc(l - 8) c calc(h + 15));
+  --light-yellow-focus: oklch(from var(--light-yellow) calc(l - 8) c calc(h + 15));
+  --light-olive-focus: oklch(from var(--light-olive) calc(l - 8) c calc(h + 15));
+  --light-green-focus: oklch(from var(--light-green) calc(l - 8) c calc(h + 15));
+  --light-teal-focus: oklch(from var(--light-teal) calc(l - 8) c calc(h + 15));
+  --light-blue-focus: oklch(from var(--light-blue) calc(l - 8) c calc(h + 15));
+  --light-violet-focus: oklch(from var(--light-violet) calc(l - 8) c calc(h + 15));
+  --light-purple-focus: oklch(from var(--light-purple) calc(l - 8) c calc(h + 15));
+  --light-pink-focus: oklch(from var(--light-pink) calc(l - 8) c calc(h + 15));
+  --light-brown-focus: oklch(from var(--light-brown) calc(l - 8) c calc(h + 15));
+  --light-grey-focus: oklch(from var(--light-grey) calc(l - 8) c calc(h + 15));
+  --light-black-focus: oklch(from var(--full-black) calc(l - 8) c calc(h + 15));
 
   /* ---  Emotive  --- */
-  --positive-color-focus: oklch(from var(--positive-color) calc(l + 8) c calc(h + 20));
-  --negative-color-focus: oklch(from var(--negative-color) calc(l + 8) c calc(h + 20));
+  --positive-color-focus: oklch(from var(--positive-color) calc(l - 8) c calc(h + 15));
+  --negative-color-focus: oklch(from var(--negative-color) calc(l - 8) c calc(h + 15));
 
   /* ---  Brand   --- */
-  --facebook-focus-color: oklch(from var(--facebook-color) calc(l + 8) c calc(h + 20));
-  --twitter-focus-color: oklch(from var(--twitter-color) calc(l + 8) c calc(h + 20));
-  --google-plus-focus-color: oklch(from var(--google-plus-color) calc(l + 8) c calc(h + 20));
-  --linked-in-focus-color: oklch(from var(--linked-in-color) calc(l + 8) c calc(h + 20));
-  --youtube-focus-color: oklch(from var(--youtube-color) calc(l + 8) c calc(h + 20));
-  --instagram-focus-color: oklch(from var(--instagram-color) calc(l + 8) c calc(h + 20));
-  --pinterest-focus-color: oklch(from var(--pinterest-color) calc(l + 8) c calc(h + 20));
-  --vk-focus-color: oklch(from var(--vk-color) calc(l + 8) c calc(h + 20));
+  --facebook-focus-color: oklch(from var(--facebook-color) calc(l - 8) c calc(h + 15));
+  --twitter-focus-color: oklch(from var(--twitter-color) calc(l - 8) c calc(h + 15));
+  --google-plus-focus-color: oklch(from var(--google-plus-color) calc(l - 8) c calc(h + 15));
+  --linked-in-focus-color: oklch(from var(--linked-in-color) calc(l - 8) c calc(h + 15));
+  --youtube-focus-color: oklch(from var(--youtube-color) calc(l - 8) c calc(h + 15));
+  --instagram-focus-color: oklch(from var(--instagram-color) calc(l - 8) c calc(h + 15));
+  --pinterest-focus-color: oklch(from var(--pinterest-color) calc(l - 8) c calc(h + 15));
+  --vk-focus-color: oklch(from var(--vk-color) calc(l - 8) c calc(h + 15));
 
   /* ---  Dark Tones  --- */
-  --full-black-focus: oklch(from var(--full-black) calc(l + 8) c h);
-  --black-focus: oklch(from var(--black) calc(l + 8) c h);
-  --grey-focus: oklch(from var(--grey) calc(l + 8) c h);
+  --full-black-focus: oklch(from var(--full-black) calc(l - 8) c h);
+  --black-focus: oklch(from var(--black) calc(l - 8) c h);
+  --grey-focus: oklch(from var(--grey) calc(l - 8) c h);
 
   /* ---  Light Tones  --- */
-  --white-focus: oklch(from var(--white) calc(l + 8) c h);
-  --off-white-focus: oklch(from var(--off-white) calc(l + 8) c h);
-  --dark-white-focus: oklch(from var(--dark-white) calc(l + 8) c h);
+  --white-focus: oklch(from var(--white) calc(l - 8) c h);
+  --off-white-focus: oklch(from var(--off-white) calc(l - 8) c h);
+  --dark-white-focus: oklch(from var(--dark-white) calc(l - 8) c h);
 
 
   /* -------------------
