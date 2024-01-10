@@ -1,0 +1,8 @@
+ui-button {
+  --animated-vertical-align: middle;
+  --animated-z-index: 1;
+  --animation-duration: 0.3s;
+  --animation-easing: ease;
+  --fade-scale-high: 1.5;
+  --fade-scale-low: 0.75;
+}

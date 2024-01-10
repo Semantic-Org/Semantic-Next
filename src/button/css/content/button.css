@@ -3,7 +3,6 @@
   display: inline-block;
   min-height: 1em;
   font-size: var(--medium);
-  outline: none;
   border: none;
   vertical-align: var(--vertical-align);
   background: var(--background);
@@ -20,9 +19,6 @@
   text-decoration: none;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
-  -webkit-user-select: none;
-  -moz-user-select: -moz-none;
-  -ms-user-select: none;
   user-select: none;
   transition: var(--transition);
   will-change: var(--will-change);

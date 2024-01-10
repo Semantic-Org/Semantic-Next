@@ -1,0 +1,18 @@
+/*--------------
+     Toggle
+---------------*/
+
+/* Toggle (Modifies active state to give affordances) */
+.toggle.buttons .active.button,
+.buttons .button.toggle.active,
+.button.toggle.active {
+  background-color: var(--positive-color) !important;
+  box-shadow: none !important;
+  text-shadow: var(--inverted-text-shadow);
+  color: var(--inverted-text-color) !important;
+}
+.button.toggle.active:hover {
+  background-color: var(--positive-color-hover) !important;
+  text-shadow: var(--inverted-text-shadow);
+  color: var(--inverted-text-color) !important;
+}

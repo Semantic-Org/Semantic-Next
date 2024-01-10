@@ -4,14 +4,39 @@
 
 /* Content */
 @import url('./content/button-variables.css');
+@import url('./content/icon-variables.css');
+@import url('./content/label-variables.css');
+@import url('./content/or-variables.css');
+
+/* Group */
+@import url('./group/buttons-variables.css');
+
+/* Types */
+@import url('./types/emphasis-variables.css');
+@import url('./types/icon-variables.css');
+@import url('./types/labeled-variables.css');
+@import url('./types/labeled-icon-variables.css');
+@import url('./types/toggle-variables.css');
+@import url('./types/animated-variables.css');
 
 /* States */
-@import url('./states/focus-variables.css');
 @import url('./states/hover-variables.css');
+@import url('./states/focus-variables.css');
 @import url('./states/pressed-variables.css');
 @import url('./states/active-variables.css');
 @import url('./states/disabled-variables.css');
 @import url('./states/loading-variables.css');
 
-/* Types */
-@import url('./types/emphasis-variables.css');
+/* Variations */
+@import url('./variations/attached-variables.css');
+@import url('./variations/basic-variables.css');
+@import url('./variations/circular-variables.css');
+@import url('./variations/colored-variables.css');
+@import url('./variations/compact-variables.css');
+@import url('./variations/floated-variables.css');
+@import url('./variations/fluid-variables.css');
+@import url('./variations/negative-variables.css');
+@import url('./variations/positive-variables.css');
+@import url('./variations/sizing-variables.css');
+@import url('./variations/social-variables.css');
+@import url('./variations/vertical-variables.css');

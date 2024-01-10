@@ -30,7 +30,10 @@
     but for blog/marketing it may make sense to increase up to 16px
   */
 
+  /* Size of UI medium size */
   --em-size: 14;
+
+  /* Size of page font */
   --font-size: 14px;
 
   /* -------------------
@@ -49,14 +52,14 @@
     @small = 13/14 = 0.928rem = 13px
   */
 
-  --mini-ratio: 11 / 14;
-  --tiny-ratio: 12 / 14;
-  --small-ratio: 13 / 14;
-  --medium-ratio: 14 / 14;
-  --large-ratio: 16 / 14;
-  --big-ratio: 18 / 14;
-  --huge-ratio: 20 / 14;
-  --massive-ratio: 24 / 14;
+  --mini-ratio: calc(11 / var(--em-size));
+  --tiny-ratio: calc(12 / var(--em-size));
+  --small-ratio: calc(13 / var(--em-size));
+  --medium-ratio: calc(14 / var(--em-size));
+  --large-ratio: calc(16 / var(--em-size));
+  --big-ratio: calc(18 / var(--em-size));
+  --huge-ratio: calc(20 / var(--em-size));
+  --massive-ratio: calc(24 / var(--em-size));
 
   /* -------------------
       Border Radius
@@ -131,7 +134,7 @@
   --page-background: #FFFFFF;
   --page-overflow-x: hidden;
 
-  --line-height: 1.4285em;
+  --line-height: 1.4285714em;
   --text-color: rgb(0 0 0 / 87%);
 
   /* -------------------

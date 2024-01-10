@@ -1,0 +1,4 @@
+ui-button {
+  --icon-button-opacity: 0.9;
+  --loading-icon-duration: 2s;
+}

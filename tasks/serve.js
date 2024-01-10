@@ -31,6 +31,7 @@ let jsBuild = await esbuild.context({
   tsconfigRaw: {
     compilerOptions: {
       experimentalDecorators: true,
+      useDefineForClassFields: false,
     },
   },
   format: 'esm',

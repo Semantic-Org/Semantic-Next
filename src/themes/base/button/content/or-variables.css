@@ -1,0 +1,25 @@
+ui-button {
+  --or-text: 'or';
+
+  --or-gap: 0.3em;
+  --or-height: calc(var(--vertical-padding) * 2) + 1em;
+  --or-z-index: 3;
+
+  --or-circle-distance-to-edge: var(--vertical-padding);
+  --or-circle-size: calc(var(--or-height) - var(--or-circle-distance-to-edge));
+  --or-line-height: var(--or-circle-size);
+  --or-box-shadow: var(--border-box-shadow);
+
+  --or-vertical-offset: calc(var(--or-circle-size) / 2 * -1);
+  --or-horizontal-offset: calc(var(--or-circle-size) / 2 * -1 );
+
+  --or-background-color: var(--white);
+  --or-text-shadow: var(--inverted-text-shadow);
+  --or-text-style: var(--normal);
+  --or-text-weight: var(--bold);
+  --or-text-color: var(--light-text-color);
+
+
+  --or-spacer-height: var(--vertical-padding);
+  --or-spacer-color: transparent;
+}

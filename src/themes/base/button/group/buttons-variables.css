@@ -1,0 +1,7 @@
+ui-button {
+  --group-box-shadow: none;
+  --group-button-box-shadow: var(--box-shadow);
+  --vertical-box-shadow: none;
+  --group-button-offset: 0px 0px 0px 0px;
+  --vertical-group-offset: 0px 0px 0px 0px;
+}

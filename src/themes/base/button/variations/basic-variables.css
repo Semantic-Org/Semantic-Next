@@ -1,0 +1,61 @@
+ui-button {
+
+  --basic-border-radius: var(--border-radius);
+  --basic-border-size: 1px;
+  --basic-text-color: var(--text-color);
+  --basic-colored-border-size: 1px;
+
+  --basic-background: transparent none;
+  --basic-font-weight: var(--normal);
+  --basic-border: 1px solid var(--border-color);
+  --basic-box-shadow: 0px 0px 0px var(--basic-border-size) var(--border-color) inset;
+  --basic-loading-color: var(--off-white);
+  --basic-text-transform: none;
+
+  /* Basic Hover */
+  --basic-hover-background: #FFFFFF;
+  --basic-hover-text-color: var(--hovered-text-color);
+  --basic-hover-box-shadow:
+    0px 0px 0px var(--basic-border-size) var(--selected-border-color) inset,
+    0px 0px 0px 0px var(--border-color) inset
+  ;
+  /* Basic Focus */
+  --basic-focus-background: var(--basic-hover-background);
+  --basic-focus-text-color: var(--basic-hover-text-color);
+  --basic-focus-box-shadow: var(--basic-hover-box-shadow);
+
+  /* Basic Down */
+  --basic-down-background: #F8F8F8;
+  --basic-down-text-color: var(--pressed-text-color);
+  --basic-down-box-shadow:
+    0px 0px 0px var(--basic-border-size) rgba(0, 0, 0, 0.15) inset,
+    0px 1px 4px 0px var(--border-color) inset
+  ;
+  /* Basic Active */
+  --basic-active-background: var(--transparent-black);
+  --basic-active-box-shadow: '';
+  --basic-active-text-color: var(--selected-text-color);
+
+  /* Basic Inverted */
+  --basic-inverted-background: transparent;
+  --basic-inverted-focus-background: transparent;
+  --basic-inverted-down-background: var(--transparent-white);
+  --basic-inverted-active-background: var(--transparent-white);
+
+  --basic-inverted-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.5) inset;
+  --basic-inverted-hover-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
+  --basic-inverted-focus-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
+  --basic-inverted-down-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.9) inset;
+  --basic-inverted-active-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.7) inset;
+
+  --basic-inverted-color: var(--dark-white);
+  --basic-inverted-hover-color: var(--dark-white-hover);
+  --basic-inverted-down-color: var(--dark-white-active);
+  --basic-inverted-active-color: var(--inverted-text-color);
+
+
+  /* Basic Group */
+  --basic-group-border: var(--basic-border-size) solid var(--border-color);
+  --basic-group-box-shadow: none;
+
+}

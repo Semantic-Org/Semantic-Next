@@ -28,7 +28,7 @@ ui-button {
   /* Internal Shadow */
   --shadow-distance: 0em;
   --shadow-offset: var(--shadow-distance) / 2;
-  --shadow-box-shadow: 0px var(---shadow-distance) 0px 0px var(--border-color) inset;
+  --shadow-box-shadow: 0px var(--shadow-distance) 0px 0px var(--border-color) inset;
 
   /* Box Shadow */
   --border-box-shadow-color: transparent;

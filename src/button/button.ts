@@ -1,6 +1,9 @@
-import { UIComponent } from '../lib/ui-component.js';
 import { html, unsafeCSS } from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+
+import { UIComponent } from '../lib/ui-component.js';
+import { isEqual } from '../lib/utils.js';
 
 import ButtonDefinition from './definition/definition.json';
 import ButtonTemplate from './button.html';
@@ -14,13 +17,18 @@ class UIButton extends UIComponent {
     return unsafeCSS(ButtonCSS);
   }
 
-  static get properties() {
-    return {};
-  }
-
-  settings = {
+  @property({
+    attribute: false,
+    type: Object,
+    hasChanged: (a, b) => {
+      console.log('has changed?', a, b);
+      return true;
+    }
+  }) settings = {
     size: 'medium',
+    emphasis: 'primary',
     icon: false,
+    text: true,
   };
 
   on = {
@@ -34,7 +42,10 @@ class UIButton extends UIComponent {
     },
 
     rendered() {
-      console.log('on render');
+      setTimeout(() => {
+        console.log('test');
+        this.settings.emphasis = 'primary';
+      }, 600);
     },
 
     moved() {
@@ -47,19 +58,54 @@ class UIButton extends UIComponent {
 
   };
 
+  get = {
+    buttonClass() {
+      const settings = this.settings;
+      return classMap({
+        primary: (settings.emphasis == 'primary'),
+        secondary: (settings.emphasis == 'secondary'),
+        icon: false,
+      });
+    }
+  };
+
   template() {
     console.log('template');
   }
 
   render() {
-    console.log('html', html);
-    return html`
-      <div class="primary button" name="button" tabindex="0">
-        <slot name="icon"></slot>
+    let icon;
+    let text;
+    let label;
+
+    if(this.settings?.icon) {
+      icon = html`
+        <span class="icon">
+          <slot name="icon"></slot>
+        </span>
+      `;
+    }
+
+    if(this.settings?.text) {
+      text = html`
         <span class="text" name="text">
           <slot></slot>
         </span>
-        <slot name="label"></slot>
+      `;
+    }
+
+    if(this.settings?.label) {
+      label = html`
+        <span class="label">
+          <slot name="label"></slot>
+        </span>
+      `;
+    }
+    return html`
+      <div class="${this.get.buttonClass.apply(this)} button" name="button" tabindex="0">
+        ${icon}
+        ${text}
+        ${label}
       </div>
     `;
   }

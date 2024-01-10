@@ -11,7 +11,7 @@
   pointer-events: var(--loading-pointer-events);
   transition: var(--loading-transition);
 }
-.loading.button:before {
+.loading.button::before {
   position: absolute;
   content: '';
   top: 50%;
@@ -23,7 +23,7 @@
   border-radius: var(--circular-radius);
   border: var(--loader-line-width) solid var(--inverted-loader-fill-color);
 }
-.loading.button:after {
+.loading.button::after {
   position: absolute;
   content: '';
   top: 50%;

@@ -1,0 +1,110 @@
+/*-------------------
+       Attached
+--------------------*/
+
+/* Singular */
+.attached.button {
+  position: relative;
+  display: block;
+  margin: 0em;
+  border-radius: 0em;
+  box-shadow: var(--attached-box-shadow) !important;
+}
+
+/* Top / Bottom */
+.attached.top.button {
+  border-radius: var(--border-radius) var(--border-radius) 0em 0em;
+}
+.attached.bottom.button {
+  border-radius: 0em 0em var(--border-radius) var(--border-radius);
+}
+
+/* Left / Right */
+.left.attached.button {
+  display: inline-block;
+  border-left: none;
+  text-align: right;
+
+  padding-right: var(--attached-horizontal-padding);
+  border-radius: var(--border-radius) 0em 0em var(--border-radius);
+}
+.right.attached.button {
+  display: inline-block;
+  text-align: left;
+  padding-left: var(--attached-horizontal-padding);
+  border-radius: 0em var(--border-radius) var(--border-radius) 0em;
+}
+
+/* Plural */
+.attached.buttons {
+  position: relative;
+  display: flex;
+  border-radius: 0em;
+  width: auto !important;
+  z-index: var(--attached-z-index);
+  margin-left: var(--attached-offset);
+  margin-right: var(--attached-offset);
+}
+.attached.buttons .button {
+  margin: 0em;
+}
+.attached.buttons .button:first-child {
+  border-radius: 0em;
+}
+.attached.buttons .button:last-child {
+  border-radius: 0em;
+}
+
+/* Top / Bottom */
+[class*="top attached"].buttons {
+  margin-bottom: var(--attached-offset);
+  border-radius: var(--border-radius) var(--border-radius) 0em 0em;
+}
+[class*="top attached"].buttons .button:first-child {
+  border-radius: var(--border-radius) 0em 0em 0em;
+}
+[class*="top attached"].buttons .button:last-child {
+  border-radius: 0em var(--border-radius) 0em 0em;
+}
+
+[class*="bottom attached"].buttons {
+  margin-top: var(--attached-offset);
+  border-radius: 0em 0em var(--border-radius) var(--border-radius);
+}
+[class*="bottom attached"].buttons .button:first-child {
+  border-radius: 0em 0em 0em var(--border-radius);
+}
+[class*="bottom attached"].buttons .button:last-child {
+  border-radius: 0em 0em var(--border-radius) 0em;
+}
+
+/* Left / Right */
+[class*="left attached"].buttons {
+  display: inline-flex;
+  margin-right: 0em;
+  margin-left: var(--attached-offset);
+  border-radius: 0em var(--border-radius) var(--border-radius) 0em;
+}
+[class*="left attached"].buttons .button:first-child {
+  margin-left: var(--attached-offset);
+  border-radius: 0em var(--border-radius) 0em 0em;
+}
+[class*="left attached"].buttons .button:last-child {
+  margin-left: var(--attached-offset);
+  border-radius: 0em 0em var(--border-radius) 0em;
+}
+
+[class*="right attached"].buttons {
+  display: inline-flex;
+  margin-left: 0em;
+  margin-right: var(--attached-offset);
+  border-radius: var(--border-radius) 0em 0em var(--border-radius);
+}
+[class*="right attached"].buttons .button:first-child {
+  margin-left: var(--attached-offset);
+  border-radius: var(--border-radius) 0em 0em 0em;
+}
+[class*="right attached"].buttons .button:last-child {
+  margin-left: var(--attached-offset);
+  border-radius: 0em 0em 0em var(--border-radius);
+}

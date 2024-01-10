@@ -1,0 +1,6 @@
+ui-button {
+  --attached-offset: -1px;
+  --attached-box-shadow: 0px 0px 0px 1px var(--border-color);
+  --attached-horizontal-padding: 0.75em;
+  --attached-z-index: 2;
+}

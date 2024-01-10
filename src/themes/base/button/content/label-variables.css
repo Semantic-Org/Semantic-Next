@@ -1,0 +1,21 @@
+ui-button {
+
+  --labeled-label-font-size: var(--medium);
+  --labeled-label-align: center;
+  --labeled-label-padding: '';
+  --labeled-label-font-size: var(--relative-medium);
+  --labeled-label-border-color: var(--border-color);
+  --labeled-label-border-offset: -var(--border-box-shadow-width);
+  --labeled-tag-label-size: 1.85em; /* hypotenuse of triangle */
+  --labeled-icon-margin: 0em;
+
+  /* Labeled Icon */
+  --labeled-icon-width: 1em + calc(var(--vertical-padding) * 2);
+  --labeled-icon-background-color: rgba(0, 0, 0, 0.05);
+  --labeled-icon-padding: calc(var(--horizontal-padding) + var(--labeled-icon-width));
+  --labeled-icon-border: transparent;
+  --labeled-icon-color: '';
+
+  --labeled-icon-left-shadow: -1px 0px 0px 0px var(--labeled-icon-border) inset;
+  --labeled-icon-right-shadow: 1px 0px 0px 0px var(--labeled-icon-border) inset;
+}

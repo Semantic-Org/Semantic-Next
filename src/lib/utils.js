@@ -29,6 +29,9 @@ export const keys = (obj) => {
   return Object.keys(obj);
 };
 
+export const isBinary = obj => {
+  return !!(typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array);
+};
 
 /* Remove duplicates from an array */
 export const unique = (arr) => {
@@ -184,6 +187,147 @@ export const get = function(object, string = '') {
     }
   }
   return object;
+};
+
+export const hasProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+
+
+/* Determine if two objects are equal */
+export const isEqual = (a, b, options) => {
+  let i;
+  const keyOrderSensitive = !!(options && options.keyOrderSensitive);
+  if (a === b) {
+    return true;
+  }
+
+  if (Number.isNaN(a) && Number.isNaN(b)) {
+    return true;
+  }
+
+  if (!a || !b) {
+    return false;
+  }
+
+  if (!(isObject(a) && isObject(b))) {
+    return false;
+  }
+
+  if (a instanceof Date && b instanceof Date) {
+    return a.valueOf() === b.valueOf();
+  }
+
+  if (isBinary(a) && isBinary(b)) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  if (isFunction(a.equals)) {
+    return a.equals(b, options);
+  }
+
+  if (isFunction(b.equals)) {
+    return b.equals(a, options);
+  }
+
+  if (a instanceof Array) {
+    if (!(b instanceof Array)) {
+      return false;
+    }
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (i = 0; i < a.length; i++) {
+      if (!isEqual(a[i], b[i], options)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+  // check obj equality
+  let ret;
+  const aKeys = keys(a);
+  const bKeys = keys(b);
+  if (keyOrderSensitive) {
+    i = 0;
+    ret = aKeys.every(key => {
+      if (i >= bKeys.length) {
+        return false;
+      }
+      if (key !== bKeys[i]) {
+        return false;
+      }
+      if (!isEqual(a[key], b[bKeys[i]], options)) {
+        return false;
+      }
+      i++;
+      return true;
+    });
+  } else {
+    i = 0;
+    ret = aKeys.every(key => {
+      if (!hasProperty(b, key)) {
+        return false;
+      }
+      if (!isEqual(a[key], b[key], options)) {
+        return false;
+      }
+      i++;
+      return true;
+    });
+  }
+  return ret && i === bKeys.length;
+};
+
+
+/* Clone Object */
+export const cloneObject = obj => {
+  let ret;
+  if (!isObject(obj)) {
+    return obj;
+  }
+
+  if (obj === null) {
+    return null; // null has typeof "object"
+  }
+
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+
+  // RegExps are not really EJSON elements (eg we don't define a serialization
+  // for them), but they're immutable anyway, so we can support them in clone.
+  if (obj instanceof RegExp) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(cloneObject);
+  }
+
+  if (isArguments(obj)) {
+    return Array.from(obj).map(cloneObject);
+  }
+
+  // handle general user-defined typed Objects if they haobje a clone method
+  if (isFunction(obj.clone)) {
+    return obj.clone();
+  }
+
+  // handle other objects
+  ret = {};
+  keys(obj).forEach((key) => {
+    ret[key] = cloneObject(obj[key]);
+  });
+  return ret;
 };
 
 import * as _ from './utils';

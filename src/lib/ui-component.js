@@ -12,7 +12,7 @@ class UIComponent extends LitElement {
     super();
     // easier to understand
     if(isFunction(this.on?.created)) {
-      this.on?.created();
+      this.on?.created.apply(this);
     }
   }
 
@@ -20,21 +20,21 @@ class UIComponent extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if(isFunction(this.on?.rendered)) {
-      this.on?.rendered();
+      this.on?.rendered.apply(this);
     }
   }
 
   // callback if removed from dom
   disconnectedCallback() {
     if(isFunction(this.on?.destroyed)) {
-      this.on?.created();
+      this.on?.created.apply(this);
     }
   }
 
   // callback if moves doc
   adoptedCallback() {
     if(isFunction(this.on?.moved)) {
-      this.on?.moved();
+      this.on?.destroyed.apply(this);
     }
   }
 

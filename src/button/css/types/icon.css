@@ -1,0 +1,14 @@
+/*--------------
+    Icon Only
+---------------*/
+
+.icon.buttons .button,
+.icon.button {
+  padding: var(--vertical-padding) var(--vertical-padding) ( var(--vertical-padding) + var(--shadow-offset) );
+}
+.icon.buttons .button > .icon,
+.icon.button > .icon {
+  opacity: var(--icon-button-opacity);
+  margin: 0em !important;
+  vertical-align: top;
+}

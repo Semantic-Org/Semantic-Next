@@ -1,6 +1,17 @@
 /* Content */
 @import url('./content/button.css');
 
+/* Group */
+@import url('./group/buttons.css');
+
+/* Types */
+@import url('./types/animated.css');
+@import url('./types/emphasis.css');
+@import url('./types/icon.css');
+@import url('./types/labeled.css');
+@import url('./types/labeled-icon.css');
+@import url('./types/toggle.css');
+
 /* States */
 @import url('./states/hover.css');
 @import url('./states/focus.css');
@@ -9,5 +20,16 @@
 @import url('./states/disabled.css');
 @import url('./states/loading.css');
 
-
-@import url('./types/emphasis.css');
+/* Variations */
+@import url('./variations/basic.css');
+@import url('./variations/attached.css');
+@import url('./variations/circular.css');
+@import url('./variations/colored.css');
+@import url('./variations/compact.css');
+@import url('./variations/floated.css');
+@import url('./variations/fluid.css');
+@import url('./variations/negative.css');
+@import url('./variations/positive.css');
+@import url('./variations/sizing.css');
+@import url('./variations/social.css');
+@import url('./variations/vertical.css');

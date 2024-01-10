@@ -46,3 +46,46 @@
   color: var(--primary-text-color);
   text-shadow: var(--primary-text-shadow);
 }
+
+
+/*-------------------
+      Secondary
+--------------------*/
+
+/* Standard */
+.secondary.buttons .button,
+.secondary.button {
+  background-color: var(--secondary-color);
+  color: var(--secondary-text-color);
+  text-shadow: var(--secondary-text-shadow);
+  background-image: var(--colored-background-image);
+}
+.secondary.button {
+  box-shadow: var(--colored-box-shadow);
+}
+.secondary.buttons .button:hover,
+.secondary.button:hover {
+  background-color: var(--secondary-color-hover);
+  color: var(--secondary-text-color);
+  text-shadow: var(--secondary-text-shadow);
+}
+.secondary.buttons .button:focus,
+.secondary.button:focus {
+  background-color: var(--secondary-color-focus);
+  color: var(--secondary-text-color);
+  text-shadow: var(--secondary-text-shadow);
+}
+.secondary.buttons .button:active,
+.secondary.button:active {
+  background-color: var(--secondary-color-down);
+  color: var(--secondary-text-color);
+  text-shadow: var(--secondary-text-shadow);
+}
+.secondary.buttons .active.button,
+.secondary.buttons .active.button:active,
+.secondary.active.button,
+.secondary.button .active.button:active {
+  background-color: var(--secondary-color-active);
+  color: var(--secondary-text-color);
+  text-shadow: var(--secondary-text-shadow);
+}

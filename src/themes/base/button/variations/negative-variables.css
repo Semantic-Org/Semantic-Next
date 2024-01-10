@@ -1,0 +1,6 @@
+ui-button {
+  --negative-background-image: var(--colored-background-image);
+  --negative-text-color: var(--inverted-text-color);
+  --negative-text-shadow: var(--inverted-text-shadow);
+  --negative-box-shadow: var(--colored-box-shadow);
+}
