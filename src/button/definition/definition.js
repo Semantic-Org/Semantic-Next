@@ -535,4 +535,13 @@ export const ButtonDefinition = {
   pluralTagName: 'buttons',
   pluralDescription: 'Buttons can exist together as a group',
 
+  pluralVariations: [
+    'inverted',
+    'size',
+    'floated',
+    'compact',
+    'colored',
+    'attached',
+  ]
+
 };
