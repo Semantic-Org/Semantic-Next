@@ -132,6 +132,10 @@ export const isPromise = (p) => {
   return p && isFunction(p.then);
 };
 
+/*
+  Efficient no operation func
+*/
+export const noop = function(){};
 
 /*
   Call function even if its not defined
