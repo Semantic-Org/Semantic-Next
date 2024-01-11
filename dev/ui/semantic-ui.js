@@ -675,9 +675,9 @@ var Query = class _Query {
     } else {
       Array.from(this).forEach((el) => {
         el.addEventListener(event, function(e4) {
-          for (let target = e4.target; target && target !== this; target = target.parentNode) {
-            if (target.matches(targetSelectorOrHandler)) {
-              handler.call(target, e4);
+          for (let target2 = e4.target; target2 && target2 !== this; target2 = target2.parentNode) {
+            if (target2.matches(targetSelectorOrHandler)) {
+              handler.call(target2, e4);
               break;
             }
           }
@@ -828,11 +828,38 @@ var Scanner = class {
   }
   isEOF() {
     this.runCount++;
-    if (this.runCount > 10) {
+    if (this.runCount > 100) {
       console.error("Recursion");
       return true;
     }
     return this.pos >= this.input.length;
+  }
+  peek() {
+    return this.input.charAt(this.pos);
+  }
+  consume(pattern) {
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const substring = this.input.substring(this.pos);
+    const match = regex.exec(substring);
+    if (match && match.index === 0) {
+      this.pos += match[0].length;
+      return match[0];
+    }
+    return null;
+  }
+  consumeUntil(pattern) {
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const match = regex.exec(this.input.substring(this.pos));
+    if (!match) {
+      const consumedText2 = this.input.substr(this.pos);
+      this.pos = this.input.length;
+      return consumedText2;
+    }
+    const consumedText = this.input.substring(this.pos, this.pos + match.index);
+    this.pos += match.index;
+    if (pattern == "}}") {
+    }
+    return consumedText;
   }
   fatal(msg) {
     msg = msg || "Parse error";
@@ -849,31 +876,6 @@ ${positionDisplay}`);
     e4.col = 1 + this.pos - allPastInput.lastIndexOf("\n");
     throw e4;
   }
-  peek() {
-    return this.input.charAt(this.pos);
-  }
-  consume(pattern) {
-    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern), "y") : new RegExp(pattern, "y");
-    regex.lastIndex = this.pos;
-    const match = regex.exec(this.input);
-    if (match) {
-      this.pos = regex.lastIndex;
-      return match[0];
-    }
-    return null;
-  }
-  consumeUntil(pattern) {
-    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
-    const match = regex.exec(this.input.substring(this.pos));
-    if (!match) {
-      const consumedText2 = this.input.substr(this.pos);
-      this.pos = this.input.length;
-      return consumedText2;
-    }
-    const consumedText = this.input.substring(this.pos, this.pos + match.index);
-    this.pos += match.index;
-    return consumedText;
-  }
 };
 
 // src/lib/template/compiler.js
@@ -882,22 +884,22 @@ var TemplateCompiler = class {
     this.template = template || "";
     this.context = context || {};
   }
-  compile() {
-    const template = this.template.trim();
+  compile(template = this.template) {
+    template = template.trim();
     const scanner = new Scanner(template);
     const parseTag = function(scanner2) {
       const starts = {
         IF: /^{{\s*#if\s+/,
         ELSEIF: /^{{\s*elseif\s+/,
-        ELSE: /^{{\s*else\s*}}/,
+        ELSE: /^{{\s*else\s*/,
         EACH: /^{{\s*#each\s+/,
-        CLOSE_IF: /^{{\s*\/(if)\s*}}/,
-        CLOSE_EACH: /^{{\s*\/(each)\s*}}/,
+        CLOSE_IF: /^{{\s*\/(if)\s*/,
+        CLOSE_EACH: /^{{\s*\/(each)\s*/,
         EXPRESSION: /^{{\s*/
       };
       for (let type in starts) {
         if (scanner2.matches(starts[type])) {
-          scanner2.consume(starts[type]);
+          const consumed = scanner2.consume(starts[type]);
           const content = scanner2.consumeUntil("}}").trim();
           scanner2.consume("}}");
           return { type, content };
@@ -907,17 +909,16 @@ var TemplateCompiler = class {
     };
     const ast = [];
     const stack = [];
-    const OPEN_TAG = /\{\{/;
-    let currentBranch = null;
+    let contentBranch = null;
+    let conditionBranch = null;
     while (!scanner.isEOF()) {
       const tag = parseTag(scanner);
-      const target = currentBranch || stack[stack.length - 1];
+      const lastNode = stack[stack.length - 1];
+      const conditionTarget = conditionBranch;
+      const contentTarget = contentBranch?.content || lastNode || ast;
       if (tag) {
-        let baseNode = {
-          type: tag.type
-        };
         let newNode = {
-          type: tag.type
+          type: tag.type.toLowerCase()
         };
         switch (tag.type) {
           case "IF":
@@ -927,49 +928,62 @@ var TemplateCompiler = class {
               content: [],
               branches: []
             };
-            if (stack.length > 0) {
-              const target2 = currentBranch ? currentBranch : stack[stack.length - 1];
-              target2.push(newNode);
-            } else {
-              ast.push(newNode);
-            }
-            stack.push(newNode);
-            currentBranch = null;
+            contentTarget.push(newNode);
+            contentBranch = newNode;
+            conditionBranch = newNode;
             break;
           case "ELSEIF":
             newNode = {
               ...newNode,
+              condition: tag.content,
               content: []
             };
-            target.branches.push(newNode);
-            currentBranch = newNode;
+            if (!conditionTarget) {
+              scanner.fatal("No open if tag when elseif found");
+              break;
+            }
+            conditionTarget.branches.push(newNode);
+            contentBranch = newNode;
             break;
           case "ELSE":
             newNode = {
               ...newNode,
               content: []
             };
-            console.log("stac", stack, target);
-            target.branches.push(newNode);
-            currentBranch = newNode;
+            if (!conditionTarget) {
+              scanner.fatal("No open if tag when else found");
+              break;
+            }
+            conditionTarget.branches.push(newNode);
+            contentBranch = newNode;
             break;
           case "EXPRESSION":
-            console.log("adding expression");
             newNode = {
               ...newNode,
-              content: this.transformInterpolations(tag.content)
+              value: tag.content
             };
+            contentTarget.push(newNode);
             break;
           case "CLOSE_IF":
             stack.pop();
-            currentBranch = null;
+            conditionBranch = null;
+            contentBranch = null;
             break;
           case "EACH":
+            const contentParts = tag.content.split(" in ");
+            let iterateOver;
+            let iterateAs;
+            if (contentParts.length > 1) {
+              iterateAs = contentParts[0].trim();
+              iterateOver = contentParts[1].trim();
+            } else {
+              iterateOver = contentParts[1].trim();
+            }
             newNode = {
               ...newNode,
-              condition: tag.content,
-              content: [],
-              branches: []
+              iterateOver,
+              iterateAs,
+              content: []
             };
             if (stack.length > 0) {
               target.push(newNode);
@@ -977,25 +991,20 @@ var TemplateCompiler = class {
               ast.push(newNode);
             }
             stack.push(newNode);
-            currentBranch = null;
+            contentBranch = null;
             break;
           case "CLOSE_EACH":
-            console.log("closing each");
             stack.pop();
-            currentBranch = null;
+            contentBranch = null;
+            conditionBranch = null;
             break;
         }
       } else {
-        const content = scanner.consumeUntil(OPEN_TAG);
-        console.log(content);
-        if (content) {
-          const htmlNode = { type: "html", content };
-          console.log(htmlNode);
-          if (stack.length > 0) {
-            target.content.push(htmlNode);
-          } else {
-            ast.push(htmlNode);
-          }
+        const OPEN_TAG = /\{\{/;
+        const html = scanner.consumeUntil(OPEN_TAG);
+        if (html) {
+          const htmlNode = { type: "html", html };
+          contentTarget.push(htmlNode);
         }
       }
     }
