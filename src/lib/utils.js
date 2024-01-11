@@ -132,6 +132,11 @@ export const isPromise = (p) => {
   return p && isFunction(p.then);
 };
 
+/* Escape Special Chars for RegExp */
+export const escapeRegExp = function(string) {
+  return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+};
+
 /*
   Efficient no operation func
 */

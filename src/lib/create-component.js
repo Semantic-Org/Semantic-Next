@@ -1,7 +1,7 @@
 import { LitElement, unsafeCSS, html } from 'lit';
 import { UIComponent } from './ui-component';
 import { attachEvents } from './attach-events';
-import { TemplateCompiler } from './template-compiler';
+import { TemplateCompiler } from './template/compiler';
 import { extend, noop, isObject, isFunction } from './utils';
 
 export const createComponent = (name, { 

@@ -603,6 +603,9 @@ var each = (obj, func, context) => {
 var isFunction = (obj) => {
   return typeof obj == "function" || false;
 };
+var escapeRegExp = function(string) {
+  return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+};
 var noop = function() {
 };
 var extend = (obj, ...sources) => {
@@ -620,6 +623,19 @@ var extend = (obj, ...sources) => {
     }
   });
   return obj;
+};
+var get = function(object, string = "") {
+  string = string.replace(/^\./, "").replace(/\[(\w+)\]/g, ".$1");
+  const stringParts = string.split(".");
+  for (let index = 0, length = stringParts.length; index < length; ++index) {
+    const part = stringParts[index];
+    if (!!object && part in object) {
+      object = object[part];
+    } else {
+      return;
+    }
+  }
+  return object;
 };
 
 // src/lib/query.js
@@ -797,63 +813,251 @@ var attachEvents = ({
   });
 };
 
-// src/lib/template-compiler.js
+// src/lib/template/scanner.js
+var Scanner = class {
+  constructor(input) {
+    this.input = input;
+    this.pos = 0;
+    this.runCount = 0;
+  }
+  matches(regex) {
+    return regex.test(this.rest());
+  }
+  rest() {
+    return this.input.slice(this.pos);
+  }
+  isEOF() {
+    this.runCount++;
+    if (this.runCount > 10) {
+      console.error("Recursion");
+      return true;
+    }
+    return this.pos >= this.input.length;
+  }
+  fatal(msg) {
+    msg = msg || "Parse error";
+    const CONTEXT_AMOUNT = 20;
+    const pastInput = this.input.substring(this.pos - CONTEXT_AMOUNT - 1, this.pos);
+    const upcomingInput = this.input.substring(this.pos, this.pos + CONTEXT_AMOUNT + 1);
+    const positionDisplay = `${pastInput + upcomingInput.replace(/\n/g, " ")}
+${" ".repeat(pastInput.length)}^`;
+    const e4 = new Error(`${msg}
+${positionDisplay}`);
+    e4.offset = this.pos;
+    const allPastInput = this.input.substring(0, this.pos);
+    e4.line = 1 + (allPastInput.match(/\n/g) || []).length;
+    e4.col = 1 + this.pos - allPastInput.lastIndexOf("\n");
+    throw e4;
+  }
+  peek() {
+    return this.input.charAt(this.pos);
+  }
+  consume(pattern) {
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern), "y") : new RegExp(pattern, "y");
+    regex.lastIndex = this.pos;
+    const match = regex.exec(this.input);
+    if (match) {
+      this.pos = regex.lastIndex;
+      return match[0];
+    }
+    return null;
+  }
+  consumeUntil(pattern) {
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const match = regex.exec(this.input.substring(this.pos));
+    if (!match) {
+      const consumedText2 = this.input.substr(this.pos);
+      this.pos = this.input.length;
+      return consumedText2;
+    }
+    const consumedText = this.input.substring(this.pos, this.pos + match.index);
+    this.pos += match.index;
+    return consumedText;
+  }
+};
+
+// src/lib/template/compiler.js
 var TemplateCompiler = class {
   constructor(template, context) {
     this.template = template || "";
     this.context = context || {};
   }
   compile() {
-    const ast = [];
-    const parts = this.template.split(/({{#if.*?}}|{{elseif.*?}}|{{else}}|{{\/if}})/).filter(Boolean);
-    const stack = [];
-    let currentBranch = null;
-    parts.forEach((part) => {
-      if (part.startsWith("{{#if")) {
-        const condition = part.match(/{{#if (.*?)}}/)[1];
-        const newCondition = { type: "if", condition, branches: [], content: [] };
-        if (stack.length > 0) {
-          (currentBranch ? currentBranch.content : stack[stack.length - 1].content).push(newCondition);
-        } else {
-          ast.push(newCondition);
+    const template = this.template.trim();
+    const scanner = new Scanner(template);
+    const parseTag = function(scanner2) {
+      const starts = {
+        IF: /^{{\s*#if\s+/,
+        ELSEIF: /^{{\s*elseif\s+/,
+        ELSE: /^{{\s*else\s*}}/,
+        EACH: /^{{\s*#each\s+/,
+        CLOSE_IF: /^{{\s*\/(if)\s*}}/,
+        CLOSE_EACH: /^{{\s*\/(each)\s*}}/,
+        EXPRESSION: /^{{\s*/
+      };
+      for (let type in starts) {
+        if (scanner2.matches(starts[type])) {
+          scanner2.consume(starts[type]);
+          const content = scanner2.consumeUntil("}}").trim();
+          scanner2.consume("}}");
+          return { type, content };
         }
-        stack.push(newCondition);
-        currentBranch = null;
-      } else if (part.startsWith("{{elseif")) {
-        const condition = part.match(/{{elseif (.*?)}}/)[1];
-        const newBranch = { type: "elseif", condition, content: [] };
-        stack[stack.length - 1].branches.push(newBranch);
-        currentBranch = newBranch;
       }
-      if (part === "{{else}}") {
-        const newBranch = { type: "else", content: [] };
-        stack[stack.length - 1].branches.push(newBranch);
-        currentBranch = newBranch;
-      } else if (part === "{{/if}}") {
-        if (stack.length > 0) {
-          stack.pop();
-          currentBranch = null;
-        } else {
-          console.error("Mismatched closing tag for if condition");
+      return null;
+    };
+    const ast = [];
+    const stack = [];
+    const OPEN_TAG = /\{\{/;
+    let currentBranch = null;
+    while (!scanner.isEOF()) {
+      const tag = parseTag(scanner);
+      const target = currentBranch || stack[stack.length - 1];
+      if (tag) {
+        let baseNode = {
+          type: tag.type
+        };
+        let newNode = {
+          type: tag.type
+        };
+        switch (tag.type) {
+          case "IF":
+            newNode = {
+              ...newNode,
+              condition: tag.content,
+              content: [],
+              branches: []
+            };
+            if (stack.length > 0) {
+              const target2 = currentBranch ? currentBranch : stack[stack.length - 1];
+              target2.push(newNode);
+            } else {
+              ast.push(newNode);
+            }
+            stack.push(newNode);
+            currentBranch = null;
+            break;
+          case "ELSEIF":
+            newNode = {
+              ...newNode,
+              content: []
+            };
+            target.branches.push(newNode);
+            currentBranch = newNode;
+            break;
+          case "ELSE":
+            newNode = {
+              ...newNode,
+              content: []
+            };
+            console.log("stac", stack, target);
+            target.branches.push(newNode);
+            currentBranch = newNode;
+            break;
+          case "EXPRESSION":
+            console.log("adding expression");
+            newNode = {
+              ...newNode,
+              content: this.transformInterpolations(tag.content)
+            };
+            break;
+          case "CLOSE_IF":
+            stack.pop();
+            currentBranch = null;
+            break;
+          case "EACH":
+            newNode = {
+              ...newNode,
+              condition: tag.content,
+              content: [],
+              branches: []
+            };
+            if (stack.length > 0) {
+              target.push(newNode);
+            } else {
+              ast.push(newNode);
+            }
+            stack.push(newNode);
+            currentBranch = null;
+            break;
+          case "CLOSE_EACH":
+            console.log("closing each");
+            stack.pop();
+            currentBranch = null;
+            break;
         }
       } else {
-        const trimmedPart = part.trim();
-        if (trimmedPart) {
-          const node = { type: "html", string: this.transformInterpolations(trimmedPart) };
+        const content = scanner.consumeUntil(OPEN_TAG);
+        console.log(content);
+        if (content) {
+          const htmlNode = { type: "html", content };
+          console.log(htmlNode);
           if (stack.length > 0) {
-            const target = currentBranch ? currentBranch : stack[stack.length - 1];
-            target.content.push(node);
+            target.content.push(htmlNode);
           } else {
-            ast.push(node);
+            ast.push(htmlNode);
           }
         }
       }
-    });
+    }
     return ast;
   }
+  /*
+    compile() {
+      const ast = [];
+      const parts = this.template.split(/({{#if.*?}}|{{elseif.*?}}|{{else}}|{{\/if}})/).filter(Boolean);
+      const stack = []; // Stack to manage nested 'if' contexts
+      let currentBranch = null; // Track the current active branch within an 'if'
+  
+      parts.forEach(part => {
+        if (part.startsWith('{{#if')) {
+          const condition = part.match(/{{#if (.*?)}}/)[1];
+          const newCondition = { type: 'if', condition, branches: [], content: [] };
+          if (stack.length > 0) {
+            (currentBranch ? currentBranch.content : stack[stack.length - 1].content).push(newCondition);
+          } else {
+            ast.push(newCondition);
+          }
+          stack.push(newCondition);
+          currentBranch = null; // Reset current branch as we're in a new 'if' context
+        }
+        else if (part.startsWith('{{elseif')) {
+          const condition = part.match(/{{elseif (.*?)}}/)[1];
+          const newBranch = { type: 'elseif', condition, content: [] };
+          stack[stack.length - 1].branches.push(newBranch);
+          currentBranch = newBranch; // Update current active branch
+        }
+        if (part === '{{else}}') {
+          const newBranch = { type: 'else', content: [] };
+          stack[stack.length - 1].branches.push(newBranch);
+          currentBranch = newBranch; // Update current active branch
+        }
+        else if (part === '{{/if}}') {
+          if (stack.length > 0) {
+            stack.pop(); // Exit the current 'if' context
+            currentBranch = null; // Reset current branch as the 'if' block is closed
+          } else {
+            console.error('Mismatched closing tag for if condition');
+          }
+        }
+        else {
+          const trimmedPart = part.trim();
+          if (trimmedPart) {
+            const node = { type: 'html', string: this.transformInterpolations(trimmedPart) };
+            if (stack.length > 0) {
+              const target = currentBranch ? currentBranch : stack[stack.length - 1];
+              target.content.push(node);
+            } else {
+              ast.push(node);
+            }
+          }
+        }
+      });
+  
+      return ast;
+    }*/
   transformInterpolations(htmlString) {
+    return htmlString;
     return htmlString.replace(/{{(.*?)}}/g, (_2, expr) => {
-      console.log(expr);
       const expressionValue = this.accessContextProperty(expr.trim());
       return expressionValue;
     });
@@ -861,6 +1065,7 @@ var TemplateCompiler = class {
   evaluateCondition(condition) {
   }
   accessContextProperty(expression) {
+    return get(this.context, expression);
   }
   // Additional methods (like generateLitTemplate) can be implemented as needed
 };
