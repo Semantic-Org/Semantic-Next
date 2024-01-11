@@ -1,77 +1,60 @@
 import { createComponent } from '../lib/create-component.js';
-import _ from '../lib/utils.js';
+import { ReactiveVar } from '../lib/reactive.js';
+import { ButtonDefinition, ButtonTemplate, ButtonCSS } from './';
 
-import ButtonDefinition from './definition/definition.json';
-import ButtonCSS from './button.css';
+const UIButton = {
 
-const Button = {};
+  createInstance: function(tpl, $) {
+    return {
+      property: true,
+      anotherProp: '1',
+      getLove() {
+        return 'love';
+      }
+    };
+  },
 
-Button.template = `
-  {{#if icon}}
-    <span class="icon">
-      {{slot icon}}
-    </span>
-  {{elseif not icon}}
-    woo
-  {{else}}
-    no icon
-  {{/if}}
-  {{#if text}}
-    <span class="text">
-      {{slot text}}
-    </span>
-  {{/if}}
-  {{#if label}}
-    <span class="label">
-      {{slot label}}
-    </span>
-  {{/if}}
-`;
+  onCreated: function(tpl) {
+    // called when initially loaded before attached to DOM
+    ReactiveVar.createReaction(() => {
+      if(fun) {
+        console.log('We have fun');
+      }
+      else {
+        console.log('No fun!');
+      }
+    });
+  },
 
-/*
-Button.template = `
-  <div class="primary button" name="button" tabindex="0">
-    <span class="text">
-      <slot></slot>
-    </span>
-  </div>
-`;
-*/
-// define available attributes and behaviors from JSON spec
-Button.onCreated = function(tpl, $) {
-  return {
-    property: true,
-    anotherProp: '1',
-    getLove() {
-      return 'love';
+  onRendered: function() {
+    // called when rendered to DOM
+  },
+
+  onDestroyed: function() {
+    // called when removed from DOM
+  },
+
+  events: {
+    'click .button'(event, tpl) {
+      tpl.$('.button')
+        .css({
+          color: 'red',
+          backgroundColor: 'black',
+        })
+        .find('.text')
+          .text('text')
+      ;
     }
-  };
-};
-
-Button.onRendered = function() {
-  console.log('added to DOM');
-};
-
-Button.onDestroyed = function() {
-  console.log('removed from DOM');
-};
-
-Button.events =  {
-  'click .button'(event, tpl) {
-    tpl.$('.button')
-      .css({
-        color: 'red',
-        backgroundColor: 'black',
-      })
-      .find('.text')
-        .text('text')
-    ;
   }
+
 };
 
 createComponent('ui-button', {
   type: 'element',
-  css: ButtonCSS,
   definition: ButtonDefinition,
-  ...Button,
+  template: ButtonTemplate,
+  css: ButtonCSS,
+  ...UIButton,
 });
+
+export { UIButton };

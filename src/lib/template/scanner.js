@@ -29,10 +29,6 @@ class Scanner {
 
   isEOF() {
     this.runCount++;
-    if(this.runCount > 100) {
-      console.error('Recursion');
-      return true;
-    }
     return this.pos >= this.input.length;
   }
 
@@ -68,9 +64,6 @@ class Scanner {
     }
     const consumedText = this.input.substring(this.pos, this.pos + match.index);
     this.pos += match.index;
-    if(pattern == '}}') {
-      //console.log('consumed text', consumedText);
-    }
     return consumedText;
   }
 

@@ -1,7 +1,21 @@
-<div class="button" part="button">
-  <slot name="icon">a</slot>
-  <span class="text" name="text">
-    <slot></slot>
-  </span>
-  <slot name="label">b</slot>
+<div class="{{ui}} button" tabindex="0" part="button">
+  {{#if icon}}
+    <span class="icon" part="icon">
+      {{slot icon}}
+    </span>
+  {{elseif not icon}}
+    woo
+  {{else}}
+    no icon
+  {{/if}}
+  {{#if text}}
+    <span class="text" part="text">
+      {{slot text}}
+    </span>
+  {{/if}}
+  {{#if label}}
+    <span class="label" part="label">
+      {{slot label}}
+    </span>
+  {{/if}}
 </div>

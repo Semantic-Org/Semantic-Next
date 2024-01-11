@@ -1,7 +1,8 @@
-import { LitElement, unsafeCSS, html } from 'lit';
+import { unsafeCSS, html } from 'lit';
 import { UIComponent } from './ui-component';
 import { attachEvents } from './attach-events';
 import { TemplateCompiler } from './template/compiler';
+import { LitRenderer } from './template/lit-renderer';
 import { extend, noop, isObject, isFunction } from './utils';
 
 export const createComponent = (name, { 
@@ -11,11 +12,14 @@ export const createComponent = (name, {
   definition = false, 
   events = {},
   defineElement = true,
+  createInstance = noop,
   onCreated = noop,
   onRendered = noop,
   onDestroyed = noop,
 } = {}) => {
 
+  const compiler = new TemplateCompiler(template);
+  const ast = compiler.compile();
   
   // create class
   let thisComponent = class ThisComponent extends UIComponent {
@@ -24,22 +28,30 @@ export const createComponent = (name, {
       return unsafeCSS(css);
     }
 
-    // callback when initialized
     constructor() {
       super();
 
-      // extend class with obj literal
-      if(isFunction(onCreated)) {
-        let tpl = onCreated.call(this, this.tpl, this.$);
+      // AST is shared across instances
+      this.ast = ast;
+
+      this.renderer = new LitRenderer();
+
+      if(isFunction(createInstance)) {
+
+        let tpl = createInstance.call(this, this.tpl, this.$);
         extend(this, tpl);
 
-        // to make it easier we only pass template instance around to functions
+        /*
+          We want to keep this separate for housekeeping passing the
+          DOM node around is cumbersome since it obscures most of the
+          implementation for the particular UI component due to random DOM attrs
+        */
         this.tpl = tpl;
 
-        // compile template
-        const compiler = new TemplateCompiler(template, tpl);
-        const ast = compiler.compile();
-        console.log(ast);
+      }
+
+      if(isFunction(onCreated)) {
+        onCreated.apply(this, this.tpl, this.$);
       }
     }
 
@@ -51,7 +63,7 @@ export const createComponent = (name, {
         events
       });
       if(isFunction(onRendered)) {
-        onRendered.apply(this);
+        onRendered.apply(this, this.tpl, this.$);
       }
     }
 
@@ -59,7 +71,7 @@ export const createComponent = (name, {
     disconnectedCallback() {
       super.disconnectedCallback();
       if(isFunction(onDestroyed)) {
-        onDestroyed.apply(this);
+        onDestroyed.apply(this, this.tpl, this.$);
       }
     }
 
@@ -67,7 +79,7 @@ export const createComponent = (name, {
     adoptedCallback() {
       super.adoptedCallback();
       if(isFunction(onMoved)) {
-        onMoved.apply(this);
+        onMoved.apply(this, this.tpl, this.$);
       }
     }
 
@@ -80,6 +92,9 @@ export const createComponent = (name, {
     }
 
     render() {
+
+      this.renderer.render(this.ast, this.tpl);
+
       // ;)
       const strings = [ template ];
       strings.raw = [String.raw({ raw: template })];

@@ -43,6 +43,18 @@ export const filterEmpty = (arr) => {
   return arr.filter(val => val);
 };
 
+/* Get last element from array */
+export const last = function(array, n, guard) {
+  if(!Array.isArray(array)) {
+    return;
+  }
+  if ((!n) || guard) {
+    return array[array.length - 1];
+  } else {
+    return slice.call(array, Math.max(array.length - n, 0));
+  }
+};
+
 
 /*
   Simple Iterator
