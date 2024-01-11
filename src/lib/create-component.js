@@ -51,7 +51,7 @@ export const createComponent = (name, {
       }
 
       if(isFunction(onCreated)) {
-        onCreated.apply(this, this.tpl, this.$);
+        onCreated.call(this, this.tpl, this.$);
       }
     }
 
@@ -63,7 +63,7 @@ export const createComponent = (name, {
         events
       });
       if(isFunction(onRendered)) {
-        onRendered.apply(this, this.tpl, this.$);
+        onRendered.call(this, this.tpl, this.$);
       }
     }
 
@@ -71,7 +71,7 @@ export const createComponent = (name, {
     disconnectedCallback() {
       super.disconnectedCallback();
       if(isFunction(onDestroyed)) {
-        onDestroyed.apply(this, this.tpl, this.$);
+        onDestroyed.call(this, this.tpl, this.$);
       }
     }
 
@@ -79,13 +79,13 @@ export const createComponent = (name, {
     adoptedCallback() {
       super.adoptedCallback();
       if(isFunction(onMoved)) {
-        onMoved.apply(this, this.tpl, this.$);
+        onMoved.call(this, this.tpl, this.$);
       }
     }
 
     attributeChangedCallback(attribute, oldValue, newValue) {
       if(isFunction(this.onAttributeChanged)) {
-        this.on?.settingChanged.call(this, {
+        this.onAttributeChanged.call(this, {
           attribute, oldValue, newValue
         });
       }

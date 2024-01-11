@@ -1088,6 +1088,9 @@ r4?.({ LitElement: s3 });
 var keys = (obj) => {
   return Object.keys(obj);
 };
+var isBinary = (obj) => {
+  return !!(typeof Uint8Array !== "undefined" && obj instanceof Uint8Array);
+};
 var last = function(array, n5, guard) {
   if (!Array.isArray(array)) {
     return;
@@ -1125,6 +1128,13 @@ var each = (obj, func, context) => {
   }
   return obj;
 };
+var isObject = (obj) => {
+  let type = typeof obj;
+  if (type === "function" || type === "object" && !!obj) {
+    return true;
+  }
+  return false;
+};
 var isFunction = (obj) => {
   return typeof obj == "function" || false;
 };
@@ -1161,6 +1171,121 @@ var get = function(object, string = "") {
     }
   }
   return object;
+};
+var hasProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+var isEqual = (a3, b3, options) => {
+  let i6;
+  const keyOrderSensitive = !!(options && options.keyOrderSensitive);
+  if (a3 === b3) {
+    return true;
+  }
+  if (Number.isNaN(a3) && Number.isNaN(b3)) {
+    return true;
+  }
+  if (!a3 || !b3) {
+    return false;
+  }
+  if (!(isObject(a3) && isObject(b3))) {
+    return false;
+  }
+  if (a3 instanceof Date && b3 instanceof Date) {
+    return a3.valueOf() === b3.valueOf();
+  }
+  if (isBinary(a3) && isBinary(b3)) {
+    if (a3.length !== b3.length) {
+      return false;
+    }
+    for (i6 = 0; i6 < a3.length; i6++) {
+      if (a3[i6] !== b3[i6]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (isFunction(a3.equals)) {
+    return a3.equals(b3, options);
+  }
+  if (isFunction(b3.equals)) {
+    return b3.equals(a3, options);
+  }
+  if (a3 instanceof Array) {
+    if (!(b3 instanceof Array)) {
+      return false;
+    }
+    if (a3.length !== b3.length) {
+      return false;
+    }
+    for (i6 = 0; i6 < a3.length; i6++) {
+      if (!isEqual(a3[i6], b3[i6], options)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  let ret;
+  const aKeys = keys(a3);
+  const bKeys = keys(b3);
+  if (keyOrderSensitive) {
+    i6 = 0;
+    ret = aKeys.every((key) => {
+      if (i6 >= bKeys.length) {
+        return false;
+      }
+      if (key !== bKeys[i6]) {
+        return false;
+      }
+      if (!isEqual(a3[key], b3[bKeys[i6]], options)) {
+        return false;
+      }
+      i6++;
+      return true;
+    });
+  } else {
+    i6 = 0;
+    ret = aKeys.every((key) => {
+      if (!hasProperty(b3, key)) {
+        return false;
+      }
+      if (!isEqual(a3[key], b3[key], options)) {
+        return false;
+      }
+      i6++;
+      return true;
+    });
+  }
+  return ret && i6 === bKeys.length;
+};
+var isArguments = function(obj) {
+  return !!(obj && get(obj, "callee"));
+};
+var clone = (obj) => {
+  let ret;
+  if (!isObject(obj)) {
+    return obj;
+  }
+  if (obj === null) {
+    return null;
+  }
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+  if (obj instanceof RegExp) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(clone);
+  }
+  if (isArguments(obj)) {
+    return Array.from(obj).map(clone);
+  }
+  if (isFunction(obj.clone)) {
+    return obj.clone();
+  }
+  ret = {};
+  keys(obj).forEach((key) => {
+    ret[key] = clone(obj[key]);
+  });
+  return ret;
 };
 
 // src/lib/query.js
@@ -1294,9 +1419,6 @@ var UIComponent = class extends s3 {
       return renderRoot;
     }
   }
-  /*******************************
-              CSS
-  *******************************/
   /*******************************
          Settings / Attrs
   *******************************/
@@ -1752,7 +1874,7 @@ var createComponent = (name, {
         this.tpl = tpl;
       }
       if (isFunction(onCreated)) {
-        onCreated.apply(this, this.tpl, this.$);
+        onCreated.call(this, this.tpl, this.$);
       }
     }
     // callback when added to dom
@@ -1763,26 +1885,26 @@ var createComponent = (name, {
         events
       });
       if (isFunction(onRendered)) {
-        onRendered.apply(this, this.tpl, this.$);
+        onRendered.call(this, this.tpl, this.$);
       }
     }
     // callback if removed from dom
     disconnectedCallback() {
       super.disconnectedCallback();
       if (isFunction(onDestroyed)) {
-        onDestroyed.apply(this, this.tpl, this.$);
+        onDestroyed.call(this, this.tpl, this.$);
       }
     }
     // callback if moves doc
     adoptedCallback() {
       super.adoptedCallback();
       if (isFunction(onMoved)) {
-        onMoved.apply(this, this.tpl, this.$);
+        onMoved.call(this, this.tpl, this.$);
       }
     }
     attributeChangedCallback(attribute, oldValue, newValue) {
       if (isFunction(this.onAttributeChanged)) {
-        this.on?.settingChanged.call(this, {
+        this.onAttributeChanged.call(this, {
           attribute,
           oldValue,
           newValue
@@ -1804,10 +1926,114 @@ var createComponent = (name, {
   }
 };
 
+// src/lib/reactive.js
+var Reaction = class _Reaction {
+  static current = null;
+  static pendingReactions = /* @__PURE__ */ new Set();
+  static afterFlushCallbacks = [];
+  static isFlushScheduled = false;
+  static scheduleFlush() {
+    if (!_Reaction.isFlushScheduled) {
+      _Reaction.isFlushScheduled = true;
+      Promise.resolve().then(_Reaction.flush);
+    }
+  }
+  static flush() {
+    _Reaction.isFlushScheduled = false;
+    _Reaction.pendingReactions.forEach((reaction) => reaction());
+    _Reaction.pendingReactions.clear();
+    _Reaction.afterFlushCallbacks.forEach((callback) => callback());
+    _Reaction.afterFlushCallbacks = [];
+  }
+  static afterFlush(callback) {
+    _Reaction.afterFlushCallbacks.push(callback);
+  }
+  static recordDependency(reactiveVar) {
+    if (_Reaction.current) {
+      _Reaction.current.dependencies.add(reactiveVar);
+    }
+  }
+  static create(callback) {
+    const reaction = new _Reaction(callback);
+    reaction.run();
+    return () => reaction.stop();
+  }
+  constructor(callback) {
+    this.callback = callback;
+    this.dependencies = /* @__PURE__ */ new Set();
+    this.boundRun = this.run.bind(this);
+  }
+  run() {
+    _Reaction.current = this;
+    this.dependencies.clear();
+    this.callback();
+    _Reaction.current = null;
+    this.dependencies.forEach((dep) => dep.addListener(this.boundRun));
+  }
+  stop() {
+    this.dependencies.forEach((dep) => dep.removeListener(this.boundRun));
+  }
+};
+var ReactiveVar = class _ReactiveVar {
+  constructor(initialValue, equalityFunction) {
+    this.currentValue = initialValue;
+    this._listeners = /* @__PURE__ */ new Set();
+    this.equalityFunction = equalityFunction || _ReactiveVar.equalityFunction;
+  }
+  /* Classic Meteor
+  static equalityFunction(a, b) {
+    if (a !== b) {
+      return false;
+    }
+    else {
+      return ((!a) || (typeof a === 'number') || (typeof a === 'boolean') ||
+              (typeof a === 'string'));
+    }
+  }
+  */
+  // modern
+  static equalityFunction = (a3, b3) => {
+    return isEqual(a3, b3);
+  };
+  get value() {
+    Reaction.recordDependency(this);
+    const value = this.currentValue;
+    return Array.isArray(value) || typeof value == "object" ? clone(value) : value;
+  }
+  set value(newValue) {
+    if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.currentValue = newValue;
+      this._notifyListeners();
+    }
+  }
+  get() {
+    return this.value;
+  }
+  set(newValue) {
+    if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.value = newValue;
+      this._notifyListeners();
+    }
+  }
+  addListener(listener) {
+    this._listeners.add(listener);
+  }
+  removeListener(listener) {
+    this._listeners.delete(listener);
+  }
+  _notifyListeners() {
+    this._listeners.forEach((listener) => {
+      Reaction.pendingReactions.add(listener);
+    });
+    Reaction.scheduleFlush();
+  }
+};
+
 // src/button/button.ts
 var UIButton = {
   createInstance: function(tpl, $3) {
     return {
+      fun: new ReactiveVar(false),
       property: true,
       anotherProp: "1",
       getLove() {
@@ -1816,13 +2042,29 @@ var UIButton = {
     };
   },
   onCreated: function(tpl) {
-    (void 0).createReaction(() => {
-      if (fun) {
-        console.log("We have fun");
+    let settings = new ReactiveVar({
+      fun: true,
+      trucks: true
+    });
+    Reaction.create(function() {
+      if (settings.value.fun) {
+        console.log("We have fun!");
       } else {
         console.log("No fun!");
       }
     });
+    Reaction.create(function() {
+      if (settings.value.trucks) {
+        console.log("We have trucks!");
+      } else {
+        console.log("No trucks!");
+      }
+    });
+    setTimeout(() => {
+      let newSettings = settings.get();
+      newSettings.fun = false;
+      settings.set(newSettings);
+    }, 500);
   },
   onRendered: function() {
   },

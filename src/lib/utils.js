@@ -308,9 +308,12 @@ export const isEqual = (a, b, options) => {
   return ret && i === bKeys.length;
 };
 
+export const isArguments = function(obj) {
+  return !!(obj && get(obj, 'callee'));
+};
 
-/* Clone Object */
-export const cloneObject = obj => {
+/* Clone Object or ARray */
+export const clone = obj => {
   let ret;
   if (!isObject(obj)) {
     return obj;
@@ -331,11 +334,11 @@ export const cloneObject = obj => {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(cloneObject);
+    return obj.map(clone);
   }
 
   if (isArguments(obj)) {
-    return Array.from(obj).map(cloneObject);
+    return Array.from(obj).map(clone);
   }
 
   // handle general user-defined typed Objects if they haobje a clone method
@@ -346,7 +349,7 @@ export const cloneObject = obj => {
   // handle other objects
   ret = {};
   keys(obj).forEach((key) => {
-    ret[key] = cloneObject(obj[key]);
+    ret[key] = clone(obj[key]);
   });
   return ret;
 };
