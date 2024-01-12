@@ -3,14 +3,10 @@
     <span class="icon" part="icon">
       {{slot icon}}
     </span>
-  {{elseif not icon}}
-    woo
-  {{else}}
-    no icon
   {{/if}}
   {{#if text}}
     <span class="text" part="text">
-      {{slot text}}
+      {{slot text}} - {{getSaying}}
     </span>
   {{/if}}
   {{#if label}}

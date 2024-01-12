@@ -35,10 +35,10 @@
   vertical-align: baseline;
   margin: var(--vertical-margin) var(--horizontal-margin) 0em 0em;
 }
-.buttons:not(.basic):not(.inverted) {
+:scope:not(.basic):not(.inverted) {
   box-shadow: var(--group-box-shadow);
 }
-.buttons::after {
+&::after {
   content: ".";
   display: block;
   height: 0;

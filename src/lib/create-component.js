@@ -5,11 +5,11 @@ import { TemplateCompiler } from './template/compiler';
 import { LitRenderer } from './template/lit-renderer';
 import { extend, noop, isObject, isFunction } from './utils';
 
-export const createComponent = (name, { 
+export const createComponent = (tagName, {
   type = 'element', 
   css = false, 
   template = '',
-  definition = false, 
+  spec = false,
   events = {},
   defineElement = true,
   createInstance = noop,
@@ -18,6 +18,7 @@ export const createComponent = (name, {
   onDestroyed = noop,
 } = {}) => {
 
+  // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
   
@@ -31,24 +32,31 @@ export const createComponent = (name, {
     constructor() {
       super();
 
-      // AST is shared across instances
+      // store details
       this.ast = ast;
+      this.css = css;
+      this.template = template;
 
-      this.renderer = new LitRenderer();
+      // store callbacks
+      this.onCreated = onCreated;
+      this.onRendered = onRendered;
+      this.onDestroyed = onDestroyed;
 
+      let tpl;
       if(isFunction(createInstance)) {
 
-        let tpl = createInstance.call(this, this.tpl, this.$);
-        extend(this, tpl);
+        this.tpl = {};
+        tpl = createInstance.call(this, this.tpl, this.$);
 
         /*
           We want to keep this separate for housekeeping passing the
           DOM node around is cumbersome since it obscures most of the
           implementation for the particular UI component due to random DOM attrs
         */
-        this.tpl = tpl;
+        extend(this.tpl, tpl);
 
       }
+      this.renderer = new LitRenderer(ast, tpl);
 
       if(isFunction(onCreated)) {
         onCreated.call(this, this.tpl, this.$);
@@ -92,23 +100,13 @@ export const createComponent = (name, {
     }
 
     render() {
-
-      this.renderer.render(this.ast, this.tpl);
-
-      // ;)
-      const strings = [ template ];
-      strings.raw = [String.raw({ raw: template })];
-      return html(strings, []);
+      return this.renderer.render();
     }
-
-    onCreated;
-    onRendered;
-    onDestroyed;
 
   };
 
   if(defineElement) {
-    customElements.define(name, thisComponent);
+    customElements.define(tagName, thisComponent);
   }
 
 };

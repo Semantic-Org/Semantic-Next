@@ -9,12 +9,12 @@
   vertical-align: baseline;
   margin: var(--vertical-margin) var(--horizontal-margin) 0em 0em;
 }
-.buttons:not(.basic):not(.inverted) {
+&:not(.basic):not(.inverted) {
   box-shadow: var(--group-box-shadow);
 }
 
 /* Clearfix */
-.buttons::after {
+&::after {
   content: ".";
   display: block;
   height: 0;

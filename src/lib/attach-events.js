@@ -13,7 +13,7 @@ export const attachEvents = ({
     parts.shift();
     const selector = parts.join(' ');
 
-    $(el.shadowRoot).on(eventName, selector, function(event) {
+    $(el.renderRoot).on(eventName, selector, function(event) {
       eventHandler.call(this, event, el);
     });
   });

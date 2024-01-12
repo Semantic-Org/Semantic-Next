@@ -1,4 +1,4 @@
-export const ButtonDefinition = {
+export const ButtonSpec = {
 
   /*******************************
              Definition

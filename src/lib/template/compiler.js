@@ -17,7 +17,7 @@ class TemplateCompiler {
 
     const scanner = new Scanner(template);
 
-    const parseTag = function(scanner) {
+    const parseTag = (scanner) => {
       const starts = {
         IF: /^{{\s*#if\s+/,
         ELSEIF: /^{{\s*else\s*if\s+/,
@@ -31,7 +31,7 @@ class TemplateCompiler {
       for (let type in starts) {
         if (scanner.matches(starts[type])) {
           const consumed = scanner.consume(starts[type]);
-          const content = scanner.consumeUntil('}}').trim();
+          const content = this.getValue(scanner.consumeUntil('}}').trim());
           scanner.consume('}}');
           return { type, content };
         }
@@ -69,8 +69,8 @@ class TemplateCompiler {
               branches: []
             };
             contentTarget.push(newNode);
-            contentBranch = newNode;
             conditionStack.push(newNode);
+            contentBranch = newNode;
             break;
 
           case 'ELSEIF':
@@ -159,6 +159,19 @@ class TemplateCompiler {
     }
 
     return ast;
+  }
+
+  getValue(expression) {
+    if(expression == 'true') {
+      return true;
+    }
+    else if(expression == 'false') {
+      return false;
+    }
+    else if(!Number.isNaN( parseInt(expression, 10) )) {
+      return +(expression);
+    }
+    return expression;
   }
 }
 

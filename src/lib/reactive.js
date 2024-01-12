@@ -43,18 +43,32 @@ class Reaction {
     this.callback = callback;
     this.dependencies = new Set();
     this.boundRun = this.run.bind(this); // Bound function
+    this.firstRun = true;
+    this.active = true;
   }
 
   run() {
+    if (!this.active) {
+      return;
+    }
     Reaction.current = this;
     this.dependencies.clear();
-    this.callback();
+
+    // Provide computation context
+    this.callback({
+      firstRun: this.firstRun,
+      stop: () => this.stop()
+    });
+
+    this.firstRun = false;
     Reaction.current = null;
 
     this.dependencies.forEach(dep => dep.addListener(this.boundRun));
   }
 
   stop() {
+    if (!this.active) return;
+    this.active = false;
     this.dependencies.forEach(dep => dep.removeListener(this.boundRun));
   }
 }
@@ -115,6 +129,20 @@ class ReactiveVar {
     }
   }
 
+  subscribe(callback) {
+    const reaction = Reaction.create(() => {
+      callback(this._value);
+    });
+    return () => reaction.stop();
+  }
+
+  peek() {
+    const currentReaction = Reaction.current;
+    Reaction.current = null;
+    const value = this._value;
+    Reaction.current = currentReaction;
+    return value;
+  }
 
   addListener(listener) {
     this._listeners.add(listener);
