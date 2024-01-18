@@ -1,6 +1,7 @@
 import {directive} from 'lit/directive.js';
 import {AsyncDirective} from 'lit/async-directive.js';
-import { ReactiveVar, Reaction } from '../reactive.js';
+
+import { ReactiveVar, Reaction } from '../reactive/';
 
 /*
   Adapted from Preact Signals Watch

@@ -56,7 +56,7 @@ export const createComponent = (tagName, {
         extend(this.tpl, tpl);
 
       }
-      this.renderer = new LitRenderer(ast, tpl);
+      this.renderer = new LitRenderer({ast, data: tpl, litElement: this });
 
       if(isFunction(onCreated)) {
         onCreated.call(this, this.tpl, this.$);

@@ -1,6 +1,6 @@
 import { escapeRegExp } from '../utils';
 
-// This is a Scanner class suitable for any parser/lexer/tokenizer.
+// Adapted from BlazeJS Scanner
 //
 // A Scanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
@@ -32,6 +32,7 @@ class Scanner {
     return this.pos >= this.input.length;
   }
 
+  // get character at current position
   peek() {
     return this.input.charAt(this.pos);
   }

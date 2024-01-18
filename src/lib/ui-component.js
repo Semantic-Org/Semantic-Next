@@ -1,5 +1,7 @@
 import { LitElement, unsafeCSS } from 'lit';
 import { each, isFunction, isObject, extend } from './utils';
+import { scopeStyles } from './styles';
+
 import { $ } from './query';
 
 class UIComponent extends LitElement {
@@ -24,53 +26,13 @@ class UIComponent extends LitElement {
       return renderRoot;
     }
   }
-
   applyScopedStyles(scopeSelector, css) {
     if (!this.scopedStyleSheet) {
-      const scopedCSS = this.scopeStyles(css, scopeSelector);
+      const scopedCSS = scopeStyles(css, scopeSelector);
       this.scopedStyleSheet = new CSSStyleSheet();
       this.scopedStyleSheet.replaceSync(scopedCSS);
     }
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.scopedStyleSheet];
-  }
-
-  scopeStyles(css, scopeSelector = '') {
-    scopeSelector = scopeSelector.toLowerCase();
-    const style = document.createElement('style');
-    document.head.appendChild(style);
-    style.appendChild(document.createTextNode(css));
-    const sheet = style.sheet;
-    let modifiedRules = [];
-    for (let i = 0; i < sheet.cssRules.length; i++) {
-      let rule = sheet.cssRules[i];
-      switch (rule.type) {
-        case CSSRule.STYLE_RULE:
-          // Handle regular style rules
-          modifiedRules.push(this.scopeRule(rule, scopeSelector));
-          break;
-        case CSSRule.MEDIA_RULE:
-        case CSSRule.SUPPORTS_RULE:
-          // Handle @media and @supports which contain nested rules
-          let scopedInnerRules = [];
-          Array.from(rule.cssRules).forEach(innerRule => {
-            scopedInnerRules.push(scopeRule(innerRule, scopeSelector));
-          });
-          modifiedRules.push(`@${rule.name} ${rule.conditionText} { ${scopedInnerRules.join(' ')} }`);
-          break;
-        default:
-          // push all other rules through verbatim
-          modifiedRules.push(rule.cssText);
-          break;
-      }
-    }
-    document.head.removeChild(style);
-    const scopedCSS = modifiedRules.join('\n');
-    return scopedCSS;
-  }
-
-  scopeRule(rule, scopeSelector) {
-    const modifiedSelector = `${scopeSelector} ${rule.selectorText}`;
-    return `${modifiedSelector} { ${rule.style.cssText} }`;
   }
 
   storeOriginalContent() {
@@ -101,7 +63,6 @@ class UIComponent extends LitElement {
         $slot.html(html);
       }
     });
-
   }
 
   firstUpdated() {
@@ -110,6 +71,12 @@ class UIComponent extends LitElement {
       this.slotContent();
     }
   }
+
+  updated() {
+    super.updated();
+    this.slotContent();
+  }
+
 
 
   /*******************************

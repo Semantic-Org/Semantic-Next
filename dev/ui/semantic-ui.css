@@ -197,6 +197,27 @@ input[type=password] {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+body ::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: var(--custom-scrollbar-width);
+  height: var(--custom-scrollbar-height);
+}
+body ::-webkit-scrollbar-track {
+  background: var(--track-background);
+  border-radius: var(--track-border-radius);
+}
+body ::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: var(--thumb-border-radius);
+  background: var(--thumb-background);
+  transition: var(--thumb-transition);
+}
+body ::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inactive-background);
+}
+body ::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hover-background);
+}
 
 /* src/globals/initial.css */
 ui-button:not(:defined) {

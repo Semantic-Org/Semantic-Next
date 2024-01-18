@@ -312,7 +312,7 @@ export const isArguments = function(obj) {
   return !!(obj && get(obj, 'callee'));
 };
 
-/* Clone Object or ARray */
+/* Clone Object or Array */
 export const clone = obj => {
   let ret;
   if (!isObject(obj)) {

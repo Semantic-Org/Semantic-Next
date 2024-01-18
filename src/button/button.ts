@@ -1,11 +1,6 @@
 import { createComponent } from '../lib/create-component.js';
-import { ReactiveVar, Reaction } from '../lib/reactive.js';
-import {
-  ButtonSpec,
-  ButtonTemplate,
-  ButtonCSS
-} from './';
-
+import { Reaction, ReactiveVar } from '../lib/reactive/';
+import { ButtonSpec, ButtonTemplate, ButtonCSS } from './';
 
 const UIButton = {};
 
@@ -24,7 +19,7 @@ UIButton.createInstance = (tpl, $) => ({
   },
 
   getSaying() {
-    //console.log('being called again', tpl.saying.get());
+    console.log('being called again', tpl.saying.get());
     return tpl.saying.get();
   }
 });

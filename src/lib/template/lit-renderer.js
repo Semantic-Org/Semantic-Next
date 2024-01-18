@@ -1,13 +1,15 @@
 import { html } from 'lit';
-import { keyed } from 'lit/directives/keyed.js';
+import { guard } from 'lit/directives/guard.js';
 import { get, each, last, wrapFunction, isFunction } from '../utils';
-import { Reaction } from '../reactive';
+import { Reaction } from '../reactive/';
 
 class LitRenderer {
 
-  constructor(ast, data) {
+  constructor({ast, data, litElement}) {
     this.ast = ast || '';
     this.data = data || {};
+    console.log('creating', litElement);
+    this.litElement = litElement;
     this.resetHTML();
   }
 
@@ -22,10 +24,10 @@ class LitRenderer {
     this can be cached on the web component class
   */
   render(ast = this.ast, data = this.data) {
-
     this.resetHTML();
     this.readAST(ast, data);
-    return html.apply(this, [this.html, ...this.expressions]);
+    this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
+    return this.litTemplate;
   }
 
   readAST(ast = this.ast, data = this.data) {
@@ -37,7 +39,7 @@ class LitRenderer {
           break;
 
         case 'expression':
-          this.addValue(this.getValue(node.value));
+          this.addValue(this.getValue(node.value, this.litElement));
           break;
 
         case 'if':
@@ -75,27 +77,18 @@ class LitRenderer {
     this.clearTemp();
   }
 
-
-
-  /*
-  log`what do you ${'jack'} know ${cat} the end`
-  ['what do you ', ' know ', ' the end', raw: Array(3)] 
-  (2)['jack', 'boo']
-
-
-  const strings = [ template ];
-  strings.raw = [String.raw({ raw: template })];
-  return html(strings, []);
-
-  */
-
-  getValue(value) {
+  getValue(value, litElement) {
+    // lookup this value in data context
+    // i.e foo.baz = { foo: { baz: 'value' } }
     if(typeof value === 'string') {
       let result;
       const data = this.data;
       Reaction.create(function(comp) {
         const dataValue = get(data, value);
         result = wrapFunction(dataValue)();
+        if(!comp.firstRun) {
+          litElement.requestUpdate();
+        }
       });
       return result;
     }
