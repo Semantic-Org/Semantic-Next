@@ -1,3 +1,5 @@
+@layer baseTheme, userTheme, siteTheme;
+
 /* src/themes/base/global-variables.css */
 :root {
   --font-name: "Lato";
@@ -620,345 +622,403 @@
 }
 
 /* src/themes/base/button/content/button-variables.css */
-ui-button {
-  --vertical-align: baseline;
-  --vertical-margin: 0em;
-  --horizontal-margin: 0.25em;
-  --background-color: #E0E1E2;
-  --background-image: none;
-  --background: var(--background-color) var(--background-image);
-  --line-height: 1em;
-  --vertical-padding: var(--input-vertical-padding);
-  --horizontal-padding: 1.5em;
-  --text-transform: none;
-  --tap-color: transparent;
-  --font-family: var(--page-font);
-  --font-weight: var(--bold);
-  --text-color: var(--text-color);
-  --text-shadow: none;
-  --inverted-text-shadow: var(--text-shadow);
-  --border-radius: var(--default-border-radius);
-  --shadow-distance: 0em;
-  --shadow-offset: var(--shadow-distance) / 2;
-  --shadow-box-shadow: 0px var(--shadow-distance) 0px 0px var(--border-color) inset;
-  --border-box-shadow-color: transparent;
-  --border-box-shadow-width: 1px;
-  --border-box-shadow: 0px 0px 0px var(--border-box-shadow-width) var(--border-box-shadow-color) inset;
-  --box-shadow: var(--border-box-shadow), var(--shadow-box-shadow) ;
-  --transition:
-    opacity var(--default-duration) var(--default-easing),
-    background-color var(--default-duration) var(--default-easing),
-    color var(--default-duration) var(--default-easing),
-    box-shadow var(--default-duration) var(--default-easing),
-    background var(--default-duration) var(--default-easing) ;
-  --will-change: initial;
+@layer baseTheme {
+  ui-button {
+    --vertical-align: baseline;
+    --vertical-margin: 0em;
+    --horizontal-margin: 0.25em;
+    --background-color: #E0E1E2;
+    --background-image: none;
+    --background: var(--background-color) var(--background-image);
+    --line-height: 1em;
+    --vertical-padding: var(--input-vertical-padding);
+    --horizontal-padding: 1.5em;
+    --text-transform: none;
+    --tap-color: transparent;
+    --font-family: var(--page-font);
+    --font-weight: var(--bold);
+    --text-color: var(--text-color);
+    --text-shadow: none;
+    --inverted-text-shadow: var(--text-shadow);
+    --border-radius: var(--default-border-radius);
+    --shadow-distance: 0em;
+    --shadow-offset: var(--shadow-distance) / 2;
+    --shadow-box-shadow: 0px var(--shadow-distance) 0px 0px var(--border-color) inset;
+    --border-box-shadow-color: transparent;
+    --border-box-shadow-width: 1px;
+    --border-box-shadow: 0px 0px 0px var(--border-box-shadow-width) var(--border-box-shadow-color) inset;
+    --box-shadow: var(--border-box-shadow), var(--shadow-box-shadow) ;
+    --transition:
+      opacity var(--default-duration) var(--default-easing),
+      background-color var(--default-duration) var(--default-easing),
+      color var(--default-duration) var(--default-easing),
+      box-shadow var(--default-duration) var(--default-easing),
+      background var(--default-duration) var(--default-easing) ;
+    --will-change: initial;
+  }
 }
 
 /* src/themes/base/button/content/icon-variables.css */
-ui-button {
-  --icon-button-opacity: 0.9;
-  --loading-icon-duration: 2s;
+@layer baseTheme {
+  ui-button {
+    --icon-button-opacity: 0.9;
+    --loading-icon-duration: 2s;
+  }
 }
 
 /* src/themes/base/button/content/label-variables.css */
-ui-button {
-  --labeled-label-font-size: var(--medium);
-  --labeled-label-align: center;
-  --labeled-label-padding: "";
-  --labeled-label-font-size: var(--relative-medium);
-  --labeled-label-border-color: var(--border-color);
-  --labeled-label-border-offset: -var(--border-box-shadow-width);
-  --labeled-tag-label-size: 1.85em;
-  --labeled-icon-margin: 0em;
-  --labeled-icon-width: 1em + calc(var(--vertical-padding) * 2);
-  --labeled-icon-background-color: rgba(0, 0, 0, 0.05);
-  --labeled-icon-padding: calc(var(--horizontal-padding) + var(--labeled-icon-width));
-  --labeled-icon-border: transparent;
-  --labeled-icon-color: "";
-  --labeled-icon-left-shadow: -1px 0px 0px 0px var(--labeled-icon-border) inset;
-  --labeled-icon-right-shadow: 1px 0px 0px 0px var(--labeled-icon-border) inset;
+@layer baseTheme {
+  ui-button {
+    --labeled-label-font-size: var(--medium);
+    --labeled-label-align: center;
+    --labeled-label-padding: "";
+    --labeled-label-font-size: var(--relative-medium);
+    --labeled-label-border-color: var(--border-color);
+    --labeled-label-border-offset: -var(--border-box-shadow-width);
+    --labeled-tag-label-size: 1.85em;
+    --labeled-icon-margin: 0em;
+    --labeled-icon-width: 1em + calc(var(--vertical-padding) * 2);
+    --labeled-icon-background-color: rgba(0, 0, 0, 0.05);
+    --labeled-icon-padding: calc(var(--horizontal-padding) + var(--labeled-icon-width));
+    --labeled-icon-border: transparent;
+    --labeled-icon-color: "";
+    --labeled-icon-left-shadow: -1px 0px 0px 0px var(--labeled-icon-border) inset;
+    --labeled-icon-right-shadow: 1px 0px 0px 0px var(--labeled-icon-border) inset;
+  }
 }
 
 /* src/themes/base/button/content/or-variables.css */
-ui-button {
-  --or-text: "or";
-  --or-gap: 0.3em;
-  --or-height: calc(var(--vertical-padding) * 2) + 1em;
-  --or-z-index: 3;
-  --or-circle-distance-to-edge: var(--vertical-padding);
-  --or-circle-size: calc(var(--or-height) - var(--or-circle-distance-to-edge));
-  --or-line-height: var(--or-circle-size);
-  --or-box-shadow: var(--border-box-shadow);
-  --or-vertical-offset: calc(var(--or-circle-size) / 2 * -1);
-  --or-horizontal-offset: calc(var(--or-circle-size) / 2 * -1 );
-  --or-background-color: var(--white);
-  --or-text-shadow: var(--inverted-text-shadow);
-  --or-text-style: var(--normal);
-  --or-text-weight: var(--bold);
-  --or-text-color: var(--light-text-color);
-  --or-spacer-height: var(--vertical-padding);
-  --or-spacer-color: transparent;
+@layer baseTheme {
+  ui-button {
+    --or-text: "or";
+    --or-gap: 0.3em;
+    --or-height: calc(var(--vertical-padding) * 2) + 1em;
+    --or-z-index: 3;
+    --or-circle-distance-to-edge: var(--vertical-padding);
+    --or-circle-size: calc(var(--or-height) - var(--or-circle-distance-to-edge));
+    --or-line-height: var(--or-circle-size);
+    --or-box-shadow: var(--border-box-shadow);
+    --or-vertical-offset: calc(var(--or-circle-size) / 2 * -1);
+    --or-horizontal-offset: calc(var(--or-circle-size) / 2 * -1 );
+    --or-background-color: var(--white);
+    --or-text-shadow: var(--inverted-text-shadow);
+    --or-text-style: var(--normal);
+    --or-text-weight: var(--bold);
+    --or-text-color: var(--light-text-color);
+    --or-spacer-height: var(--vertical-padding);
+    --or-spacer-color: transparent;
+  }
 }
 
 /* src/themes/base/button/group/buttons-variables.css */
-ui-button {
-  --group-box-shadow: none;
-  --group-button-box-shadow: var(--box-shadow);
-  --vertical-box-shadow: none;
-  --group-button-offset: 0px 0px 0px 0px;
-  --vertical-group-offset: 0px 0px 0px 0px;
+@layer baseTheme {
+  ui-button {
+    --group-box-shadow: none;
+    --group-button-box-shadow: var(--box-shadow);
+    --vertical-box-shadow: none;
+    --group-button-offset: 0px 0px 0px 0px;
+    --vertical-group-offset: 0px 0px 0px 0px;
+  }
 }
 
 /* src/themes/base/button/types/emphasis-variables.css */
-ui-button {
-  --primary-background-image: var(--colored-background-image);
-  --primary-box-shadow: var(--colored-box-shadow);
-  --primary-text-color: var(--inverted-text-color);
-  --primary-text-shadow: var(--inverted-text-shadow);
-  --secondary-background-image: var(--colored-background-image);
-  --secondary-box-shadow: var(--colored-box-shadow);
-  --secondary-text-color: var(--inverted-text-color);
-  --secondary-text-shadow: var(--inverted-text-shadow);
-  --light-primary-text-color: var(--inverted-text-color);
-  --light-secondary-text-color: var(--inverted-text-color);
+@layer baseTheme {
+  ui-button {
+    --primary-background-image: var(--colored-background-image);
+    --primary-box-shadow: var(--colored-box-shadow);
+    --primary-text-color: var(--inverted-text-color);
+    --primary-text-shadow: var(--inverted-text-shadow);
+    --secondary-background-image: var(--colored-background-image);
+    --secondary-box-shadow: var(--colored-box-shadow);
+    --secondary-text-color: var(--inverted-text-color);
+    --secondary-text-shadow: var(--inverted-text-shadow);
+    --light-primary-text-color: var(--inverted-text-color);
+    --light-secondary-text-color: var(--inverted-text-color);
+  }
 }
 
 /* src/themes/base/button/types/icon-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/types/labeled-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/types/labeled-icon-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/types/toggle-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/types/animated-variables.css */
-ui-button {
-  --animated-vertical-align: middle;
-  --animated-z-index: 1;
-  --animation-duration: 0.3s;
-  --animation-easing: ease;
-  --fade-scale-high: 1.5;
-  --fade-scale-low: 0.75;
+@layer baseTheme {
+  ui-button {
+    --animated-vertical-align: middle;
+    --animated-z-index: 1;
+    --animation-duration: 0.3s;
+    --animation-easing: ease;
+    --fade-scale-high: 1.5;
+    --fade-scale-low: 0.75;
+  }
 }
 
 /* src/themes/base/button/states/hover-variables.css */
-ui-button {
-  --hover-background-color: #CACBCD;
-  --hover-background-image: var(--background-image);
-  --hover-box-shadow: var(--box-shadow);
-  --hover-color: var(--hovered-text-color);
-  --hover-icon-opacity: 0.85;
+@layer baseTheme {
+  ui-button {
+    --hover-background-color: #CACBCD;
+    --hover-background-image: var(--background-image);
+    --hover-box-shadow: var(--box-shadow);
+    --hover-color: var(--hovered-text-color);
+    --hover-icon-opacity: 0.85;
+  }
 }
 
 /* src/themes/base/button/states/focus-variables.css */
-ui-button {
-  --focus-background-color: var(--hover-background-color);
-  --focus-background-image: "";
-  --focus-box-shadow: "";
-  --focus-color: var(--hovered-text-color);
-  --icon-focus-opacity: 0.85;
+@layer baseTheme {
+  ui-button {
+    --focus-background-color: var(--hover-background-color);
+    --focus-background-image: "";
+    --focus-box-shadow: "";
+    --focus-color: var(--hovered-text-color);
+    --icon-focus-opacity: 0.85;
+  }
 }
 
 /* src/themes/base/button/states/pressed-variables.css */
-ui-button {
-  --pressed-background-color: #BABBBC;
-  --pressed-background-image: "";
-  --pressed-shadow: none;
-  --pressed-box-shadow: var(--border-box-shadow), var(--pressed-pressed-shadow) ;
+@layer baseTheme {
+  ui-button {
+    --pressed-background-color: #BABBBC;
+    --pressed-background-image: "";
+    --pressed-shadow: none;
+    --pressed-box-shadow: var(--border-box-shadow), var(--pressed-pressed-shadow) ;
+  }
 }
 
 /* src/themes/base/button/states/active-variables.css */
-ui-button {
-  --active-background-color: #C0C1C2;
-  --active-background-image: var(--background-image);
-  --active-color: var(--selected-text-color);
-  --active-box-shadow: var(--border-box-shadow);
-  --active-hover-background-color: var(--active-background-color);
-  --active-hover-background-image: var(--active-background-image);
-  --active-hover-color: var(--active-color);
-  --active-hover-box-shadow: var(--active-box-shadow);
-  --active-down-background-color: var(--active-background-color);
-  --active-down-background-image: var(--active-background-image);
-  --active-down-color: var(--active-color);
-  --active-down-box-shadow: var(--active-box-shadow);
+@layer baseTheme {
+  ui-button {
+    --active-background-color: #C0C1C2;
+    --active-background-image: var(--background-image);
+    --active-color: var(--selected-text-color);
+    --active-box-shadow: var(--border-box-shadow);
+    --active-hover-background-color: var(--active-background-color);
+    --active-hover-background-image: var(--active-background-image);
+    --active-hover-color: var(--active-color);
+    --active-hover-box-shadow: var(--active-box-shadow);
+    --active-down-background-color: var(--active-background-color);
+    --active-down-background-image: var(--active-background-image);
+    --active-down-color: var(--active-color);
+    --active-down-box-shadow: var(--active-box-shadow);
+  }
 }
 
 /* src/themes/base/button/states/disabled-variables.css */
-ui-button {
-  --disabled-opacity: var(--disabled-opacity, 0.45);
-  --disabled-background-image: none;
-  --disabled-box-shadow: none;
+@layer baseTheme {
+  ui-button {
+    --disabled-opacity: var(--disabled-opacity, 0.45);
+    --disabled-background-image: none;
+    --disabled-box-shadow: none;
+  }
 }
 
 /* src/themes/base/button/states/loading-variables.css */
-ui-button {
-  --loading-opacity: 1;
-  --loading-pointer-events: auto;
-  --loading-transition: all 0s linear, opacity var(--default-duration) var(--default-easing) ;
+@layer baseTheme {
+  ui-button {
+    --loading-opacity: 1;
+    --loading-pointer-events: auto;
+    --loading-transition: all 0s linear, opacity var(--default-duration) var(--default-easing) ;
+  }
 }
 
 /* src/themes/base/button/variations/attached-variables.css */
-ui-button {
-  --attached-offset: -1px;
-  --attached-box-shadow: 0px 0px 0px 1px var(--border-color);
-  --attached-horizontal-padding: 0.75em;
-  --attached-z-index: 2;
+@layer baseTheme {
+  ui-button {
+    --attached-offset: -1px;
+    --attached-box-shadow: 0px 0px 0px 1px var(--border-color);
+    --attached-horizontal-padding: 0.75em;
+    --attached-z-index: 2;
+  }
 }
 
 /* src/themes/base/button/variations/basic-variables.css */
-ui-button {
-  --basic-border-radius: var(--border-radius);
-  --basic-border-size: 1px;
-  --basic-text-color: var(--text-color);
-  --basic-colored-border-size: 1px;
-  --basic-background: transparent none;
-  --basic-font-weight: var(--normal);
-  --basic-border: 1px solid var(--border-color);
-  --basic-box-shadow: 0px 0px 0px var(--basic-border-size) var(--border-color) inset;
-  --basic-loading-color: var(--off-white);
-  --basic-text-transform: none;
-  --basic-hover-background: #FFFFFF;
-  --basic-hover-text-color: var(--hovered-text-color);
-  --basic-hover-box-shadow: 0px 0px 0px var(--basic-border-size) var(--selected-border-color) inset, 0px 0px 0px 0px var(--border-color) inset ;
-  --basic-focus-background: var(--basic-hover-background);
-  --basic-focus-text-color: var(--basic-hover-text-color);
-  --basic-focus-box-shadow: var(--basic-hover-box-shadow);
-  --basic-down-background: #F8F8F8;
-  --basic-down-text-color: var(--pressed-text-color);
-  --basic-down-box-shadow: 0px 0px 0px var(--basic-border-size) rgba(0, 0, 0, 0.15) inset, 0px 1px 4px 0px var(--border-color) inset ;
-  --basic-active-background: var(--transparent-black);
-  --basic-active-box-shadow: "";
-  --basic-active-text-color: var(--selected-text-color);
-  --basic-inverted-background: transparent;
-  --basic-inverted-focus-background: transparent;
-  --basic-inverted-down-background: var(--transparent-white);
-  --basic-inverted-active-background: var(--transparent-white);
-  --basic-inverted-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.5) inset;
-  --basic-inverted-hover-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
-  --basic-inverted-focus-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
-  --basic-inverted-down-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.9) inset;
-  --basic-inverted-active-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.7) inset;
-  --basic-inverted-color: var(--dark-white);
-  --basic-inverted-hover-color: var(--dark-white-hover);
-  --basic-inverted-down-color: var(--dark-white-active);
-  --basic-inverted-active-color: var(--inverted-text-color);
-  --basic-group-border: var(--basic-border-size) solid var(--border-color);
-  --basic-group-box-shadow: none;
+@layer baseTheme {
+  ui-button {
+    --basic-border-radius: var(--border-radius);
+    --basic-border-size: 1px;
+    --basic-text-color: var(--text-color);
+    --basic-colored-border-size: 1px;
+    --basic-background: transparent none;
+    --basic-font-weight: var(--normal);
+    --basic-border: 1px solid var(--border-color);
+    --basic-box-shadow: 0px 0px 0px var(--basic-border-size) var(--border-color) inset;
+    --basic-loading-color: var(--off-white);
+    --basic-text-transform: none;
+    --basic-hover-background: #FFFFFF;
+    --basic-hover-text-color: var(--hovered-text-color);
+    --basic-hover-box-shadow: 0px 0px 0px var(--basic-border-size) var(--selected-border-color) inset, 0px 0px 0px 0px var(--border-color) inset ;
+    --basic-focus-background: var(--basic-hover-background);
+    --basic-focus-text-color: var(--basic-hover-text-color);
+    --basic-focus-box-shadow: var(--basic-hover-box-shadow);
+    --basic-down-background: #F8F8F8;
+    --basic-down-text-color: var(--pressed-text-color);
+    --basic-down-box-shadow: 0px 0px 0px var(--basic-border-size) rgba(0, 0, 0, 0.15) inset, 0px 1px 4px 0px var(--border-color) inset ;
+    --basic-active-background: var(--transparent-black);
+    --basic-active-box-shadow: "";
+    --basic-active-text-color: var(--selected-text-color);
+    --basic-inverted-background: transparent;
+    --basic-inverted-focus-background: transparent;
+    --basic-inverted-down-background: var(--transparent-white);
+    --basic-inverted-active-background: var(--transparent-white);
+    --basic-inverted-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.5) inset;
+    --basic-inverted-hover-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
+    --basic-inverted-focus-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
+    --basic-inverted-down-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.9) inset;
+    --basic-inverted-active-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.7) inset;
+    --basic-inverted-color: var(--dark-white);
+    --basic-inverted-hover-color: var(--dark-white-hover);
+    --basic-inverted-down-color: var(--dark-white-active);
+    --basic-inverted-active-color: var(--inverted-text-color);
+    --basic-group-border: var(--basic-border-size) solid var(--border-color);
+    --basic-group-box-shadow: none;
+  }
 }
 
 /* src/themes/base/button/variations/circular-variables.css */
-ui-button {
-  --circular-radius: 500rem;
+@layer baseTheme {
+  ui-button {
+    --circular-radius: 500rem;
+  }
 }
 
 /* src/themes/base/button/variations/colored-variables.css */
-ui-button {
-  --colored-background-image: none;
-  --colored-box-shadow: var(--shadow-box-shadow);
-  --brown-text-color: var(--inverted-text-color);
-  --brown-text-shadow: var(--inverted-text-shadow);
-  --red-text-color: var(--inverted-text-color);
-  --red-text-shadow: var(--inverted-text-shadow);
-  --orange-text-color: var(--inverted-text-color);
-  --orange-text-shadow: var(--inverted-text-shadow);
-  --green-text-color: var(--inverted-text-color);
-  --green-text-shadow: var(--inverted-text-shadow);
-  --blue-text-color: var(--inverted-text-color);
-  --blue-text-shadow: var(--inverted-text-shadow);
-  --violet-text-color: var(--inverted-text-color);
-  --violet-text-shadow: var(--inverted-text-shadow);
-  --purple-text-color: var(--inverted-text-color);
-  --purple-text-shadow: var(--inverted-text-shadow);
-  --pink-text-color: var(--inverted-text-color);
-  --pink-text-shadow: var(--inverted-text-shadow);
-  --black-text-color: var(--inverted-text-color);
-  --black-text-shadow: var(--inverted-text-shadow);
-  --olive-text-color: var(--inverted-text-color);
-  --olive-text-shadow: var(--inverted-text-shadow);
-  --yellow-text-color: var(--inverted-text-color);
-  --yellow-text-shadow: var(--inverted-text-shadow);
-  --teal-text-color: var(--inverted-text-color);
-  --teal-text-shadow: var(--inverted-text-shadow);
-  --grey-text-color: var(--inverted-text-color);
-  --grey-text-shadow: var(--inverted-text-shadow);
-  --light-brown-text-color: var(--inverted-text-color);
-  --light-brown-text-shadow: var(--inverted-text-shadow);
-  --light-red-text-color: var(--inverted-text-color);
-  --light-red-text-shadow: var(--inverted-text-shadow);
-  --light-orange-text-color: var(--inverted-text-color);
-  --light-orange-text-shadow: var(--inverted-text-shadow);
-  --light-green-text-color: var(--inverted-text-color);
-  --light-green-text-shadow: var(--inverted-text-shadow);
-  --light-blue-text-color: var(--inverted-text-color);
-  --light-blue-text-shadow: var(--inverted-text-shadow);
-  --light-violet-text-color: var(--inverted-text-color);
-  --light-violet-text-shadow: var(--inverted-text-shadow);
-  --light-purple-text-color: var(--inverted-text-color);
-  --light-purple-text-shadow: var(--inverted-text-shadow);
-  --light-pink-text-color: var(--inverted-text-color);
-  --light-pink-text-shadow: var(--inverted-text-shadow);
-  --light-black-text-color: var(--inverted-text-color);
-  --light-black-text-shadow: var(--inverted-text-shadow);
-  --light-olive-text-color: var(--text-color);
-  --light-olive-text-shadow: var(--text-shadow);
-  --light-yellow-text-color: var(--text-color);
-  --light-yellow-text-shadow: var(--text-shadow);
-  --light-teal-text-color: var(--text-color);
-  --light-teal-text-shadow: var(--text-shadow);
-  --light-grey-text-color: var(--text-color);
-  --light-grey-text-shadow: var(--text-shadow);
+@layer baseTheme {
+  ui-button {
+    --colored-background-image: none;
+    --colored-box-shadow: var(--shadow-box-shadow);
+    --brown-text-color: var(--inverted-text-color);
+    --brown-text-shadow: var(--inverted-text-shadow);
+    --red-text-color: var(--inverted-text-color);
+    --red-text-shadow: var(--inverted-text-shadow);
+    --orange-text-color: var(--inverted-text-color);
+    --orange-text-shadow: var(--inverted-text-shadow);
+    --green-text-color: var(--inverted-text-color);
+    --green-text-shadow: var(--inverted-text-shadow);
+    --blue-text-color: var(--inverted-text-color);
+    --blue-text-shadow: var(--inverted-text-shadow);
+    --violet-text-color: var(--inverted-text-color);
+    --violet-text-shadow: var(--inverted-text-shadow);
+    --purple-text-color: var(--inverted-text-color);
+    --purple-text-shadow: var(--inverted-text-shadow);
+    --pink-text-color: var(--inverted-text-color);
+    --pink-text-shadow: var(--inverted-text-shadow);
+    --black-text-color: var(--inverted-text-color);
+    --black-text-shadow: var(--inverted-text-shadow);
+    --olive-text-color: var(--inverted-text-color);
+    --olive-text-shadow: var(--inverted-text-shadow);
+    --yellow-text-color: var(--inverted-text-color);
+    --yellow-text-shadow: var(--inverted-text-shadow);
+    --teal-text-color: var(--inverted-text-color);
+    --teal-text-shadow: var(--inverted-text-shadow);
+    --grey-text-color: var(--inverted-text-color);
+    --grey-text-shadow: var(--inverted-text-shadow);
+    --light-brown-text-color: var(--inverted-text-color);
+    --light-brown-text-shadow: var(--inverted-text-shadow);
+    --light-red-text-color: var(--inverted-text-color);
+    --light-red-text-shadow: var(--inverted-text-shadow);
+    --light-orange-text-color: var(--inverted-text-color);
+    --light-orange-text-shadow: var(--inverted-text-shadow);
+    --light-green-text-color: var(--inverted-text-color);
+    --light-green-text-shadow: var(--inverted-text-shadow);
+    --light-blue-text-color: var(--inverted-text-color);
+    --light-blue-text-shadow: var(--inverted-text-shadow);
+    --light-violet-text-color: var(--inverted-text-color);
+    --light-violet-text-shadow: var(--inverted-text-shadow);
+    --light-purple-text-color: var(--inverted-text-color);
+    --light-purple-text-shadow: var(--inverted-text-shadow);
+    --light-pink-text-color: var(--inverted-text-color);
+    --light-pink-text-shadow: var(--inverted-text-shadow);
+    --light-black-text-color: var(--inverted-text-color);
+    --light-black-text-shadow: var(--inverted-text-shadow);
+    --light-olive-text-color: var(--text-color);
+    --light-olive-text-shadow: var(--text-shadow);
+    --light-yellow-text-color: var(--text-color);
+    --light-yellow-text-shadow: var(--text-shadow);
+    --light-teal-text-color: var(--text-color);
+    --light-teal-text-shadow: var(--text-shadow);
+    --light-grey-text-color: var(--text-color);
+    --light-grey-text-shadow: var(--text-shadow);
+  }
 }
 
 /* src/themes/base/button/variations/compact-variables.css */
-ui-button {
-  --compact-reduction-factor: 0.75;
-  --compact-vertical-padding: calc(var(--vertical-padding) * var(--compact-reduction-factor));
-  --compact-horizontal-padding: calc(var(--horizontal-padding) * var(--compact-reduction-factor));
+@layer baseTheme {
+  ui-button {
+    --compact-reduction-factor: 0.75;
+    --compact-vertical-padding: calc(var(--vertical-padding) * var(--compact-reduction-factor));
+    --compact-horizontal-padding: calc(var(--horizontal-padding) * var(--compact-reduction-factor));
+  }
 }
 
 /* src/themes/base/button/variations/floated-variables.css */
-ui-button {
-  --floated-margin: 0.25em;
+@layer baseTheme {
+  ui-button {
+    --floated-margin: 0.25em;
+  }
 }
 
 /* src/themes/base/button/variations/fluid-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/variations/negative-variables.css */
-ui-button {
-  --negative-background-image: var(--colored-background-image);
-  --negative-text-color: var(--inverted-text-color);
-  --negative-text-shadow: var(--inverted-text-shadow);
-  --negative-box-shadow: var(--colored-box-shadow);
+@layer baseTheme {
+  ui-button {
+    --negative-background-image: var(--colored-background-image);
+    --negative-text-color: var(--inverted-text-color);
+    --negative-text-shadow: var(--inverted-text-shadow);
+    --negative-box-shadow: var(--colored-box-shadow);
+  }
 }
 
 /* src/themes/base/button/variations/positive-variables.css */
-ui-button {
-  --positive-background-image: var(--colored-background-image);
-  --positive-text-color: var(--inverted-text-color);
-  --positive-text-shadow: var(--inverted-text-shadow);
-  --positive-box-shadow: var(--colored-box-shadow);
+@layer baseTheme {
+  ui-button {
+    --positive-background-image: var(--colored-background-image);
+    --positive-text-color: var(--inverted-text-color);
+    --positive-text-shadow: var(--inverted-text-shadow);
+    --positive-box-shadow: var(--colored-box-shadow);
+  }
 }
 
 /* src/themes/base/button/variations/sizing-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/variations/social-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/variations/vertical-variables.css */
-ui-button {
+@layer baseTheme {
+  ui-button {
+  }
 }
 
 /* src/themes/base/button/button-theme.css */
