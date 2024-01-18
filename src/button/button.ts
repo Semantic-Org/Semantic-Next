@@ -24,7 +24,7 @@ UIButton.createInstance = (tpl, $) => ({
   },
 
   getSaying() {
-    console.log('being called again', tpl.saying.get());
+    //console.log('being called again', tpl.saying.get());
     return tpl.saying.get();
   }
 });

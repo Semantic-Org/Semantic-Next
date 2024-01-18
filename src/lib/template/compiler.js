@@ -25,7 +25,7 @@ class TemplateCompiler {
         EACH: /^{{\s*#each\s+/,
         CLOSE_IF: /^{{\s*\/(if)\s*/,
         CLOSE_EACH: /^{{\s*\/(each)\s*/,
-        SLOT: /^{{\s*slot\s+/,
+        SLOT: /^{{\s*slot\s*/,
         EXPRESSION: /^{{\s*/,
       };
       for (let type in starts) {

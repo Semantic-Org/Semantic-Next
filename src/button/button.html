@@ -1,13 +1,11 @@
-<div class="{{ui}} button" tabindex="0" part="button">
+<div class="{{ui}}button" tabindex="0" part="button">
   {{#if icon}}
     <span class="icon" part="icon">
       {{slot icon}}
     </span>
   {{/if}}
   {{#if text}}
-    <span class="text" part="text">
-      {{slot text}} - {{getSaying}}
-    </span>
+    {{slot}} - {{getSaying}}
   {{/if}}
   {{#if label}}
     <span class="label" part="label">

@@ -58,8 +58,8 @@ class LitRenderer {
           break;
 
         case 'slot':
-          if(name) {
-            this.addHTML(`<slot name="${name}"></slot>`);
+          if(node.name) {
+            this.addHTML(`<slot name="${node.name}"></slot>`);
           }
           else {
             this.addHTML(`<slot></slot>`);
@@ -72,6 +72,7 @@ class LitRenderer {
       }
 
     });
+    this.clearTemp();
   }
 
 
@@ -115,6 +116,10 @@ class LitRenderer {
   addValue(expression) {
     this.lastHTML = false;
     this.expressions.push(expression);
+  }
+
+  clearTemp() {
+    delete this.lastHTML;
   }
 
 }

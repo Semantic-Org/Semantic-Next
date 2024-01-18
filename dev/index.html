@@ -32,13 +32,13 @@ new EventSource('/esbuild').addEventListener('change', e => {
 <body>
   <div class="container">
 
-    <ui-button size="large" emphasis="primary">
+    <ui-button size="large" emphasis="primary" expose>
       Follow
+      <span slot="icon">close</span>
     </ui-button>
     <style>
       ui-button .button {
-
-        background-color: purple !important;
+        background-color: purple;
       }
     </style>
 <!--

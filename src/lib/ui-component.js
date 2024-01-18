@@ -1,5 +1,5 @@
 import { LitElement, unsafeCSS } from 'lit';
-import { isFunction, isObject, extend } from './utils';
+import { each, isFunction, isObject, extend } from './utils';
 import { $ } from './query';
 
 class UIComponent extends LitElement {
@@ -10,11 +10,13 @@ class UIComponent extends LitElement {
 
   static scopedStyleSheet = null;
 
+  useLight = false;
 
   createRenderRoot() {
-    const useLight = false;
-    if(useLight) {
+    this.useLight = (this.getAttribute('expose') !== null);
+    if(this.useLight) {
       this.applyScopedStyles(this.tagName, this.css);
+      this.storeOriginalContent.apply(this);
       return this;
     }
     else {
@@ -71,6 +73,44 @@ class UIComponent extends LitElement {
     return `${modifiedSelector} { ${rule.style.cssText} }`;
   }
 
+  storeOriginalContent() {
+    this.originalDOM = document.createElement('template');
+    this.originalDOM.innerHTML = this.innerHTML;
+    this.innerHTML = '';
+  }
+
+  slotContent() {
+    const $slots =  this.$('slot');
+    $slots.each(($slot) => {
+      let html;
+      if($slot.attr('name')) {
+        const $slotContent = this.$$(`[slot="${slotName}"]`);
+        if($slotContent.length) {
+          html = $slotContent.outerHTML();
+        }
+      }
+      else {
+        // default slot takes all DOM content that is not slotted
+        const $originalDOM = this.$$(this.originalDOM.content);
+        const $defaultContent = $originalDOM.children().not('[slot]');
+        const defaultHTML = $defaultContent.html() || '';
+        const defaultText = $originalDOM.textNode() || '';
+        html = defaultHTML + defaultText;
+      }
+      if($slot && html) {
+        $slot.html(html);
+      }
+    });
+
+  }
+
+  firstUpdated() {
+    super.firstUpdated();
+    if(this.useLight) {
+      this.slotContent();
+    }
+  }
+
 
   /*******************************
          Settings / Attrs
@@ -92,16 +132,14 @@ class UIComponent extends LitElement {
     return this.renderRoot.querySelectorAll(selector);
   }
 
-  // Shadow DOM
+  // Rendered DOM (either shadow or regular)
   $(selector) {
-    // Query is a simply $ jQuery like wrapper for
-    // chaining utility functions on DOM nodes
     return $(selector, this?.renderRoot);
   }
 
-  // DOM
+  // Original DOM (used for pulling slotted text)
   $$(selector) {
-    return $(selector, this);
+    return $(selector, this.originalDOM.content);
   }
 
 }

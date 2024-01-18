@@ -40,6 +40,32 @@ class Query {
     return selector ? new Query(parents).filter(selector) : new Query(parents);
   }
 
+  children(selector) {
+    // Get all children of each element in the Query object
+    const allChildren = Array.from(this).flatMap(el => Array.from(el.children));
+
+    // If a selector is provided, filter the children
+    const filteredChildren = selector ? allChildren.filter(child => child.matches(selector)) : allChildren;
+
+    // Return a new Query object with these children
+    return new Query(filteredChildren);
+  }
+
+  filter(selector) {
+    // Filter out elements that match the provided selector
+    const filteredElements = Array.from(this).filter(el => el.matches(selector));
+
+    // Return a new Query object with the filtered elements
+    return new Query(filteredElements);
+  }
+
+  not(selector) {
+    // Filter out elements that match the provided selector
+    const filteredElements = Array.from(this).filter(el => !el.matches(selector));
+    // Return a new Query object with the filtered elements
+    return new Query(filteredElements);
+  }
+
   closest(selector) {
     const closest = Array.from(this).map(el => el.closest(selector)).filter(Boolean);
     return new Query(closest);
@@ -100,13 +126,23 @@ class Query {
     return this;
   }
 
-  html(newHtml) {
-    if(newHtml !== undefined) {
-      Array.from(this).forEach(el => el.innerHTML = newHtml);
+  html(newHTML) {
+    if(newHTML !== undefined) {
+      Array.from(this).forEach(el => el.innerHTML = newHTML);
       return this;
     }
     else if(this.length) {
       return this[0].innerHTML;
+    }
+  }
+
+  outerHTML(newHTML) {
+    if(newHTML !== undefined) {
+      Array.from(this).forEach(el => el.outerHTML = newHTML);
+      return this;
+    }
+    else if(this.length) {
+      return this[0].outerHTML;
     }
   }
 
@@ -142,6 +178,33 @@ class Query {
       return this[0].getAttribute(attribute);
     }
   }
+  each(callback) {
+    Array.from(this).forEach((el, index) => {
+      // Call the callback with 'this' context set to the current element
+      callback.call(el, new Query(el), index);
+    });
+    return this;
+  }
+  get(index) {
+    if (index !== undefined) {
+      // If an index is provided, return the element at that index (or undefined if it doesn't exist)
+      return this[index];
+    } else {
+      // If no index is provided, return all elements as an array
+      return Array.from(this);
+    }
+  }
+
+  // non jquery variant to return only immediate text node
+  textNode() {
+    return Array.from(this).map(el => {
+      return Array.from(el.childNodes)
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .map(node => node.nodeValue)
+        .join('');
+    }).join('');
+  }
+
 }
 
 export function $(selector, root = document) {
