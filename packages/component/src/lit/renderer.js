@@ -4,7 +4,7 @@ import { guard } from 'lit/directives/guard.js';
 import { get, each, last, wrapFunction, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
-class LitRenderer {
+export class LitRenderer {
 
   constructor({ast, data, litElement}) {
     this.ast = ast || '';
@@ -121,5 +121,3 @@ class LitRenderer {
   }
 
 }
-
-export { LitRenderer };

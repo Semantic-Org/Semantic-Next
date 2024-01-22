@@ -1,5 +1,4 @@
 import { LitElement, unsafeCSS } from 'lit';
-
 import { each, isFunction, isObject, extend } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
@@ -8,10 +7,7 @@ import { scopeStyles } from './styles';
 
 class UIComponent extends LitElement {
 
-  /*
-    SUI lets you specify if you want to use light dom via attribute
-  */
-
+  // for use with light dom rendering
   static scopedStyleSheet = null;
 
   useLight = false;
@@ -77,7 +73,6 @@ class UIComponent extends LitElement {
       this.slotContent();
     }
   }
-
 
 
   /*******************************
