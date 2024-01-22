@@ -10,7 +10,14 @@ export class Reaction {
   static scheduleFlush() {
     if (!Reaction.isFlushScheduled) {
       Reaction.isFlushScheduled = true;
-      Promise.resolve().then(Reaction.flush); // Using microtask queue
+
+      // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
+      if(queueMicrotask) {
+        queueMicrotask(Reaction.flush);
+      }
+      else {
+        Promise.resolve().then(Reaction.flush); // Using microtask queue
+      }
     }
   }
 
@@ -36,7 +43,7 @@ export class Reaction {
   static create(callback) {
     const reaction = new Reaction(callback);
     reaction.run();
-    return () => reaction.stop();
+    return reaction;
   }
 
   constructor(callback) {
@@ -55,10 +62,7 @@ export class Reaction {
     this.dependencies.clear();
 
     // Provide computation context
-    this.callback({
-      firstRun: this.firstRun,
-      stop: () => this.stop()
-    });
+    this.callback(this);
 
     this.firstRun = false;
     Reaction.current = null;
@@ -69,7 +73,9 @@ export class Reaction {
   stop() {
     if (!this.active) return;
     this.active = false;
-    this.dependencies.forEach(dep => dep.removeListener(this.boundRun));
+    this.dependencies.forEach(dep => {
+      dep.removeListener(this.boundRun);
+    });
   }
 }
 

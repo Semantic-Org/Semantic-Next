@@ -14,7 +14,7 @@ export const attachEvents = ({
     const selector = parts.join(' ');
 
     $(el.renderRoot).on(eventName, selector, function(event) {
-      eventHandler.call(this, event, el);
+      el.call(eventHandler, {firstArg: event });
     });
   });
 };

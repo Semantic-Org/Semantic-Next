@@ -11,15 +11,21 @@ import { attachEvents } from './events';
 export const createComponent = (tagName, {
   type = 'element', 
   renderer = 'lit',
-  css = false, 
+
   template = '',
+  css = false,
   spec = false,
-  events = {},
   defineElement = true,
+
+  events = {},
+
   createInstance = noop,
   onCreated = noop,
   onRendered = noop,
   onDestroyed = noop,
+
+  beforeRendered = noop,
+
 } = {}) => {
 
   // AST shared across instances
@@ -36,21 +42,11 @@ export const createComponent = (tagName, {
     constructor() {
       super();
 
-      // store details
-      this.ast = ast;
-      this.css = css;
-      this.template = template;
-
-      // store callbacks
-      this.onCreated = onCreated;
-      this.onRendered = onRendered;
-      this.onDestroyed = onDestroyed;
-
       let tpl;
       if(isFunction(createInstance)) {
 
         this.tpl = {};
-        tpl = createInstance.call(this, this.tpl, this.$);
+        tpl = this.call(createInstance);
 
         /*
           We want to keep this separate for housekeeping passing the
@@ -61,10 +57,7 @@ export const createComponent = (tagName, {
 
       }
       this.renderer = new LitRenderer({ast, data: tpl, litElement: this });
-
-      if(isFunction(onCreated)) {
-        onCreated.call(this, this.tpl, this.$);
-      }
+      this.call(onCreated);
     }
 
     // callback when added to dom
@@ -74,33 +67,28 @@ export const createComponent = (tagName, {
         el: this,
         events
       });
-      if(isFunction(onRendered)) {
-        onRendered.call(this, this.tpl, this.$);
-      }
+      this.call(beforeRendered);
+    }
+
+    firstUpdated() {
+      super.firstUpdated();
+      this.call(onRendered);
     }
 
     // callback if removed from dom
     disconnectedCallback() {
       super.disconnectedCallback();
-      if(isFunction(onDestroyed)) {
-        onDestroyed.call(this, this.tpl, this.$);
-      }
+      this.call(onDestroyed);
     }
 
     // callback if moves doc
     adoptedCallback() {
       super.adoptedCallback();
-      if(isFunction(onMoved)) {
-        onMoved.call(this, this.tpl, this.$);
-      }
+      this.call(onMoved);
     }
 
     attributeChangedCallback(attribute, oldValue, newValue) {
-      if(isFunction(this.onAttributeChanged)) {
-        this.onAttributeChanged.call(this, {
-          attribute, oldValue, newValue
-        });
-      }
+      this.call(onAttributeChanged);
     }
 
     render() {

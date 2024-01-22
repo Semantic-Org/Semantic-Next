@@ -157,13 +157,27 @@ export class Query {
   }
 
   text(newText) {
-    if(newText !== undefined) {
+    if (newText !== undefined) {
       Array.from(this).forEach(el => el.textContent = newText);
       return this;
+    } else {
+      return Array.from(this).map(el => this.getTextContentRecursive(el.childNodes)).join('');
     }
-    else if(this.length) {
-      return this[0].textContent;
-    }
+  }
+
+  // Helper function to recursively get text content
+  getTextContentRecursive(nodes) {
+    return Array.from(nodes).map(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.nodeValue;
+      } else if (node.nodeName === 'SLOT') {
+        // If the node is a slot, retrieve its assigned nodes
+        const slotNodes = node.assignedNodes({ flatten: true });
+        return this.getTextContentRecursive(slotNodes);
+      } else {
+        return this.getTextContentRecursive(node.childNodes);
+      }
+    }).join('');
   }
 
   css(property, value) {

@@ -87,22 +87,29 @@ class UIComponent extends LitElement {
            DOM Helpers
   *******************************/
 
-  queryScoped(selector) {
-    return this.renderRoot.querySelector(selector);
-  }
-
-  queryAllScoped(selector) {
-    return this.renderRoot.querySelectorAll(selector);
-  }
 
   // Rendered DOM (either shadow or regular)
   $(selector) {
+    if(!this.renderRoot) {
+      console.error('Cannot query DOM until element has rendered.');
+    }
     return $(selector, this?.renderRoot);
   }
 
   // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $(selector, this.originalDOM.content);
+  }
+
+
+  // calls callback if defined with consistent params
+  call(func, { firstArg, args = [this.tpl, this.$.bind(this)] } = {}) {
+    if(firstArg) {
+      args.unshift(firstArg);
+    }
+    if(isFunction(func)) {
+      return func.apply(this, args);
+    }
   }
 
 }
