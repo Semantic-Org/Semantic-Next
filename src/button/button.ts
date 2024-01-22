@@ -1,5 +1,6 @@
-import { createComponent } from '../lib/create-component.js';
-import { Reaction, ReactiveVar } from '../lib/reactive/';
+import { createComponent } from '@semantic-ui/component';
+import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+
 import { ButtonSpec, ButtonTemplate, ButtonCSS } from './';
 
 const UIButton = {};

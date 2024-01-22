@@ -1,5 +1,5 @@
-import { $ } from './query';
-import { each } from './utils';
+import { $ } from '@semantic-ui/query';
+import { each } from '@semantic-ui/utils';
 
 export const attachEvents = ({
   el,

@@ -1,9 +1,9 @@
 /*
-  A minimal DOM toolkit for querying and chaining
-  across DOM nodes
+  A minimal toolkit for querying and performing modifications
+  across DOM nodes based off a selector
 */
 
-class Query {
+export class Query {
 
   constructor(selector, root = document) {
     let elements = [];
@@ -215,8 +215,4 @@ class Query {
     }).join('');
   }
 
-}
-
-export function $(selector, root = document) {
-  return new Query(selector, root);
 }

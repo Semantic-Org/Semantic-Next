@@ -1,8 +1,10 @@
 import { LitElement, unsafeCSS } from 'lit';
-import { each, isFunction, isObject, extend } from './utils';
+
+import { each, isFunction, isObject, extend } from '@semantic-ui/utils';
+import { $ } from '@semantic-ui/query';
+
 import { scopeStyles } from './styles';
 
-import { $ } from './query';
 
 class UIComponent extends LitElement {
 

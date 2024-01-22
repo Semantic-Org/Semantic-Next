@@ -1,7 +1,7 @@
 {
-  "name": "semantic-ui-web-components",
+  "name": "semantic-ui-next",
   "version": "0.0.1",
-  "title": "Semantic UI Web Components",
+  "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
@@ -21,15 +21,16 @@
     "esbuild": "^0.19.11",
     "esbuild-plugin-babel": "^0.2.3",
     "esbuild-plugin-glob": "^2.2.1",
-    "esbuild-plugin-less": "^1.3.1",
     "esbuild-plugin-output-reset": "^2.0.1",
-    "esbuild-svelte": "^0.8.0",
     "glob": "^10.3.10",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^0.0.1-alpha.0",
     "underscore": "^1.13.6"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "dependencies": {
-    "lit": "^3.1.0",
-    "typescript-eslint": "^0.0.1-alpha.0"
+    "lit": "^3.1.0"
   }
 }

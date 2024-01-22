@@ -1,7 +1,7 @@
-import {directive} from 'lit/directive.js';
-import {AsyncDirective} from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
+import { AsyncDirective } from 'lit/async-directive.js';
 
-import { ReactiveVar, Reaction } from '../reactive/';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 /*
   Adapted from Preact Signals Watch

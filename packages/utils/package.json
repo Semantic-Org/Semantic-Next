@@ -1,0 +1,7 @@
+{
+  "name": "@semantic-ui/utils",
+  "version": "0.0.1",
+  "main": "src/utils.js",
+  "author": "Jack Lukic",
+  "license": "ISC"
+}

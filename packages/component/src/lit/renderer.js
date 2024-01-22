@@ -1,7 +1,8 @@
 import { html } from 'lit';
 import { guard } from 'lit/directives/guard.js';
-import { get, each, last, wrapFunction, isFunction } from '../utils';
-import { Reaction } from '../reactive/';
+
+import { get, each, last, wrapFunction, isFunction } from '@semantic-ui/utils';
+import { Reaction } from '@semantic-ui/reactivity';
 
 class LitRenderer {
 

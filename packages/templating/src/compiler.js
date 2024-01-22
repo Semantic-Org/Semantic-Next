@@ -1,5 +1,6 @@
+import { get, last } from '@semantic-ui/utils';
+
 import { Scanner } from './scanner';
-import { get, last } from '../utils';
 
 class TemplateCompiler {
 

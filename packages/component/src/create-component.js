@@ -1,12 +1,16 @@
 import { unsafeCSS, html } from 'lit';
+
+import { extend, noop, isObject, isFunction } from '@semantic-ui/utils';
+import { TemplateCompiler } from '@semantic-ui/templating';
+
+import { LitRenderer } from './lit/renderer';
+
 import { UIComponent } from './ui-component';
-import { attachEvents } from './attach-events';
-import { TemplateCompiler } from './template/compiler';
-import { LitRenderer } from './template/lit-renderer';
-import { extend, noop, isObject, isFunction } from './utils';
+import { attachEvents } from './events';
 
 export const createComponent = (tagName, {
   type = 'element', 
+  renderer = 'lit',
   css = false, 
   template = '',
   spec = false,

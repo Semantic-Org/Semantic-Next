@@ -1,4 +1,4 @@
-import { escapeRegExp } from '../utils';
+import { escapeRegExp } from '@semantic-ui/utils';
 
 // Adapted from BlazeJS Scanner
 //
