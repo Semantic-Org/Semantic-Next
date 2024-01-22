@@ -126,6 +126,16 @@ class Query {
     return this;
   }
 
+  addClass(className) {
+    Array.from(this).forEach(el => el.classList.add(className));
+    return this;
+  }
+
+  removeClass(className) {
+    Array.from(this).forEach(el => el.classList.remove(className));
+    return this;
+  }
+
   html(newHTML) {
     if(newHTML !== undefined) {
       Array.from(this).forEach(el => el.innerHTML = newHTML);

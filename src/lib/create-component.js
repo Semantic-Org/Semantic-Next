@@ -100,7 +100,9 @@ export const createComponent = (tagName, {
     }
 
     render() {
-      return this.renderer.render();
+      const html = this.renderer.render();
+      console.log(html);
+      return html;
     }
 
   };

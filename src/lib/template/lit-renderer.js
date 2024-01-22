@@ -8,7 +8,6 @@ class LitRenderer {
   constructor({ast, data, litElement}) {
     this.ast = ast || '';
     this.data = data || {};
-    console.log('creating', litElement);
     this.litElement = litElement;
     this.resetHTML();
   }
@@ -39,7 +38,9 @@ class LitRenderer {
           break;
 
         case 'expression':
-          this.addValue(this.getValue(node.value, this.litElement));
+          const value = this.getValue(node.value, this.litElement);
+          console.log('getting value', node.value, value);
+          this.addValue(value);
           break;
 
         case 'if':
@@ -87,7 +88,8 @@ class LitRenderer {
         const dataValue = get(data, value);
         result = wrapFunction(dataValue)();
         if(!comp.firstRun) {
-          litElement.requestUpdate();
+          console.log('requesting update');
+          this.rerender();
         }
       });
       return result;
@@ -113,6 +115,10 @@ class LitRenderer {
 
   clearTemp() {
     delete this.lastHTML;
+  }
+
+  rerender() {
+    this.litElement.requestUpdate();
   }
 
 }

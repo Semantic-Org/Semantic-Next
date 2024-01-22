@@ -19,7 +19,6 @@ UIButton.createInstance = (tpl, $) => ({
   },
 
   getSaying() {
-    console.log('being called again', tpl.saying.get());
     return tpl.saying.get();
   }
 });
@@ -28,20 +27,14 @@ UIButton.createInstance = (tpl, $) => ({
 UIButton.onCreated = function(tpl) {
   setTimeout(() => {
     // test reactivity
-    tpl.saying.set('goodbye');
+    //tpl.saying.set('goodbye');
   }, 1000);
 };
 
 
 UIButton.events = {
   'click .button'(event, tpl) {
-    tpl.$('.button')
-      .css({
-        color: 'red',
-        backgroundColor: 'black',
-      })
-      .find('.text').text('text')
-    ;
+    tpl.$('.button').addClass('red');
   }
 };
 
