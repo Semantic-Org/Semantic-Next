@@ -27,7 +27,7 @@ UIButton.createInstance = (tpl, $) => ({
 UIButton.onCreated = function(tpl) {
   setTimeout(() => {
     // test reactivity
-    //tpl.saying.set('goodbye');
+    tpl.saying.set('goodbye');
   }, 1000);
 };
 

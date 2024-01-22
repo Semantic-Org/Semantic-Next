@@ -25,6 +25,7 @@ class LitRenderer {
   render(ast = this.ast, data = this.data) {
     this.resetHTML();
     this.readAST(ast, data);
+    this.clearTemp();
     this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
   }
@@ -39,7 +40,6 @@ class LitRenderer {
 
         case 'expression':
           const value = this.getValue(node.value, this.litElement);
-          console.log('getting value', node.value, value);
           this.addValue(value);
           break;
 
@@ -75,7 +75,6 @@ class LitRenderer {
       }
 
     });
-    this.clearTemp();
   }
 
   getValue(value, litElement) {
@@ -84,11 +83,10 @@ class LitRenderer {
     if(typeof value === 'string') {
       let result;
       const data = this.data;
-      Reaction.create(function(comp) {
+      Reaction.create((comp) => {
         const dataValue = get(data, value);
         result = wrapFunction(dataValue)();
         if(!comp.firstRun) {
-          console.log('requesting update');
           this.rerender();
         }
       });

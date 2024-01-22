@@ -101,7 +101,6 @@ export const createComponent = (tagName, {
 
     render() {
       const html = this.renderer.render();
-      console.log(html);
       return html;
     }
 
