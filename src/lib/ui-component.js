@@ -72,7 +72,7 @@ class UIComponent extends LitElement {
   updated() {
     super.updated();
     if(this.useLight) {
-      //this.slotContent();
+      this.slotContent();
     }
   }
 
