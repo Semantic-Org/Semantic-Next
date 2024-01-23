@@ -151,6 +151,19 @@ export const createComponent = (tagName, {
       }
     }
 
+    getSettings() {
+      const settings = {};
+      each(thisComponent.properties, (propSettings, property) => {
+        if(property == 'class' || !propSettings.observe) {
+          return;
+        }
+        settings[property] = this[property];
+        if(!settings[this[property]]) {
+          settings[this[property]] = true;
+        }
+      });
+      return settings;
+    }
     getUIClasses() {
       const classes = [];
       each(thisComponent.properties, (settings, property) => {
@@ -164,10 +177,12 @@ export const createComponent = (tagName, {
     }
 
     render() {
+      console.log(this.getSettings());
       const html = this.renderer.render({
         data: {
           ...this.tpl,
-          ui: this.getUIClasses()
+          ...this.getSettings(),
+          ui: this.getUIClasses(),
         }
       });
       return html;
