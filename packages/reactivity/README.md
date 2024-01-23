@@ -1,6 +1,6 @@
 # @semantic-ui/reactivity
 
-This is a paired down signal/reactivity library loosely inspired by Tracker from Meteor JS. It is used to control reactive updates from Semantic and is built into its templating system.
+This is a paired down signal/reactivity library loosely inspired by [Tracker](https://github.com/meteor/meteor/tree/devel/packages/tracker) from [Meteor JS](https://github.com/meteor/meteor/). It is used to control reactive updates from Semantic and is built into its templating system.
 
 
 `ReactiveVar` lets you define a variable which will trigger any `Reaction` or functions called by a reaction to retrigger when it is modified.
