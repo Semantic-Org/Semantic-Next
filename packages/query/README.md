@@ -1,6 +1,6 @@
 # @semantic-ui/reactivity
 
-Query is a tiny (3kb!) library for chaining interactions with DOM elements similar to jQuery.
+Query is a **tiny (3kb!) library** for chaining interactions with DOM elements similar to jQuery.
 
 It's designed to be fast, using only modern DOM APIs and built to work with the shadow DOM and help simplify imperative DOM mutations.
 
