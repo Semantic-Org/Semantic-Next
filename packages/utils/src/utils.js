@@ -4,23 +4,71 @@
 */
 
 
+/*-------------------
+        Types
+--------------------*/
+
+export const isObject = (x) => {
+  return typeof x == 'object';
+};
+
+export const isPlainObject = (x) => {
+  return isObject(x) && x.constructor === Object;
+};
+
+export const isString = (x) => {
+  return typeof x == 'string';
+};
+
+export const isArray = (x) => {
+  return Array.isArray(x);
+};
+
+export const isBinary = (x) => {
+  return !!(typeof Uint8Array !== 'undefined' && x instanceof Uint8Array);
+};
+
+export const isFunction = (x) =>{
+  return typeof x == 'function' || false;
+};
+
+export const isPromise = (x) => {
+  return x && isFunction(x.then);
+};
+
+
 /*
   Create a hash from a string
 */
-export const hashCode = (str) => {
+export const hashCode = (input) => {
+  let str;
+
+  // Check if input has a custom toString method, otherwise use JSON stringify for objects
+  if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
+    try {
+      str = JSON.stringify(input);
+    } catch (error) {
+      console.error('Error serializing input', error);
+      return 0;
+    }
+  } else {
+    str = input.toString();
+  }
+
   let hash = 0;
-  if(str.length === 0) {
+  if (str.length === 0) {
     return hash;
   }
 
   for (let i = 0; i < str.length; i++) {
     let char = str.charCodeAt(i);
-    hash = ((hash<<5)-hash)+char;
+    hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // Convert to 32bit integer
   }
 
   return hash;
 };
+
 
 /*
   Shorthand for Keys
@@ -29,9 +77,6 @@ export const keys = (obj) => {
   return Object.keys(obj);
 };
 
-export const isBinary = obj => {
-  return !!(typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array);
-};
 
 /* Remove duplicates from an array */
 export const unique = (arr) => {
@@ -116,33 +161,6 @@ export const inArray = (value, array = []) => {
 /*
   Simple Type Checking
 */
-export const isObject = (obj) => {
-  let type = typeof obj;
-  if(type === 'function' || ((type === 'object') && !!obj)){
-    return true;
-  }
-  return false;
-};
-
-export const isString = (str) => {
-  return typeof str == 'string';
-};
-
-export const isArray = (arr) => {
-  return Array.isArray(arr);
-};
-
-export const isFunction = (obj) =>{
-  return typeof obj == 'function' || false;
-};
-
-export const isPlainObject = (x) => {
-  return isObject(x) && x.constructor === Object;
-};
-
-export const isPromise = (p) => {
-  return p && isFunction(p.then);
-};
 
 /* Escape Special Chars for RegExp */
 export const escapeRegExp = function(string) {
@@ -158,7 +176,7 @@ export const noop = function(){};
   Call function even if its not defined
 */
 export const wrapFunction = (x) => {
-  return isFunction(x) ? x : () => x;
+  return isFunction(x) ? x : noop;
 };
 
 /*
@@ -191,7 +209,7 @@ export const kebabToCamel = (str) => {
 };
 
 // Access a nested object field from a string, like 'a.b.c'
-export const get = function(object, string = '') {
+export const get = function(obj, string = '') {
   // prepare string
   string = string
     .replace(/^\./, '')
@@ -200,17 +218,17 @@ export const get = function(object, string = '') {
   const stringParts = string.split('.');
   for(let index = 0, length = stringParts.length; index < length; ++index) {
     const part = stringParts[index];
-    if(!!object && part in object) {
-      object = object[part];
+    if(!!obj && part in obj) {
+      obj = obj[part];
     }
     else {
       return;
     }
   }
-  return object;
+  return obj;
 };
 
-export const hasProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+export const hasProperty = (obj, prop) => Object.prototype.hasOwn.call(obj, prop);
 
 
 /* Determine if two objects are equal */
