@@ -100,7 +100,7 @@ Reaction.create(comp => {
 
 person.name = 'Jill';
 // outputs Jack, Jill
-
+```
 
 ### First Run
 
