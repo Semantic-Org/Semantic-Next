@@ -126,13 +126,15 @@ export class Query {
     return this;
   }
 
-  addClass(className) {
-    Array.from(this).forEach(el => el.classList.add(className));
+  addClass(classNames) {
+    const classesToAdd = classNames.split(' ');
+    Array.from(this).forEach(el => el.classList.add(...classesToAdd));
     return this;
   }
 
-  removeClass(className) {
-    Array.from(this).forEach(el => el.classList.remove(className));
+  removeClass(classNames) {
+    const classesToRemove = classNames.split(' ');
+    Array.from(this).forEach(el => el.classList.remove(...classesToRemove));
     return this;
   }
 
@@ -194,13 +196,19 @@ export class Query {
   }
 
   attr(attribute, value) {
-    if(value !== undefined) {
+    if (typeof attribute === 'object') {
+      // Handle object of attribute-value pairs
+      Object.entries(attribute).forEach(([attr, val]) => {
+        Array.from(this).forEach(el => el.setAttribute(attr, val));
+      });
+    } else if (value !== undefined) {
+      // Handle single attribute-value pair
       Array.from(this).forEach(el => el.setAttribute(attribute, value));
-      return this;
-    }
-    else if(this.length) {
+    } else if (this.length) {
+      // Get the value of the attribute for the first element
       return this[0].getAttribute(attribute);
     }
+    return this;
   }
   each(callback) {
     Array.from(this).forEach((el, index) => {
@@ -209,14 +217,17 @@ export class Query {
     });
     return this;
   }
+
   get(index) {
     if (index !== undefined) {
-      // If an index is provided, return the element at that index (or undefined if it doesn't exist)
       return this[index];
     } else {
-      // If no index is provided, return all elements as an array
       return Array.from(this);
     }
+  }
+
+  eq(index) {
+    return new Query(this[index]);
   }
 
   // non jquery variant to return only immediate text node

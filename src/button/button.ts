@@ -32,7 +32,6 @@ UIButton.createInstance = function(tpl, $) {
 
 UIButton.onCreated = function(tpl) {
 
-
 };
 
 UIButton.events = {
