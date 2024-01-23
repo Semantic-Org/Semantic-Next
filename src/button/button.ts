@@ -31,28 +31,6 @@ UIButton.createInstance = function(tpl, $) {
 
 
 UIButton.onCreated = function(tpl) {
-
-let number = new ReactiveVar(1);
-Reaction.create(comp => {
-  if(number.get() > 3) {
-    comp.stop();
-    return;
-  }
-  console.log('a', number.get());
-});
-
-let comp = Reaction.create(() => {
-  if(number.get() > 3) {
-    comp.stop();
-    return;
-  }
-  console.log('b', number.get());
-});
-
-[1,2,3,4,5].forEach(value => {
-  number.set(value);
-  Reaction.flush();
-});
 };
 
 UIButton.events = {
