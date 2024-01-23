@@ -7,30 +7,77 @@ This is a paired down signal/reactivity library loosely inspired by Tracker from
 
 `Reaction` is a reactive context, this will rerun when referenced reactive values are modified.
 
-Reactions are enqueued and then flushed using the [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide)
-
-## Equality
-
-You can specify an equality function as the second parameter of ReactiveVar. If it is not specified it will use the `isEqual` function provided in the utils library. This handles most general cases of equality including objects with matching properties, dates, and binary data.
-
-## Example
+Reactions are enqueued and then flushed using the [microtask queue](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide)
 
 
 ### Basic
+
+You can get or set values using `var.value` or `var.get()` and `var.set()`, both handle reactivity similarly and its up to developers preference which to use.
 
 ```javascript
 
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-let saying = new ReactiveVar('foo');
+let saying = new ReactiveVar('hello');
 Reaction.create(comp => {
-  let saying = tpl.saying.get();
-  console.log(saying);
+  console.log(saying.get());
 });
-tpl.saying.set('goodbye');
+saying.set('goodbye');
 
 // outputs hello, goodbye
 ```
+
+```javascript
+
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+
+let saying = new ReactiveVar('hello');
+Reaction.create(comp => {
+  console.log(saying.value);
+});
+saying.value = 'goodbye';
+
+// outputs hello, goodbye
+```
+
+## Equality
+
+You can specify an equality function as the second parameter of `ReactiveVar`. If it is not specified it will use the `isEqual` function provided in the utils library. The default equality function handles most general cases of equality including objects with matching properties, dates, and binary data.
+
+Objects
+
+```javascript
+
+let obj1 = { name: 'Sally', age: 22 };
+let obj2 = { name: 'Sally', age: 22 };
+let reactiveObj = new ReactiveVar(obj1);
+Reaction.create(comp => {
+  console.log(reactiveObj.get());
+});
+reactiveObj.set(obj2);
+
+// outputs {name: 'Sally', age: 22}
+
+```
+
+```javascript
+
+let obj1 = { name: 'Sally', age: 22 };
+let obj2 = { name: 'Sally', age: 23 };
+let reactiveObj = new ReactiveVar(obj1);
+
+Reaction.create(comp => {
+  console.log(reactiveObj.get());
+});
+
+// outputs Mon Jan 01 2024 12:00:00, Mon Jan 02 2024 12:00:00
+reactiveObj.set(obj2);
+
+// outputs {name: 'Sally', age: 22}
+// outputs {name: 'Sally', age: 23}
+
+```
+
 
 
 ### Property / Array Mutations
@@ -62,18 +109,18 @@ You can use `firstRun` to determine if this calculation is running from an initi
 ```javascript
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-let saying = new ReactiveVar('foo');
+let saying = new ReactiveVar('hello');
 Reaction.create(comp => {
   if(comp.firstRun) {
     return;
   }
-  let saying = tpl.saying.get();
+  let saying = saying.get();
   console.log(saying);
   // outputs nothing since reactive reference is never reached
 });
 
 Reaction.create(comp => {
-  let saying = tpl.saying.get();
+  let saying = saying.get();
   if(comp.firstRun) {
     return;
   }
@@ -81,7 +128,7 @@ Reaction.create(comp => {
   // outputs goodbye
 });
 
-tpl.saying.set('goodbye');
+saying.set('goodbye');
 
 ```
 
