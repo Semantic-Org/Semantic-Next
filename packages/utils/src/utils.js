@@ -54,7 +54,7 @@ export const noop = function(){};
   Call function even if its not defined
 */
 export const wrapFunction = (x) => {
-  return isFunction(x) ? x : noop;
+  return isFunction(x) ? x : () => x;
 };
 
 /*-------------------
