@@ -1,3 +1,4 @@
+/*
 ui-button:not(:defined) {
   cursor: pointer;
   display: inline-block;
@@ -34,4 +35,10 @@ ui-button:not(:defined) {
   -webkit-tap-highlight-color: var(--tap-color);
 
   outline: none;
+}
+
+*/
+
+ui-button:not(:defined) {
+  opacity: 0;
 }

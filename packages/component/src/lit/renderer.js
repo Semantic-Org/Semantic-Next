@@ -6,7 +6,11 @@ import { Reaction } from '@semantic-ui/reactivity';
 
 export class LitRenderer {
 
-  constructor({ast, data, litElement}) {
+  constructor({
+    ast,
+    data,
+    litElement
+  }) {
     this.ast = ast || '';
     this.data = data || {};
     this.litElement = litElement;
@@ -23,15 +27,21 @@ export class LitRenderer {
     Creates an AST representation of a template
     this can be cached on the web component class
   */
-  render(ast = this.ast, data = this.data) {
+  render({
+    ast = this.ast,
+    data = this.data
+  } = {}) {
     this.resetHTML();
-    this.readAST(ast, data);
+    this.readAST({ast, data});
     this.clearTemp();
     this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
   }
 
-  readAST(ast = this.ast, data = this.data) {
+  readAST({
+    ast = this.ast,
+    data = this.data
+  } = {}) {
     each(ast, node => {
       switch (node.type) {
 
@@ -40,22 +50,22 @@ export class LitRenderer {
           break;
 
         case 'expression':
-          const value = this.getValue(node.value, this.litElement);
+          const value = this.getValue(node.value, data, this.litElement);
           this.addValue(value);
           break;
 
         case 'if':
           // determine if true
-          if(this.getValue(node.condition) == true) {
-            this.readAST(node.content);
+          if(this.getValue(node.condition, data, this.litElement) == true) {
+            this.readAST({ ast: node.content, data });
           }
           else if(node.branches?.length) {
             // evalutate each branch
             let match = false;
             each(node.branches, (branch) => {
-              if(!match && (branch.type == 'elseif' && this.getValue(branch.condition) == true) || branch.type == 'else') {
+              if(!match && (branch.type == 'elseif' && this.getValue(branch.condition, data, this.litElement) == true) || branch.type == 'else') {
                 match = true;
-                this.readAST(branch.content);
+                this.readAST({ ast: branch.content, data });
               }
             });
           }
@@ -78,15 +88,23 @@ export class LitRenderer {
     });
   }
 
-  getValue(value, litElement) {
-    // lookup this value in data context
+  // TODO: rewrite this to evaluate expressions RTL
+  // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
+  getValue(value, data = this.data, litElement) {
     // i.e foo.baz = { foo: { baz: 'value' } }
     if(typeof value === 'string') {
       let result;
-      const data = this.data;
       Reaction.create((comp) => {
         const dataValue = get(data, value);
-        result = wrapFunction(dataValue)();
+        if(isFunction(dataValue)) {
+          // preserve the 'this' context'
+          const path = value.split('.').slice(0, -1).join('.');
+          const context = get(data, path);
+          result = dataValue.bind(context)();
+        }
+        else {
+          result = dataValue;
+        }
         if(!comp.firstRun) {
           this.rerender();
         }
@@ -113,7 +131,7 @@ export class LitRenderer {
   }
 
   clearTemp() {
-    delete this.lastHTML;
+    delete this.lastHTML; // used to concat concurrent html
   }
 
   rerender() {

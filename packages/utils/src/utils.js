@@ -185,6 +185,37 @@ export const hasProperty = (obj, prop) => {
   return Object.prototype.hasOwn.call(obj, prop);
 };
 
+/*
+  Reverses a lookup object
+  start { a: 1, b: [1, 2] }
+  end { 1: ['a', 'b'], 2: 'b' }
+*/
+export const reverseKeys = (obj) => {
+  const newObj = {};
+  const pushValue = (key, value) => {
+    if(isArray(newObj[key])) {
+      newObj[key].push(value);
+    }
+    else if(newObj[key]) {
+      newObj[key] = [ newObj[key], value ];
+    }
+    else {
+      newObj[key] = value;
+    }
+  };
+  Object.keys(obj).forEach(key => {
+    if(isArray(obj[key])) {
+      each(obj[key], subKey => {
+        pushValue(subKey, key);
+      });
+    }
+    else {
+      pushValue(obj[key], key);
+    }
+  });
+  return newObj;
+};
+
 /*-------------------
     Array / Object
 --------------------*/

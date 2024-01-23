@@ -3,7 +3,7 @@ import { browserTarget } from './config.js';
 import { logPlugin } from './plugins.js';
 
 /*
-  Takes all parts of a component and creates
+  Takes all css parts of a component and creates
   a single css file for JS css imports
 */
 const cssConcat = await esbuild.context({
@@ -73,7 +73,25 @@ let cssBuild = await esbuild.context({
   outdir: 'dev/ui/',
 });
 
-
+/*
+  Takes a full JSON spec file and creates a smaller JSON
+  file which is consumed by a component
+*/
+/*const specBuild = await esbuild.context({
+  entryPoints: [
+    'src/spec.js'
+  ],
+  target: browserTarget,
+  bundle: true,
+  plugins: [ logPlugin('Spec Build') ],
+  loader: {
+    '.css': 'css',
+  },
+  entryNames: '[dir]/../[name]',
+  outbase: 'src',
+  outdir: 'src',
+});
+*/
 
 /*
   Exports themes as separate css

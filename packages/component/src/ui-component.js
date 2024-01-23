@@ -102,7 +102,7 @@ class UIComponent extends LitElement {
   }
 
 
-  // calls callback if defined with consistent params
+  // calls callback if defined with consistent params and this context
   call(func, { firstArg, args = [this.tpl, this.$.bind(this)] } = {}) {
     if(firstArg) {
       args.unshift(firstArg);
