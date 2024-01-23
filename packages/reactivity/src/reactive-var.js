@@ -4,7 +4,7 @@ import { Reaction } from './reaction.js';
 export class ReactiveVar {
 
   constructor(initialValue, equalityFunction) {
-    this.currentValue = initialValue;
+    this.currentValue = clone(initialValue);
     this._listeners = new Set();
     this.equalityFunction = equalityFunction || ReactiveVar.equalityFunction;
   }
@@ -40,7 +40,7 @@ export class ReactiveVar {
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = newValue;
+      this.currentValue = clone(newValue);
       this._notifyListeners();
     }
   }

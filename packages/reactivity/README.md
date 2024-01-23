@@ -84,23 +84,45 @@ reactiveObj.set(obj2);
 
 Unlike Preact Signals or Lit Reactive Elements, ReactiveVar will consider mutations to properties or arrays to be updates. This greatly simplifies many simple cases of reactivity like updating lists.
 
+Objects
+
 ```javascript
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-let person = new ReactiveVar({
+let person = {
   name: 'Jack',
   age: 32,
-});
+}
+let reactivePerson = new ReactiveVar(person);
 Reaction.create(comp => {
-  if(comp.firstRun) {
-    return;
-  }
-  console.log(person.get().name);
+  console.log(reactivePerson.get().name);
 });
 
 person.name = 'Jill';
+reactivePerson.set(person);
 // outputs Jack, Jill
 ```
+
+Arrays
+
+```javascript
+
+let rows = [
+  { name: 'Sally', age: 22 },
+  { name: 'Jack', age: 32 }
+];
+let reactiveRows = new ReactiveVar(rows);
+
+Reaction.create(comp => {
+  console.log(reactiveRows.get().length);
+});
+
+rows.pop();
+
+// outputs 2, 1
+reactiveRows.set(rows);
+```
+
 
 ### First Run
 
