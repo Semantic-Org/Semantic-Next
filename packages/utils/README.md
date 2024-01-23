@@ -11,10 +11,6 @@ Utils has three primary uses:
 
 Utility includes the following helpers
 
-### Identity
-* `hashCode(input)` - Return a 32bit integer hash of an array, object or string.
-* `isEqual(a, b)` - Returns whether most things are equal in a way reasonable to humans. This avoids most common gotchas of equality like two dates of same time not being equal.
-
 ### Arrays
 * `uniq(arr)` - Removes duplicates from arrays
 * `clone(arr)` - Recursively clone an array
@@ -50,3 +46,7 @@ Utility includes the following helpers
 * `isPromise` - Is a promise
 * `isString` - Is a string
 * `isArguments*` - Is function arguments
+
+### Identity
+* `hashCode(input)` - Return a 32bit integer hash of an array, object or string.
+* `isEqual(a, b)` - Returns whether most things are equal in a way reasonable to humans. This avoids most common gotchas of equality like two dates of same time not being equal.
