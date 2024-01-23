@@ -36,59 +36,63 @@ export const isPromise = (x) => {
   return x && isFunction(x.then);
 };
 
-
-/*
-  Create a hash from a string
-*/
-export const hashCode = (input) => {
-  let str;
-
-  // Check if input has a custom toString method, otherwise use JSON stringify for objects
-  if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
-    try {
-      str = JSON.stringify(input);
-    } catch (error) {
-      console.error('Error serializing input', error);
-      return 0;
-    }
-  } else {
-    str = input.toString();
-  }
-
-  let hash = 0;
-  if (str.length === 0) {
-    return hash;
-  }
-
-  for (let i = 0; i < str.length; i++) {
-    let char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-
-  return hash;
+export const isArguments = function(obj) {
+  return !!(obj && get(obj, 'callee'));
 };
 
 
+/*-------------------
+      Functions
+--------------------*/
+
 /*
-  Shorthand for Keys
+  Efficient no operation func
 */
-export const keys = (obj) => {
-  return Object.keys(obj);
+export const noop = function(){};
+
+/*
+  Call function even if its not defined
+*/
+export const wrapFunction = (x) => {
+  return isFunction(x) ? x : noop;
+};
+
+/*-------------------
+       Strings
+--------------------*/
+
+/*
+  HTML Attributes -> JS Properties
+*/
+export const kebabToCamel = (str) => {
+  return str.replace(/-([a-z])/g, (g) => {
+    return g[1].toUpperCase();
+  });
 };
 
 
-/* Remove duplicates from an array */
+/*-------------------
+        Arrays
+--------------------*/
+
+
+/*
+  Remove duplicates from an array
+*/
 export const unique = (arr) => {
   return Array.from(new Set(arr));
 };
 
-/* Remove undefined values from an array */
+/*
+  Remove undefined values from an array
+*/
 export const filterEmpty = (arr) => {
   return arr.filter(val => val);
 };
 
-/* Get last element from array */
+/*
+  Get last element from array
+*/
 export const last = function(array, n, guard) {
   if(!Array.isArray(array)) {
     return;
@@ -100,9 +104,137 @@ export const last = function(array, n, guard) {
   }
 };
 
+/*
+  Iterate through returning first value
+*/
+export const firstMatch = (array = [], evaluator) => {
+  let result;
+  each(array, (value, name) => {
+    const shouldReturn = evaluator(value, name);
+    if(!result && shouldReturn == true) {
+      result = value;
+    }
+  });
+  return result;
+};
+
+
+export const inArray = (value, array = []) => {
+  return array.indexOf(value) > -1;
+};
+
+/*-------------------
+       Objects
+--------------------*/
+
 
 /*
-  Simple Iterator
+  Return keys from object
+*/
+export const keys = (obj) => {
+  return Object.keys(obj);
+};
+
+
+/*
+  Handles properly copying getter/setters
+*/
+export const extend = (obj, ...sources) => {
+  sources.forEach((source) => {
+    let descriptor, prop;
+    if(source) {
+      for (prop in source) {
+        descriptor = Object.getOwnPropertyDescriptor(source, prop);
+        if(descriptor === undefined) {
+          obj[prop] = source[prop];
+        } else {
+          Object.defineProperty(obj, prop, descriptor);
+        }
+      }
+    }
+  });
+  return obj;
+};
+
+
+/*
+  Access a nested object field from a string, like 'a.b.c'
+*/
+export const get = function(obj, string = '') {
+  string = string
+    .replace(/^\./, '')
+    .replace(/\[(\w+)\]/g, '.$1')
+  ;
+  const stringParts = string.split('.');
+  for(let index = 0, length = stringParts.length; index < length; ++index) {
+    const part = stringParts[index];
+    if(!!obj && part in obj) {
+      obj = obj[part];
+    }
+    else {
+      return;
+    }
+  }
+  return obj;
+};
+
+/*
+  Return true if non-inherited property
+*/
+export const hasProperty = (obj, prop) => {
+  return Object.prototype.hasOwn.call(obj, prop);
+};
+
+/*-------------------
+    Array / Object
+--------------------*/
+
+/*
+  Clone an object or array
+*/
+export const clone = obj => {
+  let ret;
+  if (!isObject(obj)) {
+    return obj;
+  }
+
+  if (obj === null) {
+    return null; // null has typeof "object"
+  }
+
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+
+  // RegExps are not really EJSON elements (eg we don't define a serialization
+  // for them), but they're immutable anyway, so we can support them in clone.
+  if (obj instanceof RegExp) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(clone);
+  }
+
+  if (isArguments(obj)) {
+    return Array.from(obj).map(clone);
+  }
+
+  // handle general user-defined typed Objects if they haobje a clone method
+  if (isFunction(obj.clone)) {
+    return obj.clone();
+  }
+
+  // handle other objects
+  ret = {};
+  keys(obj).forEach((key) => {
+    ret[key] = clone(obj[key]);
+  });
+  return ret;
+};
+
+/*
+  Simplify iterating over objects and arrays
 */
 export const each = (obj, func, context) => {
   if(obj === null) {
@@ -137,101 +269,57 @@ export const each = (obj, func, context) => {
   return obj;
 };
 
-/*
- Iterate through returning first value
-*/
-
-export const firstMatch = (array = [], evaluator) => {
-  let result;
-  each(array, (value, name) => {
-    const shouldReturn = evaluator(value, name);
-    if(!result && shouldReturn == true) {
-      result = value;
-    }
-  });
-  return result;
-};
-
-
-export const inArray = (value, array = []) => {
-  return array.indexOf(value) > -1;
-};
-
+/*-------------------
+       RegExp
+--------------------*/
 
 /*
-  Simple Type Checking
+  Escape Special Chars for RegExp
 */
-
-/* Escape Special Chars for RegExp */
 export const escapeRegExp = function(string) {
   return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 };
 
-/*
-  Efficient no operation func
-*/
-export const noop = function(){};
+
+/*-------------------
+      Identity
+--------------------*/
 
 /*
-  Call function even if its not defined
+  Create a hash from a string
 */
-export const wrapFunction = (x) => {
-  return isFunction(x) ? x : noop;
-};
+export const hashCode = (input) => {
+  let str;
 
-/*
-  Handles properly copying getter/setters
-*/
-export const extend = (obj, ...sources) => {
-  sources.forEach((source) => {
-    let descriptor, prop;
-    if(source) {
-      for (prop in source) {
-        descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if(descriptor === undefined) {
-          obj[prop] = source[prop];
-        } else {
-          Object.defineProperty(obj, prop, descriptor);
-        }
-      }
+  // Check if input has a custom toString method, otherwise use JSON stringify for objects
+  if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
+    try {
+      str = JSON.stringify(input);
+    } catch (error) {
+      console.error('Error serializing input', error);
+      return 0;
     }
-  });
-  return obj;
-};
-
-/*
-  HTML Attributes -> JS Properties
-*/
-export const kebabToCamel = (str) => {
-  return str.replace(/-([a-z])/g, (g) => {
-    return g[1].toUpperCase();
-  });
-};
-
-// Access a nested object field from a string, like 'a.b.c'
-export const get = function(obj, string = '') {
-  // prepare string
-  string = string
-    .replace(/^\./, '')
-    .replace(/\[(\w+)\]/g, '.$1')
-  ;
-  const stringParts = string.split('.');
-  for(let index = 0, length = stringParts.length; index < length; ++index) {
-    const part = stringParts[index];
-    if(!!obj && part in obj) {
-      obj = obj[part];
-    }
-    else {
-      return;
-    }
+  } else {
+    str = input.toString();
   }
-  return obj;
+
+  let hash = 0;
+  if (str.length === 0) {
+    return hash;
+  }
+
+  for (let i = 0; i < str.length; i++) {
+    let char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+
+  return hash;
 };
 
-export const hasProperty = (obj, prop) => Object.prototype.hasOwn.call(obj, prop);
-
-
-/* Determine if two objects are equal */
+/*
+  Determine if two objects are equal
+*/
 export const isEqual = (a, b, options) => {
   let i;
   const keyOrderSensitive = !!(options && options.keyOrderSensitive);
@@ -326,51 +414,6 @@ export const isEqual = (a, b, options) => {
   return ret && i === bKeys.length;
 };
 
-export const isArguments = function(obj) {
-  return !!(obj && get(obj, 'callee'));
-};
-
-/* Clone Object or Array */
-export const clone = obj => {
-  let ret;
-  if (!isObject(obj)) {
-    return obj;
-  }
-
-  if (obj === null) {
-    return null; // null has typeof "object"
-  }
-
-  if (obj instanceof Date) {
-    return new Date(obj.getTime());
-  }
-
-  // RegExps are not really EJSON elements (eg we don't define a serialization
-  // for them), but they're immutable anyway, so we can support them in clone.
-  if (obj instanceof RegExp) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(clone);
-  }
-
-  if (isArguments(obj)) {
-    return Array.from(obj).map(clone);
-  }
-
-  // handle general user-defined typed Objects if they haobje a clone method
-  if (isFunction(obj.clone)) {
-    return obj.clone();
-  }
-
-  // handle other objects
-  ret = {};
-  keys(obj).forEach((key) => {
-    ret[key] = clone(obj[key]);
-  });
-  return ret;
-};
 
 import * as _ from './utils';
 export default _;

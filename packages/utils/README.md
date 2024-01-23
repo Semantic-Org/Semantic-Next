@@ -13,10 +13,11 @@ Utility includes the following helpers
 
 ### Identity
 * `hashCode(input)` - Return a 32bit integer hash of an array, object or string.
-* `isEqual(a, b)` - Returns whether anything is equal in a way reasonable to humans. This avoids most common gotchas of equality like two dates of same time not being equal.
+* `isEqual(a, b)` - Returns whether most things are equal in a way reasonable to humans. This avoids most common gotchas of equality like two dates of same time not being equal.
 
 ### Arrays
 * `uniq(arr)` - Removes duplicates from arrays
+* `clone(arr)` - Recursively clone an array
 * `filterEmpty(arr)` - Removes falsey values from array
 * `last(arr)` - Returns last element from array
 * `each(arr, eachFunction(value, index))` - Iterates over an array calling function with each value and index
@@ -33,15 +34,17 @@ Utility includes the following helpers
 
 ### Regular Expressions
 * `escapeRegExp` - Escapes special values for use inside regular expressions
-* `wrapFunction(unknown)` - Returns either the function or an empty function. Useful to avoid erroring when invoking something which may or may not be a function.
+
+### Strings
+* `kebabToCamel` - Change 'one-two' to 'oneTwo'
 
 ### Functions
 * `noop` - Returns an empty function to avoid overhead of creating new anonymous function
+* `wrapFunction(unknown)` - Returns either the function or an empty function. Useful to avoid erroring when invoking something which may or may not be a function.
 
 ### Types
 * `isObject(x)` - Is something that presents as an object. This has some gotchas like array, regular expression, and null are `typeof 'object'`.
 * `isPlainObject(x)` - Is a regular object (not including gotchas)
-
 * `isBinary(x)` - Is data binary
 * `isArray(x)` - Is array
 * `isPromise` - Is a promise
