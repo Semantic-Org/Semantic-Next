@@ -2,12 +2,13 @@
 
 **Utils is a tiny 3kb library for simplifying common javascript boilerplate.**
 
-Utils has three primary uses:
-* Tree Shaking - Many components will need to do similar things like escaping regular expressions. Coding this independently in all locations means that we can't save on file size when multiple components are used.
+Utils has three primary advantages over custom implementations.
 
-* Code Readability - Although much of what people use utility libraries are for are baked into modern ECMAScript, and you can get a lot of the niceties by using babel. Many native ECMAScript features have weird names and unconventional function signatures. Anyone who has tried using `Object.entries` before to do a simple each loop will understand the pains here. It's not impossible to learn but its unconventional.
+* Tree Shaking -  Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones.This means smaller bundled size when using more than one component together in a bundle.
 
-* Gotcha Handling - A lot of things that are now native to javascript still have plenty of gotchas. Consider non-enumerated properties with object manipulation like extend/clone
+* Code Readability -  Utility libraries offer a level of familiarity and consistency that can be missing with native ECMAScript features. Removing rough edges reduces the learning curve when looking at unfamiliar code so you can focus on the intention not the implementation.
+
+* Gotcha Handling - More Robust Implementations: When using utility libraries for common operations like object manipulation, you're not just avoiding gotchas (consider non-enumerated properties with object manipulation like extend/clone.); you're also leveraging a community-tested solution. These libraries often include safeguards against edge cases and peculiarities of JavaScript that a typical custom implementation might overlook. This results in more robust code, reducing the likelihood of bugs related to subtle language intricacies.
 
 Utility includes the following helpers
 
