@@ -4,7 +4,7 @@
 
 Utils has three primary advantages over custom implementations.
 
-* **Tree Shaking** -  Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones.This means smaller bundled size when using more than one component together in a bundle.
+* **Tree Shaking** -  Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones. This means smaller bundled size when using more than one component together in a bundle.
 
 * **Code Readability** -  Utility libraries offer a level of familiarity and consistency that can be missing with native ECMAScript features. Removing rough edges reduces the learning curve when looking at unfamiliar code so you can focus on the intention not the implementation.
 
