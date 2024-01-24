@@ -177,7 +177,6 @@ export const createComponent = (tagName, {
     }
 
     render() {
-      console.log(this.getSettings());
       const html = this.renderer.render({
         data: {
           ...this.tpl,

@@ -157,7 +157,7 @@ saying.set('goodbye');
 
 When a `ReactiveVar` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.
 
-You can trigger the queue to be immediately flushed to prevent this by using the `Tracker.flush()` helper.
+You can trigger the queue to be immediately flushed to prevent this by using the `Reaction.flush()` helper.
 
 ```javascript
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';

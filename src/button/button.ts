@@ -11,18 +11,21 @@ UIButton.createInstance = function(tpl, $) {
 
     word: 'bird',
 
-    saying: new ReactiveVar('hello'),
+    foo: {
+      saying: new ReactiveVar('hello'),
+    },
+
 
     hasIcon() {
       return tpl.data.icon;
     },
 
     format(expression) {
-      return `Wrapping thing ${expression}`;
+      return `The whole sentence is "${expression}"`;
     },
 
-    sayWord(word, word2) {
-      return `This is ${word}. Second word is ${word2}`;
+    sayWord(word, word2, word3) {
+      return `Left word is ${word}. Right word is ${word2}. The third word is ${word3 || 'not set'}`;
     },
 
     getIcon() {
@@ -42,8 +45,8 @@ UIButton.createInstance = function(tpl, $) {
 
 UIButton.onCreated = function(tpl) {
   setTimeout(() => {
-    tpl.saying.set('goodbye');
-  }, 2000);
+    tpl.foo.saying.set('goodbye');
+  }, 1000);
 };
 
 UIButton.events = {

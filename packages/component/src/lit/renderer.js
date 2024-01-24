@@ -3,6 +3,7 @@ import { guard } from 'lit/directives/guard.js';
 
 import { get, each, last, wrapFunction, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
+import { reactiveDirective } from './reactive-directive';
 
 export class LitRenderer {
 
@@ -50,20 +51,20 @@ export class LitRenderer {
           break;
 
         case 'expression':
-          const value = this.getValue(node.value, data, this.litElement);
+          const value = this.evaluateExpression(node.value, data, { asDirective: true });
           this.addValue(value);
           break;
 
         case 'if':
           // determine if true
-          if(this.getValue(node.condition, data, this.litElement) == true) {
+          if(this.evaluateExpression(node.condition, data, { asDirective: false }) == true) {
             this.readAST({ ast: node.content, data });
           }
           else if(node.branches?.length) {
             // evalutate each branch
             let match = false;
             each(node.branches, (branch) => {
-              if(!match && (branch.type == 'elseif' && this.getValue(branch.condition, data, this.litElement) == true) || branch.type == 'else') {
+              if(!match && (branch.type == 'elseif' && this.getValue(branch.condition, data, { asDirective: false }) == true) || branch.type == 'else') {
                 match = true;
                 this.readAST({ ast: branch.content, data });
               }
@@ -88,30 +89,83 @@ export class LitRenderer {
     });
   }
 
-  // TODO: rewrite this to evaluate expressions RTL
-  // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
-  getValue(value, data = this.data, litElement) {
+  evaluateExpression(expression, data = this.data, { asDirective = false} = {}) {
     // i.e foo.baz = { foo: { baz: 'value' } }
-    if(typeof value === 'string') {
-      let result;
-      Reaction.create((comp) => {
-        const dataValue = get(data, value);
-        if(isFunction(dataValue)) {
-          // preserve the 'this' context'
-          const path = value.split('.').slice(0, -1).join('.');
-          const context = get(data, path);
-          result = dataValue.bind(context)();
-        }
-        else {
-          result = dataValue;
-        }
-        if(!comp.firstRun) {
-          this.rerender();
-        }
-      });
-      return result;
+    if(typeof expression === 'string') {
+      if(asDirective) {
+        return reactiveDirective(() => this.lookupExpressionValue(expression, data));
+      }
+      else {
+        // we can only use directives for reactivity passed down to Lit
+        // for reactivity inside this renderer we need to create a novel computation
+        // for example for branching conditions like if/else which parse diff parts of AST
+        // depending on reactive computation
+        let result;
+        Reaction.create((comp) => {
+          result = this.lookupExpressionValue(expression, data);
+          if(!comp.firstRun) {
+            this.rerender();
+          }
+        });
+        return result;
+      }
     }
-    return value;
+    return expression;
+  }
+
+  // this evaluates an expression from right determining if something is an argument or a function
+  // then looking up the value
+  // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
+  lookupExpressionValue(expressionString = '', data = {}) {
+
+    const expressions = expressionString.split(' ').reverse();
+    const stringRegExp = /\'(.*)\'/;
+
+    let funcArguments = [];
+    let result;
+
+    each(expressions, (expression, index) => {
+      // the 'this' context' is the path up to expression
+      // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
+      const getContext = () => {
+        const path = expression.split('.').slice(0, index - 1).join('.');
+        const context = get(data, path);
+        return context;
+      };
+      const dataValue = get(data, expression);
+      let stringMatches;
+      let parsedNumber;
+      if(isFunction(dataValue)) {
+        // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
+        const boundFunc = dataValue.bind( getContext() );
+        result = boundFunc(...funcArguments);
+        // Reset arguments after function execution
+        funcArguments = [];
+      }
+      else if(dataValue) {
+        result = dataValue;
+      }
+      else if((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
+        result = stringMatches[1];
+      }
+      else if(parsedNumber = parseFloat(expression) && !Number.isNaN(parsedNumber)) {
+        // Numbers should be passed as their numerical values to functions
+        result = parsedNumber;
+      }
+      else if(expression == 'true') {
+        result = true;
+      }
+      else if(expression == 'false') {
+        result = false;
+      }
+      else {
+        result = undefined;
+      }
+
+      // Prepending current result for the next function invocation
+      funcArguments.unshift(result);
+    });
+    return result;
   }
 
   addHTML(html) {
