@@ -1,10 +1,10 @@
 import { html } from 'lit';
 import { guard } from 'lit/directives/guard.js';
 
-import { get, each, last, wrapFunction, isFunction } from '@semantic-ui/utils';
+import { get, each, last, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 import { reactiveData } from './directives/reactive-data.js';
-import { reactiveCondition } from './directives/reactive-condition.js';
+import { reactiveConditional } from './directives/reactive-conditional.js';
 
 export class LitRenderer {
 
@@ -52,25 +52,13 @@ export class LitRenderer {
           break;
 
         case 'expression':
-          const value = this.evaluateExpression(node.value, data, { asDirective: true });
-          this.addValue(value);
+          this.addValue( this.evaluateExpression(node.value, data, { asDirective: true }) );
           break;
 
         case 'if':
-          // determine if true
-          if(this.evaluateExpression(node.condition, data, { asDirective: false }) == true) {
-            this.readAST({ ast: node.content, data });
-          }
-          else if(node.branches?.length) {
-            // evalutate each branch
-            let match = false;
-            each(node.branches, (branch) => {
-              if(!match && (branch.type == 'elseif' && this.getValue(branch.condition, data, { asDirective: false }) == true) || branch.type == 'else') {
-                match = true;
-                this.readAST({ ast: branch.content, data });
-              }
-            });
-          }
+          let result = this.evaluateConditional(node, data);
+          console.log(result);
+          this.addValue( result );
           break;
 
         case 'slot':
@@ -90,6 +78,28 @@ export class LitRenderer {
     });
   }
 
+  /*
+    The conditional directive takes an if condition and branches
+    but does not have access to LitRenderer and evaluateExpression
+    so we have to pass through functions that do this
+  */
+  evaluateConditional(node, data) {
+    const mapCondition = (value, key) => {
+      if(key == 'branches') {
+        return value.map(branch => mapObject(branch, mapCondition));
+      }
+      if(key == 'condition') {
+        return () => this.evaluateExpression(value, data, { asDirective: false });
+      }
+      if(key == 'content') {
+        return () => new LitRenderer({ ast: value, data }).render();
+      }
+      return value;
+    };
+    let directiveArguments = mapObject(node, mapCondition);
+    return reactiveConditional(directiveArguments);
+  }
+
   evaluateExpression(expression, data = this.data, { asDirective = false} = {}) {
     // i.e foo.baz = { foo: { baz: 'value' } }
     if(typeof expression === 'string') {
@@ -97,18 +107,7 @@ export class LitRenderer {
         return reactiveData(() => this.lookupExpressionValue(expression, data));
       }
       else {
-        // we can only use directives for reactivity passed down to Lit
-        // for reactivity inside this renderer we need to create a novel computation
-        // for example for branching conditions like if/else which parse diff parts of AST
-        // depending on reactive computation
-        let result;
-        Reaction.create((comp) => {
-          result = this.lookupExpressionValue(expression, data);
-          if(!comp.firstRun) {
-            this.rerender();
-          }
-        });
-        return result;
+        return this.lookupExpressionValue(expression, data);
       }
     }
     return expression;

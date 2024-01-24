@@ -1,24 +1,10 @@
-<div class="{{ui}} button" tabindex="0" part="button">
-  {{#if icon}}
-    <span class="icon" part="icon">
-      {{slot icon}}
-    </span>
+<div>
+  {{#if condition.get}}
+    1111
+  {{else}}
+    2222
   {{/if}}
-  {{#if text}}
-    {{slot}}
-    <div>
-      {{#if condition.get}}
-        True
-      {{else}}
-        False
-      {{/if}}
-    <div>
-      {{format sayWord 'balloon' saying.get}}
-    </div>
-  {{/if}}
-  {{#if label}}
-    <span class="label" part="label">
-      {{slot label}}
-    </span>
-  {{/if}}
+</div>
+<div>
+  {{getSaying}}
 </div>

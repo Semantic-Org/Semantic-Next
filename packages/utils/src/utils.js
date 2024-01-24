@@ -135,6 +135,17 @@ export const keys = (obj) => {
   return Object.keys(obj);
 };
 
+export const mapObject = function(obj, callback) {
+  const objKeys = keys(obj).reverse();
+  const length = objKeys.length;
+  let index = objKeys.length;
+  let newObj = {};
+  while(index--) {
+    const thisKey = objKeys[index];
+    newObj[thisKey] = callback(obj[thisKey], thisKey);
+  }
+  return newObj;
+};
 
 /*
   Handles properly copying getter/setters
