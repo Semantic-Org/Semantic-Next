@@ -12,7 +12,7 @@ UIButton.createInstance = function(tpl, $) {
     word: 'bird',
 
     condition: new ReactiveVar(true),
-    condition2: new ReactiveVar(false),
+    condition2: new ReactiveVar(true),
     saying: new ReactiveVar('hello'),
 
     hasIcon() {
@@ -45,10 +45,13 @@ UIButton.createInstance = function(tpl, $) {
 UIButton.onCreated = function(tpl) {
   setTimeout(() => {
     tpl.saying.set('goodbye');
-  }, 1000);
+  }, 5000);
   setTimeout(() => {
     tpl.condition.set(false);
-  }, 500);
+  }, 2000);
+  setTimeout(() => {
+    tpl.condition2.set(false);
+  }, 7000);
 };
 
 UIButton.events = {

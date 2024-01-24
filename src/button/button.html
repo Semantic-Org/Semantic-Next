@@ -1,10 +1,16 @@
 <div>
-  {{#if condition.get}}
-    1111
+{{#if condition.get}}
+  1
+{{elseif false}}
+{{else}}
+  2
+  {{#if condition2.get}}
+    False True
   {{else}}
-    2222
+    True False
   {{/if}}
+{{/if}}
 </div>
 <div>
-  {{getSaying}}
+  Should not rerender
 </div>

@@ -57,7 +57,6 @@ export class LitRenderer {
 
         case 'if':
           let result = this.evaluateConditional(node, data);
-          console.log(result);
           this.addValue( result );
           break;
 
@@ -84,19 +83,27 @@ export class LitRenderer {
     so we have to pass through functions that do this
   */
   evaluateConditional(node, data) {
+    //console.log('evaluating new conditional', node.condition);
     const mapCondition = (value, key) => {
       if(key == 'branches') {
         return value.map(branch => mapObject(branch, mapCondition));
       }
       if(key == 'condition') {
-        return () => this.evaluateExpression(value, data, { asDirective: false });
+        console.log('evaluating', value, this.evaluateExpression(value, data, { asDirective: false }));
+        return () => {
+          const result = this.evaluateExpression(value, data, { asDirective: false });
+          console.log('returning result for value', value, result);
+          return result;
+        };
       }
       if(key == 'content') {
+        //console.log('content is', value, new LitRenderer({ ast: value, data }).render());
         return () => new LitRenderer({ ast: value, data }).render();
       }
       return value;
     };
     let directiveArguments = mapObject(node, mapCondition);
+    console.log('init new directive', directiveArguments, directiveArguments.condition());
     return reactiveConditional(directiveArguments);
   }
 
