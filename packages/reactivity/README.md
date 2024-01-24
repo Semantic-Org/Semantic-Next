@@ -22,8 +22,8 @@ let saying = new ReactiveVar('hello');
 Reaction.create(comp => {
   console.log(saying.get());
 });
-saying.set('goodbye');
 
+saying.set('goodbye');
 // outputs hello, goodbye
 ```
 
@@ -35,8 +35,8 @@ let saying = new ReactiveVar('hello');
 Reaction.create(comp => {
   console.log(saying.value);
 });
-saying.value = 'goodbye';
 
+saying.value = 'goodbye';
 // outputs hello, goodbye
 ```
 
@@ -70,9 +70,7 @@ Reaction.create(comp => {
   console.log(reactiveObj.get());
 });
 
-// outputs Mon Jan 01 2024 12:00:00, Mon Jan 02 2024 12:00:00
 reactiveObj.set(obj2);
-
 // outputs {name: 'Sally', age: 22}
 // outputs {name: 'Sally', age: 23}
 
@@ -99,6 +97,7 @@ Reaction.create(comp => {
 });
 
 person.name = 'Jill';
+
 reactivePerson.set(person);
 // outputs Jack, Jill
 ```
@@ -119,8 +118,8 @@ Reaction.create(comp => {
 
 rows.pop();
 
-// outputs 2, 1
 reactiveRows.set(rows);
+// outputs 2, 1
 ```
 
 
@@ -138,7 +137,6 @@ Reaction.create(comp => {
   }
   let saying = saying.get();
   console.log(saying);
-  // outputs nothing since reactive reference is never reached
 });
 
 Reaction.create(comp => {
@@ -151,6 +149,7 @@ Reaction.create(comp => {
 });
 
 saying.set('goodbye');
+// outputs nothing since reactive reference is never reached because of early termination
 
 ```
 
@@ -170,7 +169,6 @@ Reaction.create(comp => {
 
 [1,2,3,4,5].forEach(value => number.set(value));
 
-
 let number = new ReactiveVar(1);
 Reaction.create(comp => {
   console.log(number.get());
@@ -180,7 +178,6 @@ Reaction.create(comp => {
   number.set(value);
   Reaction.flush();
 });
-
 // outputs 1,2,3,4,5
 ```
 
@@ -215,7 +212,6 @@ let comp = Reaction.create(() => {
   number.set(value);
   Reaction.flush();
 });
-
 // both output 1,2,3
 
 ```
