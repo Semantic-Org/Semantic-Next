@@ -4,11 +4,11 @@
 
 Utils has three primary advantages over custom implementations.
 
-* Tree Shaking -  Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones.This means smaller bundled size when using more than one component together in a bundle.
+* **Tree Shaking** -  Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones.This means smaller bundled size when using more than one component together in a bundle.
 
-* Code Readability -  Utility libraries offer a level of familiarity and consistency that can be missing with native ECMAScript features. Removing rough edges reduces the learning curve when looking at unfamiliar code so you can focus on the intention not the implementation.
+* **Code Readability** -  Utility libraries offer a level of familiarity and consistency that can be missing with native ECMAScript features. Removing rough edges reduces the learning curve when looking at unfamiliar code so you can focus on the intention not the implementation.
 
-* Gotcha Handling - More Robust Implementations: When using utility libraries for common operations like object manipulation, you're not just avoiding gotchas (consider non-enumerated properties with object manipulation like extend/clone.); you're also leveraging a community-tested solution. These libraries often include safeguards against edge cases and peculiarities of JavaScript that a typical custom implementation might overlook. This results in more robust code, reducing the likelihood of bugs related to subtle language intricacies.
+* **Gotcha Handling** - More Robust Implementations: When using utility libraries for common operations like object manipulation, you're not just avoiding gotchas (consider non-enumerated properties with object manipulation like extend/clone.); you're also leveraging a community-tested solution. These libraries often include safeguards against edge cases and peculiarities of JavaScript that a typical custom implementation might overlook. This results in more robust code, reducing the likelihood of bugs related to subtle language intricacies.
 
 Utility includes the following helpers
 
