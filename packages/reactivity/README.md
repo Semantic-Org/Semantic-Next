@@ -137,6 +137,7 @@ Reaction.create(comp => {
   }
   let saying = saying.get();
   console.log(saying);
+  // outputs nothing (early termination on first run prevents reactive var from being referenced)
 });
 
 Reaction.create(comp => {
@@ -149,7 +150,6 @@ Reaction.create(comp => {
 });
 
 saying.set('goodbye');
-// outputs nothing since reactive reference is never reached because of early termination
 
 ```
 
