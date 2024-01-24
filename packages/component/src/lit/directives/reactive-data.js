@@ -2,7 +2,7 @@ import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
 
-class ReactiveDirective extends AsyncDirective {
+class ReactiveData extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
@@ -38,4 +38,4 @@ class ReactiveDirective extends AsyncDirective {
   }
 }
 
-export const reactiveDirective = directive(ReactiveDirective);
+export const reactiveData = directive(ReactiveData);

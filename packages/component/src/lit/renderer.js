@@ -3,7 +3,8 @@ import { guard } from 'lit/directives/guard.js';
 
 import { get, each, last, wrapFunction, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
-import { reactiveDirective } from './reactive-directive';
+import { reactiveData } from './directives/reactive-data.js';
+import { reactiveCondition } from './directives/reactive-condition.js';
 
 export class LitRenderer {
 
@@ -93,7 +94,7 @@ export class LitRenderer {
     // i.e foo.baz = { foo: { baz: 'value' } }
     if(typeof expression === 'string') {
       if(asDirective) {
-        return reactiveDirective(() => this.lookupExpressionValue(expression, data));
+        return reactiveData(() => this.lookupExpressionValue(expression, data));
       }
       else {
         // we can only use directives for reactivity passed down to Lit
