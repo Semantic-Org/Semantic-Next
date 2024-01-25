@@ -46,6 +46,7 @@ class TemplateCompiler {
 
     let contentBranch = null; // Track the current node to add content
     let conditionStack = []; // Track the current condition stack
+    let contentStack = []; // Track the current content target stack
 
     while (!scanner.isEOF()) {
       const tag = parseTag(scanner);
@@ -71,7 +72,9 @@ class TemplateCompiler {
             };
             contentTarget.push(newNode);
             conditionStack.push(newNode);
+            contentStack.push(newNode);
             contentBranch = newNode;
+            console.log('setting content branch to', newNode);
             break;
 
           case 'ELSEIF':
@@ -80,8 +83,11 @@ class TemplateCompiler {
               condition: tag.content,
               content: [],
             };
+            contentStack.pop();
+            contentStack.push(newNode);
             conditionTarget.branches.push(newNode);
             contentBranch = newNode;
+            console.log('setting content branch to', newNode);
             break;
 
           case 'ELSE':
@@ -93,8 +99,11 @@ class TemplateCompiler {
               scanner.fatal('No open if tag when else found');
               break;
             }
+            contentStack.pop();
+            contentStack.push(newNode);
             conditionTarget.branches.push(newNode);
             contentBranch = newNode;
+            console.log('setting content branch to', newNode);
             break;
 
           case 'EXPRESSION':
@@ -115,8 +124,10 @@ class TemplateCompiler {
 
           case 'CLOSE_IF':
             stack.pop();
+            contentStack.pop();
             conditionStack.pop();
-            contentBranch = last(conditionStack); // Reset current branch
+            contentBranch = last(contentStack); // Reset current branch
+            console.log('resetting content branch in closeif', contentBranch, conditionStack);
             break;
 
           case 'EACH':
@@ -152,6 +163,7 @@ class TemplateCompiler {
         const OPEN_TAG = /\{\{/;
         const html = scanner.consumeUntil(OPEN_TAG);
         if (html) {
+          console.log('adding html to content node', html);
           const htmlNode = { type: 'html', html };
           contentTarget.push(htmlNode);
         }
