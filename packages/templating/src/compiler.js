@@ -74,7 +74,6 @@ class TemplateCompiler {
             conditionStack.push(newNode);
             contentStack.push(newNode);
             contentBranch = newNode;
-            console.log('setting content branch to', newNode);
             break;
 
           case 'ELSEIF':
@@ -87,7 +86,6 @@ class TemplateCompiler {
             contentStack.push(newNode);
             conditionTarget.branches.push(newNode);
             contentBranch = newNode;
-            console.log('setting content branch to', newNode);
             break;
 
           case 'ELSE':
@@ -103,7 +101,6 @@ class TemplateCompiler {
             contentStack.push(newNode);
             conditionTarget.branches.push(newNode);
             contentBranch = newNode;
-            console.log('setting content branch to', newNode);
             break;
 
           case 'EXPRESSION':
@@ -127,7 +124,6 @@ class TemplateCompiler {
             contentStack.pop();
             conditionStack.pop();
             contentBranch = last(contentStack); // Reset current branch
-            console.log('resetting content branch in closeif', contentBranch, conditionStack);
             break;
 
           case 'EACH':
@@ -163,7 +159,6 @@ class TemplateCompiler {
         const OPEN_TAG = /\{\{/;
         const html = scanner.consumeUntil(OPEN_TAG);
         if (html) {
-          console.log('adding html to content node', html);
           const htmlNode = { type: 'html', html };
           contentTarget.push(htmlNode);
         }

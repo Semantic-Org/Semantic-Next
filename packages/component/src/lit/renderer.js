@@ -46,7 +46,6 @@ export class LitRenderer {
   } = {}) {
     each(ast, node => {
       switch (node.type) {
-
         case 'html':
           this.addHTML(node.html);
           break;
@@ -68,12 +67,7 @@ export class LitRenderer {
             this.addHTML(`<slot></slot>`);
           }
           break;
-
-        default:
-          break;
-
       }
-
     });
   }
 
@@ -83,32 +77,34 @@ export class LitRenderer {
     so we have to pass through functions that do this
   */
   evaluateConditional(node, data) {
-    //console.log('evaluating new conditional', node.condition);
     const mapCondition = (value, key) => {
       if(key == 'branches') {
-        return value.map(branch => mapObject(branch, mapCondition));
+        return value.map(branch => {
+          let newObj = mapObject(branch, mapCondition);
+          return newObj;
+        });
       }
       if(key == 'condition') {
-        console.log('evaluating', value, this.evaluateExpression(value, data, { asDirective: false }));
         return () => {
           const result = this.evaluateExpression(value, data, { asDirective: false });
-          console.log('returning result for value', value, result);
           return result;
         };
       }
       if(key == 'content') {
-        //console.log('content is', value, new LitRenderer({ ast: value, data }).render());
         return () => new LitRenderer({ ast: value, data }).render();
       }
       return value;
     };
     let directiveArguments = mapObject(node, mapCondition);
-    console.log('init new directive', directiveArguments, directiveArguments.condition());
     return reactiveConditional(directiveArguments);
   }
 
-  evaluateExpression(expression, data = this.data, { asDirective = false} = {}) {
-    // i.e foo.baz = { foo: { baz: 'value' } }
+  // i.e foo.baz = { foo: { baz: 'value' } }
+  evaluateExpression(
+    expression,
+    data = this.data,
+    { asDirective = false} = {}
+  ) {
     if(typeof expression === 'string') {
       if(asDirective) {
         return reactiveData(() => this.lookupExpressionValue(expression, data));
@@ -123,7 +119,10 @@ export class LitRenderer {
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
   // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
-  lookupExpressionValue(expressionString = '', data = {}) {
+  lookupExpressionValue(
+    expressionString = '',
+    data = {}
+  ) {
 
     const expressions = expressionString.split(' ').reverse();
     const stringRegExp = /\'(.*)\'/;
@@ -186,9 +185,15 @@ export class LitRenderer {
     this.lastHTML = true;
   }
 
+  addHTMLSpacer() {
+    this.addHTML('');
+  }
+
   addValue(expression) {
-    this.lastHTML = false;
+    this.addHTMLSpacer(); // spacer is necessary `{'one'}` evaluates to ['',''] ['one'] with template literals
     this.expressions.push(expression);
+    this.lastHTML = false;
+    this.addHTMLSpacer();
   }
 
   clearTemp() {
@@ -196,7 +201,7 @@ export class LitRenderer {
   }
 
   rerender() {
-    this.litElement.requestUpdate();
+    this.litElement.requestUpdate(); // can only be manually invoked
   }
 
 }
