@@ -1,3 +1,6 @@
 {{#each item in items.get}}
-  <input type="text"><hr>
+  <div>
+    {{{{@index}} {{item.name}} - {{item.age}} {{item._id}} <input type="text">
+  </div>
 {{/each}}
+<hr>

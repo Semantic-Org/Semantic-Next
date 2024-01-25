@@ -10,36 +10,50 @@ class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
+    this.itemTemplates = new Map();
   }
 
   render(eachCondition, data) {
-    // Initial setup before the reaction
-    let initialRender = this.setupRender(eachCondition, data);
-    if (!this.reaction) {
-      this.reaction = Reaction.create(() => {
-        this.setValue(this.setupRender(eachCondition, data));
-      });
+    if (this.reaction) {
+      this.reaction.stop();
     }
-    return initialRender;
-  }
 
-  setupRender(eachCondition, data) {
-    const items = eachCondition.over();
-    return this.setupRenderContent(items, eachCondition, data);
-  }
+    this.reaction = Reaction.create((comp) => {
+      const items = eachCondition.over();
+      const newTemplates = new Map();
 
-  setupRenderContent(items, eachCondition, data) {
-    if (!items?.length) {
-      return nothing;
-    }
-    return repeat(
-      items,
-      (item) => item._id || hashCode(item),
-      (item, index) => {
-        let eachData = this.prepareEachData(item, index, data, eachCondition.as);
-        return eachCondition.content(eachData);
+      if (items?.length) {
+        each(items, (item, index) => {
+          let uniqueId = this.getUniqueId(item);
+          let template = this.itemTemplates.get(uniqueId);
+
+          if (!template) {
+            // Create a new template for new items
+            let eachData = this.prepareEachData(item, index, data, eachCondition.as);
+            template = eachCondition.content(eachData);
+          }
+
+          newTemplates.set(uniqueId, template);
+        });
       }
-    );
+
+      // Update the item templates map for the next run
+      this.itemTemplates = newTemplates;
+
+      if (!comp.firstRun) {
+        this.setValue(this.joinTemplates(newTemplates));
+      }
+    });
+
+    return this.joinTemplates(this.itemTemplates);
+  }
+
+  getUniqueId(item) {
+    return item._id || hashCode(item); // Ensure each item has a unique identifier
+  }
+
+  joinTemplates(templates) {
+    return html`${Array.from(templates.values())}`;
   }
 
   prepareEachData(item, index, data, alias) {
