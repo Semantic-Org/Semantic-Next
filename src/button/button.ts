@@ -17,7 +17,6 @@ UIButton.createInstance = function(tpl, $) {
 
     items: new ReactiveVar([
       { name: 'Jenny', age: 23 },
-      { name: 'Jenny', age: 23 },
       { name: 'Jack', age: 36 },
     ]),
 
@@ -60,6 +59,14 @@ UIButton.onCreated = function(tpl) {
     });
     tpl.items.set(items);
   }, 2000);
+  setTimeout(() => {
+    let items = tpl.items.get();
+    items.push({
+      name: 'Stew',
+      age: 59
+    });
+    tpl.items.set(items);
+  }, 4000);
   Reaction.create((comp) => {
     console.log('items are', tpl.items.get());
   });

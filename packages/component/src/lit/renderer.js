@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { guard } from 'lit/directives/guard.js';
 
-import { get, each, last, mapObject, wrapFunction, hashCode, isFunction } from '@semantic-ui/utils';
+import { get, each, last, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -209,10 +209,6 @@ export class LitRenderer {
 
   clearTemp() {
     delete this.lastHTML; // used to concat concurrent html
-  }
-
-  rerender() {
-    this.litElement.requestUpdate(); // can only be manually invoked
   }
 
 }

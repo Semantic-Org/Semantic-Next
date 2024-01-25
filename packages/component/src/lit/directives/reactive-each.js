@@ -1,8 +1,8 @@
-import { noChange, nothing } from 'lit';
+import { noChange, html, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, hashCode, wrapFunction } from '@semantic-ui/utils';
+import { each, hashCode, values } from '@semantic-ui/utils';
 
 class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -15,10 +15,22 @@ class ReactiveEachDirective extends AsyncDirective {
     if (this.reaction) {
       this.reaction.stop();
     }
-    let html = nothing;
+
+    let templateIndex = {};
+    let templates = [];
+    let lastTemplates = [];
+
+    let compileHTML = () => {
+      let strings = templates.map(v => '');
+      strings.push('');
+      strings.raw = [];
+      return html.apply(this, [strings, ...templates]);
+    };
+
     this.reaction = Reaction.create((comp) => {
       const values = eachCondition.over();
-      console.log('each rerun', values.length);
+      lastTemplates = templates;
+      templates = [];
       if(values?.length) {
         each(values, (value, index) => {
           let eachData = {
@@ -37,19 +49,28 @@ class ReactiveEachDirective extends AsyncDirective {
               ...value
             };
           }
-          if(html == nothing) {
-            html = [];
-            html.push( eachCondition.content(eachData) );
+
+          // reuse existing template if rendered
+          const lastIndex = templateIndex[value._id];
+          let html;
+          if(lastIndex >= 0) {
+            html = lastTemplates[lastIndex];
           }
+          else {
+            html = eachCondition.content(eachData);
+          }
+          // we store location so we can move them around y
+          templateIndex[value._id] = index;
+          templates.push(html);
+
         });
       }
 
       if(!comp.firstRun) {
-        this.setValue(html);
+        this.setValue(compileHTML());
       }
     });
-    console.log(html);
-    return html;
+    return compileHTML();
   }
 
   disconnected() {

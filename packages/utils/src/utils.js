@@ -135,6 +135,11 @@ export const keys = (obj) => {
   return Object.keys(obj);
 };
 
+export const values = (obj) => {
+  return Object.values(obj);
+};
+
+
 export const mapObject = function(obj, callback) {
   const objKeys = keys(obj).reverse();
   const length = objKeys.length;
