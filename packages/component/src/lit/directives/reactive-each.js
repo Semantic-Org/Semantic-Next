@@ -13,37 +13,33 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   render(eachCondition, data) {
-    if (this.reaction) {
-      this.reaction.stop();
+    // Initial setup before the reaction
+    let initialRender = this.setupRender(eachCondition, data);
+    if (!this.reaction) {
+      this.reaction = Reaction.create(() => {
+        this.setValue(this.setupRender(eachCondition, data));
+      });
     }
+    return initialRender;
+  }
 
-    this.reaction = Reaction.create(() => {
-      const items = eachCondition.over();
-      if (!items?.length) {
-        this.setValue(nothing);
-        return;
-      }
-      console.log('here');
-      this.setValue(repeatValue);
-    });
+  setupRender(eachCondition, data) {
+    const items = eachCondition.over();
+    return this.setupRenderContent(items, eachCondition, data);
+  }
 
-
-    let repeatValue = repeat(
+  setupRenderContent(items, eachCondition, data) {
+    if (!items?.length) {
+      return nothing;
+    }
+    return repeat(
       items,
-      (item) => {
-        const hash = item._id || hashCode(item);
-        console.log(hash);
-        return hash;
-      },
+      (item) => item._id || hashCode(item),
       (item, index) => {
         let eachData = this.prepareEachData(item, index, data, eachCondition.as);
-        let html = eachCondition.content({});
-        console.log(html);
-        return html;
+        return eachCondition.content(eachData);
       }
     );
-
-    return repeatValue;
   }
 
   prepareEachData(item, index, data, alias) {
