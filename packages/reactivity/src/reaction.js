@@ -21,6 +21,17 @@ export class Reaction {
     }
   }
 
+  static nonreactive(func) {
+    const previousReaction = Reaction.current;
+    Reaction.current = null;
+
+    try {
+      return func();
+    } finally {
+      Reaction.current = previousReaction;
+    }
+  }
+
   static flush() {
     Reaction.isFlushScheduled = false;
     Reaction.pendingReactions.forEach(reaction => reaction());
