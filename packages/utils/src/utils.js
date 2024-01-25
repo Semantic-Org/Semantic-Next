@@ -198,7 +198,7 @@ export const get = function(obj, string = '') {
   Return true if non-inherited property
 */
 export const hasProperty = (obj, prop) => {
-  return Object.prototype.hasOwn.call(obj, prop);
+  return Object.hasOwn.call(obj, prop);
 };
 
 /*

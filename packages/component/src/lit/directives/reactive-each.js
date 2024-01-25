@@ -1,7 +1,9 @@
 import { noChange, html, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { Reaction } from '@semantic-ui/reactivity';
+
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import { each, hashCode, values } from '@semantic-ui/utils';
 
 class ReactiveEachDirective extends AsyncDirective {
@@ -11,66 +13,52 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   render(eachCondition, data) {
-    // Ensure existing reaction is stopped
     if (this.reaction) {
       this.reaction.stop();
     }
 
-    let templateIndex = {};
-    let templates = [];
-    let lastTemplates = [];
-
-    let compileHTML = () => {
-      let strings = templates.map(v => '');
-      strings.push('');
-      strings.raw = [];
-      return html.apply(this, [strings, ...templates]);
-    };
-
-    this.reaction = Reaction.create((comp) => {
-      const values = eachCondition.over();
-      lastTemplates = templates;
-      templates = [];
-      if(values?.length) {
-        each(values, (value, index) => {
-          let eachData = {
-            ...data,
-            '@index': index,
-          };
-          if(!value._id) {
-            value._id = hashCode(value);
-          }
-          if(eachCondition.as) {
-            eachData[eachCondition.as] = value;
-          }
-          else {
-            eachData = {
-              ...eachData,
-              ...value
-            };
-          }
-
-          // reuse existing template if rendered
-          const lastIndex = templateIndex[value._id];
-          let html;
-          if(lastIndex >= 0) {
-            html = lastTemplates[lastIndex];
-          }
-          else {
-            html = eachCondition.content(eachData);
-          }
-          // we store location so we can move them around y
-          templateIndex[value._id] = index;
-          templates.push(html);
-
-        });
+    this.reaction = Reaction.create(() => {
+      const items = eachCondition.over();
+      if (!items?.length) {
+        this.setValue(nothing);
+        return;
       }
-
-      if(!comp.firstRun) {
-        this.setValue(compileHTML());
-      }
+      console.log('here');
+      this.setValue(repeatValue);
     });
-    return compileHTML();
+
+
+    let repeatValue = repeat(
+      items,
+      (item) => {
+        const hash = item._id || hashCode(item);
+        console.log(hash);
+        return hash;
+      },
+      (item, index) => {
+        let eachData = this.prepareEachData(item, index, data, eachCondition.as);
+        let html = eachCondition.content({});
+        console.log(html);
+        return html;
+      }
+    );
+
+    return repeatValue;
+  }
+
+  prepareEachData(item, index, data, alias) {
+    return (alias)
+      ? {
+        ...data,
+        [alias]: item,
+        '@index': index
+      }
+      : {
+        ...data,
+        ...item,
+        '@index': index
+      }
+    ;
   }
 
   disconnected() {
@@ -78,10 +66,6 @@ class ReactiveEachDirective extends AsyncDirective {
       this.reaction.stop();
       this.reaction = null;
     }
-  }
-
-  reconnected() {
-    // nothing
   }
 }
 
