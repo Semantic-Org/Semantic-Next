@@ -68,21 +68,66 @@ class Scanner {
     return consumedText;
   }
 
+  returnTo(pattern) {
+    if(!pattern) {
+      return;
+    }
+    const regex = (typeof pattern === 'string')
+      ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
+      : new RegExp(pattern, 'gm');
+
+    let lastMatch = null;
+    let match;
+    const substring = this.input.substring(0, this.pos);
+
+    // Find the last match of the regex
+    while ((match = regex.exec(substring)) !== null) {
+      lastMatch = match;
+    }
+
+    if (lastMatch) {
+      const consumedText = this.input.substring(0, lastMatch.index);
+      this.pos = lastMatch.index; // Update position to the start of the last match
+      return consumedText;
+    }
+    return;
+  }
+
   fatal(msg) {
     msg = msg || 'Parse error';
 
-    const CONTEXT_AMOUNT = 20;
-    const pastInput = this.input.substring(this.pos - CONTEXT_AMOUNT - 1, this.pos);
-    const upcomingInput = this.input.substring(this.pos, this.pos + CONTEXT_AMOUNT + 1);
+    const lines = this.input.split('\n');
+    let lineNumber = 0;
+    let charCount = 0;
+    for (const line of lines) {
+      // Add 1 for the newline character that split removes
+      if (charCount + line.length + 1 > this.pos) {
+        break;
+      }
+      charCount += line.length + 1;
+      lineNumber++;
+    }
 
-    const positionDisplay = `${pastInput + upcomingInput.replace(/\n/g, ' ')}\n${' '.repeat(pastInput.length)}^`;
-    const e = new Error(`${msg}\n${positionDisplay}`);
+    const startLine = Math.max(0, lineNumber - 2);
+    const endLine = Math.min(lines.length, lineNumber + 3);
 
-    e.offset = this.pos;
-    const allPastInput = this.input.substring(0, this.pos);
-    e.line = 1 + (allPastInput.match(/\n/g) || []).length;
-    e.col = 1 + this.pos - allPastInput.lastIndexOf('\n');
+    // Lines around the error, including the error line
+    const contextLines = lines.slice(startLine, endLine);
 
+    // Apply grey color to lines before and after the error line
+    // Apply red and bold to the error line
+    const consoleMsg = contextLines.map((line, idx) => {
+      const isErrLine = (lineNumber - startLine) === idx;
+      return `%c${line}`;
+    }).join('\n');
+
+    const normalStyle = 'color: grey';
+    const errorStyle = 'color: red; font-weight: bold';
+
+    console.error(msg + '\n' + consoleMsg,
+      ...contextLines.map((_, idx) => (lineNumber - startLine) === idx ? errorStyle : normalStyle));
+
+    const e = new Error(msg);
     throw e;
   }
 

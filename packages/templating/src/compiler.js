@@ -18,17 +18,17 @@ class TemplateCompiler {
 
     const scanner = new Scanner(template);
 
+    const starts = {
+      IF: /^{{\s*#if\s+/,
+      ELSEIF: /^{{\s*else\s*if\s+/,
+      ELSE: /^{{\s*else\s*/,
+      EACH: /^{{\s*#each\s+/,
+      CLOSE_IF: /^{{\s*\/(if)\s*/,
+      CLOSE_EACH: /^{{\s*\/(each)\s*/,
+      SLOT: /^{{\s*slot\s*/,
+      EXPRESSION: /^{{\s*/,
+    };
     const parseTag = (scanner) => {
-      const starts = {
-        IF: /^{{\s*#if\s+/,
-        ELSEIF: /^{{\s*else\s*if\s+/,
-        ELSE: /^{{\s*else\s*/,
-        EACH: /^{{\s*#each\s+/,
-        CLOSE_IF: /^{{\s*\/(if)\s*/,
-        CLOSE_EACH: /^{{\s*\/(each)\s*/,
-        SLOT: /^{{\s*slot\s*/,
-        EXPRESSION: /^{{\s*/,
-      };
       for (let type in starts) {
         if (scanner.matches(starts[type])) {
           const consumed = scanner.consume(starts[type]);
@@ -82,6 +82,10 @@ class TemplateCompiler {
               condition: tag.content,
               content: [],
             };
+            if(!conditionTarget) {
+              scanner.returnTo(starts.ELSEIF);
+              scanner.fatal('{{elseif}} encountered without matching if condition');
+            }
             contentStack.pop();
             contentStack.push(newNode);
             conditionTarget.branches.push(newNode);
@@ -94,7 +98,8 @@ class TemplateCompiler {
               content: [],
             };
             if(!conditionTarget) {
-              scanner.fatal('No open if tag when else found');
+              scanner.returnTo(starts.ELSE);
+              scanner.fatal('{{else}} encountered without matching if condition');
               break;
             }
             contentStack.pop();
@@ -120,6 +125,10 @@ class TemplateCompiler {
             break;
 
           case 'CLOSE_IF':
+            if(conditionStack.length == 0) {
+              scanner.returnTo(starts.CLOSE_IF);
+              scanner.fatal('{{/if}} close tag found without open if tag');
+            }
             stack.pop();
             contentStack.pop();
             conditionStack.pop();
@@ -136,12 +145,12 @@ class TemplateCompiler {
               iterateOver = contentParts[1].trim();
             }
             else {
-              iterateOver = contentParts[1].trim();
+              iterateOver = contentParts[0].trim();
             }
             newNode = {
               ...newNode,
-              as: iterateOver,
-              over: iterateAs,
+              as: iterateAs,
+              over: iterateOver,
               content: [],
             };
             contentTarget.push(newNode);
@@ -176,7 +185,7 @@ class TemplateCompiler {
     else if(expression == 'false') {
       return false;
     }
-    else if(!Number.isNaN( parseInt(expression, 10) )) {
+    else if(!Number.isNaN( parseFloat(expression, 10) )) {
       return +(expression);
     }
     return expression;

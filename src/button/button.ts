@@ -14,6 +14,13 @@ UIButton.createInstance = function(tpl, $) {
     condition: new ReactiveVar(false),
     condition2: new ReactiveVar(false),
     condition3: new ReactiveVar(false),
+
+    items: new ReactiveVar([
+      { name: 'Jenny', age: 23 },
+      { name: 'Jenny', age: 23 },
+      { name: 'Jack', age: 36 },
+    ]),
+
     saying: new ReactiveVar('hello'),
 
     hasIcon() {
@@ -46,17 +53,16 @@ UIButton.createInstance = function(tpl, $) {
 UIButton.onCreated = function(tpl) {
 
   setTimeout(() => {
-    tpl.condition.set(true);
+    let items = tpl.items.get();
+    items.push({
+      name: 'Albert',
+      age: 99
+    });
+    tpl.items.set(items);
   }, 2000);
-  setTimeout(() => {
-    tpl.condition2.set(true);
-  }, 4000);
-  setTimeout(() => {
-    tpl.condition3.set(true);
-  }, 6000);
-  setTimeout(() => {
-    tpl.saying.set('goodbye');
-  }, 6000);
+  Reaction.create((comp) => {
+    console.log('items are', tpl.items.get());
+  });
 };
 
 UIButton.events = {

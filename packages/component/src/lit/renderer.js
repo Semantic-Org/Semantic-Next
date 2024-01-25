@@ -1,10 +1,11 @@
 import { html } from 'lit';
 import { guard } from 'lit/directives/guard.js';
 
-import { get, each, last, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
+import { get, each, last, mapObject, wrapFunction, hashCode, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
+import { reactiveEach } from './directives/reactive-each.js';
 
 export class LitRenderer {
 
@@ -55,8 +56,11 @@ export class LitRenderer {
           break;
 
         case 'if':
-          let result = this.evaluateConditional(node, data);
-          this.addValue( result );
+          this.addValue( this.evaluateConditional(node, data) );
+          break;
+
+        case 'each':
+          this.addValue( this.evaluateEach(node, data) );
           break;
 
         case 'slot':
@@ -77,33 +81,46 @@ export class LitRenderer {
     so we have to pass through functions that do this
   */
   evaluateConditional(node, data) {
-    const mapCondition = (value, key) => {
+    const directiveMap = (value, key) => {
       if(key == 'branches') {
-        return value.map(branch => {
-          let newObj = mapObject(branch, mapCondition);
-          return newObj;
-        });
+        return value.map(branch => mapObject(branch, directiveMap));
       }
       if(key == 'condition') {
-        return () => {
-          const result = this.evaluateExpression(value, data, { asDirective: false });
-          return result;
-        };
+        return () => this.evaluateExpression(value, data, { asDirective: false });
       }
       if(key == 'content') {
-        return () => new LitRenderer({ ast: value, data }).render();
+        return () => this.renderPartial({ast: value, data});
       }
       return value;
     };
-    let directiveArguments = mapObject(node, mapCondition);
-    return reactiveConditional(directiveArguments);
+    let conditionalArguments = mapObject(node, directiveMap);
+    return reactiveConditional(conditionalArguments);
+  }
+
+  evaluateEach(node, data) {
+    const directiveMap = (value, key) => {
+      if(key == 'over') {
+        return () => this.evaluateExpression(value, data, { asDirective: false });
+      }
+      if(key == 'content') {
+        return (eachData) => this.renderPartial({ast: value, data: eachData});
+      }
+      return value;
+    };
+    let eachArguments = mapObject(node, directiveMap);
+    return reactiveEach(eachArguments, data);
+  }
+
+  // subtrees are rendered as separate contexts
+  renderPartial({ast, data}) {
+    return new LitRenderer({ ast, data }).render();
   }
 
   // i.e foo.baz = { foo: { baz: 'value' } }
   evaluateExpression(
     expression,
     data = this.data,
-    { asDirective = false} = {}
+    { asDirective = false } = {}
   ) {
     if(typeof expression === 'string') {
       if(asDirective) {
@@ -154,15 +171,9 @@ export class LitRenderer {
       else if((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
         result = stringMatches[1];
       }
-      else if(parsedNumber = parseFloat(expression) && !Number.isNaN(parsedNumber)) {
+      else if(!Number.isNaN(dataValue)) {
         // Numbers should be passed as their numerical values to functions
-        result = parsedNumber;
-      }
-      else if(expression == 'true') {
-        result = true;
-      }
-      else if(expression == 'false') {
-        result = false;
+        result = dataValue;
       }
       else {
         result = undefined;
