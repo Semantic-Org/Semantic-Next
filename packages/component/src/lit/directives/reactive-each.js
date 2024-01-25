@@ -30,7 +30,11 @@ class ReactiveEachDirective extends AsyncDirective {
           if (!template) {
             // Create a new template for new items
             let eachData = this.prepareEachData(item, index, data, eachCondition.as);
+            console.log('creating template', eachData);
             template = eachCondition.content(eachData);
+          }
+          else {
+            console.log('reusing template', index);
           }
 
           newTemplates.set(uniqueId, template);

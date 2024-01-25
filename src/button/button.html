@@ -1,6 +1,9 @@
 {{#each item in items.get}}
   <div>
-    {{{{@index}} {{item.name}} - {{item.age}} {{item._id}} <input type="text">
+    <div>
+      #{{@index}} {{item.name}} - {{item.age}} {{item._id}}
+    </div>
+    <input type="checkbox">
   </div>
 {{/each}}
 <hr>

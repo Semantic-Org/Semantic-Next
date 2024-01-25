@@ -8,9 +8,18 @@ const UIButton = {};
 UIButton.createInstance = function(tpl, $) {
   return {
     items: new ReactiveVar([
-      { name: 'Jenny', age: 23 },
-      { name: 'Jack', age: 36 },
+      { name: 'First', age: 23 },
+      { name: 'Second', age: 36 },
+      { name: 'Third', age: 36 },
+      { name: 'Fourth', age: 36 },
+      { name: 'Fifth', age: 36 },
     ]),
+
+    newItem: {
+      name: 'Sixth',
+      age: 36,
+    }
+
   };
 };
 
@@ -18,21 +27,15 @@ UIButton.createInstance = function(tpl, $) {
 UIButton.onCreated = function(tpl) {
 
   setTimeout(() => {
-    let items = tpl.items.get();
-    items.push({
-      name: 'Albert',
-      age: 99
-    });
-    tpl.items.set(items);
-  }, 2000);
+    console.log('add', tpl.newItem);
+    tpl.items.push(tpl.newItem);
+  }, 1000);
   setTimeout(() => {
     let items = tpl.items.get();
-    items.push({
-      name: 'Stew',
-      age: 59
-    });
+    items[0].name = 'Jack';
     tpl.items.set(items);
-  }, 4000);
+  }, 2000);
+
   Reaction.create((comp) => {
     console.log('items reactively updated to', tpl.items.get());
   });

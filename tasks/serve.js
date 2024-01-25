@@ -32,6 +32,7 @@ let jsBuild = await esbuild.context({
     compilerOptions: {
       experimentalDecorators: true,
       useDefineForClassFields: false,
+      verbatimModuleSyntax: true
     },
   },
   format: 'esm',

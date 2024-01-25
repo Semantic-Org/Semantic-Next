@@ -56,6 +56,19 @@ export class ReactiveVar {
     }
   }
 
+  push(value) {
+    let arr = this.value;
+    arr.push(value);
+    console.log('push');
+    this.set(arr);
+  }
+
+  unshift(value) {
+    let arr = this.value;
+    arr.unshift(value);
+    this.set(arr);
+  }
+
   subscribe(callback) {
     const reaction = Reaction.create(() => {
       callback(this._value);
