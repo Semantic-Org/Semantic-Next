@@ -1,7 +1,6 @@
 import { html } from 'lit';
-import { guard } from 'lit/directives/guard.js';
-
-import { get, each, last, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
+import { repeat } from 'lit/directives/repeat.js';
+import { get, each, last, mapObject, hashCode, wrapFunction, isFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -98,17 +97,36 @@ export class LitRenderer {
   }
 
   evaluateEach(node, data) {
-    const directiveMap = (value, key) => {
-      if(key == 'over') {
-        return () => this.evaluateExpression(value, data, { asDirective: false });
-      }
-      if(key == 'content') {
-        return (eachData) => this.renderPartial({ast: value, data: eachData});
-      }
-      return value;
-    };
-    let eachArguments = mapObject(node, directiveMap);
-    return reactiveEach(eachArguments, data);
+    let value;
+    Reaction.create(() => {
+      const items = this.evaluateExpression(node.over, data, { asDirective: false });
+      console.log('rerun', items);
+      value = repeat(
+        items,
+        (item) => {
+          const hash = item._id || hashCode(item);
+          console.log(hash);
+          return hash;
+        },
+        (item, index) => {
+          let eachData = this.prepareEachData(item, index, data, node.as);
+          let html = this.renderPartial({ast: node.content, data: eachData});
+          console.log(html);
+          return html;
+        }
+      );
+      console.log('value is', value);
+    });
+    return value;
+  }
+
+  prepareEachData(item, index, data, alias) {
+    const baseData = { ...data, ['@index']: index };
+    // whether "#each foo in baz" or "#each foo"
+    return (alias)
+      ? { ...baseData, [alias]: item }
+      : { ...baseData, ...item }
+    ;
   }
 
   // subtrees are rendered as separate contexts
