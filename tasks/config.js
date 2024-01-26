@@ -1,3 +1,3 @@
-export const browserTarget = [
+export const BROWSER_TARGET = [
   'chrome58'
 ];

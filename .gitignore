@@ -36,3 +36,7 @@ nbproject
 *.sublime-workspace
 .build*
 .idea
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

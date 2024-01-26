@@ -8,13 +8,34 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "node ./tasks/build.js",
-    "serve": "node ./tasks/serve.js"
+    "build": "wireit",
+    "serve": "wireit",
+    "test-server": "wireit",
+    "test": "wireit"
+  },
+  "wireit": {
+    "build": {
+      "command": "node ./tasks/run/build.js"
+    },
+    "serve": {
+      "command": "node ./tasks/run/serve.js",
+      "service": true
+    },
+    "test-server": {
+      "command": "http-server ./ -p 8005",
+      "service": true
+    },
+    "test": {
+      "command": "npx playwright test --config=playwright.config.cjs",
+      "dependencies": ["build"]
+    }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
     "@chialab/esbuild-plugin-css-import": "^0.17.1",
+    "@playwright/test": "^1.41.1",
+    "@types/node": "^20.11.7",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
     "chalk": "^5.3.0",
@@ -23,9 +44,12 @@
     "esbuild-plugin-glob": "^2.2.1",
     "esbuild-plugin-output-reset": "^2.0.1",
     "glob": "^10.3.10",
+    "http-server": "^14.1.1",
+    "tachometer": "^0.7.0",
     "typescript": "^5.3.3",
     "typescript-eslint": "^0.0.1-alpha.0",
-    "underscore": "^1.13.6"
+    "underscore": "^1.13.6",
+    "wireit": "^0.14.3"
   },
   "workspaces": [
     "packages/*"
