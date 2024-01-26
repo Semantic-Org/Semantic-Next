@@ -10,7 +10,7 @@ Web components are well implemented but have some obvious downsides which hinder
 
 Web components lock down styles using the Shadow DOM but this makes it difficult to make small modifications to a component for a particular placement. Semantic has a few tricks up its sleave to help with this.
 
-* Semantic provides the `expose` attribute to specify that a given instance should render to regular DOM. Slots are emulated and render identically.
+* Semantic provides the `exposed` attribute to specify that a given instance should render to regular DOM. Slots are emulated and render identically.
 
 ```html
 <ui-button large red exposed>Hello</ui-button>
@@ -28,11 +28,11 @@ For most run-of-the-mill use cases people want a simple way to initialize a comp
 Semantic UI provides a 3kb modern [DOM query library](https://github.com/jlukic/semantic-next/tree/main/packages/query) built with modern ECMAScript which lets you interact with elements. It also provides familiar patterns for initializing components out of the box.
 
 ```html
-<ui-dropdown top right pointing class="special">
+<ui-dropdown top right pointing">
 ```
 ```javascript
 <script>
-  $('ui-dropdown.special').dropdown({
+  $('ui-dropdown[pointing]').dropdown({
     items: itemArray,
     allowAdditions: true,
     onChange: (value) => console.log(value)
@@ -89,10 +89,7 @@ For developers who dislike leaving anything to interpretation, or prefer strict 
   Follow
 </ui-button>
 
-#### Additional Flexibility
-
 
 ### Tech
 
-
-Rendering is done using [`Lit-HTML`](https://krausest.github.io/js-framework-benchmark/index.html) under the hood, which is [pretty fast](https://krausest.github.io/js-framework-benchmark/index.html). Lit code is compiled from a custom templating l
+Rendering is done using [`Lit-HTML`](https://krausest.github.io/js-framework-benchmark/index.html) under the hood, which is [pretty fast](https://krausest.github.io/js-framework-benchmark/index.html). Lit code is compiled from a simple custom templating language loosely inspired by Meteor JS. 
