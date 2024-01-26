@@ -41,7 +41,7 @@ If you are working with regular DOM or using element descriptions to reference t
 </style>
 ```
 
-#### Dialect #3 - Computer Language (Verbose)
+#### Dialect #3 - Technical
 
 For developers who dont like leaving anything to interpretation, or prefer standards to personal preference -- or perhaps yet have other vanilla web components that are already in their codebase and prefer consistency. 
 
