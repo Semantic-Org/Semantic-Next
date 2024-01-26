@@ -83,12 +83,13 @@ If you are working with regular DOM or using element descriptions to reference t
 
 #### Dialect #3 - Computer Language (Verbose)
 
-For developers who dislike leaving anything to interpretation, or prefer strict adherance to standards (or perhaps to other vanilla web components that are already in their codebase) the 
+For developers who dont like leaving anything to interpretation, or prefer standards to personal preference -- or perhaps yet have other vanilla web components that are already in their codebase and prefer consistency. 
 
+```html
 <ui-button size="large" emphasis="secondary">
   Follow
 </ui-button>
-
+```
 
 ### Tech
 
