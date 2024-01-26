@@ -4,7 +4,7 @@ Semantic UI Next is an attempt at creating a generalized format of UI component 
 
 ### HTML 
 
-Semantic UI supports three dialects which each will produce the same components. They are designed to support different types of developers and different types of viewpoints on code. [Evan You of VueJS](https://www.youtube.com/watch?v=YMwCPfABwHg) does a great job of covering this topic.
+Semantic UI supports three dialects which each will produce the same components. They are designed to support different types of developers and different types of viewpoints on code. [Evan You of VueJS](https://www.youtube.com/watch?v=YMwCPfABwHg&t=3m58s) does a great job of covering this topic.
 
 Dialects are designed to appeal to different types of developers (language speakers) with different needs and expectations. This is to allow developers to choose to code in the way that comes most natural to them.
 
