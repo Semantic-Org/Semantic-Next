@@ -1,12 +1,8 @@
 ## Semantic-UI
 
-Semantic UI Next is an attempt at creating a generalized format of UI component using web components.
+Semantic UI Next is an attempt at creating a generalized format of UI component using web components. Web components are well implemented but have some obvious downsides which hinder adoptions. 
 
-### Point of View
-
-Web components are well implemented but have some obvious downsides which hinder adoptions. 
-
-### Liberate Styles
+### CSS
 
 Web components lock down styles using the Shadow DOM but this makes it difficult to make small modifications to a component for a particular placement. Semantic has a few tricks up its sleave to help with this.
 
@@ -21,9 +17,9 @@ Web components lock down styles using the Shadow DOM but this makes it difficult
 <ui-button large red tweaks="20px underlined"></ui-button>
 ```
 
-### Simplify JS Interactions
+### Javascript
 
-For most run-of-the-mill use cases people want a simple way to initialize a component with behaviors, pass in some data like callbacks and configure some settings. This can be difficult with web components as they expect you to pass settings in a mixture of attributes and properties.
+For most run-of-the-mill use cases people want a simple way to initialize a component with behaviors, pass in some data like callbacks and configure some settings. This can be difficult with web components as they expect you to pass settings in a mixture of attributes and properties and to consume callbacks as events. You can still do those with Semantic UI, but we provide alternatives which may be easier in some use cases or for novices.
 
 Semantic UI provides a 3kb modern [DOM query library](https://github.com/jlukic/semantic-next/tree/main/packages/query) built with modern ECMAScript which lets you interact with elements. It also provides familiar patterns for initializing components out of the box.
 
@@ -40,7 +36,7 @@ Semantic UI provides a 3kb modern [DOM query library](https://github.com/jlukic/
 </script>
 ```
 
-### Flexible and Adaptive
+### HTML 
 
 Semantic UI supports three dialects which each will produce the same components. They are designed to support different types of developers and different types of viewpoints on code. [Evan You of VueJS](https://www.youtube.com/watch?v=YMwCPfABwHg) does a great job of covering this topic.
 
