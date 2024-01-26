@@ -26,13 +26,22 @@ Semantic UI provides a 3kb modern [DOM query library](https://github.com/jlukic/
 ```html
 <ui-dropdown top right pointing">
 ```
+
+using query with SUI
 ```javascript
-<script>
   $('ui-dropdown').dropdown({
     items: itemArray,
     allowAdditions: true,
     onChange: (value) => console.log(value)
   });
+```
+
+traditional way 
+```javascript
+  let dropdown = document.querySelectorAll('ui-dropdown')[0];
+  dropdown.items = [];
+  dropdown.allowAdditions = true;
+  dropdown.attachEventListener('change', (value) => console.log(value));
 </script>
 ```
 
