@@ -1,0 +1,1 @@
+{"fullyTracked":false,"platform":"linux","arch":"x64","nodeVersion":"v21.6.0","command":"node ./tasks/run/build.js","extraArgs":[],"clean":true,"files":{},"output":[],"dependencies":{},"env":{}}

@@ -1,6 +1,6 @@
 import * as esbuild from 'esbuild';
-import { browserTarget } from './config.js';
-import { logPlugin } from './plugins.js';
+import { BROWSER_TARGET } from '../config.js';
+import { logPlugin } from '../plugins.js';
 
 /*
   Takes all css parts of a component and creates
@@ -10,7 +10,7 @@ const cssConcat = await esbuild.context({
   entryPoints: [
     'src/**/css/*.css'
   ],
-  target: browserTarget,
+  target: BROWSER_TARGET,
   bundle: true,
   plugins: [ logPlugin('CSS Concat') ],
   loader: {
@@ -55,7 +55,6 @@ let jsBuild = await esbuild.context({
 });
 
 
-
 /*
   Exports global css
 */
@@ -66,7 +65,7 @@ let cssBuild = await esbuild.context({
   bundle: true,
   minify: false,
   sourcemap: true,
-  target: browserTarget,
+  target: BROWSER_TARGET,
   plugins: [ logPlugin('SUI CSS') ],
   loader: {
     '.css': 'css',
@@ -82,7 +81,7 @@ let cssBuild = await esbuild.context({
   entryPoints: [
     'src/spec.js'
   ],
-  target: browserTarget,
+  target: BROWSER_TARGET,
   bundle: true,
   plugins: [ logPlugin('Spec Build') ],
   loader: {
@@ -104,7 +103,7 @@ let themeBuild = await esbuild.context({
   bundle: true,
   minify: false,
   sourcemap: true,
-  target: browserTarget,
+  target: BROWSER_TARGET,
   plugins: [ logPlugin('Theme CSS') ],
   loader: {
     '.css': 'css',
@@ -118,7 +117,6 @@ await Promise.all([
   cssBuild.watch(),
   themeBuild.watch(),
 ]);
-
 let { host, port } = await jsBuild.serve({
   servedir: 'dev',
 });
