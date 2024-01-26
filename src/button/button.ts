@@ -28,8 +28,17 @@ UIButton.onCreated = function(tpl) {
 
   setTimeout(() => {
     console.log('add', tpl.newItem);
-    tpl.items.push(tpl.newItem);
-  }, 1000);
+    tpl.items.unshift(tpl.newItem);
+  }, 4000);
+  setTimeout(() => {
+    console.log('add', tpl.newItem);
+    tpl.items.unshift(tpl.newItem);
+  }, 4000);
+  setTimeout(() => {
+    console.log('add', tpl.newItem);
+    tpl.items.unshift(tpl.newItem);
+  }, 4000);
+
   setTimeout(() => {
     let items = tpl.items.get();
     items[0].name = 'Jack';
@@ -37,7 +46,9 @@ UIButton.onCreated = function(tpl) {
   }, 2000);
 
   Reaction.create((comp) => {
-    console.log('items reactively updated to', tpl.items.get());
+    let items = Reaction.nonreactive(() => {
+      console.log('items reactively updated to', tpl.items.get());
+    });
   });
 };
 

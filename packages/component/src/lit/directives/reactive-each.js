@@ -10,54 +10,61 @@ class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.itemTemplates = new Map();
+    this.parts = new Map();
   }
 
   render(eachCondition, data) {
-    if (this.reaction) {
-      this.reaction.stop();
+    // Initial setup before the reaction
+    const initialRender = this.createRepeat(eachCondition, data);
+
+    if (!this.reaction) {
+      this.reaction = Reaction.create(() => {
+        const items = this.getItems(eachCondition); // setup reactivity
+        if(this.firstRun) {
+          return;
+        }
+        const render = this.createRepeat(eachCondition, data, items);
+        this.setValue(render);
+      });
     }
+    return initialRender;
+  }
 
-    this.reaction = Reaction.create((comp) => {
-      const items = eachCondition.over();
-      const newTemplates = new Map();
-
-      if (items?.length) {
-        each(items, (item, index) => {
-          let uniqueId = this.getUniqueId(item);
-          let template = this.itemTemplates.get(uniqueId);
-
-          if (!template) {
-            // Create a new template for new items
-            let eachData = this.prepareEachData(item, index, data, eachCondition.as);
-            console.log('creating template', eachData);
-            template = eachCondition.content(eachData);
-          }
-          else {
-            console.log('reusing template', index);
-          }
-
-          newTemplates.set(uniqueId, template);
-        });
-      }
-
-      // Update the item templates map for the next run
-      this.itemTemplates = newTemplates;
-
-      if (!comp.firstRun) {
-        this.setValue(this.joinTemplates(newTemplates));
-      }
+  getItems(eachCondition) {
+    let items = eachCondition.over();
+    items = items.map(item => {
+      item._id = item._id || hashCode(item);
+      return item;
     });
-
-    return this.joinTemplates(this.itemTemplates);
+    return items;
   }
 
-  getUniqueId(item) {
-    return item._id || hashCode(item); // Ensure each item has a unique identifier
+  createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
+    if (!items?.length) {
+      return nothing;
+    }
+    return repeat(items, this.getPartID, (item, index) => {
+      let part = this.parts.get(item._id);
+      if(part) {
+        // used cached template
+        return part;
+      }
+      else {
+        // render template
+        part = this.getPartContent(item, index, data, eachCondition);
+        this.parts.set(item._id, part);
+      }
+      return part;
+    });
   }
 
-  joinTemplates(templates) {
-    return html`${Array.from(templates.values())}`;
+  getPartContent(item, index, data, eachCondition) {
+    let eachData = this.prepareEachData(item, index, data, eachCondition.as);
+    return eachCondition.content(eachData);
+  }
+
+  getPartID(item) {
+    return item._id || hashCode(item);
   }
 
   prepareEachData(item, index, data, alias) {
