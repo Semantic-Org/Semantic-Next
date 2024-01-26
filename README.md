@@ -1,12 +1,10 @@
 ## Semantic-UI
 
-Semantic UI Next is an attempt at creating a generalized format of UI component using web components. Web components are well implemented but have some obvious downsides which hinder adoptions. 
+Semantic UI Next is an attempt at creating a generalized format of UI component using web components but hopefully smoothing out some of the rough edges which may have prevented people from adopting web components before.
 
 ### HTML 
 
-Semantic UI supports three dialects which each will produce the same components. They are designed to support different types of developers and different types of viewpoints on code. [Evan You of VueJS](https://www.youtube.com/watch?v=YMwCPfABwHg&t=3m58s) does a great job of covering this topic.
-
-Dialects are designed to appeal to different types of developers (language speakers) with different needs and expectations. This is to allow developers to choose to code in the way that comes most natural to them.
+Dialects are designed to appeal to different types of developers with different needs and expectations. This is to allow developers to choose to code in the way that comes most natural to them. [Evan You of VueJS](https://www.youtube.com/watch?v=YMwCPfABwHg&t=3m58s) does a great job of covering the various groups of people that build for the web. It is unrealistic to think that they will ever agree entirely on one lingua franca, or that we should expect them to, as different priors bring different preferences.
 
 #### Dialect #1 - Natural Language
 
