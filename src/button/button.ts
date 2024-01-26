@@ -16,11 +16,11 @@ UIButton.createInstance = function(tpl, $) {
     condition3: new ReactiveVar(false),
     saying: new ReactiveVar('hello'),
     items: new ReactiveVar([
-      { name: 'First', age: 23 },
-      { name: 'Second', age: 36 },
-      { name: 'Third', age: 36 },
-      { name: 'Fourth', age: 36 },
-      { name: 'Fifth', age: 36 },
+      { _id: 'a', name: 'First', age: 23 },
+      { _id: 'b', name: 'Second', age: 36 },
+      { _id: 'c', name: 'Third', age: 36 },
+      { _id: 'd', name: 'Fourth', age: 36 },
+      { _id: 'e', name: 'Fifth', age: 36 },
     ]),
 
 
@@ -49,6 +49,7 @@ UIButton.createInstance = function(tpl, $) {
     },
 
     newItem: {
+      _id: 'f',
       name: 'Sixth',
       age: 36,
     }
@@ -59,28 +60,12 @@ UIButton.createInstance = function(tpl, $) {
 UIButton.onCreated = function(tpl) {
 
   setTimeout(() => {
-    tpl.condition.set(true);
-  }, 2000);
-  setTimeout(() => {
-    tpl.condition2.set(true);
-  }, 4000);
-  setTimeout(() => {
-    tpl.condition3.set(true);
-  }, 6000);
-  setTimeout(() => {
-    tpl.saying.set('goodbye');
-  }, 6000);
-  setTimeout(() => {
-    console.log('add', tpl.newItem);
-    tpl.items.unshift(tpl.newItem);
-  }, 4000);
+    let items = tpl.items.get();
+    items[0].name = 'Margaret';
+    console.log('setting name to margaret');
+    tpl.items.set(items);
+  }, 1000);
 
-  setTimeout(() => {
-    tpl.items.removeItem(2);
-  }, 2000);
-  setTimeout(() => {
-    tpl.items.unshift(tpl.newItem);
-  }, 2000);
 
 };
 
