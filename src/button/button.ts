@@ -7,6 +7,14 @@ const UIButton = {};
 
 UIButton.createInstance = function(tpl, $) {
   return {
+    text: true,
+
+    word: 'bird',
+
+    condition: new ReactiveVar(false),
+    condition2: new ReactiveVar(false),
+    condition3: new ReactiveVar(false),
+    saying: new ReactiveVar('hello'),
     items: new ReactiveVar([
       { name: 'First', age: 23 },
       { name: 'Second', age: 36 },
@@ -15,17 +23,53 @@ UIButton.createInstance = function(tpl, $) {
       { name: 'Fifth', age: 36 },
     ]),
 
+
+    hasIcon() {
+      return tpl.data.icon;
+    },
+
+    format(expression) {
+      return `Wrapping thing ${expression}`;
+    },
+
+    sayWord(word, word2) {
+      return `This is ${word}. Second word is ${word2}`;
+    },
+
+    getIcon() {
+      return data.icon;
+    },
+
+    getText() {
+      return $('.button').text();
+    },
+
+    getSaying() {
+      return tpl.saying.get();
+    },
+
     newItem: {
-      name: 'Zero',
+      name: 'Sixth',
       age: 36,
     }
-
   };
 };
 
 
 UIButton.onCreated = function(tpl) {
 
+  setTimeout(() => {
+    tpl.condition.set(true);
+  }, 2000);
+  setTimeout(() => {
+    tpl.condition2.set(true);
+  }, 4000);
+  setTimeout(() => {
+    tpl.condition3.set(true);
+  }, 6000);
+  setTimeout(() => {
+    tpl.saying.set('goodbye');
+  }, 6000);
   setTimeout(() => {
     console.log('add', tpl.newItem);
     tpl.items.unshift(tpl.newItem);
@@ -34,18 +78,10 @@ UIButton.onCreated = function(tpl) {
   setTimeout(() => {
     tpl.items.removeItem(2);
   }, 2000);
-
   setTimeout(() => {
-    let items = tpl.items.get();
-    items[0].name = 'Firstt';
-    tpl.items.set(items);
-  }, 1000);
+    tpl.items.unshift(tpl.newItem);
+  }, 2000);
 
-  Reaction.create((comp) => {
-    let items = Reaction.nonreactive(() => {
-      console.log('items reactively updated to', tpl.items.get());
-    });
-  });
 };
 
 UIButton.events = {

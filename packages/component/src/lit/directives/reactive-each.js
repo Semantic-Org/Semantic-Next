@@ -4,7 +4,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { each, hashCode, values } from '@semantic-ui/utils';
+import { each, hashCode, isObject, isString, values } from '@semantic-ui/utils';
 
 class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -33,7 +33,9 @@ class ReactiveEachDirective extends AsyncDirective {
   getItems(eachCondition) {
     let items = eachCondition.over();
     items = items.map(item => {
-      item._id = item._id || hashCode(item);
+      if(isObject(item)) {
+        item._id = item._id || hashCode(item);
+      }
       return item;
     });
     return items;
@@ -44,7 +46,7 @@ class ReactiveEachDirective extends AsyncDirective {
       return nothing;
     }
     return repeat(items, this.getPartID, (item, index) => {
-      let part = this.parts.get(item._id);
+      let part = this.parts.get(this.getPartID(item));
       if(part) {
         // used cached template
         return part;
@@ -52,7 +54,7 @@ class ReactiveEachDirective extends AsyncDirective {
       else {
         // render template
         part = this.getPartContent(item, index, data, eachCondition);
-        this.parts.set(item._id, part);
+        this.parts.set(this.getPartID(item), part);
       }
       return part;
     });
@@ -64,7 +66,12 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   getPartID(item) {
-    return item._id || hashCode(item);
+    if(isObject(item)) {
+      return item._id || hashCode(item);
+    }
+    if(isString) {
+      return item;
+    }
   }
 
   prepareEachData(item, index, data, alias) {

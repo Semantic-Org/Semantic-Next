@@ -1,3 +1,28 @@
+<div>
+{{#if condition.get}}
+  1
+  {{#if condition2.get}}
+    {{#if condition3.get}}
+      True True True
+    {{else}}
+      True True False
+    {{/if}}
+  {{else}}
+    True False False
+  {{/if}}
+{{elseif false}}
+{{else}}
+  2
+  {{#if condition2.get}}
+    False True
+  {{else}}
+    False False
+  {{/if}}
+{{/if}}
+</div>
+<div>
+  Should not rerender {{getSaying}}
+</div>
 {{#each item in items.get}}
   <div>
     <div>
@@ -7,3 +32,13 @@
   </div>
 {{/each}}
 <hr>
+
+<style>
+  * {
+    animation: alert 0.5s ease;
+  }
+@keyframes alert {
+  from {background-color: red;}
+  to {background-color: white;}
+}
+</style>
