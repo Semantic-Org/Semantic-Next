@@ -30,20 +30,16 @@ UIButton.onCreated = function(tpl) {
     console.log('add', tpl.newItem);
     tpl.items.unshift(tpl.newItem);
   }, 4000);
+
   setTimeout(() => {
-    console.log('add', tpl.newItem);
-    tpl.items.unshift(tpl.newItem);
-  }, 4000);
-  setTimeout(() => {
-    console.log('add', tpl.newItem);
-    tpl.items.unshift(tpl.newItem);
-  }, 4000);
+    tpl.items.splice(1, 1);
+  }, 2000);
 
   setTimeout(() => {
     let items = tpl.items.get();
     items[0].name = 'Jack';
     tpl.items.set(items);
-  }, 2000);
+  }, 1000);
 
   Reaction.create((comp) => {
     let items = Reaction.nonreactive(() => {
