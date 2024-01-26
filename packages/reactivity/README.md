@@ -82,11 +82,11 @@ reactiveObj.set(obj2);
 
 ```javascript
   let items = new ReactiveVar([0,1,2]);
-  tpl.items.removeItem(1); // outputs 0,2
+  tpl.items.removeItem(1); // outputs 0, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,2,2]);
-  tpl.items.setItem(1); // outputs 0,1, 2
+  tpl.items.setItem(1); // outputs 0, 1, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,1,2]);
