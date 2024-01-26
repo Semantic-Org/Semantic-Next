@@ -1,4 +1,4 @@
-# @semantic-ui/reactivity
+# @semantic-ui/query
 
 Query is a **tiny (3kb!) library** for chaining interactions with DOM elements similar to jQuery.
 
