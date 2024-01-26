@@ -23,11 +23,6 @@ For most run-of-the-mill use cases people want a simple way to initialize a comp
 
 Semantic UI provides a 3kb modern [DOM query library](https://github.com/jlukic/semantic-next/tree/main/packages/query) built with modern ECMAScript which lets you interact with elements. It also provides familiar patterns for initializing components out of the box.
 
-```html
-<ui-dropdown top right pointing">
-```
-
-
 traditional way 
 ```javascript
 let dropdown = document.querySelectorAll('ui-dropdown')[0];
