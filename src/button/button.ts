@@ -16,7 +16,7 @@ UIButton.createInstance = function(tpl, $) {
     ]),
 
     newItem: {
-      name: 'Sixth',
+      name: 'Zero',
       age: 36,
     }
 
@@ -32,12 +32,12 @@ UIButton.onCreated = function(tpl) {
   }, 4000);
 
   setTimeout(() => {
-    tpl.items.splice(1, 1);
+    tpl.items.removeItem(2);
   }, 2000);
 
   setTimeout(() => {
     let items = tpl.items.get();
-    items[0].name = 'Jack';
+    items[0].name = 'Firstt';
     tpl.items.set(items);
   }, 1000);
 

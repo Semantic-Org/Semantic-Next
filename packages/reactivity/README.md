@@ -76,7 +76,26 @@ reactiveObj.set(obj2);
 
 ```
 
+### Array Mutation Helpers
 
+`ReactiveVar` includes a few helpers for some of the most common cases for manipulating arrays
+
+```javascript
+  let items = new ReactiveVar([0,1,2]);
+  tpl.items.removeItem(1); // outputs 0,2
+```
+```javascript
+  let items = new ReactiveVar([0,2,2]);
+  tpl.items.setItem(1); // outputs 0,1, 2
+```
+```javascript
+  let items = new ReactiveVar([0,1,2]);
+  tpl.items.unshift(); // outputs 1, 2
+```
+```javascript
+  let items = new ReactiveVar([0,1,2]);
+  tpl.items.push(3); // outputs 0, 1, 2, 3
+```
 
 ### Property / Array Mutations
 

@@ -85,16 +85,24 @@ export class ReactiveVar {
     arr.push(value);
     this.set(arr);
   }
-
   unshift(value) {
     let arr = this.value;
     arr.unshift(value);
     this.set(arr);
   }
-
   splice(...args) {
     let arr = this.value;
     arr.splice(...args);
+    this.set(arr);
+  }
+  setItem(index, value) {
+    let arr = this.value;
+    arr[index] = value;
+    this.set(arr);
+  }
+  removeItem(index) {
+    let arr = this.value;
+    arr.splice(index, 1);
     this.set(arr);
   }
 

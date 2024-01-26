@@ -103,10 +103,7 @@ export class LitRenderer {
         return () => this.evaluateExpression(value, data, { asDirective: false });
       }
       if(key == 'content') {
-        return (eachData) => {
-          console.log('regetting partial');
-          return this.renderPartial({ast: value, data: eachData});
-        };
+        return (eachData) => this.renderPartial({ast: value, data: eachData});
       }
       return value;
     };
