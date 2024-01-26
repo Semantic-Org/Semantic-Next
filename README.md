@@ -39,7 +39,7 @@ $('ui-dropdown').dropdown({
 traditional way 
 ```javascript
 let dropdown = document.querySelectorAll('ui-dropdown')[0];
-dropdown.items = [];
+dropdown.items = itemArray;
 dropdown.allowAdditions = true;
 dropdown.attachEventListener('change', (value) => console.log(value));
 ```
