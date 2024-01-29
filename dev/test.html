@@ -31,7 +31,15 @@ new EventSource('/esbuild').addEventListener('change', e => {
 </head>
 <body>
   <div class="container">
-    <a href="/test.html">Test Element</a>
-    <a href="/button.html">Button</a>
+    <test-element>
+      Test
+      <span slot="text">Dummy Content</span>
+    </test-element>
+    <style>
+      test-element:not(:defined) {
+        opacity: 0;
+      }
+    </style>
+
   </div>
 </body>

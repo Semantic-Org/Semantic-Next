@@ -2,7 +2,8 @@ import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { range } from '@semantic-ui/utils';
 
-import { TestSpec, TestTemplate, TestCSS } from './';
+import template from './test.html';
+import css from './test.css';
 
 const TestElement = {};
 
@@ -10,9 +11,16 @@ TestElement.createInstance = function(tpl, $) {
   return {
 
     tab: new ReactiveVar('basic'),
-
     number: new ReactiveVar(6),
     date: new ReactiveVar(new Date()),
+
+    items: new ReactiveVar([
+      { _id: 'a', name: 'First', age: 23 },
+      { _id: 'b', name: 'Second', age: 36 },
+      { _id: 'c', name: 'Third', age: 36 },
+      { _id: 'd', name: 'Fourth', age: 36 },
+      { _id: 'e', name: 'Fifth', age: 36 },
+    ]),
 
     getRange() {
       if(!Number.isFinite(+tpl.number.value)) {
@@ -52,10 +60,9 @@ TestElement.events = {
   },
 };
 
-createComponent('ui-test-element', {
-  spec: TestSpec,
-  template: TestTemplate,
-  css: TestCSS,
+createComponent('test-element', {
+  template,
+  css,
   ...TestElement,
 });
 

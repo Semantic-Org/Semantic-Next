@@ -9,8 +9,8 @@ import { UIComponent } from './ui-component';
 import { attachEvents } from './events';
 
 
-// placeholder for testing
-const spec = {
+// placeholder for testing out spec
+const FAKE_SPEC = {
   settings: {
     size: ['mini', 'tiny', 'small', 'medium', 'large', 'huge', 'massive'],
     emphasis: ['primary', 'secondary'],
@@ -24,7 +24,7 @@ export const createComponent = (tagName, {
 
   template = '',
   css = false,
-  spec2 = false,
+  spec = false,
   defineElement = true,
 
   events = {},
@@ -131,6 +131,7 @@ export const createComponent = (tagName, {
       <ui-button class="large"> // classic
     */
     adjustSettingFromAttribute(attribute, value) {
+      const spec = FAKE_SPEC; // TESTING FOR NOW
       if(attribute == 'class') {
         // this is syntax <ui-button class="large primary"></ui-button>
         each(value.split(' '), className => {

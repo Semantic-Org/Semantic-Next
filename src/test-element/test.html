@@ -24,9 +24,8 @@
     <hr>
     <h4>Global Helpers</h4>
     Today's date is {{formatDate}}, the exact time is <span>{{formatDateTimeSeconds date}}</span>
-  {{/if}}
 
-  {{#if is tab 'events'}}
+  {{else if is tab 'events'}}
     <h4>Events</h4>
     <p>
       Enter a number
@@ -65,6 +64,7 @@
     {{else}}
       {{number}} is not a valid number
     {{/if}}
+
   {{/if}}
 
 </div>

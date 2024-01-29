@@ -1,2 +1,2 @@
 export { UIButton } from './button';
-export { TestElement } from './test';
+export { TestElement } from './test-element';

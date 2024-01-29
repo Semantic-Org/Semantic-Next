@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import { ButtonSpec, ButtonTemplate, ButtonCSS } from './';
 
@@ -15,14 +15,6 @@ UIButton.createInstance = function(tpl, $) {
     condition2: new ReactiveVar(false),
     condition3: new ReactiveVar(false),
     saying: new ReactiveVar('hello'),
-    items: new ReactiveVar([
-      { _id: 'a', name: 'First', age: 23 },
-      { _id: 'b', name: 'Second', age: 36 },
-      { _id: 'c', name: 'Third', age: 36 },
-      { _id: 'd', name: 'Fourth', age: 36 },
-      { _id: 'e', name: 'Fifth', age: 36 },
-    ]),
-
 
     hasIcon() {
       return tpl.data.icon;
@@ -58,14 +50,6 @@ UIButton.createInstance = function(tpl, $) {
 
 
 UIButton.onCreated = function(tpl) {
-
-  setTimeout(() => {
-    let items = tpl.items.get();
-    items[0].name = 'Margaret';
-    console.log('setting name to margaret');
-    tpl.items.set(items);
-  }, 1000);
-
 
 };
 
