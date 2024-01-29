@@ -51,6 +51,7 @@ export const createComponent = (tagName, {
     }
 
     static get properties() {
+      // this will be dynamic
       return {
         // attrs
         size: { type: String, observe: true, reflect: false },

@@ -1,13 +1,19 @@
 import { html } from 'lit';
-import { guard } from 'lit/directives/guard.js';
+import { get, each, mapObject, isFunction } from '@semantic-ui/utils';
 
-import { get, each, last, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
-import { Reaction } from '@semantic-ui/reactivity';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveEach } from './directives/reactive-each.js';
 
+import { Helpers } from './helpers';
+
 export class LitRenderer {
+
+  static helpers = Helpers;
+
+  static addHelper(name, helper) {
+    LitRenderer.helpers[name] = helper;
+  }
 
   constructor({
     ast,
@@ -15,7 +21,10 @@ export class LitRenderer {
     litElement
   }) {
     this.ast = ast || '';
-    this.data = data || {};
+
+    // allow 'global' helpers
+    this.data = data;
+
     this.litElement = litElement;
     this.resetHTML();
   }
@@ -151,19 +160,23 @@ export class LitRenderer {
       // the 'this' context' is the path up to expression
       // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
       const getContext = () => {
-        const path = expression.split('.').slice(0, index - 1).join('.');
+        const path = expression.split('.').slice(0, -1).join('.');
         const context = get(data, path);
         return context;
       };
-      const dataValue = get(data, expression);
+      let dataValue = get(data, expression);
+      const helper = LitRenderer.helpers[expression];
+      // check if we have a global helper with this name
+      if(!dataValue && isFunction(helper)) {
+        dataValue = helper;
+      }
+
       let stringMatches;
       let parsedNumber;
       if(isFunction(dataValue)) {
         // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
         const boundFunc = dataValue.bind( getContext() );
         result = boundFunc(...funcArguments);
-        // Reset arguments after function execution
-        funcArguments = [];
       }
       else if(dataValue) {
         result = dataValue;
@@ -171,15 +184,13 @@ export class LitRenderer {
       else if((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
         result = stringMatches[1];
       }
-      else if(!Number.isNaN(dataValue)) {
+      else if(!Number.isNaN(parseFloat(expression))) {
         // Numbers should be passed as their numerical values to functions
-        result = dataValue;
+        result = Number(expression);
       }
       else {
         result = undefined;
       }
-
-      // Prepending current result for the next function invocation
       funcArguments.unshift(result);
     });
     return result;

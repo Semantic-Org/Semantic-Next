@@ -49,13 +49,13 @@ class ReactiveEachDirective extends AsyncDirective {
       let part = this.parts.get(this.getPartID(item));
       if(part) {
         // used cached template
-        console.log('reuse', this.getPartID(item));
+        //console.log('reuse', this.getPartID(item));
         return part;
       }
       else {
         // render template
         part = this.getPartContent(item, index, data, eachCondition);
-        console.log('render', this.getPartID(item));
+        //console.log('render', this.getPartID(item));
         this.parts.set(this.getPartID(item), part);
       }
       return part;
