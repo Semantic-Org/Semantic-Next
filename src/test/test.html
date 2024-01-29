@@ -1,0 +1,70 @@
+<div class="test-element">
+
+  <div class="tab" data-tab="basic">
+    Basic
+  </div>
+  <div class="tab" data-tab="events">
+    Events & Reactivity
+  </div>
+
+  {{#if is tab 'basic'}}
+
+    <h4>Default Slot Content</h4>
+    {{slot}}
+
+    <hr>
+    <h4>Named Slot "Text"</h4>
+    <p>Text slot is "{{slot text}}"</p>
+    <p>Add a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot" target="_blank">slot element</a> with name text to have it appear here.</p>
+
+    <hr>
+    <h4>Template Functions</h4>
+    {{echo 'hello!'}}
+
+    <hr>
+    <h4>Global Helpers</h4>
+    Today's date is {{formatDate}}, the exact time is <span>{{formatDateTimeSeconds date}}</span>
+  {{/if}}
+
+  {{#if is tab 'events'}}
+    <h4>Events</h4>
+    <p>
+      Enter a number
+      <input type="text" name="number" value="{{number}}" maxlength="3">
+    </p>
+
+    <hr>
+    <h4>Reactive Updates</h4>
+    <p>Number is {{number}}</p>
+
+    <hr>
+    <h4>Reactive conditions</h4>
+    {{#if greaterThan number 100}}
+      Number is greater than 100
+    {{else if greaterThan number 10}}
+      Number is greater than 10
+    {{else if greaterThan number 0}}
+      Number is between 1-10
+      {{#if is number 5}}
+        Number is 5
+      {{else if not greaterThan number 5}}
+        Number is between 1-5
+      {{/if}}
+    {{else if isNumber number}}
+      Number is {{number}} which is not between 1-1000.
+    {{else}}
+      Value is not a number "{{number}}"
+    {{/if}}
+
+    <hr>
+    <h4>Looping</h4>
+    {{#if number}}
+      {{#each countNumber in getRange number}}
+        <span class="number">{{countNumber}}</span>
+      {{/each}}
+    {{else}}
+      {{number}} is not a valid number
+    {{/if}}
+  {{/if}}
+
+</div>

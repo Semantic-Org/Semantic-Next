@@ -21,6 +21,7 @@ Query supports the following methods
 * `removeClass(classNames)` - Remove class names from element
 * `css(property, value)` - Set css property to value. Accepts either two parameters or an object of * properties to change.
 * `attr(attribute, value)` - Set css property to value. Accepts either two parameters or an object of attributes to change.
+* `value(value)` - Set or retrieve an input value for a form element
 
 ### Content
 * `html(newHTML)` - Get or set html for for current node list.

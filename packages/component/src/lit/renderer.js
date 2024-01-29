@@ -172,14 +172,16 @@ export class LitRenderer {
       }
 
       let stringMatches;
-      let parsedNumber;
       if(isFunction(dataValue)) {
         // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
         const boundFunc = dataValue.bind( getContext() );
         result = boundFunc(...funcArguments);
       }
       else if(dataValue) {
-        result = dataValue;
+        result = (dataValue?.constructor.name === '_ReactiveVar')
+          ? dataValue.value
+          : dataValue
+        ;
       }
       else if((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
         result = stringMatches[1];
@@ -212,7 +214,7 @@ export class LitRenderer {
   }
 
   addValue(expression) {
-    this.addHTMLSpacer(); // spacer is necessary `{'one'}` evaluates to ['',''] ['one'] with template literals
+    this.addHTMLSpacer(); // spacer is necessary foo`{'one'}` evaluates to foo(['',''] ['one']) with tagged template literals
     this.expressions.push(expression);
     this.lastHTML = false;
     this.addHTMLSpacer();

@@ -1,0 +1,11 @@
+<style>
+  /* Example inline styles */
+  .number {
+    animation: alert 0.5s ease;
+    will-change: background;
+  }
+  @keyframes alert {
+    from {background-color: red;}
+    to {background-color: white;}
+  }
+</style>

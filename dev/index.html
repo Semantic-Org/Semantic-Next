@@ -31,18 +31,19 @@ new EventSource('/esbuild').addEventListener('change', e => {
 </head>
 <body>
   <div class="container">
-    <ui-button size="large" emphasis="secondary">
-      Follow
-    </ui-button>
+    <ui-test-element>
+      Test
+      <span slot="text">Dummy Content</span>
+    </ui-test-element>
 
-    <!-- <ui-button large primary>
-      Follow
-    </ui-button>
+      <!-- <ui-button large primary>
+        Follow
+      </ui-button>
 
-    <ui-button class="large primary" expose>
-      Follow
-    </ui-button>
- -->
+      <ui-button class="large primary" expose>
+        Follow
+      </ui-button>
+   -->
     <style>
       ui-button.large .button {
         background-color: orange;

@@ -40,6 +40,50 @@ export const isArguments = function(obj) {
   return !!(obj && get(obj, 'callee'));
 };
 
+/*-------------------
+      Date
+--------------------*/
+
+export const formatDate = function(date, format) {
+  const pad = (n) => (n < 10 ? '0' + n : n);
+  const dateMap = {
+    'YYYY': date.getFullYear(),
+    'YY': date.getFullYear().toString().slice(-2),
+    'MMMM': date.toLocaleString('default', { month: 'long' }),
+    'MMM': date.toLocaleString('default', { month: 'short' }),
+    'MM': pad(date.getMonth() + 1),
+    'M': date.getMonth() + 1,
+    'DD': pad(date.getDate()),
+    'D': date.getDate(),
+    'Do': date.getDate() + ['th', 'st', 'nd', 'rd'][((date.getDate() + 90) % 100 - 10) % 10 - 1] || 'th',
+    'dddd': date.toLocaleString('default', { weekday: 'long' }),
+    'ddd': date.toLocaleString('default', { weekday: 'short' }),
+    'HH': pad(date.getHours()),
+    'h': date.getHours() % 12 || 12,
+    'mm': pad(date.getMinutes()),
+    'ss': pad(date.getSeconds()),
+    'a': date.getHours() >= 12 ? 'pm' : 'am'
+  };
+
+  const formatMap = {
+    'LT': 'h:mm a',
+    'LTS': 'h:mm:ss a',
+    'L': 'MM/DD/YYYY',
+    'l': 'M/D/YYYY',
+    'LL': 'MMMM D, YYYY',
+    'll': 'MMM D, YYYY',
+    'LLL': 'MMMM D, YYYY h:mm a',
+    'lll': 'MMM D, YYYY h:mm a',
+    'LLLL': 'dddd, MMMM D, YYYY h:mm a',
+    'llll': 'ddd, MMM D, YYYY h:mm a'
+  };
+
+  const expandedFormat = formatMap[format] || format;
+
+  return expandedFormat.replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g, (match) => {
+    return dateMap[match];
+  }).replace(/\[(.*?)\]/g, (match, p1) => p1);
+}
 
 /*-------------------
       Functions
@@ -122,6 +166,17 @@ export const firstMatch = (array = [], evaluator) => {
 export const inArray = (value, array = []) => {
   return array.indexOf(value) > -1;
 };
+
+export const range = (start, stop, step = 1) => {
+  if(!stop) {
+    stop = start;
+    start = 0;
+  }
+  const length = stop - start;
+  return Array(length).fill().map((x, index) => {
+    return (index * step) + start;
+  });
+}
 
 /*-------------------
        Objects

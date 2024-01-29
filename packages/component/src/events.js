@@ -15,7 +15,7 @@ export const attachEvents = ({
 
     $(el.renderRoot).on(eventName, selector, function(event) {
       const boundEvent = eventHandler.bind(event.target);
-      el.call(boundEvent, {firstArg: event });
+      el.call(boundEvent, {firstArg: event, additionalArgs: [this.dataset]});
     });
   });
 };

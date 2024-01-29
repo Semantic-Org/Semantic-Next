@@ -94,7 +94,7 @@ module.exports = {
         BinaryExpression      : true
       }
     }],
-    'no-unused-vars'          : [0, {                          // disallow declaration of variables that are not used in the code
+    'no-unused-vars'          : [1, {                          // disallow declaration of variables that are not used in the code
       argsIgnorePattern: '.*'
     }],
     'no-magic-numbers'        : [0, {                          // prevents use of numbers without variable declarations

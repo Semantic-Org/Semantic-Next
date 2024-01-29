@@ -159,8 +159,7 @@ class TemplateCompiler {
 
           case 'CLOSE_EACH':
             stack.pop();
-            contentBranch = null; // Reset current branch
-            conditionStack.pop();
+            contentBranch = last(contentStack); // Reset current branch
             break;
         }
 

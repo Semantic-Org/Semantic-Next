@@ -1,0 +1,16 @@
+/*-------------------
+       Floated
+--------------------*/
+
+[class*="left floated"].buttons,
+[class*="left floated"].button {
+  float: left;
+  margin-left: 0em;
+  margin-right: var(--floated-margin);
+}
+[class*="right floated"].buttons,
+[class*="right floated"].button {
+  float: right;
+  margin-right: 0em;
+  margin-left: var(--floated-margin);
+}

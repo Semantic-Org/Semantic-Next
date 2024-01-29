@@ -1,0 +1,46 @@
+/*-------------------
+      Or Buttons
+--------------------*/
+
+.buttons .or {
+  position: relative;
+  width: var(--or-gap);
+  height: var(--or-height);
+  z-index: var(--or-z-index);
+}
+.buttons .or:before {
+  position: absolute;
+  text-align: center;
+  border-radius: var(--circular-radius);
+
+  content: var(--or-text);
+  top: 50%;
+  left: 50%;
+  background-color: var(--or-background-color);
+  text-shadow: var(--or-text-shadow);
+
+  margin-top: var(--or-vertical-offset);
+  margin-left: var(--or-horizontal-offset);
+
+  width: var(--or-circle-size);
+  height: var(--or-circle-size);
+
+  line-height: var(--or-line-height);
+  color: var(--or-text-color);
+
+  font-style: var(--or-text-style);
+  font-weight: var(--or-text-weight);
+
+  box-shadow: var(--or-box-shadow);
+}
+.buttons .or[data-text]:before {
+  content: attr(data-text);
+}
+
+/* Fluid Or */
+.fluid.buttons .or {
+  width: 0em !important;
+}
+.fluid.buttons .or:after {
+  display: none;
+}

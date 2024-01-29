@@ -167,6 +167,26 @@ export class Query {
     }
   }
 
+  value(newValue) {
+    if (newValue !== undefined) {
+      // Set the value for each element
+      Array.from(this).forEach(el => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+          el.value = newValue;
+        }
+      });
+      return this;
+    } else {
+      // Get the value of each element
+      return Array.from(this).map(el => {
+        if(el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+          return el.value;
+        }
+        return undefined;
+      });
+    }
+  }
+
   // Helper function to recursively get text content
   getTextContentRecursive(nodes) {
     return Array.from(nodes).map(node => {

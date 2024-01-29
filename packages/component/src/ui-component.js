@@ -101,7 +101,6 @@ class UIComponent extends LitElement {
     return $(selector, this.originalDOM.content);
   }
 
-
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, args = [this.tpl, this.$.bind(this)] } = {}) {
     if(firstArg) {
