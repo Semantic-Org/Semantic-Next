@@ -220,8 +220,8 @@ class TemplateCompiler {
     let templateInfo = {};
     if(regExp.verbose.keyword.exec(expression)) {
       // shorthand notation {{> template= data1=value data2=value}}
-      templateInfo.templateName = expression.match(regExp.verbose.name)?.[1];
-      let dataString = expression.match(regExp.verbose.data)?.[1];
+      templateInfo.templateName = expression.match(regExp.verbose.name)?.[1].trim();
+      let dataString = expression.match(regExp.verbose.data)?.[1].trim();
       templateInfo.data = this.getObjectFromString(dataString);
     }
     else {
@@ -230,7 +230,7 @@ class TemplateCompiler {
       const matches = [ ...expression.matchAll(regExp.standard) ];
       each(matches, (match, index) => {
         if(index == 0) {
-          templateInfo.templateName = match[0];
+          templateInfo.templateName = match[0].trim();
         }
         else {
           const parts = match[0].split('=');
@@ -243,7 +243,6 @@ class TemplateCompiler {
       });
       templateInfo.data = data;
     }
-    console.log(templateInfo);
     return templateInfo;
   }
 

@@ -47,6 +47,9 @@ export const Helpers = {
   object: ({ obj }) => {
     return obj;
   },
+  log(...args) {
+    console.log(...args);
+  },
   debugger: () => {
     debugger;
   },
