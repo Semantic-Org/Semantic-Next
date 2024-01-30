@@ -1,4 +1,4 @@
-import { ReactiveVar } from './reactive-var.js';
+import { isEqual, clone } from '@semantic-ui/utils';
 
 export class Reaction {
 
@@ -19,6 +19,10 @@ export class Reaction {
         Promise.resolve().then(Reaction.flush); // Using microtask queue
       }
     }
+  }
+
+  static equalityFunction(a, b) {
+    return isEqual(a, b);
   }
 
   static nonreactive(func) {
@@ -60,6 +64,7 @@ export class Reaction {
   constructor(callback) {
     this.callback = callback;
     this.dependencies = new Set();
+    this.internalComputations = new Set();
     this.boundRun = this.run.bind(this); // Bound function
     this.firstRun = true;
     this.active = true;
@@ -83,6 +88,8 @@ export class Reaction {
 
   stop() {
     if (!this.active) return;
+    this.internalComputations.forEach(comp => comp.stop());
+    this.internalComputations.clear();
     this.active = false;
     this.dependencies.forEach(dep => {
       dep.removeListener(this.boundRun);

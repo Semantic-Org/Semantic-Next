@@ -186,6 +186,10 @@ export class Query {
       });
     }
   }
+  // alias
+  val(...args) {
+    return this.value(...args);
+  }
 
   // Helper function to recursively get text content
   getTextContentRecursive(nodes) {

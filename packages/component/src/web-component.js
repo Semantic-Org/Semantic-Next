@@ -1,11 +1,17 @@
-import { LitElement, unsafeCSS } from 'lit';
-import { each, isFunction, isObject, extend } from '@semantic-ui/utils';
+import { LitElement } from 'lit';
+import { isFunction } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './styles';
 
+/*
+  This extends the base Lit element class
+  to handle rendering slots to light dom
+  as well as applying scoped styles to light DOM
+  and several useful helpers for querying DOM
+*/
 
-class UIComponent extends LitElement {
+class WebComponentBase extends LitElement {
 
   // for use with light dom rendering
   static scopedStyleSheet = null;
@@ -116,4 +122,4 @@ class UIComponent extends LitElement {
 
 }
 
-export { UIComponent };
+export { WebComponentBase };

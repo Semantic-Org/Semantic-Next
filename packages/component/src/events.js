@@ -13,7 +13,8 @@ export const attachEvents = ({
     parts.shift();
     const selector = parts.join(' ');
 
-    $(el.renderRoot).on(eventName, selector, function(event) {
+    $(el).on(eventName, selector, function(event) {
+      console.log('event called');
       const boundEvent = eventHandler.bind(event.target);
       el.call(boundEvent, {firstArg: event, additionalArgs: [this.dataset]});
     });

@@ -1,4 +1,4 @@
-import { get, last } from '@semantic-ui/utils';
+import { each, last } from '@semantic-ui/utils';
 
 import { Scanner } from './scanner';
 
@@ -7,6 +7,28 @@ class TemplateCompiler {
   constructor(template) {
     this.template = template || '';
   }
+
+  static tagRegExp = {
+    IF: /^{{\s*#if\s+/,
+    ELSEIF: /^{{\s*else\s*if\s+/,
+    ELSE: /^{{\s*else\s*/,
+    EACH: /^{{\s*#each\s+/,
+    CLOSE_IF: /^{{\s*\/(if)\s*/,
+    CLOSE_EACH: /^{{\s*\/(each)\s*/,
+    SLOT: /^{{\s*slot\s*/,
+    TEMPLATE: /^{{>\s*/,
+    EXPRESSION: /^{{\s*/,
+  };
+
+  static templateRegExp = {
+    verbose: {
+      keyword: /^template\W/,
+      name: /name\s*=\s*\'(.*)\'\W/,
+      data: /data\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/m, // positive lookahead on next equals
+    },
+    standard: /(\w.*?)($|\s)/gm,
+    dataObject: /(\w+)\s*:\s*([^,}]+)/g // parses { one: 'two' }
+  };
 
   /*
     Creates an AST representation of a template
@@ -18,20 +40,13 @@ class TemplateCompiler {
 
     const scanner = new Scanner(template);
 
-    const starts = {
-      IF: /^{{\s*#if\s+/,
-      ELSEIF: /^{{\s*else\s*if\s+/,
-      ELSE: /^{{\s*else\s*/,
-      EACH: /^{{\s*#each\s+/,
-      CLOSE_IF: /^{{\s*\/(if)\s*/,
-      CLOSE_EACH: /^{{\s*\/(each)\s*/,
-      SLOT: /^{{\s*slot\s*/,
-      EXPRESSION: /^{{\s*/,
-    };
+    // quicker to compile regexp once
+    const tagRegExp = TemplateCompiler.tagRegExp;
+
     const parseTag = (scanner) => {
-      for (let type in starts) {
-        if (scanner.matches(starts[type])) {
-          const consumed = scanner.consume(starts[type]);
+      for (let type in tagRegExp) {
+        if (scanner.matches(tagRegExp[type])) {
+          scanner.consume(tagRegExp[type]);
           const content = this.getValue(scanner.consumeUntil('}}').trim());
           scanner.consume('}}');
           return { type, content };
@@ -116,6 +131,15 @@ class TemplateCompiler {
             contentTarget.push(newNode);
             break;
 
+          case 'TEMPLATE':
+            const templateInfo = this.parseTemplateString(tag.content);
+            newNode = {
+              ...newNode,
+              ...templateInfo
+            };
+            contentTarget.push(newNode);
+            break;
+
           case 'SLOT':
             newNode = {
               ...newNode,
@@ -189,6 +213,53 @@ class TemplateCompiler {
     }
     return expression;
   }
+
+  parseTemplateString(expression = '') {
+    // quicker to compile regexp once
+    const regExp = TemplateCompiler.templateRegExp;
+    let templateInfo = {};
+    if(regExp.verbose.keyword.exec(expression)) {
+      // shorthand notation {{> template= data1=value data2=value}}
+      templateInfo.templateName = expression.match(regExp.verbose.name)?.[1].trim();
+      let dataString = expression.match(regExp.verbose.data)?.[1].trim();
+      templateInfo.data = this.getObjectFromString(dataString);
+    }
+    else {
+      // standard notation {{> templateName data1=value data2=value}}
+      let data = {};
+      const matches = [ ...expression.matchAll(regExp.standard) ];
+      each(matches, (match, index) => {
+        if(index == 0) {
+          templateInfo.templateName = match[0].trim();
+        }
+        else {
+          const parts = match[0].split('=');
+          if(parts.length) {
+            let name = parts[0].trim();
+            let value = parts[1].trim();
+            data[name] = value;
+          }
+        }
+      });
+      templateInfo.data = data;
+    }
+    return templateInfo;
+  }
+
+  getObjectFromString(objectString) {
+    const regex = TemplateCompiler.templateRegExp.dataObject;
+    const obj = {};
+    let match;
+    while ((match = regex.exec(objectString)) !== null) {
+      obj[match[1]] = match[2];
+    }
+    return obj;
+  }
+
+  parseTemplateDataString(data) {
+
+  }
+
 }
 
 export { TemplateCompiler };

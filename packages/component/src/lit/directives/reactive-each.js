@@ -1,10 +1,10 @@
-import { noChange, html, nothing } from 'lit';
+import { nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { each, hashCode, isObject, isString, values } from '@semantic-ui/utils';
+import { Reaction } from '@semantic-ui/reactivity';
+import { hashCode, isObject, isString } from '@semantic-ui/utils';
 
 class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {

@@ -1,0 +1,30 @@
+<div class="test-element">
+
+  <div class="{{maybeActive 'basic'}} tab" data-tab="basic">
+    Basic
+  </div>
+  <div class="{{maybeActive 'events'}} tab" data-tab="events">
+    Events & Reactivity
+  </div>
+
+
+  <p>This is the parent template context.</p>
+  <button class="activity">Change Morning Activity</button>
+
+  <span class="helper">{{helper}}</span>
+
+  {{#if is tab 'basic'}}
+    {{> template
+      name='basic'
+      data= {
+        morning: morningActivity,
+        afternoon: 'biking',
+        evening: 'reading',
+      }
+      camera='nikon'
+    }}
+  {{else if is tab 'events'}}
+    {{> events morning='running' afternoon='biking' evening='crying'}}
+  {{/if}}
+
+</div>

@@ -2,7 +2,7 @@ import { noChange, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, wrapFunction } from '@semantic-ui/utils';
+import { each } from '@semantic-ui/utils';
 
 class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -17,9 +17,6 @@ class ReactiveConditionalDirective extends AsyncDirective {
     }
     let html = nothing;
     this.reaction = Reaction.create((comp) => {
-      // we need to setup reactive ref to all branching conditions
-      each(conditional.branches || [], branch => wrapFunction(branch.condition)());
-
       if(conditional.condition()) {
         html = conditional.content();
       }
@@ -43,6 +40,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
       if(!comp.firstRun) {
         this.setValue(html);
       }
+      return html;
     });
     return html;
   }

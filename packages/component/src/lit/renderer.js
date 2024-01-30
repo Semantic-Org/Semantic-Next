@@ -4,6 +4,7 @@ import { get, each, mapObject, isFunction } from '@semantic-ui/utils';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveEach } from './directives/reactive-each.js';
+import { renderTemplate } from './directives/render-template.js';
 
 import { Helpers } from './helpers';
 
@@ -18,14 +19,13 @@ export class LitRenderer {
   constructor({
     ast,
     data,
-    litElement
+    renderRoot,
+    subTemplates,
   }) {
     this.ast = ast || '';
-
-    // allow 'global' helpers
     this.data = data;
-
-    this.litElement = litElement;
+    this.renderRoot = renderRoot;
+    this.subTemplates = subTemplates;
     this.resetHTML();
   }
 
@@ -72,6 +72,10 @@ export class LitRenderer {
           this.addValue( this.evaluateEach(node, data) );
           break;
 
+        case 'template':
+          this.addValue( this.evaluateTemplate(node, data) );
+          break;
+
         case 'slot':
           if(node.name) {
             this.addHTML(`<slot name="${node.name}"></slot>`);
@@ -98,7 +102,7 @@ export class LitRenderer {
         return () => this.evaluateExpression(value, data, { asDirective: false });
       }
       if(key == 'content') {
-        return () => this.renderPartial({ast: value, data});
+        return () => this.renderContent({ast: value, data});
       }
       return value;
     };
@@ -112,7 +116,7 @@ export class LitRenderer {
         return () => this.evaluateExpression(value, data, { asDirective: false });
       }
       if(key == 'content') {
-        return (eachData) => this.renderPartial({ast: value, data: eachData});
+        return (eachData) => this.renderContent({ast: value, data: eachData});
       }
       return value;
     };
@@ -120,9 +124,17 @@ export class LitRenderer {
     return reactiveEach(eachArguments, data);
   }
 
-  // subtrees are rendered as separate contexts
-  renderPartial({ast, data}) {
-    return new LitRenderer({ ast, data }).render();
+  evaluateTemplate(node, data, isReactive = false) {
+    const subTemplate = this.subTemplates[node.templateName];
+    let templateData = mapObject(node.data, (value) => {
+      return this.evaluateExpression(value, data, { asDirective: false });
+    });
+    if(subTemplate) {
+      return renderTemplate({template: subTemplate, data: templateData, renderRoot: this.renderRoot});
+    }
+    else {
+      console.error(`Could not find subtemplate for "${node.templateName}"`, node);
+    }
   }
 
   // i.e foo.baz = { foo: { baz: 'value' } }
@@ -218,6 +230,11 @@ export class LitRenderer {
     this.expressions.push(expression);
     this.lastHTML = false;
     this.addHTMLSpacer();
+  }
+
+  // subtrees are rendered as separate contexts
+  renderContent({ast, data, subTemplates}) {
+    return new LitRenderer({ ast, data, subTemplates: this.subTemplates, renderRoot: this.renderRoot }).render();
   }
 
   clearTemp() {

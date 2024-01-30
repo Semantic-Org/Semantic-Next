@@ -1,16 +1,59 @@
 import { formatDate } from '@semantic-ui/utils';
 
+// these could be written in shorthand but its easier to debug if you can add a line manually
 export const Helpers = {
-  not: (a) => !a,
-  isEqual: (a, b) => a === b,
-  isNotEqual: (a, b) => a !== b,
-  greaterThan: (a, b) => a > b,
-  lessThan: (a, b) => a < b,
-  greaterThanEquals: (a, b) => a >= b,
-  lessThanEquals: (a, b) => a <= b,
-  numberFromIndex: (a) => a + 1,
-  formatDate: (date = new Date(), format = 'L') => formatDate(date, format),
-  formatDateTime: (date = new Date(), format = 'LLL') => formatDate(date, format),
-  formatDateTimeSeconds: (date = new Date(), format = 'LTS') => formatDate(date, format),
-  debugger: () => { debugger; }
+  is: (a, b) => {
+    return a == b;
+  },
+  not: (a) => {
+    return !a;
+  },
+  isEqual: (a, b) => {
+    return a == b;
+  },
+  maybePlural(value, plural = 's') {
+    return value == 1 ? '' : plural;
+  },
+  isNotEqual: (a, b) => {
+    return a != b;
+  },
+  isExactlyEqual: (a, b) => {
+    return a === b;
+  },
+  isNotExactlyEqual: (a, b) => {
+    return a !== b;
+  },
+  greaterThan: (a, b) => {
+    return a > b;
+  },
+  lessThan: (a, b) => {
+    return a < b;
+  },
+  greaterThanEquals: (a, b) => {
+    return a >= b;
+  },
+  lessThanEquals: (a, b) => {
+    return a <= b;
+  },
+  numberFromIndex: (a) => {
+    return a + 1;
+  },
+  formatDate: (date = new Date(), format = 'L') => {
+    return formatDate(date, format);
+  },
+  formatDateTime: (date = new Date(), format = 'LLL') => {
+    return formatDate(date, format);
+  },
+  formatDateTimeSeconds: (date = new Date(), format = 'LTS') => {
+    return formatDate(date, format);
+  },
+  object: ({ obj }) => {
+    return obj;
+  },
+  log(...args) {
+    console.log(...args);
+  },
+  debugger: () => {
+    debugger;
+  },
 };

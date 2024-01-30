@@ -59,7 +59,8 @@ UIButton.events = {
   }
 };
 
-createComponent('ui-button', {
+createComponent({
+  tagName: 'ui-button',
   spec: ButtonSpec,
   template: ButtonTemplate,
   css: ButtonCSS,
