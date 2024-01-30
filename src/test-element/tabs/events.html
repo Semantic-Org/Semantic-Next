@@ -1,0 +1,38 @@
+<h4>Events</h4>
+<p>
+  Enter a number
+  <input type="text" name="number" value="{{number}}" maxlength="3">
+</p>
+
+<hr>
+<h4>Reactive Updates</h4>
+<p>Number is {{number}}</p>
+
+<hr>
+<h4>Reactive conditions</h4>
+{{#if greaterThan number 100}}
+  Number is greater than 100
+{{else if greaterThan number 10}}
+  Number is greater than 10
+{{else if greaterThan number 0}}
+  Number is between 1-10
+  {{#if is number 5}}
+    Number is 5
+  {{else if not greaterThan number 5}}
+    Number is between 1-5
+  {{/if}}
+{{else if isNumber number}}
+  Number is {{number}} which is not between 1-1000.
+{{else}}
+  Value is not a number "{{number}}"
+{{/if}}
+
+<hr>
+<h4>Looping</h4>
+{{#if number}}
+  {{#each countNumber in getRange number}}
+    <span class="number">{{countNumber}}</span>
+  {{/each}}
+{{else}}
+  {{number}} is not a valid number
+{{/if}}

@@ -18,14 +18,12 @@ export class LitRenderer {
   constructor({
     ast,
     data,
-    litElement
   }) {
     this.ast = ast || '';
 
     // allow 'global' helpers
     this.data = data;
-
-    this.litElement = litElement;
+    console.log(ast);
     this.resetHTML();
   }
 

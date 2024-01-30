@@ -1,0 +1,24 @@
+.tab {
+  cursor: pointer;
+  display: inline-block;
+  border: 1px solid #DDD;
+  border-radius: 3px;
+  padding: 5px;
+  margin-right: 3px;
+}
+.tab:hover {
+  background-color: #DADADA;
+}
+
+.number {
+  animation: alert 0.5s ease;
+  will-change: background;
+}
+@keyframes alert {
+  from {
+    background-color: red;
+  }
+  to {
+    background-color: white;
+  }
+}

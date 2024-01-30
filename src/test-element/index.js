@@ -1,4 +1,4 @@
-import { TestElement } from './test.js';
+import { TestElement } from './test-element.js';
 
 export {
   TestElement,

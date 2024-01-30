@@ -1,0 +1,24 @@
+<div class="test-element">
+
+  <div class="tab" data-tab="basic">
+    Basic
+  </div>
+  <div class="tab" data-tab="events">
+    Events & Reactivity
+  </div>
+
+  {{#if is tab 'basic'}}
+    {{> template
+      name='jack'
+      data={
+        morning: 'running',
+        afternoon: 'biking',
+        evening: 'reading',
+      }
+      camera='nikon'
+    }}
+  {{else if is tab 'events'}}
+    {{> events morning='running' afternoon='biking' evening='crying'}}
+  {{/if}}
+
+</div>

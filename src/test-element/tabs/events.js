@@ -1,18 +1,12 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { range } from '@semantic-ui/utils';
 
-import template from './test.html';
-import css from './test.css';
+import template from './events.html';
 
-const TestElement = {};
-
-TestElement.createInstance = function(tpl, $) {
+const createInstance = (tpl, $) => {
   return {
 
-    tab: new ReactiveVar('basic'),
     number: new ReactiveVar(6),
-    date: new ReactiveVar(new Date()),
 
     items: new ReactiveVar([
       { _id: 'a', name: 'First', age: 23 },
@@ -40,18 +34,17 @@ TestElement.createInstance = function(tpl, $) {
 };
 
 
-TestElement.onCreated = function(tpl) {
-
+const onCreated = (tpl) => {
   tpl.interval = setInterval(() => {
     tpl.date.value = new Date();
   }, 1000);
 };
 
-TestElement.onDestroyed = function(tpl) {
+const onDestroyed = (tpl) => {
   clearInterval(tpl.interval);
 };
 
-TestElement.events = {
+const events = {
   'input input'(event, tpl, $) {
     tpl.number.value = $(this).value();
   },
@@ -60,10 +53,12 @@ TestElement.events = {
   },
 };
 
-createComponent('test-element', {
+const eventsTab = createComponent('test-element', {
   template,
-  css,
-  ...TestElement,
+  createInstance,
+  onCreated,
+  onDestroyed,
+  events,
 });
 
-export { TestElement };
+export { eventsTab };

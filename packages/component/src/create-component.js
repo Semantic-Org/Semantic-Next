@@ -19,13 +19,13 @@ const FAKE_SPEC = {
   }
 };
 
-export const createComponent = (tagName, {
+export const createComponent = ({
   renderer = 'lit',
 
   template = '',
   css = false,
   spec = false,
-  defineElement = true,
+  tagName,
 
   events = {},
 
@@ -178,12 +178,26 @@ export const createComponent = (tagName, {
       return classString;
     }
 
+    getDataContext() {
+      return {
+        ...this.tpl,
+        ...this.getSettings(),
+        ui: this.getUIClasses(),
+      };
+    }
+
     render() {
       const html = this.renderer.render({
+        data: this.getDataContext()
+      });
+      return html;
+    }
+
+    renderAsTemplate(templateData = {}) {
+      const html = this.renderer.render({
         data: {
-          ...this.tpl,
-          ...this.getSettings(),
-          ui: this.getUIClasses(),
+          ...this.getDataContext(),
+          ...templateData
         }
       });
       return html;
@@ -191,8 +205,10 @@ export const createComponent = (tagName, {
 
   };
 
-  if(defineElement) {
+  if(tagName) {
     customElements.define(tagName, thisComponent);
   }
+
+  return thisComponent;
 
 };
