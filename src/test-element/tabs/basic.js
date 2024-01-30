@@ -25,7 +25,6 @@ const createInstance = (tpl, $) => ({
 });
 
 const onRendered = (tpl) => {
-  console.log('Basic tab onrendered called');
   tpl.interval = setInterval(() => {
     tpl.date.value = new Date();
   }, 1000);
@@ -44,7 +43,6 @@ const onRendered = (tpl) => {
 };
 
 const onDestroyed = (tpl) => {
-  console.log('Basic tab ondestroyed called');
   clearInterval(tpl.interval);
 };
 

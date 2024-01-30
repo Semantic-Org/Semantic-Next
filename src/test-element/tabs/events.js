@@ -1,6 +1,6 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { range } from '@semantic-ui/utils';
+import { each, range } from '@semantic-ui/utils';
 
 import template from './events.html';
 
@@ -9,6 +9,12 @@ const createInstance = (tpl, $) => {
   return {
 
     number: new ReactiveVar(6),
+    getRange() {
+      if(!Number.isFinite(+tpl.number.value)) {
+        return [];
+      }
+      return range(tpl.number.value);
+    },
 
     persons: new ReactiveVar([
       { _id: 'a', name: 'Firstman', age: 23 },
@@ -32,20 +38,6 @@ const createInstance = (tpl, $) => {
       return person;
     },
 
-    getRange() {
-      if(!Number.isFinite(+tpl.number.value)) {
-        return [];
-      }
-      return range(tpl.number.value);
-    },
-
-    echo(value) {
-      return value;
-    },
-
-    isNumber(value) {
-      return Number.isFinite(+value);
-    }
   };
 };
 

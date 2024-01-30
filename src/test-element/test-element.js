@@ -11,14 +11,14 @@ const createInstance = function(tpl, $) {
   return {
     tab: new ReactiveVar('basic'),
     morningActivity: new ReactiveVar('running'),
-    helper() {
-      return 'Hi';
-    },
     maybeActive(tab) {
       return tpl.tab.get() == tab
         ? 'active'
         : ''
       ;
+    },
+    maybeDisabled() {
+      return tpl.tab.get() == 'basic' ? 'disabled' : '';
     },
     getText() {
       return $('.helper').text();
@@ -37,9 +37,6 @@ const onDestroyed = (tpl) => {
 const events = {
   'click .tab'(event, tpl, $, data) {
     tpl.tab.set(data.tab);
-  },
-  'click .helper'(event, tpl, $) {
-    console.log(tpl.getText());
   },
   'click .activity'(event, tpl) {
     tpl.morningActivity.set('Mowing the lawn');
