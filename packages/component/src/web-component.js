@@ -50,6 +50,7 @@ class WebComponentBase extends LitElement {
     $slots.each(($slot) => {
       let html;
       if($slot.attr('name')) {
+        let slotName = $slot.attr('name');
         const $slotContent = this.$$(`[slot="${slotName}"]`);
         if($slotContent.length) {
           html = $slotContent.outerHTML();
