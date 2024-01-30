@@ -1,9 +1,11 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
+import { range } from '@semantic-ui/utils';
 
 import template from './events.html';
 
 const createInstance = (tpl, $) => {
+  console.log('rendering events tab');
   return {
 
     number: new ReactiveVar(6),
@@ -34,30 +36,20 @@ const createInstance = (tpl, $) => {
 };
 
 
-const onCreated = (tpl) => {
-  tpl.interval = setInterval(() => {
-    tpl.date.value = new Date();
-  }, 1000);
-};
-
-const onDestroyed = (tpl) => {
-  clearInterval(tpl.interval);
-};
 
 const events = {
   'input input'(event, tpl, $) {
     tpl.number.value = $(this).value();
   },
-  'click .tab'(event, tpl, $, data) {
-    tpl.tab.set(data.tab);
-  },
+  'click button'(event, tpl, $) {
+    tpl.number.value = 5;
+    $('input').value(5);
+  }
 };
 
-const eventsTab = createComponent('test-element', {
+const eventsTab = createComponent({
   template,
   createInstance,
-  onCreated,
-  onDestroyed,
   events,
 });
 

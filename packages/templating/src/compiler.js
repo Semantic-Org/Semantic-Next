@@ -27,7 +27,7 @@ class TemplateCompiler {
       data: /data\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/m, // positive lookahead on next equals
     },
     standard: /(\w.*?)($|\s)/gm,
-    dataObject: /(\w+)\s*:\s*['"]([^'"]+)['"]/g // parses { one: 'two' }
+    dataObject: /(\w+)\s*:\s*([^,}]+)/g // parses { one: 'two' }
   };
 
   /*

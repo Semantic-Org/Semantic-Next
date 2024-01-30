@@ -1,24 +1,11 @@
 import { unsafeCSS } from 'lit';
 
-import { extend, unique, each, noop, get, reverseKeys } from '@semantic-ui/utils';
+import { unique, each, noop, get, reverseKeys } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
-
 import { WebComponentBase } from './web-component.js';
-import { attachEvents } from './events.js';
 
-
-// placeholder for testing out spec
-/*const FAKE_SPEC = {
-  settings: {
-    size: ['mini', 'tiny', 'small', 'medium', 'large', 'huge', 'massive'],
-    emphasis: ['primary', 'secondary'],
-    icon: ['icon'],
-    labeled: ['right-labeled', ['labeled', 'left-labeled']]
-  }
-};
-*/
 export const createComponent = ({
   renderer = 'lit',
 
@@ -40,10 +27,21 @@ export const createComponent = ({
   beforeRendered = noop,
 
 } = {}) => {
-
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
+
+  let FAKE_SPEC;
+  if(tagName == 'ui-button') {
+    FAKE_SPEC = {
+      settings: {
+        size: ['mini', 'tiny', 'small', 'medium', 'large', 'huge', 'massive'],
+        emphasis: ['primary', 'secondary'],
+        icon: ['icon'],
+        labeled: ['right-labeled', ['labeled', 'left-labeled']]
+      }
+    };
+  }
 
   /*
     We can choose either to render this component as a web component
@@ -53,7 +51,10 @@ export const createComponent = ({
   let litTemplate = new LitTemplate({
     ast,
     css,
+    events,
     subTemplates,
+    onRendered,
+    onDestroyed,
     createInstance
   });
   let webComponent;
@@ -71,21 +72,22 @@ export const createComponent = ({
       }
 
       static get properties() {
-        // this will be dynamic
-        return {};
-        /*
-          // attrs
-          size: { type: String, observe: true, reflect: false },
-          emphasis: { type: String, observe: true, reflect: false },
+        // testing for now
+        if(tagName == 'ui-button') {
+          return {
+            // attrs
+            size: { type: String, observe: true, reflect: false },
+            emphasis: { type: String, observe: true, reflect: false },
 
-          // example of value -> attr
-          small: { type: Boolean, reflect: false },
-          large: { type: Boolean, reflect: false },
-          primary: { type: Boolean, reflect: false },
-          secondary: { type: Boolean, reflect: false },
-          class: { type: String }
-        };
-        */
+            // example of value -> attr
+            small: { type: Boolean, reflect: false },
+            large: { type: Boolean, reflect: false },
+            primary: { type: Boolean, reflect: false },
+            secondary: { type: Boolean, reflect: false },
+            class: { type: String }
+          };
+        }
+        return {};
       }
 
       constructor() {
@@ -93,25 +95,16 @@ export const createComponent = ({
 
         this.css = css;
 
-        let tpl;
-        if(litTemplate.tpl) {
-
-          this.tpl = {};
-          tpl = litTemplate.tpl;
-          extend(this.tpl, tpl);
-
-        }
-        this.renderer = litTemplate.renderer;
+        this.tpl = litTemplate.tpl;
+        this.template = litTemplate;
         this.call(onCreated);
       }
 
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
-        attachEvents({
-          el: this,
-          events
-        });
+        litTemplate.setRoot(this.renderRoot);
+        litTemplate.attachEvents();
         this.call(beforeRendered);
       }
 
@@ -204,7 +197,7 @@ export const createComponent = ({
       }
 
       render() {
-        const html = litTemplate.renderWithData(this.getDataContext());
+        const html = litTemplate.render(this.getDataContext());
         return html;
       }
 

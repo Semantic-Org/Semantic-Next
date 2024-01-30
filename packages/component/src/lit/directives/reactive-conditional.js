@@ -2,7 +2,7 @@ import { noChange, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, wrapFunction } from '@semantic-ui/utils';
+import { each } from '@semantic-ui/utils';
 
 class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -16,24 +16,35 @@ class ReactiveConditionalDirective extends AsyncDirective {
       this.reaction.stop();
     }
     let html = nothing;
+    let renderedBranchIndex;
     this.reaction = Reaction.create((comp) => {
-      // we need to setup reactive ref to all branching conditions
-      each(conditional.branches || [], branch => wrapFunction(branch.condition)());
-
+      // we want to avoid calling content() unless we need to rerender content
       if(conditional.condition()) {
+        if(renderedBranchIndex == -1) {
+          return;
+        }
         html = conditional.content();
+        renderedBranchIndex = -1;
       }
       else if(conditional.branches?.length) {
         // evaluate each branch
         let match = false;
-        each(conditional.branches, (branch) => {
+        each(conditional.branches, (branch, index) => {
           if(!match && branch.type == 'elseif' && branch.condition()) {
             match = true;
+            if(renderedBranchIndex == index) {
+              return;
+            }
             html = branch.content();
+            renderedBranchIndex = index;
           }
           else if(!match && branch.type == 'else') {
+            if(renderedBranchIndex == index) {
+              return;
+            }
             match = true;
             html = branch.content();
+            renderedBranchIndex = index;
           }
         });
       }
@@ -43,6 +54,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
       if(!comp.firstRun) {
         this.setValue(html);
       }
+      return html;
     });
     return html;
   }

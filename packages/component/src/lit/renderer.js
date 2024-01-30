@@ -4,6 +4,7 @@ import { get, each, mapObject, isFunction } from '@semantic-ui/utils';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveEach } from './directives/reactive-each.js';
+import { renderTemplate } from './directives/render-template.js';
 
 import { Helpers } from './helpers';
 
@@ -18,12 +19,12 @@ export class LitRenderer {
   constructor({
     ast,
     data,
+    renderRoot,
     subTemplates,
   }) {
     this.ast = ast || '';
-
-    // allow 'global' helpers
     this.data = data;
+    this.renderRoot = renderRoot;
     this.subTemplates = subTemplates;
     this.resetHTML();
   }
@@ -123,11 +124,13 @@ export class LitRenderer {
     return reactiveEach(eachArguments, data);
   }
 
-  evaluateTemplate(node, data) {
+  evaluateTemplate(node, data, isReactive = false) {
     const subTemplate = this.subTemplates[node.templateName];
+    let templateData = mapObject(node.data, (value) => {
+      return this.evaluateExpression(value, data, { asDirective: false });
+    });
     if(subTemplate) {
-      console.log(subTemplate);
-      return subTemplate.render(node.data);
+      return renderTemplate({template: subTemplate, data: templateData, renderRoot: this.renderRoot});
     }
     else {
       console.error(`Could not find subtemplate for "${node.templateName}"`, node);
@@ -231,7 +234,7 @@ export class LitRenderer {
 
   // subtrees are rendered as separate contexts
   renderContent({ast, data, subTemplates}) {
-    return new LitRenderer({ ast, data, subTemplates: this.subTemplates }).render();
+    return new LitRenderer({ ast, data, subTemplates: this.subTemplates, renderRoot: this.renderRoot }).render();
   }
 
   clearTemp() {

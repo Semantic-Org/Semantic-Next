@@ -7,11 +7,24 @@ import css from './test-element.css';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createInstance = (tpl, $) => ({
-
-  tab: new ReactiveVar('basic'),
-
-});
+const createInstance = function(tpl, $) {
+  return {
+    tab: new ReactiveVar('basic'),
+    morningActivity: new ReactiveVar('running'),
+    helper() {
+      return 'Hi';
+    },
+    maybeActive(tab) {
+      return tpl.tab.get() == tab
+        ? 'active'
+        : ''
+      ;
+    },
+    getText() {
+      return $('.helper').text();
+    }
+  };
+};
 
 const onCreated = (tpl) => {
   // nothing
@@ -22,12 +35,15 @@ const onDestroyed = (tpl) => {
 };
 
 const events = {
-  'input input'(event, tpl, $) {
-    tpl.number.value = $(this).value();
-  },
   'click .tab'(event, tpl, $, data) {
     tpl.tab.set(data.tab);
   },
+  'click .helper'(event, tpl, $) {
+    console.log(tpl.getText());
+  },
+  'click .activity'(event, tpl) {
+    tpl.morningActivity.set('Mowing the lawn');
+  }
 };
 
 const TestElement = createComponent({

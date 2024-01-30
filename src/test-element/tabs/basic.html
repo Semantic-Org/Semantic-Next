@@ -1,6 +1,20 @@
 <h4>Default Slot Content</h4>
 {{slot}}
 
+<h4>Data Context</h4>
+<ul>
+  <li>Morning - {{morning}}</li>
+  <li>Afternoon - {{afternoon}}</li>
+  <li>Evening - {{evening}}</li>
+</ul>
+
+<h4>Reactive Computations & Helpers</h4>
+<p>Today's date is {{formatDate}}, the exact time is <span>{{formatDateTimeSeconds date}}</span></p>
+<p>
+  Slogan for
+  <b>{{second}} second{{maybePlural second}} is "{{slogan}}"</b>
+</p>
+
 <hr>
 <h4>Named Slot "Text"</h4>
 <p>Text slot is "{{slot text}}"</p>
@@ -10,6 +24,3 @@
 <h4>Template Functions</h4>
 {{echo 'hello!'}}
 
-<hr>
-<h4>Global Helpers</h4>
-Today's date is {{formatDate}}, the exact time is <span>{{formatDateTimeSeconds date}}</span>

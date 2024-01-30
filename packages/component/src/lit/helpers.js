@@ -11,6 +11,9 @@ export const Helpers = {
   isEqual: (a, b) => {
     return a == b;
   },
+  maybePlural(value, plural = 's') {
+    return value == 1 ? '' : plural;
+  },
   isNotEqual: (a, b) => {
     return a != b;
   },
