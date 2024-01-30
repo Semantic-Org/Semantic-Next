@@ -16,35 +16,21 @@ class ReactiveConditionalDirective extends AsyncDirective {
       this.reaction.stop();
     }
     let html = nothing;
-    let renderedBranchIndex;
     this.reaction = Reaction.create((comp) => {
-      // we want to avoid calling content() unless we need to rerender content
       if(conditional.condition()) {
-        if(renderedBranchIndex == -1) {
-          return;
-        }
         html = conditional.content();
-        renderedBranchIndex = -1;
       }
       else if(conditional.branches?.length) {
         // evaluate each branch
         let match = false;
-        each(conditional.branches, (branch, index) => {
+        each(conditional.branches, (branch) => {
           if(!match && branch.type == 'elseif' && branch.condition()) {
             match = true;
-            if(renderedBranchIndex == index) {
-              return;
-            }
             html = branch.content();
-            renderedBranchIndex = index;
           }
           else if(!match && branch.type == 'else') {
-            if(renderedBranchIndex == index) {
-              return;
-            }
             match = true;
             html = branch.content();
-            renderedBranchIndex = index;
           }
         });
       }

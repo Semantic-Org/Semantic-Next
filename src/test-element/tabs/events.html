@@ -29,7 +29,23 @@
 {{/if}}
 
 <hr>
-<h4>Looping</h4>
+
+<h4>People Looping</h4>
+{{#each person in persons}}
+  <li>
+    <input type="checkbox" id="{{person._id}}">
+    <label for="{{person._id}}">
+      {{person.name}} - Age {{person.age}}
+    </label>
+  </li>
+{{/each}}
+  <button class="add front">Add Front</button>
+  <button class="add end">Add End</button>
+  <button class="remove front">Remove Front</button>
+  <button class="remove end">Remove End</button>
+  <button class="replace second">Replace Second</button>
+
+<h4>Input Looping</h4>
 {{#if number}}
   {{#each countNumber in getRange number}}
     <span class="number">{{countNumber}}</span>
@@ -37,3 +53,5 @@
 {{else}}
   {{number}} is not a valid number
 {{/if}}
+
+
