@@ -1,6 +1,6 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { each, range } from '@semantic-ui/utils';
+import { range } from '@semantic-ui/utils';
 
 import template from './events.html';
 

@@ -1,14 +1,9 @@
-June 7
-- Set up definition file and use it to read in attr
-- Add primary/secondary variation as attributes
-
-June 2
-+ Review inheritance for global / component vars
-+ Confirm approach to css variables
-+ Confirm approach to attr
-
-
-June 1
-+ Get scaffolding of a web component button set up, no abstraction
-+ Confirm ES6 compiling
-+ Create demo page and confirm component loading
++ Attach events for sub templates
++ Allow computations to be attached to templates
++ onCreated/onDestroyed callbacks
+- Implement parent() helper
+- Adopting stylesheets from subtemplates
+- Namespacing events so only fire on subtemplates
+- Adding ifdefined for attributes from templates
+- Move example to example folder
+- Create todo app

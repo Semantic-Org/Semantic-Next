@@ -1,4 +1,4 @@
-import { isEqual, clone } from '@semantic-ui/utils';
+import { isEqual } from '@semantic-ui/utils';
 
 export class Reaction {
 

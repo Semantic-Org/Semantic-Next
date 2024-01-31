@@ -22,6 +22,7 @@ export class LitRenderer {
     renderRoot,
     subTemplates,
   }) {
+    console.log(ast);
     this.ast = ast || '';
     this.data = data;
     this.renderRoot = renderRoot;
