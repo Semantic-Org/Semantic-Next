@@ -11,17 +11,15 @@
   <button class="activity">Change Morning Activity</button>
 
   {{#if is tab 'basic'}}
-    <div>
-      {{> template
-        name='basic'
-        data= {
-          morning: morningActivity,
-          afternoon: 'biking',
-          evening: 'reading',
-        }
-        camera='nikon'
-      }}
-    </div>
+    {{> template
+      name='basic'
+      data= {
+        morning: morningActivity,
+        afternoon: 'biking',
+        evening: 'reading',
+      }
+      camera='nikon'
+    }}
   {{else if is tab 'events'}}
     {{> events morning='running' afternoon='biking' evening='crying'}}
   {{/if}}

@@ -9,22 +9,18 @@ class RenderTemplate extends AsyncDirective {
     this.template = null;
   }
   render({template, data}) {
-    if(!this.template) {
-      this.template = template;
-      template.attach(this.renderRoot);
-    }
-    let html = this.template.render(data);
-    return html;
+    return template.render(data);
   }
 
-  /*
-  update(part) {
-    if(this.template) {
-      template.attach(this.renderRoot);
+  update(part, renderSettings) {
+    const template = renderSettings[0].template;
+    if(template) {
+      this.template = template;
+      const {startNode, endNode} = part;
+      template.attach(part.parentNode, { startNode, endNode });
     }
-    return part;
+    return this.render.apply(this, renderSettings);
   }
-  */
 
   reconnected() {
     // nothing yet

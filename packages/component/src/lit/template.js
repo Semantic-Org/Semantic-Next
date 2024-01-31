@@ -79,8 +79,10 @@ export const LitTemplate = class UITemplate {
     });
   }
 
-  attach(element) {
-    this.renderRoot = element;
+  attach(rootElement, { startNode, endNode } = {}) {
+    this.renderRoot = rootElement;
+    this.startNode = startNode;
+    this.endNode = endNode;
     this.attachEvents();
   }
 
@@ -109,11 +111,45 @@ export const LitTemplate = class UITemplate {
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
-      $(this.renderRoot).on(eventName, selector, function(event) {
+      $(this.renderRoot).on(eventName, selector, (event) => {
+        if(!this.isNodeInTemplate(event.target)) {
+          return;
+        }
         const boundEvent = eventHandler.bind(event.target);
-        template.call(boundEvent, {firstArg: event, additionalArgs: [this.dataset]});
+        template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
       }, this.eventController);
     });
+  }
+
+  // Find the direct child of the renderRoot that is an ancestor of the event.target
+  // then confirm position
+  isNodeInTemplate(node) {
+    const getRootChild = (node) => {
+      while (node && node.parentNode !== this.renderRoot) {
+        node = node.parentNode;
+      }
+      return node;
+    };
+    const isNodeInRange = (node, startNode = this.startNode, endNode = this.endNode) => {
+      if(!startNode || !endNode) {
+        return true;
+      }
+      const startComparison = startNode.compareDocumentPosition(node);
+      const endComparison = endNode.compareDocumentPosition(node);
+
+      /* "&" here comes some gnarly bitwise
+        DOCUMENT_POSITION_FOLLOWING = 0x04, DOCUMENT_POSITION_PRECEDING = 0x02
+        <https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition>
+      */
+      const isAfterStart = (startComparison & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+      const isBeforeEnd = (endComparison & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
+      return isAfterStart && isBeforeEnd;
+    };
+    return isNodeInRange(getRootChild(node));
+  }
+
+  attachEvent(eventHandler, eventString) {
+
   }
 
   removeEvents() {
