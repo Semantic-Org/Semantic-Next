@@ -1,4 +1,5 @@
 import { html } from 'lit';
+
 import { get, each, mapObject, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
@@ -19,13 +20,10 @@ export class LitRenderer {
   constructor({
     ast,
     data,
-    renderRoot,
     subTemplates,
   }) {
-    console.log(ast);
     this.ast = ast || '';
     this.data = data;
-    this.renderRoot = renderRoot;
     this.subTemplates = subTemplates;
     this.resetHTML();
   }
@@ -62,7 +60,7 @@ export class LitRenderer {
           break;
 
         case 'expression':
-          this.addValue( this.evaluateExpression(node.value, data, { asDirective: true }) );
+          this.addValue( this.evaluateExpression(node.value, data, { unsafeHTML: node.unsafeHTML, asDirective: true }) );
           break;
 
         case 'if':
@@ -125,13 +123,13 @@ export class LitRenderer {
     return reactiveEach(eachArguments, data);
   }
 
-  evaluateTemplate(node, data, isReactive = false) {
+  evaluateTemplate(node, data) {
     const subTemplate = this.subTemplates[node.templateName];
     let templateData = mapObject(node.data, (value) => {
       return this.evaluateExpression(value, data, { asDirective: false });
     });
     if(subTemplate) {
-      return renderTemplate({template: subTemplate, data: templateData, renderRoot: this.renderRoot});
+      return renderTemplate({template: subTemplate, data: templateData });
     }
     else {
       console.error(`Could not find subtemplate for "${node.templateName}"`, node);
@@ -142,11 +140,11 @@ export class LitRenderer {
   evaluateExpression(
     expression,
     data = this.data,
-    { asDirective = false } = {}
+    { asDirective = false, unsafeHTML = false } = {}
   ) {
     if(typeof expression === 'string') {
       if(asDirective) {
-        return reactiveData(() => this.lookupExpressionValue(expression, data));
+        return reactiveData(() => this.lookupExpressionValue(expression, data), { unsafeHTML });
       }
       else {
         return this.lookupExpressionValue(expression, data);
@@ -160,15 +158,20 @@ export class LitRenderer {
   // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
   lookupExpressionValue(
     expressionString = '',
-    data = {}
+    data = {},
+    { unsafeHTML = false } = {}
   ) {
 
-    const expressions = expressionString.split(' ').reverse();
-    const stringRegExp = /\'(.*)\'/;
+    const stringRegExp = /^\'(.*)\'$/;
 
+    // we only have significant " " if this is a string literal which means early exit
+    if(expressionString.search(stringRegExp) > -1) {
+      return expressionString;
+    }
+
+    const expressions = expressionString.split(' ').reverse();
     let funcArguments = [];
     let result;
-
     each(expressions, (expression, index) => {
       // the 'this' context' is the path up to expression
       // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
@@ -235,7 +238,7 @@ export class LitRenderer {
 
   // subtrees are rendered as separate contexts
   renderContent({ast, data, subTemplates}) {
-    return new LitRenderer({ ast, data, subTemplates: this.subTemplates, renderRoot: this.renderRoot }).render();
+    return new LitRenderer({ ast, data, subTemplates: this.subTemplates }).render();
   }
 
   clearTemp() {

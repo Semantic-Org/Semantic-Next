@@ -12,6 +12,7 @@ export const createComponent = ({
   template = '',
   css = false,
   spec = false,
+  templateName,
   tagName,
 
   events = {},
@@ -49,10 +50,12 @@ export const createComponent = ({
     a sub template of another web component
   */
   let litTemplate = new LitTemplate({
+    templateName: templateName || tagName,
     ast,
     css,
     events,
     subTemplates,
+    onCreated,
     onRendered,
     onDestroyed,
     createInstance
@@ -103,8 +106,7 @@ export const createComponent = ({
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
-        litTemplate.setRoot(this.renderRoot);
-        litTemplate.attachEvents();
+        litTemplate.attach(this.renderRoot);
         this.call(beforeRendered);
       }
 
@@ -116,6 +118,7 @@ export const createComponent = ({
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
+        litTemplate.removeEvents();
         this.call(onDestroyed);
       }
 

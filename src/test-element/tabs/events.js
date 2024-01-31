@@ -69,6 +69,7 @@ const events = {
 };
 
 const eventsTab = createComponent({
+  templateName: 'events',
   template,
   createInstance,
   events,

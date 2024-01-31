@@ -1,5 +1,6 @@
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Reaction } from '@semantic-ui/reactivity';
 
 class ReactiveData extends AsyncDirective {
@@ -8,22 +9,26 @@ class ReactiveData extends AsyncDirective {
     this.reaction = null;
   }
 
-  render(computeFunc) {
+  render(computeFunc, settings) {
     // Stop and clean up any existing reaction
     if (this.reaction) {
       this.reaction.stop();
     }
 
     // Create a new reaction to rerun the computation function
+    let value;
     this.reaction = Reaction.create((comp) => {
-      const value = computeFunc();
+      value = computeFunc();
+      if(settings.unsafeHTML) {
+        value = unsafeHTML(value);
+      }
       if (!comp.firstRun) {
         this.setValue(value);
       }
     });
 
     // Return the initial result of the computation function
-    return computeFunc();
+    return value;
   }
 
   disconnected() {

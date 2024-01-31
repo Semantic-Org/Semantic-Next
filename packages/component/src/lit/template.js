@@ -7,7 +7,10 @@ import { LitRenderer } from './renderer.js';
 
 export const LitTemplate = class UITemplate {
 
+  static templateCount = 0;
+
   constructor({
+    templateName,
     ast,
     template,
     data,
@@ -15,6 +18,7 @@ export const LitTemplate = class UITemplate {
     events,
     subTemplates,
     createInstance,
+    onCreated = noop,
     onRendered = noop,
     onDestroyed = noop
   }) {
@@ -29,10 +33,17 @@ export const LitTemplate = class UITemplate {
     this.ast = ast;
     this.css = css;
     this.data = data || {};
+    this.templateName = templateName || getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
+    this.onCreatedCallback = onCreated;
+  }
+
+  getGenericTemplateName() {
+    LitTemplate.templateCount++;
+    return `Anonymous #${LitTemplate.templateCount}`;
   }
 
   initialize() {
@@ -44,11 +55,19 @@ export const LitTemplate = class UITemplate {
     }
     this.tpl.reaction = this.reaction;
 
+    this.onCreated = () => {
+      this.call(this.onCreatedCallback.bind(this));
+    };
+    this.onFirstRender = () => {
+      this.call(this.onFirstRenderCallback.bind(this));
+    };
     this.onRendered = () => {
       this.call(this.onRenderedCallback.bind(this));
     };
     this.onDestroyed = () => {
+      this.rendered = false;
       this.clearComputations();
+      this.removeEvents();
       this.call(this.onDestroyedCallback.bind(this));
     };
 
@@ -60,8 +79,9 @@ export const LitTemplate = class UITemplate {
     });
   }
 
-  setRoot(element) {
-    return this.renderRoot = element;
+  attach(element) {
+    this.renderRoot = element;
+    this.attachEvents();
   }
 
   getDataContext() {
@@ -84,19 +104,26 @@ export const LitTemplate = class UITemplate {
       return { eventName, selector };
     };
 
+    // the magic of aborts <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
+    this.eventController = new AbortController();
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
       $(this.renderRoot).on(eventName, selector, function(event) {
         const boundEvent = eventHandler.bind(event.target);
         template.call(boundEvent, {firstArg: event, additionalArgs: [this.dataset]});
-      });
+      }, this.eventController);
     });
+  }
+
+  removeEvents() {
+    this.eventController.abort();
   }
 
   render(additionalData = {}) {
     if(!this.renderer) {
       this.initialize();
+      this.onCreated();
     }
     const html = this.renderer.render({
       data: {
@@ -104,6 +131,9 @@ export const LitTemplate = class UITemplate {
         ...additionalData
       }
     });
+    if(!this.rendered) {
+      this.onRendered();
+    }
     this.rendered = true;
     return html;
   }

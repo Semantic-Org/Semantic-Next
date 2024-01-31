@@ -17,6 +17,7 @@ class TemplateCompiler {
     CLOSE_EACH: /^{{\s*\/(each)\s*/,
     SLOT: /^{{\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
+    HTML_EXPRESSION: /^{{{\s*/,
     EXPRESSION: /^{{\s*/,
   };
 
@@ -121,6 +122,17 @@ class TemplateCompiler {
             contentStack.push(newNode);
             conditionTarget.branches.push(newNode);
             contentBranch = newNode;
+            break;
+
+          case 'HTML_EXPRESSION':
+            newNode = {
+              ...newNode,
+              type: 'expression',
+              unsafeHTML: true,
+              value: tag.content
+            };
+            contentTarget.push(newNode);
+            scanner.consume('}'); // got an extra }
             break;
 
           case 'EXPRESSION':

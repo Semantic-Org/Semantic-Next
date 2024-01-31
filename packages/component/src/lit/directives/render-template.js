@@ -5,20 +5,27 @@ import { AsyncDirective } from 'lit/async-directive.js';
 class RenderTemplate extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
+    this.renderRoot = partInfo.options.host.renderRoot;
     this.template = null;
   }
-  render({template, data, renderRoot}) {
+  render({template, data}) {
     if(!this.template) {
       this.template = template;
-      if(renderRoot) {
-        template.setRoot(renderRoot);
-        template.attachEvents();
-      }
+      template.attach(this.renderRoot);
     }
     let html = this.template.render(data);
-    template.onRendered();
     return html;
   }
+
+  /*
+  update(part) {
+    if(this.template) {
+      template.attach(this.renderRoot);
+    }
+    return part;
+  }
+  */
+
   reconnected() {
     // nothing yet
   }

@@ -71,40 +71,43 @@ export class Query {
     return new Query(closest);
   }
 
-  on(event, targetSelectorOrHandler, handler) {
+  // uses abort signals <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
+  on(event, targetSelectorOrHandler, handler, abortController = new AbortController()) {
+    this._eventHandlers = this._eventHandlers || [];
+    const eventHandlers = [];
 
-    // Check if targetSelectorOrHandler is a function (direct event binding)
-    if (typeof targetSelectorOrHandler === 'function') {
-      // Direct event binding
-      Array.from(this).forEach(el => el.addEventListener(event, targetSelectorOrHandler));
-    } else {
-      // Event delegation
-      Array.from(this).forEach(el => {
-        el.addEventListener(event, function(e) {
-          // Check if any of the parent elements of the event target match the targetSelector
-          for (let target = e.target; target && target !== this; target = target.parentNode) {
+    const signal = abortController.signal;
+
+    Array.from(this).forEach(el => {
+      const eventListener = (e) => {
+        if (typeof targetSelectorOrHandler === 'function') {
+          targetSelectorOrHandler.call(el, e);
+        } else {
+          for (let target = e.target; target && target !== el; target = target.parentNode) {
             if (target.matches(targetSelectorOrHandler)) {
               handler.call(target, e);
               break;
             }
           }
-        });
-      });
-    }
-
-    this._eventHandlers = this._eventHandlers || [];
-    Array.from(this).forEach(el => {
-      const eventHandler = {
-        el: el,
-        event: event,
-        handler: typeof targetSelectorOrHandler === 'function' ? targetSelectorOrHandler : handler,
-        delegated: typeof targetSelectorOrHandler === 'string',
-        originalHandler: handler // Store original handler for delegated events
+        }
       };
-      this._eventHandlers.push(eventHandler);
+
+      el.addEventListener(event, eventListener, { signal });
+
+      const eventHandler = {
+        el,
+        event,
+        eventListener,
+        abortController,
+        delegated: typeof targetSelectorOrHandler === 'string',
+        originalHandler: handler
+      };
+      eventHandlers.push(eventHandler);
     });
 
-    return this;
+    this._eventHandlers.push(...eventHandlers);
+
+    return (eventHandlers.length == 1) ? eventHandlers[0] : eventHandlers;
   }
 
   off(event, handler) {

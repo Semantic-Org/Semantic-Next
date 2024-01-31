@@ -7,20 +7,21 @@
     Events & Reactivity
   </div>
 
-
   <p>This is the parent template context.</p>
   <button class="activity">Change Morning Activity</button>
 
   {{#if is tab 'basic'}}
-    {{> template
-      name='basic'
-      data= {
-        morning: morningActivity,
-        afternoon: 'biking',
-        evening: 'reading',
-      }
-      camera='nikon'
-    }}
+    <div>
+      {{> template
+        name='basic'
+        data= {
+          morning: morningActivity,
+          afternoon: 'biking',
+          evening: 'reading',
+        }
+        camera='nikon'
+      }}
+    </div>
   {{else if is tab 'events'}}
     {{> events morning='running' afternoon='biking' evening='crying'}}
   {{/if}}

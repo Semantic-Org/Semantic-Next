@@ -18,39 +18,55 @@ const createInstance = (tpl, $) => ({
     8: 'Never again!',
     9: 'Number 9 for the win',
   },
+  setCurrentDate() {
+    tpl.date.value = new Date();
+  },
+  calculateCurrentSeconds() {
+    let date = tpl.date.get();
+    let second = Math.abs(date.getSeconds()) % 10;
+    tpl.second.set(second);
+  },
+  getFormattedText() {
+    return `This is <b>bolded text</b> in a sentence`;
+  },
+  calculateCurrentSlogan() {
+    let second = tpl.second.get();
+    tpl.slogan.value = tpl.slogans[second];
+  },
   echo(value) {
-    //console.log('tpl is', tpl);
     return value;
   }
 });
 
 const onRendered = (tpl) => {
-  tpl.interval = setInterval(() => {
-    tpl.date.value = new Date();
-  }, 1000);
+  tpl.setCurrentDate();
 
-  tpl.reaction((comp) => {
-    let date = tpl.date.get();
-    let second = Math.abs(date.getSeconds()) % 10;
-    tpl.second.set(second);
-  });
+  // update date every 1 sec
+  tpl.interval = setInterval(tpl.setCurrentDate, 1000);
 
-  tpl.reaction((comp) => {
-    let second = tpl.second.get();
-    tpl.slogan.value = tpl.slogans[second];
-  });
+  // calculate seconds from date (reactive on date)
+  tpl.reaction(tpl.calculateCurrentSeconds);
+
+  // calculate slogan from seconds (reactive on seconds);
+  tpl.reaction(tpl.calculateCurrentSlogan);
 
 };
 
 const onDestroyed = (tpl) => {
+  console.log('basic destroyed');
   clearInterval(tpl.interval);
 };
 
 const basicTab = createComponent({
+  templateName: 'basic',
   template,
   createInstance,
+  onCreated: () => console.log('on created basic'),
   onRendered,
   onDestroyed,
+  events: {
+    'click button': () => console.log('button clicked')
+  }
 });
 
 export { basicTab };
