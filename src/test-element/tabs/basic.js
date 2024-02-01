@@ -1,6 +1,7 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './basic.html';
+import css from './basic.css';
 
 const createInstance = (tpl, $) => ({
   date: new ReactiveVar(new Date()),
@@ -68,12 +69,12 @@ const events = {
 
 const basicTab = createComponent({
   templateName: 'basic',
-  template,
   createInstance,
+  template,
+  css,
   onCreated: () => console.log('on created basic'),
   onRendered,
   onDestroyed,
   events,
 });
-
 export { basicTab };

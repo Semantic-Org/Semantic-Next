@@ -1,6 +1,6 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { each, noop, isFunction, extend } from '@semantic-ui/utils';
+import { fatal, each, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
@@ -86,15 +86,19 @@ export const LitTemplate = class UITemplate {
       ast: this.ast,
       data: this.getDataContext(),
       subTemplates: this.subTemplates,
-      renderRoot: this.renderRoot
     });
   }
 
-  attach(rootElement, { startNode, endNode } = {}) {
-    this.renderRoot = rootElement;
+  async attach(renderRoot, { parentElement = renderRoot, startNode, endNode } = {}) {
+    // to attach styles & events
+    this.renderRoot = renderRoot;
+    // to determine if event occurred on template
+    this.parentElement = parentElement;
     this.startNode = startNode;
     this.endNode = endNode;
+
     this.attachEvents();
+    await this.attachStyles();
   }
 
   getDataContext() {
@@ -104,9 +108,31 @@ export const LitTemplate = class UITemplate {
     };
   }
 
+  async attachStyles() {
+    if(!this.css) {
+      return;
+    }
+    if(!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
+      return;
+    }
+    const cssString = this.css;
+    if(!this.stylesheet) {
+      this.stylesheet = new CSSStyleSheet();
+      await this.stylesheet.replace(cssString);
+    }
+    let styles = Array.from(this.renderRoot.adoptedStyleSheets);
+
+    // check if already adopted
+    let hasStyles = styles.some(style => isEqual(style.cssRules, this.stylesheet.cssRules));
+
+    if(!hasStyles) {
+      this.renderRoot.adoptedStyleSheets = [ ...this.renderRoot.adoptedStyleSheets, this.stylesheet ];
+    }
+  }
+
   attachEvents(events = this.events) {
-    if(!this.renderRoot) {
-      this.fatal('You must set a render root before attaching events');
+    if(!this.parentElement || !this.renderRoot) {
+      fatal('You must set a parent before attaching events');
     }
     // format like 'click .foo baz'
     const parseEventString = (eventString) => {
@@ -193,7 +219,7 @@ export const LitTemplate = class UITemplate {
   // Rendered DOM (either shadow or regular)
   $(selector) {
     if(!this.renderRoot) {
-      this.fatal('Cannot query DOM unless render root specified.');
+      fatal('Cannot query DOM unless render root specified.');
     }
     return $(selector, this.renderRoot);
   }
@@ -226,8 +252,5 @@ export const LitTemplate = class UITemplate {
     each(this.reactions || [], comp => comp.stop());
   }
 
-  fatal(message) {
-    throw new Error(message);
-  }
 
 };

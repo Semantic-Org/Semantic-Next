@@ -9,9 +9,6 @@ class RenderTemplate extends AsyncDirective {
     super(partInfo);
     this.renderRoot = partInfo.options.host.renderRoot;
     this.template = null;
-    this.startNode = null;
-    this.endNode = null;
-    this.parentNode = null;
     this.part = null;
   }
   render({getTemplateName, subTemplates, data, parentTemplate}) {
@@ -35,15 +32,15 @@ class RenderTemplate extends AsyncDirective {
       const templateData = unpackData(data); // data is stored in functions to properly bind to reactivity
       if(template) {
         this.template = template;
-        const {parentNode, startNode, endNode} = this; // stored from update
-        template.attach(parentNode, { startNode, endNode });
+        const { parentNode, startNode, endNode} = this.part; // stored from update
+        const renderRoot = this.part.options.host?.renderRoot;
+        template.attach(renderRoot, { parentNode, startNode, endNode });
       }
       // used for foo.parent()
       if(parentTemplate) {
         template.setParent(parentTemplate);
       }
       if(!comp.firstRun) {
-        console.log('rerender', this.isConnected);
         this.setValue(renderTemplate(template, templateData));
       }
     });
@@ -53,10 +50,7 @@ class RenderTemplate extends AsyncDirective {
   }
 
   update(part, renderSettings) {
-    console.log('update called', renderSettings[0]);
-    this.startNode = part.startNode;
-    this.endNode = part.endNode;
-    this.parentNode = part.parentNode;
+    this.part = part;
     return this.render.apply(this, renderSettings);
   }
 
