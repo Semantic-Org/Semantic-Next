@@ -1,5 +1,7 @@
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
+import { Reaction } from '@semantic-ui/reactivity';
+import { mapObject } from '@semantic-ui/utils';
 
 // Define directive
 class RenderTemplate extends AsyncDirective {
@@ -7,21 +9,54 @@ class RenderTemplate extends AsyncDirective {
     super(partInfo);
     this.renderRoot = partInfo.options.host.renderRoot;
     this.template = null;
+    this.startNode = null;
+    this.endNode = null;
+    this.parentNode = null;
+    this.part = null;
   }
-  render({template, data, parentTemplate}) {
-    if(parentTemplate) {
-      template.setParent(parentTemplate);
-    }
-    return template.render(data);
+  render({getTemplateName, subTemplates, data, parentTemplate}) {
+    const getTemplate = () => {
+      const templateName = getTemplateName();
+      const template = subTemplates[templateName];
+      return template;
+    };
+    const renderTemplate = (template, data) => {
+      return template.render(data);
+    };
+    const unpackData = (dataObj) => {
+      return mapObject(dataObj, (val) => val());
+    };
+    Reaction.create((comp) => {
+      if(!this.isConnected) {
+        comp.stop();
+        return;
+      }
+      const template = getTemplate();
+      const templateData = unpackData(data); // data is stored in functions to properly bind to reactivity
+      if(template) {
+        this.template = template;
+        const {parentNode, startNode, endNode} = this; // stored from update
+        template.attach(parentNode, { startNode, endNode });
+      }
+      // used for foo.parent()
+      if(parentTemplate) {
+        template.setParent(parentTemplate);
+      }
+      if(!comp.firstRun) {
+        console.log('rerender', this.isConnected);
+        this.setValue(renderTemplate(template, templateData));
+      }
+    });
+    const template = getTemplate();
+    const templateData = unpackData(data);
+    return renderTemplate(template, templateData);
   }
 
   update(part, renderSettings) {
-    const template = renderSettings[0].template;
-    if(template) {
-      this.template = template;
-      const {startNode, endNode} = part; // we use this for binding events
-      template.attach(part.parentNode, { startNode, endNode });
-    }
+    console.log('update called', renderSettings[0]);
+    this.startNode = part.startNode;
+    this.endNode = part.endNode;
+    this.parentNode = part.parentNode;
     return this.render.apply(this, renderSettings);
   }
 

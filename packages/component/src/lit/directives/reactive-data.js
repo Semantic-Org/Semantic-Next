@@ -18,6 +18,10 @@ class ReactiveData extends AsyncDirective {
     // Create a new reaction to rerun the computation function
     let value;
     this.reaction = Reaction.create((comp) => {
+      if(!this.isConnected) {
+        comp.stop();
+        return;
+      }
       value = computeFunc();
       if(settings.unsafeHTML) {
         value = unsafeHTML(value);

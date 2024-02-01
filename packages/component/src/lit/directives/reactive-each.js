@@ -18,7 +18,11 @@ class ReactiveEachDirective extends AsyncDirective {
     const initialRender = this.createRepeat(eachCondition, data);
 
     if (!this.reaction) {
-      this.reaction = Reaction.create(() => {
+      this.reaction = Reaction.create((comp) => {
+        if(!this.isConnected) {
+          comp.stop();
+          return;
+        }
         const items = this.getItems(eachCondition); // setup reactivity
         if(this.firstRun) {
           return;

@@ -18,6 +18,10 @@ class ReactiveConditionalDirective extends AsyncDirective {
     let html = nothing;
     let lastHTML = nothing;
     this.reaction = Reaction.create((comp) => {
+      if(!this.isConnected) {
+        comp.stop();
+        return;
+      }
       if(conditional.condition()) {
         html = conditional.content();
       }
@@ -43,7 +47,6 @@ class ReactiveConditionalDirective extends AsyncDirective {
       }
       return html;
     });
-    lastHTML = html;
     return html;
   }
 

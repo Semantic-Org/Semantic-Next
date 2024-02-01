@@ -61,7 +61,11 @@ export class LitRenderer {
           break;
 
         case 'expression':
-          this.addValue( this.evaluateExpression(node.value, data, { unsafeHTML: node.unsafeHTML, asDirective: true }) );
+          const value = this.evaluateExpression(node.value, data, {
+            unsafeHTML: node.unsafeHTML,
+            asDirective: true
+          });
+          this.addValue( value );
           break;
 
         case 'if':
@@ -99,7 +103,7 @@ export class LitRenderer {
         return value.map(branch => mapObject(branch, directiveMap));
       }
       if(key == 'condition') {
-        return () => this.evaluateExpression(value, data, { asDirective: false });
+        return () => this.evaluateExpression(value, data);
       }
       if(key == 'content') {
         return () => this.renderContent({ast: value, data});
@@ -113,7 +117,7 @@ export class LitRenderer {
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
       if(key == 'over') {
-        return () => this.evaluateExpression(value, data, { asDirective: false });
+        return () => this.evaluateExpression(value, data);
       }
       if(key == 'content') {
         return (eachData) => this.renderContent({ast: value, data: eachData});
@@ -125,25 +129,28 @@ export class LitRenderer {
   }
 
   evaluateTemplate(node, data = {}) {
-    const subTemplate = this.subTemplates[node.templateName];
-    const getValue = (value) => this.evaluateExpression(value, data, { asDirective: false });
-    const staticValues = mapObject(node.data || {}, (value) => Reaction.nonreactive(() => getValue(value)));
-    const reactiveValues = mapObject(node.reactiveData || {}, getValue);
+    const getValue = (value) => this.evaluateExpression(value, data);
+
+    // template names can be dynamic
+    const getTemplateName = () => getValue(node.name);
+
+    // data can either be reactive or nonreactive
+    const staticValues = mapObject(node.data || {}, (value) => {
+      return () => Reaction.nonreactive(() => getValue(value));
+    });
+    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
+      return () => getValue(value);
+    });
     const templateData = {
       ...staticValues,
       ...reactiveValues
     };
-    if(subTemplate) {
-      //debugger;
-      return renderTemplate({
-        template: subTemplate,
-        data: templateData,
-        parentTemplate: data
-      });
-    }
-    else {
-      console.error(`Could not find subtemplate for "${node.templateName}"`, node);
-    }
+    return renderTemplate({
+      subTemplates: this.subTemplates,
+      getTemplateName: getTemplateName,
+      data: templateData,
+      parentTemplate: data
+    });
   }
 
   // i.e foo.baz = { foo: { baz: 'value' } }

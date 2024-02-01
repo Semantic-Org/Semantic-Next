@@ -23,12 +23,10 @@ class TemplateCompiler {
 
   static templateRegExp = {
     verbose: {
-      keyword: /^template\W/,
-      name: /name\s*=\s*\'(.*)\'\W/,
-      reactiveData: /reactiveData\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/m, // positive lookahead on next equals
-      data: /data\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/m, // positive lookahead on next equals
+      keyword: /^template\W/g,
+      properties: /(\w+)\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/mg,
     },
-    standard: /(\w.*?)($|\s)/gm,
+    standard: /(\w.*?)($|\s)/mg,
     dataObject: /(\w+)\s*:\s*([^,}]+)/g // parses { one: 'two' }
   };
 
@@ -233,12 +231,12 @@ class TemplateCompiler {
     let templateInfo = {};
     if(regExp.verbose.keyword.exec(expression)) {
       // verbose notation {{> templateName reactiveData=true data={one: 'one', two: 'two'} }}
-      templateInfo.templateName = expression.match(regExp.verbose.name)?.[1].trim();
-      let dataString = expression.match(regExp.verbose.data)?.[1].trim();
-      templateInfo.data = this.getObjectFromString(dataString);
-      let reactiveDataString = expression.match(regExp.verbose.reactiveData)?.[1].trim();
-      templateInfo.reactiveData = this.getObjectFromString(reactiveDataString);
-      console.log(templateInfo);
+      const matches = [ ...expression.matchAll(regExp.verbose.properties) ];
+      each(matches, (match, index) => {
+        const property = match[1];
+        const value = this.getObjectFromString(match[2]);
+        templateInfo[property] = value;
+      });
     }
     else {
       // standard notation {{> templateName data1=value data2=value}}
@@ -246,7 +244,7 @@ class TemplateCompiler {
       const matches = [ ...expression.matchAll(regExp.standard) ];
       each(matches, (match, index) => {
         if(index == 0) {
-          templateInfo.templateName = match[0].trim();
+          templateInfo.name = `'${match[0].trim()}'`;
         }
         else {
           const parts = match[0].split('=');
@@ -269,14 +267,7 @@ class TemplateCompiler {
     let isObject = false;
     while ((match = regex.exec(objectString)) !== null) {
       isObject = true;
-      console.log(match[1], match[2]);
       obj[match[1]] = match[2].trim();
-    }
-    if(!isObject) {
-      console.log('is not an object');
-      console.log('object string');
-      console.log(objectString);
-      debugger;
     }
     // if this isnt an object we want to return the string value which may be an expression
     return isObject ? obj : objectString.trim();
