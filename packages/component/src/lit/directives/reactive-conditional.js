@@ -16,7 +16,6 @@ class ReactiveConditionalDirective extends AsyncDirective {
       this.reaction.stop();
     }
     let html = nothing;
-    let lastHTML = nothing;
     this.reaction = Reaction.create((comp) => {
       if(!this.isConnected) {
         comp.stop();
