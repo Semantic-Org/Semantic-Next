@@ -1,4 +1,5 @@
 import { isEqual } from '@semantic-ui/utils';
+import { Dependency } from './dependency.js';
 
 export class Reaction {
 
@@ -23,17 +24,6 @@ export class Reaction {
 
   static equalityFunction(a, b) {
     return isEqual(a, b);
-  }
-
-  static nonreactive(func) {
-    const previousReaction = Reaction.current;
-    Reaction.current = null;
-
-    try {
-      return func();
-    } finally {
-      Reaction.current = previousReaction;
-    }
   }
 
   static flush() {
@@ -64,7 +54,6 @@ export class Reaction {
   constructor(callback) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.internalComputations = new Set();
     this.boundRun = this.run.bind(this); // Bound function
     this.firstRun = true;
     this.active = true;
@@ -82,18 +71,50 @@ export class Reaction {
 
     this.firstRun = false;
     Reaction.current = null;
-
+    console.log('deps', this.dependencies);
     this.dependencies.forEach(dep => dep.addListener(this.boundRun));
   }
 
   stop() {
     if (!this.active) return;
-    this.internalComputations.forEach(comp => comp.stop());
-    this.internalComputations.clear();
     this.active = false;
     this.dependencies.forEach(dep => {
       dep.removeListener(this.boundRun);
     });
+  }
+
+  /*
+    Makes sure anything called inside this function does not trigger reactions
+  */
+  static nonreactive(func) {
+    const previousReaction = Reaction.current;
+    Reaction.current = null;
+    try {
+      return func();
+    } finally {
+      Reaction.current = previousReaction;
+    }
+  }
+
+  /*
+    Makes sure function doesnt rerun when values dont change
+  */
+  static guard(f) {
+    if (!Reaction.current) {
+      return f();
+    }
+    let dep = new Dependency();
+    let value, newValue;
+    const comp = new Reaction(() => {
+      newValue = f();
+      if (!comp.firstRun && !isEqual(newValue, value)) {
+        dep.changed();
+      }
+      value = clone(newValue);
+    });
+    comp.run(); // Initial run to capture dependencies
+    dep.depend(); // Create dependency on guard function
+    return value;
   }
 }
 

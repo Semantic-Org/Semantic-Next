@@ -1,6 +1,6 @@
 import { html } from 'lit';
 
-import { get, each, mapObject, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -129,7 +129,11 @@ export class LitRenderer {
       return this.evaluateExpression(value, data, { asDirective: false });
     });
     if(subTemplate) {
-      return renderTemplate({template: subTemplate, data: templateData });
+      return renderTemplate({
+        template: subTemplate,
+        data: templateData,
+        parentTemplate: data
+      });
     }
     else {
       console.error(`Could not find subtemplate for "${node.templateName}"`, node);
@@ -162,7 +166,6 @@ export class LitRenderer {
     { unsafeHTML = false } = {}
   ) {
 
-
     // if the whole expression is a string we want to return that
     const stringRegExp = /^\'(.*)\'$/;
     const stringMatches = expressionString.match(stringRegExp);
@@ -170,19 +173,26 @@ export class LitRenderer {
       return stringMatches[1];
     }
 
-
     const expressions = expressionString.split(' ').reverse();
     let funcArguments = [];
     let result;
     each(expressions, (expression, index) => {
+
+      // This lookups a deep value in an object, calling any intermediary functions
+      const getValue = (obj, path) => path.split('.').reduce((acc, part) => {
+        const current = wrapFunction(acc)();
+        return current[part];
+      }, obj);
+
       // the 'this' context' is the path up to expression
       // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
       const getContext = () => {
         const path = expression.split('.').slice(0, -1).join('.');
-        const context = get(data, path);
+        const context = getValue(data, path);
         return context;
       };
-      let dataValue = get(data, expression);
+
+      let dataValue = getValue(data, expression);
       const helper = LitRenderer.helpers[expression];
       // check if we have a global helper with this name
       if(!dataValue && isFunction(helper)) {

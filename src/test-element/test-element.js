@@ -21,7 +21,7 @@ const createInstance = function(tpl, $) {
       return tpl.tab.get() == 'basic' ? 'disabled' : '';
     },
     getText() {
-      return $('.helper').text();
+      return 'banana';
     }
   };
 };

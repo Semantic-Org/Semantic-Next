@@ -21,6 +21,9 @@ const createInstance = (tpl, $) => ({
   setCurrentDate() {
     tpl.date.value = new Date();
   },
+  callParentMethod() {
+    return tpl.parent().getText();
+  },
   calculateCurrentSeconds() {
     let date = tpl.date.get();
     let second = Math.abs(date.getSeconds()) % 10;

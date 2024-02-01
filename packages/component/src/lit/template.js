@@ -18,6 +18,7 @@ export const LitTemplate = class UITemplate {
     events,
     subTemplates,
     createInstance,
+    parentTemplate, // the parent template when nested
     onCreated = noop,
     onRendered = noop,
     onDestroyed = noop
@@ -41,6 +42,11 @@ export const LitTemplate = class UITemplate {
     this.onCreatedCallback = onCreated;
   }
 
+  // when rendered as a partial/subtemplate
+  setParent(parentTemplate) {
+    return this.parentTemplate = parentTemplate;
+  }
+
   getGenericTemplateName() {
     LitTemplate.templateCount++;
     return `Anonymous #${LitTemplate.templateCount}`;
@@ -53,7 +59,12 @@ export const LitTemplate = class UITemplate {
       tpl = this.call(this.createInstance);
       extend(this.tpl, tpl);
     }
+    // reactions bound with tpl.reaction will be scoped to template
+    // and be removed when the template is destroyed
     this.tpl.reaction = this.reaction;
+    this.tpl.templateName = this.templateName;
+    // this is a function to avoid naive cascading reactivity
+    this.tpl.parent = () => this.parentTemplate;
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback.bind(this));
@@ -66,7 +77,7 @@ export const LitTemplate = class UITemplate {
     };
     this.onDestroyed = () => {
       this.rendered = false;
-      this.clearComputations();
+      this.clearReactions();
       this.removeEvents();
       this.call(this.onDestroyedCallback.bind(this));
     };
@@ -205,14 +216,14 @@ export const LitTemplate = class UITemplate {
   *******************************/
 
   reaction(reaction) {
-    if(!this.computations) {
-      this.computations = [];
+    if(!this.reactions) {
+      this.reactions = [];
     }
-    this.computations.push(Reaction.create(reaction));
+    this.reactions.push(Reaction.create(reaction));
   }
 
-  clearComputations() {
-    each(this.computations || [], comp => comp.stop());
+  clearReactions() {
+    each(this.reactions || [], comp => comp.stop());
   }
 
   fatal(message) {

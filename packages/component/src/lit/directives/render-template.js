@@ -8,7 +8,10 @@ class RenderTemplate extends AsyncDirective {
     this.renderRoot = partInfo.options.host.renderRoot;
     this.template = null;
   }
-  render({template, data}) {
+  render({template, data, parentTemplate}) {
+    if(parentTemplate) {
+      template.setParent(parentTemplate);
+    }
     return template.render(data);
   }
 
@@ -16,7 +19,7 @@ class RenderTemplate extends AsyncDirective {
     const template = renderSettings[0].template;
     if(template) {
       this.template = template;
-      const {startNode, endNode} = part;
+      const {startNode, endNode} = part; // we use this for binding events
       template.attach(part.parentNode, { startNode, endNode });
     }
     return this.render.apply(this, renderSettings);

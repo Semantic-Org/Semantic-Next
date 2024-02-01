@@ -1,5 +1,4 @@
 next
-- Implement parent() helper
 - Adopting stylesheets from subtemplates
 - Move example to example folder & add to npm script
 - Create todo app
@@ -7,17 +6,12 @@ next
 later
 - Adding ifdefined for attributes from templates
 - review reactivity on data context changes
+- consider await/task syntax
 
 recent done
++ Implement parent() helper
 + Namespacing events so only fire on subtemplates
 + add unsafe html / raw html
 + Attach events for sub templates
 + Allow computations to be attached to templates
 + onCreated/onDestroyed callbacks on subtemplates
-
-
-{{#await $tpl.get.dogFromDaycare}}
-  Got dog from daycare
-{{loading}}
-  Walking to daycare now
-{{/await}}
