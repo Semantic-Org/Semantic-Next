@@ -162,12 +162,14 @@ export class LitRenderer {
     { unsafeHTML = false } = {}
   ) {
 
-    const stringRegExp = /^\'(.*)\'$/;
 
-    // we only have significant " " if this is a string literal which means early exit
-    if(expressionString.search(stringRegExp) > -1) {
-      return expressionString;
+    // if the whole expression is a string we want to return that
+    const stringRegExp = /^\'(.*)\'$/;
+    const stringMatches = expressionString.match(stringRegExp);
+    if(stringMatches && stringMatches.length > 0) {
+      return stringMatches[1];
     }
+
 
     const expressions = expressionString.split(' ').reverse();
     let funcArguments = [];

@@ -1,7 +1,6 @@
 next
 - Implement parent() helper
 - Adopting stylesheets from subtemplates
-- Namespacing events so only fire on subtemplates
 - Move example to example folder & add to npm script
 - Create todo app
 
@@ -10,6 +9,16 @@ later
 - review reactivity on data context changes
 
 recent done
++ Namespacing events so only fire on subtemplates
++ add unsafe html / raw html
 + Attach events for sub templates
 + Allow computations to be attached to templates
 + onCreated/onDestroyed callbacks on subtemplates
+
+
+{{#await $tpl.get.dog}}
+  There is a dog
+
+{{loading}}
+  Dog is coming
+{{/await}}
