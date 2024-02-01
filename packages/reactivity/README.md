@@ -176,11 +176,20 @@ saying.set('goodbye');
 
 You can help fine-tune reactivity by using guard to only pay attention to certain parts of a reactive context
 
-
 ```javascript
+  const userAge = new ReactiveVar(30);
+  const userName = new ReactiveVar('John Doe');
+  const lastUpdated = new ReactiveVar(new Date()); // Assume this updates frequently
+  const getUserInfo = () => {
+    return {
+      name: userName,
+      age: userAge,
+      date: lastUpdated,
+    };
+  };
   Reaction.create((comp) => {
     Reaction.guard(() => {
-      let user = getUserInfo();
+      let user = getUserInfo(); // we only want to call this function if name/age changes
       return {
         name: user.name,
         age: user.age,
@@ -200,7 +209,7 @@ You can help fine-tune reactivity by using guard to only pay attention to certai
       lastUpdated.value = new Date(); // This should NOT trigger the reaction
     }, 2000);
   });
-
+```
 
 
 ### Flushing Changes
