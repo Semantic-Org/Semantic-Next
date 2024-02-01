@@ -1,5 +1,4 @@
 import { unsafeCSS } from 'lit';
-
 import { unique, each, noop, get, reverseKeys } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 

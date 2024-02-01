@@ -25,6 +25,7 @@ class TemplateCompiler {
     verbose: {
       keyword: /^template\W/,
       name: /name\s*=\s*\'(.*)\'\W/,
+      reactiveData: /reactiveData\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/m, // positive lookahead on next equals
       data: /data\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/m, // positive lookahead on next equals
     },
     standard: /(\w.*?)($|\s)/gm,
@@ -231,10 +232,13 @@ class TemplateCompiler {
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
     if(regExp.verbose.keyword.exec(expression)) {
-      // shorthand notation {{> template= data1=value data2=value}}
+      // verbose notation {{> templateName reactiveData=true data={one: 'one', two: 'two'} }}
       templateInfo.templateName = expression.match(regExp.verbose.name)?.[1].trim();
       let dataString = expression.match(regExp.verbose.data)?.[1].trim();
       templateInfo.data = this.getObjectFromString(dataString);
+      let reactiveDataString = expression.match(regExp.verbose.reactiveData)?.[1].trim();
+      templateInfo.reactiveData = this.getObjectFromString(reactiveDataString);
+      console.log(templateInfo);
     }
     else {
       // standard notation {{> templateName data1=value data2=value}}
@@ -258,18 +262,24 @@ class TemplateCompiler {
     return templateInfo;
   }
 
-  getObjectFromString(objectString) {
+  getObjectFromString(objectString = '') {
     const regex = TemplateCompiler.templateRegExp.dataObject;
     const obj = {};
     let match;
+    let isObject = false;
     while ((match = regex.exec(objectString)) !== null) {
-      obj[match[1]] = match[2];
+      isObject = true;
+      console.log(match[1], match[2]);
+      obj[match[1]] = match[2].trim();
     }
-    return obj;
-  }
-
-  parseTemplateDataString(data) {
-
+    if(!isObject) {
+      console.log('is not an object');
+      console.log('object string');
+      console.log(objectString);
+      debugger;
+    }
+    // if this isnt an object we want to return the string value which may be an expression
+    return isObject ? obj : objectString.trim();
   }
 
 }

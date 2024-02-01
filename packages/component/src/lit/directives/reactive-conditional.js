@@ -2,7 +2,7 @@ import { noChange, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { each } from '@semantic-ui/utils';
+import { each, isEqual } from '@semantic-ui/utils';
 
 class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -16,6 +16,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
       this.reaction.stop();
     }
     let html = nothing;
+    let lastHTML = nothing;
     this.reaction = Reaction.create((comp) => {
       if(conditional.condition()) {
         html = conditional.content();
@@ -42,6 +43,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
       }
       return html;
     });
+    lastHTML = html;
     return html;
   }
 

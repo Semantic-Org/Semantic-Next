@@ -8,15 +8,18 @@
   </div>
 
   <p>This is the parent template context.</p>
-  <button class="activity">Change Morning Activity</button>
+  <button class="morning">Change Morning Activity</button>
+  <button class="evening">Change Evening Activity</button>
 
   {{#if is tab 'basic'}}
     {{> template
       name='basic'
-      data= {
+      reactiveData={
         morning: morningActivity,
-        afternoon: 'afternoon delight',
-        evening: 'reading',
+      }
+      data= {
+        afternoon: 'Biking',
+        evening: eveningActivity,
       }
       camera='nikon'
     }}

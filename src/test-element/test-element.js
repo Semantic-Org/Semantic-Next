@@ -11,6 +11,7 @@ const createInstance = function(tpl, $) {
   return {
     tab: new ReactiveVar('basic'),
     morningActivity: new ReactiveVar('running'),
+    eveningActivity: new ReactiveVar('reading'),
     maybeActive(tab) {
       return tpl.tab.get() == tab
         ? 'active'
@@ -38,8 +39,11 @@ const events = {
   'click .tab'(event, tpl, $, data) {
     tpl.tab.set(data.tab);
   },
-  'click .activity'(event, tpl) {
+  'click .morning'(event, tpl) {
     tpl.morningActivity.set('Mowing the lawn');
+  },
+  'click .evening'(event, tpl) {
+    tpl.eveningActivity.set('Reading');
   }
 };
 

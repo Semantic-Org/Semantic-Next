@@ -1,5 +1,6 @@
 import { html } from 'lit';
 
+import { Reaction } from '@semantic-ui/reactivity';
 import { each, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
@@ -123,11 +124,15 @@ export class LitRenderer {
     return reactiveEach(eachArguments, data);
   }
 
-  evaluateTemplate(node, data) {
+  evaluateTemplate(node, data = {}) {
     const subTemplate = this.subTemplates[node.templateName];
-    let templateData = mapObject(node.data, (value) => {
-      return this.evaluateExpression(value, data, { asDirective: false });
-    });
+    const getValue = (value) => this.evaluateExpression(value, data, { asDirective: false });
+    const staticValues = mapObject(node.data || {}, (value) => Reaction.nonreactive(() => getValue(value)));
+    const reactiveValues = mapObject(node.reactiveData || {}, getValue);
+    const templateData = {
+      ...staticValues,
+      ...reactiveValues
+    };
     if(subTemplate) {
       //debugger;
       return renderTemplate({

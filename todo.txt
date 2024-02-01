@@ -1,4 +1,5 @@
 next
+- support expressions for partial object data
 - Adopting stylesheets from subtemplates
 - Move example to example folder & add to npm script
 - Create todo app
@@ -9,6 +10,7 @@ later
 - consider await/task syntax
 
 recent done
++ Control data reactivity with temlpates, add reactiveData as a setting
 + Implement parent() helper
 + Namespacing events so only fire on subtemplates
 + add unsafe html / raw html
