@@ -89,11 +89,11 @@ export const LitTemplate = class UITemplate {
     });
   }
 
-  async attach(renderRoot, { parentElement = renderRoot, startNode, endNode } = {}) {
+  async attach(renderRoot, { parentNode = renderRoot, startNode, endNode } = {}) {
     // to attach styles & events
     this.renderRoot = renderRoot;
     // to determine if event occurred on template
-    this.parentElement = parentElement;
+    this.parentNode = parentNode;
     this.startNode = startNode;
     this.endNode = endNode;
 
@@ -131,7 +131,7 @@ export const LitTemplate = class UITemplate {
   }
 
   attachEvents(events = this.events) {
-    if(!this.parentElement || !this.renderRoot) {
+    if(!this.parentNode || !this.renderRoot) {
       fatal('You must set a parent before attaching events');
     }
     // format like 'click .foo baz'
@@ -162,7 +162,7 @@ export const LitTemplate = class UITemplate {
   // then confirm position
   isNodeInTemplate(node) {
     const getRootChild = (node) => {
-      while (node && node.parentNode !== this.renderRoot) {
+      while (node && node.parentNode !== this.parentNode) {
         node = node.parentNode;
       }
       return node;
