@@ -57,6 +57,12 @@ const onDestroyed = (tpl) => {
   clearInterval(tpl.interval);
 };
 
+const events = {
+  'click button'(event, tpl) {
+    console.log('button clicked');
+  }
+};
+
 const basicTab = createComponent({
   templateName: 'basic',
   template,
@@ -64,9 +70,7 @@ const basicTab = createComponent({
   onCreated: () => console.log('on created basic'),
   onRendered,
   onDestroyed,
-  events: {
-    'click button': () => console.log('button clicked')
-  }
+  events,
 });
 
 export { basicTab };

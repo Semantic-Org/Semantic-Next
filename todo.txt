@@ -16,9 +16,8 @@ recent done
 + onCreated/onDestroyed callbacks on subtemplates
 
 
-{{#await $tpl.get.dog}}
-  There is a dog
-
+{{#await $tpl.get.dogFromDaycare}}
+  Got dog from daycare
 {{loading}}
-  Dog is coming
+  Walking to daycare now
 {{/await}}
