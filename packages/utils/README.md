@@ -23,6 +23,7 @@ Utility includes the following helpers
 
 ### Objects
 * `keys(obj)` - Return the keys of an object
+* `pick(obj, ...keys)` - Returns a new object with specified keys from object
 * `clone(obj)` - Recursively clone an object
 * `each(arr, eachFunction(value, key))` - Iterates over an object calling function with each value and key
 * `extend(obj, ...sources)` - Adds new values to an object. This avoids the common trap of nuking getter/setters.
