@@ -172,6 +172,37 @@ saying.set('goodbye');
 
 ```
 
+### Guard
+
+You can help fine-tune reactivity by using guard to only pay attention to certain parts of a reactive context
+
+
+```javascript
+  Reaction.create((comp) => {
+    Reaction.guard(() => {
+      let user = getUserInfo();
+      return {
+        name: user.name,
+        age: user.age,
+      };
+    });
+    if(!comp.firstRun) {
+      console.log(`User Info Updated: Name: ${userInfo.name}, Age: ${userInfo.age}`);
+    }
+    // Simulate updates
+    setTimeout(() => {
+      userName.value = 'Jane Doe'; // This should trigger the reaction
+    }, 300);
+    setTimeout(() => {
+      userAge.value = 31; // This should also trigger the reaction
+    }, 1000);
+    setTimeout(() => {
+      lastUpdated.value = new Date(); // This should NOT trigger the reaction
+    }, 2000);
+  });
+
+
+
 ### Flushing Changes
 
 When a `ReactiveVar` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.

@@ -98,6 +98,7 @@ export class Reaction {
     const comp = new Reaction(() => {
       newValue = f();
       if (!comp.firstRun && !isEqual(newValue, value)) {
+        console.log('dep changed', value);
         dep.changed();
       }
       value = clone(newValue);

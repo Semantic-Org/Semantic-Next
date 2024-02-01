@@ -1,5 +1,6 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { pick } from '@semantic-ui/utils';
 import template from './basic.html';
 
 const createInstance = (tpl, $) => ({
@@ -52,6 +53,43 @@ const onRendered = (tpl) => {
 
   // calculate slogan from seconds (reactive on seconds);
   tpl.reaction(tpl.calculateCurrentSlogan);
+
+  const userAge = new ReactiveVar(30);
+  const userName = new ReactiveVar('John Doe');
+  const lastUpdated = new ReactiveVar(new Date()); // Assume this updates frequently
+
+  const getUserInfo = () => {
+    return {
+      name: userName,
+      age: userAge,
+      date: lastUpdated,
+    };
+  };
+  Reaction.create((comp) => {
+    Reaction.guard(() => {
+      let user = getUserInfo();
+      return {
+        name: user.name,
+        age: user.age,
+      };
+    });
+
+    // Simulate updates
+    setTimeout(() => {
+      console.log('set name');
+      userName.value = 'Jane Doe'; // This should trigger the reaction
+    }, 300);
+    setTimeout(() => {
+      console.log('set age');
+      userAge.value = 31;          // This should also trigger the reaction
+    }, 1000);
+    setTimeout(() => {
+      lastUpdated.value = new Date(); // This should NOT trigger the reaction
+    }, 2000);
+    if(!comp.firstRun) {
+      console.log(`User Info Updated: Name: ${userInfo.name}, Age: ${userInfo.age}`);
+    }
+  });
 
 };
 

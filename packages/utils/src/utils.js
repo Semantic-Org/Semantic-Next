@@ -227,6 +227,15 @@ export const extend = (obj, ...sources) => {
   return obj;
 };
 
+export const pick = function(obj, ...keys) {
+  let copy = {};
+  each(keys, function(key) {
+    if (key in obj) {
+      copy[key] = obj[key];
+    }
+  });
+  return copy;
+};
 
 /*
   Access a nested object field from a string, like 'a.b.c'

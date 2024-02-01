@@ -129,6 +129,7 @@ export class LitRenderer {
       return this.evaluateExpression(value, data, { asDirective: false });
     });
     if(subTemplate) {
+      //debugger;
       return renderTemplate({
         template: subTemplate,
         data: templateData,
