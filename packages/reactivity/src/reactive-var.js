@@ -1,34 +1,22 @@
 import { clone, isEqual } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
+import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
 
   constructor(initialValue, equalityFunction) {
     this.currentValue = clone(initialValue);
-    this._listeners = new Set();
+    this.dependency = new Dependency();
     this.equalityFunction = equalityFunction || ReactiveVar.equalityFunction;
   }
 
-  /* Classic Meteor
-  static equalityFunction(a, b) {
-    if (a !== b) {
-      return false;
-    }
-    else {
-      return ((!a) || (typeof a === 'number') || (typeof a === 'boolean') ||
-              (typeof a === 'string'));
-    }
-  }
-  */
-
-  // modern
   static equalityFunction = (a, b) => {
     return isEqual(a, b);
   };
 
   get value() {
     // Record this ReactiveVar as a dependency if inside a Reaction computation
-    Reaction.recordDependency(this);
+    this.dependency.depend();
     const value = this.currentValue;
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
@@ -41,7 +29,7 @@ export class ReactiveVar {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = clone(newValue);
-      this._notifyListeners();
+      this.dependency.changed();
     }
   }
 
@@ -52,7 +40,7 @@ export class ReactiveVar {
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
-      this._notifyListeners();
+      this.dependency.changed();
     }
   }
 
@@ -104,14 +92,6 @@ export class ReactiveVar {
     let arr = this.value;
     arr.splice(index, 1);
     this.set(arr);
-  }
-
-
-  _notifyListeners() {
-    this._listeners.forEach(listener => {
-      Reaction.pendingReactions.add(listener);
-    });
-    Reaction.scheduleFlush();
   }
 
 }

@@ -1,4 +1,4 @@
-import { isEqual } from '@semantic-ui/utils';
+import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
@@ -8,27 +8,27 @@ export class Reaction {
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
 
+  static create(callback) {
+    const reaction = new Reaction(callback);
+    reaction.run();
+    return reaction;
+  }
+
   static scheduleFlush() {
     if (!Reaction.isFlushScheduled) {
       Reaction.isFlushScheduled = true;
-
-      // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
-      if(queueMicrotask) {
-        queueMicrotask(Reaction.flush);
-      }
-      else {
-        Promise.resolve().then(Reaction.flush); // Using microtask queue
+      if (typeof queueMicrotask === 'function') {
+        // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
+        queueMicrotask(() => Reaction.flush());
+      } else {
+        Promise.resolve().then(() => Reaction.flush());
       }
     }
   }
 
-  static equalityFunction(a, b) {
-    return isEqual(a, b);
-  }
-
   static flush() {
     Reaction.isFlushScheduled = false;
-    Reaction.pendingReactions.forEach(reaction => reaction());
+    Reaction.pendingReactions.forEach(reaction => reaction.run());
     Reaction.pendingReactions.clear();
 
     Reaction.afterFlushCallbacks.forEach(callback => callback());
@@ -39,22 +39,10 @@ export class Reaction {
     Reaction.afterFlushCallbacks.push(callback);
   }
 
-  static recordDependency(reactiveVar) {
-    if (Reaction.current) {
-      Reaction.current.dependencies.add(reactiveVar);
-    }
-  }
-
-  static create(callback) {
-    const reaction = new Reaction(callback);
-    reaction.run();
-    return reaction;
-  }
-
   constructor(callback) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.boundRun = this.run.bind(this); // Bound function
+    this.boundRun = this.run.bind(this);
     this.firstRun = true;
     this.active = true;
   }
@@ -64,24 +52,26 @@ export class Reaction {
       return;
     }
     Reaction.current = this;
+    this.dependencies.forEach(dep => dep.cleanUp(this));
     this.dependencies.clear();
-
-    // Provide computation context
     this.callback(this);
-
     this.firstRun = false;
     Reaction.current = null;
-    console.log('deps', this.dependencies);
-    this.dependencies.forEach(dep => dep.addListener(this.boundRun));
+    Reaction.pendingReactions.delete(this);
+  }
+
+  invalidate() {
+    this.active = true;
+    Reaction.pendingReactions.add(this);
+    Reaction.scheduleFlush();
   }
 
   stop() {
     if (!this.active) return;
     this.active = false;
-    this.dependencies.forEach(dep => {
-      dep.removeListener(this.boundRun);
-    });
+    this.dependencies.forEach(dep => dep.unsubscribe(this));
   }
+
 
   /*
     Makes sure anything called inside this function does not trigger reactions
@@ -117,4 +107,3 @@ export class Reaction {
     return value;
   }
 }
-
