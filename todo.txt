@@ -5,13 +5,15 @@ next
 later
 - Adding ifdefined for attributes from templates
 - consider await/task syntax
+- add getParent helper with tree search
+- add getTemplate helper to search all active rendered templates. Add global registry of active templates.
 
 recent done
 + Move example to example folder & add to build script.
-+ Add globals for build script and review
-+ Fix render template reactivity on data
-+ Adopting stylesheets from subtemplates
-+ Control data reactivity with temlpates, add reactiveData as a setting
++ Add constants for build script and review
++ Fix renderTemplate reactivity on data context. General reactivity review of subtemplates.
++ Allow adopting stylesheets from subtemplates
++ Add reactiveData syntax for specifying reactive data for subtemplates.
 + Implement parent() helper
 + Namespacing events so only fire on subtemplates
 + add unsafe html / raw html
