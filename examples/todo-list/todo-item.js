@@ -20,7 +20,7 @@ const onRendered = (tpl, $) => {
   if(tpl.data.item.completed) {
     console.log('checking');
     console.log($('.completed').length);
-    $('.completed').attr('checked');
+    $('.completed').attr('checked', true);
   }
   else {
     console.log('unchecking');

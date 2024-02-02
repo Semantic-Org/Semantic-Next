@@ -2091,10 +2091,11 @@ var RenderTemplate = class extends f4 {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
-      if (this.template) {
+      const templateName = getTemplateName();
+      if (this.template && this.templateName == templateName) {
         return false;
       }
-      const templateName = getTemplateName();
+      this.templateName = templateName;
       const template = subTemplates[templateName];
       if (!template) {
         fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
@@ -2113,7 +2114,6 @@ var RenderTemplate = class extends f4 {
     const renderTemplate2 = () => {
       let html = this.template.render();
       setTimeout(() => {
-        console.log("RENDER IS CALLED");
         this.template.onRendered();
       }, 0);
       return html;
@@ -2124,12 +2124,9 @@ var RenderTemplate = class extends f4 {
         return;
       }
       const isCloned = cloneTemplate();
-      console.log("reaction", isCloned, comp.firstRun);
       if (!comp.firstRun) {
-        console.log("comp first run not true");
         attachTemplate();
         if (!isCloned) {
-          console.log("changing data context to", data);
           this.template.setDataContext(unpackData(data));
         }
         this.setValue(renderTemplate2());
@@ -2141,12 +2138,10 @@ var RenderTemplate = class extends f4 {
     return renderTemplate2();
   }
   update(part, renderSettings) {
-    console.log(part);
     this.part = part;
     return this.render.apply(this, renderSettings);
   }
   reconnected() {
-    console.log("reconnected called");
   }
   disconnected() {
     if (this.template) {
@@ -2468,7 +2463,6 @@ var LitTemplate = class UITemplate {
   initialize() {
     let tpl = this;
     if (isFunction(this.createInstance)) {
-      console.log("initializing");
       this.tpl = {};
       tpl = this.call(this.createInstance);
       extend(this.tpl, tpl);
@@ -2488,7 +2482,6 @@ var LitTemplate = class UITemplate {
       this.call(this.onRenderedCallback.bind(this));
     };
     this.onDestroyed = () => {
-      console.log("on destroyed called");
       this.rendered = false;
       this.clearReactions();
       this.removeEvents();
@@ -2506,11 +2499,9 @@ var LitTemplate = class UITemplate {
     if (!this.initialized) {
       this.initialize();
     }
-    console.log(this.renderRoot, renderRoot);
     if (this.renderRoot == renderRoot) {
       return;
     }
-    console.log("WTF");
     this.renderRoot = renderRoot;
     this.parentNode = parentNode;
     this.startNode = startNode;
@@ -2572,7 +2563,6 @@ var LitTemplate = class UITemplate {
       return { eventName, selector };
     };
     this.eventController = new AbortController();
-    console.log("adding events", this.templateName);
     each(events2, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
@@ -2587,7 +2577,6 @@ var LitTemplate = class UITemplate {
   }
   removeEvents() {
     if (this.eventController) {
-      console.log("remove events", this.templateName);
       this.eventController.abort();
     }
   }
@@ -2635,7 +2624,6 @@ var LitTemplate = class UITemplate {
     if (!this.renderRoot) {
       fatal("Cannot query DOM unless render root specified.");
     }
-    console.log(selector, this.renderRoot);
     return $2(selector, this.renderRoot);
   }
   // calls callback if defined with consistent params and this context
@@ -2839,7 +2827,6 @@ var createComponent = ({
         this.call(onRendered);
       }
       updated() {
-        console.log("updated", this.renderCallbacks);
         each(this.renderCallbacks, (callback) => callback());
       }
       addRenderCallback(callback) {

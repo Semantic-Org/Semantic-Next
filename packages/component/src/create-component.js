@@ -115,7 +115,6 @@ export const createComponent = ({
       }
 
       updated() {
-        console.log('updated', this.renderCallbacks);
         each(this.renderCallbacks, callback => callback());
       }
 

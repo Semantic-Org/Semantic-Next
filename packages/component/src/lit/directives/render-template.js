@@ -16,10 +16,11 @@ class RenderTemplate extends AsyncDirective {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
-      if(this.template) {
+      const templateName = getTemplateName();
+      if(this.template && this.templateName == templateName) {
         return false;
       }
-      const templateName = getTemplateName();
+      this.templateName = templateName;
       const template = subTemplates[templateName];
       if(!template) {
         fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
@@ -38,7 +39,6 @@ class RenderTemplate extends AsyncDirective {
     const renderTemplate = () => {
       let html = this.template.render();
       setTimeout(() => {
-        console.log('RENDER IS CALLED');
         this.template.onRendered();
       }, 0);
       return html;
@@ -49,12 +49,9 @@ class RenderTemplate extends AsyncDirective {
         return;
       }
       const isCloned = cloneTemplate(); // reactive reference
-      console.log('reaction', isCloned, comp.firstRun);
       if(!comp.firstRun) {
-        console.log('comp first run not true');
         attachTemplate();
         if(!isCloned) {
-          console.log('changing data context to', data);
           this.template.setDataContext(unpackData(data));
         }
         this.setValue(renderTemplate());
@@ -67,14 +64,12 @@ class RenderTemplate extends AsyncDirective {
   }
 
   update(part, renderSettings) {
-    console.log(part);
     this.part = part;
     return this.render.apply(this, renderSettings);
   }
 
   reconnected() {
     // nothing yet
-    console.log('reconnected called');
   }
   disconnected() {
     if (this.template) {

@@ -60,7 +60,6 @@ export const LitTemplate = class UITemplate {
   initialize() {
     let tpl = this;
     if(isFunction(this.createInstance)) {
-      console.log('initializing');
       this.tpl = {};
       tpl = this.call(this.createInstance);
       extend(this.tpl, tpl);
@@ -84,7 +83,6 @@ export const LitTemplate = class UITemplate {
       this.call(this.onRenderedCallback.bind(this));
     };
     this.onDestroyed = () => {
-      console.log('on destroyed called');
       this.rendered = false;
       this.clearReactions();
       this.removeEvents();
@@ -106,11 +104,9 @@ export const LitTemplate = class UITemplate {
     if(!this.initialized) {
       this.initialize();
     }
-    console.log(this.renderRoot, renderRoot);
     if(this.renderRoot == renderRoot) {
       return;
     }
-    console.log('WTF');
 
     // to attach styles & events
     this.renderRoot = renderRoot;
@@ -185,7 +181,6 @@ export const LitTemplate = class UITemplate {
 
     // the magic of aborts <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
-    console.log('adding events', this.templateName);
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
@@ -201,7 +196,6 @@ export const LitTemplate = class UITemplate {
 
   removeEvents() {
     if(this.eventController) {
-      console.log('remove events', this.templateName);
       this.eventController.abort();
     }
   }
@@ -260,7 +254,6 @@ export const LitTemplate = class UITemplate {
     if(!this.renderRoot) {
       fatal('Cannot query DOM unless render root specified.');
     }
-    console.log(selector, this.renderRoot);
     return $(selector, this.renderRoot);
   }
 
