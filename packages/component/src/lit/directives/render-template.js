@@ -1,7 +1,7 @@
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { mapObject } from '@semantic-ui/utils';
+import { fatal, mapObject } from '@semantic-ui/utils';
 
 // Define directive
 class RenderTemplate extends AsyncDirective {
@@ -15,6 +15,7 @@ class RenderTemplate extends AsyncDirective {
     const getTemplate = () => {
       const templateName = getTemplateName();
       const template = subTemplates[templateName];
+      console.log(template);
       return template;
     };
     const renderTemplate = (template, data) => {
@@ -29,16 +30,21 @@ class RenderTemplate extends AsyncDirective {
         return;
       }
       const template = getTemplate();
+      if(!template) {
+        fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
+      }
+
       const templateData = unpackData(data); // data is stored in functions to properly bind to reactivity
+
       if(template) {
         this.template = template;
         const { parentNode, startNode, endNode} = this.part; // stored from update
         const renderRoot = this.part.options.host?.renderRoot;
         template.attach(renderRoot, { parentNode, startNode, endNode });
-      }
-      // used for foo.parent()
-      if(parentTemplate) {
-        template.setParent(parentTemplate);
+        // used for foo.parent()
+        if(parentTemplate) {
+          template.setParent(parentTemplate);
+        }
       }
       if(!comp.firstRun) {
         this.setValue(renderTemplate(template, templateData));

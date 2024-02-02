@@ -117,7 +117,6 @@ export class LitRenderer {
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
       if(key == 'over') {
-        console.log(this.evaluateExpression(value, data));
         return () => this.evaluateExpression(value, data);
       }
       if(key == 'content') {

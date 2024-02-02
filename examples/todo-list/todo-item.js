@@ -2,8 +2,8 @@ import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 
-import template from './todo-list.html';
-import css from './todo-list.css';
+import template from './todo-item.html';
+import css from './todo-item.css';
 
 
 const createInstance = (tpl, $) => ({
@@ -22,7 +22,8 @@ const onDestroyed = (tpl) => {
 const events = {
 };
 
-const TodoItem = createComponent({
+const todoItem = createComponent({
+  templateName: 'todoItem',
   template,
   css,
   createInstance,
@@ -31,4 +32,4 @@ const TodoItem = createComponent({
   events,
 });
 
-export { TodoItem };
+export { todoItem };

@@ -1,2970 +1,3404 @@
-var Ct=(r,t="")=>{t=t.toLowerCase();let e=document.createElement("style"),o=(c,s)=>`${`${s} ${c.selectorText}`} { ${c.style.cssText} }`;document.head.appendChild(e),e.appendChild(document.createTextNode(r));let n=e.sheet,a=[];for(let c=0;c<n.cssRules.length;c++){let s=n.cssRules[c];switch(s.type){case CSSRule.STYLE_RULE:a.push(o(s,t));break;case CSSRule.MEDIA_RULE:case CSSRule.SUPPORTS_RULE:let d=[];Array.from(s.cssRules).forEach(l=>{d.push(o(l,t))}),a.push(`@${s.name} ${s.conditionText} { ${d.join(" ")} }`);break;default:a.push(s.cssText);break}}return document.head.removeChild(e),a.join(`
-`)};var ct=globalThis,bt=ct.ShadowRoot&&(ct.ShadyCSS===void 0||ct.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,qt=Symbol(),Vt=new WeakMap,lt=class{constructor(t,e,o){if(this._$cssResult$=!0,o!==qt)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e}get styleSheet(){let t=this.o,e=this.t;if(bt&&t===void 0){let o=e!==void 0&&e.length===1;o&&(t=Vt.get(e)),t===void 0&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),o&&Vt.set(e,t))}return t}toString(){return this.cssText}},ut=r=>new lt(typeof r=="string"?r:r+"",void 0,qt);var zt=(r,t)=>{if(bt)r.adoptedStyleSheets=t.map(e=>e instanceof CSSStyleSheet?e:e.styleSheet);else for(let e of t){let o=document.createElement("style"),n=ct.litNonce;n!==void 0&&o.setAttribute("nonce",n),o.textContent=e.cssText,r.appendChild(o)}},dt=bt?r=>r:r=>r instanceof CSSStyleSheet?(t=>{let e="";for(let o of t.cssRules)e+=o.cssText;return ut(e)})(r):r;var{is:He,defineProperty:De,getOwnPropertyDescriptor:Pe,getOwnPropertyNames:Oe,getOwnPropertySymbols:Ue,getPrototypeOf:Ie}=Object,vt=globalThis,jt=vt.trustedTypes,Fe=jt?jt.emptyScript:"",Ye=vt.reactiveElementPolyfillSupport,Z=(r,t)=>r,Tt={toAttribute(r,t){switch(t){case Boolean:r=r?Fe:null;break;case Object:case Array:r=r==null?r:JSON.stringify(r)}return r},fromAttribute(r,t){let e=r;switch(t){case Boolean:e=r!==null;break;case Number:e=r===null?null:Number(r);break;case Object:case Array:try{e=JSON.parse(r)}catch{e=null}}return e}},Kt=(r,t)=>!He(r,t),Wt={attribute:!0,type:String,converter:Tt,reflect:!1,hasChanged:Kt};Symbol.metadata??=Symbol("metadata"),vt.litPropertyMetadata??=new WeakMap;var T=class extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t)}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,e=Wt){if(e.state&&(e.attribute=!1),this._$Ei(),this.elementProperties.set(t,e),!e.noAccessor){let o=Symbol(),n=this.getPropertyDescriptor(t,o,e);n!==void 0&&De(this.prototype,t,n)}}static getPropertyDescriptor(t,e,o){let{get:n,set:a}=Pe(this.prototype,t)??{get(){return this[e]},set(i){this[e]=i}};return{get(){return n?.call(this)},set(i){let c=n?.call(this);a.call(this,i),this.requestUpdate(t,c,o)},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??Wt}static _$Ei(){if(this.hasOwnProperty(Z("elementProperties")))return;let t=Ie(this);t.finalize(),t.l!==void 0&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties)}static finalize(){if(this.hasOwnProperty(Z("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(Z("properties"))){let e=this.properties,o=[...Oe(e),...Ue(e)];for(let n of o)this.createProperty(n,e[n])}let t=this[Symbol.metadata];if(t!==null){let e=litPropertyMetadata.get(t);if(e!==void 0)for(let[o,n]of e)this.elementProperties.set(o,n)}this._$Eh=new Map;for(let[e,o]of this.elementProperties){let n=this._$Eu(e,o);n!==void 0&&this._$Eh.set(n,e)}this.elementStyles=this.finalizeStyles(this.styles)}static finalizeStyles(t){let e=[];if(Array.isArray(t)){let o=new Set(t.flat(1/0).reverse());for(let n of o)e.unshift(dt(n))}else t!==void 0&&e.push(dt(t));return e}static _$Eu(t,e){let o=e.attribute;return o===!1?void 0:typeof o=="string"?o:typeof t=="string"?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev()}_$Ev(){this._$ES=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(t=>t(this))}addController(t){(this._$EO??=new Set).add(t),this.renderRoot!==void 0&&this.isConnected&&t.hostConnected?.()}removeController(t){this._$EO?.delete(t)}_$E_(){let t=new Map,e=this.constructor.elementProperties;for(let o of e.keys())this.hasOwnProperty(o)&&(t.set(o,this[o]),delete this[o]);t.size>0&&(this._$Ep=t)}createRenderRoot(){let t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return zt(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach(t=>t.hostConnected?.())}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach(t=>t.hostDisconnected?.())}attributeChangedCallback(t,e,o){this._$AK(t,o)}_$EC(t,e){let o=this.constructor.elementProperties.get(t),n=this.constructor._$Eu(t,o);if(n!==void 0&&o.reflect===!0){let a=(o.converter?.toAttribute!==void 0?o.converter:Tt).toAttribute(e,o.type);this._$Em=t,a==null?this.removeAttribute(n):this.setAttribute(n,a),this._$Em=null}}_$AK(t,e){let o=this.constructor,n=o._$Eh.get(t);if(n!==void 0&&this._$Em!==n){let a=o.getPropertyOptions(n),i=typeof a.converter=="function"?{fromAttribute:a.converter}:a.converter?.fromAttribute!==void 0?a.converter:Tt;this._$Em=n,this[n]=i.fromAttribute(e,a.type),this._$Em=null}}requestUpdate(t,e,o){if(t!==void 0){if(o??=this.constructor.getPropertyOptions(t),!(o.hasChanged??Kt)(this[t],e))return;this.P(t,e,o)}this.isUpdatePending===!1&&(this._$ES=this._$ET())}P(t,e,o){this._$AL.has(t)||this._$AL.set(t,e),o.reflect===!0&&this._$Em!==t&&(this._$Ej??=new Set).add(t)}async _$ET(){this.isUpdatePending=!0;try{await this._$ES}catch(e){Promise.reject(e)}let t=this.scheduleUpdate();return t!=null&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(let[n,a]of this._$Ep)this[n]=a;this._$Ep=void 0}let o=this.constructor.elementProperties;if(o.size>0)for(let[n,a]of o)a.wrapped!==!0||this._$AL.has(n)||this[n]===void 0||this.P(n,this[n],a)}let t=!1,e=this._$AL;try{t=this.shouldUpdate(e),t?(this.willUpdate(e),this._$EO?.forEach(o=>o.hostUpdate?.()),this.update(e)):this._$EU()}catch(o){throw t=!1,this._$EU(),o}t&&this._$AE(e)}willUpdate(t){}_$AE(t){this._$EO?.forEach(e=>e.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t)}_$EU(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return!0}update(t){this._$Ej&&=this._$Ej.forEach(e=>this._$EC(e,this[e])),this._$EU()}updated(t){}firstUpdated(t){}};T.elementStyles=[],T.shadowRootOptions={mode:"open"},T[Z("elementProperties")]=new Map,T[Z("finalized")]=new Map,Ye?.({ReactiveElement:T}),(vt.reactiveElementVersions??=[]).push("2.0.4");var Mt=globalThis,pt=Mt.trustedTypes,Gt=pt?pt.createPolicy("lit-html",{createHTML:r=>r}):void 0,Rt="$lit$",L=`lit$${(Math.random()+"").slice(9)}$`,Nt="?"+L,Be=`<${Nt}>`,I=document,Q=()=>I.createComment(""),tt=r=>r===null||typeof r!="object"&&typeof r!="function",ee=Array.isArray,oe=r=>ee(r)||typeof r?.[Symbol.iterator]=="function",Lt=`[ 	
-\f\r]`,J=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,Xt=/-->/g,Zt=/>/g,O=RegExp(`>|${Lt}(?:([^\\s"'>=/]+)(${Lt}*=${Lt}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`,"g"),Jt=/'/g,Qt=/"/g,re=/^(?:script|style|textarea|title)$/i,ne=r=>(t,...e)=>({_$litType$:r,strings:t,values:e}),ae=ne(1),po=ne(2),$=Symbol.for("lit-noChange"),f=Symbol.for("lit-nothing"),te=new WeakMap,U=I.createTreeWalker(I,129);function ie(r,t){if(!Array.isArray(r)||!r.hasOwnProperty("raw"))throw Error("invalid template strings array");return Gt!==void 0?Gt.createHTML(t):t}var se=(r,t)=>{let e=r.length-1,o=[],n,a=t===2?"<svg>":"",i=J;for(let c=0;c<e;c++){let s=r[c],d,l,b=-1,p=0;for(;p<s.length&&(i.lastIndex=p,l=i.exec(s),l!==null);)p=i.lastIndex,i===J?l[1]==="!--"?i=Xt:l[1]!==void 0?i=Zt:l[2]!==void 0?(re.test(l[2])&&(n=RegExp("</"+l[2],"g")),i=O):l[3]!==void 0&&(i=O):i===O?l[0]===">"?(i=n??J,b=-1):l[1]===void 0?b=-2:(b=i.lastIndex-l[2].length,d=l[1],i=l[3]===void 0?O:l[3]==='"'?Qt:Jt):i===Qt||i===Jt?i=O:i===Xt||i===Zt?i=J:(i=O,n=void 0);let v=i===O&&r[c+1].startsWith("/>")?" ":"";a+=i===J?s+Be:b>=0?(o.push(d),s.slice(0,b)+Rt+s.slice(b)+L+v):s+L+(b===-2?c:v)}return[ie(r,a+(r[e]||"<?>")+(t===2?"</svg>":"")),o]},et=class r{constructor({strings:t,_$litType$:e},o){let n;this.parts=[];let a=0,i=0,c=t.length-1,s=this.parts,[d,l]=se(t,e);if(this.el=r.createElement(d,o),U.currentNode=this.el.content,e===2){let b=this.el.content.firstChild;b.replaceWith(...b.childNodes)}for(;(n=U.nextNode())!==null&&s.length<c;){if(n.nodeType===1){if(n.hasAttributes())for(let b of n.getAttributeNames())if(b.endsWith(Rt)){let p=l[i++],v=n.getAttribute(b).split(L),u=/([.?@])?(.*)/.exec(p);s.push({type:1,index:a,name:u[2],strings:v,ctor:u[1]==="."?gt:u[1]==="?"?mt:u[1]==="@"?ft:Y}),n.removeAttribute(b)}else b.startsWith(L)&&(s.push({type:6,index:a}),n.removeAttribute(b));if(re.test(n.tagName)){let b=n.textContent.split(L),p=b.length-1;if(p>0){n.textContent=pt?pt.emptyScript:"";for(let v=0;v<p;v++)n.append(b[v],Q()),U.nextNode(),s.push({type:2,index:++a});n.append(b[p],Q())}}}else if(n.nodeType===8)if(n.data===Nt)s.push({type:2,index:a});else{let b=-1;for(;(b=n.data.indexOf(L,b+1))!==-1;)s.push({type:7,index:a}),b+=L.length-1}a++}}static createElement(t,e){let o=I.createElement("template");return o.innerHTML=t,o}};function F(r,t,e=r,o){if(t===$)return t;let n=o!==void 0?e._$Co?.[o]:e._$Cl,a=tt(t)?void 0:t._$litDirective$;return n?.constructor!==a&&(n?._$AO?.(!1),a===void 0?n=void 0:(n=new a(r),n._$AT(r,e,o)),o!==void 0?(e._$Co??=[])[o]=n:e._$Cl=n),n!==void 0&&(t=F(r,n._$AS(r,t.values),n,o)),t}var ht=class{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){let{el:{content:e},parts:o}=this._$AD,n=(t?.creationScope??I).importNode(e,!0);U.currentNode=n;let a=U.nextNode(),i=0,c=0,s=o[0];for(;s!==void 0;){if(i===s.index){let d;s.type===2?d=new q(a,a.nextSibling,this,t):s.type===1?d=new s.ctor(a,s.name,s.strings,this,t):s.type===6&&(d=new xt(a,this,t)),this._$AV.push(d),s=o[++c]}i!==s?.index&&(a=U.nextNode(),i++)}return U.currentNode=I,n}p(t){let e=0;for(let o of this._$AV)o!==void 0&&(o.strings!==void 0?(o._$AI(t,o,e),e+=o.strings.length-2):o._$AI(t[e])),e++}},q=class r{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,e,o,n){this.type=2,this._$AH=f,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=o,this.options=n,this._$Cv=n?.isConnected??!0}get parentNode(){let t=this._$AA.parentNode,e=this._$AM;return e!==void 0&&t?.nodeType===11&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=F(this,t,e),tt(t)?t===f||t==null||t===""?(this._$AH!==f&&this._$AR(),this._$AH=f):t!==this._$AH&&t!==$&&this._(t):t._$litType$!==void 0?this.$(t):t.nodeType!==void 0?this.T(t):oe(t)?this.k(t):this._(t)}S(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.S(t))}_(t){this._$AH!==f&&tt(this._$AH)?this._$AA.nextSibling.data=t:this.T(I.createTextNode(t)),this._$AH=t}$(t){let{values:e,_$litType$:o}=t,n=typeof o=="number"?this._$AC(t):(o.el===void 0&&(o.el=et.createElement(ie(o.h,o.h[0]),this.options)),o);if(this._$AH?._$AD===n)this._$AH.p(e);else{let a=new ht(n,this),i=a.u(this.options);a.p(e),this.T(i),this._$AH=a}}_$AC(t){let e=te.get(t.strings);return e===void 0&&te.set(t.strings,e=new et(t)),e}k(t){ee(this._$AH)||(this._$AH=[],this._$AR());let e=this._$AH,o,n=0;for(let a of t)n===e.length?e.push(o=new r(this.S(Q()),this.S(Q()),this,this.options)):o=e[n],o._$AI(a),n++;n<e.length&&(this._$AR(o&&o._$AB.nextSibling,n),e.length=n)}_$AR(t=this._$AA.nextSibling,e){for(this._$AP?.(!1,!0,e);t&&t!==this._$AB;){let o=t.nextSibling;t.remove(),t=o}}setConnected(t){this._$AM===void 0&&(this._$Cv=t,this._$AP?.(t))}},Y=class{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,e,o,n,a){this.type=1,this._$AH=f,this._$AN=void 0,this.element=t,this.name=e,this._$AM=n,this.options=a,o.length>2||o[0]!==""||o[1]!==""?(this._$AH=Array(o.length-1).fill(new String),this.strings=o):this._$AH=f}_$AI(t,e=this,o,n){let a=this.strings,i=!1;if(a===void 0)t=F(this,t,e,0),i=!tt(t)||t!==this._$AH&&t!==$,i&&(this._$AH=t);else{let c=t,s,d;for(t=a[0],s=0;s<a.length-1;s++)d=F(this,c[o+s],e,s),d===$&&(d=this._$AH[s]),i||=!tt(d)||d!==this._$AH[s],d===f?t=f:t!==f&&(t+=(d??"")+a[s+1]),this._$AH[s]=d}i&&!n&&this.j(t)}j(t){t===f?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"")}},gt=class extends Y{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===f?void 0:t}},mt=class extends Y{constructor(){super(...arguments),this.type=4}j(t){this.element.toggleAttribute(this.name,!!t&&t!==f)}},ft=class extends Y{constructor(t,e,o,n,a){super(t,e,o,n,a),this.type=5}_$AI(t,e=this){if((t=F(this,t,e,0)??f)===$)return;let o=this._$AH,n=t===f&&o!==f||t.capture!==o.capture||t.once!==o.once||t.passive!==o.passive,a=t!==f&&(o===f||n);n&&this.element.removeEventListener(this.name,this,o),a&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){typeof this._$AH=="function"?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t)}},xt=class{constructor(t,e,o){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=o}get _$AU(){return this._$AM._$AU}_$AI(t){F(this,t)}},ce={P:Rt,A:L,C:Nt,M:1,L:se,R:ht,D:oe,V:F,I:q,H:Y,N:mt,U:ft,B:gt,F:xt},Ve=Mt.litHtmlPolyfillSupport;Ve?.(et,q),(Mt.litHtmlVersions??=[]).push("3.1.2");var le=(r,t,e)=>{let o=e?.renderBefore??t,n=o._$litPart$;if(n===void 0){let a=e?.renderBefore??null;o._$litPart$=n=new q(t.insertBefore(Q(),a),a,void 0,e??{})}return n._$AI(r),n};var R=class extends T{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){let t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){let e=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=le(e,this.renderRoot,this.renderOptions)}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0)}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1)}render(){return $}};R._$litElement$=!0,R.finalized=!0,globalThis.litElementHydrateSupport?.({LitElement:R});var qe=globalThis.litElementPolyfillSupport;qe?.({LitElement:R});(globalThis.litElementVersions??=[]).push("4.0.4");var Ht=(r,{errorType:t=Error,metadata:e={},onError:o=null,removeStackLines:n=1}={})=>{let a=new t(r);if(Object.assign(a,e),a.stack){let c=a.stack.split(`
-`);c.splice(1,n),a.stack=c.join(`
-`)}let i=()=>{throw typeof o=="function"&&o(a),a};typeof queueMicrotask=="function"?queueMicrotask(i):setTimeout(i,0)},W=r=>typeof r=="object";var de=r=>typeof r=="string",be=r=>Array.isArray(r),ue=r=>typeof Uint8Array<"u"&&r instanceof Uint8Array,E=r=>typeof r=="function"||!1;var je=function(r){return!!(r&&yt(r,"callee"))},wt=function(r,t){let e=i=>i<10?"0"+i:i,o={YYYY:r.getFullYear(),YY:r.getFullYear().toString().slice(-2),MMMM:r.toLocaleString("default",{month:"long"}),MMM:r.toLocaleString("default",{month:"short"}),MM:e(r.getMonth()+1),M:r.getMonth()+1,DD:e(r.getDate()),D:r.getDate(),Do:r.getDate()+["th","st","nd","rd"][((r.getDate()+90)%100-10)%10-1]||"th",dddd:r.toLocaleString("default",{weekday:"long"}),ddd:r.toLocaleString("default",{weekday:"short"}),HH:e(r.getHours()),h:r.getHours()%12||12,mm:e(r.getMinutes()),ss:e(r.getSeconds()),a:r.getHours()>=12?"pm":"am"};return({LT:"h:mm a",LTS:"h:mm:ss a",L:"MM/DD/YYYY",l:"M/D/YYYY",LL:"MMMM D, YYYY",ll:"MMM D, YYYY",LLL:"MMMM D, YYYY h:mm a",lll:"MMM D, YYYY h:mm a",LLLL:"dddd, MMMM D, YYYY h:mm a",llll:"ddd, MMM D, YYYY h:mm a"}[t]||t).replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g,i=>o[i]).replace(/\[(.*?)\]/g,(i,c)=>c)},C=function(){},ve=r=>E(r)?r:()=>r,pe=(r="")=>r.replace(/-./g,t=>t[1].toUpperCase());var he=r=>Array.from(new Set(r));var rt=function(r,t,e){if(Array.isArray(r))return!t||e?r[r.length-1]:slice.call(r,Math.max(r.length-t,0))};var ot=r=>Object.keys(r);var H=function(r,t){let e=ot(r).reverse(),o=e.length,n=e.length,a={};for(;n--;){let i=e[n];a[i]=t(r[i],i)}return a},ge=(r,...t)=>(t.forEach(e=>{let o,n;if(e)for(n in e)o=Object.getOwnPropertyDescriptor(e,n),o===void 0?r[n]=e[n]:Object.defineProperty(r,n,o)}),r);var yt=function(r,t=""){t=t.replace(/^\./,"").replace(/\[(\w+)\]/g,".$1");let e=t.split(".");for(let o=0,n=e.length;o<n;++o){let a=e[o];if(r&&a in r)r=r[a];else return}return r},We=(r,t)=>Object.hasOwn.call(r,t),me=r=>{let t={},e=(o,n)=>{be(t[o])?t[o].push(n):t[o]?t[o]=[t[o],n]:t[o]=n};return Object.keys(r).forEach(o=>{be(r[o])?y(r[o],n=>{e(n,o)}):e(r[o],o)}),t},j=r=>{let t;return W(r)?r===null?null:r instanceof Date?new Date(r.getTime()):r instanceof RegExp?r:Array.isArray(r)?r.map(j):je(r)?Array.from(r).map(j):E(r.clone)?r.clone():(t={},ot(r).forEach(e=>{t[e]=j(r[e])}),t):r},y=(r,t,e)=>{if(r===null)return r;let n=((i,c)=>i===void 0?c:(s,d,l)=>c.call(i,s,d,l))(e,t),a;if(r.length===+r.length)for(a=0;a<r.length;++a)n(r[a],a,r);else{let i=ot(r);for(a=0;a<i.length;++a)n(r[i[a]],i[a],r)}return r},kt=function(r){return r.replace(/([.*+?^=!:${}()|\[\]\/\\])/g,"\\$1")};function Dt(r){let t;if(r&&r.toString===Object.prototype.toString&&typeof r=="object")try{t=JSON.stringify(r)}catch(i){return console.error("Error serializing input",i),0}else t=r.toString();let e=305419896,o=(i,c)=>{let s,d,l,b,p,v,u,m,h,g;for(s=i.length&3,d=i.length-s,l=c,p=3432918353,u=461845907,g=0;g<d;)h=i.charCodeAt(g)&255|(i.charCodeAt(++g)&255)<<8|(i.charCodeAt(++g)&255)<<16|(i.charCodeAt(++g)&255)<<24,++g,h=(h&65535)*p+(((h>>>16)*p&65535)<<16)&4294967295,h=h<<15|h>>>17,h=(h&65535)*u+(((h>>>16)*u&65535)<<16)&4294967295,l^=h,l=l<<13|l>>>19,b=(l&65535)*5+(((l>>>16)*5&65535)<<16)&4294967295,l=(b&65535)+27492+(((b>>>16)+58964&65535)<<16);switch(h=0,s){case 3:h^=(i.charCodeAt(g+2)&255)<<16;case 2:h^=(i.charCodeAt(g+1)&255)<<8;case 1:h^=i.charCodeAt(g)&255,h=(h&65535)*p+(((h>>>16)*p&65535)<<16)&4294967295,h=h<<15|h>>>17,h=(h&65535)*u+(((h>>>16)*u&65535)<<16)&4294967295,l^=h}return l^=i.length,l^=l>>>16,l=(l&65535)*2246822507+(((l>>>16)*2246822507&65535)<<16)&4294967295,l^=l>>>13,l=(l&65535)*3266489909+(((l>>>16)*3266489909&65535)<<16)&4294967295,l^=l>>>16,l>>>0},n=i=>{if(i===0)return"0";let c="",s="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";for(;i>0;)c=s[i%s.length]+c,i=Math.floor(i/s.length);return c},a;return a=o(t,e),a=n(a),a}var N=(r,t,e)=>{let o,n=!!(e&&e.keyOrderSensitive);if(r===t||Number.isNaN(r)&&Number.isNaN(t))return!0;if(!r||!t||!(W(r)&&W(t)))return!1;if(r instanceof Date&&t instanceof Date)return r.valueOf()===t.valueOf();if(ue(r)&&ue(t)){if(r.length!==t.length)return!1;for(o=0;o<r.length;o++)if(r[o]!==t[o])return!1;return!0}if(E(r.equals))return r.equals(t,e);if(E(t.equals))return t.equals(r,e);if(r instanceof Array){if(!(t instanceof Array)||r.length!==t.length)return!1;for(o=0;o<r.length;o++)if(!N(r[o],t[o],e))return!1;return!0}let a,i=ot(r),c=ot(t);return n?(o=0,a=i.every(s=>o>=c.length||s!==c[o]||!N(r[s],t[c[o]],e)?!1:(o++,!0))):(o=0,a=i.every(s=>!We(t,s)||!N(r[s],t[s],e)?!1:(o++,!0))),a&&o===c.length};var nt=class r{static DEBUG_MODE=!0;constructor(t){this.input=t,this.pos=0,this.runCount=0}matches(t){return t.test(this.rest())}rest(){return this.input.slice(this.pos)}isEOF(){return this.runCount++,this.pos>=this.input.length}peek(){return this.input.charAt(this.pos)}consume(t){let e=typeof t=="string"?new RegExp(kt(t)):new RegExp(t),o=this.input.substring(this.pos),n=e.exec(o);return n&&n.index===0?(this.pos+=n[0].length,n[0]):null}consumeUntil(t){let o=(typeof t=="string"?new RegExp(kt(t)):new RegExp(t)).exec(this.input.substring(this.pos));if(!o){let a=this.input.substr(this.pos);return this.pos=this.input.length,a}let n=this.input.substring(this.pos,this.pos+o.index);return this.pos+=o.index,n}returnTo(t){if(!t)return;let e=typeof t=="string"?new RegExp(kt(t),"gm"):new RegExp(t,"gm"),o=null,n,a=this.input.substring(0,this.pos);for(;(n=e.exec(a))!==null;)o=n;if(o){let i=this.input.substring(0,o.index);return this.pos=o.index,i}}fatal(t){t=t||"Parse error";let e=this.input.split(`
-`),o=0,n=0;for(let u of e){if(n+u.length+1>this.pos)break;n+=u.length+1,o++}let a=5,i=5,c=Math.max(0,o-a),s=Math.min(e.length,o+i+1),d=e.slice(c,s),l=d.map((u,m)=>{let h=o-c===m;return`%c${u}`}).join(`
-`),b="color: grey",p="color: red; font-weight: bold";if(r.DEBUG_MODE&&document.body){let u="";y(d,(h,g)=>{let _=g<a||g>a?b:p;u+=`<div style="${_}">${h}</div>`});let m=`
+// packages/component/src/styles.js
+var scopeStyles = (css, scopeSelector = "") => {
+  scopeSelector = scopeSelector.toLowerCase();
+  const style = document.createElement("style");
+  const scopeRule = (rule, scopeSelector2) => {
+    const modifiedSelector = `${scopeSelector2} ${rule.selectorText}`;
+    return `${modifiedSelector} { ${rule.style.cssText} }`;
+  };
+  document.head.appendChild(style);
+  style.appendChild(document.createTextNode(css));
+  const sheet = style.sheet;
+  let modifiedRules = [];
+  for (let i5 = 0; i5 < sheet.cssRules.length; i5++) {
+    let rule = sheet.cssRules[i5];
+    switch (rule.type) {
+      case CSSRule.STYLE_RULE:
+        modifiedRules.push(scopeRule(rule, scopeSelector));
+        break;
+      case CSSRule.MEDIA_RULE:
+      case CSSRule.SUPPORTS_RULE:
+        let scopedInnerRules = [];
+        Array.from(rule.cssRules).forEach((innerRule) => {
+          scopedInnerRules.push(scopeRule(innerRule, scopeSelector));
+        });
+        modifiedRules.push(`@${rule.name} ${rule.conditionText} { ${scopedInnerRules.join(" ")} }`);
+        break;
+      default:
+        modifiedRules.push(rule.cssText);
+        break;
+    }
+  }
+  document.head.removeChild(style);
+  const scopedCSS = modifiedRules.join("\n");
+  return scopedCSS;
+};
+
+// node_modules/@lit/reactive-element/css-tag.js
+var t = globalThis;
+var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype;
+var s = Symbol();
+var o = /* @__PURE__ */ new WeakMap();
+var n = class {
+  constructor(t5, e6, o6) {
+    if (this._$cssResult$ = true, o6 !== s)
+      throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+    this.cssText = t5, this.t = e6;
+  }
+  get styleSheet() {
+    let t5 = this.o;
+    const s6 = this.t;
+    if (e && void 0 === t5) {
+      const e6 = void 0 !== s6 && 1 === s6.length;
+      e6 && (t5 = o.get(s6)), void 0 === t5 && ((this.o = t5 = new CSSStyleSheet()).replaceSync(this.cssText), e6 && o.set(s6, t5));
+    }
+    return t5;
+  }
+  toString() {
+    return this.cssText;
+  }
+};
+var r = (t5) => new n("string" == typeof t5 ? t5 : t5 + "", void 0, s);
+var S = (s6, o6) => {
+  if (e)
+    s6.adoptedStyleSheets = o6.map((t5) => t5 instanceof CSSStyleSheet ? t5 : t5.styleSheet);
+  else
+    for (const e6 of o6) {
+      const o7 = document.createElement("style"), n5 = t.litNonce;
+      void 0 !== n5 && o7.setAttribute("nonce", n5), o7.textContent = e6.cssText, s6.appendChild(o7);
+    }
+};
+var c = e ? (t5) => t5 : (t5) => t5 instanceof CSSStyleSheet ? ((t6) => {
+  let e6 = "";
+  for (const s6 of t6.cssRules)
+    e6 += s6.cssText;
+  return r(e6);
+})(t5) : t5;
+
+// node_modules/@lit/reactive-element/reactive-element.js
+var { is: i2, defineProperty: e2, getOwnPropertyDescriptor: r2, getOwnPropertyNames: h, getOwnPropertySymbols: o2, getPrototypeOf: n2 } = Object;
+var a = globalThis;
+var c2 = a.trustedTypes;
+var l = c2 ? c2.emptyScript : "";
+var p = a.reactiveElementPolyfillSupport;
+var d = (t5, s6) => t5;
+var u = { toAttribute(t5, s6) {
+  switch (s6) {
+    case Boolean:
+      t5 = t5 ? l : null;
+      break;
+    case Object:
+    case Array:
+      t5 = null == t5 ? t5 : JSON.stringify(t5);
+  }
+  return t5;
+}, fromAttribute(t5, s6) {
+  let i5 = t5;
+  switch (s6) {
+    case Boolean:
+      i5 = null !== t5;
+      break;
+    case Number:
+      i5 = null === t5 ? null : Number(t5);
+      break;
+    case Object:
+    case Array:
+      try {
+        i5 = JSON.parse(t5);
+      } catch (t6) {
+        i5 = null;
+      }
+  }
+  return i5;
+} };
+var f = (t5, s6) => !i2(t5, s6);
+var y = { attribute: true, type: String, converter: u, reflect: false, hasChanged: f };
+Symbol.metadata ??= Symbol("metadata"), a.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+var b = class extends HTMLElement {
+  static addInitializer(t5) {
+    this._$Ei(), (this.l ??= []).push(t5);
+  }
+  static get observedAttributes() {
+    return this.finalize(), this._$Eh && [...this._$Eh.keys()];
+  }
+  static createProperty(t5, s6 = y) {
+    if (s6.state && (s6.attribute = false), this._$Ei(), this.elementProperties.set(t5, s6), !s6.noAccessor) {
+      const i5 = Symbol(), r7 = this.getPropertyDescriptor(t5, i5, s6);
+      void 0 !== r7 && e2(this.prototype, t5, r7);
+    }
+  }
+  static getPropertyDescriptor(t5, s6, i5) {
+    const { get: e6, set: h5 } = r2(this.prototype, t5) ?? { get() {
+      return this[s6];
+    }, set(t6) {
+      this[s6] = t6;
+    } };
+    return { get() {
+      return e6?.call(this);
+    }, set(s7) {
+      const r7 = e6?.call(this);
+      h5.call(this, s7), this.requestUpdate(t5, r7, i5);
+    }, configurable: true, enumerable: true };
+  }
+  static getPropertyOptions(t5) {
+    return this.elementProperties.get(t5) ?? y;
+  }
+  static _$Ei() {
+    if (this.hasOwnProperty(d("elementProperties")))
+      return;
+    const t5 = n2(this);
+    t5.finalize(), void 0 !== t5.l && (this.l = [...t5.l]), this.elementProperties = new Map(t5.elementProperties);
+  }
+  static finalize() {
+    if (this.hasOwnProperty(d("finalized")))
+      return;
+    if (this.finalized = true, this._$Ei(), this.hasOwnProperty(d("properties"))) {
+      const t6 = this.properties, s6 = [...h(t6), ...o2(t6)];
+      for (const i5 of s6)
+        this.createProperty(i5, t6[i5]);
+    }
+    const t5 = this[Symbol.metadata];
+    if (null !== t5) {
+      const s6 = litPropertyMetadata.get(t5);
+      if (void 0 !== s6)
+        for (const [t6, i5] of s6)
+          this.elementProperties.set(t6, i5);
+    }
+    this._$Eh = /* @__PURE__ */ new Map();
+    for (const [t6, s6] of this.elementProperties) {
+      const i5 = this._$Eu(t6, s6);
+      void 0 !== i5 && this._$Eh.set(i5, t6);
+    }
+    this.elementStyles = this.finalizeStyles(this.styles);
+  }
+  static finalizeStyles(s6) {
+    const i5 = [];
+    if (Array.isArray(s6)) {
+      const e6 = new Set(s6.flat(1 / 0).reverse());
+      for (const s7 of e6)
+        i5.unshift(c(s7));
+    } else
+      void 0 !== s6 && i5.push(c(s6));
+    return i5;
+  }
+  static _$Eu(t5, s6) {
+    const i5 = s6.attribute;
+    return false === i5 ? void 0 : "string" == typeof i5 ? i5 : "string" == typeof t5 ? t5.toLowerCase() : void 0;
+  }
+  constructor() {
+    super(), this._$Ep = void 0, this.isUpdatePending = false, this.hasUpdated = false, this._$Em = null, this._$Ev();
+  }
+  _$Ev() {
+    this._$ES = new Promise((t5) => this.enableUpdating = t5), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), this.constructor.l?.forEach((t5) => t5(this));
+  }
+  addController(t5) {
+    (this._$EO ??= /* @__PURE__ */ new Set()).add(t5), void 0 !== this.renderRoot && this.isConnected && t5.hostConnected?.();
+  }
+  removeController(t5) {
+    this._$EO?.delete(t5);
+  }
+  _$E_() {
+    const t5 = /* @__PURE__ */ new Map(), s6 = this.constructor.elementProperties;
+    for (const i5 of s6.keys())
+      this.hasOwnProperty(i5) && (t5.set(i5, this[i5]), delete this[i5]);
+    t5.size > 0 && (this._$Ep = t5);
+  }
+  createRenderRoot() {
+    const t5 = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
+    return S(t5, this.constructor.elementStyles), t5;
+  }
+  connectedCallback() {
+    this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(true), this._$EO?.forEach((t5) => t5.hostConnected?.());
+  }
+  enableUpdating(t5) {
+  }
+  disconnectedCallback() {
+    this._$EO?.forEach((t5) => t5.hostDisconnected?.());
+  }
+  attributeChangedCallback(t5, s6, i5) {
+    this._$AK(t5, i5);
+  }
+  _$EC(t5, s6) {
+    const i5 = this.constructor.elementProperties.get(t5), e6 = this.constructor._$Eu(t5, i5);
+    if (void 0 !== e6 && true === i5.reflect) {
+      const r7 = (void 0 !== i5.converter?.toAttribute ? i5.converter : u).toAttribute(s6, i5.type);
+      this._$Em = t5, null == r7 ? this.removeAttribute(e6) : this.setAttribute(e6, r7), this._$Em = null;
+    }
+  }
+  _$AK(t5, s6) {
+    const i5 = this.constructor, e6 = i5._$Eh.get(t5);
+    if (void 0 !== e6 && this._$Em !== e6) {
+      const t6 = i5.getPropertyOptions(e6), r7 = "function" == typeof t6.converter ? { fromAttribute: t6.converter } : void 0 !== t6.converter?.fromAttribute ? t6.converter : u;
+      this._$Em = e6, this[e6] = r7.fromAttribute(s6, t6.type), this._$Em = null;
+    }
+  }
+  requestUpdate(t5, s6, i5) {
+    if (void 0 !== t5) {
+      if (i5 ??= this.constructor.getPropertyOptions(t5), !(i5.hasChanged ?? f)(this[t5], s6))
+        return;
+      this.P(t5, s6, i5);
+    }
+    false === this.isUpdatePending && (this._$ES = this._$ET());
+  }
+  P(t5, s6, i5) {
+    this._$AL.has(t5) || this._$AL.set(t5, s6), true === i5.reflect && this._$Em !== t5 && (this._$Ej ??= /* @__PURE__ */ new Set()).add(t5);
+  }
+  async _$ET() {
+    this.isUpdatePending = true;
+    try {
+      await this._$ES;
+    } catch (t6) {
+      Promise.reject(t6);
+    }
+    const t5 = this.scheduleUpdate();
+    return null != t5 && await t5, !this.isUpdatePending;
+  }
+  scheduleUpdate() {
+    return this.performUpdate();
+  }
+  performUpdate() {
+    if (!this.isUpdatePending)
+      return;
+    if (!this.hasUpdated) {
+      if (this.renderRoot ??= this.createRenderRoot(), this._$Ep) {
+        for (const [t7, s7] of this._$Ep)
+          this[t7] = s7;
+        this._$Ep = void 0;
+      }
+      const t6 = this.constructor.elementProperties;
+      if (t6.size > 0)
+        for (const [s7, i5] of t6)
+          true !== i5.wrapped || this._$AL.has(s7) || void 0 === this[s7] || this.P(s7, this[s7], i5);
+    }
+    let t5 = false;
+    const s6 = this._$AL;
+    try {
+      t5 = this.shouldUpdate(s6), t5 ? (this.willUpdate(s6), this._$EO?.forEach((t6) => t6.hostUpdate?.()), this.update(s6)) : this._$EU();
+    } catch (s7) {
+      throw t5 = false, this._$EU(), s7;
+    }
+    t5 && this._$AE(s6);
+  }
+  willUpdate(t5) {
+  }
+  _$AE(t5) {
+    this._$EO?.forEach((t6) => t6.hostUpdated?.()), this.hasUpdated || (this.hasUpdated = true, this.firstUpdated(t5)), this.updated(t5);
+  }
+  _$EU() {
+    this._$AL = /* @__PURE__ */ new Map(), this.isUpdatePending = false;
+  }
+  get updateComplete() {
+    return this.getUpdateComplete();
+  }
+  getUpdateComplete() {
+    return this._$ES;
+  }
+  shouldUpdate(t5) {
+    return true;
+  }
+  update(t5) {
+    this._$Ej &&= this._$Ej.forEach((t6) => this._$EC(t6, this[t6])), this._$EU();
+  }
+  updated(t5) {
+  }
+  firstUpdated(t5) {
+  }
+};
+b.elementStyles = [], b.shadowRootOptions = { mode: "open" }, b[d("elementProperties")] = /* @__PURE__ */ new Map(), b[d("finalized")] = /* @__PURE__ */ new Map(), p?.({ ReactiveElement: b }), (a.reactiveElementVersions ??= []).push("2.0.4");
+
+// node_modules/lit-html/lit-html.js
+var t2 = globalThis;
+var i3 = t2.trustedTypes;
+var s2 = i3 ? i3.createPolicy("lit-html", { createHTML: (t5) => t5 }) : void 0;
+var e3 = "$lit$";
+var h2 = `lit$${(Math.random() + "").slice(9)}$`;
+var o3 = "?" + h2;
+var n3 = `<${o3}>`;
+var r3 = document;
+var l2 = () => r3.createComment("");
+var c3 = (t5) => null === t5 || "object" != typeof t5 && "function" != typeof t5;
+var a2 = Array.isArray;
+var u2 = (t5) => a2(t5) || "function" == typeof t5?.[Symbol.iterator];
+var d2 = "[ 	\n\f\r]";
+var f2 = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g;
+var v = /-->/g;
+var _ = />/g;
+var m = RegExp(`>|${d2}(?:([^\\s"'>=/]+)(${d2}*=${d2}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g");
+var p2 = /'/g;
+var g = /"/g;
+var $ = /^(?:script|style|textarea|title)$/i;
+var y2 = (t5) => (i5, ...s6) => ({ _$litType$: t5, strings: i5, values: s6 });
+var x = y2(1);
+var b2 = y2(2);
+var w = Symbol.for("lit-noChange");
+var T = Symbol.for("lit-nothing");
+var A = /* @__PURE__ */ new WeakMap();
+var E = r3.createTreeWalker(r3, 129);
+function C(t5, i5) {
+  if (!Array.isArray(t5) || !t5.hasOwnProperty("raw"))
+    throw Error("invalid template strings array");
+  return void 0 !== s2 ? s2.createHTML(i5) : i5;
+}
+var P = (t5, i5) => {
+  const s6 = t5.length - 1, o6 = [];
+  let r7, l3 = 2 === i5 ? "<svg>" : "", c6 = f2;
+  for (let i6 = 0; i6 < s6; i6++) {
+    const s7 = t5[i6];
+    let a3, u5, d3 = -1, y3 = 0;
+    for (; y3 < s7.length && (c6.lastIndex = y3, u5 = c6.exec(s7), null !== u5); )
+      y3 = c6.lastIndex, c6 === f2 ? "!--" === u5[1] ? c6 = v : void 0 !== u5[1] ? c6 = _ : void 0 !== u5[2] ? ($.test(u5[2]) && (r7 = RegExp("</" + u5[2], "g")), c6 = m) : void 0 !== u5[3] && (c6 = m) : c6 === m ? ">" === u5[0] ? (c6 = r7 ?? f2, d3 = -1) : void 0 === u5[1] ? d3 = -2 : (d3 = c6.lastIndex - u5[2].length, a3 = u5[1], c6 = void 0 === u5[3] ? m : '"' === u5[3] ? g : p2) : c6 === g || c6 === p2 ? c6 = m : c6 === v || c6 === _ ? c6 = f2 : (c6 = m, r7 = void 0);
+    const x2 = c6 === m && t5[i6 + 1].startsWith("/>") ? " " : "";
+    l3 += c6 === f2 ? s7 + n3 : d3 >= 0 ? (o6.push(a3), s7.slice(0, d3) + e3 + s7.slice(d3) + h2 + x2) : s7 + h2 + (-2 === d3 ? i6 : x2);
+  }
+  return [C(t5, l3 + (t5[s6] || "<?>") + (2 === i5 ? "</svg>" : "")), o6];
+};
+var V = class _V {
+  constructor({ strings: t5, _$litType$: s6 }, n5) {
+    let r7;
+    this.parts = [];
+    let c6 = 0, a3 = 0;
+    const u5 = t5.length - 1, d3 = this.parts, [f5, v3] = P(t5, s6);
+    if (this.el = _V.createElement(f5, n5), E.currentNode = this.el.content, 2 === s6) {
+      const t6 = this.el.content.firstChild;
+      t6.replaceWith(...t6.childNodes);
+    }
+    for (; null !== (r7 = E.nextNode()) && d3.length < u5; ) {
+      if (1 === r7.nodeType) {
+        if (r7.hasAttributes())
+          for (const t6 of r7.getAttributeNames())
+            if (t6.endsWith(e3)) {
+              const i5 = v3[a3++], s7 = r7.getAttribute(t6).split(h2), e6 = /([.?@])?(.*)/.exec(i5);
+              d3.push({ type: 1, index: c6, name: e6[2], strings: s7, ctor: "." === e6[1] ? k : "?" === e6[1] ? H : "@" === e6[1] ? I : R }), r7.removeAttribute(t6);
+            } else
+              t6.startsWith(h2) && (d3.push({ type: 6, index: c6 }), r7.removeAttribute(t6));
+        if ($.test(r7.tagName)) {
+          const t6 = r7.textContent.split(h2), s7 = t6.length - 1;
+          if (s7 > 0) {
+            r7.textContent = i3 ? i3.emptyScript : "";
+            for (let i5 = 0; i5 < s7; i5++)
+              r7.append(t6[i5], l2()), E.nextNode(), d3.push({ type: 2, index: ++c6 });
+            r7.append(t6[s7], l2());
+          }
+        }
+      } else if (8 === r7.nodeType)
+        if (r7.data === o3)
+          d3.push({ type: 2, index: c6 });
+        else {
+          let t6 = -1;
+          for (; -1 !== (t6 = r7.data.indexOf(h2, t6 + 1)); )
+            d3.push({ type: 7, index: c6 }), t6 += h2.length - 1;
+        }
+      c6++;
+    }
+  }
+  static createElement(t5, i5) {
+    const s6 = r3.createElement("template");
+    return s6.innerHTML = t5, s6;
+  }
+};
+function N(t5, i5, s6 = t5, e6) {
+  if (i5 === w)
+    return i5;
+  let h5 = void 0 !== e6 ? s6._$Co?.[e6] : s6._$Cl;
+  const o6 = c3(i5) ? void 0 : i5._$litDirective$;
+  return h5?.constructor !== o6 && (h5?._$AO?.(false), void 0 === o6 ? h5 = void 0 : (h5 = new o6(t5), h5._$AT(t5, s6, e6)), void 0 !== e6 ? (s6._$Co ??= [])[e6] = h5 : s6._$Cl = h5), void 0 !== h5 && (i5 = N(t5, h5._$AS(t5, i5.values), h5, e6)), i5;
+}
+var S2 = class {
+  constructor(t5, i5) {
+    this._$AV = [], this._$AN = void 0, this._$AD = t5, this._$AM = i5;
+  }
+  get parentNode() {
+    return this._$AM.parentNode;
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  u(t5) {
+    const { el: { content: i5 }, parts: s6 } = this._$AD, e6 = (t5?.creationScope ?? r3).importNode(i5, true);
+    E.currentNode = e6;
+    let h5 = E.nextNode(), o6 = 0, n5 = 0, l3 = s6[0];
+    for (; void 0 !== l3; ) {
+      if (o6 === l3.index) {
+        let i6;
+        2 === l3.type ? i6 = new M(h5, h5.nextSibling, this, t5) : 1 === l3.type ? i6 = new l3.ctor(h5, l3.name, l3.strings, this, t5) : 6 === l3.type && (i6 = new L(h5, this, t5)), this._$AV.push(i6), l3 = s6[++n5];
+      }
+      o6 !== l3?.index && (h5 = E.nextNode(), o6++);
+    }
+    return E.currentNode = r3, e6;
+  }
+  p(t5) {
+    let i5 = 0;
+    for (const s6 of this._$AV)
+      void 0 !== s6 && (void 0 !== s6.strings ? (s6._$AI(t5, s6, i5), i5 += s6.strings.length - 2) : s6._$AI(t5[i5])), i5++;
+  }
+};
+var M = class _M {
+  get _$AU() {
+    return this._$AM?._$AU ?? this._$Cv;
+  }
+  constructor(t5, i5, s6, e6) {
+    this.type = 2, this._$AH = T, this._$AN = void 0, this._$AA = t5, this._$AB = i5, this._$AM = s6, this.options = e6, this._$Cv = e6?.isConnected ?? true;
+  }
+  get parentNode() {
+    let t5 = this._$AA.parentNode;
+    const i5 = this._$AM;
+    return void 0 !== i5 && 11 === t5?.nodeType && (t5 = i5.parentNode), t5;
+  }
+  get startNode() {
+    return this._$AA;
+  }
+  get endNode() {
+    return this._$AB;
+  }
+  _$AI(t5, i5 = this) {
+    t5 = N(this, t5, i5), c3(t5) ? t5 === T || null == t5 || "" === t5 ? (this._$AH !== T && this._$AR(), this._$AH = T) : t5 !== this._$AH && t5 !== w && this._(t5) : void 0 !== t5._$litType$ ? this.$(t5) : void 0 !== t5.nodeType ? this.T(t5) : u2(t5) ? this.k(t5) : this._(t5);
+  }
+  S(t5) {
+    return this._$AA.parentNode.insertBefore(t5, this._$AB);
+  }
+  T(t5) {
+    this._$AH !== t5 && (this._$AR(), this._$AH = this.S(t5));
+  }
+  _(t5) {
+    this._$AH !== T && c3(this._$AH) ? this._$AA.nextSibling.data = t5 : this.T(r3.createTextNode(t5)), this._$AH = t5;
+  }
+  $(t5) {
+    const { values: i5, _$litType$: s6 } = t5, e6 = "number" == typeof s6 ? this._$AC(t5) : (void 0 === s6.el && (s6.el = V.createElement(C(s6.h, s6.h[0]), this.options)), s6);
+    if (this._$AH?._$AD === e6)
+      this._$AH.p(i5);
+    else {
+      const t6 = new S2(e6, this), s7 = t6.u(this.options);
+      t6.p(i5), this.T(s7), this._$AH = t6;
+    }
+  }
+  _$AC(t5) {
+    let i5 = A.get(t5.strings);
+    return void 0 === i5 && A.set(t5.strings, i5 = new V(t5)), i5;
+  }
+  k(t5) {
+    a2(this._$AH) || (this._$AH = [], this._$AR());
+    const i5 = this._$AH;
+    let s6, e6 = 0;
+    for (const h5 of t5)
+      e6 === i5.length ? i5.push(s6 = new _M(this.S(l2()), this.S(l2()), this, this.options)) : s6 = i5[e6], s6._$AI(h5), e6++;
+    e6 < i5.length && (this._$AR(s6 && s6._$AB.nextSibling, e6), i5.length = e6);
+  }
+  _$AR(t5 = this._$AA.nextSibling, i5) {
+    for (this._$AP?.(false, true, i5); t5 && t5 !== this._$AB; ) {
+      const i6 = t5.nextSibling;
+      t5.remove(), t5 = i6;
+    }
+  }
+  setConnected(t5) {
+    void 0 === this._$AM && (this._$Cv = t5, this._$AP?.(t5));
+  }
+};
+var R = class {
+  get tagName() {
+    return this.element.tagName;
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  constructor(t5, i5, s6, e6, h5) {
+    this.type = 1, this._$AH = T, this._$AN = void 0, this.element = t5, this.name = i5, this._$AM = e6, this.options = h5, s6.length > 2 || "" !== s6[0] || "" !== s6[1] ? (this._$AH = Array(s6.length - 1).fill(new String()), this.strings = s6) : this._$AH = T;
+  }
+  _$AI(t5, i5 = this, s6, e6) {
+    const h5 = this.strings;
+    let o6 = false;
+    if (void 0 === h5)
+      t5 = N(this, t5, i5, 0), o6 = !c3(t5) || t5 !== this._$AH && t5 !== w, o6 && (this._$AH = t5);
+    else {
+      const e7 = t5;
+      let n5, r7;
+      for (t5 = h5[0], n5 = 0; n5 < h5.length - 1; n5++)
+        r7 = N(this, e7[s6 + n5], i5, n5), r7 === w && (r7 = this._$AH[n5]), o6 ||= !c3(r7) || r7 !== this._$AH[n5], r7 === T ? t5 = T : t5 !== T && (t5 += (r7 ?? "") + h5[n5 + 1]), this._$AH[n5] = r7;
+    }
+    o6 && !e6 && this.j(t5);
+  }
+  j(t5) {
+    t5 === T ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t5 ?? "");
+  }
+};
+var k = class extends R {
+  constructor() {
+    super(...arguments), this.type = 3;
+  }
+  j(t5) {
+    this.element[this.name] = t5 === T ? void 0 : t5;
+  }
+};
+var H = class extends R {
+  constructor() {
+    super(...arguments), this.type = 4;
+  }
+  j(t5) {
+    this.element.toggleAttribute(this.name, !!t5 && t5 !== T);
+  }
+};
+var I = class extends R {
+  constructor(t5, i5, s6, e6, h5) {
+    super(t5, i5, s6, e6, h5), this.type = 5;
+  }
+  _$AI(t5, i5 = this) {
+    if ((t5 = N(this, t5, i5, 0) ?? T) === w)
+      return;
+    const s6 = this._$AH, e6 = t5 === T && s6 !== T || t5.capture !== s6.capture || t5.once !== s6.once || t5.passive !== s6.passive, h5 = t5 !== T && (s6 === T || e6);
+    e6 && this.element.removeEventListener(this.name, this, s6), h5 && this.element.addEventListener(this.name, this, t5), this._$AH = t5;
+  }
+  handleEvent(t5) {
+    "function" == typeof this._$AH ? this._$AH.call(this.options?.host ?? this.element, t5) : this._$AH.handleEvent(t5);
+  }
+};
+var L = class {
+  constructor(t5, i5, s6) {
+    this.element = t5, this.type = 6, this._$AN = void 0, this._$AM = i5, this.options = s6;
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  _$AI(t5) {
+    N(this, t5);
+  }
+};
+var z = { P: e3, A: h2, C: o3, M: 1, L: P, R: S2, D: u2, V: N, I: M, H: R, N: H, U: I, B: k, F: L };
+var Z = t2.litHtmlPolyfillSupport;
+Z?.(V, M), (t2.litHtmlVersions ??= []).push("3.1.2");
+var j = (t5, i5, s6) => {
+  const e6 = s6?.renderBefore ?? i5;
+  let h5 = e6._$litPart$;
+  if (void 0 === h5) {
+    const t6 = s6?.renderBefore ?? null;
+    e6._$litPart$ = h5 = new M(i5.insertBefore(l2(), t6), t6, void 0, s6 ?? {});
+  }
+  return h5._$AI(t5), h5;
+};
+
+// node_modules/lit-element/lit-element.js
+var s3 = class extends b {
+  constructor() {
+    super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
+  }
+  createRenderRoot() {
+    const t5 = super.createRenderRoot();
+    return this.renderOptions.renderBefore ??= t5.firstChild, t5;
+  }
+  update(t5) {
+    const i5 = this.render();
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t5), this._$Do = j(i5, this.renderRoot, this.renderOptions);
+  }
+  connectedCallback() {
+    super.connectedCallback(), this._$Do?.setConnected(true);
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback(), this._$Do?.setConnected(false);
+  }
+  render() {
+    return w;
+  }
+};
+s3._$litElement$ = true, s3["finalized", "finalized"] = true, globalThis.litElementHydrateSupport?.({ LitElement: s3 });
+var r4 = globalThis.litElementPolyfillSupport;
+r4?.({ LitElement: s3 });
+(globalThis.litElementVersions ??= []).push("4.0.4");
+
+// packages/utils/src/utils.js
+var fatal = (message, {
+  errorType = Error,
+  metadata = {},
+  onError = null,
+  removeStackLines = 1
+} = {}) => {
+  const error = new errorType(message);
+  Object.assign(error, metadata);
+  if (error.stack) {
+    const stackLines = error.stack.split("\n");
+    stackLines.splice(1, removeStackLines);
+    error.stack = stackLines.join("\n");
+  }
+  const throwError = () => {
+    if (typeof onError === "function") {
+      onError(error);
+    }
+    throw error;
+  };
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(throwError);
+  } else {
+    setTimeout(throwError, 0);
+  }
+};
+var isObject = (x2) => {
+  return typeof x2 == "object";
+};
+var isString = (x2) => {
+  return typeof x2 == "string";
+};
+var isArray = (x2) => {
+  return Array.isArray(x2);
+};
+var isBinary = (x2) => {
+  return !!(typeof Uint8Array !== "undefined" && x2 instanceof Uint8Array);
+};
+var isFunction = (x2) => {
+  return typeof x2 == "function" || false;
+};
+var isArguments = function(obj) {
+  return !!(obj && get(obj, "callee"));
+};
+var formatDate = function(date, format) {
+  const pad = (n5) => n5 < 10 ? "0" + n5 : n5;
+  const dateMap = {
+    "YYYY": date.getFullYear(),
+    "YY": date.getFullYear().toString().slice(-2),
+    "MMMM": date.toLocaleString("default", { month: "long" }),
+    "MMM": date.toLocaleString("default", { month: "short" }),
+    "MM": pad(date.getMonth() + 1),
+    "M": date.getMonth() + 1,
+    "DD": pad(date.getDate()),
+    "D": date.getDate(),
+    "Do": date.getDate() + ["th", "st", "nd", "rd"][((date.getDate() + 90) % 100 - 10) % 10 - 1] || "th",
+    "dddd": date.toLocaleString("default", { weekday: "long" }),
+    "ddd": date.toLocaleString("default", { weekday: "short" }),
+    "HH": pad(date.getHours()),
+    "h": date.getHours() % 12 || 12,
+    "mm": pad(date.getMinutes()),
+    "ss": pad(date.getSeconds()),
+    "a": date.getHours() >= 12 ? "pm" : "am"
+  };
+  const formatMap = {
+    "LT": "h:mm a",
+    "LTS": "h:mm:ss a",
+    "L": "MM/DD/YYYY",
+    "l": "M/D/YYYY",
+    "LL": "MMMM D, YYYY",
+    "ll": "MMM D, YYYY",
+    "LLL": "MMMM D, YYYY h:mm a",
+    "lll": "MMM D, YYYY h:mm a",
+    "LLLL": "dddd, MMMM D, YYYY h:mm a",
+    "llll": "ddd, MMM D, YYYY h:mm a"
+  };
+  const expandedFormat = formatMap[format] || format;
+  return expandedFormat.replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g, (match) => {
+    return dateMap[match];
+  }).replace(/\[(.*?)\]/g, (match, p1) => p1);
+};
+var noop = function() {
+};
+var wrapFunction = (x2) => {
+  return isFunction(x2) ? x2 : () => x2;
+};
+var kebabToCamel = (str = "") => str.replace(/-./g, (m3) => m3[1].toUpperCase());
+var unique = (arr) => {
+  return Array.from(new Set(arr));
+};
+var last = function(array, n5, guard) {
+  if (!Array.isArray(array)) {
+    return;
+  }
+  if (!n5 || guard) {
+    return array[array.length - 1];
+  } else {
+    return slice.call(array, Math.max(array.length - n5, 0));
+  }
+};
+var keys = (obj) => {
+  return Object.keys(obj);
+};
+var mapObject = function(obj, callback) {
+  const objKeys = keys(obj).reverse();
+  const length = objKeys.length;
+  let index = objKeys.length;
+  let newObj = {};
+  while (index--) {
+    const thisKey = objKeys[index];
+    newObj[thisKey] = callback(obj[thisKey], thisKey);
+  }
+  return newObj;
+};
+var extend = (obj, ...sources) => {
+  sources.forEach((source) => {
+    let descriptor, prop;
+    if (source) {
+      for (prop in source) {
+        descriptor = Object.getOwnPropertyDescriptor(source, prop);
+        if (descriptor === void 0) {
+          obj[prop] = source[prop];
+        } else {
+          Object.defineProperty(obj, prop, descriptor);
+        }
+      }
+    }
+  });
+  return obj;
+};
+var get = function(obj, string = "") {
+  string = string.replace(/^\./, "").replace(/\[(\w+)\]/g, ".$1");
+  const stringParts = string.split(".");
+  for (let index = 0, length = stringParts.length; index < length; ++index) {
+    const part = stringParts[index];
+    if (!!obj && part in obj) {
+      obj = obj[part];
+    } else {
+      return;
+    }
+  }
+  return obj;
+};
+var hasProperty = (obj, prop) => {
+  return Object.hasOwn.call(obj, prop);
+};
+var reverseKeys = (obj) => {
+  const newObj = {};
+  const pushValue = (key, value) => {
+    if (isArray(newObj[key])) {
+      newObj[key].push(value);
+    } else if (newObj[key]) {
+      newObj[key] = [newObj[key], value];
+    } else {
+      newObj[key] = value;
+    }
+  };
+  Object.keys(obj).forEach((key) => {
+    if (isArray(obj[key])) {
+      each(obj[key], (subKey) => {
+        pushValue(subKey, key);
+      });
+    } else {
+      pushValue(obj[key], key);
+    }
+  });
+  return newObj;
+};
+var clone = (obj) => {
+  let ret;
+  if (!isObject(obj)) {
+    return obj;
+  }
+  if (obj === null) {
+    return null;
+  }
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+  if (obj instanceof RegExp) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(clone);
+  }
+  if (isArguments(obj)) {
+    return Array.from(obj).map(clone);
+  }
+  if (isFunction(obj.clone)) {
+    return obj.clone();
+  }
+  ret = {};
+  keys(obj).forEach((key) => {
+    ret[key] = clone(obj[key]);
+  });
+  return ret;
+};
+var each = (obj, func, context) => {
+  if (obj === null) {
+    return obj;
+  }
+  let createCallback = (context2, func2) => {
+    if (context2 === void 0) {
+      return func2;
+    } else {
+      return (value, index, collection) => {
+        return func2.call(context2, value, index, collection);
+      };
+    }
+  };
+  let iteratee = createCallback(context, func);
+  let i5;
+  if (obj.length === +obj.length) {
+    for (i5 = 0; i5 < obj.length; ++i5) {
+      iteratee(obj[i5], i5, obj);
+    }
+  } else {
+    let objKeys = keys(obj);
+    for (i5 = 0; i5 < objKeys.length; ++i5) {
+      iteratee(obj[objKeys[i5]], objKeys[i5], obj);
+    }
+  }
+  return obj;
+};
+var escapeRegExp = function(string) {
+  return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+};
+function hashCode(input) {
+  let str;
+  if (input && input.toString === Object.prototype.toString && typeof input === "object") {
+    try {
+      str = JSON.stringify(input);
+    } catch (error) {
+      console.error("Error serializing input", error);
+      return 0;
+    }
+  } else {
+    str = input.toString();
+  }
+  const seed = 305419896;
+  const murmurhash = (key, seed2) => {
+    let remainder, bytes, h1, h1b, c1, c1b, c22, c2b, k1, i5;
+    remainder = key.length & 3;
+    bytes = key.length - remainder;
+    h1 = seed2;
+    c1 = 3432918353;
+    c22 = 461845907;
+    i5 = 0;
+    while (i5 < bytes) {
+      k1 = key.charCodeAt(i5) & 255 | (key.charCodeAt(++i5) & 255) << 8 | (key.charCodeAt(++i5) & 255) << 16 | (key.charCodeAt(++i5) & 255) << 24;
+      ++i5;
+      k1 = (k1 & 65535) * c1 + (((k1 >>> 16) * c1 & 65535) << 16) & 4294967295;
+      k1 = k1 << 15 | k1 >>> 17;
+      k1 = (k1 & 65535) * c22 + (((k1 >>> 16) * c22 & 65535) << 16) & 4294967295;
+      h1 ^= k1;
+      h1 = h1 << 13 | h1 >>> 19;
+      h1b = (h1 & 65535) * 5 + (((h1 >>> 16) * 5 & 65535) << 16) & 4294967295;
+      h1 = (h1b & 65535) + 27492 + (((h1b >>> 16) + 58964 & 65535) << 16);
+    }
+    k1 = 0;
+    switch (remainder) {
+      case 3:
+        k1 ^= (key.charCodeAt(i5 + 2) & 255) << 16;
+      case 2:
+        k1 ^= (key.charCodeAt(i5 + 1) & 255) << 8;
+      case 1:
+        k1 ^= key.charCodeAt(i5) & 255;
+        k1 = (k1 & 65535) * c1 + (((k1 >>> 16) * c1 & 65535) << 16) & 4294967295;
+        k1 = k1 << 15 | k1 >>> 17;
+        k1 = (k1 & 65535) * c22 + (((k1 >>> 16) * c22 & 65535) << 16) & 4294967295;
+        h1 ^= k1;
+    }
+    h1 ^= key.length;
+    h1 ^= h1 >>> 16;
+    h1 = (h1 & 65535) * 2246822507 + (((h1 >>> 16) * 2246822507 & 65535) << 16) & 4294967295;
+    h1 ^= h1 >>> 13;
+    h1 = (h1 & 65535) * 3266489909 + (((h1 >>> 16) * 3266489909 & 65535) << 16) & 4294967295;
+    h1 ^= h1 >>> 16;
+    return h1 >>> 0;
+  };
+  const prettify = (num) => {
+    if (num === 0)
+      return "0";
+    let result = "";
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    while (num > 0) {
+      result = chars[num % chars.length] + result;
+      num = Math.floor(num / chars.length);
+    }
+    return result;
+  };
+  let hash;
+  hash = murmurhash(str, seed);
+  hash = prettify(hash);
+  return hash;
+}
+var isEqual = (a3, b3, options) => {
+  let i5;
+  const keyOrderSensitive = !!(options && options.keyOrderSensitive);
+  if (a3 === b3) {
+    return true;
+  }
+  if (Number.isNaN(a3) && Number.isNaN(b3)) {
+    return true;
+  }
+  if (!a3 || !b3) {
+    return false;
+  }
+  if (!(isObject(a3) && isObject(b3))) {
+    return false;
+  }
+  if (a3 instanceof Date && b3 instanceof Date) {
+    return a3.valueOf() === b3.valueOf();
+  }
+  if (isBinary(a3) && isBinary(b3)) {
+    if (a3.length !== b3.length) {
+      return false;
+    }
+    for (i5 = 0; i5 < a3.length; i5++) {
+      if (a3[i5] !== b3[i5]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (isFunction(a3.equals)) {
+    return a3.equals(b3, options);
+  }
+  if (isFunction(b3.equals)) {
+    return b3.equals(a3, options);
+  }
+  if (a3 instanceof Array) {
+    if (!(b3 instanceof Array)) {
+      return false;
+    }
+    if (a3.length !== b3.length) {
+      return false;
+    }
+    for (i5 = 0; i5 < a3.length; i5++) {
+      if (!isEqual(a3[i5], b3[i5], options)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  let ret;
+  const aKeys = keys(a3);
+  const bKeys = keys(b3);
+  if (keyOrderSensitive) {
+    i5 = 0;
+    ret = aKeys.every((key) => {
+      if (i5 >= bKeys.length) {
+        return false;
+      }
+      if (key !== bKeys[i5]) {
+        return false;
+      }
+      if (!isEqual(a3[key], b3[bKeys[i5]], options)) {
+        return false;
+      }
+      i5++;
+      return true;
+    });
+  } else {
+    i5 = 0;
+    ret = aKeys.every((key) => {
+      if (!hasProperty(b3, key)) {
+        return false;
+      }
+      if (!isEqual(a3[key], b3[key], options)) {
+        return false;
+      }
+      i5++;
+      return true;
+    });
+  }
+  return ret && i5 === bKeys.length;
+};
+
+// packages/templating/src/scanner.js
+var Scanner = class _Scanner {
+  static DEBUG_MODE = true;
+  constructor(input) {
+    this.input = input;
+    this.pos = 0;
+    this.runCount = 0;
+  }
+  matches(regex) {
+    return regex.test(this.rest());
+  }
+  rest() {
+    return this.input.slice(this.pos);
+  }
+  isEOF() {
+    this.runCount++;
+    return this.pos >= this.input.length;
+  }
+  // get character at current position
+  peek() {
+    return this.input.charAt(this.pos);
+  }
+  consume(pattern) {
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const substring = this.input.substring(this.pos);
+    const match = regex.exec(substring);
+    if (match && match.index === 0) {
+      this.pos += match[0].length;
+      return match[0];
+    }
+    return null;
+  }
+  consumeUntil(pattern) {
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const match = regex.exec(this.input.substring(this.pos));
+    if (!match) {
+      const consumedText2 = this.input.substr(this.pos);
+      this.pos = this.input.length;
+      return consumedText2;
+    }
+    const consumedText = this.input.substring(this.pos, this.pos + match.index);
+    this.pos += match.index;
+    return consumedText;
+  }
+  returnTo(pattern) {
+    if (!pattern) {
+      return;
+    }
+    const regex = typeof pattern === "string" ? new RegExp(escapeRegExp(pattern), "gm") : new RegExp(pattern, "gm");
+    let lastMatch = null;
+    let match;
+    const substring = this.input.substring(0, this.pos);
+    while ((match = regex.exec(substring)) !== null) {
+      lastMatch = match;
+    }
+    if (lastMatch) {
+      const consumedText = this.input.substring(0, lastMatch.index);
+      this.pos = lastMatch.index;
+      return consumedText;
+    }
+    return;
+  }
+  fatal(msg) {
+    msg = msg || "Parse error";
+    const lines = this.input.split("\n");
+    let lineNumber = 0;
+    let charCount = 0;
+    for (const line of lines) {
+      if (charCount + line.length + 1 > this.pos) {
+        break;
+      }
+      charCount += line.length + 1;
+      lineNumber++;
+    }
+    const linesBefore = 5;
+    const linesAfter = 5;
+    const startLine = Math.max(0, lineNumber - linesBefore);
+    const endLine = Math.min(lines.length, lineNumber + linesAfter + 1);
+    const contextLines = lines.slice(startLine, endLine);
+    const consoleMsg = contextLines.map((line, idx) => {
+      const isErrLine = lineNumber - startLine === idx;
+      return `%c${line}`;
+    }).join("\n");
+    const normalStyle = "color: grey";
+    const errorStyle = "color: red; font-weight: bold";
+    if (_Scanner.DEBUG_MODE && document.body) {
+      let errorHTML = "";
+      each(contextLines, (line, index) => {
+        const style = index < linesBefore || index > linesBefore ? normalStyle : errorStyle;
+        errorHTML += `<div style="${style}">${line}</div>`;
+      });
+      const html = `
         <div style="padding: 1rem; font-size: 14px;">
           <h2>Could not render template</h2>
-          <h3>${t}</h3>
-          <code style="margin-top: 1rem; display: block; background-color: #EFEFEF; padding: 0.25rem 1rem;border-left: 3px solid #888"><pre>${u}</pre></code>
+          <h3>${msg}</h3>
+          <code style="margin-top: 1rem; display: block; background-color: #EFEFEF; padding: 0.25rem 1rem;border-left: 3px solid #888"><pre>${errorHTML}</pre></code>
         </div>
-      `;document.body.innerHTML=m}throw console.error(t+`
-`+l,...d.map((u,m)=>o-c===m?p:b)),new Error(t)}};var B=class r{constructor(t){this.template=t||""}static tagRegExp={IF:/^{{\s*#if\s+/,ELSEIF:/^{{\s*else\s*if\s+/,ELSE:/^{{\s*else\s*/,EACH:/^{{\s*#each\s+/,CLOSE_IF:/^{{\s*\/(if)\s*/,CLOSE_EACH:/^{{\s*\/(each)\s*/,SLOT:/^{{\s*slot\s*/,TEMPLATE:/^{{>\s*/,HTML_EXPRESSION:/^{{{\s*/,EXPRESSION:/^{{\s*/};static templateRegExp={verbose:{keyword:/^template\W/g,properties:/(\w+)\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/mg},standard:/(\w.*?)($|\s)/mg,dataObject:/(\w+)\s*:\s*([^,}]+)/g};compile(t=this.template){t=t.trim();let e=new nt(t),o=r.tagRegExp,n=l=>{for(let b in o)if(l.matches(o[b])){l.consume(o[b]);let p=this.getValue(l.consumeUntil("}}").trim());return l.consume("}}"),{type:b,content:p}}return null},a=[],i=[],c=null,s=[],d=[];for(;!e.isEOF();){let l=n(e),b=rt(i),p=rt(s),v=c?.content||b||a;if(l){let u={type:l.type.toLowerCase()};switch(l.type){case"IF":u={...u,condition:l.content,content:[],branches:[]},v.push(u),s.push(u),d.push(u),c=u;break;case"ELSEIF":u={...u,condition:l.content,content:[]},p||(e.returnTo(starts.ELSEIF),e.fatal("{{elseif}} encountered without matching if condition")),d.pop(),d.push(u),p.branches.push(u),c=u;break;case"ELSE":if(u={...u,content:[]},!p){e.returnTo(starts.ELSE),e.fatal("{{else}} encountered without matching if condition");break}d.pop(),d.push(u),p.branches.push(u),c=u;break;case"HTML_EXPRESSION":u={...u,type:"expression",unsafeHTML:!0,value:l.content},v.push(u),e.consume("}");break;case"EXPRESSION":u={...u,value:l.content},v.push(u);break;case"TEMPLATE":let m=this.parseTemplateString(l.content);u={...u,...m},v.push(u);break;case"SLOT":u={...u,name:l.content},v.push(u);break;case"CLOSE_IF":s.length==0&&(e.returnTo(starts.CLOSE_IF),e.fatal("{{/if}} close tag found without open if tag")),i.pop(),d.pop(),s.pop(),c=rt(d);break;case"EACH":let h=l.content.split(" in "),g,_;h.length>1?(_=h[0].trim(),g=h[1].trim()):g=h[0].trim(),u={...u,as:_,over:g,content:[]},v.push(u),c=u;break;case"CLOSE_EACH":i.pop(),c=rt(d);break}}else{let u=/\{\{/,m=e.consumeUntil(u);if(m){let h={type:"html",html:m};v.push(h)}}}return a}getValue(t){return t=="true"?!0:t=="false"?!1:Number.isNaN(parseFloat(t,10))?t:+t}parseTemplateString(t=""){let e=r.templateRegExp,o={};if(e.verbose.keyword.exec(t)){let n=[...t.matchAll(e.verbose.properties)];y(n,(a,i)=>{let c=a[1],s=this.getObjectFromString(a[2]);o[c]=s})}else{let n={},a=[...t.matchAll(e.standard)];y(a,(i,c)=>{if(c==0)o.name=`'${i[0].trim()}'`;else{let s=i[0].split("=");if(s.length){let d=s[0].trim(),l=s[1].trim();n[d]=l}}}),o.data=n}return o}getObjectFromString(t=""){let e=r.templateRegExp.dataObject,o={},n,a=!1;for(;(n=e.exec(t))!==null;)a=!0,o[n[1]]=n[2].trim();return a?o:t.trim()}};var V={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},k=r=>(...t)=>({_$litDirective$:r,values:t}),M=class{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,o){this._$Ct=t,this._$AM=e,this._$Ci=o}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}};var{I:Ge}=ce;var xe=r=>r.strings===void 0,fe=()=>document.createComment(""),K=(r,t,e)=>{let o=r._$AA.parentNode,n=t===void 0?r._$AB:t._$AA;if(e===void 0){let a=o.insertBefore(fe(),n),i=o.insertBefore(fe(),n);e=new Ge(a,i,r,r.options)}else{let a=e._$AB.nextSibling,i=e._$AM,c=i!==r;if(c){let s;e._$AQ?.(r),e._$AM=r,e._$AP!==void 0&&(s=r._$AU)!==i._$AU&&e._$AP(s)}if(a!==n||c){let s=e._$AA;for(;s!==a;){let d=s.nextSibling;o.insertBefore(s,n),s=d}}}return e},D=(r,t,e=r)=>(r._$AI(t,e),r),Xe={},we=(r,t=Xe)=>r._$AH=t,ye=r=>r._$AH,At=r=>{r._$AP?.(!1,!0);let t=r._$AA,e=r._$AB.nextSibling;for(;t!==e;){let o=t.nextSibling;t.remove(),t=o}};var at=(r,t)=>{let e=r._$AN;if(e===void 0)return!1;for(let o of e)o._$AO?.(t,!1),at(o,t);return!0},$t=r=>{let t,e;do{if((t=r._$AM)===void 0)break;e=t._$AN,e.delete(r),r=t}while(e?.size===0)},ke=r=>{for(let t;t=r._$AM;r=t){let e=t._$AN;if(e===void 0)t._$AN=e=new Set;else if(e.has(r))break;e.add(r),Qe(t)}};function Ze(r){this._$AN!==void 0?($t(this),this._$AM=r,ke(this)):this._$AM=r}function Je(r,t=!1,e=0){let o=this._$AH,n=this._$AN;if(n!==void 0&&n.size!==0)if(t)if(Array.isArray(o))for(let a=e;a<o.length;a++)at(o[a],!1),$t(o[a]);else o!=null&&(at(o,!1),$t(o));else at(this,r)}var Qe=r=>{r.type==V.CHILD&&(r._$AP??=Je,r._$AQ??=Ze)},S=class extends M{constructor(){super(...arguments),this._$AN=void 0}_$AT(t,e,o){super._$AT(t,e,o),ke(this),this.isConnected=t._$AU}_$AO(t,e=!0){t!==this.isConnected&&(this.isConnected=t,t?this.reconnected?.():this.disconnected?.()),e&&(at(this,t),$t(this))}setValue(t){if(xe(this._$Ct))this._$Ct._$AI(t,this);else{let e=[...this._$Ct._$AH];e[this._$Ci]=t,this._$Ct._$AI(e,this,0)}}disconnected(){}reconnected(){}};var G=class{constructor(){this.subscribers=new Set}depend(){x.current&&(this.subscribers.add(x.current),x.current.dependencies.add(this))}changed(){this.subscribers.forEach(t=>t.invalidate())}cleanUp(t){this.subscribers.delete(t)}unsubscribe(t){this.subscribers.delete(t)}};var x=class r{static current=null;static pendingReactions=new Set;static afterFlushCallbacks=[];static isFlushScheduled=!1;static create(t){let e=new r(t);return e.run(),e}static scheduleFlush(){r.isFlushScheduled||(r.isFlushScheduled=!0,typeof queueMicrotask=="function"?queueMicrotask(()=>r.flush()):Promise.resolve().then(()=>r.flush()))}static flush(){r.isFlushScheduled=!1,r.pendingReactions.forEach(t=>t.run()),r.pendingReactions.clear(),r.afterFlushCallbacks.forEach(t=>t()),r.afterFlushCallbacks=[]}static afterFlush(t){r.afterFlushCallbacks.push(t)}constructor(t){this.callback=t,this.dependencies=new Set,this.boundRun=this.run.bind(this),this.firstRun=!0,this.active=!0}run(){this.active&&(r.current=this,this.dependencies.forEach(t=>t.cleanUp(this)),this.dependencies.clear(),this.callback(this),this.firstRun=!1,r.current=null,r.pendingReactions.delete(this))}invalidate(){this.active=!0,r.pendingReactions.add(this),r.scheduleFlush()}stop(){this.active&&(this.active=!1,this.dependencies.forEach(t=>t.unsubscribe(this)))}static nonreactive(t){let e=r.current;r.current=null;try{return t()}finally{r.current=e}}static guard(t){if(!r.current)return t();let e=new G,o,n,a=new r(()=>{n=t(),!a.firstRun&&!N(n,o)&&(console.log("dep changed",o),e.changed()),o=j(n)});return a.run(),e.depend(),o}};var Pt=class extends S{__reactiveVar;__dispose=function(){};render(t){if(t){if(t!==this.__reactiveVar){this.__dispose?.(),this.__reactiveVar=t;let e=!0;this.__dispose=t.subscribe(o=>{e===!1&&this.setValue(o)}),e=!1}return t.peek()}}disconnected(){this.__dispose?.()}reconnected(){this.__dispose=this.__reactiveVar?.subscribe(t=>{this.setValue(t)})}},to=k(Pt);var _t=class r{constructor(t,e=document){let o=[];t&&(Array.isArray(t)?o=t:typeof t=="string"?o=e.querySelectorAll(t):t instanceof Element||t instanceof Document||t instanceof DocumentFragment?o=[t]:t instanceof NodeList&&(o=t),this.length=o.length,Object.assign(this,o))}find(t){let e=Array.from(this).flatMap(o=>Array.from(o.querySelectorAll(t)));return new r(e)}parent(t){let e=Array.from(this).map(o=>o.parentElement).filter(Boolean);return t?new r(e).filter(t):new r(e)}children(t){let e=Array.from(this).flatMap(n=>Array.from(n.children)),o=t?e.filter(n=>n.matches(t)):e;return new r(o)}filter(t){let e=Array.from(this).filter(o=>o.matches(t));return new r(e)}not(t){let e=Array.from(this).filter(o=>!o.matches(t));return new r(e)}closest(t){let e=Array.from(this).map(o=>o.closest(t)).filter(Boolean);return new r(e)}on(t,e,o,n=new AbortController){this._eventHandlers=this._eventHandlers||[];let a=[],i=n.signal;return Array.from(this).forEach(c=>{let s=l=>{if(typeof e=="function")e.call(c,l);else for(let b=l.target;b&&b!==c;b=b.parentNode)if(b.matches(e)){o.call(b,l);break}};c.addEventListener(t,s,{signal:i});let d={el:c,event:t,eventListener:s,abortController:n,delegated:typeof e=="string",originalHandler:o};a.push(d)}),this._eventHandlers.push(...a),a.length==1?a[0]:a}off(t,e){return this._eventHandlers&&(this._eventHandlers=this._eventHandlers.filter(o=>o.event===t&&(!e||o.handler===e||o.originalHandler===e)?(o.el.removeEventListener(t,o.handler),!1):!0)),this}remove(){return Array.from(this).forEach(t=>t.remove()),this}addClass(t){let e=t.split(" ");return Array.from(this).forEach(o=>o.classList.add(...e)),this}removeClass(t){let e=t.split(" ");return Array.from(this).forEach(o=>o.classList.remove(...e)),this}html(t){if(t!==void 0)return Array.from(this).forEach(e=>e.innerHTML=t),this;if(this.length)return this[0].innerHTML}outerHTML(t){if(t!==void 0)return Array.from(this).forEach(e=>e.outerHTML=t),this;if(this.length)return this[0].outerHTML}text(t){return t!==void 0?(Array.from(this).forEach(e=>e.textContent=t),this):Array.from(this).map(e=>this.getTextContentRecursive(e.childNodes)).join("")}value(t){return t!==void 0?(Array.from(this).forEach(e=>{(e instanceof HTMLInputElement||e instanceof HTMLSelectElement||e instanceof HTMLTextAreaElement)&&(e.value=t)}),this):Array.from(this).map(e=>{if(e instanceof HTMLInputElement||e instanceof HTMLSelectElement||e instanceof HTMLTextAreaElement)return e.value})}val(...t){return this.value(...t)}getTextContentRecursive(t){return Array.from(t).map(e=>{if(e.nodeType===Node.TEXT_NODE)return e.nodeValue;if(e.nodeName==="SLOT"){let o=e.assignedNodes({flatten:!0});return this.getTextContentRecursive(o)}else return this.getTextContentRecursive(e.childNodes)}).join("")}css(t,e){if(typeof t=="object")Object.entries(t).forEach(([o,n])=>{Array.from(this).forEach(a=>a.style[o]=n)});else if(e!==void 0)Array.from(this).forEach(o=>o.style[t]=e);else if(this.length)return this[0].style[t];return this}attr(t,e){if(typeof t=="object")Object.entries(t).forEach(([o,n])=>{Array.from(this).forEach(a=>a.setAttribute(o,n))});else if(e!==void 0)Array.from(this).forEach(o=>o.setAttribute(t,e));else if(this.length)return this[0].getAttribute(t);return this}each(t){return Array.from(this).forEach((e,o)=>{t.call(e,new r(e),o)}),this}get(t){return t!==void 0?this[t]:Array.from(this)}eq(t){return new r(this[t])}textNode(){return Array.from(this).map(t=>Array.from(t.childNodes).filter(e=>e.nodeType===Node.TEXT_NODE).map(e=>e.nodeValue).join("")).join("")}};function X(r,t=document){return new _t(r,t)}var it=class extends M{constructor(t){if(super(t),this.it=f,t.type!==V.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(t){if(t===f||t==null)return this._t=void 0,this.it=t;if(t===$)return t;if(typeof t!="string")throw Error(this.constructor.directiveName+"() called with a non-string value");if(t===this.it)return this._t;this.it=t;let e=[t];return e.raw=e,this._t={_$litType$:this.constructor.resultType,strings:e,values:[]}}};it.directiveName="unsafeHTML",it.resultType=1;var Ae=k(it);var Ot=class extends S{constructor(t){super(t),this.reaction=null}render(t,e){this.reaction&&this.reaction.stop();let o;return this.reaction=x.create(n=>{if(!this.isConnected){n.stop();return}o=t(),e.unsafeHTML&&(o=Ae(o)),n.firstRun||this.setValue(o)}),o}disconnected(){this.reaction&&(this.reaction.stop(),this.reaction=null)}reconnected(){}},$e=k(Ot);var Ut=class extends S{constructor(t){super(t),this.reaction=null}render(t){this.reaction&&this.reaction.stop();let e=f;return this.reaction=x.create(o=>{if(!this.isConnected){o.stop();return}if(t.condition())e=t.content();else if(t.branches?.length){let n=!1;y(t.branches,a=>{(!n&&a.type=="elseif"&&a.condition()||!n&&a.type=="else")&&(n=!0,e=a.content())})}else e=$;return o.firstRun||this.setValue(e),e}),e}disconnected(){this.reaction&&(this.reaction.stop(),this.reaction=null)}reconnected(){}},_e=k(Ut);var Ee=(r,t,e)=>{let o=new Map;for(let n=t;n<=e;n++)o.set(r[n],n);return o},Se=k(class extends M{constructor(r){if(super(r),r.type!==V.CHILD)throw Error("repeat() can only be used in text expressions")}dt(r,t,e){let o;e===void 0?e=t:t!==void 0&&(o=t);let n=[],a=[],i=0;for(let c of r)n[i]=o?o(c,i):i,a[i]=e(c,i),i++;return{values:a,keys:n}}render(r,t,e){return this.dt(r,t,e).values}update(r,[t,e,o]){let n=ye(r),{values:a,keys:i}=this.dt(t,e,o);if(!Array.isArray(n))return this.ut=i,a;let c=this.ut??=[],s=[],d,l,b=0,p=n.length-1,v=0,u=a.length-1;for(;b<=p&&v<=u;)if(n[b]===null)b++;else if(n[p]===null)p--;else if(c[b]===i[v])s[v]=D(n[b],a[v]),b++,v++;else if(c[p]===i[u])s[u]=D(n[p],a[u]),p--,u--;else if(c[b]===i[u])s[u]=D(n[b],a[u]),K(r,s[u+1],n[b]),b++,u--;else if(c[p]===i[v])s[v]=D(n[p],a[v]),K(r,n[b],n[p]),p--,v++;else if(d===void 0&&(d=Ee(i,v,u),l=Ee(c,b,p)),d.has(c[b]))if(d.has(c[p])){let m=l.get(i[v]),h=m!==void 0?n[m]:null;if(h===null){let g=K(r,n[b]);D(g,a[v]),s[v]=g}else s[v]=D(h,a[v]),K(r,n[b],h),n[m]=null;v++}else At(n[p]),p--;else At(n[b]),b++;for(;v<=u;){let m=K(r,s[u+1]);D(m,a[v]),s[v++]=m}for(;b<=p;){let m=n[b++];m!==null&&At(m)}return this.ut=i,we(r,s),$}});var It=class extends S{constructor(t){super(t),this.reaction=null,this.parts=new Map}render(t,e){let o=this.createRepeat(t,e);return this.reaction||(this.reaction=x.create(n=>{if(!this.isConnected){n.stop();return}let a=this.getItems(t);if(this.firstRun)return;let i=this.createRepeat(t,e,a);this.setValue(i)})),o}getItems(t){let e=t.over()||[];return e=e.map(o=>(W(o)&&(o._id=o._id||Dt(o)),o)),e}createRepeat(t,e,o=this.getItems(t)){return o?.length?Se(o,this.getPartID,(n,a)=>{let i=this.parts.get(this.getPartID(n));return i||(i=this.getPartContent(n,a,e,t),this.parts.set(this.getPartID(n),i),i)}):f}getPartContent(t,e,o,n){let a=this.prepareEachData(t,e,o,n.as);return n.content(a)}getPartID(t){if(W(t))return t._id||t.id||t.key||t.hash||Dt(t);if(de)return t}prepareEachData(t,e,o,n){return n?{...o,[n]:t,"@index":e}:{...o,...t,"@index":e}}disconnected(){this.reaction&&(this.reaction.stop(),this.reaction=null)}},Ce=k(It);var Ft=class extends S{constructor(t){super(t),this.renderRoot=t.options.host.renderRoot,this.template=null,this.part=null}render({getTemplateName:t,subTemplates:e,data:o,parentTemplate:n}){let a=()=>{let l=t();return e[l]},i=(l,b)=>l.render(b),c=l=>H(l,b=>b());x.create(l=>{if(!this.isConnected){l.stop();return}let b=a(),p=c(o);if(b){this.template=b;let{parentNode:v,startNode:u,endNode:m}=this.part,h=this.part.options.host?.renderRoot;b.attach(h,{parentNode:v,startNode:u,endNode:m})}n&&b.setParent(n),l.firstRun||this.setValue(i(b,p))});let s=a(),d=c(o);return i(s,d)}update(t,e){return this.part=t,this.render.apply(this,e)}reconnected(){}disconnected(){this.template&&this.template.onDestroyed()}},ze=k(Ft);var Te={is:(r,t)=>r==t,not:r=>!r,isEqual:(r,t)=>r==t,maybePlural(r,t="s"){return r==1?"":t},isNotEqual:(r,t)=>r!=t,isExactlyEqual:(r,t)=>r===t,isNotExactlyEqual:(r,t)=>r!==t,greaterThan:(r,t)=>r>t,lessThan:(r,t)=>r<t,greaterThanEquals:(r,t)=>r>=t,lessThanEquals:(r,t)=>r<=t,numberFromIndex:r=>r+1,formatDate:(r=new Date,t="L")=>wt(r,t),formatDateTime:(r=new Date,t="LLL")=>wt(r,t),formatDateTimeSeconds:(r=new Date,t="LTS")=>wt(r,t),object:({obj:r})=>r,log(...r){console.log(...r)},debugger:()=>{debugger}};var Et=class r{static helpers=Te;static addHelper(t,e){r.helpers[t]=e}constructor({ast:t,data:e,subTemplates:o}){this.ast=t||"",this.data=e,this.subTemplates=o,this.resetHTML()}resetHTML(){this.html=[],this.html.raw=[],this.expressions=[]}render({ast:t=this.ast,data:e=this.data}={}){return this.resetHTML(),this.readAST({ast:t,data:e}),this.clearTemp(),this.litTemplate=ae.apply(this,[this.html,...this.expressions]),this.litTemplate}readAST({ast:t=this.ast,data:e=this.data}={}){y(t,o=>{switch(o.type){case"html":this.addHTML(o.html);break;case"expression":let n=this.evaluateExpression(o.value,e,{unsafeHTML:o.unsafeHTML,asDirective:!0});this.addValue(n);break;case"if":this.addValue(this.evaluateConditional(o,e));break;case"each":this.addValue(this.evaluateEach(o,e));break;case"template":this.addValue(this.evaluateTemplate(o,e));break;case"slot":o.name?this.addHTML(`<slot name="${o.name}"></slot>`):this.addHTML("<slot></slot>");break}})}evaluateConditional(t,e){let o=(a,i)=>i=="branches"?a.map(c=>H(c,o)):i=="condition"?()=>this.evaluateExpression(a,e):i=="content"?()=>this.renderContent({ast:a,data:e}):a,n=H(t,o);return _e(n)}evaluateEach(t,e){let n=H(t,(a,i)=>i=="over"?(console.log(this.evaluateExpression(a,e)),()=>this.evaluateExpression(a,e)):i=="content"?c=>this.renderContent({ast:a,data:c}):a);return Ce(n,e)}evaluateTemplate(t,e={}){let o=s=>this.evaluateExpression(s,e),n=()=>o(t.name),a=H(t.data||{},s=>()=>x.nonreactive(()=>o(s))),i=H(t.reactiveData||{},s=>()=>o(s)),c={...a,...i};return ze({subTemplates:this.subTemplates,getTemplateName:n,data:c,parentTemplate:e})}evaluateExpression(t,e=this.data,{asDirective:o=!1,unsafeHTML:n=!1}={}){return typeof t=="string"?o?$e(()=>this.lookupExpressionValue(t,e),{unsafeHTML:n}):this.lookupExpressionValue(t,e):t}lookupExpressionValue(t="",e={},{unsafeHTML:o=!1}={}){let n=/^\'(.*)\'$/,a=t.match(n);if(a&&a.length>0)return a[1];let i=t.split(" ").reverse(),c=[],s;return y(i,(d,l)=>{let b=(h,g)=>g.split(".").reduce((_,Bt)=>ve(_)()[Bt],h),p=()=>{let h=d.split(".").slice(0,-1).join(".");return b(e,h)},v=b(e,d),u=r.helpers[d];!v&&E(u)&&(v=u);let m;E(v)?s=v.bind(p())(...c):v?s=v?.constructor.name==="_ReactiveVar"?v.value:v:(m=n.exec(d))!==null&&m.length>1?s=m[1]:Number.isNaN(parseFloat(d))?s=void 0:s=Number(d),c.unshift(s)}),s}addHTML(t){this.lastHTML&&(t=`${this.html.pop()}${t}`),this.html.push(t),this.html.raw.push(String.raw({raw:t})),this.lastHTML=!0}addHTMLSpacer(){this.addHTML("")}addValue(t){this.addHTMLSpacer(),this.expressions.push(t),this.lastHTML=!1,this.addHTMLSpacer()}renderContent({ast:t,data:e,subTemplates:o}){return new r({ast:t,data:e,subTemplates:this.subTemplates}).render()}clearTemp(){delete this.lastHTML}};var St=class{static templateCount=0;constructor({templateName:t,ast:e,template:o,data:n,css:a,events:i,subTemplates:c,createInstance:s,parentTemplate:d,onCreated:l=C,onRendered:b=C,onDestroyed:p=C}){e||(e=new B(o).compile()),this.events=i,this.ast=e,this.css=a,this.data=n||{},this.templateName=t||this.getGenericTemplateName(),this.subTemplates=c,this.createInstance=s,this.onRenderedCallback=b,this.onDestroyedCallback=p,this.onCreatedCallback=l}setParent(t){return this.parentTemplate=t}getGenericTemplateName(){return St.templateCount++,`Anonymous #${St.templateCount}`}initialize(){let t=this;E(this.createInstance)&&(this.tpl={},t=this.call(this.createInstance),ge(this.tpl,t),console.log("instance created",this.tpl)),this.tpl.reaction=this.reaction,this.tpl.templateName=this.templateName,this.tpl.parent=()=>this.parentTemplate,this.onCreated=()=>{console.log("oncreated called"),this.call(this.onCreatedCallback.bind(this))},this.onFirstRender=()=>{this.call(this.onFirstRenderCallback.bind(this))},this.onRendered=()=>{this.call(this.onRenderedCallback.bind(this))},this.onDestroyed=()=>{this.rendered=!1,this.clearReactions(),this.removeEvents(),this.call(this.onDestroyedCallback.bind(this))},this.renderer=new Et({ast:this.ast,data:this.getDataContext(),subTemplates:this.subTemplates})}async attach(t,{parentNode:e=t,startNode:o,endNode:n}={}){this.renderRoot=t,this.parentNode=e,this.startNode=o,this.endNode=n,this.attachEvents(),await this.attachStyles()}getDataContext(){return{...this.tpl,...this.data}}async attachStyles(){if(!this.css||!this.renderRoot||!this.renderRoot.adoptedStyleSheets)return;let t=this.css;this.stylesheet||(this.stylesheet=new CSSStyleSheet,await this.stylesheet.replace(t)),Array.from(this.renderRoot.adoptedStyleSheets).some(n=>N(n.cssRules,this.stylesheet.cssRules))||(this.renderRoot.adoptedStyleSheets=[...this.renderRoot.adoptedStyleSheets,this.stylesheet])}attachEvents(t=this.events){(!this.parentNode||!this.renderRoot)&&Ht("You must set a parent before attaching events");let e=o=>{let n=o.split(" "),a=n[0];n.shift();let i=n.join(" ");return{eventName:a,selector:i}};this.eventController=new AbortController,y(t,(o,n)=>{let{eventName:a,selector:i}=e(n),c=this;X(this.renderRoot).on(a,i,s=>{if(!this.isNodeInTemplate(s.target))return;let d=o.bind(s.target);c.call(d,{firstArg:s,additionalArgs:[s.target.dataset]})},this.eventController)})}isNodeInTemplate(t){return((n,a=this.startNode,i=this.endNode)=>{if(!a||!i)return!0;let c=a.compareDocumentPosition(n),s=i.compareDocumentPosition(n),d=(c&Node.DOCUMENT_POSITION_FOLLOWING)!==0,l=(s&Node.DOCUMENT_POSITION_PRECEDING)!==0;return d&&l})((n=>{for(;n&&n.parentNode!==this.parentNode;)n=n.parentNode;return n})(t))}attachEvent(t,e){}removeEvents(){this.eventController.abort()}render(t={}){this.renderer||(this.initialize(),console.log("finished initializing"),this.onCreated());let e=this.renderer.render({data:{...this.getDataContext(),...t}});return this.rendered||this.onRendered(),this.rendered=!0,e}$(t){return this.renderRoot||Ht("Cannot query DOM unless render root specified."),X(t,this.renderRoot)}call(t,{firstArg:e,additionalArgs:o,args:n=[this.tpl,this.$.bind(this)]}={}){if(e&&n.unshift(e),o&&n.push(...o),E(t))return t.apply(this,n)}reaction(t){this.reactions||(this.reactions=[]),this.reactions.push(x.create(t))}clearReactions(){y(this.reactions||[],t=>t.stop())}};var st=class extends R{static scopedStyleSheet=null;useLight=!1;createRenderRoot(){return this.useLight=this.getAttribute("expose")!==null,this.useLight?(this.applyScopedStyles(this.tagName,this.css),this.storeOriginalContent.apply(this),this):super.createRenderRoot(this.css)}applyScopedStyles(t,e){if(!this.scopedStyleSheet){let o=Ct(e,t);this.scopedStyleSheet=new CSSStyleSheet,this.scopedStyleSheet.replaceSync(o)}document.adoptedStyleSheets=[...document.adoptedStyleSheets,this.scopedStyleSheet]}storeOriginalContent(){this.originalDOM=document.createElement("template"),this.originalDOM.innerHTML=this.innerHTML,this.innerHTML=""}slotContent(){this.$("slot").each(e=>{let o;if(e.attr("name")){let n=e.attr("name"),a=this.$$(`[slot="${n}"]`);a.length&&(o=a.outerHTML())}else{let n=this.$$(this.originalDOM.content),i=n.children().not("[slot]").html()||"",c=n.textNode()||"";o=i+c}e&&o&&e.html(o)})}firstUpdated(){super.firstUpdated()}updated(){super.updated(),this.useLight&&this.slotContent()}get defaultSettings(){return{}}$(t){return this.renderRoot||console.error("Cannot query DOM until element has rendered."),X(t,this?.renderRoot)}$$(t){return X(t,this.originalDOM.content)}call(t,{firstArg:e,additionalArgs:o,args:n=[this.tpl,this.$.bind(this)]}={}){if(e&&n.unshift(e),o&&n.push(...o),E(t))return t.apply(this,n)}};var Yt=({renderer:r="lit",template:t="",css:e=!1,spec:o=!1,templateName:n,tagName:a,events:i={},createInstance:c=C,onCreated:s=C,onRendered:d=C,onDestroyed:l=C,onAttributeChanged:b=C,subTemplates:p=[],beforeRendered:v=C}={})=>{let m=new B(t).compile(),h;a=="ui-button"&&(h={settings:{size:["mini","tiny","small","medium","large","huge","massive"],emphasis:["primary","secondary"],icon:["icon"],labeled:["right-labeled",["labeled","left-labeled"]]}});let g=new St({templateName:n||pe(a),ast:m,css:e,events:i,subTemplates:p,onCreated:s,onRendered:d,onDestroyed:l,createInstance:c}),_;return a&&(_=class extends st{static get styles(){return ut(e)}static get properties(){return a=="ui-button"?{size:{type:String,observe:!0,reflect:!1},emphasis:{type:String,observe:!0,reflect:!1},small:{type:Boolean,reflect:!1},large:{type:Boolean,reflect:!1},primary:{type:Boolean,reflect:!1},secondary:{type:Boolean,reflect:!1},class:{type:String}}:{}}constructor(){super(),this.css=e,this.tpl=g.tpl,this.template=g}connectedCallback(){super.connectedCallback(),g.attach(this.renderRoot),this.call(v)}firstUpdated(){super.firstUpdated(),this.call(d)}disconnectedCallback(){super.disconnectedCallback(),g.removeEvents(),this.call(l)}adoptedCallback(){super.adoptedCallback(),this.call(onMoved)}attributeChangedCallback(w,P,A){this.adjustSettingFromAttribute(w,A),this.call(b,{args:[w,P,A]}),super.attributeChangedCallback(w,P,A)}adjustSettingFromAttribute(w,P){let A=h;if(w=="class")y(P.split(" "),z=>{this.adjustSettingFromAttribute(z)});else if(!yt(A.attribute,w)){let z=yt(me(A.settings),w);if(z){let Ne=this[z];this[z]=w,this.attributeChangedCallback(z,Ne,w)}}}getSettings(){let w={};return y(_.properties,(P,A)=>{A=="class"||!P.observe||(w[A]=this[A],w[this[A]]||(w[this[A]]=!0))}),w}getUIClasses(){let w=[];return y(_.properties,(A,z)=>{z=="class"||!A.observe||w.push(this[z])}),he(w).filter(Boolean).join(" ")}getDataContext(){return{...this.tpl,...this.getSettings(),ui:this.getUIClasses()}}render(){return g.render(this.getDataContext())}},customElements.define(a,_)),a?_:g};var Le=`/* src/button/css/content/button.css */
-@layer component {
-  .button {
-    cursor: pointer;
-    display: inline-block;
-    min-height: 1em;
-    font-size: var(--medium);
-    border: none;
-    vertical-align: var(--vertical-align);
-    background: var(--background);
-    color: var(--text-color);
-    font-family: var(--font-family);
-    margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;
-    padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));
-    text-transform: var(--text-transform);
-    text-shadow: var(--text-shadow);
-    font-weight: var(--font-weight);
-    line-height: var(--line-height);
-    font-style: normal;
-    text-align: center;
-    text-decoration: none;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    user-select: none;
-    transition: var(--transition);
-    will-change: var(--will-change);
-    -webkit-tap-highlight-color: var(--tap-color);
-    outline: none;
-  }
-}
-
-/* src/button/css/group/buttons.css */
-@layer component {
-  .buttons {
-    display: inline-flex;
-    flex-direction: row;
-    font-size: 0em;
-    vertical-align: baseline;
-    margin: var(--vertical-margin) var(--horizontal-margin) 0em 0em;
-  }
-  :scope:not(.basic):not(.inverted) {
-    box-shadow: var(--group-box-shadow);
-  }
-  &::after {
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
-  }
-  .buttons .button {
-    flex: 1 0 auto;
-    border-radius: 0em;
-    margin: var(--group-button-offset);
-  }
-  .buttons > .button:not(.basic):not(.inverted),
-  .buttons:not(.basic):not(.inverted) > .button {
-    box-shadow: var(--group-button-box-shadow);
-  }
-  .buttons .button:first-child {
-    border-left: none;
-    margin-left: 0em;
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
-  }
-  .buttons .button:last-child {
-    border-top-right-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
-  }
-}
-
-/* src/button/css/types/animated.css */
-@layer component {
-  .animated.button {
-    position: relative;
-    overflow: hidden;
-    padding-right: 0em !important;
-    vertical-align: var(--animated-vertical-align);
-    z-index: var(--animated-z-index);
-  }
-  .animated.button .content {
-    will-change: transform, opacity;
-  }
-  .animated.button .visible.content {
-    position: relative;
-    margin-right: var(--horizontal-padding);
-  }
-  .animated.button .hidden.content {
-    position: absolute;
-    width: 100%;
-  }
-  .animated.button .visible.content,
-  .animated.button .hidden.content {
-    transition: right var(--animation-duration) var(--animation-easing) 0s;
-  }
-  .animated.button .visible.content {
-    left: auto;
-    right: 0%;
-  }
-  .animated.button .hidden.content {
-    top: 50%;
-    left: auto;
-    right: -100%;
-    margin-top: calc(var(--line-height) / 2 * -1);
-  }
-  .animated.button:focus .visible.content,
-  .animated.button:hover .visible.content {
-    left: auto;
-    right: 200%;
-  }
-  .animated.button:focus .hidden.content,
-  .animated.button:hover .hidden.content {
-    left: auto;
-    right: 0%;
-  }
-  .vertical.animated.button .visible.content,
-  .vertical.animated.button .hidden.content {
-    transition: top var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);
-  }
-  .vertical.animated.button .visible.content {
-    transform: translateY(0%);
-    right: auto;
-  }
-  .vertical.animated.button .hidden.content {
-    top: -50%;
-    left: 0%;
-    right: auto;
-  }
-  .vertical.animated.button:focus .visible.content,
-  .vertical.animated.button:hover .visible.content {
-    transform: translateY(200%);
-    right: auto;
-  }
-  .vertical.animated.button:focus .hidden.content,
-  .vertical.animated.button:hover .hidden.content {
-    top: 50%;
-    right: auto;
-  }
-  .fade.animated.button .visible.content,
-  .fade.animated.button .hidden.content {
-    transition: opacity var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);
-  }
-  .fade.animated.button .visible.content {
-    left: auto;
-    right: auto;
-    opacity: 1;
-    transform: scale(1);
-  }
-  .fade.animated.button .hidden.content {
-    opacity: 0;
-    left: 0%;
-    right: auto;
-    transform: scale(var(--fade-scale-high));
-  }
-  .fade.animated.button:focus .visible.content,
-  .fade.animated.button:hover .visible.content {
-    left: auto;
-    right: auto;
-    opacity: 0;
-    transform: scale(var(--fade-scale-low));
-  }
-  .fade.animated.button:focus .hidden.content,
-  .fade.animated.button:hover .hidden.content {
-    left: 0%;
-    right: auto;
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* src/button/css/types/emphasis.css */
-@layer component {
-  .primary.buttons .button,
-  .primary.button {
-    background-color: var(--primary-color);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
-    background-image: var(--primary-background-image);
-  }
-  .primary.button {
-    box-shadow: var(--primary-box-shadow);
-  }
-  .primary.buttons .button:hover,
-  .primary.button:hover {
-    background-color: var(--primary-color-hover);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
-  }
-  .primary.buttons .button:focus,
-  .primary.button:focus {
-    background-color: var(--primary-color-focus);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
-  }
-  .primary.buttons .button:active,
-  .primary.button:active {
-    background-color: var(--primary-color-down);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
-  }
-  .primary.buttons .active.button,
-  .primary.buttons .active.button:active,
-  .primary.active.button,
-  .primary.button .active.button:active {
-    background-color: var(--primary-color-active);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
-  }
-  .secondary.buttons .button,
-  .secondary.button {
-    background-color: var(--secondary-color);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .secondary.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .secondary.buttons .button:hover,
-  .secondary.button:hover {
-    background-color: var(--secondary-color-hover);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
-  }
-  .secondary.buttons .button:focus,
-  .secondary.button:focus {
-    background-color: var(--secondary-color-focus);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
-  }
-  .secondary.buttons .button:active,
-  .secondary.button:active {
-    background-color: var(--secondary-color-down);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
-  }
-  .secondary.buttons .active.button,
-  .secondary.buttons .active.button:active,
-  .secondary.active.button,
-  .secondary.button .active.button:active {
-    background-color: var(--secondary-color-active);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
-  }
-}
-
-/* src/button/css/types/icon.css */
-@layer component {
-  .icon.buttons .button,
-  .icon.button {
-    padding: var(--vertical-padding) var(--vertical-padding) (var(--vertical-padding) + var(--shadow-offset));
-  }
-  .icon.buttons .button > .icon,
-  .icon.button > .icon {
-    opacity: var(--icon-button-opacity);
-    margin: 0em !important;
-    vertical-align: top;
-  }
-}
-
-/* src/button/css/types/labeled.css */
-@layer component {
-  .labeled.button:not(.icon) {
-    display: inline-flex;
-    flex-direction: row;
-    background: none !important;
-    padding: 0px !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  .labeled.button > .button {
-    margin: 0px;
-  }
-  .labeled.button > .label {
-    display: flex;
-    align-items: var(--labeled-label-align);
-    margin: 0px 0px 0px var(--labeled-label-border-offset) !important;
-    padding: var(--labeled-label-padding);
-    font-size: var(--labeled-label-font-size);
-    border-color: var(--labeled-label-border-color);
-  }
-  .labeled.button > .tag.label::before {
-    width: var(--labeled-tag-label-size);
-    height: var(--labeled-tag-label-size);
-  }
-  .labeled.button:not([class*="left labeled"]) > .button {
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-  .labeled.button:not([class*="left labeled"]) > .label {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-  }
-  [class*="left labeled"].button > .button {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-  }
-  [class*="left labeled"].button > .label {
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-}
-
-/* src/button/css/types/labeled-icon.css */
-@layer component {
-  .labeled.icon.buttons .button,
-  .labeled.icon.button {
-    position: relative;
-    padding-left: var(--labeled-icon-padding) !important;
-    padding-right: var(--horizontal-padding) !important;
-  }
-  .labeled.icon.buttons > .button > .icon,
-  .labeled.icon.button > .icon {
-    position: absolute;
-    height: 100%;
-    line-height: 1;
-    border-radius: 0px;
-    border-top-left-radius: inherit;
-    border-bottom-left-radius: inherit;
-    text-align: center;
-    margin: var(--labeled-icon-margin);
-    width: var(--labeled-icon-width);
-    background-color: var(--labeled-icon-background-color);
-    color: var(--labeled-icon-color);
-    box-shadow: var(--labeled-icon-left-shadow);
-  }
-  .labeled.icon.buttons > .button > .icon,
-  .labeled.icon.button > .icon {
-    top: 0em;
-    left: 0em;
-  }
-  [class*="right labeled"].icon.button {
-    padding-right: var(--labeled-icon-padding) !important;
-    padding-left: var(--horizontal-padding) !important;
-  }
-  [class*="right labeled"].icon.button > .icon {
-    left: auto;
-    right: 0em;
-    border-radius: 0px;
-    border-top-right-radius: inherit;
-    border-bottom-right-radius: inherit;
-    box-shadow: var(--labeled-icon-right-shadow);
-  }
-  .labeled.icon.buttons > .button > .icon::before,
-  .labeled.icon.button > .icon::before,
-  .labeled.icon.buttons > .button > .icon::after,
-  .labeled.icon.button > .icon::after {
-    display: block;
-    position: absolute;
-    width: 100%;
-    top: 50%;
-    text-align: center;
-    transform: translateY(-50%);
-  }
-  .labeled.icon.button > .icon.loading {
-    animation: none;
-  }
-  .labeled.icon.button > .icon.loading::before {
-    animation: labeled-button-icon-loading var(--loading-icon-duration) linear infinite;
-  }
-  @keyframes labeled-button-icon-loading {
-    from {
-      transform: translateY(-50%) rotate(0deg);
+      `;
+      document.body.innerHTML = html;
     }
-    to {
-      transform: translateY(-50%) rotate(360deg);
+    console.error(
+      msg + "\n" + consoleMsg,
+      ...contextLines.map((_2, idx) => lineNumber - startLine === idx ? errorStyle : normalStyle)
+    );
+    const e6 = new Error(msg);
+    throw e6;
+  }
+};
+
+// packages/templating/src/compiler.js
+var TemplateCompiler = class _TemplateCompiler {
+  constructor(template) {
+    this.template = template || "";
+  }
+  static tagRegExp = {
+    IF: /^{{\s*#if\s+/,
+    ELSEIF: /^{{\s*else\s*if\s+/,
+    ELSE: /^{{\s*else\s*/,
+    EACH: /^{{\s*#each\s+/,
+    CLOSE_IF: /^{{\s*\/(if)\s*/,
+    CLOSE_EACH: /^{{\s*\/(each)\s*/,
+    SLOT: /^{{\s*slot\s*/,
+    TEMPLATE: /^{{>\s*/,
+    HTML_EXPRESSION: /^{{{\s*/,
+    EXPRESSION: /^{{\s*/
+  };
+  static templateRegExp = {
+    verbose: {
+      keyword: /^template\W/g,
+      properties: /(\w+)\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/mg
+    },
+    standard: /(\w.*?)($|\s)/mg,
+    dataObject: /(\w+)\s*:\s*([^,}]+)/g
+    // parses { one: 'two' }
+  };
+  /*
+    Creates an AST representation of a template
+    this can be cached on the web component class
+  */
+  compile(template = this.template) {
+    template = template.trim();
+    const scanner = new Scanner(template);
+    const tagRegExp = _TemplateCompiler.tagRegExp;
+    const parseTag = (scanner2) => {
+      for (let type in tagRegExp) {
+        if (scanner2.matches(tagRegExp[type])) {
+          scanner2.consume(tagRegExp[type]);
+          const content = this.getValue(scanner2.consumeUntil("}}").trim());
+          scanner2.consume("}}");
+          return { type, content };
+        }
+      }
+      return null;
+    };
+    const ast = [];
+    const stack = [];
+    let contentBranch = null;
+    let conditionStack = [];
+    let contentStack = [];
+    while (!scanner.isEOF()) {
+      const tag = parseTag(scanner);
+      const lastNode = last(stack);
+      const conditionTarget = last(conditionStack);
+      const contentTarget = contentBranch?.content || lastNode || ast;
+      if (tag) {
+        let newNode = {
+          type: tag.type.toLowerCase()
+        };
+        switch (tag.type) {
+          case "IF":
+            newNode = {
+              ...newNode,
+              condition: tag.content,
+              content: [],
+              branches: []
+            };
+            contentTarget.push(newNode);
+            conditionStack.push(newNode);
+            contentStack.push(newNode);
+            contentBranch = newNode;
+            break;
+          case "ELSEIF":
+            newNode = {
+              ...newNode,
+              condition: tag.content,
+              content: []
+            };
+            if (!conditionTarget) {
+              scanner.returnTo(starts.ELSEIF);
+              scanner.fatal("{{elseif}} encountered without matching if condition");
+            }
+            contentStack.pop();
+            contentStack.push(newNode);
+            conditionTarget.branches.push(newNode);
+            contentBranch = newNode;
+            break;
+          case "ELSE":
+            newNode = {
+              ...newNode,
+              content: []
+            };
+            if (!conditionTarget) {
+              scanner.returnTo(starts.ELSE);
+              scanner.fatal("{{else}} encountered without matching if condition");
+              break;
+            }
+            contentStack.pop();
+            contentStack.push(newNode);
+            conditionTarget.branches.push(newNode);
+            contentBranch = newNode;
+            break;
+          case "HTML_EXPRESSION":
+            newNode = {
+              ...newNode,
+              type: "expression",
+              unsafeHTML: true,
+              value: tag.content
+            };
+            contentTarget.push(newNode);
+            scanner.consume("}");
+            break;
+          case "EXPRESSION":
+            newNode = {
+              ...newNode,
+              value: tag.content
+            };
+            contentTarget.push(newNode);
+            break;
+          case "TEMPLATE":
+            const templateInfo = this.parseTemplateString(tag.content);
+            newNode = {
+              ...newNode,
+              ...templateInfo
+            };
+            contentTarget.push(newNode);
+            break;
+          case "SLOT":
+            newNode = {
+              ...newNode,
+              name: tag.content
+            };
+            contentTarget.push(newNode);
+            break;
+          case "CLOSE_IF":
+            if (conditionStack.length == 0) {
+              scanner.returnTo(starts.CLOSE_IF);
+              scanner.fatal("{{/if}} close tag found without open if tag");
+            }
+            stack.pop();
+            contentStack.pop();
+            conditionStack.pop();
+            contentBranch = last(contentStack);
+            break;
+          case "EACH":
+            const contentParts = tag.content.split(" in ");
+            let iterateOver;
+            let iterateAs;
+            if (contentParts.length > 1) {
+              iterateAs = contentParts[0].trim();
+              iterateOver = contentParts[1].trim();
+            } else {
+              iterateOver = contentParts[0].trim();
+            }
+            newNode = {
+              ...newNode,
+              as: iterateAs,
+              over: iterateOver,
+              content: []
+            };
+            contentTarget.push(newNode);
+            contentBranch = newNode;
+            break;
+          case "CLOSE_EACH":
+            stack.pop();
+            contentBranch = last(contentStack);
+            break;
+        }
+      } else {
+        const OPEN_TAG = /\{\{/;
+        const html = scanner.consumeUntil(OPEN_TAG);
+        if (html) {
+          const htmlNode = { type: "html", html };
+          contentTarget.push(htmlNode);
+        }
+      }
+    }
+    return ast;
+  }
+  getValue(expression) {
+    if (expression == "true") {
+      return true;
+    } else if (expression == "false") {
+      return false;
+    } else if (!Number.isNaN(parseFloat(expression, 10))) {
+      return +expression;
+    }
+    return expression;
+  }
+  parseTemplateString(expression = "") {
+    const regExp = _TemplateCompiler.templateRegExp;
+    let templateInfo = {};
+    if (regExp.verbose.keyword.exec(expression)) {
+      const matches = [...expression.matchAll(regExp.verbose.properties)];
+      each(matches, (match, index) => {
+        const property = match[1];
+        const value = this.getObjectFromString(match[2]);
+        templateInfo[property] = value;
+      });
+    } else {
+      let data = {};
+      const matches = [...expression.matchAll(regExp.standard)];
+      each(matches, (match, index) => {
+        if (index == 0) {
+          templateInfo.name = `'${match[0].trim()}'`;
+        } else {
+          const parts = match[0].split("=");
+          if (parts.length) {
+            let name = parts[0].trim();
+            let value = parts[1].trim();
+            data[name] = value;
+          }
+        }
+      });
+      templateInfo.data = data;
+    }
+    return templateInfo;
+  }
+  getObjectFromString(objectString = "") {
+    const regex = _TemplateCompiler.templateRegExp.dataObject;
+    const obj = {};
+    let match;
+    let isObject2 = false;
+    while ((match = regex.exec(objectString)) !== null) {
+      isObject2 = true;
+      obj[match[1]] = match[2].trim();
+    }
+    return isObject2 ? obj : objectString.trim();
+  }
+};
+
+// node_modules/lit-html/directive.js
+var t3 = { ATTRIBUTE: 1, CHILD: 2, PROPERTY: 3, BOOLEAN_ATTRIBUTE: 4, EVENT: 5, ELEMENT: 6 };
+var e4 = (t5) => (...e6) => ({ _$litDirective$: t5, values: e6 });
+var i4 = class {
+  constructor(t5) {
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  _$AT(t5, e6, i5) {
+    this._$Ct = t5, this._$AM = e6, this._$Ci = i5;
+  }
+  _$AS(t5, e6) {
+    return this.update(t5, e6);
+  }
+  update(t5, e6) {
+    return this.render(...e6);
+  }
+};
+
+// node_modules/lit-html/directive-helpers.js
+var { I: t4 } = z;
+var f3 = (o6) => void 0 === o6.strings;
+var s4 = () => document.createComment("");
+var r5 = (o6, i5, n5) => {
+  const e6 = o6._$AA.parentNode, l3 = void 0 === i5 ? o6._$AB : i5._$AA;
+  if (void 0 === n5) {
+    const i6 = e6.insertBefore(s4(), l3), c6 = e6.insertBefore(s4(), l3);
+    n5 = new t4(i6, c6, o6, o6.options);
+  } else {
+    const t5 = n5._$AB.nextSibling, i6 = n5._$AM, c6 = i6 !== o6;
+    if (c6) {
+      let t6;
+      n5._$AQ?.(o6), n5._$AM = o6, void 0 !== n5._$AP && (t6 = o6._$AU) !== i6._$AU && n5._$AP(t6);
+    }
+    if (t5 !== l3 || c6) {
+      let o7 = n5._$AA;
+      for (; o7 !== t5; ) {
+        const t6 = o7.nextSibling;
+        e6.insertBefore(o7, l3), o7 = t6;
+      }
     }
   }
-  .labeled.icon.buttons .button > .icon {
-    border-radius: 0em;
+  return n5;
+};
+var v2 = (o6, t5, i5 = o6) => (o6._$AI(t5, i5), o6);
+var u3 = {};
+var m2 = (o6, t5 = u3) => o6._$AH = t5;
+var p3 = (o6) => o6._$AH;
+var h3 = (o6) => {
+  o6._$AP?.(false, true);
+  let t5 = o6._$AA;
+  const i5 = o6._$AB.nextSibling;
+  for (; t5 !== i5; ) {
+    const o7 = t5.nextSibling;
+    t5.remove(), t5 = o7;
   }
-  .labeled.icon.buttons .button:first-child > .icon {
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
-  }
-  .labeled.icon.buttons .button:last-child > .icon {
-    border-top-right-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
-  }
-  .vertical.labeled.icon.buttons .button:first-child > .icon {
-    border-radius: 0em;
-    border-top-left-radius: var(--border-radius);
-  }
-  .vertical.labeled.icon.buttons .button:last-child > .icon {
-    border-radius: 0em;
-    border-bottom-left-radius: var(--border-radius);
-  }
-  .fluid[class*="left labeled"].icon.button,
-  .fluid[class*="right labeled"].icon.button {
-    padding-left: var(--horizontal-padding) !important;
-    padding-right: var(--horizontal-padding) !important;
-  }
-}
+};
 
-/* src/button/css/types/toggle.css */
-@layer component {
-  .toggle.buttons .active.button,
-  .buttons .button.toggle.active,
-  .button.toggle.active {
-    background-color: var(--positive-color) !important;
-    box-shadow: none !important;
-    text-shadow: var(--inverted-text-shadow);
-    color: var(--inverted-text-color) !important;
+// node_modules/lit-html/async-directive.js
+var s5 = (i5, t5) => {
+  const e6 = i5._$AN;
+  if (void 0 === e6)
+    return false;
+  for (const i6 of e6)
+    i6._$AO?.(t5, false), s5(i6, t5);
+  return true;
+};
+var o4 = (i5) => {
+  let t5, e6;
+  do {
+    if (void 0 === (t5 = i5._$AM))
+      break;
+    e6 = t5._$AN, e6.delete(i5), i5 = t5;
+  } while (0 === e6?.size);
+};
+var r6 = (i5) => {
+  for (let t5; t5 = i5._$AM; i5 = t5) {
+    let e6 = t5._$AN;
+    if (void 0 === e6)
+      t5._$AN = e6 = /* @__PURE__ */ new Set();
+    else if (e6.has(i5))
+      break;
+    e6.add(i5), c4(t5);
   }
-  .button.toggle.active:hover {
-    background-color: var(--positive-color-hover) !important;
-    text-shadow: var(--inverted-text-shadow);
-    color: var(--inverted-text-color) !important;
-  }
+};
+function h4(i5) {
+  void 0 !== this._$AN ? (o4(this), this._$AM = i5, r6(this)) : this._$AM = i5;
 }
-
-/* src/button/css/states/hover.css */
-@layer component {
-  .button:hover {
-    background-color: var(--hover-background-color);
-    background-image: var(--hover-background-image);
-    box-shadow: var(--hover-box-shadow);
-    color: var(--hover-color);
-  }
-  .button:hover .icon {
-    opacity: var(--hover-icon-opacity);
-  }
+function n4(i5, t5 = false, e6 = 0) {
+  const r7 = this._$AH, h5 = this._$AN;
+  if (void 0 !== h5 && 0 !== h5.size)
+    if (t5)
+      if (Array.isArray(r7))
+        for (let i6 = e6; i6 < r7.length; i6++)
+          s5(r7[i6], false), o4(r7[i6]);
+      else
+        null != r7 && (s5(r7, false), o4(r7));
+    else
+      s5(this, i5);
 }
-
-/* src/button/css/states/focus.css */
-@layer component {
-  .button:focus {
-    background-color: var(--focus-background-color);
-    color: var(--focus-color);
-    background-image: var(--focus-background-image) !important;
-    box-shadow: var(--focus-box-shadow) !important;
+var c4 = (i5) => {
+  i5.type == t3.CHILD && (i5._$AP ??= n4, i5._$AQ ??= h4);
+};
+var f4 = class extends i4 {
+  constructor() {
+    super(...arguments), this._$AN = void 0;
   }
-  .button:focus .icon {
-    opacity: var(--icon-focus-opacity);
+  _$AT(i5, t5, e6) {
+    super._$AT(i5, t5, e6), r6(this), this.isConnected = i5._$AU;
   }
-}
-
-/* src/button/css/states/pressed.css */
-@layer component {
-  .button:active,
-  .active.button:active {
-    background-color: var(--pressed-background-color);
-    background-image: var(--pressed-background-image);
-    color: var(--pressed-color);
-    box-shadow: var(--pressed-box-shadow);
+  _$AO(i5, t5 = true) {
+    i5 !== this.isConnected && (this.isConnected = i5, i5 ? this.reconnected?.() : this.disconnected?.()), t5 && (s5(this, i5), o4(this));
   }
-}
-
-/* src/button/css/states/active.css */
-@layer component {
-  .active.button {
-    background-color: var(--active-background-color);
-    background-image: var(--active-background-image);
-    box-shadow: var(--active-box-shadow);
-    color: var(--active-color);
-  }
-  .active.button:hover {
-    background-color: var(--active-hover-background-color);
-    background-image: var(--active-hover-background-image);
-    color: var(--active-hover-color);
-    box-shadow: var(--active-hover-box-shadow);
-  }
-  .active.button:active {
-    background-color: var(--active-down-background-color);
-    background-image: var(--active-down-background-image);
-    color: var(--active-down-color);
-    box-shadow: var(--active-down-box-shadow);
-  }
-}
-
-/* src/button/css/states/disabled.css */
-@layer component {
-  .disabled.button,
-  .disabled.button:hover,
-  .disabled.active.button {
-    cursor: default;
-    pointer-events: none !important;
-    opacity: var(--disabled-opacity) !important;
-    background-image: var(--disabled-background-image) !important;
-    box-shadow: var(--disabled-background-image) !important;
-  }
-}
-
-/* src/button/css/states/loading.css */
-@layer component {
-  .loading.button {
-    position: relative;
-    cursor: default;
-    text-shadow: none !important;
-    color: transparent !important;
-    opacity: var(--loading-opacity);
-    pointer-events: var(--loading-pointer-events);
-    transition: var(--loading-transition);
-  }
-  .loading.button::before {
-    position: absolute;
-    content: "";
-    top: 50%;
-    left: 50%;
-    margin: var(--loader-margin);
-    width: var(--loader-size);
-    height: var(--loader-size);
-    border-radius: var(--circular-radius);
-    border: var(--loader-line-width) solid var(--inverted-loader-fill-color);
-  }
-  .loading.button::after {
-    position: absolute;
-    content: "";
-    top: 50%;
-    left: 50%;
-    margin: var(--loader-margin);
-    width: var(--loader-size);
-    height: var(--loader-size);
-    animation: button-spin var(--loader-speed-linear);
-    animation-iteration-count: infinite;
-    border-radius: var(--circular-radius);
-    border-color: var(--inverted-loader-line-color) transparent transparent;
-    border-style: solid;
-    border-width: var(--loader-line-width);
-    box-shadow: 0px 0px 0px 1px transparent;
-  }
-  @keyframes button-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
+  setValue(t5) {
+    if (f3(this._$Ct))
+      this._$Ct._$AI(t5, this);
+    else {
+      const i5 = [...this._$Ct._$AH];
+      i5[this._$Ci] = t5, this._$Ct._$AI(i5, this, 0);
     }
   }
+  disconnected() {
+  }
+  reconnected() {
+  }
+};
+
+// packages/reactivity/src/dependency.js
+var Dependency = class {
+  constructor() {
+    this.subscribers = /* @__PURE__ */ new Set();
+  }
+  depend() {
+    if (Reaction.current) {
+      this.subscribers.add(Reaction.current);
+      Reaction.current.dependencies.add(this);
+    }
+  }
+  changed() {
+    this.subscribers.forEach((subscriber) => subscriber.invalidate());
+  }
+  cleanUp(reaction) {
+    this.subscribers.delete(reaction);
+  }
+  unsubscribe(reaction) {
+    this.subscribers.delete(reaction);
+  }
+};
+
+// packages/reactivity/src/reaction.js
+var Reaction = class _Reaction {
+  static current = null;
+  static pendingReactions = /* @__PURE__ */ new Set();
+  static afterFlushCallbacks = [];
+  static isFlushScheduled = false;
+  static create(callback) {
+    const reaction = new _Reaction(callback);
+    reaction.run();
+    return reaction;
+  }
+  static scheduleFlush() {
+    if (!_Reaction.isFlushScheduled) {
+      _Reaction.isFlushScheduled = true;
+      if (typeof queueMicrotask === "function") {
+        queueMicrotask(() => _Reaction.flush());
+      } else {
+        Promise.resolve().then(() => _Reaction.flush());
+      }
+    }
+  }
+  static flush() {
+    _Reaction.isFlushScheduled = false;
+    _Reaction.pendingReactions.forEach((reaction) => reaction.run());
+    _Reaction.pendingReactions.clear();
+    _Reaction.afterFlushCallbacks.forEach((callback) => callback());
+    _Reaction.afterFlushCallbacks = [];
+  }
+  static afterFlush(callback) {
+    _Reaction.afterFlushCallbacks.push(callback);
+  }
+  constructor(callback) {
+    this.callback = callback;
+    this.dependencies = /* @__PURE__ */ new Set();
+    this.boundRun = this.run.bind(this);
+    this.firstRun = true;
+    this.active = true;
+  }
+  run() {
+    if (!this.active) {
+      return;
+    }
+    _Reaction.current = this;
+    this.dependencies.forEach((dep) => dep.cleanUp(this));
+    this.dependencies.clear();
+    this.callback(this);
+    this.firstRun = false;
+    _Reaction.current = null;
+    _Reaction.pendingReactions.delete(this);
+  }
+  invalidate() {
+    this.active = true;
+    _Reaction.pendingReactions.add(this);
+    _Reaction.scheduleFlush();
+  }
+  stop() {
+    if (!this.active)
+      return;
+    this.active = false;
+    this.dependencies.forEach((dep) => dep.unsubscribe(this));
+  }
+  /*
+    Makes sure anything called inside this function does not trigger reactions
+  */
+  static nonreactive(func) {
+    const previousReaction = _Reaction.current;
+    _Reaction.current = null;
+    try {
+      return func();
+    } finally {
+      _Reaction.current = previousReaction;
+    }
+  }
+  /*
+    Makes sure function doesnt rerun when values dont change
+  */
+  static guard(f5) {
+    if (!_Reaction.current) {
+      return f5();
+    }
+    let dep = new Dependency();
+    let value, newValue;
+    const comp = new _Reaction(() => {
+      newValue = f5();
+      if (!comp.firstRun && !isEqual(newValue, value)) {
+        console.log("dep changed", value);
+        dep.changed();
+      }
+      value = clone(newValue);
+    });
+    comp.run();
+    dep.depend();
+    return value;
+  }
+};
+
+// packages/templating/src/watch.js
+var WatchDirective = class extends f4 {
+  __reactiveVar;
+  __dispose = function() {
+  };
+  render(reactiveVar) {
+    if (!reactiveVar) {
+      return;
+    }
+    if (reactiveVar !== this.__reactiveVar) {
+      this.__dispose?.();
+      this.__reactiveVar = reactiveVar;
+      let updateFromLit = true;
+      this.__dispose = reactiveVar.subscribe((value) => {
+        if (updateFromLit === false) {
+          this.setValue(value);
+        }
+      });
+      updateFromLit = false;
+    }
+    return reactiveVar.peek();
+  }
+  disconnected() {
+    this.__dispose?.();
+  }
+  reconnected() {
+    this.__dispose = this.__reactiveVar?.subscribe((value) => {
+      this.setValue(value);
+    });
+  }
+};
+var watch = e4(WatchDirective);
+
+// packages/query/src/query.js
+var Query = class _Query {
+  constructor(selector, root = document) {
+    let elements = [];
+    if (!selector) {
+      return;
+    }
+    if (Array.isArray(selector)) {
+      elements = selector;
+    } else if (typeof selector === "string") {
+      elements = root.querySelectorAll(selector);
+    } else if (selector instanceof Element || selector instanceof Document || selector instanceof DocumentFragment) {
+      elements = [selector];
+    } else if (selector instanceof NodeList) {
+      elements = selector;
+    }
+    this.length = elements.length;
+    Object.assign(this, elements);
+  }
+  find(selector) {
+    const elements = Array.from(this).flatMap((el) => Array.from(el.querySelectorAll(selector)));
+    return new _Query(elements);
+  }
+  parent(selector) {
+    const parents = Array.from(this).map((el) => el.parentElement).filter(Boolean);
+    return selector ? new _Query(parents).filter(selector) : new _Query(parents);
+  }
+  children(selector) {
+    const allChildren = Array.from(this).flatMap((el) => Array.from(el.children));
+    const filteredChildren = selector ? allChildren.filter((child) => child.matches(selector)) : allChildren;
+    return new _Query(filteredChildren);
+  }
+  filter(selector) {
+    const filteredElements = Array.from(this).filter((el) => el.matches(selector));
+    return new _Query(filteredElements);
+  }
+  not(selector) {
+    const filteredElements = Array.from(this).filter((el) => !el.matches(selector));
+    return new _Query(filteredElements);
+  }
+  closest(selector) {
+    const closest = Array.from(this).map((el) => el.closest(selector)).filter(Boolean);
+    return new _Query(closest);
+  }
+  // uses abort signals <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
+  on(event, targetSelectorOrHandler, handler, abortController = new AbortController()) {
+    this._eventHandlers = this._eventHandlers || [];
+    const eventHandlers = [];
+    const signal = abortController.signal;
+    Array.from(this).forEach((el) => {
+      const eventListener = (e6) => {
+        if (typeof targetSelectorOrHandler === "function") {
+          targetSelectorOrHandler.call(el, e6);
+        } else {
+          for (let target = e6.target; target && target !== el; target = target.parentNode) {
+            if (target.matches(targetSelectorOrHandler)) {
+              handler.call(target, e6);
+              break;
+            }
+          }
+        }
+      };
+      el.addEventListener(event, eventListener, { signal });
+      const eventHandler = {
+        el,
+        event,
+        eventListener,
+        abortController,
+        delegated: typeof targetSelectorOrHandler === "string",
+        originalHandler: handler
+      };
+      eventHandlers.push(eventHandler);
+    });
+    this._eventHandlers.push(...eventHandlers);
+    return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
+  }
+  off(event, handler) {
+    if (this._eventHandlers) {
+      this._eventHandlers = this._eventHandlers.filter((eventHandler) => {
+        if (eventHandler.event === event && (!handler || eventHandler.handler === handler || eventHandler.originalHandler === handler)) {
+          eventHandler.el.removeEventListener(event, eventHandler.handler);
+          return false;
+        }
+        return true;
+      });
+    }
+    return this;
+  }
+  remove() {
+    Array.from(this).forEach((el) => el.remove());
+    return this;
+  }
+  addClass(classNames) {
+    const classesToAdd = classNames.split(" ");
+    Array.from(this).forEach((el) => el.classList.add(...classesToAdd));
+    return this;
+  }
+  removeClass(classNames) {
+    const classesToRemove = classNames.split(" ");
+    Array.from(this).forEach((el) => el.classList.remove(...classesToRemove));
+    return this;
+  }
+  html(newHTML) {
+    if (newHTML !== void 0) {
+      Array.from(this).forEach((el) => el.innerHTML = newHTML);
+      return this;
+    } else if (this.length) {
+      return this[0].innerHTML;
+    }
+  }
+  outerHTML(newHTML) {
+    if (newHTML !== void 0) {
+      Array.from(this).forEach((el) => el.outerHTML = newHTML);
+      return this;
+    } else if (this.length) {
+      return this[0].outerHTML;
+    }
+  }
+  text(newText) {
+    if (newText !== void 0) {
+      Array.from(this).forEach((el) => el.textContent = newText);
+      return this;
+    } else {
+      return Array.from(this).map((el) => this.getTextContentRecursive(el.childNodes)).join("");
+    }
+  }
+  value(newValue) {
+    if (newValue !== void 0) {
+      Array.from(this).forEach((el) => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+          el.value = newValue;
+        }
+      });
+      return this;
+    } else {
+      return Array.from(this).map((el) => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+          return el.value;
+        }
+        return void 0;
+      });
+    }
+  }
+  // alias
+  val(...args) {
+    return this.value(...args);
+  }
+  // Helper function to recursively get text content
+  getTextContentRecursive(nodes) {
+    return Array.from(nodes).map((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.nodeValue;
+      } else if (node.nodeName === "SLOT") {
+        const slotNodes = node.assignedNodes({ flatten: true });
+        return this.getTextContentRecursive(slotNodes);
+      } else {
+        return this.getTextContentRecursive(node.childNodes);
+      }
+    }).join("");
+  }
+  css(property, value) {
+    if (typeof property === "object") {
+      Object.entries(property).forEach(([prop, val]) => {
+        Array.from(this).forEach((el) => el.style[prop] = val);
+      });
+    } else if (value !== void 0) {
+      Array.from(this).forEach((el) => el.style[property] = value);
+    } else if (this.length) {
+      return this[0].style[property];
+    }
+    return this;
+  }
+  attr(attribute, value) {
+    if (typeof attribute === "object") {
+      Object.entries(attribute).forEach(([attr, val]) => {
+        Array.from(this).forEach((el) => el.setAttribute(attr, val));
+      });
+    } else if (value !== void 0) {
+      Array.from(this).forEach((el) => el.setAttribute(attribute, value));
+    } else if (this.length) {
+      return this[0].getAttribute(attribute);
+    }
+    return this;
+  }
+  each(callback) {
+    Array.from(this).forEach((el, index) => {
+      callback.call(el, new _Query(el), index);
+    });
+    return this;
+  }
+  get(index) {
+    if (index !== void 0) {
+      return this[index];
+    } else {
+      return Array.from(this);
+    }
+  }
+  eq(index) {
+    return new _Query(this[index]);
+  }
+  // non jquery variant to return only immediate text node
+  textNode() {
+    return Array.from(this).map((el) => {
+      return Array.from(el.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.nodeValue).join("");
+    }).join("");
+  }
+};
+
+// packages/query/src/index.js
+function $2(selector, root = document) {
+  return new Query(selector, root);
 }
 
-/* src/button/css/variations/basic.css */
-@layer component {
-  .basic.buttons .button,
-  .basic.button {
-    background: var(--basic-background) !important;
-    color: var(--basic-text-color) !important;
-    font-weight: var(--basic-font-weight);
-    border-radius: var(--basic-border-radius);
-    text-transform: var(--basic-text-transform);
-    text-shadow: none !important;
-    box-shadow: var(--basic-box-shadow);
+// node_modules/lit-html/directives/unsafe-html.js
+var e5 = class extends i4 {
+  constructor(i5) {
+    if (super(i5), this.it = T, i5.type !== t3.CHILD)
+      throw Error(this.constructor.directiveName + "() can only be used in child bindings");
   }
-  .basic.buttons {
-    box-shadow: var(--basic-group-box-shadow);
-    border: var(--basic-group-border);
-    border-radius: var(--border-radius);
+  render(r7) {
+    if (r7 === T || null == r7)
+      return this._t = void 0, this.it = r7;
+    if (r7 === w)
+      return r7;
+    if ("string" != typeof r7)
+      throw Error(this.constructor.directiveName + "() called with a non-string value");
+    if (r7 === this.it)
+      return this._t;
+    this.it = r7;
+    const s6 = [r7];
+    return s6.raw = s6, this._t = { _$litType$: this.constructor.resultType, strings: s6, values: [] };
   }
-  .basic.buttons .button {
-    border-radius: 0em;
-  }
-  .basic.buttons .button:hover,
-  .basic.button:hover {
-    background: var(--basic-hover-background) !important;
-    color: var(--basic-hover-text-color) !important;
-    box-shadow: var(--basic-hover-box-shadow);
-  }
-  .basic.buttons .button:focus,
-  .basic.button:focus {
-    background: var(--basic-focus-background) !important;
-    color: var(--basic-focus-text-color) !important;
-    box-shadow: var(--basic-focus-box-shadow);
-  }
-  .basic.buttons .button:active,
-  .basic.button:active {
-    background: var(--basic-down-background) !important;
-    color: var(--basic-down-text-color) !important;
-    box-shadow: var(--basic-down-box-shadow);
-  }
-  .basic.buttons .active.button,
-  .basic.active.button {
-    background: var(--basic-active-background) !important;
-    box-shadow: var(--basic-active-box-shadow) !important;
-    color: var(--basic-active-text-color) !important;
-  }
-  .basic.buttons .active.button:hover,
-  .basic.active.button:hover {
-    background-color: var(--transparent-black);
-  }
-  .basic.buttons .button:hover {
-    box-shadow: var(--basic-hover-box-shadow) inset;
-  }
-  .basic.buttons .button:active {
-    box-shadow: var(--basic-down-box-shadow) inset;
-  }
-  .basic.buttons .active.button {
-    box-shadow: var(--basic-active-box-shadow) !important;
-  }
-  .basic.inverted.buttons .button,
-  .basic.inverted.button {
-    background-color: transparent !important;
-    color: var(--off-white) !important;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-  }
-  .basic.inverted.buttons .button:hover,
-  .basic.inverted.button:hover {
-    color: var(--white) !important;
-    box-shadow: var(--basic-inverted-hover-box-shadow) !important;
-  }
-  .basic.inverted.buttons .button:focus,
-  .basic.inverted.button:focus {
-    color: var(--white) !important;
-    box-shadow: var(--basic-inverted-focus-box-shadow) !important;
-  }
-  .basic.inverted.buttons .button:active,
-  .basic.inverted.button:active {
-    background-color: var(--transparent-white) !important;
-    color: var(--white) !important;
-    box-shadow: var(--basic-inverted-down-box-shadow) !important;
-  }
-  .basic.inverted.buttons .active.button,
-  .basic.inverted.active.button {
-    background-color: var(--transparent-white);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    box-shadow: var(--basic-inverted-active-box-shadow);
-  }
-  .basic.inverted.buttons .active.button:hover,
-  .basic.inverted.active.button:hover {
-    background-color: var(--strong-transparent-white);
-    box-shadow: var(--basic-inverted-hover-box-shadow) !important;
-  }
-  .basic.buttons .button {
-    border-left: var(--basic-group-border);
-    box-shadow: none;
-  }
-  .basic.vertical.buttons .button {
-    border-left: none;
-  }
-  .basic.vertical.buttons .button {
-    border-left-width: 0px;
-    border-top: var(--basic-group-border);
-  }
-  .basic.vertical.buttons .button:first-child {
-    border-top-width: 0px;
-  }
-}
+};
+e5.directiveName = "unsafeHTML", e5.resultType = 1;
+var o5 = e4(e5);
 
-/* src/button/css/variations/attached.css */
-@layer component {
-  .attached.button {
-    position: relative;
-    display: block;
-    margin: 0em;
-    border-radius: 0em;
-    box-shadow: var(--attached-box-shadow) !important;
+// packages/component/src/lit/directives/reactive-data.js
+var ReactiveData = class extends f4 {
+  constructor(partInfo) {
+    super(partInfo);
+    this.reaction = null;
   }
-  .attached.top.button {
-    border-radius: var(--border-radius) var(--border-radius) 0em 0em;
+  render(computeFunc, settings) {
+    if (this.reaction) {
+      this.reaction.stop();
+    }
+    let value;
+    this.reaction = Reaction.create((comp) => {
+      if (!this.isConnected) {
+        comp.stop();
+        return;
+      }
+      value = computeFunc();
+      if (settings.unsafeHTML) {
+        value = o5(value);
+      }
+      if (!comp.firstRun) {
+        this.setValue(value);
+      }
+    });
+    return value;
   }
-  .attached.bottom.button {
-    border-radius: 0em 0em var(--border-radius) var(--border-radius);
+  disconnected() {
+    if (this.reaction) {
+      this.reaction.stop();
+      this.reaction = null;
+    }
   }
-  .left.attached.button {
-    display: inline-block;
-    border-left: none;
-    text-align: right;
-    padding-right: var(--attached-horizontal-padding);
-    border-radius: var(--border-radius) 0em 0em var(--border-radius);
+  reconnected() {
   }
-  .right.attached.button {
-    display: inline-block;
-    text-align: left;
-    padding-left: var(--attached-horizontal-padding);
-    border-radius: 0em var(--border-radius) var(--border-radius) 0em;
-  }
-  .attached.buttons {
-    position: relative;
-    display: flex;
-    border-radius: 0em;
-    width: auto !important;
-    z-index: var(--attached-z-index);
-    margin-left: var(--attached-offset);
-    margin-right: var(--attached-offset);
-  }
-  .attached.buttons .button {
-    margin: 0em;
-  }
-  .attached.buttons .button:first-child {
-    border-radius: 0em;
-  }
-  .attached.buttons .button:last-child {
-    border-radius: 0em;
-  }
-  [class*="top attached"].buttons {
-    margin-bottom: var(--attached-offset);
-    border-radius: var(--border-radius) var(--border-radius) 0em 0em;
-  }
-  [class*="top attached"].buttons .button:first-child {
-    border-radius: var(--border-radius) 0em 0em 0em;
-  }
-  [class*="top attached"].buttons .button:last-child {
-    border-radius: 0em var(--border-radius) 0em 0em;
-  }
-  [class*="bottom attached"].buttons {
-    margin-top: var(--attached-offset);
-    border-radius: 0em 0em var(--border-radius) var(--border-radius);
-  }
-  [class*="bottom attached"].buttons .button:first-child {
-    border-radius: 0em 0em 0em var(--border-radius);
-  }
-  [class*="bottom attached"].buttons .button:last-child {
-    border-radius: 0em 0em var(--border-radius) 0em;
-  }
-  [class*="left attached"].buttons {
-    display: inline-flex;
-    margin-right: 0em;
-    margin-left: var(--attached-offset);
-    border-radius: 0em var(--border-radius) var(--border-radius) 0em;
-  }
-  [class*="left attached"].buttons .button:first-child {
-    margin-left: var(--attached-offset);
-    border-radius: 0em var(--border-radius) 0em 0em;
-  }
-  [class*="left attached"].buttons .button:last-child {
-    margin-left: var(--attached-offset);
-    border-radius: 0em 0em var(--border-radius) 0em;
-  }
-  [class*="right attached"].buttons {
-    display: inline-flex;
-    margin-left: 0em;
-    margin-right: var(--attached-offset);
-    border-radius: var(--border-radius) 0em 0em var(--border-radius);
-  }
-  [class*="right attached"].buttons .button:first-child {
-    margin-left: var(--attached-offset);
-    border-radius: var(--border-radius) 0em 0em 0em;
-  }
-  [class*="right attached"].buttons .button:last-child {
-    margin-left: var(--attached-offset);
-    border-radius: 0em 0em 0em var(--border-radius);
-  }
-}
+};
+var reactiveData = e4(ReactiveData);
 
-/* src/button/css/variations/circular.css */
-@layer component {
-  .circular.button {
-    border-radius: 10em;
+// packages/component/src/lit/directives/reactive-conditional.js
+var ReactiveConditionalDirective = class extends f4 {
+  constructor(partInfo) {
+    super(partInfo);
+    this.reaction = null;
   }
-  .circular.button > .icon {
-    width: 1em;
-    vertical-align: baseline;
+  render(conditional) {
+    if (this.reaction) {
+      this.reaction.stop();
+    }
+    let html = T;
+    this.reaction = Reaction.create((comp) => {
+      if (!this.isConnected) {
+        comp.stop();
+        return;
+      }
+      if (conditional.condition()) {
+        html = conditional.content();
+      } else if (conditional.branches?.length) {
+        let match = false;
+        each(conditional.branches, (branch) => {
+          if (!match && branch.type == "elseif" && branch.condition()) {
+            match = true;
+            html = branch.content();
+          } else if (!match && branch.type == "else") {
+            match = true;
+            html = branch.content();
+          }
+        });
+      } else {
+        html = w;
+      }
+      if (!comp.firstRun) {
+        this.setValue(html);
+      }
+      return html;
+    });
+    return html;
   }
-}
+  disconnected() {
+    if (this.reaction) {
+      this.reaction.stop();
+      this.reaction = null;
+    }
+  }
+  reconnected() {
+  }
+};
+var reactiveConditional = e4(ReactiveConditionalDirective);
 
-/* src/button/css/variations/colored.css */
-@layer component {
-  .black.buttons .button,
-  .black.button {
-    background-color: var(--black);
-    color: var(--black-text-color);
-    text-shadow: var(--black-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .black.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .black.buttons .button:hover,
-  .black.button:hover {
-    background-color: var(--black-hover);
-    color: var(--black-text-color);
-    text-shadow: var(--black-text-shadow);
-  }
-  .black.buttons .button:focus,
-  .black.button:focus {
-    background-color: var(--black-focus);
-    color: var(--black-text-color);
-    text-shadow: var(--black-text-shadow);
-  }
-  .black.buttons .button:active,
-  .black.button:active {
-    background-color: var(--black-down);
-    color: var(--black-text-color);
-    text-shadow: var(--black-text-shadow);
-  }
-  .black.buttons .active.button,
-  .black.buttons .active.button:active,
-  .black.active.button,
-  .black.button .active.button:active {
-    background-color: var(--black-active);
-    color: var(--black-text-color);
-    text-shadow: var(--black-text-shadow);
-  }
-  .basic.black.buttons .button,
-  .basic.black.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--black) inset !important;
-    color: var(--black) !important;
-  }
-  .basic.black.buttons .button:hover,
-  .basic.black.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-hover) inset !important;
-    color: var(--black-hover) !important;
-  }
-  .basic.black.buttons .button:focus,
-  .basic.black.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-focus) inset !important;
-    color: var(--black-hover) !important;
-  }
-  .basic.black.buttons .active.button,
-  .basic.black.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-active) inset !important;
-    color: var(--black-down) !important;
-  }
-  .basic.black.buttons .button:active,
-  .basic.black.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-down) inset !important;
-    color: var(--black-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.black.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.black.buttons .button,
-  .inverted.black.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--solid-border-color) inset !important;
-    color: var(--inverted-text-color);
-  }
-  .inverted.black.buttons .button:hover,
-  .inverted.black.button:hover,
-  .inverted.black.buttons .button:focus,
-  .inverted.black.button:focus,
-  .inverted.black.buttons .button.active,
-  .inverted.black.button.active,
-  .inverted.black.buttons .button:active,
-  .inverted.black.button:active {
-    box-shadow: none !important;
-    color: var(--light-black-text-color);
-  }
-  .inverted.black.buttons .button:hover,
-  .inverted.black.button:hover {
-    background-color: var(--light-black-hover);
-  }
-  .inverted.black.buttons .button:focus,
-  .inverted.black.button:focus {
-    background-color: var(--light-black-focus);
-  }
-  .inverted.black.buttons .active.button,
-  .inverted.black.active.button {
-    background-color: var(--light-black-active);
-  }
-  .inverted.black.buttons .button:active,
-  .inverted.black.button:active {
-    background-color: var(--light-black-down);
-  }
-  .inverted.black.basic.buttons .button,
-  .inverted.black.buttons .basic.button,
-  .inverted.black.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.black.basic.buttons .button:hover,
-  .inverted.black.buttons .basic.button:hover,
-  .inverted.black.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-hover) inset !important;
-    color: var(--white) !important;
-  }
-  .inverted.black.basic.buttons .button:focus,
-  .inverted.black.basic.buttons .button:focus,
-  .inverted.black.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-focus) inset !important;
-    color: var(--light-black) !important;
-  }
-  .inverted.black.basic.buttons .active.button,
-  .inverted.black.buttons .basic.active.button,
-  .inverted.black.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-active) inset !important;
-    color: var(--white) !important;
-  }
-  .inverted.black.basic.buttons .button:active,
-  .inverted.black.buttons .basic.button:active,
-  .inverted.black.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-down) inset !important;
-    color: var(--white) !important;
-  }
-  .grey.buttons .button,
-  .grey.button {
-    background-color: var(--grey);
-    color: var(--grey-text-color);
-    text-shadow: var(--grey-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .grey.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .grey.buttons .button:hover,
-  .grey.button:hover {
-    background-color: var(--grey-hover);
-    color: var(--grey-text-color);
-    text-shadow: var(--grey-text-shadow);
-  }
-  .grey.buttons .button:focus,
-  .grey.button:focus {
-    background-color: var(--grey-focus);
-    color: var(--grey-text-color);
-    text-shadow: var(--grey-text-shadow);
-  }
-  .grey.buttons .button:active,
-  .grey.button:active {
-    background-color: var(--grey-down);
-    color: var(--grey-text-color);
-    text-shadow: var(--grey-text-shadow);
-  }
-  .grey.buttons .active.button,
-  .grey.buttons .active.button:active,
-  .grey.active.button,
-  .grey.button .active.button:active {
-    background-color: var(--grey-active);
-    color: var(--grey-text-color);
-    text-shadow: var(--grey-text-shadow);
-  }
-  .basic.grey.buttons .button,
-  .basic.grey.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--grey) inset !important;
-    color: var(--grey) !important;
-  }
-  .basic.grey.buttons .button:hover,
-  .basic.grey.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-hover) inset !important;
-    color: var(--grey-hover) !important;
-  }
-  .basic.grey.buttons .button:focus,
-  .basic.grey.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-focus) inset !important;
-    color: var(--grey-hover) !important;
-  }
-  .basic.grey.buttons .active.button,
-  .basic.grey.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-active) inset !important;
-    color: var(--grey-down) !important;
-  }
-  .basic.grey.buttons .button:active,
-  .basic.grey.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-down) inset !important;
-    color: var(--grey-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.grey.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.grey.buttons .button,
-  .inverted.grey.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--solid-border-color) inset !important;
-    color: var(--inverted-text-color);
-  }
-  .inverted.grey.buttons .button:hover,
-  .inverted.grey.button:hover,
-  .inverted.grey.buttons .button:focus,
-  .inverted.grey.button:focus,
-  .inverted.grey.buttons .button.active,
-  .inverted.grey.button.active,
-  .inverted.grey.buttons .button:active,
-  .inverted.grey.button:active {
-    box-shadow: none !important;
-    color: var(--light-grey-text-color);
-  }
-  .inverted.grey.buttons .button:hover,
-  .inverted.grey.button:hover {
-    background-color: var(--light-grey-hover);
-  }
-  .inverted.grey.buttons .button:focus,
-  .inverted.grey.button:focus {
-    background-color: var(--light-grey-focus);
-  }
-  .inverted.grey.buttons .active.button,
-  .inverted.grey.active.button {
-    background-color: var(--light-grey-active);
-  }
-  .inverted.grey.buttons .button:active,
-  .inverted.grey.button:active {
-    background-color: var(--light-grey-down);
-  }
-  .inverted.grey.basic.buttons .button,
-  .inverted.grey.buttons .basic.button,
-  .inverted.grey.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.grey.basic.buttons .button:hover,
-  .inverted.grey.buttons .basic.button:hover,
-  .inverted.grey.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-hover) inset !important;
-    color: var(--white) !important;
-  }
-  .inverted.grey.basic.buttons .button:focus,
-  .inverted.grey.basic.buttons .button:focus,
-  .inverted.grey.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-focus) inset !important;
-    color: var(--light-grey) !important;
-  }
-  .inverted.grey.basic.buttons .active.button,
-  .inverted.grey.buttons .basic.active.button,
-  .inverted.grey.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-active) inset !important;
-    color: var(--white) !important;
-  }
-  .inverted.grey.basic.buttons .button:active,
-  .inverted.grey.buttons .basic.button:active,
-  .inverted.grey.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-down) inset !important;
-    color: var(--white) !important;
-  }
-  .brown.buttons .button,
-  .brown.button {
-    background-color: var(--brown);
-    color: var(--brown-text-color);
-    text-shadow: var(--brown-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .brown.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .brown.buttons .button:hover,
-  .brown.button:hover {
-    background-color: var(--brown-hover);
-    color: var(--brown-text-color);
-    text-shadow: var(--brown-text-shadow);
-  }
-  .brown.buttons .button:focus,
-  .brown.button:focus {
-    background-color: var(--brown-focus);
-    color: var(--brown-text-color);
-    text-shadow: var(--brown-text-shadow);
-  }
-  .brown.buttons .button:active,
-  .brown.button:active {
-    background-color: var(--brown-down);
-    color: var(--brown-text-color);
-    text-shadow: var(--brown-text-shadow);
-  }
-  .brown.buttons .active.button,
-  .brown.buttons .active.button:active,
-  .brown.active.button,
-  .brown.button .active.button:active {
-    background-color: var(--brown-active);
-    color: var(--brown-text-color);
-    text-shadow: var(--brown-text-shadow);
-  }
-  .basic.brown.buttons .button,
-  .basic.brown.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--brown) inset !important;
-    color: var(--brown) !important;
-  }
-  .basic.brown.buttons .button:hover,
-  .basic.brown.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-hover) inset !important;
-    color: var(--brown-hover) !important;
-  }
-  .basic.brown.buttons .button:focus,
-  .basic.brown.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-focus) inset !important;
-    color: var(--brown-hover) !important;
-  }
-  .basic.brown.buttons .active.button,
-  .basic.brown.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-active) inset !important;
-    color: var(--brown-down) !important;
-  }
-  .basic.brown.buttons .button:active,
-  .basic.brown.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-down) inset !important;
-    color: var(--brown-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.brown.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.brown.buttons .button,
-  .inverted.brown.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown) inset !important;
-    color: var(--light-brown);
-  }
-  .inverted.brown.buttons .button:hover,
-  .inverted.brown.button:hover,
-  .inverted.brown.buttons .button:focus,
-  .inverted.brown.button:focus,
-  .inverted.brown.buttons .button.active,
-  .inverted.brown.button.active,
-  .inverted.brown.buttons .button:active,
-  .inverted.brown.button:active {
-    box-shadow: none !important;
-    color: var(--light-brown-text-color);
-  }
-  .inverted.brown.buttons .button:hover,
-  .inverted.brown.button:hover {
-    background-color: var(--light-brown-hover);
-  }
-  .inverted.brown.buttons .button:focus,
-  .inverted.brown.button:focus {
-    background-color: var(--light-brown-focus);
-  }
-  .inverted.brown.buttons .active.button,
-  .inverted.brown.active.button {
-    background-color: var(--light-brown-active);
-  }
-  .inverted.brown.buttons .button:active,
-  .inverted.brown.button:active {
-    background-color: var(--light-brown-down);
-  }
-  .inverted.brown.basic.buttons .button,
-  .inverted.brown.buttons .basic.button,
-  .inverted.brown.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.brown.basic.buttons .button:hover,
-  .inverted.brown.buttons .basic.button:hover,
-  .inverted.brown.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-hover) inset !important;
-    color: var(--light-brown) !important;
-  }
-  .inverted.brown.basic.buttons .button:focus,
-  .inverted.brown.basic.buttons .button:focus,
-  .inverted.brown.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-focus) inset !important;
-    color: var(--light-brown) !important;
-  }
-  .inverted.brown.basic.buttons .active.button,
-  .inverted.brown.buttons .basic.active.button,
-  .inverted.brown.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-active) inset !important;
-    color: var(--light-brown) !important;
-  }
-  .inverted.brown.basic.buttons .button:active,
-  .inverted.brown.buttons .basic.button:active,
-  .inverted.brown.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-down) inset !important;
-    color: var(--light-brown) !important;
-  }
-  .blue.buttons .button,
-  .blue.button {
-    background-color: var(--blue);
-    color: var(--blue-text-color);
-    text-shadow: var(--blue-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .blue.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .blue.buttons .button:hover,
-  .blue.button:hover {
-    background-color: var(--blue-hover);
-    color: var(--blue-text-color);
-    text-shadow: var(--blue-text-shadow);
-  }
-  .blue.buttons .button:focus,
-  .blue.button:focus {
-    background-color: var(--blue-focus);
-    color: var(--blue-text-color);
-    text-shadow: var(--blue-text-shadow);
-  }
-  .blue.buttons .button:active,
-  .blue.button:active {
-    background-color: var(--blue-down);
-    color: var(--blue-text-color);
-    text-shadow: var(--blue-text-shadow);
-  }
-  .blue.buttons .active.button,
-  .blue.buttons .active.button:active,
-  .blue.active.button,
-  .blue.button .active.button:active {
-    background-color: var(--blue-active);
-    color: var(--blue-text-color);
-    text-shadow: var(--blue-text-shadow);
-  }
-  .basic.blue.buttons .button,
-  .basic.blue.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--blue) inset !important;
-    color: var(--blue) !important;
-  }
-  .basic.blue.buttons .button:hover,
-  .basic.blue.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-hover) inset !important;
-    color: var(--blue-hover) !important;
-  }
-  .basic.blue.buttons .button:focus,
-  .basic.blue.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-focus) inset !important;
-    color: var(--blue-hover) !important;
-  }
-  .basic.blue.buttons .active.button,
-  .basic.blue.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-active) inset !important;
-    color: var(--blue-down) !important;
-  }
-  .basic.blue.buttons .button:active,
-  .basic.blue.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-down) inset !important;
-    color: var(--blue-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.blue.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.blue.buttons .button,
-  .inverted.blue.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue) inset !important;
-    color: var(--light-blue);
-  }
-  .inverted.blue.buttons .button:hover,
-  .inverted.blue.button:hover,
-  .inverted.blue.buttons .button:focus,
-  .inverted.blue.button:focus,
-  .inverted.blue.buttons .button.active,
-  .inverted.blue.button.active,
-  .inverted.blue.buttons .button:active,
-  .inverted.blue.button:active {
-    box-shadow: none !important;
-    color: var(--light-blue-text-color);
-  }
-  .inverted.blue.buttons .button:hover,
-  .inverted.blue.button:hover {
-    background-color: var(--light-blue-hover);
-  }
-  .inverted.blue.buttons .button:focus,
-  .inverted.blue.button:focus {
-    background-color: var(--light-blue-focus);
-  }
-  .inverted.blue.buttons .active.button,
-  .inverted.blue.active.button {
-    background-color: var(--light-blue-active);
-  }
-  .inverted.blue.buttons .button:active,
-  .inverted.blue.button:active {
-    background-color: var(--light-blue-down);
-  }
-  .inverted.blue.basic.buttons .button,
-  .inverted.blue.buttons .basic.button,
-  .inverted.blue.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.blue.basic.buttons .button:hover,
-  .inverted.blue.buttons .basic.button:hover,
-  .inverted.blue.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-hover) inset !important;
-    color: var(--light-blue) !important;
-  }
-  .inverted.blue.basic.buttons .button:focus,
-  .inverted.blue.basic.buttons .button:focus,
-  .inverted.blue.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-focus) inset !important;
-    color: var(--light-blue) !important;
-  }
-  .inverted.blue.basic.buttons .active.button,
-  .inverted.blue.buttons .basic.active.button,
-  .inverted.blue.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-active) inset !important;
-    color: var(--light-blue) !important;
-  }
-  .inverted.blue.basic.buttons .button:active,
-  .inverted.blue.buttons .basic.button:active,
-  .inverted.blue.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-down) inset !important;
-    color: var(--light-blue) !important;
-  }
-  .green.buttons .button,
-  .green.button {
-    background-color: var(--green);
-    color: var(--green-text-color);
-    text-shadow: var(--green-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .green.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .green.buttons .button:hover,
-  .green.button:hover {
-    background-color: var(--green-hover);
-    color: var(--green-text-color);
-    text-shadow: var(--green-text-shadow);
-  }
-  .green.buttons .button:focus,
-  .green.button:focus {
-    background-color: var(--green-focus);
-    color: var(--green-text-color);
-    text-shadow: var(--green-text-shadow);
-  }
-  .green.buttons .button:active,
-  .green.button:active {
-    background-color: var(--green-down);
-    color: var(--green-text-color);
-    text-shadow: var(--green-text-shadow);
-  }
-  .green.buttons .active.button,
-  .green.buttons .active.button:active,
-  .green.active.button,
-  .green.button .active.button:active {
-    background-color: var(--green-active);
-    color: var(--green-text-color);
-    text-shadow: var(--green-text-shadow);
-  }
-  .basic.green.buttons .button,
-  .basic.green.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--green) inset !important;
-    color: var(--green) !important;
-  }
-  .basic.green.buttons .button:hover,
-  .basic.green.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-hover) inset !important;
-    color: var(--green-hover) !important;
-  }
-  .basic.green.buttons .button:focus,
-  .basic.green.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-focus) inset !important;
-    color: var(--green-hover) !important;
-  }
-  .basic.green.buttons .active.button,
-  .basic.green.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-active) inset !important;
-    color: var(--green-down) !important;
-  }
-  .basic.green.buttons .button:active,
-  .basic.green.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-down) inset !important;
-    color: var(--green-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.green.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.green.buttons .button,
-  .inverted.green.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green) inset !important;
-    color: var(--light-green);
-  }
-  .inverted.green.buttons .button:hover,
-  .inverted.green.button:hover,
-  .inverted.green.buttons .button:focus,
-  .inverted.green.button:focus,
-  .inverted.green.buttons .button.active,
-  .inverted.green.button.active,
-  .inverted.green.buttons .button:active,
-  .inverted.green.button:active {
-    box-shadow: none !important;
-    color: var(--green-text-color);
-  }
-  .inverted.green.buttons .button:hover,
-  .inverted.green.button:hover {
-    background-color: var(--light-green-hover);
-  }
-  .inverted.green.buttons .button:focus,
-  .inverted.green.button:focus {
-    background-color: var(--light-green-focus);
-  }
-  .inverted.green.buttons .active.button,
-  .inverted.green.active.button {
-    background-color: var(--light-green-active);
-  }
-  .inverted.green.buttons .button:active,
-  .inverted.green.button:active {
-    background-color: var(--light-green-down);
-  }
-  .inverted.green.basic.buttons .button,
-  .inverted.green.buttons .basic.button,
-  .inverted.green.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.green.basic.buttons .button:hover,
-  .inverted.green.buttons .basic.button:hover,
-  .inverted.green.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-hover) inset !important;
-    color: var(--light-green) !important;
-  }
-  .inverted.green.basic.buttons .button:focus,
-  .inverted.green.basic.buttons .button:focus,
-  .inverted.green.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-focus) inset !important;
-    color: var(--light-green) !important;
-  }
-  .inverted.green.basic.buttons .active.button,
-  .inverted.green.buttons .basic.active.button,
-  .inverted.green.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-active) inset !important;
-    color: var(--light-green) !important;
-  }
-  .inverted.green.basic.buttons .button:active,
-  .inverted.green.buttons .basic.button:active,
-  .inverted.green.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-down) inset !important;
-    color: var(--light-green) !important;
-  }
-  .orange.buttons .button,
-  .orange.button {
-    background-color: var(--orange);
-    color: var(--orange-text-color);
-    text-shadow: var(--orange-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .orange.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .orange.buttons .button:hover,
-  .orange.button:hover {
-    background-color: var(--orange-hover);
-    color: var(--orange-text-color);
-    text-shadow: var(--orange-text-shadow);
-  }
-  .orange.buttons .button:focus,
-  .orange.button:focus {
-    background-color: var(--orange-focus);
-    color: var(--orange-text-color);
-    text-shadow: var(--orange-text-shadow);
-  }
-  .orange.buttons .button:active,
-  .orange.button:active {
-    background-color: var(--orange-down);
-    color: var(--orange-text-color);
-    text-shadow: var(--orange-text-shadow);
-  }
-  .orange.buttons .active.button,
-  .orange.buttons .active.button:active,
-  .orange.active.button,
-  .orange.button .active.button:active {
-    background-color: var(--orange-active);
-    color: var(--orange-text-color);
-    text-shadow: var(--orange-text-shadow);
-  }
-  .basic.orange.buttons .button,
-  .basic.orange.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--orange) inset !important;
-    color: var(--orange) !important;
-  }
-  .basic.orange.buttons .button:hover,
-  .basic.orange.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-hover) inset !important;
-    color: var(--orange-hover) !important;
-  }
-  .basic.orange.buttons .button:focus,
-  .basic.orange.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-focus) inset !important;
-    color: var(--orange-hover) !important;
-  }
-  .basic.orange.buttons .active.button,
-  .basic.orange.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-active) inset !important;
-    color: var(--orange-down) !important;
-  }
-  .basic.orange.buttons .button:active,
-  .basic.orange.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-down) inset !important;
-    color: var(--orange-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.orange.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.orange.buttons .button,
-  .inverted.orange.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange) inset !important;
-    color: var(--light-orange);
-  }
-  .inverted.orange.buttons .button:hover,
-  .inverted.orange.button:hover,
-  .inverted.orange.buttons .button:focus,
-  .inverted.orange.button:focus,
-  .inverted.orange.buttons .button.active,
-  .inverted.orange.button.active,
-  .inverted.orange.buttons .button:active,
-  .inverted.orange.button:active {
-    box-shadow: none !important;
-    color: var(--light-orange-text-color);
-  }
-  .inverted.orange.buttons .button:hover,
-  .inverted.orange.button:hover {
-    background-color: var(--light-orange-hover);
-  }
-  .inverted.orange.buttons .button:focus,
-  .inverted.orange.button:focus {
-    background-color: var(--light-orange-focus);
-  }
-  .inverted.orange.buttons .active.button,
-  .inverted.orange.active.button {
-    background-color: var(--light-orange-active);
-  }
-  .inverted.orange.buttons .button:active,
-  .inverted.orange.button:active {
-    background-color: var(--light-orange-down);
-  }
-  .inverted.orange.basic.buttons .button,
-  .inverted.orange.buttons .basic.button,
-  .inverted.orange.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.orange.basic.buttons .button:hover,
-  .inverted.orange.buttons .basic.button:hover,
-  .inverted.orange.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-hover) inset !important;
-    color: var(--light-orange) !important;
-  }
-  .inverted.orange.basic.buttons .button:focus,
-  .inverted.orange.basic.buttons .button:focus,
-  .inverted.orange.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-focus) inset !important;
-    color: var(--light-orange) !important;
-  }
-  .inverted.orange.basic.buttons .active.button,
-  .inverted.orange.buttons .basic.active.button,
-  .inverted.orange.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-active) inset !important;
-    color: var(--light-orange) !important;
-  }
-  .inverted.orange.basic.buttons .button:active,
-  .inverted.orange.buttons .basic.button:active,
-  .inverted.orange.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-down) inset !important;
-    color: var(--light-orange) !important;
-  }
-  .pink.buttons .button,
-  .pink.button {
-    background-color: var(--pink);
-    color: var(--pink-text-color);
-    text-shadow: var(--pink-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .pink.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .pink.buttons .button:hover,
-  .pink.button:hover {
-    background-color: var(--pink-hover);
-    color: var(--pink-text-color);
-    text-shadow: var(--pink-text-shadow);
-  }
-  .pink.buttons .button:focus,
-  .pink.button:focus {
-    background-color: var(--pink-focus);
-    color: var(--pink-text-color);
-    text-shadow: var(--pink-text-shadow);
-  }
-  .pink.buttons .button:active,
-  .pink.button:active {
-    background-color: var(--pink-down);
-    color: var(--pink-text-color);
-    text-shadow: var(--pink-text-shadow);
-  }
-  .pink.buttons .active.button,
-  .pink.buttons .active.button:active,
-  .pink.active.button,
-  .pink.button .active.button:active {
-    background-color: var(--pink-active);
-    color: var(--pink-text-color);
-    text-shadow: var(--pink-text-shadow);
-  }
-  .basic.pink.buttons .button,
-  .basic.pink.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--pink) inset !important;
-    color: var(--pink) !important;
-  }
-  .basic.pink.buttons .button:hover,
-  .basic.pink.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-hover) inset !important;
-    color: var(--pink-hover) !important;
-  }
-  .basic.pink.buttons .button:focus,
-  .basic.pink.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-focus) inset !important;
-    color: var(--pink-hover) !important;
-  }
-  .basic.pink.buttons .active.button,
-  .basic.pink.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-active) inset !important;
-    color: var(--pink-down) !important;
-  }
-  .basic.pink.buttons .button:active,
-  .basic.pink.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-down) inset !important;
-    color: var(--pink-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.pink.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.pink.buttons .button,
-  .inverted.pink.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink) inset !important;
-    color: var(--light-pink);
-  }
-  .inverted.pink.buttons .button:hover,
-  .inverted.pink.button:hover,
-  .inverted.pink.buttons .button:focus,
-  .inverted.pink.button:focus,
-  .inverted.pink.buttons .button.active,
-  .inverted.pink.button.active,
-  .inverted.pink.buttons .button:active,
-  .inverted.pink.button:active {
-    box-shadow: none !important;
-    color: var(--light-pink-text-color);
-  }
-  .inverted.pink.buttons .button:hover,
-  .inverted.pink.button:hover {
-    background-color: var(--light-pink-hover);
-  }
-  .inverted.pink.buttons .button:focus,
-  .inverted.pink.button:focus {
-    background-color: var(--light-pink-focus);
-  }
-  .inverted.pink.buttons .active.button,
-  .inverted.pink.active.button {
-    background-color: var(--light-pink-active);
-  }
-  .inverted.pink.buttons .button:active,
-  .inverted.pink.button:active {
-    background-color: var(--light-pink-down);
-  }
-  .inverted.pink.basic.buttons .button,
-  .inverted.pink.buttons .basic.button,
-  .inverted.pink.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.pink.basic.buttons .button:hover,
-  .inverted.pink.buttons .basic.button:hover,
-  .inverted.pink.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-hover) inset !important;
-    color: var(--light-pink) !important;
-  }
-  .inverted.pink.basic.buttons .button:focus,
-  .inverted.pink.basic.buttons .button:focus,
-  .inverted.pink.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-focus) inset !important;
-    color: var(--light-pink) !important;
-  }
-  .inverted.pink.basic.buttons .active.button,
-  .inverted.pink.buttons .basic.active.button,
-  .inverted.pink.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-active) inset !important;
-    color: var(--light-pink) !important;
-  }
-  .inverted.pink.basic.buttons .button:active,
-  .inverted.pink.buttons .basic.button:active,
-  .inverted.pink.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-down) inset !important;
-    color: var(--light-pink) !important;
-  }
-  .violet.buttons .button,
-  .violet.button {
-    background-color: var(--violet);
-    color: var(--violet-text-color);
-    text-shadow: var(--violet-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .violet.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .violet.buttons .button:hover,
-  .violet.button:hover {
-    background-color: var(--violet-hover);
-    color: var(--violet-text-color);
-    text-shadow: var(--violet-text-shadow);
-  }
-  .violet.buttons .button:focus,
-  .violet.button:focus {
-    background-color: var(--violet-focus);
-    color: var(--violet-text-color);
-    text-shadow: var(--violet-text-shadow);
-  }
-  .violet.buttons .button:active,
-  .violet.button:active {
-    background-color: var(--violet-down);
-    color: var(--violet-text-color);
-    text-shadow: var(--violet-text-shadow);
-  }
-  .violet.buttons .active.button,
-  .violet.buttons .active.button:active,
-  .violet.active.button,
-  .violet.button .active.button:active {
-    background-color: var(--violet-active);
-    color: var(--violet-text-color);
-    text-shadow: var(--violet-text-shadow);
-  }
-  .basic.violet.buttons .button,
-  .basic.violet.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--violet) inset !important;
-    color: var(--violet) !important;
-  }
-  .basic.violet.buttons .button:hover,
-  .basic.violet.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-hover) inset !important;
-    color: var(--violet-hover) !important;
-  }
-  .basic.violet.buttons .button:focus,
-  .basic.violet.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-focus) inset !important;
-    color: var(--violet-hover) !important;
-  }
-  .basic.violet.buttons .active.button,
-  .basic.violet.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-active) inset !important;
-    color: var(--violet-down) !important;
-  }
-  .basic.violet.buttons .button:active,
-  .basic.violet.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-down) inset !important;
-    color: var(--violet-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.violet.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.violet.buttons .button,
-  .inverted.violet.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet) inset !important;
-    color: var(--light-violet);
-  }
-  .inverted.violet.buttons .button:hover,
-  .inverted.violet.button:hover,
-  .inverted.violet.buttons .button:focus,
-  .inverted.violet.button:focus,
-  .inverted.violet.buttons .button.active,
-  .inverted.violet.button.active,
-  .inverted.violet.buttons .button:active,
-  .inverted.violet.button:active {
-    box-shadow: none !important;
-    color: var(--light-violet-text-color);
-  }
-  .inverted.violet.buttons .button:hover,
-  .inverted.violet.button:hover {
-    background-color: var(--light-violet-hover);
-  }
-  .inverted.violet.buttons .button:focus,
-  .inverted.violet.button:focus {
-    background-color: var(--light-violet-focus);
-  }
-  .inverted.violet.buttons .active.button,
-  .inverted.violet.active.button {
-    background-color: var(--light-violet-active);
-  }
-  .inverted.violet.buttons .button:active,
-  .inverted.violet.button:active {
-    background-color: var(--light-violet-down);
-  }
-  .inverted.violet.basic.buttons .button,
-  .inverted.violet.buttons .basic.button,
-  .inverted.violet.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.violet.basic.buttons .button:hover,
-  .inverted.violet.buttons .basic.button:hover,
-  .inverted.violet.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-hover) inset !important;
-    color: var(--light-violet) !important;
-  }
-  .inverted.violet.basic.buttons .button:focus,
-  .inverted.violet.basic.buttons .button:focus,
-  .inverted.violet.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-focus) inset !important;
-    color: var(--light-violet) !important;
-  }
-  .inverted.violet.basic.buttons .active.button,
-  .inverted.violet.buttons .basic.active.button,
-  .inverted.violet.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-active) inset !important;
-    color: var(--light-violet) !important;
-  }
-  .inverted.violet.basic.buttons .button:active,
-  .inverted.violet.buttons .basic.button:active,
-  .inverted.violet.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-down) inset !important;
-    color: var(--light-violet) !important;
-  }
-  .purple.buttons .button,
-  .purple.button {
-    background-color: var(--purple);
-    color: var(--purple-text-color);
-    text-shadow: var(--purple-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .purple.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .purple.buttons .button:hover,
-  .purple.button:hover {
-    background-color: var(--purple-hover);
-    color: var(--purple-text-color);
-    text-shadow: var(--purple-text-shadow);
-  }
-  .purple.buttons .button:focus,
-  .purple.button:focus {
-    background-color: var(--purple-focus);
-    color: var(--purple-text-color);
-    text-shadow: var(--purple-text-shadow);
-  }
-  .purple.buttons .button:active,
-  .purple.button:active {
-    background-color: var(--purple-down);
-    color: var(--purple-text-color);
-    text-shadow: var(--purple-text-shadow);
-  }
-  .purple.buttons .active.button,
-  .purple.buttons .active.button:active,
-  .purple.active.button,
-  .purple.button .active.button:active {
-    background-color: var(--purple-active);
-    color: var(--purple-text-color);
-    text-shadow: var(--purple-text-shadow);
-  }
-  .basic.purple.buttons .button,
-  .basic.purple.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--purple) inset !important;
-    color: var(--purple) !important;
-  }
-  .basic.purple.buttons .button:hover,
-  .basic.purple.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-hover) inset !important;
-    color: var(--purple-hover) !important;
-  }
-  .basic.purple.buttons .button:focus,
-  .basic.purple.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-focus) inset !important;
-    color: var(--purple-hover) !important;
-  }
-  .basic.purple.buttons .active.button,
-  .basic.purple.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-active) inset !important;
-    color: var(--purple-down) !important;
-  }
-  .basic.purple.buttons .button:active,
-  .basic.purple.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-down) inset !important;
-    color: var(--purple-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.purple.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.purple.buttons .button,
-  .inverted.purple.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple) inset !important;
-    color: var(--light-purple);
-  }
-  .inverted.purple.buttons .button:hover,
-  .inverted.purple.button:hover,
-  .inverted.purple.buttons .button:focus,
-  .inverted.purple.button:focus,
-  .inverted.purple.buttons .button.active,
-  .inverted.purple.button.active,
-  .inverted.purple.buttons .button:active,
-  .inverted.purple.button:active {
-    box-shadow: none !important;
-    color: var(--light-purple-text-color);
-  }
-  .inverted.purple.buttons .button:hover,
-  .inverted.purple.button:hover {
-    background-color: var(--light-purple-hover);
-  }
-  .inverted.purple.buttons .button:focus,
-  .inverted.purple.button:focus {
-    background-color: var(--light-purple-focus);
-  }
-  .inverted.purple.buttons .active.button,
-  .inverted.purple.active.button {
-    background-color: var(--light-purple-active);
-  }
-  .inverted.purple.buttons .button:active,
-  .inverted.purple.button:active {
-    background-color: var(--light-purple-down);
-  }
-  .inverted.purple.basic.buttons .button,
-  .inverted.purple.buttons .basic.button,
-  .inverted.purple.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.purple.basic.buttons .button:hover,
-  .inverted.purple.buttons .basic.button:hover,
-  .inverted.purple.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-hover) inset !important;
-    color: var(--light-purple) !important;
-  }
-  .inverted.purple.basic.buttons .button:focus,
-  .inverted.purple.basic.buttons .button:focus,
-  .inverted.purple.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-focus) inset !important;
-    color: var(--light-purple) !important;
-  }
-  .inverted.purple.basic.buttons .active.button,
-  .inverted.purple.buttons .basic.active.button,
-  .inverted.purple.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-active) inset !important;
-    color: var(--light-purple) !important;
-  }
-  .inverted.purple.basic.buttons .button:active,
-  .inverted.purple.buttons .basic.button:active,
-  .inverted.purple.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-down) inset !important;
-    color: var(--light-purple) !important;
-  }
-  .red.buttons .button,
-  .red.button {
-    background-color: var(--red);
-    color: var(--red-text-color);
-    text-shadow: var(--red-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .red.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .red.buttons .button:hover,
-  .red.button:hover {
-    background-color: var(--red-hover);
-    color: var(--red-text-color);
-    text-shadow: var(--red-text-shadow);
-  }
-  .red.buttons .button:focus,
-  .red.button:focus {
-    background-color: var(--red-focus);
-    color: var(--red-text-color);
-    text-shadow: var(--red-text-shadow);
-  }
-  .red.buttons .button:active,
-  .red.button:active {
-    background-color: var(--red-down);
-    color: var(--red-text-color);
-    text-shadow: var(--red-text-shadow);
-  }
-  .red.buttons .active.button,
-  .red.buttons .active.button:active,
-  .red.active.button,
-  .red.button .active.button:active {
-    background-color: var(--red-active);
-    color: var(--red-text-color);
-    text-shadow: var(--red-text-shadow);
-  }
-  .basic.red.buttons .button,
-  .basic.red.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--red) inset !important;
-    color: var(--red) !important;
-  }
-  .basic.red.buttons .button:hover,
-  .basic.red.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-hover) inset !important;
-    color: var(--red-hover) !important;
-  }
-  .basic.red.buttons .button:focus,
-  .basic.red.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-focus) inset !important;
-    color: var(--red-hover) !important;
-  }
-  .basic.red.buttons .active.button,
-  .basic.red.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-active) inset !important;
-    color: var(--red-down) !important;
-  }
-  .basic.red.buttons .button:active,
-  .basic.red.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-down) inset !important;
-    color: var(--red-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.red.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.red.buttons .button,
-  .inverted.red.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red) inset !important;
-    color: var(--light-red);
-  }
-  .inverted.red.buttons .button:hover,
-  .inverted.red.button:hover,
-  .inverted.red.buttons .button:focus,
-  .inverted.red.button:focus,
-  .inverted.red.buttons .button.active,
-  .inverted.red.button.active,
-  .inverted.red.buttons .button:active,
-  .inverted.red.button:active {
-    box-shadow: none !important;
-    color: var(--light-red-text-color);
-  }
-  .inverted.red.buttons .button:hover,
-  .inverted.red.button:hover {
-    background-color: var(--light-red-hover);
-  }
-  .inverted.red.buttons .button:focus,
-  .inverted.red.button:focus {
-    background-color: var(--light-red-focus);
-  }
-  .inverted.red.buttons .active.button,
-  .inverted.red.active.button {
-    background-color: var(--light-red-active);
-  }
-  .inverted.red.buttons .button:active,
-  .inverted.red.button:active {
-    background-color: var(--light-red-down);
-  }
-  .inverted.red.basic.buttons .button,
-  .inverted.red.buttons .basic.button,
-  .inverted.red.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.red.basic.buttons .button:hover,
-  .inverted.red.buttons .basic.button:hover,
-  .inverted.red.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-hover) inset !important;
-    color: var(--light-red) !important;
-  }
-  .inverted.red.basic.buttons .button:focus,
-  .inverted.red.basic.buttons .button:focus,
-  .inverted.red.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-focus) inset !important;
-    color: var(--light-red) !important;
-  }
-  .inverted.red.basic.buttons .active.button,
-  .inverted.red.buttons .basic.active.button,
-  .inverted.red.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-active) inset !important;
-    color: var(--light-red) !important;
-  }
-  .inverted.red.basic.buttons .button:active,
-  .inverted.red.buttons .basic.button:active,
-  .inverted.red.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-down) inset !important;
-    color: var(--light-red) !important;
-  }
-  .teal.buttons .button,
-  .teal.button {
-    background-color: var(--teal);
-    color: var(--teal-text-color);
-    text-shadow: var(--teal-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .teal.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .teal.buttons .button:hover,
-  .teal.button:hover {
-    background-color: var(--teal-hover);
-    color: var(--teal-text-color);
-    text-shadow: var(--teal-text-shadow);
-  }
-  .teal.buttons .button:focus,
-  .teal.button:focus {
-    background-color: var(--teal-focus);
-    color: var(--teal-text-color);
-    text-shadow: var(--teal-text-shadow);
-  }
-  .teal.buttons .button:active,
-  .teal.button:active {
-    background-color: var(--teal-down);
-    color: var(--teal-text-color);
-    text-shadow: var(--teal-text-shadow);
-  }
-  .teal.buttons .active.button,
-  .teal.buttons .active.button:active,
-  .teal.active.button,
-  .teal.button .active.button:active {
-    background-color: var(--teal-active);
-    color: var(--teal-text-color);
-    text-shadow: var(--teal-text-shadow);
-  }
-  .basic.teal.buttons .button,
-  .basic.teal.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--teal) inset !important;
-    color: var(--teal) !important;
-  }
-  .basic.teal.buttons .button:hover,
-  .basic.teal.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-hover) inset !important;
-    color: var(--teal-hover) !important;
-  }
-  .basic.teal.buttons .button:focus,
-  .basic.teal.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-focus) inset !important;
-    color: var(--teal-hover) !important;
-  }
-  .basic.teal.buttons .active.button,
-  .basic.teal.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-active) inset !important;
-    color: var(--teal-down) !important;
-  }
-  .basic.teal.buttons .button:active,
-  .basic.teal.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-down) inset !important;
-    color: var(--teal-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.teal.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.teal.buttons .button,
-  .inverted.teal.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal) inset !important;
-    color: var(--light-teal);
-  }
-  .inverted.teal.buttons .button:hover,
-  .inverted.teal.button:hover,
-  .inverted.teal.buttons .button:focus,
-  .inverted.teal.button:focus,
-  .inverted.teal.buttons .button.active,
-  .inverted.teal.button.active,
-  .inverted.teal.buttons .button:active,
-  .inverted.teal.button:active {
-    box-shadow: none !important;
-    color: var(--light-teal-text-color);
-  }
-  .inverted.teal.buttons .button:hover,
-  .inverted.teal.button:hover {
-    background-color: var(--light-teal-hover);
-  }
-  .inverted.teal.buttons .button:focus,
-  .inverted.teal.button:focus {
-    background-color: var(--light-teal-focus);
-  }
-  .inverted.teal.buttons .active.button,
-  .inverted.teal.active.button {
-    background-color: var(--light-teal-active);
-  }
-  .inverted.teal.buttons .button:active,
-  .inverted.teal.button:active {
-    background-color: var(--light-teal-down);
-  }
-  .inverted.teal.basic.buttons .button,
-  .inverted.teal.buttons .basic.button,
-  .inverted.teal.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.teal.basic.buttons .button:hover,
-  .inverted.teal.buttons .basic.button:hover,
-  .inverted.teal.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-hover) inset !important;
-    color: var(--light-teal) !important;
-  }
-  .inverted.teal.basic.buttons .button:focus,
-  .inverted.teal.basic.buttons .button:focus,
-  .inverted.teal.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-focus) inset !important;
-    color: var(--light-teal) !important;
-  }
-  .inverted.teal.basic.buttons .active.button,
-  .inverted.teal.buttons .basic.active.button,
-  .inverted.teal.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-active) inset !important;
-    color: var(--light-teal) !important;
-  }
-  .inverted.teal.basic.buttons .button:active,
-  .inverted.teal.buttons .basic.button:active,
-  .inverted.teal.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-down) inset !important;
-    color: var(--light-teal) !important;
-  }
-  .olive.buttons .button,
-  .olive.button {
-    background-color: var(--olive);
-    color: var(--olive-text-color);
-    text-shadow: var(--olive-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .olive.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .olive.buttons .button:hover,
-  .olive.button:hover {
-    background-color: var(--olive-hover);
-    color: var(--olive-text-color);
-    text-shadow: var(--olive-text-shadow);
-  }
-  .olive.buttons .button:focus,
-  .olive.button:focus {
-    background-color: var(--olive-focus);
-    color: var(--olive-text-color);
-    text-shadow: var(--olive-text-shadow);
-  }
-  .olive.buttons .button:active,
-  .olive.button:active {
-    background-color: var(--olive-down);
-    color: var(--olive-text-color);
-    text-shadow: var(--olive-text-shadow);
-  }
-  .olive.buttons .active.button,
-  .olive.buttons .active.button:active,
-  .olive.active.button,
-  .olive.button .active.button:active {
-    background-color: var(--olive-active);
-    color: var(--olive-text-color);
-    text-shadow: var(--olive-text-shadow);
-  }
-  .basic.olive.buttons .button,
-  .basic.olive.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--olive) inset !important;
-    color: var(--olive) !important;
-  }
-  .basic.olive.buttons .button:hover,
-  .basic.olive.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-hover) inset !important;
-    color: var(--olive-hover) !important;
-  }
-  .basic.olive.buttons .button:focus,
-  .basic.olive.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-focus) inset !important;
-    color: var(--olive-hover) !important;
-  }
-  .basic.olive.buttons .active.button,
-  .basic.olive.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-active) inset !important;
-    color: var(--olive-down) !important;
-  }
-  .basic.olive.buttons .button:active,
-  .basic.olive.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-down) inset !important;
-    color: var(--olive-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.olive.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.olive.buttons .button,
-  .inverted.olive.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive) inset !important;
-    color: var(--light-olive);
-  }
-  .inverted.olive.buttons .button:hover,
-  .inverted.olive.button:hover,
-  .inverted.olive.buttons .button:focus,
-  .inverted.olive.button:focus,
-  .inverted.olive.buttons .button.active,
-  .inverted.olive.button.active,
-  .inverted.olive.buttons .button:active,
-  .inverted.olive.button:active {
-    box-shadow: none !important;
-    color: var(--light-olive-text-color);
-  }
-  .inverted.olive.buttons .button:hover,
-  .inverted.olive.button:hover {
-    background-color: var(--light-olive-hover);
-  }
-  .inverted.olive.buttons .button:focus,
-  .inverted.olive.button:focus {
-    background-color: var(--light-olive-focus);
-  }
-  .inverted.olive.buttons .active.button,
-  .inverted.olive.active.button {
-    background-color: var(--light-olive-active);
-  }
-  .inverted.olive.buttons .button:active,
-  .inverted.olive.button:active {
-    background-color: var(--light-olive-down);
-  }
-  .inverted.olive.basic.buttons .button,
-  .inverted.olive.buttons .basic.button,
-  .inverted.olive.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.olive.basic.buttons .button:hover,
-  .inverted.olive.buttons .basic.button:hover,
-  .inverted.olive.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-hover) inset !important;
-    color: var(--light-olive) !important;
-  }
-  .inverted.olive.basic.buttons .button:focus,
-  .inverted.olive.basic.buttons .button:focus,
-  .inverted.olive.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-focus) inset !important;
-    color: var(--light-olive) !important;
-  }
-  .inverted.olive.basic.buttons .active.button,
-  .inverted.olive.buttons .basic.active.button,
-  .inverted.olive.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-active) inset !important;
-    color: var(--light-olive) !important;
-  }
-  .inverted.olive.basic.buttons .button:active,
-  .inverted.olive.buttons .basic.button:active,
-  .inverted.olive.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-down) inset !important;
-    color: var(--light-olive) !important;
-  }
-  .yellow.buttons .button,
-  .yellow.button {
-    background-color: var(--yellow);
-    color: var(--yellow-text-color);
-    text-shadow: var(--yellow-text-shadow);
-    background-image: var(--colored-background-image);
-  }
-  .yellow.button {
-    box-shadow: var(--colored-box-shadow);
-  }
-  .yellow.buttons .button:hover,
-  .yellow.button:hover {
-    background-color: var(--yellow-hover);
-    color: var(--yellow-text-color);
-    text-shadow: var(--yellow-text-shadow);
-  }
-  .yellow.buttons .button:focus,
-  .yellow.button:focus {
-    background-color: var(--yellow-focus);
-    color: var(--yellow-text-color);
-    text-shadow: var(--yellow-text-shadow);
-  }
-  .yellow.buttons .button:active,
-  .yellow.button:active {
-    background-color: var(--yellow-down);
-    color: var(--yellow-text-color);
-    text-shadow: var(--yellow-text-shadow);
-  }
-  .yellow.buttons .active.button,
-  .yellow.buttons .active.button:active,
-  .yellow.active.button,
-  .yellow.button .active.button:active {
-    background-color: var(--yellow-active);
-    color: var(--yellow-text-color);
-    text-shadow: var(--yellow-text-shadow);
-  }
-  .basic.yellow.buttons .button,
-  .basic.yellow.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--yellow) inset !important;
-    color: var(--yellow) !important;
-  }
-  .basic.yellow.buttons .button:hover,
-  .basic.yellow.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-hover) inset !important;
-    color: var(--yellow-hover) !important;
-  }
-  .basic.yellow.buttons .button:focus,
-  .basic.yellow.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-focus) inset !important;
-    color: var(--yellow-hover) !important;
-  }
-  .basic.yellow.buttons .active.button,
-  .basic.yellow.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-active) inset !important;
-    color: var(--yellow-down) !important;
-  }
-  .basic.yellow.buttons .button:active,
-  .basic.yellow.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-down) inset !important;
-    color: var(--yellow-down) !important;
-  }
-  .buttons:not(.vertical) > .basic.yellow.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
-  }
-  .inverted.yellow.buttons .button,
-  .inverted.yellow.button {
-    background-color: transparent;
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow) inset !important;
-    color: var(--light-yellow);
-  }
-  .inverted.yellow.buttons .button:hover,
-  .inverted.yellow.button:hover,
-  .inverted.yellow.buttons .button:focus,
-  .inverted.yellow.button:focus,
-  .inverted.yellow.buttons .button.active,
-  .inverted.yellow.button.active,
-  .inverted.yellow.buttons .button:active,
-  .inverted.yellow.button:active {
-    box-shadow: none !important;
-    color: var(--light-yellow-text-color);
-  }
-  .inverted.yellow.buttons .button:hover,
-  .inverted.yellow.button:hover {
-    background-color: var(--light-yellow-hover);
-  }
-  .inverted.yellow.buttons .button:focus,
-  .inverted.yellow.button:focus {
-    background-color: var(--light-yellow-focus);
-  }
-  .inverted.yellow.buttons .active.button,
-  .inverted.yellow.active.button {
-    background-color: var(--light-yellow-active);
-  }
-  .inverted.yellow.buttons .button:active,
-  .inverted.yellow.button:active {
-    background-color: var(--light-yellow-down);
-  }
-  .inverted.yellow.basic.buttons .button,
-  .inverted.yellow.buttons .basic.button,
-  .inverted.yellow.basic.button {
-    background-color: transparent;
-    box-shadow: var(--basic-inverted-box-shadow) !important;
-    color: var(--white) !important;
-  }
-  .inverted.yellow.basic.buttons .button:hover,
-  .inverted.yellow.buttons .basic.button:hover,
-  .inverted.yellow.basic.button:hover {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-hover) inset !important;
-    color: var(--light-yellow) !important;
-  }
-  .inverted.yellow.basic.buttons .button:focus,
-  .inverted.yellow.basic.buttons .button:focus,
-  .inverted.yellow.basic.button:focus {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-focus) inset !important;
-    color: var(--light-yellow) !important;
-  }
-  .inverted.yellow.basic.buttons .active.button,
-  .inverted.yellow.buttons .basic.active.button,
-  .inverted.yellow.basic.active.button {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-active) inset !important;
-    color: var(--light-yellow) !important;
-  }
-  .inverted.yellow.basic.buttons .button:active,
-  .inverted.yellow.buttons .basic.button:active,
-  .inverted.yellow.basic.button:active {
-    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-down) inset !important;
-    color: var(--light-yellow) !important;
-  }
-}
+// node_modules/lit-html/directives/repeat.js
+var u4 = (e6, s6, t5) => {
+  const r7 = /* @__PURE__ */ new Map();
+  for (let l3 = s6; l3 <= t5; l3++)
+    r7.set(e6[l3], l3);
+  return r7;
+};
+var c5 = e4(class extends i4 {
+  constructor(e6) {
+    if (super(e6), e6.type !== t3.CHILD)
+      throw Error("repeat() can only be used in text expressions");
+  }
+  dt(e6, s6, t5) {
+    let r7;
+    void 0 === t5 ? t5 = s6 : void 0 !== s6 && (r7 = s6);
+    const l3 = [], o6 = [];
+    let i5 = 0;
+    for (const s7 of e6)
+      l3[i5] = r7 ? r7(s7, i5) : i5, o6[i5] = t5(s7, i5), i5++;
+    return { values: o6, keys: l3 };
+  }
+  render(e6, s6, t5) {
+    return this.dt(e6, s6, t5).values;
+  }
+  update(s6, [t5, r7, c6]) {
+    const d3 = p3(s6), { values: p4, keys: a3 } = this.dt(t5, r7, c6);
+    if (!Array.isArray(d3))
+      return this.ut = a3, p4;
+    const h5 = this.ut ??= [], v3 = [];
+    let m3, y3, x2 = 0, j2 = d3.length - 1, k2 = 0, w2 = p4.length - 1;
+    for (; x2 <= j2 && k2 <= w2; )
+      if (null === d3[x2])
+        x2++;
+      else if (null === d3[j2])
+        j2--;
+      else if (h5[x2] === a3[k2])
+        v3[k2] = v2(d3[x2], p4[k2]), x2++, k2++;
+      else if (h5[j2] === a3[w2])
+        v3[w2] = v2(d3[j2], p4[w2]), j2--, w2--;
+      else if (h5[x2] === a3[w2])
+        v3[w2] = v2(d3[x2], p4[w2]), r5(s6, v3[w2 + 1], d3[x2]), x2++, w2--;
+      else if (h5[j2] === a3[k2])
+        v3[k2] = v2(d3[j2], p4[k2]), r5(s6, d3[x2], d3[j2]), j2--, k2++;
+      else if (void 0 === m3 && (m3 = u4(a3, k2, w2), y3 = u4(h5, x2, j2)), m3.has(h5[x2]))
+        if (m3.has(h5[j2])) {
+          const e6 = y3.get(a3[k2]), t6 = void 0 !== e6 ? d3[e6] : null;
+          if (null === t6) {
+            const e7 = r5(s6, d3[x2]);
+            v2(e7, p4[k2]), v3[k2] = e7;
+          } else
+            v3[k2] = v2(t6, p4[k2]), r5(s6, d3[x2], t6), d3[e6] = null;
+          k2++;
+        } else
+          h3(d3[j2]), j2--;
+      else
+        h3(d3[x2]), x2++;
+    for (; k2 <= w2; ) {
+      const e6 = r5(s6, v3[w2 + 1]);
+      v2(e6, p4[k2]), v3[k2++] = e6;
+    }
+    for (; x2 <= j2; ) {
+      const e6 = d3[x2++];
+      null !== e6 && h3(e6);
+    }
+    return this.ut = a3, m2(s6, v3), w;
+  }
+});
 
-/* src/button/css/variations/compact.css */
-@layer component {
-  .compact.buttons .button,
-  .compact.button {
-    padding: var(--compact-vertical-padding) var(--compact-horizontal-padding) (var(--compact-vertical-padding) + var(--shadow-offset));
+// packages/component/src/lit/directives/reactive-each.js
+var ReactiveEachDirective = class extends f4 {
+  constructor(partInfo) {
+    super(partInfo);
+    this.reaction = null;
+    this.parts = /* @__PURE__ */ new Map();
   }
-  .compact.icon.buttons .button,
-  .compact.icon.button {
-    padding: var(--compact-vertical-padding) var(--compact-vertical-padding) (var(--compact-vertical-padding) + var(--shadow-offset));
+  render(eachCondition, data) {
+    const initialRender = this.createRepeat(eachCondition, data);
+    if (!this.reaction) {
+      this.reaction = Reaction.create((comp) => {
+        if (!this.isConnected) {
+          comp.stop();
+          return;
+        }
+        const items = this.getItems(eachCondition);
+        if (this.firstRun) {
+          return;
+        }
+        const render = this.createRepeat(eachCondition, data, items);
+        this.setValue(render);
+      });
+    }
+    return initialRender;
   }
-  .compact.labeled.icon.buttons .button,
-  .compact.labeled.icon.button {
-    padding: var(--compact-vertical-padding) (var(--compact-horizontal-padding) + var(--labeled-icon-width)) (var(--compact-vertical-padding) + var(--shadow-offset));
+  getItems(eachCondition) {
+    let items = eachCondition.over() || [];
+    items = items.map((item) => {
+      if (isObject(item)) {
+        item._id = item._id || hashCode(item);
+      }
+      return item;
+    });
+    return items;
   }
-}
+  createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
+    if (!items?.length) {
+      return T;
+    }
+    return c5(items, this.getPartID, (item, index) => {
+      let part = this.parts.get(this.getPartID(item));
+      if (part) {
+        return part;
+      } else {
+        part = this.getPartContent(item, index, data, eachCondition);
+        this.parts.set(this.getPartID(item), part);
+      }
+      return part;
+    });
+  }
+  getPartContent(item, index, data, eachCondition) {
+    let eachData = this.prepareEachData(item, index, data, eachCondition.as);
+    return eachCondition.content(eachData);
+  }
+  getPartID(item) {
+    if (isObject(item)) {
+      return item._id || item.id || item.key || item.hash || hashCode(item);
+    }
+    if (isString) {
+      return item;
+    }
+  }
+  prepareEachData(item, index, data, alias) {
+    return alias ? {
+      ...data,
+      [alias]: item,
+      "@index": index
+    } : {
+      ...data,
+      ...item,
+      "@index": index
+    };
+  }
+  disconnected() {
+    if (this.reaction) {
+      this.reaction.stop();
+      this.reaction = null;
+    }
+  }
+};
+var reactiveEach = e4(ReactiveEachDirective);
 
-/* src/button/css/variations/floated.css */
-@layer component {
-  [class*="left floated"].buttons,
-  [class*="left floated"].button {
-    float: left;
-    margin-left: 0em;
-    margin-right: var(--floated-margin);
+// packages/component/src/lit/directives/render-template.js
+var RenderTemplate = class extends f4 {
+  constructor(partInfo) {
+    super(partInfo);
+    this.renderRoot = partInfo.options.host.renderRoot;
+    this.template = null;
+    this.part = null;
   }
-  [class*="right floated"].buttons,
-  [class*="right floated"].button {
-    float: right;
-    margin-right: 0em;
-    margin-left: var(--floated-margin);
+  render({ getTemplateName, subTemplates, data, parentTemplate }) {
+    const getTemplate = () => {
+      const templateName = getTemplateName();
+      const template2 = subTemplates[templateName];
+      console.log(template2);
+      return template2;
+    };
+    const renderTemplate2 = (template2, data2) => {
+      return template2.render(data2);
+    };
+    const unpackData = (dataObj) => {
+      return mapObject(dataObj, (val) => val());
+    };
+    Reaction.create((comp) => {
+      if (!this.isConnected) {
+        comp.stop();
+        return;
+      }
+      const template2 = getTemplate();
+      if (!template2) {
+        fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
+      }
+      const templateData2 = unpackData(data);
+      if (template2) {
+        this.template = template2;
+        const { parentNode, startNode, endNode } = this.part;
+        const renderRoot = this.part.options.host?.renderRoot;
+        template2.attach(renderRoot, { parentNode, startNode, endNode });
+        if (parentTemplate) {
+          template2.setParent(parentTemplate);
+        }
+      }
+      if (!comp.firstRun) {
+        this.setValue(renderTemplate2(template2, templateData2));
+      }
+    });
+    const template = getTemplate();
+    const templateData = unpackData(data);
+    return renderTemplate2(template, templateData);
   }
-}
+  update(part, renderSettings) {
+    this.part = part;
+    return this.render.apply(this, renderSettings);
+  }
+  reconnected() {
+  }
+  disconnected() {
+    if (this.template) {
+      this.template.onDestroyed();
+    }
+  }
+};
+var renderTemplate = e4(RenderTemplate);
 
-/* src/button/css/variations/fluid.css */
-@layer component {
-  .fluid.buttons,
-  .fluid.button {
-    width: 100%;
+// packages/component/src/lit/helpers.js
+var Helpers = {
+  is: (a3, b3) => {
+    return a3 == b3;
+  },
+  not: (a3) => {
+    return !a3;
+  },
+  isEqual: (a3, b3) => {
+    return a3 == b3;
+  },
+  maybePlural(value, plural = "s") {
+    return value == 1 ? "" : plural;
+  },
+  isNotEqual: (a3, b3) => {
+    return a3 != b3;
+  },
+  isExactlyEqual: (a3, b3) => {
+    return a3 === b3;
+  },
+  isNotExactlyEqual: (a3, b3) => {
+    return a3 !== b3;
+  },
+  greaterThan: (a3, b3) => {
+    return a3 > b3;
+  },
+  lessThan: (a3, b3) => {
+    return a3 < b3;
+  },
+  greaterThanEquals: (a3, b3) => {
+    return a3 >= b3;
+  },
+  lessThanEquals: (a3, b3) => {
+    return a3 <= b3;
+  },
+  numberFromIndex: (a3) => {
+    return a3 + 1;
+  },
+  formatDate: (date = /* @__PURE__ */ new Date(), format = "L") => {
+    return formatDate(date, format);
+  },
+  formatDateTime: (date = /* @__PURE__ */ new Date(), format = "LLL") => {
+    return formatDate(date, format);
+  },
+  formatDateTimeSeconds: (date = /* @__PURE__ */ new Date(), format = "LTS") => {
+    return formatDate(date, format);
+  },
+  object: ({ obj }) => {
+    return obj;
+  },
+  log(...args) {
+    console.log(...args);
+  },
+  debugger: () => {
+    debugger;
   }
-  .fluid.button {
-    display: block;
-  }
-  .two.buttons {
-    width: 100%;
-  }
-  .two.buttons > .button {
-    width: 50%;
-  }
-  .three.buttons {
-    width: 100%;
-  }
-  .three.buttons > .button {
-    width: 33.333%;
-  }
-  .four.buttons {
-    width: 100%;
-  }
-  .four.buttons > .button {
-    width: 25%;
-  }
-  .five.buttons {
-    width: 100%;
-  }
-  .five.buttons > .button {
-    width: 20%;
-  }
-  .six.buttons {
-    width: 100%;
-  }
-  .six.buttons > .button {
-    width: 16.666%;
-  }
-  .seven.buttons {
-    width: 100%;
-  }
-  .seven.buttons > .button {
-    width: 14.285%;
-  }
-  .eight.buttons {
-    width: 100%;
-  }
-  .eight.buttons > .button {
-    width: 12.500%;
-  }
-  .nine.buttons {
-    width: 100%;
-  }
-  .nine.buttons > .button {
-    width: 11.11%;
-  }
-  .ten.buttons {
-    width: 100%;
-  }
-  .ten.buttons > .button {
-    width: 10%;
-  }
-  .eleven.buttons {
-    width: 100%;
-  }
-  .eleven.buttons > .button {
-    width: 9.09%;
-  }
-  .twelve.buttons {
-    width: 100%;
-  }
-  .twelve.buttons > .button {
-    width: 8.3333%;
-  }
-  .fluid.vertical.buttons,
-  .fluid.vertical.buttons > .button {
-    display: flex;
-    width: auto;
-  }
-  .two.vertical.buttons > .button {
-    height: 50%;
-  }
-  .three.vertical.buttons > .button {
-    height: 33.333%;
-  }
-  .four.vertical.buttons > .button {
-    height: 25%;
-  }
-  .five.vertical.buttons > .button {
-    height: 20%;
-  }
-  .six.vertical.buttons > .button {
-    height: 16.666%;
-  }
-  .seven.vertical.buttons > .button {
-    height: 14.285%;
-  }
-  .eight.vertical.buttons > .button {
-    height: 12.500%;
-  }
-  .nine.vertical.buttons > .button {
-    height: 11.11%;
-  }
-  .ten.vertical.buttons > .button {
-    height: 10%;
-  }
-  .eleven.vertical.buttons > .button {
-    height: 9.09%;
-  }
-  .twelve.vertical.buttons > .button {
-    height: 8.3333%;
-  }
-}
+};
 
-/* src/button/css/variations/negative.css */
-@layer component {
-  .negative.buttons .button,
-  .negative.button {
-    background-color: var(--negative-color);
-    color: var(--negative-text-color);
-    text-shadow: var(--negative-text-shadow);
-    background-image: var(--colored-background-image);
+// packages/component/src/lit/renderer.js
+var LitRenderer = class _LitRenderer {
+  static helpers = Helpers;
+  static addHelper(name, helper) {
+    _LitRenderer.helpers[name] = helper;
   }
-  .negative.button {
-    box-shadow: var(--colored-box-shadow);
+  constructor({
+    ast,
+    data,
+    subTemplates
+  }) {
+    this.ast = ast || "";
+    this.data = data;
+    this.subTemplates = subTemplates;
+    this.resetHTML();
   }
-  .negative.buttons .button:hover,
-  .negative.button:hover {
-    background-color: var(--negative-color-hover);
-    color: var(--negative-text-color);
-    text-shadow: var(--negative-text-shadow);
+  resetHTML() {
+    this.html = [];
+    this.html.raw = [];
+    this.expressions = [];
   }
-  .negative.buttons .button:focus,
-  .negative.button:focus {
-    background-color: var(--negative-color-focus);
-    color: var(--negative-text-color);
-    text-shadow: var(--negative-text-shadow);
+  /*
+    Creates an AST representation of a template
+    this can be cached on the web component class
+  */
+  render({
+    ast = this.ast,
+    data = this.data
+  } = {}) {
+    this.resetHTML();
+    this.readAST({ ast, data });
+    this.clearTemp();
+    this.litTemplate = x.apply(this, [this.html, ...this.expressions]);
+    return this.litTemplate;
   }
-  .negative.buttons .button:active,
-  .negative.button:active {
-    background-color: var(--negative-color-down);
-    color: var(--negative-text-color);
-    text-shadow: var(--negative-text-shadow);
+  readAST({
+    ast = this.ast,
+    data = this.data
+  } = {}) {
+    each(ast, (node) => {
+      switch (node.type) {
+        case "html":
+          this.addHTML(node.html);
+          break;
+        case "expression":
+          const value = this.evaluateExpression(node.value, data, {
+            unsafeHTML: node.unsafeHTML,
+            asDirective: true
+          });
+          this.addValue(value);
+          break;
+        case "if":
+          this.addValue(this.evaluateConditional(node, data));
+          break;
+        case "each":
+          this.addValue(this.evaluateEach(node, data));
+          break;
+        case "template":
+          this.addValue(this.evaluateTemplate(node, data));
+          break;
+        case "slot":
+          if (node.name) {
+            this.addHTML(`<slot name="${node.name}"></slot>`);
+          } else {
+            this.addHTML(`<slot></slot>`);
+          }
+          break;
+      }
+    });
   }
-  .negative.buttons .active.button,
-  .negative.buttons .active.button:active,
-  .negative.active.button,
-  .negative.button .active.button:active {
-    background-color: var(--negative-color-active);
-    color: var(--negative-text-color);
-    text-shadow: var(--negative-text-shadow);
+  /*
+    The conditional directive takes an if condition and branches
+    but does not have access to LitRenderer and evaluateExpression
+    so we have to pass through functions that do this
+  */
+  evaluateConditional(node, data) {
+    const directiveMap = (value, key) => {
+      if (key == "branches") {
+        return value.map((branch) => mapObject(branch, directiveMap));
+      }
+      if (key == "condition") {
+        return () => this.evaluateExpression(value, data);
+      }
+      if (key == "content") {
+        return () => this.renderContent({ ast: value, data });
+      }
+      return value;
+    };
+    let conditionalArguments = mapObject(node, directiveMap);
+    return reactiveConditional(conditionalArguments);
   }
-  .basic.negative.buttons .button,
-  .basic.negative.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--negative-color) inset !important;
-    color: var(--negative-color) !important;
+  evaluateEach(node, data) {
+    const directiveMap = (value, key) => {
+      if (key == "over") {
+        return () => this.evaluateExpression(value, data);
+      }
+      if (key == "content") {
+        return (eachData) => this.renderContent({ ast: value, data: eachData });
+      }
+      return value;
+    };
+    let eachArguments = mapObject(node, directiveMap);
+    return reactiveEach(eachArguments, data);
   }
-  .basic.negative.buttons .button:hover,
-  .basic.negative.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-hover) inset !important;
-    color: var(--negative-color-hover) !important;
+  evaluateTemplate(node, data = {}) {
+    const getValue = (value) => this.evaluateExpression(value, data);
+    const getTemplateName = () => getValue(node.name);
+    const staticValues = mapObject(node.data || {}, (value) => {
+      return () => Reaction.nonreactive(() => getValue(value));
+    });
+    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
+      return () => getValue(value);
+    });
+    const templateData = {
+      ...staticValues,
+      ...reactiveValues
+    };
+    return renderTemplate({
+      subTemplates: this.subTemplates,
+      getTemplateName,
+      data: templateData,
+      parentTemplate: data
+    });
   }
-  .basic.negative.buttons .button:focus,
-  .basic.negative.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-focus) inset !important;
-    color: var(--negative-color-hover) !important;
+  // i.e foo.baz = { foo: { baz: 'value' } }
+  evaluateExpression(expression, data = this.data, { asDirective = false, unsafeHTML = false } = {}) {
+    if (typeof expression === "string") {
+      if (asDirective) {
+        return reactiveData(() => this.lookupExpressionValue(expression, data), { unsafeHTML });
+      } else {
+        return this.lookupExpressionValue(expression, data);
+      }
+    }
+    return expression;
   }
-  .basic.negative.buttons .active.button,
-  .basic.negative.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-active) inset !important;
-    color: var(--negative-color-down) !important;
+  // this evaluates an expression from right determining if something is an argument or a function
+  // then looking up the value
+  // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
+  lookupExpressionValue(expressionString = "", data = {}, { unsafeHTML = false } = {}) {
+    const stringRegExp = /^\'(.*)\'$/;
+    const stringMatches = expressionString.match(stringRegExp);
+    if (stringMatches && stringMatches.length > 0) {
+      return stringMatches[1];
+    }
+    const expressions = expressionString.split(" ").reverse();
+    let funcArguments = [];
+    let result;
+    each(expressions, (expression, index) => {
+      const getDeepValue = (obj, path) => path.split(".").reduce((acc, part) => {
+        const current = wrapFunction(acc)();
+        return current[part];
+      }, obj);
+      const getContext = () => {
+        const path = expression.split(".").slice(0, -1).join(".");
+        const context = getDeepValue(data, path);
+        return context;
+      };
+      let dataValue = getDeepValue(data, expression);
+      const helper = _LitRenderer.helpers[expression];
+      if (!dataValue && isFunction(helper)) {
+        dataValue = helper;
+      }
+      let stringMatches2;
+      if (isFunction(dataValue)) {
+        const boundFunc = dataValue.bind(getContext());
+        result = boundFunc(...funcArguments);
+      } else if (dataValue) {
+        result = dataValue?.constructor.name === "_ReactiveVar" ? dataValue.value : dataValue;
+      } else if ((stringMatches2 = stringRegExp.exec(expression)) !== null && stringMatches2.length > 1) {
+        result = stringMatches2[1];
+      } else if (!Number.isNaN(parseFloat(expression))) {
+        result = Number(expression);
+      } else {
+        result = void 0;
+      }
+      funcArguments.unshift(result);
+    });
+    return result;
   }
-  .basic.negative.buttons .button:active,
-  .basic.negative.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-down) inset !important;
-    color: var(--negative-color-down) !important;
+  addHTML(html) {
+    if (this.lastHTML) {
+      const lastHTML = this.html.pop();
+      html = `${lastHTML}${html}`;
+    }
+    this.html.push(html);
+    this.html.raw.push(String.raw({ raw: html }));
+    this.lastHTML = true;
   }
-  .buttons:not(.vertical) > .basic.primary.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
+  addHTMLSpacer() {
+    this.addHTML("");
   }
-}
+  addValue(expression) {
+    this.addHTMLSpacer();
+    this.expressions.push(expression);
+    this.lastHTML = false;
+    this.addHTMLSpacer();
+  }
+  // subtrees are rendered as separate contexts
+  renderContent({ ast, data, subTemplates }) {
+    return new _LitRenderer({ ast, data, subTemplates: this.subTemplates }).render();
+  }
+  clearTemp() {
+    delete this.lastHTML;
+  }
+};
 
-/* src/button/css/variations/positive.css */
-@layer component {
-  .positive.buttons .button,
-  .positive.button {
-    background-color: var(--positive-color);
-    color: var(--positive-text-color);
-    text-shadow: var(--positive-text-shadow);
-    background-image: var(--colored-background-image);
+// packages/component/src/lit/template.js
+var LitTemplate = class UITemplate {
+  static templateCount = 0;
+  constructor({
+    templateName,
+    ast,
+    template,
+    data,
+    css,
+    events: events2,
+    subTemplates,
+    createInstance: createInstance2,
+    parentTemplate,
+    // the parent template when nested
+    onCreated: onCreated2 = noop,
+    onRendered = noop,
+    onDestroyed = noop
+  }) {
+    if (!ast) {
+      const compiler = new TemplateCompiler(template);
+      ast = compiler.compile();
+    }
+    this.events = events2;
+    this.ast = ast;
+    this.css = css;
+    this.data = data || {};
+    this.templateName = templateName || this.getGenericTemplateName();
+    this.subTemplates = subTemplates;
+    this.createInstance = createInstance2;
+    this.onRenderedCallback = onRendered;
+    this.onDestroyedCallback = onDestroyed;
+    this.onCreatedCallback = onCreated2;
   }
-  .positive.button {
-    box-shadow: var(--colored-box-shadow);
+  // when rendered as a partial/subtemplate
+  setParent(parentTemplate) {
+    return this.parentTemplate = parentTemplate;
   }
-  .positive.buttons .button:hover,
-  .positive.button:hover {
-    background-color: var(--positive-color-hover);
-    color: var(--positive-text-color);
-    text-shadow: var(--positive-text-shadow);
+  getGenericTemplateName() {
+    LitTemplate.templateCount++;
+    return `Anonymous #${LitTemplate.templateCount}`;
   }
-  .positive.buttons .button:focus,
-  .positive.button:focus {
-    background-color: var(--positive-color-focus);
-    color: var(--positive-text-color);
-    text-shadow: var(--positive-text-shadow);
+  initialize() {
+    let tpl = this;
+    if (isFunction(this.createInstance)) {
+      this.tpl = {};
+      tpl = this.call(this.createInstance);
+      extend(this.tpl, tpl);
+    }
+    this.tpl.reaction = this.reaction;
+    this.tpl.templateName = this.templateName;
+    this.tpl.parent = () => this.parentTemplate;
+    this.onCreated = () => {
+      this.call(this.onCreatedCallback.bind(this));
+    };
+    this.onFirstRender = () => {
+      this.call(this.onFirstRenderCallback.bind(this));
+    };
+    this.onRendered = () => {
+      this.call(this.onRenderedCallback.bind(this));
+    };
+    this.onDestroyed = () => {
+      this.rendered = false;
+      this.clearReactions();
+      this.removeEvents();
+      this.call(this.onDestroyedCallback.bind(this));
+    };
+    this.renderer = new LitRenderer({
+      ast: this.ast,
+      data: this.getDataContext(),
+      subTemplates: this.subTemplates
+    });
   }
-  .positive.buttons .button:active,
-  .positive.button:active {
-    background-color: var(--positive-color-down);
-    color: var(--positive-text-color);
-    text-shadow: var(--positive-text-shadow);
+  async attach(renderRoot, { parentNode = renderRoot, startNode, endNode } = {}) {
+    this.renderRoot = renderRoot;
+    this.parentNode = parentNode;
+    this.startNode = startNode;
+    this.endNode = endNode;
+    this.attachEvents();
+    await this.attachStyles();
   }
-  .positive.buttons .active.button,
-  .positive.buttons .active.button:active,
-  .positive.active.button,
-  .positive.button .active.button:active {
-    background-color: var(--positive-color-active);
-    color: var(--positive-text-color);
-    text-shadow: var(--positive-text-shadow);
+  getDataContext() {
+    return {
+      ...this.tpl,
+      ...this.data
+    };
   }
-  .basic.positive.buttons .button,
-  .basic.positive.button {
-    box-shadow: 0px 0px 0px var(--basic-border-size) var(--positive-color) inset !important;
-    color: var(--positive-color) !important;
+  async attachStyles() {
+    if (!this.css) {
+      return;
+    }
+    if (!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
+      return;
+    }
+    const cssString = this.css;
+    if (!this.stylesheet) {
+      this.stylesheet = new CSSStyleSheet();
+      await this.stylesheet.replace(cssString);
+    }
+    let styles = Array.from(this.renderRoot.adoptedStyleSheets);
+    let hasStyles = styles.some((style) => isEqual(style.cssRules, this.stylesheet.cssRules));
+    if (!hasStyles) {
+      this.renderRoot.adoptedStyleSheets = [...this.renderRoot.adoptedStyleSheets, this.stylesheet];
+    }
   }
-  .basic.positive.buttons .button:hover,
-  .basic.positive.button:hover {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-hover) inset !important;
-    color: var(--positive-color-hover) !important;
+  attachEvents(events2 = this.events) {
+    if (!this.parentNode || !this.renderRoot) {
+      fatal("You must set a parent before attaching events");
+    }
+    const parseEventString = (eventString) => {
+      const parts = eventString.split(" ");
+      const eventName = parts[0];
+      parts.shift();
+      const selector = parts.join(" ");
+      return { eventName, selector };
+    };
+    this.eventController = new AbortController();
+    each(events2, (eventHandler, eventString) => {
+      const { eventName, selector } = parseEventString(eventString);
+      const template = this;
+      $2(this.renderRoot).on(eventName, selector, (event) => {
+        if (!this.isNodeInTemplate(event.target)) {
+          return;
+        }
+        const boundEvent = eventHandler.bind(event.target);
+        template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
+      }, this.eventController);
+    });
   }
-  .basic.positive.buttons .button:focus,
-  .basic.positive.button:focus {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-focus) inset !important;
-    color: var(--positive-color-hover) !important;
+  // Find the direct child of the renderRoot that is an ancestor of the event.target
+  // then confirm position
+  isNodeInTemplate(node) {
+    const getRootChild = (node2) => {
+      while (node2 && node2.parentNode !== this.parentNode) {
+        node2 = node2.parentNode;
+      }
+      return node2;
+    };
+    const isNodeInRange = (node2, startNode = this.startNode, endNode = this.endNode) => {
+      if (!startNode || !endNode) {
+        return true;
+      }
+      const startComparison = startNode.compareDocumentPosition(node2);
+      const endComparison = endNode.compareDocumentPosition(node2);
+      const isAfterStart = (startComparison & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+      const isBeforeEnd = (endComparison & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
+      return isAfterStart && isBeforeEnd;
+    };
+    return isNodeInRange(getRootChild(node));
   }
-  .basic.positive.buttons .active.button,
-  .basic.positive.active.button {
-    background: transparent !important;
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-active) inset !important;
-    color: var(--positive-color-down) !important;
+  attachEvent(eventHandler, eventString) {
   }
-  .basic.positive.buttons .button:active,
-  .basic.positive.button:active {
-    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-down) inset !important;
-    color: var(--positive-color-down) !important;
+  removeEvents() {
+    this.eventController.abort();
   }
-  .buttons:not(.vertical) > .basic.primary.button:not(:first-child) {
-    margin-left: var(--basic-colored-border-size);
+  render(additionalData = {}) {
+    if (!this.renderer) {
+      this.initialize();
+      console.log("finished initializing");
+      this.onCreated();
+    }
+    const html = this.renderer.render({
+      data: {
+        ...this.getDataContext(),
+        ...additionalData
+      }
+    });
+    if (!this.rendered) {
+      this.onRendered();
+    }
+    this.rendered = true;
+    return html;
   }
-}
+  /*******************************
+           DOM Helpers
+  *******************************/
+  // Rendered DOM (either shadow or regular)
+  $(selector) {
+    if (!this.renderRoot) {
+      fatal("Cannot query DOM unless render root specified.");
+    }
+    return $2(selector, this.renderRoot);
+  }
+  // calls callback if defined with consistent params and this context
+  call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
+    if (firstArg) {
+      args.unshift(firstArg);
+    }
+    if (additionalArgs) {
+      args.push(...additionalArgs);
+    }
+    if (isFunction(func)) {
+      return func.apply(this, args);
+    }
+  }
+  /*******************************
+           Reactive Helpers
+  *******************************/
+  reaction(reaction) {
+    if (!this.reactions) {
+      this.reactions = [];
+    }
+    this.reactions.push(Reaction.create(reaction));
+  }
+  clearReactions() {
+    each(this.reactions || [], (comp) => comp.stop());
+  }
+};
 
-/* src/button/css/variations/sizing.css */
-@layer component {
-  .mini.buttons .button,
-  .mini.buttons .or,
-  .mini.button {
-    font-size: var(--mini);
+// packages/component/src/web-component.js
+var WebComponentBase = class extends s3 {
+  // for use with light dom rendering
+  static scopedStyleSheet = null;
+  useLight = false;
+  createRenderRoot() {
+    this.useLight = this.getAttribute("expose") !== null;
+    if (this.useLight) {
+      this.applyScopedStyles(this.tagName, this.css);
+      this.storeOriginalContent.apply(this);
+      return this;
+    } else {
+      const renderRoot = super.createRenderRoot(this.css);
+      return renderRoot;
+    }
   }
-  .tiny.buttons .button,
-  .tiny.buttons .or,
-  .tiny.button {
-    font-size: var(--tiny);
+  applyScopedStyles(scopeSelector, css) {
+    if (!this.scopedStyleSheet) {
+      const scopedCSS = scopeStyles(css, scopeSelector);
+      this.scopedStyleSheet = new CSSStyleSheet();
+      this.scopedStyleSheet.replaceSync(scopedCSS);
+    }
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.scopedStyleSheet];
   }
-  .small.buttons .button,
-  .small.buttons .or,
-  .small.button {
-    font-size: var(--small);
+  storeOriginalContent() {
+    this.originalDOM = document.createElement("template");
+    this.originalDOM.innerHTML = this.innerHTML;
+    this.innerHTML = "";
   }
-  .buttons .button,
-  .buttons .or,
-  .button {
-    font-size: var(--medium);
+  slotContent() {
+    const $slots = this.$("slot");
+    $slots.each(($slot) => {
+      let html;
+      if ($slot.attr("name")) {
+        let slotName = $slot.attr("name");
+        const $slotContent = this.$$(`[slot="${slotName}"]`);
+        if ($slotContent.length) {
+          html = $slotContent.outerHTML();
+        }
+      } else {
+        const $originalDOM = this.$$(this.originalDOM.content);
+        const $defaultContent = $originalDOM.children().not("[slot]");
+        const defaultHTML = $defaultContent.html() || "";
+        const defaultText = $originalDOM.textNode() || "";
+        html = defaultHTML + defaultText;
+      }
+      if ($slot && html) {
+        $slot.html(html);
+      }
+    });
   }
-  .large.buttons .button,
-  .large.buttons .or,
-  .large.button {
-    font-size: var(--large);
+  firstUpdated() {
+    super.firstUpdated();
   }
-  .big.buttons .button,
-  .big.buttons .or,
-  .big.button {
-    font-size: var(--big);
+  updated() {
+    super.updated();
+    if (this.useLight) {
+      this.slotContent();
+    }
   }
-  .huge.buttons .button,
-  .huge.buttons .or,
-  .huge.button {
-    font-size: var(--huge);
+  /*******************************
+         Settings / Attrs
+  *******************************/
+  get defaultSettings() {
+    return {};
   }
-  .massive.buttons .button,
-  .massive.buttons .or,
-  .massive.button {
-    font-size: var(--massive);
+  /*******************************
+           DOM Helpers
+  *******************************/
+  // Rendered DOM (either shadow or regular)
+  $(selector) {
+    if (!this.renderRoot) {
+      console.error("Cannot query DOM until element has rendered.");
+    }
+    return $2(selector, this?.renderRoot);
   }
-}
+  // Original DOM (used for pulling slotted text)
+  $$(selector) {
+    return $2(selector, this.originalDOM.content);
+  }
+  // calls callback if defined with consistent params and this context
+  call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
+    if (firstArg) {
+      args.unshift(firstArg);
+    }
+    if (additionalArgs) {
+      args.push(...additionalArgs);
+    }
+    if (isFunction(func)) {
+      return func.apply(this, args);
+    }
+  }
+};
 
-/* src/button/css/variations/social.css */
-@layer component {
-  .facebook.button {
-    background-color: var(--facebook-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
+// packages/component/src/create-component.js
+var createComponent = ({
+  renderer = "lit",
+  template = "",
+  css = false,
+  spec = false,
+  templateName,
+  tagName,
+  events: events2 = {},
+  createInstance: createInstance2 = noop,
+  onCreated: onCreated2 = noop,
+  onRendered = noop,
+  onDestroyed = noop,
+  onAttributeChanged = noop,
+  subTemplates = [],
+  beforeRendered = noop
+} = {}) => {
+  const compiler = new TemplateCompiler(template);
+  const ast = compiler.compile();
+  let FAKE_SPEC;
+  if (tagName == "ui-button") {
+    FAKE_SPEC = {
+      settings: {
+        size: ["mini", "tiny", "small", "medium", "large", "huge", "massive"],
+        emphasis: ["primary", "secondary"],
+        icon: ["icon"],
+        labeled: ["right-labeled", ["labeled", "left-labeled"]]
+      }
+    };
   }
-  .facebook.button:hover {
-    background-color: var(--facebook-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
+  let litTemplate = new LitTemplate({
+    templateName: templateName || kebabToCamel(tagName),
+    ast,
+    css,
+    events: events2,
+    subTemplates,
+    onCreated: onCreated2,
+    onRendered,
+    onDestroyed,
+    createInstance: createInstance2
+  });
+  let webComponent;
+  if (tagName) {
+    webComponent = class UIWebComponent extends WebComponentBase {
+      static get styles() {
+        return r(css);
+      }
+      static get properties() {
+        if (tagName == "ui-button") {
+          return {
+            // attrs
+            size: { type: String, observe: true, reflect: false },
+            emphasis: { type: String, observe: true, reflect: false },
+            // example of value -> attr
+            small: { type: Boolean, reflect: false },
+            large: { type: Boolean, reflect: false },
+            primary: { type: Boolean, reflect: false },
+            secondary: { type: Boolean, reflect: false },
+            class: { type: String }
+          };
+        }
+        return {};
+      }
+      constructor() {
+        super();
+        this.css = css;
+        this.tpl = litTemplate.tpl;
+        this.template = litTemplate;
+      }
+      // callback when added to dom
+      connectedCallback() {
+        super.connectedCallback();
+        litTemplate.attach(this.renderRoot);
+        this.call(beforeRendered);
+      }
+      firstUpdated() {
+        super.firstUpdated();
+        this.call(onRendered);
+      }
+      // callback if removed from dom
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        litTemplate.removeEvents();
+        this.call(onDestroyed);
+      }
+      // callback if moves doc
+      adoptedCallback() {
+        super.adoptedCallback();
+        this.call(onMoved);
+      }
+      attributeChangedCallback(attribute, oldValue, newValue) {
+        this.adjustSettingFromAttribute(attribute, newValue);
+        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
+        super.attributeChangedCallback(attribute, oldValue, newValue);
+      }
+      /*
+              Semantic UI supports 3 dialects to support this we
+              check if attribute is a setting and reflect the value
+      
+              <ui-button size="large"> // verbose
+              <ui-button large> // concise
+              <ui-button class="large"> // classic
+            */
+      adjustSettingFromAttribute(attribute, value) {
+        const spec2 = FAKE_SPEC;
+        if (attribute == "class") {
+          each(value.split(" "), (className) => {
+            this.adjustSettingFromAttribute(className);
+          });
+        } else if (get(spec2.attribute, attribute)) {
+        } else {
+          const setting = get(reverseKeys(spec2.settings), attribute);
+          if (setting) {
+            const oldValue = this[setting];
+            this[setting] = attribute;
+            this.attributeChangedCallback(setting, oldValue, attribute);
+          }
+        }
+      }
+      getSettings() {
+        const settings = {};
+        each(webComponent.properties, (propSettings, property) => {
+          if (property == "class" || !propSettings.observe) {
+            return;
+          }
+          settings[property] = this[property];
+          if (!settings[this[property]]) {
+            settings[this[property]] = true;
+          }
+        });
+        return settings;
+      }
+      getUIClasses() {
+        const classes = [];
+        each(webComponent.properties, (settings, property) => {
+          if (property == "class" || !settings.observe) {
+            return;
+          }
+          classes.push(this[property]);
+        });
+        const classString = unique(classes).filter(Boolean).join(" ");
+        return classString;
+      }
+      getDataContext() {
+        return {
+          ...this.tpl,
+          ...this.getSettings(),
+          ui: this.getUIClasses()
+        };
+      }
+      render() {
+        const html = litTemplate.render(this.getDataContext());
+        return html;
+      }
+    };
+    customElements.define(tagName, webComponent);
   }
-  .facebook.button:active {
-    background-color: var(--facebook-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .twitter.button {
-    background-color: var(--twitter-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
-  }
-  .twitter.button:hover {
-    background-color: var(--twitter-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .twitter.button:active {
-    background-color: var(--twitter-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .google.plus.button {
-    background-color: var(--google-plus-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
-  }
-  .google.plus.button:hover {
-    background-color: var(--google-plus-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .google.plus.button:active {
-    background-color: var(--google-plus-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .linkedin.button {
-    background-color: var(--linked-in-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .linkedin.button:hover {
-    background-color: var(--linked-in-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .linkedin.button:active {
-    background-color: var(--linked-in-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .youtube.button {
-    background-color: var(--youtube-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
-  }
-  .youtube.button:hover {
-    background-color: var(--youtube-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .youtube.button:active {
-    background-color: var(--youtube-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .instagram.button {
-    background-color: var(--instagram-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
-  }
-  .instagram.button:hover {
-    background-color: var(--instagram-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .instagram.button:active {
-    background-color: var(--instagram-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .pinterest.button {
-    background-color: var(--pinterest-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
-  }
-  .pinterest.button:hover {
-    background-color: var(--pinterest-hover-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .pinterest.button:active {
-    background-color: var(--pinterest-down-color);
-    color: var(--inverted-text-color);
-    text-shadow: var(--inverted-text-shadow);
-  }
-  .vk.button {
-    background-color: var(--vk-color);
-    color: var(--white);
-    background-image: var(--colored-background-image);
-    box-shadow: var(--colored-box-shadow);
-  }
-  .vk.button:hover {
-    background-color: var(--vk-hover-color);
-    color: var(--white);
-  }
-  .vk.button:active {
-    background-color: var(--vk-down-color);
-    color: var(--white);
-  }
-}
+  return tagName ? webComponent : litTemplate;
+};
 
-/* src/button/css/variations/vertical.css */
-@layer component {
-  .vertical.buttons {
-    display: inline-flex;
-    flex-direction: column;
-  }
-  .vertical.buttons .button {
-    display: block;
-    float: none;
-    width: 100%;
-    margin: var(--vertical-group-offset);
-    box-shadow: var(--vertical-box-shadow);
-    border-radius: 0em;
-  }
-  .vertical.buttons .button:first-child {
-    border-top-left-radius: var(--border-radius);
-    border-top-right-radius: var(--border-radius);
-  }
-  .vertical.buttons .button:last-child {
-    margin-bottom: 0px;
-    border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
-  }
-  .vertical.buttons .button:only-child {
-    border-radius: var(--border-radius);
-  }
-}
+// src/button/button.css
+var button_default = '/* src/button/css/content/button.css */\n@layer component {\n  .button {\n    cursor: pointer;\n    display: inline-block;\n    min-height: 1em;\n    font-size: var(--medium);\n    border: none;\n    vertical-align: var(--vertical-align);\n    background: var(--background);\n    color: var(--text-color);\n    font-family: var(--font-family);\n    margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;\n    padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));\n    text-transform: var(--text-transform);\n    text-shadow: var(--text-shadow);\n    font-weight: var(--font-weight);\n    line-height: var(--line-height);\n    font-style: normal;\n    text-align: center;\n    text-decoration: none;\n    border-radius: var(--border-radius);\n    box-shadow: var(--box-shadow);\n    user-select: none;\n    transition: var(--transition);\n    will-change: var(--will-change);\n    -webkit-tap-highlight-color: var(--tap-color);\n    outline: none;\n  }\n}\n\n/* src/button/css/group/buttons.css */\n@layer component {\n  .buttons {\n    display: inline-flex;\n    flex-direction: row;\n    font-size: 0em;\n    vertical-align: baseline;\n    margin: var(--vertical-margin) var(--horizontal-margin) 0em 0em;\n  }\n  :scope:not(.basic):not(.inverted) {\n    box-shadow: var(--group-box-shadow);\n  }\n  &::after {\n    content: ".";\n    display: block;\n    height: 0;\n    clear: both;\n    visibility: hidden;\n  }\n  .buttons .button {\n    flex: 1 0 auto;\n    border-radius: 0em;\n    margin: var(--group-button-offset);\n  }\n  .buttons > .button:not(.basic):not(.inverted),\n  .buttons:not(.basic):not(.inverted) > .button {\n    box-shadow: var(--group-button-box-shadow);\n  }\n  .buttons .button:first-child {\n    border-left: none;\n    margin-left: 0em;\n    border-top-left-radius: var(--border-radius);\n    border-bottom-left-radius: var(--border-radius);\n  }\n  .buttons .button:last-child {\n    border-top-right-radius: var(--border-radius);\n    border-bottom-right-radius: var(--border-radius);\n  }\n}\n\n/* src/button/css/types/animated.css */\n@layer component {\n  .animated.button {\n    position: relative;\n    overflow: hidden;\n    padding-right: 0em !important;\n    vertical-align: var(--animated-vertical-align);\n    z-index: var(--animated-z-index);\n  }\n  .animated.button .content {\n    will-change: transform, opacity;\n  }\n  .animated.button .visible.content {\n    position: relative;\n    margin-right: var(--horizontal-padding);\n  }\n  .animated.button .hidden.content {\n    position: absolute;\n    width: 100%;\n  }\n  .animated.button .visible.content,\n  .animated.button .hidden.content {\n    transition: right var(--animation-duration) var(--animation-easing) 0s;\n  }\n  .animated.button .visible.content {\n    left: auto;\n    right: 0%;\n  }\n  .animated.button .hidden.content {\n    top: 50%;\n    left: auto;\n    right: -100%;\n    margin-top: calc(var(--line-height) / 2 * -1);\n  }\n  .animated.button:focus .visible.content,\n  .animated.button:hover .visible.content {\n    left: auto;\n    right: 200%;\n  }\n  .animated.button:focus .hidden.content,\n  .animated.button:hover .hidden.content {\n    left: auto;\n    right: 0%;\n  }\n  .vertical.animated.button .visible.content,\n  .vertical.animated.button .hidden.content {\n    transition: top var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);\n  }\n  .vertical.animated.button .visible.content {\n    transform: translateY(0%);\n    right: auto;\n  }\n  .vertical.animated.button .hidden.content {\n    top: -50%;\n    left: 0%;\n    right: auto;\n  }\n  .vertical.animated.button:focus .visible.content,\n  .vertical.animated.button:hover .visible.content {\n    transform: translateY(200%);\n    right: auto;\n  }\n  .vertical.animated.button:focus .hidden.content,\n  .vertical.animated.button:hover .hidden.content {\n    top: 50%;\n    right: auto;\n  }\n  .fade.animated.button .visible.content,\n  .fade.animated.button .hidden.content {\n    transition: opacity var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);\n  }\n  .fade.animated.button .visible.content {\n    left: auto;\n    right: auto;\n    opacity: 1;\n    transform: scale(1);\n  }\n  .fade.animated.button .hidden.content {\n    opacity: 0;\n    left: 0%;\n    right: auto;\n    transform: scale(var(--fade-scale-high));\n  }\n  .fade.animated.button:focus .visible.content,\n  .fade.animated.button:hover .visible.content {\n    left: auto;\n    right: auto;\n    opacity: 0;\n    transform: scale(var(--fade-scale-low));\n  }\n  .fade.animated.button:focus .hidden.content,\n  .fade.animated.button:hover .hidden.content {\n    left: 0%;\n    right: auto;\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n/* src/button/css/types/emphasis.css */\n@layer component {\n  .primary.buttons .button,\n  .primary.button {\n    background-color: var(--primary-color);\n    color: var(--primary-text-color);\n    text-shadow: var(--primary-text-shadow);\n    background-image: var(--primary-background-image);\n  }\n  .primary.button {\n    box-shadow: var(--primary-box-shadow);\n  }\n  .primary.buttons .button:hover,\n  .primary.button:hover {\n    background-color: var(--primary-color-hover);\n    color: var(--primary-text-color);\n    text-shadow: var(--primary-text-shadow);\n  }\n  .primary.buttons .button:focus,\n  .primary.button:focus {\n    background-color: var(--primary-color-focus);\n    color: var(--primary-text-color);\n    text-shadow: var(--primary-text-shadow);\n  }\n  .primary.buttons .button:active,\n  .primary.button:active {\n    background-color: var(--primary-color-down);\n    color: var(--primary-text-color);\n    text-shadow: var(--primary-text-shadow);\n  }\n  .primary.buttons .active.button,\n  .primary.buttons .active.button:active,\n  .primary.active.button,\n  .primary.button .active.button:active {\n    background-color: var(--primary-color-active);\n    color: var(--primary-text-color);\n    text-shadow: var(--primary-text-shadow);\n  }\n  .secondary.buttons .button,\n  .secondary.button {\n    background-color: var(--secondary-color);\n    color: var(--secondary-text-color);\n    text-shadow: var(--secondary-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .secondary.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .secondary.buttons .button:hover,\n  .secondary.button:hover {\n    background-color: var(--secondary-color-hover);\n    color: var(--secondary-text-color);\n    text-shadow: var(--secondary-text-shadow);\n  }\n  .secondary.buttons .button:focus,\n  .secondary.button:focus {\n    background-color: var(--secondary-color-focus);\n    color: var(--secondary-text-color);\n    text-shadow: var(--secondary-text-shadow);\n  }\n  .secondary.buttons .button:active,\n  .secondary.button:active {\n    background-color: var(--secondary-color-down);\n    color: var(--secondary-text-color);\n    text-shadow: var(--secondary-text-shadow);\n  }\n  .secondary.buttons .active.button,\n  .secondary.buttons .active.button:active,\n  .secondary.active.button,\n  .secondary.button .active.button:active {\n    background-color: var(--secondary-color-active);\n    color: var(--secondary-text-color);\n    text-shadow: var(--secondary-text-shadow);\n  }\n}\n\n/* src/button/css/types/icon.css */\n@layer component {\n  .icon.buttons .button,\n  .icon.button {\n    padding: var(--vertical-padding) var(--vertical-padding) (var(--vertical-padding) + var(--shadow-offset));\n  }\n  .icon.buttons .button > .icon,\n  .icon.button > .icon {\n    opacity: var(--icon-button-opacity);\n    margin: 0em !important;\n    vertical-align: top;\n  }\n}\n\n/* src/button/css/types/labeled.css */\n@layer component {\n  .labeled.button:not(.icon) {\n    display: inline-flex;\n    flex-direction: row;\n    background: none !important;\n    padding: 0px !important;\n    border: none !important;\n    box-shadow: none !important;\n  }\n  .labeled.button > .button {\n    margin: 0px;\n  }\n  .labeled.button > .label {\n    display: flex;\n    align-items: var(--labeled-label-align);\n    margin: 0px 0px 0px var(--labeled-label-border-offset) !important;\n    padding: var(--labeled-label-padding);\n    font-size: var(--labeled-label-font-size);\n    border-color: var(--labeled-label-border-color);\n  }\n  .labeled.button > .tag.label::before {\n    width: var(--labeled-tag-label-size);\n    height: var(--labeled-tag-label-size);\n  }\n  .labeled.button:not([class*="left labeled"]) > .button {\n    border-top-right-radius: 0px;\n    border-bottom-right-radius: 0px;\n  }\n  .labeled.button:not([class*="left labeled"]) > .label {\n    border-top-left-radius: 0px;\n    border-bottom-left-radius: 0px;\n  }\n  [class*="left labeled"].button > .button {\n    border-top-left-radius: 0px;\n    border-bottom-left-radius: 0px;\n  }\n  [class*="left labeled"].button > .label {\n    border-top-right-radius: 0px;\n    border-bottom-right-radius: 0px;\n  }\n}\n\n/* src/button/css/types/labeled-icon.css */\n@layer component {\n  .labeled.icon.buttons .button,\n  .labeled.icon.button {\n    position: relative;\n    padding-left: var(--labeled-icon-padding) !important;\n    padding-right: var(--horizontal-padding) !important;\n  }\n  .labeled.icon.buttons > .button > .icon,\n  .labeled.icon.button > .icon {\n    position: absolute;\n    height: 100%;\n    line-height: 1;\n    border-radius: 0px;\n    border-top-left-radius: inherit;\n    border-bottom-left-radius: inherit;\n    text-align: center;\n    margin: var(--labeled-icon-margin);\n    width: var(--labeled-icon-width);\n    background-color: var(--labeled-icon-background-color);\n    color: var(--labeled-icon-color);\n    box-shadow: var(--labeled-icon-left-shadow);\n  }\n  .labeled.icon.buttons > .button > .icon,\n  .labeled.icon.button > .icon {\n    top: 0em;\n    left: 0em;\n  }\n  [class*="right labeled"].icon.button {\n    padding-right: var(--labeled-icon-padding) !important;\n    padding-left: var(--horizontal-padding) !important;\n  }\n  [class*="right labeled"].icon.button > .icon {\n    left: auto;\n    right: 0em;\n    border-radius: 0px;\n    border-top-right-radius: inherit;\n    border-bottom-right-radius: inherit;\n    box-shadow: var(--labeled-icon-right-shadow);\n  }\n  .labeled.icon.buttons > .button > .icon::before,\n  .labeled.icon.button > .icon::before,\n  .labeled.icon.buttons > .button > .icon::after,\n  .labeled.icon.button > .icon::after {\n    display: block;\n    position: absolute;\n    width: 100%;\n    top: 50%;\n    text-align: center;\n    transform: translateY(-50%);\n  }\n  .labeled.icon.button > .icon.loading {\n    animation: none;\n  }\n  .labeled.icon.button > .icon.loading::before {\n    animation: labeled-button-icon-loading var(--loading-icon-duration) linear infinite;\n  }\n  @keyframes labeled-button-icon-loading {\n    from {\n      transform: translateY(-50%) rotate(0deg);\n    }\n    to {\n      transform: translateY(-50%) rotate(360deg);\n    }\n  }\n  .labeled.icon.buttons .button > .icon {\n    border-radius: 0em;\n  }\n  .labeled.icon.buttons .button:first-child > .icon {\n    border-top-left-radius: var(--border-radius);\n    border-bottom-left-radius: var(--border-radius);\n  }\n  .labeled.icon.buttons .button:last-child > .icon {\n    border-top-right-radius: var(--border-radius);\n    border-bottom-right-radius: var(--border-radius);\n  }\n  .vertical.labeled.icon.buttons .button:first-child > .icon {\n    border-radius: 0em;\n    border-top-left-radius: var(--border-radius);\n  }\n  .vertical.labeled.icon.buttons .button:last-child > .icon {\n    border-radius: 0em;\n    border-bottom-left-radius: var(--border-radius);\n  }\n  .fluid[class*="left labeled"].icon.button,\n  .fluid[class*="right labeled"].icon.button {\n    padding-left: var(--horizontal-padding) !important;\n    padding-right: var(--horizontal-padding) !important;\n  }\n}\n\n/* src/button/css/types/toggle.css */\n@layer component {\n  .toggle.buttons .active.button,\n  .buttons .button.toggle.active,\n  .button.toggle.active {\n    background-color: var(--positive-color) !important;\n    box-shadow: none !important;\n    text-shadow: var(--inverted-text-shadow);\n    color: var(--inverted-text-color) !important;\n  }\n  .button.toggle.active:hover {\n    background-color: var(--positive-color-hover) !important;\n    text-shadow: var(--inverted-text-shadow);\n    color: var(--inverted-text-color) !important;\n  }\n}\n\n/* src/button/css/states/hover.css */\n@layer component {\n  .button:hover {\n    background-color: var(--hover-background-color);\n    background-image: var(--hover-background-image);\n    box-shadow: var(--hover-box-shadow);\n    color: var(--hover-color);\n  }\n  .button:hover .icon {\n    opacity: var(--hover-icon-opacity);\n  }\n}\n\n/* src/button/css/states/focus.css */\n@layer component {\n  .button:focus {\n    background-color: var(--focus-background-color);\n    color: var(--focus-color);\n    background-image: var(--focus-background-image) !important;\n    box-shadow: var(--focus-box-shadow) !important;\n  }\n  .button:focus .icon {\n    opacity: var(--icon-focus-opacity);\n  }\n}\n\n/* src/button/css/states/pressed.css */\n@layer component {\n  .button:active,\n  .active.button:active {\n    background-color: var(--pressed-background-color);\n    background-image: var(--pressed-background-image);\n    color: var(--pressed-color);\n    box-shadow: var(--pressed-box-shadow);\n  }\n}\n\n/* src/button/css/states/active.css */\n@layer component {\n  .active.button {\n    background-color: var(--active-background-color);\n    background-image: var(--active-background-image);\n    box-shadow: var(--active-box-shadow);\n    color: var(--active-color);\n  }\n  .active.button:hover {\n    background-color: var(--active-hover-background-color);\n    background-image: var(--active-hover-background-image);\n    color: var(--active-hover-color);\n    box-shadow: var(--active-hover-box-shadow);\n  }\n  .active.button:active {\n    background-color: var(--active-down-background-color);\n    background-image: var(--active-down-background-image);\n    color: var(--active-down-color);\n    box-shadow: var(--active-down-box-shadow);\n  }\n}\n\n/* src/button/css/states/disabled.css */\n@layer component {\n  .disabled.button,\n  .disabled.button:hover,\n  .disabled.active.button {\n    cursor: default;\n    pointer-events: none !important;\n    opacity: var(--disabled-opacity) !important;\n    background-image: var(--disabled-background-image) !important;\n    box-shadow: var(--disabled-background-image) !important;\n  }\n}\n\n/* src/button/css/states/loading.css */\n@layer component {\n  .loading.button {\n    position: relative;\n    cursor: default;\n    text-shadow: none !important;\n    color: transparent !important;\n    opacity: var(--loading-opacity);\n    pointer-events: var(--loading-pointer-events);\n    transition: var(--loading-transition);\n  }\n  .loading.button::before {\n    position: absolute;\n    content: "";\n    top: 50%;\n    left: 50%;\n    margin: var(--loader-margin);\n    width: var(--loader-size);\n    height: var(--loader-size);\n    border-radius: var(--circular-radius);\n    border: var(--loader-line-width) solid var(--inverted-loader-fill-color);\n  }\n  .loading.button::after {\n    position: absolute;\n    content: "";\n    top: 50%;\n    left: 50%;\n    margin: var(--loader-margin);\n    width: var(--loader-size);\n    height: var(--loader-size);\n    animation: button-spin var(--loader-speed-linear);\n    animation-iteration-count: infinite;\n    border-radius: var(--circular-radius);\n    border-color: var(--inverted-loader-line-color) transparent transparent;\n    border-style: solid;\n    border-width: var(--loader-line-width);\n    box-shadow: 0px 0px 0px 1px transparent;\n  }\n  @keyframes button-spin {\n    from {\n      transform: rotate(0deg);\n    }\n    to {\n      transform: rotate(360deg);\n    }\n  }\n}\n\n/* src/button/css/variations/basic.css */\n@layer component {\n  .basic.buttons .button,\n  .basic.button {\n    background: var(--basic-background) !important;\n    color: var(--basic-text-color) !important;\n    font-weight: var(--basic-font-weight);\n    border-radius: var(--basic-border-radius);\n    text-transform: var(--basic-text-transform);\n    text-shadow: none !important;\n    box-shadow: var(--basic-box-shadow);\n  }\n  .basic.buttons {\n    box-shadow: var(--basic-group-box-shadow);\n    border: var(--basic-group-border);\n    border-radius: var(--border-radius);\n  }\n  .basic.buttons .button {\n    border-radius: 0em;\n  }\n  .basic.buttons .button:hover,\n  .basic.button:hover {\n    background: var(--basic-hover-background) !important;\n    color: var(--basic-hover-text-color) !important;\n    box-shadow: var(--basic-hover-box-shadow);\n  }\n  .basic.buttons .button:focus,\n  .basic.button:focus {\n    background: var(--basic-focus-background) !important;\n    color: var(--basic-focus-text-color) !important;\n    box-shadow: var(--basic-focus-box-shadow);\n  }\n  .basic.buttons .button:active,\n  .basic.button:active {\n    background: var(--basic-down-background) !important;\n    color: var(--basic-down-text-color) !important;\n    box-shadow: var(--basic-down-box-shadow);\n  }\n  .basic.buttons .active.button,\n  .basic.active.button {\n    background: var(--basic-active-background) !important;\n    box-shadow: var(--basic-active-box-shadow) !important;\n    color: var(--basic-active-text-color) !important;\n  }\n  .basic.buttons .active.button:hover,\n  .basic.active.button:hover {\n    background-color: var(--transparent-black);\n  }\n  .basic.buttons .button:hover {\n    box-shadow: var(--basic-hover-box-shadow) inset;\n  }\n  .basic.buttons .button:active {\n    box-shadow: var(--basic-down-box-shadow) inset;\n  }\n  .basic.buttons .active.button {\n    box-shadow: var(--basic-active-box-shadow) !important;\n  }\n  .basic.inverted.buttons .button,\n  .basic.inverted.button {\n    background-color: transparent !important;\n    color: var(--off-white) !important;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n  }\n  .basic.inverted.buttons .button:hover,\n  .basic.inverted.button:hover {\n    color: var(--white) !important;\n    box-shadow: var(--basic-inverted-hover-box-shadow) !important;\n  }\n  .basic.inverted.buttons .button:focus,\n  .basic.inverted.button:focus {\n    color: var(--white) !important;\n    box-shadow: var(--basic-inverted-focus-box-shadow) !important;\n  }\n  .basic.inverted.buttons .button:active,\n  .basic.inverted.button:active {\n    background-color: var(--transparent-white) !important;\n    color: var(--white) !important;\n    box-shadow: var(--basic-inverted-down-box-shadow) !important;\n  }\n  .basic.inverted.buttons .active.button,\n  .basic.inverted.active.button {\n    background-color: var(--transparent-white);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    box-shadow: var(--basic-inverted-active-box-shadow);\n  }\n  .basic.inverted.buttons .active.button:hover,\n  .basic.inverted.active.button:hover {\n    background-color: var(--strong-transparent-white);\n    box-shadow: var(--basic-inverted-hover-box-shadow) !important;\n  }\n  .basic.buttons .button {\n    border-left: var(--basic-group-border);\n    box-shadow: none;\n  }\n  .basic.vertical.buttons .button {\n    border-left: none;\n  }\n  .basic.vertical.buttons .button {\n    border-left-width: 0px;\n    border-top: var(--basic-group-border);\n  }\n  .basic.vertical.buttons .button:first-child {\n    border-top-width: 0px;\n  }\n}\n\n/* src/button/css/variations/attached.css */\n@layer component {\n  .attached.button {\n    position: relative;\n    display: block;\n    margin: 0em;\n    border-radius: 0em;\n    box-shadow: var(--attached-box-shadow) !important;\n  }\n  .attached.top.button {\n    border-radius: var(--border-radius) var(--border-radius) 0em 0em;\n  }\n  .attached.bottom.button {\n    border-radius: 0em 0em var(--border-radius) var(--border-radius);\n  }\n  .left.attached.button {\n    display: inline-block;\n    border-left: none;\n    text-align: right;\n    padding-right: var(--attached-horizontal-padding);\n    border-radius: var(--border-radius) 0em 0em var(--border-radius);\n  }\n  .right.attached.button {\n    display: inline-block;\n    text-align: left;\n    padding-left: var(--attached-horizontal-padding);\n    border-radius: 0em var(--border-radius) var(--border-radius) 0em;\n  }\n  .attached.buttons {\n    position: relative;\n    display: flex;\n    border-radius: 0em;\n    width: auto !important;\n    z-index: var(--attached-z-index);\n    margin-left: var(--attached-offset);\n    margin-right: var(--attached-offset);\n  }\n  .attached.buttons .button {\n    margin: 0em;\n  }\n  .attached.buttons .button:first-child {\n    border-radius: 0em;\n  }\n  .attached.buttons .button:last-child {\n    border-radius: 0em;\n  }\n  [class*="top attached"].buttons {\n    margin-bottom: var(--attached-offset);\n    border-radius: var(--border-radius) var(--border-radius) 0em 0em;\n  }\n  [class*="top attached"].buttons .button:first-child {\n    border-radius: var(--border-radius) 0em 0em 0em;\n  }\n  [class*="top attached"].buttons .button:last-child {\n    border-radius: 0em var(--border-radius) 0em 0em;\n  }\n  [class*="bottom attached"].buttons {\n    margin-top: var(--attached-offset);\n    border-radius: 0em 0em var(--border-radius) var(--border-radius);\n  }\n  [class*="bottom attached"].buttons .button:first-child {\n    border-radius: 0em 0em 0em var(--border-radius);\n  }\n  [class*="bottom attached"].buttons .button:last-child {\n    border-radius: 0em 0em var(--border-radius) 0em;\n  }\n  [class*="left attached"].buttons {\n    display: inline-flex;\n    margin-right: 0em;\n    margin-left: var(--attached-offset);\n    border-radius: 0em var(--border-radius) var(--border-radius) 0em;\n  }\n  [class*="left attached"].buttons .button:first-child {\n    margin-left: var(--attached-offset);\n    border-radius: 0em var(--border-radius) 0em 0em;\n  }\n  [class*="left attached"].buttons .button:last-child {\n    margin-left: var(--attached-offset);\n    border-radius: 0em 0em var(--border-radius) 0em;\n  }\n  [class*="right attached"].buttons {\n    display: inline-flex;\n    margin-left: 0em;\n    margin-right: var(--attached-offset);\n    border-radius: var(--border-radius) 0em 0em var(--border-radius);\n  }\n  [class*="right attached"].buttons .button:first-child {\n    margin-left: var(--attached-offset);\n    border-radius: var(--border-radius) 0em 0em 0em;\n  }\n  [class*="right attached"].buttons .button:last-child {\n    margin-left: var(--attached-offset);\n    border-radius: 0em 0em 0em var(--border-radius);\n  }\n}\n\n/* src/button/css/variations/circular.css */\n@layer component {\n  .circular.button {\n    border-radius: 10em;\n  }\n  .circular.button > .icon {\n    width: 1em;\n    vertical-align: baseline;\n  }\n}\n\n/* src/button/css/variations/colored.css */\n@layer component {\n  .black.buttons .button,\n  .black.button {\n    background-color: var(--black);\n    color: var(--black-text-color);\n    text-shadow: var(--black-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .black.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .black.buttons .button:hover,\n  .black.button:hover {\n    background-color: var(--black-hover);\n    color: var(--black-text-color);\n    text-shadow: var(--black-text-shadow);\n  }\n  .black.buttons .button:focus,\n  .black.button:focus {\n    background-color: var(--black-focus);\n    color: var(--black-text-color);\n    text-shadow: var(--black-text-shadow);\n  }\n  .black.buttons .button:active,\n  .black.button:active {\n    background-color: var(--black-down);\n    color: var(--black-text-color);\n    text-shadow: var(--black-text-shadow);\n  }\n  .black.buttons .active.button,\n  .black.buttons .active.button:active,\n  .black.active.button,\n  .black.button .active.button:active {\n    background-color: var(--black-active);\n    color: var(--black-text-color);\n    text-shadow: var(--black-text-shadow);\n  }\n  .basic.black.buttons .button,\n  .basic.black.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--black) inset !important;\n    color: var(--black) !important;\n  }\n  .basic.black.buttons .button:hover,\n  .basic.black.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-hover) inset !important;\n    color: var(--black-hover) !important;\n  }\n  .basic.black.buttons .button:focus,\n  .basic.black.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-focus) inset !important;\n    color: var(--black-hover) !important;\n  }\n  .basic.black.buttons .active.button,\n  .basic.black.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-active) inset !important;\n    color: var(--black-down) !important;\n  }\n  .basic.black.buttons .button:active,\n  .basic.black.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--black-down) inset !important;\n    color: var(--black-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.black.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.black.buttons .button,\n  .inverted.black.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--solid-border-color) inset !important;\n    color: var(--inverted-text-color);\n  }\n  .inverted.black.buttons .button:hover,\n  .inverted.black.button:hover,\n  .inverted.black.buttons .button:focus,\n  .inverted.black.button:focus,\n  .inverted.black.buttons .button.active,\n  .inverted.black.button.active,\n  .inverted.black.buttons .button:active,\n  .inverted.black.button:active {\n    box-shadow: none !important;\n    color: var(--light-black-text-color);\n  }\n  .inverted.black.buttons .button:hover,\n  .inverted.black.button:hover {\n    background-color: var(--light-black-hover);\n  }\n  .inverted.black.buttons .button:focus,\n  .inverted.black.button:focus {\n    background-color: var(--light-black-focus);\n  }\n  .inverted.black.buttons .active.button,\n  .inverted.black.active.button {\n    background-color: var(--light-black-active);\n  }\n  .inverted.black.buttons .button:active,\n  .inverted.black.button:active {\n    background-color: var(--light-black-down);\n  }\n  .inverted.black.basic.buttons .button,\n  .inverted.black.buttons .basic.button,\n  .inverted.black.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.black.basic.buttons .button:hover,\n  .inverted.black.buttons .basic.button:hover,\n  .inverted.black.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-hover) inset !important;\n    color: var(--white) !important;\n  }\n  .inverted.black.basic.buttons .button:focus,\n  .inverted.black.basic.buttons .button:focus,\n  .inverted.black.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-focus) inset !important;\n    color: var(--light-black) !important;\n  }\n  .inverted.black.basic.buttons .active.button,\n  .inverted.black.buttons .basic.active.button,\n  .inverted.black.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-active) inset !important;\n    color: var(--white) !important;\n  }\n  .inverted.black.basic.buttons .button:active,\n  .inverted.black.buttons .basic.button:active,\n  .inverted.black.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-black-down) inset !important;\n    color: var(--white) !important;\n  }\n  .grey.buttons .button,\n  .grey.button {\n    background-color: var(--grey);\n    color: var(--grey-text-color);\n    text-shadow: var(--grey-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .grey.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .grey.buttons .button:hover,\n  .grey.button:hover {\n    background-color: var(--grey-hover);\n    color: var(--grey-text-color);\n    text-shadow: var(--grey-text-shadow);\n  }\n  .grey.buttons .button:focus,\n  .grey.button:focus {\n    background-color: var(--grey-focus);\n    color: var(--grey-text-color);\n    text-shadow: var(--grey-text-shadow);\n  }\n  .grey.buttons .button:active,\n  .grey.button:active {\n    background-color: var(--grey-down);\n    color: var(--grey-text-color);\n    text-shadow: var(--grey-text-shadow);\n  }\n  .grey.buttons .active.button,\n  .grey.buttons .active.button:active,\n  .grey.active.button,\n  .grey.button .active.button:active {\n    background-color: var(--grey-active);\n    color: var(--grey-text-color);\n    text-shadow: var(--grey-text-shadow);\n  }\n  .basic.grey.buttons .button,\n  .basic.grey.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--grey) inset !important;\n    color: var(--grey) !important;\n  }\n  .basic.grey.buttons .button:hover,\n  .basic.grey.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-hover) inset !important;\n    color: var(--grey-hover) !important;\n  }\n  .basic.grey.buttons .button:focus,\n  .basic.grey.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-focus) inset !important;\n    color: var(--grey-hover) !important;\n  }\n  .basic.grey.buttons .active.button,\n  .basic.grey.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-active) inset !important;\n    color: var(--grey-down) !important;\n  }\n  .basic.grey.buttons .button:active,\n  .basic.grey.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--grey-down) inset !important;\n    color: var(--grey-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.grey.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.grey.buttons .button,\n  .inverted.grey.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--solid-border-color) inset !important;\n    color: var(--inverted-text-color);\n  }\n  .inverted.grey.buttons .button:hover,\n  .inverted.grey.button:hover,\n  .inverted.grey.buttons .button:focus,\n  .inverted.grey.button:focus,\n  .inverted.grey.buttons .button.active,\n  .inverted.grey.button.active,\n  .inverted.grey.buttons .button:active,\n  .inverted.grey.button:active {\n    box-shadow: none !important;\n    color: var(--light-grey-text-color);\n  }\n  .inverted.grey.buttons .button:hover,\n  .inverted.grey.button:hover {\n    background-color: var(--light-grey-hover);\n  }\n  .inverted.grey.buttons .button:focus,\n  .inverted.grey.button:focus {\n    background-color: var(--light-grey-focus);\n  }\n  .inverted.grey.buttons .active.button,\n  .inverted.grey.active.button {\n    background-color: var(--light-grey-active);\n  }\n  .inverted.grey.buttons .button:active,\n  .inverted.grey.button:active {\n    background-color: var(--light-grey-down);\n  }\n  .inverted.grey.basic.buttons .button,\n  .inverted.grey.buttons .basic.button,\n  .inverted.grey.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.grey.basic.buttons .button:hover,\n  .inverted.grey.buttons .basic.button:hover,\n  .inverted.grey.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-hover) inset !important;\n    color: var(--white) !important;\n  }\n  .inverted.grey.basic.buttons .button:focus,\n  .inverted.grey.basic.buttons .button:focus,\n  .inverted.grey.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-focus) inset !important;\n    color: var(--light-grey) !important;\n  }\n  .inverted.grey.basic.buttons .active.button,\n  .inverted.grey.buttons .basic.active.button,\n  .inverted.grey.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-active) inset !important;\n    color: var(--white) !important;\n  }\n  .inverted.grey.basic.buttons .button:active,\n  .inverted.grey.buttons .basic.button:active,\n  .inverted.grey.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-grey-down) inset !important;\n    color: var(--white) !important;\n  }\n  .brown.buttons .button,\n  .brown.button {\n    background-color: var(--brown);\n    color: var(--brown-text-color);\n    text-shadow: var(--brown-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .brown.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .brown.buttons .button:hover,\n  .brown.button:hover {\n    background-color: var(--brown-hover);\n    color: var(--brown-text-color);\n    text-shadow: var(--brown-text-shadow);\n  }\n  .brown.buttons .button:focus,\n  .brown.button:focus {\n    background-color: var(--brown-focus);\n    color: var(--brown-text-color);\n    text-shadow: var(--brown-text-shadow);\n  }\n  .brown.buttons .button:active,\n  .brown.button:active {\n    background-color: var(--brown-down);\n    color: var(--brown-text-color);\n    text-shadow: var(--brown-text-shadow);\n  }\n  .brown.buttons .active.button,\n  .brown.buttons .active.button:active,\n  .brown.active.button,\n  .brown.button .active.button:active {\n    background-color: var(--brown-active);\n    color: var(--brown-text-color);\n    text-shadow: var(--brown-text-shadow);\n  }\n  .basic.brown.buttons .button,\n  .basic.brown.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--brown) inset !important;\n    color: var(--brown) !important;\n  }\n  .basic.brown.buttons .button:hover,\n  .basic.brown.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-hover) inset !important;\n    color: var(--brown-hover) !important;\n  }\n  .basic.brown.buttons .button:focus,\n  .basic.brown.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-focus) inset !important;\n    color: var(--brown-hover) !important;\n  }\n  .basic.brown.buttons .active.button,\n  .basic.brown.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-active) inset !important;\n    color: var(--brown-down) !important;\n  }\n  .basic.brown.buttons .button:active,\n  .basic.brown.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--brown-down) inset !important;\n    color: var(--brown-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.brown.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.brown.buttons .button,\n  .inverted.brown.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown) inset !important;\n    color: var(--light-brown);\n  }\n  .inverted.brown.buttons .button:hover,\n  .inverted.brown.button:hover,\n  .inverted.brown.buttons .button:focus,\n  .inverted.brown.button:focus,\n  .inverted.brown.buttons .button.active,\n  .inverted.brown.button.active,\n  .inverted.brown.buttons .button:active,\n  .inverted.brown.button:active {\n    box-shadow: none !important;\n    color: var(--light-brown-text-color);\n  }\n  .inverted.brown.buttons .button:hover,\n  .inverted.brown.button:hover {\n    background-color: var(--light-brown-hover);\n  }\n  .inverted.brown.buttons .button:focus,\n  .inverted.brown.button:focus {\n    background-color: var(--light-brown-focus);\n  }\n  .inverted.brown.buttons .active.button,\n  .inverted.brown.active.button {\n    background-color: var(--light-brown-active);\n  }\n  .inverted.brown.buttons .button:active,\n  .inverted.brown.button:active {\n    background-color: var(--light-brown-down);\n  }\n  .inverted.brown.basic.buttons .button,\n  .inverted.brown.buttons .basic.button,\n  .inverted.brown.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.brown.basic.buttons .button:hover,\n  .inverted.brown.buttons .basic.button:hover,\n  .inverted.brown.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-hover) inset !important;\n    color: var(--light-brown) !important;\n  }\n  .inverted.brown.basic.buttons .button:focus,\n  .inverted.brown.basic.buttons .button:focus,\n  .inverted.brown.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-focus) inset !important;\n    color: var(--light-brown) !important;\n  }\n  .inverted.brown.basic.buttons .active.button,\n  .inverted.brown.buttons .basic.active.button,\n  .inverted.brown.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-active) inset !important;\n    color: var(--light-brown) !important;\n  }\n  .inverted.brown.basic.buttons .button:active,\n  .inverted.brown.buttons .basic.button:active,\n  .inverted.brown.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-brown-down) inset !important;\n    color: var(--light-brown) !important;\n  }\n  .blue.buttons .button,\n  .blue.button {\n    background-color: var(--blue);\n    color: var(--blue-text-color);\n    text-shadow: var(--blue-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .blue.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .blue.buttons .button:hover,\n  .blue.button:hover {\n    background-color: var(--blue-hover);\n    color: var(--blue-text-color);\n    text-shadow: var(--blue-text-shadow);\n  }\n  .blue.buttons .button:focus,\n  .blue.button:focus {\n    background-color: var(--blue-focus);\n    color: var(--blue-text-color);\n    text-shadow: var(--blue-text-shadow);\n  }\n  .blue.buttons .button:active,\n  .blue.button:active {\n    background-color: var(--blue-down);\n    color: var(--blue-text-color);\n    text-shadow: var(--blue-text-shadow);\n  }\n  .blue.buttons .active.button,\n  .blue.buttons .active.button:active,\n  .blue.active.button,\n  .blue.button .active.button:active {\n    background-color: var(--blue-active);\n    color: var(--blue-text-color);\n    text-shadow: var(--blue-text-shadow);\n  }\n  .basic.blue.buttons .button,\n  .basic.blue.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--blue) inset !important;\n    color: var(--blue) !important;\n  }\n  .basic.blue.buttons .button:hover,\n  .basic.blue.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-hover) inset !important;\n    color: var(--blue-hover) !important;\n  }\n  .basic.blue.buttons .button:focus,\n  .basic.blue.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-focus) inset !important;\n    color: var(--blue-hover) !important;\n  }\n  .basic.blue.buttons .active.button,\n  .basic.blue.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-active) inset !important;\n    color: var(--blue-down) !important;\n  }\n  .basic.blue.buttons .button:active,\n  .basic.blue.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--blue-down) inset !important;\n    color: var(--blue-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.blue.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.blue.buttons .button,\n  .inverted.blue.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue) inset !important;\n    color: var(--light-blue);\n  }\n  .inverted.blue.buttons .button:hover,\n  .inverted.blue.button:hover,\n  .inverted.blue.buttons .button:focus,\n  .inverted.blue.button:focus,\n  .inverted.blue.buttons .button.active,\n  .inverted.blue.button.active,\n  .inverted.blue.buttons .button:active,\n  .inverted.blue.button:active {\n    box-shadow: none !important;\n    color: var(--light-blue-text-color);\n  }\n  .inverted.blue.buttons .button:hover,\n  .inverted.blue.button:hover {\n    background-color: var(--light-blue-hover);\n  }\n  .inverted.blue.buttons .button:focus,\n  .inverted.blue.button:focus {\n    background-color: var(--light-blue-focus);\n  }\n  .inverted.blue.buttons .active.button,\n  .inverted.blue.active.button {\n    background-color: var(--light-blue-active);\n  }\n  .inverted.blue.buttons .button:active,\n  .inverted.blue.button:active {\n    background-color: var(--light-blue-down);\n  }\n  .inverted.blue.basic.buttons .button,\n  .inverted.blue.buttons .basic.button,\n  .inverted.blue.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.blue.basic.buttons .button:hover,\n  .inverted.blue.buttons .basic.button:hover,\n  .inverted.blue.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-hover) inset !important;\n    color: var(--light-blue) !important;\n  }\n  .inverted.blue.basic.buttons .button:focus,\n  .inverted.blue.basic.buttons .button:focus,\n  .inverted.blue.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-focus) inset !important;\n    color: var(--light-blue) !important;\n  }\n  .inverted.blue.basic.buttons .active.button,\n  .inverted.blue.buttons .basic.active.button,\n  .inverted.blue.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-active) inset !important;\n    color: var(--light-blue) !important;\n  }\n  .inverted.blue.basic.buttons .button:active,\n  .inverted.blue.buttons .basic.button:active,\n  .inverted.blue.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-blue-down) inset !important;\n    color: var(--light-blue) !important;\n  }\n  .green.buttons .button,\n  .green.button {\n    background-color: var(--green);\n    color: var(--green-text-color);\n    text-shadow: var(--green-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .green.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .green.buttons .button:hover,\n  .green.button:hover {\n    background-color: var(--green-hover);\n    color: var(--green-text-color);\n    text-shadow: var(--green-text-shadow);\n  }\n  .green.buttons .button:focus,\n  .green.button:focus {\n    background-color: var(--green-focus);\n    color: var(--green-text-color);\n    text-shadow: var(--green-text-shadow);\n  }\n  .green.buttons .button:active,\n  .green.button:active {\n    background-color: var(--green-down);\n    color: var(--green-text-color);\n    text-shadow: var(--green-text-shadow);\n  }\n  .green.buttons .active.button,\n  .green.buttons .active.button:active,\n  .green.active.button,\n  .green.button .active.button:active {\n    background-color: var(--green-active);\n    color: var(--green-text-color);\n    text-shadow: var(--green-text-shadow);\n  }\n  .basic.green.buttons .button,\n  .basic.green.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--green) inset !important;\n    color: var(--green) !important;\n  }\n  .basic.green.buttons .button:hover,\n  .basic.green.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-hover) inset !important;\n    color: var(--green-hover) !important;\n  }\n  .basic.green.buttons .button:focus,\n  .basic.green.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-focus) inset !important;\n    color: var(--green-hover) !important;\n  }\n  .basic.green.buttons .active.button,\n  .basic.green.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-active) inset !important;\n    color: var(--green-down) !important;\n  }\n  .basic.green.buttons .button:active,\n  .basic.green.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--green-down) inset !important;\n    color: var(--green-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.green.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.green.buttons .button,\n  .inverted.green.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green) inset !important;\n    color: var(--light-green);\n  }\n  .inverted.green.buttons .button:hover,\n  .inverted.green.button:hover,\n  .inverted.green.buttons .button:focus,\n  .inverted.green.button:focus,\n  .inverted.green.buttons .button.active,\n  .inverted.green.button.active,\n  .inverted.green.buttons .button:active,\n  .inverted.green.button:active {\n    box-shadow: none !important;\n    color: var(--green-text-color);\n  }\n  .inverted.green.buttons .button:hover,\n  .inverted.green.button:hover {\n    background-color: var(--light-green-hover);\n  }\n  .inverted.green.buttons .button:focus,\n  .inverted.green.button:focus {\n    background-color: var(--light-green-focus);\n  }\n  .inverted.green.buttons .active.button,\n  .inverted.green.active.button {\n    background-color: var(--light-green-active);\n  }\n  .inverted.green.buttons .button:active,\n  .inverted.green.button:active {\n    background-color: var(--light-green-down);\n  }\n  .inverted.green.basic.buttons .button,\n  .inverted.green.buttons .basic.button,\n  .inverted.green.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.green.basic.buttons .button:hover,\n  .inverted.green.buttons .basic.button:hover,\n  .inverted.green.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-hover) inset !important;\n    color: var(--light-green) !important;\n  }\n  .inverted.green.basic.buttons .button:focus,\n  .inverted.green.basic.buttons .button:focus,\n  .inverted.green.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-focus) inset !important;\n    color: var(--light-green) !important;\n  }\n  .inverted.green.basic.buttons .active.button,\n  .inverted.green.buttons .basic.active.button,\n  .inverted.green.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-active) inset !important;\n    color: var(--light-green) !important;\n  }\n  .inverted.green.basic.buttons .button:active,\n  .inverted.green.buttons .basic.button:active,\n  .inverted.green.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-green-down) inset !important;\n    color: var(--light-green) !important;\n  }\n  .orange.buttons .button,\n  .orange.button {\n    background-color: var(--orange);\n    color: var(--orange-text-color);\n    text-shadow: var(--orange-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .orange.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .orange.buttons .button:hover,\n  .orange.button:hover {\n    background-color: var(--orange-hover);\n    color: var(--orange-text-color);\n    text-shadow: var(--orange-text-shadow);\n  }\n  .orange.buttons .button:focus,\n  .orange.button:focus {\n    background-color: var(--orange-focus);\n    color: var(--orange-text-color);\n    text-shadow: var(--orange-text-shadow);\n  }\n  .orange.buttons .button:active,\n  .orange.button:active {\n    background-color: var(--orange-down);\n    color: var(--orange-text-color);\n    text-shadow: var(--orange-text-shadow);\n  }\n  .orange.buttons .active.button,\n  .orange.buttons .active.button:active,\n  .orange.active.button,\n  .orange.button .active.button:active {\n    background-color: var(--orange-active);\n    color: var(--orange-text-color);\n    text-shadow: var(--orange-text-shadow);\n  }\n  .basic.orange.buttons .button,\n  .basic.orange.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--orange) inset !important;\n    color: var(--orange) !important;\n  }\n  .basic.orange.buttons .button:hover,\n  .basic.orange.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-hover) inset !important;\n    color: var(--orange-hover) !important;\n  }\n  .basic.orange.buttons .button:focus,\n  .basic.orange.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-focus) inset !important;\n    color: var(--orange-hover) !important;\n  }\n  .basic.orange.buttons .active.button,\n  .basic.orange.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-active) inset !important;\n    color: var(--orange-down) !important;\n  }\n  .basic.orange.buttons .button:active,\n  .basic.orange.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--orange-down) inset !important;\n    color: var(--orange-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.orange.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.orange.buttons .button,\n  .inverted.orange.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange) inset !important;\n    color: var(--light-orange);\n  }\n  .inverted.orange.buttons .button:hover,\n  .inverted.orange.button:hover,\n  .inverted.orange.buttons .button:focus,\n  .inverted.orange.button:focus,\n  .inverted.orange.buttons .button.active,\n  .inverted.orange.button.active,\n  .inverted.orange.buttons .button:active,\n  .inverted.orange.button:active {\n    box-shadow: none !important;\n    color: var(--light-orange-text-color);\n  }\n  .inverted.orange.buttons .button:hover,\n  .inverted.orange.button:hover {\n    background-color: var(--light-orange-hover);\n  }\n  .inverted.orange.buttons .button:focus,\n  .inverted.orange.button:focus {\n    background-color: var(--light-orange-focus);\n  }\n  .inverted.orange.buttons .active.button,\n  .inverted.orange.active.button {\n    background-color: var(--light-orange-active);\n  }\n  .inverted.orange.buttons .button:active,\n  .inverted.orange.button:active {\n    background-color: var(--light-orange-down);\n  }\n  .inverted.orange.basic.buttons .button,\n  .inverted.orange.buttons .basic.button,\n  .inverted.orange.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.orange.basic.buttons .button:hover,\n  .inverted.orange.buttons .basic.button:hover,\n  .inverted.orange.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-hover) inset !important;\n    color: var(--light-orange) !important;\n  }\n  .inverted.orange.basic.buttons .button:focus,\n  .inverted.orange.basic.buttons .button:focus,\n  .inverted.orange.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-focus) inset !important;\n    color: var(--light-orange) !important;\n  }\n  .inverted.orange.basic.buttons .active.button,\n  .inverted.orange.buttons .basic.active.button,\n  .inverted.orange.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-active) inset !important;\n    color: var(--light-orange) !important;\n  }\n  .inverted.orange.basic.buttons .button:active,\n  .inverted.orange.buttons .basic.button:active,\n  .inverted.orange.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-orange-down) inset !important;\n    color: var(--light-orange) !important;\n  }\n  .pink.buttons .button,\n  .pink.button {\n    background-color: var(--pink);\n    color: var(--pink-text-color);\n    text-shadow: var(--pink-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .pink.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .pink.buttons .button:hover,\n  .pink.button:hover {\n    background-color: var(--pink-hover);\n    color: var(--pink-text-color);\n    text-shadow: var(--pink-text-shadow);\n  }\n  .pink.buttons .button:focus,\n  .pink.button:focus {\n    background-color: var(--pink-focus);\n    color: var(--pink-text-color);\n    text-shadow: var(--pink-text-shadow);\n  }\n  .pink.buttons .button:active,\n  .pink.button:active {\n    background-color: var(--pink-down);\n    color: var(--pink-text-color);\n    text-shadow: var(--pink-text-shadow);\n  }\n  .pink.buttons .active.button,\n  .pink.buttons .active.button:active,\n  .pink.active.button,\n  .pink.button .active.button:active {\n    background-color: var(--pink-active);\n    color: var(--pink-text-color);\n    text-shadow: var(--pink-text-shadow);\n  }\n  .basic.pink.buttons .button,\n  .basic.pink.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--pink) inset !important;\n    color: var(--pink) !important;\n  }\n  .basic.pink.buttons .button:hover,\n  .basic.pink.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-hover) inset !important;\n    color: var(--pink-hover) !important;\n  }\n  .basic.pink.buttons .button:focus,\n  .basic.pink.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-focus) inset !important;\n    color: var(--pink-hover) !important;\n  }\n  .basic.pink.buttons .active.button,\n  .basic.pink.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-active) inset !important;\n    color: var(--pink-down) !important;\n  }\n  .basic.pink.buttons .button:active,\n  .basic.pink.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--pink-down) inset !important;\n    color: var(--pink-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.pink.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.pink.buttons .button,\n  .inverted.pink.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink) inset !important;\n    color: var(--light-pink);\n  }\n  .inverted.pink.buttons .button:hover,\n  .inverted.pink.button:hover,\n  .inverted.pink.buttons .button:focus,\n  .inverted.pink.button:focus,\n  .inverted.pink.buttons .button.active,\n  .inverted.pink.button.active,\n  .inverted.pink.buttons .button:active,\n  .inverted.pink.button:active {\n    box-shadow: none !important;\n    color: var(--light-pink-text-color);\n  }\n  .inverted.pink.buttons .button:hover,\n  .inverted.pink.button:hover {\n    background-color: var(--light-pink-hover);\n  }\n  .inverted.pink.buttons .button:focus,\n  .inverted.pink.button:focus {\n    background-color: var(--light-pink-focus);\n  }\n  .inverted.pink.buttons .active.button,\n  .inverted.pink.active.button {\n    background-color: var(--light-pink-active);\n  }\n  .inverted.pink.buttons .button:active,\n  .inverted.pink.button:active {\n    background-color: var(--light-pink-down);\n  }\n  .inverted.pink.basic.buttons .button,\n  .inverted.pink.buttons .basic.button,\n  .inverted.pink.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.pink.basic.buttons .button:hover,\n  .inverted.pink.buttons .basic.button:hover,\n  .inverted.pink.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-hover) inset !important;\n    color: var(--light-pink) !important;\n  }\n  .inverted.pink.basic.buttons .button:focus,\n  .inverted.pink.basic.buttons .button:focus,\n  .inverted.pink.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-focus) inset !important;\n    color: var(--light-pink) !important;\n  }\n  .inverted.pink.basic.buttons .active.button,\n  .inverted.pink.buttons .basic.active.button,\n  .inverted.pink.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-active) inset !important;\n    color: var(--light-pink) !important;\n  }\n  .inverted.pink.basic.buttons .button:active,\n  .inverted.pink.buttons .basic.button:active,\n  .inverted.pink.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-down) inset !important;\n    color: var(--light-pink) !important;\n  }\n  .violet.buttons .button,\n  .violet.button {\n    background-color: var(--violet);\n    color: var(--violet-text-color);\n    text-shadow: var(--violet-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .violet.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .violet.buttons .button:hover,\n  .violet.button:hover {\n    background-color: var(--violet-hover);\n    color: var(--violet-text-color);\n    text-shadow: var(--violet-text-shadow);\n  }\n  .violet.buttons .button:focus,\n  .violet.button:focus {\n    background-color: var(--violet-focus);\n    color: var(--violet-text-color);\n    text-shadow: var(--violet-text-shadow);\n  }\n  .violet.buttons .button:active,\n  .violet.button:active {\n    background-color: var(--violet-down);\n    color: var(--violet-text-color);\n    text-shadow: var(--violet-text-shadow);\n  }\n  .violet.buttons .active.button,\n  .violet.buttons .active.button:active,\n  .violet.active.button,\n  .violet.button .active.button:active {\n    background-color: var(--violet-active);\n    color: var(--violet-text-color);\n    text-shadow: var(--violet-text-shadow);\n  }\n  .basic.violet.buttons .button,\n  .basic.violet.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--violet) inset !important;\n    color: var(--violet) !important;\n  }\n  .basic.violet.buttons .button:hover,\n  .basic.violet.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-hover) inset !important;\n    color: var(--violet-hover) !important;\n  }\n  .basic.violet.buttons .button:focus,\n  .basic.violet.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-focus) inset !important;\n    color: var(--violet-hover) !important;\n  }\n  .basic.violet.buttons .active.button,\n  .basic.violet.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-active) inset !important;\n    color: var(--violet-down) !important;\n  }\n  .basic.violet.buttons .button:active,\n  .basic.violet.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--violet-down) inset !important;\n    color: var(--violet-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.violet.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.violet.buttons .button,\n  .inverted.violet.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet) inset !important;\n    color: var(--light-violet);\n  }\n  .inverted.violet.buttons .button:hover,\n  .inverted.violet.button:hover,\n  .inverted.violet.buttons .button:focus,\n  .inverted.violet.button:focus,\n  .inverted.violet.buttons .button.active,\n  .inverted.violet.button.active,\n  .inverted.violet.buttons .button:active,\n  .inverted.violet.button:active {\n    box-shadow: none !important;\n    color: var(--light-violet-text-color);\n  }\n  .inverted.violet.buttons .button:hover,\n  .inverted.violet.button:hover {\n    background-color: var(--light-violet-hover);\n  }\n  .inverted.violet.buttons .button:focus,\n  .inverted.violet.button:focus {\n    background-color: var(--light-violet-focus);\n  }\n  .inverted.violet.buttons .active.button,\n  .inverted.violet.active.button {\n    background-color: var(--light-violet-active);\n  }\n  .inverted.violet.buttons .button:active,\n  .inverted.violet.button:active {\n    background-color: var(--light-violet-down);\n  }\n  .inverted.violet.basic.buttons .button,\n  .inverted.violet.buttons .basic.button,\n  .inverted.violet.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.violet.basic.buttons .button:hover,\n  .inverted.violet.buttons .basic.button:hover,\n  .inverted.violet.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-hover) inset !important;\n    color: var(--light-violet) !important;\n  }\n  .inverted.violet.basic.buttons .button:focus,\n  .inverted.violet.basic.buttons .button:focus,\n  .inverted.violet.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-focus) inset !important;\n    color: var(--light-violet) !important;\n  }\n  .inverted.violet.basic.buttons .active.button,\n  .inverted.violet.buttons .basic.active.button,\n  .inverted.violet.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-active) inset !important;\n    color: var(--light-violet) !important;\n  }\n  .inverted.violet.basic.buttons .button:active,\n  .inverted.violet.buttons .basic.button:active,\n  .inverted.violet.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-violet-down) inset !important;\n    color: var(--light-violet) !important;\n  }\n  .purple.buttons .button,\n  .purple.button {\n    background-color: var(--purple);\n    color: var(--purple-text-color);\n    text-shadow: var(--purple-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .purple.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .purple.buttons .button:hover,\n  .purple.button:hover {\n    background-color: var(--purple-hover);\n    color: var(--purple-text-color);\n    text-shadow: var(--purple-text-shadow);\n  }\n  .purple.buttons .button:focus,\n  .purple.button:focus {\n    background-color: var(--purple-focus);\n    color: var(--purple-text-color);\n    text-shadow: var(--purple-text-shadow);\n  }\n  .purple.buttons .button:active,\n  .purple.button:active {\n    background-color: var(--purple-down);\n    color: var(--purple-text-color);\n    text-shadow: var(--purple-text-shadow);\n  }\n  .purple.buttons .active.button,\n  .purple.buttons .active.button:active,\n  .purple.active.button,\n  .purple.button .active.button:active {\n    background-color: var(--purple-active);\n    color: var(--purple-text-color);\n    text-shadow: var(--purple-text-shadow);\n  }\n  .basic.purple.buttons .button,\n  .basic.purple.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--purple) inset !important;\n    color: var(--purple) !important;\n  }\n  .basic.purple.buttons .button:hover,\n  .basic.purple.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-hover) inset !important;\n    color: var(--purple-hover) !important;\n  }\n  .basic.purple.buttons .button:focus,\n  .basic.purple.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-focus) inset !important;\n    color: var(--purple-hover) !important;\n  }\n  .basic.purple.buttons .active.button,\n  .basic.purple.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-active) inset !important;\n    color: var(--purple-down) !important;\n  }\n  .basic.purple.buttons .button:active,\n  .basic.purple.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--purple-down) inset !important;\n    color: var(--purple-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.purple.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.purple.buttons .button,\n  .inverted.purple.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple) inset !important;\n    color: var(--light-purple);\n  }\n  .inverted.purple.buttons .button:hover,\n  .inverted.purple.button:hover,\n  .inverted.purple.buttons .button:focus,\n  .inverted.purple.button:focus,\n  .inverted.purple.buttons .button.active,\n  .inverted.purple.button.active,\n  .inverted.purple.buttons .button:active,\n  .inverted.purple.button:active {\n    box-shadow: none !important;\n    color: var(--light-purple-text-color);\n  }\n  .inverted.purple.buttons .button:hover,\n  .inverted.purple.button:hover {\n    background-color: var(--light-purple-hover);\n  }\n  .inverted.purple.buttons .button:focus,\n  .inverted.purple.button:focus {\n    background-color: var(--light-purple-focus);\n  }\n  .inverted.purple.buttons .active.button,\n  .inverted.purple.active.button {\n    background-color: var(--light-purple-active);\n  }\n  .inverted.purple.buttons .button:active,\n  .inverted.purple.button:active {\n    background-color: var(--light-purple-down);\n  }\n  .inverted.purple.basic.buttons .button,\n  .inverted.purple.buttons .basic.button,\n  .inverted.purple.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.purple.basic.buttons .button:hover,\n  .inverted.purple.buttons .basic.button:hover,\n  .inverted.purple.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-hover) inset !important;\n    color: var(--light-purple) !important;\n  }\n  .inverted.purple.basic.buttons .button:focus,\n  .inverted.purple.basic.buttons .button:focus,\n  .inverted.purple.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-focus) inset !important;\n    color: var(--light-purple) !important;\n  }\n  .inverted.purple.basic.buttons .active.button,\n  .inverted.purple.buttons .basic.active.button,\n  .inverted.purple.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-active) inset !important;\n    color: var(--light-purple) !important;\n  }\n  .inverted.purple.basic.buttons .button:active,\n  .inverted.purple.buttons .basic.button:active,\n  .inverted.purple.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-purple-down) inset !important;\n    color: var(--light-purple) !important;\n  }\n  .red.buttons .button,\n  .red.button {\n    background-color: var(--red);\n    color: var(--red-text-color);\n    text-shadow: var(--red-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .red.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .red.buttons .button:hover,\n  .red.button:hover {\n    background-color: var(--red-hover);\n    color: var(--red-text-color);\n    text-shadow: var(--red-text-shadow);\n  }\n  .red.buttons .button:focus,\n  .red.button:focus {\n    background-color: var(--red-focus);\n    color: var(--red-text-color);\n    text-shadow: var(--red-text-shadow);\n  }\n  .red.buttons .button:active,\n  .red.button:active {\n    background-color: var(--red-down);\n    color: var(--red-text-color);\n    text-shadow: var(--red-text-shadow);\n  }\n  .red.buttons .active.button,\n  .red.buttons .active.button:active,\n  .red.active.button,\n  .red.button .active.button:active {\n    background-color: var(--red-active);\n    color: var(--red-text-color);\n    text-shadow: var(--red-text-shadow);\n  }\n  .basic.red.buttons .button,\n  .basic.red.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--red) inset !important;\n    color: var(--red) !important;\n  }\n  .basic.red.buttons .button:hover,\n  .basic.red.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-hover) inset !important;\n    color: var(--red-hover) !important;\n  }\n  .basic.red.buttons .button:focus,\n  .basic.red.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-focus) inset !important;\n    color: var(--red-hover) !important;\n  }\n  .basic.red.buttons .active.button,\n  .basic.red.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-active) inset !important;\n    color: var(--red-down) !important;\n  }\n  .basic.red.buttons .button:active,\n  .basic.red.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--red-down) inset !important;\n    color: var(--red-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.red.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.red.buttons .button,\n  .inverted.red.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red) inset !important;\n    color: var(--light-red);\n  }\n  .inverted.red.buttons .button:hover,\n  .inverted.red.button:hover,\n  .inverted.red.buttons .button:focus,\n  .inverted.red.button:focus,\n  .inverted.red.buttons .button.active,\n  .inverted.red.button.active,\n  .inverted.red.buttons .button:active,\n  .inverted.red.button:active {\n    box-shadow: none !important;\n    color: var(--light-red-text-color);\n  }\n  .inverted.red.buttons .button:hover,\n  .inverted.red.button:hover {\n    background-color: var(--light-red-hover);\n  }\n  .inverted.red.buttons .button:focus,\n  .inverted.red.button:focus {\n    background-color: var(--light-red-focus);\n  }\n  .inverted.red.buttons .active.button,\n  .inverted.red.active.button {\n    background-color: var(--light-red-active);\n  }\n  .inverted.red.buttons .button:active,\n  .inverted.red.button:active {\n    background-color: var(--light-red-down);\n  }\n  .inverted.red.basic.buttons .button,\n  .inverted.red.buttons .basic.button,\n  .inverted.red.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.red.basic.buttons .button:hover,\n  .inverted.red.buttons .basic.button:hover,\n  .inverted.red.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-hover) inset !important;\n    color: var(--light-red) !important;\n  }\n  .inverted.red.basic.buttons .button:focus,\n  .inverted.red.basic.buttons .button:focus,\n  .inverted.red.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-focus) inset !important;\n    color: var(--light-red) !important;\n  }\n  .inverted.red.basic.buttons .active.button,\n  .inverted.red.buttons .basic.active.button,\n  .inverted.red.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-active) inset !important;\n    color: var(--light-red) !important;\n  }\n  .inverted.red.basic.buttons .button:active,\n  .inverted.red.buttons .basic.button:active,\n  .inverted.red.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-red-down) inset !important;\n    color: var(--light-red) !important;\n  }\n  .teal.buttons .button,\n  .teal.button {\n    background-color: var(--teal);\n    color: var(--teal-text-color);\n    text-shadow: var(--teal-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .teal.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .teal.buttons .button:hover,\n  .teal.button:hover {\n    background-color: var(--teal-hover);\n    color: var(--teal-text-color);\n    text-shadow: var(--teal-text-shadow);\n  }\n  .teal.buttons .button:focus,\n  .teal.button:focus {\n    background-color: var(--teal-focus);\n    color: var(--teal-text-color);\n    text-shadow: var(--teal-text-shadow);\n  }\n  .teal.buttons .button:active,\n  .teal.button:active {\n    background-color: var(--teal-down);\n    color: var(--teal-text-color);\n    text-shadow: var(--teal-text-shadow);\n  }\n  .teal.buttons .active.button,\n  .teal.buttons .active.button:active,\n  .teal.active.button,\n  .teal.button .active.button:active {\n    background-color: var(--teal-active);\n    color: var(--teal-text-color);\n    text-shadow: var(--teal-text-shadow);\n  }\n  .basic.teal.buttons .button,\n  .basic.teal.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--teal) inset !important;\n    color: var(--teal) !important;\n  }\n  .basic.teal.buttons .button:hover,\n  .basic.teal.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-hover) inset !important;\n    color: var(--teal-hover) !important;\n  }\n  .basic.teal.buttons .button:focus,\n  .basic.teal.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-focus) inset !important;\n    color: var(--teal-hover) !important;\n  }\n  .basic.teal.buttons .active.button,\n  .basic.teal.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-active) inset !important;\n    color: var(--teal-down) !important;\n  }\n  .basic.teal.buttons .button:active,\n  .basic.teal.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--teal-down) inset !important;\n    color: var(--teal-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.teal.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.teal.buttons .button,\n  .inverted.teal.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal) inset !important;\n    color: var(--light-teal);\n  }\n  .inverted.teal.buttons .button:hover,\n  .inverted.teal.button:hover,\n  .inverted.teal.buttons .button:focus,\n  .inverted.teal.button:focus,\n  .inverted.teal.buttons .button.active,\n  .inverted.teal.button.active,\n  .inverted.teal.buttons .button:active,\n  .inverted.teal.button:active {\n    box-shadow: none !important;\n    color: var(--light-teal-text-color);\n  }\n  .inverted.teal.buttons .button:hover,\n  .inverted.teal.button:hover {\n    background-color: var(--light-teal-hover);\n  }\n  .inverted.teal.buttons .button:focus,\n  .inverted.teal.button:focus {\n    background-color: var(--light-teal-focus);\n  }\n  .inverted.teal.buttons .active.button,\n  .inverted.teal.active.button {\n    background-color: var(--light-teal-active);\n  }\n  .inverted.teal.buttons .button:active,\n  .inverted.teal.button:active {\n    background-color: var(--light-teal-down);\n  }\n  .inverted.teal.basic.buttons .button,\n  .inverted.teal.buttons .basic.button,\n  .inverted.teal.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.teal.basic.buttons .button:hover,\n  .inverted.teal.buttons .basic.button:hover,\n  .inverted.teal.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-hover) inset !important;\n    color: var(--light-teal) !important;\n  }\n  .inverted.teal.basic.buttons .button:focus,\n  .inverted.teal.basic.buttons .button:focus,\n  .inverted.teal.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-focus) inset !important;\n    color: var(--light-teal) !important;\n  }\n  .inverted.teal.basic.buttons .active.button,\n  .inverted.teal.buttons .basic.active.button,\n  .inverted.teal.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-active) inset !important;\n    color: var(--light-teal) !important;\n  }\n  .inverted.teal.basic.buttons .button:active,\n  .inverted.teal.buttons .basic.button:active,\n  .inverted.teal.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-down) inset !important;\n    color: var(--light-teal) !important;\n  }\n  .olive.buttons .button,\n  .olive.button {\n    background-color: var(--olive);\n    color: var(--olive-text-color);\n    text-shadow: var(--olive-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .olive.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .olive.buttons .button:hover,\n  .olive.button:hover {\n    background-color: var(--olive-hover);\n    color: var(--olive-text-color);\n    text-shadow: var(--olive-text-shadow);\n  }\n  .olive.buttons .button:focus,\n  .olive.button:focus {\n    background-color: var(--olive-focus);\n    color: var(--olive-text-color);\n    text-shadow: var(--olive-text-shadow);\n  }\n  .olive.buttons .button:active,\n  .olive.button:active {\n    background-color: var(--olive-down);\n    color: var(--olive-text-color);\n    text-shadow: var(--olive-text-shadow);\n  }\n  .olive.buttons .active.button,\n  .olive.buttons .active.button:active,\n  .olive.active.button,\n  .olive.button .active.button:active {\n    background-color: var(--olive-active);\n    color: var(--olive-text-color);\n    text-shadow: var(--olive-text-shadow);\n  }\n  .basic.olive.buttons .button,\n  .basic.olive.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--olive) inset !important;\n    color: var(--olive) !important;\n  }\n  .basic.olive.buttons .button:hover,\n  .basic.olive.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-hover) inset !important;\n    color: var(--olive-hover) !important;\n  }\n  .basic.olive.buttons .button:focus,\n  .basic.olive.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-focus) inset !important;\n    color: var(--olive-hover) !important;\n  }\n  .basic.olive.buttons .active.button,\n  .basic.olive.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-active) inset !important;\n    color: var(--olive-down) !important;\n  }\n  .basic.olive.buttons .button:active,\n  .basic.olive.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--olive-down) inset !important;\n    color: var(--olive-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.olive.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.olive.buttons .button,\n  .inverted.olive.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive) inset !important;\n    color: var(--light-olive);\n  }\n  .inverted.olive.buttons .button:hover,\n  .inverted.olive.button:hover,\n  .inverted.olive.buttons .button:focus,\n  .inverted.olive.button:focus,\n  .inverted.olive.buttons .button.active,\n  .inverted.olive.button.active,\n  .inverted.olive.buttons .button:active,\n  .inverted.olive.button:active {\n    box-shadow: none !important;\n    color: var(--light-olive-text-color);\n  }\n  .inverted.olive.buttons .button:hover,\n  .inverted.olive.button:hover {\n    background-color: var(--light-olive-hover);\n  }\n  .inverted.olive.buttons .button:focus,\n  .inverted.olive.button:focus {\n    background-color: var(--light-olive-focus);\n  }\n  .inverted.olive.buttons .active.button,\n  .inverted.olive.active.button {\n    background-color: var(--light-olive-active);\n  }\n  .inverted.olive.buttons .button:active,\n  .inverted.olive.button:active {\n    background-color: var(--light-olive-down);\n  }\n  .inverted.olive.basic.buttons .button,\n  .inverted.olive.buttons .basic.button,\n  .inverted.olive.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.olive.basic.buttons .button:hover,\n  .inverted.olive.buttons .basic.button:hover,\n  .inverted.olive.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-hover) inset !important;\n    color: var(--light-olive) !important;\n  }\n  .inverted.olive.basic.buttons .button:focus,\n  .inverted.olive.basic.buttons .button:focus,\n  .inverted.olive.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-focus) inset !important;\n    color: var(--light-olive) !important;\n  }\n  .inverted.olive.basic.buttons .active.button,\n  .inverted.olive.buttons .basic.active.button,\n  .inverted.olive.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-active) inset !important;\n    color: var(--light-olive) !important;\n  }\n  .inverted.olive.basic.buttons .button:active,\n  .inverted.olive.buttons .basic.button:active,\n  .inverted.olive.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-olive-down) inset !important;\n    color: var(--light-olive) !important;\n  }\n  .yellow.buttons .button,\n  .yellow.button {\n    background-color: var(--yellow);\n    color: var(--yellow-text-color);\n    text-shadow: var(--yellow-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .yellow.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .yellow.buttons .button:hover,\n  .yellow.button:hover {\n    background-color: var(--yellow-hover);\n    color: var(--yellow-text-color);\n    text-shadow: var(--yellow-text-shadow);\n  }\n  .yellow.buttons .button:focus,\n  .yellow.button:focus {\n    background-color: var(--yellow-focus);\n    color: var(--yellow-text-color);\n    text-shadow: var(--yellow-text-shadow);\n  }\n  .yellow.buttons .button:active,\n  .yellow.button:active {\n    background-color: var(--yellow-down);\n    color: var(--yellow-text-color);\n    text-shadow: var(--yellow-text-shadow);\n  }\n  .yellow.buttons .active.button,\n  .yellow.buttons .active.button:active,\n  .yellow.active.button,\n  .yellow.button .active.button:active {\n    background-color: var(--yellow-active);\n    color: var(--yellow-text-color);\n    text-shadow: var(--yellow-text-shadow);\n  }\n  .basic.yellow.buttons .button,\n  .basic.yellow.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--yellow) inset !important;\n    color: var(--yellow) !important;\n  }\n  .basic.yellow.buttons .button:hover,\n  .basic.yellow.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-hover) inset !important;\n    color: var(--yellow-hover) !important;\n  }\n  .basic.yellow.buttons .button:focus,\n  .basic.yellow.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-focus) inset !important;\n    color: var(--yellow-hover) !important;\n  }\n  .basic.yellow.buttons .active.button,\n  .basic.yellow.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-active) inset !important;\n    color: var(--yellow-down) !important;\n  }\n  .basic.yellow.buttons .button:active,\n  .basic.yellow.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--yellow-down) inset !important;\n    color: var(--yellow-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.yellow.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n  .inverted.yellow.buttons .button,\n  .inverted.yellow.button {\n    background-color: transparent;\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow) inset !important;\n    color: var(--light-yellow);\n  }\n  .inverted.yellow.buttons .button:hover,\n  .inverted.yellow.button:hover,\n  .inverted.yellow.buttons .button:focus,\n  .inverted.yellow.button:focus,\n  .inverted.yellow.buttons .button.active,\n  .inverted.yellow.button.active,\n  .inverted.yellow.buttons .button:active,\n  .inverted.yellow.button:active {\n    box-shadow: none !important;\n    color: var(--light-yellow-text-color);\n  }\n  .inverted.yellow.buttons .button:hover,\n  .inverted.yellow.button:hover {\n    background-color: var(--light-yellow-hover);\n  }\n  .inverted.yellow.buttons .button:focus,\n  .inverted.yellow.button:focus {\n    background-color: var(--light-yellow-focus);\n  }\n  .inverted.yellow.buttons .active.button,\n  .inverted.yellow.active.button {\n    background-color: var(--light-yellow-active);\n  }\n  .inverted.yellow.buttons .button:active,\n  .inverted.yellow.button:active {\n    background-color: var(--light-yellow-down);\n  }\n  .inverted.yellow.basic.buttons .button,\n  .inverted.yellow.buttons .basic.button,\n  .inverted.yellow.basic.button {\n    background-color: transparent;\n    box-shadow: var(--basic-inverted-box-shadow) !important;\n    color: var(--white) !important;\n  }\n  .inverted.yellow.basic.buttons .button:hover,\n  .inverted.yellow.buttons .basic.button:hover,\n  .inverted.yellow.basic.button:hover {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-hover) inset !important;\n    color: var(--light-yellow) !important;\n  }\n  .inverted.yellow.basic.buttons .button:focus,\n  .inverted.yellow.basic.buttons .button:focus,\n  .inverted.yellow.basic.button:focus {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-focus) inset !important;\n    color: var(--light-yellow) !important;\n  }\n  .inverted.yellow.basic.buttons .active.button,\n  .inverted.yellow.buttons .basic.active.button,\n  .inverted.yellow.basic.active.button {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-active) inset !important;\n    color: var(--light-yellow) !important;\n  }\n  .inverted.yellow.basic.buttons .button:active,\n  .inverted.yellow.buttons .basic.button:active,\n  .inverted.yellow.basic.button:active {\n    box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-yellow-down) inset !important;\n    color: var(--light-yellow) !important;\n  }\n}\n\n/* src/button/css/variations/compact.css */\n@layer component {\n  .compact.buttons .button,\n  .compact.button {\n    padding: var(--compact-vertical-padding) var(--compact-horizontal-padding) (var(--compact-vertical-padding) + var(--shadow-offset));\n  }\n  .compact.icon.buttons .button,\n  .compact.icon.button {\n    padding: var(--compact-vertical-padding) var(--compact-vertical-padding) (var(--compact-vertical-padding) + var(--shadow-offset));\n  }\n  .compact.labeled.icon.buttons .button,\n  .compact.labeled.icon.button {\n    padding: var(--compact-vertical-padding) (var(--compact-horizontal-padding) + var(--labeled-icon-width)) (var(--compact-vertical-padding) + var(--shadow-offset));\n  }\n}\n\n/* src/button/css/variations/floated.css */\n@layer component {\n  [class*="left floated"].buttons,\n  [class*="left floated"].button {\n    float: left;\n    margin-left: 0em;\n    margin-right: var(--floated-margin);\n  }\n  [class*="right floated"].buttons,\n  [class*="right floated"].button {\n    float: right;\n    margin-right: 0em;\n    margin-left: var(--floated-margin);\n  }\n}\n\n/* src/button/css/variations/fluid.css */\n@layer component {\n  .fluid.buttons,\n  .fluid.button {\n    width: 100%;\n  }\n  .fluid.button {\n    display: block;\n  }\n  .two.buttons {\n    width: 100%;\n  }\n  .two.buttons > .button {\n    width: 50%;\n  }\n  .three.buttons {\n    width: 100%;\n  }\n  .three.buttons > .button {\n    width: 33.333%;\n  }\n  .four.buttons {\n    width: 100%;\n  }\n  .four.buttons > .button {\n    width: 25%;\n  }\n  .five.buttons {\n    width: 100%;\n  }\n  .five.buttons > .button {\n    width: 20%;\n  }\n  .six.buttons {\n    width: 100%;\n  }\n  .six.buttons > .button {\n    width: 16.666%;\n  }\n  .seven.buttons {\n    width: 100%;\n  }\n  .seven.buttons > .button {\n    width: 14.285%;\n  }\n  .eight.buttons {\n    width: 100%;\n  }\n  .eight.buttons > .button {\n    width: 12.500%;\n  }\n  .nine.buttons {\n    width: 100%;\n  }\n  .nine.buttons > .button {\n    width: 11.11%;\n  }\n  .ten.buttons {\n    width: 100%;\n  }\n  .ten.buttons > .button {\n    width: 10%;\n  }\n  .eleven.buttons {\n    width: 100%;\n  }\n  .eleven.buttons > .button {\n    width: 9.09%;\n  }\n  .twelve.buttons {\n    width: 100%;\n  }\n  .twelve.buttons > .button {\n    width: 8.3333%;\n  }\n  .fluid.vertical.buttons,\n  .fluid.vertical.buttons > .button {\n    display: flex;\n    width: auto;\n  }\n  .two.vertical.buttons > .button {\n    height: 50%;\n  }\n  .three.vertical.buttons > .button {\n    height: 33.333%;\n  }\n  .four.vertical.buttons > .button {\n    height: 25%;\n  }\n  .five.vertical.buttons > .button {\n    height: 20%;\n  }\n  .six.vertical.buttons > .button {\n    height: 16.666%;\n  }\n  .seven.vertical.buttons > .button {\n    height: 14.285%;\n  }\n  .eight.vertical.buttons > .button {\n    height: 12.500%;\n  }\n  .nine.vertical.buttons > .button {\n    height: 11.11%;\n  }\n  .ten.vertical.buttons > .button {\n    height: 10%;\n  }\n  .eleven.vertical.buttons > .button {\n    height: 9.09%;\n  }\n  .twelve.vertical.buttons > .button {\n    height: 8.3333%;\n  }\n}\n\n/* src/button/css/variations/negative.css */\n@layer component {\n  .negative.buttons .button,\n  .negative.button {\n    background-color: var(--negative-color);\n    color: var(--negative-text-color);\n    text-shadow: var(--negative-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .negative.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .negative.buttons .button:hover,\n  .negative.button:hover {\n    background-color: var(--negative-color-hover);\n    color: var(--negative-text-color);\n    text-shadow: var(--negative-text-shadow);\n  }\n  .negative.buttons .button:focus,\n  .negative.button:focus {\n    background-color: var(--negative-color-focus);\n    color: var(--negative-text-color);\n    text-shadow: var(--negative-text-shadow);\n  }\n  .negative.buttons .button:active,\n  .negative.button:active {\n    background-color: var(--negative-color-down);\n    color: var(--negative-text-color);\n    text-shadow: var(--negative-text-shadow);\n  }\n  .negative.buttons .active.button,\n  .negative.buttons .active.button:active,\n  .negative.active.button,\n  .negative.button .active.button:active {\n    background-color: var(--negative-color-active);\n    color: var(--negative-text-color);\n    text-shadow: var(--negative-text-shadow);\n  }\n  .basic.negative.buttons .button,\n  .basic.negative.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--negative-color) inset !important;\n    color: var(--negative-color) !important;\n  }\n  .basic.negative.buttons .button:hover,\n  .basic.negative.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-hover) inset !important;\n    color: var(--negative-color-hover) !important;\n  }\n  .basic.negative.buttons .button:focus,\n  .basic.negative.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-focus) inset !important;\n    color: var(--negative-color-hover) !important;\n  }\n  .basic.negative.buttons .active.button,\n  .basic.negative.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-active) inset !important;\n    color: var(--negative-color-down) !important;\n  }\n  .basic.negative.buttons .button:active,\n  .basic.negative.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-down) inset !important;\n    color: var(--negative-color-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.primary.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n}\n\n/* src/button/css/variations/positive.css */\n@layer component {\n  .positive.buttons .button,\n  .positive.button {\n    background-color: var(--positive-color);\n    color: var(--positive-text-color);\n    text-shadow: var(--positive-text-shadow);\n    background-image: var(--colored-background-image);\n  }\n  .positive.button {\n    box-shadow: var(--colored-box-shadow);\n  }\n  .positive.buttons .button:hover,\n  .positive.button:hover {\n    background-color: var(--positive-color-hover);\n    color: var(--positive-text-color);\n    text-shadow: var(--positive-text-shadow);\n  }\n  .positive.buttons .button:focus,\n  .positive.button:focus {\n    background-color: var(--positive-color-focus);\n    color: var(--positive-text-color);\n    text-shadow: var(--positive-text-shadow);\n  }\n  .positive.buttons .button:active,\n  .positive.button:active {\n    background-color: var(--positive-color-down);\n    color: var(--positive-text-color);\n    text-shadow: var(--positive-text-shadow);\n  }\n  .positive.buttons .active.button,\n  .positive.buttons .active.button:active,\n  .positive.active.button,\n  .positive.button .active.button:active {\n    background-color: var(--positive-color-active);\n    color: var(--positive-text-color);\n    text-shadow: var(--positive-text-shadow);\n  }\n  .basic.positive.buttons .button,\n  .basic.positive.button {\n    box-shadow: 0px 0px 0px var(--basic-border-size) var(--positive-color) inset !important;\n    color: var(--positive-color) !important;\n  }\n  .basic.positive.buttons .button:hover,\n  .basic.positive.button:hover {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-hover) inset !important;\n    color: var(--positive-color-hover) !important;\n  }\n  .basic.positive.buttons .button:focus,\n  .basic.positive.button:focus {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-focus) inset !important;\n    color: var(--positive-color-hover) !important;\n  }\n  .basic.positive.buttons .active.button,\n  .basic.positive.active.button {\n    background: transparent !important;\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-active) inset !important;\n    color: var(--positive-color-down) !important;\n  }\n  .basic.positive.buttons .button:active,\n  .basic.positive.button:active {\n    box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-down) inset !important;\n    color: var(--positive-color-down) !important;\n  }\n  .buttons:not(.vertical) > .basic.primary.button:not(:first-child) {\n    margin-left: var(--basic-colored-border-size);\n  }\n}\n\n/* src/button/css/variations/sizing.css */\n@layer component {\n  .mini.buttons .button,\n  .mini.buttons .or,\n  .mini.button {\n    font-size: var(--mini);\n  }\n  .tiny.buttons .button,\n  .tiny.buttons .or,\n  .tiny.button {\n    font-size: var(--tiny);\n  }\n  .small.buttons .button,\n  .small.buttons .or,\n  .small.button {\n    font-size: var(--small);\n  }\n  .buttons .button,\n  .buttons .or,\n  .button {\n    font-size: var(--medium);\n  }\n  .large.buttons .button,\n  .large.buttons .or,\n  .large.button {\n    font-size: var(--large);\n  }\n  .big.buttons .button,\n  .big.buttons .or,\n  .big.button {\n    font-size: var(--big);\n  }\n  .huge.buttons .button,\n  .huge.buttons .or,\n  .huge.button {\n    font-size: var(--huge);\n  }\n  .massive.buttons .button,\n  .massive.buttons .or,\n  .massive.button {\n    font-size: var(--massive);\n  }\n}\n\n/* src/button/css/variations/social.css */\n@layer component {\n  .facebook.button {\n    background-color: var(--facebook-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .facebook.button:hover {\n    background-color: var(--facebook-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .facebook.button:active {\n    background-color: var(--facebook-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .twitter.button {\n    background-color: var(--twitter-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .twitter.button:hover {\n    background-color: var(--twitter-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .twitter.button:active {\n    background-color: var(--twitter-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .google.plus.button {\n    background-color: var(--google-plus-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .google.plus.button:hover {\n    background-color: var(--google-plus-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .google.plus.button:active {\n    background-color: var(--google-plus-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .linkedin.button {\n    background-color: var(--linked-in-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .linkedin.button:hover {\n    background-color: var(--linked-in-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .linkedin.button:active {\n    background-color: var(--linked-in-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .youtube.button {\n    background-color: var(--youtube-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .youtube.button:hover {\n    background-color: var(--youtube-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .youtube.button:active {\n    background-color: var(--youtube-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .instagram.button {\n    background-color: var(--instagram-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .instagram.button:hover {\n    background-color: var(--instagram-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .instagram.button:active {\n    background-color: var(--instagram-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .pinterest.button {\n    background-color: var(--pinterest-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .pinterest.button:hover {\n    background-color: var(--pinterest-hover-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .pinterest.button:active {\n    background-color: var(--pinterest-down-color);\n    color: var(--inverted-text-color);\n    text-shadow: var(--inverted-text-shadow);\n  }\n  .vk.button {\n    background-color: var(--vk-color);\n    color: var(--white);\n    background-image: var(--colored-background-image);\n    box-shadow: var(--colored-box-shadow);\n  }\n  .vk.button:hover {\n    background-color: var(--vk-hover-color);\n    color: var(--white);\n  }\n  .vk.button:active {\n    background-color: var(--vk-down-color);\n    color: var(--white);\n  }\n}\n\n/* src/button/css/variations/vertical.css */\n@layer component {\n  .vertical.buttons {\n    display: inline-flex;\n    flex-direction: column;\n  }\n  .vertical.buttons .button {\n    display: block;\n    float: none;\n    width: 100%;\n    margin: var(--vertical-group-offset);\n    box-shadow: var(--vertical-box-shadow);\n    border-radius: 0em;\n  }\n  .vertical.buttons .button:first-child {\n    border-top-left-radius: var(--border-radius);\n    border-top-right-radius: var(--border-radius);\n  }\n  .vertical.buttons .button:last-child {\n    margin-bottom: 0px;\n    border-bottom-left-radius: var(--border-radius);\n    border-bottom-right-radius: var(--border-radius);\n  }\n  .vertical.buttons .button:only-child {\n    border-radius: var(--border-radius);\n  }\n}\n\n/* src/button/css/button.css */\n';
 
-/* src/button/css/button.css */
-`;var Me=`<div class="{{ui}} button">
-  {{slot}}
-</div>
-`;var Re={uiType:"element",name:"Button",description:"A button indicates possible user action",tagName:"button",content:[{name:"Text",looseCoupling:!0,couplesWith:["icon"],slot:"icon",description:"A button can can contain text content"},{name:"Icon",looseCoupling:!0,couplesWith:["icon"],slot:"icon",description:"A button can be formatted to include an icon"},{name:"Label",looseCoupling:!0,couplesWith:["label"],slot:"label",description:"A button can be formatted to include a label"},{name:"Or",slot:"or",description:"A button group can be formatted to show a conditional choice"}],types:[{name:"Emphasis",attribute:"emphasis",description:"A button can be formatted to show different levels of emphasis",adoptionLevel:1,options:[{name:"Primary",value:"primary",description:"This button should appear to be emphasized as the first action that should be taken over other options."},{name:"Secondary",value:"secondary",description:"This button should appear to be emphasized as a secondary option that should appear after other options"}]},{name:"Icon",attribute:"icon",description:"A button can appear with an icon",adoptionLevel:2,looseCoupling:!0,couplesWith:["icon"],distinctHTML:!0},{name:"Labeled",attribute:"labeled",description:"A button can appear specially formatted to attach to a label element",adoptionLevel:3,looseCoupling:!0,couplesWith:["label"],options:[{name:"Labeled",value:["labeled","right-labeled"],description:"A button can be formatted so that a label appears to the right"},{name:"Left Labeled",value:"left-labeled",description:"A button can be formatted so that a label appears to the left"}],distinctHTML:!0},{name:"Labeled Icon",description:"A button can be formatted so that the icon appears separately.",looseCoupling:!0,adoptionLevel:3,options:[{name:"Labeled",value:"labeled",description:"A button can be formatted so that the icon appears to the right"},{name:"Left Labeled",value:"left-labeled",description:"A button can be formatted so that the icon appears to the left"}],distinctHTML:!0},{name:"Toggle",description:"A button can be formatted to emphasize its active state",adoptionLevel:3,options:[{name:"Toggle",value:!0,description:"A button can be formatted to animate hidden content horizontally"}],distinctHTML:!0},{name:"Animated",description:"A button can animate to show hidden content",adoptionLevel:5,options:[{name:"Animated",value:"animated",description:"A button can be formatted to animate hidden content horizontally"},{name:"Vertical Animated",value:"vertical-animated",description:"A button can be formatted to animate hidden content vertically"},{name:"Fade Animated",value:"vertical-animated",description:"A button can be formatted to fade in hidden content"}],distinctHTML:!0}],states:[{name:"Hover",attribute:"hover",description:"A button can show it is currently hovered"},{name:"Focus",attribute:"focus",description:"A button can show it is currently focused by the keyboard"},{name:"Active",attribute:"active",description:"A button can show it is currently the activated"},{name:"Disabled",attribute:"disabled",description:"A button can show it is currently unable to be interacted with"},{name:"Loading",attribute:"loading",description:"A button can show a loading indicator"}],variations:[{name:"Attached",value:"attached",description:"A button can be attached",adoptionLevel:2,options:[{name:"Attached",value:"attached",description:"A button can appear attached both above and below"},{name:"Bottom Attached",value:"bottom-attached",description:"A button can appear attached to the bottom of other content"},{name:"Top Attached",value:"top-attached",description:"A button can appear attached to the top of other content"},{name:"Left Attached",value:"left-attached",description:"A button can appear attached to the left of other content"},{name:"Right Attached",value:"right-attached",description:"A button can appear attached to the right of other content"}]},{name:"Basic",value:"styling",description:"A button can be formatted to appear de-emphasized over other elements in the page.",adoptionLevel:3,options:[{name:"Basic",value:"basic",description:"A button can appear slightly less pronounced."},{name:"Very Basic",value:"very-basic",description:"A button can appear to be much less pronounced."}]},{name:"Circular",value:"circular",description:"A button can be formatted to appear circular.",adoptionLevel:3,options:[{name:"Circular",value:!0}]},{name:"Colored",value:"color",description:"A button can be colored",adoptionLevel:3,options:[{name:"Red",value:"red",description:"A button can be red"},{name:"Orange",value:"orange",description:"A button can be orange"},{name:"Yellow",value:"yellow",description:"A button can be yellow"},{name:"Olive",value:"olive",description:"A button can be olive"},{name:"Green",value:"green",description:"A button can be green"},{name:"Teal",value:"teal",description:"A button can be teal"},{name:"Blue",value:"blue",description:"A button can be blue"},{name:"Violet",value:"violet",description:"A button can be violet"},{name:"Purple",value:"purple",description:"A button can be purple"},{name:"Pink",value:"pink",description:"A button can be pink"},{name:"Brown",value:"brown",description:"A button can be brown"},{name:"Grey",value:"grey",description:"A button can be grey"},{name:"Black",value:"black",description:"A button can be black"}]},{name:"Compact",value:"compact",adoptionLevel:3,description:"A button can reduce its padding to fit into tighter spaces without adjusting its font size",options:[{name:"Compact",value:"compact",description:"A button can reduce its padding size slightly."},{name:"Very Compact",value:"very-compact",description:"A button can reduce its padding size greatly."}]},{name:"Social Site",value:"social",adoptionLevel:5,description:"A button can appear formatted with the brand colors of a social website",options:[{name:"Facebook",value:"facebook",description:"A button can link to facebook"},{name:"Twitter",value:"twitter",description:"A button can link to twitter"},{name:"Google Plus",value:"google plus",description:"A button can link to google plus"},{name:"Vk",value:"vk",description:"A button can link to vk"},{name:"Linkedin",value:"linkedin",description:"A button can link to linkedin"},{name:"Instagram",value:"instagram",description:"A button can link to instagram"},{name:"Youtube",value:"youtube",description:"A button can link to youtube"}]},{name:"Positive",value:"positive",adoptionLevel:2,description:"A button can appear to be associated with a positive action",options:[{name:"Positive",value:"positive",description:"A button be positive."},{name:"Subtle Positive",value:"subtle-positive",description:"A button can subtly hint at a positive action"}]},{name:"Negative",value:"negative",adoptionLevel:2,description:"A button can appear to be associated with a negative action",options:[{name:"Negative",value:"negative",description:"A button be negative."},{name:"Subtle Negative",value:"subtle-negative",description:"A button can subtly hint at a negative action"}]},{name:"Floated",value:"floated",adoptionLevel:1,description:"A button can be aligned to the left or right of its container",options:[{name:"Left Floated",value:["left-floated"],description:"A button can appear to the left of content."},{name:"Right Floated",value:"right-floated",description:"A button can appear to the right of content."}]},{name:"Fluid",value:"fluid",adoptionLevel:1,description:"A button can take the width of its container"},{name:"Size",value:"size",adoptionLevel:1,description:"A button can vary in size",options:[{name:"Mini",value:"mini",description:"An element can appear extremely small"},{name:"Tiny",value:"tiny",description:"An element can appear very small"},{name:"Small",value:"small",description:"An element can appear small"},{name:"Medium",value:"medium",description:"An element can appear normal sized"},{name:"Large",value:"large",description:"An element can appear larger than normal"},{name:"Big",value:"big",description:"An element can appear much larger than normal"},{name:"Huge",value:"huge",description:"An element can appear very much larger than normal"},{name:"Massive",value:"massive",description:"An element can appear extremely larger than normal"}]},{name:"Inverted",description:"A button can be formatted to appear on dark backgrounds",adoptionLevel:2,attribute:"inverted"}],supportsPlural:!0,pluralName:"Buttons",pluralTagName:"buttons",pluralDescription:"Buttons can exist together as a group",pluralVariations:["inverted","size","floated","compact","colored","attached"]};var ro=(r,t)=>({}),no=r=>{},ao={"click .button"(r,t,e){}},io=Yt({tagName:"ui-button",spec:Re,template:Me,css:Le,createInstance:ro,onCreated:no,events:ao});export{io as UIButton};
+// src/button/button.html
+var button_default2 = '<div class="{{ui}} button">\n  {{slot}}\n</div>\n';
+
+// src/button/spec/spec.js
+var ButtonSpec = {
+  /*******************************
+             Definition
+  *******************************/
+  uiType: "element",
+  name: "Button",
+  description: "A button indicates possible user action",
+  tagName: "button",
+  /*******************************
+             Singular
+  *******************************/
+  content: [
+    {
+      name: "Text",
+      looseCoupling: true,
+      couplesWith: ["icon"],
+      slot: "icon",
+      description: "A button can can contain text content"
+    },
+    {
+      name: "Icon",
+      looseCoupling: true,
+      couplesWith: ["icon"],
+      slot: "icon",
+      description: "A button can be formatted to include an icon"
+    },
+    {
+      name: "Label",
+      looseCoupling: true,
+      couplesWith: ["label"],
+      slot: "label",
+      description: "A button can be formatted to include a label"
+    },
+    {
+      name: "Or",
+      slot: "or",
+      description: "A button group can be formatted to show a conditional choice"
+    }
+  ],
+  /*-------------------
+          Types
+  --------------------*/
+  types: [
+    {
+      name: "Emphasis",
+      attribute: "emphasis",
+      description: "A button can be formatted to show different levels of emphasis",
+      adoptionLevel: 1,
+      options: [
+        {
+          name: "Primary",
+          value: "primary",
+          description: "This button should appear to be emphasized as the first action that should be taken over other options."
+        },
+        {
+          name: "Secondary",
+          value: "secondary",
+          description: "This button should appear to be emphasized as a secondary option that should appear after other options"
+        }
+      ]
+    },
+    {
+      name: "Icon",
+      attribute: "icon",
+      description: "A button can appear with an icon",
+      adoptionLevel: 2,
+      looseCoupling: true,
+      couplesWith: ["icon"],
+      distinctHTML: true
+    },
+    {
+      name: "Labeled",
+      attribute: "labeled",
+      description: "A button can appear specially formatted to attach to a label element",
+      adoptionLevel: 3,
+      looseCoupling: true,
+      couplesWith: ["label"],
+      options: [
+        {
+          name: "Labeled",
+          value: ["labeled", "right-labeled"],
+          description: "A button can be formatted so that a label appears to the right"
+        },
+        {
+          name: "Left Labeled",
+          value: "left-labeled",
+          description: "A button can be formatted so that a label appears to the left"
+        }
+      ],
+      distinctHTML: true
+    },
+    {
+      name: "Labeled Icon",
+      description: "A button can be formatted so that the icon appears separately.",
+      looseCoupling: true,
+      adoptionLevel: 3,
+      options: [
+        {
+          name: "Labeled",
+          value: "labeled",
+          description: "A button can be formatted so that the icon appears to the right"
+        },
+        {
+          name: "Left Labeled",
+          value: "left-labeled",
+          description: "A button can be formatted so that the icon appears to the left"
+        }
+      ],
+      distinctHTML: true
+    },
+    {
+      name: "Toggle",
+      description: "A button can be formatted to emphasize its active state",
+      adoptionLevel: 3,
+      options: [
+        {
+          name: "Toggle",
+          value: true,
+          description: "A button can be formatted to animate hidden content horizontally"
+        }
+      ],
+      distinctHTML: true
+    },
+    {
+      name: "Animated",
+      description: "A button can animate to show hidden content",
+      adoptionLevel: 5,
+      options: [
+        {
+          name: "Animated",
+          value: "animated",
+          description: "A button can be formatted to animate hidden content horizontally"
+        },
+        {
+          name: "Vertical Animated",
+          value: "vertical-animated",
+          description: "A button can be formatted to animate hidden content vertically"
+        },
+        {
+          name: "Fade Animated",
+          value: "vertical-animated",
+          description: "A button can be formatted to fade in hidden content"
+        }
+      ],
+      distinctHTML: true
+    }
+  ],
+  /*-------------------
+         States
+  --------------------*/
+  states: [
+    {
+      name: "Hover",
+      attribute: "hover",
+      description: "A button can show it is currently hovered"
+    },
+    {
+      name: "Focus",
+      attribute: "focus",
+      description: "A button can show it is currently focused by the keyboard"
+    },
+    {
+      name: "Active",
+      attribute: "active",
+      description: "A button can show it is currently the activated"
+    },
+    {
+      name: "Disabled",
+      attribute: "disabled",
+      description: "A button can show it is currently unable to be interacted with"
+    },
+    {
+      name: "Loading",
+      attribute: "loading",
+      description: "A button can show a loading indicator"
+    }
+  ],
+  /*-------------------
+        Variations
+  --------------------*/
+  variations: [
+    {
+      name: "Attached",
+      value: "attached",
+      description: "A button can be attached",
+      adoptionLevel: 2,
+      options: [
+        {
+          name: "Attached",
+          value: "attached",
+          description: "A button can appear attached both above and below"
+        },
+        {
+          name: "Bottom Attached",
+          value: "bottom-attached",
+          description: "A button can appear attached to the bottom of other content"
+        },
+        {
+          name: "Top Attached",
+          value: "top-attached",
+          description: "A button can appear attached to the top of other content"
+        },
+        {
+          name: "Left Attached",
+          value: "left-attached",
+          description: "A button can appear attached to the left of other content"
+        },
+        {
+          name: "Right Attached",
+          value: "right-attached",
+          description: "A button can appear attached to the right of other content"
+        }
+      ]
+    },
+    {
+      name: "Basic",
+      value: "styling",
+      description: "A button can be formatted to appear de-emphasized over other elements in the page.",
+      adoptionLevel: 3,
+      options: [
+        {
+          name: "Basic",
+          value: "basic",
+          description: "A button can appear slightly less pronounced."
+        },
+        {
+          name: "Very Basic",
+          value: "very-basic",
+          description: "A button can appear to be much less pronounced."
+        }
+      ]
+    },
+    {
+      name: "Circular",
+      value: "circular",
+      description: "A button can be formatted to appear circular.",
+      adoptionLevel: 3,
+      options: [
+        {
+          name: "Circular",
+          value: true
+        }
+      ]
+    },
+    {
+      name: "Colored",
+      value: "color",
+      description: "A button can be colored",
+      adoptionLevel: 3,
+      options: [
+        {
+          name: "Red",
+          value: "red",
+          description: "A button can be red"
+        },
+        {
+          name: "Orange",
+          value: "orange",
+          description: "A button can be orange"
+        },
+        {
+          name: "Yellow",
+          value: "yellow",
+          description: "A button can be yellow"
+        },
+        {
+          name: "Olive",
+          value: "olive",
+          description: "A button can be olive"
+        },
+        {
+          name: "Green",
+          value: "green",
+          description: "A button can be green"
+        },
+        {
+          name: "Teal",
+          value: "teal",
+          description: "A button can be teal"
+        },
+        {
+          name: "Blue",
+          value: "blue",
+          description: "A button can be blue"
+        },
+        {
+          name: "Violet",
+          value: "violet",
+          description: "A button can be violet"
+        },
+        {
+          name: "Purple",
+          value: "purple",
+          description: "A button can be purple"
+        },
+        {
+          name: "Pink",
+          value: "pink",
+          description: "A button can be pink"
+        },
+        {
+          name: "Brown",
+          value: "brown",
+          description: "A button can be brown"
+        },
+        {
+          name: "Grey",
+          value: "grey",
+          description: "A button can be grey"
+        },
+        {
+          name: "Black",
+          value: "black",
+          description: "A button can be black"
+        }
+      ]
+    },
+    {
+      name: "Compact",
+      value: "compact",
+      adoptionLevel: 3,
+      description: "A button can reduce its padding to fit into tighter spaces without adjusting its font size",
+      options: [
+        {
+          name: "Compact",
+          value: "compact",
+          description: "A button can reduce its padding size slightly."
+        },
+        {
+          name: "Very Compact",
+          value: "very-compact",
+          description: "A button can reduce its padding size greatly."
+        }
+      ]
+    },
+    {
+      name: "Social Site",
+      value: "social",
+      adoptionLevel: 5,
+      description: "A button can appear formatted with the brand colors of a social website",
+      options: [
+        {
+          name: "Facebook",
+          value: "facebook",
+          description: "A button can link to facebook"
+        },
+        {
+          name: "Twitter",
+          value: "twitter",
+          description: "A button can link to twitter"
+        },
+        {
+          name: "Google Plus",
+          value: "google plus",
+          description: "A button can link to google plus"
+        },
+        {
+          name: "Vk",
+          value: "vk",
+          description: "A button can link to vk"
+        },
+        {
+          name: "Linkedin",
+          value: "linkedin",
+          description: "A button can link to linkedin"
+        },
+        {
+          name: "Instagram",
+          value: "instagram",
+          description: "A button can link to instagram"
+        },
+        {
+          name: "Youtube",
+          value: "youtube",
+          description: "A button can link to youtube"
+        }
+      ]
+    },
+    {
+      name: "Positive",
+      value: "positive",
+      adoptionLevel: 2,
+      description: "A button can appear to be associated with a positive action",
+      options: [
+        {
+          name: "Positive",
+          value: "positive",
+          description: "A button be positive."
+        },
+        {
+          name: "Subtle Positive",
+          value: "subtle-positive",
+          description: "A button can subtly hint at a positive action"
+        }
+      ]
+    },
+    {
+      name: "Negative",
+      value: "negative",
+      adoptionLevel: 2,
+      description: "A button can appear to be associated with a negative action",
+      options: [
+        {
+          name: "Negative",
+          value: "negative",
+          description: "A button be negative."
+        },
+        {
+          name: "Subtle Negative",
+          value: "subtle-negative",
+          description: "A button can subtly hint at a negative action"
+        }
+      ]
+    },
+    {
+      name: "Floated",
+      value: "floated",
+      adoptionLevel: 1,
+      description: "A button can be aligned to the left or right of its container",
+      options: [
+        {
+          name: "Left Floated",
+          value: ["left-floated"],
+          description: "A button can appear to the left of content."
+        },
+        {
+          name: "Right Floated",
+          value: "right-floated",
+          description: "A button can appear to the right of content."
+        }
+      ]
+    },
+    {
+      name: "Fluid",
+      value: "fluid",
+      adoptionLevel: 1,
+      description: "A button can take the width of its container"
+    },
+    {
+      name: "Size",
+      value: "size",
+      adoptionLevel: 1,
+      description: "A button can vary in size",
+      options: [
+        {
+          name: "Mini",
+          value: "mini",
+          description: "An element can appear extremely small"
+        },
+        {
+          name: "Tiny",
+          value: "tiny",
+          description: "An element can appear very small"
+        },
+        {
+          name: "Small",
+          value: "small",
+          description: "An element can appear small"
+        },
+        {
+          name: "Medium",
+          value: "medium",
+          description: "An element can appear normal sized"
+        },
+        {
+          name: "Large",
+          value: "large",
+          description: "An element can appear larger than normal"
+        },
+        {
+          name: "Big",
+          value: "big",
+          description: "An element can appear much larger than normal"
+        },
+        {
+          name: "Huge",
+          value: "huge",
+          description: "An element can appear very much larger than normal"
+        },
+        {
+          name: "Massive",
+          value: "massive",
+          description: "An element can appear extremely larger than normal"
+        }
+      ]
+    },
+    {
+      name: "Inverted",
+      description: "A button can be formatted to appear on dark backgrounds",
+      adoptionLevel: 2,
+      attribute: "inverted"
+    }
+  ],
+  /*******************************
+              Plural
+  *******************************/
+  supportsPlural: true,
+  pluralName: "Buttons",
+  pluralTagName: "buttons",
+  pluralDescription: "Buttons can exist together as a group",
+  pluralVariations: [
+    "inverted",
+    "size",
+    "floated",
+    "compact",
+    "colored",
+    "attached"
+  ]
+};
+
+// src/button/button.js
+var createInstance = (tpl, $3) => ({});
+var onCreated = (tpl) => {
+};
+var events = {
+  "click .button"(event, tpl, $3) {
+  }
+};
+var UIButton = createComponent({
+  tagName: "ui-button",
+  spec: ButtonSpec,
+  template: button_default2,
+  css: button_default,
+  createInstance,
+  onCreated,
+  events
+});
+export {
+  UIButton
+};
 /*! Bundled license information:
 
 @lit/reactive-element/css-tag.js:
