@@ -14,14 +14,18 @@ const onCreated = (tpl) => {
   // nothing
 };
 
-const onRendered = (tpl, $) => {/*
+const onRendered = (tpl, $) => {
   // nothing
-  if(tpl.data.item.checked) {
+  console.log(tpl.data.item);
+  if(tpl.data.item.completed) {
+    console.log('checking');
+    console.log($('.completed').length);
     $('.completed').attr('checked');
   }
   else {
+    console.log('unchecking');
     $('.completed').removeAttr('checked');
-  }*/
+  }
 };
 
 const onDestroyed = (tpl) => {
@@ -31,7 +35,7 @@ const onDestroyed = (tpl) => {
 const events = {
   'change input.completed'(event, tpl) {
     let todos = tpl.parent().todos.get();
-    todos[tpl.data.index].completed = !!todos[tpl.data.index].completed;
+    todos[tpl.data.index].completed = !todos[tpl.data.index].completed;
     tpl.parent().todos.set(todos);
   }
 };

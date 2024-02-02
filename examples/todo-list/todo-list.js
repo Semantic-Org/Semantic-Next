@@ -11,8 +11,7 @@ import css from './todo-list.css';
 const createInstance = (tpl, $) => ({
 
   todos: new ReactiveVar([
-    { text: 'Start a band', completed: false },
-    { text: 'Tour country', completed: false }
+    { _id: 1, text: 'Start a band', completed: false },
   ]),
 
   allSelected: new ReactiveVar(false),
@@ -53,8 +52,7 @@ const createInstance = (tpl, $) => ({
 });
 
 const onCreated = (tpl) => {
-  tpl.calculateSelection();
-
+  //tpl.calculateSelection();
 };
 
 const events = {

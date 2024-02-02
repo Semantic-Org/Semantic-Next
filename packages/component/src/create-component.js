@@ -99,6 +99,7 @@ export const createComponent = ({
 
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
+        this.renderCallbacks = [];
       }
 
       // callback when added to dom
@@ -111,6 +112,15 @@ export const createComponent = ({
       firstUpdated() {
         super.firstUpdated();
         this.call(onRendered);
+      }
+
+      updated() {
+        console.log('updated', this.renderCallbacks);
+        each(this.renderCallbacks, callback => callback());
+      }
+
+      addRenderCallback(callback) {
+        this.renderCallbacks.push(callback);
       }
 
       // callback if removed from dom

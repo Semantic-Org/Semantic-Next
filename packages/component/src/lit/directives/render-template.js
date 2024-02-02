@@ -12,17 +12,20 @@ class RenderTemplate extends AsyncDirective {
     this.part = null;
   }
   render({getTemplateName, subTemplates, data, parentTemplate}) {
-    console.log('render called');
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
+      if(this.template) {
+        return false;
+      }
       const templateName = getTemplateName();
       const template = subTemplates[templateName];
       if(!template) {
         fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
       }
       this.template = template.clone({ data: unpackData(data) });
+      return true;
     };
     const attachTemplate = () => {
       const { parentNode, startNode, endNode} = this.part; // stored from update
@@ -33,32 +36,45 @@ class RenderTemplate extends AsyncDirective {
       }
     };
     const renderTemplate = () => {
-      return this.template.render();
+      let html = this.template.render();
+      setTimeout(() => {
+        console.log('RENDER IS CALLED');
+        this.template.onRendered();
+      }, 0);
+      return html;
     };
     Reaction.create((comp) => {
       if(!this.isConnected) {
         comp.stop();
         return;
       }
-      cloneTemplate(); // reactive reference
+      const isCloned = cloneTemplate(); // reactive reference
+      console.log('reaction', isCloned, comp.firstRun);
       if(!comp.firstRun) {
+        console.log('comp first run not true');
         attachTemplate();
+        if(!isCloned) {
+          console.log('changing data context to', data);
+          this.template.setDataContext(unpackData(data));
+        }
         this.setValue(renderTemplate());
       }
     });
     cloneTemplate();
     attachTemplate();
+    this.template.setDataContext(unpackData(data));
     return renderTemplate();
   }
 
   update(part, renderSettings) {
+    console.log(part);
     this.part = part;
-    console.log('update called', part);
     return this.render.apply(this, renderSettings);
   }
 
   reconnected() {
     // nothing yet
+    console.log('reconnected called');
   }
   disconnected() {
     if (this.template) {
