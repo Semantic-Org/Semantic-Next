@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./reload.js" type="module"></script>
+  <link rel="stylesheet" href="./index.css">
+  <link rel="stylesheet" href="./ui/semantic-ui.css">
+  <link rel="stylesheet" href="./ui/theme/base.css">
+
+  <title>Test Element</title>
+  <script src="./examples/test-element.js" type="module"></script>
+</head>
+<body>
+  <div class="container">
+    <test-element hello="true" myname="jack">
+      Test
+      <span slot="text">Dummy Content</span>
+    </test-element>
+    <style>
+      test-element:not(:defined) {
+        opacity: 0;
+      }
+    </style>
+  </div>
+</body>

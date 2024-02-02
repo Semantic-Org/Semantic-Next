@@ -1,6 +1,4 @@
-import * as esbuild from 'esbuild';
-import { BROWSER_TARGET } from '../config.js';
-import { logPlugin } from '../plugins.js';
+import { browserTarget } from './lib/config.js';
 
 /*
   Takes all css parts of a component and creates
@@ -32,7 +30,7 @@ let jsBuild = await esbuild.context({
     compilerOptions: {
       experimentalDecorators: true,
       useDefineForClassFields: false,
-      verbatimModuleSyntax: false
+      verbatimModuleSyntax: true
     },
   },
   format: 'esm',
@@ -74,26 +72,6 @@ let cssBuild = await esbuild.context({
 });
 
 /*
-  Takes a full JSON spec file and creates a smaller JSON
-  file which is consumed by a component
-*/
-/*const specBuild = await esbuild.context({
-  entryPoints: [
-    'src/spec.js'
-  ],
-  target: BROWSER_TARGET,
-  bundle: true,
-  plugins: [ logPlugin('Spec Build') ],
-  loader: {
-    '.css': 'css',
-  },
-  entryNames: '[dir]/../[name]',
-  outbase: 'src',
-  outdir: 'src',
-});
-*/
-
-/*
   Exports themes as separate css
 */
 let themeBuild = await esbuild.context({
@@ -117,8 +95,3 @@ await Promise.all([
   cssBuild.watch(),
   themeBuild.watch(),
 ]);
-let { host, port } = await jsBuild.serve({
-  servedir: 'dev',
-});
-
-console.log(`Server up ${host}:${port}`);

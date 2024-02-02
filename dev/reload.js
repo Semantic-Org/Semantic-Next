@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Button</title>
-  <link rel="stylesheet" href="./index.css">
-  <link rel="stylesheet" href="./ui/semantic-ui.css">
-  <link rel="stylesheet" href="./ui/theme/base.css">
-  <script src="./ui/semantic-ui.js" type="module"></script>
-  <script>
 new EventSource('/esbuild').addEventListener('change', e => {
   /* Rebuilds page after JS changes */
   const { added, removed, updated } = JSON.parse(e.data);
@@ -27,18 +16,3 @@ new EventSource('/esbuild').addEventListener('change', e => {
   }
   location.reload();
 });
-</script>
-</head>
-<body>
-  <div class="container">
-    <test-element hello="true" myname="jack">
-      Test
-      <span slot="text">Dummy Content</span>
-    </test-element>
-    <style>
-      test-element:not(:defined) {
-        opacity: 0;
-      }
-    </style>
-  </div>
-</body>

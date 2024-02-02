@@ -15,10 +15,10 @@
   },
   "wireit": {
     "build": {
-      "command": "node ./tasks/run/build.js"
+      "command": "node ./tasks/build.js"
     },
     "serve": {
-      "command": "node ./tasks/run/serve.js",
+      "command": "node ./tasks/serve.js",
       "service": true
     },
     "test-server": {

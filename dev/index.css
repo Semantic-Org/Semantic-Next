@@ -1,7 +1,9 @@
-
-
 body .container {
   width: 1170px;
   margin: 0rem auto;
   padding: 2rem;
+}
+
+*:not(:defined) {
+  opacity: 0;
 }

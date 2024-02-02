@@ -1,6 +1,6 @@
 import * as esbuild from 'esbuild';
-import { BROWSER_TARGET } from '../config.js';
-import { logPlugin } from '../plugins.js';
+import { BROWSER_TARGET } from 'lib/config.js';
+import { logPlugin } from 'lib/log.js';
 
 const cssConcat = await esbuild.build({
   entryPoints: [

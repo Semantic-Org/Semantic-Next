@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 
 export const logPlugin = (text ='') => {
-
   return {
     name: 'log-build',
     setup(build) {
