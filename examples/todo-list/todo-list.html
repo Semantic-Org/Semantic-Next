@@ -1,3 +1,13 @@
-<div class="todo">
-  Todo list goes here
-</div>
+<header class="header">
+  <h1>Todos</h1>
+  <input type="text" class="add" autofocus autocomplete="off" placeholder="What needs to be done?">
+  <div class="select-all"></div>
+</header>
+<main class="main">
+  {{#each item in todos}}
+    {{>todoItem item=item}}
+  {{/each}}
+</main>
+<footer class="footer">
+
+</footer>

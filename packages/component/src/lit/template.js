@@ -34,7 +34,7 @@ export const LitTemplate = class UITemplate {
     this.ast = ast;
     this.css = css;
     this.data = data || {};
-    this.templateName = templateName || getGenericTemplateName();
+    this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
     this.onRenderedCallback = onRendered;
@@ -58,6 +58,7 @@ export const LitTemplate = class UITemplate {
       this.tpl = {};
       tpl = this.call(this.createInstance);
       extend(this.tpl, tpl);
+      console.log('instance created', this.tpl);
     }
     // reactions bound with tpl.reaction will be scoped to template
     // and be removed when the template is destroyed
@@ -67,6 +68,7 @@ export const LitTemplate = class UITemplate {
     this.tpl.parent = () => this.parentTemplate;
 
     this.onCreated = () => {
+      console.log('oncreated called');
       this.call(this.onCreatedCallback.bind(this));
     };
     this.onFirstRender = () => {
@@ -196,6 +198,7 @@ export const LitTemplate = class UITemplate {
   render(additionalData = {}) {
     if(!this.renderer) {
       this.initialize();
+      console.log('finished initializing');
       this.onCreated();
     }
     const html = this.renderer.render({

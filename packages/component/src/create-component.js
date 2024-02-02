@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { unique, each, noop, get, reverseKeys } from '@semantic-ui/utils';
+import { unique, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
@@ -49,7 +49,7 @@ export const createComponent = ({
     a sub template of another web component
   */
   let litTemplate = new LitTemplate({
-    templateName: templateName || tagName,
+    templateName: templateName || kebabToCamel(tagName),
     ast,
     css,
     events,
@@ -99,7 +99,6 @@ export const createComponent = ({
 
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
-        this.call(onCreated);
       }
 
       // callback when added to dom

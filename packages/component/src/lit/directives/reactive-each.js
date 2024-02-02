@@ -35,7 +35,7 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   getItems(eachCondition) {
-    let items = eachCondition.over();
+    let items = eachCondition.over() || [];
     items = items.map(item => {
       if(isObject(item)) {
         item._id = item._id || hashCode(item);

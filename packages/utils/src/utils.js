@@ -74,7 +74,7 @@ export const isArguments = function(obj) {
 };
 
 /*-------------------
-      Date
+        Date
 --------------------*/
 
 export const formatDate = function(date, format) {
@@ -116,7 +116,7 @@ export const formatDate = function(date, format) {
   return expandedFormat.replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g, (match) => {
     return dateMap[match];
   }).replace(/\[(.*?)\]/g, (match, p1) => p1);
-}
+};
 
 /*-------------------
       Functions
@@ -141,11 +141,11 @@ export const wrapFunction = (x) => {
 /*
   HTML Attributes -> JS Properties
 */
-export const kebabToCamel = (str) => {
-  return str.replace(/-([a-z])/g, (g) => {
-    return g[1].toUpperCase();
-  });
-};
+
+// attr-name to varName
+export const kebabToCamel = (str = '') => str.replace(/-./g, (m) => m[1].toUpperCase());
+export const camelToKebab = (str = '') => str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
 
 
 /*-------------------
