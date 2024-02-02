@@ -51,7 +51,7 @@ class ReactiveEachDirective extends AsyncDirective {
     }
     return repeat(items, this.getPartID, (item, index) => {
       let part = this.parts.get(this.getPartID(item));
-      if(part) {
+      if(false && part) {
         // used cached template
         //console.log('reuse', this.getPartID(item));
         return part;

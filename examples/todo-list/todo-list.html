@@ -5,9 +5,23 @@
 </header>
 <main class="main">
   {{#each item in todos}}
-    {{>todoItem item=item}}
+    {{>todoItem item=item index=@index}}
   {{/each}}
 </main>
 <footer class="footer">
-
+  <span>
+    {{getIncomplete.length}} item{{maybeS getIncomplete.length}} left
+  </span>
+  <div class="filters">
+    <span data-filter="all">
+      All
+    </span>
+    <span data-filter="active">
+      Active
+    </span>
+    <span data-filter="completed">
+      Completed
+    </span>
+  </div>
+  <div class="clear">Clear Completed</div>
 </footer>

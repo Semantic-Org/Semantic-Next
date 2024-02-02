@@ -11,21 +11,29 @@ import css from './todo-list.css';
 const createInstance = (tpl, $) => ({
 
   todos: new ReactiveVar([
-    {_id: '1', text: 'Start a band'}
+    { text: 'Start a band', completed: false },
+    { text: 'Tour country', completed: false }
   ]),
 
   allSelected: new ReactiveVar(false),
 
   selectAll() {
-    let todos = tpl.todos.get();
-    each(todos, todo => todo.selected);
-    todos.set(todos);
+    todos.set(each(tpl.todos.value, todo => todo.selected));
   },
 
   selectNone() {
-    let todos = tpl.todos.get();
-    each(todos, todo => !todo.selected);
-    todos.set(todos);
+    todos.set(each(tpl.todos.value, todo => !todo.selected));
+  },
+
+  getIncomplete() {
+    return tpl.todos.value.filter(todo => !todo.completed);
+  },
+
+  addTodo(text = $('input.add').val()) {
+    tpl.todos.push({
+      text: text,
+      completed: false,
+    });
   },
 
   calculateSelection() {
@@ -50,10 +58,16 @@ const onCreated = (tpl) => {
 };
 
 const events = {
-  'click selectAll'(event, tpl) {
-    let todos = tpl.todos.get();
-    each(todos, todo => todo.selected);
-    todos.set(todos);
+  'keydown input.add'(event, tpl, $) {
+    if(event.key === 'Enter') {
+      tpl.addTodo();
+    }
+  },
+  'click .select-all'(event, tpl) {
+    tpl.allSelected.toggle();
+  },
+  'click .filters'(event, tpl, data) {
+    console.log(data);
   }
 };
 

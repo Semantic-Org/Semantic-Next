@@ -218,7 +218,7 @@ export class LitRenderer {
         const boundFunc = dataValue.bind( getContext() );
         result = boundFunc(...funcArguments);
       }
-      else if(dataValue) {
+      else if(dataValue !== undefined) {
         result = (dataValue?.constructor.name === '_ReactiveVar')
           ? dataValue.value
           : dataValue

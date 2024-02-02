@@ -237,6 +237,12 @@ export class Query {
     }
     return this;
   }
+
+  removeAttr(attributeName) {
+    Array.from(this).forEach(el => el.removeAttribute(attributeName));
+    return this;
+  }
+
   each(callback) {
     Array.from(this).forEach((el, index) => {
       // Call the callback with 'this' context set to the current element

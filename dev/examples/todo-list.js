@@ -1643,6 +1643,9 @@ var ReactiveVar = class _ReactiveVar {
     arr.splice(index, 1);
     this.set(arr);
   }
+  toggle() {
+    return this.set(!!this.value);
+  }
 };
 
 // packages/templating/src/watch.js
@@ -1860,6 +1863,10 @@ var Query = class _Query {
     } else if (this.length) {
       return this[0].getAttribute(attribute);
     }
+    return this;
+  }
+  removeAttr(attributeName) {
+    Array.from(this).forEach((el) => el.removeAttribute(attributeName));
     return this;
   }
   each(callback) {
@@ -2110,7 +2117,7 @@ var ReactiveEachDirective = class extends f4 {
     }
     return c5(items, this.getPartID, (item, index) => {
       let part = this.parts.get(this.getPartID(item));
-      if (part) {
+      if (false) {
         return part;
       } else {
         part = this.getPartContent(item, index, data, eachCondition);
@@ -2160,47 +2167,47 @@ var RenderTemplate = class extends f4 {
     this.part = null;
   }
   render({ getTemplateName, subTemplates, data, parentTemplate }) {
-    const getTemplate = () => {
-      const templateName = getTemplateName();
-      const template2 = subTemplates[templateName];
-      console.log(template2);
-      return template2;
-    };
-    const renderTemplate2 = (template2, data2) => {
-      return template2.render(data2);
-    };
+    console.log("render called");
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
+    };
+    const cloneTemplate = () => {
+      const templateName = getTemplateName();
+      const template = subTemplates[templateName];
+      if (!template) {
+        fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
+      }
+      this.template = template.clone({ data: unpackData(data) });
+    };
+    const attachTemplate = () => {
+      const { parentNode, startNode, endNode } = this.part;
+      const renderRoot = this.part.options.host?.renderRoot;
+      this.template.attach(renderRoot, { parentNode, startNode, endNode });
+      if (parentTemplate) {
+        this.template.setParent(parentTemplate);
+      }
+    };
+    const renderTemplate2 = () => {
+      return this.template.render();
     };
     Reaction.create((comp) => {
       if (!this.isConnected) {
         comp.stop();
         return;
       }
-      const template2 = getTemplate();
-      if (!template2) {
-        fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
-      }
-      const templateData2 = unpackData(data);
-      if (template2) {
-        this.template = template2;
-        const { parentNode, startNode, endNode } = this.part;
-        const renderRoot = this.part.options.host?.renderRoot;
-        template2.attach(renderRoot, { parentNode, startNode, endNode });
-        if (parentTemplate) {
-          template2.setParent(parentTemplate);
-        }
-      }
+      cloneTemplate();
       if (!comp.firstRun) {
-        this.setValue(renderTemplate2(template2, templateData2));
+        attachTemplate();
+        this.setValue(renderTemplate2());
       }
     });
-    const template = getTemplate();
-    const templateData = unpackData(data);
-    return renderTemplate2(template, templateData);
+    cloneTemplate();
+    attachTemplate();
+    return renderTemplate2();
   }
   update(part, renderSettings) {
     this.part = part;
+    console.log("update called", part);
     return this.render.apply(this, renderSettings);
   }
   reconnected() {
@@ -2437,7 +2444,7 @@ var LitRenderer = class _LitRenderer {
       if (isFunction(dataValue)) {
         const boundFunc = dataValue.bind(getContext());
         result = boundFunc(...funcArguments);
-      } else if (dataValue) {
+      } else if (dataValue !== void 0) {
         result = dataValue?.constructor.name === "_ReactiveVar" ? dataValue.value : dataValue;
       } else if ((stringMatches2 = stringRegExp.exec(expression)) !== null && stringMatches2.length > 1) {
         result = stringMatches2[1];
@@ -2492,7 +2499,7 @@ var LitTemplate = class UITemplate {
     parentTemplate,
     // the parent template when nested
     onCreated: onCreated3 = noop,
-    onRendered = noop,
+    onRendered: onRendered2 = noop,
     onDestroyed: onDestroyed2 = noop
   }) {
     if (!ast) {
@@ -2506,7 +2513,7 @@ var LitTemplate = class UITemplate {
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance3;
-    this.onRenderedCallback = onRendered;
+    this.onRenderedCallback = onRendered2;
     this.onDestroyedCallback = onDestroyed2;
     this.onCreatedCallback = onCreated3;
   }
@@ -2526,6 +2533,8 @@ var LitTemplate = class UITemplate {
       extend(this.tpl, tpl);
     }
     this.tpl.reaction = this.reaction;
+    this.tpl.data = this.data;
+    this.tpl.$ = this.$;
     this.tpl.templateName = this.templateName;
     this.tpl.parent = () => this.parentTemplate;
     this.onCreated = () => {
@@ -2543,17 +2552,23 @@ var LitTemplate = class UITemplate {
       this.removeEvents();
       this.call(this.onDestroyedCallback.bind(this));
     };
+    this.initialized = true;
     this.renderer = new LitRenderer({
       ast: this.ast,
       data: this.getDataContext(),
       subTemplates: this.subTemplates
     });
+    this.onCreated();
   }
   async attach(renderRoot, { parentNode = renderRoot, startNode, endNode } = {}) {
+    if (!this.initialized) {
+      this.initialize();
+    }
     this.renderRoot = renderRoot;
     this.parentNode = parentNode;
     this.startNode = startNode;
     this.endNode = endNode;
+    console.log("attaching events", this.tpl.data?.index);
     this.attachEvents();
     await this.attachStyles();
   }
@@ -2581,10 +2596,28 @@ var LitTemplate = class UITemplate {
       this.renderRoot.adoptedStyleSheets = [...this.renderRoot.adoptedStyleSheets, this.stylesheet];
     }
   }
+  clone(settings) {
+    const defaultSettings = {
+      templateName: this.templateName,
+      ast: this.ast,
+      css: this.css,
+      events: this.events,
+      subTemplates: this.subTemplates,
+      onCreated: this.onCreatedCallback,
+      onRendered: this.onRenderedCallback,
+      onDestroyed: this.onDestroyedCallback,
+      createInstance: this.createInstance
+    };
+    return new LitTemplate({
+      ...defaultSettings,
+      ...settings
+    });
+  }
   attachEvents(events3 = this.events) {
     if (!this.parentNode || !this.renderRoot) {
       fatal("You must set a parent before attaching events");
     }
+    this.removeEvents();
     const parseEventString = (eventString) => {
       const parts = eventString.split(" ");
       const eventName = parts[0];
@@ -2604,6 +2637,11 @@ var LitTemplate = class UITemplate {
         template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
       }, this.eventController);
     });
+  }
+  removeEvents() {
+    if (this.eventController) {
+      this.eventController.abort();
+    }
   }
   // Find the direct child of the renderRoot that is an ancestor of the event.target
   // then confirm position
@@ -2626,16 +2664,9 @@ var LitTemplate = class UITemplate {
     };
     return isNodeInRange(getRootChild(node));
   }
-  attachEvent(eventHandler, eventString) {
-  }
-  removeEvents() {
-    this.eventController.abort();
-  }
   render(additionalData = {}) {
-    if (!this.renderer) {
+    if (!this.initialized) {
       this.initialize();
-      console.log("finished initializing");
-      this.onCreated();
     }
     const html = this.renderer.render({
       data: {
@@ -2790,7 +2821,7 @@ var createComponent = ({
   events: events3 = {},
   createInstance: createInstance3 = noop,
   onCreated: onCreated3 = noop,
-  onRendered = noop,
+  onRendered: onRendered2 = noop,
   onDestroyed: onDestroyed2 = noop,
   onAttributeChanged = noop,
   subTemplates = [],
@@ -2816,7 +2847,7 @@ var createComponent = ({
     events: events3,
     subTemplates,
     onCreated: onCreated3,
-    onRendered,
+    onRendered: onRendered2,
     onDestroyed: onDestroyed2,
     createInstance: createInstance3
   });
@@ -2856,7 +2887,7 @@ var createComponent = ({
       }
       firstUpdated() {
         super.firstUpdated();
-        this.call(onRendered);
+        this.call(onRendered2);
       }
       // callback if removed from dom
       disconnectedCallback() {
@@ -2940,7 +2971,7 @@ var createComponent = ({
 };
 
 // examples/todo-list/todo-item.html
-var todo_item_default = '<div class="item">\n  <input type="checkbox" id={{item._id}} checked="{{item.checked}}">\n  <label for="{{item._id}}">{{item.text}}\n</div>\n';
+var todo_item_default = '<div class="item">\n  <input class="completed" type="checkbox" id={{item._id}}>\n  <label for="{{item._id}}">{{item.text}}\n</div>\n';
 
 // examples/todo-list/todo-item.css
 var todo_item_default2 = "";
@@ -2951,21 +2982,30 @@ var createInstance = (tpl, $3) => ({
 });
 var onCreated = (tpl) => {
 };
+var onRendered = (tpl, $3) => {
+};
 var onDestroyed = (tpl) => {
 };
-var events = {};
+var events = {
+  "change input.completed"(event, tpl) {
+    let todos2 = tpl.parent().todos.get();
+    todos2[tpl.data.index].completed = !!todos2[tpl.data.index].completed;
+    tpl.parent().todos.set(todos2);
+  }
+};
 var todoItem = createComponent({
   templateName: "todoItem",
   template: todo_item_default,
   css: todo_item_default2,
   createInstance,
   onCreated,
+  onRendered,
   onDestroyed,
   events
 });
 
 // examples/todo-list/todo-list.html
-var todo_list_default = '<header class="header">\n  <h1>Todos</h1>\n  <input type="text" class="add" autofocus autocomplete="off" placeholder="What needs to be done?">\n  <div class="select-all"></div>\n</header>\n<main class="main">\n  {{#each item in todos}}\n    {{>todoItem item=item}}\n  {{/each}}\n</main>\n<footer class="footer">\n\n</footer>\n';
+var todo_list_default = '<header class="header">\n  <h1>Todos</h1>\n  <input type="text" class="add" autofocus autocomplete="off" placeholder="What needs to be done?">\n  <div class="select-all"></div>\n</header>\n<main class="main">\n  {{#each item in todos}}\n    {{>todoItem item=item index=@index}}\n  {{/each}}\n</main>\n<footer class="footer">\n  <span>\n    {{getIncomplete.length}} item{{maybeS getIncomplete.length}} left\n  </span>\n  <div class="filters">\n    <span data-filter="all">\n      All\n    </span>\n    <span data-filter="active">\n      Active\n    </span>\n    <span data-filter="completed">\n      Completed\n    </span>\n  </div>\n  <div class="clear">Clear Completed</div>\n</footer>\n';
 
 // examples/todo-list/todo-list.css
 var todo_list_default2 = "";
@@ -2973,18 +3013,24 @@ var todo_list_default2 = "";
 // examples/todo-list/todo-list.js
 var createInstance2 = (tpl, $3) => ({
   todos: new ReactiveVar([
-    { _id: "1", text: "Start a band" }
+    { text: "Start a band", completed: false },
+    { text: "Tour country", completed: false }
   ]),
   allSelected: new ReactiveVar(false),
   selectAll() {
-    let todos = tpl.todos.get();
-    each(todos, (todo) => todo.selected);
-    todos.set(todos);
+    todos.set(each(tpl.todos.value, (todo) => todo.selected));
   },
   selectNone() {
-    let todos = tpl.todos.get();
-    each(todos, (todo) => !todo.selected);
-    todos.set(todos);
+    todos.set(each(tpl.todos.value, (todo) => !todo.selected));
+  },
+  getIncomplete() {
+    return tpl.todos.value.filter((todo) => !todo.completed);
+  },
+  addTodo(text = $3("input.add").val()) {
+    tpl.todos.push({
+      text,
+      completed: false
+    });
   },
   calculateSelection() {
     tpl.reaction((comp) => {
@@ -3003,10 +3049,16 @@ var onCreated2 = (tpl) => {
   tpl.calculateSelection();
 };
 var events2 = {
-  "click selectAll"(event, tpl) {
-    let todos = tpl.todos.get();
-    each(todos, (todo) => todo.selected);
-    todos.set(todos);
+  "keydown input.add"(event, tpl, $3) {
+    if (event.key === "Enter") {
+      tpl.addTodo();
+    }
+  },
+  "click .select-all"(event, tpl) {
+    tpl.allSelected.toggle();
+  },
+  "click .filters"(event, tpl, data) {
+    console.log(data);
   }
 };
 var TodoList = createComponent({
