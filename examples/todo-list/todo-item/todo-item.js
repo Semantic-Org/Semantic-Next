@@ -23,9 +23,11 @@ const onDestroyed = (tpl) => {
 const events = {
 };
 
-const TodoList = createComponent({
+const TodoItem = createComponent({
   tagName: 'todo-list',
-  subTemplates: {},
+  subTemplates: {
+    todoItem
+  },
   template,
   css,
   createInstance,
@@ -34,4 +36,4 @@ const TodoList = createComponent({
   events,
 });
 
-export { TodoList };
+export { TodoItem };
