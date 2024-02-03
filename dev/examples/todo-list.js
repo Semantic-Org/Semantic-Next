@@ -2540,8 +2540,8 @@ var LitTemplate = class UITemplate {
     createInstance: createInstance3,
     parentTemplate,
     // the parent template when nested
-    onCreated: onCreated3 = noop,
-    onRendered = noop,
+    onCreated: onCreated2 = noop,
+    onRendered: onRendered2 = noop,
     onDestroyed: onDestroyed2 = noop
   }) {
     if (!ast) {
@@ -2555,9 +2555,9 @@ var LitTemplate = class UITemplate {
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance3;
-    this.onRenderedCallback = onRendered;
+    this.onRenderedCallback = onRendered2;
     this.onDestroyedCallback = onDestroyed2;
-    this.onCreatedCallback = onCreated3;
+    this.onCreatedCallback = onCreated2;
   }
   setDataContext(data) {
     this.data = data;
@@ -2876,8 +2876,8 @@ var createComponent = ({
   tagName,
   events: events3 = {},
   createInstance: createInstance3 = noop,
-  onCreated: onCreated3 = noop,
-  onRendered = noop,
+  onCreated: onCreated2 = noop,
+  onRendered: onRendered2 = noop,
   onDestroyed: onDestroyed2 = noop,
   onAttributeChanged = noop,
   subTemplates = [],
@@ -2902,8 +2902,8 @@ var createComponent = ({
     css,
     events: events3,
     subTemplates,
-    onCreated: onCreated3,
-    onRendered,
+    onCreated: onCreated2,
+    onRendered: onRendered2,
     onDestroyed: onDestroyed2,
     createInstance: createInstance3
   });
@@ -2944,7 +2944,7 @@ var createComponent = ({
       }
       firstUpdated() {
         super.firstUpdated();
-        this.call(onRendered);
+        this.call(onRendered2);
       }
       updated() {
         each(this.renderCallbacks, (callback) => callback());
@@ -3042,23 +3042,27 @@ var todo_item_default2 = '.todo-list li .toggle {\n    text-align: center;\n    
 // examples/todo-list/todo-item.js
 var createInstance = (tpl, $3) => ({
   toggleCompleted() {
-    todos[tpl.data.index].completed = !todos[tpl.data.index].completed;
-    tpl.parent().todos.set(todos);
+    let todo = tpl.data.item;
+    todo.completed = !todo.completed;
+    tpl.parent().todos.setItem(tpl.data.index, todo);
   },
   maybeCompleted() {
     const completed = tpl.data.item.completed;
-    console.log(completed);
     return completed ? "completed " : "";
   },
   removeTodo() {
     tpl.parent().todos.removeItem(tpl.data.index);
   }
 });
-var onCreated = (tpl, $3) => {
-  console.log("created", tpl.data);
+var onRendered = (tpl, $3) => {
+  if (tpl.data.item.completed) {
+    $3(".toggle").get(0).checked = true;
+  } else {
+    $3(".toggle").get(0).checked = false;
+  }
 };
 var events = {
-  "change label"(event, tpl) {
+  "change .toggle"(event, tpl) {
     tpl.toggleCompleted();
   },
   "click .destroy"(event, tpl) {
@@ -3070,7 +3074,7 @@ var todoItem = createComponent({
   template: todo_item_default,
   css: todo_item_default2,
   createInstance,
-  onCreated,
+  onRendered,
   events
 });
 
@@ -3087,13 +3091,7 @@ var todo_list_default = `<header class="header">
   </div>
   <ul class="todo-list">
     {{#each item in getVisibleTodos}}
-      {{> template
-        name='todoItem'
-        reactiveData={
-          item: item,
-          index: @index
-        }
-      }}
+      {{>todoItem item=item index=@index}}
     {{/each}}
   </ul>
 </main>
@@ -3196,7 +3194,7 @@ var createInstance2 = (tpl, $3) => ({
     $3(window).off(tpl.hashEvent);
   }
 });
-var onCreated2 = (tpl) => {
+var onCreated = (tpl) => {
   tpl.calculateSelection();
   tpl.addRouter();
 };
@@ -3228,7 +3226,7 @@ var TodoList = createComponent({
   template: todo_list_default,
   css: todo_list_default2,
   createInstance: createInstance2,
-  onCreated: onCreated2,
+  onCreated,
   onDestroyed,
   events: events2
 });

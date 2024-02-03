@@ -4,12 +4,12 @@ import css from './todo-item.css';
 
 const createInstance = (tpl, $) => ({
   toggleCompleted() {
-    todos[tpl.data.index].completed = !todos[tpl.data.index].completed;
-    tpl.parent().todos.set(todos);
+    let todo = tpl.data.item;
+    todo.completed = !todo.completed;
+    tpl.parent().todos.setItem(tpl.data.index, todo);
   },
   maybeCompleted() {
     const completed = tpl.data.item.completed;
-    console.log(completed);
     return completed ? 'completed ' : '';
   },
   removeTodo() {
@@ -17,12 +17,17 @@ const createInstance = (tpl, $) => ({
   }
 });
 
-const onCreated = (tpl, $) => {
-  console.log('created', tpl.data);
+const onRendered = (tpl, $) => {
+  if(tpl.data.item.completed) {
+    $('.toggle').get(0).checked = true;
+  }
+  else {
+    $('.toggle').get(0).checked = false;
+  }
 };
 
 const events = {
-  'change label'(event, tpl) {
+  'change .toggle'(event, tpl) {
     tpl.toggleCompleted();
   },
   'click .destroy'(event, tpl) {
@@ -35,7 +40,7 @@ const todoItem = createComponent({
   template,
   css,
   createInstance,
-  onCreated,
+  onRendered,
   events,
 });
 

@@ -10,13 +10,7 @@
   </div>
   <ul class="todo-list">
     {{#each item in getVisibleTodos}}
-      {{> template
-        name='todoItem'
-        reactiveData={
-          item: item,
-          index: @index
-        }
-      }}
+      {{>todoItem item=item index=@index}}
     {{/each}}
   </ul>
 </main>
