@@ -95,7 +95,7 @@ export class ReactiveVar {
   }
 
   toggle() {
-    return this.set(!!this.value);
+    return this.set(!this.value);
   }
 
 }

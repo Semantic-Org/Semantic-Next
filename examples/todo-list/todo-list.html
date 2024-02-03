@@ -4,9 +4,19 @@
   <div class="select-all"></div>
 </header>
 <main class="main">
+  <div class="toggle-all-container">
+    <input class="toggle-all" type="checkbox"/>
+    <label class="toggle-all-label" htmlFor="toggle-all">Toggle All Input</label>
+  </div>
   <ul class="todo-list">
     {{#each item in getVisibleTodos}}
-      {{>todoItem item=item index=@index}}
+      {{> template
+        name='todoItem'
+        reactiveData={
+          item: item,
+          index: @index
+        }
+      }}
     {{/each}}
   </ul>
 </main>

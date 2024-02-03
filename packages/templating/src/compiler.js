@@ -24,7 +24,7 @@ class TemplateCompiler {
   static templateRegExp = {
     verbose: {
       keyword: /^template\W/g,
-      properties: /(\w+)\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/mg,
+      properties: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
     },
     standard: /(\w.*?)($|\s)/mg,
     dataObject: /(\w+)\s*:\s*([^,}]+)/g // parses { one: 'two' }

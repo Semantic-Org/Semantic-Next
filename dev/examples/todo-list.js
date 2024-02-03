@@ -1116,7 +1116,7 @@ var TemplateCompiler = class _TemplateCompiler {
   static templateRegExp = {
     verbose: {
       keyword: /^template\W/g,
-      properties: /(\w+)\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/mg
+      properties: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms
     },
     standard: /(\w.*?)($|\s)/mg,
     dataObject: /(\w+)\s*:\s*([^,}]+)/g
@@ -1649,7 +1649,7 @@ var ReactiveVar = class _ReactiveVar {
     this.set(arr);
   }
   toggle() {
-    return this.set(!!this.value);
+    return this.set(!this.value);
   }
 };
 
@@ -2540,7 +2540,7 @@ var LitTemplate = class UITemplate {
     createInstance: createInstance3,
     parentTemplate,
     // the parent template when nested
-    onCreated: onCreated2 = noop,
+    onCreated: onCreated3 = noop,
     onRendered = noop,
     onDestroyed: onDestroyed2 = noop
   }) {
@@ -2557,7 +2557,7 @@ var LitTemplate = class UITemplate {
     this.createInstance = createInstance3;
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed2;
-    this.onCreatedCallback = onCreated2;
+    this.onCreatedCallback = onCreated3;
   }
   setDataContext(data) {
     this.data = data;
@@ -2739,7 +2739,6 @@ var LitTemplate = class UITemplate {
     if (root == this.renderRoot) {
       return $2(selector, root).filter((node) => this.isNodeInTemplate(node));
     } else {
-      console.log(selector, root, $2(selector, root));
       return $2(selector, root);
     }
   }
@@ -2877,7 +2876,7 @@ var createComponent = ({
   tagName,
   events: events3 = {},
   createInstance: createInstance3 = noop,
-  onCreated: onCreated2 = noop,
+  onCreated: onCreated3 = noop,
   onRendered = noop,
   onDestroyed: onDestroyed2 = noop,
   onAttributeChanged = noop,
@@ -2903,7 +2902,7 @@ var createComponent = ({
     css,
     events: events3,
     subTemplates,
-    onCreated: onCreated2,
+    onCreated: onCreated3,
     onRendered,
     onDestroyed: onDestroyed2,
     createInstance: createInstance3
@@ -3035,12 +3034,7 @@ var createComponent = ({
 };
 
 // examples/todo-list/todo-item.html
-var todo_item_default = `<li class="{{maybe item.completed 'completed '}}todo-item">
-  <input class="toggle" type="checkbox">
-  <label>{{item.text}}</label>
-  <button class="destroy"></button>
-</li>
-`;
+var todo_item_default = '<li class="{{maybeCompleted}}todo-item">\n  <input class="toggle" type="checkbox">\n  <label>{{item.text}}</label>\n  <button class="destroy"></button>\n</li>\n';
 
 // examples/todo-list/todo-item.css
 var todo_item_default2 = '.todo-list li .toggle {\n    text-align: center;\n    width: 40px;\n    height: auto;\n    position: absolute;\n    top: 0;\n    bottom: 0;\n    margin: auto 0;\n    border: none;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none\n}\n\n.todo-list li .toggle {\n    opacity: 0\n}\n\n.todo-list li .toggle+label {\n    background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23949494%22%20stroke-width%3D%223%22/%3E%3C/svg%3E);\n    background-repeat: no-repeat;\n    background-position: center left\n}\n\n.todo-list li .toggle:checked+label {\n    background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%2359A193%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20fill%3D%22%233EA390%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22%2F%3E%3C%2Fsvg%3E)\n}\n\n.todo-list li label {\n    overflow-wrap: break-word;\n    padding: 15px 15px 15px 60px;\n    display: block;\n    line-height: 1.2;\n    transition: color .4s;\n    font-weight: 400;\n    color: #484848\n}\n\n.todo-list li.completed label {\n    color: #949494;\n    text-decoration: line-through\n}\n\n.todo-list li .destroy {\n    display: none;\n    position: absolute;\n    top: 0;\n    right: 10px;\n    bottom: 0;\n    width: 40px;\n    height: 40px;\n    margin: auto 0;\n    font-size: 30px;\n    color: #949494;\n    transition: color .2s ease-out\n}\n\n.todo-list li .destroy:hover,.todo-list li .destroy:focus {\n    color: #c18585\n}\n\n.todo-list li .destroy:after {\n    content: "\xD7";\n    display: block;\n    height: 100%;\n    line-height: 1.1\n}\n\n.todo-list li:hover .destroy {\n    display: block\n}\n\n.todo-list li .edit {\n    display: none\n}\n\n.todo-list li.editing:last-child {\n    margin-bottom: -1px\n}\n';
@@ -3051,10 +3045,18 @@ var createInstance = (tpl, $3) => ({
     todos[tpl.data.index].completed = !todos[tpl.data.index].completed;
     tpl.parent().todos.set(todos);
   },
+  maybeCompleted() {
+    const completed = tpl.data.item.completed;
+    console.log(completed);
+    return completed ? "completed " : "";
+  },
   removeTodo() {
     tpl.parent().todos.removeItem(tpl.data.index);
   }
 });
+var onCreated = (tpl, $3) => {
+  console.log("created", tpl.data);
+};
 var events = {
   "change label"(event, tpl) {
     tpl.toggleCompleted();
@@ -3068,6 +3070,7 @@ var todoItem = createComponent({
   template: todo_item_default,
   css: todo_item_default2,
   createInstance,
+  onCreated,
   events
 });
 
@@ -3078,9 +3081,19 @@ var todo_list_default = `<header class="header">
   <div class="select-all"></div>
 </header>
 <main class="main">
+  <div class="toggle-all-container">
+    <input class="toggle-all" type="checkbox"/>
+    <label class="toggle-all-label" htmlFor="toggle-all">Toggle All Input</label>
+  </div>
   <ul class="todo-list">
     {{#each item in getVisibleTodos}}
-      {{>todoItem item=item index=@index}}
+      {{> template
+        name='todoItem'
+        reactiveData={
+          item: item,
+          index: @index
+        }
+      }}
     {{/each}}
   </ul>
 </main>
@@ -3140,10 +3153,10 @@ var createInstance2 = (tpl, $3) => ({
     });
   },
   selectAll() {
-    todos.set(each(tpl.todos.value, (todo) => todo.selected));
+    tpl.todos.set(each(tpl.todos.value, (todo) => todo.completed = true));
   },
   selectNone() {
-    todos.set(each(tpl.todos.value, (todo) => !todo.selected));
+    tpl.todos.set(each(tpl.todos.value, (todo) => todo.completed = false));
   },
   getIncomplete() {
     return tpl.todos.value.filter((todo) => !todo.completed);
@@ -3159,9 +3172,6 @@ var createInstance2 = (tpl, $3) => ({
   },
   calculateSelection() {
     tpl.reaction((comp) => {
-      if (comp.firstRun) {
-        return;
-      }
       if (tpl.allSelected.get()) {
         tpl.selectAll();
       } else {
@@ -3186,7 +3196,7 @@ var createInstance2 = (tpl, $3) => ({
     $3(window).off(tpl.hashEvent);
   }
 });
-var onCreated = (tpl) => {
+var onCreated2 = (tpl) => {
   tpl.calculateSelection();
   tpl.addRouter();
 };
@@ -3199,7 +3209,8 @@ var events2 = {
       tpl.addTodo($3(this).val());
     }
   },
-  "click .select-all"(event, tpl) {
+  "change .toggle-all"(event, tpl, $3) {
+    $3(event.target).attr("checked", !$3(event.target).attr("checked"));
     tpl.allSelected.toggle();
   },
   "click .filters"(event, tpl, $3, data) {
@@ -3217,7 +3228,7 @@ var TodoList = createComponent({
   template: todo_list_default,
   css: todo_list_default2,
   createInstance: createInstance2,
-  onCreated,
+  onCreated: onCreated2,
   onDestroyed,
   events: events2
 });

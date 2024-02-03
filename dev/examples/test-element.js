@@ -1126,7 +1126,7 @@ var TemplateCompiler = class _TemplateCompiler {
   static templateRegExp = {
     verbose: {
       keyword: /^template\W/g,
-      properties: /(\w+)\s*=\s*((?:.|\n)*?)(?=\s*\w+\s*=)/mg
+      properties: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms
     },
     standard: /(\w.*?)($|\s)/mg,
     dataObject: /(\w+)\s*:\s*([^,}]+)/g
@@ -1659,7 +1659,7 @@ var ReactiveVar = class _ReactiveVar {
     this.set(arr);
   }
   toggle() {
-    return this.set(!!this.value);
+    return this.set(!this.value);
   }
 };
 
@@ -2749,7 +2749,6 @@ var LitTemplate = class UITemplate {
     if (root == this.renderRoot) {
       return $2(selector, root).filter((node) => this.isNodeInTemplate(node));
     } else {
-      console.log(selector, root, $2(selector, root));
       return $2(selector, root);
     }
   }
@@ -3062,7 +3061,7 @@ var test_element_default = `<div class="test-element">
     reactiveData={
       morning: morningActivity,
     }
-    data= {
+    data={
       afternoon: 'Biking',
       evening: eveningActivity,
     }

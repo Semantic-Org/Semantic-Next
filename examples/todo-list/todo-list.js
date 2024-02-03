@@ -33,11 +33,11 @@ const createInstance = (tpl, $) => ({
   },
 
   selectAll() {
-    todos.set(each(tpl.todos.value, todo => todo.selected));
+    tpl.todos.set(each(tpl.todos.value, todo => todo.completed = true));
   },
 
   selectNone() {
-    todos.set(each(tpl.todos.value, todo => !todo.selected));
+    tpl.todos.set(each(tpl.todos.value, todo => todo.completed = false));
   },
 
   getIncomplete() {
@@ -57,9 +57,6 @@ const createInstance = (tpl, $) => ({
 
   calculateSelection() {
     tpl.reaction((comp) => {
-      if(comp.firstRun) {
-        return;
-      }
       if(tpl.allSelected.get()) {
         tpl.selectAll();
       }
@@ -105,7 +102,8 @@ const events = {
       tpl.addTodo( $(this).val() );
     }
   },
-  'click .select-all'(event, tpl) {
+  'change .toggle-all'(event, tpl, $) {
+    $(event.target).attr('checked', !$(event.target).attr('checked'));
     tpl.allSelected.toggle();
   },
   'click .filters'(event, tpl, $, data) {

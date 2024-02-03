@@ -258,7 +258,6 @@ export const LitTemplate = class UITemplate {
       return $(selector, root).filter(node => this.isNodeInTemplate(node));
     }
     else {
-      console.log(selector, root, $(selector, root));
       return $(selector, root);
     }
   }

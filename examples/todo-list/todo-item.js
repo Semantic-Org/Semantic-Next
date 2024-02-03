@@ -7,10 +7,19 @@ const createInstance = (tpl, $) => ({
     todos[tpl.data.index].completed = !todos[tpl.data.index].completed;
     tpl.parent().todos.set(todos);
   },
+  maybeCompleted() {
+    const completed = tpl.data.item.completed;
+    console.log(completed);
+    return completed ? 'completed ' : '';
+  },
   removeTodo() {
     tpl.parent().todos.removeItem(tpl.data.index);
   }
 });
+
+const onCreated = (tpl, $) => {
+  console.log('created', tpl.data);
+};
 
 const events = {
   'change label'(event, tpl) {
@@ -26,6 +35,7 @@ const todoItem = createComponent({
   template,
   css,
   createInstance,
+  onCreated,
   events,
 });
 
