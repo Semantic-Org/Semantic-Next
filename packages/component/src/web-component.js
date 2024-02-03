@@ -96,7 +96,7 @@ class WebComponentBase extends LitElement {
 
 
   // Rendered DOM (either shadow or regular)
-  $(selector) {
+  $(selector, root = this?.renderRoot) {
     if(!this.renderRoot) {
       console.error('Cannot query DOM until element has rendered.');
     }
@@ -106,6 +106,11 @@ class WebComponentBase extends LitElement {
   // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $(selector, this.originalDOM.content);
+  }
+
+  // Query parent DOM
+  $$$(selector) {
+    return $(selector, document);
   }
 
   // calls callback if defined with consistent params and this context

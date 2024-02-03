@@ -18,7 +18,7 @@ export class Query {
     } else if (typeof selector === 'string') {
       // String selector provided, find elements using querySelectorAll
       elements = root.querySelectorAll(selector);
-    } else if (selector instanceof Element || selector instanceof Document || selector instanceof DocumentFragment) {
+    } else if (selector instanceof Element || selector instanceof Document || selector === window || selector instanceof DocumentFragment) {
       // A single Element, Document, or DocumentFragment is provided
       elements = [selector];
     } else if (selector instanceof NodeList) {
@@ -47,22 +47,25 @@ export class Query {
     // If a selector is provided, filter the children
     const filteredChildren = selector ? allChildren.filter(child => child.matches(selector)) : allChildren;
 
-    // Return a new Query object with these children
     return new Query(filteredChildren);
   }
 
-  filter(selector) {
-    // Filter out elements that match the provided selector
-    const filteredElements = Array.from(this).filter(el => el.matches(selector));
+  filter(selectorOrFunction) {
+    let filteredElements = [];
 
-    // Return a new Query object with the filtered elements
+    if (typeof selectorOrFunction === 'string') {
+      // If a CSS selector is provided, use it with the matches method
+      filteredElements = Array.from(this).filter(el => el.matches(selectorOrFunction));
+    } else if (typeof selectorOrFunction === 'function') {
+      // If a function is provided, use it directly to filter elements
+      filteredElements = Array.from(this).filter(selectorOrFunction);
+    }
     return new Query(filteredElements);
   }
 
   not(selector) {
     // Filter out elements that match the provided selector
     const filteredElements = Array.from(this).filter(el => !el.matches(selector));
-    // Return a new Query object with the filtered elements
     return new Query(filteredElements);
   }
 

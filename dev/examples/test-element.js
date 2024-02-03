@@ -689,7 +689,12 @@ var noop = function() {
 var wrapFunction = (x2) => {
   return isFunction(x2) ? x2 : () => x2;
 };
-var kebabToCamel = (str = "") => str.replace(/-./g, (m3) => m3[1].toUpperCase());
+var kebabToCamel = (str = "") => {
+  return str.replace(/-./g, (m3) => m3[1].toUpperCase());
+};
+var toTitleCase = (str = "") => {
+  return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase()).replace(/\b(\w+)\b/g, (match) => match.toLowerCase()).replace(/\b(\w)/g, (match) => match.toUpperCase());
+};
 var unique = (arr) => {
   return Array.from(new Set(arr));
 };
@@ -1702,7 +1707,7 @@ var Query = class _Query {
       elements = selector;
     } else if (typeof selector === "string") {
       elements = root.querySelectorAll(selector);
-    } else if (selector instanceof Element || selector instanceof Document || selector instanceof DocumentFragment) {
+    } else if (selector instanceof Element || selector instanceof Document || selector === window || selector instanceof DocumentFragment) {
       elements = [selector];
     } else if (selector instanceof NodeList) {
       elements = selector;
@@ -1723,8 +1728,13 @@ var Query = class _Query {
     const filteredChildren = selector ? allChildren.filter((child) => child.matches(selector)) : allChildren;
     return new _Query(filteredChildren);
   }
-  filter(selector) {
-    const filteredElements = Array.from(this).filter((el) => el.matches(selector));
+  filter(selectorOrFunction) {
+    let filteredElements = [];
+    if (typeof selectorOrFunction === "string") {
+      filteredElements = Array.from(this).filter((el) => el.matches(selectorOrFunction));
+    } else if (typeof selectorOrFunction === "function") {
+      filteredElements = Array.from(this).filter(selectorOrFunction);
+    }
     return new _Query(filteredElements);
   }
   not(selector) {
@@ -2102,7 +2112,7 @@ var ReactiveEachDirective = class extends f4 {
           return;
         }
         const items = this.getItems(eachCondition);
-        if (this.firstRun) {
+        if (comp.firstRun) {
           return;
         }
         const render = this.createRepeat(eachCondition, data, items);
@@ -2177,17 +2187,21 @@ var RenderTemplate = class extends f4 {
     this.part = null;
   }
   render({ getTemplateName, subTemplates, data, parentTemplate }) {
-    console.log("render called");
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
       const templateName = getTemplateName();
+      if (this.template && this.templateName == templateName) {
+        return false;
+      }
+      this.templateName = templateName;
       const template = subTemplates[templateName];
       if (!template) {
         fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
       }
       this.template = template.clone({ data: unpackData(data) });
+      return true;
     };
     const attachTemplate = () => {
       const { parentNode, startNode, endNode } = this.part;
@@ -2198,26 +2212,33 @@ var RenderTemplate = class extends f4 {
       }
     };
     const renderTemplate2 = () => {
-      return this.template.render();
+      let html = this.template.render();
+      setTimeout(() => {
+        this.template.onRendered();
+      }, 0);
+      return html;
     };
     Reaction.create((comp) => {
       if (!this.isConnected) {
         comp.stop();
         return;
       }
-      cloneTemplate();
+      const isCloned = cloneTemplate();
       if (!comp.firstRun) {
         attachTemplate();
+        if (!isCloned) {
+          this.template.setDataContext(unpackData(data));
+        }
         this.setValue(renderTemplate2());
       }
     });
     cloneTemplate();
     attachTemplate();
+    this.template.setDataContext(unpackData(data));
     return renderTemplate2();
   }
   update(part, renderSettings) {
     this.part = part;
-    console.log("update called", part);
     return this.render.apply(this, renderSettings);
   }
   reconnected() {
@@ -2237,6 +2258,27 @@ var Helpers = {
   },
   not: (a3) => {
     return !a3;
+  },
+  maybe(expr, trueCondition = "", falseCondition = "") {
+    return expr ? trueCondition : falseCondition;
+  },
+  activeIf: (expr) => {
+    return Helpers.maybe(expr, "active", "");
+  },
+  selectedIf: (expr) => {
+    return Helpers.maybe(expr, "selected", "");
+  },
+  capitalize: (text) => {
+    return toTitleCase(text);
+  },
+  titleCase: (text) => {
+    return toTitleCase(text);
+  },
+  disabledIf: (expr) => {
+    return Helpers.maybe(expr, "disabled", "");
+  },
+  checkedIf: (expr) => {
+    return Helpers.maybe(expr, "checked", "");
   },
   isEqual: (a3, b3) => {
     return a3 == b3;
@@ -2527,6 +2569,10 @@ var LitTemplate = class UITemplate {
     this.onDestroyedCallback = onDestroyed3;
     this.onCreatedCallback = onCreated2;
   }
+  setDataContext(data) {
+    this.data = data;
+    this.tpl.data = data;
+  }
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
     return this.parentTemplate = parentTemplate;
@@ -2574,11 +2620,13 @@ var LitTemplate = class UITemplate {
     if (!this.initialized) {
       this.initialize();
     }
+    if (this.renderRoot == renderRoot) {
+      return;
+    }
     this.renderRoot = renderRoot;
     this.parentNode = parentNode;
     this.startNode = startNode;
     this.endNode = endNode;
-    console.log("attaching events", this.tpl.data?.index);
     this.attachEvents();
     await this.attachStyles();
   }
@@ -2685,7 +2733,7 @@ var LitTemplate = class UITemplate {
       }
     });
     if (!this.rendered) {
-      this.onRendered();
+      setTimeout(this.onRendered, 0);
     }
     this.rendered = true;
     return html;
@@ -2694,11 +2742,16 @@ var LitTemplate = class UITemplate {
            DOM Helpers
   *******************************/
   // Rendered DOM (either shadow or regular)
-  $(selector) {
-    if (!this.renderRoot) {
-      fatal("Cannot query DOM unless render root specified.");
+  $(selector, root = this.renderRoot) {
+    if (!root) {
+      root = document;
     }
-    return $2(selector, this.renderRoot);
+    if (root == this.renderRoot) {
+      return $2(selector, root).filter((node) => this.isNodeInTemplate(node));
+    } else {
+      console.log(selector, root, $2(selector, root));
+      return $2(selector, root);
+    }
   }
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
@@ -2796,7 +2849,7 @@ var WebComponentBase = class extends s3 {
            DOM Helpers
   *******************************/
   // Rendered DOM (either shadow or regular)
-  $(selector) {
+  $(selector, root = this?.renderRoot) {
     if (!this.renderRoot) {
       console.error("Cannot query DOM until element has rendered.");
     }
@@ -2805,6 +2858,10 @@ var WebComponentBase = class extends s3 {
   // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $2(selector, this.originalDOM.content);
+  }
+  // Query parent DOM
+  $$$(selector) {
+    return $2(selector, document);
   }
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
@@ -2888,6 +2945,7 @@ var createComponent = ({
         this.css = css;
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
+        this.renderCallbacks = [];
       }
       // callback when added to dom
       connectedCallback() {
@@ -2898,6 +2956,12 @@ var createComponent = ({
       firstUpdated() {
         super.firstUpdated();
         this.call(onRendered2);
+      }
+      updated() {
+        each(this.renderCallbacks, (callback) => callback());
+      }
+      addRenderCallback(callback) {
+        this.renderCallbacks.push(callback);
       }
       // callback if removed from dom
       disconnectedCallback() {
@@ -2982,7 +3046,6 @@ var createComponent = ({
 
 // examples/test-element/test-element.html
 var test_element_default = `<div class="test-element">
-
   <div class="{{maybeActive 'basic'}} tab" data-tab="basic">
     Basic
   </div>
@@ -2994,21 +3057,17 @@ var test_element_default = `<div class="test-element">
   <button class="morning">Change Morning Activity</button>
   <button class="evening">Change Evening Activity</button>
 
-  {{#if is tab 'basic'}}
-    {{> template
-      name=tab
-      reactiveData={
-        morning: morningActivity,
-      }
-      data= {
-        afternoon: 'Biking',
-        evening: eveningActivity,
-      }
-      camera='nikon'
-    }}
-  {{else if is tab 'events'}}
-    {{> events morning='running' afternoon='biking' evening='crying'}}
-  {{/if}}
+  {{> template
+    name=tab
+    reactiveData={
+      morning: morningActivity,
+    }
+    data= {
+      afternoon: 'Biking',
+      evening: eveningActivity,
+    }
+    camera='nikon'
+  }}
 
 </div>
 `;

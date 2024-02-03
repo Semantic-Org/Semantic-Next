@@ -689,7 +689,12 @@ var noop = function() {
 var wrapFunction = (x2) => {
   return isFunction(x2) ? x2 : () => x2;
 };
-var kebabToCamel = (str = "") => str.replace(/-./g, (m3) => m3[1].toUpperCase());
+var kebabToCamel = (str = "") => {
+  return str.replace(/-./g, (m3) => m3[1].toUpperCase());
+};
+var toTitleCase = (str = "") => {
+  return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase()).replace(/\b(\w+)\b/g, (match) => match.toLowerCase()).replace(/\b(\w)/g, (match) => match.toUpperCase());
+};
 var unique = (arr) => {
   return Array.from(new Set(arr));
 };
@@ -1612,7 +1617,7 @@ var Query = class _Query {
       elements = selector;
     } else if (typeof selector === "string") {
       elements = root.querySelectorAll(selector);
-    } else if (selector instanceof Element || selector instanceof Document || selector instanceof DocumentFragment) {
+    } else if (selector instanceof Element || selector instanceof Document || selector === window || selector instanceof DocumentFragment) {
       elements = [selector];
     } else if (selector instanceof NodeList) {
       elements = selector;
@@ -1633,8 +1638,13 @@ var Query = class _Query {
     const filteredChildren = selector ? allChildren.filter((child) => child.matches(selector)) : allChildren;
     return new _Query(filteredChildren);
   }
-  filter(selector) {
-    const filteredElements = Array.from(this).filter((el) => el.matches(selector));
+  filter(selectorOrFunction) {
+    let filteredElements = [];
+    if (typeof selectorOrFunction === "string") {
+      filteredElements = Array.from(this).filter((el) => el.matches(selectorOrFunction));
+    } else if (typeof selectorOrFunction === "function") {
+      filteredElements = Array.from(this).filter(selectorOrFunction);
+    }
     return new _Query(filteredElements);
   }
   not(selector) {
@@ -2159,6 +2169,27 @@ var Helpers = {
   not: (a3) => {
     return !a3;
   },
+  maybe(expr, trueCondition = "", falseCondition = "") {
+    return expr ? trueCondition : falseCondition;
+  },
+  activeIf: (expr) => {
+    return Helpers.maybe(expr, "active", "");
+  },
+  selectedIf: (expr) => {
+    return Helpers.maybe(expr, "selected", "");
+  },
+  capitalize: (text) => {
+    return toTitleCase(text);
+  },
+  titleCase: (text) => {
+    return toTitleCase(text);
+  },
+  disabledIf: (expr) => {
+    return Helpers.maybe(expr, "disabled", "");
+  },
+  checkedIf: (expr) => {
+    return Helpers.maybe(expr, "checked", "");
+  },
   isEqual: (a3, b3) => {
     return a3 == b3;
   },
@@ -2612,6 +2643,7 @@ var LitTemplate = class UITemplate {
       }
     });
     if (!this.rendered) {
+      setTimeout(this.onRendered, 0);
     }
     this.rendered = true;
     return html;
@@ -2620,11 +2652,16 @@ var LitTemplate = class UITemplate {
            DOM Helpers
   *******************************/
   // Rendered DOM (either shadow or regular)
-  $(selector) {
-    if (!this.renderRoot) {
-      fatal("Cannot query DOM unless render root specified.");
+  $(selector, root = this.renderRoot) {
+    if (!root) {
+      root = document;
     }
-    return $2(selector, this.renderRoot);
+    if (root == this.renderRoot) {
+      return $2(selector, root).filter((node) => this.isNodeInTemplate(node));
+    } else {
+      console.log(selector, root, $2(selector, root));
+      return $2(selector, root);
+    }
   }
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
@@ -2722,7 +2759,7 @@ var WebComponentBase = class extends s3 {
            DOM Helpers
   *******************************/
   // Rendered DOM (either shadow or regular)
-  $(selector) {
+  $(selector, root = this?.renderRoot) {
     if (!this.renderRoot) {
       console.error("Cannot query DOM until element has rendered.");
     }
@@ -2731,6 +2768,10 @@ var WebComponentBase = class extends s3 {
   // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $2(selector, this.originalDOM.content);
+  }
+  // Query parent DOM
+  $$$(selector) {
+    return $2(selector, document);
   }
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {

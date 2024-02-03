@@ -1,4 +1,5 @@
-<div class="item">
-  <input class="completed" type="checkbox" id={{item._id}}>
-  <label for="{{item._id}}">{{item.text}}
-</div>
+<li class="{{maybe item.completed 'completed '}}todo-item">
+  <input class="toggle" type="checkbox">
+  <label>{{item.text}}</label>
+  <button class="destroy"></button>
+</li>

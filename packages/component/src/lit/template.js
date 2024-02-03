@@ -238,7 +238,7 @@ export const LitTemplate = class UITemplate {
       }
     });
     if(!this.rendered) {
-      //this.onRendered();
+      setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
     return html;
@@ -250,11 +250,17 @@ export const LitTemplate = class UITemplate {
 
 
   // Rendered DOM (either shadow or regular)
-  $(selector) {
-    if(!this.renderRoot) {
-      fatal('Cannot query DOM unless render root specified.');
+  $(selector, root = this.renderRoot) {
+    if(!root) {
+      root = document;
     }
-    return $(selector, this.renderRoot);
+    if(root == this.renderRoot) {
+      return $(selector, root).filter(node => this.isNodeInTemplate(node));
+    }
+    else {
+      console.log(selector, root, $(selector, root));
+      return $(selector, root);
+    }
   }
 
   // calls callback if defined with consistent params and this context

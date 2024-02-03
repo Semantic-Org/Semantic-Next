@@ -143,10 +143,20 @@ export const wrapFunction = (x) => {
 */
 
 // attr-name to varName
-export const kebabToCamel = (str = '') => str.replace(/-./g, (m) => m[1].toUpperCase());
-export const camelToKebab = (str = '') => str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+export const kebabToCamel = (str = '') => {
+  return str.replace(/-./g, (m) => m[1].toUpperCase());
+};
 
+export const camelToKebab = (str = '') => {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+};
 
+export const toTitleCase = (str = '') => {
+  return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
+    .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
+    .replace(/\b(\w)/g, (match) => match.toUpperCase())
+  ;
+};
 
 /*-------------------
         Arrays

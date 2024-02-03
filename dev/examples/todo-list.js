@@ -689,7 +689,12 @@ var noop = function() {
 var wrapFunction = (x2) => {
   return isFunction(x2) ? x2 : () => x2;
 };
-var kebabToCamel = (str = "") => str.replace(/-./g, (m3) => m3[1].toUpperCase());
+var kebabToCamel = (str = "") => {
+  return str.replace(/-./g, (m3) => m3[1].toUpperCase());
+};
+var toTitleCase = (str = "") => {
+  return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase()).replace(/\b(\w+)\b/g, (match) => match.toLowerCase()).replace(/\b(\w)/g, (match) => match.toUpperCase());
+};
 var unique = (arr) => {
   return Array.from(new Set(arr));
 };
@@ -1692,7 +1697,7 @@ var Query = class _Query {
       elements = selector;
     } else if (typeof selector === "string") {
       elements = root.querySelectorAll(selector);
-    } else if (selector instanceof Element || selector instanceof Document || selector instanceof DocumentFragment) {
+    } else if (selector instanceof Element || selector instanceof Document || selector === window || selector instanceof DocumentFragment) {
       elements = [selector];
     } else if (selector instanceof NodeList) {
       elements = selector;
@@ -1713,8 +1718,13 @@ var Query = class _Query {
     const filteredChildren = selector ? allChildren.filter((child) => child.matches(selector)) : allChildren;
     return new _Query(filteredChildren);
   }
-  filter(selector) {
-    const filteredElements = Array.from(this).filter((el) => el.matches(selector));
+  filter(selectorOrFunction) {
+    let filteredElements = [];
+    if (typeof selectorOrFunction === "string") {
+      filteredElements = Array.from(this).filter((el) => el.matches(selectorOrFunction));
+    } else if (typeof selectorOrFunction === "function") {
+      filteredElements = Array.from(this).filter(selectorOrFunction);
+    }
     return new _Query(filteredElements);
   }
   not(selector) {
@@ -2092,7 +2102,7 @@ var ReactiveEachDirective = class extends f4 {
           return;
         }
         const items = this.getItems(eachCondition);
-        if (this.firstRun) {
+        if (comp.firstRun) {
           return;
         }
         const render = this.createRepeat(eachCondition, data, items);
@@ -2167,17 +2177,21 @@ var RenderTemplate = class extends f4 {
     this.part = null;
   }
   render({ getTemplateName, subTemplates, data, parentTemplate }) {
-    console.log("render called");
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
       const templateName = getTemplateName();
+      if (this.template && this.templateName == templateName) {
+        return false;
+      }
+      this.templateName = templateName;
       const template = subTemplates[templateName];
       if (!template) {
         fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
       }
       this.template = template.clone({ data: unpackData(data) });
+      return true;
     };
     const attachTemplate = () => {
       const { parentNode, startNode, endNode } = this.part;
@@ -2188,26 +2202,33 @@ var RenderTemplate = class extends f4 {
       }
     };
     const renderTemplate2 = () => {
-      return this.template.render();
+      let html = this.template.render();
+      setTimeout(() => {
+        this.template.onRendered();
+      }, 0);
+      return html;
     };
     Reaction.create((comp) => {
       if (!this.isConnected) {
         comp.stop();
         return;
       }
-      cloneTemplate();
+      const isCloned = cloneTemplate();
       if (!comp.firstRun) {
         attachTemplate();
+        if (!isCloned) {
+          this.template.setDataContext(unpackData(data));
+        }
         this.setValue(renderTemplate2());
       }
     });
     cloneTemplate();
     attachTemplate();
+    this.template.setDataContext(unpackData(data));
     return renderTemplate2();
   }
   update(part, renderSettings) {
     this.part = part;
-    console.log("update called", part);
     return this.render.apply(this, renderSettings);
   }
   reconnected() {
@@ -2227,6 +2248,27 @@ var Helpers = {
   },
   not: (a3) => {
     return !a3;
+  },
+  maybe(expr, trueCondition = "", falseCondition = "") {
+    return expr ? trueCondition : falseCondition;
+  },
+  activeIf: (expr) => {
+    return Helpers.maybe(expr, "active", "");
+  },
+  selectedIf: (expr) => {
+    return Helpers.maybe(expr, "selected", "");
+  },
+  capitalize: (text) => {
+    return toTitleCase(text);
+  },
+  titleCase: (text) => {
+    return toTitleCase(text);
+  },
+  disabledIf: (expr) => {
+    return Helpers.maybe(expr, "disabled", "");
+  },
+  checkedIf: (expr) => {
+    return Helpers.maybe(expr, "checked", "");
   },
   isEqual: (a3, b3) => {
     return a3 == b3;
@@ -2498,8 +2540,8 @@ var LitTemplate = class UITemplate {
     createInstance: createInstance3,
     parentTemplate,
     // the parent template when nested
-    onCreated: onCreated3 = noop,
-    onRendered: onRendered2 = noop,
+    onCreated: onCreated2 = noop,
+    onRendered = noop,
     onDestroyed: onDestroyed2 = noop
   }) {
     if (!ast) {
@@ -2513,9 +2555,13 @@ var LitTemplate = class UITemplate {
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance3;
-    this.onRenderedCallback = onRendered2;
+    this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed2;
-    this.onCreatedCallback = onCreated3;
+    this.onCreatedCallback = onCreated2;
+  }
+  setDataContext(data) {
+    this.data = data;
+    this.tpl.data = data;
   }
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
@@ -2564,11 +2610,13 @@ var LitTemplate = class UITemplate {
     if (!this.initialized) {
       this.initialize();
     }
+    if (this.renderRoot == renderRoot) {
+      return;
+    }
     this.renderRoot = renderRoot;
     this.parentNode = parentNode;
     this.startNode = startNode;
     this.endNode = endNode;
-    console.log("attaching events", this.tpl.data?.index);
     this.attachEvents();
     await this.attachStyles();
   }
@@ -2675,7 +2723,7 @@ var LitTemplate = class UITemplate {
       }
     });
     if (!this.rendered) {
-      this.onRendered();
+      setTimeout(this.onRendered, 0);
     }
     this.rendered = true;
     return html;
@@ -2684,11 +2732,16 @@ var LitTemplate = class UITemplate {
            DOM Helpers
   *******************************/
   // Rendered DOM (either shadow or regular)
-  $(selector) {
-    if (!this.renderRoot) {
-      fatal("Cannot query DOM unless render root specified.");
+  $(selector, root = this.renderRoot) {
+    if (!root) {
+      root = document;
     }
-    return $2(selector, this.renderRoot);
+    if (root == this.renderRoot) {
+      return $2(selector, root).filter((node) => this.isNodeInTemplate(node));
+    } else {
+      console.log(selector, root, $2(selector, root));
+      return $2(selector, root);
+    }
   }
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
@@ -2786,7 +2839,7 @@ var WebComponentBase = class extends s3 {
            DOM Helpers
   *******************************/
   // Rendered DOM (either shadow or regular)
-  $(selector) {
+  $(selector, root = this?.renderRoot) {
     if (!this.renderRoot) {
       console.error("Cannot query DOM until element has rendered.");
     }
@@ -2795,6 +2848,10 @@ var WebComponentBase = class extends s3 {
   // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $2(selector, this.originalDOM.content);
+  }
+  // Query parent DOM
+  $$$(selector) {
+    return $2(selector, document);
   }
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
@@ -2820,8 +2877,8 @@ var createComponent = ({
   tagName,
   events: events3 = {},
   createInstance: createInstance3 = noop,
-  onCreated: onCreated3 = noop,
-  onRendered: onRendered2 = noop,
+  onCreated: onCreated2 = noop,
+  onRendered = noop,
   onDestroyed: onDestroyed2 = noop,
   onAttributeChanged = noop,
   subTemplates = [],
@@ -2846,8 +2903,8 @@ var createComponent = ({
     css,
     events: events3,
     subTemplates,
-    onCreated: onCreated3,
-    onRendered: onRendered2,
+    onCreated: onCreated2,
+    onRendered,
     onDestroyed: onDestroyed2,
     createInstance: createInstance3
   });
@@ -2878,6 +2935,7 @@ var createComponent = ({
         this.css = css;
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
+        this.renderCallbacks = [];
       }
       // callback when added to dom
       connectedCallback() {
@@ -2887,7 +2945,13 @@ var createComponent = ({
       }
       firstUpdated() {
         super.firstUpdated();
-        this.call(onRendered2);
+        this.call(onRendered);
+      }
+      updated() {
+        each(this.renderCallbacks, (callback) => callback());
+      }
+      addRenderCallback(callback) {
+        this.renderCallbacks.push(callback);
       }
       // callback if removed from dom
       disconnectedCallback() {
@@ -2971,26 +3035,32 @@ var createComponent = ({
 };
 
 // examples/todo-list/todo-item.html
-var todo_item_default = '<div class="item">\n  <input class="completed" type="checkbox" id={{item._id}}>\n  <label for="{{item._id}}">{{item.text}}\n</div>\n';
+var todo_item_default = `<li class="{{maybe item.completed 'completed '}}todo-item">
+  <input class="toggle" type="checkbox">
+  <label>{{item.text}}</label>
+  <button class="destroy"></button>
+</li>
+`;
 
 // examples/todo-list/todo-item.css
-var todo_item_default2 = "";
+var todo_item_default2 = '.todo-list li .toggle {\n    text-align: center;\n    width: 40px;\n    height: auto;\n    position: absolute;\n    top: 0;\n    bottom: 0;\n    margin: auto 0;\n    border: none;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none\n}\n\n.todo-list li .toggle {\n    opacity: 0\n}\n\n.todo-list li .toggle+label {\n    background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23949494%22%20stroke-width%3D%223%22/%3E%3C/svg%3E);\n    background-repeat: no-repeat;\n    background-position: center left\n}\n\n.todo-list li .toggle:checked+label {\n    background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%2359A193%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20fill%3D%22%233EA390%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22%2F%3E%3C%2Fsvg%3E)\n}\n\n.todo-list li label {\n    overflow-wrap: break-word;\n    padding: 15px 15px 15px 60px;\n    display: block;\n    line-height: 1.2;\n    transition: color .4s;\n    font-weight: 400;\n    color: #484848\n}\n\n.todo-list li.completed label {\n    color: #949494;\n    text-decoration: line-through\n}\n\n.todo-list li .destroy {\n    display: none;\n    position: absolute;\n    top: 0;\n    right: 10px;\n    bottom: 0;\n    width: 40px;\n    height: 40px;\n    margin: auto 0;\n    font-size: 30px;\n    color: #949494;\n    transition: color .2s ease-out\n}\n\n.todo-list li .destroy:hover,.todo-list li .destroy:focus {\n    color: #c18585\n}\n\n.todo-list li .destroy:after {\n    content: "\xD7";\n    display: block;\n    height: 100%;\n    line-height: 1.1\n}\n\n.todo-list li:hover .destroy {\n    display: block\n}\n\n.todo-list li .edit {\n    display: none\n}\n\n.todo-list li.editing:last-child {\n    margin-bottom: -1px\n}\n';
 
 // examples/todo-list/todo-item.js
 var createInstance = (tpl, $3) => ({
-  //nothing yet
+  toggleCompleted() {
+    todos[tpl.data.index].completed = !todos[tpl.data.index].completed;
+    tpl.parent().todos.set(todos);
+  },
+  removeTodo() {
+    tpl.parent().todos.removeItem(tpl.data.index);
+  }
 });
-var onCreated = (tpl) => {
-};
-var onRendered = (tpl, $3) => {
-};
-var onDestroyed = (tpl) => {
-};
 var events = {
-  "change input.completed"(event, tpl) {
-    let todos2 = tpl.parent().todos.get();
-    todos2[tpl.data.index].completed = !!todos2[tpl.data.index].completed;
-    tpl.parent().todos.set(todos2);
+  "change label"(event, tpl) {
+    tpl.toggleCompleted();
+  },
+  "click .destroy"(event, tpl) {
+    tpl.removeTodo();
   }
 };
 var todoItem = createComponent({
@@ -2998,25 +3068,77 @@ var todoItem = createComponent({
   template: todo_item_default,
   css: todo_item_default2,
   createInstance,
-  onCreated,
-  onRendered,
-  onDestroyed,
   events
 });
 
 // examples/todo-list/todo-list.html
-var todo_list_default = '<header class="header">\n  <h1>Todos</h1>\n  <input type="text" class="add" autofocus autocomplete="off" placeholder="What needs to be done?">\n  <div class="select-all"></div>\n</header>\n<main class="main">\n  {{#each item in todos}}\n    {{>todoItem item=item index=@index}}\n  {{/each}}\n</main>\n<footer class="footer">\n  <span>\n    {{getIncomplete.length}} item{{maybeS getIncomplete.length}} left\n  </span>\n  <div class="filters">\n    <span data-filter="all">\n      All\n    </span>\n    <span data-filter="active">\n      Active\n    </span>\n    <span data-filter="completed">\n      Completed\n    </span>\n  </div>\n  <div class="clear">Clear Completed</div>\n</footer>\n';
+var todo_list_default = `<header class="header">
+  <h1>Todos</h1>
+  <input type="text" class="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?">
+  <div class="select-all"></div>
+</header>
+<main class="main">
+  <ul class="todo-list">
+    {{#each item in getVisibleTodos}}
+      {{>todoItem item=item index=@index}}
+    {{/each}}
+  </ul>
+</main>
+<footer class="footer">
+  <span class="todo-count">
+    {{getIncomplete.length}} item{{maybeS getIncomplete.length}} left
+  </span>
+  <ul class="filters">
+    {{#each filter in filters}}
+      <li>
+        {{#if isActiveFilter filter}}
+          <a class="selected">
+            {{capitalize filter}}
+          </a>
+        {{else}}
+          {{#if is route 'all'}
+            <a href="#/">
+              All
+            </a>
+          {{else}}
+            <a href="#/{{filter}}">
+              {{capitalize filter}}
+            </a>
+          {{/if}}
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+  {{#if hasAnyCompleted}}
+    <div class="clear-completed">Clear Completed</div>
+  {{/if}}
+</footer>
+`;
 
 // examples/todo-list/todo-list.css
-var todo_list_default2 = "";
+var todo_list_default2 = 'h1 {\n  position: absolute;\n  top: -140px;\n  width: 100%;\n  font-size: 80px;\n  font-weight: 200;\n  text-align: center;\n  color: #b83f45;\n  text-rendering: optimizeLegibility;\n}\n\n.new-todo {\n  padding: 16px 16px 16px 60px;\n  height: 65px;\n  border: none;\n  background: rgba(0, 0, 0, 0.003);\n  box-shadow: inset 0 -2px 1px rgba(0, 0, 0, 0.03);\n}\n\n.visually-hidden {\n    border: 0;\n    clip: rect(0 0 0 0);\n    clip-path: inset(50%);\n    height: 1px;\n    width: 1px;\n    margin: -1px;\n    padding: 0;\n    overflow: hidden;\n    position: absolute;\n    white-space: nowrap\n}\n\n.toggle-all {\n    width: 40px!important;\n    height: 60px!important;\n    right: auto!important\n}\n\n.toggle-all-label {\n    pointer-events: none\n}\n\nhtml,body {\n    margin: 0;\n    padding: 0\n}\n\nbutton {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    background: none;\n    font-size: 100%;\n    vertical-align: baseline;\n    font-family: inherit;\n    font-weight: inherit;\n    color: inherit;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none;\n    -webkit-font-smoothing: antialiased;\n    -moz-osx-font-smoothing: grayscale\n}\n\nbody {\n    font: 14px Helvetica Neue,Helvetica,Arial,sans-serif;\n    line-height: 1.4em;\n    background: #f5f5f5;\n    color: #111;\n    min-width: 230px;\n    max-width: 550px;\n    margin: 0 auto;\n    -webkit-font-smoothing: antialiased;\n    -moz-osx-font-smoothing: grayscale;\n    font-weight: 300\n}\n\n.hidden {\n    display: none\n}\n\n.todoapp {\n    background: #fff;\n    margin: 130px 0 40px;\n    position: relative;\n    box-shadow: 0 2px 4px #0003,0 25px 50px #0000001a\n}\n\n.todoapp input::-webkit-input-placeholder {\n    font-style: italic;\n    font-weight: 400;\n    color: #0006\n}\n\n.todoapp input::-moz-placeholder {\n    font-style: italic;\n    font-weight: 400;\n    color: #0006\n}\n\n.todoapp input::input-placeholder {\n    font-style: italic;\n    font-weight: 400;\n    color: #0006\n}\n\n.todoapp h1 {\n    position: absolute;\n    top: -140px;\n    width: 100%;\n    font-size: 80px;\n    font-weight: 200;\n    text-align: center;\n    color: #b83f45;\n    -webkit-text-rendering: optimizeLegibility;\n    -moz-text-rendering: optimizeLegibility;\n    text-rendering: optimizeLegibility\n}\n\n.new-todo,.edit {\n    position: relative;\n    margin: 0;\n    width: 100%;\n    font-size: 24px;\n    font-family: inherit;\n    font-weight: inherit;\n    line-height: 1.4em;\n    color: inherit;\n    padding: 6px;\n    border: 1px solid #999;\n    box-shadow: inset 0 -1px 5px #0003;\n    box-sizing: border-box;\n    -webkit-font-smoothing: antialiased;\n    -moz-osx-font-smoothing: grayscale\n}\n\n.new-todo {\n    padding: 16px 16px 16px 60px;\n    height: 65px;\n    border: none;\n    background: rgba(0,0,0,.003);\n    box-shadow: inset 0 -2px 1px #00000008\n}\n\n.main {\n    position: relative;\n    z-index: 2;\n    border-top: 1px solid #e6e6e6\n}\n\n.toggle-all {\n    width: 1px;\n    height: 1px;\n    border: none;\n    opacity: 0;\n    position: absolute;\n    right: 100%;\n    bottom: 100%\n}\n\n.toggle-all+label {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: 45px;\n    height: 65px;\n    font-size: 0;\n    position: absolute;\n    top: -65px;\n    left: -0\n}\n\n.toggle-all+label:before {\n    content: "\u276F";\n    display: inline-block;\n    font-size: 22px;\n    color: #949494;\n    padding: 10px 27px;\n    -webkit-transform: rotate(90deg);\n    transform: rotate(90deg)\n}\n\n.toggle-all:checked+label:before {\n    color: #484848\n}\n\n.todo-list {\n    margin: 0;\n    padding: 0;\n    list-style: none\n}\n\n.todo-list li {\n    position: relative;\n    font-size: 24px;\n    border-bottom: 1px solid #ededed\n}\n\n.todo-list li:last-child {\n    border-bottom: none\n}\n\n.todo-list li.editing {\n    border-bottom: none;\n    padding: 0\n}\n\n.todo-list li.editing .edit {\n    display: block;\n    width: calc(100% - 43px);\n    padding: 12px 16px;\n    margin: 0 0 0 43px\n}\n\n.todo-list li.editing .view {\n    display: none\n}\n\n.footer {\n    padding: 10px 15px;\n    height: 20px;\n    text-align: center;\n    font-size: 15px;\n    border-top: 1px solid #e6e6e6\n}\n\n.footer:before {\n    content: "";\n    position: absolute;\n    right: 0;\n    bottom: 0;\n    left: 0;\n    height: 50px;\n    overflow: hidden;\n    box-shadow: 0 1px 1px #0003,0 8px 0 -3px #f6f6f6,0 9px 1px -3px #0003,0 16px 0 -6px #f6f6f6,0 17px 2px -6px #0003\n}\n\n.todo-count {\n    float: left;\n    text-align: left\n}\n\n.todo-count strong {\n    font-weight: 300\n}\n\n.filters {\n    margin: 0;\n    padding: 0;\n    list-style: none;\n    position: absolute;\n    right: 0;\n    left: 0\n}\n\n.filters li {\n    display: inline\n}\n\n.filters li a {\n    color: inherit;\n    margin: 3px;\n    padding: 3px 7px;\n    text-decoration: none;\n    border: 1px solid transparent;\n    border-radius: 3px\n}\n\n.filters li a:hover {\n    border-color: #db7676\n}\n\n.filters li a.selected {\n    border-color: #ce4646\n}\n\n.clear-completed,html .clear-completed:active {\n    float: right;\n    position: relative;\n    line-height: 19px;\n    text-decoration: none;\n    cursor: pointer\n}\n\n.clear-completed:hover {\n    text-decoration: underline\n}\n\n.info {\n    margin: 65px auto 0;\n    color: #4d4d4d;\n    font-size: 11px;\n    text-shadow: 0 1px 0 rgba(255,255,255,.5);\n    text-align: center\n}\n\n.info p {\n    line-height: 1\n}\n\n.info a {\n    color: inherit;\n    text-decoration: none;\n    font-weight: 400\n}\n\n.info a:hover {\n    text-decoration: underline\n}\n\n@media screen and (-webkit-min-device-pixel-ratio: 0) {\n    .toggle-all,.todo-list li .toggle {\n        background:none\n    }\n\n    .todo-list li .toggle {\n        height: 40px\n    }\n}\n\n@media (max-width: 430px) {\n    .footer {\n        height:50px\n    }\n\n    .filters {\n        bottom: 10px\n    }\n}\n\n:focus,.toggle:focus+label,.toggle-all:focus+label {\n    box-shadow: 0 0 2px 2px #cf7d7d;\n    outline: 0\n}\n\nhr {\n    margin: 20px 0;\n    border: 0;\n    border-top: 1px dashed #c5c5c5;\n    border-bottom: 1px dashed #f7f7f7\n}\n\n.learn a {\n    font-weight: 400;\n    text-decoration: none;\n    color: #b83f45\n}\n\n.learn a:hover {\n    text-decoration: underline;\n    color: #787e7e\n}\n\n.learn h3,.learn h4,.learn h5 {\n    margin: 10px 0;\n    font-weight: 500;\n    line-height: 1.2;\n    color: #000\n}\n\n.learn h3 {\n    font-size: 24px\n}\n\n.learn h4 {\n    font-size: 18px\n}\n\n.learn h5 {\n    margin-bottom: 0;\n    font-size: 14px\n}\n\n.learn ul {\n    padding: 0;\n    margin: 0 0 30px 25px\n}\n\n.learn li {\n    line-height: 20px\n}\n\n.learn p {\n    font-size: 15px;\n    font-weight: 300;\n    line-height: 1.3;\n    margin-top: 0;\n    margin-bottom: 0\n}\n\n#issue-count {\n    display: none\n}\n\n.quote {\n    border: none;\n    margin: 20px 0 60px\n}\n\n.quote p {\n    font-style: italic\n}\n\n.quote p:before {\n    content: "\u201C";\n    font-size: 50px;\n    opacity: .15;\n    position: absolute;\n    top: -20px;\n    left: 3px\n}\n\n.quote p:after {\n    content: "\u201D";\n    font-size: 50px;\n    opacity: .15;\n    position: absolute;\n    bottom: -42px;\n    right: 3px\n}\n\n.quote footer {\n    position: absolute;\n    bottom: -40px;\n    right: 0\n}\n\n.quote footer img {\n    border-radius: 3px\n}\n\n.quote footer a {\n    margin-left: 5px;\n    vertical-align: middle\n}\n\n.speech-bubble {\n    position: relative;\n    padding: 10px;\n    background: rgba(0,0,0,.04);\n    border-radius: 5px\n}\n\n.speech-bubble:after {\n    content: "";\n    position: absolute;\n    top: 100%;\n    right: 30px;\n    border: 13px solid transparent;\n    border-top-color: #0000000a\n}\n\n.learn-bar>.learn {\n    position: absolute;\n    width: 272px;\n    top: 8px;\n    left: -300px;\n    padding: 10px;\n    border-radius: 5px;\n    background-color: #fff9;\n    transition-property: left;\n    transition-duration: .5s\n}\n\n@media (min-width: 899px) {\n    .learn-bar {\n        width:auto;\n        padding-left: 300px\n    }\n\n    .learn-bar>.learn {\n        left: 8px\n    }\n}\n';
 
 // examples/todo-list/todo-list.js
 var createInstance2 = (tpl, $3) => ({
-  todos: new ReactiveVar([
-    { text: "Start a band", completed: false },
-    { text: "Tour country", completed: false }
-  ]),
+  todos: new ReactiveVar([{ text: "Test 123", completed: false }]),
+  filter: new ReactiveVar("all"),
   allSelected: new ReactiveVar(false),
+  filters: [
+    "all",
+    "active",
+    "complete"
+  ],
+  getVisibleTodos() {
+    const filter = tpl.filter.get();
+    return tpl.todos.get().filter((todo) => {
+      if (filter == "active") {
+        return !todo.completed;
+      } else if (filter == "complete") {
+        return todo.completed;
+      }
+      return true;
+    });
+  },
   selectAll() {
     todos.set(each(tpl.todos.value, (todo) => todo.selected));
   },
@@ -3026,11 +3148,14 @@ var createInstance2 = (tpl, $3) => ({
   getIncomplete() {
     return tpl.todos.value.filter((todo) => !todo.completed);
   },
-  addTodo(text = $3("input.add").val()) {
+  addTodo(text) {
     tpl.todos.push({
       text,
       completed: false
     });
+  },
+  hasAnyCompleted() {
+    return tpl.todos.value.some((todo) => todo.completed);
   },
   calculateSelection() {
     tpl.reaction((comp) => {
@@ -3043,22 +3168,45 @@ var createInstance2 = (tpl, $3) => ({
         tpl.selectNone();
       }
     });
+  },
+  isActiveFilter(filter) {
+    return tpl.filter.get() == filter;
+  },
+  clearCompleted() {
+    tpl.todos.set(todos.filter((todo) => todo.completed));
+  },
+  // handle state
+  addRouter() {
+    tpl.hashEvent = $3(window).on("hashchange", (event) => {
+      let filter = window.location.hash.substring(2);
+      tpl.filter.set(filter);
+    });
+  },
+  removeRouter() {
+    $3(window).off(tpl.hashEvent);
   }
 });
-var onCreated2 = (tpl) => {
+var onCreated = (tpl) => {
   tpl.calculateSelection();
+  tpl.addRouter();
+};
+var onDestroyed = (tpl) => {
+  tpl.removeRouter();
 };
 var events2 = {
-  "keydown input.add"(event, tpl, $3) {
+  "keydown input.new-todo"(event, tpl, $3) {
     if (event.key === "Enter") {
-      tpl.addTodo();
+      tpl.addTodo($3(this).val());
     }
   },
   "click .select-all"(event, tpl) {
     tpl.allSelected.toggle();
   },
-  "click .filters"(event, tpl, data) {
-    console.log(data);
+  "click .filters"(event, tpl, $3, data) {
+    tpl.filter.set(data.filter);
+  },
+  "click .clear-completed"(event, tpl) {
+    tpl.clearCompleted();
   }
 };
 var TodoList = createComponent({
@@ -3069,7 +3217,8 @@ var TodoList = createComponent({
   template: todo_list_default,
   css: todo_list_default2,
   createInstance: createInstance2,
-  onCreated: onCreated2,
+  onCreated,
+  onDestroyed,
   events: events2
 });
 export {

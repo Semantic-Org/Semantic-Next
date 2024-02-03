@@ -7,14 +7,30 @@ import { todoItem } from './todo-item.js';
 import template from './todo-list.html';
 import css from './todo-list.css';
 
-
 const createInstance = (tpl, $) => ({
 
-  todos: new ReactiveVar([
-    { _id: 1, text: 'Start a band', completed: false },
-  ]),
-
+  todos: new ReactiveVar([{text: 'Test 123', completed: false}]),
+  filter: new ReactiveVar('all'),
   allSelected: new ReactiveVar(false),
+
+  filters: [
+    'all',
+    'active',
+    'complete'
+  ],
+
+  getVisibleTodos() {
+    const filter = tpl.filter.get();
+    return tpl.todos.get().filter(todo => {
+      if(filter == 'active') {
+        return !todo.completed;
+      }
+      else if(filter == 'complete') {
+        return todo.completed;
+      }
+      return true;
+    });
+  },
 
   selectAll() {
     todos.set(each(tpl.todos.value, todo => todo.selected));
@@ -28,11 +44,15 @@ const createInstance = (tpl, $) => ({
     return tpl.todos.value.filter(todo => !todo.completed);
   },
 
-  addTodo(text = $('input.add').val()) {
+  addTodo(text) {
     tpl.todos.push({
       text: text,
       completed: false,
     });
+  },
+
+  hasAnyCompleted() {
+    return tpl.todos.value.some(todo => todo.completed);
   },
 
   calculateSelection() {
@@ -47,25 +67,52 @@ const createInstance = (tpl, $) => ({
         tpl.selectNone();
       }
     });
+  },
+
+  isActiveFilter(filter) {
+    return tpl.filter.get() == filter;
+  },
+
+  clearCompleted() {
+    tpl.todos.set(todos.filter(todo => todo.completed));
+  },
+
+  // handle state
+  addRouter() {
+    tpl.hashEvent = $(window).on('hashchange', (event) => {
+      let filter = window.location.hash.substring(2); // #/foo
+      tpl.filter.set(filter);
+    });
+  },
+  removeRouter() {
+    $(window).off(tpl.hashEvent);
   }
 
 });
 
 const onCreated = (tpl) => {
-  //tpl.calculateSelection();
+  tpl.calculateSelection();
+  tpl.addRouter();
+};
+
+const onDestroyed = (tpl) => {
+  tpl.removeRouter();
 };
 
 const events = {
-  'keydown input.add'(event, tpl, $) {
+  'keydown input.new-todo'(event, tpl, $) {
     if(event.key === 'Enter') {
-      tpl.addTodo();
+      tpl.addTodo( $(this).val() );
     }
   },
   'click .select-all'(event, tpl) {
     tpl.allSelected.toggle();
   },
-  'click .filters'(event, tpl, data) {
-    console.log(data);
+  'click .filters'(event, tpl, $, data) {
+    tpl.filter.set(data.filter);
+  },
+  'click .clear-completed'(event, tpl) {
+    tpl.clearCompleted();
   }
 };
 
@@ -79,6 +126,7 @@ const TodoList = createComponent({
   css,
   createInstance,
   onCreated,
+  onDestroyed,
   events,
 });
 
