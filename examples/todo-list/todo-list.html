@@ -9,8 +9,8 @@
     <label class="toggle-all-label" htmlFor="toggle-all">Toggle All Input</label>
   </div>
   <ul class="todo-list">
-    {{#each item in getVisibleTodos}}
-      {{>todoItem item=item index=@index}}
+    {{#each todo in getVisibleTodos}}
+      {{>todoItem todo=todo index=@index}}
     {{/each}}
   </ul>
 </main>

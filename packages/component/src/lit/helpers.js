@@ -8,8 +8,8 @@ export const Helpers = {
   not: (a) => {
     return !a;
   },
-  maybe(expr, trueCondition = '', falseCondition = '') {
-    return (expr) ? trueCondition : falseCondition;
+  maybe(expr, trueClass = '', falseClass = '') {
+    return (expr) ? trueClass + ' ' : falseClass;
   },
   activeIf: (expr) => {
     return Helpers.maybe(expr, 'active', '');

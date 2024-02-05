@@ -169,7 +169,8 @@ export class Query {
       Array.from(this).forEach(el => el.textContent = newText);
       return this;
     } else {
-      return Array.from(this).map(el => this.getTextContentRecursive(el.childNodes)).join('');
+      const values = Array.from(this).map(el => this.getTextContentRecursive(el.childNodes));
+      return (values.length > 1) ? values : values[0];
     }
   }
 
@@ -184,12 +185,13 @@ export class Query {
       return this;
     } else {
       // Get the value of each element
-      return Array.from(this).map(el => {
+      const values = Array.from(this).map(el => {
         if(el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
           return el.value;
         }
         return undefined;
       });
+      return (values.length > 1) ? values : values[0];
     }
   }
   // alias
@@ -209,7 +211,7 @@ export class Query {
       } else {
         return this.getTextContentRecursive(node.childNodes);
       }
-    }).join('');
+    }).join('').trim();
   }
 
   css(property, value) {
@@ -275,5 +277,13 @@ export class Query {
         .join('');
     }).join('');
   }
+
+  focus() {
+    return this[0].focus();
+  }
+  blur() {
+    return this[0].blur();
+  }
+
 
 }

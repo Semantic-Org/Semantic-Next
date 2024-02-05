@@ -117,7 +117,10 @@ export class LitRenderer {
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
       if(key == 'over') {
-        return () => this.evaluateExpression(value, data);
+        return (expressionString) => {
+          const computedValue = this.evaluateExpression(value, data);
+          return computedValue;
+        };
       }
       if(key == 'content') {
         return (eachData) => this.renderContent({ast: value, data: eachData});
@@ -129,7 +132,11 @@ export class LitRenderer {
   }
 
   evaluateTemplate(node, data = {}) {
-    const getValue = (value) => this.evaluateExpression(value, data);
+    const getValue = (expressionString) => {
+      const value = this.evaluateExpression(expressionString, data);
+      //console.log(expressionString, value);
+      return value;
+    };
 
     // template names can be dynamic
     const getTemplateName = () => getValue(node.name);

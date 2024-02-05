@@ -53,6 +53,10 @@ export const isString = (x) => {
   return typeof x == 'string';
 };
 
+export const isNumber = (x) => {
+  return typeof x == 'number';
+};
+
 export const isArray = (x) => {
   return Array.isArray(x);
 };

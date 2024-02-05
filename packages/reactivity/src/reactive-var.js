@@ -1,4 +1,4 @@
-import { clone, isEqual } from '@semantic-ui/utils';
+import { clone, isEqual, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
@@ -29,7 +29,7 @@ export class ReactiveVar {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = clone(newValue);
-      this.dependency.changed();
+      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
 
@@ -40,7 +40,7 @@ export class ReactiveVar {
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
-      this.dependency.changed();
+      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
 
@@ -52,11 +52,7 @@ export class ReactiveVar {
   }
 
   peek() {
-    const currentReaction = Reaction.current;
-    Reaction.current = null;
-    const value = this._value;
-    Reaction.current = currentReaction;
-    return value;
+    return this.currentValue;
   }
 
   addListener(listener) {
@@ -92,6 +88,35 @@ export class ReactiveVar {
     let arr = this.value;
     arr.splice(index, 1);
     this.set(arr);
+  }
+
+  // sets
+  setArrayProperty(indexOrProperty, property, value) {
+    let index;
+    if(isNumber(indexOrProperty)) {
+      index = indexOrProperty;
+    }
+    else {
+      index = 'all';
+      value = property;
+      property = indexOrProperty;
+    }
+    const newValue = clone(this.currentValue).map((object, currentIndex) => {
+      if(index == 'all' || currentIndex == index) {
+        object[property] = value;
+      }
+      return object;
+    });
+    this.set(newValue);
+  }
+
+  changeItems(mapFunction) {
+    const newValue = clone(this.currentValue).map(mapFunction);
+    this.set(newValue);
+  }
+  removeItems(filterFunction) {
+    const newValue = clone(this.currentValue).filter((value) => !filterFunction(value));
+    this.set(newValue);
   }
 
   toggle() {

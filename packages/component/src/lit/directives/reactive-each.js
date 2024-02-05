@@ -10,12 +10,13 @@ class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.parts = new Map();
+    this.useCache = false;
+    this.templateCache = new Map();
   }
 
   render(eachCondition, data) {
     // Initial setup before the reaction
-    const initialRender = this.createRepeat(eachCondition, data);
+    this.repeat = this.createRepeat(eachCondition, data);
 
     if (!this.reaction) {
       this.reaction = Reaction.create((comp) => {
@@ -27,11 +28,13 @@ class ReactiveEachDirective extends AsyncDirective {
         if(comp.firstRun) {
           return;
         }
+        // this.updateRepeat(items);
+        // hack for now
         const render = this.createRepeat(eachCondition, data, items);
         this.setValue(render);
       });
     }
-    return initialRender;
+    return this.repeat;
   }
 
   getItems(eachCondition) {
@@ -45,33 +48,40 @@ class ReactiveEachDirective extends AsyncDirective {
     return items;
   }
 
+  updateRepeat(items) {
+    // need to implement
+  }
+
   createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
     if (!items?.length) {
       return nothing;
     }
-    return repeat(items, this.getPartID, (item, index) => {
-      let part = this.parts.get(this.getPartID(item));
-      if(false && part) {
-        // used cached template
-        //console.log('reuse', this.getPartID(item));
-        return part;
+    return repeat(items, this.getItemID, (item, index) => {
+      let template;
+      if(this.useCache) {
+        const cachedTemplate = this.templateCache.get(this.getItemID(item));
+        if(cachedTemplate) {
+          //console.log('reuse', this.getItemID(item));
+          template = cachedTemplate;
+        }
+        else {
+          template = this.getTemplateContent(item, index, data, eachCondition);
+          this.templateCache.set(this.getItemID(item), template);
+        }
       }
       else {
-        // render template
-        part = this.getPartContent(item, index, data, eachCondition);
-        //console.log('render', this.getPartID(item));
-        this.parts.set(this.getPartID(item), part);
+        template = this.getTemplateContent(item, index, data, eachCondition);
       }
-      return part;
+      return template;
     });
   }
 
-  getPartContent(item, index, data, eachCondition) {
+  getTemplateContent(item, index, data, eachCondition) {
     let eachData = this.prepareEachData(item, index, data, eachCondition.as);
     return eachCondition.content(eachData);
   }
 
-  getPartID(item) {
+  getItemID(item) {
     if(isObject(item)) {
       return item._id || item.id || item.key || item.hash || hashCode(item);
     }

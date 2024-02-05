@@ -635,6 +635,9 @@ var isObject = (x2) => {
 var isString = (x2) => {
   return typeof x2 == "string";
 };
+var isNumber = (x2) => {
+  return typeof x2 == "number";
+};
 var isArray = (x2) => {
   return Array.isArray(x2);
 };
@@ -1466,8 +1469,8 @@ var Dependency = class {
       Reaction.current.dependencies.add(this);
     }
   }
-  changed() {
-    this.subscribers.forEach((subscriber) => subscriber.invalidate());
+  changed(context) {
+    this.subscribers.forEach((subscriber) => subscriber.invalidate(context));
   }
   cleanUp(reaction) {
     this.subscribers.delete(reaction);
@@ -1527,8 +1530,11 @@ var Reaction = class _Reaction {
     _Reaction.current = null;
     _Reaction.pendingReactions.delete(this);
   }
-  invalidate() {
+  invalidate(context) {
     this.active = true;
+    if (context) {
+      this.context = context;
+    }
     _Reaction.pendingReactions.add(this);
     _Reaction.scheduleFlush();
   }
@@ -1571,6 +1577,17 @@ var Reaction = class _Reaction {
     dep.depend();
     return value;
   }
+  static getSource() {
+    if (!_Reaction.current || !_Reaction.current.context || !_Reaction.current.context.trace) {
+      console.log("No source available or no current reaction.");
+      return;
+    }
+    let trace = _Reaction.current.context.trace;
+    trace = trace.split("\n").slice(3).join("\n");
+    trace = `Reaction triggered by:
+${trace}`;
+    console.info(trace);
+  }
 };
 
 // packages/reactivity/src/reactive-var.js
@@ -1591,7 +1608,7 @@ var ReactiveVar = class _ReactiveVar {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = clone(newValue);
-      this.dependency.changed();
+      this.dependency.changed({ value: newValue, trace: new Error().stack });
     }
   }
   get() {
@@ -1600,7 +1617,7 @@ var ReactiveVar = class _ReactiveVar {
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
-      this.dependency.changed();
+      this.dependency.changed({ value: newValue, trace: new Error().stack });
     }
   }
   subscribe(callback) {
@@ -1610,11 +1627,7 @@ var ReactiveVar = class _ReactiveVar {
     return () => reaction.stop();
   }
   peek() {
-    const currentReaction = Reaction.current;
-    Reaction.current = null;
-    const value = this._value;
-    Reaction.current = currentReaction;
-    return value;
+    return this.currentValue;
   }
   addListener(listener) {
     this._listeners.add(listener);
@@ -1647,6 +1660,32 @@ var ReactiveVar = class _ReactiveVar {
     let arr = this.value;
     arr.splice(index, 1);
     this.set(arr);
+  }
+  // sets
+  setArrayProperty(indexOrProperty, property, value) {
+    let index;
+    if (isNumber(indexOrProperty)) {
+      index = indexOrProperty;
+    } else {
+      index = "all";
+      value = property;
+      property = indexOrProperty;
+    }
+    const newValue = clone(this.currentValue).map((object, currentIndex) => {
+      if (index == "all" || currentIndex == index) {
+        object[property] = value;
+      }
+      return object;
+    });
+    this.set(newValue);
+  }
+  changeItems(mapFunction) {
+    const newValue = clone(this.currentValue).map(mapFunction);
+    this.set(newValue);
+  }
+  removeItems(filterFunction) {
+    const newValue = clone(this.currentValue).filter((value) => !filterFunction(value));
+    this.set(newValue);
   }
   toggle() {
     return this.set(!this.value);
@@ -1814,7 +1853,8 @@ var Query = class _Query {
       Array.from(this).forEach((el) => el.textContent = newText);
       return this;
     } else {
-      return Array.from(this).map((el) => this.getTextContentRecursive(el.childNodes)).join("");
+      const values = Array.from(this).map((el) => this.getTextContentRecursive(el.childNodes));
+      return values.length > 1 ? values : values[0];
     }
   }
   value(newValue) {
@@ -1826,12 +1866,13 @@ var Query = class _Query {
       });
       return this;
     } else {
-      return Array.from(this).map((el) => {
+      const values = Array.from(this).map((el) => {
         if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
           return el.value;
         }
         return void 0;
       });
+      return values.length > 1 ? values : values[0];
     }
   }
   // alias
@@ -1849,7 +1890,7 @@ var Query = class _Query {
       } else {
         return this.getTextContentRecursive(node.childNodes);
       }
-    }).join("");
+    }).join("").trim();
   }
   css(property, value) {
     if (typeof property === "object") {
@@ -1900,6 +1941,12 @@ var Query = class _Query {
     return Array.from(this).map((el) => {
       return Array.from(el.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.nodeValue).join("");
     }).join("");
+  }
+  focus() {
+    return this[0].focus();
+  }
+  blur() {
+    return this[0].blur();
   }
 };
 
@@ -2091,10 +2138,11 @@ var ReactiveEachDirective = class extends f4 {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.parts = /* @__PURE__ */ new Map();
+    this.useCache = false;
+    this.templateCache = /* @__PURE__ */ new Map();
   }
   render(eachCondition, data) {
-    const initialRender = this.createRepeat(eachCondition, data);
+    this.repeat = this.createRepeat(eachCondition, data);
     if (!this.reaction) {
       this.reaction = Reaction.create((comp) => {
         if (!this.isConnected) {
@@ -2109,7 +2157,7 @@ var ReactiveEachDirective = class extends f4 {
         this.setValue(render);
       });
     }
-    return initialRender;
+    return this.repeat;
   }
   getItems(eachCondition) {
     let items = eachCondition.over() || [];
@@ -2121,26 +2169,33 @@ var ReactiveEachDirective = class extends f4 {
     });
     return items;
   }
+  updateRepeat(items) {
+  }
   createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
     if (!items?.length) {
       return T;
     }
-    return c5(items, this.getPartID, (item, index) => {
-      let part = this.parts.get(this.getPartID(item));
-      if (false) {
-        return part;
+    return c5(items, this.getItemID, (item, index) => {
+      let template;
+      if (this.useCache) {
+        const cachedTemplate = this.templateCache.get(this.getItemID(item));
+        if (cachedTemplate) {
+          template = cachedTemplate;
+        } else {
+          template = this.getTemplateContent(item, index, data, eachCondition);
+          this.templateCache.set(this.getItemID(item), template);
+        }
       } else {
-        part = this.getPartContent(item, index, data, eachCondition);
-        this.parts.set(this.getPartID(item), part);
+        template = this.getTemplateContent(item, index, data, eachCondition);
       }
-      return part;
+      return template;
     });
   }
-  getPartContent(item, index, data, eachCondition) {
+  getTemplateContent(item, index, data, eachCondition) {
     let eachData = this.prepareEachData(item, index, data, eachCondition.as);
     return eachCondition.content(eachData);
   }
-  getPartID(item) {
+  getItemID(item) {
     if (isObject(item)) {
       return item._id || item.id || item.key || item.hash || hashCode(item);
     }
@@ -2203,12 +2258,10 @@ var RenderTemplate = class extends f4 {
     };
     const renderTemplate2 = () => {
       let html = this.template.render();
-      setTimeout(() => {
-        this.template.onRendered();
-      }, 0);
       return html;
     };
     Reaction.create((comp) => {
+      console.log("rerun");
       if (!this.isConnected) {
         comp.stop();
         return;
@@ -2217,14 +2270,17 @@ var RenderTemplate = class extends f4 {
       if (!comp.firstRun) {
         attachTemplate();
         if (!isCloned) {
+          console.log("updating data context", unpack(data));
           this.template.setDataContext(unpackData(data));
         }
+        console.log("rerendering");
         this.setValue(renderTemplate2());
       }
     });
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
+    console.log("initial render");
     return renderTemplate2();
   }
   update(part, renderSettings) {
@@ -2249,8 +2305,8 @@ var Helpers = {
   not: (a3) => {
     return !a3;
   },
-  maybe(expr, trueCondition = "", falseCondition = "") {
-    return expr ? trueCondition : falseCondition;
+  maybe(expr, trueClass = "", falseClass = "") {
+    return expr ? trueClass + " " : falseClass;
   },
   activeIf: (expr) => {
     return Helpers.maybe(expr, "active", "");
@@ -2414,7 +2470,10 @@ var LitRenderer = class _LitRenderer {
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
       if (key == "over") {
-        return () => this.evaluateExpression(value, data);
+        return (expressionString) => {
+          const computedValue = this.evaluateExpression(value, data);
+          return computedValue;
+        };
       }
       if (key == "content") {
         return (eachData) => this.renderContent({ ast: value, data: eachData });
@@ -2425,7 +2484,10 @@ var LitRenderer = class _LitRenderer {
     return reactiveEach(eachArguments, data);
   }
   evaluateTemplate(node, data = {}) {
-    const getValue = (value) => this.evaluateExpression(value, data);
+    const getValue = (expressionString) => {
+      const value = this.evaluateExpression(expressionString, data);
+      return value;
+    };
     const getTemplateName = () => getValue(node.name);
     const staticValues = mapObject(node.data || {}, (value) => {
       return () => Reaction.nonreactive(() => getValue(value));
@@ -2562,6 +2624,7 @@ var LitTemplate = class UITemplate {
   setDataContext(data) {
     this.data = data;
     this.tpl.data = data;
+    this.rendered = false;
   }
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
@@ -2668,9 +2731,12 @@ var LitTemplate = class UITemplate {
     this.removeEvents();
     const parseEventString = (eventString) => {
       const parts = eventString.split(" ");
-      const eventName = parts[0];
+      let eventName = parts[0];
       parts.shift();
       const selector = parts.join(" ");
+      if (eventName == "blur") {
+        eventName = "focusout";
+      }
       return { eventName, selector };
     };
     this.eventController = new AbortController();
@@ -2703,6 +2769,9 @@ var LitTemplate = class UITemplate {
     const isNodeInRange = (node2, startNode = this.startNode, endNode = this.endNode) => {
       if (!startNode || !endNode) {
         return true;
+      }
+      if (node2 === null) {
+        return;
       }
       const startComparison = startNode.compareDocumentPosition(node2);
       const endComparison = endNode.compareDocumentPosition(node2);
@@ -3034,28 +3103,38 @@ var createComponent = ({
 };
 
 // examples/todo-list/todo-item.html
-var todo_item_default = '<li class="{{maybeCompleted}}todo-item">\n  <input class="toggle" type="checkbox">\n  <label>{{item.text}}</label>\n  <button class="destroy"></button>\n</li>\n';
+var todo_item_default = `<li class="{{maybe todo.completed 'completed'}}{{maybe editing 'editing'}}todo-item">
+  {{#if editing}}
+    <input type="text" class="edit" value={{todo.text}}>
+  {{else}}
+    <input class="toggle" type="checkbox">
+    <label>{{todo.text}}</label>
+    <button class="destroy"></button>
+  {{/if}}
+</li>
+`;
 
 // examples/todo-list/todo-item.css
 var todo_item_default2 = '.todo-list li .toggle {\n    text-align: center;\n    width: 40px;\n    height: auto;\n    position: absolute;\n    top: 0;\n    bottom: 0;\n    margin: auto 0;\n    border: none;\n    -webkit-appearance: none;\n    -moz-appearance: none;\n    appearance: none\n}\n\n.todo-list li .toggle {\n    opacity: 0\n}\n\n.todo-list li .toggle+label {\n    background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23949494%22%20stroke-width%3D%223%22/%3E%3C/svg%3E);\n    background-repeat: no-repeat;\n    background-position: center left\n}\n\n.todo-list li .toggle:checked+label {\n    background-image: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%2359A193%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20fill%3D%22%233EA390%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22%2F%3E%3C%2Fsvg%3E)\n}\n\n.todo-list li label {\n    overflow-wrap: break-word;\n    padding: 15px 15px 15px 60px;\n    display: block;\n    line-height: 1.2;\n    transition: color .4s;\n    font-weight: 400;\n    color: #484848\n}\n\n.todo-list li.completed label {\n    color: #949494;\n    text-decoration: line-through\n}\n\n.todo-list li .destroy {\n    display: none;\n    position: absolute;\n    top: 0;\n    right: 10px;\n    bottom: 0;\n    width: 40px;\n    height: 40px;\n    margin: auto 0;\n    font-size: 30px;\n    color: #949494;\n    transition: color .2s ease-out\n}\n\n.todo-list li .destroy:hover,.todo-list li .destroy:focus {\n    color: #c18585\n}\n\n.todo-list li .destroy:after {\n    content: "\xD7";\n    display: block;\n    height: 100%;\n    line-height: 1.1\n}\n\n.todo-list li:hover .destroy {\n    display: block\n}\n\n.todo-list li .edit {\n    display: none\n}\n\n.todo-list li.editing:last-child {\n    margin-bottom: -1px\n}\n';
 
 // examples/todo-list/todo-item.js
 var createInstance = (tpl, $3) => ({
+  editing: new ReactiveVar(false),
   toggleCompleted() {
-    let todo = tpl.data.item;
-    todo.completed = !todo.completed;
-    tpl.parent().todos.setItem(tpl.data.index, todo);
+    const todos = tpl.parent().todos;
+    const todo = tpl.data.todo;
+    todos.setArrayProperty(tpl.data.index, "completed", !todo.completed);
   },
-  maybeCompleted() {
-    const completed = tpl.data.item.completed;
-    return completed ? "completed " : "";
+  changeText(text) {
+    const todos = tpl.parent().todos;
+    todos.setArrayProperty(tpl.data.index, "text", text);
   },
   removeTodo() {
     tpl.parent().todos.removeItem(tpl.data.index);
   }
 });
 var onRendered = (tpl, $3) => {
-  if (tpl.data.item.completed) {
+  if (tpl.data.todo.completed) {
     $3(".toggle").get(0).checked = true;
   } else {
     $3(".toggle").get(0).checked = false;
@@ -3067,6 +3146,21 @@ var events = {
   },
   "click .destroy"(event, tpl) {
     tpl.removeTodo();
+  },
+  "dblclick li"(event, tpl, $3) {
+    tpl.editing.set(true);
+    Reaction.afterFlush(() => {
+      $3("input.edit").focus();
+    });
+  },
+  "keydown input.edit"(event, tpl, $3) {
+    if (event.key === "Enter") {
+      $3(this).blur();
+    }
+  },
+  "blur input.edit"(event, tpl, $3) {
+    tpl.changeText($3(this).val());
+    tpl.editing.set(false);
   }
 };
 var todoItem = createComponent({
@@ -3090,8 +3184,8 @@ var todo_list_default = `<header class="header">
     <label class="toggle-all-label" htmlFor="toggle-all">Toggle All Input</label>
   </div>
   <ul class="todo-list">
-    {{#each item in getVisibleTodos}}
-      {{>todoItem item=item index=@index}}
+    {{#each todo in getVisibleTodos}}
+      {{>todoItem todo=todo index=@index}}
     {{/each}}
   </ul>
 </main>
@@ -3131,9 +3225,13 @@ var todo_list_default2 = 'h1 {\n  position: absolute;\n  top: -140px;\n  width: 
 
 // examples/todo-list/todo-list.js
 var createInstance2 = (tpl, $3) => ({
-  todos: new ReactiveVar([{ text: "Test 123", completed: false }]),
+  todos: new ReactiveVar([
+    { text: "Pickup drycleaning", completed: false },
+    { text: "Get groceries", completed: false },
+    { text: "Take kids to school", completed: false }
+  ]),
   filter: new ReactiveVar("all"),
-  allSelected: new ReactiveVar(false),
+  allCompleted: new ReactiveVar(false),
   filters: [
     "all",
     "active",
@@ -3141,7 +3239,8 @@ var createInstance2 = (tpl, $3) => ({
   ],
   getVisibleTodos() {
     const filter = tpl.filter.get();
-    return tpl.todos.get().filter((todo) => {
+    const todos = tpl.todos.get();
+    return todos.filter((todo) => {
       if (filter == "active") {
         return !todo.completed;
       } else if (filter == "complete") {
@@ -3150,16 +3249,18 @@ var createInstance2 = (tpl, $3) => ({
       return true;
     });
   },
-  selectAll() {
-    tpl.todos.set(each(tpl.todos.value, (todo) => todo.completed = true));
+  completeAll() {
+    tpl.todos.setArrayProperty("completed", true);
   },
-  selectNone() {
-    tpl.todos.set(each(tpl.todos.value, (todo) => todo.completed = false));
+  completeNone() {
+    tpl.todos.setArrayProperty("completed", false);
   },
   getIncomplete() {
-    return tpl.todos.value.filter((todo) => !todo.completed);
+    const todos = tpl.todos.get();
+    return todos.filter((todo) => !todo.completed);
   },
   addTodo(text) {
+    console.log(text);
     tpl.todos.push({
       text,
       completed: false
@@ -3168,12 +3269,16 @@ var createInstance2 = (tpl, $3) => ({
   hasAnyCompleted() {
     return tpl.todos.value.some((todo) => todo.completed);
   },
-  calculateSelection() {
+  calculateAllCompleted() {
     tpl.reaction((comp) => {
-      if (tpl.allSelected.get()) {
-        tpl.selectAll();
+      const allCompleted = tpl.allCompleted.get();
+      if (comp.firstRun) {
+        return;
+      }
+      if (allCompleted) {
+        tpl.completeAll();
       } else {
-        tpl.selectNone();
+        tpl.completeNone();
       }
     });
   },
@@ -3181,7 +3286,7 @@ var createInstance2 = (tpl, $3) => ({
     return tpl.filter.get() == filter;
   },
   clearCompleted() {
-    tpl.todos.set(todos.filter((todo) => todo.completed));
+    tpl.todos.removeItems((todo) => todo.completed);
   },
   // handle state
   addRouter() {
@@ -3195,7 +3300,7 @@ var createInstance2 = (tpl, $3) => ({
   }
 });
 var onCreated = (tpl) => {
-  tpl.calculateSelection();
+  tpl.calculateAllCompleted();
   tpl.addRouter();
 };
 var onDestroyed = (tpl) => {
@@ -3205,11 +3310,12 @@ var events2 = {
   "keydown input.new-todo"(event, tpl, $3) {
     if (event.key === "Enter") {
       tpl.addTodo($3(this).val());
+      $3(this).val("");
     }
   },
   "change .toggle-all"(event, tpl, $3) {
     $3(event.target).attr("checked", !$3(event.target).attr("checked"));
-    tpl.allSelected.toggle();
+    tpl.allCompleted.toggle();
   },
   "click .filters"(event, tpl, $3, data) {
     tpl.filter.set(data.filter);

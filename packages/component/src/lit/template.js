@@ -45,6 +45,7 @@ export const LitTemplate = class UITemplate {
   setDataContext(data) {
     this.data = data;
     this.tpl.data = data;
+    this.rendered = false;
   }
 
   // when rendered as a partial/subtemplate
@@ -173,9 +174,12 @@ export const LitTemplate = class UITemplate {
     // format like 'click .foo baz'
     const parseEventString = (eventString) => {
       const parts = eventString.split(' ');
-      const eventName = parts[0];
+      let eventName = parts[0];
       parts.shift();
       const selector = parts.join(' ');
+      if(eventName == 'blur') {
+        eventName = 'focusout'; // blur doesnt bubble
+      }
       return { eventName, selector };
     };
 
@@ -212,6 +216,9 @@ export const LitTemplate = class UITemplate {
     const isNodeInRange = (node, startNode = this.startNode, endNode = this.endNode) => {
       if(!startNode || !endNode) {
         return true;
+      }
+      if(node === null) {
+        return;
       }
       const startComparison = startNode.compareDocumentPosition(node);
       const endComparison = endNode.compareDocumentPosition(node);

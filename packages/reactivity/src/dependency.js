@@ -12,8 +12,8 @@ export class Dependency {
     }
   }
 
-  changed() {
-    this.subscribers.forEach(subscriber => subscriber.invalidate());
+  changed(context) {
+    this.subscribers.forEach(subscriber => subscriber.invalidate(context));
   }
 
   cleanUp(reaction) {

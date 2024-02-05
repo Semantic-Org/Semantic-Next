@@ -60,8 +60,11 @@ export class Reaction {
     Reaction.pendingReactions.delete(this);
   }
 
-  invalidate() {
+  invalidate(context) {
     this.active = true;
+    if(context) {
+      this.context = context;
+    }
     Reaction.pendingReactions.add(this);
     Reaction.scheduleFlush();
   }
@@ -106,5 +109,16 @@ export class Reaction {
     comp.run(); // Initial run to capture dependencies
     dep.depend(); // Create dependency on guard function
     return value;
+  }
+
+  static getSource() {
+    if (!Reaction.current || !Reaction.current.context || !Reaction.current.context.trace) {
+      console.log('No source available or no current reaction.');
+      return;
+    }
+    let trace = Reaction.current.context.trace;
+    trace = trace.split('\n').slice(3).join('\n');
+    trace = `Reaction triggered by:\n${trace}`;
+    console.info(trace);
   }
 }

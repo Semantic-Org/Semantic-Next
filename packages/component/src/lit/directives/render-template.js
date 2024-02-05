@@ -38,12 +38,10 @@ class RenderTemplate extends AsyncDirective {
     };
     const renderTemplate = () => {
       let html = this.template.render();
-      setTimeout(() => {
-        this.template.onRendered();
-      }, 0);
       return html;
     };
     Reaction.create((comp) => {
+      console.log('rerun');
       if(!this.isConnected) {
         comp.stop();
         return;
@@ -52,14 +50,17 @@ class RenderTemplate extends AsyncDirective {
       if(!comp.firstRun) {
         attachTemplate();
         if(!isCloned) {
+          console.log('updating data context', unpack(data));
           this.template.setDataContext(unpackData(data));
         }
+        console.log('rerendering');
         this.setValue(renderTemplate());
       }
     });
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
+    console.log('initial render');
     return renderTemplate();
   }
 

@@ -1,5 +1,9 @@
-<li class="{{maybeCompleted}}todo-item">
-  <input class="toggle" type="checkbox">
-  <label>{{item.text}}</label>
-  <button class="destroy"></button>
+<li class="{{maybe todo.completed 'completed'}}{{maybe editing 'editing'}}todo-item">
+  {{#if editing}}
+    <input type="text" class="edit" value={{todo.text}}>
+  {{else}}
+    <input class="toggle" type="checkbox">
+    <label>{{todo.text}}</label>
+    <button class="destroy"></button>
+  {{/if}}
 </li>

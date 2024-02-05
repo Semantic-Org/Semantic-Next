@@ -1,6 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { each } from '@semantic-ui/utils';
 
 import { todoItem } from './todo-item.js';
 
@@ -9,9 +8,13 @@ import css from './todo-list.css';
 
 const createInstance = (tpl, $) => ({
 
-  todos: new ReactiveVar([{text: 'Test 123', completed: false}]),
+  todos: new ReactiveVar([
+    {text: 'Pickup drycleaning', completed: false},
+    {text: 'Get groceries', completed: false},
+    {text: 'Take kids to school', completed: false},
+  ]),
   filter: new ReactiveVar('all'),
-  allSelected: new ReactiveVar(false),
+  allCompleted: new ReactiveVar(false),
 
   filters: [
     'all',
@@ -21,7 +24,8 @@ const createInstance = (tpl, $) => ({
 
   getVisibleTodos() {
     const filter = tpl.filter.get();
-    return tpl.todos.get().filter(todo => {
+    const todos = tpl.todos.get();
+    return todos.filter(todo => {
       if(filter == 'active') {
         return !todo.completed;
       }
@@ -32,19 +36,21 @@ const createInstance = (tpl, $) => ({
     });
   },
 
-  selectAll() {
-    tpl.todos.set(each(tpl.todos.value, todo => todo.completed = true));
+  completeAll() {
+    tpl.todos.setArrayProperty('completed', true);
   },
 
-  selectNone() {
-    tpl.todos.set(each(tpl.todos.value, todo => todo.completed = false));
+  completeNone() {
+    tpl.todos.setArrayProperty('completed', false);
   },
 
   getIncomplete() {
-    return tpl.todos.value.filter(todo => !todo.completed);
+    const todos = tpl.todos.get();
+    return todos.filter(todo => !todo.completed);
   },
 
   addTodo(text) {
+    console.log(text);
     tpl.todos.push({
       text: text,
       completed: false,
@@ -55,13 +61,17 @@ const createInstance = (tpl, $) => ({
     return tpl.todos.value.some(todo => todo.completed);
   },
 
-  calculateSelection() {
+  calculateAllCompleted() {
     tpl.reaction((comp) => {
-      if(tpl.allSelected.get()) {
-        tpl.selectAll();
+      const allCompleted = tpl.allCompleted.get();
+      if(comp.firstRun) {
+        return;
+      }
+      if(allCompleted) {
+        tpl.completeAll();
       }
       else {
-        tpl.selectNone();
+        tpl.completeNone();
       }
     });
   },
@@ -71,7 +81,7 @@ const createInstance = (tpl, $) => ({
   },
 
   clearCompleted() {
-    tpl.todos.set(todos.filter(todo => todo.completed));
+    tpl.todos.removeItems(todo => todo.completed);
   },
 
   // handle state
@@ -88,7 +98,7 @@ const createInstance = (tpl, $) => ({
 });
 
 const onCreated = (tpl) => {
-  tpl.calculateSelection();
+  tpl.calculateAllCompleted();
   tpl.addRouter();
 };
 
@@ -100,11 +110,12 @@ const events = {
   'keydown input.new-todo'(event, tpl, $) {
     if(event.key === 'Enter') {
       tpl.addTodo( $(this).val() );
+      $(this).val('');
     }
   },
   'change .toggle-all'(event, tpl, $) {
     $(event.target).attr('checked', !$(event.target).attr('checked'));
-    tpl.allSelected.toggle();
+    tpl.allCompleted.toggle();
   },
   'click .filters'(event, tpl, $, data) {
     tpl.filter.set(data.filter);
