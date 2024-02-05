@@ -2629,8 +2629,17 @@ var LitTemplate = class UITemplate {
       let eventName = parts[0];
       parts.shift();
       const selector = parts.join(" ");
-      if (eventName == "blur") {
-        eventName = "focusout";
+      const bubbleMap = {
+        blur: "focusout",
+        focus: "focusin",
+        change: "input",
+        load: "DOMContentLoaded",
+        unload: "beforeunload",
+        mouseenter: "mouseover",
+        mouseleave: "mouseout"
+      };
+      if (bubbleMap[eventName]) {
+        eventName = bubbleMap[eventName];
       }
       return { eventName, selector };
     };
@@ -2640,6 +2649,9 @@ var LitTemplate = class UITemplate {
       const template = this;
       $2(this.renderRoot).on(eventName, selector, (event) => {
         if (!this.isNodeInTemplate(event.target)) {
+          return;
+        }
+        if ((eventName === "mouseover" || eventName === "mouseout") && event.relatedTarget && event.target.contains(event.relatedTarget)) {
           return;
         }
         const boundEvent = eventHandler.bind(event.target);

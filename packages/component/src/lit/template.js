@@ -177,8 +177,17 @@ export const LitTemplate = class UITemplate {
       let eventName = parts[0];
       parts.shift();
       const selector = parts.join(' ');
-      if(eventName == 'blur') {
-        eventName = 'focusout'; // blur doesnt bubble
+      const bubbleMap = {
+        blur: 'focusout',
+        focus: 'focusin',
+        change: 'input',
+        load: 'DOMContentLoaded',
+        unload: 'beforeunload',
+        mouseenter: 'mouseover',
+        mouseleave: 'mouseout'
+      };
+      if(bubbleMap[eventName]) {
+        eventName = bubbleMap[eventName];
       }
       return { eventName, selector };
     };
@@ -190,6 +199,10 @@ export const LitTemplate = class UITemplate {
       const template = this;
       $(this.renderRoot).on(eventName, selector, (event) => {
         if(!this.isNodeInTemplate(event.target)) {
+          return;
+        }
+        // this is
+        if ((eventName === 'mouseover' || eventName === 'mouseout') && event.relatedTarget && event.target.contains(event.relatedTarget)) {
           return;
         }
         const boundEvent = eventHandler.bind(event.target);
