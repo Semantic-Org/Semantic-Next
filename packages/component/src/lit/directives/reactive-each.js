@@ -55,6 +55,7 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   updateRepeat(items) {
+    this.host.requestUpdate();
     // need to implement
   }
 

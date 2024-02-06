@@ -1,13 +1,14 @@
 next
 + Complete todomvc example.
-- Redo reactive each to never rerender
+- add getParent helper with tree search
 - Adding ifdefined for attributes from templates
+- Debug events not triggering on right element
+- Fix reactive each to properly reuse dom
 - Determine rendered vs update loop
 - Inherit data context if none specified for subtemplates
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 
 later
-- add getParent helper with tree search
 - consider await/task syntax
 - add getTemplate helper to search all active rendered templates. Add global registry of active templates. i.e. tpl.findTemplate('sidebar').set('')
 

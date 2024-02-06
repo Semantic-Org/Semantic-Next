@@ -2070,6 +2070,7 @@ var ReactiveEachDirective = class extends f4 {
     return items;
   }
   updateRepeat(items) {
+    this.host.requestUpdate();
   }
   createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
     if (!items?.length) {
