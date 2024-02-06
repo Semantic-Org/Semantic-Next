@@ -1,5 +1,6 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { each } from '@semantic-ui/utils';
 
 import { todoItem } from './todo-item.js';
 
@@ -10,7 +11,12 @@ const createInstance = (tpl, $) => ({
 
   // reactive state
   todos: new ReactiveVar([
-    { text: 'Pickup drycleaning', completed: false },
+    { text: 'Another one', completed: false },
+    { text: 'Another one 2', completed: false },
+    { text: 'Another one 3', completed: false },
+    { text: 'Another one 4', completed: false },
+    { text: 'Another one 5', completed: false },
+    { text: 'Pickup dry cleaning', completed: false },
     { text: 'Get groceries', completed: false },
     { text: 'Take kids to school', completed: false },
   ]),
@@ -23,6 +29,9 @@ const createInstance = (tpl, $) => ({
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
+    each(todos, (todo) => {
+      todo._id = todo.text;
+    });
     return todos.filter(todo => {
       if(filter == 'active') {
         return !todo.completed;
@@ -55,7 +64,6 @@ const createInstance = (tpl, $) => ({
   },
 
   hasAnyCompleted() {
-    return true;
     return tpl.todos.value.some(todo => todo.completed);
   },
 
@@ -119,7 +127,11 @@ const events = {
     tpl.filter.set(data.filter);
   },
   'click .clear-completed'(event, tpl) {
-    //tpl.clearCompleted();
+    tpl.clearCompleted();
+  },
+  'click .todo'(event, tpl, $, data) {
+    console.log(data.index);
+    tpl.todos.removeItem(data.index);
   }
 };
 

@@ -21,6 +21,7 @@ const createInstance = (tpl, $) => ({
 });
 
 const onRendered = (tpl, $) => {
+  //console.log('on rendered called', tpl.data.todo.text);
   if($('.toggle').length) {
     if(tpl.data.todo.completed) {
       $('.toggle').get(0).checked = true;

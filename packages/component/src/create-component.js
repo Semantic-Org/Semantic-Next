@@ -90,7 +90,7 @@ export const createComponent = ({
           };
         }
         return {
-          test: { type: String }
+          //test: { type: String }
         };
       }
 
