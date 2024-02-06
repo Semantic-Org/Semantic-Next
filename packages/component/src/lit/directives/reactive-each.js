@@ -1,12 +1,6 @@
 import { nothing, noChange } from 'lit';
 import { directive } from 'lit/directive.js';
-import {
-  insertPart,
-  getCommittedValue,
-  removePart,
-  setCommittedValue,
-  setChildPartValue,
-} from 'lit/directive-helpers.js';
+import { insertPart, getCommittedValue, removePart, setCommittedValue, setChildPartValue } from 'lit/directive-helpers.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
