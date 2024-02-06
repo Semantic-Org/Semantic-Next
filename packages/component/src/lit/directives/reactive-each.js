@@ -2,6 +2,7 @@ import { nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { AsyncDirective } from 'lit/async-directive.js';
+import { property } from 'lit/decorators.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
 import { hashCode, isObject, isString } from '@semantic-ui/utils';
@@ -29,7 +30,7 @@ class ReactiveEachDirective extends AsyncDirective {
         if(comp.firstRun) {
           return;
         }
-        //this.updateRepeat(items);
+        this.updateRepeat(items);
         // hack for now
         const render = this.createRepeat(eachCondition, data, items);
         this.setValue(render);
@@ -55,7 +56,8 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   updateRepeat(items) {
-    this.host.requestUpdate();
+    console.log('requesting update');
+    //this.host.requestUpdate();
     // need to implement
   }
 

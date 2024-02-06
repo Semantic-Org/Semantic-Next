@@ -89,7 +89,9 @@ export const createComponent = ({
             class: { type: String }
           };
         }
-        return {};
+        return {
+          test: { type: String }
+        };
       }
 
       constructor() {
@@ -151,23 +153,26 @@ export const createComponent = ({
       */
       adjustSettingFromAttribute(attribute, value) {
         const spec = FAKE_SPEC; // TESTING FOR NOW
-        if(attribute == 'class') {
-          // this is syntax <ui-button class="large primary"></ui-button>
-          each(value.split(' '), className => {
-            this.adjustSettingFromAttribute(className);
-          });
-        }
-        else if(get(spec.attribute, attribute)) {
-          // we dont need to set anything here obj reflection handles this
-        }
-        else {
-          // go from large -> size, or primary -> emphasis
-          // we reverse obj key/value then check lookup
-          const setting = get(reverseKeys(spec.settings), attribute);
-          if(setting) {
-            const oldValue = this[setting];
-            this[setting] = attribute;
-            this.attributeChangedCallback(setting, oldValue, attribute);
+        if(spec) {
+          if(attribute == 'class') {
+            // this is syntax <ui-button class="large primary"></ui-button>
+            each(value.split(' '), className => {
+              this.adjustSettingFromAttribute(className);
+            });
+          }
+          else if(get(spec?.attribute, attribute)) {
+            // we dont need to set anything here obj reflection handles this
+          }
+          else {
+            // go from large -> size, or primary -> emphasis
+            // we reverse obj key/value then check lookup
+            const setting = get(reverseKeys(spec.settings), attribute);
+            if(setting) {
+              const oldValue = this[setting];
+              const newValue = attribute;
+              this[setting] = newValue;
+              this.attributeChangedCallback(setting, oldValue, newValue);
+            }
           }
         }
       }

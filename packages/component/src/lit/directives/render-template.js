@@ -30,6 +30,7 @@ class RenderTemplate extends AsyncDirective {
     };
     const attachTemplate = () => {
       const { parentNode, startNode, endNode} = this.part; // stored from update
+      //console.log('attaching template', this.part, startNode, endNode);
       const renderRoot = this.part.options.host?.renderRoot;
       this.template.attach(renderRoot, { parentNode, startNode, endNode });
       if(parentTemplate) {

@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 import { todoItem } from './todo-item.js';
 
@@ -55,6 +55,7 @@ const createInstance = (tpl, $) => ({
   },
 
   hasAnyCompleted() {
+    return true;
     return tpl.todos.value.some(todo => todo.completed);
   },
 
@@ -118,7 +119,7 @@ const events = {
     tpl.filter.set(data.filter);
   },
   'click .clear-completed'(event, tpl) {
-    tpl.clearCompleted();
+    //tpl.clearCompleted();
   }
 };
 
