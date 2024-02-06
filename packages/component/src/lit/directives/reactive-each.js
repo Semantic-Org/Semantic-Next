@@ -10,7 +10,7 @@ import {
 import { AsyncDirective } from 'lit/async-directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { hashCode, clone, isEqual, isObject, isString } from '@semantic-ui/utils';
+import { hashCode, clone, each, isObject, isString } from '@semantic-ui/utils';
 
 const generateMap = (list, start, end) => {
   const map = new Map();
@@ -46,7 +46,7 @@ class ReactiveEachDirective extends AsyncDirective {
         this.updateItems(items);
       });
     }
-    return this.getValuesAndKeys().values.map((value, index) => value(index));
+    return this.getValuesAndKeys().values.map((value, index) => value(index).content);
   }
 
   update(part, settings) {
@@ -75,14 +75,13 @@ class ReactiveEachDirective extends AsyncDirective {
   getValuesAndKeys(items = this.getItems()) {
     const keys = [];
     const values = [];
-    let index = 0;
-    for (const item of items) {
+    each(items, (item, index) => {
       keys[index] = this.getItemID(item, index);
+      // we only want to lazily get new template if the contents have changed
       values[index] = (passedIndex) => {
         return this.getTemplate(item, passedIndex);
       };
-      index++;
-    }
+    });
     return {
       values,
       keys,
@@ -114,7 +113,10 @@ class ReactiveEachDirective extends AsyncDirective {
     const sameData = JSON.stringify(this.templateCachedData.get(itemID)) == JSON.stringify(eachData);
     if(sameIndex && sameData) {
       // reuse the template nothing to rerender
-      return this.templateCache.get(itemID);
+      return {
+        cached: true,
+        content: this.templateCache.get(itemID)
+      };
     }
     else {
       // something has changed for this template
@@ -122,7 +124,10 @@ class ReactiveEachDirective extends AsyncDirective {
       this.templateCachedIndex.set(itemID, index);
       this.templateCachedData.set(itemID, clone(eachData));
       this.templateCache.set(itemID, content);
-      return content;
+      return {
+        cached: false,
+        content: content
+      };
     }
   }
 
@@ -155,24 +160,31 @@ class ReactiveEachDirective extends AsyncDirective {
       } else if (oldParts[oldTail] === null) {
         oldTail--;
       } else if (oldKeys[oldHead] === newKeys[newHead]) {
+        // MODIFIED FROM REPEAT
         // WE DONT WANT TO REPULL TEMPLATE HERE
-        newParts[newHead] = setChildPartValue(
-          oldParts[oldHead],
-          newValues[newHead](newHead)
-        );
+        const template = newValues[newHead](newHead);
+        if(template.cached) {
+          newParts[newHead] = oldParts[oldHead];
+        }
+        else {
+          newParts[newHead] = setChildPartValue(
+            oldParts[oldHead],
+            template.content
+          );
+        }
         oldHead++;
         newHead++;
       } else if (oldKeys[oldTail] === newKeys[newTail]) {
         newParts[newTail] = setChildPartValue(
           oldParts[oldTail],
-          newValues[newTail](newTail)
+          newValues[newTail](newTail).content
         );
         oldTail--;
         newTail--;
       } else if (oldKeys[oldHead] === newKeys[newTail]) {
         newParts[newTail] = setChildPartValue(
           oldParts[oldHead],
-          newValues[newTail](newTail)
+          newValues[newTail](newTail).content
         );
         insertPart(containerPart, newParts[newTail + 1], oldParts[oldHead]);
         oldHead++;
@@ -180,7 +192,7 @@ class ReactiveEachDirective extends AsyncDirective {
       } else if (oldKeys[oldTail] === newKeys[newHead]) {
         newParts[newHead] = setChildPartValue(
           oldParts[oldTail],
-          newValues[newHead](newHead)
+          newValues[newHead](newHead).content
         );
         insertPart(containerPart, oldParts[oldHead], oldParts[oldTail]);
         oldTail--;
@@ -201,10 +213,10 @@ class ReactiveEachDirective extends AsyncDirective {
           const oldPart = oldIndex !== undefined ? oldParts[oldIndex] : null;
           if (oldPart === null) {
             const newPart = insertPart(containerPart, oldParts[oldHead]);
-            setChildPartValue(newPart, newValues[newHead](newHead));
+            setChildPartValue(newPart, newValues[newHead](newHead).content);
             newParts[newHead] = newPart;
           } else {
-            newParts[newHead] = setChildPartValue(oldPart, newValues[newHead](newHead));
+            newParts[newHead] = setChildPartValue(oldPart, newValues[newHead](newHead).content);
             insertPart(containerPart, oldParts[oldHead], oldPart);
             oldParts[oldIndex] = null;
           }
@@ -214,7 +226,7 @@ class ReactiveEachDirective extends AsyncDirective {
     }
     while (newHead <= newTail) {
       const newPart = insertPart(containerPart, newParts[newTail + 1]);
-      setChildPartValue(newPart, newValues[newHead]());
+      setChildPartValue(newPart, newValues[newHead]().content);
       newParts[newHead++] = newPart;
     }
     while (oldHead <= oldTail) {
@@ -224,7 +236,6 @@ class ReactiveEachDirective extends AsyncDirective {
       }
     }
     this._itemKeys = newKeys;
-    this._itemValues = newValues;
     setCommittedValue(containerPart, newParts);
     return noChange;
   }

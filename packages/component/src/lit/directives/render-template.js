@@ -12,6 +12,7 @@ class RenderTemplate extends AsyncDirective {
     this.part = null;
   }
   render({getTemplateName, subTemplates, data, parentTemplate}) {
+    console.log('rendering template', data);
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
@@ -30,7 +31,6 @@ class RenderTemplate extends AsyncDirective {
     };
     const attachTemplate = () => {
       const { parentNode, startNode, endNode} = this.part; // stored from update
-      //console.log('attaching template', this.part, startNode, endNode);
       const renderRoot = this.part.options.host?.renderRoot;
       this.template.attach(renderRoot, { parentNode, startNode, endNode });
       if(parentTemplate) {
@@ -47,6 +47,7 @@ class RenderTemplate extends AsyncDirective {
         return;
       }
       const isCloned = cloneTemplate(); // reactive reference
+      console.log('updating template', data);
       if(!comp.firstRun) {
         attachTemplate();
         if(!isCloned) {
@@ -55,6 +56,7 @@ class RenderTemplate extends AsyncDirective {
         this.setValue(renderTemplate());
       }
     });
+    console.log('init template', data);
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));

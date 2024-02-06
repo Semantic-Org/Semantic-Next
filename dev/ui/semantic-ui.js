@@ -1990,7 +1990,7 @@ var ReactiveEachDirective = class extends f4 {
         this.updateItems(items);
       });
     }
-    return this.getValuesAndKeys().values.map((value, index) => value(index));
+    return this.getValuesAndKeys().values.map((value, index) => value(index).content);
   }
   update(part, settings) {
     this.part = part;
@@ -2015,14 +2015,12 @@ var ReactiveEachDirective = class extends f4 {
   getValuesAndKeys(items = this.getItems()) {
     const keys2 = [];
     const values = [];
-    let index = 0;
-    for (const item of items) {
+    each(items, (item, index) => {
       keys2[index] = this.getItemID(item, index);
       values[index] = (passedIndex) => {
         return this.getTemplate(item, passedIndex);
       };
-      index++;
-    }
+    });
     return {
       values,
       keys: keys2
@@ -2046,13 +2044,19 @@ var ReactiveEachDirective = class extends f4 {
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
     const sameData = JSON.stringify(this.templateCachedData.get(itemID)) == JSON.stringify(eachData);
     if (sameIndex && sameData) {
-      return this.templateCache.get(itemID);
+      return {
+        cached: true,
+        content: this.templateCache.get(itemID)
+      };
     } else {
       const content = this.eachCondition.content(eachData);
       this.templateCachedIndex.set(itemID, index);
       this.templateCachedData.set(itemID, clone(eachData));
       this.templateCache.set(itemID, content);
-      return content;
+      return {
+        cached: false,
+        content
+      };
     }
   }
   /*
@@ -2082,23 +2086,28 @@ var ReactiveEachDirective = class extends f4 {
       } else if (oldParts[oldTail] === null) {
         oldTail--;
       } else if (oldKeys[oldHead] === newKeys[newHead]) {
-        newParts[newHead] = v2(
-          oldParts[oldHead],
-          newValues[newHead](newHead)
-        );
+        const template = newValues[newHead](newHead);
+        if (template.cached) {
+          newParts[newHead] = oldParts[oldHead];
+        } else {
+          newParts[newHead] = v2(
+            oldParts[oldHead],
+            template.content
+          );
+        }
         oldHead++;
         newHead++;
       } else if (oldKeys[oldTail] === newKeys[newTail]) {
         newParts[newTail] = v2(
           oldParts[oldTail],
-          newValues[newTail](newTail)
+          newValues[newTail](newTail).content
         );
         oldTail--;
         newTail--;
       } else if (oldKeys[oldHead] === newKeys[newTail]) {
         newParts[newTail] = v2(
           oldParts[oldHead],
-          newValues[newTail](newTail)
+          newValues[newTail](newTail).content
         );
         r5(containerPart, newParts[newTail + 1], oldParts[oldHead]);
         oldHead++;
@@ -2106,7 +2115,7 @@ var ReactiveEachDirective = class extends f4 {
       } else if (oldKeys[oldTail] === newKeys[newHead]) {
         newParts[newHead] = v2(
           oldParts[oldTail],
-          newValues[newHead](newHead)
+          newValues[newHead](newHead).content
         );
         r5(containerPart, oldParts[oldHead], oldParts[oldTail]);
         oldTail--;
@@ -2127,10 +2136,10 @@ var ReactiveEachDirective = class extends f4 {
           const oldPart = oldIndex !== void 0 ? oldParts[oldIndex] : null;
           if (oldPart === null) {
             const newPart = r5(containerPart, oldParts[oldHead]);
-            v2(newPart, newValues[newHead](newHead));
+            v2(newPart, newValues[newHead](newHead).content);
             newParts[newHead] = newPart;
           } else {
-            newParts[newHead] = v2(oldPart, newValues[newHead](newHead));
+            newParts[newHead] = v2(oldPart, newValues[newHead](newHead).content);
             r5(containerPart, oldParts[oldHead], oldPart);
             oldParts[oldIndex] = null;
           }
@@ -2140,7 +2149,7 @@ var ReactiveEachDirective = class extends f4 {
     }
     while (newHead <= newTail) {
       const newPart = r5(containerPart, newParts[newTail + 1]);
-      v2(newPart, newValues[newHead]());
+      v2(newPart, newValues[newHead]().content);
       newParts[newHead++] = newPart;
     }
     while (oldHead <= oldTail) {
@@ -2150,7 +2159,6 @@ var ReactiveEachDirective = class extends f4 {
       }
     }
     this._itemKeys = newKeys;
-    this._itemValues = newValues;
     m2(containerPart, newParts);
     return w;
   }
@@ -2166,6 +2174,7 @@ var RenderTemplate = class extends f4 {
     this.part = null;
   }
   render({ getTemplateName, subTemplates, data, parentTemplate }) {
+    console.log("rendering template", data);
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
@@ -2200,6 +2209,7 @@ var RenderTemplate = class extends f4 {
         return;
       }
       const isCloned = cloneTemplate();
+      console.log("updating template", data);
       if (!comp.firstRun) {
         attachTemplate();
         if (!isCloned) {
@@ -2208,6 +2218,7 @@ var RenderTemplate = class extends f4 {
         this.setValue(renderTemplate2());
       }
     });
+    console.log("init template", data);
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
