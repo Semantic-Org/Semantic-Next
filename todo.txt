@@ -1,6 +1,8 @@
 next
-+ Make todomvc example.
++ Complete todomvc example.
+- Redo reactive each to never rerender
 - Adding ifdefined for attributes from templates
+- Determine rendered vs update loop
 - Inherit data context if none specified for subtemplates
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 

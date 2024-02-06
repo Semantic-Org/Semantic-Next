@@ -2033,7 +2033,8 @@ var ReactiveEachDirective = class extends f4 {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.useCache = false;
+    this.useCache = true;
+    this.host = partInfo.options.host;
     this.templateCache = /* @__PURE__ */ new Map();
   }
   render(eachCondition, data) {
@@ -2054,6 +2055,10 @@ var ReactiveEachDirective = class extends f4 {
     }
     return this.repeat;
   }
+  update(part, settings) {
+    this.part = part;
+    return this.render.apply(this, settings);
+  }
   getItems(eachCondition) {
     let items = eachCondition.over() || [];
     items = items.map((item) => {
@@ -2071,7 +2076,7 @@ var ReactiveEachDirective = class extends f4 {
       return T;
     }
     return c5(items, this.getItemID, (item, index) => {
-      let template;
+      let template = this;
       if (this.useCache) {
         const cachedTemplate = this.templateCache.get(this.getItemID(item));
         if (cachedTemplate) {
@@ -2156,7 +2161,6 @@ var RenderTemplate = class extends f4 {
       return html;
     };
     Reaction.create((comp) => {
-      console.log("rerun");
       if (!this.isConnected) {
         comp.stop();
         return;
@@ -2165,22 +2169,19 @@ var RenderTemplate = class extends f4 {
       if (!comp.firstRun) {
         attachTemplate();
         if (!isCloned) {
-          console.log("updating data context", unpack(data));
           this.template.setDataContext(unpackData(data));
         }
-        console.log("rerendering");
         this.setValue(renderTemplate2());
       }
     });
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
-    console.log("initial render");
     return renderTemplate2();
   }
-  update(part, renderSettings) {
+  update(part, settings) {
     this.part = part;
-    return this.render.apply(this, renderSettings);
+    return this.render.apply(this, settings);
   }
   reconnected() {
   }
@@ -2632,7 +2633,6 @@ var LitTemplate = class UITemplate {
       const bubbleMap = {
         blur: "focusout",
         focus: "focusin",
-        change: "input",
         load: "DOMContentLoaded",
         unload: "beforeunload",
         mouseenter: "mouseover",

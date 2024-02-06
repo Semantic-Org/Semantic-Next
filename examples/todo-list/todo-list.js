@@ -8,19 +8,17 @@ import css from './todo-list.css';
 
 const createInstance = (tpl, $) => ({
 
+  // reactive state
   todos: new ReactiveVar([
-    {text: 'Pickup drycleaning', completed: false},
-    {text: 'Get groceries', completed: false},
-    {text: 'Take kids to school', completed: false},
+    { text: 'Pickup drycleaning', completed: false },
+    { text: 'Get groceries', completed: false },
+    { text: 'Take kids to school', completed: false },
   ]),
   filter: new ReactiveVar('all'),
   allCompleted: new ReactiveVar(false),
 
-  filters: [
-    'all',
-    'active',
-    'complete'
-  ],
+  // static state
+  filters: [ 'all', 'active', 'complete'],
 
   getVisibleTodos() {
     const filter = tpl.filter.get();
@@ -50,7 +48,6 @@ const createInstance = (tpl, $) => ({
   },
 
   addTodo(text) {
-    console.log(text);
     tpl.todos.push({
       text: text,
       completed: false,

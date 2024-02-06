@@ -10,7 +10,8 @@ class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.useCache = false;
+    this.useCache = true;
+    this.host = partInfo.options.host;
     this.templateCache = new Map();
   }
 
@@ -28,13 +29,18 @@ class ReactiveEachDirective extends AsyncDirective {
         if(comp.firstRun) {
           return;
         }
-        // this.updateRepeat(items);
+        //this.updateRepeat(items);
         // hack for now
         const render = this.createRepeat(eachCondition, data, items);
         this.setValue(render);
       });
     }
     return this.repeat;
+  }
+
+  update(part, settings) {
+    this.part = part;
+    return this.render.apply(this, settings);
   }
 
   getItems(eachCondition) {
@@ -57,11 +63,10 @@ class ReactiveEachDirective extends AsyncDirective {
       return nothing;
     }
     return repeat(items, this.getItemID, (item, index) => {
-      let template;
+      let template = this;
       if(this.useCache) {
         const cachedTemplate = this.templateCache.get(this.getItemID(item));
         if(cachedTemplate) {
-          //console.log('reuse', this.getItemID(item));
           template = cachedTemplate;
         }
         else {

@@ -21,11 +21,13 @@ const createInstance = (tpl, $) => ({
 });
 
 const onRendered = (tpl, $) => {
-  if(tpl.data.todo.completed) {
-    $('.toggle').get(0).checked = true;
-  }
-  else {
-    $('.toggle').get(0).checked = false;
+  if($('.toggle').length) {
+    if(tpl.data.todo.completed) {
+      $('.toggle').get(0).checked = true;
+    }
+    else {
+      $('.toggle').get(0).checked = false;
+    }
   }
 };
 

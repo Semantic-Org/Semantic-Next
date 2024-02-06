@@ -2138,7 +2138,8 @@ var ReactiveEachDirective = class extends f4 {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.useCache = false;
+    this.useCache = true;
+    this.host = partInfo.options.host;
     this.templateCache = /* @__PURE__ */ new Map();
   }
   render(eachCondition, data) {
@@ -2159,6 +2160,10 @@ var ReactiveEachDirective = class extends f4 {
     }
     return this.repeat;
   }
+  update(part, settings) {
+    this.part = part;
+    return this.render.apply(this, settings);
+  }
   getItems(eachCondition) {
     let items = eachCondition.over() || [];
     items = items.map((item) => {
@@ -2176,7 +2181,7 @@ var ReactiveEachDirective = class extends f4 {
       return T;
     }
     return c5(items, this.getItemID, (item, index) => {
-      let template;
+      let template = this;
       if (this.useCache) {
         const cachedTemplate = this.templateCache.get(this.getItemID(item));
         if (cachedTemplate) {
@@ -2261,7 +2266,6 @@ var RenderTemplate = class extends f4 {
       return html;
     };
     Reaction.create((comp) => {
-      console.log("rerun");
       if (!this.isConnected) {
         comp.stop();
         return;
@@ -2270,22 +2274,19 @@ var RenderTemplate = class extends f4 {
       if (!comp.firstRun) {
         attachTemplate();
         if (!isCloned) {
-          console.log("updating data context", unpack(data));
           this.template.setDataContext(unpackData(data));
         }
-        console.log("rerendering");
         this.setValue(renderTemplate2());
       }
     });
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
-    console.log("initial render");
     return renderTemplate2();
   }
-  update(part, renderSettings) {
+  update(part, settings) {
     this.part = part;
-    return this.render.apply(this, renderSettings);
+    return this.render.apply(this, settings);
   }
   reconnected() {
   }
@@ -2737,7 +2738,6 @@ var LitTemplate = class UITemplate {
       const bubbleMap = {
         blur: "focusout",
         focus: "focusin",
-        change: "input",
         load: "DOMContentLoaded",
         unload: "beforeunload",
         mouseenter: "mouseover",
@@ -3146,10 +3146,12 @@ var createInstance = (tpl, $3) => ({
   }
 });
 var onRendered = (tpl, $3) => {
-  if (tpl.data.todo.completed) {
-    $3(".toggle").get(0).checked = true;
-  } else {
-    $3(".toggle").get(0).checked = false;
+  if ($3(".toggle").length) {
+    if (tpl.data.todo.completed) {
+      $3(".toggle").get(0).checked = true;
+    } else {
+      $3(".toggle").get(0).checked = false;
+    }
   }
 };
 var events = {
@@ -3237,6 +3239,7 @@ var todo_list_default2 = 'h1 {\n  position: absolute;\n  top: -140px;\n  width: 
 
 // examples/todo-list/todo-list.js
 var createInstance2 = (tpl, $3) => ({
+  // reactive state
   todos: new ReactiveVar([
     { text: "Pickup drycleaning", completed: false },
     { text: "Get groceries", completed: false },
@@ -3244,11 +3247,8 @@ var createInstance2 = (tpl, $3) => ({
   ]),
   filter: new ReactiveVar("all"),
   allCompleted: new ReactiveVar(false),
-  filters: [
-    "all",
-    "active",
-    "complete"
-  ],
+  // static state
+  filters: ["all", "active", "complete"],
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
@@ -3272,7 +3272,6 @@ var createInstance2 = (tpl, $3) => ({
     return todos.filter((todo) => !todo.completed);
   },
   addTodo(text) {
-    console.log(text);
     tpl.todos.push({
       text,
       completed: false

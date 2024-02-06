@@ -180,7 +180,6 @@ export const LitTemplate = class UITemplate {
       const bubbleMap = {
         blur: 'focusout',
         focus: 'focusin',
-        change: 'input',
         load: 'DOMContentLoaded',
         unload: 'beforeunload',
         mouseenter: 'mouseover',
