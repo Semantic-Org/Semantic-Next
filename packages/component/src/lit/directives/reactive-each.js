@@ -88,9 +88,7 @@ class ReactiveEachDirective extends AsyncDirective {
     items.forEach((item, index) => {
       childParts.push({
         id: this.getItemID(item),
-        content: (parseTemplate)
-          ? this.getTemplateContent(item, index, data, eachCondition)
-          : () => this.getTemplateContent(item, index, data, eachCondition)
+        content: this.getTemplateContent(item, index, data, eachCondition)
       });
     });
     return childParts;
@@ -104,17 +102,17 @@ class ReactiveEachDirective extends AsyncDirective {
     });
     // we dont want to create new templates unless we are inserting a new part
     const newParts = this.getChildParts(items, data, eachCondition, {
-      parseTemplate: false
+      parseTemplate: true
     });
     this.changeParts(oldParts, newParts);
   }
   changeParts(oldParts, newParts) {
     const containerPart = this.part;
     const oldIndexMap = new Map(oldParts.map((item, index) => [item.id, index]));
-    const newIndexMap = new Map(newParts.map((item, index) => [item.id, index]));
 
     let committedParts = [];
     let childParts = [];
+    let removedParts = {};
 
     newParts.forEach((newPart, newIndex) => {
       const previousIndex = oldIndexMap.get(newPart.id);
@@ -129,20 +127,23 @@ class ReactiveEachDirective extends AsyncDirective {
         // content moved position
         const oldPart = oldParts[newIndex];
         const movedPart = oldParts[previousIndex];
-        const newChildPart = setChildPartValue(oldPart.part, movedPart.content);
-        console.log('moved', movedPart.id, movedPart.part, newIndex);
-        committedParts.push(newChildPart);
+        setChildPartValue(oldPart.part, movedPart.content);
+        delete removedParts[oldPart.id];
+        removedParts[movedPart.id] = movedPart.part;
+        committedParts.push(oldPart.part);
+        console.log('moved', movedPart.id, newIndex);
         childParts.push({
           ...movedPart,
-          part: newChildPart
+          part: oldPart.part
         });
       }
       else {
         // new content
         const newChildPart = insertPart(containerPart);
-        const partContent = newPart.content();
+        const partContent = newPart.content;
         setChildPartValue(newChildPart, partContent);
         committedParts.push(newChildPart);
+        console.log('added', newPart.id, newIndex);
         childParts.push({
           id: newPart.id,
           part: newChildPart,
@@ -152,24 +153,11 @@ class ReactiveEachDirective extends AsyncDirective {
     });
 
     // remove items
-    oldParts.forEach(oldValue => {
-      if (!newIndexMap.has(oldValue.id)) {
-        console.log('removed', oldValue.id);
-        //removePart(oldValue.part);
-      }
+    each(removedParts, (part) => {
+      removePart(part);
     });
     this.childParts = childParts;
-    console.log('setting comitted values', committedParts);
     setCommittedValue(containerPart, committedParts);
-  }
-
-  createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
-    if (!items?.length) {
-      return nothing;
-    }
-    return repeat(items, this.getItemID, (item, index) => {
-      return this.getTemplateContent(item, index, data, eachCondition);
-    });
   }
 
   getTemplateContent(item, index, data, eachCondition) {

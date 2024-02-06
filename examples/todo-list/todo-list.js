@@ -11,14 +11,16 @@ const createInstance = (tpl, $) => ({
 
   // reactive state
   todos: new ReactiveVar([
-    { text: 'Another one', completed: false },
-    { text: 'Another one 2', completed: false },
-    { text: 'Another one 3', completed: false },
-    { text: 'Another one 4', completed: false },
-    { text: 'Another one 5', completed: false },
-    { text: 'Pickup dry cleaning', completed: false },
-    { text: 'Get groceries', completed: false },
-    { text: 'Take kids to school', completed: false },
+    { _id: '0', text: 'Another one 1', completed: false },
+    { _id: '1', text: 'Another one 2', completed: false },
+    { _id: '2', text: 'Another one 3', completed: false },
+    { _id: '3', text: 'Another one 4', completed: false },
+    { _id: '4', text: 'Another one 5', completed: false },
+    { _id: '5', text: 'Another one 6', completed: false },
+    { _id: '6', text: 'Another one 7', completed: false },
+    { _id: '7', text: 'Another one 8', completed: false },
+    { _id: '8', text: 'Another one 9', completed: false },
+    { _id: '9', text: 'Another one 10', completed: false },
   ]),
   filter: new ReactiveVar('all'),
   allCompleted: new ReactiveVar(false),
@@ -30,7 +32,9 @@ const createInstance = (tpl, $) => ({
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
     each(todos, (todo) => {
-      todo._id = todo.text;
+      if(!todo._id) {
+        todo._id = todo.text;
+      }
     });
     return todos.filter(todo => {
       if(filter == 'active') {
@@ -58,6 +62,7 @@ const createInstance = (tpl, $) => ({
 
   addTodo(text) {
     tpl.todos.push({
+      _id: text,
       text: text,
       completed: false,
     });
@@ -130,8 +135,8 @@ const events = {
     tpl.clearCompleted();
   },
   'click .todo'(event, tpl, $, data) {
-    console.log(data.index);
-    tpl.todos.removeItem(data.index);
+    console.log(data.id);
+    tpl.todos.removeItem(data.id);
   }
 };
 

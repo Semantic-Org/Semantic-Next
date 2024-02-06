@@ -2094,7 +2094,7 @@ var ReactiveEachDirective = class extends f4 {
     items.forEach((item, index) => {
       childParts.push({
         id: this.getItemID(item),
-        content: parseTemplate ? this.getTemplateContent(item, index, data, eachCondition) : () => this.getTemplateContent(item, index, data, eachCondition)
+        content: this.getTemplateContent(item, index, data, eachCondition)
       });
     });
     return childParts;
@@ -2106,16 +2106,16 @@ var ReactiveEachDirective = class extends f4 {
       oldPart.part = previousParts[index];
     });
     const newParts = this.getChildParts(items, data, eachCondition, {
-      parseTemplate: false
+      parseTemplate: true
     });
     this.changeParts(oldParts, newParts);
   }
   changeParts(oldParts, newParts) {
     const containerPart = this.part;
     const oldIndexMap = new Map(oldParts.map((item, index) => [item.id, index]));
-    const newIndexMap = new Map(newParts.map((item, index) => [item.id, index]));
     let committedParts = [];
     let childParts = [];
+    let removedParts = {};
     newParts.forEach((newPart, newIndex) => {
       const previousIndex = oldIndexMap.get(newPart.id);
       if (newIndex == previousIndex) {
@@ -2126,18 +2126,21 @@ var ReactiveEachDirective = class extends f4 {
       } else if (previousIndex !== void 0) {
         const oldPart = oldParts[newIndex];
         const movedPart = oldParts[previousIndex];
-        const newChildPart = v2(oldPart.part, movedPart.content);
-        console.log("moved", movedPart.id, movedPart.part, newIndex);
-        committedParts.push(newChildPart);
+        v2(oldPart.part, movedPart.content);
+        delete removedParts[oldPart.id];
+        removedParts[movedPart.id] = movedPart.part;
+        committedParts.push(oldPart.part);
+        console.log("moved", movedPart.id, newIndex);
         childParts.push({
           ...movedPart,
-          part: newChildPart
+          part: oldPart.part
         });
       } else {
         const newChildPart = r5(containerPart);
-        const partContent = newPart.content();
+        const partContent = newPart.content;
         v2(newChildPart, partContent);
         committedParts.push(newChildPart);
+        console.log("added", newPart.id, newIndex);
         childParts.push({
           id: newPart.id,
           part: newChildPart,
@@ -2145,22 +2148,11 @@ var ReactiveEachDirective = class extends f4 {
         });
       }
     });
-    oldParts.forEach((oldValue) => {
-      if (!newIndexMap.has(oldValue.id)) {
-        console.log("removed", oldValue.id);
-      }
+    each(removedParts, (part) => {
+      h3(part);
     });
     this.childParts = childParts;
-    console.log("setting comitted values", committedParts);
     m2(containerPart, committedParts);
-  }
-  createRepeat(eachCondition, data, items = this.getItems(eachCondition)) {
-    if (!items?.length) {
-      return T;
-    }
-    return c5(items, this.getItemID, (item, index) => {
-      return this.getTemplateContent(item, index, data, eachCondition);
-    });
   }
   getTemplateContent(item, index, data, eachCondition) {
     let eachData = this.prepareEachData(item, index, data, eachCondition.as);

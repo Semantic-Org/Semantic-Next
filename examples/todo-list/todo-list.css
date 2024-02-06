@@ -1,3 +1,13 @@
+.todo {
+
+    padding: 15px 10px;
+    font-size: 17px;
+    font-weight: bold;
+}
+.todo:hover {
+    background-color: #FAFAFA;
+    cursor: pointer;
+}
 h1 {
   position: absolute;
   top: -140px;

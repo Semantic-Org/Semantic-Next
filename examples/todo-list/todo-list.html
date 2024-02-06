@@ -10,7 +10,10 @@
   </div>
   <ul class="todo-list">
     {{#each todo in getVisibleTodos}}
-      <div class="todo" data-index={{@index}}>{{todo.text}}</div>
+      <div class="todo" data-id={{todo._id}}>
+        Index is "{{@index}}" -
+        {{todo.text}}
+      </div>
     {{/each}}
   </ul>
 </main>
