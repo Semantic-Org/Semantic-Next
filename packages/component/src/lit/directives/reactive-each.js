@@ -86,9 +86,14 @@ class ReactiveEachDirective extends AsyncDirective {
     const childParts = [];
     // get html and id for each item
     items.forEach((item, index) => {
+      let getContent = () => {
+        return this.getTemplateContent(item, index, data, eachCondition);
+      };
       childParts.push({
         id: this.getItemID(item),
-        content: this.getTemplateContent(item, index, data, eachCondition)
+        content: (parseTemplate)
+          ? getContent()
+          : getContent
       });
     });
     return childParts;
@@ -102,7 +107,7 @@ class ReactiveEachDirective extends AsyncDirective {
     });
     // we dont want to create new templates unless we are inserting a new part
     const newParts = this.getChildParts(items, data, eachCondition, {
-      parseTemplate: true
+      parseTemplate: false
     });
     this.changeParts(oldParts, newParts);
   }
@@ -120,16 +125,18 @@ class ReactiveEachDirective extends AsyncDirective {
         // no change
         const existingPart = oldParts[newIndex];
         childParts.push(existingPart);
-        console.log('kept', existingPart.id, newIndex);
         committedParts.push(existingPart.part);
       }
       else if(previousIndex !== undefined) {
         // content moved position
         const oldPart = oldParts[newIndex];
         const movedPart = oldParts[previousIndex];
-        setChildPartValue(oldPart.part, movedPart.content);
+        setChildPartValue(oldPart.part, newPart.content());
+
+        // when we move parts we need to track which old parts to remove
         delete removedParts[oldPart.id];
         removedParts[movedPart.id] = movedPart.part;
+
         committedParts.push(oldPart.part);
         console.log('moved', movedPart.id, newIndex);
         childParts.push({
@@ -140,7 +147,7 @@ class ReactiveEachDirective extends AsyncDirective {
       else {
         // new content
         const newChildPart = insertPart(containerPart);
-        const partContent = newPart.content;
+        const partContent = newPart.content();
         setChildPartValue(newChildPart, partContent);
         committedParts.push(newChildPart);
         console.log('added', newPart.id, newIndex);
@@ -153,11 +160,19 @@ class ReactiveEachDirective extends AsyncDirective {
     });
 
     // remove items
-    each(removedParts, (part) => {
+    each(removedParts, (part, id) => {
+      console.log('removing displaced part', id);
       removePart(part);
     });
+    const newIDs = childParts.map(part => part.id);
+    each(oldParts, (oldPart) => {
+      if(newIDs.indexOf(oldPart.id) == -1) {
+        console.log('removing old part', oldPart.id);
+        removePart(oldPart.part);
+      }
+    });
     this.childParts = childParts;
-    setCommittedValue(containerPart, committedParts);
+    //setCommittedValue(containerPart, committedParts);
   }
 
   getTemplateContent(item, index, data, eachCondition) {

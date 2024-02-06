@@ -2092,9 +2092,12 @@ var ReactiveEachDirective = class extends f4 {
   getChildParts(items, data, eachCondition, { parseTemplate = true } = {}) {
     const childParts = [];
     items.forEach((item, index) => {
+      let getContent = () => {
+        return this.getTemplateContent(item, index, data, eachCondition);
+      };
       childParts.push({
         id: this.getItemID(item),
-        content: this.getTemplateContent(item, index, data, eachCondition)
+        content: parseTemplate ? getContent() : getContent
       });
     });
     return childParts;
@@ -2106,7 +2109,7 @@ var ReactiveEachDirective = class extends f4 {
       oldPart.part = previousParts[index];
     });
     const newParts = this.getChildParts(items, data, eachCondition, {
-      parseTemplate: true
+      parseTemplate: false
     });
     this.changeParts(oldParts, newParts);
   }
@@ -2121,12 +2124,11 @@ var ReactiveEachDirective = class extends f4 {
       if (newIndex == previousIndex) {
         const existingPart = oldParts[newIndex];
         childParts.push(existingPart);
-        console.log("kept", existingPart.id, newIndex);
         committedParts.push(existingPart.part);
       } else if (previousIndex !== void 0) {
         const oldPart = oldParts[newIndex];
         const movedPart = oldParts[previousIndex];
-        v2(oldPart.part, movedPart.content);
+        v2(oldPart.part, newPart.content());
         delete removedParts[oldPart.id];
         removedParts[movedPart.id] = movedPart.part;
         committedParts.push(oldPart.part);
@@ -2137,7 +2139,7 @@ var ReactiveEachDirective = class extends f4 {
         });
       } else {
         const newChildPart = r5(containerPart);
-        const partContent = newPart.content;
+        const partContent = newPart.content();
         v2(newChildPart, partContent);
         committedParts.push(newChildPart);
         console.log("added", newPart.id, newIndex);
@@ -2148,11 +2150,18 @@ var ReactiveEachDirective = class extends f4 {
         });
       }
     });
-    each(removedParts, (part) => {
+    each(removedParts, (part, id) => {
+      console.log("removing displaced part", id);
       h3(part);
     });
+    const newIDs = childParts.map((part) => part.id);
+    each(oldParts, (oldPart) => {
+      if (newIDs.indexOf(oldPart.id) == -1) {
+        console.log("removing old part", oldPart.id);
+        h3(oldPart.part);
+      }
+    });
     this.childParts = childParts;
-    m2(containerPart, committedParts);
   }
   getTemplateContent(item, index, data, eachCondition) {
     let eachData = this.prepareEachData(item, index, data, eachCondition.as);
