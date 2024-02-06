@@ -24,7 +24,6 @@ const createInstance = (tpl, $) => ({
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
-    console.log('todos are really', todos);
     each(todos, (todo) => {
       if(!todo._id) {
         todo._id = todo.text;

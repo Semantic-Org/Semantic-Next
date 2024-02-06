@@ -2300,6 +2300,7 @@ var RenderTemplate = class extends f4 {
     const cloneTemplate = () => {
       const templateName = getTemplateName();
       if (this.template && this.templateName == templateName) {
+        console.log("use cached");
         return false;
       }
       this.templateName = templateName;
@@ -2337,7 +2338,6 @@ var RenderTemplate = class extends f4 {
         this.setValue(renderTemplate2());
       }
     });
-    console.log("init template", data);
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
@@ -3319,7 +3319,6 @@ var createInstance2 = (tpl, $3) => ({
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
-    console.log("todos are really", todos);
     each(todos, (todo) => {
       if (!todo._id) {
         todo._id = todo.text;

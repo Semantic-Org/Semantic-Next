@@ -19,6 +19,7 @@ class RenderTemplate extends AsyncDirective {
     const cloneTemplate = () => {
       const templateName = getTemplateName();
       if(this.template && this.templateName == templateName) {
+        console.log('use cached');
         return false;
       }
       this.templateName = templateName;
@@ -56,7 +57,6 @@ class RenderTemplate extends AsyncDirective {
         this.setValue(renderTemplate());
       }
     });
-    console.log('init template', data);
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));

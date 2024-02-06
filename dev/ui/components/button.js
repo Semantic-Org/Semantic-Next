@@ -2181,6 +2181,7 @@ var RenderTemplate = class extends f4 {
     const cloneTemplate = () => {
       const templateName = getTemplateName();
       if (this.template && this.templateName == templateName) {
+        console.log("use cached");
         return false;
       }
       this.templateName = templateName;
@@ -2218,7 +2219,6 @@ var RenderTemplate = class extends f4 {
         this.setValue(renderTemplate2());
       }
     });
-    console.log("init template", data);
     cloneTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
