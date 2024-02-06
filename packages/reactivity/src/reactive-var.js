@@ -67,7 +67,6 @@ export class ReactiveVar {
   push(value) {
     let arr = this.value;
     arr.push(value);
-    console.log('new arr', arr);
     this.set(arr);
   }
   unshift(value) {
@@ -93,16 +92,13 @@ export class ReactiveVar {
   removeItem(id) {
     let matchIndex;
     let arr = this.value;
-    console.log(arr);
     arr.forEach((item, index) => {
       const ids = [item, item?._id, item?.id, item?.hash].filter(Boolean);
-      console.log(ids, id);
       if(ids.indexOf(id) > -1) {
         matchIndex = index;
       }
     });
     if(matchIndex >= 0) {
-      console.log('match index', matchIndex);
       arr.splice(matchIndex, 1);
       this.set(arr);
     }

@@ -16,7 +16,7 @@ const createInstance = (tpl, $) => ({
     todos.setArrayProperty(tpl.data.index, 'text', text);
   },
   removeTodo() {
-    tpl.parent().todos.removeItem(tpl.data.index);
+    tpl.parent().todos.removeIndex(tpl.data.index);
   }
 });
 

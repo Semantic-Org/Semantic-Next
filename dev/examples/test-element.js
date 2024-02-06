@@ -342,14 +342,14 @@ function C(t5, i5) {
 }
 var P = (t5, i5) => {
   const s6 = t5.length - 1, o6 = [];
-  let r7, l3 = 2 === i5 ? "<svg>" : "", c6 = f2;
+  let r7, l3 = 2 === i5 ? "<svg>" : "", c5 = f2;
   for (let i6 = 0; i6 < s6; i6++) {
     const s7 = t5[i6];
-    let a3, u5, d3 = -1, y3 = 0;
-    for (; y3 < s7.length && (c6.lastIndex = y3, u5 = c6.exec(s7), null !== u5); )
-      y3 = c6.lastIndex, c6 === f2 ? "!--" === u5[1] ? c6 = v : void 0 !== u5[1] ? c6 = _ : void 0 !== u5[2] ? ($.test(u5[2]) && (r7 = RegExp("</" + u5[2], "g")), c6 = m) : void 0 !== u5[3] && (c6 = m) : c6 === m ? ">" === u5[0] ? (c6 = r7 ?? f2, d3 = -1) : void 0 === u5[1] ? d3 = -2 : (d3 = c6.lastIndex - u5[2].length, a3 = u5[1], c6 = void 0 === u5[3] ? m : '"' === u5[3] ? g : p2) : c6 === g || c6 === p2 ? c6 = m : c6 === v || c6 === _ ? c6 = f2 : (c6 = m, r7 = void 0);
-    const x2 = c6 === m && t5[i6 + 1].startsWith("/>") ? " " : "";
-    l3 += c6 === f2 ? s7 + n3 : d3 >= 0 ? (o6.push(a3), s7.slice(0, d3) + e3 + s7.slice(d3) + h2 + x2) : s7 + h2 + (-2 === d3 ? i6 : x2);
+    let a3, u4, d3 = -1, y3 = 0;
+    for (; y3 < s7.length && (c5.lastIndex = y3, u4 = c5.exec(s7), null !== u4); )
+      y3 = c5.lastIndex, c5 === f2 ? "!--" === u4[1] ? c5 = v : void 0 !== u4[1] ? c5 = _ : void 0 !== u4[2] ? ($.test(u4[2]) && (r7 = RegExp("</" + u4[2], "g")), c5 = m) : void 0 !== u4[3] && (c5 = m) : c5 === m ? ">" === u4[0] ? (c5 = r7 ?? f2, d3 = -1) : void 0 === u4[1] ? d3 = -2 : (d3 = c5.lastIndex - u4[2].length, a3 = u4[1], c5 = void 0 === u4[3] ? m : '"' === u4[3] ? g : p2) : c5 === g || c5 === p2 ? c5 = m : c5 === v || c5 === _ ? c5 = f2 : (c5 = m, r7 = void 0);
+    const x2 = c5 === m && t5[i6 + 1].startsWith("/>") ? " " : "";
+    l3 += c5 === f2 ? s7 + n3 : d3 >= 0 ? (o6.push(a3), s7.slice(0, d3) + e3 + s7.slice(d3) + h2 + x2) : s7 + h2 + (-2 === d3 ? i6 : x2);
   }
   return [C(t5, l3 + (t5[s6] || "<?>") + (2 === i5 ? "</svg>" : "")), o6];
 };
@@ -357,39 +357,39 @@ var V = class _V {
   constructor({ strings: t5, _$litType$: s6 }, n5) {
     let r7;
     this.parts = [];
-    let c6 = 0, a3 = 0;
-    const u5 = t5.length - 1, d3 = this.parts, [f5, v3] = P(t5, s6);
+    let c5 = 0, a3 = 0;
+    const u4 = t5.length - 1, d3 = this.parts, [f5, v3] = P(t5, s6);
     if (this.el = _V.createElement(f5, n5), E.currentNode = this.el.content, 2 === s6) {
       const t6 = this.el.content.firstChild;
       t6.replaceWith(...t6.childNodes);
     }
-    for (; null !== (r7 = E.nextNode()) && d3.length < u5; ) {
+    for (; null !== (r7 = E.nextNode()) && d3.length < u4; ) {
       if (1 === r7.nodeType) {
         if (r7.hasAttributes())
           for (const t6 of r7.getAttributeNames())
             if (t6.endsWith(e3)) {
               const i5 = v3[a3++], s7 = r7.getAttribute(t6).split(h2), e6 = /([.?@])?(.*)/.exec(i5);
-              d3.push({ type: 1, index: c6, name: e6[2], strings: s7, ctor: "." === e6[1] ? k : "?" === e6[1] ? H : "@" === e6[1] ? I : R }), r7.removeAttribute(t6);
+              d3.push({ type: 1, index: c5, name: e6[2], strings: s7, ctor: "." === e6[1] ? k : "?" === e6[1] ? H : "@" === e6[1] ? I : R }), r7.removeAttribute(t6);
             } else
-              t6.startsWith(h2) && (d3.push({ type: 6, index: c6 }), r7.removeAttribute(t6));
+              t6.startsWith(h2) && (d3.push({ type: 6, index: c5 }), r7.removeAttribute(t6));
         if ($.test(r7.tagName)) {
           const t6 = r7.textContent.split(h2), s7 = t6.length - 1;
           if (s7 > 0) {
             r7.textContent = i3 ? i3.emptyScript : "";
             for (let i5 = 0; i5 < s7; i5++)
-              r7.append(t6[i5], l2()), E.nextNode(), d3.push({ type: 2, index: ++c6 });
+              r7.append(t6[i5], l2()), E.nextNode(), d3.push({ type: 2, index: ++c5 });
             r7.append(t6[s7], l2());
           }
         }
       } else if (8 === r7.nodeType)
         if (r7.data === o3)
-          d3.push({ type: 2, index: c6 });
+          d3.push({ type: 2, index: c5 });
         else {
           let t6 = -1;
           for (; -1 !== (t6 = r7.data.indexOf(h2, t6 + 1)); )
-            d3.push({ type: 7, index: c6 }), t6 += h2.length - 1;
+            d3.push({ type: 7, index: c5 }), t6 += h2.length - 1;
         }
-      c6++;
+      c5++;
     }
   }
   static createElement(t5, i5) {
@@ -764,9 +764,6 @@ var get = function(obj, string = "") {
   }
   return obj;
 };
-var hasProperty = (obj, prop) => {
-  return Object.hasOwn.call(obj, prop);
-};
 var reverseKeys = (obj) => {
   const newObj = {};
   const pushValue = (key, value) => {
@@ -987,7 +984,7 @@ var isEqual = (a3, b3, options) => {
   } else {
     i5 = 0;
     ret = aKeys.every((key) => {
-      if (!hasProperty(b3, key)) {
+      if (!b3[key]) {
         return false;
       }
       if (!isEqual(a3[key], b3[key], options)) {
@@ -1367,15 +1364,15 @@ var s4 = () => document.createComment("");
 var r5 = (o6, i5, n5) => {
   const e6 = o6._$AA.parentNode, l3 = void 0 === i5 ? o6._$AB : i5._$AA;
   if (void 0 === n5) {
-    const i6 = e6.insertBefore(s4(), l3), c6 = e6.insertBefore(s4(), l3);
-    n5 = new t4(i6, c6, o6, o6.options);
+    const i6 = e6.insertBefore(s4(), l3), c5 = e6.insertBefore(s4(), l3);
+    n5 = new t4(i6, c5, o6, o6.options);
   } else {
-    const t5 = n5._$AB.nextSibling, i6 = n5._$AM, c6 = i6 !== o6;
-    if (c6) {
+    const t5 = n5._$AB.nextSibling, i6 = n5._$AM, c5 = i6 !== o6;
+    if (c5) {
       let t6;
       n5._$AQ?.(o6), n5._$AM = o6, void 0 !== n5._$AP && (t6 = o6._$AU) !== i6._$AU && n5._$AP(t6);
     }
-    if (t5 !== l3 || c6) {
+    if (t5 !== l3 || c5) {
       let o7 = n5._$AA;
       for (; o7 !== t5; ) {
         const t6 = o7.nextSibling;
@@ -1649,7 +1646,6 @@ var ReactiveVar = class _ReactiveVar {
   push(value) {
     let arr = this.value;
     arr.push(value);
-    console.log("new arr", arr);
     this.set(arr);
   }
   unshift(value) {
@@ -1675,16 +1671,13 @@ var ReactiveVar = class _ReactiveVar {
   removeItem(id) {
     let matchIndex;
     let arr = this.value;
-    console.log(arr);
     arr.forEach((item, index) => {
       const ids = [item, item?._id, item?.id, item?.hash].filter(Boolean);
-      console.log(ids, id);
       if (ids.indexOf(id) > -1) {
         matchIndex = index;
       }
     });
     if (matchIndex >= 0) {
-      console.log("match index", matchIndex);
       arr.splice(matchIndex, 1);
       this.set(arr);
     }
@@ -2073,7 +2066,7 @@ var ReactiveConditionalDirective = class extends f4 {
           }
         });
       } else {
-        html = w;
+        html = T;
       }
       if (!comp.firstRun) {
         this.setValue(html);
@@ -2093,88 +2086,29 @@ var ReactiveConditionalDirective = class extends f4 {
 };
 var reactiveConditional = e4(ReactiveConditionalDirective);
 
-// node_modules/lit-html/directives/repeat.js
-var u4 = (e6, s6, t5) => {
-  const r7 = /* @__PURE__ */ new Map();
-  for (let l3 = s6; l3 <= t5; l3++)
-    r7.set(e6[l3], l3);
-  return r7;
-};
-var c5 = e4(class extends i4 {
-  constructor(e6) {
-    if (super(e6), e6.type !== t3.CHILD)
-      throw Error("repeat() can only be used in text expressions");
-  }
-  dt(e6, s6, t5) {
-    let r7;
-    void 0 === t5 ? t5 = s6 : void 0 !== s6 && (r7 = s6);
-    const l3 = [], o6 = [];
-    let i5 = 0;
-    for (const s7 of e6)
-      l3[i5] = r7 ? r7(s7, i5) : i5, o6[i5] = t5(s7, i5), i5++;
-    return { values: o6, keys: l3 };
-  }
-  render(e6, s6, t5) {
-    return this.dt(e6, s6, t5).values;
-  }
-  update(s6, [t5, r7, c6]) {
-    const d3 = p3(s6), { values: p4, keys: a3 } = this.dt(t5, r7, c6);
-    if (!Array.isArray(d3))
-      return this.ut = a3, p4;
-    const h5 = this.ut ??= [], v3 = [];
-    let m3, y3, x2 = 0, j2 = d3.length - 1, k2 = 0, w2 = p4.length - 1;
-    for (; x2 <= j2 && k2 <= w2; )
-      if (null === d3[x2])
-        x2++;
-      else if (null === d3[j2])
-        j2--;
-      else if (h5[x2] === a3[k2])
-        v3[k2] = v2(d3[x2], p4[k2]), x2++, k2++;
-      else if (h5[j2] === a3[w2])
-        v3[w2] = v2(d3[j2], p4[w2]), j2--, w2--;
-      else if (h5[x2] === a3[w2])
-        v3[w2] = v2(d3[x2], p4[w2]), r5(s6, v3[w2 + 1], d3[x2]), x2++, w2--;
-      else if (h5[j2] === a3[k2])
-        v3[k2] = v2(d3[j2], p4[k2]), r5(s6, d3[x2], d3[j2]), j2--, k2++;
-      else if (void 0 === m3 && (m3 = u4(a3, k2, w2), y3 = u4(h5, x2, j2)), m3.has(h5[x2]))
-        if (m3.has(h5[j2])) {
-          const e6 = y3.get(a3[k2]), t6 = void 0 !== e6 ? d3[e6] : null;
-          if (null === t6) {
-            const e7 = r5(s6, d3[x2]);
-            v2(e7, p4[k2]), v3[k2] = e7;
-          } else
-            v3[k2] = v2(t6, p4[k2]), r5(s6, d3[x2], t6), d3[e6] = null;
-          k2++;
-        } else
-          h3(d3[j2]), j2--;
-      else
-        h3(d3[x2]), x2++;
-    for (; k2 <= w2; ) {
-      const e6 = r5(s6, v3[w2 + 1]);
-      v2(e6, p4[k2]), v3[k2++] = e6;
-    }
-    for (; x2 <= j2; ) {
-      const e6 = d3[x2++];
-      null !== e6 && h3(e6);
-    }
-    return this.ut = a3, m2(s6, v3), w;
-  }
-});
-
 // packages/component/src/lit/directives/reactive-each.js
+var generateMap = (list, start, end) => {
+  const map = /* @__PURE__ */ new Map();
+  for (let i5 = start; i5 <= end; i5++) {
+    map.set(list[i5], i5);
+  }
+  return map;
+};
 var ReactiveEachDirective = class extends f4 {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
     this.part = null;
+    this.eachCondition = null;
     this.host = partInfo.options.host;
     this.initialized = false;
     this.childParts = [];
+    this.templateCachedIndex = /* @__PURE__ */ new Map();
+    this.templateCachedData = /* @__PURE__ */ new Map();
+    this.templateCache = /* @__PURE__ */ new Map();
   }
   render(eachCondition, data) {
-    if (!this.initialized) {
-      this.initialRender(eachCondition, data);
-    }
+    this.eachCondition = eachCondition;
     if (!this.reaction) {
       this.reaction = Reaction.create((comp) => {
         if (!this.isConnected) {
@@ -2182,14 +2116,10 @@ var ReactiveEachDirective = class extends f4 {
           return T;
         }
         const items = this.getItems(eachCondition);
-        if (comp.firstRun) {
-          return;
-        }
-        this.updateItems(items, data, eachCondition);
+        this.updateItems(items);
       });
     }
-    const content = this.childParts.map((part) => part.content);
-    return content;
+    return this.getValuesAndKeys().values.map((value, index) => value(index));
   }
   update(part, settings) {
     this.part = part;
@@ -2201,8 +2131,8 @@ var ReactiveEachDirective = class extends f4 {
       this.reaction = null;
     }
   }
-  getItems(eachCondition) {
-    let items = eachCondition.over() || [];
+  getItems() {
+    let items = this.eachCondition.over() || [];
     items = items.map((item) => {
       if (isObject(item)) {
         item._id = item._id || hashCode(item);
@@ -2211,105 +2141,147 @@ var ReactiveEachDirective = class extends f4 {
     });
     return items;
   }
-  initialRender(eachCondition, data, items = this.getItems(eachCondition)) {
-    const childParts = this.getChildParts(items, data, eachCondition);
-    childParts.forEach((childPart, index) => {
-      const newPart = r5(this.part);
-      v2(newPart, childPart.content);
-      r5(this.part, newPart);
-    });
-    this.childParts = childParts;
-    console.log("setting", childParts);
-    this.initialized = true;
-  }
-  getChildParts(items, data, eachCondition, { parseTemplate = true } = {}) {
-    const childParts = [];
-    items.forEach((item, index) => {
-      let getContent = () => {
-        return this.getTemplateContent(item, index, data, eachCondition);
+  getValuesAndKeys(items = this.getItems()) {
+    const keys2 = [];
+    const values = [];
+    let index = 0;
+    for (const item of items) {
+      keys2[index] = this.getItemID(item, index);
+      values[index] = (passedIndex) => {
+        return this.getTemplate(item, passedIndex);
       };
-      childParts.push({
-        id: this.getItemID(item),
-        content: parseTemplate ? getContent() : getContent
-      });
-    });
-    return childParts;
+      index++;
+    }
+    return {
+      values,
+      keys: keys2
+    };
   }
-  updateItems(items, data, eachCondition) {
-    const previousParts = p3(this.part);
-    const oldParts = this.childParts;
-    each(oldParts, (oldPart, index) => {
-      oldPart.part = previousParts[index];
-    });
-    const newParts = this.getChildParts(items, data, eachCondition, {
-      parseTemplate: false
-    });
-    this.changeParts(oldParts, newParts);
-  }
-  changeParts(oldParts, newParts) {
-    const containerPart = this.part;
-    const oldIndexMap = new Map(oldParts.map((item, index) => [item.id, index]));
-    let committedParts = [];
-    let childParts = [];
-    let removedParts = {};
-    newParts.forEach((newPart, newIndex) => {
-      const previousIndex = oldIndexMap.get(newPart.id);
-      if (newIndex == previousIndex) {
-        const existingPart = oldParts[newIndex];
-        childParts.push(existingPart);
-        committedParts.push(existingPart.part);
-      } else if (previousIndex !== void 0) {
-        const oldPart = oldParts[newIndex];
-        const movedPart = oldParts[previousIndex];
-        v2(oldPart.part, newPart.content());
-        delete removedParts[oldPart.id];
-        removedParts[movedPart.id] = movedPart.part;
-        committedParts.push(oldPart.part);
-        console.log("moved", movedPart.id, newIndex);
-        childParts.push({
-          ...movedPart,
-          part: oldPart.part
-        });
-      } else {
-        const newChildPart = r5(containerPart);
-        const partContent = newPart.content();
-        v2(newChildPart, partContent);
-        committedParts.push(newChildPart);
-        console.log("added", newPart.id, newIndex);
-        childParts.push({
-          id: newPart.id,
-          part: newChildPart,
-          content: partContent
-        });
-      }
-    });
-    each(removedParts, (part, id) => {
-      console.log("removing displaced part", id);
-      h3(part);
-    });
-    const newIDs = childParts.map((part) => part.id);
-    each(oldParts, (oldPart) => {
-      if (newIDs.indexOf(oldPart.id) == -1) {
-        console.log("removing old part", oldPart.id);
-        h3(oldPart.part);
-      }
-    });
-    this.childParts = childParts;
-  }
-  getTemplateContent(item, index, data, eachCondition) {
-    let eachData = this.prepareEachData(item, index, data, eachCondition.as);
-    return eachCondition.content(eachData);
-  }
-  getItemID(item) {
+  getItemID(item, index) {
     if (isObject(item)) {
-      return item._id || item.id || item.key || item.hash || hashCode(item);
+      return item._id || item.id || item.key || item.hash || index;
     }
     if (isString) {
       return item;
     }
+    return index;
   }
-  prepareEachData(item, index, data, alias) {
-    return alias ? { ...data, [alias]: item, "@index": index } : { ...data, ...item, "@index": index };
+  getEachData(item, index, alias) {
+    return alias ? { [alias]: item, "@index": index } : { ...item, "@index": index };
+  }
+  getTemplate(item, index) {
+    let eachData = this.getEachData(item, index, this.eachCondition.as);
+    const itemID = this.getItemID(item, index);
+    const sameIndex = this.templateCachedIndex.get(itemID) == index;
+    const sameData = JSON.stringify(this.templateCachedData.get(itemID)) == JSON.stringify(eachData);
+    if (sameIndex && sameData) {
+      return this.templateCache.get(itemID);
+    } else {
+      const content = this.eachCondition.content(eachData);
+      this.templateCachedIndex.set(itemID, index);
+      this.templateCachedData.set(itemID, clone(eachData));
+      this.templateCache.set(itemID, content);
+      return content;
+    }
+  }
+  /*
+    Adapted from Lit's Repeat Directive
+    The key difference is we dont want to rerender templates (call content())
+    if the position doesnt move.
+  */
+  updateItems(items = this.getItems()) {
+    const containerPart = this.part;
+    const oldParts = p3(containerPart);
+    const { values: newValues, keys: newKeys } = this.getValuesAndKeys(items);
+    if (!Array.isArray(oldParts)) {
+      this._itemKeys = newKeys;
+      return newValues;
+    }
+    const oldKeys = this._itemKeys ??= [];
+    const newParts = [];
+    let newKeyToIndexMap;
+    let oldKeyToIndexMap;
+    let oldHead = 0;
+    let oldTail = oldParts.length - 1;
+    let newHead = 0;
+    let newTail = newValues.length - 1;
+    while (oldHead <= oldTail && newHead <= newTail) {
+      if (oldParts[oldHead] === null) {
+        oldHead++;
+      } else if (oldParts[oldTail] === null) {
+        oldTail--;
+      } else if (oldKeys[oldHead] === newKeys[newHead]) {
+        newParts[newHead] = v2(
+          oldParts[oldHead],
+          newValues[newHead](newHead)
+        );
+        oldHead++;
+        newHead++;
+      } else if (oldKeys[oldTail] === newKeys[newTail]) {
+        newParts[newTail] = v2(
+          oldParts[oldTail],
+          newValues[newTail](newTail)
+        );
+        oldTail--;
+        newTail--;
+      } else if (oldKeys[oldHead] === newKeys[newTail]) {
+        newParts[newTail] = v2(
+          oldParts[oldHead],
+          newValues[newTail](newTail)
+        );
+        r5(containerPart, newParts[newTail + 1], oldParts[oldHead]);
+        oldHead++;
+        newTail--;
+      } else if (oldKeys[oldTail] === newKeys[newHead]) {
+        newParts[newHead] = v2(
+          oldParts[oldTail],
+          newValues[newHead](newHead)
+        );
+        r5(containerPart, oldParts[oldHead], oldParts[oldTail]);
+        oldTail--;
+        newHead++;
+      } else {
+        if (newKeyToIndexMap === void 0) {
+          newKeyToIndexMap = generateMap(newKeys, newHead, newTail);
+          oldKeyToIndexMap = generateMap(oldKeys, oldHead, oldTail);
+        }
+        if (!newKeyToIndexMap.has(oldKeys[oldHead])) {
+          h3(oldParts[oldHead]);
+          oldHead++;
+        } else if (!newKeyToIndexMap.has(oldKeys[oldTail])) {
+          h3(oldParts[oldTail]);
+          oldTail--;
+        } else {
+          const oldIndex = oldKeyToIndexMap.get(newKeys[newHead]);
+          const oldPart = oldIndex !== void 0 ? oldParts[oldIndex] : null;
+          if (oldPart === null) {
+            const newPart = r5(containerPart, oldParts[oldHead]);
+            v2(newPart, newValues[newHead](newHead));
+            newParts[newHead] = newPart;
+          } else {
+            newParts[newHead] = v2(oldPart, newValues[newHead](newHead));
+            r5(containerPart, oldParts[oldHead], oldPart);
+            oldParts[oldIndex] = null;
+          }
+          newHead++;
+        }
+      }
+    }
+    while (newHead <= newTail) {
+      const newPart = r5(containerPart, newParts[newTail + 1]);
+      v2(newPart, newValues[newHead]());
+      newParts[newHead++] = newPart;
+    }
+    while (oldHead <= oldTail) {
+      const oldPart = oldParts[oldHead++];
+      if (oldPart !== null) {
+        h3(oldPart);
+      }
+    }
+    this._itemKeys = newKeys;
+    this._itemValues = newValues;
+    m2(containerPart, newParts);
+    return w;
   }
 };
 var reactiveEach = e4(ReactiveEachDirective);
@@ -2401,10 +2373,10 @@ var Helpers = {
   selectedIf: (expr) => {
     return Helpers.maybe(expr, "selected", "");
   },
-  capitalize: (text) => {
+  capitalize: (text = "") => {
     return toTitleCase(text);
   },
-  titleCase: (text) => {
+  titleCase: (text = "") => {
     return toTitleCase(text);
   },
   disabledIf: (expr) => {
@@ -2563,12 +2535,14 @@ var LitRenderer = class _LitRenderer {
         };
       }
       if (key == "content") {
-        return (eachData) => this.renderContent({ ast: value, data: eachData });
+        return (eachData) => {
+          return this.renderContent({ ast: value, data: { ...data, ...eachData } });
+        };
       }
       return value;
     };
     let eachArguments = mapObject(node, directiveMap);
-    return reactiveEach(eachArguments, data);
+    return reactiveEach(eachArguments);
   }
   evaluateTemplate(node, data = {}) {
     const getValue = (expressionString) => {
@@ -3525,13 +3499,6 @@ lit-html/async-directive.js:
    *)
 
 lit-html/directives/unsafe-html.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   * SPDX-License-Identifier: BSD-3-Clause
-   *)
-
-lit-html/directives/repeat.js:
   (**
    * @license
    * Copyright 2017 Google LLC

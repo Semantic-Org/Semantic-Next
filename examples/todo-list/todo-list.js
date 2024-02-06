@@ -11,9 +11,9 @@ const createInstance = (tpl, $) => ({
 
   // reactive state
   todos: new ReactiveVar([
-    { _id: '0', text: 'Another one 1', completed: false },
-    { _id: '1', text: 'Another one 2', completed: false },
-    { _id: '2', text: 'Another one 3', completed: false },
+    { _id: 'id-0', text: 'Another one 1', completed: false },
+    { _id: 'id-1', text: 'Another one 2', completed: false },
+    { _id: 'id-2', text: 'Another one 3', completed: false },
   ]),
   filter: new ReactiveVar('all'),
   allCompleted: new ReactiveVar(false),
@@ -24,6 +24,7 @@ const createInstance = (tpl, $) => ({
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
+    console.log('todos are really', todos);
     each(todos, (todo) => {
       if(!todo._id) {
         todo._id = todo.text;
@@ -128,7 +129,6 @@ const events = {
     tpl.clearCompleted();
   },
   'click .todo'(event, tpl, $, data) {
-    console.log(data.id);
     tpl.todos.removeItem(data.id);
   }
 };

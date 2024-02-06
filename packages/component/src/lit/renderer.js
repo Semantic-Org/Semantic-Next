@@ -123,18 +123,19 @@ export class LitRenderer {
         };
       }
       if(key == 'content') {
-        return (eachData) => this.renderContent({ast: value, data: eachData});
+        return (eachData) => {
+          return this.renderContent({ast: value, data: { ...data, ...eachData } });
+        };
       }
       return value;
     };
     let eachArguments = mapObject(node, directiveMap);
-    return reactiveEach(eachArguments, data);
+    return reactiveEach(eachArguments);
   }
 
   evaluateTemplate(node, data = {}) {
     const getValue = (expressionString) => {
       const value = this.evaluateExpression(expressionString, data);
-      //console.log(expressionString, value);
       return value;
     };
 

@@ -618,7 +618,7 @@ export const isEqual = (a, b, options) => {
   } else {
     i = 0;
     ret = aKeys.every(key => {
-      if (!hasProperty(b, key)) {
+      if (!b[key]) {
         return false;
       }
       if (!isEqual(a[key], b[key], options)) {

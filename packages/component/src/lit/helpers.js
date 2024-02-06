@@ -17,10 +17,10 @@ export const Helpers = {
   selectedIf: (expr) => {
     return Helpers.maybe(expr, 'selected', '');
   },
-  capitalize: (text) => {
+  capitalize: (text = '') => {
     return toTitleCase(text);
   },
-  titleCase: (text) => {
+  titleCase: (text = '') => {
     return toTitleCase(text);
   },
   disabledIf: (expr) => {
