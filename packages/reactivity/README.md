@@ -42,7 +42,7 @@ saying.value = 'goodbye';
 
 ## Equality
 
-You can specify an equality function as the second parameter of `ReactiveVar`. If it is not specified it will use the `isEqual` function provided in the utils library. The default equality function handles most general cases of equality including objects with matching properties, dates, and binary data.
+When declaring a reactive variable you can pass in an equality function that will be used to determine if calculations should be rerun when the value is updated. The default function is [`isEqual`](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/utils) from utils which will handle most common cases like dates, binary data and deep object equality.
 
 Objects
 
@@ -78,7 +78,7 @@ reactiveObj.set(obj2);
 
 ### Property / Array Mutations
 
-Unlike Preact Signals or Lit Reactive Elements, ReactiveVar will consider mutations to properties or arrays to be updates. This greatly simplifies many simple cases of reactivity like updating lists.
+You can use the `set` helper to declaratively update values like arrays and objects, which would not normally trigger reactivity if you simply modify their `value`.
 
 Objects
 
