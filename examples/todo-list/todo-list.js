@@ -61,7 +61,8 @@ const onDestroyed = (tpl) => {
 
 
 const events = {
-  // toggle all is in main although it appears in header
+  // toggle all checkbox is in the main html although its functionality is in the header
+  // this is per todo-mvc spec
   'change .toggle-all'(event, tpl, $) {
     const headerTpl = tpl.child('todoHeader');
     $(event.target).attr('checked', !$(event.target).attr('checked'));
