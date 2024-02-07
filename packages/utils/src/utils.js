@@ -155,6 +155,10 @@ export const camelToKebab = (str = '') => {
   return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 };
 
+export const capitalize = (str = '') => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 export const capitalizeWords = (str = '') => {
   return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
     .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())

@@ -1,4 +1,4 @@
-import { toTitleCase, formatDate } from '@semantic-ui/utils';
+import { capitalize, toTitleCase, formatDate } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
 export const Helpers = {
@@ -18,7 +18,7 @@ export const Helpers = {
     return Helpers.maybe(expr, 'selected', '');
   },
   capitalize: (text = '') => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    return capitalize(text);
   },
   titleCase: (text = '') => {
     return toTitleCase(text);
