@@ -36,7 +36,6 @@ export const createComponent = ({
     or as a naked template. In the case of a naked template this is typically
     a sub template of another web component
   */
-  console.log('creating template', templateName || kebabToCamel(tagName));
   let litTemplate = new LitTemplate({
     templateName: templateName || kebabToCamel(tagName),
     prototype: true,
@@ -65,6 +64,7 @@ export const createComponent = ({
 
       static get properties() {
         // not yet implemented
+        return {};
       }
 
       constructor() {

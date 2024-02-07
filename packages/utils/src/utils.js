@@ -563,7 +563,7 @@ export const generateID = () => {
 /*
   Determine if two objects are equal
 */
-export const isEqual = (a, b, { keyOrderSensitive = false } = {}) => {
+export const isEqual = (a, b, options = {}) => {
   let i;
   if (a === b) {
     return true;
@@ -625,7 +625,7 @@ export const isEqual = (a, b, { keyOrderSensitive = false } = {}) => {
   let ret;
   const aKeys = keys(a);
   const bKeys = keys(b);
-  if (keyOrderSensitive) {
+  if (options.keyOrderSensitive) {
     i = 0;
     ret = aKeys.every(key => {
       if (i >= bKeys.length) {
