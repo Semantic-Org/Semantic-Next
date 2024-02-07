@@ -31,18 +31,6 @@ export const createComponent = ({
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
 
-  let FAKE_SPEC;
-  if(tagName == 'ui-button') {
-    FAKE_SPEC = {
-      settings: {
-        size: ['mini', 'tiny', 'small', 'medium', 'large', 'huge', 'massive'],
-        emphasis: ['primary', 'secondary'],
-        icon: ['icon'],
-        labeled: ['right-labeled', ['labeled', 'left-labeled']]
-      }
-    };
-  }
-
   /*
     We can choose either to render this component as a web component
     or as a naked template. In the case of a naked template this is typically
@@ -76,24 +64,7 @@ export const createComponent = ({
       }
 
       static get properties() {
-        // testing for now
-        if(tagName == 'ui-button') {
-          return {
-            // attrs
-            size: { type: String, observe: true, reflect: false },
-            emphasis: { type: String, observe: true, reflect: false },
-
-            // example of value -> attr
-            small: { type: Boolean, reflect: false },
-            large: { type: Boolean, reflect: false },
-            primary: { type: Boolean, reflect: false },
-            secondary: { type: Boolean, reflect: false },
-            class: { type: String }
-          };
-        }
-        return {
-          //test: { type: String }
-        };
+        // not yet implemented
       }
 
       constructor() {
@@ -154,7 +125,6 @@ export const createComponent = ({
         <ui-button class="large"> // classic
       */
       adjustSettingFromAttribute(attribute, value) {
-        const spec = FAKE_SPEC; // TESTING FOR NOW
         if(spec) {
           if(attribute == 'class') {
             // this is syntax <ui-button class="large primary"></ui-button>
