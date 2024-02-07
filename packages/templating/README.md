@@ -114,8 +114,11 @@ context = {
 
 Keep in mind values here can cause XSS vulnerabilities. A common way to mitigate this is to create a global helper to sanitize your html input if it comes from a user. There are many [third party libraries](https://github.com/apostrophecms/sanitize-html) that can help with this, but they are typically fairly large and are not included with templating.
 ```javascript
+import escapeHTML from 'some/npm/library';
 context = {
-  escapeHTML(html) { // some library }
+  escapeHTML(html) {
+    return escapeHTML(html);
+  }
 }
 ```
 
