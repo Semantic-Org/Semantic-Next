@@ -27,7 +27,9 @@ Reactions are enqueued and then flushed using the [microtask queue](https://deve
 
 ## Basic Usage
 
-You can get or set values using `var.value` or `var.get()` and `var.set()`, both handle reactivity similarly and its up to developers preference which to use.
+"ReactiveVar acts as a reactive variable that automatically triggers dependent functions to execute whenever its value changes. Internally, ReactiveVar manages a list of these dependencies, ensuring that any function or context that uses the variable is re-executed if the variable's value is updated.
+
+By using `Reaction.create`, you establish a reactive context. Within this context, referencing any `ReactiveVar` binds the context so that any change to the variables' values causes the entire context to automatically re-execute.
 
 ```javascript
 
