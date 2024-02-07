@@ -12,7 +12,6 @@ class RenderTemplate extends AsyncDirective {
     this.part = null;
   }
   render({getTemplateName, subTemplates, data, parentTemplate}) {
-    //console.log('rendering template', data);
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };

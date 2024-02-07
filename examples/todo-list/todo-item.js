@@ -9,7 +9,7 @@ const createInstance = (tpl, $) => ({
   toggleCompleted() {
     const todos = tpl.parent().todos;
     const todo = tpl.data.todo;
-    todos.setProperty(tpl.data.todo._id, 'completed', !todo.completed);
+    todos.setProperty(todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
     const todos = tpl.parent().todos;
@@ -17,7 +17,7 @@ const createInstance = (tpl, $) => ({
   },
   removeTodo() {
     tpl.parent().todos.removeItem(tpl.data.todo._id);
-  }
+  },
 });
 
 const onRendered = (tpl, $) => {
@@ -33,7 +33,7 @@ const onRendered = (tpl, $) => {
 };
 
 const events = {
-  'change .toggle'(event, tpl) {
+  'change .toggle'(event, tpl, $) {
     tpl.toggleCompleted();
   },
   'click .destroy'(event, tpl) {

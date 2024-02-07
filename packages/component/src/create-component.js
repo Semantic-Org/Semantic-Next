@@ -50,6 +50,7 @@ export const createComponent = ({
   */
   let litTemplate = new LitTemplate({
     templateName: templateName || kebabToCamel(tagName),
+    prototype: true,
     ast,
     css,
     events,
@@ -127,7 +128,7 @@ export const createComponent = ({
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
-        litTemplate.removeEvents();
+        litTemplate.onDestroyed();
         this.call(onDestroyed);
       }
 

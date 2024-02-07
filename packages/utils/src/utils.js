@@ -221,6 +221,19 @@ export const findIndex = (array, callback) => {
 };
 
 
+export const remove = (array, callbackOrValue) => {
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue)
+  ;
+  const index = findIndex(array, callback);
+  if(index > -1) {
+    array.splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
 
 export const inArray = (value, array = []) => {
   return array.indexOf(value) > -1;
@@ -447,6 +460,18 @@ export const escapeRegExp = function(string) {
       Identity
 --------------------*/
 
+export const prettifyID = (num) => {
+  num = parseInt(num, 10);
+  if (num === 0) return '0';
+  let result = '';
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  while (num > 0) {
+    result = chars[num % chars.length] + result;
+    num = Math.floor(num / chars.length);
+  }
+  return result;
+};
+
 /*
   Create a uniqueID from a string
 */
@@ -519,23 +544,18 @@ export function hashCode(input) {
     return h1 >>> 0;
   };
 
-  const prettify = (num) => {
-    if (num === 0) return '0';
-    let result = '';
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    while (num > 0) {
-      result = chars[num % chars.length] + result;
-      num = Math.floor(num / chars.length);
-    }
-    return result;
-  };
 
   let hash;
   hash = murmurhash(str, seed); // fast and pretty good collisions
-  hash = prettify(hash); // pretty and easier to recognize
+  hash = prettifyID(hash); // pretty and easier to recognize
 
   return hash;
 }
+
+export const generateID = () => {
+  const num = Math.random() * 1000000000000000;
+  return prettifyID(num);
+};
 
 
 /*

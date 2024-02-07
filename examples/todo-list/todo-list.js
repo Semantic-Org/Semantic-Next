@@ -11,7 +11,7 @@ const createInstance = (tpl, $) => ({
 
   initialize() {
     let counter = 1;
-    while(counter < tpl.todoCount) {
+    while(counter <= tpl.todoCount) {
       const todo = {
         _id: `id-${counter}`,
         text: `Task #${counter}`,
@@ -21,7 +21,7 @@ const createInstance = (tpl, $) => ({
       tpl.todos.push(todo);
     }
   },
-  todoCount: 2,
+  todoCount: 1,
 
   // reactive state
   todos: new ReactiveVar([]),
@@ -34,7 +34,6 @@ const createInstance = (tpl, $) => ({
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
-    //console.log('getting todos');
     each(todos, (todo) => {
       if(!todo._id) {
         todo._id = todo.text;

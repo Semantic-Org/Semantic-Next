@@ -1,6 +1,6 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { fatal, each, clone, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
+import { fatal, each, remove, generateID, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
@@ -19,6 +19,7 @@ export const LitTemplate = class UITemplate {
     subTemplates,
     createInstance,
     parentTemplate, // the parent template when nested
+    prototype = false,
     onCreated = noop,
     onRendered = noop,
     onDestroyed = noop
@@ -40,6 +41,9 @@ export const LitTemplate = class UITemplate {
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
+    this.id = generateID();
+    this.isPrototype = prototype;
+    LitTemplate.addTemplate(this);
   }
 
   setDataContext(data) {
@@ -75,7 +79,8 @@ export const LitTemplate = class UITemplate {
     this.tpl.$ = this.$;
     this.tpl.templateName = this.templateName;
     // this is a function to avoid naive cascading reactivity
-    this.tpl.parent = () => this.parentTemplate;
+    this.tpl.parent = (templateName) => LitTemplate.findParentTemplate(this, templateName);
+    this.tpl.findTemplate = LitTemplate.findTemplate;
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback.bind(this));
@@ -87,6 +92,7 @@ export const LitTemplate = class UITemplate {
       this.call(this.onRenderedCallback.bind(this));
     };
     this.onDestroyed = () => {
+      LitTemplate.removeTemplate(this);
       this.rendered = false;
       this.clearReactions();
       this.removeEvents();
@@ -312,5 +318,49 @@ export const LitTemplate = class UITemplate {
     each(this.reactions || [], comp => comp.stop());
   }
 
+  static renderedTemplates = new Map();
+
+  static addTemplate(template) {
+    if(template.isPrototype) {
+      return;
+    }
+    let templates = LitTemplate.renderedTemplates.get(template.templateName) || [];
+    templates.push(template);
+    LitTemplate.renderedTemplates.set(template.templateName, templates);
+  }
+  static removeTemplate(template) {
+    if(template.isPrototype) {
+      return;
+    }
+    let templates = LitTemplate.renderedTemplates.get(template.templateName) || [];
+    remove(templates, template);
+    LitTemplate.renderedTemplates.set(templates);
+  }
+  static getTemplates(templateName) {
+    let templates = LitTemplate.renderedTemplates.get(templateName) || [];
+    if(templates.length > 1) {
+      return templates;
+    }
+    if(templates.length == 1) {
+      return templates[0];
+    }
+  }
+  static findTemplate(templateName) {
+    return LitTemplate.getTemplates(templateName)[0];
+  }
+  static findParentTemplate(template, templateName) {
+    let match;
+    if(templateName) {
+      while(template) {
+        template = template.parentTemplate;
+        if(template?.templateName == templateName) {
+          match = template;
+          break;
+        }
+      }
+      return match;
+    }
+    return template.parentTemplate;
+  }
 
 };
