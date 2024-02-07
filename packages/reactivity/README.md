@@ -27,22 +27,26 @@ Reactions are enqueued and then flushed using the [microtask queue](https://deve
 
 ## Basic Usage
 
-"ReactiveVar acts as a reactive variable that automatically triggers dependent functions to execute whenever its value changes. Internally, ReactiveVar manages a list of these dependencies, ensuring that any function or context that uses the variable is re-executed if the variable's value is updated.
-
-By using `Reaction.create`, you establish a reactive context. Within this context, referencing any `ReactiveVar` binds the context so that any change to the variables' values causes the entire context to automatically re-execute.
+You can create a reaction by simply creating a variable then modifying its value.
 
 ```javascript
 
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 let saying = new ReactiveVar('hello');
-Reaction.create(comp => {
+Reaction.create(computation => {
   console.log(saying.get());
 });
 
-saying.set('goodbye');
+// equivalent ways to set value
+saying.value = 'goodbye' // option 1
+saying.set('goodbye');  // option 2
+
+
+
 // outputs hello, goodbye
 ```
+ Any computation will receive itself as the first parameter of its callback, which you use to do things like check if its the `firstRun` or call `stop()` to stop the computation.
 
 ```javascript
 
@@ -50,11 +54,14 @@ import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 let saying = new ReactiveVar('hello');
 Reaction.create(comp => {
-  console.log(saying.value);
+  if(comp.firstRun) {
+    console.log('First run!');
+  }
+  // stop computation if value is set to goodbye
+  if(saying.value == 'goodbye') {
+    comp.stop();
+  }
 });
-
-saying.value = 'goodbye';
-// outputs hello, goodbye
 ```
 
 ## Equality
