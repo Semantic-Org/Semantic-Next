@@ -2,7 +2,7 @@
 
 Semantic UI provides a templating language for specifying structured html that is tightly coupled with the reactivity framework provided by the Reactive library.
 
-This package specifically deals with compiling static html templates to an abstract syntax tree (AST) which can be parsed by a renderer like the one included for `Lit` in the component package.
+This package specifically deals with compiling static html templates to an abstract syntax tree (AST) which can be parsed by a renderer like the one included for [Lit](https://lit.dev/) in the [component package](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/component).
 
 <!-- TOC start  -->
 
