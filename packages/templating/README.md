@@ -77,7 +77,7 @@ As new variable in context
 </ul>
 ```
 
-### Subtempaltes
+### Subtemplates
 
 You can specify subtemplates using several syntax depending on your use case. Remember data values can either be literal values or references to expressions which are evaluated at run time.
 
@@ -97,4 +97,28 @@ You can also use a more complex structure, which allows you to choose a template
     toy: getFavoriteToy
   }
 }}
+```
+
+### Escaping HTML
+
+You can use `{{{` triple brackets to pass in raw html. 
+```javascript
+context = {
+  name: 'Dwayne <b>The Rock</b> Johnson'
+}
+```
+
+```html
+{{{name}}
+```
+
+Keep in mind values here can cause XSS vulnerabilities. A common way to mitigate this is to create a global helper to sanitize your html input if it comes from a user. There are many [third party libraries](https://github.com/apostrophecms/sanitize-html) that can help with this, but they are typically fairly large and are not included with templating.
+```javascript
+context = {
+  escapeHTML(html) { // some library }
+}
+```
+
+```html
+{{{escapeHTML name}}
 ```
