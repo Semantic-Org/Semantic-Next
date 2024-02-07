@@ -1,16 +1,18 @@
 next
-+ Complete todomvc example.
-- add getParent helper with tree search
 - Adding ifdefined for attributes from templates
-- Debug events not triggering on right element
-- Fix reactive each to properly reuse dom
-- Determine rendered vs update loop
-- Inherit data context if none specified for subtemplates
+- Syntax for nonreactive expressions or helper for nonreactive
+- Add inherit keyword for templates {{> template name='templateName' inheritData }}
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 
 later
 - consider await/task syntax
-- add getTemplate helper to search all active rendered templates. Add global registry of active templates. i.e. tpl.findTemplate('sidebar').set('')
+
+week of feb 4
++ Fix reactive each to properly reuse dom based off repeat directive
++ Complete todomvc example.
++ add recursive search to parent(templateName) and implement child(templateName)
++ add LitTemplate.findTemplate(templateName) and global template registry
++ First pass readme for templating
 
 week of jan 29
 + Move example to example folder & add to build script.
