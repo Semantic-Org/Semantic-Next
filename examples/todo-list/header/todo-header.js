@@ -47,8 +47,13 @@ const createInstance = (tpl, $) => ({
 
 const events = {
   'keydown input.new-todo'(event, tpl, $) {
+
     if(event.key === 'Enter') {
-      tpl.addTodo( $(this).val() );
+      const text = $(this).val();
+      if(!text) {
+        return;
+      }
+      tpl.addTodo(text);
       $(this).val('');
     }
   },

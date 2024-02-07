@@ -61,7 +61,7 @@ const events = {
     tpl.persons.setIndex(1, tpl.getPerson());
   },
   'click .remove.front'(event, tpl) {
-    tpl.persons.removeItem(0);
+    tpl.persons.removeIndex(0);
   },
   'click .remove.end'(event, tpl) {
     tpl.persons.splice(-1);
