@@ -82,11 +82,11 @@ reactiveObj.set(obj2);
 
 ```javascript
   let items = new ReactiveVar([0,1,2]);
-  tpl.items.removeItem(1); // outputs 0, 2
+  tpl.items.removeIndex(1); // outputs 0, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,2,2]);
-  tpl.items.setItem(1); // outputs 0, 1, 2
+  tpl.items.setIndex(1); // outputs 0, 1, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,1,2]);
@@ -95,6 +95,43 @@ reactiveObj.set(obj2);
 ```javascript
   let items = new ReactiveVar([0,1,2]);
   tpl.items.push(3); // outputs 0, 1, 2, 3
+```
+
+### Array of Objects
+
+A very common pattern is having an array of rows of data.
+
+```javascript
+const tasks = new ReactiveVar([
+  { _id: 'task1_uuid', task: 'Implement feature', completed: true }
+  { _id: 'task2_uuid', task: 'Write Tests', completed: true }
+  { _id: 'task3_uuid', task: 'Write documentation', completed: false },
+]);
+
+```javascript
+// sets 'write documentation' to complete
+tasks.setProperty('task3_uuid', 'completed', true);
+```
+
+```javascript
+// replaces task 1 with new task
+const newTask = { _id: 'tasks1_uuid', task: 'Reimplement feature', completed: false };
+tasks.replaceItem('task1_uuid', newTask)
+```
+
+```javascript
+// gets index of id
+const index = tasks.getIndex('tasks1_uuid')
+```
+
+```javascript
+// gets id from an item
+const id = tasks.getID(tasks.get()[0])
+```
+
+```javascript
+// remove task 2 from list
+tasks.removeItem('tasks2_uuid')
 ```
 
 ### Property / Array Mutations
@@ -141,6 +178,40 @@ reactiveRows.set(rows);
 // outputs 2, 1
 ```
 
+```javascript
+const numbers = new ReactiveVar([10, 20, 30]);
+
+// Add an item to the end
+numbers.push(40);
+// 10, 20, 30, 40
+
+numbers.unshift(0);
+// 0, 10, 20, 30, 40
+
+numbers.splice(0, 2);
+// 0, 10
+
+numbers.setIndex(1, 99);
+// 0, 99
+
+numbers.removeIndex(1);
+// 0
+```
+
+### Booleans
+
+Boolean helpers allow you to toggle the state of a ReactiveVar that holds a boolean value.
+
+```javascript
+const isToggled = new ReactiveVar(false);
+
+// Toggle the boolean value
+isToggled.toggle();
+console.log('Value is now true');
+
+isToggled.toggle();
+console.log('Value is now false again');
+```
 
 ### First Run
 
@@ -172,7 +243,9 @@ saying.set('goodbye');
 
 ```
 
-### Guard
+### Controlling Reactivity
+
+#### Guard
 
 You can help fine-tune reactivity by using guard to only pay attention to certain parts of a reactive context
 
@@ -211,8 +284,33 @@ You can help fine-tune reactivity by using guard to only pay attention to certai
   });
 ```
 
+#### Peeking at Current Value
 
-### Flushing Changes
+To get the current value of a `ReactiveVar` without establishing a reactive dependency, use the `peek()` method. This is particularly useful when you need to access the value for read-only purposes outside of a reactive computation and do not want to trigger reactivity.
+
+```javascript
+const counter = new ReactiveVar(10);
+
+// Access the value without triggering reactivity
+const currentValue = counter.peek();
+console.log(`Current value without establishing dependency: ${currentValue}`);
+
+#### Nonreactive
+The `Reaction.nonreactive` function allows you to perform computations or access reactive variables without establishing a reactive dependency. This is useful when you need to read from a reactive source but don't want the surrounding computation to re-run when the source changes.
+
+```javascript
+const reactiveValue = new ReactiveVar('Initial Value');
+
+// Perform a non-reactive read
+Reaction.nonreactive(() => {
+  const value = reactiveValue.get();
+  console.log(`Read inside nonreactive: ${value}`);
+});
+
+reactiveValue.set('Updated Value'); // Does not trigger the console.log inside nonreactive
+```
+
+#### Flushing Changes
 
 When a `ReactiveVar` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.
 

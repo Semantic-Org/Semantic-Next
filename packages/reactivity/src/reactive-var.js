@@ -142,7 +142,7 @@ export class ReactiveVar {
     const index = this.getIndex(id);
     return this.setArrayProperty(index, property, value);
   }
-  setItem(id, item) {
+  replaceItem(id, item) {
     return this.setIndex(this.getIndex(id), item);
   }
   removeItem(id) {
