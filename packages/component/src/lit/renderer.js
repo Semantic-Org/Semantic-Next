@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -202,6 +202,9 @@ export class LitRenderer {
       // This lookups a deep value in an object, calling any intermediary functions
       const getDeepValue = (obj, path) => path.split('.').reduce((acc, part) => {
         const current = wrapFunction(acc)();
+        if(current == undefined) {
+          fatal(`Error evaluating expression "${expressionString}"`);
+        }
         return current[part];
       }, obj);
 

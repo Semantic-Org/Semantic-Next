@@ -54,7 +54,8 @@ export const LitTemplate = class UITemplate {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
-    return this.parentTemplate = parentTemplate;
+    parentTemplate._childTemplates.push(this);
+    this.parentTemplate = parentTemplate;
   }
 
   getGenericTemplateName() {
@@ -76,11 +77,14 @@ export const LitTemplate = class UITemplate {
       this.call(tpl.initialize.bind(this));
     }
     this.tpl.data = this.data;
+    this.tpl._childTemplates = [];
     this.tpl.$ = this.$;
     this.tpl.templateName = this.templateName;
     // this is a function to avoid naive cascading reactivity
-    this.tpl.parent = (templateName) => LitTemplate.findParentTemplate(this, templateName);
     this.tpl.findTemplate = LitTemplate.findTemplate;
+    this.tpl.parent = (templateName) => LitTemplate.findParentTemplate(this, templateName);
+    this.tpl.child = (templateName) => LitTemplate.findChildTemplate(this, templateName);
+    this.tpl.children = (templateName) => LitTemplate.findChildTemplates(this, templateName);
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback.bind(this));
@@ -189,6 +193,7 @@ export const LitTemplate = class UITemplate {
       const bubbleMap = {
         blur: 'focusout',
         focus: 'focusin',
+        //change: 'input',
         load: 'DOMContentLoaded',
         unload: 'beforeunload',
         mouseenter: 'mouseover',
@@ -361,6 +366,26 @@ export const LitTemplate = class UITemplate {
       return match;
     }
     return template.parentTemplate;
+  }
+
+  static findChildTemplates(template, templateName) {
+    let result = [];
+    // recursive lookup
+    function search(template, templateName) {
+      if (template.templateName === templateName) {
+        result.push(template.tpl);
+      }
+      if (template.tpl._childTemplates) {
+        template.tpl._childTemplates.forEach(childTemplate => {
+          search(childTemplate, templateName);
+        });
+      }
+    }
+    search(template, templateName);
+    return result;
+  }
+  static findChildTemplate(template, templateName) {
+    return LitTemplate.findChildTemplates(template, templateName)[0];
   }
 
 };

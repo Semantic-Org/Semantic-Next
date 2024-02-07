@@ -6,17 +6,21 @@ import css from './todo-item.css';
 
 const createInstance = (tpl, $) => ({
   editing: new ReactiveVar(false),
+
+  getTodos() {
+    return tpl.parent('todoList').todos;
+  },
   toggleCompleted() {
-    const todos = tpl.parent().todos;
+    const todos = tpl.getTodos();
     const todo = tpl.data.todo;
     todos.setProperty(todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
-    const todos = tpl.parent().todos;
+    const todos = tpl.getTodos();
     todos.setProperty(tpl.data.todo._id, 'text', text);
   },
   removeTodo() {
-    tpl.parent().todos.removeItem(tpl.data.todo._id);
+    tpl.getTodos().removeItem(tpl.data.todo._id);
   },
 });
 

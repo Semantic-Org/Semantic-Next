@@ -1,35 +1,19 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { ReactiveVar } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
 
-import { todoItem } from './todo-item.js';
+import { todoItem } from './item/todo-item.js';
+import { todoHeader } from './header/todo-header.js';
+import { todoFooter } from './footer/todo-footer.js';
 
 import template from './todo-list.html';
 import css from './todo-list.css';
 
 const createInstance = (tpl, $) => ({
 
-  initialize() {
-    let counter = 1;
-    while(counter <= tpl.todoCount) {
-      const todo = {
-        _id: `id-${counter}`,
-        text: `Task #${counter}`,
-        completed: false,
-      };
-      counter++;
-      tpl.todos.push(todo);
-    }
-  },
-  todoCount: 1,
-
-  // reactive state
+  // global state
   todos: new ReactiveVar([]),
   filter: new ReactiveVar('all'),
-  allCompleted: new ReactiveVar(false),
-
-  // static state
-  filters: [ 'all', 'active', 'complete'],
 
   getVisibleTodos() {
     const filter = tpl.filter.get();
@@ -50,54 +34,6 @@ const createInstance = (tpl, $) => ({
     });
   },
 
-  completeAll() {
-    tpl.todos.setArrayProperty('completed', true);
-  },
-
-  completeNone() {
-    tpl.todos.setArrayProperty('completed', false);
-  },
-
-  getIncomplete() {
-    const todos = tpl.todos.get();
-    return todos.filter(todo => !todo.completed);
-  },
-
-  addTodo(text) {
-    tpl.todos.push({
-      _id: text,
-      text: text,
-      completed: false,
-    });
-  },
-
-  hasAnyCompleted() {
-    return tpl.todos.value.some(todo => todo.completed);
-  },
-
-  calculateAllCompleted() {
-    tpl.reaction((comp) => {
-      const allCompleted = tpl.allCompleted.get();
-      if(comp.firstRun) {
-        return;
-      }
-      if(allCompleted) {
-        tpl.completeAll();
-      }
-      else {
-        tpl.completeNone();
-      }
-    });
-  },
-
-  isActiveFilter(filter) {
-    return tpl.filter.get() == filter;
-  },
-
-  clearCompleted() {
-    tpl.todos.removeItems(todo => todo.completed);
-  },
-
   // handle state
   addRouter() {
     tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);
@@ -110,12 +46,26 @@ const createInstance = (tpl, $) => ({
   },
   removeRouter() {
     $(window).off(tpl.hashEvent);
-  }
+  },
+
+  // dev
+  initialize() {
+    let counter = 1;
+    while(counter <= tpl.todoCount) {
+      const todo = {
+        _id: `id-${counter}`,
+        text: `Task #${counter}`,
+        completed: false,
+      };
+      counter++;
+      tpl.todos.push(todo);
+    }
+  },
+  todoCount: 100,
 
 });
 
 const onCreated = (tpl) => {
-  tpl.calculateAllCompleted();
   tpl.addRouter();
   tpl.setRouteFilter();
 };
@@ -124,40 +74,29 @@ const onDestroyed = (tpl) => {
   tpl.removeRouter();
 };
 
-const events = {
-  'keydown input.new-todo'(event, tpl, $) {
-    if(event.key === 'Enter') {
-      tpl.addTodo( $(this).val() );
-      $(this).val('');
-    }
-  },
-  'change .toggle-all'(event, tpl, $) {
-    $(event.target).attr('checked', !$(event.target).attr('checked'));
-    tpl.allCompleted.toggle();
-  },
-  'click .filters'(event, tpl, $, data) {
-    tpl.filter.set(data.filter);
-  },
-  'click .clear-completed'(event, tpl) {
-    tpl.clearCompleted();
-  },
-  'click .todo'(event, tpl, $, data) {
-    tpl.todos.removeItem(data.id);
-  }
-};
 
+const events = {
+  // toggle all is in main although it appears in header
+  'change .toggle-all'(event, tpl, $) {
+    const headerTpl = tpl.child('todoHeader');
+    $(event.target).attr('checked', !$(event.target).attr('checked'));
+    headerTpl.allCompleted.toggle();
+  },
+};
 
 const TodoList = createComponent({
   tagName: 'todo-list',
   subTemplates: {
-    todoItem
+    todoHeader,
+    todoItem,
+    todoFooter,
   },
   template,
   css,
+  events,
   createInstance,
   onCreated,
   onDestroyed,
-  events,
 });
 
 export { TodoList };
