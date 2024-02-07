@@ -48,21 +48,6 @@ const createInstance = (tpl, $) => ({
     $(window).off(tpl.hashEvent);
   },
 
-  // dev
-  initialize() {
-    let counter = 1;
-    while(counter <= tpl.todoCount) {
-      const todo = {
-        _id: `id-${counter}`,
-        text: `Task #${counter}`,
-        completed: false,
-      };
-      counter++;
-      tpl.todos.push(todo);
-    }
-  },
-  todoCount: 100,
-
 });
 
 const onCreated = (tpl) => {
