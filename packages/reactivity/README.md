@@ -76,6 +76,21 @@ reactiveObj.set(obj2);
 
 ```
 
+```javascript
+// always rerun
+const customIsEqual = (a, b) => {
+  return false;
+}
+let reactiveObj = new ReactiveVar({ name: 'Sally', age: 22 }, customIsEqual);
+
+Reaction.create(comp => {
+  const obj = reactiveObj.get();
+  console.log('Log');
+});
+reactiveObj.set(reactiveObj.get());
+// log runs twice
+```
+
 ### Property / Array Mutations
 
 You can use the `set` helper to declaratively update values like arrays and objects, which would not normally trigger reactivity if you simply modify their `value`.
