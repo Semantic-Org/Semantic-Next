@@ -350,7 +350,7 @@ let comp = Reaction.create(() => {
 
 ### Array Mutation Helpers
 
-`ReactiveVar` includes a few helpers for some of the most common cases for manipulating arrays
+`ReactiveVar` includes a few helpers for some of the most common usecases for manipulating arrays
 
 ```javascript
   let items = new ReactiveVar([0,1,2]);
@@ -371,7 +371,7 @@ let comp = Reaction.create(() => {
 
 ### Array of Objects
 
-A very common pattern is having an array of rows of data.
+`ReactiveVar` provides several helpers for manipulating arrays of objects a common data structure when handling structured data.
 
 ```javascript
 const tasks = new ReactiveVar([
