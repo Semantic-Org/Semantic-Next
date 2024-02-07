@@ -9,6 +9,22 @@ This is a paired down signal/reactivity library loosely inspired by [Tracker](ht
 
 Reactions are enqueued and then flushed using the [microtask queue](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide)
 
+- [@semantic-ui/reactivity](#semantic-uireactivity)
+   * [Basic Usage](#basic-usage)
+   * [Equality](#equality)
+      + [Property / Array Mutations](#property-array-mutations)
+      + [Booleans](#booleans)
+      + [First Run](#first-run)
+   * [Controlling Reactivity](#controlling-reactivity)
+      + [Guard](#guard)
+      + [Peeking at Current Value](#peeking-at-current-value)
+      + [Nonreactive](#nonreactive)
+      + [Flushing Changes](#flushing-changes)
+      + [Accessing Computation](#accessing-computation)
+   * [Helper Functions](#helper-functions)
+      + [Array Mutation Helpers](#array-mutation-helpers)
+      + [Array of Objects](#array-of-objects)
+
 
 ## Basic Usage
 
