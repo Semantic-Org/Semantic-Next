@@ -33,7 +33,7 @@ You can specify conditions using `{{#if condition}}` blocks which can include ar
 
 ### Expressions
 
-Expressions are evaluated in the data context of the template. Expressions are evaluated right to left passing values along. You can use `.' to access deeply nested values
+Expressions are evaluated in the data context of the template from right to left passing values along. You can use `.' to access deeply nested values
 
 ```javascript
 dataContext = {
@@ -173,8 +173,8 @@ You can also register custom global helpers to run across any expression.  The s
 - `formatDateTimeSeconds`: Formats a date and time with seconds according to a given format string.
 
 ### String Helpers
-- `capitalize`: Converts a string to title case.
-- `titleCase`: Alias for `capitalize`.
+- `capitalize`: "this sentence" to "This sentence"
+- `titleCase`: "this sentence" to "This Sencence"
 
 ### Conditional Class Helpers
 - `maybe`: Returns one class if a condition is true, and another if false.

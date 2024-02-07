@@ -18,7 +18,7 @@ export const Helpers = {
     return Helpers.maybe(expr, 'selected', '');
   },
   capitalize: (text = '') => {
-    return toTitleCase(text);
+    return str.charAt(0).toUpperCase() + str.slice(1);
   },
   titleCase: (text = '') => {
     return toTitleCase(text);

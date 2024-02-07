@@ -155,11 +155,26 @@ export const camelToKebab = (str = '') => {
   return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 };
 
-export const toTitleCase = (str = '') => {
+export const capitalizeWords = (str = '') => {
   return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
     .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
     .replace(/\b(\w)/g, (match) => match.toUpperCase())
   ;
+};
+
+export const toTitleCase = (str = '') => {
+  const stopWords = ['the', 'a', 'an', 'and', 'but', 'for', 'at', 'by', 'from', 'to', 'in', 'on', 'of', 'or', 'nor', 'with', 'as'];
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map((word, index) => {
+      // Always capitalize the first word and any word not in stopWords
+      if (index === 0 || !stopWords.includes(word)) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }
+      return word;
+    })
+    .join(' ');
 };
 
 /*-------------------

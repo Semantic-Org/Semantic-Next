@@ -53,6 +53,7 @@ Utility includes the following helpers:
 ### Strings
 - `kebabToCamel(str)` - Converts a kebab-case string to camelCase.
 - `camelToKebab(str)` - Converts a camelCase string to kebab-case.
+- `capitalizeWords(str)` - Capitalizes each word of a string
 - `toTitleCase(str)` - Converts a string to title case.
 
 ### Regular Expressions
