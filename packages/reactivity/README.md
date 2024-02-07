@@ -10,7 +10,7 @@ This is a paired down signal/reactivity library loosely inspired by [Tracker](ht
 Reactions are enqueued and then flushed using the [microtask queue](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide)
 
 
-### Basic
+## Basic Usage
 
 You can get or set values using `var.value` or `var.get()` and `var.set()`, both handle reactivity similarly and its up to developers preference which to use.
 
@@ -185,9 +185,9 @@ saying.set('goodbye');
 
 ```
 
-### Controlling Reactivity
+## Controlling Reactivity
 
-#### Guard
+### Guard
 
 You can help fine-tune reactivity by using guard to only pay attention to certain parts of a reactive context
 
@@ -226,7 +226,7 @@ You can help fine-tune reactivity by using guard to only pay attention to certai
   });
 ```
 
-#### Peeking at Current Value
+### Peeking at Current Value
 
 To get the current value of a `ReactiveVar` without establishing a reactive dependency, use the `peek()` method. This is particularly useful when you need to access the value for read-only purposes outside of a reactive computation and do not want to trigger reactivity.
 
@@ -238,7 +238,7 @@ const currentValue = counter.peek();
 console.log(`Current value without establishing dependency: ${currentValue}`);
 ```
 
-#### Nonreactive
+### Nonreactive
 The `Reaction.nonreactive` function allows you to perform computations or access reactive variables without establishing a reactive dependency. This is useful when you need to read from a reactive source but don't want the surrounding computation to re-run when the source changes.
 
 ```javascript
@@ -253,7 +253,7 @@ Reaction.nonreactive(() => {
 reactiveValue.set('Updated Value'); // Does not trigger the console.log inside nonreactive
 ```
 
-#### Flushing Changes
+### Flushing Changes
 
 When a `ReactiveVar` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.
 
