@@ -33,19 +33,18 @@ You can create a reaction by simply creating a variable then modifying its value
 
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-let saying = new ReactiveVar('hello');
+let reactiveValue = new ReactiveVar('first');
 Reaction.create(computation => {
-  console.log(saying.get());
+  console.log(reactiveValue.get());
 });
 
 // equivalent ways to set value
-saying.value = 'goodbye' // option 1
-saying.set('goodbye');  // option 2
+saying.value = 'second' // option 1
+saying.set('second');  // option 2
 
-
-
-// outputs hello, goodbye
+// outputs first, second
 ```
+
  Any computation will receive itself as the first parameter of its callback, which you use to do things like check if its the `firstRun` or call `stop()` to stop the computation.
 
 ```javascript
@@ -62,6 +61,7 @@ Reaction.create(comp => {
     comp.stop();
   }
 });
+saying.set('goodbye');
 ```
 
 ## Equality
