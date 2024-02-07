@@ -1,4 +1,4 @@
-import { formatDate } from '@semantic-ui/utils';
+import { toTitleCase, formatDate } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
 export const Helpers = {
@@ -7,6 +7,27 @@ export const Helpers = {
   },
   not: (a) => {
     return !a;
+  },
+  maybe(expr, trueClass = '', falseClass = '') {
+    return (expr) ? trueClass + ' ' : falseClass;
+  },
+  activeIf: (expr) => {
+    return Helpers.maybe(expr, 'active', '');
+  },
+  selectedIf: (expr) => {
+    return Helpers.maybe(expr, 'selected', '');
+  },
+  capitalize: (text = '') => {
+    return toTitleCase(text);
+  },
+  titleCase: (text = '') => {
+    return toTitleCase(text);
+  },
+  disabledIf: (expr) => {
+    return Helpers.maybe(expr, 'disabled', '');
+  },
+  checkedIf: (expr) => {
+    return Helpers.maybe(expr, 'checked', '');
   },
   isEqual: (a, b) => {
     return a == b;

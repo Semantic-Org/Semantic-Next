@@ -1,4 +1,5 @@
 import { clone, isEqual } from '@semantic-ui/utils';
+import { ReactiveVar } from './reactive-var.js';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
@@ -60,8 +61,11 @@ export class Reaction {
     Reaction.pendingReactions.delete(this);
   }
 
-  invalidate() {
+  invalidate(context) {
     this.active = true;
+    if(context) {
+      this.context = context;
+    }
     Reaction.pendingReactions.add(this);
     Reaction.scheduleFlush();
   }
@@ -98,7 +102,6 @@ export class Reaction {
     const comp = new Reaction(() => {
       newValue = f();
       if (!comp.firstRun && !isEqual(newValue, value)) {
-        console.log('dep changed', value);
         dep.changed();
       }
       value = clone(newValue);
@@ -106,5 +109,16 @@ export class Reaction {
     comp.run(); // Initial run to capture dependencies
     dep.depend(); // Create dependency on guard function
     return value;
+  }
+
+  static getSource() {
+    if (!Reaction.current || !Reaction.current.context || !Reaction.current.context.trace) {
+      console.log('No source available or no current reaction.');
+      return;
+    }
+    let trace = Reaction.current.context.trace;
+    trace = trace.split('\n').slice(3).join('\n');
+    trace = `Reaction triggered by:\n${trace}`;
+    console.info(trace);
   }
 }

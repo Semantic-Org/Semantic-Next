@@ -1,1 +1,1 @@
-export * from './todo-list.js';
+export { TodoList } from './todo-list.js';

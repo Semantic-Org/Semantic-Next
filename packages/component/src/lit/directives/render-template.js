@@ -1,7 +1,7 @@
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { mapObject } from '@semantic-ui/utils';
+import { fatal, mapObject } from '@semantic-ui/utils';
 
 // Define directive
 class RenderTemplate extends AsyncDirective {
@@ -12,46 +12,57 @@ class RenderTemplate extends AsyncDirective {
     this.part = null;
   }
   render({getTemplateName, subTemplates, data, parentTemplate}) {
-    const getTemplate = () => {
-      const templateName = getTemplateName();
-      const template = subTemplates[templateName];
-      return template;
-    };
-    const renderTemplate = (template, data) => {
-      return template.render(data);
-    };
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
+    };
+    const cloneTemplate = () => {
+      const templateName = getTemplateName();
+      if(this.template && this.templateName == templateName) {
+        return false;
+      }
+      this.templateName = templateName;
+      const template = subTemplates[templateName];
+      if(!template) {
+        fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
+      }
+      this.template = template.clone({ data: unpackData(data) });
+      return true;
+    };
+    const attachTemplate = () => {
+      const { parentNode, startNode, endNode} = this.part; // stored from update
+      const renderRoot = this.part.options.host?.renderRoot;
+      this.template.attach(renderRoot, { parentNode, startNode, endNode });
+      if(parentTemplate) {
+        this.template.setParent(parentTemplate);
+      }
+    };
+    const renderTemplate = () => {
+      let html = this.template.render();
+      return html;
     };
     Reaction.create((comp) => {
       if(!this.isConnected) {
         comp.stop();
         return;
       }
-      const template = getTemplate();
-      const templateData = unpackData(data); // data is stored in functions to properly bind to reactivity
-      if(template) {
-        this.template = template;
-        const { parentNode, startNode, endNode} = this.part; // stored from update
-        const renderRoot = this.part.options.host?.renderRoot;
-        template.attach(renderRoot, { parentNode, startNode, endNode });
-      }
-      // used for foo.parent()
-      if(parentTemplate) {
-        template.setParent(parentTemplate);
-      }
+      const isCloned = cloneTemplate(); // reactive reference
       if(!comp.firstRun) {
-        this.setValue(renderTemplate(template, templateData));
+        attachTemplate();
+        if(!isCloned) {
+          this.template.setDataContext(unpackData(data));
+        }
+        this.setValue(renderTemplate());
       }
     });
-    const template = getTemplate();
-    const templateData = unpackData(data);
-    return renderTemplate(template, templateData);
+    cloneTemplate();
+    attachTemplate();
+    this.template.setDataContext(unpackData(data));
+    return renderTemplate();
   }
 
-  update(part, renderSettings) {
+  update(part, settings) {
     this.part = part;
-    return this.render.apply(this, renderSettings);
+    return this.render.apply(this, settings);
   }
 
   reconnected() {

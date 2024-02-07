@@ -6,6 +6,8 @@ theme.config
 semantic.json
 tasks/**/oauth.js
 playwright_report/
+dev/examples/
+dev/ui/
 
 # Numerous always-ignore extensions
 *.diff

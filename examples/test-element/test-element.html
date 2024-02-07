@@ -1,5 +1,4 @@
 <div class="test-element">
-
   <div class="{{maybeActive 'basic'}} tab" data-tab="basic">
     Basic
   </div>
@@ -11,20 +10,16 @@
   <button class="morning">Change Morning Activity</button>
   <button class="evening">Change Evening Activity</button>
 
-  {{#if is tab 'basic'}}
-    {{> template
-      name=tab
-      reactiveData={
-        morning: morningActivity,
-      }
-      data= {
-        afternoon: 'Biking',
-        evening: eveningActivity,
-      }
-      camera='nikon'
-    }}
-  {{else if is tab 'events'}}
-    {{> events morning='running' afternoon='biking' evening='crying'}}
-  {{/if}}
+  {{> template
+    name=tab
+    reactiveData={
+      morning: morningActivity,
+    }
+    data={
+      afternoon: 'Biking',
+      evening: eveningActivity,
+    }
+    camera='nikon'
+  }}
 
 </div>

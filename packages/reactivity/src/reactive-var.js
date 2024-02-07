@@ -1,4 +1,4 @@
-import { clone, isEqual } from '@semantic-ui/utils';
+import { clone, isObject, isEqual, findIndex, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
@@ -29,7 +29,7 @@ export class ReactiveVar {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = clone(newValue);
-      this.dependency.changed();
+      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
 
@@ -40,7 +40,7 @@ export class ReactiveVar {
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
-      this.dependency.changed();
+      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
 
@@ -52,11 +52,7 @@ export class ReactiveVar {
   }
 
   peek() {
-    const currentReaction = Reaction.current;
-    Reaction.current = null;
-    const value = this._value;
-    Reaction.current = currentReaction;
-    return value;
+    return this.currentValue;
   }
 
   addListener(listener) {
@@ -83,15 +79,74 @@ export class ReactiveVar {
     arr.splice(...args);
     this.set(arr);
   }
-  setItem(index, value) {
+  setIndex(index, value) {
     let arr = this.value;
     arr[index] = value;
     this.set(arr);
   }
-  removeItem(index) {
+  removeIndex(index) {
     let arr = this.value;
     arr.splice(index, 1);
     this.set(arr);
+  }
+
+  // sets
+  setArrayProperty(indexOrProperty, property, value) {
+    let index;
+    if(isNumber(indexOrProperty)) {
+      index = indexOrProperty;
+    }
+    else {
+      index = 'all';
+      value = property;
+      property = indexOrProperty;
+    }
+    const newValue = clone(this.currentValue).map((object, currentIndex) => {
+      if(index == 'all' || currentIndex == index) {
+        object[property] = value;
+      }
+      return object;
+    });
+    this.set(newValue);
+  }
+
+  changeItems(mapFunction) {
+    const newValue = clone(this.currentValue).map(mapFunction);
+    this.set(newValue);
+  }
+  removeItems(filterFunction) {
+    const newValue = clone(this.currentValue).filter((value) => !filterFunction(value));
+    this.set(newValue);
+  }
+
+  toggle() {
+    return this.set(!this.value);
+  }
+
+  getIDs(item) {
+    if(isObject(item)) {
+      return [item?._id, item?.id, item?.hash, item?.key].filter(Boolean);
+    }
+    return [item];
+  }
+  getID(item) {
+    return this.getIDs(item).filter(Boolean)[0];
+  }
+  hasID(item, id) {
+    return this.getID(item) === id;
+  }
+  getIndex(id) {
+    return findIndex(this.currentValue, item => this.hasID(item, id));
+  }
+  setProperty(id, property, value) {
+    const index = this.getIndex(id);
+    return this.setArrayProperty(index, property, value);
+  }
+  setItem(id, item) {
+    return this.setIndex(this.getIndex(id), item);
+  }
+  removeItem(id) {
+    return this.removeIndex(this.getIndex(id));
   }
 
 }

@@ -58,7 +58,7 @@ const events = {
     tpl.persons.unshift(tpl.getPerson());
   },
   'click .replace.second'(event, tpl) {
-    tpl.persons.setItem(1, tpl.getPerson());
+    tpl.persons.setIndex(1, tpl.getPerson());
   },
   'click .remove.front'(event, tpl) {
     tpl.persons.removeItem(0);

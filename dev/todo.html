@@ -12,8 +12,25 @@
   <title>Todo</title>
   <script src="./examples/todo-list.js" type="module"></script>
 </head>
+<style>
+  body {
+    font: 14px Helvetica Neue,Helvetica,Arial,sans-serif;
+    line-height: 1.4em;
+    background: #f5f5f5;
+    color: #111;
+    min-width: 230px;
+    max-width: 550px;
+    margin: 0 auto;
+    font-weight: 300;
+  }
+  body todo-list {
+    display: block;
+    background: #fff;
+    margin: 130px 0 40px;
+    position: relative;
+    box-shadow: 0 2px 4px #0003,0 25px 50px #0000001a
+  }
+</style>
 <body>
-  <div class="container">
-    <todo-list></todo-list>
-  </div>
+  <todo-list test="west"></todo-list>
 </body>

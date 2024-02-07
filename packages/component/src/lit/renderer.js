@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -117,10 +117,15 @@ export class LitRenderer {
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
       if(key == 'over') {
-        return () => this.evaluateExpression(value, data);
+        return (expressionString) => {
+          const computedValue = this.evaluateExpression(value, data);
+          return computedValue;
+        };
       }
       if(key == 'content') {
-        return (eachData) => this.renderContent({ast: value, data: eachData});
+        return (eachData) => {
+          return this.renderContent({ast: value, data: { ...data, ...eachData } });
+        };
       }
       return value;
     };
@@ -129,7 +134,10 @@ export class LitRenderer {
   }
 
   evaluateTemplate(node, data = {}) {
-    const getValue = (value) => this.evaluateExpression(value, data);
+    const getValue = (expressionString) => {
+      const value = this.evaluateExpression(expressionString, data);
+      return value;
+    };
 
     // template names can be dynamic
     const getTemplateName = () => getValue(node.name);
@@ -192,8 +200,11 @@ export class LitRenderer {
     each(expressions, (expression, index) => {
 
       // This lookups a deep value in an object, calling any intermediary functions
-      const getValue = (obj, path) => path.split('.').reduce((acc, part) => {
+      const getDeepValue = (obj, path) => path.split('.').reduce((acc, part) => {
         const current = wrapFunction(acc)();
+        if(current == undefined) {
+          fatal(`Error evaluating expression "${expressionString}"`);
+        }
         return current[part];
       }, obj);
 
@@ -201,11 +212,11 @@ export class LitRenderer {
       // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
       const getContext = () => {
         const path = expression.split('.').slice(0, -1).join('.');
-        const context = getValue(data, path);
+        const context = getDeepValue(data, path);
         return context;
       };
 
-      let dataValue = getValue(data, expression);
+      let dataValue = getDeepValue(data, expression);
       const helper = LitRenderer.helpers[expression];
       // check if we have a global helper with this name
       if(!dataValue && isFunction(helper)) {
@@ -218,7 +229,7 @@ export class LitRenderer {
         const boundFunc = dataValue.bind( getContext() );
         result = boundFunc(...funcArguments);
       }
-      else if(dataValue) {
+      else if(dataValue !== undefined) {
         result = (dataValue?.constructor.name === '_ReactiveVar')
           ? dataValue.value
           : dataValue

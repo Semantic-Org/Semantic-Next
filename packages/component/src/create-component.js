@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { unique, each, noop, get, reverseKeys } from '@semantic-ui/utils';
+import { unique, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
@@ -48,8 +48,10 @@ export const createComponent = ({
     or as a naked template. In the case of a naked template this is typically
     a sub template of another web component
   */
+  console.log('creating template', templateName || kebabToCamel(tagName));
   let litTemplate = new LitTemplate({
-    templateName: templateName || tagName,
+    templateName: templateName || kebabToCamel(tagName),
+    prototype: true,
     ast,
     css,
     events,
@@ -89,7 +91,9 @@ export const createComponent = ({
             class: { type: String }
           };
         }
-        return {};
+        return {
+          //test: { type: String }
+        };
       }
 
       constructor() {
@@ -99,7 +103,7 @@ export const createComponent = ({
 
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
-        this.call(onCreated);
+        this.renderCallbacks = [];
       }
 
       // callback when added to dom
@@ -114,10 +118,18 @@ export const createComponent = ({
         this.call(onRendered);
       }
 
+      updated() {
+        each(this.renderCallbacks, callback => callback());
+      }
+
+      addRenderCallback(callback) {
+        this.renderCallbacks.push(callback);
+      }
+
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
-        litTemplate.removeEvents();
+        litTemplate.onDestroyed();
         this.call(onDestroyed);
       }
 
@@ -143,23 +155,26 @@ export const createComponent = ({
       */
       adjustSettingFromAttribute(attribute, value) {
         const spec = FAKE_SPEC; // TESTING FOR NOW
-        if(attribute == 'class') {
-          // this is syntax <ui-button class="large primary"></ui-button>
-          each(value.split(' '), className => {
-            this.adjustSettingFromAttribute(className);
-          });
-        }
-        else if(get(spec.attribute, attribute)) {
-          // we dont need to set anything here obj reflection handles this
-        }
-        else {
-          // go from large -> size, or primary -> emphasis
-          // we reverse obj key/value then check lookup
-          const setting = get(reverseKeys(spec.settings), attribute);
-          if(setting) {
-            const oldValue = this[setting];
-            this[setting] = attribute;
-            this.attributeChangedCallback(setting, oldValue, attribute);
+        if(spec) {
+          if(attribute == 'class') {
+            // this is syntax <ui-button class="large primary"></ui-button>
+            each(value.split(' '), className => {
+              this.adjustSettingFromAttribute(className);
+            });
+          }
+          else if(get(spec?.attribute, attribute)) {
+            // we dont need to set anything here obj reflection handles this
+          }
+          else {
+            // go from large -> size, or primary -> emphasis
+            // we reverse obj key/value then check lookup
+            const setting = get(reverseKeys(spec.settings), attribute);
+            if(setting) {
+              const oldValue = this[setting];
+              const newValue = attribute;
+              this[setting] = newValue;
+              this.attributeChangedCallback(setting, oldValue, newValue);
+            }
           }
         }
       }

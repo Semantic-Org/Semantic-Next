@@ -1,6 +1,6 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { fatal, each, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
+import { fatal, each, remove, generateID, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
@@ -19,6 +19,7 @@ export const LitTemplate = class UITemplate {
     subTemplates,
     createInstance,
     parentTemplate, // the parent template when nested
+    prototype = false,
     onCreated = noop,
     onRendered = noop,
     onDestroyed = noop
@@ -34,17 +35,27 @@ export const LitTemplate = class UITemplate {
     this.ast = ast;
     this.css = css;
     this.data = data || {};
-    this.templateName = templateName || getGenericTemplateName();
+    this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
+    this.id = generateID();
+    this.isPrototype = prototype;
+    LitTemplate.addTemplate(this);
+  }
+
+  setDataContext(data) {
+    this.data = data;
+    this.tpl.data = data;
+    this.rendered = false;
   }
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
-    return this.parentTemplate = parentTemplate;
+    parentTemplate._childTemplates.push(this);
+    this.parentTemplate = parentTemplate;
   }
 
   getGenericTemplateName() {
@@ -62,9 +73,18 @@ export const LitTemplate = class UITemplate {
     // reactions bound with tpl.reaction will be scoped to template
     // and be removed when the template is destroyed
     this.tpl.reaction = this.reaction;
+    if(isFunction(tpl.initialize)) {
+      this.call(tpl.initialize.bind(this));
+    }
+    this.tpl.data = this.data;
+    this.tpl._childTemplates = [];
+    this.tpl.$ = this.$;
     this.tpl.templateName = this.templateName;
     // this is a function to avoid naive cascading reactivity
-    this.tpl.parent = () => this.parentTemplate;
+    this.tpl.findTemplate = LitTemplate.findTemplate;
+    this.tpl.parent = (templateName) => LitTemplate.findParentTemplate(this, templateName);
+    this.tpl.child = (templateName) => LitTemplate.findChildTemplate(this, templateName);
+    this.tpl.children = (templateName) => LitTemplate.findChildTemplates(this, templateName);
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback.bind(this));
@@ -76,27 +96,38 @@ export const LitTemplate = class UITemplate {
       this.call(this.onRenderedCallback.bind(this));
     };
     this.onDestroyed = () => {
+      LitTemplate.removeTemplate(this);
       this.rendered = false;
       this.clearReactions();
       this.removeEvents();
       this.call(this.onDestroyedCallback.bind(this));
     };
 
+    this.initialized = true;
+
     this.renderer = new LitRenderer({
       ast: this.ast,
       data: this.getDataContext(),
       subTemplates: this.subTemplates,
     });
+
+    this.onCreated();
   }
 
   async attach(renderRoot, { parentNode = renderRoot, startNode, endNode } = {}) {
+    if(!this.initialized) {
+      this.initialize();
+    }
+    if(this.renderRoot == renderRoot) {
+      return;
+    }
+
     // to attach styles & events
     this.renderRoot = renderRoot;
     // to determine if event occurred on template
     this.parentNode = parentNode;
     this.startNode = startNode;
     this.endNode = endNode;
-
     this.attachEvents();
     await this.attachStyles();
   }
@@ -130,16 +161,47 @@ export const LitTemplate = class UITemplate {
     }
   }
 
+  clone(settings) {
+    const defaultSettings = {
+      templateName: this.templateName,
+      ast: this.ast,
+      css: this.css,
+      events: this.events,
+      subTemplates: this.subTemplates,
+      onCreated: this.onCreatedCallback,
+      onRendered: this.onRenderedCallback,
+      onDestroyed: this.onDestroyedCallback,
+      createInstance: this.createInstance
+    };
+    return new LitTemplate({
+      ...defaultSettings,
+      ...settings,
+    });
+  }
+
   attachEvents(events = this.events) {
     if(!this.parentNode || !this.renderRoot) {
       fatal('You must set a parent before attaching events');
     }
+    this.removeEvents();
     // format like 'click .foo baz'
     const parseEventString = (eventString) => {
       const parts = eventString.split(' ');
-      const eventName = parts[0];
+      let eventName = parts[0];
       parts.shift();
       const selector = parts.join(' ');
+      const bubbleMap = {
+        blur: 'focusout',
+        focus: 'focusin',
+        //change: 'input',
+        load: 'DOMContentLoaded',
+        unload: 'beforeunload',
+        mouseenter: 'mouseover',
+        mouseleave: 'mouseout'
+      };
+      if(bubbleMap[eventName]) {
+        eventName = bubbleMap[eventName];
+      }
       return { eventName, selector };
     };
 
@@ -152,10 +214,20 @@ export const LitTemplate = class UITemplate {
         if(!this.isNodeInTemplate(event.target)) {
           return;
         }
+        // this is
+        if ((eventName === 'mouseover' || eventName === 'mouseout') && event.relatedTarget && event.target.contains(event.relatedTarget)) {
+          return;
+        }
         const boundEvent = eventHandler.bind(event.target);
         template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
       }, this.eventController);
     });
+  }
+
+  removeEvents() {
+    if(this.eventController) {
+      this.eventController.abort();
+    }
   }
 
   // Find the direct child of the renderRoot that is an ancestor of the event.target
@@ -171,6 +243,9 @@ export const LitTemplate = class UITemplate {
       if(!startNode || !endNode) {
         return true;
       }
+      if(node === null) {
+        return;
+      }
       const startComparison = startNode.compareDocumentPosition(node);
       const endComparison = endNode.compareDocumentPosition(node);
 
@@ -185,18 +260,9 @@ export const LitTemplate = class UITemplate {
     return isNodeInRange(getRootChild(node));
   }
 
-  attachEvent(eventHandler, eventString) {
-
-  }
-
-  removeEvents() {
-    this.eventController.abort();
-  }
-
   render(additionalData = {}) {
-    if(!this.renderer) {
+    if(!this.initialized) {
       this.initialize();
-      this.onCreated();
     }
     const html = this.renderer.render({
       data: {
@@ -205,7 +271,7 @@ export const LitTemplate = class UITemplate {
       }
     });
     if(!this.rendered) {
-      this.onRendered();
+      setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
     return html;
@@ -217,11 +283,16 @@ export const LitTemplate = class UITemplate {
 
 
   // Rendered DOM (either shadow or regular)
-  $(selector) {
-    if(!this.renderRoot) {
-      fatal('Cannot query DOM unless render root specified.');
+  $(selector, root = this.renderRoot) {
+    if(!root) {
+      root = document;
     }
-    return $(selector, this.renderRoot);
+    if(root == this.renderRoot) {
+      return $(selector, root).filter(node => this.isNodeInTemplate(node));
+    }
+    else {
+      return $(selector, root);
+    }
   }
 
   // calls callback if defined with consistent params and this context
@@ -252,5 +323,69 @@ export const LitTemplate = class UITemplate {
     each(this.reactions || [], comp => comp.stop());
   }
 
+  static renderedTemplates = new Map();
+
+  static addTemplate(template) {
+    if(template.isPrototype) {
+      return;
+    }
+    let templates = LitTemplate.renderedTemplates.get(template.templateName) || [];
+    templates.push(template);
+    LitTemplate.renderedTemplates.set(template.templateName, templates);
+  }
+  static removeTemplate(template) {
+    if(template.isPrototype) {
+      return;
+    }
+    let templates = LitTemplate.renderedTemplates.get(template.templateName) || [];
+    remove(templates, template);
+    LitTemplate.renderedTemplates.set(templates);
+  }
+  static getTemplates(templateName) {
+    let templates = LitTemplate.renderedTemplates.get(templateName) || [];
+    if(templates.length > 1) {
+      return templates;
+    }
+    if(templates.length == 1) {
+      return templates[0];
+    }
+  }
+  static findTemplate(templateName) {
+    return LitTemplate.getTemplates(templateName)[0];
+  }
+  static findParentTemplate(template, templateName) {
+    let match;
+    if(templateName) {
+      while(template) {
+        template = template.parentTemplate;
+        if(template?.templateName == templateName) {
+          match = template;
+          break;
+        }
+      }
+      return match;
+    }
+    return template.parentTemplate;
+  }
+
+  static findChildTemplates(template, templateName) {
+    let result = [];
+    // recursive lookup
+    function search(template, templateName) {
+      if (template.templateName === templateName) {
+        result.push(template.tpl);
+      }
+      if (template.tpl._childTemplates) {
+        template.tpl._childTemplates.forEach(childTemplate => {
+          search(childTemplate, templateName);
+        });
+      }
+    }
+    search(template, templateName);
+    return result;
+  }
+  static findChildTemplate(template, templateName) {
+    return LitTemplate.findChildTemplates(template, templateName)[0];
+  }
 
 };

@@ -53,6 +53,10 @@ export const isString = (x) => {
   return typeof x == 'string';
 };
 
+export const isNumber = (x) => {
+  return typeof x == 'number';
+};
+
 export const isArray = (x) => {
   return Array.isArray(x);
 };
@@ -74,7 +78,7 @@ export const isArguments = function(obj) {
 };
 
 /*-------------------
-      Date
+        Date
 --------------------*/
 
 export const formatDate = function(date, format) {
@@ -116,7 +120,7 @@ export const formatDate = function(date, format) {
   return expandedFormat.replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g, (match) => {
     return dateMap[match];
   }).replace(/\[(.*?)\]/g, (match, p1) => p1);
-}
+};
 
 /*-------------------
       Functions
@@ -141,12 +145,22 @@ export const wrapFunction = (x) => {
 /*
   HTML Attributes -> JS Properties
 */
-export const kebabToCamel = (str) => {
-  return str.replace(/-([a-z])/g, (g) => {
-    return g[1].toUpperCase();
-  });
+
+// attr-name to varName
+export const kebabToCamel = (str = '') => {
+  return str.replace(/-./g, (m) => m[1].toUpperCase());
 };
 
+export const camelToKebab = (str = '') => {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+};
+
+export const toTitleCase = (str = '') => {
+  return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
+    .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
+    .replace(/\b(\w)/g, (match) => match.toUpperCase())
+  ;
+};
 
 /*-------------------
         Arrays
@@ -184,15 +198,40 @@ export const last = function(array, n, guard) {
 /*
   Iterate through returning first value
 */
-export const firstMatch = (array = [], evaluator) => {
+export const firstMatch = (array, callback) => {
   let result;
-  each(array, (value, name) => {
-    const shouldReturn = evaluator(value, name);
-    if(!result && shouldReturn == true) {
+  each(array, (value, index) => {
+    if (callback(value, index, array)) {
       result = value;
+      return false;
     }
   });
   return result;
+};
+
+export const findIndex = (array, callback) => {
+  let matchedIndex = -1;
+  each(array, (value, index) => {
+    if (callback(value, index, array)) {
+      matchedIndex = index;
+      return false;
+    }
+  });
+  return matchedIndex;
+};
+
+
+export const remove = (array, callbackOrValue) => {
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue)
+  ;
+  const index = findIndex(array, callback);
+  if(index > -1) {
+    array.splice(index, 1);
+    return true;
+  }
+  return false;
 };
 
 
@@ -209,7 +248,7 @@ export const range = (start, stop, step = 1) => {
   return Array(length).fill().map((x, index) => {
     return (index * step) + start;
   });
-}
+};
 
 /*-------------------
        Objects
@@ -381,36 +420,28 @@ export const clone = obj => {
   Simplify iterating over objects and arrays
 */
 export const each = (obj, func, context) => {
-  if(obj === null) {
+  if (obj === null) {
     return obj;
   }
 
-  let createCallback = (context, func) => {
-    if(context === void 0) {
-      return func;
-    }
-    else {
-      return (value, index, collection) => {
-        return func.call(context, value, index, collection);
-      };
-    }
-  };
+  const iteratee = context ? func.bind(context) : func;
 
-  let iteratee = createCallback(context, func);
-
-  let i;
-  if(obj.length === +obj.length) {
-    for (i=0; i < obj.length; ++i){
-      iteratee(obj[i], i, obj);
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; ++i) {
+      if (iteratee(obj[i], i, obj) === false) {
+        break; // Exit early if callback explicitly returns false
+      }
+    }
+  } else {
+    const objKeys = Object.keys(obj);
+    for (const key of objKeys) {
+      if (iteratee(obj[key], key, obj) === false) {
+        break; // Exit early if callback explicitly returns false
+      }
     }
   }
-  else {
-    let objKeys = keys(obj);
-    for (i = 0; i < objKeys.length; ++i){
-      iteratee(obj[objKeys[i]], objKeys[i], obj);
-    }
-  }
-  return obj;
+
+  return obj; // Return the original object
 };
 
 /*-------------------
@@ -428,6 +459,18 @@ export const escapeRegExp = function(string) {
 /*-------------------
       Identity
 --------------------*/
+
+export const prettifyID = (num) => {
+  num = parseInt(num, 10);
+  if (num === 0) return '0';
+  let result = '';
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  while (num > 0) {
+    result = chars[num % chars.length] + result;
+    num = Math.floor(num / chars.length);
+  }
+  return result;
+};
 
 /*
   Create a uniqueID from a string
@@ -501,23 +544,18 @@ export function hashCode(input) {
     return h1 >>> 0;
   };
 
-  const prettify = (num) => {
-    if (num === 0) return '0';
-    let result = '';
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    while (num > 0) {
-      result = chars[num % chars.length] + result;
-      num = Math.floor(num / chars.length);
-    }
-    return result;
-  };
 
   let hash;
   hash = murmurhash(str, seed); // fast and pretty good collisions
-  hash = prettify(hash); // pretty and easier to recognize
+  hash = prettifyID(hash); // pretty and easier to recognize
 
   return hash;
 }
+
+export const generateID = () => {
+  const num = Math.random() * 1000000000000000;
+  return prettifyID(num);
+};
 
 
 /*
@@ -604,7 +642,7 @@ export const isEqual = (a, b, options) => {
   } else {
     i = 0;
     ret = aKeys.every(key => {
-      if (!hasProperty(b, key)) {
+      if (!b[key]) {
         return false;
       }
       if (!isEqual(a[key], b[key], options)) {

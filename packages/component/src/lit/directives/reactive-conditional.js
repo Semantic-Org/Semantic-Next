@@ -1,4 +1,4 @@
-import { noChange, nothing } from 'lit';
+import { nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
@@ -39,7 +39,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
         });
       }
       else {
-        html = noChange;
+        html = nothing;
       }
       if(!comp.firstRun) {
         this.setValue(html);

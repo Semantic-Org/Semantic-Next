@@ -18,7 +18,7 @@ export class Query {
     } else if (typeof selector === 'string') {
       // String selector provided, find elements using querySelectorAll
       elements = root.querySelectorAll(selector);
-    } else if (selector instanceof Element || selector instanceof Document || selector instanceof DocumentFragment) {
+    } else if (selector instanceof Element || selector instanceof Document || selector === window || selector instanceof DocumentFragment) {
       // A single Element, Document, or DocumentFragment is provided
       elements = [selector];
     } else if (selector instanceof NodeList) {
@@ -47,22 +47,25 @@ export class Query {
     // If a selector is provided, filter the children
     const filteredChildren = selector ? allChildren.filter(child => child.matches(selector)) : allChildren;
 
-    // Return a new Query object with these children
     return new Query(filteredChildren);
   }
 
-  filter(selector) {
-    // Filter out elements that match the provided selector
-    const filteredElements = Array.from(this).filter(el => el.matches(selector));
+  filter(selectorOrFunction) {
+    let filteredElements = [];
 
-    // Return a new Query object with the filtered elements
+    if (typeof selectorOrFunction === 'string') {
+      // If a CSS selector is provided, use it with the matches method
+      filteredElements = Array.from(this).filter(el => el.matches(selectorOrFunction));
+    } else if (typeof selectorOrFunction === 'function') {
+      // If a function is provided, use it directly to filter elements
+      filteredElements = Array.from(this).filter(selectorOrFunction);
+    }
     return new Query(filteredElements);
   }
 
   not(selector) {
     // Filter out elements that match the provided selector
     const filteredElements = Array.from(this).filter(el => !el.matches(selector));
-    // Return a new Query object with the filtered elements
     return new Query(filteredElements);
   }
 
@@ -166,7 +169,8 @@ export class Query {
       Array.from(this).forEach(el => el.textContent = newText);
       return this;
     } else {
-      return Array.from(this).map(el => this.getTextContentRecursive(el.childNodes)).join('');
+      const values = Array.from(this).map(el => this.getTextContentRecursive(el.childNodes));
+      return (values.length > 1) ? values : values[0];
     }
   }
 
@@ -181,12 +185,13 @@ export class Query {
       return this;
     } else {
       // Get the value of each element
-      return Array.from(this).map(el => {
+      const values = Array.from(this).map(el => {
         if(el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
           return el.value;
         }
         return undefined;
       });
+      return (values.length > 1) ? values : values[0];
     }
   }
   // alias
@@ -206,7 +211,7 @@ export class Query {
       } else {
         return this.getTextContentRecursive(node.childNodes);
       }
-    }).join('');
+    }).join('').trim();
   }
 
   css(property, value) {
@@ -237,6 +242,12 @@ export class Query {
     }
     return this;
   }
+
+  removeAttr(attributeName) {
+    Array.from(this).forEach(el => el.removeAttribute(attributeName));
+    return this;
+  }
+
   each(callback) {
     Array.from(this).forEach((el, index) => {
       // Call the callback with 'this' context set to the current element
@@ -266,5 +277,13 @@ export class Query {
         .join('');
     }).join('');
   }
+
+  focus() {
+    return this[0].focus();
+  }
+  blur() {
+    return this[0].blur();
+  }
+
 
 }
