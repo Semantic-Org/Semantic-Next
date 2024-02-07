@@ -76,65 +76,6 @@ reactiveObj.set(obj2);
 
 ```
 
-### Array Mutation Helpers
-
-`ReactiveVar` includes a few helpers for some of the most common cases for manipulating arrays
-
-```javascript
-  let items = new ReactiveVar([0,1,2]);
-  tpl.items.removeIndex(1); // outputs 0, 2
-```
-```javascript
-  let items = new ReactiveVar([0,2,2]);
-  tpl.items.setIndex(1); // outputs 0, 1, 2
-```
-```javascript
-  let items = new ReactiveVar([0,1,2]);
-  tpl.items.unshift(); // outputs 1, 2
-```
-```javascript
-  let items = new ReactiveVar([0,1,2]);
-  tpl.items.push(3); // outputs 0, 1, 2, 3
-```
-
-### Array of Objects
-
-A very common pattern is having an array of rows of data.
-
-```javascript
-const tasks = new ReactiveVar([
-  { _id: 'task1_uuid', task: 'Implement feature', completed: true }
-  { _id: 'task2_uuid', task: 'Write Tests', completed: true }
-  { _id: 'task3_uuid', task: 'Write documentation', completed: false },
-]);
-```
-
-```javascript
-// sets 'write documentation' to complete
-tasks.setProperty('task3_uuid', 'completed', true);
-```
-
-```javascript
-// replaces task 1 with new task
-const newTask = { _id: 'tasks1_uuid', task: 'Reimplement feature', completed: false };
-tasks.replaceItem('task1_uuid', newTask)
-```
-
-```javascript
-// gets index of id
-const index = tasks.getIndex('tasks1_uuid')
-```
-
-```javascript
-// gets id from an item
-const id = tasks.getID(tasks.get()[0])
-```
-
-```javascript
-// remove task 2 from list
-tasks.removeItem('tasks2_uuid')
-```
-
 ### Property / Array Mutations
 
 Unlike Preact Signals or Lit Reactive Elements, ReactiveVar will consider mutations to properties or arrays to be updates. This greatly simplifies many simple cases of reactivity like updating lists.
@@ -373,4 +314,65 @@ let comp = Reaction.create(() => {
 });
 // both output 1,2,3
 
+```
+
+## Helper Functions
+
+### Array Mutation Helpers
+
+`ReactiveVar` includes a few helpers for some of the most common cases for manipulating arrays
+
+```javascript
+  let items = new ReactiveVar([0,1,2]);
+  tpl.items.removeIndex(1); // outputs 0, 2
+```
+```javascript
+  let items = new ReactiveVar([0,2,2]);
+  tpl.items.setIndex(1); // outputs 0, 1, 2
+```
+```javascript
+  let items = new ReactiveVar([0,1,2]);
+  tpl.items.unshift(); // outputs 1, 2
+```
+```javascript
+  let items = new ReactiveVar([0,1,2]);
+  tpl.items.push(3); // outputs 0, 1, 2, 3
+```
+
+### Array of Objects
+
+A very common pattern is having an array of rows of data.
+
+```javascript
+const tasks = new ReactiveVar([
+  { _id: 'task1_uuid', task: 'Implement feature', completed: true }
+  { _id: 'task2_uuid', task: 'Write Tests', completed: true }
+  { _id: 'task3_uuid', task: 'Write documentation', completed: false },
+]);
+```
+
+```javascript
+// sets 'write documentation' to complete
+tasks.setProperty('task3_uuid', 'completed', true);
+```
+
+```javascript
+// replaces task 1 with new task
+const newTask = { _id: 'tasks1_uuid', task: 'Reimplement feature', completed: false };
+tasks.replaceItem('task1_uuid', newTask)
+```
+
+```javascript
+// gets index of id
+const index = tasks.getIndex('tasks1_uuid')
+```
+
+```javascript
+// gets id from an item
+const id = tasks.getID(tasks.get()[0])
+```
+
+```javascript
+// remove task 2 from list
+tasks.removeItem('tasks2_uuid')
 ```
