@@ -68,6 +68,9 @@ export const LitTemplate = class UITemplate {
     // reactions bound with tpl.reaction will be scoped to template
     // and be removed when the template is destroyed
     this.tpl.reaction = this.reaction;
+    if(isFunction(tpl.initialize)) {
+      this.call(tpl.initialize.bind(this));
+    }
     this.tpl.data = this.data;
     this.tpl.$ = this.$;
     this.tpl.templateName = this.templateName;

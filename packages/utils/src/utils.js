@@ -198,16 +198,28 @@ export const last = function(array, n, guard) {
 /*
   Iterate through returning first value
 */
-export const firstMatch = (array = [], evaluator) => {
+export const firstMatch = (array, callback) => {
   let result;
-  each(array, (value, name) => {
-    const shouldReturn = evaluator(value, name);
-    if(!result && shouldReturn == true) {
+  each(array, (value, index) => {
+    if (callback(value, index, array)) {
       result = value;
+      return false;
     }
   });
   return result;
 };
+
+export const findIndex = (array, callback) => {
+  let matchedIndex = -1;
+  each(array, (value, index) => {
+    if (callback(value, index, array)) {
+      matchedIndex = index;
+      return false;
+    }
+  });
+  return matchedIndex;
+};
+
 
 
 export const inArray = (value, array = []) => {
@@ -223,7 +235,7 @@ export const range = (start, stop, step = 1) => {
   return Array(length).fill().map((x, index) => {
     return (index * step) + start;
   });
-}
+};
 
 /*-------------------
        Objects
@@ -395,36 +407,28 @@ export const clone = obj => {
   Simplify iterating over objects and arrays
 */
 export const each = (obj, func, context) => {
-  if(obj === null) {
+  if (obj === null) {
     return obj;
   }
 
-  let createCallback = (context, func) => {
-    if(context === void 0) {
-      return func;
-    }
-    else {
-      return (value, index, collection) => {
-        return func.call(context, value, index, collection);
-      };
-    }
-  };
+  const iteratee = context ? func.bind(context) : func;
 
-  let iteratee = createCallback(context, func);
-
-  let i;
-  if(obj.length === +obj.length) {
-    for (i=0; i < obj.length; ++i){
-      iteratee(obj[i], i, obj);
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; ++i) {
+      if (iteratee(obj[i], i, obj) === false) {
+        break; // Exit early if callback explicitly returns false
+      }
+    }
+  } else {
+    const objKeys = Object.keys(obj);
+    for (const key of objKeys) {
+      if (iteratee(obj[key], key, obj) === false) {
+        break; // Exit early if callback explicitly returns false
+      }
     }
   }
-  else {
-    let objKeys = keys(obj);
-    for (i = 0; i < objKeys.length; ++i){
-      iteratee(obj[objKeys[i]], objKeys[i], obj);
-    }
-  }
-  return obj;
+
+  return obj; // Return the original object
 };
 
 /*-------------------

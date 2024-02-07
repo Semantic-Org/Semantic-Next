@@ -130,7 +130,7 @@ export class LitRenderer {
       return value;
     };
     let eachArguments = mapObject(node, directiveMap);
-    return reactiveEach(eachArguments);
+    return reactiveEach(eachArguments, data);
   }
 
   evaluateTemplate(node, data = {}) {

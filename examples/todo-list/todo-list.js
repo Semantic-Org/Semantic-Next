@@ -9,12 +9,22 @@ import css from './todo-list.css';
 
 const createInstance = (tpl, $) => ({
 
+  initialize() {
+    let counter = 1;
+    while(counter < tpl.todoCount) {
+      const todo = {
+        _id: `id-${counter}`,
+        text: `Task #${counter}`,
+        completed: false,
+      };
+      counter++;
+      tpl.todos.push(todo);
+    }
+  },
+  todoCount: 2,
+
   // reactive state
-  todos: new ReactiveVar([
-    { _id: 'id-0', text: 'Another one 1', completed: false },
-    { _id: 'id-1', text: 'Another one 2', completed: false },
-    { _id: 'id-2', text: 'Another one 3', completed: false },
-  ]),
+  todos: new ReactiveVar([]),
   filter: new ReactiveVar('all'),
   allCompleted: new ReactiveVar(false),
 
@@ -24,6 +34,7 @@ const createInstance = (tpl, $) => ({
   getVisibleTodos() {
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
+    //console.log('getting todos');
     each(todos, (todo) => {
       if(!todo._id) {
         todo._id = todo.text;
@@ -90,10 +101,13 @@ const createInstance = (tpl, $) => ({
 
   // handle state
   addRouter() {
-    tpl.hashEvent = $(window).on('hashchange', (event) => {
-      let filter = window.location.hash.substring(2); // #/foo
-      tpl.filter.set(filter);
-    });
+    tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);
+  },
+  getRouteFilter() {
+    return window.location.hash.substring(2); // #/foo
+  },
+  setRouteFilter() {
+    tpl.filter.set( tpl.getRouteFilter());
   },
   removeRouter() {
     $(window).off(tpl.hashEvent);
@@ -104,6 +118,7 @@ const createInstance = (tpl, $) => ({
 const onCreated = (tpl) => {
   tpl.calculateAllCompleted();
   tpl.addRouter();
+  tpl.setRouteFilter();
 };
 
 const onDestroyed = (tpl) => {

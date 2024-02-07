@@ -9,15 +9,14 @@ const createInstance = (tpl, $) => ({
   toggleCompleted() {
     const todos = tpl.parent().todos;
     const todo = tpl.data.todo;
-    todos.setArrayProperty(tpl.data.index, 'completed', !todo.completed);
+    todos.setProperty(tpl.data.todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
     const todos = tpl.parent().todos;
-    todos.setArrayProperty(tpl.data.index, 'text', text);
+    todos.setProperty(tpl.data.todo._id, 'text', text);
   },
   removeTodo() {
-    console.log('removing todo', tpl.data.index)
-    tpl.parent().todos.removeIndex(tpl.data.index);
+    tpl.parent().todos.removeItem(tpl.data.todo._id);
   }
 });
 

@@ -1,4 +1,4 @@
-import { clone, isEqual, isNumber } from '@semantic-ui/utils';
+import { clone, isObject, isEqual, findIndex, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
@@ -79,7 +79,7 @@ export class ReactiveVar {
     arr.splice(...args);
     this.set(arr);
   }
-  setItem(index, value) {
+  setIndex(index, value) {
     let arr = this.value;
     arr[index] = value;
     this.set(arr);
@@ -88,20 +88,6 @@ export class ReactiveVar {
     let arr = this.value;
     arr.splice(index, 1);
     this.set(arr);
-  }
-  removeItem(id) {
-    let matchIndex;
-    let arr = this.value;
-    arr.forEach((item, index) => {
-      const ids = [item, item?._id, item?.id, item?.hash].filter(Boolean);
-      if(ids.indexOf(id) > -1) {
-        matchIndex = index;
-      }
-    });
-    if(matchIndex >= 0) {
-      arr.splice(matchIndex, 1);
-      this.set(arr);
-    }
   }
 
   // sets
@@ -135,6 +121,32 @@ export class ReactiveVar {
 
   toggle() {
     return this.set(!this.value);
+  }
+
+  getIDs(item) {
+    if(isObject(item)) {
+      return [item?._id, item?.id, item?.hash, item?.key].filter(Boolean);
+    }
+    return [item];
+  }
+  getID(item) {
+    return this.getIDs(item).filter(Boolean)[0];
+  }
+  hasID(item, id) {
+    return this.getID(item) === id;
+  }
+  getIndex(id) {
+    return findIndex(this.currentValue, item => this.hasID(item, id));
+  }
+  setProperty(id, property, value) {
+    const index = this.getIndex(id);
+    return this.setArrayProperty(index, property, value);
+  }
+  setItem(id, item) {
+    return this.setIndex(this.getIndex(id), item);
+  }
+  removeItem(id) {
+    return this.removeIndex(this.getIndex(id));
   }
 
 }

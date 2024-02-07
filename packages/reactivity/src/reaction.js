@@ -1,4 +1,5 @@
 import { clone, isEqual } from '@semantic-ui/utils';
+import { ReactiveVar } from './reactive-var.js';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
@@ -101,7 +102,6 @@ export class Reaction {
     const comp = new Reaction(() => {
       newValue = f();
       if (!comp.firstRun && !isEqual(newValue, value)) {
-        console.log('dep changed', value);
         dep.changed();
       }
       value = clone(newValue);

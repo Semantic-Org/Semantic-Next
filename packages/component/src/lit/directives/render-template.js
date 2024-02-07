@@ -12,14 +12,13 @@ class RenderTemplate extends AsyncDirective {
     this.part = null;
   }
   render({getTemplateName, subTemplates, data, parentTemplate}) {
-    console.log('rendering template', data);
+    //console.log('rendering template', data);
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
       const templateName = getTemplateName();
       if(this.template && this.templateName == templateName) {
-        console.log('use cached');
         return false;
       }
       this.templateName = templateName;
@@ -48,7 +47,6 @@ class RenderTemplate extends AsyncDirective {
         return;
       }
       const isCloned = cloneTemplate(); // reactive reference
-      console.log('updating template', data);
       if(!comp.firstRun) {
         attachTemplate();
         if(!isCloned) {
