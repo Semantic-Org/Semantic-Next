@@ -184,14 +184,16 @@ export const filterEmpty = (arr) => {
 /*
   Get last element from array
 */
-export const last = function(array, n, guard) {
-  if(!Array.isArray(array)) {
-    return;
-  }
-  if ((!n) || guard) {
-    return array[array.length - 1];
+export const last = (array, number = 1) => {
+  const { length } = array;
+  if (!length) return;
+
+  if (number === 1) {
+    // Return the last element
+    return array[length - 1];
   } else {
-    return slice.call(array, Math.max(array.length - n, 0));
+    // Return the last number elements as a new array
+    return array.slice(Math.max(length - number, 0));
   }
 };
 
@@ -561,9 +563,8 @@ export const generateID = () => {
 /*
   Determine if two objects are equal
 */
-export const isEqual = (a, b, options) => {
+export const isEqual = (a, b, { keyOrderSensitive = false } = {}) => {
   let i;
-  const keyOrderSensitive = !!(options && options.keyOrderSensitive);
   if (a === b) {
     return true;
   }

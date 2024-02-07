@@ -4,51 +4,66 @@
 
 Utils has three primary advantages over custom implementations.
 
-* **Tree Shaking** -  Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones. This means smaller bundled size when using more than one component together in a bundle.
+- **Tree Shaking** - Many components will need to do similar things. When these components are bundled together its more efficient for them to reference a single code implementation than several unique ones. This means smaller bundled size when using more than one component together in a bundle.
 
-* **Code Readability** -  Utility libraries offer a level of familiarity and consistency that can be missing with native ECMAScript features. Removing rough edges reduces the learning curve when looking at unfamiliar code so you can focus on the intention not the implementation.
+- **Code Readability** - Utility libraries offer a level of familiarity and consistency that can be missing with native ECMAScript features. Removing rough edges reduces the learning curve when looking at unfamiliar code so you can focus on the intention not the implementation.
 
-* **Gotcha Handling** - More Robust Implementations: When using utility libraries for common operations like object manipulation, you're not just avoiding gotchas (consider non-enumerated properties with object manipulation like extend/clone.); you're also leveraging a community-tested solution. These libraries often include safeguards against edge cases and peculiarities of JavaScript that a typical custom implementation might overlook. This results in more robust code, reducing the likelihood of bugs related to subtle language intricacies.
+- **Gotcha Handling** - More Robust Implementations: When using utility libraries for common operations like object manipulation, you're not just avoiding gotchas (consider non-enumerated properties with object manipulation like extend/clone.); you're also leveraging a community-tested solution. These libraries often include safeguards against edge cases and peculiarities of JavaScript that a typical custom implementation might overlook. This results in more robust code, reducing the likelihood of bugs related to subtle language intricacies.
 
-Utility includes the following helpers
+Utility includes the following helpers:
 
 ### Arrays
-* `uniq(arr)` - Removes duplicates from arrays
-* `clone(arr)` - Recursively clone an array
-* `filterEmpty(arr)` - Removes falsey values from array
-* `last(arr)` - Returns last element from array
-* `each(arr, eachFunction(value, index))` - Iterates over an array calling function with each value and index
-* `firstMatch(arr, matchFunction(value, index))` - Returns the first value returning `true` from matchFunction
-* `inArray(value, array)` - Returns whether a value is present in array
+- `unique(arr)` - Removes duplicates from arrays.
+- `filterEmpty(arr)` - Removes falsey values from an array.
+- `last(array, number)` - Returns last (n) elements from array
+- `firstMatch(array, callback)` - Returns the first value that matches the provided callback function.
+- `findIndex(array, callback)` - Finds the index of the first element in the array that satisfies the provided callback function. Returns -1 if no match is found.
+- `remove(array, callbackOrValue)` - Removes elements from an array that match the given callback function or value.
+- `inArray(value, array)` - Returns whether a value is present in an array.
+- `range(start, stop, step)` - Creates an array of numbers (positive and/or negative) progressing from start up to, but not including, end.
 
 ### Objects
-* `keys(obj)` - Return the keys of an object
-* `pick(obj, ...keys)` - Returns a new object with specified keys from object
-* `clone(obj)` - Recursively clone an object
-* `each(arr, eachFunction(value, key))` - Iterates over an object calling function with each value and key
-* `extend(obj, ...sources)` - Adds new values to an object. This avoids the common trap of nuking getter/setters.
-* `get(obj, searchTerm)` - Allows you to query for deeply nested values with dot notation. i.e. `get(obj, 'deep.nested.value')`
-* `hasProperty(obj)` - Object has a property that was not inherited. i.e. hasProperty('toString') will be false but `obj['toString']` will be true
-
-### Regular Expressions
-* `escapeRegExp` - Escapes special values for use inside regular expressions
-
-### Strings
-* `kebabToCamel` - Change 'one-two' to 'oneTwo'
-
-### Functions
-* `noop` - Returns an empty function to avoid overhead of creating new anonymous function
-* `wrapFunction(unknown)` - Returns either the function or an empty function. Useful to avoid erroring when invoking something which may or may not be a function.
+- `keys(obj)` - Return the keys of an object.
+- `values(obj)` - Return the values of an object.
+- `mapObject(obj, callback)` - Creates an object with the same keys as object and values generated by running each own enumerable string keyed property of object thru iteratee.
+- `extend(obj, ...sources)` - Extends an object with properties from additional sources, handling getters and setters properly.
+- `pick(obj, ...keys)` - Creates an object composed of the picked object properties.
+- `get(obj, string)` - Access a nested object field with a string, like 'a.b.c'.
+- `hasProperty(obj, prop)` - Return true if the object has the specified property.
+- `reverseKeys(obj)` - Reverses a lookup object's keys and values.
 
 ### Types
-* `isObject(x)` - Is something that presents as an object. This has some gotchas like array, regular expression, and null are `typeof 'object'`.
-* `isPlainObject(x)` - Is a regular object (not including gotchas)
-* `isBinary(x)` - Is data binary
-* `isArray(x)` - Is array
-* `isPromise` - Is a promise
-* `isString` - Is a string
-* `isArguments*` - Is function arguments
+- `isObject(x)` - Checks if the value is an object.
+- `isPlainObject(x)` - Checks if the value is a plain object.
+- `isString(x)` - Checks if the value is a string.
+- `isNumber(x)` - Checks if the value is a number.
+- `isArray(x)` - Checks if the value is an array.
+- `isBinary(x)` - Checks if the value is binary (Uint8Array).
+- `isFunction(x)` - Checks if the value is a function.
+- `isPromise(x)` - Checks if the value is a promise.
+- `isArguments(obj)` - Checks if the value is an arguments object.
+
+### Date
+- `formatDate(date, format)` - Formats a date object into a string based on the provided format.
+
+### Functions
+- `noop()` - A no-operation function for use as a default callback.
+- `wrapFunction(x)` - Wraps a value in a function, returning a no-op function if the value is not a function.
+
+### Strings
+- `kebabToCamel(str)` - Converts a kebab-case string to camelCase.
+- `camelToKebab(str)` - Converts a camelCase string to kebab-case.
+- `toTitleCase(str)` - Converts a string to title case.
+
+### Regular Expressions
+- `escapeRegExp(string)` - Escapes special characters in a string for use in a regular expression.
 
 ### Identity
-* `hashCode(input)` - Return a 32bit integer hash of an array, object or string.
-* `isEqual(a, b)` - Returns whether most things are equal in a way reasonable to humans. This avoids most common gotchas of equality like two dates of same time not being equal.
+- `prettifyID(num)` - Converts a numeric ID into a more human-readable string format.
+- `hashCode(input)` - Creates a hash code from a string, object, or array.
+- `generateID()` - Generates a pseudo-random unique identifier.
+- `isEqual(a, b)` - Deep compares two values to determine if they are equivalent.
+
+### Errors
+- `fatal(message, options)` - Throws a custom error asynchronously, allowing for metadata and stack trace modifications.
+
