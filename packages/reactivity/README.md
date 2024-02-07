@@ -107,6 +107,7 @@ const tasks = new ReactiveVar([
   { _id: 'task2_uuid', task: 'Write Tests', completed: true }
   { _id: 'task3_uuid', task: 'Write documentation', completed: false },
 ]);
+```
 
 ```javascript
 // sets 'write documentation' to complete
@@ -294,6 +295,7 @@ const counter = new ReactiveVar(10);
 // Access the value without triggering reactivity
 const currentValue = counter.peek();
 console.log(`Current value without establishing dependency: ${currentValue}`);
+```
 
 #### Nonreactive
 The `Reaction.nonreactive` function allows you to perform computations or access reactive variables without establishing a reactive dependency. This is useful when you need to read from a reactive source but don't want the surrounding computation to re-run when the source changes.
