@@ -2,6 +2,16 @@
 
 Semantic UI provides a templating language for specifying structured html that is tightly coupled with the reactivity framework provided by the Reactive library.
 
+<!-- TOC start  -->
+
+- [Basic Features](#basic-features)
+   * [If/else/elseif ](#ifelseelseif)
+   * [Expressions](#expressions)
+   * [Each](#each)
+   * [Subtemplates](#subtemplates)
+   * [Escaping HTML](#escaping-html)
+
+<!-- TOC end -->
 
 ## Basic Features
 
@@ -25,7 +35,7 @@ You can specify conditions using `{{#if condition}}` blocks which can include ar
 Expressions are evaluated in the data context of the template. Expressions are evaluated right to left passing values along. You can use `.' to access deeply nested values
 
 ```javascript
-context = {
+dataContext = {
   values: {
      first: false,
      second: true,
@@ -49,7 +59,7 @@ context = {
 You can specify each blocks either to pass the iterated value as a variable or as the new data scope
 
 ```javascript
-{
+dataContext = {
   category: 'Icecream',
   items: [
     { name: 'One' },
