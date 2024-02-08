@@ -53,7 +53,6 @@ const createInstance = (tpl, $) => ({
 const onCreated = (tpl) => {
   tpl.addRouter();
   tpl.setRouteFilter();
-
 };
 
 const onDestroyed = (tpl) => {

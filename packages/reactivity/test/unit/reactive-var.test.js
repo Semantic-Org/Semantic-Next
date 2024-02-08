@@ -257,6 +257,22 @@ describe.concurrent('ReactiveVar', () => {
 
   });
 
+  describe.concurrent('Mutation Utilities', () => {
+
+    it('changeItems should apply a transformation to each item', () => {
+      const numbers = new ReactiveVar([1, 2, 3]);
+      numbers.changeItems(num => num * 2);
+      expect(numbers.get()).toEqual([2, 4, 6]);
+    });
+
+    it('removeItems should remove items based on a filter', () => {
+      const numbers = new ReactiveVar([1, 2, 3, 4, 5]);
+      numbers.removeItems(num => num % 2 === 0); // Remove even numbers
+      expect(numbers.get()).toEqual([1, 3, 5]);
+    });
+
+  });
+
   describe.concurrent('ID Utilities', () => {
 
     it('getID should get id from an item', () => {

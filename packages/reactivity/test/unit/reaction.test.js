@@ -172,6 +172,29 @@ describe('Reaction', () => {
     });
   });
 
+  describe('Flushing', () => {
+
+    it('afterFlush should call registered callbacks after flushing', async () => {
+      const mockCallback = vi.fn();
+      Reaction.afterFlush(mockCallback);
+      Reaction.scheduleFlush();
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
+      expect(mockCallback).toHaveBeenCalled();
+    });
+
+    it('afterFlush should call multiple registered callbacks after flushing', async () => {
+      const mockCallback = vi.fn();
+      const mockCallback2 = vi.fn();
+      Reaction.afterFlush(mockCallback);
+      Reaction.afterFlush(mockCallback2);
+      Reaction.scheduleFlush();
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
+      expect(mockCallback).toHaveBeenCalled();
+      expect(mockCallback2).toHaveBeenCalled();
+    });
+
+  });
+
   describe('Helper Functions', () => {
     it('should correctly manipulate array with helpers', () => {
       const items = new ReactiveVar([0, 1, 2]);
@@ -192,6 +215,70 @@ describe('Reaction', () => {
       // Includes the initial run plus each update
       expect(callback).toHaveBeenCalledTimes(3);
     });
+  });
+
+  describe('Debugging', () => {
+
+    it('Reaction should track current context for debugging', () => {
+      const callback = vi.fn();
+      let reactiveVar = new ReactiveVar(1);
+      Reaction.create((comp) => {
+        reactiveVar.get();
+        if(comp.firstRun) {
+          return;
+        }
+        callback(Reaction.current.context.value);
+      });
+      reactiveVar.set(2);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledWith(2);
+    });
+
+    it('Reaction should have no source on first run', () => {
+      const callback = vi.fn();
+      let reactiveVar = new ReactiveVar(1);
+      Reaction.create((comp) => {
+        reactiveVar.get();
+        if(comp.firstRun) {
+          let trace;
+          try {
+            trace = Reaction.getSource();
+          }
+          catch(e) {
+            // avoid throwing error
+          }
+          console.log(trace);
+          callback(trace);
+        }
+      });
+      reactiveVar.set(2);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledWith(undefined);
+    });
+
+
+    it('Reaction should track current stack trace with getSource', () => {
+      const callback = vi.fn();
+      let reactiveVar = new ReactiveVar(1);
+      Reaction.create((comp) => {
+        reactiveVar.get();
+        if(comp.firstRun) {
+          return;
+        }
+        let trace;
+        try {
+          trace = Reaction.getSource();
+        }
+        catch(e) {
+          // avoid throwing error
+        }
+        callback(trace);
+      });
+      reactiveVar.set(2);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledWith(expect.any(String));
+    });
+
   });
 
 });

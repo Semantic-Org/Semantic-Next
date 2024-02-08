@@ -25,7 +25,7 @@
       "service": true
     },
     "test": {
-      "command": "vitest",
+      "command": "vitest --coverage",
       "outputCapture": "stdio",
       "env": {
         "NODE_ENV": "test"
