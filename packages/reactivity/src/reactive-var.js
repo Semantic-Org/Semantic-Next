@@ -45,10 +45,9 @@ export class ReactiveVar {
   }
 
   subscribe(callback) {
-    const reaction = Reaction.create(() => {
-      callback(this._value);
+    return Reaction.create((comp) => {
+      callback(this.value, comp);
     });
-    return () => reaction.stop();
   }
 
   peek() {

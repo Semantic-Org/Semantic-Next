@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
 
 import { todoItem } from './item/todo-item.js';
@@ -53,6 +53,19 @@ const createInstance = (tpl, $) => ({
 const onCreated = (tpl) => {
   tpl.addRouter();
   tpl.setRouteFilter();
+
+
+  const reactiveVar = new ReactiveVar('initial');
+  const callback = (value) => console.log(`Called with ${value}`);
+
+  reactiveVar.subscribe(callback);
+
+  Reaction.flush();
+  reactiveVar.set('new');
+  Reaction.flush();
+  reactiveVar.set('final');
+  Reaction.flush();
+
 };
 
 const onDestroyed = (tpl) => {
