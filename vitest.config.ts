@@ -2,9 +2,18 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    setupFiles: ['./playwright.config.cjs'],
+    browser: {
+      enabled: true,
+      headless: true,
+      name: 'chrome'
+    },
     coverage: {
-      reporter: ['text', 'html'],
+      enabled: true,
+      provider: 'istanbul',
+      reporter: ['json', 'html'],
+      include: [
+        'packages/**/src/**/*.js'
+      ]
     }
-  },
+  }
 });

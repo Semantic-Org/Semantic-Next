@@ -54,18 +54,6 @@ const onCreated = (tpl) => {
   tpl.addRouter();
   tpl.setRouteFilter();
 
-
-  const reactiveVar = new ReactiveVar('initial');
-  const callback = (value) => console.log(`Called with ${value}`);
-
-  reactiveVar.subscribe(callback);
-
-  Reaction.flush();
-  reactiveVar.set('new');
-  Reaction.flush();
-  reactiveVar.set('final');
-  Reaction.flush();
-
 };
 
 const onDestroyed = (tpl) => {

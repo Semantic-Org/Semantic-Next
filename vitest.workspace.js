@@ -4,7 +4,7 @@ export default defineWorkspace([
   'packages/*',
   {
     test: {
-      include: ['tests/browser/**/*.{browser}.test.{ts,js}'],
+      include: ['tests/browser/**/*.test.{ts,js}'],
       name: 'browser',
       browser: {
         enabled: true,
@@ -15,14 +15,14 @@ export default defineWorkspace([
   },
   {
     test: {
-      include: ['tests/dom/**/*.{browser}.test.{ts,js}'],
+      include: ['tests/dom/**/*.test.{ts,js}'],
       name: 'happy-dom',
       environment: 'happy-dom',
     }
   },
   {
     test: {
-      include: ['tests/unit/**/*.{node}.test.{ts,js}'],
+      include: ['tests/unit/**/*.test.{ts,js}'],
       name: 'node',
       environment: 'node',
     }

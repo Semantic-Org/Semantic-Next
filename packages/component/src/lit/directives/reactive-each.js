@@ -4,7 +4,7 @@ import { insertPart, getCommittedValue, removePart, setCommittedValue, setChildP
 import { AsyncDirective } from 'lit/async-directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { hashCode, clone, each, isObject, isString } from '@semantic-ui/utils';
+import { hashCode, clone, isEqual, each, isObject, isString } from '@semantic-ui/utils';
 
 const generateMap = (list, start, end) => {
   const map = new Map();
@@ -104,7 +104,7 @@ class ReactiveEachDirective extends AsyncDirective {
     let eachData = this.getEachData(item, index, this.eachCondition.as);
     const itemID = this.getItemID(item, index);
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
-    const sameData = JSON.stringify(this.templateCachedData.get(itemID)) == JSON.stringify(eachData);
+    const sameData = isEqual(this.templateCachedData.get(itemID), eachData);
     if(sameIndex && sameData) {
       // reuse the template nothing to rerender
       return {

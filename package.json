@@ -10,7 +10,7 @@
   "scripts": {
     "build": "wireit",
     "serve": "wireit",
-    "test": "wireit"
+    "test": "vitest"
   },
   "wireit": {
     "build": {
@@ -41,6 +41,8 @@
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
     "@vitest/browser": "^1.2.2",
+    "@vitest/coverage-istanbul": "^1.2.2",
+    "@vitest/ui": "^1.2.2",
     "chalk": "^5.3.0",
     "esbuild": "^0.19.11",
     "esbuild-plugin-babel": "^0.2.3",

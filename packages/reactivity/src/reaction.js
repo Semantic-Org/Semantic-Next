@@ -1,5 +1,4 @@
 import { clone, isEqual } from '@semantic-ui/utils';
-import { ReactiveVar } from './reactive-var.js';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
