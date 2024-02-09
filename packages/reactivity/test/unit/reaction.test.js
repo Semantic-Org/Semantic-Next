@@ -242,12 +242,14 @@ describe('Reaction', () => {
         if(comp.firstRun) {
           let trace;
           try {
+            const consoleLog = console.log;
+            console.log = vi.fn();
             trace = Reaction.getSource();
+            console.log = consoleLog;
           }
           catch(e) {
             // avoid throwing error
           }
-          console.log(trace);
           callback(trace);
         }
       });
@@ -267,7 +269,10 @@ describe('Reaction', () => {
         }
         let trace;
         try {
+          const consoleInfo = console.info;
+          console.info = vi.fn();
           trace = Reaction.getSource();
+          console.info = consoleInfo;
         }
         catch(e) {
           // avoid throwing error

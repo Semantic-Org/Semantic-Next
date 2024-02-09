@@ -230,7 +230,7 @@ class TemplateCompiler {
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
     if(regExp.verbose.keyword.exec(expression)) {
-      // verbose notation {{> templateName reactiveData=true data={one: 'one', two: 'two'} }}
+      // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
       const matches = [ ...expression.matchAll(regExp.verbose.properties) ];
       each(matches, (match, index) => {
         const property = match[1];
@@ -249,6 +249,7 @@ class TemplateCompiler {
         else {
           const parts = match[0].split('=');
           if(parts.length) {
+            console.log(parts);
             let name = parts[0].trim();
             let value = parts[1].trim();
             data[name] = value;
