@@ -48,11 +48,20 @@ const createInstance = (tpl, $) => ({
     $(window).off(tpl.hashEvent);
   },
 
+  addFakeTodos(count) {
+    const todos = tpl.todos.get();
+    for(let i = 0; i < count; i++) {
+      todos.push({ _id: `id${i}`, text: `todo ${i}`, completed: false });
+    }
+    tpl.todos.set(todos);
+  }
+
 });
 
 const onCreated = (tpl) => {
   tpl.addRouter();
   tpl.setRouteFilter();
+  tpl.addFakeTodos(200);
 };
 
 const onDestroyed = (tpl) => {

@@ -1,3 +1,9 @@
+.todo-list {
+    height: calc(100vh - 400px);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 
 .visually-hidden {
     border: 0;
