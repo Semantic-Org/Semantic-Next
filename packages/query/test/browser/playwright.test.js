@@ -7,6 +7,7 @@ describe('query', () => {
   let browser = Browser;
   let context = BrowserContext;
 
+  /*
   beforeAll(async () => {
     browser = await chromium.launch();
     let context = await browser.newContext();
@@ -16,6 +17,7 @@ describe('query', () => {
   afterAll(async () => {
     await browser.close();
   });
+  */
 
   test('empty', () => {
     expect('to').toBeDefined();

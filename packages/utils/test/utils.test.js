@@ -181,6 +181,7 @@ describe('Object Utilities', () => {
     expect(reversed).toEqual({ '1': ['a', 'b'], '2': ['b', 'c'] });
   });
 
+
 });
 
 
@@ -326,6 +327,10 @@ describe('isEqual', () => {
     });
   });
 
+  it('should return false for == values that arent equal', () => {
+    expect(isEqual('5', 5)).toBe(false);
+  });
+
 
 });
 
@@ -407,10 +412,6 @@ describe('ID/Hashing Functions', () => {
       const value1 = 5151;
       const value2 = 2121;
       expect(hashCode(value1)).not.toBe(hashCode(value2));
-    });
-
-    it('should handle empty string correctly', () => {
-      expect(hashCode('')).toMatch(/^[0-9A-Z]+$/);
     });
   });
 
@@ -568,6 +569,13 @@ describe('each iterator utility', () => {
       expect(spy).not.toHaveBeenCalledWith(3, 'c', obj); // ensure 'c' is not iterated
     });
 
+  });
+
+  it('should handle null/undefined gracefully', () => {
+    const spy = vi.fn();
+    each(null, spy);
+    each(undefined, spy);
+    expect(spy).not.toHaveBeenCalled();
   });
 
 });

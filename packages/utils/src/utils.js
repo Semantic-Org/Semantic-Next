@@ -463,7 +463,7 @@ export const each = (obj, func, context) => {
         break; // Exit early if callback explicitly returns false
       }
     }
-  } else {
+  } else if(isObject(obj)) {
     const objKeys = Object.keys(obj);
     for (const key of objKeys) {
       if (iteratee(obj[key], key, obj) === false) {
