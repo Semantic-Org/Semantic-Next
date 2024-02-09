@@ -50,7 +50,7 @@
     "esbuild-plugin-output-reset": "^2.0.1",
     "glob": "^10.3.10",
     "http-server": "^14.1.1",
-    "tachometer": "^0.7.0",
+    "jsdom": "^24.0.0",
     "typescript": "^5.3.3",
     "typescript-eslint": "^0.0.1-alpha.0",
     "underscore": "^1.13.6",

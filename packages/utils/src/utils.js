@@ -53,6 +53,14 @@ export const isString = (x) => {
   return typeof x == 'string';
 };
 
+export const isDOM = (element) => {
+  return element instanceof Element || element instanceof Document || element === window || element instanceof DocumentFragment;
+}
+
+export const isNode = (el) => {
+  return !!(el && el.nodeType);
+}
+
 export const isNumber = (x) => {
   return typeof x == 'number';
 };

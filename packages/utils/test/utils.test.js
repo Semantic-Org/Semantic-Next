@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-
 import { each, clone, unique, filterEmpty, last, firstMatch, findIndex, remove, inArray, range, keys, values, mapObject, extend, pick, get, hasProperty, reverseKeys, isObject, isPlainObject, isString, isNumber, isArray, isBinary, isFunction, isPromise, isArguments, formatDate, noop, wrapFunction, kebabToCamel, camelToKebab, capitalizeWords, toTitleCase, escapeRegExp, prettifyID, hashCode, generateID, isEqual, fatal } from '@semantic-ui/utils';
 
 describe('Array Utilities', () => {
@@ -179,6 +178,12 @@ describe('Object Utilities', () => {
     const obj = { a: 1, b: [1, 2], c: 2 };
     const reversed = reverseKeys(obj);
     expect(reversed).toEqual({ '1': ['a', 'b'], '2': ['b', 'c'] });
+  });
+
+  it('reverseKeys should reverse array values', () => {
+    const obj = { a: [1, 2], b: [2, 3], c: 1 };
+    const reversed = reverseKeys(obj);
+    expect(reversed).toEqual({ '1': ['a', 'c'], '2': ['a', 'b'], '3': 'b' });
   });
 
 
@@ -504,6 +509,7 @@ describe('clone', () => {
     expect(clonedObject).not.toBe(originalObject);
     expect(clonedObject.circularRef).toBe(clonedObject);
   });
+
 
 });
 

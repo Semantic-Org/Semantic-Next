@@ -184,10 +184,13 @@ class TemplateCompiler {
             }
             newNode = {
               ...newNode,
-              as: iterateAs,
               over: iterateOver,
               content: [],
             };
+            if(iterateAs) {
+              newNode.as = iterateAs;
+            }
+            
             contentTarget.push(newNode);
             contentBranch = newNode;
             break;
@@ -249,7 +252,6 @@ class TemplateCompiler {
         else {
           const parts = match[0].split('=');
           if(parts.length) {
-            console.log(parts);
             let name = parts[0].trim();
             let value = parts[1].trim();
             data[name] = value;
