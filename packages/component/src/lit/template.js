@@ -78,7 +78,8 @@ export const LitTemplate = class UITemplate {
     }
     this.tpl.data = this.data;
     this.tpl._childTemplates = [];
-    this.tpl.$ = this.$;
+    this.tpl.$ = this.$.bind(this);
+    this.tpl.$$ = this.$$.bind(this);
     this.tpl.templateName = this.templateName;
     // this is a function to avoid naive cascading reactivity
     this.tpl.findTemplate = LitTemplate.findTemplate;
@@ -283,16 +284,24 @@ export const LitTemplate = class UITemplate {
 
 
   // Rendered DOM (either shadow or regular)
-  $(selector, root = this.renderRoot) {
+  $(selector, root = this.renderRoot, { filterTemplate = true } = {}) {
     if(!root) {
       root = document;
     }
     if(root == this.renderRoot) {
-      return $(selector, root).filter(node => this.isNodeInTemplate(node));
+      const $results = $(selector, root);
+      return (filterTemplate)
+        ? $results.filter(node => this.isNodeInTemplate(node))
+        : $results
+      ;
     }
     else {
       return $(selector, root);
     }
+  }
+
+  $$(selector) {
+    return this.$(selector, this.renderRoot, { filterTemplate: false });
   }
 
   // calls callback if defined with consistent params and this context

@@ -1,4 +1,4 @@
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import { createComponent } from '@semantic-ui/component';
 
 import template from './todo-header.html';
@@ -55,6 +55,10 @@ const events = {
       }
       tpl.addTodo(text);
       $(this).val('');
+      Reaction.afterFlush(() => {
+        const todoList = tpl.$$('.todo-list')[0];
+        todoList.scrollTop = todoList.scrollHeight;
+      })
     }
   },
 };
