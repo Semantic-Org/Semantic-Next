@@ -63,6 +63,7 @@ export class LitRenderer {
         case 'expression':
           const value = this.evaluateExpression(node.value, data, {
             unsafeHTML: node.unsafeHTML,
+            ifDefined: node.ifDefined,
             asDirective: true
           });
           this.addValue( value );
@@ -165,11 +166,11 @@ export class LitRenderer {
   evaluateExpression(
     expression,
     data = this.data,
-    { asDirective = false, unsafeHTML = false } = {}
+    { asDirective = false, ifDefined=false, unsafeHTML = false } = {}
   ) {
     if(typeof expression === 'string') {
       if(asDirective) {
-        return reactiveData(() => this.lookupExpressionValue(expression, data), { unsafeHTML });
+        return reactiveData(() => this.lookupExpressionValue(expression, data), { ifDefined, unsafeHTML });
       }
       else {
         return this.lookupExpressionValue(expression, data);

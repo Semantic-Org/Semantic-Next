@@ -1,7 +1,11 @@
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
+
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Reaction } from '@semantic-ui/reactivity';
+import { inArray } from '@semantic-ui/utils';
+import { ifDefined } from 'lit/directives/if-defined.js';
+
 
 class ReactiveData extends AsyncDirective {
   constructor(partInfo) {
@@ -9,11 +13,24 @@ class ReactiveData extends AsyncDirective {
     this.reaction = null;
   }
 
-  render(computeFunc, settings) {
+  render(computeFunc, settings = {}) {
     // Stop and clean up any existing reaction
     if (this.reaction) {
       this.reaction.stop();
     }
+
+    const getValue = (value) => {
+      let reactiveValue = computeFunc();
+
+      if(settings.ifDefined) {
+        // useful for things like <input checked="{{isChecked}}">
+        // template compiler does this automatically for boolean attrs
+        if(inArray(reactiveValue, [undefined, null, false, 0])) {
+          return ifDefined(undefined);
+        }
+      }
+      return reactiveValue;
+    };
 
     // Create a new reaction to rerun the computation function
     let value;
@@ -22,7 +39,7 @@ class ReactiveData extends AsyncDirective {
         comp.stop();
         return;
       }
-      value = computeFunc();
+      value = getValue();
       if(settings.unsafeHTML) {
         value = unsafeHTML(value);
       }

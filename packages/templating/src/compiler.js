@@ -46,10 +46,11 @@ class TemplateCompiler {
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
         if (scanner.matches(tagRegExp[type])) {
+          const context = scanner.getContext(); // Get context before consuming
           scanner.consume(tagRegExp[type]);
           const content = this.getValue(scanner.consumeUntil('}}').trim());
           scanner.consume('}}');
-          return { type, content };
+          return { type, content, ...context }; // Include context in the return value
         }
       }
       // Return null if no tag is matched
@@ -139,6 +140,9 @@ class TemplateCompiler {
               ...newNode,
               value: tag.content
             };
+            if(tag.booleanAttribute) {
+              newNode.ifDefined = true;
+            }
             contentTarget.push(newNode);
             break;
 
