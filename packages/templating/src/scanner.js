@@ -96,6 +96,58 @@ class Scanner {
     return;
   }
 
+  getContext() {
+    let insideTag = false;
+    let attributeName = '';
+    let i = this.pos - 1;
+    let tagPos;
+
+    // Step 1: Search backwards to confirm we're inside a tag.
+    while (i >= 0) {
+      if (this.input[i] === '>') break; // Stop if we find the end of a previous tag
+      if (this.input[i] === '<') {
+        insideTag = true; // Confirm we're inside a tag
+        tagPos = i; // Save the position of the tag
+        break;
+      }
+      i--;
+    }
+
+    if (insideTag) {
+      const tagText = this.input.substring(tagPos, this.pos);
+
+      const attrPattern = /([a-zA-Z-]+)(?=\s*=\s*[^=]*$)/;
+      const attrMatch = tagText.match(attrPattern); // Grab the last sequence of non-space characters
+      const attrName = attrMatch ? attrMatch[1] : '';
+
+      const booleanAttributes = ['allowfullscreen', 'async','autofocus','autoplay','checked','controls','default','defer','disabled','formnovalidate','inert','ismap','itemscope','loop','multiple','muted','nomodule','novalidate','open','playsinline','readonly','required','reversed','selected',
+      ];
+      let booleanAttribute = false;
+      if(booleanAttributes.includes(attrName)) { 
+        // this is a known attribute tag that is always boolean
+        booleanAttribute = true;
+      }
+      else {
+        // if the template has syntax <div attribute={{value}}> without quotes then this is intended to be a boolean attribute
+        const quotedAttrPattern = /([a-zA-Z-]+)(?=\s*=\s*(\"|\')\s*[^=]*$)/;
+        const quotedAttrMatch = tagText.match(quotedAttrPattern); 
+        const quotedAttrName = quotedAttrMatch ? quotedAttrMatch[1] : '';
+        booleanAttribute = (attrName !== quotedAttrName)
+      }
+      if(attrName) {
+        return {
+          insideTag: true,
+          attribute: attrName,
+          booleanAttribute,
+        };
+      }
+    }
+    return {
+      insideTag: insideTag,
+    };
+  }
+
+
   fatal(msg) {
     msg = msg || 'Parse error';
 
