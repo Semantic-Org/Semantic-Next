@@ -47,7 +47,7 @@ describe('Scanner', () => {
         console.error = consoleError;
     });
 
-    it('should let you check if the scanner is at the end of the input', () => {
+    it('should let you check if the scanner is at the end of the input file', () => {
         const scanner = new Scanner('Hello World');
         expect(scanner.isEOF()).toBe(false);
         scanner.consumeUntil('World');
