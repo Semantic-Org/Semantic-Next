@@ -1,4 +1,4 @@
-import { clone, isObject, isEqual, findIndex, isNumber } from '@semantic-ui/utils';
+import { clone, isObject, isEqual, findIndex, unique, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
@@ -10,9 +10,7 @@ export class ReactiveVar {
     this.equalityFunction = equalityFunction || ReactiveVar.equalityFunction;
   }
 
-  static equalityFunction = (a, b) => {
-    return isEqual(a, b);
-  };
+  static equalityFunction = isEqual;
 
   get value() {
     // Record this ReactiveVar as a dependency if inside a Reaction computation
@@ -45,22 +43,13 @@ export class ReactiveVar {
   }
 
   subscribe(callback) {
-    const reaction = Reaction.create(() => {
-      callback(this._value);
+    return Reaction.create((comp) => {
+      callback(this.value, comp);
     });
-    return () => reaction.stop();
   }
 
   peek() {
     return this.currentValue;
-  }
-
-  addListener(listener) {
-    this._listeners.add(listener);
-  }
-
-  removeListener(listener) {
-    this._listeners.delete(listener);
   }
 
   // array helpers
@@ -125,7 +114,7 @@ export class ReactiveVar {
 
   getIDs(item) {
     if(isObject(item)) {
-      return [item?._id, item?.id, item?.hash, item?.key].filter(Boolean);
+      return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
     }
     return [item];
   }

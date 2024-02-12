@@ -8,6 +8,7 @@ tasks/**/oauth.js
 playwright_report/
 dev/examples/
 dev/ui/
+html/
 
 # Numerous always-ignore extensions
 *.diff

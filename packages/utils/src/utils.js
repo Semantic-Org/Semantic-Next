@@ -42,7 +42,7 @@ export const fatal = (message, {
 --------------------*/
 
 export const isObject = (x) => {
-  return typeof x == 'object';
+  return x !== null && typeof x == 'object';
 };
 
 export const isPlainObject = (x) => {
@@ -52,6 +52,14 @@ export const isPlainObject = (x) => {
 export const isString = (x) => {
   return typeof x == 'string';
 };
+
+export const isDOM = (element) => {
+  return element instanceof Element || element instanceof Document || element === window || element instanceof DocumentFragment;
+}
+
+export const isNode = (el) => {
+  return !!(el && el.nodeType);
+}
 
 export const isNumber = (x) => {
   return typeof x == 'number';
@@ -74,7 +82,7 @@ export const isPromise = (x) => {
 };
 
 export const isArguments = function(obj) {
-  return !!(obj && get(obj, 'callee'));
+  return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
 /*-------------------
@@ -291,7 +299,7 @@ export const values = (obj) => {
 export const mapObject = function(obj, callback) {
   const objKeys = keys(obj).reverse();
   const length = objKeys.length;
-  let index = objKeys.length;
+  let index = length;
   let newObj = {};
   while(index--) {
     const thisKey = objKeys[index];
@@ -339,13 +347,15 @@ export const get = function(obj, string = '') {
     .replace(/\[(\w+)\]/g, '.$1')
   ;
   const stringParts = string.split('.');
-  for(let index = 0, length = stringParts.length; index < length; ++index) {
+
+  for (let index = 0, length = stringParts.length; index < length; ++index) {
     const part = stringParts[index];
-    if(!!obj && part in obj) {
+    // Check if obj is an object and part exists in obj
+    if (obj !== null && typeof obj === 'object' && part in obj) {
       obj = obj[part];
-    }
-    else {
-      return;
+    } else {
+      // If not, return undefined to safely indicate missing value
+      return undefined;
     }
   }
   return obj;
@@ -355,7 +365,7 @@ export const get = function(obj, string = '') {
   Return true if non-inherited property
 */
 export const hasProperty = (obj, prop) => {
-  return Object.hasOwn.call(obj, prop);
+  return Object.prototype.hasOwnProperty.call(obj, prop);
 };
 
 /*
@@ -396,45 +406,53 @@ export const reverseKeys = (obj) => {
 /*
   Clone an object or array
 */
-export const clone = obj => {
-  let ret;
-  if (!isObject(obj)) {
-    return obj;
+// adapted from nanoclone <https://github.com/Kelin2025/nanoclone>
+export const clone = (src, seen = new Map()) => {
+  if (!src || typeof src !== 'object') return src;
+
+  if (seen.has(src)) return seen.get(src);
+
+  let copy;
+  if (src.nodeType && 'cloneNode' in src) {
+    copy = src.cloneNode(true);
+    seen.set(src, copy);
+  }
+  else if (src instanceof Date) {
+    // Date
+    copy = new Date(src.getTime());
+    seen.set(src, copy);
+  }
+  else if (src instanceof RegExp) {
+    // RegExp
+    copy = new RegExp(src);
+    seen.set(src, copy);
+  }
+  else if (Array.isArray(src)) {
+    // Array
+    copy = new Array(src.length);
+    seen.set(src, copy);
+    for (let i = 0; i < src.length; i++) copy[i] = clone(src[i], seen);
+  }
+  else if (src instanceof Map) {
+    // Map
+    copy = new Map();
+    seen.set(src, copy);
+    for (const [k, v] of src.entries()) copy.set(k, clone(v, seen));
+  }
+  else if (src instanceof Set) {
+    // Set
+    copy = new Set();
+    seen.set(src, copy);
+    for (const v of src) copy.add(clone(v, seen));
+  }
+  else if (src instanceof Object) {
+    // Object
+    copy = {};
+    seen.set(src, copy);
+    for (const [k, v] of Object.entries(src)) copy[k] = clone(v, seen);
   }
 
-  if (obj === null) {
-    return null; // null has typeof "object"
-  }
-
-  if (obj instanceof Date) {
-    return new Date(obj.getTime());
-  }
-
-  // RegExps are not really EJSON elements (eg we don't define a serialization
-  // for them), but they're immutable anyway, so we can support them in clone.
-  if (obj instanceof RegExp) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(clone);
-  }
-
-  if (isArguments(obj)) {
-    return Array.from(obj).map(clone);
-  }
-
-  // handle general user-defined typed Objects if they haobje a clone method
-  if (isFunction(obj.clone)) {
-    return obj.clone();
-  }
-
-  // handle other objects
-  ret = {};
-  keys(obj).forEach((key) => {
-    ret[key] = clone(obj[key]);
-  });
-  return ret;
+  return copy;
 };
 
 /*
@@ -453,7 +471,7 @@ export const each = (obj, func, context) => {
         break; // Exit early if callback explicitly returns false
       }
     }
-  } else {
+  } else if(isObject(obj)) {
     const objKeys = Object.keys(obj);
     for (const key of objKeys) {
       if (iteratee(obj[key], key, obj) === false) {
@@ -514,57 +532,44 @@ export function hashCode(input) {
   const seed = 0x12345678;
 
   const murmurhash = (key, seed) => {
-    let remainder, bytes, h1, h1b, c1, c1b, c2, c2b, k1, i;
+    let h1 = seed;
+    const c1 = 0xcc9e2d51;
+    const c2 = 0x1b873593;
 
-    remainder = key.length & 3;
-    bytes = key.length - remainder;
-    h1 = seed;
-    c1 = 0xcc9e2d51;
-    c2 = 0x1b873593;
-    i = 0;
-
-    while (i < bytes) {
-      k1 =
-        ((key.charCodeAt(i) & 0xff)) |
-        ((key.charCodeAt(++i) & 0xff) << 8) |
-        ((key.charCodeAt(++i) & 0xff) << 16) |
-        ((key.charCodeAt(++i) & 0xff) << 24);
-      ++i;
-
-      k1 = ((((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16))) & 0xffffffff;
-      k1 = (k1 << 15) | (k1 >>> 17);
-      k1 = ((((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16))) & 0xffffffff;
-
-      h1 ^= k1;
+    const round = (k) => {
+      k = k * c1 & 0xffffffff;
+      k = (k << 15) | (k >>> 17);
+      k = k * c2 & 0xffffffff;
+      h1 ^= k;
       h1 = (h1 << 13) | (h1 >>> 19);
-      h1b = ((((h1 & 0xffff) * 5) + ((((h1 >>> 16) * 5) & 0xffff) << 16))) & 0xffffffff;
-      h1 = (((h1b & 0xffff) + 0x6b64) + ((((h1b >>> 16) + 0xe654) & 0xffff) << 16));
+      h1 = h1 * 5 + 0xe6546b64 & 0xffffffff;
+    };
+
+    for (let i = 0; i < key.length; i += 4) {
+      let k = (key.charCodeAt(i) & 0xff) |
+              ((key.charCodeAt(i + 1) & 0xff) << 8) |
+              ((key.charCodeAt(i + 2) & 0xff) << 16) |
+              ((key.charCodeAt(i + 3) & 0xff) << 24);
+      round(k);
     }
 
-    k1 = 0;
-
-    switch (remainder) {
-      case 3: k1 ^= (key.charCodeAt(i + 2) & 0xff) << 16;
-      case 2: k1 ^= (key.charCodeAt(i + 1) & 0xff) << 8;
-      case 1: k1 ^= (key.charCodeAt(i) & 0xff);
-
-        k1 = (((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
-        k1 = (k1 << 15) | (k1 >>> 17);
-        k1 = (((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
-        h1 ^= k1;
+    let k1 = 0;
+    switch (key.length & 3) {
+      case 3: k1 ^= (key.charCodeAt(key.length - 1) & 0xff) << 16;
+      case 2: k1 ^= (key.charCodeAt(key.length - 2) & 0xff) << 8;
+      case 1: k1 ^= (key.charCodeAt(key.length - 3) & 0xff);
+              round(k1);
     }
 
     h1 ^= key.length;
-
     h1 ^= h1 >>> 16;
-    h1 = (((h1 & 0xffff) * 0x85ebca6b) + ((((h1 >>> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
+    h1 = h1 * 0x85ebca6b & 0xffffffff;
     h1 ^= h1 >>> 13;
-    h1 = ((((h1 & 0xffff) * 0xc2b2ae35) + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16))) & 0xffffffff;
+    h1 = h1 * 0xc2b2ae35 & 0xffffffff;
     h1 ^= h1 >>> 16;
 
     return h1 >>> 0;
   };
-
 
   let hash;
   hash = murmurhash(str, seed); // fast and pretty good collisions
@@ -582,98 +587,92 @@ export const generateID = () => {
 /*
   Determine if two objects are equal
 */
+
+// adapted from <https://github.com/epoberezkin/fast-deep-equal/>
 export const isEqual = (a, b, options = {}) => {
-  let i;
-  if (a === b) {
-    return true;
-  }
+  if (a === b) return true;
 
-  if (Number.isNaN(a) && Number.isNaN(b)) {
-    return true;
-  }
+  if (a && b && typeof a == 'object' && typeof b == 'object') {
+    if (a.constructor !== b.constructor) return false;
 
-  if (!a || !b) {
-    return false;
-  }
-
-  if (!(isObject(a) && isObject(b))) {
-    return false;
-  }
-
-  if (a instanceof Date && b instanceof Date) {
-    return a.valueOf() === b.valueOf();
-  }
-
-  if (isBinary(a) && isBinary(b)) {
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) {
-        return false;
+    let length, i, keys;
+    if (Array.isArray(a)) {
+      length = a.length;
+      if (length != b.length) return false;
+      for (i = length; i-- !== 0;) {
+        if (!isEqual(a[i], b[i])) {
+          return false;
+        }
       }
-    }
-    return true;
-  }
-
-  if (isFunction(a.equals)) {
-    return a.equals(b, options);
-  }
-
-  if (isFunction(b.equals)) {
-    return b.equals(a, options);
-  }
-
-  if (a instanceof Array) {
-    if (!(b instanceof Array)) {
-      return false;
-    }
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (i = 0; i < a.length; i++) {
-      if (!isEqual(a[i], b[i], options)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-
-  // check obj equality
-  let ret;
-  const aKeys = keys(a);
-  const bKeys = keys(b);
-  if (options.keyOrderSensitive) {
-    i = 0;
-    ret = aKeys.every(key => {
-      if (i >= bKeys.length) {
-        return false;
-      }
-      if (key !== bKeys[i]) {
-        return false;
-      }
-      if (!isEqual(a[key], b[bKeys[i]], options)) {
-        return false;
-      }
-      i++;
       return true;
-    });
-  } else {
-    i = 0;
-    ret = aKeys.every(key => {
-      if (!b[key]) {
-        return false;
+    }
+
+    if ((a instanceof Map) && (b instanceof Map)) {
+      if (a.size !== b.size) return false;
+      for (i of a.entries()) {
+        if (!b.has(i[0])) {
+          return false;
+        }
       }
-      if (!isEqual(a[key], b[key], options)) {
-        return false;
+      for (i of a.entries()) {
+        if (!isEqual(i[1], b.get(i[0]))) {
+          return false;
+        }
       }
-      i++;
       return true;
-    });
+    }
+
+    if ((a instanceof Set) && (b instanceof Set)) {
+      if (a.size !== b.size) return false;
+      for (i of a.entries()) {
+        if (!b.has(i[0])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
+      length = a.length;
+      if (length != b.length) return false;
+      for (i = length; i-- !== 0;) {
+        if (a[i] !== b[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (a.constructor === RegExp) {
+      return a.source === b.source && a.flags === b.flags;
+    }
+    if (a.valueOf !== Object.prototype.valueOf) {
+      return a.valueOf() === b.valueOf();
+    }
+    if (a.toString !== Object.prototype.toString) {
+      return a.toString() === b.toString();
+    }
+
+    keys = Object.keys(a);
+    length = keys.length;
+    if (length !== Object.keys(b).length) return false;
+
+    for (i = length; i-- !== 0;) {
+      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+    }
+
+    for (i = length; i-- !== 0;) {
+      let key = keys[i];
+      if (!isEqual(a[key], b[key])) return false;
+    }
+
+    return true;
   }
-  return ret && i === bKeys.length;
+
+  // true if both NaN, false otherwise
+  return a !== a && b !== b;
 };
+
 
 
 import * as _ from './utils';

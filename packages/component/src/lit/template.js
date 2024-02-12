@@ -205,7 +205,6 @@ export const LitTemplate = class UITemplate {
       }
       return { eventName, selector };
     };
-
     // the magic of aborts <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
     each(events, (eventHandler, eventString) => {
@@ -221,7 +220,7 @@ export const LitTemplate = class UITemplate {
         }
         const boundEvent = eventHandler.bind(event.target);
         template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
-      }, this.eventController);
+      }, { abortController: this.eventController });
     });
   }
 

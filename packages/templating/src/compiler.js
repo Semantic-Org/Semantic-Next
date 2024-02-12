@@ -188,10 +188,13 @@ class TemplateCompiler {
             }
             newNode = {
               ...newNode,
-              as: iterateAs,
               over: iterateOver,
               content: [],
             };
+            if(iterateAs) {
+              newNode.as = iterateAs;
+            }
+            
             contentTarget.push(newNode);
             contentBranch = newNode;
             break;
@@ -234,7 +237,7 @@ class TemplateCompiler {
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
     if(regExp.verbose.keyword.exec(expression)) {
-      // verbose notation {{> templateName reactiveData=true data={one: 'one', two: 'two'} }}
+      // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
       const matches = [ ...expression.matchAll(regExp.verbose.properties) ];
       each(matches, (match, index) => {
         const property = match[1];

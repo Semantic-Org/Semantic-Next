@@ -1,3 +1,5 @@
+import { isString, isArray, isDOM, isFunction, isObject } from '@semantic-ui/utils';
+
 /*
   A minimal toolkit for querying and performing modifications
   across DOM nodes based off a selector
@@ -12,13 +14,13 @@ export class Query {
       return;
     }
 
-    if (Array.isArray(selector)) {
+    if (isArray(selector)) {
       // Directly passed an array of elements
       elements = selector;
-    } else if (typeof selector === 'string') {
+    } else if (isString(selector)) {
       // String selector provided, find elements using querySelectorAll
       elements = root.querySelectorAll(selector);
-    } else if (selector instanceof Element || selector instanceof Document || selector === window || selector instanceof DocumentFragment) {
+    } else if (isDOM(selector)) {
       // A single Element, Document, or DocumentFragment is provided
       elements = [selector];
     } else if (selector instanceof NodeList) {
@@ -74,24 +76,40 @@ export class Query {
     return new Query(closest);
   }
 
-  // uses abort signals <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
-  on(event, targetSelectorOrHandler, handler, abortController = new AbortController()) {
+  on(event, targetSelectorOrHandler, handlerOrOptions, options) {
     this._eventHandlers = this._eventHandlers || [];
     const eventHandlers = [];
 
+    let handler;
+    let targetSelector;
+    if (isObject(handlerOrOptions)) {
+      options = handlerOrOptions;
+      handler = targetSelectorOrHandler;
+    }
+    else if(isString(targetSelectorOrHandler)) {
+      targetSelector = targetSelectorOrHandler;
+      handler = handlerOrOptions;
+    }
+    else if(isFunction(targetSelectorOrHandler)) {
+      handler = targetSelectorOrHandler;
+    }
+    
+    // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
+    const abortController = options?.abortController || new AbortController();
     const signal = abortController.signal;
 
     Array.from(this).forEach(el => {
       const eventListener = (e) => {
-        if (typeof targetSelectorOrHandler === 'function') {
-          targetSelectorOrHandler.call(el, e);
-        } else {
+        if (targetSelector) {
           for (let target = e.target; target && target !== el; target = target.parentNode) {
-            if (target.matches(targetSelectorOrHandler)) {
+            if (target.matches(targetSelector)) {
               handler.call(target, e);
               break;
             }
           }
+        } 
+        else {
+          handler.call(el, e);
         }
       };
 
@@ -102,8 +120,9 @@ export class Query {
         event,
         eventListener,
         abortController,
-        delegated: typeof targetSelectorOrHandler === 'string',
-        originalHandler: handler
+        delegated: targetSelector !== undefined,
+        originalHandler: handler,
+        abort: () => abortController.abort()
       };
       eventHandlers.push(eventHandler);
     });
@@ -136,6 +155,10 @@ export class Query {
     const classesToAdd = classNames.split(' ');
     Array.from(this).forEach(el => el.classList.add(...classesToAdd));
     return this;
+  }
+
+  hasClass(className) {
+    return Array.from(this).some(el => el.classList.contains(className));
   }
 
   removeClass(classNames) {

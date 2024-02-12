@@ -18,7 +18,6 @@ class Scanner {
   constructor(input) {
     this.input = input;
     this.pos = 0;
-    this.runCount = 0;
   }
 
 
@@ -31,7 +30,6 @@ class Scanner {
   }
 
   isEOF() {
-    this.runCount++;
     return this.pos >= this.input.length;
   }
 
@@ -181,30 +179,31 @@ class Scanner {
     const normalStyle = 'color: grey';
     const errorStyle = 'color: red; font-weight: bold';
 
-    if(Scanner.DEBUG_MODE && document.body) {
-      let errorHTML = '';
-      each(contextLines, (line, index) => {
-        const style = (index < linesBefore || index > linesBefore)
-          ? normalStyle
-          : errorStyle
-        ;
-        errorHTML += `<div style="${style}">${line}</div>`;
-      });
-      const html = `
-        <div style="padding: 1rem; font-size: 14px;">
-          <h2>Could not render template</h2>
-          <h3>${msg}</h3>
-          <code style="margin-top: 1rem; display: block; background-color: #EFEFEF; padding: 0.25rem 1rem;border-left: 3px solid #888"><pre>${errorHTML}</pre></code>
-        </div>
-      `;
-      document.body.innerHTML = html;
+    if(Scanner.DEBUG_MODE) {
+      if(globalThis.document) {
+        let errorHTML = '';
+        each(contextLines, (line, index) => {
+          const style = (index < linesBefore || index > linesBefore)
+            ? normalStyle
+            : errorStyle
+          ;
+          errorHTML += `<div style="${style}">${line}</div>`;
+        });
+        const html = `
+          <div style="padding: 1rem; font-size: 14px;">
+            <h2>Could not render template</h2>
+            <h3>${msg}</h3>
+            <code style="margin-top: 1rem; display: block; background-color: #EFEFEF; padding: 0.25rem 1rem;border-left: 3px solid #888"><pre>${errorHTML}</pre></code>
+          </div>
+        `;
+        document.body.innerHTML = html;
+      }
+      console.error(msg + '\n' + consoleMsg,
+        ...contextLines.map((_, idx) => (lineNumber - startLine) === idx ? errorStyle : normalStyle));
+  
+      const e = new Error(msg);
+      throw e;
     }
-
-    console.error(msg + '\n' + consoleMsg,
-      ...contextLines.map((_, idx) => (lineNumber - startLine) === idx ? errorStyle : normalStyle));
-
-    const e = new Error(msg);
-    throw e;
   }
 
 }

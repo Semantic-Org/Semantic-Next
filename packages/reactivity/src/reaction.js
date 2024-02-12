@@ -1,5 +1,4 @@
 import { clone, isEqual } from '@semantic-ui/utils';
-import { ReactiveVar } from './reactive-var.js';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
@@ -117,8 +116,9 @@ export class Reaction {
       return;
     }
     let trace = Reaction.current.context.trace;
-    trace = trace.split('\n').slice(3).join('\n');
+    trace = trace.split('\n').slice(2).join('\n');
     trace = `Reaction triggered by:\n${trace}`;
     console.info(trace);
+    return trace;
   }
 }
