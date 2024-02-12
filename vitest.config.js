@@ -5,13 +5,15 @@ export default defineConfig({
     host: true,
   },
   test: {
+    reporter: ['html'],
     coverage: {
       enabled: true,
       provider: 'istanbul',
-      reporter: ['text', 'json-summary', 'json'],
+      reporter: ['html', 'json-summary', 'json'],
       include: [
         'packages/**/src/**/*.js'
-      ]
+      ],
+      reportOnFailure: true
     }
   },
   workspace: './vitest.workspace.js'
