@@ -10,7 +10,8 @@
   "scripts": {
     "build": "wireit",
     "serve": "wireit",
-    "test": "vitest"
+    "test": "vitest",
+    "report": "npx vite preview --outDir html --host"
   },
   "wireit": {
     "build": {
