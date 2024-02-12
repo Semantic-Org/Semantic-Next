@@ -1,2 +1,0 @@
-- name: Vitest Coverage Report
-  uses: davelosert/vitest-coverage-report-action@v2.2.1
