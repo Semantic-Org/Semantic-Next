@@ -11,7 +11,8 @@
     "build": "wireit",
     "serve": "wireit",
     "test": "vitest",
-    "coverage": "vitest --coverage",
+    "coverage": "vitest --coverage.enabled --coverage.provider=istanbul --coverage.reporter=json-summary --coverage.reporter=json
+    ",
     "test-ci": "vitest --reporter junit --outputFile tests/test-results.xml",
     "report": "npx vite preview --outDir html --host "
   },
