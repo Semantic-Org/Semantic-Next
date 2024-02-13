@@ -10,7 +10,7 @@ export default defineConfig({
       headless: true,
     },
     outdir: 'tests/',
-    reporter: ['basic'],
+    reporter: ['default'],
     coverage: {
       enabled: true,
       provider: 'istanbul',

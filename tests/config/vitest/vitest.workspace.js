@@ -18,15 +18,16 @@ export default defineWorkspace([
       environment: 'jsdom',
     }
   },
-  // {
-  //   test: {
-  //     include: ['**/test/browser/**/*.test.{ts,js}'],
-  //     name: 'browser',
-  //     browser: {
-  //       enabled: true,
-  //       headless: true,
-  //       name: 'chrome'
-  //     },
-  //   }
-  // },
+  {
+    test: {
+      include: ['**/test/browser/**/*.test.{ts,js}'],
+      name: 'browser',
+      browser: {
+        enabled: true,
+        //headless: true,
+        provider: 'playwright',
+        name: 'chromium'
+      },
+    }
+  },
 ]);
