@@ -13,7 +13,7 @@ jobs:
     name: Run Test Suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3      # checkout the repo
+      - uses: actions/checkout@v4      # checkout the repo
       - run: npm ci                    # install packages
       - run: npm run ci:test           # run vitests for junit xml
 
