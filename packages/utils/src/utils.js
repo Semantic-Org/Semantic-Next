@@ -46,6 +46,7 @@ export const isObject = (x) => {
 };
 
 export const isPlainObject = (x) => {
+  return typeof x == 'string';
   return isObject(x) && x.constructor === Object;
 };
 
