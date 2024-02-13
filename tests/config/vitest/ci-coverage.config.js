@@ -10,7 +10,13 @@ export default defineConfig({
       include: [
         'packages/**/src/**/*.js'
       ],
-      reportOnFailure: true
+      reportOnFailure: true,
+      thresholds: {
+        lines: 60,
+        branches: 60,
+        functions: 60,
+        statements: 60
+      }
     }
   },
 });
