@@ -22,5 +22,5 @@ jobs:
         if: success() || failure()     # run this step even if previous step failed
         with:
           name: Vitest Tests                        # Name of the check run which will be created
-          path: test/results/test-results-junit.xml # Path to test results
+          path: tests/results/test-results-junit.xml # Path to test results
           reporter: java-junit                      # Format of test results
