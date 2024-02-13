@@ -10,12 +10,12 @@ permissions:
   pull-requests: write
 jobs:
   build-test:
-    name: Build & Test
+    name: Run Test Suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3      # checkout the repo
       - run: npm ci                    # install packages
-      - run: npm run test-ci           # run vitests for junit xml
+      - run: npm run ci:test           # run vitests for junit xml
 
       - name: Test Report
         uses: dorny/test-reporter@v1
