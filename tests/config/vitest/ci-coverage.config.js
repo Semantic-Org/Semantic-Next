@@ -2,7 +2,6 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    enabled: false,
     coverage: {
       enabled: true,
       provider: 'istanbul',
@@ -11,6 +10,7 @@ export default defineConfig({
         'packages/**/src/**/*.js'
       ],
       reportOnFailure: true,
+      reportsDirectory: './tests/coverage',
       thresholds: {
         lines: [30, 70],
         functions: [30, 70],
