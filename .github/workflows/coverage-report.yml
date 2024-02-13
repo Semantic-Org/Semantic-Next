@@ -22,6 +22,12 @@ jobs:
       run: npm install
     - name: 'Test'
       run: npm run ci:coverage
-    - name: 'Report Coverage'
-      if: always() 
+    - name: 'Package Coverage'
+      if: always() # Also generate the report if tests are failing
       uses:  davelosert/vitest-coverage-report-action@v2
+      with:
+        name: 'Package'
+        vite-config-path: './tests/config/vitest/ci-coverage.config.js'
+        json-summary-path: './tests/coverage/coverage-summary.json'
+        json-final-path: './tests/coverage/coverage-final.json'
+        file-coverage-mode: 'changes'
