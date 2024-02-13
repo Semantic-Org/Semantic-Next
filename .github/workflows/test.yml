@@ -1,0 +1,15 @@
+name: 'Test'
+on:
+  pull_request:
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3  
+      - run: npm ci
+      - run: npm test-ci 
+      - uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: test-results
+          path: tests/test-result.xml
