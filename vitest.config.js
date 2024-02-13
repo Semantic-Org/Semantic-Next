@@ -1,11 +1,12 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  server: {
-    host: true,
-  },
   test: {
-    reporter: ['html'],
+    browser: {
+      enabled: true,
+      name: 'chromium',
+    },
+    reporter: ['basic', 'html'],
     coverage: {
       enabled: true,
       provider: 'istanbul',
