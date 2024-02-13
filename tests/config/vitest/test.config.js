@@ -14,7 +14,13 @@ export default defineConfig({
         'packages/**/src/**/*.js'
       ],
       reportsDirectory: './tests/coverage',
-      reportOnFailure: true
+      reportOnFailure: true,
+      thresholds: {
+        lines: 60,
+        branches: 60,
+        functions: 60,
+        statements: 60
+      }
     }
   },
   workspace: './vitest.workspace.js'
