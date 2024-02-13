@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4      # checkout the repo
       - run: npm ci                    # install packages
+      - run: npx playwright install --with-deps # install playwright
       - run: npm run ci:test           # run vitests for junit xml
 
       - name: Test Report
