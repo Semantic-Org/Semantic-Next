@@ -12,4 +12,4 @@ jobs:
         if: success() || failure()
         with:
           name: test-results
-          path: tests/test-result.xml
+          path: tests/test-results.xml
