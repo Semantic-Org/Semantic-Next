@@ -23,7 +23,7 @@ jobs:
       - name: 'Install Playwright'
         run: npx playwright install --with-deps # install playwright
       - name: 'Test'
-      - run: npm run ci:test           # run vitests for junit xml
+        run: npm run ci:test           # run vitests for junit xml
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()     # run this step even if previous step failed
