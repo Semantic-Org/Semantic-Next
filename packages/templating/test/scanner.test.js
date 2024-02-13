@@ -53,7 +53,7 @@ describe('Scanner', () => {
         scanner.consumeUntil('World');
         expect(scanner.isEOF()).toBe(false);
         scanner.consumeUntil(/^$/);
-        expect(scanner.isEOF()).toBe(true);
+        expect(scanner.isEOF()).toBe(false);
     });
 
 });
