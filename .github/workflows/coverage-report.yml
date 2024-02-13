@@ -21,7 +21,7 @@ jobs:
     - name: 'Install Deps'
       run: npm install
     - name: 'Test'
-      run: npm run coverage
+      run: npm run ci:coverage
     - name: 'Report Coverage'
       if: always() 
       uses:  davelosert/vitest-coverage-report-action@v2
