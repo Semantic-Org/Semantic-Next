@@ -9,7 +9,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'istanbul',
-      reporter: ['html', 'json-summary', 'json'],
+      reporter: ['html'],
       include: [
         'packages/**/src/**/*.js'
       ],
