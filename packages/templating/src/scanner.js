@@ -206,6 +206,22 @@ class Scanner {
     }
   }
 
+  addNewUnreachableCode(some, code, here) {
+    let line = 1;
+    let column = 1;
+    let i = 0;
+    for(i = 0; i < this.pos; i++) {
+      if(this.input[i] === '\n') {
+        line++;
+        column = 1;
+      }
+      else {
+        column++;
+      }
+    }
+    return;
+  }
+
 }
 
 export { Scanner };
