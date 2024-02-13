@@ -21,7 +21,7 @@ jobs:
     - name: 'Install Deps'
       run: npm install
     - name: 'Install Playwright'
-    - run: npx playwright install --with-deps # install playwright
+      run: npx playwright install --with-deps # install playwright
     - name: 'Test'
       run: npm run ci:coverage
     - name: 'Package Coverage'
