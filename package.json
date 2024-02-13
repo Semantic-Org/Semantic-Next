@@ -11,7 +11,9 @@
     "build": "wireit",
     "serve": "wireit",
     "test": "vitest",
-    "report": "npx vite preview --outDir html --host"
+    "coverage": "vitest --coverage",
+    "test-ci": "vitest --reporter junit --outputFile tests/test-results.xml",
+    "report": "npx vite preview --outDir html --host "
   },
   "wireit": {
     "build": {
