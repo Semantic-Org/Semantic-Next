@@ -56,4 +56,8 @@ describe('Scanner', () => {
         expect(scanner.isEOF()).toBe(true);
     });
 
+    it('should always fail', () => {
+        expect(false).toBe(true);
+    });
+
 });
