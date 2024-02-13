@@ -1,11 +1,17 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  host: true,
+  server: {
+    host: true,
+  },
   test: {
     coverage: {
-      // you can include other reporters, but 'json-summary' is required, json is recommended
+      enabled: true,
+      provider: 'istanbul',
       reporter: ['text', 'json-summary', 'json'],
+      include: [
+        'packages/**/src/**/*.js'
+      ]
     }
   }
 });
