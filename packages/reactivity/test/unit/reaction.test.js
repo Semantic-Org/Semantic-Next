@@ -48,6 +48,7 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledWith('Goodbye detected');
       expect(callback).toHaveBeenCalledTimes(2);
     });
+
   });
 
   describe('Equality', () => {
@@ -93,7 +94,7 @@ describe('Reaction', () => {
 
   describe('Controlling Reactivity', () => {
 
-    it('should use guard to control reactivity', () => {
+    it('guard should control reactivity', () => {
       const userAge = new ReactiveVar(30);
       const userName = new ReactiveVar('John Doe');
       const lastUpdated = new ReactiveVar(new Date());
@@ -121,6 +122,28 @@ describe('Reaction', () => {
 
       // Should include initial run plus updates that trigger guard
       expect(callback).toHaveBeenCalledTimes(3);
+    });
+
+    it('guard should not re-run for identical objects', () => {
+      const user = { name: 'John Doe', age: 30 };
+      const reactiveUser = new ReactiveVar(user);
+      const callback = vi.fn();
+
+      Reaction.create(() => {
+        Reaction.guard(() => {
+          callback(reactiveUser.get());
+          return reactiveUser.get();
+        });
+      });
+
+      // Initial flush to account for the setup of reactive computation
+      Reaction.flush();
+
+      reactiveUser.set(user);
+      Reaction.flush();
+
+      // Callback should be called only once due to deep equality
+      expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('peek should not establish reactive dependency', () => {
