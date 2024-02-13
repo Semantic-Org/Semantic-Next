@@ -13,17 +13,11 @@ jobs:
     name: Run Test Suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Install Node'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-      - name: 'Install Deps'
-        run: npm install
-      - name: 'Install Playwright'
-        run: npx playwright install --with-deps # install playwright
-      - name: 'Test'
+      - uses: actions/checkout@v4      # checkout the repo
+      - run: npm ci                    # install packages
+      - run: npx playwright install --with-deps # install playwright
       - run: npm run ci:test           # run vitests for junit xml
+
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()     # run this step even if previous step failed
