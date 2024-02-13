@@ -10,10 +10,10 @@
   "scripts": {
     "build": "wireit",
     "serve": "wireit",
-    "test": "vitest",
-    "coverage": "vitest --coverage.enabled --coverage.provider=istanbul --coverage.reporter=json-summary --coverage.reporter=json",
-    "test-ci": "vitest --reporter junit --outputFile tests/test-results.xml",
-    "report": "npx vite preview --outDir html --host "
+    "test": "vitest --c tests/config/vitest/vitest.config.js",
+    "test:ui": "vitest --ui --c tests/config/vitest/vitest-ui.config.js",
+    "ci:coverage": "vitest --c tests/config/vitest/ci-coverage.config.js",
+    "ci:test": "vitest --c tests/config/vitest/ci-test.config.js"
   },
   "wireit": {
     "build": {
@@ -39,7 +39,6 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
     "@chialab/esbuild-plugin-css-import": "^0.17.1",
-    "@playwright/test": "^1.41.1",
     "@types/node": "^20.11.7",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
