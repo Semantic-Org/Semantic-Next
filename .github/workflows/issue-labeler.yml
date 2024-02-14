@@ -1,0 +1,20 @@
+name: Issue Labeler
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  reply-labeled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: needs reproduction
+        if: github.event.label.name == 'Missing Test Case'
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "create-comment, remove-labels"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Thanks for sharing your issue. In order to review you will need to provide the minimal steps to reproduce your issue. Be sure to give a baseline minimal test-case that does not include any code specific to your project. When possible you can consider using [JSFiddle](https://www.jsfiddle.net) to help us debug it quicker.
+          labels: "pending triage"
