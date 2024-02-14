@@ -16,5 +16,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Thanks for sharing your issue. In order to review you will need to provide the minimal steps to reproduce your issue. Be sure to give a baseline minimal test-case that does not include any code specific to your project. When possible you can consider using [JSFiddle](https://www.jsfiddle.net) to help us debug it quicker.
-          labels: "pending triage"
+            ### Thanks for sharing your issue.
+
+            It looks like you're bug report is missing a test case. In order to review you will need to provide the minimal steps to reproduce your issue.
+
+            > Be sure to give a **baseline minimal test-case** that *does not include any code specific to your project*.  When possible consider using [JSFiddle](https://www.jsfiddle.net) to help us debug it quicker.
+            We will close any open issues that do not receive test cases in a timely manner.
