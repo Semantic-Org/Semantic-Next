@@ -1,28 +1,32 @@
 Component:
 - changed-files:
-  - any-glob-to-any-file: packages/component/src*
+  - any-glob-to-any-file: packages/component/src/**
 
 Examples:
 - changed-files:
-  - any-glob-to-any-file: examples/*
+  - any-glob-to-any-file: examples/**
 
 Query:
 - changed-files:
-  - any-glob-to-any-file: packages/query/src/*
+  - any-glob-to-any-file: packages/query/src/**
 
 Reactivity:
 - changed-files:
-  - any-glob-to-any-file: packages/reactivity/src/*
+  - any-glob-to-any-file: packages/reactivity/src/**
 
 Templating:
 - changed-files:
-  - any-glob-to-any-file: packages/templating/src/*
+  - any-glob-to-any-file: packages/templating/src/**
+
+Utils:
+- changed-files:
+  - any-glob-to-any-file: packages/utils/src/**
 
 Tests:
 - changed-files:
-  - any-glob-to-any-file: packages/**/test/*
-  - any-glob-to-any-file: tests/*
+  - any-glob-to-any-file: packages/**/test/*.*
+  - any-glob-to-any-file: tests/**
 
 UI Components:
 - changed-files:
-  - any-glob-to-any-file: src/*
+  - any-glob-to-any-file: src/**
