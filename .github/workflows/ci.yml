@@ -28,11 +28,11 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Cache Node Modules
-        uses: actions/cache@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: node-modules-${{ hashFiles('package-lock.json') }}
+          node-version-file: '.node-version'
+          cache: 'npm'
 
       - name: Install NPM Dependencies
         run: npm ci
@@ -55,11 +55,11 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Cache Node Modules
-        uses: actions/cache@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: node-modules-${{ hashFiles('package-lock.json') }}
+          node-version-file: '.node-version'
+          cache: 'npm'
 
       - name: Install NPM Dependencies
         run: npm ci
@@ -68,17 +68,17 @@ jobs:
         run: |
           PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV"
 
       - name: Cache Playwright
-        id: cache-playwright-browsers
+        id: cache-playwright
         uses: actions/cache@v3
         with:
           path: ~/.cache/playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+          key: playwright-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Install Playwright
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
 
       - name: Run Browser Tests
@@ -100,30 +100,27 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Cache Node Modules
-        uses: actions/cache@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install NPM Dependencies
-        run: npm ci
+          node-version-file: '.node-version'
+          cache: 'npm'
 
       - name: Get Playwright Version
         run: |
           PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV"
 
       - name: Cache Playwright
-        id: cache-playwright-browsers
+        id: cache-playwright
         uses: actions/cache@v3
         with:
           path: ~/.cache/playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+          key: playwright-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Install Playwright
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
 
       - name: Check Code Coverage
