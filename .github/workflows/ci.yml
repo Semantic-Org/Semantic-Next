@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   unit-test:
-    name: Run Test Suite
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
