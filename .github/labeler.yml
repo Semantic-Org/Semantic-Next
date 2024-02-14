@@ -20,7 +20,7 @@ Templating:
 
 Tests:
 - changed-files:
-  - any-glob-to-any-file: packages/**/tests/*
+  - any-glob-to-any-file: packages/**/test/*
   - any-glob-to-any-file: tests/*
 
 UI Components:
