@@ -18,6 +18,6 @@ export default defineConfig({
         statements: 30
       }
     },
-    workspace: './tests/configs/vitest/workspace/vitest.all.workspace.js'
+    workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
   },
 });
