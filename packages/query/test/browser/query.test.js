@@ -40,7 +40,6 @@ describe('query', () => {
 
 
       document.body.appendChild(customElement);
-      // JSDOM might not be slotting content
       expect(customElement.getSlotText()).toBe('passed in text');
       expect(customElement.getDivText()).toBe('passed in text');
 
