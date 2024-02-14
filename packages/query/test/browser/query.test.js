@@ -5,7 +5,7 @@ describe('query', () => {
   
   describe('text', () => {
 
-    it('text should get text content of slotted nodes via assigned nodes in shadow DOM', () => {
+    it('text should get text content of slotted nodes via assigned nodes from shadow DOM', () => {
       // initialize a web component then add slotted content
       // that slotted content should have the specified text content when using text
       class TestComponent extends HTMLElement {
