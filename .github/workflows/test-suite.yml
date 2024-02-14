@@ -20,8 +20,14 @@ jobs:
     name: Run Test Suite
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout Repo'
+      - name: Checkout Repo
         uses: actions/checkout@v4
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Install NPM Dependencies
         run: npm ci
@@ -41,27 +47,34 @@ jobs:
     name: Run Browser E2E Tests
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout Repo'
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: 'Cache Playwright Build'
+      - name: Cache Node Modules
         uses: actions/cache@v3
-        id: playwright-cache
         with:
-          path: |
-          ~/.cache/playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Install NPM Dependencies
         run: npm ci
 
-      - name: 'Use Cached Playwright'
-        run: npx playwright install --with-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Get Playwright Version
+        run: |
+          PLAYWRIGHT_VERSION=$(npm ls @playwright/test | grep @playwright | sed 's/.*@//')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
-      - name: 'Install Playwright'
-        run: npx playwright install-deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
+      - name: Cache Playwright
+        id: cache-playwright-browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Install Playwright
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
 
       - name: Run Browser Tests
         run: npm run ci:test:browser
