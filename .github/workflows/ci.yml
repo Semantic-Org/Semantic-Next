@@ -66,6 +66,7 @@ jobs:
 
       - name: Get Playwright Version
         run: |
+          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME\.cache\playwright-bin" >> $env:GITHUB_ENV
           PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
@@ -74,7 +75,7 @@ jobs:
         id: cache-playwright
         uses: actions/cache@v3
         with:
-          path: ~/.cache/playwright
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
           key: playwright-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Install Playwright
@@ -111,6 +112,7 @@ jobs:
 
       - name: Get Playwright Version
         run: |
+          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME\.cache\playwright-bin" >> $env:GITHUB_ENV
           PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
@@ -119,7 +121,7 @@ jobs:
         id: cache-playwright
         uses: actions/cache@v3
         with:
-          path: ~/.cache/playwright
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
           key: playwright-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Install Playwright
