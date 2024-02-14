@@ -16,7 +16,7 @@ describe('query', () => {
       expect($div[0]).toBe(div);
     });
 
-    it('query should allow dom elements to be passed in', () => {
+    it('query should allow DOM elements to be passed in', () => {
       const div = document.createElement('div');
       const $div = $(div);
       expect($div[0]).toBe(div);
