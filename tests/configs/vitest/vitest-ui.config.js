@@ -20,7 +20,7 @@ export default defineConfig({
       ],
       reportsDirectory: './tests/coverage',
       reportOnFailure: true
-    }
+    },
+    workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
   },
-  workspace: './vitest.workspace.js'
 });

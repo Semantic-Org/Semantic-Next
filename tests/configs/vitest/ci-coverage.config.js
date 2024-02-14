@@ -17,6 +17,7 @@ export default defineConfig({
         branches: 30,
         statements: 30
       }
-    }
+    },
+    workspace: './tests/configs/vitest/workspace/vitest.all.workspace.js'
   },
 });

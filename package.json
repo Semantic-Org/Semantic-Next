@@ -10,10 +10,12 @@
   "scripts": {
     "build": "wireit",
     "serve": "wireit",
-    "test": "vitest --c tests/config/vitest/vitest.config.js",
-    "test:ui": "vitest --ui --c tests/config/vitest/vitest-ui.config.js",
-    "ci:coverage": "vitest --c tests/config/vitest/ci-coverage.config.js",
-    "ci:test": "vitest --c tests/config/vitest/ci-test.config.js"
+    "test": "vitest --c tests/configs/vitest/vitest.config.js",
+    "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
+    "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
+    "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
+    "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
+    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
   },
   "wireit": {
     "build": {
@@ -22,17 +24,6 @@
     "serve": {
       "command": "node ./tasks/serve.js",
       "service": true
-    },
-    "test-server": {
-      "command": "http-server ./ -p 8005",
-      "service": true
-    },
-    "test": {
-      "command": "vitest --coverage",
-      "outputCapture": "stdio",
-      "env": {
-        "NODE_ENV": "test"
-      }
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",

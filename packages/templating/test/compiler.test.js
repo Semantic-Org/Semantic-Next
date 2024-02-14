@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { TemplateCompiler } from '../src/compiler.js';
+import { TemplateCompiler } from '@semantic-ui/templating';
 
 
 describe('TemplateCompiler', () => {
