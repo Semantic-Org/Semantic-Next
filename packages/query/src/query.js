@@ -7,6 +7,8 @@ import { isString, isArray, isDOM, isFunction, isObject } from '@semantic-ui/uti
 
 export class Query {
 
+  static eventHandlers = [];
+
   constructor(selector, root = document) {
     let elements = [];
 
@@ -31,6 +33,10 @@ export class Query {
     this.length = elements.length;
     Object.assign(this, elements);
   }
+  
+  removeAllEvents() {
+    Query._eventHandlers = [];
+  }
 
   find(selector) {
     const elements = Array.from(this).flatMap(el => Array.from(el.querySelectorAll(selector)));
@@ -54,7 +60,6 @@ export class Query {
 
   filter(selectorOrFunction) {
     let filteredElements = [];
-
     if (typeof selectorOrFunction === 'string') {
       // If a CSS selector is provided, use it with the matches method
       filteredElements = Array.from(this).filter(el => el.matches(selectorOrFunction));
@@ -77,7 +82,6 @@ export class Query {
   }
 
   on(event, targetSelectorOrHandler, handlerOrOptions, options) {
-    this._eventHandlers = this._eventHandlers || [];
     const eventHandlers = [];
 
     let handler;
@@ -99,50 +103,45 @@ export class Query {
     const signal = abortController.signal;
 
     Array.from(this).forEach(el => {
-      const eventListener = (e) => {
-        if (targetSelector) {
+      
+      let delegateHandler;
+      if(targetSelector) {
+        delegateHandler = (e) => {
           for (let target = e.target; target && target !== el; target = target.parentNode) {
             if (target.matches(targetSelector)) {
               handler.call(target, e);
               break;
             }
           }
-        } 
-        else {
-          handler.call(el, e);
-        }
-      };
-
-      el.addEventListener(event, eventListener, { signal });
+        };
+      }
+      el.addEventListener(event, delegateHandler || handler, { signal });
 
       const eventHandler = {
         el,
         event,
-        eventListener,
+        eventListener: delegateHandler || handler,
         abortController,
         delegated: targetSelector !== undefined,
-        originalHandler: handler,
+        handler,
         abort: () => abortController.abort()
       };
       eventHandlers.push(eventHandler);
     });
 
-    this._eventHandlers.push(...eventHandlers);
+    Query._eventHandlers.push(...eventHandlers);
 
     return (eventHandlers.length == 1) ? eventHandlers[0] : eventHandlers;
   }
 
   off(event, handler) {
-    // Remove the event listeners
-    if(this._eventHandlers) {
-      this._eventHandlers = this._eventHandlers.filter(eventHandler => {
-        if(eventHandler.event === event && (!handler || eventHandler.handler === handler || eventHandler.originalHandler === handler)) {
-          eventHandler.el.removeEventListener(event, eventHandler.handler);
-          return false; // Remove from the array
-        }
-        return true; // Keep handler in the array
-      });
-    }
+    Query._eventHandlers = Query._eventHandlers.filter(eventHandler => {
+      if(eventHandler.event === event && (!handler || handler?.eventListener == eventHandler.eventListener || eventHandler.eventListener === handler || eventHandler.handler === handler)) {
+        eventHandler.el.removeEventListener(event, eventHandler.eventListener);
+        return false;
+      }
+      return true;
+    });
     return this;
   }
 
@@ -192,9 +191,30 @@ export class Query {
       Array.from(this).forEach(el => el.textContent = newText);
       return this;
     } else {
-      const values = Array.from(this).map(el => this.getTextContentRecursive(el.childNodes));
+      const childNodes = (el) => {
+        return (el.nodeName === 'SLOT')
+          ? el.assignedNodes({ flatten: true })
+          : el.childNodes
+        ;
+      }
+      const values = Array.from(this).map(el => this.getTextContentRecursive(childNodes(el)));
       return (values.length > 1) ? values : values[0];
     }
+  }
+
+  // Helper function to recursively get text content
+  getTextContentRecursive(nodes) {
+    return Array.from(nodes).map(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.nodeValue;
+      } else if (node.nodeName === 'SLOT') {
+        // If the node is a slot, retrieve its assigned nodes
+        const slotNodes = node.assignedNodes({ flatten: true });
+        return this.getTextContentRecursive(slotNodes);
+      } else {
+        return this.getTextContentRecursive(node.childNodes);
+      }
+    }).join('').trim();
   }
 
   value(newValue) {
@@ -222,21 +242,6 @@ export class Query {
     return this.value(...args);
   }
 
-  // Helper function to recursively get text content
-  getTextContentRecursive(nodes) {
-    return Array.from(nodes).map(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.nodeValue;
-      } else if (node.nodeName === 'SLOT') {
-        // If the node is a slot, retrieve its assigned nodes
-        const slotNodes = node.assignedNodes({ flatten: true });
-        return this.getTextContentRecursive(slotNodes);
-      } else {
-        return this.getTextContentRecursive(node.childNodes);
-      }
-    }).join('').trim();
-  }
-
   css(property, value) {
     if (typeof property === 'object') {
       Object.entries(property).forEach(([prop, val]) => {
@@ -245,7 +250,8 @@ export class Query {
     } else if (value !== undefined) {
       Array.from(this).forEach(el => el.style[property] = value);
     } else if (this.length) {
-      return this[0].style[property];
+      const properties = Array.from(this).map(el => el.style[property]);
+      return (properties.length > 1) ? properties : properties[0];
     }
     return this;
   }
@@ -260,8 +266,8 @@ export class Query {
       // Handle single attribute-value pair
       Array.from(this).forEach(el => el.setAttribute(attribute, value));
     } else if (this.length) {
-      // Get the value of the attribute for the first element
-      return this[0].getAttribute(attribute);
+      const attributes = Array.from(this).map(el => el.getAttribute(attribute));
+      return (attributes.length > 1) ? attributes : attributes[0];
     }
     return this;
   }

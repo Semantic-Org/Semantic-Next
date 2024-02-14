@@ -99,7 +99,7 @@ class TemplateCompiler {
               content: [],
             };
             if(!conditionTarget) {
-              scanner.returnTo(starts.ELSEIF);
+              scanner.returnTo(tagRegExp.ELSEIF);
               scanner.fatal('{{elseif}} encountered without matching if condition');
             }
             contentStack.pop();
@@ -114,7 +114,7 @@ class TemplateCompiler {
               content: [],
             };
             if(!conditionTarget) {
-              scanner.returnTo(starts.ELSE);
+              scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal('{{else}} encountered without matching if condition');
               break;
             }
@@ -165,7 +165,7 @@ class TemplateCompiler {
 
           case 'CLOSE_IF':
             if(conditionStack.length == 0) {
-              scanner.returnTo(starts.CLOSE_IF);
+              scanner.returnTo(tagRegExp.CLOSE_IF);
               scanner.fatal('{{/if}} close tag found without open if tag');
             }
             stack.pop();

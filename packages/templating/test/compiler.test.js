@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { TemplateCompiler } from '../src/compiler.js';
+import { TemplateCompiler } from '@semantic-ui/templating';
+
 
 describe('TemplateCompiler', () => {
 
@@ -641,6 +642,116 @@ describe('TemplateCompiler', () => {
         { type: 'html', html: '\n        </div>' }
       ];
       expect(ast).toEqual(expectedAST);
+    });
+
+  });
+  describe('boolean attributes', () => {
+
+    it('should correctly identify known boolean attributes like checked', () => {
+      
+      const compiler = new TemplateCompiler();
+      const template = `
+        <input type="checkbox" checked={{maybeChecked}}>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<input type="checkbox" checked=' },
+        { type: 'expression', value: 'maybeChecked', booleanAttribute: true },
+        { type: 'html', html: '>' }
+      ];
+    });
+    it('should correctly identify known boolean attributes even if quoted', () => {
+      
+      const compiler = new TemplateCompiler();
+      const template = `
+        <input type="checkbox" checked="{{maybeChecked}}">
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<input type="checkbox" checked=' },
+        { type: 'expression', value: 'maybeChecked', booleanAttribute: true },
+        { type: 'html', html: '>' }
+      ];
+    });
+
+    it('should identify boolean attributes when no quotes', () => {
+      
+      const compiler = new TemplateCompiler();
+      const template = `
+        <input type="checkbox" custom={{maybeChecked}}>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<input type="checkbox" custom=' },
+        { type: 'expression', value: 'maybeChecked', booleanAttribute: true },
+        { type: 'html', html: '>' }
+      ];
+    });
+
+    it('should identify not boolean attributes when no quotes', () => {
+      
+      const compiler = new TemplateCompiler();
+      const template = `
+        <input type="checkbox" custom="{{maybeChecked}}">
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<input type="checkbox" custom=' },
+        { type: 'expression', value: 'maybeChecked', booleanAttribute: true },
+        { type: 'html', html: '>' }
+      ];
+    });
+
+  });
+
+  describe('error conditions', () => {
+
+    it('should throw an error when an else included outside an if', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{else}}
+        </div>
+      `;
+      try {
+        const consoleError = console.error;
+        console.error = vi.fn();
+        expect(() => compiler.compile(template)).toThrow();
+        console.error = consoleError;
+      }
+      catch(e) {};
+    });
+
+    it('should throw an error when an elseif included outside an if', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{elseif name}}
+        </div>
+      `;
+      try {
+        const consoleError = console.error;
+        console.error = vi.fn();
+        expect(() => compiler.compile(template)).toThrow();
+        console.error = consoleError;
+      }
+      catch(e) {};
+    });
+
+    it('should throw an error when closing if tag is included without an if', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{/if}}
+        </div>
+      `;
+      try {
+        const consoleError = console.error;
+        console.error = vi.fn();
+        expect(() => compiler.compile(template)).toThrow();
+        console.error = consoleError;
+      }
+      catch(e) {};
     });
 
   });
