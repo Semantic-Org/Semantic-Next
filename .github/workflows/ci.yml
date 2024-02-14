@@ -22,6 +22,7 @@ permissions:
 
 jobs:
   changes:
+    name: Check Changed Files
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
