@@ -33,7 +33,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Vitest Tests
+          name: Vitest Unit Tests
           path: tests/results/test-results-unit-junit.xml
           reporter: java-junit
 
@@ -70,7 +70,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Vitest Tests
+          name: Vitest Browser Tests
           path: tests/results/test-results-browser-junit.xml
           reporter: java-junit
 
