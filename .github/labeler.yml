@@ -18,3 +18,41 @@ Reactivity:
       - any-glob-to-any-file:
           - packages/reactivity/src/**
 
+Templating:
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/templating/src/**
+
+Utils:
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/utils/src/**
+
+Tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/**/test/**
+          - tests/**
+
+UI Components:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/**
+
+CI:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+
+Tooling:
+  - changed-files:
+      - any-glob-to-any-file:
+          - package.json
+          - \.*
+          - .prettierrc.json
+
+Docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - README.md
+          - "**/*.md"
