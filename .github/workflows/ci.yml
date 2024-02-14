@@ -66,21 +66,22 @@ jobs:
 
       - name: Get Playwright Version
         run: |
-          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME\.cache\playwright-bin" >> $env:GITHUB_ENV
-          PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/playwright-bin" >> $GITHUB_ENV
+          PLAYWRIGHT_VERSION="$(npm ls playwright | grep playwright | sed 's/.*@//')"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
       - name: Cache Playwright
-        id: cache-playwright
-        uses: actions/cache@v3
+        if: steps.changed-files.outputs.only_changed != 'true'
+        uses: actions/cache@v4
         with:
+          key: ${{ runner.os }}-playwright-bin-${{ env.PLAYWRIGHT_VERSION }}
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          key: playwright-${{ env.PLAYWRIGHT_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-bin-
 
       - name: Install Playwright
         if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium
 
       - name: Run Browser Tests
         run: npm run ci:test:browser
@@ -112,21 +113,22 @@ jobs:
 
       - name: Get Playwright Version
         run: |
-          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME\.cache\playwright-bin" >> $env:GITHUB_ENV
-          PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/playwright-bin" >> $GITHUB_ENV
+          PLAYWRIGHT_VERSION="$(npm ls playwright | grep playwright | sed 's/.*@//')"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
       - name: Cache Playwright
-        id: cache-playwright
-        uses: actions/cache@v3
+        if: steps.changed-files.outputs.only_changed != 'true'
+        uses: actions/cache@v4
         with:
+          key: ${{ runner.os }}-playwright-bin-${{ env.PLAYWRIGHT_VERSION }}
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          key: playwright-${{ env.PLAYWRIGHT_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-bin-
 
       - name: Install Playwright
         if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium
 
       - name: Check Code Coverage
         run: npm run ci:coverage
