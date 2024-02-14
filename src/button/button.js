@@ -15,6 +15,7 @@ const onCreated = (tpl) => {
 
 const events = {
   'click .button'(event, tpl, $) {
+
   }
 };
 

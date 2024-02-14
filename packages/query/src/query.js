@@ -314,5 +314,4 @@ export class Query {
     return this[0].blur();
   }
 
-
 }
