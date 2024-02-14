@@ -1,4 +1,4 @@
-name: 'Test Suite'
+name: 'CI'
 
 on:
   push:
@@ -18,8 +18,6 @@ permissions:
   contents: read
   actions: read
   checks: write
-  # Required to put a comment into the pull-request
-  pull-requests: write
 
 jobs:
   unit-test:
@@ -67,7 +65,7 @@ jobs:
 
       - name: Get Playwright Version
         run: |
-          PLAYWRIGHT_VERSION=$(npm ls @playwright/test | grep @playwright | sed 's/.*@//')
+          PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -92,5 +90,55 @@ jobs:
           name: Vitest Browser Tests
           path: tests/results/test-results-browser-junit.xml
           reporter: java-junit
+
+  coverage:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: 'Checkout Repo'
+        uses: actions/checkout@v4
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Get Playwright Version
+        run: |
+          PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright
+        id: cache-playwright-browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Install Playwright
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: 'Check Code Coverage'
+        run: npm run ci:coverage
+
+      - name: 'Generate Coverage Report'
+        if: always() # still generate if tests failing
+        uses:  davelosert/vitest-coverage-report-action@v2
+        with:
+          name: 'Package'
+          vite-config-path: './tests/configs/vitest/ci-coverage.config.js'
+          json-summary-path: './tests/coverage/coverage-summary.json'
+          json-final-path: './tests/coverage/coverage-final.json'
+          file-coverage-mode: 'changes'
 
 
