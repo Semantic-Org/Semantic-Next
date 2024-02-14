@@ -106,6 +106,9 @@ jobs:
           node-version-file: '.node-version'
           cache: 'npm'
 
+      - name: Install NPM Dependencies
+        run: npm ci
+
       - name: Get Playwright Version
         run: |
           PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | sed 's/.*@//')
