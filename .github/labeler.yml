@@ -1,43 +1,58 @@
 Component:
-- changed-files:
-  - any-glob-to-any-file: ['packages/component/src/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/component/src/**
 
 Examples:
-- changed-files:
-  - any-glob-to-any-file: ['examples/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - examples/**
 
 Query:
-- changed-files:
-  - any-glob-to-any-file: ['packages/query/src/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/query/src/**
 
 Reactivity:
-- changed-files:
-  - any-glob-to-any-file: ['packages/reactivity/src/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/reactivity/src/**
 
 Templating:
-- changed-files:
-  - any-glob-to-any-file: ['packages/templating/src/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/templating/src/**
 
 Utils:
-- changed-files:
-  - any-glob-to-any-file: ['packages/utils/src/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/utils/src/**
 
 Tests:
-- changed-files:
-  - any-glob-to-any-file: ['packages/**/test/**', 'tests/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/**/test/**
+          - tests/**
 
 UI Components:
-- changed-files:
-  - any-glob-to-any-file: ['src/**']
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/**
 
 CI:
-- changed-files:
-  - any-glob-to-any-file: [.github/**]
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
 
 Tooling:
-- changed-files:
-  - any-glob-to-any-file: ['package.json', '\.*', '.prettierrc.json']
+  - changed-files:
+      - any-glob-to-any-file:
+          - package.json
+          - \.*
+          - .prettierrc.json
 
 Docs:
-- changed-files:
-  - any-glob-to-any-file: ['README.md', ['**/*.md']]
+  - changed-files:
+      - any-glob-to-any-file:
+          - README.md
+          - "**/*.md"
