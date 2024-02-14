@@ -11,14 +11,14 @@ describe('query', () => {
 
   describe('selectors', () => {
     
-    it('query should query dom when given a selector', () => {
+    it('query should query DOM when given a selector', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const $div = $('div');
       expect($div[0]).toBe(div);
     });
 
-    it('query should allow dom elements to be passed in', () => {
+    it('query should allow DOM elements to be passed in', () => {
       const div = document.createElement('div');
       const $div = $(div);
       expect($div[0]).toBe(div);
