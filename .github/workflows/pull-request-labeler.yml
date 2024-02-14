@@ -1,4 +1,5 @@
 name: "Pull Request Labeler"
+
 on:
 - pull_request_target
 
@@ -11,7 +12,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+
       - name: Label PR
         uses: actions/labeler@v5
-          with:
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
