@@ -13,23 +13,37 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v4
-    - name: 'Install Node'
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-    - name: 'Install Deps'
-      run: npm install
-    - name: 'Install Playwright'
-      run: npx playwright install --with-deps # install playwright
-    - name: 'Test'
-      run: npm run ci:coverage
-    - name: 'Package Coverage'
-      if: always() # Also generate the report if tests are failing
-      uses:  davelosert/vitest-coverage-report-action@v2
-      with:
-        name: 'Package'
-        vite-config-path: './tests/configs/vitest/ci-coverage.config.js'
-        json-summary-path: './tests/coverage/coverage-summary.json'
-        json-final-path: './tests/coverage/coverage-final.json'
-        file-coverage-mode: 'changes'
+      - name: 'Checkout Repo'
+        uses: actions/checkout@v4
+
+      - name: 'Cache Playwright Build'
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: |
+          ~/.cache/playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: 'Use Cached Playwright'
+        run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: 'Install Playwright'
+        run: npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+
+      - name: 'Check Code Coverage'
+        run: npm run ci:coverage
+
+      - name: 'Generate Coverage Report'
+        if: always() # still generate if tests failing
+        uses:  davelosert/vitest-coverage-report-action@v2
+        with:
+          name: 'Package'
+          vite-config-path: './tests/configs/vitest/ci-coverage.config.js'
+          json-summary-path: './tests/coverage/coverage-summary.json'
+          json-final-path: './tests/coverage/coverage-final.json'
+          file-coverage-mode: 'changes'
