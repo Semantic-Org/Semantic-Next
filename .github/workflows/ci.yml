@@ -18,6 +18,7 @@ permissions:
   contents: read
   actions: read
   checks: write
+  pull-requests: write
 
 jobs:
   unit-test:
@@ -92,14 +93,11 @@ jobs:
           reporter: java-junit
 
   coverage:
+    name: Code Coverage
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      pull-requests: write
-
     steps:
-      - name: 'Checkout Repo'
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Cache Node Modules
@@ -128,10 +126,10 @@ jobs:
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
 
-      - name: 'Check Code Coverage'
+      - name: Check Code Coverage
         run: npm run ci:coverage
 
-      - name: 'Generate Coverage Report'
+      - name: Generate Coverage Report
         if: always() # still generate if tests failing
         uses:  davelosert/vitest-coverage-report-action@v2
         with:
