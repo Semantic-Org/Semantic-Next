@@ -799,7 +799,7 @@ describe('query', () => {
   });
 
   describe('textNode', () => {
-    it('textNode should return only immediate text and not child content text', () => {
+    it('textNode should return only immediate text and not child el text', () => {
       const text = document.createTextNode('test');
       const div = document.createElement('div');
       const span = document.createElement('span');
