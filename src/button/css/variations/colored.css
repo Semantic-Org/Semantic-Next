@@ -280,7 +280,6 @@
   color: var(--white) !important;
 }
 
-
 /*--- Brown ---*/
 .brown.buttons .button,
 .brown.button {
@@ -596,7 +595,6 @@
   color: var(--green-text-color);
   text-shadow: var(--green-text-shadow);
 }
-
 
 /* Basic */
 .basic.green.buttons .button,
@@ -976,7 +974,6 @@
   box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-pink-down) inset !important;
   color: var(--light-pink) !important;
 }
-
 
 /*--- Violet ---*/
 .violet.buttons .button,
@@ -1395,7 +1392,6 @@
   color: var(--light-red) !important;
 }
 
-
 /*--- Teal ---*/
 .teal.buttons .button,
 .teal.button {
@@ -1534,7 +1530,6 @@
   box-shadow: 0px 0px 0px var(--inverted-border-size) var(--light-teal-down) inset !important;
   color: var(--light-teal) !important;
 }
-
 
 /*--- Olive ---*/
 .olive.buttons .button,

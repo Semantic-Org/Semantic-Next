@@ -48,7 +48,6 @@
   box-shadow: var(--labeled-icon-right-shadow);
 }
 
-
 .labeled.icon.buttons > .button > .icon::before,
 .labeled.icon.button > .icon::before,
 .labeled.icon.buttons > .button > .icon::after,

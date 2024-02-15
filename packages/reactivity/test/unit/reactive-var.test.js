@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 describe.concurrent('ReactiveVar', () => {
-
   /*******************************
               Creation
   *******************************/
@@ -31,7 +30,6 @@ describe.concurrent('ReactiveVar', () => {
   *******************************/
 
   describe.concurrent('Equality', () => {
-
     it('allow custom equality', () => {
       const callback = vi.fn();
 
@@ -80,7 +78,6 @@ describe.concurrent('ReactiveVar', () => {
       reactiveVar.value = b;
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
-
     });
 
     it('identical objects with different key order shouldnt trigger reactivity', () => {
@@ -111,22 +108,19 @@ describe.concurrent('ReactiveVar', () => {
       reactiveVar.value = b;
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
-
     });
   });
-
 
   /*******************************
             Reactivity
   *******************************/
 
   describe.concurrent('Reactivity', () => {
-
     it('should notify subscribers on value change', async () => {
       const callback = vi.fn();
 
       const expectReaction = expect.objectContaining({
-        stop: expect.any(Function)
+        stop: expect.any(Function),
       });
 
       const reactiveVar = new ReactiveVar('initial');
@@ -146,7 +140,6 @@ describe.concurrent('ReactiveVar', () => {
 
       expect(callback).toHaveBeenCalledTimes(3);
       expect(callback).toHaveBeenCalledWith('final', expectReaction);
-
     });
 
     it('Peek should not trigger reactivity', () => {
@@ -158,7 +151,6 @@ describe.concurrent('ReactiveVar', () => {
 
       reactiveVar.set('anything else');
       expect(reaction).toHaveBeenCalledTimes(1);
-
     });
 
     it('Reactive variables should trigger nested dependencies', () => {
@@ -176,7 +168,6 @@ describe.concurrent('ReactiveVar', () => {
       Reaction.flush();
       expect(value3.get()).toEqual(1);
     });
-
   });
 
   /*******************************
@@ -184,7 +175,6 @@ describe.concurrent('ReactiveVar', () => {
   *******************************/
 
   describe.concurrent('Array Utilities', () => {
-
     it('Push should push values', () => {
       const reactiveArray = new ReactiveVar([1, 2, 3]);
       reactiveArray.push(4);
@@ -196,7 +186,6 @@ describe.concurrent('ReactiveVar', () => {
       reactiveArray.unshift(1);
       expect(reactiveArray.value).toEqual([1, 2, 3]);
     });
-
 
     it('Splice should insert values', () => {
       const reactiveArray = new ReactiveVar([1, 4]);
@@ -227,14 +216,12 @@ describe.concurrent('ReactiveVar', () => {
       reactiveArray.setArrayProperty('status', 'active'); // Set 'status' property for all objects
       expect(reactiveArray.value).toEqual([
         { name: 'Alice', status: 'active' },
-        { name: 'Bob', status: 'active' }
+        { name: 'Bob', status: 'active' },
       ]);
     });
-
   });
 
   describe.concurrent('Transformation Helpers', () => {
-
     it('changeItems should change each item based on a map function', () => {
       // code here
     });
@@ -242,11 +229,9 @@ describe.concurrent('ReactiveVar', () => {
     it('removeItems should remove items based on a filter callback', () => {
       // code here
     });
-
   });
 
   describe.concurrent('Boolean Helpers', () => {
-
     it('toggle should toggle a boolean', () => {
       const reactiveBool = new ReactiveVar(true);
       reactiveBool.toggle();
@@ -254,27 +239,23 @@ describe.concurrent('ReactiveVar', () => {
       reactiveBool.toggle();
       expect(reactiveBool.value).toBe(true);
     });
-
   });
 
   describe.concurrent('Mutation Utilities', () => {
-
     it('changeItems should apply a transformation to each item', () => {
       const numbers = new ReactiveVar([1, 2, 3]);
-      numbers.changeItems(num => num * 2);
+      numbers.changeItems((num) => num * 2);
       expect(numbers.get()).toEqual([2, 4, 6]);
     });
 
     it('removeItems should remove items based on a filter', () => {
       const numbers = new ReactiveVar([1, 2, 3, 4, 5]);
-      numbers.removeItems(num => num % 2 === 0); // Remove even numbers
+      numbers.removeItems((num) => num % 2 === 0); // Remove even numbers
       expect(numbers.get()).toEqual([1, 3, 5]);
     });
-
   });
 
   describe.concurrent('ID Utilities', () => {
-
     it('getID should get id from an item', () => {
       const id1 = 'one';
       const id2 = { _id: 'one' };
@@ -304,15 +285,12 @@ describe.concurrent('ReactiveVar', () => {
       const reactiveVar = new ReactiveVar();
       expect(reactiveVar.hasID(item, 'one')).toEqual(true);
     });
-
   });
 
-
   describe.concurrent('ID Helpers', () => {
-
     const arrayItems = [
       { id: 1, name: 'Item 1' },
-      { id: 2, name: 'Item 2' }
+      { id: 2, name: 'Item 2' },
     ];
 
     it('setProperty should set the property of the item matching an id', () => {
@@ -320,7 +298,7 @@ describe.concurrent('ReactiveVar', () => {
       items.setProperty(1, 'name', 'Updated Item 1');
       expect(items.get()).toEqual([
         { id: 1, name: 'Updated Item 1' },
-        { id: 2, name: 'Item 2' }
+        { id: 2, name: 'Item 2' },
       ]);
     });
 
@@ -335,16 +313,14 @@ describe.concurrent('ReactiveVar', () => {
       items.replaceItem(1, { id: 1, name: 'Replaced Item 1' });
       expect(items.get()).toEqual([
         { id: 1, name: 'Replaced Item 1' },
-        { id: 2, name: 'Item 2' }
+        { id: 2, name: 'Item 2' },
       ]);
     });
 
     it('removeItem should remove an item matching an ID', () => {
       const items = new ReactiveVar(arrayItems);
       items.removeItem(1);
-      expect(items.get()).toEqual([
-        { id: 2, name: 'Item 2' }
-      ]);
+      expect(items.get()).toEqual([{ id: 2, name: 'Item 2' }]);
     });
 
     it('setProperty should set the property of the item matching a given id', () => {
@@ -352,7 +328,7 @@ describe.concurrent('ReactiveVar', () => {
       items.setProperty(2, 'status', 'active');
       expect(items.get()).toEqual([
         { id: 1, name: 'Item 1' },
-        { id: 2, name: 'Item 2', status: 'active' }
+        { id: 2, name: 'Item 2', status: 'active' },
       ]);
     });
 
@@ -367,12 +343,8 @@ describe.concurrent('ReactiveVar', () => {
       items.setArrayProperty('status', 'active');
       expect(items.get()).toEqual([
         { id: 1, name: 'Item 1', status: 'active' },
-        { id: 2, name: 'Item 2', status: 'active' }
+        { id: 2, name: 'Item 2', status: 'active' },
       ]);
     });
-
   });
-
-
-
 });

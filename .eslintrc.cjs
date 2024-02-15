@@ -228,11 +228,7 @@ module.exports = {
     'wrap-regex': 0, // require regex literals to be wrapped in parentheses (off by default)
     // removing this rule until we can agree on a max length "max-len"                    : [1, { "code": 100, "ignoreComments": true }],
     'object-curly-newline': [1, { consistent: true }],
-    indent: [
-      1,
-      2,
-      { MemberExpression: 1, SwitchCase: 1, VariableDeclarator: 'first' },
-    ],
+    indent: [1, 2, { MemberExpression: 1, SwitchCase: 1, VariableDeclarator: 'first' }],
     /* ECMAScipt 6 */
     'generator-star': 0, // enforce the position of the * in generator functions (off by default)
   },

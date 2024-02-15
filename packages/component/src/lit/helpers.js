@@ -10,7 +10,7 @@ export const Helpers = {
     return !a;
   },
   maybe(expr, trueClass = '', falseClass = '') {
-    return (expr) ? trueClass + ' ' : falseClass;
+    return expr ? trueClass + ' ' : falseClass;
   },
   activeIf: (expr) => {
     return Helpers.maybe(expr, 'active', '');
@@ -83,5 +83,5 @@ export const Helpers = {
     debugger;
   },
   guard: Reaction.guard,
-  nonreactive: Reaction.nonreactive
+  nonreactive: Reaction.nonreactive,
 };

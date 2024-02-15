@@ -6,10 +6,8 @@ import { logPlugin } from './lib/log.js';
   Exports SUI
 */
 let jsBuild = await esbuild.context({
-  entryPoints: [
-    './src/semantic-ui.js',
-  ],
-  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS, },
+  entryPoints: ['./src/semantic-ui.js'],
+  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
   format: 'esm',
   bundle: true,
   minify: false,
@@ -17,18 +15,16 @@ let jsBuild = await esbuild.context({
   outbase: 'src',
   outdir: 'dev/ui',
   loader: JS_LOADER_CONFIG,
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
 });
 
 /*
   Exports Componentsd
 */
 let componentBuild = await esbuild.context({
-  entryPoints: [
-    './src/**/index.js',
-  ],
+  entryPoints: ['./src/**/index.js'],
   entryNames: 'ui/components/[dir]', // button/button.js
-  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS, },
+  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
   format: 'esm',
   bundle: true,
   minify: false,
@@ -36,17 +32,15 @@ let componentBuild = await esbuild.context({
   outbase: 'src',
   outdir: 'dev/',
   loader: JS_LOADER_CONFIG,
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
 });
 
 /*
   Exports Examples
 */
 let exampleBuild = await esbuild.context({
-  entryPoints: [
-    './examples/**/index.js',
-  ],
-  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS, },
+  entryPoints: ['./examples/**/index.js'],
+  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
   entryNames: 'examples/[dir]', // examples/example-component.js
   format: 'esm',
   bundle: true,
@@ -55,7 +49,7 @@ let exampleBuild = await esbuild.context({
   outbase: 'examples',
   outdir: 'dev/',
   loader: JS_LOADER_CONFIG,
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
 });
 
 /*
@@ -63,31 +57,26 @@ let exampleBuild = await esbuild.context({
   a single css file for JS css imports
 */
 const cssConcat = await esbuild.context({
-  entryPoints: [
-    'src/**/css/*.css'
-  ],
+  entryPoints: ['src/**/css/*.css'],
   bundle: true,
   entryNames: '[dir]/../[name]',
   outbase: 'src',
   outdir: 'dev/ui',
-  plugins: [ logPlugin('CSS Concat') ],
+  plugins: [logPlugin('CSS Concat')],
   target: BROWSER_TARGET,
   loader: CSS_LOADER_CONFIG,
 });
-
 
 /*
   Exports global css
 */
 let cssBuild = await esbuild.context({
-  entryPoints: [
-    './src/semantic-ui.css',
-  ],
+  entryPoints: ['./src/semantic-ui.css'],
   bundle: true,
   minify: false,
   sourcemap: true,
   outdir: 'dev/ui/',
-  plugins: [ logPlugin('SUI CSS') ],
+  plugins: [logPlugin('SUI CSS')],
   loader: CSS_LOADER_CONFIG,
   target: BROWSER_TARGET,
 });
@@ -116,14 +105,12 @@ let cssBuild = await esbuild.context({
   Exports themes as separate css
 */
 let themeBuild = await esbuild.context({
-  entryPoints: [
-    './src/themes/base/base.css',
-  ],
+  entryPoints: ['./src/themes/base/base.css'],
   bundle: true,
   minify: false,
   sourcemap: true,
   outdir: 'dev/ui/theme',
-  plugins: [ logPlugin('Theme CSS') ],
+  plugins: [logPlugin('Theme CSS')],
   target: BROWSER_TARGET,
   loader: CSS_LOADER_CONFIG,
 });

@@ -1,17 +1,17 @@
 .tab {
   cursor: pointer;
   display: inline-block;
-  border: 1px solid #DDD;
+  border: 1px solid #ddd;
   border-radius: 3px;
   padding: 5px;
   margin-right: 3px;
 }
 .tab:hover {
-  background-color: #DADADA;
+  background-color: #dadada;
 }
 
 .tab.active {
-  background-color: #DDD;
+  background-color: #ddd;
 }
 
 .number {

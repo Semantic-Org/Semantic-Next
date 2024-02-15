@@ -6,7 +6,6 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { LitRenderer } from './renderer.js';
 
 export const LitTemplate = class UITemplate {
-
   static templateCount = 0;
 
   constructor({
@@ -22,11 +21,10 @@ export const LitTemplate = class UITemplate {
     prototype = false,
     onCreated = noop,
     onRendered = noop,
-    onDestroyed = noop
+    onDestroyed = noop,
   }) {
-
     // if we are rendering many of same template we want to pass in AST for performance
-    if(!ast) {
+    if (!ast) {
       const compiler = new TemplateCompiler(template);
       ast = compiler.compile();
     }
@@ -65,7 +63,7 @@ export const LitTemplate = class UITemplate {
 
   initialize() {
     let tpl = this;
-    if(isFunction(this.createInstance)) {
+    if (isFunction(this.createInstance)) {
       this.tpl = {};
       tpl = this.call(this.createInstance);
       extend(this.tpl, tpl);
@@ -73,7 +71,7 @@ export const LitTemplate = class UITemplate {
     // reactions bound with tpl.reaction will be scoped to template
     // and be removed when the template is destroyed
     this.tpl.reaction = this.reaction;
-    if(isFunction(tpl.initialize)) {
+    if (isFunction(tpl.initialize)) {
       this.call(tpl.initialize.bind(this));
     }
     this.tpl.data = this.data;
@@ -116,10 +114,10 @@ export const LitTemplate = class UITemplate {
   }
 
   async attach(renderRoot, { parentNode = renderRoot, startNode, endNode } = {}) {
-    if(!this.initialized) {
+    if (!this.initialized) {
       this.initialize();
     }
-    if(this.renderRoot == renderRoot) {
+    if (this.renderRoot == renderRoot) {
       return;
     }
 
@@ -136,29 +134,29 @@ export const LitTemplate = class UITemplate {
   getDataContext() {
     return {
       ...this.tpl,
-      ...this.data
+      ...this.data,
     };
   }
 
   async attachStyles() {
-    if(!this.css) {
+    if (!this.css) {
       return;
     }
-    if(!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
+    if (!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
       return;
     }
     const cssString = this.css;
-    if(!this.stylesheet) {
+    if (!this.stylesheet) {
       this.stylesheet = new CSSStyleSheet();
       await this.stylesheet.replace(cssString);
     }
     let styles = Array.from(this.renderRoot.adoptedStyleSheets);
 
     // check if already adopted
-    let hasStyles = styles.some(style => isEqual(style.cssRules, this.stylesheet.cssRules));
+    let hasStyles = styles.some((style) => isEqual(style.cssRules, this.stylesheet.cssRules));
 
-    if(!hasStyles) {
-      this.renderRoot.adoptedStyleSheets = [ ...this.renderRoot.adoptedStyleSheets, this.stylesheet ];
+    if (!hasStyles) {
+      this.renderRoot.adoptedStyleSheets = [...this.renderRoot.adoptedStyleSheets, this.stylesheet];
     }
   }
 
@@ -172,7 +170,7 @@ export const LitTemplate = class UITemplate {
       onCreated: this.onCreatedCallback,
       onRendered: this.onRenderedCallback,
       onDestroyed: this.onDestroyedCallback,
-      createInstance: this.createInstance
+      createInstance: this.createInstance,
     };
     return new LitTemplate({
       ...defaultSettings,
@@ -181,7 +179,7 @@ export const LitTemplate = class UITemplate {
   }
 
   attachEvents(events = this.events) {
-    if(!this.parentNode || !this.renderRoot) {
+    if (!this.parentNode || !this.renderRoot) {
       fatal('You must set a parent before attaching events');
     }
     this.removeEvents();
@@ -198,9 +196,9 @@ export const LitTemplate = class UITemplate {
         load: 'DOMContentLoaded',
         unload: 'beforeunload',
         mouseenter: 'mouseover',
-        mouseleave: 'mouseout'
+        mouseleave: 'mouseout',
       };
-      if(bubbleMap[eventName]) {
+      if (bubbleMap[eventName]) {
         eventName = bubbleMap[eventName];
       }
       return { eventName, selector };
@@ -210,22 +208,31 @@ export const LitTemplate = class UITemplate {
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
-      $(this.renderRoot).on(eventName, selector, (event) => {
-        if(!this.isNodeInTemplate(event.target)) {
-          return;
-        }
-        // this is
-        if ((eventName === 'mouseover' || eventName === 'mouseout') && event.relatedTarget && event.target.contains(event.relatedTarget)) {
-          return;
-        }
-        const boundEvent = eventHandler.bind(event.target);
-        template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
-      }, { abortController: this.eventController });
+      $(this.renderRoot).on(
+        eventName,
+        selector,
+        (event) => {
+          if (!this.isNodeInTemplate(event.target)) {
+            return;
+          }
+          // this is
+          if (
+            (eventName === 'mouseover' || eventName === 'mouseout') &&
+            event.relatedTarget &&
+            event.target.contains(event.relatedTarget)
+          ) {
+            return;
+          }
+          const boundEvent = eventHandler.bind(event.target);
+          template.call(boundEvent, { firstArg: event, additionalArgs: [event.target.dataset] });
+        },
+        { abortController: this.eventController }
+      );
     });
   }
 
   removeEvents() {
-    if(this.eventController) {
+    if (this.eventController) {
       this.eventController.abort();
     }
   }
@@ -240,10 +247,10 @@ export const LitTemplate = class UITemplate {
       return node;
     };
     const isNodeInRange = (node, startNode = this.startNode, endNode = this.endNode) => {
-      if(!startNode || !endNode) {
+      if (!startNode || !endNode) {
         return true;
       }
-      if(node === null) {
+      if (node === null) {
         return;
       }
       const startComparison = startNode.compareDocumentPosition(node);
@@ -261,16 +268,16 @@ export const LitTemplate = class UITemplate {
   }
 
   render(additionalData = {}) {
-    if(!this.initialized) {
+    if (!this.initialized) {
       this.initialize();
     }
     const html = this.renderer.render({
       data: {
         ...this.getDataContext(),
-        ...additionalData
-      }
+        ...additionalData,
+      },
     });
-    if(!this.rendered) {
+    if (!this.rendered) {
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
@@ -281,18 +288,14 @@ export const LitTemplate = class UITemplate {
            DOM Helpers
   *******************************/
 
-
   // Rendered DOM (either shadow or regular)
   $(selector, root = this.renderRoot, { filterTemplate = true } = {}) {
-    if(!root) {
+    if (!root) {
       root = document;
     }
-    if(root == this.renderRoot) {
+    if (root == this.renderRoot) {
       const $results = $(selector, root);
-      return (filterTemplate)
-        ? $results.filter(node => this.isNodeInTemplate(node))
-        : $results
-      ;
+      return filterTemplate ? $results.filter((node) => this.isNodeInTemplate(node)) : $results;
     }
     else {
       return $(selector, root);
@@ -305,13 +308,13 @@ export const LitTemplate = class UITemplate {
 
   // calls callback if defined with consistent params and this context
   call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
-    if(firstArg) {
+    if (firstArg) {
       args.unshift(firstArg);
     }
-    if(additionalArgs) {
+    if (additionalArgs) {
       args.push(...additionalArgs);
     }
-    if(isFunction(func)) {
+    if (isFunction(func)) {
       return func.apply(this, args);
     }
   }
@@ -321,20 +324,20 @@ export const LitTemplate = class UITemplate {
   *******************************/
 
   reaction(reaction) {
-    if(!this.reactions) {
+    if (!this.reactions) {
       this.reactions = [];
     }
     this.reactions.push(Reaction.create(reaction));
   }
 
   clearReactions() {
-    each(this.reactions || [], comp => comp.stop());
+    each(this.reactions || [], (comp) => comp.stop());
   }
 
   static renderedTemplates = new Map();
 
   static addTemplate(template) {
-    if(template.isPrototype) {
+    if (template.isPrototype) {
       return;
     }
     let templates = LitTemplate.renderedTemplates.get(template.templateName) || [];
@@ -342,7 +345,7 @@ export const LitTemplate = class UITemplate {
     LitTemplate.renderedTemplates.set(template.templateName, templates);
   }
   static removeTemplate(template) {
-    if(template.isPrototype) {
+    if (template.isPrototype) {
       return;
     }
     let templates = LitTemplate.renderedTemplates.get(template.templateName) || [];
@@ -351,10 +354,10 @@ export const LitTemplate = class UITemplate {
   }
   static getTemplates(templateName) {
     let templates = LitTemplate.renderedTemplates.get(templateName) || [];
-    if(templates.length > 1) {
+    if (templates.length > 1) {
       return templates;
     }
-    if(templates.length == 1) {
+    if (templates.length == 1) {
       return templates[0];
     }
   }
@@ -363,10 +366,10 @@ export const LitTemplate = class UITemplate {
   }
   static findParentTemplate(template, templateName) {
     let match;
-    if(templateName) {
-      while(template) {
+    if (templateName) {
+      while (template) {
         template = template.parentTemplate;
-        if(template?.templateName == templateName) {
+        if (template?.templateName == templateName) {
           match = template;
           break;
         }
@@ -384,7 +387,7 @@ export const LitTemplate = class UITemplate {
         result.push(template.tpl);
       }
       if (template.tpl._childTemplates) {
-        template.tpl._childTemplates.forEach(childTemplate => {
+        template.tpl._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });
       }
@@ -395,5 +398,4 @@ export const LitTemplate = class UITemplate {
   static findChildTemplate(template, templateName) {
     return LitTemplate.findChildTemplates(template, templateName)[0];
   }
-
 };

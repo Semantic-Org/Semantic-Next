@@ -42,14 +42,14 @@ const events = {
     });
   },
   'keydown input.edit'(event, tpl, $) {
-    if(event.key === 'Enter') {
+    if (event.key === 'Enter') {
       $(this).blur();
     }
   },
   'blur input.edit'(event, tpl, $) {
     tpl.changeText($(this).val());
     tpl.editing.set(false);
-  }
+  },
 };
 
 const todoItem = createComponent({

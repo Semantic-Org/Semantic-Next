@@ -4,19 +4,12 @@ import ButtonCSS from './button.css';
 import ButtonTemplate from './button.html';
 import { ButtonSpec } from './spec/spec.js';
 
-const createInstance = (tpl, $) => ({
+const createInstance = (tpl, $) => ({});
 
-});
-
-
-const onCreated = (tpl) => {
-
-};
+const onCreated = (tpl) => {};
 
 const events = {
-  'click .button'(event, tpl, $) {
-
-  }
+  'click .button'(event, tpl, $) {},
 };
 
 const UIButton = createComponent({

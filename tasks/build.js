@@ -3,12 +3,10 @@ import { BROWSER_TARGET } from 'lib/config.js';
 import { logPlugin } from 'lib/log.js';
 
 const cssConcat = await esbuild.build({
-  entryPoints: [
-    'src/**/css/*.css'
-  ],
+  entryPoints: ['src/**/css/*.css'],
   target: BROWSER_TARGET,
   bundle: true,
-  plugins: [ logPlugin('CSS Concat') ],
+  plugins: [logPlugin('CSS Concat')],
   loader: {
     '.css': 'css',
   },
@@ -21,14 +19,12 @@ const cssConcat = await esbuild.build({
   Exports all components as one js file
 */
 let jsBuild = await esbuild.build({
-  entryPoints: [
-    './src/semantic-ui.js',
-  ],
+  entryPoints: ['./src/semantic-ui.js'],
   tsconfigRaw: {
     compilerOptions: {
       experimentalDecorators: true,
       useDefineForClassFields: false,
-      verbatimModuleSyntax: true
+      verbatimModuleSyntax: true,
     },
   },
   format: 'esm',
@@ -45,24 +41,21 @@ let jsBuild = await esbuild.build({
     '.svg': 'file',
     '.gif': 'file',
   },
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
   outbase: 'src',
   outdir: 'dev/ui',
 });
-
 
 /*
   Exports global css
 */
 let cssBuild = await esbuild.build({
-  entryPoints: [
-    './src/semantic-ui.css',
-  ],
+  entryPoints: ['./src/semantic-ui.css'],
   bundle: true,
   minify: false,
   sourcemap: true,
   target: BROWSER_TARGET,
-  plugins: [ logPlugin('SUI CSS') ],
+  plugins: [logPlugin('SUI CSS')],
   loader: {
     '.css': 'css',
   },
@@ -73,23 +66,16 @@ let cssBuild = await esbuild.build({
   Exports themes as separate css
 */
 let themeBuild = await esbuild.build({
-  entryPoints: [
-    './src/themes/base/base.css',
-  ],
+  entryPoints: ['./src/themes/base/base.css'],
   bundle: true,
   minify: false,
   sourcemap: true,
   target: BROWSER_TARGET,
-  plugins: [ logPlugin('Theme CSS') ],
+  plugins: [logPlugin('Theme CSS')],
   loader: {
     '.css': 'css',
   },
   outdir: 'dev/ui/theme',
 });
 
-await Promise.all([
-  cssConcat,
-  jsBuild,
-  cssBuild,
-  themeBuild,
-]);
+await Promise.all([cssConcat, jsBuild, cssBuild, themeBuild]);

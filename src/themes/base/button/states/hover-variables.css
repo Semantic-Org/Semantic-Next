@@ -1,7 +1,7 @@
 /* Hovered */
 
 ui-button {
-  --hover-background-color: #CACBCD;
+  --hover-background-color: #cacbcd;
   --hover-background-image: var(--background-image);
   --hover-box-shadow: var(--box-shadow);
   --hover-color: var(--hovered-text-color);

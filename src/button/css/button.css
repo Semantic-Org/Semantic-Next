@@ -1,36 +1,35 @@
 /* Content */
-@import url('./content/button.css') layer(component);
+@import url("./content/button.css") layer(component);
 
 /* Group */
-@import url('./group/buttons.css') layer(component);
+@import url("./group/buttons.css") layer(component);
 
 /* Types */
-@import url('./types/animated.css') layer(component);
-@import url('./types/emphasis.css') layer(component);
-@import url('./types/icon.css') layer(component);
-@import url('./types/labeled.css') layer(component);
-@import url('./types/labeled-icon.css') layer(component);
-@import url('./types/toggle.css') layer(component);
+@import url("./types/animated.css") layer(component);
+@import url("./types/emphasis.css") layer(component);
+@import url("./types/icon.css") layer(component);
+@import url("./types/labeled.css") layer(component);
+@import url("./types/labeled-icon.css") layer(component);
+@import url("./types/toggle.css") layer(component);
 
 /* States */
-@import url('./states/hover.css') layer(component);
-@import url('./states/focus.css') layer(component);
-@import url('./states/pressed.css') layer(component);
-@import url('./states/active.css') layer(component);
-@import url('./states/disabled.css') layer(component);
-@import url('./states/loading.css') layer(component);
+@import url("./states/hover.css") layer(component);
+@import url("./states/focus.css") layer(component);
+@import url("./states/pressed.css") layer(component);
+@import url("./states/active.css") layer(component);
+@import url("./states/disabled.css") layer(component);
+@import url("./states/loading.css") layer(component);
 
 /* Variations */
-@import url('./variations/basic.css') layer(component);
-@import url('./variations/attached.css') layer(component);
-@import url('./variations/circular.css') layer(component);
-@import url('./variations/colored.css') layer(component);
-@import url('./variations/compact.css') layer(component);
-@import url('./variations/floated.css') layer(component);
-@import url('./variations/fluid.css') layer(component);
-@import url('./variations/negative.css') layer(component);
-@import url('./variations/positive.css') layer(component);
-@import url('./variations/sizing.css') layer(component);
-@import url('./variations/social.css') layer(component);
-@import url('./variations/vertical.css') layer(component);
-
+@import url("./variations/basic.css") layer(component);
+@import url("./variations/attached.css") layer(component);
+@import url("./variations/circular.css") layer(component);
+@import url("./variations/colored.css") layer(component);
+@import url("./variations/compact.css") layer(component);
+@import url("./variations/floated.css") layer(component);
+@import url("./variations/fluid.css") layer(component);
+@import url("./variations/negative.css") layer(component);
+@import url("./variations/positive.css") layer(component);
+@import url("./variations/sizing.css") layer(component);
+@import url("./variations/social.css") layer(component);
+@import url("./variations/vertical.css") layer(component);
