@@ -3,6 +3,8 @@
   "singleQuote": true,
   "offsetTernaryExpressions": false,
   "spaceBeforeFunctionParen": false,
+  "import-formatting": "oneline",
+  "trailingComma": "es5",
   "breakBeforeElse": true,
 
   "overrides": [
