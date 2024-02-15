@@ -1,12 +1,5 @@
 import { unsafeCSS } from 'lit';
-import {
-  unique,
-  each,
-  noop,
-  kebabToCamel,
-  get,
-  reverseKeys,
-} from '@semantic-ui/utils';
+import { unique, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
@@ -196,6 +189,5 @@ export const createComponent = ({
     };
     customElements.define(tagName, webComponent);
   }
-
   return tagName ? webComponent : litTemplate;
 };
