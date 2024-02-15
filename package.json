@@ -10,7 +10,7 @@
   "scripts": {
     "build": "wireit",
     "serve": "wireit",
-    "prettify": "prettierx ./ --write --ignore-unknown",
+    "format": "npx dprint fmt",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
     "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
@@ -52,7 +52,6 @@
     "jsdom": "^24.0.0",
     "lint-staged": "^15.2.2",
     "opencommit": "^3.0.4",
-    "prettierx": "^0.19.0",
     "typescript": "^5.3.3",
     "typescript-eslint": "^0.0.1-alpha.0",
     "underscore": "^1.13.6",
