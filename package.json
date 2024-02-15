@@ -10,6 +10,7 @@
   "scripts": {
     "build": "wireit",
     "serve": "wireit",
+    "prettify": "prettierx ./ --write --ignore-unknown",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
     "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
