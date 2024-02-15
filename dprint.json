@@ -8,7 +8,7 @@
     "trailingCommas": "onlyMultiLine",
     "preferHanging": true,
     "module.sortImportDeclarations": "maintain",
-    "ifStatement.spaceAfterIfKeyword": false,
+    "ifStatement.spaceAfterIfKeyword": false
   },
   "json": {},
   "markdown": {},
