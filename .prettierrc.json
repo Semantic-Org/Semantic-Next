@@ -1,9 +1,13 @@
 {
   "semi": true,
   "singleQuote": true,
+  "offsetTernaryExpressions": false,
+  "spaceBeforeFunctionParen": false,
+  "breakBeforeElse": true,
+
   "overrides": [
     {
-      "files": ["*.json5"],
+      "files": ["*.json"],
       "options": {
         "singleQuote": false,
         "quoteProps": "preserve"
