@@ -6,7 +6,7 @@
     "bracePosition": "sameLine",
     "nextControlFlowPosition": "nextLine",
     "trailingCommas": "onlyMultiLine",
-    "arrowFunction.useParentheses": "force",
+    "preferHanging": true,
     "spaceSurroundingProperties": true
   },
   "json": {},
