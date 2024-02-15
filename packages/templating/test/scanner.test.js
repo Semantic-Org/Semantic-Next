@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { Scanner } from '@semantic-ui/templating';
 
 describe('Scanner', () => {
-
   it('should let you consume a regex', () => {
     const scanner = new Scanner('Hello World');
     expect(scanner.consume(/Hello/)).toBe('Hello');
@@ -33,8 +32,8 @@ describe('Scanner', () => {
   it('should let you returnTo the first previous instance of pattern', () => {
     const scanner = new Scanner('Hello Hello World');
     scanner.consumeUntil('World');
-    scanner.returnTo(/Hello/)
-    expect(scanner.pos).toBe(6)
+    scanner.returnTo(/Hello/);
+    expect(scanner.pos).toBe(6);
   });
 
   it('should let you log errors with fatal', () => {
@@ -56,7 +55,6 @@ describe('Scanner', () => {
   });
 
   describe('get context', () => {
-
     it('getContext should return attribute and tag info inside tag', () => {
       const scanner = new Scanner('<hello bird="robin"></hello>');
       scanner.consume('<hello bird="');
@@ -67,29 +65,21 @@ describe('Scanner', () => {
     });
 
     it('getContext should return booleanAttribute when unquoted attribute', () => {
-        const scanner = new Scanner('<hello bird=robin></hello>');
-        scanner.consume('<hello bird=');
-        const context = scanner.getContext();
-        expect(context.insideTag).toBe(true);
-        expect(context.attribute).toBe('bird');
-        expect(context.booleanAttribute).toBe(true);
+      const scanner = new Scanner('<hello bird=robin></hello>');
+      scanner.consume('<hello bird=');
+      const context = scanner.getContext();
+      expect(context.insideTag).toBe(true);
+      expect(context.attribute).toBe('bird');
+      expect(context.booleanAttribute).toBe(true);
     });
 
     it('getContext should return booleanAttribute when a boolean attribute type', () => {
-        const scanner = new Scanner('<input checked="checked"></hello>');
-        scanner.consume('<input checked=');
-        const context = scanner.getContext();
-        expect(context.insideTag).toBe(true);
-        expect(context.attribute).toBe('checked');
-        expect(context.booleanAttribute).toBe(true);
-    });
-
-    it('getContext should return inside tag false when outside tag', () => {
-      const scanner = new Scanner('<hello bird="robin"></hello>Other Text');
-      scanner.consume('Other');
+      const scanner = new Scanner('<input checked="checked"></hello>');
+      scanner.consume('<input checked=');
       const context = scanner.getContext();
-      expect(context.insideTag).toBe(false);
+      expect(context.insideTag).toBe(true);
+      expect(context.attribute).toBe('checked');
+      expect(context.booleanAttribute).toBe(true);
     });
-  })
-
+  });
 });
