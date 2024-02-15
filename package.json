@@ -41,6 +41,7 @@
     "@vitest/coverage-istanbul": "^1.2.2",
     "@vitest/ui": "^1.2.2",
     "chalk": "^5.3.0",
+    "dprint": "^0.45.0",
     "esbuild": "^0.19.11",
     "esbuild-plugin-babel": "^0.2.3",
     "esbuild-plugin-glob": "^2.2.1",
