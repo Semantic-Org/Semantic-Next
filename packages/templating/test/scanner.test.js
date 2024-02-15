@@ -82,7 +82,7 @@ describe('Scanner', () => {
       expect(context.booleanAttribute).toBe(true);
     });
 
-    it('getContext should return inside tag false when outside tag', () => {
+    it('getContext should return inside tag false when outside tagz', () => {
       const scanner = new Scanner('<hello bird="robin"></hello>Other Text');
       scanner.consume('Other');
       const context = scanner.getContext();
