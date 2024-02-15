@@ -1,5 +1,5 @@
-import { $ } from '@semantic-ui/query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { $ } from '@semantic-ui/query';
 
 describe('query', () => {
   beforeEach(() => {

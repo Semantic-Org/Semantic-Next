@@ -3,8 +3,8 @@ import { html } from 'lit';
 import { Reaction } from '@semantic-ui/reactivity';
 import { each, fatal, isFunction, mapObject, wrapFunction } from '@semantic-ui/utils';
 
-import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveData } from './directives/reactive-data.js';
+import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveEach } from './directives/reactive-each.js';
 import { renderTemplate } from './directives/render-template.js';
 
@@ -53,7 +53,7 @@ export class LitRenderer {
     ast = this.ast,
     data = this.data,
   } = {}) {
-    each(ast, (node) => {
+    each(ast, node => {
       switch (node.type) {
         case 'html':
           this.addHTML(node.html);
@@ -100,7 +100,7 @@ export class LitRenderer {
   evaluateConditional(node, data) {
     const directiveMap = (value, key) => {
       if (key == 'branches') {
-        return value.map((branch) => mapObject(branch, directiveMap));
+        return value.map(branch => mapObject(branch, directiveMap));
       }
       if (key == 'condition') {
         return () => this.evaluateExpression(value, data);

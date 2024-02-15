@@ -1,10 +1,10 @@
-import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
+import { AsyncDirective } from 'lit/async-directive.js';
 
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { inArray } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 class ReactiveData extends AsyncDirective {
   constructor(partInfo) {

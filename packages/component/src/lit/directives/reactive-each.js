@@ -1,8 +1,8 @@
 import { noChange, nothing } from 'lit';
-import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 import { getCommittedValue, insertPart, removePart, setChildPartValue,
   setCommittedValue } from 'lit/directive-helpers.js';
-import { directive } from 'lit/directive.js';
+import { AsyncDirective } from 'lit/async-directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
 import { clone, each, hashCode, isEqual, isObject, isString } from '@semantic-ui/utils';
@@ -58,7 +58,7 @@ class ReactiveEachDirective extends AsyncDirective {
 
   getItems() {
     let items = this.eachCondition.over() || [];
-    items = items.map((item) => {
+    items = items.map(item => {
       if (isObject(item)) {
         item._id = item._id || hashCode(item);
       }

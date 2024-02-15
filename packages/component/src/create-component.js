@@ -1,6 +1,6 @@
-import { TemplateCompiler } from '@semantic-ui/templating';
-import { each, get, kebabToCamel, noop, reverseKeys, unique } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
+import { each, get, kebabToCamel, noop, reverseKeys, unique } from '@semantic-ui/utils';
+import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';

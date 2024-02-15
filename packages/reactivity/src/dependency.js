@@ -13,7 +13,7 @@ export class Dependency {
   }
 
   changed(context) {
-    this.subscribers.forEach((subscriber) => subscriber.invalidate(context));
+    this.subscribers.forEach(subscriber => subscriber.invalidate(context));
   }
 
   cleanUp(reaction) {

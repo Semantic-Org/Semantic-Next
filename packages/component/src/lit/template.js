@@ -1,7 +1,7 @@
-import { $ } from '@semantic-ui/query';
-import { Reaction } from '@semantic-ui/reactivity';
 import { TemplateCompiler } from '@semantic-ui/templating';
+import { $ } from '@semantic-ui/query';
 import { each, extend, fatal, generateID, isEqual, isFunction, noop, remove } from '@semantic-ui/utils';
+import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
 
@@ -153,7 +153,7 @@ export const LitTemplate = class UITemplate {
     let styles = Array.from(this.renderRoot.adoptedStyleSheets);
 
     // check if already adopted
-    let hasStyles = styles.some((style) => isEqual(style.cssRules, this.stylesheet.cssRules));
+    let hasStyles = styles.some(style => isEqual(style.cssRules, this.stylesheet.cssRules));
 
     if (!hasStyles) {
       this.renderRoot.adoptedStyleSheets = [...this.renderRoot.adoptedStyleSheets, this.stylesheet];
@@ -213,10 +213,8 @@ export const LitTemplate = class UITemplate {
           return;
         }
         // this is
-        if (
-          (eventName === 'mouseover' || eventName === 'mouseout') && event.relatedTarget
-          && event.target.contains(event.relatedTarget)
-        ) {
+        if ((eventName === 'mouseover' || eventName === 'mouseout') && event.relatedTarget
+          && event.target.contains(event.relatedTarget)) {
           return;
         }
         const boundEvent = eventHandler.bind(event.target);
@@ -290,7 +288,7 @@ export const LitTemplate = class UITemplate {
     if (root == this.renderRoot) {
       const $results = $(selector, root);
       return filterTemplate
-        ? $results.filter((node) => this.isNodeInTemplate(node))
+        ? $results.filter(node => this.isNodeInTemplate(node))
         : $results;
     }
     else {
@@ -327,7 +325,7 @@ export const LitTemplate = class UITemplate {
   }
 
   clearReactions() {
-    each(this.reactions || [], (comp) => comp.stop());
+    each(this.reactions || [], comp => comp.stop());
   }
 
   static renderedTemplates = new Map();
@@ -383,7 +381,7 @@ export const LitTemplate = class UITemplate {
         result.push(template.tpl);
       }
       if (template.tpl._childTemplates) {
-        template.tpl._childTemplates.forEach((childTemplate) => {
+        template.tpl._childTemplates.forEach(childTemplate => {
           search(childTemplate, templateName);
         });
       }

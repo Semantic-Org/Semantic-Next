@@ -20,7 +20,7 @@ export const scopeStyles = (css, scopeSelector = '') => {
       case CSSRule.SUPPORTS_RULE:
         // Handle @media and @supports which contain nested rules
         let scopedInnerRules = [];
-        Array.from(rule.cssRules).forEach((innerRule) => {
+        Array.from(rule.cssRules).forEach(innerRule => {
           scopedInnerRules.push(scopeRule(innerRule, scopeSelector));
         });
         modifiedRules.push(`@${rule.name} ${rule.conditionText} { ${scopedInnerRules.join(' ')} }`);

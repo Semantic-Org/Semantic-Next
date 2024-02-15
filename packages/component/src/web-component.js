@@ -1,6 +1,6 @@
-import { $ } from '@semantic-ui/query';
-import { isFunction } from '@semantic-ui/utils';
 import { LitElement } from 'lit';
+import { isFunction } from '@semantic-ui/utils';
+import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './styles';
 

@@ -116,32 +116,9 @@ class Scanner {
       const attrMatch = tagText.match(attrPattern); // Grab the last sequence of non-space characters
       const attrName = attrMatch ? attrMatch[1] : '';
 
-      const booleanAttributes = [
-        'allowfullscreen',
-        'async',
-        'autofocus',
-        'autoplay',
-        'checked',
-        'controls',
-        'default',
-        'defer',
-        'disabled',
-        'formnovalidate',
-        'inert',
-        'ismap',
-        'itemscope',
-        'loop',
-        'multiple',
-        'muted',
-        'nomodule',
-        'novalidate',
-        'open',
-        'playsinline',
-        'readonly',
-        'required',
-        'reversed',
-        'selected',
-      ];
+      const booleanAttributes = ['allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'controls', 'default',
+        'defer', 'disabled', 'formnovalidate', 'inert', 'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nomodule',
+        'novalidate', 'open', 'playsinline', 'readonly', 'required', 'reversed', 'selected'];
       let booleanAttribute = false;
       if (booleanAttributes.includes(attrName)) {
         // this is a known attribute tag that is always boolean
@@ -218,10 +195,9 @@ class Scanner {
         `;
         document.body.innerHTML = html;
       }
-      console.error(
-        msg + '\n' + consoleMsg,
-        ...contextLines.map((_, idx) => (lineNumber - startLine) === idx ? errorStyle : normalStyle),
-      );
+      console.error(msg + '\n' + consoleMsg, ...contextLines.map((_, idx) =>
+        (lineNumber - startLine) === idx ? errorStyle : normalStyle
+      ));
 
       const e = new Error(msg);
       throw e;

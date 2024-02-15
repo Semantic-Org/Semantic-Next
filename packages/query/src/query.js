@@ -41,21 +41,21 @@ export class Query {
   }
 
   find(selector) {
-    const elements = Array.from(this).flatMap((el) => Array.from(el.querySelectorAll(selector)));
+    const elements = Array.from(this).flatMap(el => Array.from(el.querySelectorAll(selector)));
     return new Query(elements); // Directly pass the array of elements
   }
 
   parent(selector) {
-    const parents = Array.from(this).map((el) => el.parentElement).filter(Boolean);
+    const parents = Array.from(this).map(el => el.parentElement).filter(Boolean);
     return selector ? new Query(parents).filter(selector) : new Query(parents);
   }
 
   children(selector) {
     // Get all children of each element in the Query object
-    const allChildren = Array.from(this).flatMap((el) => Array.from(el.children));
+    const allChildren = Array.from(this).flatMap(el => Array.from(el.children));
 
     // If a selector is provided, filter the children
-    const filteredChildren = selector ? allChildren.filter((child) => child.matches(selector)) : allChildren;
+    const filteredChildren = selector ? allChildren.filter(child => child.matches(selector)) : allChildren;
 
     return new Query(filteredChildren);
   }
@@ -64,7 +64,7 @@ export class Query {
     let filteredElements = [];
     if (typeof selectorOrFunction === 'string') {
       // If a CSS selector is provided, use it with the matches method
-      filteredElements = Array.from(this).filter((el) => el.matches(selectorOrFunction));
+      filteredElements = Array.from(this).filter(el => el.matches(selectorOrFunction));
     }
     else if (typeof selectorOrFunction === 'function') {
       // If a function is provided, use it directly to filter elements
@@ -75,12 +75,12 @@ export class Query {
 
   not(selector) {
     // Filter out elements that match the provided selector
-    const filteredElements = Array.from(this).filter((el) => !el.matches(selector));
+    const filteredElements = Array.from(this).filter(el => !el.matches(selector));
     return new Query(filteredElements);
   }
 
   closest(selector) {
-    const closest = Array.from(this).map((el) => el.closest(selector)).filter(Boolean);
+    const closest = Array.from(this).map(el => el.closest(selector)).filter(Boolean);
     return new Query(closest);
   }
 
@@ -105,7 +105,7 @@ export class Query {
     const abortController = options?.abortController || new AbortController();
     const signal = abortController.signal;
 
-    Array.from(this).forEach((el) => {
+    Array.from(this).forEach(el => {
       let delegateHandler;
       if (targetSelector) {
         delegateHandler = (e) => {
@@ -137,12 +137,10 @@ export class Query {
   }
 
   off(event, handler) {
-    Query._eventHandlers = Query._eventHandlers.filter((eventHandler) => {
-      if (
-        eventHandler.event === event
+    Query._eventHandlers = Query._eventHandlers.filter(eventHandler => {
+      if (eventHandler.event === event
         && (!handler || handler?.eventListener == eventHandler.eventListener || eventHandler.eventListener === handler
-          || eventHandler.handler === handler)
-      ) {
+          || eventHandler.handler === handler)) {
         eventHandler.el.removeEventListener(event, eventHandler.eventListener);
         return false;
       }
@@ -152,29 +150,29 @@ export class Query {
   }
 
   remove() {
-    Array.from(this).forEach((el) => el.remove());
+    Array.from(this).forEach(el => el.remove());
     return this;
   }
 
   addClass(classNames) {
     const classesToAdd = classNames.split(' ');
-    Array.from(this).forEach((el) => el.classList.add(...classesToAdd));
+    Array.from(this).forEach(el => el.classList.add(...classesToAdd));
     return this;
   }
 
   hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
+    return Array.from(this).some(el => el.classList.contains(className));
   }
 
   removeClass(classNames) {
     const classesToRemove = classNames.split(' ');
-    Array.from(this).forEach((el) => el.classList.remove(...classesToRemove));
+    Array.from(this).forEach(el => el.classList.remove(...classesToRemove));
     return this;
   }
 
   html(newHTML) {
     if (newHTML !== undefined) {
-      Array.from(this).forEach((el) => el.innerHTML = newHTML);
+      Array.from(this).forEach(el => el.innerHTML = newHTML);
       return this;
     }
     else if (this.length) {
@@ -184,7 +182,7 @@ export class Query {
 
   outerHTML(newHTML) {
     if (newHTML !== undefined) {
-      Array.from(this).forEach((el) => el.outerHTML = newHTML);
+      Array.from(this).forEach(el => el.outerHTML = newHTML);
       return this;
     }
     else if (this.length) {
@@ -194,7 +192,7 @@ export class Query {
 
   text(newText) {
     if (newText !== undefined) {
-      Array.from(this).forEach((el) => el.textContent = newText);
+      Array.from(this).forEach(el => el.textContent = newText);
       return this;
     }
     else {
@@ -203,14 +201,14 @@ export class Query {
           ? el.assignedNodes({ flatten: true })
           : el.childNodes;
       };
-      const values = Array.from(this).map((el) => this.getTextContentRecursive(childNodes(el)));
+      const values = Array.from(this).map(el => this.getTextContentRecursive(childNodes(el)));
       return (values.length > 1) ? values : values[0];
     }
   }
 
   // Helper function to recursively get text content
   getTextContentRecursive(nodes) {
-    return Array.from(nodes).map((node) => {
+    return Array.from(nodes).map(node => {
       if (node.nodeType === Node.TEXT_NODE) {
         return node.nodeValue;
       }
@@ -228,7 +226,7 @@ export class Query {
   value(newValue) {
     if (newValue !== undefined) {
       // Set the value for each element
-      Array.from(this).forEach((el) => {
+      Array.from(this).forEach(el => {
         if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
           el.value = newValue;
         }
@@ -237,7 +235,7 @@ export class Query {
     }
     else {
       // Get the value of each element
-      const values = Array.from(this).map((el) => {
+      const values = Array.from(this).map(el => {
         if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
           return el.value;
         }
@@ -254,14 +252,14 @@ export class Query {
   css(property, value) {
     if (typeof property === 'object') {
       Object.entries(property).forEach(([prop, val]) => {
-        Array.from(this).forEach((el) => el.style[prop] = val);
+        Array.from(this).forEach(el => el.style[prop] = val);
       });
     }
     else if (value !== undefined) {
-      Array.from(this).forEach((el) => el.style[property] = value);
+      Array.from(this).forEach(el => el.style[property] = value);
     }
     else if (this.length) {
-      const properties = Array.from(this).map((el) => el.style[property]);
+      const properties = Array.from(this).map(el => el.style[property]);
       return (properties.length > 1) ? properties : properties[0];
     }
     return this;
@@ -271,22 +269,22 @@ export class Query {
     if (typeof attribute === 'object') {
       // Handle object of attribute-value pairs
       Object.entries(attribute).forEach(([attr, val]) => {
-        Array.from(this).forEach((el) => el.setAttribute(attr, val));
+        Array.from(this).forEach(el => el.setAttribute(attr, val));
       });
     }
     else if (value !== undefined) {
       // Handle single attribute-value pair
-      Array.from(this).forEach((el) => el.setAttribute(attribute, value));
+      Array.from(this).forEach(el => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = Array.from(this).map((el) => el.getAttribute(attribute));
+      const attributes = Array.from(this).map(el => el.getAttribute(attribute));
       return (attributes.length > 1) ? attributes : attributes[0];
     }
     return this;
   }
 
   removeAttr(attributeName) {
-    Array.from(this).forEach((el) => el.removeAttribute(attributeName));
+    Array.from(this).forEach(el => el.removeAttribute(attributeName));
     return this;
   }
 
@@ -313,10 +311,10 @@ export class Query {
 
   // non jquery variant to return only immediate text node
   textNode() {
-    return Array.from(this).map((el) => {
+    return Array.from(this).map(el => {
       return Array.from(el.childNodes)
-        .filter((node) => node.nodeType === Node.TEXT_NODE)
-        .map((node) => node.nodeValue)
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .map(node => node.nodeValue)
         .join('');
     }).join('');
   }

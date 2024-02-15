@@ -1,8 +1,8 @@
+import { describe, expect, it, vi } from 'vitest';
 import { camelToKebab, capitalizeWords, clone, each, escapeRegExp, extend, fatal, filterEmpty, findIndex, firstMatch,
   formatDate, generateID, get, hashCode, hasProperty, inArray, isArguments, isArray, isBinary, isEqual, isFunction,
   isNumber, isObject, isPlainObject, isPromise, isString, kebabToCamel, keys, last, mapObject, noop, pick, prettifyID,
   range, remove, reverseKeys, toTitleCase, unique, values, wrapFunction } from '@semantic-ui/utils';
-import { describe, expect, it, vi } from 'vitest';
 
 describe('Array Utilities', () => {
   it('unique should remove duplicates', () => {
@@ -25,19 +25,19 @@ describe('Array Utilities', () => {
 
   it('firstMatch should return the first matching element based on callback', () => {
     const arr = [1, 2, 3, 4];
-    const result = firstMatch(arr, (x) => x > 2);
+    const result = firstMatch(arr, x => x > 2);
     expect(result).toBe(3);
   });
 
   it('findIndex should return the index of the first matching element', () => {
     const arr = ['apple', 'banana', 'orange'];
-    const index = findIndex(arr, (fruit) => fruit === 'banana');
+    const index = findIndex(arr, fruit => fruit === 'banana');
     expect(index).toBe(1);
   });
 
   it('remove should remove elements based on a callback or value', () => {
     let arr = [1, 2, 3, 4];
-    remove(arr, (x) => x === 3);
+    remove(arr, x => x === 3);
     expect(arr).toEqual([1, 2, 4]);
 
     arr = [1, 2, 3, 4];

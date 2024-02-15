@@ -1,5 +1,5 @@
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
 
 describe('Reaction', () => {
   beforeEach(() => {
@@ -182,7 +182,7 @@ describe('Reaction', () => {
         callback(number.get());
       });
 
-      [2, 3, 4, 5].forEach((value) => {
+      [2, 3, 4, 5].forEach(value => {
         number.set(value);
         Reaction.flush(); // Flush after each update
       });
@@ -196,7 +196,7 @@ describe('Reaction', () => {
       const mockCallback = vi.fn();
       Reaction.afterFlush(mockCallback);
       Reaction.scheduleFlush();
-      await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for flush
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
       expect(mockCallback).toHaveBeenCalled();
     });
 
@@ -206,7 +206,7 @@ describe('Reaction', () => {
       Reaction.afterFlush(mockCallback);
       Reaction.afterFlush(mockCallback2);
       Reaction.scheduleFlush();
-      await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for flush
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
       expect(mockCallback).toHaveBeenCalled();
       expect(mockCallback2).toHaveBeenCalled();
     });

@@ -28,10 +28,10 @@ export class Reaction {
 
   static flush() {
     Reaction.isFlushScheduled = false;
-    Reaction.pendingReactions.forEach((reaction) => reaction.run());
+    Reaction.pendingReactions.forEach(reaction => reaction.run());
     Reaction.pendingReactions.clear();
 
-    Reaction.afterFlushCallbacks.forEach((callback) => callback());
+    Reaction.afterFlushCallbacks.forEach(callback => callback());
     Reaction.afterFlushCallbacks = [];
   }
 
@@ -52,7 +52,7 @@ export class Reaction {
       return;
     }
     Reaction.current = this;
-    this.dependencies.forEach((dep) => dep.cleanUp(this));
+    this.dependencies.forEach(dep => dep.cleanUp(this));
     this.dependencies.clear();
     this.callback(this);
     this.firstRun = false;
@@ -72,7 +72,7 @@ export class Reaction {
   stop() {
     if (!this.active) { return; }
     this.active = false;
-    this.dependencies.forEach((dep) => dep.unsubscribe(this));
+    this.dependencies.forEach(dep => dep.unsubscribe(this));
   }
 
   /*

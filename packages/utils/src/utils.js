@@ -175,25 +175,8 @@ export const capitalizeWords = (str = '') => {
 };
 
 export const toTitleCase = (str = '') => {
-  const stopWords = [
-    'the',
-    'a',
-    'an',
-    'and',
-    'but',
-    'for',
-    'at',
-    'by',
-    'from',
-    'to',
-    'in',
-    'on',
-    'of',
-    'or',
-    'nor',
-    'with',
-    'as',
-  ];
+  const stopWords = ['the', 'a', 'an', 'and', 'but', 'for', 'at', 'by', 'from', 'to', 'in', 'on', 'of', 'or', 'nor',
+    'with', 'as'];
   return str
     .toLowerCase()
     .split(' ')
@@ -222,7 +205,7 @@ export const unique = (arr) => {
   Remove undefined values from an array
 */
 export const filterEmpty = (arr) => {
-  return arr.filter((val) => val);
+  return arr.filter(val => val);
 };
 
 /*
@@ -400,9 +383,9 @@ export const reverseKeys = (obj) => {
       newObj[key] = value;
     }
   };
-  Object.keys(obj).forEach((key) => {
+  Object.keys(obj).forEach(key => {
     if (isArray(obj[key])) {
-      each(obj[key], (subKey) => {
+      each(obj[key], subKey => {
         pushValue(subKey, key);
       });
     }

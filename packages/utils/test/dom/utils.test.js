@@ -1,5 +1,5 @@
-import { clone } from '@semantic-ui/utils';
 import { describe, expect, it, vi } from 'vitest';
+import { clone } from '@semantic-ui/utils';
 
 describe('clone', () => {
   it('should clone dom nodes', () => {

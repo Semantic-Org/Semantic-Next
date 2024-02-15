@@ -7,7 +7,7 @@
     "nextControlFlowPosition": "nextLine",
     "trailingCommas": "onlyMultiLine",
     "preferHanging": true,
-    "module.sortImportDeclarations": false,
+    "module.sortImportDeclarations": "maintain",
     "spaceSurroundingProperties": true
   },
   "json": {},

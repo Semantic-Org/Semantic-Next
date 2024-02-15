@@ -1,7 +1,7 @@
+import { directive } from 'lit/directive.js';
+import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { fatal, mapObject } from '@semantic-ui/utils';
-import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
 
 // Define directive
 class RenderTemplate extends AsyncDirective {

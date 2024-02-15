@@ -1,6 +1,6 @@
 import { clone, findIndex, isEqual, isNumber, isObject, unique } from '@semantic-ui/utils';
-import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
+import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
   constructor(initialValue, equalityFunction) {
@@ -123,7 +123,7 @@ export class ReactiveVar {
     return this.getID(item) === id;
   }
   getIndex(id) {
-    return findIndex(this.currentValue, (item) => this.hasID(item, id));
+    return findIndex(this.currentValue, item => this.hasID(item, id));
   }
   setProperty(id, property, value) {
     const index = this.getIndex(id);
