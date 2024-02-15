@@ -15,7 +15,8 @@
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
-    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
+    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
+    "prepare": "husky"
   },
   "wireit": {
     "build": {
@@ -43,7 +44,9 @@
     "esbuild-plugin-output-reset": "^2.0.1",
     "glob": "^10.3.10",
     "http-server": "^14.1.1",
+    "husky": "^9.0.11",
     "jsdom": "^24.0.0",
+    "lint-staged": "^15.2.2",
     "prettierx": "^0.19.0",
     "typescript": "^5.3.3",
     "typescript-eslint": "^0.0.1-alpha.0",
@@ -56,5 +59,8 @@
   ],
   "dependencies": {
     "lit": "^3.1.2"
+  },
+  "lint-staged": {
+    "**/*": "prettierx --write --ignore-unknown"
   }
 }
