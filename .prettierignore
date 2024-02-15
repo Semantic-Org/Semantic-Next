@@ -1,0 +1,7 @@
+dev
+dist
+tests
+LICENSE.md
+README.md
+**/*.html
+**/*.md
