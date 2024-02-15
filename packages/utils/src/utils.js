@@ -3,7 +3,6 @@
   to save time on common boilerplate
 */
 
-
 /*-------------------
        Errors
 --------------------*/
@@ -32,7 +31,8 @@ export const fatal = (message, {
 
   if (typeof queueMicrotask === 'function') {
     queueMicrotask(throwError);
-  } else {
+  }
+  else {
     setTimeout(throwError, 0);
   }
 };
@@ -54,12 +54,13 @@ export const isString = (x) => {
 };
 
 export const isDOM = (element) => {
-  return element instanceof Element || element instanceof Document || element === window || element instanceof DocumentFragment;
-}
+  return element instanceof Element || element instanceof Document || element === window
+    || element instanceof DocumentFragment;
+};
 
 export const isNode = (el) => {
   return !!(el && el.nodeType);
-}
+};
 
 export const isNumber = (x) => {
   return typeof x == 'number';
@@ -73,7 +74,7 @@ export const isBinary = (x) => {
   return !!(typeof Uint8Array !== 'undefined' && x instanceof Uint8Array);
 };
 
-export const isFunction = (x) =>{
+export const isFunction = (x) => {
   return typeof x == 'function' || false;
 };
 
@@ -107,7 +108,7 @@ export const formatDate = function(date, format) {
     'h': date.getHours() % 12 || 12,
     'mm': pad(date.getMinutes()),
     'ss': pad(date.getSeconds()),
-    'a': date.getHours() >= 12 ? 'pm' : 'am'
+    'a': date.getHours() >= 12 ? 'pm' : 'am',
   };
 
   const formatMap = {
@@ -120,7 +121,7 @@ export const formatDate = function(date, format) {
     'LLL': 'MMMM D, YYYY h:mm a',
     'lll': 'MMM D, YYYY h:mm a',
     'LLLL': 'dddd, MMMM D, YYYY h:mm a',
-    'llll': 'ddd, MMM D, YYYY h:mm a'
+    'llll': 'ddd, MMM D, YYYY h:mm a',
   };
 
   const expandedFormat = formatMap[format] || format;
@@ -137,7 +138,7 @@ export const formatDate = function(date, format) {
 /*
   Efficient no operation func
 */
-export const noop = function(){};
+export const noop = function() {};
 
 /*
   Call function even if its not defined
@@ -170,12 +171,12 @@ export const capitalize = (str = '') => {
 export const capitalizeWords = (str = '') => {
   return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
     .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
-    .replace(/\b(\w)/g, (match) => match.toUpperCase())
-  ;
+    .replace(/\b(\w)/g, (match) => match.toUpperCase());
 };
 
 export const toTitleCase = (str = '') => {
-  const stopWords = ['the', 'a', 'an', 'and', 'but', 'for', 'at', 'by', 'from', 'to', 'in', 'on', 'of', 'or', 'nor', 'with', 'as'];
+  const stopWords = ['the', 'a', 'an', 'and', 'but', 'for', 'at', 'by', 'from', 'to', 'in', 'on', 'of', 'or', 'nor',
+    'with', 'as'];
   return str
     .toLowerCase()
     .split(' ')
@@ -192,7 +193,6 @@ export const toTitleCase = (str = '') => {
 /*-------------------
         Arrays
 --------------------*/
-
 
 /*
   Remove duplicates from an array
@@ -213,12 +213,13 @@ export const filterEmpty = (arr) => {
 */
 export const last = (array, number = 1) => {
   const { length } = array;
-  if (!length) return;
+  if (!length) { return; }
 
   if (number === 1) {
     // Return the last element
     return array[length - 1];
-  } else {
+  }
+  else {
     // Return the last number elements as a new array
     return array.slice(Math.max(length - number, 0));
   }
@@ -249,27 +250,24 @@ export const findIndex = (array, callback) => {
   return matchedIndex;
 };
 
-
 export const remove = (array, callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
-    : (val) => isEqual(val, callbackOrValue)
-  ;
+    : (val) => isEqual(val, callbackOrValue);
   const index = findIndex(array, callback);
-  if(index > -1) {
+  if (index > -1) {
     array.splice(index, 1);
     return true;
   }
   return false;
 };
 
-
 export const inArray = (value, array = []) => {
   return array.indexOf(value) > -1;
 };
 
 export const range = (start, stop, step = 1) => {
-  if(!stop) {
+  if (!stop) {
     stop = start;
     start = 0;
   }
@@ -283,7 +281,6 @@ export const range = (start, stop, step = 1) => {
        Objects
 --------------------*/
 
-
 /*
   Return keys from object
 */
@@ -295,13 +292,12 @@ export const values = (obj) => {
   return Object.values(obj);
 };
 
-
 export const mapObject = function(obj, callback) {
   const objKeys = keys(obj).reverse();
   const length = objKeys.length;
   let index = length;
   let newObj = {};
-  while(index--) {
+  while (index--) {
     const thisKey = objKeys[index];
     newObj[thisKey] = callback(obj[thisKey], thisKey);
   }
@@ -314,12 +310,13 @@ export const mapObject = function(obj, callback) {
 export const extend = (obj, ...sources) => {
   sources.forEach((source) => {
     let descriptor, prop;
-    if(source) {
+    if (source) {
       for (prop in source) {
         descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if(descriptor === undefined) {
+        if (descriptor === undefined) {
           obj[prop] = source[prop];
-        } else {
+        }
+        else {
           Object.defineProperty(obj, prop, descriptor);
         }
       }
@@ -344,8 +341,7 @@ export const pick = function(obj, ...keys) {
 export const get = function(obj, string = '') {
   string = string
     .replace(/^\./, '')
-    .replace(/\[(\w+)\]/g, '.$1')
-  ;
+    .replace(/\[(\w+)\]/g, '.$1');
   const stringParts = string.split('.');
 
   for (let index = 0, length = stringParts.length; index < length; ++index) {
@@ -353,7 +349,8 @@ export const get = function(obj, string = '') {
     // Check if obj is an object and part exists in obj
     if (obj !== null && typeof obj === 'object' && part in obj) {
       obj = obj[part];
-    } else {
+    }
+    else {
       // If not, return undefined to safely indicate missing value
       return undefined;
     }
@@ -376,18 +373,18 @@ export const hasProperty = (obj, prop) => {
 export const reverseKeys = (obj) => {
   const newObj = {};
   const pushValue = (key, value) => {
-    if(isArray(newObj[key])) {
+    if (isArray(newObj[key])) {
       newObj[key].push(value);
     }
-    else if(newObj[key]) {
-      newObj[key] = [ newObj[key], value ];
+    else if (newObj[key]) {
+      newObj[key] = [newObj[key], value];
     }
     else {
       newObj[key] = value;
     }
   };
   Object.keys(obj).forEach(key => {
-    if(isArray(obj[key])) {
+    if (isArray(obj[key])) {
       each(obj[key], subKey => {
         pushValue(subKey, key);
       });
@@ -408,9 +405,9 @@ export const reverseKeys = (obj) => {
 */
 // adapted from nanoclone <https://github.com/Kelin2025/nanoclone>
 export const clone = (src, seen = new Map()) => {
-  if (!src || typeof src !== 'object') return src;
+  if (!src || typeof src !== 'object') { return src; }
 
-  if (seen.has(src)) return seen.get(src);
+  if (seen.has(src)) { return seen.get(src); }
 
   let copy;
   if (src.nodeType && 'cloneNode' in src) {
@@ -431,25 +428,25 @@ export const clone = (src, seen = new Map()) => {
     // Array
     copy = new Array(src.length);
     seen.set(src, copy);
-    for (let i = 0; i < src.length; i++) copy[i] = clone(src[i], seen);
+    for (let i = 0; i < src.length; i++) { copy[i] = clone(src[i], seen); }
   }
   else if (src instanceof Map) {
     // Map
     copy = new Map();
     seen.set(src, copy);
-    for (const [k, v] of src.entries()) copy.set(k, clone(v, seen));
+    for (const [k, v] of src.entries()) { copy.set(k, clone(v, seen)); }
   }
   else if (src instanceof Set) {
     // Set
     copy = new Set();
     seen.set(src, copy);
-    for (const v of src) copy.add(clone(v, seen));
+    for (const v of src) { copy.add(clone(v, seen)); }
   }
   else if (src instanceof Object) {
     // Object
     copy = {};
     seen.set(src, copy);
-    for (const [k, v] of Object.entries(src)) copy[k] = clone(v, seen);
+    for (const [k, v] of Object.entries(src)) { copy[k] = clone(v, seen); }
   }
 
   return copy;
@@ -471,7 +468,8 @@ export const each = (obj, func, context) => {
         break; // Exit early if callback explicitly returns false
       }
     }
-  } else if(isObject(obj)) {
+  }
+  else if (isObject(obj)) {
     const objKeys = Object.keys(obj);
     for (const key of objKeys) {
       if (iteratee(obj[key], key, obj) === false) {
@@ -494,14 +492,13 @@ export const escapeRegExp = function(string) {
   return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 };
 
-
 /*-------------------
       Identity
 --------------------*/
 
 export const prettifyID = (num) => {
   num = parseInt(num, 10);
-  if (num === 0) return '0';
+  if (num === 0) { return '0'; }
   let result = '';
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   while (num > 0) {
@@ -521,11 +518,13 @@ export function hashCode(input) {
   if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
     try {
       str = JSON.stringify(input);
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error serializing input', error);
       return 0;
     }
-  } else {
+  }
+  else {
     str = input.toString();
   }
 
@@ -546,19 +545,22 @@ export function hashCode(input) {
     };
 
     for (let i = 0; i < key.length; i += 4) {
-      let k = (key.charCodeAt(i) & 0xff) |
-              ((key.charCodeAt(i + 1) & 0xff) << 8) |
-              ((key.charCodeAt(i + 2) & 0xff) << 16) |
-              ((key.charCodeAt(i + 3) & 0xff) << 24);
+      let k = (key.charCodeAt(i) & 0xff)
+        | ((key.charCodeAt(i + 1) & 0xff) << 8)
+        | ((key.charCodeAt(i + 2) & 0xff) << 16)
+        | ((key.charCodeAt(i + 3) & 0xff) << 24);
       round(k);
     }
 
     let k1 = 0;
     switch (key.length & 3) {
-      case 3: k1 ^= (key.charCodeAt(key.length - 1) & 0xff) << 16;
-      case 2: k1 ^= (key.charCodeAt(key.length - 2) & 0xff) << 8;
-      case 1: k1 ^= (key.charCodeAt(key.length - 3) & 0xff);
-              round(k1);
+      case 3:
+        k1 ^= (key.charCodeAt(key.length - 1) & 0xff) << 16;
+      case 2:
+        k1 ^= (key.charCodeAt(key.length - 2) & 0xff) << 8;
+      case 1:
+        k1 ^= key.charCodeAt(key.length - 3) & 0xff;
+        round(k1);
     }
 
     h1 ^= key.length;
@@ -583,22 +585,21 @@ export const generateID = () => {
   return prettifyID(num);
 };
 
-
 /*
   Determine if two objects are equal
 */
 
 // adapted from <https://github.com/epoberezkin/fast-deep-equal/>
 export const isEqual = (a, b, options = {}) => {
-  if (a === b) return true;
+  if (a === b) { return true; }
 
   if (a && b && typeof a == 'object' && typeof b == 'object') {
-    if (a.constructor !== b.constructor) return false;
+    if (a.constructor !== b.constructor) { return false; }
 
     let length, i, keys;
     if (Array.isArray(a)) {
       length = a.length;
-      if (length != b.length) return false;
+      if (length != b.length) { return false; }
       for (i = length; i-- !== 0;) {
         if (!isEqual(a[i], b[i])) {
           return false;
@@ -608,7 +609,7 @@ export const isEqual = (a, b, options = {}) => {
     }
 
     if ((a instanceof Map) && (b instanceof Map)) {
-      if (a.size !== b.size) return false;
+      if (a.size !== b.size) { return false; }
       for (i of a.entries()) {
         if (!b.has(i[0])) {
           return false;
@@ -623,7 +624,7 @@ export const isEqual = (a, b, options = {}) => {
     }
 
     if ((a instanceof Set) && (b instanceof Set)) {
-      if (a.size !== b.size) return false;
+      if (a.size !== b.size) { return false; }
       for (i of a.entries()) {
         if (!b.has(i[0])) {
           return false;
@@ -634,7 +635,7 @@ export const isEqual = (a, b, options = {}) => {
 
     if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
       length = a.length;
-      if (length != b.length) return false;
+      if (length != b.length) { return false; }
       for (i = length; i-- !== 0;) {
         if (a[i] !== b[i]) {
           return false;
@@ -655,15 +656,15 @@ export const isEqual = (a, b, options = {}) => {
 
     keys = Object.keys(a);
     length = keys.length;
-    if (length !== Object.keys(b).length) return false;
+    if (length !== Object.keys(b).length) { return false; }
 
     for (i = length; i-- !== 0;) {
-      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) { return false; }
     }
 
     for (i = length; i-- !== 0;) {
       let key = keys[i];
-      if (!isEqual(a[key], b[key])) return false;
+      if (!isEqual(a[key], b[key])) { return false; }
     }
 
     return true;
@@ -672,8 +673,6 @@ export const isEqual = (a, b, options = {}) => {
   // true if both NaN, false otherwise
   return a !== a && b !== b;
 };
-
-
 
 import * as _ from './utils';
 export default _;

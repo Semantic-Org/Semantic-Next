@@ -1,8 +1,8 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
-import template from './test-element.html';
 import css from './test-element.css';
+import template from './test-element.html';
 
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
@@ -15,15 +15,14 @@ const createInstance = function(tpl, $) {
     maybeActive(tab) {
       return tpl.tab.get() == tab
         ? 'active'
-        : ''
-      ;
+        : '';
     },
     maybeDisabled() {
       return tpl.tab.get() == 'basic' ? 'disabled' : '';
     },
     getText() {
       return 'banana';
-    }
+    },
   };
 };
 
@@ -44,7 +43,7 @@ const events = {
   },
   'click .evening'(event, tpl) {
     tpl.eveningActivity.set('Reading');
-  }
+  },
 };
 
 const TestElement = createComponent({
@@ -58,7 +57,7 @@ const TestElement = createComponent({
   subTemplates: {
     events: eventsTab,
     basic: basicTab,
-  }
+  },
 });
 
 export { TestElement };

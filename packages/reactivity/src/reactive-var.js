@@ -1,9 +1,8 @@
-import { clone, isObject, isEqual, findIndex, unique, isNumber } from '@semantic-ui/utils';
+import { clone, findIndex, isEqual, isNumber, isObject, unique } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
-
   constructor(initialValue, equalityFunction) {
     this.currentValue = clone(initialValue);
     this.dependency = new Dependency();
@@ -20,14 +19,13 @@ export class ReactiveVar {
     // otherwise previous value would be modified if the returned value is mutated negating the equality
     return (Array.isArray(value) || typeof value == 'object')
       ? clone(value)
-      : value
-    ;
+      : value;
   }
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = clone(newValue);
-      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
+      this.dependency.changed({ value: newValue, trace: new Error().stack }); // Pass context
     }
   }
 
@@ -38,7 +36,7 @@ export class ReactiveVar {
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
-      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
+      this.dependency.changed({ value: newValue, trace: new Error().stack }); // Pass context
     }
   }
 
@@ -82,7 +80,7 @@ export class ReactiveVar {
   // sets
   setArrayProperty(indexOrProperty, property, value) {
     let index;
-    if(isNumber(indexOrProperty)) {
+    if (isNumber(indexOrProperty)) {
       index = indexOrProperty;
     }
     else {
@@ -91,7 +89,7 @@ export class ReactiveVar {
       property = indexOrProperty;
     }
     const newValue = clone(this.currentValue).map((object, currentIndex) => {
-      if(index == 'all' || currentIndex == index) {
+      if (index == 'all' || currentIndex == index) {
         object[property] = value;
       }
       return object;
@@ -113,7 +111,7 @@ export class ReactiveVar {
   }
 
   getIDs(item) {
-    if(isObject(item)) {
+    if (isObject(item)) {
       return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
     }
     return [item];
@@ -137,5 +135,4 @@ export class ReactiveVar {
   removeItem(id) {
     return this.removeIndex(this.getIndex(id));
   }
-
 }

@@ -1,5 +1,5 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { capitalize, toTitleCase, formatDate } from '@semantic-ui/utils';
+import { capitalize, formatDate, toTitleCase } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
 export const Helpers = {
@@ -10,7 +10,7 @@ export const Helpers = {
     return !a;
   },
   maybe(expr, trueClass = '', falseClass = '') {
-    return (expr) ? trueClass + ' ' : falseClass;
+    return expr ? trueClass + ' ' : falseClass;
   },
   activeIf: (expr) => {
     return Helpers.maybe(expr, 'active', '');
@@ -83,5 +83,5 @@ export const Helpers = {
     debugger;
   },
   guard: Reaction.guard,
-  nonreactive: Reaction.nonreactive
+  nonreactive: Reaction.nonreactive,
 };

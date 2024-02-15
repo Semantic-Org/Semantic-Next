@@ -7,7 +7,8 @@ async function runTests() {
       reporter: 'list', // or any other reporter you prefer
       testMatch: '**/*.spec.js',
     });
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to run tests:', error);
     process.exit(1);
   }

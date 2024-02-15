@@ -1,10 +1,11 @@
-import { nothing, noChange } from 'lit';
+import { noChange, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
-import { insertPart, getCommittedValue, removePart, setCommittedValue, setChildPartValue } from 'lit/directive-helpers.js';
+import { getCommittedValue, insertPart, removePart, setChildPartValue,
+  setCommittedValue } from 'lit/directive-helpers.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { hashCode, clone, isEqual, each, isObject, isString } from '@semantic-ui/utils';
+import { clone, each, hashCode, isEqual, isObject, isString } from '@semantic-ui/utils';
 
 const generateMap = (list, start, end) => {
   const map = new Map();
@@ -32,7 +33,7 @@ class ReactiveEachDirective extends AsyncDirective {
     this.eachCondition = eachCondition;
     if (!this.reaction) {
       this.reaction = Reaction.create((comp) => {
-        if(!this.isConnected) {
+        if (!this.isConnected) {
           comp.stop();
           return nothing;
         }
@@ -83,10 +84,10 @@ class ReactiveEachDirective extends AsyncDirective {
   }
 
   getItemID(item, index) {
-    if(isObject(item)) {
+    if (isObject(item)) {
       return item._id || item.id || item.key || item.hash || index;
     }
-    if(isString) {
+    if (isString) {
       return item;
     }
     return index;
@@ -95,8 +96,7 @@ class ReactiveEachDirective extends AsyncDirective {
   getEachData(item, index, alias) {
     return alias
       ? { [alias]: item, '@index': index }
-      : { ...item, '@index': index }
-    ;
+      : { ...item, '@index': index };
   }
 
   getTemplate(item, index) {
@@ -105,11 +105,11 @@ class ReactiveEachDirective extends AsyncDirective {
     const itemID = this.getItemID(item, index);
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
     const sameData = isEqual(this.templateCachedData.get(itemID), eachData);
-    if(sameIndex && sameData) {
+    if (sameIndex && sameData) {
       // reuse the template nothing to rerender
       return {
         cached: true,
-        content: this.templateCache.get(itemID)
+        content: this.templateCache.get(itemID),
       };
     }
     else {
@@ -120,11 +120,10 @@ class ReactiveEachDirective extends AsyncDirective {
       this.templateCache.set(itemID, content);
       return {
         cached: false,
-        content: content
+        content: content,
       };
     }
   }
-
 
   /*
     Adapted from Lit's Repeat Directive
@@ -134,7 +133,7 @@ class ReactiveEachDirective extends AsyncDirective {
   updateItems(items = this.getItems()) {
     const containerPart = this.part;
     const oldParts = getCommittedValue(containerPart);
-    const {values: newValues, keys: newKeys} = this.getValuesAndKeys(items);
+    const { values: newValues, keys: newKeys } = this.getValuesAndKeys(items);
     if (!Array.isArray(oldParts)) {
       this._itemKeys = newKeys;
       return newValues;
@@ -151,47 +150,53 @@ class ReactiveEachDirective extends AsyncDirective {
     while (oldHead <= oldTail && newHead <= newTail) {
       if (oldParts[oldHead] === null) {
         oldHead++;
-      } else if (oldParts[oldTail] === null) {
+      }
+      else if (oldParts[oldTail] === null) {
         oldTail--;
-      } else if (oldKeys[oldHead] === newKeys[newHead]) {
+      }
+      else if (oldKeys[oldHead] === newKeys[newHead]) {
         // MODIFIED FROM REPEAT
         // WE DONT WANT TO REPULL TEMPLATE HERE
         const template = newValues[newHead](newHead);
-        if(template.cached) {
+        if (template.cached) {
           newParts[newHead] = oldParts[oldHead];
         }
         else {
           newParts[newHead] = setChildPartValue(
             oldParts[oldHead],
-            template.content
+            template.content,
           );
         }
         oldHead++;
         newHead++;
-      } else if (oldKeys[oldTail] === newKeys[newTail]) {
+      }
+      else if (oldKeys[oldTail] === newKeys[newTail]) {
         newParts[newTail] = setChildPartValue(
           oldParts[oldTail],
-          newValues[newTail](newTail).content
+          newValues[newTail](newTail).content,
         );
         oldTail--;
         newTail--;
-      } else if (oldKeys[oldHead] === newKeys[newTail]) {
+      }
+      else if (oldKeys[oldHead] === newKeys[newTail]) {
         newParts[newTail] = setChildPartValue(
           oldParts[oldHead],
-          newValues[newTail](newTail).content
+          newValues[newTail](newTail).content,
         );
         insertPart(containerPart, newParts[newTail + 1], oldParts[oldHead]);
         oldHead++;
         newTail--;
-      } else if (oldKeys[oldTail] === newKeys[newHead]) {
+      }
+      else if (oldKeys[oldTail] === newKeys[newHead]) {
         newParts[newHead] = setChildPartValue(
           oldParts[oldTail],
-          newValues[newHead](newHead).content
+          newValues[newHead](newHead).content,
         );
         insertPart(containerPart, oldParts[oldHead], oldParts[oldTail]);
         oldTail--;
         newHead++;
-      } else {
+      }
+      else {
         if (newKeyToIndexMap === undefined) {
           newKeyToIndexMap = generateMap(newKeys, newHead, newTail);
           oldKeyToIndexMap = generateMap(oldKeys, oldHead, oldTail);
@@ -199,17 +204,20 @@ class ReactiveEachDirective extends AsyncDirective {
         if (!newKeyToIndexMap.has(oldKeys[oldHead])) {
           removePart(oldParts[oldHead]);
           oldHead++;
-        } else if (!newKeyToIndexMap.has(oldKeys[oldTail])) {
+        }
+        else if (!newKeyToIndexMap.has(oldKeys[oldTail])) {
           removePart(oldParts[oldTail]);
           oldTail--;
-        } else {
+        }
+        else {
           const oldIndex = oldKeyToIndexMap.get(newKeys[newHead]);
           const oldPart = oldIndex !== undefined ? oldParts[oldIndex] : null;
           if (oldPart === null) {
             const newPart = insertPart(containerPart, oldParts[oldHead]);
             setChildPartValue(newPart, newValues[newHead](newHead).content);
             newParts[newHead] = newPart;
-          } else {
+          }
+          else {
             newParts[newHead] = setChildPartValue(oldPart, newValues[newHead](newHead).content);
             insertPart(containerPart, oldParts[oldHead], oldPart);
             oldParts[oldIndex] = null;

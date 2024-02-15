@@ -1,4 +1,4 @@
-import { escapeRegExp, each } from '@semantic-ui/utils';
+import { each, escapeRegExp } from '@semantic-ui/utils';
 
 // Adapted from BlazeJS Scanner
 //
@@ -12,14 +12,12 @@ import { escapeRegExp, each } from '@semantic-ui/utils';
 // * `scanner.fatal(msg)` - throw an error indicating a problem at `pos`
 
 class Scanner {
-
-  static DEBUG_MODE = true
+  static DEBUG_MODE = true;
 
   constructor(input) {
     this.input = input;
     this.pos = 0;
   }
-
 
   matches(regex) {
     return regex.test(this.rest());
@@ -56,8 +54,7 @@ class Scanner {
   consumeUntil(pattern) {
     const regex = (typeof pattern === 'string')
       ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern)
-    ;
+      : new RegExp(pattern);
     const match = regex.exec(this.input.substring(this.pos));
     if (!match) {
       const consumedText = this.input.substr(this.pos);
@@ -70,7 +67,7 @@ class Scanner {
   }
 
   returnTo(pattern) {
-    if(!pattern) {
+    if (!pattern) {
       return;
     }
     const regex = (typeof pattern === 'string')
@@ -102,7 +99,8 @@ class Scanner {
 
     // Step 1: Search backwards to confirm we're inside a tag.
     while (i >= 0) {
-      if (this.input[i] === '>') break; // Stop if we find the end of a previous tag
+      if (this.input[i] === '>') { break; // Stop if we find the end of a previous tag
+       }
       if (this.input[i] === '<') {
         insideTag = true; // Confirm we're inside a tag
         tagPos = i; // Save the position of the tag
@@ -118,21 +116,22 @@ class Scanner {
       const attrMatch = tagText.match(attrPattern); // Grab the last sequence of non-space characters
       const attrName = attrMatch ? attrMatch[1] : '';
 
-      const booleanAttributes = ['allowfullscreen', 'async','autofocus','autoplay','checked','controls','default','defer','disabled','formnovalidate','inert','ismap','itemscope','loop','multiple','muted','nomodule','novalidate','open','playsinline','readonly','required','reversed','selected',
-      ];
+      const booleanAttributes = ['allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'controls', 'default',
+        'defer', 'disabled', 'formnovalidate', 'inert', 'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nomodule',
+        'novalidate', 'open', 'playsinline', 'readonly', 'required', 'reversed', 'selected'];
       let booleanAttribute = false;
-      if(booleanAttributes.includes(attrName)) { 
+      if (booleanAttributes.includes(attrName)) {
         // this is a known attribute tag that is always boolean
         booleanAttribute = true;
       }
       else {
         // if the template has syntax <div attribute={{value}}> without quotes then this is intended to be a boolean attribute
         const quotedAttrPattern = /([a-zA-Z-]+)(?=\s*=\s*(\"|\')\s*[^=]*$)/;
-        const quotedAttrMatch = tagText.match(quotedAttrPattern); 
+        const quotedAttrMatch = tagText.match(quotedAttrPattern);
         const quotedAttrName = quotedAttrMatch ? quotedAttrMatch[1] : '';
-        booleanAttribute = (attrName !== quotedAttrName)
+        booleanAttribute = attrName !== quotedAttrName;
       }
-      if(attrName) {
+      if (attrName) {
         return {
           insideTag: true,
           attribute: attrName,
@@ -144,7 +143,6 @@ class Scanner {
       insideTag: insideTag,
     };
   }
-
 
   fatal(msg) {
     msg = msg || 'Parse error';
@@ -179,14 +177,13 @@ class Scanner {
     const normalStyle = 'color: grey';
     const errorStyle = 'color: red; font-weight: bold';
 
-    if(Scanner.DEBUG_MODE) {
-      if(globalThis.document) {
+    if (Scanner.DEBUG_MODE) {
+      if (globalThis.document) {
         let errorHTML = '';
         each(contextLines, (line, index) => {
           const style = (index < linesBefore || index > linesBefore)
             ? normalStyle
-            : errorStyle
-          ;
+            : errorStyle;
           errorHTML += `<div style="${style}">${line}</div>`;
         });
         const html = `
@@ -198,14 +195,14 @@ class Scanner {
         `;
         document.body.innerHTML = html;
       }
-      console.error(msg + '\n' + consoleMsg,
-        ...contextLines.map((_, idx) => (lineNumber - startLine) === idx ? errorStyle : normalStyle));
-  
+      console.error(msg + '\n' + consoleMsg, ...contextLines.map((_, idx) =>
+        (lineNumber - startLine) === idx ? errorStyle : normalStyle
+      ));
+
       const e = new Error(msg);
       throw e;
     }
   }
-
 }
 
 export { Scanner };
