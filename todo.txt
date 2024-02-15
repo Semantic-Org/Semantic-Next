@@ -1,11 +1,25 @@
 next
-- Adding ifdefined for attributes from templates
-- Syntax for nonreactive expressions or helper for nonreactive
-- Add inherit keyword for templates {{> template name='templateName' inheritData }}
-- support expressions for partial object data i.e. {{>template getTemplateSettings}}
+Up next
+- Add jsdom + browser testing for component package
+- Determine spec file build step + use in component
+- Build out button
 
-later
+Templating Later
+- Add syntax for embedding web components
+- Add mechanism for inherting data context from parent template
+- support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
+
+week of feb 16
++ Add reactivity template helpers for guard, nonreactive, reactiveDebug
++ Set up auto labeler
++ Set up github issue bot
++ Handle boolean attributes like checked readonly etc
+
+week of feb 9
++ implement CI with github actions
++ figure out unit + jsdom + browser testing
++ write unit tests for query, reactive var, templating, utils
 
 week of feb 4
 + Fix reactive each to properly reuse dom based off repeat directive

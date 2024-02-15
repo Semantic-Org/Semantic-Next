@@ -1,3 +1,4 @@
+import { Reaction } from '@semantic-ui/reactivity';
 import { capitalize, toTitleCase, formatDate } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
@@ -77,4 +78,10 @@ export const Helpers = {
   debugger: () => {
     debugger;
   },
+  reactiveDebug() {
+    Reaction.getSource();
+    debugger;
+  },
+  guard: Reaction.guard,
+  nonreactive: Reaction.nonreactive
 };
