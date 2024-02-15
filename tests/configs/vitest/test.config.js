@@ -21,7 +21,7 @@ export default defineConfig({
         functions: 60,
         statements: 60
       }
-    }
+    },
     workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
   },
 });

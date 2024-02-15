@@ -25,9 +25,7 @@ export const createComponent = ({
   subTemplates = [],
 
   beforeRendered = noop,
-
 } = {}) => {
-
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
@@ -47,18 +45,16 @@ export const createComponent = ({
     onCreated,
     onRendered,
     onDestroyed,
-    createInstance
+    createInstance,
   });
   let webComponent;
 
-  if(tagName) {
-
+  if (tagName) {
     /*
       Web Component Base is the static portion of the web component which
       doesnt change based off component configuration
     */
     webComponent = class UIWebComponent extends WebComponentBase {
-
       static get styles() {
         return unsafeCSS(css);
       }
@@ -91,7 +87,7 @@ export const createComponent = ({
       }
 
       updated() {
-        each(this.renderCallbacks, callback => callback());
+        each(this.renderCallbacks, (callback) => callback());
       }
 
       addRenderCallback(callback) {
@@ -113,7 +109,9 @@ export const createComponent = ({
 
       attributeChangedCallback(attribute, oldValue, newValue) {
         this.adjustSettingFromAttribute(attribute, newValue);
-        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
+        this.call(onAttributeChanged, {
+          args: [attribute, oldValue, newValue],
+        });
         super.attributeChangedCallback(attribute, oldValue, newValue);
       }
 
@@ -126,21 +124,21 @@ export const createComponent = ({
         <ui-button class="large"> // classic
       */
       adjustSettingFromAttribute(attribute, value) {
-        if(spec) {
-          if(attribute == 'class') {
+        if (spec) {
+          if (attribute == 'class') {
             // syntax <ui-button class="large primary"></ui-button>
-            each(value.split(' '), className => {
+            each(value.split(' '), (className) => {
               this.adjustSettingFromAttribute(className);
             });
           }
-          else if(get(spec?.attribute, attribute)) {
+          else if (get(spec?.attribute, attribute)) {
             // we dont need to set anything here obj reflection handles this
           }
           else {
             // go from large -> size, or primary -> emphasis
             // we reverse obj key/value then check lookup
             const setting = get(reverseKeys(spec.settings), attribute);
-            if(setting) {
+            if (setting) {
               const oldValue = this[setting];
               const newValue = attribute;
               this[setting] = newValue;
@@ -153,11 +151,11 @@ export const createComponent = ({
       getSettings() {
         const settings = {};
         each(webComponent.properties, (propSettings, property) => {
-          if(property == 'class' || !propSettings.observe) {
+          if (property == 'class' || !propSettings.observe) {
             return;
           }
           settings[property] = this[property];
-          if(!settings[this[property]]) {
+          if (!settings[this[property]]) {
             settings[this[property]] = true;
           }
         });
@@ -167,7 +165,7 @@ export const createComponent = ({
       getUIClasses() {
         const classes = [];
         each(webComponent.properties, (settings, property) => {
-          if(property == 'class' || !settings.observe) {
+          if (property == 'class' || !settings.observe) {
             return;
           }
           classes.push(this[property]);
@@ -188,15 +186,8 @@ export const createComponent = ({
         const html = litTemplate.render(this.getDataContext());
         return html;
       }
-
-
     };
     customElements.define(tagName, webComponent);
   }
-
-  return (tagName)
-    ? webComponent
-    : litTemplate
-  ;
-
+  return tagName ? webComponent : litTemplate;
 };
