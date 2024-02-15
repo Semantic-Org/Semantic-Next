@@ -27,6 +27,7 @@ export const createComponent = ({
   beforeRendered = noop,
 
 } = {}) => {
+
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
@@ -127,7 +128,7 @@ export const createComponent = ({
       adjustSettingFromAttribute(attribute, value) {
         if(spec) {
           if(attribute == 'class') {
-            // this is syntax <ui-button class="large primary"></ui-button>
+            // syntax <ui-button class="large primary"></ui-button>
             each(value.split(' '), className => {
               this.adjustSettingFromAttribute(className);
             });
