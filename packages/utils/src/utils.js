@@ -3,17 +3,19 @@
   to save time on common boilerplate
 */
 
-
 /*-------------------
        Errors
 --------------------*/
 
-export const fatal = (message, {
-  errorType = Error,
-  metadata = {},
-  onError = null,
-  removeStackLines = 1,
-} = {}) => {
+export const fatal = (
+  message,
+  {
+    errorType = Error,
+    metadata = {},
+    onError = null,
+    removeStackLines = 1,
+  } = {}
+) => {
   const error = new errorType(message);
   Object.assign(error, metadata);
 
@@ -32,7 +34,8 @@ export const fatal = (message, {
 
   if (typeof queueMicrotask === 'function') {
     queueMicrotask(throwError);
-  } else {
+  }
+  else {
     setTimeout(throwError, 0);
   }
 };
@@ -54,12 +57,17 @@ export const isString = (x) => {
 };
 
 export const isDOM = (element) => {
-  return element instanceof Element || element instanceof Document || element === window || element instanceof DocumentFragment;
-}
+  return (
+    element instanceof Element ||
+    element instanceof Document ||
+    element === window ||
+    element instanceof DocumentFragment
+  );
+};
 
 export const isNode = (el) => {
   return !!(el && el.nodeType);
-}
+};
 
 export const isNumber = (x) => {
   return typeof x == 'number';
@@ -73,7 +81,7 @@ export const isBinary = (x) => {
   return !!(typeof Uint8Array !== 'undefined' && x instanceof Uint8Array);
 };
 
-export const isFunction = (x) =>{
+export const isFunction = (x) => {
   return typeof x == 'function' || false;
 };
 
@@ -81,7 +89,7 @@ export const isPromise = (x) => {
   return x && isFunction(x.then);
 };
 
-export const isArguments = function(obj) {
+export const isArguments = function (obj) {
   return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
@@ -89,45 +97,54 @@ export const isArguments = function(obj) {
         Date
 --------------------*/
 
-export const formatDate = function(date, format) {
+export const formatDate = function (date, format) {
   const pad = (n) => (n < 10 ? '0' + n : n);
   const dateMap = {
-    'YYYY': date.getFullYear(),
-    'YY': date.getFullYear().toString().slice(-2),
-    'MMMM': date.toLocaleString('default', { month: 'long' }),
-    'MMM': date.toLocaleString('default', { month: 'short' }),
-    'MM': pad(date.getMonth() + 1),
-    'M': date.getMonth() + 1,
-    'DD': pad(date.getDate()),
-    'D': date.getDate(),
-    'Do': date.getDate() + ['th', 'st', 'nd', 'rd'][((date.getDate() + 90) % 100 - 10) % 10 - 1] || 'th',
-    'dddd': date.toLocaleString('default', { weekday: 'long' }),
-    'ddd': date.toLocaleString('default', { weekday: 'short' }),
-    'HH': pad(date.getHours()),
-    'h': date.getHours() % 12 || 12,
-    'mm': pad(date.getMinutes()),
-    'ss': pad(date.getSeconds()),
-    'a': date.getHours() >= 12 ? 'pm' : 'am'
+    YYYY: date.getFullYear(),
+    YY: date.getFullYear().toString().slice(-2),
+    MMMM: date.toLocaleString('default', { month: 'long' }),
+    MMM: date.toLocaleString('default', { month: 'short' }),
+    MM: pad(date.getMonth() + 1),
+    M: date.getMonth() + 1,
+    DD: pad(date.getDate()),
+    D: date.getDate(),
+    Do:
+      date.getDate() +
+        ['th', 'st', 'nd', 'rd'][
+          ((((date.getDate() + 90) % 100) - 10) % 10) - 1
+        ] || 'th',
+    dddd: date.toLocaleString('default', { weekday: 'long' }),
+    ddd: date.toLocaleString('default', { weekday: 'short' }),
+    HH: pad(date.getHours()),
+    h: date.getHours() % 12 || 12,
+    mm: pad(date.getMinutes()),
+    ss: pad(date.getSeconds()),
+    a: date.getHours() >= 12 ? 'pm' : 'am',
   };
 
   const formatMap = {
-    'LT': 'h:mm a',
-    'LTS': 'h:mm:ss a',
-    'L': 'MM/DD/YYYY',
-    'l': 'M/D/YYYY',
-    'LL': 'MMMM D, YYYY',
-    'll': 'MMM D, YYYY',
-    'LLL': 'MMMM D, YYYY h:mm a',
-    'lll': 'MMM D, YYYY h:mm a',
-    'LLLL': 'dddd, MMMM D, YYYY h:mm a',
-    'llll': 'ddd, MMM D, YYYY h:mm a'
+    LT: 'h:mm a',
+    LTS: 'h:mm:ss a',
+    L: 'MM/DD/YYYY',
+    l: 'M/D/YYYY',
+    LL: 'MMMM D, YYYY',
+    ll: 'MMM D, YYYY',
+    LLL: 'MMMM D, YYYY h:mm a',
+    lll: 'MMM D, YYYY h:mm a',
+    LLLL: 'dddd, MMMM D, YYYY h:mm a',
+    llll: 'ddd, MMM D, YYYY h:mm a',
   };
 
   const expandedFormat = formatMap[format] || format;
 
-  return expandedFormat.replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g, (match) => {
-    return dateMap[match];
-  }).replace(/\[(.*?)\]/g, (match, p1) => p1);
+  return expandedFormat
+    .replace(
+      /\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g,
+      (match) => {
+        return dateMap[match];
+      }
+    )
+    .replace(/\[(.*?)\]/g, (match, p1) => p1);
 };
 
 /*-------------------
@@ -137,7 +154,7 @@ export const formatDate = function(date, format) {
 /*
   Efficient no operation func
 */
-export const noop = function(){};
+export const noop = function () {};
 
 /*
   Call function even if its not defined
@@ -168,14 +185,32 @@ export const capitalize = (str = '') => {
 };
 
 export const capitalizeWords = (str = '') => {
-  return str.replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
+  return str
+    .replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
     .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
-    .replace(/\b(\w)/g, (match) => match.toUpperCase())
-  ;
+    .replace(/\b(\w)/g, (match) => match.toUpperCase());
 };
 
 export const toTitleCase = (str = '') => {
-  const stopWords = ['the', 'a', 'an', 'and', 'but', 'for', 'at', 'by', 'from', 'to', 'in', 'on', 'of', 'or', 'nor', 'with', 'as'];
+  const stopWords = [
+    'the',
+    'a',
+    'an',
+    'and',
+    'but',
+    'for',
+    'at',
+    'by',
+    'from',
+    'to',
+    'in',
+    'on',
+    'of',
+    'or',
+    'nor',
+    'with',
+    'as',
+  ];
   return str
     .toLowerCase()
     .split(' ')
@@ -193,7 +228,6 @@ export const toTitleCase = (str = '') => {
         Arrays
 --------------------*/
 
-
 /*
   Remove duplicates from an array
 */
@@ -205,7 +239,7 @@ export const unique = (arr) => {
   Remove undefined values from an array
 */
 export const filterEmpty = (arr) => {
-  return arr.filter(val => val);
+  return arr.filter((val) => val);
 };
 
 /*
@@ -218,7 +252,8 @@ export const last = (array, number = 1) => {
   if (number === 1) {
     // Return the last element
     return array[length - 1];
-  } else {
+  }
+  else {
     // Return the last number elements as a new array
     return array.slice(Math.max(length - number, 0));
   }
@@ -249,40 +284,38 @@ export const findIndex = (array, callback) => {
   return matchedIndex;
 };
 
-
 export const remove = (array, callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
-    : (val) => isEqual(val, callbackOrValue)
-  ;
+    : (val) => isEqual(val, callbackOrValue);
   const index = findIndex(array, callback);
-  if(index > -1) {
+  if (index > -1) {
     array.splice(index, 1);
     return true;
   }
   return false;
 };
 
-
 export const inArray = (value, array = []) => {
   return array.indexOf(value) > -1;
 };
 
 export const range = (start, stop, step = 1) => {
-  if(!stop) {
+  if (!stop) {
     stop = start;
     start = 0;
   }
   const length = stop - start;
-  return Array(length).fill().map((x, index) => {
-    return (index * step) + start;
-  });
+  return Array(length)
+    .fill()
+    .map((x, index) => {
+      return index * step + start;
+    });
 };
 
 /*-------------------
        Objects
 --------------------*/
-
 
 /*
   Return keys from object
@@ -295,13 +328,12 @@ export const values = (obj) => {
   return Object.values(obj);
 };
 
-
-export const mapObject = function(obj, callback) {
+export const mapObject = function (obj, callback) {
   const objKeys = keys(obj).reverse();
   const length = objKeys.length;
   let index = length;
   let newObj = {};
-  while(index--) {
+  while (index--) {
     const thisKey = objKeys[index];
     newObj[thisKey] = callback(obj[thisKey], thisKey);
   }
@@ -314,12 +346,13 @@ export const mapObject = function(obj, callback) {
 export const extend = (obj, ...sources) => {
   sources.forEach((source) => {
     let descriptor, prop;
-    if(source) {
+    if (source) {
       for (prop in source) {
         descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if(descriptor === undefined) {
+        if (descriptor === undefined) {
           obj[prop] = source[prop];
-        } else {
+        }
+        else {
           Object.defineProperty(obj, prop, descriptor);
         }
       }
@@ -328,9 +361,9 @@ export const extend = (obj, ...sources) => {
   return obj;
 };
 
-export const pick = function(obj, ...keys) {
+export const pick = function (obj, ...keys) {
   let copy = {};
-  each(keys, function(key) {
+  each(keys, function (key) {
     if (key in obj) {
       copy[key] = obj[key];
     }
@@ -341,11 +374,8 @@ export const pick = function(obj, ...keys) {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
-export const get = function(obj, string = '') {
-  string = string
-    .replace(/^\./, '')
-    .replace(/\[(\w+)\]/g, '.$1')
-  ;
+export const get = function (obj, string = '') {
+  string = string.replace(/^\./, '').replace(/\[(\w+)\]/g, '.$1');
   const stringParts = string.split('.');
 
   for (let index = 0, length = stringParts.length; index < length; ++index) {
@@ -353,7 +383,8 @@ export const get = function(obj, string = '') {
     // Check if obj is an object and part exists in obj
     if (obj !== null && typeof obj === 'object' && part in obj) {
       obj = obj[part];
-    } else {
+    }
+    else {
       // If not, return undefined to safely indicate missing value
       return undefined;
     }
@@ -376,19 +407,19 @@ export const hasProperty = (obj, prop) => {
 export const reverseKeys = (obj) => {
   const newObj = {};
   const pushValue = (key, value) => {
-    if(isArray(newObj[key])) {
+    if (isArray(newObj[key])) {
       newObj[key].push(value);
     }
-    else if(newObj[key]) {
-      newObj[key] = [ newObj[key], value ];
+    else if (newObj[key]) {
+      newObj[key] = [newObj[key], value];
     }
     else {
       newObj[key] = value;
     }
   };
-  Object.keys(obj).forEach(key => {
-    if(isArray(obj[key])) {
-      each(obj[key], subKey => {
+  Object.keys(obj).forEach((key) => {
+    if (isArray(obj[key])) {
+      each(obj[key], (subKey) => {
         pushValue(subKey, key);
       });
     }
@@ -471,7 +502,8 @@ export const each = (obj, func, context) => {
         break; // Exit early if callback explicitly returns false
       }
     }
-  } else if(isObject(obj)) {
+  }
+  else if (isObject(obj)) {
     const objKeys = Object.keys(obj);
     for (const key of objKeys) {
       if (iteratee(obj[key], key, obj) === false) {
@@ -490,10 +522,9 @@ export const each = (obj, func, context) => {
 /*
   Escape Special Chars for RegExp
 */
-export const escapeRegExp = function(string) {
+export const escapeRegExp = function (string) {
   return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 };
-
 
 /*-------------------
       Identity
@@ -518,14 +549,19 @@ export function hashCode(input) {
   let str;
 
   // Convert input to a string
-  if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
+  if (
+    input &&
+    input.toString === Object.prototype.toString &&
+    typeof input === 'object'
+  ) {
     try {
       str = JSON.stringify(input);
     } catch (error) {
       console.error('Error serializing input', error);
       return 0;
     }
-  } else {
+  }
+  else {
     str = input.toString();
   }
 
@@ -537,35 +573,39 @@ export function hashCode(input) {
     const c2 = 0x1b873593;
 
     const round = (k) => {
-      k = k * c1 & 0xffffffff;
+      k = (k * c1) & 0xffffffff;
       k = (k << 15) | (k >>> 17);
-      k = k * c2 & 0xffffffff;
+      k = (k * c2) & 0xffffffff;
       h1 ^= k;
       h1 = (h1 << 13) | (h1 >>> 19);
-      h1 = h1 * 5 + 0xe6546b64 & 0xffffffff;
+      h1 = (h1 * 5 + 0xe6546b64) & 0xffffffff;
     };
 
     for (let i = 0; i < key.length; i += 4) {
-      let k = (key.charCodeAt(i) & 0xff) |
-              ((key.charCodeAt(i + 1) & 0xff) << 8) |
-              ((key.charCodeAt(i + 2) & 0xff) << 16) |
-              ((key.charCodeAt(i + 3) & 0xff) << 24);
+      let k =
+        (key.charCodeAt(i) & 0xff) |
+        ((key.charCodeAt(i + 1) & 0xff) << 8) |
+        ((key.charCodeAt(i + 2) & 0xff) << 16) |
+        ((key.charCodeAt(i + 3) & 0xff) << 24);
       round(k);
     }
 
     let k1 = 0;
     switch (key.length & 3) {
-      case 3: k1 ^= (key.charCodeAt(key.length - 1) & 0xff) << 16;
-      case 2: k1 ^= (key.charCodeAt(key.length - 2) & 0xff) << 8;
-      case 1: k1 ^= (key.charCodeAt(key.length - 3) & 0xff);
-              round(k1);
+      case 3:
+        k1 ^= (key.charCodeAt(key.length - 1) & 0xff) << 16;
+      case 2:
+        k1 ^= (key.charCodeAt(key.length - 2) & 0xff) << 8;
+      case 1:
+        k1 ^= key.charCodeAt(key.length - 3) & 0xff;
+        round(k1);
     }
 
     h1 ^= key.length;
     h1 ^= h1 >>> 16;
-    h1 = h1 * 0x85ebca6b & 0xffffffff;
+    h1 = (h1 * 0x85ebca6b) & 0xffffffff;
     h1 ^= h1 >>> 13;
-    h1 = h1 * 0xc2b2ae35 & 0xffffffff;
+    h1 = (h1 * 0xc2b2ae35) & 0xffffffff;
     h1 ^= h1 >>> 16;
 
     return h1 >>> 0;
@@ -583,7 +623,6 @@ export const generateID = () => {
   return prettifyID(num);
 };
 
-
 /*
   Determine if two objects are equal
 */
@@ -599,7 +638,7 @@ export const isEqual = (a, b, options = {}) => {
     if (Array.isArray(a)) {
       length = a.length;
       if (length != b.length) return false;
-      for (i = length; i-- !== 0;) {
+      for (i = length; i-- !== 0; ) {
         if (!isEqual(a[i], b[i])) {
           return false;
         }
@@ -607,7 +646,7 @@ export const isEqual = (a, b, options = {}) => {
       return true;
     }
 
-    if ((a instanceof Map) && (b instanceof Map)) {
+    if (a instanceof Map && b instanceof Map) {
       if (a.size !== b.size) return false;
       for (i of a.entries()) {
         if (!b.has(i[0])) {
@@ -622,7 +661,7 @@ export const isEqual = (a, b, options = {}) => {
       return true;
     }
 
-    if ((a instanceof Set) && (b instanceof Set)) {
+    if (a instanceof Set && b instanceof Set) {
       if (a.size !== b.size) return false;
       for (i of a.entries()) {
         if (!b.has(i[0])) {
@@ -635,7 +674,7 @@ export const isEqual = (a, b, options = {}) => {
     if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
       length = a.length;
       if (length != b.length) return false;
-      for (i = length; i-- !== 0;) {
+      for (i = length; i-- !== 0; ) {
         if (a[i] !== b[i]) {
           return false;
         }
@@ -657,11 +696,11 @@ export const isEqual = (a, b, options = {}) => {
     length = keys.length;
     if (length !== Object.keys(b).length) return false;
 
-    for (i = length; i-- !== 0;) {
+    for (i = length; i-- !== 0; ) {
       if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
     }
 
-    for (i = length; i-- !== 0;) {
+    for (i = length; i-- !== 0; ) {
       let key = keys[i];
       if (!isEqual(a[key], b[key])) return false;
     }
@@ -672,8 +711,6 @@ export const isEqual = (a, b, options = {}) => {
   // true if both NaN, false otherwise
   return a !== a && b !== b;
 };
-
-
 
 import * as _ from './utils';
 export default _;

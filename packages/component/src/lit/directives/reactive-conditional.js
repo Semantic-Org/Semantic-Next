@@ -17,22 +17,22 @@ class ReactiveConditionalDirective extends AsyncDirective {
     }
     let html = nothing;
     this.reaction = Reaction.create((comp) => {
-      if(!this.isConnected) {
+      if (!this.isConnected) {
         comp.stop();
         return;
       }
-      if(conditional.condition()) {
+      if (conditional.condition()) {
         html = conditional.content();
       }
-      else if(conditional.branches?.length) {
+      else if (conditional.branches?.length) {
         // evaluate each branch
         let match = false;
         each(conditional.branches, (branch) => {
-          if(!match && branch.type == 'elseif' && branch.condition()) {
+          if (!match && branch.type == 'elseif' && branch.condition()) {
             match = true;
             html = branch.content();
           }
-          else if(!match && branch.type == 'else') {
+          else if (!match && branch.type == 'else') {
             match = true;
             html = branch.content();
           }
@@ -41,7 +41,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
       else {
         html = nothing;
       }
-      if(!comp.firstRun) {
+      if (!comp.firstRun) {
         this.setValue(html);
       }
       return html;

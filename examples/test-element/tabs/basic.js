@@ -39,7 +39,7 @@ const createInstance = (tpl, $) => ({
   },
   echo(value) {
     return value;
-  }
+  },
 });
 
 const onRendered = (tpl) => {
@@ -53,7 +53,6 @@ const onRendered = (tpl) => {
 
   // calculate slogan from seconds (reactive on seconds);
   tpl.reaction(tpl.calculateCurrentSlogan);
-
 };
 
 const onDestroyed = (tpl) => {
@@ -64,7 +63,7 @@ const onDestroyed = (tpl) => {
 const events = {
   'click button'(event, tpl) {
     console.log('button clicked');
-  }
+  },
 };
 
 const basicTab = createComponent({

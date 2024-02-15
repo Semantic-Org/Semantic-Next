@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { each, clone, unique, filterEmpty, last, firstMatch, findIndex, remove, inArray, range, keys, values, mapObject, extend, pick, get, hasProperty, reverseKeys, isObject, isPlainObject, isString, isNumber, isArray, isBinary, isFunction, isPromise, isArguments, formatDate, noop, wrapFunction, kebabToCamel, camelToKebab, capitalizeWords, toTitleCase, escapeRegExp, prettifyID, hashCode, generateID, isEqual, fatal } from '@semantic-ui/utils';
 
 describe('Array Utilities', () => {
-
   it('unique should remove duplicates', () => {
     const arr = [1, 2, 2, 3, 4, 4, 5];
     const result = unique(arr);
@@ -23,19 +22,19 @@ describe('Array Utilities', () => {
 
   it('firstMatch should return the first matching element based on callback', () => {
     const arr = [1, 2, 3, 4];
-    const result = firstMatch(arr, x => x > 2);
+    const result = firstMatch(arr, (x) => x > 2);
     expect(result).toBe(3);
   });
 
   it('findIndex should return the index of the first matching element', () => {
     const arr = ['apple', 'banana', 'orange'];
-    const index = findIndex(arr, fruit => fruit === 'banana');
+    const index = findIndex(arr, (fruit) => fruit === 'banana');
     expect(index).toBe(1);
   });
 
   it('remove should remove elements based on a callback or value', () => {
     let arr = [1, 2, 3, 4];
-    remove(arr, x => x === 3);
+    remove(arr, (x) => x === 3);
     expect(arr).toEqual([1, 2, 4]);
 
     arr = [1, 2, 3, 4];
@@ -53,11 +52,9 @@ describe('Array Utilities', () => {
     expect(range(1, 5)).toEqual([1, 2, 3, 4]);
     expect(range(0, 4, 5)).toEqual([0, 5, 10, 15]);
   });
-
 });
 
 describe('Type Checking Utilities', () => {
-
   it('isObject should correctly identify objects', () => {
     expect(isObject({})).toBe(true);
     expect(isObject(new Date())).toBe(true);
@@ -96,30 +93,28 @@ describe('Type Checking Utilities', () => {
   });
 
   it('isFunction should correctly identify functions', () => {
-    expect(isFunction(function() {})).toBe(true);
+    expect(isFunction(function () {})).toBe(true);
     expect(isFunction(() => {})).toBe(true);
     expect(isFunction({})).toBe(false);
   });
 
   it('isPromise should correctly identify promises', () => {
     expect(isPromise(Promise.resolve())).toBe(true);
-    expect(isPromise({ then: function() {} })).toBe(true);
+    expect(isPromise({ then: function () {} })).toBe(true);
     expect(isPromise({})).toBe(false);
   });
 
-  it('isArguments should correctly identify arguments objects', function() {
-    const testFunction = function() {
+  it('isArguments should correctly identify arguments objects', function () {
+    const testFunction = function () {
       return isArguments(arguments);
     };
     expect(testFunction()).toBe(true);
     expect(testFunction(1, 2, 3)).toBe(true);
     expect(isArguments([1, 2, 3])).toBe(false);
   });
-
 });
 
 describe('Date Utilities', () => {
-
   it('formatDate should format dates according to provided patterns', () => {
     const testDate = new Date('2023-01-01T12:00:00Z');
     expect(formatDate(testDate, 'YYYY-MM-DD')).toBe('2023-01-01');
@@ -128,7 +123,6 @@ describe('Date Utilities', () => {
 });
 
 describe('Object Utilities', () => {
-
   it('keys should return the keys of an object', () => {
     expect(keys({ a: 1, b: 2 })).toEqual(['a', 'b']);
     expect(keys([1, 2, 3])).toEqual(['0', '1', '2']);
@@ -147,8 +141,12 @@ describe('Object Utilities', () => {
   it('extend should merge properties from source into target, including getters and setters', () => {
     const target = { a: 1 };
     const source = {
-      get b() { return 2; },
-      set b(val) { this.c = val; }
+      get b() {
+        return 2;
+      },
+      set b(val) {
+        this.c = val;
+      },
     };
     extend(target, source);
     expect(target.b).toBe(2);
@@ -174,24 +172,20 @@ describe('Object Utilities', () => {
     expect(hasProperty(obj, 'c')).toBe(false);
   });
 
-  it('reverseKeys should reverse a lookup object\'s keys and values', () => {
+  it("reverseKeys should reverse a lookup object's keys and values", () => {
     const obj = { a: 1, b: [1, 2], c: 2 };
     const reversed = reverseKeys(obj);
-    expect(reversed).toEqual({ '1': ['a', 'b'], '2': ['b', 'c'] });
+    expect(reversed).toEqual({ 1: ['a', 'b'], 2: ['b', 'c'] });
   });
 
   it('reverseKeys should reverse array values', () => {
     const obj = { a: [1, 2], b: [2, 3], c: 1 };
     const reversed = reverseKeys(obj);
-    expect(reversed).toEqual({ '1': ['a', 'c'], '2': ['a', 'b'], '3': 'b' });
+    expect(reversed).toEqual({ 1: ['a', 'c'], 2: ['a', 'b'], 3: 'b' });
   });
-
-
 });
 
-
 describe('isEqual', () => {
-
   describe('Various types', () => {
     // Primitives
     it('should return true for equal strings', () => {
@@ -229,8 +223,14 @@ describe('isEqual', () => {
     });
 
     it('should return true for equal Maps', () => {
-      const mapA = new Map([['key', 'value'], ['anotherKey', 'anotherValue']]);
-      const mapB = new Map([['key', 'value'], ['anotherKey', 'anotherValue']]);
+      const mapA = new Map([
+        ['key', 'value'],
+        ['anotherKey', 'anotherValue'],
+      ]);
+      const mapB = new Map([
+        ['key', 'value'],
+        ['anotherKey', 'anotherValue'],
+      ]);
       expect(isEqual(mapA, mapB)).toBe(true);
     });
 
@@ -311,14 +311,46 @@ describe('isEqual', () => {
 
     // Complex scenarios
     it('should return true for complex nested structures', () => {
-      const complex1 = { a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }] };
-      const complex2 = { a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }] };
+      const complex1 = {
+        a: [
+          1,
+          {
+            b: 'test',
+            c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }],
+          },
+        ],
+      };
+      const complex2 = {
+        a: [
+          1,
+          {
+            b: 'test',
+            c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }],
+          },
+        ],
+      };
       expect(isEqual(complex1, complex2)).toBe(true);
     });
 
     it('should return false for complex nested structures with differences', () => {
-      const complex1 = { a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }] };
-      const complex2 = { a: [1, { b: 'test', c: [new Date(2020, 0, 2), { d: new Uint8Array([1, 2, 3]) }] }] };
+      const complex1 = {
+        a: [
+          1,
+          {
+            b: 'test',
+            c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }],
+          },
+        ],
+      };
+      const complex2 = {
+        a: [
+          1,
+          {
+            b: 'test',
+            c: [new Date(2020, 0, 2), { d: new Uint8Array([1, 2, 3]) }],
+          },
+        ],
+      };
       expect(isEqual(complex1, complex2)).toBe(false);
     });
     it('should ignore non-enumerable properties by default', () => {
@@ -335,8 +367,6 @@ describe('isEqual', () => {
   it('should return false for == values that arent equal', () => {
     expect(isEqual('5', 5)).toBe(false);
   });
-
-
 });
 
 describe('function utilities', () => {
@@ -373,7 +403,6 @@ describe('String Conversion', () => {
 });
 
 describe('ID/Hashing Functions', () => {
-
   describe('prettifyID', () => {
     it('should return "0" for input 0', () => {
       expect(prettifyID(0)).toBe('0');
@@ -402,8 +431,8 @@ describe('ID/Hashing Functions', () => {
     });
 
     it('should hash objects', () => {
-      const input1 = { one: 'one', two: { one: 'one', two:'two' }};
-      const input2 = { one: 'one', two: { one: 'two', two:'two' }};
+      const input1 = { one: 'one', two: { one: 'one', two: 'two' } };
+      const input2 = { one: 'one', two: { one: 'two', two: 'two' } };
       expect(hashCode(input1)).not.toBe(hashCode(input2));
     });
 
@@ -434,7 +463,6 @@ describe('ID/Hashing Functions', () => {
 });
 
 describe('clone', () => {
-
   it('should clone dates', () => {
     const originalDate = new Date(2020, 0, 1);
     const clonedDate = clone(originalDate);
@@ -486,10 +514,10 @@ describe('clone', () => {
       level1: {
         level2: {
           level3: {
-            value: 'deep value'
-          }
-        }
-      }
+            value: 'deep value',
+          },
+        },
+      },
     };
     const clonedObject = clone(originalObject);
     expect(clonedObject).toEqual(originalObject);
@@ -509,10 +537,7 @@ describe('clone', () => {
     expect(clonedObject).not.toBe(originalObject);
     expect(clonedObject.circularRef).toBe(clonedObject);
   });
-
-
 });
-
 
 describe('regular expression utilities', () => {
   it('should escape characters that have special meaning in regex', () => {
@@ -523,7 +548,6 @@ describe('regular expression utilities', () => {
 });
 
 describe('each iterator utility', () => {
-
   describe('Array iteration', () => {
     it('should iterate over all elements', () => {
       const array = [1, 2, 3];
@@ -574,7 +598,6 @@ describe('each iterator utility', () => {
       expect(spy).toHaveBeenCalledWith(2, 'b', obj);
       expect(spy).not.toHaveBeenCalledWith(3, 'c', obj); // ensure 'c' is not iterated
     });
-
   });
 
   it('should handle null/undefined gracefully', () => {
@@ -583,5 +606,4 @@ describe('each iterator utility', () => {
     each(undefined, spy);
     expect(spy).not.toHaveBeenCalled();
   });
-
 });

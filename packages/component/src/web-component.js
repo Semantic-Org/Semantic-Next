@@ -12,15 +12,14 @@ import { scopeStyles } from './styles';
 */
 
 class WebComponentBase extends LitElement {
-
   // for use with light dom rendering
   static scopedStyleSheet = null;
 
   useLight = false;
 
   createRenderRoot() {
-    this.useLight = (this.getAttribute('expose') !== null);
-    if(this.useLight) {
+    this.useLight = this.getAttribute('expose') !== null;
+    if (this.useLight) {
       this.applyScopedStyles(this.tagName, this.css);
       this.storeOriginalContent.apply(this);
       return this;
@@ -36,7 +35,10 @@ class WebComponentBase extends LitElement {
       this.scopedStyleSheet = new CSSStyleSheet();
       this.scopedStyleSheet.replaceSync(scopedCSS);
     }
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.scopedStyleSheet];
+    document.adoptedStyleSheets = [
+      ...document.adoptedStyleSheets,
+      this.scopedStyleSheet,
+    ];
   }
 
   storeOriginalContent() {
@@ -46,13 +48,13 @@ class WebComponentBase extends LitElement {
   }
 
   slotContent() {
-    const $slots =  this.$('slot');
+    const $slots = this.$('slot');
     $slots.each(($slot) => {
       let html;
-      if($slot.attr('name')) {
+      if ($slot.attr('name')) {
         let slotName = $slot.attr('name');
         const $slotContent = this.$$(`[slot="${slotName}"]`);
-        if($slotContent.length) {
+        if ($slotContent.length) {
           html = $slotContent.outerHTML();
         }
       }
@@ -64,7 +66,7 @@ class WebComponentBase extends LitElement {
         const defaultText = $originalDOM.textNode() || '';
         html = defaultHTML + defaultText;
       }
-      if($slot && html) {
+      if ($slot && html) {
         $slot.html(html);
       }
     });
@@ -76,11 +78,10 @@ class WebComponentBase extends LitElement {
 
   updated() {
     super.updated();
-    if(this.useLight) {
+    if (this.useLight) {
       this.slotContent();
     }
   }
-
 
   /*******************************
          Settings / Attrs
@@ -94,10 +95,9 @@ class WebComponentBase extends LitElement {
            DOM Helpers
   *******************************/
 
-
   // Rendered DOM (either shadow or regular)
   $(selector, root = this?.renderRoot) {
-    if(!this.renderRoot) {
+    if (!this.renderRoot) {
       console.error('Cannot query DOM until element has rendered.');
     }
     return $(selector, this?.renderRoot);
@@ -114,18 +114,20 @@ class WebComponentBase extends LitElement {
   }
 
   // calls callback if defined with consistent params and this context
-  call(func, { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}) {
-    if(firstArg) {
+  call(
+    func,
+    { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}
+  ) {
+    if (firstArg) {
       args.unshift(firstArg);
     }
-    if(additionalArgs) {
+    if (additionalArgs) {
       args.push(...additionalArgs);
     }
-    if(isFunction(func)) {
+    if (isFunction(func)) {
       return func.apply(this, args);
     }
   }
-
 }
 
 export { WebComponentBase };

@@ -3,7 +3,6 @@ import { each, last } from '@semantic-ui/utils';
 import { Scanner } from './scanner';
 
 class TemplateCompiler {
-
   constructor(template) {
     this.template = template || '';
   }
@@ -26,8 +25,8 @@ class TemplateCompiler {
       keyword: /^template\W/g,
       properties: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
     },
-    standard: /(\w.*?)($|\s)/mg,
-    dataObject: /(\w+)\s*:\s*([^,}]+)/g // parses { one: 'two' }
+    standard: /(\w.*?)($|\s)/gm,
+    dataObject: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
   };
 
   /*
@@ -35,7 +34,6 @@ class TemplateCompiler {
     this can be cached on the web component class
   */
   compile(template = this.template) {
-
     template = template.trim();
 
     const scanner = new Scanner(template);
@@ -72,19 +70,17 @@ class TemplateCompiler {
       const contentTarget = contentBranch?.content || lastNode || ast;
 
       if (tag) {
-
         let newNode = {
-          type: tag.type.toLowerCase()
+          type: tag.type.toLowerCase(),
         };
 
         switch (tag.type) {
-
           case 'IF':
             newNode = {
               ...newNode,
               condition: tag.content,
               content: [],
-              branches: []
+              branches: [],
             };
             contentTarget.push(newNode);
             conditionStack.push(newNode);
@@ -98,9 +94,11 @@ class TemplateCompiler {
               condition: tag.content,
               content: [],
             };
-            if(!conditionTarget) {
+            if (!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSEIF);
-              scanner.fatal('{{elseif}} encountered without matching if condition');
+              scanner.fatal(
+                '{{elseif}} encountered without matching if condition'
+              );
             }
             contentStack.pop();
             contentStack.push(newNode);
@@ -113,9 +111,11 @@ class TemplateCompiler {
               ...newNode,
               content: [],
             };
-            if(!conditionTarget) {
+            if (!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSE);
-              scanner.fatal('{{else}} encountered without matching if condition');
+              scanner.fatal(
+                '{{else}} encountered without matching if condition'
+              );
               break;
             }
             contentStack.pop();
@@ -129,7 +129,7 @@ class TemplateCompiler {
               ...newNode,
               type: 'expression',
               unsafeHTML: true,
-              value: tag.content
+              value: tag.content,
             };
             contentTarget.push(newNode);
             scanner.consume('}'); // got an extra }
@@ -138,9 +138,9 @@ class TemplateCompiler {
           case 'EXPRESSION':
             newNode = {
               ...newNode,
-              value: tag.content
+              value: tag.content,
             };
-            if(tag.booleanAttribute) {
+            if (tag.booleanAttribute) {
               newNode.ifDefined = true;
             }
             contentTarget.push(newNode);
@@ -150,7 +150,7 @@ class TemplateCompiler {
             const templateInfo = this.parseTemplateString(tag.content);
             newNode = {
               ...newNode,
-              ...templateInfo
+              ...templateInfo,
             };
             contentTarget.push(newNode);
             break;
@@ -158,13 +158,13 @@ class TemplateCompiler {
           case 'SLOT':
             newNode = {
               ...newNode,
-              name: tag.content
+              name: tag.content,
             };
             contentTarget.push(newNode);
             break;
 
           case 'CLOSE_IF':
-            if(conditionStack.length == 0) {
+            if (conditionStack.length == 0) {
               scanner.returnTo(tagRegExp.CLOSE_IF);
               scanner.fatal('{{/if}} close tag found without open if tag');
             }
@@ -179,7 +179,7 @@ class TemplateCompiler {
 
             let iterateOver;
             let iterateAs;
-            if(contentParts.length > 1) {
+            if (contentParts.length > 1) {
               iterateAs = contentParts[0].trim();
               iterateOver = contentParts[1].trim();
             }
@@ -191,10 +191,10 @@ class TemplateCompiler {
               over: iterateOver,
               content: [],
             };
-            if(iterateAs) {
+            if (iterateAs) {
               newNode.as = iterateAs;
             }
-            
+
             contentTarget.push(newNode);
             contentBranch = newNode;
             break;
@@ -204,8 +204,8 @@ class TemplateCompiler {
             contentBranch = last(contentStack); // Reset current branch
             break;
         }
-
-      } else {
+      }
+      else {
         const OPEN_TAG = /\{\{/;
         const html = scanner.consumeUntil(OPEN_TAG);
         if (html) {
@@ -213,21 +213,20 @@ class TemplateCompiler {
           contentTarget.push(htmlNode);
         }
       }
-
     }
 
     return ast;
   }
 
   getValue(expression) {
-    if(expression == 'true') {
+    if (expression == 'true') {
       return true;
     }
-    else if(expression == 'false') {
+    else if (expression == 'false') {
       return false;
     }
-    else if(!Number.isNaN( parseFloat(expression, 10) )) {
-      return +(expression);
+    else if (!Number.isNaN(parseFloat(expression, 10))) {
+      return +expression;
     }
     return expression;
   }
@@ -236,9 +235,9 @@ class TemplateCompiler {
     // quicker to compile regexp once
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
-    if(regExp.verbose.keyword.exec(expression)) {
+    if (regExp.verbose.keyword.exec(expression)) {
       // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
-      const matches = [ ...expression.matchAll(regExp.verbose.properties) ];
+      const matches = [...expression.matchAll(regExp.verbose.properties)];
       each(matches, (match, index) => {
         const property = match[1];
         const value = this.getObjectFromString(match[2]);
@@ -248,14 +247,14 @@ class TemplateCompiler {
     else {
       // standard notation {{> templateName data1=value data2=value}}
       let data = {};
-      const matches = [ ...expression.matchAll(regExp.standard) ];
+      const matches = [...expression.matchAll(regExp.standard)];
       each(matches, (match, index) => {
-        if(index == 0) {
+        if (index == 0) {
           templateInfo.name = `'${match[0].trim()}'`;
         }
         else {
           const parts = match[0].split('=');
-          if(parts.length) {
+          if (parts.length) {
             let name = parts[0].trim();
             let value = parts[1].trim();
             data[name] = value;
@@ -279,7 +278,6 @@ class TemplateCompiler {
     // if this isnt an object we want to return the string value which may be an expression
     return isObject ? obj : objectString.trim();
   }
-
 }
 
 export { TemplateCompiler };

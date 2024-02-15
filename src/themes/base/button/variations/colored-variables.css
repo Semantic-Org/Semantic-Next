@@ -1,5 +1,4 @@
 ui-button {
-
   /* Colors */
   --colored-background-image: none;
   --colored-box-shadow: var(--shadow-box-shadow);
@@ -59,5 +58,4 @@ ui-button {
   --light-teal-text-shadow: var(--text-shadow);
   --light-grey-text-color: var(--text-color);
   --light-grey-text-shadow: var(--text-shadow);
-
 }

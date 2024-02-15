@@ -12,14 +12,12 @@ import { escapeRegExp, each } from '@semantic-ui/utils';
 // * `scanner.fatal(msg)` - throw an error indicating a problem at `pos`
 
 class Scanner {
-
-  static DEBUG_MODE = true
+  static DEBUG_MODE = true;
 
   constructor(input) {
     this.input = input;
     this.pos = 0;
   }
-
 
   matches(regex) {
     return regex.test(this.rest());
@@ -39,14 +37,16 @@ class Scanner {
   }
 
   consume(pattern) {
-    const regex = (typeof pattern === 'string')
-      ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern);
+    const regex =
+      typeof pattern === 'string'
+        ? new RegExp(escapeRegExp(pattern))
+        : new RegExp(pattern);
 
     // Match from the current position
     const substring = this.input.substring(this.pos);
     const match = regex.exec(substring);
-    if (match && match.index === 0) { // Ensure match starts at the beginning of the substring
+    if (match && match.index === 0) {
+      // Ensure match starts at the beginning of the substring
       this.pos += match[0].length; // Advance position by the length of the match
       return match[0];
     }
@@ -54,10 +54,10 @@ class Scanner {
   }
 
   consumeUntil(pattern) {
-    const regex = (typeof pattern === 'string')
-      ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern)
-    ;
+    const regex =
+      typeof pattern === 'string'
+        ? new RegExp(escapeRegExp(pattern))
+        : new RegExp(pattern);
     const match = regex.exec(this.input.substring(this.pos));
     if (!match) {
       const consumedText = this.input.substr(this.pos);
@@ -70,12 +70,13 @@ class Scanner {
   }
 
   returnTo(pattern) {
-    if(!pattern) {
+    if (!pattern) {
       return;
     }
-    const regex = (typeof pattern === 'string')
-      ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
-      : new RegExp(pattern, 'gm');
+    const regex =
+      typeof pattern === 'string'
+        ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
+        : new RegExp(pattern, 'gm');
 
     let lastMatch = null;
     let match;
@@ -118,21 +119,45 @@ class Scanner {
       const attrMatch = tagText.match(attrPattern); // Grab the last sequence of non-space characters
       const attrName = attrMatch ? attrMatch[1] : '';
 
-      const booleanAttributes = ['allowfullscreen', 'async','autofocus','autoplay','checked','controls','default','defer','disabled','formnovalidate','inert','ismap','itemscope','loop','multiple','muted','nomodule','novalidate','open','playsinline','readonly','required','reversed','selected',
+      const booleanAttributes = [
+        'allowfullscreen',
+        'async',
+        'autofocus',
+        'autoplay',
+        'checked',
+        'controls',
+        'default',
+        'defer',
+        'disabled',
+        'formnovalidate',
+        'inert',
+        'ismap',
+        'itemscope',
+        'loop',
+        'multiple',
+        'muted',
+        'nomodule',
+        'novalidate',
+        'open',
+        'playsinline',
+        'readonly',
+        'required',
+        'reversed',
+        'selected',
       ];
       let booleanAttribute = false;
-      if(booleanAttributes.includes(attrName)) { 
+      if (booleanAttributes.includes(attrName)) {
         // this is a known attribute tag that is always boolean
         booleanAttribute = true;
       }
       else {
         // if the template has syntax <div attribute={{value}}> without quotes then this is intended to be a boolean attribute
         const quotedAttrPattern = /([a-zA-Z-]+)(?=\s*=\s*(\"|\')\s*[^=]*$)/;
-        const quotedAttrMatch = tagText.match(quotedAttrPattern); 
+        const quotedAttrMatch = tagText.match(quotedAttrPattern);
         const quotedAttrName = quotedAttrMatch ? quotedAttrMatch[1] : '';
-        booleanAttribute = (attrName !== quotedAttrName)
+        booleanAttribute = attrName !== quotedAttrName;
       }
-      if(attrName) {
+      if (attrName) {
         return {
           insideTag: true,
           attribute: attrName,
@@ -144,7 +169,6 @@ class Scanner {
       insideTag: insideTag,
     };
   }
-
 
   fatal(msg) {
     msg = msg || 'Parse error';
@@ -171,22 +195,24 @@ class Scanner {
 
     // Apply grey color to lines before and after the error line
     // Apply red and bold to the error line
-    const consoleMsg = contextLines.map((line, idx) => {
-      const isErrLine = (lineNumber - startLine) === idx;
-      return `%c${line}`;
-    }).join('\n');
+    const consoleMsg = contextLines
+      .map((line, idx) => {
+        const isErrLine = lineNumber - startLine === idx;
+        return `%c${line}`;
+      })
+      .join('\n');
 
     const normalStyle = 'color: grey';
     const errorStyle = 'color: red; font-weight: bold';
 
-    if(Scanner.DEBUG_MODE) {
-      if(globalThis.document) {
+    if (Scanner.DEBUG_MODE) {
+      if (globalThis.document) {
         let errorHTML = '';
         each(contextLines, (line, index) => {
-          const style = (index < linesBefore || index > linesBefore)
-            ? normalStyle
-            : errorStyle
-          ;
+          const style =
+            index < linesBefore || index > linesBefore
+              ? normalStyle
+              : errorStyle;
           errorHTML += `<div style="${style}">${line}</div>`;
         });
         const html = `
@@ -198,14 +224,17 @@ class Scanner {
         `;
         document.body.innerHTML = html;
       }
-      console.error(msg + '\n' + consoleMsg,
-        ...contextLines.map((_, idx) => (lineNumber - startLine) === idx ? errorStyle : normalStyle));
-  
+      console.error(
+        msg + '\n' + consoleMsg,
+        ...contextLines.map((_, idx) =>
+          lineNumber - startLine === idx ? errorStyle : normalStyle
+        )
+      );
+
       const e = new Error(msg);
       throw e;
     }
   }
-
 }
 
 export { Scanner };
