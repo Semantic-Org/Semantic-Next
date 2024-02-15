@@ -1,17 +1,16 @@
 import { html } from 'lit';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import { each, fatal, isFunction, mapObject, wrapFunction } from '@semantic-ui/utils';
 
-import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
+import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
 import { renderTemplate } from './directives/render-template.js';
 
 import { Helpers } from './helpers';
 
 export class LitRenderer {
-
   static helpers = Helpers;
 
   static addHelper(name, helper) {
@@ -41,10 +40,10 @@ export class LitRenderer {
   */
   render({
     ast = this.ast,
-    data = this.data
+    data = this.data,
   } = {}) {
     this.resetHTML();
-    this.readAST({ast, data});
+    this.readAST({ ast, data });
     this.clearTemp();
     this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
@@ -52,9 +51,9 @@ export class LitRenderer {
 
   readAST({
     ast = this.ast,
-    data = this.data
+    data = this.data,
   } = {}) {
-    each(ast, node => {
+    each(ast, (node) => {
       switch (node.type) {
         case 'html':
           this.addHTML(node.html);
@@ -64,25 +63,25 @@ export class LitRenderer {
           const value = this.evaluateExpression(node.value, data, {
             unsafeHTML: node.unsafeHTML,
             ifDefined: node.ifDefined,
-            asDirective: true
+            asDirective: true,
           });
-          this.addValue( value );
+          this.addValue(value);
           break;
 
         case 'if':
-          this.addValue( this.evaluateConditional(node, data) );
+          this.addValue(this.evaluateConditional(node, data));
           break;
 
         case 'each':
-          this.addValue( this.evaluateEach(node, data) );
+          this.addValue(this.evaluateEach(node, data));
           break;
 
         case 'template':
-          this.addValue( this.evaluateTemplate(node, data) );
+          this.addValue(this.evaluateTemplate(node, data));
           break;
 
         case 'slot':
-          if(node.name) {
+          if (node.name) {
             this.addHTML(`<slot name="${node.name}"></slot>`);
           }
           else {
@@ -100,14 +99,14 @@ export class LitRenderer {
   */
   evaluateConditional(node, data) {
     const directiveMap = (value, key) => {
-      if(key == 'branches') {
-        return value.map(branch => mapObject(branch, directiveMap));
+      if (key == 'branches') {
+        return value.map((branch) => mapObject(branch, directiveMap));
       }
-      if(key == 'condition') {
+      if (key == 'condition') {
         return () => this.evaluateExpression(value, data);
       }
-      if(key == 'content') {
-        return () => this.renderContent({ast: value, data});
+      if (key == 'content') {
+        return () => this.renderContent({ ast: value, data });
       }
       return value;
     };
@@ -117,15 +116,15 @@ export class LitRenderer {
 
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
-      if(key == 'over') {
+      if (key == 'over') {
         return (expressionString) => {
           const computedValue = this.evaluateExpression(value, data);
           return computedValue;
         };
       }
-      if(key == 'content') {
+      if (key == 'content') {
         return (eachData) => {
-          return this.renderContent({ast: value, data: { ...data, ...eachData } });
+          return this.renderContent({ ast: value, data: { ...data, ...eachData } });
         };
       }
       return value;
@@ -152,13 +151,13 @@ export class LitRenderer {
     });
     const templateData = {
       ...staticValues,
-      ...reactiveValues
+      ...reactiveValues,
     };
     return renderTemplate({
       subTemplates: this.subTemplates,
       getTemplateName: getTemplateName,
       data: templateData,
-      parentTemplate: data
+      parentTemplate: data,
     });
   }
 
@@ -166,10 +165,10 @@ export class LitRenderer {
   evaluateExpression(
     expression,
     data = this.data,
-    { asDirective = false, ifDefined=false, unsafeHTML = false } = {}
+    { asDirective = false, ifDefined = false, unsafeHTML = false } = {},
   ) {
-    if(typeof expression === 'string') {
-      if(asDirective) {
+    if (typeof expression === 'string') {
+      if (asDirective) {
         return reactiveData(() => this.lookupExpressionValue(expression, data), { ifDefined, unsafeHTML });
       }
       else {
@@ -185,13 +184,12 @@ export class LitRenderer {
   lookupExpressionValue(
     expressionString = '',
     data = {},
-    { unsafeHTML = false } = {}
+    { unsafeHTML = false } = {},
   ) {
-
     // if the whole expression is a string we want to return that
     const stringRegExp = /^\'(.*)\'$/;
     const stringMatches = expressionString.match(stringRegExp);
-    if(stringMatches && stringMatches.length > 0) {
+    if (stringMatches && stringMatches.length > 0) {
       return stringMatches[1];
     }
 
@@ -199,15 +197,15 @@ export class LitRenderer {
     let funcArguments = [];
     let result;
     each(expressions, (expression, index) => {
-
       // This lookups a deep value in an object, calling any intermediary functions
-      const getDeepValue = (obj, path) => path.split('.').reduce((acc, part) => {
-        const current = wrapFunction(acc)();
-        if(current == undefined) {
-          fatal(`Error evaluating expression "${expressionString}"`);
-        }
-        return current[part];
-      }, obj);
+      const getDeepValue = (obj, path) =>
+        path.split('.').reduce((acc, part) => {
+          const current = wrapFunction(acc)();
+          if (current == undefined) {
+            fatal(`Error evaluating expression "${expressionString}"`);
+          }
+          return current[part];
+        }, obj);
 
       // the 'this' context' is the path up to expression
       // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
@@ -220,26 +218,25 @@ export class LitRenderer {
       let dataValue = getDeepValue(data, expression);
       const helper = LitRenderer.helpers[expression];
       // check if we have a global helper with this name
-      if(!dataValue && isFunction(helper)) {
+      if (!dataValue && isFunction(helper)) {
         dataValue = helper;
       }
 
       let stringMatches;
-      if(isFunction(dataValue)) {
+      if (isFunction(dataValue)) {
         // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
-        const boundFunc = dataValue.bind( getContext() );
+        const boundFunc = dataValue.bind(getContext());
         result = boundFunc(...funcArguments);
       }
-      else if(dataValue !== undefined) {
+      else if (dataValue !== undefined) {
         result = (dataValue?.constructor.name === '_ReactiveVar')
           ? dataValue.value
-          : dataValue
-        ;
+          : dataValue;
       }
-      else if((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
+      else if ((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
         result = stringMatches[1];
       }
-      else if(!Number.isNaN(parseFloat(expression))) {
+      else if (!Number.isNaN(parseFloat(expression))) {
         // Numbers should be passed as their numerical values to functions
         result = Number(expression);
       }
@@ -253,7 +250,7 @@ export class LitRenderer {
 
   addHTML(html) {
     // we want to concat all html added consecutively
-    if(this.lastHTML) {
+    if (this.lastHTML) {
       const lastHTML = this.html.pop();
       html = `${lastHTML}${html}`;
     }
@@ -274,12 +271,11 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts
-  renderContent({ast, data, subTemplates}) {
+  renderContent({ ast, data, subTemplates }) {
     return new LitRenderer({ ast, data, subTemplates: this.subTemplates }).render();
   }
 
   clearTemp() {
     delete this.lastHTML; // used to concat concurrent html
   }
-
 }

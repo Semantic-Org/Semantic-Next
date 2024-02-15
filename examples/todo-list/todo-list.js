@@ -1,16 +1,15 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
 
-import { todoItem } from './item/todo-item.js';
-import { todoHeader } from './header/todo-header.js';
 import { todoFooter } from './footer/todo-footer.js';
+import { todoHeader } from './header/todo-header.js';
+import { todoItem } from './item/todo-item.js';
 
-import template from './todo-list.html';
 import css from './todo-list.css';
+import template from './todo-list.html';
 
 const createInstance = (tpl, $) => ({
-
   // global state
   todos: new ReactiveVar([]),
   filter: new ReactiveVar('all'),
@@ -19,15 +18,15 @@ const createInstance = (tpl, $) => ({
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
     each(todos, (todo) => {
-      if(!todo._id) {
+      if (!todo._id) {
         todo._id = todo.text;
       }
     });
-    return todos.filter(todo => {
-      if(filter == 'active') {
+    return todos.filter((todo) => {
+      if (filter == 'active') {
         return !todo.completed;
       }
-      else if(filter == 'complete') {
+      else if (filter == 'complete') {
         return todo.completed;
       }
       return true;
@@ -42,12 +41,11 @@ const createInstance = (tpl, $) => ({
     return window.location.hash.substring(2); // #/foo
   },
   setRouteFilter() {
-    tpl.filter.set( tpl.getRouteFilter());
+    tpl.filter.set(tpl.getRouteFilter());
   },
   removeRouter() {
     $(window).off(tpl.hashEvent);
   },
-
 });
 
 const onCreated = (tpl) => {
@@ -58,7 +56,6 @@ const onCreated = (tpl) => {
 const onDestroyed = (tpl) => {
   tpl.removeRouter();
 };
-
 
 const events = {
   // toggle all checkbox is in the main html although its functionality is in the header

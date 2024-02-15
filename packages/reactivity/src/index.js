@@ -1,9 +1,5 @@
-import { ReactiveVar } from './reactive-var';
-import { Reaction } from './reaction';
 import { Dependency } from './dependency';
+import { Reaction } from './reaction';
+import { ReactiveVar } from './reactive-var';
 
-export {
-  ReactiveVar,
-  Reaction,
-  Dependency,
-};
+export { Dependency, Reaction, ReactiveVar };

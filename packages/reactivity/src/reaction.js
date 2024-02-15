@@ -2,7 +2,6 @@ import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
-
   static current = null;
   static pendingReactions = new Set();
   static afterFlushCallbacks = [];
@@ -20,7 +19,8 @@ export class Reaction {
       if (typeof queueMicrotask === 'function') {
         // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
         queueMicrotask(() => Reaction.flush());
-      } else {
+      }
+      else {
         Promise.resolve().then(() => Reaction.flush());
       }
     }
@@ -28,10 +28,10 @@ export class Reaction {
 
   static flush() {
     Reaction.isFlushScheduled = false;
-    Reaction.pendingReactions.forEach(reaction => reaction.run());
+    Reaction.pendingReactions.forEach((reaction) => reaction.run());
     Reaction.pendingReactions.clear();
 
-    Reaction.afterFlushCallbacks.forEach(callback => callback());
+    Reaction.afterFlushCallbacks.forEach((callback) => callback());
     Reaction.afterFlushCallbacks = [];
   }
 
@@ -52,7 +52,7 @@ export class Reaction {
       return;
     }
     Reaction.current = this;
-    this.dependencies.forEach(dep => dep.cleanUp(this));
+    this.dependencies.forEach((dep) => dep.cleanUp(this));
     this.dependencies.clear();
     this.callback(this);
     this.firstRun = false;
@@ -62,7 +62,7 @@ export class Reaction {
 
   invalidate(context) {
     this.active = true;
-    if(context) {
+    if (context) {
       this.context = context;
     }
     Reaction.pendingReactions.add(this);
@@ -70,11 +70,10 @@ export class Reaction {
   }
 
   stop() {
-    if (!this.active) return;
+    if (!this.active) { return; }
     this.active = false;
-    this.dependencies.forEach(dep => dep.unsubscribe(this));
+    this.dependencies.forEach((dep) => dep.unsubscribe(this));
   }
-
 
   /*
     Makes sure anything called inside this function does not trigger reactions
@@ -84,7 +83,8 @@ export class Reaction {
     Reaction.current = null;
     try {
       return func();
-    } finally {
+    }
+    finally {
       Reaction.current = previousReaction;
     }
   }

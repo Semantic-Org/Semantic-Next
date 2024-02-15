@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import { BROWSER_TARGET, JS_LOADER_CONFIG, CSS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './lib/config.js';
+import { BROWSER_TARGET, CSS_LOADER_CONFIG, JS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './lib/config.js';
 import { logPlugin } from './lib/log.js';
 
 /*
@@ -9,7 +9,7 @@ let jsBuild = await esbuild.context({
   entryPoints: [
     './src/semantic-ui.js',
   ],
-  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS, },
+  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
   format: 'esm',
   bundle: true,
   minify: false,
@@ -17,7 +17,7 @@ let jsBuild = await esbuild.context({
   outbase: 'src',
   outdir: 'dev/ui',
   loader: JS_LOADER_CONFIG,
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
 });
 
 /*
@@ -28,7 +28,7 @@ let componentBuild = await esbuild.context({
     './src/**/index.js',
   ],
   entryNames: 'ui/components/[dir]', // button/button.js
-  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS, },
+  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
   format: 'esm',
   bundle: true,
   minify: false,
@@ -36,7 +36,7 @@ let componentBuild = await esbuild.context({
   outbase: 'src',
   outdir: 'dev/',
   loader: JS_LOADER_CONFIG,
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
 });
 
 /*
@@ -46,7 +46,7 @@ let exampleBuild = await esbuild.context({
   entryPoints: [
     './examples/**/index.js',
   ],
-  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS, },
+  tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
   entryNames: 'examples/[dir]', // examples/example-component.js
   format: 'esm',
   bundle: true,
@@ -55,7 +55,7 @@ let exampleBuild = await esbuild.context({
   outbase: 'examples',
   outdir: 'dev/',
   loader: JS_LOADER_CONFIG,
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
 });
 
 /*
@@ -64,17 +64,16 @@ let exampleBuild = await esbuild.context({
 */
 const cssConcat = await esbuild.context({
   entryPoints: [
-    'src/**/css/*.css'
+    'src/**/css/*.css',
   ],
   bundle: true,
   entryNames: '[dir]/../[name]',
   outbase: 'src',
   outdir: 'dev/ui',
-  plugins: [ logPlugin('CSS Concat') ],
+  plugins: [logPlugin('CSS Concat')],
   target: BROWSER_TARGET,
   loader: CSS_LOADER_CONFIG,
 });
-
 
 /*
   Exports global css
@@ -87,7 +86,7 @@ let cssBuild = await esbuild.context({
   minify: false,
   sourcemap: true,
   outdir: 'dev/ui/',
-  plugins: [ logPlugin('SUI CSS') ],
+  plugins: [logPlugin('SUI CSS')],
   loader: CSS_LOADER_CONFIG,
   target: BROWSER_TARGET,
 });
@@ -123,7 +122,7 @@ let themeBuild = await esbuild.context({
   minify: false,
   sourcemap: true,
   outdir: 'dev/ui/theme',
-  plugins: [ logPlugin('Theme CSS') ],
+  plugins: [logPlugin('Theme CSS')],
   target: BROWSER_TARGET,
   loader: CSS_LOADER_CONFIG,
 });

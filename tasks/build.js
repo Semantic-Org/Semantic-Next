@@ -4,11 +4,11 @@ import { logPlugin } from 'lib/log.js';
 
 const cssConcat = await esbuild.build({
   entryPoints: [
-    'src/**/css/*.css'
+    'src/**/css/*.css',
   ],
   target: BROWSER_TARGET,
   bundle: true,
-  plugins: [ logPlugin('CSS Concat') ],
+  plugins: [logPlugin('CSS Concat')],
   loader: {
     '.css': 'css',
   },
@@ -28,7 +28,7 @@ let jsBuild = await esbuild.build({
     compilerOptions: {
       experimentalDecorators: true,
       useDefineForClassFields: false,
-      verbatimModuleSyntax: true
+      verbatimModuleSyntax: true,
     },
   },
   format: 'esm',
@@ -45,11 +45,10 @@ let jsBuild = await esbuild.build({
     '.svg': 'file',
     '.gif': 'file',
   },
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
   outbase: 'src',
   outdir: 'dev/ui',
 });
-
 
 /*
   Exports global css
@@ -62,7 +61,7 @@ let cssBuild = await esbuild.build({
   minify: false,
   sourcemap: true,
   target: BROWSER_TARGET,
-  plugins: [ logPlugin('SUI CSS') ],
+  plugins: [logPlugin('SUI CSS')],
   loader: {
     '.css': 'css',
   },
@@ -80,7 +79,7 @@ let themeBuild = await esbuild.build({
   minify: false,
   sourcemap: true,
   target: BROWSER_TARGET,
-  plugins: [ logPlugin('Theme CSS') ],
+  plugins: [logPlugin('Theme CSS')],
   loader: {
     '.css': 'css',
   },

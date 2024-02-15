@@ -1,7 +1,7 @@
-import { directive } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { fatal, mapObject } from '@semantic-ui/utils';
+import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 
 // Define directive
 class RenderTemplate extends AsyncDirective {
@@ -11,28 +11,28 @@ class RenderTemplate extends AsyncDirective {
     this.template = null;
     this.part = null;
   }
-  render({getTemplateName, subTemplates, data, parentTemplate}) {
+  render({ getTemplateName, subTemplates, data, parentTemplate }) {
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
     const cloneTemplate = () => {
       const templateName = getTemplateName();
-      if(this.template && this.templateName == templateName) {
+      if (this.template && this.templateName == templateName) {
         return false;
       }
       this.templateName = templateName;
       const template = subTemplates[templateName];
-      if(!template) {
+      if (!template) {
         fatal(`Could not find template named "${getTemplateName()}`, subTemplates);
       }
       this.template = template.clone({ data: unpackData(data) });
       return true;
     };
     const attachTemplate = () => {
-      const { parentNode, startNode, endNode} = this.part; // stored from update
+      const { parentNode, startNode, endNode } = this.part; // stored from update
       const renderRoot = this.part.options.host?.renderRoot;
       this.template.attach(renderRoot, { parentNode, startNode, endNode });
-      if(parentTemplate) {
+      if (parentTemplate) {
         this.template.setParent(parentTemplate);
       }
     };
@@ -41,14 +41,14 @@ class RenderTemplate extends AsyncDirective {
       return html;
     };
     Reaction.create((comp) => {
-      if(!this.isConnected) {
+      if (!this.isConnected) {
         comp.stop();
         return;
       }
       const isCloned = cloneTemplate(); // reactive reference
-      if(!comp.firstRun) {
+      if (!comp.firstRun) {
         attachTemplate();
-        if(!isCloned) {
+        if (!isCloned) {
           this.template.setDataContext(unpackData(data));
         }
         this.setValue(renderTemplate());

@@ -1,16 +1,13 @@
-import { describe, beforeEach, expect, it, vi } from 'vitest';
 import { $ } from '@semantic-ui/query';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('query', () => {
-
   beforeEach(() => {
     document.body.innerHTML = '';
     $().removeAllEvents();
   });
 
-
   describe('selectors', () => {
-    
     it('query should query DOM when given a selector', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -41,11 +38,9 @@ describe('query', () => {
       expect($div[0]).toBe(div);
       expect($div[1]).toBe(div2);
     });
-
   });
 
   describe('find', () => {
-
     it('find should return all nested elements inside an element', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -68,26 +63,21 @@ describe('query', () => {
       expect($span[0]).toBe(span);
       expect($span[1]).toBe(span2);
     });
-
   });
-  
 
   describe('not', () => {
-      
-      it('not should filter out elements that match a selector', () => {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div2.classList.add('test');
-        document.body.appendChild(div);
-        document.body.appendChild(div2);
-        const $div = $('div').not('.test');
-        expect($div[0]).toBe(div);
-      });
-
+    it('not should filter out elements that match a selector', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      const $div = $('div').not('.test');
+      expect($div[0]).toBe(div);
+    });
   });
-  
-  describe('closest', () => {
 
+  describe('closest', () => {
     it('closest should return the closest parent matching a selector', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -106,35 +96,31 @@ describe('query', () => {
       const $span = $('span').closest('.test2');
       expect($span.length).toBe(0);
     });
-
   });
 
   describe('filter', () => {
-      
-      it('filter should return elements that match a selector', () => {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div2.classList.add('test');
-        document.body.appendChild(div);
-        document.body.appendChild(div2);
-        const $div = $('div').filter('.test');
-        expect($div[0]).toBe(div2);
-      });
+    it('filter should return elements that match a selector', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      const $div = $('div').filter('.test');
+      expect($div[0]).toBe(div2);
+    });
 
-      it('filter should return elements that match a function', () => {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div2.classList.add('test');
-        document.body.appendChild(div);
-        document.body.appendChild(div2);
-        const $div = $('div').filter((el) => el.classList.contains('test'));
-        expect($div[0]).toBe(div2);
-      });
-
+    it('filter should return elements that match a function', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      const $div = $('div').filter((el) => el.classList.contains('test'));
+      expect($div[0]).toBe(div2);
+    });
   });
 
   describe('children', () => {
-
     it('children should return all children of an element', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -169,7 +155,6 @@ describe('query', () => {
       expect($div[0]).toBe(span);
       expect($div[1]).toBe(span2);
     });
-
   });
 
   describe('parent', () => {
@@ -201,20 +186,18 @@ describe('query', () => {
       const $span = $('span').parent('.test2');
       expect($span.length).toBe(0);
     });
-
   });
 
   describe('on', () => {
-
     it('should attach an event handler to elements', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', callback);
-      
+
       div.click();
-      
+
       expect(callback).toHaveBeenCalled();
     });
 
@@ -224,12 +207,12 @@ describe('query', () => {
       document.body.appendChild(div);
       document.body.appendChild(div2);
       const callback = vi.fn();
-      
+
       $('div').on('click', callback);
-      
+
       div.click();
       div2.click();
-      
+
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
@@ -238,12 +221,12 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       const callback2 = vi.fn();
-      
+
       $('div').on('click', callback);
       $('div').on('click', callback2);
-      
+
       div.click();
-      
+
       expect(callback).toHaveBeenCalled();
       expect(callback2).toHaveBeenCalled();
     });
@@ -253,16 +236,16 @@ describe('query', () => {
       document.body.appendChild(div);
       const div2 = document.createElement('div');
       document.body.appendChild(div2);
-      
+
       const eventHandlers = $('div').on('click', () => {});
-      
+
       expect(eventHandlers.length).toBe(2);
     });
 
     it('should return a single event handler when only one attached', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      
+
       const eventHandler = $('div').on('click', () => {});
       expect(eventHandler).toBeInstanceOf(Object);
     });
@@ -271,7 +254,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', callback);
       div.click();
       eventHandler.abort();
@@ -285,10 +268,10 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', 'span', callback);
       span.click();
-      
+
       expect(callback).toHaveBeenCalled();
     });
 
@@ -297,7 +280,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       const abortController = new AbortController();
-      
+
       $('div').on('click', callback, { abortController });
       abortController.abort();
       div.click();
@@ -308,7 +291,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', 'span', callback);
       expect(eventHandler.delegated).toBe(true);
     });
@@ -317,7 +300,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', 'span', callback);
       expect(eventHandler.delegated).toBe(true);
     });
@@ -331,27 +314,26 @@ describe('query', () => {
       div.click();
       expect(callback).not.toHaveBeenCalled();
     });
-
   });
-  
+
   describe('off', () => {
     it('should remove a given event type', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', callback);
       $('div').off('click');
       div.click();
       expect(callback).not.toHaveBeenCalled();
     });
-    
+
     it('should remove a specific event handler', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
       const callback2 = vi.fn();
-      
+
       $('div').on('click', callback);
       $('div').on('click', callback2);
       $('div').off('click', callback);
@@ -364,13 +346,12 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', callback);
-      
+
       div.removeEventListener('click', callback);
       div.click();
       expect(callback).not.toHaveBeenCalled();
-      
     });
 
     it('should remove delegated events', () => {
@@ -379,7 +360,7 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', 'span', callback);
       $('div').off('click', callback);
       span.click();
@@ -392,24 +373,22 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const event = $('div').on('click', 'span', callback);
       $('div').off('click', event);
       span.click();
       expect(callback).not.toHaveBeenCalled();
     });
-
   });
 
   describe('remove', () => {
-
     it('remove should remove an element', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       $('div').remove();
       expect(document.body.innerHTML).toBe('');
     });
-    
+
     it('remove should remove multiple elements that match selector', () => {
       const div = document.createElement('div');
       const div2 = document.createElement('div');
@@ -418,12 +397,9 @@ describe('query', () => {
       $('div').remove();
       expect(document.body.innerHTML).toBe('');
     });
-
-
   });
 
   describe('add class', () => {
-
     it('add class should add a class', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -447,7 +423,6 @@ describe('query', () => {
       const $div = $('div').addClass('test');
       expect($div.hasClass('test')).toBe(true);
     });
-
   });
 
   describe('has class', () => {
@@ -483,11 +458,9 @@ describe('query', () => {
       expect($div.hasClass('test')).toBe(false);
       expect($div.hasClass('test2')).toBe(false);
     });
-
   });
 
   describe('html', () => {
-
     it('html should return the innerHTML of an element', () => {
       const div = document.createElement('div');
       div.innerHTML = 'test';
@@ -502,9 +475,8 @@ describe('query', () => {
       expect(div.innerHTML).toBe('test');
     });
   });
-  
+
   describe('outerHTML', () => {
-    
     it('outerHTML should return the outerHTML of an element', () => {
       const div = document.createElement('div');
       div.innerHTML = 'test';
@@ -520,9 +492,8 @@ describe('query', () => {
       $('div div').outerHTML('<div>test</div>');
       expect(div.outerHTML).toBe('<div><div>test</div></div>');
     });
-
   });
-  
+
   describe('text', () => {
     it('text should return the textContent of an element', () => {
       const div = document.createElement('div');
@@ -536,7 +507,7 @@ describe('query', () => {
       const span = document.createElement('span');
       const span2 = document.createElement('span');
       const span3 = document.createElement('span');
-      div.textContent = 'test 1'
+      div.textContent = 'test 1';
       span.textContent = 'test 2';
       span2.textContent = 'test 3';
       span3.textContent = 'test 4';
@@ -555,7 +526,7 @@ describe('query', () => {
       const span3 = document.createElement('span');
       div.textContent = `
       test 1
-      test 2`
+      test 2`;
       span.textContent = `
       test 3
       test 4`;
@@ -587,7 +558,6 @@ describe('query', () => {
     });
   });
   describe('value', () => {
-
     it('value should return the value of an input', () => {
       const input = document.createElement('input');
       input.value = 'test';
@@ -654,7 +624,6 @@ describe('query', () => {
       document.body.appendChild(input);
       expect($('input').val()).toBe('test');
     });
-
   });
 
   describe('css', () => {
@@ -687,7 +656,7 @@ describe('query', () => {
       div2.style.color = 'blue';
       document.body.appendChild(div);
       document.body.appendChild(div2);
-      expect($('div').css('color')).toStrictEqual(['red','blue']);
+      expect($('div').css('color')).toStrictEqual(['red', 'blue']);
     });
   });
 
@@ -721,12 +690,11 @@ describe('query', () => {
       div2.setAttribute('test', 'test2');
       document.body.appendChild(div);
       document.body.appendChild(div2);
-      expect($('div').attr('test')).toStrictEqual(['test','test2']);
+      expect($('div').attr('test')).toStrictEqual(['test', 'test2']);
     });
   });
 
   describe('removeAttr', () => {
-    
     it('removeAttr should remove an attribute', () => {
       const div = document.createElement('div');
       div.setAttribute('test', 'test');
@@ -746,7 +714,6 @@ describe('query', () => {
       expect(div.getAttribute('test')).toBe(null);
       expect(div2.getAttribute('test')).toBe(null);
     });
-
   });
 
   describe('each', () => {
@@ -756,7 +723,7 @@ describe('query', () => {
       document.body.appendChild(div);
       document.body.appendChild(div2);
       const callback = vi.fn((index) => {
-        if(index == 0) {
+        if (index == 0) {
           expect(this).toBe(div);
         }
         expect(index).toBeDefined();
@@ -783,7 +750,6 @@ describe('query', () => {
       document.body.appendChild(div2);
       expect($('div').get()).toStrictEqual([div, div2]);
     });
-
   });
 
   describe('eq', () => {
@@ -795,7 +761,6 @@ describe('query', () => {
       expect($('div').eq(0)[0]).toBe(div);
       expect($('div').eq(1)[0]).toBe(div2);
     });
-
   });
 
   describe('textNode', () => {
@@ -809,7 +774,6 @@ describe('query', () => {
       document.body.appendChild(div);
       expect($('div').textNode()).toStrictEqual('test');
     });
-
   });
 
   describe('focus', () => {
@@ -819,9 +783,8 @@ describe('query', () => {
       $('input').focus();
       expect(document.activeElement).toBe(input);
     });
-
   });
-  
+
   describe('blur', () => {
     it('blur should blur an element', () => {
       const input = document.createElement('input');
@@ -830,7 +793,5 @@ describe('query', () => {
       $('input').blur();
       expect(document.activeElement).not.toBe(input);
     });
-
   });
-
 });

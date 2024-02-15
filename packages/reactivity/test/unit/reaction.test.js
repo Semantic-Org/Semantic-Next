@@ -1,8 +1,7 @@
-import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Reaction', () => {
-
   beforeEach(() => {
     // Reset Reaction state before each test if needed
     Reaction.current = null;
@@ -48,7 +47,6 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledWith('Goodbye detected');
       expect(callback).toHaveBeenCalledTimes(2);
     });
-
   });
 
   describe('Equality', () => {
@@ -89,11 +87,9 @@ describe('Reaction', () => {
       // Log runs twice including the initial run due to custom equality function
       expect(callback).toHaveBeenCalledTimes(2);
     });
-
   });
 
   describe('Controlling Reactivity', () => {
-
     it('guard should control reactivity', () => {
       const userAge = new ReactiveVar(30);
       const userName = new ReactiveVar('John Doe');
@@ -186,7 +182,7 @@ describe('Reaction', () => {
         callback(number.get());
       });
 
-      [2, 3, 4, 5].forEach(value => {
+      [2, 3, 4, 5].forEach((value) => {
         number.set(value);
         Reaction.flush(); // Flush after each update
       });
@@ -196,12 +192,11 @@ describe('Reaction', () => {
   });
 
   describe('Flushing', () => {
-
     it('afterFlush should call registered callbacks after flushing', async () => {
       const mockCallback = vi.fn();
       Reaction.afterFlush(mockCallback);
       Reaction.scheduleFlush();
-      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
+      await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for flush
       expect(mockCallback).toHaveBeenCalled();
     });
 
@@ -211,11 +206,10 @@ describe('Reaction', () => {
       Reaction.afterFlush(mockCallback);
       Reaction.afterFlush(mockCallback2);
       Reaction.scheduleFlush();
-      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
+      await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for flush
       expect(mockCallback).toHaveBeenCalled();
       expect(mockCallback2).toHaveBeenCalled();
     });
-
   });
 
   describe('Helper Functions', () => {
@@ -241,13 +235,12 @@ describe('Reaction', () => {
   });
 
   describe('Debugging', () => {
-
     it('Reaction should track current context for debugging', () => {
       const callback = vi.fn();
       let reactiveVar = new ReactiveVar(1);
       Reaction.create((comp) => {
         reactiveVar.get();
-        if(comp.firstRun) {
+        if (comp.firstRun) {
           return;
         }
         callback(Reaction.current.context.value);
@@ -262,7 +255,7 @@ describe('Reaction', () => {
       let reactiveVar = new ReactiveVar(1);
       Reaction.create((comp) => {
         reactiveVar.get();
-        if(comp.firstRun) {
+        if (comp.firstRun) {
           let trace;
           try {
             const consoleLog = console.log;
@@ -270,7 +263,7 @@ describe('Reaction', () => {
             trace = Reaction.getSource();
             console.log = consoleLog;
           }
-          catch(e) {
+          catch (e) {
             // avoid throwing error
           }
           callback(trace);
@@ -281,13 +274,12 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledWith(undefined);
     });
 
-
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
       let reactiveVar = new ReactiveVar(1);
       Reaction.create((comp) => {
         reactiveVar.get();
-        if(comp.firstRun) {
+        if (comp.firstRun) {
           return;
         }
         let trace;
@@ -297,7 +289,7 @@ describe('Reaction', () => {
           trace = Reaction.getSource();
           console.info = consoleInfo;
         }
-        catch(e) {
+        catch (e) {
           // avoid throwing error
         }
         callback(trace);
@@ -306,7 +298,5 @@ describe('Reaction', () => {
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(expect.any(String));
     });
-
   });
-
 });
