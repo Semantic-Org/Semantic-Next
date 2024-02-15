@@ -2,7 +2,6 @@
      Primary
 ---------------*/
 
-
 /*--- Standard ---*/
 .primary.buttons .button,
 .primary.button {
@@ -14,7 +13,6 @@
 .primary.button {
   box-shadow: var(--primary-box-shadow);
 }
-
 
 /* States */
 .primary.buttons .button:hover,
@@ -46,7 +44,6 @@
   color: var(--primary-text-color);
   text-shadow: var(--primary-text-shadow);
 }
-
 
 /*-------------------
       Secondary

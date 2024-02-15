@@ -1,7 +1,7 @@
 ui-button {
   --focus-background-color: var(--hover-background-color);
-  --focus-background-image: '';
-  --focus-box-shadow: '';
+  --focus-background-image: "";
+  --focus-box-shadow: "";
   --focus-color: var(--hovered-text-color);
   --icon-focus-opacity: 0.85;
 }

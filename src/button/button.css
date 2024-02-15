@@ -115,7 +115,8 @@
   }
   .vertical.animated.button .visible.content,
   .vertical.animated.button .hidden.content {
-    transition: top var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);
+    transition: top var(--animation-duration) var(--animation-easing),
+      transform var(--animation-duration) var(--animation-easing);
   }
   .vertical.animated.button .visible.content {
     transform: translateY(0%);
@@ -138,7 +139,8 @@
   }
   .fade.animated.button .visible.content,
   .fade.animated.button .hidden.content {
-    transition: opacity var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);
+    transition: opacity var(--animation-duration) var(--animation-easing),
+      transform var(--animation-duration) var(--animation-easing);
   }
   .fade.animated.button .visible.content {
     left: auto;
@@ -2454,15 +2456,18 @@
 @layer component {
   .compact.buttons .button,
   .compact.button {
-    padding: var(--compact-vertical-padding) var(--compact-horizontal-padding) (var(--compact-vertical-padding) + var(--shadow-offset));
+    padding: var(--compact-vertical-padding) var(--compact-horizontal-padding)
+      (var(--compact-vertical-padding) + var(--shadow-offset));
   }
   .compact.icon.buttons .button,
   .compact.icon.button {
-    padding: var(--compact-vertical-padding) var(--compact-vertical-padding) (var(--compact-vertical-padding) + var(--shadow-offset));
+    padding: var(--compact-vertical-padding) var(--compact-vertical-padding)
+      (var(--compact-vertical-padding) + var(--shadow-offset));
   }
   .compact.labeled.icon.buttons .button,
   .compact.labeled.icon.button {
-    padding: var(--compact-vertical-padding) (var(--compact-horizontal-padding) + var(--labeled-icon-width)) (var(--compact-vertical-padding) + var(--shadow-offset));
+    padding: var(--compact-vertical-padding) (var(--compact-horizontal-padding) + var(--labeled-icon-width))
+      (var(--compact-vertical-padding) + var(--shadow-offset));
   }
 }
 
@@ -2531,7 +2536,7 @@
     width: 100%;
   }
   .eight.buttons > .button {
-    width: 12.500%;
+    width: 12.5%;
   }
   .nine.buttons {
     width: 100%;
@@ -2581,7 +2586,7 @@
     height: 14.285%;
   }
   .eight.vertical.buttons > .button {
-    height: 12.500%;
+    height: 12.5%;
   }
   .nine.vertical.buttons > .button {
     height: 11.11%;

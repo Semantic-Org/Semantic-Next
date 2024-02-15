@@ -97,7 +97,6 @@
   box-shadow: var(--basic-inverted-hover-box-shadow) !important;
 }
 
-
 /* Basic Group */
 .basic.buttons .button {
   border-left: var(--basic-group-border);

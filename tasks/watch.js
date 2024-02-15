@@ -5,12 +5,10 @@ import { browserTarget } from './lib/config.js';
   a single css file for JS css imports
 */
 const cssConcat = await esbuild.context({
-  entryPoints: [
-    'src/**/css/*.css'
-  ],
+  entryPoints: ['src/**/css/*.css'],
   target: BROWSER_TARGET,
   bundle: true,
-  plugins: [ logPlugin('CSS Concat') ],
+  plugins: [logPlugin('CSS Concat')],
   loader: {
     '.css': 'css',
   },
@@ -23,14 +21,12 @@ const cssConcat = await esbuild.context({
   Exports all components as one js file
 */
 let jsBuild = await esbuild.context({
-  entryPoints: [
-    './src/semantic-ui.js',
-  ],
+  entryPoints: ['./src/semantic-ui.js'],
   tsconfigRaw: {
     compilerOptions: {
       experimentalDecorators: true,
       useDefineForClassFields: false,
-      verbatimModuleSyntax: true
+      verbatimModuleSyntax: true,
     },
   },
   format: 'esm',
@@ -47,24 +43,21 @@ let jsBuild = await esbuild.context({
     '.svg': 'file',
     '.gif': 'file',
   },
-  plugins: [ logPlugin('JS') ],
+  plugins: [logPlugin('JS')],
   outbase: 'src',
   outdir: 'dev/ui',
 });
-
 
 /*
   Exports global css
 */
 let cssBuild = await esbuild.context({
-  entryPoints: [
-    './src/semantic-ui.css',
-  ],
+  entryPoints: ['./src/semantic-ui.css'],
   bundle: true,
   minify: false,
   sourcemap: true,
   target: BROWSER_TARGET,
-  plugins: [ logPlugin('SUI CSS') ],
+  plugins: [logPlugin('SUI CSS')],
   loader: {
     '.css': 'css',
   },
@@ -75,14 +68,12 @@ let cssBuild = await esbuild.context({
   Exports themes as separate css
 */
 let themeBuild = await esbuild.context({
-  entryPoints: [
-    './src/themes/base/base.css',
-  ],
+  entryPoints: ['./src/themes/base/base.css'],
   bundle: true,
   minify: false,
   sourcemap: true,
   target: BROWSER_TARGET,
-  plugins: [ logPlugin('Theme CSS') ],
+  plugins: [logPlugin('Theme CSS')],
   loader: {
     '.css': 'css',
   },
