@@ -37,7 +37,8 @@ class Scanner {
   }
 
   consume(pattern) {
-    const regex = typeof pattern === 'string' ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const regex =
+      typeof pattern === 'string' ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
 
     // Match from the current position
     const substring = this.input.substring(this.pos);
@@ -51,7 +52,8 @@ class Scanner {
   }
 
   consumeUntil(pattern) {
-    const regex = typeof pattern === 'string' ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
+    const regex =
+      typeof pattern === 'string' ? new RegExp(escapeRegExp(pattern)) : new RegExp(pattern);
     const match = regex.exec(this.input.substring(this.pos));
     if (!match) {
       const consumedText = this.input.substr(this.pos);

@@ -1,8 +1,8 @@
 {
   "semi": true,
-  "printWidth": 120,
+  "printWidth": 100,
   "singleQuote": true,
-  "offsetTernaryExpressions": false,
+  "offsetTernaryExpressions": true,
   "spaceBeforeFunctionParen": false,
   "importFormatting": "oneline",
   "trailingComma": "es5",

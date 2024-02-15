@@ -237,7 +237,8 @@ export const ButtonSpec = {
     {
       name: 'Basic',
       value: 'styling',
-      description: 'A button can be formatted to appear de-emphasized over other elements in the page.',
+      description:
+        'A button can be formatted to appear de-emphasized over other elements in the page.',
       adoptionLevel: 3,
       options: [
         {
@@ -344,7 +345,8 @@ export const ButtonSpec = {
       name: 'Compact',
       value: 'compact',
       adoptionLevel: 3,
-      description: 'A button can reduce its padding to fit into tighter spaces without adjusting its font size',
+      description:
+        'A button can reduce its padding to fit into tighter spaces without adjusting its font size',
       options: [
         {
           name: 'Compact',

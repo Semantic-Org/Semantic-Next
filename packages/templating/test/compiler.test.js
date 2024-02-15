@@ -272,7 +272,9 @@ describe('TemplateCompiler', () => {
                   branches: [
                     {
                       type: 'else',
-                      content: [{ type: 'html', html: '\n              <p>False</p>\n            ' }],
+                      content: [
+                        { type: 'html', html: '\n              <p>False</p>\n            ' },
+                      ],
                     },
                   ],
                 },
@@ -409,11 +411,15 @@ describe('TemplateCompiler', () => {
                 {
                   type: 'if',
                   condition: 'height',
-                  content: [{ type: 'html', html: '\n                <p>True</p>\n              ' }],
+                  content: [
+                    { type: 'html', html: '\n                <p>True</p>\n              ' },
+                  ],
                   branches: [
                     {
                       type: 'else',
-                      content: [{ type: 'html', html: '\n                <p>False</p>\n              ' }],
+                      content: [
+                        { type: 'html', html: '\n                <p>False</p>\n              ' },
+                      ],
                     },
                   ],
                 },

@@ -57,7 +57,9 @@ export class Query {
     const allChildren = Array.from(this).flatMap((el) => Array.from(el.children));
 
     // If a selector is provided, filter the children
-    const filteredChildren = selector ? allChildren.filter((child) => child.matches(selector)) : allChildren;
+    const filteredChildren = selector
+      ? allChildren.filter((child) => child.matches(selector))
+      : allChildren;
 
     return new Query(filteredChildren);
   }
@@ -236,7 +238,11 @@ export class Query {
     if (newValue !== undefined) {
       // Set the value for each element
       Array.from(this).forEach((el) => {
-        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+        if (
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLSelectElement ||
+          el instanceof HTMLTextAreaElement
+        ) {
           el.value = newValue;
         }
       });
@@ -245,7 +251,11 @@ export class Query {
     else {
       // Get the value of each element
       const values = Array.from(this).map((el) => {
-        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+        if (
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLSelectElement ||
+          el instanceof HTMLTextAreaElement
+        ) {
           return el.value;
         }
         return undefined;

@@ -159,7 +159,10 @@ export class LitRenderer {
   ) {
     if (typeof expression === 'string') {
       if (asDirective) {
-        return reactiveData(() => this.lookupExpressionValue(expression, data), { ifDefined, unsafeHTML });
+        return reactiveData(() => this.lookupExpressionValue(expression, data), {
+          ifDefined,
+          unsafeHTML,
+        });
       }
       else {
         return this.lookupExpressionValue(expression, data);
@@ -217,7 +220,10 @@ export class LitRenderer {
       else if (dataValue !== undefined) {
         result = dataValue?.constructor.name === '_ReactiveVar' ? dataValue.value : dataValue;
       }
-      else if ((stringMatches = stringRegExp.exec(expression)) !== null && stringMatches.length > 1) {
+      else if (
+        (stringMatches = stringRegExp.exec(expression)) !== null &&
+        stringMatches.length > 1
+      ) {
         result = stringMatches[1];
       }
       else if (!Number.isNaN(parseFloat(expression))) {

@@ -8,10 +8,18 @@ export const logPlugin = (text = '') => {
       build.onEnd((result) => {
         let time = new Date();
         if (count++ === 0) {
-          console.log(chalk.red('Initial Build'), chalk.blue(`(${text})`), chalk.grey(time.toLocaleTimeString()));
+          console.log(
+            chalk.red('Initial Build'),
+            chalk.blue(`(${text})`),
+            chalk.grey(time.toLocaleTimeString())
+          );
         }
         else {
-          console.log(chalk.cyan('Rebuild'), chalk.blue(`(${text})`), chalk.grey(time.toLocaleTimeString()));
+          console.log(
+            chalk.cyan('Rebuild'),
+            chalk.blue(`(${text})`),
+            chalk.grey(time.toLocaleTimeString())
+          );
         }
       });
     },

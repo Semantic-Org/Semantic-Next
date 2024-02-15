@@ -165,18 +165,27 @@ class ReactiveEachDirective extends AsyncDirective {
         newHead++;
       }
       else if (oldKeys[oldTail] === newKeys[newTail]) {
-        newParts[newTail] = setChildPartValue(oldParts[oldTail], newValues[newTail](newTail).content);
+        newParts[newTail] = setChildPartValue(
+          oldParts[oldTail],
+          newValues[newTail](newTail).content
+        );
         oldTail--;
         newTail--;
       }
       else if (oldKeys[oldHead] === newKeys[newTail]) {
-        newParts[newTail] = setChildPartValue(oldParts[oldHead], newValues[newTail](newTail).content);
+        newParts[newTail] = setChildPartValue(
+          oldParts[oldHead],
+          newValues[newTail](newTail).content
+        );
         insertPart(containerPart, newParts[newTail + 1], oldParts[oldHead]);
         oldHead++;
         newTail--;
       }
       else if (oldKeys[oldTail] === newKeys[newHead]) {
-        newParts[newHead] = setChildPartValue(oldParts[oldTail], newValues[newHead](newHead).content);
+        newParts[newHead] = setChildPartValue(
+          oldParts[oldTail],
+          newValues[newHead](newHead).content
+        );
         insertPart(containerPart, oldParts[oldHead], oldParts[oldTail]);
         oldTail--;
         newHead++;

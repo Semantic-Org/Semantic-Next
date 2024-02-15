@@ -311,14 +311,22 @@ describe('isEqual', () => {
 
     // Complex scenarios
     it('should return true for complex nested structures', () => {
-      const complex1 = { a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }] };
-      const complex2 = { a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }] };
+      const complex1 = {
+        a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }],
+      };
+      const complex2 = {
+        a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }],
+      };
       expect(isEqual(complex1, complex2)).toBe(true);
     });
 
     it('should return false for complex nested structures with differences', () => {
-      const complex1 = { a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }] };
-      const complex2 = { a: [1, { b: 'test', c: [new Date(2020, 0, 2), { d: new Uint8Array([1, 2, 3]) }] }] };
+      const complex1 = {
+        a: [1, { b: 'test', c: [new Date(2020, 0, 1), { d: new Uint8Array([1, 2, 3]) }] }],
+      };
+      const complex2 = {
+        a: [1, { b: 'test', c: [new Date(2020, 0, 2), { d: new Uint8Array([1, 2, 3]) }] }],
+      };
       expect(isEqual(complex1, complex2)).toBe(false);
     });
     it('should ignore non-enumerable properties by default', () => {

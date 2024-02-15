@@ -7,7 +7,10 @@
        Errors
 --------------------*/
 
-export const fatal = (message, { errorType = Error, metadata = {}, onError = null, removeStackLines = 1 } = {}) => {
+export const fatal = (
+  message,
+  { errorType = Error, metadata = {}, onError = null, removeStackLines = 1 } = {}
+) => {
   const error = new errorType(message);
   Object.assign(error, metadata);
 
@@ -100,7 +103,9 @@ export const formatDate = function (date, format) {
     M: date.getMonth() + 1,
     DD: pad(date.getDate()),
     D: date.getDate(),
-    Do: date.getDate() + ['th', 'st', 'nd', 'rd'][((((date.getDate() + 90) % 100) - 10) % 10) - 1] || 'th',
+    Do:
+      date.getDate() + ['th', 'st', 'nd', 'rd'][((((date.getDate() + 90) % 100) - 10) % 10) - 1] ||
+      'th',
     dddd: date.toLocaleString('default', { weekday: 'long' }),
     ddd: date.toLocaleString('default', { weekday: 'short' }),
     HH: pad(date.getHours()),
@@ -270,7 +275,9 @@ export const findIndex = (array, callback) => {
 };
 
 export const remove = (array, callbackOrValue) => {
-  const callback = isFunction(callbackOrValue) ? callbackOrValue : (val) => isEqual(val, callbackOrValue);
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue);
   const index = findIndex(array, callback);
   if (index > -1) {
     array.splice(index, 1);
