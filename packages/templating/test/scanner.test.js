@@ -81,5 +81,12 @@ describe('Scanner', () => {
       expect(context.attribute).toBe('checked');
       expect(context.booleanAttribute).toBe(true);
     });
+
+    it('getContext should return inside tag false when outside tag', () => {
+      const scanner = new Scanner('<hello bird="robin"></hello>Other Text');
+      scanner.consume('Other');
+      const context = scanner.getContext();
+      expect(context.insideTag).toBe(false);
+    });
   });
 });
