@@ -6,8 +6,9 @@
     "bracePosition": "sameLine",
     "nextControlFlowPosition": "nextLine",
     "trailingCommas": "onlyMultiLine",
-    "arrowFunction.useParentheses": "force",
-    "spaceSurroundingProperties": true
+    "preferHanging": true,
+    "module.sortImportDeclarations": "maintain",
+    "ifStatement.spaceAfterIfKeyword": false,
   },
   "json": {},
   "markdown": {},

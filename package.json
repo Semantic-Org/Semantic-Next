@@ -66,6 +66,6 @@
     "lit": "^3.1.2"
   },
   "lint-staged": {
-    "**/*": "prettierx --write --ignore-unknown"
+    "**/*.js": "npx dprint fmt"
   }
 }
