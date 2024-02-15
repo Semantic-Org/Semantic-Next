@@ -1,5 +1,10 @@
 import * as esbuild from 'esbuild';
-import { BROWSER_TARGET, JS_LOADER_CONFIG, CSS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './lib/config.js';
+import {
+  BROWSER_TARGET,
+  JS_LOADER_CONFIG,
+  CSS_LOADER_CONFIG,
+  TS_COMPILER_OPTIONS,
+} from './lib/config.js';
 import { logPlugin } from './lib/log.js';
 
 /*

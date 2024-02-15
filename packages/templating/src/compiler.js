@@ -182,8 +182,7 @@ class TemplateCompiler {
             if (contentParts.length > 1) {
               iterateAs = contentParts[0].trim();
               iterateOver = contentParts[1].trim();
-            }
-            else {
+            } else {
               iterateOver = contentParts[0].trim();
             }
             newNode = {
@@ -204,8 +203,7 @@ class TemplateCompiler {
             contentBranch = last(contentStack); // Reset current branch
             break;
         }
-      }
-      else {
+      } else {
         const OPEN_TAG = /\{\{/;
         const html = scanner.consumeUntil(OPEN_TAG);
         if (html) {
@@ -221,11 +219,9 @@ class TemplateCompiler {
   getValue(expression) {
     if (expression == 'true') {
       return true;
-    }
-    else if (expression == 'false') {
+    } else if (expression == 'false') {
       return false;
-    }
-    else if (!Number.isNaN(parseFloat(expression, 10))) {
+    } else if (!Number.isNaN(parseFloat(expression, 10))) {
       return +expression;
     }
     return expression;
@@ -243,16 +239,14 @@ class TemplateCompiler {
         const value = this.getObjectFromString(match[2]);
         templateInfo[property] = value;
       });
-    }
-    else {
+    } else {
       // standard notation {{> templateName data1=value data2=value}}
       let data = {};
       const matches = [...expression.matchAll(regExp.standard)];
       each(matches, (match, index) => {
         if (index == 0) {
           templateInfo.name = `'${match[0].trim()}'`;
-        }
-        else {
+        } else {
           const parts = match[0].split('=');
           if (parts.length) {
             let name = parts[0].trim();

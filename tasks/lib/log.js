@@ -13,8 +13,7 @@ export const logPlugin = (text = '') => {
             chalk.blue(`(${text})`),
             chalk.grey(time.toLocaleTimeString())
           );
-        }
-        else {
+        } else {
           console.log(
             chalk.cyan('Rebuild'),
             chalk.blue(`(${text})`),

@@ -23,8 +23,7 @@ class WebComponentBase extends LitElement {
       this.applyScopedStyles(this.tagName, this.css);
       this.storeOriginalContent.apply(this);
       return this;
-    }
-    else {
+    } else {
       const renderRoot = super.createRenderRoot(this.css);
       return renderRoot;
     }
@@ -57,8 +56,7 @@ class WebComponentBase extends LitElement {
         if ($slotContent.length) {
           html = $slotContent.outerHTML();
         }
-      }
-      else {
+      } else {
         // default slot takes all DOM content that is not slotted
         const $originalDOM = this.$$(this.originalDOM.content);
         const $defaultContent = $originalDOM.children().not('[slot]');

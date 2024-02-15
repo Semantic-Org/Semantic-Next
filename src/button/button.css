@@ -115,7 +115,8 @@
   }
   .vertical.animated.button .visible.content,
   .vertical.animated.button .hidden.content {
-    transition: top var(--animation-duration) var(--animation-easing),
+    transition:
+      top var(--animation-duration) var(--animation-easing),
       transform var(--animation-duration) var(--animation-easing);
   }
   .vertical.animated.button .visible.content {
@@ -139,7 +140,8 @@
   }
   .fade.animated.button .visible.content,
   .fade.animated.button .hidden.content {
-    transition: opacity var(--animation-duration) var(--animation-easing),
+    transition:
+      opacity var(--animation-duration) var(--animation-easing),
       transform var(--animation-duration) var(--animation-easing);
   }
   .fade.animated.button .visible.content {

@@ -1,4 +1,10 @@
-import { isString, isArray, isDOM, isFunction, isObject } from '@semantic-ui/utils';
+import {
+  isString,
+  isArray,
+  isDOM,
+  isFunction,
+  isObject,
+} from '@semantic-ui/utils';
 
 /*
   A minimal toolkit for querying and performing modifications
@@ -18,16 +24,13 @@ export class Query {
     if (isArray(selector)) {
       // Directly passed an array of elements
       elements = selector;
-    }
-    else if (isString(selector)) {
+    } else if (isString(selector)) {
       // String selector provided, find elements using querySelectorAll
       elements = root.querySelectorAll(selector);
-    }
-    else if (isDOM(selector)) {
+    } else if (isDOM(selector)) {
       // A single Element, Document, or DocumentFragment is provided
       elements = [selector];
-    }
-    else if (selector instanceof NodeList) {
+    } else if (selector instanceof NodeList) {
       // A NodeList is provided
       elements = selector;
     }
@@ -75,8 +78,7 @@ export class Query {
       filteredElements = Array.from(this).filter((el) =>
         el.matches(selectorOrFunction)
       );
-    }
-    else if (typeof selectorOrFunction === 'function') {
+    } else if (typeof selectorOrFunction === 'function') {
       // If a function is provided, use it directly to filter elements
       filteredElements = Array.from(this).filter(selectorOrFunction);
     }
@@ -106,12 +108,10 @@ export class Query {
     if (isObject(handlerOrOptions)) {
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
-    }
-    else if (isString(targetSelectorOrHandler)) {
+    } else if (isString(targetSelectorOrHandler)) {
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
-    }
-    else if (isFunction(targetSelectorOrHandler)) {
+    } else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
 
@@ -196,8 +196,7 @@ export class Query {
     if (newHTML !== undefined) {
       Array.from(this).forEach((el) => (el.innerHTML = newHTML));
       return this;
-    }
-    else if (this.length) {
+    } else if (this.length) {
       return this[0].innerHTML;
     }
   }
@@ -206,8 +205,7 @@ export class Query {
     if (newHTML !== undefined) {
       Array.from(this).forEach((el) => (el.outerHTML = newHTML));
       return this;
-    }
-    else if (this.length) {
+    } else if (this.length) {
       return this[0].outerHTML;
     }
   }
@@ -216,8 +214,7 @@ export class Query {
     if (newText !== undefined) {
       Array.from(this).forEach((el) => (el.textContent = newText));
       return this;
-    }
-    else {
+    } else {
       const childNodes = (el) => {
         return el.nodeName === 'SLOT'
           ? el.assignedNodes({ flatten: true })
@@ -236,13 +233,11 @@ export class Query {
       .map((node) => {
         if (node.nodeType === Node.TEXT_NODE) {
           return node.nodeValue;
-        }
-        else if (node.nodeName === 'SLOT') {
+        } else if (node.nodeName === 'SLOT') {
           // If the node is a slot, retrieve its assigned nodes
           const slotNodes = node.assignedNodes({ flatten: true });
           return this.getTextContentRecursive(slotNodes);
-        }
-        else {
+        } else {
           return this.getTextContentRecursive(node.childNodes);
         }
       })
@@ -263,8 +258,7 @@ export class Query {
         }
       });
       return this;
-    }
-    else {
+    } else {
       // Get the value of each element
       const values = Array.from(this).map((el) => {
         if (
@@ -289,11 +283,9 @@ export class Query {
       Object.entries(property).forEach(([prop, val]) => {
         Array.from(this).forEach((el) => (el.style[prop] = val));
       });
-    }
-    else if (value !== undefined) {
+    } else if (value !== undefined) {
       Array.from(this).forEach((el) => (el.style[property] = value));
-    }
-    else if (this.length) {
+    } else if (this.length) {
       const properties = Array.from(this).map((el) => el.style[property]);
       return properties.length > 1 ? properties : properties[0];
     }
@@ -306,12 +298,10 @@ export class Query {
       Object.entries(attribute).forEach(([attr, val]) => {
         Array.from(this).forEach((el) => el.setAttribute(attr, val));
       });
-    }
-    else if (value !== undefined) {
+    } else if (value !== undefined) {
       // Handle single attribute-value pair
       Array.from(this).forEach((el) => el.setAttribute(attribute, value));
-    }
-    else if (this.length) {
+    } else if (this.length) {
       const attributes = Array.from(this).map((el) =>
         el.getAttribute(attribute)
       );
@@ -336,8 +326,7 @@ export class Query {
   get(index) {
     if (index !== undefined) {
       return this[index];
-    }
-    else {
+    } else {
       return Array.from(this);
     }
   }

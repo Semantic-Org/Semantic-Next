@@ -25,8 +25,7 @@ const createInstance = (tpl, $) => ({
     return todos.filter((todo) => {
       if (filter == 'active') {
         return !todo.completed;
-      }
-      else if (filter == 'complete') {
+      } else if (filter == 'complete') {
         return todo.completed;
       }
       return true;

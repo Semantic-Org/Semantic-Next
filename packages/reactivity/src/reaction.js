@@ -19,8 +19,7 @@ export class Reaction {
       if (typeof queueMicrotask === 'function') {
         // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
         queueMicrotask(() => Reaction.flush());
-      }
-      else {
+      } else {
         Promise.resolve().then(() => Reaction.flush());
       }
     }

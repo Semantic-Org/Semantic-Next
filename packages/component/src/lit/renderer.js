@@ -1,7 +1,13 @@
 import { html } from 'lit';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import {
+  each,
+  mapObject,
+  wrapFunction,
+  fatal,
+  isFunction,
+} from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -73,8 +79,7 @@ export class LitRenderer {
         case 'slot':
           if (node.name) {
             this.addHTML(`<slot name="${node.name}"></slot>`);
-          }
-          else {
+          } else {
             this.addHTML(`<slot></slot>`);
           }
           break;
@@ -166,8 +171,7 @@ export class LitRenderer {
           () => this.lookupExpressionValue(expression, data),
           { ifDefined, unsafeHTML }
         );
-      }
-      else {
+      } else {
         return this.lookupExpressionValue(expression, data);
       }
     }
@@ -223,24 +227,20 @@ export class LitRenderer {
         // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
         const boundFunc = dataValue.bind(getContext());
         result = boundFunc(...funcArguments);
-      }
-      else if (dataValue !== undefined) {
+      } else if (dataValue !== undefined) {
         result =
           dataValue?.constructor.name === '_ReactiveVar'
             ? dataValue.value
             : dataValue;
-      }
-      else if (
+      } else if (
         (stringMatches = stringRegExp.exec(expression)) !== null &&
         stringMatches.length > 1
       ) {
         result = stringMatches[1];
-      }
-      else if (!Number.isNaN(parseFloat(expression))) {
+      } else if (!Number.isNaN(parseFloat(expression))) {
         // Numbers should be passed as their numerical values to functions
         result = Number(expression);
-      }
-      else {
+      } else {
         result = undefined;
       }
       funcArguments.unshift(result);

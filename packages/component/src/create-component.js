@@ -1,5 +1,12 @@
 import { unsafeCSS } from 'lit';
-import { unique, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
+import {
+  unique,
+  each,
+  noop,
+  kebabToCamel,
+  get,
+  reverseKeys,
+} from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
@@ -130,11 +137,9 @@ export const createComponent = ({
             each(value.split(' '), (className) => {
               this.adjustSettingFromAttribute(className);
             });
-          }
-          else if (get(spec?.attribute, attribute)) {
+          } else if (get(spec?.attribute, attribute)) {
             // we dont need to set anything here obj reflection handles this
-          }
-          else {
+          } else {
             // go from large -> size, or primary -> emphasis
             // we reverse obj key/value then check lookup
             const setting = get(reverseKeys(spec.settings), attribute);

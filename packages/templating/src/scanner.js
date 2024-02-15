@@ -149,8 +149,7 @@ class Scanner {
       if (booleanAttributes.includes(attrName)) {
         // this is a known attribute tag that is always boolean
         booleanAttribute = true;
-      }
-      else {
+      } else {
         // if the template has syntax <div attribute={{value}}> without quotes then this is intended to be a boolean attribute
         const quotedAttrPattern = /([a-zA-Z-]+)(?=\s*=\s*(\"|\')\s*[^=]*$)/;
         const quotedAttrMatch = tagText.match(quotedAttrPattern);

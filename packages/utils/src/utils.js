@@ -34,8 +34,7 @@ export const fatal = (
 
   if (typeof queueMicrotask === 'function') {
     queueMicrotask(throwError);
-  }
-  else {
+  } else {
     setTimeout(throwError, 0);
   }
 };
@@ -252,8 +251,7 @@ export const last = (array, number = 1) => {
   if (number === 1) {
     // Return the last element
     return array[length - 1];
-  }
-  else {
+  } else {
     // Return the last number elements as a new array
     return array.slice(Math.max(length - number, 0));
   }
@@ -351,8 +349,7 @@ export const extend = (obj, ...sources) => {
         descriptor = Object.getOwnPropertyDescriptor(source, prop);
         if (descriptor === undefined) {
           obj[prop] = source[prop];
-        }
-        else {
+        } else {
           Object.defineProperty(obj, prop, descriptor);
         }
       }
@@ -383,8 +380,7 @@ export const get = function (obj, string = '') {
     // Check if obj is an object and part exists in obj
     if (obj !== null && typeof obj === 'object' && part in obj) {
       obj = obj[part];
-    }
-    else {
+    } else {
       // If not, return undefined to safely indicate missing value
       return undefined;
     }
@@ -409,11 +405,9 @@ export const reverseKeys = (obj) => {
   const pushValue = (key, value) => {
     if (isArray(newObj[key])) {
       newObj[key].push(value);
-    }
-    else if (newObj[key]) {
+    } else if (newObj[key]) {
       newObj[key] = [newObj[key], value];
-    }
-    else {
+    } else {
       newObj[key] = value;
     }
   };
@@ -422,8 +416,7 @@ export const reverseKeys = (obj) => {
       each(obj[key], (subKey) => {
         pushValue(subKey, key);
       });
-    }
-    else {
+    } else {
       pushValue(obj[key], key);
     }
   });
@@ -447,36 +440,30 @@ export const clone = (src, seen = new Map()) => {
   if (src.nodeType && 'cloneNode' in src) {
     copy = src.cloneNode(true);
     seen.set(src, copy);
-  }
-  else if (src instanceof Date) {
+  } else if (src instanceof Date) {
     // Date
     copy = new Date(src.getTime());
     seen.set(src, copy);
-  }
-  else if (src instanceof RegExp) {
+  } else if (src instanceof RegExp) {
     // RegExp
     copy = new RegExp(src);
     seen.set(src, copy);
-  }
-  else if (Array.isArray(src)) {
+  } else if (Array.isArray(src)) {
     // Array
     copy = new Array(src.length);
     seen.set(src, copy);
     for (let i = 0; i < src.length; i++) copy[i] = clone(src[i], seen);
-  }
-  else if (src instanceof Map) {
+  } else if (src instanceof Map) {
     // Map
     copy = new Map();
     seen.set(src, copy);
     for (const [k, v] of src.entries()) copy.set(k, clone(v, seen));
-  }
-  else if (src instanceof Set) {
+  } else if (src instanceof Set) {
     // Set
     copy = new Set();
     seen.set(src, copy);
     for (const v of src) copy.add(clone(v, seen));
-  }
-  else if (src instanceof Object) {
+  } else if (src instanceof Object) {
     // Object
     copy = {};
     seen.set(src, copy);
@@ -502,8 +489,7 @@ export const each = (obj, func, context) => {
         break; // Exit early if callback explicitly returns false
       }
     }
-  }
-  else if (isObject(obj)) {
+  } else if (isObject(obj)) {
     const objKeys = Object.keys(obj);
     for (const key of objKeys) {
       if (iteratee(obj[key], key, obj) === false) {
@@ -560,8 +546,7 @@ export function hashCode(input) {
       console.error('Error serializing input', error);
       return 0;
     }
-  }
-  else {
+  } else {
     str = input.toString();
   }
 

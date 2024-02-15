@@ -35,8 +35,7 @@ const createInstance = (tpl, $) => ({
       }
       if (allCompleted) {
         tpl.completeAll();
-      }
-      else {
+      } else {
         tpl.completeNone();
       }
     });

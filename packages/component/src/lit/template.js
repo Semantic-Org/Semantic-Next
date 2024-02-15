@@ -1,6 +1,15 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { fatal, each, remove, generateID, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
+import {
+  fatal,
+  each,
+  remove,
+  generateID,
+  isEqual,
+  noop,
+  isFunction,
+  extend,
+} from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
@@ -318,8 +327,7 @@ export const LitTemplate = class UITemplate {
       return filterTemplate
         ? $results.filter((node) => this.isNodeInTemplate(node))
         : $results;
-    }
-    else {
+    } else {
       return $(selector, root);
     }
   }

@@ -1,4 +1,11 @@
-import { clone, isObject, isEqual, findIndex, unique, isNumber } from '@semantic-ui/utils';
+import {
+  clone,
+  isObject,
+  isEqual,
+  findIndex,
+  unique,
+  isNumber,
+} from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
@@ -82,8 +89,7 @@ export class ReactiveVar {
     let index;
     if (isNumber(indexOrProperty)) {
       index = indexOrProperty;
-    }
-    else {
+    } else {
       index = 'all';
       value = property;
       property = indexOrProperty;
