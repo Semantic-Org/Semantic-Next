@@ -1,11 +1,11 @@
-next
 Up next
 - Add jsdom + browser testing for component package
 - Determine spec file build step + use in component
+- Determine build step for components from configuration json. Small/medium/large
 - Build out button
+- Add syntax for embedding web components
 
 Templating Later
-- Add syntax for embedding web components
 - Add mechanism for inherting data context from parent template
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
@@ -14,6 +14,7 @@ week of feb 16
 + Add reactivity template helpers for guard, nonreactive, reactiveDebug
 + Set up auto labeler
 + Set up github issue bot
++ Set up commit lint/open commit
 + Handle boolean attributes like checked readonly etc
 
 week of feb 9
