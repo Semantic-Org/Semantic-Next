@@ -140,8 +140,7 @@ jobs:
     name: Code Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: changes
-    if: needs.changes.outputs.packages == 'true' || github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
