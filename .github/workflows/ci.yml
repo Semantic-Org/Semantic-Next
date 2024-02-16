@@ -1,4 +1,4 @@
-name: 'CI'
+name: "CI"
 
 on:
   push:
@@ -37,14 +37,14 @@ jobs:
       ui: ${{ steps.filter.outputs.ui }}
       packages: ${{ steps.filter.outputs.packages }}
     steps:
-    - uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: |
-          ui:
-            - 'src/**'
-          packages:
-            - 'packages/**'
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ui:
+              - 'src/**'
+            packages:
+              - 'packages/**'
 
   unit-test:
     name: Run Unit Tests
@@ -57,8 +57,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
-          cache: 'npm'
+          node-version-file: ".node-version"
+          cache: "npm"
 
       - name: Install NPM Dependencies
         run: npm ci
@@ -75,6 +75,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           reporter: java-junit
 
+      - name: "Upload JSON for badge"
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-unit
+          path: tests/results/test-results-unit.json
+
   browser:
     name: Run Browser E2E Tests
     timeout-minutes: 10
@@ -86,8 +92,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
-          cache: 'npm'
+          node-version-file: ".node-version"
+          cache: "npm"
 
       - name: Install NPM Dependencies
         run: npm ci
@@ -123,6 +129,12 @@ jobs:
           reporter: java-junit
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Upload JSON for badge"
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-browser
+          path: tests/results/test-results-browser.json
+
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
@@ -137,8 +149,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
-          cache: 'npm'
+          node-version-file: ".node-version"
+          cache: "npm"
 
       - name: Install NPM Dependencies
         run: npm ci
@@ -167,12 +179,16 @@ jobs:
 
       - name: Generate Coverage Report
         if: always() # still generate if tests failing
-        uses:  davelosert/vitest-coverage-report-action@v2
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
-          name: 'Package'
-          vite-config-path: './tests/configs/vitest/ci-coverage.config.js'
-          json-summary-path: './tests/coverage/coverage-summary.json'
-          json-final-path: './tests/coverage/coverage-final.json'
-          file-coverage-mode: 'changes'
+          name: "Package"
+          vite-config-path: "./tests/configs/vitest/ci-coverage.config.js"
+          json-summary-path: "./tests/coverage/coverage-summary.json"
+          json-final-path: "./tests/coverage/coverage-final.json"
+          file-coverage-mode: "changes"
 
-
+      - name: "Upload JSON for badge"
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-results
+          path: tests/results/coverage-summary.json
