@@ -1,5 +1,6 @@
 ## Semantic-UI
-[![CI](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml/badge.svg)](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml)
+
+[![UnitTests](https://badgen.net/https/wzcozo2uwacu4dfvawkdkmxi640guflx.lambda-url.us-east-1.on.aws)](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml)
 
 Semantic UI Next is an attempt at creating a generalized format of UI component using web components but hopefully smoothing out some of the rough edges which may have prevented people from adopting web components before.
 
