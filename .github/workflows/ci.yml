@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - release/*
+      - next/*
       - feat/*
       - fix/*
       - perf/*
@@ -13,7 +13,7 @@ on:
   pull_request:
     branches:
       - main
-      - release/*
+      - next/*
       - feat/*
       - fix/*
       - perf/*
@@ -29,6 +29,7 @@ permissions:
 jobs:
   changes:
     name: Check Changed Files
+    if: github.event_name == 'pull_request'
     timeout-minutes: 5
     runs-on: ubuntu-latest
     permissions:
@@ -128,7 +129,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: changes
-    if: ${{ needs.changes.outputs.packages == 'true' }}
+    if: >
+      needs.changes.outputs.packages == 'true' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/next'
 
     steps:
       - name: Checkout Repo
