@@ -140,7 +140,6 @@ jobs:
     name: Code Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: changes
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repo
