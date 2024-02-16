@@ -141,11 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: changes
-    if: >
-      needs.changes.outputs.packages == 'true' ||
-      github.ref == 'refs/heads/main' ||
-      github.ref == 'refs/heads/next'
-
+    if: needs.changes.outputs.packages == 'true' || github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
