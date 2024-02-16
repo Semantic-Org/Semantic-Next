@@ -1,13 +1,14 @@
 {
   "hash": "98464304c878918bac37d9442a59c09e2ca05152669c0ae49b82ee13b656c65d",
   "prompts": [
-    "The scope should always be one of the following values: \n  - component\n  - examples\n  - query\n  - reactivity\n  - templating\n  - utils\n  - tests\n  - ui\n  - ci\n  - tooling\n  - docs."
+    "The scope should always be one of the following values: \n  - component\n  - examples\n  - query\n  - reactivity\n  - templating\n  - utils\n  - tests\n  - ui\n  - ci\n  - tooling\n  - docs.",
+    "There should only be one scope and type per commit message."
   ],
   "consistency": {
     "english": {
       "localLanguage": "english",
-      "commitFix": "bug(server): Change 'port' variable to uppercase",
-      "commitFeat": "feat(server): Allow server to listen on env variable port",
+      "commitFix": "bug(utils): Change 'port' variable to uppercase",
+      "commitFeat": "feat(utils): Allow server to listen on env variable port",
       "commitDescription": "Changed 'port' variable to uppercase for consistency. Added feature to allow server to listen on a port specified through the environment variable."
     }
   }
