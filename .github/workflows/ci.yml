@@ -140,7 +140,8 @@ jobs:
     name: Code Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.ref == 'refs/heads/main'
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.packages == 'true'
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -191,3 +192,9 @@ jobs:
         with:
           name: coverage-results
           path: tests/results/coverage-summary.json
+
+      - name: "Upload JSON for badge"
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-browser
+          path: tests/coverage/coverage-summary.json
