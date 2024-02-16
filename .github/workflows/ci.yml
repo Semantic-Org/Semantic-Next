@@ -189,5 +189,5 @@ jobs:
       - name: "Upload JSON for badge"
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-results
+          name: coverage-summary
           path: tests/coverage/coverage-summary.json
