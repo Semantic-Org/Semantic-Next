@@ -1,0 +1,44 @@
+layout masthead {
+  display: block;
+  padding: 2em 0em 0em;
+  background: none transparent;
+  border-radius: 0px;
+  box-shadow: none;
+  border: none;
+  padding-bottom: 0em;
+  z-index: 3;
+  margin: 0em;
+  padding: 2em 0em 0em;
+  border-bottom: 1px solid #EEEEEE;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+}
+
+layout masthead h1 {
+  margin-top: -0.14285em;
+  font-size: 28px;
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+layout masthead h1 + p {
+  font-size: 16px;
+  margin: 0rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+
+layout masthead ui-menu {
+  margin-bottom: 0rem;
+}
+
+layout masthead ui-container {
+  position: relative;
+  width: auto !important;
+  max-width: 960px !important;
+  margin-left: 3em !important;
+  margin-right: 387px !important;
+}
+layout masthead > ui-menu ui-container {
+  width: 960px !important;
+  margin-right: 387px !important;
+  margin-left: 2em !important;
+}

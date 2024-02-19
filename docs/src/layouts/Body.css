@@ -27,6 +27,13 @@ img {
   display: block;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: #131313;
+}
 
 h1:first-child,
 h2:first-child,
@@ -34,4 +41,14 @@ h3:first-child,
 h4:first-child,
 h5:first-child {
   margin-top: 0px;
+}
+
+body.dark {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    color: #FFFFFF;
+  }
 }

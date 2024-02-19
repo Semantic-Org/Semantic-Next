@@ -7,6 +7,8 @@ import '../css/container.css';
 import '../css/menu.css';
 import '../css/image.css';
 import '../css/rail.css';
+import '../css/header.css';
+import '../css/icon.css';
 
 ---
 <html lang="en">
@@ -22,3 +24,14 @@ import '../css/rail.css';
     <slot />
   </body>
 </html>
+<script>
+  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const currentTheme = localStorage.getItem('theme')
+    ? localStorage.getItem('theme') :
+      systemPrefersDark
+      ? 'dark'
+      : 'light'
+  ;
+  console.log(currentTheme);
+  document.querySelectorAll('body')[0].classList.add(currentTheme);
+</script>

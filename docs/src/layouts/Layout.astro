@@ -1,33 +1,25 @@
 ---
 import Body from './Body.astro';
 import Navigation from '../components/Navigation.astro';
+import DocsMasthead from '../components/DocsMasthead.astro';
+import TopBar from '../components/TopBar.astro';
 import DocsRail from '../components/DocsRail.astro';
 import './Layout.css';
 
 ---
 <Body>
+	<TopBar></TopBar>
 	<layout>
-		<Navigation>
-			nav
-		</Navigation>
+		<Navigation/>
 		<page>
-			<masthead>
-				<ui-container>
-					<h1>Component Name</h1>
-					<p>This is a description of the component</p>
-				</ui-container>
-				<ui-menu two-item dashboard>
-					<ui-container>
-						<a class="active item">Definition</a>
-						<a class="item">Settings</a>
-					</ui-container>
-				</ui-menu>
-			</masthead>
+			<slot name="masthead">
+				<DocsMasthead />
+			</slot>
 			<main>
 				<ui-container>
 					<rail class="ui right dividing rail">
 						<slot name="rail">
-							<DocsRail></DocsRail>
+							<DocsRail />
 						</slot>
 					</rail>
 					<pageContent>
