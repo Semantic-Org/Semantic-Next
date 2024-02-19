@@ -1,0 +1,56 @@
+/* Shim for docs until component ready */
+
+/*******************************
+            Container
+*******************************/
+
+ui-menu {
+  display: flex;
+  margin: 1rem 0em;
+  background: #ffffff;
+  font-weight: normal;
+  box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+  min-height: 2.71428571em;
+}
+
+ui-menu > ui-container {
+  display: flex;
+  align-items: inherit;
+  flex-direction: inherit;
+}
+
+ui-menu[two-item] .item {
+  width: 50%;
+  text-align: center;
+}
+
+ui-menu[dashboard] {
+  padding: 11px 14px 7px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.04));
+  font-size: 1em;
+  font-weight: bold;
+  justify-content: flex-start;
+  box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
+}
+
+ui-menu[dashboard] .item {
+  font-weight: bold;
+  padding: 7px 6px;
+  line-height: 1;
+  margin-right: 6px;
+  border-radius: 3px;
+  color: rgba(0, 0, 0, 0.6);
+}
+ui-menu[dashboard] .active.item {
+  cursor: default;
+  background-color: #CEE2E6;
+  color: #0A3F4F;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2) inset;
+}
+
+ui-menu[dashboard] a.item {
+  cursor: pointer;
+}
+ui-menu[dashboard] a.item:not(.active):hover {
+  background-color: #E0E5E6;
+}

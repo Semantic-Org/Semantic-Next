@@ -1,0 +1,77 @@
+layout {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+layout navigation {
+  position: fixed;
+  z-index: 1;
+  background-color: #1B1C1D;
+  width: 250px;
+  height: 100vh;
+  flex: 0 1 auto;
+}
+layout page {
+  display: block;
+  margin-left: 250px;
+  flex: 1 1 auto;
+}
+layout masthead {
+  display: block;
+  padding: 2em 0em 0em;
+  background: none transparent;
+  border-radius: 0px;
+  box-shadow: none;
+  border: none;
+  padding-bottom: 0em;
+  z-index: 3;
+  margin: 0em;
+  padding: 2em 0em 0em;
+  background-color: #FFFFFF;
+  border-bottoM: 1px solid #EEEEEE;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+}
+
+layout masthead h1 {
+  margin-top: -0.14285em;
+  font-size: 28px;
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+layout masthead h1 + p {
+  font-size: 16px;
+  margin: 0rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+
+layout masthead ui-menu {
+  margin-bottom: 0rem;
+}
+
+layout masthead ui-container {
+  position: relative;
+  width: auto !important;
+  max-width: 960px !important;
+  margin-left: 3em !important;
+  margin-right: 387px !important;
+}
+layout masthead > ui-menu ui-container {
+  width: 960px !important;
+  margin-right: 387px !important;
+  margin-left: 2em !important;
+}
+
+layout main ui-container {
+  position: relative;
+  padding: 2em 0em 7em;
+  margin-left: 3em !important;
+  margin-right: 387px !important;
+  width: auto !important;
+  max-width: 960px !important;
+}
+
+layout rail.ui.rail {
+  padding-top: 2rem !important;
+}
