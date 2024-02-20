@@ -47,10 +47,6 @@ topbar + layout navigation {
 }
 
 body.dark {
-  background-color: #000000;
-  color: rgba(255, 255, 255, 0.83);
-}
-body.dark {
   page > masthead {
     border-bottom: 1px solid #333333;
     box-shadow: none;

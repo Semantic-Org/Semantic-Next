@@ -44,6 +44,10 @@ h5:first-child {
 }
 
 body.dark {
+  background-color: #000000;
+  color: rgba(255, 255, 255, 0.83);
+}
+body.dark {
   h1,
   h2,
   h3,
