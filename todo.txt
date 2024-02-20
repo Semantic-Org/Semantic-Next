@@ -1,4 +1,5 @@
 Up next
+- Build scaffolding for docs
 - Add jsdom + browser testing for component package
 - Determine spec file build step + use in component
 - Determine build step for components from configuration json. Small/medium/large
@@ -9,6 +10,9 @@ Templating Later
 - Add mechanism for inherting data context from parent template
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
+
+week of feb 23
+- Set up astro docs project
 
 week of feb 16
 + Add reactivity template helpers for guard, nonreactive, reactiveDebug
