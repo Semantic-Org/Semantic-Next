@@ -1,0 +1,6 @@
+- Fix responsive layout
+- Get basic topbar menu
+- Get basic nav menu
+- Add button page
+- Figure out build step into docs
+- Test lit components with islands

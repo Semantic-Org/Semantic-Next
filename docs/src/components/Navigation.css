@@ -5,8 +5,33 @@ navigation {
   color: #FFFFFF;
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
 }
-navigation .content {
+navigation navSearch.input {
+  margin: 1rem 1rem;
+}
+navSearch.input .icon {
+  color: #FFFFFF;
+}
+navSearch.input input {
+  border-radius: 500rem !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+}
+navSearch.input input {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+navSearch.input input:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 1) !important;
+}
+navSearch.input input:focus {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 1) !important;
+}
+navigation .toc {
   flex-grow: 1;
+  padding-left: 1rem;
+  padding-bottom: 1rem;
 }
 navigation .logo {
   background-image: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
@@ -28,6 +53,66 @@ navigation .logo span {
   text-align: center;
   margin-left: -20px;
   text-shadow: 0px 1px 2px rgb(0 0 0 / 75%);
+}
+
+navigation .toc > .title {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  font-size: 14px;
+  text-transform: none;
+  font-weight: bold;
+  transition: 0.3s color ease;
+  padding: 0.5rem 0rem;
+  color: #798088;
+}
+navigation .toc > .title:hover {
+  color: #FFFFFF;
+}
+
+navigation .toc > .title.current {
+  color: #73B9E1;
+  cursor: default;
+}
+navigation .toc > .title.active {
+  color: #FFFFFF;
+}
+navigation .toc > .title > .icon:not(.dropdown) {
+  display: block;
+  font-size: 18px;
+  width: 1.5rem;
+  flex: 0 0 auto;
+  text-align: center;
+  margin-right: 1rem;
+}
+navigation .toc .content {
+  display: none;
+}
+navigation .toc .content.active {
+  display: block;
+}
+
+navigation .toc > .title + .content {
+  padding: 0rem 0rem 0.5rem 2.5rem;
+}
+navigation .toc > .content > .menu > .item {
+  display: block;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1;
+  margin: 2px 0px;
+  padding: 5px 0px;
+}
+navigation .toc > .content > .menu > .active.item {
+  color: #73B9E1;
+}
+navigation .toc > .content > .menu > .item:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+navigation .toc > .content .title {
+  font-size: 13px;
+  padding: 4px 0px;
 }
 
 

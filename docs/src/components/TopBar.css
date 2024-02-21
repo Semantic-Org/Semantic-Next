@@ -20,6 +20,10 @@ topbar .logo span {
   margin-left: 10px;
 }
 
+topbar .theme.icon {
+  float: right;
+  margin: 20px 20px 0px 0px;
+}
 
 body.dark topbar {
   background-color: #000710;

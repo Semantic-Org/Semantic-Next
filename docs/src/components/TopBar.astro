@@ -9,4 +9,17 @@ import './TopBar.css';
       Semantic UI
     </span>
   </div>
+  <i class="theme link icon"></i>
 </topbar>
+
+<script>
+  const el = document.querySelectorAll('.theme.icon')[0];
+  el.addEventListener('click', function() {
+    let theme = localStorage.getItem('theme');
+    let newTheme = (theme == 'light') ? 'dark' : 'light';
+    localStorage.setItem('theme', newTheme);
+    let body = document.querySelectorAll('body')[0];
+    body.classList.remove(theme);
+    body.classList.add(newTheme);
+  }, true, true);
+</script>

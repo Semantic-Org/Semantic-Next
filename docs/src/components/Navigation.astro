@@ -1,21 +1,102 @@
 ---
 const { currentRoute } = Astro.props;
 import './Navigation.css';
+import renderMenu from './Navigation.js';
+
+const menu = [
+  {
+    name: 'Guide',
+    icon: 'info circle',
+    pages: [
+    	{ name: 'Introduction', url: '/page-1'},
+    	{ name: 'Using Web Components', url: '/page-2'},
+    	{ name: 'Web Components', url: '/page-3'},
+    ]
+  },
+  {
+    name: 'Theming',
+    active: true,
+    icon: 'paint brush',
+    pages: [
+    	{ name: 'Using Themes', url: '/page-1', active: true},
+    	{ name: 'Creating Themes', url: '/page-3'},
+    	{ name: 'Dev Tools', url: '/page-2'},
+    	{ name: 'Figma & Prototyping', url: '/page-2'},
+    ]
+  },
+  {
+    name: 'CSS Components',
+    icon: 'heart',
+    pages: [
+    	{ name: 'Site & Colors', url: '/page-3'},
+    	{ name: 'Headers', url: '/page-4'},
+    	{ name: 'Icons', url: '/page-4'},
+    ]
+  },
+  {
+    name: 'UI Components',
+    icon: 'cubes ',
+    pages: [
+      {
+        name: 'Essential',
+        pages: [{ name: 'Page 5', url: '/page-5'}, { name: 'Page 6', url: '/page-6'} ]
+      },
+      {
+        name: 'Form Components',
+        pages: [{ name: 'Page 7', url: '/page-7'}, { name: 'Page 8', url: '/page-8'} ]
+      },
+      {
+        name: 'Website Components',
+        pages: [{ name: 'Page 7', url: '/page-7'}, { name: 'Page 8', url: '/page-8'} ]
+      },
+      {
+        name: 'App Components',
+        pages: [{ name: 'Page 7', url: '/page-7'}, { name: 'Page 8', url: '/page-8'} ]
+      },
+    ]
+  }
+];
 ---
 <navigation>
-	<div class="content">
-		wee
+	<navSearch class="ui inverted icon input">
+		<input type="text" placeholder="Search...">
+		<i class="search icon"></i>
+	</navSearch>
+	<div class="toc">
+	  {menu.map((section) => (
+	    <>
+	    	<div class={`title${section.active ? ' active' : ''}`}>
+				  {section.icon && <i class={`icon ${section.icon}`}></i>}
+  				<div class="text">
+				  	{section.name}
+				  </div>
+				</div>
+	      <div class={`content${section.active ? ' active' : ''}`}>
+	        <div class="menu">
+	          {section.pages.map((page) => (
+	            'pages' in page ?
+	            <>
+	              <div class="title">
+				  				{page.icon && <i class={`icon ${page.icon}`}></i>}
+				  				<i class="dropdown icon"></i>
+				  				<div class="text">
+	            			{page.name}
+	            		</div>
+	            	</div>
+	              <div class="content">
+	                <div class="menu">
+	                  {page.pages.map((subPage) => (
+	                    <a class={`item ${page.active ? 'active' : ''}`} href={subPage.url}>{subPage.name}</a>
+	                  ))}
+	                </div>
+	              </div>
+	            </>
+	            :
+	            <a class={`item ${page.active ? 'active' : ''}`} href={page.url}>{page.name}</a>
+	          ))}
+	        </div>
+	      </div>
+	    </>
+	  ))}
 	</div>
 </navigation>
-
-<script>
-	const el = document.querySelectorAll('.theme.icon')[0];
-	el.addEventListener('click', function() {
-		let theme = localStorage.getItem('theme');
-		let newTheme = (theme == 'light') ? 'dark' : 'light';
-		localStorage.setItem('theme', newTheme);
-		let body = document.querySelectorAll('body')[0];
-		body.classList.remove(theme);
-		body.classList.add(newTheme);
-	}, true, true);
-</script>
