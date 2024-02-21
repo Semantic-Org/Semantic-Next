@@ -9,7 +9,8 @@ import {
 
 export const buildProject = async ({
   watch = false,
-  includeExamples = true,
+  includeExamples = false,
+  includePackages = false,
   outDir = 'docs/public/semantic/',
   uiDir = `${outDir}/ui`
 } = {}) => {

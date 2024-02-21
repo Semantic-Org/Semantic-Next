@@ -1,7 +1,7 @@
 ---
 const { currentRoute } = Astro.props;
 import './Navigation.css';
-import renderMenu from './Navigation.js';
+import { SidebarMenu } from'./sidebar-menu/sidebar-menu.js';
 
 const menu = [
   {
@@ -62,41 +62,5 @@ const menu = [
 		<input type="text" placeholder="Search...">
 		<i class="search icon"></i>
 	</navSearch>
-	<div class="toc">
-	  {menu.map((section) => (
-	    <>
-	    	<div class={`title${section.active ? ' active' : ''}`}>
-				  {section.icon && <i class={`icon ${section.icon}`}></i>}
-  				<div class="text">
-				  	{section.name}
-				  </div>
-				</div>
-	      <div class={`content${section.active ? ' active' : ''}`}>
-	        <div class="menu">
-	          {section.pages.map((page) => (
-	            'pages' in page ?
-	            <>
-	              <div class="title">
-				  				{page.icon && <i class={`icon ${page.icon}`}></i>}
-				  				<i class="dropdown icon"></i>
-				  				<div class="text">
-	            			{page.name}
-	            		</div>
-	            	</div>
-	              <div class="content">
-	                <div class="menu">
-	                  {page.pages.map((subPage) => (
-	                    <a class={`item ${page.active ? 'active' : ''}`} href={subPage.url}>{subPage.name}</a>
-	                  ))}
-	                </div>
-	              </div>
-	            </>
-	            :
-	            <a class={`item ${page.active ? 'active' : ''}`} href={page.url}>{page.name}</a>
-	          ))}
-	        </div>
-	      </div>
-	    </>
-	  ))}
-	</div>
+	<SidebarMenu client:load></sidebar-menu>
 </navigation>

@@ -30,7 +30,9 @@
     },
     "dev": {
       "command": "cd docs && npm run dev",
-      "dependencies": ["watch"]
+      "dependencies": [
+        "watch"
+      ]
     },
     "serve:docs": {
       "command": "cd docs && npm run dev",
@@ -75,7 +77,8 @@
     "packages/*"
   ],
   "dependencies": {
-    "lit": "^3.1.2"
+    "lit": "^3.1.2",
+    "rollup-plugin-string": "^3.0.0"
   },
   "lint-staged": {
     "**/*": "prettierx --write --ignore-unknown"

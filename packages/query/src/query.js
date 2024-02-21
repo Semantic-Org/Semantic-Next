@@ -129,6 +129,9 @@ export class Query {
       eventHandlers.push(eventHandler);
     });
 
+    if(!Query._eventHandlers) {
+      Query._eventHandlers = [];
+    }
     Query._eventHandlers.push(...eventHandlers);
 
     return (eventHandlers.length == 1) ? eventHandlers[0] : eventHandlers;

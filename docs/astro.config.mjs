@@ -1,16 +1,16 @@
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
+import { string } from 'rollup-plugin-string';
+import lit from '@astrojs/lit';
 
 // https://astro.build/config
 export default defineConfig({
-
   //site: 'https://next.semantic-ui.com',
 
   server: {
     host: true,
-    port: 443,
+    port: 443
   },
-
   vite: {
     server: {
       // SSL for localhost and dev.semantic-ui.com
@@ -18,8 +18,9 @@ export default defineConfig({
       https: {
         key: fs.readFileSync('./cert/dev-key.pem'),
         cert: fs.readFileSync('./cert/dev.pem')
-      },
-    }
-  }
-
+      }
+    },
+    plugins: []
+  },
+  integrations: [lit()]
 });

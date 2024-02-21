@@ -20,6 +20,7 @@ class WebComponentBase extends LitElement {
 
   createRenderRoot() {
     this.useLight = (this.getAttribute('expose') !== null);
+    console.log('use light', this);
     if(this.useLight) {
       this.applyScopedStyles(this.tagName, this.css);
       this.storeOriginalContent.apply(this);

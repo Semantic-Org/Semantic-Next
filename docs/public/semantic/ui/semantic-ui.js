@@ -1517,6 +1517,9 @@ var Query = class _Query {
       };
       eventHandlers.push(eventHandler);
     });
+    if (!_Query._eventHandlers) {
+      _Query._eventHandlers = [];
+    }
     _Query._eventHandlers.push(...eventHandlers);
     return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
   }
@@ -2985,6 +2988,7 @@ var WebComponentBase = class extends s3 {
   useLight = false;
   createRenderRoot() {
     this.useLight = this.getAttribute("expose") !== null;
+    console.log("use light", this);
     if (this.useLight) {
       this.applyScopedStyles(this.tagName, this.css);
       this.storeOriginalContent.apply(this);
