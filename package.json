@@ -1,5 +1,5 @@
 {
-  "name": "semantic-ui-next",
+  "name": "@semantic/ui",
   "version": "0.0.1",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
@@ -8,7 +8,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "wireit",
+    "build": "node ./tasks/build.js",
+    "dev": "wireit",
     "serve": "wireit",
     "prettify": "prettierx ./ --write --ignore-unknown",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
@@ -22,6 +23,18 @@
   "wireit": {
     "build": {
       "command": "node ./tasks/build.js"
+    },
+    "watch": {
+      "command": "node ./tasks/watch.js",
+      "service": true
+    },
+    "dev": {
+      "command": "cd docs && npm run dev",
+      "dependencies": ["watch"]
+    },
+    "serve:docs": {
+      "command": "cd docs && npm run dev",
+      "service": true
     },
     "serve": {
       "command": "node ./tasks/serve.js",

@@ -6,6 +6,7 @@ import { ButtonSpec } from './spec/spec.js';
 
 const createInstance = (tpl, $) => ({
 
+
 });
 
 
@@ -15,6 +16,7 @@ const onCreated = (tpl) => {
 
 const events = {
   'click .button'(event, tpl, $) {
+
 
   }
 };
