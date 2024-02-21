@@ -27,6 +27,7 @@ layout masthead h1 + p {
 
 
 layout masthead ui-menu {
+  padding-bottom: 1.5rem !important;
   margin-bottom: 0rem;
 }
 
