@@ -1,12 +1,11 @@
 import { buildDeps } from './lib/build-deps.js';
 import { buildProject } from './lib/build-project.js';
 
-
 await buildDeps({
-  watch: true
+  watch: true,
 });
-
+/*
 await buildProject({
   watch: true,
   outDir: 'docs/public/semantic'
-});
+});*/

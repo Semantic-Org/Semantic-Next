@@ -6,11 +6,10 @@ import { todoItem } from './item/todo-item.js';
 import { todoHeader } from './header/todo-header.js';
 import { todoFooter } from './footer/todo-footer.js';
 
-import template from './todo-list.html';
-import css from './todo-list.css';
+import template from './todo-list.html?raw';
+import css from './todo-list.css?raw';
 
 const createInstance = (tpl, $) => ({
-
   // global state
   todos: new ReactiveVar([]),
   filter: new ReactiveVar('all'),
@@ -19,15 +18,15 @@ const createInstance = (tpl, $) => ({
     const filter = tpl.filter.get();
     const todos = tpl.todos.get();
     each(todos, (todo) => {
-      if(!todo._id) {
+      if (!todo._id) {
         todo._id = todo.text;
       }
     });
-    return todos.filter(todo => {
-      if(filter == 'active') {
+    return todos.filter((todo) => {
+      if (filter == 'active') {
         return !todo.completed;
       }
-      else if(filter == 'complete') {
+      else if (filter == 'complete') {
         return todo.completed;
       }
       return true;
@@ -36,21 +35,20 @@ const createInstance = (tpl, $) => ({
 
   // handle state
   addRouter() {
-    tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);
+    tpl.hashEvent = $(globalThis).on('hashchange', tpl.setRouteFilter);
   },
   getRouteFilter() {
-    return window.location.hash.substring(2); // #/foo
+    return globalThis.location.hash.substring(2); // #/foo
   },
   setRouteFilter() {
-    tpl.filter.set( tpl.getRouteFilter());
+    tpl.filter.set(tpl.getRouteFilter());
   },
   removeRouter() {
-    $(window).off(tpl.hashEvent);
+    $(globalThis).off(tpl.hashEvent);
   },
-
 });
 
-const onCreated = (tpl) => {
+const onRendered = (tpl) => {
   tpl.addRouter();
   tpl.setRouteFilter();
 };
@@ -58,7 +56,6 @@ const onCreated = (tpl) => {
 const onDestroyed = (tpl) => {
   tpl.removeRouter();
 };
-
 
 const events = {
   // toggle all checkbox is in the main html although its functionality is in the header
@@ -81,7 +78,7 @@ const TodoList = createComponent({
   css,
   events,
   createInstance,
-  onCreated,
+  onRendered,
   onDestroyed,
 });
 

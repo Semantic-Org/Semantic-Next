@@ -10,6 +10,7 @@ dev/examples/
 dev/ui/
 html/
 tests/results/
+tests/test-case/dist
 
 # Numerous always-ignore extensions
 *.diff

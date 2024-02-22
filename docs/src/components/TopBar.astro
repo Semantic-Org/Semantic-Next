@@ -1,10 +1,12 @@
 ---
 const { currentRoute } = Astro.props;
 import './TopBar.css';
+import { Image } from 'astro:assets';
+import logoImage from '@images/logo.png';
 ---
 <topbar>
   <div class="logo">
-    <img src="/images/logo.png">
+    <Image src={logoImage} alt="Logo" height=35>
     <span>
       Semantic UI
     </span>

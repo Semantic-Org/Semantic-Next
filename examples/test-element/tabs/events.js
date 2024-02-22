@@ -2,15 +2,14 @@ import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { range } from '@semantic-ui/utils';
 
-import template from './events.html';
+import template from './events.html?raw';
 
 const createInstance = (tpl, $) => {
   console.log('rendering events tab');
   return {
-
     number: new ReactiveVar(6),
     getRange() {
-      if(!Number.isFinite(+tpl.number.value)) {
+      if (!Number.isFinite(+tpl.number.value)) {
         return [];
       }
       return range(tpl.number.value);
@@ -28,20 +27,17 @@ const createInstance = (tpl, $) => {
     addedCount: 0,
     getPerson() {
       let person = {
-        ... tpl.newPerson
+        ...tpl.newPerson,
       };
-      if(tpl.addedCount > 0) {
+      if (tpl.addedCount > 0) {
         person._id = `${person._id}${tpl.addedCount}`;
         person.name = `${person.name} #${tpl.addedCount}`;
       }
       tpl.addedCount++;
       return person;
     },
-
   };
 };
-
-
 
 const events = {
   'input input[type="text"]'(event, tpl, $) {

@@ -1,8 +1,8 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-import template from './todo-item.html';
-import css from './todo-item.css';
+import template from './todo-item.html?raw';
+import css from './todo-item.css?raw';
 
 const createInstance = (tpl, $) => ({
   editing: new ReactiveVar(false),
@@ -42,14 +42,14 @@ const events = {
     });
   },
   'keydown input.edit'(event, tpl, $) {
-    if(event.key === 'Enter') {
+    if (event.key === 'Enter') {
       $(this).blur();
     }
   },
   'blur input.edit'(event, tpl, $) {
     tpl.changeText($(this).val());
     tpl.editing.set(false);
-  }
+  },
 };
 
 const todoItem = createComponent({

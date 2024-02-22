@@ -1,9 +1,9 @@
 import { createComponent } from '@semantic-ui/component';
 
-import template from './test-case.html';
-import css from './test-case.css';
+import template from './test-case.html?raw';
+import css from './test-case.css?raw';
 
-const createInstance = function(tpl, $) {
+const createInstance = function (tpl, $) {
   // test instance
   return {};
 };

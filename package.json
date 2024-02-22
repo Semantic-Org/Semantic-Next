@@ -11,6 +11,7 @@
     "build": "node ./tasks/build.js",
     "dev": "wireit",
     "serve": "wireit",
+    "test:case": "wireit",
     "prettify": "prettierx ./ --write --ignore-unknown",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
     "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
@@ -34,6 +35,9 @@
         "watch"
       ]
     },
+    "test:case": {
+      "command": "node ./tasks/test-case.js"
+    },
     "serve:docs": {
       "command": "cd docs && npm run dev",
       "service": true
@@ -56,6 +60,7 @@
     "@vitest/coverage-istanbul": "^1.2.2",
     "@vitest/ui": "^1.2.2",
     "chalk": "^5.3.0",
+    "chokidar": "^3.6.0",
     "esbuild": "^0.19.11",
     "esbuild-plugin-babel": "^0.2.3",
     "esbuild-plugin-glob": "^2.2.1",
@@ -74,7 +79,8 @@
     "wireit": "^0.14.3"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/"
   ],
   "dependencies": {
     "lit": "^3.1.2",
