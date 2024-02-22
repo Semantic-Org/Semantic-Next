@@ -53,10 +53,13 @@ const onCreated = (tpl) => {
     return;
   }
   tpl.addRouter();
-  tpl.setRouteFilter();
 };
 
 const onRendered = (tpl) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  tpl.setRouteFilter();
   console.log(tpl);
 };
 
