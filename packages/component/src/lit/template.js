@@ -146,9 +146,11 @@ export const LitTemplate = class UITemplate {
 
   async attachStyles() {
     if (!this.css) {
+      console.log('NO CSS');
       return;
     }
     if (!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
+      console.log('NO RENDER ROOT');
       return;
     }
     const cssString = this.css;

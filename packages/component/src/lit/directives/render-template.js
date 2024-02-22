@@ -7,7 +7,6 @@ import { fatal, mapObject } from '@semantic-ui/utils';
 class RenderTemplate extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
-    console.log(partInfo);
     this.renderRoot = partInfo.options?.host?.renderRoot;
     this.template = null;
     this.part = null;

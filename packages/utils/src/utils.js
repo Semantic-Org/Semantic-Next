@@ -96,6 +96,10 @@ export const isArguments = function (obj) {
   return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
+export const isServer = () => {
+  return typeof window === 'undefined';
+};
+
 /*-------------------
         Date
 --------------------*/

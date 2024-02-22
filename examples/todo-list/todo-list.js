@@ -38,7 +38,7 @@ const createInstance = (tpl, $) => ({
     tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);
   },
   getRouteFilter() {
-    return window.location.hash.substring(2); // #/foo
+    return window.location.hash.substring(2) || 'all'; // #/foo
   },
   setRouteFilter() {
     tpl.filter.set(tpl.getRouteFilter());
@@ -48,12 +48,16 @@ const createInstance = (tpl, $) => ({
   },
 });
 
-const onRendered = (tpl) => {
+const onCreated = (tpl) => {
   if (typeof window === 'undefined') {
     return;
   }
   tpl.addRouter();
   tpl.setRouteFilter();
+};
+
+const onRendered = (tpl) => {
+  console.log(tpl);
 };
 
 const onDestroyed = (tpl) => {
@@ -81,6 +85,7 @@ const TodoList = createComponent({
   css,
   events,
   createInstance,
+  onCreated,
   onRendered,
   onDestroyed,
 });
