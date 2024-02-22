@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { unique, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
+import { unique, isServer, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { LitTemplate } from './lit/template.js';
@@ -29,6 +29,16 @@ export const createComponent = ({
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
+
+  // we normally attach this using DOM APIs conditionaly on render
+  // but in SSR we need to just include it naively
+  if (isServer()) {
+    each(subTemplates, (template) => {
+      if (template.css) {
+        css += template.css;
+      }
+    });
+  }
 
   /*
     We can choose either to render this component as a web component
