@@ -83,7 +83,6 @@ export const createComponent = ({
 
       firstUpdated() {
         super.firstUpdated();
-        this.call(onRendered);
       }
 
       updated() {
