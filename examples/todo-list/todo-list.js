@@ -35,20 +35,23 @@ const createInstance = (tpl, $) => ({
 
   // handle state
   addRouter() {
-    tpl.hashEvent = $(globalThis).on('hashchange', tpl.setRouteFilter);
+    tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);
   },
   getRouteFilter() {
-    return globalThis.location.hash.substring(2); // #/foo
+    return window.location.hash.substring(2); // #/foo
   },
   setRouteFilter() {
     tpl.filter.set(tpl.getRouteFilter());
   },
   removeRouter() {
-    $(globalThis).off(tpl.hashEvent);
+    $(window).off(tpl.hashEvent);
   },
 });
 
 const onRendered = (tpl) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
   tpl.addRouter();
   tpl.setRouteFilter();
 };

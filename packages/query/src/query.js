@@ -135,7 +135,9 @@ export class Query {
           }
         };
       }
-      el.addEventListener(event, delegateHandler || handler, { signal });
+      if (el.addEventListener) {
+        el.addEventListener(event, delegateHandler || handler, { signal });
+      }
 
       const eventHandler = {
         el,

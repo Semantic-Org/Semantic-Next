@@ -57,7 +57,7 @@ export const isString = (x) => {
 };
 
 export const isDOM = (element) => {
-  if (!Element) {
+  if (typeof window === 'undefined') {
     return true; // ssr or not a browser
   }
   return (

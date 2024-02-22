@@ -7,7 +7,8 @@ import { fatal, mapObject } from '@semantic-ui/utils';
 class RenderTemplate extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
-    this.renderRoot = partInfo.options.host?.renderRoot;
+    console.log(partInfo);
+    this.renderRoot = partInfo.options?.host?.renderRoot;
     this.template = null;
     this.part = null;
   }
@@ -32,8 +33,8 @@ class RenderTemplate extends AsyncDirective {
       return true;
     };
     const attachTemplate = () => {
-      const { parentNode, startNode, endNode } = this.part; // stored from update
-      const renderRoot = this.part.options.host?.renderRoot;
+      const { parentNode, startNode, endNode } = this.part || {}; // stored from update
+      const renderRoot = this.part?.options?.host?.renderRoot;
       this.template.attach(renderRoot, { parentNode, startNode, endNode });
       if (parentTemplate) {
         this.template.setParent(parentTemplate);
