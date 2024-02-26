@@ -74,7 +74,7 @@ class ReactiveEachDirective extends AsyncDirective {
     each(items, (item, index) => {
       keys[index] = this.getItemID(item, index);
       // we only want to lazily get new template if the contents have changed
-      values[index] = (passedIndex) => {
+      values[index] = (passedIndex = index) => {
         return this.getTemplate(item, passedIndex);
       };
     });

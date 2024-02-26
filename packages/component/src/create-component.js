@@ -81,6 +81,7 @@ export const createComponent = ({
 
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
+        this.template.setElement(this);
         this.renderCallbacks = [];
       }
 

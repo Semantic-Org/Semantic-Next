@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { isFunction } from '@semantic-ui/utils';
+import { isFunction, noop } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './styles';

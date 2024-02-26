@@ -1,12 +1,14 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { fatal, each, remove, generateID, isEqual, noop, isFunction, extend } from '@semantic-ui/utils';
+import { fatal, each, remove, generateID, isEqual, noop, isServer, isFunction, extend } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
 
 export const LitTemplate = class UITemplate {
   static templateCount = 0;
+
+  static isServer = isServer();
 
   constructor({
     templateName,
@@ -19,6 +21,7 @@ export const LitTemplate = class UITemplate {
     createInstance,
     parentTemplate, // the parent template when nested
     prototype = false,
+    attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
     onRendered = noop,
     onDestroyed = noop,
@@ -28,7 +31,6 @@ export const LitTemplate = class UITemplate {
       const compiler = new TemplateCompiler(template);
       ast = compiler.compile();
     }
-
     this.events = events;
     this.ast = ast;
     this.css = css;
@@ -41,6 +43,7 @@ export const LitTemplate = class UITemplate {
     this.onCreatedCallback = onCreated;
     this.id = generateID();
     this.isPrototype = prototype;
+    this.attachStyles = attachStyles;
     LitTemplate.addTemplate(this);
   }
 
@@ -54,6 +57,10 @@ export const LitTemplate = class UITemplate {
   setParent(parentTemplate) {
     parentTemplate._childTemplates.push(this);
     this.parentTemplate = parentTemplate;
+  }
+
+  setElement(element) {
+    this.element = element;
   }
 
   getGenericTemplateName() {
@@ -89,13 +96,13 @@ export const LitTemplate = class UITemplate {
       LitTemplate.findChildTemplates(this, templateName);
 
     this.onCreated = () => {
-      this.call(this.onCreatedCallback.bind(this));
-    };
-    this.onFirstRender = () => {
-      this.call(this.onFirstRenderCallback.bind(this));
+      this.call(this.onCreatedCallback);
     };
     this.onRendered = () => {
-      this.call(this.onRenderedCallback.bind(this));
+      this.call(this.onRenderedCallback, {
+        additionalData: { firstRender: !!this.firstRender },
+      });
+      this.firstRender = false;
     };
     this.onDestroyed = () => {
       LitTemplate.removeTemplate(this);
@@ -134,7 +141,9 @@ export const LitTemplate = class UITemplate {
     this.startNode = startNode;
     this.endNode = endNode;
     this.attachEvents();
-    await this.attachStyles();
+    if (this.attachStyles) {
+      await this.addAdoptedStylesheet();
+    }
   }
 
   getDataContext() {
@@ -144,13 +153,11 @@ export const LitTemplate = class UITemplate {
     };
   }
 
-  async attachStyles() {
+  async addAdoptedStylesheet() {
     if (!this.css) {
-      console.log('NO CSS');
       return;
     }
     if (!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
-      console.log('NO RENDER ROOT');
       return;
     }
     const cssString = this.css;
@@ -175,6 +182,7 @@ export const LitTemplate = class UITemplate {
 
   clone(settings) {
     const defaultSettings = {
+      element: this.element,
       templateName: this.templateName,
       ast: this.ast,
       css: this.css,
@@ -238,8 +246,7 @@ export const LitTemplate = class UITemplate {
           }
           const boundEvent = eventHandler.bind(event.target);
           template.call(boundEvent, {
-            firstArg: event,
-            additionalArgs: [event.target.dataset],
+            additionalData: { event: event, data: event.target.dataset },
           });
         },
         { abortController: this.eventController }
@@ -331,18 +338,23 @@ export const LitTemplate = class UITemplate {
   }
 
   // calls callback if defined with consistent params and this context
-  call(
-    func,
-    { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}
-  ) {
-    if (firstArg) {
-      args.unshift(firstArg);
+  call(func, { params, additionalData = {}, firstArg, additionalArgs } = {}) {
+    const args = [];
+    if (!params) {
+      params = {
+        tpl: this.tpl,
+        template: this,
+        isServer: LitTemplate.isServer,
+        $: this.$.bind(this),
+        ...additionalData,
+      };
+      args.push(params);
     }
     if (additionalArgs) {
       args.push(...additionalArgs);
     }
     if (isFunction(func)) {
-      return func.apply(this, args);
+      return func.apply(this.element, args);
     }
   }
 
