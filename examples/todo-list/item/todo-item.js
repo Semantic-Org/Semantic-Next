@@ -24,10 +24,7 @@ const createInstance = ({ tpl, $ }) => ({
   },
 });
 
-const onRendered = ({ tpl, $, firstRender }) => {
-  console.log(tpl.data.index);
-  console.log('rerender', firstRender);
-};
+const onRendered = ({ tpl, $, firstRender }) => {};
 
 const events = {
   'change .toggle'({ event, tpl, $ }) {

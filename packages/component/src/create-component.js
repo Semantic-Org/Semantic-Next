@@ -11,8 +11,8 @@ export const createComponent = ({
   template = '',
   css = false,
   spec = false,
-  templateName,
   tagName,
+  templateName = kebabToCamel(tagName),
 
   events = {},
 
@@ -21,6 +21,9 @@ export const createComponent = ({
   onRendered = noop,
   onDestroyed = noop,
   onAttributeChanged = noop,
+
+  properties = null, // allow overriding properties for lit
+  settings = {}, // a list of properties which we can use to infer type
 
   subTemplates = [],
 
@@ -46,7 +49,7 @@ export const createComponent = ({
     a sub template of another web component
   */
   let litTemplate = new LitTemplate({
-    templateName: templateName || kebabToCamel(tagName),
+    templateName: templateName,
     prototype: true,
     ast,
     css,
@@ -69,39 +72,45 @@ export const createComponent = ({
         return unsafeCSS(css);
       }
 
-      static get properties() {
-        // not yet implemented
-        return {};
-      }
+      static properties =
+        properties || WebComponentBase.getProperties(settings);
+
+      settings = {};
 
       constructor() {
         super();
 
         this.css = css;
-
+        this.setDefaultSettings(settings);
         this.tpl = litTemplate.tpl;
         this.template = litTemplate;
         this.template.setElement(this);
-        this.renderCallbacks = [];
       }
 
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
+        console.log('connected', this.menu);
         litTemplate.attach(this.renderRoot);
         this.call(beforeRendered);
       }
 
       firstUpdated() {
         super.firstUpdated();
+        console.log('first updated', this.menu);
+        litTemplate.setDataContext(this.getDataContext());
+        // nothing for now
+      }
+
+      willUpdate() {
+        super.willUpdate();
+        // nothing for now
       }
 
       updated() {
-        each(this.renderCallbacks, (callback) => callback());
-      }
-
-      addRenderCallback(callback) {
-        this.renderCallbacks.push(callback);
+        super.updated();
+        console.log('updated', this.menu);
+        // nothing for now
       }
 
       // callback if removed from dom
@@ -114,10 +123,12 @@ export const createComponent = ({
       // callback if moves doc
       adoptedCallback() {
         super.adoptedCallback();
+        console.log('adopted', this.menu);
         this.call(onMoved);
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {
+        console.log('attr change callback');
         this.adjustSettingFromAttribute(attribute, newValue);
         this.call(onAttributeChanged, {
           args: [attribute, oldValue, newValue],
@@ -161,11 +172,11 @@ export const createComponent = ({
       getSettings() {
         const settings = {};
         each(webComponent.properties, (propSettings, property) => {
-          if (property == 'class' || !propSettings.observe) {
+          if (property == 'class' || propSettings.observe === false) {
             return;
           }
           settings[property] = this[property];
-          if (!settings[this[property]]) {
+          if (spec && !settings[this[property]]) {
             settings[this[property]] = true;
           }
         });
@@ -173,9 +184,12 @@ export const createComponent = ({
       }
 
       getUIClasses() {
+        if (!spec) {
+          return;
+        }
         const classes = [];
         each(webComponent.properties, (settings, property) => {
-          if (property == 'class' || !settings.observe) {
+          if (property == 'class' || settings.observe === false) {
             return;
           }
           classes.push(this[property]);
@@ -185,14 +199,18 @@ export const createComponent = ({
       }
 
       getDataContext() {
-        return {
+        let data = {
           ...this.tpl,
           ...this.getSettings(),
-          ui: this.getUIClasses(),
         };
+        if (spec) {
+          data.ui = this.getUIClasses();
+        }
+        return data;
       }
 
       render() {
+        console.log('render', this.menu);
         const html = litTemplate.render(this.getDataContext());
         return html;
       }

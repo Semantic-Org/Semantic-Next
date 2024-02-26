@@ -99,10 +99,7 @@ export const LitTemplate = class UITemplate {
       this.call(this.onCreatedCallback);
     };
     this.onRendered = () => {
-      this.call(this.onRenderedCallback, {
-        additionalData: { firstRender: !!this.firstRender },
-      });
-      this.firstRender = false;
+      this.call(this.onRenderedCallback);
     };
     this.onDestroyed = () => {
       LitTemplate.removeTemplate(this);
@@ -343,6 +340,7 @@ export const LitTemplate = class UITemplate {
     if (!params) {
       params = {
         tpl: this.tpl,
+        data: this.tpl.data,
         template: this,
         isServer: LitTemplate.isServer,
         $: this.$.bind(this),

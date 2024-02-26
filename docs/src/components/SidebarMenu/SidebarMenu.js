@@ -2,11 +2,17 @@ import { createComponent } from '@semantic-ui/component';
 import template from './SidebarMenu.html?raw';
 import css from './SidebarMenu.css?raw';
 
-const createInstance = function (params) {
+const settings = {
+  menu: [],
+};
+
+const createInstance = function ({ tpl }) {
   return {};
 };
 
-const onCreated = function (params) {};
+const onCreated = function ({ tpl }) {
+  console.log(tpl.data);
+};
 
 const onDestroyed = function (params) {};
 
@@ -24,6 +30,7 @@ const SidebarMenu = createComponent({
   template,
   css,
   createInstance,
+  settings,
   onCreated,
   onDestroyed,
   onRendered,

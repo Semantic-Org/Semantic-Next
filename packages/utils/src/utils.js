@@ -56,6 +56,10 @@ export const isString = (x) => {
   return typeof x == 'string';
 };
 
+export const isBoolean = (x) => {
+  return typeof x == 'boolean';
+};
+
 export const isDOM = (element) => {
   if (typeof window === 'undefined') {
     return true; // ssr or not a browser

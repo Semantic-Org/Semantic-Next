@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { isFunction, noop } from '@semantic-ui/utils';
+import { each, isFunction, isNumber, isString, isPlainObject, isBoolean, isArray, isEqual } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './styles';
@@ -15,7 +15,11 @@ class WebComponentBase extends LitElement {
   // for use with light dom rendering
   static scopedStyleSheet = null;
 
-  useLight = false;
+  constructor() {
+    super();
+    this.useLight = false;
+    this.renderCallbacks = [];
+  }
 
   createRenderRoot() {
     this.useLight = this.getAttribute('expose') !== null;
@@ -81,14 +85,87 @@ class WebComponentBase extends LitElement {
     if (this.useLight) {
       this.slotContent();
     }
+    each(this.renderCallbacks, (callback) => callback());
+  }
+
+  addRenderCallback(callback) {
+    this.renderCallbacks.push(callback);
   }
 
   /*******************************
          Settings / Attrs
   *******************************/
 
-  get defaultSettings() {
-    return {};
+  setDefaultSettings(settings) {
+    this.settings = settings;
+    each(settings, (setting, name) => {
+      if (setting?.default) {
+        this.settings[name] = setting.default;
+      }
+      else {
+        this.settings[name] = setting;
+      }
+    });
+  }
+
+  static getProperties(settings = {}) {
+    const properties = {};
+    each(settings, (setting, name) => {
+      // expert mode
+      if (setting?.type) {
+        properties[name] = settings;
+      }
+      else {
+        properties[name] = WebComponentBase.mapSettingToProperty(setting);
+      }
+    });
+    return properties;
+  }
+
+  static mapSettingToProperty(setting) {
+    let property;
+    if (isString(setting)) {
+      property = {
+        type: String,
+      };
+    }
+    else if (isNumber(setting)) {
+      property = {
+        type: Number,
+      };
+    }
+    else if (isBoolean(setting)) {
+      property = {
+        type: Boolean,
+      };
+    }
+    else if (isArray(setting)) {
+      property = {
+        type: Array,
+        attribute: false,
+        reflect: false,
+      };
+    }
+    else if (isPlainObject(setting)) {
+      property = {
+        type: Object,
+        reflect: false,
+      };
+    }
+    else if (isFunction(setting)) {
+      property = {
+        type: Function,
+        attribute: false,
+        reflect: false,
+      };
+    }
+    else {
+      property = {
+        type: String,
+      };
+    }
+    //property.hasChanged = isEqual;
+    return property;
   }
 
   /*******************************
@@ -106,11 +183,6 @@ class WebComponentBase extends LitElement {
   // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $(selector, this.originalDOM.content);
-  }
-
-  // Query parent DOM
-  $$$(selector) {
-    return $(selector, document);
   }
 
   // calls callback if defined with consistent params and this context
