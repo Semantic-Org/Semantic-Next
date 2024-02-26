@@ -2,6 +2,8 @@ import { defineConfig } from 'astro/config';
 import fs from 'fs';
 import lit from '@astrojs/lit';
 
+import mdx from '@astrojs/mdx';
+
 // https://astro.build/config
 export default defineConfig({
   //site: 'https://next.semantic-ui.com',
@@ -21,5 +23,5 @@ export default defineConfig({
       },
     },
   },
-  integrations: [lit()],
+  integrations: [lit(), mdx()],
 });

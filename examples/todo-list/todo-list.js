@@ -60,7 +60,6 @@ const onRendered = (tpl) => {
     return;
   }
   tpl.setRouteFilter();
-  console.log(tpl);
 };
 
 const onDestroyed = (tpl) => {

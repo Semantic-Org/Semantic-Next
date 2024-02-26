@@ -5,6 +5,8 @@
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
+  "main": "src/semantic-ui.js",
+  "module": "src/semantic-ui.js",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -48,6 +50,9 @@
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
+  "peerDependencies": {
+    "lit": "^3.1.2"
+  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
     "@chialab/esbuild-plugin-css-import": "^0.17.1",
@@ -69,6 +74,7 @@
     "http-server": "^14.1.1",
     "husky": "^9.0.11",
     "jsdom": "^24.0.0",
+    "lit": "^3.1.2",
     "lint-staged": "^15.2.2",
     "opencommit": "^3.0.4",
     "prettierx": "^0.19.0",
@@ -82,10 +88,6 @@
     "packages/*",
     "examples/"
   ],
-  "dependencies": {
-    "lit": "^3.1.2",
-    "rollup-plugin-string": "^3.0.0"
-  },
   "lint-staged": {
     "**/*": "prettierx --write --ignore-unknown"
   }
