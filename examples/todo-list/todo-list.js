@@ -9,7 +9,7 @@ import { todoFooter } from './footer/todo-footer.js';
 import template from './todo-list.html?raw';
 import css from './todo-list.css?raw';
 
-const createInstance = (tpl, $) => ({
+const createInstance = ({ tpl, $ }) => ({
   // global state
   todos: new ReactiveVar([]),
   filter: new ReactiveVar('all'),
@@ -48,28 +48,28 @@ const createInstance = (tpl, $) => ({
   },
 });
 
-const onCreated = (tpl) => {
+const onCreated = ({ tpl }) => {
   if (typeof window === 'undefined') {
     return;
   }
   tpl.addRouter();
 };
 
-const onRendered = (tpl) => {
+const onRendered = ({ tpl }) => {
   if (typeof window === 'undefined') {
     return;
   }
   tpl.setRouteFilter();
 };
 
-const onDestroyed = (tpl) => {
+const onDestroyed = ({ tpl }) => {
   tpl.removeRouter();
 };
 
 const events = {
   // toggle all checkbox is in the main html although its functionality is in the header
   // this is per todo-mvc spec
-  'change .toggle-all'(event, tpl, $) {
+  'change .toggle-all'({ event, tpl, $ }) {
     const headerTpl = tpl.child('todoHeader');
     $(event.target).attr('checked', !$(event.target).attr('checked'));
     headerTpl.allCompleted.toggle();

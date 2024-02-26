@@ -4,7 +4,7 @@ import { createComponent } from '@semantic-ui/component';
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createInstance = (tpl, $) => ({
+const createInstance = ({ tpl, $ }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodos() {
@@ -44,7 +44,7 @@ const createInstance = (tpl, $) => ({
 });
 
 const events = {
-  'keydown input.new-todo'(event, tpl, $) {
+  'keydown input.new-todo'({ event, tpl, $ }) {
     if (event.key === 'Enter') {
       const text = $(this).val();
       if (!text) {
@@ -60,7 +60,7 @@ const events = {
   },
 };
 
-const onCreated = (tpl) => {
+const onCreated = ({ tpl }) => {
   tpl.calculateAllCompleted();
 };
 

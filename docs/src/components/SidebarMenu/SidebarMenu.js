@@ -2,20 +2,20 @@ import { createComponent } from '@semantic-ui/component';
 import template from './SidebarMenu.html?raw';
 import css from './SidebarMenu.css?raw';
 
-const createInstance = function (tpl, $) {
+const createInstance = function (params) {
   return {};
 };
 
-const onCreated = (tpl) => {};
+const onCreated = function (params) {};
 
-const onDestroyed = (tpl) => {
-  // test destroyed
-};
+const onDestroyed = function (params) {};
+
+const onRendered = function (params) {};
 
 const events = {
   // test events
-  'click .title'(event, tpl) {
-    console.log('title clicked');
+  'click .title'(params) {
+    console.log('click title', this, params);
   },
 };
 
@@ -26,6 +26,7 @@ const SidebarMenu = createComponent({
   createInstance,
   onCreated,
   onDestroyed,
+  onRendered,
   events,
 });
 
