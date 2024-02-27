@@ -199,12 +199,14 @@ class TemplateCompiler {
               newNode.as = iterateAs;
             }
 
+            contentStack.push(newNode);
             contentTarget.push(newNode);
             contentBranch = newNode;
             break;
 
           case 'CLOSE_EACH':
             stack.pop();
+            contentStack.pop();
             contentBranch = last(contentStack); // Reset current branch
             break;
         }

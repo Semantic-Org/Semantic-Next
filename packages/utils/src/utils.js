@@ -324,6 +324,12 @@ export const range = (start, stop, step = 1) => {
     });
 };
 
+export const where = (array, properties) => {
+  return array.filter((obj) =>
+    Object.keys(properties).every((key) => obj[key] === properties[key])
+  );
+};
+
 /*-------------------
        Objects
 --------------------*/
@@ -440,6 +446,11 @@ export const reverseKeys = (obj) => {
   });
   return newObj;
 };
+
+export const some = (collection, predicate) => {
+  return collection.some(predicate);
+};
+export const any = some;
 
 /*-------------------
     Array / Object

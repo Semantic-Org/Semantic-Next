@@ -44,9 +44,8 @@ export const createComponent = ({
   }
 
   /*
-    We can choose either to render this component as a web component
-    or as a naked template. In the case of a naked template this is typically
-    a sub template of another web component
+    Create Component Returns Either a LitTemplate or WebComponent
+    LitTemplates are created as a prototype that can be cloned when instantiated
   */
   let litTemplate = new LitTemplate({
     templateName: templateName,
@@ -79,7 +78,6 @@ export const createComponent = ({
 
       constructor() {
         super();
-
         this.css = css;
         this.setDefaultSettings(settings);
       }
@@ -92,7 +90,7 @@ export const createComponent = ({
       willUpdate() {
         super.willUpdate();
         this.template = litTemplate.clone({
-          data: this.getDataContext(),
+          data: this.getData(),
           element: this,
           renderRoot: this.renderRoot,
         });
@@ -193,15 +191,20 @@ export const createComponent = ({
         return classString;
       }
 
-      getDataContext() {
+      getData() {
         let data = {
-          ...this.tpl,
           ...this.getSettings(),
         };
         if (spec) {
           data.ui = this.getUIClasses();
         }
         return data;
+      }
+      getDataContext() {
+        return {
+          ...this.tpl,
+          ...this.getData(),
+        };
       }
 
       render() {

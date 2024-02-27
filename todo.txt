@@ -15,6 +15,7 @@ Docs
 
 Templating Syntax
 - Add syntax for embedding web components
+- Add syntax for part ?
 - Add mechanism for inherting data context from parent template
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
@@ -27,8 +28,12 @@ Components
 - Determine build step for components from configuration json. Small/medium/large
 - Build out button
 
+CI
+- Add stylelint
+
 Testing
 - Add jsdom + browser testing for component package
+- Redo coverage on functionality added for v1
 
 
 Completed

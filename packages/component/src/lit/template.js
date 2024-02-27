@@ -1,11 +1,11 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { fatal, each, remove, generateID, isEqual, noop, isServer, isFunction, extend } from '@semantic-ui/utils';
+import { fatal, each, remove, generateID, isEqual, noop, isServer, isFunction, extend, clone } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
 
-export const LitTemplate = class UITemplate {
+export const LitTemplate = class LitTemplate {
   static templateCount = 0;
 
   static isServer = isServer();
@@ -76,7 +76,7 @@ export const LitTemplate = class UITemplate {
   initialize() {
     let tpl = this;
     if (isFunction(this.createInstance)) {
-      this.tpl = {};
+      this.tpl = { data: this.data };
       tpl = this.call(this.createInstance);
       extend(this.tpl, tpl);
     }
@@ -348,10 +348,10 @@ export const LitTemplate = class UITemplate {
     if (!params) {
       params = {
         tpl: this.tpl,
-        data: this.tpl.data,
+        data: clone(this.tpl.data), // no mutations
         template: this,
         isServer: LitTemplate.isServer,
-        isClient: !LitTemplate.isServer,
+        isClient: !LitTemplate.isServer, // convenience
         $: this.$.bind(this),
         ...additionalData,
       };

@@ -1,59 +1,37 @@
-<div class="toc">
-  <div class="title">
-    <i class="icon info circle"></i>
-    <div class="text"> Guide </div>
+{{#each section in getMenu}}
+  <div class="{{activeIf isActiveItem section}} title" data-href="{{section.url}}">
+    {{#if section.icon}}
+      <i class="{{section.icon}} icon"></i>
+    {{else if section.image}}
+      <img src="{{section.image}}">
+    {{/if}}
+    <div class="text">{{section.name}}</div>
   </div>
-  <div class="content">
-    <div class="menu"> <a class="item " href="/button">Introduction</a><a class="item " href="/todo">Using Web Components</a><a class="item " href="/page-3">Web Components</a> </div>
+  <div class="{{activeIf isActiveItem section}} content">
+    {{#if section.pages}}
+      <div class="menu">
+        {{#each page in section.pages}}
+          {{#if page.pages}}
+            <div class="{{activeIf isActiveItem page}}title item">
+              <i class="dropdown icon"></i>
+              <div class="text">{{page.name}}</div>
+            </div>
+            <div class="{{activeIf isActiveItem page}} content">
+              <div class="menu">
+                {{#each page in page.pages}}
+                  <a class="{{activeIf isActiveItem page}}item" href="{{page.url}}">
+                    {{page.name}}
+                  </a>
+                {{/each}}
+              </div>
+            </div>
+          {{else}}
+            <a class="{{activeIf isActiveItem page}}item" href="{{page.url}}">
+              {{page.name}}
+            </a>
+          {{/if}}
+        {{/each}}
+      </div>
+    {{/if}}
   </div>
-  <div class="title active">
-    <i class="icon paint brush"></i>
-    <div class="text"> Theming </div>
-  </div>
-  <div class="content active">
-    <div class="menu"> <a class="item active" href="/button">Using Themes</a><a class="item " href="/page-3">Creating Themes</a><a class="item " href="/todo">Dev Tools</a><a class="item " href="/todo">Figma &amp; Prototyping</a> </div>
-  </div>
-  <div class="title">
-    <i class="icon heart"></i>
-    <div class="text"> CSS Components </div>
-  </div>
-  <div class="content">
-    <div class="menu"> <a class="item " href="/page-3">Site &amp; Colors</a><a class="item " href="/page-4">Headers</a><a class="item " href="/page-4">Icons</a> </div>
-  </div>
-  <div class="title">
-    <i class="icon cubes "></i>
-    <div class="text"> UI Components </div>
-  </div>
-  <div class="content">
-    <div class="menu">
-      <div class="title">
-        <i class="dropdown icon"></i>
-        <div class="text"> Essential </div>
-      </div>
-      <div class="content">
-        <div class="menu"> <a class="item " href="/page-5">Page 5</a><a class="item " href="/page-6">Page 6</a> </div>
-      </div>
-      <div class="title">
-        <i class="dropdown icon"></i>
-        <div class="text"> Form Components </div>
-      </div>
-      <div class="content">
-        <div class="menu"> <a class="item " href="/page-7">Page 7</a><a class="item " href="/page-8">Page 8</a> </div>
-      </div>
-      <div class="title">
-        <i class="dropdown icon"></i>
-        <div class="text"> Website Components </div>
-      </div>
-      <div class="content">
-        <div class="menu"> <a class="item " href="/page-7">Page 7</a><a class="item " href="/page-8">Page 8</a> </div>
-      </div>
-      <div class="title">
-        <i class="dropdown icon"></i>
-        <div class="text"> App Components </div>
-      </div>
-      <div class="content">
-        <div class="menu"> <a class="item " href="/page-7">Page 7</a><a class="item " href="/page-8">Page 8</a> </div>
-      </div>
-    </div>
-  </div>
-</div>
+{{/each}}

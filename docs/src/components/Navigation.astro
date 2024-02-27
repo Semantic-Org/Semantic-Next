@@ -2,6 +2,7 @@
 const { currentRoute } = Astro.props;
 import './Navigation.css';
 import { SidebarMenu } from'@components/SidebarMenu/SidebarMenu.js';
+import { getNavMenu } from '@helpers/get-nav-menu.js';
 
 ---
 <navigation>
@@ -9,15 +10,9 @@ import { SidebarMenu } from'@components/SidebarMenu/SidebarMenu.js';
 		<input type="text" placeholder="Search...">
 		<i class="search icon"></i>
 	</navSearch>
-	<SidebarMenu client:load></SidebarMenu>
-  <script>
-    import { getNavMenu } from '@helpers/get-nav-menu.js';
-    import { $ } from '@semantic-ui/query';
-    const el = $('sidebar-menu')[0];
-    el.menu = getNavMenu();
-    console.log('outside', el.menu);
-    $('sidebar-menu').initialize({
-      menu: getNavMenu()
-    });
-  </script>
+
+	<SidebarMenu client:load
+    menu={getNavMenu()}
+    activeURL={Astro.url.pathname}
+  />
 </navigation>
