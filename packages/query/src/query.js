@@ -36,6 +36,14 @@ export class Query {
     Object.assign(this, elements);
   }
 
+  each(callback) {
+    Array.from(this).forEach((el, index) => {
+      const $el = new Query(el);
+      callback.call($el, el, index);
+    });
+    return this;
+  }
+
   removeAllEvents() {
     Query._eventHandlers = [];
   }
@@ -119,7 +127,7 @@ export class Query {
     const abortController = options?.abortController || new AbortController();
     const signal = abortController.signal;
 
-    Array.from(this).forEach((el) => {
+    this.each((el) => {
       let delegateHandler;
       if (targetSelector) {
         delegateHandler = (e) => {
@@ -177,14 +185,12 @@ export class Query {
   }
 
   remove() {
-    Array.from(this).forEach((el) => el.remove());
-    return this;
+    return this.each((el) => el.remove());
   }
 
   addClass(classNames) {
     const classesToAdd = classNames.split(' ');
-    Array.from(this).forEach((el) => el.classList.add(...classesToAdd));
-    return this;
+    return this.each((el) => el.classList.add(...classesToAdd));
   }
 
   hasClass(className) {
@@ -193,24 +199,22 @@ export class Query {
 
   removeClass(classNames) {
     const classesToRemove = classNames.split(' ');
-    Array.from(this).forEach((el) => el.classList.remove(...classesToRemove));
-    return this;
+    return this.each((el) => el.classList.remove(...classesToRemove));
   }
 
   html(newHTML) {
     if (newHTML !== undefined) {
-      Array.from(this).forEach((el) => (el.innerHTML = newHTML));
-      return this;
+      return this.each((el) => (el.innerHTML = newHTML));
     }
     else if (this.length) {
       return this[0].innerHTML;
     }
+    return this;
   }
 
   outerHTML(newHTML) {
     if (newHTML !== undefined) {
-      Array.from(this).forEach((el) => (el.outerHTML = newHTML));
-      return this;
+      return this.each((el) => (el.outerHTML = newHTML));
     }
     else if (this.length) {
       return this[0].outerHTML;
@@ -219,8 +223,7 @@ export class Query {
 
   text(newText) {
     if (newText !== undefined) {
-      Array.from(this).forEach((el) => (el.textContent = newText));
-      return this;
+      return this.each((el) => (el.textContent = newText));
     }
     else {
       const childNodes = (el) => {
@@ -258,7 +261,7 @@ export class Query {
   value(newValue) {
     if (newValue !== undefined) {
       // Set the value for each element
-      Array.from(this).forEach((el) => {
+      return this.each((el) => {
         if (
           el instanceof HTMLInputElement ||
           el instanceof HTMLSelectElement ||
@@ -267,7 +270,6 @@ export class Query {
           el.value = newValue;
         }
       });
-      return this;
     }
     else {
       // Get the value of each element
@@ -323,12 +325,12 @@ export class Query {
     if (typeof attribute === 'object') {
       // Handle object of attribute-value pairs
       Object.entries(attribute).forEach(([attr, val]) => {
-        Array.from(this).forEach((el) => el.setAttribute(attr, val));
+        this.each((el) => el.setAttribute(attr, val));
       });
     }
     else if (value !== undefined) {
       // Handle single attribute-value pair
-      Array.from(this).forEach((el) => el.setAttribute(attribute, value));
+      this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
       const attributes = Array.from(this).map((el) =>
@@ -340,16 +342,7 @@ export class Query {
   }
 
   removeAttr(attributeName) {
-    Array.from(this).forEach((el) => el.removeAttribute(attributeName));
-    return this;
-  }
-
-  each(callback) {
-    Array.from(this).forEach((el, index) => {
-      // Call the callback with 'this' context set to the current element
-      callback.call(el, new Query(el), index);
-    });
-    return this;
+    return this.each((el) => el.removeAttribute(attributeName));
   }
 
   get(index) {
@@ -385,7 +378,7 @@ export class Query {
   }
 
   initialize(settings) {
-    return Array.from(this).forEach((el) => {
+    return this.each((el) => {
       Object.entries(settings).forEach(([prop, val]) => {
         el[prop] = val;
       });
