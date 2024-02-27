@@ -34,12 +34,13 @@ class TemplateCompiler {
     this can be cached on the web component class
   */
   compile(template = this.template) {
+    template = template.trim();
+
     const scanner = new Scanner(template);
 
     if (!isString(template)) {
       scanner.fatal('Template is not a string', template);
     }
-    template = template.trim();
 
     // quicker to compile regexp once
     const tagRegExp = TemplateCompiler.tagRegExp;
