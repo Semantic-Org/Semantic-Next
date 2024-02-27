@@ -50,7 +50,7 @@ export const createComponent = ({
   */
   let litTemplate = new LitTemplate({
     templateName: templateName,
-    prototype: true,
+    isPrototype: true,
     ast,
     css,
     events,
@@ -82,53 +82,48 @@ export const createComponent = ({
 
         this.css = css;
         this.setDefaultSettings(settings);
-        this.tpl = litTemplate.tpl;
-        this.template = litTemplate;
-        this.template.setElement(this);
       }
 
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
-        console.log('connected', this.menu);
-        litTemplate.attach(this.renderRoot);
-        this.call(beforeRendered);
-      }
-
-      firstUpdated() {
-        super.firstUpdated();
-        console.log('first updated', this.menu);
-        litTemplate.setDataContext(this.getDataContext());
-        // nothing for now
       }
 
       willUpdate() {
         super.willUpdate();
+        this.template = litTemplate.clone({
+          data: this.getDataContext(),
+          element: this,
+          renderRoot: this.renderRoot,
+        });
+        this.tpl = this.template.tpl;
+      }
+
+      firstUpdated() {
+        super.firstUpdated();
         // nothing for now
       }
 
       updated() {
         super.updated();
-        console.log('updated', this.menu);
         // nothing for now
       }
 
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
-        litTemplate.onDestroyed();
+        this.template.onDestroyed(); // destroy instance
+        litTemplate.onDestroyed(); // destroy prototype
         this.call(onDestroyed);
       }
 
       // callback if moves doc
       adoptedCallback() {
         super.adoptedCallback();
-        console.log('adopted', this.menu);
         this.call(onMoved);
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {
-        console.log('attr change callback');
         this.adjustSettingFromAttribute(attribute, newValue);
         this.call(onAttributeChanged, {
           args: [attribute, oldValue, newValue],
@@ -210,8 +205,7 @@ export const createComponent = ({
       }
 
       render() {
-        console.log('render', this.menu);
-        const html = litTemplate.render(this.getDataContext());
+        const html = this.template.render(this.getDataContext());
         return html;
       }
     };

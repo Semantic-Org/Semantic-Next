@@ -15,12 +15,14 @@ export const LitTemplate = class UITemplate {
     ast,
     template,
     data,
+    element,
+    renderRoot,
     css,
     events,
     subTemplates,
     createInstance,
     parentTemplate, // the parent template when nested
-    prototype = false,
+    isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
     onRendered = noop,
@@ -42,9 +44,12 @@ export const LitTemplate = class UITemplate {
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
     this.id = generateID();
-    this.isPrototype = prototype;
+    this.isPrototype = isPrototype;
     this.attachStyles = attachStyles;
-    LitTemplate.addTemplate(this);
+    this.element = element;
+    if (renderRoot) {
+      this.attach(renderRoot);
+    }
   }
 
   setDataContext(data) {
@@ -179,8 +184,8 @@ export const LitTemplate = class UITemplate {
 
   clone(settings) {
     const defaultSettings = {
-      element: this.element,
       templateName: this.templateName,
+      element: this.element,
       ast: this.ast,
       css: this.css,
       events: this.events,
@@ -337,12 +342,16 @@ export const LitTemplate = class UITemplate {
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalData = {}, firstArg, additionalArgs } = {}) {
     const args = [];
+    if (this.isPrototype) {
+      return;
+    }
     if (!params) {
       params = {
         tpl: this.tpl,
         data: this.tpl.data,
         template: this,
         isServer: LitTemplate.isServer,
+        isClient: !LitTemplate.isServer,
         $: this.$.bind(this),
         ...additionalData,
       };

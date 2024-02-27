@@ -24,8 +24,6 @@ const createInstance = ({ tpl, $ }) => ({
   },
 });
 
-const onRendered = ({ tpl, $, firstRender }) => {};
-
 const events = {
   'change .toggle'({ event, tpl, $ }) {
     tpl.toggleCompleted();
@@ -55,7 +53,6 @@ const todoItem = createComponent({
   template,
   css,
   createInstance,
-  onRendered,
   events,
 });
 

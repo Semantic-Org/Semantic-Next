@@ -48,18 +48,16 @@ const createInstance = ({ tpl, $ }) => ({
   },
 });
 
-const onCreated = ({ tpl }) => {
-  if (typeof window === 'undefined') {
-    return;
+const onCreated = ({ tpl, isClient }) => {
+  if (isClient) {
+    tpl.addRouter();
   }
-  tpl.addRouter();
 };
 
-const onRendered = ({ tpl }) => {
-  if (typeof window === 'undefined') {
-    return;
+const onRendered = ({ tpl, isClient }) => {
+  if (isClient) {
+    tpl.setRouteFilter();
   }
-  tpl.setRouteFilter();
 };
 
 const onDestroyed = ({ tpl }) => {

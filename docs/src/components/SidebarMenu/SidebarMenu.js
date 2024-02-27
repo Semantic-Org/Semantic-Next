@@ -14,9 +14,9 @@ const onCreated = function ({ tpl }) {
   console.log(tpl.data);
 };
 
-const onDestroyed = function (params) {};
+const onDestroyed = function ({ tpl }) {};
 
-const onRendered = function (params) {};
+const onRendered = function ({ tpl }) {};
 
 const events = {
   // test events
