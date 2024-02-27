@@ -21,13 +21,17 @@
 .title.active {
   color: #ffffff;
 }
-.title .icon:not(.dropdown) {
+.title ui-icon:not([icon="dropdown"]) {
   display: block;
   font-size: 18px;
   width: 1.5rem;
   flex: 0 0 auto;
   text-align: center;
   margin-right: 1rem;
+}
+.title ui-icon[icon="dropdown"] {
+  float: right;
+  opacity: 0.3;
 }
 .content {
   display: none;

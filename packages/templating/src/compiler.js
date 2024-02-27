@@ -20,13 +20,15 @@ class TemplateCompiler {
     EXPRESSION: /^{{\s*/,
   };
 
+  static preprocessRegExp = {
+    WEB_COMPONENT_SELF_CLOSING: /<(\w+-\w+)([^>]*)\/>/g,
+  };
+
   static templateRegExp = {
-    verbose: {
-      keyword: /^template\W/g,
-      properties: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
-    },
-    standard: /(\w.*?)($|\s)/gm,
-    dataObject: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
+    VERBOSE_KEYWORD: /^template\W/g,
+    VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
+    STANDARD: /(\w.*?)($|\s)/gm,
+    DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
   };
 
   /*
@@ -34,7 +36,7 @@ class TemplateCompiler {
     this can be cached on the web component class
   */
   compile(template = this.template) {
-    template = template.trim();
+    template = TemplateCompiler.preprocessTemplate(template);
 
     const scanner = new Scanner(template);
 
@@ -48,7 +50,7 @@ class TemplateCompiler {
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
         if (scanner.matches(tagRegExp[type])) {
-          const context = scanner.getContext(); // Get context before consuming
+          const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
           const content = this.getValue(scanner.consumeUntil('}}').trim());
           scanner.consume('}}');
@@ -241,19 +243,19 @@ class TemplateCompiler {
     // quicker to compile regexp once
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
-    if (regExp.verbose.keyword.exec(expression)) {
+    if (regExp.VERBOSE_KEYWORD.exec(expression)) {
       // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
-      const matches = [...expression.matchAll(regExp.verbose.properties)];
+      const matches = [...expression.matchAll(regExp.VERBOSE_PROPERTIES)];
       each(matches, (match, index) => {
         const property = match[1];
-        const value = this.getObjectFromString(match[2]);
+        const value = TemplateCompiler.getObjectFromString(match[2]);
         templateInfo[property] = value;
       });
     }
     else {
       // standard notation {{> templateName data1=value data2=value}}
       let data = {};
-      const matches = [...expression.matchAll(regExp.standard)];
+      const matches = [...expression.matchAll(regExp.STANDARD)];
       each(matches, (match, index) => {
         if (index == 0) {
           templateInfo.name = `'${match[0].trim()}'`;
@@ -272,17 +274,34 @@ class TemplateCompiler {
     return templateInfo;
   }
 
-  getObjectFromString(objectString = '') {
-    const regex = TemplateCompiler.templateRegExp.dataObject;
+  static getObjectFromString(objectString = '') {
+    const regexp = TemplateCompiler.templateRegExp.DATA_OBJECT;
     const obj = {};
     let match;
     let isObject = false;
-    while ((match = regex.exec(objectString)) !== null) {
+    while ((match = regexp.exec(objectString)) !== null) {
       isObject = true;
       obj[match[1]] = match[2].trim();
     }
     // if this isnt an object we want to return the string value which may be an expression
     return isObject ? obj : objectString.trim();
+  }
+
+  static preprocessTemplate(template = '') {
+    template = template.trim();
+
+    /*
+      support self closing web component tags
+      this allows you to do <ui-icon icon="foo" />
+      instead of <ui-icon icon="foo"></ui-icon>
+    */
+    template = template.replace(
+      TemplateCompiler.preprocessRegExp.WEB_COMPONENT_SELF_CLOSING,
+      (match, tagName, attributes) => {
+        return `<${tagName}${attributes}></${tagName}>`;
+      }
+    );
+    return template;
   }
 }
 

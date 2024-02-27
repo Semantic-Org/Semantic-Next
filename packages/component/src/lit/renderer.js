@@ -21,7 +21,6 @@ export class LitRenderer {
 
   constructor({ ast, data, subTemplates }) {
     this.ast = ast || '';
-    console.log(ast);
     this.data = data;
     this.subTemplates = subTemplates;
     this.resetHTML();
