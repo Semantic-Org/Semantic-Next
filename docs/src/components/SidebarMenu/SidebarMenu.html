@@ -1,12 +1,23 @@
 {{#each section in getMenu}}
-  <div class="{{activeIf isActiveItem section}} title" data-href="{{section.url}}">
-    {{#if section.icon}}
-      <ui-icon icon={{section.icon}} />
-    {{else if section.image}}
-      <img src="{{section.image}}">
-    {{/if}}
-    <div class="text">{{section.name}}</div>
-  </div>
+  {{#if isLinkItem section}}
+    <a class="{{activeIf isActiveItem section}} title" href="{{section.url}}">
+      {{#if section.icon}}
+        <ui-icon icon={{section.icon}} />
+      {{else if section.image}}
+        <img src="{{section.image}}">
+      {{/if}}
+      <div class="text">{{section.name}}</div>
+    </a>
+  {{else}}
+    <div class="{{activeIf isActiveItem section}} title">
+      {{#if section.icon}}
+        <ui-icon icon={{section.icon}} />
+      {{else if section.image}}
+        <img src="{{section.image}}">
+      {{/if}}
+      <div class="text">{{section.name}}</div>
+    </div>
+  {{/if}}
   <div class="{{activeIf isActiveItem section}} content">
     {{#if section.pages}}
       <div class="menu">

@@ -11,7 +11,7 @@ export const getNavMenu = () => {
     },
     {
       name: 'Theming',
-      active: true,
+      url: '/theming',
       icon: 'paint brush',
       pages: [
         { name: 'Using Themes', url: '/test' },

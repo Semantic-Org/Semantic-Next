@@ -9,7 +9,6 @@ const settings = {
 };
 
 const createInstance = function ({ tpl, data }) {
-  console.log(data);
   return {
     getMenu() {
       return tpl.filterVisibleSections(data.menu);
@@ -35,12 +34,20 @@ const createInstance = function ({ tpl, data }) {
         return acc;
       }, []);
     },
-    isActiveItem(item) {
-      if (item?.url === data.activeURL) {
+    isLinkItem(item) {
+      return item.url && !tpl.isActiveItem(item);
+    },
+    isCurrentItem(item) {
+      if (tpl.is.activeItem(item)) {
         return true;
       }
       if (isArray(item.pages)) {
-        return any(item.pages, tpl.isActiveItem);
+        return any(item.pages, tpl.isCurrentItem);
+      }
+    },
+    isActiveItem(item) {
+      if (item?.url === data.activeURL) {
+        return true;
       }
     },
   };
@@ -54,8 +61,8 @@ const onRendered = function ({ tpl }) {};
 
 const events = {
   // test events
-  'click .title'(params) {
-    console.log('click title', this, params);
+  'click [data-href]'(params) {
+    console.log('click data href', this, params);
   },
 };
 

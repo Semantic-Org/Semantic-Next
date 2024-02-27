@@ -9,6 +9,7 @@
   transition: 0.3s color ease;
   padding: 0.5rem 0rem;
   color: #798088;
+  text-decoration: none;
 }
 .title:hover {
   color: #ffffff;

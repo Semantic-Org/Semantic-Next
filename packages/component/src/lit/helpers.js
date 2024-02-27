@@ -3,73 +3,79 @@ import { capitalize, toTitleCase, formatDate } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
 export const Helpers = {
-  is: (a, b) => {
+  is(a, b) {
     return a == b;
   },
-  not: (a) => {
+  not(a) {
     return !a;
+  },
+  both(a, b) {
+    return a && b;
   },
   maybe(expr, trueClass = '', falseClass = '') {
     return expr ? trueClass + ' ' : falseClass;
   },
-  activeIf: (expr) => {
+  classIf(expr, trueClass = '', falseClass = '') {
+    return expr ? trueClass + ' ' : falseClass;
+  },
+  activeIf(expr) {
     return Helpers.maybe(expr, 'active', '');
   },
-  selectedIf: (expr) => {
+  selectedIf(expr) {
     return Helpers.maybe(expr, 'selected', '');
   },
-  capitalize: (text = '') => {
+  capitalize(text = '') {
     return capitalize(text);
   },
-  titleCase: (text = '') => {
+  titleCase(text = '') {
     return toTitleCase(text);
   },
-  disabledIf: (expr) => {
+  disabledIf(expr) {
     return Helpers.maybe(expr, 'disabled', '');
   },
-  checkedIf: (expr) => {
+  checkedIf(expr) {
     return Helpers.maybe(expr, 'checked', '');
   },
-  isEqual: (a, b) => {
+  isEqual(a, b) {
     return a == b;
   },
   maybePlural(value, plural = 's') {
     return value == 1 ? '' : plural;
   },
-  isNotEqual: (a, b) => {
+  isNotEqual(a, b) {
     return a != b;
   },
-  isExactlyEqual: (a, b) => {
+  isExactlyEqual(a, b) {
     return a === b;
   },
-  isNotExactlyEqual: (a, b) => {
+  isNotExactlyEqual(a, b) {
     return a !== b;
   },
-  greaterThan: (a, b) => {
+  greaterThan(a, b) {
     return a > b;
   },
-  lessThan: (a, b) => {
+  lessThan(a, b) {
     return a < b;
   },
-  greaterThanEquals: (a, b) => {
+  greaterThanEquals(a, b) {
     return a >= b;
   },
-  lessThanEquals: (a, b) => {
+  lessThanEquals(a, b) {
     return a <= b;
   },
-  numberFromIndex: (a) => {
+  numberFromIndex(a) {
     return a + 1;
   },
-  formatDate: (date = new Date(), format = 'L') => {
+  formatDate(date = new Date(), format = 'L') {
     return formatDate(date, format);
   },
-  formatDateTime: (date = new Date(), format = 'LLL') => {
+  formatDateTime(date = new Date(), format = 'LLL') {
     return formatDate(date, format);
   },
-  formatDateTimeSeconds: (date = new Date(), format = 'LTS') => {
+  formatDateTimeSeconds(date = new Date(), format = 'LTS') {
     return formatDate(date, format);
   },
-  object: ({ obj }) => {
+  object({ obj }) {
     return obj;
   },
   log(...args) {
