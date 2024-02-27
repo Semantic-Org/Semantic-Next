@@ -1,9 +1,14 @@
 Up next
-+ Figure out final solve for SSR css injection
-- Refactor callbacks to use {} syntax instead of params
 - Figure out component settings
 - Build out nav menu
 - Create icon component
+- Finish baseline nav menu
+- Create accordion component
+- Figure out animation engine
+
+Component Settings
+- Settings or spec
+- Settings specify attribute, allowedValues, defaultValue
 
 Docs
 - Dupe lit in astro build
@@ -30,9 +35,11 @@ Completed
 =====================
 
 week of feb 23
-- Set up astro docs project
-- build scaffolding for docs
-- get server side rendering with hydration working
++ Figure out final solve for SSR css injection
++ Refactor callbacks to use {} syntax instead of params
++ Set up astro docs project
++ build scaffolding for docs
++ get server side rendering with hydration working
 
 week of feb 16
 + Add reactivity template helpers for guard, nonreactive, reactiveDebug

@@ -501,29 +501,31 @@ export const clone = (src, seen = new Map()) => {
   Simplify iterating over objects and arrays
 */
 export const each = (obj, func, context) => {
-  if (obj === null) {
+  if (obj === null || obj === undefined) {
     return obj;
   }
-
   const iteratee = context ? func.bind(context) : func;
-
-  if (Array.isArray(obj)) {
+  if (isObject(obj) || isFunction(obj)) {
+    if (obj.length !== undefined && typeof obj.length === 'number') {
+      obj = Array.from(obj);
+    }
+  }
+  if (isArray(obj)) {
     for (let i = 0; i < obj.length; ++i) {
       if (iteratee(obj[i], i, obj) === false) {
-        break; // Exit early if callback explicitly returns false
+        break;
       }
     }
   }
-  else if (isObject(obj)) {
-    const objKeys = Object.keys(obj);
-    for (const key of objKeys) {
+  else {
+    const keys = Object.keys(obj);
+    for (let key of keys) {
       if (iteratee(obj[key], key, obj) === false) {
-        break; // Exit early if callback explicitly returns false
+        break;
       }
     }
   }
-
-  return obj; // Return the original object
+  return obj;
 };
 
 /*-------------------

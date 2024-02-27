@@ -289,20 +289,34 @@ export class Query {
     return this.value(...args);
   }
 
-  css(property, value) {
-    if (typeof property === 'object') {
-      Object.entries(property).forEach(([prop, val]) => {
-        Array.from(this).forEach((el) => (el.style[prop] = val));
-      });
+  css(property, value, settings = { includeComputed: false }) {
+    const elements = Array.from(this);
+    // Setting a value or multiple values
+    if (typeof property === 'object' || value !== undefined) {
+      if (typeof property === 'object') {
+        Object.entries(property).forEach(([prop, val]) => {
+          elements.forEach((el) => (el.style[prop] = val));
+        });
+      }
+      else {
+        elements.forEach((el) => (el.style[property] = value));
+      }
+      return this; // Return the Query instance for chaining
     }
-    else if (value !== undefined) {
-      Array.from(this).forEach((el) => (el.style[property] = value));
+    else {
+      // Attempt to get a style directly
+      if (elements?.length) {
+        const styles = elements.map((el) => {
+          const inlineStyle = el.style[property];
+          if (inlineStyle !== '') return inlineStyle; // Return inline style if present
+          if (settings.includeComputed) {
+            return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
+          }
+          return undefined; // If includeComputed is false, return undefined
+        });
+        return elements.length === 1 ? styles[0] : styles;
+      }
     }
-    else if (this.length) {
-      const properties = Array.from(this).map((el) => el.style[property]);
-      return properties.length > 1 ? properties : properties[0];
-    }
-    return this;
   }
 
   attr(attribute, value) {
