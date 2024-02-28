@@ -330,6 +330,12 @@ export const where = (array, properties) => {
   );
 };
 
+export const flatten = (arr) => {
+  return arr.reduce((acc, val) => {
+    return Array.isArray(val) ? acc.concat(flattenArray(val)) : acc.concat(val);
+  }, []);
+};
+
 /*-------------------
        Objects
 --------------------*/
@@ -338,11 +344,15 @@ export const where = (array, properties) => {
   Return keys from object
 */
 export const keys = (obj) => {
-  return Object.keys(obj);
+  if (isObject(obj)) {
+    return Object.keys(obj);
+  }
 };
 
 export const values = (obj) => {
-  return Object.values(obj);
+  if (isObject(obj)) {
+    return Object.values(obj);
+  }
 };
 
 export const mapObject = function (obj, callback) {

@@ -4,8 +4,10 @@ import { buildProject } from './lib/build-project.js';
 await buildDeps({
   watch: true,
 });
-/*
+
 await buildProject({
   watch: true,
-  outDir: 'docs/public/semantic'
-});*/
+  includeComponents: false,
+  includeJavascript: false,
+  outDir: 'docs/src/css/sui',
+});

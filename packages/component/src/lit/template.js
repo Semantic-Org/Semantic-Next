@@ -346,9 +346,11 @@ export const LitTemplate = class LitTemplate {
       return;
     }
     if (!params) {
+      const data = clone(this.tpl.data);
       params = {
         tpl: this.tpl,
-        data: clone(this.tpl.data), // no mutations
+        data: data,
+        settings: data, // Todo: extract only settings from data
         template: this,
         isServer: LitTemplate.isServer,
         isClient: !LitTemplate.isServer, // convenience

@@ -4,7 +4,7 @@ import { range } from '@semantic-ui/utils';
 
 import template from './events.html?raw';
 
-const createInstance = (tpl, $) => {
+const createInstance = ({ tpl, $ }) => {
   console.log('rendering events tab');
   return {
     number: new ReactiveVar(6),
@@ -40,26 +40,26 @@ const createInstance = (tpl, $) => {
 };
 
 const events = {
-  'input input[type="text"]'(event, tpl, $) {
+  'input input[type="text"]'({ event, tpl, $ }) {
     tpl.number.value = $(this).value();
   },
-  'click .set'(event, tpl, $) {
+  'click .set'({ event, tpl, $ }) {
     tpl.number.value = 5;
     $('input').value(5);
   },
-  'click .add.end'(event, tpl) {
+  'click .add.end'({ event, tpl }) {
     tpl.persons.push(tpl.getPerson());
   },
-  'click .add.front'(event, tpl) {
+  'click .add.front'({ event, tpl }) {
     tpl.persons.unshift(tpl.getPerson());
   },
-  'click .replace.second'(event, tpl) {
+  'click .replace.second'({ event, tpl }) {
     tpl.persons.setIndex(1, tpl.getPerson());
   },
-  'click .remove.front'(event, tpl) {
+  'click .remove.front'({ event, tpl }) {
     tpl.persons.removeIndex(0);
   },
-  'click .remove.end'(event, tpl) {
+  'click .remove.end'({ event, tpl }) {
     tpl.persons.splice(-1);
   },
 };

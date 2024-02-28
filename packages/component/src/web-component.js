@@ -1,8 +1,8 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, isBoolean, isArray, isEqual } from '@semantic-ui/utils';
+import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray, flatten } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
-import { scopeStyles } from './styles';
+import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
   This extends the base Lit element class
@@ -23,6 +23,7 @@ class WebComponentBase extends LitElement {
 
   createRenderRoot() {
     this.useLight = this.getAttribute('expose') !== null;
+    console.log(this, this.getAttribute('expose'));
     if (this.useLight) {
       this.applyScopedStyles(this.tagName, this.css);
       this.storeOriginalContent.apply(this);
@@ -97,28 +98,39 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   setDefaultSettings(settings) {
-    this.settings = settings;
+    this.defaultSettings = settings;
     each(settings, (setting, name) => {
-      if (setting?.default) {
-        this.settings[name] = setting.default;
+      if (setting?.default !== undefined) {
+        this.defaultSettings[name] = setting.default;
       }
       else {
-        this.settings[name] = setting;
+        this.defaultSettings[name] = setting;
       }
     });
   }
 
-  static getProperties(settings = {}) {
-    const properties = {};
-    each(settings, (setting, name) => {
-      // expert mode
-      if (setting?.type) {
-        properties[name] = settings;
-      }
-      else {
-        properties[name] = WebComponentBase.mapSettingToProperty(setting);
-      }
-    });
+  static getProperties({ properties = {}, settings, componentSpec }) {
+    if (keys(properties).length) {
+      return properties;
+    }
+    if (componentSpec) {
+      each(componentSpec.settings, (valueArrays, setting) => {
+        properties[setting] = {
+          type: String,
+        };
+      });
+    }
+    if (settings) {
+      each(settings, (setting, name) => {
+        // expert mode
+        if (setting?.type) {
+          properties[name] = settings;
+        }
+        else {
+          properties[name] = WebComponentBase.mapSettingToProperty(setting);
+        }
+      });
+    }
     return properties;
   }
 

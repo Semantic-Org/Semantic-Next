@@ -2,7 +2,8 @@ export const getNavMenu = () => {
   const menu = [
     {
       name: 'Guide',
-      icon: 'info circle',
+      url: '/guide',
+      icon: 'bookmark',
       pages: [
         { name: 'Introduction', url: '/todo' },
         { name: 'Using Web Components', url: '/page-2' },
@@ -12,7 +13,7 @@ export const getNavMenu = () => {
     {
       name: 'Theming',
       url: '/theming',
-      icon: 'paint brush',
+      icon: 'box',
       pages: [
         { name: 'Using Themes', url: '/test' },
         { name: 'Creating Themes', url: '/page-a' },
@@ -22,7 +23,7 @@ export const getNavMenu = () => {
     },
     {
       name: 'CSS Components',
-      icon: 'heart',
+      icon: 'check',
       pages: [
         { name: 'Site & Colors', url: '/page-3' },
         { name: 'Headers', url: '/page-4' },
@@ -31,7 +32,7 @@ export const getNavMenu = () => {
     },
     {
       name: 'UI Components',
-      icon: 'cubes ',
+      icon: 'bell',
       pages: [
         { name: 'Site & Colors', url: '/page-3' },
         { name: 'Headers', url: '/page-4' },
