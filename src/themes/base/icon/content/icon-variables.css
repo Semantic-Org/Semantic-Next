@@ -1,0 +1,6 @@
+ui-icon {
+  --opacity: 1;
+  --width: --var(iconWidth);
+  --height: 1em;
+  --distanceFromText: 0.25rem;
+}
