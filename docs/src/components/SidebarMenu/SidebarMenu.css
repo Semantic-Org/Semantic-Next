@@ -1,5 +1,8 @@
+/*******************************
+            Content
+*******************************/
+
 .title {
-  cursor: pointer;
   display: flex;
   flex-direction: row;
   text-align: left;
@@ -11,56 +14,27 @@
   color: #798088;
   text-decoration: none;
 }
-.title:hover {
-  color: #ffffff;
+.title {
+  ui-icon:not([icon="dropdown"]) {
+    display: block;
+    font-size: 18px;
+    width: 1.5rem;
+    flex: 0 0 auto;
+    text-align: center;
+    margin-right: 1rem;
+  }
+  ui-icon[icon="dropdown"] {
+    float: right;
+    opacity: 0.3;
+  }
+  + .content {
+    padding: 0rem 0rem 0.5rem 2.5rem;
+  }
 }
 
-.title.current {
-  color: #73b9e1;
-  cursor: default;
-}
-.title.active {
-  color: #ffffff;
-}
-.title ui-icon:not([icon="dropdown"]) {
-  display: block;
-  font-size: 18px;
-  width: 1.5rem;
-  flex: 0 0 auto;
-  text-align: center;
-  margin-right: 1rem;
-}
-.title ui-icon[icon="dropdown"] {
-  float: right;
-  opacity: 0.3;
-}
+/* Accordion Content */
 .content {
   display: none;
-}
-.content.active {
-  display: block;
-}
-
-.title + .content {
-  padding: 0rem 0rem 0.5rem 2.5rem;
-}
-.content .menu .item {
-  display: block;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1;
-  margin: 2px 0px;
-  padding: 5px 0px;
-}
-.content .menu .active.item {
-  color: #73b9e1;
-}
-.content .menu .item:hover {
-  color: rgba(255, 255, 255, 0.9);
-}
-.content .title {
-  font-size: 13px;
-  padding: 4px 0px;
 }
 
 /* Nested Menu */
@@ -70,7 +44,7 @@
     font-size: 13px;
     padding: 4px 0px;
   }
-  .title .dropdown.icon {
+  .title ui-icon[icon="dropdown"] {
     float: right;
     margin: 0rem 1rem 0rem 0rem;
   }
@@ -80,14 +54,70 @@
   .title .content .title {
     font-size: 12px;
   }
-  .content .menu .item {
-    padding: 0.35em 0em;
-  }
-  .content .menu .item.item.item.item.item:not(:hover):not(.current):not(.active) {
-    color: rgba(255, 255, 255, 0.35) !important;
+
+  .menu {
+    .item {
+      display: block;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.4);
+      line-height: 1;
+      font-size: 13px;
+      margin: 2px 0px;
+      padding: 5px 0px;
+    }
+
+    /* Third Level Menu */
+    .content .menu {
+      .item {
+        padding: 0.35em 0em;
+      }
+    }
   }
 }
 
-:host-context(body.dark) .content .menu .active.item {
+/*******************************
+            States
+*******************************/
+
+.title {
+  &:hover {
+    color: #ffffff;
+  }
+  &.active {
+    color: #ffffff;
+  }
+  &.current {
+    color: #73b9e1;
+  }
+}
+.content {
+  &.active {
+    display: block;
+  }
+
+  .menu {
+    .item:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .current.item {
+      cursor: default;
+      color: #73b9e1;
+    }
+    .current.item[href] {
+      cursor: auto;
+    }
+    .menu {
+      .item:not(:hover):not(.current):not(.active) {
+        color: rgba(255, 255, 255, 0.35) !important;
+      }
+    }
+  }
+}
+
+/*******************************
+          Dark Mode
+*******************************/
+
+:host-context(body.dark) .content .menu .current.item {
   color: #26b0ff;
 }

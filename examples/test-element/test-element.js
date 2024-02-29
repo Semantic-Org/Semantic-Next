@@ -7,7 +7,7 @@ import css from './test-element.css?raw';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createInstance = function (tpl, $) {
+const createInstance = function ({ tpl, $ }) {
   return {
     tab: new ReactiveVar('basic'),
     morningActivity: new ReactiveVar('running'),
@@ -24,22 +24,22 @@ const createInstance = function (tpl, $) {
   };
 };
 
-const onCreated = (tpl) => {
+const onCreated = ({ tpl }) => {
   // nothing
 };
 
-const onDestroyed = (tpl) => {
+const onDestroyed = ({ tpl }) => {
   // nothing
 };
 
 const events = {
-  'click .tab'(event, tpl, $, data) {
+  'click .tab'({ event, tpl, $, data }) {
     tpl.tab.set(data.tab);
   },
-  'click .morning'(event, tpl) {
+  'click .morning'({ event, tpl }) {
     tpl.morningActivity.set('Mowing the lawn');
   },
-  'click .evening'(event, tpl) {
+  'click .evening'({ event, tpl }) {
     tpl.eveningActivity.set('Reading');
   },
 };

@@ -1,7 +1,8 @@
 import { unsafeCSS } from 'lit';
-import { unique, isServer, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
+import { unique, isServer, each, noop, kebabToCamel, get } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
+import { extractComponentSpec } from './helpers/extract-component-spec.js';
 import { LitTemplate } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';
 
@@ -22,7 +23,7 @@ export const createComponent = ({
   onDestroyed = noop,
   onAttributeChanged = noop,
 
-  properties = null, // allow overriding properties for lit
+  properties, // allow overriding properties for lit
   settings = {}, // a list of properties which we can use to infer type
 
   subTemplates = [],
@@ -32,6 +33,13 @@ export const createComponent = ({
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
+
+  // specs include a lot of metadata not necessary for powering the component
+  // we want to extract the relevent content and then use that portion.
+  let componentSpec;
+  if (spec) {
+    componentSpec = extractComponentSpec(spec);
+  }
 
   // we normally attach this using DOM APIs conditionaly on render
   // but in SSR we need to just include it naively
@@ -71,10 +79,13 @@ export const createComponent = ({
         return unsafeCSS(css);
       }
 
-      static properties =
-        properties || WebComponentBase.getProperties(settings);
+      static properties = WebComponentBase.getProperties({
+        properties,
+        componentSpec,
+        settings,
+      });
 
-      settings = {};
+      defaultSettings = {};
 
       constructor() {
         super();
@@ -138,21 +149,21 @@ export const createComponent = ({
         <ui-button class="large"> // classic
       */
       adjustSettingFromAttribute(attribute, value) {
-        if (spec) {
+        if (componentSpec) {
           if (attribute == 'class') {
             // syntax <ui-button class="large primary"></ui-button>
             each(value.split(' '), (className) => {
               this.adjustSettingFromAttribute(className);
             });
           }
-          else if (get(spec?.attribute, attribute)) {
+          else if (get(componentSpec.settings, attribute)) {
             // we dont need to set anything here obj reflection handles this
           }
           else {
             // go from large -> size, or primary -> emphasis
             // we reverse obj key/value then check lookup
-            const setting = get(reverseKeys(spec.settings), attribute);
-            if (setting) {
+            const setting = get(componentSpec.reverseSettings, attribute);
+            if (setting !== undefined) {
               const oldValue = this[setting];
               const newValue = attribute;
               this[setting] = newValue;
@@ -168,8 +179,9 @@ export const createComponent = ({
           if (property == 'class' || propSettings.observe === false) {
             return;
           }
-          settings[property] = this[property];
-          if (spec && !settings[this[property]]) {
+          settings[property] = this[property] || this.defaultSettings[property];
+          // boolean attribute case
+          if (spec && settings[this[property]] !== undefined) {
             settings[this[property]] = true;
           }
         });

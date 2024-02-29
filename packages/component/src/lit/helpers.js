@@ -12,6 +12,9 @@ export const Helpers = {
   both(a, b) {
     return a && b;
   },
+  classes(array = []) {
+    return array.join(' ') + ' ';
+  },
   maybe(expr, trueClass = '', falseClass = '') {
     return expr ? trueClass + ' ' : falseClass;
   },

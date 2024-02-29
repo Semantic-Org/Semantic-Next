@@ -194,15 +194,13 @@ class Scanner {
     // Lines around the error, including the error line
     const contextLines = lines.slice(startLine, endLine);
 
-    // Apply grey color to lines before and after the error line
-    // Apply red and bold to the error line
     const consoleMsg = contextLines
       .map((line, idx) => {
-        const isErrLine = lineNumber - startLine === idx;
         return `%c${line}`;
       })
       .join('\n');
 
+    // Apply red and bold to the error line
     const normalStyle = 'color: grey';
     const errorStyle = 'color: red; font-weight: bold';
 

@@ -1,17 +1,36 @@
+import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { any, isFunction, isArray, each } from '@semantic-ui/utils';
+import { any, isFunction, isArray } from '@semantic-ui/utils';
 import template from './SidebarMenu.html?raw';
 import css from './SidebarMenu.css?raw';
 
 const settings = {
   menu: [],
+  linkCurrentPage: false,
   activeURL: '',
 };
 
-const createInstance = function ({ tpl, data }) {
+const createInstance = function ({ tpl, settings }) {
   return {
     getMenu() {
-      return tpl.filterVisibleSections(data.menu);
+      return tpl.filterVisibleSections(settings.menu);
+    },
+    getTitleStates(title) {
+      const classes = [];
+      if (tpl.isActiveItem(title)) {
+        classes.push('active');
+      }
+      if (tpl.isCurrentItem(title)) {
+        classes.push('current');
+      }
+      return classes;
+    },
+    getPageStates(page) {
+      const classes = [];
+      if (tpl.isCurrentItem(page)) {
+        classes.push('current');
+      }
+      return classes;
     },
     shouldShow(item) {
       if (isFunction(item.shouldShow)) {
@@ -34,19 +53,26 @@ const createInstance = function ({ tpl, data }) {
         return acc;
       }, []);
     },
-    isLinkItem(item) {
-      return item.url && !tpl.isActiveItem(item);
+    getLink(item) {
+      //console.log(settings);
+      if (settings.linkCurrentPage || !tpl.isCurrentItem(item)) {
+        return item?.url;
+      }
+      return;
     },
-    isCurrentItem(item) {
-      if (tpl.is.activeItem(item)) {
+    isLinkItem(item) {
+      return item.url && !tpl.isCurrentItem(item);
+    },
+    isActiveItem(item) {
+      if (tpl.isCurrentItem(item)) {
         return true;
       }
       if (isArray(item.pages)) {
-        return any(item.pages, tpl.isCurrentItem);
+        return any(item.pages, tpl.isActiveItem);
       }
     },
-    isActiveItem(item) {
-      if (item?.url === data.activeURL) {
+    isCurrentItem(item) {
+      if (item?.url === settings.activeURL) {
         return true;
       }
     },

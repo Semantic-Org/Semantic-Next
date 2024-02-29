@@ -1,5 +1,5 @@
 {
-  "name": "@semantic/ui",
+  "name": "@semantic-ui/core",
   "version": "0.0.1",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
@@ -86,7 +86,8 @@
   },
   "workspaces": [
     "packages/*",
-    "examples/"
+    "docs/*",
+    "examples/*"
   ],
   "lint-staged": {
     "**/*": "prettierx --write --ignore-unknown"
