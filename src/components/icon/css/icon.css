@@ -1,0 +1,16 @@
+/* Content */
+@import url('./content/icon.css') layer(component);
+
+/* Group */
+@import url('./group/icons.css') layer(component);
+
+/* Types */
+
+/* States */
+@import url('./states/disabled.css') layer(component);
+@import url('./states/loading.css') layer(component);
+
+/* Variations */
+@import url('./variations/sizing.css') layer(component);
+@import url('./variations/colored.css') layer(component);
+

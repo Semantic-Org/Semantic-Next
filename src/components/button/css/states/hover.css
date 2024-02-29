@@ -1,0 +1,14 @@
+/*--------------
+      Hover
+---------------*/
+
+.button:hover {
+  background-color: var(--hover-background-color);
+  background-image: var(--hover-background-image);
+  box-shadow: var(--hover-box-shadow);
+  color: var(--hover-color);
+}
+
+.button:hover .icon {
+  opacity: var(--hover-icon-opacity);
+}

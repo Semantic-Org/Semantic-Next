@@ -1,0 +1,27 @@
+.button {
+  cursor: pointer;
+  display: inline-block;
+  min-height: 1em;
+  font-size: var(--medium);
+  border: none;
+  vertical-align: var(--vertical-align);
+  background: var(--background);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;
+  padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));
+  text-transform: var(--text-transform);
+  text-shadow: var(--text-shadow);
+  font-weight: var(--font-weight);
+  line-height: var(--line-height);
+  font-style: normal;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  user-select: none;
+  transition: var(--transition);
+  will-change: var(--will-change);
+  -webkit-tap-highlight-color: var(--tap-color);
+  outline: none;
+}

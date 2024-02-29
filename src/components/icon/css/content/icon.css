@@ -1,0 +1,17 @@
+.icon {
+  display: inline-block;
+  opacity: var(--opacity);
+
+  margin: 0em var(--distanceFromText) 0em 0em;
+
+  width: var(--width);
+  height: var(--height);
+
+  font-style: normal;
+  font-weight: var(--normal);
+  text-decoration: inherit;
+  text-align: center;
+
+  speak: none;
+  font-smoothing: antialiased;
+}

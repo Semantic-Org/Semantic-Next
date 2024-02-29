@@ -1,0 +1,45 @@
+/*******************************
+            Groups
+*******************************/
+
+.buttons {
+  display: inline-flex;
+  flex-direction: row;
+  font-size: 0em;
+  vertical-align: baseline;
+  margin: var(--vertical-margin) var(--horizontal-margin) 0em 0em;
+}
+&:not(.basic):not(.inverted) {
+  box-shadow: var(--group-box-shadow);
+}
+
+/* Clearfix */
+&::after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+/* Standard Group */
+.buttons .button {
+  flex: 1 0 auto;
+  border-radius: 0em;
+  margin: var(--group-button-offset);
+}
+.buttons > .button:not(.basic):not(.inverted),
+.buttons:not(.basic):not(.inverted) > .button {
+  box-shadow: var(--group-button-box-shadow);
+}
+
+.buttons .button:first-child {
+  border-left: none;
+  margin-left: 0em;
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+.buttons .button:last-child {
+  border-top-right-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}

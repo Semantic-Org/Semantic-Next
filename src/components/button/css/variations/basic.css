@@ -1,0 +1,115 @@
+/*-------------------
+        Basic
+--------------------*/
+
+.basic.buttons .button,
+.basic.button {
+  background: var(--basic-background) !important;
+  color: var(--basic-text-color) !important;
+  font-weight: var(--basic-font-weight);
+  border-radius: var(--basic-border-radius);
+  text-transform: var(--basic-text-transform);
+  text-shadow: none !important;
+  box-shadow: var(--basic-box-shadow);
+}
+.basic.buttons {
+  box-shadow: var(--basic-group-box-shadow);
+  border: var(--basic-group-border);
+  border-radius: var(--border-radius);
+}
+.basic.buttons .button {
+  border-radius: 0em;
+}
+
+.basic.buttons .button:hover,
+.basic.button:hover {
+  background: var(--basic-hover-background) !important;
+  color: var(--basic-hover-text-color) !important;
+  box-shadow: var(--basic-hover-box-shadow);
+}
+.basic.buttons .button:focus,
+.basic.button:focus {
+  background: var(--basic-focus-background) !important;
+  color: var(--basic-focus-text-color) !important;
+  box-shadow: var(--basic-focus-box-shadow);
+}
+.basic.buttons .button:active,
+.basic.button:active {
+  background: var(--basic-down-background) !important;
+  color: var(--basic-down-text-color) !important;
+  box-shadow: var(--basic-down-box-shadow);
+}
+.basic.buttons .active.button,
+.basic.active.button {
+  background: var(--basic-active-background) !important;
+  box-shadow: var(--basic-active-box-shadow) !important;
+  color: var(--basic-active-text-color) !important;
+}
+.basic.buttons .active.button:hover,
+.basic.active.button:hover {
+  background-color: var(--transparent-black);
+}
+
+/* Vertical */
+.basic.buttons .button:hover {
+  box-shadow: var(--basic-hover-box-shadow) inset;
+}
+.basic.buttons .button:active {
+  box-shadow: var(--basic-down-box-shadow) inset;
+}
+.basic.buttons .active.button {
+  box-shadow: var(--basic-active-box-shadow) !important;
+}
+
+/* Standard Basic Inverted */
+.basic.inverted.buttons .button,
+.basic.inverted.button {
+  background-color: transparent !important;
+  color: var(--off-white) !important;
+  box-shadow: var(--basic-inverted-box-shadow) !important;
+}
+.basic.inverted.buttons .button:hover,
+.basic.inverted.button:hover {
+  color: var(--white) !important;
+  box-shadow: var(--basic-inverted-hover-box-shadow) !important;
+}
+.basic.inverted.buttons .button:focus,
+.basic.inverted.button:focus {
+  color: var(--white) !important;
+  box-shadow: var(--basic-inverted-focus-box-shadow) !important;
+}
+.basic.inverted.buttons .button:active,
+.basic.inverted.button:active {
+  background-color: var(--transparent-white) !important;
+  color: var(--white) !important;
+  box-shadow: var(--basic-inverted-down-box-shadow) !important;
+}
+.basic.inverted.buttons .active.button,
+.basic.inverted.active.button {
+  background-color: var(--transparent-white);
+  color: var(--inverted-text-color);
+  text-shadow: var(--inverted-text-shadow);
+  box-shadow: var(--basic-inverted-active-box-shadow);
+}
+.basic.inverted.buttons .active.button:hover,
+.basic.inverted.active.button:hover {
+  background-color: var(--strong-transparent-white);
+  box-shadow: var(--basic-inverted-hover-box-shadow) !important;
+}
+
+
+/* Basic Group */
+.basic.buttons .button {
+  border-left: var(--basic-group-border);
+  box-shadow: none;
+}
+.basic.vertical.buttons .button {
+  border-left: none;
+}
+.basic.vertical.buttons .button {
+  border-left-width: 0px;
+  border-top: var(--basic-group-border);
+}
+.basic.vertical.buttons .button:first-child {
+  border-top-width: 0px;
+}
