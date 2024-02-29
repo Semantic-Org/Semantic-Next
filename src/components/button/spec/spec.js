@@ -7,7 +7,7 @@ export const ButtonSpec = {
   uiType: 'element',
   name: 'Button',
   description: 'A button indicates possible user action',
-  tagName: 'button',
+  tagName: 'ui-button',
 
   /*******************************
              Singular

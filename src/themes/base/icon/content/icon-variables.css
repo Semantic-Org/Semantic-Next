@@ -1,6 +1,6 @@
-ui-icon {
+:root {
   --opacity: 1;
-  --width: --var(iconWidth);
+  --width: --var(icon-width);
   --height: 1em;
   --distanceFromText: 0.25rem;
 }

@@ -1,0 +1,36 @@
+/*-------------------
+        Sizing
+--------------------*/
+
+.mini.icons .icon,
+.mini.icon {
+  font-size: var(--mini);
+}
+.tiny.icons .icon,
+.tiny.icon {
+  font-size: var(--tiny);
+}
+.small.icons .icon,
+.small.icon {
+  font-size: var(--small);
+}
+.icons .icon,
+.icon {
+  font-size: var(--medium);
+}
+.large.icons .icon,
+.large.icon {
+  font-size: var(--large);
+}
+.big.icons .icon,
+.big.icon {
+  font-size: var(--big);
+}
+.huge.icons .icon,
+.huge.icon {
+  font-size: var(--huge);
+}
+.massive.icons .icon,
+.massive.icon {
+  font-size: var(--massive);
+}

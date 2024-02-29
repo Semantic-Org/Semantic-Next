@@ -1,0 +1,70 @@
+/* src/components/icon/css/content/icon.css */
+@layer component {
+  .icon {
+    display: inline-block;
+    opacity: var(--opacity);
+    margin: 0em var(--distanceFromText) 0em 0em;
+    width: var(--width);
+    height: var(--height);
+    font-style: normal;
+    font-weight: var(--normal);
+    text-decoration: inherit;
+    text-align: center;
+    speak: none;
+    font-smoothing: antialiased;
+  }
+}
+
+/* src/components/icon/css/group/icons.css */
+@layer component;
+
+/* src/components/icon/css/states/disabled.css */
+@layer component {
+  .disabled.icon {
+    opacity: 0.3;
+  }
+}
+
+/* src/components/icon/css/states/loading.css */
+@layer component;
+
+/* src/components/icon/css/variations/sizing.css */
+@layer component {
+  .mini.icons .icon,
+  .mini.icon {
+    font-size: var(--mini);
+  }
+  .tiny.icons .icon,
+  .tiny.icon {
+    font-size: var(--tiny);
+  }
+  .small.icons .icon,
+  .small.icon {
+    font-size: var(--small);
+  }
+  .icons .icon,
+  .icon {
+    font-size: var(--medium);
+  }
+  .large.icons .icon,
+  .large.icon {
+    font-size: var(--large);
+  }
+  .big.icons .icon,
+  .big.icon {
+    font-size: var(--big);
+  }
+  .huge.icons .icon,
+  .huge.icon {
+    font-size: var(--huge);
+  }
+  .massive.icons .icon,
+  .massive.icon {
+    font-size: var(--massive);
+  }
+}
+
+/* src/components/icon/css/variations/colored.css */
+@layer component;
+
+/* src/components/icon/css/icon.css */
