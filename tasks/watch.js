@@ -9,5 +9,8 @@ await buildProject({
   watch: true,
   includeComponents: false,
   includeJavascript: false,
+  includeCSS: true,
+  includeThemes: true,
+  includeExamples: false,
   outDir: 'docs/src/css/sui',
 });
