@@ -1,4 +1,4 @@
-:root {
+jui-icon, :root, :host ui-icon {
   --opacity: 1;
   --width: --var(icon-width);
   --height: 1em;
