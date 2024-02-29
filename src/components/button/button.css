@@ -1,4 +1,4 @@
-/* src/button/css/content/button.css */
+/* src/components/button/css/content/button.css */
 @layer component {
   .button {
     cursor: pointer;
@@ -29,7 +29,7 @@
   }
 }
 
-/* src/button/css/group/buttons.css */
+/* src/components/button/css/group/buttons.css */
 @layer component {
   .buttons {
     display: inline-flex;
@@ -69,7 +69,7 @@
   }
 }
 
-/* src/button/css/types/animated.css */
+/* src/components/button/css/types/animated.css */
 @layer component {
   .animated.button {
     position: relative;
@@ -168,7 +168,7 @@
   }
 }
 
-/* src/button/css/types/emphasis.css */
+/* src/components/button/css/types/emphasis.css */
 @layer component {
   .primary.buttons .button,
   .primary.button {
@@ -244,7 +244,7 @@
   }
 }
 
-/* src/button/css/types/icon.css */
+/* src/components/button/css/types/icon.css */
 @layer component {
   .icon.buttons .button,
   .icon.button {
@@ -258,7 +258,7 @@
   }
 }
 
-/* src/button/css/types/labeled.css */
+/* src/components/button/css/types/labeled.css */
 @layer component {
   .labeled.button:not(.icon) {
     display: inline-flex;
@@ -301,7 +301,7 @@
   }
 }
 
-/* src/button/css/types/labeled-icon.css */
+/* src/components/button/css/types/labeled-icon.css */
 @layer component {
   .labeled.icon.buttons .button,
   .labeled.icon.button {
@@ -392,7 +392,7 @@
   }
 }
 
-/* src/button/css/types/toggle.css */
+/* src/components/button/css/types/toggle.css */
 @layer component {
   .toggle.buttons .active.button,
   .buttons .button.toggle.active,
@@ -409,7 +409,7 @@
   }
 }
 
-/* src/button/css/states/hover.css */
+/* src/components/button/css/states/hover.css */
 @layer component {
   .button:hover {
     background-color: var(--hover-background-color);
@@ -422,7 +422,7 @@
   }
 }
 
-/* src/button/css/states/focus.css */
+/* src/components/button/css/states/focus.css */
 @layer component {
   .button:focus {
     background-color: var(--focus-background-color);
@@ -435,7 +435,7 @@
   }
 }
 
-/* src/button/css/states/pressed.css */
+/* src/components/button/css/states/pressed.css */
 @layer component {
   .button:active,
   .active.button:active {
@@ -446,7 +446,7 @@
   }
 }
 
-/* src/button/css/states/active.css */
+/* src/components/button/css/states/active.css */
 @layer component {
   .active.button {
     background-color: var(--active-background-color);
@@ -468,7 +468,7 @@
   }
 }
 
-/* src/button/css/states/disabled.css */
+/* src/components/button/css/states/disabled.css */
 @layer component {
   .disabled.button,
   .disabled.button:hover,
@@ -481,7 +481,7 @@
   }
 }
 
-/* src/button/css/states/loading.css */
+/* src/components/button/css/states/loading.css */
 @layer component {
   .loading.button {
     position: relative;
@@ -529,7 +529,7 @@
   }
 }
 
-/* src/button/css/variations/basic.css */
+/* src/components/button/css/variations/basic.css */
 @layer component {
   .basic.buttons .button,
   .basic.button {
@@ -636,7 +636,7 @@
   }
 }
 
-/* src/button/css/variations/attached.css */
+/* src/components/button/css/variations/attached.css */
 @layer component {
   .attached.button {
     position: relative;
@@ -732,7 +732,7 @@
   }
 }
 
-/* src/button/css/variations/circular.css */
+/* src/components/button/css/variations/circular.css */
 @layer component {
   .circular.button {
     border-radius: 10em;
@@ -743,7 +743,7 @@
   }
 }
 
-/* src/button/css/variations/colored.css */
+/* src/components/button/css/variations/colored.css */
 @layer component {
   .black.buttons .button,
   .black.button {
@@ -2450,7 +2450,7 @@
   }
 }
 
-/* src/button/css/variations/compact.css */
+/* src/components/button/css/variations/compact.css */
 @layer component {
   .compact.buttons .button,
   .compact.button {
@@ -2466,7 +2466,7 @@
   }
 }
 
-/* src/button/css/variations/floated.css */
+/* src/components/button/css/variations/floated.css */
 @layer component {
   [class*="left floated"].buttons,
   [class*="left floated"].button {
@@ -2482,7 +2482,7 @@
   }
 }
 
-/* src/button/css/variations/fluid.css */
+/* src/components/button/css/variations/fluid.css */
 @layer component {
   .fluid.buttons,
   .fluid.button {
@@ -2597,7 +2597,7 @@
   }
 }
 
-/* src/button/css/variations/negative.css */
+/* src/components/button/css/variations/negative.css */
 @layer component {
   .negative.buttons .button,
   .negative.button {
@@ -2668,7 +2668,7 @@
   }
 }
 
-/* src/button/css/variations/positive.css */
+/* src/components/button/css/variations/positive.css */
 @layer component {
   .positive.buttons .button,
   .positive.button {
@@ -2739,7 +2739,7 @@
   }
 }
 
-/* src/button/css/variations/sizing.css */
+/* src/components/button/css/variations/sizing.css */
 @layer component {
   .mini.buttons .button,
   .mini.buttons .or,
@@ -2783,7 +2783,7 @@
   }
 }
 
-/* src/button/css/variations/social.css */
+/* src/components/button/css/variations/social.css */
 @layer component {
   .facebook.button {
     background-color: var(--facebook-color);
@@ -2918,7 +2918,7 @@
   }
 }
 
-/* src/button/css/variations/vertical.css */
+/* src/components/button/css/variations/vertical.css */
 @layer component {
   .vertical.buttons {
     display: inline-flex;
@@ -2946,4 +2946,4 @@
   }
 }
 
-/* src/button/css/button.css */
+/* src/components/button/css/button.css */
