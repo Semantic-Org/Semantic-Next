@@ -1,9 +1,8 @@
-import { LitElement, isServer } from 'lit';
+import { LitElement } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray, flatten } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './helpers/scope-styles.js';
-import { extractCSS } from './helpers/extract-css.js';
 
 /*
   This extends the base Lit element class
@@ -39,6 +38,22 @@ class WebComponentBase extends LitElement {
     }
   }
 
+  updated() {
+    super.updated();
+    if (this.useLight) {
+      this.slotLightContent();
+    }
+    each(this.renderCallbacks, (callback) => callback());
+  }
+
+  addRenderCallback(callback) {
+    this.renderCallbacks.push(callback);
+  }
+
+  /*******************************
+         Light DOM Rendering
+  *******************************/
+
   /* Modifies shadow dom rules to be scoped to component tag */
   addLightScopedCSS(scopeSelector, css) {
     if (!this.scopedStyleSheet) {
@@ -53,58 +68,13 @@ class WebComponentBase extends LitElement {
     ];
   }
 
-  /*
-    Vars declared like ui-component { --var: 'foo'; } will not
-    inherit inside nested shadow DOMs.
-
-    We can either scope all css vars in global :root and not use
-    css var inheritance. or we can handle this with javascript
-    to apply the rules in nested shadow dom contexts
-  */
-  connectedCallback() {
-    super.connectedCallback();
-    this.parentShadowRoot = this.getParentShadowRoot();
-    if (this.parentShadowRoot) {
-      //this.attachShadowRootStyles();
-    }
-  }
-  willUpdate() {
-    super.willUpdate();
-  }
-
-  attachShadowRootStyles() {
-    // expecting render root to be defined here but it is not
-    const shadowRoot = this.parentShadowRoot;
-    if(shadowRoot) {
-      this.nestedStylesheet = extractCSS(this.tagName);
-      shadowRoot.adoptedStyleSheets = [
-        ...shadowRoot.adoptedStyleSheets,
-        this.nestedStylesheet,
-      ];
-    }
-  }
-
-  // check if this is a web component inside a web component
-  getParentShadowRoot() {
-    let currentNode = this.parentNode;
-    let nestedComponent = false;
-    while (currentNode) {
-      if (currentNode?.constructor?.name === 'ShadowRoot') {
-        nestedComponent = currentNode;
-        break;
-      }
-      currentNode = currentNode.parentNode;
-    }
-    return nestedComponent;
-  }
-
   storeOriginalContent() {
     this.originalDOM = document.createElement('template');
     this.originalDOM.innerHTML = this.innerHTML;
     this.innerHTML = '';
   }
 
-  slotContent() {
+  slotLightContent() {
     const $slots = this.$('slot');
     $slots.each(($slot) => {
       let html;
@@ -129,27 +99,11 @@ class WebComponentBase extends LitElement {
     });
   }
 
-  firstUpdated() {
-    super.firstUpdated();
-  }
-
-  updated() {
-    super.updated();
-    if (this.useLight) {
-      this.slotContent();
-    }
-    each(this.renderCallbacks, (callback) => callback());
-  }
-
-  addRenderCallback(callback) {
-    this.renderCallbacks.push(callback);
-  }
-
   /*******************************
          Settings / Attrs
   *******************************/
 
-  setDefaultSettings(settings) {
+  setDefaultSettings(settings = {}) {
     this.defaultSettings = settings;
     each(settings, (setting, name) => {
       if (setting?.default !== undefined) {
@@ -166,10 +120,14 @@ class WebComponentBase extends LitElement {
       return properties;
     }
     if (componentSpec) {
+      properties.class = {
+        type: String
+      };
       each(componentSpec.settings, (valueArrays, setting) => {
-        properties[setting] = {
-          type: String,
-        };
+        properties[setting] = WebComponentBase.mapSettingToProperty(setting);
+      });
+      each(componentSpec.reverseSettings, (valueArray, reverseSetting) => {
+        properties[reverseSetting] = { type: String, reflect: false };
       });
     }
     if (settings) {
@@ -191,28 +149,32 @@ class WebComponentBase extends LitElement {
     if (isString(setting)) {
       property = {
         type: String,
+        attribute: true,
       };
     }
     else if (isNumber(setting)) {
       property = {
         type: Number,
+        attribute: true,
       };
     }
     else if (isBoolean(setting)) {
       property = {
         type: Boolean,
+        attribute: true,
       };
     }
     else if (isArray(setting)) {
       property = {
         type: Array,
-        attribute: false,
+        attribute: true,
         reflect: false,
       };
     }
     else if (isPlainObject(setting)) {
       property = {
         type: Object,
+        attribute: true,
         reflect: false,
       };
     }
@@ -226,6 +188,7 @@ class WebComponentBase extends LitElement {
     else {
       property = {
         type: String,
+        attribute: true,
       };
     }
     //property.hasChanged = isEqual;

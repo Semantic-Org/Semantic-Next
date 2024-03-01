@@ -13,6 +13,9 @@ export const extractComponentSpec = (spec) => {
   const getSettingsFromSpecPart = (specPart) => {
     each(spec[specPart], (spec) => {
       const settingName = spec.attribute || spec.name.toLowerCase();
+      if(!settingName) {
+        return;
+      }
       componentSpec[specPart].push(settingName);
       if(spec.options) {
         const optionValues = spec.options.map(option => {
@@ -20,7 +23,7 @@ export const extractComponentSpec = (spec) => {
             return option.value;
           }
           return option;
-        });
+        }).filter(Boolean);
         componentSpec.settings[settingName] = optionValues;
       }
     });

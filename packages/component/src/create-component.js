@@ -1,5 +1,5 @@
-import { unsafeCSS } from 'lit';
-import { unique, isServer, each, noop, kebabToCamel, get } from '@semantic-ui/utils';
+import { unsafeCSS, isServer } from 'lit';
+import { unique, each, noop, kebabToCamel, get } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { extractComponentSpec } from './helpers/extract-component-spec.js';
@@ -24,7 +24,7 @@ export const createComponent = ({
   onAttributeChanged = noop,
 
   properties, // allow overriding properties for lit
-  settings = {}, // a list of properties which we can use to infer type
+  settings = spec?.settings, // settings for js functionality like callbacks etc
 
   subTemplates = [],
 
@@ -43,7 +43,7 @@ export const createComponent = ({
 
   // we normally attach this using DOM APIs conditionaly on render
   // but in SSR we need to just include it naively
-  if (isServer()) {
+  if (isServer) {
     each(subTemplates, (template) => {
       if (template.css) {
         css += template.css;
@@ -106,16 +106,19 @@ export const createComponent = ({
           renderRoot: this.renderRoot,
         });
         this.tpl = this.template.tpl;
+        if(isServer) {
+          each(webComponent.properties, (propSettings, property) => {
+            this.attributeChangedCallback(property, undefined, this[property]);
+          });
+        }
       }
 
       firstUpdated() {
         super.firstUpdated();
-        // nothing for now
       }
 
       updated() {
         super.updated();
-        // nothing for now
       }
 
       // callback if removed from dom
@@ -150,36 +153,41 @@ export const createComponent = ({
       */
       adjustSettingFromAttribute(attribute, value) {
         if (componentSpec) {
-          if (attribute == 'class') {
+          if (attribute == 'class' && value) {
             // syntax <ui-button class="large primary"></ui-button>
             each(value.split(' '), (className) => {
-              this.adjustSettingFromAttribute(className);
+              this.adjustSettingFromAttribute(className, true);
             });
           }
           else if (get(componentSpec.settings, attribute)) {
-            // we dont need to set anything here obj reflection handles this
+            // syntax <ui-button size="large"> (handled natively)
           }
-          else {
-            // go from large -> size, or primary -> emphasis
-            // we reverse obj key/value then check lookup
+          else if(value) {
+            // syntax <ui-button primary large>
+            // reverse lookup
             const setting = get(componentSpec.reverseSettings, attribute);
             if (setting !== undefined) {
               const oldValue = this[setting];
               const newValue = attribute;
               this[setting] = newValue;
-              this.attributeChangedCallback(setting, oldValue, newValue);
             }
           }
         }
       }
 
       getSettings() {
-        const settings = {};
+        let settings = {};
         each(webComponent.properties, (propSettings, property) => {
-          if (property == 'class' || propSettings.observe === false) {
+          if (property == 'class' || settings.observe === false) {
             return;
           }
-          settings[property] = this[property] || this.defaultSettings[property];
+          if(componentSpec && get(componentSpec.reverseSettings, property)) {
+            return;
+          }
+          const setting = this[property] || this.defaultSettings[property];
+          if(setting !== undefined) {
+            settings[property] = setting;
+          }
           // boolean attribute case
           if (spec && settings[this[property]] !== undefined) {
             settings[this[property]] = true;
@@ -197,6 +205,9 @@ export const createComponent = ({
           if (property == 'class' || settings.observe === false) {
             return;
           }
+          if(componentSpec && get(componentSpec.reverseSettings, property)) {
+            return;
+          }
           classes.push(this[property]);
         });
         const classString = unique(classes).filter(Boolean).join(' ');
@@ -212,15 +223,12 @@ export const createComponent = ({
         }
         return data;
       }
-      getDataContext() {
-        return {
-          ...this.tpl,
-          ...this.getData(),
-        };
-      }
 
       render() {
-        const html = this.template.render(this.getDataContext());
+        const html = this.template.render({
+          ...this.tpl,
+          ...this.getData(),
+        });
         return html;
       }
     };

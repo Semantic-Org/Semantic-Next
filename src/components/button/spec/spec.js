@@ -106,6 +106,7 @@ export const ButtonSpec = {
 
     {
       name: 'Labeled Icon',
+      attribute: 'labeled-icon',
       description: 'A button can be formatted so that the icon appears separately.',
       looseCoupling: true,
       adoptionLevel: 3,
@@ -140,6 +141,7 @@ export const ButtonSpec = {
 
     {
       name: 'Animated',
+      attribute: 'animated',
       description: 'A button can animate to show hidden content',
       adoptionLevel: 5,
       options: [
@@ -203,7 +205,7 @@ export const ButtonSpec = {
   variations: [
     {
       name: 'Attached',
-      value: 'attached',
+      attribute: 'attached',
       description: 'A button can be attached',
       adoptionLevel: 2,
       options: [
@@ -237,7 +239,7 @@ export const ButtonSpec = {
 
     {
       name: 'Basic',
-      value: 'styling',
+      attribute: 'styling',
       description: 'A button can be formatted to appear de-emphasized over other elements in the page.',
       adoptionLevel: 3,
       options: [
@@ -256,7 +258,7 @@ export const ButtonSpec = {
 
     {
       name: 'Circular',
-      value: 'circular',
+      attribute: 'circular',
       description: 'A button can be formatted to appear circular.',
       adoptionLevel: 3,
       options: [
@@ -269,7 +271,7 @@ export const ButtonSpec = {
 
     {
       name: 'Colored',
-      value: 'color',
+      attribute: 'color',
       description: 'A button can be colored',
       adoptionLevel: 3,
       options: [
@@ -343,7 +345,7 @@ export const ButtonSpec = {
 
     {
       name: 'Compact',
-      value: 'compact',
+      attribute: 'compact',
       adoptionLevel: 3,
       description: 'A button can reduce its padding to fit into tighter spaces without adjusting its font size',
       options: [
@@ -362,6 +364,7 @@ export const ButtonSpec = {
 
     {
       name: 'Social Site',
+      attribute: 'social',
       value: 'social',
       adoptionLevel: 5,
       description: 'A button can appear formatted with the brand colors of a social website',
@@ -406,7 +409,7 @@ export const ButtonSpec = {
 
     {
       name: 'Positive',
-      value: 'positive',
+      attribute: 'positive',
       adoptionLevel: 2,
       description: 'A button can appear to be associated with a positive action',
       options: [
@@ -425,7 +428,7 @@ export const ButtonSpec = {
 
     {
       name: 'Negative',
-      value: 'negative',
+      attribute: 'negative',
       adoptionLevel: 2,
       description: 'A button can appear to be associated with a negative action',
       options: [
@@ -444,7 +447,7 @@ export const ButtonSpec = {
 
     {
       name: 'Floated',
-      value: 'floated',
+      attribute: 'floated',
       adoptionLevel: 1,
       description: 'A button can be aligned to the left or right of its container',
       options: [
@@ -463,14 +466,14 @@ export const ButtonSpec = {
 
     {
       name: 'Fluid',
-      value: 'fluid',
+      attribute: 'fluid',
       adoptionLevel: 1,
       description: 'A button can take the width of its container',
     },
 
     {
       name: 'Size',
-      value: 'size',
+      attribute: 'size',
       adoptionLevel: 1,
       description: 'A button can vary in size',
       options: [

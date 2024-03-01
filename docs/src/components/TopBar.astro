@@ -11,18 +11,21 @@ import logoImage from '@images/logo.png';
       Semantic UI
     </span>
   </a>
-  <ui-icon icon="bookmark"></ui-icon>
-  <i class="theme link icon"></i>
+  <ui-icon class="sun"></ui-icon>
+  <ui-icon sun></ui-icon>
+  <ui-icon icon="sun"></ui-icon>
 </topbar>
 
 <script>
-  const el = document.querySelectorAll('.theme.icon')[0];
-  el.addEventListener('click', function() {
-    let theme = localStorage.getItem('theme');
-    let newTheme = (theme == 'light') ? 'dark' : 'light';
-    localStorage.setItem('theme', newTheme);
-    let body = document.querySelectorAll('body')[0];
-    body.classList.remove(theme);
-    body.classList.add(newTheme);
-  }, true, true);
+  const el = document.querySelectorAll('.moon')[0];
+  if(el) {
+    el.addEventListener('click', function() {
+      let theme = localStorage.getItem('theme');
+      let newTheme = (theme == 'light') ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      let body = document.querySelectorAll('body')[0];
+      body.classList.remove(theme);
+      body.classList.add(newTheme);
+    }, true, true);
+  }
 </script>
