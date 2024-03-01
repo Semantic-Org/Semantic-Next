@@ -10,11 +10,10 @@ const createInstance = ({tpl, $}) => ({
 });
 
 
-const onCreated = ({tpl}) => {
-
+const onCreated = ({tpl, el}) => {
 };
 
-const onRendered = function({isClient}) {
+const onRendered = function({$, isClient}) {
 };
 
 const UIIcon = createComponent({

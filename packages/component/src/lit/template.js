@@ -348,6 +348,7 @@ export const LitTemplate = class LitTemplate {
     if (!params) {
       const data = clone(this.tpl.data);
       params = {
+        el: this.element,
         tpl: this.tpl,
         data: data,
         settings: data, // Todo: extract only settings from data

@@ -13,12 +13,17 @@ export const JS_LOADER_CONFIG = {
   '.html': 'text',
   '.css': 'text',
   '.png': 'file',
+  '.svg': 'file',
   '.jpg': 'file',
   '.jpeg': 'file',
-  '.svg': 'file',
   '.gif': 'file',
 };
 
 export const CSS_LOADER_CONFIG = {
   '.css': 'css',
+  '.png': 'file',
+  '.svg': 'file',
+  '.jpg': 'file',
+  '.jpeg': 'file',
+  '.gif': 'file',
 };

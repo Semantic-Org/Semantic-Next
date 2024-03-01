@@ -476,11 +476,11 @@ export const clone = (src, seen = new Map()) => {
   if (seen.has(src)) return seen.get(src);
 
   let copy;
-  if (src.nodeType && 'cloneNode' in src) {
+  /*if (src.nodeType && 'cloneNode' in src) {
     copy = src.cloneNode(true);
     seen.set(src, copy);
   }
-  else if (src instanceof Date) {
+  else */if (src instanceof Date) {
     // Date
     copy = new Date(src.getTime());
     seen.set(src, copy);

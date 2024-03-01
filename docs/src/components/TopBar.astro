@@ -5,12 +5,12 @@ import { Image } from 'astro:assets';
 import logoImage from '@images/logo.png';
 ---
 <topbar>
-  <div class="logo">
+  <a class="logo" href="/">
     <Image src={logoImage} alt="Logo" height="35" loading="eager">
     <span>
       Semantic UI
     </span>
-  </div>
+  </a>
   <ui-icon icon="bookmark"></ui-icon>
   <i class="theme link icon"></i>
 </topbar>

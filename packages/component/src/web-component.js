@@ -1,8 +1,9 @@
-import { LitElement } from 'lit';
+import { LitElement, isServer } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray, flatten } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './helpers/scope-styles.js';
+import { extractCSS } from './helpers/extract-css.js';
 
 /*
   This extends the base Lit element class
@@ -12,8 +13,12 @@ import { scopeStyles } from './helpers/scope-styles.js';
 */
 
 class WebComponentBase extends LitElement {
+
   // for use with light dom rendering
   static scopedStyleSheet = null;
+
+  // for use with variable hoisting
+  static nestedStylesheet = null;
 
   constructor() {
     super();
@@ -23,9 +28,8 @@ class WebComponentBase extends LitElement {
 
   createRenderRoot() {
     this.useLight = this.getAttribute('expose') !== null;
-    console.log(this, this.getAttribute('expose'));
     if (this.useLight) {
-      this.applyScopedStyles(this.tagName, this.css);
+      this.addLightScopedCSS(this.tagName, this.css);
       this.storeOriginalContent.apply(this);
       return this;
     }
@@ -34,16 +38,64 @@ class WebComponentBase extends LitElement {
       return renderRoot;
     }
   }
-  applyScopedStyles(scopeSelector, css) {
+
+  /* Modifies shadow dom rules to be scoped to component tag */
+  addLightScopedCSS(scopeSelector, css) {
     if (!this.scopedStyleSheet) {
       const scopedCSS = scopeStyles(css, scopeSelector);
       this.scopedStyleSheet = new CSSStyleSheet();
       this.scopedStyleSheet.replaceSync(scopedCSS);
     }
+    // we add a new stylesheet to document scoped to component name
     document.adoptedStyleSheets = [
       ...document.adoptedStyleSheets,
       this.scopedStyleSheet,
     ];
+  }
+
+  /*
+    Vars declared like ui-component { --var: 'foo'; } will not
+    inherit inside nested shadow DOMs.
+
+    We can either scope all css vars in global :root and not use
+    css var inheritance. or we can handle this with javascript
+    to apply the rules in nested shadow dom contexts
+  */
+  connectedCallback() {
+    super.connectedCallback();
+    this.parentShadowRoot = this.getParentShadowRoot();
+    if (this.parentShadowRoot) {
+      this.attachShadowRootStyles();
+    }
+  }
+  willUpdate() {
+    super.willUpdate();
+  }
+
+  attachShadowRootStyles() {
+    // expecting render root to be defined here but it is not
+    const shadowRoot = this.parentShadowRoot;
+    if(shadowRoot) {
+      this.nestedStylesheet = extractCSS(this.tagName);
+      shadowRoot.adoptedStyleSheets = [
+        ...shadowRoot.adoptedStyleSheets,
+        this.nestedStylesheet,
+      ];
+    }
+  }
+
+  // check if this is a web component inside a web component
+  getParentShadowRoot() {
+    let currentNode = this.parentNode;
+    let nestedComponent = false;
+    while (currentNode) {
+      if (currentNode?.constructor?.name === 'ShadowRoot') {
+        nestedComponent = currentNode;
+        break;
+      }
+      currentNode = currentNode.parentNode;
+    }
+    return nestedComponent;
   }
 
   storeOriginalContent() {

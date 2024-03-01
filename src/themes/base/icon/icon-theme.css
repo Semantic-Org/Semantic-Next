@@ -17,3 +17,6 @@
 /* Variations */
 @import url('./variations/colored-variables.css') layer(baseTheme);
 @import url('./variations/sizing-variables.css') layer(baseTheme);
+
+/* Overrides */
+@import url('./overrides/feather-icons.css') layer(baseTheme);

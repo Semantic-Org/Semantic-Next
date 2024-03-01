@@ -1,4 +1,4 @@
-import { isString, isArray, isDOM, isFunction, isObject } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, isObject } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -78,13 +78,13 @@ export class Query {
 
   filter(selectorOrFunction) {
     let filteredElements = [];
-    if (typeof selectorOrFunction === 'string') {
+    if (isString(selectorOrFunction)) {
       // If a CSS selector is provided, use it with the matches method
       filteredElements = Array.from(this).filter((el) =>
         el.matches(selectorOrFunction)
       );
     }
-    else if (typeof selectorOrFunction === 'function') {
+    else if (isFunction(selectorOrFunction)) {
       // If a function is provided, use it directly to filter elements
       filteredElements = Array.from(this).filter(selectorOrFunction);
     }
@@ -294,8 +294,8 @@ export class Query {
   css(property, value, settings = { includeComputed: false }) {
     const elements = Array.from(this);
     // Setting a value or multiple values
-    if (typeof property === 'object' || value !== undefined) {
-      if (typeof property === 'object') {
+    if (isPlainObject(property) || isString(value)) {
+      if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
           elements.forEach((el) => (el.style[prop] = val));
         });
@@ -321,8 +321,12 @@ export class Query {
     }
   }
 
+  computedStyle(property) {
+    return this.css(property, null, { includeComputed: true });
+  }
+
   attr(attribute, value) {
-    if (typeof attribute === 'object') {
+    if (isPlainObject(attribute)) {
       // Handle object of attribute-value pairs
       Object.entries(attribute).forEach(([attr, val]) => {
         this.each((el) => el.setAttribute(attr, val));

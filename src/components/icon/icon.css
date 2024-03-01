@@ -10,8 +10,20 @@
     font-weight: var(--normal);
     text-decoration: inherit;
     text-align: center;
+    background-color: currentColor;
+    -webkit-mask-image: none;
+    mask-image: none;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    fill: currentColor;
     speak: none;
-    font-smoothing: antialiased;
+  }
+  icon::before {
+    width: inherit;
+    height: inherit;
+    content: "";
   }
 }
 
