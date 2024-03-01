@@ -65,7 +65,7 @@ class WebComponentBase extends LitElement {
     super.connectedCallback();
     this.parentShadowRoot = this.getParentShadowRoot();
     if (this.parentShadowRoot) {
-      this.attachShadowRootStyles();
+      //this.attachShadowRootStyles();
     }
   }
   willUpdate() {

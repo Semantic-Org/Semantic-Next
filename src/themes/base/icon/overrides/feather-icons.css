@@ -1,840 +1,840 @@
-ui-icon::part(airplay) {
+::part(icon airplay) {
   mask-image: url('./assets/airplay.svg')
 }
-ui-icon::part(alert-circle) {
+::part(icon alert-circle) {
   mask-image: url('./assets/alert-circle.svg')
 }
-ui-icon::part(alert-octagon) {
+::part(icon alert-octagon) {
   mask-image: url('./assets/alert-octagon.svg')
 }
-ui-icon::part(alert-triangle) {
+::part(icon alert-triangle) {
   mask-image: url('./assets/alert-triangle.svg')
 }
-ui-icon::part(align-center) {
+::part(icon align-center) {
   mask-image: url('./assets/align-center.svg')
 }
-ui-icon::part(align-justify) {
+::part(icon align-justify) {
   mask-image: url('./assets/align-justify.svg')
 }
-ui-icon::part(align-left) {
+::part(icon align-left) {
   mask-image: url('./assets/align-left.svg')
 }
-ui-icon::part(align-right) {
+::part(icon align-right) {
   mask-image: url('./assets/align-right.svg')
 }
-ui-icon::part(anchor) {
+::part(icon anchor) {
   mask-image: url('./assets/anchor.svg')
 }
-ui-icon::part(aperture) {
+::part(icon aperture) {
   mask-image: url('./assets/aperture.svg')
 }
-ui-icon::part(archive) {
+::part(icon archive) {
   mask-image: url('./assets/archive.svg')
 }
-ui-icon::part(arrow-down) {
+::part(icon arrow-down) {
   mask-image: url('./assets/arrow-down.svg')
 }
-ui-icon::part(arrow-down-circle) {
+::part(icon arrow-down-circle) {
   mask-image: url('./assets/arrow-down-circle.svg')
 }
-ui-icon::part(arrow-down-left) {
+::part(icon arrow-down-left) {
   mask-image: url('./assets/arrow-down-left.svg')
 }
-ui-icon::part(arrow-down-right) {
+::part(icon arrow-down-right) {
   mask-image: url('./assets/arrow-down-right.svg')
 }
-ui-icon::part(arrow-left) {
+::part(icon arrow-left) {
   mask-image: url('./assets/arrow-left.svg')
 }
-ui-icon::part(arrow-left-circle) {
+::part(icon arrow-left-circle) {
   mask-image: url('./assets/arrow-left-circle.svg')
 }
-ui-icon::part(arrow-right) {
+::part(icon arrow-right) {
   mask-image: url('./assets/arrow-right.svg')
 }
-ui-icon::part(arrow-right-circle) {
+::part(icon arrow-right-circle) {
   mask-image: url('./assets/arrow-right-circle.svg')
 }
-ui-icon::part(arrow-up) {
+::part(icon arrow-up) {
   mask-image: url('./assets/arrow-up.svg')
 }
-ui-icon::part(arrow-up-circle) {
+::part(icon arrow-up-circle) {
   mask-image: url('./assets/arrow-up-circle.svg')
 }
-ui-icon::part(arrow-up-left) {
+::part(icon arrow-up-left) {
   mask-image: url('./assets/arrow-up-left.svg')
 }
-ui-icon::part(arrow-up-right) {
+::part(icon arrow-up-right) {
   mask-image: url('./assets/arrow-up-right.svg')
 }
-ui-icon::part(at-sign) {
+::part(icon at-sign) {
   mask-image: url('./assets/at-sign.svg')
 }
-ui-icon::part(award) {
+::part(icon award) {
   mask-image: url('./assets/award.svg')
 }
-ui-icon::part(bar-chart) {
+::part(icon bar-chart) {
   mask-image: url('./assets/bar-chart.svg')
 }
-ui-icon::part(bar-chart-2) {
+::part(icon bar-chart-2) {
   mask-image: url('./assets/bar-chart-2.svg')
 }
-ui-icon::part(battery) {
+::part(icon battery) {
   mask-image: url('./assets/battery.svg')
 }
-ui-icon::part(battery-charging) {
+::part(icon battery-charging) {
   mask-image: url('./assets/battery-charging.svg')
 }
-ui-icon::part(bell) {
+::part(icon bell) {
   mask-image: url('./assets/bell.svg')
 }
-ui-icon::part(bell-off) {
+::part(icon bell-off) {
   mask-image: url('./assets/bell-off.svg')
 }
-ui-icon::part(bluetooth) {
+::part(icon bluetooth) {
   mask-image: url('./assets/bluetooth.svg')
 }
-ui-icon::part(bold) {
+::part(icon bold) {
   mask-image: url('./assets/bold.svg')
 }
-ui-icon::part(book) {
+::part(icon book) {
   mask-image: url('./assets/book.svg')
 }
-ui-icon::part(book-open) {
+::part(icon book-open) {
   mask-image: url('./assets/book-open.svg')
 }
-ui-icon::part(bookmark) {
+::part(icon bookmark) {
   mask-image: url('./assets/bookmark.svg')
 }
-ui-icon::part(box) {
+::part(icon box) {
   mask-image: url('./assets/box.svg')
 }
-ui-icon::part(briefcase) {
+::part(icon briefcase) {
   mask-image: url('./assets/briefcase.svg')
 }
-ui-icon::part(calendar) {
+::part(icon calendar) {
   mask-image: url('./assets/calendar.svg')
 }
-ui-icon::part(camera) {
+::part(icon camera) {
   mask-image: url('./assets/camera.svg')
 }
-ui-icon::part(camera-off) {
+::part(icon camera-off) {
   mask-image: url('./assets/camera-off.svg')
 }
-ui-icon::part(cast) {
+::part(icon cast) {
   mask-image: url('./assets/cast.svg')
 }
-ui-icon::part(check) {
+::part(icon check) {
   mask-image: url('./assets/check.svg')
 }
-ui-icon::part(check-circle) {
+::part(icon check-circle) {
   mask-image: url('./assets/check-circle.svg')
 }
-ui-icon::part(check-square) {
+::part(icon check-square) {
   mask-image: url('./assets/check-square.svg')
 }
-ui-icon::part(chevron-down) {
+::part(icon chevron-down) {
   mask-image: url('./assets/chevron-down.svg')
 }
-ui-icon::part(chevron-left) {
+::part(icon chevron-left) {
   mask-image: url('./assets/chevron-left.svg')
 }
-ui-icon::part(chevron-right) {
+::part(icon chevron-right) {
   mask-image: url('./assets/chevron-right.svg')
 }
-ui-icon::part(chevron-up) {
+::part(icon chevron-up) {
   mask-image: url('./assets/chevron-up.svg')
 }
-ui-icon::part(chevrons-down) {
+::part(icon chevrons-down) {
   mask-image: url('./assets/chevrons-down.svg')
 }
-ui-icon::part(chevrons-left) {
+::part(icon chevrons-left) {
   mask-image: url('./assets/chevrons-left.svg')
 }
-ui-icon::part(chevrons-right) {
+::part(icon chevrons-right) {
   mask-image: url('./assets/chevrons-right.svg')
 }
-ui-icon::part(chevrons-up) {
+::part(icon chevrons-up) {
   mask-image: url('./assets/chevrons-up.svg')
 }
-ui-icon::part(chrome) {
+::part(icon chrome) {
   mask-image: url('./assets/chrome.svg')
 }
-ui-icon::part(circle) {
+::part(icon circle) {
   mask-image: url('./assets/circle.svg')
 }
-ui-icon::part(clipboard) {
+::part(icon clipboard) {
   mask-image: url('./assets/clipboard.svg')
 }
-ui-icon::part(clock) {
+::part(icon clock) {
   mask-image: url('./assets/clock.svg')
 }
-ui-icon::part(cloud) {
+::part(icon cloud) {
   mask-image: url('./assets/cloud.svg')
 }
-ui-icon::part(cloud-drizzle) {
+::part(icon cloud-drizzle) {
   mask-image: url('./assets/cloud-drizzle.svg')
 }
-ui-icon::part(cloud-lightning) {
+::part(icon cloud-lightning) {
   mask-image: url('./assets/cloud-lightning.svg')
 }
-ui-icon::part(cloud-off) {
+::part(icon cloud-off) {
   mask-image: url('./assets/cloud-off.svg')
 }
-ui-icon::part(cloud-rain) {
+::part(icon cloud-rain) {
   mask-image: url('./assets/cloud-rain.svg')
 }
-ui-icon::part(cloud-snow) {
+::part(icon cloud-snow) {
   mask-image: url('./assets/cloud-snow.svg')
 }
-ui-icon::part(code) {
+::part(icon code) {
   mask-image: url('./assets/code.svg')
 }
-ui-icon::part(codepen) {
+::part(icon codepen) {
   mask-image: url('./assets/codepen.svg')
 }
-ui-icon::part(codesandbox) {
+::part(icon codesandbox) {
   mask-image: url('./assets/codesandbox.svg')
 }
-ui-icon::part(coffee) {
+::part(icon coffee) {
   mask-image: url('./assets/coffee.svg')
 }
-ui-icon::part(columns) {
+::part(icon columns) {
   mask-image: url('./assets/columns.svg')
 }
-ui-icon::part(command) {
+::part(icon command) {
   mask-image: url('./assets/command.svg')
 }
-ui-icon::part(compass) {
+::part(icon compass) {
   mask-image: url('./assets/compass.svg')
 }
-ui-icon::part(copy) {
+::part(icon copy) {
   mask-image: url('./assets/copy.svg')
 }
-ui-icon::part(corner-down-left) {
+::part(icon corner-down-left) {
   mask-image: url('./assets/corner-down-left.svg')
 }
-ui-icon::part(corner-down-right) {
+::part(icon corner-down-right) {
   mask-image: url('./assets/corner-down-right.svg')
 }
-ui-icon::part(corner-left-down) {
+::part(icon corner-left-down) {
   mask-image: url('./assets/corner-left-down.svg')
 }
-ui-icon::part(corner-left-up) {
+::part(icon corner-left-up) {
   mask-image: url('./assets/corner-left-up.svg')
 }
-ui-icon::part(corner-right-down) {
+::part(icon corner-right-down) {
   mask-image: url('./assets/corner-right-down.svg')
 }
-ui-icon::part(corner-right-up) {
+::part(icon corner-right-up) {
   mask-image: url('./assets/corner-right-up.svg')
 }
-ui-icon::part(corner-up-left) {
+::part(icon corner-up-left) {
   mask-image: url('./assets/corner-up-left.svg')
 }
-ui-icon::part(corner-up-right) {
+::part(icon corner-up-right) {
   mask-image: url('./assets/corner-up-right.svg')
 }
-ui-icon::part(cpu) {
+::part(icon cpu) {
   mask-image: url('./assets/cpu.svg')
 }
-ui-icon::part(credit-card) {
+::part(icon credit-card) {
   mask-image: url('./assets/credit-card.svg')
 }
-ui-icon::part(crop) {
+::part(icon crop) {
   mask-image: url('./assets/crop.svg')
 }
-ui-icon::part(crosshair) {
+::part(icon crosshair) {
   mask-image: url('./assets/crosshair.svg')
 }
-ui-icon::part(database) {
+::part(icon database) {
   mask-image: url('./assets/database.svg')
 }
-ui-icon::part(delete) {
+::part(icon delete) {
   mask-image: url('./assets/delete.svg')
 }
-ui-icon::part(disc) {
+::part(icon disc) {
   mask-image: url('./assets/disc.svg')
 }
-ui-icon::part(divide) {
+::part(icon divide) {
   mask-image: url('./assets/divide.svg')
 }
-ui-icon::part(divide-circle) {
+::part(icon divide-circle) {
   mask-image: url('./assets/divide-circle.svg')
 }
-ui-icon::part(divide-square) {
+::part(icon divide-square) {
   mask-image: url('./assets/divide-square.svg')
 }
-ui-icon::part(dollar-sign) {
+::part(icon dollar-sign) {
   mask-image: url('./assets/dollar-sign.svg')
 }
-ui-icon::part(download) {
+::part(icon download) {
   mask-image: url('./assets/download.svg')
 }
-ui-icon::part(download-cloud) {
+::part(icon download-cloud) {
   mask-image: url('./assets/download-cloud.svg')
 }
-ui-icon::part(dribbble) {
+::part(icon dribbble) {
   mask-image: url('./assets/dribbble.svg')
 }
-ui-icon::part(droplet) {
+::part(icon droplet) {
   mask-image: url('./assets/droplet.svg')
 }
-ui-icon::part(edit) {
+::part(icon edit) {
   mask-image: url('./assets/edit.svg')
 }
-ui-icon::part(edit-2) {
+::part(icon edit-2) {
   mask-image: url('./assets/edit-2.svg')
 }
-ui-icon::part(edit-3) {
+::part(icon edit-3) {
   mask-image: url('./assets/edit-3.svg')
 }
-ui-icon::part(external-link) {
+::part(icon external-link) {
   mask-image: url('./assets/external-link.svg')
 }
-ui-icon::part(eye) {
+::part(icon eye) {
   mask-image: url('./assets/eye.svg')
 }
-ui-icon::part(eye-off) {
+::part(icon eye-off) {
   mask-image: url('./assets/eye-off.svg')
 }
-ui-icon::part(facebook) {
+::part(icon facebook) {
   mask-image: url('./assets/facebook.svg')
 }
-ui-icon::part(fast-forward) {
+::part(icon fast-forward) {
   mask-image: url('./assets/fast-forward.svg')
 }
-ui-icon::part(feather) {
+::part(icon feather) {
   mask-image: url('./assets/feather.svg')
 }
-ui-icon::part(figma) {
+::part(icon figma) {
   mask-image: url('./assets/figma.svg')
 }
-ui-icon::part(file) {
+::part(icon file) {
   mask-image: url('./assets/file.svg')
 }
-ui-icon::part(file-minus) {
+::part(icon file-minus) {
   mask-image: url('./assets/file-minus.svg')
 }
-ui-icon::part(file-plus) {
+::part(icon file-plus) {
   mask-image: url('./assets/file-plus.svg')
 }
-ui-icon::part(file-text) {
+::part(icon file-text) {
   mask-image: url('./assets/file-text.svg')
 }
-ui-icon::part(film) {
+::part(icon film) {
   mask-image: url('./assets/film.svg')
 }
-ui-icon::part(filter) {
+::part(icon filter) {
   mask-image: url('./assets/filter.svg')
 }
-ui-icon::part(flag) {
+::part(icon flag) {
   mask-image: url('./assets/flag.svg')
 }
-ui-icon::part(folder) {
+::part(icon folder) {
   mask-image: url('./assets/folder.svg')
 }
-ui-icon::part(folder-minus) {
+::part(icon folder-minus) {
   mask-image: url('./assets/folder-minus.svg')
 }
-ui-icon::part(folder-plus) {
+::part(icon folder-plus) {
   mask-image: url('./assets/folder-plus.svg')
 }
-ui-icon::part(framer) {
+::part(icon framer) {
   mask-image: url('./assets/framer.svg')
 }
-ui-icon::part(frown) {
+::part(icon frown) {
   mask-image: url('./assets/frown.svg')
 }
-ui-icon::part(gitlab) {
+::part(icon gitlab) {
   mask-image: url('./assets/gitlab.svg')
 }
-ui-icon::part(globe) {
+::part(icon globe) {
   mask-image: url('./assets/globe.svg')
 }
-ui-icon::part(grid) {
+::part(icon grid) {
   mask-image: url('./assets/grid.svg')
 }
-ui-icon::part(hard-drive) {
+::part(icon hard-drive) {
   mask-image: url('./assets/hard-drive.svg')
 }
-ui-icon::part(hash) {
+::part(icon hash) {
   mask-image: url('./assets/hash.svg')
 }
-ui-icon::part(headphones) {
+::part(icon headphones) {
   mask-image: url('./assets/headphones.svg')
 }
-ui-icon::part(heart) {
+::part(icon heart) {
   mask-image: url('./assets/heart.svg')
 }
-ui-icon::part(help-circle) {
+::part(icon help-circle) {
   mask-image: url('./assets/help-circle.svg')
 }
-ui-icon::part(hexagon) {
+::part(icon hexagon) {
   mask-image: url('./assets/hexagon.svg')
 }
-ui-icon::part(home) {
+::part(icon home) {
   mask-image: url('./assets/home.svg')
 }
-ui-icon::part(image) {
+::part(icon image) {
   mask-image: url('./assets/image.svg')
 }
-ui-icon::part(inbox) {
+::part(icon inbox) {
   mask-image: url('./assets/inbox.svg')
 }
-ui-icon::part(info) {
+::part(icon info) {
   mask-image: url('./assets/info.svg')
 }
-ui-icon::part(instagram) {
+::part(icon instagram) {
   mask-image: url('./assets/instagram.svg')
 }
-ui-icon::part(italic) {
+::part(icon italic) {
   mask-image: url('./assets/italic.svg')
 }
-ui-icon::part(key) {
+::part(icon key) {
   mask-image: url('./assets/key.svg')
 }
-ui-icon::part(layers) {
+::part(icon layers) {
   mask-image: url('./assets/layers.svg')
 }
-ui-icon::part(layout) {
+::part(icon layout) {
   mask-image: url('./assets/layout.svg')
 }
-ui-icon::part(life-buoy) {
+::part(icon life-buoy) {
   mask-image: url('./assets/life-buoy.svg')
 }
-ui-icon::part(link) {
+::part(icon link) {
   mask-image: url('./assets/link.svg')
 }
-ui-icon::part(link-2) {
+::part(icon link-2) {
   mask-image: url('./assets/link-2.svg')
 }
-ui-icon::part(linkedin) {
+::part(icon linkedin) {
   mask-image: url('./assets/linkedin.svg')
 }
-ui-icon::part(list) {
+::part(icon list) {
   mask-image: url('./assets/list.svg')
 }
-ui-icon::part(loader) {
+::part(icon loader) {
   mask-image: url('./assets/loader.svg')
 }
-ui-icon::part(lock) {
+::part(icon lock) {
   mask-image: url('./assets/lock.svg')
 }
-ui-icon::part(log-in) {
+::part(icon log-in) {
   mask-image: url('./assets/log-in.svg')
 }
-ui-icon::part(log-out) {
+::part(icon log-out) {
   mask-image: url('./assets/log-out.svg')
 }
-ui-icon::part(mail) {
+::part(icon mail) {
   mask-image: url('./assets/mail.svg')
 }
-ui-icon::part(map) {
+::part(icon map) {
   mask-image: url('./assets/map.svg')
 }
-ui-icon::part(map-pin) {
+::part(icon map-pin) {
   mask-image: url('./assets/map-pin.svg')
 }
-ui-icon::part(maximize) {
+::part(icon maximize) {
   mask-image: url('./assets/maximize.svg')
 }
-ui-icon::part(maximize-2) {
+::part(icon maximize-2) {
   mask-image: url('./assets/maximize-2.svg')
 }
-ui-icon::part(meh) {
+::part(icon meh) {
   mask-image: url('./assets/meh.svg')
 }
-ui-icon::part(menu) {
+::part(icon menu) {
   mask-image: url('./assets/menu.svg')
 }
-ui-icon::part(message-circle) {
+::part(icon message-circle) {
   mask-image: url('./assets/message-circle.svg')
 }
-ui-icon::part(message-square) {
+::part(icon message-square) {
   mask-image: url('./assets/message-square.svg')
 }
-ui-icon::part(mic) {
+::part(icon mic) {
   mask-image: url('./assets/mic.svg')
 }
-ui-icon::part(mic-off) {
+::part(icon mic-off) {
   mask-image: url('./assets/mic-off.svg')
 }
-ui-icon::part(minimize) {
+::part(icon minimize) {
   mask-image: url('./assets/minimize.svg')
 }
-ui-icon::part(minimize-2) {
+::part(icon minimize-2) {
   mask-image: url('./assets/minimize-2.svg')
 }
-ui-icon::part(minus) {
+::part(icon minus) {
   mask-image: url('./assets/minus.svg')
 }
-ui-icon::part(minus-circle) {
+::part(icon minus-circle) {
   mask-image: url('./assets/minus-circle.svg')
 }
-ui-icon::part(minus-square) {
+::part(icon minus-square) {
   mask-image: url('./assets/minus-square.svg')
 }
-ui-icon::part(monitor) {
+::part(icon monitor) {
   mask-image: url('./assets/monitor.svg')
 }
-ui-icon::part(moon) {
+::part(icon moon) {
   mask-image: url('./assets/moon.svg')
 }
-ui-icon::part(more-horizontal) {
+::part(icon more-horizontal) {
   mask-image: url('./assets/more-horizontal.svg')
 }
-ui-icon::part(more-vertical) {
+::part(icon more-vertical) {
   mask-image: url('./assets/more-vertical.svg')
 }
-ui-icon::part(mouse-pointer) {
+::part(icon mouse-pointer) {
   mask-image: url('./assets/mouse-pointer.svg')
 }
-ui-icon::part(move) {
+::part(icon move) {
   mask-image: url('./assets/move.svg')
 }
-ui-icon::part(music) {
+::part(icon music) {
   mask-image: url('./assets/music.svg')
 }
-ui-icon::part(navigation) {
+::part(icon navigation) {
   mask-image: url('./assets/navigation.svg')
 }
-ui-icon::part(navigation-2) {
+::part(icon navigation-2) {
   mask-image: url('./assets/navigation-2.svg')
 }
-ui-icon::part(octagon) {
+::part(icon octagon) {
   mask-image: url('./assets/octagon.svg')
 }
-ui-icon::part(package) {
+::part(icon package) {
   mask-image: url('./assets/package.svg')
 }
-ui-icon::part(paperclip) {
+::part(icon paperclip) {
   mask-image: url('./assets/paperclip.svg')
 }
-ui-icon::part(pause) {
+::part(icon pause) {
   mask-image: url('./assets/pause.svg')
 }
-ui-icon::part(pause-circle) {
+::part(icon pause-circle) {
   mask-image: url('./assets/pause-circle.svg')
 }
-ui-icon::part(pen-tool) {
+::part(icon pen-tool) {
   mask-image: url('./assets/pen-tool.svg')
 }
-ui-icon::part(percent) {
+::part(icon percent) {
   mask-image: url('./assets/percent.svg')
 }
-ui-icon::part(phone) {
+::part(icon phone) {
   mask-image: url('./assets/phone.svg')
 }
-ui-icon::part(phone-call) {
+::part(icon phone-call) {
   mask-image: url('./assets/phone-call.svg')
 }
-ui-icon::part(phone-forwarded) {
+::part(icon phone-forwarded) {
   mask-image: url('./assets/phone-forwarded.svg')
 }
-ui-icon::part(phone-incoming) {
+::part(icon phone-incoming) {
   mask-image: url('./assets/phone-incoming.svg')
 }
-ui-icon::part(phone-missed) {
+::part(icon phone-missed) {
   mask-image: url('./assets/phone-missed.svg')
 }
-ui-icon::part(phone-off) {
+::part(icon phone-off) {
   mask-image: url('./assets/phone-off.svg')
 }
-ui-icon::part(phone-outgoing) {
+::part(icon phone-outgoing) {
   mask-image: url('./assets/phone-outgoing.svg')
 }
-ui-icon::part(pie-chart) {
+::part(icon pie-chart) {
   mask-image: url('./assets/pie-chart.svg')
 }
-ui-icon::part(play) {
+::part(icon play) {
   mask-image: url('./assets/play.svg')
 }
-ui-icon::part(play-circle) {
+::part(icon play-circle) {
   mask-image: url('./assets/play-circle.svg')
 }
-ui-icon::part(plus) {
+::part(icon plus) {
   mask-image: url('./assets/plus.svg')
 }
-ui-icon::part(plus-circle) {
+::part(icon plus-circle) {
   mask-image: url('./assets/plus-circle.svg')
 }
-ui-icon::part(plus-square) {
+::part(icon plus-square) {
   mask-image: url('./assets/plus-square.svg')
 }
-ui-icon::part(pocket) {
+::part(icon pocket) {
   mask-image: url('./assets/pocket.svg')
 }
-ui-icon::part(power) {
+::part(icon power) {
   mask-image: url('./assets/power.svg')
 }
-ui-icon::part(printer) {
+::part(icon printer) {
   mask-image: url('./assets/printer.svg')
 }
-ui-icon::part(radio) {
+::part(icon radio) {
   mask-image: url('./assets/radio.svg')
 }
-ui-icon::part(refresh-ccw) {
+::part(icon refresh-ccw) {
   mask-image: url('./assets/refresh-ccw.svg')
 }
-ui-icon::part(refresh-cw) {
+::part(icon refresh-cw) {
   mask-image: url('./assets/refresh-cw.svg')
 }
-ui-icon::part(repeat) {
+::part(icon repeat) {
   mask-image: url('./assets/repeat.svg')
 }
-ui-icon::part(rewind) {
+::part(icon rewind) {
   mask-image: url('./assets/rewind.svg')
 }
-ui-icon::part(rotate-ccw) {
+::part(icon rotate-ccw) {
   mask-image: url('./assets/rotate-ccw.svg')
 }
-ui-icon::part(rotate-cw) {
+::part(icon rotate-cw) {
   mask-image: url('./assets/rotate-cw.svg')
 }
-ui-icon::part(rss) {
+::part(icon rss) {
   mask-image: url('./assets/rss.svg')
 }
-ui-icon::part(save) {
+::part(icon save) {
   mask-image: url('./assets/save.svg')
 }
-ui-icon::part(scissors) {
+::part(icon scissors) {
   mask-image: url('./assets/scissors.svg')
 }
-ui-icon::part(search) {
+::part(icon search) {
   mask-image: url('./assets/search.svg')
 }
-ui-icon::part(send) {
+::part(icon send) {
   mask-image: url('./assets/send.svg')
 }
-ui-icon::part(server) {
+::part(icon server) {
   mask-image: url('./assets/server.svg')
 }
-ui-icon::part(settings) {
+::part(icon settings) {
   mask-image: url('./assets/settings.svg')
 }
-ui-icon::part(share) {
+::part(icon share) {
   mask-image: url('./assets/share.svg')
 }
-ui-icon::part(share-2) {
+::part(icon share-2) {
   mask-image: url('./assets/share-2.svg')
 }
-ui-icon::part(shield) {
+::part(icon shield) {
   mask-image: url('./assets/shield.svg')
 }
-ui-icon::part(shield-off) {
+::part(icon shield-off) {
   mask-image: url('./assets/shield-off.svg')
 }
-ui-icon::part(shopping-bag) {
+::part(icon shopping-bag) {
   mask-image: url('./assets/shopping-bag.svg')
 }
-ui-icon::part(shopping-cart) {
+::part(icon shopping-cart) {
   mask-image: url('./assets/shopping-cart.svg')
 }
-ui-icon::part(shuffle) {
+::part(icon shuffle) {
   mask-image: url('./assets/shuffle.svg')
 }
-ui-icon::part(sidebar) {
+::part(icon sidebar) {
   mask-image: url('./assets/sidebar.svg')
 }
-ui-icon::part(skip-back) {
+::part(icon skip-back) {
   mask-image: url('./assets/skip-back.svg')
 }
-ui-icon::part(skip-forward) {
+::part(icon skip-forward) {
   mask-image: url('./assets/skip-forward.svg')
 }
-ui-icon::part(slack) {
+::part(icon slack) {
   mask-image: url('./assets/slack.svg')
 }
-ui-icon::part(slash) {
+::part(icon slash) {
   mask-image: url('./assets/slash.svg')
 }
-ui-icon::part(sliders) {
+::part(icon sliders) {
   mask-image: url('./assets/sliders.svg')
 }
-ui-icon::part(smartphone) {
+::part(icon smartphone) {
   mask-image: url('./assets/smartphone.svg')
 }
-ui-icon::part(smile) {
+::part(icon smile) {
   mask-image: url('./assets/smile.svg')
 }
-ui-icon::part(speaker) {
+::part(icon speaker) {
   mask-image: url('./assets/speaker.svg')
 }
-ui-icon::part(square) {
+::part(icon square) {
   mask-image: url('./assets/square.svg')
 }
-ui-icon::part(star) {
+::part(icon star) {
   mask-image: url('./assets/star.svg')
 }
-ui-icon::part(stop-circle) {
+::part(icon stop-circle) {
   mask-image: url('./assets/stop-circle.svg')
 }
-ui-icon::part(sun) {
+::part(icon sun) {
   mask-image: url('./assets/sun.svg')
 }
-ui-icon::part(sunrise) {
+::part(icon sunrise) {
   mask-image: url('./assets/sunrise.svg')
 }
-ui-icon::part(sunset) {
+::part(icon sunset) {
   mask-image: url('./assets/sunset.svg')
 }
-ui-icon::part(table) {
+::part(icon table) {
   mask-image: url('./assets/table.svg')
 }
-ui-icon::part(tablet) {
+::part(icon tablet) {
   mask-image: url('./assets/tablet.svg')
 }
-ui-icon::part(tag) {
+::part(icon tag) {
   mask-image: url('./assets/tag.svg')
 }
-ui-icon::part(target) {
+::part(icon target) {
   mask-image: url('./assets/target.svg')
 }
-ui-icon::part(terminal) {
+::part(icon terminal) {
   mask-image: url('./assets/terminal.svg')
 }
-ui-icon::part(thermometer) {
+::part(icon thermometer) {
   mask-image: url('./assets/thermometer.svg')
 }
-ui-icon::part(thumbs-down) {
+::part(icon thumbs-down) {
   mask-image: url('./assets/thumbs-down.svg')
 }
-ui-icon::part(thumbs-up) {
+::part(icon thumbs-up) {
   mask-image: url('./assets/thumbs-up.svg')
 }
-ui-icon::part(toggle-left) {
+::part(icon toggle-left) {
   mask-image: url('./assets/toggle-left.svg')
 }
-ui-icon::part(toggle-right) {
+::part(icon toggle-right) {
   mask-image: url('./assets/toggle-right.svg')
 }
-ui-icon::part(tool) {
+::part(icon tool) {
   mask-image: url('./assets/tool.svg')
 }
-ui-icon::part(trash) {
+::part(icon trash) {
   mask-image: url('./assets/trash.svg')
 }
-ui-icon::part(trash-2) {
+::part(icon trash-2) {
   mask-image: url('./assets/trash-2.svg')
 }
-ui-icon::part(trello) {
+::part(icon trello) {
   mask-image: url('./assets/trello.svg')
 }
-ui-icon::part(trending-down) {
+::part(icon trending-down) {
   mask-image: url('./assets/trending-down.svg')
 }
-ui-icon::part(trending-up) {
+::part(icon trending-up) {
   mask-image: url('./assets/trending-up.svg')
 }
-ui-icon::part(triangle) {
+::part(icon triangle) {
   mask-image: url('./assets/triangle.svg')
 }
-ui-icon::part(truck) {
+::part(icon truck) {
   mask-image: url('./assets/truck.svg')
 }
-ui-icon::part(tv) {
+::part(icon tv) {
   mask-image: url('./assets/tv.svg')
 }
-ui-icon::part(twitch) {
+::part(icon twitch) {
   mask-image: url('./assets/twitch.svg')
 }
-ui-icon::part(twitter) {
+::part(icon twitter) {
   mask-image: url('./assets/twitter.svg')
 }
-ui-icon::part(type) {
+::part(icon type) {
   mask-image: url('./assets/type.svg')
 }
-ui-icon::part(umbrella) {
+::part(icon umbrella) {
   mask-image: url('./assets/umbrella.svg')
 }
-ui-icon::part(underline) {
+::part(icon underline) {
   mask-image: url('./assets/underline.svg')
 }
-ui-icon::part(unlock) {
+::part(icon unlock) {
   mask-image: url('./assets/unlock.svg')
 }
-ui-icon::part(upload) {
+::part(icon upload) {
   mask-image: url('./assets/upload.svg')
 }
-ui-icon::part(upload-cloud) {
+::part(icon upload-cloud) {
   mask-image: url('./assets/upload-cloud.svg')
 }
-ui-icon::part(user) {
+::part(icon user) {
   mask-image: url('./assets/user.svg')
 }
-ui-icon::part(user-check) {
+::part(icon user-check) {
   mask-image: url('./assets/user-check.svg')
 }
-ui-icon::part(user-minus) {
+::part(icon user-minus) {
   mask-image: url('./assets/user-minus.svg')
 }
-ui-icon::part(user-plus) {
+::part(icon user-plus) {
   mask-image: url('./assets/user-plus.svg')
 }
-ui-icon::part(user-x) {
+::part(icon user-x) {
   mask-image: url('./assets/user-x.svg')
 }
-ui-icon::part(users) {
+::part(icon users) {
   mask-image: url('./assets/users.svg')
 }
-ui-icon::part(video) {
+::part(icon video) {
   mask-image: url('./assets/video.svg')
 }
-ui-icon::part(video-off) {
+::part(icon video-off) {
   mask-image: url('./assets/video-off.svg')
 }
-ui-icon::part(voicemail) {
+::part(icon voicemail) {
   mask-image: url('./assets/voicemail.svg')
 }
-ui-icon::part(volume) {
+::part(icon volume) {
   mask-image: url('./assets/volume.svg')
 }
-ui-icon::part(volume-1) {
+::part(icon volume-1) {
   mask-image: url('./assets/volume-1.svg')
 }
-ui-icon::part(volume-2) {
+::part(icon volume-2) {
   mask-image: url('./assets/volume-2.svg')
 }
-ui-icon::part(volume-x) {
+::part(icon volume-x) {
   mask-image: url('./assets/volume-x.svg')
 }
-ui-icon::part(watch) {
+::part(icon watch) {
   mask-image: url('./assets/watch.svg')
 }
-ui-icon::part(wifi) {
+::part(icon wifi) {
   mask-image: url('./assets/wifi.svg')
 }
-ui-icon::part(wifi-off) {
+::part(icon wifi-off) {
   mask-image: url('./assets/wifi-off.svg')
 }
-ui-icon::part(wind) {
+::part(icon wind) {
   mask-image: url('./assets/wind.svg')
 }
-ui-icon::part(x) {
+::part(icon x) {
   mask-image: url('./assets/x.svg')
 }
-ui-icon::part(x-circle) {
+::part(icon x-circle) {
   mask-image: url('./assets/x-circle.svg')
 }
-ui-icon::part(x-octagon) {
+::part(icon x-octagon) {
   mask-image: url('./assets/x-octagon.svg')
 }
-ui-icon::part(x-square) {
+::part(icon x-square) {
   mask-image: url('./assets/x-square.svg')
 }
-ui-icon::part(youtube) {
+::part(icon youtube) {
   mask-image: url('./assets/youtube.svg')
 }
-ui-icon::part(zap) {
+::part(icon zap) {
   mask-image: url('./assets/zap.svg')
 }
-ui-icon::part(zap-off) {
+::part(icon zap-off) {
   mask-image: url('./assets/zap-off.svg')
 }
-ui-icon::part(zoom-in) {
+::part(icon zoom-in) {
   mask-image: url('./assets/zoom-in.svg')
 }
-ui-icon::part(zoom-out) {
+::part(icon zoom-out) {
   mask-image: url('./assets/zoom-out.svg')
 }
