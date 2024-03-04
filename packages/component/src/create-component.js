@@ -1,5 +1,5 @@
 import { unsafeCSS, isServer } from 'lit';
-import { unique, each, noop, kebabToCamel, get } from '@semantic-ui/utils';
+import { unique, each, noop, kebabToCamel, isString, isBoolean, get } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { extractComponentSpec } from './helpers/extract-component-spec.js';
@@ -124,9 +124,10 @@ export const createComponent = ({
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
-        this.template.onDestroyed(); // destroy instance
+        if(this.template) {
+          this.template.onDestroyed(); // destroy instance
+        }
         litTemplate.onDestroyed(); // destroy prototype
-        this.call(onDestroyed);
       }
 
       // callback if moves doc
@@ -160,14 +161,20 @@ export const createComponent = ({
             });
           }
           else if (get(componentSpec.settings, attribute)) {
-            // syntax <ui-button size="large"> (handled natively)
+            if(value === '') {
+              // boolean attribute
+              value = true;
+            }
+            // syntax <ui-button size="large">
+            if(value !== undefined) {
+              this[attribute] = value;
+            }
           }
           else if(value) {
             // syntax <ui-button primary large>
             // reverse lookup
             const setting = get(componentSpec.reverseSettings, attribute);
             if (setting !== undefined) {
-              const oldValue = this[setting];
               const newValue = attribute;
               this[setting] = newValue;
             }
@@ -182,12 +189,12 @@ export const createComponent = ({
             return;
           }
           if(componentSpec && get(componentSpec.reverseSettings, property)) {
+            // this property is used to lookup a setting like 'large' -> sizing
+            // no action necessary
             return;
           }
           const setting = this[property] || this.defaultSettings[property];
-          if(setting !== undefined) {
-            settings[property] = setting;
-          }
+          settings[property] = setting;
           // boolean attribute case
           if (spec && settings[this[property]] !== undefined) {
             settings[this[property]] = true;
@@ -208,7 +215,17 @@ export const createComponent = ({
           if(componentSpec && get(componentSpec.reverseSettings, property)) {
             return;
           }
-          classes.push(this[property]);
+          const value = this[property];
+          // if the setting has a string value use that as class name
+          // i.e. sizing='large' => 'large'
+          // otherwise if this is a boolean property push the property name
+          // i.e. link=true => 'link'
+          if(isString(value) && value) {
+            classes.push(value);
+          }
+          else if(isBoolean(value) || value === '') {
+            classes.push(property);
+          }
         });
         const classString = unique(classes).filter(Boolean).join(' ');
         return classString;

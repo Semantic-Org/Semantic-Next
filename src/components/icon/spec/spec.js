@@ -25,7 +25,7 @@ export const IconSpec = {
       name: 'Icon',
       attribute: 'icon',
       description: 'An icon can specify what icon should appear',
-      adoptionLevel: 1,
+      usageLevel: 1,
       options: [
         'airplay',
         'alert-circle',
@@ -164,8 +164,8 @@ export const IconSpec = {
         'layers',
         'layout',
         'life-buoy',
-        'link',
-        'link-2',
+        'linkify',
+        'linkify-2',
         'linkedin',
         'list',
         'loader',
@@ -323,11 +323,13 @@ export const IconSpec = {
       name: 'Disabled',
       attribute: 'disabled',
       description: 'An icon appear disabled',
+      usageLevel: 1,
     },
     {
       name: 'Loading',
       attribute: 'loading',
       description: 'An icon can be used as a simple loader',
+      usageLevel: 1,
     },
   ],
 
@@ -338,10 +340,20 @@ export const IconSpec = {
   variations: [
 
     {
+      name: 'Link',
+      description: 'A button can be formatted as a link',
+      usageLevel: 1,
+    },
+    {
+      name: 'Fitted',
+      description: 'An icon can be fitted without any space to the left or right of it.',
+      usageLevel: 1,
+    },
+    {
       name: 'Colored',
       value: 'color',
       description: 'A button can be colored',
-      adoptionLevel: 3,
+      usageLevel: 2,
       options: [
         {
           name: 'Red',
@@ -413,7 +425,7 @@ export const IconSpec = {
     {
       name: 'Size',
       value: 'size',
-      adoptionLevel: 1,
+      usageLevel: 1,
       description: 'A button can vary in size',
       options: [
         {
@@ -462,7 +474,7 @@ export const IconSpec = {
     {
       name: 'Inverted',
       description: 'A button can be formatted to appear on dark backgrounds',
-      adoptionLevel: 2,
+      usageLevel: 2,
       attribute: 'inverted',
     },
   ],
@@ -473,9 +485,9 @@ export const IconSpec = {
   *******************************/
 
   supportsPlural: true,
-  pluralName: 'Buttons',
-  pluralTagName: 'buttons',
-  pluralDescription: 'Buttons can exist together as a group',
+  pluralName: 'Icons',
+  pluralTagName: 'ui-icons',
+  pluralDescription: 'Icons can exist together as a group',
 
   pluralVariations: [
     'colored',

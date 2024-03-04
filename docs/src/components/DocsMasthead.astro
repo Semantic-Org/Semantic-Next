@@ -1,10 +1,11 @@
 ---
 import './DocsMasthead.css';
+const { header, description } = Astro.props;
 ---
 <masthead>
   <ui-container>
-    <h1>Component Name</h1>
-    <p>This is a description of the component</p>
+    <h1>{header}</h1>
+    <p>{description}</p>
   </ui-container>
   <ui-menu two-item dashboard>
     <ui-container>

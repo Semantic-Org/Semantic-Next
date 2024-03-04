@@ -1,6 +1,7 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
 import { any, isFunction, isArray } from '@semantic-ui/utils';
+import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './SidebarMenu.html?raw';
 import css from './SidebarMenu.css?raw';
 
@@ -12,6 +13,7 @@ const settings = {
 
 const createInstance = function ({ tpl, settings }) {
   return {
+    url: new ReactiveVar(settings.activeURL),
     getMenu() {
       return tpl.filterVisibleSections(settings.menu);
     },
@@ -72,10 +74,13 @@ const createInstance = function ({ tpl, settings }) {
       }
     },
     isCurrentItem(item) {
-      if (item?.url === settings.activeURL) {
+      if (item?.url === tpl.url.get()) {
         return true;
       }
     },
+    onPageChange() {
+      tpl.url.set(window.location.pathname);
+    }
   };
 };
 
@@ -83,7 +88,11 @@ const onCreated = function ({ tpl }) {};
 
 const onDestroyed = function ({ tpl }) {};
 
-const onRendered = function ({ tpl }) {};
+const onRendered = function ({ $, tpl, isClient }) {
+  if(isClient) {
+    $(document).on('astro:after-swap', tpl.onPageChange);
+  }
+};
 
 const events = {
   // test events
@@ -104,4 +113,5 @@ const SidebarMenu = createComponent({
   events,
 });
 
+export default SidebarMenu;
 export { SidebarMenu };

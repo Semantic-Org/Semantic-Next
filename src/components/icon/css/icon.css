@@ -4,13 +4,14 @@
 /* Group */
 @import url('./group/icons.css') layer(component);
 
-/* Types */
-
 /* States */
 @import url('./states/disabled.css') layer(component);
 @import url('./states/loading.css') layer(component);
 
 /* Variations */
-@import url('./variations/sizing.css') layer(component);
+@import url('./variations/circular.css') layer(component);
 @import url('./variations/colored.css') layer(component);
+@import url('./variations/fitted.css') layer(component);
+@import url('./variations/link.css') layer(component);
+@import url('./variations/sizing.css') layer(component);
 

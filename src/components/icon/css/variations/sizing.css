@@ -4,33 +4,33 @@
 
 .mini.icons .icon,
 .mini.icon {
-  font-size: var(--mini);
+  font-size: var(--relative-mini);
 }
 .tiny.icons .icon,
 .tiny.icon {
-  font-size: var(--tiny);
+  font-size: var(--relative-tiny);
 }
 .small.icons .icon,
 .small.icon {
-  font-size: var(--small);
+  font-size: var(--relative-small);
 }
 .icons .icon,
 .icon {
-  font-size: var(--medium);
+  font-size: var(--relative-medium);
 }
 .large.icons .icon,
 .large.icon {
-  font-size: var(--large);
+  font-size: var(--relative-large);
 }
 .big.icons .icon,
 .big.icon {
-  font-size: var(--big);
+  font-size: var(--relative-big);
 }
 .huge.icons .icon,
 .huge.icon {
-  font-size: var(--huge);
+  font-size: var(--relative-huge);
 }
 .massive.icons .icon,
 .massive.icon {
-  font-size: var(--massive);
+  font-size: var(--relative-massive);
 }

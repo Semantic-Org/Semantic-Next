@@ -1,6 +1,6 @@
 import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
-import { fatal, each, remove, generateID, isEqual, noop, isServer, isFunction, extend, clone } from '@semantic-ui/utils';
+import { fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, clone } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
@@ -40,6 +40,9 @@ export const LitTemplate = class LitTemplate {
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
+    this.onCreated = noop;
+    this.onDestroyed = noop;
+    this.onRendered = noop;
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
@@ -111,7 +114,7 @@ export const LitTemplate = class LitTemplate {
       this.rendered = false;
       this.clearReactions();
       this.removeEvents();
-      this.call(this.onDestroyedCallback.bind(this));
+      this.call(this.onDestroyedCallback);
     };
 
     this.initialized = true;
@@ -321,6 +324,9 @@ export const LitTemplate = class LitTemplate {
 
   // Rendered DOM (either shadow or regular)
   $(selector, root = this.renderRoot, { filterTemplate = true } = {}) {
+    if(!LitTemplate.isServer && inArray(selector, ['body', 'document', 'html'])) {
+      root = document;
+    }
     if (!root) {
       root = globalThis;
     }

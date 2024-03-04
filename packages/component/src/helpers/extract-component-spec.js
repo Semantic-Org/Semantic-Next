@@ -10,28 +10,39 @@ export const extractComponentSpec = (spec) => {
     reverseSettings: {}
   };
 
+  const getAttributeFromPart = (part) => {
+    return part.attribute || part.name.toLowerCase();
+  };
+
   const getSettingsFromSpecPart = (specPart) => {
     each(spec[specPart], (spec) => {
-      const settingName = spec.attribute || spec.name.toLowerCase();
+      const settingName = getAttributeFromPart(spec);
       if(!settingName) {
         return;
       }
       componentSpec[specPart].push(settingName);
+
+      let optionValues;
       if(spec.options) {
-        const optionValues = spec.options.map(option => {
+        optionValues = spec.options.map(option => {
           if(option?.value !== undefined) {
             return option.value;
           }
           return option;
         }).filter(Boolean);
-        componentSpec.settings[settingName] = optionValues;
       }
+      else {
+        // boolean
+        optionValues = [true, false];
+      }
+      componentSpec.settings[settingName] = optionValues;
     });
   };
 
   getSettingsFromSpecPart('types');
   getSettingsFromSpecPart('states');
   getSettingsFromSpecPart('variations');
+
 
   // avoid having to reverse array at runtime
   componentSpec.reverseSettings = reverseKeys(componentSpec.settings);

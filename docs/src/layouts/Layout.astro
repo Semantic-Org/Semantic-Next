@@ -1,21 +1,23 @@
 ---
 import Body from './Body.astro';
-import Navigation from '../components/Navigation.astro';
-import DocsMasthead from '../components/DocsMasthead.astro';
-import TopBar from '../components/TopBar.astro';
-import DocsRail from '../components/DocsRail.astro';
+import Sidebar from '@components/Sidebar.astro';
+import DocsMasthead from '@components/DocsMasthead.astro';
+import TopBar from '@components/TopBar.astro';
+import DocsRail from '@components/DocsRail.astro';
 import './Layout.css';
 
+let { title, header, description } = Astro.props;
+header = header || title;
 ---
-<Body>
+<Body title={title}>
 	<TopBar></TopBar>
 	<layout>
-		<Navigation/>
-		<page>
+		<Sidebar/>
+		<page transition:animate="none">
 			<slot name="masthead">
-				<DocsMasthead />
+				<DocsMasthead header={header} description={description}/>
 			</slot>
-			<main>
+			<main transition:animate="fade">
 				<ui-container>
 					<rail class="ui right dividing rail">
 						<slot name="rail">

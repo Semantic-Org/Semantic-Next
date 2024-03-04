@@ -1,3 +1,4 @@
 .disabled.icon {
-  opacity: 0.3;
+  cursor: default;
+  opacity: --var(icon-disabled-opacity);
 }

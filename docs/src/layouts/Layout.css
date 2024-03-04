@@ -3,7 +3,7 @@ layout {
   flex-direction: row;
 }
 
-layout navigation {
+layout sidebar {
   position: fixed;
   z-index: 1;
   background-color: #1B1C1D;
@@ -41,18 +41,18 @@ layout rail.ui.rail {
 }
 
 layout,
-layout navigation {
+layout sidebar {
   height: 100vh;
 }
 
 topbar + layout,
-topbar + layout navigation {
+topbar + layout sidebar {
   height: calc(100vh - 60px);
 }
 
 body.dark {
   page > masthead {
-    border-bottom: 1px solid #000000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: none;
   }
   page > masthead h1 {
@@ -68,6 +68,6 @@ body.dark {
     background-image: linear-gradient(rgb(195 195 195 / 9%), rgb(0 0 0 / 0%) 25px);
   }
   main rail.ui.right.dividing.rail {
-    border-color: #1A1A1A;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }

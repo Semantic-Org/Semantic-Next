@@ -1,5 +1,6 @@
 :host {
   margin: 0em var(--icon-distance-from-text) 0em 0em;
+  font-size: inherit;
   width: var(--icon-width);
   height: var(--icon-height);
 }
@@ -156,8 +157,8 @@
 .icon.layers { mask-image: var(--icon-layers-svg); }
 .icon.layout { mask-image: var(--icon-layout-svg); }
 .icon.life-buoy { mask-image: var(--icon-life-buoy-svg); }
-.icon.link { mask-image: var(--icon-link-svg); }
-.icon.link-2 { mask-image: var(--icon-link-2-svg); }
+.icon.linkify { mask-image: var(--icon-linkify-svg); }
+.icon.linkify-2 { mask-image: var(--icon-linkify-2-svg); }
 .icon.linkedin { mask-image: var(--icon-linkedin-svg); }
 .icon.list { mask-image: var(--icon-list-svg); }
 .icon.loader { mask-image: var(--icon-loader-svg); }

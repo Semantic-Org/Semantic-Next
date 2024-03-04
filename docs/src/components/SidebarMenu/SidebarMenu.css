@@ -2,11 +2,16 @@
             Content
 *******************************/
 
+:host {
+  font-size: inherit;
+  padding: 0rem 1rem;
+}
+
 .title {
   display: flex;
   flex-direction: row;
   text-align: left;
-  font-size: 14px;
+  font-size: var(--14px);
   text-transform: none;
   font-weight: bold;
   transition: 0.3s color ease;
@@ -15,13 +20,15 @@
   text-decoration: none;
 }
 .title {
-  ui-icon:not([icon="dropdown"]) {
+  ui-icon {
     display: block;
-    font-size: 18px;
     width: 1.5rem;
     flex: 0 0 auto;
     text-align: center;
     margin-right: 1rem;
+  }
+  ui-icon::part(icon) {
+    font-size: 18px;
   }
   ui-icon[icon="dropdown"] {
     float: right;
@@ -61,7 +68,7 @@
       text-decoration: none;
       color: rgba(255, 255, 255, 0.4);
       line-height: 1;
-      font-size: 13px;
+      font-size: var(--13px);
       margin: 2px 0px;
       padding: 5px 0px;
     }

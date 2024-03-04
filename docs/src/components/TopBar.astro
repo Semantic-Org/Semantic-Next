@@ -3,6 +3,7 @@ const { currentRoute } = Astro.props;
 import './TopBar.css';
 import { Image } from 'astro:assets';
 import logoImage from '@images/logo.png';
+import ThemeSwitcher from'@components/ThemeSwitcher/ThemeSwitcher.js';
 ---
 <topbar>
   <a class="logo" href="/">
@@ -11,21 +12,5 @@ import logoImage from '@images/logo.png';
       Semantic UI
     </span>
   </a>
-  <ui-icon class="sun"></ui-icon>
-  <ui-icon sun></ui-icon>
-  <ui-icon icon="sun"></ui-icon>
+  <ThemeSwitcher client:load></ThemeSwitcher>
 </topbar>
-
-<script>
-  const el = document.querySelectorAll('.moon')[0];
-  if(el) {
-    el.addEventListener('click', function() {
-      let theme = localStorage.getItem('theme');
-      let newTheme = (theme == 'light') ? 'dark' : 'light';
-      localStorage.setItem('theme', newTheme);
-      let body = document.querySelectorAll('body')[0];
-      body.classList.remove(theme);
-      body.classList.add(newTheme);
-    }, true, true);
-  }
-</script>

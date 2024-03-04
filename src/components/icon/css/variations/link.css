@@ -1,0 +1,10 @@
+.link.icon,
+.link.icons {
+  cursor: pointer;
+  opacity: var(--icon-link-opacity);
+  transition: var(--icon-link-transition);
+
+  &:hover {
+    opacity: 1;
+  }
+}

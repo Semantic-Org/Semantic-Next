@@ -2,6 +2,7 @@
 @layer component {
   :host {
     margin: 0em var(--icon-distance-from-text) 0em 0em;
+    font-size: inherit;
     width: var(--icon-width);
     height: var(--icon-height);
   }
@@ -564,13 +565,13 @@
     -webkit-mask-image: var(--icon-life-buoy-svg);
     mask-image: var(--icon-life-buoy-svg);
   }
-  .icon.link {
-    -webkit-mask-image: var(--icon-link-svg);
-    mask-image: var(--icon-link-svg);
+  .icon.linkify {
+    -webkit-mask-image: var(--icon-linkify-svg);
+    mask-image: var(--icon-linkify-svg);
   }
-  .icon.link-2 {
-    -webkit-mask-image: var(--icon-link-2-svg);
-    mask-image: var(--icon-link-2-svg);
+  .icon.linkify-2 {
+    -webkit-mask-image: var(--icon-linkify-2-svg);
+    mask-image: var(--icon-linkify-2-svg);
   }
   .icon.linkedin {
     -webkit-mask-image: var(--icon-linkedin-svg);
@@ -1152,50 +1153,95 @@
 /* src/components/icon/css/states/disabled.css */
 @layer component {
   .disabled.icon {
-    opacity: 0.3;
+    cursor: default;
+    opacity: --var(icon-disabled-opacity);
   }
 }
 
 /* src/components/icon/css/states/loading.css */
 @layer component;
 
-/* src/components/icon/css/variations/sizing.css */
+/* src/components/icon/css/variations/circular.css */
 @layer component {
-  .mini.icons .icon,
-  .mini.icon {
-    font-size: var(--mini);
+  i.circular.icon {
+    border-radius: 500em !important;
+    line-height: 1 !important;
+    padding: --var(circular-padding) !important;
+    box-shadow: --var(circular-shadow);
+    width: --var(circular-size) !important;
+    height: --var(circular-size) !important;
   }
-  .tiny.icons .icon,
-  .tiny.icon {
-    font-size: var(--tiny);
-  }
-  .small.icons .icon,
-  .small.icon {
-    font-size: var(--small);
-  }
-  .icons .icon,
-  .icon {
-    font-size: var(--medium);
-  }
-  .large.icons .icon,
-  .large.icon {
-    font-size: var(--large);
-  }
-  .big.icons .icon,
-  .big.icon {
-    font-size: var(--big);
-  }
-  .huge.icons .icon,
-  .huge.icon {
-    font-size: var(--huge);
-  }
-  .massive.icons .icon,
-  .massive.icon {
-    font-size: var(--massive);
+  i.circular.inverted.icon {
+    border: none;
+    box-shadow: none;
   }
 }
 
 /* src/components/icon/css/variations/colored.css */
 @layer component;
+
+/* src/components/icon/css/variations/fitted.css */
+@layer component {
+  .link.icon,
+  .link.icons {
+    cursor: pointer;
+    opacity: --var(link-opacity);
+    transition: opacity --var(default-duration) --var(default-easing);
+  }
+  .link.icon:hover,
+  .link.icons:hover {
+    opacity: 1 !important;
+  }
+}
+
+/* src/components/icon/css/variations/link.css */
+@layer component {
+  .link.icon,
+  .link.icons {
+    cursor: pointer;
+    opacity: var(--icon-link-opacity);
+    transition: var(--icon-link-transition);
+  }
+  .link.icon:hover,
+  .link.icons:hover {
+    opacity: 1;
+  }
+}
+
+/* src/components/icon/css/variations/sizing.css */
+@layer component {
+  .mini.icons .icon,
+  .mini.icon {
+    font-size: var(--relative-mini);
+  }
+  .tiny.icons .icon,
+  .tiny.icon {
+    font-size: var(--relative-tiny);
+  }
+  .small.icons .icon,
+  .small.icon {
+    font-size: var(--relative-small);
+  }
+  .icons .icon,
+  .icon {
+    font-size: var(--relative-medium);
+  }
+  .large.icons .icon,
+  .large.icon {
+    font-size: var(--relative-large);
+  }
+  .big.icons .icon,
+  .big.icon {
+    font-size: var(--relative-big);
+  }
+  .huge.icons .icon,
+  .huge.icon {
+    font-size: var(--relative-huge);
+  }
+  .massive.icons .icon,
+  .massive.icon {
+    font-size: var(--relative-massive);
+  }
+}
 
 /* src/components/icon/css/icon.css */

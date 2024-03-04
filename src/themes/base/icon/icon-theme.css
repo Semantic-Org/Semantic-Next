@@ -15,6 +15,7 @@
 @import url('./states/loading-variables.css') layer(baseTheme);
 
 /* Variations */
+@import url('./variations/link-variables.css') layer(baseTheme);
 @import url('./variations/colored-variables.css') layer(baseTheme);
 @import url('./variations/sizing-variables.css') layer(baseTheme);
 

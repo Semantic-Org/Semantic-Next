@@ -1,11 +1,11 @@
-navigation {
+sidebar {
   display: flex;
   flex-direction: column;
   background-color: #1B1C1D;
   color: #FFFFFF;
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
 }
-navigation navSearch.input {
+sidebar navSearch.input {
   margin: 1rem 1rem;
 }
 navSearch.input .icon {
@@ -28,19 +28,19 @@ navSearch.input input:focus {
   background-color: rgba(255, 255, 255, 0.15) !important;
   color: rgba(255, 255, 255, 1) !important;
 }
-navigation .toc {
+sidebar .toc {
   flex-grow: 1;
   padding-left: 1rem;
   padding-bottom: 1rem;
 }
 
-navigation sidebar-menu {
+sidebar sidebar-menu {
   flex-grow: 1;
 }
 
 
 body.dark {
-  navigation {
-    background-color: #0d0e0e;
+  sidebar {
+    background-color: #1C1D1E;
   }
 }

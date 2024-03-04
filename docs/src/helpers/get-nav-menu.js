@@ -1,9 +1,25 @@
-export const getNavMenu = () => {
+import { getCollection } from 'astro:content';
+
+export const getNavMenu = async () => {
+
+  const components = await getCollection('components');
+
+  const componentPages = components.map(page => ({
+    name: page.data.title,
+    url: `/components/${page.slug}`,
+  }));
+
   const menu = [
+    {
+      name: 'UI Components',
+      url: '/test',
+      icon: 'layers',
+      pages: componentPages,
+    },
     {
       name: 'Guide',
       url: '/guide',
-      icon: 'bookmark',
+      icon: 'book-open',
       pages: [
         { name: 'Introduction', url: '/todo' },
         { name: 'Using Web Components', url: '/page-2' },
@@ -13,30 +29,11 @@ export const getNavMenu = () => {
     {
       name: 'Theming',
       url: '/theming',
-      icon: 'box',
+      icon: 'tool',
       pages: [
-        { name: 'Using Themes', url: '/test' },
         { name: 'Creating Themes', url: '/page-a' },
         { name: 'Dev Tools', url: '/page-2' },
         { name: 'Figma & Prototyping', url: '/page-2' },
-      ],
-    },
-    {
-      name: 'CSS Components',
-      icon: 'check',
-      pages: [
-        { name: 'Site & Colors', url: '/page-3' },
-        { name: 'Headers', url: '/page-4' },
-        { name: 'Icons', url: '/page-4' },
-      ],
-    },
-    {
-      name: 'UI Components',
-      icon: 'bell',
-      pages: [
-        { name: 'Site & Colors', url: '/page-3' },
-        { name: 'Headers', url: '/page-4' },
-        { name: 'Icons', url: '/page-4' },
       ],
     },
   ];
