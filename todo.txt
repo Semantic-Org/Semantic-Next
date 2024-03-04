@@ -1,8 +1,7 @@
 Up next
-- Figure out component settings
-- Tweaks param
-- Build out nav menu
-- Create icon component
+- Review 3 syntax function
+- Complete sidebar and topbar pulling dynamically docs
+- Figure out markdown rendering for definition page
 - Finish baseline nav menu
 - Create accordion component
 - Figure out animation engine
@@ -15,8 +14,7 @@ Docs
 - Dupe lit in astro build
 
 Templating Syntax
-- Add syntax for embedding web components
-- Add syntax for part ?
+- Add syntax for embedding web components / part if necessary
 - Add mechanism for inherting data context from parent template
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
@@ -39,6 +37,10 @@ Testing
 
 Completed
 =====================
+
+week of mar 1
++ work on nested web component issues
++ determine spec file / properties / settings interactions
 
 week of feb 23
 + Figure out final solve for SSR css injection
