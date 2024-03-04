@@ -16,8 +16,8 @@
     text-decoration: inherit;
     text-align: center;
     background-color: currentColor;
-    -webkit-mask-image: none;
-    mask-image: none;
+    -webkit-mask-image: linear-gradient(transparent, transparent);
+    mask-image: linear-gradient(transparent, transparent);
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
