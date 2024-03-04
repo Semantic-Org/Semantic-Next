@@ -353,7 +353,7 @@ export const LitTemplate = class LitTemplate {
         data: data,
         settings: data, // Todo: extract only settings from data
         template: this,
-        templates: LitTemplates.renderedTemplates,
+        templates: LitTemplate.renderedTemplates,
         isServer: LitTemplate.isServer,
         isClient: !LitTemplate.isServer, // convenience
         $: this.$.bind(this),
