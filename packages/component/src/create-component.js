@@ -170,7 +170,7 @@ export const createComponent = ({
               this[attribute] = value;
             }
           }
-          else if(value) {
+          else if(value !== undefined) {
             // syntax <ui-button primary large>
             // reverse lookup
             const setting = get(componentSpec.reverseSettings, attribute);
@@ -190,7 +190,7 @@ export const createComponent = ({
           }
           if(componentSpec && get(componentSpec.reverseSettings, property)) {
             // this property is used to lookup a setting like 'large' -> sizing
-            // no action necessary
+            // we dont record this into settings
             return;
           }
           const setting = this[property] || this.defaultSettings[property];

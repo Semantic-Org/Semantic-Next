@@ -2,6 +2,7 @@ import { UIIcon } from '@semantic-ui/core';
 
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
+import { get } from '@semantic-ui/utils';
 import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
 
@@ -24,10 +25,12 @@ const createInstance = function ({ $, isServer, tpl }) {
       ;
     },
     getIcon() {
-      return (tpl.theme.get() == 'light')
-        ? 'sun'
-        : 'moon'
-      ;
+      const icons = {
+        dark: 'moon',
+        light: 'sun'
+      };
+      const icon = get(icons, tpl.theme.get());
+      return icon;
     },
     calculateTheme() {
       tpl.reaction((comp) => {
@@ -48,9 +51,9 @@ const createInstance = function ({ $, isServer, tpl }) {
 };
 
 const onCreated = function({tpl, isClient}) {
+  tpl.theme.set(tpl.getLocalTheme());
   if(isClient) {
     tpl.calculateTheme();
-    tpl.theme.set(tpl.getLocalTheme());
   }
 };
 

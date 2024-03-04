@@ -7,7 +7,7 @@ Up next
 - Figure out animation engine
 
 Component Settings
-- Settings or spec
++ Settings or spec
 - Settings specify attribute, allowedValues, defaultValue
 
 Docs
@@ -23,7 +23,7 @@ Rendering
 - Templates -- consider global cache for same data && template
 
 Components
-- Determine spec file build step + use in component
++ Determine spec file build step + use in component
 - Determine build step for components from configuration json. Small/medium/large
 - Build out button
 
@@ -39,6 +39,7 @@ Completed
 =====================
 
 week of mar 1
++ continue scaffolding website
 + work on nested web component issues
 + determine spec file / properties / settings interactions
 
