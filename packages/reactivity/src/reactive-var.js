@@ -7,7 +7,9 @@ export class ReactiveVar {
   constructor(initialValue, equalityFunction) {
     this.currentValue = clone(initialValue);
     this.dependency = new Dependency();
-    this.equalityFunction = wrapFunction(equalityFunction) || ReactiveVar.equalityFunction;
+    this.equalityFunction = equalityFunction
+      ? wrapFunction(equalityFunction)
+      : ReactiveVar.equalityFunction;
   }
 
   static equalityFunction = isEqual;
