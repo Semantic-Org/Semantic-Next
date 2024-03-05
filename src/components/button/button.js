@@ -4,8 +4,11 @@ import ButtonCSS from './button.css?raw';
 import ButtonTemplate from './button.html?raw';
 import { ButtonSpec } from './spec/spec.js';
 
-const createInstance = ({tpl, $}) => ({
+const createInstance = ({tpl, content, $}) => ({
 
+  isAnimated() {
+    return content?.hidden && content?.visible;
+  }
 
 });
 

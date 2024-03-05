@@ -56,7 +56,6 @@ const createInstance = function ({ tpl, settings }) {
       }, []);
     },
     getLink(item) {
-      //console.log(settings);
       if (settings.linkCurrentPage || !tpl.isCurrentItem(item)) {
         return item?.url;
       }
@@ -95,10 +94,6 @@ const onRendered = function ({ $, tpl, isClient }) {
 };
 
 const events = {
-  // test events
-  'click [data-href]'(params) {
-    console.log('click data href', this, params);
-  },
 };
 
 const SidebarMenu = createComponent({

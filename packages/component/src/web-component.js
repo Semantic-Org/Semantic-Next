@@ -121,7 +121,7 @@ class WebComponentBase extends LitElement {
     }
     if (componentSpec) {
       properties.class = {
-        type: String
+        type: String,
       };
       each(componentSpec.settings, (valueArrays, setting) => {
         properties[setting] = WebComponentBase.mapSettingToProperty(setting);

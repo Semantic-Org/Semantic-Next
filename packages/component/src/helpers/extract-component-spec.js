@@ -1,4 +1,12 @@
-import { reverseKeys, each } from '@semantic-ui/utils';
+import { reverseKeys, flatten, each } from '@semantic-ui/utils';
+
+/*
+  This takes quite a large spec file and reduces it to
+  just the portions needed for the web component to function
+
+  This is because the spec includes a lot of additional metadata
+  and descriptive text which is useful for dev tools
+*/
 
 export const extractComponentSpec = (spec) => {
 
@@ -7,7 +15,8 @@ export const extractComponentSpec = (spec) => {
     types: [],
     states: [],
     settings: {},
-    reverseSettings: {}
+    reverseSettings: {},
+    attributeClasses: [],
   };
 
   const getAttributeFromPart = (part) => {
@@ -22,6 +31,10 @@ export const extractComponentSpec = (spec) => {
       }
       componentSpec[specPart].push(settingName);
 
+      if(spec.includeAttributeClass) {
+        componentSpec.attributeClasses.push(settingName);
+      }
+
       let optionValues;
       if(spec.options) {
         optionValues = spec.options.map(option => {
@@ -30,6 +43,7 @@ export const extractComponentSpec = (spec) => {
           }
           return option;
         }).filter(Boolean);
+        optionValues = flatten(optionValues);
       }
       else {
         // boolean
@@ -45,6 +59,10 @@ export const extractComponentSpec = (spec) => {
 
 
   // avoid having to reverse array at runtime
-  componentSpec.reverseSettings = reverseKeys(componentSpec.settings);
+  let reverseSettings = reverseKeys(componentSpec.settings);
+  delete reverseSettings.true;
+  delete reverseSettings.false;
+  componentSpec.reverseSettings = reverseSettings;
+  console.log(componentSpec);
   return componentSpec;
 };

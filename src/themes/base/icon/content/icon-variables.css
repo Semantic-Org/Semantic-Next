@@ -1,6 +1,6 @@
 :root {
   --icon-opacity: 1;
-  --icon-width: 1.18em;
+  --icon-width: 1em;
   --icon-height: 1em;
-  --icon-distance-from-text: 0.25rem;
+  --icon-distance-from-text: var(--3px);
 }

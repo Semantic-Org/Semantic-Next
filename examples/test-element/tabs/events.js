@@ -5,7 +5,6 @@ import { range } from '@semantic-ui/utils';
 import template from './events.html?raw';
 
 const createInstance = ({ tpl, $ }) => {
-  console.log('rendering events tab');
   return {
     number: new ReactiveVar(6),
     getRange() {

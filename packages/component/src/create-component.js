@@ -1,8 +1,10 @@
 import { unsafeCSS, isServer } from 'lit';
-import { unique, each, noop, kebabToCamel, isString, isBoolean, get } from '@semantic-ui/utils';
+import { unique, each, noop, kebabToCamel, inArray, isString, isBoolean, get } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { extractComponentSpec } from './helpers/extract-component-spec.js';
+import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
+
 import { LitTemplate } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';
 
@@ -137,50 +139,11 @@ export const createComponent = ({
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {
-        this.adjustSettingFromAttribute(attribute, newValue);
-        this.call(onAttributeChanged, {
-          args: [attribute, oldValue, newValue],
-        });
         super.attributeChangedCallback(attribute, oldValue, newValue);
+        adjustSettingFromAttribute(this, attribute, newValue, componentSpec);
+        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
-      /*
-        Semantic UI supports 3 dialects to support this we
-        check if attribute is a setting and reflect the value
-
-        <ui-button size="large"> // verbose
-        <ui-button large> // concise
-        <ui-button class="large"> // classic
-      */
-      adjustSettingFromAttribute(attribute, value) {
-        if (componentSpec) {
-          if (attribute == 'class' && value) {
-            // syntax <ui-button class="large primary"></ui-button>
-            each(value.split(' '), (className) => {
-              this.adjustSettingFromAttribute(className, true);
-            });
-          }
-          else if (get(componentSpec.settings, attribute)) {
-            if(value === '') {
-              // boolean attribute
-              value = true;
-            }
-            // syntax <ui-button size="large">
-            if(value !== undefined) {
-              this[attribute] = value;
-            }
-          }
-          else if(value !== undefined) {
-            // syntax <ui-button primary large>
-            // reverse lookup
-            const setting = get(componentSpec.reverseSettings, attribute);
-            if (setting !== undefined) {
-              const newValue = attribute;
-              this[setting] = newValue;
-            }
-          }
-        }
-      }
 
       getSettings() {
         let settings = {};
@@ -188,13 +151,15 @@ export const createComponent = ({
           if (property == 'class' || settings.observe === false) {
             return;
           }
-          if(componentSpec && get(componentSpec.reverseSettings, property)) {
+          if(componentSpec && !get(componentSpec.settings, property) && get(componentSpec.reverseSettings, property)) {
             // this property is used to lookup a setting like 'large' -> sizing
             // we dont record this into settings
             return;
           }
           const setting = this[property] || this.defaultSettings[property];
-          settings[property] = setting;
+          if(setting !== undefined) {
+            settings[property] = setting;
+          }
           // boolean attribute case
           if (spec && settings[this[property]] !== undefined) {
             settings[this[property]] = true;
@@ -212,22 +177,30 @@ export const createComponent = ({
           if (property == 'class' || settings.observe === false) {
             return;
           }
-          if(componentSpec && get(componentSpec.reverseSettings, property)) {
+          if(componentSpec && !get(componentSpec.settings, property) && get(componentSpec.reverseSettings, property)) {
             return;
           }
           const value = this[property];
           // if the setting has a string value use that as class name
           // i.e. sizing='large' => 'large'
-          // otherwise if this is a boolean property push the property name
-          // i.e. link=true => 'link'
           if(isString(value) && value) {
             classes.push(value);
+            if(componentSpec.attributeClasses.includes(property)) {
+              classes.push(property);
+            }
           }
+
+          // otherwise if this is a boolean property push the property name
+          // i.e. <button primary="true" => 'primary'
           else if(isBoolean(value) || value === '') {
             classes.push(property);
           }
+
         });
-        const classString = unique(classes).filter(Boolean).join(' ');
+        const ignoredValues = ['true', 'false'];
+        const classString = unique(classes)
+          .filter(value => value && !inArray(value, ignoredValues))
+          .join(' ');
         return classString;
       }
 

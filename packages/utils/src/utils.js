@@ -332,7 +332,7 @@ export const where = (array, properties) => {
 
 export const flatten = (arr) => {
   return arr.reduce((acc, val) => {
-    return Array.isArray(val) ? acc.concat(flattenArray(val)) : acc.concat(val);
+    return Array.isArray(val) ? acc.concat(flatten(val)) : acc.concat(val);
   }, []);
 };
 
@@ -402,6 +402,9 @@ export const pick = function (obj, ...keys) {
   Access a nested object field from a string, like 'a.b.c'
 */
 export const get = function (obj, string = '') {
+  if(!isString(string)) {
+    return;
+  }
   string = string.replace(/^\./, '').replace(/\[(\w+)\]/g, '.$1');
   const stringParts = string.split('.');
 

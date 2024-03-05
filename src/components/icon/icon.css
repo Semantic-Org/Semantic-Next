@@ -1,6 +1,11 @@
 /* src/components/icon/css/content/icon.css */
 @layer component {
   :host {
+    display: inline-block;
+    font-style: normal;
+    font-weight: normal;
+    text-decoration: inherit;
+    text-align: center;
     margin: 0em var(--icon-distance-from-text) 0em 0em;
     font-size: inherit;
     width: var(--icon-width);
@@ -11,10 +16,6 @@
     opacity: var(--opacity);
     width: var(--icon-width);
     height: var(--icon-height);
-    font-style: normal;
-    font-weight: normal;
-    text-decoration: inherit;
-    text-align: center;
     background-color: currentColor;
     -webkit-mask-image: linear-gradient(transparent, transparent);
     mask-image: linear-gradient(transparent, transparent);

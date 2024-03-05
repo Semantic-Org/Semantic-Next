@@ -1,3 +1,12 @@
 <div class="{{ui}} button">
-  {{slot}}
+  <span class="hidden content">
+    {{>slot hidden}}
+  </span>
+  <span class="visible content">
+    {{>slot visible}}
+  </span>
+  {{#if icon}}
+    <ui-icon icon={{icon}} class="icon"></ui-icon>
+  {{/if}}
+  {{>slot}}
 </div>
