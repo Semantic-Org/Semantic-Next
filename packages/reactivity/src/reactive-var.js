@@ -1,4 +1,4 @@
-import { clone, isObject, isEqual, findIndex, unique, isNumber } from '@semantic-ui/utils';
+import { clone, isObject, isEqual, wrapFunction, findIndex, unique, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
@@ -7,7 +7,7 @@ export class ReactiveVar {
   constructor(initialValue, equalityFunction) {
     this.currentValue = clone(initialValue);
     this.dependency = new Dependency();
-    this.equalityFunction = equalityFunction || ReactiveVar.equalityFunction;
+    this.equalityFunction = wrapFunction(equalityFunction) || ReactiveVar.equalityFunction;
   }
 
   static equalityFunction = isEqual;
