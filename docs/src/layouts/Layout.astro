@@ -13,11 +13,11 @@ header = header || title;
 	<TopBar></TopBar>
 	<layout>
 		<Sidebar/>
-		<page transition:animate="none">
+		<page>
 			<slot name="masthead">
 				<DocsMasthead header={header} description={description}/>
 			</slot>
-			<main transition:animate="fade">
+			<main>
 				<ui-container>
 					<rail class="ui right dividing rail">
 						<slot name="rail">

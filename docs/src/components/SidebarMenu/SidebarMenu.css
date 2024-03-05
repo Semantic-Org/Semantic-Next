@@ -14,7 +14,6 @@
   font-size: var(--14px);
   text-transform: none;
   font-weight: bold;
-  transition: 0.3s color ease;
   padding: 0.5rem 0rem;
   color: #798088;
   text-decoration: none;
@@ -88,6 +87,7 @@
 
 .title {
   &:hover {
+    transition: 0.3s color ease;
     color: #ffffff;
   }
   &.active {
