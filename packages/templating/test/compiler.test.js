@@ -671,7 +671,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{slot 'name'}}
+          {{>slot 'name'}}
         </div>
       `;
       const ast = compiler.compile(template);
