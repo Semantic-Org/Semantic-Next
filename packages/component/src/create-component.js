@@ -165,6 +165,9 @@ export const createComponent = ({
             settings[this[property]] = true;
           }
         });
+        if(tagName == 'ui-button') {
+          console.log(settings);
+        }
         return settings;
       }
 

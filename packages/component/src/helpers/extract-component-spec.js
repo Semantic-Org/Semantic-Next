@@ -11,6 +11,7 @@ import { reverseKeys, flatten, each } from '@semantic-ui/utils';
 export const extractComponentSpec = (spec) => {
 
   const componentSpec = {
+    content: [],
     variations: [],
     types: [],
     states: [],
@@ -53,6 +54,7 @@ export const extractComponentSpec = (spec) => {
     });
   };
 
+  getSettingsFromSpecPart('content');
   getSettingsFromSpecPart('types');
   getSettingsFromSpecPart('states');
   getSettingsFromSpecPart('variations');
@@ -64,5 +66,6 @@ export const extractComponentSpec = (spec) => {
   delete reverseSettings.false;
   componentSpec.reverseSettings = reverseSettings;
   console.log(componentSpec);
+  console.log(spec);
   return componentSpec;
 };

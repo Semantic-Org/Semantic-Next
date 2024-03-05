@@ -17,6 +17,7 @@ export const ButtonSpec = {
     {
       name: 'Text',
       looseCoupling: true,
+      attribute: 'text',
       couplesWith: ['icon'],
       slot: 'icon',
       description: 'A button can can contain text content',
@@ -24,6 +25,7 @@ export const ButtonSpec = {
     {
       name: 'Icon',
       looseCoupling: true,
+      attribute: 'icon',
       couplesWith: ['icon'],
       slot: 'icon',
       description: 'A button can be formatted to include an icon',
@@ -32,6 +34,7 @@ export const ButtonSpec = {
     {
       name: 'Label',
       looseCoupling: true,
+      attribute: 'label',
       couplesWith: ['label'],
       slot: 'label',
       description: 'A button can be formatted to include a label',
@@ -39,6 +42,7 @@ export const ButtonSpec = {
 
     {
       name: 'Or',
+      attribute: 'or',
       slot: 'or',
       description: 'A button group can be formatted to show a conditional choice',
     },

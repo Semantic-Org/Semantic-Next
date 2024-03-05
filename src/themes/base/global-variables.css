@@ -282,17 +282,17 @@
   --brown-background: #F1E2D3;
 
   /* --- Colored Headers --- */
-  --red-header-color: oklch(from var(--red-text-color) calc(l - 5) c h);
-  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 5) c h);
-  --green-header-color: oklch(from var(--green-text-color) calc(l - 5) c h);
-  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 5) c h);
-  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 5) c h);
-  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 5) c h);
-  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 5) c h);
-  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 5) c h);
-  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 5) c h);
-  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 5) c h);
-  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 5) c h);
+  --red-header-color: oklch(from var(--red-text-color) calc(l - 0.05) c h);
+  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 0.05) c h);
+  --green-header-color: oklch(from var(--green-text-color) calc(l - 0.05) c h);
+  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 0.05) c h);
+  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 0.05) c h);
+  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 0.05) c h);
+  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 0.05) c h);
+  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 0.05) c h);
+  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 0.05) c h);
+  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 0.05) c h);
+  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 0.05) c h);
 
   /* --- Colored Text --- */
   --red-text-color: var(--red);
@@ -441,12 +441,12 @@
 
   --circular-radius: 500rem;
 
-  --border-color: rgb(34 36 38 15%);
-  --strong-border-color: rgb(34 36 38 22%);
-  --internal-border-color: rgb(34 36 38 10%);
-  --selected-border-color: rgb(34 36 38 35%);
-  --strong-selected-border-color: rgb(34 36 38 50%);
-  --disabled-border-color: rgb(34 36 38 50%);
+  --border-color: rgba(34, 36, 38, 0.15);
+  --strong-border-color: rgb(34, 36, 38, 0.22);
+  --internal-border-color: rgb(34, 36, 38, 0.10);
+  --selected-border-color: rgb(34, 36, 38, 0.35);
+  --strong-selected-border-color: rgb(34, 36, 38, 0.5);
+  --disabled-border-color: rgb(34, 36, 38, 0.5);
 
   --solid-internal-border-color: #FAFAFA;
   --solid-border-color: #D4D4D5;
@@ -735,60 +735,60 @@
   ;
 
   /* ---  Colors  --- */
-  --primary-color-hover: oklch(from var(--primary-color) calc(l - 5) c calc(h + 10));
-  --secondary-color-hover: oklch(from var(--secondary-color) calc(l - 5) c calc(h + 10));
-  --light-primary-color-hover: oklch(from var(--light-primary-color) calc(l - 5) c calc(h + 10));
-  --light-secondary-color-hover: oklch(from var(--light-secondary-color) calc(l - 5) c calc(h + 10));
+  --primary-color-hover: oklch(from var(--primary-color) calc(l - 0.05) c calc(h + 10));
+  --secondary-color-hover: oklch(from var(--secondary-color) calc(l - 0.05) c calc(h + 10));
+  --light-primary-color-hover: oklch(from var(--light-primary-color) calc(l - 0.05) c calc(h + 10));
+  --light-secondary-color-hover: oklch(from var(--light-secondary-color) calc(l - 0.05) c calc(h + 10));
 
-  --red-hover: oklch(from var(--red) calc(l - 5) c calc(h + 10));
-  --orange-hover: oklch(from var(--orange) calc(l - 5) c calc(h + 10));
-  --yellow-hover: oklch(from var(--yellow) calc(l - 5) c calc(h + 10));
-  --olive-hover: oklch(from var(--olive) calc(l - 5) c calc(h + 10));
-  --green-hover: oklch(from var(--green) calc(l - 5) c calc(h + 10));
-  --teal-hover: oklch(from var(--teal) calc(l - 5) c calc(h + 10));
-  --blue-hover: oklch(from var(--blue) calc(l - 5) c calc(h + 10));
-  --violet-hover: oklch(from var(--violet) calc(l - 5) c calc(h + 10));
-  --purple-hover: oklch(from var(--purple) calc(l - 5) c calc(h + 10));
-  --pink-hover: oklch(from var(--pink) calc(l - 5) c calc(h + 10));
-  --brown-hover: oklch(from var(--brown) calc(l - 5) c calc(h + 10));
+  --red-hover: oklch(from var(--red) calc(l - 0.05) c calc(h + 10));
+  --orange-hover: oklch(from var(--orange) calc(l - 0.05) c calc(h + 10));
+  --yellow-hover: oklch(from var(--yellow) calc(l - 0.05) c calc(h + 10));
+  --olive-hover: oklch(from var(--olive) calc(l - 0.05) c calc(h + 10));
+  --green-hover: oklch(from var(--green) calc(l - 0.05) c calc(h + 10));
+  --teal-hover: oklch(from var(--teal) calc(l - 0.05) c calc(h + 10));
+  --blue-hover: oklch(from var(--blue) calc(l - 0.05) c calc(h + 10));
+  --violet-hover: oklch(from var(--violet) calc(l - 0.05) c calc(h + 10));
+  --purple-hover: oklch(from var(--purple) calc(l - 0.05) c calc(h + 10));
+  --pink-hover: oklch(from var(--pink) calc(l - 0.05) c calc(h + 10));
+  --brown-hover: oklch(from var(--brown) calc(l - 0.05) c calc(h + 10));
 
-  --light-red-hover: oklch(from var(--light-red) calc(l - 5) c calc(h + 10));
-  --light-orange-hover: oklch(from var(--light-orange) calc(l - 5) c calc(h + 10));
-  --light-yellow-hover: oklch(from var(--light-yellow) calc(l - 5) c calc(h + 10));
-  --light-olive-hover: oklch(from var(--light-olive) calc(l - 5) c calc(h + 10));
-  --light-green-hover: oklch(from var(--light-green) calc(l - 5) c calc(h + 10));
-  --light-teal-hover: oklch(from var(--light-teal) calc(l - 5) c calc(h + 10));
-  --light-blue-hover: oklch(from var(--light-blue) calc(l - 5) c calc(h + 10));
-  --light-violet-hover: oklch(from var(--light-violet) calc(l - 5) c calc(h + 10));
-  --light-purple-hover: oklch(from var(--light-purple) calc(l - 5) c calc(h + 10));
-  --light-pink-hover: oklch(from var(--light-pink) calc(l - 5) c calc(h + 10));
-  --light-brown-hover: oklch(from var(--light-brown) calc(l - 5) c calc(h + 10));
-  --light-grey-hover: oklch(from var(--light-grey) calc(l - 5) c calc(h + 10));
-  --light-black-hover: oklch(from var(--full-black) calc(l - 5) c calc(h + 10));
+  --light-red-hover: oklch(from var(--light-red) calc(l - 0.05) c calc(h + 10));
+  --light-orange-hover: oklch(from var(--light-orange) calc(l - 0.05) c calc(h + 10));
+  --light-yellow-hover: oklch(from var(--light-yellow) calc(l - 0.05) c calc(h + 10));
+  --light-olive-hover: oklch(from var(--light-olive) calc(l - 0.05) c calc(h + 10));
+  --light-green-hover: oklch(from var(--light-green) calc(l - 0.05) c calc(h + 10));
+  --light-teal-hover: oklch(from var(--light-teal) calc(l - 0.05) c calc(h + 10));
+  --light-blue-hover: oklch(from var(--light-blue) calc(l - 0.05) c calc(h + 10));
+  --light-violet-hover: oklch(from var(--light-violet) calc(l - 0.05) c calc(h + 10));
+  --light-purple-hover: oklch(from var(--light-purple) calc(l - 0.05) c calc(h + 10));
+  --light-pink-hover: oklch(from var(--light-pink) calc(l - 0.05) c calc(h + 10));
+  --light-brown-hover: oklch(from var(--light-brown) calc(l - 0.05) c calc(h + 10));
+  --light-grey-hover: oklch(from var(--light-grey) calc(l - 0.05) c calc(h + 10));
+  --light-black-hover: oklch(from var(--full-black) calc(l - 0.05) c calc(h + 10));
 
   /* ---  Emotive  --- */
-  --positive-color-hover: oklch(from var(--positive-color) calc(l - 5) c calc(h + 10));
-  --negative-color-hover: oklch(from var(--negative-color) calc(l - 5) c calc(h + 10));
+  --positive-color-hover: oklch(from var(--positive-color) calc(l - 0.05) c calc(h + 10));
+  --negative-color-hover: oklch(from var(--negative-color) calc(l - 0.05) c calc(h + 10));
 
   /* ---  Brand   --- */
-  --facebook-hover-color: oklch(from var(--facebook-color) calc(l - 5) c calc(h + 10));
-  --twitter-hover-color: oklch(from var(--twitter-color) calc(l - 5) c calc(h + 10));
-  --google-plus-hover-color: oklch(from var(--google-plus-color) calc(l - 5) c calc(h + 10));
-  --linked-in-hover-color: oklch(from var(--linked-in-color) calc(l - 5) c calc(h + 10));
-  --youtube-hover-color: oklch(from var(--youtube-color) calc(l - 5) c calc(h + 10));
-  --instagram-hover-color: oklch(from var(--instagram-color) calc(l - 5) c calc(h + 10));
-  --pinterest-hover-color: oklch(from var(--pinterest-color) calc(l - 5) c calc(h + 10));
-  --vk-hover-color: oklch(from var(--vk-color) calc(l - 5) c calc(h + 10));
+  --facebook-hover-color: oklch(from var(--facebook-color) calc(l - 0.05) c calc(h + 10));
+  --twitter-hover-color: oklch(from var(--twitter-color) calc(l - 0.05) c calc(h + 10));
+  --google-plus-hover-color: oklch(from var(--google-plus-color) calc(l - 0.05) c calc(h + 10));
+  --linked-in-hover-color: oklch(from var(--linked-in-color) calc(l - 0.05) c calc(h + 10));
+  --youtube-hover-color: oklch(from var(--youtube-color) calc(l - 0.05) c calc(h + 10));
+  --instagram-hover-color: oklch(from var(--instagram-color) calc(l - 0.05) c calc(h + 10));
+  --pinterest-hover-color: oklch(from var(--pinterest-color) calc(l - 0.05) c calc(h + 10));
+  --vk-hover-color: oklch(from var(--vk-color) calc(l - 0.05) c calc(h + 10));
 
   /* ---  Dark Tones  --- */
-  --full-black-hover: oklch(from var(--full-black) calc(l - 5) c h);
-  --black-hover: oklch(from var(--black) calc(l - 5) c h);
-  --grey-hover: oklch(from var(--grey) calc(l - 5) c h);
+  --full-black-hover: oklch(from var(--full-black) calc(l - 0.05) c h);
+  --black-hover: oklch(from var(--black) calc(l - 0.05) c h);
+  --grey-hover: oklch(from var(--grey) calc(l - 0.05) c h);
 
   /* ---  Light Tones  --- */
-  --white-hover: oklch(from var(--white) calc(l - 5) c h);
-  --off-white-hover: oklch(from var(--off-white) calc(l - 5) c h);
-  --dark-white-hover: oklch(from var(--dark-white) calc(l - 5) c h);
+  --white-hover: oklch(from var(--white) calc(l - 0.05) c h);
+  --off-white-hover: oklch(from var(--off-white) calc(l - 0.05) c h);
+  --dark-white-hover: oklch(from var(--dark-white) calc(l - 0.05) c h);
 
   /* -------------------
           Focus
@@ -917,59 +917,59 @@
   -------------------- */
 
   /* ---  Colors  --- */
-  --primary-color-active: oklch(from var(--primary-color) calc(l - 5) calc(s + 15) h);
-  --secondary-color-active: oklch(from var(--secondary-color) calc(l - 5) calc(s + 15) h);
-  --light-primary-color-active: oklch(from var(--light-primary-color) calc(l - 5) calc(s + 15) h);
-  --light-secondary-color-active: oklch(from var(--light-secondary-color) calc(l - 5) calc(s + 15) h);
+  --primary-color-active: oklch(from var(--primary-color) calc(l - 0.05) calc(s + 15) h);
+  --secondary-color-active: oklch(from var(--secondary-color) calc(l - 0.05) calc(s + 15) h);
+  --light-primary-color-active: oklch(from var(--light-primary-color) calc(l - 0.05) calc(s + 15) h);
+  --light-secondary-color-active: oklch(from var(--light-secondary-color) calc(l - 0.05) calc(s + 15) h);
 
-  --red-active: oklch(from var(--red) calc(l - 5) calc(s + 15) h);
-  --orange-active: oklch(from var(--orange) calc(l - 5) calc(s + 15) h);
-  --yellow-active: oklch(from var(--yellow) calc(l - 5) calc(s + 15) h);
-  --olive-active: oklch(from var(--olive) calc(l - 5) calc(s + 15) h);
-  --green-active: oklch(from var(--green) calc(l - 5) calc(s + 15) h);
-  --teal-active: oklch(from var(--teal) calc(l - 5) calc(s + 15) h);
-  --blue-active: oklch(from var(--blue) calc(l - 5) calc(s + 15) h);
-  --violet-active: oklch(from var(--violet) calc(l - 5) calc(s + 15) h);
-  --purple-active: oklch(from var(--purple) calc(l - 5) calc(s + 15) h);
-  --pink-active: oklch(from var(--pink) calc(l - 5) calc(s + 15) h);
-  --brown-active: oklch(from var(--brown) calc(l - 5) calc(s + 15) h);
+  --red-active: oklch(from var(--red) calc(l - 0.05) calc(s + 15) h);
+  --orange-active: oklch(from var(--orange) calc(l - 0.05) calc(s + 15) h);
+  --yellow-active: oklch(from var(--yellow) calc(l - 0.05) calc(s + 15) h);
+  --olive-active: oklch(from var(--olive) calc(l - 0.05) calc(s + 15) h);
+  --green-active: oklch(from var(--green) calc(l - 0.05) calc(s + 15) h);
+  --teal-active: oklch(from var(--teal) calc(l - 0.05) calc(s + 15) h);
+  --blue-active: oklch(from var(--blue) calc(l - 0.05) calc(s + 15) h);
+  --violet-active: oklch(from var(--violet) calc(l - 0.05) calc(s + 15) h);
+  --purple-active: oklch(from var(--purple) calc(l - 0.05) calc(s + 15) h);
+  --pink-active: oklch(from var(--pink) calc(l - 0.05) calc(s + 15) h);
+  --brown-active: oklch(from var(--brown) calc(l - 0.05) calc(s + 15) h);
 
-  --light-red-active: oklch(from var(--light-red) calc(l - 5) calc(s + 15) h);
-  --light-orange-active: oklch(from var(--light-orange) calc(l - 5) calc(s + 15) h);
-  --light-yellow-active: oklch(from var(--light-yellow) calc(l - 5) calc(s + 15) h);
-  --light-olive-active: oklch(from var(--light-olive) calc(l - 5) calc(s + 15) h);
-  --light-green-active: oklch(from var(--light-green) calc(l - 5) calc(s + 15) h);
-  --light-teal-active: oklch(from var(--light-teal) calc(l - 5) calc(s + 15) h);
-  --light-blue-active: oklch(from var(--light-blue) calc(l - 5) calc(s + 15) h);
-  --light-violet-active: oklch(from var(--light-violet) calc(l - 5) calc(s + 15) h);
-  --light-purple-active: oklch(from var(--light-purple) calc(l - 5) calc(s + 15) h);
-  --light-pink-active: oklch(from var(--light-pink) calc(l - 5) calc(s + 15) h);
-  --light-brown-active: oklch(from var(--light-brown) calc(l - 5) calc(s + 15) h);
-  --light-grey-active: oklch(from var(--light-grey) calc(l - 5) calc(s + 15) h);
-  --light-black-active: oklch(from var(--full - black) calc(l - 5) calc(s + 15) h);
+  --light-red-active: oklch(from var(--light-red) calc(l - 0.05) calc(s + 15) h);
+  --light-orange-active: oklch(from var(--light-orange) calc(l - 0.05) calc(s + 15) h);
+  --light-yellow-active: oklch(from var(--light-yellow) calc(l - 0.05) calc(s + 15) h);
+  --light-olive-active: oklch(from var(--light-olive) calc(l - 0.05) calc(s + 15) h);
+  --light-green-active: oklch(from var(--light-green) calc(l - 0.05) calc(s + 15) h);
+  --light-teal-active: oklch(from var(--light-teal) calc(l - 0.05) calc(s + 15) h);
+  --light-blue-active: oklch(from var(--light-blue) calc(l - 0.05) calc(s + 15) h);
+  --light-violet-active: oklch(from var(--light-violet) calc(l - 0.05) calc(s + 15) h);
+  --light-purple-active: oklch(from var(--light-purple) calc(l - 0.05) calc(s + 15) h);
+  --light-pink-active: oklch(from var(--light-pink) calc(l - 0.05) calc(s + 15) h);
+  --light-brown-active: oklch(from var(--light-brown) calc(l - 0.05) calc(s + 15) h);
+  --light-grey-active: oklch(from var(--light-grey) calc(l - 0.05) calc(s + 15) h);
+  --light-black-active: oklch(from var(--full - black) calc(l - 0.05) calc(s + 15) h);
 
   /* ---  Emotive  --- */
-  --positive-color-active: oklch(from var(--positive-color) calc(l - 5) calc(s + 15) h);
-  --negative-color-active: oklch(from var(--negative-color) calc(l - 5) calc(s + 15) h);
+  --positive-color-active: oklch(from var(--positive-color) calc(l - 0.05) calc(s + 15) h);
+  --negative-color-active: oklch(from var(--negative-color) calc(l - 0.05) calc(s + 15) h);
 
   /* ---  Brand   --- */
-  --facebook-active-color: oklch(from var(--facebook-color) calc(l - 5) calc(s + 15) h);
-  --twitter-active-color: oklch(from var(--twitter-color) calc(l - 5) calc(s + 15) h);
-  --google-plus-active-color: oklch(from var(--google-plus-color) calc(l - 5) calc(s + 15) h);
-  --linked-in-active-color: oklch(from var(--linked-in-color) calc(l - 5) calc(s + 15) h);
-  --youtube-active-color: oklch(from var(--youtube-color) calc(l - 5) calc(s + 15) h);
-  --instagram-active-color: oklch(from var(--instagram-color) calc(l - 5) calc(s + 15) h);
-  --pinterest-active-color: oklch(from var(--pinterest-color) calc(l - 5) calc(s + 15) h);
-  --vk-active-color: oklch(from var(--vk-color) calc(l - 5) calc(s + 15) h);
+  --facebook-active-color: oklch(from var(--facebook-color) calc(l - 0.05) calc(s + 15) h);
+  --twitter-active-color: oklch(from var(--twitter-color) calc(l - 0.05) calc(s + 15) h);
+  --google-plus-active-color: oklch(from var(--google-plus-color) calc(l - 0.05) calc(s + 15) h);
+  --linked-in-active-color: oklch(from var(--linked-in-color) calc(l - 0.05) calc(s + 15) h);
+  --youtube-active-color: oklch(from var(--youtube-color) calc(l - 0.05) calc(s + 15) h);
+  --instagram-active-color: oklch(from var(--instagram-color) calc(l - 0.05) calc(s + 15) h);
+  --pinterest-active-color: oklch(from var(--pinterest-color) calc(l - 0.05) calc(s + 15) h);
+  --vk-active-color: oklch(from var(--vk-color) calc(l - 0.05) calc(s + 15) h);
 
   /* ---  Dark Tones  --- */
-  --full-black-active: oklch(from var(--full - black) calc(l - 5) c h);
-  --black-active: oklch(from var(--black) calc(l - 5) c h);
-  --grey-active: oklch(from var(--grey) calc(l - 5) c h);
+  --full-black-active: oklch(from var(--full - black) calc(l - 0.05) c h);
+  --black-active: oklch(from var(--black) calc(l - 0.05) c h);
+  --grey-active: oklch(from var(--grey) calc(l - 0.05) c h);
 
   /* ---  Light Tones  --- */
-  --white-active: oklch(from var(--white) calc(l - 5) c h);
-  --off-white-active: oklch(from var(--off-white) calc(l - 5) c h);
-  --dark-white-active: oklch(from var(--dark-white) calc(l - 5) c h);
+  --white-active: oklch(from var(--white) calc(l - 0.05) c h);
+  --off-white-active: oklch(from var(--off-white) calc(l - 0.05) c h);
+  --dark-white-active: oklch(from var(--dark-white) calc(l - 0.05) c h);
 
 }

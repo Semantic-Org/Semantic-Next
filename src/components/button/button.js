@@ -14,7 +14,7 @@ const createInstance = ({tpl, content, $}) => ({
 
 
 const onCreated = ({tpl}) => {
-
+  console.log(tpl.data);
 };
 
 const events = {
