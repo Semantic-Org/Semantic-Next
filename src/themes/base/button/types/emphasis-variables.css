@@ -1,16 +1,17 @@
+:root {
+  --button-primary-color: var(--primary-color);
+  --button-primary-background-image: var(--button-colored-background-image);
+  --button-primary-box-shadow: var(--button-colored-box-shadow);
+  --button-primary-text-color: var(--button-inverted-text-color);
+  --button-primary-text-shadow: var(--button-inverted-text-shadow);
 
-ui-button {
-  --primary-background-image: var(--colored-background-image);
-  --primary-box-shadow: var(--colored-box-shadow);
-  --primary-text-color: var(--inverted-text-color);
-  --primary-text-shadow: var(--inverted-text-shadow);
-
-  --secondary-background-image: var(--colored-background-image);
-  --secondary-box-shadow: var(--colored-box-shadow);
-  --secondary-text-color: var(--inverted-text-color);
-  --secondary-text-shadow: var(--inverted-text-shadow);
+  --button-secondary-color: var(--secondary-color);
+  --button-secondary-background-image: var(--button-colored-background-image);
+  --button-secondary-box-shadow: var(--button-colored-box-shadow);
+  --button-secondary-text-color: var(--button-inverted-text-color);
+  --button-secondary-text-shadow: var(--button-inverted-text-shadow);
 
   /* Inverted */
-  --light-primary-text-color: var(--inverted-text-color);
-  --light-secondary-text-color: var(--inverted-text-color);
+  --button-light-primary-text-color: var(--button-inverted-text-color);
+  --button-light-secondary-text-color: var(--button-inverted-text-color);
 }

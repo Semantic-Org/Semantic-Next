@@ -795,60 +795,60 @@
   -------------------- */
 
   /* ---  Colors  --- */
-  --primary-color-focus: oklch(from var(--primary-color) calc(l - 8) c calc(h + 15));
-  --secondary-color-focus: oklch(from var(--secondary-color) calc(l - 8) c calc(h + 15));
-  --light-primary-color-focus: oklch(from var(--light-primary-color) calc(l - 8) c calc(h + 15));
-  --light-secondary-color-focus: oklch(from var(--light-secondary-color) calc(l - 8) c calc(h + 15));
+  --primary-color-focus: oklch(from var(--primary-color) calc(l - 0.08) c calc(h + 15));
+  --secondary-color-focus: oklch(from var(--secondary-color) calc(l - 0.08) c calc(h + 15));
+  --light-primary-color-focus: oklch(from var(--light-primary-color) calc(l - 0.08) c calc(h + 15));
+  --light-secondary-color-focus: oklch(from var(--light-secondary-color) calc(l - 0.08) c calc(h + 15));
 
-  --red-focus: oklch(from var(--red) calc(l - 8) c calc(h + 15));
-  --orange-focus: oklch(from var(--orange) calc(l - 8) c calc(h + 15));
-  --yellow-focus: oklch(from var(--yellow) calc(l - 8) c calc(h + 15));
-  --olive-focus: oklch(from var(--olive) calc(l - 8) c calc(h + 15));
-  --green-focus: oklch(from var(--green) calc(l - 8) c calc(h + 15));
-  --teal-focus: oklch(from var(--teal) calc(l - 8) c calc(h + 15));
-  --blue-focus: oklch(from var(--blue) calc(l - 8) c calc(h + 15));
-  --violet-focus: oklch(from var(--violet) calc(l - 8) c calc(h + 15));
-  --purple-focus: oklch(from var(--purple) calc(l - 8) c calc(h + 15));
-  --pink-focus: oklch(from var(--pink) calc(l - 8) c calc(h + 15));
-  --brown-focus: oklch(from var(--brown) calc(l - 8) c calc(h + 15));
+  --red-focus: oklch(from var(--red) calc(l - 0.08) c calc(h + 15));
+  --orange-focus: oklch(from var(--orange) calc(l - 0.08) c calc(h + 15));
+  --yellow-focus: oklch(from var(--yellow) calc(l - 0.08) c calc(h + 15));
+  --olive-focus: oklch(from var(--olive) calc(l - 0.08) c calc(h + 15));
+  --green-focus: oklch(from var(--green) calc(l - 0.08) c calc(h + 15));
+  --teal-focus: oklch(from var(--teal) calc(l - 0.08) c calc(h + 15));
+  --blue-focus: oklch(from var(--blue) calc(l - 0.08) c calc(h + 15));
+  --violet-focus: oklch(from var(--violet) calc(l - 0.08) c calc(h + 15));
+  --purple-focus: oklch(from var(--purple) calc(l - 0.08) c calc(h + 15));
+  --pink-focus: oklch(from var(--pink) calc(l - 0.08) c calc(h + 15));
+  --brown-focus: oklch(from var(--brown) calc(l - 0.08) c calc(h + 15));
 
-  --light-red-focus: oklch(from var(--light-red) calc(l - 8) c calc(h + 15));
-  --light-orange-focus: oklch(from var(--light-orange) calc(l - 8) c calc(h + 15));
-  --light-yellow-focus: oklch(from var(--light-yellow) calc(l - 8) c calc(h + 15));
-  --light-olive-focus: oklch(from var(--light-olive) calc(l - 8) c calc(h + 15));
-  --light-green-focus: oklch(from var(--light-green) calc(l - 8) c calc(h + 15));
-  --light-teal-focus: oklch(from var(--light-teal) calc(l - 8) c calc(h + 15));
-  --light-blue-focus: oklch(from var(--light-blue) calc(l - 8) c calc(h + 15));
-  --light-violet-focus: oklch(from var(--light-violet) calc(l - 8) c calc(h + 15));
-  --light-purple-focus: oklch(from var(--light-purple) calc(l - 8) c calc(h + 15));
-  --light-pink-focus: oklch(from var(--light-pink) calc(l - 8) c calc(h + 15));
-  --light-brown-focus: oklch(from var(--light-brown) calc(l - 8) c calc(h + 15));
-  --light-grey-focus: oklch(from var(--light-grey) calc(l - 8) c calc(h + 15));
-  --light-black-focus: oklch(from var(--full-black) calc(l - 8) c calc(h + 15));
+  --light-red-focus: oklch(from var(--light-red) calc(l - 0.08) c calc(h + 15));
+  --light-orange-focus: oklch(from var(--light-orange) calc(l - 0.08) c calc(h + 15));
+  --light-yellow-focus: oklch(from var(--light-yellow) calc(l - 0.08) c calc(h + 15));
+  --light-olive-focus: oklch(from var(--light-olive) calc(l - 0.08) c calc(h + 15));
+  --light-green-focus: oklch(from var(--light-green) calc(l - 0.08) c calc(h + 15));
+  --light-teal-focus: oklch(from var(--light-teal) calc(l - 0.08) c calc(h + 15));
+  --light-blue-focus: oklch(from var(--light-blue) calc(l - 0.08) c calc(h + 15));
+  --light-violet-focus: oklch(from var(--light-violet) calc(l - 0.08) c calc(h + 15));
+  --light-purple-focus: oklch(from var(--light-purple) calc(l - 0.08) c calc(h + 15));
+  --light-pink-focus: oklch(from var(--light-pink) calc(l - 0.08) c calc(h + 15));
+  --light-brown-focus: oklch(from var(--light-brown) calc(l - 0.08) c calc(h + 15));
+  --light-grey-focus: oklch(from var(--light-grey) calc(l - 0.08) c calc(h + 15));
+  --light-black-focus: oklch(from var(--full-black) calc(l - 0.08) c calc(h + 15));
 
   /* ---  Emotive  --- */
-  --positive-color-focus: oklch(from var(--positive-color) calc(l - 8) c calc(h + 15));
-  --negative-color-focus: oklch(from var(--negative-color) calc(l - 8) c calc(h + 15));
+  --positive-color-focus: oklch(from var(--positive-color) calc(l - 0.08) c calc(h + 15));
+  --negative-color-focus: oklch(from var(--negative-color) calc(l - 0.08) c calc(h + 15));
 
   /* ---  Brand   --- */
-  --facebook-focus-color: oklch(from var(--facebook-color) calc(l - 8) c calc(h + 15));
-  --twitter-focus-color: oklch(from var(--twitter-color) calc(l - 8) c calc(h + 15));
-  --google-plus-focus-color: oklch(from var(--google-plus-color) calc(l - 8) c calc(h + 15));
-  --linked-in-focus-color: oklch(from var(--linked-in-color) calc(l - 8) c calc(h + 15));
-  --youtube-focus-color: oklch(from var(--youtube-color) calc(l - 8) c calc(h + 15));
-  --instagram-focus-color: oklch(from var(--instagram-color) calc(l - 8) c calc(h + 15));
-  --pinterest-focus-color: oklch(from var(--pinterest-color) calc(l - 8) c calc(h + 15));
-  --vk-focus-color: oklch(from var(--vk-color) calc(l - 8) c calc(h + 15));
+  --facebook-focus-color: oklch(from var(--facebook-color) calc(l - 0.08) c calc(h + 15));
+  --twitter-focus-color: oklch(from var(--twitter-color) calc(l - 0.08) c calc(h + 15));
+  --google-plus-focus-color: oklch(from var(--google-plus-color) calc(l - 0.08) c calc(h + 15));
+  --linked-in-focus-color: oklch(from var(--linked-in-color) calc(l - 0.08) c calc(h + 15));
+  --youtube-focus-color: oklch(from var(--youtube-color) calc(l - 0.08) c calc(h + 15));
+  --instagram-focus-color: oklch(from var(--instagram-color) calc(l - 0.08) c calc(h + 15));
+  --pinterest-focus-color: oklch(from var(--pinterest-color) calc(l - 0.08) c calc(h + 15));
+  --vk-focus-color: oklch(from var(--vk-color) calc(l - 0.08) c calc(h + 15));
 
   /* ---  Dark Tones  --- */
-  --full-black-focus: oklch(from var(--full-black) calc(l - 8) c h);
-  --black-focus: oklch(from var(--black) calc(l - 8) c h);
-  --grey-focus: oklch(from var(--grey) calc(l - 8) c h);
+  --full-black-focus: oklch(from var(--full-black) calc(l - 0.08) c h);
+  --black-focus: oklch(from var(--black) calc(l - 0.08) c h);
+  --grey-focus: oklch(from var(--grey) calc(l - 0.08) c h);
 
   /* ---  Light Tones  --- */
-  --white-focus: oklch(from var(--white) calc(l - 8) c h);
-  --off-white-focus: oklch(from var(--off-white) calc(l - 8) c h);
-  --dark-white-focus: oklch(from var(--dark-white) calc(l - 8) c h);
+  --white-focus: oklch(from var(--white) calc(l - 0.08) c h);
+  --off-white-focus: oklch(from var(--off-white) calc(l - 0.08) c h);
+  --dark-white-focus: oklch(from var(--dark-white) calc(l - 0.08) c h);
 
 
   /* -------------------
@@ -856,60 +856,60 @@
   -------------------- */
 
   /* ---  Colors  --- */
-  --primary-color-down: oklch(from var(--primary-color) calc(l - 10) c h);
-  --secondary-color-down: oklch(from var(--secondary-color) calc(l - 10) c h);
-  --light-primary-color-down: oklch(from var(--light-primary-color) calc(l - 10) c h);
-  --light-secondary-color-down: oklch(from var(--light-secondary-color) calc(l - 10) c h);
+  --primary-color-down: oklch(from var(--primary-color) calc(l - 0.1) c h);
+  --secondary-color-down: oklch(from var(--secondary-color) calc(l - 0.1) c h);
+  --light-primary-color-down: oklch(from var(--light-primary-color) calc(l - 0.1) c h);
+  --light-secondary-color-down: oklch(from var(--light-secondary-color) calc(l - 0.1) c h);
 
-  --red-down: oklch(from var(--red) calc(l - 10) c h);
-  --orange-down: oklch(from var(--orange) calc(l - 10) c h);
-  --yellow-down: oklch(from var(--yellow) calc(l - 10) c h);
-  --olive-down: oklch(from var(--olive) calc(l - 10) c h);
-  --green-down: oklch(from var(--green) calc(l - 10) c h);
-  --teal-down: oklch(from var(--teal) calc(l - 10) c h);
-  --blue-down: oklch(from var(--blue) calc(l - 10) c h);
-  --violet-down: oklch(from var(--violet) calc(l - 10) c h);
-  --purple-down: oklch(from var(--purple) calc(l - 10) c h);
-  --pink-down: oklch(from var(--pink) calc(l - 10) c h);
-  --brown-down: oklch(from var(--brown) calc(l - 10) c h);
+  --red-down: oklch(from var(--red) calc(l - 0.1) c h);
+  --orange-down: oklch(from var(--orange) calc(l - 0.1) c h);
+  --yellow-down: oklch(from var(--yellow) calc(l - 0.1) c h);
+  --olive-down: oklch(from var(--olive) calc(l - 0.1) c h);
+  --green-down: oklch(from var(--green) calc(l - 0.1) c h);
+  --teal-down: oklch(from var(--teal) calc(l - 0.1) c h);
+  --blue-down: oklch(from var(--blue) calc(l - 0.1) c h);
+  --violet-down: oklch(from var(--violet) calc(l - 0.1) c h);
+  --purple-down: oklch(from var(--purple) calc(l - 0.1) c h);
+  --pink-down: oklch(from var(--pink) calc(l - 0.1) c h);
+  --brown-down: oklch(from var(--brown) calc(l - 0.1) c h);
 
-  --light-red-down: oklch(from var(--light-red) calc(l - 10) c h);
-  --light-orange-down: oklch(from var(--light-orange) calc(l - 10) c h);
-  --light-yellow-down: oklch(from var(--light-yellow) calc(l - 10) c h);
-  --light-olive-down: oklch(from var(--light-olive) calc(l - 10) c h);
-  --light-green-down: oklch(from var(--light-green) calc(l - 10) c h);
-  --light-teal-down: oklch(from var(--light-teal) calc(l - 10) c h);
-  --light-blue-down: oklch(from var(--light-blue) calc(l - 10) c h);
-  --light-violet-down: oklch(from var(--light-violet) calc(l - 10) c h);
-  --light-purple-down: oklch(from var(--light-purple) calc(l - 10) c h);
-  --light-pink-down: oklch(from var(--light-pink) calc(l - 10) c h);
-  --light-brown-down: oklch(from var(--light-brown) calc(l - 10) c h);
-  --light-grey-down: oklch(from var(--light-grey) calc(l - 10) c h);
-  --light-black-down: oklch(from var(--full-black) calc(l - 10) c h);
+  --light-red-down: oklch(from var(--light-red) calc(l - 0.1) c h);
+  --light-orange-down: oklch(from var(--light-orange) calc(l - 0.1) c h);
+  --light-yellow-down: oklch(from var(--light-yellow) calc(l - 0.1) c h);
+  --light-olive-down: oklch(from var(--light-olive) calc(l - 0.1) c h);
+  --light-green-down: oklch(from var(--light-green) calc(l - 0.1) c h);
+  --light-teal-down: oklch(from var(--light-teal) calc(l - 0.1) c h);
+  --light-blue-down: oklch(from var(--light-blue) calc(l - 0.1) c h);
+  --light-violet-down: oklch(from var(--light-violet) calc(l - 0.1) c h);
+  --light-purple-down: oklch(from var(--light-purple) calc(l - 0.1) c h);
+  --light-pink-down: oklch(from var(--light-pink) calc(l - 0.1) c h);
+  --light-brown-down: oklch(from var(--light-brown) calc(l - 0.1) c h);
+  --light-grey-down: oklch(from var(--light-grey) calc(l - 0.1) c h);
+  --light-black-down: oklch(from var(--full-black) calc(l - 0.1) c h);
 
   /* ---  Emotive  --- */
-  --positive-color-down: oklch(from var(--positive-color) calc(l - 10) c h);
-  --negative-color-down: oklch(from var(--negative-color) calc(l - 10) c h);
+  --positive-color-down: oklch(from var(--positive-color) calc(l - 0.1) c h);
+  --negative-color-down: oklch(from var(--negative-color) calc(l - 0.1) c h);
 
   /* ---  Brand   --- */
-  --facebook-down-color: oklch(from var(--facebook-color) calc(l - 10) c h);
-  --twitter-down-color: oklch(from var(--twitter-color) calc(l - 10) c h);
-  --google-plus-down-color: oklch(from var(--google-plus-color) calc(l - 10) c h);
-  --linked-in-down-color: oklch(from var(--linked-in-color) calc(l - 10) c h);
-  --youtube-down-color: oklch(from var(--youtube-color) calc(l - 10) c h);
-  --instagram-down-color: oklch(from var(--instagram-color) calc(l - 10) c h);
-  --pinterest-down-color: oklch(from var(--pinterest-color) calc(l - 10) c h);
-  --vk-down-color: oklch(from var(--vk-color) calc(l - 10) c h);
+  --facebook-down-color: oklch(from var(--facebook-color) calc(l - 0.1) c h);
+  --twitter-down-color: oklch(from var(--twitter-color) calc(l - 0.1) c h);
+  --google-plus-down-color: oklch(from var(--google-plus-color) calc(l - 0.1) c h);
+  --linked-in-down-color: oklch(from var(--linked-in-color) calc(l - 0.1) c h);
+  --youtube-down-color: oklch(from var(--youtube-color) calc(l - 0.1) c h);
+  --instagram-down-color: oklch(from var(--instagram-color) calc(l - 0.1) c h);
+  --pinterest-down-color: oklch(from var(--pinterest-color) calc(l - 0.1) c h);
+  --vk-down-color: oklch(from var(--vk-color) calc(l - 0.1) c h);
 
   /* ---  Dark Tones  --- */
-  --full-black-down: oklch(from var(--full - black) calc(l - 10) c h);
-  --black-down: oklch(from var(--black) calc(l - 10) c h);
-  --grey-down: oklch(from var(--grey) calc(l - 10) c h);
+  --full-black-down: oklch(from var(--full-black) calc(l - 0.1) c h);
+  --black-down: oklch(from var(--black) calc(l - 0.1) c h);
+  --grey-down: oklch(from var(--grey) calc(l - 0.1) c h);
 
   /* ---  Light Tones  --- */
-  --white-down: oklch(from var(--white) calc(l - 10) c h);
-  --off-white-down: oklch(from var(--off-white) calc(l - 10) c h);
-  --dark-white-down: oklch(from var(--dark-white) calc(l - 10) c h);
+  --white-down: oklch(from var(--white) calc(l - 0.1) c h);
+  --off-white-down: oklch(from var(--off-white) calc(l - 0.1) c h);
+  --dark-white-down: oklch(from var(--dark-white) calc(l - 0.1) c h);
 
 
   /* -------------------
@@ -946,7 +946,7 @@
   --light-pink-active: oklch(from var(--light-pink) calc(l - 0.05) calc(s + 15) h);
   --light-brown-active: oklch(from var(--light-brown) calc(l - 0.05) calc(s + 15) h);
   --light-grey-active: oklch(from var(--light-grey) calc(l - 0.05) calc(s + 15) h);
-  --light-black-active: oklch(from var(--full - black) calc(l - 0.05) calc(s + 15) h);
+  --light-black-active: oklch(from var(--full-black) calc(l - 0.05) calc(s + 15) h);
 
   /* ---  Emotive  --- */
   --positive-color-active: oklch(from var(--positive-color) calc(l - 0.05) calc(s + 15) h);
@@ -963,7 +963,7 @@
   --vk-active-color: oklch(from var(--vk-color) calc(l - 0.05) calc(s + 15) h);
 
   /* ---  Dark Tones  --- */
-  --full-black-active: oklch(from var(--full - black) calc(l - 0.05) c h);
+  --full-black-active: oklch(from var(--full-black) calc(l - 0.05) c h);
   --black-active: oklch(from var(--black) calc(l - 0.05) c h);
   --grey-active: oklch(from var(--grey) calc(l - 0.05) c h);
 

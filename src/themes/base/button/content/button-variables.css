@@ -1,51 +1,51 @@
-ui-button {
+:root {
 
-  --vertical-align: baseline;
+  --button-vertical-align: baseline;
 
-  --vertical-margin: 0em;
-  --horizontal-margin: 0.25em;
+  --button-vertical-margin: 0em;
+  --button-horizontal-margin: var(--3px);
 
-  --background-color: #E0E1E2;
-  --background-image: none;
-  --background: var(--background-color) var(--background-image);
+  --button-background-color: #E0E1E2;
+  --button-background-image: none;
+  --button-background: var(--button-background-color) var(--button-background-image);
 
-  --line-height: 1em;
+  --button-line-height: 1em;
 
   /* button same height as input globally */
-  --vertical-padding: var(--input-vertical-padding);
-  --horizontal-padding: 1.5em;
+  --button-vertical-padding: var(--input-vertical-padding);
+  --button-horizontal-padding: 1.5em;
 
   /* Text */
-  --text-transform: none;
-  --tap-color: transparent;
-  --font-family: var(--page-font);
-  --font-weight: var(--bold);
-  --text-color: var(--text-color);
-  --text-shadow: none;
-  --inverted-text-shadow: var(--text-shadow);
-  --border-radius: var(--default-border-radius);
+  --button-text-transform: none;
+  --button-tap-color: transparent;
+  --button-font-family: var(--page-font);
+  --button-font-weight: var(--bold);
+  --button-text-color: var(--text-color);
+  --button-inverted-text-color: var(--inverted-text-color);
+  --button-text-shadow: none;
+  --button-inverted-text-shadow: var(--button-text-shadow);
 
-  /* Internal Shadow */
-  --shadow-distance: 0em;
-  --shadow-offset: var(--shadow-distance) / 2;
-  --shadow-box-shadow: 0px var(--shadow-distance) 0px 0px var(--border-color) inset;
+  /* Border */
+  --button-border-radius: var(--default-border-radius);
+  --button-border-color: var(--border-color);
+  --button-border-width: 0px;
+  --button-border: var(--button-border-width) solid var(--button-border-color);
 
-  /* Box Shadow */
-  --border-box-shadow-color: transparent;
-  --border-box-shadow-width: 1px;
-  --border-box-shadow: 0px 0px 0px var(--border-box-shadow-width) var(--border-box-shadow-color) inset;
-  --box-shadow:
-    var(--border-box-shadow),
-    var(--shadow-box-shadow)
+  /* Shadow */
+  --button-shadow-distance: 0px;
+  --button-box-shadow:
+    0px var(--button-shadow-distance) 0px 0px var(--button-border-color)
   ;
+  /* Used for some padding calculations */
+  --button-shadow-offset: var(--button-shadow-distance) / 2;
 
-  --transition:
+  --button-transition:
     opacity var(--default-duration) var(--default-easing),
     background-color var(--default-duration) var(--default-easing),
     color var(--default-duration) var(--default-easing),
     box-shadow var(--default-duration) var(--default-easing),
     background var(--default-duration) var(--default-easing)
   ;
-  --will-change: initial;
+  --button-will-change: initial;
 
 }

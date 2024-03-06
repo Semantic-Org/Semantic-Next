@@ -5,40 +5,40 @@
 .mini.buttons .button,
 .mini.buttons .or,
 .mini.button {
-  font-size: var(--mini);
+  font-size: var(--button-mini);
 }
 .tiny.buttons .button,
 .tiny.buttons .or,
 .tiny.button {
-  font-size: var(--tiny);
+  font-size: var(--button-tiny);
 }
 .small.buttons .button,
 .small.buttons .or,
 .small.button {
-  font-size: var(--small);
+  font-size: var(--button-small);
 }
 .buttons .button,
 .buttons .or,
 .button {
-  font-size: var(--medium);
+  font-size: var(--button-medium);
 }
 .large.buttons .button,
 .large.buttons .or,
 .large.button {
-  font-size: var(--large);
+  font-size: var(--button-large);
 }
 .big.buttons .button,
 .big.buttons .or,
 .big.button {
-  font-size: var(--big);
+  font-size: var(--button-big);
 }
 .huge.buttons .button,
 .huge.buttons .or,
 .huge.button {
-  font-size: var(--huge);
+  font-size: var(--button-huge);
 }
 .massive.buttons .button,
 .massive.buttons .or,
 .massive.button {
-  font-size: var(--massive);
+  font-size: var(--button-massive);
 }

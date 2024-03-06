@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray, flatten } from '@semantic-ui/utils';
+import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './helpers/scope-styles.js';

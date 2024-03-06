@@ -4,28 +4,27 @@
     cursor: pointer;
     display: inline-block;
     min-height: 1em;
-    font-size: var(--medium);
     border: none;
-    vertical-align: var(--vertical-align);
-    background: var(--background);
-    color: var(--text-color);
-    font-family: var(--font-family);
-    margin: 0em var(--horizontal-margin) var(--vertical-margin) 0em;
-    padding: var(--vertical-padding) var(--horizontal-padding) calc(var(--vertical-padding) + var(--shadow-offset));
-    text-transform: var(--text-transform);
-    text-shadow: var(--text-shadow);
-    font-weight: var(--font-weight);
-    line-height: var(--line-height);
+    vertical-align: var(--button-vertical-align);
+    background: var(--button-background);
+    color: var(--button-text-color);
+    font-family: var(--button-font-family);
+    margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
+    padding: var(--button-vertical-padding) var(--button-horizontal-padding) calc(var(--button-vertical-padding) + var(--button-shadow-offset));
+    text-transform: var(--button-text-transform);
+    text-shadow: var(--button-text-shadow);
+    font-weight: var(--button-font-weight);
+    line-height: var(--button-line-height);
     font-style: normal;
     text-align: center;
     text-decoration: none;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: var(--button-border-radius);
+    box-shadow: var(--button-box-shadow);
     user-select: none;
-    transition: var(--transition);
-    will-change: var(--will-change);
-    -webkit-tap-highlight-color: var(--tap-color);
-    outline: none;
+    transition: var(--button-transition);
+    will-change: var(--button-will-change);
+    -webkit-tap-highlight-color: var(--button-tap-color);
+    outline: var(--button-border);
   }
 }
 
@@ -185,75 +184,75 @@
 @layer component {
   .primary.buttons .button,
   .primary.button {
-    background-color: var(--primary-color);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
-    background-image: var(--primary-background-image);
+    background-color: var(--button-primary-color);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
+    background-image: var(--button-primary-background-image);
   }
   .primary.button {
-    box-shadow: var(--primary-box-shadow);
+    box-shadow: var(--button-primary-box-shadow);
   }
   .primary.buttons .button:hover,
   .primary.button:hover {
-    background-color: var(--primary-color-hover);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
+    background-color: var(--button-primary-color-hover);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
   }
   .primary.buttons .button:focus,
   .primary.button:focus {
-    background-color: var(--primary-color-focus);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
+    background-color: var(--button-primary-color-focus);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
   }
   .primary.buttons .button:active,
   .primary.button:active {
-    background-color: var(--primary-color-down);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
+    background-color: var(--button-primary-color-down);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
   }
   .primary.buttons .active.button,
   .primary.buttons .active.button:active,
   .primary.active.button,
   .primary.button .active.button:active {
-    background-color: var(--primary-color-active);
-    color: var(--primary-text-color);
-    text-shadow: var(--primary-text-shadow);
+    background-color: var(--button-primary-color-active);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
   }
   .secondary.buttons .button,
   .secondary.button {
-    background-color: var(--secondary-color);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
-    background-image: var(--colored-background-image);
+    background-color: var(--button-secondary-color);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
+    background-image: var(--button-colored-background-image);
   }
   .secondary.button {
-    box-shadow: var(--colored-box-shadow);
+    box-shadow: var(--button-colored-box-shadow);
   }
   .secondary.buttons .button:hover,
   .secondary.button:hover {
-    background-color: var(--secondary-color-hover);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
+    background-color: var(--button-secondary-color-hover);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
   }
   .secondary.buttons .button:focus,
   .secondary.button:focus {
-    background-color: var(--secondary-color-focus);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
+    background-color: var(--button-secondary-color-focus);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
   }
   .secondary.buttons .button:active,
   .secondary.button:active {
-    background-color: var(--secondary-color-down);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
+    background-color: var(--button-secondary-color-down);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
   }
   .secondary.buttons .active.button,
   .secondary.buttons .active.button:active,
   .secondary.active.button,
   .secondary.button .active.button:active {
-    background-color: var(--secondary-color-active);
-    color: var(--secondary-text-color);
-    text-shadow: var(--secondary-text-shadow);
+    background-color: var(--button-secondary-color-active);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
   }
 }
 
@@ -2757,42 +2756,42 @@
   .mini.buttons .button,
   .mini.buttons .or,
   .mini.button {
-    font-size: var(--mini);
+    font-size: var(--button-mini);
   }
   .tiny.buttons .button,
   .tiny.buttons .or,
   .tiny.button {
-    font-size: var(--tiny);
+    font-size: var(--button-tiny);
   }
   .small.buttons .button,
   .small.buttons .or,
   .small.button {
-    font-size: var(--small);
+    font-size: var(--button-small);
   }
   .buttons .button,
   .buttons .or,
   .button {
-    font-size: var(--medium);
+    font-size: var(--button-medium);
   }
   .large.buttons .button,
   .large.buttons .or,
   .large.button {
-    font-size: var(--large);
+    font-size: var(--button-large);
   }
   .big.buttons .button,
   .big.buttons .or,
   .big.button {
-    font-size: var(--big);
+    font-size: var(--button-big);
   }
   .huge.buttons .button,
   .huge.buttons .or,
   .huge.button {
-    font-size: var(--huge);
+    font-size: var(--button-huge);
   }
   .massive.buttons .button,
   .massive.buttons .or,
   .massive.button {
-    font-size: var(--massive);
+    font-size: var(--button-massive);
   }
 }
 
