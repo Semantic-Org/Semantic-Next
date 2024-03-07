@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray, flatten } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
+import { extractCSS } from './helpers/extract-css.js';
 import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
@@ -97,6 +98,52 @@ class WebComponentBase extends LitElement {
         $slot.html(html);
       }
     });
+  }
+
+  /*******************************
+        Nested Shadow DOM
+  *******************************/
+
+  /*
+    Vars declared like ui-component { --var: 'foo'; } will not
+    inherit inside nested shadow DOMs.
+    We can either scope all css vars in global :root and not use
+    css var inheritance. or we can handle this with javascript
+    to apply the rules in nested shadow dom contexts
+  */
+  connectedCallback() {
+    super.connectedCallback();
+    if(!this.parentShadowRoot) {
+      this.parentShadowRoot = this.getParentShadowRoot();
+    }
+    if (this.parentShadowRoot) {
+      this.attachShadowRootStyles();
+    }
+  }
+  attachShadowRootStyles() {
+    // expecting render root to be defined here but it is not
+    const shadowRoot = this.parentShadowRoot;
+    if(shadowRoot) {
+      this.nestedStylesheet = extractCSS(this.tagName);
+      shadowRoot.adoptedStyleSheets = [
+        ...shadowRoot.adoptedStyleSheets,
+        this.nestedStylesheet,
+      ];
+    }
+  }
+
+  // check if this is a web component inside a web component
+  getParentShadowRoot() {
+    let currentNode = this.parentNode;
+    let nestedComponent = false;
+    while (currentNode) {
+      if (currentNode?.constructor?.name === 'ShadowRoot') {
+        nestedComponent = currentNode;
+        break;
+      }
+      currentNode = currentNode.parentNode;
+    }
+    return nestedComponent;
   }
 
   /*******************************

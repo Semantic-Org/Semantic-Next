@@ -23,6 +23,7 @@ export const CSS_LOADER_CONFIG = {
   '.css': 'css',
   '.png': 'file',
   '.svg': 'dataurl',
+  //'.svg': 'file',
   '.jpg': 'file',
   '.jpeg': 'file',
   '.gif': 'file',
