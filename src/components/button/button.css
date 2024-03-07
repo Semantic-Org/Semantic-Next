@@ -34,6 +34,9 @@
   .button .icon {
     vertical-align: top;
   }
+  .button .icon:only-child {
+    margin: 0rem;
+  }
 }
 
 /* src/components/button/css/content/label.css */

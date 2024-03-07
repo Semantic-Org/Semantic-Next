@@ -43,15 +43,12 @@ export const createComponent = ({
     componentSpec = extractComponentSpec(spec);
   }
 
-  // we normally attach this using DOM APIs conditionaly on render
-  // but in SSR we need to just include it naively
-  if (isServer) {
-    each(subTemplates, (template) => {
-      if (template.css) {
-        css += template.css;
-      }
-    });
-  }
+  // to support SSR we need to include all subtemplate css in base template
+  each(subTemplates, (template) => {
+    if (template.css) {
+      css += template.css;
+    }
+  });
 
   /*
     Create Component Returns Either a LitTemplate or WebComponent
@@ -165,9 +162,6 @@ export const createComponent = ({
             settings[this[property]] = true;
           }
         });
-        if(tagName == 'ui-button') {
-          console.log(settings);
-        }
         return settings;
       }
 

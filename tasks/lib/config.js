@@ -22,7 +22,7 @@ export const JS_LOADER_CONFIG = {
 export const CSS_LOADER_CONFIG = {
   '.css': 'css',
   '.png': 'file',
-  '.svg': 'file',
+  '.svg': 'dataurl',
   '.jpg': 'file',
   '.jpeg': 'file',
   '.gif': 'file',
