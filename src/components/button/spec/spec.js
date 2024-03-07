@@ -148,7 +148,7 @@ export const ButtonSpec = {
       options: [
         {
           name: 'Animated',
-          value: [true, 'animated', 'horizontal-animated'],
+          value: ['animated', 'horizontal-animated'],
           description: 'A button can be formatted to animate hidden content horizontally'
         },
         {
@@ -417,7 +417,7 @@ export const ButtonSpec = {
       options: [
         {
           name: 'Positive',
-          value: 'positive',
+          value: ['positive'],
           description: 'A button be positive.'
         },
         {
@@ -436,7 +436,7 @@ export const ButtonSpec = {
       options: [
         {
           name: 'Negative',
-          value: 'negative',
+          value: ['negative'],
           description: 'A button be negative.'
         },
         {

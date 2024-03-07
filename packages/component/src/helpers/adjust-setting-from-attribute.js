@@ -59,6 +59,10 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, spec) 
     }
   };
 
+  const removeSetting = (setting) => {
+    el[setting] = undefined;
+  };
+
   const getSettingsFromClass = (classNames) => {
     each(classNames.split(' '), (className) => {
       adjustSettingFromAttribute(className, true);
@@ -90,7 +94,12 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, spec) 
     // we need to lookup the setting using the reverseSetting lookup table
     else if(attributeValue !== undefined) {
       const setting = lookupSettingFromValue(attribute);
-      if (setting !== undefined) {
+
+      // when a value is unset it is passed null in this case a boolean attribute was removed
+      if(attributeValue === null) {
+        removeSetting(setting);
+      }
+      else if (setting !== undefined) {
         setSetting(setting, attribute);
       }
 

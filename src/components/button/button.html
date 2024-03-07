@@ -1,4 +1,4 @@
-<div class="{{ui}} button">
+<div class="{{ui}} button" tabindex="0">
   {{#if animated}}
     <span class="hidden content">
       {{>slot hidden}}
@@ -10,5 +10,7 @@
   {{#if icon}}
     <ui-icon icon={{icon}} class="icon"></ui-icon>
   {{/if}}
-  {{>slot}}
+  <span class="text">
+    {{>slot}}
+  </span>
 </div>

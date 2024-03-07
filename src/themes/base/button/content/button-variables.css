@@ -5,8 +5,8 @@
   --button-vertical-margin: 0em;
   --button-horizontal-margin: var(--3px);
 
-  --button-background-color: #E0E1E2;
-  --button-background-image: none;
+  --button-background-color: #FAFAFA;
+  --button-background-image: var(--subtle-gradient);
   --button-background: var(--button-background-color) var(--button-background-image);
 
   --button-line-height: 1em;
@@ -27,24 +27,31 @@
 
   /* Border */
   --button-border-radius: var(--default-border-radius);
-  --button-border-color: var(--border-color);
-  --button-border-width: 0px;
-  --button-border: var(--button-border-width) solid var(--button-border-color);
+  --button-border: none;
 
-  /* Shadow */
-  --button-shadow-distance: 0px;
+  /* Border (For Alignment Require Box Shadow) */
+  --button-border-color: var(--border-color);
+  --button-border-width: 1px;
+
+  /* Box Shadow */
+  --button-sharpen-box-shadow: 0px -1px 0px 0px rgba(0, 0, 0, 0.05) inset;
+  --button-border-box-shadow: 0px 0px 0px var(--button-border-width) var(--button-border-color) inset;
+  --button-shadow-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   --button-box-shadow:
-    0px var(--button-shadow-distance) 0px 0px var(--button-border-color)
+    var(--button-sharpen-box-shadow),
+    var(--button-border-box-shadow),
+    var(--button-shadow-box-shadow)
   ;
-  /* Used for some padding calculations */
-  --button-shadow-offset: var(--button-shadow-distance) / 2;
+
+  --button-default-duration: var(--default-duration);
+  --button-default-easing: var(--default-easing);
 
   --button-transition:
-    opacity var(--default-duration) var(--default-easing),
-    background-color var(--default-duration) var(--default-easing),
-    color var(--default-duration) var(--default-easing),
-    box-shadow var(--default-duration) var(--default-easing),
-    background var(--default-duration) var(--default-easing)
+    opacity var(--button-default-duration) var(--button-default-easing),
+    background-color var(--button-default-duration) var(--button-default-easing),
+    color var(--button-default-duration) var(--button-default-easing),
+    box-shadow var(--button-default-duration) var(--button-default-easing),
+    background var(--button-default-duration) var(--button-default-easing)
   ;
   --button-will-change: initial;
 

@@ -1,6 +1,6 @@
-ui-button {
-  --positive-background-image: var(--colored-background-image);
-  --positive-text-color: var(--inverted-text-color);
-  --positive-text-shadow: var(--inverted-text-shadow);
-  --positive-box-shadow: var(--colored-box-shadow);
+:root {
+  --button-positive-background-image: var(--colored-background-image);
+  --button-positive-text-color: var(--inverted-text-color);
+  --button-positive-text-shadow: var(--inverted-text-shadow);
+  --button-positive-box-shadow: var(--colored-box-shadow);
 }

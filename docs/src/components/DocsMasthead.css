@@ -15,8 +15,9 @@ layout masthead {
 
 layout masthead h1 {
   margin-top: -0.14285em;
-  font-size: 28px;
+  font-size: 32px;
   margin-bottom: 0.75rem;
+  font-family: "Geist", Arial;
   font-weight: bold;
 }
 layout masthead h1 + p {

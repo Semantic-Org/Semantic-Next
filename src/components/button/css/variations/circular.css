@@ -3,7 +3,7 @@
 ---------------*/
 
 .circular.button {
-  border-radius: 10em;
+  border-radius: var(--circular-radius);
 }
 .circular.button > .icon {
   width: 1em;

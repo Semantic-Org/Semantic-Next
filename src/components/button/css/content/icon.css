@@ -5,3 +5,6 @@
 .button .icon {
   vertical-align: top;
 }
+.button .icon:only-child {
+  margin: 0rem;
+}

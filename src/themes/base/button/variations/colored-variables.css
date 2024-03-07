@@ -1,8 +1,26 @@
 :root {
 
   /* Colors */
-  --button-colored-background-image: none;
-  --button-colored-box-shadow: var(--button-box-shadow);
+  --button-colored-background-image: var(--button-background-image);
+  --button-colored-box-shadow:
+    0 -1px 0 0 rgba(0, 0, 0, 0.05) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.13) inset,
+    0 1px 3px rgba(0, 0, 0, 0.15)
+  ;
+
+  --button-red: var(--red);
+  --button-orange: var(--orange);
+  --button-yellow: var(--yellow);
+  --button-olive: var(--olive);
+  --button-green: var(--green);
+  --button-teal: var(--teal);
+  --button-blue: var(--blue);
+  --button-violet: var(--violet);
+  --button-purple: var(--purple);
+  --button-pink: var(--pink);
+  --button-brown: var(--brown);
+  --button-grey: var(--grey);
+  --button-black: var(--black);
 
   /* Colored */
   --button-brown-text-color: var(--button-inverted-text-color);

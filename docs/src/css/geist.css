@@ -1,0 +1,16 @@
+
+@font-face {
+  font-family: 'Geist';
+  src:
+    local('Geist'),
+    url('/fonts/geist/Geist-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Geist';
+  src:
+    local('Geist'),
+    url('/fonts/geist/Geist-SemiBold.woff2') format('woff2');
+
+  font-weight: bold;
+}

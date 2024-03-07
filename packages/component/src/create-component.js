@@ -43,15 +43,12 @@ export const createComponent = ({
     componentSpec = extractComponentSpec(spec);
   }
 
-  // we normally attach this using DOM APIs conditionaly on render
-  // but in SSR we need to just include it naively
-  if (isServer) {
-    each(subTemplates, (template) => {
-      if (template.css) {
-        css += template.css;
-      }
-    });
-  }
+  // to support SSR we need to include all subtemplate css in base template
+  each(subTemplates, (template) => {
+    if (template.css) {
+      css += template.css;
+    }
+  });
 
   /*
     Create Component Returns Either a LitTemplate or WebComponent
@@ -165,9 +162,6 @@ export const createComponent = ({
             settings[this[property]] = true;
           }
         });
-        if(tagName == 'ui-button') {
-          console.log(settings);
-        }
         return settings;
       }
 
@@ -183,10 +177,13 @@ export const createComponent = ({
           if(componentSpec && !get(componentSpec.settings, property) && get(componentSpec.reverseSettings, property)) {
             return;
           }
-          const value = this[property];
+          let value = this[property];
           // if the setting has a string value use that as class name
           // i.e. sizing='large' => 'large'
           if(isString(value) && value) {
+            if(value === 'true') {
+              value = property;
+            }
             classes.push(value);
             if(componentSpec.attributeClasses.includes(property)) {
               classes.push(property);

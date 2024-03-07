@@ -14,9 +14,9 @@ ui-button {
 
   /* Basic Hover */
   --button-basic-hover-background: #FFFFFF;
-  --button-basic-hover-text-color: var(--button-hovered-text-color);
+  --button-basic-hover-text-color: var(--button-hover-color);
   --button-basic-hover-box-shadow:
-    0px 0px 0px var(--button-basic-border-size) var(--button-selected-border-color) inset,
+    0px 0px 0px var(--button-basic-border-size) var(--selected-border-color) inset,
     0px 0px 0px 0px var(--button-border-color) inset
   ;
   /* Basic Focus */

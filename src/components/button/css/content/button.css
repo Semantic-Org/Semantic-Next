@@ -1,14 +1,17 @@
+* {
+  box-sizing: border-box;
+}
 .button {
   cursor: pointer;
   display: inline-block;
   min-height: 1em;
-  border: none;
+  border: var(--button-border);
   vertical-align: var(--button-vertical-align);
   background: var(--button-background);
   color: var(--button-text-color);
   font-family: var(--button-font-family);
   margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
-  padding: var(--button-vertical-padding) var(--button-horizontal-padding) calc(var(--button-vertical-padding) + var(--button-shadow-offset));
+  padding: var(--button-vertical-padding) var(--button-horizontal-padding);
   text-transform: var(--button-text-transform);
   text-shadow: var(--button-text-shadow);
   font-weight: var(--button-font-weight);

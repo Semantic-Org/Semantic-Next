@@ -1,7 +1,7 @@
-ui-button {
-  --focus-background-color: var(--hover-background-color);
-  --focus-background-image: '';
-  --focus-box-shadow: '';
-  --focus-color: var(--hovered-text-color);
-  --icon-focus-opacity: 0.85;
+:root {
+  --button-focus-background-color: var(--button-hover-background-color);
+  --button-focus-background-image: var(--button-hover-background-image);
+  --button-focus-box-shadow: var(--button-hover-box-shadow);
+  --button-focus-color: var(--button-hovered-text-color);
+  --button-focus-icon-opacity: 0.85;
 }
