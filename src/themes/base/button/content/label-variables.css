@@ -5,7 +5,7 @@ ui-button {
   --labeled-label-padding: '';
   --labeled-label-font-size: var(--relative-medium);
   --labeled-label-border-color: var(--border-color);
-  --labeled-label-border-offset: -var(--border-box-shadow-width);
+  --labeled-label-border-offset: var(--border-box-shadow-width);
   --labeled-tag-label-size: 1.85em; /* hypotenuse of triangle */
   --labeled-icon-margin: 0em;
 

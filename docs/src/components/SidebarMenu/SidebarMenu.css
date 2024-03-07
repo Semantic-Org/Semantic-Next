@@ -7,6 +7,10 @@
   padding: 0rem 1rem;
 }
 
+.test {
+  background-color: var(--primary-color);
+}
+
 .title {
   display: flex;
   flex-direction: row;

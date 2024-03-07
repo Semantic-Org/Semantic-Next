@@ -3,21 +3,21 @@
 *******************************/
 
 /* Content */
-@import url('./content/icon-variables.css') layer(baseTheme);
+@import url('./content/icon-variables.css') layer(icon);
 
 /* Group */
-@import url('./group/icons-variables.css') layer(baseTheme);
+@import url('./group/icons-variables.css') layer(icon);
 
 /* Types */
 
 /* States */
-@import url('./states/disabled-variables.css') layer(baseTheme);
-@import url('./states/loading-variables.css') layer(baseTheme);
+@import url('./states/disabled-variables.css') layer(icon);
+@import url('./states/loading-variables.css') layer(icon);
 
 /* Variations */
-@import url('./variations/link-variables.css') layer(baseTheme);
-@import url('./variations/colored-variables.css') layer(baseTheme);
-@import url('./variations/sizing-variables.css') layer(baseTheme);
+@import url('./variations/link-variables.css') layer(icon);
+@import url('./variations/colored-variables.css') layer(icon);
+@import url('./variations/sizing-variables.css') layer(icon);
 
 /* Overrides */
-@import url('./overrides/feather-icons.css') layer(baseTheme);
+@import url('./overrides/feather-icons.css') layer(icon);

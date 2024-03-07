@@ -1,5 +1,3 @@
-@layer global, component, themeOverrides, siteOverrides, utilities, pageOverrides;
-
 @import url('./globals/reset.css');
 @import url('./globals/site.css');
 @import url('./globals/initial.css');

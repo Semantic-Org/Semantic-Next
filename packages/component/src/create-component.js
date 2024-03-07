@@ -4,6 +4,7 @@ import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { extractComponentSpec } from './helpers/extract-component-spec.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
+import { extractCSS } from './helpers/extract-css.js';
 
 import { LitTemplate } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';
@@ -51,6 +52,15 @@ export const createComponent = ({
         css += template.css;
       }
     });
+  }
+  else if(tagName) {
+    // on client we need to hoist css vars for use in nested shadow doms
+    const variableCSS = extractCSS(tagName);
+    //css = variableCSS + css;
+  }
+
+  if(tagName == 'ui-button') {
+    console.log(css);
   }
 
   /*
@@ -165,9 +175,6 @@ export const createComponent = ({
             settings[this[property]] = true;
           }
         });
-        if(tagName == 'ui-button') {
-          console.log(settings);
-        }
         return settings;
       }
 

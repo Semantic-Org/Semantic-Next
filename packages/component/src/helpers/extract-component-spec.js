@@ -65,7 +65,5 @@ export const extractComponentSpec = (spec) => {
   delete reverseSettings.true;
   delete reverseSettings.false;
   componentSpec.reverseSettings = reverseSettings;
-  console.log(componentSpec);
-  console.log(spec);
   return componentSpec;
 };
