@@ -6,45 +6,45 @@
 /*--- Standard ---*/
 .primary.buttons .button,
 .primary.button {
-  background-color: var(--primary-color);
-  color: var(--primary-text-color);
-  text-shadow: var(--primary-text-shadow);
-  background-image: var(--primary-background-image);
+  background-color: var(--button-primary-color);
+  color: var(--button-primary-text-color);
+  text-shadow: var(--button-primary-text-shadow);
+  background-image: var(--button-primary-background-image);
 }
 .primary.button {
-  box-shadow: var(--primary-box-shadow);
+  box-shadow: var(--button-primary-box-shadow);
 }
 
 
 /* States */
 .primary.buttons .button:hover,
 .primary.button:hover {
-  background-color: var(--primary-color-hover);
-  color: var(--primary-text-color);
-  text-shadow: var(--primary-text-shadow);
+  background-color: var(--button-primary-color-hover);
+  color: var(--button-primary-text-color);
+  text-shadow: var(--button-primary-text-shadow);
 }
 
 .primary.buttons .button:focus,
 .primary.button:focus {
-  background-color: var(--primary-color-focus);
-  color: var(--primary-text-color);
-  text-shadow: var(--primary-text-shadow);
+  background-color: var(--button-primary-color-focus);
+  color: var(--button-primary-text-color);
+  text-shadow: var(--button-primary-text-shadow);
 }
 
 .primary.buttons .button:active,
 .primary.button:active {
-  background-color: var(--primary-color-down);
-  color: var(--primary-text-color);
-  text-shadow: var(--primary-text-shadow);
+  background-color: var(--button-primary-color-down);
+  color: var(--button-primary-text-color);
+  text-shadow: var(--button-primary-text-shadow);
 }
 
 .primary.buttons .active.button,
 .primary.buttons .active.button:active,
 .primary.active.button,
 .primary.button .active.button:active {
-  background-color: var(--primary-color-active);
-  color: var(--primary-text-color);
-  text-shadow: var(--primary-text-shadow);
+  background-color: var(--button-primary-color-active);
+  color: var(--button-primary-text-color);
+  text-shadow: var(--button-primary-text-shadow);
 }
 
 
@@ -55,37 +55,37 @@
 /* Standard */
 .secondary.buttons .button,
 .secondary.button {
-  background-color: var(--secondary-color);
-  color: var(--secondary-text-color);
-  text-shadow: var(--secondary-text-shadow);
-  background-image: var(--colored-background-image);
+  background-color: var(--button-secondary-color);
+  color: var(--button-secondary-text-color);
+  text-shadow: var(--button-secondary-text-shadow);
+  background-image: var(--button-colored-background-image);
 }
 .secondary.button {
-  box-shadow: var(--colored-box-shadow);
+  box-shadow: var(--button-colored-box-shadow);
 }
 .secondary.buttons .button:hover,
 .secondary.button:hover {
-  background-color: var(--secondary-color-hover);
-  color: var(--secondary-text-color);
-  text-shadow: var(--secondary-text-shadow);
+  background-color: var(--button-secondary-color-hover);
+  color: var(--button-secondary-text-color);
+  text-shadow: var(--button-secondary-text-shadow);
 }
 .secondary.buttons .button:focus,
 .secondary.button:focus {
-  background-color: var(--secondary-color-focus);
-  color: var(--secondary-text-color);
-  text-shadow: var(--secondary-text-shadow);
+  background-color: var(--button-secondary-color-focus);
+  color: var(--button-secondary-text-color);
+  text-shadow: var(--button-secondary-text-shadow);
 }
 .secondary.buttons .button:active,
 .secondary.button:active {
-  background-color: var(--secondary-color-down);
-  color: var(--secondary-text-color);
-  text-shadow: var(--secondary-text-shadow);
+  background-color: var(--button-secondary-color-down);
+  color: var(--button-secondary-text-color);
+  text-shadow: var(--button-secondary-text-shadow);
 }
 .secondary.buttons .active.button,
 .secondary.buttons .active.button:active,
 .secondary.active.button,
 .secondary.button .active.button:active {
-  background-color: var(--secondary-color-active);
-  color: var(--secondary-text-color);
-  text-shadow: var(--secondary-text-shadow);
+  background-color: var(--button-secondary-color-active);
+  color: var(--button-secondary-text-color);
+  text-shadow: var(--button-secondary-text-shadow);
 }

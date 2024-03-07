@@ -5,70 +5,37 @@
 /* Standard */
 .positive.buttons .button,
 .positive.button {
-  background-color: var(--positive-color);
-  color: var(--positive-text-color);
-  text-shadow: var(--positive-text-shadow);
-  background-image: var(--colored-background-image);
+  background-color: var(--button-positive-color);
+  color: var(--button-positive-text-color);
+  text-shadow: var(--button-positive-text-shadow);
+  background-image: var(--button-colored-background-image);
 }
 .positive.button {
-  box-shadow: var(--colored-box-shadow);
+  box-shadow: var(--button-colored-box-shadow);
 }
 .positive.buttons .button:hover,
 .positive.button:hover {
-  background-color: var(--positive-color-hover);
-  color: var(--positive-text-color);
-  text-shadow: var(--positive-text-shadow);
+  background-color: var(--button-positive-color-hover);
+  color: var(--button-positive-text-color);
+  text-shadow: var(--button-positive-text-shadow);
 }
 .positive.buttons .button:focus,
 .positive.button:focus {
-  background-color: var(--positive-color-focus);
-  color: var(--positive-text-color);
-  text-shadow: var(--positive-text-shadow);
+  background-color: var(--button-positive-color-focus);
+  color: var(--button-positive-text-color);
+  text-shadow: var(--button-positive-text-shadow);
 }
 .positive.buttons .button:active,
 .positive.button:active {
-  background-color: var(--positive-color-down);
-  color: var(--positive-text-color);
-  text-shadow: var(--positive-text-shadow);
+  background-color: var(--button-positive-color-down);
+  color: var(--button-positive-text-color);
+  text-shadow: var(--button-positive-text-shadow);
 }
 .positive.buttons .active.button,
 .positive.buttons .active.button:active,
 .positive.active.button,
 .positive.button .active.button:active {
-  background-color: var(--positive-color-active);
-  color: var(--positive-text-color);
-  text-shadow: var(--positive-text-shadow);
-}
-
-/* Basic */
-.basic.positive.buttons .button,
-.basic.positive.button {
-  box-shadow: 0px 0px 0px var(--basic-border-size) var(--positive-color) inset !important;
-  color: var(--positive-color) !important;
-}
-.basic.positive.buttons .button:hover,
-.basic.positive.button:hover {
-  background: transparent !important;
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-hover) inset !important;
-  color: var(--positive-color-hover) !important;
-}
-.basic.positive.buttons .button:focus,
-.basic.positive.button:focus {
-  background: transparent !important;
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-focus) inset !important;
-  color: var(--positive-color-hover) !important;
-}
-.basic.positive.buttons .active.button,
-.basic.positive.active.button {
-  background: transparent !important;
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-active) inset !important;
-  color: var(--positive-color-down) !important;
-}
-.basic.positive.buttons .button:active,
-.basic.positive.button:active {
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--positive-color-down) inset !important;
-  color: var(--positive-color-down) !important;
-}
-.buttons:not(.vertical) > .basic.primary.button:not(:first-child) {
-  margin-left: var(--basic-colored-border-size);
+  background-color: var(--button-positive-color-active);
+  color: var(--button-positive-text-color);
+  text-shadow: var(--button-positive-text-shadow);
 }

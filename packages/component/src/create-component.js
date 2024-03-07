@@ -177,10 +177,13 @@ export const createComponent = ({
           if(componentSpec && !get(componentSpec.settings, property) && get(componentSpec.reverseSettings, property)) {
             return;
           }
-          const value = this[property];
+          let value = this[property];
           // if the setting has a string value use that as class name
           // i.e. sizing='large' => 'large'
           if(isString(value) && value) {
+            if(value === 'true') {
+              value = property;
+            }
             classes.push(value);
             if(componentSpec.attributeClasses.includes(property)) {
               classes.push(property);

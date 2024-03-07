@@ -3,12 +3,12 @@
 ---------------*/
 
 .button:hover {
-  background-color: var(--hover-background-color);
-  background-image: var(--hover-background-image);
-  box-shadow: var(--hover-box-shadow);
-  color: var(--hover-color);
+  background-color: var(--button-hover-background-color);
+  background-image: var(--button-hover-background-image);
+  box-shadow: var(--button-hover-box-shadow);
+  color: var(--button-hover-color);
 }
 
 .button:hover .icon {
-  opacity: var(--hover-icon-opacity);
+  opacity: var(--button-hover-icon-opacity);
 }

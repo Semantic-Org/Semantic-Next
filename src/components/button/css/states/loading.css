@@ -7,8 +7,8 @@
   cursor: default;
   text-shadow: none !important;
   color: transparent !important;
-  opacity: var(--loading-opacity);
-  pointer-events: var(--loading-pointer-events);
+  opacity: var(--button-loading-opacity);
+  pointer-events: auto;
   transition: var(--loading-transition);
 }
 .loading.button::before {

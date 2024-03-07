@@ -6,8 +6,8 @@
   position: relative;
   overflow: hidden;
   padding-right: 0em !important;
-  vertical-align: var(--animated-vertical-align);
-  z-index: var(--animated-z-index);
+  vertical-align: var(--button-animated-vertical-align);
+  z-index: var(--button-animated-z-index);
 }
 
 .animated.button > .content {
@@ -17,7 +17,7 @@
 }
 .animated.button > .visible.content {
   position: relative;
-  margin-right: var(--horizontal-padding);
+  margin-right: var(--button-horizontal-padding);
 }
 .animated.button > .hidden.content {
   position: absolute;
@@ -27,7 +27,7 @@
 /* Horizontal */
 .animated.animated.button > .visible.content,
 .animated.button > .hidden.content {
-  transition: right var(--animation-duration) var(--animation-easing) 0s;
+  transition: right var(--button-animation-duration) var(--button-animation-easing) 0s;
 }
 .animated.button > .visible.content {
   left: auto;
@@ -37,7 +37,7 @@
   top: 50%;
   left: auto;
   right: -100%;
-  margin-top: calc(var(--line-height) / 2 * -1);
+  margin-top: calc(var(--button-line-height) / 2 * -1);
 }
 .animated.button:focus > .visible.content,
 .animated.button:hover > .visible.content {
@@ -54,8 +54,8 @@
 .vertical-animated.button > .visible.content,
 .vertical-animated.button > .hidden.content {
   transition:
-    top var(--animation-duration) var(--animation-easing),
-    transform var(--animation-duration) var(--animation-easing)
+    top var(--button-animation-duration) var(--button-animation-easing),
+    transform var(--button-animation-duration) var(--button-animation-easing)
   ;
 }
 .vertical-animated.button > .visible.content {
@@ -79,7 +79,7 @@
 /* Fade */
 .fade-animated.button > .visible.content,
 .fade-animated.button > .hidden.content {
-  transition: opacity var(--animation-duration) var(--animation-easing), transform var(--animation-duration) var(--animation-easing);
+  transition: opacity var(--button-animation-duration) var(--button-animation-easing), transform var(--button-animation-duration) var(--button-animation-easing);
 }
 .fade-animated.button > .visible.content {
   left: auto;
@@ -91,14 +91,14 @@
   opacity: 0;
   left: 0%;
   right: auto;
-  transform: scale(var(--fade-scale-high));
+  transform: scale(var(--button-fade-scale-high));
 }
 .fade-animated.button:focus > .visible.content,
 .fade-animated.button:hover > .visible.content {
   left: auto;
   right: auto;
   opacity: 0;
-  transform: scale(var(--fade-scale-low));
+  transform: scale(var(--button-fade-scale-low));
 }
 .fade-animated.button:focus > .hidden.content,
 .fade-animated.button:hover > .hidden.content {

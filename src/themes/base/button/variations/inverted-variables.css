@@ -1,4 +1,4 @@
-ui-button {
+:root {
   --inverted-border-size: 2px;
   --inverted-text-color: var(--white);
   --inverted-text-hover-color: var(--hover-color);

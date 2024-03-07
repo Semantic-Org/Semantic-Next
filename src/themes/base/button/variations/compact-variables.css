@@ -1,5 +1,5 @@
 ui-button {
   --compact-reduction-factor: 0.75;
-  --compact-vertical-padding: calc(var(--vertical-padding) * var(--compact-reduction-factor));
-  --compact-horizontal-padding: calc(var(--horizontal-padding) * var(--compact-reduction-factor));
+  --compact-vertical-padding: calc(var(--button-vertical-padding) * var(--button-compact-reduction-factor));
+  --compact-horizontal-padding: calc(var(--button-horizontal-padding) * var(--button-compact-reduction-factor));
 }

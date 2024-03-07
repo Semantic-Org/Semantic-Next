@@ -1,3 +1,10 @@
-ui-button {
-
+:root {
+  --button-mini: var(--mini);
+  --button-tiny: var(--tiny);
+  --button-small: var(--small);
+  --button-medium: var(--medium);
+  --button-large: var(--large);
+  --button-big: var(--big);
+  --button-huge: var(--huge);
+  --button-massive: var(--massive);
 }

@@ -3,12 +3,12 @@
 ---------------*/
 
 .button:focus {
-  background-color: var(--focus-background-color);
-  color: var(--focus-color);
-  background-image: var(--focus-background-image) !important;
-  box-shadow: var(--focus-box-shadow) !important;
+  background-color: var(--button-focus-background-color);
+  background-image: var(--button-focus-background-image) !important;
+  color: var(--button-focus-color);
+  box-shadow: var(--button-focus-box-shadow) !important;
 }
 
 .button:focus .icon {
-  opacity: var(--icon-focus-opacity);
+  opacity: var(--button-focus-icon-opacity);
 }
