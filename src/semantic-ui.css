@@ -1,5 +1,28 @@
-@import url('./globals/reset.css');
-@import url('./globals/site.css');
-@import url('./globals/initial.css');
+/*
+  There are 3 levels of inheritance for global variables
+  and components.
+
+  Base is the included semantic theme (Cola)
+  Theme is the packaged theme used ontop of the base theme (Coca Cola)
+  Site is a theme specific to a particular site used ontop of a packaged theme (Diet Coca Cola)
+
+  Utilities allows a base utility layer to be applied last over components
+*/
+
+@layer
+  global.base,
+  global.theme,
+  global.site,
+  global,
+  component.base,
+  component.theme,
+  component.site,
+  component,
+  utilities
+;
+
+@import url('./globals/reset.css') layer(global);
+@import url('./globals/site.css') layer(global);
+@import url('./globals/initial.css') layer(global);
 
 

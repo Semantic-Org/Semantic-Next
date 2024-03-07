@@ -1,5 +1,5 @@
-:root {
-  --primary-color: red;
+ui-button {
+  --primary-color: teal;
   --vertical-align: baseline;
 
   --vertical-margin: 0em;
