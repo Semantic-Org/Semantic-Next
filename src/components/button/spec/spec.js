@@ -40,12 +40,6 @@ export const ButtonSpec = {
       description: 'A button can be formatted to include a label',
     },
 
-    {
-      name: 'Or',
-      attribute: 'or',
-      slot: 'or',
-      description: 'A button group can be formatted to show a conditional choice',
-    },
   ],
 
   /*-------------------
@@ -63,20 +57,23 @@ export const ButtonSpec = {
         {
           name: 'Primary',
           value: 'primary',
-          description: 'This button should appear to be emphasized as the first action that should be taken over other options.'
+          description: 'This button should appear to be emphasized as the first action that should be taken over other options.',
+          example: '<ui-button emphasis="primary">Primary</ui-button>'
         },
         {
           name: 'Secondary',
           value: 'secondary',
-          description: 'This button should appear to be emphasized as a secondary option that should appear after other options'
+          description: 'This button should appear to be emphasized as a secondary option that should appear after other options',
+          example: '<ui-button emphasis="secondary">Secondary</ui-button>'
         },
-      ]
+      ],
     },
 
     {
       name: 'Icon',
       attribute: 'icon-only',
       description: 'A button can appear with only an icon',
+      example: '<ui-button icon="pause">Pause</ui-button>',
       usageLevel: 2,
     },
 
@@ -101,28 +98,6 @@ export const ButtonSpec = {
           description: 'A button can be formatted so that a label appears to the left'
         },
       ],
-      distinctHTML: true,
-    },
-
-    {
-      name: 'Labeled Icon',
-      attribute: 'labeled-icon',
-      description: 'A button can be formatted so that the icon appears separately.',
-      looseCoupling: true,
-      usageLevel: 3,
-      options: [
-        {
-          name: 'Labeled',
-          value: 'labeled',
-          description: 'A button can be formatted so that the icon appears to the right'
-        },
-        {
-          name: 'Left Labeled',
-          value: 'left-labeled',
-          description: 'A button can be formatted so that the icon appears to the left'
-        },
-      ],
-      distinctHTML: true,
     },
 
     {
@@ -136,7 +111,6 @@ export const ButtonSpec = {
           description: 'A button can be formatted to animate hidden content horizontally'
         },
       ],
-      distinctHTML: true,
     },
 
     {
@@ -162,7 +136,6 @@ export const ButtonSpec = {
           description: 'A button can be formatted to fade in hidden content'
         },
       ],
-      distinctHTML: true,
     },
 
   ],
@@ -190,7 +163,12 @@ export const ButtonSpec = {
     {
       name: 'Disabled',
       attribute: 'disabled',
-      description: 'A button can show it is currently unable to be interacted with',
+      description: 'A button can disable interactions',
+    },
+    {
+      name: 'Clickable Disabled',
+      attribute: 'clickable-disabled',
+      description: 'A button can allow interactions but warn that it is interactable.',
     },
     {
       name: 'Loading',
@@ -253,7 +231,7 @@ export const ButtonSpec = {
         {
           name: 'Very Basic',
           value: 'very-basic',
-          description: 'A button can appear to be much less pronounced.'
+          description: 'A button can be much less pronounced.'
         },
       ]
     },
@@ -382,16 +360,6 @@ export const ButtonSpec = {
           description: 'A button can link to twitter'
         },
         {
-          name: 'Google Plus',
-          value: 'google plus',
-          description: 'A button can link to google plus'
-        },
-        {
-          name: 'Vk',
-          value: 'vk',
-          description: 'A button can link to vk'
-        },
-        {
           name: 'Linkedin',
           value: 'linkedin',
           description: 'A button can link to linkedin'
@@ -413,7 +381,7 @@ export const ButtonSpec = {
       name: 'Positive',
       attribute: 'positive',
       usageLevel: 2,
-      description: 'A button can appear to be associated with a positive action',
+      description: 'A button can be associated with a positive action',
       options: [
         {
           name: 'Positive',
@@ -432,7 +400,7 @@ export const ButtonSpec = {
       name: 'Negative',
       attribute: 'negative',
       usageLevel: 2,
-      description: 'A button can appear to be associated with a negative action',
+      description: 'A button can be associated with a negative action',
       options: [
         {
           name: 'Negative',
@@ -446,6 +414,26 @@ export const ButtonSpec = {
         },
       ]
     },
+
+    {
+      name: 'Warning',
+      attribute: 'warning',
+      usageLevel: 2,
+      description: 'A button can be associated with a potentially dangerous action',
+      options: [
+        {
+          name: 'Warning',
+          value: ['warning'],
+          description: 'A button can hint at it may be dangerous.'
+        },
+        {
+          name: 'Subtle warning',
+          value: 'subtle-warning',
+          description: 'A button can subtly hint it may be dangerous'
+        },
+      ]
+    },
+
 
     {
       name: 'Floated',
@@ -530,17 +518,91 @@ export const ButtonSpec = {
     },
   ],
 
-
   /*******************************
               Plural
   *******************************/
 
   supportsPlural: true,
   pluralName: 'Buttons',
-  pluralTagName: 'buttons',
+  pluralTagName: 'ui-buttons',
   pluralDescription: 'Buttons can exist together as a group',
 
-  pluralVariations: [
+  pluralContent: [
+    {
+      name: 'Or',
+      attribute: 'or',
+      slot: 'or',
+      description: 'A button group can be formatted to show a conditional choice',
+    },
+  ],
+
+  pluralSharedTypes: [],
+  pluralOnlyTypes: [
+    {
+      name: 'Icon',
+      attribute: 'icon',
+      description: 'A button can be formatted to include an icon',
+      usageLevel: 1,
+      options: [
+        {
+          name: 'Icon',
+          value: true,
+          description: 'A button can be formatted to include an icon'
+        },
+      ],
+    },
+    {
+      name: 'vertical',
+      attribute: 'vertical',
+      description: 'A button group can be formatted to show buttons in a vertical stack',
+      usageLevel: 3,
+      options: [
+        {
+          name: 'Vertical',
+          value: true,
+          description: 'A button group can be formatted to show buttons in a vertical stack'
+        },
+      ],
+    }
+  ],
+
+  pluralOnlyVariations: [
+    {
+      name: 'Equal Width',
+      attribute: 'equal-width',
+      description: 'A button group can be formatted to have the same width for each button',
+      usageLevel: 3,
+      options: [
+        {
+          name: 'Two',
+          value: 'two',
+          description: 'A button group can have two items evenly split'
+        },
+        {
+          name: 'Three',
+          value: 'three',
+          description: 'A button group can have three items evenly split'
+        },
+        {
+          name: 'Four',
+          value: 'four',
+          description: 'A button group can have four items evenly split'
+        },
+        {
+          name: 'Five',
+          value: 'five',
+          description: 'A button group can have five items evenly split'
+        },
+        {
+          name: 'Six',
+          value: 'six',
+          description: 'A button group can have six items evenly split'
+        },
+      ],
+    },
+  ],
+
+  pluralSharedVariations: [
     'inverted',
     'size',
     'floated',

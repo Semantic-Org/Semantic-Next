@@ -21,6 +21,14 @@ ui-menu[two-item] .item {
   width: 50%;
   text-align: center;
 }
+ui-menu[three-item] .item {
+  width: 33.3333%;
+  text-align: center;
+}
+ui-menu[four-item] .item {
+  width: 25%;
+  text-align: center;
+}
 
 ui-menu[dashboard] {
   padding: 11px 14px 11px;
