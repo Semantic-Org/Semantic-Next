@@ -1,7 +1,6 @@
 layout masthead {
   display: block;
-  padding: 2em 0em 0em;
-  background: none transparent;
+  background: #FFFFFF;
   border-radius: 0px;
   box-shadow: none;
   border: none;
@@ -35,12 +34,12 @@ layout masthead ui-menu {
 layout masthead ui-container {
   position: relative;
   width: auto !important;
-  max-width: 960px !important;
-  margin-left: 3em !important;
-  margin-right: 387px !important;
+  max-width: 1170px !important;
+  margin-left: 1.5em !important;
+  margin-right: calc(300px - 1rem) !important;
 }
 layout masthead > ui-menu ui-container {
-  width: 960px !important;
-  margin-right: 387px !important;
-  margin-left: 2em !important;
+  width: 1170px !important;
+  margin-right: calc(300px - 1rem) !important;
+  margin-left: 0.5em !important;
 }

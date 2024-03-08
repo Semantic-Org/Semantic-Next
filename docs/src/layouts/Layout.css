@@ -22,15 +22,17 @@ layout main {
   display: flex;
   flex-grow: 1;
   flex-direction: column;
+  background-color: #F5F5F6;
 }
 layout main ui-container {
   flex-grow: 1;
   position: relative;
-  padding: 2em 0em 7em;
-  margin-left: 3em !important;
-  margin-right: 387px !important;
+  padding: 2em 3em 7em;
+  margin: 0rem calc(300px + 1em) 0rem 0rem !important;
   width: auto !important;
-  max-width: 960px !important;
+  max-width: 1170px !important;
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.15);
+  background-color: #FFF;
 }
 
 layout pageContent {
