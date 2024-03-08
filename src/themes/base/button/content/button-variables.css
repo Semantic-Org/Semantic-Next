@@ -5,10 +5,12 @@
   --button-vertical-margin: 0em;
   --button-horizontal-margin: var(--3px);
 
+
   --button-background-color: #FAFAFA;
   --button-background-image: var(--subtle-gradient);
   --button-background: var(--button-background-color) var(--button-background-image);
 
+  --button-text-color: var(--text-color);
   --button-line-height: 1em;
 
   /* button same height as input globally */
@@ -36,7 +38,7 @@
   /* Box Shadow */
   --button-sharpen-box-shadow: 0px -1px 0px 0px rgba(0, 0, 0, 0.05) inset;
   --button-border-box-shadow: 0px 0px 0px var(--button-border-width) var(--button-border-color) inset;
-  --button-shadow-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --button-shadow-box-shadow: var(--subtle-shadow);
   --button-box-shadow:
     var(--button-sharpen-box-shadow),
     var(--button-border-box-shadow),

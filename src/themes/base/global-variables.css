@@ -324,7 +324,7 @@
 
   --subtle-transparent-black: rgb(0 0 0 / 3%);
   --transparent-black: rgb(0 0 0 / 5%);
-  --strong-transparent-black: rgb(0 0 0 / 10%);
+  --strong-transparent-black: rgb(0 0 0 / 8%);
   --very-strong-transparent-black: rgb(0 0 0 / 15%);
 
   --subtle-transparent-white: rgb(255 255 255 / 5%);
@@ -378,7 +378,7 @@
   --info-text-color: #276F86;
 
   /* Warning */
-  --warning-color: #F2C037;
+  --warning-color: var(--orange);
   --warning-border-color: #C9BA9B;
   --warning-background-color: #FFFAF3;
   --warning-header-color: #794B02;
@@ -704,8 +704,8 @@
   *******************************/
 
   --disabled-opacity: 0.45;
-  --hover-lightness: -0.05;
-  --focus-lightness: -0.08;
+  --hover-lightness: 0.05;
+  --focus-lightness: -0.05;
   --down-lightness: -0.12;
   --active-lightness: -0.12;
 }

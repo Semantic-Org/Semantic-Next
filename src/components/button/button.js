@@ -4,10 +4,13 @@ import ButtonCSS from './button.css?raw';
 import ButtonTemplate from './button.html?raw';
 import { ButtonSpec } from './spec/spec.js';
 
-const createInstance = ({tpl, content, $}) => ({
-
-  isAnimated() {
-    return content?.hidden && content?.visible;
+const createInstance = ({tpl, content, data, $}) => ({
+  
+  isIconBefore() {
+    return data.icon && !data.iconAfter
+  },
+  isIconAfter() {
+    return data.icon && data.iconAfter;
   }
 
 });

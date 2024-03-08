@@ -32,6 +32,7 @@
 @import url('./variations/fluid.css') layer(component);
 @import url('./variations/negative.css') layer(component);
 @import url('./variations/positive.css') layer(component);
+@import url('./variations/warning.css') layer(component);
 @import url('./variations/sizing.css') layer(component);
 @import url('./variations/social.css') layer(component);
 @import url('./variations/vertical.css') layer(component);

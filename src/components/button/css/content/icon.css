@@ -4,6 +4,7 @@
 
 .button .icon {
   vertical-align: top;
+  opacity: var(--button-icon-opacity);
 }
 .button .icon:only-child {
   margin: 0rem;

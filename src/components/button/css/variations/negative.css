@@ -6,70 +6,83 @@
 /* Standard */
 .negative.buttons .button,
 .negative.button {
-  background-color: var(--negative-color);
-  color: var(--negative-text-color);
-  text-shadow: var(--negative-text-shadow);
-  background-image: var(--colored-background-image);
+  background-color: var(--button-negative-color);
+  color: var(--button-negative-text-color);
+  text-shadow: var(--button-negative-text-shadow);
+  background-image: var(--button-colored-background-image);
 }
 .negative.button {
-  box-shadow: var(--colored-box-shadow);
+  box-shadow: var(--button-negative-box-shadow);
 }
 .negative.buttons .button:hover,
 .negative.button:hover {
-  background-color: var(--negative-color-hover);
-  color: var(--negative-text-color);
-  text-shadow: var(--negative-text-shadow);
+  background-color: var(--button-negative-color-hover);
+  color: var(--button-negative-text-color);
+  text-shadow: var(--button-negative-text-shadow);
 }
 .negative.buttons .button:focus,
 .negative.button:focus {
-  background-color: var(--negative-color-focus);
-  color: var(--negative-text-color);
-  text-shadow: var(--negative-text-shadow);
+  background-color: var(--button-negative-color-focus);
+  color: var(--button-negative-text-color);
+  text-shadow: var(--button-negative-text-shadow);
 }
 .negative.buttons .button:active,
 .negative.button:active {
-  background-color: var(--negative-color-down);
-  color: var(--negative-text-color);
-  text-shadow: var(--negative-text-shadow);
+  background-color: var(--button-negative-color-down);
+  color: var(--button-negative-text-color);
+  text-shadow: var(--button-negative-text-shadow);
 }
 .negative.buttons .active.button,
 .negative.buttons .active.button:active,
 .negative.active.button,
 .negative.button .active.button:active {
-  background-color: var(--negative-color-active);
-  color: var(--negative-text-color);
-  text-shadow: var(--negative-text-shadow);
+  background-color: var(--button-negative-color-active);
+  color: var(--button-negative-text-color);
+  text-shadow: var(--button-negative-text-shadow);
 }
 
-/* Basic */
-.basic.negative.buttons .button,
-.basic.negative.button {
-  box-shadow: 0px 0px 0px var(--basic-border-size) var(--negative-color) inset !important;
-  color: var(--negative-color) !important;
+/*-----------------
+  Subtle Negative
+------------------*/
+
+.subtle-negative.buttons .button,
+.subtle-negative.button {
+  background-color: var(--button-subtle-negative-color);
+  color: var(--button-subtle-negative-text-color);
+  text-shadow: var(--button-subtle-negative-text-shadow);
+  background-image: var(--button-subtle-negative-background-image);
 }
-.basic.negative.buttons .button:hover,
-.basic.negative.button:hover {
-  background: transparent !important;
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-hover) inset !important;
-  color: var(--negative-color-hover) !important;
+.subtle-negative.button {
+  box-shadow: var(--button-subtle-negative-box-shadow);
 }
-.basic.negative.buttons .button:focus,
-.basic.negative.button:focus {
-  background: transparent !important;
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-focus) inset !important;
-  color: var(--negative-color-hover) !important;
+.subtle-negative.buttons .button:hover,
+.subtle-negative.button:hover {
+  background-color: var(--button-subtle-negative-color-hover);
+  color: var(--button-subtle-negative-text-color);
+  text-shadow: var(--button-subtle-negative-text-shadow);
 }
-.basic.negative.buttons .active.button,
-.basic.negative.active.button {
-  background: transparent !important;
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-active) inset !important;
-  color: var(--negative-color-down) !important;
+.subtle-negative.buttons .button:focus,
+.subtle-negative.button:focus {
+  background-color: var(--button-subtle-negative-color-focus);
+  color: var(--button-subtle-negative-text-color);
+  text-shadow: var(--button-subtle-negative-text-shadow);
 }
-.basic.negative.buttons .button:active,
-.basic.negative.button:active {
-  box-shadow: 0px 0px 0px var(--basic-colored-border-size) var(--negative-color-down) inset !important;
-  color: var(--negative-color-down) !important;
+.subtle-negative.buttons .button:active,
+.subtle-negative.button:active {
+  background-color: var(--button-subtle-negative-color-down);
+  color: var(--button-subtle-negative-text-color);
+  text-shadow: var(--button-subtle-negative-text-shadow);
 }
-.buttons:not(.vertical) > .basic.primary.button:not(:first-child) {
-  margin-left: var(--basic-colored-border-size);
+.subtle-negative.buttons .active.button,
+.subtle-negative.buttons .active.button:active,
+.subtle-negative.active.button,
+.subtle-negative.button .active.button:active {
+  background-color: var(--button-subtle-negative-color-active);
+  background-image: var(--button-subtle-negative-background-image);
+  color: var(--button-subtle-negative-text-color);
+  text-shadow: var(--button-subtle-negative-text-shadow);
+}
+.subtle-negative.buttons .button > .icon,
+.subtle-negative.button > .icon {
+  color: var(--button-subtle-negative-text-color);
 }

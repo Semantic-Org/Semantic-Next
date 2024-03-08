@@ -518,6 +518,16 @@ export const ButtonSpec = {
     },
   ],
 
+  settings: {
+
+    iconAfter: {
+      type: Boolean,
+      default: false,
+      description: 'Enable to position the icon after the text',
+    },
+
+  },
+
   /*******************************
               Plural
   *******************************/
@@ -538,19 +548,6 @@ export const ButtonSpec = {
 
   pluralSharedTypes: [],
   pluralOnlyTypes: [
-    {
-      name: 'Icon',
-      attribute: 'icon',
-      description: 'A button can be formatted to include an icon',
-      usageLevel: 1,
-      options: [
-        {
-          name: 'Icon',
-          value: true,
-          description: 'A button can be formatted to include an icon'
-        },
-      ],
-    },
     {
       name: 'vertical',
       attribute: 'vertical',
