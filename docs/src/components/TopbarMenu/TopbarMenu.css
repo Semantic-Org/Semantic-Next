@@ -1,0 +1,31 @@
+/*******************************
+            Content
+*******************************/
+
+ui-menu {
+  display: inline-flex;
+}
+ui-menu .item {
+  flex: 0 1 auto;
+  margin: 0px 10px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  font-weight: bold;
+}
+ui-menu .item:after {
+  position: absolute;
+  background-color: #009FDA;
+  top: 100%;
+  left: 0px;
+  width: 0%;
+  height: 2px;
+  transition: width 0.2s ease;
+}
+ui-menu .active.item {
+  color: #FFFFFF;
+}
+ui-menu .active.item:after {
+  width: 100%;
+}
+

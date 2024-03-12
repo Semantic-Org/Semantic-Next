@@ -1,0 +1,12 @@
+<ui-menu>
+  {{#each item in getMenu}}
+    <a class="{{classes getItemStates item}}item" href={{getLink item}}>
+      {{#if item.icon}}
+        <ui-icon icon={{item.icon}} exportparts="icon:title-icon" />
+      {{else if item.image}}
+        <img src="{{item.image}}">
+      {{/if}}
+      <span class="text">{{item.name}}</span>
+    </a>
+  {{/each}}
+</ui-menu>

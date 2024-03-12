@@ -71,9 +71,9 @@ body.dark {
     color: rgba(255, 255, 255, 0.6);
   }
   ui-menu[dashboard] .active.item {
-    background-color: #A2C8FF;
-    background-image: linear-gradient(transparent, rgb(57 121 179));
-    color: #000000;
+    background: linear-gradient(#1bbcec, #1a91b8);
+    color: #FFFFFF;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.50);
     box-shadow: none;
   }
 }

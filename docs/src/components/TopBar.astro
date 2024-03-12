@@ -3,14 +3,23 @@ const { currentRoute } = Astro.props;
 import './TopBar.css';
 import { Image } from 'astro:assets';
 import logoImage from '@images/logo.png';
-import ThemeSwitcher from'@components/ThemeSwitcher/ThemeSwitcher.js';
+import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
+import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
+
+const menu = [
+  { name: 'UI Docs', url: '/test' },
+  { name: 'Tutorials', url: '/components/button' },
+  { name: 'Showcase', url: '/test3' },
+];
+
 ---
 <topbar>
   <a class="logo" href="/">
     <Image src={logoImage} alt="Logo" height="35" loading="eager">
-    <span>
-      Semantic UI
-    </span>
   </a>
+  <span class="name">
+    Semantic UI
+  </span>
+  <TopbarMenu menu={menu}></TopbarMenu>
   <ThemeSwitcher client:only transition:name="theme"></ThemeSwitcher>
 </topbar>

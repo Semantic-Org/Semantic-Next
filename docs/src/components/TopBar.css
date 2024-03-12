@@ -14,10 +14,14 @@ topbar .logo img {
   height: 35px;
   vertical-align: -12px;
 }
-topbar .logo span {
-  font-size: 18px;
+topbar span.name {
+  font-size: 16px;
   font-weight: bold;
   margin-left: 10px;
+}
+
+topbar topbar-menu {
+  margin-left: 1rem;
 }
 
 topbar theme-switcher {
