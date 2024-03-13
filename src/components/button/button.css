@@ -60,7 +60,7 @@
   :scope:not(.basic):not(.inverted) {
     box-shadow: var(--group-box-shadow);
   }
-  :scope::after {
+  &::after {
     content: ".";
     display: block;
     height: 0;
