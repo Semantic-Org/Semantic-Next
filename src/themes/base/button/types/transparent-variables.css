@@ -32,6 +32,11 @@
   --button-transparent-inverted-hover-text-color: var(--inverted-light-text-color);
   --button-transparent-inverted-hover-box-shadow: var(--button-hover-box-shadow);
 
+  --button-transparent-inverted-pressed-background-image: var(--button-pressed-background-image);
+  --button-transparent-inverted-pressed-background-color: var(--transparent-white);
+  --button-transparent-inverted-pressed-text-color: var(--inverted-light-text-color);
+  --button-transparent-inverted-pressed-box-shadow: var(--button-pressed-box-shadow);
+
   --button-transparent-inverted-active-background-image: var(--button-background-image);
   --button-transparent-inverted-active-background-color: var(--subtle-transparent-white);
   --button-transparent-inverted-active-text-color: #FFFFFF;

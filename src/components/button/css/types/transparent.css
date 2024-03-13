@@ -30,6 +30,7 @@
   background-image: var(--button-transparent-inverted-background-image);
   background-color: var(--button-transparent-inverted-background-color);
   color: var(--button-transparent-inverted-text-color);
+  text-shadow: var(--button-inverted-text-shadow);
   box-shadow: var(--button-transparent-inverted-box-shadow) !important;
 }
 .transparent.inverted.button:hover {
@@ -37,6 +38,12 @@
   background-color: var(--button-transparent-inverted-hover-background-color);
   color: var(--button-transparent-inverted-hover-text-color);
   box-shadow: var(--button-transparent-inverted-hover-box-shadow) !important;
+}
+.transparent.inverted.button:active {
+  background-image: var(--button-transparent-inverted-pressed-background-image);
+  background-color: var(--button-transparent-inverted-pressed-background-color);
+  color: var(--button-transparent-inverted-pressed-text-color);
+  box-shadow: var(--button-transparent-inverted-pressed-box-shadow) !important;
 }
 .transparent.inverted.button.active {
   background-image: var(--button-transparent-inverted-active-background-image);

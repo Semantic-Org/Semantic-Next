@@ -2,16 +2,23 @@
     Loading
 ---------------*/
 
-.loading.button {
+.loading.button:not(.icon) {
   position: relative;
   cursor: default;
   text-shadow: none !important;
   color: transparent !important;
   opacity: var(--button-loading-opacity);
   pointer-events: auto;
-  transition: var(--loading-transition);
+  transition: var(--button-loading-transition);
 }
-.loading.button::before {
+
+.loading.icon.button .icon {
+  position: relative;
+  color: transparent !important;
+}
+
+.loading.icon.button > .icon:before,
+.loading.button:not(.icon)::before {
   position: absolute;
   content: '';
   top: 50%;
@@ -23,7 +30,8 @@
   border-radius: var(--circular-radius);
   border: var(--loader-line-width) solid var(--loader-fill-color);
 }
-.loading.button::after {
+.loading.icon.button > .icon:after,
+.loading.button:not(.icon)::after {
   position: absolute;
   content: '';
   top: 50%;
@@ -33,7 +41,7 @@
   width: var(--loader-size);
   height: var(--loader-size);
 
-  animation: button-spin var(--loader-speed-linear);
+  animation: button-spin var(--loader-speed) linear;
   animation-iteration-count: infinite;
 
   border-radius: var(--circular-radius);
@@ -53,3 +61,15 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* Inverted */
+.loading.button.inverted .icon:before,
+.loading.button.inverted:before {
+  border-color: var(--inverted-loader-fill-color);
+}
+.loading.button.inverted .icon:after,
+.loading.button.inverted:after {
+  border-top-color: var(--inverted-loader-line-color);
+}
+

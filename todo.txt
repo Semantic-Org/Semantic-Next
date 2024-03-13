@@ -1,14 +1,15 @@
 Button
-- Transparent vars
-- Attached pressed state
-- Active state
++ Transparent vars
++ Attached pressed state
++ Disabled
++ Button focus on click
++ Active state
 - Basic -> Outline
-- Button focus on click
-- oklch -> colormix() (colored button, global)
 - automatic icon only and content
 - link button
 - ghost button
 - href / extending <a> tag??
+- oklch -> colormix() (colored button, global)
 
 lifecycle onCreated with astro
 

@@ -202,6 +202,11 @@ export class Query {
     return this.each((el) => el.classList.remove(...classesToRemove));
   }
 
+  toggleClass(classNames) {
+    const classesToToggle = classNames.split(' ');
+    return this.each((el) => el.classList.toggle(...classesToToggle));
+  }
+
   html(newHTML) {
     if (newHTML !== undefined) {
       return this.each((el) => (el.innerHTML = newHTML));

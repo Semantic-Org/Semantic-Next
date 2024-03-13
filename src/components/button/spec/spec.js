@@ -25,6 +25,7 @@ export const ButtonSpec = {
     {
       name: 'Icon',
       looseCoupling: true,
+      includeAttributeClass: true,
       attribute: 'icon',
       couplesWith: ['icon'],
       slot: 'icon',
@@ -242,12 +243,6 @@ export const ButtonSpec = {
       attribute: 'circular',
       description: 'A button can be formatted to appear circular.',
       usageLevel: 3,
-      options: [
-        {
-          name: 'Circular',
-          value: true,
-        },
-      ]
     },
 
     {

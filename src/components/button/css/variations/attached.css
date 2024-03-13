@@ -11,6 +11,10 @@
   box-shadow: var(--button-attached-box-shadow) !important;
 }
 
+.attached.button:active {
+  box-shadow: var(--button-attached-pressed-box-shadow) !important;
+}
+
 /* Top / Bottom */
 .top-attached.button {
   border-radius: var(--button-border-radius) var(--button-border-radius) 0em 0em;

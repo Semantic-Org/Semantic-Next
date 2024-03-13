@@ -42,6 +42,8 @@ body ::-webkit-scrollbar {
   width: var(--custom-scrollbar-width);
   height: var(--custom-scrollbar-height);
 }
+
+/* Scrollbars */
 body ::-webkit-scrollbar-track {
   background: var(--track-background);
   border-radius: var(--track-border-radius);

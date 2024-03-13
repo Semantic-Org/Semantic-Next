@@ -7,4 +7,8 @@
   ;
   --button-attached-horizontal-padding: var(--relative-12px);
   --button-attached-z-index: 2;
+  --button-attached-pressed-box-shadow:
+    0 2px 2px rgba(0, 0, 0, 0.08) inset,
+    var(--button-attached-box-shadow)
+  ;
 }
