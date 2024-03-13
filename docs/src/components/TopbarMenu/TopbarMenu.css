@@ -16,6 +16,9 @@ ui-menu .item {
   font-size: 14px;
   font-weight: bold;
 }
+ui-menu a.item:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
 ui-menu .item:before,
 ui-menu .item:after {
   position: absolute;

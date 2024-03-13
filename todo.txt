@@ -1,14 +1,20 @@
-page > rail
-    background-color: #f3f3f3;
-    z-index: 5;
-    box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.1) inset;
-    margin-left: 0;
+Button
+- Transparent vars
+- Attached pressed state
+- Active state
+- Basic -> Outline
+- Button focus on click
+- oklch -> colormix() (colored button, global)
+- automatic icon only and content
+- link button
+- ghost button
+- href / extending <a> tag??
 
 Up next
-- Review 3 syntax function
-- Complete sidebar and topbar pulling dynamically docs
-- Figure out markdown rendering for definition page
-- Finish baseline nav menu
++ Review 3 syntax function
++ Complete sidebar and topbar pulling dynamically docs
++ Figure out markdown rendering for definition page
++ Finish baseline nav menu
 - Create accordion component
 - Figure out animation engine
 
