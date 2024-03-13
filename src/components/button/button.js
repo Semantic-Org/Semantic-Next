@@ -32,7 +32,6 @@ const onCreated = ({tpl}) => {
 const events = {
   'click .button'({event, tpl, $}) {
     let $button = $(event.target).closest('.button');
-    $button.toggleClass('active');
     $button.blur();
   }
 };
