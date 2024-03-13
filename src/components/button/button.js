@@ -33,6 +33,18 @@ const events = {
   'click .button'({event, tpl, $}) {
     let $button = $(event.target).closest('.button');
     $button.blur();
+  },
+  'keydown .button'({event, tpl, $}) {
+    let $button = $(event.target).closest('.button');
+    if (event.key === 'Enter') {
+      $button.addClass('pressed');
+    }
+  },
+  'keyup .button'({event, tpl, $}) {
+    let $button = $(event.target).closest('.button');
+    if (event.key === 'Enter') {
+      $button.removeClass('pressed');
+    }
   }
 };
 

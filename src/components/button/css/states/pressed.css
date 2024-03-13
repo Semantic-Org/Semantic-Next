@@ -1,7 +1,8 @@
 /*--------------
   Pressed Down
 ---------------*/
-
+.pressed.button,
+.active.pressed.button,
 .button:active,
 .active.button:active {
   background-color: var(--button-pressed-background-color);
