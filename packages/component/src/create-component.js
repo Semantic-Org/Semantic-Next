@@ -1,5 +1,5 @@
 import { unsafeCSS, isServer } from 'lit';
-import { unique, each, noop, kebabToCamel, inArray, isString, isBoolean, get } from '@semantic-ui/utils';
+import { each, noop, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { extractComponentSpec } from './helpers/extract-component-spec.js';
@@ -16,6 +16,7 @@ export const createComponent = ({
   css = false,
   spec = false,
   tagName,
+  delegateFocus = false,
   templateName = kebabToCamel(tagName),
 
   events = {},
@@ -33,6 +34,7 @@ export const createComponent = ({
 
   beforeRendered = noop,
 } = {}) => {
+
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
@@ -75,6 +77,7 @@ export const createComponent = ({
       doesnt change based off component configuration
     */
     webComponent = class UIWebComponent extends WebComponentBase {
+
       static get styles() {
         return unsafeCSS(css);
       }
@@ -147,91 +150,13 @@ export const createComponent = ({
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
-
-      getSettings() {
-        let settings = {};
-        each(webComponent.properties, (propSettings, property) => {
-          if (property == 'class' || settings.observe === false) {
-            return;
-          }
-          if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
-            // this property is used to lookup a setting like 'large' -> sizing
-            // we dont record this into settings
-            return;
-          }
-          const setting = this[property] || this.defaultSettings[property];
-
-          // only pass through setting if it is defined
-          if(setting !== undefined) {
-            settings[property] = setting;
-          }
-          // boolean attribute case
-          if (spec && settings[this[property]] !== undefined) {
-            settings[this[property]] = true;
-          }
-        });
-        return settings;
-      }
-
-      getUIClasses() {
-        if (!spec) {
-          return;
-        }
-        const classes = [];
-        each(webComponent.properties, (propSettings, property) => {
-          if (property == 'class' || propSettings.observe === false) {
-            return;
-          }
-          if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
-            return;
-          }
-          let value = this[property];
-          // if the setting has a string value use that as class name
-          // i.e. sizing='large' => 'large'
-          if(isString(value) && value) {
-            if(get(componentSpec.attributes, property) && componentSpec.attributes[property].includes(value)) {
-              classes.push(value);
-            }
-            // components can opt-in to including the attribute as a default class
-            if(componentSpec.attributeClasses.includes(property)) {
-              classes.push(property);
-            }
-          }
-
-          // otherwise if this is a boolean property push the property name
-          // i.e. <button primary="true" => 'primary'
-          else if(isBoolean(value) || value === '') {
-            classes.push(property);
-          }
-
-        });
-        const ignoredValues = ['true', 'false'];
-        const classString = unique(classes)
-          .filter(value => value && !inArray(value, ignoredValues))
-          .join(' ');
-        return classString;
-      }
-
-      getContent() {
-        const content = {};
-        if(!componentSpec) {
-          return;
-        }
-        each(componentSpec.content, (contentName) => {
-          if(this[contentName]) {
-            content[contentName] = this[contentName];
-          }
-        });
-        return content;
-      }
-
       getData() {
         let data = {
-          ...this.getSettings(),
-          ...this.getContent(),
+          ...this.getSettings({componentSpec, properties: webComponent.properties }),
+          ...this.getContent({componentSpec}),
         };
         if (spec) {
-          data.ui = this.getUIClasses();
+          data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
         }
         return data;
       }

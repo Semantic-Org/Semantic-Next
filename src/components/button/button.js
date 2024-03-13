@@ -21,6 +21,8 @@ const onCreated = ({tpl}) => {
 
 const events = {
   'click .button'({event, tpl, $}) {
+    let $button = $(event.target).closest('.button');
+    $button.blur();
   }
 };
 
@@ -28,6 +30,7 @@ const UIButton = createComponent({
   tagName: 'ui-button',
   spec: ButtonSpec,
   template: ButtonTemplate,
+  delegateFocus: true,
   css: ButtonCSS,
   createInstance,
   onCreated,

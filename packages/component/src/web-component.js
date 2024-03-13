@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, keys, isEqual, isBoolean, isArray } from '@semantic-ui/utils';
+import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isEqual, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './helpers/scope-styles.js';
@@ -13,11 +13,10 @@ import { scopeStyles } from './helpers/scope-styles.js';
 
 class WebComponentBase extends LitElement {
 
+  static shadowRootOptions = {...LitElement.shadowRootOptions, delegatesFocus: true};
+
   // for use with light dom rendering
   static scopedStyleSheet = null;
-
-  // for use with variable hoisting
-  static nestedStylesheet = null;
 
   constructor() {
     super();
@@ -100,20 +99,8 @@ class WebComponentBase extends LitElement {
   }
 
   /*******************************
-         Settings / Attrs
+           Lit Properties
   *******************************/
-
-  setDefaultSettings(settings = {}) {
-    this.defaultSettings = settings;
-    each(settings, (setting, name) => {
-      if (setting?.default !== undefined) {
-        this.defaultSettings[name] = setting.default;
-      }
-      else {
-        this.defaultSettings[name] = setting;
-      }
-    });
-  }
 
   static getProperties({ properties = {}, settings, componentSpec }) {
     if (keys(properties).length) {
@@ -146,41 +133,41 @@ class WebComponentBase extends LitElement {
     return properties;
   }
 
-  static getPropertySettings(sampleValue) {
+  static getPropertySettings(value) {
     let property;
-    if (isString(sampleValue)) {
+    if (isString(value)) {
       property = {
         type: String,
         attribute: true,
       };
     }
-    else if (isNumber(sampleValue)) {
+    else if (isNumber(value)) {
       property = {
         type: Number,
         attribute: true,
       };
     }
-    else if (isBoolean(sampleValue)) {
+    else if (isBoolean(value)) {
       property = {
         type: Boolean,
         attribute: true,
       };
     }
-    else if (isArray(sampleValue)) {
+    else if (isArray(value)) {
       property = {
         type: Array,
         attribute: true,
         reflect: false,
       };
     }
-    else if (isPlainObject(sampleValue)) {
+    else if (isPlainObject(value)) {
       property = {
         type: Object,
         attribute: true,
         reflect: false,
       };
     }
-    else if (isFunction(sampleValue)) {
+    else if (isFunction(value)) {
       property = {
         type: Function,
         attribute: false,
@@ -198,7 +185,116 @@ class WebComponentBase extends LitElement {
   }
 
   /*******************************
-           DOM Helpers
+      Settings / Template Data
+  *******************************/
+
+  /*
+    This sets default settings for a component
+  */
+  setDefaultSettings(settings = {}) {
+    this.defaultSettings = settings;
+    each(settings, (setting, name) => {
+      if (setting?.default !== undefined) {
+        // (expert) this is a settings object
+        this.defaultSettings[name] = setting.default;
+      }
+      else {
+        // (simple) this is just a default value
+        this.defaultSettings[name] = setting;
+      }
+    });
+  }
+
+
+  /*
+    This returns a list of settings which may include both html attributes and properties
+    as specified in the spec for the component. It will extend them from default settings
+  */
+  getSettings({componentSpec, properties}) {
+    let settings = {};
+    each(properties, (propSettings, property) => {
+      if (property == 'class' || settings.observe === false) {
+        return;
+      }
+      if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
+        // this property is used to lookup a setting like 'large' -> sizing
+        // we dont record this into settings
+        return;
+      }
+      const setting = this[property] || this.defaultSettings[property];
+
+      // only pass through setting if it is defined
+      if(setting !== undefined) {
+        settings[property] = setting;
+      }
+      // boolean attribute case
+      if (componentSpec && settings[this[property]] !== undefined) {
+        settings[this[property]] = true;
+      }
+    });
+    return settings;
+  }
+
+  /*
+    This returns a list of styling classes to pass through to
+    the template data context for the component based off
+    component attributes
+  */
+  getUIClasses({componentSpec, properties}) {
+    if (!componentSpec) {
+      return;
+    }
+    const classes = [];
+    each(properties, (propSettings, property) => {
+      if (property == 'class' || propSettings.observe === false) {
+        return;
+      }
+      if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
+        return;
+      }
+      let value = this[property];
+      // if the setting has a string value use that as class name
+      // i.e. sizing='large' => 'large'
+      if(isString(value) && value) {
+        if(get(componentSpec.attributes, property) && componentSpec.attributes[property].includes(value)) {
+          classes.push(value);
+        }
+        // components can opt-in to including the attribute as a default class
+        if(componentSpec.attributeClasses.includes(property)) {
+          classes.push(property);
+        }
+      }
+
+      // otherwise if this is a boolean property push the property name
+      // i.e. <button primary="true" => 'primary'
+      else if(isBoolean(value) || value === '') {
+        classes.push(property);
+      }
+
+    });
+    const ignoredValues = ['true', 'false'];
+    const classString = unique(classes)
+      .filter(value => value && !inArray(value, ignoredValues))
+      .join(' ');
+    return classString;
+  }
+
+  /* Returns content (slotted content) from a component spec */
+  getContent({componentSpec}) {
+    const content = {};
+    if(!componentSpec) {
+      return;
+    }
+    each(componentSpec.content, (contentName) => {
+      if(this[contentName]) {
+        content[contentName] = this[contentName];
+      }
+    });
+    return content;
+  }
+
+  /*******************************
+            DOM Helpers
   *******************************/
 
   // Rendered DOM (either shadow or regular)
