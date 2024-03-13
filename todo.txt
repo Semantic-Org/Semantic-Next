@@ -23,7 +23,7 @@ Up next
 
 Component Settings
 + Settings or spec
-- Settings specify attribute, allowedValues, defaultValue
++ Settings specify attribute, allowedValues, defaultValue
 
 Docs
 - Dupe lit in astro build
