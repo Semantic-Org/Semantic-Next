@@ -21,7 +21,7 @@ tags: ['web-component']
 
 ### Emphasis
 
-<ui-button primary>Save</ui-button>
+<ui-button primary>Okay</ui-button>
 <ui-button>Discard</ui-button>
 
 <br/><br/>
@@ -46,15 +46,22 @@ tags: ['web-component']
 
 ### Info
 
-<ui-button info>Info</ui-button>
+<ui-button info>Learn More</ui-button>
+<ui-button subtle-info icon="info">More Info</ui-button>
 
 ### Transparent
 
-<div style="background-color:#1A1A1A;padding: 1em;border-radius:4px 4px 0px 0px;">
-  <ui-button inverted transparent>Transparent</ui-button>
-</div>
-<div style="background-color: #EEFFFF;padding:1em;border:1px solid #EAEAEA; border-radius: 0px 0px 4px;">
-  <ui-button transparent>Transparent</ui-button>
+<div style="display: inline-flex;border-radius: 3px; border: 1px solid #EAEAEA;">
+  <div style="
+    background-image: linear-gradient(45deg, #aaced9, #FFFFFF);
+    padding:2em;">
+    <ui-button transparent>Transparent</ui-button>
+  </div>
+  <div style="
+    background-image: linear-gradient(45deg, #232323, #0A0A0A);
+    padding:2em;">
+    <ui-button inverted transparent>Transparent</ui-button>
+  </div>
 </div>
 
 ### Toggle
@@ -108,6 +115,27 @@ tags: ['web-component']
 <ui-button icon="linkedin" linkedin>Linkedin</ui-button>
 <ui-button icon="instagram" instagram>Instagram</ui-button>
 <ui-button icon="youtube" youtube>Youtube</ui-button>
+
+## States
+
+### Hover
+<ui-button>Normal</ui-button>
+<ui-button hover>Hover</ui-button>
+
+### Focus
+<ui-button>Normal</ui-button>
+<ui-button focus>Focus</ui-button>
+
+### Active
+<ui-button>Normal</ui-button>
+<ui-button active>Active</ui-button>
+
+### Disabled
+<ui-button disabled>Disabled</ui-button>
+<ui-button clickable-disabled>Clickable Disabled</ui-button>
+
+### Loading
+<ui-button loading>Loading</ui-button>
 
 ## Variations
 

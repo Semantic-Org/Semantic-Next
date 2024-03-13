@@ -5,6 +5,6 @@
     var(--button-attached-border-shadow),
     var(--button-shadow-box-shadow)
   ;
-  --button-attached-horizontal-padding: var(--relative12px);
+  --button-attached-horizontal-padding: var(--relative-12px);
   --button-attached-z-index: 2;
 }

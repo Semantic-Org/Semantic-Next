@@ -60,7 +60,7 @@
   :scope:not(.basic):not(.inverted) {
     box-shadow: var(--group-box-shadow);
   }
-  &::after {
+  :scope::after {
     content: ".";
     display: block;
     height: 0;
@@ -411,6 +411,52 @@
   }
 }
 
+/* src/components/button/css/types/transparent.css */
+@layer component {
+  .transparent.button {
+    background-image: var(--button-transparent-background-image);
+    background-color: var(--button-transparent-background-color);
+    color: var(--button-transparent-text-color);
+    box-shadow: var(--button-transparent-box-shadow) !important;
+  }
+  .transparent.button:hover {
+    background-image: var(--button-transparent-hover-background-image);
+    background-color: var(--button-transparent-hover-background-color);
+    color: var(--button-transparent-hover-text-color);
+    box-shadow: var(--button-transparent-hover-box-shadow) !important;
+  }
+  .transparent.button:active {
+    background-image: var(--button-transparent-pressed-background-image);
+    background-color: var(--button-transparent-pressed-background-color);
+    color: var(--button-transparent-pressed-text-color);
+    box-shadow: var(--button-transparent-pressed-box-shadow) !important;
+  }
+  .transparent.button.active {
+    background-image: var(--button-transparent-active-background-image);
+    background-color: var(--button-transparent-active-background-color);
+    color: var(--button-transparent-active-text-color) !important;
+    box-shadow: var(--button-transparent-active-box-shadow) !important;
+  }
+  .transparent.inverted.button {
+    background-image: var(--button-transparent-inverted-background-image);
+    background-color: var(--button-transparent-inverted-background-color);
+    color: var(--button-transparent-inverted-text-color);
+    box-shadow: var(--button-transparent-inverted-box-shadow) !important;
+  }
+  .transparent.inverted.button:hover {
+    background-image: var(--button-transparent-inverted-hover-background-image);
+    background-color: var(--button-transparent-inverted-hover-background-color);
+    color: var(--button-transparent-inverted-hover-text-color);
+    box-shadow: var(--button-transparent-inverted-hover-box-shadow) !important;
+  }
+  .transparent.inverted.button.active {
+    background-image: var(--button-transparent-inverted-active-background-image);
+    background-color: var(--button-transparent-inverted-active-background-color);
+    color: var(--button-transparent-inverted-active-text-color) !important;
+    box-shadow: var(--button-transparent-inverted-active-box-shadow) !important;
+  }
+}
+
 /* src/components/button/css/types/toggle.css */
 @layer component {
   .toggle.buttons .active.button,
@@ -430,12 +476,14 @@
 
 /* src/components/button/css/states/hover.css */
 @layer component {
+  .button.hover,
   .button:hover {
     background-color: var(--button-hover-background-color);
     background-image: var(--button-hover-background-image);
     box-shadow: var(--button-hover-box-shadow);
     color: var(--button-hover-color);
   }
+  .button.hover .icon,
   .button:hover .icon {
     opacity: var(--button-hover-icon-opacity);
   }
@@ -443,12 +491,14 @@
 
 /* src/components/button/css/states/focus.css */
 @layer component {
+  .button.focus,
   .button:focus {
     background-color: var(--button-focus-background-color);
     background-image: var(--button-focus-background-image) !important;
     color: var(--button-focus-color);
     box-shadow: var(--button-focus-box-shadow) !important;
   }
+  .button.focus .icon,
   .button:focus .icon {
     opacity: var(--button-focus-icon-opacity);
   }
@@ -498,6 +548,10 @@
     background-image: var(--disabled-background-image) !important;
     box-shadow: var(--disabled-background-image) !important;
   }
+  .clickable-disabled.button {
+    pointer-events: auto !important;
+    cursor: not-allowed;
+  }
 }
 
 /* src/components/button/css/states/loading.css */
@@ -520,7 +574,7 @@
     width: var(--loader-size);
     height: var(--loader-size);
     border-radius: var(--circular-radius);
-    border: var(--loader-line-width) solid var(--inverted-loader-fill-color);
+    border: var(--loader-line-width) solid var(--loader-fill-color);
   }
   .loading.button::after {
     position: absolute;
@@ -533,7 +587,7 @@
     animation: button-spin var(--loader-speed-linear);
     animation-iteration-count: infinite;
     border-radius: var(--circular-radius);
-    border-color: var(--inverted-loader-line-color) transparent transparent;
+    border-color: var(--loader-line-color) transparent transparent;
     border-style: solid;
     border-width: var(--loader-line-width);
     box-shadow: 0px 0px 0px 1px transparent;
@@ -2473,15 +2527,19 @@
 @layer component {
   .compact.buttons .button,
   .compact.button {
-    padding: var(--compact-vertical-padding) var(--compact-horizontal-padding) (var(--compact-vertical-padding) + var(--shadow-offset));
+    padding: var(--button-compact-vertical-padding) var(--button-compact-horizontal-padding);
   }
   .compact.icon.buttons .button,
   .compact.icon.button {
-    padding: var(--compact-vertical-padding) var(--compact-vertical-padding) (var(--compact-vertical-padding) + var(--shadow-offset));
+    padding: var(--button-compact-icon-padding);
   }
-  .compact.labeled.icon.buttons .button,
-  .compact.labeled.icon.button {
-    padding: var(--compact-vertical-padding) (var(--compact-horizontal-padding) + var(--labeled-icon-width)) (var(--compact-vertical-padding) + var(--shadow-offset));
+  .very-compact.buttons .button,
+  .very-compact.button {
+    padding: var(--button-very-compact-vertical-padding) var(--button-very-compact-horizontal-padding);
+  }
+  .very-compact.icon.buttons .button,
+  .very-compact.icon.button {
+    padding: var(--button-very-compact-icon-padding);
   }
 }
 
@@ -2491,13 +2549,13 @@
   .left-floated.button {
     float: left;
     margin-left: 0em;
-    margin-right: var(--floated-margin);
+    margin-right: var(--button-floated-margin);
   }
   .right-floated.buttons,
   .right-floated.button {
     float: right;
     margin-right: 0em;
-    margin-left: var(--floated-margin);
+    margin-left: var(--button-floated-margin);
   }
 }
 
@@ -2856,6 +2914,87 @@
   .subtle-warning.buttons .button > .icon,
   .subtle-warning.button > .icon {
     color: var(--button-subtle-warning-text-color);
+  }
+}
+
+/* src/components/button/css/variations/info.css */
+@layer component {
+  .info.buttons .button,
+  .info.button {
+    background-color: var(--button-info-color);
+    color: var(--button-info-text-color);
+    text-shadow: var(--button-info-text-shadow);
+    background-image: var(--button-colored-background-image);
+  }
+  .info.button {
+    box-shadow: var(--button-info-box-shadow);
+  }
+  .info.buttons .button:hover,
+  .info.button:hover {
+    background-color: var(--button-info-color-hover);
+    color: var(--button-info-text-color);
+    text-shadow: var(--button-info-text-shadow);
+  }
+  .info.buttons .button:focus,
+  .info.button:focus {
+    background-color: var(--button-info-color-focus);
+    color: var(--button-info-text-color);
+    text-shadow: var(--button-info-text-shadow);
+  }
+  .info.buttons .button:active,
+  .info.button:active {
+    background-color: var(--button-info-color-down);
+    color: var(--button-info-text-color);
+    text-shadow: var(--button-info-text-shadow);
+  }
+  .info.buttons .active.button,
+  .info.buttons .active.button:active,
+  .info.active.button,
+  .info.button .active.button:active {
+    background-color: var(--button-info-color-active);
+    color: var(--button-info-text-color);
+    text-shadow: var(--button-info-text-shadow);
+  }
+  .subtle-info.buttons .button,
+  .subtle-info.button {
+    background-color: var(--button-subtle-info-color);
+    color: var(--button-subtle-info-text-color);
+    text-shadow: var(--button-subtle-info-text-shadow);
+    background-image: var(--button-subtle-info-background-image);
+  }
+  .subtle-info.button {
+    box-shadow: var(--button-subtle-info-box-shadow);
+  }
+  .subtle-info.buttons .button:hover,
+  .subtle-info.button:hover {
+    background-color: var(--button-subtle-info-color-hover);
+    color: var(--button-subtle-info-text-color);
+    text-shadow: var(--button-subtle-info-text-shadow);
+  }
+  .subtle-info.buttons .button:focus,
+  .subtle-info.button:focus {
+    background-color: var(--button-subtle-info-color-focus);
+    color: var(--button-subtle-info-text-color);
+    text-shadow: var(--button-subtle-info-text-shadow);
+  }
+  .subtle-info.buttons .button:active,
+  .subtle-info.button:active {
+    background-color: var(--button-subtle-info-color-down);
+    color: var(--button-subtle-info-text-color);
+    text-shadow: var(--button-subtle-info-text-shadow);
+  }
+  .subtle-info.buttons .active.button,
+  .subtle-info.buttons .active.button:active,
+  .subtle-info.active.button,
+  .subtle-info.button .active.button:active {
+    background-color: var(--button-subtle-info-color-active);
+    background-image: var(--button-subtle-info-background-image);
+    color: var(--button-subtle-info-text-color);
+    text-shadow: var(--button-subtle-info-text-shadow);
+  }
+  .subtle-info.buttons .button > .icon,
+  .subtle-info.button > .icon {
+    color: var(--button-subtle-info-text-color);
   }
 }
 

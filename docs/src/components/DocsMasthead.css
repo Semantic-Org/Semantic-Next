@@ -14,7 +14,7 @@ layout masthead {
 
 layout masthead h1 {
   margin-top: -0.14285em;
-  font-size: 32px;
+  font-size: 28px;
   margin-bottom: 0.75rem;
   font-weight: bold;
 }
@@ -26,7 +26,8 @@ layout masthead h1 + p {
 
 
 layout masthead ui-menu {
-  padding-bottom: 1.5rem !important;
+  margin-top: 0rem;
+  padding-bottom: 1rem !important;
   margin-bottom: 0rem;
 }
 

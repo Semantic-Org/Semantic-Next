@@ -8,6 +8,7 @@ import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attrib
 import { LitTemplate } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';
 
+
 export const createComponent = ({
   renderer = 'lit',
 
@@ -26,7 +27,7 @@ export const createComponent = ({
   onAttributeChanged = noop,
 
   properties, // allow overriding properties for lit
-  settings = spec?.settings, // settings for js functionality like callbacks etc
+  settings, // settings for js functionality like callbacks etc
 
   subTemplates = [],
 
@@ -99,15 +100,20 @@ export const createComponent = ({
 
       willUpdate() {
         super.willUpdate();
-        this.template = litTemplate.clone({
-          data: this.getData(),
-          element: this,
-          renderRoot: this.renderRoot,
-        });
-        this.tpl = this.template.tpl;
+        if(!this.template) {
+          this.template = litTemplate.clone({
+            data: this.getData(),
+            element: this,
+            renderRoot: this.renderRoot,
+          });
+          this.tpl = this.template.tpl;
+        }
+        // property change callbacks wont call on SSR
         if(isServer) {
           each(webComponent.properties, (propSettings, property) => {
-            this.attributeChangedCallback(property, undefined, this[property]);
+            const oldValue = undefined;
+            const newValue = this[property];
+            this.attributeChangedCallback(property, oldValue, newValue);
           });
         }
       }
@@ -148,12 +154,14 @@ export const createComponent = ({
           if (property == 'class' || settings.observe === false) {
             return;
           }
-          if(componentSpec && !get(componentSpec.settings, property) && get(componentSpec.reverseSettings, property)) {
+          if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
             // this property is used to lookup a setting like 'large' -> sizing
             // we dont record this into settings
             return;
           }
           const setting = this[property] || this.defaultSettings[property];
+
+          // only pass through setting if it is defined
           if(setting !== undefined) {
             settings[property] = setting;
           }
@@ -170,21 +178,21 @@ export const createComponent = ({
           return;
         }
         const classes = [];
-        each(webComponent.properties, (settings, property) => {
-          if (property == 'class' || settings.observe === false) {
+        each(webComponent.properties, (propSettings, property) => {
+          if (property == 'class' || propSettings.observe === false) {
             return;
           }
-          if(componentSpec && !get(componentSpec.settings, property) && get(componentSpec.reverseSettings, property)) {
+          if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
             return;
           }
           let value = this[property];
           // if the setting has a string value use that as class name
           // i.e. sizing='large' => 'large'
           if(isString(value) && value) {
-            if(value === 'true') {
-              value = property;
+            if(get(componentSpec.attributes, property) && componentSpec.attributes[property].includes(value)) {
+              classes.push(value);
             }
-            classes.push(value);
+            // components can opt-in to including the attribute as a default class
             if(componentSpec.attributeClasses.includes(property)) {
               classes.push(property);
             }
@@ -204,9 +212,23 @@ export const createComponent = ({
         return classString;
       }
 
+      getContent() {
+        const content = {};
+        if(!componentSpec) {
+          return;
+        }
+        each(componentSpec.content, (contentName) => {
+          if(this[contentName]) {
+            content[contentName] = this[contentName];
+          }
+        });
+        return content;
+      }
+
       getData() {
         let data = {
           ...this.getSettings(),
+          ...this.getContent(),
         };
         if (spec) {
           data.ui = this.getUIClasses();

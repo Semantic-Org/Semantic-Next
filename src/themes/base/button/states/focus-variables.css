@@ -2,6 +2,6 @@
   --button-focus-background-color: var(--button-hover-background-color);
   --button-focus-background-image: var(--button-hover-background-image);
   --button-focus-box-shadow: var(--button-hover-box-shadow);
-  --button-focus-color: var(--button-hovered-text-color);
+  --button-focus-color: var(--button-hover-text-color);
   --button-focus-icon-opacity: 0.85;
 }

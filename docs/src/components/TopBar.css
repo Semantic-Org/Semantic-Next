@@ -8,16 +8,19 @@ topbar {
 topbar .logo {
   margin: 12px 0px 0px 20px;
   display: inline-block;
+  text-decoration: none;
 }
 topbar .logo img {
   display: inline-block;
   height: 35px;
   vertical-align: -12px;
 }
-topbar span.name {
+topbar .logo .name {
   font-size: 16px;
   font-weight: bold;
   margin-left: 10px;
+  color: #FFF;
+  outline: none;
 }
 
 topbar topbar-menu {

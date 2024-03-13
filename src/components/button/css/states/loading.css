@@ -21,7 +21,7 @@
   height: var(--loader-size);
 
   border-radius: var(--circular-radius);
-  border: var(--loader-line-width) solid var(--inverted-loader-fill-color);
+  border: var(--loader-line-width) solid var(--loader-fill-color);
 }
 .loading.button::after {
   position: absolute;
@@ -38,7 +38,7 @@
 
   border-radius: var(--circular-radius);
 
-  border-color: var(--inverted-loader-line-color) transparent transparent;
+  border-color: var(--loader-line-color) transparent transparent;
   border-style: solid;
   border-width: var(--loader-line-width);
 

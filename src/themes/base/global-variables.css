@@ -68,7 +68,7 @@
   /* See Power-user section below
      for explanation of px variables
   */
-  --relative-border-radius: var(--relative4px);
+  --relative-border-radius: var(--relative-4px);
   --absolute-border-radius: var(--4px);
 
   --default-border-radius: var(--absolute-border-radius);
@@ -103,8 +103,8 @@
 
   /* This adjusts the default form input across all elements */
   --input-background: var(--white);
-  --input-vertical-padding: var(--relative10px);
-  --input-horizontal-padding: var(--relative12px);
+  --input-vertical-padding: var(--relative-10px);
+  --input-horizontal-padding: var(--relative-12px);
   --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
 
   /* Input Text Color */
@@ -193,9 +193,9 @@
          Loader
   -------------------- */
 
-  --loader-size: var(--relative-big);
+  --loader-size: var(--13px);
   --loader-speed: 0.6s;
-  --loader-line-width: 0.2em;
+  --loader-line-width: var(--2px);
   --loader-fill-color: rgb(0 0 0 / 10%);
   --loader-line-color: var(--grey);
 
@@ -356,33 +356,39 @@
       Emotive Colors
   -------------------- */
 
+
+/*--------------
+     Messages
+---------------*/
+
+
   /* Positive */
   --positive-color: var(--green);
-  --positive-background-color: #FCFFF5;
-  --positive-border-color: #A3C293;
+  --positive-background-color: #F0F7F3;
+  --positive-border-color: #CCEAD9;
   --positive-header-color: #1A531B;
-  --positive-text-color: #2C662D;
+  --positive-text-color: var(--green-text-color);
 
   /* Negative */
   --negative-color: var(--red);
-  --negative-background-color: #FFF6F6;
-  --negative-border-color: #E0B4B4;
-  --negative-header-color: #912D2B;
-  --negative-text-color: #9F3A38;
+  --negative-background-color: #F9F1F1;
+  --negative-border-color: #E6D9D9;
+  --negative-header-color: #C55250;
+  --negative-text-color: var(--red-text-color);
 
   /* Info */
-  --info-color: #31CCEC;
-  --info-background-color: #F8FFFF;
-  --info-border-color: #A9D5DE;
+  --info-color: #318291;
+  --info-background-color: #FAFDFD;
+  --info-border-color: #B0D8D8;
   --info-header-color: #0E566C;
   --info-text-color: #276F86;
 
   /* Warning */
-  --warning-color: var(--orange);
-  --warning-border-color: #C9BA9B;
-  --warning-background-color: #FFFAF3;
+  --warning-color: #D7922E;
+  --warning-border-color: #CAC09D;
+  --warning-background-color: #FFFAF8;
   --warning-header-color: #794B02;
-  --warning-text-color: #573A08;
+  --warning-text-color: var(--orange-text-color);
 
   /* -------------------
        Neutral Text
@@ -598,70 +604,70 @@
   --63px: calc((63 / var(--em-size)) * 1rem);
   --64px: calc((64 / var(--em-size)) * 1rem);
 
-  --relative1px: calc((1 / var(--em-size)) * 1em);
-  --relative2px: calc((2 / var(--em-size)) * 1em);
-  --relative3px: calc((3 / var(--em-size)) * 1em);
-  --relative4px: calc((4 / var(--em-size)) * 1em);
-  --relative5px: calc((5 / var(--em-size)) * 1em);
-  --relative6px: calc((6 / var(--em-size)) * 1em);
-  --relative7px: calc((7 / var(--em-size)) * 1em);
-  --relative8px: calc((8 / var(--em-size)) * 1em);
-  --relative9px: calc((9 / var(--em-size)) * 1em);
-  --relative10px: calc((10 / var(--em-size)) * 1em);
-  --relative11px: calc((11 / var(--em-size)) * 1em);
-  --relative12px: calc((12 / var(--em-size)) * 1em);
-  --relative13px: calc((13 / var(--em-size)) * 1em);
-  --relative14px: calc((14 / var(--em-size)) * 1em);
-  --relative15px: calc((15 / var(--em-size)) * 1em);
-  --relative16px: calc((16 / var(--em-size)) * 1em);
-  --relative17px: calc((17 / var(--em-size)) * 1em);
-  --relative18px: calc((18 / var(--em-size)) * 1em);
-  --relative19px: calc((19 / var(--em-size)) * 1em);
-  --relative20px: calc((20 / var(--em-size)) * 1em);
-  --relative21px: calc((21 / var(--em-size)) * 1em);
-  --relative22px: calc((22 / var(--em-size)) * 1em);
-  --relative23px: calc((23 / var(--em-size)) * 1em);
-  --relative24px: calc((24 / var(--em-size)) * 1em);
-  --relative25px: calc((25 / var(--em-size)) * 1em);
-  --relative26px: calc((26 / var(--em-size)) * 1em);
-  --relative27px: calc((27 / var(--em-size)) * 1em);
-  --relative28px: calc((28 / var(--em-size)) * 1em);
-  --relative29px: calc((29 / var(--em-size)) * 1em);
-  --relative30px: calc((30 / var(--em-size)) * 1em);
-  --relative31px: calc((31 / var(--em-size)) * 1em);
-  --relative32px: calc((32 / var(--em-size)) * 1em);
-  --relative33px: calc((33 / var(--em-size)) * 1em);
-  --relative34px: calc((34 / var(--em-size)) * 1em);
-  --relative35px: calc((35 / var(--em-size)) * 1em);
-  --relative36px: calc((36 / var(--em-size)) * 1em);
-  --relative37px: calc((37 / var(--em-size)) * 1em);
-  --relative38px: calc((38 / var(--em-size)) * 1em);
-  --relative39px: calc((39 / var(--em-size)) * 1em);
-  --relative40px: calc((40 / var(--em-size)) * 1em);
-  --relative41px: calc((41 / var(--em-size)) * 1em);
-  --relative42px: calc((42 / var(--em-size)) * 1em);
-  --relative43px: calc((43 / var(--em-size)) * 1em);
-  --relative44px: calc((44 / var(--em-size)) * 1em);
-  --relative45px: calc((45 / var(--em-size)) * 1em);
-  --relative46px: calc((46 / var(--em-size)) * 1em);
-  --relative47px: calc((47 / var(--em-size)) * 1em);
-  --relative48px: calc((48 / var(--em-size)) * 1em);
-  --relative49px: calc((49 / var(--em-size)) * 1em);
-  --relative50px: calc((50 / var(--em-size)) * 1em);
-  --relative51px: calc((51 / var(--em-size)) * 1em);
-  --relative52px: calc((52 / var(--em-size)) * 1em);
-  --relative53px: calc((53 / var(--em-size)) * 1em);
-  --relative54px: calc((54 / var(--em-size)) * 1em);
-  --relative55px: calc((55 / var(--em-size)) * 1em);
-  --relative56px: calc((56 / var(--em-size)) * 1em);
-  --relative57px: calc((57 / var(--em-size)) * 1em);
-  --relative58px: calc((58 / var(--em-size)) * 1em);
-  --relative59px: calc((59 / var(--em-size)) * 1em);
-  --relative60px: calc((60 / var(--em-size)) * 1em);
-  --relative61px: calc((61 / var(--em-size)) * 1em);
-  --relative62px: calc((62 / var(--em-size)) * 1em);
-  --relative63px: calc((63 / var(--em-size)) * 1em);
-  --relative64px: calc((64 / var(--em-size)) * 1em);
+  --relative-1px: calc((1 / var(--em-size)) * 1em);
+  --relative-2px: calc((2 / var(--em-size)) * 1em);
+  --relative-3px: calc((3 / var(--em-size)) * 1em);
+  --relative-4px: calc((4 / var(--em-size)) * 1em);
+  --relative-5px: calc((5 / var(--em-size)) * 1em);
+  --relative-6px: calc((6 / var(--em-size)) * 1em);
+  --relative-7px: calc((7 / var(--em-size)) * 1em);
+  --relative-8px: calc((8 / var(--em-size)) * 1em);
+  --relative-9px: calc((9 / var(--em-size)) * 1em);
+  --relative-10px: calc((10 / var(--em-size)) * 1em);
+  --relative-11px: calc((11 / var(--em-size)) * 1em);
+  --relative-12px: calc((12 / var(--em-size)) * 1em);
+  --relative-13px: calc((13 / var(--em-size)) * 1em);
+  --relative-14px: calc((14 / var(--em-size)) * 1em);
+  --relative-15px: calc((15 / var(--em-size)) * 1em);
+  --relative-16px: calc((16 / var(--em-size)) * 1em);
+  --relative-17px: calc((17 / var(--em-size)) * 1em);
+  --relative-18px: calc((18 / var(--em-size)) * 1em);
+  --relative-19px: calc((19 / var(--em-size)) * 1em);
+  --relative-20px: calc((20 / var(--em-size)) * 1em);
+  --relative-21px: calc((21 / var(--em-size)) * 1em);
+  --relative-22px: calc((22 / var(--em-size)) * 1em);
+  --relative-23px: calc((23 / var(--em-size)) * 1em);
+  --relative-24px: calc((24 / var(--em-size)) * 1em);
+  --relative-25px: calc((25 / var(--em-size)) * 1em);
+  --relative-26px: calc((26 / var(--em-size)) * 1em);
+  --relative-27px: calc((27 / var(--em-size)) * 1em);
+  --relative-28px: calc((28 / var(--em-size)) * 1em);
+  --relative-29px: calc((29 / var(--em-size)) * 1em);
+  --relative-30px: calc((30 / var(--em-size)) * 1em);
+  --relative-31px: calc((31 / var(--em-size)) * 1em);
+  --relative-32px: calc((32 / var(--em-size)) * 1em);
+  --relative-33px: calc((33 / var(--em-size)) * 1em);
+  --relative-34px: calc((34 / var(--em-size)) * 1em);
+  --relative-35px: calc((35 / var(--em-size)) * 1em);
+  --relative-36px: calc((36 / var(--em-size)) * 1em);
+  --relative-37px: calc((37 / var(--em-size)) * 1em);
+  --relative-38px: calc((38 / var(--em-size)) * 1em);
+  --relative-39px: calc((39 / var(--em-size)) * 1em);
+  --relative-40px: calc((40 / var(--em-size)) * 1em);
+  --relative-41px: calc((41 / var(--em-size)) * 1em);
+  --relative-42px: calc((42 / var(--em-size)) * 1em);
+  --relative-43px: calc((43 / var(--em-size)) * 1em);
+  --relative-44px: calc((44 / var(--em-size)) * 1em);
+  --relative-45px: calc((45 / var(--em-size)) * 1em);
+  --relative-46px: calc((46 / var(--em-size)) * 1em);
+  --relative-47px: calc((47 / var(--em-size)) * 1em);
+  --relative-48px: calc((48 / var(--em-size)) * 1em);
+  --relative-49px: calc((49 / var(--em-size)) * 1em);
+  --relative-50px: calc((50 / var(--em-size)) * 1em);
+  --relative-51px: calc((51 / var(--em-size)) * 1em);
+  --relative-52px: calc((52 / var(--em-size)) * 1em);
+  --relative-53px: calc((53 / var(--em-size)) * 1em);
+  --relative-54px: calc((54 / var(--em-size)) * 1em);
+  --relative-55px: calc((55 / var(--em-size)) * 1em);
+  --relative-56px: calc((56 / var(--em-size)) * 1em);
+  --relative-57px: calc((57 / var(--em-size)) * 1em);
+  --relative-58px: calc((58 / var(--em-size)) * 1em);
+  --relative-59px: calc((59 / var(--em-size)) * 1em);
+  --relative-60px: calc((60 / var(--em-size)) * 1em);
+  --relative-61px: calc((61 / var(--em-size)) * 1em);
+  --relative-62px: calc((62 / var(--em-size)) * 1em);
+  --relative-63px: calc((63 / var(--em-size)) * 1em);
+  --relative-64px: calc((64 / var(--em-size)) * 1em);
 
   /* Columns */
   --one-wide: calc(1 / var(--column-count) * 100%);

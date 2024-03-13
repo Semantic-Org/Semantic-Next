@@ -15,7 +15,7 @@
 
   /* button same height as input globally */
   --button-vertical-padding: var(--input-vertical-padding);
-  --button-horizontal-padding: 1.5em;
+  --button-horizontal-padding: 1.35em;
 
   /* Text */
   --button-text-transform: none;

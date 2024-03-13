@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, keys, isBoolean, isArray } from '@semantic-ui/utils';
+import { each, isFunction, isNumber, isString, isPlainObject, keys, isEqual, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './helpers/scope-styles.js';
@@ -123,62 +123,64 @@ class WebComponentBase extends LitElement {
       properties.class = {
         type: String,
       };
-      each(componentSpec.settings, (valueArrays, setting) => {
-        properties[setting] = WebComponentBase.mapSettingToProperty(setting);
+      each(componentSpec.attributes, (attributeValues, attribute) => {
+        // this is an easy way to determine if this is a boolean or string attribute
+        const sampleValue = attributeValues[0];
+        properties[attribute] = WebComponentBase.getPropertySettings(sampleValue);
       });
-      each(componentSpec.reverseSettings, (valueArray, reverseSetting) => {
-        properties[reverseSetting] = { type: String, reflect: false };
+      each(componentSpec.reverseAttributes, (attributeValues, attribute) => {
+        properties[attribute] = { type: String, reflect: false };
       });
     }
     if (settings) {
-      each(settings, (setting, name) => {
-        // expert mode
-        if (setting?.type) {
+      each(settings, (defaultValue, name) => {
+        // expert mode (this is a settings object not a default value)
+        if (defaultValue?.type) {
           properties[name] = settings;
         }
         else {
-          properties[name] = WebComponentBase.mapSettingToProperty(setting);
+          properties[name] = WebComponentBase.getPropertySettings(defaultValue);
         }
       });
     }
     return properties;
   }
 
-  static mapSettingToProperty(setting) {
+  static getPropertySettings(sampleValue) {
     let property;
-    if (isString(setting)) {
+    if (isString(sampleValue)) {
       property = {
         type: String,
         attribute: true,
       };
     }
-    else if (isNumber(setting)) {
+    else if (isNumber(sampleValue)) {
       property = {
         type: Number,
         attribute: true,
       };
     }
-    else if (isBoolean(setting)) {
+    else if (isBoolean(sampleValue)) {
       property = {
         type: Boolean,
         attribute: true,
       };
     }
-    else if (isArray(setting)) {
+    else if (isArray(sampleValue)) {
       property = {
         type: Array,
         attribute: true,
         reflect: false,
       };
     }
-    else if (isPlainObject(setting)) {
+    else if (isPlainObject(sampleValue)) {
       property = {
         type: Object,
         attribute: true,
         reflect: false,
       };
     }
-    else if (isFunction(setting)) {
+    else if (isFunction(sampleValue)) {
       property = {
         type: Function,
         attribute: false,

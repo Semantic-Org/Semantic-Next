@@ -1,0 +1,39 @@
+:root {
+
+    /* Transparent */
+  --button-transparent-background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.08));
+  --button-transparent-background-color: rgba(0, 0, 0, 0.0);
+  --button-transparent-text-color: var(--button-text-color);
+  --button-transparent-box-shadow: var(--button-box-shadow);
+
+  --button-transparent-hover-background-image: var(--button-hover-background-image);
+  --button-transparent-hover-background-color: var(--subtle-transparent-black);
+  --button-transparent-hover-text-color: var(--button-hover-color);
+  --button-transparent-hover-box-shadow: var(--button-hover-box-shadow);
+
+  --button-transparent-pressed-background-image: var(--button-hover-background-image);
+  --button-transparent-pressed-background-color: var(--subtle-transparent-black);
+  --button-transparent-pressed-text-color: var(--button-pressed-color);
+  --button-transparent-pressed-box-shadow: var(--button-pressed-box-shadow);
+
+  --button-transparent-active-background-image: var(--button-background-image);
+  --button-transparent-active-background-color: rgba(0, 0, 0, 0.02);
+  --button-transparent-active-text-color: var(--button-green);
+  --button-transparent-active-box-shadow: var(--button-box-shadow);
+
+  /* Transparent Inverted */
+  --button-transparent-inverted-background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.08));
+  --button-transparent-inverted-background-color: var(--subtle-transparent-white);
+  --button-transparent-inverted-text-color: var(--inverted-unselected-text-color);
+  --button-transparent-inverted-box-shadow: var(--button-box-shadow);
+
+  --button-transparent-inverted-hover-background-image: var(--button-hover-background-image);
+  --button-transparent-inverted-hover-background-color: var(--transparent-white);
+  --button-transparent-inverted-hover-text-color: var(--inverted-light-text-color);
+  --button-transparent-inverted-hover-box-shadow: var(--button-hover-box-shadow);
+
+  --button-transparent-inverted-active-background-image: var(--button-background-image);
+  --button-transparent-inverted-active-background-color: var(--subtle-transparent-white);
+  --button-transparent-inverted-active-text-color: #FFFFFF;
+  --button-transparent-inverted-active-box-shadow: var(--button-box-shadow);
+}

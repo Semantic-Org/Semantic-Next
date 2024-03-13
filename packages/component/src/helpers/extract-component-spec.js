@@ -1,4 +1,4 @@
-import { reverseKeys, flatten, each } from '@semantic-ui/utils';
+import { reverseKeys, flatten, isString, each } from '@semantic-ui/utils';
 
 /*
   This takes quite a large spec file and reduces it to
@@ -10,32 +10,48 @@ import { reverseKeys, flatten, each } from '@semantic-ui/utils';
 
 export const extractComponentSpec = (spec) => {
 
-  const componentSpec = {
+  let componentSpec = {
+    contentAttributes: [],
     content: [],
     variations: [],
     types: [],
     states: [],
-    settings: {},
-    reverseSettings: {},
+    settings: [],
+    attributes: {},
+    reverseAttributes: {},
     attributeClasses: [],
+    defaultSettings: {},
   };
 
-  const getAttributeFromPart = (part) => {
-    return part.attribute || part.name.toLowerCase();
+  const getAttributeName = (part) => {
+    if(part.attribute) {
+      return part.attribute;
+    }
+    if(isString(part.name)) {
+      return part.name.toLowerCase();
+    }
   };
 
   const getSettingsFromSpecPart = (specPart) => {
     each(spec[specPart], (spec) => {
-      const settingName = getAttributeFromPart(spec);
-      if(!settingName) {
+
+      const attributeName = getAttributeName(spec);
+
+      if(!attributeName) {
         return;
       }
-      componentSpec[specPart].push(settingName);
 
+      // add to list of this spec part attributes
+      componentSpec[specPart].push(attributeName);
+
+      // allow spec to specify that the group class name should be included
+      // i.e if enabled for 'attached' will output <class="attached left-attached">
       if(spec.includeAttributeClass) {
-        componentSpec.attributeClasses.push(settingName);
+        componentSpec.attributeClasses.push(attributeName);
       }
 
+      // record allowed values for attribute if this part uses attributes
+      // functions and non-serializable content cannot use attributes
       let optionValues;
       if(spec.options) {
         optionValues = spec.options.map(option => {
@@ -50,7 +66,17 @@ export const extractComponentSpec = (spec) => {
         // boolean
         optionValues = [true, false];
       }
-      componentSpec.settings[settingName] = optionValues;
+      componentSpec.attributes[attributeName] = optionValues;
+
+      // we handle slots in a special way
+      if(specPart == 'content' && attributeName) {
+        componentSpec.contentAttributes.push(attributeName);
+      }
+
+      // we handle settings in a special way
+      if(specPart == 'settings' && spec.defaultValue !== undefined) {
+        componentSpec.defaultSettings[attributeName] = spec.defaultValue;
+      }
     });
   };
 
@@ -58,12 +84,13 @@ export const extractComponentSpec = (spec) => {
   getSettingsFromSpecPart('types');
   getSettingsFromSpecPart('states');
   getSettingsFromSpecPart('variations');
-
+  getSettingsFromSpecPart('settings');
 
   // avoid having to reverse array at runtime
-  let reverseSettings = reverseKeys(componentSpec.settings);
-  delete reverseSettings.true;
-  delete reverseSettings.false;
-  componentSpec.reverseSettings = reverseSettings;
+  let reverseAttributes = reverseKeys(componentSpec.attributes);
+  delete reverseAttributes.true;
+  delete reverseAttributes.false;
+  componentSpec.reverseAttributes = reverseAttributes;
+
   return componentSpec;
 };

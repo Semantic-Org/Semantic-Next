@@ -2,7 +2,7 @@
   {{#each item in getMenu}}
     <a class="{{classes getItemStates item}}item" href={{getLink item}}>
       {{#if item.icon}}
-        <ui-icon icon={{item.icon}} exportparts="icon:title-icon" />
+        <ui-icon icon={{item.icon}} exportparts="icon:item-icon" />
       {{else if item.image}}
         <img src="{{item.image}}">
       {{/if}}

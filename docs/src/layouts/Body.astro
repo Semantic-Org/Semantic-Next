@@ -27,14 +27,18 @@ import './Body.css';
     <ViewTransitions />
   </head>
   <body>
-    <script is:inline>
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const currentTheme = localStorage.getItem('theme')
-        ? localStorage.getItem('theme') :
-          systemPrefersDark
-          ? 'dark'
-          : 'light'
-      ;
+    <script is:inline data-astro-rerun>
+      if(!window.systemPrefersDark) {
+        window.systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      if(!window.currentTheme) {
+        window.currentTheme = localStorage.getItem('theme')
+          ? localStorage.getItem('theme') :
+            systemPrefersDark
+            ? 'dark'
+            : 'light'
+        ;
+      }
       document.querySelectorAll('body')[0].classList.add(currentTheme);
     </script>
     <slot />

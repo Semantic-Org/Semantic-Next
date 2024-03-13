@@ -19,7 +19,7 @@ export const ButtonSpec = {
       looseCoupling: true,
       attribute: 'text',
       couplesWith: ['icon'],
-      slot: 'icon',
+      slot: 'default',
       description: 'A button can can contain text content',
     },
     {
@@ -104,13 +104,6 @@ export const ButtonSpec = {
       name: 'Toggle',
       description: 'A button can be formatted to emphasize its active state',
       usageLevel: 3,
-      options: [
-        {
-          name: 'Toggle',
-          value: true,
-          description: 'A button can be formatted to animate hidden content horizontally'
-        },
-      ],
     },
 
     {
@@ -163,12 +156,20 @@ export const ButtonSpec = {
     {
       name: 'Disabled',
       attribute: 'disabled',
+      includeAttributeClass: true,
       description: 'A button can disable interactions',
-    },
-    {
-      name: 'Clickable Disabled',
-      attribute: 'clickable-disabled',
-      description: 'A button can allow interactions but warn that it is interactable.',
+      options: [
+        {
+          name: 'Disabled',
+          value: 'disabled',
+          description: 'A button can disable interactions',
+        },
+        {
+          name: 'Clickable Disabled',
+          value: 'clickable-disabled',
+          description: 'A button can allow interactions but warn that it is interactable.',
+        },
+      ],
     },
     {
       name: 'Loading',
@@ -424,16 +425,41 @@ export const ButtonSpec = {
         {
           name: 'Warning',
           value: ['warning'],
-          description: 'A button can hint at it may be dangerous.'
+          description: 'may be dangerous.'
         },
         {
-          name: 'Subtle warning',
+          name: 'Subtle Warning',
           value: 'subtle-warning',
           description: 'A button can subtly hint it may be dangerous'
         },
       ]
     },
 
+    {
+      name: 'Info',
+      attribute: 'info',
+      usageLevel: 2,
+      description: 'A button can be associated with a potentially dangerous action',
+      options: [
+        {
+          name: 'Info',
+          value: ['info'],
+          description: 'may be dangerous.'
+        },
+        {
+          name: 'Subtle Info',
+          value: 'subtle-info',
+          description: 'A button can subtly hint it may be dangerous'
+        },
+      ]
+    },
+
+    {
+      name: 'Transparent',
+      attribute: 'transparent',
+      usageLevel: 2,
+      description: 'A button can apper transparent',
+    },
 
     {
       name: 'Floated',
@@ -518,15 +544,17 @@ export const ButtonSpec = {
     },
   ],
 
-  settings: {
+  settings: [
 
-    iconAfter: {
+    {
+      name: 'Icon After',
       type: Boolean,
-      default: false,
+      attribute: 'icon-after',
+      defaultValue: false,
       description: 'Enable to position the icon after the text',
     },
 
-  },
+  ],
 
   /*******************************
               Plural
@@ -553,17 +581,15 @@ export const ButtonSpec = {
       attribute: 'vertical',
       description: 'A button group can be formatted to show buttons in a vertical stack',
       usageLevel: 3,
-      options: [
-        {
-          name: 'Vertical',
-          value: true,
-          description: 'A button group can be formatted to show buttons in a vertical stack'
-        },
-      ],
     }
   ],
 
   pluralOnlyVariations: [
+    {
+      name: 'Separate',
+      attribute: 'separate',
+      description: 'A button group can appear with their buttons separated',
+    },
     {
       name: 'Equal Width',
       attribute: 'equal-width',

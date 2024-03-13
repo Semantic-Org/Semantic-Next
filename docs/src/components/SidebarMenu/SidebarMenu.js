@@ -78,14 +78,17 @@ const createInstance = function ({ tpl, settings }) {
       }
     },
     onPageChange() {
+      console.log('after', window.location.pathname);
       tpl.url.set(window.location.pathname);
     }
   };
 };
 
-const onCreated = function ({ tpl }) {};
+const onCreated = function ({ tpl }) {
+};
 
-const onDestroyed = function ({ tpl }) {};
+const onDestroyed = function ({ tpl }) {
+};
 
 const onRendered = function ({ $, tpl, isClient }) {
   if(isClient) {

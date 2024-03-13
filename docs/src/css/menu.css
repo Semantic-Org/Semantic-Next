@@ -50,9 +50,9 @@ ui-menu[dashboard] .item {
 }
 ui-menu[dashboard] .active.item {
   cursor: default;
-  background-color: #CEE2E6;
-  color: #0A3F4F;
-  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2) inset;
+  background-color: #d0ebf3;
+  color: #013a4f;
+  box-shadow: 0px 1px 6px rgb(85 147 167 / 77%) inset;
 }
 
 ui-menu[dashboard] a.item {

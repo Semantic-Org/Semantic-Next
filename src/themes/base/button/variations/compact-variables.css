@@ -1,5 +1,10 @@
 ui-button {
-  --compact-reduction-factor: 0.75;
-  --compact-vertical-padding: calc(var(--button-vertical-padding) * var(--button-compact-reduction-factor));
-  --compact-horizontal-padding: calc(var(--button-horizontal-padding) * var(--button-compact-reduction-factor));
+  --button-compact-vertical-padding: var(--6px);
+  --button-compact-horizontal-padding: var(--8px);
+  --button-compact-icon-padding: var(--button-compact-vertical-padding);
+
+  --button-very-compact-reduction-factor: 0.4;
+  --button-very-compact-vertical-padding: var(--5px);
+  --button-very-compact-horizontal-padding: var(--5px);
+  --button-very-compact-icon-padding: var(--button-very-compact-vertical-padding);
 }

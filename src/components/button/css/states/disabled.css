@@ -11,3 +11,8 @@
   background-image: var(--disabled-background-image) !important;
   box-shadow: var(--disabled-background-image) !important;
 }
+
+.clickable-disabled.button {
+  pointer-events: auto !important;
+  cursor: not-allowed;
+}

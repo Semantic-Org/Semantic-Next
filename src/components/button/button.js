@@ -4,13 +4,13 @@ import ButtonCSS from './button.css?raw';
 import ButtonTemplate from './button.html?raw';
 import { ButtonSpec } from './spec/spec.js';
 
-const createInstance = ({tpl, content, data, $}) => ({
+const createInstance = ({tpl, content, settings, $}) => ({
   
   isIconBefore() {
-    return data.icon && !data.iconAfter
+    return settings.icon && !settings.iconAfter;
   },
   isIconAfter() {
-    return data.icon && data.iconAfter;
+    return settings.icon && settings.iconAfter;
   }
 
 });
@@ -21,8 +21,6 @@ const onCreated = ({tpl}) => {
 
 const events = {
   'click .button'({event, tpl, $}) {
-
-
   }
 };
 

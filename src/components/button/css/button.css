@@ -12,6 +12,7 @@
 @import url('./types/icon.css') layer(component);
 @import url('./types/labeled.css') layer(component);
 @import url('./types/labeled-icon.css') layer(component);
+@import url('./types/transparent.css') layer(component);
 @import url('./types/toggle.css') layer(component);
 
 /* States */
@@ -33,6 +34,7 @@
 @import url('./variations/negative.css') layer(component);
 @import url('./variations/positive.css') layer(component);
 @import url('./variations/warning.css') layer(component);
+@import url('./variations/info.css') layer(component);
 @import url('./variations/sizing.css') layer(component);
 @import url('./variations/social.css') layer(component);
 @import url('./variations/vertical.css') layer(component);

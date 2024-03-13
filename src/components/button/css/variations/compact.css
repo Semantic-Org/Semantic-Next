@@ -4,13 +4,18 @@
 
 .compact.buttons .button,
 .compact.button {
-  padding: var(--compact-vertical-padding) var(--compact-horizontal-padding) ( var(--compact-vertical-padding) + var(--shadow-offset) );
+  padding: var(--button-compact-vertical-padding) var(--button-compact-horizontal-padding);
 }
 .compact.icon.buttons .button,
 .compact.icon.button {
-  padding: var(--compact-vertical-padding) var(--compact-vertical-padding) ( var(--compact-vertical-padding) + var(--shadow-offset) );
+  padding: var(--button-compact-icon-padding);
 }
-.compact.labeled.icon.buttons .button,
-.compact.labeled.icon.button {
-  padding: var(--compact-vertical-padding) (var(--compact-horizontal-padding) + var(--labeled-icon-width)) ( var(--compact-vertical-padding) + var(--shadow-offset) );
+
+.very-compact.buttons .button,
+.very-compact.button {
+  padding: var(--button-very-compact-vertical-padding) var(--button-very-compact-horizontal-padding);
+}
+.very-compact.icon.buttons .button,
+.very-compact.icon.button {
+  padding: var(--button-very-compact-icon-padding);
 }

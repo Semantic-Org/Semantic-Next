@@ -30,26 +30,34 @@ const tokenizeSpaces = (string) => {
   return string;
 };
 
-export const adjustSettingFromAttribute = (el, attribute, attributeValue, spec) => {
-
+export const adjustSettingFromAttribute = (el, attribute, attributeValue, componentSpec) => {
   const getSettingValue = (setting, attributeValue) => {
-    const value = tokenizeSpaces(attributeValue);
-    const reverseValue = reverseDashes(value);
-    const settings = get(spec.settings, setting);
-    // regular match
-    if(inArray(value, settings)) {
+    const value = tokenizeSpaces(attributeValue); // right arrow -> right-arrow
+    const reverseValue = reverseDashes(value); // arrow-right -> right-arrow
+    const attributes = get(componentSpec.attributes, setting);
+
+    // this is a type/state/variation in standard format 'emphasis', 'size'
+    if(inArray(value, attributes)) {
       return value;
     }
-    if(inArray(reverseValue, settings)) {
+
+    // this is a reverse lookup of a type/state/variation 'primary' => 'emphasis'
+    if(inArray(reverseValue, attributes)) {
       return reverseValue;
     }
+
+    // this is a setting or a piece of slotted content
+    if(inArray(setting, componentSpec.content) || inArray(setting, componentSpec.setting)) {
+      return value;
+    }
+
   };
 
   const lookupSettingFromValue = (attributeValue) => {
     const value = tokenizeSpaces(attributeValue);
     const reverseValue = reverseDashes(value);
-    const setting = get(spec.reverseSettings, value);
-    return setting || get(spec.reverseSettings, reverseValue);
+    const setting = get(componentSpec.reverseAttributes, value);
+    return setting || get(componentSpec.reverseAttributes, reverseValue);
   };
 
   const setSetting = (setting, attributeValue) => {
@@ -65,11 +73,11 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, spec) 
 
   const getSettingsFromClass = (classNames) => {
     each(classNames.split(' '), (className) => {
-      adjustSettingFromAttribute(className, true);
+      adjustSettingFromAttribute(el, className, true, componentSpec);
     });
   };
 
-  if (spec) {
+  if (componentSpec) {
 
     // syntax <ui-button class="large primary"></ui-button>
     // we want to check attribute for each class
@@ -79,7 +87,7 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, spec) 
 
     // syntax <ui-button size="large">
     // we can check if this setting is defined
-    else if (get(spec.settings, attribute)) {
+    else if (get(componentSpec.attributes, attribute)) {
       if(attributeValue === '') {
         // boolean attribute
         attributeValue = true;
@@ -91,7 +99,7 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, spec) 
     }
 
     // syntax <ui-button primary large>
-    // we need to lookup the setting using the reverseSetting lookup table
+    // we need to lookup the setting using the reverseAttributes lookup table
     else if(attributeValue !== undefined) {
       const setting = lookupSettingFromValue(attribute);
 

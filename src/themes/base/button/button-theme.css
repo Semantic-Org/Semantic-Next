@@ -18,6 +18,7 @@
 @import url('./types/labeled-icon-variables.css') layer(baseTheme);
 @import url('./types/toggle-variables.css') layer(baseTheme);
 @import url('./types/animated-variables.css') layer(baseTheme);
+@import url('./types/transparent-variables.css') layer(baseTheme);
 
 /* States */
 @import url('./states/hover-variables.css') layer(baseTheme);
@@ -37,6 +38,7 @@
 @import url('./variations/fluid-variables.css') layer(baseTheme);
 @import url('./variations/negative-variables.css') layer(baseTheme);
 @import url('./variations/warning-variables.css') layer(baseTheme);
+@import url('./variations/info-variables.css') layer(baseTheme);
 @import url('./variations/positive-variables.css') layer(baseTheme);
 @import url('./variations/sizing-variables.css') layer(baseTheme);
 @import url('./variations/social-variables.css') layer(baseTheme);

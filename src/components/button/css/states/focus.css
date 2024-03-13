@@ -2,6 +2,7 @@
       Focus
 ---------------*/
 
+.button.focus,
 .button:focus {
   background-color: var(--button-focus-background-color);
   background-image: var(--button-focus-background-image) !important;
@@ -9,6 +10,7 @@
   box-shadow: var(--button-focus-box-shadow) !important;
 }
 
+.button.focus .icon,
 .button:focus .icon {
   opacity: var(--button-focus-icon-opacity);
 }
