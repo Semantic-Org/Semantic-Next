@@ -1,32 +1,31 @@
 Button
-+ Transparent vars
-+ Attached pressed state
-+ Disabled
-+ Button focus on click
-+ Active state
-- Basic -> Outline
-- automatic icon only and content
-- link button
-- ghost button
-- href / extending <a> tag??
-- oklch -> colormix() (colored button, global)
+- Figure out attr issue with compact
+- Add basic
+- Rename existing basic -> Outline
+- Add link button
+- Add ghost button
 
-lifecycle onCreated with astro
+Buttons
+- Figure out plural format
 
-Up next
-+ Review 3 syntax function
-+ Complete sidebar and topbar pulling dynamically docs
-+ Figure out markdown rendering for definition page
-+ Finish baseline nav menu
-- Create accordion component
-- Figure out animation engine
+- Documentation
+-- Determine the sitemap of component docs
+-- Write out initial draft of component documentation
+--
 
-Component Settings
-+ Settings or spec
-+ Settings specify attribute, allowedValues, defaultValue
+
+Button Later
+- Determine link behavior, extending a tag?
+- Review colormixing - oklch -> colormix() ?
+- Icon only styling (auto detect no text)
+
+Component
+- Pass through content to content obj
+- Review separating data from settings esp if content
+- review component lifecycle events esp with SSR and hydration
 
 Docs
-- Dupe lit in astro build
+- Dupe lit in astro build?
 
 Templating Syntax
 - Add syntax for embedding web components / part if necessary
@@ -34,11 +33,7 @@ Templating Syntax
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
 
-Rendering
-- Templates -- consider global cache for same data && template
-
 Components
-+ Determine spec file build step + use in component
 - Determine build step for components from configuration json. Small/medium/large
 - Build out button
 
@@ -52,6 +47,13 @@ Testing
 
 Completed
 =====================
+
+completed mar 8/15
++ Docs - Add theme switcher, navigation and routing
++ Docs - Figure out markdown rendering
++ Figure out relationship between settings, variations, types, states in spec format
++ Complete most variations and types for button
++ Finish spec format interpretation
 
 week of mar 1
 + continue scaffolding website

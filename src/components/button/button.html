@@ -1,19 +1,25 @@
-<div class="{{ui}}{{getClasses}} button" tabindex="0">
-  {{#if animated}}
-    <span class="hidden content">
-      {{>slot hidden}}
+{{#if not plural}}
+  <div class="{{ui}}{{getClasses}} button" tabindex="0">
+    {{#if animated}}
+      <span class="hidden content">
+        {{>slot hidden}}
+      </span>
+      <span class="visible content">
+        {{>slot visible}}
+      </span>
+    {{/if}}
+    {{#if isIconBefore}}
+      <ui-icon icon={{icon}} class="icon"></ui-icon>
+    {{/if}}
+    <span class="text">
+      {{>slot}}
     </span>
-    <span class="visible content">
-      {{>slot visible}}
-    </span>
-  {{/if}}
-  {{#if isIconBefore}}
-    <ui-icon icon={{icon}} class="icon"></ui-icon>
-  {{/if}}
-  <span class="text">
+    {{#if isIconAfter}}
+      <ui-icon icon={{icon}} class="icon"></ui-icon>
+    {{/if}}
+  </div>
+{{else}}
+  <div class="buttons">
     {{>slot}}
-  </span>
-  {{#if isIconAfter}}
-    <ui-icon icon={{icon}} class="icon"></ui-icon>
-  {{/if}}
-</div>
+  </div>
+{{/if}}

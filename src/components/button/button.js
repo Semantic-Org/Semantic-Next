@@ -59,4 +59,16 @@ const UIButton = createComponent({
   events,
 });
 
-export { UIButton };
+const UIButtons = createComponent({
+  tagName: 'ui-buttons',
+  spec: ButtonSpec,
+  template: ButtonTemplate,
+  delegateFocus: true,
+  plural: true,
+  css: ButtonCSS,
+  createInstance,
+  onCreated,
+  events,
+});
+
+export { UIButton, UIButtons };
