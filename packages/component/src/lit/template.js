@@ -241,7 +241,6 @@ export const LitTemplate = class LitTemplate {
           if (!this.isNodeInTemplate(event.target)) {
             return;
           }
-          // this is
           if (
             (eventName === 'mouseover' || eventName === 'mouseout') &&
             event.relatedTarget &&
@@ -249,7 +248,8 @@ export const LitTemplate = class LitTemplate {
           ) {
             return;
           }
-          const boundEvent = eventHandler.bind(event.target);
+          const matchingElement = $(event.target).closest(selector).get(0);
+          const boundEvent = eventHandler.bind(matchingElement);
           template.call(boundEvent, {
             additionalData: { event: event, data: event.target.dataset },
           });

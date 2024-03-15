@@ -31,17 +31,17 @@ const onCreated = ({tpl}) => {
 
 const events = {
   'click .button'({event, tpl, $}) {
-    let $button = $(event.target).closest('.button');
+    let $button = $(this);
     $button.blur();
   },
   'keydown .button'({event, tpl, $}) {
-    let $button = $(event.target).closest('.button');
+    let $button = $(this);
     if (event.key === 'Enter') {
       $button.addClass('pressed');
     }
   },
   'keyup .button'({event, tpl, $}) {
-    let $button = $(event.target).closest('.button');
+    let $button = $(this);
     if (event.key === 'Enter') {
       $button.removeClass('pressed');
     }

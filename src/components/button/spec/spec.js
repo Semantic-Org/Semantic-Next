@@ -327,7 +327,7 @@ export const ButtonSpec = {
       options: [
         {
           name: 'Compact',
-          value: 'compact',
+          value: true,
           description: 'A button can reduce its padding size slightly.'
         },
         {

@@ -7,6 +7,7 @@ Button
 
 Buttons
 - Figure out plural format
+- Figure out content
 
 - Documentation
 -- Determine the sitemap of component docs

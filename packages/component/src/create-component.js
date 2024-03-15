@@ -15,6 +15,7 @@ export const createComponent = ({
   template = '',
   css = false,
   spec = false,
+  plural = false,
   tagName,
   delegateFocus = false,
   templateName = kebabToCamel(tagName),
@@ -154,6 +155,7 @@ export const createComponent = ({
         let data = {
           ...this.getSettings({componentSpec, properties: webComponent.properties }),
           ...this.getContent({componentSpec}),
+          plural
         };
         if (spec) {
           data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
