@@ -24,7 +24,7 @@
   --button-black: var(--black);
 
   /* Hover */
-  --button-colored-hover-lightness: -0.05;
+  --button-colored-hover-lightness: 0.05;
   --button-colored-hover-hue: 2;
 
   --button-red-hover: oklch(from var(--button-red) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
@@ -42,7 +42,7 @@
   --button-black-hover: oklch(from var(--button-black) calc(l - var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
 
   /* Focus */
-  --button-colored-focus-lightness: -0.08;
+  --button-colored-focus-lightness: 0.08;
   --button-colored-focus-hue: 2;
 
   --button-red-focus: oklch(from var(--button-red) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
@@ -60,7 +60,7 @@
   --button-black-focus: oklch(from var(--button-black) calc(l - var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
 
   /* Pressed Down */
-  --button-colored-pressed-lightness: -0.12;
+  --button-colored-pressed-lightness: -0.02;
   --button-colored-pressed-hue: 2;
 
   --button-red-pressed: oklch(from var(--button-red) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));

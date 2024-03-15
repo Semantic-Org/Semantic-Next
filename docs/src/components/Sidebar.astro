@@ -11,8 +11,7 @@ const menu = await getNavMenu();
 		<input type="text" placeholder="Search...">
 		<i class="search icon"></i>
 	</navSearch>
-
-	<SidebarMenu client:load
+	<SidebarMenu
     menu={menu}
     activeURL={Astro.url.pathname}
   />

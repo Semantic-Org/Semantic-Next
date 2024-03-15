@@ -3,57 +3,55 @@ title: 'Button'
 description: 'A button indicates a possible user action'
 tags: ['web-component']
 ---
-
-
-## Types
+import { UIButton, UIButtons } from '@semantic-ui/core';
 
 ### Plural
-<ui-buttons>
-  <ui-button red>Red</ui-button>
-  <ui-button blue>Blue</ui-button>
-</ui-buttons>
+<UIButtons client:load large red>
+  <UIButton client:load>Red</UIButton>
+  <UIButton client:load blue>Blue</UIButton>
+</UIButtons>
 
 ### Standard
 
-<ui-button>Button</ui-button>
+<UIButton client:load>Button</UIButton>
 
 ### Icon
 
-<ui-button icon="play">Play</ui-button>
-<ui-button icon="pause">Pause</ui-button>
+<UIButton client:load icon="play">Play</UIButton>
+<UIButton client:load icon="pause">Pause</UIButton>
 
-<ui-button icon="play"></ui-button>
-<ui-button icon="pause"></ui-button>
+<UIButton client:load icon="play"></UIButton>
+<UIButton client:load icon="pause"></UIButton>
 
 ### Emphasis
 
-<ui-button primary>Okay</ui-button>
-<ui-button>Discard</ui-button>
+<UIButton client:load primary>Okay</UIButton>
+<UIButton client:load>Discard</UIButton>
 
 <br/><br/>
-<ui-button secondary>Okay</ui-button>
-<ui-button>Cancel</ui-button>
+<UIButton client:load secondary>Okay</UIButton>
+<UIButton client:load>Cancel</UIButton>
 
 
 ### Positive
 
-<ui-button positive>Save</ui-button>
-<ui-button subtle-positive icon="check">Complete</ui-button>
+<UIButton client:load positive>Save</UIButton>
+<UIButton client:load subtle-positive icon="check">Complete</UIButton>
 
 ### Warning
 
-<ui-button warning>Rename</ui-button>
-<ui-button subtle-warning icon="edit">Modify</ui-button>
+<UIButton client:load warning>Rename</UIButton>
+<UIButton client:load subtle-warning icon="edit">Modify</UIButton>
 
 ### Negative
 
-<ui-button negative>Delete</ui-button>
-<ui-button subtle-negative icon="alert circle">Delete</ui-button>
+<UIButton client:load negative>Delete</UIButton>
+<UIButton client:load subtle-negative icon="alert circle">Delete</UIButton>
 
 ### Info
 
-<ui-button info>Learn More</ui-button>
-<ui-button subtle-info icon="info">More Info</ui-button>
+<UIButton client:load info>Learn More</UIButton>
+<UIButton client:load subtle-info icon="info">More Info</UIButton>
 
 ### Transparent
 
@@ -61,134 +59,134 @@ tags: ['web-component']
   <div style="
     background-image: linear-gradient(45deg, #aaced9, #FFFFFF);
     padding:2em;">
-    <ui-button transparent>Transparent</ui-button>
+    <UIButton client:load transparent>Transparent</UIButton>
   </div>
   <div style="
     background-image: linear-gradient(45deg, #232323, #0A0A0A);
     padding:2em;">
-    <ui-button inverted transparent>Transparent</ui-button>
+    <UIButton client:load inverted transparent>Transparent</UIButton>
   </div>
 </div>
 
 ### Toggle
-<ui-button toggle>Toggle</ui-button>
+<UIButton client:load toggle>Toggle</UIButton>
 
 
 ### Animated
-<ui-button animated>
+<UIButton client:load animated>
   <span slot="visible">
     <ui-icon icon="shopping cart"></ui-icon>
   </span>
   <span slot="hidden">Shop</span>
-</ui-button>
+</UIButton>
 
-<ui-button vertical-animated>
+<UIButton client:load vertical-animated>
   <span slot="visible">
     <ui-icon icon="shopping cart"></ui-icon>
   </span>
   <span slot="hidden">Shop</span>
-</ui-button>
+</UIButton>
 
-<ui-button fade-animated>
+<UIButton client:load fade-animated>
   <span slot="visible">
     <ui-icon icon="shopping cart"></ui-icon>
   </span>
   <span slot="hidden">Shop</span>
-</ui-button>
+</UIButton>
 
 ### Basic
-<ui-button basic icon="user">Add Friend</ui-button>
+<UIButton client:load basic icon="user">Add Friend</UIButton>
 
 ### Colored
-<ui-button red>Red</ui-button>
-<ui-button orange>Orange</ui-button>
-<ui-button yellow>Yellow</ui-button>
-<ui-button olive>Olive</ui-button>
-<ui-button green>Green</ui-button>
-<ui-button teal>Teal</ui-button>
+<UIButton client:load red>Red</UIButton>
+<UIButton client:load orange>Orange</UIButton>
+<UIButton client:load yellow>Yellow</UIButton>
+<UIButton client:load olive>Olive</UIButton>
+<UIButton client:load green>Green</UIButton>
+<UIButton client:load teal>Teal</UIButton>
 <br/><br/>
-<ui-button blue>Blue</ui-button>
-<ui-button violet>Violet</ui-button>
-<ui-button purple>Purple</ui-button>
-<ui-button pink>Pink</ui-button>
-<ui-button brown>Brown</ui-button>
-<ui-button grey>Grey</ui-button>
-<ui-button black>Black</ui-button>
+<UIButton client:load blue>Blue</UIButton>
+<UIButton client:load violet>Violet</UIButton>
+<UIButton client:load purple>Purple</UIButton>
+<UIButton client:load pink>Pink</UIButton>
+<UIButton client:load brown>Brown</UIButton>
+<UIButton client:load grey>Grey</UIButton>
+<UIButton client:load black>Black</UIButton>
 
 ### Social
-<ui-button icon="facebook" facebook>Facebook</ui-button>
-<ui-button icon="twitter" twitter>Twitter</ui-button>
-<ui-button icon="linkedin" linkedin>Linkedin</ui-button>
-<ui-button icon="instagram" instagram>Instagram</ui-button>
-<ui-button icon="youtube" youtube>Youtube</ui-button>
+<UIButton client:load icon="facebook" facebook>Facebook</UIButton>
+<UIButton client:load icon="twitter" twitter>Twitter</UIButton>
+<UIButton client:load icon="linkedin" linkedin>Linkedin</UIButton>
+<UIButton client:load icon="instagram" instagram>Instagram</UIButton>
+<UIButton client:load icon="youtube" youtube>Youtube</UIButton>
 
 ## States
 
 ### Hover
-<ui-button>Normal</ui-button>
-<ui-button hover>Hover</ui-button>
+<UIButton client:load>Normal</UIButton>
+<UIButton client:load hover>Hover</UIButton>
 
 ### Focus
-<ui-button>Normal</ui-button>
-<ui-button focus>Focus</ui-button>
+<UIButton client:load>Normal</UIButton>
+<UIButton client:load focus>Focus</UIButton>
 
 ### Active
-<ui-button>Normal</ui-button>
-<ui-button active>Active</ui-button>
+<UIButton client:load>Normal</UIButton>
+<UIButton client:load active>Active</UIButton>
 
 ### Disabled
-<ui-button disabled>Disabled</ui-button>
-<ui-button clickable-disabled>Clickable Disabled</ui-button>
+<UIButton client:load disabled>Disabled</UIButton>
+<UIButton client:load clickable-disabled>Clickable Disabled</UIButton>
 
 ### Loading
-<ui-button loading>Loading</ui-button>
-<ui-button loading icon="save">Save</ui-button>
-<ui-button primary loading>Loading</ui-button>
-<ui-button primary loading icon="save">Save</ui-button>
+<UIButton client:load loading>Loading</UIButton>
+<UIButton client:load loading icon="save">Save</UIButton>
+<UIButton client:load primary loading>Loading</UIButton>
+<UIButton client:load primary loading icon="save">Save</UIButton>
 
 ## Variations
 
 ### Sizing
 
-<ui-button mini>Mini</ui-button>
-<ui-button tiny>Tiny</ui-button>
-<ui-button small>Small</ui-button>
-<ui-button>Medium</ui-button>
-<ui-button large>Large</ui-button>
-<ui-button big>Big</ui-button>
-<ui-button huge>Huge</ui-button>
-<ui-button massive>Massive</ui-button>
+<UIButton client:load mini>Mini</UIButton>
+<UIButton client:load tiny>Tiny</UIButton>
+<UIButton client:load small>Small</UIButton>
+<UIButton client:load>Medium</UIButton>
+<UIButton client:load large>Large</UIButton>
+<UIButton client:load big>Big</UIButton>
+<UIButton client:load huge>Huge</UIButton>
+<UIButton client:load massive>Massive</UIButton>
 
 ### Floated
-<ui-button right-floated>Right Floated</ui-button>
-<ui-button left-floated>Left Floated</ui-button>
+<UIButton client:load right-floated>Right Floated</UIButton>
+<UIButton client:load left-floated>Left Floated</UIButton>
 <br/> <br />
 
 ### Fluid
-<ui-button fluid>Fluid</ui-button>
+<UIButton client:load fluid>Fluid</UIButton>
 
 ### Inverted
-<ui-button inverted>Inverted</ui-button>
+<UIButton client:load inverted>Inverted</UIButton>
 
 ### Circular
-<ui-button circular icon="plus"></ui-button>
+<UIButton client:load circular icon="plus"></UIButton>
 
 ### Top / Bottom Attached
-<ui-button top-attached>Top Attached</ui-button>
+<UIButton client:load top-attached>Top Attached</UIButton>
 <div style="
     border-left: 1px solid var(--border-color);
     height: 200px;
     background-color: #EEE;
     border-right: 1px solid var(--border-color);
     margin: 0px -1px;"></div>
-<ui-button bottom-attached>Bottom Attached</ui-button>
+<UIButton client:load bottom-attached>Bottom Attached</UIButton>
 
 ### Left / Right Attached
 
-<ui-button left-attached>Left</ui-button>
-<ui-button right-attached>Right</ui-button>
+<UIButton client:load left-attached>Left</UIButton>
+<UIButton client:load right-attached>Right</UIButton>
 
 ### Compact
 
-<ui-button compact>Compact</ui-button>
-<ui-button very-compact>Very Compact</ui-button>
+<UIButton client:load compact>Compact</UIButton>
+<UIButton client:load very-compact>Very Compact</UIButton>

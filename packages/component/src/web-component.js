@@ -1,4 +1,4 @@
-import { LitElement } from 'lit';
+import { LitElement, isServer } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isEqual, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
@@ -96,6 +96,38 @@ class WebComponentBase extends LitElement {
         $slot.html(html);
       }
     });
+  }
+  /*******************************
+         Nested Components
+  *******************************/
+
+  watchSlottedContent(settings) {
+    const $slot = this.$('slot');
+    $slot.on('slotchange', (event) => {
+      this.onSlotChange(event.target, settings);
+    });
+    $slot.each((el) => {
+      this.onSlotChange(el, settings);
+    });
+  }
+  onSlotChange(slotEl, {singularTag}) {
+    const nodes = slotEl.assignedNodes();
+    if(singularTag) {
+      const addInheritedProps = (node) => {
+        if (node.tagName && node.tagName.toLowerCase() == singularTag) {
+          node.setAttribute('plural', '');
+        }
+      };
+      nodes.forEach(node => {
+        /*
+          We look a max of two levels deep
+          this is because sometimes rendering tools like Astro
+          will wrap a component in an arbitrary tag (island).
+        */
+        addInheritedProps(node);
+        each(node.children, addInheritedProps);
+      });
+    }
   }
 
   /*******************************
@@ -298,11 +330,12 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   // Rendered DOM (either shadow or regular)
-  $(selector, root = this?.renderRoot) {
-    if (!this.renderRoot) {
+  $(selector, root = this?.renderRoot || this.shadowRoot) {
+    if (!root) {
       console.error('Cannot query DOM until element has rendered.');
     }
-    return $(selector, this?.renderRoot);
+    console.log('root is', this);
+    return $(selector, root);
   }
 
   // Original DOM (used for pulling slotted text)

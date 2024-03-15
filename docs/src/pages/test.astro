@@ -1,47 +1,12 @@
 ---
-import Layout from '@layouts//Layout.astro';
+import '../css/sui/theme/base.css';
+import '../css/sui/ui/semantic-ui.css';
+import { UIButton, UIButtons } from '@semantic-ui/core';
 ---
+<h3>Button Test SSR</h3>
+<UIButtons client:load large red>
+  <UIButton client:load>Red</UIButton>
+  <UIButton client:load blue>Blue</UIButton>
+</UIButtons>
 
-<Layout
-	title="Theming"
-	header="Theming"
-	description="Learn about theming"
-	component=false
->
-	<h3>Button Component Overview</h3>
-	<p>Welcome to the comprehensive guide on utilizing the Button Component in your user interface design. This essential element offers versatile interaction mechanisms, seamlessly integrating with various user actions to enhance engagement and usability.</p>
-
-	<h3>Features and Benefits</h3>
-	<ul>
-	  <li>Customizable Appearance: Easily adapt the button's visual design to match your application's theme, including colors, borders, and shadow effects.</li>
-	  <li>Dynamic Interaction Feedback: Incorporate feedback through animations and visual cues to indicate action states like hover, clicked, and disabled.</li>
-	  <li>Accessibility Compliance: Designed with accessibility in mind, ensuring that all users can navigate and interact with the Button Component effectively.</li>
-	  <li>Extensive Compatibility: Fully tested across modern web browsers and devices to provide a consistent user experience everywhere.</li>
-	</ul>
-
-	<h3>Implementation Guidelines</h3>
-	<p>Integrating the Button Component into your project is straightforward. Begin by importing the component into your development environment. Next, customize its properties to fit your needs, such as setting the button text, action handlers, and style presets. For advanced usage, consider extending the component with custom classes and event listeners to create a unique user interaction model.</p>
-
-	<h3>Usage Examples</h3>
-	<p>Below are practical examples demonstrating the Button Component in action:</p>
-	<ul>
-	  <li>Primary Action Button: The main call-to-action on a page, styled prominently to attract user engagement.</li>
-	  <li>Secondary Button: Used for alternative actions, styled to be less prominent but still easily accessible.</li>
-	  <li>Icon Button: Incorporates an icon for visual emphasis or to support minimalistic designs where space is limited.</li>
-	</ul>
-
-	<h3>Customization Tips</h3>
-	<p>Customizing the Button Component is simple. Start with the basic properties and gradually explore advanced styling options. Utilize CSS variables for theme consistency and leverage pseudo-classes for interactive states. Remember, the key to an effective button is not just its appearance but also its responsiveness to user interactions.</p>
-
-	<h3>Best Practices</h3>
-	<p>To maximize the effectiveness of the Button Component, adhere to the following best practices:</p>
-	<ul>
-	  <li>Keep button labels concise and action-oriented to improve usability.</li>
-	  <li>Ensure contrast and legibility in all states to maintain accessibility.</li>
-	  <li>Avoid using too many button styles on a single page to prevent user confusion.</li>
-	  <li>Test your buttons thoroughly in different environments to ensure consistent behavior.</li>
-	</ul>
-
-	<h3>Conclusion</h3>
-	<p>The Button Component is a cornerstone of user interface design, bridging the gap between user intent and action. By following the guidelines and best practices outlined in this document, developers and designers can create engaging, accessible, and effective user interfaces that drive user interaction and satisfaction.</p>
-</Layout>
+<h3>Another Header</h3>

@@ -3,7 +3,6 @@ import { ViewTransitions } from 'astro:transitions';
 
 const { title } = Astro.props;
 
-
 import '../css/container.css';
 import '../css/menu.css';
 import '../css/legacy-sui/input.css';
@@ -24,11 +23,10 @@ import './Body.css';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <title>{title}</title>
-    <ViewTransitions />
   </head>
   <body>
     <script>
-      import { $ } from '@semantic-ui/query'
+      import { $ } from '@semantic-ui/query';
       window.$ = $;
     </script>
     <script is:inline data-astro-rerun>

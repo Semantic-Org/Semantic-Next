@@ -15,10 +15,12 @@ export const createComponent = ({
   template = '',
   css = false,
   spec = false,
-  plural = false,
   tagName,
   delegateFocus = false,
   templateName = kebabToCamel(tagName),
+
+  plural = false,
+  singularTag,
 
   events = {},
 
@@ -100,6 +102,8 @@ export const createComponent = ({
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
+        // shared variations are passed through to singular
+        this.watchSlottedContent({singularTag});
       }
 
       willUpdate() {
@@ -115,9 +119,8 @@ export const createComponent = ({
         // property change callbacks wont call on SSR
         if(isServer) {
           each(webComponent.properties, (propSettings, property) => {
-            const oldValue = undefined;
             const newValue = this[property];
-            this.attributeChangedCallback(property, oldValue, newValue);
+            adjustSettingFromAttribute(this, property, newValue, componentSpec);
           });
         }
       }

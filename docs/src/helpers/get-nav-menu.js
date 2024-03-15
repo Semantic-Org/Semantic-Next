@@ -12,7 +12,7 @@ export const getNavMenu = async () => {
   const menu = [
     {
       name: 'UI Components',
-      url: '/test',
+      url: '/components',
       icon: 'layers',
       pages: componentPages,
     },
@@ -35,6 +35,11 @@ export const getNavMenu = async () => {
         { name: 'Dev Tools', url: '/page-2' },
         { name: 'Figma & Prototyping', url: '/page-2' },
       ],
+    },
+    {
+      name: 'Test',
+      url: '/test',
+      icon: 'code',
     },
   ];
   return menu;

@@ -1,5 +1,6 @@
 Button
-- Figure out attr issue with compact
++ Figure out attr issue with compact
+- Review SSR for button
 - Add basic
 - Rename existing basic -> Outline
 - Add link button

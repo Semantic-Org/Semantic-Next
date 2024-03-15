@@ -62,19 +62,12 @@
   :scope:not(.basic):not(.inverted) {
     box-shadow: var(--group-box-shadow);
   }
-  &::after {
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
-  }
-  .buttons .button {
+  :host(plural) {
     flex: 1 0 auto;
     border-radius: 0em;
     margin: var(--group-button-offset);
   }
-  .buttons > .button:not(.basic):not(.inverted),
+  :host(.plural) > .button:not(.basic):not(.inverted),
   .buttons:not(.basic):not(.inverted) > .button {
     box-shadow: var(--group-button-box-shadow);
   }
