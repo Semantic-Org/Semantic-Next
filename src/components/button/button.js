@@ -48,8 +48,7 @@ const events = {
   }
 };
 
-const UIButton = createComponent({
-  tagName: 'ui-button',
+const componentConfig = {
   spec: ButtonSpec,
   template: ButtonTemplate,
   delegateFocus: true,
@@ -57,18 +56,18 @@ const UIButton = createComponent({
   createInstance,
   onCreated,
   events,
+};
+
+const UIButton = createComponent({
+  tagName: 'ui-button',
+  ...componentConfig
 });
 
 const UIButtons = createComponent({
   tagName: 'ui-buttons',
-  spec: ButtonSpec,
-  template: ButtonTemplate,
-  delegateFocus: true,
+  singularTag: 'ui-button',
   plural: true,
-  css: ButtonCSS,
-  createInstance,
-  onCreated,
-  events,
+  ...componentConfig
 });
 
 export { UIButton, UIButtons };
