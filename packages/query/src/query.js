@@ -131,12 +131,8 @@ export class Query {
       let delegateHandler;
       if (targetSelector) {
         delegateHandler = (e) => {
-          for (
-            let target = e.target;
-            target && target !== el;
-            target = target.parentNode
-          ) {
-            if (target.matches(targetSelector)) {
+          for (let target = e.target; target && target !== el; target = target.parentNode) {
+            if (target.matches && target.matches(targetSelector)) {
               handler.call(target, e);
               break;
             }
