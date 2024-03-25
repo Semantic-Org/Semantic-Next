@@ -26,8 +26,10 @@ import './Body.css';
   </head>
   <body>
     <script>
-      import { $ } from '@semantic-ui/query';
-      window.$ = $;
+      import { Query } from '@semantic-ui/query';
+      window.$ = function(selector, root = document) {
+        return new Query(selector, root);
+      };
     </script>
     <script is:inline data-astro-rerun>
       if(!window.systemPrefersDark) {
