@@ -1,5 +1,7 @@
 import { Query } from './query.js';
 
-export function $(selector, root = document) {
+const $ = function (selector, root = document) {
   return new Query(selector, root);
-}
+};
+
+export { Query, $ };
