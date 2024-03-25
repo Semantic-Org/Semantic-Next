@@ -334,7 +334,6 @@ class WebComponentBase extends LitElement {
     if (!root) {
       console.error('Cannot query DOM until element has rendered.');
     }
-    console.log('root is', this);
     return $(selector, root);
   }
 
