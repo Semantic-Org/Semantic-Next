@@ -7,6 +7,7 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   //site: 'https://next.semantic-ui.com',
+  devToolbar: { enabled: false },
 
   server: {
     host: true,
