@@ -1,7 +1,7 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
 
-const { title } = Astro.props;
+const { title, padded } = Astro.props;
 
 import '../css/container.css';
 import '../css/menu.css';
@@ -24,7 +24,7 @@ import './Body.css';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <title>{title}</title>
   </head>
-  <body>
+  <body style={padded ? 'padding: 2rem;' : ''}>
     <script>
       import { $ } from '@semantic-ui/query';
       window.$ = $;

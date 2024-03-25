@@ -1,12 +1,8 @@
 ---
 import '../css/sui/theme/base.css';
 import '../css/sui/ui/semantic-ui.css';
-import { UIButton, UIButtons } from '@semantic-ui/core';
+import Body from '../layouts/Body.astro';
 ---
-<h3>Button Test SSR</h3>
-<UIButtons client:load large red>
-  <UIButton client:load>Red</UIButton>
-  <UIButton client:load blue>Blue</UIButton>
-</UIButtons>
-
-<h3>Another Header</h3>
+<Body padded>
+  <ui-button primary loading>Test</ui-button>
+</Body>
