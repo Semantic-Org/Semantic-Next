@@ -5,7 +5,7 @@ A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
 
-export default class Query {
+export class Query {
   static eventHandlers = [];
 
   constructor(selector, root = document) {
