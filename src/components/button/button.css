@@ -57,29 +57,29 @@
     flex-direction: row;
     font-size: 0em;
     vertical-align: baseline;
-    margin: var(--vertical-margin) var(--horizontal-margin) 0em 0em;
+    margin: var(--button-vertical-margin) var(--button-horizontal-margin) 0em 0em;
   }
-  :scope:not(.basic):not(.inverted) {
-    box-shadow: var(--group-box-shadow);
+  .buttons:not(.basic):not(.inverted) {
+    box-shadow: var(--button-group-box-shadow);
   }
-  :host(plural) {
+  :host([grouped]) .button {
     flex: 1 0 auto;
     border-radius: 0em;
-    margin: var(--group-button-offset);
+    margin: var(--button-group-button-offset);
   }
-  :host(.plural) > .button:not(.basic):not(.inverted),
+  :host([grouped]) > .button:not(.basic):not(.inverted),
   .buttons:not(.basic):not(.inverted) > .button {
-    box-shadow: var(--group-button-box-shadow);
+    box-shadow: var(--button-group-button-box-shadow);
   }
-  .buttons .button:first-child {
+  :host([first]) .button {
     border-left: none;
     margin-left: 0em;
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
+    border-top-left-radius: var(--button-border-radius);
+    border-bottom-left-radius: var(--button-border-radius);
   }
-  .buttons .button:last-child {
-    border-top-right-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
+  :host([last]) .button {
+    border-top-right-radius: var(--button-border-radius);
+    border-bottom-right-radius: var(--button-border-radius);
   }
 }
 

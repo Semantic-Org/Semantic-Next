@@ -103,30 +103,60 @@ class WebComponentBase extends LitElement {
 
   watchSlottedContent(settings) {
     const $slot = this.$('slot');
-    $slot.on('slotchange', (event) => {
-      this.onSlotChange(event.target, settings);
-    });
+    // initial render
     $slot.each((el) => {
       this.onSlotChange(el, settings);
     });
+    // on change
+    $slot.on('slotchange', (event) => {
+      this.onSlotChange(event.target, settings);
+    });
   }
-  onSlotChange(slotEl, {singularTag}) {
+  onSlotChange(slotEl, {singularTag, componentSpec, properties}) {
     const nodes = slotEl.assignedNodes();
+    const name = slotEl.name || 'default';
+    const settings = this.getSettings({componentSpec, properties});
+    if(!this.slottedContent) {
+      this.slottedContent = {};
+    }
+    this.slottedContent[name] = nodes;
     if(singularTag) {
-      const addInheritedProps = (node) => {
-        if (node.tagName && node.tagName.toLowerCase() == singularTag) {
-          node.setAttribute('plural', '');
-        }
+
+      // we use this element to track last-child
+      let lastSingularNode;
+
+      const isSingular = (node) => {
+        return node.tagName && node.tagName.toLowerCase() == singularTag;
       };
+      const addSingularProps = (node) => {
+        if(!isSingular(node)) {
+          return;
+        }
+        if(!lastSingularNode) {
+          node.setAttribute('first', '');
+        }
+        node.setAttribute('grouped', '');
+        lastSingularNode = node;
+        each(componentSpec?.inheritedPluralVariations, (variation) => {
+          const pluralVariation = settings[variation];
+          if(pluralVariation && !node[variation]) {
+            node.setAttribute(variation, pluralVariation);
+          }
+        });
+      };
+
+      /*
+        We look a max of two levels deep
+        this is because sometimes rendering tools like Astro
+        will wrap a component in an arbitrary tag (island).
+      */
       nodes.forEach(node => {
-        /*
-          We look a max of two levels deep
-          this is because sometimes rendering tools like Astro
-          will wrap a component in an arbitrary tag (island).
-        */
-        addInheritedProps(node);
-        each(node.children, addInheritedProps);
+        addSingularProps(node);
+        each(node.children, addSingularProps);
       });
+      if(lastSingularNode) {
+        lastSingularNode.setAttribute('last', '');
+      }
     }
   }
 
@@ -254,7 +284,6 @@ class WebComponentBase extends LitElement {
         return;
       }
       const setting = this[property] || this.defaultSettings[property];
-
       // only pass through setting if it is defined
       if(setting !== undefined) {
         settings[property] = setting;
@@ -317,9 +346,10 @@ class WebComponentBase extends LitElement {
     if(!componentSpec) {
       return;
     }
+    // slotted content is stored in onSlotChange
     each(componentSpec.content, (contentName) => {
-      if(this[contentName]) {
-        content[contentName] = this[contentName];
+      if(this[contentName] && this.slottedContent) {
+        content[contentName] = this.slottedContent[contentName];
       }
     });
     return content;

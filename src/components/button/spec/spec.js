@@ -116,7 +116,7 @@ export const ButtonSpec = {
       options: [
         {
           name: 'Animated',
-          value: ['animated', 'horizontal-animated'],
+          value: [true, 'horizontal-animated'],
           description: 'A button can be formatted to animate hidden content horizontally'
         },
         {
@@ -625,7 +625,7 @@ export const ButtonSpec = {
     'size',
     'floated',
     'compact',
-    'colored',
+    'color',
     'attached',
   ]
 

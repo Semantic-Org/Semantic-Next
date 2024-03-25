@@ -21,6 +21,7 @@ export const extractComponentSpec = (spec) => {
     reverseAttributes: {},
     attributeClasses: [],
     defaultSettings: {},
+    inheritedPluralVariations: [],
   };
 
   const getAttributeName = (part) => {
@@ -91,6 +92,8 @@ export const extractComponentSpec = (spec) => {
   delete reverseAttributes.true;
   delete reverseAttributes.false;
   componentSpec.reverseAttributes = reverseAttributes;
+
+  componentSpec.inheritedPluralVariations = spec.pluralSharedVariations;
 
   return componentSpec;
 };
