@@ -3,22 +3,24 @@ import { logPlugin } from './log.js';
 import { BROWSER_TARGET, JS_LOADER_CONFIG, CSS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './config.js';
 
 export const buildProject = async ({
-  watch = false,
-  includeJavascript = true,
-  includeComponents = true,
-  includeCSS = true,
-  includeThemes = true,
-  includeExamples = false,
-  outDir = 'docs/public/semantic/',
-  minify = true,
-  bundle = true,
-  sourcemap = true,
+  watch = false, // watch for changes
+  includeJavascript = true, // include concatenated build
+  includeComponents = true, // include web components
+  includeCSS = true, // include global css
+  includeThemes = true, // include themes
+  includeExamples = false, // include examples like 'todo'
+  outDir = 'docs/public/semantic/', // base directory to output
+  minify = true, // minify files
+  bundle = true, // bundle files
+  sourcemap = true, // include sourcemaps
+  serveDir = false, // serve director after building
   uiDir = `${outDir}/ui`,
 } = {}) => {
   const esbuilder = watch ? esbuild.context : esbuild.build;
   let tasks = [];
 
   if (includeJavascript) {
+
     /*
       Export Concat Components
     */
@@ -38,6 +40,7 @@ export const buildProject = async ({
   }
 
   if (includeComponents) {
+
     /*
       Exports Individual Components
     */
@@ -75,6 +78,7 @@ export const buildProject = async ({
   }
 
   if (includeThemes) {
+
     /*
       Exports themes as separate css
     */
@@ -110,9 +114,16 @@ export const buildProject = async ({
     });
     tasks.push(exampleBuild);
   }
-
-  if (watch) {
-    tasks = tasks.map((task) => task.watch());
+  if(serveDir) {
+    let { host, port } = await tasks[0].serve({
+      servedir: serveDir,
+    });
+    console.log(`Server up ${host}:${port}`);
   }
-  return await Promise.all(tasks);
+  else {
+    if (watch) {
+      tasks = tasks.map((task) => task.watch());
+    }
+    return await Promise.all(tasks);
+  }
 };

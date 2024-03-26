@@ -14,12 +14,12 @@ export const buildDeps = async ({
   ;
 
   /*
-    Takes all css parts of a component and creates
-    a single css file for JS css imports
+    This is CSS that will be imported into the
+    web component to style the shadow dom
   */
-  const cssConcat = await esbuilder({
+  const cssShadowConcat = await esbuilder({
     entryPoints: [
-      'src/**/css/*.css'
+      'src/**/css/shadow/*.css'
     ],
     target: BROWSER_TARGET,
     bundle: true,
@@ -27,19 +27,40 @@ export const buildDeps = async ({
     loader: {
       '.css': 'css',
     },
-    entryNames: '[dir]/../[name]',
+    entryNames: '[dir]/../[name]-shadow',
+    outbase: 'src',
+    outdir: 'src',
+  });
+
+  /*
+    This is CSS that will be imported into
+    the page to style the light dom
+  */
+  const cssLightConcat = await esbuilder({
+    entryPoints: [
+      'src/**/css/light/*.css'
+    ],
+    target: BROWSER_TARGET,
+    bundle: true,
+    plugins: [ logPlugin('CSS Concat') ],
+    loader: {
+      '.css': 'css',
+    },
+    entryNames: '[dir]/../[name]-light',
     outbase: 'src',
     outdir: 'src',
   });
 
   if(watch) {
     return await Promise.all([
-      cssConcat.watch()
+      cssLightConcat.watch(),
+      cssShadowConcat.watch(),
     ]);
   }
   else {
     return await Promise.all([
-      cssConcat
+      cssLightConcat,
+      cssShadowConcat,
     ]);
   }
 
