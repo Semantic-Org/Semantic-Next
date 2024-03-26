@@ -1,4 +1,4 @@
-/* src/components/button/css/content/button.css */
+/* src/components/button/css/shadow/content/button.css */
 @layer component {
   *,
   :after,
@@ -33,7 +33,7 @@
   }
 }
 
-/* src/components/button/css/content/icon.css */
+/* src/components/button/css/shadow/content/icon.css */
 @layer component {
   .button .icon {
     vertical-align: top;
@@ -44,13 +44,13 @@
   }
 }
 
-/* src/components/button/css/content/label.css */
+/* src/components/button/css/shadow/content/label.css */
 @layer component {
   .button .label {
   }
 }
 
-/* src/components/button/css/group/buttons.css */
+/* src/components/button/css/shadow/group/buttons.css */
 @layer component {
   .buttons {
     display: inline-flex;
@@ -62,28 +62,9 @@
   .buttons:not(.basic):not(.inverted) {
     box-shadow: var(--button-group-box-shadow);
   }
-  :host([grouped]) .button {
-    flex: 1 0 auto;
-    border-radius: 0em;
-    margin: var(--button-group-button-offset);
-  }
-  :host([grouped]) > .button:not(.basic):not(.inverted),
-  .buttons:not(.basic):not(.inverted) > .button {
-    box-shadow: var(--button-group-button-box-shadow);
-  }
-  :host([first]) .button {
-    border-left: none;
-    margin-left: 0em;
-    border-top-left-radius: var(--button-border-radius);
-    border-bottom-left-radius: var(--button-border-radius);
-  }
-  :host([last]) .button {
-    border-top-right-radius: var(--button-border-radius);
-    border-bottom-right-radius: var(--button-border-radius);
-  }
 }
 
-/* src/components/button/css/types/animated.css */
+/* src/components/button/css/shadow/types/animated.css */
 @layer component {
   .animated.button {
     position: relative;
@@ -182,7 +163,7 @@
   }
 }
 
-/* src/components/button/css/types/emphasis.css */
+/* src/components/button/css/shadow/types/emphasis.css */
 @layer component {
   .primary.buttons .button,
   .primary.button {
@@ -258,7 +239,7 @@
   }
 }
 
-/* src/components/button/css/types/icon.css */
+/* src/components/button/css/shadow/types/icon.css */
 @layer component {
   .icon-only.buttons .button,
   .icon-only.button {
@@ -272,7 +253,7 @@
   }
 }
 
-/* src/components/button/css/types/labeled.css */
+/* src/components/button/css/shadow/types/labeled.css */
 @layer component {
   .labeled.button:not(.icon) {
     display: inline-flex;
@@ -315,7 +296,7 @@
   }
 }
 
-/* src/components/button/css/types/labeled-icon.css */
+/* src/components/button/css/shadow/types/labeled-icon.css */
 @layer component {
   .labeled.icon.buttons .button,
   .labeled.icon.button {
@@ -406,7 +387,7 @@
   }
 }
 
-/* src/components/button/css/types/transparent.css */
+/* src/components/button/css/shadow/types/transparent.css */
 @layer component {
   .transparent.button {
     background-image: var(--button-transparent-background-image);
@@ -459,7 +440,7 @@
   }
 }
 
-/* src/components/button/css/types/toggle.css */
+/* src/components/button/css/shadow/types/toggle.css */
 @layer component {
   .toggle.buttons .active.button,
   .buttons .button.toggle.active,
@@ -476,7 +457,7 @@
   }
 }
 
-/* src/components/button/css/states/hover.css */
+/* src/components/button/css/shadow/states/hover.css */
 @layer component {
   .button.hover,
   .button:hover {
@@ -491,7 +472,7 @@
   }
 }
 
-/* src/components/button/css/states/focus.css */
+/* src/components/button/css/shadow/states/focus.css */
 @layer component {
   .button.focus,
   .button:focus {
@@ -506,7 +487,7 @@
   }
 }
 
-/* src/components/button/css/states/pressed.css */
+/* src/components/button/css/shadow/states/pressed.css */
 @layer component {
   .pressed.button,
   .active.pressed.button,
@@ -519,7 +500,7 @@
   }
 }
 
-/* src/components/button/css/states/active.css */
+/* src/components/button/css/shadow/states/active.css */
 @layer component {
   .active.button {
     background-color: var(--button-active-background-color);
@@ -541,7 +522,7 @@
   }
 }
 
-/* src/components/button/css/states/disabled.css */
+/* src/components/button/css/shadow/states/disabled.css */
 @layer component {
   .disabled.button,
   .disabled.button:hover,
@@ -570,7 +551,7 @@
   }
 }
 
-/* src/components/button/css/states/loading.css */
+/* src/components/button/css/shadow/states/loading.css */
 @layer component {
   .loading.button:not(.icon) {
     position: relative;
@@ -632,7 +613,7 @@
   }
 }
 
-/* src/components/button/css/variations/basic.css */
+/* src/components/button/css/shadow/variations/basic.css */
 @layer component {
   .basic.buttons .button,
   .basic.button {
@@ -739,7 +720,7 @@
   }
 }
 
-/* src/components/button/css/variations/attached.css */
+/* src/components/button/css/shadow/variations/attached.css */
 @layer component {
   .attached.button {
     position: relative;
@@ -838,7 +819,7 @@
   }
 }
 
-/* src/components/button/css/variations/circular.css */
+/* src/components/button/css/shadow/variations/circular.css */
 @layer component {
   .circular.button {
     border-radius: var(--circular-radius);
@@ -849,7 +830,7 @@
   }
 }
 
-/* src/components/button/css/variations/colored.css */
+/* src/components/button/css/shadow/variations/colored.css */
 @layer component {
   .black.buttons .button,
   .black.button {
@@ -2556,7 +2537,7 @@
   }
 }
 
-/* src/components/button/css/variations/compact.css */
+/* src/components/button/css/shadow/variations/compact.css */
 @layer component {
   .compact.buttons .button,
   .compact.button {
@@ -2576,7 +2557,7 @@
   }
 }
 
-/* src/components/button/css/variations/floated.css */
+/* src/components/button/css/shadow/variations/floated.css */
 @layer component {
   .left-floated.buttons,
   .left-floated.button {
@@ -2592,7 +2573,7 @@
   }
 }
 
-/* src/components/button/css/variations/fluid.css */
+/* src/components/button/css/shadow/variations/fluid.css */
 @layer component {
   .fluid.buttons,
   .fluid.button {
@@ -2707,7 +2688,7 @@
   }
 }
 
-/* src/components/button/css/variations/negative.css */
+/* src/components/button/css/shadow/variations/negative.css */
 @layer component {
   .negative.buttons .button,
   .negative.button {
@@ -2788,7 +2769,7 @@
   }
 }
 
-/* src/components/button/css/variations/positive.css */
+/* src/components/button/css/shadow/variations/positive.css */
 @layer component {
   .positive.buttons .button,
   .positive.button {
@@ -2869,7 +2850,7 @@
   }
 }
 
-/* src/components/button/css/variations/warning.css */
+/* src/components/button/css/shadow/variations/warning.css */
 @layer component {
   .warning.buttons .button,
   .warning.button {
@@ -2950,7 +2931,7 @@
   }
 }
 
-/* src/components/button/css/variations/info.css */
+/* src/components/button/css/shadow/variations/info.css */
 @layer component {
   .info.buttons .button,
   .info.button {
@@ -3031,7 +3012,7 @@
   }
 }
 
-/* src/components/button/css/variations/sizing.css */
+/* src/components/button/css/shadow/variations/sizing.css */
 @layer component {
   .mini.buttons .button,
   .mini.buttons .or,
@@ -3075,7 +3056,7 @@
   }
 }
 
-/* src/components/button/css/variations/social.css */
+/* src/components/button/css/shadow/variations/social.css */
 @layer component {
   .facebook.button {
     background-color: var(--facebook-color);
@@ -3196,7 +3177,7 @@
   }
 }
 
-/* src/components/button/css/variations/vertical.css */
+/* src/components/button/css/shadow/variations/vertical.css */
 @layer component {
   .vertical.buttons {
     display: inline-flex;
@@ -3224,4 +3205,4 @@
   }
 }
 
-/* src/components/button/css/button.css */
+/* src/components/button/css/shadow/button.css */

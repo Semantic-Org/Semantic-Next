@@ -1,7 +1,7 @@
 import { createComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 
-import ButtonCSS from './button.css?raw';
+import ButtonCSS from './css/button-shadow.css?raw';
 import ButtonTemplate from './button.html?raw';
 import { ButtonSpec } from './spec/spec.js';
 
@@ -34,6 +34,7 @@ const createInstance = ({tpl, settings, $}) => ({
 
 
 const onCreated = ({tpl}) => {
+
 };
 
 const events = {
@@ -59,26 +60,12 @@ const events = {
   }
 };
 
-const componentConfig = {
+export const UIButton = createComponent({
+  tagName: 'ui-button',
   spec: ButtonSpec,
   template: ButtonTemplate,
-  delegateFocus: true,
   css: ButtonCSS,
   createInstance,
   onCreated,
   events,
-};
-
-const UIButton = createComponent({
-  tagName: 'ui-button',
-  ...componentConfig
 });
-
-const UIButtons = createComponent({
-  tagName: 'ui-buttons',
-  singularTag: 'ui-button',
-  plural: true,
-  ...componentConfig
-});
-
-export { UIButton, UIButtons };

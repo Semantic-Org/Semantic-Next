@@ -1,2 +1,2 @@
-export { UIButton, UIButtons } from './components/button/button.js';
-export { UIIcon } from './components/icon/icon.js';
+export { UIButton, UIButtons } from './components/button/index.js';
+export { UIIcon } from './components/icon/index.js';
