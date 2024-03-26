@@ -40,6 +40,7 @@
 
 
 /*--- Red ---*/
+
 .blue.buttons,
 .blue.button {
   --button-text-color: var(--button-blue-text-color);

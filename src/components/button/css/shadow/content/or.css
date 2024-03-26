@@ -2,45 +2,48 @@
       Or Buttons
 --------------------*/
 
-.buttons .or {
-  position: relative;
-  width: var(--or-gap);
-  height: var(--or-height);
-  z-index: var(--or-z-index);
+.buttons ::slotted(ui-button::part(button)) {
+  color: #009fda !important;
 }
-.buttons .or:before {
+.buttons ::slotted(button-or) {
+  position: relative;
+  width: var(--button-or-gap);
+  height: var(--button-or-height);
+  z-index: var(--button-or-z-index);
+}
+.buttons ::slotted(button-or):before {
   position: absolute;
   text-align: center;
   border-radius: var(--circular-radius);
 
-  content: var(--or-text);
+  content: var(--button-or-text);
   top: 50%;
   left: 50%;
-  background-color: var(--or-background-color);
-  text-shadow: var(--or-text-shadow);
+  background-color: var(--button-or-background-color);
+  text-shadow: var(--button-or-text-shadow);
 
-  margin-top: var(--or-vertical-offset);
-  margin-left: var(--or-horizontal-offset);
+  margin-top: var(--button-or-vertical-offset);
+  margin-left: var(--button-or-horizontal-offset);
 
-  width: var(--or-circle-size);
-  height: var(--or-circle-size);
+  width: var(--button-or-circle-size);
+  height: var(--button-or-circle-size);
 
-  line-height: var(--or-line-height);
-  color: var(--or-text-color);
+  line-height: var(--button-or-line-height);
+  color: var(--button-or-text-color);
 
-  font-style: var(--or-text-style);
-  font-weight: var(--or-text-weight);
+  font-style: var(--button-or-text-style);
+  font-weight: var(--button-or-text-weight);
 
-  box-shadow: var(--or-box-shadow);
+  box-shadow: var(--button-or-box-shadow);
 }
-.buttons .or[data-text]:before {
+.buttons ::slotted(button-or)[data-text]:before {
   content: attr(data-text);
 }
 
 /* Fluid Or */
-.fluid.buttons .or {
+.fluid.buttons ::slotted(button-or) {
   width: 0em !important;
 }
-.fluid.buttons .or:after {
+.fluid.buttons ::slotted(button-or):after {
   display: none;
 }

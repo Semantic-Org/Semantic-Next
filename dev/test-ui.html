@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./index.css">
   <link rel="stylesheet" href="./ui/semantic-ui.css">
   <link rel="stylesheet" href="./ui/theme/base.css">
-  <script src="./ui/semantic-ui.js" type="module"></script>
+  <script src="./ui/ui/semantic-ui.js" type="module"></script>
   <script>
 new EventSource('/esbuild').addEventListener('change', e => {
   /* Rebuilds page after JS changes */
@@ -32,8 +32,7 @@ new EventSource('/esbuild').addEventListener('change', e => {
 <body>
   <div class="container">
 
-    <ui-buttons large red>
-      <ui-button>1</ui-button>
+    <ui-buttons large>
       <ui-button red>2</ui-button>
       <ui-button blue>3</ui-button>
       <ui-button>4</ui-button>

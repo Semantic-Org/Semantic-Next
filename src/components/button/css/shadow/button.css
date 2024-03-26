@@ -1,6 +1,7 @@
 
 /* Content */
 @import url('./content/button.css') layer(component);
+@import url('./content/or.css') layer(component);
 @import url('./content/icon.css') layer(component);
 @import url('./content/label.css') layer(component);
 

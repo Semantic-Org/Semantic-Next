@@ -1,8 +1,5 @@
 /* src/components/button/css/light/group/buttons.css */
 @layer component {
-  ui-buttons ui-button {
-    flex: 1 0 auto;
-  }
   ui-buttons ui-button::part(button) {
     flex: 1 0 auto;
     border-radius: 0em;
