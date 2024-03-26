@@ -100,9 +100,13 @@ export const isArguments = function (obj) {
   return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
-export const isServer = () => {
+export const isServer = (() => {
   return typeof window === 'undefined';
-};
+})();
+
+export const isClient = (() => {
+  return typeof window !== 'undefined';
+})();
 
 /*-------------------
         Date
@@ -401,26 +405,34 @@ export const pick = function (obj, ...keys) {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
-export const get = function (obj, string = '') {
-  if(!isString(string)) {
-    return;
-  }
-  string = string.replace(/^\./, '').replace(/\[(\w+)\]/g, '.$1');
-  const stringParts = string.split('.');
 
-  for (let index = 0, length = stringParts.length; index < length; ++index) {
+// map 'foo.1.baz' -> foo[1].baz'
+const transformArrayRegExp = /\[(\w+)\]/g;
+
+export const get = function (obj, string = '') {
+  if (typeof string !== 'string') {
+    return undefined;
+  }
+
+  // Transform array notation to dot notation
+  const stringParts = string.replace(transformArrayRegExp, '.$1').split('.');
+
+  let currentObject = obj;
+  for (let index = 0; index < stringParts.length; index++) {
     const part = stringParts[index];
-    // Check if obj is an object and part exists in obj
-    if (obj !== null && typeof obj === 'object' && part in obj) {
-      obj = obj[part];
-    }
-    else {
-      // If not, return undefined to safely indicate missing value
+    if (part === '') continue; // Skip empty parts that result from leading dots or consecutive dots.
+
+    // Check if the part exists in the current object
+    if (currentObject !== null && typeof currentObject === 'object' && part in currentObject) {
+      currentObject = currentObject[part];
+    } else {
+      // If the path breaks, return undefined
       return undefined;
     }
   }
-  return obj;
+  return currentObject;
 };
+
 
 /*
   Return true if non-inherited property

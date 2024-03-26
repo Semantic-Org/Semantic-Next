@@ -13,7 +13,7 @@ import { scopeStyles } from './helpers/scope-styles.js';
 
 class WebComponentBase extends LitElement {
 
-  static shadowRootOptions = {...LitElement.shadowRootOptions, delegatesFocus: true};
+  static shadowRootOptions = {...LitElement.shadowRootOptions, delegatesFocus: false};
 
   // for use with light dom rendering
   static scopedStyleSheet = null;
@@ -27,7 +27,7 @@ class WebComponentBase extends LitElement {
   createRenderRoot() {
     this.useLight = this.getAttribute('expose') !== null;
     if (this.useLight) {
-      this.addLightScopedCSS(this.tagName, this.css);
+      this.addLightCSS('light', this.css, { scopeSelector: this.tagName });
       this.storeOriginalContent.apply(this);
       return this;
     }
@@ -54,16 +54,25 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   /* Modifies shadow dom rules to be scoped to component tag */
-  addLightScopedCSS(scopeSelector, css) {
-    if (!this.scopedStyleSheet) {
-      const scopedCSS = scopeStyles(css, scopeSelector);
-      this.scopedStyleSheet = new CSSStyleSheet();
-      this.scopedStyleSheet.replaceSync(scopedCSS);
+  addLightCSS(id, css, { scopeSelector } = {}) {
+    if(isServer) {
+      return;
+    }
+    const stylesheet = new CSSStyleSheet();
+    if(!this.lightStylesheets) {
+      this.lightStylesheets = {};
+    }
+    if (!this.lightStylesheets[id]) {
+      if(scopeSelector) {
+        css = scopeStyles(css, scopeSelector);
+      }
+      stylesheet.replaceSync(css);
+      this.lightStylesheets[id] = stylesheet;
     }
     // we add a new stylesheet to document scoped to component name
     document.adoptedStyleSheets = [
       ...document.adoptedStyleSheets,
-      this.scopedStyleSheet,
+      stylesheet,
     ];
   }
 

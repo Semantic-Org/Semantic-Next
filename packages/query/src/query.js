@@ -11,7 +11,7 @@ export class Query {
   constructor(selector, root = document) {
     let elements = [];
 
-    if (!selector) {
+    if (!selector || !root) {
       return;
     }
 

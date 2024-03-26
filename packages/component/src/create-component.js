@@ -2,6 +2,7 @@ import { unsafeCSS, isServer } from 'lit';
 import { each, noop, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
+import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { extractComponentSpec } from './helpers/extract-component-spec.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
 
@@ -14,6 +15,7 @@ export const createComponent = ({
 
   template = '',
   css = false,
+  lightCSS = false,
   spec = false,
   tagName,
   delegateFocus = false,
@@ -55,6 +57,10 @@ export const createComponent = ({
       css += template.css;
     }
   });
+
+  if(lightCSS) {
+    adoptStylesheet(lightCSS);
+  }
 
   /*
     Create Component Returns Either a LitTemplate or WebComponent
@@ -125,12 +131,12 @@ export const createComponent = ({
 
       firstUpdated() {
         super.firstUpdated();
-        // shared variations are passed through to singular
-        this.watchSlottedContent({
-          singularTag,
-          componentSpec,
-          properties: webComponent.properties
-        });
+        // // shared variations are passed through to singular
+        // this.watchSlottedContent({
+        //   singularTag,
+        //   componentSpec,
+        //   properties: webComponent.properties
+        // });
       }
 
       updated() {

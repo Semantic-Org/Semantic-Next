@@ -8,7 +8,7 @@ import { LitRenderer } from './renderer.js';
 export const LitTemplate = class LitTemplate {
   static templateCount = 0;
 
-  static isServer = isServer();
+  static isServer = isServer;
 
   constructor({
     templateName,
@@ -80,7 +80,7 @@ export const LitTemplate = class LitTemplate {
     let tpl = this;
     if (isFunction(this.createInstance)) {
       this.tpl = { data: this.data };
-      tpl = this.call(this.createInstance);
+      tpl = this.call(this.createInstance) || {};
       extend(this.tpl, tpl);
     }
     // reactions bound with tpl.reaction will be scoped to template
