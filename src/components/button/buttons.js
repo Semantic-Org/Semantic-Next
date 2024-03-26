@@ -9,6 +9,7 @@ export const UIButtons = createComponent({
   tagName: 'ui-buttons',
   plural: true,
   singularTag: 'ui-button',
+  delegateFocus: true,
   spec: ButtonSpec,
   template: ButtonsTemplate,
   css: ButtonShadowCSS,
