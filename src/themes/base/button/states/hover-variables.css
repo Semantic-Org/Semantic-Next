@@ -1,6 +1,6 @@
 /* Hovered */
 
-:root {
+* {
   --button-hover-background-color: #FFFFFF;
   --button-hover-background-image: var(--button-background-image);
   --button-hover-box-shadow:

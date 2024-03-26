@@ -1,4 +1,4 @@
-:root {
+* {
 
   --button-negative-color: var(--negative-color);
   --button-negative-background-image: var(--button-colored-background-image);

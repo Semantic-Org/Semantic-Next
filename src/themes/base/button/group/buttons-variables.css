@@ -1,4 +1,4 @@
-:root {
+* {
   --button-group-box-shadow: none;
   --button-group-button-box-shadow: var(--button-box-shadow);
   --button-vertical-box-shadow: none;

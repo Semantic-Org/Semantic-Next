@@ -35,9 +35,6 @@
 
 /* src/components/button/css/shadow/content/or.css */
 @layer component {
-  .buttons ::slotted(ui-button::part(button)) {
-    color: #009fda !important;
-  }
   .buttons ::slotted(button-or) {
     position: relative;
     width: var(--button-or-gap);

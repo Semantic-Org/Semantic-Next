@@ -3,7 +3,3 @@ body .container {
   margin: 0rem auto;
   padding: 2rem;
 }
-
-*:not(:defined) {
-  opacity: 0;
-}

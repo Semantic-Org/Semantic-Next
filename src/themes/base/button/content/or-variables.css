@@ -1,4 +1,4 @@
-:root {
+* {
   --button-or-text: 'or';
   --button-or-gap: 0.3em;
   --button-or-height: calc(var(--button-vertical-padding) * 2) + 1em;

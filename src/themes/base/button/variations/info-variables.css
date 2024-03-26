@@ -1,4 +1,4 @@
-:root {
+* {
 
   --button-info-color: var(--info-color);
   --button-info-background-image: var(--button-colored-background-image);

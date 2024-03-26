@@ -1,4 +1,4 @@
-:root {
+* {
   --button-inverted-border-size: 2px;
   --button-inverted-text-color: var(--white);
   --button-inverted-text-hover-color: var(--hover-color);

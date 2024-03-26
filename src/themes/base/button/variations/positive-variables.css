@@ -1,4 +1,4 @@
-:root {
+* {
   
   --button-positive-color: var(--positive-color);
   --button-positive-background-image: var(--button-colored-background-image);
