@@ -1,7 +1,7 @@
 import { createComponent } from '@semantic-ui/component';
 import { IconSpec } from './spec/spec.js';
 
-import CSS from './icon.css?raw';
+import CSS from './icon-shadow.css?raw';
 import Template from './icon.html?raw';
 
 const createInstance = ({tpl, $}) => ({

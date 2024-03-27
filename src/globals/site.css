@@ -17,7 +17,6 @@ body {
   font-family: var(--page-font);
   line-height: var(--line-height);
   color: var(--text-color);
-  font-smoothing: var(--font-smoothing);
 }
 
 /* Border-Box */

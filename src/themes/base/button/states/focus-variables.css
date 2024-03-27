@@ -1,4 +1,4 @@
-* {
+:root {
   --button-focus-background-color: var(--button-hover-background-color);
   --button-focus-background-image: var(--button-hover-background-image);
   --button-focus-box-shadow: var(--button-hover-box-shadow);

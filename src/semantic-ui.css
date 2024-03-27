@@ -1,7 +1,7 @@
-@layer global, component, themeOverrides, siteOverrides, utilities, pageOverrides;
+@layer global, baseTheme, component, theme, overrides, utilities, page;
 
-@import url('./globals/reset.css');
-@import url('./globals/site.css');
-@import url('./globals/initial.css');
+@import url('./globals/reset.css') layer(global);
+@import url('./globals/site.css') layer(global);
+@import url('./globals/initial.css') layer(global);
 
 

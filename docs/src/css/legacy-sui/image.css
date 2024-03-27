@@ -99,7 +99,7 @@ img.ui.image {
 .ui.rounded.images .image,
 .ui.rounded.image,
 .ui.rounded.images .image > *,
-.ui.rounded.image > * {
+.ui.rounded.image > :root {
   border-radius: 0.3125em;
 }
 
@@ -127,7 +127,7 @@ img.ui.bordered.image {
 .ui.circular.images .image,
 .ui.circular.image,
 .ui.circular.images .image > *,
-.ui.circular.image > * {
+.ui.circular.image > :root {
   border-radius: 500rem;
 }
 

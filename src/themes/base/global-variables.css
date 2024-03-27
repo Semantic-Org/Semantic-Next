@@ -2,16 +2,13 @@
          Site Settings
 *******************************/
 
-@import url('https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic&subset=latin');
-
-* {
+:root {
 
   /* -------------------
          Fonts
   -------------------- */
 
   --font-name: 'Lato';
-  --font-smoothing: antialiased;
 
   --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
   --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;

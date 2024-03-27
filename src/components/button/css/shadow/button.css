@@ -1,43 +1,42 @@
 
 /* Content */
-@import url('./content/button.css') layer(component);
-@import url('./content/or.css') layer(component);
-@import url('./content/icon.css') layer(component);
-@import url('./content/label.css') layer(component);
+@import url('./content/button.css') layer(component.button);
+@import url('./content/icon.css') layer(component.button);
+@import url('./content/label.css') layer(component.button);
 
 /* Group */
-@import url('./group/buttons.css') layer(component);
+@import url('./plural/buttons.css') layer(component.button);
 
 /* Types */
-@import url('./types/animated.css') layer(component);
-@import url('./types/emphasis.css') layer(component);
-@import url('./types/icon.css') layer(component);
-@import url('./types/labeled.css') layer(component);
-@import url('./types/labeled-icon.css') layer(component);
-@import url('./types/transparent.css') layer(component);
-@import url('./types/toggle.css') layer(component);
+@import url('./types/animated.css') layer(component.button);
+@import url('./types/emphasis.css') layer(component.button);
+@import url('./types/icon.css') layer(component.button);
+@import url('./types/labeled.css') layer(component.button);
+@import url('./types/labeled-icon.css') layer(component.button);
+@import url('./types/transparent.css') layer(component.button);
+@import url('./types/toggle.css') layer(component.button);
 
 /* States */
-@import url('./states/hover.css') layer(component);
-@import url('./states/focus.css') layer(component);
-@import url('./states/pressed.css') layer(component);
-@import url('./states/active.css') layer(component);
-@import url('./states/disabled.css') layer(component);
-@import url('./states/loading.css') layer(component);
+@import url('./states/hover.css') layer(component.button);
+@import url('./states/focus.css') layer(component.button);
+@import url('./states/pressed.css') layer(component.button);
+@import url('./states/active.css') layer(component.button);
+@import url('./states/disabled.css') layer(component.button);
+@import url('./states/loading.css') layer(component.button);
 
 /* Variations */
-@import url('./variations/basic.css') layer(component);
-@import url('./variations/attached.css') layer(component);
-@import url('./variations/circular.css') layer(component);
-@import url('./variations/colored.css') layer(component);
-@import url('./variations/compact.css') layer(component);
-@import url('./variations/floated.css') layer(component);
-@import url('./variations/fluid.css') layer(component);
-@import url('./variations/negative.css') layer(component);
-@import url('./variations/positive.css') layer(component);
-@import url('./variations/warning.css') layer(component);
-@import url('./variations/info.css') layer(component);
-@import url('./variations/sizing.css') layer(component);
-@import url('./variations/social.css') layer(component);
-@import url('./variations/vertical.css') layer(component);
+@import url('./variations/basic.css') layer(component.button);
+@import url('./variations/attached.css') layer(component.button);
+@import url('./variations/circular.css') layer(component.button);
+@import url('./variations/colored.css') layer(component.button);
+@import url('./variations/compact.css') layer(component.button);
+@import url('./variations/floated.css') layer(component.button);
+@import url('./variations/fluid.css') layer(component.button);
+@import url('./variations/negative.css') layer(component.button);
+@import url('./variations/positive.css') layer(component.button);
+@import url('./variations/warning.css') layer(component.button);
+@import url('./variations/info.css') layer(component.button);
+@import url('./variations/sizing.css') layer(component.button);
+@import url('./variations/social.css') layer(component.button);
+@import url('./variations/vertical.css') layer(component.button);
 

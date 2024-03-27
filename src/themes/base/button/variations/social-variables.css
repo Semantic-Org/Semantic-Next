@@ -1,4 +1,4 @@
-* {
+:root {
 
   /* ---  Brand   --- */
   --facebook-hover-color: oklch(from var(--facebook-color) calc(l - 0.05) c calc(h + 10));

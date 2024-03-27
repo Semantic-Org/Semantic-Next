@@ -1,4 +1,4 @@
-/* src/components/icon/css/content/icon.css */
+/* src/components/icon/css/icon-shadow.css */
 @layer component {
   :host {
     display: inline-block;
@@ -1147,22 +1147,14 @@
     mask-image: var(--icon-zoom-out-svg);
   }
 }
-
-/* src/components/icon/css/group/icons.css */
 @layer component;
-
-/* src/components/icon/css/states/disabled.css */
 @layer component {
   .disabled.icon {
     cursor: default;
     opacity: --var(icon-disabled-opacity);
   }
 }
-
-/* src/components/icon/css/states/loading.css */
 @layer component;
-
-/* src/components/icon/css/variations/circular.css */
 @layer component {
   i.circular.icon {
     border-radius: 500em !important;
@@ -1177,11 +1169,7 @@
     box-shadow: none;
   }
 }
-
-/* src/components/icon/css/variations/colored.css */
 @layer component;
-
-/* src/components/icon/css/variations/fitted.css */
 @layer component {
   .link.icon,
   .link.icons {
@@ -1194,8 +1182,6 @@
     opacity: 1 !important;
   }
 }
-
-/* src/components/icon/css/variations/link.css */
 @layer component {
   .link.icon,
   .link.icons {
@@ -1208,8 +1194,6 @@
     opacity: 1;
   }
 }
-
-/* src/components/icon/css/variations/sizing.css */
 @layer component {
   .mini.icons .icon,
   .mini.icon {
@@ -1244,5 +1228,3 @@
     font-size: var(--relative-massive);
   }
 }
-
-/* src/components/icon/css/icon.css */

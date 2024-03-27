@@ -75,6 +75,7 @@ export const buildProject = async ({
       target: BROWSER_TARGET,
     });
     tasks.push(cssBuild);
+
   }
 
   if (includeThemes) {

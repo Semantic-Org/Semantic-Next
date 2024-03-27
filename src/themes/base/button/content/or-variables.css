@@ -1,4 +1,4 @@
-* {
+:root {
   --button-or-text: 'or';
   --button-or-gap: 0.3em;
   --button-or-height: calc(var(--button-vertical-padding) * 2) + 1em;
@@ -7,7 +7,7 @@
   --button-or-circle-distance-to-edge: var(--button-vertical-padding);
   --button-or-circle-size: calc(var(--button-or-height) - var(--button-or-circle-distance-to-edge));
   --button-or-line-height: var(--button-or-circle-size);
-  --button-or-box-shadow: var(--button-border-box-shadow);
+  --button-or-box-shadow: var(--button-border-box-shadow), var(--button-shadow-box-shadow);
 
   --button-or-vertical-offset: calc(var(--button-or-circle-size) / 2 * -1);
   --button-or-horizontal-offset: calc(var(--button-or-circle-size) / 2 * -1 );

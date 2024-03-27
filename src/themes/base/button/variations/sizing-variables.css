@@ -1,4 +1,4 @@
-* {
+:root {
   --button-mini: var(--mini);
   --button-tiny: var(--tiny);
   --button-small: var(--small);

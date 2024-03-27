@@ -1,4 +1,4 @@
-* {
+:root {
   --button-pressed-background-color: var(--button-background-color);
   --button-pressed-background-image: var(--button-background-image);
   --button-pressed-color: var(--pressed-text-color);

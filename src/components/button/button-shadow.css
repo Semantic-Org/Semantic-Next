@@ -1,5 +1,5 @@
-/* src/components/button/css/shadow/content/button.css */
-@layer component.button {
+/* src/components/button/css/button-shadow.css */
+@layer component {
   *,
   :after,
   :before {
@@ -32,9 +32,43 @@
     outline: var(--button-border);
   }
 }
-
-/* src/components/button/css/shadow/content/icon.css */
-@layer component.button {
+@layer component {
+  .buttons ::slotted(button-or) {
+    position: relative;
+    width: var(--button-or-gap);
+    height: var(--button-or-height);
+    z-index: var(--button-or-z-index);
+  }
+  .buttons ::slotted(button-or):before {
+    position: absolute;
+    text-align: center;
+    border-radius: var(--circular-radius);
+    content: var(--button-or-text);
+    top: 50%;
+    left: 50%;
+    background-color: var(--button-or-background-color);
+    text-shadow: var(--button-or-text-shadow);
+    margin-top: var(--button-or-vertical-offset);
+    margin-left: var(--button-or-horizontal-offset);
+    width: var(--button-or-circle-size);
+    height: var(--button-or-circle-size);
+    line-height: var(--button-or-line-height);
+    color: var(--button-or-text-color);
+    font-style: var(--button-or-text-style);
+    font-weight: var(--button-or-text-weight);
+    box-shadow: var(--button-or-box-shadow);
+  }
+  .buttons ::slotted(button-or) [data-text]:before {
+    content: attr(data-text);
+  }
+  .fluid.buttons ::slotted(button-or) {
+    width: 0em !important;
+  }
+  .fluid.buttons ::slotted(button-or):after {
+    display: none;
+  }
+}
+@layer component {
   .button .icon {
     vertical-align: top;
     opacity: var(--button-icon-opacity);
@@ -43,18 +77,15 @@
     margin: 0rem;
   }
 }
-
-/* src/components/button/css/shadow/content/label.css */
-@layer component.button {
+@layer component {
   .button .label {
   }
 }
-
-/* src/components/button/css/shadow/plural/buttons.css */
-@layer component.button {
+@layer component {
   .buttons {
     display: inline-flex;
     flex-direction: row;
+    font-size: 0em;
     vertical-align: baseline;
     margin: var(--button-vertical-margin) var(--button-horizontal-margin) 0em 0em;
   }
@@ -62,9 +93,7 @@
     box-shadow: var(--button-group-box-shadow);
   }
 }
-
-/* src/components/button/css/shadow/types/animated.css */
-@layer component.button {
+@layer component {
   .animated.button {
     position: relative;
     overflow: hidden;
@@ -161,9 +190,7 @@
     transform: scale(1);
   }
 }
-
-/* src/components/button/css/shadow/types/emphasis.css */
-@layer component.button {
+@layer component {
   .primary.buttons .button,
   .primary.button {
     background-color: var(--button-primary-color);
@@ -237,9 +264,7 @@
     text-shadow: var(--button-secondary-text-shadow);
   }
 }
-
-/* src/components/button/css/shadow/types/icon.css */
-@layer component.button {
+@layer component {
   .icon-only.buttons .button,
   .icon-only.button {
     padding: var(--vertical-padding) var(--vertical-padding) (var(--vertical-padding) + var(--shadow-offset));
@@ -251,9 +276,7 @@
     vertical-align: top;
   }
 }
-
-/* src/components/button/css/shadow/types/labeled.css */
-@layer component.button {
+@layer component {
   .labeled.button:not(.icon) {
     display: inline-flex;
     flex-direction: row;
@@ -294,9 +317,7 @@
     border-bottom-right-radius: 0px;
   }
 }
-
-/* src/components/button/css/shadow/types/labeled-icon.css */
-@layer component.button {
+@layer component {
   .labeled.icon.buttons .button,
   .labeled.icon.button {
     position: relative;
@@ -385,9 +406,7 @@
     padding-right: var(--horizontal-padding) !important;
   }
 }
-
-/* src/components/button/css/shadow/types/transparent.css */
-@layer component.button {
+@layer component {
   .transparent.button {
     background-image: var(--button-transparent-background-image);
     background-color: var(--button-transparent-background-color);
@@ -438,9 +457,7 @@
     box-shadow: var(--button-transparent-inverted-active-box-shadow) !important;
   }
 }
-
-/* src/components/button/css/shadow/types/toggle.css */
-@layer component.button {
+@layer component {
   .toggle.buttons .active.button,
   .buttons .button.toggle.active,
   .button.toggle.active {
@@ -455,9 +472,7 @@
     color: var(--button-inverted-text-color) !important;
   }
 }
-
-/* src/components/button/css/shadow/states/hover.css */
-@layer component.button {
+@layer component {
   .button.hover,
   .button:hover {
     background-color: var(--button-hover-background-color);
@@ -470,9 +485,7 @@
     opacity: var(--button-hover-icon-opacity);
   }
 }
-
-/* src/components/button/css/shadow/states/focus.css */
-@layer component.button {
+@layer component {
   .button.focus,
   .button:focus {
     background-color: var(--button-focus-background-color);
@@ -485,9 +498,7 @@
     opacity: var(--button-focus-icon-opacity);
   }
 }
-
-/* src/components/button/css/shadow/states/pressed.css */
-@layer component.button {
+@layer component {
   .pressed.button,
   .active.pressed.button,
   .button:active,
@@ -498,9 +509,7 @@
     box-shadow: var(--button-pressed-box-shadow) !important;
   }
 }
-
-/* src/components/button/css/shadow/states/active.css */
-@layer component.button {
+@layer component {
   .active.button {
     background-color: var(--button-active-background-color);
     background-image: var(--button-active-background-image);
@@ -520,9 +529,7 @@
     box-shadow: var(--button-active-down-box-shadow);
   }
 }
-
-/* src/components/button/css/shadow/states/disabled.css */
-@layer component.button {
+@layer component {
   .disabled.button,
   .disabled.button:hover,
   .disabled.active.button {
@@ -549,9 +556,7 @@
     cursor: var(--button-clickable-disabled-cursor) !important;
   }
 }
-
-/* src/components/button/css/shadow/states/loading.css */
-@layer component.button {
+@layer component {
   .loading.button:not(.icon) {
     position: relative;
     cursor: default;
@@ -611,9 +616,7 @@
     border-top-color: var(--inverted-loader-line-color);
   }
 }
-
-/* src/components/button/css/shadow/variations/basic.css */
-@layer component.button {
+@layer component {
   .basic.buttons .button,
   .basic.button {
     background: var(--button-basic-background) !important;
@@ -718,9 +721,7 @@
     border-top-width: 0px;
   }
 }
-
-/* src/components/button/css/shadow/variations/attached.css */
-@layer component.button {
+@layer component {
   .attached.button {
     position: relative;
     display: block;
@@ -817,9 +818,7 @@
     border-radius: 0em 0em 0em var(--button-border-radius);
   }
 }
-
-/* src/components/button/css/shadow/variations/circular.css */
-@layer component.button {
+@layer component {
   .circular.button {
     border-radius: var(--circular-radius);
   }
@@ -828,9 +827,7 @@
     vertical-align: baseline;
   }
 }
-
-/* src/components/button/css/shadow/variations/colored.css */
-@layer component.button {
+@layer component {
   .red.buttons,
   .red.button {
     --button-text-color: var(--button-red-text-color);
@@ -900,9 +897,7 @@
     text-shadow: var(--button-blue-text-shadow);
   }
 }
-
-/* src/components/button/css/shadow/variations/compact.css */
-@layer component.button {
+@layer component {
   .compact.buttons .button,
   .compact.button {
     padding: var(--button-compact-vertical-padding) var(--button-compact-horizontal-padding);
@@ -920,9 +915,7 @@
     padding: var(--button-very-compact-icon-padding);
   }
 }
-
-/* src/components/button/css/shadow/variations/floated.css */
-@layer component.button {
+@layer component {
   .left-floated.buttons,
   .left-floated.button {
     float: left;
@@ -936,9 +929,7 @@
     margin-left: var(--button-floated-margin);
   }
 }
-
-/* src/components/button/css/shadow/variations/fluid.css */
-@layer component.button {
+@layer component {
   .fluid.buttons,
   .fluid.button {
     width: 100%;
@@ -1051,9 +1042,7 @@
     height: 8.3333%;
   }
 }
-
-/* src/components/button/css/shadow/variations/negative.css */
-@layer component.button {
+@layer component {
   .negative.buttons .button,
   .negative.button {
     background-color: var(--button-negative-color);
@@ -1132,9 +1121,7 @@
     color: var(--button-subtle-negative-text-color);
   }
 }
-
-/* src/components/button/css/shadow/variations/positive.css */
-@layer component.button {
+@layer component {
   .positive.buttons .button,
   .positive.button {
     background-color: var(--button-positive-color);
@@ -1213,9 +1200,7 @@
     color: var(--button-subtle-positive-text-color);
   }
 }
-
-/* src/components/button/css/shadow/variations/warning.css */
-@layer component.button {
+@layer component {
   .warning.buttons .button,
   .warning.button {
     background-color: var(--button-warning-color);
@@ -1294,9 +1279,7 @@
     color: var(--button-subtle-warning-text-color);
   }
 }
-
-/* src/components/button/css/shadow/variations/info.css */
-@layer component.button {
+@layer component {
   .info.buttons .button,
   .info.button {
     background-color: var(--button-info-color);
@@ -1375,9 +1358,7 @@
     color: var(--button-subtle-info-text-color);
   }
 }
-
-/* src/components/button/css/shadow/variations/sizing.css */
-@layer component.button {
+@layer component {
   .mini.buttons .button,
   .mini.buttons .or,
   .mini.button {
@@ -1419,9 +1400,7 @@
     font-size: var(--button-massive);
   }
 }
-
-/* src/components/button/css/shadow/variations/social.css */
-@layer component.button {
+@layer component {
   .facebook.button {
     background-color: var(--facebook-color);
     color: var(--button-inverted-text-color);
@@ -1540,9 +1519,7 @@
     text-shadow: var(--button-inverted-text-shadow);
   }
 }
-
-/* src/components/button/css/shadow/variations/vertical.css */
-@layer component.button {
+@layer component {
   .vertical.buttons {
     display: inline-flex;
     flex-direction: column;
@@ -1568,5 +1545,3 @@
     border-radius: var(--border-radius);
   }
 }
-
-/* src/components/button/css/shadow/button.css */

@@ -1,4 +1,4 @@
-* {
+:root {
   --icon-airplay-svg: url('./assets/airplay.svg');
   --icon-alert-circle-svg: url('./assets/alert-circle.svg');
   --icon-alert-octagon-svg: url('./assets/alert-octagon.svg');

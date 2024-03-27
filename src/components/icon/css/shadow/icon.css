@@ -1,17 +1,17 @@
 /* Content */
-@import url('./content/icon.css') layer(component);
+@import url('./content/icon.css') layer(component.icon);
 
 /* Group */
-@import url('./group/icons.css') layer(component);
+@import url('./group/icons.css') layer(component.icon);
 
 /* States */
-@import url('./states/disabled.css') layer(component);
-@import url('./states/loading.css') layer(component);
+@import url('./states/disabled.css') layer(component.icon);
+@import url('./states/loading.css') layer(component.icon);
 
 /* Variations */
-@import url('./variations/circular.css') layer(component);
-@import url('./variations/colored.css') layer(component);
-@import url('./variations/fitted.css') layer(component);
-@import url('./variations/link.css') layer(component);
-@import url('./variations/sizing.css') layer(component);
+@import url('./variations/circular.css') layer(component.icon);
+@import url('./variations/colored.css') layer(component.icon);
+@import url('./variations/fitted.css') layer(component.icon);
+@import url('./variations/link.css') layer(component.icon);
+@import url('./variations/sizing.css') layer(component.icon);
 

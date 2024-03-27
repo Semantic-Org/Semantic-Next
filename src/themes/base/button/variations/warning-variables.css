@@ -1,4 +1,4 @@
-* {
+:root {
 
   --button-warning-color: var(--warning-color);
   --button-warning-background-image: var(--button-colored-background-image);

@@ -1,4 +1,4 @@
-* {
+:root {
   --button-compact-vertical-padding: var(--6px);
   --button-compact-horizontal-padding: var(--8px);
   --button-compact-icon-padding: var(--button-compact-vertical-padding);
