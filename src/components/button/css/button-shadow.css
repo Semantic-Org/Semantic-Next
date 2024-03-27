@@ -35,11 +35,11 @@
 
 /* src/components/button/css/shadow/content/icon.css */
 @layer component.button {
-  .button .icon {
+  .button ui-icon {
     vertical-align: top;
     opacity: var(--button-icon-opacity);
   }
-  .button .icon:only-child {
+  .button ui-icon:only-child {
     margin: 0rem;
   }
 }
