@@ -88,9 +88,8 @@ layout main ui-container {
 
 body.dark {
   page > masthead {
-    background-color: #000000;
-    background-image: linear-gradient(transparent, transparent 80%, rgb(20 149 183 / 12%) 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #080808;
+    border-bottom: 1px solid rgba(34, 35, 37, 0.7);
     box-shadow: none;
   }
   page > masthead h1 {
@@ -111,8 +110,11 @@ body.dark {
   main rail.ui.right.dividing.rail {
     border-color: rgba(255, 255, 255, 0.1);
   }
+  layout main {
+    background-image: linear-gradient(to bottom, #0e0e0e, #000000 100px, #000000);
+  }
   layout main ui-container {
     background-color: rgb(0, 0, 0, 0);
-    box-shadow: 1px 0px 1px 0 rgb(255 255 255 / 10%);
+    box-shadow: 1px 0px 1px 0 rgba(34, 35, 37, 0.7);
   }
 }
