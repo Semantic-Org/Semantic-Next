@@ -35,7 +35,9 @@
       transition: opacity 0.5s;
     }
 
+    &.visible,
     &:popover-open {
+      box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.5);
       translate: 0 0;
 
       &::backdrop {
@@ -50,12 +52,6 @@
         }
       }
     }
-  }
-  layout sidebar:popover-open,
-  layout sidebar.visible {
-    box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.5);
-    transform: translateX(0%);
-    content-visibility: visible;
   }
   layout page {
     margin: 0rem;

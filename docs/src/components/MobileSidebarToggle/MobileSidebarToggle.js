@@ -23,8 +23,11 @@ const createInstance = function ({ $, isServer, tpl }) {
         $sidebar.get(0).showPopover();
       }
       else {
+        console.log('adding', $sidebar.length);
         $sidebar.addClass('visible');
       }
+      // safari ios doesnt handle this natively properly so we gotta do manual
+      tpl.bindClickaway();
     },
     hideSidebar() {
       const $sidebar = tpl.getSidebar();
@@ -40,20 +43,18 @@ const createInstance = function ({ $, isServer, tpl }) {
       return !!$sidebar.get(0).showPopover;
     },
     bindClickaway() {
-      //tpl.clickaway = $('body').on('click',
+      tpl.clickaway = $('body').one('click', function(event) {
+        if($(event.target).closest('mobile-sidebar-toggle, sidebar').length == 0) {
+          tpl.hideSidebar();
+        }
+      });
     }
   };
 };
 
-const onCreated = function({tpl, isClient}) {
-};
-
-const onDestroyed = function({tpl, isClient}) {
-};
-
-
 const events = {
   'click ui-icon'({tpl}) {
+    console.log('clicked');
     if(tpl.isVisible()) {
       tpl.hideSidebar();
     }
@@ -68,7 +69,6 @@ const MobileSidebarToggle = createComponent({
   template,
   events,
   css,
-  onCreated,
   createInstance,
 });
 
