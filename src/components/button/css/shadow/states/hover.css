@@ -1,7 +1,7 @@
 /*--------------
       Hover
 ---------------*/
-@media (hover: hover) {
+@media (pointer: fine) {
 
   .button.hover,
   .button:hover {

@@ -458,7 +458,7 @@
 
 /* src/components/button/css/shadow/states/hover.css */
 @layer component.button.shadow {
-  @media (hover: hover) {
+  @media (pointer: fine) {
     .button.hover,
     .button:hover {
       background-color: var(--button-hover-background-color);
@@ -490,7 +490,7 @@
 
 /* src/components/button/css/shadow/states/pressed.css */
 @layer component.button.shadow {
-  @media (hover: hover) {
+  @media (pointer: fine) {
     .button:active,
     .active.button:active {
       background-color: var(--button-pressed-background-color);
