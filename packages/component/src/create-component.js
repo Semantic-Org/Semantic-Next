@@ -18,7 +18,7 @@ export const createComponent = ({
   lightCSS = false,
   spec = false,
   tagName,
-  delegateFocus = false,
+  delegateFocus = true,
   templateName = kebabToCamel(tagName),
 
   plural = false,

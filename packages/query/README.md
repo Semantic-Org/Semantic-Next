@@ -32,6 +32,7 @@ Query supports the following methods:
 
 ### Events
 * `on(event, targetSelectorOrHandler, handler)` - Attach an event using either event delegation (i.e., `.on('childNode', 'click', func)`) or regular event binding (i.e., `.on('click', func)`).
+* `one(event, targetSelectorOrHandler, handler, options)` - Attach an event handler that fires only once
 * `off(event, handler)` - Removes an event either by event type or handler.
 
 ### DOM Manipulation

@@ -122,6 +122,7 @@ export class Query {
     }
 
     const abortController = options?.abortController || new AbortController();
+    const eventSettings = options?.eventSettings || {};
     const signal = abortController.signal;
 
     this.each((el) => {
@@ -135,7 +136,7 @@ export class Query {
         };
       }
       if (el.addEventListener) {
-        el.addEventListener(event, delegateHandler || handler, { signal });
+        el.addEventListener(event, delegateHandler || handler, { composed: true, signal, ...eventSettings });
       }
 
       const eventHandler = {
@@ -159,19 +160,19 @@ export class Query {
   }
 
   one(event, targetSelectorOrHandler, handlerOrOptions, options) {
+    let handler;
+    if (isObject(handlerOrOptions)) {
+      handler = targetSelectorOrHandler;
+    } else if (isString(targetSelectorOrHandler)) {
+      handler = handlerOrOptions;
+    } else if (isFunction(targetSelectorOrHandler)) {
+      handler = targetSelectorOrHandler;
+    }
     const wrappedHandler = (...args) => {
-      // Call the original event handler
-      if (isFunction(handlerOrOptions)) {
-        handlerOrOptions.apply(this, args);
-      } else if (isString(targetSelectorOrHandler) && isFunction(targetSelectorOrHandler)) {
-        targetSelectorOrHandler.apply(this, args);
-      }
-
+      handler.apply(this, args);
       // Unbind the event handler after it has been invoked once
       this.off(event, wrappedHandler);
     };
-
-    // Use the existing `on` method to bind the wrapped handler
     return this.on(event, targetSelectorOrHandler, wrappedHandler, options);
   }
 
