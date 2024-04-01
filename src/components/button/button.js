@@ -28,8 +28,10 @@ const createInstance = ({tpl, settings, $}) => ({
       ? ' ' + classes.join(' ')
       : ''
     ;
+  },
+  isDisabled() {
+    return settings.state == 'disabled';
   }
-
 });
 
 
@@ -38,9 +40,14 @@ const onCreated = ({tpl}) => {
 };
 
 const events = {
+  'touchstart .button'({event, tpl, $}) {
+    $(this).addClass('pressed');
+  },
+  'touchend .button'({event, tpl, $}) {
+    $(this).removeClass('pressed');
+  },
   'click .button'({event, tpl, $}) {
-    let $button = $(this);
-    $button.blur();
+    $(this).blur();
   },
   'keydown .button'({event, tpl, $}) {
     let $button = $(this);

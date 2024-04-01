@@ -13,7 +13,7 @@
   }
   .icon {
     display: inline-block;
-    opacity: var(--opacity);
+    opacity: var(--icon-opacity);
     width: var(--icon-width);
     height: var(--icon-height);
     background-color: currentColor;

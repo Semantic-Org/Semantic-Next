@@ -59,3 +59,16 @@ body ::-webkit-scrollbar-thumb:window-inactive {
 body ::-webkit-scrollbar-thumb:hover {
   background: var(--thumb-hover-background);
 }
+
+body.dark ::-webkit-scrollbar-track {
+  background: var(--track-inverted-background);
+}
+body.dark ::-webkit-scrollbar-thumb {
+  background: var(--thumb-inverted-background);
+}
+body.dark ::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inverted-inactive-background);
+}
+body.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-inverted-hover-background);
+}

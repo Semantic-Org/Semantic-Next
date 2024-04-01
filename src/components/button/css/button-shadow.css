@@ -1,5 +1,5 @@
 /* src/components/button/css/shadow/content/button.css */
-@layer component.button {
+@layer component.button.shadow {
   *,
   :after,
   :before {
@@ -34,7 +34,7 @@
 }
 
 /* src/components/button/css/shadow/content/icon.css */
-@layer component.button {
+@layer component.button.shadow {
   .button ui-icon {
     vertical-align: top;
     opacity: var(--button-icon-opacity);
@@ -45,13 +45,13 @@
 }
 
 /* src/components/button/css/shadow/content/label.css */
-@layer component.button {
+@layer component.button.shadow {
   .button .label {
   }
 }
 
 /* src/components/button/css/shadow/plural/buttons.css */
-@layer component.button {
+@layer component.button.shadow {
   .buttons {
     display: inline-flex;
     flex-direction: row;
@@ -64,7 +64,7 @@
 }
 
 /* src/components/button/css/shadow/types/animated.css */
-@layer component.button {
+@layer component.button.shadow {
   .animated.button {
     position: relative;
     overflow: hidden;
@@ -163,7 +163,7 @@
 }
 
 /* src/components/button/css/shadow/types/emphasis.css */
-@layer component.button {
+@layer component.button.shadow {
   .primary.buttons .button,
   .primary.button {
     background-color: var(--button-primary-color);
@@ -239,7 +239,7 @@
 }
 
 /* src/components/button/css/shadow/types/icon.css */
-@layer component.button {
+@layer component.button.shadow {
   .icon-only.buttons .button,
   .icon-only.button {
     padding: var(--vertical-padding) var(--vertical-padding) (var(--vertical-padding) + var(--shadow-offset));
@@ -253,7 +253,7 @@
 }
 
 /* src/components/button/css/shadow/types/labeled.css */
-@layer component.button {
+@layer component.button.shadow {
   .labeled.button:not(.icon) {
     display: inline-flex;
     flex-direction: row;
@@ -296,7 +296,7 @@
 }
 
 /* src/components/button/css/shadow/types/labeled-icon.css */
-@layer component.button {
+@layer component.button.shadow {
   .labeled.icon.buttons .button,
   .labeled.icon.button {
     position: relative;
@@ -387,7 +387,7 @@
 }
 
 /* src/components/button/css/shadow/types/transparent.css */
-@layer component.button {
+@layer component.button.shadow {
   .transparent.button {
     background-image: var(--button-transparent-background-image);
     background-color: var(--button-transparent-background-color);
@@ -440,7 +440,7 @@
 }
 
 /* src/components/button/css/shadow/types/toggle.css */
-@layer component.button {
+@layer component.button.shadow {
   .toggle.buttons .active.button,
   .buttons .button.toggle.active,
   .button.toggle.active {
@@ -457,22 +457,24 @@
 }
 
 /* src/components/button/css/shadow/states/hover.css */
-@layer component.button {
-  .button.hover,
-  .button:hover {
-    background-color: var(--button-hover-background-color);
-    background-image: var(--button-hover-background-image);
-    box-shadow: var(--button-hover-box-shadow);
-    color: var(--button-hover-color);
-  }
-  .button.hover .icon,
-  .button:hover .icon {
-    opacity: var(--button-hover-icon-opacity);
+@layer component.button.shadow {
+  @media (hover: hover) {
+    .button.hover,
+    .button:hover {
+      background-color: var(--button-hover-background-color);
+      background-image: var(--button-hover-background-image);
+      box-shadow: var(--button-hover-box-shadow);
+      color: var(--button-hover-color);
+    }
+    .button.hover .icon,
+    .button:hover .icon {
+      opacity: var(--button-hover-icon-opacity);
+    }
   }
 }
 
 /* src/components/button/css/shadow/states/focus.css */
-@layer component.button {
+@layer component.button.shadow {
   .button.focus,
   .button:focus {
     background-color: var(--button-focus-background-color);
@@ -487,11 +489,18 @@
 }
 
 /* src/components/button/css/shadow/states/pressed.css */
-@layer component.button {
+@layer component.button.shadow {
+  @media (hover: hover) {
+    .button:active,
+    .active.button:active {
+      background-color: var(--button-pressed-background-color);
+      background-image: var(--button-pressed-background-image);
+      color: var(--button-pressed-color);
+      box-shadow: var(--button-pressed-box-shadow) !important;
+    }
+  }
   .pressed.button,
-  .active.pressed.button,
-  .button:active,
-  .active.button:active {
+  .active.pressed.button {
     background-color: var(--button-pressed-background-color);
     background-image: var(--button-pressed-background-image);
     color: var(--button-pressed-color);
@@ -500,7 +509,7 @@
 }
 
 /* src/components/button/css/shadow/states/active.css */
-@layer component.button {
+@layer component.button.shadow {
   .active.button {
     background-color: var(--button-active-background-color);
     background-image: var(--button-active-background-image);
@@ -522,7 +531,7 @@
 }
 
 /* src/components/button/css/shadow/states/disabled.css */
-@layer component.button {
+@layer component.button.shadow {
   .disabled.button,
   .disabled.button:hover,
   .disabled.active.button {
@@ -551,7 +560,7 @@
 }
 
 /* src/components/button/css/shadow/states/loading.css */
-@layer component.button {
+@layer component.button.shadow {
   .loading.button:not(.icon) {
     position: relative;
     cursor: default;
@@ -613,7 +622,7 @@
 }
 
 /* src/components/button/css/shadow/variations/basic.css */
-@layer component.button {
+@layer component.button.shadow {
   .basic.buttons .button,
   .basic.button {
     background: var(--button-basic-background) !important;
@@ -720,7 +729,7 @@
 }
 
 /* src/components/button/css/shadow/variations/attached.css */
-@layer component.button {
+@layer component.button.shadow {
   .attached.button {
     position: relative;
     display: block;
@@ -819,7 +828,7 @@
 }
 
 /* src/components/button/css/shadow/variations/circular.css */
-@layer component.button {
+@layer component.button.shadow {
   .circular.button {
     border-radius: var(--circular-radius);
   }
@@ -830,7 +839,7 @@
 }
 
 /* src/components/button/css/shadow/variations/colored.css */
-@layer component.button {
+@layer component.button.shadow {
   .red.buttons,
   .red.button {
     --button-text-color: var(--button-red-text-color);
@@ -902,7 +911,7 @@
 }
 
 /* src/components/button/css/shadow/variations/compact.css */
-@layer component.button {
+@layer component.button.shadow {
   .compact.buttons .button,
   .compact.button {
     padding: var(--button-compact-vertical-padding) var(--button-compact-horizontal-padding);
@@ -922,7 +931,7 @@
 }
 
 /* src/components/button/css/shadow/variations/floated.css */
-@layer component.button {
+@layer component.button.shadow {
   .left-floated.buttons,
   .left-floated.button {
     float: left;
@@ -938,7 +947,7 @@
 }
 
 /* src/components/button/css/shadow/variations/fluid.css */
-@layer component.button {
+@layer component.button.shadow {
   .fluid.buttons,
   .fluid.button {
     width: 100%;
@@ -1053,7 +1062,7 @@
 }
 
 /* src/components/button/css/shadow/variations/negative.css */
-@layer component.button {
+@layer component.button.shadow {
   .negative.buttons .button,
   .negative.button {
     background-color: var(--button-negative-color);
@@ -1134,7 +1143,7 @@
 }
 
 /* src/components/button/css/shadow/variations/positive.css */
-@layer component.button {
+@layer component.button.shadow {
   .positive.buttons .button,
   .positive.button {
     background-color: var(--button-positive-color);
@@ -1215,7 +1224,7 @@
 }
 
 /* src/components/button/css/shadow/variations/warning.css */
-@layer component.button {
+@layer component.button.shadow {
   .warning.buttons .button,
   .warning.button {
     background-color: var(--button-warning-color);
@@ -1296,7 +1305,7 @@
 }
 
 /* src/components/button/css/shadow/variations/info.css */
-@layer component.button {
+@layer component.button.shadow {
   .info.buttons .button,
   .info.button {
     background-color: var(--button-info-color);
@@ -1377,7 +1386,7 @@
 }
 
 /* src/components/button/css/shadow/variations/sizing.css */
-@layer component.button {
+@layer component.button.shadow {
   .mini.buttons .button,
   .mini.buttons .or,
   .mini.button {
@@ -1421,7 +1430,7 @@
 }
 
 /* src/components/button/css/shadow/variations/social.css */
-@layer component.button {
+@layer component.button.shadow {
   .facebook.button {
     background-color: var(--facebook-color);
     color: var(--button-inverted-text-color);
@@ -1542,7 +1551,7 @@
 }
 
 /* src/components/button/css/shadow/variations/vertical.css */
-@layer component.button {
+@layer component.button.shadow {
   .vertical.buttons {
     display: inline-flex;
     flex-direction: column;
