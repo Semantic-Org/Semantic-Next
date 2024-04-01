@@ -135,14 +135,15 @@ export class Query {
           }
         };
       }
+      const eventListener = delegateHandler || handler;
       if (el.addEventListener) {
-        el.addEventListener(event, delegateHandler || handler, { composed: true, signal, ...eventSettings });
+        el.addEventListener(event, eventListener, { signal, ...eventSettings });
       }
 
       const eventHandler = {
         el,
         event,
-        eventListener: delegateHandler || handler,
+        eventListener,
         abortController,
         delegated: targetSelector !== undefined,
         handler,

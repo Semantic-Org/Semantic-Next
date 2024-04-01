@@ -229,11 +229,19 @@ export const LitTemplate = class LitTemplate {
       }
       return { eventName, selector };
     };
-    // the magic of aborts <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
+
+    // this is to cancel event bindings when template tears down
+    // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
+
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
+
+      // BUG: iOS Safari will not bubble the touchstart / touchend events
+      // if theres no handler on the actual element
+      $(selector, this.renderRoot).on(eventName, noop);
+
       $(this.renderRoot).on(
         eventName,
         selector,

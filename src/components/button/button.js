@@ -38,6 +38,12 @@ const createInstance = ({tpl, settings, $}) => ({
 const onCreated = ({tpl}) => {
 
 };
+const onRendered = function({tpl}){
+  const shadowRoot = this.renderRoot;
+  if(!shadowRoot) {
+    return;
+  }
+};
 
 const events = {
   'touchstart .button'({event, tpl, $}) {
@@ -74,5 +80,6 @@ export const UIButton = createComponent({
   css: ButtonCSS,
   createInstance,
   onCreated,
+  onRendered,
   events,
 });
