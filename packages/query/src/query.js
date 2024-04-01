@@ -114,16 +114,13 @@ export class Query {
     if (isObject(handlerOrOptions)) {
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
-    }
-    else if (isString(targetSelectorOrHandler)) {
+    } else if (isString(targetSelectorOrHandler)) {
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
-    }
-    else if (isFunction(targetSelectorOrHandler)) {
+    } else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
 
-    // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     const abortController = options?.abortController || new AbortController();
     const signal = abortController.signal;
 
@@ -131,11 +128,9 @@ export class Query {
       let delegateHandler;
       if (targetSelector) {
         delegateHandler = (e) => {
-          for (let target = e.target; target && target !== el; target = target.parentNode) {
-            if (target.matches && target.matches(targetSelector)) {
-              handler.call(target, e);
-              break;
-            }
+          const target = e.target.closest(targetSelector);
+          if (target && el.contains(target)) {
+            handler.call(target, e);
           }
         };
       }
@@ -161,6 +156,23 @@ export class Query {
     Query._eventHandlers.push(...eventHandlers);
 
     return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
+  }
+
+  one(event, targetSelectorOrHandler, handlerOrOptions, options) {
+    const wrappedHandler = (...args) => {
+      // Call the original event handler
+      if (isFunction(handlerOrOptions)) {
+        handlerOrOptions.apply(this, args);
+      } else if (isString(targetSelectorOrHandler) && isFunction(targetSelectorOrHandler)) {
+        targetSelectorOrHandler.apply(this, args);
+      }
+
+      // Unbind the event handler after it has been invoked once
+      this.off(event, wrappedHandler);
+    };
+
+    // Use the existing `on` method to bind the wrapped handler
+    return this.on(event, targetSelectorOrHandler, wrappedHandler, options);
   }
 
   off(event, handler) {
