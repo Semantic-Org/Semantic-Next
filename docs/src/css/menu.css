@@ -1,5 +1,8 @@
 /* Shim for docs until component ready */
 
+@layer component {
+
+
 /*******************************
             Container
 *******************************/
@@ -41,12 +44,16 @@ ui-menu[dashboard] {
 }
 
 ui-menu[dashboard] .item {
+  display: inline-block;
   font-weight: bold;
   padding: 7px 6px;
   line-height: 1;
   margin-right: 6px;
   border-radius: 3px;
   color: rgba(0, 0, 0, 0.6);
+}
+ui-menu[dashboard] .item:last-child {
+  margin-right: 0px;
 }
 ui-menu[dashboard] .active.item {
   cursor: default;
@@ -76,4 +83,6 @@ body.dark {
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.50);
     box-shadow: none;
   }
+}
+
 }

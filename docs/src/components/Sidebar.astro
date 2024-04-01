@@ -6,7 +6,7 @@ import { getNavMenu } from '@helpers/get-nav-menu.js';
 
 const menu = await getNavMenu();
 ---
-<sidebar transition:persist>
+<sidebar transition:persist id="sidebar" popover>
 	<navSearch class="ui inverted icon input">
 		<input type="text" placeholder="Search...">
 		<i class="search icon"></i>

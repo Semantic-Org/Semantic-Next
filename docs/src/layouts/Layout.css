@@ -1,120 +1,141 @@
-layout {
-  display: flex;
-  flex-direction: row;
-}
+@layer layout {
 
-layout sidebar {
-  position: fixed;
-  z-index: 1;
-  background-color: #1B1C1D;
-  width: 250px;
-  flex: 0 1 auto;
-}
-layout page {
-  display: flex;
-  flex-direction: column;
-  margin-left: 250px;
-  overflow: auto;
-  flex: 1 1 auto;
-}
-
-layout main {
-  display: flex;
-  flex-grow: 1;
-  flex-direction: column;
-}
-layout main ui-container {
-  flex-grow: 1;
-  position: relative;
-  padding: 2em 3em 7em;
-  margin: 0rem calc(300px + 1em) 0rem 0rem !important;
-  width: auto !important;
-  max-width: 1170px !important;
-  box-shadow: 1px 0px 1px 0 rgb(0 0 0 / 8%);
-}
-
-layout pageContent {
-  font-size: 15px;
-}
-
-layout rail.ui.rail {
-  padding-top: 2rem !important;
-}
-
-layout,
-layout sidebar {
-  height: 100vh;
-}
-
-topbar + layout,
-topbar + layout sidebar {
-  height: calc(100vh - 60px);
-}
-
-layout main h2 {
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #dfdfdf;
-  padding-bottom: 8px;
-  font-size: 20px;
-}
-layout main h3 {
-  margin: 2rem 0rem 1rem;
-  font-size: 16px;
-  font-weight: bold;
-  color: #000;
-  letter-spacing: 0.05em;
-  padding-left: 0px;
-  padding-bottom: 5px;
-}
-layout main h3 p {
-  display: inline-block !important;
-  font-weight: normal;
-  color: rgba(0, 0, 0, 0);
-  font-size: 13px;
-  margin: 1px 0px 0px 6px;
-  margin-bottom: 0;
-  text-transform: none;
-  vertical-align: top;
-  transition: color 0.3s ease;
-}
-
-
-layout main {
-  background-color: #F5F5F6;
-}
-layout main ui-container {
-  background-color: #FFFFFF;
-}
-
-body.dark {
-  page > masthead {
-    background-color: #080808;
-    border-bottom: 1px solid rgba(34, 35, 37, 0.7);
-    box-shadow: none;
+  :root {
+    --sidebar-width: 250px;
+    --rail-width: 300px;
   }
-  page > masthead h1 {
-    color: #FFFFFF;
+
+  layout {
+    display: flex;
+    flex-direction: row;
   }
-  page > masthead p {
-    color: rgba(255, 255, 255, 0.6);
+
+  layout sidebar {
+    position: fixed;
+
+    left: 0;
+    top: auto;
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    z-index: 1;
+    background-color: #1B1C1D;
+    width: var(--sidebar-width);
+    flex: 0 1 auto;
   }
-  page > masthead > ui-menu {
-    box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
+  layout page {
+    display: flex;
+    flex-direction: column;
+    margin-left: var(--sidebar-width);
+    overflow: auto;
+    flex: 1 1 auto;
   }
+
   layout main {
-    background: linear-gradient(#020c0f, #0a0a0a 50px);
-  }
-  layout main h2 {
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  main rail.ui.right.dividing.rail {
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  layout main {
-    background-image: linear-gradient(to bottom, #0e0e0e, #000000 100px, #000000);
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
   }
   layout main ui-container {
-    background-color: rgb(0, 0, 0, 0);
-    box-shadow: 1px 0px 1px 0 rgba(34, 35, 37, 0.7);
+    flex-grow: 1;
+    position: relative;
+    padding: 2em 3em 7em;
+    margin: 0rem calc(var(--rail-width) + 2rem) 0rem 0rem;
+    width: auto;
+    max-width: 1170px ;
+    box-shadow: 1px 0px 1px 0 rgb(0 0 0 / 8%);
   }
+
+  layout pageContent {
+    font-size: 15px;
+  }
+
+  layout rail.ui.rail {
+    width: var(--rail-width);
+    padding-top: 2rem;
+  }
+
+  layout,
+  layout sidebar {
+    height: 100vh;
+  }
+
+  topbar + layout,
+  topbar + layout sidebar {
+    height: calc(100vh - var(--topbar-height));
+  }
+
+  layout main h2 {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #dfdfdf;
+    padding-bottom: 8px;
+    font-size: 20px;
+  }
+  layout main h3 {
+    margin: 2rem 0rem 1rem;
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+    letter-spacing: 0.05em;
+    padding-left: 0px;
+    padding-bottom: 5px;
+  }
+  layout main h2:first-child,
+  layout main h3:first-child {
+    margin-top: 0rem;
+  }
+  layout main h3 p {
+    display: inline-block;
+    font-weight: normal;
+    color: rgba(0, 0, 0, 0);
+    font-size: 13px;
+    margin: 1px 0px 0px 6px;
+    margin-bottom: 0;
+    text-transform: none;
+    vertical-align: top;
+    transition: color 0.3s ease;
+  }
+
+
+  layout main {
+    background-color: #F5F5F6;
+  }
+  layout main ui-container {
+    background-color: #FFFFFF;
+  }
+
+  body.dark {
+    page > masthead {
+      background-color: #080808;
+      border-bottom: 1px solid rgba(34, 35, 37, 0.7);
+      box-shadow: none;
+    }
+    page > masthead h1 {
+      color: #FFFFFF;
+    }
+    page > masthead p {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    page > masthead > ui-menu {
+      box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
+    }
+    layout main {
+      background: linear-gradient(#020c0f, #0a0a0a 50px);
+    }
+    layout main h2 {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    main rail.ui.right.dividing.rail {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    layout main {
+      background-image: linear-gradient(to bottom, #0e0e0e, #000000 100px, #000000);
+    }
+    layout main ui-container {
+      background-color: rgb(0, 0, 0, 0);
+      box-shadow: 1px 0px 1px 0 rgba(34, 35, 37, 0.7);
+    }
+  }
+
 }

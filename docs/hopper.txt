@@ -1,9 +1,15 @@
+Docs layout
 - Fix responsive layout
-- Roll custom icon font
-- Get basic nav menu
-- Get basic topbar menu
-- Add button page
-- Figure out build step into docs
-- Test lit components with islands
-- Figure out SUI component with islands
-- Page transitions
+- Top menu for docs page
+- Following menu
+- Code component
+
+Button
+- Finish button group
+
+Docs
+- Rewrite readmes as docs
+
+Components
+- Figure out build step for component spec
+

@@ -1,0 +1,13 @@
+/* Laptop Only(992px-1200px only) */
+
+@layer responsive {
+
+  layout {
+    --sidebar-width: 230px;
+    --rail-width: 220px;
+  }
+  layout masthead > ui-menu ui-container {
+    margin-right: 0px;
+  }
+
+}

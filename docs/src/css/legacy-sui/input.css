@@ -1,3 +1,5 @@
+@layer component {
+
 /*!
  * # Semantic UI 2.5.0 - Input
  * http://github.com/semantic-org/semantic-ui/
@@ -473,10 +475,4 @@
   font-size: 1.71428571em;
 }
 
-/*******************************
-         Theme Overrides
-*******************************/
-
-/*******************************
-         Site Overrides
-*******************************/
+}

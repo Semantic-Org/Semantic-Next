@@ -1,3 +1,5 @@
+@layer component {
+
 /* Shim for docs until component ready */
 
 /*******************************
@@ -8,15 +10,15 @@
 /* All Sizes */
 ui-container {
   display: block;
-  max-width: 100% !important;
+  max-width: 100%;
 }
 
 /* Mobile */
 @media only screen and (max-width: 767px) {
   ui-container {
-    width: auto !important;
-    margin-left: 1em !important;
-    margin-right: 1em !important;
+    width: auto;
+    margin-left: 1em;
+    margin-right: 1em;
   }
 }
 
@@ -24,8 +26,8 @@ ui-container {
 @media only screen and (min-width: 768px) and (max-width: 991px) {
   ui-container {
     width: 723px;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -33,8 +35,8 @@ ui-container {
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   ui-container {
     width: 933px;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -42,8 +44,8 @@ ui-container {
 @media only screen and (min-width: 1200px) {
   ui-container {
     width: 1127px;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -61,4 +63,6 @@ ui-container.text {
 /* Fluid */
 ui-container.fluid {
   width: 100%;
+}
+
 }

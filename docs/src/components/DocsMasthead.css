@@ -1,45 +1,49 @@
-layout masthead {
-  display: block;
-  background: #FFFFFF;
-  border-radius: 0px;
-  box-shadow: none;
-  border: none;
-  padding-bottom: 0em;
-  z-index: 3;
-  margin: 0em;
-  padding: 2em 0em 0em;
-  border-bottom: 1px solid #EEEEEE;
-  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
-}
+@layer layout {
 
-layout masthead h1 {
-  margin-top: -0.14285em;
-  font-size: 28px;
-  margin-bottom: 0.75rem;
-  font-weight: bold;
-}
-layout masthead h1 + p {
-  font-size: 16px;
-  margin: 0rem;
-  color: rgba(0, 0, 0, 0.6);
-}
+  layout masthead {
+    display: block;
+    background: #FFFFFF;
+    border-radius: 0px;
+    box-shadow: none;
+    border: none;
+    padding-bottom: 0em;
+    z-index: 3;
+    margin: 0em;
+    padding: 2em 0em 0em;
+    border-bottom: 1px solid #EEEEEE;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+  }
+
+  layout masthead h1 {
+    margin-top: -0.14285em;
+    font-size: 28px;
+    margin-bottom: 0.75rem;
+    font-weight: bold;
+  }
+  layout masthead h1 + p {
+    font-size: 16px;
+    margin: 0rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
 
 
-layout masthead ui-menu {
-  margin-top: 0rem;
-  padding-bottom: 1rem !important;
-  margin-bottom: 0rem;
-}
+  layout masthead ui-menu {
+    margin-top: 0rem;
+    padding-bottom: 1rem;
+    margin-bottom: 0rem;
+  }
 
-layout masthead ui-container {
-  position: relative;
-  width: auto !important;
-  max-width: 1170px !important;
-  margin-left: 1.5em !important;
-  margin-right: calc(300px - 1rem) !important;
-}
-layout masthead > ui-menu ui-container {
-  width: 1170px !important;
-  margin-right: calc(300px - 1rem) !important;
-  margin-left: 0.5em !important;
+  layout masthead ui-container {
+    position: relative;
+    width: auto;
+    max-width: 1170px;
+    margin-left: 1.5em;
+    margin-right: var(--rail-width);
+  }
+  layout masthead > ui-menu ui-container {
+    width: 100%;
+    max-width: 1170px;
+    margin-right: var(--rail-width);
+    margin-left: 0.5em;
+  }
 }

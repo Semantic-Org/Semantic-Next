@@ -23,8 +23,15 @@ import './Body.css';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <title>{title}</title>
+
+    <link rel="stylesheet" href="/css/layers.css">
+    <link rel="stylesheet" href="/css/responsive/large-monitor.css" media="screen and (min-width: 1980px)">
+    <link rel="stylesheet" href="/css/responsive/laptop.css" media="screen and (max-width: 1200px)">
+    <link rel="stylesheet" href="/css/responsive/computer.css" media="screen and (min-width: 992px)">
+    <link rel="stylesheet" href="/css/responsive/tablet.css" media="screen and (max-width: 991px)">
+    <link rel="stylesheet" href="/css/responsive/mobile.css" media="screen and (max-width: 767px)">
   </head>
-  <body style={padded ? 'padding: 2rem;' : ''}>
+  <body class={padded ? 'padded' : ''}>
     <script>
       import { $ } from '@semantic-ui/query';
       window.$ = $;

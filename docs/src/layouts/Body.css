@@ -1,59 +1,66 @@
-html, body {
-  margin: 0px;
-  padding: 0px;
-  font-size: 14px;
-  height: 100%;
-  box-sizing: border-box;
-}
+@layer global {
 
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
+  html, body {
+    margin: 0px;
+    padding: 0px;
+    font-size: 14px;
+    height: 100%;
+    box-sizing: border-box;
+  }
 
-body {
-  margin: 0px;
-  padding: 0px;
-  overflow-x: hidden;
-  min-width: 320px;
-  background: #FEFEFF;
-  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  line-height: 1.4285em;
-  color: rgba(0, 0, 0, 0.87);
-}
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
 
-img {
-  display: block;
-}
+  body {
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden;
+    min-width: 320px;
+    background: #FEFEFF;
+    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    line-height: 1.4285em;
+    color: rgba(0, 0, 0, 0.87);
+  }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  color: #131313;
-}
+  body.padded {
+    padding: 2rem;
+  }
 
-h1:first-child,
-h2:first-child,
-h3:first-child,
-h4:first-child,
-h5:first-child {
-  margin-top: 0px;
-}
+  img {
+    display: block;
+  }
 
-body.dark {
-  background-color: #000000;
-  color: rgba(255, 255, 255, 0.83);
-}
-body.dark {
   h1,
   h2,
   h3,
   h4,
   h5 {
-    color: #FFFFFF;
+    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    color: #131313;
+  }
+
+  h1:first-child,
+  h2:first-child,
+  h3:first-child,
+  h4:first-child,
+  h5:first-child {
+    margin-top: 0px;
+  }
+
+  body.dark {
+    background-color: #000000;
+    color: rgba(255, 255, 255, 0.83);
+  }
+  body.dark {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      color: #FFFFFF;
+    }
   }
 }
