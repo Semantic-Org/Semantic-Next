@@ -11,7 +11,7 @@
   }
 
   layout sidebar {
-    position: fixed;
+    position: static;
 
     left: 0;
     top: auto;
@@ -22,14 +22,14 @@
     z-index: 1;
     background-color: #1B1C1D;
     width: var(--sidebar-width);
-    flex: 0 1 auto;
+    flex: 0 0 auto;
   }
   layout page {
     display: flex;
     flex-direction: column;
-    margin-left: var(--sidebar-width);
     overflow: auto;
     flex: 1 1 auto;
+    width: 100%;
   }
 
   layout main {
@@ -58,12 +58,12 @@
 
   layout,
   layout sidebar {
-    height: 100vh;
+    height: 100dvh;
   }
 
   topbar + layout,
   topbar + layout sidebar {
-    height: calc(100vh - var(--topbar-height));
+    height: calc(100dvh - var(--topbar-height));
   }
 
   layout main h2 {
