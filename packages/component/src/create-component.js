@@ -1,5 +1,5 @@
-import { unsafeCSS, isServer } from 'lit';
-import { each, noop, kebabToCamel } from '@semantic-ui/utils';
+import { unsafeCSS } from 'lit';
+import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';

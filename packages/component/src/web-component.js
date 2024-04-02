@@ -1,5 +1,5 @@
-import { LitElement, isServer } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isEqual, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
+import { LitElement } from 'lit';
+import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isEqual, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 
 import { scopeStyles } from './helpers/scope-styles.js';
