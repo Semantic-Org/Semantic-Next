@@ -57,7 +57,7 @@
       "service": true
     },
     "build:docs": {
-      "command": "cd docs && npm run build",
+      "command": "cd docs && npm run build"
     },
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
