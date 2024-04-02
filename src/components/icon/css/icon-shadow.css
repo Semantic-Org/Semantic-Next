@@ -1155,7 +1155,7 @@
 @layer component.icon {
   .disabled.icon {
     cursor: default;
-    opacity: --var(icon-disabled-opacity);
+    opacity: var(--icon-disabled-opacity);
   }
 }
 
@@ -1167,10 +1167,10 @@
   i.circular.icon {
     border-radius: 500em !important;
     line-height: 1 !important;
-    padding: --var(circular-padding) !important;
-    box-shadow: --var(circular-shadow);
-    width: --var(circular-size) !important;
-    height: --var(circular-size) !important;
+    padding: var(--circular-padding) !important;
+    box-shadow: var(--circular-shadow);
+    width: var(--circular-size) !important;
+    height: var(--circular-size) !important;
   }
   i.circular.inverted.icon {
     border: none;

@@ -17,16 +17,17 @@
 *******************************/
 
 
-/* Code */
-pre {
-  display: block;
-  background-color: transparent;
-  margin: 0em 1.5em 0em 0em;
-  padding: 0em;
-}
 
-pre code {
+code {
   min-width: 500px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Code */
+code pre {
+  display: block;
+  background-color: transparent !important;
+  margin: 0em 0em;
+  padding: 0em;
 }

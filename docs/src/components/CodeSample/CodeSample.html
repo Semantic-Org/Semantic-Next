@@ -5,18 +5,18 @@
     </div>
   {{/if}}
   {{#if get.sourceTypes}}
-    <sourceType class="ui tabular dashboard menu">
+    <!--ui-menu dashboard>
       {{#each sourceType in get.sourceTypes}}
         <a class="{{maybeActiveSourceType sourceType}} item" data-value="{{sourceType}}">
-          {{upperCase sourceType}}
+          {{titleCase sourceType}}
         </a>
       {{/each}}
-    </sourceType>
+    </ui-menu !-->
   {{/if}}
   {{#if copyable}}
     <ui-icon copy></ui-icon>
   {{/if}}
   {{#if formattedCode}}
-    <pre><code class="code {{sourceType}}">{{{formattedCode}}}</code></pre>
+    <code class="code {{sourceType}}">{{{formattedCode}}}</code>
   {{/if}}
 </codeSample>
