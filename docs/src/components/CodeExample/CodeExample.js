@@ -15,26 +15,17 @@ const settings = {
 const createInstance = ({ $, isServer, settings, tpl }) => ({
   codeVisible : new ReactiveVar(false),
   code: new ReactiveVar(''),
-  extractAstroIslandHTML(input) {
-    const regex = /(?:<|\\x3C)(?!(!--|script))([\w\-]+)(?:\s+[^>]*)?>(.*?)(?:<|\\x3C)\/\1>|(?:<|\\x3C)[\w\-]+(?:\s+[^>]*)?\/?>|(?:(?!<|\\x3C|\(?\(?=>\)?)[\s\S])+/gi;
-    const matches = input.match(regex);
-    const filteredMatches = matches.filter(match =>
-      !match.startsWith('<script') &&
-      !match.startsWith('\\x3Cscript') &&
-      !match.startsWith('!--astro:end-->') &&
-      !match.startsWith('\\x3C!--astro:end-->') &&
-      !match.startsWith('(()=>')
-    );
-    return filteredMatches.join('').trim();
+  removeComments(input) {
+    return input.replace(/<!--[\s\S]*?-->/g, '');
   },
   setCode() {
     let
       defaultSlot = $('slot').not('[name]').get(0),
       nodes = defaultSlot.assignedNodes(),
-      html = $(nodes).not('script').html(),
-      code = tpl.extractAstroIslandHTML( html )
+      html = $(nodes).not('script').map(el => $(el).html()).join('\n'),
+      code = tpl.removeComments( html )
     ;
-    console.log(nodes, code);
+    console.log(html);
     tpl.code.set(code);
   }
 });

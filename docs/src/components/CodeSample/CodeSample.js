@@ -28,7 +28,6 @@ const createInstance = ({ el, $, settings, tpl }) => ({
   formattedCode : new ReactiveVar(false),
 
   watchCode() {
-    console.log(settings);
     tpl.reaction(async () => {
       tpl.sourceType.get(); // reactivity source
 
@@ -89,7 +88,7 @@ const createInstance = ({ el, $, settings, tpl }) => ({
 
 
   formatHTML: function(html) {
-    return pretty(html);
+    return pretty(html, {ocd: true});
   },
 
   set: {
@@ -118,9 +117,6 @@ const onCreated = function({tpl }) {
   tpl.watchCode();
 };
 
-const onRendered = function({tpl, settings}) {
-};
-
 
 const events = {
 };
@@ -131,7 +127,6 @@ const CodeSample = createComponent({
   events,
   css,
   onCreated,
-  onRendered,
   createInstance,
   settings,
 });
