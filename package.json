@@ -12,6 +12,7 @@
   "scripts": {
     "build": "node ./tasks/build.js",
     "dev": "wireit",
+    "build-docs": "wireit",
     "serve": "wireit",
     "test:case": "wireit",
     "prettify": "prettierx ./ --write --ignore-unknown",
@@ -38,6 +39,12 @@
         "watch"
       ]
     },
+    "build-docs": {
+      "command": "cd docs && npm run build",
+      "dependencies": [
+        "build"
+      ]
+    },
     "test:case": {
       "command": "node ./tasks/test-case.js"
     },
@@ -48,7 +55,10 @@
     "serve": {
       "command": "node ./tasks/serve.js",
       "service": true
-    }
+    },
+    "build:docs": {
+      "command": "cd docs && npm run build",
+    },
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "peerDependencies": {
