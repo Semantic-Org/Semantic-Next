@@ -13,6 +13,7 @@
     "@astrojs/lit": "^4.0.1",
     "@astrojs/mdx": "^2.2.0",
     "@webcomponents/template-shadowroot": "^0.2.1",
-    "astro": "^4.5.2"
+    "astro": "^4.5.2",
+    "link": "^2.1.0"
   }
 }
