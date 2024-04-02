@@ -6,81 +6,88 @@ tags: ['web-component']
 import { UIButton, UIButtons } from '@semantic-ui/core';
 import './button.css';
 
-### Plural
 
 ### Standard
 
-<UIButton client:load>Button</UIButton>
+<UIButton client:visible>Button</UIButton>
+
+### Plural
+<UIButtons client:load>
+  <UIButton client:visible>One</UIButton>
+  <UIButton client:visible>Two</UIButton>
+</UIButtons>
+
+## Types
 
 ### Icon
 
-<UIButton client:load icon="pause">Play</UIButton>
-<UIButton client:load icon="pause">Pause</UIButton>
+<UIButton client:visible icon="pause">Play</UIButton>
+<UIButton client:visible icon="pause">Pause</UIButton>
 
-<UIButton client:load icon="play"></UIButton>
-<UIButton client:load icon="pause"></UIButton>
+<UIButton client:visible icon="play"></UIButton>
+<UIButton client:visible icon="pause"></UIButton>
 
 ### Emphasis
 
-<UIButton client:load primary>Okay</UIButton>
-<UIButton client:load>Discard</UIButton>
+<UIButton client:visible primary>Okay</UIButton>
+<UIButton client:visible>Discard</UIButton>
 
 <br/><br/>
-<UIButton client:load secondary>Okay</UIButton>
-<UIButton client:load>Cancel</UIButton>
+<UIButton client:visible secondary>Okay</UIButton>
+<UIButton client:visible>Cancel</UIButton>
 
 
 ### Positive
 
-<UIButton client:load positive>Save</UIButton>
-<UIButton client:load subtle-positive icon="check">Complete</UIButton>
+<UIButton client:visible positive>Save</UIButton>
+<UIButton client:visible subtle-positive icon="check">Complete</UIButton>
 
 ### Warning
 
-<UIButton client:load warning>Rename</UIButton>
-<UIButton client:load subtle-warning icon="edit">Modify</UIButton>
+<UIButton client:visible warning>Rename</UIButton>
+<UIButton client:visible subtle-warning icon="edit">Modify</UIButton>
 
 ### Negative
 
-<UIButton client:load negative>Delete</UIButton>
-<UIButton client:load subtle-negative icon="alert circle">Delete</UIButton>
+<UIButton client:visible negative>Delete</UIButton>
+<UIButton client:visible subtle-negative icon="alert circle">Delete</UIButton>
 
 ### Info
 
-<UIButton client:load info>Learn More</UIButton>
-<UIButton client:load subtle-info icon="info">More Info</UIButton>
+<UIButton client:visible info>Learn More</UIButton>
+<UIButton client:visible subtle-info icon="info">More Info</UIButton>
 
 ### Transparent
 
 <div class="transparent segments">
   <div class="light segment">
-    <UIButton client:load transparent>Transparent</UIButton>
+    <UIButton client:visible transparent>Transparent</UIButton>
   </div>
   <div class="dark segment">
-    <UIButton client:load inverted transparent>Transparent</UIButton>
+    <UIButton client:visible inverted transparent>Transparent</UIButton>
   </div>
 </div>
 
 ### Toggle
-<UIButton client:load toggle>Toggle</UIButton>
+<UIButton client:visible toggle>Toggle</UIButton>
 
 
 ### Animated
-<UIButton client:load animated>
+<UIButton client:visible animated>
   <span slot="visible">
     <ui-icon icon="shopping cart"></ui-icon>
   </span>
   <span slot="hidden">Shop</span>
 </UIButton>
 
-<UIButton client:load vertical-animated>
+<UIButton client:visible vertical-animated>
   <span slot="visible">
     <ui-icon icon="shopping cart"></ui-icon>
   </span>
   <span slot="hidden">Shop</span>
 </UIButton>
 
-<UIButton client:load fade-animated>
+<UIButton client:visible fade-animated>
   <span slot="visible">
     <ui-icon icon="shopping cart"></ui-icon>
   </span>
@@ -88,98 +95,98 @@ import './button.css';
 </UIButton>
 
 ### Basic
-<UIButton client:load basic icon="user">Add Friend</UIButton>
+<UIButton client:visible basic icon="user">Add Friend</UIButton>
 
 ### Colored
-<UIButton client:load red>Red</UIButton>
-<UIButton client:load orange>Orange</UIButton>
-<UIButton client:load yellow>Yellow</UIButton>
-<UIButton client:load olive>Olive</UIButton>
-<UIButton client:load green>Green</UIButton>
-<UIButton client:load teal>Teal</UIButton>
+<UIButton client:visible red>Red</UIButton>
+<UIButton client:visible orange>Orange</UIButton>
+<UIButton client:visible yellow>Yellow</UIButton>
+<UIButton client:visible olive>Olive</UIButton>
+<UIButton client:visible green>Green</UIButton>
+<UIButton client:visible teal>Teal</UIButton>
 <br/><br/>
-<UIButton client:load blue>Blue</UIButton>
-<UIButton client:load violet>Violet</UIButton>
-<UIButton client:load purple>Purple</UIButton>
-<UIButton client:load pink>Pink</UIButton>
-<UIButton client:load brown>Brown</UIButton>
-<UIButton client:load grey>Grey</UIButton>
-<UIButton client:load black>Black</UIButton>
+<UIButton client:visible blue>Blue</UIButton>
+<UIButton client:visible violet>Violet</UIButton>
+<UIButton client:visible purple>Purple</UIButton>
+<UIButton client:visible pink>Pink</UIButton>
+<UIButton client:visible brown>Brown</UIButton>
+<UIButton client:visible grey>Grey</UIButton>
+<UIButton client:visible black>Black</UIButton>
 
 ### Social
-<UIButton client:load icon="facebook" facebook>Facebook</UIButton>
-<UIButton client:load icon="twitter" twitter>Twitter</UIButton>
-<UIButton client:load icon="linkedin" linkedin>Linkedin</UIButton>
-<UIButton client:load icon="instagram" instagram>Instagram</UIButton>
-<UIButton client:load icon="youtube" youtube>Youtube</UIButton>
+<UIButton client:visible icon="facebook" facebook>Facebook</UIButton>
+<UIButton client:visible icon="twitter" twitter>Twitter</UIButton>
+<UIButton client:visible icon="linkedin" linkedin>Linkedin</UIButton>
+<UIButton client:visible icon="instagram" instagram>Instagram</UIButton>
+<UIButton client:visible icon="youtube" youtube>Youtube</UIButton>
 
 ## States
 
 ### Hover
-<UIButton client:load>Normal</UIButton>
-<UIButton client:load hover>Hover</UIButton>
+<UIButton client:visible>Normal</UIButton>
+<UIButton client:visible hover>Hover</UIButton>
 
 ### Focus
-<UIButton client:load>Normal</UIButton>
-<UIButton client:load focus>Focus</UIButton>
+<UIButton client:visible>Normal</UIButton>
+<UIButton client:visible focus>Focus</UIButton>
 
 ### Active
-<UIButton client:load>Normal</UIButton>
-<UIButton client:load active>Active</UIButton>
+<UIButton client:visible>Normal</UIButton>
+<UIButton client:visible active>Active</UIButton>
 
 ### Disabled
-<UIButton client:load disabled>Disabled</UIButton>
-<UIButton client:load clickable-disabled>Clickable Disabled</UIButton>
+<UIButton client:visible disabled>Disabled</UIButton>
+<UIButton client:visible clickable-disabled>Clickable Disabled</UIButton>
 
 ### Loading
-<UIButton client:load loading>Loading</UIButton>
-<UIButton client:load loading icon="save">Save</UIButton>
-<UIButton client:load primary loading>Loading</UIButton>
-<UIButton client:load primary loading icon="save">Save</UIButton>
+<UIButton client:visible loading>Loading</UIButton>
+<UIButton client:visible loading icon="save">Save</UIButton>
+<UIButton client:visible primary loading>Loading</UIButton>
+<UIButton client:visible primary loading icon="save">Save</UIButton>
 
 ## Variations
 
 ### Sizing
 
-<UIButton client:load mini>Mini</UIButton>
-<UIButton client:load tiny>Tiny</UIButton>
-<UIButton client:load small>Small</UIButton>
-<UIButton client:load>Medium</UIButton>
-<UIButton client:load large>Large</UIButton>
-<UIButton client:load big>Big</UIButton>
-<UIButton client:load huge>Huge</UIButton>
-<UIButton client:load massive>Massive</UIButton>
+<UIButton client:visible mini>Mini</UIButton>
+<UIButton client:visible tiny>Tiny</UIButton>
+<UIButton client:visible small>Small</UIButton>
+<UIButton client:visible>Medium</UIButton>
+<UIButton client:visible large>Large</UIButton>
+<UIButton client:visible big>Big</UIButton>
+<UIButton client:visible huge>Huge</UIButton>
+<UIButton client:visible massive>Massive</UIButton>
 
 ### Floated
-<UIButton client:load right-floated>Right Floated</UIButton>
-<UIButton client:load left-floated>Left Floated</UIButton>
+<UIButton client:visible right-floated>Right Floated</UIButton>
+<UIButton client:visible left-floated>Left Floated</UIButton>
 <br/> <br />
 
 ### Fluid
-<UIButton client:load fluid>Fluid</UIButton>
+<UIButton client:visible fluid>Fluid</UIButton>
 
 ### Inverted
-<UIButton client:load inverted>Inverted</UIButton>
+<UIButton client:visible inverted>Inverted</UIButton>
 
 ### Circular
-<UIButton client:load circular icon="plus"></UIButton>
+<UIButton client:visible circular icon="plus"></UIButton>
 
 ### Top / Bottom Attached
-<UIButton client:load top-attached>Top Attached</UIButton>
+<UIButton client:visible top-attached>Top Attached</UIButton>
 <div style="
     border-left: 1px solid var(--border-color);
     height: 200px;
     background-color: #EEE;
     border-right: 1px solid var(--border-color);
     margin: 0px -1px;"></div>
-<UIButton client:load bottom-attached>Bottom Attached</UIButton>
+<UIButton client:visible bottom-attached>Bottom Attached</UIButton>
 
 ### Left / Right Attached
 
-<UIButton client:load left-attached>Left</UIButton>
-<UIButton client:load right-attached>Right</UIButton>
+<UIButton client:visible left-attached>Left</UIButton>
+<UIButton client:visible right-attached>Right</UIButton>
 
 ### Compact
 
-<UIButton client:load compact>Compact</UIButton>
-<UIButton client:load very-compact>Very Compact</UIButton>
+<UIButton client:visible compact>Compact</UIButton>
+<UIButton client:visible very-compact>Very Compact</UIButton>

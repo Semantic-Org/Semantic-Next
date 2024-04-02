@@ -5,13 +5,15 @@
     border-radius: 0em;
     margin: var(--button-group-button-offset);
   }
-  ui-buttons ui-button:first-child::part(button) {
+  ui-buttons ui-button[first]::part(button),
+  ui-buttons > ui-button:first-child::part(button) {
     border-left: none;
     margin-left: 0em;
     border-top-left-radius: var(--button-border-radius);
     border-bottom-left-radius: var(--button-border-radius);
   }
-  ui-buttons ui-button:last-child::part(button) {
+  ui-buttons ui-button[last]::part(button),
+  ui-buttons > ui-button:last-child::part(button) {
     border-top-right-radius: var(--button-border-radius);
     border-bottom-right-radius: var(--button-border-radius);
   }
