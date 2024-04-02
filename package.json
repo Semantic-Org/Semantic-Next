@@ -34,13 +34,13 @@
       "service": true
     },
     "dev": {
-      "command": "cd docs && npm install && npm link && npm run dev",
+      "command": "cd docs && npm install && npx link ../ && npm run dev",
       "dependencies": [
         "watch"
       ]
     },
     "build-docs": {
-      "command": "cd docs && npm install && npm link && npm run build",
+      "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
         "build"
       ]
