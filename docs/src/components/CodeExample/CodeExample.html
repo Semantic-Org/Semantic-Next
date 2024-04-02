@@ -1,0 +1,30 @@
+<a class="code link">
+  <ui-icon code link></ui-icon>
+</a>
+<a class="sandbox link">
+  <ui-icon codesandbox link></ui-icon>
+</a>
+
+{{#if title}}
+  <h3>{{title}}</h3>
+{{else}}
+  {{>slot title}}
+{{/if}}
+
+{{#if description}}
+  <p class="description">{{description}}</p>
+{{else}}
+  <p class="description">{{>slot description}}</p>
+{{/if}}
+
+{{#if codeVisible}}
+  <div class="segment">
+    <div class="label">
+      {{title}}
+    </div>
+    {{>slot}}
+  </div>
+  <code-sample code="{{code}}" attached="true"></code-sample>
+{{else}}
+  {{>slot}}
+{{/if}}

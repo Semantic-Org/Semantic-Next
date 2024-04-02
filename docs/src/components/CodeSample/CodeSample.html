@@ -1,0 +1,22 @@
+<codeSample class="{{classIf attached 'attached'}}segment">
+  {{#if label}}
+    <div class="label">
+      {{label}}
+    </div>
+  {{/if}}
+  {{#if get.sourceTypes}}
+    <sourceType class="ui tabular dashboard menu">
+      {{#each sourceType in get.sourceTypes}}
+        <a class="{{maybeActiveSourceType sourceType}} item" data-value="{{sourceType}}">
+          {{upperCase sourceType}}
+        </a>
+      {{/each}}
+    </sourceType>
+  {{/if}}
+  {{#if copyable}}
+    <ui-icon copy></ui-icon>
+  {{/if}}
+  {{#if formattedCode}}
+    <pre><code class="code {{sourceType}}">{{{formattedCode}}}</code></pre>
+  {{/if}}
+</codeSample>

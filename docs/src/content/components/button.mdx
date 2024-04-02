@@ -4,28 +4,21 @@ description: 'A button indicates a possible user action'
 tags: ['web-component']
 ---
 import { UIButton, UIButtons } from '@semantic-ui/core';
+import { CodeExample } from '@components/CodeExample/CodeExample.js';
 import './button.css';
 
+## Element
 
-### Standard
-
-<UIButton client:visible>Button</UIButton>
-
-### Plural
-<UIButtons client:load>
-  <ui-button client:visible>One</ui-button>
-  <ui-button client:visible>Two</ui-button>
-</UIButtons>
+<CodeExample client:load title="Standard" description="A button indicates possible user action">
+  <UIButton client:load>Button</UIButton>
+</CodeExample>
 
 ## Types
 
-### Icon
-
-<UIButton client:visible icon="pause">Play</UIButton>
-<UIButton client:visible icon="pause">Pause</UIButton>
-
-<UIButton client:visible icon="play"></UIButton>
-<UIButton client:visible icon="pause"></UIButton>
+<CodeExample client:load title="Icon" description="A button can be formatted to include an icon">
+  <UIButton client:visible icon="pause">Play</UIButton>
+  <UIButton client:visible icon="pause">Pause</UIButton>
+</CodeExample>
 
 ### Emphasis
 

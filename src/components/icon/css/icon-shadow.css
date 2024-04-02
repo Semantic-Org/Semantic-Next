@@ -1182,18 +1182,7 @@
 @layer component.icon;
 
 /* src/components/icon/css/shadow/variations/fitted.css */
-@layer component.icon {
-  .link.icon,
-  .link.icons {
-    cursor: pointer;
-    opacity: --var(link-opacity);
-    transition: opacity --var(default-duration) --var(default-easing);
-  }
-  .link.icon:hover,
-  .link.icons:hover {
-    opacity: 1 !important;
-  }
-}
+@layer component.icon;
 
 /* src/components/icon/css/shadow/variations/link.css */
 @layer component.icon {

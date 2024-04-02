@@ -28,7 +28,7 @@
   --button-inverted-text-shadow: var(--button-text-shadow);
 
   /* Border */
-  --button-border-radius: var(--default-border-radius);
+  --button-border-radius: var(--border-radius);
   --button-border: none;
 
   /* Border (For Alignment Require Box Shadow) */
@@ -45,15 +45,15 @@
     var(--button-shadow-box-shadow)
   ;
 
-  --button-default-duration: var(--default-duration);
-  --button-default-easing: var(--default-easing);
+  --button-transition-duration: var(--default-duration);
+  --button-transition-easing: var(--default-easing);
 
   --button-transition:
-    opacity var(--button-default-duration) var(--button-default-easing),
-    background-color var(--button-default-duration) var(--button-default-easing),
-    color var(--button-default-duration) var(--button-default-easing),
-    box-shadow var(--button-default-duration) var(--button-default-easing),
-    background var(--button-default-duration) var(--button-default-easing)
+    opacity var(--button-transition-duration) var(--button-transition-easing),
+    background-color var(--button-transition-duration) var(--button-transition-easing),
+    color var(--button-transition-duration) var(--button-transition-easing),
+    box-shadow var(--button-transition-duration) var(--button-transition-easing),
+    background var(--button-transition-duration) var(--button-transition-easing)
   ;
   --button-will-change: initial;
 

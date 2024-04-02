@@ -68,7 +68,7 @@
   --relative-border-radius: var(--relative-4px);
   --absolute-border-radius: var(--4px);
 
-  --default-border-radius: var(--absolute-border-radius);
+  --border-radius: var(--absolute-border-radius);
 
   /* -------------------
       Brand Colors
@@ -432,6 +432,7 @@
 
   --circular-radius: 500rem;
 
+  --border: 1px solid var(--border-color);
   --border-color: rgba(34, 36, 38, 0.15);
   --strong-border-color: rgba(34, 36, 38, 0.22);
   --internal-border-color: rgba(34, 36, 38, 0.10);

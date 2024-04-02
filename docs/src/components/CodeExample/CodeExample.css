@@ -1,0 +1,36 @@
+a.link {
+  cursor: pointer;
+  float: right;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.4);
+}
+a.link:hover {
+  color: rgba(0, 0, 0, 1);
+}
+a.link ~ a.link {
+  margin-right: 0.5rem;
+}
+
+.description {
+  margin-top: -1rem;
+}
+
+.segment {
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  border: var(--border);
+}
+
+.segment {
+  border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+}
+
+.label {
+  margin: -1rem -1rem 1rem;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+  background-color: rgba(144, 144, 144, 0.08);
+  font-size: 11px;
+  box-shadow: 0px -3px 6px -3px rgba(0, 0, 0, 0.18) inset;
+  font-weight: bold;
+}

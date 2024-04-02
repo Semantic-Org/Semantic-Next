@@ -222,7 +222,7 @@ export class Query {
       return this.each((el) => (el.innerHTML = newHTML));
     }
     else if (this.length) {
-      return this[0].innerHTML;
+      return Array.from(this).map(el => el.innerHTML).join('');;
     }
     return this;
   }
@@ -232,7 +232,7 @@ export class Query {
       return this.each((el) => (el.outerHTML = newHTML));
     }
     else if (this.length) {
-      return this[0].outerHTML;
+      return Array.from(this).map(el => el.outerHTML).join('');
     }
   }
 

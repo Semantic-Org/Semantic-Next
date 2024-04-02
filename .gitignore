@@ -9,6 +9,7 @@ playwright_report/
 dev/examples/
 dev/ui/
 html/
+docs/dist/
 dist/
 tests/results/
 tests/test-case/dist

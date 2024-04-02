@@ -1,0 +1,32 @@
+
+.segment {
+  display: block;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  border: var(--border);
+}
+.attached.segment {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+}
+
+
+/*******************************
+         Code Samples
+*******************************/
+
+
+/* Code */
+pre {
+  display: block;
+  background-color: transparent;
+  margin: 0em 1.5em 0em 0em;
+  padding: 0em;
+}
+
+pre code {
+  min-width: 500px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}

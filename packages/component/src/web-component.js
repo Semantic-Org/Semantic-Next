@@ -110,6 +110,13 @@ class WebComponentBase extends LitElement {
          Nested Components
   *******************************/
 
+  /* This is currently not being called out because
+     it cannot ever work for SSR.
+
+     including it would mean breaking parity of functionality
+
+    *
+  */
   watchSlottedContent(settings) {
     const $slot = this.$('slot');
     // initial render
