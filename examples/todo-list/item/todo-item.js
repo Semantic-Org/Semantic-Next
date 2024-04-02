@@ -1,10 +1,10 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-import template from './todo-item.html';
-import css from './todo-item.css';
+import template from './todo-item.html?raw';
+import css from './todo-item.css?raw';
 
-const createInstance = (tpl, $) => ({
+const createInstance = ({ tpl, $ }) => ({
   editing: new ReactiveVar(false),
 
   getTodos() {
@@ -24,32 +24,28 @@ const createInstance = (tpl, $) => ({
   },
 });
 
-const onRendered = (tpl, $) => {
-  //console.log('rerender');
-};
-
 const events = {
-  'change .toggle'(event, tpl, $) {
+  'change .toggle'({ event, tpl, $ }) {
     tpl.toggleCompleted();
   },
-  'click .destroy'(event, tpl) {
+  'click .destroy'({ event, tpl }) {
     tpl.removeTodo();
   },
-  'dblclick li'(event, tpl, $) {
+  'dblclick li'({ event, tpl, $ }) {
     tpl.editing.set(true);
     Reaction.afterFlush(() => {
       $('input.edit').focus();
     });
   },
-  'keydown input.edit'(event, tpl, $) {
-    if(event.key === 'Enter') {
+  'keydown input.edit'({ event, tpl, $ }) {
+    if (event.key === 'Enter') {
       $(this).blur();
     }
   },
-  'blur input.edit'(event, tpl, $) {
+  'blur input.edit'({ event, tpl, $ }) {
     tpl.changeText($(this).val());
     tpl.editing.set(false);
-  }
+  },
 };
 
 const todoItem = createComponent({
@@ -57,7 +53,6 @@ const todoItem = createComponent({
   template,
   css,
   createInstance,
-  onRendered,
   events,
 });
 

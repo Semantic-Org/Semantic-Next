@@ -1,21 +1,26 @@
-ui-button {
+:root {
 
   /* Active */
-  --active-background-color: #C0C1C2;
-  --active-background-image: var(--background-image);
-  --active-color: var(--selected-text-color);
-  --active-box-shadow: var(--border-box-shadow);
+  --button-active-background-color: #DFDFDF;
+  --button-active-background-image: var(--button-background-image);
+  --button-active-color: var(--selected-text-color);
+  --button-active-shadow-box-shadow: var(--subtle-inset-shadow);
+  --button-active-box-shadow:
+    var(--button-sharpen-box-shadow),
+    var(--button-border-box-shadow),
+    var(--button-active-shadow-box-shadow)
+  ;
 
   /* Active + Hovered */
-  --active-hover-background-color: var(--active-background-color);
-  --active-hover-background-image: var(--active-background-image);
-  --active-hover-color: var(--active-color);
-  --active-hover-box-shadow: var(--active-box-shadow);
+  --button-active-hover-background-color: #DADADA;
+  --button-active-hover-background-image: var(--button-active-background-image);
+  --button-active-hover-color: var(--button-active-color);
+  --button-active-hover-box-shadow: var(--button-active-box-shadow);
 
   /* Active + Hovered */
-  --active-down-background-color: var(--active-background-color);
-  --active-down-background-image: var(--active-background-image);
-  --active-down-color: var(--active-color);
-  --active-down-box-shadow: var(--active-box-shadow);
+  --button-active-down-background-color: var(--button-active-background-color);
+  --button-active-down-background-image: var(--button-active-background-image);
+  --button-active-down-color: var(--button-active-color);
+  --button-active-down-box-shadow: var(--button-active-box-shadow);
 
 }

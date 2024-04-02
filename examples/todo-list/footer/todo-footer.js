@@ -1,11 +1,10 @@
 import { createComponent } from '@semantic-ui/component';
 
-import template from './todo-footer.html';
-import css from './todo-footer.css';
+import template from './todo-footer.html?raw';
+import css from './todo-footer.css?raw';
 
-const createInstance = (tpl, $) => ({
-
-  filters: [ 'all', 'active', 'complete'],
+const createInstance = ({ tpl, $ }) => ({
+  filters: ['all', 'active', 'complete'],
 
   todoList() {
     return tpl.parent('todoList');
@@ -13,11 +12,11 @@ const createInstance = (tpl, $) => ({
 
   getIncomplete() {
     const todos = tpl.todoList().todos.get();
-    return todos.filter(todo => !todo.completed);
+    return todos.filter((todo) => !todo.completed);
   },
 
   hasAnyCompleted() {
-    return tpl.todoList().todos.value.some(todo => todo.completed);
+    return tpl.todoList().todos.value.some((todo) => todo.completed);
   },
 
   isActiveFilter(filter) {
@@ -29,21 +28,18 @@ const createInstance = (tpl, $) => ({
   },
 
   clearCompleted() {
-    tpl.todoList().todos.removeItems(todo => todo.completed);
+    tpl.todoList().todos.removeItems((todo) => todo.completed);
   },
-
 });
 
-
 const events = {
-  'click .filters'(event, tpl, $, data) {
+  'click .filters'({ event, tpl, $, data }) {
     tpl.setFilter(data.filter);
   },
-  'click .clear-completed'(event, tpl) {
+  'click .clear-completed'({ event, tpl }) {
     tpl.clearCompleted();
   },
 };
-
 
 const todoFooter = createComponent({
   templateName: 'todoFooter',

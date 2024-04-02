@@ -9,7 +9,10 @@ playwright_report/
 dev/examples/
 dev/ui/
 html/
+dist/
 tests/results/
+tests/test-case/dist
+docs/src/css/sui/
 
 # Numerous always-ignore extensions
 *.diff

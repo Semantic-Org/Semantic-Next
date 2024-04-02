@@ -1,16 +1,36 @@
+:root {
 
-ui-button {
-  --primary-background-image: var(--colored-background-image);
-  --primary-box-shadow: var(--colored-box-shadow);
-  --primary-text-color: var(--inverted-text-color);
-  --primary-text-shadow: var(--inverted-text-shadow);
+  /* Primary */
+  --button-primary-color: var(--primary-color);
+  --button-primary-background-image: var(--button-colored-background-image);
+  --button-primary-box-shadow: var(--button-colored-box-shadow);
+  --button-primary-text-color: var(--button-inverted-text-color);
+  --button-primary-text-shadow: var(--button-inverted-text-shadow);
 
-  --secondary-background-image: var(--colored-background-image);
-  --secondary-box-shadow: var(--colored-box-shadow);
-  --secondary-text-color: var(--inverted-text-color);
-  --secondary-text-shadow: var(--inverted-text-shadow);
+  /* Secondary */
+  --button-secondary-color: var(--secondary-color);
+  --button-secondary-background-image: var(--button-colored-background-image);
+  --button-secondary-box-shadow: var(--button-colored-box-shadow);
+  --button-secondary-text-color: var(--button-inverted-text-color);
+  --button-secondary-text-shadow: var(--button-inverted-text-shadow);
+
+  /* Hover */
+  --button-primary-color-hover: oklch(from var(--button-primary-color) calc(l + var(--hover-lightness)) c h);
+  --button-secondary-color-hover: oklch(from var(--button-secondary-color) calc(l + var(--hover-lightness)) c h);
+
+  /* Focus */
+  --button-primary-color-focus: oklch(from var(--button-primary-color) calc(l + var(--focus-lightness)) c h);
+  --button-secondary-color-focus: oklch(from var(--button-secondary-color) calc(l + var(--focus-lightness)) c h);
+
+  /* Down */
+  --button-primary-color-down: oklch(from var(--button-primary-color) calc(l + var(--down-lightness)) c h);
+  --button-secondary-color-down: oklch(from var(--button-secondary-color) calc(l + var(--down-lightness)) c h);
+
+  /* Active */
+  --button-primary-color-active: oklch(from var(--button-primary-color) calc(l + var(--active-lightness)) c h);
+  --button-secondary-color-active: oklch(from var(--button-secondary-color) calc(l + var(--active-lightness)) c h);
 
   /* Inverted */
-  --light-primary-text-color: var(--inverted-text-color);
-  --light-secondary-text-color: var(--inverted-text-color);
+  --button-light-primary-text-color: var(--button-inverted-text-color);
+  --button-light-secondary-text-color: var(--button-inverted-text-color);
 }

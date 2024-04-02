@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Button</title>
+  <link rel="stylesheet" href="./index.css">
+  <link rel="stylesheet" href="./ui/ui/semantic-ui.css">
+  <link rel="stylesheet" href="./ui/theme/base.css">
+  <script src="./ui/ui/semantic-ui.js" type="module"></script>
+  <script>
+new EventSource('/esbuild').addEventListener('change', e => {
+  /* Rebuilds page after JS changes */
+  const { added, removed, updated } = JSON.parse(e.data);
+  if(!added.length && !removed.length && updated.length === 1) {
+    for(const link of document.getElementsByTagName('link')) {
+      const url = new URL(link.href);
+
+      if(url.host === location.host && url.pathname === updated[0]) {
+        const next = link.cloneNode();
+        next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
+        next.onload = () => link.remove();
+        link.parentNode.insertBefore(next, link.nextSibling);
+        return;
+      }
+    }
+  }
+  location.reload();
+});
+</script>
+</head>
+<body>
+  <div class="container">
+
+    <ui-buttons large red>
+      <ui-button red>2</ui-button>
+      <ui-button blue>3</ui-button>
+      <button-or>or</button-or>
+      <ui-button>4</ui-button>
+      <ui-button>5</ui-button>
+    </ui-buttons>
+    <ui-buttons large>
+      <ui-button subtle-negative>Cancel</ui-button>
+      <button-or>or</button-or>
+      <ui-button positive>Submit</ui-button>
+    </ui-buttons>
+
+  </div>
+</body>

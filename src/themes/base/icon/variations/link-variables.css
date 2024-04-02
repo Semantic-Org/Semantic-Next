@@ -1,0 +1,4 @@
+:root {
+  --icon-link-opacity: 0.8;
+  --icon-link-transition: opacity --var(default-duration) --var(default-easing);
+}

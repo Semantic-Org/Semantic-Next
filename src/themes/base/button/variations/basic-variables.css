@@ -1,61 +1,61 @@
 ui-button {
 
-  --basic-border-radius: var(--border-radius);
-  --basic-border-size: 1px;
-  --basic-text-color: var(--text-color);
-  --basic-colored-border-size: 1px;
+  --button-basic-border-radius: var(--button-border-radius);
+  --button-basic-border-size: 1px;
+  --button-basic-text-color: var(--button-text-color);
+  --button-basic-colored-border-size: 1px;
 
-  --basic-background: transparent none;
-  --basic-font-weight: var(--normal);
-  --basic-border: 1px solid var(--border-color);
-  --basic-box-shadow: 0px 0px 0px var(--basic-border-size) var(--border-color) inset;
-  --basic-loading-color: var(--off-white);
-  --basic-text-transform: none;
+  --button-basic-background: transparent none;
+  --button-basic-font-weight: var(--button-font-weight);
+  --button-basic-border: 1px solid var(--button-border-color);
+  --button-basic-box-shadow: 0px 0px 0px var(--button-basic-border-size) var(--button-border-color) inset;
+  --button-basic-loading-color: var(--button-off-white);
+  --button-basic-text-transform: none;
 
   /* Basic Hover */
-  --basic-hover-background: #FFFFFF;
-  --basic-hover-text-color: var(--hovered-text-color);
-  --basic-hover-box-shadow:
-    0px 0px 0px var(--basic-border-size) var(--selected-border-color) inset,
-    0px 0px 0px 0px var(--border-color) inset
+  --button-basic-hover-background: #FFFFFF;
+  --button-basic-hover-text-color: var(--button-hover-color);
+  --button-basic-hover-box-shadow:
+    0px 0px 0px var(--button-basic-border-size) var(--selected-border-color) inset,
+    0px 0px 0px 0px var(--button-border-color) inset
   ;
   /* Basic Focus */
-  --basic-focus-background: var(--basic-hover-background);
-  --basic-focus-text-color: var(--basic-hover-text-color);
-  --basic-focus-box-shadow: var(--basic-hover-box-shadow);
+  --button-basic-focus-background: var(--button-basic-hover-background);
+  --button-basic-focus-text-color: var(--button-basic-hover-text-color);
+  --button-basic-focus-box-shadow: var(--button-basic-hover-box-shadow);
 
   /* Basic Down */
-  --basic-down-background: #F8F8F8;
-  --basic-down-text-color: var(--pressed-text-color);
-  --basic-down-box-shadow:
-    0px 0px 0px var(--basic-border-size) rgba(0, 0, 0, 0.15) inset,
-    0px 1px 4px 0px var(--border-color) inset
+  --button-basic-down-background: #F8F8F8;
+  --button-basic-down-text-color: var(--button-pressed-text-color);
+  --button-basic-down-box-shadow:
+    0px 0px 0px var(--button-basic-border-size) rgba(0, 0, 0, 0.15) inset,
+    0px 1px 4px 0px var(--button-border-color) inset
   ;
   /* Basic Active */
-  --basic-active-background: var(--transparent-black);
-  --basic-active-box-shadow: '';
-  --basic-active-text-color: var(--selected-text-color);
+  --button-basic-active-background: var(--button-transparent-black);
+  --button-basic-active-box-shadow: '';
+  --button-basic-active-text-color: var(--button-selected-text-color);
 
   /* Basic Inverted */
-  --basic-inverted-background: transparent;
-  --basic-inverted-focus-background: transparent;
-  --basic-inverted-down-background: var(--transparent-white);
-  --basic-inverted-active-background: var(--transparent-white);
+  --button-basic-inverted-background: transparent;
+  --button-basic-inverted-focus-background: transparent;
+  --button-basic-inverted-down-background: var(--button-transparent-white);
+  --button-basic-inverted-active-background: var(--button-transparent-white);
 
-  --basic-inverted-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.5) inset;
-  --basic-inverted-hover-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
-  --basic-inverted-focus-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 1) inset;
-  --basic-inverted-down-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.9) inset;
-  --basic-inverted-active-box-shadow: 0px 0px 0px var(--inverted-border-size) rgba(255, 255, 255, 0.7) inset;
+  --button-basic-inverted-box-shadow: 0px 0px 0px var(--button-inverted-border-size) rgba(255, 255, 255, 0.5) inset;
+  --button-basic-inverted-hover-box-shadow: 0px 0px 0px var(--button-inverted-border-size) rgba(255, 255, 255, 1) inset;
+  --button-basic-inverted-focus-box-shadow: 0px 0px 0px var(--button-inverted-border-size) rgba(255, 255, 255, 1) inset;
+  --button-basic-inverted-down-box-shadow: 0px 0px 0px var(--button-inverted-border-size) rgba(255, 255, 255, 0.9) inset;
+  --button-basic-inverted-active-box-shadow: 0px 0px 0px var(--button-inverted-border-size) rgba(255, 255, 255, 0.7) inset;
 
-  --basic-inverted-color: var(--dark-white);
-  --basic-inverted-hover-color: var(--dark-white-hover);
-  --basic-inverted-down-color: var(--dark-white-active);
-  --basic-inverted-active-color: var(--inverted-text-color);
+  --button-basic-inverted-color: var(--button-dark-white);
+  --button-basic-inverted-hover-color: var(--button-dark-white-hover);
+  --button-basic-inverted-down-color: var(--button-dark-white-active);
+  --button-basic-inverted-active-color: var(--button-inverted-text-color);
 
 
   /* Basic Group */
-  --basic-group-border: var(--basic-border-size) solid var(--border-color);
-  --basic-group-box-shadow: none;
+  --button-basic-group-border: var(--button-basic-border-size) solid var(--button-border-color);
+  --button-basic-group-box-shadow: none;
 
 }

@@ -1,0 +1,50 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+
+const { title, padded } = Astro.props;
+
+import '../css/layers.css';
+
+import './Body.css';
+import '../css/responsive.css';
+import '../css/fake-sui/container.css';
+import '../css/fake-sui/menu.css';
+import '../css/legacy-sui/input.css';
+import '../css/legacy-sui/rail.css';
+import '../css/sui/theme/base.css';
+import '../css/sui/ui/semantic-ui.css';
+
+---
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>{title}</title>
+  </head>
+  <body class={padded ? 'padded' : ''}>
+    <script>
+      import { $ } from '@semantic-ui/query';
+      window.$ = $;
+    </script>
+    <script is:inline data-astro-rerun>
+      if(!window.systemPrefersDark) {
+        window.systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      if(!window.currentTheme) {
+        window.currentTheme = localStorage.getItem('theme')
+          ? localStorage.getItem('theme') :
+            systemPrefersDark
+            ? 'dark'
+            : 'light'
+        ;
+      }
+      document.querySelectorAll('body')[0].classList.add(currentTheme);
+    </script>
+    <slot />
+  </body>
+</html>

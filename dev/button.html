@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./index.css">
   <link rel="stylesheet" href="./ui/semantic-ui.css">
   <link rel="stylesheet" href="./ui/theme/base.css">
-  <script src="./ui/semantic-ui.js" type="module"></script>
+  <script src="./ui/ui/semantic-ui.js" type="module"></script>
   <script>
 new EventSource('/esbuild').addEventListener('change', e => {
   /* Rebuilds page after JS changes */
@@ -32,23 +32,66 @@ new EventSource('/esbuild').addEventListener('change', e => {
 <body>
   <div class="container">
 
-    <ui-button size="large" emphasis="primary">
-      Follow
+    <ui-button>Button</ui-button>
+
+    <ui-button primary>Save</ui-button>
+    <ui-button>Discard</ui-button>
+
+    <br/><br/>
+    <ui-button secondary>Okay</ui-button>
+    <ui-button>Cancel</ui-button>
+
+
+    <ui-button icon="left arrow"></ui-button>
+    <ui-button icon="arrow left"></ui-button>
+    <ui-button icon="left-arrow"></ui-button>
+
+    <h3>Sizing</h3>
+
+    <ui-button mini>Mini</ui-button>
+    <ui-button tiny>Tiny</ui-button>
+    <ui-button small>Small</ui-button>
+    <ui-button>Medium</ui-button>
+    <ui-button large>Large</ui-button>
+    <ui-button big>Big</ui-button>
+    <ui-button huge>Huge</ui-button>
+    <ui-button massive>Massive</ui-button>
+
+
+    <h3>Icon</h3>
+
+    <ui-button icon="pause">Pause</ui-button>
+    <ui-button icon="x arrow">Cancel</ui-button>
+
+
+
+    <ui-button text="Hello">Text</ui-button>
+
+
+    <h3>Animated</h3>
+    <ui-button animated>
+      <span slot="visible">
+        <ui-icon icon="shopping cart"></ui-icon>
+      </span>
+      <span slot="hidden">Shop</span>
     </ui-button>
 
-    <ui-button large primary>
-      Follow
+    <ui-button vertical-animated>
+      <span slot="visible">
+        <ui-icon icon="shopping cart"></ui-icon>
+      </span>
+      <span slot="hidden">Shop</span>
     </ui-button>
 
-    <ui-button class="small primary">
-      Follow
+    <ui-button fade-animated>
+      <span slot="visible">
+        <ui-icon icon="shopping cart"></ui-icon>
+      </span>
+      <span slot="hidden">Shop</span>
     </ui-button>
 
-    <style>
-      .small .button {
-        background-color: orange;
-        color: #333333;
-      }
-    </style>
+    <h3>Basic</h3>
+    <ui-button basic icon="user">Add Friend</ui-button>
+
   </div>
 </body>

@@ -1,0 +1,5 @@
+@import './responsive/large-monitor.css' screen and (min-width: 1980px);
+@import './responsive/laptop.css' screen and (max-width: 1200px);
+@import './responsive/computer.css' screen and (min-width: 992px);
+@import './responsive/tablet.css' screen and (max-width: 991px);
+@import './responsive/mobile.css' screen and (max-width: 767px);

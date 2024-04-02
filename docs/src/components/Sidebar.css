@@ -1,0 +1,48 @@
+@layer layout {
+  sidebar {
+    display: flex;
+    flex-direction: column;
+    background-color: #1B1C1D;
+    color: #FFFFFF;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
+  }
+  sidebar navSearch.input {
+    margin: 1rem 1rem;
+  }
+  navSearch.input .icon {
+    color: #FFFFFF;
+  }
+  navSearch.input input {
+    border-radius: 500rem !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+  }
+  navSearch.input input {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+  navSearch.input input:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 1) !important;
+  }
+  navSearch.input input:focus {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: rgba(255, 255, 255, 1) !important;
+  }
+  sidebar .toc {
+    flex-grow: 1;
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  sidebar sidebar-menu {
+    flex-grow: 1;
+  }
+
+
+  body.dark {
+    sidebar {
+      background-color: #151516;
+    }
+  }
+}

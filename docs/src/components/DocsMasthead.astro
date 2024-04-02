@@ -1,0 +1,17 @@
+---
+import './DocsMasthead.css';
+const { header, description } = Astro.props;
+---
+<masthead>
+  <ui-container>
+    <h1>{header}</h1>
+    <p>{description}</p>
+  </ui-container>
+  <ui-menu three-item dashboard>
+    <ui-container>
+      <a class="active item">Singular</a>
+      <a class="item">Plural</a>
+      <a class="item">Spec</a>
+    </ui-container>
+  </ui-menu>
+</masthead>

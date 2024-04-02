@@ -1,6 +1,26 @@
-ui-button {
-  --positive-background-image: var(--colored-background-image);
-  --positive-text-color: var(--inverted-text-color);
-  --positive-text-shadow: var(--inverted-text-shadow);
-  --positive-box-shadow: var(--colored-box-shadow);
+:root {
+  
+  --button-positive-color: var(--positive-color);
+  --button-positive-background-image: var(--button-colored-background-image);
+  --button-positive-text-color: var(--button-inverted-text-color);
+  --button-positive-text-shadow: var(--button-inverted-text-shadow);
+  --button-positive-box-shadow: var(--button-colored-box-shadow);
+
+  --button-positive-color-hover: oklch(from var(--positive-color) calc(l + var(--hover-lightness)) c h);
+  --button-positive-color-focus: oklch(from var(--positive-color) calc(l + var(--focus-lightness)) c h);
+  --button-positive-color-down: oklch(from var(--positive-color) calc(l + var(--down-lightness)) c h);
+  --button-positive-color-active: oklch(from var(--positive-color) calc(l + var(--active-lightness)) c h);
+
+  /* Subtle Positive */
+  --button-subtle-positive-color: #F3FFF6;
+  --button-subtle-positive-background-image: var(--button-colored-background-image);
+  --button-subtle-positive-text-color: rgba(38, 127, 81, 0.9);
+  --button-subtle-positive-text-shadow: var(--button-text-shadow);
+  --button-subtle-positive-box-shadow: var(--button-box-shadow);
+  
+  --button-subtle-positive-color-hover: #EAFFEA;
+  --button-subtle-positive-color-focus: #EAFFEA;
+  --button-subtle-positive-color-down: #EAFFEA;
+  --button-subtle-positive-color-active: #F1FFF7;
+
 }

@@ -1,0 +1,83 @@
+/*-------------------
+       Colors
+--------------------*/
+
+/*--- Red ---*/
+.red.buttons,
+.red.button {
+  --button-text-color: var(--button-red-text-color);
+  --button-text-shadow: var(--button-red-text-shadow);
+  --button-background: var(--button-red) var(--button-colored-background-image);
+  --button-box-shadow: var(--button-colored-box-shadow);
+}
+.red.buttons,
+.red.button:hover {
+  --button-hover-color: var(--button-red-text-color);
+  --button-hover-text-shadow: var(--button-red-text-shadow);
+  --button-hover-background-color: var(--button-red-hover);
+  --button-hover-box-shadow: var(--button-colored-box-shadow);
+}
+.red.buttons,
+.red.button:focus {
+  --button-focus-background-color: var(--button-red-focus);
+  --button-focus-color: var(--button-red-text-color);
+  --button-focus-text-shadow: var(--button-red-text-shadow);
+}
+.red.buttons,
+.red.button.pressed,
+.red.button:active {
+  --button-pressed-background-color: var(--button-red-pressed);
+  --button-pressed-color: var(--button-red-text-color);
+  --button-pressed-text-shadow: var(--button-red-text-shadow);
+}
+.red.buttons .active.button,
+.red.buttons .active.button.pressed,
+.red.buttons .active.button:active,
+.red.active.button,
+.red.button .active.button.pressed,
+.red.button .active.button:active {
+  background-color: var(--button-red-active);
+  color: var(--button-red-text-color);
+  text-shadow: var(--button-red-text-shadow);
+}
+
+
+/*--- Red ---*/
+
+.blue.buttons,
+.blue.button {
+  --button-text-color: var(--button-blue-text-color);
+  --button-text-shadow: var(--button-blue-text-shadow);
+  --button-background: var(--button-blue) var(--button-colored-background-image);
+  --button-box-shadow: var(--button-colored-box-shadow);
+}
+.blue.buttons,
+.blue.button:hover {
+  --button-hover-color: var(--button-blue-text-color);
+  --button-hover-text-shadow: var(--button-blue-text-shadow);
+  --button-hover-background-color: var(--button-blue-hover);
+  --button-hover-box-shadow: var(--button-colored-box-shadow);
+}
+.blue.buttons,
+.blue.button:focus {
+  --button-focus-background-color: var(--button-blue-focus);
+  --button-focus-color: var(--button-blue-text-color);
+  --button-focus-text-shadow: var(--button-blue-text-shadow);
+}
+.blue.buttons,
+.blue.button.pressed,
+.blue.button:active {
+  --button-pressed-background-color: var(--button-blue-pressed);
+  --button-pressed-color: var(--button-blue-text-color);
+  --button-pressed-text-shadow: var(--button-blue-text-shadow);
+}
+.blue.buttons .active.button,
+.blue.buttons .active.button.pressed,
+.blue.buttons .active.button:active,
+.blue.active.button,
+.blue.button .active.button.pressed,
+.blue.button .active.button:active {
+  background-color: var(--button-blue-active);
+  color: var(--button-blue-text-color);
+  text-shadow: var(--button-blue-text-shadow);
+}

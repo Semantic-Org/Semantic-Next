@@ -1,0 +1,130 @@
+/*******************************
+            Content
+*******************************/
+
+:host {
+  font-size: inherit;
+  padding: 0rem 1rem;
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  font-size: var(--14px);
+  text-transform: none;
+  font-weight: bold;
+  padding: 0.5rem 0rem;
+  color: #798088;
+  text-decoration: none;
+}
+.title {
+  ui-icon {
+    display: block;
+    width: 1.5rem;
+    flex: 0 0 auto;
+    text-align: center;
+    margin-right: 1rem;
+  }
+  ui-icon::part(icon) {
+    font-size: 18px;
+  }
+  ui-icon[icon="dropdown"] {
+    float: right;
+    opacity: 0.3;
+  }
+  + .content {
+    padding: 0rem 0rem 0.5rem 2.5rem;
+  }
+}
+
+/* Accordion Content */
+.content {
+  display: none;
+}
+
+/* Nested Menu */
+.content {
+  .title {
+    display: block;
+    font-size: 13px;
+    padding: 4px 0px;
+  }
+  .title ui-icon[icon="dropdown"] {
+    float: right;
+    margin: 0rem 1rem 0rem 0rem;
+  }
+  .title + .content {
+    padding: 0rem 0rem 0rem 0.25rem !important;
+  }
+  .title .content .title {
+    font-size: 12px;
+  }
+
+  .menu {
+    .item {
+      display: block;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.4);
+      line-height: 1;
+      font-size: var(--13px);
+      margin: 2px 0px;
+      padding: 5px 0px;
+    }
+
+    /* Third Level Menu */
+    .content .menu {
+      .item {
+        padding: 0.35em 0em;
+      }
+    }
+  }
+}
+
+/*******************************
+            States
+*******************************/
+
+.title {
+  &:hover {
+    transition: 0.3s color ease;
+    color: #ffffff;
+  }
+  &.active {
+    color: #ffffff;
+  }
+  &.current {
+    color: #73b9e1;
+  }
+}
+.content {
+  &.active {
+    display: block;
+  }
+
+  .menu {
+    .item:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .current.item {
+      cursor: default;
+      color: #73b9e1;
+    }
+    .current.item[href] {
+      cursor: auto;
+    }
+    .menu {
+      .item:not(:hover):not(.current):not(.active) {
+        color: rgba(255, 255, 255, 0.35) !important;
+      }
+    }
+  }
+}
+
+/*******************************
+          Dark Mode
+*******************************/
+
+:host-context(body.dark) .content .menu .current.item {
+  color: #1ECCFF;
+}

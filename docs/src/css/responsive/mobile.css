@@ -1,0 +1,61 @@
+/* Mobile (Max width 767px) */
+
+@layer responsive.mobile {
+
+  topbar .logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-100%);
+  }
+  topbar mobile-sidebar-toggle {
+    display: inline-block;
+  }
+
+  layout sidebar {
+    position: fixed;
+    z-index: 4;
+    width: 250px;
+    height: 100%;
+
+    border: none;
+    padding: 0;
+    margin: 0;
+    right: auto;
+
+
+    transition:
+      translate 0.3s ease,
+      display 0.3s ease allow-discrete,
+      overlay 0.3s ease allow-discrete;
+
+    translate: -250px 0;
+
+    &::backdrop {
+      opacity: 0;
+      background: rgba(0, 0, 0, 0.8);
+      transition: opacity 0.5s;
+    }
+
+    &.visible,
+    &:popover-open {
+      box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.5);
+      translate: 0 0;
+
+      &::backdrop {
+        opacity: 1;
+      }
+
+      @starting-style {
+        translate: 250px 0;
+
+        &::backdrop {
+          opacity: 0;
+        }
+      }
+    }
+  }
+  layout page {
+    margin: 0rem;
+  }
+
+}

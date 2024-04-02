@@ -3,5 +3,11 @@
   "version": "0.0.1",
   "main": "src/index.js",
   "author": "Jack Lukic",
-  "license": "ISC"
+  "license": "ISC",
+  "peerDependencies": {
+    "lit": "^3.1.2"
+  },
+  "devDependencies": {
+    "lit": "^3.1.2"
+  }
 }

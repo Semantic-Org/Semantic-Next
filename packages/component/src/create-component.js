@@ -1,18 +1,28 @@
-import { unsafeCSS } from 'lit';
-import { unique, each, noop, kebabToCamel, get, reverseKeys } from '@semantic-ui/utils';
+import { unsafeCSS, isServer } from 'lit';
+import { each, noop, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
+
+import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
+import { extractComponentSpec } from './helpers/extract-component-spec.js';
+import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
 
 import { LitTemplate } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';
+
 
 export const createComponent = ({
   renderer = 'lit',
 
   template = '',
   css = false,
+  lightCSS = false,
   spec = false,
-  templateName,
   tagName,
+  delegateFocus = true,
+  templateName = kebabToCamel(tagName),
+
+  plural = false,
+  singularTag,
 
   events = {},
 
@@ -22,22 +32,43 @@ export const createComponent = ({
   onDestroyed = noop,
   onAttributeChanged = noop,
 
+  properties, // allow overriding properties for lit
+  settings, // settings for js functionality like callbacks etc
+
   subTemplates = [],
 
   beforeRendered = noop,
 } = {}) => {
+
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
 
+  // specs include a lot of metadata not necessary for powering the component
+  // we want to extract the relevent content and then use that portion.
+  let componentSpec;
+  if (spec) {
+    componentSpec = extractComponentSpec(spec);
+  }
+
+  // to support SSR we need to include all subtemplate css in base template
+  each(subTemplates, (template) => {
+    if (template.css) {
+      css += template.css;
+    }
+  });
+
+  if(lightCSS) {
+    adoptStylesheet(lightCSS);
+  }
+
   /*
-    We can choose either to render this component as a web component
-    or as a naked template. In the case of a naked template this is typically
-    a sub template of another web component
+    Create Component Returns Either a LitTemplate or WebComponent
+    LitTemplates are created as a prototype that can be cloned when instantiated
   */
   let litTemplate = new LitTemplate({
-    templateName: templateName || kebabToCamel(tagName),
-    prototype: true,
+    templateName: templateName,
+    isPrototype: true,
     ast,
     css,
     events,
@@ -55,50 +86,70 @@ export const createComponent = ({
       doesnt change based off component configuration
     */
     webComponent = class UIWebComponent extends WebComponentBase {
+
       static get styles() {
         return unsafeCSS(css);
       }
 
-      static get properties() {
-        // not yet implemented
-        return {};
-      }
+      static properties = WebComponentBase.getProperties({
+        properties,
+        componentSpec,
+        settings,
+      });
+
+      defaultSettings = {};
 
       constructor() {
         super();
-
         this.css = css;
-
-        this.tpl = litTemplate.tpl;
-        this.template = litTemplate;
-        this.renderCallbacks = [];
+        this.setDefaultSettings(settings);
       }
 
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
-        litTemplate.attach(this.renderRoot);
-        this.call(beforeRendered);
+      }
+
+      willUpdate() {
+        super.willUpdate();
+        if(!this.template) {
+          this.template = litTemplate.clone({
+            data: this.getData(),
+            element: this,
+            renderRoot: this.renderRoot,
+          });
+          this.tpl = this.template.tpl;
+        }
+        // property change callbacks wont call on SSR
+        if(isServer) {
+          each(webComponent.properties, (propSettings, property) => {
+            const newValue = this[property];
+            adjustSettingFromAttribute(this, property, newValue, componentSpec);
+          });
+        }
       }
 
       firstUpdated() {
         super.firstUpdated();
-        this.call(onRendered);
+        // // shared variations are passed through to singular
+        // this.watchSlottedContent({
+        //   singularTag,
+        //   componentSpec,
+        //   properties: webComponent.properties
+        // });
       }
 
       updated() {
-        each(this.renderCallbacks, (callback) => callback());
-      }
-
-      addRenderCallback(callback) {
-        this.renderCallbacks.push(callback);
+        super.updated();
       }
 
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
-        litTemplate.onDestroyed();
-        this.call(onDestroyed);
+        if(this.template) {
+          this.template.onDestroyed(); // destroy instance
+        }
+        litTemplate.onDestroyed(); // destroy prototype
       }
 
       // callback if moves doc
@@ -108,82 +159,28 @@ export const createComponent = ({
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {
-        this.adjustSettingFromAttribute(attribute, newValue);
-        this.call(onAttributeChanged, {
-          args: [attribute, oldValue, newValue],
-        });
         super.attributeChangedCallback(attribute, oldValue, newValue);
+        adjustSettingFromAttribute(this, attribute, newValue, componentSpec);
+        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
-      /*
-        Semantic UI supports 3 dialects to support this we
-        check if attribute is a setting and reflect the value
-
-        <ui-button size="large"> // verbose
-        <ui-button large> // concise
-        <ui-button class="large"> // classic
-      */
-      adjustSettingFromAttribute(attribute, value) {
-        if (spec) {
-          if (attribute == 'class') {
-            // syntax <ui-button class="large primary"></ui-button>
-            each(value.split(' '), (className) => {
-              this.adjustSettingFromAttribute(className);
-            });
-          }
-          else if (get(spec?.attribute, attribute)) {
-            // we dont need to set anything here obj reflection handles this
-          }
-          else {
-            // go from large -> size, or primary -> emphasis
-            // we reverse obj key/value then check lookup
-            const setting = get(reverseKeys(spec.settings), attribute);
-            if (setting) {
-              const oldValue = this[setting];
-              const newValue = attribute;
-              this[setting] = newValue;
-              this.attributeChangedCallback(setting, oldValue, newValue);
-            }
-          }
-        }
-      }
-
-      getSettings() {
-        const settings = {};
-        each(webComponent.properties, (propSettings, property) => {
-          if (property == 'class' || !propSettings.observe) {
-            return;
-          }
-          settings[property] = this[property];
-          if (!settings[this[property]]) {
-            settings[this[property]] = true;
-          }
-        });
-        return settings;
-      }
-
-      getUIClasses() {
-        const classes = [];
-        each(webComponent.properties, (settings, property) => {
-          if (property == 'class' || !settings.observe) {
-            return;
-          }
-          classes.push(this[property]);
-        });
-        const classString = unique(classes).filter(Boolean).join(' ');
-        return classString;
-      }
-
-      getDataContext() {
-        return {
-          ...this.tpl,
-          ...this.getSettings(),
-          ui: this.getUIClasses(),
+      getData() {
+        let data = {
+          ...this.getSettings({componentSpec, properties: webComponent.properties }),
+          ...this.getContent({componentSpec}),
+          plural
         };
+        if (spec) {
+          data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
+        }
+        return data;
       }
 
       render() {
-        const html = litTemplate.render(this.getDataContext());
+        const html = this.template.render({
+          ...this.tpl,
+          ...this.getData(),
+        });
         return html;
       }
     };

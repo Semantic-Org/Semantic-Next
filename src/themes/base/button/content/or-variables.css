@@ -1,25 +1,23 @@
-ui-button {
-  --or-text: 'or';
+:root {
+  --button-or-text: 'or';
+  --button-or-gap: 0.3em;
+  --button-or-height: calc(var(--button-vertical-padding) * 2) + 1em;
+  --button-or-z-index: 3;
 
-  --or-gap: 0.3em;
-  --or-height: calc(var(--vertical-padding) * 2) + 1em;
-  --or-z-index: 3;
+  --button-or-circle-distance-to-edge: var(--button-vertical-padding);
+  --button-or-circle-size: calc(var(--button-or-height) - var(--button-or-circle-distance-to-edge));
+  --button-or-line-height: var(--button-or-circle-size);
+  --button-or-box-shadow: var(--button-border-box-shadow), var(--button-shadow-box-shadow);
 
-  --or-circle-distance-to-edge: var(--vertical-padding);
-  --or-circle-size: calc(var(--or-height) - var(--or-circle-distance-to-edge));
-  --or-line-height: var(--or-circle-size);
-  --or-box-shadow: var(--border-box-shadow);
+  --button-or-vertical-offset: calc(var(--button-or-circle-size) / 2 * -1);
+  --button-or-horizontal-offset: calc(var(--button-or-circle-size) / 2 * -1 );
 
-  --or-vertical-offset: calc(var(--or-circle-size) / 2 * -1);
-  --or-horizontal-offset: calc(var(--or-circle-size) / 2 * -1 );
+  --button-or-background-color: var(--white);
+  --button-or-text-shadow: var(--button-text-shadow);
+  --button-or-text-style: var(--normal);
+  --button-or-text-weight: var(--bold);
+  --button-or-text-color: var(--light-text-color);
 
-  --or-background-color: var(--white);
-  --or-text-shadow: var(--inverted-text-shadow);
-  --or-text-style: var(--normal);
-  --or-text-weight: var(--bold);
-  --or-text-color: var(--light-text-color);
-
-
-  --or-spacer-height: var(--vertical-padding);
-  --or-spacer-color: transparent;
+  --button-or-spacer-height: var(--button-vertical-padding);
+  --button-or-spacer-color: transparent;
 }

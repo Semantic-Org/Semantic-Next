@@ -1,0 +1,14 @@
+{
+  "name": "@semantic-ui/examples",
+  "version": "0.0.1",
+  "title": "Semantic UI Next Examples",
+  "description": "Sample components written using SUI",
+  "homepage": "http://www.semantic-ui.com",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./examples.js",
+  "peerDependencies": {
+    "lit": "^3.1.2"
+  }
+}

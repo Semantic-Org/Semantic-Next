@@ -1,8 +1,11 @@
-ui-button {
-  --pressed-background-color: #BABBBC;
-  --pressed-background-image: '';
-  --pressed-shadow: none;
-  --pressed-box-shadow:
-    var(--border-box-shadow),
-    var(--pressed-pressed-shadow)
+:root {
+  --button-pressed-background-color: var(--button-background-color);
+  --button-pressed-background-image: var(--button-background-image);
+  --button-pressed-color: var(--pressed-text-color);
+  --button-pressed-shadow-box-shadow: var(--subtle-inset-shadow);
+  --button-pressed-box-shadow:
+    var(--button-sharpen-box-shadow),
+    var(--button-border-box-shadow),
+    var(--button-pressed-shadow-box-shadow)
+  ;
 }

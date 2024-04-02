@@ -103,7 +103,7 @@ export class Reaction {
       if (!comp.firstRun && !isEqual(newValue, value)) {
         dep.changed();
       }
-      value = clone(newValue);
+      value = newValue;
     });
     comp.run(); // Initial run to capture dependencies
     dep.depend(); // Create dependency on guard function

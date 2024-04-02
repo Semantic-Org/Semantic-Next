@@ -2,15 +2,13 @@ import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { range } from '@semantic-ui/utils';
 
-import template from './events.html';
+import template from './events.html?raw';
 
-const createInstance = (tpl, $) => {
-  console.log('rendering events tab');
+const createInstance = ({ tpl, $ }) => {
   return {
-
     number: new ReactiveVar(6),
     getRange() {
-      if(!Number.isFinite(+tpl.number.value)) {
+      if (!Number.isFinite(+tpl.number.value)) {
         return [];
       }
       return range(tpl.number.value);
@@ -28,42 +26,39 @@ const createInstance = (tpl, $) => {
     addedCount: 0,
     getPerson() {
       let person = {
-        ... tpl.newPerson
+        ...tpl.newPerson,
       };
-      if(tpl.addedCount > 0) {
+      if (tpl.addedCount > 0) {
         person._id = `${person._id}${tpl.addedCount}`;
         person.name = `${person.name} #${tpl.addedCount}`;
       }
       tpl.addedCount++;
       return person;
     },
-
   };
 };
 
-
-
 const events = {
-  'input input[type="text"]'(event, tpl, $) {
+  'input input[type="text"]'({ event, tpl, $ }) {
     tpl.number.value = $(this).value();
   },
-  'click .set'(event, tpl, $) {
+  'click .set'({ event, tpl, $ }) {
     tpl.number.value = 5;
     $('input').value(5);
   },
-  'click .add.end'(event, tpl) {
+  'click .add.end'({ event, tpl }) {
     tpl.persons.push(tpl.getPerson());
   },
-  'click .add.front'(event, tpl) {
+  'click .add.front'({ event, tpl }) {
     tpl.persons.unshift(tpl.getPerson());
   },
-  'click .replace.second'(event, tpl) {
+  'click .replace.second'({ event, tpl }) {
     tpl.persons.setIndex(1, tpl.getPerson());
   },
-  'click .remove.front'(event, tpl) {
+  'click .remove.front'({ event, tpl }) {
     tpl.persons.removeIndex(0);
   },
-  'click .remove.end'(event, tpl) {
+  'click .remove.end'({ event, tpl }) {
     tpl.persons.splice(-1);
   },
 };

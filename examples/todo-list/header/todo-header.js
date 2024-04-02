@@ -1,11 +1,10 @@
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import { createComponent } from '@semantic-ui/component';
 
-import template from './todo-header.html';
-import css from './todo-header.css';
+import template from './todo-header.html?raw';
+import css from './todo-header.css?raw';
 
-const createInstance = (tpl, $) => ({
-
+const createInstance = ({ tpl, $ }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodos() {
@@ -31,10 +30,10 @@ const createInstance = (tpl, $) => ({
   calculateAllCompleted() {
     tpl.reaction((comp) => {
       const allCompleted = tpl.allCompleted.get();
-      if(comp.firstRun) {
+      if (comp.firstRun) {
         return;
       }
-      if(allCompleted) {
+      if (allCompleted) {
         tpl.completeAll();
       }
       else {
@@ -42,15 +41,13 @@ const createInstance = (tpl, $) => ({
       }
     });
   },
-
 });
 
 const events = {
-  'keydown input.new-todo'(event, tpl, $) {
-
-    if(event.key === 'Enter') {
+  'keydown input.new-todo'({ event, tpl, $ }) {
+    if (event.key === 'Enter') {
       const text = $(this).val();
-      if(!text) {
+      if (!text) {
         return;
       }
       tpl.addTodo(text);
@@ -58,12 +55,12 @@ const events = {
       Reaction.afterFlush(() => {
         const todoList = tpl.$$('.todo-list')[0];
         todoList.scrollTop = todoList.scrollHeight;
-      })
+      });
     }
   },
 };
 
-const onCreated = (tpl) => {
+const onCreated = ({ tpl }) => {
   tpl.calculateAllCompleted();
 };
 

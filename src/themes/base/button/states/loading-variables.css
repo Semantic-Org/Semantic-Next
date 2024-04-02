@@ -1,8 +1,7 @@
-ui-button {
-  --loading-opacity: 1;
-  --loading-pointer-events: auto;
-  --loading-transition:
-    all 0s linear,
-    opacity var(--default-duration) var(--default-easing)
+:root {
+  --button-loading-icon-duration: 2s;
+  --button-loading-opacity: 1;
+  --button-loading-transition:
+    opacity var(--button-default-duration) var(--button-default-easing)
   ;
 }

@@ -1,0 +1,34 @@
+---
+import Body from './Body.astro';
+import Sidebar from '@components/Sidebar.astro';
+import DocsMasthead from '@components/DocsMasthead.astro';
+import TopBar from '@components/TopBar.astro';
+import DocsRail from '@components/DocsRail.astro';
+import './Layout.css';
+
+let { title, header, description } = Astro.props;
+header = header || title;
+---
+<Body title={title}>
+	<TopBar></TopBar>
+	<layout>
+		<Sidebar/>
+		<page>
+			<slot name="masthead">
+				<DocsMasthead header={header} description={description}/>
+			</slot>
+			<main>
+				<ui-container>
+					<rail class="ui right rail">
+						<slot name="rail">
+							<DocsRail />
+						</slot>
+					</rail>
+					<pageContent>
+						<slot />
+					</pageContent>
+				</ui-container>
+			</main>
+		</page>
+	</layout>
+</Body>

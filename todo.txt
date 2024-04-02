@@ -1,14 +1,73 @@
-Up next
-- Add jsdom + browser testing for component package
-- Determine spec file build step + use in component
-- Determine build step for components from configuration json. Small/medium/large
-- Build out button
-- Add syntax for embedding web components
+Button
++ Figure out attr issue with compact
+- Review SSR for button
+- Add basic
+- Rename existing basic -> Outline
+- Add link button
+- Add ghost button
 
-Templating Later
+Buttons
+- Figure out plural format
+- Figure out content
+
+- Documentation
+-- Determine the sitemap of component docs
+-- Write out initial draft of component documentation
+--
+
+
+Button Later
+- Determine link behavior, extending a tag?
+- Review colormixing - oklch -> colormix() ?
+- Icon only styling (auto detect no text)
+
+Component
+- Pass through content to content obj
+- Review separating data from settings esp if content
+- review component lifecycle events esp with SSR and hydration
+
+Docs
+- Dupe lit in astro build?
+
+Templating Syntax
+- Add syntax for embedding web components / part if necessary
 - Add mechanism for inherting data context from parent template
 - support expressions for partial object data i.e. {{>template getTemplateSettings}}
 - consider await/task syntax
+
+Components
+- Determine build step for components from configuration json. Small/medium/large
+- Build out button
+
+CI
+- Add stylelint
+
+Testing
+- Add jsdom + browser testing for component package
+- Redo coverage on functionality added for v1
+
+
+Completed
+=====================
+
+completed mar 8/15
++ Docs - Add theme switcher, navigation and routing
++ Docs - Figure out markdown rendering
++ Figure out relationship between settings, variations, types, states in spec format
++ Complete most variations and types for button
++ Finish spec format interpretation
+
+week of mar 1
++ continue scaffolding website
++ work on nested web component issues
++ determine spec file / properties / settings interactions
+
+week of feb 23
++ Figure out final solve for SSR css injection
++ Refactor callbacks to use {} syntax instead of params
++ Set up astro docs project
++ build scaffolding for docs
++ get server side rendering with hydration working
 
 week of feb 16
 + Add reactivity template helpers for guard, nonreactive, reactiveDebug

@@ -1,0 +1,35 @@
+/* Tablet Max Width 992px */
+
+@layer responsive.tablet {
+
+  layout {
+    --rail-width: 0px;
+  }
+  topbar .logo .name {
+    display: none;
+  }
+  layout main ui-container {
+    margin-right: 0rem;
+    width: 100%;
+    max-width: none;
+    padding: 2rem 2rem;
+  }
+  layout rail.ui.rail {
+    position: fixed;
+    z-index: 5;
+    top: 0px;
+    left: 100%;
+    width: 300px;
+    height: 100%;
+    background-color: #FFFFFF;
+    box-shadow: -2px 0px 6px rgba(0, 0, 0, 0.08);
+    border-left: 1px solid #DDD;
+    transform: translateX(0%);
+    transition: transform 0.5s ease;
+    content-visibility: hidden;
+  }
+  layout rail.ui.rail.visible {
+    transform: translateX(-100%);
+    content-visibility: visible;
+  }
+}

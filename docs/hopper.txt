@@ -1,0 +1,15 @@
+Docs layout
+- Fix responsive layout
+- Top menu for docs page
+- Following menu
+- Code component
+
+Button
+- Finish button group
+
+Docs
+- Rewrite readmes as docs
+
+Components
+- Figure out build step for component spec
+

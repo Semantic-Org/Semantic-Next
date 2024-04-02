@@ -1,0 +1,52 @@
+@layer layout {
+
+  :root {
+    --topbar-height: 60px;
+  }
+
+  topbar {
+    background-color: #1A1D1E;
+    display: block;
+    height: var(--topbar-height);
+    color: #FFFFFF;
+  }
+
+  topbar .logo {
+    margin: 12px 0px 0px 20px;
+    display: inline-block;
+    text-decoration: none;
+  }
+  topbar .logo img {
+    display: inline-block;
+    height: 35px;
+    vertical-align: -12px;
+  }
+  topbar .logo .name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 10px;
+    color: #FFF;
+    outline: none;
+  }
+
+  topbar mobile-sidebar-toggle {
+    display: none;
+    margin: 20px 0px 0px 20px;
+  }
+
+  topbar topbar-menu {
+    margin-left: 1rem;
+    vertical-align: 1px; /* Bottom border */
+  }
+
+  topbar theme-switcher {
+    float: right;
+    font-size: 18px;
+    margin: 20px 20px 0px 0px;
+  }
+
+  body.dark topbar {
+    background-color: #212325;
+  }
+
+}

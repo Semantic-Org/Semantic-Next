@@ -1,0 +1,44 @@
+/*-------------------
+        Sizing
+--------------------*/
+
+.mini.buttons .button,
+.mini.buttons .or,
+.mini.button {
+  font-size: var(--button-mini);
+}
+.tiny.buttons .button,
+.tiny.buttons .or,
+.tiny.button {
+  font-size: var(--button-tiny);
+}
+.small.buttons .button,
+.small.buttons .or,
+.small.button {
+  font-size: var(--button-small);
+}
+.buttons .button,
+.buttons .or,
+.button {
+  font-size: var(--button-medium);
+}
+.large.buttons .button,
+.large.buttons .or,
+.large.button {
+  font-size: var(--button-large);
+}
+.big.buttons .button,
+.big.buttons .or,
+.big.button {
+  font-size: var(--button-big);
+}
+.huge.buttons .button,
+.huge.buttons .or,
+.huge.button {
+  font-size: var(--button-huge);
+}
+.massive.buttons .button,
+.massive.buttons .or,
+.massive.button {
+  font-size: var(--button-massive);
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Button</title>
+  <link rel="stylesheet" href="./index.css">
+  <script src="dist/test-case.js"></script>
+</head>
+<body>
+  <div class="container">
+    <test-case>
+      Slotted Content
+    </test-case>
+  </div>
+</body>
+<script>
+  /* Rebuilds page after JS changes */
+  new EventSource('/esbuild').addEventListener('change', e => {
+    const { added, removed, updated } = JSON.parse(e.data);
+    if (!added.length && !removed.length && updated.length === 1) {
+      for (const link of document.getElementsByTagName('link')) {
+        const url = new URL(link.href);
+
+        if (url.host === location.host && url.pathname === updated[0]) {
+          const next = link.cloneNode();
+          next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
+          next.onload = () => link.remove();
+          link.parentNode.insertBefore(next, link.nextSibling);
+          return;
+        }
+      }
+    }
+    location.reload();
+  });
+</script>
+
