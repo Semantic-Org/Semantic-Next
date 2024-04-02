@@ -1,6 +1,6 @@
 /* Tablet Max Width 992px */
 
-@layer responsive {
+@layer responsive.tablet {
 
   layout {
     --rail-width: 0px;

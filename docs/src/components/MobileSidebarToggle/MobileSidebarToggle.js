@@ -23,7 +23,6 @@ const createInstance = function ({ $, isServer, tpl }) {
         $sidebar.get(0).showPopover();
       }
       else {
-        console.log('adding', $sidebar.length);
         $sidebar.addClass('visible');
       }
       // safari ios doesnt handle this natively properly so we gotta do manual
@@ -54,7 +53,6 @@ const createInstance = function ({ $, isServer, tpl }) {
 
 const events = {
   'click ui-icon'({tpl}) {
-    console.log('clicked');
     if(tpl.isVisible()) {
       tpl.hideSidebar();
     }

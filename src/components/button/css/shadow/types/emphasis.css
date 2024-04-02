@@ -31,7 +31,9 @@
   text-shadow: var(--button-primary-text-shadow);
 }
 
+.primary.buttons .button.pressed,
 .primary.buttons .button:active,
+.primary.button.pressed,
 .primary.button:active {
   background-color: var(--button-primary-color-down);
   color: var(--button-primary-text-color);
@@ -76,6 +78,8 @@
   text-shadow: var(--button-secondary-text-shadow);
 }
 .secondary.buttons .button:active,
+.secondary.buttons .button.pressed,
+.secondary.button.pressed,
 .secondary.button:active {
   background-color: var(--button-secondary-color-down);
   color: var(--button-secondary-text-color);

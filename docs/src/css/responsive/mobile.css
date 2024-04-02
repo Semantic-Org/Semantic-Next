@@ -1,6 +1,6 @@
 /* Mobile (Max width 767px) */
 
-@layer responsive {
+@layer responsive.mobile {
 
   topbar .logo {
     position: absolute;

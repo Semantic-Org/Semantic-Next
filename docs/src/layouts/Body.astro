@@ -3,14 +3,16 @@ import { ViewTransitions } from 'astro:transitions';
 
 const { title, padded } = Astro.props;
 
-import '../css/container.css';
-import '../css/menu.css';
+import '../css/layers.css';
+
+import './Body.css';
+import '../css/responsive.css';
+import '../css/fake-sui/container.css';
+import '../css/fake-sui/menu.css';
 import '../css/legacy-sui/input.css';
 import '../css/legacy-sui/rail.css';
 import '../css/sui/theme/base.css';
 import '../css/sui/ui/semantic-ui.css';
-
-import './Body.css';
 
 ---
 <html>
@@ -23,13 +25,6 @@ import './Body.css';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <title>{title}</title>
-
-    <link rel="stylesheet" href="/css/layers.css">
-    <link rel="stylesheet" href="/css/responsive/large-monitor.css" media="screen and (min-width: 1980px)">
-    <link rel="stylesheet" href="/css/responsive/laptop.css" media="screen and (max-width: 1200px)">
-    <link rel="stylesheet" href="/css/responsive/computer.css" media="screen and (min-width: 992px)">
-    <link rel="stylesheet" href="/css/responsive/tablet.css" media="screen and (max-width: 991px)">
-    <link rel="stylesheet" href="/css/responsive/mobile.css" media="screen and (max-width: 767px)">
   </head>
   <body class={padded ? 'padded' : ''}>
     <script>

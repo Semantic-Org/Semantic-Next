@@ -1,6 +1,6 @@
 /* Laptop Only(992px-1200px only) */
 
-@layer responsive {
+@layer responsive.laptop {
 
   layout {
     --sidebar-width: 230px;

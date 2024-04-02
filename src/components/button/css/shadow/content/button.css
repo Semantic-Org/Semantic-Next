@@ -1,5 +1,11 @@
+:root {
+  user-select: none;
+}
 *, :after, :before {
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none; /* disable selection/Copy of UIWebView */
+  -webkit-touch-callout: none;
 }
 .button {
   cursor: pointer;
