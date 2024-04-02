@@ -40,7 +40,7 @@
       ]
     },
     "build-docs": {
-      "command": "cd docs && npm run build",
+      "command": "cd docs && npm install && npm run build",
       "dependencies": [
         "build"
       ]
