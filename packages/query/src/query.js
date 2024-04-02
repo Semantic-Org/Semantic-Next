@@ -222,7 +222,7 @@ export class Query {
       return this.each((el) => (el.innerHTML = newHTML));
     }
     else if (this.length) {
-      return Array.from(this).map(el => el.innerHTML).join('');;
+      return this.map(el => el.innerHTML).join('');;
     }
     return this;
   }
@@ -232,7 +232,7 @@ export class Query {
       return this.each((el) => (el.outerHTML = newHTML));
     }
     else if (this.length) {
-      return Array.from(this).map(el => el.outerHTML).join('');
+      return this.map(el => el.outerHTML).join('');
     }
   }
 
@@ -246,7 +246,7 @@ export class Query {
           ? el.assignedNodes({ flatten: true })
           : el.childNodes;
       };
-      const values = Array.from(this).map((el) =>
+      const values = this.map((el) =>
         this.getTextContentRecursive(childNodes(el))
       );
       return values.length > 1 ? values : values[0];
@@ -273,6 +273,10 @@ export class Query {
       .trim();
   }
 
+  map(...args) {
+    return Array.from(this).map(...args);
+  }
+
   value(newValue) {
     if (newValue !== undefined) {
       // Set the value for each element
@@ -288,7 +292,7 @@ export class Query {
     }
     else {
       // Get the value of each element
-      const values = Array.from(this).map((el) => {
+      const values = this.map((el) => {
         if (
           el instanceof HTMLInputElement ||
           el instanceof HTMLSelectElement ||
@@ -352,7 +356,7 @@ export class Query {
       this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = Array.from(this).map((el) =>
+      const attributes = this.map((el) =>
         el.getAttribute(attribute)
       );
       return attributes.length > 1 ? attributes : attributes[0];
