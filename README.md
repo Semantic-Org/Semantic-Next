@@ -99,4 +99,4 @@ $('ui-dropdown').dropdown({
 
 ### Tech
 
-Rendering is done using [`Lit-HTML`](https://krausest.github.io/js-framework-benchmark/index.html) under the hood, which is [pretty fast](https://krausest.github.io/js-framework-benchmark/index.html). Lit code is compiled from a simple custom templating language loosely inspired by Meteor JS. 
+Rendering is done using [`Lit-HTML`](https://krausest.github.io/js-framework-benchmark/index.html) under the hood, which is [pretty fast](https://krausest.github.io/js-framework-benchmark/index.html).
