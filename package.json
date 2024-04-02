@@ -34,7 +34,7 @@
       "service": true
     },
     "dev": {
-      "command": "cd docs && npm run dev",
+      "command": "cd docs && npm install && npm run dev",
       "dependencies": [
         "watch"
       ]
