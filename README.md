@@ -81,7 +81,7 @@ traditional way
 let dropdown = document.querySelectorAll('ui-dropdown')[0];
 dropdown.items = itemArray;
 dropdown.allowAdditions = true;
-dropdown.attachEventListener('change', (value) => console.log(value));
+dropdown.addEventListener('change', (value) => console.log(value));
 ```
 
 using query
