@@ -178,8 +178,8 @@ export const createComponent = ({
 
       render() {
         const html = this.template.render({
-          ...this.tpl,
           ...this.getData(),
+          ...this.tpl,
         });
         return html;
       }

@@ -81,7 +81,7 @@ export class Query {
     if (isString(selectorOrFunction)) {
       // If a CSS selector is provided, use it with the matches method
       filteredElements = Array.from(this).filter((el) =>
-        el.matches(selectorOrFunction)
+        el.matches && el.matches(selectorOrFunction)
       );
     }
     else if (isFunction(selectorOrFunction)) {
@@ -94,7 +94,7 @@ export class Query {
   not(selector) {
     // Filter out elements that match the provided selector
     const filteredElements = Array.from(this).filter(
-      (el) => !el.matches(selector)
+      (el) => !el.matches || (el.matches && !el.matches(selector))
     );
     return new Query(filteredElements);
   }
@@ -222,7 +222,7 @@ export class Query {
       return this.each((el) => (el.innerHTML = newHTML));
     }
     else if (this.length) {
-      return this.map(el => el.innerHTML).join('');;
+      return this.map(el => el.innerHTML || el.nodeValue).join('');;
     }
     return this;
   }

@@ -38,7 +38,7 @@ class ReactiveConditionalDirective extends AsyncDirective {
           }
         });
       }
-      else {
+      if(!html) {
         html = nothing;
       }
       if(!comp.firstRun) {
