@@ -27,7 +27,6 @@ const createInstance = ({ $, isServer, settings, tpl }) => ({
       html = $(nodes).not('script, style').map(el => $(el).html()).join('\n'),
       code = tpl.removeComments( html )
     ;
-    console.log('set code', code);
     tpl.code.set(code);
   },
   calculateCodeVisible() {
