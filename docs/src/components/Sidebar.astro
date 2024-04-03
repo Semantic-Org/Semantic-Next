@@ -12,6 +12,7 @@ const menu = await getNavMenu();
 		<i class="search icon"></i>
 	</navSearch>
 	<SidebarMenu
+		client:load
     menu={menu}
     activeURL={Astro.url.pathname}
   />

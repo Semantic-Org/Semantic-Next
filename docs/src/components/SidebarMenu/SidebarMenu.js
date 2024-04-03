@@ -72,13 +72,22 @@ const createInstance = function ({ tpl, settings }) {
         return any(item.pages, tpl.isActiveItem);
       }
     },
-    isCurrentItem(item) {
-      if (item?.url === tpl.url.get()) {
-        return true;
+    addTrailingSlash(url) {
+      return (url.substr(-1) === '/')
+        ? url
+        : `${url}/`
+      ;
+    },
+    isSameURL(url1, url2) {
+      if(!url1 || !url2) {
+        return false;
       }
+      return tpl.addTrailingSlash(url1) == tpl.addTrailingSlash(url2);
+    },
+    isCurrentItem(item) {
+      return tpl.isSameURL(item?.url, tpl.url.get());
     },
     onPageChange() {
-      console.log('after', window.location.pathname);
       tpl.url.set(window.location.pathname);
     }
   };

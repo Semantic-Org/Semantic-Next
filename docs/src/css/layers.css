@@ -1,1 +1,3 @@
 @layer global, baseTheme, component, theme, overrides, utilities, layout, page, responsive;
+
+astro-island, astro-slot, astro-static-slot { display: contents; }

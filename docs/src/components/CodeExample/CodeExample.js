@@ -2,12 +2,14 @@ import { createComponent } from '@semantic-ui/component';
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
 import { ReactiveVar, Reaction} from '@semantic-ui/reactivity';
+import { UIIcon } from '@semantic-ui/core';
 
 import CodeSample from '../CodeSample/CodeSample.js';
 const settings = {
   title: undefined,
   description: undefined,
   language: 'html',
+  code: '',
   showCode: false, // show code on start
 };
 
@@ -17,22 +19,25 @@ const createInstance = ({ $, isServer, settings, tpl }) => ({
   removeComments(input) {
     return input.replace(/<!--[\s\S]*?-->/g, '');
   },
-  isHeaderless() {
-    return !settings.title;
-  },
-  setCode() {
+  getSlottedContent() {
     let
       defaultSlot = $('slot').not('[name]').get(0),
-      nodes = defaultSlot.assignedNodes(),
-      html = $(nodes).not('script, style').map(el => $(el).html()).join('\n'),
+      slottedNodes = defaultSlot.assignedNodes(),
+      nodes = $(slottedNodes).not('script, style'),
+      html = nodes.map(el => {
+        return (el.nodeType == 3)
+          ? el.nodeValue.trim()
+          : $(el).html().trim();
+      }).join('\n'),
       code = tpl.removeComments( html )
     ;
-    tpl.code.set(code);
+    return code.trim();
   },
   calculateCodeVisible() {
     tpl.reaction(() => {
       if(tpl.codeVisible.get() && !tpl.code.get()) {
-        tpl.setCode();
+        const code = settings.code || tpl.getSlottedContent();
+        tpl.code.set(code);
       }
     });
   }
