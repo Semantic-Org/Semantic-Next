@@ -87,6 +87,9 @@ export const Helpers = {
   debugger() {
     debugger;
   },
+  tokenize(string = '') {
+    return (string || '').replace(/\s+/g, '-').replace(/[^\w-]+/g, '').toLowerCase();
+  },
   reactiveDebug() {
     Reaction.getSource();
     debugger;

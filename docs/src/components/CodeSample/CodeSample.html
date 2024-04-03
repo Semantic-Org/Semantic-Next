@@ -1,22 +1,28 @@
-<codeSample class="{{classIf attached 'attached'}}segment">
+<codeSample class="{{classIf attached 'attached'}}{{classIf segment 'segment'}}">
   {{#if label}}
     <div class="label">
       {{label}}
     </div>
   {{/if}}
-  {{#if get.sourceTypes}}
-    <!--ui-menu dashboard>
-      {{#each sourceType in get.sourceTypes}}
-        <a class="{{maybeActiveSourceType sourceType}} item" data-value="{{sourceType}}">
-          {{titleCase sourceType}}
+  {{#if get.languages}}
+    <ui-menu dashboard>
+      {{#each language in get.languages}}
+        <a class="{{maybeActiveLanguage language}} item" data-value="{{language}}">
+          {{titleCase language}}
         </a>
       {{/each}}
-    </ui-menu !-->
+    </ui-menu>
   {{/if}}
   {{#if copyable}}
-    <ui-icon copy></ui-icon>
+    <ui-icon link copy></ui-icon>
   {{/if}}
   {{#if formattedCode}}
-    <code class="code {{sourceType}}">{{{formattedCode}}}</code>
+    <code class="code {{language}}">
+      {{#if formattedCode}}
+        {{{formattedCode}}}
+      {{else}}
+        {{>slot}}
+      {{/if}}
+    </code>
   {{/if}}
 </codeSample>

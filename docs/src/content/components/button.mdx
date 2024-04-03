@@ -3,183 +3,276 @@ title: 'Button'
 description: 'A button indicates a possible user action'
 tags: ['web-component']
 ---
+
 import { UIButton, UIButtons } from '@semantic-ui/core';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
+import { CodeSample } from '@components/CodeSample/CodeSample.js';
 import './button.css';
 
 ## Element
 
-<CodeExample client:load title="Standard" description="A button indicates possible user action">
+<CodeExample client:load
+  title="Standard"
+  code='<ui-button>Button</ui-button>'
+  description="A button indicates possible user action"
+>
   <UIButton client:load>Button</UIButton>
 </CodeExample>
 
 ## Types
 
-<CodeExample client:load title="Icon" description="A button can be formatted to include an icon">
-  <UIButton client:visible icon="pause">Play</UIButton>
+<CodeExample client:load
+  title="Icon"
+  description="A button can be formatted to include an icon"
+>
+  <UIButton client:visible icon="play">Play</UIButton>
   <UIButton client:visible icon="pause">Pause</UIButton>
 </CodeExample>
 
-<CodeExample client:load title="Emphasis" description="A button can be formatted to show different levels of emphasis">
+<CodeExample client:load
+  title="Emphasis"
+  description="A button can be formatted to show different levels of emphasis"
+>
   <UIButton client:visible primary>Okay</UIButton>
   <UIButton client:visible>Discard</UIButton>
 </CodeExample>
 
-<br/><br/>
-<UIButton client:visible secondary>Okay</UIButton>
-<UIButton client:visible>Cancel</UIButton>
+<CodeExample client:load>
+  <UIButton client:visible secondary>Okay</UIButton>
+  <UIButton client:visible>Cancel</UIButton>
+</CodeExample>
 
 
-### Positive
+<CodeExample client:load
+  title="Positive"
+  description="A button can be associated with a positive action"
+>
+  <UIButton client:visible positive>Save</UIButton>
+  <UIButton client:visible subtle-positive icon="check">Complete</UIButton>
+</CodeExample>
 
-<UIButton client:visible positive>Save</UIButton>
-<UIButton client:visible subtle-positive icon="check">Complete</UIButton>
+<CodeExample client:load
+  title="Warning"
+  description="A button can be associated with a potentially dangerous action"
+>
+  <UIButton client:visible warning>Rename</UIButton>
+  <UIButton client:visible subtle-warning icon="edit">Modify</UIButton>
+</CodeExample>
 
-### Warning
+<CodeExample client:load
+  title="Negative"
+  description="A button can be associated with a negative action"
+>
+  <UIButton client:visible negative>Delete</UIButton>
+  <UIButton client:visible subtle-negative icon="alert circle">Delete</UIButton>
+</CodeExample>
 
-<UIButton client:visible warning>Rename</UIButton>
-<UIButton client:visible subtle-warning icon="edit">Modify</UIButton>
+<CodeExample client:load
+  title="Info"
+  description="A button can be associated with a potentially dangerous action"
+>
+  <UIButton client:visible info>Learn More</UIButton>
+  <UIButton client:visible subtle-info icon="info">More Info</UIButton>
+</CodeExample>
 
-### Negative
-
-<UIButton client:visible negative>Delete</UIButton>
-<UIButton client:visible subtle-negative icon="alert circle">Delete</UIButton>
-
-### Info
-
-<UIButton client:visible info>Learn More</UIButton>
-<UIButton client:visible subtle-info icon="info">More Info</UIButton>
-
-### Transparent
-
-<div class="transparent segments">
-  <div class="light segment">
-    <UIButton client:visible transparent>Transparent</UIButton>
+<CodeExample client:load
+  title="Transparent"
+  description="A button can apper transparent"
+>
+  <div class="transparent segments">
+    <div class="light segment">
+      <UIButton client:visible transparent>Transparent</UIButton>
+    </div>
+    <div class="dark segment">
+      <UIButton client:visible inverted transparent>Transparent</UIButton>
+    </div>
   </div>
-  <div class="dark segment">
-    <UIButton client:visible inverted transparent>Transparent</UIButton>
-  </div>
-</div>
+</CodeExample>
 
-### Toggle
-<UIButton client:visible toggle>Toggle</UIButton>
+<CodeExample client:load
+  title="Toggle"
+  description="A button can be formatted to emphasize its active state"
+>
+  <UIButton client:visible toggle>Toggle</UIButton>
+</CodeExample>
 
 
-### Animated
-<UIButton client:visible animated>
-  <span slot="visible">
-    <ui-icon icon="shopping cart"></ui-icon>
-  </span>
-  <span slot="hidden">Shop</span>
-</UIButton>
+<CodeExample client:load
+  title="Animated"
+  description="A button can animate to show hidden content"
+>
+  <UIButton client:visible animated>
+    <span slot="visible">
+      <ui-icon icon="shopping cart"></ui-icon>
+    </span>
+    <span slot="hidden">Shop</span>
+  </UIButton>
 
-<UIButton client:visible vertical-animated>
-  <span slot="visible">
-    <ui-icon icon="shopping cart"></ui-icon>
-  </span>
-  <span slot="hidden">Shop</span>
-</UIButton>
+  <UIButton client:visible vertical-animated>
+    <span slot="visible">
+      <ui-icon icon="shopping cart"></ui-icon>
+    </span>
+    <span slot="hidden">Shop</span>
+  </UIButton>
 
-<UIButton client:visible fade-animated>
-  <span slot="visible">
-    <ui-icon icon="shopping cart"></ui-icon>
-  </span>
-  <span slot="hidden">Shop</span>
-</UIButton>
+  <UIButton client:visible fade-animated>
+    <span slot="visible">
+      <ui-icon icon="shopping cart"></ui-icon>
+    </span>
+    <span slot="hidden">Shop</span>
+  </UIButton>
+</CodeExample>
 
-### Basic
+<CodeExample client:load
+  title="Basic"
+  description="A button can be formatted to appear de-emphasized over other elements in the page."
+>
 <UIButton client:visible basic icon="user">Add Friend</UIButton>
+</CodeExample>
 
-### Colored
-<UIButton client:visible red>Red</UIButton>
-<UIButton client:visible orange>Orange</UIButton>
-<UIButton client:visible yellow>Yellow</UIButton>
-<UIButton client:visible olive>Olive</UIButton>
-<UIButton client:visible green>Green</UIButton>
-<UIButton client:visible teal>Teal</UIButton>
-<br/><br/>
-<UIButton client:visible blue>Blue</UIButton>
-<UIButton client:visible violet>Violet</UIButton>
-<UIButton client:visible purple>Purple</UIButton>
-<UIButton client:visible pink>Pink</UIButton>
-<UIButton client:visible brown>Brown</UIButton>
-<UIButton client:visible grey>Grey</UIButton>
-<UIButton client:visible black>Black</UIButton>
+<CodeExample client:load
+  title="Colored"
+  description="A button can be colored"
+>
+  <UIButton client:visible red>Red</UIButton>
+  <UIButton client:visible orange>Orange</UIButton>
+  <UIButton client:visible yellow>Yellow</UIButton>
+  <UIButton client:visible olive>Olive</UIButton>
+  <UIButton client:visible green>Green</UIButton>
+  <UIButton client:visible teal>Teal</UIButton>
+  <br/><br/>
+  <UIButton client:visible blue>Blue</UIButton>
+  <UIButton client:visible violet>Violet</UIButton>
+  <UIButton client:visible purple>Purple</UIButton>
+  <UIButton client:visible pink>Pink</UIButton>
+  <UIButton client:visible brown>Brown</UIButton>
+  <UIButton client:visible grey>Grey</UIButton>
+  <UIButton client:visible black>Black</UIButton>
+</CodeExample>
 
-### Social
-<UIButton client:visible icon="facebook" facebook>Facebook</UIButton>
-<UIButton client:visible icon="twitter" twitter>Twitter</UIButton>
-<UIButton client:visible icon="linkedin" linkedin>Linkedin</UIButton>
-<UIButton client:visible icon="instagram" instagram>Instagram</UIButton>
-<UIButton client:visible icon="youtube" youtube>Youtube</UIButton>
+<CodeExample client:load
+  title="Social"
+  description="A button can appear formatted with the brand colors of a social website"
+>
+  <UIButton client:visible icon="facebook" facebook>Facebook</UIButton>
+  <UIButton client:visible icon="twitter" twitter>Twitter</UIButton>
+  <UIButton client:visible icon="linkedin" linkedin>Linkedin</UIButton>
+  <UIButton client:visible icon="instagram" instagram>Instagram</UIButton>
+  <UIButton client:visible icon="youtube" youtube>Youtube</UIButton>
+</CodeExample>
 
 ## States
 
-### Hover
-<UIButton client:visible>Normal</UIButton>
-<UIButton client:visible hover>Hover</UIButton>
+<CodeExample client:load
+  title="Hover"
+  description="A button can show it is currently hovered"
+>
+  <UIButton client:visible>Normal</UIButton>
+  <UIButton client:visible hover>Hover</UIButton>
+</CodeExample>
 
-### Focus
-<UIButton client:visible>Normal</UIButton>
-<UIButton client:visible focus>Focus</UIButton>
+<CodeExample client:load
+  title="Focus"
+  description="A button can show it is currently focused by the keyboard"
+>
+  <UIButton client:visible>Normal</UIButton>
+  <UIButton client:visible focus>Focus</UIButton>
+</CodeExample>
 
-### Active
-<UIButton client:visible>Normal</UIButton>
-<UIButton client:visible active>Active</UIButton>
+<CodeExample client:load
+  title="Active"
+  description="A button can show it is currently the activated"
+>
+  <UIButton client:visible>Normal</UIButton>
+  <UIButton client:visible active>Active</UIButton>
+</CodeExample>
 
-### Disabled
-<UIButton client:visible disabled>Disabled</UIButton>
-<UIButton client:visible clickable-disabled>Clickable Disabled</UIButton>
+<CodeExample client:load
+  title="Disabled"
+  description="A button can disable interactions"
+>
+  <UIButton client:visible disabled>Disabled</UIButton>
+  <UIButton client:visible clickable-disabled>Clickable Disabled</UIButton>
+</CodeExample>
 
-### Loading
-<UIButton client:visible loading>Loading</UIButton>
-<UIButton client:visible loading icon="save">Save</UIButton>
-<UIButton client:visible primary loading>Loading</UIButton>
-<UIButton client:visible primary loading icon="save">Save</UIButton>
+<CodeExample client:load
+  title="Loading"
+  description="A button can show a loading indicator"
+>
+  <UIButton client:visible loading>Loading</UIButton>
+  <UIButton client:visible loading icon="save">Save</UIButton>
+  <UIButton client:visible primary loading>Loading</UIButton>
+  <UIButton client:visible primary loading icon="save">Save</UIButton>
+</CodeExample>
 
 ## Variations
 
-### Sizing
+<CodeExample client:load
+  title="Size"
+  description="A button can vary in size"
+>
+  <UIButton client:visible mini>Mini</UIButton>
+  <UIButton client:visible tiny>Tiny</UIButton>
+  <UIButton client:visible small>Small</UIButton>
+  <UIButton client:visible>Medium</UIButton>
+  <UIButton client:visible large>Large</UIButton>
+  <UIButton client:visible big>Big</UIButton>
+  <UIButton client:visible huge>Huge</UIButton>
+  <UIButton client:visible massive>Massive</UIButton>
+</CodeExample>
 
-<UIButton client:visible mini>Mini</UIButton>
-<UIButton client:visible tiny>Tiny</UIButton>
-<UIButton client:visible small>Small</UIButton>
-<UIButton client:visible>Medium</UIButton>
-<UIButton client:visible large>Large</UIButton>
-<UIButton client:visible big>Big</UIButton>
-<UIButton client:visible huge>Huge</UIButton>
-<UIButton client:visible massive>Massive</UIButton>
+<CodeExample client:load
+  title="Floated"
+  description="A button can be aligned to the left or right of its container"
+>
+  <UIButton client:visible right-floated>Right Floated</UIButton>
+  <UIButton client:visible left-floated>Left Floated</UIButton>
+</CodeExample>
 
-### Floated
-<UIButton client:visible right-floated>Right Floated</UIButton>
-<UIButton client:visible left-floated>Left Floated</UIButton>
-<br/> <br />
+<CodeExample client:load
+  title="Fluid"
+  description="A button can take the width of its container"
+>
+  <UIButton client:visible fluid>Fluid</UIButton>
+</CodeExample>
 
-### Fluid
-<UIButton client:visible fluid>Fluid</UIButton>
+<CodeExample client:load
+  title="Inverted"
+  description="A button can be formatted to appear on dark backgrounds"
+>
+  <UIButton client:visible inverted>Inverted</UIButton>
+</CodeExample>
 
-### Inverted
-<UIButton client:visible inverted>Inverted</UIButton>
+<CodeExample client:load
+  title="Circular"
+  description="A button can be formatted to appear circular"
+>
+  <UIButton client:visible circular icon="plus"></UIButton>
+</CodeExample>
 
-### Circular
-<UIButton client:visible circular icon="plus"></UIButton>
-
-### Top / Bottom Attached
+<CodeExample client:load
+  title="Attached"
+  description="A button can be attached"
+>
 <UIButton client:visible top-attached>Top Attached</UIButton>
-<div style="
-    border-left: 1px solid var(--border-color);
-    height: 200px;
-    background-color: #EEE;
-    border-right: 1px solid var(--border-color);
-    margin: 0px -1px;"></div>
-<UIButton client:visible bottom-attached>Bottom Attached</UIButton>
+  <div style="
+      border-left: 1px solid var(--border-color);
+      height: 200px;
+      background-color: #EEE;
+      border-right: 1px solid var(--border-color);
+      margin: 0px -1px;"></div>
+  <UIButton client:visible bottom-attached>Bottom Attached</UIButton>
+</CodeExample>
 
-### Left / Right Attached
+<CodeExample client:load>
+  <UIButton client:visible left-attached>Left</UIButton>
+  <UIButton client:visible right-attached>Right</UIButton>
+</CodeExample>
 
-<UIButton client:visible left-attached>Left</UIButton>
-<UIButton client:visible right-attached>Right</UIButton>
-
-### Compact
-
-<UIButton client:visible compact>Compact</UIButton>
-<UIButton client:visible very-compact>Very Compact</UIButton>
+<CodeExample client:load
+  title="Compact"
+  description="A button can reduce its padding to fit into tighter spaces without adjusting its font size"
+>
+  <UIButton client:visible compact>Compact</UIButton>
+  <UIButton client:visible very-compact>Very Compact</UIButton>
+</CodeExample>

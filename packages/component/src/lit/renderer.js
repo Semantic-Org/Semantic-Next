@@ -225,7 +225,6 @@ export class LitRenderer {
         // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
         const boundFunc = dataValue.bind(getContext());
         result = boundFunc(...funcArguments);
-        funcArguments = []; // reset args
       }
       else if (dataValue !== undefined) {
         result =

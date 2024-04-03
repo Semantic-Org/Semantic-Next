@@ -1,27 +1,34 @@
-<div class="example {{classIf codeVisible 'visible'}}">
-  <a class="code link">
-    <ui-icon code link></ui-icon>
-  </a>
-  <a class="sandbox link">
-    <ui-icon codesandbox link></ui-icon>
-  </a>
+<div class="example {{classIf codeVisible 'visible'}} {{classIf isHeaderless 'another'}}">
 
   {{#if title}}
-    <h3>{{title}}</h3>
+    <h3 id="{{tokenize title}}">
+      <a class="code link">
+        <ui-icon code link></ui-icon>
+      </a>
+      <a class="sandbox link">
+        <ui-icon codesandbox link></ui-icon>
+      </a>
+      {{title}}
+      {{#if description}}
+        <p>{{description}}</p>
+      {{/if}}
+    </h3>
   {{else}}
-    {{>slot title}}
+    <a class="code link">
+      <ui-icon code link></ui-icon>
+    </a>
+    <a class="sandbox link">
+      <ui-icon codesandbox link></ui-icon>
+    </a>
   {{/if}}
 
-  {{#if description}}
-    <p class="description">{{description}}</p>
-  {{else}}
-    <p class="description">{{>slot description}}</p>
-  {{/if}}
 
-  <div class="segment">
+  <div class="top segment">
     {{>slot}}
   </div>
-  {{#if codeVisible}}
-    <code-sample code="{{code}}" attached="true"></code-sample>
-  {{/if}}
+  <div class="bottom segment">
+    {{#if both code codeVisible}}
+      <code-sample code="{{code}}" segment="false"></code-sample>
+    {{/if}}
+  </div>
 </div>

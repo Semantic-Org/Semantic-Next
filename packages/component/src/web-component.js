@@ -227,8 +227,19 @@ class WebComponentBase extends LitElement {
     }
     else if (isBoolean(value)) {
       property = {
-        type: Boolean,
         attribute: true,
+        // simplify the use case of setting setting="false"
+        converter: {
+          fromAttribute: (value, type) => {
+            if (inArray(value, ['false', '0', 'undefined'])) {
+              return false;
+            }
+            return Boolean(value);
+          },
+          toAttribute: (value, type) => {
+            return String(value);
+          }
+        }
       };
     }
     else if (isArray(value)) {
@@ -299,7 +310,7 @@ class WebComponentBase extends LitElement {
         // we dont record this into settings
         return;
       }
-      const setting = this[property] || this.defaultSettings[property];
+      const setting = this[property] ?? this.defaultSettings[property];
       // only pass through setting if it is defined
       if(setting !== undefined) {
         settings[property] = setting;

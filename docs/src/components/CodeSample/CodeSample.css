@@ -1,3 +1,7 @@
+ui-menu {
+  display: none;
+}
+
 
 .segment {
   display: block;
@@ -10,13 +14,30 @@
   border-top-right-radius: 0;
   border-top: none;
 }
+.segment.transparent {
+  background-color: transparent;
+  border: none;
+  padding: 0rem;
+}
 
 
 /*******************************
          Code Samples
 *******************************/
 
+ui-icon[copy] {
+  float: right;
+  color: rgba(0, 0, 0, 0.2);
+}
+codeSample:hover {
+  ui-icon[copy] {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
 
+ui-icon[copy]:hover {
+  color: rgba(0, 0, 0, 1);
+}
 
 code {
   min-width: 500px;

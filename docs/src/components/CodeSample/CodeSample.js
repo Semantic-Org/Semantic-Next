@@ -10,10 +10,11 @@ import { each } from '@semantic-ui/utils';
 
 
 const settings = {
-  sourceType: 'html',
-  sourceTypes: 'auto',
+  language: 'html',
+  languageMenu: 'auto',
   code: '',
-  template: false,
+  copyable: true,
+  segment: true,
   attached: false,
   onCodeVisible: function(){},
 };
@@ -22,17 +23,16 @@ const createInstance = ({ el, $, settings, tpl }) => ({
 
   // internal
   code          : new ReactiveVar(false),
-  sourceType    : new ReactiveVar(''),
-  sourceTypes   : new ReactiveVar([]),
+  language      : new ReactiveVar(''),
+  languages     : new ReactiveVar([]),
   slottedCode   : new ReactiveVar(false),
-  formattedCode : new ReactiveVar(false),
+  formattedCode : new ReactiveVar(''),
 
   watchCode() {
     tpl.reaction(async () => {
-      tpl.sourceType.get(); // reactivity source
+      tpl.language.get(); // reactivity source
 
       let code;
-      tpl.formattedCode.set(false);
       if(settings.code) {
         code = settings.code;
       }
@@ -40,7 +40,7 @@ const createInstance = ({ el, $, settings, tpl }) => ({
         code = tpl.slottedCode.get();
       }
       if(code) {
-        if(settings.sourceType == 'html') {
+        if(settings.language == 'html') {
           tpl.formatHTML(code);
         }
         tpl.code.set(code);
@@ -51,7 +51,7 @@ const createInstance = ({ el, $, settings, tpl }) => ({
 
   async highlight(code) {
     let
-      language = tpl.sourceType.get(),
+      language = tpl.language.get(),
       formattedCode = await codeToHtml(code, {
         lang: language,
         theme: 'vitesse-light',
@@ -69,20 +69,20 @@ const createInstance = ({ el, $, settings, tpl }) => ({
   },
 
   get: {
-    sourceTypes() {
+    languages() {
       let
-        sourceTypes
+        languages
       ;
-      if(settings.sourceTypes !== 'auto') {
-        sourceTypes = settings.sourceTypes;
+      if(settings.languageMenu !== 'auto') {
+        languages = settings.languageMenu;
       }
-      else if(settings.sourceType == 'html') {
-        sourceTypes = ['html', 'astro'];
+      else if(settings.language == 'html') {
+        languages = ['html', 'astro'];
       }
       else {
-        sourceTypes = [ setings.sourceType ];
+        languages = [ settings.language ];
       }
-      return sourceTypes;
+      return languages;
     },
   },
 
@@ -92,9 +92,9 @@ const createInstance = ({ el, $, settings, tpl }) => ({
   },
 
   set: {
-    sourceType() {
-      if(settings.sourceType) {
-        tpl.sourceType.set(settings.sourceType);
+    language() {
+      if(settings.language) {
+        tpl.language.set(settings.language);
       }
     },
     copyableCode(code) {
@@ -112,7 +112,7 @@ const createInstance = ({ el, $, settings, tpl }) => ({
 
 const onCreated = function({tpl }) {
   tpl.set.slottedCode();
-  tpl.set.sourceType();
+  tpl.set.language();
   tpl.configureHighlighting();
   tpl.watchCode();
 };
