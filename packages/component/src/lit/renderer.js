@@ -1,6 +1,6 @@
 import { html } from 'lit';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
 import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
@@ -227,10 +227,9 @@ export class LitRenderer {
         result = boundFunc(...funcArguments);
       }
       else if (dataValue !== undefined) {
-        result =
-          dataValue?.constructor.name.search('ReactiveVar') !== -1
-            ? dataValue.value
-            : dataValue;
+        result = (dataValue instanceof ReactiveVar)
+          ? dataValue.value
+          : dataValue;
       }
       else if (
         (stringMatches = stringRegExp.exec(expression)) !== null &&
