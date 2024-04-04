@@ -1,25 +1,30 @@
 import { createComponent } from '@semantic-ui/component';
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
-import { ReactiveVar, Reaction} from '@semantic-ui/reactivity';
-import { UIIcon } from '@semantic-ui/core';
+import { ReactiveVar } from '@semantic-ui/reactivity';
 
+import { UIIcon } from '@semantic-ui/core';
 import CodeSample from '../CodeSample/CodeSample.js';
+
 const settings = {
   title: undefined,
   description: undefined,
   language: 'html',
-  code: '',
+  code: undefined,
   showCode: false, // show code on start
 };
 
 const createInstance = ({ $, isServer, settings, tpl }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
-  code: new ReactiveVar(''),
+  slottedContent: new ReactiveVar(),
+  code: new ReactiveVar(),
   removeComments(input) {
     return input.replace(/<!--[\s\S]*?-->/g, '');
   },
-  getSlottedContent() {
+  setSlottedContent() {
+    if(isServer) {
+      return;
+    }
     let
       defaultSlot = $('slot').not('[name]').get(0),
       slottedNodes = defaultSlot.assignedNodes(),
@@ -31,22 +36,22 @@ const createInstance = ({ $, isServer, settings, tpl }) => ({
       }).join('\n'),
       code = tpl.removeComments( html )
     ;
-    return code.trim();
+    tpl.slottedContent.set(code);
   },
   calculateCodeVisible() {
     tpl.reaction(() => {
-      if(tpl.codeVisible.get() && !tpl.code.get()) {
-        const code = settings.code || tpl.getSlottedContent();
-        tpl.code.set(code);
-      }
+      const code = settings.code || tpl.slottedContent.get();
+      tpl.code.set(code);
     });
   }
 });
 
+const onCreated = function({tpl, isClient, settings}) {
+  tpl.calculateCodeVisible();
+};
+
 const onRendered = function({tpl, isClient, settings}) {
-  if(isClient) {
-    tpl.calculateCodeVisible();
-  }
+  tpl.setSlottedContent();
 };
 
 
@@ -61,6 +66,7 @@ const CodeExample = createComponent({
   template,
   events,
   css,
+  onCreated,
   onRendered,
   createInstance,
   settings,
