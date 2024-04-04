@@ -22,7 +22,6 @@ class ReactiveData extends AsyncDirective {
 
     const getValue = (value) => {
       let reactiveValue = computeFunc();
-
       if(settings.ifDefined) {
         // useful for things like <input checked="{{isChecked}}">
         // template compiler does this automatically for boolean attrs
@@ -35,16 +34,16 @@ class ReactiveData extends AsyncDirective {
 
     // Create a new reaction to rerun the computation function
     let value;
-    this.reaction = Reaction.create((comp) => {
+    this.reaction = Reaction.create((computation) => {
       if(!this.isConnected) {
-        comp.stop();
+        computation.stop();
         return;
       }
       value = getValue();
       if(settings.unsafeHTML) {
         value = unsafeHTML(value);
       }
-      if (!comp.firstRun) {
+      if (!computation.firstRun) {
         this.setValue(value);
       }
     });

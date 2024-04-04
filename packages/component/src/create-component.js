@@ -118,6 +118,10 @@ export const createComponent = ({
             element: this,
             renderRoot: this.renderRoot,
           });
+          // just to be safe
+          if(!this.template.initialized) {
+            this.template.initialize();
+          }
           this.tpl = this.template.tpl;
         }
         // property change callbacks wont call on SSR
@@ -177,10 +181,11 @@ export const createComponent = ({
       }
 
       render() {
-        const html = this.template.render({
+        const data = {
           ...this.getData(),
           ...this.tpl,
-        });
+        };
+        const html = this.template.render(data);
         return html;
       }
     };

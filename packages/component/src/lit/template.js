@@ -153,8 +153,8 @@ export const LitTemplate = class LitTemplate {
 
   getDataContext() {
     return {
-      ...this.tpl,
       ...this.data,
+      ...this.tpl,
     };
   }
 
