@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '@layouts/Layout.astro';
+import Definition from '@layouts/Definition.astro';
+import SpecDefinition from '@components/SpecDefinition.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('components');
@@ -8,10 +9,9 @@ export async function getStaticPaths() {
     params: { slug: entry.slug }, props: { entry },
   }));
 }
-
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const data = entry.data;
 ---
-<Layout {...entry.data}>
-  <Content />
-</Layout>
+<Definition {...entry.data}>
+  <SpecDefinition slot="singular" specPath={data.specPath} />
+</Definition>

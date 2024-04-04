@@ -1,0 +1,27 @@
+---
+import * as UI from '@semantic-ui/core';
+
+const { specPath, plural } = Astro.props;
+
+async function loadSpec(path) {
+  if (path) {
+    const module = await import(path);
+    return module.default; // Access the default export of the module
+  }
+  console.error('Path is undefined');
+  return null;
+}
+
+const spec = await loadSpec(specPath);
+console.log('spec is', spec);
+const exportName = (plural !== undefined)
+  ? spec.pluralExportName
+  : spec.exportName
+;
+
+console.log('export name is', exportName);
+const Component = UI[exportName];
+---
+
+
+<Component>Omg yes</Component>

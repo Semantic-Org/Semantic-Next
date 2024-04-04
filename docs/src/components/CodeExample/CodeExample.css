@@ -37,7 +37,7 @@ h3 {
   font-size: 16px;
 }
 
-h3 p {
+p.description {
   margin: 0.25rem 0rem 0rem;
   font-size: 15px;
   color: rgba(0, 0, 0, 0);

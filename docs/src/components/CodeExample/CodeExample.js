@@ -36,7 +36,6 @@ const createInstance = ({ $, isServer, settings, tpl }) => ({
       }).join('\n').trim(),
       code = tpl.removeComments( html )
     ;
-    console.log(code, html);
     tpl.slottedContent.set(code);
   },
   calculateCodeVisible() {

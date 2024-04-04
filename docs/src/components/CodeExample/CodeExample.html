@@ -1,4 +1,4 @@
-<div class="example {{classIf codeVisible 'visible'}} {{classIf isHeaderless 'another'}}">
+<div class="example {{classIf codeVisible 'visible'}} {{classIf title '' 'another'}}">
 
   {{#if title}}
     <h3 id="{{tokenize title}}">
@@ -10,10 +10,13 @@
       </a>
       {{title}}
       {{#if description}}
-        <p>{{description}}</p>
+        <p class="description">{{description}}</p>
       {{/if}}
     </h3>
   {{else}}
+    {{#if description}}
+      <p class="description">{{description}}</p>
+    {{/if}}
     <a class="code link">
       <ui-icon code link></ui-icon>
     </a>

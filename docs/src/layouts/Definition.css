@@ -1,0 +1,13 @@
+.definition h3 {
+  display: none;
+  font-size: 16px;
+}
+.definition h3 + h4 {
+  margin-top: -1rem;
+}
+.definition h4 {
+  margin: 0.25rem 0rem 1rem;
+  font-size: 15px;
+  transition: color 0.3s ease;
+  font-weight: normal;
+}

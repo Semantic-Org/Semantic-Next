@@ -39,10 +39,6 @@ const onCreated = ({tpl}) => {
 
 };
 const onRendered = function({tpl}){
-  const shadowRoot = this.renderRoot;
-  if(!shadowRoot) {
-    return;
-  }
 };
 
 const events = {

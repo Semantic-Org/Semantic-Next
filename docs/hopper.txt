@@ -1,5 +1,6 @@
+Code Component
+
 Docs layout
-- Fix responsive layout
 - Top menu for docs page
 - Following menu
 - Code component
