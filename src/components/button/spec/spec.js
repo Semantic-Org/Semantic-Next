@@ -241,7 +241,7 @@ export const ButtonSpec = {
     {
       name: 'Circular',
       attribute: 'circular',
-      description: 'A button can be formatted to appear circular.',
+      description: 'A button can be formatted to appear circular',
       usageLevel: 3,
     },
 
@@ -393,25 +393,6 @@ export const ButtonSpec = {
     },
 
     {
-      name: 'Negative',
-      attribute: 'negative',
-      usageLevel: 2,
-      description: 'A button can be associated with a negative action',
-      options: [
-        {
-          name: 'Negative',
-          value: ['negative'],
-          description: 'A button be negative.'
-        },
-        {
-          name: 'Subtle Negative',
-          value: 'subtle-negative',
-          description: 'A button can subtly hint at a negative action'
-        },
-      ]
-    },
-
-    {
       name: 'Warning',
       attribute: 'warning',
       usageLevel: 2,
@@ -426,6 +407,25 @@ export const ButtonSpec = {
           name: 'Subtle Warning',
           value: 'subtle-warning',
           description: 'A button can subtly hint it may be dangerous'
+        },
+      ]
+    },
+
+    {
+      name: 'Negative',
+      attribute: 'negative',
+      usageLevel: 2,
+      description: 'A button can be associated with a negative action',
+      options: [
+        {
+          name: 'Negative',
+          value: ['negative'],
+          description: 'A button be negative.'
+        },
+        {
+          name: 'Subtle Negative',
+          value: 'subtle-negative',
+          description: 'A button can subtly hint at a negative action'
         },
       ]
     },
