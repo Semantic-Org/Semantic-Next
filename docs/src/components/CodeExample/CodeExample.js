@@ -33,9 +33,10 @@ const createInstance = ({ $, isServer, settings, tpl }) => ({
         return (el.nodeType == 3)
           ? el.nodeValue.trim()
           : $(el).html().trim();
-      }).join('\n'),
+      }).join('\n').trim(),
       code = tpl.removeComments( html )
     ;
+    console.log(code, html);
     tpl.slottedContent.set(code);
   },
   calculateCodeVisible() {
