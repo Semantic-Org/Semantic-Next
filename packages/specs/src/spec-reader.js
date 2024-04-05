@@ -22,12 +22,8 @@ export class SpecReader {
       inheritedPluralVariations: [],
     };
 
-    const addSettingsFromPart = (partName, usedKeys) => {
-      let specPart = spec[partName] || [];
-
-      if(usedKeys) {
-        specPart = specPart.map(obj => onlyKeys(obj, usedKeys));
-      }
+    const addSettingsFromPart = (partName) => {
+      const specPart = spec[partName] || [];
 
       each(specPart, (spec) => {
         const attributeName = this.getAttributeName(spec);
@@ -73,11 +69,11 @@ export class SpecReader {
     };
 
     // Only process necessary parts of the spec
-    addSettingsFromPart('content', ['name', 'attribute', 'slot', 'options']);
-    addSettingsFromPart('types', ['name', 'attribute', 'options']);
-    addSettingsFromPart('states', ['name', 'attribute', 'options']);
-    addSettingsFromPart('variations', ['name', 'attribute', 'options']);
-    addSettingsFromPart('settings', ['name', 'attribute', 'defaultValue']);
+    addSettingsFromPart('content');
+    addSettingsFromPart('types');
+    addSettingsFromPart('states');
+    addSettingsFromPart('variations');
+    addSettingsFromPart('settings');
 
 
     // avoid having to reverse array at runtime
