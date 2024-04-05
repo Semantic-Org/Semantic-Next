@@ -4,7 +4,6 @@ import { ViewTransitions } from 'astro:transitions';
 const { title, padded } = Astro.props;
 
 import '../css/layers.css';
-import '../css/fonts.css';
 
 import './Body.css';
 import '../css/responsive.css';
@@ -25,6 +24,7 @@ import '../css/sui/ui/semantic-ui.css';
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <title>{title}</title>
   </head>
   <body class={padded ? 'padded' : ''}>
