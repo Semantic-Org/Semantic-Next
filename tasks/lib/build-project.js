@@ -1,6 +1,7 @@
 import * as esbuild from 'esbuild';
 import { logPlugin } from './log.js';
 import { BROWSER_TARGET, JS_LOADER_CONFIG, CSS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './config.js';
+import * as fs from 'fs';
 
 export const buildProject = async ({
   watch = false, // watch for changes
@@ -28,6 +29,7 @@ export const buildProject = async ({
       entryPoints: ['./src/semantic-ui.js'],
       tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
       format: 'esm',
+      metafile: true,
       bundle,
       minify,
       sourcemap,
@@ -36,6 +38,8 @@ export const buildProject = async ({
       loader: JS_LOADER_CONFIG,
       plugins: [logPlugin('SUI')],
     });
+    const json = JSON.stringify(jsBuild.metafile);
+    console.log(json);
     tasks.push(jsBuild);
   }
 

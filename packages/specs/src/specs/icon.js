@@ -489,8 +489,9 @@ const IconSpec = {
 
 };
 
-const reader = new SpecReader(IconSpec);
-const IconComponentSpec = reader.getComponentSpec();
+
+const reader = new SpecReader(); // need this for tree shaking
+const IconComponentSpec = reader.getComponentSpec(IconSpec);
 
 export default IconSpec;
 

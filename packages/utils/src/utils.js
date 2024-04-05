@@ -433,6 +433,14 @@ export const get = function (obj, string = '') {
   return currentObject;
 };
 
+export const onlyKeys = (obj, keysToKeep) => {
+  return keysToKeep.reduce((accumulator, key) => {
+    if (obj.hasOwnProperty(key)) {
+      accumulator[key] = obj[key];
+    }
+    return accumulator;
+  }, {});
+};
 
 /*
   Return true if non-inherited property

@@ -637,8 +637,8 @@ const ButtonSpec = {
 
 };
 
-const reader = new SpecReader(ButtonSpec);
-const ButtonComponentSpec = reader.getComponentSpec();
+const reader = new SpecReader();
+const ButtonComponentSpec = reader.getComponentSpec(ButtonSpec);
 
 export default ButtonSpec;
 export {

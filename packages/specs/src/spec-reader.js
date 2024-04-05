@@ -1,14 +1,13 @@
-import { reverseKeys, flatten, isString, each } from '@semantic-ui/utils';
+import { reverseKeys, flatten, onlyKeys, isString, each } from '@semantic-ui/utils';
 
 export class SpecReader {
-
-  static spec = {};
-
   constructor(spec) {
     this.spec = spec || {};
   }
 
+  // we allow this to pass in spec so we can tree shake (this.spec would cause a ref to whole spec)
   getComponentSpec(spec = this.spec) {
+
     let componentSpec = {
       contentAttributes: [],
       content: [],
@@ -23,11 +22,63 @@ export class SpecReader {
       inheritedPluralVariations: [],
     };
 
-    this.addSettingsFromPart(componentSpec, 'content');
-    this.addSettingsFromPart(componentSpec, 'types');
-    this.addSettingsFromPart(componentSpec, 'states');
-    this.addSettingsFromPart(componentSpec, 'variations');
-    this.addSettingsFromPart(componentSpec, 'settings');
+    const addSettingsFromPart = (partName, usedKeys) => {
+      let specPart = spec[partName] || [];
+
+      if(usedKeys) {
+        specPart = specPart.map(obj => onlyKeys(obj, usedKeys));
+      }
+
+      each(specPart, (spec) => {
+        const attributeName = this.getAttributeName(spec);
+
+        if (!attributeName) {
+          return;
+        }
+
+        // add to list of this spec part attributes
+        componentSpec[partName].push(attributeName);
+
+        // allow spec to specify that the group class name should be included
+        // i.e if enabled for 'attached' will output <class="attached left-attached">
+        if (spec.includeAttributeClass) {
+          componentSpec.attributeClasses.push(attributeName);
+        }
+
+        // store allowed values for attribute if this part uses attributes
+        // functions and non-serializable content cannot use attributes
+        let optionValues;
+        if (spec.options) {
+          optionValues = spec.options
+            .map((option) => option?.value !== undefined ? option.value : option)
+            .filter(Boolean);
+          optionValues = flatten(optionValues);
+        }
+        else {
+          // boolean allowed values can be inferred
+          optionValues = [true, false];
+        }
+        componentSpec.attributes[attributeName] = optionValues;
+
+        // store detail of attributes which could represent content
+        if (partName === 'content' && attributeName) {
+          componentSpec.contentAttributes.push(attributeName);
+        }
+
+        // settings may or may not have associated attributes
+        if (partName === 'settings' && spec.defaultValue !== undefined) {
+          componentSpec.defaultSettings[attributeName] = spec.defaultValue;
+        }
+      });
+    };
+
+    // Only process necessary parts of the spec
+    addSettingsFromPart('content', ['name', 'attribute', 'slot', 'options']);
+    addSettingsFromPart('types', ['name', 'attribute', 'options']);
+    addSettingsFromPart('states', ['name', 'attribute', 'options']);
+    addSettingsFromPart('variations', ['name', 'attribute', 'options']);
+    addSettingsFromPart('settings', ['name', 'attribute', 'defaultValue']);
+
 
     // avoid having to reverse array at runtime
     let reverseAttributes = reverseKeys(componentSpec.attributes);
@@ -36,71 +87,19 @@ export class SpecReader {
     componentSpec.reverseAttributes = reverseAttributes;
 
     // store some details for plurality if present
-    componentSpec.inheritedPluralVariations = spec.pluralSharedVariations;
+    componentSpec.inheritedPluralVariations = this.spec.pluralSharedVariations || [];
     return componentSpec;
   }
-
-  addSettingsFromPart(componentSpec, specPart) {
-
-    each(this.spec[specPart], (spec) => {
-
-      const attributeName = this.getAttributeName(spec);
-
-      if(!attributeName) {
-        return;
-      }
-
-      // add to list of this spec part attributes
-      componentSpec[specPart].push(attributeName);
-
-      // allow spec to specify that the group class name should be included
-      // i.e if enabled for 'attached' will output <class="attached left-attached">
-      if(spec.includeAttributeClass) {
-        componentSpec.attributeClasses.push(attributeName);
-      }
-
-      // store allowed values for attribute if this part uses attributes
-      // functions and non-serializable content cannot use attributes
-      let optionValues;
-      if(spec.options) {
-        optionValues = spec.options.map(option => {
-          if(option?.value !== undefined) {
-            return option.value;
-          }
-          return option;
-        }).filter(Boolean);
-        optionValues = flatten(optionValues);
-      }
-      else {
-        // boolean allowed values can be inferred
-        optionValues = [true, false];
-      }
-      componentSpec.attributes[attributeName] = optionValues;
-
-      // store detail of attributes which could represent content
-      if(specPart == 'content' && attributeName) {
-        componentSpec.contentAttributes.push(attributeName);
-      }
-
-      // settings may or may not have associated attributes
-      if(specPart == 'settings' && spec.defaultValue !== undefined) {
-        componentSpec.defaultSettings[attributeName] = spec.defaultValue;
-      }
-    });
-  }
-
-  // returns the property name for a given definition part from a spec
   getAttributeName(part) {
-    if(part.attribute) {
+    if (part.attribute) {
       return part.attribute;
     }
-    if(isString(part.name)) {
+    if (isString(part.name)) {
       return part.name.toLowerCase();
     }
   }
 
-  getCodeSample(attribute, { language='html', dialect='standard' } = {}) {
-
+  getCodeSample(attribute, { language = 'html', dialect = 'standard' } = {}) {
+    // Implementation for code samples
   }
-
 }
