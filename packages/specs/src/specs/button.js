@@ -1,3 +1,5 @@
+import { SpecReader } from '../spec-reader.js';
+
 const ButtonSpec = {
 
   /*******************************
@@ -635,5 +637,11 @@ const ButtonSpec = {
 
 };
 
+const reader = new SpecReader(ButtonSpec);
+const ButtonComponentSpec = reader.getComponentSpec();
+
 export default ButtonSpec;
-export { ButtonSpec };
+export {
+  ButtonSpec,
+  ButtonComponentSpec
+};

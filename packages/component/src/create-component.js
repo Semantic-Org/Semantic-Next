@@ -3,7 +3,6 @@ import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
-import { extractComponentSpec } from './helpers/extract-component-spec.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
 
 import { LitTemplate } from './lit/template.js';
@@ -16,7 +15,7 @@ export const createComponent = ({
   template = '',
   css = false,
   lightCSS = false,
-  spec = false,
+  componentSpec = false,
   tagName,
   delegateFocus = true,
   templateName = kebabToCamel(tagName),
@@ -43,13 +42,6 @@ export const createComponent = ({
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
-
-  // specs include a lot of metadata not necessary for powering the component
-  // we want to extract the relevent content and then use that portion.
-  let componentSpec;
-  if (spec) {
-    componentSpec = extractComponentSpec(spec);
-  }
 
   // to support SSR we need to include all subtemplate css in base template
   each(subTemplates, (template) => {
@@ -174,7 +166,7 @@ export const createComponent = ({
           ...this.getContent({componentSpec}),
           plural
         };
-        if (spec) {
+        if (componentSpec) {
           data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
         }
         return data;
