@@ -645,6 +645,27 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
+    it('should compile a template with a partial and helper to produce data context', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{> partialName data=getData}}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        {
+          type: 'template',
+          name: "'partialName'",
+          data: 'getData',
+        },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      console.log(ast);
+      expect(ast).toEqual(expectedAST);
+    });
+
     it('should compile a template with a partial and reactive data', () => {
       const compiler = new TemplateCompiler();
       const template = `

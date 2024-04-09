@@ -5,23 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="./reload.js" type="module"></script>
   <link rel="stylesheet" href="./index.css">
-  <link rel="stylesheet" href="./ui/semantic-ui.css">
+  <link rel="stylesheet" href="./ui/ui/semantic-ui.css">
   <link rel="stylesheet" href="./ui/theme/base.css">
   <script src="./ui/ui/semantic-ui.js" type="module"></script>
 
   <title>Test Element</title>
-  <script src="./examples/test-element.js" type="module"></script>
+  <script src="./ui/examples/test-element.js" type="module"></script>
 </head>
 <body>
   <div class="container">
     <test-element hello="true" myname="jack">
       Tests
-      <ui-buttons large red>
-        <ui-button red>2</ui-button>
-        <ui-button blue>3</ui-button>
-        <ui-button>4</ui-button>
-        <ui-button>5</ui-button>
-      </ui-buttons>
       <span slot="text">Dummy Content</span>
     </test-element>
     <style>

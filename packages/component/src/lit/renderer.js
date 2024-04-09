@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, fatal, isString, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -137,17 +137,32 @@ export class LitRenderer {
     // template names can be dynamic
     const getTemplateName = () => getValue(node.name);
 
-    // data can either be reactive or nonreactive
-    const staticValues = mapObject(node.data || {}, (value) => {
-      return () => Reaction.nonreactive(() => getValue(value));
-    });
-    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
-      return () => getValue(value);
-    });
-    const templateData = {
-      ...staticValues,
-      ...reactiveValues,
-    };
+    // data is "packed" meaning each value is wrapped in a function
+    // this allows for reactive context to rerun properly when required
+
+    let templateData;
+    if(isString(data)) {
+      // this is a string providing a helper to return the whole data context
+      const values = getValue(data);
+      mapObject(values || {}, (value) => {
+        return () => Reaction.nonreactive(() => getValue(value));
+      });
+    }
+    else {
+      // this is an object of data passed through
+      // data can either be reactive or nonreactive
+      const staticValues = mapObject(node.data || {}, (value) => {
+        return () => Reaction.nonreactive(() => getValue(value));
+      });
+      const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
+        return () => getValue(value);
+      });
+      templateData = {
+        ...staticValues,
+        ...reactiveValues,
+      };
+    }
+
     return renderTemplate({
       subTemplates: this.subTemplates,
       getTemplateName: getTemplateName,

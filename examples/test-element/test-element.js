@@ -6,6 +6,7 @@ import css from './test-element.css?raw';
 
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
+import { dataTestTab } from './tabs/data-test.js';
 
 const createInstance = function ({ tpl, $ }) {
   return {
@@ -55,6 +56,7 @@ const TestElement = createComponent({
   subTemplates: {
     events: eventsTab,
     basic: basicTab,
+    dataTest: dataTestTab,
   },
 });
 

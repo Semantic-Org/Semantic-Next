@@ -256,16 +256,24 @@ class TemplateCompiler {
       // standard notation {{> templateName data1=value data2=value}}
       let data = {};
       const matches = [...expression.matchAll(regExp.STANDARD)];
+      let dataObjectShorthand = false;
       each(matches, (match, index) => {
         if (index == 0) {
           templateInfo.name = `'${match[0].trim()}'`;
         }
         else {
           const parts = match[0].split('=');
-          if (parts.length) {
+          if (parts.length == 2) {
             let name = parts[0].trim();
             let value = parts[1].trim();
-            data[name] = value;
+            // data shorthand i.e. {{> templateName data=getData}}
+            if(index == 1 && name == 'data') {
+              dataObjectShorthand = true;
+              data = value;
+            }
+            else if(!dataObjectShorthand) {
+              data[name] = value;
+            }
           }
         }
       });
