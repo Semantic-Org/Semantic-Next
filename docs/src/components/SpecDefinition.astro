@@ -1,27 +1,72 @@
 ---
 import * as UI from '@semantic-ui/core';
+import * as SpecExports from '@semantic-ui/specs';
+import { CodeExample } from '@components/CodeExample/CodeExample.js';
 
-const { specPath, plural } = Astro.props;
+const { specName, plural } = Astro.props;
 
-async function loadSpec(path) {
-  if (path) {
-    const module = await import(path);
-    return module.default; // Access the default export of the module
-  }
-  console.error('Path is undefined');
-  return null;
-}
+const { SpecReader, ...Specs } = SpecExports;
 
-const spec = await loadSpec(specPath);
-console.log('spec is', spec);
-const exportName = (plural !== undefined)
-  ? spec.pluralExportName
-  : spec.exportName
-;
+const spec = Specs[specName];
+const componentSpec = new SpecReader(spec, {plural});
 
-console.log('export name is', exportName);
-const Component = UI[exportName];
+const componentName = componentSpec.getComponentName();
+
+const Component = UI[componentName];
+
+const componentDefinition = componentSpec.getDefinition();
 ---
-
-
-<Component>Omg yes</Component>
+<h2>Types</h2>
+{componentDefinition.types.map((type) => (
+  <>
+    {type.examples.map((example, index) => (
+      <>
+        <CodeExample client:load
+          title={(index == 0) ? type.title : undefined }
+          description={type.description}
+          code={example.code}
+        >
+          <Component {...example.codeParts.attributes}>
+            <Fragment set:html={example.codeParts.html} />
+          </Component>
+        </CodeExample>
+      </>
+    ))}
+  </>
+))}
+<h2>States</h2>
+{componentDefinition.states.map((type) => (
+  <>
+    {type.examples.map((example, index) => (
+      <>
+        <CodeExample client:load
+          title={(index == 0) ? type.title : undefined }
+          description={(index == 0) ? type.description : undefined }
+          code={example.code}
+        >
+          <Component {...example.codeParts.attributes}>
+            <Fragment set:html={example.codeParts.html} />
+          </Component>
+        </CodeExample>
+      </>
+    ))}
+  </>
+))}
+<h2>Variations</h2>
+{componentDefinition.variations.map((type) => (
+  <>
+    {type.examples.map((example, index) => (
+      <>
+        <CodeExample client:load
+          title={(index == 0) ? type.title : undefined }
+          description={(index == 0) ? type.description : undefined }
+          code={example.code}
+        >
+          <Component {...example.codeParts.attributes}>
+            <Fragment set:html={example.codeParts.html} />
+          </Component>
+        </CodeExample>
+      </>
+    ))}
+  </>
+))}

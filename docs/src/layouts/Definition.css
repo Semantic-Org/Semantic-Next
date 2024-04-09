@@ -1,6 +1,8 @@
 .definition h3 {
-  display: none;
   font-size: 16px;
+}
+.definition h3 + p {
+  margin-top: -1rem;
 }
 .definition h3 + h4 {
   margin-top: -1rem;

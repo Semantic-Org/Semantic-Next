@@ -13,5 +13,5 @@ const { entry } = Astro.props;
 const data = entry.data;
 ---
 <Definition {...entry.data}>
-  <SpecDefinition slot="singular" specPath={data.specPath} />
+  <SpecDefinition slot="singular" {...entry.data} />
 </Definition>

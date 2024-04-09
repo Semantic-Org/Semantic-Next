@@ -226,6 +226,9 @@ export const toTitleCase = (str = '') => {
     'with',
     'as',
   ];
+  if(!isString(str)) {
+    return;
+  }
   return str
     .toLowerCase()
     .split(' ')

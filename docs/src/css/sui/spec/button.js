@@ -6,7 +6,7 @@ const ButtonSpec = {
 
   uiType: 'element',
   name: 'Button',
-  description: 'A button indicates possible user action',
+  description: 'A button indicates a possible user action',
 
   /*******************************
              Singular
@@ -116,6 +116,7 @@ const ButtonSpec = {
       description: 'A button can animate to show hidden content',
       includeAttributeClass: true,
       usageLevel: 3,
+      exampleHTML: "<span slot=\"visible\">\n<ui-icon icon=\"shopping cart\"></ui-icon>\n</span>\n<span slot=\"hidden\">Shop</span>\n",
       options: [
         {
           name: 'Animated',
