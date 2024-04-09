@@ -79,21 +79,30 @@ export class SpecReader {
         definition[partName].push(examples);
       });
     });
-    console.log(definition);
     return definition;
   }
 
-  // returns an object of code parts from an HTML string
-  // html = '<ui-button icon="delete">Delete</ui-button>'
+  /*
+    Returns only top level with all inner content as 'html'
+    <ui-button icon="delete"><div>Hello</div></ui-button>
+    returns {
+      componentName: 'ui-button',
+      attributes: { icon: 'delete' }
+      attributeString 'icon="delete"'
+      html: '<div>Hello</div>'
+    }
+  */
+
   getCodePartsFromHTML(html) {
-    const words = html.replace(/<[^>]*>/mg, '');
-    const componentName = html.match(/<([^ ]*)/)[1];
-    const attributes = this.getAttributes(words);
-    const innerHTML = html.replace(/<[^>]*>/mg, '');
+    let componentName = '';
+    let attributes = {};
+    let attributeString = '';
+    let html = '';
+    // code goes here
     return {
       componentName: componentName,
       attributes: attributes,
-      attributeString: this.getAttributeString(words, { attributes }),
+      attributeString: attributeString,
       html: innerHTML
     };
   }
