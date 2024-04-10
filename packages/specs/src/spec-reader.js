@@ -65,7 +65,10 @@ export class SpecReader {
       title: spec.name,
       description: spec.description,
       examples: [
-        { code: this.getCode(''), codeParts: this.getCodeParts('') }        
+        {
+          code: this.getCode(''),
+          components: [ this.getComponentParts('') ]
+        }
       ]
     });
 
@@ -92,7 +95,7 @@ export class SpecReader {
       html: '<div>Hello</div>'
     }
   */
-  getCodePartsFromHTML(html) {
+  getComponentPartsFromHTML(html) {
     // Remove leading and trailing whitespace from the HTML string
     html = html.trim();
 
@@ -126,7 +129,7 @@ export class SpecReader {
     return {
       componentName: componentName,
       attributes: attributes,
-      attributeString: getAttributeStringFromWords(html, { attributes }),
+      attributeString: this.getAttributeStringFromWords(html, { attributes }),
       html: innerHTML
     };
   }
@@ -134,14 +137,13 @@ export class SpecReader {
   getCodeExamples(part) {
     let examples = [];
     if(part.options) {
-      let jointExample;
       let examplesToJoin = [];
       each(part.options, (option, index) => {
-        let code, codeParts;
+        let code, componentParts;
         if(option.exampleCode) {
           // an example was provided in the spec for us
-          code = options.exampleCode;
-          codeParts = this.getCodePartsFromHTML(code);
+          code = option.exampleCode;
+          componentParts = this.getComponentPartsFromHTML(code);
         }
         else {
           // we will construct an example programatically
@@ -151,11 +153,11 @@ export class SpecReader {
             : option.value
           ;
           code = this.getCode(words);
-          codeParts = this.getCodeParts(words);
+          componentParts = this.getComponentParts(words);
         }
         const example = {
           code,
-          codeParts
+          components: [componentParts]
         };
         if(part.separateExamples) {
           examples.push(example);
@@ -164,25 +166,28 @@ export class SpecReader {
           examplesToJoin.push(example);
         }
       });
-      examples.push({
-        code: examplesToJoin.map(ex => ex.code).join('\n'),
-        codeParts
-      });
+      // join all examples
+      if(!part.separateExamples) {
+        examples.push({
+          code: examplesToJoin.map(ex => ex.code).join('\n'),
+          components: flatten([...examplesToJoin.map(ex => ex.components)])
+        });
+      }
     }
     else {
-      let code, codeParts;
+      let code, componentParts;
       const words = this.getAttributeName(part);
       if(part.exampleCode) {
         code = part.exampleCode;
-        codeParts = this.getCodePartsFromHTML(code);
+        componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
         code = this.getCode(words);
-        codeParts = this.getCodeParts(words);
+        componentParts = this.getComponentParts(words);
       }
       const example = {
         code,
-        codeParts
+        components: [componentParts]
       };
       examples.push(example);
     }
@@ -194,7 +199,7 @@ export class SpecReader {
     };
   }
 
-  getCodeParts(words, {
+  getComponentParts(words, {
     lang='html',
     plural=this.plural,
     text,
@@ -221,7 +226,7 @@ export class SpecReader {
   }
 
   getCode(words, settings) {
-    const { componentName, attributeString, html } = this.getCodeParts(words, settings);
+    const { componentName, attributeString, html } = this.getComponentParts(words, settings);
     return `<${componentName}${attributeString}>${html}</${componentName}>`;
   }
 
@@ -287,8 +292,8 @@ export class SpecReader {
 
   getAttributeStringFromWords(words, {
     dialect = this.dialect,
-    joinWith = '=',
     attributes,
+    joinWith = '=',
     quoteCharacter = `'`
   } = {}) {
     if(!words) {
@@ -304,11 +309,15 @@ export class SpecReader {
     }
     else if(dialect == SpecReader.DIALECT_TYPES.verbose) {
       if(!attributes) {
-        attributes = this.getAttributes(words, { dialect });
+        attributes = this.getAttributesFromWords(words);
       }
       let attributeString = ' ';
       each(attributes, (value, attribute) => {
-        attributeString += `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`;
+        const singleAttr = this.getSingleAttributeString(attribute, value, {
+          joinWith,
+          quoteCharacter
+        });
+        attributeString += ` ${singleAttr}`;
       });
       return attributeString;
     }

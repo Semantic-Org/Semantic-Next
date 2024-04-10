@@ -1,7 +1,8 @@
 ---
-import * as UI from '@semantic-ui/core';
 import * as SpecExports from '@semantic-ui/specs';
+import { toTitleCase } from '@semantic-ui/utils';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
+import UIComponent from '@components/UIComponent.astro';
 
 const { specName, plural } = Astro.props;
 
@@ -9,63 +10,31 @@ const { SpecReader, ...Specs } = SpecExports;
 
 const spec = Specs[specName];
 const componentSpec = new SpecReader(spec, {plural});
-
 const componentName = componentSpec.getComponentName();
 
-const Component = UI[componentName];
-
 const componentDefinition = componentSpec.getDefinition();
+const sections = ['types', 'content', 'states', 'variations'];
 ---
-<h2>Types</h2>
-{componentDefinition.types.map((type) => (
+{sections.map((section) => (
   <>
-    {type.examples.map((example, index) => (
+    <h2>{toTitleCase(section)}</h2>
+    {componentDefinition[section].map((type) => (
       <>
-        <CodeExample client:load
-          title={(index == 0) ? type.title : undefined }
-          description={type.description}
-          code={example.code}
-        >
-          <Component {...example.codeParts.attributes}>
-            <Fragment set:html={example.codeParts.html} />
-          </Component>
-        </CodeExample>
-      </>
-    ))}
-  </>
-))}
-<h2>States</h2>
-{componentDefinition.states.map((type) => (
-  <>
-    {type.examples.map((example, index) => (
-      <>
-        <CodeExample client:load
-          title={(index == 0) ? type.title : undefined }
-          description={(index == 0) ? type.description : undefined }
-          code={example.code}
-        >
-          <Component {...example.codeParts.attributes}>
-            <Fragment set:html={example.codeParts.html} />
-          </Component>
-        </CodeExample>
-      </>
-    ))}
-  </>
-))}
-<h2>Variations</h2>
-{componentDefinition.variations.map((type) => (
-  <>
-    {type.examples.map((example, index) => (
-      <>
-        <CodeExample client:load
-          title={(index == 0) ? type.title : undefined }
-          description={(index == 0) ? type.description : undefined }
-          code={example.code}
-        >
-          <Component {...example.codeParts.attributes}>
-            <Fragment set:html={example.codeParts.html} />
-          </Component>
-        </CodeExample>
+        {type.examples.map((example, index) => (
+          <>
+            <CodeExample client:load
+              title={(index == 0) ? type.title : undefined }
+              description={type.description}
+              code={example.code}
+            >
+              {example.components.map((component) => (
+                <UIComponent client:load name={componentName} attributes={component.attributes}>
+                  <Fragment set:html={component.html} />
+                </UIComponent>
+              ))}
+            </CodeExample>
+          </>
+        ))}
       </>
     ))}
   </>

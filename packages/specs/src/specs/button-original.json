@@ -25,6 +25,16 @@
       ],
       "slot": "icon",
       "description": "A button can be formatted to include an icon"
+    },
+    {
+      "name": "Label",
+      "looseCoupling": true,
+      "attribute": "label",
+      "couplesWith": [
+        "label"
+      ],
+      "slot": "label",
+      "description": "A button can be formatted to include a label"
     }
   ],
   "types": [
@@ -44,8 +54,7 @@
         {
           "name": "Secondary",
           "value": "secondary",
-          "description": "This button should appear to be emphasized as a secondary option that should appear after other options",
-          "exampleCode": "<ui-button secondary>Confirm</ui-button><ui-button>Cancel</ui-button>"
+          "description": "This button should appear to be emphasized as a secondary option that should appear after other options"
         }
       ]
     },
@@ -55,6 +64,31 @@
       "description": "A button can appear with only an icon",
       "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>",
       "usageLevel": 2
+    },
+    {
+      "name": "Labeled",
+      "attribute": "labeled",
+      "description": "A button can appear specially formatted to attach to a label element",
+      "usageLevel": 3,
+      "looseCoupling": true,
+      "couplesWith": [
+        "label"
+      ],
+      "options": [
+        {
+          "name": "Labeled",
+          "value": [
+            "labeled",
+            "right-labeled"
+          ],
+          "description": "A button can be formatted so that a label appears to the right"
+        },
+        {
+          "name": "Left Labeled",
+          "value": "left-labeled",
+          "description": "A button can be formatted so that a label appears to the left"
+        }
+      ]
     },
     {
       "name": "Toggle",
@@ -76,20 +110,17 @@
             true,
             "horizontal-animated"
           ],
-          "description": "A button can be formatted to animate hidden content horizontally",
-          "exampleCode": "<ui-button animated><span slot=\"visible\">Hover Me</span><span slot=\"hidden\">Hidden</span></ui-button>"
+          "description": "A button can be formatted to animate hidden content horizontally"
         },
         {
           "name": "Vertical Animated",
           "value": "vertical-animated",
-          "description": "A button can be formatted to animate hidden content vertically",
-          "exampleCode": "<ui-button vertical-animated><span slot=\"visible\">Hover Me</span><span slot=\"hidden\">Hidden</span></ui-button>"
+          "description": "A button can be formatted to animate hidden content vertically"
         },
         {
           "name": "Fade Animated",
           "value": "fade-animated",
-          "description": "A button can be formatted to fade in hidden content",
-          "exampleCode": "<ui-button fade-animated><span slot=\"visible\">Hover Me</span><span slot=\"hidden\">Hidden</span></ui-button>"
+          "description": "A button can be formatted to fade in hidden content"
         }
       ]
     }

@@ -1,13 +1,9 @@
 ---
 import Body from '../layouts/Body.astro';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
-import { UIButton, UIButtons } from '@semantic-ui/core';
+import { UIButton, UIButtons, UIIcon } from '@semantic-ui/core';
 ---
 <Body padded>
-<CodeExample client:load title="Standard" description="A button indicates possible user action">
-  <UIButton client:load>Button</UIButton>
-</CodeExample>
-<CodeExample client:load title="Standard" description="A button indicates possible user action">
-  const value = 1;
-</CodeExample>
+<UIIcon client:load icon="pause"></UIIcon>
+<UIButton client:load icon="pause">Pause</UIButton>
 </Body>

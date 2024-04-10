@@ -6,13 +6,11 @@
 .toggle.buttons .active.button,
 .buttons .button.toggle.active,
 .button.toggle.active {
-  background-color: var(--button-positive-color) !important;
-  box-shadow: none !important;
-  text-shadow: var(--button-inverted-text-shadow);
-  color: var(--button-inverted-text-color) !important;
+  background-color: var(--button-toggle-active-background) !important;
+  color: var(--button-toggle-active-color) !important;
+  text-shadow: var(--button-toggle-active-text-shadow);
 }
 .button.toggle.active:hover {
-  background-color: var(--button-positive-color-hover) !important;
-  text-shadow: var(--button-inverted-text-shadow);
-  color: var(--button-inverted-text-color) !important;
+  background-color: var(--button-toggle-active-hover-background) !important;
+  color: var(--button-toggle-active-hover-color) !important;
 }
