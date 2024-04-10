@@ -95,7 +95,7 @@ export class SpecReader {
       html: '<div>Hello</div>'
     }
   */
-  getComponentPartsFromHTML(html) {
+  getComponentPartsFromHTML(html, { dialect } = {}) {
     // Remove leading and trailing whitespace from the HTML string
     html = html.trim();
 
@@ -127,6 +127,8 @@ export class SpecReader {
         }
       }
     }
+    const dialectAttributeString = this.getAttributeStringFromWords(html, { attributes, dialect });
+
 
     // Extract the inner HTML
     const innerHTML = html.slice(closingTagIndex + 1, html.lastIndexOf('<')).trim();
@@ -134,7 +136,7 @@ export class SpecReader {
     return {
       componentName: componentName,
       attributes: attributes,
-      attributeString: this.getAttributeStringFromWords(html, { attributes }),
+      attributeString: dialectAttributeString,
       html: innerHTML
     };
   }
@@ -222,12 +224,13 @@ export class SpecReader {
       html = toTitleCase(text);
     }
     const attributes = this.getAttributesFromWords(words);
-    return {
+    const componentParts = {
       componentName: componentName,
       attributes: attributes,
       attributeString: this.getAttributeStringFromWords(words, { attributes, dialect }),
       html: html
     };
+    return componentParts;
   }
 
   getCode(words, settings) {
@@ -256,7 +259,10 @@ export class SpecReader {
     joinWith = '=',
     quoteCharacter = ':',
   } = {}) {
-    return `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`;
+    return (value == true || value==attribute)
+      ? `${attribute}`
+      : `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`
+    ;
   }
 
   getAttributeString(attributes, {
@@ -302,7 +308,7 @@ export class SpecReader {
     dialect = this.dialect,
     attributes,
     joinWith = '=',
-    quoteCharacter = `'`
+    quoteCharacter = `"`
   } = {}) {
     if(!words) {
       return '';
@@ -327,7 +333,7 @@ export class SpecReader {
         });
         attributeString += ` ${singleAttr}`;
       });
-      return attributeString;
+      return ` ${attributeString.trim()}`;
     }
   }
 

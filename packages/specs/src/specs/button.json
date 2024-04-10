@@ -8,7 +8,6 @@
     {
       "name": "Text",
       "looseCoupling": true,
-      "attribute": "text",
       "couplesWith": [
         "icon"
       ],
