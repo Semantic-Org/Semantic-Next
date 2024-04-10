@@ -13,3 +13,24 @@
   transition: color 0.3s ease;
   font-weight: normal;
 }
+
+.transparent.segments {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.transparent.segments > .segment {
+  padding: 2rem;
+}
+.transparent.segments .dark {
+  background-image: linear-gradient(45deg, #232323, #0A0A0A);
+}
+.transparent.segments .light {
+  background-image: linear-gradient(45deg, #aaced9, #FFFFFF);
+}
+
+@media screen and (max-width: 767px) {
+  .transparent.segments {
+    flex-direction: column;
+  }
+}

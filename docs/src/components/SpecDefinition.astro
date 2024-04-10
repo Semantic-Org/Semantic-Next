@@ -28,9 +28,9 @@ const sections = ['types', 'content', 'states', 'variations'];
               code={example.code}
             >
               {example.components.map((component) => (
-                <UIComponent name={componentName} attributes={component.attributes}>
-                  <Fragment set:html={component.html} />
-                </UIComponent>
+                (component.componentName)
+                  ? (<UIComponent name={componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
+                  : (<Fragment set:html={component.html} />)
               ))}
             </CodeExample>
           </>

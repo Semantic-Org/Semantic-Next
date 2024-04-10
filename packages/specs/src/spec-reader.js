@@ -105,7 +105,12 @@ export class SpecReader {
 
     // Extract the component name
     const componentName = html.slice(1, spaceIndex !== -1 ? spaceIndex : closingTagIndex);
-
+    // complex examples arent supported
+    if(componentName == 'div') {
+      return {
+        html: html
+      };
+    }
     // Extract the attribute string
     const attributeString = spaceIndex !== -1 ? html.slice(spaceIndex, closingTagIndex).trim() : '';
 
@@ -184,8 +189,6 @@ export class SpecReader {
       else {
         code = this.getCode(words);
         componentParts = this.getComponentParts(words);
-        console.log('words are', words);
-        console.log('code', componentParts);
       }
       const example = {
         code,

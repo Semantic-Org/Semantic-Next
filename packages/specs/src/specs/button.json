@@ -388,7 +388,7 @@
       "name": "Info",
       "attribute": "info",
       "usageLevel": 2,
-      "description": "A button can be associated with a potentially dangerous action",
+      "description": "A button can be associated with additional information",
       "options": [
         {
           "name": "Info",
@@ -409,7 +409,7 @@
       "attribute": "transparent",
       "usageLevel": 2,
       "description": "A button can apper transparent",
-      "exampleCode": "<div class=\"transparent segments\">\n  <div class=\"light segment\">\n    <ui-button client:visible transparent>Transparent</ui-button>\n  </div>\n  <div class=\"dark segment\">\n    <ui-button client:visible inverted transparent>Transparent</ui-button>\n  </div>\n</div>"
+      "exampleCode": "<div class=\"transparent segments\">\n  <div class=\"light segment\">\n    <ui-button transparent>Transparent</ui-button>\n  </div>\n  <div class=\"dark segment\">\n    <ui-button inverted transparent>Transparent</ui-button>\n  </div>\n</div>"
     },
     {
       "name": "Floated",
