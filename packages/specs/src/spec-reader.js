@@ -1,4 +1,4 @@
-import { reverseKeys, flatten, isString, isArray, each, toTitleCase } from '@semantic-ui/utils';
+import { reverseKeys, flatten, isString, isArray, each, values, toTitleCase } from '@semantic-ui/utils';
 
 export class SpecReader {
 
@@ -92,17 +92,41 @@ export class SpecReader {
       html: '<div>Hello</div>'
     }
   */
-
   getCodePartsFromHTML(html) {
-    let componentName = '';
-    let attributes = {};
-    let attributeString = '';
-    let html = '';
-    // code goes here
+    // Remove leading and trailing whitespace from the HTML string
+    html = html.trim();
+
+    // Find the index of the first space or closing angle bracket
+    const spaceIndex = html.indexOf(' ');
+    const closingTagIndex = html.indexOf('>');
+
+    // Extract the component name
+    const componentName = html.slice(1, spaceIndex !== -1 ? spaceIndex : closingTagIndex);
+
+    // Extract the attribute string
+    const attributeString = spaceIndex !== -1 ? html.slice(spaceIndex, closingTagIndex).trim() : '';
+
+    // Parse the attribute string into an object
+    const attributes = {};
+    if (attributeString) {
+      const attributePairs = attributeString.split(' ');
+      for (const pair of attributePairs) {
+        const [key, value] = pair.split('=');
+        if (value) {
+          attributes[key] = value.replace(/"/g, '');
+        } else {
+          attributes[key] = true;
+        }
+      }
+    }
+
+    // Extract the inner HTML
+    const innerHTML = html.slice(closingTagIndex + 1, html.lastIndexOf('<')).trim();
+
     return {
       componentName: componentName,
       attributes: attributes,
-      attributeString: attributeString,
+      attributeString: getAttributeStringFromWords(html, { attributes }),
       html: innerHTML
     };
   }
@@ -110,14 +134,18 @@ export class SpecReader {
   getCodeExamples(part) {
     let examples = [];
     if(part.options) {
+      let jointExample;
+      let examplesToJoin = [];
       each(part.options, (option, index) => {
         let code, codeParts;
         if(option.exampleCode) {
+          // an example was provided in the spec for us
           code = options.exampleCode;
           codeParts = this.getCodePartsFromHTML(code);
         }
         else {
-          // get first string option value
+          // we will construct an example programatically
+          // using the option values
           const words = (isArray(option.value))
             ? option.value.filter(val => isString(val))[0]
             : option.value
@@ -129,7 +157,16 @@ export class SpecReader {
           code,
           codeParts
         };
-        examples.push(example);
+        if(part.separateExamples) {
+          examples.push(example);
+        }
+        else {
+          examplesToJoin.push(example);
+        }
+      });
+      examples.push({
+        code: examplesToJoin.map(ex => ex.code).join('\n'),
+        codeParts
       });
     }
     else {
@@ -168,16 +205,17 @@ export class SpecReader {
       ? this.getTagName({ plural })
       : this.getComponentName({ plural, lang })
     ;
+    // use the word as text or component name i.e. 'primary', 'emphasis' etc
     if(!text && !html) {
       const baseText = words || componentName.replace(/^ui-/, '');
       text = String(baseText).replace(/\-/mg, ' ');
       html = toTitleCase(text);
     }
-    const attributes = this.getAttributes(words);
+    const attributes = this.getAttributesFromWords(words);
     return {
       componentName: componentName,
       attributes: attributes,
-      attributeString: this.getAttributeString(words, { attributes, dialect }),
+      attributeString: this.getAttributeStringFromWords(words, { attributes, dialect }),
       html: html
     };
   }
@@ -188,7 +226,7 @@ export class SpecReader {
   }
 
   /* Returns an object of attributes and their values from a list of words */
-  getAttributes(words = '') {
+  getAttributesFromWords(words = '') {
     const componentSpec = this.getWebComponentSpec();
     const attributes = {};
     const wordArray = String(words).split(' ');
@@ -201,7 +239,53 @@ export class SpecReader {
     return attributes;
   }
 
-  getAttributeString(words, {
+  getSingleAttributeString(attribute, value, {
+    joinWith = '=',
+    quoteCharacter = ':',
+  } = {}) {
+    return `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`;
+  }
+
+  getAttributeString(attributes, {
+    dialect = this.dialect,
+    joinWith = '=',
+    quoteCharacter = `'`
+  } = {}) {
+    let attributeString;
+    let words = [];
+    let categoryAttributes = clone(attributes);
+    let componentSpec = this.getWebComponentSpec();
+    each(attributes, (value, key) => {
+      const parentAttribute = componentSpec.reverseAttributes[value];
+      if(parentAttribute) {
+        words.push(value);
+      }
+      else {
+        categoryAttributes[key] = value;
+      }
+    });
+    if(words.length) {
+      const wordString = wordAttributes.join(' ');
+      if(dialect == SpecReader.DIALECT_TYPES.standard) {
+        // <ui-button large red>
+        attributeString += ` ${wordString}`;
+      }
+      else if(dialect == SpecReader.DIALECT_TYPES.classic) {
+        // <ui-button class="large red">
+        return ` class="${wordString}"`;
+      }
+    }
+    else if(dialect == SpecReader.DIALECT_TYPES.verbose || keys(categoryAttributes)) {
+      let attributeString = ' ';
+      each(attributes, (value, attribute) => {
+        const singleAttr = this.getSingleAttributeString(attribute, value, { joinWith, quoteCharacter});
+        attributeString += ` ${singleAttr}`;
+      });
+    }
+    return attributeString;
+  }
+
+  getAttributeStringFromWords(words, {
     dialect = this.dialect,
     joinWith = '=',
     attributes,

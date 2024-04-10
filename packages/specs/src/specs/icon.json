@@ -1,15 +1,15 @@
 {
-  "uiType": "element",
-  "name": "Icon",
-  "description": "An icon is a glyph used to represent something else",
-  "tagName": "ui-icon",
-  "content":[
+  "uiType":  "element",
+  "name":  "Icon",
+  "description":  "An icon is a glyph used to represent something else",
+  "tagName":  "ui-icon",
+  "content": [
     {
-      "name": "Icon",
-      "attribute": "icon",
-      "description": "An icon can specify what icon should appear",
-      "usageLevel":1,
-      "options":[
+      "name":  "Icon",
+      "attribute":  "icon",
+      "description":  "An icon can specify what icon should appear",
+      "usageLevel": 1,
+      "options": [
         "airplay",
         "alert-circle",
         "alert-octagon",
@@ -295,164 +295,164 @@
       ]
     }
   ],
-  "states":[
+  "states": [
     {
-      "name": "Disabled",
-      "attribute": "disabled",
-      "description": "An icon appear disabled",
-      "usageLevel":1
+      "name":  "Disabled",
+      "attribute":  "disabled",
+      "description":  "An icon appear disabled",
+      "usageLevel": 1
     },
     {
-      "name": "Loading",
-      "attribute": "loading",
-      "description": "An icon can be used as a simple loader",
-      "usageLevel":1
+      "name":  "Loading",
+      "attribute":  "loading",
+      "description":  "An icon can be used as a simple loader",
+      "usageLevel": 1
     }
   ],
-  "variations":[
+  "variations": [
     {
-      "name": "Link",
-      "description": "A button can be formatted as a link",
-      "usageLevel":1
+      "name":  "Link",
+      "description":  "A button can be formatted as a link",
+      "usageLevel": 1
     },
     {
-      "name": "Fitted",
-      "description": "An icon can be fitted without any space to the left or right of it.",
-      "usageLevel":1
+      "name":  "Fitted",
+      "description":  "An icon can be fitted without any space to the left or right of it.",
+      "usageLevel": 1
     },
     {
-      "name": "Colored",
-      "value": "color",
-      "description": "A button can be colored",
-      "usageLevel":2,
-      "options":[
+      "name":  "Colored",
+      "value":  "color",
+      "description":  "A button can be colored",
+      "usageLevel": 2,
+      "options": [
         {
-          "name": "Red",
-          "value": "red",
-          "description": "A button can be red"
+          "name":  "Red",
+          "value":  "red",
+          "description":  "A button can be red"
         },
         {
-          "name": "Orange",
-          "value": "orange",
-          "description": "A button can be orange"
+          "name":  "Orange",
+          "value":  "orange",
+          "description":  "A button can be orange"
         },
         {
-          "name": "Yellow",
-          "value": "yellow",
-          "description": "A button can be yellow"
+          "name":  "Yellow",
+          "value":  "yellow",
+          "description":  "A button can be yellow"
         },
         {
-          "name": "Olive",
-          "value": "olive",
-          "description": "A button can be olive"
+          "name":  "Olive",
+          "value":  "olive",
+          "description":  "A button can be olive"
         },
         {
-          "name": "Green",
-          "value": "green",
-          "description": "A button can be green"
+          "name":  "Green",
+          "value":  "green",
+          "description":  "A button can be green"
         },
         {
-          "name": "Teal",
-          "value": "teal",
-          "description": "A button can be teal"
+          "name":  "Teal",
+          "value":  "teal",
+          "description":  "A button can be teal"
         },
         {
-          "name": "Blue",
-          "value": "blue",
-          "description": "A button can be blue"
+          "name":  "Blue",
+          "value":  "blue",
+          "description":  "A button can be blue"
         },
         {
-          "name": "Violet",
-          "value": "violet",
-          "description": "A button can be violet"
+          "name":  "Violet",
+          "value":  "violet",
+          "description":  "A button can be violet"
         },
         {
-          "name": "Purple",
-          "value": "purple",
-          "description": "A button can be purple"
+          "name":  "Purple",
+          "value":  "purple",
+          "description":  "A button can be purple"
         },
         {
-          "name": "Pink",
-          "value": "pink",
-          "description": "A button can be pink"
+          "name":  "Pink",
+          "value":  "pink",
+          "description":  "A button can be pink"
         },
         {
-          "name": "Brown",
-          "value": "brown",
-          "description": "A button can be brown"
+          "name":  "Brown",
+          "value":  "brown",
+          "description":  "A button can be brown"
         },
         {
-          "name": "Grey",
-          "value": "grey",
-          "description": "A button can be grey"
+          "name":  "Grey",
+          "value":  "grey",
+          "description":  "A button can be grey"
         },
         {
-          "name": "Black",
-          "value": "black",
-          "description": "A button can be black"
+          "name":  "Black",
+          "value":  "black",
+          "description":  "A button can be black"
         }
       ]
     },
     {
-      "name": "Size",
-      "value": "size",
-      "usageLevel":1,
-      "description": "A button can vary in size",
-      "options":[
+      "name":  "Size",
+      "value":  "size",
+      "usageLevel": 1,
+      "description":  "A button can vary in size",
+      "options": [
         {
-          "name": "Mini",
-          "value": "mini",
-          "description": "An element can appear extremely small"
+          "name":  "Mini",
+          "value":  "mini",
+          "description":  "An element can appear extremely small"
         },
         {
-          "name": "Tiny",
-          "value": "tiny",
-          "description": "An element can appear very small"
+          "name":  "Tiny",
+          "value":  "tiny",
+          "description":  "An element can appear very small"
         },
         {
-          "name": "Small",
-          "value": "small",
-          "description": "An element can appear small"
+          "name":  "Small",
+          "value":  "small",
+          "description":  "An element can appear small"
         },
         {
-          "name": "Medium",
-          "value": "medium",
-          "description": "An element can appear normal sized"
+          "name":  "Medium",
+          "value":  "medium",
+          "description":  "An element can appear normal sized"
         },
         {
-          "name": "Large",
-          "value": "large",
-          "description": "An element can appear larger than normal"
+          "name":  "Large",
+          "value":  "large",
+          "description":  "An element can appear larger than normal"
         },
         {
-          "name": "Big",
-          "value": "big",
-          "description": "An element can appear much larger than normal"
+          "name":  "Big",
+          "value":  "big",
+          "description":  "An element can appear much larger than normal"
         },
         {
-          "name": "Huge",
-          "value": "huge",
-          "description": "An element can appear very much larger than normal"
+          "name":  "Huge",
+          "value":  "huge",
+          "description":  "An element can appear very much larger than normal"
         },
         {
-          "name": "Massive",
-          "value": "massive",
-          "description": "An element can appear extremely larger than normal"
+          "name":  "Massive",
+          "value":  "massive",
+          "description":  "An element can appear extremely larger than normal"
         }
       ]
     },
     {
-      "name": "Inverted",
-      "description": "A button can be formatted to appear on dark backgrounds",
-      "usageLevel":2,
-      "attribute": "inverted"
+      "name":  "Inverted",
+      "description":  "A button can be formatted to appear on dark backgrounds",
+      "usageLevel": 2,
+      "attribute":  "inverted"
     }
   ],
-  "supportsPlural":true,
-  "pluralName": "Icons",
-  "pluralTagName": "ui-icons",
-  "pluralDescription": "Icons can exist together as a group",
-  "pluralVariations":[
+  "supportsPlural": true,
+  "pluralName":  "Icons",
+  "pluralTagName":  "ui-icons",
+  "pluralDescription":  "Icons can exist together as a group",
+  "pluralVariations": [
     "colored"
   ]
 }
