@@ -15,4 +15,12 @@ import './Definition.css';
 	<div class="spec" data-tab="spec">
 		<slot name="spec" />
 	</div>
+	<script is:inline>
+	  try {
+	    $('.definition [defer-hydration]').removeAttr('defer-hydration');
+	  }
+	  catch(e) {
+	    // ignore hydration errors
+	  }
+	</script>
 </Layout>

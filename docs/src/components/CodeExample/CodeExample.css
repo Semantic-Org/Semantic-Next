@@ -38,12 +38,14 @@ h3 {
 }
 
 p.description {
-  margin: 0.25rem 0rem 0rem;
-  font-size: 15px;
+  margin: 0.15rem 0rem 1rem;
+  font-size: 14px;
+  font-weight: normal;
+  /*
+  transition: color 0.3s ease;
   color: rgba(0, 0, 0, 0);
   height: 0px;
-  transition: color 0.3s ease;
-  font-weight: normal;
+  */
 }
 
 .top.segment {
@@ -53,6 +55,14 @@ p.description {
   border: 1px solid transparent;
   padding: 0rem;
   transition: all 0.2s ease;
+}
+/* clearfix */
+.top.segment:after {
+  content: "";
+  display: block;
+  height: 0px;
+  clear: both;
+  visibility: hidden;
 }
 .bottom.segment {
   display: none;

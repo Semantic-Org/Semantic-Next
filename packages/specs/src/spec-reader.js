@@ -184,6 +184,8 @@ export class SpecReader {
       else {
         code = this.getCode(words);
         componentParts = this.getComponentParts(words);
+        console.log('words are', words);
+        console.log('code', componentParts);
       }
       const example = {
         code,
@@ -239,6 +241,9 @@ export class SpecReader {
       const parentAttribute = componentSpec.reverseAttributes[word];
       if(parentAttribute) {
         attributes[parentAttribute] = word;
+      }
+      else {
+        attributes[word] = true;
       }
     });
     return attributes;

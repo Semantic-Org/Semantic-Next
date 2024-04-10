@@ -35,8 +35,8 @@ const createInstance = ({tpl, settings, $}) => ({
 });
 
 
-const onCreated = ({tpl}) => {
-
+const onCreated = ({tpl, settings}) => {
+  console.log(settings);
 };
 const onRendered = function({tpl}){
 };
