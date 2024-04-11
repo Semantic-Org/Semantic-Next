@@ -1,0 +1,26 @@
+---
+import Layout from '@layouts/Layout.astro';
+import './Definition.css';
+---
+<Layout {...Astro.props}>
+	<div slot="rail">
+		Test
+	</div>
+	<div class="singular definition" data-tab="singular">
+		<slot name="singular" />
+	</div>
+	<div class="plural definition" data-tab="plural">
+		<slot name="plural" />
+	</div>
+	<div class="spec" data-tab="spec">
+		<slot name="spec" />
+	</div>
+	<script is:inline>
+	  try {
+	    $('.definition [defer-hydration]').removeAttr('defer-hydration');
+	  }
+	  catch(e) {
+	    // ignore hydration errors
+	  }
+	</script>
+</Layout>

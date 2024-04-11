@@ -226,6 +226,9 @@ export const toTitleCase = (str = '') => {
     'with',
     'as',
   ];
+  if(!isString(str)) {
+    return;
+  }
   return str
     .toLowerCase()
     .split(' ')
@@ -359,16 +362,18 @@ export const values = (obj) => {
   }
 };
 
-export const mapObject = function (obj, callback) {
-  const objKeys = keys(obj).reverse();
-  const length = objKeys.length;
-  let index = length;
-  let newObj = {};
-  while (index--) {
-    const thisKey = objKeys[index];
-    newObj[thisKey] = callback(obj[thisKey], thisKey);
-  }
-  return newObj;
+export const filterObject = (obj, callback) => {
+  return Object.fromEntries(
+    Object.entries(obj)
+      .filter(([key, value]) => callback(value, key))
+  );
+};
+
+export const mapObject = (obj, callback) => {
+  return Object.fromEntries(
+    Object.entries(obj)
+      .map(([key, value]) => [key, callback(value, key)])
+  );
 };
 
 /*
@@ -433,6 +438,14 @@ export const get = function (obj, string = '') {
   return currentObject;
 };
 
+export const onlyKeys = (obj, keysToKeep) => {
+  return keysToKeep.reduce((accumulator, key) => {
+    if (obj.hasOwnProperty(key)) {
+      accumulator[key] = obj[key];
+    }
+    return accumulator;
+  }, {});
+};
 
 /*
   Return true if non-inherited property

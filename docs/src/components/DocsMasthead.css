@@ -42,8 +42,8 @@
   }
   layout masthead > ui-menu ui-container {
     width: 100%;
-    max-width: 1170px;
-    margin-right: var(--rail-width);
+    max-width: calc(1170px - 1.5rem);
+    margin-right: calc(var(--rail-width) + 1rem);
     margin-left: 0.5em;
   }
 }

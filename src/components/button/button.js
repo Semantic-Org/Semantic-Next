@@ -1,9 +1,9 @@
 import { createComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
+import { ButtonComponentSpec } from '@semantic-ui/specs';
 
 import ButtonCSS from './css/button-shadow.css?raw';
 import ButtonTemplate from './button.html?raw';
-import { ButtonSpec } from './spec/spec.js';
 
 const createInstance = ({tpl, settings, $}) => ({
   isIconBefore() {
@@ -39,10 +39,7 @@ const onCreated = ({tpl}) => {
 
 };
 const onRendered = function({tpl}){
-  const shadowRoot = this.renderRoot;
-  if(!shadowRoot) {
-    return;
-  }
+
 };
 
 const events = {
@@ -53,6 +50,7 @@ const events = {
     $(this).removeClass('pressed');
   },
   'click .button'({event, tpl, $}) {
+    console.log('button clicked');
     $(this).blur();
   },
   'keydown .button'({event, tpl, $}) {
@@ -75,7 +73,7 @@ const events = {
 
 export const UIButton = createComponent({
   tagName: 'ui-button',
-  spec: ButtonSpec,
+  componentSpec: ButtonComponentSpec,
   template: ButtonTemplate,
   css: ButtonCSS,
   createInstance,

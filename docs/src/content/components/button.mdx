@@ -1,5 +1,6 @@
 ---
 title: 'Button'
+specName: 'ButtonSpec'
 description: 'A button indicates a possible user action'
 tags: ['web-component']
 ---
@@ -11,6 +12,7 @@ import './button.css';
 
 ## Element
 
+### Standard
 <CodeExample client:load
   title="Standard"
   code='<ui-button>Button</ui-button>'
@@ -21,14 +23,16 @@ import './button.css';
 
 ## Types
 
+### Icon
 <CodeExample client:load
-  title="Icon"
-  description="A button can be formatted to include an icon"
+  title="Emphasis"
+  description="A button can be formatted to show different levels of emphasis"
 >
   <UIButton client:visible icon="play">Play</UIButton>
   <UIButton client:visible icon="pause">Pause</UIButton>
 </CodeExample>
 
+### Emphasis
 <CodeExample client:load
   title="Emphasis"
   description="A button can be formatted to show different levels of emphasis"
@@ -51,6 +55,7 @@ import './button.css';
   <UIButton client:visible subtle-positive icon="check">Complete</UIButton>
 </CodeExample>
 
+### Warning
 <CodeExample client:load
   title="Warning"
   description="A button can be associated with a potentially dangerous action"
@@ -59,6 +64,7 @@ import './button.css';
   <UIButton client:visible subtle-warning icon="edit">Modify</UIButton>
 </CodeExample>
 
+### Negative
 <CodeExample client:load
   title="Negative"
   description="A button can be associated with a negative action"
@@ -67,6 +73,7 @@ import './button.css';
   <UIButton client:visible subtle-negative icon="alert circle">Delete</UIButton>
 </CodeExample>
 
+### Info
 <CodeExample client:load
   title="Info"
   description="A button can be associated with a potentially dangerous action"
@@ -75,6 +82,7 @@ import './button.css';
   <UIButton client:visible subtle-info icon="info">More Info</UIButton>
 </CodeExample>
 
+### Transparent
 <CodeExample client:load
   title="Transparent"
   description="A button can apper transparent"
@@ -89,6 +97,7 @@ import './button.css';
   </div>
 </CodeExample>
 
+### Toggle
 <CodeExample client:load
   title="Toggle"
   description="A button can be formatted to emphasize its active state"
@@ -96,7 +105,7 @@ import './button.css';
   <UIButton client:visible toggle>Toggle</UIButton>
 </CodeExample>
 
-
+### Animated
 <CodeExample client:load
   title="Animated"
   description="A button can animate to show hidden content"
@@ -123,6 +132,7 @@ import './button.css';
   </UIButton>
 </CodeExample>
 
+### Basic
 <CodeExample client:load
   title="Basic"
   description="A button can be formatted to appear de-emphasized over other elements in the page."
@@ -130,6 +140,7 @@ import './button.css';
 <UIButton client:visible basic icon="user">Add Friend</UIButton>
 </CodeExample>
 
+### Colored
 <CodeExample client:load
   title="Colored"
   description="A button can be colored"
@@ -150,6 +161,7 @@ import './button.css';
   <UIButton client:visible black>Black</UIButton>
 </CodeExample>
 
+### Social
 <CodeExample client:load
   title="Social"
   description="A button can appear formatted with the brand colors of a social website"
@@ -161,8 +173,9 @@ import './button.css';
   <UIButton client:visible icon="youtube" youtube>Youtube</UIButton>
 </CodeExample>
 
-## States
+### States
 
+### Social
 <CodeExample client:load
   title="Hover"
   description="A button can show it is currently hovered"
@@ -171,6 +184,7 @@ import './button.css';
   <UIButton client:visible hover>Hover</UIButton>
 </CodeExample>
 
+### Focus
 <CodeExample client:load
   title="Focus"
   description="A button can show it is currently focused by the keyboard"
@@ -179,6 +193,7 @@ import './button.css';
   <UIButton client:visible focus>Focus</UIButton>
 </CodeExample>
 
+### Active
 <CodeExample client:load
   title="Active"
   description="A button can show it is currently the activated"
@@ -187,6 +202,7 @@ import './button.css';
   <UIButton client:visible active>Active</UIButton>
 </CodeExample>
 
+### Disabled
 <CodeExample client:load
   title="Disabled"
   description="A button can disable interactions"
@@ -195,6 +211,7 @@ import './button.css';
   <UIButton client:visible clickable-disabled>Clickable Disabled</UIButton>
 </CodeExample>
 
+### Loading
 <CodeExample client:load
   title="Loading"
   description="A button can show a loading indicator"
@@ -207,6 +224,7 @@ import './button.css';
 
 ## Variations
 
+### Size
 <CodeExample client:load
   title="Size"
   description="A button can vary in size"
@@ -221,6 +239,7 @@ import './button.css';
   <UIButton client:visible massive>Massive</UIButton>
 </CodeExample>
 
+### Floated
 <CodeExample client:load
   title="Floated"
   description="A button can be aligned to the left or right of its container"
@@ -229,6 +248,7 @@ import './button.css';
   <UIButton client:visible left-floated>Left Floated</UIButton>
 </CodeExample>
 
+### Fluid
 <CodeExample client:load
   title="Fluid"
   description="A button can take the width of its container"
@@ -236,6 +256,7 @@ import './button.css';
   <UIButton client:visible fluid>Fluid</UIButton>
 </CodeExample>
 
+### Inverted
 <CodeExample client:load
   title="Inverted"
   description="A button can be formatted to appear on dark backgrounds"
@@ -243,6 +264,7 @@ import './button.css';
   <UIButton client:visible inverted>Inverted</UIButton>
 </CodeExample>
 
+### Circular
 <CodeExample client:load
   title="Circular"
   description="A button can be formatted to appear circular"
@@ -250,6 +272,7 @@ import './button.css';
   <UIButton client:visible circular icon="plus"></UIButton>
 </CodeExample>
 
+### Attached
 <CodeExample client:load
   title="Attached"
   description="A button can be attached"
@@ -269,6 +292,7 @@ import './button.css';
   <UIButton client:visible right-attached>Right</UIButton>
 </CodeExample>
 
+### Compact
 <CodeExample client:load
   title="Compact"
   description="A button can reduce its padding to fit into tighter spaces without adjusting its font size"

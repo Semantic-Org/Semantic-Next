@@ -13,7 +13,7 @@ import { scopeStyles } from './helpers/scope-styles.js';
 
 class WebComponentBase extends LitElement {
 
-  static shadowRootOptions = {...LitElement.shadowRootOptions, delegatesFocus: true};
+  static shadowRootOptions = {...LitElement.shadowRootOptions, delegatesFocus: false};
 
   // for use with light dom rendering
   static scopedStyleSheet = null;

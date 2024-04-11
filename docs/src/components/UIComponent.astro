@@ -1,0 +1,8 @@
+---
+import * as UI from '@semantic-ui/core';
+const { name, attributes } = Astro.props;
+const Component = UI[name];
+---
+<Component {...attributes}>
+  <slot></slot>
+</Component>

@@ -1,4 +1,4 @@
-export const ButtonSpec = {
+const ButtonSpec = {
 
   /*******************************
              Definition
@@ -6,12 +6,15 @@ export const ButtonSpec = {
 
   uiType: 'element',
   name: 'Button',
-  description: 'A button indicates possible user action',
-  tagName: 'ui-button',
+  description: 'A button indicates a possible user action',
 
   /*******************************
              Singular
+
   *******************************/
+
+  tagName: 'ui-button',
+  exportName: 'UIButton',
 
   content: [
     {
@@ -113,6 +116,7 @@ export const ButtonSpec = {
       description: 'A button can animate to show hidden content',
       includeAttributeClass: true,
       usageLevel: 3,
+      exampleHTML: "<span slot=\"visible\">\n<ui-icon icon=\"shopping cart\"></ui-icon>\n</span>\n<span slot=\"hidden\">Shop</span>\n",
       options: [
         {
           name: 'Animated',
@@ -558,6 +562,7 @@ export const ButtonSpec = {
   supportsPlural: true,
   pluralName: 'Buttons',
   pluralTagName: 'ui-buttons',
+  pluralExportName: 'UIButtons',
   pluralDescription: 'Buttons can exist together as a group',
 
   pluralContent: [
@@ -630,3 +635,6 @@ export const ButtonSpec = {
   ]
 
 };
+
+export default ButtonSpec;
+export { ButtonSpec };

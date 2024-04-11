@@ -1,5 +1,30 @@
+- Utility library that parses spec file
+-- Should be able to generate code samples in various formats (html, astro, react, vue) as strings
+
+getDefinition({ type: 'singular', minUsageLevel: 3 })
+getDefinition({ type: 'plural', minUsageLevel: 1 })
+
+// returns menu for rail
+getDefinitionMenu({ type: 'plural' })
+
+// returns component from exports
+getComponent()
+getComponent({ type: 'plural '})
+
+// returns the actual sample code
+getSampleCode('emphasis', { language: 'astro' })
+
+getExample('allowAdditions');
+
+Component Definition
+
+--
+
+
+
+Code Component
+
 Docs layout
-- Fix responsive layout
 - Top menu for docs page
 - Following menu
 - Code component
