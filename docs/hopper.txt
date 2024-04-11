@@ -1,16 +1,24 @@
 Starter
 -- Expand standard example by default
+-- Fix "true" example (disabled)
 
-Missing Button Styling
+Follow Menu
+-- Add component
+
+Tabs
+-- Add tab component
+--- Determine JS init
+--- Test out specifying callbacks in JS using init syntax
+
+Button Cleanup
 -- Basic -> Outline
 -- Ghost button
 -- Link button
+-- Dark Mode Theme Variables
 
--- Following Menu webcomponent
---- Determine menu format
+Spec Reader
 
--- Top tabs
---- How should JS components work
+- Add sub menu for changing format of code sample
 
 
 getDefinition({ type: 'singular', minUsageLevel: 3 })
