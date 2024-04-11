@@ -1,3 +1,15 @@
-ui-icon {
-
+:root {
+  --icon-red: var(--red);
+  --icon-orange: var(--orange);
+  --icon-yellow: var(--yellow);
+  --icon-olive: var(--olive);
+  --icon-green: var(--green);
+  --icon-teal: var(--teal);
+  --icon-blue: var(--blue);
+  --icon-violet: var(--violet);
+  --icon-purple: var(--purple);
+  --icon-pink: var(--pink);
+  --icon-brown: var(--brown);
+  --icon-grey: var(--grey);
+  --icon-black: var(--black);
 }

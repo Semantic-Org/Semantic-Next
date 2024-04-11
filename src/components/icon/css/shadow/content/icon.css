@@ -18,8 +18,8 @@
   mask-image: linear-gradient(transparent, transparent);
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
+  backface-visibility: hidden;
   fill: currentColor;
-
   speak: none;
 }
 .icon.airplay { mask-image: var(--icon-airplay-svg); }

@@ -1,5 +1,5 @@
 /* src/components/icon/css/shadow/content/icon.css */
-@layer component.icon {
+@layer component.icon.shadow {
   :host {
     display: inline-block;
     font-style: normal;
@@ -23,6 +23,7 @@
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
+    backface-visibility: hidden;
     fill: currentColor;
     speak: none;
   }
@@ -1149,10 +1150,10 @@
 }
 
 /* src/components/icon/css/shadow/group/icons.css */
-@layer component.icon;
+@layer component.icon.shadow;
 
 /* src/components/icon/css/shadow/states/disabled.css */
-@layer component.icon {
+@layer component.icon.shadow {
   .disabled.icon {
     cursor: default;
     opacity: var(--icon-disabled-opacity);
@@ -1160,10 +1161,10 @@
 }
 
 /* src/components/icon/css/shadow/states/loading.css */
-@layer component.icon;
+@layer component.icon.shadow;
 
 /* src/components/icon/css/shadow/variations/circular.css */
-@layer component.icon {
+@layer component.icon.shadow {
   i.circular.icon {
     border-radius: 500em !important;
     line-height: 1 !important;
@@ -1179,13 +1180,53 @@
 }
 
 /* src/components/icon/css/shadow/variations/colored.css */
-@layer component.icon;
+@layer component.icon.shadow {
+  .red.icon {
+    color: var(--icon-red);
+  }
+  .orange.icon {
+    color: var(--icon-orange);
+  }
+  .yellow.icon {
+    color: var(--icon-yellow);
+  }
+  .olive.icon {
+    color: var(--icon-olive);
+  }
+  .green.icon {
+    color: var(--icon-green);
+  }
+  .teal.icon {
+    color: var(--icon-teal);
+  }
+  .blue.icon {
+    color: var(--icon-blue);
+  }
+  .violet.icon {
+    color: var(--icon-violet);
+  }
+  .purple.icon {
+    color: var(--icon-purple);
+  }
+  .pink.icon {
+    color: var(--icon-pink);
+  }
+  .brown.icon {
+    color: var(--icon-brown);
+  }
+  .grey.icon {
+    color: var(--icon-grey);
+  }
+  .black.icon {
+    color: var(--icon-black);
+  }
+}
 
 /* src/components/icon/css/shadow/variations/fitted.css */
-@layer component.icon;
+@layer component.icon.shadow;
 
 /* src/components/icon/css/shadow/variations/link.css */
-@layer component.icon {
+@layer component.icon.shadow {
   .link.icon,
   .link.icons {
     cursor: pointer;
@@ -1199,38 +1240,54 @@
 }
 
 /* src/components/icon/css/shadow/variations/sizing.css */
-@layer component.icon {
+@layer component.icon.shadow {
   .mini.icons .icon,
   .mini.icon {
-    font-size: var(--relative-mini);
+    width: var(--icon-mini);
+    height: var(--icon-mini);
+    font-size: var(--icon-mini);
   }
   .tiny.icons .icon,
   .tiny.icon {
-    font-size: var(--relative-tiny);
+    width: var(--icon-tiny);
+    height: var(--icon-tiny);
+    font-size: var(--icon-tiny);
   }
   .small.icons .icon,
   .small.icon {
-    font-size: var(--relative-small);
+    width: var(--icon-small);
+    height: var(--icon-small);
+    font-size: var(--icon-small);
   }
   .icons .icon,
   .icon {
-    font-size: var(--relative-medium);
+    width: var(--icon-medium);
+    height: var(--icon-medium);
+    font-size: var(--icon-medium);
   }
   .large.icons .icon,
   .large.icon {
-    font-size: var(--relative-large);
+    width: var(--icon-large);
+    height: var(--icon-large);
+    font-size: var(--icon-large);
   }
   .big.icons .icon,
   .big.icon {
-    font-size: var(--relative-big);
+    width: var(--icon-big);
+    height: var(--icon-big);
+    font-size: var(--icon-big);
   }
   .huge.icons .icon,
   .huge.icon {
-    font-size: var(--relative-huge);
+    width: var(--icon-huge);
+    height: var(--icon-huge);
+    font-size: var(--icon-huge);
   }
   .massive.icons .icon,
   .massive.icon {
-    font-size: var(--relative-massive);
+    width: var(--icon-massive);
+    height: var(--icon-massive);
+    font-size: var(--icon-massive);
   }
 }
 

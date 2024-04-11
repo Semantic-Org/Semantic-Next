@@ -3,6 +3,7 @@
   "name":  "Icon",
   "description":  "An icon is a glyph used to represent something else",
   "tagName":  "ui-icon",
+  "exportName": "UIIcon",
   "content": [
     {
       "name":  "Icon",
@@ -454,5 +455,10 @@
   "pluralDescription":  "Icons can exist together as a group",
   "pluralVariations": [
     "colored"
-  ]
+  ],
+  "examples": {
+    "defaultAttributes": {
+      "icon": "check"
+    }
+  }
 }

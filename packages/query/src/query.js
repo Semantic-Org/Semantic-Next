@@ -11,7 +11,7 @@ export class Query {
   constructor(selector, root = document) {
     let elements = [];
 
-    if (!selector || !root) {
+    if (!root) {
       return;
     }
 
@@ -31,9 +31,26 @@ export class Query {
       // A NodeList is provided
       elements = selector;
     }
+    else if(this.getComponent()) {
+      console.log('here');
+      elements = this.getComponent();
+    }
 
     this.length = elements.length;
     Object.assign(this, elements);
+  }
+
+  getComponent() {
+    const currentScript = document.currentScript;
+    console.log(currentScript, import.meta);
+    let previousElement = currentScript?.previousElementSibling;
+    while (previousElement) {
+      if (previousElement.nodeType === Node.ELEMENT_NODE && previousElement.tagName.includes('-')) {
+        return new Query(previousElement);
+      }
+      previousElement = previousElement.previousElementSibling;
+    }
+    return previousElement;
   }
 
   each(callback) {

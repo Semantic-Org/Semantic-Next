@@ -26,6 +26,7 @@ const sections = ['types', 'content', 'states', 'variations'];
               title={(index == 0) ? type.title : undefined }
               description={type.description}
               code={example.code}
+              showCode={example.showCode}
             >
               {example.components.map((component) => (
                 (component.componentName)

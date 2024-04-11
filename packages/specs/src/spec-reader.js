@@ -1,4 +1,4 @@
-import { reverseKeys, flatten, isString, isArray, each, values, toTitleCase } from '@semantic-ui/utils';
+import { reverseKeys, flatten, isString, isArray, clone, each, values, toTitleCase } from '@semantic-ui/utils';
 
 export class SpecReader {
 
@@ -60,14 +60,16 @@ export class SpecReader {
     };
     const spec = this.spec;
 
-    // standard type
+    // standard example
+    const defaultWords = values(spec?.examples.defaultAttributes || {}).join(' ');
     definition.types.push({
       title: spec.name,
       description: spec.description,
       examples: [
         {
-          code: this.getCode(''),
-          components: [ this.getComponentParts('') ]
+          showCode: false,
+          code: this.getCode(defaultWords),
+          components: [ this.getComponentParts(defaultWords) ]
         }
       ]
     });
@@ -78,10 +80,11 @@ export class SpecReader {
         if(!isMinimumUsageLevel(part)) {
           return;
         }
-        const examples = this.getCodeExamples(part);
+        const examples = this.getCodeExamples(part, { defaultAttributes: spec?.examples.defaultAttributes });
         definition[partName].push(examples);
       });
     });
+
     return definition;
   }
 
@@ -141,8 +144,15 @@ export class SpecReader {
     };
   }
   
-  getCodeExamples(part) {
+  getCodeExamples(part, { defaultAttributes } = {}) {
     let examples = [];
+    let attribute = this.getAttributeName(part);
+    let defaultWords;
+    if(defaultAttributes) {
+      const attributes = clone(defaultAttributes);
+      delete attributes[attribute];
+      defaultWords = values(attributes).join(' ');
+    }
     if(part.options) {
       let examplesToJoin = [];
       each(part.options, (option, index) => {
@@ -153,12 +163,21 @@ export class SpecReader {
           componentParts = this.getComponentPartsFromHTML(code);
         }
         else {
-          // we will construct an example programatically
+          // construct an example programatically
           // using the option values
-          const words = (isArray(option.value))
-            ? option.value.filter(val => isString(val))[0]
-            : option.value
-          ;
+          let words;
+          if(isString(option.value)) {
+            words = option.value;
+          }
+          else if(isString(option)) {
+            words = option;
+          }
+          if(isArray(option.value)) {
+            words = option.value.filter(val => isString(val))[0];
+          }
+          if(defaultWords) {
+            words = `${words} ${defaultWords}`;
+          }
           code = this.getCode(words);
           componentParts = this.getComponentParts(words);
         }
@@ -183,7 +202,10 @@ export class SpecReader {
     }
     else {
       let code, componentParts;
-      const words = this.getAttributeName(part);
+      let words = this.getAttributeName(part);
+      if(defaultWords) {
+        words = `${words} ${defaultWords}`;
+      }
       if(part.exampleCode) {
         code = part.exampleCode;
         componentParts = this.getComponentPartsFromHTML(code);

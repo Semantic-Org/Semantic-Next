@@ -17,26 +17,9 @@ const settings = {
 const createInstance = ({ $, isServer, settings, tpl }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
   slottedContent: new ReactiveVar(),
-  code: new ReactiveVar(),
+  code: new ReactiveVar(settings.code),
   removeComments(input) {
     return input.replace(/<!--[\s\S]*?-->/g, '');
-  },
-  setSlottedContent() {
-    if(isServer) {
-      return;
-    }
-    let
-      defaultSlot = $('slot').not('[name]').get(0),
-      slottedNodes = defaultSlot.assignedNodes(),
-      nodes = $(slottedNodes).not('script, style'),
-      html = nodes.map(el => {
-        return (el.nodeType == 3)
-          ? el.nodeValue.trim()
-          : $(el).html().trim();
-      }).join('\n').trim(),
-      code = tpl.removeComments( html )
-    ;
-    tpl.slottedContent.set(code);
   },
   calculateCodeVisible() {
     tpl.reaction(() => {
@@ -51,7 +34,6 @@ const onCreated = function({tpl, isClient, settings}) {
 };
 
 const onRendered = function({tpl, isClient, settings}) {
-  tpl.setSlottedContent();
 };
 
 

@@ -1,8 +1,10 @@
 ---
 import Body from '../layouts/Body.astro';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
+import { CodeSample } from '@components/CodeSample/CodeSample.js';
 import { UIButton, UIButtons, UIIcon } from '@semantic-ui/core';
 ---
 <Body padded>
 <UIButton loading>Pause</UIButton>
+<CodeSample language='js'>const foo = 'baz';</CodeSample>
 </Body>
