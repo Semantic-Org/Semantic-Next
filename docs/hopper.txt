@@ -1,5 +1,17 @@
-- Utility library that parses spec file
--- Should be able to generate code samples in various formats (html, astro, react, vue) as strings
+Starter
+-- Expand standard example by default
+
+Missing Button Styling
+-- Basic -> Outline
+-- Ghost button
+-- Link button
+
+-- Following Menu webcomponent
+--- Determine menu format
+
+-- Top tabs
+--- How should JS components work
+
 
 getDefinition({ type: 'singular', minUsageLevel: 3 })
 getDefinition({ type: 'plural', minUsageLevel: 1 })
