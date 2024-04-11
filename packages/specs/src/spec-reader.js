@@ -61,7 +61,7 @@ export class SpecReader {
     const spec = this.spec;
 
     // standard example
-    const defaultWords = values(spec?.examples.defaultAttributes || {}).join(' ');
+    const defaultWords = values(spec?.examples?.defaultAttributes || {}).join(' ');
     definition.types.push({
       title: spec.name,
       description: spec.description,
@@ -80,7 +80,7 @@ export class SpecReader {
         if(!isMinimumUsageLevel(part)) {
           return;
         }
-        const examples = this.getCodeExamples(part, { defaultAttributes: spec?.examples.defaultAttributes });
+        const examples = this.getCodeExamples(part, { defaultAttributes: spec?.examples?.defaultAttributes });
         definition[partName].push(examples);
       });
     });

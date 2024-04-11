@@ -119,6 +119,9 @@ const onCreated = function({tpl }) {
 
 
 const events = {
+  'click ui-icon[copy]'(event, tpl) {
+    console.log('copy');
+  }
 };
 
 const CodeSample = createComponent({
