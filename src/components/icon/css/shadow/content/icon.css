@@ -6,8 +6,6 @@
   text-align: center;
   margin: 0em var(--icon-distance-from-text) 0em 0em;
   font-size: inherit;
-  width: var(--icon-width);
-  height: var(--icon-height);
 }
 .icon {
   display: inline-block;

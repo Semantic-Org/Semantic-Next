@@ -8,8 +8,6 @@
     text-align: center;
     margin: 0em var(--icon-distance-from-text) 0em 0em;
     font-size: inherit;
-    width: var(--icon-width);
-    height: var(--icon-height);
   }
   .icon {
     display: inline-block;
@@ -1243,20 +1241,14 @@
 @layer component.icon.shadow {
   .mini.icons .icon,
   .mini.icon {
-    width: var(--icon-mini);
-    height: var(--icon-mini);
     font-size: var(--icon-mini);
   }
   .tiny.icons .icon,
   .tiny.icon {
-    width: var(--icon-tiny);
-    height: var(--icon-tiny);
     font-size: var(--icon-tiny);
   }
   .small.icons .icon,
   .small.icon {
-    width: var(--icon-small);
-    height: var(--icon-small);
     font-size: var(--icon-small);
   }
   .icons .icon,
@@ -1264,26 +1256,18 @@
   }
   .large.icons .icon,
   .large.icon {
-    width: var(--icon-large);
-    height: var(--icon-large);
     font-size: var(--icon-large);
   }
   .big.icons .icon,
   .big.icon {
-    width: var(--icon-big);
-    height: var(--icon-big);
     font-size: var(--icon-big);
   }
   .huge.icons .icon,
   .huge.icon {
-    width: var(--icon-huge);
-    height: var(--icon-huge);
     font-size: var(--icon-huge);
   }
   .massive.icons .icon,
   .massive.icon {
-    width: var(--icon-massive);
-    height: var(--icon-massive);
     font-size: var(--icon-massive);
   }
 }

@@ -42,7 +42,7 @@
 /* src/components/button/css/shadow/content/icon.css */
 @layer component.button.shadow {
   .button ui-icon {
-    vertical-align: top;
+    vertical-align: middle;
     opacity: var(--button-icon-opacity);
   }
   .button ui-icon:only-child {
