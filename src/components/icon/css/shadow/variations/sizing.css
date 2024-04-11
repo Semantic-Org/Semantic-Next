@@ -22,9 +22,7 @@
 }
 .icons .icon,
 .icon {
-  width: var(--icon-medium);
-  height: var(--icon-medium);
-  font-size: var(--icon-medium);
+  /* inherit */
 }
 .large.icons .icon,
 .large.icon {
