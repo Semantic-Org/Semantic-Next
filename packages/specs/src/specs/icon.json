@@ -458,7 +458,6 @@
   ],
   "examples": {
     "defaultAttributes": {
-      "size": "large",
       "icon": "check-circle"
     }
   }

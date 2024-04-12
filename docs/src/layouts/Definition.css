@@ -14,7 +14,7 @@
   font-weight: normal;
 }
 
-code-example {
+#button {
   .transparent.segments {
     display: inline-flex;
     border-radius: 4px;
@@ -29,10 +29,14 @@ code-example {
   .transparent.segments .light {
     background-image: linear-gradient(45deg, #aaced9, #FFFFFF);
   }
-}
-
-@media screen and (max-width: 767px) {
-  .transparent.segments {
-    flex-direction: column;
+  @media screen and (max-width: 767px) {
+    .transparent.segments {
+      flex-direction: column;
+    }
   }
 }
+
+#icon code-example:not(.size) ui-icon {
+    font-size: 24px;
+}
+

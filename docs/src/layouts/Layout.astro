@@ -6,12 +6,12 @@ import TopBar from '@components/TopBar.astro';
 import DocsRail from '@components/DocsRail.astro';
 import './Layout.css';
 
-let { title, header, description } = Astro.props;
+let { title, header, description, id } = Astro.props;
 header = header || title;
 ---
-<Body title={title}>
+<Body title={title} description={description}>
 	<TopBar></TopBar>
-	<layout>
+	<layout id={id}>
 		<Sidebar/>
 		<page>
 			<slot name="masthead">

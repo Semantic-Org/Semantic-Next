@@ -1,8 +1,9 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import './Definition.css';
+const { id } = Astro.props;
 ---
-<Layout {...Astro.props}>
+<Layout {...Astro.props} id={id}>
 	<div slot="rail">
 		Test
 	</div>

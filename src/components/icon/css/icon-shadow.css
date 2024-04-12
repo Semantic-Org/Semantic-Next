@@ -20,10 +20,9 @@
     mask-image: linear-gradient(transparent, transparent);
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    -webkit-mask-size: auto 100%;
-    mask-size: auto 100%;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
     backface-visibility: hidden;
-    overflow: hidden;
     fill: currentColor;
     speak: none;
   }
@@ -1231,11 +1230,13 @@
   .link.icons {
     cursor: pointer;
     opacity: var(--icon-link-opacity);
+    color: var(--icon-link-color);
     transition: var(--icon-link-transition);
   }
   .link.icon:hover,
   .link.icons:hover {
-    opacity: 1;
+    opacity: var(--icon-link-hover-opacity);
+    color: var(--icon-link-hover-color);
   }
 }
 

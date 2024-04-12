@@ -1,9 +1,15 @@
 ---
-import * as UI from '@semantic-ui/core';
+import { UIButton, UIIcon } from '@semantic-ui/core';
 import { $ } from '@semantic-ui/query';
+
 const { name, attributes } = Astro.props;
-const Component = UI[name];
 ---
-<Component {...attributes}>
-  <slot></slot>
-</Component>
+
+{name === 'UIButton' && (
+  <UIButton {...attributes} client:load>
+    <slot />
+  </UIButton>
+)}
+{name === 'UIIcon' && (
+  <UIIcon {...attributes} />
+)}

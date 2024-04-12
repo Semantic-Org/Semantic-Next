@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
-import lit from '@astrojs/lit';
 
+import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
