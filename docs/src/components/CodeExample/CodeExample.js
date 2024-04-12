@@ -1,9 +1,11 @@
 import { createComponent } from '@semantic-ui/component';
+import { ReactiveVar } from '@semantic-ui/reactivity';
+import { UIIcon } from '@semantic-ui/core';
+import { tokenize } from '@semantic-ui/utils';
+
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 
-import { UIIcon } from '@semantic-ui/core';
 import CodeSample from '../CodeSample/CodeSample.js';
 
 const settings = {

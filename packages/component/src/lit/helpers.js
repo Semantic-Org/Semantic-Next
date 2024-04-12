@@ -1,5 +1,5 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { capitalize, toTitleCase, formatDate } from '@semantic-ui/utils';
+import { capitalize, toTitleCase, formatDate, tokenize } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
 export const Helpers = {
@@ -88,7 +88,7 @@ export const Helpers = {
     debugger;
   },
   tokenize(string = '') {
-    return (string || '').replace(/\s+/g, '-').replace(/[^\w-]+/g, '').toLowerCase();
+    return tokenize(string);
   },
   reactiveDebug() {
     Reaction.getSource();

@@ -8,19 +8,26 @@ const getMenu = function() {
     {
       title: 'Types',
       items: [
-        { _id: 'standard', title: 'Standard' },
-        { _id: 'emphasis', title: 'Emphasis' },
+        { _id: 'button-example', title: 'Standard' },
+        { _id: 'emphasis-example', title: 'Emphasis' },
+        { _id: 'icon-example', title: 'Icon' },
+        { _id: 'toggle-example', title: 'Toggle' },
+        { _id: 'animated-example', title: 'Animated' },
       ]
     },
     {
-      title: 'States',
+      title: 'Content',
       items: [
-        { _id: 'one', title: 'One' },
+        { _id: 'text-example', title: 'Text' },
       ]
     }
   ];
 };
 ---
 <railMenu>
-   <InPageMenu menu={getMenu()} client:load></InPageMenu>
+   <InPageMenu
+      menu={getMenu()}
+      intersectionOffset=150
+      client:load
+  ></InPageMenu>
 </railMenu>

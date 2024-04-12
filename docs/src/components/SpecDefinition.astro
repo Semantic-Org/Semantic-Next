@@ -1,6 +1,6 @@
 ---
 import * as SpecExports from '@semantic-ui/specs';
-import { toTitleCase } from '@semantic-ui/utils';
+import { tokenize, toTitleCase } from '@semantic-ui/utils';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
 import UIComponent from '@components/UIComponent.astro';
 
@@ -27,7 +27,8 @@ const sections = ['types', 'content', 'states', 'variations'];
               description={type.description}
               code={example.code}
               showCode={example.showCode}
-              class={type.title.toLowerCase()}
+              class={tokenize(type.title)}
+              id={tokenize(type.title) + '-example'}
             >
               {example.components.map((component) => (
                 (component.componentName)

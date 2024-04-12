@@ -1,6 +1,7 @@
 /*******************************
             Content
 *******************************/
+
 .title {
   display: flex;
   flex-direction: row;
@@ -11,6 +12,7 @@
   color: rgba(0, 0, 0, 0.6);
   padding: 0.5rem 0rem;
   transition: 0.3s color ease;
+  user-select: none;
 
   .text {
     flex: 1 1 auto;
@@ -60,14 +62,15 @@
 
     .item {
       display: block;
+      font-weight: bold;
       text-decoration: none;
       font-size: 13px;
       padding: var(--2px) 0px;
       color: rgba(0, 0, 0, 0.4);
       transition: 0.3s color ease;
     }
-    &.current {
-      color: rgba(0, 0, 0, 1);
+    .item.current {
+      color: #73B9E1;
     }
     .item:hover {
       color: rgba(0, 0, 0, 1);

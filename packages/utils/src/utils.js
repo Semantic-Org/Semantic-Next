@@ -206,6 +206,13 @@ export const capitalizeWords = (str = '') => {
     .replace(/\b(\w)/g, (match) => match.toUpperCase());
 };
 
+export const tokenize = (str = '') => {
+  return (str).replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .toLowerCase()
+  ;
+};
+
 export const toTitleCase = (str = '') => {
   const stopWords = [
     'the',
