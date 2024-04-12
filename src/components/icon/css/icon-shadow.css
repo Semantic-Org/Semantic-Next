@@ -11,6 +11,7 @@
   }
   .icon {
     display: inline-block;
+    vertical-align: top;
     opacity: var(--icon-opacity);
     width: var(--icon-width);
     height: var(--icon-height);
@@ -19,9 +20,10 @@
     mask-image: linear-gradient(transparent, transparent);
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
+    -webkit-mask-size: auto 100%;
+    mask-size: auto 100%;
     backface-visibility: hidden;
+    overflow: hidden;
     fill: currentColor;
     speak: none;
   }
