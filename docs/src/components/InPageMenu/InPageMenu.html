@@ -1,0 +1,15 @@
+{{#each section in menu}}
+  <div class="{{maybeActive @index}} title" data-index="{{@index}}">
+    <span class="text">
+      {{section.title}}
+    </span>
+    <ui-icon chevron-down></ui-icon>
+  </div>
+  <div class="{{maybeActive @index}} content">
+    <div class="menu">
+      {{#each item in section.items}}
+        <a href="#{{getAnchorID item}}" class="item">{{item.title}}</a>
+      {{/each}}
+    </div>
+  </div>
+{{/each}}

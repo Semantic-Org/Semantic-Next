@@ -31,26 +31,9 @@ export class Query {
       // A NodeList is provided
       elements = selector;
     }
-    else if(this.getComponent()) {
-      console.log('here');
-      elements = this.getComponent();
-    }
 
     this.length = elements.length;
     Object.assign(this, elements);
-  }
-
-  getComponent() {
-    const currentScript = document.currentScript;
-    console.log(currentScript, import.meta);
-    let previousElement = currentScript?.previousElementSibling;
-    while (previousElement) {
-      if (previousElement.nodeType === Node.ELEMENT_NODE && previousElement.tagName.includes('-')) {
-        return new Query(previousElement);
-      }
-      previousElement = previousElement.previousElementSibling;
-    }
-    return previousElement;
   }
 
   each(callback) {
@@ -423,5 +406,29 @@ export class Query {
         el[prop] = val;
       });
     });
+  }
+
+  height() {
+    return this.length === 1
+      ? this[0].clientHeight
+      : this.map(el => el.clientHeight);
+  }
+
+  width() {
+    return this.length === 1
+      ? this[0].clientWidth
+      : this.map(el => el.clientWidth);
+  }
+
+  scrollHeight() {
+    return this.length === 1
+      ? this[0].scrollHeight
+      : this.map(el => el.scrollHeight);
+  }
+
+  scrollWidth() {
+    return this.length === 1
+      ? this[0].scrollWidth
+      : this.map(el => el.scrollWidth);
   }
 }

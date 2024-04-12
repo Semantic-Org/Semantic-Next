@@ -259,7 +259,7 @@ export const LitTemplate = class LitTemplate {
           const matchingElement = $(event.target).closest(selector).get(0);
           const boundEvent = eventHandler.bind(matchingElement);
           template.call(boundEvent, {
-            additionalData: { event: event, data: event.target.dataset },
+            additionalData: { event: event, data: matchingElement.dataset },
           });
         },
         { abortController: this.eventController }

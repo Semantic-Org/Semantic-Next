@@ -4,9 +4,6 @@ import './Definition.css';
 const { id } = Astro.props;
 ---
 <Layout {...Astro.props} id={id}>
-	<div slot="rail">
-		Test
-	</div>
 	<div class="singular definition" data-tab="singular">
 		<slot name="singular" />
 	</div>

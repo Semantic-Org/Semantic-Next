@@ -1,7 +1,26 @@
 ---
+import InPageMenu from'@components/InPageMenu/InPageMenu.js';
 const { currentRoute } = Astro.props;
 import './DocsRail.css';
+
+const getMenu = function() {
+  return [
+    {
+      title: 'Types',
+      items: [
+        { _id: 'standard', title: 'Standard' },
+        { _id: 'emphasis', title: 'Emphasis' },
+      ]
+    },
+    {
+      title: 'States',
+      items: [
+        { _id: 'one', title: 'One' },
+      ]
+    }
+  ];
+};
 ---
 <railMenu>
- Content here
+   <InPageMenu menu={getMenu()} client:load></InPageMenu>
 </railMenu>
