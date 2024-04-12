@@ -8,7 +8,7 @@
   <div class="{{maybeActive @index}} content">
     <div class="menu">
       {{#each item in section.items}}
-        <a href="#{{getAnchorID item}}" class="{{maybeCurrentItem item}} item">{{item.title}}</a>
+        <a href="#{{getAnchorID item}}" data-id="{{getAnchorID item}}" class="{{maybeCurrentItem item}} item">{{item.title}}</a>
       {{/each}}
     </div>
   </div>

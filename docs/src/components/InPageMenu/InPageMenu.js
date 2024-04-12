@@ -8,8 +8,10 @@ import { ReactiveVar } from '@semantic-ui/reactivity';
 
 const settings = {
   menu: [],
+  scrollContext: null,
   intersectionContext: null,
   intersectionOffset: 0,
+  scrollOffset: 0,
 };
 
 const createInstance = ({tpl, isServer, settings, $}) => ({
@@ -79,10 +81,9 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   onIntersection(entries) {
     let closestSection = null;
     let minDistance = Infinity;
-
+    let lastTarget = null;
     entries.forEach(entry => {
       const distanceFromTop = entry.boundingClientRect.bottom;
-      console.log(entry.target, distanceFromTop);
       const isScrollingDown = entry.rootBounds.top > 0;
 
       if (isScrollingDown && distanceFromTop > 0 && distanceFromTop < minDistance) {
@@ -92,18 +93,17 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
         }
       } else if (!isScrollingDown && entry.isIntersecting) {
         if(!closestSection) {
-          closestSection = entry.target;
+          closestSection = lastTarget;
         }
       }
+      lastTarget = entry.target;
     });
-    console.log('closest is', closestSection);
     if(closestSection) {
       const itemID = closestSection.id;
       tpl.setActiveItem(itemID);
     }
   },
   setActiveItem(itemID) {
-    console.log('setting active', itemID);
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
       item.items.some((subItem) => tpl.getAnchorID(subItem) === itemID)
@@ -124,12 +124,30 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   maybeCurrentItem(item) {
     return tpl.isCurrentItem(item) ? 'current' : '';
   },
+  scrollTo(itemID, offset = Number(settings.scrollOffset)) {
+    const element = document.getElementById(itemID);
+    if (element) {
+      const targetPosition = element.offsetTop + offset;
+      const scrollContext = (settings.scrollContext)
+        ? $(settings.scrollContext, document).get(0)
+        : window
+      ;
+      console.log(element.offsetTop, targetPosition);
+      if(scrollContext) {
+        scrollContext.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }
 });
 
 const onRendered = function ({ tpl, isServer, settings}) {
   if(isServer) {
     return;
   }
+  console.log(settings);
   tpl.calculateScrollHeight();
   tpl.bindIntersectionObserver();
 };
@@ -146,6 +164,10 @@ const events = {
     const thisIndex = Number(data.index);
     const newIndex = (currentIndex !== thisIndex) ? thisIndex : -1;
     tpl.openIndex.set(newIndex);
+  },
+  'click .item'({event, tpl, data}) {
+    tpl.scrollTo(data.id);
+    event.preventDefault();
   }
 };
 

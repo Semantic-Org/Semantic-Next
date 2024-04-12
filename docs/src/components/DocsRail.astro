@@ -27,7 +27,9 @@ const getMenu = function() {
 <railMenu>
    <InPageMenu
       menu={getMenu()}
-      intersectionOffset=150
+      scrollContext='layout page'
+      intersectionOffset=60
+      scrollOffset=120
       client:load
   ></InPageMenu>
 </railMenu>
