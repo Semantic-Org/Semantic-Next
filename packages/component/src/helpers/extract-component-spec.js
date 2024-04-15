@@ -63,8 +63,11 @@ export const extractComponentSpec = (spec) => {
         }).filter(Boolean);
         optionValues = flatten(optionValues);
       }
-      else {
-        // boolean
+      else if(spec?.type == 'string' || specPart == 'content') {
+        // all content defaults to string
+      }
+      else if(spec?.type == 'boolean' || !spec.type) {
+        // attributes default to boolean if no allowed values
         optionValues = [true, false];
       }
       componentSpec.attributes[attributeName] = optionValues;

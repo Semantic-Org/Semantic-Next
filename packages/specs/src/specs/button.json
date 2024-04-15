@@ -102,7 +102,7 @@
     },
     {
       "name": "Focus",
-      "attribute": "focus",
+      "attribute": "focused",
       "description": "A button can show it is currently focused by the keyboard"
     },
     {

@@ -190,8 +190,9 @@ class WebComponentBase extends LitElement {
       };
       each(componentSpec.attributes, (attributeValues, attribute) => {
         // this is an easy way to determine if this is a boolean or string attribute
-        const sampleValue = attributeValues[0];
-        properties[attribute] = WebComponentBase.getPropertySettings(sampleValue);
+        const isContent = inArray(attribute, componentSpec.contentAttributes);
+        const sampleValue = isContent ? '' : attributeValues[0];
+        properties[attribute] = WebComponentBase.getPropertySettings(sampleValue, attribute);
       });
       each(componentSpec.reverseAttributes, (attributeValues, attribute) => {
         properties[attribute] = { type: String, reflect: false };
@@ -204,14 +205,14 @@ class WebComponentBase extends LitElement {
           properties[name] = settings;
         }
         else {
-          properties[name] = WebComponentBase.getPropertySettings(defaultValue);
+          properties[name] = WebComponentBase.getPropertySettings(defaultValue, name);
         }
       });
     }
     return properties;
   }
 
-  static getPropertySettings(value) {
+  static getPropertySettings(value, name) {
     let property;
     if (isString(value)) {
       property = {
@@ -222,11 +223,15 @@ class WebComponentBase extends LitElement {
     else if (isNumber(value)) {
       property = {
         type: Number,
+        noAccessor: true,
         attribute: true,
       };
     }
     else if (isBoolean(value)) {
       property = {
+        type: Boolean,
+        // we have to use an accessor if the name is reserved
+        noAccessor: !inArray(name, ['focus', 'disabled']),
         attribute: true,
         // simplify the use case of setting setting="false"
         converter: {
