@@ -91,6 +91,14 @@ export class Query {
     return new Query(filteredElements);
   }
 
+  // Returns true if every element matches
+  is(selector) {
+    const filteredElements = Array.from(this).filter(
+      (el) => (el.matches && el.matches(selector))
+    );
+    return filteredElements.length > 0;
+  }
+
   not(selector) {
     // Filter out elements that match the provided selector
     const filteredElements = Array.from(this).filter(
@@ -430,5 +438,31 @@ export class Query {
     return this.length === 1
       ? this[0].scrollWidth
       : this.map(el => el.scrollWidth);
+  }
+
+  // offsetParent does not return the true offset parent
+  // in cases where there is a parent node with a transform context
+  // so we need to get that manually where finding the true offset parent is essential
+  // for instance when calculating position
+  offsetParent({ calculate = true } = {}) {
+    return Array.from(this)
+      .map((el) => {
+        if(!calculate) {
+          return el.offsetParent;
+        }
+        let $el, isPositioned, isTransformed, isBody;
+        let parentNode = el?.parentNode;
+        while(parentNode && !isPositioned && !isTransformed && !isBody) {
+          parentNode = parentNode?.parentNode;
+          if(parentNode) {
+            $el = $(parentNode);
+            isPositioned = ($el.computedStyle('position') !== 'static');
+            isTransformed = ($el.computedStyle('transform') !== 'none');
+            isBody = $el.is('body');
+          }
+        }
+        return parentNode;
+      })
+    ;
   }
 }

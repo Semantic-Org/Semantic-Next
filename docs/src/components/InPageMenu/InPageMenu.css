@@ -69,11 +69,12 @@
       color: rgba(0, 0, 0, 0.4);
       transition: 0.3s color ease;
     }
-    .item.current {
-      color: #73B9E1;
-    }
     .item:hover {
       color: rgba(0, 0, 0, 1);
+    }
+    .item.current {
+      cursor: default;
+      color: #73B9E1;
     }
   }
 }

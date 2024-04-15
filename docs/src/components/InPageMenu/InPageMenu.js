@@ -1,6 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { each } from '@semantic-ui/utils';
+import { each, firstMatch } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
@@ -11,16 +11,19 @@ const settings = {
   scrollContext: null,
   intersectionContext: null,
   intersectionOffset: 0,
+  scrollBehavior: 'smooth',
   scrollOffset: 0,
+  getAnchorID: (item) => item?._id || item.title.toLowercase(),
+  getElement: (itemID) => document.getElementById(itemID),
+  getActiveElementID: (element) => element?.id
 };
 
 const createInstance = ({tpl, isServer, settings, $}) => ({
   openIndex: new ReactiveVar(0),
   currentItem: new ReactiveVar(0),
 
-  getAnchorID(item) {
-    return item?._id || item.title.toLowercase();
-  },
+  observer: null, // intersection observer
+
   isOpenIndex(index) {
     return index == tpl.openIndex.get();
   },
@@ -58,55 +61,10 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       });
     });
   },
-  observeSections() {
-    const root = $(settings.intersectionContext, document).get(0);
-    const observerSettings = {
-      root: root,
-      threshold: 0,
-      rootMargin: `-${settings.intersectionOffset}px 0px 0px 0px`
-      //rootMargin: `0px 0px 0px 0px`
-    };
-    tpl.observer = new IntersectionObserver(tpl.onIntersection, observerSettings);
-    each(settings.menu, (section) => {
-      each(section.items, (item) => {
-        const itemID = tpl.getAnchorID(item);
-        const sectionElement = document.getElementById(itemID);
-        if (sectionElement) {
-          tpl.observer.observe(sectionElement);
-        }
-      });
-    });
-    return tpl.observer;
-  },
-  onIntersection(entries) {
-    let closestSection = null;
-    let minDistance = Infinity;
-    let lastTarget = null;
-    entries.forEach(entry => {
-      const distanceFromTop = entry.boundingClientRect.bottom;
-      const isScrollingDown = entry.rootBounds.top > 0;
-
-      if (isScrollingDown && distanceFromTop > 0 && distanceFromTop < minDistance) {
-        minDistance = distanceFromTop;
-        if(!closestSection) {
-          closestSection = entry.target;
-        }
-      } else if (!isScrollingDown && entry.isIntersecting) {
-        if(!closestSection) {
-          closestSection = lastTarget;
-        }
-      }
-      lastTarget = entry.target;
-    });
-    if(closestSection) {
-      const itemID = closestSection.id;
-      tpl.setActiveItem(itemID);
-    }
-  },
   setActiveItem(itemID) {
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
-      item.items.some((subItem) => tpl.getAnchorID(subItem) === itemID)
+      item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
     );
     if (menuItem) {
       const menuIndex = menu.indexOf(menuItem);
@@ -114,48 +72,104 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       tpl.currentItem.set(itemID);
     }
   },
-  bindIntersectionObserver() {
-    tpl.observeSections();
-  },
   isCurrentItem(item) {
-    const itemID = tpl.getAnchorID(item);
+    const itemID = settings.getAnchorID(item);
     return tpl.currentItem.get() === itemID;
   },
   maybeCurrentItem(item) {
     return tpl.isCurrentItem(item) ? 'current' : '';
   },
   scrollTo(itemID, offset = Number(settings.scrollOffset)) {
-    const element = document.getElementById(itemID);
+    const element = settings.getElement(itemID);
+    console.log('here', itemID);
     if (element) {
       const targetPosition = element.offsetTop + offset;
       const scrollContext = (settings.scrollContext)
         ? $(settings.scrollContext, document).get(0)
         : window
       ;
-      console.log(element.offsetTop, targetPosition);
       if(scrollContext) {
+        tpl.currentItem.set(itemID);
+        // we want to ignore intersection observer while smoothscroll is happening
+        tpl.isScrolling = true;
+        $(scrollContext).one('scrollend', (event) => {
+          tpl.isScrolling = false;
+        });
         scrollContext.scrollTo({
           top: targetPosition,
-          behavior: 'smooth'
+          behavior: settings.scrollBehavior
         });
       }
     }
-  }
+  },
+  bindIntersectionObserver() {
+    const root = $(settings.intersectionContext, document).get(0);
+    const observerSettings = {
+      root: root,
+      threshold: [0, 1],
+      rootMargin: `0px 0px 0px 0px` // dont appear to be working
+    };
+    tpl.observer = new IntersectionObserver(tpl.onIntersection, observerSettings);
+    // observe intersection of each id in menu items
+    each(settings.menu, (section) => {
+      each(section.items, (item) => {
+        const itemID = settings.getAnchorID(item);
+        const sectionElement = settings.getElement(itemID);
+        if (sectionElement) {
+          tpl.observer.observe(sectionElement);
+        }
+      });
+    });
+    return tpl.observer;
+  },
+
+  onIntersection(entries) {
+    // intersection occurred while scrolling
+    if(tpl.isScrolling) {
+      return;
+    }
+    // this event is debounced so it may return multiple visible entries
+    // we want to get the first one that is fully visible
+    let activeEntry = firstMatch(entries, entry => entry.intersectionRatio == 1);
+
+    // in the case that we are scrolling up (threshhold 1) we want to return the first
+    activeEntry = activeEntry || entries[0];
+
+    const itemID = settings.getActiveElementID(activeEntry.target);
+    tpl.setActiveItem(itemID);
+  },
+
+  unbindIntersectionObserver() {
+    if (tpl.observer) {
+      tpl.observer.disconnect();
+    }
+  },
+
+  bindHashChange() {
+    tpl.hashChange = $(window).on('hashchange', () => {
+      tpl.scrollTo(location.hash.substr(1));
+    });
+  },
+
+  unbindHashChange() {
+    if (tpl.hashChange) {
+      $(window).off(tpl.hashChange);
+    }
+  },
 });
 
 const onRendered = function ({ tpl, isServer, settings}) {
   if(isServer) {
     return;
   }
-  console.log(settings);
   tpl.calculateScrollHeight();
+  tpl.bindHashChange();
   tpl.bindIntersectionObserver();
+  tpl.unbindHashChange();
 };
 
 const onDestroyed = function ({ tpl }) {
-  if (tpl.observer) {
-    tpl.observer.disconnect();
-  }
+  tpl.unbindIntersectionObserver();
 };
 
 const events = {
@@ -166,8 +180,8 @@ const events = {
     tpl.openIndex.set(newIndex);
   },
   'click .item'({event, tpl, data}) {
-    tpl.scrollTo(data.id);
     event.preventDefault();
+    location.hash = `#${data.id}`;
   }
 };
 
