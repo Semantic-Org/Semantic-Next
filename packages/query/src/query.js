@@ -31,7 +31,7 @@ export class Query {
       // A NodeList is provided
       elements = selector;
     }
-
+    this.selector = selector;
     this.length = elements.length;
     Object.assign(this, elements);
   }
@@ -170,9 +170,12 @@ export class Query {
 
   one(event, targetSelectorOrHandler, handlerOrOptions, options) {
     let handler;
+    let targetSelector;
     if (isObject(handlerOrOptions)) {
+      options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     } else if (isString(targetSelectorOrHandler)) {
+      targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     } else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
@@ -182,7 +185,10 @@ export class Query {
       // Unbind the event handler after it has been invoked once
       this.off(event, wrappedHandler);
     };
-    return this.on(event, targetSelectorOrHandler, wrappedHandler, options);
+    return (targetSelector)
+      ? this.on(event, targetSelector, wrappedHandler, options)
+      : this.on(event, wrappedHandler, options)
+    ;
   }
 
   off(event, handler) {
@@ -465,4 +471,16 @@ export class Query {
       })
     ;
   }
+
+  // adds properties to an element after dom loads
+  initialize(settings) {
+    $(document).on('DOMContentLoaded', () => {
+      $(this.selector).each((el) => {
+        each(settings, (value, setting) => {
+          el[setting] = value;
+        });
+      });
+    });
+  }
+
 }
