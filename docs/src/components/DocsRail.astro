@@ -28,7 +28,14 @@ const getMenu = function() {
    <InPageMenu
       menu={getMenu()}
       scrollContext='layout page'
-      scrollOffset=110
+      scrollOffset=120
+      smoothScroll=true
       client:load
   ></InPageMenu>
+  <script is:client>
+    const el = document.querySelector('inpage-menu');
+    el.onActive = function(itemID) {
+      console.log(itemID, 'active!');
+    }
+  </script>
 </railMenu>

@@ -11,10 +11,11 @@ const settings = {
   scrollContext: null,
   intersectionContext: null,
   intersectionOffset: 0,
-  scrollBehavior: 'smooth',
+  smoothScroll: true,
   scrollOffset: 0,
   getAnchorID: (item) => item?._id || item.title.toLowercase(),
   getElement: (itemID) => document.getElementById(itemID),
+  onActive: (itemID) => itemID,
   getActiveElementID: (element) => element?.id
 };
 
@@ -27,6 +28,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   isOpenIndex(index) {
     return index == tpl.openIndex.get();
   },
+
   maybeActive(index) {
     return tpl.isOpenIndex(index)
       ? 'active'
@@ -36,10 +38,12 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   getContent(index = tpl.openIndex.get()) {
     return $('.content').eq(index);
   },
+
   getScrollHeight(index) {
     const $content = tpl.getContent();
     return $content.get(0).scrollHeight;
   },
+
   getContentStyle(index) {
     if(isServer) {
       return;
@@ -50,6 +54,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       return `max-height: ${scrollHeight}px;`;
     }
   },
+
   calculateScrollHeight() {
     tpl.reaction(() => {
       if(isServer) {
@@ -61,6 +66,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       });
     });
   },
+
   setActiveItem(itemID) {
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
@@ -72,16 +78,18 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       tpl.currentItem.set(itemID);
     }
   },
+
   isCurrentItem(item) {
     const itemID = settings.getAnchorID(item);
     return tpl.currentItem.get() === itemID;
   },
+
   maybeCurrentItem(item) {
     return tpl.isCurrentItem(item) ? 'current' : '';
   },
+
   scrollTo(itemID, offset = Number(settings.scrollOffset)) {
     const element = settings.getElement(itemID);
-    console.log('here', itemID);
     if (element) {
       const targetPosition = element.offsetTop + offset;
       const scrollContext = (settings.scrollContext)
@@ -89,19 +97,23 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
         : window
       ;
       if(scrollContext) {
+        tpl.isScrolling = true;
         tpl.currentItem.set(itemID);
         // we want to ignore intersection observer while smoothscroll is happening
-        tpl.isScrolling = true;
         $(scrollContext).one('scrollend', (event) => {
-          tpl.isScrolling = false;
+          requestIdleCallback(() => {
+            tpl.isScrolling = false;
+          });
         });
         scrollContext.scrollTo({
           top: targetPosition,
-          behavior: settings.scrollBehavior
+          behavior: 'smooth'
         });
+        settings.onActive(itemID);
       }
     }
   },
+
   bindIntersectionObserver() {
     const root = $(settings.intersectionContext, document).get(0);
     const observerSettings = {
@@ -146,8 +158,10 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   },
 
   bindHashChange() {
-    tpl.hashChange = $(window).on('hashchange', () => {
-      tpl.scrollTo(location.hash.substr(1));
+    tpl.hashChange = $(window).on('hashchange', (event) => {
+      const itemID = location.hash.substr(1);
+      tpl.scrollTo(itemID);
+      event.preventDefault();
     });
   },
 
@@ -165,11 +179,11 @@ const onRendered = function ({ tpl, isServer, settings}) {
   tpl.calculateScrollHeight();
   tpl.bindHashChange();
   tpl.bindIntersectionObserver();
-  tpl.unbindHashChange();
 };
 
 const onDestroyed = function ({ tpl }) {
   tpl.unbindIntersectionObserver();
+  tpl.unbindHashChange();
 };
 
 const events = {
@@ -180,8 +194,8 @@ const events = {
     tpl.openIndex.set(newIndex);
   },
   'click .item'({event, tpl, data}) {
-    event.preventDefault();
     location.hash = `#${data.id}`;
+    event.preventDefault();
   }
 };
 
