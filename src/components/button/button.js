@@ -50,7 +50,6 @@ const events = {
     $(this).removeClass('pressed');
   },
   'click .button'({event, tpl, $}) {
-    console.log('button clicked');
     $(this).blur();
   },
   'keydown .button'({event, tpl, $}) {
