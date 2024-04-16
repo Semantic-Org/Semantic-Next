@@ -30,13 +30,6 @@ One large advantage here is you can write out modifiers without having to think 
 </ui-button>
 ```
 
-In addition Semantic provides a generalized component `ui-` which allows you to preserve natural word order (unfortunately web components [mandate a "-" is present](https://blog.jim-nielsen.com/2023/validity-of-custom-element-tag-names/) leaving it slightly suboptimal.
-```html
-<ui- large primary button>
-  Download
-</ui->
-```
-
 ### Dialect #2 Classic
 
 If you are working with regular DOM or using element descriptions to reference them in Javascript using class names can be the easiest approach. For those coming from Semantic UI Classic this will also be the most familiar. (Note you can still do this with attributes but its much more cumbersome and unfamiliar for some)

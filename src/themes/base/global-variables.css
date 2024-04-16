@@ -132,7 +132,18 @@
   --page-overflow-x: hidden;
 
   --line-height: 1.4285714em;
-  --text-color: rgb(0 0 0 / 87%);
+  --text-color: 0, 0, 0;
+
+  --page-text-color: rgba(var(--text-color), 0.87);
+
+
+  /* -------------------
+        Dark Mode
+  -------------------- */
+
+  /* These swap to handle coarse level of dark mode theming */
+  --standard-color: rgb(0 0 0);
+  --inverted-color: rgb(255 255 255);
 
   /* -------------------
         Paragraph
