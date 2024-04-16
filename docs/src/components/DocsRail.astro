@@ -8,31 +8,14 @@ const getMenu = function() {
     return menu;
   }
   if(entry) {
-
+    return [];
   }
-  return [
-    {
-      title: 'Types',
-      items: [
-        { _id: 'button-example', title: 'Standard' },
-        { _id: 'emphasis-example', title: 'Emphasis' },
-        { _id: 'icon-example', title: 'Icon' },
-        { _id: 'toggle-example', title: 'Toggle' },
-        { _id: 'animated-example', title: 'Animated' },
-      ]
-    },
-    {
-      title: 'Content',
-      items: [
-        { _id: 'text-example', title: 'Text' },
-      ]
-    }
-  ];
 };
 ---
 <railMenu>
    <InPageMenu
       menu={getMenu()}
+      intersectionContext='layout page'
       scrollContext='layout page'
       scrollOffset=120
       smoothScroll=true

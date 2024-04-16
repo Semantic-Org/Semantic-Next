@@ -33,7 +33,7 @@ const { SpecReader, ...Specs } = SpecExports;
 const spec = Specs[data.specName];
 const componentSpec = new SpecReader(spec, { plural });
 const componentName = componentSpec.getComponentName();
-const definition = componentSpec.getDefinition({ IDSuffix: '-example' });
+const definition = componentSpec.getDefinition();
 
 
 const menu = data.tabs.map(tab => ({
@@ -41,7 +41,10 @@ const menu = data.tabs.map(tab => ({
   url: `/components/${entry.slug}/${tab}`,
 }));
 
-const railMenu = definitionDisplayed ? componentSpec.getDefinitionMenu() : [];
+let railMenu = [];
+if(definitionDisplayed) {
+  railMenu = componentSpec.getDefinitionMenu();
+}
 ---
 <Definition {...entry.data} menu={menu} railMenu={railMenu}>
   {definitionDisplayed && (

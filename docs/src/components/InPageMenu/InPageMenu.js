@@ -1,6 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { each, firstMatch } from '@semantic-ui/utils';
+import { each, first, last } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
@@ -24,6 +24,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   currentItem: new ReactiveVar(0),
 
   observer: null, // intersection observer
+  lastScrollPosition: 0, // used to track scroll direction
 
   isOpenIndex(index) {
     return index == tpl.openIndex.get();
@@ -121,7 +122,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     const observerSettings = {
       root: root,
       threshold: [0, 1],
-      rootMargin: `0px 0px 0px 0px` // dont appear to be working
+      rootMargin: `0px 0px 0px 0px`
     };
     tpl.observer = new IntersectionObserver(tpl.onIntersection, observerSettings);
     // observe intersection of each id in menu items
@@ -142,25 +143,35 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     if(tpl.isScrolling) {
       return;
     }
-    // this event is debounced so it may return multiple visible entries
-    // we want to get the first one that is fully visible
-    let activeEntry = firstMatch(entries, entry => entry.intersectionRatio == 1);
 
-    // in the case that we are scrolling up (threshhold 1) we want to return the first
-    activeEntry = activeEntry || entries[0];
+    let activeEntry;
 
-    const itemID = settings.getActiveElementID(activeEntry.target);
-    if(itemID) {
-      tpl.setActiveItem(itemID);
+    // on first load we want to return the top most element
+    if(!tpl.currentItem.get()) {
+      activeEntry = entries[0];
     }
     else {
-      tpl.scrollToTop();
-    }
-  },
+      let eligibleEntries = entries.filter(entry => entry.boundingClientRect.top < 100);
+      // intersection triggers both when the element LEAVES the top (which we want)
+      // and appears at the bottom of the page
+      // we want to filter out all intersection events which are reaching the bottom of the page;
 
-  unbindIntersectionObserver() {
-    if (tpl.observer) {
-      tpl.observer.disconnect();
+      // this event is debounced so it may return multiple visible entries
+      // we want to get the first one that is fully visible
+      activeEntry = (tpl.scrollingDown)
+        ? last(eligibleEntries)
+        : first(eligibleEntries)
+      ;
+
+      // in the case that we are scrolling up (threshhold 1) we want to return the first
+      activeEntry = activeEntry || eligibleEntries[0];
+    }
+
+    if(activeEntry) {
+      const itemID = settings.getActiveElementID(activeEntry.target);
+      if(itemID) {
+        tpl.setActiveItem(itemID);
+      }
     }
   },
 
@@ -178,11 +189,33 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     });
   },
 
-  unbindHashChange() {
+  bindScroll() {
+    tpl.scrollEvent = $(settings.scrollContext, document)
+      .on('scroll', function () {
+        tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
+        tpl.scrollingUp = !tpl.scrollingDown;
+        tpl.lastScrollPosition = this.scrollTop;
+      }, { passive: true })
+    ;
+  },
+
+  bindPageEvents() {
+    tpl.bindScroll();
+    tpl.bindHashChange();
+    tpl.bindIntersectionObserver();
+  },
+
+  unbindEvents() {
+    if (tpl.observer) {
+      tpl.observer.disconnect();
+    }
     if (tpl.hashChange) {
       $(window).off(tpl.hashChange);
     }
-  },
+    if (tpl.scrollEvent) {
+      $(settings.scrollContext).off(tpl.scrollEvent);
+    }
+  }
 });
 
 const onRendered = function ({ tpl, isServer, settings}) {
@@ -190,13 +223,14 @@ const onRendered = function ({ tpl, isServer, settings}) {
     return;
   }
   tpl.calculateScrollHeight();
-  tpl.bindHashChange();
-  tpl.bindIntersectionObserver();
+  tpl.bindPageEvents();
 };
 
-const onDestroyed = function ({ tpl }) {
-  tpl.unbindIntersectionObserver();
-  tpl.unbindHashChange();
+const onDestroyed = function ({ tpl, isServer }) {
+  if(isServer) {
+    return;
+  }
+  tpl.unbindPageEvents();
 };
 
 const events = {

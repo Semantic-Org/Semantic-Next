@@ -283,6 +283,22 @@ export const last = (array, number = 1) => {
     return array.slice(Math.max(length - number, 0));
   }
 };
+/*
+  Get first element(s) from array
+*/
+export const first = (array, number = 1) => {
+  const { length } = array;
+  if (!length) return;
+
+  if (number === 1) {
+    // Return the first element
+    return array[0];
+  }
+  else {
+    // Return the first number elements as a new array
+    return array.slice(0, number);
+  }
+};
 
 /*
   Iterate through returning first value

@@ -38,7 +38,10 @@ export class SpecReader {
     return name;
   }
 
-  /* Returns a definition for a component including code samples for documentation */
+  /*
+    Returns a definition for a component including code samples for documentation
+    as a structured object literal
+  */
   getDefinition({
     plural = this.plural,
     minUsageLevel,
@@ -74,7 +77,7 @@ export class SpecReader {
       ]
     });
 
-    const parts = ['types', 'content', 'states', 'variations'];
+    const parts = this.getOrderedParts();
     each(parts, (partName) => {
       each(spec[partName], part => {
         if(!isMinimumUsageLevel(part)) {
@@ -88,19 +91,29 @@ export class SpecReader {
     return definition;
   }
 
-  getDefinitionMenu({ IDSuffix = '', plural = false, minUsageLevel } = {}) {
-    const definition = this.getDefinition({plural, minUsageLevel});
-    let menu = [];
-    each(definition, (part, partName) => {
-      menu.push({
-        title: partName,
-        items: part.map((partItem) => ({
-          _id: tokenize(`${partItem.title}${IDSuffix}`),
-          title: partItem.title
-        }))
-      });
-    });
-    console.log(menu);
+  // Returns the sequencing for a spec when displaying in a structured way
+  getOrderedParts() {
+    return ['types', 'content', 'states', 'variations']
+  }
+
+  // returns definition object as an array of examples
+  getOrderedExamples({plural = false, minUsageLevel, dialect = this.dialect } = {}) {
+    const definition = this.getDefinition({plural, minUsageLevel, dialect});
+    return this.getOrderedParts().map((partName) => ({
+      title: toTitleCase(partName),
+      examples: definition[partName]
+    }));
+  }
+
+  getDefinitionMenu({ IDSuffix = '-example', plural = false, minUsageLevel } = {}) {
+    const orderedDefinition = this.getOrderedExamples({plural, minUsageLevel});
+    let menu = orderedDefinition.map(part => ({
+      title: part.title,
+      items: part.examples.map((example) => ({
+        _id: tokenize(`${example.title}${IDSuffix}`),
+        title: example.title
+      }))
+    }));
     return menu;
   }
 
@@ -130,8 +143,12 @@ export class SpecReader {
         html: html
       };
     }
+
     // Extract the attribute string
-    const attributeString = spaceIndex !== -1 ? html.slice(spaceIndex, closingTagIndex).trim() : '';
+    const attributeString = spaceIndex !== -1
+      ? html.slice(spaceIndex, closingTagIndex).trim()
+      : ''
+    ;
 
     // Parse the attribute string into an object
     const attributes = {};
@@ -293,6 +310,7 @@ export class SpecReader {
     return attributes;
   }
 
+  /* Returns an attribute string for an attribute */
   getSingleAttributeString(attribute, value, {
     joinWith = '=',
     quoteCharacter = ':',
@@ -303,6 +321,10 @@ export class SpecReader {
     ;
   }
 
+  /*
+    Returns an attribute string from a given set of attributes
+    passed in as an object literal like { emphasis: 'primary '}
+  */
   getAttributeString(attributes, {
     dialect = this.dialect,
     joinWith = '=',
@@ -342,6 +364,9 @@ export class SpecReader {
     return attributeString;
   }
 
+  /* Returns a stringified version of attributes for a given set of words
+     based off the dialect specified
+  */
   getAttributeStringFromWords(words, {
     dialect = this.dialect,
     attributes,
@@ -467,6 +492,7 @@ export class SpecReader {
     return componentSpec;
   }
 
+  /* Returns the attribute name for a given spec part */
   getAttributeName(specPart) {
     if (specPart.attribute) {
       return specPart.attribute;
