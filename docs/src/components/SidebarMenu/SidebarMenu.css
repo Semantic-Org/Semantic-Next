@@ -94,6 +94,7 @@
     color: #ffffff;
   }
   &.current {
+    cursor: default;
     color: #73b9e1;
   }
 }

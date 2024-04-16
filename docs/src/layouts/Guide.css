@@ -5,12 +5,16 @@ pageContent img {
 layout main ui-container {
   max-width: 960px;
 }
+layout main textContent {
+  display: block;
+  max-width: 720px;
+}
 
 pageContent {
   font-size: 16px;
 }
 pageContent li,
-pageContent > p {
+pageContent p {
   font-size: 16px;
   line-height: 1.5;
 }

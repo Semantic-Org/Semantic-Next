@@ -34,5 +34,7 @@ const getRailMenu = (headings) => {
 const railMenu = getRailMenu(Astro.props.heading);
 ---
 <Layout {...Astro.props.frontmatter} railMenu={railMenu}>
-	<slot />
+	<textContent>
+		<slot />
+	</textContent>
 </Layout>
