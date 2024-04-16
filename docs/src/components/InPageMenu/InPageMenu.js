@@ -160,6 +160,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   bindHashChange() {
     tpl.hashChange = $(window).on('hashchange', (event) => {
       const itemID = location.hash.substr(1);
+      tpl.setActiveItem(itemID);
       tpl.scrollTo(itemID);
       event.preventDefault();
     });
