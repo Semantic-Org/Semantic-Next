@@ -12,6 +12,11 @@ export const getNavMenu = async () => {
 
   const menu = [
     {
+      name: 'Getting Started',
+      url: '/guide',
+      icon: 'book',
+    },
+    {
       name: 'Components',
       url: '/components',
       icon: 'layers',

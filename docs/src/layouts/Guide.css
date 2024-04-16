@@ -1,0 +1,15 @@
+pageContent img {
+  display: inline-block;
+}
+
+layout main ui-container {
+  max-width: 960px;
+}
+
+pageContent > p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+pageContent > p:first-child {
+  margin-top: 0rem;
+}

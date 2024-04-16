@@ -22,21 +22,23 @@ const getLink = (url, index) => {
 };
 
 ---
-<masthead>
-  <ui-container>
-    <h1>{header}</h1>
-    <p>{description}</p>
-  </ui-container>
+{header && (
+  <masthead>
+    <ui-container>
+      <h1>{header}</h1>
+      <p>{description}</p>
+    </ui-container>
 
-  {isArray(menu) && (
-    <ui-menu three-item dashboard>
-      <ui-container>
-        {menu.map((item, index) => (
-          <a class={getMenuClass(item.url, index)} href={getLink(item.url, index)}>
-            {item.text}
-          </a>
-        ))}
-      </ui-container>
-    </ui-menu>
-  )}
-</masthead>
+    {isArray(menu) && (
+      <ui-menu three-item dashboard>
+        <ui-container>
+          {menu.map((item, index) => (
+            <a class={getMenuClass(item.url, index)} href={getLink(item.url, index)}>
+              {item.text}
+            </a>
+          ))}
+        </ui-container>
+      </ui-menu>
+    )}
+  </masthead>
+)}

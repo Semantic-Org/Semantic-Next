@@ -1,0 +1,38 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { each } from '@semantic-ui/utils';
+import './Guide.css';
+
+const getRailMenu = (headings) => {
+	let menu = [];
+	let items = [];
+	let menuGroup;
+	each(Astro.props.headings, heading => {
+		// new grouping
+		if(heading.depth <= 2) {
+			if(menuGroup) {
+				menu.push(menuGroup);
+			}
+			menuGroup = {
+				_id: heading.slug,
+				title: heading.text,
+				items: []
+			}
+		}
+		else if(menuGroup) {
+			// submenu
+			menuGroup.items.push({
+				_id: heading.slug,
+				title: heading.text
+			});
+		}
+	});
+	menu.push(menuGroup);
+	return menu;
+};
+
+const railMenu = getRailMenu(Astro.props.heading);
+---
+<Layout {...Astro.props.frontmatter} railMenu={railMenu}>
+	<slot />
+</Layout>
