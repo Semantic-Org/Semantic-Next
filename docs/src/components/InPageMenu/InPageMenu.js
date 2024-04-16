@@ -68,6 +68,12 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     });
   },
 
+  setFirstItemActive() {
+    const itemID = settings.getAnchorID(settings.menu[0].items[0]);
+    tpl.setActiveItem(itemID);
+    tpl.scrollToPosition(0);
+  },
+
   setActiveItem(itemID) {
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
@@ -183,7 +189,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
         tpl.scrollToItem(itemID);
       }
       else {
-        tpl.scrollToPosition(0);
+        tpl.setFirstItemActive();
       }
       event.preventDefault();
     });
