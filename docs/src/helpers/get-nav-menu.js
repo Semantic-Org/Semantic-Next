@@ -7,6 +7,7 @@ export const getNavMenu = async () => {
   const componentPages = components.map(page => ({
     name: page.data.title,
     url: `/components/${page.slug}`,
+    matchSubPaths: true,
   }));
 
   const menu = [

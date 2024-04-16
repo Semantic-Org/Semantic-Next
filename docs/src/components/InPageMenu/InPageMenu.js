@@ -88,30 +88,32 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     return tpl.isCurrentItem(item) ? 'current' : '';
   },
 
-  scrollTo(itemID, offset = Number(settings.scrollOffset)) {
+  scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
     const element = settings.getElement(itemID);
     if (element) {
       const targetPosition = element.offsetTop + offset;
-      const scrollContext = (settings.scrollContext)
-        ? $(settings.scrollContext, document).get(0)
-        : window
-      ;
-      if(scrollContext) {
-        tpl.isScrolling = true;
-        tpl.currentItem.set(itemID);
-        // we want to ignore intersection observer while smoothscroll is happening
-        $(scrollContext).one('scrollend', (event) => {
-          requestIdleCallback(() => {
-            tpl.isScrolling = false;
-          });
-        });
-        scrollContext.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-        settings.onActive(itemID);
-      }
+      tpl.currentItem.set(itemID);
+      tpl.scrollToPosition(targetPosition);
+      settings.onActive(itemID);
     }
+  },
+
+  scrollToPosition(position) {
+    const scrollContext = (settings.scrollContext)
+      ? $(settings.scrollContext, document).get(0)
+      : window
+    ;
+    tpl.isScrolling = true;
+    // we want to ignore intersection observer while smoothscroll is happening
+    $(scrollContext).one('scrollend', (event) => {
+      requestIdleCallback(() => {
+        tpl.isScrolling = false;
+      });
+    });
+    scrollContext.scrollTo({
+      top: position,
+      behavior: 'smooth'
+    });
   },
 
   bindIntersectionObserver() {
@@ -148,7 +150,12 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     activeEntry = activeEntry || entries[0];
 
     const itemID = settings.getActiveElementID(activeEntry.target);
-    tpl.setActiveItem(itemID);
+    if(itemID) {
+      tpl.setActiveItem(itemID);
+    }
+    else {
+      tpl.scrollToTop();
+    }
   },
 
   unbindIntersectionObserver() {
@@ -160,8 +167,13 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   bindHashChange() {
     tpl.hashChange = $(window).on('hashchange', (event) => {
       const itemID = location.hash.substr(1);
-      tpl.setActiveItem(itemID);
-      tpl.scrollTo(itemID);
+      if(itemID) {
+        tpl.setActiveItem(itemID);
+        tpl.scrollToItem(itemID);
+      }
+      else {
+        tpl.scrollToPosition(0);
+      }
       event.preventDefault();
     });
   },

@@ -78,14 +78,17 @@ const createInstance = function ({ tpl, settings }) {
         : `${url}/`
       ;
     },
-    isSameURL(url1, url2) {
+    isSameURL(url1 = '', url2 = '', startsWith = false) {
+      if(startsWith) {
+        return url2.startsWith(url1);
+      }
       if(!url1 || !url2) {
         return false;
       }
       return tpl.addTrailingSlash(url1) == tpl.addTrailingSlash(url2);
     },
     isCurrentItem(item) {
-      return tpl.isSameURL(item?.url, tpl.url.get());
+      return tpl.isSameURL(item?.url, tpl.url.get(), item.matchSubPaths);
     },
     onPageChange() {
       tpl.url.set(window.location.pathname);

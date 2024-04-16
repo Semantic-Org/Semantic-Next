@@ -45,6 +45,7 @@ ui-menu[dashboard] {
 
 ui-menu[dashboard] .item {
   display: inline-block;
+  text-decoration: none;
   font-weight: bold;
   padding: 7px 6px;
   line-height: 1;

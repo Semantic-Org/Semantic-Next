@@ -1,16 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import './Definition.css';
-const { id } = Astro.props;
 ---
-<Layout {...Astro.props} id={id}>
-	<div class="singular definition" data-tab="singular">
-		<slot name="singular" />
-	</div>
-	<div class="plural definition" data-tab="plural">
-		<slot name="plural" />
-	</div>
-	<div class="spec" data-tab="spec">
-		<slot name="spec" />
-	</div>
+<Layout {...Astro.props}>
+	<slot />
 </Layout>

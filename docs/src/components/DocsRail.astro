@@ -1,9 +1,15 @@
 ---
 import InPageMenu from'@components/InPageMenu/InPageMenu.js';
-const { currentRoute } = Astro.props;
+const { currentRoute, menu, entry } = Astro.props;
 import './DocsRail.css';
 
 const getMenu = function() {
+  if(menu) {
+    return menu;
+  }
+  if(entry) {
+
+  }
   return [
     {
       title: 'Types',
@@ -36,6 +42,6 @@ const getMenu = function() {
     const el = document.querySelector('inpage-menu');
     el.onActive = function(itemID) {
       console.log(itemID, 'active!');
-    }
+    };
   </script>
 </railMenu>

@@ -1,4 +1,4 @@
-import { reverseKeys, flatten, isString, isArray, clone, each, values, toTitleCase } from '@semantic-ui/utils';
+import { reverseKeys, flatten, isString, isArray, clone, each, values, tokenize, toTitleCase } from '@semantic-ui/utils';
 
 export class SpecReader {
 
@@ -86,6 +86,22 @@ export class SpecReader {
     });
 
     return definition;
+  }
+
+  getDefinitionMenu({ IDSuffix = '', plural = false, minUsageLevel } = {}) {
+    const definition = this.getDefinition({plural, minUsageLevel});
+    let menu = [];
+    each(definition, (part, partName) => {
+      menu.push({
+        title: partName,
+        items: part.map((partItem) => ({
+          _id: tokenize(`${partItem.title}${IDSuffix}`),
+          title: partItem.title
+        }))
+      });
+    });
+    console.log(menu);
+    return menu;
   }
 
   /*

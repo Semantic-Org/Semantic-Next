@@ -1,17 +1,58 @@
 ---
 import { getCollection } from 'astro:content';
+import { each, inArray, toTitleCase } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
+import * as SpecExports from '@semantic-ui/specs';
 
+const { entry, tab } = Astro.props;
 export async function getStaticPaths() {
   const entries = await getCollection('components');
-  return entries.map(entry => ({
-    params: { slug: entry.slug }, props: { entry },
-  }));
+  const paths = [];
+  each(entries, entry => {
+    paths.push({
+      params: { slug: `${entry.slug}` },
+      props: { entry }
+    });
+    each(entry.data.tabs, tab => {
+      paths.push({
+        params: { slug: `${entry.slug}/${tab}` },
+        props: { entry, tab }
+      });
+    });
+  });
+  return paths;
 }
-const { entry } = Astro.props;
+
 const data = entry.data;
+const displayedTab = tab || data.tabs[0];
+const plural = (displayedTab == 'plural');
+const definitionDisplayed = inArray(displayedTab, ['singular', 'plural']);
+
+const { SpecReader, ...Specs } = SpecExports;
+const spec = Specs[data.specName];
+const componentSpec = new SpecReader(spec, { plural });
+const componentName = componentSpec.getComponentName();
+const definition = componentSpec.getDefinition({ IDSuffix: '-example' });
+
+
+const menu = data.tabs.map(tab => ({
+  text: toTitleCase(tab),
+  url: `/components/${entry.slug}/${tab}`,
+}));
+
+const railMenu = definitionDisplayed ? componentSpec.getDefinitionMenu() : [];
 ---
-<Definition {...entry.data}>
-  <SpecDefinition slot="singular" {...entry.data} />
+<Definition {...entry.data} menu={menu} railMenu={railMenu}>
+  {definitionDisplayed && (
+    <SpecDefinition
+      definition={definition}
+      componentName={componentName}
+      spec={spec}
+      plural={plural}
+    />
+  )}
+  {displayedTab === 'spec' && (
+    <p>Spec goes here</p>
+  )}
 </Definition>

@@ -5,6 +5,7 @@ const componentsCollection = defineCollection({
   schema: z.object({
     id: z.string(),
     title: z.string(),
+    tabs: z.string().array(),
     specName: z.string(),
     description: z.string(),
     tags: z.array(z.string())

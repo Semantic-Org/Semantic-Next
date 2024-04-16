@@ -1,17 +1,42 @@
 ---
+import { isArray, any } from '@semantic-ui/utils';
 import './DocsMasthead.css';
-const { header, description } = Astro.props;
+const { tabs, header, description, menu } = Astro.props;
+
+const isURLActive = (url, index) => {
+  if(index == 0 && !any(menu.slice(1), item => Astro.url.pathname === item.url)) {
+    return true;
+  }
+  return Astro.url.pathname == url;
+};
+
+const getMenuClass = (url, index) => {
+  return isURLActive(url, index)
+    ? 'active item'
+    : 'item'
+  ;
+};
+
+const getLink = (url, index) => {
+  return !isURLActive(url, index) ? url : undefined;
+};
+
 ---
 <masthead>
   <ui-container>
     <h1>{header}</h1>
     <p>{description}</p>
   </ui-container>
-  <ui-menu three-item dashboard>
-    <ui-container>
-      <a class="active item">Singular</a>
-      <a class="item">Plural</a>
-      <a class="item">Spec</a>
-    </ui-container>
-  </ui-menu>
+
+  {isArray(menu) && (
+    <ui-menu three-item dashboard>
+      <ui-container>
+        {menu.map((item, index) => (
+          <a class={getMenuClass(item.url, index)} href={getLink(item.url, index)}>
+            {item.text}
+          </a>
+        ))}
+      </ui-container>
+    </ui-menu>
+  )}
 </masthead>
