@@ -21,11 +21,11 @@ a.link {
   cursor: pointer;
   float: right;
   font-size: 18px;
-  color: rgba(0, 0, 0, 0.2);
+  color: var(--standard-20);
   top: -3rem;
 }
 a.link:hover {
-  color: rgba(0, 0, 0, 1);
+  color: var(--standard-100);
 }
 a.link ~ a.link {
   margin-right: 0.5rem;
@@ -40,11 +40,6 @@ p.description {
   margin: 0.15rem 0rem 1rem;
   font-size: 14px;
   font-weight: normal;
-  /*
-  transition: color 0.3s ease;
-  color: rgba(0, 0, 0, 0);
-  height: 0px;
-  */
 }
 
 .top.segment {
@@ -88,16 +83,16 @@ h3 a.link {
   top: 0rem;
 }
 h3:hover a.link {
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--standard-70);
 }
 h3:hover a.link:hover {
-  color: rgba(0, 0, 0, 1);
+  color: var(--standard-100);
 }
 
 .visible.example {
   h3 p {
     height: auto;
-    color: rgba(0, 0, 0, 0.6);
+    color: rgb(0 0 0 / 0.60%);
   }
   .top.segment {
     background: #FAFAFA url(/images/bg2.jpg) repeat;

@@ -16,7 +16,7 @@ body {
   background: var(--page-background);
   font-family: var(--page-font);
   line-height: var(--line-height);
-  color: var(--page-text-color);
+  color: var(--text-color);
 }
 
 /* Border-Box */

@@ -24,7 +24,7 @@ This is the sweet spot between terse and expressive, and designed to be the clos
 
 One large advantage here is you can write out modifiers without having to think of their class grouping: "I want to make this button large", what did they call the quality of largeness again? Oh that's right "size" or was it "sizing"? Argh let me look it up.
 
-```html
+```html title="Standard Syntax"
 <ui-button large primary>
   Download
 </ui-button>
@@ -34,7 +34,7 @@ One large advantage here is you can write out modifiers without having to think 
 
 If you are working with regular DOM or using element descriptions to reference them in Javascript using class names can be the easiest approach. For those coming from Semantic UI Classic this will also be the most familiar. (Note you can still do this with attributes but its much more cumbersome and unfamiliar for some)
 
-```html
+```html title="Classic Syntax"
 <ui-button class="large primary">
   Download
 </ui-button>
@@ -46,11 +46,11 @@ If you are working with regular DOM or using element descriptions to reference t
 </style>
 ```
 
-### Dialect #3 - Technical
+### Dialect #3 - Verbose
 
 For developers who dont like leaving anything to interpretation, or prefer standards to personal preference -- or perhaps yet have other vanilla web components that are already in their codebase and prefer consistency.
 
-```html
+```html title="Verbose Syntax"
 <ui-button size="large" emphasis="secondary">
   Follow
 </ui-button>

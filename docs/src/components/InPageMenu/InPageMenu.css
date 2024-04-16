@@ -9,7 +9,7 @@
   font-size: var(--14px);
   cursor: pointer;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--standard-60);
   padding: 0.5rem 0rem;
   transition: 0.3s color ease;
   user-select: none;
@@ -33,10 +33,10 @@
 
   &:hover {
     transition: 0.2s color ease;
-    color: rgba(0, 0, 0, 1);
+    color: var(--standard-100);
   }
   &.active {
-    color: rgba(0, 0, 0, 1);
+    color: var(--standard-100);
     ui-icon {
       transform: translateY(15%) rotateX(180deg);
     }
@@ -66,11 +66,11 @@
       text-decoration: none;
       font-size: 13px;
       padding: var(--2px) 0px;
-      color: rgba(0, 0, 0, 0.4);
+      color: var(--standard-40);
       transition: 0.3s color ease;
     }
     .item:hover {
-      color: rgba(0, 0, 0, 1);
+      color: var(--standard-100);
     }
     .item.current {
       cursor: default;

@@ -9,6 +9,7 @@ layout main ui-container {
 pageContent {
   font-size: 16px;
 }
+pageContent li,
 pageContent > p {
   font-size: 16px;
   line-height: 1.5;
@@ -18,5 +19,5 @@ pageContent > p:first-child {
 }
 
 pageContent code {
-  font-size: 16px !important;
+  font-size: 14px !important;
 }

@@ -123,6 +123,37 @@
   --focused-form-muted-border-color: #96C8DA;
 
 
+  /* -------------------
+        Dark Mode
+  -------------------- */
+
+  /* These swap to handle coarse level of dark mode theming */
+  --standard-color: 0 0 0;
+  --inverted-color: 255 255 255;
+
+  --standard-10: rgb(var(--standard-color) / 10%);
+  --standard-20: rgb(var(--standard-color) / 20%);
+  --standard-30: rgb(var(--standard-color) / 30%);
+  --standard-40: rgb(var(--standard-color) / 40%);
+  --standard-50: rgb(var(--standard-color) / 50%);
+  --standard-60: rgb(var(--standard-color) / 60%);
+  --standard-70: rgb(var(--standard-color) / 70%);
+  --standard-80: rgb(var(--standard-color) / 80%);
+  --standard-90: rgb(var(--standard-color) / 90%);
+  --standard-100: rgb(var(--standard-color) / 100%);
+
+  --inverted-10: rgb(var(--inverted-color) / 10%);
+  --inverted-20: rgb(var(--inverted-color) / 20%);
+  --inverted-30: rgb(var(--inverted-color) / 30%);
+  --inverted-40: rgb(var(--inverted-color) / 40%);
+  --inverted-50: rgb(var(--inverted-color) / 50%);
+  --inverted-60: rgb(var(--inverted-color) / 60%);
+  --inverted-70: rgb(var(--inverted-color) / 70%);
+  --inverted-80: rgb(var(--inverted-color) / 80%);
+  --inverted-90: rgb(var(--inverted-color) / 90%);
+  --inverted-100: rgb(var(--inverted-color) / 100%);
+
+  --text-color: var(--standard-90);
 
   /* -------------------
           Page
@@ -132,18 +163,7 @@
   --page-overflow-x: hidden;
 
   --line-height: 1.4285714em;
-  --text-color: 0, 0, 0;
 
-  --page-text-color: rgba(var(--text-color), 0.87);
-
-
-  /* -------------------
-        Dark Mode
-  -------------------- */
-
-  /* These swap to handle coarse level of dark mode theming */
-  --standard-color: rgb(0 0 0);
-  --inverted-color: rgb(255 255 255);
 
   /* -------------------
         Paragraph
@@ -170,21 +190,21 @@
   --custom-scrollbar-width: 10px;
   --custom-scrollbar-height: 10px;
 
-  --track-background: rgb(0 0 0 / 10%);
+  --track-background: rgb(var(--standard-color) / 10%);
   --track-border-radius: 0px;
 
   --thumb-border-radius: 5px;
-  --thumb-background: rgb(0 0 0 / 25%);
+  --thumb-background: rgb(var(--standard-color) / 25%);
   --thumb-transition: color 0.2s ease;
 
-  --thumb-inactive-background: rgb(0 0 0 / 15%);
+  --thumb-inactive-background: rgb(var(--standard-color) / 15%);
   --thumb-hover-background: rgb(128 135 139 / 80%);
 
   /* Inverted */
-  --track-inverted-background: rgb(255 255 255 / 10%);
-  --thumb-inverted-background: rgb(255 255 255 / 25%);
-  --thumb-inverted-inactive-background: rgb(255 255 255 / 15%);
-  --thumb-inverted-hover-background: rgb(255 255 255 / 35%);
+  --track-inverted-background: rgb(var(--inverted-color) / 10%);
+  --thumb-inverted-background: rgb(var(--inverted-color) / 25%);
+  --thumb-inverted-inactive-background: rgb(var(--inverted-color) / 15%);
+  --thumb-inverted-hover-background: rgb(var(--inverted-color) / 35%);
 
   /* -------------------
     Highlighted Text
@@ -204,10 +224,10 @@
   --loader-size: var(--13px);
   --loader-speed: 0.6s;
   --loader-line-width: var(--2px);
-  --loader-fill-color: rgb(0 0 0 / 10%);
+  --loader-fill-color: rgb(var(--standard-color) / 10%);
   --loader-line-color: var(--grey);
 
-  --inverted-loader-fill-color: rgb(255 255 255 / 15%);
+  --inverted-loader-fill-color: rgb(var(--inverted-color) / 15%);
   --inverted-loader-line-color: var(--white);
 
   /* -------------------
@@ -330,14 +350,14 @@
        Alpha Colors
   -------------------- */
 
-  --subtle-transparent-black: rgb(0 0 0 / 3%);
-  --transparent-black: rgb(0 0 0 / 5%);
-  --strong-transparent-black: rgb(0 0 0 / 8%);
-  --very-strong-transparent-black: rgb(0 0 0 / 15%);
+  --subtle-transparent-black: rgb(var(--standard-color) / 3%);
+  --transparent-black: rgb(var(--standard-color) / 5%);
+  --strong-transparent-black: rgb(var(--standard-color) / 8%);
+  --very-strong-transparent-black: rgb(var(--standard-color) / 15%);
 
-  --subtle-transparent-white: rgb(255 255 255 / 5%);
-  --transparent-white: rgb(255 255 255 / 8%);
-  --strong-transparent-white: rgb(255 255 255 / 15%);
+  --subtle-transparent-white: rgb(var(--inverted-color) / 5%);
+  --transparent-white: rgb(var(--inverted-color) / 8%);
+  --strong-transparent-white: rgb(var(--inverted-color) / 15%);
 
   /* -------------------
          Accents
@@ -405,24 +425,24 @@
        Neutral Text
   -------------------- */
 
-  --dark-text-color: rgb(0 0 0 / 85%);
-  --muted-text-color: rgb(0 0 0 / 60%);
-  --light-text-color: rgb(0 0 0 / 40%);
+  --dark-text-color: rgb(var(--standard-color) / 85%);
+  --muted-text-color: rgb(var(--standard-color) / 60%);
+  --light-text-color: rgb(var(--standard-color) / 40%);
 
-  --unselected-text-color: rgb(0 0 0 / 40%);
-  --hovered-text-color: rgb(0 0 0 / 80%);
-  --pressed-text-color: rgb(0 0 0 / 90%);
-  --selected-text-color: rgb(0 0 0 / 95%);
-  --disabled-text-color: rgb(0 0 0 / 20%);
+  --unselected-text-color: rgb(var(--standard-color) / 40%);
+  --hovered-text-color: rgb(var(--standard-color) / 80%);
+  --pressed-text-color: rgb(var(--standard-color) / 90%);
+  --selected-text-color: rgb(var(--standard-color) / 95%);
+  --disabled-text-color: rgb(var(--standard-color) / 20%);
 
-  --inverted-text-color: rgb(255 255 255 / 90%);
-  --inverted-muted-text-color: rgb(255 255 255 / 80%);
-  --inverted-light-text-color: rgb(255 255 255 / 70%);
-  --inverted-unselected-text-color: rgb(255 255 255 / 50%);
-  --inverted-hovered-text-color: rgb(255 255 255 / 100%);
-  --inverted-pressed-text-color: rgb(255 255 255 / 100%);
-  --inverted-selected-text-color: rgb(255 255 255 / 100%);
-  --inverted-disabled-text-color: rgb(255 255 255 / 20%);
+  --inverted-text-color: rgb(var(--inverted-color) / 90%);
+  --inverted-muted-text-color: rgb(var(--inverted-color) / 80%);
+  --inverted-light-text-color: rgb(var(--inverted-color) / 70%);
+  --inverted-unselected-text-color: rgb(var(--inverted-color) / 50%);
+  --inverted-hovered-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-pressed-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-selected-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-disabled-text-color: rgb(var(--inverted-color) / 20%);
 
   /* -------------------
        Brand Colors
@@ -726,4 +746,30 @@
   --focus-lightness: -0.05;
   --down-lightness: -0.12;
   --active-lightness: -0.12;
+}
+
+body.dark {
+  --standard-color: 255 255 255;
+  --inverted-color: 0 0 0;
+  --standard-10: rgb(var(--standard-color) / 10%);
+  --standard-20: rgb(var(--standard-color) / 20%);
+  --standard-30: rgb(var(--standard-color) / 30%);
+  --standard-40: rgb(var(--standard-color) / 40%);
+  --standard-50: rgb(var(--standard-color) / 50%);
+  --standard-60: rgb(var(--standard-color) / 60%);
+  --standard-70: rgb(var(--standard-color) / 70%);
+  --standard-80: rgb(var(--standard-color) / 80%);
+  --standard-90: rgb(var(--standard-color) / 90%);
+  --standard-100: rgb(var(--standard-color) / 100%);
+
+  --inverted-10: rgb(var(--inverted-color) / 10%);
+  --inverted-20: rgb(var(--inverted-color) / 20%);
+  --inverted-30: rgb(var(--inverted-color) / 30%);
+  --inverted-40: rgb(var(--inverted-color) / 40%);
+  --inverted-50: rgb(var(--inverted-color) / 50%);
+  --inverted-60: rgb(var(--inverted-color) / 60%);
+  --inverted-70: rgb(var(--inverted-color) / 70%);
+  --inverted-80: rgb(var(--inverted-color) / 80%);
+  --inverted-90: rgb(var(--inverted-color) / 90%);
+  --inverted-100: rgb(var(--inverted-color) / 100%);
 }
