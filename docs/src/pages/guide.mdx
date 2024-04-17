@@ -1,103 +1,58 @@
 ---
 layout: ../layouts/Guide.astro
-title: Getting Started
+icon: code
+title: Query
 description: Learn how to setup Semantic UI
 ---
 
 ## Overview
 
-Semantic UI Next is an attempt at creating a generalized format of UI component using web components but hopefully smoothing out some of the rough edges which may have prevented people from adopting web components before.
-```js "Individual terms" /Even.*supported/
-// Individual terms can be highlighted, too
-function demo() {
-  return 'Even regular expressions are supported';
-}
-```
+Query is a **tiny (3kb!) library** for chaining interactions with DOM elements similar to jQuery.
 
-## HTML
+It's designed to be fast, using only modern DOM APIs and built to work with the shadow DOM and help simplify imperative DOM mutations.
 
-Dialects are designed to appeal to different types of developers with different needs and expectations. This is to allow developers to choose to code in the way that comes most natural to them. [Evan You of VueJS](https://www.youtube.com/watch?v=YMwCPfABwHg&t=3m58s) does a great job of covering the various groups of people that build for the web. It is unrealistic to think that they will ever agree entirely on one lingua franca, or that we should expect them to, as different priors bring different preferences.
+There's many reasons why you might use this over vanilla just DOM APIs, consider removing event handlers which requires you to track a reference to the original event handler to unbind, or setting up basic interaction patterns like [event delegation](https://learn.jquery.com/events/event-delegation/).
 
-### Dialect #1 - Natural Language
+Query supports the following methods:
 
-This is the sweet spot between terse and expressive, and designed to be the closest to natural language.
+### Querying DOM
+* `find(selector)` - Find child elements matching a selector.
+* `parent(selector)` - Find the parent elements matching a selector.
+* `children(selector)` - Return only child nodes matching a selector.
+* `filter(selector)` - Filter current node list to match selector.
+* `not(selector)` - Return only elements not matching a selector.
+* `closest(selector)` - Find the closest parent element matching a selector.
 
-One large advantage here is you can write out modifiers without having to think of their class grouping: "I want to make this button large", what did they call the quality of largeness again? Oh that's right "size" or was it "sizing"? Argh let me look it up.
+### Attributes
+* `addClass(classNames)` - Add class names to element.
+* `removeClass(classNames)` - Remove class names from element.
+* `css(property, value)` - Set CSS property to value. Accepts either two parameters or an object of properties to change.
+* `attr(attribute, value)` - Set an attribute to a value. Accepts either two parameters or an object of attributes to change.
+* `removeAttr(attributeName)` - Remove a specified attribute from each element in the set of matched elements.
+* `value(value)` - Set or retrieve the value of form elements.
 
-```html title="Standard Syntax"
-<ui-button large primary>
-  Download
-</ui-button>
-```
+### Content
+* `html(newHTML)` - Get or set HTML for the current node list.
+* `outerHTML(newHTML)` - Get or set outer HTML for the current node list. Outer HTML includes the current tag contents in the returned HTML.
+* `text(newText)` - Get or set text for the current node list. This is recursive, getting all child text nodes and works with slotted content.
+* `textNode()` - Gets the current text node of the matched elements. This is not recursive.
 
-### Dialect #2 Classic
+### Events
+* `on(event, targetSelectorOrHandler, handler)` - Attach an event using either event delegation (i.e., `.on('childNode', 'click', func)`) or regular event binding (i.e., `.on('click', func)`).
+* `one(event, targetSelectorOrHandler, handler, options)` - Attach an event handler that fires only once
+* `off(event, handler)` - Removes an event either by event type or handler.
 
-If you are working with regular DOM or using element descriptions to reference them in Javascript using class names can be the easiest approach. For those coming from Semantic UI Classic this will also be the most familiar. (Note you can still do this with attributes but its much more cumbersome and unfamiliar for some)
+### DOM Manipulation
+* `remove()` - Remove current elements from the DOM.
 
-```html title="Classic Syntax"
-<ui-button class="large primary">
-  Download
-</ui-button>
+### Utilities
+* `each(function(el, index) => {})` - Run a function across a series of DOM nodes.
+* `get(index)` - Returns the real DOM element from the node list at the matching index (no longer chainable).
+* `eq(index)` - Filters node list to only include the element at the index (still chainable).
 
-<style>
-  ui-button.primary {
-    background-color: #FA0000;
-  }
-</style>
-```
+### Form
+* `val(newValue)` - Get the current value of the first element in the set of matched elements or set the value of every matched element. This method is an alias for `value(newValue)`.
 
-### Dialect #3 - Verbose
-
-For developers who dont like leaving anything to interpretation, or prefer standards to personal preference -- or perhaps yet have other vanilla web components that are already in their codebase and prefer consistency.
-
-```html title="Verbose Syntax"
-<ui-button size="large" emphasis="secondary">
-  Follow
-</ui-button>
-```
-
-## CSS
-
-Web components lock down styles using the Shadow DOM but this makes it difficult to make small modifications to a component for a particular placement. Semantic has a few tricks up its sleave to help with this.
-
-* Semantic provides the `exposed` attribute to specify that a given instance should render to regular DOM. Slots are emulated and render identically.
-
-```html
-<ui-button large red exposed>Hello</ui-button>
-```
-
-* In addition Semantic includes the `tweaks` attribute which lets you apply tailwind style classes to modify an existing instance without writing css. These styles are not part of a component definition, and are available in any component and let you do most of the things you'd want to adjust.
-```html
-<ui-button large red tweaks="20px underlined"></ui-button>
-```
-
-## Javascript
-
-For most run-of-the-mill use cases people want a simple way to initialize a component with behaviors, pass in some data like callbacks and configure some settings. This can be difficult with web components as they expect you to pass settings in a mixture of attributes and properties and to consume callbacks as events. You can still do those with Semantic UI, but we provide alternatives which may be easier in some use cases or for novices.
-
-Semantic UI provides a 3kb modern [DOM query library](https://github.com/jlukic/semantic-next/tree/main/packages/query) built with modern ECMAScript which lets you interact with elements. It also provides familiar patterns for initializing components out of the box.
-
-traditional way
-```javascript
-let dropdown = document.querySelectorAll('ui-dropdown')[0];
-dropdown.items = itemArray;
-dropdown.allowAdditions = true;
-dropdown.addEventListener('change', (value) => console.log(value));
-```
-
-using query
-```javascript
-$('ui-dropdown').dropdown({
-  items: itemArray,
-  allowAdditions: true,
-  onChange: (value) => console.log(value)
-});
-// composed automatically for you
-// el.allowAdditions = true;
-// event bound to change event
-```
-
-
-### Tech
-
-Rendering is done using [`Lit-HTML`](https://krausest.github.io/js-framework-benchmark/index.html) under the hood, which is [pretty fast](https://krausest.github.io/js-framework-benchmark/index.html). Lit code is compiled from a simple custom templating language loosely inspired by Meteor JS.
+### Event Handling
+* `focus()` - Sets focus on the first element in the set of matched elements.
+* `blur()` - Removes focus from the first element in the set of matched elements.

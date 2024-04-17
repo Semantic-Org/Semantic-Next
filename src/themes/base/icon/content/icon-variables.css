@@ -2,5 +2,5 @@
   --icon-width: 1em;
   --icon-height: 1em;
   --icon-opacity: 1;
-  --icon-distance-from-text: var(--3px);
+  --icon-distance-from-text: var(--relative-3px);
 }

@@ -72,3 +72,12 @@ body.dark ::-webkit-scrollbar-thumb:window-inactive {
 body.dark ::-webkit-scrollbar-thumb:hover {
   background: var(--thumb-inverted-hover-background);
 }
+
+a {
+  color: var(--link-color);
+  text-decoration: var(--link-text-decoration);
+}
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: var(--link-hover-text-decoration);
+}

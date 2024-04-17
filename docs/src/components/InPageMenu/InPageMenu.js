@@ -13,7 +13,8 @@ const settings = {
   intersectionOffset: 0,
   smoothScroll: true,
   scrollOffset: 0,
-  getAnchorID: (item) => item?._id || item.title.toLowercase(),
+  useAccordion: true,
+  getAnchorID: (item) => item?._id,
   getElement: (itemID) => document.getElementById(itemID),
   onActive: (itemID) => itemID,
   getActiveElementID: (element) => element?.id
@@ -30,12 +31,20 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     return index == tpl.openIndex.get();
   },
 
-  maybeActive(index) {
-    return tpl.isOpenIndex(index)
+  maybeActiveTitle(index) {
+    return (tpl.isOpenIndex(index))
       ? 'active'
       : ''
     ;
   },
+
+  maybeActiveContent(index) {
+    return (!settings.useAccordion || tpl.isOpenIndex(index))
+      ? 'active'
+      : ''
+    ;
+  },
+
   getContent(index = tpl.openIndex.get()) {
     return $('.content').eq(index);
   },
@@ -66,6 +75,10 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
         el.style.setProperty('--max-height', `${el.scrollHeight}px`);
       });
     });
+  },
+
+  getAllFlattenedLinks() {
+
   },
 
   setFirstItemActive() {
@@ -169,6 +182,11 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
         : first(eligibleEntries)
       ;
 
+      // if the scroll bar is at bottom we always highlight the bottom menu item
+      if(tpl.scrolledBottom) {
+        activeEntry = last(entries);
+      }
+
       // in the case that we are scrolling up (threshhold 1) we want to return the first
       activeEntry = activeEntry || eligibleEntries[0];
     }
@@ -199,8 +217,13 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     tpl.scrollEvent = $(settings.scrollContext, document)
       .on('scroll', function () {
         tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
-        tpl.scrollingUp = !tpl.scrollingDown;
+        tpl.scrolledBottom = this.scrollTop + this.clientHeight == this.scrollHeight;
         tpl.lastScrollPosition = this.scrollTop;
+        if(tpl.scrolledBottom) {
+          requestAnimationFrame(() => {
+            console.log('select bottom');
+          })
+        }
       }, { passive: true })
     ;
   },

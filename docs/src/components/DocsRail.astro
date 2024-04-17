@@ -1,6 +1,6 @@
 ---
 import InPageMenu from'@components/InPageMenu/InPageMenu.js';
-const { currentRoute, menu, entry } = Astro.props;
+const { currentRoute, menu, useAccordion, scrollOffset, entry } = Astro.props;
 import './DocsRail.css';
 
 const getMenu = function() {
@@ -15,9 +15,10 @@ const getMenu = function() {
 <railMenu>
    <InPageMenu
       menu={getMenu()}
+      useAccordion={useAccordion}
       intersectionContext='layout page'
       scrollContext='layout page'
-      scrollOffset=120
+      scrollOffset={scrollOffset || 120}
       smoothScroll=true
       client:load
   ></InPageMenu>

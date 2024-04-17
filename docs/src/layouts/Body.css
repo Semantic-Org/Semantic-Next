@@ -50,6 +50,44 @@
     margin-top: 0px;
   }
 
+  /* Link Styles */
+  p a {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    vertical-align: top;
+    z-index: 0;
+    -webkit-transition: color 0.2s;
+    transition: color 0.2s;
+    text-decoration: none;
+    outline: none;
+    font-weight: bold;
+  }
+  p a > code {
+    background-color: rgba(0, 50, 100, 0.08);
+  }
+  p a:before {
+    position: absolute;
+    top: auto;
+    bottom: 0.2em;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    content: '';
+    transition: all 0.2s;
+    backface-visibility: hidden;
+    background-color: var(--link-color);
+    transform: scaleX(0);
+  }
+  /* Hover */
+  p a:hover > code {
+    background-color: rgba(0, 50, 100, 0.12);
+  }
+  p a:hover:before {
+    background-color: var(--link-hover-color);
+    transform: scaleX(1);
+  }
+
   body.dark {
     background-color: #000000;
     color: rgba(255, 255, 255, 0.83);

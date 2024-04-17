@@ -30,11 +30,19 @@ const getRailMenu = (headings) => {
 	menu.push(menuGroup);
 	return menu;
 };
+const { frontmatter } = Astro.props;
 
 const railMenu = getRailMenu(Astro.props.heading);
 ---
-<Layout {...Astro.props.frontmatter} railMenu={railMenu}>
-	<textContent>
-		<slot />
-	</textContent>
+<Layout
+	inlineHeader=true
+	header={frontmatter.title}
+	headerIcon={frontmatter.icon}
+	headerImage={frontmatter.iconImage}
+	scrollOffset=90
+	expandRailMenu=true
+	textContent=true
+	railMenu={railMenu}
+>
+	<slot />
 </Layout>

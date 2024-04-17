@@ -75,11 +75,14 @@
   -------------------- */
 
   --primary-color: var(--blue);
-
   --secondary-color: var(--black);
 
   --light-primary-color: var(--light-blue);
   --light-secondary-color: var(--light-black);
+
+  /* Used to emphasize text  */
+  --primary-text-color: var(--blue);
+  --primary-light-text-color: var(--light-blue);
 
   /* --------------
     Page Heading
@@ -155,6 +158,7 @@
 
   --text-color: var(--standard-90);
 
+
   /* -------------------
           Page
   -------------------- */
@@ -177,9 +181,9 @@
   -------------------- */
 
   --link-color: #4183C4;
-  --link-underline: none;
-  --link-hover-color: oklch(from var(--link-color) calc(l + 20) c calc(h + 15));
-  --link-hover-underline: var(--link-underline);
+  --link-text-decoration: none;
+  --link-hover-color: #3A90E4;
+  --link-hover-text-decoration: var(--link-text-decoration);
 
   /* -------------------
       Scroll Bars
@@ -279,7 +283,7 @@
   --light-olive: #D9E778;
   --light-green: #2ECC40;
   --light-teal: #6DFFFF;
-  --light-blue: #54C8FF;
+  --light-blue: #26ADFF;
   --light-violet: #A291FB;
   --light-purple: #DC73FF;
   --light-pink: #FF8EDF;
@@ -751,6 +755,9 @@
 body.dark {
   --standard-color: 255 255 255;
   --inverted-color: 0 0 0;
+
+  --primary-text-color: var(--primary-light-text-color);
+
   --standard-10: rgb(var(--standard-color) / 10%);
   --standard-20: rgb(var(--standard-color) / 20%);
   --standard-30: rgb(var(--standard-color) / 30%);

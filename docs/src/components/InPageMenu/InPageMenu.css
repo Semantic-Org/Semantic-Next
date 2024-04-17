@@ -42,7 +42,7 @@
     }
   }
   &.current {
-    color: #73b9e1;
+    color: var(--primary-text-color);
   }
 }
 .content {
@@ -62,7 +62,6 @@
 
     .item {
       display: block;
-      font-weight: bold;
       text-decoration: none;
       font-size: 13px;
       padding: var(--2px) 0px;
@@ -74,7 +73,7 @@
     }
     .item.current {
       cursor: default;
-      color: #73B9E1;
+      color: var(--primary-text-color);
     }
   }
 }

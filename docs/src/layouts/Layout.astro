@@ -1,4 +1,5 @@
 ---
+import { UIIcon } from '@semantic-ui/core';
 import Body from './Body.astro';
 import Sidebar from '@components/Sidebar.astro';
 import DocsMasthead from '@components/DocsMasthead.astro';
@@ -6,7 +7,19 @@ import TopBar from '@components/TopBar.astro';
 import DocsRail from '@components/DocsRail.astro';
 import './Layout.css';
 
-let { title, header, description, id, menu, railMenu } = Astro.props;
+let {
+	title,
+	header,
+	headerIcon,
+	description,
+	id,
+	menu,
+	inlineHeader,
+	expandRailMenu,
+	menuScrollOffset,
+	textContent,
+	railMenu
+} = Astro.props;
 header = header || title;
 ---
 <Body title={title} description={description}>
@@ -15,16 +28,23 @@ header = header || title;
 		<Sidebar/>
 		<page>
 			<slot name="masthead">
-				<DocsMasthead header={header} description={description} menu={menu}/>
+				{inlineHeader != 'true' && (
+					<DocsMasthead header={title} description={description} menu={menu}/>
+				)}
 			</slot>
-			<main>
+			<main class={textContent ? 'text-content' : ''}>
 				<ui-container>
 					<rail class="ui close right rail">
 						<slot name="rail">
-							<DocsRail menu={railMenu}/>
+							<DocsRail menu={railMenu} useAccordion={expandRailMenu != 'true'} scrollOffset={menuScrollOffset} />
 						</slot>
 					</rail>
 					<pageContent>
+						{inlineHeader == 'true' && header && (
+							<h1>
+								{headerIcon !== undefined && (<UIIcon icon={headerIcon}></UIIcon>)}<span class="text">{header}</span>
+							</h1>
+						)}
 						<slot />
 					</pageContent>
 				</ui-container>

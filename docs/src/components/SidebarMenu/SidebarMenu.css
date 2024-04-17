@@ -95,7 +95,7 @@
   }
   &.current {
     cursor: default;
-    color: #73b9e1;
+    color: var(--primary-light-text-color);
   }
 }
 .content {
@@ -109,7 +109,7 @@
     }
     .current.item {
       cursor: default;
-      color: #73b9e1;
+      color: var(--primary-light-text-color);
     }
     .current.item[href] {
       cursor: auto;
@@ -122,10 +122,3 @@
   }
 }
 
-/*******************************
-          Dark Mode
-*******************************/
-
-:host-context(body.dark) .content .menu .current.item {
-  color: #1ECCFF;
-}
