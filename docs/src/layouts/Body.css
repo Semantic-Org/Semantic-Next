@@ -51,6 +51,7 @@
   }
 
   /* Link Styles */
+  li a,
   p a {
     display: inline-block;
     position: relative;
@@ -61,15 +62,19 @@
     transition: color 0.2s;
     text-decoration: none;
     outline: none;
-    font-weight: bold;
+    font-weight: normal;
   }
+  li a > code,
   p a > code {
     background-color: rgba(0, 50, 100, 0.08);
   }
-  p a:before {
+  li a:before,
+  p a:before,
+  li a:after,
+  p a:after {
     position: absolute;
     top: auto;
-    bottom: 0.2em;
+    bottom: 0.1em;
     left: 0;
     width: 100%;
     height: 2px;
@@ -77,15 +82,50 @@
     transition: all 0.2s;
     backface-visibility: hidden;
     background-color: var(--link-color);
-    transform: scaleX(0);
+  }
+  li a:before,
+  p a:before {
+    background-color: var(--standard-10);
+    transform: scaleX(1);
+  }
+  li a:after,
+  p a:after {
+    transform: scaleX(0) scaleY(0);
   }
   /* Hover */
+  li a:hover > code,
   p a:hover > code {
     background-color: rgba(0, 50, 100, 0.12);
   }
-  p a:hover:before {
+  li a[aria-selected="true"]:after,
+  li a:hover:after,
+  p a:hover:after {
     background-color: var(--link-hover-color);
-    transform: scaleX(1);
+    transform: scaleX(1) scaleY(1);
+  }
+  ul[role=tablist] {
+    box-shadow: 0px -2px 0px 0px var(--standard-30) inset
+  }
+  li a[role="tab"] {
+    padding-bottom: 0.5rem !important;
+  }
+  li a[role="tab"][aria-selected="true"] {
+    color: var(--primary-text-color) !important;
+  }
+
+  ul {
+    padding-left: 1.5em;
+  }
+
+  p code,
+  li code {
+    background-color: var(--standard-10);
+    padding: 0em 0.5em;
+    font-size: 0.8em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    margin: -0.3em 0px;
+    border-radius: var(--border-radius);
+    display: inline-block;
   }
 
   body.dark {

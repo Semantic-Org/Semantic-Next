@@ -9,6 +9,9 @@
   "module": "src/semantic-ui.js",
   "license": "MIT",
   "type": "module",
+  "files": [
+    "dist/**/*.*"
+  ],
   "scripts": {
     "build": "wireit",
     "dev": "wireit",

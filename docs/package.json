@@ -16,6 +16,7 @@
   "dependencies": {
     "@astrojs/lit": "^4.0.1",
     "@astrojs/mdx": "^2.2.3",
+    "@astrojs/starlight": "^0.21.5",
     "@webcomponents/template-shadowroot": "^0.2.1",
     "astro": "^4.5.15",
     "astro-expressive-code": "^0.35.1",

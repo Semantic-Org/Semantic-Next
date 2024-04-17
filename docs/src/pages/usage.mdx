@@ -1,0 +1,47 @@
+---
+layout: ../layouts/Guide.astro
+icon: code
+title: Getting Started
+description: Learn how to setup Semantic UI
+---
+import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
+
+
+## Component Syntax
+
+Semantic is built to support **three major dialects** that can be mixed/matched to allow you and your team to decide how to structure your code.
+
+* **Standard** - Standard lets you use words and have the component interpret their classification. This is the most similar to natural language
+* **Verbose** - This is a more explicit syntax where attributes are enumerated more specifically
+* **Classic** - This syntax can be more familiar for seasoned developers, and lets you use your class names to easily reference elements in code
+
+<Tabs>
+  <TabItem label="Standard Dialect">
+    ```html
+    <ui-buttons large>
+      <ui-button primary>First</ui-button>
+      <ui-button>Second</ui-button>
+      <ui-button>Third</ui-button>
+    </ui-buttons>
+    ```
+  </TabItem>
+      <TabItem label="Verbose Dialect">
+    ```html
+    <ui-buttons size="large">
+      <ui-button emphasis="primary">First</ui-button>
+      <ui-button>Second</ui-button>
+      <ui-button>Third</ui-button>
+    </ui-buttons>
+    ```
+  </TabItem>
+  <TabItem label="Classic Dialect">
+    ```html
+    <ui-buttons class="large">
+      <ui-button class="primary">First</ui-button>
+      <ui-button>Second</ui-button>
+      <ui-button>Third</ui-button>
+    </ui-buttons>
+    ```
+  </TabItem>
+</Tabs>
+

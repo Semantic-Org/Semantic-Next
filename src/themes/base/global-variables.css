@@ -81,7 +81,7 @@
   --light-secondary-color: var(--light-black);
 
   /* Used to emphasize text  */
-  --primary-text-color: var(--blue);
+  --primary-text-color: var(--blue-text-color);
   --primary-light-text-color: var(--light-blue);
 
   /* --------------
@@ -283,7 +283,7 @@
   --light-olive: #D9E778;
   --light-green: #2ECC40;
   --light-teal: #6DFFFF;
-  --light-blue: #26ADFF;
+  --light-blue: #58C1FE;
   --light-violet: #A291FB;
   --light-purple: #DC73FF;
   --light-pink: #FF8EDF;
@@ -331,7 +331,7 @@
   --olive-text-color: #8ABC1E; /* Olive is difficult to read */
   --green-text-color: #1EBC30; /* Green is difficult to read */
   --teal-text-color: #10A3A3; /* Teal text is difficult to read */
-  --blue-text-color: var(--blue);
+  --blue-text-color: #208BD7;
   --violet-text-color: var(--violet);
   --purple-text-color: var(--purple);
   --pink-text-color: var(--pink);
@@ -753,6 +753,10 @@
 }
 
 body.dark {
+
+  --link-color: #64B2FF;
+  --link-hover-color: #2492FF;
+
   --standard-color: 255 255 255;
   --inverted-color: 0 0 0;
 

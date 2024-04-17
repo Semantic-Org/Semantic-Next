@@ -2,8 +2,9 @@ import { defineConfig } from 'astro/config';
 import fs from 'fs';
 import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
+import expressiveCode from 'astro-expressive-code';
 
-import expressiveCode from "astro-expressive-code";
+import starlight from "@astrojs/starlight";
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,5 +27,5 @@ export default defineConfig({
       }
     }
   },
-  integrations: [lit(), expressiveCode(), mdx()]
+  integrations: [lit(), expressiveCode(), mdx(), starlight({title: 'Semantic UI'})]
 });

@@ -77,8 +77,8 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     });
   },
 
-  getAllFlattenedLinks() {
-
+  getFlattenedLinks() {
+    const links = []
   },
 
   setFirstItemActive() {

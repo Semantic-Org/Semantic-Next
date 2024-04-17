@@ -1,6 +1,6 @@
 ---
 
-const { title, padded } = Astro.props;
+const { title, description, padded } = Astro.props;
 
 import '../css/layers.css';
 import '../css/fonts.css';
@@ -18,7 +18,7 @@ import '../css/sui/ui/semantic-ui.css';
 <html>
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
+    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />

@@ -12,9 +12,23 @@ export const getNavMenu = async () => {
 
   const menu = [
     {
-      name: 'Getting Started',
-      url: '/guide',
-      icon: 'book',
+      name: 'Introduction',
+      url: '/introduction',
+      icon: 'open book',
+      pages: [
+        {
+          name: 'Quick Start',
+          url: '/getting-started'
+        },
+        {
+          name: 'Usage',
+          url: '/usage'
+        },
+        {
+          name: 'Web Components',
+          url: '/web-components'
+        }
+      ]
     },
     {
       name: 'Components',

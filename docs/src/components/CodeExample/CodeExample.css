@@ -21,7 +21,7 @@ a.link {
   cursor: pointer;
   float: right;
   font-size: 18px;
-  color: var(--standard-20);
+  color: var(--standard-40);
   top: -3rem;
 }
 a.link:hover {
