@@ -1,4 +1,4 @@
-ui-button {
+:root {
 
   --labeled-label-font-size: var(--medium);
   --labeled-label-align: center;

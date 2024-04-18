@@ -5,9 +5,9 @@
 .button.focused,
 .button:focus {
   background-color: var(--button-focus-background-color);
-  background-image: var(--button-focus-background-image) !important;
+  background-image: var(--button-focus-background-image);
   color: var(--button-focus-color);
-  box-shadow: var(--button-focus-box-shadow) !important;
+  box-shadow: var(--button-focus-box-shadow);
 }
 
 .button.focused .icon,

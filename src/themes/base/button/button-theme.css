@@ -3,43 +3,43 @@
 *******************************/
 
 /* Content */
-@import url('./content/button-variables.css');
-@import url('./content/icon-variables.css');
-@import url('./content/label-variables.css');
-@import url('./content/or-variables.css');
+@import url('./content/button-variables.css') layer(content.button);
+@import url('./content/icon-variables.css') layer(content.icon);
+@import url('./content/label-variables.css') layer(content.label);
+@import url('./content/or-variables.css') layer(content.or);
 
 /* Group */
-@import url('./plural/buttons-variables.css');
+@import url('./plural/buttons-variables.css') layer(plural);
 
 /* Types */
-@import url('./types/emphasis-variables.css');
-@import url('./types/icon-variables.css');
-@import url('./types/labeled-variables.css');
-@import url('./types/labeled-icon-variables.css');
-@import url('./types/toggle-variables.css');
-@import url('./types/animated-variables.css');
-@import url('./types/transparent-variables.css');
+@import url('./types/emphasis-variables.css') layer(types.emphasis);
+@import url('./types/icon-variables.css') layer(types.icon);
+@import url('./types/labeled-variables.css') layer(types.labeled);
+@import url('./types/labeled-icon-variables.css') layer(types.labeled-icon);
+@import url('./types/toggle-variables.css') layer(types.toggle);
+@import url('./types/animated-variables.css') layer(types.animated);
+@import url('./types/transparent-variables.css') layer(types.transparent);
 
 /* States */
-@import url('./states/hover-variables.css');
-@import url('./states/focus-variables.css');
-@import url('./states/pressed-variables.css');
-@import url('./states/active-variables.css');
-@import url('./states/disabled-variables.css');
-@import url('./states/loading-variables.css');
+@import url('./states/hover-variables.css') layer(states.hover);
+@import url('./states/focus-variables.css') layer(states.focus);
+@import url('./states/pressed-variables.css') layer(states.pressed);
+@import url('./states/active-variables.css') layer(states.active);
+@import url('./states/disabled-variables.css') layer(states.disabled);
+@import url('./states/loading-variables.css') layer(states.loading);
 
 /* Variations */
-@import url('./variations/attached-variables.css');
-@import url('./variations/basic-variables.css');
-@import url('./variations/circular-variables.css');
-@import url('./variations/colored-variables.css');
-@import url('./variations/compact-variables.css');
-@import url('./variations/floated-variables.css');
-@import url('./variations/fluid-variables.css');
-@import url('./variations/negative-variables.css');
-@import url('./variations/warning-variables.css');
-@import url('./variations/info-variables.css');
-@import url('./variations/positive-variables.css');
-@import url('./variations/sizing-variables.css');
-@import url('./variations/social-variables.css');
-@import url('./variations/vertical-variables.css');
+@import url('./variations/attached-variables.css') layer(variations.attached);
+@import url('./variations/basic-variables.css') layer(variations.basic);
+@import url('./variations/circular-variables.css') layer(variations.circular);
+@import url('./variations/colored-variables.css') layer(variations.colored);
+@import url('./variations/compact-variables.css') layer(variations.compact);
+@import url('./variations/floated-variables.css') layer(variations.floated);
+@import url('./variations/fluid-variables.css') layer(variations.fluid);
+@import url('./variations/negative-variables.css') layer(variations.negative);
+@import url('./variations/warning-variables.css') layer(variations.warning);
+@import url('./variations/info-variables.css') layer(variations.info);
+@import url('./variations/positive-variables.css') layer(variations.positive);
+@import url('./variations/sizing-variables.css') layer(variations.sizing);
+@import url('./variations/social-variables.css') layer(variations.social);
+@import url('./variations/vertical-variables.css') layer(variations.vertical);

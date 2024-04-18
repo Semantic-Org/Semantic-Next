@@ -1,4 +1,4 @@
-ui-button {
+:root {
 
   --button-basic-border-radius: var(--button-border-radius);
   --button-basic-border-size: 1px;

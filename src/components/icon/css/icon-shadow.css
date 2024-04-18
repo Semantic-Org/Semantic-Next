@@ -1,5 +1,5 @@
 /* src/components/icon/css/shadow/content/icon.css */
-@layer component.icon.shadow {
+@layer component.icon {
   :host {
     display: inline-block;
     font-style: normal;
@@ -1150,10 +1150,10 @@
 }
 
 /* src/components/icon/css/shadow/group/icons.css */
-@layer component.icon.shadow;
+@layer component.icon.plural;
 
 /* src/components/icon/css/shadow/states/disabled.css */
-@layer component.icon.shadow {
+@layer component.icon.states.disabled {
   .disabled.icon {
     cursor: default;
     opacity: var(--icon-disabled-opacity);
@@ -1161,10 +1161,10 @@
 }
 
 /* src/components/icon/css/shadow/states/loading.css */
-@layer component.icon.shadow;
+@layer component.icon.states.loading;
 
 /* src/components/icon/css/shadow/variations/circular.css */
-@layer component.icon.shadow {
+@layer component.icon.variations.circular {
   i.circular.icon {
     border-radius: 500em !important;
     line-height: 1 !important;
@@ -1180,7 +1180,7 @@
 }
 
 /* src/components/icon/css/shadow/variations/colored.css */
-@layer component.icon.shadow {
+@layer component.icon.variations.colored {
   .red.icon {
     color: var(--icon-red);
   }
@@ -1223,10 +1223,10 @@
 }
 
 /* src/components/icon/css/shadow/variations/fitted.css */
-@layer component.icon.shadow;
+@layer component.icon.variations.fitted;
 
 /* src/components/icon/css/shadow/variations/link.css */
-@layer component.icon.shadow {
+@layer component.icon.variations.links {
   .link.icon,
   .link.icons {
     cursor: pointer;
@@ -1242,7 +1242,7 @@
 }
 
 /* src/components/icon/css/shadow/variations/sizing.css */
-@layer component.icon.shadow {
+@layer component.icon.variations.sizing {
   .mini.icons .icon,
   .mini.icon {
     font-size: var(--icon-mini);

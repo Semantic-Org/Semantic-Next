@@ -757,6 +757,19 @@ body.dark {
   --link-color: #64B2FF;
   --link-hover-color: #2492FF;
 
+
+  --subtle-transparent-black: rgb(var(--standard-color) / 5%);
+  --transparent-black: rgb(var(--standard-color) / 10%);
+  --strong-transparent-black: rgb(var(--standard-color) / 15%);
+  --very-strong-transparent-black: rgb(var(--standard-color) / 20%);
+
+  --subtle-transparent-white: rgb(var(--inverted-color) / 5%);
+  --transparent-white: rgb(var(--inverted-color) / 10%);
+  --strong-transparent-white: rgb(var(--inverted-color) / 15%);
+  --very-strong-transparent-white: rgb(var(--inverted-color) / 20%);
+
+  --subtle-inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
+
   --standard-color: 255 255 255;
   --inverted-color: 0 0 0;
 

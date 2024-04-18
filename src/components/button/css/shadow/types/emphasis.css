@@ -22,6 +22,7 @@
   background-color: var(--button-primary-color-hover);
   color: var(--button-primary-text-color);
   text-shadow: var(--button-primary-text-shadow);
+  box-shadow: var(--button-hover-box-shadow);
 }
 
 .primary.buttons .button:focus,
@@ -29,6 +30,7 @@
   background-color: var(--button-primary-color-focus);
   color: var(--button-primary-text-color);
   text-shadow: var(--button-primary-text-shadow);
+  box-shadow: var(--button-focus-box-shadow);
 }
 
 .primary.buttons .button.pressed,
@@ -38,6 +40,7 @@
   background-color: var(--button-primary-color-down);
   color: var(--button-primary-text-color);
   text-shadow: var(--button-primary-text-shadow);
+  box-shadow: var(--button-pressed-box-shadow);
 }
 
 .primary.buttons .active.button,
@@ -47,6 +50,7 @@
   background-color: var(--button-primary-color-active);
   color: var(--button-primary-text-color);
   text-shadow: var(--button-primary-text-shadow);
+  box-shadow: var(--button-active-box-shadow);
 }
 
 
@@ -70,12 +74,14 @@
   background-color: var(--button-secondary-color-hover);
   color: var(--button-secondary-text-color);
   text-shadow: var(--button-secondary-text-shadow);
+  box-shadow: var(--button-hover-box-shadow);
 }
 .secondary.buttons .button:focus,
 .secondary.button:focus {
   background-color: var(--button-secondary-color-focus);
   color: var(--button-secondary-text-color);
   text-shadow: var(--button-secondary-text-shadow);
+  box-shadow: var(--button-focus-box-shadow);
 }
 .secondary.buttons .button:active,
 .secondary.buttons .button.pressed,
@@ -84,6 +90,7 @@
   background-color: var(--button-secondary-color-down);
   color: var(--button-secondary-text-color);
   text-shadow: var(--button-secondary-text-shadow);
+  box-shadow: var(--button-pressed-box-shadow);
 }
 .secondary.buttons .active.button,
 .secondary.buttons .active.button:active,
@@ -92,4 +99,5 @@
   background-color: var(--button-secondary-color-active);
   color: var(--button-secondary-text-color);
   text-shadow: var(--button-secondary-text-shadow);
+  box-shadow: var(--button-active-box-shadow);
 }

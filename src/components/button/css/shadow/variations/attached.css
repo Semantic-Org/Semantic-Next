@@ -8,11 +8,11 @@
   display: block;
   margin: 0em;
   border-radius: 0em;
-  box-shadow: var(--button-attached-box-shadow) !important;
+  box-shadow: var(--button-attached-box-shadow);
 }
 
 .attached.button:active {
-  box-shadow: var(--button-attached-pressed-box-shadow) !important;
+  box-shadow: var(--button-attached-pressed-box-shadow);
 }
 
 /* Top / Bottom */
@@ -44,7 +44,7 @@
   position: relative;
   display: flex;
   border-radius: 0em;
-  width: auto !important;
+  width: auto;
   z-index: var(--button-attached-z-index);
   margin-left: var(--button-attached-offset);
   margin-right: var(--button-attached-offset);

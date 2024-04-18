@@ -1,5 +1,5 @@
 /* src/components/button/css/shadow/content/button.css */
-@layer component.button.shadow {
+@layer component.button.content.button {
   :root {
     user-select: none;
   }
@@ -40,7 +40,7 @@
 }
 
 /* src/components/button/css/shadow/content/icon.css */
-@layer component.button.shadow {
+@layer component.button.content.icon {
   .button ui-icon {
     vertical-align: middle;
     opacity: var(--button-icon-opacity);
@@ -51,13 +51,13 @@
 }
 
 /* src/components/button/css/shadow/content/label.css */
-@layer component.button.shadow {
+@layer component.button.content.label {
   .button .label {
   }
 }
 
 /* src/components/button/css/shadow/plural/buttons.css */
-@layer component.button.shadow {
+@layer component.button.plural {
   .buttons {
     display: inline-flex;
     flex-direction: row;
@@ -69,8 +69,173 @@
   }
 }
 
+/* src/components/button/css/shadow/states/hover.css */
+@layer component.button.states.hover {
+  @media (pointer: fine) {
+    .button.hover,
+    .button:hover {
+      background-color: var(--button-hover-background-color);
+      background-image: var(--button-hover-background-image);
+      box-shadow: var(--button-hover-box-shadow);
+      color: var(--button-hover-color);
+    }
+    .button.hover .icon,
+    .button:hover .icon {
+      opacity: var(--button-hover-icon-opacity);
+    }
+  }
+}
+
+/* src/components/button/css/shadow/states/focus.css */
+@layer component.button.states.focus {
+  .button.focused,
+  .button:focus {
+    background-color: var(--button-focus-background-color);
+    background-image: var(--button-focus-background-image);
+    color: var(--button-focus-color);
+    box-shadow: var(--button-focus-box-shadow);
+  }
+  .button.focused .icon,
+  .button:focus .icon {
+    opacity: var(--button-focus-icon-opacity);
+  }
+}
+
+/* src/components/button/css/shadow/states/pressed.css */
+@layer component.button.states.pressed {
+  @media (pointer: fine) {
+    .button:active,
+    .active.button:active {
+      background-color: var(--button-pressed-background-color);
+      background-image: var(--button-pressed-background-image);
+      color: var(--button-pressed-color);
+      box-shadow: var(--button-pressed-box-shadow);
+    }
+    .pressed.button,
+    .active.pressed.button {
+      background-color: var(--button-pressed-background-color);
+      background-image: var(--button-pressed-background-image);
+      color: var(--button-pressed-color);
+      box-shadow: var(--button-pressed-box-shadow);
+    }
+  }
+}
+
+/* src/components/button/css/shadow/states/active.css */
+@layer component.button.states.active {
+  .active.button {
+    background-color: var(--button-active-background-color);
+    background-image: var(--button-active-background-image);
+    box-shadow: var(--button-active-box-shadow);
+    color: var(--button-active-color);
+  }
+  .active.button:hover {
+    background-color: var(--button-active-hover-background-color);
+    background-image: var(--button-active-hover-background-image);
+    color: var(--button-active-hover-color);
+    box-shadow: var(--button-active-hover-box-shadow);
+  }
+  .active.button:active {
+    background-color: var(--button-active-down-background-color);
+    background-image: var(--button-active-down-background-image);
+    color: var(--button-active-down-color);
+    box-shadow: var(--button-active-down-box-shadow);
+  }
+}
+
+/* src/components/button/css/shadow/states/disabled.css */
+@layer component.button.states.disabled {
+  .disabled.button,
+  .disabled.button:hover,
+  .disabled.active.button {
+    cursor: var(--button-disabled-cursor);
+    opacity: var(--button-disabled-opacity) !important;
+    color: var(--button-disabled-color);
+    background-color: var(--button-disabled-background-color) !important;
+    background-image: var(--button-disabled-background-image) !important;
+    box-shadow: var(--button-disabled-box-shadow) !important;
+  }
+  ui-button[disabled] {
+    cursor: var(--button-disabled-cursor);
+    pointer-events: none !important;
+  }
+  .clickable-disabled.button {
+    pointer-events: auto !important;
+    cursor: var(--button-clickable-disabled-cursor) !important;
+  }
+  .clickable-disabled.button:active {
+    box-shadow: var(--button-pressed-box-shadow) !important;
+  }
+  ui-button[clickable-disabled] {
+    pointer-events: auto !important;
+    cursor: var(--button-clickable-disabled-cursor) !important;
+  }
+}
+
+/* src/components/button/css/shadow/states/loading.css */
+@layer component.button.states.loading {
+  .loading.button:not(.icon) {
+    position: relative;
+    cursor: default;
+    text-shadow: none !important;
+    color: transparent !important;
+    opacity: var(--button-loading-opacity);
+    pointer-events: auto;
+    transition: var(--button-loading-transition);
+  }
+  .loading.icon.button .icon {
+    position: relative;
+    color: transparent !important;
+  }
+  .loading.icon.button > .icon:before,
+  .loading.button:not(.icon)::before {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: var(--loader-margin);
+    width: var(--loader-size);
+    height: var(--loader-size);
+    border-radius: var(--circular-radius);
+    border: var(--loader-line-width) solid var(--loader-fill-color);
+  }
+  .loading.icon.button > .icon:after,
+  .loading.button:not(.icon)::after {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: var(--loader-margin);
+    width: var(--loader-size);
+    height: var(--loader-size);
+    animation: button-spin var(--loader-speed) linear;
+    animation-iteration-count: infinite;
+    border-radius: var(--circular-radius);
+    border-color: var(--loader-line-color) transparent transparent;
+    border-style: solid;
+    border-width: var(--loader-line-width);
+    box-shadow: 0px 0px 0px 1px transparent;
+  }
+  @keyframes button-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .loading.button.inverted .icon:before,
+  .loading.button.inverted:before {
+    border-color: var(--inverted-loader-fill-color);
+  }
+  .loading.button.inverted .icon:after,
+  .loading.button.inverted:after {
+    border-top-color: var(--inverted-loader-line-color);
+  }
+}
+
 /* src/components/button/css/shadow/types/animated.css */
-@layer component.button.shadow {
+@layer component.button.types.animated {
   .animated.button {
     position: relative;
     overflow: hidden;
@@ -169,7 +334,7 @@
 }
 
 /* src/components/button/css/shadow/types/emphasis.css */
-@layer component.button.shadow {
+@layer component.button.types.emphasis {
   .primary.buttons .button,
   .primary.button {
     background-color: var(--button-primary-color);
@@ -185,12 +350,14 @@
     background-color: var(--button-primary-color-hover);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-hover-box-shadow);
   }
   .primary.buttons .button:focus,
   .primary.button:focus {
     background-color: var(--button-primary-color-focus);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-focus-box-shadow);
   }
   .primary.buttons .button.pressed,
   .primary.buttons .button:active,
@@ -199,6 +366,7 @@
     background-color: var(--button-primary-color-down);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-pressed-box-shadow);
   }
   .primary.buttons .active.button,
   .primary.buttons .active.button:active,
@@ -207,6 +375,7 @@
     background-color: var(--button-primary-color-active);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-active-box-shadow);
   }
   .secondary.buttons .button,
   .secondary.button {
@@ -223,12 +392,14 @@
     background-color: var(--button-secondary-color-hover);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-hover-box-shadow);
   }
   .secondary.buttons .button:focus,
   .secondary.button:focus {
     background-color: var(--button-secondary-color-focus);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-focus-box-shadow);
   }
   .secondary.buttons .button:active,
   .secondary.buttons .button.pressed,
@@ -237,6 +408,7 @@
     background-color: var(--button-secondary-color-down);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-pressed-box-shadow);
   }
   .secondary.buttons .active.button,
   .secondary.buttons .active.button:active,
@@ -245,11 +417,12 @@
     background-color: var(--button-secondary-color-active);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-active-box-shadow);
   }
 }
 
 /* src/components/button/css/shadow/types/icon.css */
-@layer component.button.shadow {
+@layer component.button.types.icon {
   .icon-only.buttons .button,
   .icon-only.button {
     padding: var(--vertical-padding) var(--vertical-padding) (var(--vertical-padding) + var(--shadow-offset));
@@ -263,7 +436,7 @@
 }
 
 /* src/components/button/css/shadow/types/labeled.css */
-@layer component.button.shadow {
+@layer component.button.types.labeled {
   .labeled.button:not(.icon) {
     display: inline-flex;
     flex-direction: row;
@@ -306,7 +479,7 @@
 }
 
 /* src/components/button/css/shadow/types/labeled-icon.css */
-@layer component.button.shadow {
+@layer component.button.types.labeled-icon {
   .labeled.icon.buttons .button,
   .labeled.icon.button {
     position: relative;
@@ -397,7 +570,7 @@
 }
 
 /* src/components/button/css/shadow/types/transparent.css */
-@layer component.button.shadow {
+@layer component.button.types.transparent {
   .transparent.button {
     background-image: var(--button-transparent-background-image);
     background-color: var(--button-transparent-background-color);
@@ -450,7 +623,7 @@
 }
 
 /* src/components/button/css/shadow/types/toggle.css */
-@layer component.button.shadow {
+@layer component.button.types.toggle {
   .toggle.buttons .active.button,
   .buttons .button.toggle.active,
   .button.toggle.active {
@@ -464,173 +637,8 @@
   }
 }
 
-/* src/components/button/css/shadow/states/hover.css */
-@layer component.button.shadow {
-  @media (pointer: fine) {
-    .button.hover,
-    .button:hover {
-      background-color: var(--button-hover-background-color);
-      background-image: var(--button-hover-background-image);
-      box-shadow: var(--button-hover-box-shadow);
-      color: var(--button-hover-color);
-    }
-    .button.hover .icon,
-    .button:hover .icon {
-      opacity: var(--button-hover-icon-opacity);
-    }
-  }
-}
-
-/* src/components/button/css/shadow/states/focus.css */
-@layer component.button.shadow {
-  .button.focused,
-  .button:focus {
-    background-color: var(--button-focus-background-color);
-    background-image: var(--button-focus-background-image) !important;
-    color: var(--button-focus-color);
-    box-shadow: var(--button-focus-box-shadow) !important;
-  }
-  .button.focused .icon,
-  .button:focus .icon {
-    opacity: var(--button-focus-icon-opacity);
-  }
-}
-
-/* src/components/button/css/shadow/states/pressed.css */
-@layer component.button.shadow {
-  @media (pointer: fine) {
-    .button:active,
-    .active.button:active {
-      background-color: var(--button-pressed-background-color);
-      background-image: var(--button-pressed-background-image);
-      color: var(--button-pressed-color);
-      box-shadow: var(--button-pressed-box-shadow) !important;
-    }
-  }
-  .pressed.button,
-  .active.pressed.button {
-    background-color: var(--button-pressed-background-color);
-    background-image: var(--button-pressed-background-image);
-    color: var(--button-pressed-color);
-    box-shadow: var(--button-pressed-box-shadow) !important;
-  }
-}
-
-/* src/components/button/css/shadow/states/active.css */
-@layer component.button.shadow {
-  .active.button {
-    background-color: var(--button-active-background-color);
-    background-image: var(--button-active-background-image);
-    box-shadow: var(--button-active-box-shadow);
-    color: var(--button-active-color);
-  }
-  .active.button:hover {
-    background-color: var(--button-active-hover-background-color);
-    background-image: var(--button-active-hover-background-image);
-    color: var(--button-active-hover-color);
-    box-shadow: var(--button-active-hover-box-shadow);
-  }
-  .active.button:active {
-    background-color: var(--button-active-down-background-color);
-    background-image: var(--button-active-down-background-image);
-    color: var(--button-active-down-color);
-    box-shadow: var(--button-active-down-box-shadow);
-  }
-}
-
-/* src/components/button/css/shadow/states/disabled.css */
-@layer component.button.shadow {
-  .disabled.button,
-  .disabled.button:hover,
-  .disabled.active.button {
-    cursor: var(--button-disabled-cursor);
-    opacity: var(--button-disabled-opacity) !important;
-    color: var(--button-disabled-color);
-    background-color: var(--button-disabled-background-color) !important;
-    background-image: var(--button-disabled-background-image) !important;
-    box-shadow: var(--button-disabled-box-shadow) !important;
-  }
-  ui-button[disabled] {
-    cursor: var(--button-disabled-cursor);
-    pointer-events: none !important;
-  }
-  .clickable-disabled.button {
-    pointer-events: auto !important;
-    cursor: var(--button-clickable-disabled-cursor) !important;
-  }
-  .clickable-disabled.button:active {
-    box-shadow: var(--button-pressed-box-shadow) !important;
-  }
-  ui-button[clickable-disabled] {
-    pointer-events: auto !important;
-    cursor: var(--button-clickable-disabled-cursor) !important;
-  }
-}
-
-/* src/components/button/css/shadow/states/loading.css */
-@layer component.button.shadow {
-  .loading.button:not(.icon) {
-    position: relative;
-    cursor: default;
-    text-shadow: none !important;
-    color: transparent !important;
-    opacity: var(--button-loading-opacity);
-    pointer-events: auto;
-    transition: var(--button-loading-transition);
-  }
-  .loading.icon.button .icon {
-    position: relative;
-    color: transparent !important;
-  }
-  .loading.icon.button > .icon:before,
-  .loading.button:not(.icon)::before {
-    position: absolute;
-    content: "";
-    top: 50%;
-    left: 50%;
-    margin: var(--loader-margin);
-    width: var(--loader-size);
-    height: var(--loader-size);
-    border-radius: var(--circular-radius);
-    border: var(--loader-line-width) solid var(--loader-fill-color);
-  }
-  .loading.icon.button > .icon:after,
-  .loading.button:not(.icon)::after {
-    position: absolute;
-    content: "";
-    top: 50%;
-    left: 50%;
-    margin: var(--loader-margin);
-    width: var(--loader-size);
-    height: var(--loader-size);
-    animation: button-spin var(--loader-speed) linear;
-    animation-iteration-count: infinite;
-    border-radius: var(--circular-radius);
-    border-color: var(--loader-line-color) transparent transparent;
-    border-style: solid;
-    border-width: var(--loader-line-width);
-    box-shadow: 0px 0px 0px 1px transparent;
-  }
-  @keyframes button-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  .loading.button.inverted .icon:before,
-  .loading.button.inverted:before {
-    border-color: var(--inverted-loader-fill-color);
-  }
-  .loading.button.inverted .icon:after,
-  .loading.button.inverted:after {
-    border-top-color: var(--inverted-loader-line-color);
-  }
-}
-
 /* src/components/button/css/shadow/variations/basic.css */
-@layer component.button.shadow {
+@layer component.button.variations.basic {
   .basic.buttons .button,
   .basic.button {
     background: var(--button-basic-background) !important;
@@ -737,16 +745,16 @@
 }
 
 /* src/components/button/css/shadow/variations/attached.css */
-@layer component.button.shadow {
+@layer component.button.variations.attached {
   .attached.button {
     position: relative;
     display: block;
     margin: 0em;
     border-radius: 0em;
-    box-shadow: var(--button-attached-box-shadow) !important;
+    box-shadow: var(--button-attached-box-shadow);
   }
   .attached.button:active {
-    box-shadow: var(--button-attached-pressed-box-shadow) !important;
+    box-shadow: var(--button-attached-pressed-box-shadow);
   }
   .top-attached.button {
     border-radius: var(--button-border-radius) var(--button-border-radius) 0em 0em;
@@ -771,7 +779,7 @@
     position: relative;
     display: flex;
     border-radius: 0em;
-    width: auto !important;
+    width: auto;
     z-index: var(--button-attached-z-index);
     margin-left: var(--button-attached-offset);
     margin-right: var(--button-attached-offset);
@@ -836,7 +844,7 @@
 }
 
 /* src/components/button/css/shadow/variations/circular.css */
-@layer component.button.shadow {
+@layer component.button.variations.circular {
   .circular.button {
     border-radius: var(--circular-radius);
   }
@@ -847,7 +855,7 @@
 }
 
 /* src/components/button/css/shadow/variations/colored.css */
-@layer component.button.shadow {
+@layer component.button.variations.colored {
   .red.buttons,
   .red.button {
     --button-text-color: var(--button-red-text-color);
@@ -1332,7 +1340,7 @@
 }
 
 /* src/components/button/css/shadow/variations/compact.css */
-@layer component.button.shadow {
+@layer component.button.variations.compact {
   .compact.buttons .button,
   .compact.button {
     padding: var(--button-compact-vertical-padding) var(--button-compact-horizontal-padding);
@@ -1352,7 +1360,7 @@
 }
 
 /* src/components/button/css/shadow/variations/floated.css */
-@layer component.button.shadow {
+@layer component.button.variations.floated {
   .left-floated.buttons,
   .left-floated.button {
     float: left;
@@ -1368,7 +1376,7 @@
 }
 
 /* src/components/button/css/shadow/variations/fluid.css */
-@layer component.button.shadow {
+@layer component.button.variations.fluid {
   .fluid.buttons,
   .fluid.button {
     width: 100%;
@@ -1483,7 +1491,7 @@
 }
 
 /* src/components/button/css/shadow/variations/negative.css */
-@layer component.button.shadow {
+@layer component.button.variations.negative {
   .negative.buttons .button,
   .negative.button {
     background-color: var(--button-negative-color);
@@ -1564,7 +1572,7 @@
 }
 
 /* src/components/button/css/shadow/variations/positive.css */
-@layer component.button.shadow {
+@layer component.button.variations.positive {
   .positive.buttons .button,
   .positive.button {
     background-color: var(--button-positive-color);
@@ -1645,7 +1653,7 @@
 }
 
 /* src/components/button/css/shadow/variations/warning.css */
-@layer component.button.shadow {
+@layer component.button.variations.warning {
   .warning.buttons .button,
   .warning.button {
     background-color: var(--button-warning-color);
@@ -1726,7 +1734,7 @@
 }
 
 /* src/components/button/css/shadow/variations/info.css */
-@layer component.button.shadow {
+@layer component.button.variations.info {
   .info.buttons .button,
   .info.button {
     background-color: var(--button-info-color);
@@ -1807,7 +1815,7 @@
 }
 
 /* src/components/button/css/shadow/variations/sizing.css */
-@layer component.button.shadow {
+@layer component.button.variations.sizing {
   .mini.buttons .button,
   .mini.buttons .or,
   .mini.button {
@@ -1851,7 +1859,7 @@
 }
 
 /* src/components/button/css/shadow/variations/social.css */
-@layer component.button.shadow {
+@layer component.button.variations.social {
   .facebook.button {
     background-color: var(--facebook-color);
     color: var(--button-inverted-text-color);
@@ -1972,7 +1980,7 @@
 }
 
 /* src/components/button/css/shadow/variations/vertical.css */
-@layer component.button.shadow {
+@layer component.button.variations.vertical {
   .vertical.buttons {
     display: inline-flex;
     flex-direction: column;

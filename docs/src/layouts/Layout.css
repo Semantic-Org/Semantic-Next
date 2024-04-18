@@ -110,8 +110,8 @@
     margin-top: 0rem;
   }
   layout main h1 {
-    font-size: 30px;
-    margin: 3rem 0rem 3rem;
+    font-size: 17px;
+    margin: 3rem 0rem 2rem;
   }
   layout main h1 ui-icon {
     margin-right: 1rem;
@@ -120,7 +120,7 @@
   layout main h2 {
     font-size: 26px;
     font-weight: bold;
-    margin: 3rem 0rem 2rem;
+    margin: 2rem 0rem 2rem;
     letter-spacing: 0.05em;
   }
   layout main h3 {
