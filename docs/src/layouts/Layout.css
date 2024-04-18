@@ -81,10 +81,8 @@
   }
 
   layout main.text-content > ui-container {
-    max-width: 900px;/*
-    margin: 0 auto;
-    position: relative;
-    left: -150px;*/
+    max-width: 1000px;
+    padding: 3em 5em 7em;
   }
   layout main.text-content pageContent,
   layout main.text-content li,
@@ -104,7 +102,7 @@
   }
 
 
-  layout main h1:first-child,
+layout main h1:first-child,
   layout main h2:first-child,
   layout main h3:first-child {
     margin-top: 0rem;

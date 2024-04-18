@@ -1,0 +1,23 @@
+---
+layout: ../layouts/Guide.astro
+icon: code
+title: Expert Guide
+description: A more descriptive explanation of web components
+---
+
+## Technicalities
+
+Semantic UI are web components designed using an underlying reactive framework to avoid many of the common pitfalls and dead-ends when creating custom web components.
+
+### Shadow DOM
+
+Web components construct their Shadow DOM using a bespoke templating language called `Semantic Component Markup (SCM)`.
+
+This is designed to make it easy to write code that binds reactively to data in a web component, allowing for reactive control structures, partials with shared data contexts and much more.
+
+
+### Semantic Component Markup
+
+Semantic component markup is a templating language that renders to an `AST`. Semantic includes a render for compiling this `AST` to `Lit` which can be used to create web components, but other renderers could be made in the future to render to other endpoints.
+
+For more information view our [templating guide](/templating).

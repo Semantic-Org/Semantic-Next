@@ -1,47 +1,88 @@
 ---
 layout: ../layouts/Guide.astro
 icon: code
-title: Getting Started
-description: Learn how to setup Semantic UI
+title: Usage
+description: Using Semantic UI components
 ---
 import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
+import { UIButton, UIButtons } from '@semantic-ui/core';
 
 
-## Component Syntax
+## Adding Components
 
-Semantic is built to support **three major dialects** that can be mixed/matched to allow you and your team to decide how to structure your code.
+You can use web components just like normal tags like `<p>` `<h3>` etc in your page. Simply add the tag wherever you want the component to appear in your `html`.
 
-* **Standard** - Standard lets you use words and have the component interpret their classification. This is the most similar to natural language
-* **Verbose** - This is a more explicit syntax where attributes are enumerated more specifically
-* **Classic** - This syntax can be more familiar for seasoned developers, and lets you use your class names to easily reference elements in code
+Web components can be quickly identified because they are [required by spec](/) to have a `-` dash in their names so `<ui-button>` but not `<button>`.
+
+## Attributes
+
+
+Semantic is built to support **three dialects**, ways which attributes are passed into components, that can be mixed/matched to allow you and your team to decide how to structure your code.
+
+* **Standard** - Standard lets you use words and have the component interpret their classification. This is the most similar to natural language.
+* **Technical** - A more explicit syntax where attributes are enumerated by category.
+* **Classic** - This syntax can be more familiar for seasoned developers, and lets you use class names to reference elements in code.
+
+<UIButton primary client:load>Primary</UIButton>
+<br/><br/>
 
 <Tabs>
-  <TabItem label="Standard Dialect">
+  <TabItem label="Standard">
     ```html
-    <ui-buttons large>
-      <ui-button primary>First</ui-button>
-      <ui-button>Second</ui-button>
-      <ui-button>Third</ui-button>
-    </ui-buttons>
+      <ui-button primary>Primary</ui-button>
     ```
   </TabItem>
-      <TabItem label="Verbose Dialect">
+      <TabItem label="Verbose">
     ```html
-    <ui-buttons size="large">
-      <ui-button emphasis="primary">First</ui-button>
-      <ui-button>Second</ui-button>
-      <ui-button>Third</ui-button>
-    </ui-buttons>
+      <ui-button emphasis="primary">Primary</ui-button>
     ```
   </TabItem>
-  <TabItem label="Classic Dialect">
+  <TabItem label="Classic">
     ```html
-    <ui-buttons class="large">
-      <ui-button class="primary">First</ui-button>
-      <ui-button>Second</ui-button>
-      <ui-button>Third</ui-button>
-    </ui-buttons>
+    <ui-button class="primary">Primary</ui-button>
     ```
   </TabItem>
 </Tabs>
 
+
+## Plurality
+
+Some components support plurality, attributes assigned to the group pass through to the children. For instance in this example a button group is large so all child buttons are `large`, with one also being `primary`.
+
+
+<UIButtons large>
+  <UIButton primary>Large Primary</UIButton>
+  <UIButton>Large</UIButton>
+  <UIButton>Large</UIButton>
+</UIButtons>
+<br/><br/>
+
+<Tabs>
+  <TabItem label="Standard">
+    ```html
+    <ui-buttons large>
+      <ui-button primary>Large Primary</ui-button>
+      <ui-button>Large</ui-button>
+      <ui-button>Large</ui-button>
+    </ui-buttons>
+    ```
+  </TabItem>
+      <TabItem label="Verbose">
+    ```html
+    <ui-buttons size="large">
+      <ui-button emphasis="primary">Primary</ui-button>
+      <ui-button>Large</ui-button>
+      <ui-button>Large</ui-button>
+    </ui-buttons>
+    ```
+  </TabItem>
+  <TabItem label="Classic">
+    ```html
+    <ui-buttons class="large">
+      <ui-button class="primary">Primary</ui-button>
+      <ui-button>Large</ui-button>
+      <ui-button>Large</ui-button>
+    </ui-buttons>
+    ```
+  </TabItem>
+</Tabs>

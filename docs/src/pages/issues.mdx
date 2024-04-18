@@ -1,0 +1,23 @@
+---
+layout: ../layouts/Guide.astro
+icon: help circle
+title: Common Issues
+description: Using Semantic UI components
+---
+import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
+
+
+## Gotchas
+
+### Flash of Unstyled Content (FOUC)
+
+Web components define themselves when their script is executed. This means tags you add to the page will become styled when the components mount and the Shadow DOM is created.
+
+If you are using [server side rendering](/ssr) the initial styling will be set on page load and there should be no shift, but if you are using vanilla web components that are defined only in the browser you will need to add special CSS to avoid the unstyled components appearing.
+
+```css title="page.css"
+/* elements will not appear until they are defined */
+*:not(:defined) {
+  opacity: 0;
+}
+```
