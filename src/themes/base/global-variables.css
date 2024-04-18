@@ -131,8 +131,11 @@
   -------------------- */
 
   /* These swap to handle coarse level of dark mode theming */
-  --standard-color: 0 0 0;
-  --inverted-color: 255 255 255;
+  --light-standard-color: 0 0 0;
+  --light-inverted-color: 255 255 255;
+
+  --standard-color: var( var(--dark-standard-color), var(--light-standard-color) );
+  --inverted-color: var( var(--dark-inverted-color), var(--light-inverted-color) );
 
   --standard-10: rgb(var(--standard-color) / 10%);
   --standard-20: rgb(var(--standard-color) / 20%);
@@ -754,46 +757,46 @@
 
 body.dark {
 
-  --link-color: #64B2FF;
-  --link-hover-color: #2492FF;
+  --dark-standard-color: 255 255 255;
+  --dark-inverted-color: 0 0 0;
+
+  --dark-link-color: #64B2FF;
+  --dark-link-hover-color: #2492FF;
+
+  --dark-subtle-transparent-black: rgb(var(--dark-standard-color) / 5%);
+  --dark-transparent-black: rgb(var(--dark-standard-color) / 10%);
+  --dark-strong-transparent-black: rgb(var(--dark-standard-color) / 15%);
+  --dark-very-strong-transparent-black: rgb(var(--dark-standard-color) / 20%);
+
+  --dark-subtle-transparent-white: rgb(var(--dark-inverted-color) / 5%);
+  --dark-transparent-white: rgb(var(--dark-inverted-color) / 10%);
+  --dark-strong-transparent-white: rgb(var(--dark-inverted-color) / 15%);
+  --dark-very-strong-transparent-white: rgb(var(--dark-inverted-color) / 20%);
+
+  --dark-subtle-inset-shadow: 0px 2px 3px 0 var(--dark-strong-transparent-black) inset;
 
 
-  --subtle-transparent-black: rgb(var(--standard-color) / 5%);
-  --transparent-black: rgb(var(--standard-color) / 10%);
-  --strong-transparent-black: rgb(var(--standard-color) / 15%);
-  --very-strong-transparent-black: rgb(var(--standard-color) / 20%);
+  --dark-primary-text-color: var(--dark-primary-light-text-color);
 
-  --subtle-transparent-white: rgb(var(--inverted-color) / 5%);
-  --transparent-white: rgb(var(--inverted-color) / 10%);
-  --strong-transparent-white: rgb(var(--inverted-color) / 15%);
-  --very-strong-transparent-white: rgb(var(--inverted-color) / 20%);
+  --dark-standard-10: rgb(var(--dark-standard-color) / 10%);
+  --dark-standard-20: rgb(var(--dark-standard-color) / 20%);
+  --dark-standard-30: rgb(var(--dark-standard-color) / 30%);
+  --dark-standard-40: rgb(var(--dark-standard-color) / 40%);
+  --dark-standard-50: rgb(var(--dark-standard-color) / 50%);
+  --dark-standard-60: rgb(var(--dark-standard-color) / 60%);
+  --dark-standard-70: rgb(var(--dark-standard-color) / 70%);
+  --dark-standard-80: rgb(var(--dark-standard-color) / 80%);
+  --dark-standard-90: rgb(var(--dark-standard-color) / 90%);
+  --dark-standard-100: rgb(var(--dark-standard-color) / 100%);
 
-  --subtle-inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
-
-  --standard-color: 255 255 255;
-  --inverted-color: 0 0 0;
-
-  --primary-text-color: var(--primary-light-text-color);
-
-  --standard-10: rgb(var(--standard-color) / 10%);
-  --standard-20: rgb(var(--standard-color) / 20%);
-  --standard-30: rgb(var(--standard-color) / 30%);
-  --standard-40: rgb(var(--standard-color) / 40%);
-  --standard-50: rgb(var(--standard-color) / 50%);
-  --standard-60: rgb(var(--standard-color) / 60%);
-  --standard-70: rgb(var(--standard-color) / 70%);
-  --standard-80: rgb(var(--standard-color) / 80%);
-  --standard-90: rgb(var(--standard-color) / 90%);
-  --standard-100: rgb(var(--standard-color) / 100%);
-
-  --inverted-10: rgb(var(--inverted-color) / 10%);
-  --inverted-20: rgb(var(--inverted-color) / 20%);
-  --inverted-30: rgb(var(--inverted-color) / 30%);
-  --inverted-40: rgb(var(--inverted-color) / 40%);
-  --inverted-50: rgb(var(--inverted-color) / 50%);
-  --inverted-60: rgb(var(--inverted-color) / 60%);
-  --inverted-70: rgb(var(--inverted-color) / 70%);
-  --inverted-80: rgb(var(--inverted-color) / 80%);
-  --inverted-90: rgb(var(--inverted-color) / 90%);
-  --inverted-100: rgb(var(--inverted-color) / 100%);
+  --dark-inverted-10: rgb(var(--dark-inverted-color) / 10%);
+  --dark-inverted-20: rgb(var(--dark-inverted-color) / 20%);
+  --dark-inverted-30: rgb(var(--dark-inverted-color) / 30%);
+  --dark-inverted-40: rgb(var(--dark-inverted-color) / 40%);
+  --dark-inverted-50: rgb(var(--dark-inverted-color) / 50%);
+  --dark-inverted-60: rgb(var(--dark-inverted-color) / 60%);
+  --dark-inverted-70: rgb(var(--dark-inverted-color) / 70%);
+  --dark-inverted-80: rgb(var(--dark-inverted-color) / 80%);
+  --dark-inverted-90: rgb(var(--dark-inverted-color) / 90%);
+  --dark-inverted-100: rgb(var(--dark-inverted-color) / 100%);
 }
