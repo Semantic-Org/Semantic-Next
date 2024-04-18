@@ -198,6 +198,9 @@ export class LitRenderer {
       // This lookups a deep value in an object, calling any intermediary functions
       const getDeepValue = (obj, path) =>
         path.split('.').reduce((acc, part) => {
+          if (acc === undefined) {
+            return undefined;
+          }
           const current = wrapFunction(acc)();
           if (current == undefined) {
             fatal(`Error evaluating expression "${expressionString}"`);
