@@ -1,5 +1,8 @@
+{{#if both menu.length showHeader}}
+  <h5 class="header">{{header}}</h5>
+{{/if}}
 {{#each section in menu}}
-  <div class="{{maybeActiveTitle @index}} title" data-id={{getAnchorID item}} data-index="{{@index}}">
+  <div class="{{maybeActiveTitle @index}} {{maybeCurrentItem section}} title" data-id={{getAnchorID section}} data-index="{{@index}}">
     <span class="text">
       {{section.title}}
     </span>
@@ -7,16 +10,18 @@
       <ui-icon chevron-down></ui-icon>
     {{/if}}
   </div>
-  <div class="{{maybeActiveContent @index}} content">
-    <div class="menu">
-      {{#each item in section.items}}
-        <a
-          href="#{{getAnchorID item}}"
-          data-id="{{getAnchorID item}}"
-          class="{{maybeCurrentItem item}} item">
-          {{item.title}}
-        </a>
-      {{/each}}
+  {{#if section.items.length}}
+    <div class="{{maybeActiveContent @index}} content">
+      <div class="menu">
+        {{#each item in section.items}}
+          <a
+            href="#{{getAnchorID item}}"
+            data-id="{{getAnchorID item}}"
+            class="{{maybeCurrentItem item}} item">
+            {{item.title}}
+          </a>
+        {{/each}}
+      </div>
     </div>
-  </div>
+  {{/if}}
 {{/each}}

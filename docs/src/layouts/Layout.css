@@ -101,8 +101,27 @@
     color: var(--standard-100);
   }
 
+  layout h1,
+  layout h2,
+  layout h3,
+  layout h4,
+  layout h5 {
+    transition: box-shadow 0.5s ease, color 0.5s ease;
+    box-shadow: -3px 0px 0px transparent;
+    margin-left: -0.5rem !important;
+    padding-left: 0.5rem !important;
+  }
 
-layout main h1:first-child,
+  layout h1.highlight,
+  layout h2.highlight,
+  layout h3.highlight,
+  layout h4.highlight,
+  layout h5.highlight {
+    color: var(--warning-text-color) !important;
+    box-shadow: -3px 0px 0px var(--warning-text-color);
+  }
+
+  layout main h1:first-child,
   layout main h2:first-child,
   layout main h3:first-child {
     margin-top: 0rem;
@@ -111,6 +130,9 @@ layout main h1:first-child,
     font-size: 17px;
     margin: 3rem 0rem 2rem;
   }
+  layout main h1 + h2 {
+    margin-top: 2rem;
+  }
   layout main h1 ui-icon {
     margin-right: 1rem;
     color: var(--primary-text-color);
@@ -118,7 +140,7 @@ layout main h1:first-child,
   layout main h2 {
     font-size: 26px;
     font-weight: bold;
-    margin: 2rem 0rem 2rem;
+    margin: 3rem 0rem 1rem;
     letter-spacing: 0.05em;
   }
   layout main h3 {

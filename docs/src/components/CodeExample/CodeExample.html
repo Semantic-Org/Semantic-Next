@@ -1,4 +1,4 @@
-<div class="example {{classIf codeVisible 'visible'}} {{classIf title '' 'another'}}">
+<div class="example {{classIf codeVisible 'visible'}} {{classIf title '' 'another'}}" part="example">
 
   {{#if title}}
     <h3>
@@ -8,9 +8,11 @@
       <a class="sandbox link">
         <ui-icon codesandbox link></ui-icon>
       </a>
-      {{title}}
+      <span class="text" part="header">
+        {{title}}
+      </span>
       {{#if description}}
-        <p class="description">{{description}}</p>
+        <p class="description" part="description">{{description}}</p>
       {{/if}}
     </h3>
   {{else}}
@@ -23,10 +25,10 @@
   {{/if}}
 
 
-  <div class="top segment">
+  <div class="top segment" part="top-segment">
     {{>slot}}
   </div>
-  <div class="bottom segment">
+  <div class="bottom segment" part="bottom-segment">
     {{#if both code codeVisible}}
       <code-sample code="{{code}}" segment="false"></code-sample>
     {{/if}}

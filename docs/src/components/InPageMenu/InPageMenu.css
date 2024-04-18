@@ -2,6 +2,15 @@
             Content
 *******************************/
 
+.header {
+  font-size: 10px;
+  font-weight: normal;
+  letter-spacing: 0.05rem;
+  margin: 0rem 0rem 0rem;
+  text-transform: uppercase;
+  color: var(--standard-30);
+}
+
 .title {
   display: flex;
   flex-direction: row;
@@ -10,7 +19,7 @@
   cursor: pointer;
   font-weight: bold;
   color: var(--standard-60);
-  padding: 0.5rem 0rem;
+  margin: 0.5rem 0rem;
   transition: 0.3s color ease;
   user-select: none;
 
@@ -32,7 +41,7 @@
   }
 
   &:hover {
-    transition: 0.2s color ease;
+    transition: var(--default-duration) color var(--default-easing);
     color: var(--standard-100);
   }
   &.active {
@@ -50,7 +59,10 @@
   max-height: 0px;
   opacity: 0;
   overflow: hidden;
-  transition: opacity 0.2s ease, max-height 0.2s ease;
+  transition:
+    opacity var(--default-duration) var(--default-easing),
+    max-height var(--default-duration) var(--default-easing)
+  ;
 
   &.active {
     opacity: 1;

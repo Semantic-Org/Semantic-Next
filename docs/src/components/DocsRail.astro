@@ -24,8 +24,11 @@ const getMenu = function() {
   ></InPageMenu>
   <script is:client>
     const el = document.querySelector('inpage-menu');
-    el.onActive = function(itemID) {
-      console.log(itemID, 'active!');
+    el.onSamePageActive = function(element, itemID) {
+      $(element).addClass('highlight');
+      setTimeout(() => {
+        $(element).removeClass('highlight');
+      }, 300)
     };
   </script>
 </railMenu>

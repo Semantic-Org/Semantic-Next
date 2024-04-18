@@ -15,9 +15,9 @@ let {
 	id,
 	menu,
 	inlineHeader,
-	expandRailMenu,
-	menuScrollOffset,
 	textContent,
+	expandRailMenu,
+	railMenuScrollOffset,
 	railMenu
 } = Astro.props;
 header = header || title;
@@ -36,7 +36,7 @@ header = header || title;
 				<ui-container>
 					<rail class="ui close right rail">
 						<slot name="rail">
-							<DocsRail menu={railMenu} useAccordion={expandRailMenu != 'true'} scrollOffset={menuScrollOffset} />
+							<DocsRail menu={railMenu} useAccordion={expandRailMenu != 'true'} scrollOffset={railMenuScrollOffset} />
 						</slot>
 					</rail>
 					<pageContent>

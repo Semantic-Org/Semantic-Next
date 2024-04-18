@@ -14,6 +14,24 @@
   font-weight: normal;
 }
 
+code-example {
+  display: block;
+  margin: 0rem -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  transition: box-shadow 0.3s ease;
+  box-shadow: -3px 0px 0px transparent;
+}
+code-example.highlight {
+  box-shadow: -3px 0px 0px var(--warning-text-color);
+}
+code-example::part(header) {
+  transition: color 0.3s ease;
+}
+code-example.highlight::part(header) {
+  color: var(--warning-text-color);
+}
+
 #button {
   .transparent.segments {
     display: inline-flex;

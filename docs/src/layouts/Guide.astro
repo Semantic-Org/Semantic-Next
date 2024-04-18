@@ -1,20 +1,24 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { each } from '@semantic-ui/utils';
+import { each, unique } from '@semantic-ui/utils';
 import './Guide.css';
 
 const getRailMenu = (headings) => {
 	let menu = [];
 	let items = [];
 	let menuGroup;
-	each(Astro.props.headings, heading => {
+
+	const headingLevels = unique(headings.map(heading => heading.depth)).sort();
+	const lowestHeadingLevel = headingLevels[0];
+
+	each(headings, heading => {
 		// new grouping
-		if(heading.depth <= 2) {
+		if(heading.depth == lowestHeadingLevel) {
 			if(menuGroup) {
 				menu.push(menuGroup);
 			}
 			menuGroup = {
-				_id: heading.slug,
+				id: heading.slug,
 				title: heading.text,
 				items: []
 			}
@@ -22,7 +26,7 @@ const getRailMenu = (headings) => {
 		else if(menuGroup) {
 			// submenu
 			menuGroup.items.push({
-				_id: heading.slug,
+				id: heading.slug,
 				title: heading.text
 			});
 		}
@@ -32,16 +36,16 @@ const getRailMenu = (headings) => {
 };
 const { frontmatter } = Astro.props;
 
-const railMenu = getRailMenu(Astro.props.heading);
+const railMenu = getRailMenu(Astro.props.headings);
 ---
 <Layout
 	inlineHeader=true
 	header={frontmatter.title}
 	headerIcon={frontmatter.icon}
 	headerImage={frontmatter.iconImage}
-	scrollOffset=90
-	expandRailMenu=true
 	textContent=true
+	expandRailMenu=true
+	railMenuScrollOffset=-20
 	railMenu={railMenu}
 >
 	<slot />

@@ -11,6 +11,7 @@ Docs Design
 - Add following header on long pages
 
 In Page Menu
+- Different offset for guide pages
 - Allow titles to link
 - Fix issue when building titles from markdown getHeadings
 - Highlight when on same page as scroll

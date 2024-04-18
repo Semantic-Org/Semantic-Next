@@ -1,31 +1,44 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { each, first, last } from '@semantic-ui/utils';
+import { each, flatten, noop, first, last, isServer } from '@semantic-ui/utils';
+import { $ } from '@semantic-ui/query';
 
 import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 const settings = {
+  showHeader: true,
+  header: 'On This Page',
   menu: [],
-  scrollContext: null,
+  scrollContext: (isServer) ? null : window,
   intersectionContext: null,
   intersectionOffset: 0,
+  // selects last on bottom of scroll
+  autoSelectLast: true,
   smoothScroll: true,
   scrollOffset: 0,
   useAccordion: true,
-  getAnchorID: (item) => item?._id,
+  getAnchorID: (item) => item?.id,
   getElement: (itemID) => document.getElementById(itemID),
   onActive: (itemID) => itemID,
+  onSamePageActive: (element, itemID) => {},
   getActiveElementID: (element) => element?.id
 };
 
 const createInstance = ({tpl, isServer, settings, $}) => ({
-  openIndex: new ReactiveVar(0),
-  currentItem: new ReactiveVar(0),
+
+  openIndex: new ReactiveVar(0), // current accordion index open
+  currentItem: new ReactiveVar(), // current active item id
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
+
+  isScrolling: false, // to avoid intersection observes when scrolling to item
+  isActivating: false, // to avoid scroll events while activating element
+
+  scrolledDown: false, // are we scrolling down
+  scrolledBottom: false, // is scroll context at bottom
 
   isOpenIndex(index) {
     return index == tpl.openIndex.get();
@@ -77,17 +90,33 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     });
   },
 
-  getFlattenedLinks() {
-    const links = []
+  // returns all titles and items as a flat ordered list
+  getFlattenedMenu() {
+    const menuArrays = settings.menu.map(section => {
+      const parentItem = { title: section.title, _id: section.id };
+      return [
+        parentItem,
+        ...section.items
+      ]
+    })
+    const flattenedMenu = flatten(menuArrays)
+    return flattenedMenu;
   },
 
   setFirstItemActive() {
-    const itemID = settings.getAnchorID(settings.menu[0].items[0]);
-    tpl.setActiveItem(itemID);
-    tpl.scrollToPosition(0);
+    const menu = tpl.getFlattenedMenu();
+    const itemID = first(menu)?.id;
+    tpl.setActiveItem(itemID)
+  },
+
+  setLastItemActive() {
+    const menu = tpl.getFlattenedMenu();
+    const itemID = last(menu)?.id;
+    tpl.setActiveItem(itemID)
   },
 
   setActiveItem(itemID) {
+    tpl.isActivating = true;
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
       item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
@@ -96,12 +125,16 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       const menuIndex = menu.indexOf(menuItem);
       tpl.openIndex.set(menuIndex);
       tpl.currentItem.set(itemID);
+      Reaction.afterFlush(() => {
+        tpl.isActivating = false;
+      })
     }
   },
 
   isCurrentItem(item) {
+    const currentItem = tpl.currentItem.get();
     const itemID = settings.getAnchorID(item);
-    return tpl.currentItem.get() === itemID;
+    return currentItem && currentItem === itemID;
   },
 
   maybeCurrentItem(item) {
@@ -110,20 +143,37 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
 
   scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
     const element = settings.getElement(itemID);
+    const scrollContext = tpl.getScrollContext();
     if (element) {
       const targetPosition = element.offsetTop + offset;
       tpl.currentItem.set(itemID);
-      tpl.scrollToPosition(targetPosition);
+      tpl.scrollToPosition(targetPosition, {
+        onSamePage() {
+          settings.onSamePageActive(element, itemID);
+        }
+      });
       settings.onActive(itemID);
     }
   },
 
-  scrollToPosition(position) {
-    const scrollContext = (settings.scrollContext)
+  getScrollContext() {
+    return (settings.scrollContext)
       ? $(settings.scrollContext, document).get(0)
       : window
     ;
+  },
+
+  scrollToPosition(position, { onSamePage = noop } = {}) {
+    const scrollContext = tpl.getScrollContext();
+    const startingScrollTop = scrollContext.scrollTop;
     tpl.isScrolling = true;
+
+    // special callback if we are at bottom this can be used to make it clear
+    // what we are scrolling to (as it may not be the top of the page)
+    if(position + scrollContext.clientHeight >= scrollContext.scrollHeight) {
+      onSamePage();
+    }
+
     // we want to ignore intersection observer while smoothscroll is happening
     $(scrollContext).one('scrollend', (event) => {
       requestIdleCallback(() => {
@@ -132,7 +182,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     });
     scrollContext.scrollTo({
       top: position,
-      behavior: 'smooth'
+      behavior: (settings.smoothScroll) ? 'smooth' : 'auto'
     });
   },
 
@@ -214,15 +264,13 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   },
 
   bindScroll() {
-    tpl.scrollEvent = $(settings.scrollContext, document)
+    tpl.scrollEvent = $(tpl.getScrollContext(), document)
       .on('scroll', function () {
         tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
         tpl.scrolledBottom = this.scrollTop + this.clientHeight == this.scrollHeight;
         tpl.lastScrollPosition = this.scrollTop;
-        if(tpl.scrolledBottom) {
-          requestAnimationFrame(() => {
-            console.log('select bottom');
-          })
+        if(settings.autoSelectLast && tpl.scrolledBottom && !tpl.isActivating) {
+          tpl.setLastItemActive();
         }
       }, { passive: true })
     ;
@@ -242,9 +290,18 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       $(window).off(tpl.hashChange);
     }
     if (tpl.scrollEvent) {
-      $(settings.scrollContext).off(tpl.scrollEvent);
+      $(tpl.getScrollContext(), document).off(tpl.scrollEvent);
+    }
+  },
+
+  setHash(itemID) {
+    // this avoids triggering default scrolling behavior by using pushState
+    const hash = `#${itemID}`;
+    if(window.location.hash !== hash) {
+      history.pushState(null, '', hash);
     }
   }
+
 });
 
 const onRendered = function ({ tpl, isServer, settings}) {
@@ -269,8 +326,10 @@ const events = {
     const newIndex = (currentIndex !== thisIndex) ? thisIndex : -1;
     tpl.openIndex.set(newIndex);
   },
-  'click .item'({event, tpl, data}) {
-    location.hash = `#${data.id}`;
+  'click [data-id]'({event, tpl, data}) {
+    // this avoids triggering scroll behavior or hashchange
+    tpl.setHash(data.id);
+    tpl.scrollToItem(data.id);
     event.preventDefault();
   }
 };

@@ -1,8 +1,13 @@
-
+:host {
+  --header-color: '';
+  --header-font-size: 16px;
+  --example-margin: 1rem 0rem;
+  --example-padding: 1rem 0rem;
+}
 
 .example {
-  margin: 1rem 0rem;
-  padding: 1rem 0rem;
+  margin: var(--example-margin);
+  padding: var(--example-padding);
   clear: both;
 }
 .another.example {
@@ -33,7 +38,8 @@ a.link ~ a.link {
 
 h3 {
   margin: 0rem 0rem 0.5rem;
-  font-size: 16px;
+  color: var(--header-color);
+  font-size: var(--header-font-size);
 }
 
 p.description {
