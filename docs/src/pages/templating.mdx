@@ -25,26 +25,27 @@ SCM can be used for any DOM structure but includes additional features which mak
 
 ### Slots
 
-```handlebars
 Default Slot
+```handlebars
 {{>slot}}
-
+```
 Named Slot
+```handlebars
 {{>slot icon}}
 ```
 
 ### Data
 
+HTML Sanitized Output
 ```handlebars
-Variable Output
 {{escaped}}
 ```
-```handlebars
 HTML Output
-{{{unescapted}}}
-```
 ```handlebars
+{{{someHTML}}}
+```
 Built in helpers
+```handlebars
 {{formatDate date 'MM/DD/YYYY'}}
 ```
 
@@ -52,7 +53,7 @@ Built in helpers
 
 Template Support
 ```handlebars
-{{> subtemplate}}
+{{> exampleSubtemplate}}
 ```
 Dynamic Template Support
 ```handlebars

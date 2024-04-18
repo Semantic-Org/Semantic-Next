@@ -1,6 +1,7 @@
 Docs
 -- Write lots of docs at your discretion
 -- Port readmes to start
+-- Hook up search
 
 Docs Design
 - Fix codesample dark mode
