@@ -50,7 +50,7 @@
       ]
     },
     {
-      "name": "Icon",
+      "name": "Icon Only",
       "attribute": "icon-only",
       "description": "A button can appear with only an icon",
       "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>",

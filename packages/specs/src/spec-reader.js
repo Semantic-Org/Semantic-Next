@@ -110,7 +110,7 @@ export class SpecReader {
     let menu = orderedDefinition.map(part => ({
       title: part.title,
       items: part.examples.map((example) => ({
-        _id: tokenize(`${example.title}${IDSuffix}`),
+        id: tokenize(`${example.title}${IDSuffix}`),
         title: example.title
       }))
     }));
