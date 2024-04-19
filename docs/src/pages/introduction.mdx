@@ -8,37 +8,28 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What is Semantic UI?
 
-Semantic is a UI framework that helps you create beautiful websites fast by creating markup that is easy to read and semantically meaningful.
+Semantic is a web-component based UI framework that supports SSR out of the box. Semantic uses naming based around concepts from natural language, that makes your html easy to read and semantically meaningful.
+
+Semantic is built with [web components](/web-components) a core web technology that allows you to take your UI with you even if you change between your front-end javascript frameworks.
 
 
 #### Tech Features
 
 * [Modern css theming](/theming) using **cascading inheritance layers**, **dark mode** and **em based** scaling.
-* Supports [server side rendering](/ssr) with hydration out of the box.
-* Built with [web components](/web-components) so you can take your UI with you even if you change  frameworks.
+* UI components support [server side rendering with hydration](/ssr) out of the box.
+* Provides a [reactive web component framework](/templates) to build your own web components
+
 
 #### What's Inside
 
 Semantic includes the following core libraries:
-* An underlying [component framework](/component) that renders to web components.
-* A high level [templating](/templating) language with **built in signals support**.
+* An underlying [UI component framework](/component) that includes things like popups, dropdowns, modals, and form controls.
+* A robust [reactive templating language](/templating) that compiles to web components.
 * A signals based [reactivity library](/reactivity).
-* A modern 3kb jQuery-like replacement called [Query](/query).
-* A robust [rendering engine](/rendering) powered by [Lit](https://lit.dev) under the hood.
-
-
-### Easy to Use
-
-The core of Semantic UI are a set of themeable web components that let you easily and quickly design applications.
-
-### A Natural Approach to Code
-
-Semantic UI is built using natural language which means components are easy to read and modify.
-
-It transforms your front end code from a set of heiroglyphics to something that describe the interface elements in a layout.
+* A modern 3kb jQuery-like replacement called [Query](/query) to handle DOM APIs
+* A higly-performant [rendering engine](/rendering) powered by [Lit](https://lit.dev) under the hood.
 
 ### Machine Interpretable
 
 Semantic UI components are all built using an underlying JSON specification. This specification outlines components in a way that is machine-interpretable and can be used to build robust developer or internal tooling.
-
 

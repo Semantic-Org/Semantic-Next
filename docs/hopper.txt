@@ -4,17 +4,9 @@ Docs
 -- Hook up search
 
 Docs Design
-- Fix codesample dark mode
 - Add overview page card design
-- Add custom theme for code samples
 - Further style tabs/code component
 - Add following header on long pages
-
-In Page Menu
-- Different offset for guide pages
-- Allow titles to link
-- Fix issue when building titles from markdown getHeadings
-- Highlight when on same page as scroll
 
 Button Component
 -- Add plural definition and start fixing plural issues
@@ -27,3 +19,14 @@ Button Component
 Build System
 - Figure out build step for component spec
 
+Completed
+
+Docs Design
++ Fix codesample dark mode
+? Add custom theme for code samples
+
+In Page Menu
++ Different offset for guide pages
++ Allow titles to link
++ Fix issue when building titles from markdown getHeadings
++ Highlight when on same page as scroll
