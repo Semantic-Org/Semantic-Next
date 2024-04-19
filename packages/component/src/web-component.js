@@ -20,21 +20,8 @@ class WebComponentBase extends LitElement {
 
   constructor() {
     super();
-    this.useLight = false;
+    this.useLight = true;
     this.renderCallbacks = [];
-  }
-
-  createRenderRoot() {
-    this.useLight = this.getAttribute('expose') !== null;
-    if (this.useLight) {
-      this.addLightCSS('light', this.css, { scopeSelector: this.tagName });
-      this.storeOriginalContent.apply(this);
-      return this;
-    }
-    else {
-      const renderRoot = super.createRenderRoot(this.css);
-      return renderRoot;
-    }
   }
 
   updated() {
@@ -54,20 +41,20 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   /* Modifies shadow dom rules to be scoped to component tag */
-  addLightCSS(id, css, { scopeSelector } = {}) {
+  addLightCSS(webComponent, id, css, { scopeSelector } = {}) {
     if(isServer) {
       return;
     }
     const stylesheet = new CSSStyleSheet();
-    if(!this.lightStylesheets) {
-      this.lightStylesheets = {};
+    if(!webComponent.lightStylesheets) {
+      webComponent.lightStylesheets = {};
     }
-    if (!this.lightStylesheets[id]) {
+    if (!webComponent.lightStylesheets[id]) {
       if(scopeSelector) {
         css = scopeStyles(css, scopeSelector);
       }
       stylesheet.replaceSync(css);
-      this.lightStylesheets[id] = stylesheet;
+      webComponent.lightStylesheets[id] = stylesheet;
     }
     // we add a new stylesheet to document scoped to component name
     document.adoptedStyleSheets = [
@@ -84,7 +71,8 @@ class WebComponentBase extends LitElement {
 
   slotLightContent() {
     const $slots = this.$('slot');
-    $slots.each(($slot) => {
+    $slots.each((slot) => {
+      const $slot = $(slot);
       let html;
       if ($slot.attr('name')) {
         let slotName = $slot.attr('name');

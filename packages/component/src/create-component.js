@@ -29,6 +29,7 @@ export const createComponent = ({
   onCreated = noop,
   onRendered = noop,
   onDestroyed = noop,
+  onThemeChanged = noop,
   onAttributeChanged = noop,
 
   properties, // allow overriding properties for lit
@@ -68,6 +69,7 @@ export const createComponent = ({
     onCreated,
     onRendered,
     onDestroyed,
+    onThemeChanged,
     createInstance,
   });
   let webComponent;
@@ -100,6 +102,19 @@ export const createComponent = ({
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
+      }
+
+      createRenderRoot() {
+        this.useLight = this.getAttribute('expose') !== null;
+        if (this.useLight) {
+          this.addLightCSS(webComponent, 'light', this.css, { scopeSelector: this.tagName });
+          this.storeOriginalContent.apply(this);
+          return this;
+        }
+        else {
+          const renderRoot = super.createRenderRoot(this.css);
+          return renderRoot;
+        }
       }
 
       willUpdate() {
@@ -160,12 +175,22 @@ export const createComponent = ({
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
+      isDarkMode() {
+        return (isServer)
+          ? undefined
+          : getComputedStyle(this).getPropertyValue('--dark-mode') == 'true'
+        ;
+      }
+
       getData() {
         let data = {
           ...this.getSettings({componentSpec, properties: webComponent.properties }),
           ...this.getContent({componentSpec}),
           plural
         };
+        if (!isServer) {
+          data.darkMode = this.isDarkMode();
+        }
         if (componentSpec) {
           data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
         }

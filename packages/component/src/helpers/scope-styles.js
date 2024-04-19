@@ -8,7 +8,7 @@ export const scopeStyles = (css, scopeSelector = '') => {
       return `${scopeSelector} ${rule.selectorText} { ${rule.style.cssText} }`;
     }
     else if (rule.type === CSSRule.MEDIA_RULE || rule.type === CSSRule.SUPPORTS_RULE) {
-      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${scopeRules(rule.cssText, scopeSelector)} }`;
+      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${scopeRule(rule.cssText, scopeSelector)} }`;
     }
     else if (rule.type === CSSRule.LAYER_STATEMENT_RULE || rule.type == 0 && rule.cssRules) {
       let scopedInnerRules = [];

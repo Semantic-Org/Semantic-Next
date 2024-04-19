@@ -27,8 +27,8 @@ export const adoptStylesheet = (css, { adoptedElement, scopeSelector } = {}) => 
   if(scopeSelector) {
     css = scopeStyles(css, scopeSelector);
   }
+  stylesheet.id = hash;
   stylesheet.replaceSync(css);
-
   // adopt this stylesheet after others
   adoptedElement.adoptedStyleSheets = [
     ...adoptedElement.adoptedStyleSheets,

@@ -27,6 +27,7 @@ export const LitTemplate = class LitTemplate {
     onCreated = noop,
     onRendered = noop,
     onDestroyed = noop,
+    onThemeChanged = noop,
   }) {
     // if we are rendering many of same template we want to pass in AST for performance
     if (!ast) {
@@ -46,6 +47,7 @@ export const LitTemplate = class LitTemplate {
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
+    this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
     this.attachStyles = attachStyles;
@@ -108,6 +110,9 @@ export const LitTemplate = class LitTemplate {
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
+    };
+    this.onThemeChanged = (...args) => {
+      this.call(this.onThemeChangedCallback, ...args);
     };
     this.onDestroyed = () => {
       LitTemplate.removeTemplate(this);
@@ -194,6 +199,7 @@ export const LitTemplate = class LitTemplate {
       events: this.events,
       subTemplates: this.subTemplates,
       onCreated: this.onCreatedCallback,
+      onThemeChanged: this.onThemeChangedCallback,
       onRendered: this.onRenderedCallback,
       onDestroyed: this.onDestroyedCallback,
       createInstance: this.createInstance,
@@ -241,6 +247,18 @@ export const LitTemplate = class LitTemplate {
       // BUG: iOS Safari will not bubble the touchstart / touchend events
       // if theres no handler on the actual element
       $(selector, this.renderRoot).on(eventName, noop);
+
+      // This makes an assumption that a custom event will be emitted when a theme change occurs
+      if(!LitTemplate.isServer && this.onThemeChangedCallback !== noop) {
+        $('html').on('themechange', (event) => {
+          this.onThemeChanged({
+            additionalData: {
+              event: event,
+              ...event.detail
+            },
+          });
+        }, { abortController: this.eventController });
+      }
 
       $(this.renderRoot).on(
         eventName,
@@ -371,6 +389,7 @@ export const LitTemplate = class LitTemplate {
         templates: LitTemplate.renderedTemplates,
         isServer: LitTemplate.isServer,
         isClient: !LitTemplate.isServer, // convenience
+        darkMode: this.element.isDarkMode(),
         $: this.$.bind(this),
         ...additionalData,
       };
