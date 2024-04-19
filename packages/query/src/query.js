@@ -208,6 +208,20 @@ export class Query {
     return this;
   }
 
+  dispatchEvent(eventName, data = {}, eventSettings = {}) {
+    const eventOptions = {
+      bubbles: true,
+      cancelable: true,
+      detail: data,
+      ...eventSettings
+    };
+    this.each(el => {
+      const event = new CustomEvent(eventName, eventOptions);
+      el.dispatchEvent(event);
+    });
+    return this;
+  }
+
   remove() {
     return this.each((el) => el.remove());
   }
