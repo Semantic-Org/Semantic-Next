@@ -4,6 +4,7 @@ Docs
 -- Hook up search
 
 Docs Design
+- Add rehype external links plugin
 - Add overview page card design
 - Further style tabs/code component
 - Add following header on long pages
