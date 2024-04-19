@@ -1,13 +1,15 @@
-<div class="example {{classIf codeVisible 'visible'}} {{classIf title '' 'another'}}" part="example">
+<div class="example {{classIf canShowCode 'visible'}} {{classIf title '' 'another'}}" part="example">
 
   {{#if title}}
     <h3>
-      <a class="code link">
-        <ui-icon code link></ui-icon>
-      </a>
-      <a class="sandbox link">
-        <ui-icon codesandbox link></ui-icon>
-      </a>
+      <span class="links">
+        <a class="sandbox link">
+          <ui-icon codesandbox link></ui-icon>
+        </a>
+        <a class="code link">
+          <ui-icon code link></ui-icon>
+        </a>
+      </span>
       <span class="text" part="header">
         {{title}}
       </span>
@@ -16,12 +18,14 @@
       {{/if}}
     </h3>
   {{else}}
-    <a class="code link">
-      <ui-icon code link></ui-icon>
-    </a>
-    <a class="sandbox link">
-      <ui-icon codesandbox link></ui-icon>
-    </a>
+    <span class="links">
+      <a class="sandbox link">
+        <ui-icon codesandbox link></ui-icon>
+      </a>
+      <a class="code link">
+        <ui-icon code link></ui-icon>
+      </a>
+    </span>
   {{/if}}
 
 

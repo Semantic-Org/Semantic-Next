@@ -66,6 +66,10 @@ const events = {
       : 'light'
     ;
     tpl.theme.set(newTheme);
+    $('html').dispatchEvent('themechange', {
+      theme: newTheme,
+      darkMode: newTheme == 'dark'
+    });
   },
 };
 

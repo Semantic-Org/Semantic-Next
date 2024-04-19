@@ -27,16 +27,16 @@ ui-menu {
 
 ui-icon[copy] {
   float: right;
-  color: rgba(0, 0, 0, 0.2);
+  color: var(--standard-40);
 }
 codeSample:hover {
   ui-icon[copy] {
-    color: rgba(0, 0, 0, 0.7);
+    color: var(--standard-70);
   }
 }
 
 ui-icon[copy]:hover {
-  color: rgba(0, 0, 0, 1);
+  color: var(--standard-100);
 }
 
 code {
@@ -51,4 +51,6 @@ code pre {
   background-color: transparent !important;
   margin: 0em 0em;
   padding: 0em;
+  font-size: 15px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

@@ -1,0 +1,5 @@
+body.dark {
+  code-example {
+    --example-bg: url(/images/bg-dark.png);
+  }
+}

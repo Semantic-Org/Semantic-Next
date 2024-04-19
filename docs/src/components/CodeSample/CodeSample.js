@@ -6,7 +6,7 @@ import template from './CodeSample.html?raw';
 import css from './CodeSample.css?raw';
 
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { each } from '@semantic-ui/utils';
+import { each, copyText } from '@semantic-ui/utils';
 
 
 const settings = {
@@ -19,7 +19,7 @@ const settings = {
   onCodeVisible: function(){},
 };
 
-const createInstance = ({ el, $, settings, tpl }) => ({
+const createInstance = ({ el, $, settings, darkMode, tpl }) => ({
 
   // internal
   code          : new ReactiveVar(false),
@@ -28,17 +28,21 @@ const createInstance = ({ el, $, settings, tpl }) => ({
   slottedCode   : new ReactiveVar(false),
   formattedCode : new ReactiveVar(''),
 
+  getCode() {
+    let code;
+    if(settings.code) {
+      code = settings.code;
+    }
+    else if(tpl.slottedCode.get()) {
+      code = tpl.slottedCode.get();
+    }
+    return code;
+  },
+
   watchCode() {
     tpl.reaction(async () => {
       tpl.language.get(); // reactivity source
-
-      let code;
-      if(settings.code) {
-        code = settings.code;
-      }
-      else if(tpl.slottedCode.get()) {
-        code = tpl.slottedCode.get();
-      }
+      const code = tpl.getCode();
       if(code) {
         if(settings.language == 'html') {
           tpl.formatHTML(code);
@@ -49,17 +53,32 @@ const createInstance = ({ el, $, settings, tpl }) => ({
     });
   },
 
-  async highlight(code) {
+  async highlight(code = tpl.getCode(), darkModeOverride) {
+    console.log(darkModeOverride, darkMode);
     let
+      useDarkMode = (darkModeOverride !== undefined)
+        ? darkModeOverride
+        : darkMode,
       language = tpl.language.get(),
       formattedCode = await codeToHtml(code, {
         lang: language,
-        theme: 'vitesse-light',
+        theme: (useDarkMode)
+          ? 'github-dark'
+          : 'github-light',
+        colorReplacements: {
+          // dark mode
+          '#85e89d': '#979797', // <foo
+          '#e1e4e8': '#979797',
+          '#b392f0': '#58C1FE', // attr
+          '#032F62': '6F42C1',
+          // light mode
+          '#22863a': '#777',
+          '#24292e': '#777',
+        }
       })
     ;
     tpl.formattedCode.set(formattedCode);
     Reaction.afterFlush(function() {
-      tpl.set.copyableCode(code);
       settings.onCodeVisible(formattedCode.value, tpl.code.get());
     });
   },
@@ -97,9 +116,6 @@ const createInstance = ({ el, $, settings, tpl }) => ({
         tpl.language.set(settings.language);
       }
     },
-    copyableCode(code) {
-      // handle copy code
-    },
     slottedCode() {
       let slottedCode = el.innerHTML;
       if(slottedCode) {
@@ -118,9 +134,14 @@ const onCreated = function({tpl }) {
 };
 
 
+const onThemeChanged = function({tpl, isClient, darkMode, settings}) {
+  tpl.highlight(tpl.getCode(), darkMode);
+};
+
 const events = {
-  'click ui-icon[copy]'(event, tpl) {
-    console.log('copy');
+  'click ui-icon[copy]'({event, tpl}) {
+    copyText(tpl.code.get());
+    console.log('copy', tpl.code.get());
   }
 };
 
@@ -130,6 +151,7 @@ const CodeSample = createComponent({
   events,
   css,
   onCreated,
+  onThemeChanged,
   createInstance,
   settings,
 });

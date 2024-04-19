@@ -16,11 +16,14 @@
 
 code-example {
   display: block;
-  margin: 0rem -1rem;
+  margin: 2rem -1rem;
   padding-left: 1rem;
   padding-right: 1rem;
   transition: box-shadow 0.3s ease;
   box-shadow: -3px 0px 0px transparent;
+}
+code-example.another {
+  margin-top: 4rem;
 }
 code-example.highlight {
   box-shadow: -3px 0px 0px var(--warning-text-color);
@@ -32,7 +35,22 @@ code-example.highlight::part(header) {
   color: var(--warning-text-color);
 }
 
+
+code-example ui-button {
+  margin-bottom: 5px;
+}
+
 #button {
+
+  #social-site-example,
+  #size-example,
+  #colored-example {
+    ui-button {
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+  }
+
   .transparent.segments {
     display: inline-flex;
     border-radius: 4px;

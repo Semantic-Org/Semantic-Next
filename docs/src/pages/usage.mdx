@@ -6,7 +6,7 @@ description: Using Semantic UI components
 ---
 import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 import { UIButton, UIButtons } from '@semantic-ui/core';
-
+import { CodeExample } from '@components/CodeExample/CodeExample.js';
 
 ## Adding Components
 
@@ -16,14 +16,19 @@ Web components can be quickly identified because they are [required by spec](/) 
 
 ## Attributes
 
-
 Semantic is built to support **three dialects**, ways which attributes are passed into components, that can be mixed/matched to allow you and your team to decide how to structure your code.
 
 * **Standard** - Standard lets you use words and have the component interpret their classification. This is the most similar to natural language.
 * **Technical** - A more explicit syntax where attributes are enumerated by category.
 * **Classic** - This syntax can be more familiar for seasoned developers, and lets you use class names to reference elements in code.
 
-<UIButton primary client:load>Primary</UIButton>
+
+
+<CodeExample
+  client:only showCode="true" code="<ui-button primary>Primary</ui-button>">
+  <ui-button primary>Primary</ui-button>
+</CodeExample>
+
 <br/><br/>
 
 <Tabs>

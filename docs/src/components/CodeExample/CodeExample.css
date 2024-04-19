@@ -2,16 +2,16 @@
   --header-color: '';
   --header-font-size: 16px;
   --example-margin: 1rem 0rem;
-  --example-padding: 1rem 0rem;
+  --example-bg: url(/images/bg2.jpg);
+  display: block;
+  margin: var(--example-margin);
 }
 
 .example {
-  margin: var(--example-margin);
-  padding: var(--example-padding);
   clear: both;
 }
-.another.example {
-  margin-top: 3.5rem;
+.example.another {
+  margin-top: 3rem;
 }
 
 .example::after {
@@ -20,22 +20,22 @@
   display: table;
 }
 
+.links {
+  position: relative;
+  float: right;
+  top: -3rem;
+}
+
 a.link {
   position: relative;
   z-index: 4;
   cursor: pointer;
-  float: right;
   font-size: 18px;
   color: var(--standard-40);
-  top: -3rem;
 }
 a.link:hover {
   color: var(--standard-100);
 }
-a.link ~ a.link {
-  margin-right: 0.5rem;
-}
-
 h3 {
   margin: 0rem 0rem 0.5rem;
   color: var(--header-color);
@@ -54,7 +54,7 @@ p.description {
   border-radius: var(--border-radius) var(--border-radius) 0px 0px;
   border: 1px solid transparent;
   padding: 0rem;
-  transition: all 0.2s ease;
+  transition: padding 0.2s ease;
 }
 /* clearfix */
 .top.segment:after {
@@ -73,6 +73,7 @@ p.description {
   border: 1px solid transparent;
   border-top: none;
   transform-origin: top center;
+  margin-bottom: 1rem;
 }
 
 .label {
@@ -85,7 +86,7 @@ p.description {
   font-weight: bold;
 }
 
-h3 a.link {
+h3 .links {
   top: 0rem;
 }
 h3:hover a.link {
@@ -98,10 +99,9 @@ h3:hover a.link:hover {
 .visible.example {
   h3 p {
     height: auto;
-    color: rgb(0 0 0 / 0.60%);
   }
   .top.segment {
-    background: #FAFAFA url(/images/bg2.jpg) repeat;
+    background: var(--example-bg) repeat;
     border: var(--border);
     box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.04);
     padding: 1rem;
