@@ -41,6 +41,14 @@ export const fatal = (
 };
 
 /*-------------------
+        DOM
+--------------------*/
+
+export const copyText = (text) => {
+  navigator.clipboard.writeText(text);
+};
+
+/*-------------------
         Types
 --------------------*/
 
