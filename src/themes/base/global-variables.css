@@ -754,8 +754,13 @@
 
 body.dark {
 
+  --dark-mode: true;
+
   --link-color: #64B2FF;
   --link-hover-color: #2492FF;
+
+  --border-color: rgba(234, 236, 238, 0.15);
+  --border: 1px solid var(--border-color);
 
 
   --subtle-transparent-black: rgb(var(--standard-color) / 5%);
