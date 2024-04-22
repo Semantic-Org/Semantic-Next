@@ -7,27 +7,9 @@ import MobileSidebarToggle from '@components/MobileSidebarToggle/MobileSidebarTo
 import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
 import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
 
-const menu = [
-  {
-    _id: 'ui',
-    name: 'UI Components',
-    url: '/ui',
-    baseURL: '/ui',
-  },
-  {
-    _id: 'framework',
-    name: 'Framework',
-    url: '/components',
-    baseURL: '/components',
-  },
-  /*
-  { name: 'JS Docs', url: '/docs', baseURL: '/docs' },
-  { name: 'Themes', url: '/themes', baseURL: '/themes' },
-  { name: 'Tutorials', url: '/tutorials', baseURL: '/tutorials' },
-  { name: 'Showcase', url: '/showcase', baseURL: '/showcase'},
-  { name: 'For Designers', url: '/designers', baseURL: '/designers'},
-  */
-];
+import { getTopBarMenu } from '@helpers/navigation.js';
+
+const menu = await getTopBarMenu();
 
 import './TopBar.css';
 ---

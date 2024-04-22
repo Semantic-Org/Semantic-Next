@@ -50,8 +50,11 @@ const createInstance = function ({ tpl, settings }) {
     },
     isCurrentItem(item) {
       const url = tpl.url.get();
-      if(item.baseURL) {
-        return url.startsWith(item.baseURL);
+      if(item.activeURL) {
+        return isArray(item.activeURL)
+          ? any(item.activeURL, (activeURL) => url.startsWith(activeURL))
+          : url.startsWith(item.activeURL)
+        ;
       }
       if (item?.url === tpl.url.get()) {
         return true;

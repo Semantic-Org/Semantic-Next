@@ -13,13 +13,15 @@ import './DocsRail.css';
       smoothScroll=true
       client:load
   ></InPageMenu>
-  <script is:client>
-    const el = document.querySelector('inpage-menu');
-    el.onSamePageActive = function(element, itemID) {
-      $(element).addClass('highlight');
-      setTimeout(() => {
-        $(element).removeClass('highlight');
-      }, 300)
-    };
+  <script>
+    import { $ } from '@semantic-ui/query';
+    $('inpage-menu').settings({
+      onSamePageActive(element) {
+        $(element).addClass('highlight');
+        setTimeout(() => {
+          $(element).removeClass('highlight');
+        }, 300)
+      }
+    });
   </script>
 </railMenu>

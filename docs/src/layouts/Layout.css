@@ -14,7 +14,16 @@
     --ec-brdRad: var(--border-radius);
     --ec-brdWd: 0px;
     --ec-frm-edBg: linear-gradient(45deg, #17171c, #081116);
+    /*--ec-frm-edActTabIndTopCol: var(--primary-text-color);*/
+    --ec-frm-edActTabIndTopCol: transparent;
+    --ec-frm-trmTtbBrdBtmCol: transparent;
+    --ec-frm-edTabBarBg: transparent;
+    --ec-frm-edActTabIndBtmCol: transparent;
+    --ec-frm-edActTabBg: #13151a;
 
+  }
+  .expressive-code .frame.has-title:not(.is-terminal) .title {
+    font-weight: bold;
   }
   body.dark {
     --primary-text-color: var(--primary-light-text-color);

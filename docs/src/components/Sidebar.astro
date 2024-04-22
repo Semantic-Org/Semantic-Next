@@ -2,10 +2,10 @@
 const { currentRoute } = Astro.props;
 import './Sidebar.css';
 import SidebarMenu from'@components/SidebarMenu/SidebarMenu.js';
-import { getNavMenu } from '@helpers/get-nav-menu.js';
+import { getSidebarMenu } from '@helpers/navigation.js';
 import { Template } from '@semantic-ui/component';
 
-const menu = await getNavMenu('framework');
+const menu = await getSidebarMenu({url: Astro.url.pathname});
 ---
 <sidebar transition:persist id="sidebar" popover>
 	<navSearch class="ui inverted icon input">
