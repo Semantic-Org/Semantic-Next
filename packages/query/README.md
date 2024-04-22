@@ -24,6 +24,7 @@ Query supports the following methods:
 * `removeClass(classNames)` - Remove class names from elements.
 # `toggleClass(classNames)` - Toggles class names on elements.
 * `css(property, value)` - Gets or sets CSS properties on an element. Accepts either two parameters or an object of properties to change. Will not return computed styles by default.
+* `cssVar(varName, newValue)` - Get/set a css var
 # `computedStyle(property)` - Gets the computed CSS for an element
 * `attr(attribute, value)` - Get/Set an attribute to a value. Accepts either two parameters or an object of attributes to change.
 * `removeAttr(attributeName)` - Remove a specified attribute from each element in the set of matched elements.
