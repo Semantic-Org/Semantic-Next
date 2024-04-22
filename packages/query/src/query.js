@@ -379,7 +379,9 @@ export class Query {
       if (elements?.length) {
         const styles = elements.map((el) => {
           const inlineStyle = el.style[property];
-          if (inlineStyle !== '') return inlineStyle; // Return inline style if present
+          if (inlineStyle) {
+            return inlineStyle; // Return inline style if present
+          }
           if (settings.includeComputed) {
             return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
           }
@@ -392,6 +394,10 @@ export class Query {
 
   computedStyle(property) {
     return this.css(property, null, { includeComputed: true });
+  }
+
+  cssVar(variable, value) {
+    return this.css(`--${variable}`, value, { includeComputed: true });
   }
 
   attr(attribute, value) {
@@ -483,17 +489,15 @@ export class Query {
 
   // adds properties to an element after dom loads
   initialize(settings, { onDOMReady = true } = {}) {
-    const addSettings = () => {
-      this.each((el) => {
-        Object.entries(settings).forEach(([prop, val]) => {
-          el[prop] = val;
-        });
+    $(document).on('DOMContentLoaded', this.addSettings);
+  }
+
+  addSettings(settings) {
+    this.each((el) => {
+      Object.entries(settings).forEach(([prop, val]) => {
+        el[prop] = val;
       });
-    };
-    if(onDOMReady) {
-      $(document).on('DOMContentLoaded', addSettings);
-    }
-    addSettings();
+    });
   }
 
 }
