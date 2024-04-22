@@ -3,6 +3,7 @@ const { currentRoute } = Astro.props;
 import './Sidebar.css';
 import SidebarMenu from'@components/SidebarMenu/SidebarMenu.js';
 import { getNavMenu } from '@helpers/get-nav-menu.js';
+import { Template } from '@semantic-ui/component';
 
 const menu = await getNavMenu('framework');
 ---

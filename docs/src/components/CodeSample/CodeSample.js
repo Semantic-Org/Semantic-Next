@@ -54,7 +54,6 @@ const createInstance = ({ el, $, settings, darkMode, tpl }) => ({
   },
 
   async highlight(code = tpl.getCode(), darkModeOverride) {
-    console.log(darkModeOverride, darkMode);
     let
       useDarkMode = (darkModeOverride !== undefined)
         ? darkModeOverride
@@ -141,7 +140,6 @@ const onThemeChanged = function({tpl, isClient, darkMode, settings}) {
 const events = {
   'click ui-icon[copy]'({event, tpl}) {
     copyText(tpl.code.get());
-    console.log('copy', tpl.code.get());
   }
 };
 
