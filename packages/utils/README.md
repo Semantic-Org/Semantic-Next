@@ -16,11 +16,19 @@ Utility includes the following helpers:
 - `unique(arr)` - Removes duplicates from arrays.
 - `filterEmpty(arr)` - Removes falsey values from an array.
 - `last(array, number)` - Returns last (n) elements from array
+- `first(array, number)` - Returns first (n) elements from array
 - `firstMatch(array, callback)` - Returns the first value that matches the provided callback function.
 - `findIndex(array, callback)` - Finds the index of the first element in the array that satisfies the provided callback function. Returns -1 if no match is found.
 - `remove(array, callbackOrValue)` - Removes elements from an array that match the given callback function or value.
 - `inArray(value, array)` - Returns whether a value is present in an array.
 - `range(start, stop, step)` - Creates an array of numbers (positive and/or negative) progressing from start up to, but not including, end.
+- `where(array, properties)` - Returns only objs with given properties in an array of objects.
+- `flatten(arr)` - Flattens an array of arrays
+- `some/any(arr, truthFunc)` - Returns true if any/some values match truthFunc
+
+
+### DOM
+- `copyText(text) - Copies text to clipboard
 
 ### Objects
 - `keys(obj)` - Return the keys of an object.
@@ -29,6 +37,7 @@ Utility includes the following helpers:
 - `extend(obj, ...sources)` - Extends an object with properties from additional sources, handling getters and setters properly.
 - `pick(obj, ...keys)` - Creates an object composed of the picked object properties.
 - `get(obj, string)` - Access a nested object field with a string, like 'a.b.c'.
+- `onlyKeys(obj, keysToKeep)` - Returns an object with only specified keys
 - `hasProperty(obj, prop)` - Return true if the object has the specified property.
 - `reverseKeys(obj)` - Reverses a lookup object's keys and values.
 
@@ -36,12 +45,15 @@ Utility includes the following helpers:
 - `isObject(x)` - Checks if the value is an object.
 - `isPlainObject(x)` - Checks if the value is a plain object.
 - `isString(x)` - Checks if the value is a string.
+- `isBoolean(x) - Checks if the value is a boolean.
 - `isNumber(x)` - Checks if the value is a number.
 - `isArray(x)` - Checks if the value is an array.
 - `isBinary(x)` - Checks if the value is binary (Uint8Array).
 - `isFunction(x)` - Checks if the value is a function.
 - `isPromise(x)` - Checks if the value is a promise.
 - `isArguments(obj)` - Checks if the value is an arguments object.
+- `isDOM(x)` - Checks if the value is a DOM element.
+- `isNode(x)` - Checks if the value is a DOM node.
 
 ### Date
 - `formatDate(date, format)` - Formats a date object into a string based on the provided format.
@@ -53,18 +65,31 @@ Utility includes the following helpers:
 ### Strings
 - `kebabToCamel(str)` - Converts a kebab-case string to camelCase.
 - `camelToKebab(str)` - Converts a camelCase string to kebab-case.
+- `capitalize(str)` - Capitalize only the first word in a string.
 - `capitalizeWords(str)` - Capitalizes each word of a string
 - `toTitleCase(str)` - Converts a string to title case.
 
 ### Regular Expressions
 - `escapeRegExp(string)` - Escapes special characters in a string for use in a regular expression.
 
-### Identity
-- `prettifyID(num)` - Converts a numeric ID into a more human-readable string format.
-- `hashCode(input)` - Creates a hash code from a string, object, or array.
-- `generateID()` - Generates a pseudo-random unique identifier.
+### Looping
+- `each(iterable, func, context)` - Calls function for each element of an iterable.
+
+### Equality
 - `isEqual(a, b)` - Deep compares two values to determine if they are equivalent.
+
+### Cloning
+- `clone(a)` - Performant clone of Array, Object, Date, regExp, Map, Set, or other data.
+
+### Identity
+- `tokenize(str)` - Returns a tokenized version of a string
+- `prettifyID(num)` - Converts a numeric ID into a more human-readable string format.
+- `hashCode(input)` - Creates a hash code from a string, object, or array (murmur hash)
+- `generateID()` - Generates a pseudo-random unique identifier.
 
 ### Errors
 - `fatal(message, options)` - Throws a custom error asynchronously, allowing for metadata and stack trace modifications.
 
+### Constants
+  - isServer - Boolean whether code is running on server
+  - isClient - Boolean whether code is running on client

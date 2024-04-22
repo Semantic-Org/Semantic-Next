@@ -301,6 +301,18 @@ export class Query {
       .trim();
   }
 
+  // non jquery variant to return only immediate text node
+  textNode() {
+    return Array.from(this)
+      .map((el) => {
+        return Array.from(el.childNodes)
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.nodeValue)
+          .join('');
+      })
+      .join('');
+  }
+
   map(...args) {
     return Array.from(this).map(...args);
   }
@@ -336,6 +348,13 @@ export class Query {
   // alias
   val(...args) {
     return this.value(...args);
+  }
+
+  focus() {
+    return this[0].focus();
+  }
+  blur() {
+    return this[0].blur();
   }
 
   css(property, value, settings = { includeComputed: false }) {
@@ -407,25 +426,6 @@ export class Query {
 
   eq(index) {
     return new Query(this[index]);
-  }
-
-  // non jquery variant to return only immediate text node
-  textNode() {
-    return Array.from(this)
-      .map((el) => {
-        return Array.from(el.childNodes)
-          .filter((node) => node.nodeType === Node.TEXT_NODE)
-          .map((node) => node.nodeValue)
-          .join('');
-      })
-      .join('');
-  }
-
-  focus() {
-    return this[0].focus();
-  }
-  blur() {
-    return this[0].blur();
   }
 
   initialize(settings) {

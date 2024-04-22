@@ -68,22 +68,6 @@ export const isBoolean = (x) => {
   return typeof x == 'boolean';
 };
 
-export const isDOM = (element) => {
-  if (typeof window === 'undefined') {
-    return true; // ssr or not a browser
-  }
-  return (
-    element instanceof Element ||
-    element instanceof Document ||
-    element === window ||
-    element instanceof DocumentFragment
-  );
-};
-
-export const isNode = (el) => {
-  return !!(el && el.nodeType);
-};
-
 export const isNumber = (x) => {
   return typeof x == 'number';
 };
@@ -108,14 +92,21 @@ export const isArguments = function (obj) {
   return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
-export const isServer = (() => {
-  return typeof window === 'undefined';
-})();
+export const isDOM = (element) => {
+  if (typeof window === 'undefined') {
+    return true; // ssr or not a browser
+  }
+  return (
+    element instanceof Element ||
+    element instanceof Document ||
+    element === window ||
+    element instanceof DocumentFragment
+  );
+};
 
-export const isClient = (() => {
-  return typeof window !== 'undefined';
-})();
-
+export const isNode = (el) => {
+  return !!(el && el.nodeType);
+};
 /*-------------------
         Date
 --------------------*/
@@ -212,13 +203,6 @@ export const capitalizeWords = (str = '') => {
     .replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
     .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
     .replace(/\b(\w)/g, (match) => match.toUpperCase());
-};
-
-export const tokenize = (str = '') => {
-  return (str).replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .toLowerCase()
-  ;
 };
 
 export const toTitleCase = (str = '') => {
@@ -374,6 +358,11 @@ export const flatten = (arr) => {
   }, []);
 };
 
+export const some = (collection, predicate) => {
+  return collection.some(predicate);
+};
+export const any = some;
+
 /*-------------------
        Objects
 --------------------*/
@@ -516,11 +505,6 @@ export const reverseKeys = (obj) => {
   return newObj;
 };
 
-export const some = (collection, predicate) => {
-  return collection.some(predicate);
-};
-export const any = some;
-
 /*-------------------
     Array / Object
 --------------------*/
@@ -590,7 +574,7 @@ export const each = (obj, func, context) => {
       obj = Array.from(obj);
     }
   }
-  if (isArray(obj)) {
+  else if (isArray(obj)) {
     for (let i = 0; i < obj.length; ++i) {
       if (iteratee(obj[i], i, obj) === false) {
         break;
@@ -622,6 +606,13 @@ export const escapeRegExp = function (string) {
 /*-------------------
       Identity
 --------------------*/
+
+export const tokenize = (str = '') => {
+  return (str).replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .toLowerCase()
+  ;
+};
 
 export const prettifyID = (num) => {
   num = parseInt(num, 10);
@@ -804,6 +795,19 @@ export const isEqual = (a, b, options = {}) => {
   // true if both NaN, false otherwise
   return a !== a && b !== b;
 };
+
+/*-------------------
+      Constants
+--------------------*/
+
+export const isServer = (() => {
+  return typeof window === 'undefined';
+})();
+
+export const isClient = (() => {
+  return typeof window !== 'undefined';
+})();
+
 
 import * as _ from './utils';
 export default _;

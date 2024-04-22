@@ -9,20 +9,24 @@ There's many reasons why you might use this over vanilla just DOM APIs, consider
 Query supports the following methods:
 
 ### Querying DOM
-* `find(selector)` - Find child elements matching a selector.
-* `parent(selector)` - Find the parent elements matching a selector.
-* `children(selector)` - Return only child nodes matching a selector.
 * `filter(selector)` - Filter current node list to match selector.
+* `children(selector)` - Return only child nodes matching a selector.
+* `parent(selector)` - Find the parent elements matching a selector.
+* `find(selector)` - Find child elements matching a selector.
 * `not(selector)` - Return only elements not matching a selector.
 * `closest(selector)` - Find the closest parent element matching a selector.
+* `is(selector)` - returns true if the current elements all match a selector.
+- `not(seletor)` - returns true if the current elements all do not match a selector.
 
 ### Attributes
-* `addClass(classNames)` - Add class names to element.
-* `removeClass(classNames)` - Remove class names from element.
-* `css(property, value)` - Set CSS property to value. Accepts either two parameters or an object of properties to change.
-* `attr(attribute, value)` - Set an attribute to a value. Accepts either two parameters or an object of attributes to change.
+` `hasClass(className)` - Returns true if class name is present on some elements
+* `addClass(classNames)` - Add class names to elements.
+* `removeClass(classNames)` - Remove class names from elements.
+# `toggleClass(classNames)` - Toggles class names on elements.
+* `css(property, value)` - Gets or sets CSS properties on an element. Accepts either two parameters or an object of properties to change. Will not return computed styles by default.
+# `computedStyle(property)` - Gets the computed CSS for an element
+* `attr(attribute, value)` - Get/Set an attribute to a value. Accepts either two parameters or an object of attributes to change.
 * `removeAttr(attributeName)` - Remove a specified attribute from each element in the set of matched elements.
-* `value(value)` - Set or retrieve the value of form elements.
 
 ### Content
 * `html(newHTML)` - Get or set HTML for the current node list.
@@ -30,10 +34,18 @@ Query supports the following methods:
 * `text(newText)` - Get or set text for the current node list. This is recursive, getting all child text nodes and works with slotted content.
 * `textNode()` - Gets the current text node of the matched elements. This is not recursive.
 
+## Sizing
+- `width()` - get the width of an element
+- `height()` get the height of an element
+- `scrollHeight()` - get the scroll height of an element
+- `scrollWidth()`- get the scroll width of an element
+- `offsetParent()` - get the offset parent of an element for positioning.
+
 ### Events
 * `on(event, targetSelectorOrHandler, handler)` - Attach an event using either event delegation (i.e., `.on('childNode', 'click', func)`) or regular event binding (i.e., `.on('click', func)`).
 * `one(event, targetSelectorOrHandler, handler, options)` - Attach an event handler that fires only once
 * `off(event, handler)` - Removes an event either by event type or handler.
+* `dispatchEvent(eventName, data, eventSettings)` - Dispatch an event from an element with data
 
 ### DOM Manipulation
 * `remove()` - Remove current elements from the DOM.
@@ -42,9 +54,10 @@ Query supports the following methods:
 * `each(function(el, index) => {})` - Run a function across a series of DOM nodes.
 * `get(index)` - Returns the real DOM element from the node list at the matching index (no longer chainable).
 * `eq(index)` - Filters node list to only include the element at the index (still chainable).
+* `initialize(settings)` - Adds the settings to given element after DOM content has loaded.
 
 ### Form
-* `val(newValue)` - Get the current value of the first element in the set of matched elements or set the value of every matched element. This method is an alias for `value(newValue)`.
+* `value(newValue)` - Get the current value of the first element in the set of matched elements or set the value of every matched element. This method is an alias for `value(newValue)`.
 
 ### Event Handling
 * `focus()` - Sets focus on the first element in the set of matched elements.
