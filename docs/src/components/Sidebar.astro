@@ -4,7 +4,7 @@ import './Sidebar.css';
 import SidebarMenu from'@components/SidebarMenu/SidebarMenu.js';
 import { getNavMenu } from '@helpers/get-nav-menu.js';
 
-const menu = await getNavMenu();
+const menu = await getNavMenu('framework');
 ---
 <sidebar transition:persist id="sidebar" popover>
 	<navSearch class="ui inverted icon input">

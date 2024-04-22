@@ -1,7 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
 import { each, flatten, noop, first, last, isServer } from '@semantic-ui/utils';
-import { $ } from '@semantic-ui/query';
 
 import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
@@ -97,22 +96,22 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       return [
         parentItem,
         ...section.items
-      ]
-    })
-    const flattenedMenu = flatten(menuArrays)
+      ];
+    });
+    const flattenedMenu = flatten(menuArrays);
     return flattenedMenu;
   },
 
   setFirstItemActive() {
     const menu = tpl.getFlattenedMenu();
     const itemID = first(menu)?.id;
-    tpl.setActiveItem(itemID)
+    tpl.setActiveItem(itemID);
   },
 
   setLastItemActive() {
     const menu = tpl.getFlattenedMenu();
     const itemID = last(menu)?.id;
-    tpl.setActiveItem(itemID)
+    tpl.setActiveItem(itemID);
   },
 
   setActiveItem(itemID) {
@@ -127,7 +126,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
       tpl.currentItem.set(itemID);
       Reaction.afterFlush(() => {
         tpl.isActivating = false;
-      })
+      });
     }
   },
 
@@ -165,7 +164,6 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
 
   scrollToPosition(position, { onSamePage = noop } = {}) {
     const scrollContext = tpl.getScrollContext();
-    const startingScrollTop = scrollContext.scrollTop;
     tpl.isScrolling = true;
 
     // special callback if we are at bottom this can be used to make it clear
@@ -196,7 +194,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
     tpl.observer = new IntersectionObserver(tpl.onIntersection, observerSettings);
     // observe intersection of each id in menu items
     each(settings.menu, (section) => {
-      each(section.items, (item) => {
+      each(section?.items, (item) => {
         const itemID = settings.getAnchorID(item);
         const sectionElement = settings.getElement(itemID);
         if (sectionElement) {
@@ -305,7 +303,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
 });
 
 const onRendered = function ({ tpl, isServer, settings}) {
-  if(isServer) {
+  if(isServer || !settings.menu.length) {
     return;
   }
   tpl.calculateScrollHeight();

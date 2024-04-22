@@ -17,6 +17,13 @@
   padding: 0.5rem 0rem;
   color: #798088;
   text-decoration: none;
+
+  .description {
+    float: right;
+    opacity: 0.4;
+    margin-left: 0.5rem;
+    font-size: 12px;
+  }
 }
 .title {
   ui-icon {

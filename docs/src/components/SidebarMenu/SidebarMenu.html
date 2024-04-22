@@ -5,7 +5,12 @@
     {{else if section.image}}
       <img src="{{section.image}}">
     {{/if}}
-    <span class="text">{{section.name}}</span>
+    <span class="text">
+      {{section.name}}
+    </span>
+    {{#if section.description}}
+      <span class="description">{{section.description}}</span>
+    {{/if}}
   </a>
   {{#if section.pages}}
     <div class="{{activeIf isActiveItem section}}content">
