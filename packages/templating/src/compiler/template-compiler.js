@@ -1,10 +1,11 @@
 import { each, isString, last } from '@semantic-ui/utils';
 
-import { Scanner } from './scanner';
+import { StringScanner } from './string-scanner.js';
 
 class TemplateCompiler {
-  constructor(template) {
-    this.template = template || '';
+
+  constructor(templateString) {
+    this.templateString = templateString || '';
   }
 
   static tagRegExp = {
@@ -33,15 +34,15 @@ class TemplateCompiler {
 
   /*
     Creates an AST representation of a template
-    this can be cached on the web component class
+    from a template string
   */
-  compile(template = this.template) {
-    template = TemplateCompiler.preprocessTemplate(template);
+  compile(templateString = this.templateString) {
+    templateString = TemplateCompiler.preprocessTemplate(templateString);
 
-    const scanner = new Scanner(template);
+    const scanner = new StringScanner(templateString);
 
-    if (!isString(template)) {
-      scanner.fatal('Template is not a string', template);
+    if (!isString(templateString)) {
+      scanner.fatal('Template is not a string', templateString);
     }
 
     // quicker to compile regexp once
@@ -287,21 +288,21 @@ class TemplateCompiler {
     return isObject ? obj : objectString.trim();
   }
 
-  static preprocessTemplate(template = '') {
-    template = template.trim();
+  static preprocessTemplate(templateString = '') {
+    templateString = templateString.trim();
 
     /*
       support self closing web component tags
       this allows you to do <ui-icon icon="foo" />
       instead of <ui-icon icon="foo"></ui-icon>
     */
-    template = template.replace(
+    templateString = templateString.replace(
       TemplateCompiler.preprocessRegExp.WEB_COMPONENT_SELF_CLOSING,
       (match, tagName, attributes) => {
         return `<${tagName}${attributes}></${tagName}>`;
       }
     );
-    return template;
+    return templateString;
   }
 }
 

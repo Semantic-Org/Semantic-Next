@@ -1,7 +1,10 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { capitalize, toTitleCase, formatDate, tokenize } from '@semantic-ui/utils';
 
-// these could be written in shorthand but its easier to debug if you can add a line manually
+/*
+  These could be written in shorthand but its easier for debugging
+  if you give have a line to breakpoint on
+*/
 export const TemplateHelpers = {
   is(a, b) {
     return a == b;

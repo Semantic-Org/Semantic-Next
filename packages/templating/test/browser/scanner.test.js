@@ -1,13 +1,13 @@
-import { Scanner } from '@semantic-ui/templating';
+import { StringScanner } from '@semantic-ui/templating';
 import { describe, it, expect, test, vi } from 'vitest';
 
-describe('scanner', () => {
+describe('string scanner', () => {
   
   describe('fatal', () => {
 
     it('fatal should log error to page in debug mode', () => {
-      Scanner.debugMode = true;
-      const scanner = new Scanner(`
+      StringScanner.debugMode = true;
+      const scanner = new StringScanner(`
         <div>
           {{#if someCondition}}
 
@@ -17,7 +17,7 @@ describe('scanner', () => {
       `);
       const consoleError = console.error;
       console.error = vi.fn();
-      Scanner.DEBUG_MODE = true;
+      StringScanner.DEBUG_MODE = true;
 
       scanner.consumeUntil('{{/if}}');
       scanner.consumeUntil('{{/if}}');
@@ -34,7 +34,7 @@ describe('scanner', () => {
       expect(html.search('h3')).toBeGreaterThan(-1);
 
       console.error = consoleError;
-      Scanner.debugMode = false;
+      StringScanner.debugMode = false;
     });
   });
 

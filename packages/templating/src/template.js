@@ -1,9 +1,9 @@
-import { TemplateCompiler } from '@semantic-ui/templating';
 import { $ } from '@semantic-ui/query';
 import { fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, clone } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
-import { LitRenderer } from '../engines/lit/renderer.js';
+import { LitRenderer } from '@semantic-ui/component';
+import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 
 export const Template = class Template {

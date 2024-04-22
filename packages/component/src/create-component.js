@@ -5,7 +5,7 @@ import { TemplateCompiler } from '@semantic-ui/templating';
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
 
-import { Template } from './template/template.js';
+import { Template } from '@semantic-ui/templating';
 import { WebComponentBase } from './web-component.js';
 
 
@@ -30,7 +30,7 @@ export const createComponent = ({
   onThemeChanged = noop,
   onAttributeChanged = noop,
 
-  properties, // allow overriding properties for lit
+  properties, // allow overriding properties
   settings, // settings for js functionality like callbacks etc
 
   subTemplates = [],
@@ -177,7 +177,7 @@ export const createComponent = ({
       isDarkMode() {
         return (isServer)
           ? undefined
-          : getComputedStyle(this).getPropertyValue('--dark-mode') == 'true'
+          : $(this).cssVar('dark-mode') == 'true'
         ;
       }
 

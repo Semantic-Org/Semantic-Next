@@ -1,9 +1,8 @@
 import { escapeRegExp, each } from '@semantic-ui/utils';
 
-// Adapted from BlazeJS Scanner
-//
-// A Scanner has an immutable source document (string) `input` and a current
+// A StringScanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
+// Adapted from BlazeJS Scanner
 //
 // * `new Scanner(input)` - constructs a Scanner with source string `input`
 // * `scanner.rest()` - returns the rest of the input after `pos`
@@ -11,7 +10,7 @@ import { escapeRegExp, each } from '@semantic-ui/utils';
 // * `scanner.isEOF()` - true if `pos` is at or beyond the end of `input`
 // * `scanner.fatal(msg)` - throw an error indicating a problem at `pos`
 
-class Scanner {
+export class StringScanner {
   static DEBUG_MODE = true;
 
   constructor(input) {
@@ -204,7 +203,7 @@ class Scanner {
     const normalStyle = 'color: grey';
     const errorStyle = 'color: red; font-weight: bold';
 
-    if (Scanner.DEBUG_MODE) {
+    if (StringScanner.DEBUG_MODE) {
       if (globalThis.document) {
         let errorHTML = '';
         each(contextLines, (line, index) => {
@@ -236,4 +235,3 @@ class Scanner {
   }
 }
 
-export { Scanner };

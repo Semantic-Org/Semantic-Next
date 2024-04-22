@@ -431,14 +431,6 @@ export class Query {
     return new Query(this[index]);
   }
 
-  initialize(settings) {
-    return this.each((el) => {
-      Object.entries(settings).forEach(([prop, val]) => {
-        el[prop] = val;
-      });
-    });
-  }
-
   height() {
     return this.length === 1
       ? this[0].clientHeight
@@ -490,14 +482,18 @@ export class Query {
   }
 
   // adds properties to an element after dom loads
-  initialize(settings) {
-    $(document).on('DOMContentLoaded', () => {
-      $(this.selector).each((el) => {
-        each(settings, (value, setting) => {
-          el[setting] = value;
+  initialize(settings, { onDOMReady = true } = {}) {
+    const addSettings = () => {
+      this.each((el) => {
+        Object.entries(settings).forEach(([prop, val]) => {
+          el[prop] = val;
         });
       });
-    });
+    };
+    if(onDOMReady) {
+      $(document).on('DOMContentLoaded', addSettings);
+    }
+    addSettings();
   }
 
 }
