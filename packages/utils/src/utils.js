@@ -574,7 +574,7 @@ export const each = (obj, func, context) => {
       obj = Array.from(obj);
     }
   }
-  else if (isArray(obj)) {
+  if (isArray(obj)) {
     for (let i = 0; i < obj.length; ++i) {
       if (iteratee(obj[i], i, obj) === false) {
         break;
