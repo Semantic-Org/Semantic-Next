@@ -3,7 +3,8 @@ import { $ } from '@semantic-ui/query';
 import { fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, clone } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
-import { LitRenderer } from './renderer.js';
+import { LitRenderer } from '../engines/lit/renderer.js';
+import { TemplateHelpers } from './template-helpers.js';
 
 export const Template = class Template {
   static templateCount = 0;
@@ -131,6 +132,7 @@ export const Template = class Template {
         ast: this.ast,
         data: this.getDataContext(),
         subTemplates: this.subTemplates,
+        helpers: TemplateHelpers,
       });
     }
     else {

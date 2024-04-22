@@ -4,7 +4,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { fatal, mapObject } from '@semantic-ui/utils';
 
 // Define directive
-class RenderTemplate extends AsyncDirective {
+export class RenderTemplateDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.renderRoot = partInfo.options?.host?.renderRoot;
@@ -85,4 +85,4 @@ class RenderTemplate extends AsyncDirective {
   }
 }
 // Create the directive function
-export const renderTemplate = directive(RenderTemplate);
+export const renderTemplate = directive(RenderTemplateDirective);

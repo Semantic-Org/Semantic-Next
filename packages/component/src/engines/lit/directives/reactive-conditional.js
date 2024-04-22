@@ -4,7 +4,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { each, isEqual } from '@semantic-ui/utils';
 
-class ReactiveConditionalDirective extends AsyncDirective {
+export class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;

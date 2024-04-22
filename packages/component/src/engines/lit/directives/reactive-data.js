@@ -8,7 +8,7 @@ import { inArray } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
 
 
-class ReactiveData extends AsyncDirective {
+export class ReactiveDataDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
@@ -64,4 +64,4 @@ class ReactiveData extends AsyncDirective {
   }
 }
 
-export const reactiveData = directive(ReactiveData);
+export const reactiveData = directive(ReactiveDataDirective);

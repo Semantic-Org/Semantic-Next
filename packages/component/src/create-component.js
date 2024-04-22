@@ -5,7 +5,7 @@ import { TemplateCompiler } from '@semantic-ui/templating';
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
 
-import { Template } from './lit/template.js';
+import { Template } from './template/template.js';
 import { WebComponentBase } from './web-component.js';
 
 

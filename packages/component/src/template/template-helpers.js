@@ -2,7 +2,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { capitalize, toTitleCase, formatDate, tokenize } from '@semantic-ui/utils';
 
 // these could be written in shorthand but its easier to debug if you can add a line manually
-export const Helpers = {
+export const TemplateHelpers = {
   is(a, b) {
     return a == b;
   },
@@ -22,10 +22,10 @@ export const Helpers = {
     return expr ? trueClass + ' ' : falseClass;
   },
   activeIf(expr) {
-    return Helpers.maybe(expr, 'active', '');
+    return TemplateHelpers.maybe(expr, 'active', '');
   },
   selectedIf(expr) {
-    return Helpers.maybe(expr, 'selected', '');
+    return TemplateHelpers.maybe(expr, 'selected', '');
   },
   capitalize(text = '') {
     return capitalize(text);
@@ -34,10 +34,10 @@ export const Helpers = {
     return toTitleCase(text);
   },
   disabledIf(expr) {
-    return Helpers.maybe(expr, 'disabled', '');
+    return TemplateHelpers.maybe(expr, 'disabled', '');
   },
   checkedIf(expr) {
-    return Helpers.maybe(expr, 'checked', '');
+    return TemplateHelpers.maybe(expr, 'checked', '');
   },
   isEqual(a, b) {
     return a == b;

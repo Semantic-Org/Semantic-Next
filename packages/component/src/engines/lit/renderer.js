@@ -8,22 +8,16 @@ import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveEach } from './directives/reactive-each.js';
 import { renderTemplate } from './directives/render-template.js';
 
-import { Helpers } from './helpers';
-
 export class LitRenderer {
-  static helpers = Helpers;
 
   static html = html;
 
-  static addHelper(name, helper) {
-    LitRenderer.helpers[name] = helper;
-  }
-
-  constructor({ ast, data, subTemplates }) {
+  constructor({ ast, data, subTemplates, helpers }) {
     this.ast = ast || '';
     this.data = data;
     this.subTemplates = subTemplates;
     this.resetHTML();
+    this.helpers = helpers || {};
   }
 
   resetHTML() {
@@ -217,7 +211,7 @@ export class LitRenderer {
       };
 
       let dataValue = getDeepValue(data, expression);
-      const helper = LitRenderer.helpers[expression];
+      const helper = this.helpers[expression];
       // check if we have a global helper with this name
       if (!dataValue && isFunction(helper)) {
         dataValue = helper;
@@ -280,6 +274,7 @@ export class LitRenderer {
       ast,
       data,
       subTemplates: this.subTemplates,
+      helpers: this.helpers,
     }).render();
   }
 

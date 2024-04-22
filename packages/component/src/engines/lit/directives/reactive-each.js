@@ -14,7 +14,7 @@ const generateMap = (list, start, end) => {
   return map;
 };
 
-class ReactiveEachDirective extends AsyncDirective {
+export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
