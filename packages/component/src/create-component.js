@@ -5,13 +5,11 @@ import { TemplateCompiler } from '@semantic-ui/templating';
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
 
-import { LitTemplate } from './lit/template.js';
+import { Template } from './lit/template.js';
 import { WebComponentBase } from './web-component.js';
 
 
 export const createComponent = ({
-  renderer = 'lit',
-
   template = '',
   css = false,
   lightCSS = false,
@@ -36,7 +34,7 @@ export const createComponent = ({
   settings, // settings for js functionality like callbacks etc
 
   subTemplates = [],
-
+  renderingEngine,
   beforeRendered = noop,
 } = {}) => {
 
@@ -56,12 +54,13 @@ export const createComponent = ({
   }
 
   /*
-    Create Component Returns Either a LitTemplate or WebComponent
-    LitTemplates are created as a prototype that can be cloned when instantiated
+    Create Component Returns Either a Template or WebComponent
+    Templates are created as a prototype that can be cloned when instantiated
   */
-  let litTemplate = new LitTemplate({
+  let litTemplate = new Template({
     templateName: templateName,
     isPrototype: true,
+    renderingEngine,
     ast,
     css,
     events,

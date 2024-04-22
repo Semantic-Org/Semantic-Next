@@ -5,7 +5,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from './renderer.js';
 
-export const LitTemplate = class LitTemplate {
+export const Template = class Template {
   static templateCount = 0;
 
   static isServer = isServer;
@@ -22,6 +22,7 @@ export const LitTemplate = class LitTemplate {
     subTemplates,
     createInstance,
     parentTemplate, // the parent template when nested
+    renderingEngine = 'lit',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
@@ -52,6 +53,7 @@ export const LitTemplate = class LitTemplate {
     this.isPrototype = isPrototype;
     this.attachStyles = attachStyles;
     this.element = element;
+    this.renderingEngine = renderingEngine;
     if (renderRoot) {
       this.attach(renderRoot);
     }
@@ -74,8 +76,8 @@ export const LitTemplate = class LitTemplate {
   }
 
   getGenericTemplateName() {
-    LitTemplate.templateCount++;
-    return `Anonymous #${LitTemplate.templateCount}`;
+    Template.templateCount++;
+    return `Anonymous #${Template.templateCount}`;
   }
 
   initialize() {
@@ -97,13 +99,13 @@ export const LitTemplate = class LitTemplate {
     this.tpl.$$ = this.$$.bind(this);
     this.tpl.templateName = this.templateName;
     // this is a function to avoid naive cascading reactivity
-    this.tpl.findTemplate = LitTemplate.findTemplate;
+    this.tpl.findTemplate = Template.findTemplate;
     this.tpl.parent = (templateName) =>
-      LitTemplate.findParentTemplate(this, templateName);
+      Template.findParentTemplate(this, templateName);
     this.tpl.child = (templateName) =>
-      LitTemplate.findChildTemplate(this, templateName);
+      Template.findChildTemplate(this, templateName);
     this.tpl.children = (templateName) =>
-      LitTemplate.findChildTemplates(this, templateName);
+      Template.findChildTemplates(this, templateName);
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
@@ -115,7 +117,7 @@ export const LitTemplate = class LitTemplate {
       this.call(this.onThemeChangedCallback, ...args);
     };
     this.onDestroyed = () => {
-      LitTemplate.removeTemplate(this);
+      Template.removeTemplate(this);
       this.rendered = false;
       this.clearReactions();
       this.removeEvents();
@@ -124,11 +126,16 @@ export const LitTemplate = class LitTemplate {
 
     this.initialized = true;
 
-    this.renderer = new LitRenderer({
-      ast: this.ast,
-      data: this.getDataContext(),
-      subTemplates: this.subTemplates,
-    });
+    if(this.renderingEngine == 'lit') {
+      this.renderer = new LitRenderer({
+        ast: this.ast,
+        data: this.getDataContext(),
+        subTemplates: this.subTemplates,
+      });
+    }
+    else {
+      fatal('Unknown renderer specified', this.renderingEngine);
+    }
 
     this.onCreated();
   }
@@ -197,6 +204,7 @@ export const LitTemplate = class LitTemplate {
       ast: this.ast,
       css: this.css,
       events: this.events,
+      renderingEngine: this.renderingEngine,
       subTemplates: this.subTemplates,
       onCreated: this.onCreatedCallback,
       onThemeChanged: this.onThemeChangedCallback,
@@ -204,7 +212,7 @@ export const LitTemplate = class LitTemplate {
       onDestroyed: this.onDestroyedCallback,
       createInstance: this.createInstance,
     };
-    return new LitTemplate({
+    return new Template({
       ...defaultSettings,
       ...settings,
     });
@@ -249,7 +257,7 @@ export const LitTemplate = class LitTemplate {
       $(selector, this.renderRoot).on(eventName, noop);
 
       // This makes an assumption that a custom event will be emitted when a theme change occurs
-      if(!LitTemplate.isServer && this.onThemeChangedCallback !== noop) {
+      if(!Template.isServer && this.onThemeChangedCallback !== noop) {
         $('html').on('themechange', (event) => {
           this.onThemeChanged({
             additionalData: {
@@ -350,7 +358,7 @@ export const LitTemplate = class LitTemplate {
 
   // Rendered DOM (either shadow or regular)
   $(selector, root = this.renderRoot, { filterTemplate = true } = {}) {
-    if(!LitTemplate.isServer && inArray(selector, ['body', 'document', 'html'])) {
+    if(!Template.isServer && inArray(selector, ['body', 'document', 'html'])) {
       root = document;
     }
     if (!root) {
@@ -386,9 +394,9 @@ export const LitTemplate = class LitTemplate {
         settings: data, // Todo: extract only settings from data
         template: this,
         content: this.tpl.content,
-        templates: LitTemplate.renderedTemplates,
-        isServer: LitTemplate.isServer,
-        isClient: !LitTemplate.isServer, // convenience
+        templates: Template.renderedTemplates,
+        isServer: Template.isServer,
+        isClient: !Template.isServer, // convenience
         darkMode: this.element.isDarkMode(),
         $: this.$.bind(this),
         ...additionalData,
@@ -425,24 +433,24 @@ export const LitTemplate = class LitTemplate {
       return;
     }
     let templates =
-      LitTemplate.renderedTemplates.get(template.templateName) || [];
+      Template.renderedTemplates.get(template.templateName) || [];
     templates.push(template);
-    LitTemplate.renderedTemplates.set(template.templateName, templates);
+    Template.renderedTemplates.set(template.templateName, templates);
   }
   static removeTemplate(template) {
     if (template.isPrototype) {
       return;
     }
     let templates =
-      LitTemplate.renderedTemplates.get(template.templateName) || [];
+      Template.renderedTemplates.get(template.templateName) || [];
     remove(templates, template);
-    LitTemplate.renderedTemplates.set(templates);
+    Template.renderedTemplates.set(templates);
   }
   static getTemplates(templateName) {
-    return LitTemplate.renderedTemplates.get(templateName) || [];
+    return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
-    return LitTemplate.getTemplates(templateName)[0];
+    return Template.getTemplates(templateName)[0];
   }
   static findParentTemplate(template, templateName) {
     let match;
@@ -476,6 +484,6 @@ export const LitTemplate = class LitTemplate {
     return result;
   }
   static findChildTemplate(template, templateName) {
-    return LitTemplate.findChildTemplates(template, templateName)[0];
+    return Template.findChildTemplates(template, templateName)[0];
   }
 };
