@@ -16,9 +16,9 @@ export class Query {
     }
     // window is outside of document root
     if(selector == 'window') {
-      return globalThis;
+      elements = [globalThis];
     }
-    if (isArray(selector)) {
+    else if (isArray(selector)) {
       // Directly passed an array of elements
       elements = selector;
     }
