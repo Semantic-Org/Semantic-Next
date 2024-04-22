@@ -489,10 +489,10 @@ export class Query {
 
   // adds properties to an element after dom loads
   initialize(settings, { onDOMReady = true } = {}) {
-    $(document).on('DOMContentLoaded', this.addSettings);
+    $(document).on('DOMContentLoaded', this.settings);
   }
 
-  addSettings(settings) {
+  settings(settings) {
     this.each((el) => {
       Object.entries(settings).forEach(([prop, val]) => {
         el[prop] = val;
