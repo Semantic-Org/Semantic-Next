@@ -4,6 +4,7 @@ import { any, isFunction, isArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './TopbarMenu.html?raw';
 import css from './TopbarMenu.css?raw';
+import { first } from '@semantic-ui/utils';
 
 const settings = {
   menu: [],
@@ -34,6 +35,10 @@ const createInstance = function ({ tpl, settings }) {
         return item?.url;
       }
       return;
+    },
+    getActiveID() {
+      const activeItem = first(settings.menu, (item) => tpl.isActiveItem(item));
+      return activeItem?._id;
     },
     isActiveItem(item) {
       if (tpl.isCurrentItem(item)) {

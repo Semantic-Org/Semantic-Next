@@ -8,8 +8,18 @@ import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
 import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
 
 const menu = [
-  { name: 'UI Components', url: '/components/button', baseURL: '/component', },
-  { name: 'Framework', url: '/docs', baseURL: '/docs', },
+  {
+    _id: 'ui',
+    name: 'UI Components',
+    url: '/ui',
+    baseURL: '/ui',
+  },
+  {
+    _id: 'framework',
+    name: 'Framework',
+    url: '/components',
+    baseURL: '/components',
+  },
   /*
   { name: 'JS Docs', url: '/docs', baseURL: '/docs' },
   { name: 'Themes', url: '/themes', baseURL: '/themes' },
