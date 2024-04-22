@@ -14,7 +14,10 @@ export class Query {
     if (!root) {
       return;
     }
-
+    // window is outside of document root
+    if(selector == 'window') {
+      return globalThis;
+    }
     if (isArray(selector)) {
       // Directly passed an array of elements
       elements = selector;
