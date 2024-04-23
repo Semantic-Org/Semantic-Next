@@ -1,7 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './MobileSidebarToggle.html?raw';
 import css from './MobileSidebarToggle.css?raw';
 
