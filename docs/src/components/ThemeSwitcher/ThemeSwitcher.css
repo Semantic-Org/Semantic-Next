@@ -1,0 +1,13 @@
+.hitbox {
+  display: inline-block;
+  cursor: pointer;
+  padding: 20px;
+  margin: 0px;
+}
+.hitbox ui-icon {
+  transition: opacity var(--default-duration) var(--default-easing);
+  opacity: 0.6;
+}
+.hitbox:hover ui-icon {
+  opacity: 1;
+}

@@ -23,8 +23,8 @@ const createInstance = function ({ $, isServer, tpl }) {
       else {
         $sidebar.addClass('visible');
       }
-      // safari ios doesnt handle this natively properly so we gotta do manual
-      tpl.bindClickaway();
+      // safari ios doesnt handle this natively properly so we gotta do manual after this event bubbles
+      setTimeout(tpl.bindClickaway, 1);
     },
     hideSidebar() {
       const $sidebar = tpl.getSidebar();
@@ -50,7 +50,7 @@ const createInstance = function ({ $, isServer, tpl }) {
 };
 
 const events = {
-  'click ui-icon'({tpl}) {
+  'click'({tpl}) {
     if(tpl.isVisible()) {
       tpl.hideSidebar();
     }

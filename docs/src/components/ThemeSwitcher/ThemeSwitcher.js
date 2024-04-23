@@ -59,7 +59,7 @@ const onCreated = function({tpl, isClient}) {
 
 
 const events = {
-  'click ui-icon'({tpl}) {
+  'click .hitbox'({tpl}) {
     const currentTheme = tpl.theme.get();
     const newTheme = (currentTheme == 'light')
       ? 'dark'
