@@ -252,11 +252,14 @@ export const Template = class Template {
 
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
+      console.log(this, eventName, selector);
       const template = this;
 
       // BUG: iOS Safari will not bubble the touchstart / touchend events
       // if theres no handler on the actual element
-      $(selector, this.renderRoot).on(eventName, noop);
+      if(selector) {
+        $(selector, this.renderRoot).on(eventName, noop);
+      }
 
       // This makes an assumption that a custom event will be emitted when a theme change occurs
       if(!Template.isServer && this.onThemeChangedCallback !== noop) {
@@ -284,10 +287,13 @@ export const Template = class Template {
           ) {
             return;
           }
-          const matchingElement = $(event.target).closest(selector).get(0);
-          const boundEvent = eventHandler.bind(matchingElement);
+          const targetElement = (selector)
+            ? $(event.target).closest(selector).get(0) // delegation
+            : event.target
+          ;
+          const boundEvent = eventHandler.bind(targetElement);
           template.call(boundEvent, {
-            additionalData: { event: event, data: matchingElement.dataset },
+            additionalData: { event: event, data: targetElement.dataset },
           });
         },
         { abortController: this.eventController }
