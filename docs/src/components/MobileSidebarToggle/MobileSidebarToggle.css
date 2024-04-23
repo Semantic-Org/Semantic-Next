@@ -1,5 +1,5 @@
 .hitbox {
-  padding: 20px;
+  padding: 19px;
 }
 .hitbox ui-icon {
   transition: opacity var(--default-duration) var(--default-easing);
