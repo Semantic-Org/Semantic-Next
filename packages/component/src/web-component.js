@@ -375,6 +375,13 @@ class WebComponentBase extends LitElement {
     return content;
   }
 
+  isDarkMode() {
+    return (isServer)
+      ? undefined
+      : $(this).cssVar('dark-mode') == 'true'
+    ;
+  }
+
   /*******************************
             DOM Helpers
   *******************************/

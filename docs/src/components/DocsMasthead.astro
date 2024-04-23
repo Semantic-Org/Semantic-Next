@@ -1,9 +1,11 @@
 ---
 import { isArray, any } from '@semantic-ui/utils';
+import { removeTrailingSlash } from '@helpers/navigation';
 import './DocsMasthead.css';
 const { tabs, header, description, menu } = Astro.props;
 
 const isURLActive = (url, index) => {
+  url = removeTrailingSlash(url);
   if(index == 0 && !any(menu.slice(1), item => Astro.url.pathname === item.url)) {
     return true;
   }

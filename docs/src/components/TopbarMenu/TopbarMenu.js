@@ -41,13 +41,13 @@ const createInstance = function ({ tpl, settings }) {
     },
     isActiveItem(item) {
       let activeURL = tpl.url.get();
-      if(item.baseURLs && any(item.baseURLS, (baseURL) => activeURL.startsWith(baseURL))) {
+      if(isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
         return true;
       }
       if(item.baseURL && activeURL.startsWith(item.baseURL)) {
         return true;
       }
-      if (item?.url === tpl.url.get()) {
+      if (item?.url === activeURL) {
         return true;
       }
       return false;

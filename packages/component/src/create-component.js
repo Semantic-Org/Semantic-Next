@@ -1,11 +1,9 @@
 import { unsafeCSS } from 'lit';
 import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
-
-import { Template } from '@semantic-ui/templating';
 import { WebComponentBase } from './web-component.js';
 
 
@@ -172,13 +170,6 @@ export const createComponent = ({
         super.attributeChangedCallback(attribute, oldValue, newValue);
         adjustSettingFromAttribute(this, attribute, newValue, componentSpec);
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
-      }
-
-      isDarkMode() {
-        return (isServer)
-          ? undefined
-          : $(this).cssVar('dark-mode') == 'true'
-        ;
       }
 
       getData() {

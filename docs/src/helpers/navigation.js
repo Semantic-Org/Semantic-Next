@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { firstMatch, asyncEach, flatten, isArray, inArray, any } from '@semantic-ui/utils';
+import { firstMatch, asyncEach, flatten, isArray, inArray, isString, any } from '@semantic-ui/utils';
 
 const components = await getCollection('components');
 const componentPages = components.map(page => ({
@@ -289,8 +289,15 @@ export const sidebarMenuFramework = [
   },
 ];
 
+export const removeTrailingSlash = (url = '') => {
+  return isString(url)
+    ? url.replace(/\/$/, '')
+    : url
+  ;
+};
 
 export const getActiveTopbarSection = async (activeURL = '') => {
+  activeURL = removeTrailingSlash(activeURL);
   const topbarMenuWithLinks = await getTopBarMenu();
   const isActive = (item) => {
     if(isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
@@ -306,10 +313,6 @@ export const getActiveTopbarSection = async (activeURL = '') => {
   };
   const activeItem = firstMatch(topbarMenuWithLinks, isActive);
   return activeItem?._id;
-};
-
-export const replaceTrailingSlash = (url = '') => {
-  return url.replace(/\/$/, ''); // remove trailing slash;
 };
 
 

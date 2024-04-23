@@ -7,9 +7,10 @@ import MobileSidebarToggle from '@components/MobileSidebarToggle/MobileSidebarTo
 import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
 import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
 
-import { getTopBarMenu } from '@helpers/navigation.js';
+import { getTopBarMenu, removeTrailingSlash } from '@helpers/navigation.js';
 
 const menu = await getTopBarMenu();
+const activeURL = removeTrailingSlash(Astro.url.pathname);
 
 import './TopBar.css';
 ---
@@ -26,7 +27,7 @@ import './TopBar.css';
   <TopbarMenu
     client:load
     menu={menu}
-    activeURL={Astro.url.pathname}
+    activeURL={activeURL}
   ></TopbarMenu>
   <ThemeSwitcher client:load transition:name="theme"></ThemeSwitcher>
 </topbar>
