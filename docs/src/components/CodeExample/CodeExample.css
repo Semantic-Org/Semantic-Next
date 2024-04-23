@@ -7,6 +7,11 @@
   margin: var(--example-margin);
 }
 
+ui-icon[link] {
+  margin: -5px -2px;
+  padding: 5px;
+}
+
 .example {
   clear: both;
 }

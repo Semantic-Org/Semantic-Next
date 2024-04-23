@@ -27,6 +27,8 @@ ui-menu {
 
 ui-icon[copy] {
   float: right;
+  margin: -5px;
+  padding: 5px;
   color: var(--standard-40);
 }
 codeSample:hover {
