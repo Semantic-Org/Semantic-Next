@@ -74,6 +74,7 @@ p.description {
   border-top: none;
   transform-origin: top center;
   margin-bottom: 1rem;
+  overflow-x: auto;
 }
 
 .label {

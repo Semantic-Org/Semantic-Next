@@ -24,7 +24,7 @@ const createInstance = function ({ $, isServer, tpl }) {
         $sidebar.addClass('visible');
       }
       // safari ios doesnt handle this natively properly so we gotta do manual after this event bubbles
-      setTimeout(tpl.bindClickaway, 1);
+      //setTimeout(tpl.bindClickaway, 1);
     },
     hideSidebar() {
       const $sidebar = tpl.getSidebar();

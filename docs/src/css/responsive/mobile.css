@@ -11,6 +11,14 @@
     display: inline-block;
   }
 
+  layout {
+    width: 100%;
+  }
+  layout main ui-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
   layout sidebar {
     position: fixed;
     z-index: 4;
