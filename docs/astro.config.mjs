@@ -3,8 +3,7 @@ import fs from 'fs';
 import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
 import expressiveCode from 'astro-expressive-code';
-
-import starlight from "@astrojs/starlight";
+import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
@@ -25,7 +24,14 @@ export default defineConfig({
         key: fs.readFileSync('./cert/dev-key.pem'),
         cert: fs.readFileSync('./cert/dev.pem')
       }
+    },
+    ssr: {
+      // Example: Force a broken package to skip SSR processing, if needed
+      //external: ['playground-ide'],
     }
+  },
+  optimizeDeps: {
+    exclude: ['playground-typescript-worker.js']
   },
   integrations: [lit(), expressiveCode(), mdx(), starlight({title: 'Semantic UI'})]
 });

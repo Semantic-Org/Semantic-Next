@@ -1,0 +1,45 @@
+playground {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100% - var(--topbar-height));
+
+  codePanes {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+  }
+  codePanes codePane {
+    display: flex;
+    flex-direction: column;
+    border-top: var(--border);
+    flex: 1 1 auto;
+  }
+  codePanes codePane > playground-file-editor {
+    flex: 1 1 auto;
+    height: auto;
+  }
+  .CodeMirror {
+    background: transparent !important;
+  }
+  codePanes codePane:first-child {
+    border-top: none;
+  }
+  previewPane {
+    display: flex;
+    flex-direction: column;
+    border-left: var(--border);
+    flex: 1 0 auto;
+    display: block;
+    display: flex;
+    flex-direction: column;
+  }
+  previewPane > playground-preview {
+    background-color: transparent;
+    flex: 1 1 auto;
+  }
+}
+
+playground-ide {
+  height: 100%;
+}

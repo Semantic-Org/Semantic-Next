@@ -19,6 +19,11 @@ export const topbarMenu =  [
     name: 'Framework',
     url: '/components',
   },
+  {
+    _id: 'playground',
+    name: 'Playground',
+    url: '/playground',
+  },
 ];
 
 export const sidebarMenuUI = [

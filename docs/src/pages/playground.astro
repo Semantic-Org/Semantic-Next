@@ -1,0 +1,18 @@
+---
+import Playground from '@layouts/Playground.astro';
+import PlaygroundIDE from './playground-ide.html?raw';
+---
+<script>
+  if (!import.meta.env.SSR) {
+    const { PlaygroundProject } = await import('playground-elements/playground-project.js');
+    const { PlaygroundPreview } = await import('playground-elements/playground-preview.js');
+    const { PlaygroundFileEditor } = await import('playground-elements/playground-file-editor.js');
+    const project = new PlaygroundProject({
+      workerUrl: 'https://unpkg.com/playground-elements/playground-typescript-worker.js',
+    });
+    console.log(project);
+  }
+</script>
+<Playground>
+  <Fragment set:html={PlaygroundIDE} />
+</Playground>

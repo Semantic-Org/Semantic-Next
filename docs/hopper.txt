@@ -9,6 +9,10 @@ Docs Design
 - Further style tabs/code component
 - Add following header on long pages
 
+Templates
+- Add system for external events 'external scroll window'()
+- Add system for multiple event types for an event handler 'touchstart foo, click foo'() =>
+
 Button Component
 -- Add plural definition and start fixing plural issues
 -- Disabled button issue

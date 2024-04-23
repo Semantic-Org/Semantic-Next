@@ -252,7 +252,6 @@ export const Template = class Template {
 
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
-      console.log(this, eventName, selector);
       const template = this;
 
       // BUG: iOS Safari will not bubble the touchstart / touchend events

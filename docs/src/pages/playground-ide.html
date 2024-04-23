@@ -1,0 +1,30 @@
+<playground-project id="project1">
+  <script type="sample/js" filename="index.js">
+    window.addEventListener('DOMContentLoaded', () => {
+      const world = document.createTextNode(' World!');
+      document.body.appendChild(world);
+    });
+  </script>
+
+  <script type="sample/html" filename="index.html">
+    <!doctype html>
+    <head>
+      <script type="module" src="./index.js">&lt;/script>
+    </head>
+    <body>Hello</body>
+  </script>
+</playground-project>
+
+<playground>
+  <codePanes>
+    <codePane class="html">
+      <playground-file-editor project="project1" filename="index.js"> </playground-file-editor>
+    </codePane>
+    <codePane class="css">
+      <playground-file-editor project="project1" filename="index.html"> </playground-file-editor>
+    </codePane>
+  </codePanes>
+  <previewPane>
+    <playground-preview project="project1"> </playground-preview>
+  </previewPane>
+</playground>
