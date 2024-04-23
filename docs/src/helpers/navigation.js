@@ -1,23 +1,6 @@
 import { getCollection } from 'astro:content';
-import { firstMatch, isArray, each } from '@semantic-ui/utils';
+import { firstMatch, asyncEach, flatten, isArray, any } from '@semantic-ui/utils';
 
-export const getTopBarSection = (activeURL = '') => {
-  const topbarMenu = getTopBarMenu();
-  const isActive = (item) => {
-    if(item.baseURL) {
-      return isArray(item.baseURL)
-        ? any(item.baseURL, (baseURL) => activeURL.startsWith(baseURL))
-        : activeURL.startsWith(item.baseURL)
-      ;
-    }
-    if (item?.url === activeURL) {
-      return true;
-    }
-  };
-
-  const activeItem = firstMatch(topbarMenu, item => isActive(item));
-  return activeItem?._id;
-};
 
 export const getTopBarMenu = async () => {
   const menu = [
@@ -29,30 +12,61 @@ export const getTopBarMenu = async () => {
     {
       _id: 'framework',
       name: 'Framework',
+      url: '/components',
     },
     /*
-    { name: 'JS Docs', url: '/docs', activeURL: '/docs' },
     { name: 'Themes', url: '/themes', activeURL: '/themes' },
     { name: 'Tutorials', url: '/tutorials', activeURL: '/tutorials' },
     { name: 'Showcase', url: '/showcase', activeURL: '/showcase'},
     { name: 'For Designers', url: '/designers', activeURL: '/designers'},
     */
   ];
-/*
-  menuPromises = menu.map(topbarSection => getSidebarURLs(topbarSection._id));
-  await Promises.all(menuPromises);*/
 
+  await asyncEach(menu, async item => {
+    const flattenedMenu = await getFlattenedSidebarMenu(item._id);
+    const urls = flattenedMenu.map(page => page.url);
+    item.baseURLs = urls;
+  });
   return menu;
 };
 
-export const getSidebarURLs = async (topbarSection) => {
-  const menu = await getSidebarMenu({
-    topbarSection: topbarSection._id
-  });
-  return [];
+export const getActiveTopbarSection = async (activeURL = '') => {
+  const topbarMenu = await getTopBarMenu();
+  const isActive = (item) => {
+    if(isArray(item.baseURLs) && item.baseURLs.includes(activeURL)) {
+      return true;
+    }
+    if(item.baseURL && activeURL.startsWith(item.baseURL)) {
+      return true;
+    }
+    if (item?.url === activeURL) {
+      return true;
+    }
+    return false;
+  };
+  const activeItem = firstMatch(topbarMenu, isActive);
+  return activeItem?._id;
 };
 
-export const getSidebarMenu = async ({url, topbarSection = getTopBarSection(url)}) => {
+export const getFlattenedSidebarMenu = async (topbarSection) => {
+  const menu = await getSidebarMenu({ topbarSection: topbarSection });
+  const menuArrays = menu.map(section => {
+    const parentItem = { name: section.name, url: section.url };
+    return [
+      parentItem,
+      ...(section.pages || [])
+    ];
+  });
+  return flatten(menuArrays);
+};
+
+export const getSidebarMenu = async ({url, topbarSection}) => {
+
+  let menu = [];
+
+  if(url && !topbarSection) {
+    topbarSection = await getActiveTopbarSection(url);
+  }
 
   if(topbarSection == 'ui') {
     const components = await getCollection('components');
@@ -61,7 +75,7 @@ export const getSidebarMenu = async ({url, topbarSection = getTopBarSection(url)
       url: `/ui/${page.slug}`,
       matchSubPaths: true,
     }));
-    return [
+    menu = [
       {
         name: 'Getting Started',
         url: '/introduction',
@@ -108,7 +122,8 @@ export const getSidebarMenu = async ({url, topbarSection = getTopBarSection(url)
     ];
   }
   else if(topbarSection == 'framework') {
-    return [
+
+    menu = [
       {
         name: 'Components',
         url: '/components',
@@ -329,6 +344,7 @@ export const getSidebarMenu = async ({url, topbarSection = getTopBarSection(url)
         ]
       },
     ];
+
   }
-  return [];
+  return menu;
 };

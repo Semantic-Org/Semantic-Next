@@ -1,10 +1,9 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { any, isFunction, isArray } from '@semantic-ui/utils';
+import { any, isFunction, first, isArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './TopbarMenu.html?raw';
 import css from './TopbarMenu.css?raw';
-import { first } from '@semantic-ui/utils';
 
 const settings = {
   menu: [],
@@ -41,13 +40,19 @@ const createInstance = function ({ tpl, settings }) {
       return activeItem?._id;
     },
     isActiveItem(item) {
-      if (tpl.isCurrentItem(item)) {
+      let activeURL = tpl.url.get();
+      if(item.baseURLs && any(item.baseURLS, (baseURL) => activeURL.startsWith(baseURL))) {
         return true;
       }
-      if (isArray(item.pages)) {
-        return any(item.pages, tpl.isActiveItem);
+      if(item.baseURL && activeURL.startsWith(item.baseURL)) {
+        return true;
       }
+      if (item?.url === tpl.url.get()) {
+        return true;
+      }
+      return false;
     },
+    // the current url is the link from this topbar menu
     isCurrentItem(item) {
       const url = tpl.url.get();
       if(item.activeURL) {
