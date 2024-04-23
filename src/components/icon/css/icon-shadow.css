@@ -1,5 +1,5 @@
 /* src/components/icon/css/shadow/content/icon.css */
-@layer component.icon {
+@layer component.icon.singular {
   :host {
     display: inline-block;
     font-style: normal;

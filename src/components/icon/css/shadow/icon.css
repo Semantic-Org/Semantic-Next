@@ -1,5 +1,5 @@
 /* Content */
-@import url('./content/icon.css') layer(component.icon);
+@import url('./content/icon.css') layer(component.icon.singular);
 
 /* Group */
 @import url('./group/icons.css') layer(component.icon.plural);
