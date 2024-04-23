@@ -35,7 +35,6 @@ playground {
     flex-direction: column;
   }
   previewPane > playground-preview {
-    background-color: transparent;
     flex: 1 1 auto;
   }
 }
