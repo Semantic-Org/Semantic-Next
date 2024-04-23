@@ -1,0 +1,10 @@
+.hitbox {
+  padding: 20px;
+}
+.hitbox ui-icon {
+  transition: opacity var(--default-duration) var(--default-easing);
+  opacity: 0.6;
+}
+.hitbox:hover ui-icon {
+  opacity: 1;
+}

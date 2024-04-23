@@ -32,17 +32,19 @@
   topbar mobile-sidebar-toggle {
     display: none;
     margin: 0px;
-    padding: 20px;
   }
 
   topbar topbar-menu {
     margin-left: 1rem;
     vertical-align: 1px; /* Bottom border */
   }
+  topbar theme-switcher,
+  topbar mobile-sidebar-toggle {
+    font-size: 18px;
+  }
 
   topbar theme-switcher {
     float: right;
-    font-size: 18px;
   }
 
   body.dark topbar {
