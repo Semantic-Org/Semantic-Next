@@ -1,10 +1,21 @@
 @layer layout {
+
+  :root {
+    --sidebar-background-color: var(--panel-color);
+    --sidebar-box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
+    --sidebar-width: 250px;
+  }
+
+  body.dark {
+    --sidebar-background-color: #0C1114;
+  }
+
   sidebar {
     display: flex;
     flex-direction: column;
-    background-color: #1B1C1D;
+    background-color: var(--sidebar-background-color);
     color: #FFFFFF;
-    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
+    box-shadow: var(--sidebar-box-shadow);
   }
   sidebar navSearch.input {
     margin: 1rem 1rem;
@@ -37,12 +48,5 @@
 
   sidebar sidebar-menu {
     flex-grow: 1;
-  }
-
-
-  body.dark {
-    sidebar {
-      background-color: #0c1114;
-    }
   }
 }

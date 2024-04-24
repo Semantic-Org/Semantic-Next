@@ -1,6 +1,7 @@
 @layer layout {
 
   :root {
+    --topbar-logo-margin: 12px 0px 0px 20px;
     --topbar-logo-size: 35px;
     --topbar-logo-valign: -55%;
     --topbar-height: 60px;
@@ -24,7 +25,7 @@
   }
 
   topbar .logo {
-    margin: 12px 0px 0px 20px;
+    margin: var(--topbar-logo-margin);
     display: inline-block;
     text-decoration: none;
   }

@@ -7,7 +7,7 @@ body {
     --topbar-logo-size: 20px;
     --topbar-logo-valign: -5px;
     --topbar-height: 45px;
-    --topbar-site-name-font-size: 14px;
+    --topbar-site-name-font-size: 13px;
     --topbar-site-name-distance: 10px;
     --topbar-site-name-color: var(--white);
     --topbar-menu-distance: 10px;
@@ -58,6 +58,7 @@ playground {
   codePanes {
     background-color: var(--playground-code-background);
     display: flex;
+    width: 60%;
     flex: 1 0 auto;
     flex-direction: column;
   }
@@ -65,7 +66,7 @@ playground {
     padding: 1rem;
     display: flex;
     flex-direction: column;
-    border-top: var(--border);
+    border-top: 1px solid var(--white-10);
     flex: 1 1 auto;
   }
   codePanes codePane > playground-file-editor {
@@ -81,14 +82,27 @@ playground {
   previewPane {
     display: flex;
     flex-direction: column;
-    border-left: var(--border);
+    border-left: 1px solid var(--white-10);
     flex: 1 0 auto;
+    width: 40%;
     display: block;
     display: flex;
     flex-direction: column;
   }
   previewPane > playground-preview {
     flex: 1 1 auto;
+  }
+
+  playground-preview::part(preview-toolbar) {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+  playground-preview::part(preview-loading-indicator) {
+    --mdc-theme-primary: #49b1d2;
+    height: 3px;
+    overflow: hidden;
+    top: -3px;
   }
 }
 

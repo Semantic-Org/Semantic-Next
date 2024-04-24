@@ -1,5 +1,16 @@
 @layer global {
 
+  :root {
+    --page-background: #FEFEFF;
+    --primary-text-color: #73B9E1;
+    --panel-color: #1B1C1D;
+  }
+  body.dark {
+    --page-background: #000000;
+    --text-color: rgba(255, 255, 255, 0.83);
+    --panel-color: #0C1114;
+  }
+
   html, body {
     margin: 0px;
     padding: 0px;
@@ -19,10 +30,10 @@
     padding: 0px;
     overflow-x: hidden;
     min-width: 320px;
-    background: #FEFEFF;
-    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    line-height: 1.4285em;
-    color: rgba(0, 0, 0, 0.87);
+    background: var(--page-background);
+    font-family: var(--page-font);
+    line-height: var(--line-height);
+    color: var(--page-text-color);
   }
 
   body.padded {
@@ -130,8 +141,6 @@
   }
 
   body.dark {
-    background-color: #000000;
-    color: rgba(255, 255, 255, 0.83);
   }
   body.dark {
     h1,
