@@ -11,11 +11,11 @@
 }`;
   const jsContent = `document.body.appendChild(document.createTextNode("World!"))`;
   console.log(import.meta);
-  const baseURL = import.meta.env.BASE_URL;
+  const baseURL = `https://semantic-next.vercel.app`;
   const projectConfig = {
     importMap: {
       imports: {
-        '@semantic-ui/core': `${baseURL}playground/packages/@semantic-ui/core/src/semantic-ui.js`,
+        '@semantic-ui/core': `${baseURL}/playground/packages/@semantic-ui/core/src/semantic-ui.js`,
       }
     },
     files: {
