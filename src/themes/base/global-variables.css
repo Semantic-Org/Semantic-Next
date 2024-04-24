@@ -13,8 +13,14 @@
   --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
   --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
 
+  --header-color: var(--standard-90);
+  --text-color: var(--standard-80);
+  --line-height: var(--20px);
+
   --bold: bold;
   --normal: normal;
+
+  --box-sizing: border-box;
 
   /* -------------------
         Global Size
@@ -155,18 +161,12 @@
   --inverted-90: rgb(var(--inverted-color) / 90%);
   --inverted-100: rgb(var(--inverted-color) / 100%);
 
-  --text-color: var(--standard-90);
-
-
   /* -------------------
           Page
   -------------------- */
 
   --page-background: #FFFFFF;
   --page-overflow-x: hidden;
-
-  --line-height: 1.4285714em;
-
 
   /* -------------------
         Paragraph
@@ -776,13 +776,19 @@
 body.dark {
 
   --dark-mode: true;
+  --page-background: #000000;
+
+  --standard-color: 255 255 255;
+  --inverted-color: 0 0 0;
+
+  --text-color: var(--standard-90);
+  --header-color: var(--standard-100);
 
   --link-color: #64B2FF;
   --link-hover-color: #2492FF;
 
   --border-color: rgba(234, 236, 238, 0.15);
   --border: 1px solid var(--border-color);
-
 
   --subtle-transparent-black: rgb(var(--standard-color) / 5%);
   --transparent-black: rgb(var(--standard-color) / 10%);
@@ -795,9 +801,6 @@ body.dark {
   --very-strong-transparent-white: rgb(var(--inverted-color) / 20%);
 
   --subtle-inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
-
-  --standard-color: 255 255 255;
-  --inverted-color: 0 0 0;
 
   --primary-text-color: var(--primary-light-text-color);
 

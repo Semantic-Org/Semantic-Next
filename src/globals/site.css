@@ -2,10 +2,18 @@
 html,
 body {
   height: 100%;
+  margin: 0px;
+  padding: 0px;
 }
 
 html {
   font-size: var(--font-size);
+  box-sizing: var(--box-sizing);
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
 }
 
 body {
@@ -19,15 +27,15 @@ body {
   color: var(--text-color);
 }
 
-/* Border-Box */
-html {
-  box-sizing: border-box;
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--header-font);
+  color: var(--header-color);
 }
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
+
 
 /* iPad Input Shadows */
 input[type="text"], input[type="email"], input[type="search"], input[type="password"] {
