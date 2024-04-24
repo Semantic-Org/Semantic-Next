@@ -1,4 +1,11 @@
 <playground-project id="project1">
+  <script type="sample/importmap">
+    {
+      "imports": {
+        "@semantic-ui/core": "https://cdn.skypack.dev/lit@^2.0.2",
+      }
+    }
+  </script>
   <script type="sample/js" filename="index.js">
     window.addEventListener('DOMContentLoaded', () => {
       const world = document.createTextNode(' World!');
