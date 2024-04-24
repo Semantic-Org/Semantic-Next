@@ -14,7 +14,5 @@ export const cssBefore = `/* playground-hide */ body { padding 1rem; font-family
 
 
 export const jsBefore = `/* playground-hide */
-  import '@semantic-ui/core';
-  import { $ } from '@semantic-ui/query';
 /* playground-hide-end */`;
 
