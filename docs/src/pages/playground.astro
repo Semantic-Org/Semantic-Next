@@ -3,6 +3,20 @@
 
   import coreURL from '@semantic-ui/core?url';
 
+  const htmlStart = `<!-- playground-hide -->
+<html>
+<head>
+<link href="./index.css" rel="stylesheet">
+<script src="./index.js" type="module"></script>
+</head>
+<body>
+    <!-- playground-hide-end -->`;
+
+  const htmlEnd = `<!-- playground-hide --></body></html><!-- playground-hide-end -->`;
+
+  const exampleHTML = `<ui-button primary>Button</ui-button>`;
+
+
   const projectConfig = {
     importMap: {
       imports: {
@@ -10,13 +24,15 @@
       }
     },
     files: {
-      'index.html': {
-        contentType: 'text/html',
-        content: `<ui-button primary>Button</ui-button>`
-      },
       'index.js': {
         contentType: 'text/javascript',
         content: `document.body.appendChild(document.createTextNode("World!"))`
+      },
+      'index.html': {
+        contentType: 'text/html',
+        content: `${htmlStart}
+${exampleHTML}
+${htmlEnd}`
       },
       'index.css': {
         contentType: 'text/css',
