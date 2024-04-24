@@ -70,7 +70,7 @@ playground {
     flex-direction: column;
   }
   panes pane {
-    padding: 1rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     border-top: 1px solid var(--white-10);
@@ -92,7 +92,7 @@ playground {
 
   /* Reskin */
   playground-preview {
-    margin: -1rem;
+    margin: -0.5rem;
     flex: 1 1 0;
     max-height: calc(100vh - var(--topbar-height));
   }

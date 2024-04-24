@@ -6,28 +6,23 @@
   const projectConfig = {
     importMap: {
       imports: {
-        '@semantic-ui/core': coreURL
+        //'@semantic-ui/core': coreURL
       }
     },
     files: {
       'index.html': {
         contentType: 'text/html',
-        content: `
-          <ui-button primary>Button</ui-button>
-        `
+        content: `<ui-button primary>Button</ui-button>`
       },
       'index.js': {
         contentType: 'text/javascript',
-        content: `
-          import * as UI from '@semantic-ui/core';
-          console.log('hello')
-        `
+        content: `document.body.appendChild(document.createTextNode("World!"))`
       },
       'index.css': {
         contentType: 'text/css',
         content: `ui-button {
-          font-size: 18px;
-        }`
+  font-size: 18px;
+}`
       }
     }
   };
