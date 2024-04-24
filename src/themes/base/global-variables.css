@@ -125,7 +125,6 @@
   /* Used on dropdowns, other larger blocks */
   --focused-form-muted-border-color: #96C8DA;
 
-
   /* -------------------
         Dark Mode
   -------------------- */
@@ -297,6 +296,28 @@
   --dark-white: #F3F4F5;
   --mid-white: #DCDDDE;
   --white: #FFFFFF;
+
+  --white-10: rgb(255 255 255 / 10%);
+  --white-20: rgb(255 255 255 / 20%);
+  --white-30: rgb(255 255 255 / 30%);
+  --white-40: rgb(255 255 255 / 40%);
+  --white-50: rgb(255 255 255 / 50%);
+  --white-60: rgb(255 255 255 / 60%);
+  --white-70: rgb(255 255 255 / 70%);
+  --white-80: rgb(255 255 255 / 80%);
+  --white-90: rgb(255 255 255 / 90%);
+  --white-100: rgb(255 255 255 / 100%);
+
+  --black-10: rgb(0 0 0 / 10%);
+  --black-20: rgb(0 0 0 / 20%);
+  --black-30: rgb(0 0 0 / 30%);
+  --black-40: rgb(0 0 0 / 40%);
+  --black-50: rgb(0 0 0 / 50%);
+  --black-60: rgb(0 0 0 / 60%);
+  --black-70: rgb(0 0 0 / 70%);
+  --black-80: rgb(0 0 0 / 80%);
+  --black-90: rgb(0 0 0 / 90%);
+  --black-100: rgb(0 0 0 / 100%);
 
   /* --- Colored Backgs --- */
   --red-background: #FFE8E6;

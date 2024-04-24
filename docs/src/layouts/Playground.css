@@ -1,15 +1,68 @@
+
+body {
+  display: flex;
+  flex-direction: column;
+
+  topbar {
+    --topbar-logo-size: 20px;
+    --topbar-logo-valign: -5px;
+    --topbar-height: 45px;
+    --topbar-site-name-font-size: 14px;
+    --topbar-site-name-distance: 10px;
+    --topbar-site-name-color: var(--white);
+    --topbar-menu-distance: 10px;
+    --topbar-icon-size: 13px;
+  }
+  topbar topbar-menu {
+    --topbar-menu-item-spacing: 3px;
+    --topbar-menu-item-padding: 2px 2px;
+    --topbar-menu-item-font-size: var(--12px);
+    --topbar-menu-item-font-weight: normal;
+    --topbar-menu-item-active-font-weight: bold;
+  }
+
+  --playground-code-font-size: 14px;
+  --playground-code-background: #0d1117;
+  --playground-code-default-color: #c9d1d9;
+  --playground-code-keyword-color: #ff7b72;
+  --playground-code-atom-color: #c9d1d9;
+  --playground-code-number-color: #58a6ff;
+  --playground-code-def-color: #ffa657;
+  --playground-code-variable-color: #c9d1d9;
+  --playground-code-property-color: #d2a8ff;
+  --playground-code-operator-color: #79c0ff;
+  --playground-code-variable-2-color: #79c0ff;
+  --playground-code-variable-3-color: #c9d1d9;
+  --playground-code-type-color: #c9d1d9;
+  --playground-code-comment-color: #c9d1d9;
+  --playground-code-string-color: #a5d6ff;
+  --playground-code-string-2-color: #c9d1d9;
+  --playground-code-meta-color: #c9d1d9;
+  --playground-code-qualifier-color: #c9d1d9;
+  --playground-code-builtin-color: #c9d1d9;
+  --playground-code-tag-color: #c9d1d9;
+  --playground-code-attribute-color: #c9d1d9;
+  --playground-code-callee-color: #d2a8ff;
+  --playground-tab-bar-background: #ffffff;
+  --playground-bar-height: 39px;
+  --playground-preview-width: 42%;
+}
+
 playground {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: row;
   width: 100%;
   height: calc(100% - var(--topbar-height));
 
   codePanes {
+    background-color: var(--playground-code-background);
     display: flex;
     flex: 1 0 auto;
     flex-direction: column;
   }
   codePanes codePane {
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     border-top: var(--border);

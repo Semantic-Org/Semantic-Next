@@ -1,14 +1,26 @@
 @layer layout {
 
   :root {
+    --topbar-logo-size: 35px;
+    --topbar-logo-valign: -55%;
     --topbar-height: 60px;
-  }
+    --topbar-site-name-font-size: 16px;
+    --topbar-site-name-distance: 10px;
+    --topbar-site-name-color: var(--white);
+    --topbar-menu-distance: 1rem;
+    --topbar-icon-size: 18px;
 
+    --topbar-background-color: #1A1D1E;
+    --topbar-text-color: var(--white);
+  }
+  body.dark {
+    --topbar-background-color: #151a1e;
+  }
   topbar {
-    background-color: #1A1D1E;
     display: block;
+    background-color: var(--topbar-background-color);
     height: var(--topbar-height);
-    color: #FFFFFF;
+    color: var(--topbar-text-color);
   }
 
   topbar .logo {
@@ -18,14 +30,15 @@
   }
   topbar .logo img {
     display: inline-block;
-    height: 35px;
-    vertical-align: -12px;
+    height: var(--topbar-logo-size);
+    width: var(--topbar-logo-size);
+    vertical-align: var(--topbar-logo-valign);
   }
   topbar .logo .name {
-    font-size: 16px;
+    font-size: var(--topbar-site-name-font-size);
+    margin-left: var(--topbar-site-name-distance);
     font-weight: bold;
-    margin-left: 10px;
-    color: #FFF;
+    color: var(--topbar-site-name-color);
     outline: none;
   }
 
@@ -35,20 +48,16 @@
   }
 
   topbar topbar-menu {
-    margin-left: 1rem;
+    margin-left: var(--topbar-menu-distance);
     vertical-align: 1px; /* Bottom border */
   }
   topbar theme-switcher,
   topbar mobile-sidebar-toggle {
-    font-size: 18px;
+    font-size: var(--topbar-icon-size);
   }
 
   topbar theme-switcher {
     float: right;
-  }
-
-  body.dark topbar {
-    background-color: #151a1e;
   }
 
 }

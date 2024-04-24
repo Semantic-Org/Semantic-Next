@@ -1,13 +1,24 @@
-.hitbox {
-  display: inline-block;
-  cursor: pointer;
-  padding: 19px;
-  margin: 0px;
-}
-.hitbox ui-icon {
-  transition: opacity var(--default-duration) var(--default-easing);
-  opacity: 0.6;
-}
-.hitbox:hover ui-icon {
-  opacity: 1;
+@layer themeSwitcher.shadow {
+
+  :host {
+    --theme-switcher-hitbox-padding: var(--relative-15px) var(--relative-18px) ;
+    --theme-switcher-icon-opacity: 0.6;
+    --theme-switcher-icon-opacity-active: 1;
+    --theme-switcher-transition: opacity var(--default-duration) var(--default-easing);
+  }
+
+  .hitbox {
+    display: inline-block;
+    cursor: pointer;
+    padding: var(--theme-switcher-hitbox-padding);
+    margin: 0px;
+  }
+  .hitbox ui-icon {
+    margin: 0px;
+    transition: var(--theme-switcher-transition);
+    opacity: var(--theme-switcher-icon-opacity);
+  }
+  .hitbox:hover ui-icon {
+    opacity: var(--theme-switcher-icon-opacity-active);
+  }
 }
