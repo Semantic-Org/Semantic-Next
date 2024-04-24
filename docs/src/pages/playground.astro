@@ -1,37 +1,21 @@
 ---
   import Playground from '@layouts/Playground.astro';
-
-  import coreURL from '@semantic-ui/core?url';
-
-  import { htmlBefore, htmlAfter, cssBefore, jsBefore } from '@helpers/playground.js';
+  import {
+    htmlBefore,
+    htmlAfter,
+    cssBefore,
+    jsBefore,
+    importMap
+  } from '@helpers/playground.js';
 
   const htmlContent = `<ui-button primary>Button</ui-button>`;
   const cssContent = `ui-button {
   font-size: 18px;
 }`;
   const jsContent = `document.body.appendChild(document.createTextNode("World!"))`;
-  console.log(import.meta);
-  const baseURL = `https://semantic-next.vercel.app`;
-  const packageBase = `${baseURL}/playground/packages/@semantic-ui`;
+
   const projectConfig = {
-    importMap: {
-      imports: {
-        '@semantic-ui/component': `${packageBase}/component/src/index.js`,
-        '@semantic-ui/component/': `${packageBase}/component/src/`,
-        '@semantic-ui/core': `${packageBase}/core/src/semantic-ui.js`,
-        '@semantic-ui/core/': `${packageBase}/core/src/`,
-        '@semantic-ui/query': `${packageBase}/query/src/index.js`,
-        '@semantic-ui/query/': `${packageBase}/query/src/`,
-        '@semantic-ui/reactivity': `${packageBase}/reactivity/src/index.js`,
-        '@semantic-ui/reactivity/': `${packageBase}/reactivity/src/`,
-        '@semantic-ui/specs': `${packageBase}/specs/src/index.js`,
-        '@semantic-ui/specs/': `${packageBase}/specs/src/`,
-        '@semantic-ui/templating': `${packageBase}/templating/src/index.js`,
-        '@semantic-ui/templating/': `${packageBase}/templating/src/`,
-        '@semantic-ui/utils': `${packageBase}/utils/src/utils.js`,
-        '@semantic-ui/utils/': `${packageBase}/utils/src/`,
-      }
-    },
+    importMap: importMap,
     files: {
       'index.js': {
         contentType: 'text/javascript',
