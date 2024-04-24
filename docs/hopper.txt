@@ -1,13 +1,16 @@
-Docs
--- Write lots of docs at your discretion
--- Port readmes to start
--- Hook up search
+Code Playground
+- Import resolution
 
 Docs Design
 - Add rehype external links plugin
 - Add overview page card design
 - Further style tabs/code component
 - Add following header on long pages
+
+Docs
+-- Write lots of docs at your discretion
+-- Port readmes to start
+-- Hook up search
 
 Templates
 - Add system for external events 'external scroll window'()

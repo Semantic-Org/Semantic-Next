@@ -12,11 +12,16 @@ body {
     --topbar-site-name-color: var(--white);
     --topbar-menu-distance: 10px;
     --topbar-icon-size: 13px;
+    --topbar-background-color: var(--playground-code-background);
+    border-bottom: 1px solid var(--white-10);
   }
   topbar topbar-menu {
     --topbar-menu-item-spacing: 3px;
     --topbar-menu-item-padding: 2px 2px;
     --topbar-menu-item-font-size: var(--12px);
+    --topbar-menu-item-color: var(--white-20);
+    --topbar-menu-item-hover-color: var(--white-60);
+    --topbar-menu-item-active-color: var(--white-100);
     --topbar-menu-item-font-weight: normal;
     --topbar-menu-item-active-font-weight: bold;
   }
@@ -58,50 +63,39 @@ playground {
   width: 100%;
   height: calc(100% - var(--topbar-height));
 
-  codePanes {
+  panes {
     background-color: var(--playground-code-background);
     display: flex;
-    width: 60%;
-    flex: 1 0 auto;
+    flex: 1 0 0;
     flex-direction: column;
   }
-  codePanes codePane {
+  panes pane {
     padding: 1rem;
     display: flex;
     flex-direction: column;
     border-top: 1px solid var(--white-10);
     box-shadow: 0px 1px 0px 0px var(--black-60) inset;
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    box-sizing: border-box;
   }
-  codePanes codePane > playground-file-editor {
-    flex: 1 1 auto;
+  panes pane > playground-file-editor {
+    flex: 1 1 0;
     height: auto;
   }
-  .CodeMirror {
-    background: transparent !important;
-  }
-  codePanes codePane:first-child {
+  panes pane:first-child {
     border-top: none;
     box-shadow: none;
   }
-  previewPane {
-    display: flex;
-    flex-direction: column;
+  panes + panes {
     border-left: 1px solid var(--white-10);
-    flex: 1 0 auto;
-    width: 40%;
-    display: block;
-    display: flex;
-    flex-direction: column;
-  }
-  previewPane > playground-preview {
-    flex: 1 1 auto;
   }
 
+  /* Reskin */
   playground-preview {
+    margin: -1rem;
+    flex: 1 1 0;
     max-height: calc(100vh - var(--topbar-height));
   }
-
   playground-preview::part(preview-toolbar) {
     font-size: 11px;
     text-transform: uppercase;
@@ -111,13 +105,6 @@ playground {
   }
   playground-preview::part(preview-loading-indicator) {
     --mdc-theme-primary: #49b1d2;
-
-    /* wide
-    height: 3px;
-    overflow: hidden;
-    top: -3px;
-    */
-
     height: 4px;
     overflow: hidden;
     top: -26px;

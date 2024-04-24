@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, isObject } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -494,9 +494,14 @@ export class Query {
 
   settings(settings) {
     this.each((el) => {
-      Object.entries(settings).forEach(([prop, val]) => {
-        el[prop] = val;
+      each(settings, (value, setting) => {
+        el[setting] = val;
       });
+    });
+  }
+  setting(setting, value) {
+    this.each((el) => {
+      el[setting] = value;
     });
   }
 

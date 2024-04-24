@@ -9,8 +9,12 @@
     --topbar-menu-item-padding: 4px 3px;
     --topbar-menu-item-font-size: var(--14px);
     --topbar-menu-item-font-weight: var(--bold);
+    --topbar-menu-item-color: var(--white-30);
 
     --topbar-menu-icon-color: var(--white);
+
+    --topbar-menu-item-hover-color: var(--white-90);
+
     --topbar-menu-item-active-color: var(--white);
     --topbar-menu-item-active-font-weight: var(--bold);
 
@@ -29,7 +33,7 @@
       flex: 0 1 auto;
       margin: 0px var(--topbar-menu-item-spacing) 0px;
       padding: var(--topbar-menu-item-padding);
-      color: var(--white-30);
+      color: var(--topbar-menu-item-color);
       font-size: var(--topbar-menu-item-font-size);
       font-weight: var(--topbar-menu-item-font-weight);
       text-decoration: none;
@@ -40,8 +44,8 @@
     a.item[href] {
       cursor: pointer;
     }
-    a.item:hover {
-      color: var(--white-90);
+    a.item:hover:not(.active) {
+      color: var(--topbar-menu-item-hover-color);
     }
 
     .item:before,

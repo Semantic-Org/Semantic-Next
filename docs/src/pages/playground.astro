@@ -1,6 +1,28 @@
 ---
-import Playground from '@layouts/Playground.astro';
-import PlaygroundIDE from './playground-ide.html?raw';
+  import Playground from '@layouts/Playground.astro';
+  import coreURL from '@semantic-ui/core?url';
+  console.log(coreURL);
+  const files = {
+    'index.html': {
+      contentType: 'text/html',
+      content: `
+        <ui-button primary>Button</ui-button>
+      `
+    },
+    'index.js': {
+      contentType: 'text/javascript',
+      content: `
+        import * as UI from '@semantic-ui/core';
+        console.log('hello')
+      `
+    },
+    'index.css': {
+      contentType: 'text/css',
+      content: `ui-button {
+  font-size: 18px;
+}`
+    },
+  }
 ---
 <script>
   import 'playground-elements/playground-project.js';
@@ -8,5 +30,32 @@ import PlaygroundIDE from './playground-ide.html?raw';
   import 'playground-elements/playground-preview.js';
 </script>
 <Playground>
-  <Fragment set:html={PlaygroundIDE} />
+  <playground-project id="source"></playground-project>
+  <script define:vars={{ files }} type="module">
+    document.querySelector('playground-project').config = {
+      files
+    };
+  </script>
+  <playground>
+    <panes>
+      <pane>
+        <playground-tab-bar editor="editor1" editable-file-system></playground-tab-bar>
+        <playground-file-editor line-numbers id="editor1" project="source" filename="index.js"> </playground-file-editor>
+      </pane>
+      <pane>
+        <playground-file-editor line-numbers project="source" filename="index.html"> </playground-file-editor>
+      </pane>
+    </panes>
+    <panes>
+      <pane>
+        <playground-file-editor line-numbers project="source" filename="index.css"> </playground-file-editor>
+      </pane>
+      <pane class="preview">
+        <playground-preview project="source"> </playground-preview>
+      </pane>
+    </panes>
+  </playground>
+  <script>
+    const editor = document.querySelectorAll('playground-file-editor');
+  </script>
 </Playground>
