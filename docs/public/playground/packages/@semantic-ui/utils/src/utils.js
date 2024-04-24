@@ -869,5 +869,5 @@ export const isClient = (() => {
 })();
 
 
-import * as _ from './utils';
+import * as _ from './utils.js';
 export default _;
