@@ -395,9 +395,17 @@
   --subtle-shadow:
     0px 1px 2px 0 var(--strong-transparent-black)
   ;
+
+  /* Pressed or inset */
   --subtle-inset-shadow:
     0px 2px 3px 0 var(--strong-transparent-black) inset
   ;
+
+  /* Bottom Lip Shadow */
+  --subtle-bottom-lip-shadow:
+    0px -2px 10px -6px var(--strong-transparent-black) inset
+  ;
+
   --floating-shadow:
     0px 2px 4px 0px rgb(34 36 38 12%),
     0px 2px 10px 0px rgb(34 36 38 15%)
