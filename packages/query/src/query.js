@@ -495,7 +495,7 @@ export class Query {
   settings(settings) {
     this.each((el) => {
       each(settings, (value, setting) => {
-        el[setting] = val;
+        el[setting] = value;
       });
     });
   }
