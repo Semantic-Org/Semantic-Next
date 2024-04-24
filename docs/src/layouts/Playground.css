@@ -98,6 +98,10 @@ playground {
     flex: 1 1 auto;
   }
 
+  playground-preview {
+    max-height: calc(100vh - var(--topbar-height);
+  }
+
   playground-preview::part(preview-toolbar) {
     font-size: 11px;
     text-transform: uppercase;
