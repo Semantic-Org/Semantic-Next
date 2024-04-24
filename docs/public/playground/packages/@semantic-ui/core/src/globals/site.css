@@ -1,0 +1,91 @@
+
+html,
+body {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+html {
+  font-size: var(--font-size);
+  box-sizing: var(--box-sizing);
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0px;
+  padding: 0px;
+  overflow-x: var(--page-overflow-x);
+  min-width: var(--page-min-width);
+  background: var(--page-background);
+  font-family: var(--page-font);
+  line-height: var(--line-height);
+  color: var(--text-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--header-font);
+  color: var(--header-color);
+}
+
+
+/* iPad Input Shadows */
+input[type="text"], input[type="email"], input[type="search"], input[type="password"] {
+  -webkit-appearance: none;
+  -moz-appearance: none; /* mobile firefox too! */
+}
+
+
+body ::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: var(--custom-scrollbar-width);
+  height: var(--custom-scrollbar-height);
+}
+
+/* Scrollbars */
+body ::-webkit-scrollbar-track {
+  background: var(--track-background);
+  border-radius: var(--track-border-radius);
+}
+body ::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: var(--thumb-border-radius);
+  background: var(--thumb-background);
+  transition: var(--thumb-transition);
+}
+body ::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inactive-background);
+}
+body ::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hover-background);
+}
+
+body.dark ::-webkit-scrollbar-track {
+  background: var(--track-inverted-background);
+}
+body.dark ::-webkit-scrollbar-thumb {
+  background: var(--thumb-inverted-background);
+}
+body.dark ::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inverted-inactive-background);
+}
+body.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-inverted-hover-background);
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: var(--link-text-decoration);
+}
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: var(--link-hover-text-decoration);
+}

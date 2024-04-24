@@ -1,0 +1,508 @@
+import { isPlainObject, isString, isArray, isDOM, isFunction, isObject, each } from '@semantic-ui/utils';
+
+/*
+A minimal toolkit for querying and performing modifications
+across DOM nodes based off a selector
+*/
+
+export class Query {
+  static eventHandlers = [];
+
+  constructor(selector, root = document) {
+    let elements = [];
+
+    if (!root) {
+      return;
+    }
+    // window is outside of document root
+    if(selector == 'window') {
+      elements = [globalThis];
+    }
+    else if (isArray(selector)) {
+      // Directly passed an array of elements
+      elements = selector;
+    }
+    else if (isString(selector)) {
+      // String selector provided, find elements using querySelectorAll
+      elements = root.querySelectorAll(selector);
+    }
+    else if (isDOM(selector)) {
+      // A single Element, Document, or DocumentFragment is provided
+      elements = [selector];
+    }
+    else if (selector instanceof NodeList) {
+      // A NodeList is provided
+      elements = selector;
+    }
+    this.selector = selector;
+    this.length = elements.length;
+    Object.assign(this, elements);
+  }
+
+  each(callback) {
+    Array.from(this).forEach((el, index) => {
+      const $el = new Query(el);
+      callback.call($el, el, index);
+    });
+    return this;
+  }
+
+  removeAllEvents() {
+    Query._eventHandlers = [];
+  }
+
+  find(selector) {
+    const elements = Array.from(this).flatMap((el) =>
+      Array.from(el.querySelectorAll(selector))
+    );
+    return new Query(elements); // Directly pass the array of elements
+  }
+
+  parent(selector) {
+    const parents = Array.from(this)
+      .map((el) => el.parentElement)
+      .filter(Boolean);
+    return selector ? new Query(parents).filter(selector) : new Query(parents);
+  }
+
+  children(selector) {
+    // Get all children of each element in the Query object
+    const allChildren = Array.from(this).flatMap((el) =>
+      Array.from(el.children)
+    );
+
+    // If a selector is provided, filter the children
+    const filteredChildren = selector
+      ? allChildren.filter((child) => child.matches(selector))
+      : allChildren;
+
+    return new Query(filteredChildren);
+  }
+
+  filter(selectorOrFunction) {
+    let filteredElements = [];
+    if (isString(selectorOrFunction)) {
+      // If a CSS selector is provided, use it with the matches method
+      filteredElements = Array.from(this).filter((el) =>
+        el.matches && el.matches(selectorOrFunction)
+      );
+    }
+    else if (isFunction(selectorOrFunction)) {
+      // If a function is provided, use it directly to filter elements
+      filteredElements = Array.from(this).filter(selectorOrFunction);
+    }
+    return new Query(filteredElements);
+  }
+
+  // Returns true if every element matches
+  is(selector) {
+    const filteredElements = Array.from(this).filter(
+      (el) => (el.matches && el.matches(selector))
+    );
+    return filteredElements.length > 0;
+  }
+
+  not(selector) {
+    // Filter out elements that match the provided selector
+    const filteredElements = Array.from(this).filter(
+      (el) => !el.matches || (el.matches && !el.matches(selector))
+    );
+    return new Query(filteredElements);
+  }
+
+  closest(selector) {
+    const closest = Array.from(this)
+      .map((el) => el.closest(selector))
+      .filter(Boolean);
+    return new Query(closest);
+  }
+
+  on(event, targetSelectorOrHandler, handlerOrOptions, options) {
+    const eventHandlers = [];
+
+    let handler;
+    let targetSelector;
+    if (isObject(handlerOrOptions)) {
+      options = handlerOrOptions;
+      handler = targetSelectorOrHandler;
+    } else if (isString(targetSelectorOrHandler)) {
+      targetSelector = targetSelectorOrHandler;
+      handler = handlerOrOptions;
+    } else if (isFunction(targetSelectorOrHandler)) {
+      handler = targetSelectorOrHandler;
+    }
+
+    const abortController = options?.abortController || new AbortController();
+    const eventSettings = options?.eventSettings || {};
+    const signal = abortController.signal;
+
+    this.each((el) => {
+      let delegateHandler;
+      if (targetSelector) {
+        delegateHandler = (e) => {
+          const target = e.target.closest(targetSelector);
+          if (target && el.contains(target)) {
+            handler.call(target, e);
+          }
+        };
+      }
+      const eventListener = delegateHandler || handler;
+      if (el.addEventListener) {
+        el.addEventListener(event, eventListener, { signal, ...eventSettings });
+      }
+
+      const eventHandler = {
+        el,
+        event,
+        eventListener,
+        abortController,
+        delegated: targetSelector !== undefined,
+        handler,
+        abort: () => abortController.abort(),
+      };
+      eventHandlers.push(eventHandler);
+    });
+
+    if (!Query._eventHandlers) {
+      Query._eventHandlers = [];
+    }
+    Query._eventHandlers.push(...eventHandlers);
+
+    return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
+  }
+
+  one(event, targetSelectorOrHandler, handlerOrOptions, options) {
+    let handler;
+    let targetSelector;
+    if (isObject(handlerOrOptions)) {
+      options = handlerOrOptions;
+      handler = targetSelectorOrHandler;
+    } else if (isString(targetSelectorOrHandler)) {
+      targetSelector = targetSelectorOrHandler;
+      handler = handlerOrOptions;
+    } else if (isFunction(targetSelectorOrHandler)) {
+      handler = targetSelectorOrHandler;
+    }
+    const wrappedHandler = (...args) => {
+      handler.apply(this, args);
+      // Unbind the event handler after it has been invoked once
+      this.off(event, wrappedHandler);
+    };
+    return (targetSelector)
+      ? this.on(event, targetSelector, wrappedHandler, options)
+      : this.on(event, wrappedHandler, options)
+    ;
+  }
+
+  off(event, handler) {
+    Query._eventHandlers = Query._eventHandlers.filter((eventHandler) => {
+      if (
+        eventHandler.event === event &&
+        (!handler ||
+          handler?.eventListener == eventHandler.eventListener ||
+          eventHandler.eventListener === handler ||
+          eventHandler.handler === handler)
+      ) {
+        eventHandler.el.removeEventListener(event, eventHandler.eventListener);
+        return false;
+      }
+      return true;
+    });
+    return this;
+  }
+
+  dispatchEvent(eventName, data = {}, eventSettings = {}) {
+    const eventOptions = {
+      bubbles: true,
+      cancelable: true,
+      detail: data,
+      ...eventSettings
+    };
+    this.each(el => {
+      const event = new CustomEvent(eventName, eventOptions);
+      el.dispatchEvent(event);
+    });
+    return this;
+  }
+
+  remove() {
+    return this.each((el) => el.remove());
+  }
+
+  addClass(classNames) {
+    const classesToAdd = classNames.split(' ');
+    return this.each((el) => el.classList.add(...classesToAdd));
+  }
+
+  hasClass(className) {
+    return Array.from(this).some((el) => el.classList.contains(className));
+  }
+
+  removeClass(classNames) {
+    const classesToRemove = classNames.split(' ');
+    return this.each((el) => el.classList.remove(...classesToRemove));
+  }
+
+  toggleClass(classNames) {
+    const classesToToggle = classNames.split(' ');
+    return this.each((el) => el.classList.toggle(...classesToToggle));
+  }
+
+  html(newHTML) {
+    if (newHTML !== undefined) {
+      return this.each((el) => (el.innerHTML = newHTML));
+    }
+    else if (this.length) {
+      return this.map(el => el.innerHTML || el.nodeValue).join('');;
+    }
+    return this;
+  }
+
+  outerHTML(newHTML) {
+    if (newHTML !== undefined) {
+      return this.each((el) => (el.outerHTML = newHTML));
+    }
+    else if (this.length) {
+      return this.map(el => el.outerHTML).join('');
+    }
+  }
+
+  text(newText) {
+    if (newText !== undefined) {
+      return this.each((el) => (el.textContent = newText));
+    }
+    else {
+      const childNodes = (el) => {
+        return el.nodeName === 'SLOT'
+          ? el.assignedNodes({ flatten: true })
+          : el.childNodes;
+      };
+      const values = this.map((el) =>
+        this.getTextContentRecursive(childNodes(el))
+      );
+      return values.length > 1 ? values : values[0];
+    }
+  }
+
+  // Helper function to recursively get text content
+  getTextContentRecursive(nodes) {
+    return Array.from(nodes)
+      .map((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return node.nodeValue;
+        }
+        else if (node.nodeName === 'SLOT') {
+          // If the node is a slot, retrieve its assigned nodes
+          const slotNodes = node.assignedNodes({ flatten: true });
+          return this.getTextContentRecursive(slotNodes);
+        }
+        else {
+          return this.getTextContentRecursive(node.childNodes);
+        }
+      })
+      .join('')
+      .trim();
+  }
+
+  // non jquery variant to return only immediate text node
+  textNode() {
+    return Array.from(this)
+      .map((el) => {
+        return Array.from(el.childNodes)
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.nodeValue)
+          .join('');
+      })
+      .join('');
+  }
+
+  map(...args) {
+    return Array.from(this).map(...args);
+  }
+
+  value(newValue) {
+    if (newValue !== undefined) {
+      // Set the value for each element
+      return this.each((el) => {
+        if (
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLSelectElement ||
+          el instanceof HTMLTextAreaElement
+        ) {
+          el.value = newValue;
+        }
+      });
+    }
+    else {
+      // Get the value of each element
+      const values = this.map((el) => {
+        if (
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLSelectElement ||
+          el instanceof HTMLTextAreaElement
+        ) {
+          return el.value;
+        }
+        return undefined;
+      });
+      return values.length > 1 ? values : values[0];
+    }
+  }
+  // alias
+  val(...args) {
+    return this.value(...args);
+  }
+
+  focus() {
+    return this[0].focus();
+  }
+  blur() {
+    return this[0].blur();
+  }
+
+  css(property, value, settings = { includeComputed: false }) {
+    const elements = Array.from(this);
+    // Setting a value or multiple values
+    if (isPlainObject(property) || isString(value)) {
+      if (isPlainObject(property)) {
+        Object.entries(property).forEach(([prop, val]) => {
+          elements.forEach((el) => (el.style[prop] = val));
+        });
+      }
+      else {
+        elements.forEach((el) => (el.style[property] = value));
+      }
+      return this; // Return the Query instance for chaining
+    }
+    else {
+      // Attempt to get a style directly
+      if (elements?.length) {
+        const styles = elements.map((el) => {
+          const inlineStyle = el.style[property];
+          if (inlineStyle) {
+            return inlineStyle; // Return inline style if present
+          }
+          if (settings.includeComputed) {
+            return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
+          }
+          return undefined; // If includeComputed is false, return undefined
+        });
+        return elements.length === 1 ? styles[0] : styles;
+      }
+    }
+  }
+
+  computedStyle(property) {
+    return this.css(property, null, { includeComputed: true });
+  }
+
+  cssVar(variable, value) {
+    return this.css(`--${variable}`, value, { includeComputed: true });
+  }
+
+  attr(attribute, value) {
+    if (isPlainObject(attribute)) {
+      // Handle object of attribute-value pairs
+      Object.entries(attribute).forEach(([attr, val]) => {
+        this.each((el) => el.setAttribute(attr, val));
+      });
+    }
+    else if (value !== undefined) {
+      // Handle single attribute-value pair
+      this.each((el) => el.setAttribute(attribute, value));
+    }
+    else if (this.length) {
+      const attributes = this.map((el) =>
+        el.getAttribute(attribute)
+      );
+      return attributes.length > 1 ? attributes : attributes[0];
+    }
+    return this;
+  }
+
+  removeAttr(attributeName) {
+    return this.each((el) => el.removeAttribute(attributeName));
+  }
+
+  get(index) {
+    if (index !== undefined) {
+      return this[index];
+    }
+    else {
+      return Array.from(this);
+    }
+  }
+
+  eq(index) {
+    return new Query(this[index]);
+  }
+
+  height() {
+    return this.length === 1
+      ? this[0].clientHeight
+      : this.map(el => el.clientHeight);
+  }
+
+  width() {
+    return this.length === 1
+      ? this[0].clientWidth
+      : this.map(el => el.clientWidth);
+  }
+
+  scrollHeight() {
+    return this.length === 1
+      ? this[0].scrollHeight
+      : this.map(el => el.scrollHeight);
+  }
+
+  scrollWidth() {
+    return this.length === 1
+      ? this[0].scrollWidth
+      : this.map(el => el.scrollWidth);
+  }
+
+  // offsetParent does not return the true offset parent
+  // in cases where there is a parent node with a transform context
+  // so we need to get that manually where finding the true offset parent is essential
+  // for instance when calculating position
+  offsetParent({ calculate = true } = {}) {
+    return Array.from(this)
+      .map((el) => {
+        if(!calculate) {
+          return el.offsetParent;
+        }
+        let $el, isPositioned, isTransformed, isBody;
+        let parentNode = el?.parentNode;
+        while(parentNode && !isPositioned && !isTransformed && !isBody) {
+          parentNode = parentNode?.parentNode;
+          if(parentNode) {
+            $el = $(parentNode);
+            isPositioned = ($el.computedStyle('position') !== 'static');
+            isTransformed = ($el.computedStyle('transform') !== 'none');
+            isBody = $el.is('body');
+          }
+        }
+        return parentNode;
+      })
+    ;
+  }
+
+  // adds properties to an element after dom loads
+  initialize(settings, { onDOMReady = true } = {}) {
+    $(document).on('DOMContentLoaded', this.settings);
+  }
+
+  settings(settings) {
+    this.each((el) => {
+      each(settings, (value, setting) => {
+        el[setting] = value;
+      });
+    });
+  }
+  setting(setting, value) {
+    this.each((el) => {
+      el[setting] = value;
+    });
+  }
+
+}

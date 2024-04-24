@@ -1,0 +1,11 @@
+/*-------------------
+    Button Icon
+--------------------*/
+
+.button ui-icon {
+  vertical-align: middle;
+  opacity: var(--button-icon-opacity);
+}
+.button ui-icon:only-child {
+  margin: 0rem;
+}

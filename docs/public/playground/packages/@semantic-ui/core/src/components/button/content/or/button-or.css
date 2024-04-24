@@ -1,0 +1,37 @@
+/*-------------------
+      Or Buttons
+--------------------*/
+:host {
+  align-self: center;
+}
+.or {
+  position: relative;
+  width: var(--button-or-gap);
+  height: var(--button-or-height);
+  z-index: var(--button-or-z-index);
+}
+.or .shape {
+  position: absolute;
+  text-align: center;
+  border-radius: var(--circular-radius);
+
+  top: 50%;
+  left: 50%;
+  background-color: var(--button-or-background-color);
+  text-shadow: var(--button-or-text-shadow);
+
+  margin-top: var(--button-or-vertical-offset);
+  margin-left: var(--button-or-horizontal-offset);
+
+  width: var(--button-or-circle-size);
+  height: var(--button-or-circle-size);
+
+  line-height: var(--button-or-line-height);
+  color: var(--button-or-text-color);
+
+  font-style: var(--button-or-text-style);
+  font-weight: var(--button-or-text-weight);
+
+  box-shadow: var(--button-or-box-shadow);
+}
+

@@ -1,0 +1,7 @@
+{
+  "name": "@semantic-ui/templating",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "author": "Jack Lukic",
+  "license": "ISC"
+}

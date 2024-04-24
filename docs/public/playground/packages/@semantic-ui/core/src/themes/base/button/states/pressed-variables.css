@@ -1,0 +1,11 @@
+:root {
+  --button-pressed-background-color: var(--button-background-color);
+  --button-pressed-background-image: var(--button-background-image);
+  --button-pressed-color: var(--pressed-text-color);
+  --button-pressed-shadow-box-shadow: var(--subtle-inset-shadow);
+  --button-pressed-box-shadow:
+    var(--button-sharpen-box-shadow),
+    var(--button-border-box-shadow),
+    var(--button-pressed-shadow-box-shadow)
+  ;
+}

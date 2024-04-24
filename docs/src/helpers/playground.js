@@ -13,3 +13,4 @@ export const htmlAfter = `<!-- playground-hide --></body></html><!-- playground-
 export const cssBefore = `/* playground-hide */ body { padding 1rem; font-family: Lato; } /* playground-hide-end */`;
 
 export const jsBefore = `/* playground-hide */import '@semantic-ui/core';/* playground-hide-end */`;
+

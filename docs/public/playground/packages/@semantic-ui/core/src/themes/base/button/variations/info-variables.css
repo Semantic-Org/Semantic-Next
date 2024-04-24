@@ -1,0 +1,26 @@
+:root {
+
+  --button-info-color: var(--info-color);
+  --button-info-background-image: var(--button-colored-background-image);
+  --button-info-text-color: var(--button-inverted-text-color);
+  --button-info-text-shadow: var(--button-inverted-text-shadow);
+  --button-info-box-shadow: var(--button-colored-box-shadow);
+
+  --button-info-color-hover: oklch(from var(--button-info-color) calc(l + var(--hover-lightness)) c h);
+  --button-info-color-focus: oklch(from var(--button-info-color) calc(l + var(--focus-lightness)) c h);
+  --button-info-color-down: oklch(from var(--button-info-color) calc(l + var(--down-lightness)) c h);
+  --button-info-color-active: oklch(from var(--button-info-color) calc(l + var(--active-lightness)) c h);
+
+  /* Subtle Positive */
+  --button-subtle-info-color: #F8FEFF;
+  --button-subtle-info-background-image: var(--button-colored-background-image);
+  --button-subtle-info-text-color: rgba(23, 94, 135, 0.9);
+  --button-subtle-info-text-shadow: var(--button-text-shadow);
+  --button-subtle-info-box-shadow: var(--button-box-shadow);
+  
+  --button-subtle-info-color-hover: #DEFBFF;
+  --button-subtle-info-color-focus: #DEFBFF;
+  --button-subtle-info-color-down: #DEFBFF;
+  --button-subtle-info-color-active: #E4FBFF;
+  
+}

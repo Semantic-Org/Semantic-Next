@@ -1,0 +1,11 @@
+:root {
+  --icon-link-opacity: 0.6;
+  --icon-link-color: inherit;
+  --icon-link-transition:
+    opacity var(--default-duration) var(--default-easing),
+    color var(--default-duration) var(--default-easing)
+  ;
+  --icon-link-hover-opacity: 1;
+  --icon-link-hover-color: inherit;
+
+}

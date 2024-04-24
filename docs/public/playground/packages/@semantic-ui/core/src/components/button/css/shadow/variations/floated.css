@@ -1,0 +1,16 @@
+/*-------------------
+       Floated
+--------------------*/
+
+.left-floated.buttons,
+.left-floated.button {
+  float: left;
+  margin-left: 0em;
+  margin-right: var(--button-floated-margin);
+}
+.right-floated.buttons,
+.right-floated.button {
+  float: right;
+  margin-right: 0em;
+  margin-left: var(--button-floated-margin);
+}

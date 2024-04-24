@@ -14,7 +14,7 @@
   const projectConfig = {
     importMap: {
       imports: {
-        '@semantic-ui/core': coreURL
+        '@semantic-ui/core': '/playground/packages/@semantic-ui/core',
       }
     },
     files: {
@@ -37,6 +37,11 @@
   import 'playground-elements/playground-project.js';
   import 'playground-elements/playground-file-editor.js';
   import 'playground-elements/playground-preview.js';
+</script>
+<script is:inline>
+  import { UIButton } from '@semantic-ui/core';
+  import url from '@semantic-ui/core?url';
+  console.log(UIButton, url);
 </script>
 <Playground>
   <playground-project id="source"></playground-project>

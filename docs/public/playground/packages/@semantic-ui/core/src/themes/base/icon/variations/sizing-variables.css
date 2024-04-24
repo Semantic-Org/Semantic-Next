@@ -1,0 +1,10 @@
+:root {
+  --icon-mini: var(--10px);
+  --icon-tiny: var(--11px);
+  --icon-small: var(--13px);
+  --icon-medium: var(--medium);
+  --icon-large: var(--16px);
+  --icon-big: var(--24px);
+  --icon-huge: var(--32px);
+  --icon-massive: var(--64px);
+}
