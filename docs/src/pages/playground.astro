@@ -1,28 +1,36 @@
 ---
   import Playground from '@layouts/Playground.astro';
+
   import coreURL from '@semantic-ui/core?url';
-  console.log(coreURL);
-  const files = {
-    'index.html': {
-      contentType: 'text/html',
-      content: `
-        <ui-button primary>Button</ui-button>
-      `
+
+  const projectConfig = {
+    importMap: {
+      imports: {
+        '@semantic-ui/core': coreURL
+      }
     },
-    'index.js': {
-      contentType: 'text/javascript',
-      content: `
-        import * as UI from '@semantic-ui/core';
-        console.log('hello')
-      `
-    },
-    'index.css': {
-      contentType: 'text/css',
-      content: `ui-button {
-  font-size: 18px;
-}`
-    },
-  }
+    files: {
+      'index.html': {
+        contentType: 'text/html',
+        content: `
+          <ui-button primary>Button</ui-button>
+        `
+      },
+      'index.js': {
+        contentType: 'text/javascript',
+        content: `
+          import * as UI from '@semantic-ui/core';
+          console.log('hello')
+        `
+      },
+      'index.css': {
+        contentType: 'text/css',
+        content: `ui-button {
+          font-size: 18px;
+        }`
+      }
+    }
+  };
 ---
 <script>
   import 'playground-elements/playground-project.js';
@@ -31,10 +39,8 @@
 </script>
 <Playground>
   <playground-project id="source"></playground-project>
-  <script define:vars={{ files }} type="module">
-    document.querySelector('playground-project').config = {
-      files
-    };
+  <script define:vars={{ projectConfig }}>
+    document.querySelector('playground-project').config = projectConfig;
   </script>
   <playground>
     <panes>
