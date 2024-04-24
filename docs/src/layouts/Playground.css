@@ -20,6 +20,9 @@ body {
     --topbar-menu-item-font-weight: normal;
     --topbar-menu-item-active-font-weight: bold;
   }
+  topbar theme-switcher {
+    display: none;
+  }
 
   --playground-code-font-size: 14px;
   --playground-code-background: #0d1117;
