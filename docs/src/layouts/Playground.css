@@ -67,6 +67,7 @@ playground {
     display: flex;
     flex-direction: column;
     border-top: 1px solid var(--white-10);
+    box-shadow: 0px 1px 0px 0px var(--black-60) inset;
     flex: 1 1 auto;
   }
   codePanes codePane > playground-file-editor {
@@ -78,6 +79,7 @@ playground {
   }
   codePanes codePane:first-child {
     border-top: none;
+    box-shadow: none;
   }
   previewPane {
     display: flex;
@@ -97,12 +99,23 @@ playground {
     font-size: 11px;
     text-transform: uppercase;
     font-weight: bold;
+    background: var(--subtle-gradient);
+    box-shadow: var(--subtle-bottom-lip-shadow);
   }
   playground-preview::part(preview-loading-indicator) {
     --mdc-theme-primary: #49b1d2;
+
+    /* wide
     height: 3px;
     overflow: hidden;
     top: -3px;
+    */
+
+    height: 4px;
+    overflow: hidden;
+    top: -26px;
+    width: 71px;
+    left: 22px;
   }
 }
 
