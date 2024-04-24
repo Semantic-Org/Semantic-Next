@@ -99,7 +99,7 @@ playground {
   }
 
   playground-preview {
-    max-height: calc(100vh - var(--topbar-height);
+    max-height: calc(100vh - var(--topbar-height));
   }
 
   playground-preview::part(preview-toolbar) {
