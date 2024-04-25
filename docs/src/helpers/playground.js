@@ -1,8 +1,8 @@
 export const htmlBefore = `<!-- playground-hide -->
 <html>
 <head>
+<script src="./component.js" type="module"></script>
 <link href="./index.css" rel="stylesheet">
-<script src="./index.js" type="module"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
