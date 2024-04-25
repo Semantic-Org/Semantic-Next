@@ -5,10 +5,10 @@
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
+  "type": "module",
   "main": "src/semantic-ui.js",
   "module": "src/semantic-ui.js",
   "license": "MIT",
-  "type": "module",
   "files": [
     "dist/**/*.*"
   ],
