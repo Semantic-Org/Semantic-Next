@@ -5,5 +5,43 @@ import { CodeSample } from '@components/CodeSample/CodeSample.js';
 import { UIButton, UIButtons, UIIcon } from '@semantic-ui/core';
 ---
 <Body padded>
-<UIButton loading>Disabled</UIButton>
+  <script>
+    import { createComponent } from '@semantic-ui/component';
+    import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+
+    const settings = {
+      showParity: true
+    };
+
+    const template = `
+     The timer is {{timer}}
+     <br><br>
+     {{#if showParity}}
+       {{#if isEven timer}}
+         Even
+       {{else}}
+         Odd
+       {{/if}}
+     {{/if}}
+    `;
+
+    const createInstance = ({tpl}) => ({
+       timer: new ReactiveVar(0),
+       isEven() {
+         return tpl.timer.get() % 2 == 0;
+       }
+    });
+
+    createComponent({
+      tagName: 'ui-counter',
+      template,
+      createInstance,
+      settings,
+      onCreated: function({tpl, settings}) {
+        console.log(settings);
+        setInterval(() => tpl.timer.value = tpl.timer.get() + 1, 1000);
+      }
+    });
+  </script>
+  <ui-counter showParity="false"></ui-counter>
 </Body>
