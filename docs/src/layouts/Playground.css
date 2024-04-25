@@ -57,6 +57,7 @@ body {
 }
 
 playground {
+
   display: flex;
   flex: 1 1 auto;
   flex-direction: row;
@@ -64,38 +65,44 @@ playground {
   height: calc(100% - var(--topbar-height));
 
   panes {
+
     background-color: var(--playground-code-background);
     display: flex;
     flex: 1 0 0;
     flex-direction: column;
+
+    pane {
+      position: relative;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--white-10);
+      box-shadow: 0px 1px 0px 0px var(--black-60) inset;
+      flex: 1 1 0;
+      box-sizing: border-box;
+    }
+    label {
+      font-size: 11px;
+      width: max-content;
+      border-radius: 5px;
+      line-height: 15px;
+      padding: 2px 6px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.3);
+      position: absolute;
+      z-index: 5;
+      right: 0.5rem;
+    }
+    pane > playground-file-editor {
+      flex: 1 1 0;
+      height: auto;
+    }
+    pane:first-child {
+      border-top: none;
+      box-shadow: none;
+    }
   }
-  panes pane {
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid var(--white-10);
-    box-shadow: 0px 1px 0px 0px var(--black-60) inset;
-    flex: 1 1 0;
-    box-sizing: border-box;
-  }
-  label {
-    font-size: 11px;
-    background-color: rgba(255, 255, 255, 0.05);
-    width: max-content;
-    border-radius: 5px;
-    line-height: 15px;
-    padding: 2px 6px;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.3);
-  }
-  panes pane > playground-file-editor {
-    flex: 1 1 0;
-    height: auto;
-  }
-  panes pane:first-child {
-    border-top: none;
-    box-shadow: none;
-  }
+
   panes + panes {
     border-left: 1px solid var(--white-10);
   }
