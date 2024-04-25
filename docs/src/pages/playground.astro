@@ -8,14 +8,38 @@
     importMap
   } from '@helpers/playground.js';
 
-  const htmlContent = `<ui-button primary>Button</ui-button>`;
-  const cssContent = `ui-button {
+  const htmlContent = `<ui-counter></ui-counter>`;
+  const cssContent = `/* playground-hide */ body { padding 1rem; font-family: Lato; } /* playground-hide-end */ui-counter {
   font-size: 18px;
+  font-weight: bold;
 }`;
-  const jsContent = `import '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
-import { $ } from '@semantic-ui/query';
-document.body.appendChild(document.createTextNode("World!"))`;
+  const jsContent = `import { createComponent } from '@semantic-ui/component';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+const template = \`
+ The timer is {{timer}}
+ <br><br>
+ {{#if isEven timer}}
+   Even
+ {{else}}
+   Odd
+ {{/if}}
+\`;
+
+const createInstance = ({tpl}) => ({
+   timer: new ReactiveVar(0),
+   isEven() {
+     return tpl.timer.get() % 2 == 0;
+   }
+});
+
+createComponent({
+  tagName: 'ui-counter',
+  template,
+  createInstance,
+  onCreated: function({tpl}) {
+    setInterval(() => tpl.timer.value = tpl.timer.get() + 1, 1000);
+  }
+});`;
 
   const projectConfig = {
     importMap: importMap,

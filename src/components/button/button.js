@@ -2,8 +2,8 @@ import { createComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 import { ButtonComponentSpec } from '@semantic-ui/specs';
 
-import ButtonCSS from './css/button-shadow.css?raw';
-import ButtonTemplate from './button.html?raw';
+import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
+import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
 const createInstance = ({tpl, settings, $}) => ({
   isIconBefore() {
