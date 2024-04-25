@@ -10,7 +10,8 @@
   "license": "MIT",
   "type": "module",
   "files": [
-    "dist/**/*.*"
+    "dist/**",
+    "src/**"
   ],
   "scripts": {
     "build": "wireit",
