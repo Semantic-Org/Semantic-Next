@@ -85,7 +85,7 @@ createComponent({
   import 'playground-elements/playground-preview.js';
 </script>
 <Playground>
-  <playground-project id="source"></playground-project>
+  <playground-project id="source" sandbox-base-url="/playground"></playground-project>
   <script define:vars={{ projectConfig }}>
     document.querySelector('playground-project').config = projectConfig;
   </script>
