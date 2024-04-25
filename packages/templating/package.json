@@ -1,8 +1,15 @@
 {
   "name": "@semantic-ui/templating",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
+  "exports": {
+    "TemplateCompiler": "./src/compiler/template-compiler.js",
+    "StringScanner": "./src/compiler/string-scanner.js",
+    "Template": "./src/template.js",
+    "TemplateHelpers": "./template-helpers.js"
+  },
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {

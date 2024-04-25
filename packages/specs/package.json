@@ -1,9 +1,16 @@
 {
   "name": "@semantic-ui/specs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
+  "exports": {
+    "SpecReader": "./src/spec-reader.js",
+    "ButtonSpec": "./src/specs/button.js",
+    "ButtonComponentSpec": "./src/specs/button.js",
+    "IconSpec": "./src/specs/icon.js",
+    "IconComponentSpec": "./src/specs/icon.js"
+  },
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {

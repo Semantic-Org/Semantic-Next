@@ -4,6 +4,10 @@
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
+  "exports": {
+    "$": "./src/index.js",
+    "Query": "./src/query.js"
+  },
   "author": "Jack Lukic",
   "license": "ISC",
   "devDependencies": {

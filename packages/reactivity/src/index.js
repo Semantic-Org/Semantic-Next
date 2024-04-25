@@ -1,6 +1,6 @@
-import { ReactiveVar } from './reactive-var';
-import { Reaction } from './reaction';
-import { Dependency } from './dependency';
+import { ReactiveVar } from './reactive-var.js';
+import { Reaction } from './reaction.js';
+import { Dependency } from './dependency.js';
 
 export {
   ReactiveVar,

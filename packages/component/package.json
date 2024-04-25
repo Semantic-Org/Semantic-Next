@@ -1,9 +1,20 @@
 {
   "name": "@semantic-ui/component",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
-  "main": "src/index.js",
+  "main": "./index.js",
   "module": "src/index.js",
+  "exports": {
+    "scopeStyles": "./src/helpers/scope-styles.js",
+    "extractComponentSpec": "./src/helpers/extract-component-spec.js",
+    "createComponent": "./src/create-component.js",
+    "WebComponentBase": "./src/web-component.js",
+    "LitRenderer": "./src/engines/lit/renderer.js",
+    "ReactiveDataDirective": "./src/engines/lit/directives/reactive-data.js",
+    "ReactiveConditionalDirective": "./src/engines/lit/directives/reactive-conditional.js",
+    "ReactiveEachDirective": "./src/engines/lit/directives/reactive-each.js",
+    "RenderTemplateDirective": "./src/engines/lit/directives/render-template.js"
+  },
   "author": "Jack Lukic",
   "license": "ISC",
   "peerDependencies": {

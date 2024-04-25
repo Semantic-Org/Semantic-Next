@@ -1,9 +1,14 @@
 {
   "name": "@semantic-ui/reactivity",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
+  "exports": {
+    "ReactiveVar": "./src/reactive-var.js",
+    "Reaction": "./src/reaction.js",
+    "Dependency": "./src/dependency.js"
+  },
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
