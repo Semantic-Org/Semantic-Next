@@ -13,8 +13,7 @@ export const htmlAfter = `<!-- playground-hide --></body></html><!-- playground-
 
 export const cssBefore = `/* playground-hide */ body { padding 1rem; font-family: Lato; } /* playground-hide-end */`;
 
-export const jsBefore = `/* playground-hide */
-/* playground-hide-end */`;
+export const jsBefore = ``;
 
 const baseURL = `https://semantic-next.vercel.app`;
 const packageBase = `${baseURL}/playground/packages/@semantic-ui`;
