@@ -21,6 +21,7 @@ Reactions are enqueued and then flushed using the [microtask queue](https://deve
   * [Flushing Changes](#flushing-changes)
   * [Accessing Computation](#accessing-computation)
 - [Helper Functions](#helper-functions)
+  * [Number Helpers](#numbers)
   * [Array Mutation Helpers](#array-mutation-helpers)
   * [Array of Objects](#array-of-objects)
 
@@ -357,25 +358,60 @@ let comp = Reaction.create(() => {
 
 ## Helper Functions
 
+### Numbers
+
+`ReactiveVar` includes a couple helpers numbers
+
+```javascript
+  let count = new ReactiveVar(0);
+  count.increment(); // set to 1
+```
+```javascript
+  let count = new ReactiveVar(0);
+  count.increment(2); // set to 2
+```
+```javascript
+  let count = new ReactiveVar(2);
+  count.decrement(); // set to 1
+```
+```javascript
+  let count = new ReactiveVar(0);
+  count.decrement(2); // set to 1
+```
+
+### Date
+
+`ReactiveVar` includes a helper to make dates asier
+
+```javascript
+  let date = new ReactiveVar().now(); // initializes as now
+  setTimeout(() => {
+    date.now(); // now 1 second later
+  }, 1000);
+```
+
+
+
+
 ### Array Mutation Helpers
 
 `ReactiveVar` includes a few helpers for some of the most common usecases for manipulating arrays
 
 ```javascript
   let items = new ReactiveVar([0,1,2]);
-  tpl.items.removeIndex(1); // outputs 0, 2
+  items.removeIndex(1); // outputs 0, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,2,2]);
-  tpl.items.setIndex(1); // outputs 0, 1, 2
+  items.setIndex(1); // outputs 0, 1, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,1,2]);
-  tpl.items.unshift(); // outputs 1, 2
+  items.unshift(); // outputs 1, 2
 ```
 ```javascript
   let items = new ReactiveVar([0,1,2]);
-  tpl.items.push(3); // outputs 0, 1, 2, 3
+  items.push(3); // outputs 0, 1, 2, 3
 ```
 
 ### Array of Objects

@@ -114,6 +114,17 @@ export class ReactiveVar {
     return this.set(!this.value);
   }
 
+  increment(amount = 1) {
+    this.set(this.value + amount);
+  }
+  decrement(amount = 1) {
+    this.set(this.value - amount);
+  }
+
+  now() {
+    this.set(new Date());
+  }
+
   getIDs(item) {
     if(isObject(item)) {
       return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
