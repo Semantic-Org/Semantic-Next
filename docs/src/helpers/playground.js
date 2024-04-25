@@ -20,17 +20,17 @@ const packageBase = `${baseURL}/playground/packages/@semantic-ui`;
 
 export const importMap = {
   imports: {
-    '@semantic-ui/component': `${packageBase}/component/src/index.js`,
+    '@semantic-ui/component': `${packageBase}/component/`,
     '@semantic-ui/component/': `${packageBase}/component/src/`,
     '@semantic-ui/core': `${packageBase}/core/src/semantic-ui.js`,
     '@semantic-ui/core/': `${packageBase}/core/src/`,
-    '@semantic-ui/query': `${packageBase}/query/src/index.js`,
+    '@semantic-ui/query': `${packageBase}/query/`,
     '@semantic-ui/query/': `${packageBase}/query/src/`,
-    '@semantic-ui/reactivity': `${packageBase}/reactivity/src/index.js`,
+    '@semantic-ui/reactivity': `${packageBase}/reactivity/`,
     '@semantic-ui/reactivity/': `${packageBase}/reactivity/src/`,
-    '@semantic-ui/specs': `${packageBase}/specs/src/index.js`,
+    '@semantic-ui/specs': `${packageBase}/specs/`,
     '@semantic-ui/specs/': `${packageBase}/specs/src/`,
-    '@semantic-ui/templating': `${packageBase}/templating/src/index.js`,
+    '@semantic-ui/templating': `${packageBase}/templating/`,
     '@semantic-ui/templating/': `${packageBase}/templating/src/`,
     '@semantic-ui/utils': `${packageBase}/utils/src/utils.js`,
     '@semantic-ui/utils/': `${packageBase}/utils/src/`,
