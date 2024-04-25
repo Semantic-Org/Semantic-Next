@@ -2,7 +2,7 @@ export const htmlBefore = `<!-- playground-hide -->
 <html>
 <head>
 <!-- This defines the component tag and makes it available on your page !-->
-<script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js"></script>
+<script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
 <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
 <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
 <script src="./component.js" type="module"></script>

@@ -7,7 +7,11 @@ await buildDeps({
 
 await buildProject({
   watch: false,
-  includeExamples: false,
+  includeComponents: true,
+  includeJavascript: true,
+  includeCSS: true,
+  includeThemes: true,
+  includeExamples: true,
   uiDir: 'dist',
   outDir: 'dist'
 });
