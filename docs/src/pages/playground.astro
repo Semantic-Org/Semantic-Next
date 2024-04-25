@@ -8,7 +8,9 @@
     importMap
   } from '@helpers/playground.js';
 
-  const htmlContent = `<ui-counter></ui-counter>`;
+  const htmlContent = `<ui-counter></ui-counter>
+<hr>
+<ui-button>Button</ui-button`;
   const cssContent = `/* playground-hide */ body { padding 1rem; font-family: Lato; } /* playground-hide-end */ui-counter {
   font-size: 18px;
   font-weight: bold;
@@ -16,25 +18,24 @@
   const jsContent = `import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-const createInstance = ({tpl}) => ({
-   timer: new ReactiveVar(0),
-   isEven() {
-     return tpl.timer.get() % 2 == 0;
-   },
-   tick() {
-     tpl.timer.set(tpl.timer.value + 1);
-   };
-});
+const template = \`
+ The currentTime is {{formatDate currentTime 'h:mm:ss'}}
+ <br><br>
+\`;
 
-const onCreated = ({tpl}) => ({
-  setInterval(tpl.tick, 1000);
+const createInstance = ({tpl}) => ({
+   currentTime: new ReactiveVar(new Date())
 });
 
 createComponent({
   tagName: 'ui-counter',
   template,
   createInstance,
-  onCreated,
+  onCreated: function({tpl, settings}) {
+    setInterval(() => {
+      tpl.currentTime.set(new Date());
+    }, 1000);
+  }
 });`;
 
   const projectConfig = {
@@ -46,24 +47,11 @@ createComponent({
       },
       'component.html': {
         contentType: 'text/html',
-        content: `<div class="timer">
-  The timer is {{timer}}
-</div>
-<div class="even">
-  {{#if isEven timer}}
-    Even
-  {{else}}
-    Odd
-  {{/if}}
-</div>`
+        content: ``
       },
       'component.css': {
         contentType: 'text/css',
-        content: `.timer {
-  border: var(--border);
-  padding: var(--padding);
-  border-radius: var(--border-radius);
-}`
+        content: ``
       },
       'index.html': {
         contentType: 'text/html',
