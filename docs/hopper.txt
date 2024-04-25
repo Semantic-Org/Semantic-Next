@@ -1,3 +1,40 @@
+Playground
+- codemirror multiple selection -- pass through
+- Add example content collection
+- Example type -> layout
+- Wrap playground-examples with layouts
+
+- Imports
+-- Auto wrap html/css in JS string export
+-- Pull semantic ui from CDN and add to head (for usage)
+
+Wrapped Component
+- Layout setting
+- Hide/expand panels
+- Resize panels
+- Active label on section you are editing
+
+- Layouts
+-- Custom Component
+-- Javascript only
+-- Javascript + css
+-- Usage (SUI)
+
+Later Layouts
+-- Multi-component
+-- Theming
+
+- Playground section
+-- Switcher at top
+-- sidebar to load examples
+
+Reactive Var
+- Add increment / decrement
+- Add date helper for now
+
+Query
+- Add support for piercing shadow DOM by default
+
 Code Playground
 - Import resolution
 
