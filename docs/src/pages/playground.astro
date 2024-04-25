@@ -16,16 +16,13 @@
   const jsContent = `import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
-import template from './template.css?raw';
-import css from './template.css?raw';
-
 const createInstance = ({tpl}) => ({
    timer: new ReactiveVar(0),
    isEven() {
      return tpl.timer.get() % 2 == 0;
    },
    tick() {
-     tpl.timer.increment();
+     tpl.timer.set(tpl.timer.value + 1);
    };
 });
 
