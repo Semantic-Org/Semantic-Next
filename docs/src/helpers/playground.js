@@ -1,6 +1,12 @@
 export const htmlBefore = `<!-- playground-hide -->
 <html>
 <head>
+<!-- This defines the component tag and makes it available on your page !-->
+<script src="https://unpkg.com/browse/@semantic-ui/core@latest/dist/theme/semantic-ui.js"></script>
+<!-- This includes global base theming variables !-->
+<link rel="stylesheet" href="https://unpkg.com/browse/@semantic-ui/core@latest/dist/theme/base.css"></link>
+<!-- This includes global base global css (optional) !-->
+<link rel="stylesheet" href="https://unpkg.com/browse/@semantic-ui/core@latest/dist/theme/semantic-ui.css"></link>
 <script src="./component.js" type="module"></script>
 <link href="./index.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
