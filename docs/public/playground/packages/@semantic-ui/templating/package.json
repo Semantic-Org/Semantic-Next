@@ -2,6 +2,14 @@
   "name": "@semantic-ui/templating",
   "version": "0.0.1",
   "main": "src/index.js",
+  "module": "src/index.js",
   "author": "Jack Lukic",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@semantic-ui/component": "^0.0.1",
+    "@semantic-ui/query": "^0.0.1",
+    "@semantic-ui/reactivity": "^0.0.1",
+    "@semantic-ui/templating": "^0.0.1",
+    "@semantic-ui/utils": "^0.0.1"
+  }
 }
