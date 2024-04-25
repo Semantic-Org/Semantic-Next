@@ -1,15 +1,22 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
+  "type": "module",
   "main": "src/semantic-ui.js",
   "module": "src/semantic-ui.js",
+  "exports": {
+    "UIButton": "./src/components/button/button.js",
+    "UIButtons": "./src/components/buttons/plural/buttons.js",
+    "ButtonOr": "./src/components/button/content/or/button-or.js",
+    "UIIcon": "./src/components/icon/icon.js"
+  },
   "license": "MIT",
-  "type": "module",
   "files": [
+    "src/**/*",
     "dist/**/*.*"
   ],
   "scripts": {
