@@ -115,14 +115,14 @@ export class ReactiveVar {
   }
 
   increment(amount = 1) {
-    this.set(this.value + amount);
+    return this.set(this.value + amount);
   }
   decrement(amount = 1) {
-    this.set(this.value - amount);
+    return this.set(this.value - amount);
   }
 
   now() {
-    this.set(new Date());
+    return this.set(new Date());
   }
 
   getIDs(item) {

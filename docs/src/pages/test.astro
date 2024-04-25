@@ -14,21 +14,14 @@ import { UIButton, UIButtons, UIIcon } from '@semantic-ui/core';
     };
 
     const template = `
-     The timer is {{timer}}
+     The currentTime is {{formatDate currentTime 'h:mm:ss'}}
      <br><br>
-     {{#if showParity}}
-       {{#if isEven timer}}
-         Even
-       {{else}}
-         Odd
-       {{/if}}
-     {{/if}}
     `;
 
     const createInstance = ({tpl}) => ({
-       timer: new ReactiveVar(0),
+       currentTime: new ReactiveVar(new Date()),
        isEven() {
-         return tpl.timer.get() % 2 == 0;
+         return tpl.currentTime.get() % 2 == 0;
        }
     });
 
@@ -39,7 +32,9 @@ import { UIButton, UIButtons, UIIcon } from '@semantic-ui/core';
       settings,
       onCreated: function({tpl, settings}) {
         console.log(settings);
-        setInterval(() => tpl.timer.value = tpl.timer.get() + 1, 1000);
+        setInterval(() => {
+          tpl.currentTime.now();
+        }, 1000);
       }
     });
   </script>

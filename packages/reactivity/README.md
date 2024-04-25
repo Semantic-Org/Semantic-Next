@@ -384,7 +384,7 @@ let comp = Reaction.create(() => {
 `ReactiveVar` includes a helper to make dates asier
 
 ```javascript
-  let date = new ReactiveVar().now(); // initializes as now
+  let date = new ReactiveVar(new Date()); // initializes as now
   setTimeout(() => {
     date.now(); // now 1 second later
   }, 1000);
