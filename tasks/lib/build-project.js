@@ -38,8 +38,6 @@ export const buildProject = async ({
       loader: JS_LOADER_CONFIG,
       plugins: [logPlugin('SUI')],
     });
-    const json = JSON.stringify(jsBuild.metafile);
-    console.log(json);
     tasks.push(jsBuild);
   }
 
