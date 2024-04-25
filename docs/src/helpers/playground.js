@@ -22,7 +22,7 @@ export const importMap = {
   imports: {
     '@semantic-ui/component': `${packageBase}/component/`,
     '@semantic-ui/component/': `${packageBase}/component/src/`,
-    '@semantic-ui/core': `${packageBase}/core/src/semantic-ui.js`,
+    '@semantic-ui/core': `${packageBase}/core/`,
     '@semantic-ui/core/': `${packageBase}/core/src/`,
     '@semantic-ui/query': `${packageBase}/query/`,
     '@semantic-ui/query/': `${packageBase}/query/src/`,
