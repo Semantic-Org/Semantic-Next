@@ -2,6 +2,7 @@
   "name": "@semantic-ui/reactivity",
   "version": "0.0.1",
   "main": "src/index.js",
+  "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
