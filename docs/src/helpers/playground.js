@@ -20,7 +20,7 @@ const packageBase = `${baseURL}/playground/packages/@semantic-ui`;
 
 export const importMap = {
   imports: {
-    '@semantic-ui/component': `${packageBase}/component/src/index.js`,
+    /*'@semantic-ui/component': `${packageBase}/component/src/index.js`,
     '@semantic-ui/component/': `${packageBase}/component/src/`,
     '@semantic-ui/core': `${packageBase}/core/src/semantic-ui.js`,
     '@semantic-ui/core/': `${packageBase}/core/src/`,
@@ -33,6 +33,6 @@ export const importMap = {
     '@semantic-ui/templating': `${packageBase}/templating/src/index.js`,
     '@semantic-ui/templating/': `${packageBase}/templating/src/`,
     '@semantic-ui/utils': `${packageBase}/utils/src/utils.js`,
-    '@semantic-ui/utils/': `${packageBase}/utils/src/`,
+    '@semantic-ui/utils/': `${packageBase}/utils/src/`,*/
   }
 };
