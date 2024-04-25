@@ -15,38 +15,58 @@
 }`;
   const jsContent = `import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-const template = \`
- The timer is {{timer}}
- <br><br>
- {{#if isEven timer}}
-   Even
- {{else}}
-   Odd
- {{/if}}
-\`;
+
+import template from './template.css?raw';
+import css from './template.css?raw';
 
 const createInstance = ({tpl}) => ({
    timer: new ReactiveVar(0),
    isEven() {
      return tpl.timer.get() % 2 == 0;
-   }
+   },
+   tick() {
+     tpl.timer.increment();
+   };
+});
+
+const onCreated = ({tpl}) => ({
+  setInterval(tpl.tick, 1000);
 });
 
 createComponent({
   tagName: 'ui-counter',
   template,
   createInstance,
-  onCreated: function({tpl}) {
-    setInterval(() => tpl.timer.value = tpl.timer.get() + 1, 1000);
-  }
+  onCreated,
 });`;
 
   const projectConfig = {
     importMap: importMap,
     files: {
-      'index.js': {
+      'component.js': {
         contentType: 'text/javascript',
         content: `${jsBefore}${jsContent}`
+      },
+      'component.html': {
+        contentType: 'text/html',
+        content: `<div class="timer">
+  The timer is {{timer}}
+</div>
+<div class="even">
+  {{#if isEven timer}}
+    Even
+  {{else}}
+    Odd
+  {{/if}}
+</div>`
+      },
+      'component.css': {
+        contentType: 'text/css',
+        content: `.timer {
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+}`
       },
       'index.html': {
         contentType: 'text/html',
@@ -72,18 +92,28 @@ createComponent({
   <playground>
     <panes>
       <pane>
-        <label>JS</label>
+        <label>Component JS</label>
         <playground-tab-bar editor="editor1" editable-file-system></playground-tab-bar>
-        <playground-file-editor line-numbers project="source" filename="index.js"> </playground-file-editor>
+        <playground-file-editor line-numbers project="source" filename="component.js"> </playground-file-editor>
       </pane>
       <pane>
-        <label>HTML</label>
-        <playground-file-editor line-numbers project="source" filename="index.html"> </playground-file-editor>
+        <label>Component Template</label>
+        <playground-tab-bar editor="editor1" editable-file-system></playground-tab-bar>
+        <playground-file-editor line-numbers project="source" filename="component.html"> </playground-file-editor>
+      </pane>
+      <pane>
+        <label>Component CSS</label>
+        <playground-tab-bar editor="editor1" editable-file-system></playground-tab-bar>
+        <playground-file-editor line-numbers project="source" filename="component.css"> </playground-file-editor>
       </pane>
     </panes>
     <panes>
       <pane>
-        <label>CSS</label>
+        <label>Page HTML</label>
+        <playground-file-editor line-numbers project="source" filename="index.html"> </playground-file-editor>
+      </pane>
+      <pane>
+        <label>Page CSS</label>
         <playground-file-editor line-numbers project="source" filename="index.css"> </playground-file-editor>
       </pane>
       <pane class="preview">
