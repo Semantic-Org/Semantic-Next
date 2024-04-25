@@ -12,7 +12,10 @@
   const cssContent = `ui-button {
   font-size: 18px;
 }`;
-  const jsContent = `document.body.appendChild(document.createTextNode("World!"))`;
+  const jsContent = `import '@semantic-ui/core';
+import { createComponent } from '@semantic-ui/component';
+import { $ } from '@semantic-ui/query';
+document.body.appendChild(document.createTextNode("World!"))`;
 
   const projectConfig = {
     importMap: importMap,
