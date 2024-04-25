@@ -3,5 +3,11 @@
   "version": "0.0.1",
   "main": "src/index.js",
   "author": "Jack Lukic",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^1.5.2"
+  },
+  "dependencies": {
+    "@semantic-ui/utils": "^0.0.1"
+  }
 }
