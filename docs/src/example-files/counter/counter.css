@@ -1,0 +1,5 @@
+.counter {
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+}

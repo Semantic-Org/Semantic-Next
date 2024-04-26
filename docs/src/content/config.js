@@ -11,7 +11,19 @@ const componentsCollection = defineCollection({
     tags: z.array(z.string())
   })
 });
+const examplesCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    id: z.optional(z.string()),
+    title: z.string(),
+    category: z.string(),
+    subcategory: z.string(),
+    description: z.string(),
+    tags: z.array(z.string())
+  })
+});
 
 export const collections = {
   components: componentsCollection,
+  examples: examplesCollection,
 };
