@@ -20,6 +20,11 @@ export const topbarMenu =  [
     url: '/components',
   },
   {
+    _id: 'examples',
+    name: 'Examples',
+    url: '/examples/counter',
+  },
+  {
     _id: 'playground',
     name: 'Playground',
     url: '/playground',
