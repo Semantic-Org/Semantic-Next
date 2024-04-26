@@ -1,13 +1,15 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
-const template = `<p>Count is {{timer}}</p>
- {{#if isEven timer}}
-   Even
- {{else}}
-   Odd
- {{/if}}
-`;
+const getText = async (src) => {
+  const response = await fetch(src);
+  return await response.text();
+};
+
+const css = await getText('./component.css');
+const template = await getText('./component.html');
+
+
 const createInstance = ({tpl}) => ({
   initialize() {
     tpl.tick();
@@ -24,6 +26,7 @@ const onCreated = ({tpl}) => {
 createComponent({
   tagName: 'ui-counter',
   template,
+  css,
   createInstance,
   onCreated,
 });

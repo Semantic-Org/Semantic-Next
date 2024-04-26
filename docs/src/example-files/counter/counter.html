@@ -1,6 +1,12 @@
- <p>The counter is "{{timer}}"</p>
- {{#if isEven timer}}
-   Even
- {{else}}
-   Odd
- {{/if}}
+<div class="counter">
+  <div class="parity">
+    {{#if isEven timer}}
+     Even
+    {{else}}
+     Odd
+    {{/if}}
+  </div>
+  <span class="text">
+    The counter is "{{timer}}"
+  </span>
+</div>

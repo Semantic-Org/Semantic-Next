@@ -15,6 +15,8 @@ export const componentCSSAfter = ``;
 export const indexHTMLBeforeStandard = `<!-- playground-hide -->
 <html>
 <head>
+<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
+<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
 <!-- This defines the component tag and makes it available on your page !-->
 <script src="./component.js" type="module"></script>
 <link href="./index.css" rel="stylesheet">
