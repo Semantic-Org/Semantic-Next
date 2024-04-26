@@ -97,12 +97,11 @@ export const getExampleFiles = async(example, files) => {
     const tagName = camelToKebab(exampleID);
     exampleFiles['index.html'] = {
       contentType: 'text/html',
-      content: `<${tagName}></${tagName}>`
+      content: `<ui-${tagName}></ui-${tagName}>`
     };
   }
   // auto generate index.css if not specified for component
   if(!exampleFiles['index.css']?.content) {
-    const tagName = camelToKebab(exampleID);
     exampleFiles['index.css'] = {
       contentType: 'text/css',
       content: ''

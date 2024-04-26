@@ -1,18 +1,24 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
-const template = '';
+const template = `<p>Count is {{timer}}</p>
+ {{#if isEven timer}}
+   Even
+ {{else}}
+   Odd
+ {{/if}}
+`;
 const createInstance = ({tpl}) => ({
   initialize() {
     tpl.tick();
   },
   timer: new ReactiveVar(0),
   isEven: () => tpl.timer.get() % 2 == 0,
-  tick: () => tpl.timer.increment()
+  tick: () => tpl.timer.set(tpl.timer.value + 1)
 });
 
 const onCreated = ({tpl}) => {
-  tpl.tick();
+  setInterval(tpl.tick, 1000);
 };
 
 createComponent({
