@@ -65,6 +65,16 @@
   --massive-ratio: calc(24 / 14);
 
   /* -------------------
+         Defaults
+  -------------------- */
+
+  --padding: 1rem;
+  --relative-padding: 1em;
+
+  --margin: 1rem;
+  --relative-margin: 1em;
+
+  /* -------------------
       Border Radius
   -------------------- */
 
