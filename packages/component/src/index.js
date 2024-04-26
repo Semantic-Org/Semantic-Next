@@ -1,3 +1,4 @@
+export { getText } from '@semantic-ui/utils';
 export { scopeStyles } from './helpers/scope-styles.js';
 export { extractComponentSpec } from './helpers/extract-component-spec.js';
 export { createComponent } from './create-component.js';

@@ -49,6 +49,15 @@ export const copyText = (text) => {
 };
 
 /*-------------------
+         XHR
+--------------------*/
+
+export const getText = async (src) => {
+  const response = await fetch(src);
+  return await response.text();
+};
+
+/*-------------------
         Types
 --------------------*/
 
