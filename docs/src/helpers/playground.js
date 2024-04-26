@@ -104,6 +104,34 @@ export const getExampleFiles = async(example, files) => {
   return exampleFiles;
 };
 
+export const getEmptyProjectFiles = () => {
+  return {
+    'component.js': {
+      contentType: 'text/javascript',
+      content: '',
+    },
+    'component.html': {
+      contentType: 'text/html',
+      content: '',
+    },
+    'component.css': {
+      contentType: 'text/css',
+      content: '',
+    },
+    'index.js': {
+      contentType: 'text/javascript',
+      content: '',
+    },
+    'index.html': {
+      contentType: 'text/html',
+      content: '',
+    },
+    'index.css': {
+      contentType: 'text/css',
+      content: '',
+    },
+  };
+};
 
 export const getPlaygroundInjections = (type) => {
   const indexHTMLBefore = (type == 'ui')
@@ -143,7 +171,7 @@ export const addPlaygroundInjections = (files, type) => {
   each(files, (file, name) => {
     if(file.content && fileInjections[name]) {
       const { before, after } = fileInjections[name];
-      files[name].content = before + files[name].content + after;
+      files[name].content = (before || '') + files[name].content + (after || '');
     }
   });
   return files;

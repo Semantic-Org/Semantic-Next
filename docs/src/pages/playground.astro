@@ -1,67 +1,10 @@
 ---
   import Playground from '@layouts/Playground.astro';
-  import {
-    htmlBefore,
-    htmlAfter,
-    cssBefore,
-    jsBefore,
-    importMap
-  } from '@helpers/playground.js';
+  import { getEmptyProjectFiles } from '@helpers/playground.js';
 
-  const htmlContent = `<ui-counter></ui-counter>
-<hr>
-<ui-button>Button</ui-button`;
-  const cssContent = `/* playground-hide */ body { padding 1rem; font-family: Lato; } /* playground-hide-end */ui-counter {
-  font-size: 18px;
-  font-weight: bold;
-}`;
-  const jsContent = `import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-
-const template = \`
- The currentTime is {{formatDate currentTime 'h:mm:ss'}}
- <br><br>
-\`;
-
-const createInstance = ({tpl}) => ({
-   currentTime: new ReactiveVar(new Date())
-});
-
-createComponent({
-  tagName: 'ui-counter',
-  template,
-  createInstance,
-  onCreated: function({tpl, settings}) {
-    setInterval(() => {
-      tpl.currentTime.set(new Date());
-    }, 1000);
-  }
-});`;
-
+  const files = getEmptyProjectFiles();
   const projectConfig = {
-    importMap: importMap,
-    files: {
-      'component.js': {
-        contentType: 'text/javascript',
-        content: `${jsBefore}${jsContent}`
-      },
-      'component.html': {
-        contentType: 'text/html',
-        content: ``
-      },
-      'component.css': {
-        contentType: 'text/css',
-        content: ``
-      },
-      'index.html': {
-        contentType: 'text/html',
-        content: `${htmlBefore}${htmlContent}${htmlAfter}`
-      },
-      'index.css': {
-        contentType: 'text/css',
-        content: `${cssBefore}${cssContent}`
-      }
-    }
+    files: files
   };
 ---
 <script>
