@@ -39,7 +39,9 @@
     },
     "publish": {
       "command": "npm publish",
-      "dependencies": ["build"]
+      "dependencies": [
+        "build"
+      ]
     },
     "publish:all": {
       "dependencies": [
@@ -53,10 +55,14 @@
       ]
     },
     "dev": {
-      "dependencies": ["./docs:dev"]
+      "dependencies": [
+        "./docs:dev"
+      ]
     },
     "build:docs": {
-      "dependencies": ["./docs:build"]
+      "dependencies": [
+        "./docs:build"
+      ]
     },
     "test:case": {
       "command": "node ./tasks/test-case.js"
@@ -104,6 +110,7 @@
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "@vitest/browser": "^1.5.2",
+    "@vitest/coverage-istanbul": "^1.5.2",
     "@vitest/ui": "^1.5.2",
     "chalk": "^5.3.0",
     "dprint": "^0.45.1",
