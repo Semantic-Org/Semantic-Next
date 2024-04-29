@@ -34,7 +34,6 @@ const onDestroyed = ({ tpl }) => {
 };
 
 const onRendered = ({ $, tpl, settings }) => {
-  console.log(settings);
 };
 
 const events = {

@@ -1,4 +1,4 @@
-:root {
+:root {/*
   --playground-code-linenumber-color: #25272B;
   --playground-code-font-size: 14px;
   --playground-code-background: #0d1117;
@@ -24,7 +24,7 @@
   --playground-code-callee-color: #d2a8ff;
   --playground-tab-bar-background: #ffffff;
   --playground-bar-height: 39px;
-  --playground-preview-width: 42%;
+  --playground-preview-width: 42%;*/
 }
 
 playground {
@@ -59,10 +59,10 @@ playground {
       line-height: 15px;
       padding: 2px 6px;
       font-weight: bold;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.3);/*
       position: absolute;
       z-index: 5;
-      right: 0.5rem;
+      right: 0.5rem;*/
     }
     pane > playground-file-editor {
       flex: 1 1 0;
