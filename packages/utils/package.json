@@ -1,19 +1,11 @@
 {
   "name": "@semantic-ui/utils",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "type": "module",
   "main": "src/utils.js",
   "module": "src/utils.js",
   "author": "Jack Lukic",
   "license": "ISC",
-  "scripts": {
-    "publish": "wireit"
-  },
-  "wireit": {
-    "publish": {
-      "command": "npm publish"
-    }
-  },
   "devDependencies": {
     "vitest": "^1.5.2"
   }

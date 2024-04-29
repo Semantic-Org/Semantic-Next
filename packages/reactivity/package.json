@@ -1,21 +1,13 @@
 {
   "name": "@semantic-ui/reactivity",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
-  "scripts": {
-    "publish": "wireit"
-  },
-  "wireit": {
-    "publish": {
-      "command": "npm publish"
-    }
-  },
   "dependencies": {
-    "@semantic-ui/utils": "latest"
+    "@semantic-ui/utils": "^0.0.1"
   },
   "devDependencies": {
     "vitest": "^1.5.2"

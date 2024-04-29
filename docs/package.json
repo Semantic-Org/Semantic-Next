@@ -1,45 +1,13 @@
 {
   "name": "@semantic-ui/docs",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "scripts": {
-    "dev": "wireit",
-    "astro:dev": "wireit",
-    "astro:start": "wireit",
-    "astro:build": "wireit",
-    "astro:preview": "wireit",
-    "astro": "wireit"
-  },
-  "wireit": {
-    "install": {
-      "command": "npm install"
-    },
-    "link": {
-      "command": "npm install && npx link ../",
-      "dependencies": ["install"]
-    },
-    "dev": {
-      "command": "astro dev",
-      "dependencies": [ "link"],
-      "service": true
-    },
-    "build": {
-      "command": "astro build",
-      "dependencies": [ "link"]
-    },
-    "astro:dev": {
-      "command": "astro dev",
-      "service": true
-    },
-    "astro:build": {
-      "command": "astro build"
-    },
-    "astro:preview": {
-      "command": "astro preview"
-    },
-    "astro": {
-      "command": "astro"
-    }
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "peerDependencies": {
     "@lit-labs/ssr": "^3.2.2",
@@ -50,7 +18,7 @@
     "@astrojs/mdx": "^2.3.1",
     "@astrojs/starlight": "^0.21.5",
     "@webcomponents/template-shadowroot": "^0.2.1",
-    "astro": "^4.7.0",
+    "astro": "^4.6.3",
     "astro-expressive-code": "^0.35.2",
     "link": "^2.1.0",
     "playground-elements": "^0.18.1",
