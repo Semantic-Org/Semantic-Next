@@ -116,6 +116,22 @@ export const isDOM = (element) => {
 export const isNode = (el) => {
   return !!(el && el.nodeType);
 };
+
+export const isEmpty = (x) => {
+  if (x == null) {
+    return true;
+  }
+  if (isArray(x) || isString(x)) {
+    return x.length === 0;
+  }
+  for (let key in x) {
+    if (x[key]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 /*-------------------
         Date
 --------------------*/

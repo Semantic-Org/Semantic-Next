@@ -54,6 +54,7 @@ Utility includes the following helpers:
 - `isArguments(obj)` - Checks if the value is an arguments object.
 - `isDOM(x)` - Checks if the value is a DOM element.
 - `isNode(x)` - Checks if the value is a DOM node.
+- `isEmpty(x)` Checks if the value is empty like {}
 
 ### Date
 - `formatDate(date, format)` - Formats a date object into a string based on the provided format.
