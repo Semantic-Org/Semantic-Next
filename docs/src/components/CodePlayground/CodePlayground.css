@@ -1,3 +1,32 @@
+:root {
+  --playground-code-linenumber-color: #25272B;
+  --playground-code-font-size: 14px;
+  --playground-code-background: #0d1117;
+  --playground-code-default-color: #c9d1d9;
+  --playground-code-keyword-color: #AAAAAA;
+  --playground-code-atom-color: #c9d1d9;
+  --playground-code-number-color: #58a6ff;
+  --playground-code-def-color: var(--primary-text-color);
+  --playground-code-variable-color: #e98080;
+  --playground-code-property-color: #656565;
+  --playground-code-operator-color: #79c0ff;
+  --playground-code-variable-2-color: #79c0ff;
+  --playground-code-variable-3-color: #c9d1d9;
+  --playground-code-type-color: #c9d1d9;
+  --playground-code-comment-color: #c9d1d9;
+  --playground-code-string-color: var(--primary-text-color);
+  --playground-code-string-2-color: #656565;
+  --playground-code-meta-color: #c9d1d9;
+  --playground-code-qualifier-color: #c9d1d9;
+  --playground-code-builtin-color: #c9d1d9;
+  --playground-code-tag-color: #d2a8ff;
+  --playground-code-attribute-color: var(--primary-text-color);
+  --playground-code-callee-color: #d2a8ff;
+  --playground-tab-bar-background: #ffffff;
+  --playground-bar-height: 39px;
+  --playground-preview-width: 42%;
+}
+
 playground {
 
   display: flex;

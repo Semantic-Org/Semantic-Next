@@ -29,6 +29,7 @@ body {
     display: none;
   }
 
+  --playground-code-linenumber-color: #25272B;
   --playground-code-font-size: 14px;
   --playground-code-background: #0d1117;
   --playground-code-default-color: #c9d1d9;

@@ -1,10 +1,13 @@
 <playground part="playground">
+  {{log files}}
+  {{#if exists files}}
+    <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
+      {{#each file in arrayFromObject files}}
+        <script type="{{getFileType file.value.contentType}}" filename="{{file.key}}">{{{escapeHTML file.value.content}}}</script>
+      {{/each}}
+    </playground-project>
+  {{/if}}
   <panes>
-    {{#if exists config}}
-      <playground-project id="source" project-config="{{config}}" sandbox-base-url="{{sandboxURL}}"></playground-project>
-    {{else}}
-      None
-    {{/if}}
     <pane>
       <label>Component JS</label>
       <playground-tab-bar editor="editor1" editable-file-system

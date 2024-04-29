@@ -1,5 +1,13 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { capitalize, toTitleCase, isEmpty, formatDate, tokenize } from '@semantic-ui/utils';
+import {
+  capitalize,
+  toTitleCase,
+  isEmpty,
+  arrayFromObject,
+  formatDate,
+  escapeHTML,
+  tokenize,
+} from '@semantic-ui/utils';
 
 /*
   These could be written in shorthand but its easier for debugging
@@ -7,10 +15,13 @@ import { capitalize, toTitleCase, isEmpty, formatDate, tokenize } from '@semanti
 */
 export const TemplateHelpers = {
   exists(a) {
-    return isEmpty(a);
+    return !isEmpty(a);
   },
   isEmpty(a) {
     return isEmpty(a);
+  },
+  stringify(a) {
+    return JSON.stringify(a);
   },
   is(a, b) {
     return a == b;
@@ -102,6 +113,12 @@ export const TemplateHelpers = {
   reactiveDebug() {
     Reaction.getSource();
     debugger;
+  },
+  arrayFromObject(obj) {
+    return arrayFromObject(obj);
+  },
+  escapeHTML(string) {
+    return escapeHTML(string);
   },
   guard: Reaction.guard,
   nonreactive: Reaction.nonreactive,

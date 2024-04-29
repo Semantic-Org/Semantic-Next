@@ -60,7 +60,7 @@ export const getExampleFiles = async(example, files) => {
       }
       else if(inArray(fileName, ['index.css'])) {
         const fileContent = await file();
-        exampleFiles['index.html'] = {
+        exampleFiles['index.css'] = {
           contentType: 'text/css',
           content: fileContent.default
         };
@@ -75,7 +75,7 @@ export const getExampleFiles = async(example, files) => {
       else if(inArray(fileName, ['component.css', `${exampleID}.css`])) {
         const fileContent = await file();
         exampleFiles['component.css'] = {
-          contentType: 'text/javascript',
+          contentType: 'text/css',
           content: fileContent.default
         };
       }
