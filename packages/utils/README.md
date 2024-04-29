@@ -40,6 +40,7 @@ Utility includes the following helpers:
 - `onlyKeys(obj, keysToKeep)` - Returns an object with only specified keys
 - `hasProperty(obj, prop)` - Return true if the object has the specified property.
 - `reverseKeys(obj)` - Reverses a lookup object's keys and values.
+- `arrayFromObject(obj) - Returns an array with key value pairs from an object
 
 ### Types
 - `isObject(x)` - Checks if the value is an object.
@@ -72,6 +73,7 @@ Utility includes the following helpers:
 
 ### Regular Expressions
 - `escapeRegExp(string)` - Escapes special characters in a string for use in a regular expression.
+- `escapeHTML(string)` - Escapes string for html '&<>"' only
 
 ### Looping
 - `each(iterable, func, context)` - Calls function for each element of an iterable.

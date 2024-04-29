@@ -445,7 +445,7 @@ export const extend = (obj, ...sources) => {
   return obj;
 };
 
-export const pick = function (obj, ...keys) {
+export const pick = (obj, ...keys) => {
   let copy = {};
   each(keys, function (key) {
     if (key in obj) {
@@ -453,6 +453,20 @@ export const pick = function (obj, ...keys) {
     }
   });
   return copy;
+};
+
+export const arrayFromObject = (obj) => {
+  if(isArray(obj)) {
+    return obj;
+  }
+  let arr = [];
+  each(obj, (value, key) => {
+    arr.push({
+      value,
+      key,
+    });
+  });
+  return arr;
 };
 
 /*
@@ -683,8 +697,24 @@ export const asyncMap = async (obj, func, context) => {
 /*
   Escape Special Chars for RegExp
 */
-export const escapeRegExp = function (string) {
+export const escapeRegExp = (string) => {
   return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+};
+
+export const escapeHTML = (string) => {
+  const htmlEscapes = {
+    '&': '&amp',
+    '<': '&lt',
+    '>': '&gt',
+    '"': '&quot',
+    "\'": '&#39'
+  };
+  const htmlRegExp = /[&<>"']/g;
+  const hasHTML = RegExp(htmlRegExp.source);
+  return (string && hasHTML.test(string))
+    ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
+    : string
+  ;
 };
 
 /*-------------------
