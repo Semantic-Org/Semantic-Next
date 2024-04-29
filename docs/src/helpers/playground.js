@@ -118,7 +118,7 @@ export const getExampleFiles = async(example, files) => {
 };
 
 export const getEmptyProjectFiles = ({withInjections = false} = {}) => {
-  const emptyFiles = {
+  let emptyFiles = {
     'component.js': {
       contentType: 'text/javascript',
       content: '',
@@ -145,7 +145,7 @@ export const getEmptyProjectFiles = ({withInjections = false} = {}) => {
     },
   };
   if(withInjections) {
-    this.addPlaygroundInjections(emptyFiles);
+    emptyFiles = addPlaygroundInjections(emptyFiles);
   }
   return emptyFiles;
 };
