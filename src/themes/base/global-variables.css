@@ -68,11 +68,14 @@
          Defaults
   -------------------- */
 
-  --padding: 1rem;
-  --relative-padding: 1em;
+  --spacing: 1rem;
+  --padding: var(--spacing);
 
-  --margin: 1rem;
-  --relative-margin: 1em;
+  --margin: var(--spacing);
+  --vertically-spaced: var(--spacing) 0rem;
+  --horizontally-spaced: 0rem var(--spacing);
+
+  --centered: var(--spacing) auto;
 
   /* -------------------
       Border Radius
