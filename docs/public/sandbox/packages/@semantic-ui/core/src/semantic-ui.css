@@ -1,7 +1,0 @@
-@layer global, baseTheme, component, theme, overrides, utilities, layout, page, responsive;
-
-@import url('./globals/reset.css') layer(global);
-@import url('./globals/site.css') layer(global);
-@import url('./globals/initial.css') layer(global);
-
-

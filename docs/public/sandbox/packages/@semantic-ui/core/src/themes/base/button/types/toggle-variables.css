@@ -1,8 +1,0 @@
-:root {
-  --button-toggle-active-background: #CFF3D8;
-  --button-toggle-active-color: #22592D;
-  --button-toggle-active-text-shadow: var(--button-text-shadow);
-
-  --button-toggle-active-hover-background: #CFFFD8;
-  --button-toggle-active-hover-color: #22592D;
-}

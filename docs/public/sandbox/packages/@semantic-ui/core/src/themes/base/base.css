@@ -1,5 +1,0 @@
-@layer baseTheme.global, baseTheme.component;
-
-@import url("./global-variables.css") layer(baseTheme.global);
-@import url("./button/button-theme.css") layer(baseTheme.component.button);
-@import url("./icon/icon-theme.css") layer(baseTheme.component.icon);
