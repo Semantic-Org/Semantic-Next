@@ -35,7 +35,6 @@ export const createComponent = ({
   renderingEngine,
   beforeRendered = noop,
 } = {}) => {
-
   // AST shared across instances
   const compiler = new TemplateCompiler(template);
   const ast = compiler.compile();
