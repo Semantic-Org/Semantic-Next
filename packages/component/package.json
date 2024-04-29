@@ -13,10 +13,12 @@
     "lit": "^3.1.2"
   },
   "scripts": {
-    "dev": "publish"
+    "publish": "wireit"
   },
-  "publish": {
-    "command": "npm publish"
+  "wireit": {
+    "publish": {
+      "command": "npm publish"
+    }
   },
   "dependencies": {
     "@semantic-ui/query": "^0.0.1",

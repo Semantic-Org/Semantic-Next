@@ -7,10 +7,12 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "scripts": {
-    "dev": "publish"
+    "publish": "wireit"
   },
-  "publish": {
-    "command": "npm publish"
+  "wireit": {
+    "publish": {
+      "command": "npm publish"
+    }
   },
   "dependencies": {
     "@semantic-ui/utils": "^0.0.1"

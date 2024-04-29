@@ -91,12 +91,12 @@
     "publish:all": {
       "dependencies": [
         "publish",
-        "packages/component:publish",
-        "packages/query:publish",
-        "packages/reactivity:publish",
-        "packages/specs:publish",
-        "packages/templating:publish",
-        "packages/utils:publish"
+        "./packages/component:publish",
+        "./packages/query:publish",
+        "./packages/reactivity:publish",
+        "./packages/specs:publish",
+        "./packages/templating:publish",
+        "./packages/utils:publish"
       ]
     },
     "dev": {
