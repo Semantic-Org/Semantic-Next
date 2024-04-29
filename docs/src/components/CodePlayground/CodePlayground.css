@@ -1,0 +1,77 @@
+playground {
+
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  width: 100vw;
+  height: calc(100vh - var(--topbar-height));
+
+  panes {
+
+    background-color: var(--playground-code-background);
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+
+    pane {
+      position: relative;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--white-10);
+      box-shadow: 0px 1px 0px 0px var(--black-60) inset;
+      flex: 1 1 0;
+      box-sizing: border-box;
+    }
+    label {
+      font-size: 11px;
+      width: max-content;
+      border-radius: 5px;
+      line-height: 15px;
+      padding: 2px 6px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.3);
+      position: absolute;
+      z-index: 5;
+      right: 0.5rem;
+    }
+    pane > playground-file-editor {
+      flex: 1 1 0;
+      height: auto;
+    }
+    pane:first-child {
+      border-top: none;
+      box-shadow: none;
+    }
+  }
+
+  panes + panes {
+    border-left: 1px solid var(--white-10);
+  }
+
+  /* Reskin */
+  playground-preview {
+    margin: -0.5rem;
+    flex: 1 1 0;
+    max-height: calc(100vh - var(--topbar-height));
+  }
+  playground-preview::part(preview-toolbar) {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: bold;
+    background: var(--subtle-gradient);
+    box-shadow: var(--subtle-bottom-lip-shadow);
+  }
+  playground-preview::part(preview-loading-indicator) {
+    --mdc-theme-primary: #49b1d2;
+    height: 4px;
+    overflow: hidden;
+    top: -26px;
+    width: 71px;
+    left: 22px;
+  }
+}
+
+playground-ide {
+  height: 100%;
+}
