@@ -1,14 +1,45 @@
 {
   "name": "@semantic-ui/docs",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
-    "dev": "astro dev",
-    "astro:dev": "astro dev",
-    "astro:start": "astro dev",
-    "astro:build": "astro build",
-    "astro:preview": "astro preview",
-    "astro": "astro"
+    "dev": "wireit",
+    "astro:dev": "wireit",
+    "astro:start": "wireit",
+    "astro:build": "wireit",
+    "astro:preview": "wireit",
+    "astro": "wireit"
+  },
+  "wireit": {
+    "install": {
+      "command": "npm install"
+    },
+    "link": {
+      "command": "npm install && npx link ../",
+      "dependencies": ["install"]
+    },
+    "dev": {
+      "command": "astro dev",
+      "dependencies": [ "link"],
+      "service": true
+    },
+    "build": {
+      "command": "astro build",
+      "dependencies": [ "link"]
+    },
+    "astro:dev": {
+      "command": "astro dev",
+      "service": true
+    },
+    "astro:build": {
+      "command": "astro build"
+    },
+    "astro:preview": {
+      "command": "astro preview"
+    },
+    "astro": {
+      "command": "astro"
+    }
   },
   "peerDependencies": {
     "@lit-labs/ssr": "^3.2.2",

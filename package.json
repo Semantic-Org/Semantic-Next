@@ -38,16 +38,10 @@
       "service": true
     },
     "dev": {
-      "command": "cd docs && npm install && npx link ../ && npm run astro:dev",
-      "dependencies": [
-        "watch"
-      ]
+      "dependencies": ["./docs:dev"]
     },
     "build-docs": {
-      "command": "cd docs && npm install && npx link ../ && npm run astro:build",
-      "dependencies": [
-        "build"
-      ]
+      "dependencies": ["./docs:build"]
     },
     "test:case": {
       "command": "node ./tasks/test-case.js"

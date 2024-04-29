@@ -38,7 +38,7 @@ export const indexCSSBefore = ``;
 export const indexCSSAfter = ``;
 
 export const getSandboxURL = () => {
-  return `/playground/`;
+  return `/sandbox/`;
 };
 
 export const getExampleFiles = async(example, files) => {
