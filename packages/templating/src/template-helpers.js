@@ -1,11 +1,17 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { capitalize, toTitleCase, formatDate, tokenize } from '@semantic-ui/utils';
+import { capitalize, toTitleCase, isEmpty, formatDate, isEmpty, tokenize } from '@semantic-ui/utils';
 
 /*
   These could be written in shorthand but its easier for debugging
   if you give have a line to breakpoint on
 */
 export const TemplateHelpers = {
+  exists(a) {
+    return isEmpty(a);
+  },
+  isEmpty(a) {
+    return isEmpty(a);
+  },
   is(a, b) {
     return a == b;
   },

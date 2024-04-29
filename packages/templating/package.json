@@ -1,6 +1,7 @@
 {
   "name": "@semantic-ui/templating",
   "version": "0.0.3",
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",
@@ -19,5 +20,9 @@
     "@semantic-ui/reactivity": "latest",
     "@semantic-ui/templating": "latest",
     "@semantic-ui/utils": "latest"
+  },
+  "devDependencies": {
+    "wireit": "^0.14.4",
+    "vitest": "^1.5.2"
   }
 }
