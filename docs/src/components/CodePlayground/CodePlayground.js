@@ -22,7 +22,6 @@ const createInstance = ({tpl, settings, $}) => ({
       'text/javascript': 'sample/js',
       'text/typescript': 'sample/ts',
     };
-    console.log(type, get(types, type));
     return get(types, type);
   }
 });

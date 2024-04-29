@@ -8,8 +8,8 @@ body {
 
 html {
   font-size: var(--font-size);
-  box-sizing: var(--box-sizing);
 }
+
 *,
 *:before,
 *:after {
@@ -25,6 +25,7 @@ body {
   font-family: var(--page-font);
   line-height: var(--line-height);
   color: var(--text-color);
+  box-sizing: var(--box-sizing);
 }
 
 h1,
