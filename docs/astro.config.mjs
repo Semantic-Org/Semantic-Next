@@ -21,8 +21,8 @@ export default defineConfig({
       // SSL for localhost and dev.semantic-ui.com
       // add '127.0.0.1 dev.semantic-ui.com ' to your 'etc/hosts' file to use
       https: {
-        key: fs.readFileSync('./cert/dev-key.pem'),
-        cert: fs.readFileSync('./cert/dev.pem')
+        key: fs.readFileSync('./cert/dev.semantic-ui.com-key.pem'),
+        cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem')
       }
     },
     ssr: {
@@ -31,7 +31,8 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: ['playground-typescript-worker.js']
+    force: true,
+    exclude: ['playground-elements']
   },
   integrations: [lit(), expressiveCode(), mdx(), starlight({title: 'Semantic UI'})]
 });

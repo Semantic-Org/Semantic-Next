@@ -1,0 +1,15 @@
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+[req_distinguished_name]
+C = US
+ST = NY
+L = Brooklyn
+O = Semantic UI LLC
+OU = Development
+CN = dev.semantic-ui.com
+[v3_req]
+keyUsage = critical, digitalSignature, keyAgreement
+extendedKeyUsage = serverAuth
+subjectAltName = DNS:dev.semantic-ui.com, DNS:localhost
