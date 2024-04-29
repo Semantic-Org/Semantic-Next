@@ -47,6 +47,10 @@ export const indexJSAfter = ``;
 export const indexCSSBefore = `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
 export const indexCSSAfter = ``;
 
+export const getSandboxURL = () => {
+  return `https://api.semantic-ui.com/sandbox/`;
+};
+
 export const getExampleFiles = async(example, files) => {
   const exampleID = example.id || tokenize(example.title);
   if(!exampleID) {
@@ -113,8 +117,8 @@ export const getExampleFiles = async(example, files) => {
   return exampleFiles;
 };
 
-export const getEmptyProjectFiles = () => {
-  return {
+export const getEmptyProjectFiles = ({withInjections = false} = {}) => {
+  const emptyFiles = {
     'component.js': {
       contentType: 'text/javascript',
       content: '',
@@ -140,6 +144,10 @@ export const getEmptyProjectFiles = () => {
       content: '',
     },
   };
+  if(withInjections) {
+    this.addPlaygroundInjections(emptyFiles);
+  }
+  return emptyFiles;
 };
 
 export const getPlaygroundInjections = (type) => {

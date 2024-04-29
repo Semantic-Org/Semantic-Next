@@ -1,11 +1,12 @@
 ---
   import Playground from '@layouts/Playground.astro';
-  import { getEmptyProjectFiles } from '@helpers/playground.js';
+  import { getSandboxURL, getEmptyProjectFiles } from '@helpers/playground.js';
 
-  const files = getEmptyProjectFiles();
+  const files = getEmptyProjectFiles({withInjections: true});
   const projectConfig = {
     files: files
   };
+  const sandboxURL = getSandboxURL();
 ---
 <script>
   import 'playground-elements/playground-project.js';
@@ -13,7 +14,7 @@
   import 'playground-elements/playground-preview.js';
 </script>
 <Playground>
-  <playground-project id="source" sandbox-base-url="/playground"></playground-project>
+  <playground-project id="source" sandbox-base-url={sandboxURL}></playground-project>
   <script define:vars={{ projectConfig }}>
     document.querySelector('playground-project').config = projectConfig;
   </script>

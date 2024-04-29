@@ -4,6 +4,7 @@ import { each, tokenize } from '@semantic-ui/utils';
 import {
   getExampleFiles,
   addPlaygroundInjections,
+  getSandboxURL,
 } from '@helpers/playground.js';
 import Playground from '@layouts/Playground.astro';
 
@@ -19,14 +20,13 @@ export async function getStaticPaths() {
   });
   return paths;
 }
-
+const sandboxURL = getSandboxURL();
 const example = entry.data;
 const exampleID = example.id || tokenize(example.title);
 const allExampleFiles = await import.meta.glob(`../../example-files/**`, {
   query: '?raw',
 });
 let files = await getExampleFiles(example, allExampleFiles);
-console.log(files);
 files = addPlaygroundInjections(files);
 console.log(files);
 const projectConfig = {
@@ -36,11 +36,11 @@ const projectConfig = {
 
 <Playground {...entry.data}>
   <script>
-    import 'playground-elements/playground-project.js';
-    import 'playground-elements/playground-file-editor.js';
-    import 'playground-elements/playground-preview.js';
+  import 'playground-elements/playground-project.js';
+  import 'playground-elements/playground-file-editor.js';
+  import 'playground-elements/playground-preview.js';
   </script>
-  <playground-project id="source" sandbox-base-url="/playground"
+  <playground-project id="source" sandbox-base-url={sandboxURL}
   ></playground-project>
   <script define:vars={{ projectConfig }}>
     document.querySelector('playground-project').config = projectConfig;
@@ -106,6 +106,6 @@ const projectConfig = {
     </panes>
   </playground>
   <script>
-    const editor = document.querySelectorAll('playground-file-editor');
+  const editor = document.querySelectorAll('playground-file-editor');
   </script>
 </Playground>
