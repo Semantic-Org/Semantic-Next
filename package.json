@@ -40,11 +40,6 @@
     "format": "wireit",
     "prepare": "wireit"
   },
-  "dependencies": {
-    "@semantic-ui/component": "latest",
-    "@semantic-ui/utils": "latest",
-    "@semantic-ui/specs": "latest"
-  },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",

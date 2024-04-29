@@ -2,7 +2,6 @@
   "name": "@semantic-ui/specs",
   "version": "0.0.3",
   "type": "module",
-  "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",

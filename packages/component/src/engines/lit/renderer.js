@@ -210,6 +210,8 @@ export class LitRenderer {
         return context;
       };
 
+      console.log('here');
+
       let dataValue = getDeepValue(data, expression);
       const helper = this.helpers[expression];
       // check if we have a global helper with this name
