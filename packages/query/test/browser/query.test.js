@@ -1,8 +1,8 @@
 import { $ } from '@semantic-ui/query';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, test, vi } from 'vitest';
 
 describe('query', () => {
-  
+
   describe('text', () => {
 
     it('text should get text content of slotted nodes from shadow DOM', () => {
@@ -35,7 +35,7 @@ describe('query', () => {
       const span = document.createElement('span');
       span.slot = 'test';
 
-      span.textContent = 'passed in text';  
+      span.textContent = 'passed in text';
       customElement.appendChild(span);
 
 
@@ -45,6 +45,5 @@ describe('query', () => {
 
     });
   });
-
 
 });

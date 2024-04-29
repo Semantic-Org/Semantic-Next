@@ -6,6 +6,7 @@ export default defineConfig({
       enabled: true,
       headless: true,
     },
+    setupFiles: [ 'tests/configs/setup.js' ],
     outdir: 'tests/',
     reporter: ['default'],
     coverage: {

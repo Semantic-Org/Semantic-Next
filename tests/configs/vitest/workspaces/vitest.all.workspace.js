@@ -20,6 +20,7 @@ export default defineWorkspace([
   },
   {
     test: {
+      setupFiles: [ 'tests/configs/setup.js' ],
       include: ['**/test/browser/**/*.test.{ts,js}'],
       name: 'browser',
       browser: {

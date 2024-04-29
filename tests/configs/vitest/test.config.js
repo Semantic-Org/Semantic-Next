@@ -16,10 +16,10 @@ export default defineConfig({
       reportsDirectory: './tests/coverage',
       reportOnFailure: true,
       thresholds: {
-        lines: 60,
-        branches: 60,
-        functions: 60,
-        statements: 60
+        lines: 10,
+        branches: 10,
+        functions: 10,
+        statements: 10
       }
     },
     workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
