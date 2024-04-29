@@ -21,9 +21,9 @@
     }
   },
   "dependencies": {
-    "@semantic-ui/query": "^0.0.1",
-    "@semantic-ui/reactivity": "^0.0.1",
-    "@semantic-ui/templating": "^0.0.1",
-    "@semantic-ui/utils": "^0.0.1"
+    "@semantic-ui/query": "latest",
+    "@semantic-ui/reactivity": "latest",
+    "@semantic-ui/templating": "latest",
+    "@semantic-ui/utils": "latest"
   }
 }

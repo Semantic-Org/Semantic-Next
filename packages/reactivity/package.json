@@ -15,7 +15,7 @@
     }
   },
   "dependencies": {
-    "@semantic-ui/utils": "^0.0.1"
+    "@semantic-ui/utils": "latest"
   },
   "devDependencies": {
     "vitest": "^1.5.2"
