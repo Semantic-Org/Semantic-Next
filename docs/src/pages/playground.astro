@@ -2,7 +2,7 @@
   import Playground from '@layouts/Playground.astro';
   import { getSandboxURL, getEmptyProjectFiles } from '@helpers/playground.js';
 
-  const files = getEmptyProjectFiles({withInjections: true});
+  const files = getEmptyProjectFiles({withInjections: true, withStubs: true});
   const projectConfig = {
     files: files
   };

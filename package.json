@@ -38,13 +38,13 @@
       "service": true
     },
     "dev": {
-      "command": "cd docs && npm install && npx link ../ && npm run dev",
+      "command": "cd docs && npm install && npx link ../ && npm run astro:dev",
       "dependencies": [
         "watch"
       ]
     },
     "build-docs": {
-      "command": "cd docs && npm install && npx link ../ && npm run build",
+      "command": "cd docs && npm install && npx link ../ && npm run astro:build",
       "dependencies": [
         "build"
       ]
@@ -69,22 +69,22 @@
     "lit": "^3.1.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.2.1",
-    "@commitlint/config-conventional": "^19.1.0",
-    "@types/node": "^20.12.3",
-    "@typescript-eslint/eslint-plugin": "^7.5.0",
-    "@typescript-eslint/parser": "^7.5.0",
-    "@vitest/browser": "^1.4.0",
-    "@vitest/ui": "^1.4.0",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@types/node": "^20.12.7",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
+    "@vitest/browser": "^1.5.2",
+    "@vitest/ui": "^1.5.2",
     "chalk": "^5.3.0",
-    "dprint": "^0.45.0",
+    "dprint": "^0.45.1",
     "esbuild": "^0.20.2",
     "husky": "^9.0.11",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.2.2",
     "opencommit": "^3.0.12",
     "underscore": "^1.13.6",
-    "vitest": "^1.4.0",
+    "vitest": "^1.5.2",
     "wireit": "^0.14.4"
   },
   "ciDependencies": {

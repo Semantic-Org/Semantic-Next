@@ -1,4 +1,4 @@
-import { each } from '@semantic-ui/core';
+import { each } from '@semantic-ui/utils';
 
 /* These are top level to make it easier to format */
 export const componentJSBefore = ``;

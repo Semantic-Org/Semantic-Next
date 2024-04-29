@@ -15,40 +15,30 @@ export const componentCSSAfter = ``;
 export const indexHTMLBeforeStandard = `<!-- playground-hide -->
 <html>
 <head>
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
-<!-- This defines the component tag and makes it available on your page !-->
-<script src="./component.js" type="module"></script>
-<link href="./index.css" rel="stylesheet">
-</head>
-<body>
-<!-- playground-hide-end -->
-`;
-export const indexHTMLBeforeUI = `<!-- playground-hide -->
-<html>
-<head>
-<!-- This defines the component tag and makes it available on your page !-->
 <script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
 <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
 <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
+<!-- This defines the component tag and makes it available on your page !-->
 <script src="./component.js" type="module"></script>
 <link href="./index.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
 <!-- playground-hide-end -->
 `;
 
+// nothing dif yet
+export const indexHTMLBeforeUI = indexHTMLBeforeStandard;
+
 export const indexHTMLAfter = `<!-- playground-hide --></body></html><!-- playground-hide-end -->`;
 
-export const indexJSBefore = `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
+export const indexJSBefore = ``;
 export const indexJSAfter = ``;
 
-export const indexCSSBefore = `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
+export const indexCSSBefore = ``;
 export const indexCSSAfter = ``;
 
 export const getSandboxURL = () => {
-  return `https://api.semantic-ui.com/sandbox/`;
+  return `/playground/`;
 };
 
 export const getExampleFiles = async(example, files) => {
@@ -117,39 +107,6 @@ export const getExampleFiles = async(example, files) => {
   return exampleFiles;
 };
 
-export const getEmptyProjectFiles = ({withInjections = false} = {}) => {
-  let emptyFiles = {
-    'component.js': {
-      contentType: 'text/javascript',
-      content: '',
-    },
-    'component.html': {
-      contentType: 'text/html',
-      content: '',
-    },
-    'component.css': {
-      contentType: 'text/css',
-      content: '',
-    },
-    'index.js': {
-      contentType: 'text/javascript',
-      content: '',
-    },
-    'index.html': {
-      contentType: 'text/html',
-      content: '',
-    },
-    'index.css': {
-      contentType: 'text/css',
-      content: '',
-    },
-  };
-  if(withInjections) {
-    emptyFiles = addPlaygroundInjections(emptyFiles);
-  }
-  return emptyFiles;
-};
-
 export const getPlaygroundInjections = (type) => {
   const indexHTMLBefore = (type == 'ui')
     ? indexHTMLBeforeUI
@@ -186,11 +143,46 @@ export const getPlaygroundInjections = (type) => {
 export const addPlaygroundInjections = (files, type) => {
   const fileInjections = getPlaygroundInjections(type);
   each(files, (file, name) => {
-    if(file.content && fileInjections[name]) {
+    if(fileInjections[name]) {
       const { before, after } = fileInjections[name];
       files[name].content = (before || '') + files[name].content + (after || '');
     }
   });
   return files;
+};
+
+export const getEmptyProjectFiles = ({
+  withInjections = false
+} = {}) => {
+  let emptyFiles = {
+    'component.js': {
+      contentType: 'text/javascript',
+      content: '',
+    },
+    'component.html': {
+      contentType: 'text/html',
+      content: '',
+    },
+    'component.css': {
+      contentType: 'text/css',
+      content: '',
+    },
+    'index.js': {
+      contentType: 'text/javascript',
+      content: '',
+    },
+    'index.html': {
+      contentType: 'text/html',
+      content: '',
+    },
+    'index.css': {
+      contentType: 'text/css',
+      content: '',
+    },
+  };
+  if(withInjections) {
+    emptyFiles = addPlaygroundInjections(emptyFiles);
+  }
+  return emptyFiles;
 };
 
