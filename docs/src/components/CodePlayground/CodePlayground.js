@@ -6,7 +6,6 @@ import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
 
 import 'playground-elements/playground-project.js';
-import 'playground-elements/playground-typescript-worker.js?worker';
 import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
 

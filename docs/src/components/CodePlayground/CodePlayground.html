@@ -1,6 +1,6 @@
 <playground part="playground">
   <panes>
-    {{#if config}}
+    {{#if exists config}}
       <playground-project id="source" project-config="{{config}}" sandbox-base-url="{{sandboxURL}}"></playground-project>
     {{else}}
       None

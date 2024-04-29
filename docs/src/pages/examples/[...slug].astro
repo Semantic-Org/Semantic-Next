@@ -7,6 +7,7 @@ import {
   getSandboxURL,
 } from '@helpers/playground.js';
 import Playground from '@layouts/Playground.astro';
+import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
 const { entry } = Astro.props;
 export async function getStaticPaths() {
@@ -28,85 +29,11 @@ const allExampleFiles = await import.meta.glob(`../../example-files/**`, {
 });
 let files = await getExampleFiles(example, allExampleFiles);
 files = addPlaygroundInjections(files);
-console.log(files);
 const projectConfig = {
   files: files
 };
 ---
 
 <Playground {...entry.data}>
-  <script>
-  import 'playground-elements/playground-project.js';
-  import 'playground-elements/playground-typescript-worker.js?worker';
-  import 'playground-elements/playground-file-editor.js';
-  import 'playground-elements/playground-preview.js';
-  </script>
-  <playground-project id="source" sandbox-base-url={sandboxURL}
-  ></playground-project>
-  <script define:vars={{ projectConfig }}>
-    document.querySelector('playground-project').config = projectConfig;
-  </script>
-  <playground>
-    <panes>
-      <pane>
-        <label>Component JS</label>
-        <playground-tab-bar editor="editor1" editable-file-system
-        ></playground-tab-bar>
-        <playground-file-editor
-          line-numbers
-          project="source"
-          filename="component.js"
-        >
-        </playground-file-editor>
-      </pane>
-      <pane>
-        <label>Component Template</label>
-        <playground-tab-bar editor="editor1" editable-file-system
-        ></playground-tab-bar>
-        <playground-file-editor
-          line-numbers
-          project="source"
-          filename="component.html"
-        >
-        </playground-file-editor>
-      </pane>
-      <pane>
-        <label>Component CSS</label>
-        <playground-tab-bar editor="editor1" editable-file-system
-        ></playground-tab-bar>
-        <playground-file-editor
-          line-numbers
-          project="source"
-          filename="component.css"
-        >
-        </playground-file-editor>
-      </pane>
-    </panes>
-    <panes>
-      <pane>
-        <label>Page HTML</label>
-        <playground-file-editor
-          line-numbers
-          project="source"
-          filename="index.html"
-        >
-        </playground-file-editor>
-      </pane>
-      <pane>
-        <label>Page CSS</label>
-        <playground-file-editor
-          line-numbers
-          project="source"
-          filename="index.css"
-        >
-        </playground-file-editor>
-      </pane>
-      <pane class="preview">
-        <playground-preview project="source"> </playground-preview>
-      </pane>
-    </panes>
-  </playground>
-  <script>
-  const editor = document.querySelectorAll('playground-file-editor');
-  </script>
+  <CodePlayground client:only config={projectConfig} sandboxURL={sandboxURL}></CodePlayground>
 </Playground>
