@@ -6,6 +6,12 @@
   "module": "src/utils.js",
   "author": "Jack Lukic",
   "license": "ISC",
+  "scripts": {
+    "dev": "publish"
+  },
+  "publish": {
+    "command": "npm publish"
+  },
   "devDependencies": {
     "vitest": "^1.5.2"
   }

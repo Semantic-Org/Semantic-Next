@@ -6,6 +6,12 @@
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
+  "scripts": {
+    "dev": "publish"
+  },
+  "publish": {
+    "command": "npm publish"
+  },
   "dependencies": {
     "@semantic-ui/utils": "^0.0.1"
   }

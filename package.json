@@ -16,18 +16,18 @@
   "scripts": {
     "build": "wireit",
     "dev": "wireit",
-    "build-docs": "wireit",
+    "build:docs": "wireit",
     "serve": "wireit",
     "test:case": "wireit",
-    "prettify": "prettierx ./ --write --ignore-unknown",
-    "format": "npx dprint fmt",
-    "test": "vitest --c tests/configs/vitest/vitest.config.js",
-    "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
-    "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
-    "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
-    "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
-    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
-    "prepare": "husky"
+    "prettify": "wireit",
+    "format": "wireit",
+    "test": "wireit",
+    "test:ui": "wireit",
+    "ci:coverage": "wireit",
+    "ci:test": "wireit",
+    "ci:test:unit": "wireit",
+    "ci:test:browser": "wireit",
+    "prepare": "wireit"
   },
   "wireit": {
     "build": {
@@ -37,25 +37,60 @@
       "command": "node ./tasks/watch.js",
       "service": true
     },
+    "publish": {
+      "command": "npm publish",
+      "dependencies": ["build"]
+    },
+    "publish:all": {
+      "dependencies": [
+        "publish",
+        "packages/component:publish",
+        "packages/query:publish",
+        "packages/reactivity:publish",
+        "packages/specs:publish",
+        "packages/templating:publish",
+        "packages/utils:publish"
+      ]
+    },
     "dev": {
       "dependencies": ["./docs:dev"]
     },
-    "build-docs": {
+    "build:docs": {
       "dependencies": ["./docs:build"]
     },
     "test:case": {
       "command": "node ./tasks/test-case.js"
     },
-    "serve:docs": {
-      "command": "cd docs && npm run dev",
-      "service": true
-    },
     "serve": {
       "command": "node ./tasks/serve.js",
       "service": true
     },
-    "build:docs": {
-      "command": "cd docs && npm run build"
+    "format": {
+      "command": "npx dprint fmt"
+    },
+    "test": {
+      "command": "vitest --c tests/configs/vitest/vitest.config.js"
+    },
+    "test:ui": {
+      "command": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js"
+    },
+    "ci:coverage": {
+      "command": "vitest --c tests/configs/vitest/ci-coverage.config.js"
+    },
+    "ci:test": {
+      "command": "vitest --c tests/configs/vitest/ci-test-all.config.js"
+    },
+    "ci:test:unit": {
+      "command": "vitest --c tests/configs/vitest/ci-test-unit.config.js"
+    },
+    "ci:test:browser": {
+      "command": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
+    },
+    "prettify": {
+      "command": "prettierx ./ --write --ignore-unknown"
+    },
+    "prepare": {
+      "command": "husky"
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",

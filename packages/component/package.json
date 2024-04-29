@@ -12,6 +12,12 @@
   "devDependencies": {
     "lit": "^3.1.2"
   },
+  "scripts": {
+    "dev": "publish"
+  },
+  "publish": {
+    "command": "npm publish"
+  },
   "dependencies": {
     "@semantic-ui/query": "^0.0.1",
     "@semantic-ui/reactivity": "^0.0.1",
