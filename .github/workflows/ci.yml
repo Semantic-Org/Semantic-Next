@@ -108,7 +108,7 @@ jobs:
       - name: Get Playwright Version
         run: |
           echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/playwright-bin" >> $GITHUB_ENV
-          PLAYWRIGHT_VERSION="$(npm ls playwright | grep playwright | sed 's/.*@//')"
+          PLAYWRIGHT_VERSION="$(npm ls playwright | grep playwright | awk -F@ '{print $NF}' | awk '!/deduped/')"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
       - name: Cache Playwright
