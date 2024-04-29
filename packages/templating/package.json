@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/templating",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",

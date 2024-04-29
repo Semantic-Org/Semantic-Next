@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
@@ -41,9 +41,9 @@
     "prepare": "wireit"
   },
   "dependencies": {
-    "@semantic-ui/component": "^0.0.2",
-    "@semantic-ui/utils": "^0.0.2",
-    "@semantic-ui/specs": "^0.0.2"
+    "@semantic-ui/component": "latest",
+    "@semantic-ui/utils": "latest",
+    "@semantic-ui/specs": "latest"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
