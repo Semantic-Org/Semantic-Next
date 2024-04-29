@@ -15,18 +15,26 @@
   ],
   "scripts": {
     "build": "wireit",
+
     "dev": "wireit",
     "build:docs": "wireit",
+
     "serve": "wireit",
     "test:case": "wireit",
+
+    "publish": "wireit",
+    "publish:all": "wireit",
+
     "prettify": "wireit",
-    "format": "wireit",
     "test": "wireit",
     "test:ui": "wireit",
+
     "ci:coverage": "wireit",
     "ci:test": "wireit",
     "ci:test:unit": "wireit",
     "ci:test:browser": "wireit",
+
+    "format": "wireit",
     "prepare": "wireit"
   },
   "wireit": {
