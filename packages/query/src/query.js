@@ -488,8 +488,10 @@ export class Query {
   }
 
   // adds properties to an element after dom loads
-  initialize(settings, { onDOMReady = true } = {}) {
-    $(document).on('DOMContentLoaded', this.settings);
+  initialize(settings) {
+    $(document).on('DOMContentLoaded', () => {
+      this.settings(settings);
+    });
   }
 
   settings(settings) {
