@@ -59,8 +59,8 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   getItems() {
     let items = this.eachCondition.over() || [];
-    items = items.map((item) => {
-      if (isObject(item)) {
+    items = items.map((item, index) => {
+      if (isObject(item) && !this.getItemID(item, index)) {
         item._hash = hashCode(item);
       }
       return item;
