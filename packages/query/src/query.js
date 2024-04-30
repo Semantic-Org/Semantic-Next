@@ -69,10 +69,12 @@ export class Query {
   }
 
   each(callback) {
-    Array.from(this).forEach((el, index) => {
+    // "for" perf
+    for (let index = 0; index < this.length; index++) {
+      const el = this[index];
       const $el = this.chain(el);
       callback.call($el, el, index);
-    });
+    }
     return this;
   }
 
@@ -173,7 +175,6 @@ export class Query {
 
   closestDeep(element, selector) {
     let currentElement = element;
-
     while (currentElement) {
       if (currentElement.matches(selector)) {
         return currentElement;
