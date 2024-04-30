@@ -6,62 +6,25 @@
       {{/each}}
     </playground-project>
   {{/if}}
-  <panes>
-    <pane>
-      <label>Component JS</label>
-      <playground-tab-bar editor="editor1" editable-file-system
-      ></playground-tab-bar>
-      <playground-file-editor
-        line-numbers
-        project="source"
-        filename="component.js"
-      >
-      </playground-file-editor>
-    </pane>
-    <pane>
-      <label>Component Template</label>
-      <playground-tab-bar editor="editor1" editable-file-system
-      ></playground-tab-bar>
-      <playground-file-editor
-        line-numbers
-        project="source"
-        filename="component.html"
-      >
-      </playground-file-editor>
-    </pane>
-    <pane>
-      <label>Component CSS</label>
-      <playground-tab-bar editor="editor1" editable-file-system
-      ></playground-tab-bar>
-      <playground-file-editor
-        line-numbers
-        project="source"
-        filename="component.css"
-      >
-      </playground-file-editor>
-    </pane>
-  </panes>
-  <panes>
-    <pane>
-      <label>Page HTML</label>
-      <playground-file-editor
-        line-numbers
-        project="source"
-        filename="index.html"
-      >
-      </playground-file-editor>
-    </pane>
-    <pane>
-      <label>Page CSS</label>
-      <playground-file-editor
-        line-numbers
-        project="source"
-        filename="index.css"
-      >
-      </playground-file-editor>
-    </pane>
-    <pane class="preview">
-      <playground-preview project="source"> </playground-preview>
-    </pane>
-  </panes>
+  {{#each paneGroup in getPanes}}
+    <panes>
+      {{#each pane in paneGroup}}
+        {{#if is pane.type 'preview'}}
+          <pane class="preview">
+            <playground-preview project="source"> </playground-preview>
+          </pane>
+        {{else}}
+          <pane>
+            <label>{{pane.label}}</label>
+            <playground-file-editor
+              line-numbers
+              project="source"
+              filename="{{pane.filename}}"
+            >
+            </playground-file-editor>
+          </pane>
+        {{/if}}
+      {{/each}}
+    </panes>
+  {{/each}}
 </playground>

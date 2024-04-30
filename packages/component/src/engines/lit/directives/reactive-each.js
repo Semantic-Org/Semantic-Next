@@ -4,7 +4,7 @@ import { insertPart, getCommittedValue, removePart, setCommittedValue, setChildP
 import { AsyncDirective } from 'lit/async-directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { hashCode, clone, isEqual, each, isObject, isString } from '@semantic-ui/utils';
+import { hashCode, clone, isEqual, each, isPlainObject, isString } from '@semantic-ui/utils';
 
 const generateMap = (list, start, end) => {
   const map = new Map();
@@ -60,7 +60,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   getItems() {
     let items = this.eachCondition.over() || [];
     items = items.map((item, index) => {
-      if (isObject(item) && !this.getItemID(item, index)) {
+      if (isPlainObject(item) && !this.getItemID(item, index)) {
         item._hash = hashCode(item);
       }
       return item;
@@ -85,7 +85,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getItemID(item, index) {
-    if (isObject(item)) {
+    if (isPlainObject(item)) {
       return item._id || item.id || item.key || item.hash || item._hash || index;
     }
     if (isString) {

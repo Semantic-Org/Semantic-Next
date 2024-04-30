@@ -28,7 +28,7 @@ body {
   topbar theme-switcher {
     display: none;
   }
-
+  --playground-code-comment-color: #444444;
   --playground-code-linenumber-color: #25272B;
   --playground-code-font-size: 14px;
   --playground-code-background: #0d1117;
@@ -43,7 +43,6 @@ body {
   --playground-code-variable-2-color: #79c0ff;
   --playground-code-variable-3-color: #c9d1d9;
   --playground-code-type-color: #c9d1d9;
-  --playground-code-comment-color: #c9d1d9;
   --playground-code-string-color: var(--primary-text-color);
   --playground-code-string-2-color: #656565;
   --playground-code-meta-color: #c9d1d9;

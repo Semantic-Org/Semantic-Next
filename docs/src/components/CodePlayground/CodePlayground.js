@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { get, each } from '@semantic-ui/utils';
+import { get, each, sortBy } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import template from './CodePlayground.html?raw';
@@ -21,7 +21,15 @@ const createInstance = ({tpl, settings, $}) => ({
     'text/javascript': 'sample/js',
     'text/typescript': 'sample/ts',
   },
-  panelIndex: {
+  fileLabels: {
+    'component.js': 'Component JS',
+    'component.html': 'Component Template',
+    'component.css': 'Component CSS',
+    'index.html': 'Page HTML',
+    'index.css': 'Page CSS',
+    'index.js': 'Page JS',
+  },
+  paneIndex: {
     'component.js': 0,
     'component.html': 0,
     'component.css': 0,
@@ -29,7 +37,7 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.css': 1,
     'index.js': 1,
   },
-  positionIndex: {
+  sortIndex: {
     'component.js': 0,
     'component.html': 1,
     'component.css': 2,
@@ -44,10 +52,8 @@ const createInstance = ({tpl, settings, $}) => ({
     let files = [];
     each(settings.files, (file, filename) => {
       const fileData = tpl.getFile(file, filename);
-      console.log(fileData);
       files.push(fileData);
     });
-    console.log(files);
     return files;
   },
   getFile(file, filename) {
@@ -56,20 +62,31 @@ const createInstance = ({tpl, settings, $}) => ({
       filename,
       ...file,
       scriptType: tpl.getScriptType(file.contentType),
-      panelIndex: tpl.getPanelIndex(filename),
-      positionIndex: tpl.getPositionIndex(filename),
+      paneIndex: tpl.getDefaultPanel(filename),
+      sortIndex: tpl.getDefaultSort(filename),
+      label: tpl.getFileLabel(filename)
     };
   },
-  getPanelIndex(filename) {
-    console.log(tpl.panelIndex, filename, get(tpl.panelIndex, filename));
-    return get(tpl.panelIndex, filename);
+  getDefaultPanel(filename) {
+    return get(tpl.paneIndex, filename);
   },
-  getPositionIndex(filename) {
-    return get(tpl.positionIndex, filename);
+  getDefaultSort(filename) {
+    return get(tpl.sortIndex, filename);
+  },
+  getFileLabel(filename) {
+    return get(tpl.fileLabels, filename);
   },
   getPanes() {
+    let panes = [[], []];
     let files = tpl.getFileArray();
-    let panes = [];
+    each(files, file => {
+      panes[file.paneIndex].push(file);
+    });
+    panes = panes.map(pane => sortBy(pane, 'sortIndex'));
+    panes[1].push({
+      type: 'preview',
+    });
+    console.log(panes);
     return panes;
   },
 });
