@@ -9,6 +9,7 @@ export default defineWorkspace([
       ],
       name: 'node',
       environment: 'node',
+      setupFiles: ['tests/setup/node-setup.js'],
     }
   },
   {
@@ -16,6 +17,7 @@ export default defineWorkspace([
       include: ['**/test/dom/**/*.test.{ts,js}'],
       name: 'jsdom',
       environment: 'jsdom',
+      setupFiles: ['tests/setup/dom-setup.js'],
     }
   },
   {
@@ -27,6 +29,7 @@ export default defineWorkspace([
         provider: 'playwright',
         name: 'chromium'
       },
+      setupFiles: ['tests/setup/browser-setup.js'],
     }
   },
 ]);

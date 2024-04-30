@@ -1,5 +1,51 @@
 import { describe, expect, it, vi } from 'vitest';
-import { each, clone, unique, filterEmpty, last, firstMatch, findIndex, remove, inArray, range, keys, values, mapObject, extend, pick, get, hasProperty, reverseKeys, isObject, isPlainObject, isString, isNumber, isArray, isBinary, isFunction, isPromise, isArguments, formatDate, noop, wrapFunction, kebabToCamel, camelToKebab, capitalizeWords, toTitleCase, escapeRegExp, prettifyID, hashCode, generateID, isEqual, fatal } from '@semantic-ui/utils';
+import { tokenize,
+  asyncEach,
+  asyncMap,
+  camelToKebab,
+  capitalizeWords,
+  clone,
+  each,
+  escapeHTML,
+  escapeRegExp,
+  extend,
+  filterEmpty,
+  findIndex,
+  firstMatch,
+  formatDate,
+  generateID,
+  get,
+  hashCode,
+  hasProperty,
+  inArray,
+  isArguments,
+  isArray,
+  isBinary,
+  isEqual,
+  isFunction,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isPromise,
+  isString,
+  kebabToCamel,
+  keys,
+  last,
+  mapObject,
+  noop,
+  pick,
+  prettifyID,
+  range,
+  remove,
+  reverseKeys,
+  sortBy,
+  toTitleCase,
+  tokenize,
+  unique,
+  values,
+  where,
+  wrapFunction
+} from '@semantic-ui/utils';
 
 describe('Array Utilities', () => {
 
@@ -52,6 +98,21 @@ describe('Array Utilities', () => {
   it('range should create an array of numbers', () => {
     expect(range(1, 5)).toEqual([1, 2, 3, 4]);
     expect(range(0, 4, 5)).toEqual([0, 5, 10, 15]);
+  });
+
+  describe('where', () => {
+    it('should filter an array of objects based on properties', () => {
+      const array = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'John' },
+      ];
+      const result = where(array, { name: 'John' });
+      expect(result).toEqual([
+        { id: 1, name: 'John' },
+        { id: 3, name: 'John' },
+      ]);
+    });
   });
 
 });
@@ -116,6 +177,47 @@ describe('Type Checking Utilities', () => {
     expect(isArguments([1, 2, 3])).toBe(false);
   });
 
+  describe('sortBy', () => {
+    it('should sort by a simple key', () => {
+      const input = [{a: 2}, {a: 3}, {a: 1}];
+      const expected = [{a: 1}, {a: 2}, {a: 3}];
+      expect(sortBy(input, 'a')).toEqual(expected);
+    });
+
+    it('should sort by a nested key', () => {
+      const input = [{a: {b: 2}}, {a: {b: 3}}, {a: {b: 1}}];
+      const expected = [{a: {b: 1}}, {a: {b: 2}}, {a: {b: 3}}];
+      expect(sortBy(input, 'a.b')).toEqual(expected);
+    });
+
+    it('should handle custom comparator', () => {
+      const input = [{a: 1}, {a: 2}, {a: 3}];
+      const expected = [{a: 3}, {a: 2}, {a: 1}];
+      const reverseComparator = (a, b) => b - a;
+      expect(sortBy(input, 'a', reverseComparator)).toEqual(expected);
+    });
+
+    it('should handle sorting with additional object context in comparator', () => {
+      const input = [{a: 1, b: 2}, {a: 1, b: 1}];
+      const expected = [{a: 1, b: 1}, {a: 1, b: 2}];
+      const comparator = (valA, valB, objA, objB) => objA.b - objB.b;
+      expect(sortBy(input, 'a', comparator)).toEqual(expected);
+    });
+
+    it('should return a new array and not mutate the original', () => {
+      const input = [{a: 1}, {a: 2}];
+      const result = sortBy(input, 'a');
+      expect(result).not.toBe(input);
+      expect(result).toEqual([{a: 1}, {a: 2}]);
+    });
+
+    it('should sort objects with undefined values last', () => {
+      const input = [{a: 1}, {a: undefined}, {a: 2}];
+      const expected = [{a: 1}, {a: 2}, {a: undefined}];
+      expect(sortBy(input, 'a')).toEqual(expected);
+    });
+  });
+
 });
 
 describe('Date Utilities', () => {
@@ -129,61 +231,114 @@ describe('Date Utilities', () => {
 
 describe('Object Utilities', () => {
 
-  it('keys should return the keys of an object', () => {
-    expect(keys({ a: 1, b: 2 })).toEqual(['a', 'b']);
-    expect(keys([1, 2, 3])).toEqual(['0', '1', '2']);
+  describe('keys', () => {
+    it('keys should return the keys of an object', () => {
+      expect(keys({ a: 1, b: 2 })).toEqual(['a', 'b']);
+      expect(keys([1, 2, 3])).toEqual(['0', '1', '2']);
+    });
   });
 
-  it('values should return the values of an object', () => {
-    expect(values({ a: 1, b: 2 })).toEqual([1, 2]);
-    expect(values([1, 2, 3])).toEqual([1, 2, 3]);
+  describe('values', () => {
+    it('values should return the values of an object', () => {
+      expect(values({ a: 1, b: 2 })).toEqual([1, 2]);
+      expect(values([1, 2, 3])).toEqual([1, 2, 3]);
+    });
   });
 
-  it('mapObject should create an object with the same keys and mapped values', () => {
-    const result = mapObject({ a: 1, b: 2 }, (val) => val * 2);
-    expect(result).toEqual({ a: 2, b: 4 });
+  describe('mapObject', () => {
+    it('mapObject should create an object with the same keys and mapped values', () => {
+      const result = mapObject({ a: 1, b: 2 }, (val) => val * 2);
+      expect(result).toEqual({ a: 2, b: 4 });
+    });
   });
 
-  it('extend should merge properties from source into target, including getters and setters', () => {
-    const target = { a: 1 };
-    const source = {
-      get b() { return 2; },
-      set b(val) { this.c = val; }
-    };
-    extend(target, source);
-    expect(target.b).toBe(2);
-    target.b = 3;
-    expect(target.c).toBe(3);
+  describe('extend', () => {
+    it('extend should merge properties from source into target, including getters and setters', () => {
+      const target = { a: 1 };
+      const source = {
+        get b() { return 2; },
+        set b(val) { this.c = val; }
+      };
+      extend(target, source);
+      expect(target.b).toBe(2);
+      target.b = 3;
+      expect(target.c).toBe(3);
+    });
   });
 
-  it('pick should create an object composed of the picked properties', () => {
-    const obj = { a: 1, b: 2, c: 3 };
-    expect(pick(obj, 'a', 'c')).toEqual({ a: 1, c: 3 });
+  describe('pick', () => {
+    it('pick should create an object composed of the picked properties', () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      expect(pick(obj, 'a', 'c')).toEqual({ a: 1, c: 3 });
+    });
   });
 
-  it('get should access a nested object field from a string', () => {
-    const obj = { a: { b: { c: 1 } } };
-    expect(get(obj, 'a.b.c')).toBe(1);
-    expect(get(obj, 'a.b.c.d')).toBeUndefined();
+  describe('get', () => {
+
+    it('get should support array like "arr.1.value" notation in lookup', () => {
+      const obj = { arr: [{ value: 1 }, { value: 2 }] };
+      expect(get(obj, 'arr.1.value')).toBe(2);
+    });
+
+    it('get should access a nested object field from a string', () => {
+      const obj = { a: { b: { c: 1 } } };
+      expect(get(obj, 'a.b.c')).toBe(1);
+      expect(get(obj, 'a.b.c.d')).toBeUndefined();
+    });
+
+
+    it('get should support files with "." in the key', () => {
+      const obj = { 'a.b': 1 };
+      expect(get(obj, 'a.b')).toBe(1);
+    });
+
+    it('get should support deeply nested files with "." in the key', () => {
+      const obj = { a: { 'b.c': 1 } };
+      expect(get(obj, 'a.b.c')).toBe(1);
+    });
+
+    it('get should return undefined when accessing a non-existent nested key', () => {
+      const obj = { a: { b: { c: 1 } } };
+      expect(get(obj, 'a.b.d')).toBeUndefined();
+    });
+
+    it('get should support accessing nested keys with dots and array indexes', () => {
+      const obj = { 'a.b': [{ 'c.d': 1 }, { 'c.d': 2 }] };
+      expect(get(obj, 'a.b.1.c.d')).toBe(2);
+    });
+
+    it('get should return undefined when accessing an out-of-bounds array index', () => {
+      const obj = { arr: [1, 2, 3] };
+      expect(get(obj, 'arr.3')).toBeUndefined();
+    });
+
+    it('get should return undefined when accessing a non-existent array index', () => {
+      const obj = { a: { b: [1, 2, 3] } };
+      expect(get(obj, 'a.c.1')).toBeUndefined();
+    });
   });
 
-  it('hasProperty should return true if the object has the specified property', () => {
-    const obj = { a: 1, b: undefined };
-    expect(hasProperty(obj, 'a')).toBe(true);
-    expect(hasProperty(obj, 'b')).toBe(true);
-    expect(hasProperty(obj, 'c')).toBe(false);
+  describe('hasProperty', () => {
+    it('hasProperty should return true if the object has the specified property', () => {
+      const obj = { a: 1, b: undefined };
+      expect(hasProperty(obj, 'a')).toBe(true);
+      expect(hasProperty(obj, 'b')).toBe(true);
+      expect(hasProperty(obj, 'c')).toBe(false);
+    });
   });
 
-  it('reverseKeys should reverse a lookup object\'s keys and values', () => {
-    const obj = { a: 1, b: [1, 2], c: 2 };
-    const reversed = reverseKeys(obj);
-    expect(reversed).toEqual({ '1': ['a', 'b'], '2': ['b', 'c'] });
-  });
+  describe('reverseKeys', () => {
+    it('reverseKeys should reverse a lookup object\'s keys and values', () => {
+      const obj = { a: 1, b: [1, 2], c: 2 };
+      const reversed = reverseKeys(obj);
+      expect(reversed).toEqual({ '1': ['a', 'b'], '2': ['b', 'c'] });
+    });
 
-  it('reverseKeys should reverse array values', () => {
-    const obj = { a: [1, 2], b: [2, 3], c: 1 };
-    const reversed = reverseKeys(obj);
-    expect(reversed).toEqual({ '1': ['a', 'c'], '2': ['a', 'b'], '3': 'b' });
+    it('reverseKeys should reverse array values', () => {
+      const obj = { a: [1, 2], b: [2, 3], c: 1 };
+      const reversed = reverseKeys(obj);
+      expect(reversed).toEqual({ '1': ['a', 'c'], '2': ['a', 'b'], '3': 'b' });
+    });
   });
 
 
@@ -374,6 +529,14 @@ describe('String Conversion', () => {
 
 describe('ID/Hashing Functions', () => {
 
+
+  describe('tokenize', () => {
+    it('should convert a string to a token', () => {
+      expect(tokenize('Hello World')).toBe('hello-world');
+      expect(tokenize('A simple-test_string')).toBe('a-simple-test-string');
+    });
+  });
+
   describe('prettifyID', () => {
     it('should return "0" for input 0', () => {
       expect(prettifyID(0)).toBe('0');
@@ -515,73 +678,134 @@ describe('clone', () => {
 
 
 describe('regular expression utilities', () => {
-  it('should escape characters that have special meaning in regex', () => {
-    const specialChars = '. * + ? ^ $ { } ( ) | [ ] \\';
-    const escaped = escapeRegExp(specialChars);
-    expect(() => new RegExp(escaped)).not.toThrow();
+
+  describe('escapeRegExp', () => {
+    it('should escape characters that have special meaning in regex', () => {
+      const specialChars = '. * + ? ^ $ { } ( ) | [ ] \\';
+      const escaped = escapeRegExp(specialChars);
+      expect(() => new RegExp(escaped)).not.toThrow();
+    });
   });
+
+  describe('escapeHTML', () => {
+    it('should escape only HTML tag characters', () => {
+      const input = '<div>Hello "World"</div>';
+      const expected = '&ltdiv&gtHello &quotWorld&quot&lt/div&gt';
+      expect(escapeHTML(input)).toBe(expected);
+    });
+
+    it('should not modify a string without special characters', () => {
+      const input = 'Hello World';
+      expect(escapeHTML(input)).toBe(input);
+    });
+  });
+
 });
 
-describe('each iterator utility', () => {
+describe('iterators', () => {
 
-  describe('Array iteration', () => {
-    it('should iterate over all elements', () => {
+  describe('each', () => {
+
+    describe('Array iteration', () => {
+      it('should iterate over all elements', () => {
+        const array = [1, 2, 3];
+        const spy = vi.fn();
+        each(array, spy);
+        expect(spy).toHaveBeenCalledTimes(3);
+        expect(spy).toHaveBeenNthCalledWith(1, 1, 0, array);
+        expect(spy).toHaveBeenNthCalledWith(2, 2, 1, array);
+        expect(spy).toHaveBeenNthCalledWith(3, 3, 2, array);
+      });
+
+      it('should break early if the callback returns false', () => {
+        const array = [1, 2, 3];
+        const spy = vi.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
+        each(array, spy);
+        expect(spy).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('Object iteration', () => {
+      it('should iterate over all properties', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const spy = vi.fn();
+        each(obj, spy);
+        expect(spy).toHaveBeenCalledTimes(3);
+        expect(spy).toHaveBeenCalledWith(1, 'a', obj);
+        expect(spy).toHaveBeenCalledWith(2, 'b', obj);
+        expect(spy).toHaveBeenCalledWith(3, 'c', obj);
+      });
+
+      it('should break early if the callback returns false', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const spy = vi.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
+        each(obj, spy);
+        expect(spy).toHaveBeenCalledTimes(2);
+      });
+
+      it('should not iterate over non-enumerable properties', () => {
+        const obj = { a: 1, b: 2 };
+        Object.defineProperty(obj, 'c', {
+          value: 3,
+          enumerable: false,
+        });
+        const spy = vi.fn();
+        each(obj, spy);
+        expect(spy).toHaveBeenCalledTimes(2); // should not include non-enumerable 'c'
+        expect(spy).toHaveBeenCalledWith(1, 'a', obj);
+        expect(spy).toHaveBeenCalledWith(2, 'b', obj);
+        expect(spy).not.toHaveBeenCalledWith(3, 'c', obj); // ensure 'c' is not iterated
+      });
+
+    });
+
+    it('should handle null/undefined gracefully', () => {
+      const spy = vi.fn();
+      each(null, spy);
+      each(undefined, spy);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+  });
+
+  describe('asyncEach', () => {
+    it('should iterate over an array asynchronously', async () => {
       const array = [1, 2, 3];
       const spy = vi.fn();
-      each(array, spy);
+      await asyncEach(array, spy);
       expect(spy).toHaveBeenCalledTimes(3);
       expect(spy).toHaveBeenNthCalledWith(1, 1, 0, array);
       expect(spy).toHaveBeenNthCalledWith(2, 2, 1, array);
       expect(spy).toHaveBeenNthCalledWith(3, 3, 2, array);
     });
 
-    it('should break early if the callback returns false', () => {
+    it('should handle null/undefined gracefully', async () => {
+      const spy = vi.fn();
+      await asyncEach(null, spy);
+      await asyncEach(undefined, spy);
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('asyncMap', () => {
+    it('should map an array asynchronously', async () => {
       const array = [1, 2, 3];
-      const spy = vi.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
-      each(array, spy);
-      expect(spy).toHaveBeenCalledTimes(2);
+      const result = await asyncMap(array, async (value) => value * 2);
+      expect(result).toEqual([2, 4, 6]);
     });
-  });
 
-  describe('Object iteration', () => {
-    it('should iterate over all properties', () => {
+    it('should map an object asynchronously', async () => {
       const obj = { a: 1, b: 2, c: 3 };
-      const spy = vi.fn();
-      each(obj, spy);
-      expect(spy).toHaveBeenCalledTimes(3);
-      expect(spy).toHaveBeenCalledWith(1, 'a', obj);
-      expect(spy).toHaveBeenCalledWith(2, 'b', obj);
-      expect(spy).toHaveBeenCalledWith(3, 'c', obj);
+      const result = await asyncMap(obj, async (value) => value * 2);
+      expect(result).toEqual({ a: 2, b: 4, c: 6 });
     });
 
-    it('should break early if the callback returns false', () => {
-      const obj = { a: 1, b: 2, c: 3 };
-      const spy = vi.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
-      each(obj, spy);
-      expect(spy).toHaveBeenCalledTimes(2);
+    it('should handle null/undefined gracefully', async () => {
+      const result1 = await asyncMap(null, async (value) => value);
+      expect(result1).toBeNull();
+      const result2 = await asyncMap(undefined, async (value) => value);
+      expect(result2).toBeUndefined();
     });
-
-    it('should not iterate over non-enumerable properties', () => {
-      const obj = { a: 1, b: 2 };
-      Object.defineProperty(obj, 'c', {
-        value: 3,
-        enumerable: false,
-      });
-      const spy = vi.fn();
-      each(obj, spy);
-      expect(spy).toHaveBeenCalledTimes(2); // should not include non-enumerable 'c'
-      expect(spy).toHaveBeenCalledWith(1, 'a', obj);
-      expect(spy).toHaveBeenCalledWith(2, 'b', obj);
-      expect(spy).not.toHaveBeenCalledWith(3, 'c', obj); // ensure 'c' is not iterated
-    });
-
-  });
-
-  it('should handle null/undefined gracefully', () => {
-    const spy = vi.fn();
-    each(null, spy);
-    each(undefined, spy);
-    expect(spy).not.toHaveBeenCalled();
   });
 
 });

@@ -17,6 +17,9 @@ export default defineConfig({
       reportsDirectory: './tests/coverage',
       reportOnFailure: true
     },
+    onConsoleLog (log) {
+      if (log.includes('Lit is in dev mode.')) return false;
+    },
     workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
   },
 });

@@ -22,6 +22,9 @@ export default defineConfig({
         statements: 60
       }
     },
+    onConsoleLog (log) {
+      if (log.includes('Lit is in dev mode.')) return false;
+    },
     workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
   },
 });

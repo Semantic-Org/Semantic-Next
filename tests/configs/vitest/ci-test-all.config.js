@@ -4,6 +4,9 @@ export default defineConfig({
   test: {
     reporter: ['basic', 'junit'],
     outputFile: './tests/results/test-results-all-junit.xml',
-    workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
+    onConsoleLog (log) {
+      if (log.includes('Lit is in dev mode.')) return false;
+    },
+    workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js',
   },
 });

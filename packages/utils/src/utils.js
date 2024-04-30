@@ -118,6 +118,7 @@ export const isNode = (el) => {
 };
 
 export const isEmpty = (x) => {
+  // we want nullish here
   if (x == null) {
     return true;
   }
@@ -391,6 +392,28 @@ export const some = (collection, predicate) => {
 };
 export const any = some;
 
+export const sortBy = function (arr, key, comparator) {
+  const compare = (a, b) => {
+    const valA = get(a, key);
+    const valB = get(b, key);
+
+    if (valA === undefined && valB === undefined) return 0;
+    if (valA === undefined) return 1; // Place undefined values at the end
+    if (valB === undefined) return -1; // Place undefined values at the end
+
+    if (comparator) {
+      return comparator(valA, valB, a, b);
+    }
+
+    if (valA < valB) return -1;
+    if (valA > valB) return 1;
+    return 0;
+  };
+
+  return arr.slice().sort(compare);
+};
+
+
 /*-------------------
        Objects
 --------------------*/
@@ -472,31 +495,71 @@ export const arrayFromObject = (obj) => {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
-
-// map 'foo.1.baz' -> foo[1].baz'
-const transformArrayRegExp = /\[(\w+)\]/g;
-
-export const get = function (obj, string = '') {
-  if (typeof string !== 'string') {
+export const get = function (obj, path = '') {
+  if (typeof path !== 'string') {
     return undefined;
   }
 
-  // Transform array notation to dot notation
-  const stringParts = string.replace(transformArrayRegExp, '.$1').split('.');
+  function extractArrayLikeAccess(part) {
+    const key = part.substring(0, part.indexOf('['));
+    const index = parseInt(part.substring(part.indexOf('[') + 1, part.indexOf(']')), 10);
+    return { key, index };
+  }
 
+  function getCombinedKey(path) {
+    const dotIndex = path.indexOf('.');
+    if (dotIndex !== -1) {
+      const nextDotIndex = path.indexOf('.', dotIndex + 1);
+      if (nextDotIndex !== -1) {
+        return path.slice(0, nextDotIndex);
+      }
+    }
+    return path;
+  }
+
+  if (obj === null || !isObject(obj)) {
+    return undefined;
+  }
+
+  const parts = path.split('.');
   let currentObject = obj;
-  for (let index = 0; index < stringParts.length; index++) {
-    const part = stringParts[index];
-    if (part === '') continue; // Skip empty parts that result from leading dots or consecutive dots.
 
-    // Check if the part exists in the current object
-    if (currentObject !== null && typeof currentObject === 'object' && part in currentObject) {
-      currentObject = currentObject[part];
-    } else {
-      // If the path breaks, return undefined
+  for (let i = 0; i < parts.length; i++) {
+    if (currentObject === null || !isObject(currentObject)) {
       return undefined;
     }
+
+    let part = parts[i];
+
+    if (part.includes('[')) {
+      const { key, index } = extractArrayLikeAccess(part);
+
+      if (key in currentObject && isArray(currentObject[key]) && index < currentObject[key].length) {
+        currentObject = currentObject[key][index];
+      } else {
+        return undefined;
+      }
+    } else {
+      if (part in currentObject) {
+        currentObject = currentObject[part];
+      } else {
+        const remainingPath = parts.slice(i).join('.');
+        if (remainingPath in currentObject) {
+          currentObject = currentObject[remainingPath];
+          break;
+        } else {
+          const combinedKey = getCombinedKey(`${part}.${parts[i + 1]}`);
+          if (combinedKey in currentObject) {
+            currentObject = currentObject[combinedKey];
+            i++;
+          } else {
+            return undefined;
+          }
+        }
+      }
+    }
   }
+
   return currentObject;
 };
 
@@ -722,8 +785,9 @@ export const escapeHTML = (string) => {
 --------------------*/
 
 export const tokenize = (str = '') => {
-  return (str).replace(/\s+/g, '-')
+  return (str || '').replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, '')
+    .replace(/_/g, '-')
     .toLowerCase()
   ;
 };
