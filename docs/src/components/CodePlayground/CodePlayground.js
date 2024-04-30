@@ -2,6 +2,9 @@ import { createComponent } from '@semantic-ui/component';
 import { get, each, sortBy } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
+import UIPanels from '../Panels/Panels.js';
+import UIPanel from '../Panels/Panel.js';
+
 import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
 
@@ -76,18 +79,21 @@ const createInstance = ({tpl, settings, $}) => ({
   getFileLabel(filename) {
     return get(tpl.fileLabels, filename);
   },
-  getPanes() {
-    let panes = [[], []];
+  getPanels() {
+    let panels = [[], []];
     let files = tpl.getFileArray();
     each(files, file => {
-      panes[file.paneIndex].push(file);
+      panels[file.paneIndex].push({
+        type: 'file',
+        ...file
+      });
     });
-    panes = panes.map(pane => sortBy(pane, 'sortIndex'));
-    panes[1].push({
+    panels = panels.map(pane => sortBy(pane, 'sortIndex'));
+    panels[1].push({
       type: 'preview',
     });
-    console.log(panes);
-    return panes;
+    console.log(panels);
+    return panels;
   },
 });
 

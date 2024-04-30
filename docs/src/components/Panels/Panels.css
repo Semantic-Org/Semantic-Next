@@ -1,0 +1,15 @@
+:host {
+  display: contents;
+}
+.panels {
+  height: 100%;
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+}
+.panels.vertical {
+  flex-direction: column;
+}
+.panels.horizontal {
+  flex-direction: row;
+}

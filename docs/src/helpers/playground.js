@@ -2,6 +2,11 @@ import { asyncEach, tokenize, inArray, camelToKebab, each } from '@semantic-ui/u
 
 /* These are top level to make it easier to format */
 
+export const htmlHideMarkerStart = `<!-- playground-hide -->`;
+export const htmlHideMarkerEnd = `<!-- playground-hide-end -->`;
+export const hideMarkerStart = `/* playground-hide */`;
+export const hideMarkerEnd = `/* playground-hide-end */`;
+
 export const componentJSBefore = ``;
 export const componentJSAfter = ``;
 
@@ -12,7 +17,7 @@ export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
 
-export const indexHTMLBeforeStandard = `<!-- playground-hide -->
+export const indexHTMLBeforeStandard = `${htmlHideMarkerStart}
 <html>
 <head>
 <script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
@@ -23,18 +28,18 @@ export const indexHTMLBeforeStandard = `<!-- playground-hide -->
 <link href="./index.css" rel="stylesheet">
 </head>
 <body>
-<!-- playground-hide-end -->
+${htmlHideMarkerEnd}
 `;
 
 // nothing dif yet
 export const indexHTMLBeforeUI = indexHTMLBeforeStandard;
 
-export const indexHTMLAfter = `<!-- playground-hide --></body></html><!-- playground-hide-end -->`;
+export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
 export const indexJSBefore = ``;
 export const indexJSAfter = ``;
 
-export const indexCSSBefore = ``;
+export const indexCSSBefore = `${hideMarkerStart}body { height: auto; }${hideMarkerEnd}`;
 export const indexCSSAfter = ``;
 
 export const getSandboxURL = () => {

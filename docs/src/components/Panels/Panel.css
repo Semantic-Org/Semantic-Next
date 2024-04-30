@@ -1,0 +1,81 @@
+:host {
+  position: relative;
+  display: flex;
+  flex: 1 1 0px;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:host {
+  --handle-height: 20px;
+  --divider-width: 1px;
+  --divider-shadow-color: var(--black-60);
+
+  --divider-color: var(--white-10);
+  --divider-color-hover: var(--white-10);
+  --divider-color-resize: var(--white-20);
+}
+
+.panel {
+  display: contents;
+  overflow: hidden;
+  flex: auto;
+  box-sizing: border-box;
+
+
+  &.resizing + .handle:hover .divider,
+  &.resizing + .handle .divider {
+    background-color: var(--divider-color-resize);
+  }
+}
+
+.handle {
+  display: flex;
+  user-select: none;
+  position: absolute;
+  height: var(--handle-height);
+  background-color: rgb(255 0 0 / 4%);
+  .divider {
+    background-color: var(--divider-color);
+  }
+
+  &:hover .divider {
+    background-color: var(--divider-color-hover);
+  }
+}
+
+
+.horizontal.panel + .handle {
+  top: 0%;
+  left: 100%;
+  flex-direction: row;
+  cursor: w-resize;
+  margin-left: calc(var(--handle-height) / -2);
+  width: var(--handle-height);
+  height: 100%;
+
+  .divider {
+    margin: 0 auto;
+    width: var(--divider-width);
+    height: 100%;
+    box-shadow: calc( var(--divider-width) * -1) 0px 0px 0px var(--divider-shadow-color);
+  }
+}
+
+
+.vertical.panel + .handle {
+  top: 100%;
+  left: 0%;
+  flex-direction: row;
+  cursor: ns-resize;
+  margin-top: calc(var(--handle-height) / -2);
+  width: 100%;
+  height: var(--handle-height);
+
+  .divider {
+    margin: auto 0;
+    width: 100%;
+    height: var(--divider-width);
+    box-shadow: 0px calc( var(--divider-width) * -1) 0px 0px var(--divider-shadow-color);
+  }
+}

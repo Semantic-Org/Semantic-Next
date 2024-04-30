@@ -1,4 +1,4 @@
-<playground part="playground">
+<div class="playground" part="playground">
   {{#if exists files}}
     <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
       {{#each file in getFileArray}}
@@ -6,25 +6,29 @@
       {{/each}}
     </playground-project>
   {{/if}}
-  {{#each paneGroup in getPanes}}
-    <panes>
-      {{#each pane in paneGroup}}
-        {{#if is pane.type 'preview'}}
-          <pane class="preview">
-            <playground-preview project="source"> </playground-preview>
-          </pane>
-        {{else}}
-          <pane>
-            <label>{{pane.label}}</label>
-            <playground-file-editor
-              line-numbers
-              project="source"
-              filename="{{pane.filename}}"
-            >
-            </playground-file-editor>
-          </pane>
-        {{/if}}
-      {{/each}}
-    </panes>
-  {{/each}}
-</playground>
+  <ui-panels direction="horizontal">
+    {{#each panelGroup in getPanels}}
+      <ui-panel direction="horizontal">
+        <ui-panels>
+          {{#each panel in panelGroup}}
+            {{#if is panel.type 'preview'}}
+              <ui-panel class="preview">
+                <playground-preview project="source"> </playground-preview>
+              </ui-panel>
+            {{else if is panel.type 'file'}}
+              <ui-panel>
+                <label>{{panel.label}}</label>
+                <playground-file-editor
+                  line-numbers
+                  project="source"
+                  filename="{{panel.filename}}"
+                >
+                </playground-file-editor>
+              </ui-panel>
+            {{/if}}
+          {{/each}}
+        </ui-panels>
+      </ui-panel>
+    {{/each}}
+  </ui-panels>
+</div>
