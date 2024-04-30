@@ -173,7 +173,6 @@ export class Query {
 
   closestDeep(element, selector) {
     let currentElement = element;
-    console.log('deep!');
 
     while (currentElement) {
       if (currentElement.matches(selector)) {
