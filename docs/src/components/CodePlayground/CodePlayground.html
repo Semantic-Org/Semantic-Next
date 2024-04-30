@@ -1,8 +1,8 @@
 <playground part="playground">
   {{#if exists files}}
     <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
-      {{#each file in arrayFromObject files}}
-        <script type="{{getFileType file.value.contentType}}" filename="{{file.key}}">{{{escapeHTML file.value.content}}}</script>
+      {{#each file in getFileArray}}
+        <script type="{{file.scriptType}}" filename="{{file.filename}}">{{{escapeHTML file.content}}}</script>
       {{/each}}
     </playground-project>
   {{/if}}
