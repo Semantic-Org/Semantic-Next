@@ -13,6 +13,7 @@
 
     --topbar-background-color: #1A1D1E;
     --topbar-text-color: var(--white);
+    --topbar-border-bottom: none;
   }
   body.dark {
     --topbar-background-color: #151a1e;
@@ -22,6 +23,7 @@
     background-color: var(--topbar-background-color);
     height: var(--topbar-height);
     color: var(--topbar-text-color);
+    border-bottom: var(--topbar-border-bottom);
   }
 
   topbar .logo {

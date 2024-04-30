@@ -92,7 +92,6 @@ const createInstance = ({tpl, settings, $}) => ({
     panels[1].push({
       type: 'preview',
     });
-    console.log(panels);
     return panels;
   },
 });
@@ -108,6 +107,9 @@ const onRendered = ({ $, tpl, settings }) => {
 };
 
 const events = {
+  'click playground-code-editor'(event, tpl ){
+    console.log('focused');
+  }
 };
 
 const CodePlayground = createComponent({

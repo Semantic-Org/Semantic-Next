@@ -11,7 +11,9 @@ const settings = {
 };
 
 const createInstance = ({tpl, settings, $}) => ({
-
+  onResize() {
+    console.log('got here');
+  }
 });
 
 const onCreated = ({ tpl }) => {
@@ -22,18 +24,9 @@ const onDestroyed = ({ tpl }) => {
 };
 
 const onRendered = ({ $, el, tpl, settings }) => {
-
-  console.log($(el));
-
 };
 
 const events = {
-  'click ui-panel'(event, tpl) {
-    console.log('woah1');
-  },
-  'click slotted ui-panel'(event, tpl) {
-    console.log('woah2');
-  }
 };
 
 const Panels = createComponent({

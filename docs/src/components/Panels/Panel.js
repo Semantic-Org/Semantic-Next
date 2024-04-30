@@ -1,5 +1,4 @@
 import { createComponent } from '@semantic-ui/component';
-import { get, each, sortBy } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import template from './Panel.html?raw';
@@ -13,8 +12,7 @@ const settings = {
 };
 
 const createInstance = ({tpl, isServer, settings, el, $}) => ({
-
-  isResizing: new ReactiveVar(false),
+  resizing: new ReactiveVar(false),
   getCurrentFlex() {
     return $(el).css('flex-grow');
   },
@@ -22,17 +20,20 @@ const createInstance = ({tpl, isServer, settings, el, $}) => ({
     return 100 / tpl.getItemCount();
   },
   getResizeCursor() {
-    return settings.direction == 'horizontal'
+    return (settings.direction == 'horizontal')
       ? 'w-resize'
       : 'ns-resize'
     ;
+  },
+  getIndex() {
+    return $(el).index('ui-panel');
   },
   getItemCount() {
     let itemCount;
     if(settings.itemCount == 'auto') {
       itemCount = (isServer)
         ? 3
-        : $(el).siblings() + 1
+        : $(el).siblings('ui-panel').count() + 1
       ;
     }
     else {
@@ -40,9 +41,46 @@ const createInstance = ({tpl, isServer, settings, el, $}) => ({
     }
     return itemCount;
   },
+  isResizable() {
+    return settings.resizable && tpl.getIndex() !== 0;
+  },
   setInitialFlex() {
     const initialFlex = tpl.getInitialFlex();
     $(el).css('flex-grow', initialFlex);
+  },
+  getPanels() {
+    return tpl.parent('uiPanels');
+  },
+  getEventPosition(event) {
+    return (settings.direction == 'horizontal')
+      ? event.pageX
+      : event.pageY
+    ;
+  },
+  startResize(event) {
+    tpl.resizing.set(true);
+    tpl.startPosition = tpl.getEventPosition(event);
+  },
+  resize(event) {
+    let newPosition = tpl.getEventPosition(event);
+    let delta = newPosition - tpl.startPosition;
+  },
+  endResize() {
+    $('body').off('mousemove').css('cursor', null);
+    tpl.resizing.set(false);
+  },
+  beginResize(event) {
+    tpl.startResize(event);
+    $('body')
+      .css('cursor', tpl.getResizeCursor())
+      .on('mousemove', (event) => {
+        tpl.resize(event);
+      });
+    $('body')
+      .one('mouseup', (event) => {
+        tpl.endResize(event);
+      })
+    ;
   }
 });
 
@@ -52,26 +90,15 @@ const onCreated = ({ tpl, el }) => {
 const onDestroyed = ({ tpl }) => {
 };
 
-const onRendered = ({ $, tpl, settings }) => {
-
+const onRendered = ({ $, el, tpl, settings }) => {
   tpl.setInitialFlex();
-
 };
 
 const events = {
-  'mousedown .handle'({event, tpl}) {
-    console.log('resizing start');
-    tpl.isResizing.set(true);
-    $('body').css('cursor', tpl.getResizeCursor());
-    $('body').one('mouseup', () => {
-      $('body').css('cursor', null);
-      tpl.isResizing.set(false);
-    });
+  'mousedown .handle'({event, settings, tpl}) {
+    tpl.beginResize(event);
     event.preventDefault();
   },
-  'mouseup .handle'({event, tpl}) {
-    event.preventDefault();
-  }
 };
 
 const Panel = createComponent({

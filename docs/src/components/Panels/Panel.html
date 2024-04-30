@@ -1,7 +1,7 @@
-<div class="{{classIf isResizing 'resizing'}}{{direction}} panel" part="panel">
+<div class="{{classIf resizing 'resizing'}}{{direction}} panel" part="panel">
   {{>slot}}
 </div>
-{{#if resizable}}
+{{#if isResizable}}
   <span class="handle" part="handle">
     <span class="divider"></span>
   </span>

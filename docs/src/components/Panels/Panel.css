@@ -1,19 +1,17 @@
 :host {
-  position: relative;
   display: flex;
   flex: 1 1 0px;
   flex-direction: column;
-  overflow: hidden;
 }
 
 :host {
   --handle-height: 20px;
   --divider-width: 1px;
-  --divider-shadow-color: var(--black-60);
+  --divider-shadow-color: #181818;
 
-  --divider-color: var(--white-10);
-  --divider-color-hover: var(--white-10);
-  --divider-color-resize: var(--white-20);
+  --divider-color: #232323;
+  --divider-color-hover: #232323;
+  --divider-color-resize: #444444;
 }
 
 .panel {
@@ -23,6 +21,9 @@
   box-sizing: border-box;
 
 
+  &.resizing + .handle {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
   &.resizing + .handle:hover .divider,
   &.resizing + .handle .divider {
     background-color: var(--divider-color-resize);
@@ -31,10 +32,12 @@
 
 .handle {
   display: flex;
-  user-select: none;
   position: absolute;
-  height: var(--handle-height);
-  background-color: rgb(255 0 0 / 4%);
+  top: auto;
+  left: auto;
+  user-select: none;
+  border-radius: 5px;
+
   .divider {
     background-color: var(--divider-color);
   }
@@ -46,8 +49,6 @@
 
 
 .horizontal.panel + .handle {
-  top: 0%;
-  left: 100%;
   flex-direction: row;
   cursor: w-resize;
   margin-left: calc(var(--handle-height) / -2);
@@ -64,8 +65,6 @@
 
 
 .vertical.panel + .handle {
-  top: 100%;
-  left: 0%;
   flex-direction: row;
   cursor: ns-resize;
   margin-top: calc(var(--handle-height) / -2);

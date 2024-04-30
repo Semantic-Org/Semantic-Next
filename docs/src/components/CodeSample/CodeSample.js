@@ -6,7 +6,7 @@ import template from './CodeSample.html?raw';
 import css from './CodeSample.css?raw';
 
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { each, copyText } from '@semantic-ui/utils';
+import { copyText } from '@semantic-ui/utils';
 
 
 const settings = {
