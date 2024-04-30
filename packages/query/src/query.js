@@ -79,6 +79,13 @@ export class Query {
     return new Query(filteredChildren);
   }
 
+  siblings(selector) {
+    const siblings = Array.from(this).flatMap((el) => {
+      return Array.from(el.parentNode.children).filter((child) => child !== el);
+    });
+    return selector ? new Query(siblings).filter(selector) : new Query(siblings);
+  }
+
   filter(selectorOrFunction) {
     let filteredElements = [];
     if (isString(selectorOrFunction)) {
@@ -363,7 +370,7 @@ export class Query {
   css(property, value, settings = { includeComputed: false }) {
     const elements = Array.from(this);
     // Setting a value or multiple values
-    if (isPlainObject(property) || isString(value)) {
+    if (isPlainObject(property) || !isPlainObject(value)) {
       if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
           elements.forEach((el) => (el.style[prop] = val));
@@ -485,6 +492,11 @@ export class Query {
         return parentNode;
       })
     ;
+  }
+
+  // alias
+  count() {
+    return this.length;
   }
 
   // adds properties to an element after dom loads
