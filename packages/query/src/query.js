@@ -39,7 +39,12 @@ export class Query {
     }
     this.selector = selector;
     this.length = elements.length;
+    this.options = { root, pierceShadow };
     Object.assign(this, elements);
+  }
+
+  chain(elements) {
+    return new Query(elements, this.options);
   }
 
   querySelectorAllDeep(root, selector) {
@@ -65,7 +70,7 @@ export class Query {
 
   each(callback) {
     Array.from(this).forEach((el, index) => {
-      const $el = new Query(el);
+      const $el = this.chain(el);
       callback.call($el, el, index);
     });
     return this;
@@ -76,17 +81,21 @@ export class Query {
   }
 
   find(selector) {
-    const elements = Array.from(this).flatMap((el) =>
-      Array.from(el.querySelectorAll(selector))
-    );
-    return new Query(elements); // Directly pass the array of elements
+    const elements = Array.from(this).flatMap((el) => {
+      if (this.options.pierceShadow) {
+        return this.querySelectorAllDeep(el, selector);
+      } else {
+        return Array.from(el.querySelectorAll(selector));
+      }
+    });
+    return this.chain(elements);
   }
 
   parent(selector) {
     const parents = Array.from(this)
       .map((el) => el.parentElement)
       .filter(Boolean);
-    return selector ? new Query(parents).filter(selector) : new Query(parents);
+    return selector ? this.chain(parents).filter(selector) : this.chain(parents);
   }
 
   children(selector) {
@@ -100,19 +109,19 @@ export class Query {
       ? allChildren.filter((child) => child.matches(selector))
       : allChildren;
 
-    return new Query(filteredChildren);
+    return this.chain(filteredChildren);
   }
 
   siblings(selector) {
     const siblings = Array.from(this).flatMap((el) => {
       return Array.from(el.parentNode.children).filter((child) => child !== el);
     });
-    return selector ? new Query(siblings).filter(selector) : new Query(siblings);
+    return selector ? this.chain(siblings).filter(selector) : this.chain(siblings);
   }
 
   index(selector) {
     const indices = Array.from(this).map((el) => {
-      const $parent = new Query(el).parent();
+      const $parent = this.chain(el).parent();
       const $children = $parent.children(selector);
       return $children.get().indexOf(el);
     });
@@ -131,7 +140,7 @@ export class Query {
       // If a function is provided, use it directly to filter elements
       filteredElements = Array.from(this).filter(selectorOrFunction);
     }
-    return new Query(filteredElements);
+    return this.chain(filteredElements);
   }
 
   // Returns true if every element matches
@@ -147,14 +156,40 @@ export class Query {
     const filteredElements = Array.from(this).filter(
       (el) => !el.matches || (el.matches && !el.matches(selector))
     );
-    return new Query(filteredElements);
+    return this.chain(filteredElements);
   }
 
   closest(selector) {
-    const closest = Array.from(this)
-      .map((el) => el.closest(selector))
-      .filter(Boolean);
-    return new Query(closest);
+    const closest = Array.from(this).map((el) => {
+      if (this.options.pierceShadow) {
+        return this.closestDeep(el, selector);
+      } else {
+        return el.closest(selector);
+      }
+    }).filter(Boolean);
+
+    return this.chain(closest);
+  }
+
+  closestDeep(element, selector) {
+    let currentElement = element;
+    console.log('deep!');
+
+    while (currentElement) {
+      if (currentElement.matches(selector)) {
+        return currentElement;
+      }
+
+      if (currentElement.parentElement) {
+        currentElement = currentElement.parentElement;
+      } else if (currentElement.parentNode && currentElement.parentNode.host) {
+        currentElement = currentElement.parentNode.host;
+      } else {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   on(event, targetSelectorOrHandler, handlerOrOptions, options) {
@@ -474,7 +509,7 @@ export class Query {
   }
 
   eq(index) {
-    return new Query(this[index]);
+    return this.chain(this[index]);
   }
 
   height() {

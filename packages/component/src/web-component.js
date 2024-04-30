@@ -396,7 +396,7 @@ class WebComponentBase extends LitElement {
 
   // Original DOM (used for pulling slotted text)
   $$(selector) {
-    return $(selector, this.originalDOM.content);
+    return $(selector, { root: this.originalDOM.content });
   }
 
   // calls callback if defined with consistent params and this context

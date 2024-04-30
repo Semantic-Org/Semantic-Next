@@ -20,7 +20,7 @@ describe('query', () => {
           shadow.appendChild(div);
         }
         $(selector) {
-          return $(selector, this.shadowRoot);
+          return $(selector, { root: this.shadowRoot });
         }
         getSlotText() {
           return this.$('slot').text();

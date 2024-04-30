@@ -258,7 +258,7 @@ export const Template = class Template {
       // BUG: iOS Safari will not bubble the touchstart / touchend events
       // if theres no handler on the actual element
       if(selector) {
-        $(selector, this.renderRoot).on(eventName, noop);
+        $(selector, { root: this.renderRoot }).on(eventName, noop);
       }
 
       // This makes an assumption that a custom event will be emitted when a theme change occurs
@@ -364,7 +364,7 @@ export const Template = class Template {
   *******************************/
 
   // Rendered DOM (either shadow or regular)
-  $(selector, { root = this.renderRoot, filterTemplate = true } = {}) {
+  $(selector, { root = this.renderRoot, filterTemplate = true, ...otherArgs } = {}) {
     if(!Template.isServer && inArray(selector, ['body', 'document', 'html'])) {
       root = document;
     }
@@ -372,18 +372,18 @@ export const Template = class Template {
       root = globalThis;
     }
     if (root == this.renderRoot) {
-      const $results = $(selector, { root });
+      const $results = $(selector, { root, ...otherArgs });
       return filterTemplate
         ? $results.filter((node) => this.isNodeInTemplate(node))
         : $results;
     }
     else {
-      return $(selector, { root });
+      return $(selector, { root, ...otherArgs});
     }
   }
 
-  $$(selector) {
-    return this.$(selector, { root: this.renderRoot, filterTemplate: false });
+  $$(selector, args) {
+    return this.$(selector, { root: this.renderRoot, filterTemplate: false, ...args });
   }
 
   // calls callback if defined with consistent params and this context
