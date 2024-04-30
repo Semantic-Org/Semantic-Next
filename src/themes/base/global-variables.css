@@ -321,6 +321,37 @@
   --white-90: rgb(255 255 255 / 90%);
   --white-100: rgb(255 255 255 / 100%);
 
+  --white-90-solid: #E6E6E6;
+  --white-80-solid: #CCCCCC;
+  --white-70-solid: #B3B3B3;
+  --white-60-solid: #999999;
+  --white-50-solid: #808080;
+  --white-40-solid: #666666;
+  --white-30-solid: #4D4D4D;
+  --white-20-solid: #333333;
+  --white-10-solid: #1A1A1A;
+
+  --black-10-solid: #E6E6E6;
+  --black-20-solid: #CCCCCC;
+  --black-30-solid: #B3B3B3;
+  --black-40-solid: #999999;
+  --black-50-solid: #808080;
+  --black-60-solid: #666666;
+  --black-70-solid: #4D4D4D;
+  --black-80-solid: #333333;
+  --black-90-solid: #1A1A1A;
+
+  --black-10: rgb(0 0 0 / 10%);
+  --black-20: rgb(0 0 0 / 20%);
+  --black-30: rgb(0 0 0 / 30%);
+  --black-40: rgb(0 0 0 / 40%);
+  --black-50: rgb(0 0 0 / 50%);
+  --black-60: rgb(0 0 0 / 60%);
+  --black-70: rgb(0 0 0 / 70%);
+  --black-80: rgb(0 0 0 / 80%);
+  --black-90: rgb(0 0 0 / 90%);
+  --black-100: rgb(0 0 0 / 100%);
+
   --black-10: rgb(0 0 0 / 10%);
   --black-20: rgb(0 0 0 / 20%);
   --black-30: rgb(0 0 0 / 30%);
