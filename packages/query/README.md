@@ -2,6 +2,8 @@
 
 Query is a **tiny (3kb!) library** for chaining interactions with DOM elements similar to jQuery.
 
+It is designed to work with the Shadow DOM tree, correctly matching on nested shadow DOMs in pages that use web components.
+
 It's designed to be fast, using only modern DOM APIs and built to work with the shadow DOM and help simplify imperative DOM mutations.
 
 There's many reasons why you might use this over vanilla just DOM APIs, consider removing event handlers which requires you to track a reference to the original event handler to unbind, or setting up basic interaction patterns like [event delegation](https://learn.jquery.com/events/event-delegation/).

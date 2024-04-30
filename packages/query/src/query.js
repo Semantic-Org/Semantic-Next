@@ -8,7 +8,7 @@ across DOM nodes based off a selector
 export class Query {
   static eventHandlers = [];
 
-  constructor(selector, root = document) {
+  constructor(selector, { root = document, pierceShadow = true } = {}) {
     let elements = [];
 
     if (!root) {
@@ -24,7 +24,10 @@ export class Query {
     }
     else if (isString(selector)) {
       // String selector provided, find elements using querySelectorAll
-      elements = root.querySelectorAll(selector);
+      elements = (pierceShadow)
+        ? this.querySelectorAllDeep(root, selector)
+        : root.querySelectorAll(selector)
+      ;
     }
     else if (isDOM(selector)) {
       // A single Element, Document, or DocumentFragment is provided
@@ -37,6 +40,27 @@ export class Query {
     this.selector = selector;
     this.length = elements.length;
     Object.assign(this, elements);
+  }
+
+  querySelectorAllDeep(root, selector) {
+    const elements = new Set();
+    const findElements = (node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        if (node.matches(selector)) {
+          elements.add(node);
+        }
+        if (node.shadowRoot) {
+          findElements(node.shadowRoot);
+        }
+      }
+      if (node.childNodes) {
+        node.childNodes.forEach((childNode) => {
+          findElements(childNode);
+        });
+      }
+    };
+    findElements(root);
+    return Array.from(elements);
   }
 
   each(callback) {
@@ -84,6 +108,15 @@ export class Query {
       return Array.from(el.parentNode.children).filter((child) => child !== el);
     });
     return selector ? new Query(siblings).filter(selector) : new Query(siblings);
+  }
+
+  index(selector) {
+    const indices = Array.from(this).map((el) => {
+      const $parent = new Query(el).parent();
+      const $children = $parent.children(selector);
+      return $children.get().indexOf(el);
+    });
+    return indices.length === 1 ? indices[0] : indices;
   }
 
   filter(selectorOrFunction) {
@@ -370,7 +403,7 @@ export class Query {
   css(property, value, settings = { includeComputed: false }) {
     const elements = Array.from(this);
     // Setting a value or multiple values
-    if (isPlainObject(property) || !isPlainObject(value)) {
+    if (isPlainObject(property) || value !== undefined) {
       if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
           elements.forEach((el) => (el.style[prop] = val));
@@ -403,7 +436,7 @@ export class Query {
     return this.css(property, null, { includeComputed: true });
   }
 
-  cssVar(variable, value) {
+  cssVar(variable, value = null) {
     return this.css(`--${variable}`, value, { includeComputed: true });
   }
 
