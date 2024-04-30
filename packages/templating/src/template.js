@@ -110,6 +110,7 @@ export const Template = class Template {
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
+      Template.addTemplate(this);
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
@@ -271,7 +272,6 @@ export const Template = class Template {
           });
         }, { abortController: this.eventController });
       }
-
       $(this.renderRoot).on(
         eventName,
         selector,
@@ -364,7 +364,7 @@ export const Template = class Template {
   *******************************/
 
   // Rendered DOM (either shadow or regular)
-  $(selector, root = this.renderRoot, { filterTemplate = true } = {}) {
+  $(selector, { root = this.renderRoot, filterTemplate = true } = {}) {
     if(!Template.isServer && inArray(selector, ['body', 'document', 'html'])) {
       root = document;
     }
@@ -372,18 +372,18 @@ export const Template = class Template {
       root = globalThis;
     }
     if (root == this.renderRoot) {
-      const $results = $(selector, root);
+      const $results = $(selector, { root });
       return filterTemplate
         ? $results.filter((node) => this.isNodeInTemplate(node))
         : $results;
     }
     else {
-      return $(selector, root);
+      return $(selector, { root });
     }
   }
 
   $$(selector) {
-    return this.$(selector, this.renderRoot, { filterTemplate: false });
+    return this.$(selector, { root: this.renderRoot, filterTemplate: false });
   }
 
   // calls callback if defined with consistent params and this context
@@ -462,9 +462,21 @@ export const Template = class Template {
   static findParentTemplate(template, templateName) {
     let match;
     if (templateName) {
+      // this matches on DOM (common)
+      if(!match) {
+        let parentNode = template.element?.parentNode;
+        while(parentNode) {
+          if(parentNode.template?.templateName == templateName) {
+            match = parentNode.template.tpl;
+            break;
+          }
+          parentNode = parentNode.parentNode;
+        }
+      }
+      // this matches on nested partials (less common)
       while (template) {
         template = template.parentTemplate;
-        if (template?.templateName == templateName) {
+        if (!match && template?.templateName == templateName) {
           match = template;
           break;
         }

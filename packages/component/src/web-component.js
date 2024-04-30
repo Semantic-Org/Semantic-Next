@@ -387,11 +387,11 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   // Rendered DOM (either shadow or regular)
-  $(selector, root = this?.renderRoot || this.shadowRoot) {
+  $(selector, { root = this?.renderRoot || this.shadowRoot} = {}) {
     if (!root) {
       console.error('Cannot query DOM until element has rendered.');
     }
-    return $(selector, root);
+    return $(selector, { root });
   }
 
   // Original DOM (used for pulling slotted text)
