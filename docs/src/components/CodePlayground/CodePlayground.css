@@ -59,7 +59,7 @@
     transition: background-color 0.1s ease, color 0.1s ease-in-out;
   }
   ui-panel label.active {
-    color: rgb(255 255 255 / 60%);
+    color: rgb(255 255 255 / 80%);
     background-color: rgb(255 255 255 / 3%);
   }
   ui-panel > playground-file-editor {
