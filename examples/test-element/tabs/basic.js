@@ -3,7 +3,7 @@ import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './basic.html?raw';
 import css from './basic.css?raw';
 
-const createInstance = ({ tpl, $ }) => ({
+const createInstance = ({ tpl, $, findParent }) => ({
   date: new ReactiveVar(new Date()),
   slogan: new ReactiveVar(),
   second: new ReactiveVar(),
@@ -23,7 +23,7 @@ const createInstance = ({ tpl, $ }) => ({
     tpl.date.value = new Date();
   },
   callParentMethod() {
-    return tpl.parent().getText();
+    return findParent().getText();
   },
   calculateCurrentSeconds() {
     let date = tpl.date.get();

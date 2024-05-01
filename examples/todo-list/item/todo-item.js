@@ -4,11 +4,11 @@ import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import template from './todo-item.html?raw';
 import css from './todo-item.css?raw';
 
-const createInstance = ({ tpl, $ }) => ({
+const createInstance = ({ tpl, findParent, $ }) => ({
   editing: new ReactiveVar(false),
 
   getTodos() {
-    return tpl.parent('todoList').todos;
+    return findParent('todoList').todos;
   },
   toggleCompleted() {
     const todos = tpl.getTodos();

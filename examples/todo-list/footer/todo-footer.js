@@ -3,11 +3,11 @@ import { createComponent } from '@semantic-ui/component';
 import template from './todo-footer.html?raw';
 import css from './todo-footer.css?raw';
 
-const createInstance = ({ tpl, $ }) => ({
+const createInstance = ({ tpl, findParent, $ }) => ({
   filters: ['all', 'active', 'complete'],
 
   todoList() {
-    return tpl.parent('todoList');
+    return findParent('todoList');
   },
 
   getIncomplete() {

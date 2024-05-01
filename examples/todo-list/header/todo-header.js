@@ -4,11 +4,11 @@ import { createComponent } from '@semantic-ui/component';
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createInstance = ({ tpl, $ }) => ({
+const createInstance = ({ tpl, $, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodos() {
-    return tpl.parent('todoList').todos;
+    return findParent('todoList').todos;
   },
 
   completeAll() {
