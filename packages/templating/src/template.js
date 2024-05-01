@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, clone } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, clone, wrapFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -81,6 +81,11 @@ export const Template = class Template {
     return `Anonymous #${Template.templateCount}`;
   }
 
+  findTemplate = (templateName) => Template.findTemplate(templateName);
+  findParent = (templateName) => Template.findParentTemplate(this, templateName);
+  findChild = (templateName) => Template.findChildTemplate(this, templateName);
+  findChildren = (templateName) => Template.findChildTemplates(this, templateName);
+
   initialize() {
     let tpl = this;
     if (isFunction(this.createInstance)) {
@@ -98,15 +103,14 @@ export const Template = class Template {
     this.tpl._childTemplates = [];
     this.tpl.$ = this.$.bind(this);
     this.tpl.$$ = this.$$.bind(this);
+    this.tpl.attachEvent = this.attachEvent.bind(this);
     this.tpl.templateName = this.templateName;
-    // this is a function to avoid naive cascading reactivity
-    this.tpl.findTemplate = Template.findTemplate;
-    this.tpl.parent = (templateName) =>
-      Template.findParentTemplate(this, templateName);
-    this.tpl.child = (templateName) =>
-      Template.findChildTemplate(this, templateName);
-    this.tpl.children = (templateName) =>
-      Template.findChildTemplates(this, templateName);
+
+    this.tpl.findTemplate = this.findTemplate;
+    this.tpl.dispatchEvent = this.dispatchEvent.bind(this);
+    this.tpl.findParent = this.findParent.bind(this);
+    this.tpl.findChild = this.findChild.bind(this);
+    this.tpl.findChildren = this.findChildren.bind(this);
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
@@ -277,6 +281,7 @@ export const Template = class Template {
         selector,
         (event) => {
           if (!this.isNodeInTemplate(event.target)) {
+            console.log('ignored event because it is not in template', eventName, selector);
             return;
           }
           if (
@@ -291,8 +296,10 @@ export const Template = class Template {
             : event.target
           ;
           const boundEvent = eventHandler.bind(targetElement);
+          const eventData = event?.detail || {};
+          const elData = targetElement.dataset;
           template.call(boundEvent, {
-            additionalData: { event: event, data: targetElement.dataset },
+            additionalData: { event: event, data: { ...elData, ...eventData } },
           });
         },
         { abortController: this.eventController }
@@ -395,17 +402,35 @@ export const Template = class Template {
     if (!params) {
       const data = clone(this.tpl.data);
       params = {
+
         el: this.element,
         tpl: this.tpl,
+        $: this.$.bind(this),
+
         data: data,
         settings: data, // Todo: extract only settings from data
-        template: this,
-        content: this.tpl.content,
-        templates: Template.renderedTemplates,
+
         isServer: Template.isServer,
         isClient: !Template.isServer, // convenience
-        darkMode: this.element.isDarkMode(),
-        $: this.$.bind(this),
+
+        dispatchEvent: this.dispatchEvent.bind(this),
+        attachEvent: this.attachEvent.bind(this),
+        abortController: this.eventController,
+
+        findTemplate: this.findTemplate,
+        template: this,
+        templates: Template.renderedTemplates,
+
+        findParent: this.findParent.bind(this),
+        findChild: this.findChild.bind(this),
+        findChildren: this.findChildren.bind(this),
+
+        // not yet implemented
+        content: this.tpl.content,
+
+        // on demand since requires  computing styles
+        get darkMode() { return this.element.isDarkMode(); },
+
         ...additionalData,
       };
       args.push(params);
@@ -416,6 +441,26 @@ export const Template = class Template {
     if (isFunction(func)) {
       return func.apply(this.element, args);
     }
+  }
+
+  // attaches an external event handler making sure to remove the event when the component is destroyed
+  attachEvent(selector, eventName, eventHandler, eventSettings) {
+    $(selector, document).on(eventName, eventHandler, {
+      abortController: this.eventController,
+      ...eventSettings
+    });
+  }
+
+  // dispatches an event from this template
+  dispatchEvent(eventName, eventData, eventSettings) {
+
+    // call callback on DOM element if defined
+    const callbackName = `on${capitalize(eventName)}`;
+    const callback = this.element[callbackName];
+    wrapFunction(callback).call(this, eventData);
+
+    // trigger DOM event
+    return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
   }
 
   /*******************************
@@ -439,8 +484,7 @@ export const Template = class Template {
     if (template.isPrototype) {
       return;
     }
-    let templates =
-      Template.renderedTemplates.get(template.templateName) || [];
+    let templates = Template.renderedTemplates.get(template.templateName) || [];
     templates.push(template);
     Template.renderedTemplates.set(template.templateName, templates);
   }
@@ -448,8 +492,7 @@ export const Template = class Template {
     if (template.isPrototype) {
       return;
     }
-    let templates =
-      Template.renderedTemplates.get(template.templateName) || [];
+    let templates = Template.renderedTemplates.get(template.templateName) || [];
     remove(templates, template);
     Template.renderedTemplates.set(templates);
   }
