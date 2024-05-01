@@ -157,7 +157,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
 
   getScrollContext() {
     return (settings.scrollContext)
-      ? $(settings.scrollContext, document).get(0)
+      ? $(settings.scrollContext, { root: document }).get(0)
       : window
     ;
   },

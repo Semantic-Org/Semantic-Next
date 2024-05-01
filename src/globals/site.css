@@ -46,27 +46,27 @@ input[type="text"], input[type="email"], input[type="search"], input[type="passw
 }
 
 
-body ::-webkit-scrollbar {
+::-webkit-scrollbar {
   -webkit-appearance: none;
   width: var(--custom-scrollbar-width);
   height: var(--custom-scrollbar-height);
 }
 
 /* Scrollbars */
-body ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: var(--track-background);
   border-radius: var(--track-border-radius);
 }
-body ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   cursor: pointer;
   border-radius: var(--thumb-border-radius);
   background: var(--thumb-background);
   transition: var(--thumb-transition);
 }
-body ::-webkit-scrollbar-thumb:window-inactive {
+::-webkit-scrollbar-thumb:window-inactive {
   background: var(--thumb-inactive-background);
 }
-body ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: var(--thumb-hover-background);
 }
 

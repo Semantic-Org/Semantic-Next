@@ -2,6 +2,10 @@ import { createComponent } from '@semantic-ui/component';
 import { get, each, sortBy } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
+import { addSearch } from './codemirror-search.js';
+
+console.log(addSearch);
+
 import UIPanels from '../Panels/Panels.js';
 import UIPanel from '../Panels/Panel.js';
 
@@ -14,7 +18,8 @@ import 'playground-elements/playground-preview.js';
 
 const settings = {
   files: {},
-  sandboxURL: '/sandbox'
+  sandboxURL: '/sandbox',
+  tabSize: 2,
 };
 
 const createInstance = ({tpl, settings, $}) => ({
@@ -94,6 +99,64 @@ const createInstance = ({tpl, settings, $}) => ({
     });
     return panels;
   },
+  configureCodeEditors() {
+    addSearch(CodeMirror);
+    $('playground-code-editor').each(function(el) {
+      tpl.modifyCodeMirror(el._codemirror);
+    });
+  },
+  modifyCodeMirror(cm) {
+
+    cm.refresh();
+
+    cm.setOption('tabSize', settings.tabSize);
+
+    // Enable multiple selections
+    cm.setOption('allowMultipleSelections', true);
+
+    // Use the drawSelection extension to display multiple selections
+    cm.setOption('drawSelectionMatches', true);
+
+    cm.setOption('extraKeys', {
+      ...cm.getOption('extraKeys'),
+      Tab: (cm) => {
+        if (cm.somethingSelected()) {
+          cm.indentSelection('add');
+        } else {
+          cm.execCommand('insertSoftTab');
+        }
+      },
+      'Shift-Tab': () => {
+        const indentUnit = cm.getOption('indentUnit') ?? 2;
+        const selections = cm.listSelections();
+        cm.operation(() => {
+          selections.forEach((selection) => {
+            const fromLine = selection.from().line;
+            const toLine = selection.to().line;
+            for (let i = fromLine; i <= toLine; i++) {
+              const lineContent = cm.getLine(i);
+              const trimmedLine = lineContent.trimStart();
+              const outdentSize = Math.min(lineContent.length - trimmedLine.length, indentUnit);
+              cm.replaceRange('', { line: i, ch: 0 }, { line: i, ch: outdentSize });
+            }
+          });
+        });
+      },
+      'Ctrl-D': () => {
+        // Get the current selection
+        const selection = cm.getSelection();
+        // Find all occurrences of the selected text
+        const cursor = cm.getSearchCursor(selection);
+        const matches = [];
+        while (cursor.findNext()) {
+          matches.push({ anchor: cursor.from(), head: cursor.to() });
+        }
+
+        // Add the occurrences as selections
+        cm.setSelections(matches);
+      },
+    });
+  }
 });
 
 const onCreated = ({ tpl }) => {
@@ -104,6 +167,7 @@ const onDestroyed = ({ tpl }) => {
 };
 
 const onRendered = ({ $, tpl, settings }) => {
+  tpl.configureCodeEditors();
 };
 
 const events = {
