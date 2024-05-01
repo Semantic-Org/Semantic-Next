@@ -44,16 +44,23 @@
     flex-direction: column;
   }
   ui-panel label {
-    font-size: 11px;
-    width: max-content;
-    border-radius: 5px;
-    line-height: 15px;
-    padding: 2px 6px;
+    font-size: 10px;
+    width: 100%;
+    text-transform: uppercase;
+    display: block;
+    line-height: 1;
+    margin: -0.5rem -0.5rem 0rem;
     font-weight: bold;
-    color: rgba(255, 255, 255, 0.3);/*
-    position: absolute;
-    z-index: 5;
-    right: 0.5rem;*/
+    color: rgba(255, 255, 255, 0.4);
+    padding: 0.75rem 2rem;
+    background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
+    border-bottom: 1px solid rgba(221, 221, 221, 0.05);
+    box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
+    transition: background-color 0.1s ease, color 0.1s ease-in-out;
+  }
+  ui-panel label.active {
+    color: rgb(255 255 255 / 60%);
+    background-color: rgb(255 255 255 / 3%);
   }
   ui-panel > playground-file-editor {
     flex: 1 1 0;
@@ -70,17 +77,28 @@
   playground-preview::part(preview-toolbar) {
     font-size: 11px;
     text-transform: uppercase;
+    display: flex;
+    align-items: ;
+    margin: -0.5rem -0.5rem 0rem;
     font-weight: bold;
-    background: var(--subtle-gradient);
-    box-shadow: var(--subtle-bottom-lip-shadow);
+    color: rgb(255 255 255 / 72%);
+    padding: 7px 1rem 0px;
+    background: linear-gradient(rgba(255, 255, 255, 0.02), rgba(15, 17, 22, 0.5));
+    border-bottom: 1px solid rgba(221, 221, 221, 0.05);
+    box-shadow: rgba(0, 0, 0, 0.4) 0px -2px 5px -3px inset;
+    background-color: var(--playground-code-background);
+    box-sizing: border-box;
+    height: 18px;
+    font-family: 'Lato';
   }
   playground-preview::part(preview-loading-indicator) {
-    --mdc-theme-primary: #49b1d2;
+    --mdc-theme-primary: var(--primary-text-color);
     height: 4px;
     overflow: hidden;
-    top: -26px;
+    top: -4px;
+    /*top: -26px;
     width: 71px;
-    left: 22px;
+    left: 22px;*/
   }
 }
 

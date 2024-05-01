@@ -512,6 +512,10 @@ export class Query {
     return this.chain(this[index]);
   }
 
+  first() {
+    return this.eq(0);
+  }
+
   height() {
     return this.length === 1
       ? this[0].clientHeight

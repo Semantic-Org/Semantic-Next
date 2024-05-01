@@ -73,6 +73,10 @@ playground {
     width: 71px;
     left: 22px;
   }
+  playground-file-editor::part(dialog) {
+    display: none !important;
+    opacity: 0;
+  }
 }
 
 playground-ide {

@@ -4,8 +4,6 @@ import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import { addSearch } from './codemirror-search.js';
 
-console.log(addSearch);
-
 import UIPanels from '../Panels/Panels.js';
 import UIPanel from '../Panels/Panel.js';
 
@@ -171,8 +169,9 @@ const onRendered = ({ $, tpl, settings }) => {
 };
 
 const events = {
-  'click playground-code-editor'(event, tpl ){
-    console.log('focused');
+  'click ui-panel': function({event}) {
+    $('label').removeClass('active');
+    $(this).children('label').addClass('active');
   }
 };
 
