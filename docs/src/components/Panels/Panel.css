@@ -10,7 +10,7 @@
   --divider-shadow-color: #181818;
 
   --divider-color: #232323;
-  --divider-color-hover: #232323;
+  --divider-color-hover: #333333;
   --divider-color-resize: #444444;
 }
 
@@ -21,9 +21,6 @@
   box-sizing: border-box;
 
 
-  &.resizing + .handle {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
   &.resizing + .handle:hover .divider,
   &.resizing + .handle .divider {
     background-color: var(--divider-color-resize);

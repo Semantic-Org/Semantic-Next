@@ -32,7 +32,6 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: row;
-  width: 100vw;
   height: calc(100vh - var(--topbar-height));
 
   ui-panels::part(panels) {
@@ -45,7 +44,6 @@
   }
   ui-panel label {
     font-size: 10px;
-    width: 100%;
     text-transform: uppercase;
     display: block;
     line-height: 1;

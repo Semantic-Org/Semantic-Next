@@ -25,7 +25,7 @@ const settings = {
   getActiveElementID: (element) => element?.id
 };
 
-const createInstance = ({tpl, isServer, settings, $}) => ({
+const createInstance = ({tpl, isServer, settings, attachEvent, $}) => ({
 
   openIndex: new ReactiveVar(0), // current accordion index open
   currentItem: new ReactiveVar(), // current active item id
@@ -142,7 +142,6 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
 
   scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
     const element = settings.getElement(itemID);
-    const scrollContext = tpl.getScrollContext();
     if (element) {
       const targetPosition = element.offsetTop + offset;
       tpl.currentItem.set(itemID);
@@ -248,7 +247,7 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   },
 
   bindHashChange() {
-    tpl.hashChange = $(window).on('hashchange', (event) => {
+    attachEvent(window, 'hashchange', (event) => {
       const itemID = location.hash.substr(1);
       if(itemID) {
         tpl.setActiveItem(itemID);
@@ -262,16 +261,14 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   },
 
   bindScroll() {
-    tpl.scrollEvent = $(tpl.getScrollContext(), document)
-      .on('scroll', function () {
-        tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
-        tpl.scrolledBottom = this.scrollTop + this.clientHeight == this.scrollHeight;
-        tpl.lastScrollPosition = this.scrollTop;
-        if(settings.autoSelectLast && tpl.scrolledBottom && !tpl.isActivating) {
-          tpl.setLastItemActive();
-        }
-      }, { passive: true })
-    ;
+    attachEvent(tpl.getScrollContext(), 'scroll', function() {
+      tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
+      tpl.scrolledBottom = this.scrollTop + this.clientHeight == this.scrollHeight;
+      tpl.lastScrollPosition = this.scrollTop;
+      if(settings.autoSelectLast && tpl.scrolledBottom && !tpl.isActivating) {
+        tpl.setLastItemActive();
+      }
+    }, { passive: true });
   },
 
   bindPageEvents() {
@@ -283,12 +280,6 @@ const createInstance = ({tpl, isServer, settings, $}) => ({
   unbindEvents() {
     if (tpl.observer) {
       tpl.observer.disconnect();
-    }
-    if (tpl.hashChange) {
-      $(window).off(tpl.hashChange);
-    }
-    if (tpl.scrollEvent) {
-      $(tpl.getScrollContext(), document).off(tpl.scrollEvent);
     }
   },
 

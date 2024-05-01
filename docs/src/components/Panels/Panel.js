@@ -11,10 +11,18 @@ const settings = {
   itemCount: 'auto',
 };
 
-const createInstance = ({tpl, isServer, settings, el, $}) => ({
+const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent, $}) => ({
   resizing: new ReactiveVar(false),
+
+  registerPanel() {
+    let panels = tpl.getPanels();
+    if(panels) {
+      panels.registerPanel({el, settings});
+    }
+  },
+
   getCurrentFlex() {
-    return $(el).css('flex-grow');
+    return parseFloat($(el).css('flex-grow'));
   },
   getInitialFlex() {
     return 100 / tpl.getItemCount();
@@ -49,7 +57,7 @@ const createInstance = ({tpl, isServer, settings, el, $}) => ({
     $(el).css('flex-grow', initialFlex);
   },
   getPanels() {
-    return tpl.parent('uiPanels');
+    return findParent('uiPanels');
   },
   getEventPosition(event) {
     return (settings.direction == 'horizontal')
@@ -59,15 +67,30 @@ const createInstance = ({tpl, isServer, settings, el, $}) => ({
   },
   startResize(event) {
     tpl.resizing.set(true);
-    tpl.startPosition = tpl.getEventPosition(event);
+    tpl.initialPosition = tpl.getEventPosition(event);
+    tpl.initialSize = tpl.getCurrentFlex();
+    dispatchEvent('resizeBegin', {
+      initialPosition: tpl.initialPosition,
+      initialSize: tpl.initialSize,
+      direction: settings.direction
+    });
   },
   resize(event) {
     let newPosition = tpl.getEventPosition(event);
-    let delta = newPosition - tpl.startPosition;
+    let delta = newPosition - tpl.initialPosition;
+    dispatchEvent('resize', {
+      initialPosition: tpl.initialPosition,
+      initialSize: tpl.initialSize,
+      newPosition: newPosition,
+      delta,
+    });
   },
   endResize() {
     $('body').off('mousemove').css('cursor', null);
     tpl.resizing.set(false);
+    delete tpl.initialPosition;
+    delete tpl.initialSize;
+    dispatchEvent('resizeEnd');
   },
   beginResize(event) {
     tpl.startResize(event);
@@ -91,6 +114,7 @@ const onDestroyed = ({ tpl }) => {
 };
 
 const onRendered = ({ $, el, tpl, settings }) => {
+  tpl.registerPanel();
   tpl.setInitialFlex();
 };
 

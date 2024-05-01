@@ -5,6 +5,8 @@ body {
   }
   overflow: hidden;
 
+  --playground-code-background: #080c10;
+
   --topbar-logo-size: 20px;
   --topbar-logo-valign: -5px;
   --topbar-height: 45px;
@@ -27,7 +29,6 @@ body {
   --playground-code-comment-color: #444444;
   --playground-code-linenumber-color: #25272B;
   --playground-code-font-size: 14px;
-  --playground-code-background: #0d1117;
   --playground-code-default-color: #c9d1d9;
   --playground-code-keyword-color: #AAAAAA;
   --playground-code-atom-color: #c9d1d9;

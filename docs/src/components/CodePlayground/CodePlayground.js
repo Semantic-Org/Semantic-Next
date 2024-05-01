@@ -80,6 +80,7 @@ const createInstance = ({tpl, settings, $}) => ({
     return get(tpl.sortIndex, filename);
   },
   getFileLabel(filename) {
+    return filename;
     return get(tpl.fileLabels, filename);
   },
   getPanels() {
@@ -123,6 +124,9 @@ const createInstance = ({tpl, settings, $}) => ({
         } else {
           cm.execCommand('insertSoftTab');
         }
+      },
+      'Ctrl+Tab': () => {
+        console.log('got here');
       },
       'Shift-Tab': () => {
         const indentUnit = cm.getOption('indentUnit') ?? 2;
@@ -169,6 +173,11 @@ const onRendered = ({ $, tpl, settings }) => {
 };
 
 const events = {
+  'click label': function({event}) {
+    const $panel = $(this).closest('ui-panel');
+    const $codeEditor = $panel.find('playground-code-editor');
+    $codeEditor.focus();
+  },
   'click ui-panel': function({event}) {
     $('label').removeClass('active');
     $(this).children('label').addClass('active');
