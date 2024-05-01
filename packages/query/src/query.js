@@ -49,14 +49,26 @@ export class Query {
 
   querySelectorAllDeep(root, selector) {
     const elements = new Set();
+    const domSelector = isDOM(selector);
+    const stringSelector = isString(selector);
     const findElements = (node) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
-        if (node.matches(selector)) {
+        if (domSelector) {
+          if(node == selector) {
+            elements.add(node);
+          }
+        }
+        else if (stringSelector && node.matches(selector)) {
           elements.add(node);
         }
-        if (node.shadowRoot) {
+        else if (node.shadowRoot) {
           findElements(node.shadowRoot);
         }
+      }
+      if(node.assignedNodes) {
+        each(node.assignedNodes(), node => {
+          findElements(node);
+        });
       }
       if (node.childNodes) {
         node.childNodes.forEach((childNode) => {
@@ -179,17 +191,15 @@ export class Query {
       if (currentElement.matches(selector)) {
         return currentElement;
       }
-
       if (currentElement.parentElement) {
         currentElement = currentElement.parentElement;
       } else if (currentElement.parentNode && currentElement.parentNode.host) {
         currentElement = currentElement.parentNode.host;
       } else {
-        return null;
+        return;
       }
     }
-
-    return null;
+    return;
   }
 
   on(event, targetSelectorOrHandler, handlerOrOptions, options) {
@@ -200,10 +210,12 @@ export class Query {
     if (isObject(handlerOrOptions)) {
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
-    } else if (isString(targetSelectorOrHandler)) {
+    }
+    else if (isString(targetSelectorOrHandler)) {
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
-    } else if (isFunction(targetSelectorOrHandler)) {
+    }
+    else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
 
@@ -216,7 +228,7 @@ export class Query {
       if (targetSelector) {
         delegateHandler = (e) => {
           const target = e.target.closest(targetSelector);
-          if (target && el.contains(target)) {
+          if (target && $(el).find(target).length) {
             handler.call(target, e);
           }
         };
@@ -252,10 +264,12 @@ export class Query {
     if (isObject(handlerOrOptions)) {
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
-    } else if (isString(targetSelectorOrHandler)) {
+    }
+    else if (isString(targetSelectorOrHandler)) {
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
-    } else if (isFunction(targetSelectorOrHandler)) {
+    }
+    else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
     const wrappedHandler = (...args) => {
@@ -286,11 +300,11 @@ export class Query {
     return this;
   }
 
-  dispatchEvent(eventName, data = {}, eventSettings = {}) {
+  dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
     const eventOptions = {
       bubbles: true,
       cancelable: true,
-      detail: data,
+      detail: eventData,
       ...eventSettings
     };
     this.each(el => {
@@ -471,7 +485,7 @@ export class Query {
     return this.css(property, null, { includeComputed: true });
   }
 
-  cssVar(variable, value = null) {
+  cssVar(variable, value) {
     return this.css(`--${variable}`, value, { includeComputed: true });
   }
 
@@ -569,6 +583,9 @@ export class Query {
   // alias
   count() {
     return this.length;
+  }
+  exists() {
+    return this.length > 0;
   }
 
   // adds properties to an element after dom loads
