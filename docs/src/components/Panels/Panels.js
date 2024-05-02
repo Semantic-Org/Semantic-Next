@@ -51,6 +51,7 @@ const createInstance = ({tpl, settings, $}) => ({
       ...tpl.resize,
       end: eventData.endPosition + tpl.group.scrollOffset,
     };
+    console.log(tpl.resize.end, tpl.resize.start);
     tpl.resize.delta = tpl.resize.end - tpl.resize.start;
   },
   removeResizeCalculations() {
@@ -76,8 +77,8 @@ const createInstance = ({tpl, settings, $}) => ({
   },
   getGroupScrollOffset() {
     return (settings.direction == 'horizontal')
-      ? $('.panels').scrollLeft()
-      : $('.panels').scrollTop()
+      ? $('.panels', { pierceShadow: false }).scrollLeft()
+      : $('.panels', { pierceShadow: false }).scrollTop()
     ;
   },
   getGroupSize() {
@@ -85,8 +86,8 @@ const createInstance = ({tpl, settings, $}) => ({
       return tpl.group.size;
     }
     return (settings.direction == 'horizontal')
-      ? $('.panels').width()
-      : $('.panels').height()
+      ? $('.panels', { pierceShadow: false }).width()
+      : $('.panels', { pierceShadow: false }).height()
     ;
   },
   setNaturalPanelSize(index) {
@@ -153,6 +154,7 @@ const createInstance = ({tpl, settings, $}) => ({
         return panelSize;
       },
       setSize = (index, size) => {
+        console.log('setting size', index, size);
         tpl.setPanelSizePixels(index, size);
       },
       pixelsToGrow = Math.abs(delta),
@@ -160,6 +162,8 @@ const createInstance = ({tpl, settings, $}) => ({
       leftIndex,
       rightIndex
     ;
+
+    console.log('got here', delta);
 
     leftIndex = getLeftIndex();
     rightIndex = getRightIndex();
@@ -366,9 +370,7 @@ const createInstance = ({tpl, settings, $}) => ({
         setSize(rightIndex, currentSize + pixelsToGrow);
       }
 
-
     }
-    tpl.debugSizes();
   },
 });
 
