@@ -353,11 +353,13 @@ export const Template = class Template {
     if (!this.initialized) {
       this.initialize();
     }
+    const dataContext = {
+      ...this.getDataContext(),
+      ...additionalData,
+    };
+    this.setDataContext(dataContext);
     const html = this.renderer.render({
-      data: {
-        ...this.getDataContext(),
-        ...additionalData,
-      },
+      data: dataContext,
     });
     if (!this.rendered) {
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
