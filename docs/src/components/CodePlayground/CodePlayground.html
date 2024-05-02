@@ -8,7 +8,7 @@
   {{/if}}
   <ui-panels direction="horizontal">
     {{#each panelGroup in getPanels}}
-      <ui-panel direction="horizontal">
+      <ui-panel direction="horizontal" class="code-group">
         <ui-panels>
           {{#each panel in panelGroup}}
             {{#if is panel.type 'preview'}}
@@ -16,7 +16,7 @@
                 <playground-preview project="source"> </playground-preview>
               </ui-panel>
             {{else if is panel.type 'file'}}
-              <ui-panel>
+              <ui-panel class="code">
                 <label>{{panel.label}}</label>
                 <playground-file-editor
                   line-numbers

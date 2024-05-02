@@ -80,8 +80,8 @@ const createInstance = ({tpl, settings, $}) => ({
     return get(tpl.sortIndex, filename);
   },
   getFileLabel(filename) {
+    //return get(tpl.fileLabels, filename);
     return filename;
-    return get(tpl.fileLabels, filename);
   },
   getPanels() {
     let panels = [[], []];
@@ -173,7 +173,9 @@ const onRendered = ({ $, tpl, settings }) => {
 
   $('ui-panel').settings({
     getNaturalSize: function(panel) {
-      return $('.CodeMirror-sizer', panel).height();
+      const codeHeight = $(panel).find('.CodeMirror-sizer').height();
+      const labelHeight = $(panel).children('label').height();
+      return codeHeight + labelHeight + 10;
     }
   });
 };

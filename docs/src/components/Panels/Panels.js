@@ -15,7 +15,7 @@ const createInstance = ({tpl, settings, $}) => ({
   panelSettings: [],
   panelWidths: [],
   group: {
-    width: undefined,
+    size: undefined,
     scrollOffset: undefined,
   },
   resize: {
@@ -52,10 +52,13 @@ const createInstance = ({tpl, settings, $}) => ({
       end: eventData.endPosition + tpl.group.scrollOffset,
     };
     tpl.resize.delta = tpl.resize.end - tpl.resize.start;
-    tpl.resizePanels(tpl.resize.index, tpl.resize.delta);
   },
   removeResizeCalculations() {
-    tpl.start = tpl.end;
+    tpl.resize.start = tpl.resize.end;
+  },
+  getPanelSetting(index, setting) {
+    let panel = tpl.panels[index];
+    return panel.tpl.data[setting];
   },
   getPanelIndex(el) {
     return tpl.panels.indexOf(el);
@@ -68,13 +71,7 @@ const createInstance = ({tpl, settings, $}) => ({
     return parseFloat($(panel).css('flex-grow'));
   },
   getPanelSizePixels(panel) {
-    return tpl.getPanelSize(panel) * tpl.getGroupSize();
-  },
-  getNaturalPanelSize(panel) {
-    return (settings.direction == 'horizontal')
-      ? $(panel).naturalWidth()
-      : $(panel).naturalHeight()
-    ;
+    return (tpl.getPanelSize(panel) / 100) * tpl.getGroupSize();
   },
   getGroupScrollOffset() {
     return (settings.direction == 'horizontal')
@@ -91,13 +88,13 @@ const createInstance = ({tpl, settings, $}) => ({
       : $('.panels').height()
     ;
   },
-  setPanelWidth(index, relativeWidth) {
+  setPanelSize(index, relativeSize) {
     let panel = tpl.panels[index];
-    $(panel).css('flex-grow', relativeWidth);
+    $(panel).css('flex-grow', relativeSize);
   },
-  setPanelWidthPixels(index, pixelWidth) {
-    let relativeWidth = pixelWidth / tpl.get.groupSize();
-    tpl.setPanelWidth(index, relativeWidth);
+  setPanelSizePixels(index, pixelSize) {
+    let relativeSize = pixelSize / tpl.getGroupSize() * 100;
+    tpl.setPanelSize(index, relativeSize);
   },
   debugSizes() {
     let total = 0;
@@ -106,31 +103,54 @@ const createInstance = ({tpl, settings, $}) => ({
       total += size;
     });
   },
-  resizePanels(index, delta) {
+  resizePanels(index, delta, { handleBefore = true } = {}) {
     let
-      leftIndex = index - 1,
-      rightIndex = index + 1,
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
       inverted = delta < 0,
+      // if the handle is on the other side
+      getLeftIndex = () => {
+        return (handleBefore)
+          ? index - 1
+          : index
+        ;
+      },
+      getRightIndex = () => {
+        return (handleBefore)
+          ? index
+          : index + 1
+        ;
+      },
       getNaturalSize = (index) => {
-        tpl.getNaturalPanelSize(index);
+        let panel = tpl.panels[index];
+        let getPanelNaturalWidth = tpl.getPanelSetting(index, 'getNaturalSize', 'getNaturalSize');
+        let naturalSize = getPanelNaturalWidth(panel, settings.direction);
+        return naturalSize;
       },
       getMaxSize = (index) => {
-        return tpl.panelSettings[index]?.maxSize;
+        let maxSize = tpl.getPanelSetting(index, 'maxSize');
+        return maxSize;
       },
       getMinSize = (index) => {
-        return tpl.panelSettings[index]?.minSize;
+        let minSize = tpl.getPanelSetting(index, 'minSize');
+        return minSize || 0;
       },
       getSize = (index) => {
-        tpl.getPanelSizePixels(index);
+        let panel = tpl.panels[index];
+        let panelSize = tpl.getPanelSizePixels(panel);
+        return panelSize;
       },
-      setWidth = (index, width) => {
-        tpl.setPanelWidthPixels(index, width);
+      setSize = (index, size) => {
+        tpl.setPanelSizePixels(index, size);
       },
       pixelsToGrow = Math.abs(delta),
-      pixelsToTake = Math.abs(delta)
+      pixelsToTake = Math.abs(delta),
+      leftIndex,
+      rightIndex
     ;
+
+    leftIndex = getLeftIndex();
+    rightIndex = getRightIndex();
 
     if(standard) {
 
@@ -140,21 +160,21 @@ const createInstance = ({tpl, settings, $}) => ({
 
       while (rightIndex <= lastIndex) {
         let
-          currentWidth = getSize(rightIndex),
+          currentSize = getSize(rightIndex),
           naturalSize = getNaturalSize(index),
-          maxWidth = getMaxSize(index) || naturalSize
+          maxSize = getMaxSize(index) || naturalSize
         ;
         // has any pixels to give
-        if (currentWidth > maxWidth) {
-          if (currentWidth - pixelsToTake >= maxWidth) {
+        if (currentSize > maxSize) {
+          if (currentSize - pixelsToTake >= maxSize) {
             // can subtract all from this column
-            setWidth(rightIndex, currentWidth - pixelsToTake);
+            setSize(rightIndex, currentSize - pixelsToTake);
             pixelsToTake = 0;
             break;
           } else {
             // can only subtract partial amount from this column
-            setWidth(rightIndex, maxWidth);
-            pixelsToTake -= currentWidth - maxWidth;
+            setSize(rightIndex, maxSize);
+            pixelsToTake -= currentSize - maxSize;
           }
         }
         rightIndex++;
@@ -165,26 +185,27 @@ const createInstance = ({tpl, settings, $}) => ({
       ---------------*/
 
       if (pixelsToTake > 0) {
+
         // reset index
-        rightIndex = index + 1;
+        rightIndex = getRightIndex();
 
         // collapse pass
         while (rightIndex <= lastIndex) {
           let
-            currentWidth = getSize(rightIndex),
-            minWidth = getMinSize(rightIndex)
+            currentSize = getSize(rightIndex),
+            minSize = getMinSize(rightIndex)
           ;
           // has any pixels to give
-          if (currentWidth > minWidth) {
-            if (currentWidth - pixelsToTake >= minWidth) {
+          if (currentSize > minSize) {
+            if (currentSize - pixelsToTake >= minSize) {
               // can subtract all from this column
-              setWidth(rightIndex, currentWidth - pixelsToTake);
+              setSize(rightIndex, currentSize - pixelsToTake);
               pixelsToTake = 0;
               break;
             } else {
               // can only subtract partial amount from this column
-              setWidth(rightIndex, minWidth);
-              pixelsToTake -= currentWidth - minWidth;
+              setSize(rightIndex, minSize);
+              pixelsToTake -= currentSize - minSize;
             }
           }
           rightIndex++;
@@ -200,21 +221,21 @@ const createInstance = ({tpl, settings, $}) => ({
 
       while (leftIndex >= 0) {
         let
-          currentWidth = getSize(leftIndex),
+          currentSize = getSize(leftIndex),
           naturalSize = getNaturalSize(leftIndex),
-          maxWidth = getMaxSize(leftIndex) || naturalSize
+          maxSize = getMaxSize(leftIndex) || naturalSize
         ;
         // has any pixels to give
-        if (currentWidth < maxWidth) {
-          if (currentWidth + pixelsToGrow <= maxWidth) {
+        if (currentSize < maxSize) {
+          if (currentSize + pixelsToGrow <= maxSize) {
             // can subtract all from this column
-            setWidth(leftIndex, currentWidth + pixelsToGrow);
+            setSize(leftIndex, currentSize + pixelsToGrow);
             pixelsToGrow = 0;
             break;
           } else {
             // can only subtract partial amount from this column
-            setWidth(leftIndex, maxWidth);
-            pixelsToGrow -= maxWidth - currentWidth;
+            setSize(leftIndex, maxSize);
+            pixelsToGrow -= maxSize - currentSize;
           }
         }
         leftIndex--;
@@ -227,11 +248,11 @@ const createInstance = ({tpl, settings, $}) => ({
       // add leftover pixels so that we're even
       if (pixelsToGrow > 0) {
         // reset index
-        leftIndex = index;
+        leftIndex = getLeftIndex();
 
         // grow pass
-        let currentWidth = getSize(leftIndex);
-        setWidth(leftIndex, currentWidth + pixelsToGrow);
+        let currentSize = getSize(leftIndex);
+        setSize(leftIndex, currentSize + pixelsToGrow);
       }
 
     }
@@ -243,20 +264,20 @@ const createInstance = ({tpl, settings, $}) => ({
 
       while (leftIndex >= 0) {
         let
-          currentWidth = getSize(leftIndex),
+          currentSize = getSize(leftIndex),
           naturalSize = getNaturalSize(leftIndex)
         ;
         // has any pixels to give
-        if (currentWidth > naturalSize) {
-          if (currentWidth - pixelsToTake >= naturalSize) {
+        if (currentSize > naturalSize) {
+          if (currentSize - pixelsToTake >= naturalSize) {
             // can subtract all from this column
-            setWidth(leftIndex, currentWidth - pixelsToTake);
+            setSize(leftIndex, currentSize - pixelsToTake);
             pixelsToTake = 0;
             break;
           } else {
             // can only subtract partial amount from this column
-            setWidth(leftIndex, naturalSize);
-            pixelsToTake -= currentWidth - naturalSize;
+            setSize(leftIndex, naturalSize);
+            pixelsToTake -= currentSize - naturalSize;
           }
         }
         leftIndex--;
@@ -269,25 +290,25 @@ const createInstance = ({tpl, settings, $}) => ({
       if (pixelsToTake > 0) {
 
         // reset index
-        leftIndex = index;
+        leftIndex = getLeftIndex();
 
         // collapse pass
         while (leftIndex >= 0) {
           let
-            currentWidth = getSize(leftIndex),
-            minWidth = getMinSize(leftIndex)
+            currentSize = getSize(leftIndex),
+            minSize = getMinSize(leftIndex)
           ;
           // has any pixels to give
-          if (currentWidth > minWidth) {
-            if (currentWidth - pixelsToTake >= minWidth) {
+          if (currentSize > minSize) {
+            if (currentSize - pixelsToTake >= minSize) {
               // can subtract all from this column
-              setWidth(leftIndex, currentWidth - pixelsToTake);
+              setSize(leftIndex, currentSize - pixelsToTake);
               pixelsToTake = 0;
               break;
             } else {
               // can only subtract partial amount from this column
-              setWidth(leftIndex, minWidth);
-              pixelsToTake -= currentWidth - minWidth;
+              setSize(leftIndex, minSize);
+              pixelsToTake -= currentSize - minSize;
             }
           }
           leftIndex--;
@@ -296,7 +317,7 @@ const createInstance = ({tpl, settings, $}) => ({
 
       // if couldn't take all the pixels we needed then let's not grow as much
       pixelsToGrow -= pixelsToTake;
-      rightIndex = index + 1;
+      rightIndex = getRightIndex();
 
       /*--------------
        Max Width Pass
@@ -304,21 +325,21 @@ const createInstance = ({tpl, settings, $}) => ({
 
       while (rightIndex <= lastIndex) {
         let
-          currentWidth = getSize(rightIndex),
+          currentSize = getSize(rightIndex),
           naturalSize = getNaturalSize(rightIndex),
-          maxWidth = getMaxSize(rightIndex) || naturalSize
+          maxSize = getMaxSize(rightIndex) || naturalSize
         ;
         // has any pixels to give
-        if (currentWidth < maxWidth) {
-          if (currentWidth + pixelsToGrow <= maxWidth) {
+        if (currentSize < maxSize) {
+          if (currentSize + pixelsToGrow <= maxSize) {
             // can subtract all from this column
-            setWidth(rightIndex, currentWidth + pixelsToGrow);
+            setSize(rightIndex, currentSize + pixelsToGrow);
             pixelsToGrow = 0;
             break;
           } else {
             // can only subtract partial amount from this column
-            setWidth(rightIndex, maxWidth);
-            pixelsToGrow -= naturalSize - currentWidth;
+            setSize(rightIndex, maxSize);
+            pixelsToGrow -= naturalSize - currentSize;
           }
         }
         rightIndex++;
@@ -328,14 +349,14 @@ const createInstance = ({tpl, settings, $}) => ({
       ---------------*/
 
       if (pixelsToGrow > 0) {
-        rightIndex = index + 1;
-        let currentWidth = getSize(rightIndex);
-        setWidth(rightIndex, currentWidth + pixelsToGrow);
+        rightIndex = getRightIndex();
+        let currentSize = getSize(rightIndex);
+        setSize(rightIndex, currentSize + pixelsToGrow);
       }
 
-    }
 
-    console.log('resize', index, delta);
+    }
+    tpl.debugSizes();
   },
 });
 
@@ -362,7 +383,9 @@ const events = {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
       tpl.setResizeCalculations(panel, data);
-      requestAnimationFrame(tpl.resizePanels);
+      requestAnimationFrame(() => {
+        tpl.resizePanels(tpl.resize.index, tpl.resize.delta);
+      });
       tpl.removeResizeCalculations();
     }
   },

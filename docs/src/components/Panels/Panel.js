@@ -10,7 +10,7 @@ const settings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
-  getNaturalSize: (panel) => {
+  getNaturalSize: (panel, direction) => {
     const $children = $(panel).children();
     return sum($children.height());
   }
@@ -73,7 +73,6 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   startResize(event) {
     tpl.resizing.set(true);
     tpl.initialSize = tpl.getCurrentFlex();
-    console.log(settings.getNaturalSize);
     dispatchEvent('resizeStart', {
       initialSize: tpl.initialSize,
       direction: settings.direction,
@@ -124,7 +123,6 @@ const onDestroyed = ({ tpl }) => {
 const onRendered = ({ $, el, tpl, settings }) => {
   tpl.registerPanel();
   tpl.setInitialFlex();
-  console.log(settings.getNaturalSize);
 };
 
 const events = {
