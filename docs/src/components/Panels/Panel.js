@@ -132,6 +132,12 @@ const events = {
     tpl.beginResize(event);
     event.preventDefault();
   },
+  'dblclick .handle': function({event, tpl, el}) {
+    const panels = tpl.getPanels();
+    const index = panels.getPanelIndex(el);
+    panels.setNaturalPanelSize(index - 1);
+    console.log('zz', index);
+  },
 };
 
 const Panel = createComponent({

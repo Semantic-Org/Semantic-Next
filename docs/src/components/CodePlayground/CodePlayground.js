@@ -174,16 +174,16 @@ const onRendered = ({ $, tpl, settings }) => {
 
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
-      const emSpacing = 14;
+      const extraSpacing = 7;
 
       if(direction == 'horizontal') {
         const codeWidth = $(panel).find('.CodeMirror-sizer').first().width();
-        return codeWidth + emSpacing;
+        return codeWidth + extraSpacing;
       }
       else if(direction == 'vertical') {
         const codeHeight = $(panel).find('.CodeMirror-sizer').first().height();
         const labelHeight = $(panel).children('label').height();
-        return codeHeight + labelHeight + emSpacing;
+        return codeHeight + labelHeight + extraSpacing;
       }
     }
   });
@@ -200,6 +200,9 @@ const events = {
     const $panel = $(this).closest('ui-panel');
     const $codeEditor = $panel.find('playground-code-editor');
     $codeEditor.focus();
+  },
+  'dblclick label': function({event}) {
+    console.log('zz');
   },
   'click ui-panel': function({event}) {
     $('label').removeClass('active');

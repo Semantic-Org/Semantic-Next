@@ -70,7 +70,8 @@ const createInstance = ({tpl, settings, $}) => ({
   getPanelSize(panel) {
     return parseFloat($(panel).css('flex-grow'));
   },
-  getPanelSizePixels(panel) {
+  getPanelSizePixels(index) {
+    let panel = this.panels[index];
     return (tpl.getPanelSize(panel) / 100) * tpl.getGroupSize();
   },
   getGroupScrollOffset() {
@@ -87,6 +88,20 @@ const createInstance = ({tpl, settings, $}) => ({
       ? $('.panels').width()
       : $('.panels').height()
     ;
+  },
+  setNaturalPanelSize(index) {
+    let naturalSize = tpl.getNaturalPanelSize(index);
+    let currentSize = tpl.getPanelSizePixels(index); 
+    let sizeDelta = naturalSize - currentSize;
+    let donorSize = tpl.getPanelSizePixels(index + 1);
+    tpl.setPanelSizePixels(index, naturalSize);
+    tpl.setPanelSizePixels(index + 1, donorSize - sizeDelta);
+  },
+  getNaturalPanelSize(index) {
+    let panel = tpl.panels[index];
+    let getPanelNaturalWidth = tpl.getPanelSetting(index, 'getNaturalSize', 'getNaturalSize');
+    let naturalSize = getPanelNaturalWidth(panel, settings.direction);
+    return naturalSize;
   },
   setPanelSize(index, relativeSize) {
     let panel = tpl.panels[index];
@@ -122,9 +137,7 @@ const createInstance = ({tpl, settings, $}) => ({
         ;
       },
       getNaturalSize = (index) => {
-        let panel = tpl.panels[index];
-        let getPanelNaturalWidth = tpl.getPanelSetting(index, 'getNaturalSize', 'getNaturalSize');
-        let naturalSize = getPanelNaturalWidth(panel, settings.direction);
+        let naturalSize = tpl.getNaturalPanelSize(index);
         return naturalSize;
       },
       getMaxSize = (index) => {
@@ -133,12 +146,10 @@ const createInstance = ({tpl, settings, $}) => ({
       },
       getMinSize = (index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
-        console.log(minSize);
         return minSize || 0;
       },
       getSize = (index) => {
-        let panel = tpl.panels[index];
-        let panelSize = tpl.getPanelSizePixels(panel);
+        let panelSize = tpl.getPanelSizePixels(index);
         return panelSize;
       },
       setSize = (index, size) => {
