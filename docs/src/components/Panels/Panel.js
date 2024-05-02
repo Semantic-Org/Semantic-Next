@@ -22,7 +22,7 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   },
 
   getCurrentFlex() {
-    return parseFloat($(el).css('flex-grow'));
+    return $(el).css('flex-grow');
   },
   getInitialFlex() {
     return 100 / tpl.getItemCount();
@@ -67,21 +67,16 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   },
   startResize(event) {
     tpl.resizing.set(true);
-    tpl.initialPosition = tpl.getEventPosition(event);
     tpl.initialSize = tpl.getCurrentFlex();
     dispatchEvent('resizeBegin', {
-      initialPosition: tpl.initialPosition,
       initialSize: tpl.initialSize,
       direction: settings.direction
     });
   },
-  resize(event) {
-    let newPosition = tpl.getEventPosition(event);
-    let delta = newPosition - tpl.initialPosition;
-    dispatchEvent('resize', {
-      initialPosition: tpl.initialPosition,
+  resizeDrag(event) {
+    dispatchEvent('resizeDrag', {
       initialSize: tpl.initialSize,
-      newPosition: newPosition,
+      mousePosition: { x : event.pageX, y: event.pageY },
       delta,
     });
   },
@@ -90,7 +85,10 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     tpl.resizing.set(false);
     delete tpl.initialPosition;
     delete tpl.initialSize;
-    dispatchEvent('resizeEnd');
+    dispatchEvent('resizeEnd', {
+      initialSize: tpl.initialSize,
+      finalSize: tpl.getCurrentFlex()
+    });
   },
   beginResize(event) {
     tpl.startResize(event);
