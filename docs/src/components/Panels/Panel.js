@@ -1,5 +1,6 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
+import { sum } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
@@ -9,6 +10,10 @@ const settings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
+  getNaturalSize: (panel) => {
+    const $children = $(panel).children();
+    return sum($children.height());
+  }
 };
 
 const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent, $}) => ({
@@ -34,7 +39,7 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     ;
   },
   getIndex() {
-    return $(el).index('ui-panel');
+    return $(el).index();
   },
   getItemCount() {
     let itemCount;
@@ -68,16 +73,21 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   startResize(event) {
     tpl.resizing.set(true);
     tpl.initialSize = tpl.getCurrentFlex();
-    dispatchEvent('resizeBegin', {
+    console.log(settings.getNaturalSize);
+    dispatchEvent('resizeStart', {
       initialSize: tpl.initialSize,
-      direction: settings.direction
+      direction: settings.direction,
+      startPosition: (settings.direction == 'horizontal')
+        ? event.pageX
+        : event.pageY,
     });
   },
   resizeDrag(event) {
     dispatchEvent('resizeDrag', {
       initialSize: tpl.initialSize,
-      mousePosition: { x : event.pageX, y: event.pageY },
-      delta,
+      endPosition: (settings.direction == 'horizontal')
+        ? event.pageX
+        : event.pageY,
     });
   },
   endResize() {
@@ -95,7 +105,7 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     $('body')
       .css('cursor', tpl.getResizeCursor())
       .on('mousemove', (event) => {
-        tpl.resize(event);
+        tpl.resizeDrag(event);
       });
     $('body')
       .one('mouseup', (event) => {
@@ -114,6 +124,7 @@ const onDestroyed = ({ tpl }) => {
 const onRendered = ({ $, el, tpl, settings }) => {
   tpl.registerPanel();
   tpl.setInitialFlex();
+  console.log(settings.getNaturalSize);
 };
 
 const events = {

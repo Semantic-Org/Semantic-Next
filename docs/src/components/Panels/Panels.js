@@ -13,38 +13,49 @@ const settings = {
 const createInstance = ({tpl, settings, $}) => ({
   panels: [],
   panelSettings: [],
+  panelWidths: [],
+  group: {
+    width: undefined,
+    scrollOffset: undefined,
+  },
+  resize: {
+    start: undefined,
+    end: undefined,
+    index: undefined,
+    delta: undefined,
+  },
   registerPanel({el, settings}) {
     tpl.panels.push(el);
     tpl.panelSettings.push(settings);
   },
-  resizePanel({afterPanel, delta, initialSize}) {
-    let afterIndex = tpl.getPanelIndex(afterPanel);
-    const beforePanel = tpl.panels[afterIndex - 1];
-    // if the handle was dragged towards the after panel (positive)
-    // then we are growing the preceding panel
-    const growingPanel = (delta > 0)
-      ? beforePanel
-      : afterPanel
-    ;
-    const shrinkingPanel = tpl.getFirstAvailableDonor(growingPanel, delta);
-    const changeAmount = tpl.getChangeAmount(delta);
-    tpl.shrinkPanel({shrinkingPanel, changeAmount, initialSize});
-    tpl.growPanel({growingPanel, changeAmount, initialSize});
+  setStartingCalculations(panel, eventData) {
+    tpl.group = {
+      ...tpl.group,
+      scrollOffset: tpl.getGroupScrollOffset(),
+      size: tpl.getGroupSize()
+    };
+    tpl.resize = {
+      ...tpl.resize,
+      index: tpl.getPanelIndex(panel),
+      start: eventData.startPosition + tpl.group.scrollOffset
+    };
   },
-  getFirstAvailableDonor(growingPanel, delta) {
-    let growingIndex = tpl.getPanelIndex(growingPanel);
-    let donorPanels = (delta > 0)
-      ? tpl.panels.slice(growingIndex + 1)
-      : tpl.panels.slice(0, growingIndex - 1).reverse()
-    ;
-    return firstMatch(donorPanels, (panel) => {
-      const index = tpl.getPanelIndex(panel);
-      const settings = tpl.panelSettings[index];
-      if(settings.minWidth && settings.minWidth.search('px')) {
-        // check min width px
-      }
-      return true;
-    });
+  removeStartingCalculations() {
+    delete tpl.group.scrollOffset;
+    delete tpl.group.size;
+    delete tpl.resize.start;
+    delete tpl.resize.index;
+  },
+  setResizeCalculations(panel, eventData) {
+    tpl.resize = {
+      ...tpl.resize,
+      end: eventData.endPosition + tpl.group.scrollOffset,
+    };
+    tpl.resize.delta = tpl.resize.end - tpl.resize.start;
+    tpl.resizePanels(tpl.resize.index, tpl.resize.delta);
+  },
+  removeResizeCalculations() {
+    tpl.start = tpl.end;
   },
   getPanelIndex(el) {
     return tpl.panels.indexOf(el);
@@ -56,41 +67,276 @@ const createInstance = ({tpl, settings, $}) => ({
   getPanelSize(panel) {
     return parseFloat($(panel).css('flex-grow'));
   },
+  getPanelSizePixels(panel) {
+    return tpl.getPanelSize(panel) * tpl.getGroupSize();
+  },
+  getNaturalPanelSize(panel) {
+    return (settings.direction == 'horizontal')
+      ? $(panel).naturalWidth()
+      : $(panel).naturalHeight()
+    ;
+  },
+  getGroupScrollOffset() {
+    return (settings.direction == 'horizontal')
+      ? $('.panels').scrollLeft()
+      : $('.panels').scrollTop()
+    ;
+  },
   getGroupSize() {
-    if(tpl.cachedSize) {
-      return tpl.cachedSize;
+    if(tpl.group.size) {
+      return tpl.group.size;
     }
     return (settings.direction == 'horizontal')
       ? $('.panels').width()
       : $('.panels').height()
     ;
   },
-  shrinkPanel(shrinkingPanel, shrinkAmount) {
-    const currentSize = tpl.getPanelSize(shrinkingPanel);
-    const newSize = currentSize - shrinkAmount;
-    $(shrinkingPanel).css('flex-grow', newSize);
+  setPanelWidth(index, relativeWidth) {
+    let panel = tpl.panels[index];
+    $(panel).css('flex-grow', relativeWidth);
   },
-  growPanel({growingPanel, growAmount, initialSize}) {
-    const newSize = initialSize + growAmount;
-    console.log('new size growing', growAmount, growingPanel);
-    $(growingPanel).css('flex-grow', newSize);
+  setPanelWidthPixels(index, pixelWidth) {
+    let relativeWidth = pixelWidth / tpl.get.groupSize();
+    tpl.setPanelWidth(index, relativeWidth);
   },
   debugSizes() {
     let total = 0;
     each(tpl.panels, (panel) => {
       const size = tpl.getPanelSize(panel);
       total += size;
-      console.log(size);
     });
-    console.log('total', total);
-    console.log('-----');
   },
-  setCachedSize() {
-    tpl.cachedSize = tpl.getPanelSize();
+  resizePanels(index, delta) {
+    let
+      leftIndex = index - 1,
+      rightIndex = index + 1,
+      lastIndex = tpl.panels.length - 1,
+      standard = delta > 0,
+      inverted = delta < 0,
+      getNaturalSize = (index) => {
+        tpl.getNaturalPanelSize(index);
+      },
+      getMaxSize = (index) => {
+        return tpl.panelSettings[index]?.maxSize;
+      },
+      getMinSize = (index) => {
+        return tpl.panelSettings[index]?.minSize;
+      },
+      getSize = (index) => {
+        tpl.getPanelSizePixels(index);
+      },
+      setWidth = (index, width) => {
+        tpl.setPanelWidthPixels(index, width);
+      },
+      pixelsToGrow = Math.abs(delta),
+      pixelsToTake = Math.abs(delta)
+    ;
+
+    if(standard) {
+
+      /*--------------
+        Collapse Pass
+      ---------------*/
+
+      while (rightIndex <= lastIndex) {
+        let
+          currentWidth = getSize(rightIndex),
+          naturalSize = getNaturalSize(index),
+          maxWidth = getMaxSize(index) || naturalSize
+        ;
+        // has any pixels to give
+        if (currentWidth > maxWidth) {
+          if (currentWidth - pixelsToTake >= maxWidth) {
+            // can subtract all from this column
+            setWidth(rightIndex, currentWidth - pixelsToTake);
+            pixelsToTake = 0;
+            break;
+          } else {
+            // can only subtract partial amount from this column
+            setWidth(rightIndex, maxWidth);
+            pixelsToTake -= currentWidth - maxWidth;
+          }
+        }
+        rightIndex++;
+      }
+
+      /*--------------
+        Min-Width Pass
+      ---------------*/
+
+      if (pixelsToTake > 0) {
+        // reset index
+        rightIndex = index + 1;
+
+        // collapse pass
+        while (rightIndex <= lastIndex) {
+          let
+            currentWidth = getSize(rightIndex),
+            minWidth = getMinSize(rightIndex)
+          ;
+          // has any pixels to give
+          if (currentWidth > minWidth) {
+            if (currentWidth - pixelsToTake >= minWidth) {
+              // can subtract all from this column
+              setWidth(rightIndex, currentWidth - pixelsToTake);
+              pixelsToTake = 0;
+              break;
+            } else {
+              // can only subtract partial amount from this column
+              setWidth(rightIndex, minWidth);
+              pixelsToTake -= currentWidth - minWidth;
+            }
+          }
+          rightIndex++;
+        }
+      }
+
+      // if couldn't take all the pixels we needed then let's not grow as much
+      pixelsToGrow -= pixelsToTake;
+
+      /*-----------------
+        Grow-Left Pass
+      ------------------*/
+
+      while (leftIndex >= 0) {
+        let
+          currentWidth = getSize(leftIndex),
+          naturalSize = getNaturalSize(leftIndex),
+          maxWidth = getMaxSize(leftIndex) || naturalSize
+        ;
+        // has any pixels to give
+        if (currentWidth < maxWidth) {
+          if (currentWidth + pixelsToGrow <= maxWidth) {
+            // can subtract all from this column
+            setWidth(leftIndex, currentWidth + pixelsToGrow);
+            pixelsToGrow = 0;
+            break;
+          } else {
+            // can only subtract partial amount from this column
+            setWidth(leftIndex, maxWidth);
+            pixelsToGrow -= maxWidth - currentWidth;
+          }
+        }
+        leftIndex--;
+      }
+
+      /*--------------
+        Adjacent Pass
+      ---------------*/
+
+      // add leftover pixels so that we're even
+      if (pixelsToGrow > 0) {
+        // reset index
+        leftIndex = index;
+
+        // grow pass
+        let currentWidth = getSize(leftIndex);
+        setWidth(leftIndex, currentWidth + pixelsToGrow);
+      }
+
+    }
+    else if(inverted) {
+
+      /*-----------------
+       Collapse-Left Pass
+      ------------------*/
+
+      while (leftIndex >= 0) {
+        let
+          currentWidth = getSize(leftIndex),
+          naturalSize = getNaturalSize(leftIndex)
+        ;
+        // has any pixels to give
+        if (currentWidth > naturalSize) {
+          if (currentWidth - pixelsToTake >= naturalSize) {
+            // can subtract all from this column
+            setWidth(leftIndex, currentWidth - pixelsToTake);
+            pixelsToTake = 0;
+            break;
+          } else {
+            // can only subtract partial amount from this column
+            setWidth(leftIndex, naturalSize);
+            pixelsToTake -= currentWidth - naturalSize;
+          }
+        }
+        leftIndex--;
+      }
+
+      /*--------------
+        Min-Width Pass
+      ---------------*/
+
+      if (pixelsToTake > 0) {
+
+        // reset index
+        leftIndex = index;
+
+        // collapse pass
+        while (leftIndex >= 0) {
+          let
+            currentWidth = getSize(leftIndex),
+            minWidth = getMinSize(leftIndex)
+          ;
+          // has any pixels to give
+          if (currentWidth > minWidth) {
+            if (currentWidth - pixelsToTake >= minWidth) {
+              // can subtract all from this column
+              setWidth(leftIndex, currentWidth - pixelsToTake);
+              pixelsToTake = 0;
+              break;
+            } else {
+              // can only subtract partial amount from this column
+              setWidth(leftIndex, minWidth);
+              pixelsToTake -= currentWidth - minWidth;
+            }
+          }
+          leftIndex--;
+        }
+      }
+
+      // if couldn't take all the pixels we needed then let's not grow as much
+      pixelsToGrow -= pixelsToTake;
+      rightIndex = index + 1;
+
+      /*--------------
+       Max Width Pass
+      ---------------*/
+
+      while (rightIndex <= lastIndex) {
+        let
+          currentWidth = getSize(rightIndex),
+          naturalSize = getNaturalSize(rightIndex),
+          maxWidth = getMaxSize(rightIndex) || naturalSize
+        ;
+        // has any pixels to give
+        if (currentWidth < maxWidth) {
+          if (currentWidth + pixelsToGrow <= maxWidth) {
+            // can subtract all from this column
+            setWidth(rightIndex, currentWidth + pixelsToGrow);
+            pixelsToGrow = 0;
+            break;
+          } else {
+            // can only subtract partial amount from this column
+            setWidth(rightIndex, maxWidth);
+            pixelsToGrow -= naturalSize - currentWidth;
+          }
+        }
+        rightIndex++;
+      }
+      /*--------------
+        Adjacent Pass
+      ---------------*/
+
+      if (pixelsToGrow > 0) {
+        rightIndex = index + 1;
+        let currentWidth = getSize(rightIndex);
+        setWidth(rightIndex, currentWidth + pixelsToGrow);
+      }
+
+    }
+
+    console.log('resize', index, delta);
   },
-  removeCachedSize() {
-    delete tpl.cachedSize;
-  }
 });
 
 const onCreated = ({ tpl }) => {
@@ -104,28 +350,26 @@ const onRendered = ({ $, el, tpl, settings }) => {
 };
 
 const events = {
-  'resizeBegin ui-panel'() {
+  'resizeStart ui-panel'({tpl, event, data}) {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      tpl.setCachedSize();
+      tpl.setStartingCalculations(panel, data);
     }
   },
-  // note: the handle event fires on the preceding panel to the handle
-  // so for | 1 || 2 | the handle fires on '2'
-  'resize ui-panel'({tpl, event, data}) {
+  'resizeDrag ui-panel'({tpl, event, data}) {
+    // note: the handle event fires on the preceding panel to the handle
+    // so for | 1 || 2 | the handle fires on '2'
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      const { delta } = data;
-      requestAnimationFrame(() => {
-        tpl.resizePanel({afterPanel: panel, delta: delta, initialSize });
-        tpl.debugSizes();
-      });
+      tpl.setResizeCalculations(panel, data);
+      requestAnimationFrame(tpl.resizePanels);
+      tpl.removeResizeCalculations();
     }
   },
-  'resizeEnd ui-panel'() {
+  'resizeEnd ui-panel'({tpl, event, data}) {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      tpl.removeCachedSize();
+      tpl.removeStartingCalculations();
     }
   },
 };

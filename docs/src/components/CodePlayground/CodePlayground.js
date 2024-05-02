@@ -170,6 +170,12 @@ const onDestroyed = ({ tpl }) => {
 
 const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
+
+  $('ui-panel').settings({
+    getNaturalSize: function(panel) {
+      return $('.CodeMirror-sizer', panel).height();
+    }
+  });
 };
 
 const events = {
