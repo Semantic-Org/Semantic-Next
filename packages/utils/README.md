@@ -25,6 +25,7 @@ Utility includes the following helpers:
 - `where(array, properties)` - Returns only objs with given properties in an array of objects.
 - `flatten(arr)` - Flattens an array of arrays
 - `some/any(arr, truthFunc)` - Returns true if any/some values match truthFunc
+- `sum(values)` - sums an array of numbers
 
 
 ### DOM

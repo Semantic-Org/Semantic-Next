@@ -372,6 +372,10 @@ export const range = (start, stop, step = 1) => {
     });
 };
 
+export const sum = (values) => {
+  return values.reduce((acc, num) => acc + num, 0);
+};
+
 export const where = (array, properties) => {
   return array.filter((obj) =>
     Object.keys(properties).every((key) => obj[key] === properties[key])
