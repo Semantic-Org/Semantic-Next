@@ -60,10 +60,12 @@ export const Template = class Template {
     }
   }
 
-  setDataContext(data) {
+  setDataContext(data, { rerender = true } = {}) {
     this.data = data;
     this.tpl.data = data;
-    this.rendered = false;
+    if(rerender) {
+      this.rendered = false;
+    }
   }
 
   // when rendered as a partial/subtemplate
@@ -357,7 +359,7 @@ export const Template = class Template {
       ...this.getDataContext(),
       ...additionalData,
     };
-    this.setDataContext(dataContext);
+    this.setDataContext(dataContext, { rerender: false });
     const html = this.renderer.render({
       data: dataContext,
     });
@@ -402,15 +404,14 @@ export const Template = class Template {
       return;
     }
     if (!params) {
-      const data = clone(this.tpl.data);
       params = {
 
         el: this.element,
         tpl: this.tpl,
         $: this.$.bind(this),
 
-        data: data,
-        settings: data, // Todo: extract only settings from data
+        data: this.tpl.data,
+        settings: this.tpl.data, // Todo: extract only settings from data
 
         isServer: Template.isServer,
         isClient: !Template.isServer, // convenience
