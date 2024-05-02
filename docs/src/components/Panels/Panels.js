@@ -133,6 +133,7 @@ const createInstance = ({tpl, settings, $}) => ({
       },
       getMinSize = (index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
+        console.log(minSize);
         return minSize || 0;
       },
       getSize = (index) => {

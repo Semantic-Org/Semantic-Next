@@ -10,6 +10,8 @@ const settings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
+  minSize: 0,
+  maxSize: 0,
   getNaturalSize: (panel, direction) => {
     const $children = $(panel).children();
     return sum($children.height());

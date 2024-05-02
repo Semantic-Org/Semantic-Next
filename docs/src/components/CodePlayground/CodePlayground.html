@@ -1,4 +1,4 @@
-<div class="playground" part="playground">
+<div class="playground {{classIf resizing 'resizing'}}" part="playground">
   {{#if exists files}}
     <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
       {{#each file in getFileArray}}

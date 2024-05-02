@@ -42,6 +42,10 @@
     padding: 0.5rem;
     flex-direction: column;
   }
+  ui-panel {
+    overflow: hidden;
+    min-height: 32px;
+  }
   ui-panel label {
     font-size: 10px;
     text-transform: uppercase;
@@ -98,6 +102,11 @@
     width: 71px;
     left: 22px;*/
   }
+
+  &.resizing playground-preview {
+    pointer-events: none;
+  }
+
 }
 
 playground-ide {

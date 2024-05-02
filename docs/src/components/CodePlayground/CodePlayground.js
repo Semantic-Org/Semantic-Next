@@ -51,6 +51,7 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.css': 1,
     'index.js': 2,
   },
+  resizing: new ReactiveVar(false),
   getScriptType(type) {
     return get(tpl.scriptTypes, type);
   },
@@ -172,15 +173,29 @@ const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
 
   $('ui-panel').settings({
-    getNaturalSize: function(panel) {
-      const codeHeight = $(panel).find('.CodeMirror-sizer').height();
-      const labelHeight = $(panel).children('label').height();
-      return codeHeight + labelHeight + 10;
+    getNaturalSize: function(panel, direction) {
+      const emSpacing = 14;
+
+      if(direction == 'horizontal') {
+        const codeWidth = $(panel).find('.CodeMirror-sizer').first().width();
+        return codeWidth + emSpacing;
+      }
+      else if(direction == 'vertical') {
+        const codeHeight = $(panel).find('.CodeMirror-sizer').first().height();
+        const labelHeight = $(panel).children('label').height();
+        return codeHeight + labelHeight + emSpacing;
+      }
     }
   });
 };
 
 const events = {
+  'resizeStart ui-panel'({tpl, event, data}) {
+    tpl.resizing.set(true);
+  },
+  'resizeEnd ui-panel'({tpl, event, data}) {
+    tpl.resizing.set(false);
+  },
   'click label': function({event}) {
     const $panel = $(this).closest('ui-panel');
     const $codeEditor = $panel.find('playground-code-editor');
