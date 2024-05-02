@@ -115,7 +115,7 @@ const events = {
   'resize ui-panel'({tpl, event, data}) {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      const { delta, initialSize } = data;
+      const { delta } = data;
       requestAnimationFrame(() => {
         tpl.resizePanel({afterPanel: panel, delta: delta, initialSize });
         tpl.debugSizes();
