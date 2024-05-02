@@ -38,7 +38,6 @@ describe('query', () => {
       span.textContent = 'passed in text';  
       customElement.appendChild(span);
 
-
       document.body.appendChild(customElement);
       expect(customElement.getSlotText()).toBe('passed in text');
       expect(customElement.getDivText()).toBe('passed in text');

@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -133,26 +133,44 @@ export class Query {
     return selector ? this.chain(siblings).filter(selector) : this.chain(siblings);
   }
 
-  index(selector) {
-    const indices = Array.from(this).map((el) => {
-      const $parent = this.chain(el).parent();
-      const $children = $parent.children(selector);
-      return $children.get().indexOf(el);
-    });
-    return indices.length === 1 ? indices[0] : indices;
+  index(indexFilter) {
+    if(indexFilter) {
+      // if we are passed in a filter we are just grabbing el position
+      const els = this.get();
+      const el = this.filter(indexFilter).get(0);
+      return els.indexOf(el);
+    }
+    else {
+      // if we aren't we are grabbing sibling position
+      const $siblings = this.parent().children();
+      const siblingEls = $siblings.get();
+      const els = this.get();
+      return findIndex(siblingEls, el => inArray(el, els));
+    }
   }
 
-  filter(selectorOrFunction) {
+  filter(filter) {
     let filteredElements = [];
-    if (isString(selectorOrFunction)) {
-      // If a CSS selector is provided, use it with the matches method
-      filteredElements = Array.from(this).filter((el) =>
-        el.matches && el.matches(selectorOrFunction)
-      );
+    // If a function is provided, use it directly to filter elements
+    if (isFunction(filter)) {
+      filteredElements = Array.from(this).filter(filter);
     }
-    else if (isFunction(selectorOrFunction)) {
-      // If a function is provided, use it directly to filter elements
-      filteredElements = Array.from(this).filter(selectorOrFunction);
+    else {
+      // If a CSS selector is provided, use it with the matches method
+      filteredElements = Array.from(this).filter((el) => {
+        if(isString(filter)) {
+          return el.matches && el.matches(filter);
+        }
+        else {
+          let els = isFunction(filter.get)
+            ? filter.get()
+            : isArray(filter)
+              ? filter
+              : [ filter]
+          ;
+          return inArray(el, els);
+        }
+      });
     }
     return this.chain(filteredElements);
   }
@@ -162,7 +180,7 @@ export class Query {
     const filteredElements = Array.from(this).filter(
       (el) => (el.matches && el.matches(selector))
     );
-    return filteredElements.length > 0;
+    return filteredElements.length == this.length;
   }
 
   not(selector) {
@@ -228,7 +246,7 @@ export class Query {
       if (targetSelector) {
         delegateHandler = (e) => {
           const target = e.target.closest(targetSelector);
-          if (target && $(el).find(target).length) {
+          if (target && this.chain(el).find(target).length) {
             handler.call(target, e);
           }
         };
@@ -530,28 +548,44 @@ export class Query {
     return this.eq(0);
   }
 
-  height() {
-    return this.length === 1
-      ? this[0].clientHeight
-      : this.map(el => el.clientHeight);
+  prop(name, value) {
+    if (value !== undefined) {
+      // Set the property value for each element
+      return this.each(el => {
+        el[name] = value;
+      });
+    } else {
+      // Get the property value from elements
+      if (this.length === 1) {
+        return this[0][name];
+      } else {
+        return this.map(el => el[name]);
+      }
+    }
   }
 
-  width() {
-    return this.length === 1
-      ? this[0].clientWidth
-      : this.map(el => el.clientWidth);
+  height(value) {
+    return this.prop('clientHeight', value);
   }
 
-  scrollHeight() {
-    return this.length === 1
-      ? this[0].scrollHeight
-      : this.map(el => el.scrollHeight);
+  width(value) {
+    return this.prop('clientWidth', value);
   }
 
-  scrollWidth() {
-    return this.length === 1
-      ? this[0].scrollWidth
-      : this.map(el => el.scrollWidth);
+  scrollHeight(value) {
+    return this.prop('scrollHeight', value);
+  }
+
+  scrollWidth(value) {
+    return this.prop('scrollWidth', value);
+  }
+
+  scrollLeft(value) {
+    return this.prop('scrollLeft', value);
+  }
+
+  scrollTop(value) {
+    return this.prop('scrollTop', value);
   }
 
   // offsetParent does not return the true offset parent

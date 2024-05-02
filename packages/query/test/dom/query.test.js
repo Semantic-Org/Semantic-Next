@@ -70,19 +70,152 @@ describe('query', () => {
     });
 
   });
-  
+
+  describe('siblings', () => {
+    it('siblings should return all siblings of an element', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      document.body.appendChild(span2);
+      expect($('span').siblings()[0]).toBe(div);
+      expect($('span').siblings()[1]).toBe(span2);
+    });
+
+    it('siblings should return all siblings matching a selector', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      const span2 = document.createElement('span');
+      span2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      document.body.appendChild(span2);
+      expect($('span').siblings('.test')[0]).toBe(span2);
+    });
+  });
+
+  describe('is', () => {
+    it('is should return true if all elements match a selector', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div.classList.add('test');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      expect($('div').is('.test')).toBe(true);
+    });
+
+    it('is should return false if not all elements match a selector', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      expect($('div').is('.test')).toBe(false);
+    });
+  });
+
+  describe('index', () => {
+
+    it('index should return -1 if no matching element is found among its siblings', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      expect($('p').index()).toBe(-1);
+    });
+
+    it('index should return the first matching index', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      document.body.appendChild(span);
+      document.body.appendChild(span);
+      expect($('span').index()).toBe(1);
+    });
+
+    it('index should return the indexes of multiple element among its siblings', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      document.body.appendChild(span2);
+      expect($('span').index()).toBe(1);
+    });
+
+    it('index should return the index of an element among its siblings matching a selector', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      const span2 = document.createElement('span');
+      span2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      document.body.appendChild(span2);
+      expect($('span').index('.test')).toBe(1);
+    });
+
+    it('index should return the index of the first element when no argument is passed', () => {
+      const div = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span1);
+      document.body.appendChild(span2);
+      expect($('span').index()).toBe(1);
+    });
+
+    it('index should return the index of the element within the collection when a DOM element is passed', () => {
+      const div = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span1);
+      document.body.appendChild(span2);
+      expect($('span').index(span2)).toBe(1);
+    });
+
+    it('index should return the index of the element within the collection when a Query object is passed', () => {
+      const div = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span1);
+      document.body.appendChild(span2);
+      expect($('span').index($('span').eq(1))).toBe(1);
+    });
+
+    it('index should return -1 when the element is not found within the collection', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      expect($('div').index(span)).toBe(-1);
+    });
+
+    it('index should return -1 when the selector does not match any elements', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      expect($('span').index('.non-existent')).toBe(-1);
+    });
+  });
+
 
   describe('not', () => {
       
-      it('not should filter out elements that match a selector', () => {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div2.classList.add('test');
-        document.body.appendChild(div);
-        document.body.appendChild(div2);
-        const $div = $('div').not('.test');
-        expect($div[0]).toBe(div);
-      });
+    it('not should filter out elements that match a selector', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      const $div = $('div').not('.test');
+      expect($div[0]).toBe(div);
+    });
 
   });
   
@@ -332,6 +465,21 @@ describe('query', () => {
       expect(callback).not.toHaveBeenCalled();
     });
 
+  });
+
+  describe('one', () => {
+    it('one should attach a one-time event handler to elements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').one('click', callback);
+
+      div.click();
+      div.click();
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
   });
   
   describe('off', () => {
