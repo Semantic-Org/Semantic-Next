@@ -5,6 +5,8 @@ A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
 
+const tagRegExp = /^<(\w+)(\s*\/)?>$/;
+
 export class Query {
   static eventHandlers = [];
 
@@ -23,11 +25,15 @@ export class Query {
       elements = selector;
     }
     else if (isString(selector)) {
-      // String selector provided, find elements using querySelectorAll
-      elements = (pierceShadow)
-        ? this.querySelectorAllDeep(root, selector)
-        : root.querySelectorAll(selector)
-      ;
+      if (selector.slice(0, 1) == '<') {
+        const tagName = selector.match(tagRegExp)[1];
+        elements = [document.createElement(tagName)];
+      } else {
+        // Use querySelectorAll for normal selectors
+        elements = (pierceShadow)
+          ? this.querySelectorAllDeep(root, selector)
+          : root.querySelectorAll(selector);
+      }
     }
     else if (isDOM(selector)) {
       // A single Element, Document, or DocumentFragment is provided
@@ -128,8 +134,11 @@ export class Query {
 
   siblings(selector) {
     const siblings = Array.from(this).flatMap((el) => {
+      if(!el.parentNode) {
+        return;
+      }
       return Array.from(el.parentNode.children).filter((child) => child !== el);
-    });
+    }).filter(Boolean);
     return selector ? this.chain(siblings).filter(selector) : this.chain(siblings);
   }
 
@@ -586,6 +595,58 @@ export class Query {
 
   scrollTop(value) {
     return this.prop('scrollTop', value);
+  }
+
+  clone() {
+    const fragment = document.createDocumentFragment();
+    this.each((el) => {
+      fragment.appendChild(el.cloneNode(true));
+    });
+    return this.chain(fragment.childNodes);
+  }
+
+  insertAfter(selector) {
+    const targets = this.chain(selector);
+    const elements = this.get();
+    targets.each((target, index) => {
+      const element = elements[index] || elements[elements.length - 1];
+      if (target.parentNode) {
+        target.parentNode.insertBefore(element, target.nextSibling);
+      }
+    });
+    return this;
+  }
+
+  naturalWidth() {
+    const widths = this.map((el) => {
+      const $clone = $(el).clone().insertAfter(el);
+      $clone.css({
+        position: 'absolute',
+        display: 'block',
+        transform: 'translate(-9999px, -9999px)',
+        zIndex: '-1',
+      });
+      const naturalWidth = $clone.width();
+      $clone.remove();
+      return naturalWidth;
+    });
+    return widths.length > 1 ? widths : widths[0];
+  }
+
+  naturalHeight() {
+    const widths = this.map((el) => {
+      const $clone = $(el).clone().insertAfter(el);
+      $clone.css({
+        position: 'absolute',
+        display: 'block',
+        transform: 'translate(-9999px, -9999px)',
+        zIndex: '-1',
+      });
+      const naturalHeight = $clone.height();
+      $clone.remove();
+      return naturalHeight;
+    });
+    return widths.length > 1 ? widths : widths[0];
   }
 
   // offsetParent does not return the true offset parent

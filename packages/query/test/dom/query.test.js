@@ -981,4 +981,49 @@ describe('query', () => {
 
   });
 
+  describe('clone', () => {
+    it('should create a deep clone of the elements in the Query instance', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      span.textContent = 'Hello';
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $cloned = $('div').clone();
+      expect($cloned[0]).not.toBe(div);
+      expect($cloned[0].tagName).toBe('DIV');
+      expect($cloned[0].children[0].tagName).toBe('SPAN');
+      expect($cloned[0].children[0].textContent).toBe('Hello');
+    });
+  });
+
+  describe('insertAfter', () => {
+    it('should move elements after each target element', () => {
+      const div1 = document.createElement('div');
+      div1.textContent = 'Div 1';
+      const div2 = document.createElement('div');
+      div2.textContent = 'Div 2';
+      const p1 = document.createElement('p');
+      p1.textContent = 'Paragraph 1';
+      const p2 = document.createElement('p');
+      p2.textContent = 'Paragraph 2';
+
+      document.body.appendChild(div1);
+      document.body.appendChild(p1);
+      document.body.appendChild(div2);
+      document.body.appendChild(p2);
+
+      $('div').insertAfter('p');
+
+      expect(document.body.children[0].tagName).toBe('P');
+      expect(document.body.children[0].textContent).toBe('Paragraph 1');
+      expect(document.body.children[1].tagName).toBe('DIV');
+      expect(document.body.children[1].textContent).toBe('Div 1');
+      expect(document.body.children[2].tagName).toBe('P');
+      expect(document.body.children[2].textContent).toBe('Paragraph 2');
+      expect(document.body.children[3].tagName).toBe('DIV');
+      expect(document.body.children[3].textContent).toBe('Div 2');
+    });
+  });
+
 });
