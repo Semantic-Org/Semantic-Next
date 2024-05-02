@@ -404,6 +404,7 @@ export const Template = class Template {
       return;
     }
     if (!params) {
+      const element = this.element;
       params = {
 
         el: this.element,
@@ -432,7 +433,7 @@ export const Template = class Template {
         content: this.tpl.content,
 
         // on demand since requires  computing styles
-        get darkMode() { return this.element.isDarkMode(); },
+        get darkMode() { return element.isDarkMode(); },
 
         ...additionalData,
       };
