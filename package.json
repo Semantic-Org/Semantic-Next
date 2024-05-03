@@ -99,10 +99,5 @@
   ],
   "lint-staged": {
     "**/*.js": "npx dprint fmt"
-  },
-  "dependencies": {
-    "@semantic-ui/component": "^0.0.5",
-    "@semantic-ui/specs": "^0.0.5",
-    "@semantic-ui/utils": "^0.0.5"
   }
 }
