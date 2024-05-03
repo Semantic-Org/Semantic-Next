@@ -12,7 +12,7 @@ const settings = {
   itemCount: 'auto',
   minSize: 0,
   maxSize: 0,
-  width: 'split',
+  size: 'split',
   getNaturalSize: (panel, direction) => {
     const $children = $(panel).children();
     return (direction == 'horizontal')
@@ -39,16 +39,19 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   getCurrentFlex() {
     return $(el).css('flex-grow');
   },
+  getSplitSize() {
+    const availableFlex = tpl.getPanels().getAvailableFlex();
+    return availableFlex / (tpl.getItemCount() - tpl.getIndex());
+  },
   getInitialFlex() {
-    const defaultWidth = settings.width;
-    if(defaultWidth == 'split') {
-      const availableFlex = tpl.getPanels().getAvailableFlex();
-      return availableFlex / (tpl.getItemCount() - tpl.getIndex());
-    }
-    else if(isString(defaultWidth) && defaultWidth.includes('px')) {
-      const parts = defaultWidth.split('px');
+    const defaultSize = settings.size;
+    if(isString(defaultSize) && defaultSize.includes('px')) {
+      const parts = defaultSize.split('px');
       const pixels = Number(parts[0]);
       return tpl.getPanels().getRelativeSize(pixels);
+    }
+    else if(isString(defaultSize)) {
+      return Number(defaultSize);
     }
   },
   getResizeCursor() {
@@ -77,12 +80,16 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     return settings.resizable && tpl.getIndex() > 0;
   },
   setInitialSize() {
-    if(settings.width == 'natural') {
+    let index = tpl.getIndex();
+    // set size as if split evenly
+    tpl.getPanels().setPanelSize(index, tpl.getSplitSize(), { donor: false });
+    // then donate pixels if we are forcing a size
+    if(settings.size == 'natural') {
       tpl.setNaturalWidth();
     }
-    else {
-      const initialFlex = tpl.getInitialFlex();
-      $(el).css('flex-grow', initialFlex);
+    else if(settings.size !== 'split') {
+      let initialFlex = tpl.getInitialFlex();
+      tpl.getPanels().setPanelSize(index, initialFlex, { donor: true, splitDonor: true });
     }
   },
   getPanels() {

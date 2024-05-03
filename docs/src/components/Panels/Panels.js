@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, firstMatch, inArray } from '@semantic-ui/utils';
+import { each, firstMatch, inArray, range } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import template from './Panels.html?raw';
@@ -103,11 +103,7 @@ const createInstance = ({tpl, settings, $}) => ({
     if(naturalSize == 0) {
       return;
     }
-    let currentSize = tpl.getPanelSizePixels(index); 
-    let sizeDelta = naturalSize - currentSize;
-    let donorSize = tpl.getPanelSizePixels(index + 1);
-    tpl.setPanelSizePixels(index, naturalSize);
-    tpl.setPanelSizePixels(index + 1, donorSize - sizeDelta);
+    tpl.setPanelSizePixels(index, naturalSize, { donor: true });
   },
   getNaturalPanelSize(index) {
     let panel = tpl.panels[index];
@@ -115,25 +111,59 @@ const createInstance = ({tpl, settings, $}) => ({
     let naturalSize = getPanelNaturalSize(panel, settings.direction);
     return naturalSize;
   },
-  setPanelSize(index, relativeSize) {
+  setPanelSize(index, relativeSize, { donor = false, splitDonor = false } = {}) {
     let panel = tpl.panels[index];
-    $(panel).css('flex-grow', relativeSize);
+    if(donor) {
+      let currentSize = tpl.getPanelSizePixels(index) || 0;
+      let newSize = tpl.getPixelSize(relativeSize) || 0;
+      let sizeDelta = newSize - currentSize;
+      $(panel).css('flex-grow', relativeSize);
+      let donorIndexes;
+      if(splitDonor) {
+        donorIndexes = range(0, tpl.panels.length).filter(val => val !== index);
+      }
+      else {
+        // use panel after as donor unless last panel
+        let donorIndex = (index == tpl.panels.length - 1)
+          ? index - 1
+          : index + 1
+        ;
+        donorIndexes = [donorIndex];
+      }
+      each(donorIndexes, donorIndex => {
+        let donorSize = tpl.getPanelSizePixels(donorIndex) || 0;
+        const amountToTake = sizeDelta / donorIndexes.length;
+        tpl.setPanelSizePixels(donorIndex, donorSize - amountToTake);
+      });
+      tpl.debugSizes();
+    }
+    else {
+      $(panel).css('flex-grow', relativeSize);
+    }
   },
-  setPanelSizePixels(index, pixelSize) {
+  setPanelSizePixels(index, pixelSize, settings) {
     let relativeSize = tpl.getRelativeSize(pixelSize);
-    tpl.setPanelSize(index, relativeSize);
+    tpl.setPanelSize(index, relativeSize, settings);
   },
   getRelativeSize(pixelSize) {
     return pixelSize / tpl.getGroupSize() * 100;
   },
+  getPixelSize(relativeSize) {
+    return (relativeSize / 100) * tpl.getGroupSize();
+  },
   debugSizes() {
     let total = 0;
+    let sizes = [];
     each(tpl.panels, (panel) => {
       const size = tpl.getPanelSize(panel);
       total += size;
-      console.log(size);
+      sizes.push(size);
     });
-    console.log(total);
+    if(total < 99.5 || total > 100.5) {
+      console.log('issue with resizing');
+      console.log(total);
+      console.log(sizes);
+    }
   },
   resizePanels(index, delta, { handleBefore = true } = {}) {
     let
@@ -384,6 +414,7 @@ const createInstance = ({tpl, settings, $}) => ({
       }
 
     }
+    tpl.debugSizes();
   },
 });
 
