@@ -1025,5 +1025,70 @@ describe('query', () => {
       expect(document.body.children[3].textContent).toBe('Div 2');
     });
   });
+  describe('next', () => {
+    it('should return the next sibling element', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const $next = $(div1).next();
+      expect($next.get(0)).toBe(div2);
+    });
+
+    it('should return the next sibling element matching a selector', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('target');
+      const div3 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(div3);
+
+      const $next = $(div1).next('.target');
+      expect($next.get(0)).toBe(div2);
+    });
+
+    it('should return an empty Query instance if no matching next sibling is found', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const $next = $(div).next('.target');
+      expect($next.length).toBe(0);
+    });
+  });
+
+  describe('prev', () => {
+    it('should return the previous sibling element', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const $prev = $(div2).prev();
+      expect($prev.get(0)).toBe(div1);
+    });
+
+    it('should return the previous sibling element matching a selector', () => {
+      const div1 = document.createElement('div');
+      div1.classList.add('target');
+      const div2 = document.createElement('div');
+      const div3 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(div3);
+
+      const $prev = $(div3).prev('.target');
+      expect($prev.get(0)).toBe(div1);
+    });
+
+    it('should return an empty Query instance if no matching previous sibling is found', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const $prev = $(div).prev('.target');
+      expect($prev.length).toBe(0);
+    });
+  });
 
 });

@@ -573,6 +573,36 @@ export class Query {
     }
   }
 
+  next(selector) {
+    const nextSiblings = this.map((el) => {
+      let nextSibling = el.nextElementSibling;
+      while (nextSibling) {
+        if (!selector || nextSibling.matches(selector)) {
+          return nextSibling;
+        }
+        nextSibling = nextSibling.nextElementSibling;
+      }
+      return null;
+    }).filter(Boolean);
+
+    return this.chain(nextSiblings);
+  }
+
+  prev(selector) {
+    const prevSiblings = this.map((el) => {
+      let prevSibling = el.previousElementSibling;
+      while (prevSibling) {
+        if (!selector || prevSibling.matches(selector)) {
+          return prevSibling;
+        }
+        prevSibling = prevSibling.previousElementSibling;
+      }
+      return null;
+    }).filter(Boolean);
+
+    return this.chain(prevSiblings);
+  }
+
   height(value) {
     return this.prop('clientHeight', value);
   }
