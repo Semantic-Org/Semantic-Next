@@ -15,6 +15,7 @@ import { tokenize,
   formatDate,
   generateID,
   get,
+  groupBy,
   hashCode,
   hasProperty,
   inArray,
@@ -175,6 +176,77 @@ describe('Type Checking Utilities', () => {
     expect(testFunction()).toBe(true);
     expect(testFunction(1, 2, 3)).toBe(true);
     expect(isArguments([1, 2, 3])).toBe(false);
+  });
+  describe('groupBy', () => {
+    it('should group objects by a simple property', () => {
+      const array = [
+        { name: 'Alice', age: 25 },
+        { name: 'Bob', age: 30 },
+        { name: 'Charlie', age: 25 },
+      ];
+      const expected = {
+        '25': [
+          { name: 'Alice', age: 25 },
+          { name: 'Charlie', age: 25 },
+        ],
+        '30': [
+          { name: 'Bob', age: 30 },
+        ],
+      };
+      expect(groupBy(array, 'age')).toEqual(expected);
+    });
+
+    it('should group objects by a nested property', () => {
+      const array = [
+        { name: 'Alice', details: { city: 'New York' } },
+        { name: 'Bob', details: { city: 'London' } },
+        { name: 'Charlie', details: { city: 'New York' } },
+      ];
+      const expected = {
+        'New York': [
+          { name: 'Alice', details: { city: 'New York' } },
+          { name: 'Charlie', details: { city: 'New York' } },
+        ],
+        'London': [
+          { name: 'Bob', details: { city: 'London' } },
+        ],
+      };
+      expect(groupBy(array, 'details.city')).toEqual(expected);
+    });
+
+    it('should handle an empty array', () => {
+      const array = [];
+      const expected = {};
+      expect(groupBy(array, 'age')).toEqual(expected);
+    });
+
+    it('should handle objects with missing property', () => {
+      const array = [
+        { name: 'Alice', age: 25 },
+        { name: 'Bob' },
+        { name: 'Charlie', age: 30 },
+      ];
+      const expected = {
+        '25': [
+          { name: 'Alice', age: 25 },
+        ],
+        '30': [
+          { name: 'Charlie', age: 30 },
+        ],
+      };
+      expect(groupBy(array, 'age')).toEqual(expected);
+    });
+
+    it('should handle a property that does not exist on any objects', () => {
+      const array = [
+        { name: 'Alice', age: 25 },
+        { name: 'Bob', age: 30 },
+        { name: 'Charlie', age: 25 },
+      ];
+      const expected = {};
+      expect(groupBy(array, 'city')).toEqual(expected);
+    });
+
   });
 
   describe('sortBy', () => {

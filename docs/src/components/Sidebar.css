@@ -11,11 +11,14 @@
   }
 
   sidebar {
+    position: static;
     display: flex;
     flex-direction: column;
     background-color: var(--sidebar-background-color);
     color: #FFFFFF;
     box-shadow: var(--sidebar-box-shadow);
+    width: var(--sidebar-width);
+    border: none;
   }
   sidebar navSearch.input {
     margin: 1rem 1rem;

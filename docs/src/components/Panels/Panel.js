@@ -1,6 +1,6 @@
 import { createComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { sum } from '@semantic-ui/utils';
+import { sum, isString } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
@@ -12,9 +12,17 @@ const settings = {
   itemCount: 'auto',
   minSize: 0,
   maxSize: 0,
+  width: 'split',
   getNaturalSize: (panel, direction) => {
     const $children = $(panel).children();
-    return sum($children.height());
+    return (direction == 'horizontal')
+      ? ($children.length > 1)
+        ? sum($children.width())
+        : $children.width()
+      : ($children.length > 1)
+        ? sum($children.height())
+        : $children.height()
+    ;
   }
 };
 
@@ -32,7 +40,16 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     return $(el).css('flex-grow');
   },
   getInitialFlex() {
-    return 100 / tpl.getItemCount();
+    const defaultWidth = settings.width;
+    if(defaultWidth == 'split') {
+      const availableFlex = tpl.getPanels().getAvailableFlex();
+      return availableFlex / (tpl.getItemCount() - tpl.getIndex());
+    }
+    else if(isString(defaultWidth) && defaultWidth.includes('px')) {
+      const parts = defaultWidth.split('px');
+      const pixels = Number(parts[0]);
+      return tpl.getPanels().getRelativeSize(pixels);
+    }
   },
   getResizeCursor() {
     return (settings.direction == 'horizontal')
@@ -57,11 +74,16 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     return itemCount;
   },
   isResizable() {
-    return settings.resizable && tpl.getIndex() !== 0;
+    return settings.resizable && tpl.getIndex() > 0;
   },
-  setInitialFlex() {
-    const initialFlex = tpl.getInitialFlex();
-    $(el).css('flex-grow', initialFlex);
+  setInitialSize() {
+    if(settings.width == 'natural') {
+      tpl.setNaturalWidth();
+    }
+    else {
+      const initialFlex = tpl.getInitialFlex();
+      $(el).css('flex-grow', initialFlex);
+    }
   },
   getPanels() {
     return findParent('uiPanels');
@@ -113,6 +135,16 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
         tpl.endResize(event);
       })
     ;
+  },
+  setPreviousNaturalWidth() {
+    const panels = tpl.getPanels();
+    const index = panels.getPanelIndex(el);
+    panels.setNaturalPanelSize(index - 1);
+  },
+  setNaturalWidth() {
+    const panels = tpl.getPanels();
+    const index = panels.getPanelIndex(el);
+    panels.setNaturalPanelSize(index);
   }
 });
 
@@ -122,9 +154,11 @@ const onCreated = ({ tpl, el }) => {
 const onDestroyed = ({ tpl }) => {
 };
 
-const onRendered = ({ $, el, tpl, settings }) => {
-  tpl.registerPanel();
-  tpl.setInitialFlex();
+const onRendered = ({ $, el, tpl, isClient, settings }) => {
+  if(isClient) {
+    tpl.registerPanel();
+    tpl.setInitialSize();
+  }
 };
 
 const events = {
@@ -133,14 +167,11 @@ const events = {
     event.preventDefault();
   },
   'dblclick .handle': function({event, tpl, el}) {
-    const panels = tpl.getPanels();
-    const index = panels.getPanelIndex(el);
-    panels.setNaturalPanelSize(index - 1);
-    console.log('zz', index);
+    tpl.setPreviousNaturalWidth();
   },
 };
 
-const Panel = createComponent({
+const UIPanel = createComponent({
   tagName: 'ui-panel',
   plural: true,
   template,
@@ -153,5 +184,5 @@ const Panel = createComponent({
   events,
 });
 
-export default Panel;
-export { Panel };
+export default UIPanel;
+export { UIPanel };

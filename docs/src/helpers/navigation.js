@@ -1,11 +1,17 @@
 import { getCollection } from 'astro:content';
-import { firstMatch, asyncEach, flatten, isArray, inArray, isString, any } from '@semantic-ui/utils';
+import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, inArray, isString, any } from '@semantic-ui/utils';
 
 const components = await getCollection('components');
 const componentPages = components.map(page => ({
   name: page.data.title,
   url: `/ui/${page.slug}`,
   matchSubPaths: true,
+}));
+
+const examples = await getCollection('examples');
+const examplePages = examples.map(page => ({
+  ...page.data,
+  url: `/examples/${page.slug}`,
 }));
 
 export const topbarMenu =  [
@@ -30,6 +36,7 @@ export const topbarMenu =  [
     url: '/playground',
   },
 ];
+
 
 export const sidebarMenuUI = [
   {
@@ -299,6 +306,42 @@ export const sidebarMenuFramework = [
   },
 ];
 
+
+const createExampleMenu = () => {
+  const categories = groupBy(examplePages, 'category');
+  let menu = [];
+
+  each(categories, (examples, category) => {
+    let subcategories = groupBy(examples, 'subcategory');
+    let pages = [];
+    if(keys(subcategories).length) {
+      // has subcategories
+      each(subcategories, (examples, subcategory) => {
+        pages.push({
+          name: subcategory,
+          pages: examples.map(example => ({
+            name: example.title,
+            url: example.url
+          }))
+        })
+      });
+    }
+    else {
+      // no subcategories
+      pages = examples.map(example => ({
+        name: example.title,
+        url: example.url
+      }))
+    }
+    menu.push({
+      name: category,
+      pages
+    });
+  })
+  return menu;
+};
+export const sidebarMenuExamples = createExampleMenu();
+
 export const removeTrailingSlash = (url = '') => {
   return isString(url)
     ? url.replace(/\/$/, '')
@@ -327,21 +370,18 @@ export const getActiveTopbarSection = async (activeURL = '') => {
 
 
 export const getSidebarMenu = async ({url, topbarSection}) => {
-
   let menu = [];
-
   if(url && !topbarSection) {
     topbarSection = await getActiveTopbarSection(url);
   }
-
-
   if(topbarSection == 'ui') {
     menu = sidebarMenuUI;
   }
   else if(topbarSection == 'framework') {
-
     menu = sidebarMenuFramework;
-
+  }
+  else if(topbarSection == 'examples') {
+    menu = sidebarMenuExamples;
   }
   return menu;
 };

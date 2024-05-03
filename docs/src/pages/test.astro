@@ -2,31 +2,13 @@
 import Body from '../layouts/Body.astro';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
 import { CodeSample } from '@components/CodeSample/CodeSample.js';
-import { UIButton, UIButtons, UIIcon } from '@semantic-ui/core';
+import { UIPanels } from '@components/Panels/Panels.js';
+import { UIPanel } from '@components/Panels/Panel.js';
 ---
 <Body padded>
-  <script>
-    import { createComponent } from '@semantic-ui/component';
-    import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-
-    const template = `
-     The currentTime is {{formatDate currentTime 'h:mm:ss'}}
-    `;
-
-    const createInstance = ({tpl}) => ({
-       currentTime: new ReactiveVar(new Date())
-    });
-
-    createComponent({
-      tagName: 'ui-counter',
-      template,
-      createInstance,
-      onCreated: function({tpl, settings}) {
-        setInterval(() => {
-          tpl.currentTime.set(new Date());
-        }, 1000);
-      }
-    });
-  </script>
-  <ui-counter showParity="false"></ui-counter>
+  <UIPanels direction="horizontal">
+    <UIPanel direction="horizontal">1</UIPanel>
+    <UIPanel direction="horizontal">2</UIPanel>
+    <UIPanel direction="horizontal">3</UIPanel>
+  </UIPanels>
 </Body>

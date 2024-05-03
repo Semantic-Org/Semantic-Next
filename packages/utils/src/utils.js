@@ -417,6 +417,18 @@ export const sortBy = function (arr, key, comparator) {
   return arr.slice().sort(compare);
 };
 
+export const groupBy = function(array, property) {
+  return array.reduce((result, obj) => {
+    const key = get(obj, property);
+    if (key !== undefined) {
+      if (!result[key]) {
+        result[key] = [];
+      }
+      result[key].push(obj);
+    }
+    return result;
+  }, {});
+}
 
 /*-------------------
        Objects

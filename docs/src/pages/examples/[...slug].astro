@@ -8,6 +8,7 @@ import {
 } from '@helpers/playground.js';
 import Playground from '@layouts/Playground.astro';
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
+import Sidebar from '@components/Sidebar.astro';
 
 const { entry } = Astro.props;
 export async function getStaticPaths() {
@@ -35,5 +36,12 @@ const projectConfig = {
 ---
 
 <Playground {...entry.data} showSidebar=true>
-  <CodePlayground client:only files={files} sandboxURL={sandboxURL}></CodePlayground>
+  <ui-panels direction="horizontal">
+    <ui-panel direction="horizontal" width="natural">
+      <Sidebar/>
+    </ui-panel>
+    <ui-panel direction="horizontal">
+      <CodePlayground client:only files={files} sandboxURL={sandboxURL}></CodePlayground>
+    </ui-panel>
+  </ui-panels>
 </Playground>

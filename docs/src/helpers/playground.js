@@ -51,6 +51,7 @@ export const getExampleFiles = async(example, files) => {
   if(!exampleID) {
     return;
   }
+  let hasComponent = false;
   const exampleFiles = {};
   await asyncEach(files, async (file, path) => {
     const pathRegExp = new RegExp(`../../example-files/${exampleID}/`);
@@ -86,6 +87,7 @@ export const getExampleFiles = async(example, files) => {
       }
       else if(inArray(fileName, ['component.js', `${exampleID}.js`])) {
         const fileContent = await file();
+        hasComponent = true;
         exampleFiles['component.js'] = {
           contentType: 'text/javascript',
           content: fileContent.default
@@ -95,10 +97,22 @@ export const getExampleFiles = async(example, files) => {
   });
   // auto generate index.html if not specified for component
   if(exampleFiles['component.js']?.content && !exampleFiles['index.html']?.content) {
-    const tagName = camelToKebab(exampleID);
+    // get tag name from contents
+    let tagName;
+    if(hasComponent) {
+      console.log('has component');
+      let matches = exampleFiles['component.js'].content.match(/tagName: '(.*)'/);
+      console.log(matches[1]);
+      if(matches.length > 1) {
+        tagName = matches[1];
+      }
+      else {
+        tagName = camelToKebab(exampleID);
+      }
+    }
     exampleFiles['index.html'] = {
       contentType: 'text/html',
-      content: `<ui-${tagName}></ui-${tagName}>`
+      content: `<${tagName}></${tagName}>`
     };
   }
   // auto generate index.css if not specified for component

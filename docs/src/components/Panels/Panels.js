@@ -12,7 +12,6 @@ const settings = {
 
 const createInstance = ({tpl, settings, $}) => ({
   panels: [],
-  panelSettings: [],
   panelWidths: [],
   group: {
     size: undefined,
@@ -26,7 +25,6 @@ const createInstance = ({tpl, settings, $}) => ({
   },
   registerPanel({el, settings}) {
     tpl.panels.push(el);
-    tpl.panelSettings.push(settings);
   },
   setStartingCalculations(panel, eventData) {
     tpl.group = {
@@ -51,7 +49,6 @@ const createInstance = ({tpl, settings, $}) => ({
       ...tpl.resize,
       end: eventData.endPosition + tpl.group.scrollOffset,
     };
-    console.log(tpl.resize.end, tpl.resize.start);
     tpl.resize.delta = tpl.resize.end - tpl.resize.start;
   },
   removeResizeCalculations() {
@@ -69,7 +66,8 @@ const createInstance = ({tpl, settings, $}) => ({
     return Math.abs(delta / panelSize * 100);
   },
   getPanelSize(panel) {
-    return parseFloat($(panel).css('flex-grow'));
+    const size = $(panel).css('flex-grow');
+    return size ? parseFloat(size) : undefined;
   },
   getPanelSizePixels(index) {
     let panel = this.panels[index];
@@ -80,6 +78,16 @@ const createInstance = ({tpl, settings, $}) => ({
       ? $('.panels', { pierceShadow: false }).scrollLeft()
       : $('.panels', { pierceShadow: false }).scrollTop()
     ;
+  },
+  getAvailableFlex() {
+    let usedFlex = 0;
+    each(tpl.panels, (panel, index) => {
+      const size = tpl.getPanelSize(panel);
+      if(size) {
+        usedFlex += size;
+      }
+    });
+    return 100 - usedFlex;
   },
   getGroupSize() {
     if(tpl.group.size) {
@@ -92,6 +100,9 @@ const createInstance = ({tpl, settings, $}) => ({
   },
   setNaturalPanelSize(index) {
     let naturalSize = tpl.getNaturalPanelSize(index);
+    if(naturalSize == 0) {
+      return;
+    }
     let currentSize = tpl.getPanelSizePixels(index); 
     let sizeDelta = naturalSize - currentSize;
     let donorSize = tpl.getPanelSizePixels(index + 1);
@@ -100,8 +111,8 @@ const createInstance = ({tpl, settings, $}) => ({
   },
   getNaturalPanelSize(index) {
     let panel = tpl.panels[index];
-    let getPanelNaturalWidth = tpl.getPanelSetting(index, 'getNaturalSize', 'getNaturalSize');
-    let naturalSize = getPanelNaturalWidth(panel, settings.direction);
+    let getPanelNaturalSize = tpl.getPanelSetting(index, 'getNaturalSize', 'getNaturalSize');
+    let naturalSize = getPanelNaturalSize(panel, settings.direction);
     return naturalSize;
   },
   setPanelSize(index, relativeSize) {
@@ -109,15 +120,20 @@ const createInstance = ({tpl, settings, $}) => ({
     $(panel).css('flex-grow', relativeSize);
   },
   setPanelSizePixels(index, pixelSize) {
-    let relativeSize = pixelSize / tpl.getGroupSize() * 100;
+    let relativeSize = tpl.getRelativeSize(pixelSize);
     tpl.setPanelSize(index, relativeSize);
+  },
+  getRelativeSize(pixelSize) {
+    return pixelSize / tpl.getGroupSize() * 100;
   },
   debugSizes() {
     let total = 0;
     each(tpl.panels, (panel) => {
       const size = tpl.getPanelSize(panel);
       total += size;
+      console.log(size);
     });
+    console.log(total);
   },
   resizePanels(index, delta, { handleBefore = true } = {}) {
     let
@@ -154,7 +170,6 @@ const createInstance = ({tpl, settings, $}) => ({
         return panelSize;
       },
       setSize = (index, size) => {
-        console.log('setting size', index, size);
         tpl.setPanelSizePixels(index, size);
       },
       pixelsToGrow = Math.abs(delta),
@@ -162,8 +177,6 @@ const createInstance = ({tpl, settings, $}) => ({
       leftIndex,
       rightIndex
     ;
-
-    console.log('got here', delta);
 
     leftIndex = getLeftIndex();
     rightIndex = getRightIndex();
@@ -399,8 +412,8 @@ const events = {
       tpl.setResizeCalculations(panel, data);
       requestAnimationFrame(() => {
         tpl.resizePanels(tpl.resize.index, tpl.resize.delta);
+        tpl.removeResizeCalculations();
       });
-      tpl.removeResizeCalculations();
     }
   },
   'resizeEnd ui-panel'({tpl, event, data}) {
@@ -411,7 +424,7 @@ const events = {
   },
 };
 
-const Panels = createComponent({
+const UIPanels = createComponent({
   tagName: 'ui-panels',
   plural: true,
   template,
@@ -424,5 +437,5 @@ const Panels = createComponent({
   events,
 });
 
-export default Panels;
-export { Panels };
+export default UIPanels;
+export { UIPanels };

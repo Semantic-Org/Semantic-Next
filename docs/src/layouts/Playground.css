@@ -1,85 +1,103 @@
-
-body {
-  topbar theme-switcher {
-    display: none;
-  }
-  overflow: hidden;
-
-  --playground-code-background: #080c10;
-
-  --topbar-logo-size: 20px;
-  --topbar-logo-valign: -5px;
-  --topbar-height: 45px;
-  --topbar-site-name-font-size: 13px;
-  --topbar-site-name-distance: 10px;
-  --topbar-site-name-color: var(--white);
-  --topbar-menu-distance: 10px;
-  --topbar-icon-size: 13px;
-  --topbar-background-color: var(--playground-code-background);
-  --topbar-menu-item-spacing: 3px;
-  --topbar-menu-item-padding: 2px 2px;
-  --topbar-menu-item-font-size: var(--12px);
-  --topbar-menu-item-color: var(--white-20);
-  --topbar-menu-item-hover-color: var(--white-60);
-  --topbar-menu-item-active-color: var(--white-100);
-  --topbar-menu-item-font-weight: normal;
-  --topbar-menu-item-active-font-weight: bold;
-  --topbar-border-bottom: 1px solid #232323;
-
-  --playground-code-comment-color: #444444;
-  --playground-code-linenumber-color: #25272B;
-  --playground-code-font-size: 14px;
-  --playground-code-default-color: #c9d1d9;
-  --playground-code-keyword-color: #AAAAAA;
-  --playground-code-atom-color: #c9d1d9;
-  --playground-code-number-color: #58a6ff;
-  --playground-code-def-color: var(--primary-text-color);
-  --playground-code-variable-color: #e98080;
-  --playground-code-property-color: #656565;
-  --playground-code-operator-color: #79c0ff;
-  --playground-code-variable-2-color: #79c0ff;
-  --playground-code-variable-3-color: #c9d1d9;
-  --playground-code-type-color: #c9d1d9;
-  --playground-code-string-color: var(--primary-text-color);
-  --playground-code-string-2-color: #656565;
-  --playground-code-meta-color: #c9d1d9;
-  --playground-code-qualifier-color: #c9d1d9;
-  --playground-code-builtin-color: #c9d1d9;
-  --playground-code-tag-color: #d2a8ff;
-  --playground-code-attribute-color: var(--primary-text-color);
-  --playground-code-callee-color: #d2a8ff;
-  --playground-tab-bar-background: #ffffff;
-  --playground-bar-height: 39px;
-  --playground-preview-width: 42%;
-}
-
-playground {
-
-  playground-preview {
-    margin: -0.5rem;
-  }
-  /* Reskin Toolbar */
-  playground-preview::part(preview-toolbar) {
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: bold;
-    background: var(--subtle-gradient);
-    box-shadow: var(--subtle-bottom-lip-shadow);
-  }
-  playground-preview::part(preview-loading-indicator) {
-    --mdc-theme-primary: #49b1d2;
-    height: 4px;
+@layer layout {
+  :root {
+    topbar theme-switcher {
+      display: none;
+    }
     overflow: hidden;
-    top: -26px;
-    width: 71px;
-    left: 22px;
-  }
-  playground-file-editor::part(dialog) {
-    display: none !important;
-    opacity: 0;
-  }
-}
 
-playground-ide {
-  height: 100%;
+    --playground-code-background: #080c10;
+    --sidebar-width: 200px;
+    --sidebar-box-shadow: none;
+
+    --topbar-logo-size: 20px;
+    --topbar-logo-valign: -5px;
+    --topbar-height: 45px;
+    --topbar-site-name-font-size: 13px;
+    --topbar-site-name-distance: 10px;
+    --topbar-site-name-color: var(--white);
+    --topbar-menu-distance: 10px;
+    --topbar-icon-size: 13px;
+    --topbar-background-color: var(--playground-code-background);
+    --topbar-menu-item-spacing: 3px;
+    --topbar-menu-item-padding: 2px 2px;
+    --topbar-menu-item-font-size: var(--12px);
+    --topbar-menu-item-color: var(--white-20);
+    --topbar-menu-item-hover-color: var(--white-60);
+    --topbar-menu-item-active-color: var(--white-100);
+    --topbar-menu-item-font-weight: normal;
+    --topbar-menu-item-active-font-weight: bold;
+    --topbar-border-bottom: 1px solid #232323;
+
+    --playground-code-comment-color: #444444;
+    --playground-code-linenumber-color: #25272B;
+    --playground-code-font-size: 14px;
+    --playground-code-default-color: #c9d1d9;
+    --playground-code-keyword-color: #AAAAAA;
+    --playground-code-atom-color: #c9d1d9;
+    --playground-code-number-color: #58a6ff;
+    --playground-code-def-color: var(--primary-text-color);
+    --playground-code-variable-color: #e98080;
+    --playground-code-property-color: #656565;
+    --playground-code-operator-color: #79c0ff;
+    --playground-code-variable-2-color: #79c0ff;
+    --playground-code-variable-3-color: #c9d1d9;
+    --playground-code-type-color: #c9d1d9;
+    --playground-code-string-color: var(--primary-text-color);
+    --playground-code-string-2-color: #656565;
+    --playground-code-meta-color: #c9d1d9;
+    --playground-code-qualifier-color: #c9d1d9;
+    --playground-code-builtin-color: #c9d1d9;
+    --playground-code-tag-color: #d2a8ff;
+    --playground-code-attribute-color: var(--primary-text-color);
+    --playground-code-callee-color: #d2a8ff;
+    --playground-tab-bar-background: #ffffff;
+    --playground-bar-height: 39px;
+    --playground-preview-width: 42%;
+  }
+
+  .navigation::part(panels) {
+    background-color: var(--sidebar-background-color);
+  }
+  .navigation ui-panel::part(handle) {
+    opacity: 0.1;
+  }
+  .navigation ui-panel::part(handle):hover {
+    opacity: 0.3;
+  }
+  sidebar {
+    height: 100%;
+    box-shadow: none;
+    margin: 0;
+  }
+
+  playground {
+
+    playground-preview {
+      margin: -0.5rem;
+    }
+    /* Reskin Toolbar */
+    playground-preview::part(preview-toolbar) {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: bold;
+      background: var(--subtle-gradient);
+      box-shadow: var(--subtle-bottom-lip-shadow);
+    }
+    playground-preview::part(preview-loading-indicator) {
+      --mdc-theme-primary: #49b1d2;
+      height: 4px;
+      overflow: hidden;
+      top: -26px;
+      width: 71px;
+      left: 22px;
+    }
+    playground-file-editor::part(dialog) {
+      display: none !important;
+      opacity: 0;
+    }
+  }
+
+  playground-ide {
+    height: 100%;
+  }
 }
