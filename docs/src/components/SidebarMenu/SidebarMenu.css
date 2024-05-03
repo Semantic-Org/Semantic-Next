@@ -9,6 +9,7 @@
 
 .title {
   display: flex;
+  cursor: pointer;
   flex-direction: row;
   text-align: left;
   font-size: var(--14px);
@@ -24,42 +25,50 @@
     margin-left: 0.5rem;
     font-size: 12px;
   }
+
+  .dropdown {
+    opacity: 0.3;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    transform: rotate(90deg);
+    width: auto;
+    margin-right: 0px;
+    margin-left: auto;
+  }
 }
 .title {
-  ui-icon {
+  .glyph {
     display: block;
     width: 1.5rem;
     flex: 0 0 auto;
     text-align: center;
     margin-right: 1rem;
-  }
-  ui-icon::part(icon) {
     font-size: 18px;
   }
-  ui-icon[icon="dropdown"] {
-    float: right;
-    opacity: 0.3;
-  }
   + .content {
-    padding: 0rem 0rem 0.5rem 2.5rem;
+    padding: 0rem 0rem 0rem 0.5rem;
+  }
+  + .indented.content {
+    padding-left: 2.55rem;
   }
 }
 
 /* Accordion Content */
 .content {
   display: none;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  transition-behavior: allow-discrete;
 }
 
 /* Nested Menu */
 .content {
   .title {
-    display: block;
+    display: flex;
     font-size: 13px;
     padding: 4px 0px;
-  }
-  .title ui-icon[icon="dropdown"] {
-    float: right;
-    margin: 0rem 1rem 0rem 0rem;
   }
   .title + .content {
     padding: 0rem 0rem 0rem 0.25rem !important;
@@ -70,7 +79,7 @@
 
   .menu {
     .item {
-      display: block;
+      display: flex;
       text-decoration: none;
       color: rgba(255, 255, 255, 0.4);
       line-height: 1;
@@ -99,6 +108,11 @@
   }
   &.active {
     color: #ffffff;
+
+    .dropdown {
+      opacity: 0.8;
+      transform: rotate(0deg);
+    }
   }
   &.current {
     cursor: default;
@@ -108,6 +122,8 @@
 .content {
   &.active {
     display: block;
+    opacity: 1;
+    height: auto;
   }
 
   .menu {

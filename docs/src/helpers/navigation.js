@@ -29,6 +29,7 @@ export const topbarMenu =  [
     _id: 'examples',
     name: 'Examples',
     url: '/examples/counter',
+    baseURL: '/examples'
   },
   {
     _id: 'playground',

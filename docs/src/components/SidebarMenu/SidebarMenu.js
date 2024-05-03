@@ -27,6 +27,9 @@ const createInstance = function ({ tpl, settings }) {
       }
       return classes;
     },
+    hasIcons() {
+      return any(settings.menu, section => section.icon);
+    },
     getPageStates(page) {
       const classes = [];
       if (tpl.isCurrentItem(page)) {
@@ -109,6 +112,12 @@ const onRendered = function ({ $, tpl, isClient }) {
 };
 
 const events = {
+  'click .title': function({event, $, tpl}) {
+    const $title = $(this);
+    const $content = $title.next('.content');
+    $title.toggleClass('active');
+    $content.toggleClass('active');
+  }
 };
 
 const SidebarMenu = createComponent({

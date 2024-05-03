@@ -27,7 +27,8 @@
     --topbar-menu-item-font-weight: normal;
     --topbar-menu-item-active-font-weight: bold;
     --topbar-border-bottom: 1px solid #232323;
-
+  }
+  body {
     --playground-code-comment-color: #444444;
     --playground-code-linenumber-color: #25272B;
     --playground-code-font-size: 14px;
