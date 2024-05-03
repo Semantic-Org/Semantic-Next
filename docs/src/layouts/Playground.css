@@ -71,6 +71,15 @@
     margin: 0;
   }
 
+  page {
+    display: flex;
+    flex-direction: row;
+  }
+
+  page code-playground {
+    display: contents;
+  }
+
   playground {
 
     playground-preview {

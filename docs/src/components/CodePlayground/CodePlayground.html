@@ -1,4 +1,14 @@
 <div class="playground {{classIf resizing 'resizing'}}" part="playground">
+  {{#if example.title}}
+    <div class="masthead">
+      <ui-button right-floated transparent small compact inverted>
+        <ui-icon copy></ui-icon>
+        Fork
+      </ui-button>
+      <h3 class="title">{{example.title}}</h3>
+      <p>{{example.description}}</p>
+    </div>
+  {{/if}}
   {{#if exists files}}
     <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
       {{#each file in getFileArray}}
@@ -12,7 +22,7 @@
         <ui-panels>
           {{#each panel in panelGroup}}
             {{#if is panel.type 'preview'}}
-              <ui-panel class="preview">
+              <ui-panel class="preview" size="66.66">
                 <playground-preview project="source"> </playground-preview>
               </ui-panel>
             {{else if is panel.type 'file'}}

@@ -36,12 +36,12 @@ const projectConfig = {
 ---
 
 <Playground {...entry.data} showSidebar=true>
-  <ui-panels direction="horizontal">
-    <ui-panel direction="horizontal" width="natural">
-      <Sidebar/>
-    </ui-panel>
-    <ui-panel direction="horizontal">
-      <CodePlayground client:only files={files} sandboxURL={sandboxURL}></CodePlayground>
-    </ui-panel>
-  </ui-panels>
+  <page>
+    <Sidebar/>
+    <CodePlayground client:only
+      files={files}
+      example={example}
+      sandboxURL={sandboxURL}
+      ></CodePlayground>
+  </page>
 </Playground>

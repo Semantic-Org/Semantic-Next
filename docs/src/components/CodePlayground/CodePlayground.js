@@ -6,6 +6,7 @@ import { addSearch } from './codemirror-search.js';
 
 import UIPanels from '../Panels/Panels.js';
 import UIPanel from '../Panels/Panel.js';
+import { UIButton } from '@semantic-ui/core';
 
 import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
@@ -17,6 +18,7 @@ import 'playground-elements/playground-preview.js';
 const settings = {
   files: {},
   sandboxURL: '/sandbox',
+  example: {},
   tabSize: 2,
 };
 
@@ -171,10 +173,9 @@ const onDestroyed = ({ tpl }) => {
 
 const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
-
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
-      const extraSpacing = 7;
+      const extraSpacing = 8;
 
       if(direction == 'horizontal') {
         const codeWidth = $(panel).find('.CodeMirror-sizer').first().width();
@@ -200,9 +201,6 @@ const events = {
     const $panel = $(this).closest('ui-panel');
     const $codeEditor = $panel.find('playground-code-editor');
     $codeEditor.focus();
-  },
-  'dblclick label': function({event}) {
-    console.log('zz');
   },
   'click ui-panel': function({event}) {
     $('label').removeClass('active');

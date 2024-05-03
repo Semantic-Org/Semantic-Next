@@ -39,7 +39,9 @@ export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMar
 export const indexJSBefore = ``;
 export const indexJSAfter = ``;
 
-export const indexCSSBefore = `${hideMarkerStart}body { height: auto; }${hideMarkerEnd}`;
+export const indexCSSBefore = `${hideMarkerStart}body { height: auto; }${hideMarkerEnd}body {
+  padding: 1rem;
+}`;
 export const indexCSSAfter = ``;
 
 export const getSandboxURL = () => {
