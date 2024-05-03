@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/specs",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
