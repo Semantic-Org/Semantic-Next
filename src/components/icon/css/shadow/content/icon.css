@@ -1,5 +1,6 @@
 :host {
   display: inline-block;
+  height: 1em;
   font-style: normal;
   font-weight: normal;
   text-decoration: inherit;
