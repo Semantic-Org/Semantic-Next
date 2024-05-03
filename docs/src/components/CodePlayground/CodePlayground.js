@@ -57,6 +57,12 @@ const createInstance = ({tpl, settings, $}) => ({
   getScriptType(type) {
     return get(tpl.scriptTypes, type);
   },
+  getPanelSize(panel) {
+    if(panel.filename == 'component.js') {
+      //return 'natural';
+    }
+    return;
+  },
   getFileArray() {
     let files = [];
     each(settings.files, (file, filename) => {

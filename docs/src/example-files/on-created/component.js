@@ -9,7 +9,8 @@ const createInstance = ({tpl}) => ({
 });
 
 const onCreated = ({tpl, attachEvent}) => {
-  attachEvent('document', 'click', () => {
+  // event will teardown when component is destroyed
+  attachEvent('body', 'click', () => {
     tpl.text.set('Clicked')
   });
 };
