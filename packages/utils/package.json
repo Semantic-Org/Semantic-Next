@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/utils",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "type": "module",
   "main": "src/utils.js",
   "module": "src/utils.js",
