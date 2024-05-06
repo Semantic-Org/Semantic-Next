@@ -183,17 +183,18 @@ const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
+      let height;
       const extraSpacing = 8;
-
       if(direction == 'horizontal') {
         const codeWidth = $(panel).find('.CodeMirror-sizer').first().width();
-        return codeWidth + extraSpacing;
+        height = codeWidth + extraSpacing;
       }
       else if(direction == 'vertical') {
         const codeHeight = $(panel).find('.CodeMirror-sizer').first().height();
         const labelHeight = $(panel).children('label').height();
-        return codeHeight + labelHeight + extraSpacing;
+        height = codeHeight + labelHeight + extraSpacing;
       }
+      return height;
     }
   });
 };
