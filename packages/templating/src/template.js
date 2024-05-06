@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, clone, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, get, remove, generateID, isEqual, noop, isServer, inArray, isFunction, proxyObject, extend, clone, wrapFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -412,7 +412,7 @@ export const Template = class Template {
         $: this.$.bind(this),
 
         data: this.tpl.data,
-        settings: this.tpl.data, // Todo: extract only settings from data
+        settings: proxyObject(() => this.tpl.data),
 
         isServer: Template.isServer,
         isClient: !Template.isServer, // convenience
