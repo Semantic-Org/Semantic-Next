@@ -1,0 +1,10 @@
+
+/* Scrollbars */
+.CodeMirror-hscrollbar,
+.CodeMirror-vscrollbar {
+  scrollbar-color: #444 rgba(255, 255, 255, 0.05);
+  scrollbar-width: thin;
+}
+.CodeMirror-vscrollbar::webkit-scrollbar-thumb {
+  border-radius: 100px;
+}

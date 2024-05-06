@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { createComponent, adoptStylesheet } from '@semantic-ui/component';
 import { get, each, sortBy } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
@@ -10,6 +10,7 @@ import { UIButton } from '@semantic-ui/core';
 
 import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
+import codeMirrorCSS from './codemirror.css?raw';
 
 import 'playground-elements/playground-project.js';
 import 'playground-elements/playground-file-editor.js';
@@ -110,6 +111,7 @@ const createInstance = ({tpl, settings, $}) => ({
   configureCodeEditors() {
     addSearch(CodeMirror);
     $('playground-code-editor').each(function(el) {
+      adoptStylesheet(codeMirrorCSS, el.shadowRoot);
       tpl.modifyCodeMirror(el._codemirror);
     });
   },
