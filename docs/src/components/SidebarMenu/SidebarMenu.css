@@ -53,16 +53,6 @@
   }
 }
 
-/* Accordion Content */
-.content {
-  display: none;
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  transition-behavior: allow-discrete;
-}
-
 /* Nested Menu */
 .content {
   .title {
@@ -110,6 +100,7 @@
     color: #ffffff;
 
     .dropdown {
+      margin-top: 3px;
       opacity: 0.8;
       transform: rotate(0deg);
     }
@@ -120,8 +111,14 @@
   }
 }
 .content {
+
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+  max-height: 0px;
+
   &.active {
-    display: block;
+    max-height: 100px;
     opacity: 1;
     height: auto;
   }
