@@ -1,7 +1,7 @@
 import { scopeStyles } from './scope-styles.js';
 import { isServer, hashCode } from '@semantic-ui/utils';
 
-export const adoptStylesheet = (css, { adoptedElement, scopeSelector } = {}) => {
+export const adoptStylesheet = (css, adoptedElement, { scopeSelector } = {}) => {
   if(isServer) {
     return;
   }
