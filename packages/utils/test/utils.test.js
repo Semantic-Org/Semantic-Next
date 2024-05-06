@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { tokenize,
+  arrayFromObject,
   asyncEach,
   asyncMap,
   camelToKebab,
@@ -10,8 +11,10 @@ import { tokenize,
   escapeRegExp,
   extend,
   filterEmpty,
+  filterObject,
   findIndex,
   firstMatch,
+  flatten,
   formatDate,
   generateID,
   get,
@@ -36,9 +39,11 @@ import { tokenize,
   noop,
   pick,
   prettifyID,
+  proxyObject,
   range,
   remove,
   reverseKeys,
+  some,
   sortBy,
   toTitleCase,
   tokenize,
@@ -113,6 +118,40 @@ describe('Array Utilities', () => {
         { id: 1, name: 'John' },
         { id: 3, name: 'John' },
       ]);
+    });
+  });
+
+  describe('flatten', () => {
+    it('should flatten a nested array', () => {
+      const nested = [1, [2, [3, [4]], 5]];
+      const flat = flatten(nested);
+      expect(flat).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    it('should return the original array if it is not nested', () => {
+      const original = [1, 2, 3];
+      const flat = flatten(original);
+      expect(flat).toEqual(original);
+    });
+  });
+
+  describe('some', () => {
+    it('should return true if at least one element matches the predicate', () => {
+      const array = [1, 2, 3, 4, 5];
+      const result = some(array, (num) => num > 3);
+      expect(result).toBe(true);
+    });
+
+    it('should return false if no elements match the predicate', () => {
+      const array = [1, 2, 3, 4, 5];
+      const result = some(array, (num) => num > 10);
+      expect(result).toBe(false);
+    });
+
+    it('should return false for an empty array', () => {
+      const array = [];
+      const result = some(array, (num) => num > 3);
+      expect(result).toBe(false);
     });
   });
 
@@ -342,6 +381,117 @@ describe('Object Utilities', () => {
     it('pick should create an object composed of the picked properties', () => {
       const obj = { a: 1, b: 2, c: 3 };
       expect(pick(obj, 'a', 'c')).toEqual({ a: 1, c: 3 });
+    });
+  });
+
+  describe('filterObject', () => {
+    it('should filter an object based on a predicate', () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      const filtered = filterObject(obj, (value) => value > 1);
+      expect(filtered).toEqual({ b: 2, c: 3 });
+    });
+
+    it('should return an empty object if no properties match the predicate', () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      const filtered = filterObject(obj, (value) => value > 10);
+      expect(filtered).toEqual({});
+    });
+  });
+
+  describe('arrayFromObject', () => {
+    it('should convert an object to an array of key-value pairs', () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      const array = arrayFromObject(obj);
+      expect(array).toEqual([
+        { key: 'a', value: 1 },
+        { key: 'b', value: 2 },
+        { key: 'c', value: 3 },
+      ]);
+    });
+
+    it('should return the original array if the input is already an array', () => {
+      const original = [1, 2, 3];
+      const array = arrayFromObject(original);
+      expect(array).toEqual(original);
+    });
+  });
+
+  describe('proxyObject', () => {
+    it('should create a proxy that reflects changes in the source object', () => {
+      const source = { name: 'John', age: 30 };
+      const reference = {};
+      const proxy = proxyObject(source);
+
+      expect(proxy.name).toBe('John');
+      expect(proxy.age).toBe(30);
+
+      source.age = 31;
+
+      expect(proxy.age).toBe(31);
+    });
+
+    it('should handle nested properties correctly', () => {
+      const source = { person: { name: 'John', age: 30 } };
+      const reference = {};
+      const proxy = proxyObject(source);
+
+      expect(proxy.person.name).toBe('John');
+      expect(proxy.person.age).toBe(30);
+
+      source.person.age = 31;
+
+      expect(proxy.person.age).toBe(31);
+    });
+
+    it('should handle adding new properties to the source object', () => {
+      const source = { name: 'John' };
+      const reference = {};
+      const proxy = proxyObject(source);
+
+      expect(proxy.age).toBeUndefined();
+
+      source.age = 30;
+
+      expect(proxy.age).toBe(30);
+    });
+
+    it('should handle deleting properties from the source object', () => {
+      const source = { name: 'John', age: 30 };
+      const reference = {};
+      const proxy = proxyObject(source);
+
+      expect(proxy.age).toBe(30);
+
+      delete source.age;
+
+      expect(proxy.age).toBeUndefined();
+    });
+
+    it('should not affect the original reference object', () => {
+      const source = { name: 'John', age: 30 };
+      const reference = { name: 'Jane', age: 25 };
+      const proxy = proxyObject(source);
+
+      expect(reference.name).toBe('Jane');
+      expect(reference.age).toBe(25);
+
+      source.age = 31;
+
+      expect(reference.age).toBe(25);
+    });
+
+    it('should reflect updates made to the reference object after proxy creation', () => {
+      const source = { name: 'John' };
+      const reference = { city: 'Atlanta' };
+      const proxy = proxyObject(source, reference);
+
+      expect(proxy.city).toBe('Atlanta');
+      expect(reference.city).toBe('Atlanta');
+
+      reference.city = 'New Orleans';
+
+      expect(proxy.city).toBe('New Orleans');
+      expect(reference.city).toBe('New Orleans');
     });
   });
 

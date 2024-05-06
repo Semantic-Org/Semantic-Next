@@ -579,6 +579,17 @@ export const get = function (obj, path = '') {
   return currentObject;
 };
 
+/* This is useful for callbacks or other scenarios where you want to avoid the
+   values of a reference object becoming stale when a source object changes
+*/
+export const proxyObject = (sourceObj = noop, referenceObj = {}) => {
+  return new Proxy(referenceObj, {
+    get: (target, property) => {
+      return get(sourceObj(), property);
+    },
+  });
+};
+
 export const onlyKeys = (obj, keysToKeep) => {
   return keysToKeep.reduce((accumulator, key) => {
     if (obj.hasOwnProperty(key)) {
