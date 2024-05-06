@@ -203,8 +203,8 @@
 
   --use-custom-scrollbars: true;
 
-  --custom-scrollbar-width: 10px;
-  --custom-scrollbar-height: 10px;
+  --scrollbar-width: 10px;
+  --scrollbar-height: 10px;
 
   --track-background: rgb(var(--standard-color) / 10%);
   --track-border-radius: 0px;
@@ -568,7 +568,7 @@
   --loader-margin: var(--loader-offset) 0em 0em var(--loader-offset);
 
   /* Rendered Scrollbar Width */
-  --scrollbar-width: 17px;
+  --default-scrollbar-width: 17px;
 
   /* Maximum Single Character Glyph Width, aka Capital "W" */
   --glyph-width: 1.1em;

@@ -48,8 +48,8 @@ input[type="text"], input[type="email"], input[type="search"], input[type="passw
 
 ::-webkit-scrollbar {
   -webkit-appearance: none;
-  width: var(--custom-scrollbar-width);
-  height: var(--custom-scrollbar-height);
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-height);
 }
 
 /* Scrollbars */
