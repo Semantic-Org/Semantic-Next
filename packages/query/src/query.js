@@ -53,19 +53,25 @@ export class Query {
     return new Query(elements, this.options);
   }
 
-  querySelectorAllDeep(root, selector) {
+  querySelectorAllDeep(root, selector, { includeRoot = true } = {}) {
     const elements = new Set();
     const domSelector = isDOM(selector);
     const stringSelector = isString(selector);
+    const addElement = (node) => {
+      if(node == root && !includeRoot) {
+        return;
+      }
+      elements.add(node);
+    };
     const findElements = (node) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         if (domSelector) {
           if(node == selector) {
-            elements.add(node);
+            addElement(node);
           }
         }
         else if (stringSelector && node.matches(selector)) {
-          elements.add(node);
+          addElement(node);
         }
         else if (node.shadowRoot) {
           findElements(node.shadowRoot);
@@ -103,7 +109,7 @@ export class Query {
   find(selector) {
     const elements = Array.from(this).flatMap((el) => {
       if (this.options.pierceShadow) {
-        return this.querySelectorAllDeep(el, selector);
+        return this.querySelectorAllDeep(el, selector, {includeRoot: false });
       } else {
         return Array.from(el.querySelectorAll(selector));
       }
@@ -184,19 +190,28 @@ export class Query {
     return this.chain(filteredElements);
   }
 
-  // Returns true if every element matches
   is(selector) {
-    const filteredElements = Array.from(this).filter(
-      (el) => (el.matches && el.matches(selector))
-    );
-    return filteredElements.length == this.length;
+    const filteredElements = Array.from(this).filter((el) => {
+      if (typeof selector === 'string') {
+        return el.matches && el.matches(selector);
+      } else {
+        const elements = selector instanceof Query ? selector.get() : [selector];
+        return elements.includes(el);
+      }
+    });
+    return filteredElements.length === this.length;
   }
 
   not(selector) {
     // Filter out elements that match the provided selector
-    const filteredElements = Array.from(this).filter(
-      (el) => !el.matches || (el.matches && !el.matches(selector))
-    );
+    const filteredElements = Array.from(this).filter((el) => {
+      if (typeof selector === 'string') {
+        return !el.matches || (el.matches && !el.matches(selector));
+      } else {
+        const elements = selector instanceof Query ? selector.get() : [selector];
+        return !elements.includes(el);
+      }
+    });
     return this.chain(filteredElements);
   }
 
@@ -327,12 +342,11 @@ export class Query {
     return this;
   }
 
-  dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
+  dispatchEvent(eventName, eventData = {}, eventSettings) {
     const eventOptions = {
       bubbles: true,
       cancelable: true,
       detail: eventData,
-      ...eventSettings
     };
     this.each(el => {
       const event = new CustomEvent(eventName, eventOptions);

@@ -1,7 +1,8 @@
+import { describe, vi, beforeAll, beforeEach, afterEach, afterAll, it, expect } from 'vitest';
 import { $ } from '@semantic-ui/query';
-import { describe, it, expect } from 'vitest';
 
 describe('query', () => {
+
   
   describe('text', () => {
 
@@ -44,6 +45,5 @@ describe('query', () => {
 
     });
   });
-
 
 });

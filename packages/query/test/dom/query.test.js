@@ -41,6 +41,39 @@ describe('query', () => {
       expect($div[0]).toBe(div);
       expect($div[1]).toBe(div2);
     });
+    it('should accept a NodeList as a selector', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      const nodeList = document.querySelectorAll('div');
+      const $result = $(nodeList);
+      expect($result.length).toBe(2);
+      expect($result[0]).toBe(div1);
+      expect($result[1]).toBe(div2);
+    });
+
+    it('should accept a DocumentFragment as a selector', () => {
+      const fragment = document.createDocumentFragment();
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      fragment.appendChild(div1);
+      fragment.appendChild(div2);
+      const $result = $(fragment).find('div');
+      expect($result.length).toBe(2);
+      expect($result[0]).toBe(div1);
+      expect($result[1]).toBe(div2);
+    });
+    it('should accept a custom element as a selector', () => {
+      class CustomElement extends HTMLElement {}
+      customElements.define('custom-element', CustomElement);
+      const customElement = document.createElement('custom-element');
+      document.body.appendChild(customElement);
+      const $result = $(customElement);
+      expect($result.length).toBe(1);
+      expect($result[0]).toBe(customElement);
+    });
+
 
   });
 
@@ -336,6 +369,37 @@ describe('query', () => {
     });
 
   });
+
+  describe('dispatchEvent', () => {
+
+    it('should dispatch custom events with different event options', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const handler = vi.fn();
+      div.addEventListener('custom-event', handler);
+      $('div').dispatchEvent('custom-event', { foo: 'bar' });
+      expect(handler).toHaveBeenCalledWith(expect.any(CustomEvent));
+      expect(handler.mock.calls[0][0].type).toBe('custom-event');
+      expect(handler.mock.calls[0][0].detail).toEqual({ foo: 'bar' });
+      expect(handler.mock.calls[0][0].bubbles).toBe(true);
+      expect(handler.mock.calls[0][0].cancelable).toBe(true);
+    });
+
+    it('should dispatch events on multiple elements', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+      div1.addEventListener('custom-event', handler1);
+      div2.addEventListener('custom-event', handler2);
+      $('div').dispatchEvent('custom-event');
+      expect(handler1).toHaveBeenCalled();
+      expect(handler2).toHaveBeenCalled();
+    });
+  });
+
 
   describe('on', () => {
 
@@ -684,7 +748,7 @@ describe('query', () => {
       const span = document.createElement('span');
       const span2 = document.createElement('span');
       const span3 = document.createElement('span');
-      div.textContent = 'test 1'
+      div.textContent = 'test 1';
       span.textContent = 'test 2';
       span2.textContent = 'test 3';
       span3.textContent = 'test 4';
@@ -703,7 +767,7 @@ describe('query', () => {
       const span3 = document.createElement('span');
       div.textContent = `
       test 1
-      test 2`
+      test 2`;
       span.textContent = `
       test 3
       test 4`;
@@ -803,6 +867,36 @@ describe('query', () => {
       expect($('input').val()).toBe('test');
     });
 
+  });
+
+  describe('attr', () => {
+    it('should set and get boolean attributes', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      $('input').attr('disabled', true);
+      expect(input.disabled).toBe(true);
+      expect($('input').attr('disabled')).toBe('true');
+      $('input').removeAttr('disabled');
+      expect(input.disabled).toBe(false);
+      expect($('input').attr('disabled')).toBe(null);
+    });
+
+    it('should set and get custom data attributes', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      $('div').attr('data-custom', 'value');
+      expect(div.getAttribute('data-custom')).toBe('value');
+      expect($('div').attr('data-custom')).toBe('value'); });
+  });
+
+  describe('prop', () => {
+    it('should set and get properties on elements other than form elements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      $('div').prop('customProperty', 'value');
+      expect(div.customProperty).toBe('value');
+      expect($('div').prop('customProperty')).toBe('value');
+    });
   });
 
   describe('css', () => {
