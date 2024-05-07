@@ -75,3 +75,12 @@
     box-shadow: 0px calc( var(--divider-width) * -1) 0px 0px var(--divider-shadow-color);
   }
 }
+
+.handle,
+.panel {
+  opacity: 0;
+}
+.handle.initialized,
+.panel.initialized {
+  opacity: 1;
+}

@@ -12,7 +12,7 @@ const settings = {
   itemCount: 'auto',
   minSize: 0,
   maxSize: 0,
-  size: 'split',
+  size: 'grow',
   getNaturalSize: (panel, direction) => {
     const $children = $(panel).children();
     return (direction == 'horizontal')
@@ -28,6 +28,7 @@ const settings = {
 
 const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent, $}) => ({
   resizing: new ReactiveVar(false),
+  initialized: new ReactiveVar(false),
 
   reportRendered() {
     let panels = tpl.getPanels();
@@ -42,17 +43,6 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   getSplitSize() {
     const availableFlex = tpl.getPanels().getAvailableFlex();
     return availableFlex / (tpl.getItemCount() - tpl.getIndex());
-  },
-  getInitialFlex() {
-    const defaultSize = settings.size;
-    if(isString(defaultSize) && defaultSize.includes('px')) {
-      const parts = defaultSize.split('px');
-      const pixels = Number(parts[0]);
-      return tpl.getPanels().getRelativeSize(pixels);
-    }
-    else if(isString(defaultSize)) {
-      return Number(defaultSize);
-    }
   },
   getResizeCursor() {
     return (settings.direction == 'horizontal')
@@ -87,7 +77,7 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
     if(settings.size == 'natural') {
       tpl.setNaturalWidth();
     }
-    else if(settings.size !== 'split') {
+    else if(settings.size !== 'grow') {
       let initialFlex = tpl.getInitialFlex();
       tpl.getPanels().setPanelSize(index, initialFlex, { donor: true, splitDonor: true });
     }
@@ -152,17 +142,12 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
   }
 });
 
-const onCreated = ({ tpl, el }) => {
-};
-
-const onDestroyed = ({ tpl }) => {
-};
-
 const onRendered = ({ $, el, tpl, isClient, settings }) => {
   if(isClient) {
     //tpl.reportRendered();
   }
 };
+
 
 const events = {
   'mousedown .handle'({event, settings, tpl}) {
@@ -180,10 +165,8 @@ const UIPanel = createComponent({
   template,
   css,
   createInstance,
-  settings,
-  onCreated,
-  onDestroyed,
   onRendered,
+  settings,
   events,
 });
 

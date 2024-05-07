@@ -1,5 +1,5 @@
 import { createComponent, adoptStylesheet } from '@semantic-ui/component';
-import { get, each, sortBy } from '@semantic-ui/utils';
+import { get, each, sortBy, inArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import { addSearch } from './codemirror-search.js';
@@ -54,13 +54,14 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.css': 1,
     'index.js': 2,
   },
+  naturalPanels: ['component.js', 'index.html', 'index.css'],
   resizing: new ReactiveVar(false),
   getScriptType(type) {
     return get(tpl.scriptTypes, type);
   },
   getPanelSize(panel) {
-    if(panel.filename == 'component.js') {
-      //return 'natural';
+    if(inArray(panel.filename, tpl.naturalPanels)) {
+      return 'natural';
     }
     return;
   },
@@ -183,18 +184,19 @@ const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
-      let height;
-      const extraSpacing = 8;
+      let size;
+      const extraSpacing = 5;
       if(direction == 'horizontal') {
-        const codeWidth = $(panel).find('.CodeMirror-sizer').first().width();
-        height = codeWidth + extraSpacing;
+        const codeMargin = parseFloat($(panel).find('.CodeMirror-sizer').first().css('margin-left'));
+        const codeWidth = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-width'));
+        size = codeWidth + codeMargin + extraSpacing;
       }
       else if(direction == 'vertical') {
-        const codeHeight = $(panel).find('.CodeMirror-sizer').first().height();
+        const codeHeight = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-height'));
         const labelHeight = $(panel).children('label').height();
-        height = codeHeight + labelHeight + extraSpacing;
+        size = codeHeight + labelHeight + extraSpacing;
       }
-      return height;
+      return size;
     }
   });
 };

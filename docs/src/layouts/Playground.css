@@ -74,6 +74,7 @@
   page {
     display: flex;
     flex-direction: row;
+    background: var(--playground-code-background) !important;
     height: calc(100vh - var(--topbar-height));
   }
 

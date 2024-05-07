@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, firstMatch, inArray, range } from '@semantic-ui/utils';
+import { each, isString, inArray, range } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import template from './Panels.html?raw';
@@ -38,11 +38,61 @@ const createInstance = ({tpl, el, settings, $}) => ({
   setPanelRendered(el) {
     tpl.renderedPanels.push(el);
     if(tpl.renderedPanels.length == tpl.panels.length) {
-      tpl.setPanelInitialSizes();
+      requestAnimationFrame(() => tpl.setPanelInitialSizes());
     }
   },
   setPanelInitialSizes() {
-    console.log('ready to set sizes', el);
+    each(tpl.panels, (panel, index) => {
+      const size = panel.settings.size;
+      if(size !== 'grow') {
+        let relativeWidth = tpl.getRelativeSettingSize(panel.settings.size, index);
+        $(panel).css('flex-grow', relativeWidth);
+        panel.tpl.initialized.set(true);
+      }
+    });
+    // we have to perform grow stage after setting fixed size panels
+    const growPanels = tpl.getGrowingPanels();
+    const availableWidth = tpl.getAvailableGrowWidth();
+    each(growPanels, (panel, index) => {
+      let relativeWidth = availableWidth / growPanels.length;
+      const minWidth = tpl.getRelativeSettingSize(panel.settings.minWidth);
+      const maxWidth = tpl.getRelativeSettingSize(panel.settings.minWidth);
+      if(relativeWidth < minWidth) {
+        relativeWidth = minWidth;
+      }
+      if(relativeWidth > maxWidth) {
+        relativeWidth = maxWidth;
+      }
+      $(panel).css('flex-grow', relativeWidth);
+      panel.tpl.initialized.set(true);
+    });
+  },
+  getAvailableGrowWidth() {
+    let availableWidth = 100;
+    each(tpl.panels, (panel) => {
+      const setWidth = $(panel).css('flex-grow');
+      if(panel.settings.width !== 'grow' && setWidth) {
+        availableWidth -= setWidth;
+      }
+    });
+    return availableWidth;
+  },
+  getGrowingPanels() {
+    return tpl.panels.filter(panel => panel.settings.size == 'grow');
+  },
+  getRelativeSettingSize(size, index) {
+    if(size == 'natural') {
+      let pixels = tpl.getNaturalPanelSize(index);
+      return tpl.getRelativeSize(pixels);
+    }
+    else if(isString(size) && size.includes('px')) {
+      const parts = size.split('px');
+      const pixels = Number(parts[0]);
+      return tpl.getRelativeSize(pixels);
+    }
+    else if(size && size !== 'grow') {
+      return parseFloat(size);
+    }
   },
   setStartingCalculations(panel, eventData) {
     tpl.group = {
@@ -56,12 +106,14 @@ const createInstance = ({tpl, el, settings, $}) => ({
       start: eventData.startPosition + tpl.group.scrollOffset
     };
   },
+
   removeStartingCalculations() {
     delete tpl.group.scrollOffset;
     delete tpl.group.size;
     delete tpl.resize.start;
     delete tpl.resize.index;
   },
+
   setResizeCalculations(panel, eventData) {
     tpl.resize = {
       ...tpl.resize,
@@ -69,12 +121,14 @@ const createInstance = ({tpl, el, settings, $}) => ({
     };
     tpl.resize.delta = tpl.resize.end - tpl.resize.start;
   },
+
   removeResizeCalculations() {
     tpl.resize.start = tpl.resize.end;
   },
+
   getPanelSetting(index, setting) {
     let panel = tpl.panels[index];
-    return panel.tpl.data[setting];
+    return panel.settings[setting];
   },
   getPanelIndex(el) {
     return tpl.panels.indexOf(el);
@@ -91,6 +145,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let panel = this.panels[index];
     return (tpl.getPanelSize(panel) / 100) * tpl.getGroupSize();
   },
+
   getGroupScrollOffset() {
     return (settings.direction == 'horizontal')
       ? $('.panels', { pierceShadow: false }).scrollLeft()
@@ -116,31 +171,14 @@ const createInstance = ({tpl, el, settings, $}) => ({
       : $('.panels', { pierceShadow: false }).height()
     ;
   },
-  setNaturalPanelSize(index) {
-    let naturalSize = tpl.getNaturalPanelSize(index);
-    if(naturalSize == 0) {
-      return;
-    }
-    tpl.setPanelSizePixels(index, naturalSize, { donor: true });
-  },
-  getNaturalPanelSize(index) {
-    let panel = tpl.panels[index];
-    let getPanelNaturalSize = tpl.getPanelSetting(index, 'getNaturalSize', 'getNaturalSize');
-    let naturalSize = getPanelNaturalSize(panel, settings.direction);
-    return naturalSize;
-  },
-  setPanelSize(index, relativeSize, { donor = false, splitDonor = false } = {}) {
+  setPanelSize(index, relativeSize, { donor = false, donorIndexes = [] } = {}) {
     let panel = tpl.panels[index];
     if(donor) {
       let currentSize = tpl.getPanelSizePixels(index) || 0;
       let newSize = tpl.getPixelSize(relativeSize) || 0;
       let sizeDelta = newSize - currentSize;
       $(panel).css('flex-grow', relativeSize);
-      let donorIndexes;
-      if(splitDonor) {
-        donorIndexes = range(0, tpl.panels.length).filter(val => val !== index);
-      }
-      else {
+      if(!donorIndexes.length) {
         // use panel after as donor unless last panel
         let donorIndex = (index == tpl.panels.length - 1)
           ? index - 1
@@ -169,6 +207,19 @@ const createInstance = ({tpl, el, settings, $}) => ({
   getPixelSize(relativeSize) {
     return (relativeSize / 100) * tpl.getGroupSize();
   },
+  getNaturalPanelSize(index) {
+    let panel = tpl.panels[index];
+    let getPanelNaturalSize = tpl.getPanelSetting(index, 'getNaturalSize');
+    let naturalSize = getPanelNaturalSize(panel, settings.direction);
+    return naturalSize;
+  },
+  setNaturalPanelSize(index) {
+    let naturalSize = tpl.getNaturalPanelSize(index);
+    if(naturalSize == 0) {
+      return;
+    }
+    tpl.setPanelSizePixels(index, naturalSize, { donor: true });
+  },
   debugSizes() {
     let total = 0;
     let sizes = [];
@@ -183,6 +234,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       console.log(sizes);
     }
   },
+
   resizePanels(index, delta, { handleBefore = true } = {}) {
     let
       lastIndex = tpl.panels.length - 1,
