@@ -60,14 +60,19 @@ export const getSandboxURL = () => {
   return `/sandbox/`;
 };
 
-export const getExampleFiles = async(example, files) => {
-  const exampleID = example.id || tokenize(example.title);
+export const getExampleID = (example) => {
+  const exampleID = example?.id || tokenize(example?.title);
+  return exampleID;
+};
+
+export const getExampleFiles = async(example, allExampleFiles) => {
+  const exampleID = getExampleID(example);
   if(!exampleID) {
     return;
   }
   let hasComponent = false;
   const exampleFiles = {};
-  await asyncEach(files, async (file, path) => {
+  await asyncEach(allExampleFiles, async (file, path) => {
     const pathRegExp = new RegExp(`../../example-files/${exampleID}/`);
     if (path.match(pathRegExp)) {
       const fileName = path.replace(pathRegExp, '');

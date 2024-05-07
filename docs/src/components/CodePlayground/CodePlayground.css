@@ -1,7 +1,14 @@
-:root {/*
+.playground {
+
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: calc(100vh - var(--topbar-height));
+
+  --playground-code-background: #080C10;
+  --playground-code-comment-color: #444444;
   --playground-code-linenumber-color: #25272B;
   --playground-code-font-size: 14px;
-  --playground-code-background: #0d1117;
   --playground-code-default-color: #c9d1d9;
   --playground-code-keyword-color: #AAAAAA;
   --playground-code-atom-color: #c9d1d9;
@@ -13,7 +20,6 @@
   --playground-code-variable-2-color: #79c0ff;
   --playground-code-variable-3-color: #c9d1d9;
   --playground-code-type-color: #c9d1d9;
-  --playground-code-comment-color: #c9d1d9;
   --playground-code-string-color: var(--primary-text-color);
   --playground-code-string-2-color: #656565;
   --playground-code-meta-color: #c9d1d9;
@@ -23,11 +29,7 @@
   --playground-code-attribute-color: var(--primary-text-color);
   --playground-code-callee-color: #d2a8ff;
   --playground-tab-bar-background: #ffffff;
-  --playground-bar-height: 39px;
-  --playground-preview-width: 42%;*/
-}
-
-.playground {
+  --playground-bar-height: 32px;
 
   .masthead {
     padding: 1rem 1rem;
@@ -52,10 +54,9 @@
     }
   }
 
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  height: calc(100vh - var(--topbar-height));
+  .inline {
+    display: block;
+  }
 
   ui-panels::part(panels) {
     background-color: var(--playground-code-background);

@@ -1,5 +1,5 @@
 import { createComponent, adoptStylesheet } from '@semantic-ui/component';
-import { get, each, sortBy, inArray } from '@semantic-ui/utils';
+import { first, get, each, sortBy, inArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import { addSearch } from './codemirror-search.js';
@@ -21,9 +21,11 @@ const settings = {
   sandboxURL: '/sandbox',
   example: {},
   tabSize: 2,
+  inline: false,
 };
 
 const createInstance = ({tpl, settings, $}) => ({
+  activeFile: new ReactiveVar(),
   scriptTypes: {
     'text/css': 'sample/css',
     'text/html': 'sample/html',
@@ -106,6 +108,13 @@ const createInstance = ({tpl, settings, $}) => ({
     if(index == 0) {
       return 40;
     }
+  },
+  getFileMenuItems() {
+    const menu = tpl.getFileArray().map(file => ({
+      label: file.filename,
+      id: file.filename,
+    }));
+    return menu;
   },
   getPanels() {
     let panels = [[], []];
@@ -193,8 +202,9 @@ const createInstance = ({tpl, settings, $}) => ({
   }
 });
 
-const onCreated = ({ tpl }) => {
-
+const onCreated = ({ tpl, settings }) => {
+  const firstFilename = first(tpl.getFileArray())?.filename;
+  tpl.activeFile.set(firstFilename)
 };
 
 const onDestroyed = ({ tpl }) => {

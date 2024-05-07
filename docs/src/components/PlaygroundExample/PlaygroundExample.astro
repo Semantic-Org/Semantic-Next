@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import { getExampleFiles, addPlaygroundInjections, getExampleID, getSandboxURL } from '@helpers/playground.js';
+
+import CodePlayground from '@components/CodePlayground/CodePlayground.js';
+
+const { id } = Astro.props;
+const matchingExamples = await getCollection('examples', ({ data }) => {
+  return getExampleID(data) == id;
+});
+const example = matchingExamples[0];
+const allExampleFiles = await import.meta.glob(`../../example-files/**`, {
+  query: '?raw',
+});
+let files = await getExampleFiles(example.data, allExampleFiles);
+files = addPlaygroundInjections(files);
+const sandboxURL = getSandboxURL();
+const projectConfig = {
+  files: files
+};
+---
+<CodePlayground client:only
+  files={files}
+  example={example}
+  inline=true
+  sandboxURL={sandboxURL}
+  ></CodePlayground>

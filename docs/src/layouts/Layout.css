@@ -181,7 +181,7 @@
       background: none;
     }
     layout main h2 {
-      border-color: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-color);
     }
     layout main h2,
     layout main h3 {

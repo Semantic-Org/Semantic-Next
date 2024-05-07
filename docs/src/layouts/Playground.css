@@ -56,7 +56,6 @@
     --playground-code-callee-color: #d2a8ff;
     --playground-tab-bar-background: #ffffff;
     --playground-bar-height: 32px;
-    --playground-preview-width: 42%;
   }
 
   .navigation::part(panels) {

@@ -76,7 +76,6 @@ const createInstance = ({ el, $, settings, darkMode, tpl }) => ({
         }
       })
     ;
-    console.log('dark mode is', darkMode);
     tpl.formattedCode.set(formattedCode);
     Reaction.afterFlush(function() {
       settings.onCodeVisible(formattedCode.value, tpl.code.get());
