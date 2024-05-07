@@ -117,9 +117,11 @@ export const Template = class Template {
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
+      this.dispatchEvent('created', { tpl: this.tpl }, {}, { triggerCallback: false });
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
+      this.dispatchEvent('rendered', { tpl: this.tpl }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
       this.call(this.onThemeChangedCallback, ...args);
@@ -130,6 +132,7 @@ export const Template = class Template {
       this.clearReactions();
       this.removeEvents();
       this.call(this.onDestroyedCallback);
+      this.dispatchEvent('destroyed', { tpl: this.tpl }, {}, { triggerCallback: false });
     };
 
     this.initialized = true;
@@ -456,12 +459,16 @@ export const Template = class Template {
   }
 
   // dispatches an event from this template
-  dispatchEvent(eventName, eventData, eventSettings) {
-
+  dispatchEvent(eventName, eventData, eventSettings, { triggerCallback = true } = {}) {
+    if(Template.isServer) {
+      return;
+    }
     // call callback on DOM element if defined
-    const callbackName = `on${capitalize(eventName)}`;
-    const callback = this.element[callbackName];
-    wrapFunction(callback).call(this, eventData);
+    if(triggerCallback) {
+      const callbackName = `on${capitalize(eventName)}`;
+      const callback = this.element[callbackName];
+      wrapFunction(callback).call(this, eventData);
+    }
 
     // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
