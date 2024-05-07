@@ -41,7 +41,7 @@ export const indexHTMLBeforeUI = indexHTMLBeforeStandard;
 
 export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
-export const indexJSBefore = `${foldMarkerStart}if(localStorage.get('theme') == 'dark') {
+export const indexJSBefore = `${foldMarkerStart}if(localStorage.getItem('theme') == 'dark') {
   document.querySelector('body').classList.add('dark');
 }${foldMarkerEnd}
 
