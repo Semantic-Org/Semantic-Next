@@ -3,8 +3,8 @@
   .menu {
     display: flex;
     flex-direction: row;
-    margin: var(--vertically-spaced);
-    font-weight: var(--normal);
+    margin: var(--menu-margin);
+    font-weight: var(--menu-font-weight);
   }
 }
 

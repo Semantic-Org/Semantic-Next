@@ -1,0 +1,31 @@
+:root {
+
+  --menu-item-background-color: transparent;
+  --menu-item-background-image: none;
+  --menu-item-background: var(--menu-item-background-color) var(--menu-item-background-image);
+  --menu-item-margin: none;
+  --menu-item-padding: var(--7px) var(--6px);
+  --menu-item-border: none;
+
+  --menu-item-box-shadow: none;
+  --menu-item-border-radius: var(--border-radius);
+
+
+  --menu-item-hover-background-color: none;
+  --menu-item-hover-background-image: none;
+  --menu-item-hover-background: var(--menu-item-hover-background-color) var(--menu-item-hover-background-image);
+  --menu-item-hover-margin: none;
+  --menu-item-hover-padding: none;
+  --menu-item-hover-border: none;
+  --menu-item-hover-box-shadow: none;
+  --menu-item-hover-border-radius: none;
+
+  --menu-item-active-background: var(--menu-item-active-background-color) var(--menu-item-active-background-image);
+  --menu-item-active-background-color: #009fda;
+  --menu-item-active-background-image: none;
+  --menu-item-active-margin: none;
+  --menu-item-active-padding: none;
+  --menu-item-active-border: none;
+  --menu-item-active-box-shadow: none;
+  --menu-item-active-border-radius: none;
+}
