@@ -54,7 +54,7 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.css': 1,
     'index.js': 2,
   },
-  naturalPanels: ['component.js', 'index.html', 'index.css'],
+  naturalPanels: ['component.js', 'index.html', 'index.css', 'index.js'],
   resizing: new ReactiveVar(false),
   getScriptType(type) {
     return get(tpl.scriptTypes, type);
@@ -109,6 +109,7 @@ const createInstance = ({tpl, settings, $}) => ({
       });
     });
     panels = panels.map(pane => sortBy(pane, 'sortIndex'));
+    // preview always last on second pane
     panels[1].push({
       type: 'preview',
     });

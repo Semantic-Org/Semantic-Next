@@ -4,8 +4,12 @@ import { asyncEach, tokenize, inArray, camelToKebab, each } from '@semantic-ui/u
 
 export const htmlHideMarkerStart = `<!-- playground-hide -->`;
 export const htmlHideMarkerEnd = `<!-- playground-hide-end -->`;
+
 export const hideMarkerStart = `/* playground-hide */`;
 export const hideMarkerEnd = `/* playground-hide-end */`;
+
+export const foldMarkerStart = `/* playground-fold */`;
+export const foldMarkerEnd = `/* playground-fold-end */`;
 
 export const componentJSBefore = ``;
 export const componentJSAfter = ``;
@@ -25,6 +29,7 @@ export const indexHTMLBeforeStandard = `${htmlHideMarkerStart}
 <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
 <!-- This defines the component tag and makes it available on your page !-->
 <script src="./component.js" type="module"></script>
+<script src="./index.js" type="module"></script>
 <link href="./index.css" rel="stylesheet">
 </head>
 <body>
@@ -36,7 +41,14 @@ export const indexHTMLBeforeUI = indexHTMLBeforeStandard;
 
 export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
-export const indexJSBefore = ``;
+export const indexJSBefore = `${foldMarkerStart}if(localStorage.get('theme') == 'dark') {
+  document.querySelector('body').classList.add('dark');
+}${foldMarkerEnd}
+
+// theme code folded
+
+
+`;
 export const indexJSAfter = ``;
 
 export const indexCSSBefore = `${hideMarkerStart}body { height: auto; }${hideMarkerEnd}body {
@@ -73,6 +85,13 @@ export const getExampleFiles = async(example, files) => {
           content: fileContent.default
         };
       }
+      else if(inArray(fileName, ['index.js'])) {
+        const fileContent = await file();
+        exampleFiles['index.js'] = {
+          contentType: 'text/javascript',
+          content: fileContent.default
+        };
+      }
       else if(inArray(fileName, ['component.html', `${exampleID}.html`])) {
         const fileContent = await file();
         exampleFiles['component.html'] = {
@@ -99,12 +118,11 @@ export const getExampleFiles = async(example, files) => {
   });
   // auto generate index.html if not specified for component
   if(exampleFiles['component.js']?.content && !exampleFiles['index.html']?.content) {
+
     // get tag name from contents
     let tagName;
     if(hasComponent) {
-      console.log('has component');
       let matches = exampleFiles['component.js'].content.match(/tagName: '(.*)'/);
-      console.log(matches[1]);
       if(matches.length > 1) {
         tagName = matches[1];
       }
@@ -112,15 +130,22 @@ export const getExampleFiles = async(example, files) => {
         tagName = camelToKebab(exampleID);
       }
     }
+
     exampleFiles['index.html'] = {
       contentType: 'text/html',
       content: `<${tagName}></${tagName}>`
     };
   }
-  // auto generate index.css if not specified for component
+  // auto generate index.css/js if not specified for component
   if(!exampleFiles['index.css']?.content) {
     exampleFiles['index.css'] = {
       contentType: 'text/css',
+      content: ''
+    };
+  }
+  if(!exampleFiles['index.js']?.content) {
+    exampleFiles['index.js'] = {
+      contentType: 'text/javascript',
       content: ''
     };
   }
