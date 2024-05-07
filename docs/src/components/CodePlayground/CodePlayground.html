@@ -22,11 +22,11 @@
         <ui-panels>
           {{#each panel in panelGroup}}
             {{#if is panel.type 'preview'}}
-              <ui-panel class="preview" size="{{getPanelSize 'preview'}}">
+              <ui-panel class="preview" size="grow">
                 <playground-preview project="source"> </playground-preview>
               </ui-panel>
             {{else if is panel.type 'file'}}
-              <ui-panel class="code" size="{{getPanelSize panel.filename}}">
+              <ui-panel class="code" size="{{getPanelSize panel}}">
                 <label>{{panel.label}}</label>
                 <playground-file-editor
                   line-numbers

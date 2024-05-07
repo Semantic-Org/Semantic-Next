@@ -41,6 +41,7 @@
       display: inline-block;
       margin: 0rem;
       font-size: 16px;
+      color: var(--white-100);
       font-weight: bold;
     }
     .title + p {

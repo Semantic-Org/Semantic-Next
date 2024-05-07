@@ -1,9 +1,8 @@
 @layer layout {
   :root {
-    topbar theme-switcher {
-      display: none;
-    }
     overflow: hidden;
+
+    --theme-switcher-hitbox-padding: 13px 12px 8px;
 
     --playground-code-background: #080c10;
     --sidebar-width: 200px;
@@ -21,7 +20,7 @@
     --topbar-site-name-distance: 10px;
     --topbar-site-name-color: var(--white);
     --topbar-menu-distance: 10px;
-    --topbar-icon-size: 13px;
+    --topbar-icon-size: 14px;
     --topbar-background-color: var(--playground-code-background);
     --topbar-menu-item-spacing: 3px;
     --topbar-menu-item-padding: 2px 2px;

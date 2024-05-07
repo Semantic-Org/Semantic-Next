@@ -260,6 +260,18 @@ export const Template = class Template {
     // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
 
+    // This makes an assumption that a custom event will be emitted when a theme change occurs
+    if(!Template.isServer && this.onThemeChangedCallback !== noop) {
+      $('html').on('themechange', (event) => {
+        this.onThemeChanged({
+          additionalData: {
+            event: event,
+            ...event.detail
+          },
+        });
+      }, { abortController: this.eventController });
+    }
+
     each(events, (eventHandler, eventString) => {
       const { eventName, selector } = parseEventString(eventString);
       const template = this;
@@ -268,18 +280,6 @@ export const Template = class Template {
       // if theres no handler on the actual element
       if(selector) {
         $(selector, { root: this.renderRoot }).on(eventName, noop);
-      }
-
-      // This makes an assumption that a custom event will be emitted when a theme change occurs
-      if(!Template.isServer && this.onThemeChangedCallback !== noop) {
-        $('html').on('themechange', (event) => {
-          this.onThemeChanged({
-            additionalData: {
-              event: event,
-              ...event.detail
-            },
-          });
-        }, { abortController: this.eventController });
       }
       $(this.renderRoot).on(
         eventName,

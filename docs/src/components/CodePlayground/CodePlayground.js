@@ -58,18 +58,21 @@ const createInstance = ({tpl, settings, $}) => ({
     'component.js': 'natural',
     'component.html': 'grow',
     'component.css': 'grow',
-    'index.html': '11.111',
-    'index.css': '11.111',
-    'index.js': '11.111',
-    'preview': 'grow',
+    'index.html': (1 / 9 * 100),
+    'index.css': (1 / 9 * 100),
+    'index.js': (1 / 9 * 100),
   },
   naturalPanels: ['component.js'],
   resizing: new ReactiveVar(false),
   getScriptType(type) {
     return get(tpl.scriptTypes, type);
   },
-  getPanelSize(name) {
-    return get(tpl.panelSizes, name);
+  getPanelSize(file) {
+    let size = get(tpl.panelSizes, file.filename);
+    if(size == 'natural' && !file.content) {
+      size = 'grow';
+    }
+    return size;
   },
   getFileArray() {
     let files = [];
@@ -126,6 +129,12 @@ const createInstance = ({tpl, settings, $}) => ({
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
       tpl.modifyCodeMirror(el._codemirror);
     });
+  },
+  reloadPreview() {
+    const iframe = $('playground-preview').find('iframe').get(0);
+    if(iframe) {
+      iframe.contentWindow.location.reload()
+    }
   },
   modifyCodeMirror(cm) {
 
@@ -198,9 +207,13 @@ const onRendered = ({ $, tpl, settings }) => {
       let size;
       if(direction == 'horizontal') {
         const extraSpacing = 20; // scrollbar width and spacing
-        const codeMargin = parseFloat($(panel).find('.CodeMirror-sizer').first().css('margin-left'));
-        const codeWidth = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-width'));
-        size = codeWidth + codeMargin + extraSpacing;
+        const minWidths = [];
+        $(panel).find('.CodeMirror-sizer').each(sizer => {
+          const sizerMargin = parseFloat($(sizer).css('margin-left'));
+          const sizerWidth = parseFloat($(sizer).css('min-width'));
+          minWidths.push(sizerMargin + sizerWidth + extraSpacing);
+        });
+        size = Math.max(...minWidths);
       }
       else if(direction == 'vertical') {
         const extraSpacing = 5;
@@ -211,6 +224,10 @@ const onRendered = ({ $, tpl, settings }) => {
       return size;
     }
   });
+};
+
+const onThemeChanged = ({tpl}) => {
+  tpl.reloadPreview();
 };
 
 const events = {
@@ -241,6 +258,7 @@ const CodePlayground = createComponent({
   onDestroyed,
   onRendered,
   events,
+  onThemeChanged,
 });
 
 export default CodePlayground;

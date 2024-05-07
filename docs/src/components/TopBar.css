@@ -1,7 +1,7 @@
 @layer layout {
 
   :root {
-    --topbar-logo-margin: 12px 0px 0px 20px;
+    --topbar-logo-margin: 0px 0px 0px 20px;
     --topbar-logo-size: 35px;
     --topbar-logo-valign: -55%;
     --topbar-height: 60px;
@@ -19,7 +19,9 @@
     --topbar-background-color: #151a1e;
   }
   topbar {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     background-color: var(--topbar-background-color);
     height: var(--topbar-height);
     color: var(--topbar-text-color);
@@ -60,7 +62,7 @@
   }
 
   topbar theme-switcher {
-    float: right;
+    margin-left: auto;
   }
 
 }
