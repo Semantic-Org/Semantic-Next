@@ -1,0 +1,34 @@
+{
+  "uiType": "element",
+  "name": "Menu",
+  "description": "A menu displays grouped navigation actions",
+  "tagName": "ui-menu",
+  "exportName": "UIMenu",
+  "content": [],
+  "types": [
+    {
+      "name": "selection",
+      "attribute": "selection",
+      "description": "A button can be formatted to allow for selection between choices",
+      "usageLevel": 1
+    }
+  ],
+  "settings": [
+    {
+      "name": "Menu Items",
+      "type": [],
+      "attribute": "items",
+      "defaultValue": [],
+      "description": "A menu can specify menu items to automatically generate items"
+    },
+    {
+      "name": "Active ID",
+      "attribute": "value",
+      "defaultValue": "",
+      "description": "The current active menu item ID"
+    }
+  ],
+  "states": [],
+  "variations": [],
+  "supportsPlural": false
+}

@@ -462,7 +462,6 @@ export class SpecReader {
         if (partName === 'content' && attributeName) {
           componentSpec.contentAttributes.push(attributeName);
         }
-
         // settings may or may not have associated attributes
         if (partName === 'settings' && spec.defaultValue !== undefined) {
           componentSpec.defaultSettings[attributeName] = spec.defaultValue;
