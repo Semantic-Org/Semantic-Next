@@ -92,6 +92,7 @@
 
     playground-preview {
       margin: 0rem;
+      background-color: var(--page-background);
     }
     /* Reskin Toolbar */
     playground-preview::part(preview-toolbar) {
