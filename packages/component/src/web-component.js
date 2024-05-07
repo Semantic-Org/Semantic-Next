@@ -179,11 +179,20 @@ class WebComponentBase extends LitElement {
       each(componentSpec.attributes, (attributeValues, attribute) => {
         // this is an easy way to determine if this is a boolean or string attribute
         const isContent = inArray(attribute, componentSpec.contentAttributes);
-        const sampleValue = isContent ? '' : attributeValues[0];
+        let sampleValue;
+        if(inArray(attribute, componentSpec.contentAttributes)) {
+          sampleValue = '';
+        }
+        else if(inArray(attribute, componentSpec.settings)) {
+          sampleValue = componentSpec.defaultSettings[attribute];
+        }
+        else {
+          sampleValue = attributeValues[0];
+        }
         properties[attribute] = WebComponentBase.getPropertySettings(sampleValue, attribute);
       });
+      const reservedWords = ['settings', 'true', 'false'];
       each(componentSpec.reverseAttributes, (attributeValues, attribute) => {
-        const reservedWords = ['settings'];
         if(!inArray(attribute, reservedWords)) {
           properties[attribute] = { type: String, reflect: false };
         }
@@ -317,6 +326,36 @@ class WebComponentBase extends LitElement {
       }
     });
     return settings;
+  }
+
+  /* This may get more complex if we choose to support
+     reverse attribute lookups like setSetting('large', true);
+  */
+  setSetting(name, value) {
+    this[name] = value;
+  }
+
+
+  /* Create a proxy object which returns the current setting
+     we need this over a getter/setter because settings are
+     destructured in function arguments
+     i.e. onCreated({settings}) { }
+  */
+  createSettingsProxy({componentSpec, properties}) {
+    let component = this;
+    return new Proxy({}, {
+      get: (target, property) => {
+        const settings = component.getSettings({
+          componentSpec,
+          properties
+        });
+        return get(settings, property);
+      },
+      set: (target, property, value, receiver) => {
+        component.setSetting(property, value);
+        return true;
+      }
+    })
   }
 
   /*

@@ -90,11 +90,10 @@ export const createComponent = ({
 
       defaultSettings = {};
 
-      settings = proxyObject(() => this.getSettings({componentSpec, properties: webComponent.properties }));
-
       constructor() {
         super();
         this.css = css;
+        this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
         this.setDefaultSettings(settings);
       }
 
