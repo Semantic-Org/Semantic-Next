@@ -6,9 +6,9 @@ import { UIPanels } from '@components/Panels/Panels.js';
 import { UIPanel } from '@components/Panels/Panel.js';
 ---
 <Body padded>
-  <UIPanels direction="horizontal">
-    <UIPanel direction="horizontal">1</UIPanel>
-    <UIPanel direction="horizontal">2</UIPanel>
-    <UIPanel direction="horizontal">3</UIPanel>
+  <UIPanels direction="horizontal" client:only>
+    <UIPanel direction="horizontal" client:only>1</UIPanel>
+    <UIPanel direction="horizontal" client:only>2</UIPanel>
+    <UIPanel direction="horizontal" client:only>3</UIPanel>
   </UIPanels>
 </Body>
