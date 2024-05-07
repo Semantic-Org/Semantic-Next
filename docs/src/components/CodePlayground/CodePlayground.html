@@ -22,7 +22,7 @@
         <ui-panels>
           {{#each panel in panelGroup}}
             {{#if is panel.type 'preview'}}
-              <ui-panel class="preview" size="66.666">
+              <ui-panel class="preview">
                 <playground-preview project="source"> </playground-preview>
               </ui-panel>
             {{else if is panel.type 'file'}}
