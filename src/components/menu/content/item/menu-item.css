@@ -1,0 +1,14 @@
+/*-------------------
+      Menu Item
+--------------------*/
+:host {
+  align-self: center;
+}
+
+.item {
+  margin: var(--menu-item-margin);
+  padding: var(--menu-item-padding);
+  box-shadow: var(--menu-item-box-shadow);
+  border-radius: var(--menu-item-border-radius);
+}
+

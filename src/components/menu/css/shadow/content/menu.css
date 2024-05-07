@@ -1,0 +1,6 @@
+.menu {
+  display: flex;
+  flex-direction: row;
+  margin: var(--vertically-spaced);
+  font-weight: var(--normal);
+}
