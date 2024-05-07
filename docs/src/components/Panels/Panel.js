@@ -29,10 +29,10 @@ const settings = {
 const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent, $}) => ({
   resizing: new ReactiveVar(false),
 
-  registerPanel() {
+  reportRendered() {
     let panels = tpl.getPanels();
     if(panels) {
-      panels.registerPanel({el, settings});
+      panels.setPanelRendered(el);
     }
   },
 
@@ -111,6 +111,16 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
         ? event.pageX
         : event.pageY,
     });
+    $('body')
+      .css('cursor', tpl.getResizeCursor())
+      .on('mousemove', (event) => {
+        tpl.resizeDrag(event);
+      });
+    $('body')
+      .one('mouseup', (event) => {
+        tpl.endResize(event);
+      })
+    ;
   },
   resizeDrag(event) {
     dispatchEvent('resizeDrag', {
@@ -129,19 +139,6 @@ const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent,
       initialSize: tpl.initialSize,
       finalSize: tpl.getCurrentFlex()
     });
-  },
-  beginResize(event) {
-    tpl.startResize(event);
-    $('body')
-      .css('cursor', tpl.getResizeCursor())
-      .on('mousemove', (event) => {
-        tpl.resizeDrag(event);
-      });
-    $('body')
-      .one('mouseup', (event) => {
-        tpl.endResize(event);
-      })
-    ;
   },
   setPreviousNaturalWidth() {
     const panels = tpl.getPanels();
@@ -163,14 +160,13 @@ const onDestroyed = ({ tpl }) => {
 
 const onRendered = ({ $, el, tpl, isClient, settings }) => {
   if(isClient) {
-    tpl.registerPanel();
-    tpl.setInitialSize();
+    //tpl.reportRendered();
   }
 };
 
 const events = {
   'mousedown .handle'({event, settings, tpl}) {
-    tpl.beginResize(event);
+    tpl.startResize(event);
     event.preventDefault();
   },
   'dblclick .handle': function({event, tpl, el}) {

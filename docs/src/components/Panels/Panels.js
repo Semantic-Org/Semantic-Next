@@ -10,9 +10,9 @@ const settings = {
   direction: 'vertical',
 };
 
-const createInstance = ({tpl, settings, $}) => ({
+const createInstance = ({tpl, el, settings, $}) => ({
   panels: [],
-  panelWidths: [],
+  renderedPanels: [],
   group: {
     size: undefined,
     scrollOffset: undefined,
@@ -23,8 +23,26 @@ const createInstance = ({tpl, settings, $}) => ({
     index: undefined,
     delta: undefined,
   },
-  registerPanel({el, settings}) {
-    tpl.panels.push(el);
+
+  // we want to get all panels that are not inside other ui panels
+  // i.e. if this is a complex layout we dont want to grab nested children
+  // note we cant assume the panels are immediate children of the component
+  // frameworks may add arbitrary divs for SSR hydration (like Astro)
+  addPanels() {
+    let $childPanelGroups = $(el).find('ui-panels');
+    let $childPanelGroupPanels = $childPanelGroups.find('ui-panel');
+    let $allPanels = $(el).find('ui-panel');
+    let $panels = $allPanels.not($childPanelGroupPanels);
+    tpl.panels = $panels.get();
+  },
+  setPanelRendered(el) {
+    tpl.renderedPanels.push(el);
+    if(tpl.renderedPanels.length == tpl.panels.length) {
+      tpl.setPanelInitialSizes();
+    }
+  },
+  setPanelInitialSizes() {
+    console.log('ready to set sizes', el);
   },
   setStartingCalculations(panel, eventData) {
     tpl.group = {
@@ -418,8 +436,8 @@ const createInstance = ({tpl, settings, $}) => ({
   },
 });
 
-const onCreated = ({ tpl }) => {
-
+const onCreated = ({ el, tpl }) => {
+  tpl.addPanels();
 };
 
 const onDestroyed = ({ tpl }) => {
@@ -429,6 +447,12 @@ const onRendered = ({ $, el, tpl, settings }) => {
 };
 
 const events = {
+  'rendered ui-panel'({tpl, event, data}) {
+    const panel = event.target;
+    if(inArray(panel, tpl.panels)) {
+      tpl.setPanelRendered(panel, data);
+    }
+  },
   'resizeStart ui-panel'({tpl, event, data}) {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
