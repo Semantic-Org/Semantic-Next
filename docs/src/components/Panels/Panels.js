@@ -51,11 +51,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
       }
     });
     // we have to perform grow stage after setting fixed size panels
-    const growPanels = tpl.getGrowingPanels();
+    let growPanels = tpl.getGrowingPanels();
     const availableWidth = tpl.getAvailableGrowWidth();
     if(growPanels.length == 0 && availableWidth > 0) {
       console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
-      growPanels = last(tpl.panels);
+      growPanels = tpl.panels.slice(-1);
     }
     each(growPanels, (panel, index) => {
       let relativeWidth = availableWidth / growPanels.length;

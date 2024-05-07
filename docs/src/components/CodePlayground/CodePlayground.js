@@ -30,7 +30,7 @@ const createInstance = ({tpl, settings, $}) => ({
     'text/javascript': 'sample/js',
     'text/typescript': 'sample/ts',
   },
-  fileLabels: {
+  fileTitles: {
     'component.js': 'Component JS',
     'component.html': 'Component Template',
     'component.css': 'Component CSS',
@@ -54,16 +54,23 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.css': 1,
     'index.js': 2,
   },
-  naturalPanels: ['component.js', 'index.html', 'index.css', 'index.js'],
+  panelSizes: {
+    'component.js': 'natural',
+    'component.html': 'grow',
+    'component.css': 'grow',
+    'index.html': '11.111',
+    'index.css': '11.111',
+    'index.js': '11.111',
+    'preview': 'grow',
+  },
+  naturalPanels: ['component.js'],
   resizing: new ReactiveVar(false),
   getScriptType(type) {
     return get(tpl.scriptTypes, type);
   },
-  getPanelSize(panel) {
-    if(inArray(panel.filename, tpl.naturalPanels)) {
-      return 'natural';
-    }
-    return;
+  getPanelSize(name) {
+    console.log('getting size', name);
+    return get(tpl.panelSizes, name);
   },
   getFileArray() {
     let files = [];
@@ -91,12 +98,11 @@ const createInstance = ({tpl, settings, $}) => ({
     return get(tpl.sortIndex, filename);
   },
   getFileLabel(filename) {
-    //return get(tpl.fileLabels, filename);
     return filename;
   },
   getPanelGroupWidth(index) {
     if(index == 0) {
-      return 'natural';
+      return 40;
     }
   },
   getPanels() {

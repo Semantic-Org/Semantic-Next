@@ -9,6 +9,11 @@
     --sidebar-width: 200px;
     --sidebar-box-shadow: none;
 
+    --playground-border-color: #222222;
+    --playground-border: 1px solid var(--playground-border-color);
+
+    --panel-divider-color: var(--playground-border-color);
+
     --topbar-logo-size: 20px;
     --topbar-logo-valign: -5px;
     --topbar-height: 45px;
@@ -69,6 +74,7 @@
     height: 100%;
     box-shadow: none;
     margin: 0;
+    border-right: var(--playground-border) !important;
   }
 
   page {

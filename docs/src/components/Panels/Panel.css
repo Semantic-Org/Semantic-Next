@@ -6,13 +6,13 @@
 }
 
 :host {
-  --handle-height: 20px;
-  --divider-width: 1px;
-  --divider-shadow-color: #181818;
+  --panel-handle-height: 20px;
+  --panel-divider-width: 1px;
+  --panel-divider-shadow-color: #181818;
 
-  --divider-color: #232323;
-  --divider-color-hover: #333333;
-  --divider-color-resize: #444444;
+  --panel-divider-color: #232323;
+  --panel-divider-color-hover: #333333;
+  --panel-divider-color-resize: #444444;
 }
 
 .panel {
@@ -23,7 +23,7 @@
 
   &.resizing + .handle:hover .divider,
   &.resizing + .handle .divider {
-    background-color: var(--divider-color-resize);
+    background-color: var(--panel-divider-color-resize);
   }
 }
 
@@ -36,11 +36,11 @@
   border-radius: 5px;
 
   .divider {
-    background-color: var(--divider-color);
+    background-color: var(--panel-divider-color);
   }
 
   &:hover .divider {
-    background-color: var(--divider-color-hover);
+    background-color: var(--panel-divider-color-hover);
   }
 }
 
@@ -48,15 +48,15 @@
 .horizontal.panel + .handle {
   flex-direction: row;
   cursor: w-resize;
-  margin-left: calc(var(--handle-height) / -2);
-  width: var(--handle-height);
+  margin-left: calc(var(--panel-handle-height) / -2);
+  width: var(--panel-handle-height);
   height: 100%;
 
   .divider {
     margin: 0 auto;
-    width: var(--divider-width);
+    width: var(--panel-divider-width);
     height: 100%;
-    box-shadow: calc( var(--divider-width) * -1) 0px 0px 0px var(--divider-shadow-color);
+    box-shadow: calc( var(--panel-divider-width) * -1) 0px 0px 0px var(--panel-divider-shadow-color);
   }
 }
 
@@ -64,15 +64,15 @@
 .vertical.panel + .handle {
   flex-direction: row;
   cursor: ns-resize;
-  margin-top: calc(var(--handle-height) / -2);
+  margin-top: calc(var(--panel-handle-height) / -2);
   width: 100%;
-  height: var(--handle-height);
+  height: var(--panel-handle-height);
 
   .divider {
     margin: auto 0;
     width: 100%;
-    height: var(--divider-width);
-    box-shadow: 0px calc( var(--divider-width) * -1) 0px 0px var(--divider-shadow-color);
+    height: var(--panel-divider-width);
+    box-shadow: 0px calc( var(--panel-divider-width) * -1) 0px 0px var(--panel-divider-shadow-color);
   }
 }
 

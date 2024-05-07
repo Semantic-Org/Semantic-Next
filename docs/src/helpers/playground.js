@@ -33,6 +33,9 @@ export const indexHTMLBeforeStandard = `${htmlHideMarkerStart}
 <link href="./index.css" rel="stylesheet">
 </head>
 <body>
+<script>if(localStorage.getItem('theme') == 'dark') {
+  document.querySelector('body').classList.add('dark');
+}</script>
 ${htmlHideMarkerEnd}
 `;
 
