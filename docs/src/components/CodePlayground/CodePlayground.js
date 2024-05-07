@@ -94,6 +94,11 @@ const createInstance = ({tpl, settings, $}) => ({
     //return get(tpl.fileLabels, filename);
     return filename;
   },
+  getPanelGroupWidth(index) {
+    if(index == 0) {
+      return 'natural';
+    }
+  },
   getPanels() {
     let panels = [[], []];
     let files = tpl.getFileArray();
@@ -185,13 +190,14 @@ const onRendered = ({ $, tpl, settings }) => {
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
       let size;
-      const extraSpacing = 5;
       if(direction == 'horizontal') {
+        const extraSpacing = 20; // scrollbar width and spacing
         const codeMargin = parseFloat($(panel).find('.CodeMirror-sizer').first().css('margin-left'));
         const codeWidth = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-width'));
         size = codeWidth + codeMargin + extraSpacing;
       }
       else if(direction == 'vertical') {
+        const extraSpacing = 5;
         const codeHeight = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-height'));
         const labelHeight = $(panel).children('label').height();
         size = codeHeight + labelHeight + extraSpacing;

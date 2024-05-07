@@ -18,7 +18,7 @@
   {{/if}}
   <ui-panels direction="horizontal">
     {{#each panelGroup in getPanels}}
-      <ui-panel direction="horizontal" class="code-group">
+      <ui-panel direction="horizontal" size={{getPanelGroupWidth @index}} class="code-group">
         <ui-panels>
           {{#each panel in panelGroup}}
             {{#if is panel.type 'preview'}}

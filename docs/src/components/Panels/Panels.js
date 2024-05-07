@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, inArray, range } from '@semantic-ui/utils';
+import { each, isString, inArray, last } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import template from './Panels.html?raw';
@@ -53,6 +53,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
     // we have to perform grow stage after setting fixed size panels
     const growPanels = tpl.getGrowingPanels();
     const availableWidth = tpl.getAvailableGrowWidth();
+    if(growPanels.length == 0 && availableWidth > 0) {
+      console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
+      growPanels = last(tpl.panels);
+    }
     each(growPanels, (panel, index) => {
       let relativeWidth = availableWidth / growPanels.length;
       const minWidth = tpl.getRelativeSettingSize(panel.settings.minWidth);
