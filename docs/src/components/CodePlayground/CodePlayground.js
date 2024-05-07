@@ -69,7 +69,6 @@ const createInstance = ({tpl, settings, $}) => ({
     return get(tpl.scriptTypes, type);
   },
   getPanelSize(name) {
-    console.log('getting size', name);
     return get(tpl.panelSizes, name);
   },
   getFileArray() {

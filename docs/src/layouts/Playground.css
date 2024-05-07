@@ -91,7 +91,7 @@
   playground {
 
     playground-preview {
-      margin: -0.5rem;
+      margin: 0rem;
     }
     /* Reskin Toolbar */
     playground-preview::part(preview-toolbar) {
