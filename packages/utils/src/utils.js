@@ -585,7 +585,7 @@ export const get = function (obj, path = '') {
 export const proxyObject = (sourceObj = noop, referenceObj = {}) => {
   return new Proxy(referenceObj, {
     get: (target, property) => {
-      return get(sourceObj(), property);
+      return get(referenceObj, property) || get(sourceObj(), property);
     },
   });
 };

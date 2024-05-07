@@ -420,7 +420,7 @@ describe('Object Utilities', () => {
     it('should create a proxy that reflects changes in the source object', () => {
       const source = { name: 'John', age: 30 };
       const reference = {};
-      const proxy = proxyObject(source);
+      const proxy = proxyObject(() => source);
 
       expect(proxy.name).toBe('John');
       expect(proxy.age).toBe(30);
@@ -433,7 +433,7 @@ describe('Object Utilities', () => {
     it('should handle nested properties correctly', () => {
       const source = { person: { name: 'John', age: 30 } };
       const reference = {};
-      const proxy = proxyObject(source);
+      const proxy = proxyObject(() => source);
 
       expect(proxy.person.name).toBe('John');
       expect(proxy.person.age).toBe(30);
@@ -446,7 +446,7 @@ describe('Object Utilities', () => {
     it('should handle adding new properties to the source object', () => {
       const source = { name: 'John' };
       const reference = {};
-      const proxy = proxyObject(source);
+      const proxy = proxyObject(() => source);
 
       expect(proxy.age).toBeUndefined();
 
@@ -458,7 +458,7 @@ describe('Object Utilities', () => {
     it('should handle deleting properties from the source object', () => {
       const source = { name: 'John', age: 30 };
       const reference = {};
-      const proxy = proxyObject(source);
+      const proxy = proxyObject(() => source);
 
       expect(proxy.age).toBe(30);
 
@@ -470,7 +470,7 @@ describe('Object Utilities', () => {
     it('should not affect the original reference object', () => {
       const source = { name: 'John', age: 30 };
       const reference = { name: 'Jane', age: 25 };
-      const proxy = proxyObject(source);
+      const proxy = proxyObject(() => source);
 
       expect(reference.name).toBe('Jane');
       expect(reference.age).toBe(25);
@@ -483,7 +483,7 @@ describe('Object Utilities', () => {
     it('should reflect updates made to the reference object after proxy creation', () => {
       const source = { name: 'John' };
       const reference = { city: 'Atlanta' };
-      const proxy = proxyObject(source, reference);
+      const proxy = proxyObject(() => source, reference);
 
       expect(proxy.city).toBe('Atlanta');
       expect(reference.city).toBe('Atlanta');
