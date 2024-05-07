@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { each, noop, isServer, kebabToCamel, proxyObject } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
@@ -90,6 +90,8 @@ export const createComponent = ({
 
       defaultSettings = {};
 
+      settings = proxyObject(() => this.getSettings({componentSpec, properties: webComponent.properties }));
+
       constructor() {
         super();
         this.css = css;
@@ -173,8 +175,9 @@ export const createComponent = ({
       }
 
       getData() {
+        let settings = this.getSettings({componentSpec, properties: webComponent.properties });
         let data = {
-          ...this.getSettings({componentSpec, properties: webComponent.properties }),
+          ...settings,
           ...this.getContent({componentSpec}),
           plural
         };

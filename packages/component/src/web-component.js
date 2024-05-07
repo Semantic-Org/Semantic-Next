@@ -183,7 +183,10 @@ class WebComponentBase extends LitElement {
         properties[attribute] = WebComponentBase.getPropertySettings(sampleValue, attribute);
       });
       each(componentSpec.reverseAttributes, (attributeValues, attribute) => {
-        properties[attribute] = { type: String, reflect: false };
+        const reservedWords = ['settings'];
+        if(!inArray(attribute, reservedWords)) {
+          properties[attribute] = { type: String, reflect: false };
+        }
       });
     }
     if (settings) {
