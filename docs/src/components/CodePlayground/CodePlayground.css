@@ -98,6 +98,7 @@
     margin: 0rem;
     flex: 1 1 0;
     max-height: calc(100vh - var(--topbar-height));
+    background: var(--playground-code-background) !important;
   }
   playground-preview::part(preview-toolbar) {
     font-size: 11px;
@@ -120,10 +121,7 @@
     --mdc-theme-primary: var(--primary-text-color);
     height: 3px;
     overflow: hidden;
-    top: -76px;
-    /*top: -26px;
-    width: 71px;
-    left: 22px;*/
+    top: -62px;
   }
 
   &.resizing playground-preview {

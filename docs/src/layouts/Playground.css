@@ -1,10 +1,9 @@
 @layer layout {
   :root {
-    overflow: hidden;
 
     --theme-switcher-hitbox-padding: 13px 12px 8px;
 
-    --playground-code-background: #080c10;
+    --playground-code-background: #080C10;
     --sidebar-width: 200px;
     --sidebar-box-shadow: none;
 
@@ -79,7 +78,7 @@
   page {
     display: flex;
     flex-direction: row;
-    background: var(--playground-code-background) !important;
+    background: #080C10 !important;
     height: calc(100vh - var(--topbar-height));
   }
 
