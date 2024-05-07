@@ -85,6 +85,10 @@
     display: contents;
   }
 
+  code-playground::part(playground) {
+    height: calc(100vh - var(--topbar-height));
+  }
+
   playground {
 
     playground-preview {

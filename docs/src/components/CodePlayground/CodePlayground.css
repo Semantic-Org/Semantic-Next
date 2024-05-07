@@ -3,7 +3,6 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  height: calc(100vh - var(--topbar-height));
 
   --playground-code-background: #080C10;
   --playground-code-comment-color: #444444;
