@@ -6,22 +6,10 @@
   "exportName": "UIButton",
   "content": [
     {
-      "name": "Text",
-      "looseCoupling": true,
-      "couplesWith": [
-        "icon"
-      ],
-      "slot": "default",
-      "description": "contain text content"
-    },
-    {
       "name": "Icon",
-      "looseCoupling": true,
       "includeAttributeClass": true,
       "attribute": "icon",
-      "couplesWith": [
-        "icon"
-      ],
+      "couplesWith": ["ui-icon"],
       "slot": "icon",
       "description": "include an icon",
       "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>"

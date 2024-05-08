@@ -9,7 +9,16 @@
     {
       "name": "selection",
       "attribute": "selection",
-      "description": "A button can be formatted to allow for selection between choices",
+      "description": "formatted to allow for selection between choices",
+      "usageLevel": 1
+    }
+  ],
+  "variations": [
+    {
+      "name": "Evenly Spaced",
+      "attribute": "evenly-spaced",
+      "attribute": "evenly-spaced",
+      "description": "formatted so items are evenly split",
       "usageLevel": 1
     }
   ],
@@ -19,16 +28,13 @@
       "type": [],
       "attribute": "items",
       "defaultValue": [],
-      "description": "A menu can specify menu items to automatically generate items"
+      "description": "can automatically generate menu items"
     },
     {
       "name": "Active ID",
       "attribute": "value",
       "defaultValue": "",
-      "description": "The current active menu item ID"
+      "description": "can specify active menu item when generating menu items"
     }
-  ],
-  "states": [],
-  "variations": [],
-  "supportsPlural": false
+  ]
 }

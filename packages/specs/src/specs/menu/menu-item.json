@@ -5,6 +5,17 @@
   "parentTag": "ui-menu",
   "tagName": "menu-item",
   "exportName": "UIMenuItem",
+  "content": [
+    {
+      "name": "Icon",
+      "includeAttributeClass": true,
+      "attribute": "icon",
+      "couplesWith": ["ui-icon"],
+      "slot": "icon",
+      "description": "include an icon",
+      "exampleCode": "<menu-item icon=\"home\">Home</menu-item>"
+    }
+  ],
   "states": [
     {
       "name": "Hover",
