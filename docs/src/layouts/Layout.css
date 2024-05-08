@@ -55,6 +55,9 @@
   layout rail.ui.rail {
     width: var(--rail-width);
     padding-top: 1rem;
+    padding-left: 2rem;
+    margin-left: 0rem;
+    box-shadow: var(--subtle-left-lip-shadow);
   }
 
   layout,
@@ -67,25 +70,38 @@
     height: calc(100dvh - var(--topbar-height));
   }
 
-  layout main.text-content > ui-container {
+  layout page.text-content main > ui-container {
     max-width: 1000px;
     padding: 3em 5em 7em;
   }
-  layout main.text-content pageContent,
-  layout main.text-content li,
-  layout main.text-content p {
+  layout page.text-content pageContent,
+  layout page.text-content li,
+  layout page.text-content p {
     font-size: 17px;
   }
-  layout main.text-content li,
-  layout main.text-content p {
+  layout page.text-content li,
+  layout page.text-content p {
     line-height: 1.5;
   }
-  layout main.text-content pre code {
+  layout page.text-content pre code {
     font-size: 16px;
   }
-  layout main.text-content ul strong,
-  layout main.text-content p strong {
+  layout page.text-content ul strong,
+  layout page.text-content p strong {
     color: var(--standard-100);
+  }
+  layout page.centered main > ui-container {
+    max-width: none;
+  }
+  layout page.centered masthead ui-container,
+  layout page.centered main > ui-container pageContent {
+    display: block;
+    max-width: 750px;
+    margin: 0 auto;
+  }
+  layout page.centered masthead > ui-container {
+    max-width: 840px;
+    left: calc(var(--sidebar-width) / -2);
   }
 
   layout h1,

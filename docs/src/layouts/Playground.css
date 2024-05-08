@@ -1,4 +1,4 @@
-@layer layout {
+@layer page {
   :root {
 
     --theme-switcher-hitbox-padding: 13px 12px 8px;

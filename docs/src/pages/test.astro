@@ -1,14 +1,8 @@
 ---
 import Body from '../layouts/Body.astro';
-import { CodeExample } from '@components/CodeExample/CodeExample.js';
-import { CodeSample } from '@components/CodeSample/CodeSample.js';
-import { UIPanels } from '@components/Panels/Panels.js';
-import { UIPanel } from '@components/Panels/Panel.js';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import UIButton from '@semantic-ui/core';
 ---
 <Body padded>
-  <UIPanels direction="horizontal" client:only>
-    <UIPanel direction="horizontal" client:only>1</UIPanel>
-    <UIPanel direction="horizontal" client:only>2</UIPanel>
-    <UIPanel direction="horizontal" client:only>3</UIPanel>
-  </UIPanels>
+<PlaygroundExample id="counter"></PlaygroundExample>
 </Body>

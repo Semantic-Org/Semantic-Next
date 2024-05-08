@@ -178,7 +178,6 @@ class WebComponentBase extends LitElement {
       };
       each(componentSpec.attributes, (attributeValues, attribute) => {
         // this is an easy way to determine if this is a boolean or string attribute
-        const isContent = inArray(attribute, componentSpec.contentAttributes);
         let sampleValue;
         if(inArray(attribute, componentSpec.contentAttributes)) {
           sampleValue = '';
@@ -231,12 +230,12 @@ class WebComponentBase extends LitElement {
       property = {
         type: Boolean,
         // we have to use an accessor if the name is reserved
-        noAccessor: !inArray(name, ['focus', 'disabled']),
+        //noAccessor: inArray(name, ['focus', 'disabled']),
         attribute: true,
         // simplify the use case of setting setting="false"
         converter: {
           fromAttribute: (value, type) => {
-            if (inArray(value, ['false', '0', 'undefined'])) {
+            if (inArray(value, ['false', '0', 'null', 'undefined'])) {
               return false;
             }
             return Boolean(value);
@@ -355,7 +354,7 @@ class WebComponentBase extends LitElement {
         component.setSetting(property, value);
         return true;
       }
-    })
+    });
   }
 
   /*

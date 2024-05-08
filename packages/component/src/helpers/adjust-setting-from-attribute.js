@@ -31,6 +31,7 @@ const tokenizeSpaces = (string) => {
 };
 
 export const adjustSettingFromAttribute = (el, attribute, attributeValue, componentSpec) => {
+
   const getSettingValue = (setting, attributeValue) => {
     const value = tokenizeSpaces(attributeValue); // right arrow -> right-arrow
     const reverseValue = reverseDashes(value); // arrow-right -> right-arrow
@@ -68,6 +69,7 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, compon
   };
 
   const removeSetting = (setting) => {
+    console.log('removing setting', setting);
     el[setting] = undefined;
   };
 
@@ -92,6 +94,9 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, compon
         // boolean attribute
         attributeValue = true;
       }
+      if(attributeValue === null) {
+        removeSetting(attribute);
+      }
 
       if(attributeValue !== undefined) {
         setSetting(attribute, attributeValue);
@@ -102,7 +107,6 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, compon
     // we need to lookup the setting using the reverseAttributes lookup table
     else if(attributeValue !== undefined) {
       const setting = lookupSettingFromValue(attribute);
-
       // when a value is unset it is passed null in this case a boolean attribute was removed
       if(attributeValue === null) {
         removeSetting(setting);
@@ -110,7 +114,6 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, compon
       else if (setting !== undefined) {
         setSetting(setting, attribute);
       }
-
     }
   }
 };

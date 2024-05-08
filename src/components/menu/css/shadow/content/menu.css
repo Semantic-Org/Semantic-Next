@@ -1,6 +1,10 @@
-.menu {
+:host {
   display: flex;
   flex-direction: row;
   margin: var(--menu-margin);
   font-weight: var(--menu-font-weight);
+}
+
+.menu {
+  display: contents;
 }

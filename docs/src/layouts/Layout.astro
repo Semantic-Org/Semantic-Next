@@ -26,13 +26,13 @@ header = header || title;
 	<TopBar></TopBar>
 	<layout id={id}>
 		<Sidebar/>
-		<page>
+		<page class={textContent ? 'text-content centered' : 'centered'}>
 			<slot name="masthead">
 				{inlineHeader != 'true' && (
 					<DocsMasthead header={title} description={description} menu={menu}/>
 				)}
 			</slot>
-			<main class={textContent ? 'text-content' : ''}>
+			<main>
 				<ui-container>
 					<rail class="ui close right rail">
 						<slot name="rail">
@@ -41,9 +41,9 @@ header = header || title;
 					</rail>
 					<pageContent>
 						{inlineHeader == 'true' && header && (
-							<h1>
+							<h2>
 								{headerIcon !== undefined && (<UIIcon icon={headerIcon}></UIIcon>)}<span class="text">{header}</span>
-							</h1>
+							</h2>
 						)}
 						<slot />
 					</pageContent>

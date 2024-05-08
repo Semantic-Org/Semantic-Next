@@ -8,19 +8,26 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What is Semantic UI?
 
-Semantic is a web-component based UI framework that supports SSR out of the box. Semantic uses naming based around concepts from natural language, that makes your html easy to read and semantically meaningful.
+Semantic UI is a UI framework built for authoring websites using [web components](/web-components). It includes a UI framework that provides primitives for most common use-cases, but also a component authoring system for you to build everything that isn't included.
 
-Semantic is built with [web components](/web-components) a core web technology that allows you to take your UI with you even if you change between your front-end javascript frameworks.
+The component system compiles to native web components which means you can bring them with you regardless of what front end technologies you choose to use to build your website.
+
+#### Design Principles
+
+Semantic is designed around principles from natural language which means it is expressive and easy to use. All major components support SSR out of the box, which is the primary hurdle you might encounter when trying to ship with web components (which are a browser not a server standard)>
 
 
 #### Tech Features
 
-* [Modern css theming](/theming) using **cascading inheritance layers**, **dark mode** and **em based** scaling.
+* Built on a uniform [reactive web component framework](/templates) that you can use to build your own UI.
+* [Modern css theming](/theming) using **1,000+ CSS variables**, **cascading inheritance layers**, **dark mode** and **em based** scaling.
 * UI components support [server side rendering with hydration](/ssr) out of the box.
-* Provides a [reactive web component framework](/templates) to build your own web components
 
+### Machine Interpretable
 
-#### What's Inside
+Semantic UI components are all powered by an underlying spec format. This specification outlines components in a way that is machine-interpretable and can be used to build robust developer or internal tooling.
+
+## What's Included
 
 Semantic includes the following core libraries:
 * An underlying [UI component framework](/component) that includes things like popups, dropdowns, modals, and form controls.
@@ -28,8 +35,4 @@ Semantic includes the following core libraries:
 * A signals based [reactivity library](/reactivity).
 * A modern 3kb jQuery-like replacement called [Query](/query) to handle DOM APIs
 * A higly-performant [rendering engine](/rendering) powered by [Lit](https://lit.dev) under the hood.
-
-### Machine Interpretable
-
-Semantic UI components are all built using an underlying JSON specification. This specification outlines components in a way that is machine-interpretable and can be used to build robust developer or internal tooling.
 

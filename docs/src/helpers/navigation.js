@@ -17,12 +17,12 @@ const examplePages = examples.map(page => ({
 export const topbarMenu =  [
   {
     _id: 'ui',
-    name: 'UI Components',
+    name: 'Design Framework',
     url: '/introduction',
   },
   {
     _id: 'framework',
-    name: 'Framework',
+    name: 'Tech Docs',
     url: '/components',
   },
   {
@@ -324,7 +324,7 @@ const createExampleMenu = () => {
             name: example.title,
             url: example.url
           }))
-        })
+        });
       });
     }
     else {
@@ -332,13 +332,13 @@ const createExampleMenu = () => {
       pages = examples.map(example => ({
         name: example.title,
         url: example.url
-      }))
+      }));
     }
     menu.push({
       name: category,
       pages
     });
-  })
+  });
   return menu;
 };
 export const sidebarMenuExamples = createExampleMenu();
