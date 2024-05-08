@@ -1,0 +1,30 @@
+{
+  "uiType": "element",
+  "name": "Menu Item",
+  "description": "A menu item displays an individual selection in a menu",
+  "parentTag": "ui-menu",
+  "tagName": "menu-item",
+  "exportName": "UIMenuItem",
+  "states": [
+    {
+      "name": "Hover",
+      "attribute": "hover",
+      "description": "hovered"
+    },
+    {
+      "name": "Focus",
+      "attribute": "focused",
+      "description": "focused by the keyboard"
+    },
+    {
+      "name": "Active",
+      "attribute": "active",
+      "description": "activated"
+    },
+    {
+      "name": "Disabled",
+      "attribute": "disabled",
+      "description": "disable interactions"
+    }
+  ]
+}

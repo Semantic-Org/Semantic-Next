@@ -406,7 +406,7 @@ export class SpecReader {
   */
   getWebComponentSpec(spec = this.spec) {
 
-    if(this.componentSpec) {
+    if(spec == this.spec && this.componentSpec) {
       return this.componentSpec;
     }
 
@@ -484,7 +484,7 @@ export class SpecReader {
     componentSpec.reverseAttributes = reverseAttributes;
 
     // store some details for plurality if present
-    componentSpec.inheritedPluralVariations = this.spec.pluralSharedVariations || [];
+    componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
 
     this.componentSpec = componentSpec;
 
