@@ -7,6 +7,8 @@ const template = await getText('./component.html');
 const createInstance = ({tpl}) => ({
   sections: [
     { title: 'Section 1', content: 'Content for section 1', expanded: new ReactiveVar(false) },
+    { title: 'Section 2', content: 'Content for section 2', expanded: new ReactiveVar(false) },
+    { title: 'Section 3', content: 'Content for section 3', expanded: new ReactiveVar(false) }
   ],
 
   toggleSection(index) {
