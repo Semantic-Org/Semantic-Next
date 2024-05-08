@@ -38,6 +38,9 @@ export class ReactiveConditionalDirective extends AsyncDirective {
           }
         });
       }
+      else {
+        html = nothing;
+      }
       if(!html) {
         html = nothing;
       }
