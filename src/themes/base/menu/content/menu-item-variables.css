@@ -6,6 +6,7 @@
   --menu-item-margin: none;
   --menu-item-padding: var(--7px) var(--6px);
   --menu-item-border: none;
+  --menu-item-text-align: inherit;
 
   --menu-item-box-shadow: none;
   --menu-item-border-radius: var(--border-radius);

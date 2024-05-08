@@ -1,13 +1,20 @@
 /* src/components/menu/css/shadow/content/menu.css */
 @layer component.content.menu {
   :host {
-    display: flex;
-    flex-direction: row;
+    display: block;
     margin: var(--menu-margin);
-    font-weight: var(--menu-font-weight);
+  }
+  :host::first-child {
+    margin-top: 0rem;
+  }
+  :host::last-child {
+    margin-bottom: 0rem;
   }
   .menu {
-    display: contents;
+    display: flex;
+    flex-direction: row;
+    font-weight: var(--menu-font-weight);
+    gap: var(--menu-gap);
   }
 }
 
@@ -58,6 +65,16 @@
     color: #002A47;
     box-shadow: 0px 0px 10px rgb(0, 92, 165) inset;
     background-color: #35b7f1;
+  }
+}
+
+/* src/components/menu/css/shadow/variations/evenly-spaced.css */
+@layer component.variations.equalWidth {
+  .evenly-spaced.menu {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    --menu-item-text-align: var(--menu-evenly-spaced-item-text-align) ;
   }
 }
 

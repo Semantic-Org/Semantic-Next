@@ -4,3 +4,6 @@
 /* Types */
 @import url('./types/dashboard.css') layer(component.types.dashboard);
 
+
+/* Types */
+@import url('./variations/evenly-spaced.css') layer(component.variations.equalWidth);

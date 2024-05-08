@@ -1,4 +1,5 @@
 :root {
   --menu-margin: var(--vertically-spaced);
   --menu-font-weight: var(--normal);
+  --menu-gap: var(--4px);
 }

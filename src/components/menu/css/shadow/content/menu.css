@@ -1,10 +1,17 @@
 :host {
-  display: flex;
-  flex-direction: row;
+  display: block;
   margin: var(--menu-margin);
-  font-weight: var(--menu-font-weight);
+}
+:host::first-child {
+  margin-top: 0rem;
+}
+:host::last-child {
+  margin-bottom: 0rem;
 }
 
 .menu {
-  display: contents;
+  display: flex;
+  flex-direction: row;
+  font-weight: var(--menu-font-weight);
+  gap: var(--menu-gap);
 }
