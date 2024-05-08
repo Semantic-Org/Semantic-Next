@@ -26,6 +26,14 @@ const settings = {
 
 const createInstance = ({tpl, settings, $}) => ({
   activeFile: new ReactiveVar(),
+  sortOrder: [
+    'component.js',
+    'component.html',
+    'component.css',
+    'index.html',
+    'index.css',
+    'index.js',
+  ],
   scriptTypes: {
     'text/css': 'sample/css',
     'text/html': 'sample/html',
@@ -47,14 +55,6 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.html': 1,
     'index.css': 1,
     'index.js': 1,
-  },
-  sortIndex: {
-    'component.js': 0,
-    'component.html': 1,
-    'component.css': 2,
-    'index.html': 0,
-    'index.css': 1,
-    'index.js': 2,
   },
   panelSizes: {
     'component.js': 'natural',
@@ -82,7 +82,7 @@ const createInstance = ({tpl, settings, $}) => ({
       const fileData = tpl.getFile(file, filename);
       files.push(fileData);
     });
-    return files;
+    return sortBy(files, 'sortIndex');
   },
   getFile(file, filename) {
     return {
@@ -99,7 +99,7 @@ const createInstance = ({tpl, settings, $}) => ({
     return get(tpl.paneIndex, filename);
   },
   getDefaultSort(filename) {
-    return get(tpl.sortIndex, filename);
+    return tpl.sortOrder.indexOf(filename);
   },
   getFileLabel(filename) {
     return filename;

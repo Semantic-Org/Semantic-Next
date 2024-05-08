@@ -1,0 +1,8 @@
+<div class="color-picker">
+  <div class="preview" style="background-color: {{selectedColor}}"></div>
+  <div class="options">
+    {{#each color in colorOptions}}
+      <div class="option" style="background-color: {{color}}" data-color="{{color}}"></div>
+    {{/each}}
+  </div>
+</div>

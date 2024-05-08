@@ -1,0 +1,39 @@
+:host {
+  --card-width: 300px;
+  --card-image-max-height: 250px;
+}
+
+.product-card {
+  width: var(--card-width);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  display: flex;
+  flex-direction: column;
+
+  .image {
+    width: 100%;
+    height: auto;
+    max-height: var(--card-image-max-height);
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--padding);
+  }
+
+  .title {
+    font-size: var(--large);
+    font-weight: bold;
+    margin-bottom: var(--padding);
+  }
+
+  .description {
+    font-size: var(--medium);
+    margin-bottom: var(--padding);
+  }
+
+  .price {
+    font-size: var(--large);
+    font-weight: bold;
+    color: var(--primary-text-color);
+  }
+}

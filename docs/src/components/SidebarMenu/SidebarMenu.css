@@ -114,11 +114,10 @@
 
   opacity: 0;
   overflow: hidden;
-  transition: max-height 0.2s ease, opacity 0.2s ease;
-  max-height: 0px;
+  transition: opacity 0.2s ease;
+  height: 0px;
 
   &.active {
-    max-height: 100px;
     opacity: 1;
     height: auto;
   }

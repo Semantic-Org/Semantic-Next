@@ -1,0 +1,34 @@
+:host {
+  --color-option-size: 30px;
+  --color-preview-size: 100px;
+}
+
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview {
+  width: var(--color-preview-size);
+  height: var(--color-preview-size);
+  border-radius: 50%;
+  margin-bottom: var(--padding);
+}
+
+.options {
+  display: flex;
+}
+
+.option {
+  width: var(--color-option-size);
+  height: var(--color-option-size);
+  border-radius: 50%;
+  margin-right: var(--padding);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.option:hover {
+  transform: scale(1.1);
+}

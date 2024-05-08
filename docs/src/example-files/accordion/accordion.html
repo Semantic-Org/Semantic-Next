@@ -1,0 +1,15 @@
+<div class="accordion">
+  {{#each sections}}
+    <div class="section">
+      <div class="header" data-index="{{@index}}">
+        <span class="title">{{title}}</span>
+        <span class="icon">{{#if expanded}}▼{{else}}▶{{/if}}</span>
+      </div>
+      {{#if expanded}}
+        <div class="content">
+          {{content}}
+        </div>
+      {{/if}}
+    </div>
+  {{/each}}
+</div>

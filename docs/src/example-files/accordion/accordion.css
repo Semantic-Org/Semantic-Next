@@ -1,0 +1,25 @@
+.accordion {
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.section {
+  border-bottom: var(--border);
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--padding);
+    cursor: pointer;
+  }
+
+  .title {
+    font-weight: bold;
+  }
+
+  .content {
+    padding: var(--padding);
+  }
+
+}
