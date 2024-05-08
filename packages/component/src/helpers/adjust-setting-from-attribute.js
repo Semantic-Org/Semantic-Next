@@ -69,7 +69,6 @@ export const adjustSettingFromAttribute = (el, attribute, attributeValue, compon
   };
 
   const removeSetting = (setting) => {
-    console.log('removing setting', setting);
     el[setting] = undefined;
   };
 
