@@ -3,7 +3,13 @@
     <div class="section">
       <div class="header" data-index="{{@index}}">
         <span class="title">{{title}}</span>
-        <span class="icon">{{#if expanded}}▼{{else}}▶{{/if}}</span>
+        <span class="icon">
+          {{#if expanded}}
+            <ui-icon icon="left-chevron"></ui-icon>
+          {{else}}
+            <ui-icon icon="down-chevron"></ui-icon>
+          {{/if}}
+        </span>
       </div>
       {{#if expanded}}
         <div class="content">
