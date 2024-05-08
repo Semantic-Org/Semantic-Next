@@ -7,7 +7,7 @@
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
   "type": "module",
-  "main": "./examples.js",
+  "module": "./examples.js",
   "peerDependencies": {
     "lit": "^3.1.2"
   }
