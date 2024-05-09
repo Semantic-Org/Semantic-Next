@@ -21,7 +21,7 @@ const events = {
     settings.value =  this.id;
   }
 };
-console.log(MenuComponentSpec);
+
 const UIMenu = createComponent({
   tagName: 'ui-menu',
   componentSpec: MenuComponentSpec,

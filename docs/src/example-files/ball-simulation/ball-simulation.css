@@ -1,0 +1,12 @@
+.simulation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  width: 500px;
+  height: 500px;
+  border: var(--border);
+  border-radius: var(--border-radius);
+}

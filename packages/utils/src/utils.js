@@ -651,11 +651,7 @@ export const clone = (src, seen = new Map()) => {
   if (seen.has(src)) return seen.get(src);
 
   let copy;
-  /*if (src.nodeType && 'cloneNode' in src) {
-    copy = src.cloneNode(true);
-    seen.set(src, copy);
-  }
-  else */if (src instanceof Date) {
+  if (src instanceof Date) {
     // Date
     copy = new Date(src.getTime());
     seen.set(src, copy);
@@ -667,27 +663,58 @@ export const clone = (src, seen = new Map()) => {
   }
   else if (Array.isArray(src)) {
     // Array
-    copy = new Array(src.length);
+    copy = [];
     seen.set(src, copy);
-    for (let i = 0; i < src.length; i++) copy[i] = clone(src[i], seen);
+    src.forEach((item, index) => {
+      copy[index] = clone(item, seen);
+    });
   }
   else if (src instanceof Map) {
     // Map
     copy = new Map();
     seen.set(src, copy);
-    for (const [k, v] of src.entries()) copy.set(k, clone(v, seen));
+    src.forEach((value, key) => {
+      copy.set(key, clone(value, seen));
+    });
   }
   else if (src instanceof Set) {
     // Set
     copy = new Set();
     seen.set(src, copy);
-    for (const v of src) copy.add(clone(v, seen));
+    src.forEach((item) => {
+      copy.add(clone(item, seen));
+    });
   }
-  else if (src instanceof Object) {
-    // Object
+  else if (src.nodeType && 'cloneNode' in src) {
+    // DOM Nodes
+    copy = src.cloneNode(true);
+    seen.set(src, copy);
+  }
+  else if (src.constructor && src.constructor !== Object) {
+    // Custom object types
+    try {
+      copy = new src.constructor();
+      seen.set(src, copy);
+      Object.entries(src).forEach(([key, value]) => {
+        copy[key] = clone(value, seen);
+      });
+    } catch (error) {
+      // Fallback to shallow copy if constructor fails
+      console.error('Failed to clone using constructor:', error);
+      copy = Object.assign({}, src);
+      seen.set(src, copy);
+      Object.entries(src).forEach(([key, value]) => {
+        copy[key] = value;
+      });
+    }
+  }
+  else {
+    // Fallback for plain objects
     copy = {};
     seen.set(src, copy);
-    for (const [k, v] of Object.entries(src)) copy[k] = clone(v, seen);
+    Object.entries(src).forEach(([key, value]) => {
+      copy[key] = clone(value, seen);
+    });
   }
 
   return copy;
