@@ -117,4 +117,3 @@ createComponent({
   onRendered,
   events,
 });
-g
