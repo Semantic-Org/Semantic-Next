@@ -1,36 +1,73 @@
 import { createComponent, getText } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { generateID } from '@semantic-ui/utils';
+import { each, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const createInstance = ({tpl, $, onCreated}) => ({
-  balls: [],
+  balls: new ReactiveVar([]),
   clock: new ReactiveVar(0),
-  frameDuration: 1000 / 60, // 60 FPS
+
+  startClock() {
+    tpl.tick();
+    each(tpl.balls.get(), tpl.calculateBall);
+    tpl.draw();
+  },
 
   getCanvas() {
     return $('canvas').get(0);
   },
 
-  createBall(event) {
-    const canvas = tpl.getCanvas();
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const radius = Math.random() * 20 + 10;
-    const color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
-    const ball = {
+  tick() {
+    const t = tpl.clock.get() + 1;
+    tpl.clock.set(t);
+
+    each(tpl.balls.get(), (ball) => {
+      const ballData = ball.get();
+      ballData.t = t;
+      ball.set(ballData);
+    });
+
+    const frame = 1000 / 60;
+    setTimeout(tpl.tick, frame);
+  },
+
+  createBall({x, y}) {
+    const ball = new ReactiveVar({
       _id: generateID(),
       x,
       y,
-      radius,
-      color,
+      radius: Math.random() * 20 + 10,
+      color: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
       vx: Math.random() * 400 - 2,
-      vy: Math.random() * 400 - 2
-    };
+      vy: Math.random() * 400 - 2,
+      t: tpl.clock.get()
+    });
+    console.log(ball instanceof ReactiveVar);
     tpl.balls.push(ball);
+    console.log(ball[0] instanceof ReactiveVar);
+  },
+
+  calculateBall() {
+    tpl.reaction(() => {
+      const ballData = ball.get();
+
+      // Update ball position
+      ballData.x += ballData.vx * t;
+      ballData.y += ballData.vy * t;
+
+      // Check for collision with walls
+      const canvas = tpl.getCanvas();
+      if (ballData.x + ballData.radius > canvas.width || ballData.x - ballData.radius < 0) {
+        ballData.vx = -ballData.vx;
+      }
+      if (ballData.y + ballData.radius > canvas.height || ballData.y - ballData.radius < 0) {
+        ballData.vy = -ballData.vy;
+      }
+      console.log('setting ball to', ballData);
+      ball.set(ballData);
+    });
   },
 
   drawBall(ball) {
@@ -43,88 +80,33 @@ const createInstance = ({tpl, $, onCreated}) => ({
     ctx.closePath();
   },
 
-  updateBall(ball, index, delta) {
+  draw() {
     const canvas = tpl.getCanvas();
-    const newX = ball.x + ball.vx * delta;
-    const newY = ball.y + ball.vy * delta;
+    const ctx = canvas.getContext(`2d`);
 
-    // Check for collision with walls
-    if (newX + ball.radius > canvas.width || newX - ball.radius < 0) {
-      ball.vx = -ball.vx;
-    }
-    if (newY + ball.radius > canvas.height || newY - ball.radius < 0) {
-      ball.vy = -ball.vy;
-    }
-
-    // Update ball position
-    ball.x = newX;
-    ball.y = newY;
-
-    // Check for collision with other balls
-    for (let i = index + 1; i < tpl.balls.length; i++) {
-      const otherBall = tpl.balls[i];
-      const dx = otherBall.x - ball.x;
-      const dy = otherBall.y - ball.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < ball.radius + otherBall.radius) {
-        // Calculate collision normal
-        const normalX = dx / distance;
-        const normalY = dy / distance;
-
-        // Calculate relative velocity
-        const relVelX = ball.vx - otherBall.vx;
-        const relVelY = ball.vy - otherBall.vy;
-
-        // Calculate dot product of relative velocity and collision normal
-        const dotProduct = relVelX * normalX + relVelY * normalY;
-
-        // Calculate collision impulse
-        const impulse = 2 * dotProduct / (ball.radius + otherBall.radius);
-
-        // Update ball velocities
-        ball.vx -= impulse * normalX * otherBall.radius;
-        ball.vy -= impulse * normalY * otherBall.radius;
-        otherBall.vx += impulse * normalX * ball.radius;
-        otherBall.vy += impulse * normalY * ball.radius;
-      }
-    }
-
-    tpl.balls[index] = ball;
-  },
-
-  animate(timestamp) {
-    if (!tpl.lastTimestamp) {
-      tpl.lastTimestamp = timestamp;
-    }
-
-    const delta = timestamp - tpl.lastTimestamp;
-
-    if (delta >= tpl.frameDuration) {
-      const canvas = tpl.getCanvas();
-      const ctx = canvas.getContext(`2d`);
+    tpl.reaction(comp => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      tpl.balls.forEach((ball, index) => {
-        tpl.drawBall(ball);
-        tpl.updateBall(ball, index, delta / 1000); // Convert delta to seconds
+      each(tpl.balls.get(), (ball) => {
+        tpl.drawBall(ball.get());
       });
-
-      tpl.lastTimestamp = timestamp;
-    }
-
-    requestAnimationFrame(tpl.animate);
-  }
+    });
+  },
 
 });
 
 const events = {
   'click canvas'({tpl, event}) {
-    tpl.createBall(event);
+    const canvas = tpl.getCanvas();
+    const rect = canvas.getBoundingClientRect();
+    tpl.createBall({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    });
   }
 };
 
 const onRendered = ({tpl}) => {
-  requestAnimationFrame(tpl.animate);
+  tpl.startClock();
 };
 
 createComponent({
@@ -135,3 +117,4 @@ createComponent({
   onRendered,
   events,
 });
+g
