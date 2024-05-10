@@ -23,11 +23,12 @@
         items={{stringify getFileMenuItems}}
         value={{activeFile}}
       ></ui-menu>
-      <ui-menu evenly-spaced selection>
-        <menu-item active>1</menu-item>
-        <menu-item>3</menu-item>
-        <menu-item>2</menu-item>
-      </ui-menu>
+      <playground-file-editor
+        line-numbers
+        project="source"
+        filename="{{activeFile}}"
+      >
+      </playground-file-editor>
       <playground-preview project="source"> </playground-preview>
     </div>
   {{else}}

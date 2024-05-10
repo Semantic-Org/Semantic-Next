@@ -212,6 +212,11 @@ const onDestroyed = ({ tpl }) => {
 
 const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
+  $('ui-menu').settings({
+    onChange: function(value) {
+      tpl.activeFile.set(value);
+    }
+  });
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
       let size;
