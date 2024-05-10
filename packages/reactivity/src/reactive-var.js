@@ -5,7 +5,7 @@ import { Dependency } from './dependency.js';
 export class ReactiveVar {
 
   constructor(initialValue, equalityFunction) {
-    this.currentValue = clone(initialValue);
+    this.currentValue = this.clone(initialValue);
     this.dependency = new Dependency();
     this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
@@ -21,14 +21,23 @@ export class ReactiveVar {
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
     return (Array.isArray(value) || typeof value == 'object')
-      ? clone(value)
+      ? this.clone(value)
       : value
     ;
   }
 
+  clone(value) {
+    if (value instanceof ReactiveVar) {
+      const clonedInstance = new ReactiveVar(value.currentValue, value.equalityFunction);
+      clonedInstance.dependency = value.dependency;
+      return clonedInstance;
+    }
+    return clone(value);
+  }
+
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = clone(newValue);
+      this.currentValue = this.clone(newValue);
       this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
@@ -92,7 +101,7 @@ export class ReactiveVar {
       value = property;
       property = indexOrProperty;
     }
-    const newValue = clone(this.currentValue).map((object, currentIndex) => {
+    const newValue = this.clone(this.currentValue).map((object, currentIndex) => {
       if(index == 'all' || currentIndex == index) {
         object[property] = value;
       }
@@ -102,11 +111,11 @@ export class ReactiveVar {
   }
 
   changeItems(mapFunction) {
-    const newValue = clone(this.currentValue).map(mapFunction);
+    const newValue = this.clone(this.currentValue).map(mapFunction);
     this.set(newValue);
   }
   removeItems(filterFunction) {
-    const newValue = clone(this.currentValue).filter((value) => !filterFunction(value));
+    const newValue = this.clone(this.currentValue).filter((value) => !filterFunction(value));
     this.set(newValue);
   }
 
