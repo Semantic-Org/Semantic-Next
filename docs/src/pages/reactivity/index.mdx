@@ -4,13 +4,13 @@ layout: '@layouts/Guide.astro'
 
 ## Reactivity with Signals
 
-Reactivity put simply is **values change causing stuff to happen**.
+Reactivity in code put simply is **values changing causes stuff to happen**.
 
-Signals is a mechanism for implementing reactivity that works by tracking what should happen as dependencies on a value, or a "signal" then calling those dependencies when the underlying value changes.
+Signals is a **mechanism for implementing reactivity** that works by tracking what should happen as dependencies on a value. The value that changes is called a ***signal***, the function that occurs can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/).
 
-In Semantic UI signals are called `Reactive Variables`, and the things signals trigger are called `Reactions`.
+In Semantic UI reactivity triggers (signals) are called `Reactive Variables`, and the reactive contexts (computed) are called `Reactions`.
 
-## Naming
+### Naming
 
 Semantic UI uses the name `ReactiveVar` and `Reaction` to make it more clear their purpose.
 
@@ -18,7 +18,7 @@ You can assume underneath the hood these operate like conventional signals, but 
 
 Both names may be used in the documentation depending on if we are referring to the library implementation in specific `@semantic-ui/reactivity` or the concept in general of Signals.
 
-### By Example
+## Understanding by Example
 
 Imagine a birthday calendar. You may record a list of days which your friend's birthdays occur (dependencies) then when the day changes (the variable). You might for instance do this when you wake up and see the date on your phone, triggering a reaction to think about your friend's birthdays that might be this month.
 
@@ -26,13 +26,35 @@ This can be displayed in code like this.
 
 (birthday example)
 
+## Usage in Semantic UI
+
+Semantic UI includes a package [`@semantic-ui/reactivity`](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/reactivity) which exports `ReactiveVar`, `Dependency` and `Reaction` the primitives used in our reactivity system. You can use this package without Semantic UI library if you'd like to simply use our signals implementation.
+
+If you are using Semantic UI, reactivity can be used at a template level by importing the package in your template and assigning it to values in your template instance. Learn more in [ReactiveVar docs]().
+
+You can also access a special scoped version of a reaction on your template instance `tpl.reaction` which will automatically tear down when. Learn more in our [Reaction docs]().
+
+
+### Internal Usage
+
+Internally we use the reactivity package to track dependencies in templates and update only the locations that depend on them when values change.
+
+### In Components
+
+When authoring templates you may find you need to implement custom reactivity. This may be something that you want to re-run when something else changes, or perhaps to engineer a simpler way to handle a computation.
+
+`Reaction` is also exposed in user templates via `tpl.reaction` which will automatically attach itself to the template lifecycle teardown events.
+
+
+## What's in Reactivity
+
 ### Signals Plus
 
-Building on most utility signal implementations, Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and modify their data without having to `get` them and then `set` them later.
+Building on most utility signal implementations, Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
 
 These are things like `toggle`, `increment`, `setItem`, `push` that are implemented directly in `ReactiveVar`
 
-For more information on helpers check out their respective docs.
+You can learn more about this in the documentation for [array helpers](#), [object helpers](), [record helpers](), [date helpers](), and [boolean helpers]().
 
 ### Flushing
 
@@ -42,7 +64,13 @@ If you need to control the flushing behavior you can manually call `Reaction.flu
 
 You can also use the callback `Reaction.afterFlush` if you have code that depends on the changes from a reaction but do not need it to run immediately.
 
-### Stopping Reactivity
+Learn more about reactivity lifecycle in the documentation for [flushing changes]().
+
+### Controlling Reactivity
+
+Because of the cascading nature of reactivity, it's imperative to have tight controls over what triggers reactivity, and
+
+Semantic UI provides various helpers like `peek`, `subscribe`, `guard`
 
 You may find you want to stop a reaction from occuring at some point after setting it up. Reactions are passed to their callbacks as the first argument and provide a `stop` method for stopping the reaction.
 
@@ -55,7 +83,7 @@ Reaction((reaction) => {
 });
 ```
 
-## Special Behavior on First Run
+### Special Behavior on First Run
 
 You may need to define special behavior on the first run of a reaction, for instance to setup variables or to skip certain sections of code. You can use `reaction.firstRun` to handle this.
 
@@ -84,22 +112,3 @@ Reaction triggered by:
 ```
 
 If you are trying to debug reactivity inside a template, you can add `{{debugReactivity}}`, this will trigger a breakpoint at this context in the template and call `Reaction.getSource()`.
-
-## Signals in Semantic UI
-
-Semantic UI includes a package `@semantic-ui/reactivity` which implements our reactivity system. You can use this package without using the rest of the Semantic UI library if you'd like to simply use our signals implementation.
-
-If you are using Semantic UI reactivity can be used at a template level by importing the package in your template and assigning it to values in your template instance.
-
-You can also access a special scoped version of a reaction on your template instance `tpl.reaction` which will automatically tear down when
-
-
-### Internal Usage
-
-Internally we use this package to track dependencies in templates and update only the locations that depend on them when values change.
-
-### In Components
-
-When authoring templates you may find you need to implement custom reactivity. This may be something that you want to re-run when something else changes, or perhaps to engineer a simpler way to handle a computation.
-
-`Reaction` is also exposed in user templates via `tpl.reaction` which will automatically tear
