@@ -73,7 +73,7 @@ export const getExampleFiles = async(example, allExampleFiles) => {
   let hasComponent = false;
   const exampleFiles = {};
   await asyncEach(allExampleFiles, async (file, path) => {
-    const pathRegExp = new RegExp(`../../example-files/${exampleID}/`);
+    const pathRegExp = new RegExp(`../../examples/${exampleID}/`);
     if (path.match(pathRegExp)) {
       const fileName = path.replace(pathRegExp, '');
       if(inArray(fileName, ['index.html'])) {

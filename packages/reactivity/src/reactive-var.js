@@ -28,9 +28,7 @@ export class ReactiveVar {
 
   clone(value) {
     if (value instanceof ReactiveVar) {
-      const clonedInstance = new ReactiveVar(value.currentValue, value.equalityFunction);
-      clonedInstance.dependency = value.dependency;
-      return clonedInstance;
+      return value;
     }
     return clone(value);
   }

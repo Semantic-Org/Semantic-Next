@@ -1,8 +1,8 @@
 ---
 import Body from '../layouts/Body.astro';
-import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import BallSimulation from '@examples/ball-simulation/ball-simulation.js';
 import UIButton from '@semantic-ui/core';
 ---
 <Body padded>
-<PlaygroundExample id="counter"></PlaygroundExample>
+<BallSimulation client:only></BallSimulation>
 </Body>

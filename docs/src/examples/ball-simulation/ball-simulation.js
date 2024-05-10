@@ -11,7 +11,7 @@ const createInstance = ({tpl, $, onCreated}) => ({
 
   startClock() {
     tpl.tick();
-    each(tpl.balls.get(), tpl.calculateBall);
+    each(tpl.balls, tpl.calculateBall);
     tpl.draw();
   },
 
@@ -19,13 +19,16 @@ const createInstance = ({tpl, $, onCreated}) => ({
     return $('canvas').get(0);
   },
 
+  // each ball data has its time data changed
+  // this triggers a reaction that updates its position
   tick() {
     const t = tpl.clock.get() + 1;
     tpl.clock.set(t);
 
-    each(tpl.balls.get(), (ball) => {
+    each(tpl.balls, (ball) => {
       const ballData = ball.get();
       ballData.t = t;
+      console.log('ball is', ballData);
       ball.set(ballData);
     });
 
@@ -34,7 +37,7 @@ const createInstance = ({tpl, $, onCreated}) => ({
   },
 
   createBall({x, y}) {
-    const ball = new ReactiveVar({
+    const ball = {
       _id: generateID(),
       x,
       y,
@@ -43,10 +46,8 @@ const createInstance = ({tpl, $, onCreated}) => ({
       vx: Math.random() * 400 - 2,
       vy: Math.random() * 400 - 2,
       t: tpl.clock.get()
-    });
-    console.log(ball instanceof ReactiveVar);
+    };
     tpl.balls.push(ball);
-    console.log(ball[0] instanceof ReactiveVar);
   },
 
   calculateBall() {
@@ -86,7 +87,7 @@ const createInstance = ({tpl, $, onCreated}) => ({
 
     tpl.reaction(comp => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      each(tpl.balls.get(), (ball) => {
+      each(tpl.balls, (ball) => {
         tpl.drawBall(ball.get());
       });
     });

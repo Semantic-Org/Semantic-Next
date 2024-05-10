@@ -9,7 +9,7 @@ const matchingExamples = await getCollection('examples', ({ data }) => {
   return getExampleID(data) == id;
 });
 const example = matchingExamples[0];
-const allExampleFiles = await import.meta.glob(`../../example-files/**`, {
+const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
 let files = await getExampleFiles(example.data, allExampleFiles);
