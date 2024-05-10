@@ -55,6 +55,24 @@
 
   .inline {
     display: block;
+
+    playground-file-editor {
+      border: var(--border);
+      overflow: hidden;
+      height: max-content;
+      border-bottom: none;
+      border-radius: var(--top-attached-border-radius);
+    }
+    playground-preview {
+      background-color: var(--page-background) !important;
+      height: max-content;
+      border-radius: 0px 0px ;
+      border: var(--border);
+      border-top: var(--internal-border);
+      overflow: hidden;
+      border-radius: var(--bottom-attached-border-radius);
+    }
+
   }
 
   ui-panels::part(panels) {

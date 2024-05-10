@@ -88,6 +88,10 @@
   --absolute-border-radius: var(--4px);
 
   --border-radius: var(--absolute-border-radius);
+  --top-attached-border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+  --right-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
+  --bottom-attached-border-radius: 0px 0px var(--border-radius) var(--border-radius);
+  --left-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
 
   /* -------------------
       Brand Colors
@@ -555,6 +559,7 @@
   --circular-radius: 500rem;
 
   --border: 1px solid var(--border-color);
+  --internal-border: 1px solid var(--internal-border-color);
   --border-color: rgba(34, 36, 38, 0.15);
   --strong-border-color: rgba(34, 36, 38, 0.22);
   --internal-border-color: rgba(34, 36, 38, 0.10);
@@ -854,7 +859,9 @@ body.dark {
   --link-hover-color: #2492FF;
 
   --border-color: rgba(234, 236, 238, 0.15);
+  --internal-border-color: rgba(234, 236, 238, 0.08);
   --border: 1px solid var(--border-color);
+  --internal-border: 1px solid var(--internal-border-color);
 
   --subtle-transparent-black: rgb(var(--standard-color) / 5%);
   --transparent-black: rgb(var(--standard-color) / 10%);
