@@ -57,6 +57,8 @@ async function publishPackage(dir) {
   }
 }
 
+publishPackage('./');
+
 // Read workspaces to publish from main package
 const workspaceGlobs = mainPackageJson.workspaces;
 
