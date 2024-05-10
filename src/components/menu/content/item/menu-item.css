@@ -11,15 +11,21 @@
   margin: var(--menu-item-margin);
   padding: var(--menu-item-padding);
   border: var(--menu-item-border);
+  color: var(--menu-item-color);
+  font-weight: var(--menu-item-font-weight);
+  line-height: var(--menu-item-line-height);
   box-shadow: var(--menu-item-box-shadow);
   border-radius: var(--menu-item-border-radius);
   text-align: var(--menu-item-text-align);
 }
 
 .item:hover,
-.item.hovered {
+.item.hover {
   background: var(--menu-item-hover-background);
+  margin: var(--menu-item-hover-margin);
+  padding: var(--menu-item-hover-padding);
   border: var(--menu-item-hover-border);
+  color: var(--menu-item-hover-color);
   box-shadow: var(--menu-item-hover-box-shadow);
   border-radius: var(--menu-item-hover-border-radius);
 }
@@ -27,7 +33,11 @@
 .active.item {
   cursor: default;
   background: var(--menu-item-active-background);
+  margin: var(--menu-item-active-margin);
+  padding: var(--menu-item-active-padding);
   border: var(--menu-item-active-border);
   box-shadow: var(--menu-item-active-box-shadow);
+  font-weight: var(--menu-item-active-font-weight);
+  color: var(--menu-item-active-color);
   border-radius: var(--menu-item-active-border-radius);
 }

@@ -2,4 +2,11 @@
   --menu-margin: var(--vertically-spaced);
   --menu-font-weight: var(--normal);
   --menu-gap: var(--4px);
+  --menu-align-items: flex-start;
+  --menu-font-size: var(--medium);
+  --menu-justify-content: flex-start;
+  --menu-padding: 0;
+  --menu-box-shadow: none;
+  --menu-background: none;
+  --menu-border: none;
 }

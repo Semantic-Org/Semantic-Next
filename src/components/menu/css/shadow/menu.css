@@ -2,7 +2,7 @@
 @import url('./content/menu.css') layer(component.content.menu);
 
 /* Types */
-@import url('./types/dashboard.css') layer(component.types.dashboard);
+@import url('./types/selection.css') layer(component.types.selection);
 
 
 /* Types */

@@ -1,17 +1,18 @@
 :host {
   display: block;
   margin: var(--menu-margin);
-}
-:host::first-child {
-  margin-top: 0rem;
-}
-:host::last-child {
-  margin-bottom: 0rem;
+  padding: var(--menu-padding);
+  box-shadow: var(--menu-box-shadow);
+  border: var(--menu-border);
 }
 
 .menu {
   display: flex;
   flex-direction: row;
+  font-size: var(--menu-font-size);
   font-weight: var(--menu-font-weight);
   gap: var(--menu-gap);
+  background: var(--menu-background);
+  align-items: var(--menu-align-items);
+  justify-content: var(--menu-justify-content);
 }
