@@ -1,7 +1,7 @@
 <div class="{{ui}} menu" part="menu">
   {{#if items}}
     {{#each item in items}}
-      <menu-item active={{is value item.id}} id={{item.id}}>
+      <menu-item active={{is value item.id}} data-id={{item.id}}>
         {{item.label}}
       </menu-item>
     {{/each}}

@@ -17,24 +17,34 @@
     {
       "name": "Evenly Spaced",
       "attribute": "evenly-spaced",
-      "attribute": "evenly-spaced",
       "description": "formatted so items are evenly split",
       "usageLevel": 1
+    }
+  ],
+  "events": [
+    {
+      "eventName": "change",
+      "description": "can specify a function to occur after the value changes",
+      "arguments": [
+        {
+          "name": "value",
+          "description": "the updated value"
+        }
+      ]
     }
   ],
   "settings": [
     {
       "name": "Menu Items",
-      "type": [],
+      "type": "array",
       "attribute": "items",
-      "defaultValue": [],
       "description": "can automatically generate menu items"
     },
     {
-      "name": "Active ID",
+      "name": "Value",
+      "type": "string",
       "attribute": "value",
-      "defaultValue": "",
-      "description": "can specify active menu item when generating menu items"
+      "description": "can specify the active menu item value when generating menu items"
     }
   ]
 }

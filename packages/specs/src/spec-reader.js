@@ -1,4 +1,4 @@
-import { reverseKeys, flatten, isString, isArray, clone, each, values, tokenize, toTitleCase } from '@semantic-ui/utils';
+import { reverseKeys, get, flatten, isString, isArray, clone, each, noop, values, tokenize, toTitleCase, capitalize } from '@semantic-ui/utils';
 
 export class SpecReader {
 
@@ -416,6 +416,7 @@ export class SpecReader {
       variations: [],
       types: [],
       states: [],
+      events: [],
       settings: [],
       attributes: {},
       reverseAttributes: {},
@@ -463,8 +464,24 @@ export class SpecReader {
           componentSpec.contentAttributes.push(attributeName);
         }
         // settings may or may not have associated attributes
+        if (partName === 'settings' && isString(spec.type)) {
+          const defaultValues = {
+            string: '',
+            array: [],
+            boolean: false,
+            function: noop,
+            number: 0,
+            object: {}
+          };
+          const defaultValue = get(defaultValues, spec.type.toLowerCase());
+          componentSpec.defaultSettings[attributeName] = defaultValue;
+        }
         if (partName === 'settings' && spec.defaultValue !== undefined) {
           componentSpec.defaultSettings[attributeName] = spec.defaultValue;
+        }
+        if (partName == 'events') {
+          // events are functions
+          componentSpec.defaultSettings[attributeName] = noop;
         }
       });
     };
@@ -475,6 +492,7 @@ export class SpecReader {
     addSettingsFromPart('states');
     addSettingsFromPart('variations');
     addSettingsFromPart('settings');
+    addSettingsFromPart('events');
 
 
     // avoid having to reverse array at runtime
@@ -493,6 +511,9 @@ export class SpecReader {
 
   /* Returns the attribute name for a given spec part */
   getAttributeName(specPart) {
+    if (specPart.eventName) {
+      return `on${capitalize(specPart.eventName)}`;
+    }
     if (specPart.attribute) {
       return specPart.attribute;
     }
