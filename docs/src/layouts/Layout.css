@@ -82,9 +82,23 @@
   layout page.text-content li,
   layout page.text-content p {
     line-height: 1.5;
+    color: var(--standard-70);
   }
   layout page.text-content pre code {
     font-size: 16px;
+  }
+  layout page.text-content h2 {
+    margin: 3rem 0rem 2rem;
+  }
+  layout page.text-content .expressive-code {
+    margin-left: -0.5rem !important;
+    margin-right: -0.5rem !important;
+  }
+  layout page.text-content .expressive-code pre {
+    padding: 0.5rem !important;
+  }
+  layout page.text-content h3 {
+    margin: 3rem 0rem 1.5rem;
   }
   layout page.text-content ul strong,
   layout page.text-content p strong {

@@ -133,11 +133,19 @@
   li code {
     background-color: var(--standard-10);
     padding: 0em 0.5em;
-    font-size: 0.8em;
+    font-size: 0.85em;
+    color: var(--standard-100);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    margin: -0.3em 0px;
+    margin: 0em 0px;
     border-radius: var(--border-radius);
     display: inline-block;
+    border-radius: var(--circular-radius);
+    font-weight: bold;
+  }
+  p a code,
+  li a code {
+    background-color: var(--standard-10);
+    color: inherit;
   }
 
   body.dark {

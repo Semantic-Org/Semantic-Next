@@ -2,24 +2,21 @@
 layout: '@layouts/Guide.astro'
 ---
 
-## Understanding Signals Based Reactivity
+## Reactivity with Signals
 
 Reactivity put simply is **values change causing stuff to happen**.
 
-Signals is a mechanism for implementing reactivity that works by tracking what should happen as dependencies on a value, or a "signal".
+Signals is a mechanism for implementing reactivity that works by tracking what should happen as dependencies on a value, or a "signal" then calling those dependencies when the underlying value changes.
 
 In Semantic UI signals are called `Reactive Variables`, and the things signals trigger are called `Reactions`.
 
 ## Naming
 
-Semantic UI uses the name `ReactiveVar` and `Reaction` since the names make it more clear their purpose.
+Semantic UI uses the name `ReactiveVar` and `Reaction` to make it more clear their purpose.
 
-You can assume underneath the hood these operate like conventional signals, but include some addity niceties to make them easier to use. Both names may be used in the documentation depending on if we are referring to the library in specific `@semantic-ui/reactivity` or the concept in general of Signals.
+You can assume underneath the hood these operate like conventional signals, but include addity niceties to make them easier to use.
 
-## How Reactivity Works
-
-Reactive Vars work by tracking its dependencies then rerunning those dependencies when their value changes.
-
+Both names may be used in the documentation depending on if we are referring to the library implementation in specific `@semantic-ui/reactivity` or the concept in general of Signals.
 
 ### By Example
 
@@ -29,7 +26,7 @@ This can be displayed in code like this.
 
 (birthday example)
 
-### Data Types
+### Signals Plus
 
 Building on most utility signal implementations, Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and modify their data without having to `get` them and then `set` them later.
 
@@ -77,7 +74,7 @@ Reactivity can be complicated to debug as it requires an understanding of "what 
 
 Semantic UI's reactivity implementation provides several different ways to handle debugging. For starters if you are adding your own custom breakpoints in code, `Reaction.current` will always reference the current Reaction being run (if any). You can check this to see what the source of a reaction is.
 
-To make this even more simple `Reation` exposes a special helpers `Reaction.getSource()` this will return a trace of the current context which causes a reaction specifically for debugging;
+To make this even more simple `Reaction` exposes a special helpers `Reaction.getSource()` this will return a trace of the current context which causes a reaction specifically for debugging;
 
 ```javascript
 // example output
