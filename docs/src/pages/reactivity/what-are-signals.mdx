@@ -2,28 +2,21 @@
 layout: '@layouts/Guide.astro'
 ---
 
-## Understanding Signals Based Reactivity
+Signals
 
-Reactivity put simply is **values change causing stuff to happen**.
+## Signals for Beginners 
 
-Signals is a mechanism for implementing reactivity that works by tracking what should happen as dependencies on a value, or a "signal".
-
-In Semantic UI signals are called `Reactive Variables`, and the things signals trigger are called `Reactions`.
+Signals put simply are values that change causing stuff to happen. The value being changed is called the signal, in our library we call it a `reactiveVar` so it can be understood more succinctly. The "stuff happening" is a function scope that uses the value. We call this a `reaction` or a reactive context, but many libraries may also call this a computation. In the language of Semantic UI, reactive variables `ReactiveVar` cause `Reaction` to rerun, or in other words, signals cause computations to rerun.
 
 ## Naming
 
-Semantic UI uses the name `ReactiveVar` and `Reaction` since the names make it more clear their purpose.
+Semantic UI uses the name `ReactiveVar` and `Reaction` since the names make it more clear the their utility. You can assume underneath the hood these are very much signals, but with some addity niceties. Both names may be used interchangeably in the documentation depending on if we are referring to the library in specific `@semantic-ui/reactivity`
 
-You can assume underneath the hood these operate like conventional signals, but include some addity niceties to make them easier to use. Both names may be used in the documentation depending on if we are referring to the library in specific `@semantic-ui/reactivity` or the concept in general of Signals.
+## How Signals Work
 
-## How Reactivity Works
+Signals work by tracking a reactive variable's dependencies then rerunning dependencies when their value changes.
 
-Reactive Vars work by tracking its dependencies then rerunning those dependencies when their value changes.
-
-
-### By Example
-
-Imagine a birthday calendar. You may record a list of days which your friend's birthdays occur (dependencies) then when the day changes (the variable). You might for instance do this when you wake up and see the date on your phone, triggering a reaction to think about your friend's birthdays that might be this month.
+You could imagine this like a birthday calendar. You may record a list of days which your friend's birthdays occur then when the day changes (the signal) you review all birthdays to see which ones may have occured today.
 
 This can be displayed in code like this.
 

@@ -110,7 +110,7 @@ export const TemplateHelpers = {
   tokenize(string = '') {
     return tokenize(string);
   },
-  reactiveDebug() {
+  debugReactivity() {
     Reaction.getSource();
     debugger;
   },
