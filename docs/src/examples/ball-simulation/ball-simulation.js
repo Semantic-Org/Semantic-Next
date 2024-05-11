@@ -110,7 +110,7 @@ const onRendered = ({tpl}) => {
   tpl.startClock();
 };
 
-createComponent({
+export const BallSimulation = createComponent({
   tagName: 'ball-simulation',
   template,
   css,
