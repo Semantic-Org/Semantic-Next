@@ -1,28 +1,147 @@
 ---
 layout: ../layouts/Guide.astro
 icon: code
-title: Design Framework Integration
+title: Framework Integration
 description: Integrating Semantic UI into Your Design System
 ---
 
 import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 
-# Integrating Semantic UI into Your Design System
 
-Semantic UI uses web components which are framework agnostic. This means you can take the core of your UI with you regardless of what front end framework you use.
 
-However in many cases it is still useful, and necessary to wrap components in additional 'framework native' code so that it is simpler for developers to use when building out your app.
+## Using Directly
 
-## Creating a Design Framework
+If you want to use Semantic UI Web Components directly in your page layouts without creating a custom design framework, you can import and use the components individually.
 
 <Tabs>
 <TabItem label="React">
+In React, you can use web components directly since version 19, which introduced native support for web components. Simply import the desired component and use it in your JSX.
+
 ```jsx
 import React from 'react';
-import { UIButton } from '@semantic-ui/core';
 import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
 
-const Button = React.forwardRef(({ onChange, ...props }, ref) => {
+function MyComponent() {
+  return (
+    <div>
+      <ui-button primary>Click me</ui-button>
+      <ui-icon icon="close"></ui-icon>
+    </div>
+  );
+}
+```
+</TabItem>
+<TabItem label="Angular">
+In Angular, you can use web components directly in your templates. Import the necessary components and use them with the appropriate property and event bindings.
+
+```html
+<ui-button [primary]="true" (change)="handleChange()">Click me</ui-button>
+<ui-icon icon="close"></ui-icon>
+```
+
+```typescript
+import { Component } from '@angular/core';
+import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+})
+export class AppComponent {
+  handleChange() {
+    // Handle change event
+  }
+}
+```
+</TabItem>
+<TabItem label="Vue">
+In Vue, you can use web components directly in your templates. Import the necessary components and use them with the appropriate property and event bindings.
+
+```vue
+<template>
+  <div>
+    <ui-button :primary="true" @change="handleChange">Click me</ui-button>
+    <ui-icon icon="close"></ui-icon>
+  </div>
+</template>
+
+<script setup>
+import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
+
+function handleChange() {
+  // Handle change event
+}
+</script>
+```
+</TabItem>
+<TabItem label="Svelte">
+In Svelte, you can use web components directly in your templates. Import the necessary components and use them with the appropriate property and event bindings.
+
+```html
+<script>
+  import '@semantic-ui/core/themes/button.css';
+  import '@semantic-ui/core/themes/icon.css';
+
+  function handleChange() {
+    // Handle change event
+  }
+</script>
+
+<ui-button primary on:change={handleChange}>Click me</ui-button>
+<ui-icon icon="close"></ui-icon>
+```
+</TabItem>
+<TabItem label="Lit">
+In Lit, since the underlying web components are built using Lit, you can directly extend and customize the components in your own Lit components.
+
+```javascript
+import { LitElement, html } from 'lit';
+import { UIButton } from '@semantic-ui/core';
+import { UIIcon } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
+
+class MyButton extends UIButton {
+  // Customize the button component
+}
+
+class MyIcon extends UIIcon {
+  // Customize the icon component
+}
+
+class MyComponent extends LitElement {
+  render() {
+    return html`
+      <my-button primary @change="\${this.handleChange}">Click me</my-button>
+      <my-icon icon="close"></my-icon>
+    `;
+  }
+
+  handleChange() {
+    // Handle change event
+  }
+}
+```
+</TabItem>
+</Tabs>
+
+## Creating a Design Framework
+
+If you want to create a custom design framework that wraps multiple Semantic UI Web Components, you can create wrapper components that encapsulate the web components and provide a framework-specific API.
+
+<Tabs>
+<TabItem label="React">
+In React, you can create a generic wrapper component that handles passing properties and event bindings to the underlying web component. This approach is useful if you have multiple web components to wrap.
+
+```jsx
+import React from 'react';
+
+const WebComponentWrapper = React.forwardRef(({ component, ...props }, ref) => {
+  const Component = component;
+
   const handleEvent = (event) => {
     const eventName = event.type;
     const eventHandler = props[eventName];
@@ -31,23 +150,36 @@ const Button = React.forwardRef(({ onChange, ...props }, ref) => {
     }
   };
 
-  return <UIButton ref={ref} {...props} onEvent={handleEvent} />;
+  return <Component ref={ref} {...props} onEvent={handleEvent} />;
 });
 
-export default Button;
+export const UIButton = (props) => <WebComponentWrapper component="ui-button" {...props} />;
+export const UIIcon = (props) => <WebComponentWrapper component="ui-icon" {...props} />;
+```
+
+Alternatively, since React 19 introduced native support for web components, you can directly use the web components without the need for a wrapper component.
+
+```jsx
+import React from 'react';
+import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
+
+export const UIButton = React.forwardRef((props, ref) => <ui-button ref={ref} {...props} />);
+export const UIIcon = React.forwardRef((props, ref) => <ui-icon ref={ref} {...props} />);
 ```
 </TabItem>
 <TabItem label="Angular">
+In Angular, you can create individual wrapper components for each web component you want to include in your design framework.
+
 ```typescript
 import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
-import { UIButton } from '@semantic-ui/core';
 import '@semantic-ui/core/themes/button.css';
 
 @Component({
-  selector: 'app-button',
+  selector: 'ui-button',
   template: '<ui-button [properties]="properties"></ui-button>',
 })
-export class ButtonComponent {
+export class UIButtonComponent {
   @Input() properties: any;
   @Output() event = new EventEmitter<any>();
 
@@ -61,283 +193,113 @@ export class ButtonComponent {
   }
 }
 ```
+
+```typescript
+import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
+import '@semantic-ui/core/themes/icon.css';
+
+@Component({
+  selector: 'ui-icon',
+  template: '<ui-icon [properties]="properties"></ui-icon>',
+})
+export class UIIconComponent {
+  @Input() properties: any;
+  @Output() event = new EventEmitter<any>();
+
+  constructor(private elementRef: ElementRef) {}
+
+  ngAfterViewInit() {
+    const icon = this.elementRef.nativeElement.querySelector('ui-icon');
+    icon.addEventListener('event', (event: CustomEvent) => {
+      this.event.emit({ type: event.type, detail: event.detail });
+    });
+  }
+}
+```
 </TabItem>
 <TabItem label="Vue">
+In Vue, you can create individual wrapper components for each web component you want to include in your design framework.
+
 ```vue
 <template>
-  <UIButton v-bind="$attrs" v-on="$listeners">
+  <ui-button v-bind="$attrs" v-on="$listeners">
     <slot></slot>
-  </UIButton>
+  </ui-button>
 </template>
 
 <script setup>
-import { UIButton } from '@semantic-ui/core';
 import '@semantic-ui/core/themes/button.css';
+</script>
+```
+
+```vue
+<template>
+  <ui-icon v-bind="$attrs" v-on="$listeners">
+    <slot></slot>
+  </ui-icon>
+</template>
+
+<script setup>
+import '@semantic-ui/core/themes/icon.css';
 </script>
 ```
 </TabItem>
 <TabItem label="Svelte">
+In Svelte, you can create individual wrapper components for each web component you want to include in your design framework.
+
 ```html
 <script>
-  import { UIButton } from '@semantic-ui/core';
   import '@semantic-ui/core/themes/button.css';
 
   export let properties = {};
 </script>
 
-<UIButton {...properties} on:event>
+<ui-button {...properties} on:event>
   <slot></slot>
-</UIButton>
+</ui-button>
+```
+
+```html
+<script>
+  import '@semantic-ui/core/themes/icon.css';
+
+  export let properties = {};
+</script>
+
+<ui-icon {...properties} on:event>
+  <slot></slot>
+</ui-icon>
 ```
 </TabItem>
 <TabItem label="Lit">
+In Lit, since the web components are already built using Lit, you can directly extend and customize the components in your own Lit components. There's no need for a separate wrapper component.
+
 ```javascript
 import { LitElement, html } from 'lit';
 import { UIButton } from '@semantic-ui/core';
+import { UIIcon } from '@semantic-ui/core';
 import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
 
-class ButtonElement extends LitElement {
-  static get properties() {
-    return {
-      // Define the expected properties here
-    };
-  }
-
-  render() {
-    return html`
-      <ui-button ...="${this.properties}">
-        <slot></slot>
-      </ui-button>
-    `;
-  }
+export class MyButton extends UIButton {
+  // Customize the button component
 }
 
-customElements.define('my-button', ButtonElement);
+export class MyIcon extends UIIcon {
+  // Customize the icon component
+}
 ```
 </TabItem>
 </Tabs>
 
-## Using Your Design Framework
+By creating wrapper components or directly using the web components in your design framework, you can provide a consistent and framework-specific way for consumers to use the Semantic UI Web Components in their applications.
 
-Once you have defined the wrapper components, you can use them in your application just like any other component specific to your framework.
+Remember to import the necessary CSS files for each component you use, as shown in the examples above.
 
-<Tabs>
-<TabItem label="React">
-```jsx
-import React, { useState } from 'react';
-import Button from './Button';
+When deciding whether to create wrapper components or use the web components directly, consider the following:
 
-const Counter = () => {
-  const [count, setCount] = useState(0);
+- If your framework has native support for web components (e.g., React 19+), you can directly use the web components without the need for wrapper components.
+- If you need to customize the behavior or styling of the web components extensively, creating wrapper components allows you to encapsulate those customizations.
+- If you have a large number of web components to include in your design framework, creating a generic wrapper component (as shown in the React example) can reduce code duplication.
 
-  const incrementCounter = () => {
-    setCount(count + 1);
-  };
-
-  return (
-    <div className="counter">
-      <Button primary onChange={incrementCounter}>
-        Increment
-      </Button>
-      <p>Count: {count}</p>
-    </div>
-  );
-};
-
-export default Counter;
-```
-</TabItem>
-<TabItem label="Angular">
-```html
-<div class="counter">
-  <app-button [properties]="{ primary: true }" (event)="handleEvent($event)">
-    Increment
-  </app-button>
-  <p>Count: {{ count }}</p>
-</div>
-```
-
-```typescript
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-counter',
-  templateUrl: './counter.component.html',
-})
-export class CounterComponent {
-  count = 0;
-
-  handleEvent(event: any) {
-    if (event.type === 'change') {
-      this.incrementCounter();
-    }
-  }
-
-  incrementCounter() {
-    this.count++;
-  }
-}
-```
-</TabItem>
-<TabItem label="Vue">
-```vue
-<template>
-  <div class="counter">
-    <Button primary @change="incrementCounter">
-      Increment
-    </Button>
-    <p>Count: {{ count }}</p>
-  </div>
-</template>
-
-<script setup>
-import { ref } from 'vue';
-import Button from './Button.vue';
-
-const count = ref(0);
-
-const incrementCounter = () => {
-  count.value++;
-};
-</script>
-```
-</TabItem>
-<TabItem label="Svelte">
-```html
-<script>
-  import Button from './Button.svelte';
-
-  let count = 0;
-
-  function incrementCounter() {
-    count++;
-  }
-
-  function handleEvent(event) {
-    if (event.detail.type === 'change') {
-      incrementCounter();
-    }
-  }
-</script>
-
-<div class="counter">
-  <Button primary on:event={handleEvent}>
-    Increment
-  </Button>
-  <p>Count: {count}</p>
-</div>
-```
-</TabItem>
-<TabItem label="Lit">
-```html
-<my-button primary @change="${this.incrementCounter}">
-  Increment
-</my-button>
-<p>Count: ${this.count}</p>
-```
-
-```javascript
-import { LitElement, html } from 'lit';
-import './my-button';
-
-class CounterElement extends LitElement {
-  static get properties() {
-    return {
-      count: { type: Number },
-    };
-  }
-
-  constructor() {
-    super();
-    this.count = 0;
-  }
-
-  incrementCounter() {
-    this.count++;
-  }
-
-  render() {
-    return html`
-      <div class="counter">
-        <my-button primary @change="${this.incrementCounter}">
-          Increment
-        </my-button>
-        <p>Count: ${this.count}</p>
-      </div>
-    `;
-  }
-}
-
-customElements.define('my-counter', CounterElement);
-```
-</TabItem>
-</Tabs>
-
-## Handling Event Bindings
-
-Semantic UI use DOM custom events to emit events. The wrapper components capture these events and provide a way to bind to them using the conventions of each framework.
-
-<Tabs>
-<TabItem label="React">
-In the wrapper component, we capture the events using the `onEvent` prop and a generic event handler. The event handler checks the event type and invokes the corresponding event handler prop if it exists.
-
-```jsx
-const handleEvent = (event) => {
-  const eventName = event.type;
-  const eventHandler = props[eventName];
-  if (eventHandler) {
-    eventHandler(event.detail);
-  }
-};
-```
-
-By convention, the event handler props are named after the event type, such as `onChange` for the `change` event. The event detail is passed as an argument to the event handler.
-</TabItem>
-<TabItem label="Angular">
-  In Angular, we use the `@Output` decorator to create an `EventEmitter` for emitting custom events. In the wrapper component, we add an event listener to the web component using `addEventListener` and emit the event using the `event` output.
-
-  ```typescript
-  @Output() event = new EventEmitter<any>();
-
-  ngAfterViewInit() {
-    const button = this.elementRef.nativeElement.querySelector('ui-button');
-    button.addEventListener('event', (event: CustomEvent) => {
-      this.event.emit({ type: event.type, detail: event.detail });
-    });
-  }
-  ```
-
-  The emitted event object contains the event type and the event detail. In the parent component, we can bind to the `event` output and handle the event based on its type.
-</TabItem>
-<TabItem label="Vue">
-  In Vue, we can use the `v-on` directive (shorthand: `@`) to bind to DOM events. In the wrapper component, we use `v-on="$listeners"` to pass all the event listeners to the web component.
-
-  ```vue
-  <UIButton v-bind="$attrs" v-on="$listeners">
-    <slot></slot>
-  </UIButton>
-  ```
-
-  In the parent component, we can bind to the custom events emitted by the web component using the `@` directive followed by the event name.
-
-  ```vue
-  <Button primary @change="incrementCounter">
-    Increment
-  </Button>
-  ```
-
-  The event handler receives the event detail as an argument, which can be used to perform any necessary actions.
-  </TabItem>
-  <TabItem label="Svelte">
-  In Svelte, we use the `on:` directive to bind to DOM events. In the wrapper component, we use `on:event` to listen for the `event` event emitted by the web component.
-
-  ```html
-  <UIButton {...properties} on:event>
-    <slot></slot>
-  </UIButton>
-    ```
-
-  In the parent component, we can bind to the `event` event and handle it base
-
-</TabItem>
-</Tabs>
+Ultimately, the approach you choose depends on your specific requirements and the conventions of your framework and design system.
