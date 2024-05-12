@@ -1,0 +1,343 @@
+---
+layout: ../layouts/Guide.astro
+icon: code
+title: Design Framework Integration
+description: Integrating Semantic UI into Your Design System
+---
+
+import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
+
+# Integrating Semantic UI into Your Design System
+
+Semantic UI uses web components which are framework agnostic. This means you can take the core of your UI with you regardless of what front end framework you use.
+
+However in many cases it is still useful, and necessary to wrap components in additional 'framework native' code so that it is simpler for developers to use when building out your app.
+
+## Creating a Design Framework
+
+<Tabs>
+<TabItem label="React">
+```jsx
+import React from 'react';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+const Button = React.forwardRef(({ onChange, ...props }, ref) => {
+  const handleEvent = (event) => {
+    const eventName = event.type;
+    const eventHandler = props[eventName];
+    if (eventHandler) {
+      eventHandler(event.detail);
+    }
+  };
+
+  return <UIButton ref={ref} {...props} onEvent={handleEvent} />;
+});
+
+export default Button;
+```
+</TabItem>
+<TabItem label="Angular">
+```typescript
+import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+@Component({
+  selector: 'app-button',
+  template: '<ui-button [properties]="properties"></ui-button>',
+})
+export class ButtonComponent {
+  @Input() properties: any;
+  @Output() event = new EventEmitter<any>();
+
+  constructor(private elementRef: ElementRef) {}
+
+  ngAfterViewInit() {
+    const button = this.elementRef.nativeElement.querySelector('ui-button');
+    button.addEventListener('event', (event: CustomEvent) => {
+      this.event.emit({ type: event.type, detail: event.detail });
+    });
+  }
+}
+```
+</TabItem>
+<TabItem label="Vue">
+```vue
+<template>
+  <UIButton v-bind="$attrs" v-on="$listeners">
+    <slot></slot>
+  </UIButton>
+</template>
+
+<script setup>
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+</script>
+```
+</TabItem>
+<TabItem label="Svelte">
+```html
+<script>
+  import { UIButton } from '@semantic-ui/core';
+  import '@semantic-ui/core/themes/button.css';
+
+  export let properties = {};
+</script>
+
+<UIButton {...properties} on:event>
+  <slot></slot>
+</UIButton>
+```
+</TabItem>
+<TabItem label="Lit">
+```javascript
+import { LitElement, html } from 'lit';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+class ButtonElement extends LitElement {
+  static get properties() {
+    return {
+      // Define the expected properties here
+    };
+  }
+
+  render() {
+    return html`
+      <ui-button ...="${this.properties}">
+        <slot></slot>
+      </ui-button>
+    `;
+  }
+}
+
+customElements.define('my-button', ButtonElement);
+```
+</TabItem>
+</Tabs>
+
+## Using Your Design Framework
+
+Once you have defined the wrapper components, you can use them in your application just like any other component specific to your framework.
+
+<Tabs>
+<TabItem label="React">
+```jsx
+import React, { useState } from 'react';
+import Button from './Button';
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const incrementCounter = () => {
+    setCount(count + 1);
+  };
+
+  return (
+    <div className="counter">
+      <Button primary onChange={incrementCounter}>
+        Increment
+      </Button>
+      <p>Count: {count}</p>
+    </div>
+  );
+};
+
+export default Counter;
+```
+</TabItem>
+<TabItem label="Angular">
+```html
+<div class="counter">
+  <app-button [properties]="{ primary: true }" (event)="handleEvent($event)">
+    Increment
+  </app-button>
+  <p>Count: {{ count }}</p>
+</div>
+```
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-counter',
+  templateUrl: './counter.component.html',
+})
+export class CounterComponent {
+  count = 0;
+
+  handleEvent(event: any) {
+    if (event.type === 'change') {
+      this.incrementCounter();
+    }
+  }
+
+  incrementCounter() {
+    this.count++;
+  }
+}
+```
+</TabItem>
+<TabItem label="Vue">
+```vue
+<template>
+  <div class="counter">
+    <Button primary @change="incrementCounter">
+      Increment
+    </Button>
+    <p>Count: {{ count }}</p>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import Button from './Button.vue';
+
+const count = ref(0);
+
+const incrementCounter = () => {
+  count.value++;
+};
+</script>
+```
+</TabItem>
+<TabItem label="Svelte">
+```html
+<script>
+  import Button from './Button.svelte';
+
+  let count = 0;
+
+  function incrementCounter() {
+    count++;
+  }
+
+  function handleEvent(event) {
+    if (event.detail.type === 'change') {
+      incrementCounter();
+    }
+  }
+</script>
+
+<div class="counter">
+  <Button primary on:event={handleEvent}>
+    Increment
+  </Button>
+  <p>Count: {count}</p>
+</div>
+```
+</TabItem>
+<TabItem label="Lit">
+```html
+<my-button primary @change="${this.incrementCounter}">
+  Increment
+</my-button>
+<p>Count: ${this.count}</p>
+```
+
+```javascript
+import { LitElement, html } from 'lit';
+import './my-button';
+
+class CounterElement extends LitElement {
+  static get properties() {
+    return {
+      count: { type: Number },
+    };
+  }
+
+  constructor() {
+    super();
+    this.count = 0;
+  }
+
+  incrementCounter() {
+    this.count++;
+  }
+
+  render() {
+    return html`
+      <div class="counter">
+        <my-button primary @change="${this.incrementCounter}">
+          Increment
+        </my-button>
+        <p>Count: ${this.count}</p>
+      </div>
+    `;
+  }
+}
+
+customElements.define('my-counter', CounterElement);
+```
+</TabItem>
+</Tabs>
+
+## Handling Event Bindings
+
+Semantic UI use DOM custom events to emit events. The wrapper components capture these events and provide a way to bind to them using the conventions of each framework.
+
+<Tabs>
+<TabItem label="React">
+In the wrapper component, we capture the events using the `onEvent` prop and a generic event handler. The event handler checks the event type and invokes the corresponding event handler prop if it exists.
+
+```jsx
+const handleEvent = (event) => {
+  const eventName = event.type;
+  const eventHandler = props[eventName];
+  if (eventHandler) {
+    eventHandler(event.detail);
+  }
+};
+```
+
+By convention, the event handler props are named after the event type, such as `onChange` for the `change` event. The event detail is passed as an argument to the event handler.
+</TabItem>
+<TabItem label="Angular">
+  In Angular, we use the `@Output` decorator to create an `EventEmitter` for emitting custom events. In the wrapper component, we add an event listener to the web component using `addEventListener` and emit the event using the `event` output.
+
+  ```typescript
+  @Output() event = new EventEmitter<any>();
+
+  ngAfterViewInit() {
+    const button = this.elementRef.nativeElement.querySelector('ui-button');
+    button.addEventListener('event', (event: CustomEvent) => {
+      this.event.emit({ type: event.type, detail: event.detail });
+    });
+  }
+  ```
+
+  The emitted event object contains the event type and the event detail. In the parent component, we can bind to the `event` output and handle the event based on its type.
+</TabItem>
+<TabItem label="Vue">
+  In Vue, we can use the `v-on` directive (shorthand: `@`) to bind to DOM events. In the wrapper component, we use `v-on="$listeners"` to pass all the event listeners to the web component.
+
+  ```vue
+  <UIButton v-bind="$attrs" v-on="$listeners">
+    <slot></slot>
+  </UIButton>
+  ```
+
+  In the parent component, we can bind to the custom events emitted by the web component using the `@` directive followed by the event name.
+
+  ```vue
+  <Button primary @change="incrementCounter">
+    Increment
+  </Button>
+  ```
+
+  The event handler receives the event detail as an argument, which can be used to perform any necessary actions.
+  </TabItem>
+  <TabItem label="Svelte">
+  In Svelte, we use the `on:` directive to bind to DOM events. In the wrapper component, we use `on:event` to listen for the `event` event emitted by the web component.
+
+  ```html
+  <UIButton {...properties} on:event>
+    <slot></slot>
+  </UIButton>
+    ```
+
+  In the parent component, we can bind to the `event` event and handle it base
+
+</TabItem>
+</Tabs>

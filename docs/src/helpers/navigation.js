@@ -50,6 +50,10 @@ export const sidebarMenuUI = [
         url: '/getting-started'
       },
       {
+        name: 'Framework Integration',
+        url: '/framework-integration'
+      },
+      {
         name: 'Usage',
         url: '/usage'
       },
