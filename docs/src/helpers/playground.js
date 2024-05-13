@@ -138,6 +138,7 @@ export const getExampleFiles = async(example, allExampleFiles) => {
 
     exampleFiles['index.html'] = {
       contentType: 'text/html',
+      generated: true,
       content: `<${tagName}></${tagName}>`
     };
   }
@@ -145,12 +146,14 @@ export const getExampleFiles = async(example, allExampleFiles) => {
   if(!exampleFiles['index.css']?.content) {
     exampleFiles['index.css'] = {
       contentType: 'text/css',
+      generated: true,
       content: ''
     };
   }
   if(!exampleFiles['index.js']?.content) {
     exampleFiles['index.js'] = {
       contentType: 'text/javascript',
+      generated: true,
       content: ''
     };
   }

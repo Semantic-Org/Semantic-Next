@@ -6,11 +6,9 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 ## Reactivity with Signals
 
 
-Signals are a **mechanism for implementing reactivity** that works by tracking what should happen as dependencies on a value.
-
 Reactivity put simply is **values changing causes stuff to happen**.
 
-With a signals reacitivity implementation the value that changes is called a ***signal***, the function that occurs can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/).
+Signals are a **mechanism for implementing reactivity** that works by tracking dependencies of a reactive value. This is typically implemented using a `value` accessor or a `get()` function that tracks a reference to each time it is called, then re-runs each dependency when a value changes. The name for this "rerunning function" can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/).
 
 ### Naming
 

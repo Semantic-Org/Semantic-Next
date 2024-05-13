@@ -19,6 +19,8 @@ import 'playground-elements/playground-preview.js';
 const settings = {
   files: {},
   sandboxURL: '/sandbox',
+  exampleURL: '',
+  includeGeneratedInline: false,
   example: {},
   tabSize: 2,
   inline: false,
@@ -57,7 +59,7 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.js': 1,
   },
   panelSizes: {
-    'component.js': 'natural',
+    'component.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
     'index.html': (1 / 9 * 100),
@@ -110,10 +112,15 @@ const createInstance = ({tpl, settings, $}) => ({
     }
   },
   getFileMenuItems() {
-    const menu = tpl.getFileArray().map(file => ({
-      label: file.filename,
-      id: file.filename,
-    }));
+    const menu = tpl.getFileArray().map(file => {
+      if(file.generated && settings.inline && !settings.includeGeneratedInline) {
+        return false;
+      }
+      return {
+        label: file.filename,
+        id: file.filename,
+      }
+    }).filter(Boolean);
     return menu;
   },
   getPanels() {

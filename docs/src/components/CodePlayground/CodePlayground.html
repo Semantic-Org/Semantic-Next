@@ -23,6 +23,13 @@
         items={{stringify getFileMenuItems}}
         value={{activeFile}}
       ></ui-menu>
+      {{#if exampleURL}}
+        <div class="links">
+          <a href="{{exampleURL}}" class="sandbox link">
+            <ui-icon codesandbox link></ui-icon>
+          </a>
+        </div>
+      {{/if}}
       <playground-file-editor
         line-numbers
         project="source"

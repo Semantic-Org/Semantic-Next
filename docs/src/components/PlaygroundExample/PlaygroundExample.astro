@@ -18,10 +18,12 @@ const sandboxURL = getSandboxURL();
 const projectConfig = {
   files: files
 };
+const exampleURL = `/examples/${id}/`;
 ---
 <CodePlayground client:only
   files={files}
   example={example}
   inline=true
+  exampleURL={exampleURL}
   sandboxURL={sandboxURL}
   ></CodePlayground>
