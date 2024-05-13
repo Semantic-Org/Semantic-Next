@@ -3,12 +3,13 @@
 }
 
 a {
+  margin-left: 0.5rem;
   cursor: pointer;
-  color: var(--link-color);
+  color: var(--standard-30);
   text-decoration: none;
 }
 a:hover {
-  color: var(--link-color-hover);
+  color: var(--standard-100);
 }
 
 .info {
@@ -18,4 +19,8 @@ a:hover {
   padding: var(--padding);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+}
+
+b {
+  color: var(--primary-text-color);
 }
