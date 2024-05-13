@@ -69,7 +69,10 @@
   -------------------- */
 
   --spacing: 1rem;
+
   --padding: var(--spacing);
+  --horizontally-padded: 0rem var(--padding);
+  --vertically-padded: var(--padding) 0rem;
 
   --margin: var(--spacing);
   --vertically-spaced: var(--spacing) 0rem;
@@ -560,6 +563,7 @@
 
   --border: 1px solid var(--border-color);
   --internal-border: 1px solid var(--internal-border-color);
+
   --border-color: rgba(34, 36, 38, 0.15);
   --strong-border-color: rgba(34, 36, 38, 0.22);
   --internal-border-color: rgba(34, 36, 38, 0.10);
@@ -570,6 +574,8 @@
   --solid-internal-border-color: #FAFAFA;
   --solid-border-color: #D4D4D5;
   --solid-selected-border-color: #BCBDBD;
+
+  --solid-border: 1px solid var(--solid-border-color);
 
   --white-border-color: rgba(255, 255, 255, 0.1);
   --selected-white-border-color: rgba(255, 255, 255, 0.8);
@@ -859,9 +865,12 @@ body.dark {
   --link-hover-color: #2492FF;
 
   --border-color: rgba(234, 236, 238, 0.15);
+  --solid-border-color: #222222;
   --internal-border-color: rgba(234, 236, 238, 0.08);
   --border: 1px solid var(--border-color);
   --internal-border: 1px solid var(--internal-border-color);
+
+  --solid-border: 1px solid var(--solid-border-color);
 
   --subtle-transparent-black: rgb(var(--standard-color) / 5%);
   --transparent-black: rgb(var(--standard-color) / 10%);
@@ -898,4 +907,22 @@ body.dark {
   --inverted-80: rgb(var(--inverted-color) / 80%);
   --inverted-90: rgb(var(--inverted-color) / 90%);
   --inverted-100: rgb(var(--inverted-color) / 100%);
+
+
+  /* Differentiating Neutrals */
+  --subtle-gradient: linear-gradient(var(--subtle-transparent-white), var(--strong-transparent-black));
+
+  /* Differentiating Layers */
+  --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
+
+  /* Pressed or inset */
+  --subtle-inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
+
+  /* Lip Shadow */
+  --subtle-top-lip-shadow: 0px var(--subtle-lip-distance) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+  --subtle-bottom-lip-shadow: 0px var(--subtle-lip-distance-inverse) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+  --subtle-left-lip-shadow: var(--subtle-lip-distance) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+  --subtle-right-lip-shadow: var(--subtle-lip-distance-inverse) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+
+
 }
