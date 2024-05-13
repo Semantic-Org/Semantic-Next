@@ -1,6 +1,6 @@
 import { createComponent, getText } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
-import { formatDate, first } from '@semantic-ui/utils';
+import { formatDate } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -20,11 +20,11 @@ const createInstance = ({tpl, dispatchEvent}) => ({
   ],
 
   getDisplayDate(date = new Date()) {
-    return tpl.formatDate(date, 'MMMM DD');
+    return formatDate(date, 'MMMM DD');
   },
 
   getInputDate(date) {
-    return tpl.formatDate(new Date(date), 'YYYY-MM-DD');
+    return formatDate(new Date(date), 'YYYY-MM-DD');
   },
 
   checkBirthdays() {
