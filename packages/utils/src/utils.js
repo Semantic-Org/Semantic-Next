@@ -137,29 +137,68 @@ export const isEmpty = (x) => {
         Date
 --------------------*/
 
-export const formatDate = function (date, format) {
-  const pad = (n) => (n < 10 ? '0' + n : n);
+export const formatDate = function (date, format, {
+  locale = 'default',
+  hour12 = true,
+  timezone = 'UTC',
+  ...additionalOptions
+} = {}) {
+
+  // Create a new Date object with the same timestamp as the original date
+  const localDate = new Date(date.getTime());
+
+  if(timezone == 'local' && typeof window !== 'undefined') {
+    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+
+  const pad = (n) => (n < 10 ? `0${n}` : n);
+  const localeOptions = {
+    timeZone: timezone,
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: hour12,
+    ...additionalOptions
+  };
+  // Create an Intl.DateTimeFormat instance with the specified timezone or user's local timezone
+  const formatter = new Intl.DateTimeFormat(locale, localeOptions);
+
+  // Get the formatted date components using the Intl.DateTimeFormat instance
+  const {
+    year,
+    month,
+    day,
+    weekday,
+    hour,
+    minute,
+    second,
+    dayPeriod,
+  } = formatter.formatToParts(localDate).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
+
   const dateMap = {
-    YYYY: date.getFullYear(),
-    YY: date.getFullYear().toString().slice(-2),
-    MMMM: date.toLocaleString('default', { month: 'long' }),
-    MMM: date.toLocaleString('default', { month: 'short' }),
-    MM: pad(date.getMonth() + 1),
-    M: date.getMonth() + 1,
-    DD: pad(date.getDate()),
-    D: date.getDate(),
-    Do:
-      date.getDate() +
-        ['th', 'st', 'nd', 'rd'][
-          ((((date.getDate() + 90) % 100) - 10) % 10) - 1
-        ] || 'th',
-    dddd: date.toLocaleString('default', { weekday: 'long' }),
-    ddd: date.toLocaleString('default', { weekday: 'short' }),
-    HH: pad(date.getHours()),
-    h: date.getHours() % 12 || 12,
-    mm: pad(date.getMinutes()),
-    ss: pad(date.getSeconds()),
-    a: date.getHours() >= 12 ? 'pm' : 'am',
+    YYYY: year,
+    YY: year.slice(-2),
+    MMMM: month,
+    MMM: month.slice(0, 3),
+    MM: pad(localDate.getMonth() + 1),
+    M: localDate.getMonth() + 1,
+    DD: pad(day),
+    D: day,
+    Do: day + ['th', 'st', 'nd', 'rd'][((((+day + 90) % 100) - 10) % 10) - 1] || 'th',
+    dddd: weekday,
+    ddd: weekday.slice(0, 3),
+    HH: pad(hour % 12 || 12),
+    h: hour % 12 || 12,
+    mm: pad(minute),
+    ss: pad(second),
+    a: dayPeriod.toLowerCase(),
   };
 
   const formatMap = {
@@ -178,14 +217,12 @@ export const formatDate = function (date, format) {
   const expandedFormat = formatMap[format] || format;
 
   return expandedFormat
-    .replace(
-      /\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g,
-      (match) => {
-        return dateMap[match];
-      }
-    )
-    .replace(/\[(.*?)\]/g, (match, p1) => p1);
+    .replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|h|mm|ss|a)\b/g, (match) => {
+      return dateMap[match];
+    })
+    .replace(/\[(.+?)\]/g, (match, p1) => p1);
 };
+
 
 /*-------------------
       Functions
