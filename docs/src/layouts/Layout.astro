@@ -42,7 +42,7 @@ header = header || title;
 					<pageContent>
 						{inlineHeader == 'true' && header && (
 							<h2>
-								{headerIcon !== undefined && (<UIIcon icon={headerIcon}></UIIcon>)}<span class="text">{header}</span>
+								{headerIcon !== undefined && (<UIIcon icon={headerIcon} disabled></UIIcon>)} <span class="text">{header}</span>
 							</h2>
 						)}
 						<slot />

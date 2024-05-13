@@ -4,107 +4,156 @@ icon: code
 title: Quick Start
 description: Learn how to setup Semantic UI
 ---
-import { Steps, Aside, TabItem, Tabs } from '@astrojs/starlight/components';
+import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 
-## Getting Started
 
-You will need three things to add Semantic UI to your page.
+## Installation
 
-<Steps>
-1. Add the component definition
+To get started, install the package using npm:
 
-</Steps>
-* **Component Definition** - The component defines the CSS rules and the behaviors attached to the web component.
-* **Base Theme** - The base theme adds CSS variables that are inherited across components.
-* **Global CSS** (*Optional*) - Semantic UI can optionally define baseline css which will set your font stack, link colors, scrollbars and other basic global styles. For more information [see global styling](/global-styling)
+```bash
+npm install @semantic-ui/core
+```
+
+## Usage
 
 <Tabs>
+  <TabItem label="JavaScript">
+
+    If you're using a module bundler like webpack, Rollup, or Parcel, you can import the components and themes directly into your JavaScript files.
+    Make sure your bundler is configured to handle CSS imports.
+  ```javascript
+  import { UIButton } from '@semantic-ui/core';
+  import '@semantic-ui/core/themes/button.css';
+  ```
+
+  </TabItem>
   <TabItem label="HTML">
-
-    #### All Components
-
-    Include the files in your page, loaded from a CDN or a local source.
-
-    ```html title="index.html"
-    <head>
-      <!-- Defines all Web Components !-->
-      <script src="https://unpkg.com/browse/@semantic-ui/core@latest/dist/semantic-ui.js"></script>
-      <link rel="stylesheet" href="https://unpkg.com/browse/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
-
-      <!-- Adds Default Theme !-->
-      <link rel="stylesheet" href="https://unpkg.com/browse/@semantic-ui/core@latest/dist/theme/base.css"></link>
-    </head>
-    <body>
-      <ui-button>Button</ui-button>
-    </body>
-    ```
-
-    #### Single Component
-    ```html title="index.html"
-    <head>
-      <!-- Base global theme !-->
-      <link rel="stylesheet" href="https://cdn.semantic-ui.com/themes/base/global.css"></link>
-      <!-- Base theme for this component !-->
-      <link rel="stylesheet" href="https://cdn.semantic-ui.com/themes/base/button.css"></link>
-      <!-- Defines the component tag and makes it available on your page !-->
-      <script src="https://cdn.semantic-ui.com/components/button.js"></script>
-    </head>
-    <body>
-      <ui-button>Button</ui-button>
-    </body>
-    ```
+  ```html title="index.html"
+  <html>
+  <html>
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core/dist/themes/button.css">
+    <script type="module" src="https://unpkg.com/@semantic-ui/core"></script>
+  </head>
+  <body>
+    <ui-button primary>Click me</ui-button>
+  </body>
+  </html>
+  ```
   </TabItem>
-  <TabItem label="Astro">
-
-
-    #### HTML
-
-    With [`@astro/lit`](https://docs.astro.build/en/guides/integrations-guide/lit/) you can import the web component and then immediately use it in an astro file.
-
-    ```javascript title="MyPage.astro"
-    import { UIButton, UIButtons } from '@semantic-ui/core';
-    ```
-    <aside>
-      Be sure to use `client:load` for any components to allow client side javascript to run.
-    </aside>
-    ```javascript title="MyPage.astro"
-    <UIButton client:load>Button</UIButton>
-    ```
-
-    #### Theme
-
-    To include the base theme import the css package into your layout
-    ```astro title="Layout.astro"
-    ---
-    import 'dist/themes/base.css' from '@semantic-ui/core`; // global theme variables
-    import 'dist/semantic-ui.css' from '@semantic-ui/core`; // global css
-    ---
-    // rest of your layout
-    ```
-
-    To support SSR with hydration install the [lit package](https://docs.astro.build/en/guides/integrations-guide/lit/)
-
-
-    ### Component Wrapper
-
-    You could also consider loading all UI components and rendering them dynamically in a component to simplify things.
-
-    ```astro components/UIComponent.astro
-    ---
-    import { UIButton, UIIcon } from '@semantic-ui/core';
-    const { name, attributes } = Astro.props;
-    ---
-
-    {name === 'UIButton' && (
-      <UIButton {...attributes} client:load>
-        <slot />
-      </UIButton>
-    )}
-    {name === 'UIIcon' && (
-      <UIIcon {...attributes} />
-    )}
-    ```
-
-  </TabItem>
-
 </Tabs>
+
+## Framework Integration
+
+Semantic UI Web Components can be easily integrated into popular JavaScript frameworks.
+
+<Tabs>
+<TabItem label="React">
+```jsx
+import React from 'react';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+function MyComponent() {
+  return <UIButton primary>Click me</UIButton>;
+}
+```
+</TabItem>
+<TabItem label="Angular">
+```typescript
+import { Component } from '@angular/core';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+@Component({
+  selector: 'app-root',
+  template: '<ui-button [properties]="{ primary: true }">Click me</ui-button>',
+})
+export class AppComponent {}
+```
+</TabItem>
+<TabItem label="Vue">
+```vue
+<template>
+  <UIButton :primary="true">Click me</UIButton>
+</template>
+
+<script setup>
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+</script>
+```
+</TabItem>
+<TabItem label="Svelte">
+```html
+<script>
+  import { UIButton } from '@semantic-ui/core';
+  import '@semantic-ui/core/themes/button.css';
+</script>
+
+<UIButton primary>Click me</UIButton>
+```
+</TabItem>
+<TabItem label="Lit">
+```javascript
+import { html, LitElement } from 'lit';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+class MyComponent extends LitElement {
+  render() {
+    return html`<UIButton primary>Click me</UIButton>`;
+  }
+}
+```
+
+Since the underlying web components are written using Lit, you can also extend the `UIButton` component directly in your Lit components:
+
+```javascript
+import { html, LitElement } from 'lit';
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+class MyButton extends UIButton {
+  // Extend the button component
+}
+
+customElements.define('my-button', MyButton);
+```
+</TabItem>
+<TabItem label="Astro">
+```astro
+---
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+---
+
+<UIButton primary>Click me</UIButton>
+```
+</TabItem>
+<TabItem label="Next.js">
+```jsx
+import { UIButton } from '@semantic-ui/core';
+import '@semantic-ui/core/themes/button.css';
+
+function MyComponent() {
+  return <UIButton primary>Click me</UIButton>;
+}
+
+export default MyComponent;
+```
+</TabItem>
+</Tabs>
+
+## Theming
+
+Semantic UI Web Components provides pre-defined themes that you can use out of the box. However, you can also customize the components by overriding their CSS variables.
+
+It's recommended to scope variables to :root, so they will pierce multiple shadow DOM boundaries.
+
+```css
+:root {
+  --button-primary-color: var(--red);
+}
+```

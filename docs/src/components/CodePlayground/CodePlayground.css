@@ -59,13 +59,13 @@
     playground-file-editor {
       border: var(--border);
       overflow: hidden;
-      height: max-content;
+      height: 450px;
       border-bottom: none;
       border-radius: var(--top-attached-border-radius);
     }
     playground-preview {
       background-color: var(--page-background) !important;
-      height: max-content;
+      height: 450px;
       border-radius: 0px 0px ;
       border: var(--border);
       border-top: var(--internal-border);

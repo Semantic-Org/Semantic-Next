@@ -77,12 +77,19 @@
   layout page.text-content pageContent,
   layout page.text-content li,
   layout page.text-content p {
-    font-size: 17px;
+    font-size: 16px;
   }
   layout page.text-content li,
   layout page.text-content p {
-    line-height: 1.5;
     color: var(--standard-70);
+  }
+  layout page.text-content pageContent > ul,
+  layout page.text-content pageContent > ul li,
+  layout page.text-content pageContent > p {
+    line-height: 1.5;
+  }
+  layout page.text-content pageContent > ul li {
+    margin-bottom: 0.5rem
   }
   layout page.text-content pre code {
     font-size: 16px;

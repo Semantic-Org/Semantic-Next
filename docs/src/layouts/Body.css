@@ -147,14 +147,26 @@
     transform: scaleX(1) scaleY(1);
   }
   ul[role=tablist] {
-    box-shadow: 0px -2px 0px 0px var(--standard-30) inset
   }
   li a[role="tab"] {
     font-size: 14px;
+    font-weight: normal !important;
+    border-bottom: none !important;
+    color: var(--standard-30) !important;
     padding-bottom: 1rem !important;
   }
+  li a[role="tab"]:hover {
+    color: var(--standard-90) !important;
+  }
+  li a[role="tab"]:not([aria-selected="true"]):hover::after {
+    background-color: var(--standard-90) !important;
+  }
   li a[role="tab"][aria-selected="true"] {
+    font-weight: bold !important;
     color: var(--primary-text-color) !important;
+  }
+  li a[role="tab"][aria-selected="true"]::after {
+    background-color: var(--primary-text-color) !important;
   }
 
   ul {

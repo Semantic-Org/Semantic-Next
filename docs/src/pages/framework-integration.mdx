@@ -9,9 +9,8 @@ import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 
 
 
-## Basic Usage
-
-If you want to use Semantic UI Web Components directly in your page layouts without creating a custom design framework, you can import and use the components directly in layouts.
+## Using Components Directly
+If you want to use Semantic UI directly in your page layouts without creating a custom design framework, you can import and use the components directly in layouts.
 
 <Tabs>
 <TabItem label="React">
@@ -128,9 +127,11 @@ class MyComponent extends LitElement {
 </TabItem>
 </Tabs>
 
-## Advanced Usage
+## Creating a Design Framework
 
-If you want to create a custom design framework that wraps multiple Semantic UI Web Components, you can create wrapper components that encapsulate the web components and provide a framework-specific API.
+It may often make sense to wrap web components in native wrappers for your framework so that you can simplify passing data and events.
+
+You may also use this to set defaults for your components, or to add additional logic or settings.
 
 <Tabs>
 <TabItem label="React">
