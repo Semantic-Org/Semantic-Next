@@ -9,9 +9,9 @@ import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 
 
 
-## Using Directly
+## Basic Usage
 
-If you want to use Semantic UI Web Components directly in your page layouts without creating a custom design framework, you can import and use the components individually.
+If you want to use Semantic UI Web Components directly in your page layouts without creating a custom design framework, you can import and use the components directly in layouts.
 
 <Tabs>
 <TabItem label="React">
@@ -128,12 +128,28 @@ class MyComponent extends LitElement {
 </TabItem>
 </Tabs>
 
-## Creating a Design Framework
+## Advanced Usage
 
 If you want to create a custom design framework that wraps multiple Semantic UI Web Components, you can create wrapper components that encapsulate the web components and provide a framework-specific API.
 
 <Tabs>
 <TabItem label="React">
+
+#### React 19 or Newer
+
+React 19 introduced native support for web components, you can directly use the web components without the need for a wrapper component.
+
+```jsx
+import React from 'react';
+import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
+
+export const UIButton = React.forwardRef((props, ref) => <ui-button ref={ref} {...props} />);
+export const UIIcon = React.forwardRef((props, ref) => <ui-icon ref={ref} {...props} />);
+```
+
+#### Legacy React
+
 In React, you can create a generic wrapper component that handles passing properties and event bindings to the underlying web component. This approach is useful if you have multiple web components to wrap.
 
 ```jsx
@@ -157,16 +173,6 @@ export const UIButton = (props) => <WebComponentWrapper component="ui-button" {.
 export const UIIcon = (props) => <WebComponentWrapper component="ui-icon" {...props} />;
 ```
 
-Alternatively, since React 19 introduced native support for web components, you can directly use the web components without the need for a wrapper component.
-
-```jsx
-import React from 'react';
-import '@semantic-ui/core/themes/button.css';
-import '@semantic-ui/core/themes/icon.css';
-
-export const UIButton = React.forwardRef((props, ref) => <ui-button ref={ref} {...props} />);
-export const UIIcon = React.forwardRef((props, ref) => <ui-icon ref={ref} {...props} />);
-```
 </TabItem>
 <TabItem label="Angular">
 In Angular, you can create individual wrapper components for each web component you want to include in your design framework.
