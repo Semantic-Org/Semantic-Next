@@ -1,0 +1,112 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Reactive Variables
+description: Using reactive variables with Semantic UI
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Basic Example
+
+`ReactiveVar` are the only values that cause reactivity to occur in a reaction. When you create a `Reaction` it **will run immediately** then **re-run whenever a reactive value is updated**.
+
+<PlaygroundExample id="basic-reactivity"></PlaygroundExample>
+
+## Step by Step
+
+### Creating a Reactive Variable
+
+To create a reactive variable, you can use the `ReactiveVar` class from the `@semantic-ui/reactivity` package.
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+const count = new ReactiveVar(0);
+```
+
+In this example, we create a reactive variable named `count` with an initial value of `0`.
+
+### Accessing Values
+
+To access the current value of a reactive variable, you can use the `get()` method:
+
+```javascript
+const count = new ReactiveVar(0);
+console.log(count.get()); // Output: 0
+console.log(count.value); // Output: 0
+```
+
+### Updating the Value
+
+To update the value of a reactive variable, you can use the `set()` method:
+
+```javascript
+count.set(1);
+console.log(count.get()); // Output: 1
+```
+
+Alternatively, you can directly assign a new value to the `value` property:
+
+```javascript
+count.value = 2;
+console.log(count.get()); // Output: 2
+```
+
+### Equality Comparison
+
+By default, reactive variables use a deep equality comparison to determine if the value has changed. This means that if you assign an object or array to a reactive variable, it will only trigger a reactive update if the contents of the object or array have changed.
+
+```javascript
+const person = new ReactiveVar({ name: 'John', age: 30 });
+
+// No reactive update triggered
+person.set({ name: 'John', age: 30 });
+
+// Reactive update triggered
+person.set({ name: 'Jane', age: 30 });
+```
+
+You can customize the equality comparison function by passing a custom function as the second argument to the `ReactiveVar` constructor:
+
+```javascript
+const customEquality = (a, b) => {
+  // Custom equality comparison logic
+  // Return true if a and b are considered equal
+};
+
+const customVar = new ReactiveVar(initialValue, customEquality);
+```
+
+### Subscribing to Changes
+
+You can subscribe to changes in a reactive variable using the `subscribe()` method:
+
+```javascript
+const subscription = count.subscribe((newValue) => {
+  console.log('Count changed:', newValue);
+});
+
+count.set(3); // Output: Count changed: 3
+```
+
+The `subscribe()` method returns a subscription object that you can use to stop the subscription when needed:
+
+```javascript
+subscription.stop();
+```
+
+### Reactive Context
+
+Reactive variables are typically used within a reactive context, such as a `Reaction` or a reactive computation. When a reactive variable is accessed within a reactive context, it establishes a dependency between the variable and the context. Whenever the value of the reactive variable changes, the reactive context is automatically re-run.
+
+```javascript
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+
+const count = new ReactiveVar(0);
+
+Reaction(() => {
+  console.log('Count:', count.get());
+});
+
+count.set(1); // Output: Count: 1
+count.set(2); // Output: Count: 2
+```

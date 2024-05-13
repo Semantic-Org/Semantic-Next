@@ -7,17 +7,19 @@ description: Integrating Semantic UI into Your Design System
 
 import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 
-
-
 ## Using Components Directly
-If you want to use Semantic UI directly in your page layouts without creating a custom design framework, you can import and use the components directly in layouts.
+If you want to use Semantic UI directly in your page without wrapping the components into a custom design framework, you can simply import each component.
+
+Components emit **standard DOM events** which you can bind event handlers.
 
 <Tabs>
 <TabItem label="React">
-In React, you can use web components directly since version 19, which introduced native support for web components. Simply import the desired component and use it in your JSX.
+In React, you can use web components directly since version 19.
 
 ```jsx
 import React from 'react';
+import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -34,13 +36,10 @@ function MyComponent() {
 <TabItem label="Angular">
 In Angular, you can use web components directly in your templates. Import the necessary components and use them with the appropriate property and event bindings.
 
-```html
-<ui-button [primary]="true" (change)="handleChange()">Click me</ui-button>
-<ui-icon icon="close"></ui-icon>
-```
-
-```typescript
+```typescript title='js'
 import { Component } from '@angular/core';
+import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -53,6 +52,11 @@ export class AppComponent {
     // Handle change event
   }
 }
+```
+
+```html title='html'
+<ui-button [primary]="true" (change)="handleChange()">Click me</ui-button>
+<ui-icon icon="close"></ui-icon>
 ```
 </TabItem>
 <TabItem label="Vue">
@@ -67,6 +71,8 @@ In Vue, you can use web components directly in your templates. Import the necess
 </template>
 
 <script setup>
+import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -81,6 +87,8 @@ In Svelte, you can use web components directly in your templates. Import the nec
 
 ```html
 <script>
+  import '@semantic-ui/core/components/button';
+  import '@semantic-ui/core/components/icon';
   import '@semantic-ui/core/themes/button.css';
   import '@semantic-ui/core/themes/icon.css';
 
@@ -98,8 +106,8 @@ In Lit, since the underlying web components are built using Lit, you can directl
 
 ```javascript
 import { LitElement, html } from 'lit';
-import { UIButton } from '@semantic-ui/core';
-import { UIIcon } from '@semantic-ui/core';
+import { UIButton } from '@semantic-ui/core/components/button';
+import { UIIcon } from '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -142,19 +150,24 @@ React 19 introduced native support for web components, you can directly use the 
 
 ```jsx
 import React from 'react';
+import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
 export const UIButton = React.forwardRef((props, ref) => <ui-button ref={ref} {...props} />);
 export const UIIcon = React.forwardRef((props, ref) => <ui-icon ref={ref} {...props} />);
 ```
-
 #### Legacy React
 
 In React, you can create a generic wrapper component that handles passing properties and event bindings to the underlying web component. This approach is useful if you have multiple web components to wrap.
 
 ```jsx
 import React from 'react';
+import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/components/icon';
+import '@semantic-ui/core/themes/button.css';
+import '@semantic-ui/core/themes/icon.css';
 
 const WebComponentWrapper = React.forwardRef(({ component, ...props }, ref) => {
   const Component = component;
@@ -173,13 +186,13 @@ const WebComponentWrapper = React.forwardRef(({ component, ...props }, ref) => {
 export const UIButton = (props) => <WebComponentWrapper component="ui-button" {...props} />;
 export const UIIcon = (props) => <WebComponentWrapper component="ui-icon" {...props} />;
 ```
-
 </TabItem>
 <TabItem label="Angular">
 In Angular, you can create individual wrapper components for each web component you want to include in your design framework.
 
 ```typescript
 import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
+import '@semantic-ui/core/components/button';
 import '@semantic-ui/core/themes/button.css';
 
 @Component({
@@ -203,6 +216,7 @@ export class UIButtonComponent {
 
 ```typescript
 import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
+import '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/icon.css';
 
 @Component({
@@ -235,6 +249,7 @@ In Vue, you can create individual wrapper components for each web component you 
 </template>
 
 <script setup>
+import '@semantic-ui/core/components/button';
 import '@semantic-ui/core/themes/button.css';
 </script>
 ```
@@ -247,6 +262,7 @@ import '@semantic-ui/core/themes/button.css';
 </template>
 
 <script setup>
+import '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/icon.css';
 </script>
 ```
@@ -256,6 +272,7 @@ In Svelte, you can create individual wrapper components for each web component y
 
 ```html
 <script>
+  import '@semantic-ui/core/components/button';
   import '@semantic-ui/core/themes/button.css';
 
   export let properties = {};
@@ -268,6 +285,7 @@ In Svelte, you can create individual wrapper components for each web component y
 
 ```html
 <script>
+  import '@semantic-ui/core/components/icon';
   import '@semantic-ui/core/themes/icon.css';
 
   export let properties = {};
@@ -283,8 +301,8 @@ In Lit, since the web components are already built using Lit, you can directly e
 
 ```javascript
 import { LitElement, html } from 'lit';
-import { UIButton } from '@semantic-ui/core';
-import { UIIcon } from '@semantic-ui/core';
+import { UIButton } from '@semantic-ui/core/components/button';
+import { UIIcon } from '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 

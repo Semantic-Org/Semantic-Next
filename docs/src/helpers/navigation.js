@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, inArray, isString, any } from '@semantic-ui/utils';
+import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, inArray, isString, any, unique } from '@semantic-ui/utils';
 
 const components = await getCollection('components');
 const componentPages = components.map(page => ({
@@ -178,25 +178,20 @@ export const sidebarMenuFramework = [
     icon: 'cpu',
     pages: [
       {
-        name: 'Variables',
+        name: 'Variables & Reactions',
         description: 'Signal',
-        url: '/reactivity/reactive-var'
+        url: '/reactivity/variables'
       },
       {
-        name: 'Reactions',
-        description: 'Computation',
-        url: '/reactivity/reaction'
-      },
-      {
-        name: 'Flushing Changes',
+        name: 'Flushing',
         url: '/reactivity/flush'
       },
       {
-        name: 'Stopping Reactions',
+        name: 'First Run & Stop',
         url: '/reactivity/peek'
       },
       {
-        name: 'Avoiding Reactivity',
+        name: 'Guard & Reactivity Controls',
         url: '/reactivity/peek'
       },
       {
@@ -410,5 +405,39 @@ export const getTopBarMenu = async () => {
     const urls = flattenedMenu.map(page => page.url);
     item.baseURLs = urls;
   });
+  return menu;
+};
+
+export const getRailMenu = (headings) => {
+  let menu = [];
+  let items = [];
+  let menuGroup;
+
+  const headingLevels = unique(headings.map(heading => heading.depth)).sort();
+  const lowestHeadingLevel = headingLevels[0];
+
+  each(headings, heading => {
+    // new grouping
+    if(heading.depth == lowestHeadingLevel) {
+      if(menuGroup) {
+        menu.push(menuGroup);
+      }
+      menuGroup = {
+        id: heading.slug,
+        title: heading.text,
+        items: []
+      }
+    }
+    else if(menuGroup) {
+      // only pay attention to 1 level deeper
+      if(heading.depth == headingLevels[1]) {
+        menuGroup.items.push({
+          id: heading.slug,
+          title: heading.text
+        });
+      }
+    }
+  });
+  menu.push(menuGroup);
   return menu;
 };

@@ -17,9 +17,11 @@ const examplesCollection = defineCollection({
     id: z.optional(z.string()),
     title: z.string(),
     category: z.string(),
+    folder: z.optional(z.string()),
     subcategory: z.string(),
     description: z.string(),
-    tags: z.array(z.string())
+    tags: z.array(z.string()),
+    exampleType: z.string(),
   })
 });
 

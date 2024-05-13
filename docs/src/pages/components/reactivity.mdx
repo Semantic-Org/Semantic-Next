@@ -1,0 +1,59 @@
+---
+layout: '@layouts/Guide.astro'
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+### Reactivity in Components
+
+When authoring templates you may find you need to implement custom reactivity. This may be something that you want to re-run when something else changes, or perhaps to engineer a simpler way to handle a computation.
+
+`Reaction` is  exposed in user templates via `tpl.reaction` which will automatically attach itself to the template lifecycle teardown events.
+
+```javascript
+const createInstance = ({ tpl }) => {
+  return {
+    count: new ReactiveVar(0),
+    increment() {
+      tpl.count.set(tpl.count.get() + 1);
+    },
+  };
+};
+
+const onCreated = ({tpl}) {
+  // log will not occur after template is removed from page
+  tpl.reaction(() => {
+    console.log(`Count: ${count.get()}`);
+  });
+}
+```
+### Template Reactivity
+
+Reactive variables can be accessed from inside a template without calling its `get` helper.
+
+```html
+<ul>
+  {{#each items}}
+    <li>{{this}}</li>
+  {{/each}}
+</ul>
+```
+
+in addition any conditionals will be reactive context
+
+```html
+<ul>
+  {{#if items.length}}
+    Has items
+  {{else}}
+    No items
+  {{/each}}
+</ul>
+```
+
+If the underlying data for `items` is a reactive var then it will rerender, however if it is just a property it will not update when the underlying value changes.
+
+This is to avoid templates being overly reactive on data, allowing you to opt-in to when you need values to update.
+
+
+
