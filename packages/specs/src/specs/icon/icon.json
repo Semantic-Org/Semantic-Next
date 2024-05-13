@@ -300,31 +300,31 @@
     {
       "name":  "Disabled",
       "attribute":  "disabled",
-      "description":  "An icon appear disabled",
+      "description":  "can appear disabled",
       "usageLevel": 1
     },
     {
       "name":  "Loading",
       "attribute":  "loading",
-      "description":  "An icon can be used as a simple loader",
+      "description":  "can be used as a simple loader",
       "usageLevel": 1
     }
   ],
   "variations": [
     {
       "name":  "Link",
-      "description":  "A button can be formatted as a link",
+      "description":  "can be formatted as a link",
       "usageLevel": 1
     },
     {
       "name":  "Fitted",
-      "description":  "An icon can be fitted without any space to the left or right of it.",
+      "description":  "can be fitted without any space to the left or right of it.",
       "usageLevel": 1
     },
     {
       "name":  "Colored",
       "value":  "color",
-      "description":  "A button can be colored",
+      "description":  "can be colored",
       "usageLevel": 2,
       "options": [
         {
@@ -398,7 +398,7 @@
       "name":  "Size",
       "value":  "size",
       "usageLevel": 1,
-      "description":  "A button can vary in size",
+      "description":  "can vary in size",
       "options": [
         {
           "name":  "Mini",
@@ -444,9 +444,17 @@
     },
     {
       "name":  "Inverted",
-      "description":  "A button can be formatted to appear on dark backgrounds",
+      "description":  "can be formatted to appear on dark backgrounds",
       "usageLevel": 2,
       "attribute":  "inverted"
+    }
+  ],
+  "settings": [
+    {
+      "name": "href",
+      "type": "string",
+      "attribute": "href",
+      "description": "Link to a page"
     }
   ],
   "supportsPlural": true,

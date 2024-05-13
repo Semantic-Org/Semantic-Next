@@ -482,7 +482,7 @@
   "settings": [
     {
       "name": "Icon After",
-      "type": {},
+      "type": "boolean",
       "attribute": "icon-after",
       "defaultValue": false,
       "description": "Enable to position the icon after the text"
