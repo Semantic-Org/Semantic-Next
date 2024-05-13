@@ -235,11 +235,11 @@ describe.concurrent('ReactiveVar', () => {
 
   describe.concurrent('Transformation Helpers', () => {
 
-    it('changeItems should change each item based on a map function', () => {
+    it('map should change each item based on a map function', () => {
       // code here
     });
 
-    it('removeItems should remove items based on a filter callback', () => {
+    it('filter should remove items based on a filter callback', () => {
       // code here
     });
 

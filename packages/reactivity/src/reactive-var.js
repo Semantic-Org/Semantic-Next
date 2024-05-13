@@ -81,6 +81,15 @@ export class ReactiveVar {
     arr.splice(...args);
     this.set(arr);
   }
+  map(mapFunction) {
+    const newValue = this.map(mapFunction);
+    this.set(newValue);
+  }
+  filter(filterFunction) {
+    const newValue = this.filter((value) => !filterFunction(value));
+    this.set(newValue);
+  }
+
   setIndex(index, value) {
     let arr = this.value;
     arr[index] = value;
@@ -109,15 +118,6 @@ export class ReactiveVar {
       }
       return object;
     });
-    this.set(newValue);
-  }
-
-  changeItems(mapFunction) {
-    const newValue = this.clone(this.currentValue).map(mapFunction);
-    this.set(newValue);
-  }
-  removeItems(filterFunction) {
-    const newValue = this.clone(this.currentValue).filter((value) => !filterFunction(value));
     this.set(newValue);
   }
 

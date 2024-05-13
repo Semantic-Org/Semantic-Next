@@ -23,6 +23,9 @@ export const TemplateHelpers = {
   stringify(a) {
     return JSON.stringify(a);
   },
+  hasAny(a) {
+    a?.length > 0;
+  },
   is(a, b) {
     return a == b;
   },
