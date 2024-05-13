@@ -1,30 +1,52 @@
 ---
 layout: '@layouts/Guide.astro'
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 ## Reactivity with Signals
 
-Reactivity in code put simply is **values changing causes stuff to happen**.
 
-Signals is a **mechanism for implementing reactivity** that works by tracking what should happen as dependencies on a value. The value that changes is called a ***signal***, the function that occurs can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/).
+Signals are a **mechanism for implementing reactivity** that works by tracking what should happen as dependencies on a value.
 
-In Semantic UI reactivity triggers (signals) are called `Reactive Variables`, and the reactive contexts (computed) are called `Reactions`.
+Reactivity put simply is **values changing causes stuff to happen**.
+
+With a signals reacitivity implementation the value that changes is called a ***signal***, the function that occurs can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/).
 
 ### Naming
 
-Semantic UI uses the name `ReactiveVar` and `Reaction` to make it more clear their purpose.
+Semantic UI uses the name `ReactiveVar` and `Reaction` for `Signal` and `Computation` because these names help convey their underlying purpose as an implementation of a reactivity system, with the latter terminology being the particular means they use to achieve that aim--which may not been intuitive to most at first glance.
 
-You can assume underneath the hood these operate like conventional signals, but include addity niceties to make them easier to use.
-
-Both names may be used in the documentation depending on if we are referring to the library implementation in specific `@semantic-ui/reactivity` or the concept in general of Signals.
+Both names may be used in the documentation depending on if we are referring to the library implementation in specific `@semantic-ui/reactivity` or the underlying reactivity concept of Signals.
 
 ## Understanding by Example
 
-Imagine a birthday calendar. You may record a list of days which your friend's birthdays occur (dependencies) then when the day changes (the variable). You might for instance do this when you wake up and see the date on your phone, triggering a reaction to think about your friend's birthdays that might be this month.
+Imagine keeping a birthday calendar for your friends birthdays. Your friends birthdays on the calendar can be thought of as **dependencies**, they rely on knowing the current date to know if your friend's birthday is today. In a signal based reactivity system you can view the current day as the **signal**.
 
-This can be displayed in code like this.
+When you wake up each day, you may look at the calendar and then compare the birthday to the circled birthdays on the calendar. This is like rerunning a calculation in your head.
 
-(birthday example)
+This calculations is a `reaction` which depends on a source of truth, a signal or `ReactiveVar`.
+
+```javascript
+const today = new ReactiveVar( new Date() );
+
+// each day when you wake up
+const setToday() => {
+  today.set(new Date());
+}
+
+const checkBirthdays = Reaction(() => {
+  const today = today.get();
+  if(today == friendsBirthday) {
+    // wish them happy birthday
+  }
+  else {
+    // no birthdays today
+  }
+}
+```
+
+<PlaygroundExample id="birthday"></PlaygroundExample>
+
 
 ## Usage in Semantic UI
 
@@ -48,7 +70,7 @@ When authoring templates you may find you need to implement custom reactivity. T
 
 ## What's in Reactivity
 
-### Signals Plus
+### Data Type Helpers
 
 Building on most utility signal implementations, Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
 
@@ -66,7 +88,7 @@ You can also use the callback `Reaction.afterFlush` if you have code that depend
 
 Learn more about reactivity lifecycle in the documentation for [flushing changes]().
 
-### Controlling Reactivity
+### Stopping Reactivity
 
 Because of the cascading nature of reactivity, it's imperative to have tight controls over what triggers reactivity, and
 

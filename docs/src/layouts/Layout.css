@@ -231,7 +231,7 @@
 @layer code {
   body {
     /* expressive code */
-    --ec-uiFontSize: 0.875em;
+    --ec-uiFontSize: 14px;
     --ec-codeFontSize: 1em;
     --ec-codePadBlk: 0.5em;
     --ec-brdRad: var(--border-radius);

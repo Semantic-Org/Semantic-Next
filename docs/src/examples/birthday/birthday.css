@@ -1,0 +1,21 @@
+.group + .group {
+  border-top: var(--border);
+}
+
+a {
+  cursor: pointer;
+  color: var(--link-color);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--link-color-hover);
+}
+
+.info {
+  display: block;
+  border: var(--border);
+  margin: var(--vertically-spaced);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}

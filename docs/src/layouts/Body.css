@@ -1,6 +1,38 @@
 @layer global {
 
   :root {
+    --sl-color-accent-low: #c7d6ff;
+    --sl-color-accent: #364bff;
+    --sl-color-accent-high: #182775;
+    --sl-color-white: #17181c;
+    --sl-color-gray-1: #24272f;
+    --sl-color-gray-2: #353841;
+    --sl-color-gray-3: #545861;
+    --sl-color-gray-4: #888b96;
+    --sl-color-gray-5: #c0c2c7;
+    --sl-color-gray-6: #eceef2;
+    --sl-color-gray-7: #f5f6f8;
+    --sl-color-black: #ffffff;
+    --bullet-size: 16px;
+    --sl-font: 'Lato', serif;
+    --ec-uiFontSize: 14px;
+  }
+
+  body.dark {
+    --sl-color-accent-low: #131e4f;
+    --sl-color-accent: #3447ff;
+    --sl-color-accent-high: #b3c7ff;
+    --sl-color-white: #ffffff;
+    --sl-color-gray-1: #eceef2;
+    --sl-color-gray-2: #c0c2c7;
+    --sl-color-gray-3: #888b96;
+    --sl-color-gray-4: #545861;
+    --sl-color-gray-5: #353841;
+    --sl-color-gray-6: #24272f;
+    --sl-color-black: #17181c;
+  }
+
+  :root {
     --page-background: #FEFEFF;
     --primary-text-color: #73B9E1;
     --panel-color: #1B1C1D;
@@ -133,7 +165,7 @@
   li code {
     background-color: var(--standard-10);
     padding: 0em 0.5em;
-    font-size: 0.85em;
+    font-size: 0.8125em;
     color: var(--standard-100);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     margin: 0em 0px;

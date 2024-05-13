@@ -1,36 +1,73 @@
-// Array to store friends' birthdays
-const friendsBirthdays = [
-  { name: 'Alice', birthday: 'August 10' },
-  { name: 'Bob', birthday: 'March 15' },
-  { name: 'Charlie', birthday: 'November 30' }
-];
+import { createComponent, getText } from '@semantic-ui/component';
+import { ReactiveVar } from '@semantic-ui/reactivity';
+import { formatDate, first } from '@semantic-ui/utils';
 
-// Function to calculate the zero-indexed day of the year
-function dayOfYear(dateString) {
-  const [month, day] = dateString.split(' ');
-  const date = new Date(`2023 ${month} ${day}`);
-  const startOfYear = new Date('2023-01-01');
-  const timeDiff = date - startOfYear;
-  const dayOfYear = Math.floor(timeDiff / (1000 * 3600 * 24));
-  return dayOfYear;
-}
+const css = await getText('./component.css');
+const template = await getText('./component.html');
 
-// Function to check if today is a friend's birthday
-function isTodayFriendsBirthday() {
-  const today = new Date();
-  const currentDayOfYear = dayOfYear(`${today.toLocaleString('default', { month: 'long' })} ${today.getDate()}`);
+const createInstance = ({tpl, dispatchEvent}) => ({
 
-  for (const friend of friendsBirthdays) {
-    const friendDayOfYear = dayOfYear(friend.birthday);
-    if (friendDayOfYear === currentDayOfYear) {
-      console.log(`Today is ${friend.name}'s birthday!`);
-      return true;
-    }
+  today: new ReactiveVar(''),
+
+  birthdayNames: new ReactiveVar(),
+
+  birthdayCalendar: [
+    { name: 'Jack', birthday: 'August 10' },
+    { name: 'Elliot', birthday: 'January 13' },
+    { name: 'Stevie', birthday: 'January 16' },
+    { name: 'Stew', birthday: 'April 4' },
+    { name: 'Stew\'s Twin Brother', birthday: 'April 4' },
+  ],
+
+  getDisplayDate(date = new Date()) {
+    return tpl.formatDate(date, 'MMMM DD');
+  },
+
+  getInputDate(date) {
+    return tpl.formatDate(new Date(date), 'YYYY-MM-DD');
+  },
+
+  checkBirthdays() {
+    tpl.reaction(() => {
+
+      // setup reaction on today
+      let today = tpl.today.get();
+
+      // find people whose birthday is today
+      let birthdayNames = tpl.birthdayCalendar
+        .filter(person => person.birthday == today)
+        .map(person => person.name)
+      ;
+      if(birthdayNames.length) {
+        tpl.birthdayNames.set(birthdayNames.join(', '));
+      }
+      else {
+        tpl.birthdayNames.set(undefined);
+      }
+    });
   }
+});
 
-  console.log("Today is not any friend's birthday.");
-  return false;
-}
+const onCreated = ({ tpl }) => {
+  tpl.today.set( tpl.getDisplayDate() );
+  tpl.checkBirthdays();
+};
 
-// Example usage
-isTodayFriendsBirthday();
+const events = {
+  'change .date-picker'({tpl }) {
+    const newDay = new Date(this.value);
+    tpl.today.set( tpl.getDisplayDate(newDay) );
+  },
+  'click a.birthday'({tpl, data}) {
+    tpl.today.set( data.birthday );
+  }
+};
+
+createComponent({
+  tagName: 'birthday-calendar',
+  events,
+  template,
+  css,
+  onCreated,
+  createInstance
+});
