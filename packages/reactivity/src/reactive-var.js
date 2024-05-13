@@ -61,6 +61,10 @@ export class ReactiveVar {
     return this.currentValue;
   }
 
+  clear() {
+    return this.set(undefined);
+  }
+
   // array helpers
   push(value) {
     let arr = this.value;
