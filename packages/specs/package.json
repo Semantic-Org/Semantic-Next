@@ -1,12 +1,12 @@
 {
   "name": "@semantic-ui/specs",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.0.14"
+    "@semantic-ui/utils": "^0.0.15"
   }
 }
