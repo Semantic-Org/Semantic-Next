@@ -14,8 +14,7 @@ $('input')
   .on('focus', () => {
     let tpl = getComponent();
     tpl.stopCounter();
-  });
-$('input')
+  })
   .on('blur', () => {
     let tpl = getComponent();
     tpl.startCounter();

@@ -1,4 +1,4 @@
-import { asyncEach, tokenize, inArray, camelToKebab, each } from '@semantic-ui/utils';
+import { asyncEach, tokenize, inArray, camelToKebab, filterObject, each } from '@semantic-ui/utils';
 
 /* These are top level to make it easier to format */
 
@@ -109,9 +109,9 @@ export const getIndexHTMLBefore = function(type) {
       else if(src.search('.css') >= 0) {
         html += `\n<link href="./${src}" rel="stylesheet">`;
       }
-    })
+    });
     return html;
-  }
+  };
 
   return `${htmlHideMarkerStart}
   <html>
@@ -347,19 +347,15 @@ export const getEmptyProjectFiles = ({
 };
 
 
-export const getPanelIndexes = (type) => {
+export const getPanelIndexes = (files, type) => {
+  let indexes;
   if(type == 'log') {
-    return {
+    indexes = {
       'index.js': 0,
     };
   }
   else {
-    return {
-      'component.js': 0,
-      'component.html': 0,
-      'component.css': 1,
-    };
-    return {
+    indexes = {
       'component.js': 0,
       'component.html': 0,
       'component.css': 0,
@@ -368,4 +364,16 @@ export const getPanelIndexes = (type) => {
       'index.js': 1,
     };
   }
-}
+  // filter out generated and absent files
+  indexes = filterObject(indexes, (value, key) => {
+    if(!files[key] || files[key]?.generated) {
+      return false;
+    }
+    return true;
+  });
+  // use right pane for css if no index files
+  if(!indexes['index.html'] && !indexes['index.css'] && !indexes['index.js']) {
+    indexes['component.css'] = 1;
+  }
+  return indexes;
+};

@@ -62,7 +62,7 @@ const settings = {
     'index.css': (1 / 9 * 100),
     'index.js': (1 / 9 * 100),
   },
-  panelGroupWidth: [40]
+  panelGroupWidth: [50, 50]
 };
 
 const createInstance = ({tpl, settings, $}) => ({

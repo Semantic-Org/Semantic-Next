@@ -4,6 +4,7 @@ import glob from 'glob';
 import { join } from 'path';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import semver from 'semver';
+import inquirer from 'inquirer';
 
 const execAsync = promisify(exec);
 
@@ -17,18 +18,37 @@ const mainPackageJsonPath = join(process.cwd(), 'package.json');
 const mainPackageJson = loadJsonFile(mainPackageJsonPath);
 const versionArg = process.argv[2];
 const dryRun = process.argv.includes('--dry-run');
+const ciOverride = process.argv.includes('--ci');
 
 let newVersion = mainPackageJson.version;
 
 // Handle version bump
-if (['patch', 'minor', 'major'].includes(versionArg)) {
-  newVersion = semver.inc(mainPackageJson.version, versionArg);
-} else if (semver.valid(versionArg)) {
-  newVersion = versionArg;
-} else if (versionArg) {
-  console.error(`Invalid version argument: ${versionArg}`);
-  process.exit(1);
-}
+const handleVersionBump = async () => {
+  if (['patch', 'minor', 'major'].includes(versionArg)) {
+    if (!ciOverride && (versionArg === 'minor' || versionArg === 'major')) {
+      const confirmation = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: `You are about to perform a ${versionArg} version bump. Do you want to proceed?`,
+          default: false,
+          when: (answers) => answers.confirm,
+        },
+      ]);
+
+      if (!confirmation.confirm) {
+        console.log('Version bump canceled.');
+        process.exit(1);
+      }
+    }
+    newVersion = semver.inc(mainPackageJson.version, versionArg);
+  } else if (semver.valid(versionArg)) {
+    newVersion = versionArg;
+  } else if (versionArg) {
+    console.error(`Invalid version argument: ${versionArg}`);
+    process.exit(1);
+  }
+};
 
 const updatedFiles = [];
 
@@ -84,6 +104,8 @@ async function publishPackage(dir) {
 const workspaceGlobs = mainPackageJson.workspaces;
 
 (async () => {
+  await handleVersionBump();
+
   const publishPromises = [];
   workspaceGlobs.forEach(workspaceGlob => {
     const workspaceDirs = glob.sync(workspaceGlob, { realpath: true });
@@ -96,12 +118,30 @@ const workspaceGlobs = mainPackageJson.workspaces;
 
   if (!dryRun && updatedFiles.length > 0) {
     try {
+      // Stage changes
+      console.log('Staging changes...');
       await execAsync('git add ' + updatedFiles.join(' '));
-      await execAsync(`git commit -m "chore: bump versions to ${newVersion}"`);
-      await execAsync('git push');
-      await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
-      await execAsync('git push --tags');
-      console.log('Committed and pushed version updates and created a new tag.');
+
+      // Check if there are changes to commit
+      const statusOutput = await execAsync('git status --porcelain');
+      if (statusOutput.stdout.trim()) {
+        // Commit changes
+        console.log('Committing changes...');
+        await execAsync(`git commit -m "chore: bump versions to ${newVersion}"`);
+
+        // Push changes
+        console.log('Pushing changes...');
+        await execAsync('git push');
+
+        // Tag the new version
+        console.log('Tagging new version...');
+        await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
+        await execAsync('git push --tags');
+
+        console.log('Committed and pushed version updates and created a new tag.');
+      } else {
+        console.log('No changes to commit.');
+      }
     } catch (error) {
       console.error(`Failed to commit and push changes: ${error.message}`);
     }

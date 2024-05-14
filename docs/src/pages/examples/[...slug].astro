@@ -32,7 +32,7 @@ const allExampleFiles = await import.meta.glob(`../../examples/**`, {
 let files = await getExampleFiles(example, allExampleFiles);
 files = addPlaygroundInjections(files, example.exampleType);
 
-const panelIndexes = getPanelIndexes(example.exampleType);
+const panelIndexes = getPanelIndexes(files, example.exampleType);
 
 ---
 
