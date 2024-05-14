@@ -132,7 +132,9 @@ export const getIndexHTMLBefore = function(type) {
 
 export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
-export const indexJSBefore = `${hideMarkerStart}if(localStorage.getItem('theme') == 'dark') {
+export const indexJSBefore = `${hideMarkerStart}
+document.querySelector('body').removeAttribute('style');
+if(localStorage.getItem('theme') == 'dark') {
   document.querySelector('body').classList.add('dark');
 }${hideMarkerEnd}`;
 export const indexJSAfter = ``;

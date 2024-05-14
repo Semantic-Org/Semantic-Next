@@ -1,14 +1,17 @@
 import { UIIcon } from '@semantic-ui/core';
 
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import { get } from '@semantic-ui/utils';
 import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
 
-const createInstance = function ({ $, isServer, tpl }) {
+
+const state = {
+  theme: undefined
+};
+
+const createInstance = function ({ $, isServer, state, tpl }) {
   return {
-    theme: new ReactiveVar(),
     getLocalTheme() {
       if(isServer) {
         return 'light';
@@ -29,12 +32,12 @@ const createInstance = function ({ $, isServer, tpl }) {
         dark: 'moon',
         light: 'sun'
       };
-      const icon = get(icons, tpl.theme.get());
+      const icon = get(icons, state.theme.get());
       return icon;
     },
     calculateTheme() {
       tpl.reaction((comp) => {
-        let theme = tpl.theme.get();
+        let theme = state.theme.get();
         if(!theme || comp.isFirstRun) {
           return;
         }
@@ -50,8 +53,8 @@ const createInstance = function ({ $, isServer, tpl }) {
   };
 };
 
-const onCreated = function({tpl, isClient}) {
-  tpl.theme.set(tpl.getLocalTheme());
+const onCreated = function({tpl, state, isClient}) {
+  state.theme.set(tpl.getLocalTheme());
   if(isClient) {
     tpl.calculateTheme();
   }
@@ -59,13 +62,13 @@ const onCreated = function({tpl, isClient}) {
 
 
 const events = {
-  'click'({tpl}) {
-    const currentTheme = tpl.theme.get();
+  'click'({tpl, state}) {
+    const currentTheme = state.theme.get();
     const newTheme = (currentTheme == 'light')
       ? 'dark'
       : 'light'
     ;
-    tpl.theme.set(newTheme);
+    state.theme.set(newTheme);
     $('html').dispatchEvent('themechange', {
       theme: newTheme,
       darkMode: newTheme == 'dark'
@@ -78,6 +81,7 @@ const ThemeSwitcher = createComponent({
   template,
   events,
   css,
+  state,
   onCreated,
   createInstance,
 });
