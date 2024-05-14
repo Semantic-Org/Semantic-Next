@@ -1,6 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, inArray, last } from '@semantic-ui/utils';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { each, isString, inArray } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
@@ -520,8 +519,8 @@ const events = {
     // so for | 1 || 2 | the handle fires on '2'
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      tpl.setResizeCalculations(panel, data);
       requestAnimationFrame(() => {
+        tpl.setResizeCalculations(panel, data);
         tpl.resizePanels(tpl.resize.index, tpl.resize.delta);
         tpl.removeResizeCalculations();
       });

@@ -1,5 +1,4 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import { sum, isString } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
@@ -26,9 +25,9 @@ const settings = {
   }
 };
 
-const createInstance = ({el, tpl, isServer, findParent, settings, dispatchEvent, $}) => ({
-  resizing: new ReactiveVar(false),
-  initialized: new ReactiveVar(false),
+const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
+  resizing: reactiveVar(false),
+  initialized: reactiveVar(false),
 
   reportRendered() {
     let panels = tpl.getPanels();
