@@ -65,7 +65,7 @@
   --massive-ratio: calc(24 / 14);
 
   /* -------------------
-         Defaults
+         Spacing
   -------------------- */
 
   --spacing: 1rem;
@@ -115,7 +115,7 @@
   --------------- */
 
   --header-font-weight: var(--bold);
-  --header-line-height: calc((18 / 14) * 1em);
+  --header-line-height: var(--18px);
 
   --h1: calc(28 / 14 * 1rem);
   --h2: calc(24 / 14 * 1rem);
@@ -139,7 +139,7 @@
   --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
 
   /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */
-  --input-line-height: calc((17 / 14) * 1em);
+  --input-line-height: var(--17px);
 
   /* -------------------
       Focused Input
