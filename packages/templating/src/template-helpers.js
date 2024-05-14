@@ -38,11 +38,15 @@ export const TemplateHelpers = {
   classes(array = []) {
     return array.join(' ') + ' ';
   },
-  maybe(expr, trueClass = '', falseClass = '') {
-    return expr ? trueClass + ' ' : falseClass;
-  },
   classIf(expr, trueClass = '', falseClass = '') {
-    return expr ? trueClass + ' ' : falseClass;
+    let val = expr ? trueClass : falseClass;
+    return (val)
+      ? `${val} `
+      : ''
+    ;
+  },
+  maybe(expr, trueClass = '', falseClass = '') {
+    TemplateHelpers.maybe(expr, trueClass, falseClass);
   },
   activeIf(expr) {
     return TemplateHelpers.maybe(expr, 'active', '');
