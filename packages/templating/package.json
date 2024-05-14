@@ -1,15 +1,15 @@
 {
   "name": "@semantic-ui/templating",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/component": "^0.0.12",
-    "@semantic-ui/query": "^0.0.12",
-    "@semantic-ui/reactivity": "^0.0.12",
-    "@semantic-ui/templating": "^0.0.12",
-    "@semantic-ui/utils": "^0.0.12"
+    "@semantic-ui/component": "^0.0.13",
+    "@semantic-ui/query": "^0.0.13",
+    "@semantic-ui/reactivity": "^0.0.13",
+    "@semantic-ui/templating": "^0.0.13",
+    "@semantic-ui/utils": "^0.0.13"
   }
 }
