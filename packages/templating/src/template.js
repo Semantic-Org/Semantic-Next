@@ -1,6 +1,6 @@
 import { $ } from '@semantic-ui/query';
 import { capitalize, fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
-import { Reaction } from '@semantic-ui/reactivity';
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
 import { TemplateCompiler } from './compiler/template-compiler.js';
@@ -41,6 +41,7 @@ export const Template = class Template {
     this.ast = ast;
     this.css = css;
     this.data = data || {};
+    this.reactions = [];
     this.state = state || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
@@ -94,7 +95,7 @@ export const Template = class Template {
     }
     // reactions bound with tpl.reaction will be scoped to template
     // and be removed when the template is destroyed
-    this.tpl.reaction = this.reaction;
+    this.tpl.reaction = this.reaction.bind(this);
     if (isFunction(tpl.initialize)) {
       this.call(tpl.initialize.bind(this));
     }
@@ -415,7 +416,9 @@ export const Template = class Template {
         el: this.element,
         tpl: this.tpl,
         $: this.$.bind(this),
-        reaction: this.reaction,
+
+        reaction: this.reaction.bind(this),
+        reactiveVar: this.reactiveVar.bind(this),
 
         data: this.tpl.data,
         settings: this.element.settings,
@@ -484,10 +487,11 @@ export const Template = class Template {
   *******************************/
 
   reaction(reaction) {
-    if (!this.reactions) {
-      this.reactions = [];
-    }
     this.reactions.push(Reaction.create(reaction));
+  }
+
+  reactiveVar(value, options) {
+    return new ReactiveVar(value, options);
   }
 
   clearReactions() {
