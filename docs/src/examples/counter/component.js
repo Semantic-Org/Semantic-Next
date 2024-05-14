@@ -4,7 +4,7 @@ import { ReactiveVar } from '@semantic-ui/reactivity';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({tpl}) => ({
+const createInstance = ({tpl, settings}) => ({
   counter: new ReactiveVar(0),
   isEven: (number) => (number % 2 == 0)
 });

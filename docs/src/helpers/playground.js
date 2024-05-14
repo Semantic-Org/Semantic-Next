@@ -41,19 +41,12 @@ export const indexHTMLBeforeUI = indexHTMLBeforeStandard;
 
 export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
-export const indexJSBefore = `${foldMarkerStart}if(localStorage.getItem('theme') == 'dark') {
+export const indexJSBefore = `${hideMarkerStart}if(localStorage.getItem('theme') == 'dark') {
   document.querySelector('body').classList.add('dark');
-}${foldMarkerEnd}
-
-// theme code folded
-
-
-`;
+}${hideMarkerEnd}`;
 export const indexJSAfter = ``;
 
-export const indexCSSBefore = `${hideMarkerStart}body { height: auto; }${hideMarkerEnd}body {
-  padding: 1rem;
-}`;
+export const indexCSSBefore = `${hideMarkerStart}body { height: auto; padding: 1rem }${hideMarkerEnd}`;
 export const indexCSSAfter = ``;
 
 export const getSandboxURL = () => {
