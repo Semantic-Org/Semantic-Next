@@ -1,73 +1,87 @@
 import { createComponent, getText } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
-import { each, generateID } from '@semantic-ui/utils';
+import { each, clone, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({tpl, $, onCreated}) => ({
-  balls: new ReactiveVar([]),
-  clock: new ReactiveVar(0),
+const state = {
+  balls: [],
+  time: 0,
+};
 
-  startClock() {
+const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
+
+  startTime() {
     tpl.tick();
-    each(tpl.balls, tpl.calculateBall);
-    tpl.draw();
   },
 
   getCanvas() {
     return $('canvas').get(0);
   },
 
-  // each ball data has its time data changed
-  // this triggers a reaction that updates its position
   tick() {
-    const t = tpl.clock.get() + 1;
-    tpl.clock.set(t);
-
-    each(tpl.balls, (ball) => {
-      const ballData = ball.get();
-      ballData.t = t;
-      console.log('ball is', ballData);
-      ball.set(ballData);
-    });
-
-    const frame = 1000 / 60;
+    state.lastTime = state.time.get();
+    state.time.increment();
+    // schedule next tick in 1 frame (144fps)
+    const frame = 1000 / 144;
     setTimeout(tpl.tick, frame);
   },
 
   createBall({x, y}) {
-    const ball = {
+
+    // create ball
+    const ball = reactiveVar({
       _id: generateID(),
       x,
       y,
       radius: Math.random() * 20 + 10,
       color: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
-      vx: Math.random() * 400 - 2,
-      vy: Math.random() * 400 - 2,
-      t: tpl.clock.get()
-    };
-    tpl.balls.push(ball);
+      vx: Math.random() * 4,
+      vy: Math.random() * 4,
+    });
+
+
+    // we add it to balls array
+    state.balls.push(ball);
+
+    // we setup a reaction so it updates as time changes
+    reaction(() => tpl.updateBallPosition(ball));
   },
 
-  calculateBall() {
-    tpl.reaction(() => {
-      const ballData = ball.get();
+  updateBallPosition(ball) {
 
-      // Update ball position
-      ballData.x += ballData.vx * t;
-      ballData.y += ballData.vy * t;
+    // check time reactively
+    const t = state.time.get() - state.lastTime;
 
-      // Check for collision with walls
-      const canvas = tpl.getCanvas();
-      if (ballData.x + ballData.radius > canvas.width || ballData.x - ballData.radius < 0) {
-        ballData.vx = -ballData.vx;
-      }
-      if (ballData.y + ballData.radius > canvas.height || ballData.y - ballData.radius < 0) {
-        ballData.vy = -ballData.vy;
-      }
-      console.log('setting ball to', ballData);
-      ball.set(ballData);
+    // get current position non-reactively
+    const ballData = clone(ball.peek());
+
+    // Update ball position
+    ballData.x += ballData.vx * t;
+    ballData.y += ballData.vy * t;
+
+    // Check for collision with walls
+    const canvas = tpl.getCanvas();
+    if (ballData.x + ballData.radius > canvas.width || ballData.x - ballData.radius < 0) {
+      ballData.vx = -ballData.vx;
+    }
+    if (ballData.y + ballData.radius > canvas.height || ballData.y - ballData.radius < 0) {
+      ballData.vy = -ballData.vy;
+    }
+    // update ball
+    ball.set(ballData);
+  },
+
+  draw() {
+    const canvas = tpl.getCanvas();
+    const ctx = canvas.getContext(`2d`);
+    reaction(comp => {
+      const balls = state.balls.get();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      each(balls, (ball) => {
+        const ballData = ball.get();
+        tpl.drawBall(ballData);
+      });
     });
   },
 
@@ -81,19 +95,12 @@ const createInstance = ({tpl, $, onCreated}) => ({
     ctx.closePath();
   },
 
-  draw() {
-    const canvas = tpl.getCanvas();
-    const ctx = canvas.getContext(`2d`);
-
-    tpl.reaction(comp => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      each(tpl.balls, (ball) => {
-        tpl.drawBall(ball.get());
-      });
-    });
-  },
-
 });
+
+const onRendered = ({tpl}) => {
+  tpl.startTime();
+  tpl.draw();
+};
 
 const events = {
   'click canvas'({tpl, event}) {
@@ -106,10 +113,6 @@ const events = {
   }
 };
 
-const onRendered = ({tpl}) => {
-  tpl.startClock();
-};
-
 export const BallSimulation = createComponent({
   tagName: 'ball-simulation',
   template,
@@ -117,4 +120,5 @@ export const BallSimulation = createComponent({
   createInstance,
   onRendered,
   events,
+  state
 });

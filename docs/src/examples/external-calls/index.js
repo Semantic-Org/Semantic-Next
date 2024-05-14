@@ -6,9 +6,8 @@ const getComponent = () => $('ui-counter').getComponent();
 $('button').on('click', () => {
   let tpl = getComponent();
   let number = Number($('input').val());
-  tpl.counter.set(number);
+  tpl.setCounter(number);
 });
-
 
 $('input')
   .on('focus', () => {
