@@ -133,6 +133,38 @@ export const isEmpty = (x) => {
   return true;
 };
 
+export const isClassInstance = (obj) => {
+  if (obj === null || typeof obj !== 'object') {
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(obj);
+  const constructorName = proto.constructor.name;
+
+  const builtInTypes = [
+    'Object',
+    'Array',
+    'Date',
+    'RegExp',
+    'Map',
+    'Set',
+    'Error',
+    'Uint8Array',
+    'Int8Array',
+    'Uint16Array',
+    'Int16Array',
+    'Uint32Array',
+    'Int32Array',
+    'Float32Array',
+    'Float64Array',
+    'BigInt64Array',
+    'BigUint64Array',
+    'NodeList',
+  ];
+
+  return !builtInTypes.includes(constructorName);
+};
+
 /*-------------------
         Date
 --------------------*/
@@ -688,11 +720,11 @@ export const clone = (src, seen = new Map()) => {
   if (seen.has(src)) return seen.get(src);
 
   let copy;
-  /*if (src.nodeType && 'cloneNode' in src) {
+  if (src.nodeType && 'cloneNode' in src) {
     copy = src.cloneNode(true);
     seen.set(src, copy);
   }
-  else */if (src instanceof Date) {
+  else if (src instanceof Date) {
     // Date
     copy = new Date(src.getTime());
     seen.set(src, copy);

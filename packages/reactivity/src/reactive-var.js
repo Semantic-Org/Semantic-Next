@@ -1,18 +1,31 @@
-import { clone, isObject, isEqual, wrapFunction, findIndex, unique, isNumber } from '@semantic-ui/utils';
+import { clone, isObject, isEqual, wrapFunction, isClassInstance, isArray, findIndex, unique, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
 
-  constructor(initialValue, equalityFunction) {
-    this.currentValue = this.clone(initialValue);
+  constructor(initialValue, { equalityFunction, canClone = true, cloneFunction } = {}) {
     this.dependency = new Dependency();
-    this.equalityFunction = equalityFunction
+
+    // allow user to opt out of value cloning
+    this.canClone = canClone;
+
+    // allow custom equality function
+    this.equalityFunction = (equalityFunction)
       ? wrapFunction(equalityFunction)
-      : ReactiveVar.equalityFunction;
+      : ReactiveVar.equalityFunction
+    ;
+
+    // allow custom clone function
+    this.clone = (cloneFunction)
+      ? wrapFunction(cloneFunction)
+      : ReactiveVar.cloneFunction
+    ;
+    this.currentValue = this.maybeClone(initialValue);
   }
 
   static equalityFunction = isEqual;
+  static cloneFunction = clone;
 
   get value() {
     // Record this ReactiveVar as a dependency if inside a Reaction computation
@@ -21,21 +34,28 @@ export class ReactiveVar {
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
     return (Array.isArray(value) || typeof value == 'object')
-      ? this.clone(value)
+      ? this.maybeClone(value)
       : value
     ;
   }
 
-  clone(value) {
-    if (value instanceof ReactiveVar) {
+  canCloneValue(value) {
+    return (this.canClone === true && !isClassInstance(value));
+  }
+
+  maybeClone(value) {
+    if (!this.canCloneValue(value)) {
       return value;
     }
-    return clone(value);
+    if(isArray(value)) {
+      return value = value.map(value => this.maybeClone(value));
+    }
+    return this.clone(value);
   }
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.clone(newValue);
+      this.currentValue = this.maybeClone(newValue);
       this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
@@ -67,26 +87,26 @@ export class ReactiveVar {
 
   // array helpers
   push(value) {
-    let arr = this.value;
+    const arr = this.value;
     arr.push(value);
     this.set(arr);
   }
   unshift(value) {
-    let arr = this.value;
+    const arr = this.value;
     arr.unshift(value);
     this.set(arr);
   }
   splice(...args) {
-    let arr = this.value;
+    const arr = this.value;
     arr.splice(...args);
     this.set(arr);
   }
   map(mapFunction) {
-    const newValue = this.map(mapFunction);
+    const newValue = Array.prototype.map.call(this.currentValue, mapFunction);
     this.set(newValue);
   }
   filter(filterFunction) {
-    const newValue = this.filter((value) => !filterFunction(value));
+    const newValue = Array.prototype.filter.call(this.currentValue, filterFunction);
     this.set(newValue);
   }
 
@@ -112,7 +132,7 @@ export class ReactiveVar {
       value = property;
       property = indexOrProperty;
     }
-    const newValue = this.clone(this.currentValue).map((object, currentIndex) => {
+    const newValue = this.currentValue.map((object, currentIndex) => {
       if(index == 'all' || currentIndex == index) {
         object[property] = value;
       }
@@ -151,9 +171,19 @@ export class ReactiveVar {
   getIndex(id) {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
-  setProperty(id, property, value) {
-    const index = this.getIndex(id);
-    return this.setArrayProperty(index, property, value);
+  setProperty(idOrProperty, property, value) {
+    if(arguments.length == 3) {
+      const id = idOrProperty;
+      const index = this.getIndex(id);
+      return this.setArrayProperty(index, property, value);
+    }
+    else {
+      value = property;
+      property = idOrProperty;
+      const obj = this.currentValue;
+      obj[property] = value;
+      this.set(obj);
+    }
   }
   replaceItem(id, item) {
     return this.setIndex(this.getIndex(id), item);

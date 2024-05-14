@@ -460,7 +460,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       
-      const eventHandler = $('div').on('click', () => {});
+      const eventHandler = $('div').on('click', () => {}, { returnHandler: true });
       expect(eventHandler).toBeInstanceOf(Object);
     });
 
@@ -469,7 +469,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       
-      const eventHandler = $('div').on('click', callback);
+      const eventHandler = $('div').on('click', callback, { returnHandler: true });
       div.click();
       eventHandler.abort();
       div.click();
@@ -506,7 +506,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       
-      const eventHandler = $('div').on('click', 'span', callback);
+      const eventHandler = $('div').on('click', 'span', callback, { returnHandler: true });
       expect(eventHandler.delegated).toBe(true);
     });
 
@@ -515,7 +515,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       
-      const eventHandler = $('div').on('click', 'span', callback);
+      const eventHandler = $('div').on('click', 'span', callback, { returnHandler: true });
       expect(eventHandler.delegated).toBe(true);
     });
 
@@ -523,7 +523,7 @@ describe('query', () => {
       const div = document.createElement('div');
       const callback = vi.fn();
       document.body.appendChild(div);
-      const eventHandler = $('div').on('click', callback);
+      const eventHandler = $('div').on('click', callback, { returnHandler: true });
       div.removeEventListener('click', eventHandler.eventListener);
       div.click();
       expect(callback).not.toHaveBeenCalled();
@@ -577,7 +577,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       
-      const eventHandler = $('div').on('click', callback);
+      const eventHandler = $('div').on('click', callback, { returnHandler: true });
       
       div.removeEventListener('click', callback);
       div.click();
@@ -605,7 +605,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       
-      const event = $('div').on('click', 'span', callback);
+      const event = $('div').on('click', 'span', callback, { returnHandler: true });
       $('div').off('click', event);
       span.click();
       expect(callback).not.toHaveBeenCalled();

@@ -57,6 +57,7 @@ Utility includes the following helpers:
 - `isDOM(x)` - Checks if the value is a DOM element.
 - `isNode(x)` - Checks if the value is a DOM node.
 - `isEmpty(x)` Checks if the value is empty like {}
+- `isClassInstance(x)` - Checks if the value is an instance of a custom class
 
 ### Date
 - `formatDate(date, format)` - Formats a date object into a string based on the provided format.
