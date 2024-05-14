@@ -424,6 +424,7 @@ export const Template = class Template {
         settings: this.element.settings,
         state: this.element.state,
 
+        isRendered: this.rendered,
         isServer: Template.isServer,
         isClient: !Template.isServer, // convenience
 

@@ -78,7 +78,7 @@ export class ReactiveVar {
   }
 
   peek() {
-    return this.currentValue;
+    return maybeClone(this.currentValue);
   }
 
   clear() {
