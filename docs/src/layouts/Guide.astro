@@ -1,39 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { each, unique } from '@semantic-ui/utils';
 import './Guide.css';
+import { getRailMenu } from '@helpers/navigation.js';
 
-const getRailMenu = (headings) => {
-	let menu = [];
-	let items = [];
-	let menuGroup;
-
-	const headingLevels = unique(headings.map(heading => heading.depth)).sort();
-	const lowestHeadingLevel = headingLevels[0];
-
-	each(headings, heading => {
-		// new grouping
-		if(heading.depth == lowestHeadingLevel) {
-			if(menuGroup) {
-				menu.push(menuGroup);
-			}
-			menuGroup = {
-				id: heading.slug,
-				title: heading.text,
-				items: []
-			}
-		}
-		else if(menuGroup) {
-			// submenu
-			menuGroup.items.push({
-				id: heading.slug,
-				title: heading.text
-			});
-		}
-	});
-	menu.push(menuGroup);
-	return menu;
-};
 const { frontmatter } = Astro.props;
 
 const railMenu = getRailMenu(Astro.props.headings);

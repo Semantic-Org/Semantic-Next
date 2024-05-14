@@ -5,6 +5,7 @@ import {
   getExampleFiles,
   addPlaygroundInjections,
   getSandboxURL,
+  getPanelIndexes,
 } from '@helpers/playground.js';
 import Playground from '@layouts/Playground.astro';
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
@@ -29,10 +30,10 @@ const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
 let files = await getExampleFiles(example, allExampleFiles);
-files = addPlaygroundInjections(files);
-const projectConfig = {
-  files: files
-};
+files = addPlaygroundInjections(files, example.exampleType);
+
+const panelIndexes = getPanelIndexes(example.exampleType);
+
 ---
 
 <Playground {...entry.data} showSidebar=true>
@@ -42,6 +43,7 @@ const projectConfig = {
       files={files}
       example={example}
       sandboxURL={sandboxURL}
+      panelIndexes={panelIndexes}
       ></CodePlayground>
   </page>
 </Playground>

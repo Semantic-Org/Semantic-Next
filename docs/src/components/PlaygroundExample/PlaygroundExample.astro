@@ -9,19 +9,22 @@ const matchingExamples = await getCollection('examples', ({ data }) => {
   return getExampleID(data) == id;
 });
 const example = matchingExamples[0];
+const exampleType = example.data.exampleType;
 const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
 let files = await getExampleFiles(example.data, allExampleFiles);
-files = addPlaygroundInjections(files);
+files = addPlaygroundInjections(files, exampleType);
 const sandboxURL = getSandboxURL();
 const projectConfig = {
   files: files
 };
+const exampleURL = `/examples/${id}/`;
 ---
 <CodePlayground client:only
   files={files}
   example={example}
   inline=true
+  exampleURL={exampleURL}
   sandboxURL={sandboxURL}
   ></CodePlayground>

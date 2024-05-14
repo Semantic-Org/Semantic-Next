@@ -30,6 +30,8 @@
   --playground-tab-bar-background: #ffffff;
   --playground-bar-height: 32px;
 
+  --inline-code-height: 350px;
+
   .masthead {
     padding: 1rem 1rem;
     border-bottom: var(--playground-border);
@@ -54,23 +56,32 @@
   }
 
   .inline {
+    position: relative;
     display: block;
 
     playground-file-editor {
       border: var(--border);
       overflow: hidden;
-      height: 450px;
+      height: var(--inline-code-height);
       border-bottom: none;
       border-radius: var(--top-attached-border-radius);
     }
     playground-preview {
       background-color: var(--page-background) !important;
-      height: 450px;
+      height: var(--inline-code-height);
       border-radius: 0px 0px ;
       border: var(--border);
-      border-top: var(--internal-border);
+      border-top: 1px solid #111;
       overflow: hidden;
       border-radius: var(--bottom-attached-border-radius);
+    }
+    .links {
+      position: absolute;
+      right: 0px;
+      top: 1.5rem;
+    }
+    .links a {
+      color: var(--standard-60);
     }
 
   }

@@ -19,6 +19,7 @@
     --topbar-background-color: #151a1e;
   }
   topbar {
+    position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;

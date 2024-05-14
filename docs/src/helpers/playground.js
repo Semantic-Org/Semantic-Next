@@ -20,24 +20,115 @@ export const componentHTMLAfter = ``;
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
+export const logJS = `${hideMarkerStart}
+const oldLog = console.log;
+console.log = function() {
+  oldLog.apply(console, arguments); // Keep default logging to the console
 
-export const indexHTMLBeforeStandard = `${htmlHideMarkerStart}
-<html>
-<head>
-<script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
-<!-- This defines the component tag and makes it available on your page !-->
-<script src="./component.js" type="module"></script>
-<script src="./index.js" type="module"></script>
-<link href="./index.css" rel="stylesheet">
-</head>
-<body>
-${htmlHideMarkerEnd}
-`;
+  // Create the container for logs if it does not exist
+  let logContainer = document.getElementById('log-container');
+  if (!logContainer) {
+    const body = document.body;
 
-// nothing dif yet
-export const indexHTMLBeforeUI = indexHTMLBeforeStandard;
+    // Create a container for logs
+    logContainer = document.createElement('div');
+    logContainer.id = 'log-container';
+    logContainer.style.fontFamily = 'Consolas, "Courier New", monospace';
+    logContainer.style.color = '#AAAAAA';
+    logContainer.style.margin = '0';
+    logContainer.style.width = '100%'; // Full width
+    logContainer.style.boxSizing = 'border-box'; // Box-sizing
+
+    // Append the log container to the body
+    body.appendChild(logContainer);
+  }
+
+  // Convert all arguments to a readable string with styling
+  const messages = Array.from(arguments).map(arg => {
+    const skipFormat = typeof arg == 'string';
+    return formatJSON(arg, skipFormat);
+  }).join(' ');
+
+  // Create and append the formatted message to the log container
+  const formattedMessage = document.createElement('div'); // Use div to replicate console line
+  formattedMessage.innerHTML = \`\${messages}\`; // Use innerHTML to include styled spans
+  logContainer.appendChild(formattedMessage);
+};
+
+function formatJSON(value, skipFormat = false) {
+  if(skipFormat) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return \`<span class="json-string">"\${value}"</span>\`;
+  } else if (typeof value === 'number') {
+    return \`<span class="json-number">\${value}</span>\`;
+  } else if (typeof value === 'boolean') {
+    return \`<span class="json-boolean">\${value}</span>\`;
+  } else if (Array.isArray(value)) {
+    const contents = value.map(item => formatJSON(item)).join(', ');
+    return \`[\${contents}]\`;
+  } else if (typeof value === 'object' && value !== null) {
+    const keys = Object.keys(value);
+    const formattedObject = keys.map(key => {
+      return \`<span class="json-key">"\${key}"</span>: \${formatJSON(value[key])}\`;
+    }).join(', ');
+    return \`{\${formattedObject}}\`;
+  } else {
+    return String(value);
+  }
+}
+${hideMarkerEnd}`;
+
+
+export const logCSS = `${hideMarkerStart}
+  .json-key { color: #656565; }
+  .json-string { color: #58A6FF; }
+  .json-number { color: #58A6FF; }
+  .json-boolean { color: #58A6FF; }
+${hideMarkerEnd}`;
+
+export const getIndexHTMLBefore = function(type) {
+  const pageScripts = [
+    'component.js',
+    'index.js',
+    'index.css',
+  ];
+
+  if(type == 'log') {
+    pageScripts.unshift('log.js');
+    pageScripts.unshift('log.css');
+  }
+
+  const getScriptCode = function() {
+    let html = '';
+    each(pageScripts, (src) => {
+      if(src.search('.js') >= 0) {
+        html += `\n<script src="./${src}" type="module"></script>`;
+      }
+      else if(src.search('.css') >= 0) {
+        html += `\n<link href="./${src}" rel="stylesheet">`;
+      }
+    })
+    return html;
+  }
+
+  return `${htmlHideMarkerStart}
+  <html>
+  <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
+  <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
+  <!-- This defines the component tag and makes it available on your page !-->
+  ${getScriptCode()}
+  </head>
+  <body style="background-color:#000">
+  ${htmlHideMarkerEnd}`;
+};
+
 
 export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
@@ -66,7 +157,7 @@ export const getExampleFiles = async(example, allExampleFiles) => {
   let hasComponent = false;
   const exampleFiles = {};
   await asyncEach(allExampleFiles, async (file, path) => {
-    const pathRegExp = new RegExp(`../../examples/${exampleID}/`);
+    const pathRegExp = new RegExp(`../../examples/.*${exampleID}/`);
     if (path.match(pathRegExp)) {
       const fileName = path.replace(pathRegExp, '');
       if(inArray(fileName, ['index.html'])) {
@@ -106,7 +197,7 @@ export const getExampleFiles = async(example, allExampleFiles) => {
       }
       else if(inArray(fileName, ['component.js', `${exampleID}.js`])) {
         const fileContent = await file();
-        hasComponent = true;
+        hasComponent = fileContent.default.search('createComponent') > -1;
         exampleFiles['component.js'] = {
           contentType: 'text/javascript',
           content: fileContent.default
@@ -115,13 +206,13 @@ export const getExampleFiles = async(example, allExampleFiles) => {
     }
   });
   // auto generate index.html if not specified for component
-  if(exampleFiles['component.js']?.content && !exampleFiles['index.html']?.content) {
+  if(!exampleFiles['index.html']?.content) {
 
     // get tag name from contents
     let tagName;
     if(hasComponent) {
       let matches = exampleFiles['component.js'].content.match(/tagName: '(.*)'/);
-      if(matches.length > 1) {
+      if(matches?.length > 1) {
         tagName = matches[1];
       }
       else {
@@ -131,32 +222,56 @@ export const getExampleFiles = async(example, allExampleFiles) => {
 
     exampleFiles['index.html'] = {
       contentType: 'text/html',
-      content: `<${tagName}></${tagName}>`
+      generated: true,
+      content: (tagName)
+        ? `<${tagName}></${tagName}>`
+        : ``
     };
   }
+
+  if(example.exampleType == 'log') {
+    exampleFiles['log.js'] = {
+      contentType: 'text/javascript',
+      generated: true,
+      hidden: true,
+      content: logJS
+    };
+    exampleFiles['log.css'] = {
+      contentType: 'text/css',
+      generated: true,
+      hidden: true,
+      content: logCSS
+    };
+  }
+
   // auto generate index.css/js if not specified for component
   if(!exampleFiles['index.css']?.content) {
     exampleFiles['index.css'] = {
       contentType: 'text/css',
+      generated: true,
+      content: ''
+    };
+  }
+  if(!exampleFiles['component.js']?.content) {
+    exampleFiles['component.js'] = {
+      contentType: 'text/javascript',
+      generated: true,
       content: ''
     };
   }
   if(!exampleFiles['index.js']?.content) {
     exampleFiles['index.js'] = {
       contentType: 'text/javascript',
+      generated: true,
       content: ''
     };
   }
-
   return exampleFiles;
 };
 
 export const getPlaygroundInjections = (type) => {
-  const indexHTMLBefore = (type == 'ui')
-    ? indexHTMLBeforeUI
-    : indexHTMLBeforeStandard
-  ;
-  return {
+  const indexHTMLBefore = getIndexHTMLBefore(type);
+  let injections = {
     'component.js': {
       before: componentJSBefore,
       after: componentJSAfter,
@@ -182,6 +297,7 @@ export const getPlaygroundInjections = (type) => {
       after: indexCSSAfter,
     },
   };
+  return injections;
 };
 
 export const addPlaygroundInjections = (files, type) => {
@@ -189,7 +305,7 @@ export const addPlaygroundInjections = (files, type) => {
   each(files, (file, name) => {
     if(fileInjections[name]) {
       const { before, after } = fileInjections[name];
-      files[name].content = (before || '') + files[name].content + (after || '');
+      files[name].content = (before || '') + files[name].content + (after || '').trim();
     }
   });
   return files;
@@ -230,3 +346,26 @@ export const getEmptyProjectFiles = ({
   return emptyFiles;
 };
 
+
+export const getPanelIndexes = (type) => {
+  if(type == 'log') {
+    return {
+      'index.js': 0,
+    };
+  }
+  else {
+    return {
+      'component.js': 0,
+      'component.html': 0,
+      'component.css': 1,
+    };
+    return {
+      'component.js': 0,
+      'component.html': 0,
+      'component.css': 0,
+      'index.html': 1,
+      'index.css': 1,
+      'index.js': 1,
+    };
+  }
+}

@@ -12,7 +12,7 @@
   {{#if exists files}}
     <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
       {{#each file in getFileArray}}
-        <script type="{{file.scriptType}}" filename="{{file.filename}}">{{{escapeHTML file.content}}}</script>
+        <script type="{{file.scriptType}}" filename="{{file.filename}}">{{#if is file.type 'text/html'}}{{{escapeHTML file.content}}}{{else}}{{file.content}}{{/if}}</script>
       {{/each}}
     </playground-project>
   {{/if}}
@@ -23,6 +23,13 @@
         items={{stringify getFileMenuItems}}
         value={{activeFile}}
       ></ui-menu>
+      {{#if exampleURL}}
+        <div class="links">
+          <a href="{{exampleURL}}" class="sandbox link">
+            <ui-icon codesandbox link></ui-icon>
+          </a>
+        </div>
+      {{/if}}
       <playground-file-editor
         line-numbers
         project="source"

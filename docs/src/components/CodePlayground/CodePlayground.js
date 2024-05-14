@@ -1,5 +1,5 @@
 import { createComponent, adoptStylesheet } from '@semantic-ui/component';
-import { first, get, each, sortBy, inArray } from '@semantic-ui/utils';
+import { firstMatch, get, each, sortBy, inArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import { addSearch } from './codemirror-search.js';
@@ -19,13 +19,11 @@ import 'playground-elements/playground-preview.js';
 const settings = {
   files: {},
   sandboxURL: '/sandbox',
+  exampleURL: '',
+  includeGeneratedInline: false,
   example: {},
   tabSize: 2,
   inline: false,
-};
-
-const createInstance = ({tpl, settings, $}) => ({
-  activeFile: new ReactiveVar(),
   sortOrder: [
     'component.js',
     'component.html',
@@ -41,14 +39,14 @@ const createInstance = ({tpl, settings, $}) => ({
     'text/typescript': 'sample/ts',
   },
   fileTitles: {
-    'component.js': 'Component JS',
-    'component.html': 'Component Template',
-    'component.css': 'Component CSS',
-    'index.html': 'Page HTML',
-    'index.css': 'Page CSS',
-    'index.js': 'Page JS',
+    'component.js': 'component.js',
+    'component.html': 'component.html',
+    'component.css': 'component.css',
+    'index.html': 'index.html',
+    'index.css': 'index.css',
+    'index.js': 'index.js',
   },
-  paneIndex: {
+  panelIndexes: {
     'component.js': 0,
     'component.html': 0,
     'component.css': 0,
@@ -57,20 +55,25 @@ const createInstance = ({tpl, settings, $}) => ({
     'index.js': 1,
   },
   panelSizes: {
-    'component.js': 'natural',
+    'component.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
     'index.html': (1 / 9 * 100),
     'index.css': (1 / 9 * 100),
     'index.js': (1 / 9 * 100),
   },
+  panelGroupWidth: [40]
+};
+
+const createInstance = ({tpl, settings, $}) => ({
+  activeFile: new ReactiveVar(),
   naturalPanels: ['component.js'],
   resizing: new ReactiveVar(false),
   getScriptType(type) {
-    return get(tpl.scriptTypes, type);
+    return get(settings.scriptTypes, type);
   },
   getPanelSize(file) {
-    let size = get(tpl.panelSizes, file.filename);
+    let size = get(settings.panelSizes, file.filename);
     if(size == 'natural' && !file.content) {
       size = 'grow';
     }
@@ -90,40 +93,48 @@ const createInstance = ({tpl, settings, $}) => ({
       filename,
       ...file,
       scriptType: tpl.getScriptType(file.contentType),
-      paneIndex: tpl.getDefaultPanel(filename),
-      sortIndex: tpl.getDefaultSort(filename),
+      panelIndex: tpl.getPanelIndex(filename),
+      sortIndex: tpl.getSort(filename),
       label: tpl.getFileLabel(filename)
     };
   },
-  getDefaultPanel(filename) {
-    return get(tpl.paneIndex, filename);
+  getPanelIndex(filename) {
+    return get(settings.panelIndexes, filename);
   },
-  getDefaultSort(filename) {
-    return tpl.sortOrder.indexOf(filename);
+  getSort(filename) {
+    return settings.sortOrder.indexOf(filename);
   },
   getFileLabel(filename) {
-    return filename;
+    return get(settings.fileTitles, filename);
   },
   getPanelGroupWidth(index) {
-    if(index == 0) {
-      return 40;
-    }
+    return settings.panelGroupWidth[index];
   },
   getFileMenuItems() {
-    const menu = tpl.getFileArray().map(file => ({
-      label: file.filename,
-      id: file.filename,
-    }));
+    const menu = tpl.getFileArray().map(file => {
+      if(file.generated && settings.inline && !settings.includeGeneratedInline) {
+        return false;
+      }
+      return {
+        label: file.filename,
+        id: file.filename,
+      }
+    }).filter(Boolean);
     return menu;
+  },
+  getFirstFile() {
+    return firstMatch(tpl.getFileArray(), file => !file.generated && !file.hidden);
   },
   getPanels() {
     let panels = [[], []];
-    let files = tpl.getFileArray();
+    let files = tpl.getFileArray().filter(file => !file.hidden);
     each(files, file => {
-      panels[file.paneIndex].push({
-        type: 'file',
-        ...file
-      });
+      if(file.panelIndex >= 0) {
+        panels[file.panelIndex].push({
+          type: 'file',
+          ...file
+        });
+      }
     });
     panels = panels.map(pane => sortBy(pane, 'sortIndex'));
     // preview always last on second pane
@@ -145,6 +156,11 @@ const createInstance = ({tpl, settings, $}) => ({
       iframe.contentWindow.location.reload()
     }
   },
+
+  setCodeSize(cm, { width = null, height = null } = {}) {
+    myCodeMirror.setSize(width, height);
+  },
+
   modifyCodeMirror(cm) {
 
     cm.refresh();
@@ -199,12 +215,28 @@ const createInstance = ({tpl, settings, $}) => ({
         cm.setSelections(matches);
       },
     });
+
+    if(settings.inline) {
+      cm.on('change', (instance, changeObj) => {
+        setTimeout(() => { // Use setTimeout to allow the DOM to update
+          const scrollInfo = instance.getScrollInfo();
+          const contentHeight = scrollInfo.height;
+          const clientHeight = scrollInfo.clientHeight;
+          const wrapper = instance.getWrapperElement();
+
+          // Only resize if content has transitioned to overflow state
+          if (contentHeight > clientHeight) {
+            wrapper.style.height = `${contentHeight}px`;
+            instance.refresh();
+          }
+        }, 1);
+      });
+    }
   }
 });
 
 const onCreated = ({ tpl, settings }) => {
-  const firstFilename = first(tpl.getFileArray())?.filename;
-  tpl.activeFile.set(firstFilename)
+  tpl.activeFile.set(tpl.getFirstFile()?.filename)
 };
 
 const onDestroyed = ({ tpl }) => {
@@ -212,11 +244,13 @@ const onDestroyed = ({ tpl }) => {
 
 const onRendered = ({ $, tpl, settings }) => {
   tpl.configureCodeEditors();
+
   $('ui-menu').settings({
     onChange: function(value) {
       tpl.activeFile.set(value);
     }
   });
+
   $('ui-panel').settings({
     getNaturalSize: function(panel, direction) {
       let size;

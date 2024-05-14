@@ -177,7 +177,7 @@
   li code {
     background-color: var(--standard-10);
     padding: 0em 0.5em;
-    font-size: 0.8125em;
+    font-size: 14px;
     color: var(--standard-100);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     margin: 0em 0px;
