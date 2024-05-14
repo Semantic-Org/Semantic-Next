@@ -3,7 +3,13 @@
   padding: var(--padding);
   border-radius: var(--border-radius);
 
-  .parity {
+  .status {
     float: right;
+    &.green {
+      color: var(--green);
+    }
+    &.red {
+      color: var(--red);
+    }
   }
 }

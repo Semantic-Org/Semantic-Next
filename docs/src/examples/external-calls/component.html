@@ -1,9 +1,9 @@
 <div class="counter">
-  <div class="parity">
-    {{#if isEven counter}}
-     Even
+  <div class="{{classIf running 'green' 'red'}}status">
+    {{#if running}}
+     Running
     {{else}}
-     Odd
+     Stopped
     {{/if}}
   </div>
   <span class="text">

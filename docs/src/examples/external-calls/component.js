@@ -10,15 +10,24 @@ const settings = {
 
 const createInstance = ({tpl, settings}) => ({
   counter: new ReactiveVar(),
+  running: new ReactiveVar(false),
   initialize() {
-    tpl.counter.set(settings.startingNumber);
+    tpl.setCounter(settings.startingNumber);
+    tpl.startCounter();
   },
-  isEven: (number) => (number % 2 == 0)
+  setCounter(number) {
+    tpl.counter.set(number);
+  },
+  startCounter() {
+    tpl.running.set(true);
+    tpl.interval = setInterval(() => tpl.counter.increment(), 1000);
+  },
+  stopCounter() {
+    tpl.running.set(false);
+    clearInterval(tpl.interval);
+  },
 });
 
-const onCreated = ({tpl}) => {
-  setInterval(() => tpl.counter.increment(), 1000);
-};
 
 createComponent({
   tagName: 'ui-counter',
@@ -26,5 +35,4 @@ createComponent({
   css,
   createInstance,
   settings,
-  onCreated,
 });
