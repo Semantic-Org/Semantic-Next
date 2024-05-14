@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import glob from 'glob';
 import { join } from 'path';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import semver from 'semver';
 
 const execAsync = promisify(exec);
 
@@ -15,18 +16,35 @@ const loadJsonFile = (filePath) => {
 const mainPackageJsonPath = join(process.cwd(), 'package.json');
 const mainPackageJson = loadJsonFile(mainPackageJsonPath);
 const versionArg = process.argv[2];
-const newVersion = versionArg || mainPackageJson.version;
+const dryRun = process.argv.includes('--dry-run');
 
-// Update the version in the main package.json if a new version is passed
-if (versionArg) {
+let newVersion = mainPackageJson.version;
+
+// Handle version bump
+if (['patch', 'minor', 'major'].includes(versionArg)) {
+  newVersion = semver.inc(mainPackageJson.version, versionArg);
+} else if (semver.valid(versionArg)) {
+  newVersion = versionArg;
+} else if (versionArg) {
+  console.error(`Invalid version argument: ${versionArg}`);
+  process.exit(1);
+}
+
+const updatedFiles = [];
+
+// Update the version in the main package.json if a new version is set
+if (newVersion !== mainPackageJson.version) {
   mainPackageJson.version = newVersion;
-  writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
+  if (!dryRun) {
+    writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
+  }
   console.log(`Updated main package version to ${newVersion}`);
+  updatedFiles.push(mainPackageJsonPath);
 }
 
 // Function to update dependency versions in package.json
 function updateDependencyVersions(packageJson, newVersion) {
-  ['dependencies', 'devDependencies'].forEach(depType => {
+  ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depType => {
     if (packageJson[depType]) {
       Object.keys(packageJson[depType]).forEach(dep => {
         if (dep.startsWith('@semantic-ui/')) {  // Simple scope check
@@ -44,20 +62,23 @@ async function publishPackage(dir) {
     const packageJson = loadJsonFile(packageJsonPath);
     packageJson.version = newVersion;  // Update the package version
     updateDependencyVersions(packageJson, newVersion);  // Update dependency versions
-    writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+    if (!dryRun) {
+      writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+    }
     console.log(`Updated package version and dependencies in ${dir} to ${newVersion}`);
+    updatedFiles.push(packageJsonPath);
 
-    try {
-      console.log(`Publishing package in ${dir}...`);
-      await execAsync('npm publish', { cwd: dir });
-      console.log(`Successfully published package from ${dir}.`);
-    } catch (error) {
-      console.error(`Failed to publish package from ${dir}: ${error.message}`);
+    if (!dryRun) {
+      try {
+        console.log(`Publishing package in ${dir}...`);
+        await execAsync('npm publish', { cwd: dir });
+        console.log(`Successfully published package from ${dir}.`);
+      } catch (error) {
+        console.error(`Failed to publish package from ${dir}: ${error.message}`);
+      }
     }
   }
 }
-
-publishPackage('./');
 
 // Read workspaces to publish from main package
 const workspaceGlobs = mainPackageJson.workspaces;
@@ -72,5 +93,19 @@ const workspaceGlobs = mainPackageJson.workspaces;
   });
 
   await Promise.all(publishPromises);
+
+  if (!dryRun && updatedFiles.length > 0) {
+    try {
+      await execAsync('git add ' + updatedFiles.join(' '));
+      await execAsync(`git commit -m "chore: bump versions to ${newVersion}"`);
+      await execAsync('git push');
+      await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
+      await execAsync('git push --tags');
+      console.log('Committed and pushed version updates and created a new tag.');
+    } catch (error) {
+      console.error(`Failed to commit and push changes: ${error.message}`);
+    }
+  }
+
   console.log('All packages have been processed.');
 })();
