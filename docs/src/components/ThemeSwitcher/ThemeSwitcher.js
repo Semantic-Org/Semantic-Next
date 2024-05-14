@@ -10,7 +10,7 @@ const state = {
   theme: undefined
 };
 
-const createInstance = function ({ $, isServer, state, tpl }) {
+const createInstance = function ({ $, isServer, reaction, state, tpl }) {
   return {
     getLocalTheme() {
       if(isServer) {
@@ -36,7 +36,7 @@ const createInstance = function ({ $, isServer, state, tpl }) {
       return icon;
     },
     calculateTheme() {
-      tpl.reaction((comp) => {
+      reaction((comp) => {
         let theme = state.theme.get();
         if(!theme || comp.isFirstRun) {
           return;
@@ -53,7 +53,8 @@ const createInstance = function ({ $, isServer, state, tpl }) {
   };
 };
 
-const onCreated = function({tpl, state, isClient}) {
+const onCreated = function({tpl, reaction, reactiveVar, state, isClient}) {
+
   state.theme.set(tpl.getLocalTheme());
   if(isClient) {
     tpl.calculateTheme();
