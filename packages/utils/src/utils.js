@@ -133,6 +133,38 @@ export const isEmpty = (x) => {
   return true;
 };
 
+export const isClassInstance = (obj) => {
+  if (obj === null || typeof obj !== 'object') {
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(obj);
+  const constructorName = proto.constructor.name;
+
+  const builtInTypes = [
+    'Object',
+    'Array',
+    'Date',
+    'RegExp',
+    'Map',
+    'Set',
+    'Error',
+    'Uint8Array',
+    'Int8Array',
+    'Uint16Array',
+    'Int16Array',
+    'Uint32Array',
+    'Int32Array',
+    'Float32Array',
+    'Float64Array',
+    'BigInt64Array',
+    'BigUint64Array',
+    'NodeList',
+  ];
+
+  return !builtInTypes.includes(constructorName);
+};
+
 /*-------------------
         Date
 --------------------*/

@@ -1,15 +1,14 @@
-import { clone, isObject, isEqual, wrapFunction, findIndex, unique, isNumber } from '@semantic-ui/utils';
+import { clone, isObject, isEqual, wrapFunction, isClassInstance, isArray, findIndex, unique, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
 
-  constructor(initialValue, { equalityFunction, useClone = true, cloneFunction } = {}) {
-    this.currentValue = this.maybeClone(initialValue);
+  constructor(initialValue, { equalityFunction, canClone = true, cloneFunction } = {}) {
     this.dependency = new Dependency();
 
     // allow user to opt out of value cloning
-    this.useClone = useClone;
+    this.canClone = canClone;
 
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
@@ -22,6 +21,7 @@ export class ReactiveVar {
       ? wrapFunction(cloneFunction)
       : ReactiveVar.cloneFunction
     ;
+    this.currentValue = this.maybeClone(initialValue);
   }
 
   static equalityFunction = isEqual;
@@ -39,9 +39,16 @@ export class ReactiveVar {
     ;
   }
 
+  canCloneValue(value) {
+    return (this.canClone === true && !isClassInstance(value));
+  }
+
   maybeClone(value) {
-    if (!this.useClone || value instanceof ReactiveVar) {
+    if (!this.canCloneValue(value)) {
       return value;
+    }
+    if(isArray(value)) {
+      return value = value.map(value => this.maybeClone(value));
     }
     return this.clone(value);
   }
@@ -80,26 +87,26 @@ export class ReactiveVar {
 
   // array helpers
   push(value) {
-    let arr = this.value;
+    const arr = this.value;
     arr.push(value);
     this.set(arr);
   }
   unshift(value) {
-    let arr = this.value;
+    const arr = this.value;
     arr.unshift(value);
     this.set(arr);
   }
   splice(...args) {
-    let arr = this.value;
+    const arr = this.value;
     arr.splice(...args);
     this.set(arr);
   }
   map(mapFunction) {
-    const newValue = this.map(mapFunction);
+    const newValue = Array.prototype.map.call(this.currentValue, mapFunction);
     this.set(newValue);
   }
   filter(filterFunction) {
-    const newValue = this.filter((value) => !filterFunction(value));
+    const newValue = Array.prototype.filter.call(this.currentValue, filterFunction);
     this.set(newValue);
   }
 

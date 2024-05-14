@@ -27,6 +27,7 @@ import { tokenize,
   isBinary,
   isEqual,
   isFunction,
+  isClassInstance,
   isNumber,
   isObject,
   isPlainObject,
@@ -216,6 +217,64 @@ describe('Type Checking Utilities', () => {
     expect(testFunction(1, 2, 3)).toBe(true);
     expect(isArguments([1, 2, 3])).toBe(false);
   });
+
+  describe('isClassInstance', () => {
+    it('should return true for a custom class instance', () => {
+      class MyClass {}
+      const instance = new MyClass();
+      expect(isClassInstance(instance)).toBe(true);
+    });
+
+    it('should return false for a plain object', () => {
+      const obj = {};
+      expect(isClassInstance(obj)).toBe(false);
+    });
+
+    it('should return false for primitive values', () => {
+      expect(isClassInstance(null)).toBe(false);
+      expect(isClassInstance(undefined)).toBe(false);
+      expect(isClassInstance(42)).toBe(false);
+      expect(isClassInstance('hello')).toBe(false);
+      expect(isClassInstance(true)).toBe(false);
+    });
+
+    it('should return false for an array', () => {
+      expect(isClassInstance([])).toBe(false);
+    });
+
+    it('should return false for a Date object', () => {
+      expect(isClassInstance(new Date())).toBe(false);
+    });
+
+    it('should return false for a regular expression', () => {
+      expect(isClassInstance(/regex/)).toBe(false);
+    });
+
+    it('should return false for a Map object', () => {
+      expect(isClassInstance(new Map())).toBe(false);
+    });
+
+    it('should return false for a Set object', () => {
+      expect(isClassInstance(new Set())).toBe(false);
+    });
+
+    it('should return false for an Error object', () => {
+      expect(isClassInstance(new Error())).toBe(false);
+    });
+
+    it('should return false for a Uint8Array', () => {
+      expect(isClassInstance(new Uint8Array())).toBe(false);
+    });
+
+    // Add more test cases for other built-in object types as needed
+
+    it('should return false for functions', () => {
+      expect(isClassInstance(() => {})).toBe(false);
+      function testFunction() {}
+      expect(isClassInstance(testFunction)).toBe(false);
+    });
+  });
+
   describe('groupBy', () => {
     it('should group objects by a simple property', () => {
       const array = [
