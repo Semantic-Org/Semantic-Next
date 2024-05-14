@@ -45,14 +45,14 @@ export const TemplateHelpers = {
       : ''
     ;
   },
-  maybe(expr, trueClass = '', falseClass = '') {
-    TemplateHelpers.maybe(expr, trueClass, falseClass);
+  maybe(expr, trueExpr, falseExpr) {
+    return expr ? trueExpr : falseExpr;
   },
   activeIf(expr) {
-    return TemplateHelpers.maybe(expr, 'active', '');
+    return TemplateHelpers.classIf(expr, 'active', '');
   },
   selectedIf(expr) {
-    return TemplateHelpers.maybe(expr, 'selected', '');
+    return TemplateHelpers.classIf(expr, 'selected', '');
   },
   capitalize(text = '') {
     return capitalize(text);
@@ -61,10 +61,10 @@ export const TemplateHelpers = {
     return toTitleCase(text);
   },
   disabledIf(expr) {
-    return TemplateHelpers.maybe(expr, 'disabled', '');
+    return TemplateHelpers.classIf(expr, 'disabled', '');
   },
   checkedIf(expr) {
-    return TemplateHelpers.maybe(expr, 'checked', '');
+    return TemplateHelpers.classIf(expr, 'checked', '');
   },
   isEqual(a, b) {
     return a == b;
