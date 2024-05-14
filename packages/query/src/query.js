@@ -297,7 +297,7 @@ export class Query {
     }
     Query._eventHandlers.push(...eventHandlers);
 
-    if(options.returnHandler) {
+    if(options?.returnHandler) {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
     }
     return this;
