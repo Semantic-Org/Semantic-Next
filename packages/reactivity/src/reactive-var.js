@@ -132,7 +132,7 @@ export class ReactiveVar {
       value = property;
       property = indexOrProperty;
     }
-    const newValue = this.maybeClone(this.currentValue).map((object, currentIndex) => {
+    const newValue = this.currentValue.map((object, currentIndex) => {
       if(index == 'all' || currentIndex == index) {
         object[property] = value;
       }
@@ -171,9 +171,19 @@ export class ReactiveVar {
   getIndex(id) {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
-  setProperty(id, property, value) {
-    const index = this.getIndex(id);
-    return this.setArrayProperty(index, property, value);
+  setProperty(idOrProperty, property, value) {
+    if(arguments.length == 3) {
+      const id = idOrProperty;
+      const index = this.getIndex(id);
+      return this.setArrayProperty(index, property, value);
+    }
+    else {
+      value = property;
+      property = idOrProperty;
+      const obj = this.currentValue;
+      obj[property] = value;
+      this.set(obj);
+    }
   }
   replaceItem(id, item) {
     return this.setIndex(this.getIndex(id), item);

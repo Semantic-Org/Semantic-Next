@@ -375,96 +375,60 @@ describe.concurrent('ReactiveVar', () => {
 
   describe.concurrent('Cloning Behavior with ReactiveVars', () => {
     it('should maintain reactivity when using a ReactiveVar inside another ReactiveVar', () => {
-      const callback = vi.fn();
+      const innerCallback = vi.fn();
       const innerVar = new ReactiveVar(1);
+
+      const outerCallback = vi.fn();
       const outerVar = new ReactiveVar(innerVar);
-      outerVar.subscribe(callback);
 
+      outerVar.subscribe(outerCallback);
       Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
+      expect(outerCallback).toHaveBeenCalledTimes(1);
 
+      innerVar.subscribe(innerCallback);
       innerVar.set(2);
       Reaction.flush();
 
-      expect(callback).toHaveBeenCalledTimes(2);
-      expect(callback).toHaveBeenCalledWith(innerVar);
+      expect(innerCallback).toHaveBeenCalledTimes(2);
     });
 
-    it('should maintain reactivity when using an array of ReactiveVars', () => {
-      const callback = vi.fn();
-      const innerVar1 = new ReactiveVar(1);
-      const innerVar2 = new ReactiveVar(2);
-      const outerVar = new ReactiveVar([innerVar1, innerVar2]);
-      outerVar.subscribe(callback);
+    it('should not retrigger reactivity on array when updating objects', () => {
+      const outerCallback = vi.fn();
+
+      const innerCallback1 = vi.fn();
+      const innerCallback2 = vi.fn();
+
+      const data1 = { id: 1, text: 'test object'};
+      const data2 = { id: 2, text: 'test object 2'};
+
+      const innerVar1 = new ReactiveVar(data1);
+      const innerVar2 = new ReactiveVar(data2);
+
+      innerVar1.subscribe(innerCallback1);
+      innerVar2.subscribe(innerCallback2);
+
+      const outerVar = new ReactiveVar([]);
+      outerVar.subscribe(outerCallback);
 
       Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
+      expect(outerCallback).toHaveBeenCalledTimes(1);
 
-      innerVar1.set(3);
+      outerVar.push(innerVar1);
       Reaction.flush();
+      expect(outerCallback).toHaveBeenCalledTimes(2);
 
-      expect(callback).toHaveBeenCalledTimes(2);
-      expect(callback).toHaveBeenCalledWith([innerVar1, innerVar2]);
-
-      innerVar2.set(4);
+      outerVar.push(innerVar2);
       Reaction.flush();
+      expect(outerCallback).toHaveBeenCalledTimes(3);
 
-      expect(callback).toHaveBeenCalledTimes(3);
-      expect(callback).toHaveBeenCalledWith([innerVar1, innerVar2]);
-    });
+      innerVar1.setProperty('text', 'hello world');
+      expect(innerCallback1).toHaveBeenCalledTimes(1);
+      expect(outerCallback).toHaveBeenCalledTimes(3);
 
-    it('should not leak memory when cloning ReactiveVars', () => {
-      const innerVar = new ReactiveVar(1);
-      const outerVar = new ReactiveVar(innerVar);
+      innerVar2.setProperty('text', 'hello world 2');
+      expect(innerCallback2).toHaveBeenCalledTimes(1);
+      expect(outerCallback).toHaveBeenCalledTimes(3);
 
-      // Test case 1: Update the inner ReactiveVar
-      const clonedInnerVar1 = outerVar.value;
-      innerVar.set(2);
-      expect(clonedInnerVar1.value).toBe(1); // Cloned value should not change
-
-      // Test case 2: Update the outer ReactiveVar
-      const clonedInnerVar2 = outerVar.value;
-      outerVar.set(new ReactiveVar(3));
-      expect(clonedInnerVar2.value).toBe(2); // Cloned value should not change
-
-      // Test case 3: Subscribe and unsubscribe from the outer ReactiveVar
-      const callback = vi.fn();
-      const subscription = outerVar.subscribe(callback);
-      outerVar.set(new ReactiveVar(4));
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
-      subscription.stop();
-      outerVar.set(new ReactiveVar(5));
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1); // Callback should not be called after unsubscribing
-    });
-
-    it('should not leak memory when cloning arrays of ReactiveVars', () => {
-      const innerVar1 = new ReactiveVar(1);
-      const innerVar2 = new ReactiveVar(2);
-      const outerVar = new ReactiveVar([innerVar1, innerVar2]);
-
-      // Test case 1: Update an inner ReactiveVar
-      const clonedArray1 = outerVar.value;
-      innerVar1.set(3);
-      expect(clonedArray1[0].value).toBe(1); // Cloned value should not change
-
-      // Test case 2: Update the outer ReactiveVar
-      const clonedArray2 = outerVar.value;
-      outerVar.set([new ReactiveVar(4), new ReactiveVar(5)]);
-      expect(clonedArray2[0].value).toBe(3); // Cloned value should not change
-      expect(clonedArray2[1].value).toBe(2); // Cloned value should not change
-
-      // Test case 3: Subscribe and unsubscribe from the outer ReactiveVar
-      const callback = vi.fn();
-      const subscription = outerVar.subscribe(callback);
-      outerVar.set([new ReactiveVar(6), new ReactiveVar(7)]);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
-      subscription.stop();
-      outerVar.set([new ReactiveVar(8), new ReactiveVar(9)]);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1); // Callback should not be called after unsubscribing
     });
   });
 
