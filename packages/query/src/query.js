@@ -741,10 +741,16 @@ export class Query {
       });
     });
   }
+
   setting(setting, value) {
     this.each((el) => {
       el[setting] = value;
     });
   }
 
+  // special helper for SUI components
+  getComponent() {
+    const tpls = this.map(el => el.tpl).filter(Boolean);
+    return tpls.length > 1 ? tpls : tpls[0];
+  }
 }
