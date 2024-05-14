@@ -54,7 +54,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     const t = state.time.get() - state.lastTime;
 
     // get current position non-reactively
-    const ballData = clone(ball.peek());
+    const ballData = ball.peek();
 
     // Update ball position
     ballData.x += ballData.vx * t;
