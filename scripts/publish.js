@@ -13,6 +13,18 @@ const loadJsonFile = (filePath) => {
   return JSON.parse(readFileSync(filePath, { encoding: 'utf8' }));
 };
 
+// Get the current version from npm
+const getCurrentVersionFromNpm = async (packageName) => {
+  try {
+    const { stdout } = await execAsync(`npm show ${packageName} version`);
+    return stdout.trim();
+  } catch (error) {
+    console.error(`Failed to get current version from npm: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+
 // Load the main package.json to determine the version to set
 const mainPackageJsonPath = join(process.cwd(), 'package.json');
 const mainPackageJson = loadJsonFile(mainPackageJsonPath);
@@ -20,7 +32,13 @@ const versionArg = process.argv[2];
 const dryRun = process.argv.includes('--dry-run');
 const ciOverride = process.argv.includes('--ci');
 
+let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
 let newVersion = mainPackageJson.version;
+
+if(npmVersion == newVersion || semver.gt(npmVersion, newVersion)) {
+  console.error(`NPM version of ${npmVersion} is greater or equal to new version ${newVersion}`);
+  process.exit(1);
+}
 
 // Handle version bump
 const handleVersionBump = async () => {
