@@ -35,10 +35,6 @@ const ciOverride = process.argv.includes('--ci');
 let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
 let newVersion = mainPackageJson.version;
 
-if(npmVersion == newVersion || semver.gt(npmVersion, newVersion)) {
-  console.error(`NPM version of ${npmVersion} is greater or equal to new version ${newVersion}`);
-  process.exit(1);
-}
 
 // Handle version bump
 const handleVersionBump = async () => {
@@ -60,6 +56,10 @@ const handleVersionBump = async () => {
       }
     }
     newVersion = semver.inc(mainPackageJson.version, versionArg);
+    if(npmVersion == newVersion || semver.gt(npmVersion, newVersion)) {
+      console.error(`NPM version of ${npmVersion} is greater or equal to new version ${newVersion}`);
+      process.exit(1);
+    }
   } else if (semver.valid(versionArg)) {
     newVersion = versionArg;
   } else if (versionArg) {
