@@ -1,7 +1,7 @@
 import { LitElement } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isEqual, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
-
+import { ReactiveVar } from '@semantic-ui/reactivity';
 import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
@@ -275,6 +275,27 @@ class WebComponentBase extends LitElement {
     }
     //property.hasChanged = isEqual;
     return property;
+  }
+
+
+  /*******************************
+          Reactive State
+  *******************************/
+
+  createReactiveState(state) {
+    let reactiveState = {};
+    each(state, (config, name) => {
+      if(config?.value && config?.options) {
+        // complex config { counter: { value: 0, options: { equalityFunction }}}
+        reactiveState[name] = new ReactiveVar(config.value, config.options);
+      }
+      else {
+        // simple config i.e. { counter: 0 }
+        const initialValue = config;
+        reactiveState[name] = new ReactiveVar(initialValue);
+      }
+    });
+    return reactiveState;
   }
 
   /*******************************

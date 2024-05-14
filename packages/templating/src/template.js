@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, proxyObject, extend, clone, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -20,6 +20,7 @@ export const Template = class Template {
     renderRoot,
     css,
     events,
+    state,
     subTemplates,
     createInstance,
     parentTemplate, // the parent template when nested
@@ -40,6 +41,7 @@ export const Template = class Template {
     this.ast = ast;
     this.css = css;
     this.data = data || {};
+    this.state = state || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
@@ -83,11 +85,6 @@ export const Template = class Template {
     return `Anonymous #${Template.templateCount}`;
   }
 
-  findTemplate = (templateName) => Template.findTemplate(templateName);
-  findParent = (templateName) => Template.findParentTemplate(this, templateName);
-  findChild = (templateName) => Template.findChildTemplate(this, templateName);
-  findChildren = (templateName) => Template.findChildTemplates(this, templateName);
-
   initialize() {
     let tpl = this;
     if (isFunction(this.createInstance)) {
@@ -103,6 +100,10 @@ export const Template = class Template {
     }
     this.tpl.data = this.data;
     this.tpl._childTemplates = [];
+
+    /* This will be removed before release
+      will need to refactor some examples
+    */
     this.tpl.$ = this.$.bind(this);
     this.tpl.$$ = this.$$.bind(this);
     this.tpl.attachEvent = this.attachEvent.bind(this);
@@ -113,6 +114,7 @@ export const Template = class Template {
     this.tpl.findParent = this.findParent.bind(this);
     this.tpl.findChild = this.findChild.bind(this);
     this.tpl.findChildren = this.findChildren.bind(this);
+    /* end of removed section */
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
@@ -374,7 +376,7 @@ export const Template = class Template {
   }
 
   /*******************************
-           DOM Helpers
+             DOM Helpers
   *******************************/
 
   // Rendered DOM (either shadow or regular)
@@ -413,9 +415,11 @@ export const Template = class Template {
         el: this.element,
         tpl: this.tpl,
         $: this.$.bind(this),
+        reaction: this.reaction,
 
         data: this.tpl.data,
         settings: this.element.settings,
+        state: this.element.state,
 
         isServer: Template.isServer,
         isClient: !Template.isServer, // convenience
@@ -424,10 +428,11 @@ export const Template = class Template {
         attachEvent: this.attachEvent.bind(this),
         abortController: this.eventController,
 
-        findTemplate: this.findTemplate,
         template: this,
+        templateName: this.templateName,
         templates: Template.renderedTemplates,
 
+        findTemplate: this.findTemplate,
         findParent: this.findParent.bind(this),
         findChild: this.findChild.bind(this),
         findChildren: this.findChildren.bind(this),
@@ -488,6 +493,16 @@ export const Template = class Template {
   clearReactions() {
     each(this.reactions || [], (comp) => comp.stop());
   }
+
+  /*******************************
+          Template Helpers
+  *******************************/
+
+
+  findTemplate = (templateName) => Template.findTemplate(templateName);
+  findParent = (templateName) => Template.findParentTemplate(this, templateName);
+  findChild = (templateName) => Template.findChildTemplate(this, templateName);
+  findChildren = (templateName) => Template.findChildTemplates(this, templateName);
 
   static renderedTemplates = new Map();
 
