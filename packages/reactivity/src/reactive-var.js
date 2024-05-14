@@ -4,15 +4,28 @@ import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
 
-  constructor(initialValue, equalityFunction) {
-    this.currentValue = this.clone(initialValue);
+  constructor(initialValue, { equalityFunction, useClone = true, cloneFunction } = {}) {
+    this.currentValue = this.maybeClone(initialValue);
     this.dependency = new Dependency();
-    this.equalityFunction = equalityFunction
+
+    // allow user to opt out of value cloning
+    this.useClone = useClone;
+
+    // allow custom equality function
+    this.equalityFunction = (equalityFunction)
       ? wrapFunction(equalityFunction)
-      : ReactiveVar.equalityFunction;
+      : ReactiveVar.equalityFunction
+    ;
+
+    // allow custom clone function
+    this.clone = (cloneFunction)
+      ? wrapFunction(cloneFunction)
+      : ReactiveVar.cloneFunction
+    ;
   }
 
   static equalityFunction = isEqual;
+  static cloneFunction = clone;
 
   get value() {
     // Record this ReactiveVar as a dependency if inside a Reaction computation
@@ -21,21 +34,21 @@ export class ReactiveVar {
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
     return (Array.isArray(value) || typeof value == 'object')
-      ? this.clone(value)
+      ? this.maybeClone(value)
       : value
     ;
   }
 
-  clone(value) {
-    if (value instanceof ReactiveVar) {
+  maybeClone(value) {
+    if (!this.useClone || value instanceof ReactiveVar) {
       return value;
     }
-    return clone(value);
+    return this.clone(value);
   }
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.clone(newValue);
+      this.currentValue = this.maybeClone(newValue);
       this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
@@ -112,7 +125,7 @@ export class ReactiveVar {
       value = property;
       property = indexOrProperty;
     }
-    const newValue = this.clone(this.currentValue).map((object, currentIndex) => {
+    const newValue = this.maybeClone(this.currentValue).map((object, currentIndex) => {
       if(index == 'all' || currentIndex == index) {
         object[property] = value;
       }
