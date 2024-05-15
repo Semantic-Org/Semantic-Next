@@ -219,7 +219,8 @@ export class Query {
     const closest = Array.from(this).map((el) => {
       if (this.options.pierceShadow) {
         return this.closestDeep(el, selector);
-      } else {
+      }
+      else {
         return el.closest(selector);
       }
     }).filter(Boolean);
@@ -229,15 +230,19 @@ export class Query {
 
   closestDeep(element, selector) {
     let currentElement = element;
+    const domSelector = isDOM(selector);
+    const stringSelector = isString(selector);
     while (currentElement) {
-      if (currentElement.matches(selector)) {
+      if ((domSelector && currentElement === selector) || (stringSelector && currentElement.matches(selector))) {
         return currentElement;
       }
       if (currentElement.parentElement) {
         currentElement = currentElement.parentElement;
-      } else if (currentElement.parentNode && currentElement.parentNode.host) {
+      }
+      else if (currentElement.parentNode && currentElement.parentNode.host) {
         currentElement = currentElement.parentNode.host;
-      } else {
+      }
+      else {
         return;
       }
     }
@@ -580,7 +585,8 @@ export class Query {
       return this.each(el => {
         el[name] = value;
       });
-    } else {
+    }
+    else {
       // Get the property value from elements
       if (this.length === 1) {
         return this[0][name];

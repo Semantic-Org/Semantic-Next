@@ -275,6 +275,41 @@ describe('query', () => {
 
   });
 
+  describe('closestDeep', () => {
+    it('should return the closest ancestor matching a selector', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $span = $('span');
+      const $closest = $span.closest('div');
+      expect($closest.get(0)).toBe(div);
+    });
+
+    it('should return the closest ancestor matching a DOM element', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $span = $('span');
+      const $closest = $span.closest(div);
+      expect($closest.get(0)).toBe(div);
+    });
+
+    it('should return an empty Query instance if no matching ancestor is found', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $span = $('span');
+      const $closest = $span.closest('p');
+      expect($closest.length).toBe(0);
+    });
+  });
+
   describe('filter', () => {
       
       it('filter should return elements that match a selector', () => {
