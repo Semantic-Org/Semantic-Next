@@ -18,8 +18,9 @@ const createInstance = ({tpl, settings, state, $}) => ({
     }
     else {
       const extraSpacing = 5;
+      const scrollbarHeight = $(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
       const codeHeight = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-height'));
-      const size = codeHeight + labelHeight + extraSpacing;
+      const size = codeHeight + labelHeight + extraSpacing + scrollbarHeight;
       return size;
     }
   },
