@@ -1,6 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, kebabToCamel, proxyObject } from '@semantic-ui/utils';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
@@ -57,12 +56,14 @@ export const createComponent = ({
     Create Component Returns Either a Template or WebComponent
     Templates are created as a prototype that can be cloned when instantiated
   */
+
   let litTemplate = new Template({
     templateName: templateName,
     isPrototype: true,
     renderingEngine,
     ast,
     css,
+    state,
     events,
     subTemplates,
     onCreated,
@@ -96,7 +97,6 @@ export const createComponent = ({
         super();
         this.css = css;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
-        this.state = this.createReactiveState(state);
         this.setDefaultSettings(settings);
       }
 
@@ -126,7 +126,6 @@ export const createComponent = ({
             element: this,
             renderRoot: this.renderRoot,
           });
-          // just to be safe
           if(!this.template.initialized) {
             this.template.initialize();
           }
@@ -181,7 +180,6 @@ export const createComponent = ({
         let data = {
           ...settings,
           ...this.getContent({componentSpec}),
-          ...this.state,
         };
         if (!isServer) {
           data.darkMode = this.isDarkMode();

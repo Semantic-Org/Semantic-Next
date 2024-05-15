@@ -277,27 +277,6 @@ class WebComponentBase extends LitElement {
     return property;
   }
 
-
-  /*******************************
-          Reactive State
-  *******************************/
-
-  createReactiveState(state) {
-    let reactiveState = {};
-    each(state, (config, name) => {
-      if(config?.value && config?.options) {
-        // complex config { counter: { value: 0, options: { equalityFunction }}}
-        reactiveState[name] = new ReactiveVar(config.value, config.options);
-      }
-      else {
-        // simple config i.e. { counter: 0 }
-        const initialValue = config;
-        reactiveState[name] = new ReactiveVar(initialValue);
-      }
-    });
-    return reactiveState;
-  }
-
   /*******************************
       Settings / Template Data
   *******************************/

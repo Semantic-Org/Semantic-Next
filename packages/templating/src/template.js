@@ -42,7 +42,7 @@ export const Template = class Template {
     this.css = css;
     this.data = data || {};
     this.reactions = [];
-    this.state = state || {};
+    this.state = this.createReactiveState(state) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
@@ -55,12 +55,29 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
+    this.parentTemplate = parentTemplate;
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
     if (renderRoot) {
       this.attach(renderRoot);
     }
+  }
+
+  createReactiveState(state) {
+    let reactiveState = {};
+    each(state, (config, name) => {
+      if(config?.value && config?.options) {
+        // complex config { counter: { value: 0, options: { equalityFunction }}}
+        reactiveState[name] = new ReactiveVar(config.value, config.options);
+      }
+      else {
+        // simple config i.e. { counter: 0 }
+        const initialValue = config;
+        reactiveState[name] = new ReactiveVar(initialValue);
+      }
+    });
+    return reactiveState;
   }
 
   setDataContext(data, { rerender = true } = {}) {
@@ -181,6 +198,7 @@ export const Template = class Template {
   getDataContext() {
     return {
       ...this.data,
+      ...this.state,
       ...this.tpl,
     };
   }
@@ -218,12 +236,14 @@ export const Template = class Template {
       element: this.element,
       ast: this.ast,
       css: this.css,
+      state: this.state,
       events: this.events,
       renderingEngine: this.renderingEngine,
       subTemplates: this.subTemplates,
       onCreated: this.onCreatedCallback,
       onThemeChanged: this.onThemeChangedCallback,
       onRendered: this.onRenderedCallback,
+      parentTemplate: this.parentTemplate,
       onDestroyed: this.onDestroyedCallback,
       createInstance: this.createInstance,
     };
@@ -291,11 +311,9 @@ export const Template = class Template {
           if (!this.isNodeInTemplate(event.target)) {
             return;
           }
-          if (
-            (eventName === 'mouseover' || eventName === 'mouseout') &&
-            event.relatedTarget &&
-            event.target.contains(event.relatedTarget)
-          ) {
+          if (inArray(eventName, ['mouseover', 'mouseout'])
+            && event.relatedTarget
+            && event.target.contains(event.relatedTarget)) {
             return;
           }
           const targetElement = (selector)
@@ -413,7 +431,6 @@ export const Template = class Template {
       return;
     }
     if (!params) {
-      const element = this.element;
       params = {
 
         el: this.element,
@@ -425,11 +442,11 @@ export const Template = class Template {
 
         data: this.tpl.data,
         settings: this.element.settings,
-        state: this.element.state,
+        state: this.state,
 
         isRendered: this.rendered,
         isServer: Template.isServer,
-        isClient: !Template.isServer, // convenience
+        isClient: !Template.isServer,
 
         dispatchEvent: this.dispatchEvent.bind(this),
         attachEvent: this.attachEvent.bind(this),
