@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, inArray } from '@semantic-ui/utils';
+import { each, isString, inArray, range, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
@@ -98,10 +98,12 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
   },
   setStartingCalculations(panel, eventData) {
+    const naturalSizes = tpl.panels.map((panel, index) => tpl.getNaturalPanelSize(index));
     tpl.group = {
       ...tpl.group,
       scrollOffset: tpl.getGroupScrollOffset(),
-      size: tpl.getGroupSize()
+      size: tpl.getGroupSize(),
+      naturalSizes
     };
     tpl.resize = {
       ...tpl.resize,
@@ -174,20 +176,25 @@ const createInstance = ({tpl, el, settings, $}) => ({
       : $('.panels', { pierceShadow: false }).height()
     ;
   },
-  setPanelSize(index, relativeSize, { donor = false, donorIndexes = [] } = {}) {
+  setPanelSize(index, relativeSize, { donorType, donorIndexes = [] } = {}) {
     let panel = tpl.panels[index];
-    if(donor) {
+    if(donorType || donorIndexes.length) {
       let currentSize = tpl.getPanelSizePixels(index) || 0;
       let newSize = tpl.getPixelSize(relativeSize) || 0;
       let sizeDelta = newSize - currentSize;
       $(panel).css('flex-grow', relativeSize);
       if(!donorIndexes.length) {
-        // use panel after as donor unless last panel
-        let donorIndex = (index == tpl.panels.length - 1)
-          ? index - 1
-          : index + 1
-        ;
-        donorIndexes = [donorIndex];
+        if(donorType == 'adjacent') {
+          // use panel after as donor unless last panel
+          let donorIndex = (index == tpl.panels.length - 1)
+            ? index - 1
+            : index + 1
+          ;
+          donorIndexes = [donorIndex];
+        }
+        else if(donorType == 'others') {
+          donorIndexes = range(0, tpl.panels.length).filter(curIndex => curIndex !== index);
+        }
       }
       each(donorIndexes, donorIndex => {
         let donorSize = tpl.getPanelSizePixels(donorIndex) || 0;
@@ -213,15 +220,15 @@ const createInstance = ({tpl, el, settings, $}) => ({
   getNaturalPanelSize(index) {
     let panel = tpl.panels[index];
     let getPanelNaturalSize = tpl.getPanelSetting(index, 'getNaturalSize');
-    let naturalSize = getPanelNaturalSize(panel, settings.direction);
+    let naturalSize = getPanelNaturalSize(panel, { direction: settings.direction, minimized: panel.settings.minimized });
     return naturalSize;
   },
-  setNaturalPanelSize(index) {
+  setNaturalPanelSize(index, settings = { donorType: 'adjacent' }) {
     let naturalSize = tpl.getNaturalPanelSize(index);
     if(naturalSize == 0) {
       return;
     }
-    tpl.setPanelSizePixels(index, naturalSize, { donor: true });
+    tpl.setPanelSizePixels(index, naturalSize, settings);
   },
   debugSizes() {
     let total = 0;
@@ -256,23 +263,30 @@ const createInstance = ({tpl, el, settings, $}) => ({
           : index + 1
         ;
       },
-      getNaturalSize = (index) => {
-        let naturalSize = tpl.getNaturalPanelSize(index);
+      getNaturalSize = memoize((index) => {
+        let naturalSize = tpl.group.naturalSizes[index];
         return naturalSize;
-      },
-      getMaxSize = (index) => {
+      }),
+      getMaxSize = memoize((index) => {
         let maxSize = tpl.getPanelSetting(index, 'maxSize');
         return maxSize;
-      },
-      getMinSize = (index) => {
+      }),
+      isMinimized = memoize((index) => {
+        let minimized = tpl.getPanelSetting(index, 'minimized');
+        return minimized || false;
+      }),
+      getMinSize = memoize((index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
         return minSize || 0;
-      },
-      getSize = (index) => {
+      }),
+      getSize = memoize((index) => {
         let panelSize = tpl.getPanelSizePixels(index);
         return panelSize;
-      },
+      }),
       setSize = (index, size) => {
+        if(isMinimized(index)) {
+          return false;
+        }
         tpl.setPanelSizePixels(index, size);
       },
       pixelsToGrow = Math.abs(delta),

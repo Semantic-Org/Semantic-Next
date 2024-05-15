@@ -12,6 +12,10 @@ const settings = {
   minSize: 0,
   maxSize: 0,
   size: 'grow',
+  label: '',
+  canMinimize: true,
+  minimized: false,
+  minimizedHeight: 30,
   getNaturalSize: (panel, direction) => {
     const $children = $(panel).children();
     return (direction == 'horizontal')
@@ -25,23 +29,16 @@ const settings = {
   }
 };
 
+const state = {
+  lastPanelSize: undefined
+};
+
 const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
 
-  reportRendered() {
-    let panels = tpl.getPanels();
-    if(panels) {
-      panels.setPanelRendered(el);
-    }
-  },
-
   getCurrentFlex() {
     return $(el).css('flex-grow');
-  },
-  getSplitSize() {
-    const availableFlex = tpl.getPanels().getAvailableFlex();
-    return availableFlex / (tpl.getItemCount() - tpl.getIndex());
   },
   getResizeCursor() {
     return (settings.direction == 'horizontal')
@@ -52,43 +49,11 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
   getIndex() {
     return $(el).index();
   },
-  getItemCount() {
-    let itemCount;
-    if(settings.itemCount == 'auto') {
-      itemCount = (isServer)
-        ? 3
-        : $(el).siblings('ui-panel').count() + 1
-      ;
-    }
-    else {
-      itemCount = settings.itemCount;
-    }
-    return itemCount;
-  },
   isResizable() {
     return settings.resizable && tpl.getIndex() > 0;
   },
-  setInitialSize() {
-    let index = tpl.getIndex();
-    // set size as if split evenly
-    tpl.getPanels().setPanelSize(index, tpl.getSplitSize(), { donor: false });
-    // then donate pixels if we are forcing a size
-    if(settings.size == 'natural') {
-      tpl.setNaturalSize();
-    }
-    else if(settings.size !== 'grow') {
-      let initialFlex = tpl.getInitialFlex();
-      tpl.getPanels().setPanelSize(index, initialFlex, { donor: true, splitDonor: true });
-    }
-  },
   getPanels() {
     return findParent('uiPanels');
-  },
-  getEventPosition(event) {
-    return (settings.direction == 'horizontal')
-      ? event.pageX
-      : event.pageY
-    ;
   },
   startResize(event) {
     tpl.resizing.set(true);
@@ -101,6 +66,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
         : event.pageY,
     });
     $('body')
+      .addClass('resizing')
       .css('cursor', tpl.getResizeCursor())
       .on('mousemove', (event) => {
         tpl.resizeDrag(event);
@@ -120,7 +86,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     });
   },
   endResize() {
-    $('body').off('mousemove').css('cursor', null);
+    $('body').off('mousemove').removeClass('resizing').css('cursor', null);
     tpl.resizing.set(false);
     delete tpl.initialPosition;
     delete tpl.initialSize;
@@ -129,7 +95,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
       finalSize: tpl.getCurrentFlex()
     });
   },
-  setPreviousNaturalWidth() {
+  setPreviousNaturalSize() {
     const panels = tpl.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setNaturalPanelSize(index - 1);
@@ -138,16 +104,46 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     const panels = tpl.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setNaturalPanelSize(index);
+  },
+  toggleMinimize() {
+    if(settings.minimized) {
+      tpl.maximize();
+    }
+    else {
+      tpl.minimize();
+    }
+  },
+  minimize() {
+    settings.minimized = true;
+    // store size when maximizing again
+    state.lastPanelSize = $(el).css('flex-grow');
+    const panels = tpl.getPanels();
+    const index = panels.getPanelIndex(el);
+    const donorType = (index == 0) ? 'others' : 'adjacent';
+    panels.setNaturalPanelSize(index, { donorType });
+  },
+  maximize() {
+    settings.minimized = false;
+    const panels = tpl.getPanels();
+    const index = panels.getPanelIndex(el);
+    const donorType = (index == 0) ? 'others' : 'adjacent';
+    const naturalSizePixels = settings.getNaturalSize(el, { direction: settings.direction });
+    const naturalSize = panels.getRelativeSize(naturalSizePixels);
+    const openSize = Math.min(state.lastPanelSize, naturalSize);
+    panels.setPanelSize(index, openSize, { donorType });
   }
 });
 
 const events = {
-  'mousedown .handle'({event, settings, tpl}) {
+  'click .toggle-size'({ tpl }) {
+    tpl.toggleMinimize();
+  },
+  'mousedown .handle'({event, tpl}) {
     tpl.startResize(event);
     event.preventDefault();
   },
-  'dblclick .handle': function({event, tpl, el}) {
-    tpl.setPreviousNaturalWidth();
+  'dblclick .handle': function({ tpl }) {
+    tpl.setPreviousNaturalSize();
   },
 };
 

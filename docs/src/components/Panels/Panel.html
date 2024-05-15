@@ -1,4 +1,18 @@
 <div class="{{classIf resizing 'resizing'}}{{classIf initialized 'initialized'}}{{direction}} panel" part="panel">
+  {{#if label}}
+    <span class="label">
+      {{label}}
+      <div class="actions">
+        {{#if canMinimize}}
+          {{#if minimized}}
+            <ui-icon link maximize class="toggle-size"></ui-icon>
+          {{else}}
+            <ui-icon link minus class="toggle-size"></ui-icon>
+          {{/if}}
+        {{/if}}
+      </div>
+    </span>
+  {{/if}}
   {{>slot}}
 </div>
 {{#if isResizable}}

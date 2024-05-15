@@ -170,7 +170,7 @@ const onRendered = ({ $, tpl, state, settings }) => {
     }
   });
   $('ui-panel.code-group').settings({
-    getNaturalSize: function(panel, direction) {
+    getNaturalSize: function(panel) {
       const extraSpacing = 20; // scrollbar width and spacing
       const minWidths = [];
       $(panel).find('.CodeMirror-sizer').each(sizer => {

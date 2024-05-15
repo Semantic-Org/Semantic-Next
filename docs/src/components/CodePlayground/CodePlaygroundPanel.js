@@ -6,15 +6,14 @@ import template from './CodePlaygroundPanel.html?raw';
 import css from './CodePlaygroundPanel.css?raw';
 
 const state = {
-  minimized: false,
   lastPanelSize: undefined,
 };
 
 const createInstance = ({tpl, settings, state, $}) => ({
 
-  getNaturalSize(panel, direction) {
+  getNaturalSize(panel, {minimized }) {
     const labelHeight = $('.label').height();
-    if(state.minimized.get()) {
+    if(minimized) {
       return labelHeight;
     }
     else {
@@ -109,21 +108,6 @@ const createInstance = ({tpl, settings, state, $}) => ({
 });
 
 const events = {
-  'click .toggle-size'({$, state}) {
-    const minimized = !state.minimized.get();
-    state.minimized.set(minimized);
-    if(minimized) {
-      const panel = $('ui-panel').getComponent();
-      state.lastPanelSize = $('ui-panel').css('flex-grow');
-      panel.setNaturalSize();
-    }
-    else {
-      const panels = $(this).closest('ui-panels').getComponent();
-      const panelEl = $('ui-panel').get(0);
-      const index = panels.getPanelIndex(panelEl);
-      panels.setPanelSize(index, state.lastPanelSize, { donor: true });
-    }
-  },
   'click .label'({ $ }) {
     $('playground-code-editor').focus();
   },
