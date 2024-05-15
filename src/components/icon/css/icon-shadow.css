@@ -1156,8 +1156,8 @@
 /* src/components/icon/css/shadow/states/disabled.css */
 @layer component.icon.states.disabled {
   .disabled.icon {
-    cursor: default;
-    opacity: var(--icon-disabled-opacity);
+    cursor: default !important;
+    opacity: var(--icon-disabled-opacity) !important;
   }
 }
 
