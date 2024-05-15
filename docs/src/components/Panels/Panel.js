@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { sum, isString } from '@semantic-ui/utils';
+import { sum } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
@@ -74,7 +74,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     tpl.getPanels().setPanelSize(index, tpl.getSplitSize(), { donor: false });
     // then donate pixels if we are forcing a size
     if(settings.size == 'natural') {
-      tpl.setNaturalWidth();
+      tpl.setNaturalSize();
     }
     else if(settings.size !== 'grow') {
       let initialFlex = tpl.getInitialFlex();
@@ -134,19 +134,12 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     const index = panels.getPanelIndex(el);
     panels.setNaturalPanelSize(index - 1);
   },
-  setNaturalWidth() {
+  setNaturalSize() {
     const panels = tpl.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setNaturalPanelSize(index);
   }
 });
-
-const onRendered = ({ $, el, tpl, isClient, settings }) => {
-  if(isClient) {
-    //tpl.reportRendered();
-  }
-};
-
 
 const events = {
   'mousedown .handle'({event, settings, tpl}) {
@@ -164,7 +157,6 @@ const UIPanel = createComponent({
   template,
   css,
   createInstance,
-  onRendered,
   settings,
   events,
 });

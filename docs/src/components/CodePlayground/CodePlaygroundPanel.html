@@ -3,11 +3,15 @@
     <playground-preview project="source"> </playground-preview>
   </ui-panel>
 {{else if is panel.type 'file'}}
-  <ui-panel class="code" size="{{size}}">
+  <ui-panel class="{{classIf minimized 'minimized' ''}}code" size="{{size}}">
     <div class="label">
       {{panel.label}}
       <div class="actions">
-        <ui-icon link minimize></ui-icon>
+        {{#if minimized}}
+          <ui-icon link maximize class="toggle-size"></ui-icon>
+        {{else}}
+          <ui-icon link minimize class="toggle-size"></ui-icon>
+        {{/if}}
       </div>
     </div>
     <playground-file-editor

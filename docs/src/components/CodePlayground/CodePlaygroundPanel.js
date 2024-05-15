@@ -5,7 +5,26 @@ import codeMirrorCSS from './codemirror.css?raw';
 import template from './CodePlaygroundPanel.html?raw';
 import css from './CodePlaygroundPanel.css?raw';
 
-const createInstance = ({tpl, settings, $}) => ({
+const state = {
+  minimized: false,
+  lastPanelSize: undefined,
+};
+
+const createInstance = ({tpl, settings, state, $}) => ({
+
+  getNaturalSize(panel, direction) {
+    const labelHeight = $('.label').height();
+    if(state.minimized.get()) {
+      return labelHeight;
+    }
+    else {
+      const extraSpacing = 5;
+      const codeHeight = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-height'));
+      const size = codeHeight + labelHeight + extraSpacing;
+      return size;
+    }
+  },
+
   configureCodeEditors() {
     const el = $('playground-code-editor').get(0);
     if(el) {
@@ -13,6 +32,7 @@ const createInstance = ({tpl, settings, $}) => ({
       tpl.modifyCodeMirror(el._codemirror);
     }
   },
+
   setCodeSize(cm, { width = null, height = null } = {}) {
     myCodeMirror.setSize(width, height);
   },
@@ -89,16 +109,23 @@ const createInstance = ({tpl, settings, $}) => ({
 });
 
 const events = {
-  'resizeStart ui-panel'({tpl, findParent}) {
-    findParent('codePlayground').resizing.set(true);
+  'click .toggle-size'({$, state}) {
+    const minimized = !state.minimized.get();
+    state.minimized.set(minimized);
+    if(minimized) {
+      const panel = $('ui-panel').getComponent();
+      state.lastPanelSize = $('ui-panel').css('flex-grow');
+      panel.setNaturalSize();
+    }
+    else {
+      const panels = $(this).closest('ui-panels').getComponent();
+      const panelEl = $('ui-panel').get(0);
+      const index = panels.getPanelIndex(panelEl);
+      panels.setPanelSize(index, state.lastPanelSize, { donor: true });
+    }
   },
-  'resizeEnd ui-panel'({tpl, findParent}) {
-    findParent('codePlayground').resizing.set(false);
-  },
-  'click .label': function() {
-    const $panel = $(this).closest('ui-panel');
-    const $codeEditor = $panel.find('playground-code-editor');
-    $codeEditor.focus();
+  'click .label'({ $ }) {
+    $('playground-code-editor').focus();
   },
   'focus ui-panel'({ $ }) {
     $('.label').addClass('active');
@@ -108,19 +135,13 @@ const events = {
   }
 };
 
-const onRendered = ({ $, tpl, data, settings }) => {
+const onRendered = ({ $, tpl, data, state, settings }) => {
 
   if(data.panel.type == 'file') {
     tpl.configureCodeEditors();
   }
   $('ui-panel').settings({
-    getNaturalSize: function(panel, direction) {
-      const extraSpacing = 5;
-      const codeHeight = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-height'));
-      const labelHeight = $('.label').height();
-      const size = codeHeight + labelHeight + extraSpacing;
-      return size;
-    }
+    getNaturalSize: tpl.getNaturalSize
   });
 };
 
@@ -130,6 +151,7 @@ const CodePlaygroundPanel = createComponent({
   createInstance,
   onRendered,
   events,
+  state,
 });
 
 export default CodePlaygroundPanel;

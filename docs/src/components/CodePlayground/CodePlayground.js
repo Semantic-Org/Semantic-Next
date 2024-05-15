@@ -67,12 +67,11 @@ const settings = {
 };
 
 const state = {
-  activeFile: undefined
+  activeFile: undefined,
+  resizing: false,
 };
 
 const createInstance = ({tpl, state, settings, $}) => ({
-
-  resizing: new ReactiveVar(false),
 
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
@@ -190,6 +189,12 @@ const onThemeChanged = ({tpl}) => {
 };
 
 const events = {
+  'resizeStart ui-panel'({tpl, state, findParent}) {
+    state.resizing.set(true);
+  },
+  'resizeEnd ui-panel'({tpl, state, findParent}) {
+    state.resizing.set(false);
+  },
 };
 
 const CodePlayground = createComponent({
