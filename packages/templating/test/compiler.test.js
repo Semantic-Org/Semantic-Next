@@ -664,6 +664,89 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
+    it('should compile a template with a partial and data containing parentheses', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{> CodePlaygroundPanel size=(getPanelSize) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        {
+          type: 'template',
+          name: "'CodePlaygroundPanel'",
+          data: { size: '(getPanelSize)' },
+        },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile a template with a partial and data containing parentheses and spaces', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{> CodePlaygroundPanel size=(getPanelSize panel) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        {
+          type: 'template',
+          name: "'CodePlaygroundPanel'",
+          data: { size: '(getPanelSize panel)' },
+        },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile a template with a partial and data containing line breaks', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{> CodePlaygroundPanel
+            panel=panel
+            size=(getPanelSize panel)
+          }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        {
+          type: 'template',
+          name: "'CodePlaygroundPanel'",
+          data: { panel: 'panel', size: '(getPanelSize panel)' },
+        },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile a template with a partial and data containing multiple parentheses', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{> CodePlaygroundPanel size=(getPanelSize (getPanel)) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        {
+          type: 'template',
+          name: "'CodePlaygroundPanel'",
+          data: { size: '(getPanelSize (getPanel))' },
+        },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
   });
 
   describe('slots', () => {
@@ -734,6 +817,9 @@ describe('TemplateCompiler', () => {
         { type: 'html', html: '>' },
       ];
     });
+
+
+
   });
 
   describe('error conditions', () => {

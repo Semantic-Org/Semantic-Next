@@ -28,7 +28,7 @@ class TemplateCompiler {
   static templateRegExp = {
     VERBOSE_KEYWORD: /^template\W/g,
     VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
-    STANDARD: /(\w.*?)($|\s)/gm,
+    STANDARD: /(\w+)\s*=\s*((?:(?!\n|$|\w+\s*=).)+)/g,
     DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
   };
 
@@ -256,19 +256,13 @@ class TemplateCompiler {
     else {
       // standard notation {{> templateName data1=value data2=value}}
       let data = {};
-      const matches = [...expression.matchAll(regExp.STANDARD)];
-      each(matches, (match, index) => {
-        if (index == 0) {
-          templateInfo.name = `'${match[0].trim()}'`;
-        }
-        else {
-          const parts = match[0].split('=');
-          if (parts.length) {
-            let name = parts[0].trim();
-            let value = parts[1].trim();
-            data[name] = value;
-          }
-        }
+      const name = expression.split(/\b/)[0];
+      templateInfo.name = `'${name}'`;
+      const dataMatches = [...expression.matchAll(regExp.STANDARD)];
+      each(dataMatches, (match, index) => {
+        let name = match[1].trim();
+        let value = match[2].trim();
+        data[name] = value;
       });
       templateInfo.data = data;
     }
