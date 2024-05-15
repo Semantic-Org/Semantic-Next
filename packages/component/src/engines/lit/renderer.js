@@ -185,6 +185,9 @@ export class LitRenderer {
       return stringMatches[1];
     }
 
+    // we can safely remove outer parens
+    expressionString = expressionString.replace(/^\((.+)\)$/, '$1');
+
     const expressions = expressionString.split(' ').reverse();
     let funcArguments = [];
     let result;

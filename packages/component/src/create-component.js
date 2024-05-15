@@ -33,7 +33,7 @@ export const createComponent = ({
   properties, // allow overriding properties
   settings, // settings for js functionality like callbacks etc
 
-  subTemplates = [],
+  subTemplates = {},
   renderingEngine,
   beforeRendered = noop,
 } = {}) => {
