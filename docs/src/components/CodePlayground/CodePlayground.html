@@ -39,26 +39,12 @@
       <playground-preview project="source"> </playground-preview>
     </div>
   {{else}}
-    <ui-panels direction="horizontal">
+    <ui-panels direction="horizontal" class="horizontal">
       {{#each panelGroup in getPanels}}
         <ui-panel direction="horizontal" size={{getPanelGroupWidth @index}} class="code-group">
           <ui-panels>
             {{#each panel in panelGroup}}
-              {{#if is panel.type 'preview'}}
-                <ui-panel class="preview" size="grow">
-                  <playground-preview project="source"> </playground-preview>
-                </ui-panel>
-              {{else if is panel.type 'file'}}
-                <ui-panel class="code" size="{{getPanelSize panel}}">
-                  <label>{{panel.label}}</label>
-                  <playground-file-editor
-                    line-numbers
-                    project="source"
-                    filename="{{panel.filename}}"
-                  >
-                  </playground-file-editor>
-                </ui-panel>
-              {{/if}}
+              {{>CodePlaygroundPanel panel=panel size=(getPanelSize panel) }}
             {{/each}}
           </ui-panels>
         </ui-panel>

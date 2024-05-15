@@ -1,0 +1,20 @@
+{{#if is panel.type 'preview'}}
+  <ui-panel class="preview" size="grow">
+    <playground-preview project="source"> </playground-preview>
+  </ui-panel>
+{{else if is panel.type 'file'}}
+  <ui-panel class="code" size="{{size}}">
+    <div class="label">
+      {{panel.label}}
+      <div class="actions">
+        <ui-icon link minimize></ui-icon>
+      </div>
+    </div>
+    <playground-file-editor
+      line-numbers
+      project="source"
+      filename="{{panel.filename}}"
+    >
+    </playground-file-editor>
+  </ui-panel>
+{{/if}}

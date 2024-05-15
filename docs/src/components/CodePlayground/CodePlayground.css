@@ -98,21 +98,26 @@
     overflow: hidden;
     min-height: 32px;
   }
-  ui-panel label {
+  ui-panel .label {
+    display: flex;
+    flex-direction: row;
     font-size: 10px;
     text-transform: uppercase;
-    display: block;
     line-height: 1;
     margin: 0rem 0rem 0rem;
     font-weight: bold;
     color: rgba(255, 255, 255, 0.4);
-    padding: 0.75rem 2.5rem;
+    padding: 0.75rem 0.75rem 0.7rem 2.5rem;
     background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
     border-bottom: 1px solid rgba(221, 221, 221, 0.05);
     box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
     transition: background-color 0.1s ease, color 0.1s ease-in-out;
+
+    .actions {
+      margin-left: auto;
+    }
   }
-  ui-panel label.active {
+  ui-panel .label.active {
     color: rgb(255 255 255 / 80%);
     background-color: rgb(255 255 255 / 3%);
   }
