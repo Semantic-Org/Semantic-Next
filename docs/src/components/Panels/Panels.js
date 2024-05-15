@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, inArray, range, memoize } from '@semantic-ui/utils';
+import { each, findIndex, isString, inArray, range, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
@@ -135,6 +135,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let panel = tpl.panels[index];
     return panel.settings[setting];
   },
+  isMinimized(index) {
+    return tpl.getPanelSetting(index, 'minimized');
+  },
   getPanelIndex(el) {
     return tpl.panels.indexOf(el);
   },
@@ -184,16 +187,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
       let sizeDelta = newSize - currentSize;
       $(panel).css('flex-grow', relativeSize);
       if(!donorIndexes.length) {
+        const allIndexes = range(0, tpl.panels.length);
+        donorIndexes = allIndexes.filter(currentIndex => !tpl.isMinimized(currentIndex) && currentIndex !== index);
         if(donorType == 'adjacent') {
-          // use panel after as donor unless last panel
-          let donorIndex = (index == tpl.panels.length - 1)
-            ? index - 1
-            : index + 1
-          ;
-          donorIndexes = [donorIndex];
-        }
-        else if(donorType == 'others') {
-          donorIndexes = range(0, tpl.panels.length).filter(curIndex => curIndex !== index);
+          donorIndexes = donorIndexes.slice(0, 1);
         }
       }
       each(donorIndexes, donorIndex => {
@@ -272,7 +269,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
         return maxSize;
       }),
       isMinimized = memoize((index) => {
-        let minimized = tpl.getPanelSetting(index, 'minimized');
+        let minimized = tpl.isMinimized(index);
         return minimized || false;
       }),
       getMinSize = memoize((index) => {

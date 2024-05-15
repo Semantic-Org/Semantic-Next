@@ -15,8 +15,6 @@
   {{/if}}
   {{>slot}}
 </div>
-{{#if isResizable}}
-  <span class="{{classIf initialized 'initialized'}} handle" part="handle">
-    <span class="divider"></span>
-  </span>
-{{/if}}
+<span class="{{classIf initialized 'initialized'}} {{classIf isResizable '' 'disabled'}} handle" part="handle">
+  <span class="divider"></span>
+</span>

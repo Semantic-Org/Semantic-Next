@@ -66,6 +66,10 @@
   user-select: none;
   border-radius: 5px;
 
+  &.disabled {
+    pointer-events: none;
+  }
+
   .divider {
     background-color: var(--panel-divider-color);
   }

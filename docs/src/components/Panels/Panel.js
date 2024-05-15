@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { sum } from '@semantic-ui/utils';
+import { each, sum } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
@@ -50,7 +50,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     return $(el).index();
   },
   isResizable() {
-    return settings.resizable && tpl.getIndex() > 0;
+    return !settings.minimized && settings.resizable && tpl.getIndex() > 0;
   },
   getPanels() {
     return findParent('uiPanels');
@@ -114,10 +114,15 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     }
   },
   minimize() {
+    const panels = tpl.getPanels();
+
     settings.minimized = true;
+    if(panels.panels.every((panel, index) => panels.isMinimized(index))) {
+      settings.minimized = false;
+      return;
+    }
     // store size when maximizing again
     state.lastPanelSize = $(el).css('flex-grow');
-    const panels = tpl.getPanels();
     const index = panels.getPanelIndex(el);
     const donorType = (index == 0) ? 'others' : 'adjacent';
     panels.setNaturalPanelSize(index, { donorType });
