@@ -289,7 +289,6 @@ export const Template = class Template {
         selector,
         (event) => {
           if (!this.isNodeInTemplate(event.target)) {
-            console.log('ignored event because it is not in template', eventName, selector);
             return;
           }
           if (
@@ -326,7 +325,11 @@ export const Template = class Template {
   isNodeInTemplate(node) {
     const getRootChild = (node) => {
       while (node && node.parentNode !== this.parentNode) {
-        node = node.parentNode;
+        if (node.parentNode === null && node.host) {
+          node = node.host;
+        } else {
+          node = node.parentNode;
+        }
       }
       return node;
     };
