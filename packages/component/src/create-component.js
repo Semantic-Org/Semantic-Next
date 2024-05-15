@@ -59,11 +59,11 @@ export const createComponent = ({
 
   let litTemplate = new Template({
     templateName: templateName,
+    stateConfig: state,
     isPrototype: true,
     renderingEngine,
     ast,
     css,
-    state,
     events,
     subTemplates,
     onCreated,

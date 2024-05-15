@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, generateID, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, clone, generateID, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -20,7 +20,7 @@ export const Template = class Template {
     renderRoot,
     css,
     events,
-    state,
+    stateConfig,
     subTemplates,
     createInstance,
     parentTemplate, // the parent template when nested
@@ -42,7 +42,8 @@ export const Template = class Template {
     this.css = css;
     this.data = data || {};
     this.reactions = [];
-    this.state = this.createReactiveState(state) || {};
+    this.stateConfig = stateConfig;
+    this.state = this.createReactiveState(stateConfig) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
@@ -64,9 +65,9 @@ export const Template = class Template {
     }
   }
 
-  createReactiveState(state) {
+  createReactiveState(stateConfig) {
     let reactiveState = {};
-    each(state, (config, name) => {
+    each(stateConfig, (config, name) => {
       if(config?.value && config?.options) {
         // complex config { counter: { value: 0, options: { equalityFunction }}}
         reactiveState[name] = new ReactiveVar(config.value, config.options);
@@ -236,7 +237,7 @@ export const Template = class Template {
       element: this.element,
       ast: this.ast,
       css: this.css,
-      state: this.state,
+      stateConfig: this.stateConfig,
       events: this.events,
       renderingEngine: this.renderingEngine,
       subTemplates: this.subTemplates,
@@ -360,7 +361,7 @@ export const Template = class Template {
         return true;
       }
       if (node === null) {
-        return;
+        return false;
       }
       const startComparison = startNode.compareDocumentPosition(node);
       const endComparison = endNode.compareDocumentPosition(node);
