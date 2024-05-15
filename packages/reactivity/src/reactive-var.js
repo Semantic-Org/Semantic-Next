@@ -4,11 +4,11 @@ import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
 
-  constructor(initialValue, { equalityFunction, canClone = true, cloneFunction } = {}) {
+  constructor(initialValue, { equalityFunction, allowClone = true, cloneFunction } = {}) {
     this.dependency = new Dependency();
 
     // allow user to opt out of value cloning
-    this.canClone = canClone;
+    this.allowClone = allowClone;
 
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
@@ -40,7 +40,7 @@ export class ReactiveVar {
   }
 
   canCloneValue(value) {
-    return (this.canClone === true && !isClassInstance(value));
+    return (this.allowClone === true && !isClassInstance(value));
   }
 
   maybeClone(value) {
