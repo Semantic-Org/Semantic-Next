@@ -37,6 +37,7 @@ import { tokenize,
   keys,
   last,
   mapObject,
+  memoize,
   noop,
   pick,
   prettifyID,
@@ -787,6 +788,91 @@ describe('function utilities', () => {
   it('wrapFunction should return a function that returns the passed value if a non-function is passed', () => {
     const value = 'test';
     expect(wrapFunction(value)()).toBe('test');
+  });
+  describe('memoize', () => {
+    it('should memoize the return value of a function', () => {
+      const originalFunction = vi.fn((a, b) => a + b);
+      const memoizedFunction = memoize(originalFunction);
+
+      const result1 = memoizedFunction(2, 3);
+      expect(result1).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction(2, 3);
+      expect(result2).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again
+
+      const result3 = memoizedFunction(4, 5);
+      expect(result3).toBe(9);
+      expect(originalFunction).toHaveBeenCalledTimes(2);
+    });
+
+    it('should memoize different arguments separately', () => {
+      const originalFunction = vi.fn((a, b) => a * b);
+      const memoizedFunction = memoize(originalFunction);
+
+      const result1 = memoizedFunction(2, 3);
+      expect(result1).toBe(6);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction(2, 4);
+      expect(result2).toBe(8);
+      expect(originalFunction).toHaveBeenCalledTimes(2);
+
+      const result3 = memoizedFunction(2, 3);
+      expect(result3).toBe(6);
+      expect(originalFunction).toHaveBeenCalledTimes(2); // Should not be called again for (2, 3)
+    });
+
+    it('should memoize functions with no arguments', () => {
+      const originalFunction = vi.fn(() => 42);
+      const memoizedFunction = memoize(originalFunction);
+
+      const result1 = memoizedFunction();
+      expect(result1).toBe(42);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction();
+      expect(result2).toBe(42);
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again
+    });
+
+    it('should memoize functions with complex arguments', () => {
+      const originalFunction = vi.fn((obj) => obj.a + obj.b);
+      const memoizedFunction = memoize(originalFunction);
+
+      const result1 = memoizedFunction({ a: 2, b: 3 });
+      expect(result1).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction({ a: 2, b: 3 });
+      expect(result2).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again
+
+      const result3 = memoizedFunction({ a: 4, b: 5 });
+      expect(result3).toBe(9);
+      expect(originalFunction).toHaveBeenCalledTimes(2);
+    });
+
+    it('should preserve the context of the original function', () => {
+      const context = { multiplier: 2 };
+      const originalFunction = vi.fn(function(a) {
+        return a * this.multiplier;
+      });
+      const memoizedFunction = memoize(originalFunction);
+
+      const result1 = memoizedFunction.call(context, 3);
+      expect(result1).toBe(6);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction.call(context, 3);
+      expect(result2).toBe(6);
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again
+
+      const result3 = memoizedFunction.call(context, 4);
+      expect(result3).toBe(8);
+      expect(originalFunction).toHaveBeenCalledTimes(2);
+    });
   });
 });
 

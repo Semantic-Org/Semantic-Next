@@ -272,6 +272,26 @@ export const wrapFunction = (x) => {
   return isFunction(x) ? x : () => x;
 };
 
+/*
+  Memoize
+*/
+export const memoize = (fn) => {
+  const cache = new Map();
+
+  return function(...args) {
+    const key = hashCode(JSON.stringify(args));
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+
+    return result;
+  };
+};
+
 /*-------------------
        Strings
 --------------------*/
