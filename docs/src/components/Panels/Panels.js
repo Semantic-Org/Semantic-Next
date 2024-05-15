@@ -181,24 +181,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
   setPanelSize(index, relativeSize, { donorType, donorIndexes = [] } = {}) {
     let panel = tpl.panels[index];
-    if(donorType || donorIndexes.length) {
+    if(donorType) {
       let currentSize = tpl.getPanelSizePixels(index) || 0;
       let newSize = tpl.getPixelSize(relativeSize) || 0;
       let sizeDelta = newSize - currentSize;
-      $(panel).css('flex-grow', relativeSize);
-      if(!donorIndexes.length) {
-        const allIndexes = range(0, tpl.panels.length);
-        donorIndexes = allIndexes.filter(currentIndex => !tpl.isMinimized(currentIndex) && currentIndex !== index);
-        if(donorType == 'adjacent') {
-          donorIndexes = donorIndexes.slice(0, 1);
-        }
-      }
-      each(donorIndexes, donorIndex => {
-        let donorSize = tpl.getPanelSizePixels(donorIndex) || 0;
-        const amountToTake = sizeDelta / donorIndexes.length;
-        tpl.setPanelSizePixels(donorIndex, donorSize - amountToTake);
-      });
-      tpl.debugSizes();
+      tpl.resizePanels(index, sizeDelta, { handleBefore: false});
     }
     else {
       $(panel).css('flex-grow', relativeSize);
@@ -209,7 +196,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     tpl.setPanelSize(index, relativeSize, settings);
   },
   getRelativeSize(pixelSize) {
-    return pixelSize / tpl.getGroupSize() * 100;
+    return Math.min(pixelSize / tpl.getGroupSize() * 100, 100);
   },
   getPixelSize(relativeSize) {
     return (relativeSize / 100) * tpl.getGroupSize();

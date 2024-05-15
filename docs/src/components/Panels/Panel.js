@@ -123,7 +123,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     }
     // store size when maximizing again
     let currentSize = $(el).css('flex-grow');
-    state.lastPanelSize = Math.max(currentSize, 200);
+    state.lastPanelSize = Math.max(currentSize, 10);
     const index = panels.getPanelIndex(el);
     const donorType = (index == 0) ? 'others' : 'adjacent';
     panels.setNaturalPanelSize(index, { donorType });
@@ -142,6 +142,9 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
 
 const events = {
   'click .toggle-size'({ tpl }) {
+    tpl.toggleMinimize();
+  },
+  'dblclick .label'({ tpl }) {
     tpl.toggleMinimize();
   },
   'mousedown .handle'({event, tpl}) {
