@@ -55,6 +55,10 @@
     }
   }
 
+  ui-panel {
+    overflow: hidden;
+  }
+
   .inline {
     position: relative;
     display: block;
