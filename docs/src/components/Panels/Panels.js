@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, sum, inArray, memoize } from '@semantic-ui/utils';
+import { each, isString, isNumber, inArray, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
@@ -210,14 +210,25 @@ const createInstance = ({tpl, el, settings, $}) => ({
     tpl.changePanelSize(index, relativeSize);
   },
 
-  setPanelSizeMinimized(index) {
+  setPanelMinimized(index) {
     let naturalSize = tpl.getNaturalPanelSize(index);
     if(naturalSize == 0) {
       return;
     }
     const relativeSize = tpl.getRelativeSize(naturalSize);
-    tpl.changePanelSize(index, relativeSize, { minimizing: true });
+    tpl.changePanelSize(index, relativeSize, { manualResize: true });
   },
+
+  setPanelMaximized(index, previousSize) {
+    let naturalSize = tpl.getNaturalPanelSize(index);
+    const openSize = (previousSize)
+      ? Math.min(previousSize, naturalSize)
+      : naturalSize
+    ;
+    const relativeSize = tpl.getRelativeSize(naturalSize);
+    tpl.changePanelSize(index, relativeSize, { manualResize: true });
+  },
+
 
   changePanelSize(index, newRelativeSize, resizeSettings) {
     let currentSize = tpl.getPanelSizePixels(index) || 0;
@@ -257,9 +268,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
   },
 
-  resizePanels(index, delta, { minimizing = false } = {}) {
+  resizePanels(index, delta, { manualResize = false } = {}) {
     console.log('---------------------------------------------');
-    console.log(index, delta, minimizing);
+    console.log(index, delta, manualResize);
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
@@ -296,16 +307,17 @@ const createInstance = ({tpl, el, settings, $}) => ({
       },
       cannotResize = (resizeIndex) => {
         let result;
-        if(resizeIndex == index && minimizing) {
+        if(resizeIndex == index && manualResize) {
           result = hasMinimized;
         }
         else {
           result = isMinimized(resizeIndex);
         }
+        console.log(`cannotResize index: ${resizeIndex} result: ${result}`);
         return result;
       },
       setSize = (sizeIndex, size) => {
-        if(minimizing && sizeIndex == index) {
+        if(manualResize && sizeIndex == index) {
           hasMinimized = true;
         }
         tpl.setPanelSizePixels(sizeIndex, size);
@@ -320,6 +332,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
     // 1 | 2 | (3) | 4 | 5
 
     const performLoop = (direction, callback) => {
+      // we allow an index to be passed in as direction to perform just on this index
+      if(isNumber(direction)) {
+        callback(direction);
+        return;
+      }
       const
         directions = {
           all: {
@@ -480,7 +497,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
     let takeDirection, addDirection, shareStrategy;
 
-    if(minimizing) {
+    if(manualResize) {
       takeDirection = 'all';
       addDirection = 'all';
       shareStrategy = 'all';
@@ -489,6 +506,19 @@ const createInstance = ({tpl, el, settings, $}) => ({
       takeDirection = (standard) ? 'right' : 'left';
       addDirection = (standard) ? 'left' : 'right';
       shareStrategy = (standard) ? 'leftFirst': 'rightFirst';
+    }
+
+    /*--------------
+       Find Donors
+    ---------------*/
+
+    if(manualResize) {
+      if(delta < 0) {
+        pixelsToTake = takePixels(index, pixelsToTake, (index) => 0);
+      }
+      else {
+        pixelsToAdd = addPixels(index, pixelsToAdd, (index) => Infinity);
+      }
     }
 
     /*--------------

@@ -115,8 +115,8 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
   },
   minimize() {
     const panels = tpl.getPanels();
-
     settings.minimized = true;
+    // confirm not all panels are minimized at once as this is not possible
     if(panels.panels.every((panel, index) => panels.isMinimized(index))) {
       settings.minimized = false;
       return;
@@ -125,16 +125,13 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     let currentSize = $(el).css('flex-grow');
     state.lastPanelSize = Math.max(currentSize, 10);
     const index = panels.getPanelIndex(el);
-    panels.setPanelSizeMinimized(index);
+    panels.setPanelMinimized(index);
   },
   maximize() {
     settings.minimized = false;
     const panels = tpl.getPanels();
     const index = panels.getPanelIndex(el);
-    const naturalSizePixels = settings.getNaturalSize(el, { direction: settings.direction });
-    const naturalSize = panels.getRelativeSize(naturalSizePixels);
-    const openSize = Math.min(state.lastPanelSize, naturalSize);
-    panels.changePanelSize(index, openSize, { minimizing: true });
+    panels.setPanelMaximized(index, state.lastPanelSize);
   }
 });
 
