@@ -125,18 +125,16 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     let currentSize = $(el).css('flex-grow');
     state.lastPanelSize = Math.max(currentSize, 10);
     const index = panels.getPanelIndex(el);
-    const donorType = (index == 0) ? 'others' : 'adjacent';
-    panels.setNaturalPanelSize(index, { donorType });
+    panels.setNaturalPanelSize(index);
   },
   maximize() {
     settings.minimized = false;
     const panels = tpl.getPanels();
     const index = panels.getPanelIndex(el);
-    const donorType = (index == 0) ? 'others' : 'adjacent';
     const naturalSizePixels = settings.getNaturalSize(el, { direction: settings.direction });
     const naturalSize = panels.getRelativeSize(naturalSizePixels);
     const openSize = Math.min(state.lastPanelSize, naturalSize);
-    panels.setPanelSize(index, openSize, { donorType });
+    panels.changePanelSize(index, openSize);
   }
 });
 

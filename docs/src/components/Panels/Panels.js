@@ -1,9 +1,8 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, findIndex, isString, inArray, range, memoize } from '@semantic-ui/utils';
+import { each, isString, inArray, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
-
 
 const settings = {
   direction: 'vertical',
@@ -12,20 +11,20 @@ const settings = {
 const createInstance = ({tpl, el, settings, $}) => ({
   panels: [],
   renderedPanels: [],
-  group: {
-    size: undefined,
-    scrollOffset: undefined,
-  },
-  resize: {
-    start: undefined,
-    end: undefined,
-    index: undefined,
-    delta: undefined,
+
+  cache: {
+    groupSize: undefined,
+    groupScrollOffset: undefined,
+    resizeStart: undefined,
+    resizeEnd: undefined,
+    resizeIndex: undefined,
+    resizeDelta: undefined
   },
 
   // we want to get all panels that are not inside other ui panels
   // i.e. if this is a complex layout we dont want to grab nested children
-  // note we cant assume the panels are immediate children of the component
+
+  // we cant assume the panels are immediate children of the component
   // frameworks may add arbitrary divs for SSR hydration (like Astro)
   addPanels() {
     let $childPanelGroups = $(el).find('ui-panels');
@@ -34,18 +33,20 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let $panels = $allPanels.not($childPanelGroupPanels);
     tpl.panels = $panels.get();
   },
+
   setPanelRendered(el) {
     tpl.renderedPanels.push(el);
     if(tpl.renderedPanels.length == tpl.panels.length) {
       requestAnimationFrame(() => tpl.setPanelInitialSizes());
     }
   },
+
   setPanelInitialSizes() {
     each(tpl.panels, (panel, index) => {
       const size = panel.settings.size;
       if(size !== 'grow') {
-        let relativeWidth = tpl.getRelativeSettingSize(panel.settings.size, index);
-        $(panel).css('flex-grow', relativeWidth);
+        let relativeSize = tpl.getRelativeSettingSize(panel.settings.size, index);
+        tpl.setPanelSize(index, relativeSize);
         panel.tpl.initialized.set(true);
       }
     });
@@ -57,19 +58,59 @@ const createInstance = ({tpl, el, settings, $}) => ({
       growPanels = tpl.panels.slice(-1);
     }
     each(growPanels, (panel, index) => {
-      let relativeWidth = availableWidth / growPanels.length;
-      const minWidth = tpl.getRelativeSettingSize(panel.settings.minWidth);
-      const maxWidth = tpl.getRelativeSettingSize(panel.settings.minWidth);
-      if(relativeWidth < minWidth) {
-        relativeWidth = minWidth;
+      let relativeSize = availableWidth / growPanels.length;
+      const minSize = tpl.getRelativeSettingSize(panel.settings.minSize);
+      const maxSize = tpl.getRelativeSettingSize(panel.settings.minSize);
+      if(relativeSize < minSize) {
+        relativeSize = minSize;
       }
-      if(relativeWidth > maxWidth) {
-        relativeWidth = maxWidth;
+      if(relativeSize > maxSize) {
+        relativeSize = maxSize;
       }
-      $(panel).css('flex-grow', relativeWidth);
+      tpl.setPanelSize(index, relativeSize);
       panel.tpl.initialized.set(true);
     });
   },
+
+  // cache some sizing on pane group
+  setGroupCalculations() {
+    tpl.cache.groupSize = tpl.getGroupSize();
+    tpl.cache.groupScrollOffset = tpl.getGroupScrollOffset();
+    tpl.cache.naturalSizes = tpl.panels.map((panel, index) => tpl.getNaturalPanelSize(index));
+  },
+  removeGroupCalculations() {
+    delete tpl.cache.groupSize;
+    delete tpl.cache.groupScrollOffset;
+    delete tpl.cache.naturalSizes;
+  },
+
+  // store current resize position when starting drag
+  setDragStartCalculations(panel, eventData) {
+    // handle is after the pane it's resizing
+    tpl.cache.resizeIndex = tpl.getPanelIndex(panel) - 1;
+    tpl.cache.resizeStart = eventData.startPosition + tpl.cache.groupScrollOffset;
+  },
+
+  // remove calculations after drag end
+  removeDragStartCalculations() {
+    delete tpl.cache.resizeStart;
+    delete tpl.cache.resizeIndex;
+  },
+
+  setPointerCalculations(panel, eventData) {
+    tpl.cache.resizeEnd = eventData.endPosition + tpl.cache.groupScrollOffset;
+    tpl.cache.resizeDelta = tpl.cache.resizeEnd - tpl.cache.resizeStart;
+  },
+  setEndPointerCalculations() {
+    tpl.cache.resizeStart = tpl.cache.resizeEnd;
+    tpl.cache.resizeDelta = 0;
+  },
+
+  isMinimized(index) {
+    return tpl.getPanelSetting(index, 'minimized');
+  },
+
+  // get available width for elements set to 'grow'
   getAvailableGrowWidth() {
     let availableWidth = 100;
     each(tpl.panels, (panel) => {
@@ -80,9 +121,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
     });
     return availableWidth;
   },
+
   getGrowingPanels() {
     return tpl.panels.filter(panel => panel.settings.size == 'grow');
   },
+
   getRelativeSettingSize(size, index) {
     if(size == 'natural') {
       let pixels = tpl.getNaturalPanelSize(index);
@@ -97,46 +140,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
       return parseFloat(size);
     }
   },
-  setStartingCalculations(panel, eventData) {
-    const naturalSizes = tpl.panels.map((panel, index) => tpl.getNaturalPanelSize(index));
-    tpl.group = {
-      ...tpl.group,
-      scrollOffset: tpl.getGroupScrollOffset(),
-      size: tpl.getGroupSize(),
-      naturalSizes
-    };
-    tpl.resize = {
-      ...tpl.resize,
-      index: tpl.getPanelIndex(panel),
-      start: eventData.startPosition + tpl.group.scrollOffset
-    };
-  },
-
-  removeStartingCalculations() {
-    delete tpl.group.scrollOffset;
-    delete tpl.group.size;
-    delete tpl.resize.start;
-    delete tpl.resize.index;
-  },
-
-  setResizeCalculations(panel, eventData) {
-    tpl.resize = {
-      ...tpl.resize,
-      end: eventData.endPosition + tpl.group.scrollOffset,
-    };
-    tpl.resize.delta = tpl.resize.end - tpl.resize.start;
-  },
-
-  removeResizeCalculations() {
-    tpl.resize.start = tpl.resize.end;
-  },
 
   getPanelSetting(index, setting) {
     let panel = tpl.panels[index];
     return panel.settings[setting];
-  },
-  isMinimized(index) {
-    return tpl.getPanelSetting(index, 'minimized');
   },
   getPanelIndex(el) {
     return tpl.panels.indexOf(el);
@@ -171,32 +178,17 @@ const createInstance = ({tpl, el, settings, $}) => ({
     return 100 - usedFlex;
   },
   getGroupSize() {
-    if(tpl.group.size) {
-      return tpl.group.size;
+    if(tpl.cache.groupSize) {
+      return tpl.cache.groupSize;
     }
     return (settings.direction == 'horizontal')
       ? $('.panels', { pierceShadow: false }).width()
       : $('.panels', { pierceShadow: false }).height()
     ;
   },
-  setPanelSize(index, relativeSize, { donorType, donorIndexes = [] } = {}) {
-    let panel = tpl.panels[index];
-    if(donorType) {
-      let currentSize = tpl.getPanelSizePixels(index) || 0;
-      let newSize = tpl.getPixelSize(relativeSize) || 0;
-      let sizeDelta = newSize - currentSize;
-      tpl.resizePanels(index, sizeDelta, { handleBefore: false});
-    }
-    else {
-      $(panel).css('flex-grow', relativeSize);
-    }
-  },
-  setPanelSizePixels(index, pixelSize, settings) {
-    let relativeSize = tpl.getRelativeSize(pixelSize);
-    tpl.setPanelSize(index, relativeSize, settings);
-  },
   getRelativeSize(pixelSize) {
-    return Math.min(pixelSize / tpl.getGroupSize() * 100, 100);
+    const relativeSize = pixelSize / tpl.getGroupSize() * 100;
+    return Math.min(relativeSize, 100);
   },
   getPixelSize(relativeSize) {
     return (relativeSize / 100) * tpl.getGroupSize();
@@ -207,13 +199,36 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let naturalSize = getPanelNaturalSize(panel, { direction: settings.direction, minimized: panel.settings.minimized });
     return naturalSize;
   },
-  setNaturalPanelSize(index, settings = { donorType: 'adjacent' }) {
+
+  setNaturalPanelSize(index) {
     let naturalSize = tpl.getNaturalPanelSize(index);
     if(naturalSize == 0) {
       return;
     }
-    tpl.setPanelSizePixels(index, naturalSize, settings);
+    const relativeSize = tpl.getRelativeSize(naturalSize);
+    tpl.changePanelSize(index, relativeSize);
   },
+
+
+  changePanelSize(index, newRelativeSize) {
+    let currentSize = tpl.getPanelSizePixels(index) || 0;
+    let newSize = tpl.getPixelSize(newRelativeSize) || 0;
+    let sizeDelta = newSize - currentSize;
+    tpl.setGroupCalculations();
+    tpl.resizePanels(index, sizeDelta);
+    tpl.removeGroupCalculations();
+  },
+
+  setPanelSize(index, relativeSize) {
+    let panel = tpl.panels[index];
+    $(panel).css('flex-grow', relativeSize);
+  },
+
+  setPanelSizePixels(index, pixelSize, settings) {
+    let relativeSize = tpl.getRelativeSize(pixelSize);
+    tpl.setPanelSize(index, relativeSize, settings);
+  },
+
   debugSizes() {
     let total = 0;
     let sizes = [];
@@ -222,33 +237,34 @@ const createInstance = ({tpl, el, settings, $}) => ({
       total += size;
       sizes.push(size);
     });
-    if(total < 99.5 || total > 100.5) {
+    if(total < 99.9 || total > 100.1) {
       console.log('issue with resizing');
       console.log(total);
       console.log(sizes);
     }
   },
 
-  resizePanels(index, delta, { handleBefore = true } = {}) {
+  performDrag(panel, eventData) {
+  },
+
+  resizePanels(index, delta) {
+    tpl.log = [];
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
       inverted = delta < 0,
       // if the handle is on the other side
       getLeftIndex = () => {
-        return (handleBefore)
-          ? index - 1
-          : index
-        ;
+        return index;
       },
       getRightIndex = () => {
-        return (handleBefore)
-          ? index
-          : index + 1
-        ;
+        if(index + 1 >= tpl.panels.length) {
+          return index;
+        }
+        return index + 1;
       },
       getNaturalSize = memoize((index) => {
-        let naturalSize = tpl.group.naturalSizes[index];
+        let naturalSize = tpl.cache.naturalSizes[index];
         return naturalSize;
       }),
       getMaxSize = memoize((index) => {
@@ -261,17 +277,18 @@ const createInstance = ({tpl, el, settings, $}) => ({
       }),
       getMinSize = memoize((index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
-        return minSize || 0;
+        return minSize || 31.2;
       }),
-      getSize = memoize((index) => {
+      getSize = (index) => {
         let panelSize = tpl.getPanelSizePixels(index);
         return panelSize;
-      }),
-      setSize = (index, size) => {
-        if(isMinimized(index)) {
+      },
+      setSize = (sizeIndex, size) => {
+        tpl.log.push({index, size});
+        if(isMinimized(sizeIndex) && sizeIndex !== index) {
           return false;
         }
-        tpl.setPanelSizePixels(index, size);
+        tpl.setPanelSizePixels(sizeIndex, size);
       },
       pixelsToGrow = Math.abs(delta),
       pixelsToTake = Math.abs(delta),
@@ -509,7 +526,8 @@ const events = {
   'resizeStart ui-panel'({tpl, event, data}) {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      tpl.setStartingCalculations(panel, data);
+      tpl.setGroupCalculations();
+      tpl.setDragStartCalculations(panel, data);
     }
   },
   'resizeDrag ui-panel'({tpl, event, data}) {
@@ -518,16 +536,18 @@ const events = {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
       requestAnimationFrame(() => {
-        tpl.setResizeCalculations(panel, data);
-        tpl.resizePanels(tpl.resize.index, tpl.resize.delta);
-        tpl.removeResizeCalculations();
+        tpl.setPointerCalculations(panel, data);
+        let { resizeIndex, resizeDelta } = tpl.cache;
+        tpl.resizePanels(resizeIndex, resizeDelta);
+        tpl.setEndPointerCalculations();
       });
     }
   },
   'resizeEnd ui-panel'({tpl, event, data}) {
     const panel = event.target;
     if(inArray(panel, tpl.panels)) {
-      tpl.removeStartingCalculations();
+      tpl.removeDragStartCalculations();
+      tpl.removeGroupCalculations();
     }
   },
 };
