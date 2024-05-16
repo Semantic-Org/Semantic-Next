@@ -248,12 +248,17 @@ const createInstance = ({tpl, el, settings, $}) => ({
       sizes.push(size);
     });
     if(total < 99.9 || total > 100.1) {
+      console.log('issue with resizing');
       console.log(total);
       console.log(sizes);
+    }
+    else {
+      console.log('good', total);
     }
   },
 
   resizePanels(index, delta, { minimizing = false } = {}) {
+    console.log('---------------------------------------------');
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
@@ -328,6 +333,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       let index = getIndex();
       while(condition(index)) {
         if(callback(index) === false) {
+          console.log('condition met early break');
           break;
         }
         index = incrementor(index);
@@ -355,11 +361,13 @@ const createInstance = ({tpl, el, settings, $}) => ({
           // make sure to only take the pixels necessary
           if (pixelsAvailableToDonate >= pixelsLeftToTake) {
             const newSize = currentSize - pixelsLeftToTake;
+            console.log('remove pixels', donorIndex, newSize, pixelsLeftToTake);
             setSize(donorIndex, newSize);
             pixelsLeftToTake = 0;
             return false;
           } else {
             // can only get some pixels needed from this panel
+            console.log('remove partial pixels', donorIndex, maxSize, pixelsAvailableToDonate);
             setSize(donorIndex, maxSize);
             pixelsLeftToTake -= pixelsAvailableToDonate;
           }
@@ -395,6 +403,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
             return false;
           } else {
             // we can only add some pixels to this panel
+            console.log('add partial pixels', growIndex, maxSize, pixelsAvailableToGrow);
             setSize(growIndex, maxSize);
             pixelsLeftToAdd -= pixelsAvailableToGrow;
           }
@@ -423,6 +432,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
           }
           const currentSize = getSize(growIndex);
           const newSize = currentSize + pixelsToAdd;
+          console.log('excess pixels added to', growIndex, newSize, pixelsToAdd);
           setSize(growIndex, newSize);
           pixelsAdded = true;
         });
@@ -478,11 +488,13 @@ const createInstance = ({tpl, el, settings, $}) => ({
     /*--------------
        Grow Panels
     ---------------*/
+    console.log('looking for pixels to add', pixelsToAdd);
 
     /* If we didnt get all the pixels we requested we will need to reduce the amount we grow */
     pixelsToAdd = pixelsToAdd - pixelsToTake;
 
     if(pixelsToTake > 0) {
+      console.log('but we didnt get enough pixels', pixelsToAdd);
     }
 
     // grow all content to match their max width or natural width
