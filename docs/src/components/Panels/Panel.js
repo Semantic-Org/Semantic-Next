@@ -50,7 +50,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     return $(el).index();
   },
   isResizable() {
-    return !settings.minimized && settings.resizable && tpl.getIndex() > 0;
+    return settings.resizable && tpl.getIndex() > 0;
   },
   getPanels() {
     return findParent('uiPanels');
@@ -125,7 +125,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     let currentSize = $(el).css('flex-grow');
     state.lastPanelSize = Math.max(currentSize, 10);
     const index = panels.getPanelIndex(el);
-    panels.setNaturalPanelSize(index);
+    panels.setPanelSizeMinimized(index);
   },
   maximize() {
     settings.minimized = false;
@@ -134,7 +134,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     const naturalSizePixels = settings.getNaturalSize(el, { direction: settings.direction });
     const naturalSize = panels.getRelativeSize(naturalSizePixels);
     const openSize = Math.min(state.lastPanelSize, naturalSize);
-    panels.changePanelSize(index, openSize);
+    panels.changePanelSize(index, openSize, { minimizing: true });
   }
 });
 

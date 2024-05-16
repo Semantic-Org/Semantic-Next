@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, inArray, memoize } from '@semantic-ui/utils';
+import { each, isString, sum, inArray, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
@@ -193,6 +193,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
   getPixelSize(relativeSize) {
     return (relativeSize / 100) * tpl.getGroupSize();
   },
+
   getNaturalPanelSize(index) {
     let panel = tpl.panels[index];
     let getPanelNaturalSize = tpl.getPanelSetting(index, 'getNaturalSize');
@@ -209,13 +210,22 @@ const createInstance = ({tpl, el, settings, $}) => ({
     tpl.changePanelSize(index, relativeSize);
   },
 
+  setPanelSizeMinimized(index) {
+    let naturalSize = tpl.getNaturalPanelSize(index);
+    if(naturalSize == 0) {
+      return;
+    }
+    const relativeSize = tpl.getRelativeSize(naturalSize);
+    tpl.changePanelSize(index, relativeSize, { minimizing: true });
+  },
 
-  changePanelSize(index, newRelativeSize) {
+  changePanelSize(index, newRelativeSize, resizeSettings) {
     let currentSize = tpl.getPanelSizePixels(index) || 0;
     let newSize = tpl.getPixelSize(newRelativeSize) || 0;
     let sizeDelta = newSize - currentSize;
+
     tpl.setGroupCalculations();
-    tpl.resizePanels(index, sizeDelta);
+    tpl.resizePanels(index, sizeDelta, resizeSettings);
     tpl.removeGroupCalculations();
   },
 
@@ -244,22 +254,19 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
   },
 
-  performDrag(panel, eventData) {
-  },
-
-  resizePanels(index, delta) {
-    tpl.log = [];
+  resizePanels(index, delta, { minimizing = false } = {}) {
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
       inverted = delta < 0,
+      hasMinimized = false,
       // if the handle is on the other side
       getLeftIndex = () => {
         return index;
       },
       getRightIndex = () => {
         if(index + 1 >= tpl.panels.length) {
-          return index;
+          return index - 1;
         }
         return index + 1;
       },
@@ -283,11 +290,31 @@ const createInstance = ({tpl, el, settings, $}) => ({
         let panelSize = tpl.getPanelSizePixels(index);
         return panelSize;
       },
-      setSize = (sizeIndex, size) => {
-        tpl.log.push({index, size});
-        if(isMinimized(sizeIndex) && sizeIndex !== index) {
-          return false;
+      cannotResize = (sizeIndex) => {
+        if(sizeIndex == index && minimizing) {
+          return hasMinimized;
         }
+        return isMinimized(sizeIndex);
+      },
+      fixOversized = (sizeIndex, size) => {
+        const currentSize = tpl.getPanelSizePixels(sizeIndex);
+        const newSize = size;
+        let delta = newSize - currentSize;
+        const panelSizes = tpl.panels.map((panel, index) => tpl.getPanelSizePixels(index));
+        const panelWidths = Math.floor(sum(panelSizes));
+        const groupSize = Math.floor(tpl.cache.groupSize);
+        if(panelWidths + delta > groupSize) {
+          console.log('Fixed oversized');
+          delta = groupSize - panelWidths;
+          size = currentSize + delta;
+        }
+        return size;
+      },
+      setSize = (sizeIndex, size) => {
+        if(minimizing && sizeIndex == index) {
+          hasMinimized = true;
+        }
+        //size = fixOversized(sizeIndex, size);
         tpl.setPanelSizePixels(sizeIndex, size);
       },
       pixelsToGrow = Math.abs(delta),
@@ -306,6 +333,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
       ---------------*/
 
       while (rightIndex <= lastIndex) {
+        if(cannotResize(rightIndex)) {
+          rightIndex++;
+          continue;
+        }
         let
           currentSize = getSize(rightIndex),
           naturalSize = getNaturalSize(index),
@@ -338,6 +369,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
         // collapse pass
         while (rightIndex <= lastIndex) {
+          if(cannotResize(rightIndex)) {
+            rightIndex++;
+            continue;
+          }
           let
             currentSize = getSize(rightIndex),
             minSize = getMinSize(rightIndex)
@@ -360,13 +395,17 @@ const createInstance = ({tpl, el, settings, $}) => ({
       }
 
       // if couldn't take all the pixels we needed then let's not grow as much
-      pixelsToGrow -= pixelsToTake;
+      pixelsToGrow += pixelsToTake;
 
       /*-----------------
         Grow-Left Pass
       ------------------*/
 
       while (leftIndex >= 0) {
+        if(cannotResize(leftIndex)) {
+          leftIndex--;
+          continue;
+        }
         let
           currentSize = getSize(leftIndex),
           naturalSize = getNaturalSize(leftIndex),
@@ -398,8 +437,27 @@ const createInstance = ({tpl, el, settings, $}) => ({
         leftIndex = getLeftIndex();
 
         // grow pass
-        let currentSize = getSize(leftIndex);
-        setSize(leftIndex, currentSize + pixelsToGrow);
+        let foundDonor = false;
+        while(leftIndex >= 0) {
+          if(foundDonor || cannotResize(leftIndex)) {
+            leftIndex--;
+            continue;
+          }
+          let currentSize = getSize(leftIndex);
+          setSize(leftIndex, currentSize + pixelsToGrow);
+          foundDonor = true;
+          leftIndex--;
+        }
+        while(rightIndex <= lastIndex) {
+          if(foundDonor || cannotResize(rightIndex)) {
+            rightIndex++;
+            continue;
+          }
+          let currentSize = getSize(rightIndex);
+          setSize(rightIndex, currentSize + pixelsToGrow);
+          foundDonor = true;
+          rightIndex++;
+        }
       }
 
     }
@@ -409,7 +467,12 @@ const createInstance = ({tpl, el, settings, $}) => ({
        Collapse-Left Pass
       ------------------*/
 
+      leftIndex = getLeftIndex();
       while (leftIndex >= 0) {
+        if(cannotResize(leftIndex)) {
+          leftIndex--;
+          continue;
+        }
         let
           currentSize = getSize(leftIndex),
           naturalSize = getNaturalSize(leftIndex)
@@ -441,6 +504,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
         // collapse pass
         while (leftIndex >= 0) {
+          if(cannotResize(leftIndex)) {
+            leftIndex--;
+            continue;
+          }
           let
             currentSize = getSize(leftIndex),
             minSize = getMinSize(leftIndex)
@@ -471,6 +538,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
       ---------------*/
 
       while (rightIndex <= lastIndex) {
+        if(cannotResize(rightIndex)) {
+          rightIndex++;
+          continue;
+        }
         let
           currentSize = getSize(rightIndex),
           naturalSize = getNaturalSize(rightIndex),
@@ -497,8 +568,29 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
       if (pixelsToGrow > 0) {
         rightIndex = getRightIndex();
-        let currentSize = getSize(rightIndex);
-        setSize(rightIndex, currentSize + pixelsToGrow);
+        leftIndex = getLeftIndex();
+
+        let foundDonor = false;
+        while(rightIndex <= lastIndex) {
+          if(foundDonor || cannotResize(rightIndex)) {
+            rightIndex++;
+            continue;
+          }
+          let currentSize = getSize(rightIndex);
+          setSize(rightIndex, currentSize + pixelsToGrow);
+          foundDonor = true;
+          rightIndex++;
+        }
+        while(leftIndex >= 0) {
+          if(foundDonor || cannotResize(leftIndex)) {
+            leftIndex--;
+            continue;
+          }
+          let currentSize = getSize(leftIndex);
+          setSize(leftIndex, currentSize + pixelsToGrow);
+          foundDonor = true;
+          leftIndex--;
+        }
       }
 
     }
