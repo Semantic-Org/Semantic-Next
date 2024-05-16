@@ -223,8 +223,8 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let naturalSize = tpl.getNaturalPanelSize(index);
     const relativeSize = tpl.getRelativeSize(naturalSize);
     const openSize = (previousSize)
-      ? Math.min(previousSize, naturalSize)
-      : naturalSize
+      ? Math.min(previousSize, relativeSize)
+      : relativeSize
     ;
     tpl.changePanelSize(index, openSize, { manualResize: true });
   },
@@ -259,18 +259,12 @@ const createInstance = ({tpl, el, settings, $}) => ({
       sizes.push(size);
     });
     if(total < 99.9 || total > 100.1) {
-      console.log('issue with resizing');
       console.log(total);
       console.log(sizes);
-    }
-    else {
-      console.log('good', total);
     }
   },
 
   resizePanels(index, delta, { manualResize = false } = {}) {
-    console.log('---------------------------------------------');
-    console.log(index, delta, manualResize);
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
@@ -285,22 +279,22 @@ const createInstance = ({tpl, el, settings, $}) => ({
         }
         return index + 1;
       },
-      getNaturalSize = (index) => {
+      getNaturalSize = memoize((index) => {
         let naturalSize = tpl.cache.naturalSizes[index];
         return naturalSize;
-      },
-      getMaxSize = (index) => {
+      }),
+      getMaxSize = memoize((index) => {
         let maxSize = tpl.getPanelSetting(index, 'maxSize');
         return maxSize;
-      },
-      isMinimized = (index) => {
+      }),
+      isMinimized = memoize((index) => {
         let minimized = tpl.isMinimized(index);
         return minimized || false;
-      },
-      getMinSize = (index) => {
+      }),
+      getMinSize = memoize((index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
         return minSize || 31.2;
-      },
+      }),
       getSize = (index) => {
         let panelSize = tpl.getPanelSizePixels(index);
         return panelSize;
@@ -313,7 +307,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
         else {
           result = isMinimized(resizeIndex);
         }
-        console.log(`cannotResize index: ${resizeIndex} result: ${result}`);
         return result;
       },
       setSize = (sizeIndex, size) => {
@@ -387,13 +380,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
           // make sure to only take the pixels necessary
           if (pixelsAvailableToDonate >= pixelsLeftToTake) {
             const newSize = currentSize - pixelsLeftToTake;
-            console.log('remove pixels', donorIndex, newSize, pixelsLeftToTake);
             setSize(donorIndex, newSize);
             pixelsLeftToTake = 0;
             return false;
           } else {
             // can only get some pixels needed from this panel
-            console.log('remove partial pixels', donorIndex, maxSize, pixelsAvailableToDonate);
             setSize(donorIndex, maxSize);
             pixelsLeftToTake -= pixelsAvailableToDonate;
           }
@@ -429,7 +420,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
             return false;
           } else {
             // we can only add some pixels to this panel
-            console.log('add partial pixels', growIndex, maxSize, pixelsAvailableToGrow);
             setSize(growIndex, maxSize);
             pixelsLeftToAdd -= pixelsAvailableToGrow;
           }
@@ -458,7 +448,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
           }
           const currentSize = getSize(growIndex);
           const newSize = currentSize + pixelsToAdd;
-          console.log('excess pixels added to', growIndex, newSize, pixelsToAdd);
           setSize(growIndex, newSize);
           pixelsAdded = true;
         });
@@ -536,14 +525,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
     /*--------------
        Grow Panels
     ---------------*/
-    console.log('looking for pixels to add', pixelsToAdd);
 
     /* If we didnt get all the pixels we requested we will need to reduce the amount we grow */
     pixelsToAdd = pixelsToAdd - pixelsToTake;
-
-    if(pixelsToTake > 0) {
-      console.log('but we didnt get enough pixels', pixelsToAdd);
-    }
 
     // grow all content to match their max width or natural width
     pixelsToAdd = addPixels(addDirection, pixelsToAdd, growIndex => (getMaxSize(growIndex) || getNaturalSize(growIndex)));
