@@ -221,12 +221,12 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   setPanelMaximized(index, previousSize) {
     let naturalSize = tpl.getNaturalPanelSize(index);
+    const relativeSize = tpl.getRelativeSize(naturalSize);
     const openSize = (previousSize)
       ? Math.min(previousSize, naturalSize)
       : naturalSize
     ;
-    const relativeSize = tpl.getRelativeSize(naturalSize);
-    tpl.changePanelSize(index, relativeSize, { manualResize: true });
+    tpl.changePanelSize(index, openSize, { manualResize: true });
   },
 
 
