@@ -248,7 +248,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
       sizes.push(size);
     });
     if(total < 99.9 || total > 100.1) {
-      console.log('issue with resizing');
       console.log(total);
       console.log(sizes);
     }
@@ -258,7 +257,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
-      inverted = delta < 0,
       hasMinimized = false,
       // if the handle is on the other side
       getLeftIndex = () => {
@@ -270,330 +268,232 @@ const createInstance = ({tpl, el, settings, $}) => ({
         }
         return index + 1;
       },
-      getNaturalSize = memoize((index) => {
+      getNaturalSize = (index) => {
         let naturalSize = tpl.cache.naturalSizes[index];
         return naturalSize;
-      }),
-      getMaxSize = memoize((index) => {
+      },
+      getMaxSize = (index) => {
         let maxSize = tpl.getPanelSetting(index, 'maxSize');
         return maxSize;
-      }),
-      isMinimized = memoize((index) => {
+      },
+      isMinimized = (index) => {
         let minimized = tpl.isMinimized(index);
         return minimized || false;
-      }),
-      getMinSize = memoize((index) => {
+      },
+      getMinSize = (index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
         return minSize || 31.2;
-      }),
+      },
       getSize = (index) => {
         let panelSize = tpl.getPanelSizePixels(index);
         return panelSize;
       },
-      cannotResize = (sizeIndex) => {
-        if(sizeIndex == index && minimizing) {
+      cannotResize = (resizeIndex) => {
+        if(resizeIndex == index && minimizing) {
           return hasMinimized;
         }
-        return isMinimized(sizeIndex);
-      },
-      fixOversized = (sizeIndex, size) => {
-        const currentSize = tpl.getPanelSizePixels(sizeIndex);
-        const newSize = size;
-        let delta = newSize - currentSize;
-        const panelSizes = tpl.panels.map((panel, index) => tpl.getPanelSizePixels(index));
-        const panelWidths = Math.floor(sum(panelSizes));
-        const groupSize = Math.floor(tpl.cache.groupSize);
-        if(panelWidths + delta > groupSize) {
-          console.log('Fixed oversized');
-          delta = groupSize - panelWidths;
-          size = currentSize + delta;
-        }
-        return size;
+        return isMinimized(resizeIndex);
       },
       setSize = (sizeIndex, size) => {
         if(minimizing && sizeIndex == index) {
           hasMinimized = true;
         }
-        //size = fixOversized(sizeIndex, size);
         tpl.setPanelSizePixels(sizeIndex, size);
       },
-      pixelsToGrow = Math.abs(delta),
-      pixelsToTake = Math.abs(delta),
-      leftIndex,
-      rightIndex
+      pixelsToAdd,
+      pixelsToTake
     ;
 
-    leftIndex = getLeftIndex();
-    rightIndex = getRightIndex();
+    // call a function either leftward descending or rightward ascending
+    // i.e. if the resizing panel is 3
+    // it will check 2, 1 for left and 4, 5 for right
+    // 1 | 2 | (3) | 4 | 5
 
-    if(standard) {
-
-      /*--------------
-        Collapse Pass
-      ---------------*/
-
-      while (rightIndex <= lastIndex) {
-        if(cannotResize(rightIndex)) {
-          rightIndex++;
-          continue;
+    const performLoop = (direction, callback) => {
+      const
+        directions = {
+          left: {
+            getIndex: getLeftIndex,
+            condition: (index) => (index >= 0),
+            incrementor: (index) => (index - 1),
+          },
+          right: {
+            getIndex: getRightIndex,
+            condition: (index) => (index <= lastIndex),
+            incrementor: (index) => (index + 1),
+          },
+        },
+        { getIndex, condition, incrementor } = directions[direction]
+      ;
+      let index = getIndex();
+      while(condition(index)) {
+        if(callback(index) === false) {
+          break;
         }
-        let
-          currentSize = getSize(rightIndex),
-          naturalSize = getNaturalSize(index),
-          maxSize = getMaxSize(index) || naturalSize
-        ;
-        // has any pixels to give
-        if (currentSize > maxSize) {
-          if (currentSize - pixelsToTake >= maxSize) {
-            // can subtract all from this column
-            setSize(rightIndex, currentSize - pixelsToTake);
-            pixelsToTake = 0;
-            break;
+        index = incrementor(index);
+      }
+    };
+
+    /* Loops in a direction taking pixels from any columns that exceed a max size */
+    const takePixels = (direction, pixelsToTake, getMaxSize) => {
+
+      let pixelsLeftToTake = pixelsToTake;
+
+      performLoop(direction, (donorIndex) => {
+        // skip over panels that cannot resize
+        if(cannotResize(donorIndex)) {
+          return;
+        }
+        const currentSize = getSize(donorIndex);
+        const maxSize = getMaxSize(donorIndex);
+
+        // check if this panel exceeds max size test
+        if(currentSize > maxSize) {
+
+          const pixelsAvailableToDonate = currentSize - maxSize;
+
+          // make sure to only take the pixels necessary
+          if (pixelsAvailableToDonate >= pixelsLeftToTake) {
+            const newSize = currentSize - pixelsLeftToTake;
+            setSize(donorIndex, newSize);
+            pixelsLeftToTake = 0;
+            return false;
           } else {
-            // can only subtract partial amount from this column
-            setSize(rightIndex, maxSize);
-            pixelsToTake -= currentSize - maxSize;
+            // can only get some pixels needed from this panel
+            setSize(donorIndex, maxSize);
+            pixelsLeftToTake -= pixelsAvailableToDonate;
           }
         }
-        rightIndex++;
-      }
+      });
+      return pixelsLeftToTake;
 
-      /*--------------
-        Min-Width Pass
-      ---------------*/
+    };
 
-      if (pixelsToTake > 0) {
+    const addPixels = (direction, pixelsToAdd, getMaxSize) => {
 
-        // reset index
-        rightIndex = getRightIndex();
+      let pixelsLeftToAdd = pixelsToAdd;
+      performLoop(direction, (growIndex) => {
 
-        // collapse pass
-        while (rightIndex <= lastIndex) {
-          if(cannotResize(rightIndex)) {
-            rightIndex++;
-            continue;
-          }
-          let
-            currentSize = getSize(rightIndex),
-            minSize = getMinSize(rightIndex)
-          ;
-          // has any pixels to give
-          if (currentSize > minSize) {
-            if (currentSize - pixelsToTake >= minSize) {
-              // can subtract all from this column
-              setSize(rightIndex, currentSize - pixelsToTake);
-              pixelsToTake = 0;
-              break;
-            } else {
-              // can only subtract partial amount from this column
-              setSize(rightIndex, minSize);
-              pixelsToTake -= currentSize - minSize;
-            }
-          }
-          rightIndex++;
+        // dont grow panels that cannot resize
+        if(cannotResize(growIndex)) {
+          return;
         }
-      }
 
-      // if couldn't take all the pixels we needed then let's not grow as much
-      pixelsToGrow += pixelsToTake;
+        const currentSize = getSize(growIndex);
+        const maxSize = getMaxSize(growIndex);
 
-      /*-----------------
-        Grow-Left Pass
-      ------------------*/
+        // check if this panel is below max size test
+        if(currentSize <= maxSize) {
 
-      while (leftIndex >= 0) {
-        if(cannotResize(leftIndex)) {
-          leftIndex--;
-          continue;
-        }
-        let
-          currentSize = getSize(leftIndex),
-          naturalSize = getNaturalSize(leftIndex),
-          maxSize = getMaxSize(leftIndex) || naturalSize
-        ;
-        // has any pixels to give
-        if (currentSize < maxSize) {
-          if (currentSize + pixelsToGrow <= maxSize) {
-            // can subtract all from this column
-            setSize(leftIndex, currentSize + pixelsToGrow);
-            pixelsToGrow = 0;
-            break;
+          const pixelsAvailableToGrow = maxSize - currentSize;
+
+          if (pixelsAvailableToGrow >= pixelsLeftToAdd) {
+            // we can add all the pixels to this panel
+            const newSize = currentSize + pixelsLeftToAdd;
+            setSize(growIndex, newSize);
+            pixelsLeftToAdd = 0;
+            return false;
           } else {
-            // can only subtract partial amount from this column
-            setSize(leftIndex, maxSize);
-            pixelsToGrow -= maxSize - currentSize;
+            // we can only add some pixels to this panel
+            setSize(growIndex, maxSize);
+            pixelsLeftToAdd -= pixelsAvailableToGrow;
           }
         }
-        leftIndex--;
+      });
+      return pixelsLeftToAdd;
+
+    };
+
+    const distributeExcessPixels = (direction, pixelsToAdd) => {
+
+      let directions = (direction == 'leftFirst')
+        ? ['left', 'right']
+        : ['right', 'left']
+      ;
+      let pixelsAdded = false;
+
+      // add pixels
+      each(directions, direction => {
+        if(pixelsAdded) {
+          return;
+        }
+        performLoop(direction, (growIndex) => {
+          if(pixelsAdded || cannotResize(growIndex)) {
+            return;
+          }
+          const currentSize = getSize(growIndex);
+          const newSize = currentSize + pixelsToAdd;
+          setSize(growIndex, newSize);
+          pixelsAdded = true;
+        });
+      });
+
+    };
+
+    /*-----------------------
+      Check All Collapsed
+    -----------------------*/
+
+    let i = tpl.panels.length;
+    let collapseCount = 0;
+    while(i--) {
+      if(cannotResize(i)) {
+        collapseCount++;
       }
-
-      /*--------------
-        Adjacent Pass
-      ---------------*/
-
-      // add leftover pixels so that we're even
-      if (pixelsToGrow > 0) {
-        // reset index
-        leftIndex = getLeftIndex();
-
-        // grow pass
-        let foundDonor = false;
-        while(leftIndex >= 0) {
-          if(foundDonor || cannotResize(leftIndex)) {
-            leftIndex--;
-            continue;
-          }
-          let currentSize = getSize(leftIndex);
-          setSize(leftIndex, currentSize + pixelsToGrow);
-          foundDonor = true;
-          leftIndex--;
-        }
-        while(rightIndex <= lastIndex) {
-          if(foundDonor || cannotResize(rightIndex)) {
-            rightIndex++;
-            continue;
-          }
-          let currentSize = getSize(rightIndex);
-          setSize(rightIndex, currentSize + pixelsToGrow);
-          foundDonor = true;
-          rightIndex++;
-        }
-      }
-
     }
-    else if(inverted) {
-
-      /*-----------------
-       Collapse-Left Pass
-      ------------------*/
-
-      leftIndex = getLeftIndex();
-      while (leftIndex >= 0) {
-        if(cannotResize(leftIndex)) {
-          leftIndex--;
-          continue;
-        }
-        let
-          currentSize = getSize(leftIndex),
-          naturalSize = getNaturalSize(leftIndex)
-        ;
-        // has any pixels to give
-        if (currentSize > naturalSize) {
-          if (currentSize - pixelsToTake >= naturalSize) {
-            // can subtract all from this column
-            setSize(leftIndex, currentSize - pixelsToTake);
-            pixelsToTake = 0;
-            break;
-          } else {
-            // can only subtract partial amount from this column
-            setSize(leftIndex, naturalSize);
-            pixelsToTake -= currentSize - naturalSize;
-          }
-        }
-        leftIndex--;
-      }
-
-      /*--------------
-        Min-Width Pass
-      ---------------*/
-
-      if (pixelsToTake > 0) {
-
-        // reset index
-        leftIndex = getLeftIndex();
-
-        // collapse pass
-        while (leftIndex >= 0) {
-          if(cannotResize(leftIndex)) {
-            leftIndex--;
-            continue;
-          }
-          let
-            currentSize = getSize(leftIndex),
-            minSize = getMinSize(leftIndex)
-          ;
-          // has any pixels to give
-          if (currentSize > minSize) {
-            if (currentSize - pixelsToTake >= minSize) {
-              // can subtract all from this column
-              setSize(leftIndex, currentSize - pixelsToTake);
-              pixelsToTake = 0;
-              break;
-            } else {
-              // can only subtract partial amount from this column
-              setSize(leftIndex, minSize);
-              pixelsToTake -= currentSize - minSize;
-            }
-          }
-          leftIndex--;
-        }
-      }
-
-      // if couldn't take all the pixels we needed then let's not grow as much
-      pixelsToGrow -= pixelsToTake;
-      rightIndex = getRightIndex();
-
-      /*--------------
-       Max Width Pass
-      ---------------*/
-
-      while (rightIndex <= lastIndex) {
-        if(cannotResize(rightIndex)) {
-          rightIndex++;
-          continue;
-        }
-        let
-          currentSize = getSize(rightIndex),
-          naturalSize = getNaturalSize(rightIndex),
-          maxSize = getMaxSize(rightIndex) || naturalSize
-        ;
-        // has any pixels to give
-        if (currentSize < maxSize) {
-          if (currentSize + pixelsToGrow <= maxSize) {
-            // can subtract all from this column
-            setSize(rightIndex, currentSize + pixelsToGrow);
-            pixelsToGrow = 0;
-            break;
-          } else {
-            // can only subtract partial amount from this column
-            setSize(rightIndex, maxSize);
-            pixelsToGrow -= naturalSize - currentSize;
-          }
-        }
-        rightIndex++;
-      }
-      /*--------------
-        Adjacent Pass
-      ---------------*/
-
-      if (pixelsToGrow > 0) {
-        rightIndex = getRightIndex();
-        leftIndex = getLeftIndex();
-
-        let foundDonor = false;
-        while(rightIndex <= lastIndex) {
-          if(foundDonor || cannotResize(rightIndex)) {
-            rightIndex++;
-            continue;
-          }
-          let currentSize = getSize(rightIndex);
-          setSize(rightIndex, currentSize + pixelsToGrow);
-          foundDonor = true;
-          rightIndex++;
-        }
-        while(leftIndex >= 0) {
-          if(foundDonor || cannotResize(leftIndex)) {
-            leftIndex--;
-            continue;
-          }
-          let currentSize = getSize(leftIndex);
-          setSize(leftIndex, currentSize + pixelsToGrow);
-          foundDonor = true;
-          leftIndex--;
-        }
-      }
-
+    // When all but one panel are collapsed we cant resize
+    if(collapseCount + 1 >= tpl.panels.length) {
+      return;
     }
+
+    /*
+      Standard (Postive Delta)
+      ------------------------
+      Growing Above / Left
+      Shrinking Below / Right
+    */
+
+    // this is a running tally of the pixels we need to add to panels
+    pixelsToAdd = Math.abs(delta);
+
+    // this is a running tally of the pixels we need to take from a panel
+    pixelsToTake = Math.abs(delta);
+
+    const takeDirection = (standard) ? 'right' : 'left';
+    const addDirection = (standard) ? 'left' : 'right';
+    const shareStrategy = (standard) ? 'leftFirst': 'rightFirst';
+
+    /*--------------
+       Find Donors
+    ---------------*/
+
+    /* First check if we can take pixels from panels exceeding max or natural size */
+    pixelsToTake = takePixels(takeDirection, pixelsToTake, donorIndex => (getMaxSize(donorIndex) || getNaturalSize(donorIndex)));
+
+    /* If we still need pixels lets donate from any panels that exceed their min width */
+    if(pixelsToTake > 0) {
+      pixelsToTake = takePixels(takeDirection, pixelsToTake, donorIndex => getMinSize(donorIndex));
+    }
+
+    /*--------------
+       Grow Panels
+    ---------------*/
+
+    /* If we didnt get all the pixels we requested we will need to reduce the amount we grow */
+    pixelsToAdd = pixelsToAdd - pixelsToTake;
+
+    if(pixelsToTake > 0) {
+    }
+
+    // grow all content to match their max width or natural width
+    pixelsToAdd = addPixels(addDirection, pixelsToAdd, growIndex => (getMaxSize(growIndex) || getNaturalSize(growIndex)));
+
+    // if we still have additional pixels left to grow find the best place to place them
+    if(pixelsToAdd > 0) {
+      distributeExcessPixels(shareStrategy, pixelsToAdd);
+    }
+
+
     tpl.debugSizes();
   },
 });
