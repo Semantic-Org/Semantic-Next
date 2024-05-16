@@ -588,7 +588,10 @@ export class Query {
     }
     else {
       // Get the property value from elements
-      if (this.length === 1) {
+      if(this.length == 0) {
+        return undefined;
+      }
+      else if (this.length === 1) {
         return this[0][name];
       } else {
         return this.map(el => el[name]);
