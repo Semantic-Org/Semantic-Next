@@ -42,23 +42,28 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   setPanelInitialSizes() {
-    each(tpl.panels, (panel, index) => {
+
+    let exactPanels = tpl.getExactPanels();
+    each(exactPanels, (panel) => {
+      let index = tpl.panels.indexOf(panel);
       const size = panel.settings.size;
-      if(size !== 'grow') {
-        let relativeSize = tpl.getRelativeSettingSize(panel.settings.size, index);
-        tpl.setPanelSize(index, relativeSize);
-        panel.tpl.initialized.set(true);
-      }
+      let relativeSize = tpl.getRelativeSettingSize(size, index);
+      tpl.setPanelSize(index, relativeSize);
+      panel.tpl.initialized.set(true);
     });
+
     // we have to perform grow stage after setting fixed size panels
     let growPanels = tpl.getGrowingPanels();
     const availableWidth = tpl.getAvailableGrowWidth();
+
     if(growPanels.length == 0 && availableWidth > 0) {
       console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
       growPanels = tpl.panels.slice(-1);
     }
-    each(growPanels, (panel, index) => {
+
+    each(growPanels, (panel,) => {
       let relativeSize = availableWidth / growPanels.length;
+      let index = tpl.panels.indexOf(panel);
       const minSize = tpl.getRelativeSettingSize(panel.settings.minSize);
       const maxSize = tpl.getRelativeSettingSize(panel.settings.minSize);
       if(relativeSize < minSize) {
@@ -124,6 +129,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   getGrowingPanels() {
     return tpl.panels.filter(panel => panel.settings.size == 'grow');
+  },
+  getExactPanels() {
+    return tpl.panels.filter(panel => panel.settings.size !== 'grow');
   },
 
   getRelativeSettingSize(size, index) {

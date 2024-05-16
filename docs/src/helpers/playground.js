@@ -375,7 +375,7 @@ export const getPanelIndexes = (files, type) => {
   });
   // use right pane for css if no index files
   if(!indexes['index.html'] && !indexes['index.css'] && !indexes['index.js']) {
-    //indexes['component.css'] = 1;
+    indexes['component.css'] = 1;
   }
   return indexes;
 };
