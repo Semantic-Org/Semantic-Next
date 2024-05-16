@@ -259,6 +259,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   resizePanels(index, delta, { minimizing = false } = {}) {
     console.log('---------------------------------------------');
+    console.log(index, delta, minimizing);
     let
       lastIndex = tpl.panels.length - 1,
       standard = delta > 0,
@@ -294,10 +295,14 @@ const createInstance = ({tpl, el, settings, $}) => ({
         return panelSize;
       },
       cannotResize = (resizeIndex) => {
+        let result;
         if(resizeIndex == index && minimizing) {
-          return hasMinimized;
+          result = hasMinimized;
         }
-        return isMinimized(resizeIndex);
+        else {
+          result = isMinimized(resizeIndex);
+        }
+        return result;
       },
       setSize = (sizeIndex, size) => {
         if(minimizing && sizeIndex == index) {
@@ -317,6 +322,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
     const performLoop = (direction, callback) => {
       const
         directions = {
+          all: {
+            getIndex: () => 0,
+            condition: (index) => (index <= lastIndex),
+            incrementor: (index) => (index + 1),
+          },
           left: {
             getIndex: getLeftIndex,
             condition: (index) => (index >= 0),
@@ -333,7 +343,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
       let index = getIndex();
       while(condition(index)) {
         if(callback(index) === false) {
-          console.log('condition met early break');
           break;
         }
         index = incrementor(index);
@@ -469,9 +478,18 @@ const createInstance = ({tpl, el, settings, $}) => ({
     // this is a running tally of the pixels we need to take from a panel
     pixelsToTake = Math.abs(delta);
 
-    const takeDirection = (standard) ? 'right' : 'left';
-    const addDirection = (standard) ? 'left' : 'right';
-    const shareStrategy = (standard) ? 'leftFirst': 'rightFirst';
+    let takeDirection, addDirection, shareStrategy;
+
+    if(minimizing) {
+      takeDirection = 'all';
+      addDirection = 'all';
+      shareStrategy = 'all';
+    }
+    else {
+      takeDirection = (standard) ? 'right' : 'left';
+      addDirection = (standard) ? 'left' : 'right';
+      shareStrategy = (standard) ? 'leftFirst': 'rightFirst';
+    }
 
     /*--------------
        Find Donors
