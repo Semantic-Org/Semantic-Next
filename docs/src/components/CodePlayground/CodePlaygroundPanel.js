@@ -9,24 +9,24 @@ const state = {
   lastPanelSize: undefined,
 };
 
-const createInstance = ({tpl, settings, state, $}) => ({
+const createInstance = ({tpl, settings, state, $, $$}) => ({
 
   getNaturalSize(panel, {minimized }) {
-    const labelHeight = $('.label').height();
+    const labelHeight = $$('.label').height();
     if(minimized) {
       return labelHeight;
     }
     else {
       const extraSpacing = 5;
-      const scrollbarHeight = $(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
-      const codeHeight = parseFloat($(panel).find('.CodeMirror-sizer').first().css('min-height'));
+      const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
+      const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
       const size = codeHeight + labelHeight + extraSpacing + scrollbarHeight;
       return size;
     }
   },
 
   configureCodeEditors() {
-    const el = $('playground-code-editor').get(0);
+    const el = $$('playground-code-editor').get(0);
     if(el) {
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
       tpl.modifyCodeMirror(el._codemirror);

@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, sum } from '@semantic-ui/utils';
+import { sum } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';

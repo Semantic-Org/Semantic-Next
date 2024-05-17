@@ -42,7 +42,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   setPanelInitialSizes() {
-
     let exactPanels = tpl.getExactPanels();
     each(exactPanels, (panel) => {
       let index = tpl.panels.indexOf(panel);
