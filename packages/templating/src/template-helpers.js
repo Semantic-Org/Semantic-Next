@@ -5,6 +5,7 @@ import {
   isEmpty,
   arrayFromObject,
   formatDate,
+  each,
   escapeHTML,
   tokenize,
 } from '@semantic-ui/utils';
@@ -44,6 +45,15 @@ export const TemplateHelpers = {
       ? `${val} `
       : ''
     ;
+  },
+  classMap(classObj) {
+    let classNames = [];
+    each(classObj, (condition, className) => {
+      if(condition) {
+        classNames.push(className);
+      }
+    });
+    return (classNames.length) ? `${classNames.join(' ')} `: '';
   },
   maybe(expr, trueExpr, falseExpr) {
     return expr ? trueExpr : falseExpr;
