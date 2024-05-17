@@ -254,31 +254,61 @@ export const Template = class Template {
     });
   }
 
-  attachEvents(events = this.events) {
-    if (!this.parentNode || !this.renderRoot) {
-      fatal('You must set a parent before attaching events');
-    }
-    this.removeEvents();
-    // format like 'click .foo baz'
-    const parseEventString = (eventString) => {
-      const parts = eventString.split(' ');
-      let eventName = parts[0];
-      parts.shift();
-      const selector = parts.join(' ');
+  parseEventString(eventString) {
+    // we are using event delegation so we will have to bind
+    // some events to their corresponding event that bubbles
+    const getBubbledEvent = (eventName) => {
       const bubbleMap = {
         blur: 'focusout',
         focus: 'focusin',
-        //change: 'input',
         load: 'DOMContentLoaded',
         unload: 'beforeunload',
         mouseenter: 'mouseover',
         mouseleave: 'mouseout',
       };
-      if (bubbleMap[eventName]) {
+      if(bubbleMap[eventName]) {
         eventName = bubbleMap[eventName];
       }
-      return { eventName, selector };
+      return eventName;
     };
+
+    let events = [];
+    let parts = eventString.split(/\s+/);
+
+    let addedEvents = false;
+    const eventNames = [];
+    const selectors = [];
+    each(parts, (part, index) => {
+      const value = part.replace(/(\,|\W)+$/, '').trim();
+      if(!addedEvents) {
+        eventNames.push(getBubbledEvent(value));
+        addedEvents = (part.includes(',') === false);
+      }
+      else {
+        selectors.push(value);
+      }
+    });
+    if(eventNames.length > 1) {
+      each(eventNames, (eventName) => {
+        events.push({ eventName, selector: selectors[0] });
+      });
+    }
+    else if(selectors.length > 1) {
+      each(selectors, (selector) => {
+        events.push({ eventName: eventNames[0], selector });
+      });
+    }
+    else {
+      events.push({ eventName: eventNames[0], selector: selectors[0] || '' });
+    }
+    return events;
+  }
+
+  attachEvents(events = this.events) {
+    if (!this.parentNode || !this.renderRoot) {
+      fatal('You must set a parent before attaching events');
+    }
+    this.removeEvents();
 
     // this is to cancel event bindings when template tears down
     // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
@@ -297,39 +327,41 @@ export const Template = class Template {
     }
 
     each(events, (eventHandler, eventString) => {
-      const { eventName, selector } = parseEventString(eventString);
+      const subEvents = this.parseEventString(eventString);
       const template = this;
-
-      // BUG: iOS Safari will not bubble the touchstart / touchend events
-      // if theres no handler on the actual element
-      if(selector) {
-        $(selector, { root: this.renderRoot }).on(eventName, noop);
-      }
-      $(this.renderRoot).on(
-        eventName,
-        selector,
-        (event) => {
-          if (!this.isNodeInTemplate(event.target)) {
-            return;
-          }
-          if (inArray(eventName, ['mouseover', 'mouseout'])
-            && event.relatedTarget
-            && event.target.contains(event.relatedTarget)) {
-            return;
-          }
-          const targetElement = (selector)
-            ? $(event.target).closest(selector).get(0) // delegation
-            : event.target
-          ;
-          const boundEvent = eventHandler.bind(targetElement);
-          const eventData = event?.detail || {};
-          const elData = targetElement.dataset;
-          template.call(boundEvent, {
-            additionalData: { event: event, data: { ...elData, ...eventData } },
-          });
-        },
-        { abortController: this.eventController }
-      );
+      each(subEvents, (event) => {
+        const { eventName, selector } = event;
+        // BUG: iOS Safari will not bubble the touchstart / touchend events
+        // if theres no handler on the actual element
+        if(selector) {
+          $(selector, { root: this.renderRoot }).on(eventName, noop);
+        }
+        $(this.renderRoot).on(
+          eventName,
+          selector,
+          (event) => {
+            if (!this.isNodeInTemplate(event.target)) {
+              return;
+            }
+            if (inArray(eventName, ['mouseover', 'mouseout'])
+              && event.relatedTarget
+              && event.target.contains(event.relatedTarget)) {
+              return;
+            }
+            const targetElement = (selector)
+              ? $(event.target).closest(selector).get(0) // delegation
+              : event.target
+            ;
+            const boundEvent = eventHandler.bind(targetElement);
+            const eventData = event?.detail || {};
+            const elData = targetElement.dataset;
+            template.call(boundEvent, {
+              additionalData: { event: event, data: { ...elData, ...eventData } },
+            });
+          },
+          { abortController: this.eventController }
+        );
+      });
     });
   }
 
