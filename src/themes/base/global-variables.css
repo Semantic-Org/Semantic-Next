@@ -265,6 +265,7 @@
 
   --default-duration: 0.15s;
   --default-easing: ease;
+  --transition: all var(--default-duration) var(--default-easing);
 
   /* -------------------
        Breakpoints
