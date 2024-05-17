@@ -10,7 +10,7 @@ const tagRegExp = /^<(\w+)(\s*\/)?>$/;
 export class Query {
   static eventHandlers = [];
 
-  constructor(selector, { root = document, pierceShadow = false } = {}) {
+  constructor(selector, { root = document, pierceShadow = true } = {}) {
     let elements = [];
 
     if (!root) {
@@ -87,9 +87,12 @@ export class Query {
     }
 
     const addElements = (node) => {
-      if(domSelector && (node.contains && node.contain(selector))) {
-        elements.push(selector);
-        domFound = true;
+      if(domSelector && (node === selector || node.contains)) {
+        if(node.contains(selector)) {
+          elements.push(selector);
+          domFound = true;
+
+        }
       }
       else if(node.querySelectorAll) {
         elements.push(...node.querySelectorAll(selector));

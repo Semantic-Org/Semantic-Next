@@ -454,7 +454,7 @@ export const Template = class Template {
   }
 
   $$(selector, args) {
-    return this.$(selector, { root: this.renderRoot, filterTemplate: false, ...args });
+    return this.$(selector, { root: this.renderRoot, pierceShadow: true, filterTemplate: true, ...args });
   }
 
   // calls callback if defined with consistent params and this context
@@ -469,6 +469,7 @@ export const Template = class Template {
         el: this.element,
         tpl: this.tpl,
         $: this.$.bind(this),
+        $$: this.$$.bind(this),
 
         reaction: this.reaction.bind(this),
         reactiveVar: this.reactiveVar.bind(this),
