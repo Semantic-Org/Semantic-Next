@@ -64,6 +64,7 @@ describe('query', () => {
       expect($result[0]).toBe(div1);
       expect($result[1]).toBe(div2);
     });
+
     it('should accept a custom element as a selector', () => {
       class CustomElement extends HTMLElement {}
       customElements.define('custom-element', CustomElement);
@@ -282,7 +283,7 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
 
-      const $span = $('span');
+      const $span = $('span', { pierceShadow: true });
       const $closest = $span.closest('div');
       expect($closest.get(0)).toBe(div);
     });
@@ -293,7 +294,7 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
 
-      const $span = $('span');
+      const $span = $('span', { pierceShadow: true });
       const $closest = $span.closest(div);
       expect($closest.get(0)).toBe(div);
     });
@@ -304,7 +305,7 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
 
-      const $span = $('span');
+      const $span = $('span', { pierceShadow: true });
       const $closest = $span.closest('p');
       expect($closest.length).toBe(0);
     });

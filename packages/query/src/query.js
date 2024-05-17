@@ -10,7 +10,7 @@ const tagRegExp = /^<(\w+)(\s*\/)?>$/;
 export class Query {
   static eventHandlers = [];
 
-  constructor(selector, { root = document, pierceShadow = true } = {}) {
+  constructor(selector, { root = document, pierceShadow = false } = {}) {
     let elements = [];
 
     if (!root) {
@@ -53,43 +53,78 @@ export class Query {
     return new Query(elements, this.options);
   }
 
-  querySelectorAllDeep(root, selector, { includeRoot = true } = {}) {
-    const elements = new Set();
-    const domSelector = isDOM(selector);
-    const stringSelector = isString(selector);
-    const addElement = (node) => {
-      if(node == root && !includeRoot) {
+  /* Note this is a naive implementation for performance reasons
+     we will add all elements across shadow root boundaries but without
+     matching complex selectors that would match ACROSS shadow root boundaries
+  */
+  querySelectorAllDeep(root, selector, includeRoot = true) {
+    let elements = [];
+    let domSelector = isDOM(selector);
+    let domFound = false;
+    let queriedRoot;
+
+
+    // add root if required
+    if (includeRoot) {
+      if(domSelector && root == selector) {
+        elements.push(root);
+      }
+      else if(root.matches && root.matches(selector)) {
+        elements.push(root);
+      }
+    }
+
+    // query from root
+    if(domSelector) {
+      queriedRoot = true;
+    }
+    else if(root.querySelectorAll) {
+      elements.push(...root.querySelectorAll(selector));
+      queriedRoot = true;
+    }
+    else {
+      queriedRoot = false;
+    }
+
+    const addElements = (node) => {
+      if(domSelector && (node.contains && node.contain(selector))) {
+        elements.push(selector);
+        domFound = true;
+      }
+      else if(node.querySelectorAll) {
+        elements.push(...node.querySelectorAll(selector));
+      }
+    };
+
+    const findElements = (node, query) => {
+
+      // if we are querying for a DOM element we can stop searching once we've found it
+      if(domFound) {
         return;
       }
-      elements.add(node);
-    };
-    const findElements = (node) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        if (domSelector) {
-          if(node == selector) {
-            addElement(node);
-          }
-        }
-        else if (stringSelector && node.matches(selector)) {
-          addElement(node);
-        }
-        else if (node.shadowRoot) {
-          findElements(node.shadowRoot);
-        }
+
+      // if root element did not support querySelectorAll
+      // we query each child node then stop
+      if(query === true) {
+        addElements(node);
+        queriedRoot = true;
       }
+
+      // query at each shadow root
+      if (node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
+        addElements(node.shadowRoot);
+        findElements(node.shadowRoot, !queriedRoot);
+      }
+
       if(node.assignedNodes) {
-        each(node.assignedNodes(), node => {
-          findElements(node);
-        });
+        node.assignedNodes().forEach((node) => findElements(node, queriedRoot));
       }
-      if (node.childNodes) {
-        node.childNodes.forEach((childNode) => {
-          findElements(childNode);
-        });
+      if (node.childNodes.length) {
+        node.childNodes.forEach((node) => findElements(node, queriedRoot));
       }
     };
     findElements(root);
-    return Array.from(elements);
+    return [...new Set(elements)];
   }
 
   each(callback) {
@@ -109,7 +144,7 @@ export class Query {
   find(selector) {
     const elements = Array.from(this).flatMap((el) => {
       if (this.options.pierceShadow) {
-        return this.querySelectorAllDeep(el, selector, {includeRoot: false });
+        return this.querySelectorAllDeep(el, selector, false);
       } else {
         return Array.from(el.querySelectorAll(selector));
       }
@@ -275,7 +310,7 @@ export class Query {
       if (targetSelector) {
         delegateHandler = (e) => {
           const target = e.target.closest(targetSelector);
-          if (target && this.chain(el).find(target).length) {
+          if (target) {
             handler.call(target, e);
           }
         };
