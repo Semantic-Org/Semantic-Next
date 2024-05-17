@@ -1,6 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
 import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 

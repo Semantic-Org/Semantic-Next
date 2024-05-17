@@ -37,6 +37,16 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
 
+  getClassMap: () => ({
+    resizing: tpl.resizing.get(),
+    initialized: tpl.initialized.get()
+  }),
+
+  getHandleClassMap: () => ({
+    initialized: tpl.initialized.get(),
+    disabled: !tpl.isResizable()
+  }),
+
   getCurrentFlex() {
     return $(el).css('flex-grow');
   },
@@ -68,11 +78,12 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     $('body')
       .addClass('resizing')
       .css('cursor', tpl.getResizeCursor())
-      .on('mousemove', (event) => {
+      .on('pointermove', (event) => {
+        console.log('here');
         tpl.resizeDrag(event);
       });
     $('body')
-      .one('mouseup', (event) => {
+      .one('pointerup', (event) => {
         tpl.endResize(event);
       })
     ;
@@ -86,7 +97,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     });
   },
   endResize() {
-    $('body').off('mousemove').removeClass('resizing').css('cursor', null);
+    $('body').off('pointermove').removeClass('resizing').css('cursor', null);
     tpl.resizing.set(false);
     delete tpl.initialPosition;
     delete tpl.initialSize;
@@ -142,12 +153,12 @@ const events = {
   'dblclick .label'({ tpl }) {
     tpl.toggleMinimize();
   },
-  'mousedown .handle'({event, tpl}) {
-    tpl.startResize(event);
-    event.preventDefault();
-  },
   'dblclick .handle': function({ tpl }) {
     tpl.setPreviousNaturalSize();
+  },
+  'pointerdown .handle'({event, tpl}) {
+    tpl.startResize(event);
+    event.preventDefault();
   },
 };
 

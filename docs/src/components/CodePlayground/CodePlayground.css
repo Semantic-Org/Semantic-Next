@@ -108,6 +108,37 @@
 
 }
 
+/* Reskin */
+playground-preview {
+  margin: 0rem;
+  flex: 1 1 0;
+  max-height: calc(100vh - var(--topbar-height));
+  background: var(--playground-code-background) !important;
+}
+playground-preview::part(preview-toolbar) {
+  font-size: 11px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: ;
+  margin: 0rem 0rem 0rem;
+  font-weight: bold;
+  color: rgb(255 255 255 / 72%);
+  padding: 0px 0.5rem;
+  background: linear-gradient(rgba(255, 255, 255, 0.02), rgba(15, 17, 22, 0.5));
+  border-bottom: 1px solid rgba(221, 221, 221, 0.05);
+  box-shadow: rgba(0, 0, 0, 0.4) 0px -2px 5px -3px inset;
+  background-color: var(--playground-code-background);
+  box-sizing: border-box;
+  height: 18px;
+  font-family: 'Lato';
+}
+playground-preview::part(preview-loading-indicator) {
+  --mdc-theme-primary: var(--primary-text-color);
+  height: 3px;
+  overflow: hidden;
+  top: -62px;
+}
+
 playground-ide {
   height: 100%;
 }

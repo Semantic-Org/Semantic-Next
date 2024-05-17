@@ -1,4 +1,4 @@
-<div class="{{classIf resizing 'resizing'}}{{classIf initialized 'initialized'}}{{direction}} panel" part="panel">
+<div class="{{classMap getClassMap}}{{direction}} panel" part="panel">
   {{#if label}}
     <span class="label">
       {{label}}
@@ -15,6 +15,6 @@
   {{/if}}
   {{>slot}}
 </div>
-<span class="{{classIf initialized 'initialized'}} {{classIf isResizable '' 'disabled'}} handle" part="handle">
+<span class="{{classMap getHandleClassMap}} handle" part="handle">
   <span class="divider"></span>
 </span>

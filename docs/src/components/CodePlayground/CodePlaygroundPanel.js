@@ -39,9 +39,13 @@ const createInstance = ({tpl, settings, state, $}) => ({
 
   modifyCodeMirror(cm) {
 
+    cm.setSize(null, null);
+
     cm.refresh();
 
     cm.setOption('tabSize', settings.tabSize);
+
+    cm.setOption('viewportMargin', Infinity);
 
     // Enable multiple selections
     cm.setOption('allowMultipleSelections', true);
