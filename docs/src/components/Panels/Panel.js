@@ -65,23 +65,32 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
   getPanels() {
     return findParent('uiPanels');
   },
+  getPointerPosition(event) {
+    const positionObj = event.touches
+      ? event.touches[0]
+      : event
+    ;
+    return (settings.direction == 'horizontal')
+      ? positionObj.pageX
+      : positionObj.pageY
+    ;
+  },
   startResize(event) {
     tpl.resizing.set(true);
     tpl.initialSize = tpl.getCurrentFlex();
     dispatchEvent('resizeStart', {
       initialSize: tpl.initialSize,
       direction: settings.direction,
-      startPosition: (settings.direction == 'horizontal')
-        ? event.pageX
-        : event.pageY,
+      startPosition: tpl.getPointerPosition(event),
     });
     $('body')
       .addClass('resizing')
       .css('cursor', tpl.getResizeCursor())
-      .on('pointermove', (event) => {
-        console.log('here');
+      .on('mousemove', (event) => {
         tpl.resizeDrag(event);
-      });
+      })
+      .on('touchmove', tpl.resizeDrag)
+    ;
     $('body')
       .one('pointerup', (event) => {
         tpl.endResize(event);
@@ -91,13 +100,16 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
   resizeDrag(event) {
     dispatchEvent('resizeDrag', {
       initialSize: tpl.initialSize,
-      endPosition: (settings.direction == 'horizontal')
-        ? event.pageX
-        : event.pageY,
+      endPosition: tpl.getPointerPosition(event),
     });
   },
   endResize() {
-    $('body').off('pointermove').removeClass('resizing').css('cursor', null);
+    $('body')
+      .off('mousemove')
+      .off('touchmove')
+      .removeClass('resizing')
+      .css('cursor', null)
+    ;
     tpl.resizing.set(false);
     delete tpl.initialPosition;
     delete tpl.initialSize;
@@ -156,7 +168,7 @@ const events = {
   'dblclick .handle': function({ tpl }) {
     tpl.setPreviousNaturalSize();
   },
-  'pointerdown .handle'({event, tpl}) {
+  'mousedown, touchstart .handle'({event, tpl}) {
     tpl.startResize(event);
     event.preventDefault();
   },

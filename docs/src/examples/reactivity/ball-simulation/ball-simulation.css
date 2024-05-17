@@ -1,10 +1,13 @@
 .simulation {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
+  canvas {
+    border: var(--border);
+    border-radius: var(--border-radius);
+  }
+  p {
+    font-size: 12px;
+    color: var(--standard-30);
+    user-select: none;
+  }
 }
 
-canvas {
-  border: var(--border);
-  border-radius: var(--border-radius);
-}

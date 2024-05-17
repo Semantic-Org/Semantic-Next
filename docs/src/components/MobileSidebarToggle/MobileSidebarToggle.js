@@ -6,7 +6,7 @@ import css from './MobileSidebarToggle.css?raw';
 const createInstance = function ({ $, isServer, tpl }) {
   return {
     getSidebar() {
-      return $('sidebar', document);
+      return $('sidebar', { root: document });
     },
     isVisible() {
       const $sidebar = tpl.getSidebar();

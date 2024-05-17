@@ -20,29 +20,31 @@
     width: var(--sidebar-width);
     border: none;
   }
-  sidebar navSearch.input {
-    margin: 1rem 1rem;
+
+  navSearch.input {
+    margin: 1rem;
+
+    .icon {
+      color: #FFFFFF;
+    }
+    input {
+      padding: var(--input-padding);
+      font-size: 12px;
+      border: none;
+      border-radius: var(--circular-radius);
+      background-color: var(--subtle-transparent-black);
+      color: var(--white-50);
+      transition: var(--transition);
+
+      &:focus,
+      &:hover {
+        background-color: var(--transparent-black);
+        color: var(--white-100);
+      }
+
+    }
   }
-  navSearch.input .icon {
-    color: #FFFFFF;
-  }
-  navSearch.input input {
-    border-radius: 500rem !important;
-    transition: all 0.3s ease !important;
-    border: none !important;
-  }
-  navSearch.input input {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-  }
-  navSearch.input input:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 1) !important;
-  }
-  navSearch.input input:focus {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-    color: rgba(255, 255, 255, 1) !important;
-  }
+
   sidebar .toc {
     flex-grow: 1;
     padding-left: 1rem;

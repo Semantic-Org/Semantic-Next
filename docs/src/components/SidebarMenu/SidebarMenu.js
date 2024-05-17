@@ -8,12 +8,19 @@ import css from './SidebarMenu.css?raw';
 const settings = {
   menu: [],
   linkCurrentPage: false,
+  expandAllDefault: true,
   activeURL: '',
 };
 
-const createInstance = function ({ tpl, settings }) {
+const state = {
+  url: ''
+};
+
+const createInstance = function ({ tpl, state, settings }) {
   return {
-    url: new ReactiveVar(settings.activeURL),
+    initialize() {
+      state.url.set(settings.activeURL);
+    },
     getMenu() {
       return tpl.filterVisibleSections(settings.menu);
     },
@@ -91,10 +98,10 @@ const createInstance = function ({ tpl, settings }) {
       return tpl.addTrailingSlash(url1) == tpl.addTrailingSlash(url2);
     },
     isCurrentItem(item) {
-      return tpl.isSameURL(item?.url, tpl.url.get(), item.matchSubPaths);
+      return tpl.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
     },
     onPageChange() {
-      tpl.url.set(window.location.pathname);
+      state.url.set(window.location.pathname);
     }
   };
 };
@@ -130,6 +137,7 @@ const SidebarMenu = createComponent({
   onDestroyed,
   onRendered,
   events,
+  state
 });
 
 export default SidebarMenu;
