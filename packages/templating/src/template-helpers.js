@@ -109,14 +109,14 @@ export const TemplateHelpers = {
   numberFromIndex(a) {
     return a + 1;
   },
-  formatDate(date = new Date(), format = 'L') {
-    return formatDateLocal(date, format);
+  formatDate(date = new Date(), format = 'L', options) {
+    return formatDateLocal(date, format, options);
   },
-  formatDateTime(date = new Date(), format = 'LLL') {
-    return formatDateLocal(date, format);
+  formatDateTime(date = new Date(), format = 'LLL', options) {
+    return formatDateLocal(date, format, options);
   },
-  formatDateTimeSeconds(date = new Date(), format = 'LTS') {
-    return formatDateLocal(date, format);
+  formatDateTimeSeconds(date = new Date(), format = 'LTS', options) {
+    return formatDateLocal(date, format, options);
   },
   object({ obj }) {
     return obj;
