@@ -10,7 +10,7 @@ const tagRegExp = /^<(\w+)(\s*\/)?>$/;
 export class Query {
   static eventHandlers = [];
 
-  constructor(selector, { root = document, pierceShadow = true } = {}) {
+  constructor(selector, { root = document, pierceShadow = false } = {}) {
     let elements = [];
 
     if (!root) {
