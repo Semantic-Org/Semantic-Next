@@ -6,10 +6,10 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.0.21"
+    "@semantic-ui/utils": "^0.0.22"
   },
   "devDependencies": {
     "vitest": "^1.5.2"
   },
-  "version": "0.0.21"
+  "version": "0.0.22"
 }
