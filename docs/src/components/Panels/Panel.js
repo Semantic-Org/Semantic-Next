@@ -33,9 +33,20 @@ const state = {
   lastPanelSize: undefined
 };
 
-const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
+const createInstance = ({el, tpl, isServer, reactiveVar, findParent, reaction, settings, dispatchEvent, $}) => ({
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
+  size: reactiveVar(undefined),
+
+  initialize() {
+    reaction(() => {
+      console.log('here', tpl.size.get());
+      const size = tpl.size.get();
+      if(size) {
+        requestAnimationFrame(() => $('.panel').css('flex-grow', size));
+      }
+    });
+  },
 
   getClassMap: () => ({
     resizing: tpl.resizing.get(),

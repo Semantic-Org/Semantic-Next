@@ -10,7 +10,7 @@ const settings = {
   saveStateID: 'panels',
 };
 
-const createInstance = ({tpl, el, settings, $}) => ({
+const createInstance = ({tpl, el, settings, $, $$}) => ({
   panels: [],
   renderedPanels: [],
   cache: {
@@ -70,13 +70,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
     let storedLayout = tpl.getStoredLayout();
     if(storedLayout) {
-      console.log('zz', storedLayout);
       each(storedLayout, (stored, index) => {
         let panel = tpl.panels[index];
         panel.minimized = stored.minimized;
         tpl.setPanelSize(index, stored.size);
         panel.tpl.initialized.set(true);
-        console.log(panel);
       });
       if(storedLayout.length = tpl.panels.length) {
         return;
@@ -159,9 +157,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
   getAvailableGrowWidth() {
     let availableWidth = 100;
     each(tpl.panels, (panel) => {
-      const setWidth = $(panel).css('flex-grow');
-      if(panel.settings.width !== 'grow' && setWidth) {
-        availableWidth -= setWidth;
+      const currentWidth = tpl.getPanelSize(panel);
+      if(panel.settings.width !== 'grow' && currentWidth) {
+        availableWidth -= currentWidth;
       }
     });
     return availableWidth;
@@ -201,7 +199,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     return Math.abs(delta / panelSize * 100);
   },
   getPanelSize(panel) {
-    const size = $(panel).css('flex-grow');
+    const size = $$(panel).find('.panel').css('flex-grow');
     return size ? parseFloat(size) : undefined;
   },
   getPanelSizePixels(index) {
@@ -293,7 +291,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   setPanelSize(index, relativeSize) {
     let panel = tpl.panels[index];
-    $(panel).css('flex-grow', relativeSize);
+    console.log('setting', index, relativeSize);
+    panel.tpl.size.set(relativeSize);
+    //$$(panel).find('.panel').css('flex-grow', relativeSize);
   },
 
   setPanelSizePixels(index, pixelSize, settings) {

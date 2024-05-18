@@ -1,9 +1,5 @@
 :host {
-  display: flex;
-  flex: 1 1 0;
-  flex-direction: column;
-  overflow: hidden;
-  will-change: transform;
+  display: contents;
 }
 
 :host {
@@ -17,10 +13,18 @@
 }
 
 .panel {
-  display: contents;
+  display: flex;
+  flex: 1 1 0;
+  transition: flex 600ms cubic-bezier(0.230, 1.000, 0.320, 1.000);
+  flex-direction: column;
   overflow: hidden;
-  flex: auto;
+  will-change: transform;
+  overflow: hidden;
   box-sizing: border-box;
+
+  &.initialized {
+    transition: flex 600ms cubic-bezier(0.230, 1.000, 0.320, 1.000);
+  }
 
   .label {
     display: flex;
@@ -61,11 +65,10 @@
 
 .handle {
   display: flex;
-  position: absolute;
-  top: auto;
-  left: auto;
   user-select: none;
   border-radius: 5px;
+  position: relative;
+  z-index: 2;
 
   &.disabled {
     pointer-events: none;
