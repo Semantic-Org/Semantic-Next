@@ -39,12 +39,27 @@
       <playground-preview project="source"> </playground-preview>
     </div>
   {{else}}
-    <ui-panels direction="horizontal">
+    <ui-panels
+      direction="horizontal"
+      saveState=true
+      saveStateID="{{getSaveID 'row'}}"
+    >
       {{#each panelGroup in getPanels}}
-        <ui-panel direction="horizontal" size={{getPanelGroupWidth @index}} class="code-group">
-          <ui-panels>
+        <ui-panel
+          direction="horizontal"
+          size={{getPanelGroupWidth @index}}
+          class="code-group"
+        >
+          <ui-panels
+            class="files"
+            saveState=true
+            saveStateID="{{getSaveID 'column' @index}}"
+          >
             {{#each panel in panelGroup}}
-              {{>CodePlaygroundPanel panel=panel size=(getPanelSize panel) }}
+              {{>CodePlaygroundPanel
+                panel=panel
+                size=(getPanelSize panel)
+              }}
             {{/each}}
           </ui-panels>
         </ui-panel>

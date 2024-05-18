@@ -21,6 +21,8 @@ const settings = {
   sandboxURL: '/sandbox',
   exampleURL: '',
   includeGeneratedInline: false,
+  saveState: true,
+  saveID: 'sandbox',
   example: {},
   tabSize: 2,
   inline: false,
@@ -67,7 +69,7 @@ const settings = {
 
 const state = {
   activeFile: undefined,
-  resizing: false,
+  resizing: true,
 };
 
 const createInstance = ({tpl, state, settings, $}) => ({
@@ -131,6 +133,9 @@ const createInstance = ({tpl, state, settings, $}) => ({
   getFirstFile() {
     return firstMatch(tpl.getFileArray(), file => !file.generated && !file.hidden);
   },
+  getSaveID(group, index) {
+    return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
+  },
   getPanels() {
     let panels = [[], []];
     let files = tpl.getFileArray().filter(file => !file.hidden);
@@ -159,7 +164,7 @@ const createInstance = ({tpl, state, settings, $}) => ({
 
 });
 
-const onRendered = ({ $, tpl, state, settings }) => {
+const onRendered = ({ $, $$, tpl, state, settings }) => {
 
   addSearch(CodeMirror);
 
@@ -172,14 +177,18 @@ const onRendered = ({ $, tpl, state, settings }) => {
     getNaturalSize: function(panel) {
       const extraSpacing = 20; // scrollbar width and spacing
       const minWidths = [];
-      $(panel).find('.CodeMirror-sizer').each(sizer => {
+      $$(panel).find('.CodeMirror-sizer').each(sizer => {
         const sizerMargin = parseFloat($(sizer).css('margin-left'));
         const sizerWidth = parseFloat($(sizer).css('min-width'));
+        console.log(sizerWidth, sizer);
         minWidths.push(sizerMargin + sizerWidth + extraSpacing);
       });
       const size = Math.max(...minWidths);
       return size;
     }
+  });
+  requestIdleCallback(() => {
+    state.resizing.set(false);
   });
 };
 

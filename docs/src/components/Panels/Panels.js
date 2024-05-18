@@ -1,17 +1,18 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, isNumber, inArray, memoize } from '@semantic-ui/utils';
+import { each, isString, isNumber, roundNumber, inArray, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
 
 const settings = {
   direction: 'vertical',
+  saveState: false,
+  saveStateID: 'panels',
 };
 
 const createInstance = ({tpl, el, settings, $}) => ({
   panels: [],
   renderedPanels: [],
-
   cache: {
     groupSize: undefined,
     groupScrollOffset: undefined,
@@ -19,6 +20,30 @@ const createInstance = ({tpl, el, settings, $}) => ({
     resizeEnd: undefined,
     resizeIndex: undefined,
     resizeDelta: undefined
+  },
+
+  saveLayout() {
+    if(settings.saveState) {
+      const details = tpl.panels.map((panel, index) => ({
+        size: roundNumber(tpl.getPanelSize(panel)),
+        minimized: tpl.isMinimized(index)
+      }));
+      localStorage.setItem(settings.saveStateID, JSON.stringify(details));
+    }
+  },
+
+  getStoredLayout() {
+    if(!settings.saveState) {
+      return;
+    }
+    let storedLayout = localStorage.getItem(settings.saveStateID);
+    if(storedLayout) {
+      let details;
+      try {
+        details = JSON.parse(storedLayout);
+      } catch(e) {}
+      return details;
+    }
   },
 
   // we want to get all panels that are not inside other ui panels
@@ -42,6 +67,22 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   setPanelInitialSizes() {
+
+    let storedLayout = tpl.getStoredLayout();
+    if(storedLayout) {
+      console.log('zz', storedLayout);
+      each(storedLayout, (stored, index) => {
+        let panel = tpl.panels[index];
+        panel.minimized = stored.minimized;
+        tpl.setPanelSize(index, stored.size);
+        panel.tpl.initialized.set(true);
+        console.log(panel);
+      });
+      if(storedLayout.length = tpl.panels.length) {
+        return;
+      }
+    }
+
     let exactPanels = tpl.getExactPanels();
     each(exactPanels, (panel) => {
       let index = tpl.panels.indexOf(panel);
@@ -60,7 +101,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       growPanels = tpl.panels.slice(-1);
     }
 
-    each(growPanels, (panel,) => {
+    each(growPanels, (panel) => {
       let relativeSize = availableWidth / growPanels.length;
       let index = tpl.panels.indexOf(panel);
       const minSize = tpl.getRelativeSettingSize(panel.settings.minSize);
@@ -215,6 +256,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
     const relativeSize = tpl.getRelativeSize(naturalSize);
     tpl.changePanelSize(index, relativeSize);
+    tpl.saveLayout();
   },
 
   setPanelMinimized(index) {
@@ -224,6 +266,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
     const relativeSize = tpl.getRelativeSize(naturalSize);
     tpl.changePanelSize(index, relativeSize, { manualResize: true });
+    tpl.saveLayout();
   },
 
   setPanelMaximized(index, previousSize) {
@@ -234,6 +277,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       : relativeSize
     ;
     tpl.changePanelSize(index, openSize, { manualResize: true });
+    tpl.saveLayout();
   },
 
 
@@ -591,6 +635,7 @@ const events = {
     if(inArray(panel, tpl.panels)) {
       tpl.removeDragStartCalculations();
       tpl.removeGroupCalculations();
+      tpl.saveLayout();
     }
   },
 };
