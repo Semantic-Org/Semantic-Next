@@ -27,6 +27,8 @@ Utility includes the following helpers:
 - `some/any(arr, truthFunc)` - Returns true if any/some values match truthFunc
 - `sum(values)` - sums an array of numbers
 
+### Numbers
+- `roundNumber(number, digits)` - rounds a number to a given number significant
 
 ### DOM
 - `copyText(text) - Copies text to clipboard
