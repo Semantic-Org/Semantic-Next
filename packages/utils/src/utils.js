@@ -169,7 +169,7 @@ export const isClassInstance = (obj) => {
         Date
 --------------------*/
 
-export const formatDate = function(date, format, {
+export const formatDate = function(date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
   timezone = 'UTC',
@@ -254,6 +254,7 @@ export const formatDate = function(date, format, {
     llll: 'ddd, MMM D, YYYY h:mm a',
   };
 
+  format = format.trim();
   const expandedFormat = formatMap[format] || format;
 
   return expandedFormat
@@ -264,10 +265,6 @@ export const formatDate = function(date, format, {
     .trim();
 };
 
-// useful alias
-export const formatDateLocal = (date, format, options) => {
-  formatDate(date, format, {timezone: 'local', ...options});
-};
 
 
 
