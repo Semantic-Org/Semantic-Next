@@ -180,7 +180,6 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
       $$(panel).find('.CodeMirror-sizer').each(sizer => {
         const sizerMargin = parseFloat($(sizer).css('margin-left'));
         const sizerWidth = parseFloat($(sizer).css('min-width'));
-        console.log(sizerWidth, sizer);
         minWidths.push(sizerMargin + sizerWidth + extraSpacing);
       });
       const size = Math.max(...minWidths);

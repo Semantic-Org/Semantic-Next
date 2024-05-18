@@ -70,13 +70,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
     let storedLayout = tpl.getStoredLayout();
     if(storedLayout) {
-      console.log('zz', storedLayout);
       each(storedLayout, (stored, index) => {
         let panel = tpl.panels[index];
         panel.minimized = stored.minimized;
         tpl.setPanelSize(index, stored.size);
         panel.tpl.initialized.set(true);
-        console.log(panel);
       });
       if(storedLayout.length = tpl.panels.length) {
         return;
