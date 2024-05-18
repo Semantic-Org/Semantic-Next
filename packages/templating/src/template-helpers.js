@@ -4,7 +4,7 @@ import {
   toTitleCase,
   isEmpty,
   arrayFromObject,
-  formatDate,
+  formatDateLocal,
   each,
   escapeHTML,
   tokenize,
@@ -110,13 +110,13 @@ export const TemplateHelpers = {
     return a + 1;
   },
   formatDate(date = new Date(), format = 'L') {
-    return formatDate(date, format);
+    return formatDateLocal(date, format);
   },
   formatDateTime(date = new Date(), format = 'LLL') {
-    return formatDate(date, format);
+    return formatDateLocal(date, format);
   },
   formatDateTimeSeconds(date = new Date(), format = 'LTS') {
-    return formatDate(date, format);
+    return formatDateLocal(date, format);
   },
   object({ obj }) {
     return obj;

@@ -264,6 +264,11 @@ export const formatDate = function(date, format, {
     .trim();
 };
 
+// useful alias
+export const formatDateLocal = (date, format, options) => {
+  formatDate(date, format, {timezone: 'local', ...options});
+};
+
 
 
 /*-------------------
