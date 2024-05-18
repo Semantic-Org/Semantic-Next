@@ -464,6 +464,7 @@ export const Template = class Template {
       return;
     }
     if (!params) {
+      const element = this.element;
       params = {
 
         el: this.element,
