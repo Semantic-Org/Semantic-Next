@@ -30,6 +30,9 @@ export const TemplateHelpers = {
   is(a, b) {
     return a == b;
   },
+  concat(a, b) {
+    return a + b;
+  },
   not(a) {
     return !a;
   },
