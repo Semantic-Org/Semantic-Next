@@ -12,6 +12,10 @@ export class LitRenderer {
 
   static html = html;
 
+  static STRING_REGEXP = /^\'(.*)\'$/;
+  static OUTER_PARENS_REGEXP = /^\((.+)\)$/;
+  static EXPRESSION_REGEXP = /('[^']*'|[^\s]+)/g;
+
   constructor({ ast, data, subTemplates, helpers }) {
     this.ast = ast || '';
     this.data = data;
@@ -179,16 +183,24 @@ export class LitRenderer {
     { unsafeHTML = false } = {}
   ) {
     // if the whole expression is a string we want to return that
-    const stringRegExp = /^\'(.*)\'$/;
+    const stringRegExp = LitRenderer.STRING_REGEXP;
     const stringMatches = expressionString.match(stringRegExp);
     if (stringMatches && stringMatches.length > 0) {
       return stringMatches[1];
     }
 
-    // we can safely remove outer parens
-    expressionString = expressionString.replace(/^\((.+)\)$/, '$1');
 
-    const expressions = expressionString.split(' ').reverse();
+    // converts "foo baz 'wiz bang'" => ["foo", "baz", "'wiz bang'"]
+    const splitExpressionString = (str) => {
+      const regex = LitRenderer.EXPRESSION_REGEXP;
+      const matches = str.match(regex);
+      return matches || [];
+    };
+
+    // we can safely remove outer parens
+    expressionString = expressionString.replace(LitRenderer.OUTER_PARENS_REGEXP, '$1');
+
+    const expressions = splitExpressionString(expressionString).reverse();
     let funcArguments = [];
     let result;
     each(expressions, (expression, index) => {
