@@ -69,16 +69,13 @@ const createInstance = ({tpl, el, settings, $}) => ({
   setPanelInitialSizes() {
 
     let storedLayout = tpl.getStoredLayout();
-    if(storedLayout) {
+    if(storedLayout && storedLayout.length == tpl.panels.length) {
       each(storedLayout, (stored, index) => {
         let panel = tpl.panels[index];
         panel.minimized = stored.minimized;
         tpl.setPanelSize(index, stored.size);
         panel.tpl.initialized.set(true);
       });
-      if(storedLayout.length = tpl.panels.length) {
-        return;
-      }
     }
 
     let exactPanels = tpl.getExactPanels();
