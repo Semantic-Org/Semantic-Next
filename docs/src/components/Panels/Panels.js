@@ -24,10 +24,12 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   saveLayout() {
     if(settings.saveState) {
-      const details = tpl.panels.map((panel, index) => ({
-        size: roundNumber(tpl.getPanelSize(panel)),
-        minimized: tpl.isMinimized(index)
-      }));
+      const details = tpl.panels.map((panel, index) => {
+        return {
+          size: roundNumber(tpl.getPanelSize(panel)),
+          minimized: tpl.isMinimized(index)
+        };
+      });
       localStorage.setItem(settings.saveStateID, JSON.stringify(details));
     }
   },
@@ -67,17 +69,40 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   setPanelInitialSizes() {
-
     let storedLayout = tpl.getStoredLayout();
-    if(storedLayout && storedLayout.length == tpl.panels.length) {
-      each(storedLayout, (stored, index) => {
-        let panel = tpl.panels[index];
-        panel.minimized = stored.minimized;
-        tpl.setPanelSize(index, stored.size);
-        panel.tpl.initialized.set(true);
-      });
+    if(storedLayout) {
+      tpl.setPanelStoredSizes(storedLayout);
     }
-
+    else {
+      tpl.setPanelCalculatedSizes();
+    }
+  },
+  canUseStoredSizes(storedLayout = []) {
+    if(storedLayout.length != tpl.panels.length) {
+      return false;
+    }
+    const totalSize = sum(storedLayout.map(p => p.size));
+    if(totalSize > 100.5 || totalSize < 99.5) {
+      return false;
+    }
+    return true;
+  },
+  setPanelStoredSizes(storedLayout = []) {
+    each(storedLayout, (stored, index) => {
+      let panel = tpl.panels[index];
+      if(stored.minimized) {
+        panel.minimized = true;
+        let naturalSize = tpl.getNaturalPanelSize(index);
+        const relativeSize = tpl.getRelativeSize(naturalSize);
+        tpl.setPanelSize(index, relativeSize);
+      }
+      else {
+        tpl.setPanelSize(index, stored.size);
+      }
+      panel.tpl.initialized.set(true);
+    });
+  },
+  setPanelCalculatedSizes() {
     let exactPanels = tpl.getExactPanels();
     each(exactPanels, (panel) => {
       let index = tpl.panels.indexOf(panel);
@@ -163,10 +188,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   getGrowingPanels() {
-    return tpl.panels.filter(panel => panel.settings.size == 'grow');
+    return tpl.panels.filter(panel => !panel.tpl.initialized.get() && panel.settings.size == 'grow');
   },
   getExactPanels() {
-    return tpl.panels.filter(panel => panel.settings.size !== 'grow');
+    return tpl.panels.filter(panel => !panel.tpl.initialized.get() && panel.settings.size !== 'grow');
   },
 
   getRelativeSettingSize(size, index) {
@@ -256,11 +281,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   setPanelMinimized(index) {
     let naturalSize = tpl.getNaturalPanelSize(index);
+    const relativeSize = tpl.getRelativeSize(naturalSize);
+    tpl.changePanelSize(index, relativeSize, { manualResize: true });
     if(naturalSize == 0) {
       return;
     }
-    const relativeSize = tpl.getRelativeSize(naturalSize);
-    tpl.changePanelSize(index, relativeSize, { manualResize: true });
     tpl.saveLayout();
   },
 

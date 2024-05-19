@@ -7,7 +7,7 @@
 }
 
 :host {
-  --panel-handle-height: 40px;
+  --panel-handle-height: 20px;
   --panel-divider-width: 1px;
   --panel-divider-shadow-color: #181818;
 
