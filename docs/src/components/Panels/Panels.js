@@ -93,15 +93,15 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
     // correcting imprecise sizing
     if(sizeDelta) {
+      console.log('correcting layout', storedLayout);
       let sizeChange = sizeDelta / storedLayout.filter(s => !s.minimized).length;
       storedLayout = storedLayout.map(p => {
         if(!p.minimized) {
-          console.log(p.size, sizeChange);
           p.size = roundNumber(p.size + sizeChange);
-          console.log(p.size);
         }
         return p;
       });
+      console.log('correcting to', storedLayout);
       localStorage.setItem(settings.saveStateID, JSON.stringify(storedLayout));
     }
 
