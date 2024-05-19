@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { each, isString, isNumber, roundNumber, inArray, memoize } from '@semantic-ui/utils';
+import { each, isString, isNumber, roundNumber, inArray, sum, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
@@ -88,6 +88,23 @@ const createInstance = ({tpl, el, settings, $}) => ({
     return true;
   },
   setPanelStoredSizes(storedLayout = []) {
+
+    let sizeDelta = 100 - sum(storedLayout.map(p => p.size));
+
+    // correcting imprecise sizing
+    if(sizeDelta) {
+      let sizeChange = sizeDelta / storedLayout.filter(s => !s.minimized).length;
+      storedLayout = storedLayout.map(p => {
+        if(!p.minimized) {
+          console.log(p.size, sizeChange);
+          p.size = roundNumber(p.size + sizeChange);
+          console.log(p.size);
+        }
+        return p;
+      });
+      localStorage.setItem(settings.saveStateID, JSON.stringify(storedLayout));
+    }
+
     each(storedLayout, (stored, index) => {
       let panel = tpl.panels[index];
       if(stored.minimized) {

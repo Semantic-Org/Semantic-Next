@@ -39,6 +39,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
 
   getClassMap: () => ({
     resizing: tpl.resizing.get(),
+    minimized: settings.minimized,
     initialized: tpl.initialized.get()
   }),
 

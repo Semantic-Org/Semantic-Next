@@ -13,7 +13,7 @@
 
   --panel-divider-color: #232323;
   --panel-divider-color-hover: #333333;
-  --panel-divider-color-resize: #444444;
+  --panel-divider-color-resize: var(--primary-text-color);
 }
 
 .panel {
@@ -21,6 +21,7 @@
   overflow: hidden;
   flex: auto;
   box-sizing: border-box;
+
 
   .label {
     display: flex;
@@ -56,6 +57,13 @@
   &.resizing + .handle:hover .divider,
   &.resizing + .handle .divider {
     background-color: var(--panel-divider-color-resize);
+  }
+
+  &.minimized {
+    .label {
+      background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 30%));
+      color: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 
