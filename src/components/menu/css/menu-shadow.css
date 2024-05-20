@@ -6,11 +6,11 @@
     padding: var(--menu-padding);
     box-shadow: var(--menu-box-shadow);
     border: var(--menu-border);
+    font-size: var(--menu-font-size);
   }
   .menu {
     display: flex;
     flex-direction: row;
-    font-size: var(--menu-font-size);
     font-weight: var(--menu-font-weight);
     gap: var(--menu-gap);
     background: var(--menu-background);

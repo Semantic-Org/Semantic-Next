@@ -69,8 +69,11 @@
   -------------------- */
 
   --spacing: 1rem;
+  --compact-spacing: 0.5rem;
 
   --padding: var(--spacing);
+  --compact-padding: var(--compact-spacing);
+
   --horizontally-padded: 0rem var(--padding);
   --vertically-padded: var(--padding) 0rem;
 
