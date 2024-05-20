@@ -1,0 +1,34 @@
+.search {
+  cursor: input;
+  display: flex;
+  align-items: center;
+  min-width: 300px;
+  background-color: var(--black-30);
+  border-radius: var(--circular-radius);
+
+  &:hover {
+    background-color: var(--black-70);
+    color: var(--white-90);
+  }
+
+  input {
+    width: 100%;
+    font-family: var(--page-font);
+    background-color: transparent;
+    color: var(--text-color);
+    padding: var(--input-padding);
+    border: none;
+    flex-grow: 1;
+  }
+  input::placeholder {
+    color: vaR(--white-30);
+  }
+  input:focus {
+    outline: none;
+  }
+  ui-icon {
+    margin-left: auto;
+    flex-grow: 0;
+    width: 3rem;
+  }
+}

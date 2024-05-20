@@ -8,10 +8,6 @@ import { Template } from '@semantic-ui/component';
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 ---
 <sidebar transition:persist id="sidebar" popover>
-	<navSearch class="ui inverted icon input">
-		<input type="text" placeholder="Search...">
-		<i class="search icon"></i>
-	</navSearch>
 	<SidebarMenu
 		client:load
     menu={menu}

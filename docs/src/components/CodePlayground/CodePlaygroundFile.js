@@ -1,6 +1,6 @@
 import { createComponent, adoptStylesheet } from '@semantic-ui/component';
 
-import codeMirrorCSS from './codemirror.css?raw';
+import codeMirrorCSS from './lib/codemirror.css?raw';
 
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';

@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 
 import logoImage from '@images/logo.png';
 import MobileSidebarToggle from '@components/MobileSidebarToggle/MobileSidebarToggle.js';
+import GlobalSearch from '@components/GlobalSearch/GlobalSearch.js';
 import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
 import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
 
@@ -29,5 +30,6 @@ import './TopBar.css';
     menu={menu}
     activeURL={activeURL}
   ></TopbarMenu>
+  <GlobalSearch client:load></GlobalSearch>
   <ThemeSwitcher client:load transition:name="theme"></ThemeSwitcher>
 </topbar>

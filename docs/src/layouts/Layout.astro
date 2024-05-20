@@ -26,7 +26,7 @@ header = header || title;
 	<TopBar></TopBar>
 	<layout id={id}>
 		<Sidebar/>
-		<page class={textContent ? 'text-content centered' : 'centered'}>
+		<page class={textContent ? 'text-content' : ''}>
 			<slot name="masthead">
 				{inlineHeader != 'true' && (
 					<DocsMasthead header={title} description={description} menu={menu}/>
