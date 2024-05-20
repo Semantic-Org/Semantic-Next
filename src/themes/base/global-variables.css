@@ -213,24 +213,24 @@
 
   --use-custom-scrollbars: true;
 
-  --scrollbar-width: 10px;
-  --scrollbar-height: 10px;
+  --scrollbar-width: 9px;
+  --scrollbar-height: 9px;
 
   --track-background: rgb(var(--standard-color) / 10%);
   --track-border-radius: 0px;
 
-  --thumb-border-radius: 5px;
-  --thumb-background: rgb(var(--standard-color) / 25%);
+  --thumb-border-radius: 0px;
+  --thumb-background: rgb(var(--standard-color) / 15%);
   --thumb-transition: color 0.2s ease;
 
   --thumb-inactive-background: rgb(var(--standard-color) / 15%);
   --thumb-hover-background: rgb(128 135 139 / 80%);
 
   /* Inverted */
-  --track-inverted-background: rgb(var(--inverted-color) / 10%);
-  --thumb-inverted-background: rgb(var(--inverted-color) / 25%);
-  --thumb-inverted-inactive-background: rgb(var(--inverted-color) / 15%);
-  --thumb-inverted-hover-background: rgb(var(--inverted-color) / 35%);
+  --track-inverted-background: rgb(var(--inverted-color) / 5%);
+  --thumb-inverted-background: rgb(var(--inverted-color) / 10%);
+  --thumb-inverted-inactive-background: rgb(var(--inverted-color) / 5%);
+  --thumb-inverted-hover-background: rgb(var(--inverted-color) / 15%);
 
   /* -------------------
     Highlighted Text
@@ -928,5 +928,13 @@ body.dark {
   --subtle-left-lip-shadow: var(--subtle-lip-distance) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
   --subtle-right-lip-shadow: var(--subtle-lip-distance-inverse) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
 
+  /* Scrollbars */
+  --track-background: rgb(var(--standard-color) / 10%);
+  --thumb-background: rgb(var(--standard-color) / 25%);
+  --thumb-inactive-background: rgb(var(--standard-color) / 15%);
+  --track-inverted-background: rgb(var(--inverted-color) / 10%);
+  --thumb-inverted-background: rgb(var(--inverted-color) / 25%);
+  --thumb-inverted-inactive-background: rgb(var(--inverted-color) / 15%);
+  --thumb-inverted-hover-background: rgb(var(--inverted-color) / 35%);
 
 }

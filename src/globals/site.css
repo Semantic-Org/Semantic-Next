@@ -70,19 +70,6 @@ input[type="text"], input[type="email"], input[type="search"], input[type="passw
   background: var(--thumb-hover-background);
 }
 
-body.dark ::-webkit-scrollbar-track {
-  background: var(--track-inverted-background);
-}
-body.dark ::-webkit-scrollbar-thumb {
-  background: var(--thumb-inverted-background);
-}
-body.dark ::-webkit-scrollbar-thumb:window-inactive {
-  background: var(--thumb-inverted-inactive-background);
-}
-body.dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--thumb-inverted-hover-background);
-}
-
 a {
   color: var(--link-color);
   text-decoration: var(--link-text-decoration);
