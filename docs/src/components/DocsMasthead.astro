@@ -22,7 +22,7 @@ const getLink = (url, index) => {
 };
 
 
-const menuItems = menu.map((item, index) => ({
+const menuItems = (menu || []).map((item, index) => ({
   active: isActive(item.url, index),
   href: getLink(item.url, index),
   label: item.text
