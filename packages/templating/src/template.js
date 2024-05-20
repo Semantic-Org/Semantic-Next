@@ -276,31 +276,29 @@ export const Template = class Template {
     let parts = eventString.split(/\s+/);
 
     let addedEvents = false;
+    let addedSelectors = false;
     const eventNames = [];
     const selectors = [];
     each(parts, (part, index) => {
       const value = part.replace(/(\,|\W)+$/, '').trim();
+      const hasComma = part.includes(',')
       if(!addedEvents) {
         eventNames.push(getBubbledEvent(value));
-        addedEvents = (part.includes(',') === false);
+        addedEvents = !hasComma;
       }
-      else {
-        selectors.push(value);
+      else if(!addedSelectors) {
+        const selectorParts = parts.slice(index).join(' ').split(',');
+        each(selectorParts, (value) => {
+          selectors.push(value.trim());
+        });
+        addedSelectors = true;
       }
     });
-    if(eventNames.length > 1) {
-      each(eventNames, (eventName) => {
-        events.push({ eventName, selector: selectors[0] });
-      });
-    }
-    else if(selectors.length > 1) {
+    each(eventNames, (eventName) => {
       each(selectors, (selector) => {
-        events.push({ eventName: eventNames[0], selector });
+        events.push({ eventName, selector });
       });
-    }
-    else {
-      events.push({ eventName: eventNames[0], selector: selectors[0] || '' });
-    }
+    });
     return events;
   }
 
@@ -336,7 +334,7 @@ export const Template = class Template {
         if(selector) {
           $(selector, { root: this.renderRoot }).on(eventName, noop);
         }
-        $(this.renderRoot, { pierceShadow: true }).on(
+        $(this.renderRoot).on(
           eventName,
           selector,
           (event) => {

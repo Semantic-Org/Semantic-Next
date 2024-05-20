@@ -27,14 +27,8 @@ export const TemplateHelpers = {
   hasAny(a) {
     a?.length > 0;
   },
-  is(a, b) {
-    return a == b;
-  },
   concat(a, b) {
     return a + b;
-  },
-  not(a) {
-    return !a;
   },
   both(a, b) {
     return a && b;
@@ -79,19 +73,19 @@ export const TemplateHelpers = {
   checkedIf(expr) {
     return TemplateHelpers.classIf(expr, 'checked', '');
   },
-  isEqual(a, b) {
-    return a == b;
-  },
   maybePlural(value, plural = 's') {
     return value == 1 ? '' : plural;
   },
-  isNotEqual(a, b) {
+  is(a, b) {
+    return a == b;
+  },
+  not(a, b) {
     return a != b;
   },
-  isExactlyEqual(a, b) {
+  isEqual(a, b) {
     return a === b;
   },
-  isNotExactlyEqual(a, b) {
+  isNotEqual(a, b) {
     return a !== b;
   },
   greaterThan(a, b) {
