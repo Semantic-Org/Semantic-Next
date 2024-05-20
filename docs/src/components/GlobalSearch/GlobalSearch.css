@@ -32,3 +32,56 @@
     width: 3rem;
   }
 }
+
+
+/*   Closed state of the dialog   */
+dialog {
+  outline: none;
+  border: none;
+  background-color: transparent;
+}
+dialog .modal {
+  background-color: #FFFFFF;
+  padding: 1rem;
+  min-width: 500px;
+  min-height: 500px;
+  border-radius: var(--border-radius);
+}
+
+/* Dialog */
+dialog {
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity 0.5s ease,
+    transform 0.3s ease,
+    overlay 0.5s ease allow-discrete,
+    display 0.5s ease allow-discrete;
+}
+dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Backdrop */
+dialog::backdrop {
+  background-color: rgb(0 0 0 / 0%);
+  transition:
+    display 0.7s allow-discrete,
+    overlay 0.7s allow-discrete,
+    background-color 0.7s;
+}
+dialog[open]::backdrop {
+  background-color: rgb(0 0 0 / 85%);
+}
+@starting-style {
+  dialog[open]::backdrop {
+    background-color: rgb(0 0 0 / 0%);
+  }
+}

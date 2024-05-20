@@ -6,13 +6,21 @@ import css from './GlobalSearch.css?raw';
 
 const createInstance = ({tpl, el, settings, $}) => ({
   openModal() {
-    console.log('got here');
+    $('dialog').get(0).showModal();
+  },
+  hideModal() {
+    $('dialog').get(0).close();
   }
 });
 
 const events = {
   'input .search input'({event, tpl}) {
     tpl.openModal();
+  },
+  'click dialog'({event, tpl}) {
+    if($(event.target).is('dialog')) {
+      tpl.hideModal();
+    }
   }
 };
 
