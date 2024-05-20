@@ -336,7 +336,7 @@ export const Template = class Template {
         if(selector) {
           $(selector, { root: this.renderRoot }).on(eventName, noop);
         }
-        $(this.renderRoot).on(
+        $(this.renderRoot, { pierceShadow: true }).on(
           eventName,
           selector,
           (event) => {
@@ -516,7 +516,7 @@ export const Template = class Template {
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
   attachEvent(selector, eventName, eventHandler, eventSettings) {
-    $(selector, document).on(eventName, eventHandler, {
+    $(selector, document, { pierceShadow: true }).on(eventName, eventHandler, {
       abortController: this.eventController,
       ...eventSettings
     });

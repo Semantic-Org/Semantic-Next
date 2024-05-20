@@ -388,11 +388,13 @@ export class Query {
     return this;
   }
 
-  dispatchEvent(eventName, eventData = {}, eventSettings) {
+  dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
     const eventOptions = {
       bubbles: true,
       cancelable: true,
+      composed: true,
       detail: eventData,
+      ...eventSettings
     };
     this.each(el => {
       const event = new CustomEvent(eventName, eventOptions);
@@ -615,6 +617,10 @@ export class Query {
 
   first() {
     return this.eq(0);
+  }
+
+  last() {
+    return this.eq(this.length - 1);
   }
 
   prop(name, value) {
