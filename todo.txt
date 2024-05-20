@@ -1,6 +1,7 @@
 Easy Wins
 - Click iframe focus tab
 + Better minimized styling
++ Fix inline file
 - Fix accordion menu to start expanded in examples
 - Fix double border on first playground element
 
