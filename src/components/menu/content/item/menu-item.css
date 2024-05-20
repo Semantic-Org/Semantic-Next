@@ -17,6 +17,7 @@
   box-shadow: var(--menu-item-box-shadow);
   border-radius: var(--menu-item-border-radius);
   text-align: var(--menu-item-text-align);
+  text-decoration: var(--menu-item-text-decoration);
 }
 
 .item:hover,

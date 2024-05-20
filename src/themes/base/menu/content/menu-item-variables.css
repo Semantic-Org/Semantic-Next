@@ -12,6 +12,7 @@
   --menu-item-color: var(--standard-60);
   --menu-item-text-align: inherit;
   --menu-item-box-shadow: none;
+  --menu-item-text-decoration: none;
 
   --menu-item-hover-background-color: var(--menu-item-background-color);
   --menu-item-hover-background-image: var(--menu-item-background-image);
