@@ -1,5 +1,5 @@
 ---
-import { UIButton, UIIcon } from '@semantic-ui/core';
+import { UIButton, UIIcon, UIMenu, MenuItem } from '@semantic-ui/core';
 import { $ } from '@semantic-ui/query';
 
 const { name, attributes } = Astro.props;
@@ -12,4 +12,14 @@ const { name, attributes } = Astro.props;
 )}
 {name === 'UIIcon' && (
   <UIIcon {...attributes} />
+)}
+{name === 'UIMenu' && (
+  <UIMenu {...attributes} client:load>
+    <slot />
+  </UIMenu>
+)}
+{name === 'MenuItem' && (
+  <MenuItem {...attributes} client:load>
+    <slot />
+  </MenuItem>
 )}

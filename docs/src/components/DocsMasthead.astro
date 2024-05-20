@@ -2,6 +2,7 @@
 import { isArray, any } from '@semantic-ui/utils';
 import { removeTrailingSlash } from '@helpers/navigation';
 import './DocsMasthead.css';
+import { UIMenu, MenuItem } from '@semantic-ui/core';
 const { tabs, header, description, menu } = Astro.props;
 
 const isURLActive = (url, index) => {
@@ -12,33 +13,41 @@ const isURLActive = (url, index) => {
   return Astro.url.pathname == url;
 };
 
-const getMenuClass = (url, index) => {
-  return isURLActive(url, index)
-    ? 'active item'
-    : 'item'
-  ;
+const isActive = (url, index) => {
+  return isURLActive(url, index) ? 'true' : 'false';
 };
 
 const getLink = (url, index) => {
-  return !isURLActive(url, index) ? url : undefined;
+  return !isURLActive(url, index) ? url : '';
+};
+
+const getItemAttr = (item, index) => {
+  console.log({
+    active: isActive(item.url, index),
+    href: getLink(item.url, index)
+  });
+  return {
+    active: isActive(item.url, index),
+    href: getLink(item.url, index)
+  };
 };
 
 ---
 <masthead>
-  <ui-container>
+  <ui-container active="true">
     <h1>{header}</h1>
     <p>{description}</p>
   </ui-container>
 
   {isArray(menu) && (
-    <ui-menu three-item dashboard>
+    <UIMenu three-item dashboard>
       <ui-container>
         {menu.map((item, index) => (
-          <a class={getMenuClass(item.url, index)} href={getLink(item.url, index)}>
+          <MenuItem {...getItemAttr(item, index)}>
             {item.text}
-          </a>
+          </MenuItem>
         ))}
       </ui-container>
-    </ui-menu>
+    </UIMenu>
   )}
 </masthead>

@@ -28,9 +28,8 @@
 
 
   layout masthead ui-menu {
-    margin-top: 0rem;
-    padding-bottom: 1rem;
-    margin-bottom: -2rem;
+    margin-top: 1rem;
+    margin-bottom: -1rem;
   }
 
   layout masthead ui-container {
@@ -39,11 +38,5 @@
     max-width: 1170px;
     margin-left: 1.5em;
     margin-right: var(--rail-width);
-  }
-  layout masthead > ui-menu ui-container {
-    width: 100%;
-    max-width: calc(1170px - 1.5rem);
-    margin-right: calc(var(--rail-width) + 1rem);
-    margin-left: 0.5em;
   }
 }

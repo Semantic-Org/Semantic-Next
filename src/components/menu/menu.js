@@ -9,6 +9,16 @@ const createInstance = ({settings, dispatchEvent}) => ({
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', value);
+  },
+
+  isValueActive(value, item) {
+    if(item.active) {
+      return true;
+    }
+    if(value !== undefined) {
+      return value == item.id || value == item.href;
+    }
+    return false;
   }
 
 });
