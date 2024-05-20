@@ -1,0 +1,53 @@
+Completed
+=====================
+
+completed mar 8/15
++ Docs - Add theme switcher, navigation and routing
++ Docs - Figure out markdown rendering
++ Figure out relationship between settings, variations, types, states in spec format
++ Complete most variations and types for button
++ Finish spec format interpretation
+
+week of mar 1
++ continue scaffolding website
++ work on nested web component issues
++ determine spec file / properties / settings interactions
+
+week of feb 23
++ Figure out final solve for SSR css injection
++ Refactor callbacks to use {} syntax instead of params
++ Set up astro docs project
++ build scaffolding for docs
++ get server side rendering with hydration working
+
+week of feb 16
++ Add reactivity template helpers for guard, nonreactive, reactiveDebug
++ Set up auto labeler
++ Set up github issue bot
++ Set up commit lint/open commit
++ Handle boolean attributes like checked readonly etc
+
+week of feb 9
++ implement CI with github actions
++ figure out unit + jsdom + browser testing
++ write unit tests for query, reactive var, templating, utils
+
+week of feb 4
++ Fix reactive each to properly reuse dom based off repeat directive
++ Complete todomvc example.
++ add recursive search to parent(templateName) and implement child(templateName)
++ add LitTemplate.findTemplate(templateName) and global template registry
++ First pass readme for templating
+
+week of jan 29
++ Move example to example folder & add to build script.
++ Add constants for build script and review
++ Fix renderTemplate reactivity on data context. General reactivity review of subtemplates.
++ Allow adopting stylesheets from subtemplates
++ Add reactiveData syntax for specifying reactive data for subtemplates.
++ Implement parent() helper
++ Namespacing events so only fire on subtemplates
++ add unsafe html / raw html
++ Attach events for sub templates
++ Allow computations to be attached to templates
++ onCreated/onDestroyed callbacks on subtemplates

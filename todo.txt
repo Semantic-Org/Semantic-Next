@@ -1,102 +1,52 @@
-Button
-+ Figure out attr issue with compact
-- Review SSR for button
-- Add basic
-- Rename existing basic -> Outline
-- Add link button
-- Add ghost button
+Easy Wins
+- Click iframe focus tab
+- Better minimized styling
+- Fix accordion menu to start expanded in examples
+- Fix double border on first playground element
 
-Buttons
-- Figure out plural format
-- Figure out content
-
-- Documentation
--- Determine the sitemap of component docs
--- Write out initial draft of component documentation
---
-
-
-Button Later
-- Determine link behavior, extending a tag?
-- Review colormixing - oklch -> colormix() ?
-- Icon only styling (auto detect no text)
-
-Component
-- Pass through content to content obj
-- Review separating data from settings esp if content
-- review component lifecycle events esp with SSR and hydration
-
-Docs
+Overall Docs
+- Remove docs build step and use package directly
+- Add global search
+- Add in-menu search
 - Dupe lit in astro build?
 
+Code Playground
+- Add tabbed layout
+- Add mobile layout
+- Move flow-grow to shadow DOM to enable better handles
+- Fix result preview styling for inline
+- Tab/Pane option at top of page
+- Grow panel on new line (hasExcessSpace on panels)
+- Collapse example sidebar button/hamburger button
+
+Docs Design
+- Add overview page card design
+- Add custom theme for code samples
+- Add following header on long pages
+
+In Page Menu
++ Allow titles to link
++ Fix issue when building titles from markdown getHeadings
++ Highlight when on same page as scroll
+
+Build System
+- Figure out build step for component spec
+
+Examples
+- Todo MVC in examples
+
 Templating Syntax
-- Add syntax for embedding web components / part if necessary
-- Add mechanism for inherting data context from parent template
-- support expressions for partial object data i.e. {{>template getTemplateSettings}}
+- Add syntax sugar for passing functions/attrs to web components
+- Add mechanism for inheriting data context from parent template
 - consider await/task syntax
-
-Components
-- Determine build step for components from configuration json. Small/medium/large
-- Build out button
-
-CI
-- Add stylelint
 
 Testing
 - Add jsdom + browser testing for component package
-- Redo coverage on functionality added for v1
 
-
-Completed
-=====================
-
-completed mar 8/15
-+ Docs - Add theme switcher, navigation and routing
-+ Docs - Figure out markdown rendering
-+ Figure out relationship between settings, variations, types, states in spec format
-+ Complete most variations and types for button
-+ Finish spec format interpretation
-
-week of mar 1
-+ continue scaffolding website
-+ work on nested web component issues
-+ determine spec file / properties / settings interactions
-
-week of feb 23
-+ Figure out final solve for SSR css injection
-+ Refactor callbacks to use {} syntax instead of params
-+ Set up astro docs project
-+ build scaffolding for docs
-+ get server side rendering with hydration working
-
-week of feb 16
-+ Add reactivity template helpers for guard, nonreactive, reactiveDebug
-+ Set up auto labeler
-+ Set up github issue bot
-+ Set up commit lint/open commit
-+ Handle boolean attributes like checked readonly etc
-
-week of feb 9
-+ implement CI with github actions
-+ figure out unit + jsdom + browser testing
-+ write unit tests for query, reactive var, templating, utils
-
-week of feb 4
-+ Fix reactive each to properly reuse dom based off repeat directive
-+ Complete todomvc example.
-+ add recursive search to parent(templateName) and implement child(templateName)
-+ add LitTemplate.findTemplate(templateName) and global template registry
-+ First pass readme for templating
-
-week of jan 29
-+ Move example to example folder & add to build script.
-+ Add constants for build script and review
-+ Fix renderTemplate reactivity on data context. General reactivity review of subtemplates.
-+ Allow adopting stylesheets from subtemplates
-+ Add reactiveData syntax for specifying reactive data for subtemplates.
-+ Implement parent() helper
-+ Namespacing events so only fire on subtemplates
-+ add unsafe html / raw html
-+ Attach events for sub templates
-+ Allow computations to be attached to templates
-+ onCreated/onDestroyed callbacks on subtemplates
+Difficult / Time Sinks
+- Refactor panels to use grid-template-rows / grid-template-columns
+- Further style tabs/code component
+- Fix ipad width issues playground
+- Add way to open arbitrary code in playground
+- Save minimized groups by filename
+- Determine build step for components from configuration json. Small/medium/large
