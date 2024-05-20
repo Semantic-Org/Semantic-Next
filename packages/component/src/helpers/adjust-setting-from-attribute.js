@@ -12,7 +12,7 @@ import { get, each, inArray, isString } from '@semantic-ui/utils';
   icon="right arrow" icon="arrow-right" icon="right-arrow"
 
 */
-const SPACE_REGEX = /\W+/mg;
+const SPACE_REGEX = /\s+/mg;
 
 // allow 'arrow-down' or 'down-arrow'
 const reverseDashes = (string) => {
