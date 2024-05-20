@@ -24,11 +24,6 @@ Docs Design
 - Add custom theme for code samples
 - Add following header on long pages
 
-In Page Menu
-+ Allow titles to link
-+ Fix issue when building titles from markdown getHeadings
-+ Highlight when on same page as scroll
-
 Build System
 - Figure out build step for component spec
 
