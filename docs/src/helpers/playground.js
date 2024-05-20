@@ -122,6 +122,18 @@ export const getIndexHTMLBefore = function(type) {
   <script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
   <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
   <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
+  <script>
+    function dispatchCustomEvent(eventName) {
+      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
+      window.frameElement.dispatchEvent(event);
+    }
+    window.addEventListener('focus', function() {
+      dispatchCustomEvent('iframefocus');
+    }, true);
+    window.addEventListener('blur', function() {
+      dispatchCustomEvent('iframeblur');
+    }, true);
+  </script>
   <!-- This defines the component tag and makes it available on your page !-->
   ${getScriptCode()}
   </head>

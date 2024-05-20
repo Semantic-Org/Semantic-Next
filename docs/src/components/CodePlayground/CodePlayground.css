@@ -63,13 +63,14 @@
   .inline {
     position: relative;
     display: block;
+    margin: var(--vertically-spaced);
 
     playground-file-editor {
       border: var(--border);
       overflow: hidden;
       height: var(--inline-code-height);
       border-bottom: none;
-      border-radius: var(--top-attached-border-radius);
+      border-radius: var(--attached-border-radius);
     }
     playground-preview {
       background-color: var(--page-background) !important;
@@ -80,10 +81,21 @@
       overflow: hidden;
       border-radius: var(--bottom-attached-border-radius);
     }
+    .menu {
+      display: flex;
+      flex-direction: row;
+      border-radius: var(--top-attached-border-radius);
+      padding: var(--compact-padding);
+      border: var(--border);
+      border-bottom: none;
+    }
+    .menu ui-menu {
+      margin: 0rem;
+      font-size: 13px;
+    }
     .links {
-      position: absolute;
-      right: 0px;
-      top: 1.5rem;
+      margin-top: 3px;
+      margin-left: auto;
     }
     .links a {
       color: var(--standard-60);

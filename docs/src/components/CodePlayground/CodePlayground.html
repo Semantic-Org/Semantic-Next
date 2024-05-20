@@ -18,24 +18,25 @@
   {{/if}}
   {{#if inline}}
     <div class="inline">
-      <ui-menu
-        selection
-        items={{stringify getFileMenuItems}}
-        value={{activeFile}}
-      ></ui-menu>
-      {{#if exampleURL}}
-        <div class="links">
-          <a href="{{exampleURL}}" class="sandbox link">
-            <ui-icon codesandbox link></ui-icon>
-          </a>
-        </div>
-      {{/if}}
-      <playground-file-editor
-        line-numbers
-        project="source"
-        filename="{{activeFile}}"
-      >
-      </playground-file-editor>
+      <div class="menu">
+        <ui-menu
+          selection
+          items={{stringify getFileMenuItems}}
+          value={{activeFile}}
+        ></ui-menu>
+        {{#if exampleURL}}
+          <div class="links">
+            <a href="{{exampleURL}}" class="sandbox link">
+              <ui-icon codesandbox link></ui-icon>
+            </a>
+          </div>
+        {{/if}}
+      </div>
+      {{>template
+        name='CodePlaygroundFile'
+        data={inline: true}
+        reactiveData={filename: activeFile}
+      }}
       <playground-preview project="source"> </playground-preview>
     </div>
   {{else}}

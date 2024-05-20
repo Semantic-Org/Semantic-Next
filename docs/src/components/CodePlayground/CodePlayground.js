@@ -2,6 +2,7 @@ import { createComponent } from '@semantic-ui/component';
 import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
+import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 
 import '../Panels/Panels.js';
 import '../Panels/Panel.js';
@@ -72,7 +73,7 @@ const state = {
   resizing: true,
 };
 
-const createInstance = ({tpl, state, settings, $}) => ({
+const createInstance = ({tpl, state, settings, $, $$}) => ({
 
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
@@ -156,7 +157,7 @@ const createInstance = ({tpl, state, settings, $}) => ({
   },
 
   reloadPreview() {
-    const iframe = $('playground-preview').find('iframe').get(0);
+    const iframe = $$('playground-preview').find('iframe').get(0);
     if(iframe) {
       iframe.contentWindow.location.reload();
     }
@@ -214,7 +215,10 @@ const CodePlayground = createComponent({
   events,
   state,
   onThemeChanged,
-  subTemplates: {CodePlaygroundPanel}
+  subTemplates: {
+    CodePlaygroundPanel,
+    CodePlaygroundFile,
+  }
 });
 
 export default CodePlayground;

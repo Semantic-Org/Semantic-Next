@@ -7,11 +7,8 @@
   </ui-panel>
 {{else if is panel.type 'file'}}
   <ui-panel class="{{classIf minimized 'minimized' ''}}code" size="{{size}}" label="{{panel.label}}">
-    <playground-file-editor
-      line-numbers
-      project="source"
-      filename="{{panel.filename}}"
-    >
-    </playground-file-editor>
+    {{>CodePlaygroundFile
+      filename=panel.filename
+    }}
   </ui-panel>
 {{/if}}
