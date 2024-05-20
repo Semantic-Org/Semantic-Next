@@ -1,7 +1,7 @@
-:root {
+body {
   --menu-selection-gap: 6px;
 
-  --menu-selection-item-padding: var(--7px) var(--6px);
+  --menu-selection-item-padding: 7px 6px;
   --menu-selection-item-border-radius: var(--border-radius);
   --menu-selection-item-color: var(--standard-60);
 
@@ -9,6 +9,7 @@
   --menu-selection-item-hover-color: #013A4F;
   --menu-selection-item-hover-box-shadow: none;
 
+  --menu-selection-item-active-padding: 7px 6px;
   --menu-selection-item-active-background: #D0EBF3;
   --menu-selection-item-active-color: #013A4F;
   --menu-selection-item-active-box-shadow: 0px 1px 6px rgb(85 147 167 / 77%) inset;

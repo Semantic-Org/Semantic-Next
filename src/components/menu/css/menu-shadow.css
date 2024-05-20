@@ -32,6 +32,7 @@
     --menu-item-hover-box-shadow: var(--menu-selection-item-hover-box-shadow);
     --menu-item-active-background: var(--menu-selection-item-active-background);
     --menu-item-active-border-radius: var(--menu-selection-item-border-radius);
+    --menu-item-active-padding: var(--menu-selection-item-active-padding);
     --menu-item-active-color: var(--menu-selection-item-active-color);
     --menu-item-active-box-shadow: var(--menu-selection-item-active-box-shadow);
   }
