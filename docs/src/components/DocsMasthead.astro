@@ -14,40 +14,28 @@ const isURLActive = (url, index) => {
 };
 
 const isActive = (url, index) => {
-  return isURLActive(url, index) ? 'true' : 'false';
+  return isURLActive(url, index) ? true : false;
 };
 
 const getLink = (url, index) => {
-  return !isURLActive(url, index) ? url : '';
+  return !isURLActive(url, index) ? url : undefined;
 };
 
-const getItemAttr = (item, index) => {
-  console.log({
-    active: isActive(item.url, index),
-    href: getLink(item.url, index)
-  });
-  return {
-    active: isActive(item.url, index),
-    href: getLink(item.url, index)
-  };
-};
+
+const menuItems = menu.map((item, index) => ({
+  active: isActive(item.url, index),
+  href: getLink(item.url, index),
+  label: item.text
+}));
+
 
 ---
 <masthead>
   <ui-container active="true">
     <h1>{header}</h1>
     <p>{description}</p>
+    {isArray(menu) && (
+      <UIMenu three-item selection items={menuItems}></UIMenu>
+    )}
   </ui-container>
-
-  {isArray(menu) && (
-    <UIMenu three-item dashboard>
-      <ui-container>
-        {menu.map((item, index) => (
-          <MenuItem {...getItemAttr(item, index)}>
-            {item.text}
-          </MenuItem>
-        ))}
-      </ui-container>
-    </UIMenu>
-  )}
 </masthead>
