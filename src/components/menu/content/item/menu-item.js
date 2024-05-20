@@ -5,7 +5,7 @@ import MenuItemCSS from './menu-item.css?raw';
 import MenuItemTemplate from './menu-item.html?raw';
 
 const onCreated = ({data}) => {
-  console.log(data);
+
 };
 
 const events = {

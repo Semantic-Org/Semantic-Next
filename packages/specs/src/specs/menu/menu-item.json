@@ -14,6 +14,12 @@
       "slot": "icon",
       "description": "include an icon",
       "exampleCode": "<menu-item icon=\"home\">Home</menu-item>"
+    },
+    {
+      "name": "Href",
+      "type": "string",
+      "attribute": "href",
+      "description": "can specify a link"
     }
   ],
   "states": [
