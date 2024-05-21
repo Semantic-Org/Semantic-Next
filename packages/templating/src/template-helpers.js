@@ -77,9 +77,15 @@ export const TemplateHelpers = {
     return value == 1 ? '' : plural;
   },
   is(a, b) {
+    if(b == undefined) {
+      return a == true;
+    }
     return a == b;
   },
   not(a, b) {
+    if(b == undefined) {
+      return a == false;
+    }
     return a != b;
   },
   isEqual(a, b) {

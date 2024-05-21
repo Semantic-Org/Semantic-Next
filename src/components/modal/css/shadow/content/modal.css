@@ -1,0 +1,60 @@
+/*   Closed state of the dialog   */
+dialog {
+  outline: none;
+  border: none;
+  background-color: transparent;
+}
+dialog .modal {
+  background-color: #FFFFFF;
+  padding: 1rem;
+  max-width: calc(100vw - 2rem);
+  border-radius: var(--modal-border-radius);
+}
+
+/* Dialog */
+dialog {
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  scale: 0.8;
+  transition: var(--modal-transition);
+}
+dialog[open] {
+  opacity: 1;
+  scale: 1;
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
+/* Backdrop */
+dialog::backdrop {
+  background-color: rgb(0 0 0 / 0%);
+  transition: var(--modal-dimmer-transition);
+}
+dialog[open]::backdrop {
+  background: var(--modal-dimmer-background);
+}
+@starting-style {
+  dialog[open]::backdrop {
+    background: rgb(0 0 0 / 0%);
+  }
+}
+
+
+dialog .close {
+  cursor: pointer;
+  align-self: flex-end;
+  color: #FFF;
+  margin: 0;
+  font-size: 18px;
+  width: 1rem;
+  height: 1rem;
+  padding: 1rem;
+}
+dialog .close + .modal {
+  margin-right: 2rem;
+}

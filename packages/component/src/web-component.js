@@ -314,7 +314,7 @@ class WebComponentBase extends LitElement {
         // we dont record this into settings
         return;
       }
-      const setting = this[property] ?? this.defaultSettings[property];
+      const setting = this[property] ?? this.defaultSettings[property] ?? componentSpec.defaultSettings[property];
       // only pass through setting if it is defined
       if(setting !== undefined) {
         settings[property] = setting;

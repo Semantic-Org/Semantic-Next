@@ -1,0 +1,64 @@
+/* src/components/modal/css/shadow/content/modal.css */
+@layer component.content.modal {
+  dialog {
+    outline: none;
+    border: none;
+    background-color: transparent;
+  }
+  dialog .modal {
+    background-color: #FFFFFF;
+    padding: 1rem;
+    max-width: calc(100vw - 2rem);
+    border-radius: var(--modal-border-radius);
+  }
+  dialog {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    scale: 0.8;
+    transition: var(--modal-transition);
+  }
+  dialog[open] {
+    opacity: 1;
+    scale: 1;
+  }
+  @starting-style {
+    dialog[open] {
+      opacity: 0;
+      scale: 0.8;
+    }
+  }
+  dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0);
+    transition: var(--modal-dimmer-transition);
+  }
+  dialog[open]::backdrop {
+    background: var(--modal-dimmer-background);
+  }
+  @starting-style {
+    dialog[open]::backdrop {
+      background: rgba(0, 0, 0, 0);
+    }
+  }
+  dialog .close {
+    cursor: pointer;
+    align-self: flex-end;
+    color: #FFF;
+    margin: 0;
+    font-size: 18px;
+    width: 1rem;
+    height: 1rem;
+    padding: 1rem;
+  }
+  dialog .close + .modal {
+    margin-right: 2rem;
+  }
+}
+
+/* src/components/modal/css/shadow/variations/aligned.css */
+@layer component.variations.aligned;
+
+/* src/components/modal/css/shadow/variations/sizing.css */
+@layer component.variations.sizing;
+
+/* src/components/modal/css/shadow/modal.css */

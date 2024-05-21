@@ -307,9 +307,6 @@ export const Template = class Template {
         events.push({ eventName, selector });
       });
     });
-    if(eventString == 'click') {
-      console.log(events);
-    }
     return events;
   }
 

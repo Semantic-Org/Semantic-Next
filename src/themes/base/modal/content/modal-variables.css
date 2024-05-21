@@ -1,0 +1,20 @@
+:root {
+
+  --modal-border-radius: var(--border-radius);
+  --modal-background: var(--white);
+
+  --modal-transition-duration: 0.2s;
+
+  --modal-transition:
+    opacity var(--modal-transition-duration) ease,
+    scale var(--modal-transition-duration) ease,
+    overlay var(--modal-transition-duration) ease allow-discrete,
+    display var(--modal-transition-duration) ease allow-discrete;
+
+  --modal-dimmer-transition-duration: 700ms;
+  --modal-dimmer-background: var(--black-70);
+  --modal-dimmer-transition:
+    display var(--modal-dimmer-transition-duration) allow-discrete,
+    overlay var(--modal-dimmer-transition-duration) allow-discrete,
+    background var(--modal-dimmer-transition-duration);
+}

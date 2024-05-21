@@ -1,0 +1,10 @@
+/* Content */
+@import url('./content/modal.css') layer(component.content.modal);
+
+/* Types */
+/*@import url('./types/selection.css') layer(component.types.selection);*/
+
+
+/* Types */
+@import url('./variations/aligned.css') layer(component.variations.aligned);
+@import url('./variations/sizing.css') layer(component.variations.sizing);
