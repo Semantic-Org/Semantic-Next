@@ -403,7 +403,12 @@ export const Template = class Template {
           keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
           const keySequences = keySequence.split(',');
           if(any(keySequences, sequence => this.currentSequence.endsWith(sequence))) {
-            const eventResult = this.call(handler, { additionalData: { event: event } });
+
+            const inputFocused = document.activeElement instanceof HTMLElement &&
+              (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) ||
+                document.activeElement.isContentEditable);
+
+            const eventResult = this.call(handler, { additionalData: { event: event, inputFocused } });
             if(eventResult !== true) {
               event.preventDefault();
             }
