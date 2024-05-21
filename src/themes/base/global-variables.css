@@ -562,9 +562,11 @@
   --circular-radius: 500rem;
 
   --border: 1px solid var(--border-color);
+  --subtle-border: 1px solid var(--subtle-border-color);
   --internal-border: 1px solid var(--internal-border-color);
 
   --border-color: rgba(34, 36, 38, 0.15);
+  --subtle-border-color: rgba(34, 36, 38, 0.22);
   --strong-border-color: rgba(34, 36, 38, 0.22);
   --internal-border-color: rgba(34, 36, 38, 0.10);
   --selected-border-color: rgba(34, 36, 38, 0.35);

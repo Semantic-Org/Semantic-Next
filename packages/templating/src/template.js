@@ -39,7 +39,7 @@ export const Template = class Template {
       ast = compiler.compile();
     }
     this.events = events;
-    this.keys = keys;
+    this.keys = keys || {};
     this.ast = ast;
     this.css = css;
     this.data = data || {};
@@ -193,7 +193,7 @@ export const Template = class Template {
     this.startNode = startNode;
     this.endNode = endNode;
     this.attachEvents();
-    this.attachKeybindings();
+    this.bindKeys();
     if (this.attachStyles) {
       await this.adoptStylesheet();
     }
@@ -373,7 +373,7 @@ export const Template = class Template {
     }
   }
 
-  attachKeybindings(keys = this.keys) {
+  bindKeys(keys = this.keys) {
     if(isServer) {
       return;
     }
@@ -413,11 +413,15 @@ export const Template = class Template {
     ;
   }
 
-  addKey(key, callback) {
-    const needsInit = Object.keys(this.keys.length) == 0;
+  bindKey(key, callback) {
+    console.log(key, callback);
+    if(!key || !callback) {
+      return;
+    }
+    const needsInit = Object.keys(this.keys).length == 0;
     this.keys[key] = callback;
     if(needsInit) {
-      this.attachKeybindings();
+      this.bindKeys();
     }
   }
 
@@ -539,6 +543,7 @@ export const Template = class Template {
 
         dispatchEvent: this.dispatchEvent.bind(this),
         attachEvent: this.attachEvent.bind(this),
+        bindKey: this.bindKey.bind(this),
         abortController: this.eventController,
 
         template: this,
