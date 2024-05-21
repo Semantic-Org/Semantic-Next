@@ -13,8 +13,17 @@ const createInstance = ({tpl, el, settings, $}) => ({
   }
 });
 
+const keys = {
+  'ctrl+k'({event, tpl}) {
+    tpl.openModal();
+  },
+  'up up down down left right left right'({event}) {
+    console.log('konami', event);
+  }
+};
+
 const events = {
-  'input .search input'({event, tpl}) {
+  'click .search input'({tpl}) {
     tpl.openModal();
   },
   'click dialog'({event, tpl}) {
@@ -30,6 +39,7 @@ const GlobalSearch = createComponent({
   css,
   createInstance,
   events,
+  keys,
 });
 
 export default GlobalSearch;
