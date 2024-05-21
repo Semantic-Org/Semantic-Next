@@ -1,27 +1,61 @@
+:root {
+  --global-search-background-color: var(--black-30);
+  --global-search-border-radius: var(--circular-radius);
+  --global-search-transition: background var(--transition-duration) var(--easing);
+  --global-search-hover-background-color: var(--black-50);
+
+  --global-search-icon-width: 2rem;
+  --global-search-icon-color: inherit;
+
+  --global-search-input-font: var(--page-font);
+  --global-search-input-color: var(--text-color);
+
+  --global-search-placeholder-color: var(--white-10);
+
+  --global-search-label-color: var(--white-10);
+  --global-search-label-border: var(--internal-border);
+  --global-search-label-border-radius: var(--border-radius);
+
+  --global-search-input-color: var(--input-color);
+  --global-search-input-padding: var(--input-padding);
+}
+
+
 .search {
   cursor: input;
   display: flex;
   align-items: center;
-  min-width: 300px;
-  background-color: var(--black-30);
-  border-radius: var(--circular-radius);
+  background-color: var(--global-search-background-color);
+  border-radius: var(--global-search-border-radius);
+  transition: background 200ms ease;
 
   &:hover {
-    background-color: var(--black-70);
-    color: var(--white-90);
+    background-color: var(--global-search-hover-background-color);
   }
-
+  .label {
+    display: inline-block;
+    text-wrap: nowrap;
+    margin-left: auto;
+    padding: 2px 3px;
+    line-height: 1;
+    color: var(--global-search-label-border-color);
+    font-size: 11px;
+    font-weight: bold;
+    border: var(--global-search-label-border);
+    border-radius: var(--global-search-label-border-radius);
+  }
   input {
-    width: 100%;
-    font-family: var(--page-font);
-    background-color: transparent;
-    color: var(--text-color);
-    padding: var(--input-padding);
+    width: 100px;
     border: none;
+    font-size: 12px;
+    font-family: var(--global-search-font);
+    color: var(--global-search-input-color);
+    background-color: transparent;
+    padding: var(--global-search-input-padding);
     flex-grow: 1;
   }
   input::placeholder {
-    color: vaR(--white-30);
+    color: var(--global-search-placeholder-color);
   }
   input:focus {
     outline: none;
@@ -29,7 +63,8 @@
   ui-icon {
     margin-left: auto;
     flex-grow: 0;
-    width: 3rem;
+    width: var(--global-search-icon-width);
+    color: var(--global-search-icon-color);
   }
 }
 
@@ -39,6 +74,7 @@ dialog {
   outline: none;
   border: none;
   background-color: transparent;
+  margin-top: 10vh;
 }
 dialog .modal {
   background-color: #FFFFFF;
@@ -51,21 +87,21 @@ dialog .modal {
 /* Dialog */
 dialog {
   opacity: 0;
-  transform: scale(0.8);
+  scale: 0.8;
   transition:
     opacity 0.5s ease,
-    transform 0.3s ease,
+    scale 0.3s ease,
     overlay 0.5s ease allow-discrete,
     display 0.5s ease allow-discrete;
 }
 dialog[open] {
   opacity: 1;
-  transform: scale(1);
+  scale: 1;
 }
 @starting-style {
   dialog[open] {
     opacity: 0;
-    transform: scale(0.8);
+    scale: 0.8;
   }
 }
 

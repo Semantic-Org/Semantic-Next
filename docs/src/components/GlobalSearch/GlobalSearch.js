@@ -4,7 +4,14 @@ import { } from '@semantic-ui/utils';
 import template from './GlobalSearch.html?raw';
 import css from './GlobalSearch.css?raw';
 
-const createInstance = ({tpl, el, settings, $}) => ({
+const settings = {
+  openKey: 'ctrl + k'
+};
+
+const createInstance = ({tpl, el, bindKey, settings, $}) => ({
+  initialize() {
+    bindKey(settings.openKey, tpl.openModal);
+  },
   openModal() {
     $('dialog').get(0).showModal();
   },
@@ -12,15 +19,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
     $('dialog').get(0).close();
   }
 });
-
-const keys = {
-  'ctrl+k'({event, tpl}) {
-    tpl.openModal();
-  },
-  'up up down down left right left right'({event}) {
-    console.log('konami', event);
-  }
-};
 
 const events = {
   'click .search input'({tpl}) {
@@ -39,7 +37,6 @@ const GlobalSearch = createComponent({
   css,
   createInstance,
   events,
-  keys,
 });
 
 export default GlobalSearch;

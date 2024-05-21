@@ -3,7 +3,7 @@
   flex: 1 1 0;
   flex-direction: column;
   overflow: hidden;
-  will-change: transform;
+  will-change: flex;
 }
 
 :host {

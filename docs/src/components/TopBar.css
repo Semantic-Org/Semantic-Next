@@ -2,9 +2,9 @@
 
   :root {
     --topbar-logo-margin: 0px 0px 0px 20px;
-    --topbar-logo-size: 35px;
-    --topbar-logo-valign: -55%;
-    --topbar-height: 60px;
+    --topbar-logo-valign: middle;
+    --topbar-height: 52px;
+    --topbar-logo-size: calc(var(--topbar-height) / 2);
     --topbar-site-name-font-size: 16px;
     --topbar-site-name-distance: 10px;
     --topbar-site-name-color: var(--white);
@@ -35,6 +35,7 @@
     text-decoration: none;
   }
   topbar .logo img {
+    margin-top: -1px;
     display: inline-block;
     height: var(--topbar-logo-size);
     width: var(--topbar-logo-size);
