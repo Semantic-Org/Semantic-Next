@@ -1,25 +1,44 @@
-:root {
+:host {
+
   --global-search-background-color: var(--black-30);
   --global-search-border-radius: var(--circular-radius);
-  --global-search-transition: background var(--transition-duration) var(--easing);
+  --global-search-transition: background var(--default-duration) var(--default-easing);
   --global-search-hover-background-color: var(--black-50);
 
   --global-search-icon-width: 2rem;
   --global-search-icon-color: inherit;
 
+  --global-search-input-width: 100px;
+  --global-search-input-font-size: 12px;
   --global-search-input-font: var(--page-font);
   --global-search-input-color: var(--text-color);
 
   --global-search-placeholder-color: var(--white-10);
 
-  --global-search-label-color: var(--white-10);
+  --global-search-label-font-size: 11px;
+  --global-search-label-padding: 2px 3px;
+  --global-search-label-color: var(--white-20);
   --global-search-label-border: var(--internal-border);
   --global-search-label-border-radius: var(--border-radius);
 
   --global-search-input-color: var(--input-color);
   --global-search-input-padding: var(--input-padding);
-}
 
+
+  --modal-transition:
+    opacity 0.5s ease,
+    scale 0.3s ease,
+    overlay 0.5s ease allow-discrete,
+    display 0.5s ease allow-discrete;
+
+  --modal-dimmer-transition-duration: 700ms;
+  --modal-dimmer-background: var(--black-70);
+  --modal-dimmer-transition:
+    display var(--modal-dimmer-transition-duration) allow-discrete,
+    overlay var(--modal-dimmer-transition-duration) allow-discrete,
+    background var(--modal-dimmer-transition-duration);
+
+}
 
 .search {
   cursor: input;
@@ -27,7 +46,7 @@
   align-items: center;
   background-color: var(--global-search-background-color);
   border-radius: var(--global-search-border-radius);
-  transition: background 200ms ease;
+  transition: var(--global-search-transition);
 
   &:hover {
     background-color: var(--global-search-hover-background-color);
@@ -36,18 +55,18 @@
     display: inline-block;
     text-wrap: nowrap;
     margin-left: auto;
-    padding: 2px 3px;
+    padding: var(--global-search-label-padding);
     line-height: 1;
-    color: var(--global-search-label-border-color);
-    font-size: 11px;
+    color: var(--global-search-label-color);
+    font-size: var(--global-search-label-font-size);
     font-weight: bold;
     border: var(--global-search-label-border);
     border-radius: var(--global-search-label-border-radius);
   }
   input {
-    width: 100px;
+    width: var(--global-search-input-width);
     border: none;
-    font-size: 12px;
+    font-size: var(--global-search-input-font-size);
     font-family: var(--global-search-font);
     color: var(--global-search-input-color);
     background-color: transparent;
@@ -74,13 +93,12 @@ dialog {
   outline: none;
   border: none;
   background-color: transparent;
-  margin-top: 10vh;
 }
 dialog .modal {
   background-color: #FFFFFF;
   padding: 1rem;
-  min-width: 500px;
-  min-height: 500px;
+  width: 400px;
+  max-width: calc(100vw - 2rem);
   border-radius: var(--border-radius);
 }
 
@@ -88,11 +106,7 @@ dialog .modal {
 dialog {
   opacity: 0;
   scale: 0.8;
-  transition:
-    opacity 0.5s ease,
-    scale 0.3s ease,
-    overlay 0.5s ease allow-discrete,
-    display 0.5s ease allow-discrete;
+  transition: var(--modal-transition);
 }
 dialog[open] {
   opacity: 1;
@@ -108,16 +122,13 @@ dialog[open] {
 /* Backdrop */
 dialog::backdrop {
   background-color: rgb(0 0 0 / 0%);
-  transition:
-    display 0.7s allow-discrete,
-    overlay 0.7s allow-discrete,
-    background-color 0.7s;
+  transition: var(--modal-dimmer-transition);
 }
 dialog[open]::backdrop {
-  background-color: rgb(0 0 0 / 85%);
+  background: var(--modal-dimmer-background);
 }
 @starting-style {
   dialog[open]::backdrop {
-    background-color: rgb(0 0 0 / 0%);
+    background: rgb(0 0 0 / 0%);
   }
 }

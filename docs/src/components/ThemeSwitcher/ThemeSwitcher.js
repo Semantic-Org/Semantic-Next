@@ -54,7 +54,6 @@ const createInstance = function ({ $, isServer, reaction, state, tpl }) {
 };
 
 const onCreated = function({tpl, reaction, reactiveVar, state, isClient}) {
-
   state.theme.set(tpl.getLocalTheme());
   if(isClient) {
     tpl.calculateTheme();

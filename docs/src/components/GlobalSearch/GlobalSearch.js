@@ -4,6 +4,8 @@ import { } from '@semantic-ui/utils';
 import template from './GlobalSearch.html?raw';
 import css from './GlobalSearch.css?raw';
 
+import { UIModal } from '@semantic-ui/core';
+
 const settings = {
   openKey: 'ctrl + k'
 };
@@ -13,10 +15,10 @@ const createInstance = ({tpl, el, bindKey, settings, $}) => ({
     bindKey(settings.openKey, tpl.openModal);
   },
   openModal() {
-    $('dialog').get(0).showModal();
+    $('ui-modal').get(0).tpl.show();
   },
   hideModal() {
-    $('dialog').get(0).close();
+    $('ui-modal').get(0).tpl.hide();
   }
 });
 
@@ -24,11 +26,6 @@ const events = {
   'click .search input'({tpl}) {
     tpl.openModal();
   },
-  'click dialog'({event, tpl}) {
-    if($(event.target).is('dialog')) {
-      tpl.hideModal();
-    }
-  }
 };
 
 const GlobalSearch = createComponent({
@@ -37,6 +34,7 @@ const GlobalSearch = createComponent({
   css,
   createInstance,
   events,
+  settings,
 });
 
 export default GlobalSearch;

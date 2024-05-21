@@ -24,7 +24,6 @@ import './TopBar.css';
       </span>
     </a>
   </span>
-  <MobileSidebarToggle client:load></MobileSidebarToggle>
   <TopbarMenu
     client:load
     menu={menu}
@@ -32,4 +31,5 @@ import './TopBar.css';
   ></TopbarMenu>
   <GlobalSearch client:load></GlobalSearch>
   <ThemeSwitcher client:load transition:name="theme"></ThemeSwitcher>
+  <MobileSidebarToggle client:load></MobileSidebarToggle>
 </topbar>

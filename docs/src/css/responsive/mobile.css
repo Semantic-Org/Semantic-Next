@@ -1,16 +1,19 @@
 /* Mobile (Max width 767px) */
 
 @layer responsive.mobile {
-
+/*
   topbar .logo {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     margin: 0;
-  }
+  }*/
   topbar mobile-sidebar-toggle {
     display: inline-block;
+  }
+  topbar theme-switcher {
+    margin-left: 0;
   }
 
   layout {
