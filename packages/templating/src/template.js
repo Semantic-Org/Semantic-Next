@@ -285,7 +285,7 @@ export const Template = class Template {
     const selectors = [];
     each(parts, (part, index) => {
       const value = part.replace(/(\,|\W)+$/, '').trim();
-      const hasComma = part.includes(',')
+      const hasComma = part.includes(',');
       if(!addedEvents) {
         eventNames.push(getBubbledEvent(value));
         addedEvents = !hasComma;
@@ -299,10 +299,17 @@ export const Template = class Template {
       }
     });
     each(eventNames, (eventName) => {
+      // this event has no selectors which means it should occur on component
+      if(!selectors.length) {
+        selectors.push('');
+      }
       each(selectors, (selector) => {
         events.push({ eventName, selector });
       });
     });
+    if(eventString == 'click') {
+      console.log(events);
+    }
     return events;
   }
 
@@ -380,18 +387,20 @@ export const Template = class Template {
     if(Object.keys(keys).length == 0) {
       return;
     }
+    const sequenceTimeout = 500; // time in ms required between keypress
     const eventSettings = { abortController: this.eventController };
     this.currentSequence = '';
     $(document)
       .on('keydown', (event) => {
         const key = getKeyFromEvent(event);
+
         // avoid repeated keypress when holding down key
         if(key == this.currentKey) {
           return;
         }
-        console.log(key, this.currentSequence);
         this.currentKey = key;
         this.currentSequence += key;
+
         // check for key event
         each(this.keys, (handler, keySequence) => {
           keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
@@ -403,18 +412,20 @@ export const Template = class Template {
             }
           }
         });
+
         // start next sequence
         this.currentSequence += ' ';
-        // sequence must occur within 500ms
+
+        // end sequence if not occuring in time
         clearTimeout(this.resetSequence);
-        this.resetSequence = setTimeout(() => { this.currentSequence = ''; }, 500);
+        this.resetSequence = setTimeout(() => { this.currentSequence = ''; }, sequenceTimeout);
+
       }, eventSettings)
       .on('keyup', (event) => { this.currentKey = ''; })
     ;
   }
 
   bindKey(key, callback) {
-    console.log(key, callback);
     if(!key || !callback) {
       return;
     }
