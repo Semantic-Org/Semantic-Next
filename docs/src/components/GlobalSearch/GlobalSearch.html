@@ -1,10 +1,22 @@
-<div class="search">
+<div class="inline-search">
   <input placeholder="Search site...">
   <div class="label">
     ctrl + k
   </div>
   <ui-icon search></ui-icon>
 </div>
-<ui-modal closeable="false">
-  This is the modal
+<ui-modal>
+  <div class="search">
+    <div class="input">
+      <input type="text" placeholder="Search...">
+    </div>
+  </div>
+  <div class="results">
+    {{#each result in displayResults}}
+      <a class="result {{classMap getClassMap result}}" href="{{result.url}}">
+        <h3>{{result.title}}</h3>
+        <p>{{result.description}}</p>
+      </a>
+    {{/each}}
+  </div>
 </ui-modal>

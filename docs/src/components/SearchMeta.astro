@@ -1,0 +1,22 @@
+---
+import { each, isString } from '@semantic-ui/utils';
+import './SearchMeta.css';
+
+const meta = [];
+const props = each(Astro.props, (value, name) => {
+  meta.push({
+    value: isString(value) ? value : JSON.stringify(value),
+    name
+  });
+});
+
+
+
+---
+<searchMeta>
+  {meta.map((prop) => (
+    <>
+      <span data-pagefind-meta={prop.name}>{prop.value}</span>
+    </>
+  ))}
+</searchMeta>

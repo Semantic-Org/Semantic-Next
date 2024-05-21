@@ -14,6 +14,10 @@
     --topbar-background-color: #1A1D1E;
     --topbar-text-color: var(--white);
     --topbar-border-bottom: none;
+
+  }
+  global-search {
+    --global-search-modal-background: var(--sidebar-background-color);
   }
   body.dark {
     --topbar-background-color: #151a1e;

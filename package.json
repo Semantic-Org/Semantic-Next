@@ -102,5 +102,8 @@
   ],
   "lint-staged": {
     "**/*.js": "npx dprint fmt"
+  },
+  "dependencies": {
+    "@pagefind/modular-ui": "^1.1.0"
   }
 }

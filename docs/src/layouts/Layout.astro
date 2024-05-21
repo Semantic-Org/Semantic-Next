@@ -13,6 +13,7 @@ let {
 	headerIcon,
 	description,
 	id,
+	searchMeta,
 	menu,
 	inlineHeader,
 	textContent,
@@ -22,7 +23,7 @@ let {
 } = Astro.props;
 header = header || title;
 ---
-<Body title={title} description={description}>
+<Body title={title} description={description} searchMeta={searchMeta}>
 	<TopBar></TopBar>
 	<layout id={id}>
 		<Sidebar/>
@@ -41,9 +42,9 @@ header = header || title;
 					</rail>
 					<pageContent>
 						{inlineHeader == 'true' && header && (
-							<h2>
+							<h1>
 								{headerIcon !== undefined && (<UIIcon icon={headerIcon} disabled></UIIcon>)} <span class="text">{header}</span>
-							</h2>
+							</h1>
 						)}
 						<slot />
 					</pageContent>

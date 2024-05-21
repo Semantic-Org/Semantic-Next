@@ -154,7 +154,7 @@
   layout main h2:first-child,
   layout main h3:first-child {
     margin-top: 0rem;
-  }
+  }/*
   layout main h1 {
     font-size: 17px;
     margin: 3rem 0rem 2rem;
@@ -165,8 +165,8 @@
   layout main h1 ui-icon {
     margin-right: 1rem;
     color: var(--primary-text-color);
-  }
-  layout main h2 {
+  }*/
+  layout main h1 {
     font-size: 26px;
     font-weight: bold;
     margin: 3rem 0rem 1rem;

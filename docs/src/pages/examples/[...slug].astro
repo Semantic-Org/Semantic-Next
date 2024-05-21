@@ -34,9 +34,14 @@ files = addPlaygroundInjections(files, example.exampleType);
 
 const panelIndexes = getPanelIndexes(files, example.exampleType);
 
+const searchMeta = {
+  ...entry.data,
+  type: 'example',
+}
+
 ---
 
-<Playground {...entry.data} showSidebar=true>
+<Playground searchMeta={searchMeta} showSidebar=true>
   <page>
     <Sidebar/>
     <CodePlayground client:only
