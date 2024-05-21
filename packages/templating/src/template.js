@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, clone, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, any, clone, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -395,7 +395,8 @@ export const Template = class Template {
         // check for key event
         each(this.keys, (handler, keySequence) => {
           keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
-          if(this.currentSequence.endsWith(keySequence)) {
+          const keySequences = keySequence.split(',');
+          if(any(keySequences, sequence => this.currentSequence.endsWith(sequence))) {
             const eventResult = this.call(handler, { additionalData: { event: event } });
             if(eventResult !== true) {
               event.preventDefault();
