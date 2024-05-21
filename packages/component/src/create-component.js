@@ -21,6 +21,7 @@ export const createComponent = ({
 
   state = {},
   events = {},
+  keys = {},
 
   createInstance = noop,
   onCreated = noop,
@@ -65,6 +66,7 @@ export const createComponent = ({
     ast,
     css,
     events,
+    keys,
     subTemplates,
     onCreated,
     onRendered,

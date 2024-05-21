@@ -41,12 +41,41 @@ export const fatal = (
 };
 
 /*-------------------
-        DOM
+        Browser
 --------------------*/
 
 export const copyText = (text) => {
   navigator.clipboard.writeText(text);
 };
+
+export const getKeyFromEvent = (event) => {
+  let pressedKey = event?.key;
+  if(!pressedKey) {
+    return '';
+  }
+  let key = '';
+  if(event.ctrlKey && pressedKey !== 'Control') {
+    key += 'ctrl+';
+  }
+  if(event.altKey && pressedKey !== 'Alt') {
+    key += 'alt+';
+  }
+  if(event.shiftKey && pressedKey !== 'Shift') {
+    key += 'shift+';
+  }
+  if(event.metaKey && pressedKey !== 'Meta') {
+    key += 'meta+';
+  }
+  // standardize key names
+  const specialKeys = {
+    Control: 'ctrl',
+    Escape: 'esc',
+    ' ': 'space',
+  };
+  pressedKey = pressedKey.replace('Arrow', ''); // ArrowUp -> up
+  key += specialKeys[pressedKey] || pressedKey.toLowerCase();
+  return key;
+}
 
 /*-------------------
          XHR

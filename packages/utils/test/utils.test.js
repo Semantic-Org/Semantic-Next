@@ -3,6 +3,7 @@ import { tokenize,
   arrayFromObject,
   asyncEach,
   asyncMap,
+  any,
   camelToKebab,
   capitalizeWords,
   clone,
@@ -18,12 +19,14 @@ import { tokenize,
   formatDate,
   generateID,
   get,
+  getKeyFromEvent,
   groupBy,
   hashCode,
   hasProperty,
   inArray,
   isArguments,
   isArray,
+  isEmpty,
   isBinary,
   isEqual,
   isFunction,
@@ -38,6 +41,7 @@ import { tokenize,
   last,
   mapObject,
   memoize,
+  onlyKeys,
   noop,
   pick,
   prettifyID,
@@ -47,7 +51,10 @@ import { tokenize,
   reverseKeys,
   roundNumber,
   some,
+  isServer,
+  isClient,
   sortBy,
+  sum,
   toTitleCase,
   tokenize,
   unique,
@@ -158,6 +165,32 @@ describe('Array Utilities', () => {
     });
   });
 
+  describe('isEmpty', () => {
+    it('should return true for null or undefined', () => {
+      expect(isEmpty(null)).toBe(true);
+      expect(isEmpty(undefined)).toBe(true);
+    });
+
+    it('should return true for empty arrays', () => {
+      expect(isEmpty([])).toBe(true);
+    });
+
+    it('should return true for empty objects', () => {
+      expect(isEmpty({})).toBe(true);
+    });
+
+    it('should return false for non-empty arrays', () => {
+      expect(isEmpty([1, 2, 3])).toBe(false);
+    });
+    it('should return true if all keys are undefined', () => {
+      expect(isEmpty({ a: undefined })).toBe(true);
+    });
+
+    it('should return false for non-empty objects', () => {
+      expect(isEmpty({ a: 1, b: 2 })).toBe(false);
+    });
+  });
+
 });
 
 describe('Number Utilities', () => {
@@ -193,8 +226,86 @@ describe('Number Utilities', () => {
     });
   });
 
-  // Add more tests here for other number utilities if needed
+  describe('sum', () => {
+    it('should return the sum of an array of numbers', () => {
+      expect(sum([1, 2, 3, 4, 5])).toBe(15);
+    });
+
+    it('should return 0 for an empty array', () => {
+      expect(sum([])).toBe(0);
+    });
+  });
 });
+
+describe('Browser Utilities', () => {
+  describe('getKeyFromEvent', () => {
+
+
+    it('should return an empty string if the event.key is not defined', () => {
+      const event = { ctrlKey: true };
+      expect(getKeyFromEvent(event)).toBe('');
+    });
+
+    it('should return an empty string if the event has no key property', () => {
+      const event = {};
+      expect(getKeyFromEvent(event)).toBe('');
+    });
+
+    it('should return the lowercase key for a simple key press', () => {
+      const event = { key: 'A' };
+      expect(getKeyFromEvent(event)).toBe('a');
+    });
+
+    it('should return the correct key for a special key press', () => {
+      const event = { key: 'ArrowUp' };
+      expect(getKeyFromEvent(event)).toBe('up');
+    });
+
+    it('should include the "ctrl" modifier when the ctrlKey is pressed', () => {
+      const event = { key: 'a', ctrlKey: true };
+      expect(getKeyFromEvent(event)).toBe('ctrl+a');
+    });
+
+    it('should include the "alt" modifier when the altKey is pressed', () => {
+      const event = { key: 'b', altKey: true };
+      expect(getKeyFromEvent(event)).toBe('alt+b');
+    });
+
+    it('should include the "shift" modifier when the shiftKey is pressed', () => {
+      const event = { key: 'c', shiftKey: true };
+      expect(getKeyFromEvent(event)).toBe('shift+c');
+    });
+
+    it('should include the "meta" modifier when the metaKey is pressed', () => {
+      const event = { key: 'd', metaKey: true };
+      expect(getKeyFromEvent(event)).toBe('meta+d');
+    });
+
+    it('should include multiple modifiers when multiple modifier keys are pressed', () => {
+      const event = { key: 'e', ctrlKey: true, altKey: true, shiftKey: true, metaKey: true };
+      expect(getKeyFromEvent(event)).toBe('ctrl+alt+shift+meta+e');
+    });
+
+    it('should return the correct key for the space key', () => {
+      const event = { key: ' ' };
+      expect(getKeyFromEvent(event)).toBe('space');
+    });
+  });
+
+  describe('isServer', () => {
+    it('should return true if window is undefined', () => {
+      expect(isServer).toBe(true);
+    });
+  });
+
+  describe('isClient', () => {
+    it('should return false if window is undefined', () => {
+      expect(isClient).toBe(false);
+    });
+  });
+});
+
+
 
 describe('Type Checking Utilities', () => {
 
@@ -702,6 +813,8 @@ describe('Object Utilities', () => {
     });
   });
 
+
+
   describe('pick', () => {
     it('pick should create an object composed of the picked properties', () => {
       const obj = { a: 1, b: 2, c: 3 };
@@ -888,6 +1001,25 @@ describe('Object Utilities', () => {
     });
   });
 
+  describe('onlyKeys', () => {
+    it('should return an object with only the specified keys', () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      const result = onlyKeys(obj, ['a', 'c']);
+      expect(result).toEqual({ a: 1, c: 3 });
+    });
+
+    it('should return an empty object if no keys are specified', () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      const result = onlyKeys(obj, []);
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('any', () => {
+    it('should be an alias for some', () => {
+      expect(any).toBe(some);
+    });
+  });
 
 });
 
@@ -1236,6 +1368,12 @@ describe('clone', () => {
     expect(clonedDate).toEqual(originalDate);
     expect(clonedDate).not.toBe(originalDate);
     expect(clonedDate.getTime()).toBe(originalDate.getTime());
+  });
+
+  it('should return the input value if it is not an object or a function', () => {
+    expect(clone(123)).toBe(123);
+    expect(clone('hello')).toBe('hello');
+    expect(clone(true)).toBe(true);
   });
 
   it('should deeply clone an array', () => {

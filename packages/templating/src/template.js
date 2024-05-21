@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, clone, generateID, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, clone, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -20,6 +20,7 @@ export const Template = class Template {
     renderRoot,
     css,
     events,
+    keys,
     stateConfig,
     subTemplates,
     createInstance,
@@ -38,6 +39,7 @@ export const Template = class Template {
       ast = compiler.compile();
     }
     this.events = events;
+    this.keys = keys;
     this.ast = ast;
     this.css = css;
     this.data = data || {};
@@ -191,8 +193,9 @@ export const Template = class Template {
     this.startNode = startNode;
     this.endNode = endNode;
     this.attachEvents();
+    this.attachKeybindings();
     if (this.attachStyles) {
-      await this.addAdoptedStylesheet();
+      await this.adoptStylesheet();
     }
   }
 
@@ -204,7 +207,7 @@ export const Template = class Template {
     };
   }
 
-  async addAdoptedStylesheet() {
+  async adoptStylesheet() {
     if (!this.css) {
       return;
     }
@@ -239,6 +242,7 @@ export const Template = class Template {
       css: this.css,
       stateConfig: this.stateConfig,
       events: this.events,
+      keys: this.keys,
       renderingEngine: this.renderingEngine,
       subTemplates: this.subTemplates,
       onCreated: this.onCreatedCallback,
@@ -367,6 +371,57 @@ export const Template = class Template {
     if (this.eventController) {
       this.eventController.abort();
     }
+  }
+
+  attachKeybindings(keys = this.keys) {
+    if(isServer) {
+      return;
+    }
+    if(Object.keys(keys).length == 0) {
+      return;
+    }
+    const eventSettings = { abortController: this.eventController };
+    this.currentSequence = '';
+    $(document)
+      .on('keydown', (event) => {
+        const key = getKeyFromEvent(event);
+        // avoid repeated keypress when holding down key
+        if(key == this.currentKey) {
+          return;
+        }
+        console.log(key, this.currentSequence);
+        this.currentKey = key;
+        this.currentSequence += key;
+        // check for key event
+        each(this.keys, (handler, keySequence) => {
+          keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
+          if(this.currentSequence.endsWith(keySequence)) {
+            const eventResult = this.call(handler, { additionalData: { event: event } });
+            if(eventResult !== true) {
+              event.preventDefault();
+            }
+          }
+        });
+        // start next sequence
+        this.currentSequence += ' ';
+        // sequence must occur within 500ms
+        clearTimeout(this.resetSequence);
+        this.resetSequence = setTimeout(() => { this.currentSequence = ''; }, 500);
+      }, eventSettings)
+      .on('keyup', (event) => { this.currentKey = ''; })
+    ;
+  }
+
+  addKey(key, callback) {
+    const needsInit = Object.keys(this.keys.length) == 0;
+    this.keys[key] = callback;
+    if(needsInit) {
+      this.attachKeybindings();
+    }
+  }
+
+  removeKey(key) {
+    delete this.keys[key];
   }
 
   // Find the direct child of the renderRoot that is an ancestor of the event.target
