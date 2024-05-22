@@ -110,6 +110,9 @@ export class ReactiveVar {
     this.set(newValue);
   }
 
+  getIndex(index) {
+    return this.get()[index];
+  }
   setIndex(index, value) {
     let arr = this.value;
     arr[index] = value;
@@ -168,13 +171,13 @@ export class ReactiveVar {
   hasID(item, id) {
     return this.getID(item) === id;
   }
-  getIndex(id) {
+  getIndexByID(id) {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
   setProperty(idOrProperty, property, value) {
     if(arguments.length == 3) {
       const id = idOrProperty;
-      const index = this.getIndex(id);
+      const index = this.getIndexByID(id);
       return this.setArrayProperty(index, property, value);
     }
     else {
@@ -186,10 +189,10 @@ export class ReactiveVar {
     }
   }
   replaceItem(id, item) {
-    return this.setIndex(this.getIndex(id), item);
+    return this.setIndex(this.getIndexByID(id), item);
   }
   removeItem(id) {
-    return this.removeIndex(this.getIndex(id));
+    return this.removeIndex(this.getIndexByID(id));
   }
 
 }

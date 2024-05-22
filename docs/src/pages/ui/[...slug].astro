@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { each, inArray, toTitleCase } from '@semantic-ui/utils';
+import { each, toTitleCase, inArray, toTitleCase } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
 import * as SpecExports from '@semantic-ui/specs';
@@ -36,9 +36,17 @@ const componentName = componentSpec.getComponentName();
 const definition = componentSpec.getDefinition();
 
 
+const searchMeta = {
+  title: data.title,
+  description: data.description,
+  pageType: 'UI Components',
+  tags: data.tags,
+  tab: toTitleCase(displayedTab)
+};
+
 const menu = data.tabs.map(tab => ({
   text: toTitleCase(tab),
-  url: `/components/${entry.slug}/${tab}`,
+  url: `/ui/${entry.slug}/${tab}`,
 }));
 
 let railMenu = [];
@@ -46,7 +54,7 @@ if(definitionDisplayed) {
   railMenu = componentSpec.getDefinitionMenu();
 }
 ---
-<Definition {...entry.data} menu={menu} railMenu={railMenu}>
+<Definition title={data.title} description={data.description} searchMeta={searchMeta} menu={menu} railMenu={railMenu}>
   {definitionDisplayed && (
     <SpecDefinition
       definition={definition}

@@ -19,7 +19,7 @@ const settings = {
   onCodeVisible: function(){},
 };
 
-const createInstance = ({ el, $, settings, darkMode, tpl }) => ({
+const createInstance = ({ el, $, settings, reaction, darkMode, tpl }) => ({
 
   // internal
   code          : new ReactiveVar(false),
@@ -40,7 +40,7 @@ const createInstance = ({ el, $, settings, darkMode, tpl }) => ({
   },
 
   watchCode() {
-    tpl.reaction(async () => {
+    reaction(async () => {
       tpl.language.get(); // reactivity source
       const code = tpl.getCode();
       if(code) {

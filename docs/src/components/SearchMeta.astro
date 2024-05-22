@@ -4,6 +4,9 @@ import './SearchMeta.css';
 
 const meta = [];
 const props = each(Astro.props, (value, name) => {
+  if(name == 'file') {
+    return;
+  }
   meta.push({
     value: isString(value) ? value : JSON.stringify(value),
     name

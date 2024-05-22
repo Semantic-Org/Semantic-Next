@@ -1,22 +1,24 @@
 ---
 layout: '@layouts/Guide.astro'
+title: Components
+icon: package
+description: An overview of component features
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-### Overview
-Semantic UI provides a fully featured reactive framework for authoring web components. Semantic templates are fast, powerful, read like natural language, and are built using browser standards.
+Semantic UI provides a reactive framework for authoring web components that can be used to build custom UI on top of the primitives provided from the UI library.
 
 #### Developer Experience
 
-SUI provides everything you'd expect from other modern front end frameworks but is developed specifically for web components.
+Components provides everything you'd expect from other modern front end frameworks, but is developed specifically for web components.
 
 Each UI component you author will give you access to a custom html tag which you can compose just like you compose `<input>` `<p>` and other tags in your page.
 
 Semantic UI components are separated into three parts
-* **Component Definition** - Define what your component can do, events it consumes and emits, render lifecycle, and  settings that can be modified from outside the component.
-* **Component Template** - Use looping, conditionals, and template partials to produce html from your component
-* **Component CSS** - Define CSS that may either attach to your component's [shadow root](/web-components) or the page and style content.
+* **Definition** - Define what your component can do, events it consumes and emits, render lifecycle, and  settings that can be modified from outside the component.
+* **Template** - Use looping, conditionals, and template partials to produce html from your component
+* **CSS** - Define CSS that may either attach to your component's [shadow root](/web-components) or the page and style content.
 
 <PlaygroundExample id="counter"></PlaygroundExample>
 

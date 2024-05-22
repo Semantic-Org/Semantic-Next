@@ -6,13 +6,19 @@ import { getRailMenu } from '@helpers/navigation.js';
 const { frontmatter } = Astro.props;
 
 const railMenu = getRailMenu(Astro.props.headings);
+const searchMeta = {
+	title: frontmatter.title,
+	description: frontmatter.description,
+	icon: frontmatter.icon,
+	pageType: 'Guide'
+}
 ---
 <Layout
 	inlineHeader=true
 	header={frontmatter.title}
 	headerIcon={frontmatter.icon}
 	headerImage={frontmatter.iconImage}
-	searchMeta={frontmatter}
+	searchMeta={searchMeta}
 	textContent=true
 	expandRailMenu=true
 	railMenuScrollOffset=-20
