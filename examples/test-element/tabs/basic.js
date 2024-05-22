@@ -42,17 +42,17 @@ const createInstance = ({ tpl, $, findParent }) => ({
   },
 });
 
-const onRendered = ({ tpl }) => {
+const onRendered = ({ tpl, reaction }) => {
   tpl.setCurrentDate();
 
   // update date every 1 sec
   tpl.interval = setInterval(tpl.setCurrentDate, 1000);
 
   // calculate seconds from date (reactive on date)
-  tpl.reaction(tpl.calculateCurrentSeconds);
+  reaction(tpl.calculateCurrentSeconds);
 
   // calculate slogan from seconds (reactive on seconds);
-  tpl.reaction(tpl.calculateCurrentSlogan);
+  reaction(tpl.calculateCurrentSlogan);
 };
 
 const onDestroyed = ({ tpl }) => {

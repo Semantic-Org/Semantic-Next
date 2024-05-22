@@ -17,7 +17,7 @@ const settings = {
   showCode: false, // show code on start
 };
 
-const createInstance = ({ $, isServer, settings, tpl }) => ({
+const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
   slottedContent: new ReactiveVar(),
   code: new ReactiveVar(settings.code),
@@ -41,7 +41,7 @@ const createInstance = ({ $, isServer, settings, tpl }) => ({
     tpl.slottedContent.set(code);
   },
   calculateCodeVisible() {
-    tpl.reaction(() => {
+    reaction(() => {
       const code = settings.code || tpl.slottedContent.get();
       tpl.code.set(code);
     });

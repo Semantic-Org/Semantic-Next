@@ -4,7 +4,7 @@ import { createComponent } from '@semantic-ui/component';
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createInstance = ({ tpl, $, findParent }) => ({
+const createInstance = ({ tpl, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodos() {
@@ -28,7 +28,7 @@ const createInstance = ({ tpl, $, findParent }) => ({
   },
 
   calculateAllCompleted() {
-    tpl.reaction((comp) => {
+    reaction((comp) => {
       const allCompleted = tpl.allCompleted.get();
       if (comp.firstRun) {
         return;
