@@ -47,7 +47,6 @@ export class ReactiveDataDirective extends AsyncDirective {
         this.setValue(value);
       }
     });
-
     // Return the initial result of the computation function
     return value;
   }

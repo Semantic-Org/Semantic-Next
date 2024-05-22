@@ -85,7 +85,6 @@ export const Template = class Template {
 
   setDataContext(data, { rerender = true } = {}) {
     this.data = data;
-    this.tpl.data = data;
     if(rerender) {
       this.rendered = false;
     }
@@ -109,33 +108,14 @@ export const Template = class Template {
   initialize() {
     let tpl = this;
     if (isFunction(this.createInstance)) {
-      this.tpl = { data: this.data };
+      this.tpl = {};
       tpl = this.call(this.createInstance) || {};
       extend(this.tpl, tpl);
     }
-    // reactions bound with tpl.reaction will be scoped to template
-    // and be removed when the template is destroyed
-    this.tpl.reaction = this.reaction.bind(this);
     if (isFunction(tpl.initialize)) {
       this.call(tpl.initialize.bind(this));
     }
-    this.tpl.data = this.data;
     this.tpl._childTemplates = [];
-
-    /* This will be removed before release
-      will need to refactor some examples
-    */
-    this.tpl.$ = this.$.bind(this);
-    this.tpl.$$ = this.$$.bind(this);
-    this.tpl.attachEvent = this.attachEvent.bind(this);
-    this.tpl.templateName = this.templateName;
-
-    this.tpl.findTemplate = this.findTemplate;
-    this.tpl.dispatchEvent = this.dispatchEvent.bind(this);
-    this.tpl.findParent = this.findParent.bind(this);
-    this.tpl.findChild = this.findChild.bind(this);
-    this.tpl.findChildren = this.findChildren.bind(this);
-    /* end of removed section */
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
@@ -487,10 +467,12 @@ export const Template = class Template {
       ...additionalData,
     };
     this.setDataContext(dataContext, { rerender: false });
+
+    this.renderer.setData(dataContext);
+
+    // render will rerender the AST creating new lit html
     if (!this.rendered) {
-      this.html = this.renderer.render({
-        data: dataContext,
-      });
+      this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
@@ -542,7 +524,7 @@ export const Template = class Template {
         reaction: this.reaction.bind(this),
         reactiveVar: this.reactiveVar.bind(this),
 
-        data: this.tpl.data,
+        data: this.data,
         settings: this.element.settings,
         state: this.state,
 
@@ -610,6 +592,8 @@ export const Template = class Template {
            Reactive Helpers
   *******************************/
 
+  // reactions bound with this.reaction will be scoped to template
+  // and be removed when the template is destroyed
   reaction(reaction) {
     this.reactions.push(Reaction.create(reaction));
   }

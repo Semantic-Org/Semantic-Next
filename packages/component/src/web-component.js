@@ -395,9 +395,13 @@ class WebComponentBase extends LitElement {
 
     });
     const ignoredValues = ['true', 'false'];
-    const classString = unique(classes)
+    let classString = unique(classes)
       .filter(value => value && !inArray(value, ignoredValues))
       .join(' ');
+
+    if(classString) {
+      classString += ' ';
+    }
     return classString;
   }
 

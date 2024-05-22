@@ -19,16 +19,6 @@ const createInstance = ({tpl, settings, $}) => ({
     };
     return get(submitKeys, String(keyCode));
   },
-  getClasses() {
-    const classes = [];
-    if(!settings.inverted && (settings.emphasis)) {
-      classes.push('inverted');
-    }
-    return classes.length > 0
-      ? ' ' + classes.join(' ')
-      : ''
-    ;
-  },
   isDisabled() {
     return settings.state == 'disabled';
   }

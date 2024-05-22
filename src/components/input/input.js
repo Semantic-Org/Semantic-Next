@@ -17,7 +17,6 @@ const onRendered = function({}) {
 
 const events = {
   'input input'({event, settings, dispatchEvent}) {
-    console.log($(event.target).val());
     settings.value = $(event.target).val();
   }
 };
