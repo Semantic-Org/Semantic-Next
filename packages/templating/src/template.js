@@ -467,14 +467,13 @@ export const Template = class Template {
       ...additionalData,
     };
     this.setDataContext(dataContext, { rerender: false });
+
+    this.renderer.setData(dataContext);
+
+    // render will rerender the AST creating new lit html
     if (!this.rendered) {
-      this.html = this.renderer.render({
-        data: dataContext,
-      });
+      this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
-    }
-    else {
-      this.renderer.setData(dataContext);
     }
     this.rendered = true;
     return this.html;
