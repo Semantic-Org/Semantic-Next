@@ -164,7 +164,7 @@ export class LitRenderer {
     if (typeof expression === 'string') {
       if (asDirective) {
         return reactiveData(
-          () => this.lookupExpressionValue(expression, data),
+          () => this.lookupExpressionValue(expression, this.data),
           { ifDefined, unsafeHTML }
         );
       }

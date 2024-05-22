@@ -166,7 +166,6 @@ const createInstance = ({tpl, state, settings, $, $$}) => ({
 });
 
 const onRendered = ({ $, $$, tpl, state, settings }) => {
-
   addSearch(CodeMirror);
 
   $('ui-menu').settings({

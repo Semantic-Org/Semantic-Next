@@ -15,12 +15,17 @@ export class RenderTemplateDirective extends AsyncDirective {
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
-    const cloneTemplate = () => {
+    const maybeCreateTemplate = () => {
+
       const templateName = getTemplateName();
+
+      // check if the template name is set and is the same as current
       if (this.template && this.templateName == templateName) {
         return false;
       }
       this.templateName = templateName;
+
+      // find template to render
       const template = subTemplates[templateName];
       if (!template) {
         fatal(
@@ -28,6 +33,7 @@ export class RenderTemplateDirective extends AsyncDirective {
           subTemplates
         );
       }
+      // clone if it has changed
       this.template = template.clone({ data: unpackData(data) });
       return true;
     };
@@ -55,16 +61,16 @@ export class RenderTemplateDirective extends AsyncDirective {
         comp.stop();
         return;
       }
-      const isCloned = cloneTemplate(); // reactive reference
+      const hasCreated = maybeCreateTemplate(); // reactive reference
       if (!comp.firstRun) {
         attachTemplate();
-        if (!isCloned) {
-          this.template.setDataContext(unpackData(data));
+        if (!hasCreated) {
+          this.template.setDataContext(unpackData(data), { rerender: false });
         }
         this.setValue(renderTemplate());
       }
     });
-    cloneTemplate();
+    maybeCreateTemplate();
     attachTemplate();
     this.template.setDataContext(unpackData(data));
     return renderTemplate();
