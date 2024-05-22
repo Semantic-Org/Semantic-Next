@@ -48,6 +48,7 @@ input {
   &:hover {
     background-color: var(--global-search-hover-background-color);
   }
+
   .label {
     display: inline-block;
     text-wrap: nowrap;

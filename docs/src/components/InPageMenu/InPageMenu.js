@@ -25,7 +25,7 @@ const settings = {
   getActiveElementID: (element) => element?.id
 };
 
-const createInstance = ({tpl, isServer, settings, attachEvent, $}) => ({
+const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => ({
 
   openIndex: new ReactiveVar(0), // current accordion index open
   currentItem: new ReactiveVar(), // current active item id
@@ -78,7 +78,7 @@ const createInstance = ({tpl, isServer, settings, attachEvent, $}) => ({
   },
 
   calculateScrollHeight() {
-    tpl.reaction(() => {
+    reaction(() => {
       if(isServer) {
         return;
       }

@@ -4,9 +4,6 @@
   flex: 1 1 auto;
   flex-direction: column;
 
-  code-playground::part(playground) {
-    height: 100%;
-  }
 
   --playground-code-background: #080C10;
   --playground-code-comment-color: #444444;

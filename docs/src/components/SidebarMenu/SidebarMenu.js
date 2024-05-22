@@ -16,7 +16,7 @@ const state = {
   url: ''
 };
 
-const createInstance = function ({ tpl, state, settings }) {
+const createInstance = function ({ tpl, data, state, settings }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
