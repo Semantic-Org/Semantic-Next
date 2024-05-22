@@ -50,6 +50,7 @@ h3 {
 p.description {
   margin: 0.15rem 0rem 1rem;
   font-size: 14px;
+  color: var(--standard-40);
   font-weight: normal;
 }
 

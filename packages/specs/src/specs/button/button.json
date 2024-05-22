@@ -19,7 +19,7 @@
     {
       "name": "Emphasis",
       "attribute": "emphasis",
-      "description": "formatted to show different levels of emphasis",
+      "description": "be emphasized in a layout",
       "usageLevel": 1,
       "separateExamples": true,
       "options": [
@@ -86,23 +86,23 @@
     {
       "name": "Hover",
       "attribute": "hover",
-      "description": "hovered"
+      "description": "be hovered"
     },
     {
       "name": "Focus",
       "attribute": "focused",
-      "description": "focused by the keyboard"
+      "description": "be focused by the keyboard"
     },
     {
       "name": "Active",
       "attribute": "active",
-      "description": "activated"
+      "description": "be activated"
     },
     {
       "name": "Disabled",
       "attribute": "disabled",
       "includeAttributeClass": true,
-      "description": "disable interactions",
+      "description": "have interactions disabled",
       "options": [
         {
           "name": "Disabled",
@@ -119,14 +119,14 @@
     {
       "name": "Loading",
       "attribute": "loading",
-      "description": "loading"
+      "description": "indicate it is loading content"
     }
   ],
   "variations": [
     {
       "name": "Attached",
       "attribute": "attached",
-      "description": "attached",
+      "description": "attach to other content",
       "usageLevel": 2,
       "includeAttributeClass": true,
       "options": [
@@ -138,29 +138,29 @@
         {
           "name": "Attached",
           "value": "attached",
-          "description": "appear attached both above and below"
+          "description": "attach to content above and below"
         },
         {
           "name": "Bottom Attached",
           "value": "bottom-attached",
-          "description": "appear attached to the bottom of other content"
+          "description": "attach to the bottom"
         },
         {
           "name": "Left Attached",
           "value": "left-attached",
-          "description": "appear attached to the left of other content"
+          "description": "attach to the left"
         },
         {
           "name": "Right Attached",
           "value": "right-attached",
-          "description": "appear attached to the right of other content"
+          "description": "attach to the right"
         }
       ]
     },
     {
       "name": "Basic",
       "attribute": "styling",
-      "description": "formatted to appear de-emphasized over other elements in the page",
+      "description": "be de-emphasized in a layout",
       "usageLevel": 2,
       "options": [
         {
@@ -178,7 +178,7 @@
     {
       "name": "Circular",
       "attribute": "circular",
-      "description": "formatted to appear circular",
+      "description": "be rounded like a circle",
       "usageLevel": 3
     },
     {
@@ -315,7 +315,7 @@
       "name": "Positive",
       "attribute": "positive",
       "usageLevel": 2,
-      "description": "associated with a positive action",
+      "description": "indicate a positive action",
       "options": [
         {
           "name": "Positive",
@@ -335,7 +335,7 @@
       "name": "Warning",
       "attribute": "warning",
       "usageLevel": 2,
-      "description": "associated with a potentially dangerous action",
+      "description": "indicate a potentially dangerous action",
       "options": [
         {
           "name": "Warning",
@@ -355,7 +355,7 @@
       "name": "Negative",
       "attribute": "negative",
       "usageLevel": 2,
-      "description": "associated with a negative action",
+      "description": "indicate a negative action",
       "options": [
         {
           "name": "Negative",
@@ -375,7 +375,7 @@
       "name": "Info",
       "attribute": "info",
       "usageLevel": 2,
-      "description": "associated with additional information",
+      "description": "indicate it contains information",
       "options": [
         {
           "name": "Info",
@@ -395,14 +395,14 @@
       "name": "Transparent",
       "attribute": "transparent",
       "usageLevel": 2,
-      "description": "apper transparent",
+      "description": "appear transparent",
       "exampleCode": "<div class=\"transparent segments\">\n  <div class=\"light segment\">\n    <ui-button transparent>Transparent</ui-button>\n  </div>\n  <div class=\"dark segment\">\n    <ui-button inverted transparent>Transparent</ui-button>\n  </div>\n</div>"
     },
     {
       "name": "Floated",
       "attribute": "floated",
       "usageLevel": 1,
-      "description": "aligned to the left or right of its container",
+      "description": "align to the left or right of its container",
       "options": [
         {
           "name": "Left Floated",
@@ -474,7 +474,7 @@
     },
     {
       "name": "Inverted",
-      "description": "formatted to appear on dark backgrounds",
+      "description": "be formatted to appear on dark backgrounds",
       "usageLevel": 2,
       "attribute": "inverted"
     }
