@@ -1,5 +1,5 @@
 import { createComponent } from '@semantic-ui/component';
-import { } from '@semantic-ui/utils';
+import { findIndex, isEqual } from '@semantic-ui/utils';
 
 import template from './GlobalSearch.html?raw';
 import css from './GlobalSearch.css?raw';
@@ -19,6 +19,7 @@ const state = {
   results: [],
   displayResults: [],
   selectedIndex: 0,
+  selectedResult: undefined,
   resultOffset: 0,
   modalOpen: false,
 };
@@ -29,6 +30,7 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
     bindKey(settings.openKey, tpl.openModal);
     tpl.calculateResults();
     tpl.calculateLoadSearch();
+    tpl.calculateSelected();
   },
 
   openModal() {
@@ -68,36 +70,77 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
         .map(result => tpl.mapResult(result))
         .filter(result => result.title)
       ;
+      state.selectedIndex.set(0);
       state.displayResults.set(displayResults);
     });
   },
 
+  calculateSelected() {
+    reaction(() => {
+      let index = state.selectedIndex.get();
+      let result = state.displayResults.getIndex(index);
+      state.selectedResult.set(result);
+    });
+  },
+
   mapResult(result) {
+    const primaryResult = result.sub_results[0];
+    const otherResults = result.sub_results.slice(1);
+    const title = primaryResult.title;
+    let tags = [];
+    let subtitle;
+    if(result.meta.title && primaryResult.title !== result.meta.title) {
+      subtitle = result.meta.title;
+    }
+    if(result.meta.tab) {
+      tags.push({ text: result.meta.tab});
+    }
+    if(result.meta.pageType) {
+      const colors = {
+        'Guide': 'orange',
+        'Example': 'purple',
+        'UI Components': 'blue',
+      };
+      const text = result.meta.pageType;
+      const color = colors[text];
+      tags.push({ text, color });
+      if(text == 'Example') {
+        if(result.meta.category) {
+          tags.push({text: result.meta.category});
+        }
+        if(result.meta.subcategory) {
+          tags.push({text: result.meta.subcategory});
+        }
+      }
+    }
     const displayResult = {
-      title: result.meta.title,
+      title: title,
+      subtitle: subtitle,
+      tags: tags,
       description: result.meta.description,
-      url: result.meta.url || result.url,
+      url: primaryResult.url || result.url,
       meta: result.meta,
+      excerpt: result.excerpt,
+      subResults: otherResults,
       rawResult: result
     };
     return displayResult;
   },
 
-  selectPreviousResult() {
+  selectPrevious() {
     if(state.selectedIndex.get() > 0) {
       state.selectedIndex.decrement();
     }
   },
-  selectNextResult() {
+  selectNext() {
     if(state.selectedIndex.get() <= state.resultOffset.get() + settings.resultsPerPage) {
       state.selectedIndex.increment();
     }
   },
-  selectResult() {
-    let index =  state.selectedIndex.get();
-    let url = state.results.get()[index]?.url;
-    console.log(url);
-    window.location.href = url;
+  visitResult() {
+    let result =  state.selectedResult.get();
+    window.location.href = result.url;
+    tpl.hideModal();
   }
 
 });
@@ -107,19 +150,19 @@ const keys = {
     if(!state.modalOpen.get()) {
       return;
     }
-    tpl.selectPreviousResult();
+    tpl.selectPrevious();
   },
   'down'({tpl, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    tpl.selectNextResult();
+    tpl.selectNext();
   },
   'enter'({tpl, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    tpl.selectResult();
+    tpl.visitResult();
   }
 };
 

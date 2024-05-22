@@ -14,11 +14,24 @@
   </div>
   <div class="results">
     {{#if hasAny displayResults}}
-    {{#each result in displayResults}}
-      <a class="result {{activeIf is @index selectedIndex}}" href="{{result.url}}">
-        <h3>{{result.title}} <span class="description">{{result.description}}</span></h3>
-      </a>
-    {{/each}}
+      {{#each displayResults}}
+        <a class="result {{activeIf is @index selectedIndex}}" href="{{url}}">
+          <h3>
+            {{title}}
+            <div class="tags">
+              {{#if hasAny tags}}
+                {{#each tags}}
+                  <span class="{{color}} tag">{{text}}</span>
+                {{/each}}
+              {{/if}}
+            </div>
+              {{#if subtitle}}
+                <span class="subtitle"><span>found in</span> {{subtitle}}</span>
+              {{/if}}
+          </h3>
+          <div class="description">{{description}}</div>
+        </a>
+      {{/each}}
     {{else}}
       <ui-segment placeholder header="Enter a search term to see results." icon="search">
       </ui-segment>

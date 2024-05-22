@@ -160,12 +160,79 @@ ui-modal {
     .result h3 {
       margin: 0rem;
       font-size: 15px;
-      .description {
+
+      .subtitle {
+        float: right;
+        font-size: 11px;
+        margin-left: 5px;
         font-weight: normal;
-        margin: 0px 0px 0px 5px;
-        color: var(--standard-30);
+        font-style: italic;
+        color: rgb(255 255 255 / 72%);
+        span {
+          color: rgb(255 255 255 / 16%);
+        }
+      }
+
+      .tags {
+        display: inline-block;
+        margin-left: 5px;
+      }
+      .tag {
+        font-size: 11px;
+        padding: 3px 5px;
+        background-color: rgb(24 24 24);
+        color: rgb(255 255 255 / 44%);
+        border-radius: 5px;
+        vertical-align: middle;
+        font-weight: normal;
+        margin: 0px 0px 0px 6px;
+      }
+      .red.tag {
+        background-color: rgb(31 11 37);
+        color: #ff6de7;
+      }
+      .purple.tag {
+        background-color: rgb(31 11 37);
+        color: #ff6de7;
+      }
+      .orange.tag {
+        background-color: rgb(35 29 14);
+        color: #dabf00;
+      }
+      .blue.tag {
+        background-color: rgb(14 30 35);
+        color: #009fda;
       }
     }
+
+    .description {
+      font-weight: normal;
+      font-size: 13px;
+      margin: 1px 0px 0px 0px;
+      color: var(--standard-30);
+    }
+
+    .subresults {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 3px 9px;
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: 5px;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2) inset;
+      margin-top: 8px;
+      a.sub {
+        flex-basis: 33.333%;
+        font-size: 11px;
+        color: var(--white-30);
+        text-decoration: none;
+        font-weight: normal;
+      }
+      a.sub:hover {
+        color: var(--link-hover-color);
+      }
+    }
+
     .result h3 + p {
       margin: 5px 0rem 0rem;
     }
@@ -174,6 +241,13 @@ ui-modal {
     }
     .result:last-child {
       margin-bottom: 0rem;
+    }
+    .excerpt {
+      color: var(--standard-20);
+    }
+    mark {
+      background-color: #009fda;
+      color: #FFFFFF;
     }
 
   }
