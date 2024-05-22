@@ -68,6 +68,7 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
         .map(result => tpl.mapResult(result))
         .filter(result => result.title)
       ;
+      console.log(displayResults);
       state.displayResults.set(displayResults);
     });
   },
@@ -81,21 +82,45 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
       rawResult: result
     };
     return displayResult;
+  },
+
+  selectPreviousResult() {
+    if(state.selectedIndex.get() > 0) {
+      state.selectedIndex.decrement();
+    }
+  },
+  selectNextResult() {
+    if(state.selectedIndex.get() <= state.resultOffset.get() + settings.resultsPerPage) {
+      state.selectedIndex.increment();
+    }
+  },
+  selectResult() {
+    let index =  state.selectedIndex.get();
+    let url = state.results.get()[index]?.url;
+    console.log(url);
+    window.location.href = url;
   }
+
 });
 
 const keys = {
-  'up'({state}) {
+  'up'({tpl, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    console.log('up');
+    tpl.selectPreviousResult();
   },
-  'down'({state}) {
+  'down'({tpl, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    console.log('down');
+    tpl.selectNextResult();
+  },
+  'enter'({tpl, state}) {
+    if(!state.modalOpen.get()) {
+      return;
+    }
+    tpl.selectResult();
   }
 };
 

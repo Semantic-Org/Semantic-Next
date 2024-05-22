@@ -9,14 +9,18 @@
   <div class="search">
     <div class="input">
       <input type="text" placeholder="Search...">
+      <ui-icon search></ui-icon>
     </div>
   </div>
   <div class="results">
+    {{#if hasAny displayResults}}
     {{#each result in displayResults}}
-      <a class="result {{classMap getClassMap result}}" href="{{result.url}}">
-        <h3>{{result.title}}</h3>
-        <p>{{result.description}}</p>
+      <a class="result {{activeIf is @index selectedIndex}}" href="{{result.url}}">
+        <h3>{{result.title}} <span class="description">{{result.description}}</span></h3>
       </a>
     {{/each}}
+    {{else}}
+      Enter a search term to see results.
+    {{/if}}
   </div>
 </ui-modal>

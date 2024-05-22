@@ -87,7 +87,7 @@ input {
 
 ui-modal {
 
-  width: 900px;
+  width: 700px;
 
   &::part(dialog) {
     margin-top: 2rem;
@@ -106,18 +106,27 @@ ui-modal {
     background-image: linear-gradient(to bottom right, rgb(255 255 255 / 2%), rgb(0 0 0 / 33%));
 
     .input {
+      display: flex;
+      flex-direction: row;
       background-color: var(--standard-10);
       width: 100%;
       border-radius: var(--circular-radius);
       border: var(--border);
       overflow: hidden;
+      font-size: 20px;
+      padding: 0rem 1rem;
+      align-items: center;
+      color: #FFFFFF;
 
       input {
         background-color: transparent;
-        color: #FFFFFF;
         width: 100%;
+        color: inherit;
+        font-size: inherit;
         padding: var(--input-padding);
-        font-size: 20px;
+      }
+      ui-icon {
+
       }
     }
   }
@@ -141,14 +150,23 @@ ui-modal {
       margin: var(--vertically-spaced);
       box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
       border: 1px solid rgb(165 165 165 / 10%);
+
+      &.active {
+        border-color: var(--primary-text-color);
+      }
+
     }
     .result h3 {
       margin: 0rem;
       font-size: 15px;
+      .description {
+        font-weight: normal;
+        margin: 0px 0px 0px 5px;
+        color: var(--standard-30);
+      }
     }
     .result h3 + p {
       margin: 5px 0rem 0rem;
-      color: var(--standard-50);
     }
     .result:first-child {
       margin-top: 0rem;
