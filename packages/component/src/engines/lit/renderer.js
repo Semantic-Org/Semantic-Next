@@ -19,6 +19,7 @@ export class LitRenderer {
   constructor({ ast, data, subTemplates, helpers }) {
     this.ast = ast || '';
     this.data = data;
+    this.renderTrees = [];
     this.subTemplates = subTemplates;
     this.resetHTML();
     this.helpers = helpers || {};
@@ -163,7 +164,7 @@ export class LitRenderer {
     if (typeof expression === 'string') {
       if (asDirective) {
         return reactiveData(
-          () => this.lookupExpressionValue(expression, this.data), // we need latest value
+          () => this.lookupExpressionValue(expression, data),
           { ifDefined, unsafeHTML }
         );
       }
@@ -285,16 +286,29 @@ export class LitRenderer {
 
   // subtrees are rendered as separate contexts
   renderContent({ ast, data, subTemplates }) {
-    return new LitRenderer({
+    const tree = new LitRenderer({
       ast,
       data,
       subTemplates: this.subTemplates,
       helpers: this.helpers,
-    }).render();
+    });
+    this.renderTrees.push(tree);
+    return tree.render();
   }
 
   setData(data) {
     this.data = data;
+    each(this.renderTrees, (tree) => {
+      tree.updateData(data);
+    });
+  }
+
+  updateData(data) {
+    each(data, (value, name) => {
+      if(this.data[name] !== undefined && this.data[name] !== value) {
+        this.data[name] = value;
+      }
+    });
   }
 
   clearTemp() {

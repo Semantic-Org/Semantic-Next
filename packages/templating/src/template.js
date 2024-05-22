@@ -112,8 +112,6 @@ export const Template = class Template {
       tpl = this.call(this.createInstance) || {};
       extend(this.tpl, tpl);
     }
-    // reactions bound with tpl.reaction will be scoped to template
-    // and be removed when the template is destroyed
     if (isFunction(tpl.initialize)) {
       this.call(tpl.initialize.bind(this));
     }
@@ -480,7 +478,6 @@ export const Template = class Template {
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     else {
-      console.log('setting data to', dataContext);
       this.renderer.setData(dataContext);
     }
     this.rendered = true;
@@ -600,6 +597,8 @@ export const Template = class Template {
            Reactive Helpers
   *******************************/
 
+  // reactions bound with this.reaction will be scoped to template
+  // and be removed when the template is destroyed
   reaction(reaction) {
     this.reactions.push(Reaction.create(reaction));
   }
