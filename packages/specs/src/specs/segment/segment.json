@@ -1,0 +1,41 @@
+{
+  "uiType": "element",
+  "name": "Segment",
+  "description": "A menu displays grouped navigation actions",
+  "tagName": "ui-menu",
+  "exportName": "UISegment",
+  "content": [
+    {
+      "name": "Header",
+      "attribute": "header",
+      "couplesWith": ["ui-header"],
+      "description": "include a header",
+      "exampleCode": "<ui-segment placeholder header=\"Header\"></ui-segment>"
+    },
+    {
+      "name": "Description",
+      "attribute": "description",
+      "description": "include a description",
+      "exampleCode": "<ui-segment placeholder description=\"Header\" description=\"This is a description\"></ui-segment>"
+    },
+    {
+      "name": "Icon",
+      "includeAttributeClass": true,
+      "attribute": "icon",
+      "couplesWith": ["ui-icon"],
+      "description": "include an icon",
+      "exampleCode": "<ui-segment icon=\"search\"></ui-segment>"
+    }
+  ],
+  "types": [
+    {
+      "name": "placeholder",
+      "attribute": "placeholder",
+      "description": "used as a placeholder for content in a layout.",
+      "usageLevel": 1
+    }
+  ],
+  "variations": [],
+  "events": [],
+  "settings": []
+}

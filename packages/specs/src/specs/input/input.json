@@ -1,0 +1,53 @@
+{
+  "uiType": "element",
+  "name": "Input",
+  "description": "A menu displays grouped navigation actions",
+  "tagName": "ui-menu",
+  "exportName": "UIInput",
+  "content": [
+    {
+      "name": "Icon",
+      "includeAttributeClass": true,
+      "attribute": "icon",
+      "couplesWith": ["ui-icon"],
+      "description": "include an icon",
+      "exampleCode": "<ui-input icon=\"search\"></ui-input>"
+    }
+  ],
+  "types": [
+  ],
+  "variations": [
+  ],
+  "events": [
+    {
+      "eventName": "change",
+      "description": "occurs after the value changes",
+      "arguments": [
+        {
+          "name": "value",
+          "description": "the updated value"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Name",
+      "type": "string",
+      "attribute": "value",
+      "description": "can specify the form field name"
+    },
+    {
+      "name": "Placeholder",
+      "type": "string",
+      "attribute": "placeholder",
+      "description": "can specify placeholder text"
+    },
+    {
+      "name": "Value",
+      "type": "string",
+      "attribute": "value",
+      "description": "can specify a value to store"
+    }
+  ]
+}
