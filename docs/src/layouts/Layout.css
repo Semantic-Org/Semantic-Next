@@ -71,8 +71,8 @@
   }
 
   layout page.text-content main > ui-container {
-    max-width: 1000px;
-    padding: 3em 5em 7em;
+    max-width: 910px;
+    padding: 2em 3em 7em;
   }
   layout page.text-content pageContent,
   layout page.text-content li,

@@ -68,7 +68,6 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
         .map(result => tpl.mapResult(result))
         .filter(result => result.title)
       ;
-      console.log(displayResults);
       state.displayResults.set(displayResults);
     });
   },
