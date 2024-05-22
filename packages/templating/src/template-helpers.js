@@ -25,7 +25,7 @@ export const TemplateHelpers = {
     return JSON.stringify(a);
   },
   hasAny(a) {
-    a?.length > 0;
+    return a?.length > 0;
   },
   concat(a, b) {
     return a + b;
