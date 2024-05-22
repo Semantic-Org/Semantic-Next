@@ -390,11 +390,7 @@ export const Template = class Template {
     $(document)
       .on('keydown', (event) => {
         const key = getKeyFromEvent(event);
-
-        // avoid repeated keypress when holding down key
-        if(key == this.currentKey) {
-          return;
-        }
+        let repeatedKey = key == this.currentKey;
         this.currentKey = key;
         this.currentSequence += key;
 
@@ -408,7 +404,7 @@ export const Template = class Template {
               (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) ||
                 document.activeElement.isContentEditable);
 
-            const eventResult = this.call(handler, { additionalData: { event: event, inputFocused } });
+            const eventResult = this.call(handler, { additionalData: { event: event, inputFocused, repeatedKey } });
             if(eventResult !== true) {
               event.preventDefault();
             }

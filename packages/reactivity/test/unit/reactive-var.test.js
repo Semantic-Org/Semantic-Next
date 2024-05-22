@@ -326,7 +326,7 @@ describe.concurrent('ReactiveVar', () => {
 
     it('getIndex should get the item with matching id', () => {
       const items = new ReactiveVar(arrayItems);
-      const index = items.getIndex(2);
+      const index = items.getIndexByID(2);
       expect(index).toBe(1);
     });
 
