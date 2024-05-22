@@ -491,14 +491,14 @@ export const Template = class Template {
       ...additionalData,
     };
     this.setDataContext(dataContext, { rerender: false });
-    const html = this.renderer.render({
-      data: dataContext,
-    });
     if (!this.rendered) {
+      this.html = this.renderer.render({
+        data: dataContext,
+      });
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
-    return html;
+    return this.html;
   }
 
   /*******************************
