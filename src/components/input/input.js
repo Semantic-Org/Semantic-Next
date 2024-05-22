@@ -17,12 +17,10 @@ const onRendered = function({}) {
 
 const events = {
   'input input'({event, settings, dispatchEvent}) {
-    console.log($(event.target).val());
     settings.value = $(event.target).val();
   }
 };
 
-console.log(InputComponentSpec);
 const UIInput = createComponent({
   tagName: 'ui-input',
   componentSpec: InputComponentSpec,
