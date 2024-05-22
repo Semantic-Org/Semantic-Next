@@ -4,7 +4,7 @@ import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import template from './todo-item.html?raw';
 import css from './todo-item.css?raw';
 
-const createInstance = ({ tpl, findParent, $ }) => ({
+const createInstance = ({ tpl, data findParent, $ }) => ({
   editing: new ReactiveVar(false),
 
   getTodos() {
@@ -12,15 +12,15 @@ const createInstance = ({ tpl, findParent, $ }) => ({
   },
   toggleCompleted() {
     const todos = tpl.getTodos();
-    const todo = tpl.data.todo;
+    const todo = data.todo;
     todos.setProperty(todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
     const todos = tpl.getTodos();
-    todos.setProperty(tpl.data.todo._id, 'text', text);
+    todos.setProperty(data.todo._id, 'text', text);
   },
   removeTodo() {
-    tpl.getTodos().removeItem(tpl.data.todo._id);
+    tpl.getTodos().removeItem(data.todo._id);
   },
 });
 
