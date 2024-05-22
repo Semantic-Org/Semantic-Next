@@ -1,11 +1,11 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Reaction } from '@semantic-ui/reactivity';
 
 import template from './todo-item.html?raw';
 import css from './todo-item.css?raw';
 
-const createInstance = ({ tpl, data findParent, $ }) => ({
-  editing: new ReactiveVar(false),
+const createInstance = ({ tpl, data, reactiveVar, findParent, $ }) => ({
+  editing: reactiveVar(false),
 
   getTodos() {
     return findParent('todoList').todos;
