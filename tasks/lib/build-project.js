@@ -123,10 +123,8 @@ export const buildProject = async ({
     });
     console.log(`Server up ${host}:${port}`);
   }
-  else {
-    if (watch) {
-      tasks = tasks.map((task) => task.watch());
-    }
-    return await Promise.all(tasks);
+  if (watch) {
+    tasks = tasks.map((task) => task.watch());
   }
+  return await Promise.all(tasks);
 };

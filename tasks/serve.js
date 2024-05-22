@@ -8,6 +8,7 @@ await buildDeps({
 
 await buildProject({
   watch: false,
+  minify: false,
   includeComponents: true,
   includeJavascript: true,
   includeCSS: true,
@@ -23,6 +24,7 @@ await buildDeps({
 
 await buildProject({
   watch: true,
+  minify: false,
   serveDir: 'dev',
   includeComponents: true,
   includeJavascript: true,
