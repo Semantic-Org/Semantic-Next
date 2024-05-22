@@ -33,6 +33,11 @@ const createInstance = ({ tpl, $ }) => ({
     });
   },
 
+  scrollToBottom() {
+    const todoList = $('.todo-list').get(0);
+    todoList.scrollTop = todoList.scrollHeight;
+  },
+
   // handle state
   addRouter() {
     tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);

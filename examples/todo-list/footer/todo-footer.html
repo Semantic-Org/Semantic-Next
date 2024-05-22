@@ -5,10 +5,11 @@
   {{#each filter in filters}}
     <li>
       {{#if isActiveFilter filter}}
-        <a class="selected">
+        <a class="{{selectedIf isActiveFilter filter}}">
           {{capitalize filter}}
         </a>
       {{else}}
+      22
         {{#if is route 'all'}
           <a href="#/">
             All

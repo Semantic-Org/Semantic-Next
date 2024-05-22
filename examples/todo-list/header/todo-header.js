@@ -7,8 +7,12 @@ import css from './todo-header.css?raw';
 const createInstance = ({ tpl, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
+  getTodoList() {
+    return findParent('todoList');
+  },
+
   getTodos() {
-    return findParent('todoList').todos;
+    return tpl.getTodoList().todos;
   },
 
   completeAll() {
@@ -44,7 +48,7 @@ const createInstance = ({ tpl, $, reaction, findParent }) => ({
 });
 
 const events = {
-  'keydown input.new-todo'({ event, tpl, $ }) {
+  'keydown input.new-todo'({ event, tpl, $, $$ }) {
     if (event.key === 'Enter') {
       const text = $(this).val();
       if (!text) {
@@ -53,8 +57,7 @@ const events = {
       tpl.addTodo(text);
       $(this).val('');
       Reaction.afterFlush(() => {
-        const todoList = tpl.$$('.todo-list')[0];
-        todoList.scrollTop = todoList.scrollHeight;
+        tpl.getTodoList().scrollToBottom();
       });
     }
   },

@@ -27,6 +27,11 @@ const createInstance = ({ tpl, findParent, $ }) => ({
     tpl.todoList().filter.set(filter);
   },
 
+  scrollToBottom() {
+    const todoList = $('.todo-list')[0];
+    todoList.scrollTop = todoList.scrollHeight;
+  },
+
   clearCompleted() {
     tpl.todoList().todos.removeItems((todo) => todo.completed);
   },

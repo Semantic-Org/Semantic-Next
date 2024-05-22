@@ -13,7 +13,7 @@ await buildProject({
   includeCSS: true,
   includeThemes: true,
   includeExamples: true,
-  outDir: 'dev/ui',
+  outDir: 'dev/',
 });
 
 // serve
@@ -29,5 +29,5 @@ await buildProject({
   includeCSS: true,
   includeThemes: true,
   includeExamples: true,
-  outDir: 'dev/ui',
+  outDir: 'dev/',
 });
