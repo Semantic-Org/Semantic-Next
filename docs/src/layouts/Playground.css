@@ -31,6 +31,9 @@
     --topbar-menu-item-active-font-weight: bold;
     --topbar-border-bottom: 1px solid #232323;
   }
+  code-playground::part(playground) {
+    height: 100%;
+  }
 
   .navigation::part(panels) {
     background-color: var(--sidebar-background-color);
