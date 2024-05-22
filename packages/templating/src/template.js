@@ -115,6 +115,7 @@ export const Template = class Template {
     if (isFunction(tpl.initialize)) {
       this.call(tpl.initialize.bind(this));
     }
+    this.tpl.templateName = this.templateName;
     this.tpl._childTemplates = [];
 
     this.onCreated = () => {
