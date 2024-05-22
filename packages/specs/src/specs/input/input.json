@@ -34,7 +34,7 @@
     {
       "name": "Name",
       "type": "string",
-      "attribute": "value",
+      "attribute": "name",
       "description": "can specify the form field name"
     },
     {

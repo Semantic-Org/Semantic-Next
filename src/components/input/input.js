@@ -22,6 +22,7 @@ const events = {
   }
 };
 
+console.log(InputComponentSpec);
 const UIInput = createComponent({
   tagName: 'ui-input',
   componentSpec: InputComponentSpec,

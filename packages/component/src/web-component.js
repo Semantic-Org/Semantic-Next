@@ -398,6 +398,8 @@ class WebComponentBase extends LitElement {
     const classString = unique(classes)
       .filter(value => value && !inArray(value, ignoredValues))
       .join(' ');
+
+    console.log(classString);
     return classString;
   }
 

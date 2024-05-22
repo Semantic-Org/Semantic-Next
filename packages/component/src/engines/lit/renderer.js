@@ -163,7 +163,7 @@ export class LitRenderer {
     if (typeof expression === 'string') {
       if (asDirective) {
         return reactiveData(
-          () => this.lookupExpressionValue(expression, data),
+          () => this.lookupExpressionValue(expression, this.data), // we need latest value
           { ifDefined, unsafeHTML }
         );
       }
@@ -291,6 +291,10 @@ export class LitRenderer {
       subTemplates: this.subTemplates,
       helpers: this.helpers,
     }).render();
+  }
+
+  setData(data) {
+    this.data = data;
   }
 
   clearTemp() {
