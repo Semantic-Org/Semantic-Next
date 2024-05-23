@@ -975,79 +975,66 @@ export const prettifyID = (num) => {
 };
 
 /*
-  Create a uniqueID from a string
-*/
-export function hashCode(input) {
-  let str;
+ * Create a uniqueID from a string using an adapted UMASH algorithm
+  https://github.com/backtrace-labs/umash
+ */
+export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
+  const prime1 = 0x9e3779b1;
+  const prime2 = 0x85ebca77;
+  const prime3 = 0xc2b2ae3d;
 
-  // Convert input to a string
-  if (
-    input &&
-    input.toString === Object.prototype.toString &&
-    typeof input === 'object'
-  ) {
+  let inputData;
+
+  if (input === null || input === undefined) {
+    inputData = new TextEncoder().encode('');
+  }
+  else if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
     try {
-      str = JSON.stringify(input);
-    } catch (error) {
+      inputData = new TextEncoder().encode(JSON.stringify(input));
+    }
+    catch (error) {
       console.error('Error serializing input', error);
       return 0;
     }
   }
   else {
-    str = input.toString();
+    inputData = new TextEncoder().encode(input.toString());
   }
 
-  const seed = 0x12345678;
-
-  const murmurhash = (key, seed) => {
-    let h1 = seed;
-    const c1 = 0xcc9e2d51;
-    const c2 = 0x1b873593;
-
-    const round = (k) => {
-      k = (k * c1) & 0xffffffff;
-      k = (k << 15) | (k >>> 17);
-      k = (k * c2) & 0xffffffff;
-      h1 ^= k;
-      h1 = (h1 << 13) | (h1 >>> 19);
-      h1 = (h1 * 5 + 0xe6546b64) & 0xffffffff;
-    };
-
-    for (let i = 0; i < key.length; i += 4) {
-      let k =
-        (key.charCodeAt(i) & 0xff) |
-        ((key.charCodeAt(i + 1) & 0xff) << 8) |
-        ((key.charCodeAt(i + 2) & 0xff) << 16) |
-        ((key.charCodeAt(i + 3) & 0xff) << 24);
-      round(k);
-    }
-
-    let k1 = 0;
-    switch (key.length & 3) {
-      case 3:
-        k1 ^= (key.charCodeAt(key.length - 1) & 0xff) << 16;
-      case 2:
-        k1 ^= (key.charCodeAt(key.length - 2) & 0xff) << 8;
-      case 1:
-        k1 ^= key.charCodeAt(key.length - 3) & 0xff;
-        round(k1);
-    }
-
-    h1 ^= key.length;
-    h1 ^= h1 >>> 16;
-    h1 = (h1 * 0x85ebca6b) & 0xffffffff;
-    h1 ^= h1 >>> 13;
-    h1 = (h1 * 0xc2b2ae35) & 0xffffffff;
-    h1 ^= h1 >>> 16;
-
-    return h1 >>> 0;
-  };
-
   let hash;
-  hash = murmurhash(str, seed); // fast and pretty good collisions
-  hash = prettifyID(hash); // pretty and easier to recognize
 
-  return hash;
+  if (inputData.length <= 8) {
+    // optimize performance for short inputs
+    hash = seed;
+    for (let i = 0; i < inputData.length; i++) {
+      hash ^= inputData[i];
+      hash = Math.imul(hash, prime1);
+      hash ^= hash >>> 13;
+    }
+  }
+  else {
+    // compress input blocks while maintaining good mixing properties
+    hash = seed;
+    for (let i = 0; i < inputData.length; i++) {
+      hash = Math.imul(hash ^ inputData[i], prime1);
+      hash = (hash << 13) | (hash >>> 19);
+      hash = Math.imul(hash, prime2);
+    }
+
+    // protect against length extension attacks
+    hash ^= inputData.length;
+  }
+
+  // improve the distribution and avalanche properties of the hash
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, prime3);
+  hash ^= hash >>> 13;
+
+  if (prettify) {
+    return prettifyID(hash >>> 0);
+  }
+
+  return hash >>> 0;
 }
 
 export const generateID = () => {

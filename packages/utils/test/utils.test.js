@@ -1345,6 +1345,97 @@ describe('ID/Hashing Functions', () => {
       const value2 = 2121;
       expect(hashCode(value1)).not.toBe(hashCode(value2));
     });
+
+    it('should produce different hash codes for similar inputs', () => {
+      const input1 = 'Test String';
+      const input2 = 'test string';
+      expect(hashCode(input1)).not.toBe(hashCode(input2));
+    });
+
+    it('should handle extremely long inputs', () => {
+      const longInput = 'a'.repeat(100000);
+      expect(() => hashCode(longInput)).not.toThrow();
+    });
+
+    it('should handle inputs with special characters', () => {
+      const specialInput = '!@#$%^&*()_+{}[]|\\:;"<>,.?/~`';
+      expect(() => hashCode(specialInput)).not.toThrow();
+    });
+
+    it('should handle inputs with Unicode characters', () => {
+      const unicodeInput = '你好世界 こんにちは世界 안녕하세요 세계';
+      expect(() => hashCode(unicodeInput)).not.toThrow();
+    });
+
+    it('should handle inputs with emojis', () => {
+      const emojiInput = '😀😃😄😁😆😅😂🤣';
+      expect(() => hashCode(emojiInput)).not.toThrow();
+    });
+
+    it('should handle inputs with control characters', () => {
+      const controlInput = '\n\r\t\b\f';
+      expect(() => hashCode(controlInput)).not.toThrow();
+    });
+
+    it('should handle empty input', () => {
+      expect(hashCode('')).toBeDefined();
+    });
+
+    it('should handle null input', () => {
+      expect(hashCode(null)).toBeDefined();
+    });
+
+    it('should handle undefined input', () => {
+      expect(hashCode(undefined)).toBeDefined();
+    });
+
+    it('should handle input with leading/trailing whitespace', () => {
+      const input1 = 'Test String';
+      const input2 = '  Test String  ';
+      expect(hashCode(input1)).not.toBe(hashCode(input2));
+    });
+
+    it('should handle input with large integers', () => {
+      const input = { value: Number.MAX_SAFE_INTEGER };
+      expect(() => hashCode(input)).not.toThrow();
+    });
+
+    it('should handle input with small integers', () => {
+      const input = { value: Number.MIN_SAFE_INTEGER };
+      expect(() => hashCode(input)).not.toThrow();
+    });
+
+    it('should handle input with floating-point numbers', () => {
+      const input = { value: 3.14159265359 };
+      expect(() => hashCode(input)).not.toThrow();
+    });
+
+    it('should handle input with Infinity', () => {
+      const input = { value: Infinity };
+      expect(() => hashCode(input)).not.toThrow();
+    });
+
+    it('should handle input with -Infinity', () => {
+      const input = { value: -Infinity };
+      expect(() => hashCode(input)).not.toThrow();
+    });
+
+    it('should handle input with NaN', () => {
+      const input = { value: NaN };
+      expect(() => hashCode(input)).not.toThrow();
+    });
+
+    /* Annoying logs
+    it('should handle circular references in objects', () => {
+      const input = { a: 1 };
+      input.self = input;
+      expect(() => hashCode(input)).not.toThrow();
+    });*/
+
+    it('should handle deeply nested objects', () => {
+      const input = { a: { b: { c: { d: { e: 'nested' } } } } };
+      expect(() => hashCode(input)).not.toThrow();
+    });
   });
 
   describe('generateID', () => {
