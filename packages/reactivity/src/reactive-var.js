@@ -102,11 +102,11 @@ export class ReactiveVar {
     this.set(arr);
   }
   map(mapFunction) {
-    const newValue = Array.prototype.map.call(this.currentValue, mapFunction);
+    const newValue = Array.prototype.map.call(this.value, mapFunction);
     this.set(newValue);
   }
   filter(filterFunction) {
-    const newValue = Array.prototype.filter.call(this.currentValue, filterFunction);
+    const newValue = Array.prototype.filter.call(this.value, filterFunction);
     this.set(newValue);
   }
 
@@ -135,7 +135,7 @@ export class ReactiveVar {
       value = property;
       property = indexOrProperty;
     }
-    const newValue = this.currentValue.map((object, currentIndex) => {
+    const newValue = this.value.map((object, currentIndex) => {
       if(index == 'all' || currentIndex == index) {
         object[property] = value;
       }
@@ -171,28 +171,28 @@ export class ReactiveVar {
   hasID(item, id) {
     return this.getID(item) === id;
   }
-  getIndexByID(id) {
+  getItem(id) {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
   setProperty(idOrProperty, property, value) {
     if(arguments.length == 3) {
       const id = idOrProperty;
-      const index = this.getIndexByID(id);
+      const index = this.getItem(id);
       return this.setArrayProperty(index, property, value);
     }
     else {
       value = property;
       property = idOrProperty;
-      const obj = this.currentValue;
+      const obj = this.value;
       obj[property] = value;
       this.set(obj);
     }
   }
   replaceItem(id, item) {
-    return this.setIndex(this.getIndexByID(id), item);
+    return this.setIndex(this.getItem(id), item);
   }
   removeItem(id) {
-    return this.removeIndex(this.getIndexByID(id));
+    return this.removeIndex(this.getItem(id));
   }
 
 }
