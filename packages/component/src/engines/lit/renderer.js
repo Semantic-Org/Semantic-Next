@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, inArray, filterObject, fatal, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -16,14 +16,18 @@ export class LitRenderer {
   static OUTER_PARENS_REGEXP = /^\((.+)\)$/;
   static EXPRESSION_REGEXP = /('[^']*'|[^\s]+)/g;
 
-  static getID(val) {
-    return hashCode(val);
+  static getID(ast, data) {
+    const hashData = filterObject(data, (value) => {
+      return inArray(typeof value, ['string', 'number']) || value.constructor === Object;
+    });
+    const key = JSON.stringify({ast, hashData});
+    return hashCode(key);
   }
 
   constructor({ ast, data, subTemplates, helpers }) {
     this.ast = ast || '';
-    this.id = LitRenderer.getID(ast);
     this.data = data;
+    this.id = LitRenderer.getID(ast, data);
     this.renderTrees = {};
     this.subTemplates = subTemplates;
     this.resetHTML();
@@ -41,8 +45,8 @@ export class LitRenderer {
     this can be cached on the web component class
   */
   render({ ast = this.ast, data = this.data } = {}) {
-    this.id = LitRenderer.getID(ast);
     this.resetHTML();
+    this.id = LitRenderer.getID(ast, data);
     this.readAST({ ast, data });
     this.clearTemp();
     this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
@@ -303,28 +307,24 @@ export class LitRenderer {
       subTemplates: this.subTemplates,
       helpers: this.helpers,
     });
-    console.log('woo', tree, tree.id);
     this.renderTrees[tree.id] = tree;
     return tree;
   }
 
   // we only need to call 'render' the first time we create a subtree
   // subsequent runs can just modify the data context using tree.updateData(data)
-  renderSubtree({ ast, data, subTemplates, skipCache = true }) {
-    const treeID = LitRenderer.getID(ast);
-    console.log(treeID, this.renderTrees);
+  renderSubtree({ ast, data, subTemplates, skipCache = false }) {
+    const treeID = LitRenderer.getID(ast, data);
     let tree = this.renderTrees[treeID];
-
     if(tree && !skipCache) {
       // no need to rerender if we have existing subtree
-      console.log('updating data');
       tree.updateData(data);
       return tree.cachedRender();
     }
     else {
       // otherwise parse ast and create subtree
       tree = this.createSubtree({ast, data, subTemplates});
-      console.log('new render', data);
+      console.log('render', treeID);
       return tree.render();
     }
   }
