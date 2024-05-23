@@ -1,4 +1,4 @@
-<li class="{{maybe todo.completed 'completed'}}{{maybe editing 'editing'}}todo-item">
+<li class="{{classMap getClasses}} todo-item">
   {{#if editing}}
     <input type="text" class="edit" value={{todo.text}}>
   {{else}}

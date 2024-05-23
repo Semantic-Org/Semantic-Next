@@ -5,20 +5,13 @@
   {{#each filter in filters}}
     <li>
       {{#if isActiveFilter filter}}
-        <a class="{{selectedIf isActiveFilter filter}}">
+        <a class="selected">
           {{capitalize filter}}
         </a>
       {{else}}
-      22
-        {{#if is route 'all'}
-          <a href="#/">
-            All
-          </a>
-        {{else}}
-          <a href="#/{{filter}}">
-            {{capitalize filter}}
-          </a>
-        {{/if}}
+        <a href="#/{{filter}}">
+          {{capitalize filter}}
+        </a>
       {{/if}}
     </li>
   {{/each}}

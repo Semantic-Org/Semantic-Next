@@ -1,5 +1,4 @@
 import { createComponent } from '@semantic-ui/component';
-
 import template from './todo-footer.html?raw';
 import css from './todo-footer.css?raw';
 
@@ -33,14 +32,11 @@ const createInstance = ({ tpl, findParent, $ }) => ({
   },
 
   clearCompleted() {
-    tpl.todoList().todos.removeItems((todo) => todo.completed);
+    tpl.todoList().todos.filter((todo) => !todo.completed);
   },
 });
 
 const events = {
-  'click .filters'({ event, tpl, $, data }) {
-    tpl.setFilter(data.filter);
-  },
   'click .clear-completed'({ event, tpl }) {
     tpl.clearCompleted();
   },

@@ -6,7 +6,12 @@ import css from './todo-item.css?raw';
 
 const createInstance = ({ tpl, data, reactiveVar, findParent, $ }) => ({
   editing: reactiveVar(false),
-
+  getClasses() {
+    return {
+      completed: data.todo.completed,
+      editing: tpl.editing.get()
+    };
+  },
   getTodos() {
     return findParent('todoList').todos;
   },
