@@ -11,7 +11,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.template = null;
     this.part = null;
   }
-  render({ getTemplateName, subTemplates, data, parentTemplate }) {
+  render({ getTemplateName, subTemplates, packedData = {}, parentTemplate }) {
     const unpackData = (dataObj) => {
       console.log('unpacking data', dataObj);
       return mapObject(dataObj, (val) => val());
@@ -34,7 +34,7 @@ export class RenderTemplateDirective extends AsyncDirective {
         this.template.setParent(parentTemplate);
       }
     };
-    const renderNewTemplate = () => {
+    const renderNewTemplate = (data) => {
 
       const templateName = getTemplateName();
       this.templateName = templateName;
@@ -49,21 +49,21 @@ export class RenderTemplateDirective extends AsyncDirective {
       }
 
       // create copy of template prototype
-      this.template = template.clone({ data: unpackData(data) });
+      this.template = template.clone({ data });
 
       // attach this template to parent element
       attachTemplate();
 
       return this.template.render();
     };
-    const renderTemplate = () => {
+    const renderTemplate = (data) => {
       // check if we've rendered
       if (isDifferentTemplate()) {
-        this.html = renderNewTemplate();
+        this.html = renderNewTemplate(data);
       }
       else {
-        console.log('template rerender');
-        this.template.setDataContext(unpackData(data), { rerender: false });
+        console.log('template rerender', data);
+        this.template.setDataContext(data, { rerender: false });
       }
       return this.html;
     };
@@ -74,9 +74,9 @@ export class RenderTemplateDirective extends AsyncDirective {
         return;
       }
       const templateName = getTemplateName();
-      unpackData(data);
-      console.log('rerun');
-      html = renderTemplate();
+      const data = unpackData(packedData);
+      console.log('rerun', data);
+      html = renderTemplate(data);
       if(isDifferentTemplate()) {
         this.setValue(html);
       }

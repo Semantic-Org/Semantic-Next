@@ -18,7 +18,7 @@ export class LitRenderer {
 
   static getID(ast, data) {
     const hashData = filterObject(data, (value) => {
-      return inArray(typeof value, ['string', 'number']) || value.constructor === Object;
+      return inArray(typeof value, ['string', 'number']) || value?.constructor === Object;
     });
     const key = JSON.stringify({ast, hashData});
     return hashCode(key);
@@ -153,29 +153,11 @@ export class LitRenderer {
     const getTemplateName = () => getValue(node.name);
 
     // data can either be reactive or nonreactive
-    const staticValues = mapObject(node.data || {}, (expression) => {
-      return () => {
-        console.log('returning static value');
-        return Reaction.nonreactive(() => getValue(expression));
-      };
+    const staticValues = mapObject(node.data || {}, (value) => {
+      return () => Reaction.nonreactive(() => getValue(value));
     });
-    const reactiveData = [];
-    const reactiveValues = mapObject(node.reactiveData || {}, (expression) => {
-      return () => {
-        let value = getValue(expression);
-        if(reactiveData[expression]) {
-          console.log('returning existing reactive', value);
-          reactiveData[expression].set(value);
-          return value;
-        }
-        else {
-          let value = getValue(expression);
-          let reactiveValue = new ReactiveVar(value);
-          reactiveData[expression] = reactiveValue;
-          console.log('creating new reactive', value);
-          return reactiveValue.get();
-        }
-      };
+    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
+      return () => getValue(value);
     });
     const templateData = {
       ...staticValues,
@@ -184,7 +166,7 @@ export class LitRenderer {
     return renderTemplate({
       subTemplates: this.subTemplates,
       getTemplateName: getTemplateName,
-      data: templateData,
+      packedData: templateData,
       parentTemplate: data,
     });
   }
