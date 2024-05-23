@@ -1,0 +1,18 @@
+.selection.menu {
+  gap: var(--menu-selection-gap);
+
+  --menu-item-padding: var(--menu-selection-item-padding);
+  --menu-item-border-radius: var(--menu-selection-item-border-radius);
+  --menu-item-color: var(--menu-selection-item-color);
+
+  --menu-item-hover-background: var(--menu-selection-item-hover-background);
+  --menu-item-hover-border-radius: var(--menu-selection-item-border-radius);
+  --menu-item-hover-color: var(--menu-selection-item-hover-color);
+  --menu-item-hover-box-shadow: var(--menu-selection-item-hover-box-shadow);
+
+  --menu-item-active-background: var(--menu-selection-item-active-background);
+  --menu-item-active-border-radius: var(--menu-selection-item-border-radius);
+  --menu-item-active-padding: var(--menu-selection-item-active-padding);
+  --menu-item-active-color: var(--menu-selection-item-active-color);
+  --menu-item-active-box-shadow: var(--menu-selection-item-active-box-shadow);
+}

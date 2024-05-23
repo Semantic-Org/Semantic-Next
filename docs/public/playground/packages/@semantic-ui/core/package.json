@@ -1,0 +1,109 @@
+{
+  "name": "@semantic-ui/core",
+  "version": "0.0.24",
+  "title": "Semantic UI Next",
+  "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
+  "homepage": "http://www.semantic-ui.com",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "main": "src/semantic-ui.js",
+  "module": "src/semantic-ui.js",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist/**",
+    "src/**"
+  ],
+  "scripts": {
+    "build": "wireit",
+    "dev": "wireit",
+    "build-docs": "wireit",
+    "serve": "wireit",
+    "publish": "wireit",
+    "test:case": "wireit",
+    "prettify": "prettierx ./ --write --ignore-unknown",
+    "format": "npx dprint fmt",
+    "test": "vitest --c tests/configs/vitest/vitest.config.js",
+    "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
+    "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
+    "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
+    "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
+    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
+    "prepare": "husky"
+  },
+  "wireit": {
+    "build": {
+      "command": "node ./tasks/build.js"
+    },
+    "watch": {
+      "command": "node ./tasks/watch.js",
+      "service": true
+    },
+    "dev": {
+      "command": "cd docs && npm install && npx link ../ && npm run dev",
+      "dependencies": [
+        "watch"
+      ]
+    },
+    "build-docs": {
+      "command": "cd docs && npm install && npx link ../ && npm run build",
+      "dependencies": [
+        "build"
+      ]
+    },
+    "test:case": {
+      "command": "node ./tasks/test-case.js"
+    },
+    "serve:docs": {
+      "command": "cd docs && npm run dev",
+      "service": true
+    },
+    "serve": {
+      "command": "node ./tasks/serve.js",
+      "service": true
+    },
+    "build:docs": {
+      "command": "cd docs && npm run build"
+    },
+    "publish": {
+      "command": "node ./scripts/publish.js"
+    }
+  },
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "peerDependencies": {
+    "lit": "^3.1.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.2.1",
+    "@commitlint/config-conventional": "^19.1.0",
+    "@types/node": "^20.12.3",
+    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/parser": "^7.5.0",
+    "@vitest/browser": "^1.4.0",
+    "@vitest/coverage-istanbul": "^1.5.3",
+    "@vitest/ui": "^1.4.0",
+    "chalk": "^5.3.0",
+    "dprint": "^0.45.0",
+    "esbuild": "^0.20.2",
+    "husky": "^9.0.11",
+    "jsdom": "^24.0.0",
+    "lint-staged": "^15.2.2",
+    "underscore": "^1.13.6",
+    "vitest": "^1.4.0",
+    "wireit": "^0.14.4"
+  },
+  "ciDependencies": {
+    "axios": "^1.6.8",
+    "decompress": "^4.2.1"
+  },
+  "workspaces": [
+    "packages/*",
+    "docs/*",
+    "examples/*"
+  ],
+  "lint-staged": {
+    "**/*.js": "npx dprint fmt"
+  },
+  "dependencies": {
+    "@pagefind/modular-ui": "^1.1.0"
+  }
+}

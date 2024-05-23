@@ -1,0 +1,12 @@
+{
+  "name": "@semantic-ui/utils",
+  "type": "module",
+  "main": "src/utils.js",
+  "module": "src/utils.js",
+  "author": "Jack Lukic",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^1.5.2"
+  },
+  "version": "0.0.25"
+}

@@ -1,0 +1,43 @@
+/*-------------------
+       Colors
+--------------------*/
+
+.red.icon {
+  color: var(--icon-red);
+}
+.orange.icon {
+  color: var(--icon-orange);
+}
+.yellow.icon {
+  color: var(--icon-yellow);
+}
+.olive.icon {
+  color: var(--icon-olive);
+}
+.green.icon {
+  color: var(--icon-green);
+}
+.teal.icon {
+  color: var(--icon-teal);
+}
+.blue.icon {
+  color: var(--icon-blue);
+}
+.violet.icon {
+  color: var(--icon-violet);
+}
+.purple.icon {
+  color: var(--icon-purple);
+}
+.pink.icon {
+  color: var(--icon-pink);
+}
+.brown.icon {
+  color: var(--icon-brown);
+}
+.grey.icon {
+  color: var(--icon-grey);
+}
+.black.icon {
+  color: var(--icon-black);
+}

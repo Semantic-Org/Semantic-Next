@@ -1,0 +1,10 @@
+<div class="{{ui}} menu" part="menu">
+  {{#if items}}
+    {{#each item in items}}
+      <menu-item active={{isValueActive value item}} href={{item.href}} data-id={{item.id}}>
+        {{item.label}}
+      </menu-item>
+    {{/each}}
+  {{/if}}
+  {{>slot}}
+</div>

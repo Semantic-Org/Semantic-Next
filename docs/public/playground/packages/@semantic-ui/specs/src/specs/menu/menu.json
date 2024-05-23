@@ -1,0 +1,50 @@
+{
+  "uiType": "element",
+  "name": "Menu",
+  "description": "A menu displays grouped navigation actions",
+  "tagName": "ui-menu",
+  "exportName": "UIMenu",
+  "content": [],
+  "types": [
+    {
+      "name": "selection",
+      "attribute": "selection",
+      "description": "formatted to allow for selection between choices",
+      "usageLevel": 1
+    }
+  ],
+  "variations": [
+    {
+      "name": "Evenly Spaced",
+      "attribute": "evenly-spaced",
+      "description": "formatted so items are evenly split",
+      "usageLevel": 1
+    }
+  ],
+  "events": [
+    {
+      "eventName": "change",
+      "description": "can specify a function to occur after the value changes",
+      "arguments": [
+        {
+          "name": "value",
+          "description": "the updated value"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Menu Items",
+      "type": "array",
+      "attribute": "items",
+      "description": "can automatically generate menu items"
+    },
+    {
+      "name": "Value",
+      "type": "string",
+      "attribute": "value",
+      "description": "can specify the active menu item value when generating menu items"
+    }
+  ]
+}
