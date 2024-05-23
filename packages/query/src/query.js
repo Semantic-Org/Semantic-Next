@@ -532,10 +532,10 @@ export class Query {
   }
 
   focus() {
-    return this[0].focus();
+    return this.length ? this[0].focus() : this;
   }
   blur() {
-    return this[0].blur();
+    return this.length ? this[0].blur() : this;
   }
 
   css(property, value, settings = { includeComputed: false }) {
