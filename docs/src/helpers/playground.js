@@ -391,3 +391,22 @@ export const getPanelIndexes = (files, type) => {
   }
   return indexes;
 };
+
+export const importMap = {
+  imports: {
+    '@semantic-ui/component': `/playground/packages/@semantic-ui/component/`,
+    '@semantic-ui/component/': `/playground/packages/@semantic-ui/component/src/`,
+    '@semantic-ui/core': `/playground/packages/@semantic-ui/core/`,
+    '@semantic-ui/core/': `/playground/packages/@semantic-ui/core/src/`,
+    '@semantic-ui/query': `/playground/packages/@semantic-ui/query/`,
+    '@semantic-ui/query/': `/playground/packages/@semantic-ui/query/src/`,
+    '@semantic-ui/reactivity': `/playground/packages/@semantic-ui/reactivity/`,
+    '@semantic-ui/reactivity/': `/playground/packages/@semantic-ui/reactivity/src/`,
+    '@semantic-ui/specs': `/playground/packages/@semantic-ui/specs/`,
+    '@semantic-ui/specs/': `/playground/packages/@semantic-ui/specs/src/`,
+    '@semantic-ui/templating': `/playground/packages/@semantic-ui/templating/`,
+    '@semantic-ui/templating/': `/playground/packages/@semantic-ui/templating/src/`,
+    '@semantic-ui/utils': `/playground/packages/@semantic-ui/utils/src/`,
+    '@semantic-ui/utils/': `/playground/packages/@semantic-ui/utils/src/`,
+  }
+};

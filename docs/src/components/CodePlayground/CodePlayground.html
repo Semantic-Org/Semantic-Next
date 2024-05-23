@@ -14,6 +14,26 @@
       {{#each file in getFileArray}}
         <script type="{{file.scriptType}}" filename="{{file.filename}}">{{#if is file.type 'text/html'}}{{{escapeHTML file.content}}}{{else}}{{file.content}}{{/if}}</script>
       {{/each}}
+      <script type="sample/importmap">
+        {
+          "imports": {
+            "@semantic-ui/component": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/component/src/index.js",
+            "@semantic-ui/component/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/component/src/",
+            "@semantic-ui/core": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/core/src/index.js",
+            "@semantic-ui/core/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/core/src/",
+            "@semantic-ui/query": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/query/src/index.js",
+            "@semantic-ui/query/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/query/src/",
+            "@semantic-ui/reactivity": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/reactivity/src/index.js",
+            "@semantic-ui/reactivity/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/reactivity/src/",
+            "@semantic-ui/specs": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/specs/src/index.js",
+            "@semantic-ui/specs/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/specs/src/",
+            "@semantic-ui/templating": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/templating/src/index.js",
+            "@semantic-ui/templating/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/templating/src/",
+            "@semantic-ui/utils": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/utils/src/utils.js",
+            "@semantic-ui/utils/": "https://dev.semantic-ui.com/playground/packages/@semantic-ui/utils/src/"
+          }
+        }
+      </script>
     </playground-project>
   {{/if}}
   {{#if inline}}
