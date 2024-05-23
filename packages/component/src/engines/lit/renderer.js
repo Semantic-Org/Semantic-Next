@@ -53,7 +53,7 @@ export class LitRenderer {
     return this.litTemplate;
   }
 
-  cachedRender() {
+  lastRender() {
     return this.litTemplate;
   }
 
@@ -129,10 +129,12 @@ export class LitRenderer {
       }
       if (key == 'content') {
         return (eachData) => {
-          return this.renderSubtree({
+          const tree = this.renderSubtree({
+            returnTree: true,
             ast: value,
             data: { ...data, ...eachData },
           });
+          return tree;
         };
       }
       return value;
@@ -151,11 +153,29 @@ export class LitRenderer {
     const getTemplateName = () => getValue(node.name);
 
     // data can either be reactive or nonreactive
-    const staticValues = mapObject(node.data || {}, (value) => {
-      return () => Reaction.nonreactive(() => getValue(value));
+    const staticValues = mapObject(node.data || {}, (expression) => {
+      return () => {
+        console.log('returning static value');
+        return Reaction.nonreactive(() => getValue(expression));
+      };
     });
-    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
-      return () => getValue(value);
+    const reactiveData = [];
+    const reactiveValues = mapObject(node.reactiveData || {}, (expression) => {
+      return () => {
+        let value = getValue(expression);
+        if(reactiveData[expression]) {
+          console.log('returning existing reactive', value);
+          reactiveData[expression].set(value);
+          return value;
+        }
+        else {
+          let value = getValue(expression);
+          let reactiveValue = new ReactiveVar(value);
+          reactiveData[expression] = reactiveValue;
+          console.log('creating new reactive', value);
+          return reactiveValue.get();
+        }
+      };
     });
     const templateData = {
       ...staticValues,
@@ -313,36 +333,42 @@ export class LitRenderer {
 
   // we only need to call 'render' the first time we create a subtree
   // subsequent runs can just modify the data context using tree.updateData(data)
-  renderSubtree({ ast, data, subTemplates, skipCache = false }) {
+  renderSubtree({ ast, data, subTemplates, skipCache = false, returnTree = false }) {
     const treeID = LitRenderer.getID(ast, data);
     let tree = this.renderTrees[treeID];
+    let cached = false;
     if(tree && !skipCache) {
-      // no need to rerender if we have existing subtree
-      tree.updateData(data);
-      return tree.cachedRender();
+      // no need to rerender if we have existing subtree and same data
+      tree.setData(data);
+      cached = true;
     }
     else {
       // otherwise parse ast and create subtree
       tree = this.createSubtree({ast, data, subTemplates});
-      console.log('render', treeID);
+    }
+    if(returnTree) {
+      return tree;
+    }
+    if(cached) {
+      return tree.lastRender();
+    }
+    else {
       return tree.render();
     }
   }
 
   // set data context of a subtree
   setData(data) {
-    this.data = data;
+    this.modifyData();
     each(this.renderTrees, (tree) => {
-      tree.updateData(data);
+      tree.modifyData(data);
     });
   }
 
   // update current template with new values
-  updateData(data) {
+  modifyData(data) {
     each(data, (value, name) => {
-      if(this.data[name] !== undefined && this.data[name] !== value) {
-        this.data[name] = value;
-      }
+      this.data[name] = value;
     });
   }
 

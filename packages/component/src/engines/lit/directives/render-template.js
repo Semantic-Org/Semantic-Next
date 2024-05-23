@@ -13,10 +13,26 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
   render({ getTemplateName, subTemplates, data, parentTemplate }) {
     const unpackData = (dataObj) => {
+      console.log('unpacking data', dataObj);
       return mapObject(dataObj, (val) => val());
     };
     const isDifferentTemplate = () => {
       return this.templateName !== getTemplateName();
+    };
+    const attachTemplate = () => {
+      const { parentNode, startNode, endNode } = this.part || {}; // stored from update
+      const element = this.part?.options?.host;
+      const renderRoot = element?.renderRoot;
+      this.template.setElement(element);
+      this.template.attach(renderRoot, {
+        element,
+        parentNode,
+        startNode,
+        endNode,
+      });
+      if (parentTemplate) {
+        this.template.setParent(parentTemplate);
+      }
     };
     const renderNewTemplate = () => {
 
@@ -40,27 +56,13 @@ export class RenderTemplateDirective extends AsyncDirective {
 
       return this.template.render();
     };
-    const attachTemplate = () => {
-      const { parentNode, startNode, endNode } = this.part || {}; // stored from update
-      const element = this.part?.options?.host;
-      const renderRoot = element?.renderRoot;
-      this.template.setElement(element);
-      this.template.attach(renderRoot, {
-        element,
-        parentNode,
-        startNode,
-        endNode,
-      });
-      if (parentTemplate) {
-        this.template.setParent(parentTemplate);
-      }
-    };
     const renderTemplate = () => {
       // check if we've rendered
       if (isDifferentTemplate()) {
         this.html = renderNewTemplate();
       }
       else {
+        console.log('template rerender');
         this.template.setDataContext(unpackData(data), { rerender: false });
       }
       return this.html;
@@ -71,6 +73,9 @@ export class RenderTemplateDirective extends AsyncDirective {
         computation.stop();
         return;
       }
+      const templateName = getTemplateName();
+      unpackData(data);
+      console.log('rerun');
       html = renderTemplate();
       if(isDifferentTemplate()) {
         this.setValue(html);

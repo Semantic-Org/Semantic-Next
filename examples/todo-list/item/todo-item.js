@@ -30,10 +30,10 @@ const createInstance = ({ tpl, data, reactiveVar, findParent, $ }) => ({
 });
 
 const onCreated = ({data}) => {
-  console.log('created', data.todo._id);
+  //console.log('created', data.todo._id);
 };
 const onRendered = ({data}) => {
-  console.log('rendered', data.todo._id);
+  //console.log('rendered', data.todo._id);
 };
 
 
