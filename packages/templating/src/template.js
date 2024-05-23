@@ -582,7 +582,7 @@ export const Template = class Template {
     if(triggerCallback) {
       const callbackName = `on${capitalize(eventName)}`;
       const callback = this.element[callbackName];
-      wrapFunction(callback).call(this, eventData);
+      wrapFunction(callback).call(this.element, eventData);
     }
 
     // trigger DOM event
