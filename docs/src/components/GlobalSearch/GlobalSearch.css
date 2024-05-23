@@ -162,9 +162,8 @@ ui-modal {
       font-size: 15px;
 
       .subtitle {
-        float: right;
         font-size: 11px;
-        margin-left: 5px;
+        margin-left: 0px;
         font-weight: normal;
         font-style: italic;
         color: rgb(255 255 255 / 72%);
@@ -174,6 +173,7 @@ ui-modal {
       }
 
       .tags {
+        float: right;
         display: inline-block;
         margin-left: 5px;
       }

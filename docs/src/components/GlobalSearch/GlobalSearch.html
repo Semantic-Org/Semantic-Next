@@ -18,6 +18,9 @@
         <a class="result {{activeIf is @index selectedIndex}}" href="{{url}}">
           <h3>
             {{title}}
+            {{#if subtitle}}
+              <span class="subtitle"><span>in</span> {{subtitle}}</span>
+            {{/if}}
             <div class="tags">
               {{#if hasAny tags}}
                 {{#each tags}}
@@ -25,9 +28,6 @@
                 {{/each}}
               {{/if}}
             </div>
-              {{#if subtitle}}
-                <span class="subtitle"><span>found in</span> {{subtitle}}</span>
-              {{/if}}
           </h3>
           <div class="description">{{description}}</div>
         </a>
