@@ -4,7 +4,7 @@ import { each, flatten, noop, first, last, isServer } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Reaction } from '@semantic-ui/reactivity';
 
 const settings = {
   showHeader: true,
@@ -20,15 +20,13 @@ const settings = {
   useAccordion: true,
   getAnchorID: (item) => item?.id,
   getElement: (itemID) => document.getElementById(itemID),
-  onActive: (itemID) => itemID,
-  onSamePageActive: (element, itemID) => {},
   getActiveElementID: (element) => element?.id
 };
 
-const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => ({
+const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
 
-  openIndex: new ReactiveVar(0), // current accordion index open
-  currentItem: new ReactiveVar(), // current active item id
+  openIndex: reactiveVar(0), // current accordion index open
+  currentItem: reactiveVar(), // current active item id
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
@@ -124,6 +122,7 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
       const menuIndex = menu.indexOf(menuItem);
       tpl.openIndex.set(menuIndex);
       tpl.currentItem.set(itemID);
+      console.log('setting active', menuIndex, itemID);
       Reaction.afterFlush(() => {
         tpl.isActivating = false;
       });
@@ -137,7 +136,8 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
   },
 
   maybeCurrentItem(item) {
-    return tpl.isCurrentItem(item) ? 'current' : '';
+    console.log(tpl.isCurrentItem(item), item);
+    return tpl.isCurrentItem(item) ? 'current' : ' ';
   },
 
   scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
@@ -145,12 +145,13 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
     if (element) {
       const targetPosition = element.offsetTop + offset;
       tpl.currentItem.set(itemID);
+      console.log('setting current', itemID);
       tpl.scrollToPosition(targetPosition, {
         onSamePage() {
-          settings.onSamePageActive(element, itemID);
+          dispatchEvent('samePageActive', { element, itemID });
         }
       });
-      settings.onActive(itemID);
+      dispatchEvent('active', { itemID });
     }
   },
 
@@ -175,6 +176,7 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
     $(scrollContext).one('scrollend', (event) => {
       requestIdleCallback(() => {
         tpl.isScrolling = false;
+        dispatchEvent('finishScroll', { position });
       });
     });
     scrollContext.scrollTo({
@@ -247,7 +249,7 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
   },
 
   bindHashChange() {
-    attachEvent(window, 'hashchange', (event) => {
+    const scrollToHash = (event) => {
       const itemID = location.hash.substr(1);
       if(itemID) {
         tpl.setActiveItem(itemID);
@@ -256,8 +258,12 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
       else {
         tpl.setFirstItemActive();
       }
+    };
+    attachEvent(window, 'hashchange', (event) => {
+      scrollToHash();
       event.preventDefault();
     });
+    scrollToHash();
   },
 
   bindScroll() {
@@ -293,12 +299,13 @@ const createInstance = ({tpl, isServer, reaction, settings, attachEvent, $}) => 
 
 });
 
+
 const onRendered = function ({ tpl, isServer, settings}) {
   if(isServer || !settings.menu.length) {
     return;
   }
-  tpl.calculateScrollHeight();
   tpl.bindPageEvents();
+  tpl.calculateScrollHeight();
 };
 
 const onDestroyed = function ({ tpl, isServer }) {

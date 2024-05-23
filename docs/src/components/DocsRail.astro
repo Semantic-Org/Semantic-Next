@@ -16,11 +16,11 @@ import './DocsRail.css';
   <script>
     import { $ } from '@semantic-ui/query';
     $('inpage-menu').settings({
-      onSamePageActive(element) {
+      onSamePageActive({element}) {
         $(element).addClass('highlight');
         setTimeout(() => {
           $(element).removeClass('highlight');
-        }, 300)
+        }, 300);
       }
     });
   </script>
