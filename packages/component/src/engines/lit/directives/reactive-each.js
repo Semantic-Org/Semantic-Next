@@ -61,7 +61,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     let items = this.eachCondition.over() || [];
     items = items.map((item, index) => {
       if (isPlainObject(item) && !this.getItemID(item, index)) {
-        item._hash = hashCode(item);
+        item._hash = hashCode(item, { prettify: true });
       }
       return item;
     });
@@ -101,8 +101,8 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getTemplate(item, index) {
-    // memoize this
     let eachData = this.getEachData(item, index, this.eachCondition.as);
+    const content = this.eachCondition.content(eachData);
     const itemID = this.getItemID(item, index);
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
     const sameData = isEqual(this.templateCachedData.get(itemID), eachData);
@@ -115,12 +115,11 @@ export class ReactiveEachDirective extends AsyncDirective {
     }
     else {
       // something has changed for this template
-      const content = this.eachCondition.content(eachData);
       this.templateCachedIndex.set(itemID, index);
       this.templateCachedData.set(itemID, clone(eachData));
       this.templateCache.set(itemID, content);
       return {
-        cached: false,
+        cached: true,
         content: content,
       };
     }
