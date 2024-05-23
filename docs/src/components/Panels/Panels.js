@@ -114,8 +114,19 @@ const createInstance = ({tpl, el, settings, $}) => ({
       else {
         tpl.setPanelSize(index, stored.size);
       }
-      panel.tpl.initialized.set(true);
+      tpl.setPanelInitialized(panel);
     });
+  },
+  isPanelInitialized(panel) {
+    if(panel?.tpl) {
+      return panel.tpl.initialized.get();
+    }
+    return false;
+  },
+  setPanelInitialized(panel) {
+    if(panel?.tpl) {
+      panel.tpl.initialized.set(true);
+    }
   },
   setPanelCalculatedSizes() {
     let exactPanels = tpl.getExactPanels();
@@ -124,7 +135,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       const size = panel.settings.size;
       let relativeSize = tpl.getRelativeSettingSize(size, index);
       tpl.setPanelSize(index, relativeSize);
-      panel.tpl.initialized.set(true);
+      tpl.setPanelInitialized(panel);
     });
 
     // we have to perform grow stage after setting fixed size panels
@@ -148,7 +159,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
         relativeSize = maxSize;
       }
       tpl.setPanelSize(index, relativeSize);
-      panel.tpl.initialized.set(true);
+      tpl.setPanelInitialized(panel);
     });
   },
 
@@ -203,10 +214,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   getGrowingPanels() {
-    return tpl.panels.filter(panel => !panel.tpl.initialized.get() && panel.settings.size == 'grow');
+    return tpl.panels.filter(panel => !tpl.isInitialized(panel) && panel.settings.size == 'grow');
   },
   getExactPanels() {
-    return tpl.panels.filter(panel => !panel.tpl.initialized.get() && panel.settings.size !== 'grow');
+    return tpl.panels.filter(panel => !tpl.isInitialized(panel) && panel.settings.size !== 'grow');
   },
 
   getRelativeSettingSize(size, index) {

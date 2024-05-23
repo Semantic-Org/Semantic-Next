@@ -159,13 +159,13 @@
     },
     {
       "name": "Basic",
-      "attribute": "styling",
+      "attribute": "basic",
       "description": "be de-emphasized in a layout",
       "usageLevel": 2,
       "options": [
         {
           "name": "Basic",
-          "value": "basic",
+          "value": true,
           "description": "appear slightly less pronounced"
         },
         {

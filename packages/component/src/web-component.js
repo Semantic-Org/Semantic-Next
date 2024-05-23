@@ -1,7 +1,6 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isEqual, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
+import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
@@ -173,107 +172,66 @@ class WebComponentBase extends LitElement {
       return properties;
     }
     if (componentSpec) {
-      properties.class = {
-        type: String,
-      };
-      each(componentSpec.attributes, (attributeValues, attribute) => {
-        // this is an easy way to determine if this is a boolean or string attribute
-        let sampleValue;
-        if(inArray(attribute, componentSpec.contentAttributes)) {
-          sampleValue = '';
-        }
-        else if(inArray(attribute, componentSpec.settings)) {
-          sampleValue = componentSpec.defaultSettings[attribute];
-        }
-        else {
-          sampleValue = attributeValues[0];
-        }
-        properties[attribute] = WebComponentBase.getPropertySettings(sampleValue, attribute);
+      properties.class = { type: String };
+
+      // emphasis="primary" but also setting props
+      each(componentSpec.attributes, (name) => {
+        const propertyType = componentSpec.propertyTypes[name];
+        properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
       });
-      const reservedWords = ['settings', 'true', 'false'];
-      each(componentSpec.reverseAttributes, (attributeValues, attribute) => {
-        if(!inArray(attribute, reservedWords)) {
-          properties[attribute] = { type: String, reflect: false };
-        }
+
+      // these are functions that can only be set on the DOM el but do not have attributes
+      each(componentSpec.properties, (name) => {
+        const propertyType = componentSpec.propertyTypes[name];
+        properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
+      });
+
+      // primary -> emphasis="primary"
+      each(componentSpec.optionAttributes, (attributeValues, attribute) => {
+        properties[attribute] = { type: String };
       });
     }
     if (settings) {
       each(settings, (defaultValue, name) => {
-        // expert mode (this is a settings object not a default value)
-        if (defaultValue?.type) {
-          properties[name] = settings;
-        }
-        else {
-          properties[name] = WebComponentBase.getPropertySettings(defaultValue, name);
-        }
+        // this can either be a settings object or a default value
+        // i.e. { foo: 'baz' } // basic
+        // or { foo: { type: String, defaultValue: 'baz' } // expert
+        properties[name] = (defaultValue?.type)
+          ? settings
+          : WebComponentBase.getPropertySettings(name, defaultValue?.constructor)
+        ;
       });
     }
     return properties;
   }
 
-  static getPropertySettings(value, name) {
-    let property;
-    if (isString(value)) {
-      property = {
-        type: String,
-        attribute: true,
-      };
+  static getPropertySettings(name, type = String) {
+    let property = {
+      type,
+      attribute: true,
+      //hasChanged: isEqual,
+    };
+    // functions cannot be serialized
+    if (type == Function) {
+      property.attribute = false;
     }
-    else if (isNumber(value)) {
-      property = {
-        type: Number,
-        noAccessor: true,
-        attribute: true,
-      };
-    }
-    else if (isBoolean(value)) {
-      property = {
-        type: Boolean,
-        // we have to use an accessor if the name is reserved
-        //noAccessor: inArray(name, ['focus', 'disabled']),
-        attribute: true,
-        // simplify the use case of setting setting="false"
-        converter: {
-          fromAttribute: (value, type) => {
-            if (inArray(value, ['false', '0', 'null', 'undefined'])) {
-              return false;
-            }
-            return Boolean(value);
-          },
-          toAttribute: (value, type) => {
-            return String(value);
+    else if (type == Boolean) {
+      property.converter = {
+        fromAttribute: (value, type) => {
+          if (inArray(value, ['false', '0', 'null', 'undefined'])) {
+            return false;
           }
+          return Boolean(value);
+        },
+        toAttribute: (value, type) => {
+          return String(value);
         }
       };
     }
-    else if (isArray(value)) {
-      property = {
-        type: Array,
-        attribute: true,
-        reflect: false,
-      };
+    // adding accessors to reserved browser DOM props causes issues
+    if(inArray(name, ['disabled'])) {
+      property.noAccessor = true;
     }
-    else if (isPlainObject(value)) {
-      property = {
-        type: Object,
-        attribute: true,
-        reflect: false,
-      };
-    }
-    else if (isFunction(value)) {
-      property = {
-        type: Function,
-        attribute: false,
-        reflect: false,
-      };
-    }
-    else {
-      property = {
-        type: String,
-        attribute: true,
-      };
-    }
-    //property.hasChanged = isEqual;
     return property;
   }
 
@@ -300,35 +258,39 @@ class WebComponentBase extends LitElement {
 
 
   /*
-    This returns a list of settings which may include both html attributes and properties
+    This returns a list of settings which may include both attributes and properties
     as specified in the spec for the component. It will extend them from default settings
   */
   getSettings({componentSpec, properties}) {
     let settings = {};
     each(properties, (propSettings, property) => {
-      if (property == 'class' || settings.observe === false) {
+      if (property == 'class' || propSettings.observe === false) {
         return;
       }
-      if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
+      if(componentSpec && !get(componentSpec.allowedValues, property) && get(componentSpec.optionAttributes, property)) {
         // this property is used to lookup a setting like 'large' -> sizing
         // we dont record this into settings
         return;
       }
-      const setting = this[property] ?? this.defaultSettings[property] ?? (componentSpec?.defaultSettings || {})[property];
+      const elementProp = this[property];
+      const setting = elementProp  // check element setting
+        ?? this.defaultSettings[property]  // check default setting on this component
+        ?? (componentSpec?.defaultSettings || {})[property] // check default setting on component spec
+      ;
       // only pass through setting if it is defined
       if(setting !== undefined) {
         settings[property] = setting;
       }
       // boolean attribute case
-      if (componentSpec && settings[this[property]] !== undefined) {
-        settings[this[property]] = true;
+      if (componentSpec && settings[elementProp] !== undefined) {
+        settings[elementProp] = true;
       }
     });
     return settings;
   }
 
-  /* This may get more complex if we choose to support
-     reverse attribute lookups like setSetting('large', true);
+  /* This may become more complex if we choose to support
+     reverse attribute lookups like setSetting('large');
   */
   setSetting(name, value) {
     this[name] = value;
@@ -363,44 +325,47 @@ class WebComponentBase extends LitElement {
     component attributes
   */
   getUIClasses({componentSpec, properties}) {
+
+    // this is just a special feature of component specs and can be ignored otherwise
     if (!componentSpec) {
       return;
     }
     const classes = [];
-    each(properties, (propSettings, property) => {
-      if (property == 'class' || propSettings.observe === false) {
-        return;
-      }
-      if(componentSpec && !get(componentSpec.attributes, property) && get(componentSpec.reverseAttributes, property)) {
-        return;
-      }
-      let value = this[property];
-      // if the setting has a string value use that as class name
-      // i.e. sizing='large' => 'large'
-      if(isString(value) && value) {
-        if(get(componentSpec.attributes, property) && componentSpec.attributes[property].includes(value)) {
+
+    // iterate through tracked attributes which can receive classes
+    each(componentSpec.attributes, (attribute) => {
+
+      const allowedValues = componentSpec.allowedValues[attribute];
+      const propertyType = componentSpec.propertyTypes[attribute];
+      const value = this[attribute];
+      // this attribute
+      if(value) {
+
+        if(propertyType == Boolean) {
+          // this is a variation like active=true
+          // it receives the class "active"
+          classes.push(attribute);
+        }
+        else if(allowedValues && inArray(value, allowedValues)) {
+          // this is a variation like emphasis="primary"
+          // it receives the class "primary"
           classes.push(value);
         }
-        // components can opt-in to including the attribute as a default class
-        if(componentSpec.attributeClasses.includes(property)) {
-          classes.push(property);
+
+        // components can opt-in to including the attribute if it has a value set
+        // for instance "icon" if it has an icon set
+        if(componentSpec.attributeClasses.includes(attribute)) {
+          classes.push(attribute);
         }
       }
-
-      // otherwise if this is a boolean property push the property name
-      // i.e. <button primary="true" => 'primary'
-      else if(isBoolean(value) || value === '') {
-        classes.push(property);
-      }
-
     });
-    const ignoredValues = ['true', 'false'];
-    let classString = unique(classes)
-      .filter(value => value && !inArray(value, ignoredValues))
-      .join(' ');
 
+    let classString = unique(classes).join(' ');
     if(classString) {
       classString += ' ';
+    }
+    if(classString.search('icon value') > -1) {
+      debugger;
     }
     return classString;
   }
