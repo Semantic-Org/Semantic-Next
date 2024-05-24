@@ -24,7 +24,6 @@ export class ReactiveEachDirective extends AsyncDirective {
     this.initialized = false;
     this.childParts = [];
     this.templateCachedIndex = new Map();
-    this.templateCachedData = new Map();
     this.templateCache = new Map();
   }
 
@@ -100,28 +99,37 @@ export class ReactiveEachDirective extends AsyncDirective {
       : { ...item, '@index': index };
   }
 
+  /* Some notes:
+    Renderer already performs caching on subtrees with the same data
+    but because we may have different data we want to cache exclusively on
+    whether data._id has changed
+  */
   getTemplate(item, index) {
     // memoize this
     let eachData = this.getEachData(item, index, this.eachCondition.as);
     const itemID = this.getItemID(item, index);
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
-    const sameData = isEqual(this.templateCachedData.get(itemID), eachData);
-    if (false && sameIndex && sameData) {
+    if (sameIndex) {
       // reuse the template nothing to rerender
+      const template = this.templateCache.get(itemID);
+      if(index == 7) {
+        console.log('reusing', eachData);
+      }
+      template.setData(eachData);
       return {
         cached: true,
-        content: this.templateCache.get(itemID),
+        content: template.lastRender(),
       };
     }
     else {
       // something has changed for this template
-      const content = this.eachCondition.content(eachData);
+      const template = this.eachCondition.content(eachData);
+      console.log('creating', index);
       this.templateCachedIndex.set(itemID, index);
-      this.templateCachedData.set(itemID, clone(eachData));
-      this.templateCache.set(itemID, content);
+      this.templateCache.set(itemID, template);
       return {
         cached: false,
-        content: content,
+        content: template.render(),
       };
     }
   }

@@ -29,6 +29,14 @@ const createInstance = ({ tpl, data, reactiveVar, findParent, $ }) => ({
   },
 });
 
+const onCreated = ({data}) => {
+  //console.log('created', data.todo._id);
+};
+const onRendered = ({data}) => {
+  //console.log('rendered', data.todo._id);
+};
+
+
 const events = {
   'change .toggle'({ event, tpl, $ }) {
     tpl.toggleCompleted();
@@ -58,6 +66,8 @@ const todoItem = createComponent({
   template,
   css,
   createInstance,
+  onCreated,
+  onRendered,
   events,
 });
 

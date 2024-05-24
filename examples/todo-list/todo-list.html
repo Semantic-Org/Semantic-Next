@@ -8,7 +8,14 @@
   </div>
   <ul class="todo-list">
     {{#each todo in getVisibleTodos}}
-      {{>todoItem todo=todo index=@index}}
+      {{maybe todo.completed 'completed' 'not'}}
+      {{>template
+        name='todoItem'
+        reactiveData = {
+          index: @index,
+          todo: todo
+        }
+      }}
     {{/each}}
   </ul>
 </main>
