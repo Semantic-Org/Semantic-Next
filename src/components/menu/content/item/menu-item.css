@@ -6,6 +6,7 @@
 }
 
 .item {
+  display: block;
   cursor: pointer;
   background: var(--menu-item-background);
   margin: var(--menu-item-margin);
