@@ -24,7 +24,7 @@ const state = {
   modalOpen: false,
 };
 
-const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
+const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings, $}) => ({
 
   initialize() {
     bindKey(settings.openKey, tpl.openModal);
@@ -80,7 +80,25 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
       let index = state.selectedIndex.get();
       let result = state.displayResults.getIndex(index);
       state.selectedResult.set(result);
+      tpl.scrollIntoView(index);
     });
+  },
+
+  scrollIntoView(index) {
+    if(!isRendered()) {
+      return;
+    }
+    const element = $('.results .result').get(index);
+    const container = $('.results').get(0);
+    if(!element) {
+      return;
+    }
+    const elementRect = element.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const notOnPage = elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom;
+    if (notOnPage) {
+      element.scrollIntoView({ block: 'nearest' });
+    }
   },
 
   mapResult(result) {
@@ -133,13 +151,12 @@ const createInstance = ({tpl, el, bindKey, reaction, state, settings, $}) => ({
     }
   },
   selectNext() {
-    if(state.selectedIndex.get() <= state.resultOffset.get() + settings.resultsPerPage) {
+    if(state.selectedIndex.get() < state.displayResults.peek().length - 1) {
       state.selectedIndex.increment();
     }
   },
   visitResult() {
     let result =  state.selectedResult.get();
-    window.location.href = result.url;
     tpl.hideModal();
   }
 
