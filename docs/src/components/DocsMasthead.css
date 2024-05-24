@@ -37,6 +37,6 @@
     width: auto;
     max-width: 1170px;
     margin-left: 1.5em;
-    margin-right: var(--rail-width);
+    margin-right: calc(var(--rail-width) + 2rem);
   }
 }

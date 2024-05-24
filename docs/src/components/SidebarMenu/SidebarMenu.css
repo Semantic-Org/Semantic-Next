@@ -120,6 +120,10 @@
   transition: opacity 0.2s ease;
   height: 0px;
 
+  .title.active {
+    color: #ffffff;
+  }
+
   &.active {
     opacity: 1;
     height: auto;

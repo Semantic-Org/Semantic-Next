@@ -35,7 +35,7 @@ const menuItems = (menu || []).map((item, index) => ({
     <h1>{header}</h1>
     <p>{description}</p>
     {isArray(menu) && (
-      <UIMenu three-item selection items={menuItems}></UIMenu>
+      <UIMenu evenly-spaced selection items={menuItems}></UIMenu>
     )}
   </ui-container>
 </masthead>

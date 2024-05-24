@@ -1,3 +1,81 @@
 ---
 layout: '@layouts/Guide.astro'
+title: Templating
+description: Using template features in Semantic UI
 ---
+
+
+Semantic includes a templating language (SCM) that can be used to construct your web component's DOM and bind data and events.
+
+This language is heavily inspired by [BlazeJS](https://www.blazejs.org/) which was the original templating language used for Meteor JS (now Apollo) but has been heavily modernized.
+
+This language is used to define Semantic UI's components and make it easier for handling **data binding**, **event binding**, **reactivity**, and other features.
+
+### Extensible
+
+Semantic UI's component architecture makes it easy for you to write your own components that are built using similar principles as the Semantic UI design system.
+
+This makes it easy for third party developers to extend the library and publish additional components, as well as to built private UI components for an organization that look and feel the same as the core library.
+
+
+### Features
+
+SCM can be used for any DOM structure but includes additional features which make it particularly useful for describing the Shadow DOM used in web components like `<slot>`.
+
+### Slots
+
+Default Slot
+```handlebars
+{{>slot}}
+```
+Named Slot
+```handlebars
+{{>slot icon}}
+```
+
+### Data
+
+HTML Sanitized Output
+```handlebars
+{{escaped}}
+```
+HTML Output
+```handlebars
+{{{someHTML}}}
+```
+Built in helpers
+```handlebars
+{{formatDate date 'MM/DD/YYYY'}}
+```
+
+### Subtemplates
+
+Template Support
+```handlebars
+{{> exampleSubtemplate}}
+```
+Dynamic Template Support
+```handlebars
+{{>template
+  name=getTemplateName
+  data={
+    afternoon: 'Biking',
+    evening: getEveningActivity,
+  }
+}}
+```
+
+Reactive Data Controls
+```handlebars
+{{>template
+  name=getTemplateName
+  reactiveData={
+    morning: morningActivity,
+  }
+  data={
+    afternoon: 'Biking',
+    evening: eveningActivity,
+  }
+}}
+```
+

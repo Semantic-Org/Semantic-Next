@@ -58,17 +58,13 @@ export const sidebarMenuUI = [
         url: '/usage'
       },
       {
-        name: 'Expert Guide',
-        url: '/expert-guide'
-      },
-      {
         name: 'Web Components',
         url: '/web-components'
       },
-      {
-        name: 'Templating',
-        url: '/templating'
-      }
+      /*{
+        name: 'Expert Guide',
+        url: '/expert-guide'
+      },*/
     ]
   },
   {
