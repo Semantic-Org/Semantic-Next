@@ -4,11 +4,11 @@
 
 .icon-only.buttons .button,
 .icon-only.button {
-  padding: var(--vertical-padding) var(--vertical-padding) ( var(--vertical-padding) + var(--shadow-offset) );
+  padding: var(--button-vertical-padding);
 }
-.icon-only.buttons .button > .icon,
-.icon-only.button > .icon {
-  opacity: var(--icon-button-opacity);
-  margin: 0em !important;
+.icon-only.buttons .button > ui-icon,
+.icon-only.button > ui-icon {
+  opacity: 1;
+  margin: 0em;
   vertical-align: top;
 }
