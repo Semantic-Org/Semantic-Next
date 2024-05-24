@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import { each, tokenize } from '@semantic-ui/utils';
-import { UIButton } from '@semantic-ui/core';
 import {
   getExampleFiles,
   addPlaygroundInjections,
@@ -44,11 +43,7 @@ const searchMeta = {
 
 <Playground searchMeta={searchMeta} showSidebar=true>
   <page>
-    <Sidebar>
-      <div class="action">
-        <UIButton fluid mini compact icon="minus" transparent inverted>Hide Menu</UIButton>
-      </div>
-    </SideBar>
+    <Sidebar></SideBar>
     <CodePlayground client:only
       files={files}
       example={example}
