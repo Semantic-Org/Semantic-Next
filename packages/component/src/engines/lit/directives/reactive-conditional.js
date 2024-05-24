@@ -21,7 +21,6 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         comp.stop();
         return;
       }
-      console.log('rerun', conditional.condition());
       if(conditional.condition()) {
         html = conditional.content();
       }

@@ -92,7 +92,7 @@ export const Template = class Template {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
-    if(parentTemplate._childTemplates) {
+    if(!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);

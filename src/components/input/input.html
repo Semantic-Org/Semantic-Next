@@ -1,6 +1,8 @@
-<div class="{{ui}} input" part="input-wrapper">
+<div class="{{ui}}input" part="group">
   <input type="text" placeholder="{{placeholder}}" name={{name}} value={{value}} part="input">
-  {{#if icon}}
+  {{#if is icon 'search'}}
+    hello
+  {{else}}
     <ui-icon icon={{icon}} part="icon"></ui-icon>
   {{/if}}
 </div>

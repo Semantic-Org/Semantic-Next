@@ -20,24 +20,14 @@ export class LitRenderer {
     return hashCode(JSON.stringify({ast}));
   };
 
-  constructor({ ast, data, litTemplate, subTemplates, helpers }) {
+  constructor({ ast, data, subTemplates, helpers }) {
     this.ast = ast || '';
     this.id = LitRenderer.getID({ast, data});
     this.data = data;
     this.renderTrees = {};
     this.subTemplates = subTemplates;
+    this.resetHTML();
     this.helpers = helpers || {};
-    this.litTemplate = litTemplate;
-  }
-
-  clone({data}) {
-    return new LitRenderer({
-      ast: this.ast,
-      data: this.data,
-      subTemplates: this.subTemplates,
-      litTemplate: this.litTemplate,
-      helpers: this.helpers,
-    });
   }
 
   resetHTML() {
@@ -51,7 +41,6 @@ export class LitRenderer {
     this can be cached on the web component class
   */
   render({ ast = this.ast, data = this.data } = {}) {
-    this.resetHTML();
     this.id = LitRenderer.getID({ast});
     this.data = data;
     this.resetHTML();
@@ -138,6 +127,9 @@ export class LitRenderer {
       if (key == 'content') {
         return (eachData) => {
           return this.renderSubtree({
+            // we currently dont have an adequate solution for not rerendering
+            //  identical subtrees with different data contexts
+            allowCache: false,
             ast: value,
             data: { ...this.data, ...eachData },
           });
@@ -183,7 +175,6 @@ export class LitRenderer {
       if (asDirective) {
         return reactiveData(() => {
           const result = this.lookupExpressionValue(expression);
-          console.log(expression, 'is', result);
           return result;
         }, { ifDefined, unsafeHTML });
       }
@@ -276,9 +267,6 @@ export class LitRenderer {
       else {
         result = undefined;
       }
-      if(expression == 'section') {
-        console.log('expression', expression, expressionString, result, this.data);
-      }
       funcArguments.unshift(result);
     });
     return result;
@@ -320,15 +308,13 @@ export class LitRenderer {
 
   // we only need to call 'render' the first time we create a subtree
   // subsequent runs can just modify the data context using tree.updateData(data)
-  renderSubtree({ ast, data, subTemplates, returnTree = false }) {
+  renderSubtree({ ast, data, subTemplates, returnTree = false, allowCache = true }) {
     const treeID = LitRenderer.getID({ast});
     let tree = this.renderTrees[treeID];
-    let clonedTree;
     let cached = false;
-    if(tree) {
-      clonedTree = tree.clone({data});
+    if(allowCache && tree) {
       // no need to rerender if we have existing subtree and same data
-      clonedTree.setData(data);
+      tree.setData(data);
       cached = true;
     }
     else {
@@ -339,7 +325,7 @@ export class LitRenderer {
       return tree;
     }
     if(cached) {
-      return clonedTree.cachedRender();
+      return tree.cachedRender();
     }
     else {
       return tree.render();
