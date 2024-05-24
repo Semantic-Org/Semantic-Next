@@ -188,7 +188,7 @@ class WebComponentBase extends LitElement {
 
       // primary -> emphasis="primary"
       each(componentSpec.optionAttributes, (attributeValues, attribute) => {
-        properties[attribute] = { type: String };
+        properties[attribute] = { type: String, noAccessor: true };
       });
     }
     if (settings) {

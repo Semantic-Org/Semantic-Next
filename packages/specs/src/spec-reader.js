@@ -93,7 +93,7 @@ export class SpecReader {
 
   // Returns the sequencing for a spec when displaying in a structured way
   getOrderedParts() {
-    return ['types', 'content', 'states', 'variations']
+    return ['types', 'content', 'states', 'variations'];
   }
 
   // returns definition object as an array of examples
@@ -186,9 +186,9 @@ export class SpecReader {
       delete attributes[attribute];
       defaultWords = values(attributes).join(' ');
     }
-    if(part.allowedValues) {
+    if(part.options) {
       let examplesToJoin = [];
-      each(part.allowedValues, (option, index) => {
+      each(part.options, (option, index) => {
         let code, componentParts;
         if(option.exampleCode) {
           // an example was provided in the spec for us
