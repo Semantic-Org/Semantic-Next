@@ -355,7 +355,6 @@ class WebComponentBase extends LitElement {
         else if(allowedValues && inArray(value, allowedValues)) {
           // this is a variation like emphasis="primary"
           // it receives the class "primary"
-          console.log(value);
           classes.push(value);
         }
 

@@ -42,19 +42,30 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
   // This is used to search for potential values that should
   // to the canonical way. This is because we support swapping ordering and spaces for dashes
-  const checkSpecForAttribute = (attribute, attributeValue) => {
 
-    // normalize spaces to dashes
-    const optionValue = tokenizeSpaces(attribute);
+  // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
+  // i.e <ui-button left-attached="somevalue">
+
+  const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
+
+    let optionsToCheck = [];
+
+    // "arrow down" -> arrow-down
+    optionsToCheck.push(tokenizeSpaces(optionValue));
+
+    // <div attached="left" or <div left-attached>
+    if(attribute) {
+      optionsToCheck.push(`${attribute}-${attributeValue}`);
+      optionsToCheck.push(`${attributeValue}-${attribute}`);
+    }
 
     //  "arrow-down" or "down-arrow"
-    const valuesToCheck = unique([
-      optionValue,
-      reverseDashes(optionValue)
-    ]);
+    optionsToCheck.push(reverseDashes(optionValue));
+
+    optionsToCheck = unique(optionsToCheck);
 
     // check each potential value to see if any match a known option
-    const matchingValue = firstMatch(valuesToCheck, (currentValue) => get(componentSpec.optionAttributes, currentValue));
+    const matchingValue = firstMatch(optionsToCheck, (currentValue) => get(componentSpec.optionAttributes, currentValue));
 
     // this attribute value does not seem to match any in spec
     if(!matchingValue) {
@@ -102,6 +113,7 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
       if(attributeValue === '') {
         // boolean attribute
         attributeValue = true;
+        return;
       }
 
       // this means the attribute was removed
@@ -111,8 +123,10 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
       }
 
       // we still need to transform values from "arrow down" to "arrow-down" or "down-arrow"
-      const { matchingValue } = checkSpecForAttribute(attributeValue, attributeValue);
-
+      const { matchingValue } = checkSpecForAllowedValue({
+        attribute,
+        optionValue: attributeValue
+      });
       // any other value could be a property
       if(matchingValue) {
         setProperty(attribute, matchingValue);
@@ -124,7 +138,10 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
     else if(attributeValue !== undefined) {
 
       // lets check to see if this is a valid property by checking allowed values
-      const { matchingAttribute, matchingValue } = checkSpecForAttribute(attribute, attributeValue);
+      const { matchingAttribute, matchingValue } = checkSpecForAllowedValue({
+        optionValue: attribute,
+        optionAttributeValue: attributeValue
+      });
 
       if (matchingAttribute && matchingValue) {
         setProperty(matchingAttribute, matchingValue);

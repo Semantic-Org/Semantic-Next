@@ -41,7 +41,7 @@
       "name": "Icon Only",
       "attribute": "icon-only",
       "description": "appear with only an icon",
-      "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>",
+      "exampleCode": "<ui-button icon-only icon=\"pause\"></ui-button>",
       "usageLevel": 2
     },
     {
@@ -60,10 +60,7 @@
       "options": [
         {
           "name": "Animated",
-          "value": [
-            true,
-            "horizontal-animated"
-          ],
+          "value": ["horizontal-animated"],
           "description": "formatted to animate hidden content horizontally",
           "exampleCode": "<ui-button animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
         },
