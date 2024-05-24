@@ -1,4 +1,6 @@
-:root {
+:host {
+  display: inline-block;
+  margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
   user-select: none;
 }
 *, :after, :before {
@@ -8,11 +10,10 @@
   -webkit-touch-callout: none;
 }
 .button {
+  display: inline-flex;
   cursor: pointer;
-  display: inline-block;
   min-height: 1em;
   border: var(--button-border);
-  margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
   vertical-align: var(--button-vertical-align);
   background: var(--button-background);
   color: var(--button-text-color);

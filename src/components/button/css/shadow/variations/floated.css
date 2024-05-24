@@ -2,15 +2,16 @@
        Floated
 --------------------*/
 
-.left-floated.buttons,
-.left-floated.button {
-  float: left;
-  margin-left: 0em;
+:host(.right-floated),
+:host([floated="right"]),
+:host([right-floated]) {
+  float: right;
   margin-right: var(--button-floated-margin);
 }
-.right-floated.buttons,
-.right-floated.button {
-  float: right;
-  margin-right: 0em;
+
+:host(.left-floated),
+:host([floated="left"]),
+:host([left-floated]) {
+  float: left;
   margin-left: var(--button-floated-margin);
 }

@@ -1,6 +1,8 @@
 /* src/components/button/css/shadow/content/button.css */
 @layer component.button.content.button {
-  :root {
+  :host {
+    display: inline-block;
+    margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
     user-select: none;
   }
   *,
@@ -12,11 +14,10 @@
     -webkit-touch-callout: none;
   }
   .button {
+    display: inline-flex;
     cursor: pointer;
-    display: inline-block;
     min-height: 1em;
     border: var(--button-border);
-    margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
     vertical-align: var(--button-vertical-align);
     background: var(--button-background);
     color: var(--button-text-color);
@@ -1361,132 +1362,26 @@
 
 /* src/components/button/css/shadow/variations/floated.css */
 @layer component.button.variations.floated {
-  .left-floated.buttons,
-  .left-floated.button {
-    float: left;
-    margin-left: 0em;
+  :host(.right-floated),
+  :host([floated="right"]),
+  :host([right-floated]) {
+    float: right;
     margin-right: var(--button-floated-margin);
   }
-  .right-floated.buttons,
-  .right-floated.button {
-    float: right;
-    margin-right: 0em;
+  :host(.left-floated),
+  :host([floated="left"]),
+  :host([left-floated]) {
+    float: left;
     margin-left: var(--button-floated-margin);
   }
 }
 
 /* src/components/button/css/shadow/variations/fluid.css */
 @layer component.button.variations.fluid {
-  .fluid.buttons,
-  .fluid.button {
+  :host(.fluid),
+  :host([fluid]) {
     width: 100%;
-  }
-  .fluid.button {
-    display: block;
-  }
-  .two.buttons {
-    width: 100%;
-  }
-  .two.buttons > .button {
-    width: 50%;
-  }
-  .three.buttons {
-    width: 100%;
-  }
-  .three.buttons > .button {
-    width: 33.333%;
-  }
-  .four.buttons {
-    width: 100%;
-  }
-  .four.buttons > .button {
-    width: 25%;
-  }
-  .five.buttons {
-    width: 100%;
-  }
-  .five.buttons > .button {
-    width: 20%;
-  }
-  .six.buttons {
-    width: 100%;
-  }
-  .six.buttons > .button {
-    width: 16.666%;
-  }
-  .seven.buttons {
-    width: 100%;
-  }
-  .seven.buttons > .button {
-    width: 14.285%;
-  }
-  .eight.buttons {
-    width: 100%;
-  }
-  .eight.buttons > .button {
-    width: 12.500%;
-  }
-  .nine.buttons {
-    width: 100%;
-  }
-  .nine.buttons > .button {
-    width: 11.11%;
-  }
-  .ten.buttons {
-    width: 100%;
-  }
-  .ten.buttons > .button {
-    width: 10%;
-  }
-  .eleven.buttons {
-    width: 100%;
-  }
-  .eleven.buttons > .button {
-    width: 9.09%;
-  }
-  .twelve.buttons {
-    width: 100%;
-  }
-  .twelve.buttons > .button {
-    width: 8.3333%;
-  }
-  .fluid.vertical.buttons,
-  .fluid.vertical.buttons > .button {
-    display: flex;
-    width: auto;
-  }
-  .two.vertical.buttons > .button {
-    height: 50%;
-  }
-  .three.vertical.buttons > .button {
-    height: 33.333%;
-  }
-  .four.vertical.buttons > .button {
-    height: 25%;
-  }
-  .five.vertical.buttons > .button {
-    height: 20%;
-  }
-  .six.vertical.buttons > .button {
-    height: 16.666%;
-  }
-  .seven.vertical.buttons > .button {
-    height: 14.285%;
-  }
-  .eight.vertical.buttons > .button {
-    height: 12.500%;
-  }
-  .nine.vertical.buttons > .button {
-    height: 11.11%;
-  }
-  .ten.vertical.buttons > .button {
-    height: 10%;
-  }
-  .eleven.vertical.buttons > .button {
-    height: 9.09%;
-  }
-  .twelve.vertical.buttons > .button {
-    height: 8.3333%;
+    margin: 0;
   }
 }
 
