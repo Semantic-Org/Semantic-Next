@@ -248,7 +248,7 @@ class WebComponentBase extends LitElement {
   /*
     This sets default settings for a component
   */
-  setDefaultSettings(settings = {}) {
+  setDefaultSettings({settings = {}, componentSpec}) {
     this.defaultSettings = settings;
     each(settings, (setting, name) => {
       if (setting?.default !== undefined) {
@@ -260,6 +260,12 @@ class WebComponentBase extends LitElement {
         this.defaultSettings[name] = setting;
       }
     });
+    if(componentSpec?.defaultValues) {
+      this.defaultSettings = {
+        ...componentSpec.defaultValues,
+        ...this.defaultSettings
+      };
+    }
   }
 
 
@@ -340,12 +346,11 @@ class WebComponentBase extends LitElement {
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
 
-      const allowedValues = componentSpec.allowedValues[attribute];
-      const propertyType = componentSpec.propertyTypes[attribute];
       const value = this[attribute];
-      // this attribute
-      if(value) {
 
+      if(value) {
+        const allowedValues = componentSpec.allowedValues[attribute];
+        const propertyType = componentSpec.propertyTypes[attribute];
         if(propertyType == Boolean) {
           // this is a variation like active=true
           // it receives the class "active"

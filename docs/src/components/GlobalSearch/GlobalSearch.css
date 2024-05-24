@@ -132,6 +132,9 @@ ui-modal {
     }
   }
   .results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
     background-color: var(--standard-0);
     background-image: linear-gradient(to bottom right, rgb(23 27 30), rgb(2 14 22));
     border-radius: var(--bottom-attached-border-radius);
@@ -148,7 +151,6 @@ ui-modal {
       background-color: rgb(0 0 0 / 28%);
       padding: var(--padding);
       border-radius: var(--border-radius);
-      margin: var(--vertically-spaced);
       box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
       border: 1px solid rgb(165 165 165 / 10%);
 
@@ -251,4 +253,29 @@ ui-modal {
     }
 
   }
+}
+
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-height);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar-track {
+  background: var(--track-background);
+  border-radius: var(--track-border-radius);
+}
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: var(--thumb-border-radius);
+  background: var(--thumb-background);
+  transition: var(--thumb-transition);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inactive-background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hover-background);
 }

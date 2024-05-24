@@ -1,18 +1,9 @@
 ---
 import Body from '../layouts/Body.astro';
-import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
-import { UIInput } from '@semantic-ui/core';
-
-const menu = [{name: 'One', url: '/test#one'}, { name: 'Two', url: '/test#two' }, { name: 'Three', url: '/test#three' }];
-
+import { UIMenu, MenuItem } from '@semantic-ui/core';
 ---
 <Body padded>
-<TopbarMenu
-  client:load
-  menu={menu}
-></TopbarMenu>
-
-<hr>
-<br><br>
-<UIInput client:load placeholder="Search site..." icon="search" label="ctrl+k"></UIInput>
+<UIMenu selection client:load>
+  <MenuItem active>Test</MenuItem>
+</UIMenu>
 </Body>
