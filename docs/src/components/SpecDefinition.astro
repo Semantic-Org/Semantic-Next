@@ -6,7 +6,6 @@ import UIComponent from '@components/UIComponent.astro';
 
 const { spec, plural, definition, componentName } = Astro.props;
 
-console.log('.astro check', definition.types[1].examples);
 const sections = ['types', 'content', 'states', 'variations'];
 ---
 {sections.map((section) => (
