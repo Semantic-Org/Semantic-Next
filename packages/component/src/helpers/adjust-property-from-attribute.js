@@ -48,13 +48,13 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
   const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
 
-    let optionsToCheck = [];
-
     // "arrow down" -> arrow-down
-    optionsToCheck.push(tokenizeSpaces(optionValue));
+    optionValue = tokenizeSpaces(optionValue);
+
+    let optionsToCheck = [optionValue];
 
     // <div attached="left" or <div left-attached>
-    if(attribute) {
+    if(attribute && optionValue) {
       optionsToCheck.push(`${attribute}-${attributeValue}`);
       optionsToCheck.push(`${attributeValue}-${attribute}`);
     }
@@ -120,6 +120,10 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
       // this means the attribute was removed
       if(attributeValue === null) {
         removeProperty(attribute);
+        return;
+      }
+
+      if(attributeValue === undefined) {
         return;
       }
 
