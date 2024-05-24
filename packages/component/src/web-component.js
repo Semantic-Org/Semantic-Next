@@ -344,7 +344,6 @@ class WebComponentBase extends LitElement {
       const value = this[attribute];
 
       if(value) {
-
         const allowedValues = componentSpec.allowedValues[attribute];
         const propertyType = componentSpec.propertyTypes[attribute];
         if(propertyType == Boolean) {

@@ -113,6 +113,7 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
       if(attributeValue === '') {
         // boolean attribute
         attributeValue = true;
+        setProperty(attribute, attributeValue);
         return;
       }
 
@@ -127,6 +128,7 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
         attribute,
         optionValue: attributeValue
       });
+
       // any other value could be a property
       if(matchingValue) {
         setProperty(attribute, matchingValue);
