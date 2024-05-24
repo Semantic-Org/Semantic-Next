@@ -1,17 +1,20 @@
-.definition h3 {
-  font-size: 16px;
-}
-.definition h3 + p {
-  margin-top: -1rem;
-}
-.definition h3 + h4 {
-  margin-top: -1rem;
-}
-.definition h4 {
-  margin: 0.25rem 0rem 1rem;
-  font-size: 15px;
-  transition: color 0.3s ease;
-  font-weight: normal;
+.definition {
+
+  h3 {
+    font-size: 16px;
+  }
+  h3 + p {
+    margin-top: -1rem;
+  }
+  h3 + h4 {
+    margin-top: -1rem;
+  }
+  h4 {
+    margin: 0.25rem 0rem 1rem;
+    font-size: 15px;
+    transition: color 0.3s ease;
+    font-weight: normal;
+  }
 }
 
 code-example {
@@ -21,12 +24,16 @@ code-example {
   padding-right: 1rem;
   transition: box-shadow 0.3s ease;
   box-shadow: -3px 0px 0px transparent;
-}
-code-example.another {
-  margin-top: 4rem;
-}
-code-example.highlight {
-  box-shadow: -3px 0px 0px var(--warning-text-color);
+
+  &.another {
+    margin-top: 4rem;
+  }
+  &.highlight {
+    box-shadow: -3px 0px 0px var(--warning-text-color);
+  }
+  ui-button {
+    margin-bottom: 5px;
+  }
 }
 code-example::part(header) {
   transition: color 0.3s ease;
@@ -36,9 +43,6 @@ code-example.highlight::part(header) {
 }
 
 
-code-example ui-button {
-  margin-bottom: 5px;
-}
 
 #button {
 
