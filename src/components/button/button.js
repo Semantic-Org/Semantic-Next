@@ -59,6 +59,7 @@ const events = {
     }
   }
 };
+
 export const UIButton = createComponent({
   tagName: 'ui-button',
   componentSpec: ButtonComponentSpec,

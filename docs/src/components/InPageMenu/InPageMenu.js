@@ -90,7 +90,7 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
   // returns all titles and items as a flat ordered list
   getFlattenedMenu() {
     const menuArrays = settings.menu.map(section => {
-      const parentItem = { title: section.title, _id: section.id };
+      const parentItem = { title: section?.title, _id: section?.id };
       return [
         parentItem,
         ...section.items
