@@ -99,7 +99,7 @@ export const createComponent = ({
         super();
         this.css = css;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
-        this.setDefaultSettings(settings);
+        this.setDefaultSettings({settings, componentSpec});
       }
 
       // callback when added to dom

@@ -242,7 +242,7 @@ class WebComponentBase extends LitElement {
   /*
     This sets default settings for a component
   */
-  setDefaultSettings(settings = {}) {
+  setDefaultSettings({settings = {}, componentSpec}) {
     this.defaultSettings = settings;
     each(settings, (setting, name) => {
       if (setting?.default !== undefined) {
@@ -254,6 +254,12 @@ class WebComponentBase extends LitElement {
         this.defaultSettings[name] = setting;
       }
     });
+    if(componentSpec?.defaultValues) {
+      this.defaultSettings = {
+        ...componentSpec.defaultValues,
+        ...this.defaultSettings
+      };
+    }
   }
 
 
