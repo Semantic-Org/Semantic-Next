@@ -1,11 +1,9 @@
 ---
 import Body from '../layouts/Body.astro';
-import { UIButton, UIIcon } from '@semantic-ui/core';
+import { UIMenu, MenuItem } from '@semantic-ui/core';
 ---
 <Body padded>
-<UIButton top-attached client:load>Top Attached</UIButton>
-<br><br>
-<UIButton attached="top-attached" client:load>Top Attached</UIButton>
-<br><br>
-<UIButton attached="top" client:load>Top Attached</UIButton>
+<UIMenu selection client:load>
+  <MenuItem active>Test</MenuItem>
+</UIMenu>
 </Body>
