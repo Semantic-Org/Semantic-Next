@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, hashCode, fatal, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -16,13 +16,28 @@ export class LitRenderer {
   static OUTER_PARENS_REGEXP = /^\((.+)\)$/;
   static EXPRESSION_REGEXP = /('[^']*'|[^\s]+)/g;
 
-  constructor({ ast, data, subTemplates, helpers }) {
+  static getID = ({ast}) => {
+    return hashCode(JSON.stringify({ast}));
+  };
+
+  constructor({ ast, data, litTemplate, subTemplates, helpers }) {
     this.ast = ast || '';
+    this.id = LitRenderer.getID({ast, data});
     this.data = data;
-    this.renderTrees = [];
+    this.renderTrees = {};
     this.subTemplates = subTemplates;
-    this.resetHTML();
     this.helpers = helpers || {};
+    this.litTemplate = litTemplate;
+  }
+
+  clone({data}) {
+    return new LitRenderer({
+      ast: this.ast,
+      data: this.data,
+      subTemplates: this.subTemplates,
+      litTemplate: this.litTemplate,
+      helpers: this.helpers,
+    });
   }
 
   resetHTML() {
@@ -37,13 +52,20 @@ export class LitRenderer {
   */
   render({ ast = this.ast, data = this.data } = {}) {
     this.resetHTML();
-    this.readAST({ ast, data });
+    this.id = LitRenderer.getID({ast});
+    this.data = data;
+    this.resetHTML();
+    this.readAST({ ast });
     this.clearTemp();
     this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
   }
 
-  readAST({ ast = this.ast, data = this.data } = {}) {
+  cachedRender() {
+    return this.litTemplate;
+  }
+
+  readAST({ ast = this.ast } = {}) {
     each(ast, (node) => {
       switch (node.type) {
         case 'html':
@@ -51,7 +73,7 @@ export class LitRenderer {
           break;
 
         case 'expression':
-          const value = this.evaluateExpression(node.value, data, {
+          const value = this.evaluateExpression(node.value, {
             unsafeHTML: node.unsafeHTML,
             ifDefined: node.ifDefined,
             asDirective: true,
@@ -60,15 +82,15 @@ export class LitRenderer {
           break;
 
         case 'if':
-          this.addValue(this.evaluateConditional(node, data));
+          this.addValue(this.evaluateConditional(node));
           break;
 
         case 'each':
-          this.addValue(this.evaluateEach(node, data));
+          this.addValue(this.evaluateEach(node));
           break;
 
         case 'template':
-          this.addValue(this.evaluateTemplate(node, data));
+          this.addValue(this.evaluateTemplate(node));
           break;
 
         case 'slot':
@@ -88,16 +110,16 @@ export class LitRenderer {
     but does not have access to LitRenderer and evaluateExpression
     so we have to pass through functions that do this
   */
-  evaluateConditional(node, data) {
+  evaluateConditional(node) {
     const directiveMap = (value, key) => {
       if (key == 'branches') {
         return value.map((branch) => mapObject(branch, directiveMap));
       }
       if (key == 'condition') {
-        return () => this.evaluateExpression(value, data);
+        return () => this.evaluateExpression(value);
       }
       if (key == 'content') {
-        return () => this.renderContent({ ast: value, data });
+        return () => this.renderSubtree({ ast: value, data: this.data });
       }
       return value;
     };
@@ -105,31 +127,31 @@ export class LitRenderer {
     return reactiveConditional(conditionalArguments);
   }
 
-  evaluateEach(node, data) {
+  evaluateEach(node) {
     const directiveMap = (value, key) => {
       if (key == 'over') {
         return (expressionString) => {
-          const computedValue = this.evaluateExpression(value, data);
+          const computedValue = this.evaluateExpression(value);
           return computedValue;
         };
       }
       if (key == 'content') {
         return (eachData) => {
-          return this.renderContent({
+          return this.renderSubtree({
             ast: value,
-            data: { ...data, ...eachData },
+            data: { ...this.data, ...eachData },
           });
         };
       }
       return value;
     };
     let eachArguments = mapObject(node, directiveMap);
-    return reactiveEach(eachArguments, data);
+    return reactiveEach(eachArguments, this.data);
   }
 
-  evaluateTemplate(node, data = {}) {
+  evaluateTemplate(node) {
     const getValue = (expressionString) => {
-      const value = this.evaluateExpression(expressionString, data);
+      const value = this.evaluateExpression(expressionString);
       return value;
     };
 
@@ -151,25 +173,22 @@ export class LitRenderer {
       subTemplates: this.subTemplates,
       getTemplateName: getTemplateName,
       data: templateData,
-      parentTemplate: data,
+      parentTemplate: this.data,
     });
   }
 
   // i.e foo.baz = { foo: { baz: 'value' } }
-  evaluateExpression(
-    expression,
-    data = this.data,
-    { asDirective = false, ifDefined = false, unsafeHTML = false } = {}
-  ) {
+  evaluateExpression(expression, { asDirective = false, ifDefined = false, unsafeHTML = false } = {}) {
     if (typeof expression === 'string') {
       if (asDirective) {
-        return reactiveData(
-          () => this.lookupExpressionValue(expression, this.data),
-          { ifDefined, unsafeHTML }
-        );
+        return reactiveData(() => {
+          const result = this.lookupExpressionValue(expression);
+          console.log(expression, 'is', result);
+          return result;
+        }, { ifDefined, unsafeHTML });
       }
       else {
-        return this.lookupExpressionValue(expression, data);
+        return this.lookupExpressionValue(expression);
       }
     }
     return expression;
@@ -178,11 +197,10 @@ export class LitRenderer {
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
   // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
-  lookupExpressionValue(
-    expressionString = '',
-    data = {},
-    { unsafeHTML = false } = {}
-  ) {
+  lookupExpressionValue(expressionString = '', { unsafeHTML = false } = {}) {
+
+    const data = this.data;
+
     // if the whole expression is a string we want to return that
     const stringRegExp = LitRenderer.STRING_REGEXP;
     const stringMatches = expressionString.match(stringRegExp);
@@ -205,6 +223,7 @@ export class LitRenderer {
     let funcArguments = [];
     let result;
     each(expressions, (expression, index) => {
+
       // This lookups a deep value in an object, calling any intermediary functions
       const getDeepValue = (obj, path) =>
         path.split('.').reduce((acc, part) => {
@@ -257,6 +276,9 @@ export class LitRenderer {
       else {
         result = undefined;
       }
+      if(expression == 'section') {
+        console.log('expression', expression, expressionString, result, this.data);
+      }
       funcArguments.unshift(result);
     });
     return result;
@@ -284,30 +306,57 @@ export class LitRenderer {
     this.addHTMLSpacer();
   }
 
-  // subtrees are rendered as separate contexts
-  renderContent({ ast, data, subTemplates }) {
+  // each subtree is rendered as a separate context recursively
+  createSubtree({ ast, data, subTemplates }) {
     const tree = new LitRenderer({
       ast,
-      data,
+      data: data,
       subTemplates: this.subTemplates,
       helpers: this.helpers,
     });
-    this.renderTrees.push(tree);
-    return tree.render();
+    this.renderTrees[tree.id] = tree;
+    return tree;
+  }
+
+  // we only need to call 'render' the first time we create a subtree
+  // subsequent runs can just modify the data context using tree.updateData(data)
+  renderSubtree({ ast, data, subTemplates, returnTree = false }) {
+    const treeID = LitRenderer.getID({ast});
+    let tree = this.renderTrees[treeID];
+    let clonedTree;
+    let cached = false;
+    if(tree) {
+      clonedTree = tree.clone({data});
+      // no need to rerender if we have existing subtree and same data
+      clonedTree.setData(data);
+      cached = true;
+    }
+    else {
+      // otherwise parse ast and create subtree
+      tree = this.createSubtree({ast, data, subTemplates});
+    }
+    if(returnTree) {
+      return tree;
+    }
+    if(cached) {
+      return clonedTree.cachedRender();
+    }
+    else {
+      return tree.render();
+    }
   }
 
   setData(data) {
-    this.data = data;
+    this.updateData(data);
     each(this.renderTrees, (tree) => {
-      tree.updateData(data);
+      tree.setData(data);
     });
   }
 
+  // avoid clobbering other values
   updateData(data) {
-    each(data, (value, name) => {
-      if(this.data[name] !== undefined && this.data[name] !== value) {
-        this.data[name] = value;
-      }
+    each(data, (value, key) => {
+      this.data[key] = value;
     });
   }
 

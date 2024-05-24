@@ -92,6 +92,9 @@ export const Template = class Template {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
+    if(parentTemplate._childTemplates) {
+      parentTemplate._childTemplates = [];
+    }
     parentTemplate._childTemplates.push(this);
     this.parentTemplate = parentTemplate;
   }
@@ -116,7 +119,6 @@ export const Template = class Template {
       this.call(tpl.initialize.bind(this));
     }
     this.tpl.templateName = this.templateName;
-    this.tpl._childTemplates = [];
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);

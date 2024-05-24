@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
+import { defineReactiveProperty } from './helpers/define-reactive-property.js';
 
 /*
   This extends the base Lit element class
@@ -167,6 +168,11 @@ class WebComponentBase extends LitElement {
            Lit Properties
   *******************************/
 
+  /*
+    This defines the initial properties on the web component
+    from the values in either a 'componentSpec' (advanced)
+    or 'settings' object (basic)
+  */
   static getProperties({ properties = {}, settings, componentSpec }) {
     if (keys(properties).length) {
       return properties;
@@ -264,6 +270,7 @@ class WebComponentBase extends LitElement {
   getSettings({componentSpec, properties}) {
     let settings = {};
     each(properties, (propSettings, property) => {
+
       if (property == 'class' || propSettings.observe === false) {
         return;
       }
@@ -278,13 +285,11 @@ class WebComponentBase extends LitElement {
         ?? (componentSpec?.defaultSettings || {})[property] // check default setting on component spec
       ;
       // only pass through setting if it is defined
-      if(setting !== undefined) {
-        settings[property] = setting;
+      if(setting === undefined) {
+        return;
       }
-      // boolean attribute case
-      if (componentSpec && settings[elementProp] !== undefined) {
-        settings[elementProp] = true;
-      }
+      //settings[property] = setting;
+      defineReactiveProperty(settings, property, setting);
     });
     return settings;
   }
@@ -363,9 +368,6 @@ class WebComponentBase extends LitElement {
     let classString = unique(classes).join(' ');
     if(classString) {
       classString += ' ';
-    }
-    if(classString.search('icon value') > -1) {
-      debugger;
     }
     return classString;
   }

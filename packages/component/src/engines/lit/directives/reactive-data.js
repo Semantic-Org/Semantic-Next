@@ -15,7 +15,10 @@ export class ReactiveDataDirective extends AsyncDirective {
   }
 
   render(computeFunc, settings = {}) {
-    // Stop and clean up any existing reaction
+
+    // we cant assume to use the same reaction
+    // because expressions are dynamic and the
+    // computeFunc may have new reactivity properties
     if (this.reaction) {
       this.reaction.stop();
     }
