@@ -106,7 +106,8 @@ export class ReactiveEachDirective extends AsyncDirective {
     const itemID = this.getItemID(item, index);
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
     const sameData = isEqual(this.templateCachedData.get(itemID), eachData);
-    if (false && sameIndex && sameData) {
+    if (sameIndex && sameData) {
+      console.log('cached', index);
       // reuse the template nothing to rerender
       return {
         cached: true,

@@ -15,14 +15,12 @@ export class RenderTemplateDirective extends AsyncDirective {
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
-    const maybeCreateTemplate = () => {
+    const isDifferentTemplate = () => {
+      return this.templateName !== getTemplateName();
+    };
+    const renderNewTemplate = () => {
 
       const templateName = getTemplateName();
-
-      // check if the template name is set and is the same as current
-      if (this.template && this.templateName == templateName) {
-        return false;
-      }
       this.templateName = templateName;
 
       // find template to render
@@ -33,9 +31,14 @@ export class RenderTemplateDirective extends AsyncDirective {
           subTemplates
         );
       }
-      // clone if it has changed
+
+      // create copy of template prototype
       this.template = template.clone({ data: unpackData(data) });
-      return true;
+
+      // attach this template to parent element
+      attachTemplate();
+
+      return this.template.render();
     };
     const attachTemplate = () => {
       const { parentNode, startNode, endNode } = this.part || {}; // stored from update
@@ -53,27 +56,27 @@ export class RenderTemplateDirective extends AsyncDirective {
       }
     };
     const renderTemplate = () => {
-      let html = this.template.render();
-      return html;
+      // check if we've rendered
+      if (isDifferentTemplate()) {
+        this.html = renderNewTemplate();
+      }
+      else {
+        this.template.setDataContext(unpackData(data), { rerender: false });
+      }
+      return this.html;
     };
-    Reaction.create((comp) => {
+    let html;
+    Reaction.create((computation) => {
       if (!this.isConnected) {
-        comp.stop();
+        computation.stop();
         return;
       }
-      const hasCreated = maybeCreateTemplate(); // reactive reference
-      if (!comp.firstRun) {
-        attachTemplate();
-        if (!hasCreated) {
-          this.template.setDataContext(unpackData(data), { rerender: false });
-        }
-        this.setValue(renderTemplate());
+      html = renderTemplate();
+      if(isDifferentTemplate()) {
+        this.setValue(html);
       }
     });
-    maybeCreateTemplate();
-    attachTemplate();
-    this.template.setDataContext(unpackData(data));
-    return renderTemplate();
+    return html;
   }
 
   update(part, settings) {

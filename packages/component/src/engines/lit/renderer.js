@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, inArray, filterObject, fatal, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -16,10 +16,19 @@ export class LitRenderer {
   static OUTER_PARENS_REGEXP = /^\((.+)\)$/;
   static EXPRESSION_REGEXP = /('[^']*'|[^\s]+)/g;
 
+  static getID(ast, data) {
+    const hashData = filterObject(data, (value) => {
+      return inArray(typeof value, ['string', 'number']) || value.constructor === Object;
+    });
+    const key = JSON.stringify({ast, hashData});
+    return hashCode(key);
+  }
+
   constructor({ ast, data, subTemplates, helpers }) {
     this.ast = ast || '';
     this.data = data;
-    this.renderTrees = [];
+    this.id = LitRenderer.getID(ast, data);
+    this.renderTrees = {};
     this.subTemplates = subTemplates;
     this.resetHTML();
     this.helpers = helpers || {};
@@ -37,9 +46,14 @@ export class LitRenderer {
   */
   render({ ast = this.ast, data = this.data } = {}) {
     this.resetHTML();
+    this.id = LitRenderer.getID(ast, data);
     this.readAST({ ast, data });
     this.clearTemp();
     this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
+    return this.litTemplate;
+  }
+
+  cachedRender() {
     return this.litTemplate;
   }
 
@@ -97,7 +111,7 @@ export class LitRenderer {
         return () => this.evaluateExpression(value, data);
       }
       if (key == 'content') {
-        return () => this.renderContent({ ast: value, data });
+        return () => this.renderSubtree({ ast: value, data });
       }
       return value;
     };
@@ -115,7 +129,7 @@ export class LitRenderer {
       }
       if (key == 'content') {
         return (eachData) => {
-          return this.renderContent({
+          return this.renderSubtree({
             ast: value,
             data: { ...data, ...eachData },
           });
@@ -273,29 +287,49 @@ export class LitRenderer {
     this.lastHTML = true;
   }
 
+  // spacer is necessary foo`{'one'}` evaluates to foo(['',''] ['one']) with tagged template literals
   addHTMLSpacer() {
     this.addHTML('');
   }
 
   addValue(expression) {
-    this.addHTMLSpacer(); // spacer is necessary foo`{'one'}` evaluates to foo(['',''] ['one']) with tagged template literals
+    this.addHTMLSpacer();
     this.expressions.push(expression);
     this.lastHTML = false;
     this.addHTMLSpacer();
   }
 
-  // subtrees are rendered as separate contexts
-  renderContent({ ast, data, subTemplates }) {
+  // each subtree is rendered as a separate context recursively
+  createSubtree({ ast, data, subTemplates }) {
     const tree = new LitRenderer({
       ast,
       data,
       subTemplates: this.subTemplates,
       helpers: this.helpers,
     });
-    this.renderTrees.push(tree);
-    return tree.render();
+    this.renderTrees[tree.id] = tree;
+    return tree;
   }
 
+  // we only need to call 'render' the first time we create a subtree
+  // subsequent runs can just modify the data context using tree.updateData(data)
+  renderSubtree({ ast, data, subTemplates, skipCache = false }) {
+    const treeID = LitRenderer.getID(ast, data);
+    let tree = this.renderTrees[treeID];
+    if(tree && !skipCache) {
+      // no need to rerender if we have existing subtree
+      tree.updateData(data);
+      return tree.cachedRender();
+    }
+    else {
+      // otherwise parse ast and create subtree
+      tree = this.createSubtree({ast, data, subTemplates});
+      console.log('render', treeID);
+      return tree.render();
+    }
+  }
+
+  // set data context of a subtree
   setData(data) {
     this.data = data;
     each(this.renderTrees, (tree) => {
@@ -303,6 +337,7 @@ export class LitRenderer {
     });
   }
 
+  // update current template with new values
   updateData(data) {
     each(data, (value, name) => {
       if(this.data[name] !== undefined && this.data[name] !== value) {
