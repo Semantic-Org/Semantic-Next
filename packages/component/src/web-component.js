@@ -369,9 +369,6 @@ class WebComponentBase extends LitElement {
     if(classString) {
       classString += ' ';
     }
-    if(classString.search('icon value') > -1) {
-      debugger;
-    }
     return classString;
   }
 
