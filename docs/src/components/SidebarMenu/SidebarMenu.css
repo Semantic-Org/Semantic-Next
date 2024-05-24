@@ -5,6 +5,33 @@
 :host {
   font-size: inherit;
   padding: 0rem 1rem;
+
+  --title-padding: var(--compact-spacing) 0rem;
+  --title-color: #798088;
+  --title-font-size: 14px;
+
+  --description-font-size: 12px;
+  --descrition-opacity: 0.4;
+  --description-distance: var(--compact-spacing);
+
+  --title-icon-font-size: 18px;
+  --title-icon-width: 1.5rem;
+  --title-icon-distance: 1rem;
+
+  --dropdown-icon-opacity: 0.3;
+  --dropdown-icon-font-size: 12px;
+
+  --content-indent-distance: 0.5rem;
+  --content-icon-indent-distance: calc(var(--title-icon-width) + var(--title-icon-distance));
+
+  --sub-title-font-size: 13px;
+  --sub-title-padding: 4px 0px;
+
+  --sub-content-indent-distance: 0.25rem;
+
+  --menu-item-font-size: 13px;
+  --menu-item-spacing: 6px;
+  --menu-item-color: var(--white-40);
 }
 
 .title {
@@ -12,24 +39,25 @@
   cursor: pointer;
   flex-direction: row;
   text-align: left;
-  font-size: var(--14px);
+  font-size: var(--title-font-size);
   text-transform: none;
   font-weight: bold;
-  padding: 0.5rem 0rem;
-  color: #798088;
+  align-items: center;
+  padding: var(--title-padding);
+  color: var(--title-color);
   text-decoration: none;
 
   .description {
     float: right;
-    opacity: 0.4;
-    margin-left: 0.5rem;
-    font-size: 12px;
+    opacity: var(--description-opacity);
+    margin-left: var(--description-distance);
+    font-size: var(--description-font-size);
   }
 
   .dropdown {
-    opacity: 0.3;
-    font-size: 12px;
-    transition: all 0.3s ease;
+    opacity: var(--dropdown-icon-opacity);
+    font-size: var(--dropdown-icon-font-size);
+    transition: transform 0.3s ease;
     transform: rotate(90deg);
     width: auto;
     margin-right: 0px;
@@ -37,19 +65,19 @@
   }
 }
 .title {
-  .glyph {
+  .icon {
     display: block;
-    width: 1.5rem;
+    width: var(--title-icon-width);
     flex: 0 0 auto;
     text-align: center;
-    margin-right: 1rem;
-    font-size: 18px;
+    margin-right: var(--title-icon-distance);
+    font-size: var(--title-icon-font-size);
   }
   + .content {
-    padding: 0rem 0rem 0rem 0.5rem;
+    padding: 0rem 0rem 0rem var(--content-indent-distance);
   }
   + .indented.content {
-    padding-left: 2.55rem;
+    padding-left: var(--content-icon-indent-distance);
   }
 }
 
@@ -57,34 +85,31 @@
 .content {
   .title {
     display: flex;
-    font-size: 13px;
-    padding: 4px 0px;
-  }
-  .title + .content {
-    padding: 0rem 0rem 0rem 0.25rem !important;
-  }
-  .title .content .title {
-    font-size: 12px;
+    font-size: var(--sub-title-font-size);
+    padding: var(--sub-title-padding);
+    + .content {
+      padding: 0rem 0rem 0rem var(--sub-content-indent-distance) !important;
+    }
   }
 
   .menu {
     display: flex;
     flex-direction: column;
-    gap: 2px;
 
     .item {
       display: flex;
       text-decoration: none;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--menu-item-color);
       line-height: 1;
-      font-size: var(--13px);
-      padding: 5px 0px;
+      font-size: var(--menu-item-font-size);
+      padding: var(--menu-item-spacing) 0px;
     }
 
     /* Third Level Menu */
     .content .menu {
+
       .item {
-        padding: 0.35em 0em;
+        padding: 5px 0px;
       }
     }
   }
@@ -103,7 +128,6 @@
     color: #ffffff;
 
     .dropdown {
-      margin-top: 3px;
       opacity: 0.8;
       transform: rotate(0deg);
     }

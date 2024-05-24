@@ -46,9 +46,24 @@
   }
   sidebar {
     height: 100%;
-    box-shadow: none;
     margin: 0;
     border-right: var(--playground-border) !important;
+
+    ui-button {
+      margin: 0.5rem;
+    }
+
+    sidebar-menu {
+      margin-top: 0rem;
+      --title-icon-font-size: 13px;
+      --title-icon-width: 1rem;
+      --title-icon-distance: 9px;
+      --content-icon-indent-distance: 7px;
+      --sub-content-indent-distance: 0.25rem;
+      --menu-item-font-size: 12px;
+      --menu-item-spacing: 6px;
+    }
+
   }
 
   page {

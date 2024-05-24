@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, inArray, isString, any, unique } from '@semantic-ui/utils';
+import { firstMatch, get, groupBy, asyncEach, each, flatten, keys, isArray, inArray, isString, any, unique } from '@semantic-ui/utils';
 
 const components = await getCollection('components');
 const componentPages = components.map(page => ({
@@ -307,6 +307,13 @@ const createExampleMenu = () => {
   const categories = groupBy(examplePages, 'category');
   let menu = [];
 
+  const getCategoryIcon = (category) => {
+    const group = firstMatch(sidebarMenuFramework, (group => group.name == category));
+    if(group) {
+      return group?.icon;
+    }
+  };
+
   each(categories, (examples, category) => {
     let subcategories = groupBy(examples, 'subcategory');
     let pages = [];
@@ -331,10 +338,11 @@ const createExampleMenu = () => {
     }
     menu.push({
       name: category,
+      icon: getCategoryIcon(category),
       pages
     });
   });
-  return menu;
+  return menu.filter(menu => menu);
 };
 export const sidebarMenuExamples = createExampleMenu();
 
@@ -391,7 +399,7 @@ export const getFlattenedSidebarMenu = async (topbarSection) => {
       ...(section.pages || [])
     ];
   });
-  return flatten(menuArrays);
+  return flatten(menuArrays).filter(Boolean);
 };
 
 export const getTopBarMenu = async () => {
@@ -422,7 +430,7 @@ export const getRailMenu = (headings) => {
         id: heading.slug,
         title: heading.text,
         items: []
-      }
+      };
     }
     else if(menuGroup) {
       // only pay attention to 1 level deeper
@@ -435,5 +443,5 @@ export const getRailMenu = (headings) => {
     }
   });
   menu.push(menuGroup);
-  return menu;
+  return menu.filter(Boolean);
 };

@@ -8,9 +8,11 @@ import { Template } from '@semantic-ui/component';
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 ---
 <sidebar transition:persist id="sidebar" popover>
+  <slot/>
 	<SidebarMenu
 		client:load
     menu={menu}
     activeURL={Astro.url.pathname}
   />
+  <slot name="after"/>
 </sidebar>

@@ -1,7 +1,7 @@
 {{#each section in getMenu}}
   <a class="{{classes getTitleStates section}}title" href={{getLink section}}>
     {{#if section.icon}}
-      <ui-icon icon={{section.icon}} class="glyph" exportparts="icon:title-icon" />
+      <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
     {{else if section.image}}
       <img src="{{section.image}}">
     {{/if}}

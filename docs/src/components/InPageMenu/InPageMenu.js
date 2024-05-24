@@ -91,10 +91,10 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
   getFlattenedMenu() {
     const menuArrays = settings.menu.map(section => {
       const parentItem = { title: section?.title, _id: section?.id };
-      return [
-        parentItem,
-        ...section.items
-      ];
+      return (section?.items)
+        ? [parentItem, ...section.items]
+        : [parentItem]
+      ;
     });
     const flattenedMenu = flatten(menuArrays);
     return flattenedMenu;
@@ -116,7 +116,7 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
     tpl.isActivating = true;
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
-      item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
+      item?.items && item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
     );
     if (menuItem) {
       const menuIndex = menu.indexOf(menuItem);
