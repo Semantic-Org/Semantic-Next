@@ -106,7 +106,7 @@
       "options": [
         {
           "name": "Disabled",
-          "value": true,
+          "value": "disabled",
           "description": "disable interactions"
         },
         {
@@ -165,7 +165,7 @@
       "options": [
         {
           "name": "Basic",
-          "value": true,
+          "value": "basic",
           "description": "appear slightly less pronounced"
         },
         {
@@ -262,7 +262,7 @@
       "options": [
         {
           "name": "Compact",
-          "value": true,
+          "value": "compact",
           "description": "reduce its padding slightly"
         },
         {

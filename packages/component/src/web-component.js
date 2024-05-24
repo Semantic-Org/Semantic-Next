@@ -341,12 +341,12 @@ class WebComponentBase extends LitElement {
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
 
-      const allowedValues = componentSpec.allowedValues[attribute];
-      const propertyType = componentSpec.propertyTypes[attribute];
       const value = this[attribute];
-      // this attribute
+
       if(value) {
 
+        const allowedValues = componentSpec.allowedValues[attribute];
+        const propertyType = componentSpec.propertyTypes[attribute];
         if(propertyType == Boolean) {
           // this is a variation like active=true
           // it receives the class "active"
@@ -355,6 +355,7 @@ class WebComponentBase extends LitElement {
         else if(allowedValues && inArray(value, allowedValues)) {
           // this is a variation like emphasis="primary"
           // it receives the class "primary"
+          console.log(value);
           classes.push(value);
         }
 
