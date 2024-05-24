@@ -3,7 +3,7 @@ import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
-import { adjustSettingFromAttribute } from './helpers/adjust-setting-from-attribute.js';
+import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { WebComponentBase } from './web-component.js';
 
 
@@ -137,7 +137,7 @@ export const createComponent = ({
         if(isServer) {
           each(webComponent.properties, (propSettings, property) => {
             const newValue = this[property];
-            adjustSettingFromAttribute(this, property, newValue, componentSpec);
+            adjustPropertyFromAttribute(this, property, newValue, componentSpec);
           });
         }
       }
@@ -173,7 +173,7 @@ export const createComponent = ({
 
       attributeChangedCallback(attribute, oldValue, newValue) {
         super.attributeChangedCallback(attribute, oldValue, newValue);
-        adjustSettingFromAttribute(this, attribute, newValue, componentSpec);
+        adjustPropertyFromAttribute(this, attribute, newValue, componentSpec);
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 

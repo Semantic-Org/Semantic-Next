@@ -14,7 +14,7 @@ const settings = {
   intersectionContext: null,
   intersectionOffset: 0,
   // selects last on bottom of scroll
-  autoSelectLast: true,
+  autoSelectLast: false,
   smoothScroll: true,
   scrollOffset: 0,
   useAccordion: true,
@@ -90,7 +90,7 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
   // returns all titles and items as a flat ordered list
   getFlattenedMenu() {
     const menuArrays = settings.menu.map(section => {
-      const parentItem = { title: section.title, _id: section.id };
+      const parentItem = { title: section?.title, _id: section?.id };
       return [
         parentItem,
         ...section.items
@@ -122,7 +122,6 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
       const menuIndex = menu.indexOf(menuItem);
       tpl.openIndex.set(menuIndex);
       tpl.currentItem.set(itemID);
-      console.log('setting active', menuIndex, itemID);
       Reaction.afterFlush(() => {
         tpl.isActivating = false;
       });
@@ -136,7 +135,6 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
   },
 
   maybeCurrentItem(item) {
-    console.log(tpl.isCurrentItem(item), item);
     return tpl.isCurrentItem(item) ? 'current' : ' ';
   },
 
@@ -145,7 +143,6 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
     if (element) {
       const targetPosition = element.offsetTop + offset;
       tpl.currentItem.set(itemID);
-      console.log('setting current', itemID);
       tpl.scrollToPosition(targetPosition, {
         onSamePage() {
           dispatchEvent('samePageActive', { element, itemID });

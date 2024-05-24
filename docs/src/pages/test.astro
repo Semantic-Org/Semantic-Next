@@ -1,7 +1,8 @@
 ---
 import Body from '../layouts/Body.astro';
-import {UIButton} from '@semantic-ui/core';
+import { UIButton, UIIcon } from '@semantic-ui/core';
 ---
 <Body padded>
-<UIButton primary>Test</UIButton>
+<UIIcon icon="open-book" client:load>Test</UIIcon>
+<UIButton primary>Primary</UIButton>
 </Body>

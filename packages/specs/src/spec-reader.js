@@ -1,4 +1,4 @@
-import { reverseKeys, get, flatten, isString, isArray, clone, each, noop, values, tokenize, toTitleCase, capitalize } from '@semantic-ui/utils';
+import { reverseKeys, get, flatten, isString, isArray, clone, each, inArray, unique, mapObject, noop, values, tokenize, toTitleCase, capitalize } from '@semantic-ui/utils';
 
 export class SpecReader {
 
@@ -93,7 +93,7 @@ export class SpecReader {
 
   // Returns the sequencing for a spec when displaying in a structured way
   getOrderedParts() {
-    return ['types', 'content', 'states', 'variations']
+    return ['types', 'content', 'states', 'variations'];
   }
 
   // returns definition object as an array of examples
@@ -299,7 +299,7 @@ export class SpecReader {
     const attributes = {};
     const wordArray = String(words).split(' ');
     each(wordArray, (word) => {
-      const parentAttribute = componentSpec.reverseAttributes[word];
+      const parentAttribute = componentSpec.optionAttributes[word];
       if(parentAttribute) {
         attributes[parentAttribute] = word;
       }
@@ -335,7 +335,7 @@ export class SpecReader {
     let categoryAttributes = clone(attributes);
     let componentSpec = this.getWebComponentSpec();
     each(attributes, (value, key) => {
-      const parentAttribute = componentSpec.reverseAttributes[value];
+      const parentAttribute = componentSpec.optionAttributes[value];
       if(parentAttribute) {
         words.push(value);
       }
@@ -411,78 +411,85 @@ export class SpecReader {
     }
 
     let componentSpec = {
-      contentAttributes: [],
+      tagName: spec.tagName,
       content: [],
-      variations: [],
+      contentAttributes: [],
+
       types: [],
+      variations: [],
       states: [],
       events: [],
       settings: [],
-      attributes: {},
-      reverseAttributes: {},
+
+      properties: [],
+      attributes: [],
+      optionAttributes: {},
+      propertyTypes: {},
+      allowedValues: {},
       attributeClasses: [],
-      defaultSettings: {},
+      defaultValues: {},
       inheritedPluralVariations: [],
     };
 
-    const addSettingsFromPart = (partName) => {
-      const specPart = spec[partName] || [];
-
+    const addSettingsFromPart = (section) => {
+      const specPart = spec[section] || [];
       each(specPart, (spec) => {
-        const attributeName = this.getAttributeName(spec);
 
-        if (!attributeName) {
+        const propertyName = this.getPropertyName(spec);
+
+        // it is a requirement to have a property name defined
+        if(!propertyName) {
           return;
         }
 
-        // add to list of this spec part attributes
-        componentSpec[partName].push(attributeName);
+        // add to list of this grouping, i.e types: ['emphasis']
+        componentSpec[section].push(propertyName);
 
-        // allow spec to specify that the group class name should be included
-        // i.e if enabled for 'attached' will output <class="attached left-attached">
-        if (spec.includeAttributeClass) {
-          componentSpec.attributeClasses.push(attributeName);
+        // find allowed option values for this attribute i.e. emphasis: ['primary', 'secondary']
+        const allowedValues = this.getAllowedValues(spec);
+        if(allowedValues) {
+          componentSpec.allowedValues[propertyName] = allowedValues;
         }
 
-        // store allowed values for attribute if this part uses attributes
-        // functions and non-serializable content cannot use attributes
-        let optionValues;
-        if (spec.options) {
-          optionValues = spec.options
-            .map((option) => option?.value !== undefined ? option.value : option)
-            .filter(Boolean);
-          optionValues = flatten(optionValues);
+        // find native type of this property i.e. String
+        const propertyType = this.getPropertyType(spec, section, allowedValues);
+        if (propertyType) {
+          componentSpec.propertyTypes[propertyName] = propertyType;
+        }
+
+        // find attribute name if it its not a function
+        const attributeName = this.getAttributeName(spec, propertyType);
+        if(attributeName) {
+          componentSpec.attributes.push(attributeName);
         }
         else {
-          // boolean allowed values can be inferred
-          optionValues = [true, false];
+          componentSpec.properties.push(propertyName);
         }
-        componentSpec.attributes[attributeName] = optionValues;
 
-        // store detail of attributes which could represent content
-        if (partName === 'content' && attributeName) {
-          componentSpec.contentAttributes.push(attributeName);
+        // get default value
+        const defaultValue = this.getDefaultValue(spec, propertyType, section);
+        if (defaultValue) {
+          componentSpec.defaultValues[propertyName] = defaultValue;
         }
-        // settings may or may not have associated attributes
-        if (partName === 'settings' && isString(spec.type)) {
-          const defaultValues = {
-            string: '',
-            array: [],
-            boolean: false,
-            function: noop,
-            number: 0,
-            object: {}
-          };
-          const defaultValue = get(defaultValues, spec.type.toLowerCase());
-          componentSpec.defaultSettings[attributeName] = defaultValue;
+
+        /* Special Cases */
+
+        // content can option to either using slots or attributes
+        if (section === 'content') {
+          if(spec.attribute) {
+            componentSpec.contentAttributes.push(spec.attribute);
+          }
+          else if(spec.slot) {
+            componentSpec.slots.push(spec.slot);
+          }
         }
-        if (partName === 'settings' && spec.defaultValue !== undefined) {
-          componentSpec.defaultSettings[attributeName] = spec.defaultValue;
+
+        // components can opt in to having its attribute as a class name
+        // i.e. .attached + .left-attached
+        if (attributeName && spec.includeAttributeClass) {
+          componentSpec.attributeClasses.push(propertyName);
         }
-        if (partName == 'events') {
-          // events are functions
-          componentSpec.defaultSettings[attributeName] = noop;
-        }
+
       });
     };
 
@@ -496,10 +503,10 @@ export class SpecReader {
 
 
     // avoid having to reverse array at runtime
-    let reverseAttributes = reverseKeys(componentSpec.attributes);
-    delete reverseAttributes.true;
-    delete reverseAttributes.false;
-    componentSpec.reverseAttributes = reverseAttributes;
+    let options = mapObject(componentSpec.allowedValues, (values, key) => {
+      return values = values.filter(value => isString(value));
+    });
+    componentSpec.optionAttributes = reverseKeys(options);
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
@@ -510,16 +517,94 @@ export class SpecReader {
   }
 
   /* Returns the attribute name for a given spec part */
-  getAttributeName(specPart) {
-    if (specPart.eventName) {
-      return `on${capitalize(specPart.eventName)}`;
+  getAttributeName(specPart, type) {
+    if(!this.canUseAttribute(type)) {
+      return;
     }
+    return this.getPropertyName(specPart);
+  }
+  getPropertyName(specPart) {
     if (specPart.attribute) {
       return specPart.attribute;
     }
     if (isString(specPart.name)) {
       return specPart.name.toLowerCase();
     }
+  }
+
+  getPropertyType(spec, section, allowedValues = []) {
+    let types = {
+      string: String,
+      boolean: Boolean,
+      object: Object,
+      array: Array,
+      function: Function
+    };
+    let type;
+    let stringType;
+    if(section == 'events') {
+      // events are always functions
+      type = Function;
+    }
+    else if(inArray(section, ['types', 'states', 'variations'])) {
+      // visual modifications (types, states, variations) default to boolean attrs
+      // unless they have allowed values
+      type = Boolean;
+    }
+    else if(inArray(section, ['content'])) {
+      // content defaults to string type
+      type = String;
+    }
+
+    if(spec.type && types[spec.type]) {
+      // if they specify a type then lets use that as long as its a known type
+      stringType = spec.type;
+    }
+    else if(allowedValues.length) {
+      // if they specify allowed values we can infer type from a sample
+      stringType = typeof allowedValues[0];
+    }
+    if(stringType) {
+      type = get(types, stringType);
+    }
+
+    return type;
+  }
+
+  getAllowedValues(spec) {
+    let allowedValues;
+    if (spec.options) {
+      allowedValues = spec.options
+        .map((option) => option?.value !== undefined ? option.value : option)
+        .filter(Boolean);
+      allowedValues = unique(flatten(allowedValues));
+    }
+    return allowedValues;
+  }
+
+  getDefaultValue(spec, type, section) {
+    if(spec.defaultValue) {
+      return spec.defaultValue;
+    }
+    if(section !== 'settings') {
+      return;
+    }
+    const defaultValues = {
+      string: '',
+      array: [],
+      boolean: false,
+      function: noop,
+      number: 0,
+      object: {}
+    };
+    return get(defaultValues, type);
+  }
+
+  canUseAttribute(type) {
+    if(type == Function) {
+      return false;
+    }
+    return true;
   }
 
 }

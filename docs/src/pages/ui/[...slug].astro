@@ -54,7 +54,14 @@ if(definitionDisplayed) {
   railMenu = componentSpec.getDefinitionMenu();
 }
 ---
-<Definition title={data.title} description={data.description} searchMeta={searchMeta} menu={menu} railMenu={railMenu}>
+<Definition
+  title={data.title}
+  description={data.description}
+  searchMeta={searchMeta}
+  menu={menu}
+  railMenu={railMenu}
+  id={data.id}
+>
   {definitionDisplayed && (
     <SpecDefinition
       definition={definition}
