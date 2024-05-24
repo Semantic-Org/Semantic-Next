@@ -531,7 +531,7 @@ export const Template = class Template {
         settings: this.element.settings,
         state: this.state,
 
-        isRendered: this.rendered,
+        isRendered: () => this.rendered,
         isServer: Template.isServer,
         isClient: !Template.isServer,
 
