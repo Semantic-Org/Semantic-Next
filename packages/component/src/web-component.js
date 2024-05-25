@@ -19,7 +19,7 @@ class WebComponentBase extends LitElement {
 
   constructor() {
     super();
-    this.useLight = true;
+    this.useLight = false;
     this.renderCallbacks = [];
   }
 
