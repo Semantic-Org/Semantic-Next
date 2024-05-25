@@ -157,6 +157,7 @@ const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings
   },
   visitResult() {
     let result =  state.selectedResult.get();
+    window.location.href = result.url;
     tpl.hideModal();
   }
 

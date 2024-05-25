@@ -45,7 +45,7 @@
     flex-grow: 1;
     position: relative;
     padding: 2em 3em 7em;
-    margin: 0rem calc(var(--rail-width) + 2rem) 0rem 0rem;
+    margin: 0rem var(--rail-width) 0rem 0rem;
     width: auto;
     max-width: 1170px ;
     box-shadow: 1px 0px 1px 0 rgb(0 0 0 / 8%);
