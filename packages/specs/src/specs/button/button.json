@@ -10,7 +10,6 @@
       "includeAttributeClass": true,
       "attribute": "icon",
       "couplesWith": ["ui-icon"],
-      "slot": "icon",
       "description": "include an icon",
       "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>"
     }
@@ -181,7 +180,7 @@
     {
       "name": "Colored",
       "attribute": "color",
-      "description": "colored",
+      "description": "be colored",
       "usageLevel": 3,
       "options": [
         {

@@ -20,6 +20,12 @@
       "type": "string",
       "attribute": "href",
       "description": "can specify a link"
+    },
+    {
+      "name": "Value",
+      "type": "string",
+      "attribute": "value",
+      "description": "can specify a value"
     }
   ],
   "states": [

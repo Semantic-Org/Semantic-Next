@@ -20,6 +20,9 @@ export class SpecReader {
     this.componentSpec = null;
   }
 
+  /*
+    Get the name of the components export
+  */
   getComponentName({ plural = this.plural, lang = 'html' } = {}) {
     const spec = this.spec;
     const name = (plural)
@@ -29,6 +32,9 @@ export class SpecReader {
     return name;
   }
 
+  /*
+    Returns the tag name used for plural or singular format of a component
+  */
   getTagName({ plural = this.plural, lang = 'html' } = {}) {
     const spec = this.spec;
     const name = (plural)
@@ -64,15 +70,16 @@ export class SpecReader {
     const spec = this.spec;
 
     // standard example
-    const defaultWords = values(spec?.examples?.defaultAttributes || {}).join(' ');
+    const defaultContent = spec?.examples?.defaultContent;
+    const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
     definition.types.push({
       title: spec.name,
-      description: spec.description,
+      description: '',
       examples: [
         {
           showCode: false,
-          code: this.getCode(defaultWords),
-          components: [ this.getComponentParts(defaultWords) ]
+          code: this.getCode(defaultModifiers, { html: defaultContent }),
+          components: [ this.getComponentParts(defaultModifiers, { html: defaultContent }) ]
         }
       ]
     });
@@ -83,7 +90,10 @@ export class SpecReader {
         if(!isMinimumUsageLevel(part)) {
           return;
         }
-        const examples = this.getCodeExamples(part, { defaultAttributes: spec?.examples?.defaultAttributes });
+        const examples = this.getCodeExamples(part, {
+          defaultAttributes: spec?.examples?.defaultAttributes,
+          defaultContent: defaultContent
+        });
         definition[partName].push(examples);
       });
     });
@@ -91,12 +101,16 @@ export class SpecReader {
     return definition;
   }
 
-  // Returns the sequencing for a spec when displaying in a structured way
+  /*
+    Returns the sequencing for a spec when displaying in a structured way
+  */
   getOrderedParts() {
     return ['types', 'content', 'states', 'variations'];
   }
 
-  // returns definition object as an array of examples
+  /*
+    Returns an array of examples in the order specified in get ordered parts
+  */
   getOrderedExamples({plural = false, minUsageLevel, dialect = this.dialect } = {}) {
     const definition = this.getDefinition({plural, minUsageLevel, dialect});
     return this.getOrderedParts().map((partName) => ({
@@ -105,6 +119,9 @@ export class SpecReader {
     }));
   }
 
+  /*
+    Gets the definition menu for a component for use with an inpage menu
+  */
   getDefinitionMenu({ IDSuffix = '-example', plural = false, minUsageLevel } = {}) {
     const orderedDefinition = this.getOrderedExamples({plural, minUsageLevel});
     let menu = orderedDefinition.map(part => ({
@@ -118,7 +135,7 @@ export class SpecReader {
   }
 
   /*
-    Returns only top level with all inner content as 'html'
+    Returns only top level for component with all inner content as 'html'
     <ui-button icon="delete"><div>Hello</div></ui-button>
     returns {
       componentName: 'ui-button',
@@ -163,7 +180,7 @@ export class SpecReader {
         }
       }
     }
-    const dialectAttributeString = this.getAttributeStringFromWords(html, { attributes, dialect });
+    const dialectAttributeString = this.getAttributeStringFromModifiers(html, { attributes, dialect });
 
 
     // Extract the inner HTML
@@ -177,15 +194,20 @@ export class SpecReader {
     };
   }
   
-  getCodeExamples(part, { defaultAttributes } = {}) {
+  getCodeExamples(part, { defaultAttributes, defaultContent } = {}) {
     let examples = [];
     let attribute = this.getAttributeName(part);
-    let defaultWords;
+
+    // avoid duplicating the attribute present in this example
     if(defaultAttributes) {
       const attributes = clone(defaultAttributes);
       delete attributes[attribute];
-      defaultWords = values(attributes).join(' ');
+      defaultAttributes = values(attributes).join(' ');
     }
+    /*
+      Create an example for each option present
+      in the options array, i.e. colors => "red", "blue"
+    */
     if(part.options) {
       let examplesToJoin = [];
       each(part.options, (option, index) => {
@@ -198,21 +220,21 @@ export class SpecReader {
         else {
           // construct an example programatically
           // using the option values
-          let words;
+          let modifiers;
           if(isString(option.value)) {
-            words = option.value;
+            modifiers = option.value;
           }
           else if(isString(option)) {
-            words = option;
+            modifiers = option;
           }
           if(isArray(option.value)) {
-            words = option.value.filter(val => isString(val))[0];
+            modifiers = option.value.filter(val => isString(val))[0];
           }
-          if(defaultWords) {
-            words = `${words} ${defaultWords}`;
+          if(defaultAttributes) {
+            modifiers = `${modifiers} ${defaultAttributes}`;
           }
-          code = this.getCode(words);
-          componentParts = this.getComponentParts(words);
+          code = this.getCode(modifiers, { html: defaultContent });
+          componentParts = this.getComponentParts(modifiers, { html: defaultContent });
         }
         const example = {
           code,
@@ -225,7 +247,7 @@ export class SpecReader {
           examplesToJoin.push(example);
         }
       });
-      // join all examples
+      // unless the spec specifically asks for separate examples, join them into one example
       if(!part.separateExamples) {
         examples.push({
           code: examplesToJoin.map(ex => ex.code).join('\n'),
@@ -235,17 +257,18 @@ export class SpecReader {
     }
     else {
       let code, componentParts;
-      let words = this.getAttributeName(part);
-      if(defaultWords) {
-        words = `${words} ${defaultWords}`;
+      let modifiers = this.getAttributeName(part);
+      if(defaultAttributes) {
+        modifiers = `${modifiers} ${defaultAttributes}`;
       }
       if(part.exampleCode) {
         code = part.exampleCode;
         componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
-        code = this.getCode(words);
-        componentParts = this.getComponentParts(words);
+        console.log('here', defaultContent);
+        code = this.getCode(modifiers, { html: defaultContent });
+        componentParts = this.getComponentParts(modifiers, { html: defaultContent });
       }
       const example = {
         code,
@@ -261,7 +284,7 @@ export class SpecReader {
     };
   }
 
-  getComponentParts(words, {
+  getComponentParts(modifiers, {
     lang='html',
     plural=this.plural,
     text,
@@ -272,39 +295,39 @@ export class SpecReader {
       ? this.getTagName({ plural })
       : this.getComponentName({ plural, lang })
     ;
-    // use the word as text or component name i.e. 'primary', 'emphasis' etc
+    // use the modifier as text or component name i.e. 'primary', 'emphasis' etc
     if(!text && !html) {
-      const baseText = words || componentName.replace(/^ui-/, '');
+      const baseText = modifiers || componentName.replace(/^ui-/, '');
       text = String(baseText).replace(/\-/mg, ' ');
       html = toTitleCase(text);
     }
-    const attributes = this.getAttributesFromWords(words);
+    const attributes = this.getAttributesFromModifiers(modifiers);
     const componentParts = {
       componentName: componentName,
       attributes: attributes,
-      attributeString: this.getAttributeStringFromWords(words, { attributes, dialect }),
+      attributeString: this.getAttributeStringFromModifiers(modifiers, { attributes, dialect }),
       html: html
     };
     return componentParts;
   }
 
-  getCode(words, settings) {
-    const { componentName, attributeString, html } = this.getComponentParts(words, settings);
+  getCode(modifiers, settings) {
+    const { componentName, attributeString, html } = this.getComponentParts(modifiers, settings);
     return `<${componentName}${attributeString}>${html}</${componentName}>`;
   }
 
-  /* Returns an object of attributes and their values from a list of words */
-  getAttributesFromWords(words = '') {
+  /* Returns an object of attributes and their values from a list of modifiers */
+  getAttributesFromModifiers(modifiers = '') {
     const componentSpec = this.getWebComponentSpec();
     const attributes = {};
-    const wordArray = String(words).split(' ');
-    each(wordArray, (word) => {
-      const parentAttribute = componentSpec.optionAttributes[word];
+    const modifierArray = String(modifiers).split(' ');
+    each(modifierArray, (modifier) => {
+      const parentAttribute = componentSpec.optionAttributes[modifier];
       if(parentAttribute) {
-        attributes[parentAttribute] = word;
+        attributes[parentAttribute] = modifier;
       }
       else {
-        attributes[word] = true;
+        attributes[modifier] = true;
       }
     });
     return attributes;
@@ -331,27 +354,27 @@ export class SpecReader {
     quoteCharacter = `'`
   } = {}) {
     let attributeString;
-    let words = [];
+    let modifiers = [];
     let categoryAttributes = clone(attributes);
     let componentSpec = this.getWebComponentSpec();
     each(attributes, (value, key) => {
       const parentAttribute = componentSpec.optionAttributes[value];
       if(parentAttribute) {
-        words.push(value);
+        modifiers.push(value);
       }
       else {
         categoryAttributes[key] = value;
       }
     });
-    if(words.length) {
-      const wordString = wordAttributes.join(' ');
+    if(modifiers.length) {
+      const modifierString = modifierAttributes.join(' ');
       if(dialect == SpecReader.DIALECT_TYPES.standard) {
         // <ui-button large red>
-        attributeString += ` ${wordString}`;
+        attributeString += ` ${modifierString}`;
       }
       else if(dialect == SpecReader.DIALECT_TYPES.classic) {
         // <ui-button class="large red">
-        return ` class="${wordString}"`;
+        return ` class="${modifierString}"`;
       }
     }
     else if(dialect == SpecReader.DIALECT_TYPES.verbose || keys(categoryAttributes)) {
@@ -364,29 +387,29 @@ export class SpecReader {
     return attributeString;
   }
 
-  /* Returns a stringified version of attributes for a given set of words
+  /* Returns a stringified version of attributes for a given set of modifiers
      based off the dialect specified
   */
-  getAttributeStringFromWords(words, {
+  getAttributeStringFromModifiers(modifiers, {
     dialect = this.dialect,
     attributes,
     joinWith = '=',
     quoteCharacter = `"`
   } = {}) {
-    if(!words) {
+    if(!modifiers) {
       return '';
     }
     if(dialect == SpecReader.DIALECT_TYPES.standard) {
       // <ui-button large red>
-      return ` ${words}`;
+      return ` ${modifiers}`;
     }
     else if(dialect == SpecReader.DIALECT_TYPES.classic) {
       // <ui-button class="large red">
-      return ` class="${words}"`;
+      return ` class="${modifiers}"`;
     }
     else if(dialect == SpecReader.DIALECT_TYPES.verbose) {
       if(!attributes) {
-        attributes = this.getAttributesFromWords(words);
+        attributes = this.getAttributesFromModifiers(modifiers);
       }
       let attributeString = ' ';
       each(attributes, (value, attribute) => {
