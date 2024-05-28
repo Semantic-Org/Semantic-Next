@@ -3,7 +3,7 @@ Easy Wins
 + Better minimized styling
 + Fix inline file
 - Fix accordion menu to start expanded in examples
-- Fix double border on first playground element
++ Fix double border on first playground element
 
 Overall Docs
 - Remove docs build step and use package directly

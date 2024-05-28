@@ -12,5 +12,6 @@ await buildProject({
   includeCSS: true,
   includeThemes: true,
   includeExamples: false,
-  outDir: 'docs/src/css/sui',
+  uiDir: 'dist',
+  outDir: 'dist'
 });
