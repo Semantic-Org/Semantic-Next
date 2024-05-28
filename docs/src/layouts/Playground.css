@@ -35,6 +35,10 @@
     height: 100%;
   }
 
+  ui-panels::part(panels) {
+    background-color: var(--playground-code-background);
+  }
+
   .navigation::part(panels) {
     background-color: var(--sidebar-background-color);
   }

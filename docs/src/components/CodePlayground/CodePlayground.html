@@ -20,6 +20,8 @@
     <ui-panels
       class="inline"
       direction="{{inlineDirection}}"
+      saveState={{saveState}}
+      saveStateID="{{getSaveID}}"
       exportparts="panels"
     >
       <ui-panel
@@ -61,7 +63,7 @@
     <ui-panels
       class="fullscreen"
       direction="horizontal"
-      saveState=true
+      saveState={{saveState}}
       saveStateID="{{getSaveID 'row'}}"
       exportparts="panels"
     >

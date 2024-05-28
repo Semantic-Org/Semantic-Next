@@ -19,13 +19,16 @@ const sandboxURL = getSandboxURL();
 const projectConfig = {
   files: files
 };
-const inlineDirection = direction || 'horizontal';
+const inlineDirection = direction || 'vertical';
 const exampleURL = `/examples/${id}/`;
+const saveID = `example-${id}`;
 ---
 <CodePlayground client:only
   files={files}
   example={example}
   inline=true
+  saveState=true
+  saveID={saveID}
   inlineDirection={inlineDirection}
   exampleURL={exampleURL}
   sandboxURL={sandboxURL}

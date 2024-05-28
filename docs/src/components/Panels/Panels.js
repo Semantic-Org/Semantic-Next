@@ -25,8 +25,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
   saveLayout() {
     if(settings.saveState) {
       const details = tpl.panels.map((panel, index) => {
+        const size = roundNumber(tpl.getPanelSize(panel));
         return {
-          size: roundNumber(tpl.getPanelSize(panel)),
+          size,
           minimized: tpl.isMinimized(index)
         };
       });
@@ -114,7 +115,9 @@ const createInstance = ({tpl, el, settings, $}) => ({
       else {
         tpl.setPanelSize(index, stored.size);
       }
-      tpl.setPanelInitialized(panel);
+      if(stored.size !== undefined) {
+        tpl.setPanelInitialized(panel);
+      }
     });
   },
   isPanelInitialized(panel) {
@@ -424,7 +427,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
         if(manualResize && sizeIndex == index) {
           hasMinimized = true;
         }
-        console.log('setting size', sizeIndex, size);
         tpl.setPanelSizePixels(sizeIndex, size);
       },
       pixelsToAdd,

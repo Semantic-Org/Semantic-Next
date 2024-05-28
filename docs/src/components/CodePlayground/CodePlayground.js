@@ -175,7 +175,7 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
     }
   });
   $('ui-panel').settings({
-    getNaturalSize: function(panel, { direction }) {
+    getNaturalSize: function(panel, { direction, minimized }) {
       if(direction == 'horizontal') {
         const extraSpacing = 20; // scrollbar width and spacing
         const minWidths = [];
@@ -188,7 +188,8 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
         return size;
       }
       else {
-        const labelHeight = $$('.label').height();
+        const labelHeight = $$('.label').height() || 0;
+        const menuHeight = $$('.menu').first().height() || 0;
         if(minimized) {
           return labelHeight;
         }
@@ -196,7 +197,8 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
           const extraSpacing = 5;
           const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
           const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
-          const size = codeHeight + labelHeight + extraSpacing + scrollbarHeight;
+          const size = codeHeight + labelHeight + menuHeight + extraSpacing + scrollbarHeight;
+          console.log('natural vertical', size, panel, codeHeight, labelHeight, menuHeight, extraSpacing, scrollbarHeight);
           return Math.max(size, 100);
         }
       }
