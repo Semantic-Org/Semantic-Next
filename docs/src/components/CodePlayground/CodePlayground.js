@@ -27,6 +27,7 @@ const settings = {
   example: {},
   tabSize: 2,
   inline: false,
+  inlineDirection: 'vertical',
   sortOrder: [
     'component.js',
     'component.html',

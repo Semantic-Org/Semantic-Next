@@ -4,19 +4,17 @@ import { sum } from '@semantic-ui/utils';
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
 
-
 const settings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
-  minSize: 0,
-  maxSize: 0,
+  minSize: '0px',
+  maxSize: '0px',
   size: 'grow',
   label: '',
   canMinimize: true,
   minimized: false,
-  minimizedHeight: 30,
-  getNaturalSize: (panel, direction) => {
+  getNaturalSize: (panel, { direction, minimized }) => {
     const $children = $(panel).children();
     return (direction == 'horizontal')
       ? ($children.length > 1)

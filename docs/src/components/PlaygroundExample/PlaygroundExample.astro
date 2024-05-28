@@ -4,7 +4,7 @@ import { getExampleFiles, addPlaygroundInjections, getExampleID, getSandboxURL }
 
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
-const { id } = Astro.props;
+const { id, direction } = Astro.props;
 const matchingExamples = await getCollection('examples', ({ data }) => {
   return getExampleID(data) == id;
 });
@@ -19,12 +19,14 @@ const sandboxURL = getSandboxURL();
 const projectConfig = {
   files: files
 };
+const inlineDirection = direction || 'horizontal';
 const exampleURL = `/examples/${id}/`;
 ---
 <CodePlayground client:only
   files={files}
   example={example}
   inline=true
+  inlineDirection={inlineDirection}
   exampleURL={exampleURL}
   sandboxURL={sandboxURL}
   ></CodePlayground>

@@ -19,9 +19,11 @@
   {{#if inline}}
     <ui-panels
       class="inline"
+      direction="{{inlineDirection}}"
       exportparts="panels"
     >
       <ui-panel
+        direction="{{inlineDirection}}"
         size="60"
         class="files"
         exportparts="panel, handle"
@@ -47,6 +49,7 @@
         }}
       </ui-panel>
       <ui-panel
+        direction="{{inlineDirection}}"
         size=40
         class="preview"
         exportparts="panel, handle"
