@@ -14,15 +14,19 @@ const $$ = function (selector, args = {}) {
   return $(selector, args);
 };
 
-function exportGlobals(options = {}) {
+function exportGlobals({ dollar = true, doubleDollar = true, query = true} = {}) {
   if (isClient) {
-    const { $: dollar = true, $$: doubleDollar = true, Query: query = true } = options;
 
-    if (dollar) {
+    let originalDollar;
+
+    if(dollar) {
+      originalDollar = window.$;
       window.$ = $;
     }
 
+    let originalDoubleDollar;
     if (doubleDollar) {
+      originalDoubleDollar = window.$$;
       window.$$ = $$;
     }
 
@@ -42,6 +46,9 @@ function exportGlobals(options = {}) {
         window.Query = undefined;
       }
       return $;
+    };
+    $.useAlias = function () {
+      return new Query(...arguments);
     };
   }
 }
