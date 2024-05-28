@@ -1,12 +1,12 @@
 <div class="playground {{classIf resizing 'resizing'}}" part="playground">
   {{#if example.title}}
-    <div class="masthead">
+    <div class="masthead" part="masthead">
       <ui-button right-floated transparent small compact inverted>
         <ui-icon copy></ui-icon>
         Fork
       </ui-button>
-      <h3 class="title">{{example.title}}</h3>
-      <p>{{example.description}}</p>
+      <h3 class="title" part="title">{{example.title}}</h3>
+      <p part="description">{{example.description}}</p>
     </div>
   {{/if}}
   {{#if exists files}}
@@ -17,44 +17,64 @@
     </playground-project>
   {{/if}}
   {{#if inline}}
-    <div class="inline">
-      <div class="menu">
-        <ui-menu
-          selection
-          items={{stringify getFileMenuItems}}
-          value={{activeFile}}
-        ></ui-menu>
-        {{#if exampleURL}}
-          <div class="links">
-            <a href="{{exampleURL}}" class="sandbox link">
-              <ui-icon codesandbox link></ui-icon>
-            </a>
-          </div>
-        {{/if}}
-      </div>
-      {{>template
-        name='CodePlaygroundFile'
-        data={inline: true}
-        reactiveData={filename: activeFile}
-      }}
-      <playground-preview project="source"> </playground-preview>
-    </div>
+    <ui-panels
+      class="inline"
+      exportparts="panels"
+    >
+      <ui-panel
+        size="60"
+        class="files"
+        exportparts="panel, handle"
+      >
+        <div class="menu">
+          <ui-menu
+            selection
+            items={{stringify getFileMenuItems}}
+            value={{activeFile}}
+          ></ui-menu>
+          {{#if exampleURL}}
+            <div class="links">
+              <a href="{{exampleURL}}" class="sandbox link">
+                <ui-icon codesandbox link></ui-icon>
+              </a>
+            </div>
+          {{/if}}
+        </div>
+        {{>template
+          name='CodePlaygroundFile'
+          data={inline: true}
+          reactiveData={filename: activeFile}
+        }}
+      </ui-panel>
+      <ui-panel
+        size=40
+        class="preview"
+        exportparts="panel, handle"
+      >
+        <playground-preview project="source"> </playground-preview>
+      </ui-panel>
+    </ui-panels>
   {{else}}
     <ui-panels
+      class="fullscreen"
       direction="horizontal"
       saveState=true
       saveStateID="{{getSaveID 'row'}}"
+      exportparts="panels"
     >
       {{#each panelGroup in getPanels}}
         <ui-panel
           direction="horizontal"
           size={{getPanelGroupWidth @index}}
           class="code-group"
+          exportparts="panel, handle"
+
         >
           <ui-panels
             class="files"
             saveState=true
             saveStateID="{{getSaveID 'column' @index}}"
+            exportparts="panels"
           >
             {{#each panel in panelGroup}}
               {{>CodePlaygroundPanel
