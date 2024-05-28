@@ -8,3 +8,12 @@
 .CodeMirror-vscrollbar::webkit-scrollbar-thumb {
   border-radius: 100px;
 }
+
+.CodeMirror-foldmarker {
+  font-family: sans-serif;
+  color: #3a3b3c;
+  font-size: 18px;
+}
+.CodeMirror-foldmarker:hover {
+  color: #009FDA;
+}

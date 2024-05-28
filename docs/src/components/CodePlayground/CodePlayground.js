@@ -174,17 +174,32 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
       state.activeFile.set(value);
     }
   });
-  $('ui-panel.code-group').settings({
-    getNaturalSize: function(panel) {
-      const extraSpacing = 20; // scrollbar width and spacing
-      const minWidths = [];
-      $$(panel).find('.CodeMirror-sizer').each(sizer => {
-        const sizerMargin = parseFloat($(sizer).css('margin-left'));
-        const sizerWidth = parseFloat($(sizer).css('min-width'));
-        minWidths.push(sizerMargin + sizerWidth + extraSpacing);
-      });
-      const size = Math.max(...minWidths);
-      return size;
+  $('ui-panel').settings({
+    getNaturalSize: function(panel, { direction }) {
+      if(direction == 'horizontal') {
+        const extraSpacing = 20; // scrollbar width and spacing
+        const minWidths = [];
+        $$(panel).find('.CodeMirror-sizer').each(sizer => {
+          const sizerMargin = parseFloat($(sizer).css('margin-left'));
+          const sizerWidth = parseFloat($(sizer).css('min-width'));
+          minWidths.push(sizerMargin + sizerWidth + extraSpacing);
+        });
+        const size = Math.max(...minWidths);
+        return size;
+      }
+      else {
+        const labelHeight = $$('.label').height();
+        if(minimized) {
+          return labelHeight;
+        }
+        else {
+          const extraSpacing = 5;
+          const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
+          const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
+          const size = codeHeight + labelHeight + extraSpacing + scrollbarHeight;
+          return Math.max(size, 100);
+        }
+      }
     }
   });
   requestIdleCallback(() => {
