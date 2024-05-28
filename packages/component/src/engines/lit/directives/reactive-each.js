@@ -59,6 +59,9 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   getItems() {
     let items = this.eachCondition.over() || [];
+    if(!items?.map) {
+      return;
+    }
     items = items.map((item, index) => {
       if (isPlainObject(item) && !this.getItemID(item, index)) {
         item._hash = hashCode(item);
@@ -71,6 +74,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   getValuesAndKeys(items = this.getItems()) {
     const keys = [];
     const values = [];
+    items = items || [];
     each(items, (item, index) => {
       keys[index] = this.getItemID(item, index);
       // we only want to lazily get new template if the contents have changed
@@ -86,7 +90,7 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   getItemID(item, index) {
     if (isPlainObject(item)) {
-      return item._id || item.id || item.key || item.hash || item._hash || index;
+      return item._id || item.id || item.value || item.key || item.hash || item._hash || index;
     }
     if (isString) {
       return item;
