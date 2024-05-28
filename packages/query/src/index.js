@@ -2,6 +2,7 @@ import { isClient } from '@semantic-ui/utils';
 import { Query } from './query.js';
 
 const $ = function (selector, args = {}) {
+  const isClient = typeof window !== 'undefined';
   if (!args?.root && isClient) {
     args.root = document;
   }
@@ -13,29 +14,36 @@ const $$ = function (selector, args = {}) {
   return $(selector, args);
 };
 
-// Attach $ and $$ to global scope when running in a browser
-if (isClient) {
-  const originalDollar = window.$;
-  const originalDoubleDollar = window.$$;
+function exportGlobals(options = {}) {
+  if (isClient) {
+    const { $: dollar = true, $$: doubleDollar = true, Query: query = true } = options;
 
-  window.$ = $;
-  window.$$ = $$;
+    if (dollar) {
+      window.$ = $;
+    }
 
-  // Add a restoreGlobals method to restore the original values of $ and $$
-  $.restoreGlobals = function (settings) {
-    if (window.$ === $) {
-      window.$ = originalDollar;
+    if (doubleDollar) {
+      window.$$ = $$;
     }
-    if (window.$$ === $$) {
-      window.$$ = originalDoubleDollar;
-    }
-    if (typeof settings == 'object' && settings.removeQuery && window.Query === Query) {
-      window.Query = undefined;
-    }
-    return $;
-  };
 
-  window.Query = Query;
+    if (query) {
+      window.Query = Query;
+    }
+
+    // Add a restoreGlobals method to restore the original values of $ and $$
+    $.restoreGlobals = function (settings) {
+      if (window.$ === $) {
+        window.$ = originalDollar;
+      }
+      if (window.$$ === $$) {
+        window.$$ = originalDoubleDollar;
+      }
+      if (typeof settings == 'object' && settings.removeQuery && window.Query === Query) {
+        window.Query = undefined;
+      }
+      return $;
+    };
+  }
 }
 
-export { Query, $, $$ };
+export { Query, $, $$, exportGlobals };
