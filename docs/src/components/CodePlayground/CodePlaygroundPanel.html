@@ -2,11 +2,12 @@
   <ui-panel
     class="preview"
     size="grow"
+    exportparts="panel, handle"
   >
     <playground-preview project="source"> </playground-preview>
   </ui-panel>
 {{else if is panel.type 'file'}}
-  <ui-panel class="{{classIf minimized 'minimized' ''}}code" size="{{size}}" label="{{panel.label}}">
+  <ui-panel class="{{classIf minimized 'minimized' ''}}code" size="{{size}}" label="{{panel.label}}" exportparts="panel, handle">
     {{>CodePlaygroundFile
       filename=panel.filename
     }}

@@ -235,6 +235,20 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
   },
 
+  getPixelSettingSize(size, index) {
+    if(size == 'natural') {
+      return tpl.getNaturalPanelSize(index);
+    }
+    else if(isString(size) && size.includes('px')) {
+      const parts = size.split('px');
+      const pixels = Number(parts[0]);
+      return pixels;
+    }
+    else if(size && size !== 'grow') {
+      return tpl.getPixelSize(size);
+    }
+  },
+
   getPanelSetting(index, setting) {
     let panel = tpl.panels[index];
     return panel.settings[setting];
@@ -382,7 +396,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       }),
       getMaxSize = memoize((index) => {
         let maxSize = tpl.getPanelSetting(index, 'maxSize');
-        return maxSize;
+        return tpl.getPixelSettingSize(maxSize) || 0;
       }),
       isMinimized = memoize((index) => {
         let minimized = tpl.isMinimized(index);
@@ -390,7 +404,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       }),
       getMinSize = memoize((index) => {
         let minSize = tpl.getPanelSetting(index, 'minSize');
-        return minSize || 31.2;
+        return tpl.getPixelSettingSize(minSize) || 0;
       }),
       getSize = (index) => {
         let panelSize = tpl.getPanelSizePixels(index);
@@ -540,11 +554,12 @@ const createInstance = ({tpl, el, settings, $}) => ({
           return;
         }
         performLoop(direction, (growIndex) => {
-          if(pixelsAdded || cannotResize(growIndex)) {
-            return;
-          }
+          const maxSize = getMaxSize(growIndex);
           const currentSize = getSize(growIndex);
           const newSize = currentSize + pixelsToAdd;
+          if(pixelsAdded || (maxSize && newSize > getMaxSize(growIndex)) || cannotResize(growIndex)) {
+            return;
+          }
           setSize(growIndex, newSize);
           pixelsAdded = true;
         });
