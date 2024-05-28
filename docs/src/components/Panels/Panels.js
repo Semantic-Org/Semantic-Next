@@ -424,6 +424,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
         if(manualResize && sizeIndex == index) {
           hasMinimized = true;
         }
+        console.log('setting size', sizeIndex, size);
         tpl.setPanelSizePixels(sizeIndex, size);
       },
       pixelsToAdd,
@@ -627,7 +628,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     ---------------*/
 
     /* First check if we can take pixels from panels exceeding max or natural size */
-    pixelsToTake = takePixels(takeDirection, pixelsToTake, donorIndex => (getMaxSize(donorIndex) || getNaturalSize(donorIndex)));
+    pixelsToTake = takePixels(takeDirection, pixelsToTake, donorIndex => (getMaxSize(donorIndex) || Math.max(getNaturalSize(donorIndex), getMinSize(donorIndex))) );
 
     /* If we still need pixels lets donate from any panels that exceed their min width */
     if(pixelsToTake > 0) {
