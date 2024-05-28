@@ -23,16 +23,27 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   saveLayout() {
-    if(settings.saveState) {
-      const details = tpl.panels.map((panel, index) => {
-        const size = roundNumber(tpl.getPanelSize(panel));
-        return {
-          size,
-          minimized: tpl.isMinimized(index)
-        };
-      });
-      localStorage.setItem(settings.saveStateID, JSON.stringify(details));
+    if(!settings.saveState) {
+      return;
     }
+    const panelSizes = tpl.panels.map((panel, index) => {
+      const size = roundNumber(tpl.getPanelSize(panel));
+      return {
+        size,
+        minimized: tpl.isMinimized(index)
+      };
+    });
+    if(tpl.isLayoutCorrectSize(panelSizes)) {
+      localStorage.setItem(settings.saveStateID, JSON.stringify({ panels: panelSizes }));
+    }
+  },
+
+  isLayoutCorrectSize(storedLayout) {
+    const totalSize = sum(storedLayout.map(p => p.size));
+    const threshold = 0.1;
+    const layoutShift = Math.abs(totalSize - 100);
+    // quick sanity checks before storing a broken layout
+    return layoutShift < threshold;
   },
 
   getStoredLayout() {
@@ -43,8 +54,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
     if(storedLayout) {
       let details;
       try {
-        details = JSON.parse(storedLayout);
-      } catch(e) {}
+        details = JSON.parse(storedLayout)?.panels;
+      } catch(e) {
+        // nothing
+      }
       return details;
     }
   },
@@ -71,10 +84,11 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   setPanelInitialSizes() {
     let storedLayout = tpl.getStoredLayout();
-    if(storedLayout) {
+    if(tpl.canUseStoredSizes(storedLayout)) {
       tpl.setPanelStoredSizes(storedLayout);
     }
     else {
+      console.log('here');
       tpl.setPanelCalculatedSizes();
     }
   },
@@ -82,8 +96,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     if(storedLayout.length != tpl.panels.length) {
       return false;
     }
-    const totalSize = sum(storedLayout.map(p => p.size));
-    if(totalSize > 100.5 || totalSize < 99.5) {
+    if(!tpl.isLayoutCorrectSize(storedLayout)) {
       return false;
     }
     return true;
@@ -133,6 +146,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
   setPanelCalculatedSizes() {
     let exactPanels = tpl.getExactPanels();
+    console.log(exactPanels);
     each(exactPanels, (panel) => {
       let index = tpl.panels.indexOf(panel);
       const size = panel.settings.size;
@@ -144,6 +158,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
     // we have to perform grow stage after setting fixed size panels
     let growPanels = tpl.getGrowingPanels();
     const availableWidth = tpl.getAvailableGrowWidth();
+    console.log(growPanels);
 
     if(growPanels.length == 0 && availableWidth > 0) {
       console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
@@ -158,7 +173,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       if(relativeSize < minSize) {
         relativeSize = minSize;
       }
-      if(relativeSize > maxSize) {
+      if(maxSize && relativeSize > maxSize) {
         relativeSize = maxSize;
       }
       tpl.setPanelSize(index, relativeSize);

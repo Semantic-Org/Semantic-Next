@@ -178,7 +178,7 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
     getNaturalSize: function(panel, { direction, minimized }) {
       if(direction == 'horizontal') {
         const extraSpacing = 20; // scrollbar width and spacing
-        const minWidths = [];
+        const minWidths = [200];
         $$(panel).find('.CodeMirror-sizer').each(sizer => {
           const sizerMargin = parseFloat($(sizer).css('margin-left'));
           const sizerWidth = parseFloat($(sizer).css('min-width'));
@@ -198,7 +198,6 @@ const onRendered = ({ $, $$, tpl, state, settings }) => {
           const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
           const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
           const size = codeHeight + labelHeight + menuHeight + extraSpacing + scrollbarHeight;
-          console.log('natural vertical', size, panel, codeHeight, labelHeight, menuHeight, extraSpacing, scrollbarHeight);
           return Math.max(size, 100);
         }
       }
