@@ -1,14 +1,18 @@
 import { createComponent } from '@semantic-ui/component';
-import { MenuComponentSpec } from '@semantic-ui/specs';;
+import { MenuComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/menu-shadow.css?raw';
 import Template from './menu.html?raw';
 
-const createInstance = ({settings, dispatchEvent}) => ({
+const createInstance = ({settings, el, $, dispatchEvent}) => ({
 
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', value);
+  },
+
+  getValue() {
+    return item.value || item.href;
   },
 
   isValueActive(value, item) {
@@ -16,7 +20,7 @@ const createInstance = ({settings, dispatchEvent}) => ({
       return true;
     }
     if(value !== undefined) {
-      return value == item.id || value == item.href;
+      return value == tpl.getValue();
     }
     return false;
   }
