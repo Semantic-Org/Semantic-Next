@@ -127,7 +127,7 @@ const createInstance = ({tpl, state, settings, $, $$}) => ({
       }
       return {
         label: file.filename,
-        id: file.filename,
+        value: file.filename,
       };
     }).filter(Boolean);
     return menu;

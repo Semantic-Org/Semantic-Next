@@ -1,12 +1,20 @@
 ---
 
-import { tokenize, toTitleCase } from '@semantic-ui/utils';
+import { tokenize, getArticle, toTitleCase } from '@semantic-ui/utils';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
 import UIComponent from '@components/UIComponent.astro';
 
-const { spec, plural, definition, componentName } = Astro.props;
+const { spec, plural, definition, name, componentName } = Astro.props;
 
 const sections = ['types', 'content', 'states', 'variations'];
+const article = getArticle(name, { capitalize: true });
+const getDescription = (text) => {
+  return (text)
+    ? `<em>${article} ${name.toLowerCase()} can</em> ${text}.`
+    : `${article} ${name.toLowerCase()}.`
+  ;
+};
+console.log(definition);
 ---
 {sections.map((section) => (
   <>
@@ -17,7 +25,7 @@ const sections = ['types', 'content', 'states', 'variations'];
           <>
             <CodeExample client:load
               title={(index == 0) ? type.title : undefined }
-              description={type.description}
+              description={getDescription(type.description)}
               code={example.code}
               showCode={example.showCode}
               class={tokenize(type.title)}

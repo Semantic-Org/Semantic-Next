@@ -53,6 +53,10 @@ p.description {
   color: var(--standard-40);
   font-weight: normal;
 }
+p.description em {
+  opacity: 1;
+  font-style: normal;
+}
 
 .top.segment {
   position: relative;

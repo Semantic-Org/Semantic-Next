@@ -58,7 +58,7 @@
     opacity: var(--dropdown-icon-opacity);
     font-size: var(--dropdown-icon-font-size);
     transition: transform 0.3s ease;
-    transform: rotate(90deg);
+    transform: rotate(0deg);
     width: auto;
     margin-right: 0px;
     margin-left: auto;
@@ -129,7 +129,7 @@
 
     .dropdown {
       opacity: 0.8;
-      transform: rotate(0deg);
+      transform: rotate(180deg);
     }
   }
   &.current {

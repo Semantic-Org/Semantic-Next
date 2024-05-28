@@ -28,6 +28,7 @@
   }
 
   ui-icon {
+    opacity: 0.5;
     flex-grow: 0 1 auto;
     position: relative;
     display: block;
@@ -48,6 +49,7 @@
     color: var(--standard-100);
     ui-icon {
       transform: translateY(15%) rotateX(180deg);
+      opacity: 1;
     }
   }
   &.current {
@@ -67,6 +69,7 @@
   &.active {
     opacity: 1;
     max-height: var(--max-height);
+
   }
 
   .menu {

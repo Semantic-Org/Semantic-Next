@@ -27,7 +27,7 @@ export async function getStaticPaths() {
 const data = entry.data;
 const displayedTab = tab || data.tabs[0];
 const plural = (displayedTab == 'plural');
-const definitionDisplayed = inArray(displayedTab, ['singular', 'plural']);
+const definitionDisplayed = inArray(displayedTab, ['singular', 'definition', 'plural']);
 
 const { SpecReader, ...Specs } = SpecExports;
 const spec = Specs[data.specName];
@@ -66,6 +66,7 @@ if(definitionDisplayed) {
     <SpecDefinition
       definition={definition}
       componentName={componentName}
+      name={data.title}
       spec={spec}
       plural={plural}
     />
