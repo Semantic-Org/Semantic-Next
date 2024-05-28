@@ -397,6 +397,19 @@ export const toTitleCase = (str = '') => {
     .join(' ');
 };
 
+export const getArticle = (word, settings = {}) => {
+  const vowels = ['a', 'e', 'i', 'o', 'u'];
+  const firstLetter = word.toLowerCase()[0];
+  const article = vowels.includes(firstLetter)
+    ? 'an'
+    : 'a'
+  ;
+  return (settings.capitalize)
+    ? capitalize(article)
+    : article
+  ;
+};
+
 /*-------------------
         Arrays
 --------------------*/
