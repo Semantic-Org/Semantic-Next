@@ -88,7 +88,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
       tpl.setPanelStoredSizes(storedLayout);
     }
     else {
-      console.log('here');
       tpl.setPanelCalculatedSizes();
     }
   },
@@ -146,7 +145,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
   setPanelCalculatedSizes() {
     let exactPanels = tpl.getExactPanels();
-    console.log(exactPanels);
     each(exactPanels, (panel) => {
       let index = tpl.panels.indexOf(panel);
       const size = panel.settings.size;
@@ -158,7 +156,6 @@ const createInstance = ({tpl, el, settings, $}) => ({
     // we have to perform grow stage after setting fixed size panels
     let growPanels = tpl.getGrowingPanels();
     const availableWidth = tpl.getAvailableGrowWidth();
-    console.log(growPanels);
 
     if(growPanels.length == 0 && availableWidth > 0) {
       console.error('No panels can grow but panels have excess pixels. Using last panel to grow');

@@ -24,8 +24,8 @@ const createInstance = ({tpl, settings, state, $, $$}) => ({
 });
 
 const events = {
-  'click .label'({ $ }) {
-    $('playground-code-editor').focus();
+  'click .label'({ $, $$ }) {
+    $$('playground-code-editor').focus();
   },
   'focus ui-panel'({ $$ }) {
     $$('.label').addClass('active');
@@ -35,7 +35,10 @@ const events = {
   }
 };
 
-const onRendered = ({ $, tpl }) => {
+const onRendered = ({ $, tpl, attachEvent }) => {
+  attachEvent('.label', () => {
+    console.log('zz')
+  });
   $('ui-panel').settings({
     getNaturalSize: tpl.getNaturalSize
   });

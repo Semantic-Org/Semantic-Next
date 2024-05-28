@@ -44,8 +44,8 @@ searchMeta = {
   </head>
   <body class={padded ? 'padded' : ''}>
     <script>
-      import { $ } from '@semantic-ui/query';
-      window.$ = $;
+      import { exportGlobals, $ } from '@semantic-ui/query';
+      exportGlobals();
     </script>
     <script is:inline data-astro-rerun>
       if(!window.systemPrefersDark) {
