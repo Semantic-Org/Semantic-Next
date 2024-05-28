@@ -4,14 +4,14 @@ import { MenuComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/menu-shadow.css?raw';
 import Template from './menu.html?raw';
 
-const createInstance = ({settings, el, $, dispatchEvent}) => ({
+const createInstance = ({settings, tpl, dispatchEvent}) => ({
 
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', value);
   },
 
-  getValue() {
+  getValue(item) {
     return item.value || item.href;
   },
 
@@ -20,11 +20,10 @@ const createInstance = ({settings, el, $, dispatchEvent}) => ({
       return true;
     }
     if(value !== undefined) {
-      return value == tpl.getValue();
+      return value == tpl.getValue(item);
     }
     return false;
   }
-
 });
 
 
@@ -36,7 +35,7 @@ const onRendered = function({$}) {
 
 const events = {
   'click menu-item'({tpl, data}) {
-    tpl.setValue(data.id);
+    tpl.setValue(data.value);
   }
 };
 
