@@ -214,10 +214,10 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   getGrowingPanels() {
-    return tpl.panels.filter(panel => !tpl.isInitialized(panel) && panel.settings.size == 'grow');
+    return tpl.panels.filter(panel => !tpl.isPanelInitialized(panel) && panel.settings.size == 'grow');
   },
   getExactPanels() {
-    return tpl.panels.filter(panel => !tpl.isInitialized(panel) && panel.settings.size !== 'grow');
+    return tpl.panels.filter(panel => !tpl.isPanelInitialized(panel) && panel.settings.size !== 'grow');
   },
 
   getRelativeSettingSize(size, index) {
