@@ -6,8 +6,8 @@ Easy Wins
 + Fix double border on first playground element
 
 Overall Docs
-- Remove docs build step and use package directly
-- Add global search
++ Remove docs build step and use package directly
++ Add global search
 - Add in-menu search
 - Dupe lit in astro build?
 
@@ -24,6 +24,7 @@ Docs Design
 - Add overview page card design
 - Add custom theme for code samples
 - Add following header on long pages
+- Add min usage level to docs
 
 Build System
 - Figure out build step for component spec
