@@ -20,6 +20,24 @@ export const buildProject = async ({
   const esbuilder = watch ? esbuild.context : esbuild.build;
   let tasks = [];
 
+  /*
+    Export Concat Components
+  */
+  let test = await esbuilder({
+    entryPoints: ['./src/toy/toy-use.js'],
+    tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
+    format: 'esm',
+    metafile: true,
+    bundle,
+    minify,
+    sourcemap,
+    outbase: 'src',
+    outdir: uiDir,
+    loader: JS_LOADER_CONFIG,
+    plugins: [logPlugin('Toy')],
+  });
+  tasks.push(test);
+
   if (includeJavascript) {
 
     /*
