@@ -2,7 +2,7 @@
 import { isArray, any } from '@semantic-ui/utils';
 import { removeTrailingSlash } from '@helpers/navigation';
 import './DocsMasthead.css';
-import { UIMenu, MenuItem } from '@semantic-ui/core';
+import { UIMenu, UIContainer, MenuItem } from '@semantic-ui/core';
 const { tabs, header, description, menu } = Astro.props;
 
 const isURLActive = (url, index) => {
@@ -31,11 +31,11 @@ const menuItems = (menu || []).map((item, index) => ({
 
 ---
 <masthead>
-  <ui-container active="true">
+  <UIContainer>
     <h1>{header}</h1>
     <p>{description}</p>
     {isArray(menu) && (
       <UIMenu evenly-spaced selection items={menuItems}></UIMenu>
     )}
-  </ui-container>
+  </UIContainer>
 </masthead>

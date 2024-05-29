@@ -17,7 +17,7 @@
     ui-container {
       position: relative;
       width: auto;
-      max-width: 1170px;
+      max-width: calc(1170px - 3em);
       margin-left: 3em;
       margin-right: calc(var(--rail-width) + 2rem);
     }
