@@ -1,7 +1,18 @@
 @layer baseTheme.global, baseTheme.component;
 
+/* Globals */
 @import url("./global-variables.css") layer(baseTheme.global);
+
+/* Structural */
+@import url("./container/container-theme.css") layer(baseTheme.component.container);
+@import url("./rail/rail-theme.css") layer(baseTheme.component.rail);
+
+/* Primitives */
 @import url("./button/button-theme.css") layer(baseTheme.component.button);
 @import url("./icon/icon-theme.css") layer(baseTheme.component.icon);
 @import url("./menu/menu-theme.css") layer(baseTheme.component.menu);
+@import url("./input/input-theme.css") layer(baseTheme.component.input);
+@import url("./label/label-theme.css") layer(baseTheme.component.label);
+
+/* Components */
 @import url("./modal/modal-theme.css") layer(baseTheme.component.modal);

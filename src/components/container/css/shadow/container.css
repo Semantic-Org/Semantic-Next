@@ -1,0 +1,5 @@
+/* Content */
+@import url('./content/container.css') layer(component.container.content.container);
+
+/* Types */
+@import url('./variations/aligned.css') layer(component.container.variations.aligned);
