@@ -18,7 +18,7 @@
     --ec-uiFontSize: 14px;
   }
 
-  body.dark {
+  html.dark {
     --sl-color-accent-low: #131e4f;
     --sl-color-accent: #3447ff;
     --sl-color-accent-high: #b3c7ff;
@@ -37,7 +37,7 @@
     --primary-text-color: #73B9E1;
     --panel-color: #1B1C1D;
   }
-  body.dark {
+  html.dark {
     --page-background: #000000;
     --text-color: rgba(255, 255, 255, 0.83);
     --panel-color: #0C1114;
@@ -192,9 +192,9 @@
     color: inherit;
   }
 
-  body.dark {
+  html.dark {
   }
-  body.dark {
+  html.dark {
     h1,
     h2,
     h3,

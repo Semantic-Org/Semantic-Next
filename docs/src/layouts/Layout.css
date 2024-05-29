@@ -5,7 +5,7 @@
     --dividing-border: 1px solid rgba(0 0 0 / 10%);
     --dividing-box-shadow: 1px 0px 0px 0px rgb(34 35 37 / 100%);
   }
-  body.dark {
+  html.dark {
     --primary-text-color: var(--primary-light-text-color);
     --dividing-border: 1px solid rgb(34 35 37 / 100%);
     --dividing-box-shadow: 1px 0px 0px 0px rgb(34 35 37 / 100%);
@@ -201,7 +201,7 @@
     background-color: #FFFFFF;
   }
 
-  body.dark {
+  html.dark {
     page > masthead {
       background-color: rgb(0, 0, 0, 0.9);
       border-bottom: 1px solid rgba(34, 35, 37, 0.7);

@@ -43,10 +43,10 @@ const createInstance = function ({ $, isServer, reaction, state, tpl }) {
         }
         localStorage.setItem('theme', theme);
         if(theme == 'light') {
-          $('body').removeClass('dark').addClass('light');
+          $('html').removeClass('dark').addClass('light');
         }
         else {
-          $('body').removeClass('light').addClass('dark');
+          $('html').removeClass('light').addClass('dark');
         }
       });
     }

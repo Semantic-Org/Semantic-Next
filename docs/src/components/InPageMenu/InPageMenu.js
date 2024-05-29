@@ -280,7 +280,7 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
     tpl.bindIntersectionObserver();
   },
 
-  unbindEvents() {
+  unbindPageEvents() {
     if (tpl.observer) {
       tpl.observer.disconnect();
     }
