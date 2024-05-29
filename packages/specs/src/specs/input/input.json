@@ -12,6 +12,13 @@
       "couplesWith": ["ui-icon"],
       "description": "include an icon",
       "exampleCode": "<ui-input icon=\"search\"></ui-input>"
+    },
+    {
+      "name": "Label",
+      "includeAttributeClass": true,
+      "attribute": "label",
+      "description": "include a label",
+      "exampleCode": "<ui-input label=\"ctrl+k\"></ui-input>"
     }
   ],
   "types": [
