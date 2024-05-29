@@ -1,4 +1,4 @@
-import { Query, $, $$ } from "./index.js";
+import { Query, $, $$, exportGlobals, restoreGlobals, useAlias } from "./index.js";
 
-export { Query, $, $$ };
+export { Query, $, $$, exportGlobals, restoreGlobals, useAlias };
 export default $;

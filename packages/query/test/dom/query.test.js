@@ -1,5 +1,5 @@
-import { describe, beforeEach, expect, it, vi } from 'vitest';
-import { $ } from '@semantic-ui/query';
+import { describe, beforeEach, afterEach, expect, it, vi } from 'vitest';
+import { $, $$, Query, exportGlobals, restoreGlobals, useAlias } from '@semantic-ui/query';
 
 describe('query', () => {
 
@@ -8,6 +8,59 @@ describe('query', () => {
     $().removeAllEvents();
   });
 
+  describe('Global helpers', () => {
+    beforeEach(() => {
+      // Clear any existing global variables before each test
+      delete window.$;
+      delete window.$$;    delete window.Query;
+    });
+
+    describe('exportGlobals', () => {
+      it('should attach $, $$, and Query to the global scope', () => {
+        exportGlobals();
+        expect(window.$).toBe($);
+        expect(window.$$).toBe($$);
+        expect(window.Query).toBe(Query);
+      });
+
+      it('should allow selective global exports', () => {
+        exportGlobals({ dollar: true, doubleDollar: false, query: false });
+        expect(window.$).toBe($);
+        expect(window.$$).toBeUndefined();
+        expect(window.Query).toBeUndefined();
+      });
+    });
+
+    describe('restoreGlobals', () => {
+      it('should restore the original values of $ and $$', () => {
+        const originalDollar = window.$ = () => {};
+        const originalDoubleDollar = window.$$ = () => {};
+
+        exportGlobals();
+        restoreGlobals();
+
+        expect(window.$).toBe(originalDollar);
+        expect(window.$$).toBe(originalDoubleDollar);
+      });
+
+      it('should remove Query from the global scope when specified', () => {
+        exportGlobals();
+        restoreGlobals({ removeQuery: true });
+        expect(window.Query).toBeUndefined();
+      });
+    });
+
+    describe('useAlias', () => {
+      it('should create a new Query instance with the provided arguments', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        const $alias = useAlias('div');
+        expect($alias).toBeInstanceOf(Query);
+        expect($alias[0]).toBe(div);
+      });
+    });
+  });
 
   describe('selectors', () => {
     

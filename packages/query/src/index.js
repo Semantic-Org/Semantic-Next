@@ -14,17 +14,18 @@ const $$ = function (selector, args = {}) {
   return $(selector, args);
 };
 
-function exportGlobals({ dollar = true, doubleDollar = true, query = true} = {}) {
+let originalDollar;
+let originalDoubleDollar;
+
+const exportGlobals = function({ dollar = true, doubleDollar = true, query = true} = {}) {
   if (isClient) {
 
-    let originalDollar;
 
     if(dollar) {
       originalDollar = window.$;
       window.$ = $;
     }
 
-    let originalDoubleDollar;
     if (doubleDollar) {
       originalDoubleDollar = window.$$;
       window.$$ = $$;
@@ -33,24 +34,26 @@ function exportGlobals({ dollar = true, doubleDollar = true, query = true} = {})
     if (query) {
       window.Query = Query;
     }
-
-    // Add a restoreGlobals method to restore the original values of $ and $$
-    $.restoreGlobals = function (settings) {
-      if (window.$ === $) {
-        window.$ = originalDollar;
-      }
-      if (window.$$ === $$) {
-        window.$$ = originalDoubleDollar;
-      }
-      if (typeof settings == 'object' && settings.removeQuery && window.Query === Query) {
-        window.Query = undefined;
-      }
-      return $;
-    };
-    $.useAlias = function () {
-      return new Query(...arguments);
-    };
   }
 }
 
-export { Query, $, $$, exportGlobals };
+// Add a restoreGlobals method to restore the original values of $ and $$
+const restoreGlobals = function(settings) {
+  if (window.$ === $) {
+    window.$ = originalDollar;
+  }
+  if (window.$$ === $$) {
+    window.$$ = originalDoubleDollar;
+  }
+  if (typeof settings == 'object' && settings.removeQuery && window.Query === Query) {
+    window.Query = undefined;
+  }
+  return $;
+};
+
+// Bind Query to a different alias than $
+const useAlias = function() {
+  return new Query(...arguments);
+};
+
+export { Query, $, $$, exportGlobals, restoreGlobals, useAlias };
