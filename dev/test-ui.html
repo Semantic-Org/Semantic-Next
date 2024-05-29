@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button</title>
   <link rel="stylesheet" href="./index.css">
-  <link rel="stylesheet" href="./ui/ui/semantic-ui.css">
-  <link rel="stylesheet" href="./ui/theme/base.css">
-  <script src="./ui/ui/semantic-ui.js" type="module"></script>
+  <link rel="stylesheet" href="./ui/semantic-ui.css">
+  <link rel="stylesheet" href="./theme/base.css">
+  <script src="./ui/semantic-ui.js" type="module"></script>
   <script>
 new EventSource('/esbuild').addEventListener('change', e => {
   /* Rebuilds page after JS changes */
@@ -31,6 +31,6 @@ new EventSource('/esbuild').addEventListener('change', e => {
 </head>
 <body>
   <div class="container">
-    <ui-button primary>Primary Button</ui-button>
+    <ui-menu value="3" items='[{"label":"One","value":"1"},{"label":"Two","value":"2"},{"label":"Three","value":"3"}]'></ui-menu>
   </div>
 </body>
