@@ -5,22 +5,8 @@
   "tagName": "ui-label",
   "exportName": "UILabel",
   "content": [],
-  "types": [
-    {
-      "name": "selection",
-      "attribute": "selection",
-      "description": "formatted to allow for selection between choices",
-      "usageLevel": 1
-    }
-  ],
-  "variations": [
-    {
-      "name": "",
-      "attribute": "",
-      "description": "",
-      "usageLevel": 1
-    }
-  ],
+  "types": [],
+  "variations": [],
   "events": [],
   "settings": []
 }

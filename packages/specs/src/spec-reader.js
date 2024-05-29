@@ -266,7 +266,6 @@ export class SpecReader {
         componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
-        console.log('here', defaultContent);
         code = this.getCode(modifiers, { html: defaultContent });
         componentParts = this.getComponentParts(modifiers, { html: defaultContent });
       }
