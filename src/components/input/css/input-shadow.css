@@ -1,5 +1,32 @@
 /* src/components/input/css/shadow/content/input.css */
-@layer component.input.content.input;
+@layer component.input.content.input {
+  * {
+    box-sizing: border-box;
+  }
+  .input {
+    display: inline-flex;
+    position: relative;
+    font-style: normal;
+    font-weight: var(--input-font-weight);
+  }
+  .input input {
+    margin: 0em;
+    outline: none;
+    max-width: 100%;
+    flex: 1 0 auto;
+    text-align: left;
+    font-family: var(--input-font-family);
+    padding: var(--input-padding);
+    line-height: var(--input-line-height);
+    color: var(--input-text-color);
+    background: var(--input-background);
+    border: var(--input-border);
+    border-radius: var(--input-border-radius);
+    transition: var(--input-transition);
+    box-shadow: var(--input-box-shadow);
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+}
 
 /* src/components/input/css/shadow/variations/sizing.css */
 @layer component.input.variations.sizing;

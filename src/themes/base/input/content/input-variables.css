@@ -1,3 +1,28 @@
 :root {
 
+  --input-background: var(--inverted-color);
+
+  --input-vertical-padding: var(--relative-10px);
+  --input-horizontal-padding: var(--relative-12px);
+  --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+
+  --input-border-radius: var(--border-radius);
+
+  /* Input Text Color */
+  --input-font-family: var(--page-font);
+  --input-text-color: var(--text-color);
+
+  /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */
+  --input-line-height: var(--relative-17px);
+
+  --input-box-shadow: none;
+  --input-border: var(--border);
+
+  --input-placeholder-color: oklch(from var(--input-color) calc(l + 75) c h);
+  --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
+
+  --input-transition:
+    box-shadow var(--duration) var(--easing),
+    border-color var(--duration) var(--easing)
+  ;
 }

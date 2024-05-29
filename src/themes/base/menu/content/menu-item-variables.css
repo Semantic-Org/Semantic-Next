@@ -37,7 +37,7 @@
 }
 
 
-body.dark {
+html.dark {
   --menu-item-color: var(--standard-30);
   --menu-item-hover-color: var(--standard-100);
   --menu-item-active-color: var(--primary-text-color);

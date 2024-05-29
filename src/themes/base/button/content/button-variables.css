@@ -10,7 +10,6 @@
   --button-background-image: var(--subtle-gradient);
   --button-background: var(--button-background-color) var(--button-background-image);
 
-  --button-text-color: var(--text-color);
   --button-line-height: 1em;
 
   /* button same height as input globally */
@@ -22,8 +21,8 @@
   --button-tap-color: transparent;
   --button-font-family: var(--page-font);
   --button-font-weight: var(--bold);
-  --button-text-color: var(--text-color);
-  --button-inverted-text-color: var(--inverted-text-color);
+  --button-text-color: var(--black-80);
+  --button-inverted-text-color: var(--white-80);
   --button-text-shadow: none;
   --button-inverted-text-shadow: var(--button-text-shadow);
 
@@ -32,7 +31,7 @@
   --button-border: none;
 
   /* Border (For Alignment Require Box Shadow) */
-  --button-border-color: var(--border-color);
+  --button-border-color: var(--black-border-color);
   --button-border-width: 1px;
 
   /* Box Shadow */
@@ -45,8 +44,8 @@
     var(--button-shadow-box-shadow)
   ;
 
-  --button-transition-duration: var(--default-duration);
-  --button-transition-easing: var(--default-easing);
+  --button-transition-duration: var(--duration);
+  --button-transition-easing: var(--easing);
 
   --button-transition:
     opacity var(--button-transition-duration) var(--button-transition-easing),

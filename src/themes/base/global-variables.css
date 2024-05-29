@@ -20,8 +20,6 @@
   --bold: bold;
   --normal: normal;
 
-  --box-sizing: border-box;
-
   /* -------------------
         Global Size
   -------------------- */
@@ -126,19 +124,6 @@
      Form Input
   --------------- */
 
-  /* This adjusts the default form input across all elements */
-  --input-background: var(--white);
-  --input-vertical-padding: var(--relative-10px);
-  --input-horizontal-padding: var(--relative-12px);
-  --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
-
-  /* Input Text Color */
-  --input-color: var(--text-color);
-  --input-placeholder-color: oklch(from var(--input-color) calc(l + 75) c h);
-  --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
-
-  /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */
-  --input-line-height: var(--17px);
 
   /* -------------------
       Focused Input
@@ -155,6 +140,9 @@
   -------------------- */
 
   /* These swap to handle coarse level of dark mode theming */
+  --white-color: 255 255 255;
+  --black-color: 0 0 0;
+
   --standard-color: 0 0 0;
   --inverted-color: 255 255 255;
 
@@ -262,9 +250,9 @@
        Transitions
   -------------------- */
 
-  --default-duration: 0.15s;
-  --default-easing: ease;
-  --transition: all var(--default-duration) var(--default-easing);
+  --duration: 0.15s;
+  --easing: ease;
+  --transition: all var(--duration) var(--easing);
 
   /* -------------------
        Breakpoints
@@ -426,14 +414,14 @@
        Alpha Colors
   -------------------- */
 
-  --subtle-transparent-black: rgb(var(--standard-color) / 3%);
-  --transparent-black: rgb(var(--standard-color) / 5%);
-  --strong-transparent-black: rgb(var(--standard-color) / 8%);
-  --very-strong-transparent-black: rgb(var(--standard-color) / 15%);
+  --subtle-transparent-black: rgb(var(--black-color) / 3%);
+  --transparent-black: rgb(var(--black-color) / 5%);
+  --strong-transparent-black: rgb(var(--black-color) / 8%);
+  --very-strong-transparent-black: rgb(var(--black-color) / 15%);
 
-  --subtle-transparent-white: rgb(var(--inverted-color) / 5%);
-  --transparent-white: rgb(var(--inverted-color) / 8%);
-  --strong-transparent-white: rgb(var(--inverted-color) / 15%);
+  --subtle-transparent-white: rgb(var(--white-color) / 5%);
+  --transparent-white: rgb(var(--white-color) / 8%);
+  --strong-transparent-white: rgb(var(--white-color) / 15%);
 
   /* -------------------
          Accents
@@ -572,6 +560,9 @@
   --selected-border-color: rgba(34, 36, 38, 0.35);
   --strong-selected-border-color: rgba(34, 36, 38, 0.5);
   --disabled-border-color: rgba(34, 36, 38, 0.5);
+
+  /* this border color is invariant in dark mode theme */
+  --black-border-color: rgba(34, 36, 38, 0.15);
 
   --solid-internal-border-color: #FAFAFA;
   --solid-border-color: #D4D4D5;
@@ -852,7 +843,7 @@
   --active-lightness: -0.12;
 }
 
-body.dark {
+html.dark {
 
   --dark-mode: true;
   --page-background: #000000;
@@ -874,16 +865,6 @@ body.dark {
   --internal-border: 1px solid var(--internal-border-color);
 
   --solid-border: 1px solid var(--solid-border-color);
-
-  --subtle-transparent-black: rgb(var(--standard-color) / 5%);
-  --transparent-black: rgb(var(--standard-color) / 10%);
-  --strong-transparent-black: rgb(var(--standard-color) / 15%);
-  --very-strong-transparent-black: rgb(var(--standard-color) / 20%);
-
-  --subtle-transparent-white: rgb(var(--inverted-color) / 5%);
-  --transparent-white: rgb(var(--inverted-color) / 10%);
-  --strong-transparent-white: rgb(var(--inverted-color) / 15%);
-  --very-strong-transparent-white: rgb(var(--inverted-color) / 20%);
 
   --subtle-inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
 
@@ -911,9 +892,14 @@ body.dark {
   --inverted-90: rgb(var(--inverted-color) / 90%);
   --inverted-100: rgb(var(--inverted-color) / 100%);
 
+  --subtle-transparent-black: rgb(var(--black-color) / 3%);
+  --transparent-black: rgb(var(--black-color) / 5%);
+  --strong-transparent-black: rgb(var(--black-color) / 25%);
+  --very-strong-transparent-black: rgb(var(--black-color) / 30%);
+
 
   /* Differentiating Neutrals */
-  --subtle-gradient: linear-gradient(var(--subtle-transparent-white), var(--strong-transparent-black));
+  --subtle-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
 
   /* Differentiating Layers */
   --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);

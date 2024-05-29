@@ -16,7 +16,7 @@ body {
 }
 
 
-body.dark {
+html.dark {
   --menu-selection-item-color: var(--standard-30);
 
   --menu-selection-item-hover-background: var(--transparent-black);

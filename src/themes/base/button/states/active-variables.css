@@ -3,7 +3,7 @@
   /* Active */
   --button-active-background-color: #DFDFDF;
   --button-active-background-image: var(--button-background-image);
-  --button-active-color: var(--selected-text-color);
+  --button-active-color: var(--black-90);
   --button-active-shadow-box-shadow: var(--subtle-inset-shadow);
   --button-active-box-shadow:
     var(--button-sharpen-box-shadow),
