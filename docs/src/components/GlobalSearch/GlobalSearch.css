@@ -1,9 +1,10 @@
 :host {
 
-  --global-search-background-color: var(--black-30);
+  --global-search-background-color: var(--white-5);
   --global-search-border-radius: var(--circular-radius);
   --global-search-transition: background var(--duration) var(--easing);
-  --global-search-hover-background-color: var(--black-50);
+  --global-search-hover-background-color: var(--white-10);
+  --global-search-input-border: var(--white-border);
 
   --global-search-icon-width: 2rem;
   --global-search-icon-color: inherit;
@@ -18,7 +19,7 @@
   --global-search-label-font-size: 11px;
   --global-search-label-padding: 2px 3px;
   --global-search-label-color: var(--white-20);
-  --global-search-label-border: var(--internal-border);
+  --global-search-label-border: var(--white-border);
   --global-search-label-border-radius: var(--border-radius);
 
   --global-search-input-padding: var(--input-padding);
@@ -45,6 +46,7 @@ input {
   background-color: var(--global-search-background-color);
   border-radius: var(--global-search-border-radius);
   transition: var(--global-search-transition);
+  border: var(--global-search-input-border);
 
   &:hover {
     background-color: var(--global-search-hover-background-color);
@@ -125,6 +127,7 @@ ui-modal {
         width: 100%;
         color: inherit;
         font-size: inherit;
+        color: #FFFFFF;
         padding: var(--input-padding);
       }
       ui-icon {

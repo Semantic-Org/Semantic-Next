@@ -9,11 +9,17 @@
     transform: translateX(-50%) translateY(-50%);
     margin: 0;
   }*/
-  topbar mobile-sidebar-toggle {
-    display: inline-block;
-  }
-  topbar theme-switcher {
-    margin-left: 0;
+
+  topbar {
+    mobile-sidebar-toggle {
+      display: inline-block;
+    }
+    theme-switcher {
+      margin-left: 0;
+    }
+    global-search::part(input-label) {
+      display: none;
+    }
   }
 
   layout {
