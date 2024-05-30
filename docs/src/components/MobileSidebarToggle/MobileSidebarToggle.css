@@ -1,8 +1,8 @@
 .hitbox {
-  padding: 19px;
+  padding: var(--spacing);
 }
 .hitbox ui-icon {
-  transition: opacity var(--default-duration) var(--default-easing);
+  transition: opacity var(--duration) var(--easing);
   opacity: 0.6;
 }
 .hitbox:hover ui-icon {

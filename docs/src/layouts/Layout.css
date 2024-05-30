@@ -182,7 +182,7 @@
 
   /* Headers are smaller with masthead  */
   layout masthead + main h2 {
-    border-bottom: 1px solid #dfdfdf;
+    border-bottom: var(--internal-border);
     padding-bottom: 8px;
     font-size: 20px;
   }
@@ -221,9 +221,6 @@
     }
     page > main {
       background: none;
-    }
-    layout main h2 {
-      border-color: var(--border-color);
     }
     layout main h2,
     layout main h3 {

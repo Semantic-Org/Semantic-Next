@@ -1,10 +1,10 @@
 @layer themeSwitcher.shadow {
 
   :host {
-    --theme-switcher-hitbox-padding: var(--relative-15px) var(--relative-18px) ;
+    --theme-switcher-hitbox-padding: var(--spacing) ;
     --theme-switcher-icon-opacity: 0.6;
     --theme-switcher-icon-opacity-active: 1;
-    --theme-switcher-transition: opacity var(--default-duration) var(--default-easing);
+    --theme-switcher-transition: opacity var(--duration) var(--easing);
   }
 
   .hitbox {

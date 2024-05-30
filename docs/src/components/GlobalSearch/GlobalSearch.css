@@ -2,13 +2,13 @@
 
   --global-search-background-color: var(--black-30);
   --global-search-border-radius: var(--circular-radius);
-  --global-search-transition: background var(--default-duration) var(--default-easing);
+  --global-search-transition: background var(--duration) var(--easing);
   --global-search-hover-background-color: var(--black-50);
 
   --global-search-icon-width: 2rem;
   --global-search-icon-color: inherit;
 
-  --global-search-input-width: 10vw;
+  --global-search-input-width: 155px;
   --global-search-input-font-size: 12px;
   --global-search-input-font: var(--page-font);
   --global-search-input-color: var(--text-color);
@@ -21,7 +21,6 @@
   --global-search-label-border: var(--internal-border);
   --global-search-label-border-radius: var(--border-radius);
 
-  --global-search-input-color: var(--input-color);
   --global-search-input-padding: var(--input-padding);
 
 
@@ -38,7 +37,7 @@ input {
 }
 
 .inline-search {
-  cursor: input;
+  cursor: text;
   display: flex;
   align-items: center;
   background-color: var(--global-search-background-color);
@@ -65,7 +64,7 @@ input {
     width: var(--global-search-input-width);
     border: none;
     font-size: var(--global-search-input-font-size);
-    font-family: var(--global-search-font);
+    font-family: var(--global-search-input-font);
     color: var(--global-search-input-color);
     background-color: transparent;
     padding: var(--global-search-input-padding);
@@ -100,7 +99,7 @@ ui-modal {
   }
 
   .search {
-    background-color: var(--standard-0);
+    background-color: transparent;
     padding: 2rem 1.5rem;
     border-radius: var(--top-attached-border-radius);
     box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.4);
@@ -109,7 +108,7 @@ ui-modal {
     .input {
       display: flex;
       flex-direction: row;
-      background-color: var(--standard-10);
+      background-color: var(--white-10);
       width: 100%;
       border-radius: var(--circular-radius);
       border: var(--border);
@@ -147,7 +146,7 @@ ui-modal {
     .result {
       display: block;
       text-decoration: none;
-      color: var(--text-color);
+      color: var(--white-text-color);
       background-color: rgb(0 0 0 / 28%);
       padding: var(--padding);
       border-radius: var(--border-radius);
@@ -211,7 +210,7 @@ ui-modal {
       font-weight: normal;
       font-size: 13px;
       margin: 1px 0px 0px 0px;
-      color: var(--standard-30);
+      color: var(--white-30);
     }
 
     .subresults {

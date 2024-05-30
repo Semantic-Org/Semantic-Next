@@ -127,9 +127,9 @@
     --inverted-loader-fill-color: rgb(var(--inverted-color) / 15%);
     --inverted-loader-line-color: var(--white);
     --column-count: 16;
-    --default-duration: 0.15s;
-    --default-easing: ease;
-    --transition: all var(--default-duration) var(--default-easing);
+    --duration: 0.15s;
+    --easing: ease;
+    --transition: all var(--duration) var(--easing);
     --mobile-breakpoint: 320px;
     --tablet-breakpoint: 768px;
     --computer-breakpoint: 992px;
@@ -642,8 +642,8 @@
         var(--button-sharpen-box-shadow),
         var(--button-border-box-shadow),
         var(--button-shadow-box-shadow) ;
-      --button-transition-duration: var(--default-duration);
-      --button-transition-easing: var(--default-easing);
+      --button-transition-duration: var(--duration);
+      --button-transition-easing: var(--easing);
       --button-transition:
         opacity var(--button-transition-duration) var(--button-transition-easing),
         background-color var(--button-transition-duration) var(--button-transition-easing),
@@ -1365,7 +1365,7 @@
   :root {
     --icon-link-opacity: 0.6;
     --icon-link-color: inherit;
-    --icon-link-transition: opacity var(--default-duration) var(--default-easing), color var(--default-duration) var(--default-easing) ;
+    --icon-link-transition: opacity var(--duration) var(--easing), color var(--duration) var(--easing) ;
     --icon-link-hover-opacity: 1;
     --icon-link-hover-color: inherit;
   }

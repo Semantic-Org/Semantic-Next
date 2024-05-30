@@ -18,10 +18,42 @@
 
   layout {
     width: 100%;
-  }
-  layout main ui-container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+
+    main {
+
+      h1 {
+        font-size: 22px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 2rem 0rem 1rem;
+      }
+      ul li,
+      p {
+        font-size: 15px;
+      }
+
+      ui-container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+
+      code-example::part(header) {
+        font-size: 15px;
+      }
+      code-example::part(description) {
+        font-size: 13px;
+      }
+
+    }
+
+    masthead {
+      ui-container {
+        max-width: 100%;
+        margin-left: 1.5em;
+        margin-right: 1.5em;
+      }
+    }
   }
 
   sidebar {

@@ -22,9 +22,8 @@ const createInstance = function ({ $, isServer, tpl }) {
       }
       else {
         $sidebar.addClass('visible');
+        tpl.bindClickaway();
       }
-      // safari ios doesnt handle this natively properly so we gotta do manual after this event bubbles
-      //setTimeout(tpl.bindClickaway, 1);
     },
     hideSidebar() {
       const $sidebar = tpl.getSidebar();
@@ -50,7 +49,7 @@ const createInstance = function ({ $, isServer, tpl }) {
 };
 
 const events = {
-  'pointerdown .hitbox'({tpl}) {
+  'click .hitbox'({tpl}) {
     if(tpl.isVisible()) {
       tpl.hideSidebar();
     }

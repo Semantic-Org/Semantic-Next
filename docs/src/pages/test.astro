@@ -1,9 +1,23 @@
 ---
 import Body from '../layouts/Body.astro';
-import { UIInput } from '@semantic-ui/core';
+import { UIInput, UIButton } from '@semantic-ui/core';
 
 const items = [{label: 'One', value: '1'}, { label: 'Two', value: '2' },{label: 'Three', value: '3' }];
 ---
 <Body padded>
 <UIInput value="test" icon="x" client:load></UIInput>
+
+<ui-button red>Red</ui-button>
+<ui-button orange>Orange</ui-button>
+<ui-button yellow>Yellow</ui-button>
+<ui-button olive>Olive</ui-button>
+<ui-button green>Green</ui-button>
+<ui-button teal>Teal</ui-button>
+<ui-button blue>Blue</ui-button>
+<ui-button violet>Violet</ui-button>
+<ui-button purple>Purple</ui-button>
+<ui-button pink>Pink</ui-button>
+<ui-button brown>Brown</ui-button>
+<ui-button grey>Grey</ui-button>
+<ui-button black>Black</ui-button>
 </Body>
