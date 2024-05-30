@@ -279,31 +279,31 @@
           "name": "Facebook",
           "value": "facebook",
           "description": "match the brand colors of Facebook",
-          "exampleCode": "<ui-button facebook icon=\"facebook\">Facebook</ui-button\">"
+          "exampleCode": "<ui-button facebook icon=\"facebook\">Facebook</ui-button>"
         },
         {
           "name": "Twitter",
           "value": "twitter",
           "description": "match the brand colors of Twitter",
-          "exampleCode": "<ui-button twitter icon=\"twitter\">Facebook</ui-button\">"
+          "exampleCode": "<ui-button twitter icon=\"twitter\">Facebook</ui-button>"
         },
         {
           "name": "Linkedin",
           "value": "linkedin",
           "description": "match the brand colors of LinkedIn",
-          "exampleCode": "<ui-button linkedin icon=\"linkedin\">Facebook</ui-button\">"
+          "exampleCode": "<ui-button linkedin icon=\"linkedin\">Facebook</ui-button>"
         },
         {
           "name": "Instagram",
           "value": "instagram",
           "description": "match the brand colors of Instagram",
-          "exampleCode": "<ui-button instagram icon=\"instagram\">Facebook</ui-button\">"
+          "exampleCode": "<ui-button instagram icon=\"instagram\">Facebook</ui-button>"
         },
         {
           "name": "Youtube",
           "value": "youtube",
           "description": "match the brand colors of YouTube",
-          "exampleCode": "<ui-button youtube icon=\"youtube\">Facebook</ui-button\">"
+          "exampleCode": "<ui-button youtube icon=\"youtube\">Facebook</ui-button>"
         }
       ]
     },
