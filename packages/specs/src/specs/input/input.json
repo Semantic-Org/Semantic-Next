@@ -6,6 +6,11 @@
   "exportName": "UIInput",
   "content": [
     {
+      "name": "Placeholder",
+      "attribute": "placeholder",
+      "description": "include placeholder text"
+    },
+    {
       "name": "Icon",
       "includeAttributeClass": true,
       "attribute": "icon",
@@ -56,5 +61,10 @@
       "attribute": "value",
       "description": "can specify a value to store"
     }
-  ]
+  ],
+  "examples": {
+    "defaultAttributes": {
+      "icon": "check-circle"
+    }
+  }
 }

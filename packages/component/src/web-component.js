@@ -180,7 +180,8 @@ class WebComponentBase extends LitElement {
         properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
       });
 
-      // these are functions that can only be set on the DOM el but do not have attributes
+      // these are values that can only be set on the DOM el as properties
+      // but do not have attributes -- for instance functions
       each(componentSpec.properties, (name) => {
         const propertyType = componentSpec.propertyTypes[name];
         properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
