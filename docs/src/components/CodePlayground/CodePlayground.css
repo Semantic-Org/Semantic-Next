@@ -87,7 +87,6 @@
       height: var(--inline-code-height);
       border-radius: 0px 0px ;
       border: var(--border);
-      border-top: 1px solid #111;
       overflow: hidden;
       border-radius: var(--bottom-attached-border-radius);
     }
