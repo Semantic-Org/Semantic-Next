@@ -138,9 +138,11 @@
   --focused-ring: 0px 0px 1px 3px var(--standard-100);
   --focused-outline-color: var(--inverted-100);
   --focused-ring-color: var(--primary-color);
+  --focused-ring-outline-width: 1px;
+  --focused-ring-width: 3px;
   --focused-ring-shadow:
-    0px 0px 0px 1px var(--focused-outline-color),
-    0px 0px 1px 3px var(--focused-ring-color)
+    0px 0px 0px var(--focused-ring-outline-width) var(--focused-outline-color),
+    0px 0px 0px var(--focused-ring-width) var(--focused-ring-color)
   ;
 
 
