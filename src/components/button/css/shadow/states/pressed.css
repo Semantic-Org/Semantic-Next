@@ -10,11 +10,12 @@
     color: var(--button-pressed-color);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .pressed.button,
-  .active.pressed.button {
-    background-color: var(--button-pressed-background-color);
-    background-image: var(--button-pressed-background-image);
-    color: var(--button-pressed-color);
-    box-shadow: var(--button-pressed-box-shadow);
-  }
+}
+
+.pressed.button,
+.active.pressed.button {
+  background-color: var(--button-pressed-background-color);
+  background-image: var(--button-pressed-background-image);
+  color: var(--button-pressed-color);
+  box-shadow: var(--button-pressed-box-shadow);
 }

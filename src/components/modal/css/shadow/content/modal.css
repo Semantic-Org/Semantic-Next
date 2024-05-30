@@ -1,5 +1,6 @@
 /*   Closed state of the dialog   */
 dialog {
+  position: fixed;
   width: inherit;
   outline: none;
   border: none;

@@ -1,6 +1,7 @@
 /* src/components/modal/css/shadow/content/modal.css */
 @layer component.content.modal {
   dialog {
+    position: fixed;
     width: inherit;
     outline: none;
     border: none;
