@@ -569,8 +569,9 @@ export const Template = class Template {
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
   attachEvent(selector, eventName, eventHandler, eventSettings) {
-    $(selector, document, { pierceShadow: true }).on(eventName, eventHandler, {
+    return $(selector, document, { pierceShadow: true }).on(eventName, eventHandler, {
       abortController: this.eventController,
+      returnHandler: true,
       ...eventSettings
     });
   }
