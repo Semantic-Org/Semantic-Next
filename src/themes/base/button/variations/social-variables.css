@@ -1,5 +1,7 @@
 :root {
 
+  --button-instagram-background-image: var(--instagram-gradient);
+
   /* ---  Brand   --- */
   --facebook-hover-color: oklch(from var(--facebook-color) calc(l - 0.05) c calc(h + 10));
   --twitter-hover-color: oklch(from var(--twitter-color) calc(l - 0.05) c calc(h + 10));
@@ -7,7 +9,6 @@
   --youtube-hover-color: oklch(from var(--youtube-color) calc(l - 0.05) c calc(h + 10));
   --instagram-hover-color: oklch(from var(--instagram-color) calc(l - 0.05) c calc(h + 10));
   --pinterest-hover-color: oklch(from var(--pinterest-color) calc(l - 0.05) c calc(h + 10));
-  --vk-hover-color: oklch(from var(--vk-color) calc(l - 0.05) c calc(h + 10));
 
   /* ---  Brand   --- */
   --facebook-down-color: oklch(from var(--facebook-color) calc(l - 0.1) c h);
@@ -16,7 +17,6 @@
   --youtube-down-color: oklch(from var(--youtube-color) calc(l - 0.1) c h);
   --instagram-down-color: oklch(from var(--instagram-color) calc(l - 0.1) c h);
   --pinterest-down-color: oklch(from var(--pinterest-color) calc(l - 0.1) c h);
-  --vk-down-color: oklch(from var(--vk-color) calc(l - 0.1) c h);
 
   /* ---  Brand   --- */
   --facebook-focus-color: oklch(from var(--facebook-color) calc(l - 0.08) c calc(h + 15));
@@ -25,6 +25,5 @@
   --youtube-focus-color: oklch(from var(--youtube-color) calc(l - 0.08) c calc(h + 15));
   --instagram-focus-color: oklch(from var(--instagram-color) calc(l - 0.08) c calc(h + 15));
   --pinterest-focus-color: oklch(from var(--pinterest-color) calc(l - 0.08) c calc(h + 15));
-  --vk-focus-color: oklch(from var(--vk-color) calc(l - 0.08) c calc(h + 15));
 
 }

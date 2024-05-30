@@ -26,6 +26,8 @@
   color: var(--button-info-text-color);
   text-shadow: var(--button-info-text-shadow);
 }
+.info.buttons .button.pressed,
+.info.button.pressed,
 .info.buttons .button:active,
 .info.button:active {
   background-color: var(--button-info-color-down);
@@ -67,6 +69,8 @@
   color: var(--button-subtle-info-text-color);
   text-shadow: var(--button-subtle-info-text-shadow);
 }
+.subtle-info.buttons .button.pressed,
+.subtle-info.button.pressed,
 .subtle-info.buttons .button:active,
 .subtle-info.button:active {
   background-color: var(--button-subtle-info-color-down);

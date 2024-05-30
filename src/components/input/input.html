@@ -1,5 +1,10 @@
-<div class="{{ui}} input" part="wrapper">
+<div class="{{ui}} {{classMap getStateClasses}} input" part="wrapper">
   <input type="text" placeholder="{{placeholder}}" name={{name}} value={{value}} part="input">
+  {{#if label}}
+    <div class="label">
+      {{label}}
+    </div>
+  {{/if}}
   {{#if icon}}
     <ui-icon icon={{icon}} part="icon"></ui-icon>
   {{/if}}

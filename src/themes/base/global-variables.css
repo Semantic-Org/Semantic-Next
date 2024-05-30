@@ -17,6 +17,10 @@
   --text-color: var(--standard-80);
   --line-height: var(--20px);
 
+  /* these do not change with light/dark theme */
+  --white-text-color: var(--white-80);
+  --black-text-color: var(--black-80);
+
   --bold: bold;
   --normal: normal;
 
@@ -124,19 +128,24 @@
   --h5: 14px;
 
   /* --------------
-     Form Input
+       Form
   --------------- */
 
 
-  /* -------------------
-      Focused Input
-  -------------------- */
-
   /* Used on inputs, textarea etc */
-  --focused-form-border-color: #85B7D9;
+  --form-focused-border-color: var(--primary-text-color);
+
+  --focused-ring: 0px 0px 1px 3px var(--standard-100);
+  --focused-outline-color: var(--inverted-100);
+  --focused-ring-color: var(--primary-color);
+  --focused-ring-shadow:
+    0px 0px 0px 1px var(--focused-outline-color),
+    0px 0px 1px 3px var(--focused-ring-color)
+  ;
+
 
   /* Used on dropdowns, other larger blocks */
-  --focused-form-muted-border-color: #96C8DA;
+  --form-focused-muted-border-color: #96C8DA;
 
   /* -------------------
         Dark Mode
@@ -362,10 +371,6 @@
   --black-solid-10: oklch(0.9 0 0 / 100%);
   --black-solid-5: oklch(0.95 0 0 / 100%);
 
-  /* Immutable Text Colors */
-  --white-text-color: var(--white-80);
-  --black-text-color: var(--black-80);
-
   /* --- Colored Backgs --- */
   --red-background: #FFE8E6;
   --orange-background: #FFEDDE;
@@ -440,14 +445,11 @@
   --subtle-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
 
   /* Differentiating Layers */
-  --subtle-shadow:
-    0px 1px 2px 0 var(--strong-transparent-black)
-  ;
+  --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
 
   /* Pressed or inset */
-  --subtle-inset-shadow:
-    0px 2px 3px 0 var(--strong-transparent-black) inset
-  ;
+  --subtle-inset-shadow: 0px 1px 2px 0 var(--transparent-black) inset;
+  --inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
 
   /* Lip Shadow */
   --subtle-lip-distance: 2px;
@@ -540,13 +542,14 @@
   --youtube-color: #FF0000;
   --pinterest-color: #BD081C;
   --instagram-color: #FD1D1D;
+  --instagram-gradient: linear-gradient(45deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%);
 
   /* -------------------
        Border Colors
   -------------------- */
 
   /* color base */
-  --black-border-lch: 0.4 0.01 279.32;
+  --black-border-lch: 0.2 0.01 279.32;
   --white-border-lch: 0.96 0.01 279.32;
 
   /* theme mutable border */
@@ -574,7 +577,7 @@
   --disabled-border-color: oklch(var(--standard-border-color) / 5%);
 
   /* solids */
-  --solid-internal-border-color: var(--standard-border-lch / 15%);
+  --solid-internal-border-color: oklch(0.95 0 0 / 100%);;
   --solid-border-color: #D4D4D5;
   --solid-selected-border-color: #BCBDBD;
   --solid-white-border-color: var(--white-solid-10);

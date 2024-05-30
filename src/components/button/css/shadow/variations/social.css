@@ -41,25 +41,6 @@
   text-shadow: var(--button-inverted-text-shadow);
 }
 
-/* Google Plus */
-.google.plus.button {
-  background-color: var(--google-plus-color);
-  color: var(--button-inverted-text-color);
-  text-shadow: var(--button-inverted-text-shadow);
-  background-image: var(--button-colored-background-image);
-  box-shadow: var(--button-colored-box-shadow);
-}
-.google.plus.button:hover {
-  background-color: var(--google-plus-hover-color);
-  color: var(--button-inverted-text-color);
-  text-shadow: var(--button-inverted-text-shadow);
-}
-.google.plus.button:active {
-  background-color: var(--google-plus-down-color);
-  color: var(--button-inverted-text-color);
-  text-shadow: var(--button-inverted-text-shadow);
-}
-
 /* Linked In */
 .linkedin.button {
   background-color: var(--linked-in-color);
@@ -101,7 +82,7 @@
   background-color: var(--instagram-color);
   color: var(--button-inverted-text-color);
   text-shadow: var(--button-inverted-text-shadow);
-  background-image: var(--button-colored-background-image);
+  background-image: var(--button-instagram-background-image);
   box-shadow: var(--button-colored-box-shadow);
 }
 .instagram.button:hover {

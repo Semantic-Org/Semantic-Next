@@ -8,23 +8,150 @@
     position: relative;
     font-style: normal;
     font-weight: var(--input-font-weight);
-  }
-  .input input {
-    margin: 0em;
-    outline: none;
-    max-width: 100%;
-    flex: 1 0 auto;
-    text-align: left;
     font-family: var(--input-font-family);
-    padding: var(--input-padding);
     line-height: var(--input-line-height);
+    padding: var(--input-padding);
     color: var(--input-text-color);
     background: var(--input-background);
     border: var(--input-border);
     border-radius: var(--input-border-radius);
     transition: var(--input-transition);
     box-shadow: var(--input-box-shadow);
+    align-items: center;
+  }
+  .input input {
+    background-color: transparent;
+    margin: 0em;
+    border-radius: inherit;
+    outline: none;
+    max-width: 100%;
+    flex: 1 0 auto;
+    text-align: left;
+    color: inherit;
+    border: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+  .input ui-icon {
+    margin: 0rem;
+    width: 2rem;
+  }
+  .input .label {
+    display: inline-block;
+    text-wrap: nowrap;
+    margin-left: auto;
+    line-height: 1;
+    font-weight: var(--input-label-font-weight);
+    color: var(--input-label-color);
+    font-size: var(--input-label-font-size);
+    padding: var(--input-label-padding);
+    border: var(--input-label-border);
+    border-radius: var(--input-label-border-radius);
+  }
+}
+
+/* src/components/input/css/shadow/states/focused.css */
+@layer component.input.variations.focus {
+  .input.focus,
+  .input:focus-within {
+    border-color: var(--input-focused-border-color);
+    background: var(--input-focused-background);
+    color: var(--input-focused-color);
+    box-shadow: var(--input-focused-box-shadow);
+  }
+  .input:focus-within > input:placeholder,
+  .input.focus > input::placeholder {
+    color: var(--input-placeholder-focused-color);
+  }
+}
+
+/* src/components/input/css/shadow/states/loading.css */
+@layer component.input.variations.loading {
+  .loading.input:not(.icon) {
+    position: relative;
+    cursor: default;
+    text-shadow: none !important;
+    color: transparent !important;
+    opacity: var(--input-loading-opacity);
+    pointer-events: auto;
+    transition: var(--input-loading-transition);
+  }
+  .loading.icon.input .icon {
+    position: relative;
+    color: transparent !important;
+  }
+  .loading.icon.input > .icon:before,
+  .loading.input:not(.icon)::before {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: var(--loader-margin);
+    width: var(--loader-size);
+    height: var(--loader-size);
+    border-radius: var(--circular-radius);
+    border: var(--loader-line-width) solid var(--loader-fill-color);
+  }
+  .loading.icon.input > .icon:after,
+  .loading.input:not(.icon)::after {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: var(--loader-margin);
+    width: var(--loader-size);
+    height: var(--loader-size);
+    animation: input-spin var(--loader-speed) linear;
+    animation-iteration-count: infinite;
+    border-radius: var(--circular-radius);
+    border-color: var(--loader-line-color) transparent transparent;
+    border-style: solid;
+    border-width: var(--loader-line-width);
+    box-shadow: 0px 0px 0px 1px transparent;
+  }
+  @keyframes input-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .loading.input.inverted .icon:before,
+  .loading.input.inverted:before {
+    border-color: var(--inverted-loader-fill-color);
+  }
+  .loading.input.inverted .icon:after,
+  .loading.input.inverted:after {
+    border-top-color: var(--inverted-loader-line-color);
+  }
+}
+
+/* src/components/input/css/shadow/states/disabled.css */
+@layer component.input.variations.disabled {
+  .disabled.button,
+  .disabled.button:hover,
+  .disabled.active.button {
+    cursor: var(--button-disabled-cursor);
+    opacity: var(--button-disabled-opacity) !important;
+    color: var(--button-disabled-color);
+    background-color: var(--button-disabled-background-color) !important;
+    background-image: var(--button-disabled-background-image) !important;
+    box-shadow: var(--button-disabled-box-shadow) !important;
+  }
+  ui-button[disabled] {
+    cursor: var(--button-disabled-cursor);
+    pointer-events: none !important;
+  }
+  .clickable-disabled.button {
+    pointer-events: auto !important;
+    cursor: var(--button-clickable-disabled-cursor) !important;
+  }
+  .clickable-disabled.button:active {
+    box-shadow: var(--button-pressed-box-shadow) !important;
+  }
+  ui-button[clickable-disabled] {
+    pointer-events: auto !important;
+    cursor: var(--button-clickable-disabled-cursor) !important;
   }
 }
 

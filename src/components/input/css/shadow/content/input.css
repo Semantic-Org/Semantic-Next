@@ -9,24 +9,45 @@
   font-style: normal;
   font-weight: var(--input-font-weight);
 
+  font-family: var(--input-font-family);
+  line-height: var(--input-line-height);
+  padding: var(--input-padding);
+  color: var(--input-text-color);
+  background: var(--input-background);
+  border: var(--input-border);
+  border-radius: var(--input-border-radius);
+  transition: var(--input-transition);
+  box-shadow: var(--input-box-shadow);
+  align-items: center;
+
   input {
+    background-color: transparent;
     margin: 0em;
+    border-radius: inherit;
     outline: none;
     max-width: 100%;
     flex: 1 0 auto;
     text-align: left;
-
-    font-family: var(--input-font-family);
-    padding: var(--input-padding);
-    line-height: var(--input-line-height);
-    color: var(--input-text-color);
-
-    background: var(--input-background);
-    border: var(--input-border);
-    border-radius: var(--input-border-radius);
-    transition: var(--input-transition);
-    box-shadow: var(--input-box-shadow);
-
+    color: inherit;
+    border: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+
+  ui-icon {
+    margin: 0rem;
+    width: 2rem;
+  }
+
+  .label {
+    display: inline-block;
+    text-wrap: nowrap;
+    margin-left: auto;
+    line-height: 1;
+    font-weight: var(--input-label-font-weight);
+    color: var(--input-label-color);
+    font-size: var(--input-label-font-size);
+    padding: var(--input-label-padding);
+    border: var(--input-label-border);
+    border-radius: var(--input-label-border-radius);
   }
 }

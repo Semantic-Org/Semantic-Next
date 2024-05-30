@@ -19,12 +19,14 @@
   background-color: var(--button-warning-color-hover);
   color: var(--button-warning-text-color);
   text-shadow: var(--button-warning-text-shadow);
+  box-shadow: var(--button-hover-box-shadow);
 }
 .warning.buttons .button:focus,
 .warning.button:focus {
   background-color: var(--button-warning-color-focus);
   color: var(--button-warning-text-color);
   text-shadow: var(--button-warning-text-shadow);
+  box-shadow: var(--button-focus-box-shadow);
 }
 .warning.buttons .button:active,
 .warning.button:active {
@@ -60,18 +62,21 @@
   background-color: var(--button-subtle-warning-color-hover);
   color: var(--button-subtle-warning-text-color);
   text-shadow: var(--button-subtle-warning-text-shadow);
+  box-shadow: var(--button-hover-box-shadow);
 }
 .subtle-warning.buttons .button:focus,
 .subtle-warning.button:focus {
   background-color: var(--button-subtle-warning-color-focus);
   color: var(--button-subtle-warning-text-color);
   text-shadow: var(--button-subtle-warning-text-shadow);
+  box-shadow: var(--button-focus-box-shadow);
 }
 .subtle-warning.buttons .button:active,
 .subtle-warning.button:active {
   background-color: var(--button-subtle-warning-color-down);
   color: var(--button-subtle-warning-text-color);
   text-shadow: var(--button-subtle-warning-text-shadow);
+  box-shadow: var(--button-pressed-box-shadow);
 }
 .subtle-warning.buttons .active.button,
 .subtle-warning.buttons .active.button:active,
@@ -81,6 +86,7 @@
   background-image: var(--button-subtle-warning-background-image);
   color: var(--button-subtle-warning-text-color);
   text-shadow: var(--button-subtle-warning-text-shadow);
+  box-shadow: var(--button-active-box-shadow);
 }
 .subtle-warning.buttons .button > .icon,
 .subtle-warning.button > .icon {

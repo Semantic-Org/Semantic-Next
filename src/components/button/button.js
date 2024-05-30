@@ -34,7 +34,6 @@ const onRendered = function({tpl}){
 
 const events = {
   'touchstart .button'({event, tpl, $}) {
-    console.log(this);
     $(this).addClass('pressed');
   },
   'touchend .button'({event, tpl, $}) {

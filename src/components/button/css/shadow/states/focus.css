@@ -14,3 +14,9 @@
 .button:focus .icon {
   opacity: var(--button-focus-icon-opacity);
 }
+
+
+/* This only shows with keyboard navigation */
+.button:focus-visible {
+  box-shadow: var(--button-focus-box-shadow), var(--focused-ring-shadow) !important;
+}
