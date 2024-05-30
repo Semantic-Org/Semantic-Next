@@ -6,7 +6,7 @@
   --button-horizontal-margin: var(--3px);
 
 
-  --button-background-color: #FAFAFA;
+  --button-background-color: oklch(0.98 0 0 / 1);
   --button-background-image: var(--subtle-gradient);
   --button-background: var(--button-background-color) var(--button-background-image);
 

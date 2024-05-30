@@ -1224,7 +1224,11 @@
 }
 
 /* src/components/icon/css/shadow/variations/fitted.css */
-@layer component.icon.variations.fitted;
+@layer component.icon.variations.fitted {
+  :host([fitted]) {
+    margin: 0rem;
+  }
+}
 
 /* src/components/icon/css/shadow/variations/link.css */
 @layer component.icon.variations.links {
