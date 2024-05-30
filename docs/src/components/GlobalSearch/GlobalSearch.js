@@ -34,7 +34,9 @@ const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings
   },
 
   openModal() {
+    const val = $('.inline-search input').val();
     $('ui-modal').get(0).tpl.show();
+    $('ui-modal').find('.search input').focus().val(val);
   },
 
   hideModal() {
@@ -185,7 +187,7 @@ const keys = {
 };
 
 const events = {
-  'click .inline-search input'({tpl}) {
+  'input, click .inline-search input'({tpl}) {
     tpl.openModal();
   },
   'input .search input'({tpl, event}) {

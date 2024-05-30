@@ -26,6 +26,8 @@
 
   --global-search-modal-background: var(--page-background);
 
+  --global-sarch-modal-input-font-size: 18px;
+
 }
 
 * {
@@ -111,9 +113,9 @@ ui-modal {
       background-color: var(--white-10);
       width: 100%;
       border-radius: var(--circular-radius);
-      border: var(--border);
+      border: var(--white-border);
       overflow: hidden;
-      font-size: 20px;
+      font-size: var(--global-sarch-modal-input-font-size);
       padding: 0rem 1rem;
       align-items: center;
       color: #FFFFFF;

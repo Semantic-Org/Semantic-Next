@@ -3,7 +3,7 @@ import { createComponent } from '@semantic-ui/component';
 import template from './MobileSidebarToggle.html?raw';
 import css from './MobileSidebarToggle.css?raw';
 
-const createInstance = function ({ $, isServer, tpl }) {
+const createInstance = function ({ $, isServer, attachEvent, tpl }) {
   return {
     getSidebar() {
       return $('sidebar', { root: document });
@@ -22,8 +22,8 @@ const createInstance = function ({ $, isServer, tpl }) {
       }
       else {
         $sidebar.addClass('visible');
-        tpl.bindClickaway();
       }
+      tpl.bindClickaway();
     },
     hideSidebar() {
       const $sidebar = tpl.getSidebar();
@@ -39,9 +39,10 @@ const createInstance = function ({ $, isServer, tpl }) {
       return !!$sidebar.get(0).showPopover;
     },
     bindClickaway() {
-      tpl.clickaway = $('body').one('click', function(event) {
+      tpl.clickaway = attachEvent('body', 'click', (event) => {
         if($(event.target).closest('mobile-sidebar-toggle, sidebar').length == 0) {
           tpl.hideSidebar();
+          $('body').off('click', tpl.clickaway);
         }
       });
     }
@@ -49,7 +50,7 @@ const createInstance = function ({ $, isServer, tpl }) {
 };
 
 const events = {
-  'click .hitbox'({tpl}) {
+  'pointerdown .hitbox'({tpl}) {
     if(tpl.isVisible()) {
       tpl.hideSidebar();
     }
