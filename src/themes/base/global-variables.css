@@ -429,8 +429,8 @@
 
   --subtle-transparent-white: oklch(var(--white-lch) / 5%);
   --transparent-white: oklch(var(--white-lch) / 8%);
-  --strong-transparent-white: oklch(var(--white-lch) / 15%);
-  --very-strong-transparent-white: oklch(var(--black-lch) / 25%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--black-lch) / 18%);
 
   /* -------------------
          Accents
@@ -554,6 +554,7 @@
   --inverted-border-color: var(--white-border-lch);
 
   --border-color: oklch(var(--standard-border-color) / 15%);
+  --internal-border-color: oklch(var(--standard-border-color) / 10%);
 
   /* black - dark/light theme immutable */
   --black-border-color: oklch(var(--black-border-lch) / 15%);
@@ -566,7 +567,6 @@
   /* strength */
   --subtle-border-color: oklch(var(--standard-border-color) / 8%);
   --strong-border-color: oklch(var(--standard-border-color) / 22%);
-  --internal-border-color: oklch(var(--standard-border-color) / 10%);
 
   /* states */
   --selected-border-color: oklch(var(--standard-border-color) / 35%);
@@ -591,6 +591,7 @@
   /* black - theme invariant */
   --black-border: 1px solid var(--black-border-color);
   --selected-black-border: 1px solid var(--selected-black-border-color);
+  --internal-border: 1px solid var(--internal-border-color);
 
   /* white - theme invariant */
   --white-border: 1px solid var(--white-border-color);
@@ -599,7 +600,6 @@
   /* strength */
   --subtle-border: 1px solid var(--subtle-border-color);
   --strong-border: 1px solid var(--strong-border-color);
-  --internal-border: 1px solid var(--internal-border-color);
 
   /* states */
   --selected-border: 1px solid var(--selected-border-color);
@@ -914,9 +914,9 @@ html.dark {
   --very-strong-transparent-black: oklch(var(--black-lch) / 20%);
 
   --subtle-transparent-white: oklch(var(--white-lch) / 5%);
-  --transparent-white: oklch(var(--white-lch) / 10%);
-  --strong-transparent-white: oklch(var(--white-lch) / 15%);
-  --very-strong-transparent-white: oklch(var(--white-lch) / 20%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
 
   /* We need to boost some gradients to be noticable in dark mode */
   --subtle-gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
