@@ -836,11 +836,13 @@
                States
   *******************************/
 
-  --disabled-opacity: 0.45;
+  --recessed-opacity: 0.4;
+  --disabled-opacity: 0.4;
   --hover-lightness: 0.05;
   --focus-lightness: -0.05;
-  --down-lightness: -0.12;
-  --active-lightness: -0.12;
+  --down-lightness: -0.08;
+  --active-lightness: -0.08;
+  --link-opacity: 0.6;
 }
 
 html.dark {
@@ -899,7 +901,7 @@ html.dark {
 
 
   /* Differentiating Neutrals */
-  --subtle-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
+  --subtle-gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
 
   /* Differentiating Layers */
   --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
