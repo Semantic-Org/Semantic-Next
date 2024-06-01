@@ -35,6 +35,13 @@ const getDescription = (text) => {
                   ? (<UIComponent name={componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
                   : (<Fragment set:html={component.html} />)
               ))}
+
+            {index == 0 && (
+              <h3 slot="title">{type.title}</h3>
+            )}
+            {index == 0 && (
+              <h4 slot="description"><Fragment set:html={getDescription(type.description)} /></h4>
+            )}
             </CodeExample>
           </>
         ))}

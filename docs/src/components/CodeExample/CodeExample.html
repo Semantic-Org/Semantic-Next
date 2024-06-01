@@ -1,6 +1,9 @@
 <div class="example {{classIf canShowCode 'visible'}} {{classIf title '' 'another'}}" part="example">
-  {{#if title}}
-    <h3>
+  <div class="title">
+    <div class="top">
+      <span class="text" part="header">
+        {{>slot title}}
+      </span>
       <span class="links">
         <a class="sandbox link">
           <ui-icon codesandbox link></ui-icon>
@@ -9,25 +12,13 @@
           <ui-icon code link></ui-icon>
         </a>
       </span>
-      <span class="text" part="header">
-        {{title}}
-      </span>
-      {{#if description}}
-        <p class="description" part="description">{{{description}}}</p>
-      {{/if}}
-    </h3>
-  {{else}}
-    <span class="links">
-      <a class="sandbox link">
-        <ui-icon codesandbox link></ui-icon>
-      </a>
-      <a class="code link">
-        <ui-icon code link></ui-icon>
-      </a>
-    </span>
-  {{/if}}
-
-
+    </div>
+    {{#if description}}
+      <p class="description" part="description">
+        {{>slot description}}
+      </p>
+    {{/if}}
+  </div>
   <div class="top segment" part="top-segment">
     {{>slot}}
   </div>

@@ -1,3 +1,5 @@
+
+
 @layer global {
 
   :root {
@@ -16,6 +18,7 @@
     --bullet-size: 16px;
     --sl-font: 'Lato', serif;
     --ec-uiFontSize: 14px;
+
   }
 
   html.dark {
@@ -225,3 +228,29 @@ ui-buttons ui-button:last-child::part(button) {
   border-top-right-radius: var(--button-border-radius);
   border-bottom-right-radius: var(--button-border-radius);
 }
+
+/* experimental small topbar
+@layer page {
+
+  :root {
+    --topbar-logo-size: 20px;
+    --topbar-logo-valign: -5px;
+    --topbar-height: 45px;
+    --topbar-site-name-font-size: 13px;
+    --topbar-site-name-distance: 10px;
+    --topbar-site-name-color: var(--white);
+    --topbar-menu-distance: 10px;
+    --topbar-icon-size: 14px;
+    --topbar-background-color: #000;
+    --topbar-menu-item-spacing: 3px;
+    --topbar-menu-item-padding: 2px 2px;
+    --topbar-menu-item-font-size: var(--12px);
+    --topbar-menu-item-color: var(--white-20);
+    --topbar-menu-item-hover-color: var(--white-60);
+    --topbar-menu-item-active-color: var(--white-100);
+    --topbar-menu-item-font-weight: normal;
+    --topbar-menu-item-active-font-weight: bold;
+    --topbar-border-bottom: 1px solid #232323;
+  }
+}
+*/

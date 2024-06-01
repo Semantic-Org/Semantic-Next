@@ -25,11 +25,6 @@ ui-icon[link] {
   display: table;
 }
 
-.links {
-  position: relative;
-  float: right;
-  top: -3rem;
-}
 
 a.link {
   position: relative;
@@ -41,10 +36,27 @@ a.link {
 a.link:hover {
   color: var(--standard-100);
 }
-h3 {
+.title {
   margin: 0rem 0rem 0.5rem;
   color: var(--header-color);
   font-size: var(--header-font-size);
+
+  .top {
+    display: flex;
+    flex-direction: row;
+
+    .links {
+      margin-left: auto;
+    }
+  }
+
+  .text ::slotted(*) {
+    display: inline !important;
+    margin: 0rem !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    font-style: inherit !important;
+  }
 }
 
 p.description {
@@ -52,6 +64,15 @@ p.description {
   font-size: 14px;
   color: var(--standard-40);
   font-weight: normal;
+
+  ::slotted(*) {
+    display: inline !important;
+    margin: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    font-style: inherit !important;
+    color: inherit !important;
+  }
 }
 p.description em {
   opacity: 1;

@@ -129,9 +129,9 @@
   layout h4,
   layout h5 {
     transition: box-shadow 0.5s ease, color 0.5s ease;
-    box-shadow: -3px 0px 0px transparent;
+    box-shadow: -3px 0px 0px transparent;/*
     margin-left: -0.5rem !important;
-    padding-left: 0.5rem !important;
+    padding-left: 0.5rem !important;*/
   }
 
   layout h1.highlight,
