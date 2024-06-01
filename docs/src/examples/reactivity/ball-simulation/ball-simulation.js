@@ -34,10 +34,10 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
       _id: generateID(),
       x,
       y,
-      radius: Math.random() * 20 + 10,
-      color: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
-      vx: Math.random() * 4,
-      vy: Math.random() * 4,
+      radius: Math.random() * 15 + 10,
+      color: `oklch(${Math.random() + 0.5} ${Math.random()} ${Math.random() * 255} / ${Math.random() * 50 + 50}%)`,
+      vx: Math.random() * 3,
+      vy: Math.random() * 3,
     });
 
 
