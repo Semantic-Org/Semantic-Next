@@ -97,13 +97,6 @@
   layout page.text-content h2 {
     margin: 3rem 0rem 2rem;
   }
-  layout page.text-content .expressive-code {
-    margin-left: -0.5rem !important;
-    margin-right: -0.5rem !important;
-  }
-  layout page.text-content .expressive-code pre {
-    padding: 0.5rem !important;
-  }
   layout page.text-content h3 {
     margin: 3rem 0rem 1.5rem;
   }
@@ -238,7 +231,7 @@
 }
 
 @layer code {
-  body {
+  .expressive-code {
     /* expressive code */
     --ec-uiFontSize: 14px;
     --ec-codeFontSize: 1em;
@@ -252,8 +245,22 @@
     --ec-frm-edTabBarBg: transparent;
     --ec-frm-edActTabIndBtmCol: transparent;
     --ec-frm-edActTabBg: #13151a;
+    --code-background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
+    --ec-frm-edBg: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
+    --ec-frm-trmBg: var(--ec-frm-edBg);
+    --ec-frm-trmTtbBg: #0c0e16;
+    --ec-frm-frameBoxShdCssVal: 0px 0px 5px rgba(0 0 0 / 50% inset);
+    --ec-brdWd: 1px;
+    --ec-brdCol: oklch(0.22 0.02 277.72);
+    .expressive-code .frame.is-terminal {
+
+    }
+    .frame {
+      border: var(--internal-border);
+    }
+    .frame.has-title:not(.is-terminal) .title {
+      font-weight: bold;
+    }
   }
-  .expressive-code .frame.has-title:not(.is-terminal) .title {
-    font-weight: bold;
-  }
+
 }

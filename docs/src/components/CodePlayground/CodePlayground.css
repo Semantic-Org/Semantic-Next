@@ -74,6 +74,12 @@
         height: 100%;
       }
     }
+    &.vertical {
+      playground-preview {
+        border-top: none;
+      }
+    }
+
 
     playground-file-editor {
       border: var(--border);
