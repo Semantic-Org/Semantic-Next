@@ -2,7 +2,7 @@
   <div class="title">
     <div class="top">
       <span class="text" part="header">
-        {{>slot title}}
+        {{title}}
       </span>
       <span class="links">
         <a class="sandbox link">
@@ -13,9 +13,9 @@
         </a>
       </span>
     </div>
-    {{#if description}}
+    {{#if both title description}}
       <p class="description" part="description">
-        {{>slot description}}
+        {{{description}}}
       </p>
     {{/if}}
   </div>
