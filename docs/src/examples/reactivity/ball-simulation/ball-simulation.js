@@ -27,6 +27,12 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     setTimeout(tpl.tick, frame);
   },
 
+  createBalls(count) {
+    while(count--) {
+      tpl.createBall({x: 250, y: 250});
+    }
+  },
+
   createBall({x, y}) {
 
     // create ball
@@ -100,6 +106,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 const onRendered = ({tpl}) => {
   tpl.startTime();
   tpl.draw();
+  tpl.createBalls(25);
 };
 
 const events = {
