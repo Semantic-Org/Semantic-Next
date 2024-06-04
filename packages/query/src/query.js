@@ -608,6 +608,10 @@ export class Query {
     return this.each((el) => el.removeAttribute(attributeName));
   }
 
+  el() {
+    return this.get(0);
+  }
+
   get(index) {
     if (index !== undefined) {
       return this[index];
