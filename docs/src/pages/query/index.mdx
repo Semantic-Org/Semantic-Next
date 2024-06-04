@@ -4,15 +4,17 @@ layout: '@layouts/Guide.astro'
 
 
 
-## What is Query
+## Introduction
 
-Query is a library used for accessing the DOM of the page specifically built to support web components and the shadow DOM.
+Query is a library built specifically for web components to make it easy to interact with a page's DOM and shadow DOM in a chainable way.
 
-It is under 10kb and only uses modern browser APIs to implement the most useful parts of a traditional jQuery like chainable API including modern practices like `AbortController` for removing events, `CustomEvents` for dispatching events from web components and much more.
+Query includes many of the helpers which make it easy to interact with web components, emit and consume events, traverse the DOM tree, retreive common values and much more.
+
+It is extremely small and uses modern browser APIs, defering to native implementations wherever possible.
 
 ## Installation
 
-Query can be used as a standalone package without adopting the rest of Semantic UI templating.
+Query can be used as a standalone package or alongside templating and other core features.
 
 ```bash
 npm install @semantic-ui/query
@@ -44,6 +46,8 @@ import { $ } from '@semantic-ui/query';
 const pText = $('div').find('p').text();
 ```
 
+To see more examples of chaining browse the Query API docs.
+
 
 ### Shadow DOM Usage with $$
 
@@ -51,10 +55,12 @@ Web components have portions of their DOM encapsulated in what is known as the [
 
 Typically native browsers cannot query this DOM without querying each shadow DOM root separately, however Query provides a separate export `$$` for this use-case allowing you to access DOM deeply nested inside web components.
 
-> Piercing shadow DOM boundaries requires recursive tree traversal across shadow DOM boundaries and is slightly less performant than `$` which can use native `querySelectorAll` naively. For most but the most extreme use-cases this difference is negligible but it is recommended to use `$$` only when necessary.
+> `$$` is slightly less performant because it must pierce shadow DOM boundaries recursively unlike `$` which uses native `document.querySelectorAll`. For most but the most extreme use-cases this difference is negligible but it is recommended to use `$$` only when interacting with web components.
 
 
 ### Additional Options
+
+You can specify additional options when initializing the `Query` class.
 
 #### Root
 In some advanced cases you might want to limit Query to a particular root element.
