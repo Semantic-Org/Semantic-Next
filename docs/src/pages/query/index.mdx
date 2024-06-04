@@ -3,38 +3,73 @@ layout: '@layouts/Guide.astro'
 ---
 
 
+
 ## What is Query
 
-Query is a library used for accessing the DOM of the page specifically built to make dealing with web components simpler **that is less than 10kb**.
+Query is a library used for accessing the DOM of the page specifically built to support web components and the shadow DOM.
 
-It implements the most useful parts of a traditional jQuery like chainable API but is built to use only modern techniques like `AbortController` for removing events, `CustomEvents` for dispatching events from web components and much more.
-
+It is under 10kb and only uses modern browser APIs to implement the most useful parts of a traditional jQuery like chainable API including modern practices like `AbortController` for removing events, `CustomEvents` for dispatching events from web components and much more.
 
 ## Installation
 
-You can install Query using npm
+Query can be used as a standalone package without adopting the rest of Semantic UI templating.
 
 ```bash
 npm install @semantic-ui/query
 ```
 
+
 ## Usage
 
 
-### Standard
+### DOM Usage with $
 
-Query provides two exports `$` and `$$` for querying the DOM
+Query provides two exports `$` and `$$`.
+
+`$` is used for querying the normal browser DOM and `$$` is for querying the shadow DOM (the DOM present in web components).
+
 ```javascript
 import { $ } from '@semantic-ui/query';
+
 const $div = $('div');
 ```
 
-### Shadow Piercing
+#### Chaining
 
-Query provides a separate export `$$` for piercing the shadow DOM. This is the same as passing `pierceShadow: true` as an option to `$` but is provided for convenience as a separate export.
+Query is built on the concept of chaining, which was originally pioneered by [jQuery](https://www.jquery.com), where method can be called in a pipeline processing the results of previous method calls.
 
-> Piercing shadow DOM boundaries requires recursive tree traversal and is slightly less performant than `$` which can use native `querySelectorAll` naively--this is why this behavior is opt-in.
+```javascript
+import { $ } from '@semantic-ui/query';
 
+const pText = $('div').find('p').text();
+```
+
+
+### Shadow DOM Usage with $$
+
+Web components have portions of their DOM encapsulated in what is known as the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+
+Typically native browsers cannot query this DOM without querying each shadow DOM root separately, however Query provides a separate export `$$` for this use-case allowing you to access DOM deeply nested inside web components.
+
+> Piercing shadow DOM boundaries requires recursive tree traversal across shadow DOM boundaries and is slightly less performant than `$` which can use native `querySelectorAll` naively. For most but the most extreme use-cases this difference is negligible but it is recommended to use `$$` only when necessary.
+
+
+### Additional Options
+
+#### Root
+In some advanced cases you might want to limit Query to a particular root element.
+
+```javascript
+// special $ scoped to my-root for some custom app
+const $ = function (selector) {
+  const myRoot = $('my-component').el().shadowRoot;
+  return new Query(selector, { root: myRoot });
+};
+```
+
+#### Pierce Shadow
+
+`$$` is the same as passing `pierceShadow: true` as an option to `$` but is provided for convenience as a separate export.
 ```javascript
 import { $, $$ } from '@semantic-ui/query';
 
@@ -43,9 +78,11 @@ const $div = $$('my-component div');
 const $div = $('my-component div', { pierceShadow: true});
 ```
 
+## Usage
+
 ### Browser
 
-In a browser environment you can use `exportGlobals` to export $ and $$ for use in your page. For more fina graned control see the [browser helpers](#browser-helpers) section below
+In a browser environment you can use `exportGlobals` to export $ and $$ for use in your page. For more fine grained control see the [browser helpers](#browser-helpers) section below
 
 ```javascript
 import { exportGlobals } from '@semantic-ui/query';
