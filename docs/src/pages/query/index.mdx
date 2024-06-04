@@ -1,3 +1,108 @@
 ---
 layout: '@layouts/Guide.astro'
 ---
+
+
+## What is Query
+
+Query is a library used for accessing the DOM of the page specifically built to make dealing with web components simpler **that is less than 10kb**.
+
+It implements the most useful parts of a traditional jQuery like chainable API but is built to use only modern techniques like `AbortController` for removing events, `CustomEvents` for dispatching events from web components and much more.
+
+
+## Installation
+
+You can install Query using npm
+
+```bash
+npm install @semantic-ui/query
+```
+
+## Usage
+
+
+### Standard
+
+Query provides two exports `$` and `$$` for querying the DOM
+```javascript
+import { $ } from '@semantic-ui/query';
+const $div = $('div');
+```
+
+### Shadow Piercing
+
+Query provides a separate export `$$` for piercing the shadow DOM. This is the same as passing `pierceShadow: true` as an option to `$` but is provided for convenience as a separate export.
+
+> Piercing shadow DOM boundaries requires recursive tree traversal and is slightly less performant than `$` which can use native `querySelectorAll` naively--this is why this behavior is opt-in.
+
+```javascript
+import { $, $$ } from '@semantic-ui/query';
+
+// these are equivalent
+const $div = $$('my-component div');
+const $div = $('my-component div', { pierceShadow: true});
+```
+
+### Browser
+
+In a browser environment you can use `exportGlobals` to export $ and $$ for use in your page. For more fina graned control see the [browser helpers](#browser-helpers) section below
+
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+// make $ and $$ available globally
+exportGlobals();
+```
+
+### Components
+
+`$` and `$$` are integrated into all lifecycle callbacks and events in Semantic UI components.
+
+```javascript
+const createInstance = ({$, $$}) => ({
+  getDiv() {
+    return $('div').get(0);
+  }
+});
+```
+
+```javascript
+const onCreated = ({$, $$}) => {
+  const $div = $('div');
+};
+```
+
+```javascript
+const events =  {
+  'click div'({$ , $$}) {
+    const $div = $('div').trigger('click');
+  }
+};
+```
+
+## Browser Helpers
+
+A few additional helpers are provided specifically for using Query in browser environments.
+
+### Restoring Globals
+If you need to restore the previous values before calling export globals.
+```javascript
+import { exportGlobals, restoreGlobals } from '@semantic-ui/query';
+
+// $ and $$ are defined
+exportGlobals();
+
+// $ and $$ are now their original values
+restoreGlobals();
+```
+
+### Custom Alias
+You can also choose to use Query as a custom alias
+```javascript
+import { useAlias } from '@semantic-ui/query';
+
+const myQuery = useAlias();
+const $div = myQuery('div');
+```
+
+

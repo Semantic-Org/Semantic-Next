@@ -43,7 +43,7 @@
   html.dark {
     --page-background: #000000;
     --text-color: rgba(255, 255, 255, 0.83);
-    --panel-color: #0C1114;
+    --panel-color: oklch(0.17 0.01 234.51);
   }
 
   html, body {

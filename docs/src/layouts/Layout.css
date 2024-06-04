@@ -123,6 +123,36 @@
     left: calc(var(--sidebar-width) / -2);
   }
 
+  layout page .expressive-code {
+    margin: var(--vertically-spaced)
+  }
+  layout page blockquote {
+    border: var(--border-color);
+    padding: var(--padding);
+    background-color: oklch(0.21 0.06 236.29);
+    background-image: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+    font-style: italic;
+    border: var(--black-100);
+    background-clip: padding-box;
+    display: flex;
+    border-radius: var(--border-radius);
+    margin: var(--vertically-padded);
+    flex-direction: row;
+  }
+  layout page blockquote p code {
+    color: var(--white);
+  }
+  layout page blockquote p {
+    color: var(--white-60) !important;
+    line-height: 1.8;
+  }
+  layout page blockquote p:first-child {
+    margin-top: 0rem;
+  }
+  layout page blockquote p:last-child {
+    margin-bottom: 0rem;
+  }
+
   layout h1,
   layout h2,
   layout h3,
@@ -210,7 +240,11 @@
       box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
     }
     page {
-      background-image: linear-gradient(to bottom, #0e0e0e, #10141a 100px, #000000)
+      background-image: linear-gradient(to bottom,
+        oklch(0.16 0 0),
+        oklch(0.19 0.01 258.64) 100px,
+        oklch(0 0 0)
+      );
     }
     page > main {
       background: none;
@@ -252,8 +286,11 @@
     --ec-frm-frameBoxShdCssVal: 0px 0px 5px rgba(0 0 0 / 50% inset);
     --ec-brdWd: 1px;
     --ec-brdCol: oklch(0.22 0.02 277.72);
-    .expressive-code .frame.is-terminal {
+    .frame.is-terminal {
 
+    }
+    .frame.has-title:not(.is-terminal) .title {
+      background-color: transparent !important;
     }
     .frame {
       border: var(--internal-border);

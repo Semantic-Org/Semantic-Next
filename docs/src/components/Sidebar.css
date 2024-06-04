@@ -7,7 +7,7 @@
   }
 
   html.dark {
-    --sidebar-background-color: #0C1114;
+    --sidebar-background-color: oklch(0.17 0.01 234.61);
   }
 
   sidebar {
