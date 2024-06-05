@@ -22,7 +22,7 @@ const settings = {
   sandboxURL: '/sandbox',
   exampleURL: '',
   includeGeneratedInline: false,
-  useTabs: true,
+  useTabs: false,
   saveState: true,
   saveID: 'sandbox',
   example: {},
