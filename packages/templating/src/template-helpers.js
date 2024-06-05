@@ -33,6 +33,9 @@ export const TemplateHelpers = {
   both(a, b) {
     return a && b;
   },
+  either(a, b) {
+    return a || b;
+  },
   classes(array = []) {
     return array.join(' ') + ' ';
   },

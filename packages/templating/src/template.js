@@ -526,6 +526,7 @@ export const Template = class Template {
 
         reaction: this.reaction.bind(this),
         reactiveVar: this.reactiveVar.bind(this),
+        afterFlush: Reaction.afterFlush,
 
         data: this.data,
         settings: this.element.settings,
