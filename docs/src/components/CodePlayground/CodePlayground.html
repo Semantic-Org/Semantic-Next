@@ -1,6 +1,13 @@
 <div class="playground {{classIf resizing 'resizing'}}" part="playground">
   {{#if example.title}}
     <div class="masthead" part="masthead">
+      <ui-button right-floated transparent small compact inverted class="tabs">
+        {{#if useTabs}}
+          Use Panels
+        {{else}}
+          Use Tabs
+        {{/if}}
+      </ui-button>
       <ui-button right-floated transparent small compact inverted>
         <ui-icon copy></ui-icon>
         Fork
@@ -16,16 +23,16 @@
       {{/each}}
     </playground-project>
   {{/if}}
-  {{#if inline}}
+  {{#if either useTabs inline}}
     <ui-panels
-      class="inline"
-      direction="{{inlineDirection}}"
+      class={{classMap getTabPanelsClass}}
+      direction="{{getTabDirection}}"
       saveState={{saveState}}
       saveStateID="{{getSaveID}}"
       exportparts="panels"
     >
       <ui-panel
-        direction="{{inlineDirection}}"
+        direction="{{getTabDirection}}"
         size="60"
         class="files"
         exportparts="panel, handle"
@@ -51,7 +58,7 @@
         }}
       </ui-panel>
       <ui-panel
-        direction="{{inlineDirection}}"
+        direction="{{getTabDirection}}"
         size=40
         class="preview"
         exportparts="panel, handle"

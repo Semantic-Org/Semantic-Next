@@ -22,6 +22,7 @@ const settings = {
   sandboxURL: '/sandbox',
   exampleURL: '',
   includeGeneratedInline: false,
+  useTabs: true,
   saveState: true,
   saveID: 'sandbox',
   example: {},
@@ -71,13 +72,44 @@ const settings = {
 
 const state = {
   activeFile: undefined,
+  activeIndexFile: undefined,
   resizing: true,
 };
 
 const createInstance = ({tpl, state, settings, $, $$}) => ({
-
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
+  },
+  initializePanels() {
+    $('ui-panel').settings({
+      getNaturalSize: function(panel, { direction, minimized }) {
+        if(direction == 'horizontal') {
+          const extraSpacing = 20; // scrollbar width and spacing
+          const minWidths = [200];
+          $$(panel).find('.CodeMirror-sizer').each(sizer => {
+            const sizerMargin = parseFloat($(sizer).css('margin-left'));
+            const sizerWidth = parseFloat($(sizer).css('min-width'));
+            minWidths.push(sizerMargin + sizerWidth + extraSpacing);
+          });
+          const size = Math.max(...minWidths);
+          return size;
+        }
+        else {
+          const labelHeight = $$('.label').first().height() || 0;
+          const menuHeight = $$('.menu').first().height() || 0;
+          if(minimized) {
+            return labelHeight;
+          }
+          else {
+            const extraSpacing = 5;
+            const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
+            const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
+            const size = codeHeight + labelHeight + menuHeight + extraSpacing + scrollbarHeight;
+            return Math.max(size, 100);
+          }
+        }
+      }
+    });
   },
   getScriptType(type) {
     return get(settings.scriptTypes, type);
@@ -88,6 +120,18 @@ const createInstance = ({tpl, state, settings, $, $$}) => ({
       size = 'grow';
     }
     return size;
+  },
+  getTabPanelsClass() {
+    return {
+      inline: settings.inline,
+      tabs: settings.useTabs
+    };
+  },
+  getTabDirection() {
+    if(settings.inline) {
+      return settings.inlineDirection;
+    }
+    return 'horizontal';
   },
   getFileArray() {
     let files = [];
@@ -120,16 +164,21 @@ const createInstance = ({tpl, state, settings, $, $$}) => ({
   getPanelGroupWidth(index) {
     return settings.panelGroupWidth[index];
   },
-  getFileMenuItems() {
+  getFileMenuItems({indexOnly = false } = {}) {
     const menu = tpl.getFileArray().map(file => {
-      if(file.generated && settings.inline && !settings.includeGeneratedInline) {
+      if(file.generated && !settings.includeGeneratedInline) {
         return false;
       }
       return {
         label: file.filename,
         value: file.filename,
       };
-    }).filter(Boolean);
+    }).filter(value => {
+      if(indexOnly) {
+        return file.filename && file.filename.includes('index');
+      }
+      return Boolean(value);
+    });
     return menu;
   },
   getFirstFile() {
@@ -168,42 +217,8 @@ const createInstance = ({tpl, state, settings, $, $$}) => ({
 
 const onRendered = ({ $, $$, tpl, state, settings }) => {
   addSearch(CodeMirror);
-
-  $('ui-menu').settings({
-    onChange: function(value) {
-      state.activeFile.set(value);
-    }
-  });
-  $('ui-panel').settings({
-    getNaturalSize: function(panel, { direction, minimized }) {
-      if(direction == 'horizontal') {
-        const extraSpacing = 20; // scrollbar width and spacing
-        const minWidths = [200];
-        $$(panel).find('.CodeMirror-sizer').each(sizer => {
-          const sizerMargin = parseFloat($(sizer).css('margin-left'));
-          const sizerWidth = parseFloat($(sizer).css('min-width'));
-          minWidths.push(sizerMargin + sizerWidth + extraSpacing);
-        });
-        const size = Math.max(...minWidths);
-        return size;
-      }
-      else {
-        const labelHeight = $$('.label').height() || 0;
-        const menuHeight = $$('.menu').first().height() || 0;
-        if(minimized) {
-          return labelHeight;
-        }
-        else {
-          const extraSpacing = 5;
-          const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
-          const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
-          const size = codeHeight + labelHeight + menuHeight + extraSpacing + scrollbarHeight;
-          return Math.max(size, 100);
-        }
-      }
-    }
-  });
   requestIdleCallback(() => {
+    tpl.initializePanels();
     state.resizing.set(false);
   });
 };
@@ -213,6 +228,15 @@ const onThemeChanged = ({tpl}) => {
 };
 
 const events = {
+  'change ui-menu'({state, data}) {
+    state.activeFile.set(data.value);
+  },
+  'click ui-button.tabs'({settings, tpl, afterFlush}) {
+    settings.useTabs = !settings.useTabs;
+    afterFlush(() => {
+      tpl.initializePanels();
+    });
+  },
   'resizeStart ui-panel'({tpl, state, findParent}) {
     state.resizing.set(true);
   },

@@ -1,0 +1,6 @@
+.match {
+  margin: var(--vertically-spaced);
+  border: 1px solid var(--green);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+}

@@ -1,0 +1,19 @@
+<div class="match">Regular content will match with $ and $$</div>
+<test-element>
+  <div class="match">
+    Slotted content will match with $ and $$
+  </div>
+</test-element>
+
+<hr/>
+
+<p>
+  Remember the shadow DOM is not immediately available
+  on page load but only after the web component is rendered.
+</p>
+
+<div class="matches">
+  <div class="native"></div>
+  <div class="shadow pre"></div>
+  <div class="shadow post"></div>
+</div>

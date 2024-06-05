@@ -1,0 +1,12 @@
+.match {
+  margin: var(--vertically-spaced);
+  border: 1px solid var(--red);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+}
+test-element {
+  display: block;
+  margin: var(--vertically-spaced);
+  border: 1px solid var(--purple);
+  padding: var(--padding);
+}
