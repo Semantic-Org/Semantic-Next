@@ -8,19 +8,19 @@ const createInstance = ({settings, tpl, dispatchEvent}) => ({
 
   setValue(value) {
     settings.value = value;
-    dispatchEvent('change', value);
+    dispatchEvent('change', { value });
   },
 
   getValue(item) {
     return item.value || item.href;
   },
 
-  isValueActive(value, item) {
+  isValueActive(activeValue, item) {
     if(item.active) {
       return true;
     }
-    if(value !== undefined) {
-      return value == tpl.getValue(item);
+    if(activeValue !== undefined) {
+      return activeValue == tpl.getValue(item);
     }
     return false;
   }
