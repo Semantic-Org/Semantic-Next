@@ -49,6 +49,7 @@
     opacity: 0.3;
   }
   sidebar {
+    flex: 0 0 auto;
     height: 100%;
     margin: 0;
     border-right: var(--playground-border) !important;

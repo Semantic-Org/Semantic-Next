@@ -19,7 +19,7 @@
 .panel {
   display: contents;
   overflow: hidden;
-  flex: auto;
+  flex: 1 1 auto;
   box-sizing: border-box;
 
 
