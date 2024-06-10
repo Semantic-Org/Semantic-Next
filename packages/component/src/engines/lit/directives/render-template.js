@@ -34,7 +34,7 @@ export class RenderTemplateDirective extends AsyncDirective {
         );
       }
       // clone if it has changed
-      this.template = template.clone({ data: unpackData(data) });
+      this.template = template.clone({ templateName: templateName, data: unpackData(data) });
       return true;
     };
     const attachTemplate = () => {

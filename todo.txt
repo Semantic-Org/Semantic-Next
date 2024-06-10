@@ -1,14 +1,17 @@
 Easy Wins
 - Click iframe focus tab
+- Fix accordion menu to start expanded in examples
 + Better minimized styling
 + Fix inline file
-- Fix accordion menu to start expanded in examples
 + Fix double border on first playground element
+
+Week of June 10
+- Add tabs for iframe preview with preview / ast / console
+- Add in-menu search for sidebar
 
 Overall Docs
 + Remove docs build step and use package directly
 + Add global search
-- Add in-menu search
 - Dupe lit in astro build?
 
 Code Playground

@@ -4,13 +4,13 @@ import { AsyncDirective } from 'lit/async-directive.js';
 
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { inArray } from '@semantic-ui/utils';
+import { isArray, isObject, inArray } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
-
 
 export class ReactiveDataDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
+    this.partInfo = partInfo;
     this.reaction = null;
   }
 
@@ -28,6 +28,10 @@ export class ReactiveDataDirective extends AsyncDirective {
         if(inArray(reactiveValue, [undefined, null, false, 0])) {
           return ifDefined(undefined);
         }
+      }
+      // we need to serialize arrays and objects that are rendered to html
+      if(isArray(reactiveValue) || isObject(reactiveValue)) {
+        reactiveValue = JSON.stringify(reactiveValue);
       }
       return reactiveValue;
     };

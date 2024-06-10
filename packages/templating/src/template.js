@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, any, clone, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
@@ -45,7 +45,7 @@ export const Template = class Template {
     this.data = data || {};
     this.reactions = [];
     this.stateConfig = stateConfig;
-    this.state = this.createReactiveState(stateConfig) || {};
+    this.state = this.createReactiveState(stateConfig, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createInstance = createInstance;
@@ -67,16 +67,28 @@ export const Template = class Template {
     }
   }
 
-  createReactiveState(stateConfig) {
+  createReactiveState(stateConfig, data) {
     let reactiveState = {};
+
+    // we want to allow data context to override default state
+    // this is most useful in subtemplates as state can be used
+    // as a substitute for settings because settings only works with tag attributes
+    let getInitialValue = (config, name) => {
+      const dataValue = get(data, name);
+      if(dataValue) {
+        return dataValue;
+      }
+      return config?.value || config;
+    };
+
     each(stateConfig, (config, name) => {
-      if(config?.value && config?.options) {
+      const initialValue = getInitialValue(config, name);
+      if(config?.options) {
         // complex config { counter: { value: 0, options: { equalityFunction }}}
-        reactiveState[name] = new ReactiveVar(config.value, config.options);
+        reactiveState[name] = new ReactiveVar(initialValue, config.options);
       }
       else {
         // simple config i.e. { counter: 0 }
-        const initialValue = config;
         reactiveState[name] = new ReactiveVar(initialValue);
       }
     });
@@ -96,6 +108,7 @@ export const Template = class Template {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
+    console.log('setting parent template', this.templateName, parentTemplate.templateName, this);
     this.parentTemplate = parentTemplate;
   }
 
@@ -147,6 +160,7 @@ export const Template = class Template {
       this.renderer = new LitRenderer({
         ast: this.ast,
         data: this.getDataContext(),
+        template: this,
         subTemplates: this.subTemplates,
         helpers: TemplateHelpers,
       });
@@ -235,10 +249,11 @@ export const Template = class Template {
       onDestroyed: this.onDestroyedCallback,
       createInstance: this.createInstance,
     };
-    return new Template({
+    const templateSettings = {
       ...defaultSettings,
       ...settings,
-    });
+    };
+    return new Template(templateSettings);
   }
 
   parseEventString(eventString) {

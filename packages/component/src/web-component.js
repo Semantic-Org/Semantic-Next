@@ -317,6 +317,9 @@ class WebComponentBase extends LitElement {
           componentSpec,
           properties
         });
+        if(property == 'activeFile') {
+          console.log('getting setting', settings, property, get(settings, property));
+        }
         return get(settings, property);
       },
       set: (target, property, value, receiver) => {
