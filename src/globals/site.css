@@ -89,6 +89,7 @@ input[type="text"], input[type="email"], input[type="search"], input[type="passw
 a {
   color: var(--link-color);
   text-decoration: var(--link-text-decoration);
+  text-decoration-skip-ink: auto;
 }
 a:hover {
   color: var(--link-hover-color);

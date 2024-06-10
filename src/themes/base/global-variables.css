@@ -212,7 +212,7 @@
   --use-custom-scrollbars: true;
 
   --scrollbar-width: 9px;
-  --scrollbar-height: 9px;
+  --scrollbar-height: 5px;
 
   --track-background: oklch(var(--standard-color) / 10%);
   --track-border-radius: 0px;
