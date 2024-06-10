@@ -3,6 +3,7 @@ import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
+import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 import '../Panels/Panels.js';
 import '../Panels/Panel.js';
@@ -72,7 +73,6 @@ const settings = {
 
 const state = {
   activeFile: undefined,
-  activeIndexFile: undefined,
   resizing: true,
 };
 
@@ -229,7 +229,7 @@ const onThemeChanged = ({tpl}) => {
 };
 
 const events = {
-  'change ui-menu'({state, data}) {
+  'change ui-menu.files'({state, data}) {
     state.activeFile.set(data.value);
   },
   'click ui-button.tabs'({settings, tpl, afterFlush}) {
@@ -258,6 +258,7 @@ const CodePlayground = createComponent({
   onThemeChanged,
   subTemplates: {
     CodePlaygroundPanel,
+    CodePlaygroundPreview,
     CodePlaygroundFile,
   }
 });

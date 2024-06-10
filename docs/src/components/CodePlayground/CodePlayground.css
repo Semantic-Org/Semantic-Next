@@ -33,6 +33,28 @@
 
   --inline-code-height: 350px;
 
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: var(--scrollbar-width);
+    height: var(--scrollbar-height);
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--track-background);
+    border-radius: var(--track-border-radius);
+  }
+  ::-webkit-scrollbar-thumb {
+    cursor: pointer;
+    border-radius: var(--thumb-border-radius);
+    background: var(--thumb-background);
+    transition: var(--thumb-transition);
+  }
+  ::-webkit-scrollbar-thumb:window-inactive {
+    background: var(--thumb-inactive-background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--thumb-hover-background);
+  }
+
   .masthead {
     padding: 1rem 1rem;
     border-bottom: var(--playground-border);
@@ -56,6 +78,11 @@
     }
   }
 
+  .menu {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
   ui-panel {
     overflow: hidden;
   }
@@ -69,7 +96,7 @@
 
     &.horizontal {
       playground-preview {
-        height: 100%;
+        flex: 1 1 auto;
       }
     }
     &.vertical {
@@ -82,7 +109,7 @@
     playground-file-editor {
       border: var(--border);
       overflow: hidden;
-      height: 100%;
+      flex: 1 1 auto;
       border-bottom: none;
       border-radius: var(--attached-border-radius);
     }
@@ -106,6 +133,7 @@
       border: var(--border);
       border-bottom: none;
     }
+
     .menu ui-menu {
       margin: 0rem;
       font-size: 13px;
@@ -131,6 +159,7 @@
       font-weight: bold;
       color: rgba(255, 255, 255, 0.4);
       padding: 0.5rem 1rem;
+      min-height: 27px;
       background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
       border-bottom: 1px solid rgba(221, 221, 221, 0.05);
       box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
@@ -141,7 +170,7 @@
       font-size: 13px;
     }
     playground-file-editor {
-      height: 100%;
+      flex: 1 1 auto;
     }
   }
 
@@ -172,31 +201,31 @@
     background: var(--playground-code-background) !important;
   }
   playground-preview::part(preview-toolbar) {
-    font-size: 11px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: ;
-    margin: 0rem 0rem 0rem;
-    font-weight: bold;
-    color: rgb(255 255 255 / 72%);
-    padding: 0px 0.5rem;
-    background: linear-gradient(rgba(255, 255, 255, 0.02), rgba(15, 17, 22, 0.5));
-    border-bottom: 1px solid rgba(221, 221, 221, 0.05);
-    box-shadow: rgba(0, 0, 0, 0.4) 0px -2px 5px -3px inset;
-    background-color: var(--playground-code-background);
-    box-sizing: border-box;
-    height: 18px;
-    font-family: 'Lato';
+    background: transparent;
+    position: absolute;
+    top: -40px;
+    height: 39px;
+    border: none;
+    left: 0px;
+    width: 100%;
+    pointer-events: none;
+    color: transparent;
+  }
+  playground-preview::part(preview-reload-button) {
+    pointer-events: auto;
+    color: var(--white-80);
+    margin-right: 5px;
+    margin-top: -3px;
   }
   playground-preview::part(preview-loading-indicator) {
     --mdc-theme-primary: var(--primary-text-color);
     height: 3px;
     overflow: hidden;
-    top: -62px;
+    top: -5px;
   }
 
   playground-ide {
-    height: 100%;
+    flex: 1 1 auto;
   }
 
 }

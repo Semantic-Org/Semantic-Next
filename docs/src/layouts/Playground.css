@@ -31,6 +31,7 @@
     --topbar-menu-item-active-font-weight: bold;
     --topbar-border-bottom: 1px solid #232323;
   }
+
   code-playground::part(playground) {
     height: 100%;
   }
@@ -81,10 +82,6 @@
   page code-playground {
     display: contents;
   }
-/*
-  code-playground::part(playground) {
-    height: calc(100vh - var(--topbar-height));
-  }*/
 
   playground {
 
@@ -101,7 +98,7 @@
       box-shadow: var(--subtle-bottom-lip-shadow);
     }
     playground-preview::part(preview-loading-indicator) {
-      --mdc-theme-primary: #49b1d2;
+      --mdc-theme-primary: #49B1D2;
       height: 4px;
       overflow: hidden;
       top: -26px;

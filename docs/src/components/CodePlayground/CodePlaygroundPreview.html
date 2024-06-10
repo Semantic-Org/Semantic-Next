@@ -1,0 +1,12 @@
+<div class="menu">
+  <ui-menu value={{tab}} items={{getMenu}} class="preview"></ui-menu>
+</div>
+{{#if is tab 'preview'}}
+  <playground-preview part="preview" project="source"> </playground-preview>
+{{else if is tab 'console'}}
+  console
+{{else if is tab 'ast'}}
+  <pretty-json expand="4">
+    {{getAST}}
+  </pretty-json>
+{{/if}}

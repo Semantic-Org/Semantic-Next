@@ -2,10 +2,7 @@ import { createComponent } from '@semantic-ui/component';
 import template from './CodePlaygroundPanel.html?raw';
 import css from './CodePlaygroundPanel.css?raw';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
-
-const state = {
-  lastPanelSize: undefined,
-};
+import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 const createInstance = ({tpl, settings, state, $, $$}) => ({
   getNaturalSize(panel, {minimized }) {
@@ -36,9 +33,6 @@ const events = {
 };
 
 const onRendered = ({ $, tpl, attachEvent }) => {
-  attachEvent('.label', () => {
-    console.log('zz')
-  });
   $('ui-panel').settings({
     getNaturalSize: tpl.getNaturalSize
   });
@@ -50,9 +44,9 @@ const CodePlaygroundPanel = createComponent({
   createInstance,
   onRendered,
   events,
-  state,
   subTemplates: {
     CodePlaygroundFile,
+    CodePlaygroundPreview
   }
 });
 

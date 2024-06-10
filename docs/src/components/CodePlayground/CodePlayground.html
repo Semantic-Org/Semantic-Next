@@ -40,8 +40,9 @@
         <div class="menu">
           <ui-menu
             selection
-            items={{stringify getFileMenuItems}}
+            items={{getFileMenuItems}}
             value={{activeFile}}
+            class="files"
           ></ui-menu>
           {{#if exampleURL}}
             <div class="links">
@@ -63,7 +64,7 @@
         class="preview"
         exportparts="panel, handle"
       >
-        <playground-preview project="source"> </playground-preview>
+        {{>CodePlaygroundPreview}}
       </ui-panel>
     </ui-panels>
   {{else}}

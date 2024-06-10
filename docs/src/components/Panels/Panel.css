@@ -6,6 +6,10 @@
   will-change: flex;
 }
 
+::slotted(*) {
+  flex-shrink: 1;
+}
+
 :host {
   --panel-handle-height: 20px;
   --panel-divider-width: 1px;

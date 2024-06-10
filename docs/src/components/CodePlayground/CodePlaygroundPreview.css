@@ -1,0 +1,15 @@
+ui-menu.preview {
+  font-size: 11px !important;
+  text-transform: uppercase;
+  margin: 5px 8px;
+}
+
+playground-preview {
+  position: relative;
+}
+
+pretty-json {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--spacing);
+}

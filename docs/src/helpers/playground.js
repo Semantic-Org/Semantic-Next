@@ -80,6 +80,10 @@ function formatJSON(value, skipFormat = false) {
 }
 ${hideMarkerEnd}`;
 
+// TODO
+const wrapConsole = `${hideMarkerStart}
+${hideMarkerEnd}`;
+
 
 export const logCSS = `${hideMarkerStart}
   .json-key { color: #656565; }
