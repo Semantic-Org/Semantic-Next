@@ -79,6 +79,7 @@
   }
 
   .menu {
+    flex: 0 0 auto;
     overflow-x: auto;
     overflow-y: hidden;
   }
