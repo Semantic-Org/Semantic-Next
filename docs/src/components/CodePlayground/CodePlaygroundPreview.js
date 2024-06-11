@@ -42,7 +42,6 @@ const createInstance = ({tpl, findParent, state, $, $$}) => ({
 
 const onRendered = ({tpl, state}) => {
   const fileContent = tpl.getFile();
-  console.log(fileContent);
   state.template.set(fileContent);
 };
 

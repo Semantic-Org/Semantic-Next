@@ -5,19 +5,6 @@ import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 const createInstance = ({tpl, settings, state, $, $$}) => ({
-  getNaturalSize(panel, {minimized }) {
-    const labelHeight = $$('.label').height();
-    if(minimized) {
-      return labelHeight;
-    }
-    else {
-      const extraSpacing = 5;
-      const scrollbarHeight = $$(panel).find('.CodeMirror-hscrollbar').height() ? 17 : 0;
-      const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
-      const size = codeHeight + labelHeight + extraSpacing + scrollbarHeight;
-      return Math.max(size, 100);
-    }
-  }
 });
 
 const events = {
@@ -33,9 +20,6 @@ const events = {
 };
 
 const onRendered = ({ $, tpl, attachEvent }) => {
-  $('ui-panel').settings({
-    getNaturalSize: tpl.getNaturalSize
-  });
 };
 
 const CodePlaygroundPanel = createComponent({
