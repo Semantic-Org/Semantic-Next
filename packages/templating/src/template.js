@@ -108,8 +108,7 @@ export const Template = class Template {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-    console.log('setting parent template', this.templateName, parentTemplate.templateName, this);
-    this.parentTemplate = parentTemplate;
+    this.tpl._parentTemplate = parentTemplate;
   }
 
   setElement(element) {
@@ -676,7 +675,7 @@ export const Template = class Template {
       }
       // this matches on nested partials (less common)
       while (template) {
-        template = template.parentTemplate;
+        template = template._parentTemplate || template?.tpl?._parentTemplate;
         if (!match && template?.templateName == templateName) {
           match = template;
           break;

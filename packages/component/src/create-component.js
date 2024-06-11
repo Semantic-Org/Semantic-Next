@@ -131,6 +131,7 @@ export const createComponent = ({
           if(!this.template.initialized) {
             this.template.initialize();
           }
+          // make this easier to access in dom
           this.tpl = this.template.tpl;
         }
         // property change callbacks wont call on SSR
