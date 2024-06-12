@@ -2,9 +2,12 @@
 
 @layer responsive.mobile {
 
-  topbar {
+  :root {
     --global-search-input-font-size: 14px;
     --topbar-icon-size: 20px;
+  }
+
+  topbar {
     position: fixed;
     z-index: 2;
     top: auto;

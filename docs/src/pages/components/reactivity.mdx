@@ -35,8 +35,8 @@ Reactive variables can be accessed from inside a template without calling its `g
 
 ```html
 <ul>
-  {{#each items}}
-    <li>{{this}}</li>
+  {{#each item in items}}
+    <li>{{item}}</li>
   {{/each}}
 </ul>
 ```
@@ -45,7 +45,7 @@ in addition any conditionals will be reactive context
 
 ```html
 <ul>
-  {{#if items.length}}
+  {{#if hasAny items}}
     Has items
   {{else}}
     No items

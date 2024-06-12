@@ -105,7 +105,7 @@ export const sidebarMenuFramework = [
       },
       {
         name: 'Events',
-        url: '/components/dom'
+        url: '/components/events'
       },
       {
         name: 'Reactivity',
