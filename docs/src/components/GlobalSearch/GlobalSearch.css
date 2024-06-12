@@ -1,3 +1,5 @@
+@layer globalSearch.shadow {
+
 :host {
 
   --global-search-background-color: var(--white-5);
@@ -282,4 +284,6 @@ ui-modal {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--thumb-hover-background);
+}
+
 }

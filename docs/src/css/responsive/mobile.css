@@ -1,16 +1,18 @@
 /* Mobile (Max width 767px) */
 
 @layer responsive.mobile {
-/*
-  topbar .logo {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    margin: 0;
-  }*/
 
   topbar {
+    --global-search-input-font-size: 14px;
+    --topbar-icon-size: 20px;
+    position: fixed;
+    z-index: 2;
+    top: auto;
+    height: 70px;
+    bottom: 0;
+    width: 100%;
+    align-items: center;
+
     mobile-sidebar-toggle {
       display: inline-block;
     }
@@ -24,6 +26,7 @@
 
   layout {
     width: 100%;
+    height: auto;
 
     main {
 
@@ -107,6 +110,10 @@
   }
   layout page {
     margin: 0rem;
+  }
+
+  code-playground::part(file) {
+    max-width: calc(100vw - 3rem);
   }
 
 }

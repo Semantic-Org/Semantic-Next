@@ -92,6 +92,7 @@
     position: relative;
     display: flex;
     flex-direction: row;
+    flex-flow: column;
     height: 500px;
     margin: var(--vertically-spaced);
 
