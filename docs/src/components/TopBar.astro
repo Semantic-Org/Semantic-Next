@@ -8,9 +8,9 @@ import GlobalSearch from '@components/GlobalSearch/GlobalSearch.js';
 import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
 import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
 
-import { getTopBarMenu, removeTrailingSlash } from '@helpers/navigation.js';
+import { getTopbarMenu, removeTrailingSlash } from '@helpers/navigation.js';
 
-const menu = await getTopBarMenu();
+const menu = await getTopbarMenu();
 const activeURL = removeTrailingSlash(Astro.url.pathname);
 
 import './TopBar.css';

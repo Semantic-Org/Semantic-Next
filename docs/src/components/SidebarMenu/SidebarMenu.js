@@ -1,7 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
 import { any, isFunction, isArray } from '@semantic-ui/utils';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './SidebarMenu.html?raw';
 import css from './SidebarMenu.css?raw';
 
@@ -81,6 +80,7 @@ const createInstance = function ({ tpl, data, state, settings }) {
       if (isArray(item.pages)) {
         return any(item.pages, tpl.isActiveItem);
       }
+      return false;
     },
     addTrailingSlash(url) {
       return (url.substr(-1) === '/')

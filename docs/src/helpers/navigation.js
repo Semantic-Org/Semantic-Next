@@ -355,7 +355,7 @@ export const removeTrailingSlash = (url = '') => {
 
 export const getActiveTopbarSection = async (activeURL = '') => {
   activeURL = removeTrailingSlash(activeURL);
-  const topbarMenuWithLinks = await getTopBarMenu();
+  const topbarMenuWithLinks = await getTopbarMenu();
   const isActive = (item) => {
     if(isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
       return true;
@@ -402,7 +402,7 @@ export const getFlattenedSidebarMenu = async (topbarSection) => {
   return flatten(menuArrays).filter(Boolean);
 };
 
-export const getTopBarMenu = async () => {
+export const getTopbarMenu = async () => {
   const menu = topbarMenu;
   await asyncEach(menu, async item => {
     const flattenedMenu = await getFlattenedSidebarMenu(item._id);
