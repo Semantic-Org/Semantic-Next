@@ -50,7 +50,7 @@ const createInstance = function ({ $, isServer, attachEvent, tpl }) {
 };
 
 const events = {
-  'pointerdown .hitbox'({tpl}) {
+  'click .hitbox'({tpl}) {
     if(tpl.isVisible()) {
       tpl.hideSidebar();
     }

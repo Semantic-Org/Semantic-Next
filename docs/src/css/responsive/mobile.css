@@ -9,7 +9,7 @@
 
   topbar {
     position: fixed;
-    z-index: 2;
+    z-index: var(--page-layer-3);
     top: auto;
     height: 70px;
     bottom: 0;
@@ -70,22 +70,23 @@
 
   sidebar {
     position: fixed;
-    z-index: 4;
-    width: 250px;
-    height: 100%;
+    z-index: var(--page-layer-2);
 
-    border: none;
-    padding: 0;
-    margin: 0;
+    left: 0px;
+    bottom: 0px;
     right: auto;
-
+    width: 100%;
+    height: max-content;
+    border: none;
+    padding: 0 1rem 1rem;
+    margin: 0;
 
     transition:
       translate 0.3s ease,
       display 0.3s ease allow-discrete,
       overlay 0.3s ease allow-discrete;
 
-    translate: -250px 0;
+    translate: 0px 100%;
 
     &::backdrop {
       opacity: 0;
@@ -103,7 +104,7 @@
       }
 
       @starting-style {
-        translate: 250px 0;
+        translate: 0px 100%;
 
         &::backdrop {
           opacity: 0;

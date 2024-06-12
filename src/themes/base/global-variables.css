@@ -86,6 +86,28 @@
   --centered: var(--spacing) auto;
 
   /* -------------------
+         Z-Index
+  -------------------- */
+
+  --page-layer: 1;
+  --page-layer-2: 2;
+  --page-layer-3: 3;
+  --page-layer-4: 4;
+  --page-layer-5: 5;
+
+  --float-layer: 101;
+  --float-layer-2: 102;
+  --float-layer-3: 103;
+  --float-layer-4: 104;
+  --float-layer-5: 105;
+
+  --overlay-layer: 1001;
+  --overlay-layer-2: 1002;
+  --overlay-layer-3: 1003;
+  --overlay-layer-4: 1004;
+  --overlay-layer-5: 1005;
+
+  /* -------------------
       Border Radius
   -------------------- */
 
