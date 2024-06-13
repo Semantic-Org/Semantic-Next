@@ -1,0 +1,34 @@
+<dialog part="dialog">
+  <div class="visible menu">
+    {{#each section in visibleMenu}}
+      <a class="{{classes getTitleStates section}}title" href={{getLink section}}>
+        {{#if section.icon}}
+          <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
+        {{/if}}
+        <span class="text">
+          {{section.name}}
+        </span>
+        {{#if section.description}}
+          <span class="description">{{section.description}}</span>
+        {{/if}}
+        <ui-icon chevron-down class="dropdown"></ui-icon>
+      </a>
+    {{/each}}
+  </div>
+  <div class="next menu">
+    {{#each section in nextMenu}}
+      <a class="{{classes getTitleStates section}}title" href={{getLink section}}>
+        {{#if section.icon}}
+          <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
+        {{/if}}
+        <span class="text">
+          {{section.name}}
+        </span>
+        {{#if section.description}}
+          <span class="description">{{section.description}}</span>
+        {{/if}}
+        <ui-icon chevron-down class="dropdown"></ui-icon>
+      </a>
+    {{/each}}
+  </div>
+</dialog>

@@ -1,7 +1,7 @@
 ---
 const { sidebarMenu, currentRoute } = Astro.props;
 import './Sidebar.css';
-import NavMenu from '@components/NavMenu/NavMenu.js';
+import SidebarMenu from '@components/SidebarMenu/SidebarMenu.js';
 import { getSidebarMenu } from '@helpers/navigation.js';
 import { Template } from '@semantic-ui/component';
 
@@ -9,7 +9,7 @@ const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
-	<NavMenu
+	<SidebarMenu
 		client:load
     menu={menu}
     activeURL={Astro.url.pathname}

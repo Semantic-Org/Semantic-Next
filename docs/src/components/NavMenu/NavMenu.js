@@ -1,13 +1,14 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
 import { any, isFunction, isArray } from '@semantic-ui/utils';
-import template from './SidebarMenu.html?raw';
-import css from './SidebarMenu.css?raw';
+import template from './NavMenu.html?raw';
+import css from './NavMenu.css?raw';
 
 const settings = {
   menu: [],
   linkCurrentPage: false,
-  expandAllDefault: true,
+  expandAllDefault: false,
+  navigationIcon: '',
   activeURL: '',
 };
 
@@ -22,6 +23,9 @@ const createInstance = function ({ tpl, data, state, settings }) {
     },
     getMenu() {
       return tpl.filterVisibleSections(settings.menu);
+    },
+    getNavigationIcon(section, defaultIcon = 'chevron-down') {
+      return section?.navigationIcon || settings.navigationIcon || defaultIcon;
     },
     getTitleStates(title) {
       const classes = [];
@@ -74,6 +78,9 @@ const createInstance = function ({ tpl, data, state, settings }) {
       return item.url && !tpl.isCurrentItem(item);
     },
     isActiveItem(item) {
+      if(settings.expandAllDefault) {
+        return true;
+      }
       if (tpl.isCurrentItem(item)) {
         return true;
       }
@@ -127,8 +134,8 @@ const events = {
   }
 };
 
-const SidebarMenu = createComponent({
-  tagName: 'sidebar-menu',
+const NavMenu = createComponent({
+  tagName: 'nav-menu',
   template,
   css,
   createInstance,
@@ -140,5 +147,5 @@ const SidebarMenu = createComponent({
   state
 });
 
-export default SidebarMenu;
-export { SidebarMenu };
+export default NavMenu;
+export { NavMenu };

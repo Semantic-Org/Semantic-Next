@@ -127,7 +127,7 @@
   &.active {
     color: #ffffff;
 
-    .dropdown {
+    .dropdown[icon="chevron-down"] {
       opacity: 0.8;
       transform: rotate(180deg);
     }

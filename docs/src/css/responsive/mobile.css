@@ -16,7 +16,7 @@
     width: 100%;
     align-items: center;
 
-    mobile-sidebar-toggle {
+    mobile-menu-toggle {
       display: inline-block;
     }
     theme-switcher {
