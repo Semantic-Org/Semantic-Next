@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -6,6 +6,23 @@ across DOM nodes based off a selector
 */
 
 const tagRegExp = /^<(\w+)(\s*\/)?>$/;
+
+
+/*
+  This avoids keeping a copy of window/globalThis in
+  memory when an element references the global object
+  reducing memory footprint
+*/
+const globalThisProxy = new Proxy({}, {
+  get(target, prop) {
+    return globalThis[prop];
+  },
+  set(target, prop, value) {
+    globalThis[prop] = value;
+    return true;
+  },
+});
+
 
 export class Query {
   static eventHandlers = [];
@@ -16,9 +33,11 @@ export class Query {
     if (!root) {
       return;
     }
-    // window is outside of document root
-    if(selector == 'window') {
-      elements = [globalThis];
+    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
+      // We dont want to store a copy of globalThis in each query instance
+      elements = [globalThisProxy];
+      this.isBrowser = isClient;
+      this.isGlobal = true;
     }
     else if (isArray(selector)) {
       // Directly passed an array of elements
@@ -319,8 +338,11 @@ export class Query {
         };
       }
       const eventListener = delegateHandler || handler;
-      if (el.addEventListener) {
-        el.addEventListener(event, eventListener, { signal, ...eventSettings });
+
+      // will cause illegal invocation if used from proxy object
+      const domEL = (this.isGlobal) ? globalThis : el;
+      if (domEL.addEventListener) {
+        domEL.addEventListener(event, eventListener, { signal, ...eventSettings });
       }
 
       const eventHandler = {
@@ -380,7 +402,11 @@ export class Query {
           eventHandler.eventListener === handler ||
           eventHandler.handler === handler)
       ) {
-        eventHandler.el.removeEventListener(event, eventHandler.eventListener);
+        // global this uses proxy object will cause illegal invocation
+        const el = (this.isGlobal) ? globalThis : eventHandler.el;
+        if(el.removeEventListener) {
+          el.removeEventListener(event, eventHandler.eventListener);
+        }
         return false;
       }
       return true;
@@ -684,27 +710,33 @@ export class Query {
   }
 
   height(value) {
-    return this.prop('clientHeight', value);
+    const prop = (this.isGlobal) ? 'innerHeight' : 'clientHeight';
+    return this.prop(prop, value);
   }
 
   width(value) {
-    return this.prop('clientWidth', value);
+    const prop = (this.isGlobal) ? 'innerWidth' : 'clientWidth';
+    return this.prop(prop, value);
   }
 
   scrollHeight(value) {
-    return this.prop('scrollHeight', value);
+    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
+    return el.prop('scrollHeight', value);
   }
 
   scrollWidth(value) {
-    return this.prop('scrollWidth', value);
+    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
+    return el.prop('scrollWidth', value);
   }
 
   scrollLeft(value) {
-    return this.prop('scrollLeft', value);
+    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
+    return el.prop('scrollLeft', value);
   }
 
   scrollTop(value) {
-    return this.prop('scrollTop', value);
+    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
+    return el.prop('scrollTop', value);
   }
 
   clone() {
