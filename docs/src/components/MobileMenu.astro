@@ -1,18 +1,12 @@
 ---
-const { sidebarMenu, currentRoute } = Astro.props;
-import './Sidebar.css';
-import SidebarMenu from '@components/SidebarMenu/SidebarMenu.js';
+const { mobileMenu } = Astro.props;
+import MobileMenu from '@components/MobileMenu/MobileMenu.js';
 import { getSidebarMenu } from '@helpers/navigation.js';
-import { Template } from '@semantic-ui/component';
 
-const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
+const menu = mobileMenu || await getSidebarMenu({url: Astro.url.pathname});
 ---
-<sidebar transition:persist id="sidebar" popover="manual">
-  <slot/>
-	<SidebarMenu
-		client:load
-    menu={menu}
-    activeURL={Astro.url.pathname}
-  />
-  <slot name="after"/>
-</sidebar>
+<MobileMenu
+	client:load
+  menu={menu}
+  activeURL={Astro.url.pathname}
+/>

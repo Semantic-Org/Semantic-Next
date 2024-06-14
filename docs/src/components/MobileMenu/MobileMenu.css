@@ -4,14 +4,23 @@
 
 :host {
   --mobile-menu-background-color: oklch(0.17 0.01 234.61);
-  --mobile-menu-width: 90dvw;
-  --mobile-menu-border-radius: var(--top-attached-border-radius);
+  --mobile-menu-background: var(--mobile-menu-background-color) var(--subtle-angled-gradient);
+  --mobile-menu-width: 100%;
+  --mobile-menu-border-radius: 10px 10px 0px 0px;
   --mobile-menu-color: var(--white);
   --mobile-menu-border: none;
   --mobile-menu-box-shadow: none;
-  --mobile-menu-padding: var(--padding);
+  --mobile-menu-padding: 10px 20px 20px;
 
   --mobile-menu-dimmer-background: var(--black-70);
+
+}
+
+nav-menu {
+  --nav-menu-title-font-size: 15px;
+  --nav-menu-title-color: var(--mobile-menu-color);
+  --nav-menu-title-padding: 10px 0px;
+  --nav-menu-dropdown-icon-font-size: 16px;
 }
 
 * {
@@ -20,28 +29,52 @@
 
 dialog {
   position: fixed;
-  top: auto;
   bottom: 0px;
-  height: max-content;
+  height: 100px;
+  box-sizing: border-box;
   margin: auto;
+  padding: 0;
   outline: none;
   border: none;
+  max-width: none;
+  max-height: none;
   background-color: transparent;
-  overflow: visible;
-  display: flex;
   flex-direction: row;
   overflow: hidden;
-  background-color: var(--mobile-menu-background-color);
+  background: var(--mobile-menu-background);
   color: var(--mobile-menu-color);
   box-shadow: var(--mobile-menu-box-shadow);
   width: var(--mobile-menu-width);
   border-radius: var(--mobile-menu-border-radius);
   border: var(--mobile-menu-border);
   box-shadow: var(--mobile-menu-box-shadow);
+  z-index: var(--overlay-layer);
+
+  .container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .content {
+    width: 100%;
+    height: 100%;
+    padding: var(--mobile-menu-padding);
+    position: relative;
+    flex-shrink: 0;
+
+    &.next : {
+
+    }
+  }
+
+
 }
 dialog {
-  transform: translateY(100%);
-  transition: all 0.3s ease;
+  /*transform: translateY(100%);*/
+  transition: transform 0.3s ease;
 }
 dialog[open] {
   transform: translateY(0%);
@@ -51,23 +84,6 @@ dialog[open] {
     transform: translateY(100%);
   }
 }
-
-/* Dialog */
-dialog {
-  opacity: 0;
-  scale: 0.8;
-}
-dialog[open] {
-  opacity: 1;
-  scale: 1;
-}
-@starting-style {
-  dialog[open] {
-    opacity: 0;
-    scale: 0.8;
-  }
-}
-
 
 /* Backdrop */
 dialog::backdrop {
@@ -80,18 +96,5 @@ dialog[open]::backdrop {
 @starting-style {
   dialog[open]::backdrop {
     background: rgb(0 0 0 / 0%);
-  }
-}
-
-
-.menu {
-  width: 100%;
-  height: 100%;
-  padding: var(--mobile-menu-padding);
-  position: relative;
-  flex-shrink: 0;
-
-  &.next : {
-
   }
 }

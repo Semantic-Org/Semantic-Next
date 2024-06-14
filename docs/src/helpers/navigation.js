@@ -390,6 +390,11 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   return menu;
 };
 
+export const getMobileMenu = async ({url, topbarSection}) => {
+  let menu = [];
+  return menu;
+};
+
 export const getFlattenedSidebarMenu = async (topbarSection) => {
   const menu = await getSidebarMenu({ topbarSection: topbarSection });
   const menuArrays = menu.map(section => {

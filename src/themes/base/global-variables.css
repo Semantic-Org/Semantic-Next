@@ -451,22 +451,40 @@
        Alpha Colors
   -------------------- */
 
+  --very-subtle-transparent-black: oklch(var(--black-lch) / 2%);
   --subtle-transparent-black: oklch(var(--black-lch) / 3%);
   --transparent-black: oklch(var(--black-lch) / 5%);
   --strong-transparent-black: oklch(var(--black-lch) / 8%);
   --very-strong-transparent-black: oklch(var(--black-lch) / 15%);
 
+  --very-subtle-transparent-white: oklch(var(--white-lch) / 3%);
   --subtle-transparent-white: oklch(var(--white-lch) / 5%);
   --transparent-white: oklch(var(--white-lch) / 8%);
   --strong-transparent-white: oklch(var(--white-lch) / 13%);
   --very-strong-transparent-white: oklch(var(--black-lch) / 18%);
 
   /* -------------------
-         Accents
+         Gradients
   -------------------- */
 
   /* Differentiating Neutrals */
-  --subtle-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-subtle-gradient: linear-gradient(var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-gradient: linear-gradient(var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
+  --strong-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-gradient: linear-gradient(var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+
+  /* Differentiating Neutrals */
+  --very-subtle-angled-gradient: linear-gradient(45deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-angled-gradient: linear-gradient(45deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --angled-gradient: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+  --strong-angled-gradient: linear-gradient(45deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-angled-gradient: linear-gradient(45deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* -------------------
+         Accents
+  -------------------- */
 
   /* Differentiating Layers */
   --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
@@ -946,7 +964,6 @@ html.dark {
   --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
 
   /* We need to boost some gradients to be noticable in dark mode */
-  --subtle-gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
   --subtle-shadow: 0px 1px 2px 0 var(--transparent-black);
   --subtle-inset-shadow: 0px 2px 3px 0 var(--transparent-black) inset;
 

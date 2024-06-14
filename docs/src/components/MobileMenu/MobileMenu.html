@@ -1,34 +1,14 @@
-<dialog part="dialog">
-  <div class="visible menu">
-    {{#each section in visibleMenu}}
-      <a class="{{classes getTitleStates section}}title" href={{getLink section}}>
-        {{#if section.icon}}
-          <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
-        {{/if}}
-        <span class="text">
-          {{section.name}}
-        </span>
-        {{#if section.description}}
-          <span class="description">{{section.description}}</span>
-        {{/if}}
-        <ui-icon chevron-down class="dropdown"></ui-icon>
-      </a>
-    {{/each}}
-  </div>
-  <div class="next menu">
-    {{#each section in nextMenu}}
-      <a class="{{classes getTitleStates section}}title" href={{getLink section}}>
-        {{#if section.icon}}
-          <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
-        {{/if}}
-        <span class="text">
-          {{section.name}}
-        </span>
-        {{#if section.description}}
-          <span class="description">{{section.description}}</span>
-        {{/if}}
-        <ui-icon chevron-down class="dropdown"></ui-icon>
-      </a>
-    {{/each}}
+<dialog part="dialog" open>
+  <div class="container">
+    <div class="visible content">
+      <h3>Test</h3>
+      <h3>Test</h3>
+      <h3>Test</h3>
+      <h3>Test</h3>
+      <h3>Test</h3>
+    </div>
+    <div class="next content">
+      <nav-menu menu={{menu}} navigationIcon="right-chevron"></nav-menu>
+    </div>
   </div>
 </dialog>

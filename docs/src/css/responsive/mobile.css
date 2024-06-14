@@ -9,7 +9,7 @@
 
   topbar {
     position: fixed;
-    z-index: var(--page-layer-3);
+    z-index: var(--float-layer);
     top: auto;
     height: 70px;
     bottom: 0;
