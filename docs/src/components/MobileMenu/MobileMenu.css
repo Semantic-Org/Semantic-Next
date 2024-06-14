@@ -30,7 +30,7 @@ nav-menu {
 dialog {
   position: fixed;
   bottom: 0px;
-  height: 100px;
+  height: fit-content;
   box-sizing: border-box;
   margin: auto;
   padding: 0;
@@ -73,7 +73,7 @@ dialog {
 
 }
 dialog {
-  /*transform: translateY(100%);*/
+  transform: translateY(100%);
   transition: transform 0.3s ease;
 }
 dialog[open] {
