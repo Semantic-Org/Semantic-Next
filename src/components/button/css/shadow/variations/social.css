@@ -3,6 +3,12 @@
        Social
 --------------------*/
 
+.social.button {
+  .icon {
+    opacity: 1;
+  }
+}
+
 /* Facebook */
 .facebook.button {
   background-color: var(--facebook-color);

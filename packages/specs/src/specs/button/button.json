@@ -274,6 +274,7 @@
       "value": "social",
       "usageLevel": 5,
       "description": "appear formatted with the brand colors of a social website",
+      "includeAttributeClass": true,
       "options": [
         {
           "name": "Instagram",

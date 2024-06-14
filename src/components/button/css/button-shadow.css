@@ -1902,6 +1902,9 @@
 
 /* src/components/button/css/shadow/variations/social.css */
 @layer component.button.variations.social {
+  .social.button .icon {
+    opacity: 1;
+  }
   .facebook.button {
     background-color: var(--facebook-color);
     color: var(--button-inverted-text-color);

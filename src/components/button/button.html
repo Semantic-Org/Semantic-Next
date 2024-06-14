@@ -8,12 +8,12 @@
     </span>
   {{/if}}
   {{#if isIconBefore}}
-    <ui-icon icon={{icon}}></ui-icon>
+    <ui-icon icon={{icon}} class="icon" part="icon"></ui-icon>
   {{/if}}
   <span class="text">
     {{>slot}}
   </span>
   {{#if isIconAfter}}
-    <ui-icon icon={{icon}}></ui-icon>
+    <ui-icon icon={{icon}} class="icon" part="icon"></ui-icon>
   {{/if}}
 </div>
