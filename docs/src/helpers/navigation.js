@@ -54,11 +54,11 @@ export const sidebarMenuUI = [
         url: '/framework-integration'
       },
       {
-        name: 'Usage',
+        name: 'Using Components',
         url: '/usage'
       },
       {
-        name: 'Web Components',
+        name: 'What are Web Components',
         url: '/web-components'
       },
       /*{

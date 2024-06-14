@@ -8,31 +8,63 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What is Semantic UI?
 
-Semantic UI is a UI framework built for authoring websites using [web components](/web-components). It includes a UI framework that provides primitives for most common use-cases, but also a component authoring system for you to build everything that isn't included.
+Semantic UI is a UI framework built for authoring websites using [web components](/web-components) with signals based reactivity, an expressive shadow DOM templating syntax, robust theming using css layers and  variables, and an integrated underlying UI component framework that  supports SSR by default.
 
-The component system compiles to native web components which means you can bring them with you regardless of what front end technologies you choose to use to build your website.
-
-#### Design Principles
-
-Semantic is designed around principles from natural language which means it is expressive and easy to use. All major components support SSR out of the box, which is the primary hurdle you might encounter when trying to ship with web components (which are a browser not a server standard)>
-
-
-#### Tech Features
-
-* Built on a uniform [reactive web component framework](/templates) that you can use to build your own UI.
-* [Modern css theming](/theming) using **1,000+ CSS variables**, **cascading inheritance layers**, **dark mode** and **em based** scaling.
+#### Key Features
+* Uses **native browser standards** which means it **can run without a compilation step** unlike many modern JS frameworks.
+* Built on a [reactive component framework](/components) that you can use to author your own web components.
+* [Modern css theming](/theming) using **thousands of CSS variables**, **cascading inheritance layers** to make overrides easy, **dark mode aware** components and **em based** scaling.
 * UI components support [server side rendering with hydration](/ssr) out of the box.
 
-### Machine Interpretable
+### Built To Scale
 
-Semantic UI components are all powered by an underlying spec format. This specification outlines components in a way that is machine-interpretable and can be used to build robust developer or internal tooling.
+Semantic uses web components which are a native browser standard meaning your codebase will never grow stale when a new framework comes out. It also means that you can use Semantic inside other frameworks that support web components like React, Vue or Svelte.
+
 
 ## What's Included
 
 Semantic includes the following core libraries:
-* An underlying [UI component framework](/component) that includes things like popups, dropdowns, modals, and form controls.
+* An underlying [UI component framework](/components) that includes things like popups, dropdowns, modals, and form controls.
 * A robust [reactive templating language](/templating) that compiles to web components.
 * A signals based [reactivity library](/reactivity).
 * A modern 3kb jQuery-like replacement called [Query](/query) to handle DOM APIs
 * A higly-performant [rendering engine](/rendering) powered by [Lit](https://lit.dev) under the hood.
 
+
+## Coding With Semantic
+
+Semantic is written to read like english, which makes working with a codebase written in Semantic UI easy and intuitive
+
+```html
+<ui-menu selection evenly-spaced>
+  <menu-item value="a">Choice A</menu-item>
+  <menu-item value="b">Choice B</menu-item>
+  <menu-item value="c">Choice C</menu-item>
+</ui-menu>
+```
+
+Semantic also includes some **concepts from natural language like plurality** to make inheritance easy to understand.
+
+```html
+<ui-buttons large>
+  <ui-button>Cancel</ui-button>
+  <ui-button primary>Submit</ui-button>
+</ui-buttons>
+```
+
+### Theming
+
+Semantic theming is **light/dark mode aware** and can be used to create your own web components or just style parts of your page.
+
+```css
+.my-element {
+  /* think in terms of words not pixels. compact means 0.5em */
+  padding: var(--compact-spacing);
+
+  /* border is dark in light mode and light in dark mode */
+  border: var(--border;);
+
+  /* standard 70% means 70% black in light mode and 70% white in dark mode */
+  color: var(--standard-70);
+}
+```
