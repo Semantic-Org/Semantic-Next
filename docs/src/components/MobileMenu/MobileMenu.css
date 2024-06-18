@@ -29,10 +29,11 @@ nav-menu {
 
 dialog {
   position: fixed;
+  top: auto;
   bottom: 0px;
-  height: fit-content;
+  height: max-content;
   box-sizing: border-box;
-  margin: auto;
+  margin: auto 0;
   padding: 0;
   outline: none;
   border: none;
@@ -52,21 +53,25 @@ dialog {
 
   .container {
     display: flex;
-    width: 100%;
+    width: 200vw;
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: visible;
+    transform: translateX(0%);
+    transition: transform 0.35s cubic-bezier(0.33, 0.01, 0, 1);
+
+    &.animate {
+      transform: translateX(-100%);
+    }
   }
+
 
   .content {
     width: 100%;
     height: 100%;
     padding: var(--mobile-menu-padding);
-    position: relative;
-    flex-shrink: 0;
 
-    &.next : {
-
+    &.next {
+      left: 100%;
     }
   }
 
