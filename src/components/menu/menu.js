@@ -11,7 +11,11 @@ const createInstance = ({settings, tpl, dispatchEvent}) => ({
     dispatchEvent('change', { value });
   },
 
-  getValue(item) {
+  getValue() {
+    return settings.value;
+  },
+
+  getItemValue(item) {
     return item.value || item.href;
   },
 
@@ -20,14 +24,15 @@ const createInstance = ({settings, tpl, dispatchEvent}) => ({
       return true;
     }
     if(activeValue !== undefined) {
-      return activeValue == tpl.getValue(item);
+      return activeValue == tpl.getItemValue(item);
     }
     return false;
   }
 });
 
 
-const onCreated = ({settings}) => {
+const onCreated = ({el, settings}) => {
+  console.log(el, settings.items);
 };
 
 const onRendered = function({$}) {

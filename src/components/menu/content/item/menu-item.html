@@ -1,12 +1,12 @@
 {{#if href}}
-  <a class="{{ui}} item" href="{{href}}" part="item">
+  <a class="{{ui}}{{activeIf isActive}}item" href="{{href}}" part="item">
     {{#if icon}}
       <ui-icon icon={{icon}}></ui-icon>
     {{/if}}
     {{>slot}}
   </a>
 {{else}}
-  <div class="{{ui}} item" part="item">
+  <div class="{{ui}}{{activeIf isActive}}item" part="item">
     {{#if icon}}
       <ui-icon icon={{icon}}></ui-icon>
     {{/if}}
