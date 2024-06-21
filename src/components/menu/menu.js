@@ -4,7 +4,22 @@ import { MenuComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/menu-shadow.css?raw';
 import Template from './menu.html?raw';
 
-const createInstance = ({settings, tpl, dispatchEvent}) => ({
+const createInstance = ({$, reaction, settings, tpl, dispatchEvent}) => ({
+
+  calculateActiveValue() {
+    reaction(() => {
+      let value = settings.value;
+      $('menu-item').each((el) => {
+        const menuItem = $(el).getComponent();
+        if(menuItem.getValue() == value) {
+          $(el).attr('active', true);
+        }
+        else {
+          $(el).removeAttr('active');
+        }
+      });
+    });
+  },
 
   setValue(value) {
     settings.value = value;
@@ -32,10 +47,12 @@ const createInstance = ({settings, tpl, dispatchEvent}) => ({
 
 
 const onCreated = ({el, settings}) => {
-  console.log(el, settings.items);
 };
 
-const onRendered = function({$}) {
+const onRendered = function({tpl, isClient}) {
+  if(true || isClient) {
+    tpl.calculateActiveValue();
+  }
 };
 
 const events = {

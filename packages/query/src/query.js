@@ -29,11 +29,10 @@ export class Query {
 
   constructor(selector, { root = document, pierceShadow = false } = {}) {
     let elements = [];
-
-    if (!root) {
+    if (!root && root?.querySelectorAll) {
       return;
     }
-    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
+    if(((isClient && selector === window) || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
       // We dont want to store a copy of globalThis in each query instance
       elements = [globalThisProxy];
       this.isBrowser = isClient;
