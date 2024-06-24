@@ -6,26 +6,6 @@ import Template from './menu.html?raw';
 
 const createInstance = ({$$, $, reaction, settings, tpl, dispatchEvent}) => ({
 
-  setActiveItem() {
-    const value = settings.value;
-    $$('menu-item').each((el) => {
-      const menuItem = $(el).getComponent();
-      const itemValue = menuItem.getValue();
-      if(itemValue == value) {
-        $(el).attr('active', true);
-      }
-      else {
-        $(el).removeAttr('active');
-      }
-    });
-  },
-
-  setValue(value) {
-    settings.value = value;
-    dispatchEvent('change', { value });
-    tpl.setActiveItem();
-  },
-
   getValue() {
     return settings.value;
   },
@@ -42,7 +22,27 @@ const createInstance = ({$$, $, reaction, settings, tpl, dispatchEvent}) => ({
       return activeValue == tpl.getItemValue(item);
     }
     return false;
-  }
+  },
+
+  setValue(value) {
+    settings.value = value;
+    dispatchEvent('change', { value });
+    tpl.setActiveItem();
+  },
+
+  setActiveItem() {
+    const value = settings.value;
+    $$('menu-item').each((el) => {
+      const menuItem = $(el).getComponent();
+      const itemValue = menuItem.getValue();
+      if(itemValue == value) {
+        $(el).attr('active', true);
+      }
+      else {
+        $(el).removeAttr('active');
+      }
+    });
+  },
 });
 
 
@@ -50,12 +50,14 @@ const onCreated = ({el, settings}) => {
 };
 
 const onRendered = function({tpl, settings, isClient}) {
-  tpl.setActiveItem();
+  if(isClient) {
+    tpl.setActiveItem();
+  }
 };
 
 const events = {
-  'click menu-item'({tpl, el, data}) {
-    tpl.setValue(data.value || el.value);
+  'click menu-item'({tpl, el}) {
+    tpl.setValue(el.value);
   }
 };
 

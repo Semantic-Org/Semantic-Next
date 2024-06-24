@@ -1,8 +1,7 @@
 <div class="{{ui}} menu" part="menu">
   {{#if items}}
-    {{log 'test' items}}
     {{#each item in items}}
-      <menu-item active={{isValueActive value item}} href={{item.href}} data-value={{item.value}}>
+      <menu-item active={{isValueActive value item}} href={{item.href}} value={{item.value}}>
         {{item.label}}
       </menu-item>
     {{/each}}
