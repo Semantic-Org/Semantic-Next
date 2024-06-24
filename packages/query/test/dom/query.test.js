@@ -12,7 +12,8 @@ describe('query', () => {
     beforeEach(() => {
       // Clear any existing global variables before each test
       delete window.$;
-      delete window.$$;    delete window.Query;
+      delete window.$$;
+      delete window.Query;
     });
 
     describe('exportGlobals', () => {

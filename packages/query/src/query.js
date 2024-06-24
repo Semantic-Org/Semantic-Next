@@ -570,10 +570,10 @@ export class Query {
     return this;
   }
 
-  css(property, value, settings = { includeComputed: false }) {
+  css(property, value = null, settings = { includeComputed: false }) {
     const elements = Array.from(this);
     // Setting a value or multiple values
-    if (isPlainObject(property) || value !== undefined) {
+    if (isPlainObject(property) || value !== null) {
       if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
           elements.forEach((el) => (el.style[prop] = val));
