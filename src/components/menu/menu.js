@@ -4,14 +4,13 @@ import { MenuComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/menu-shadow.css?raw';
 import Template from './menu.html?raw';
 
-const createInstance = ({settings, tpl, dispatchEvent}) => ({
+const createInstance = ({$$, $, reaction, settings, tpl, dispatchEvent}) => ({
 
-  setValue(value) {
-    settings.value = value;
-    dispatchEvent('change', { value });
+  getValue() {
+    return settings.value;
   },
 
-  getValue(item) {
+  getItemValue(item) {
     return item.value || item.href;
   },
 
@@ -20,22 +19,45 @@ const createInstance = ({settings, tpl, dispatchEvent}) => ({
       return true;
     }
     if(activeValue !== undefined) {
-      return activeValue == tpl.getValue(item);
+      return activeValue == tpl.getItemValue(item);
     }
     return false;
-  }
+  },
+
+  setValue(value) {
+    settings.value = value;
+    dispatchEvent('change', { value });
+    tpl.setActiveItem();
+  },
+
+  setActiveItem() {
+    const value = settings.value;
+    $$('menu-item').each((el) => {
+      const menuItem = $(el).getComponent();
+      const itemValue = menuItem.getValue();
+      if(itemValue == value) {
+        $(el).attr('active', true);
+      }
+      else {
+        $(el).removeAttr('active');
+      }
+    });
+  },
 });
 
 
-const onCreated = ({settings}) => {
+const onCreated = ({el, settings}) => {
 };
 
-const onRendered = function({$}) {
+const onRendered = function({tpl, settings, isClient}) {
+  if(isClient) {
+    tpl.setActiveItem();
+  }
 };
 
 const events = {
-  'click menu-item'({tpl, data}) {
-    tpl.setValue(data.value);
+  'click menu-item'({tpl, el}) {
+    tpl.setValue(el.value);
   }
 };
 

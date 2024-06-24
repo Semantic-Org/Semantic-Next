@@ -1,11 +1,24 @@
 ---
 import Body from '../layouts/Body.astro';
-import { UIInput, UIButton } from '@semantic-ui/core';
-
+import { UIMenu, MenuItem, UIInput, UIButton } from '@semantic-ui/core';
 const items = [{label: 'One', value: '1'}, { label: 'Two', value: '2' },{label: 'Three', value: '3' }];
 ---
 <Body padded>
-<UIInput value="test" icon="x" client:load></UIInput>
-<UIInput value="test 2" icon="search" client:load></UIInput>
+
+<ui-container>
+  <UIMenu client:load value="3" items='[{"label":"One","value":"1"},{"label":"Two","value":"2"},{"label":"Three","value":"3"}]'></UIMenu>
+
+  <UIMenu client:load selection evenly-spaced value="a">
+    <MenuItem client:load value="a">Choice A</MenuItem>
+    <MenuItem client:load value="b">Choice B</MenuItem>
+    <MenuItem client:load value="c">Choice C</MenuItem>
+  </UIMenu>
+  <UIMenu client:load selection evenly-spaced value="a">
+    <MenuItem client:load active value="a">Choice A</MenuItem>
+    <MenuItem client:load value="b">Choice B</MenuItem>
+    <MenuItem client:load value="c">Choice C</MenuItem>
+  </UIMenu>
+
+</ui-container>
 
 </Body>

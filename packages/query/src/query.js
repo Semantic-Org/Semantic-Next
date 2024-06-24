@@ -29,11 +29,11 @@ export class Query {
 
   constructor(selector, { root = document, pierceShadow = false } = {}) {
     let elements = [];
-
+    // We need to make sure root supports querying dom
     if (!root) {
       return;
     }
-    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
+    if(((isClient && selector === window) || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
       // We dont want to store a copy of globalThis in each query instance
       elements = [globalThisProxy];
       this.isBrowser = isClient;
@@ -47,7 +47,8 @@ export class Query {
       if (selector.slice(0, 1) == '<') {
         const tagName = selector.match(tagRegExp)[1];
         elements = [document.createElement(tagName)];
-      } else {
+      }
+      else if (root?.querySelectorAll) {
         // Use querySelectorAll for normal selectors
         elements = (pierceShadow)
           ? this.querySelectorAllDeep(root, selector)

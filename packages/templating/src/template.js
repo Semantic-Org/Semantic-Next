@@ -359,7 +359,7 @@ export const Template = class Template {
             const eventData = event?.detail || {};
             const elData = targetElement.dataset;
             template.call(boundEvent, {
-              additionalData: { event: event, data: { ...elData, ...eventData } },
+              additionalData: { event: event, el: targetElement, data: { ...elData, ...eventData } },
             });
           },
           { abortController: this.eventController }
