@@ -29,7 +29,8 @@ export class Query {
 
   constructor(selector, { root = document, pierceShadow = false } = {}) {
     let elements = [];
-    if (!root && root?.querySelectorAll) {
+    // We need to make sure root supports querying dom
+    if (!root || !root?.querySelectorAll) {
       return;
     }
     if(((isClient && selector === window) || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
