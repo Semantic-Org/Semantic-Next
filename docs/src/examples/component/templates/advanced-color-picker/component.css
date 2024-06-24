@@ -1,0 +1,68 @@
+:host {
+  --color-option-size: 30px;
+  --color-preview-size: 100px;
+  display: block;
+  font-family: var(--page-font);
+  max-width: 300px;
+  margin: 0 auto;
+  padding: var(--padding);
+  background: var(--page-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--subtle-shadow);
+
+  h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--header-color);
+    font-size: var(--h4);
+    font-weight: var(--header-font-weight);
+  }
+
+  .preview {
+    width: var(--color-preview-size);
+    height: var(--color-preview-size);
+    border-radius: var(--circular-radius);
+    margin: 0 auto 20px;
+    box-shadow: 0 0 0 1px var(--border-color);
+    transition: box-shadow var(--duration) var(--easing);
+  }
+
+  .options {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 20px;
+
+    .option {
+      width: var(--color-option-size);
+      height: var(--color-option-size);
+      border-radius: var(--circular-radius);
+      cursor: pointer;
+      transition: transform var(--duration) var(--easing), box-shadow var(--duration) var(--easing);
+      box-shadow: var(--subtle-shadow);
+
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: var(--floating-shadow);
+      }
+    }
+  }
+
+  .custom-color {
+    display: block;
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border: var(--border);
+    border-radius: var(--border-radius);
+  }
+
+  .info {
+    margin-top: 20px;
+    padding: 10px;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    text-align: center;
+  }
+}

@@ -1,0 +1,76 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component Lifecycle
+icon: refresh-cw
+description: An overview of component lifecycle
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Component Lifecycle
+
+Semantic UI uses a simple set of callbacks designed for ease of use and readability.
+
+## Component Callbacks
+
+Each component callback receives as its arguments a destructurable set of arguments that provide you access to everything you need inside the component
+| parameter         | use                                              |
+|-------------------|--------------------------------------------------|
+| el                | the DOM element of the web component             |
+| tpl               | the template instance from createInstance        |
+| $                 | the $ query object to access DOM                 |
+| $$                | the $$ query object to access shadow DOM         |
+| reaction          | a reactive function                              |
+| reactiveVar       | a source of reactivity                           |
+| afterFlush        | a callback after reactions are flushed           |
+| data              | a read-only copy of the template data context    |
+| settings          | a read-write copy of the component's settings    |
+| state             | a reactive data store for internal state         |
+| isRendered        | a function returning whether the DOM has rendered|
+| isServer          | whether it is rendering on the server            |
+| isClient          | whether it is rendering on the client            |
+| dispatchEvent     | helper to dispatch custom events                 |
+| attachEvent       | helper to attach events to external elements     |
+| bindKey           | helper to bind keyboard shortcuts                |
+| abortController   | AbortController for cancelling async operations  |
+| template          | the current sui template                         |
+| templateName      | the name of the current component                |
+| templates         | all rendered templates on current page           |
+| findTemplate      | helper to find a specific template               |
+| findParent        | helper to find a specific parent template        |
+| findChild         | helper to find a child template                  |
+| findChildren      | helper to find multiple child templates          |
+| darkMode          | boolean for if dark mode is active               |
+
+Event handlers also have access to a few additional arguments
+| parameter         | use                                              |
+|-------------------|--------------------------------------------------|
+| el                | the dom element that fired the event             |
+| event             | the event object                                 |
+| data              | event.detail + data attributes on dom element    |
+
+### createInstance
+
+`createInstance` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
+
+#### Initialize
+
+Similar to how classes have a constructor, you may use `initialize` to set special conditions when a component is initialized for the first time.
+
+### onCreated
+
+`onCreated` fires after the instance is defined but before the DOM is rendered. You can use this callback to handle special behaviors that require the component instance but not its rendered DOM, for instance attaching external event handlers to the page.
+
+### onRendered
+
+The `onRendered` callback occurs **after the initial render** of the web components Shadow DOM.
+
+This can be used to run code which requires access to the DOM. Although this callback will fire on the server you will not be able to access deeply nested DOM as server rendered components are rendered in isolation.
+
+### onDestroyed
+
+The `onDestroyed` callback is called after the component is removed from the page.
+
+### onThemeChanged
+
+The `onThemeChanged` callback is a special callback that fires when a user swaps themes. This can be used to modify the component based on whether the user prefers light or dark mode.

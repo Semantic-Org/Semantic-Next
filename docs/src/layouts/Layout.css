@@ -105,6 +105,11 @@
     text-transform: uppercase;
     color: var(--standard-50);
   }
+  layout page.text-content img {
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: var(--padding);
+  }
   layout page.text-content ul strong,
   layout page.text-content p strong {
     color: var(--standard-100);

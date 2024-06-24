@@ -1,0 +1,19 @@
+<h4>Your Color</h4>
+<div class="preview" style="background-color: {{color}}"></div>
+<h4>Preset Color</h4>
+<div class="options">
+  {{#each color in colorOptions}}
+    <div class="option" style="background-color: var(--{{color}});"></div>
+  {{/each}}
+</div>
+<h4>Custom Color</h4>
+<input type="color" class="custom-color" value="{{color}}">
+<ui-button fluid primary>Apply</ui-button>
+<h4>New Color</h4>
+<div class="info">
+  {{#if hoveredColor}}
+    New color is <b>{{hoveredColor}}</b>
+  {{else}}
+    No color selected
+  {{/if}}
+</div>
