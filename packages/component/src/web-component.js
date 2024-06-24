@@ -1,7 +1,6 @@
 import { LitElement } from 'lit';
 import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
@@ -312,27 +311,15 @@ class WebComponentBase extends LitElement {
   */
   createSettingsProxy({componentSpec, properties}) {
     let component = this;
-    const reactiveVars = {};
     return new Proxy({}, {
       get: (target, property) => {
         const settings = component.getSettings({
           componentSpec,
           properties
         });
-        const value = get(settings, property);
-        console.log('getting', property);
-        if(!reactiveVars[property]) {
-          console.log('creating value reactively', value);
-          reactiveVars[property] = new ReactiveVar(value);
-        }
-        console.log('rerun');
-        return value;
+        return get(settings, property);
       },
       set: (target, property, value, receiver) => {
-        if(reactiveVars[property]) {
-          console.log('setting value reactively', value);
-          reactiveVars[property].set(value);
-        }
         component.setSetting(property, value);
         return true;
       }
