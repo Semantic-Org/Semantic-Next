@@ -1,0 +1,38 @@
+.search {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  margin-right: 1rem;
+}
+
+.results {
+
+  border: var(--border);
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+
+  .result {
+    cursor: pointer;
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+
+    &:hover {
+      background-color: var(--standard-10);
+    }
+
+    &.active {
+      background-color: var(--standard-20);
+    }
+
+  }
+
+  .empty {
+    font-size: 15px;
+    margin: var(--spacing);
+    color: var(--standard-50);
+  }
+}
+
+b {
+  color: var(--primary-text-color);
+}

@@ -32,9 +32,9 @@ const createInstance = ({tpl, state, settings}) => ({
 
 createComponent({
   tagName: 'ui-counter',
-  template,
-  css,
-  state,
   createInstance,
+  css,
+  template,
+  state,
   settings,
 });
