@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.0.24",
+  "version": "0.0.27",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
@@ -103,8 +103,5 @@
   ],
   "lint-staged": {
     "**/*.js": "npx dprint fmt"
-  },
-  "dependencies": {
-    "@pagefind/modular-ui": "^1.1.0"
   }
 }
