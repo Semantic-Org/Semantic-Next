@@ -23,7 +23,7 @@ const settings = {
   sandboxURL: '/sandbox',
   exampleURL: '',
   includeGeneratedInline: false,
-  useTabs: false,
+  useTabs: localStorage.getItem('codeplayground-tabs') == 'yes' || false,
   saveState: true,
   saveID: 'sandbox',
   example: {},
@@ -76,7 +76,7 @@ const state = {
   resizing: true,
 };
 
-const createInstance = ({tpl, state, settings, $, $$}) => ({
+const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
   },
@@ -213,6 +213,16 @@ const createInstance = ({tpl, state, settings, $, $$}) => ({
     }
   },
 
+  toggleTabs() {
+    const useTabs = !settings.useTabs;
+    const storedValue = useTabs ? 'yes' : 'no';
+    localStorage.setItem('codeplayground-tabs', storedValue);
+    settings.useTabs = useTabs;
+    afterFlush(() => {
+      tpl.initializePanels();
+    });
+  }
+
 });
 
 const onRendered = ({ $, $$, tpl, state, settings }) => {
@@ -227,20 +237,23 @@ const onThemeChanged = ({tpl}) => {
   tpl.reloadPreview();
 };
 
+const keys = {
+  'tab'({state, $}) {
+    console.log('hi');
+  }
+};
+
 const events = {
   'change ui-menu.files'({state, data}) {
     state.activeFile.set(data.value);
   },
-  'click ui-button.tabs'({settings, tpl, afterFlush}) {
-    settings.useTabs = !settings.useTabs;
-    afterFlush(() => {
-      tpl.initializePanels();
-    });
+  'click ui-button.tabs'({tpl}) {
+    tpl.toggleTabs();
   },
-  'resizeStart ui-panel'({tpl, state, findParent}) {
+  'resizeStart ui-panel'({state}) {
     state.resizing.set(true);
   },
-  'resizeEnd ui-panel'({tpl, state, findParent}) {
+  'resizeEnd ui-panel'({state}) {
     state.resizing.set(false);
   },
 };
@@ -254,6 +267,7 @@ const CodePlayground = createComponent({
   onRendered,
   events,
   state,
+  keys,
   onThemeChanged,
   subTemplates: {
     CodePlaygroundPanel,

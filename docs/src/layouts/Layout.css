@@ -158,6 +158,34 @@
     margin-bottom: 0rem;
   }
 
+  layout table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      font-weight: normal;
+      font-size: 12px;
+      color: var(--primary-text-color);
+      text-align: left;
+      padding: 3px 11px;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 3px 11px;
+      border-collapse: collapse;
+      font-size: 14px;
+      color: var(--standard-100);
+
+      &:first-child {
+        font-weight: bold;
+        color: #696969;
+        text-align: right;
+        width: 1px;
+      }
+    }
+  }
+
   layout h1,
   layout h2,
   layout h3,

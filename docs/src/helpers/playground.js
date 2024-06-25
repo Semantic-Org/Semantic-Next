@@ -141,7 +141,7 @@ export const getIndexHTMLBefore = function(type) {
   <!-- This defines the component tag and makes it available on your page !-->
   ${getScriptCode()}
   </head>
-  <body style="background-color:#000">
+  <body>
   ${htmlHideMarkerEnd}`;
 };
 

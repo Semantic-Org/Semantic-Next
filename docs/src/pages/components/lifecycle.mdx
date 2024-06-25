@@ -14,6 +14,9 @@ Semantic UI uses a simple set of callbacks designed for ease of use and readabil
 ## Component Callbacks
 
 Each component callback receives as its arguments a destructurable set of arguments that provide you access to everything you need inside the component
+
+#### All Callbacks (Lifecycle / Events / Keys)
+
 | parameter         | use                                              |
 |-------------------|--------------------------------------------------|
 | el                | the DOM element of the web component             |
@@ -42,6 +45,8 @@ Each component callback receives as its arguments a destructurable set of argume
 | findChildren      | helper to find multiple child templates          |
 | darkMode          | boolean for if dark mode is active               |
 
+#### Event Callbacks Only
+
 Event handlers also have access to a few additional arguments
 | parameter         | use                                              |
 |-------------------|--------------------------------------------------|
@@ -49,17 +54,25 @@ Event handlers also have access to a few additional arguments
 | event             | the event object                                 |
 | data              | event.detail + data attributes on dom element    |
 
+#### Key Bindings Only
+
+Key bindings also have access to a few additional arguments
+| parameter         | use                                              |
+|-------------------|--------------------------------------------------|
+| inputFocused      | whether any input/contenteditable is focused     |
+| repeatedKey       | whether the key is held down                     |
+
 ### createInstance
 
 `createInstance` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
 
 #### Initialize
 
-Similar to how classes have a constructor, you may use `initialize` to set special conditions when a component is initialized for the first time.
+If you include a method called `initialize` in your returned instance it will be called immediately allowing you to set up initial state for the component, for instance adding any reactive calcuations or dynamically defined variables.
 
 ### onCreated
 
-`onCreated` fires after the instance is defined but before the DOM is rendered. You can use this callback to handle special behaviors that require the component instance but not its rendered DOM, for instance attaching external event handlers to the page.
+`onCreated` fires **after the instance is defined but before the DOM is rendered**. You can use this callback to handle special behaviors that require the component instance but not its rendered DOM, for instance attaching external event handlers to the page.
 
 ### onRendered
 
