@@ -8,5 +8,5 @@
   "devDependencies": {
     "vitest": "^1.5.2"
   },
-  "version": "0.0.25"
+  "version": "0.0.27"
 }
