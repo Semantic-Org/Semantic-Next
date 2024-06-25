@@ -75,7 +75,7 @@ export const getKeyFromEvent = (event) => {
   pressedKey = pressedKey.replace('Arrow', ''); // ArrowUp -> up
   key += specialKeys[pressedKey] || pressedKey.toLowerCase();
   return key;
-}
+};
 
 /*-------------------
          XHR
