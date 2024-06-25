@@ -594,7 +594,7 @@ export class Query {
             return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
           }
           if (inlineStyle) {
-             // Return inline style if present
+            // Return inline style if present
             return inlineStyle;
           }
           return undefined; // If includeComputed is false, return undefined
