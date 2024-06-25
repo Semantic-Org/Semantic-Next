@@ -85,6 +85,7 @@
     "dprint": "^0.45.0",
     "esbuild": "^0.20.2",
     "husky": "^9.0.11",
+    "inquirer": "^9.2.23",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.2.2",
     "underscore": "^1.13.6",
