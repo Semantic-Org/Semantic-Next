@@ -149,9 +149,9 @@ export const getIndexHTMLBefore = function(type) {
 export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
 
 export const indexJSBefore = `${hideMarkerStart}
-document.querySelector('body').removeAttribute('style');
+document.querySelector('html').removeAttribute('style');
 if(localStorage.getItem('theme') == 'dark') {
-  document.querySelector('body').classList.add('dark');
+  document.querySelector('html').classList.add('dark');
 }${hideMarkerEnd}`;
 export const indexJSAfter = ``;
 

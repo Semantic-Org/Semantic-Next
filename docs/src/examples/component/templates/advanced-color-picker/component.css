@@ -1,18 +1,19 @@
 :host {
   --color-option-size: 30px;
   --color-preview-size: 100px;
+
   display: block;
-  font-family: var(--page-font);
   max-width: 300px;
   margin: 0 auto;
+  text-align: center;
   padding: var(--padding);
-  background: var(--page-background);
+  border: var(--border);
   border-radius: var(--border-radius);
-  box-shadow: var(--subtle-shadow);
+  background: var(--subtle-gradient);
+  box-shadow: var(--subtle-inset-shadow);
 
   h4 {
-    margin-top: 20px;
-    margin-bottom: 10px;
+    margin: 0rem 0rem 10px;
     color: var(--header-color);
     font-size: var(--h4);
     font-weight: var(--header-font-weight);
@@ -28,6 +29,7 @@
   }
 
   .options {
+
     display: flex;
     justify-content: center;
     gap: 5px;
@@ -48,21 +50,36 @@
     }
   }
 
-  .custom-color {
-    display: block;
-    width: 100%;
-    height: 40px;
-    margin-bottom: 10px;
-    cursor: pointer;
+  .custom {
+
+    padding: var(--padding);
     border: var(--border);
     border-radius: var(--border-radius);
+    background: var(--inverted-50);
+    box-shadow: var(--subtle-inset-shadow);
+
+    .custom-color {
+      display: block;
+      width: 100%;
+      height: 40px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: var(--border);
+      border-radius: var(--border-radius);
+    }
+
+    .info {
+      margin-top: 20px;
+      padding: 10px;
+      border: var(--border);
+      border-radius: var(--top-attached-border-radius);
+      text-align: center;
+      color: var(--standard-40);
+
+      b {
+        color: var(--standard-100);
+      }
+    }
   }
 
-  .info {
-    margin-top: 20px;
-    padding: 10px;
-    border: var(--border);
-    border-radius: var(--border-radius);
-    text-align: center;
-  }
 }

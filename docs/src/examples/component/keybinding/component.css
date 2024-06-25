@@ -1,8 +1,12 @@
 .search {
   border: var(--border);
   border-radius: var(--border-radius);
-  padding: 10px 12px;
-  margin-right: 1rem;
+  padding: var(--input-padding);
+}
+
+.selection {
+  margin-left: 1rem;
+  display: inline-block;
 }
 
 .results {
@@ -22,6 +26,7 @@
 
     &.active {
       background-color: var(--standard-20);
+      font-weight: bold;
     }
 
   }

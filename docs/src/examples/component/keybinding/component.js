@@ -4,11 +4,12 @@ const css = await getText('./component.css');
 
 const settings = {
   placeholder: 'Search...',
+  options: [],
+  noun: 'item',
 };
 
 const state = {
   searchTerm: '',
-  fruits: ['Tomato', 'Strawberry', 'Blueberry', 'Kumquat', 'Banana'],
   results: [],
   selectedResult: '',
   selectedIndex: -1,
@@ -18,30 +19,35 @@ const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $})
 
   initialize() {
     tpl.calculateResults();
+    tpl.calculateKeybindings();
+  },
+
+  /*
+    This is an example of dynamic keybinding
+    we want these to only occur when we have a
+    selected index
+  */
+  calculateKeybindings() {
+    reaction(() => {
+      const selectedIndex = state.selectedIndex.get();
+      unbindKey('enter');
+      if(selectedIndex > -1) {
+        bindKey('enter', () => tpl.selectResult());
+      }
+    });
   },
 
   calculateResults() {
     reaction(() => {
       const searchTerm = state.searchTerm.get();
 
-      let initialIndex;
-
-      unbindKey('enter');
-      if(searchTerm !== '') {
-        // only bind enter key if we have search term
-        initialIndex = 0;
-        console.log('binding');
-        bindKey('enter', () => tpl.selectResult());
-      }
-      else {
-        initialIndex = -1;
-      }
-
       // Select first result
+      const initialIndex = searchTerm == '' ? -1 : 0;
       state.selectedIndex.set(initialIndex);
 
       // Simulating search results
-      const results = state.fruits.get();
+      const results = settings.options;
+      console.log(settings.options);
       const matchingResults = results.filter(r => r.toLowerCase().includes(searchTerm.toLowerCase()));
       state.results.set(matchingResults);
     });
@@ -82,6 +88,11 @@ const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $})
   },
 
 });
+
+/*
+  This is an example of static keybindings
+  these will exist for as long as the component is rendered
+*/
 
 const keys = {
   'ctrl + f'({tpl}) {

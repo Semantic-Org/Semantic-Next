@@ -1,9 +1,11 @@
 <div class="search-component">
   <input class="search" type="text" placeholder="{{placeholder}}" value="{{searchTerm}}">
-  {{#if selectedResult}}
-    You selected <b>{{selectedResult}}</b>.
-  {{/if}}
-  <h4>Fruit Options</h4>
+  <span class="selection">
+    {{#if selectedResult}}
+      You selected <b>{{selectedResult}}</b>.
+    {{/if}}
+  </span>
+  <h4>{{titleCase noun}} Choices</h4>
   <div class="results">
     {{#if hasAny results}}
       {{#each result in results}}
@@ -11,7 +13,7 @@
       {{/each}}
     {{else}}
       <div class="empty">
-        No results for <b>{{searchTerm}}</b>
+        No results for "<b>{{searchTerm}}</b>"
       </div>
     {{/if}}
   </div>
