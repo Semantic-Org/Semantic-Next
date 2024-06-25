@@ -589,11 +589,13 @@ export class Query {
       if (elements?.length) {
         const styles = elements.map((el) => {
           const inlineStyle = el.style[property];
-          if (inlineStyle) {
-            return inlineStyle; // Return inline style if present
-          }
           if (settings.includeComputed) {
+            // return computed style if requested
             return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
+          }
+          if (inlineStyle) {
+             // Return inline style if present
+            return inlineStyle;
           }
           return undefined; // If includeComputed is false, return undefined
         });
