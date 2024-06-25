@@ -431,7 +431,7 @@ export const Template = class Template {
     }
   }
 
-  removeKey(key) {
+  unbindKey(key) {
     delete this.keys[key];
   }
 
@@ -553,6 +553,7 @@ export const Template = class Template {
         dispatchEvent: this.dispatchEvent.bind(this),
         attachEvent: this.attachEvent.bind(this),
         bindKey: this.bindKey.bind(this),
+        unbindKey: this.unbindKey.bind(this),
         abortController: this.eventController,
 
         template: this,
