@@ -17,12 +17,12 @@ const examplePages = examples.map(page => ({
 export const topbarMenu =  [
   {
     _id: 'ui',
-    name: 'Design Framework',
+    name: 'UI Framework',
     url: '/introduction',
   },
   {
     _id: 'framework',
-    name: 'Tech Docs',
+    name: 'Web Component Framework',
     url: '/components',
   },
   {

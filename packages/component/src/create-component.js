@@ -9,6 +9,7 @@ import { WebComponentBase } from './web-component.js';
 
 export const createComponent = ({
   template = '',
+  ast,
   css = false,
   lightCSS = false,
   componentSpec = false,
@@ -39,8 +40,10 @@ export const createComponent = ({
 } = {}) => {
 
   // AST shared across instances
-  const compiler = new TemplateCompiler(template);
-  const ast = compiler.compile();
+  if(!ast) {
+    const compiler = new TemplateCompiler(template);
+    ast = compiler.compile();
+  }
 
   // to support SSR we need to include all subtemplate css in base template
   each(subTemplates, (template) => {
