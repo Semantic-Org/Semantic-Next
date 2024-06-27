@@ -87,7 +87,9 @@
         color: var(--standard-100);
       }
       &.visible {
-        color: var(--standard-100);
+        border-left: 1px solid var(--primary-text-color);
+        margin-left: -7px;
+        padding-left: 7px;
       }
       &.current {
         cursor: default;

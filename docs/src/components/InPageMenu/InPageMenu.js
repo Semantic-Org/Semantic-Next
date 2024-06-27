@@ -38,7 +38,6 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   isActivating: false, // to avoid scroll events while activating element
 
   scrollingDown: false, // are we scrolling down
-  scrolledBottom: false, // is scroll context at bottom
 
   isOpenIndex(index) {
     return index == state.openIndex.get();
@@ -223,41 +222,34 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 
     entries.forEach(entry => {
       const itemID = settings.getActiveElementID(entry.target);
-      if (itemID) {
-        if (entry.isIntersecting && !newVisibleItems.includes(itemID)) {
+      if(itemID) {
+        if(entry.isIntersecting && !newVisibleItems.includes(itemID)) {
           newVisibleItems.push(itemID);
-        } else if (!entry.isIntersecting) {
+        }
+        else if(!entry.isIntersecting) {
           newVisibleItems = newVisibleItems.filter(id => id !== itemID);
         }
       }
     });
 
-    console.log(newVisibleItems);
     state.visibleItems.set(newVisibleItems);
 
-    if(tpl.isScrolling) {
-      return;
-    }
-
-    if (!state.currentItem.get()) {
+    if(!state.currentItem.get()) {
       activeEntry = entries[0];
     }
     else {
       let eligibleEntries = entries.filter(entry => entry.boundingClientRect.top < 100);
       activeEntry = (tpl.scrollingDown)
         ? last(eligibleEntries)
-        : first(eligibleEntries);
-
-      if (tpl.scrolledBottom) {
-        activeEntry = last(entries);
-      }
+        : first(eligibleEntries)
+      ;
 
       activeEntry = activeEntry || eligibleEntries[0];
     }
 
-    if (activeEntry) {
+    if(!tpl.isScrolling && activeEntry) {
       const itemID = settings.getActiveElementID(activeEntry.target);
-      if (itemID) {
+      if(itemID) {
         tpl.setActiveItem(itemID);
       }
     }
@@ -284,11 +276,7 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   bindScroll() {
     attachEvent(tpl.getScrollContext(), 'scroll', function() {
       tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
-      tpl.scrolledBottom = this.scrollTop + this.clientHeight == this.scrollHeight;
       tpl.lastScrollPosition = this.scrollTop;
-      if(settings.autoSelectLast && tpl.scrolledBottom && !tpl.isActivating) {
-        tpl.setLastItemActive();
-      }
     }, { passive: true });
   },
 
