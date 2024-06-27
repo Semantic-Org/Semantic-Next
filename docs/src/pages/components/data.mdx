@@ -1,0 +1,65 @@
+---
+layout: '@layouts/Guide.astro'
+title: Data Sources
+icon: hard-drive
+description: An overview of how data is used in components
+---
+import { Image } from 'astro:assets';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import contextImage from '@images/data-context-diagram.png';
+
+
+Semantic UI components rely on a **template** and a **data context** to generate your component's html.
+
+Instead of using a `render()` function and jsx to return html, your template provides the high level logic for explaining how html should be renderd from data for your component.
+
+
+### Data Sources
+
+
+The templates data context is a combination of several data sources.
+
+* **Settings** - Values passed in by users to configure your component from html attribute or properties.
+* **State** - Internal reactive state for your component
+* **Template Instance** - An object literal which stores methods and data accessible by your component
+* **Global Helpers** - General helpers like `titleCase` or `classMap` which can be used to manipulate data
+* **Subtemplate Data** - Subtemplates can have data directly passed in from their parent component's data context
+
+
+<Image src={contextImage} alt="Component Lifecycle" width="826" loading="eager"></Image>
+
+
+### Settings
+
+Settings are values which you want users of your component to be able to modify. To specify settings for a component simply pass in a settings object when defining a component.
+
+These values can then be overridden with values passed in by the user. You can see how this is accomplished in the following example, be sure to view `index.html` and `index.js` to see how data can be both passed in as attributes or properties.
+
+
+<PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
+
+
+### Data Types
+
+#### Strings, Numbers
+
+Strings and numbers can be passed in either through html attributes or directly as properties.
+
+#### Arrays, Objects
+
+Arrays and objects can be passed in either through attributes or properties. When passed in as attributes the data must be passed through `JSON.stringify`.
+
+### Component State
+
+
+### Template Instance
+
+
+### Subtemplates
+
+Subtemplates are Semantic UI components that are not defined a tag name. These can be used as snippets to store parts of a complex web component. For more information on subtemplates see the [dedicated subtemplate section](/components/subtemplates).
+
+
+### Global Helpers
+
+

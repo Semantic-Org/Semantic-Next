@@ -1,6 +1,6 @@
 <ui-menu>
   {{#each item in getMenu}}
-    <a class="{{classes getItemStates item}}mobile-hidden item" href={{getLink item}} part="item">
+    <a class="{{classMap getItemStates item}}mobile-hidden item" href={{getLink item}} part="item">
       {{#if item.icon}}
         <ui-icon icon={{item.icon}} exportparts="icon:item-icon" />
       {{else if item.image}}

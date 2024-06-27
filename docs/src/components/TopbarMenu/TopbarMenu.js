@@ -17,11 +17,9 @@ const createInstance = function ({ tpl, settings }) {
       return settings.menu;
     },
     getItemStates(item) {
-      const classes = [];
-      if (tpl.isActiveItem(item)) {
-        classes.push('active');
+      return {
+        active: tpl.isActiveItem(item)
       }
-      return classes;
     },
     shouldShow(item) {
       if (isFunction(item.shouldShow)) {

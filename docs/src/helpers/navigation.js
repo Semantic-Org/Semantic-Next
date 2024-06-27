@@ -22,8 +22,13 @@ export const topbarMenu =  [
   },
   {
     _id: 'framework',
-    name: 'Web Component Framework',
+    name: 'Tech Guide',
     url: '/components',
+  },
+  {
+    _id: 'api',
+    name: 'API Reference',
+    url: '/api',
   },
   {
     _id: 'examples',

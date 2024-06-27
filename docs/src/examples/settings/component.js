@@ -1,5 +1,4 @@
 import { createComponent, getText } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -8,8 +7,8 @@ const settings = {
   startingNumber: 0
 };
 
-const createInstance = ({tpl, settings}) => ({
-  counter: new ReactiveVar(),
+const createInstance = ({tpl, reactiveVar, settings}) => ({
+  counter: reactiveVar(),
   initialize() {
     tpl.counter.set(settings.startingNumber);
   },

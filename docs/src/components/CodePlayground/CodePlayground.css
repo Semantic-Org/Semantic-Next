@@ -82,6 +82,7 @@
     flex: 0 0 auto;
     overflow-x: auto;
     overflow-y: hidden;
+    white-space: nowrap;
   }
 
   ui-panel {
@@ -170,6 +171,9 @@
     .menu ui-menu {
       margin: 0rem;
       font-size: 13px;
+    }
+    .links {
+      font-size: 18px;
     }
     playground-file-editor {
       flex: 1 1 auto;

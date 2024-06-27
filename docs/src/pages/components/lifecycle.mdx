@@ -4,48 +4,56 @@ title: Component Lifecycle
 icon: refresh-cw
 description: An overview of component lifecycle
 ---
-
+import { Image } from 'astro:assets';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Component Lifecycle
+import lifecycleImage from '@images/lifecycle-diagram.png';
 
-Semantic UI uses a simple set of callbacks designed for ease of use and readability.
+## Overview
 
-## Component Callbacks
+Semantic UI components wrap native web components but provide additional callbacks to handle the lifecycle of the underlying component template.
 
-Each component callback receives as its arguments a destructurable set of arguments that provide you access to everything you need inside the component
+* **createInstance** - Defines your component instance that can be invoked from the DOM or from instance a template's data context
+* **onCreated** - Callback after your component instance is initialized to handle things that don't require the DOM
+* **onRendered** - Callback after your component is rendered to the page
+* **onDestroyed** - Callback after your component is removed from the page
 
-#### All Callbacks (Lifecycle / Events / Keys)
 
-| parameter         | use                                              |
-|-------------------|--------------------------------------------------|
-| el                | the DOM element of the web component             |
-| tpl               | the template instance from createInstance        |
-| $                 | the $ query object to access DOM                 |
-| $$                | the $$ query object to access shadow DOM         |
-| reaction          | a reactive function                              |
-| reactiveVar       | a source of reactivity                           |
-| afterFlush        | a callback after reactions are flushed           |
-| data              | a read-only copy of the template data context    |
-| settings          | a read-write copy of the component's settings    |
-| state             | a reactive data store for internal state         |
-| isRendered        | a function returning whether the DOM has rendered|
-| isServer          | whether it is rendering on the server            |
-| isClient          | whether it is rendering on the client            |
-| dispatchEvent     | helper to dispatch custom events                 |
-| attachEvent       | helper to attach events to external elements     |
-| bindKey           | helper to bind keyboard shortcuts                |
-| abortController   | AbortController for cancelling async operations  |
-| template          | the current sui template                         |
-| templateName      | the name of the current component                |
-| templates         | all rendered templates on current page           |
-| findTemplate      | helper to find a specific template               |
-| findParent        | helper to find a specific parent template        |
-| findChild         | helper to find a child template                  |
-| findChildren      | helper to find multiple child templates          |
-| darkMode          | boolean for if dark mode is active               |
+## Callback Arguments
 
-#### Event Callbacks Only
+Each callback receives a destructurable set of arguments that can be used to interact with the internals of the component
+
+### All Callbacks
+
+| parameter         | use                                                   |
+|-------------------|-------------------------------------------------------|
+| el                | the DOM element of the web component                  |
+| tpl               | the template instance from createInstance             |
+| $                 | allows you to query the shadow dom of the component   |
+| $$                | allows querying deep nested content including slots   |
+| reaction          | a reactive context for computations                   |
+| reactiveVar       | a function to define a reactive variable              |
+| afterFlush        | a callback after reactive computations are flushed    |
+| settings          | a read-write copy of the component's settings         |
+| state             | a reactive data store for internal state              |
+| data              | the full data context used when evaluated expressions |
+| isRendered        | a function returning whether the DOM has rendered     |
+| isServer          | whether it is rendering on the server                 |
+| isClient          | whether it is rendering on the client                 |
+| dispatchEvent     | helper to emit events from the component              |
+| attachEvent       | helper to listen to external events                   |
+| bindKey           | helper to bind keyboard shortcuts dynamically         |
+| abortController   | abortSignal for async events tied to lifecycle        |
+| template          | the underlying semantic template                      |
+| templateName      | the name of the current semantic template             |
+| templates         | all rendered templates on current page                |
+| findTemplate      | helper to find a specific template                    |
+| findParent        | helper to find a specific parent template             |
+| findChild         | helper to find a child template                       |
+| findChildren      | helper to find multiple child templates               |
+| darkMode          | boolean for if dark mode is active                    |
+
+### Event Callbacks Only
 
 Event handlers also have access to a few additional arguments
 | parameter         | use                                              |
@@ -61,6 +69,8 @@ Key bindings also have access to a few additional arguments
 |-------------------|--------------------------------------------------|
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
+
+## Callbacks
 
 ### createInstance
 
@@ -87,3 +97,9 @@ The `onDestroyed` callback is called after the component is removed from the pag
 ### onThemeChanged
 
 The `onThemeChanged` callback is a special callback that fires when a user swaps themes. This can be used to modify the component based on whether the user prefers light or dark mode.
+
+## Event Sequence
+
+The following diagram shows the sequence of events that occur when a component is rendered to the page.
+
+<Image src={lifecycleImage} alt="Component Lifecycle" width="826" loading="eager"></Image>
