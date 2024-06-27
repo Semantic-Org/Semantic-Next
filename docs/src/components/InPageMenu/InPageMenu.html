@@ -17,7 +17,7 @@
           <a
             href="#{{getAnchorID item}}"
             data-id="{{getAnchorID item}}"
-            class="{{maybeCurrentItem item}} item">
+            class="{{classMap getItemClasses item}}">
             {{item.title}}
           </a>
         {{/each}}

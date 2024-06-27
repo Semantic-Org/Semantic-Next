@@ -23,10 +23,13 @@ const settings = {
   getActiveElementID: (element) => element?.id
 };
 
-const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
+const state = {
+  openIndex: 0,
+  currentItem: null,
+  visibleItems: [],
+};
 
-  openIndex: reactiveVar(0), // current accordion index open
-  currentItem: reactiveVar(), // current active item id
+const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
@@ -34,11 +37,11 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
   isScrolling: false, // to avoid intersection observes when scrolling to item
   isActivating: false, // to avoid scroll events while activating element
 
-  scrolledDown: false, // are we scrolling down
+  scrollingDown: false, // are we scrolling down
   scrolledBottom: false, // is scroll context at bottom
 
   isOpenIndex(index) {
-    return index == tpl.openIndex.get();
+    return index == state.openIndex.get();
   },
 
   maybeActiveTitle(index) {
@@ -55,7 +58,7 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
     ;
   },
 
-  getContent(index = tpl.openIndex.get()) {
+  getContent(index = state.openIndex.get()) {
     return $('.content').eq(index);
   },
 
@@ -80,7 +83,7 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
       if(isServer) {
         return;
       }
-      tpl.openIndex.get(); // reactivity source
+      state.openIndex.get(); // reactivity source
       $('.active.content').each(function(el) {
         el.style.setProperty('--max-height', `${el.scrollHeight}px`);
       });
@@ -120,29 +123,38 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
     );
     if (menuItem) {
       const menuIndex = menu.indexOf(menuItem);
-      tpl.openIndex.set(menuIndex);
-      tpl.currentItem.set(itemID);
+      state.openIndex.set(menuIndex);
+      state.currentItem.set(itemID);
       Reaction.afterFlush(() => {
         tpl.isActivating = false;
       });
     }
   },
 
+  getItemClasses(item) {
+    return {
+      current: tpl.isCurrentItem(item),
+      visible: tpl.isVisibleItem(item),
+      item: true
+    };
+  },
+
   isCurrentItem(item) {
-    const currentItem = tpl.currentItem.get();
+    const currentItem = state.currentItem.get();
     const itemID = settings.getAnchorID(item);
     return currentItem && currentItem === itemID;
   },
 
-  maybeCurrentItem(item) {
-    return tpl.isCurrentItem(item) ? 'current' : ' ';
+  isVisibleItem(item) {
+    const itemID = settings.getAnchorID(item);
+    return state.visibleItems.get().includes(itemID);
   },
 
   scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
     const element = settings.getElement(itemID);
     if (element) {
       const targetPosition = element.offsetTop + offset;
-      tpl.currentItem.set(itemID);
+      state.currentItem.set(itemID);
       tpl.scrollToPosition(targetPosition, {
         onSamePage() {
           dispatchEvent('samePageActive', { element, itemID });
@@ -204,42 +216,48 @@ const createInstance = ({tpl, isServer, reactiveVar, reaction, el, dispatchEvent
   },
 
   onIntersection(entries) {
-    // intersection occurred while scrolling
+
+    let activeEntry;
+    const currentVisibleItems = state.visibleItems.get();
+    let newVisibleItems = [...currentVisibleItems];
+
+    entries.forEach(entry => {
+      const itemID = settings.getActiveElementID(entry.target);
+      if (itemID) {
+        if (entry.isIntersecting && !newVisibleItems.includes(itemID)) {
+          newVisibleItems.push(itemID);
+        } else if (!entry.isIntersecting) {
+          newVisibleItems = newVisibleItems.filter(id => id !== itemID);
+        }
+      }
+    });
+
+    console.log(newVisibleItems);
+    state.visibleItems.set(newVisibleItems);
+
     if(tpl.isScrolling) {
       return;
     }
 
-    let activeEntry;
-
-    // on first load we want to return the top most element
-    if(!tpl.currentItem.get()) {
+    if (!state.currentItem.get()) {
       activeEntry = entries[0];
     }
     else {
       let eligibleEntries = entries.filter(entry => entry.boundingClientRect.top < 100);
-      // intersection triggers both when the element LEAVES the top (which we want)
-      // and appears at the bottom of the page
-      // we want to filter out all intersection events which are reaching the bottom of the page;
-
-      // this event is debounced so it may return multiple visible entries
-      // we want to get the first one that is fully visible
       activeEntry = (tpl.scrollingDown)
         ? last(eligibleEntries)
-        : first(eligibleEntries)
-      ;
+        : first(eligibleEntries);
 
-      // if the scroll bar is at bottom we always highlight the bottom menu item
-      if(tpl.scrolledBottom) {
+      if (tpl.scrolledBottom) {
         activeEntry = last(entries);
       }
 
-      // in the case that we are scrolling up (threshhold 1) we want to return the first
       activeEntry = activeEntry || eligibleEntries[0];
     }
 
-    if(activeEntry) {
+    if (activeEntry) {
       const itemID = settings.getActiveElementID(activeEntry.target);
-      if(itemID) {
+      if (itemID) {
         tpl.setActiveItem(itemID);
       }
     }
@@ -313,11 +331,11 @@ const onDestroyed = function ({ tpl, isServer }) {
 };
 
 const events = {
-  'click .title'({event, tpl, data}) {
-    const currentIndex = tpl.openIndex.get();
+  'click .title'({event, state, data}) {
+    const currentIndex = state.openIndex.get();
     const thisIndex = Number(data.index);
     const newIndex = (currentIndex !== thisIndex) ? thisIndex : -1;
-    tpl.openIndex.set(newIndex);
+    state.openIndex.set(newIndex);
   },
   'click [data-id]'({event, tpl, data}) {
     // this avoids triggering scroll behavior or hashchange
@@ -333,6 +351,7 @@ const InPageMenu = createComponent({
   css,
   createInstance,
   settings,
+  state,
   onRendered,
   onDestroyed,
   events,

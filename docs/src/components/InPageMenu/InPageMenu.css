@@ -82,13 +82,18 @@
       padding: var(--2px) 0px;
       color: var(--standard-40);
       transition: 0.3s color ease;
+
+      &:hover {
+        color: var(--standard-100);
+      }
+      &.visible {
+        color: var(--standard-100);
+      }
+      &.current {
+        cursor: default;
+        color: var(--primary-text-color);
+      }
     }
-    .item:hover {
-      color: var(--standard-100);
-    }
-    .item.current {
-      cursor: default;
-      color: var(--primary-text-color);
-    }
+
   }
 }
