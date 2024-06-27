@@ -101,7 +101,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   getEachData(item, index, alias) {
     return alias
       ? { [alias]: item, '@index': index }
-      : { ...item, '@index': index };
+      : { ...item, this: item, '@index': index };
   }
 
   getTemplate(item, index) {
