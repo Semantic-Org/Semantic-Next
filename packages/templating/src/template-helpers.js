@@ -36,8 +36,26 @@ export const TemplateHelpers = {
   either(a, b) {
     return a || b;
   },
-  classes(array = []) {
-    return array.join(' ') + ' ';
+  join(array = [], delimiter = ' ', spaceAfter = false) {
+    if(array.length == 0) {
+      return;
+    }
+    const value = array.join(delimiter).trim();
+    return (spaceAfter)
+      ? `${value} `
+      : value
+    ;
+  },
+  classes(classes, spaceAfter = true) {
+    return TemplateHelpers.join(classes, ' ', true);
+  },
+  joinComma(array = [], oxford = false, quotes = false) {
+    return joinWords(array, {
+      separator: ', ',
+      lastSeparator: ' and ',
+      oxford: oxford,
+      quotes: quotes,
+    });
   },
   classIf(expr, trueClass = '', falseClass = '') {
     let val = expr ? trueClass : falseClass;
