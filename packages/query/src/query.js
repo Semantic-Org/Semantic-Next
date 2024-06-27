@@ -829,7 +829,7 @@ export class Query {
 
   // adds properties to an element after dom loads
   initialize(settings) {
-    $(document).on('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
       this.settings(settings);
     });
   }
