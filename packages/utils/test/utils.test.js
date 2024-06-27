@@ -36,6 +36,7 @@ import { tokenize,
   isPlainObject,
   isPromise,
   isString,
+  joinWords,
   kebabToCamel,
   keys,
   last,
@@ -1273,7 +1274,7 @@ describe('function utilities', () => {
   });
 });
 
-describe('String Conversion', () => {
+describe('String Utilities', () => {
   it('should correctly convert kebab-case to camelCase', () => {
     expect(kebabToCamel('test-string')).toBe('testString');
   });
@@ -1288,6 +1289,74 @@ describe('String Conversion', () => {
 
   it('should convert a string to title case', () => {
     expect(toTitleCase('a simple test')).toBe('A Simple Test');
+  });
+
+
+
+  describe('joinWords', () => {
+    it('should join words with default settings', () => {
+      const words = ['apple', 'banana', 'cherry'];
+      expect(joinWords(words)).toBe('apple, banana, and cherry');
+    });
+
+    it('should handle an empty array', () => {
+      expect(joinWords([])).toBe('');
+    });
+
+    it('should handle a single word', () => {
+      expect(joinWords(['apple'])).toBe('apple');
+    });
+
+    it('should handle two words', () => {
+      expect(joinWords(['apple', 'banana'])).toBe('apple and banana');
+    });
+
+    it('should use custom separator', () => {
+      const words = ['apple', 'banana', 'cherry'];
+      expect(joinWords(words, { separator: '; ' })).toBe('apple; banana; and cherry');
+    });
+
+    it('should use custom last separator', () => {
+      const words = ['apple', 'banana', 'cherry'];
+      expect(joinWords(words, { lastSeparator: ' or ' })).toBe('apple, banana, or cherry');
+    });
+
+    it('should not use Oxford comma when specified', () => {
+      const words = ['apple', 'banana', 'cherry'];
+      expect(joinWords(words, { oxford: false })).toBe('apple, banana and cherry');
+    });
+
+    it('should add quotes when specified', () => {
+      const words = ['apple', 'banana', 'cherry'];
+      expect(joinWords(words, { quotes: true })).toBe('"apple", "banana", and "cherry"');
+    });
+
+    it('should apply transform function when provided', () => {
+      const words = ['apple', 'banana', 'cherry'];
+      const transform = (word) => word.toUpperCase();
+      expect(joinWords(words, { transform })).toBe('APPLE, BANANA, and CHERRY');
+    });
+
+    it('should handle complex configuration', () => {
+      const words = ['apple', 'banana', 'cherry', 'date'];
+      const options = {
+        separator: '; ',
+        lastSeparator: ' or ',
+        oxford: false,
+        quotes: true,
+        transform: (word) => word.charAt(0).toUpperCase() + word.slice(1)
+      };
+      expect(joinWords(words, options)).toBe('"Apple"; "Banana"; "Cherry" or "Date"');
+    });
+
+    it('should handle non-array input', () => {
+      expect(joinWords('not an array')).toBe('');
+    });
+
+    it('should handle array with falsy values', () => {
+      const words = ['apple', '', null, 'banana', undefined, 'cherry'];
+      expect(joinWords(words)).toBe('apple, , , banana, , and cherry');
+    });
   });
 });
 

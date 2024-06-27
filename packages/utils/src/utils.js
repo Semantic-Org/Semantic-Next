@@ -397,6 +397,43 @@ export const toTitleCase = (str = '') => {
     .join(' ');
 };
 
+export const joinWords = (words, {
+  separator = ', ',
+  lastSeparator = ' and ',
+  oxford = true,
+  quotes = false,
+  transform = null
+} = {}) => {
+  if (!isArray(words) || words.length === 0) {
+    return '';
+  }
+
+  const processedWords = words.map(word => {
+    let processed = word;
+    if (isFunction(transform)) {
+      processed = transform(word);
+    }
+    return quotes ? `"${processed}"` : processed;
+  });
+
+  if (processedWords.length === 1) {
+    return processedWords[0];
+  }
+
+  if (processedWords.length === 2) {
+    return processedWords.join(lastSeparator);
+  }
+
+  const lastWord = processedWords.pop();
+  let result = processedWords.join(separator);
+
+  if (oxford && separator.trim() !== lastSeparator.trim()) {
+    result += separator.trim();
+  }
+
+  return result + lastSeparator + lastWord;
+};
+
 export const getArticle = (word, settings = {}) => {
   const vowels = ['a', 'e', 'i', 'o', 'u'];
   const firstLetter = word.toLowerCase()[0];
