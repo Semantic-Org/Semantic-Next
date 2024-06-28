@@ -14,8 +14,7 @@ Semantic UI components rely on a **template** and a **data context** to generate
 Instead of using a `render()` function and jsx to return html, your template provides the high level logic for explaining how html should be renderd from data for your component.
 
 
-### Data Sources
-
+## Data Sources
 
 The templates data context is a combination of several data sources.
 
@@ -26,40 +25,61 @@ The templates data context is a combination of several data sources.
 * **Subtemplate Data** - Subtemplates can have data directly passed in from their parent component's data context
 
 
-<Image src={contextImage} alt="Component Lifecycle" width="826" loading="eager"></Image>
-
-
-### Settings
+## Settings
 
 Settings are values which you want users of your component to be able to modify. To specify settings for a component simply pass in a settings object when defining a component.
 
 These values can then be overridden with values passed in by the user. You can see how this is accomplished in the following example, be sure to view `index.html` and `index.js` to see how data can be both passed in as attributes or properties.
 
-
 <PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
 
-
-### Data Types
+You can pass any type of javascript primitive as a setting however there may be serialization requirements depending on the date type.
 
 #### Strings, Numbers
 
 Strings and numbers can be passed in either through html attributes or directly as properties.
 
-#### Arrays, Objects
+#### Arrays, Objects, Dates
 
-Arrays and objects can be passed in either through attributes or properties. When passed in as attributes the data must be passed through `JSON.stringify`.
+Arrays, objects and dates can be passed in either through attributes or properties.
 
-### Component State
+When passed in as attributes the data must be passed through `JSON.stringify` to serialize the value as a string.
+
+If you are passing it in as a property you can specify the value without serialization.
+
+#### Functions
+
+Functions cannot be serialized so they must be passed in via Javascript. This can be handled using Query's `settings` method after DOM Ready or `initialize` method at any point in page load.
+
+You can also manually set the function on the corresponding DOM element.
 
 
-### Template Instance
+## State
+
+State represents internal
 
 
-### Subtemplates
+## Template Instance
+
+
+## Subtemplates
 
 Subtemplates are Semantic UI components that are not defined a tag name. These can be used as snippets to store parts of a complex web component. For more information on subtemplates see the [dedicated subtemplate section](/components/subtemplates).
 
 
-### Global Helpers
+## Global Helpers
 
 
+## Template Data Context
+
+When you use an expression in a template it will look at the component's data context to find what the value represents.
+
+You can think of the data context as a flattened copy of settings, state, your template instance and global helpers.
+
+So for example if you look up an expression `{{iconName}}` in a template it will first look
+* If there is a global template helper called `iconName`
+* If a setting is specified and a default value or DOM attribute or DOM property is set for `iconName`
+* If an internal state property is named `iconName`
+* If there is a function or property on your template instance named `iconName`
+
+<Image src={contextImage} alt="Component Lifecycle" width="826" loading="eager"></Image>

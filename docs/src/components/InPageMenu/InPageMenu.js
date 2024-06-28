@@ -1,6 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { each, flatten, noop, first, last, isServer } from '@semantic-ui/utils';
+import { any, each, flatten, noop, first, inArray, last, isServer } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
@@ -11,15 +11,18 @@ const settings = {
   header: 'On This Page',
   menu: [],
   scrollContext: (isServer) ? null : window,
-  intersectionContext: null,
-  intersectionOffset: 0,
-  // selects last on bottom of scroll
-  autoSelectLast: false,
-  smoothScroll: true,
   scrollOffset: 0,
+  intersectionContext: null,
+  smoothScroll: true,
   useAccordion: true,
-  getAnchorID: (item) => item?.id,
+
+  // get page element associated with a menu item
   getElement: (itemID) => document.getElementById(itemID),
+
+  // get page element id from menu item
+  getAnchorID: (item) => item?.id,
+
+  // get menu item id from page element
   getActiveElementID: (element) => element?.id
 };
 
@@ -33,28 +36,12 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
-
   isScrolling: false, // to avoid intersection observes when scrolling to item
   isActivating: false, // to avoid scroll events while activating element
-
   scrollingDown: false, // are we scrolling down
 
   isOpenIndex(index) {
     return index == state.openIndex.get();
-  },
-
-  maybeActiveTitle(index) {
-    return (tpl.isOpenIndex(index))
-      ? 'active'
-      : ''
-    ;
-  },
-
-  maybeActiveContent(index) {
-    return (!settings.useAccordion || tpl.isOpenIndex(index))
-      ? 'active'
-      : ''
-    ;
   },
 
   getContent(index = state.openIndex.get()) {
@@ -130,6 +117,23 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
     }
   },
 
+  hasVisibleItems(section) {
+    return any(section?.items || [], (item) => tpl.isVisibleItem(item));
+  },
+
+  getContentClasses(index) {
+    return {
+      active: !settings.useAccordion || tpl.isOpenIndex(index)
+    };
+  },
+
+  getTitleClasses(section, index) {
+    return {
+      current: tpl.isOpenIndex(index),
+      visible: tpl.hasVisibleItems(section)
+    };
+  },
+
   getItemClasses(item) {
     return {
       current: tpl.isCurrentItem(item),
@@ -146,7 +150,8 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 
   isVisibleItem(item) {
     const itemID = settings.getAnchorID(item);
-    return state.visibleItems.get().includes(itemID);
+    const visibleItems = state.visibleItems.get();
+    return inArray(itemID, visibleItems);
   },
 
   scrollToItem(itemID, offset = Number(settings.scrollOffset)) {

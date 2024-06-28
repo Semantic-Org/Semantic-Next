@@ -9,6 +9,17 @@ $('user-profile').settings({
   },
 });
 
+// configure the change link to modify the data of the component
+$('.change').on('click', (event) => {
+  $('user-profile').settings({
+    birthday: {
+      month: 'May',
+      day: '2',
+    },
+  });
+  event.preventDefault();
+});
+
 
 /* vanilla js
 const el = document.querySelector('user-profile');

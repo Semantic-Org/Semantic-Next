@@ -54,8 +54,7 @@
 
   layout rail.ui.rail {
     width: var(--rail-width);
-    padding-top: 1rem;
-    padding-left: 2rem;
+    padding: 1rem 1.5rem 0rem;
     margin-left: 0rem;
     box-shadow: var(--subtle-left-lip-shadow);
   }
