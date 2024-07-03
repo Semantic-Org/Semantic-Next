@@ -379,7 +379,6 @@ export const getActiveTopbarSection = async (activeURL = '') => {
 
 
 export const getSidebarMenu = async ({url, topbarSection}) => {
-  return [];
   let menu = [];
   if(url && !topbarSection) {
     topbarSection = await getActiveTopbarSection(url);
