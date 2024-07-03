@@ -6,6 +6,7 @@ class TemplateCompiler {
 
   constructor(templateString) {
     this.templateString = templateString || '';
+    this.snippets = {};
   }
 
   static tagRegExp = {
@@ -13,8 +14,10 @@ class TemplateCompiler {
     ELSEIF: /^{{\s*else\s*if\s+/,
     ELSE: /^{{\s*else\s*/,
     EACH: /^{{\s*#each\s+/,
+    SNIPPET: /^{{\s*#snippet\s+/,
     CLOSE_IF: /^{{\s*\/(if)\s*/,
     CLOSE_EACH: /^{{\s*\/(each)\s*/,
+    CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
     SLOT: /^{{>\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
     HTML_EXPRESSION: /^{{{\s*/,
@@ -26,10 +29,11 @@ class TemplateCompiler {
   };
 
   static templateRegExp = {
-    VERBOSE_KEYWORD: /^template\W/g,
+    VERBOSE_KEYWORD: /^(template|snippet)\W/g,
     VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
     STANDARD: /(\w+)\s*=\s*((?:(?!\n|$|\w+\s*=).)+)/g,
     DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
+    SINGLE_QUOTES: /\'/g,
   };
 
   /*
@@ -45,7 +49,7 @@ class TemplateCompiler {
       scanner.fatal('Template is not a string', templateString);
     }
 
-    // quicker to compile regexp once
+    // quicker to compile regExp once
     const tagRegExp = TemplateCompiler.tagRegExp;
 
     const parseTag = (scanner) => {
@@ -68,6 +72,7 @@ class TemplateCompiler {
     let contentBranch = null; // Track the current node to add content
     let conditionStack = []; // Track the current condition stack
     let contentStack = []; // Track the current content target stack
+    let currentSnippet = null; // Track the current snippet being rendered
 
     while (!scanner.isEOF()) {
       const tag = parseTag(scanner);
@@ -75,6 +80,7 @@ class TemplateCompiler {
       const lastNode = last(stack);
       const conditionTarget = last(conditionStack);
       const contentTarget = contentBranch?.content || lastNode || ast;
+
 
       if (tag) {
         let newNode = {
@@ -131,6 +137,42 @@ class TemplateCompiler {
             contentBranch = newNode;
             break;
 
+          case 'CLOSE_IF':
+            if (conditionStack.length == 0) {
+              scanner.returnTo(tagRegExp.CLOSE_IF);
+              scanner.fatal('{{/if}} close tag found without open if tag');
+            }
+            stack.pop();
+            contentStack.pop();
+            conditionStack.pop();
+            contentBranch = last(contentStack); // Reset current branch
+            break;
+
+          case 'SNIPPET':
+            newNode = {
+              ...newNode,
+              type: 'snippet',
+              name: tag.content,
+              content: [],
+            };
+            this.snippets[tag.content] = newNode;
+            contentTarget.push(newNode);
+            conditionStack.push(newNode);
+            contentStack.push(newNode);
+            contentBranch = newNode;
+            break;
+
+          case 'CLOSE_SNIPPET':
+            if (conditionStack.length == 0) {
+              scanner.returnTo(tagRegExp.CLOSE_IF);
+              scanner.fatal('{{/snippet}} close tag found without open if tag');
+            }
+            stack.pop();
+            contentStack.pop();
+            conditionStack.pop();
+            contentBranch = last(contentStack); // Reset current branch
+            break;
+
           case 'HTML_EXPRESSION':
             newNode = {
               ...newNode,
@@ -168,17 +210,6 @@ class TemplateCompiler {
               name: tag.content,
             };
             contentTarget.push(newNode);
-            break;
-
-          case 'CLOSE_IF':
-            if (conditionStack.length == 0) {
-              scanner.returnTo(tagRegExp.CLOSE_IF);
-              scanner.fatal('{{/if}} close tag found without open if tag');
-            }
-            stack.pop();
-            contentStack.pop();
-            conditionStack.pop();
-            contentBranch = last(contentStack); // Reset current branch
             break;
 
           case 'EACH':
@@ -223,7 +254,6 @@ class TemplateCompiler {
         }
       }
     }
-
     return ast;
   }
 
@@ -239,12 +269,13 @@ class TemplateCompiler {
     }
     return expression;
   }
-
   parseTemplateString(expression = '') {
     // quicker to compile regexp once
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
-    if (regExp.VERBOSE_KEYWORD.exec(expression)) {
+
+    regExp.VERBOSE_KEYWORD.lastIndex = 0;
+    if (regExp.VERBOSE_KEYWORD.test(expression)) {
       // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
       const matches = [...expression.matchAll(regExp.VERBOSE_PROPERTIES)];
       each(matches, (match, index) => {
@@ -270,11 +301,11 @@ class TemplateCompiler {
   }
 
   static getObjectFromString(objectString = '') {
-    const regexp = TemplateCompiler.templateRegExp.DATA_OBJECT;
+    const regExp = TemplateCompiler.templateRegExp.DATA_OBJECT;
     const obj = {};
     let match;
     let isObject = false;
-    while ((match = regexp.exec(objectString)) !== null) {
+    while ((match = regExp.exec(objectString)) !== null) {
       isObject = true;
       obj[match[1]] = match[2].trim();
     }
