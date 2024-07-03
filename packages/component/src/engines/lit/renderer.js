@@ -16,12 +16,13 @@ export class LitRenderer {
   static OUTER_PARENS_REGEXP = /^\((.+)\)$/;
   static EXPRESSION_REGEXP = /('[^']*'|[^\s]+)/g;
 
-  constructor({ ast, data, subTemplates, helpers }) {
+  constructor({ ast, data, subTemplates, snippets, helpers }) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = [];
     this.subTemplates = subTemplates;
     this.resetHTML();
+    this.snippets = snippets || {};
     this.helpers = helpers || {};
   }
 
@@ -69,6 +70,10 @@ export class LitRenderer {
 
         case 'template':
           this.addValue(this.evaluateTemplate(node, data));
+          break;
+
+        case 'snippet':
+          this.snippets[node.name] = node;
           break;
 
         case 'slot':
@@ -128,6 +133,47 @@ export class LitRenderer {
   }
 
   evaluateTemplate(node, data = {}) {
+    const templateName = this.lookupExpressionValue(node.name, data);
+    if (this.snippets[templateName]) {
+      return this.evaluateSnippet(node, data);
+    }
+    else {
+      return this.evaluateSubTemplate(node, data);
+    }
+  }
+
+  evaluateSnippet(node, data = {}) {
+    const getValue = (expressionString) => {
+      return this.lookupExpressionValue(expressionString, data);
+    };
+
+    const snippetName = getValue(node.name);
+    const snippet = this.snippets[snippetName];
+
+    if (!snippet) {
+      fatal(`Snippet "${snippetName}" not found`);
+    }
+
+    // Prepare snippet data
+    const staticValues = mapObject(node.data || {}, (value) => {
+      return Reaction.nonreactive(() => getValue(value));
+    });
+    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
+      return getValue(value);
+    });
+    const snippetData = {
+      ...data,
+      ...staticValues,
+      ...reactiveValues,
+    };
+
+    return this.renderContent({
+      ast: snippet.content,
+      data: snippetData,
+    });
+  }
+
+  evaluateSubTemplate(node, data = {}) {
     const getValue = (expressionString) => {
       const value = this.evaluateExpression(expressionString, data);
       return value;
@@ -290,6 +336,7 @@ export class LitRenderer {
       ast,
       data,
       subTemplates: this.subTemplates,
+      snippets: this.snippets,
       helpers: this.helpers,
     });
     this.renderTrees.push(tree);

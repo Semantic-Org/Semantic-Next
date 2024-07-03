@@ -156,6 +156,7 @@ export const Template = class Template {
     this.initialized = true;
 
     if(this.renderingEngine == 'lit') {
+      console.log(this.ast);
       this.renderer = new LitRenderer({
         ast: this.ast,
         data: this.getDataContext(),
