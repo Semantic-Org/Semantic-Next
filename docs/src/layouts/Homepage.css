@@ -1,0 +1,44 @@
+@layer page {
+  :root {
+
+  }
+
+  topbar {
+    position: absolute;
+    top: 1rem;
+    width: 100%;
+  }
+
+  aboveFold {
+    background-image: var(--angled-gradient);
+    display: block;
+    overflow: hidden;
+    height: 620px;
+
+    h2 {
+      font-size: 24px;
+    }
+    p {
+      font-size: 18px;
+    }
+
+    ui-button {
+      font-size: 18px;
+    }
+
+    .left {
+      margin-top: 10rem;
+    }
+  }
+
+  ribbon {
+    display: block;
+    color: var(--standard-80);
+
+    min-height: 300px;
+
+
+  }
+
+
+}

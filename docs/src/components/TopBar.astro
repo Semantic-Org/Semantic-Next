@@ -1,5 +1,6 @@
 ---
-const { currentRoute } = Astro.props;
+const { currentRoute, floating } = Astro.props;
+let { showThemeSwitcher } = Astro.props;
 import { Image } from 'astro:assets';
 
 import logoImage from '@images/logo.png';
@@ -13,23 +14,29 @@ import { getTopbarMenu, removeTrailingSlash } from '@helpers/navigation.js';
 const menu = await getTopbarMenu();
 const activeURL = removeTrailingSlash(Astro.url.pathname);
 
+showThemeSwitcher = (showThemeSwitcher === 'false') ? false : true;
+
 import './TopBar.css';
 ---
-<topbar transition:persist>
-  <span class="left">
-    <a class="logo" href="/">
-      <Image src={logoImage} alt="Logo" height="35" loading="eager"></Image>
-      <span class="name">
-        Semantic UI
-      </span>
-    </a>
-  </span>
-  <TopbarMenu
-    client:load
-    menu={menu}
-    activeURL={activeURL}
-  ></TopbarMenu>
-  <GlobalSearch client:load></GlobalSearch>
-  <ThemeSwitcher client:load transition:name="theme"></ThemeSwitcher>
-  <MobileMenuToggle client:load></MobileMenuToggle>
+<topbar class={floating ? 'floating' : 'fluid'} transition:persist>
+  <div class="content">
+    <span class="left">
+      <a class="logo" href="/">
+        <Image src={logoImage} alt="Logo" height="35" loading="eager"></Image>
+        <span class="name">
+          Semantic UI
+        </span>
+      </a>
+    </span>
+    <TopbarMenu
+      client:load
+      menu={menu}
+      activeURL={activeURL}
+    ></TopbarMenu>
+    <GlobalSearch client:load></GlobalSearch>
+    {showThemeSwitcher && (
+      <ThemeSwitcher client:load transition:name="theme"></ThemeSwitcher>
+    )}
+    <MobileMenuToggle client:load></MobileMenuToggle>
+  </div>
 </topbar>

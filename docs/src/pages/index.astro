@@ -1,7 +1,24 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Homepage from '../layouts/Homepage.astro';
 ---
 
-<Layout>
-
-</Layout>
+<Homepage>
+  <aboveFold>
+    <ui-container>
+      <div class="left">
+        <h2>This is the title</h2>
+        <p>This is the copy</p>
+        <ui-button primary>View Guide</ui-button>
+        <ui-button> Visit Docs</ui-button>
+      </div>
+    </ui-container>
+  </aboveFold>
+  <ribbons>
+    <ribbon>
+      1
+    </ribbon>
+    <ribbon class="inverted">
+      2
+    </ribbon>
+  </ribbons>
+</Homepage>

@@ -4,10 +4,10 @@
   flex: 1 1 auto;
   flex-direction: column;
 
-
   --playground-code-background: #080C10;
   --playground-code-comment-color: #444444;
   --playground-code-linenumber-color: #25272B;
+
   --playground-code-font-size: 14px;
   --playground-code-default-color: #c9d1d9;
   --playground-code-keyword-color: #AAAAAA;
@@ -28,8 +28,10 @@
   --playground-code-tag-color: #d2a8ff;
   --playground-code-attribute-color: var(--primary-text-color);
   --playground-code-callee-color: #d2a8ff;
+
   --playground-tab-bar-background: #ffffff;
   --playground-bar-height: 32px;
+
 
   --inline-code-height: 350px;
 

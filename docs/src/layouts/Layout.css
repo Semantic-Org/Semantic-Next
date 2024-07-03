@@ -80,7 +80,7 @@
   }
   layout page.text-content li,
   layout page.text-content p {
-    color: var(--standard-70);
+    color: var(--standard-90);
   }
   layout page.text-content pageContent img {
     max-width: 100%;
@@ -212,7 +212,7 @@
   layout h3,
   layout h4,
   layout h5 {
-    transition: box-shadow 0.5s ease, color 0.5s ease;
+    transition: all var(--easing) var(--duration);
     box-shadow: -3px 0px 0px transparent;/*
     margin-left: -0.5rem !important;
     padding-left: 0.5rem !important;*/
@@ -225,6 +225,7 @@
   layout h5.highlight {
     color: var(--warning-text-color) !important;
     box-shadow: -3px 0px 0px var(--warning-text-color);
+    padding-left: 0.5rem;
   }
 
   layout main h1:first-child,
@@ -294,11 +295,13 @@
       box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
     }
     page {
+      /*
       background-image: linear-gradient(to bottom,
         oklch(0.16 0 0),
         oklch(0.19 0.01 258.64) 100px,
         oklch(0 0 0)
       );
+      */
     }
     page > main {
       background: none;
@@ -313,6 +316,14 @@
     layout main ui-container {
       background-color: rgb(0, 0, 0, 0.8);
       box-shadow: 1px 0px 1px 0 rgba(34, 35, 37, 0.7);
+    }
+  }
+
+  html.dark {
+
+    layout page.text-content li,
+    layout page.text-content p {
+      color: var(--standard-70);
     }
   }
 

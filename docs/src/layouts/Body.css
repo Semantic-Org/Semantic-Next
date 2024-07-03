@@ -38,12 +38,12 @@
   :root {
     --page-background: #FEFEFF;
     --primary-text-color: #73B9E1;
-    --panel-color: #1B1C1D;
+    --panel-color: var(--ui-background);
   }
   html.dark {
     --page-background: #000000;
     --text-color: rgba(255, 255, 255, 0.83);
-    --panel-color: oklch(0.17 0.01 234.51);
+    --panel-color: var(--ui-background);
   }
 
   html, body {

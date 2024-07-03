@@ -2,6 +2,7 @@
 @layer component.button.content.button {
   :root {
     user-select: none;
+    font-size: 1rem;
   }
   *,
   :after,
@@ -1861,9 +1862,6 @@
   }
   .small.button {
     font-size: var(--button-small);
-  }
-  .button {
-    font-size: var(--button-medium);
   }
   .large.button {
     font-size: var(--button-large);

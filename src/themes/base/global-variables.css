@@ -219,6 +219,17 @@
   --page-background: #FFFFFF;
   --page-overflow-x: hidden;
 
+  --ui-hue: 234.71;
+  --ui-chroma: 0.01;
+  --ui-lightness: 0.17;
+  --ui-lightness-light: 0.2;
+  --ui-lightness-dark: 0.15;
+
+  --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
+  --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
+  --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
+
+
   /* -------------------
         Paragraph
   -------------------- */

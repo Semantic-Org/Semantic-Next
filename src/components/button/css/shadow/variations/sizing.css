@@ -11,9 +11,6 @@
 .small.button {
   font-size: var(--button-small);
 }
-.button {
-  font-size: var(--button-medium);
-}
 .large.button {
   font-size: var(--button-large);
 }

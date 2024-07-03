@@ -1,5 +1,6 @@
 :root {
   user-select: none;
+  font-size: 1rem;
 }
 *, :after, :before {
   box-sizing: border-box;
