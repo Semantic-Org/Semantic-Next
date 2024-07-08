@@ -82,8 +82,7 @@
 
   .menu {
     flex: 0 0 auto;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: auto hidden;
     white-space: nowrap;
   }
 
@@ -99,17 +98,74 @@
     height: 500px;
     margin: var(--vertically-spaced);
 
+    .menu {
+      display: flex;
+      flex-direction: row;
+      border-radius: var(--attached-border-radius);
+      padding: var(--compact-padding);
+      border: var(--border);
+    }
+    .menu ui-menu {
+      margin: 0rem;
+      font-size: 13px;
+    }
+
+    .tabs {
+      .menu {
+        border-bottom: none;
+      }
+    }
+
     &.horizontal {
       playground-preview {
         flex: 1 1 auto;
       }
+      ui-panel {
+        .menu {
+          border-radius: var(--attached-border-radius);
+          min-height: 27px
+        }
+        &:first-of-type .menu {
+          border-top-left-radius: var(--border-radius);
+          border-bottom: none;
+        }
+        &:not(:first-of-type) .menu {
+          border-top-right-radius: var(--border-radius);
+        }
+      }
+
+      playground-preview,
+      pretty-json {
+        border: var(--border);
+        border-left: none;
+        border-radius: var(--right-attached-border-radius);
+      }
+
     }
+
     &.vertical {
       playground-preview {
         border-top: none;
       }
+      ui-panel {
+        .menu {
+          border-radius: var(--attached-border-radius);
+        }
+        &:first-of-type .menu {
+          border-radius: var(--top-attached-border-radius);
+          border-bottom: none;
+        }
+        &:not(:first-of-type) .menu {
+          border-top: none
+        }
+      }
+      playground-preview,
+      pretty-json {
+        border: var(--border);
+        border-top: none;
+        border-radius: var(--bottom-attached-border-radius);
+      }
     }
-
 
     playground-file-editor {
       border: var(--border);
@@ -130,19 +186,7 @@
       background: #000;
       box-shadow: none;
     }
-    .menu {
-      display: flex;
-      flex-direction: row;
-      border-radius: var(--top-attached-border-radius);
-      padding: var(--compact-padding);
-      border: var(--border);
-      border-bottom: none;
-    }
 
-    .menu ui-menu {
-      margin: 0rem;
-      font-size: 13px;
-    }
     .links {
       margin-top: 3px;
       margin-left: auto;
@@ -164,12 +208,16 @@
       font-weight: bold;
       color: rgba(255, 255, 255, 0.4);
       padding: 0.5rem 1rem;
+    }
+
+    &:not(.inline) .menu {
       min-height: 27px;
       background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
       border-bottom: 1px solid rgba(221, 221, 221, 0.05);
       box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
       transition: background-color 0.1s ease, color 0.1s ease-in-out;
     }
+
     .menu ui-menu {
       margin: 0rem;
       font-size: 13px;
@@ -180,11 +228,20 @@
     playground-file-editor {
       flex: 1 1 auto;
     }
+    playground-preview::part(preview-reload-button) {
+      margin-top: -1px;
+    }
   }
 
   .fullscreen {
     ui-panels::part(panels) {
       background-color: var(--playground-code-background);
+    }
+    .menu {
+      border-bottom: 1px solid rgba(221, 221, 221, 0.05);
+      color: rgba(255, 255, 255, 0.4);
+      background: linear-gradient(rgba(255, 255, 255, 0.02), rgba(15, 17, 22, 0.5));
+      border-bottom: 1px solid rgba(221, 221, 221, 0.05);
     }
   }
 
@@ -223,7 +280,7 @@
     pointer-events: auto;
     color: var(--white-80);
     margin-right: 5px;
-    margin-top: -3px;
+    margin-top: 7px;
   }
   playground-preview::part(preview-loading-indicator) {
     --mdc-theme-primary: var(--primary-text-color);

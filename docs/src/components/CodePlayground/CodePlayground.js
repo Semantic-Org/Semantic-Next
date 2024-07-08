@@ -86,6 +86,7 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     });
   },
   getNaturalPanelSize(panel, { direction, minimized }) {
+    const extraSpacing = 2; // rounding
     if(direction == 'horizontal') {
       const scrollbarWidth = $$(panel).find('.CodeMirror-vscrollbar').width() ? 17 : 0;
       const minWidths = [200];
@@ -94,7 +95,7 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
         const sizerWidth = parseFloat($(sizer).css('min-width'));
         minWidths.push(sizerMargin + sizerWidth + scrollbarWidth);
       });
-      const size = Math.max(...minWidths);
+      const size = Math.max(...minWidths) + extraSpacing;
       return size;
     }
     else {
@@ -104,7 +105,6 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
         return labelHeight;
       }
       else {
-        const extraSpacing = 5;
         const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
         const size = codeHeight + labelHeight + menuHeight + extraSpacing;
         return Math.max(size, 100);
@@ -122,10 +122,12 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     return size;
   },
   getTabPanelsClass() {
-    return {
+    const classes = {
       inline: settings.inline,
       tabs: settings.useTabs
     };
+    classes[settings.inlineDirection] = true;
+    return classes;
   },
   getTabDirection() {
     if(settings.inline) {

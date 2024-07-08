@@ -16,11 +16,12 @@
     --topbar-border-bottom: none;
 
   }
+
   global-search {
     --global-search-modal-background: var(--sidebar-background-color);
   }
   html.dark {
-    --topbar-background-color: #151a1e;
+    --topbar-background-color: #151A1E;
   }
   topbar {
     display: block;

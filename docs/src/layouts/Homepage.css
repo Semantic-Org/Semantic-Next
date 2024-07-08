@@ -10,6 +10,7 @@
   }
 
   aboveFold {
+    color: var(--standard-80);
     background-image: var(--angled-gradient);
     display: block;
     overflow: hidden;

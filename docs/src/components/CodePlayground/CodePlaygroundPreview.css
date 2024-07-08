@@ -1,7 +1,8 @@
 ui-menu.preview {
   font-size: 11px !important;
   text-transform: uppercase;
-  margin: 5px 8px;
+  margin: 4px 8px 2px;
+  border-bottom-width: 1px;
 }
 
 playground-preview {

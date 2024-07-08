@@ -30,6 +30,8 @@
     --topbar-menu-item-font-weight: normal;
     --topbar-menu-item-active-font-weight: bold;
     --topbar-border-bottom: 1px solid #232323;
+
+    --nav-menu-content-icon-indent-distance: 2px;
   }
 
   code-playground::part(playground) {
