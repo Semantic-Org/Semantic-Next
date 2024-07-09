@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component-Level Theming</title>
+    <style>
+        /* Base theme (light) */
+        :root, [light], [theme="light"] {
+            --standard-color: 0 0 0;
+            --inverted-color: 1 0 0;
+            /* Other light theme variables... */
+        }
+
+        /* Dark theme */
+        html.dark, [dark], [theme="dark"] {
+            --standard-color: 1 0 0;
+            --inverted-color: 0 0 0;
+            /* Other dark theme variables... */
+        }
+
+        /* Derived values - recalculated for both light and dark themes */
+        :root, [light], [dark], [theme] {
+          /* Black in Light Mode, White in Dark Mode */
+          --standard-5: oklch(var(--standard-color) / 5%);
+          --standard-10: oklch(var(--standard-color) / 10%);
+          --standard-15: oklch(var(--standard-color) / 15%);
+          --standard-20: oklch(var(--standard-color) / 20%);
+          --standard-30: oklch(var(--standard-color) / 30%);
+          --standard-40: oklch(var(--standard-color) / 40%);
+          --standard-50: oklch(var(--standard-color) / 50%);
+          --standard-60: oklch(var(--standard-color) / 60%);
+          --standard-70: oklch(var(--standard-color) / 70%);
+          --standard-80: oklch(var(--standard-color) / 80%);
+          --standard-85: oklch(var(--standard-color) / 85%);
+          --standard-90: oklch(var(--standard-color) / 90%);
+          --standard-95: oklch(var(--standard-color) / 95%);
+          --standard-100: oklch(var(--standard-color) / 100%);
+
+          /* White in Light Mode, Black in Dark Mode */
+          --inverted-5: oklch(var(--inverted-color) / 5%);
+          --inverted-10: oklch(var(--inverted-color) / 10%);
+          --inverted-15: oklch(var(--inverted-color) / 15%);
+          --inverted-20: oklch(var(--inverted-color) / 20%);
+          --inverted-30: oklch(var(--inverted-color) / 30%);
+          --inverted-40: oklch(var(--inverted-color) / 40%);
+          --inverted-50: oklch(var(--inverted-color) / 50%);
+          --inverted-60: oklch(var(--inverted-color) / 60%);
+          --inverted-70: oklch(var(--inverted-color) / 70%);
+          --inverted-80: oklch(var(--inverted-color) / 80%);
+          --inverted-85: oklch(var(--inverted-color) / 85%);
+          --inverted-90: oklch(var(--inverted-color) / 90%);
+          --inverted-95: oklch(var(--inverted-color) / 95%);
+          --inverted-100: oklch(var(--inverted-color) / 100%);
+        }
+
+        /* Component styles */
+        .component {
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <test-component>
+            Default theme
+            <test-component theme="dark">
+                Dark theme (attribute)
+                <test-component light>Light theme (boolean)</test-component>
+            </test-component>
+
+        </test-component>
+    </div>
+
+    <script>
+        class TestComponent extends HTMLElement {
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open' });
+            }
+
+            connectedCallback() {
+                this.render();
+                this.updateTheme();
+            }
+
+            static get observedAttributes() {
+                return ['theme', 'dark', 'light'];
+            }
+
+            attributeChangedCallback(name, oldValue, newValue) {
+                this.updateTheme();
+            }
+
+            updateTheme() {
+                const theme = this.getAttribute('theme');
+                const isDark = this.hasAttribute('dark');
+                const isLight = this.hasAttribute('light');
+
+                this.shadowRoot.host.className = 'component';
+            }
+
+            render() {
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        :host {
+                            display: block;
+                        }
+                        .content {
+                            background-color: var(--inverted-90);
+                            color: var(--standard-90);
+                            padding: 10px;
+                        }
+                    </style>
+                    <div class="content">
+                        <div>Shadow DOM content</div>
+                        <slot></slot>
+                    </div>
+                `;
+            }
+        }
+
+        customElements.define('test-component', TestComponent);
+    </script>
+</body>
+</html>
