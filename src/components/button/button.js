@@ -5,7 +5,7 @@ import { ButtonComponentSpec } from '@semantic-ui/specs';
 import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
 import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
-const createInstance = ({tpl, settings, $}) => ({
+const createInstance = ({tpl, settings, data, $}) => ({
   getTag() {
     return settings.href ? 'a' : 'div';
   },
