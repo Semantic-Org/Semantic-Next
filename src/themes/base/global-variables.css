@@ -953,7 +953,7 @@ html.dark, .dark.theme, [dark], [theme="dark"] {
 
 
 /* Dark/Light derived values need to be defined in same scope as theme */
-:root, .light.theme, .dark.theme, [light], [dark], [theme], :host {
+:root, .light.theme, .dark.theme, [light], [dark], [theme] {
 
   /* Black in Light Mode, White in Dark Mode */
   --standard-5: oklch(var(--standard-color) / 5%);
