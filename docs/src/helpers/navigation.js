@@ -136,7 +136,7 @@ export const sidebarMenuFramework = [
         url: '/templates/looping'
       },
       {
-        name: 'Outputting Data',
+        name: 'Outputting Values',
         url: '/templates/data'
       },
       {
@@ -153,7 +153,11 @@ export const sidebarMenuFramework = [
       },
       {
         name: 'Subtemplates',
-        url: '/templates/sub-templates'
+        url: '/templates/subtemplates'
+      },
+      {
+        name: 'Snippets',
+        url: '/templates/snippets'
       },
     ]
   },
@@ -332,7 +336,7 @@ const createExampleMenu = () => {
         pages.push({
           name: subcategory,
           pages: examples.map(example => ({
-            name: example.title,
+            name: example.shortTitle || example.title,
             url: example.url
           }))
         });
@@ -341,7 +345,7 @@ const createExampleMenu = () => {
     else {
       // no subcategories
       pages = examples.map(example => ({
-        name: example.title,
+        name: example.shortTitle || example.title,
         url: example.url
       }));
     }

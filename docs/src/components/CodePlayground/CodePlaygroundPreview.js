@@ -15,10 +15,10 @@ const createInstance = ({tpl, findParent, state, $, $$}) => ({
   getMenu: () => {
     let menu = [
       { label: 'Preview', value: 'preview' },
-      { label: 'Console', value: 'console' },
+      //{ label: 'Console', value: 'console' },
     ];
     if(tpl.getFile()) {
-      menu.push({ label: 'Template AST', value: 'ast' });
+      menu.push({ label: 'AST', value: 'ast' });
     }
     return menu;
   },

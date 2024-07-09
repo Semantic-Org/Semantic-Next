@@ -19,11 +19,38 @@ Semantic UI components wrap native web components but provide additional callbac
 * **onDestroyed** - Callback after your component is removed from the page
 
 
+
+## Callbacks
+
+### createInstance
+
+`createInstance` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
+
+#### Initialize
+
+If you include a method called `initialize` in your returned instance it will be called immediately allowing you to set up initial state for the component, for instance adding any reactive calcuations or dynamically defined variables.
+
+### onCreated
+
+`onCreated` fires **after the instance is defined but before the DOM is rendered**. You can use this callback to handle special behaviors that require the component instance but not its rendered DOM, for instance attaching external event handlers to the page.
+
+### onRendered
+
+The `onRendered` callback occurs **after the initial render** of the web components Shadow DOM.
+
+This can be used to run code which requires access to the DOM. Although this callback will fire on the server you will not be able to access deeply nested DOM as server rendered components are rendered in isolation.
+
+### onDestroyed
+
+The `onDestroyed` callback is called after the component is removed from the page.
+
+### onThemeChanged
+
+The `onThemeChanged` callback is a special callback that fires when a user swaps themes. This can be used to modify the component based on whether the user prefers light or dark mode.
+
 ## Callback Arguments
 
 Each callback receives a destructurable set of arguments that can be used to interact with the internals of the component
-
-### All Callbacks
 
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|
@@ -53,7 +80,7 @@ Each callback receives a destructurable set of arguments that can be used to int
 | findChildren      | helper to find multiple child templates               |
 | darkMode          | boolean for if dark mode is active                    |
 
-### Event Callbacks Only
+### Event Callbacks
 
 Event handlers also have access to a few additional arguments
 | parameter         | use                                              |
@@ -62,41 +89,13 @@ Event handlers also have access to a few additional arguments
 | event             | the event object                                 |
 | data              | event.detail + data attributes on dom element    |
 
-#### Key Bindings Only
+### Key Bindings
 
-Key bindings also have access to a few additional arguments
+[Key bindings](/components/keys) also have access to a few additional arguments
 | parameter         | use                                              |
 |-------------------|--------------------------------------------------|
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
-
-## Callbacks
-
-### createInstance
-
-`createInstance` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
-
-#### Initialize
-
-If you include a method called `initialize` in your returned instance it will be called immediately allowing you to set up initial state for the component, for instance adding any reactive calcuations or dynamically defined variables.
-
-### onCreated
-
-`onCreated` fires **after the instance is defined but before the DOM is rendered**. You can use this callback to handle special behaviors that require the component instance but not its rendered DOM, for instance attaching external event handlers to the page.
-
-### onRendered
-
-The `onRendered` callback occurs **after the initial render** of the web components Shadow DOM.
-
-This can be used to run code which requires access to the DOM. Although this callback will fire on the server you will not be able to access deeply nested DOM as server rendered components are rendered in isolation.
-
-### onDestroyed
-
-The `onDestroyed` callback is called after the component is removed from the page.
-
-### onThemeChanged
-
-The `onThemeChanged` callback is a special callback that fires when a user swaps themes. This can be used to modify the component based on whether the user prefers light or dark mode.
 
 ## Event Sequence
 

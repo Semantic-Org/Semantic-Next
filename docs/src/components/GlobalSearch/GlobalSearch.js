@@ -172,6 +172,12 @@ const keys = {
     }
     tpl.selectPrevious();
   },
+  'left'() {
+    console.log('left');
+  },
+  'right'() {
+    console.log('right');
+  },
   'down'({tpl, state}) {
     if(!state.modalOpen.get()) {
       return;

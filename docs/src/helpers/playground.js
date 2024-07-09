@@ -167,6 +167,26 @@ export const getExampleID = (example) => {
   return exampleID;
 };
 
+export const hideComponentBoilerplate = (code) => {
+  // Regex to match everything up to and including the last line with getText
+  const getTextRegex = /^[\s\S]*(?:getText\([^)]*\)[;\s]*$)/m;
+
+  // Regex to match from createComponent to the end of the file
+  const createComponentRegex = /^createComponent[\s\S]*$/m;
+
+  // Apply the first fold
+  let foldedCode = code.replace(getTextRegex, (match) => {
+    return `// click ellipsus to show imports ${foldMarkerStart}\n\n${match.trim()}\n${foldMarkerEnd}\n\n`;
+  });
+
+  // Apply the second fold
+  foldedCode = foldedCode.replace(createComponentRegex, (match) => {
+    return `// click ellipsus to show exports ${foldMarkerStart}\n\n${match}\n${foldMarkerEnd}\n`;
+  });
+
+  return foldedCode;
+};
+
 export const getExampleFiles = async(example, allExampleFiles) => {
   const exampleID = getExampleID(example);
   if(!exampleID) {
@@ -215,10 +235,12 @@ export const getExampleFiles = async(example, allExampleFiles) => {
       }
       else if(inArray(fileName, ['component.js', `${exampleID}.js`])) {
         const fileContent = await file();
-        hasComponent = fileContent.default.search('createComponent') > -1;
+        let fileText = fileContent.default;
+        hasComponent = fileText.search('createComponent') > -1;
+        fileText = hideComponentBoilerplate(fileText);
         exampleFiles['component.js'] = {
           contentType: 'text/javascript',
-          content: fileContent.default
+          content: fileText
         };
       }
     }

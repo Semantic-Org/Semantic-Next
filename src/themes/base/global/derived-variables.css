@@ -22,6 +22,11 @@
   --centered: var(--spacing) auto;
 
   /* -------------------
+        Transition
+  -------------------- */
+  --transition: all var(--duration) var(--easing);
+
+  /* -------------------
       Border Radius
   -------------------- */
 

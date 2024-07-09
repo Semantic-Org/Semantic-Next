@@ -3,31 +3,25 @@ const template = await getText('./component.html');
 const css = await getText('./component.css');
 
 const state = {
-  width: 100,
-  height: 100
+  width: 250,
+  height: 250
 };
 
 const keys = {
-  'esc'({tpl}) {
-    state.width.set(100);
-    state.height.set(100);
-  },
-  'left'({state}) {
-    state.width.decrement();
-  },
-  'right'({tpl}) {
-    state.width.increment();
-  },
-  'up'({state}) {
-    state.height.decrement();
-  },
-  'down'({tpl}) {
-    state.height.increment();
+  'up'    : ({ state }) => state.height.decrement(10),
+  'right' : ({ state }) => state.width.increment(10),
+  'down'  : ({ state }) => state.height.increment(10),
+  'left'  : ({ state }) => state.width.decrement(10),
+  'esc'   : ({ state }) => {
+    state.width.set(250);
+    state.height.set(250);
   },
 };
 
 createComponent({
   tagName: 'grow-block',
+  template,
+  css,
   keys,
   state
 });

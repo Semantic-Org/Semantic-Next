@@ -118,7 +118,7 @@ const events = {
   }
 };
 
-const SearchComponent = createComponent({
+createComponent({
   tagName: 'search-component',
   keys,
   template,
@@ -128,5 +128,3 @@ const SearchComponent = createComponent({
   settings,
   state
 });
-
-export default SearchComponent;

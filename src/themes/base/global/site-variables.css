@@ -85,8 +85,6 @@
 
   --duration: 0.15s;
   --easing: ease;
-  --transition: all var(--duration) var(--easing);
-
 
   /* --------------
        States

@@ -1,10 +1,7 @@
-// imports /* playground-fold */
-
 import { createComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
-/* playground-fold-end */
 
 const state = {
   counter: 0
@@ -15,8 +12,6 @@ const createInstance = ({ state }) => ({
   isEven: (number) => (number % 2 == 0)
 });
 
-// exports /* playground-fold */
-
 createComponent({
   tagName: 'ui-counter',
   template,
@@ -24,4 +19,3 @@ createComponent({
   state,
   createInstance
 });
-/* playground-fold-end */

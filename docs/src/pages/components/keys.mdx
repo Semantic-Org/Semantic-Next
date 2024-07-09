@@ -1,17 +1,14 @@
 ---
 layout: '@layouts/Guide.astro'
 title: Key Bindings
-icon: key
+icon: command
 description: Attaching keyboard events to components
 ---
 import { Image } from 'astro:assets';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import contextImage from '@images/data-context-diagram.png';
 
-
-## Key Bindings
-
-Keyboard bindings can be attached to any component by passing in `keys` to `createComponent`
+Semantic components can be attached to any component by passing in `keys` to `createComponent`
 
 ```javascript
 createComponent({
@@ -32,20 +29,84 @@ createComponent({
 });
 ```
 
-A common pattern for keybinding is to invoke a behavior on the template instance
+## Types of Bindings
+
+
+### Single keys
+
+Key bindings can be bound to any key by their common name. Multiple key bindings can be bound to the same event using `,` separation.
+
 ```javascript
-const createComponent = () => {
-  submit() {
-    // submit form
+const keys = {
+  't' () => {
+    // handle "t" key
+  }
+}
+```
+
+Special keys are mapped to their common names like `ctrl`, `alt`, `meta` `shift`
+
+```javascript
+const keys = {
+  'meta' () => {
+    // handle apply/win key
   }
 };
 ```
+### Multiple Keys
 ```javascript
 const keys = {
-  'enter'({tpl}) {
-    tpl.submit();
-  },
+  'up, down, left, right' () => {
+    // handle all keyboard events together
+  }
+}
+```
+
+### Key Combinations
+
+Key combinations can be used by including a `+` between keys. Spacing is ignored.
+
+```javascript
+const keys = {
+  'ctrl + o' () => {
+    // handle ctrl+o pressed together
+  }
+  'ctrl+s' () => {
+    // handle ctrl+s pressed together
+  }
 };
 ```
 
+### Basic Keybinding Example
+
 <PlaygroundExample id="keybinding" direction="horizontal"></PlaygroundExample>
+
+## Callback Data
+
+In addition to the standard callback data found in [lifecycle guide](/components/lifecycle) keyboard bindings have access to a couple extra values.
+
+| parameter         | use                                              |
+|-------------------|--------------------------------------------------|
+| inputFocused      | whether any input/contenteditable is focused     |
+| repeatedKey       | whether the key is held down                     |
+
+
+
+
+## Dynamic Keybinding
+
+All [lifecycle callbacks](/components/lifecycle) receive as a parameter two methods `bindKey` and `unbindKey` which can be u
+
+
+
+### Key Sequences
+
+Key sequences can be used by leaving a space between each key. Keys will need to be pressed within a `500ms` interval to be part of the same sequence.
+
+```javascript
+const keys = {
+  'up up down down' () => {
+    // 4 keys pressed in sequence
+  }
+};
+```
