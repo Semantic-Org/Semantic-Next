@@ -67,14 +67,14 @@
 
     .title {
       display: inline-block;
-      margin: 0rem;
+      margin: 0rem 0.5rem 0rem 0rem;
       font-size: 16px;
       color: var(--white-100);
       font-weight: bold;
     }
     .title + p {
       display: inline-block;
-      margin: 0rem 0rem 0rem 0.5rem;
+      margin: 0rem;
       padding: 0rem;
       color: var(--white-40);
     }
@@ -158,6 +158,9 @@
         &:not(:first-of-type) .menu {
           border-top: none
         }
+      }
+      ::part(handle) {
+        margin: ;
       }
       playground-preview,
       pretty-json {

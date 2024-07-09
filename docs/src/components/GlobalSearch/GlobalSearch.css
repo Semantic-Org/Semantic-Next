@@ -11,7 +11,7 @@
   --global-search-icon-width: 2rem;
   --global-search-icon-color: inherit;
 
-  --global-search-input-width: 155px;
+  --global-search-input-width: 100px;
   --global-search-input-font-size: 12px;
   --global-search-input-font: var(--page-font);
   --global-search-input-color: var(--text-color);

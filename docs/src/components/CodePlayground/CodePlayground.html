@@ -39,10 +39,12 @@
       >
         <div class="menu">
           <ui-menu
+            dark
             selection
             items={{getFileMenuItems}}
             value={{activeFile}}
             class="files"
+            part="menu"
           ></ui-menu>
           {{#if exampleURL}}
             <div class="links">
@@ -74,6 +76,7 @@
       saveState={{saveState}}
       saveStateID="{{getSaveID 'row'}}"
       exportparts="panels"
+      part="full-panels"
     >
       {{#each panelGroup in getPanels}}
         <ui-panel

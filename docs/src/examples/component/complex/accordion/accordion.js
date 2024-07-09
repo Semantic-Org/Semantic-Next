@@ -4,11 +4,11 @@ import { ReactiveVar } from '@semantic-ui/reactivity';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({tpl}) => ({
+const createInstance = ({tpl, reactiveVar}) => ({
   sections: [
-    { title: 'Section 1', content: 'Content for section 1', expanded: new ReactiveVar(false) },
-    { title: 'Section 2', content: 'Content for section 2', expanded: new ReactiveVar(false) },
-    { title: 'Section 3', content: 'Content for section 3', expanded: new ReactiveVar(false) }
+    { title: 'Section 1', content: 'Content for section 1', expanded: reactiveVar(false) },
+    { title: 'Section 2', content: 'Content for section 2', expanded: reactiveVar(false) },
+    { title: 'Section 3', content: 'Content for section 3', expanded: reactiveVar(false) }
   ],
 
   toggleSection(index) {

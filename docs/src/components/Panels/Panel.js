@@ -107,7 +107,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
       .off('mousemove')
       .off('touchmove')
       .removeClass('resizing')
-      .css('cursor', null)
+      .css('cursor', '')
     ;
     tpl.resizing.set(false);
     delete tpl.initialPosition;
