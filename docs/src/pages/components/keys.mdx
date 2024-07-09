@@ -1,0 +1,51 @@
+---
+layout: '@layouts/Guide.astro'
+title: Key Bindings
+icon: key
+description: Attaching keyboard events to components
+---
+import { Image } from 'astro:assets';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import contextImage from '@images/data-context-diagram.png';
+
+
+## Key Bindings
+
+Keyboard bindings can be attached to any component by passing in `keys` to `createComponent`
+
+```javascript
+createComponent({
+  keys: {
+    'ctrl + f'() {
+      // handle search
+    },
+    'up'() {
+      // handle up
+    },
+    'down'() {
+      // handle down
+    },
+    'esc'() {
+      // handle clear
+    },
+  }
+});
+```
+
+A common pattern for keybinding is to invoke a behavior on the template instance
+```javascript
+const createComponent = () => {
+  submit() {
+    // submit form
+  }
+};
+```
+```javascript
+const keys = {
+  'enter'({tpl}) {
+    tpl.submit();
+  },
+};
+```
+
+<PlaygroundExample id="keybinding" direction="horizontal"></PlaygroundExample>

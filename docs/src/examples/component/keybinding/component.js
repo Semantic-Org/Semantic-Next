@@ -2,131 +2,32 @@ import { createComponent, getText } from '@semantic-ui/component';
 const template = await getText('./component.html');
 const css = await getText('./component.css');
 
-const settings = {
-  placeholder: 'Search...',
-  options: [],
-  noun: 'item',
-};
-
 const state = {
-  searchTerm: '',
-  results: [],
-  selectedResult: '',
-  selectedIndex: -1,
+  width: 100,
+  height: 100
 };
-
-const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $}) => ({
-
-  initialize() {
-    tpl.calculateResults();
-    tpl.calculateKeybindings();
-  },
-
-  /*
-    This is an example of dynamic keybinding
-    we want these to only occur when we have a
-    selected index
-  */
-  calculateKeybindings() {
-    reaction(() => {
-      const selectedIndex = state.selectedIndex.get();
-      unbindKey('enter');
-      if(selectedIndex > -1) {
-        bindKey('enter', () => tpl.selectResult());
-      }
-    });
-  },
-
-  calculateResults() {
-    reaction(() => {
-      const searchTerm = state.searchTerm.get();
-
-      // Select first result
-      const initialIndex = searchTerm == '' ? -1 : 0;
-      state.selectedIndex.set(initialIndex);
-
-      // Simulating search results
-      const results = settings.options;
-      console.log(settings.options);
-      const matchingResults = results.filter(r => r.toLowerCase().includes(searchTerm.toLowerCase()));
-      state.results.set(matchingResults);
-    });
-  },
-
-  focusSearch() {
-    $('input').focus();
-  },
-
-  selectPrevious() {
-    if(state.selectedIndex.get() == -1) {
-      state.selectedIndex.set(state.results.get().length - 1);
-    }
-    else if(state.selectedIndex.get() > 0) {
-      state.selectedIndex.decrement();
-    }
-  },
-
-  selectNext() {
-    if(state.selectedIndex.get() < state.results.get().length - 1) {
-      state.selectedIndex.increment();
-    }
-  },
-
-  selectResult(selectedIndex = state.selectedIndex.get()) {
-    const results = state.results.get();
-    const selectedResult = results[selectedIndex];
-    if(selectedResult) {
-      state.selectedResult.set(selectedResult);
-      tpl.clearSearch();
-    }
-  },
-
-  clearSearch() {
-    $('input').val('');
-    state.searchTerm.set('');
-    state.selectedIndex.set(-1);
-  },
-
-});
-
-/*
-  This is an example of static keybindings
-  these will exist for as long as the component is rendered
-*/
 
 const keys = {
-  'ctrl + f'({tpl}) {
-    tpl.focusSearch();
+  'esc'({tpl}) {
+    state.width.set(100);
+    state.height.set(100);
   },
-  'up'({tpl}) {
-    tpl.selectPrevious();
+  'left'({state}) {
+    state.width.decrement();
+  },
+  'right'({tpl}) {
+    state.width.increment();
+  },
+  'up'({state}) {
+    state.height.decrement();
   },
   'down'({tpl}) {
-    tpl.selectNext();
+    state.height.increment();
   },
-  'esc'({tpl}) {
-    tpl.clearSearch();
-  }
 };
 
-const events = {
-  'input .search'({event, state }) {
-    state.searchTerm.set(event.target.value);
-  },
-  'click .result'({tpl, data}) {
-    tpl.selectResult(data.index);
-  }
-};
-
-const SearchComponent = createComponent({
-  tagName: 'search-component',
+createComponent({
+  tagName: 'grow-block',
   keys,
-  template,
-  css,
-  events,
-  createInstance,
-  settings,
   state
 });
-
-export default SearchComponent;

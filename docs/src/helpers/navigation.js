@@ -113,6 +113,10 @@ export const sidebarMenuFramework = [
         url: '/components/events'
       },
       {
+        name: 'Key Bindings',
+        url: '/components/keys'
+      },
+      {
         name: 'Reactivity',
         url: '/components/reactivity'
       },
