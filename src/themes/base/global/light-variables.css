@@ -2,7 +2,10 @@
           Light Theme
 *******************************/
 
-:root, .light.theme, [light], [theme="light"] {
+:root,
+.light.theme,
+[light],
+[theme="light"] {
 
   /* -------------------
       Brand Colors
