@@ -241,7 +241,6 @@ const onThemeChanged = ({tpl}) => {
 
 const keys = {
   'tab'({state, $}) {
-    console.log('hi');
   }
 };
 
