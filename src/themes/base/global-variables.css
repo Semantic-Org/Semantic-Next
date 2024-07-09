@@ -2,7 +2,7 @@
          Site Settings
 *******************************/
 
-:root {
+html, .light.theme, [light], [theme="light"] {
 
   /* -------------------
          Fonts
@@ -182,36 +182,6 @@
   --standard-color: var(--black-lch);
   --inverted-color: var(--white-lch);
 
-  --standard-5: oklch(var(--standard-color) / 5%);
-  --standard-10: oklch(var(--standard-color) / 10%);
-  --standard-15: oklch(var(--standard-color) / 15%);
-  --standard-20: oklch(var(--standard-color) / 20%);
-  --standard-30: oklch(var(--standard-color) / 30%);
-  --standard-40: oklch(var(--standard-color) / 40%);
-  --standard-50: oklch(var(--standard-color) / 50%);
-  --standard-60: oklch(var(--standard-color) / 60%);
-  --standard-70: oklch(var(--standard-color) / 70%);
-  --standard-80: oklch(var(--standard-color) / 80%);
-  --standard-85: oklch(var(--standard-color) / 85%);
-  --standard-90: oklch(var(--standard-color) / 90%);
-  --standard-95: oklch(var(--standard-color) / 95%);
-  --standard-100: oklch(var(--standard-color) / 100%);
-
-  --inverted-5: oklch(var(--inverted-color) / 5%);
-  --inverted-10: oklch(var(--inverted-color) / 10%);
-  --inverted-15: oklch(var(--inverted-color) / 15%);
-  --inverted-20: oklch(var(--inverted-color) / 20%);
-  --inverted-30: oklch(var(--inverted-color) / 30%);
-  --inverted-40: oklch(var(--inverted-color) / 40%);
-  --inverted-50: oklch(var(--inverted-color) / 50%);
-  --inverted-60: oklch(var(--inverted-color) / 60%);
-  --inverted-70: oklch(var(--inverted-color) / 70%);
-  --inverted-80: oklch(var(--inverted-color) / 80%);
-  --inverted-85: oklch(var(--inverted-color) / 85%);
-  --inverted-90: oklch(var(--inverted-color) / 90%);
-  --inverted-95: oklch(var(--inverted-color) / 95%);
-  --inverted-100: oklch(var(--inverted-color) / 100%);
-
   /* -------------------
           Page
   -------------------- */
@@ -224,10 +194,6 @@
   --ui-lightness: 0.17;
   --ui-lightness-light: 0.2;
   --ui-lightness-dark: 0.15;
-
-  --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
-  --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
-  --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
 
 
   /* -------------------
@@ -617,9 +583,6 @@
   --standard-border-color: var(--black-border-lch);
   --inverted-border-color: var(--white-border-lch);
 
-  --border-color: oklch(var(--standard-border-color) / 15%);
-  --internal-border-color: oklch(var(--standard-border-color) / 10%);
-
   /* black - dark/light theme immutable */
   --black-border-color: oklch(var(--black-border-lch) / 15%);
   --selected-black-border-color: oklch(var(--black-border-lch) / 80%);
@@ -627,15 +590,6 @@
   /* white - dark/light theme immutable */
   --white-border-color: oklch(var(--white-border-lch) / 10%);
   --selected-white-border-color: oklch(var(--white-border-lch) / 80%);
-
-  /* strength */
-  --subtle-border-color: oklch(var(--standard-border-color) / 8%);
-  --strong-border-color: oklch(var(--standard-border-color) / 22%);
-
-  /* states */
-  --selected-border-color: oklch(var(--standard-border-color) / 35%);
-  --strong-selected-border-color: oklch(var(--standard-border-color) / 50%);
-  --disabled-border-color: oklch(var(--standard-border-color) / 5%);
 
   /* solids */
   --solid-internal-border-color: oklch(0.95 0 0 / 100%);;
@@ -946,10 +900,13 @@
 
 }
 
+/* -------------------
+       Dark Mode
+-------------------- */
 
 
 
-html.dark {
+html.dark, .dark.theme, [dark], [theme="dark"] {
 
   --dark-mode: true;
   --page-background: #000000;
@@ -995,3 +952,53 @@ html.dark {
 }
 
 
+/* Dark/Light derived values need to be defined in same scope as theme */
+:root, .light.theme, .dark.theme, [light], [dark], [theme], :host {
+
+  /* Black in Light Mode, White in Dark Mode */
+  --standard-5: oklch(var(--standard-color) / 5%);
+  --standard-10: oklch(var(--standard-color) / 10%);
+  --standard-15: oklch(var(--standard-color) / 15%);
+  --standard-20: oklch(var(--standard-color) / 20%);
+  --standard-30: oklch(var(--standard-color) / 30%);
+  --standard-40: oklch(var(--standard-color) / 40%);
+  --standard-50: oklch(var(--standard-color) / 50%);
+  --standard-60: oklch(var(--standard-color) / 60%);
+  --standard-70: oklch(var(--standard-color) / 70%);
+  --standard-80: oklch(var(--standard-color) / 80%);
+  --standard-85: oklch(var(--standard-color) / 85%);
+  --standard-90: oklch(var(--standard-color) / 90%);
+  --standard-95: oklch(var(--standard-color) / 95%);
+  --standard-100: oklch(var(--standard-color) / 100%);
+
+  /* White in Light Mode, Black in Dark Mode */
+  --inverted-5: oklch(var(--inverted-color) / 5%);
+  --inverted-10: oklch(var(--inverted-color) / 10%);
+  --inverted-15: oklch(var(--inverted-color) / 15%);
+  --inverted-20: oklch(var(--inverted-color) / 20%);
+  --inverted-30: oklch(var(--inverted-color) / 30%);
+  --inverted-40: oklch(var(--inverted-color) / 40%);
+  --inverted-50: oklch(var(--inverted-color) / 50%);
+  --inverted-60: oklch(var(--inverted-color) / 60%);
+  --inverted-70: oklch(var(--inverted-color) / 70%);
+  --inverted-80: oklch(var(--inverted-color) / 80%);
+  --inverted-85: oklch(var(--inverted-color) / 85%);
+  --inverted-90: oklch(var(--inverted-color) / 90%);
+  --inverted-95: oklch(var(--inverted-color) / 95%);
+  --inverted-100: oklch(var(--inverted-color) / 100%);
+
+  /* border colors swap on dark mode theme */
+  --border-color: oklch(var(--standard-border-color) / 15%);
+  --internal-border-color: oklch(var(--standard-border-color) / 10%);
+  --subtle-border-color: oklch(var(--standard-border-color) / 8%);
+  --strong-border-color: oklch(var(--standard-border-color) / 22%);
+  --selected-border-color: oklch(var(--standard-border-color) / 35%);
+  --strong-selected-border-color: oklch(var(--standard-border-color) / 50%);
+  --disabled-border-color: oklch(var(--standard-border-color) / 5%);
+
+  /* UI Chrome Colors */
+  --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
+  --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
+  --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
+
+}
