@@ -16,7 +16,7 @@ html, ui-menu.light.theme, ui-menu[light], ui-menu[theme="light"] {
 }
 
 
-ui-menu.dark.theme, ui-menu[dark], ui-menu[theme="dark"] {
+html.dark, ui-menu.dark.theme, ui-menu[dark], ui-menu[theme="dark"] {
   --menu-selection-item-color: var(--standard-30);
 
   --menu-selection-item-hover-background: var(--transparent-black);

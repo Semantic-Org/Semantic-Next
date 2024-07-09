@@ -1,0 +1,294 @@
+
+/*******************************
+        Derived Values
+*******************************/
+
+:root {
+  
+  /* -------------------
+         Spacing
+  -------------------- */
+
+  --padding: var(--spacing);
+  --compact-padding: var(--compact-spacing);
+
+  --horizontally-padded: 0rem var(--padding);
+  --vertically-padded: var(--padding) 0rem;
+
+  --margin: var(--spacing);
+  --vertically-spaced: var(--spacing) 0rem;
+  --horizontally-spaced: 0rem var(--spacing);
+
+  --centered: var(--spacing) auto;
+
+  /* -------------------
+      Border Radius
+  -------------------- */
+
+  /* Attached Borders */
+  --top-attached-border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+  --right-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
+  --bottom-attached-border-radius: 0px 0px var(--border-radius) var(--border-radius);
+  --left-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
+
+
+  /* -------------------
+         Loader 
+  -------------------- */
+
+  /* Loaders Position Offset */
+  --loader-offset: calc(var(--loader-size) / 2 * -1);
+  --loader-margin: var(--loader-offset) 0em 0em var(--loader-offset);
+
+  /* -------------------
+         Loader 
+  -------------------- */
+
+  /* Maximum Single Character Glyph Width, aka Capital "W" */
+  --glyph-width: 1.1em;
+
+  /* Used to match floats with text */
+  --line-height-offset: calc((var(--line-height) - 1em) / 2);
+  --header-line-height-offset: calc(var(--header-line-height) - 1em) / 2;
+
+  /* Header Spacing */
+  --header-top-margin: calc(2rem - var(--header-line-height-offset));
+  --header-bottom-margin: 1rem;
+  --header-margin: var(--header-top-margin) 0em var(--header-bottom-margin);
+
+  /* Minimum Mobile Width */
+  --page-min-width: 320px;
+
+  /* Responsive */
+  --largest-mobile-screen: calc(var(--tablet-breakpoint) - 1px);
+  --largest-tablet-screen: calc(var(--computer-breakpoint) - 1px);
+  --largest-small-monitor: calc(var(--large-monitor-breakpoint) - 1px);
+  --largest-large-monitor: calc(var(--widescreen-monitor-breakpoint) - 1px);
+
+
+  /* -------------------
+       Sizing Values
+  -------------------- */
+
+  /*
+    These are the pixel values expressed as a ratio of base em
+    This is used to calculate em sizing
+  */
+
+  /* Size of page font */
+  --font-size: calc(var(--em-size) * 1px);
+
+  --mini-ratio: calc(var(--mini-size-px) / var(--em-size));
+  --tiny-ratio: calc(var(--tiny-size-px) / var(--em-size));
+  --small-ratio: calc(var(--small-size-px) / var(--em-size));
+  --medium-ratio: calc(var(--medium-size-px) / var(--em-size));
+  --large-ratio: calc(var(--large-size-px) / var(--em-size));
+  --big-ratio: calc(var(--big-size-px) / var(--em-size));
+  --huge-ratio: calc(var(--huge-size-px) / var(--em-size));
+  --massive-ratio: calc(var(--massive-size-px) / var(--em-size));
+
+  /* rem (relative to html/body tag) */
+  --mini: calc(var(--mini-ratio) * 1rem);
+  --tiny: calc(var(--tiny-ratio) * 1rem);
+  --small: calc(var(--small-ratio) * 1rem);
+  --medium: calc(var(--medium-ratio) * 1rem);
+  --large: calc(var(--large-ratio) * 1rem);
+  --big: calc(var(--big-ratio) * 1rem);
+  --huge: calc(var(--huge-ratio) * 1rem);
+  --massive: calc(var(--massive-ratio) * 1rem);
+
+  /* em (relative to container) */
+  --relative-mini: calc(var(--mini-ratio) * 1em);
+  --relative-tiny: calc(var(--tiny-ratio) * 1em);
+  --relative-small: calc(var(--small-ratio) * 1em);
+  --relative-medium: calc(var(--medium-ratio) * 1em);
+  --relative-large: calc(var(--large-ratio) * 1em);
+  --relative-big: calc(var(--big-ratio) * 1em);
+  --relative-huge: calc(var(--huge-ratio) * 1em);
+  --relative-massive: calc(var(--massive-ratio) * 1em);
+
+  /* -------------------
+    Exact Pixel Values
+  -------------------- */
+  /*
+    These are used to specify exact pixel values in em
+    for things like borders that remain constantly
+    sized as emSize adjusts
+
+    Since there are many more sizes than names for sizes,
+    these are named by their original pixel values.
+
+  */
+
+  --1px: calc((1 / var(--em-size)) * 1rem);
+  --2px: calc((2 / var(--em-size)) * 1rem);
+  --3px: calc((3 / var(--em-size)) * 1rem);
+  --4px: calc((4 / var(--em-size)) * 1rem);
+  --5px: calc((5 / var(--em-size)) * 1rem);
+  --6px: calc((6 / var(--em-size)) * 1rem);
+  --7px: calc((7 / var(--em-size)) * 1rem);
+  --8px: calc((8 / var(--em-size)) * 1rem);
+  --9px: calc((9 / var(--em-size)) * 1rem);
+  --10px: calc((10 / var(--em-size)) * 1rem);
+  --11px: calc((11 / var(--em-size)) * 1rem);
+  --12px: calc((12 / var(--em-size)) * 1rem);
+  --13px: calc((13 / var(--em-size)) * 1rem);
+  --14px: calc((14 / var(--em-size)) * 1rem);
+  --15px: calc((15 / var(--em-size)) * 1rem);
+  --16px: calc((16 / var(--em-size)) * 1rem);
+  --17px: calc((17 / var(--em-size)) * 1rem);
+  --18px: calc((18 / var(--em-size)) * 1rem);
+  --19px: calc((19 / var(--em-size)) * 1rem);
+  --20px: calc((20 / var(--em-size)) * 1rem);
+  --21px: calc((21 / var(--em-size)) * 1rem);
+  --22px: calc((22 / var(--em-size)) * 1rem);
+  --23px: calc((23 / var(--em-size)) * 1rem);
+  --24px: calc((24 / var(--em-size)) * 1rem);
+  --25px: calc((25 / var(--em-size)) * 1rem);
+  --26px: calc((26 / var(--em-size)) * 1rem);
+  --27px: calc((27 / var(--em-size)) * 1rem);
+  --28px: calc((28 / var(--em-size)) * 1rem);
+  --29px: calc((29 / var(--em-size)) * 1rem);
+  --30px: calc((30 / var(--em-size)) * 1rem);
+  --31px: calc((31 / var(--em-size)) * 1rem);
+  --32px: calc((32 / var(--em-size)) * 1rem);
+  --33px: calc((33 / var(--em-size)) * 1rem);
+  --34px: calc((34 / var(--em-size)) * 1rem);
+  --35px: calc((35 / var(--em-size)) * 1rem);
+  --36px: calc((36 / var(--em-size)) * 1rem);
+  --37px: calc((37 / var(--em-size)) * 1rem);
+  --38px: calc((38 / var(--em-size)) * 1rem);
+  --39px: calc((39 / var(--em-size)) * 1rem);
+  --40px: calc((40 / var(--em-size)) * 1rem);
+  --41px: calc((41 / var(--em-size)) * 1rem);
+  --42px: calc((42 / var(--em-size)) * 1rem);
+  --43px: calc((43 / var(--em-size)) * 1rem);
+  --44px: calc((44 / var(--em-size)) * 1rem);
+  --45px: calc((45 / var(--em-size)) * 1rem);
+  --46px: calc((46 / var(--em-size)) * 1rem);
+  --47px: calc((47 / var(--em-size)) * 1rem);
+  --48px: calc((48 / var(--em-size)) * 1rem);
+  --49px: calc((49 / var(--em-size)) * 1rem);
+  --50px: calc((50 / var(--em-size)) * 1rem);
+  --51px: calc((51 / var(--em-size)) * 1rem);
+  --52px: calc((52 / var(--em-size)) * 1rem);
+  --53px: calc((53 / var(--em-size)) * 1rem);
+  --54px: calc((54 / var(--em-size)) * 1rem);
+  --55px: calc((55 / var(--em-size)) * 1rem);
+  --56px: calc((56 / var(--em-size)) * 1rem);
+  --57px: calc((57 / var(--em-size)) * 1rem);
+  --58px: calc((58 / var(--em-size)) * 1rem);
+  --59px: calc((59 / var(--em-size)) * 1rem);
+  --60px: calc((60 / var(--em-size)) * 1rem);
+  --61px: calc((61 / var(--em-size)) * 1rem);
+  --62px: calc((62 / var(--em-size)) * 1rem);
+  --63px: calc((63 / var(--em-size)) * 1rem);
+  --64px: calc((64 / var(--em-size)) * 1rem);
+
+  --relative-1px: calc((1 / var(--em-size)) * 1em);
+  --relative-2px: calc((2 / var(--em-size)) * 1em);
+  --relative-3px: calc((3 / var(--em-size)) * 1em);
+  --relative-4px: calc((4 / var(--em-size)) * 1em);
+  --relative-5px: calc((5 / var(--em-size)) * 1em);
+  --relative-6px: calc((6 / var(--em-size)) * 1em);
+  --relative-7px: calc((7 / var(--em-size)) * 1em);
+  --relative-8px: calc((8 / var(--em-size)) * 1em);
+  --relative-9px: calc((9 / var(--em-size)) * 1em);
+  --relative-10px: calc((10 / var(--em-size)) * 1em);
+  --relative-11px: calc((11 / var(--em-size)) * 1em);
+  --relative-12px: calc((12 / var(--em-size)) * 1em);
+  --relative-13px: calc((13 / var(--em-size)) * 1em);
+  --relative-14px: calc((14 / var(--em-size)) * 1em);
+  --relative-15px: calc((15 / var(--em-size)) * 1em);
+  --relative-16px: calc((16 / var(--em-size)) * 1em);
+  --relative-17px: calc((17 / var(--em-size)) * 1em);
+  --relative-18px: calc((18 / var(--em-size)) * 1em);
+  --relative-19px: calc((19 / var(--em-size)) * 1em);
+  --relative-20px: calc((20 / var(--em-size)) * 1em);
+  --relative-21px: calc((21 / var(--em-size)) * 1em);
+  --relative-22px: calc((22 / var(--em-size)) * 1em);
+  --relative-23px: calc((23 / var(--em-size)) * 1em);
+  --relative-24px: calc((24 / var(--em-size)) * 1em);
+  --relative-25px: calc((25 / var(--em-size)) * 1em);
+  --relative-26px: calc((26 / var(--em-size)) * 1em);
+  --relative-27px: calc((27 / var(--em-size)) * 1em);
+  --relative-28px: calc((28 / var(--em-size)) * 1em);
+  --relative-29px: calc((29 / var(--em-size)) * 1em);
+  --relative-30px: calc((30 / var(--em-size)) * 1em);
+  --relative-31px: calc((31 / var(--em-size)) * 1em);
+  --relative-32px: calc((32 / var(--em-size)) * 1em);
+  --relative-33px: calc((33 / var(--em-size)) * 1em);
+  --relative-34px: calc((34 / var(--em-size)) * 1em);
+  --relative-35px: calc((35 / var(--em-size)) * 1em);
+  --relative-36px: calc((36 / var(--em-size)) * 1em);
+  --relative-37px: calc((37 / var(--em-size)) * 1em);
+  --relative-38px: calc((38 / var(--em-size)) * 1em);
+  --relative-39px: calc((39 / var(--em-size)) * 1em);
+  --relative-40px: calc((40 / var(--em-size)) * 1em);
+  --relative-41px: calc((41 / var(--em-size)) * 1em);
+  --relative-42px: calc((42 / var(--em-size)) * 1em);
+  --relative-43px: calc((43 / var(--em-size)) * 1em);
+  --relative-44px: calc((44 / var(--em-size)) * 1em);
+  --relative-45px: calc((45 / var(--em-size)) * 1em);
+  --relative-46px: calc((46 / var(--em-size)) * 1em);
+  --relative-47px: calc((47 / var(--em-size)) * 1em);
+  --relative-48px: calc((48 / var(--em-size)) * 1em);
+  --relative-49px: calc((49 / var(--em-size)) * 1em);
+  --relative-50px: calc((50 / var(--em-size)) * 1em);
+  --relative-51px: calc((51 / var(--em-size)) * 1em);
+  --relative-52px: calc((52 / var(--em-size)) * 1em);
+  --relative-53px: calc((53 / var(--em-size)) * 1em);
+  --relative-54px: calc((54 / var(--em-size)) * 1em);
+  --relative-55px: calc((55 / var(--em-size)) * 1em);
+  --relative-56px: calc((56 / var(--em-size)) * 1em);
+  --relative-57px: calc((57 / var(--em-size)) * 1em);
+  --relative-58px: calc((58 / var(--em-size)) * 1em);
+  --relative-59px: calc((59 / var(--em-size)) * 1em);
+  --relative-60px: calc((60 / var(--em-size)) * 1em);
+  --relative-61px: calc((61 / var(--em-size)) * 1em);
+  --relative-62px: calc((62 / var(--em-size)) * 1em);
+  --relative-63px: calc((63 / var(--em-size)) * 1em);
+  --relative-64px: calc((64 / var(--em-size)) * 1em);
+
+
+  /* -------------------
+       Split Widths
+  -------------------- */
+
+  /* Columns */
+  --one-wide: calc(1 / var(--column-count) * 100%);
+  --two-wide: calc(2 / var(--column-count) * 100%);
+  --three-wide: calc(3 / var(--column-count) * 100%);
+  --four-wide: calc(4 / var(--column-count) * 100%);
+  --five-wide: calc(5 / var(--column-count) * 100%);
+  --six-wide: calc(6 / var(--column-count) * 100%);
+  --seven-wide: calc(7 / var(--column-count) * 100%);
+  --eight-wide: calc(8 / var(--column-count) * 100%);
+  --nine-wide: calc(9 / var(--column-count) * 100%);
+  --ten-wide: calc(10 / var(--column-count) * 100%);
+  --eleven-wide: calc(11 / var(--column-count) * 100%);
+  --twelve-wide: calc(12 / var(--column-count) * 100%);
+  --thirteen-wide: calc(13 / var(--column-count) * 100%);
+  --fourteen-wide: calc(14 / var(--column-count) * 100%);
+  --fifteen-wide: calc(15 / var(--column-count) * 100%);
+  --sixteen-wide: calc(16 / var(--column-count) * 100%);
+
+  --one-column: calc(1 / 1 * 100%);
+  --two-column: calc(1 / 2 * 100%);
+  --three-column: calc(1 / 3 * 100%);
+  --four-column: calc(1 / 4 * 100%);
+  --five-column: calc(1 / 5 * 100%);
+  --six-column: calc(1 / 6 * 100%);
+  --seven-column: calc(1 / 7 * 100%);
+  --eight-column: calc(1 / 8 * 100%);
+  --nine-column: calc(1 / 9 * 100%);
+  --ten-column: calc(1 / 10 * 100%);
+  --eleven-column: calc(1 / 11 * 100%);
+  --twelve-column: calc(1 / 12 * 100%);
+  --thirteen-column: calc(1 / 13 * 100%);
+  --fourteen-column: calc(1 / 14 * 100%);
+  --fifteen-column: calc(1 / 15 * 100%);
+  --sixteen-column: calc(1 / 16 * 100%);
+
+}
+

@@ -1,0 +1,131 @@
+/*******************************
+         Constants
+*******************************/
+
+/* These generally will not need to be modified */
+
+:root {
+
+  /* -------------------
+       Breakpoints
+  -------------------- */
+
+  --mobile-breakpoint: 320px;
+  --tablet-breakpoint: 768px;
+  --computer-breakpoint: 992px;
+  --large-monitor-breakpoint: 1200px;
+  --widescreen-monitor-breakpoint: 1920px;
+
+  /* -------------------
+         Z-Index
+  -------------------- */
+
+  --page-layer: 1;
+  --page-layer-2: 2;
+  --page-layer-3: 3;
+  --page-layer-4: 4;
+  --page-layer-5: 5;
+
+  --float-layer: 101;
+  --float-layer-2: 102;
+  --float-layer-3: 103;
+  --float-layer-4: 104;
+  --float-layer-5: 105;
+
+  --overlay-layer: 1001;
+  --overlay-layer-2: 1002;
+  --overlay-layer-3: 1003;
+  --overlay-layer-4: 1004;
+  --overlay-layer-5: 1005;
+
+  /* -------------------
+         Scrollbar
+  -------------------- */
+
+  /* Rendered Scrollbar Width */
+  --default-scrollbar-width: 17px;
+
+  /* -------------------
+          Colors
+  -------------------- */
+
+  --white-text-color: var(--white-80);
+  --black-text-color: var(--black-80);
+
+  /* ---   Neutrals  --- */
+  --white-5: oklch(var(--white-lch) / 5%);
+  --white-10: oklch(var(--white-lch) / 10%);
+  --white-20: oklch(var(--white-lch) / 20%);
+  --white-30: oklch(var(--white-lch) / 30%);
+  --white-40: oklch(var(--white-lch) / 40%);
+  --white-50: oklch(var(--white-lch) / 50%);
+  --white-60: oklch(var(--white-lch) / 60%);
+  --white-70: oklch(var(--white-lch) / 70%);
+  --white-80: oklch(var(--white-lch) / 80%);
+  --white-85: oklch(var(--white-lch) / 85%);
+  --white-90: oklch(var(--white-lch) / 90%);
+  --white-95: oklch(var(--white-lch) / 95%);
+  --white-100: oklch(var(--white-lch) / 100%);
+  --white: var(--white-100);
+
+  --black-5: oklch(var(--black-lch) / 5%);
+  --black-10: oklch(var(--black-lch) / 10%);
+  --black-15: oklch(var(--black-lch) / 15%);
+  --black-20: oklch(var(--black-lch) / 20%);
+  --black-30: oklch(var(--black-lch) / 30%);
+  --black-40: oklch(var(--black-lch) / 40%);
+  --black-50: oklch(var(--black-lch) / 50%);
+  --black-60: oklch(var(--black-lch) / 60%);
+  --black-70: oklch(var(--black-lch) / 70%);
+  --black-80: oklch(var(--black-lch) / 80%);
+  --black-85: oklch(var(--black-lch) / 85%);
+  --black-90: oklch(var(--black-lch) / 90%);
+  --black-95: oklch(var(--black-lch) / 95%);
+  --black-100: oklch(var(--black-lch) / 100%);
+  --black: var(--black-100);
+
+  --white-solid-100: oklch(1 0 0 / 100%);
+  --white-solid-95: oklch(0.95 0 0 / 100%);
+  --white-solid-90: oklch(0.9 0 0 / 100%);
+  --white-solid-85: oklch(0.85 0 0 / 100%);
+  --white-solid-80: oklch(0.8 0 0 / 100%);
+  --white-solid-70: oklch(0.7 0 0 / 100%);
+  --white-solid-60: oklch(0.6 0 0 / 100%);
+  --white-solid-50: oklch(0.5 0 0 / 100%);
+  --white-solid-40: oklch(0.4 0 0 / 100%);
+  --white-solid-30: oklch(0.3 0 0 / 100%);
+  --white-solid-20: oklch(0.2 0 0 / 100%);
+  --white-solid-15: oklch(0.15 0 0 / 100%);
+  --white-solid-10: oklch(0.1 0 0 / 100%);
+  --white-solid-5: oklch(0.05 0 0 / 100%);
+
+  --black-solid-100: oklch(0 0 0 / 100%);
+  --black-solid-95: oklch(0.05 0 0 / 100%);
+  --black-solid-90: oklch(0.1 0 0 / 100%);
+  --black-solid-85: oklch(0.15 0 0 / 100%);
+  --black-solid-80: oklch(0.2 0 0 / 100%);
+  --black-solid-70: oklch(0.3 0 0 / 100%);
+  --black-solid-60: oklch(0.4 0 0 / 100%);
+  --black-solid-50: oklch(0.5 0 0 / 100%);
+  --black-solid-40: oklch(0.6 0 0 / 100%);
+  --black-solid-30: oklch(0.7 0 0 / 100%);
+  --black-solid-20: oklch(0.8 0 0 / 100%);
+  --black-solid-15: oklch(0.85 0 0 / 100%);
+  --black-solid-10: oklch(0.9 0 0 / 100%);
+  --black-solid-5: oklch(0.95 0 0 / 100%);
+
+  /* -------------------
+          Brands
+  -------------------- */
+
+  --facebook-color: #1877F2;
+  --twitter-color: #55ACEE;
+  --google-plus-color: #DD4B39;
+  --linked-in-color: #1F88BE;
+  --youtube-color: #FF0000;
+  --pinterest-color: #BD081C;
+  --instagram-color: #FD1D1D;
+  --instagram-gradient: linear-gradient(45deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%);
+
+}
+
