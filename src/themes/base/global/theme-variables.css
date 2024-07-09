@@ -76,9 +76,6 @@
          Borders
   -------------------- */
 
-  /* theme mutable border */
-  --standard-border-color: var(--black-border-lch);
-  --inverted-border-color: var(--white-border-lch);
 
   /* border colors swap on dark mode theme */
   --border-color: oklch(var(--standard-border-color) / 15%);
