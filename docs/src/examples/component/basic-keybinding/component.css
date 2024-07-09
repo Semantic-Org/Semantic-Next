@@ -1,0 +1,10 @@
+.block {
+  background: var(--angled-gradient);
+  box-shadow: var(--subtle-shadow);
+  border: var(--border);
+  transition: all 0.1s linear;
+}
+p {
+  margin-top: var(--margin);
+  color: var(--standard-50);
+}
