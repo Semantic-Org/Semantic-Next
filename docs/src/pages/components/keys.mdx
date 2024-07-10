@@ -6,22 +6,22 @@ description: Attaching keyboard events to components
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic components can be attached to any component by passing in `keys` to `createComponent`
+Keybindings can be attached to any component by passing in `keys` to `createComponent`
 
 ```javascript
 createComponent({
   keys: {
-    'ctrl + f'() {
-      // handle search
+    'ctrl + f'({ tpl }) {
+      tpl.focusSearch()
     },
-    'up'() {
-      // handle up
+    'up'({ tpl }) {
+      tpl.selectPreviousResult();
     },
-    'down'() {
-      // handle down
+    'down'({ tpl }) {
+      tpl.selectNextResult();
     },
-    'esc'() {
-      // handle clear
+    'esc'({ tpl }) {
+      tpl.blurSearch();
     },
   }
 });
@@ -52,6 +52,9 @@ const keys = {
 };
 ```
 ### Multiple Keys
+
+Multiple keys can be bound to the same event using a comma separated list.
+
 ```javascript
 const keys = {
   'up, down, left, right' () => {
@@ -75,6 +78,18 @@ const keys = {
 };
 ```
 
+### Key Sequences
+
+Key sequences can be used by leaving a space between each key. Keys will need to be pressed within a `500ms` interval to be part of the same sequence.
+
+```javascript
+const keys = {
+  'up up down down' () => {
+    // 4 keys pressed in sequence
+  }
+};
+```
+
 ### Basic Keybinding Example
 
 <PlaygroundExample id="basic-keybinding" direction="horizontal"></PlaygroundExample>
@@ -89,21 +104,28 @@ In addition to the standard callback data found in [lifecycle guide](/components
 | repeatedKey       | whether the key is held down                     |
 
 
-
 ## Dynamic Keybinding
 
-All [lifecycle callbacks](/components/lifecycle) receive as a parameter two methods `bindKey` and `unbindKey` which can be u
+All [lifecycle callbacks](/components/lifecycle) receive as a parameter two methods `bindKey` and `unbindKey` which can be used to dynamically add and remove keybindings as necessary.
 
-
-
-### Key Sequences
-
-Key sequences can be used by leaving a space between each key. Keys will need to be pressed within a `500ms` interval to be part of the same sequence.
+This is often used with [componet reactivity](/component/reactivity) to adjust key bindings when something significant has changed with a component.
 
 ```javascript
-const keys = {
-  'up up down down' () => {
-    // 4 keys pressed in sequence
+const createInstance = ({ reaction, bindKey, unbindKey }) => ({
+  initialize() {
+    reaction(() => {
+      if(tpl.isSomeCondition()) {
+        bindKey('enter', tpl.submitForm());
+      }
+      else {
+        unbindKey('enter');
+      }
+    })
   }
-};
+});
 ```
+
+
+<PlaygroundExample id="advanced-keybinding" direction="horizontal"></PlaygroundExample>
+
+

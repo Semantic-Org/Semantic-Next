@@ -1,0 +1,147 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component Instances
+icon: command
+description: Defining your components behavior and exposed properties
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+
+The `createInstance` callback is used to define the behavior of your component including any static properties and methods that you might want to access.
+
+```javascript
+const state = { counter: 0 };
+const createInstance = ({tpl, state, settings}) => ({
+  setCounter(number) {
+    state.counter.set(number);
+  },
+  startCounter() {
+    state.running.set(true);
+    tpl.interval = setInterval(() => state.counter.increment(), 1000);
+  },
+  stopCounter() {
+    state.running.set(false);
+    clearInterval(tpl.interval);
+  },
+});
+```
+## Accessing Instances
+
+
+### Inside Component
+
+
+Instances are passed through to all other callbacks as `tpl` allowing you to reference methods and values directly from [events](/component/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
+
+##### Lifecycle
+```javascript
+
+const onRendered(({ tpl, isClient }) => {
+  if(isClient) {
+    tpl.draw();
+  }
+});
+```
+
+##### Keybindings
+```javascript
+const keys = {
+  'f'({ tpl }) {
+    tpl.search();
+  }
+}
+```
+
+
+##### Events
+
+```javascript
+const events = {
+  'click .stop'({ tpl }) {
+    tpl.stopCounter();
+  }
+  'click .start'({ tpl }) {
+    tpl.startCounter();
+  }
+}
+```
+
+### In Templates
+
+Your template's [data context](/components/data) can be used to access values from your component instance directly.
+
+##### Templates
+```html
+<p>Your name is {{getName}}</p>
+```
+
+## From Other Components
+
+Other components have special helpers to access template instances of other components rendered to the page.
+
+### findParent
+
+The most common scenario will require you to access some functionality on a parent template instance from a [sub template](templates/subtemplates) or a nested web component.
+
+The `findParent` helper can be used in this scenario, allowing you to walk up the render tree looking for a component matching the specified name.
+
+```javascript
+const createInstance = ({tpl, findParent}) => {
+  getTodos() => {
+    const parent = findParent('todo-list');
+    return parent.todos;
+  }
+};
+```
+
+### findChild / findChildren
+
+You can use `findChild` and `findChildren` to look down the render tree for any subtemplates that match a given component name
+
+```javascript
+const createInstance = ({tpl, findChildren}) => {
+  getRowName(id) => {
+    const rows = findChildren('table-rows');
+    const row = rows.filter(row => row._id == id);
+    return row.name;
+  }
+};
+```
+
+### findTemplate
+
+If you need to access an arbitrary template from any other template you can use `findTemplate`
+
+```javascript
+const createInstance = ({tpl, findTemplate}) => {
+  getTodos() => {
+    const sibling = findTemplate('sibling-component');
+    return sibling.someMethod();
+  }
+};
+```
+
+
+## From Page
+
+You can access your template instance directly from the DOM to modify its internal state, or access values.
+
+You can use Query's `getComponent()` helper
+
+With Query
+```javascript
+import { $ } from '@semantic-ui/query';
+const tpl = $('ui-counter').getComponent();
+tpl.setCounter(2);
+```
+
+With Pure JS
+```javascript
+const { tpl } = document.querySelector('ui-counter');
+tpl.setCounter(2);
+```
+
+
+<PlaygroundExample id="external-calls" direction="horizontal"></PlaygroundExample>
+
+

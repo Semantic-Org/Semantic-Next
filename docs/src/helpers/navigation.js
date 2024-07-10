@@ -101,6 +101,10 @@ export const sidebarMenuFramework = [
         url: '/components/lifecycle'
       },
       {
+        name: 'Instances',
+        url: '/components/instances'
+      },
+      {
         name: 'Data Sources',
         url: '/components/data'
       },
