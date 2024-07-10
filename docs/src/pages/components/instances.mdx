@@ -78,8 +78,9 @@ Your template's [data context](/components/data) can be used to access values fr
 <p>Your name is {{getName}}</p>
 ```
 
-## Accordion Example
+### Accordion Example
 
+The following example shows using `tpl` to access behaviors from inside event handlers, and when iterating through `sections` from the template.
 
 <PlaygroundExample id="accordion" direction="horizontal"></PlaygroundExample>
 
@@ -150,7 +151,10 @@ const { tpl } = document.querySelector('ui-counter');
 tpl.setCounter(2);
 ```
 
+### Page Access Example
+In this example the external input on the page updates the internal reactive state of the web component, preventing the counter from running when the external input is focused.
 
+You can view this interaction in `index.js`.
 <PlaygroundExample id="external-calls" direction="horizontal"></PlaygroundExample>
 
 

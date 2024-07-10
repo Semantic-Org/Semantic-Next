@@ -1,4 +1,4 @@
-import { asyncEach, tokenize, inArray, camelToKebab, filterObject, each } from '@semantic-ui/utils';
+import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, each } from '@semantic-ui/utils';
 
 /* These are top level to make it easier to format */
 
@@ -197,7 +197,19 @@ export const getExampleFiles = async(example, allExampleFiles) => {
   await asyncEach(allExampleFiles, async (file, path) => {
     const pathRegExp = new RegExp(`../../examples/.*${exampleID}/`);
     if (path.match(pathRegExp)) {
+
       const fileName = path.replace(pathRegExp, '');
+
+      const getContentType = (filename) => {
+        const extension = filename.split('.').pop();
+        const contentTypes = {
+          html: 'text/html',
+          css: 'text/css',
+          js: 'text/javascript'
+        };
+        return get(contentTypes, extension) || 'text/html';
+      };
+
       if(inArray(fileName, ['index.html'])) {
         const fileContent = await file();
         exampleFiles['index.html'] = {
@@ -244,6 +256,14 @@ export const getExampleFiles = async(example, allExampleFiles) => {
           contentType: 'text/javascript',
           content: fileText
         };
+      }
+      else if(example.exampleType == 'folder') {
+        const fileContent = await file();
+        exampleFiles[fileName] = {
+          contentType: getContentType(fileName),
+          content: fileContent.default
+        };
+        return;
       }
     }
   });

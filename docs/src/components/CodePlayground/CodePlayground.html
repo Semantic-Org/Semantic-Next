@@ -46,13 +46,6 @@
             class="files"
             part="menu"
           ></ui-menu>
-          {{#if exampleURL}}
-            <div class="links">
-              <a href="{{exampleURL}}" class="sandbox link">
-                <ui-icon codesandbox link></ui-icon>
-              </a>
-            </div>
-          {{/if}}
         </div>
         {{>template
           name='CodePlaygroundFile'
@@ -66,7 +59,7 @@
         class="preview"
         exportparts="panel, handle"
       >
-        {{>CodePlaygroundPreview}}
+        {{>CodePlaygroundPreview exampleURL=exampleURL}}
       </ui-panel>
     </ui-panels>
   {{else}}

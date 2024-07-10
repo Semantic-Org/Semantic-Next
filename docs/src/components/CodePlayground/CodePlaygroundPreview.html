@@ -1,5 +1,12 @@
 <div class="menu">
   <ui-menu value={{tab}} items={{getMenu}} class="preview" part="menu"></ui-menu>
+  {{#if exampleURL}}
+    <div class="links">
+      <a href="{{exampleURL}}" class="sandbox link">
+        <ui-icon codesandbox link></ui-icon>
+      </a>
+    </div>
+  {{/if}}
 </div>
 {{#if is tab 'preview'}}
   <playground-preview part="preview" project="source"> </playground-preview>

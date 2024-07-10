@@ -158,7 +158,8 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     return get(settings.panelIndexes, filename);
   },
   getSort(filename) {
-    return settings.sortOrder.indexOf(filename);
+    const index = settings.sortOrder.indexOf(filename);
+    return (index == -1) ? Infinity : index;
   },
   getFileLabel(filename) {
     return get(settings.fileTitles, filename);
