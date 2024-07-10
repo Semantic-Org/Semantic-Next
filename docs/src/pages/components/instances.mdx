@@ -6,6 +6,11 @@ description: Defining your components behavior and exposed properties
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+Your component instance is a definition of the behaviors of your component and the values it stores.
+
+Unlike internal data like `state` which is only accessible internally, your template instance is accessible from the DOM and from any component in your page.
+
+### Creating Instances
 
 The `createInstance` callback is used to define the behavior of your component including any static properties and methods that you might want to access.
 
@@ -27,9 +32,7 @@ const createInstance = ({tpl, state, settings}) => ({
 ```
 ## Accessing Instances
 
-
 ### Inside Component
-
 
 Instances are passed through to all other callbacks as `tpl` allowing you to reference methods and values directly from [events](/component/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
 
@@ -77,7 +80,7 @@ Your template's [data context](/components/data) can be used to access values fr
 
 ## From Other Components
 
-Other components have special helpers to access template instances of other components rendered to the page.
+Component instances can be directly accessed from other components to access properties and methods directly.
 
 ### findParent
 

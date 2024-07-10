@@ -98,22 +98,13 @@ const keys = {
   'ctrl + f'({tpl}) {
     tpl.focusSearch();
   },
-  'up'({tpl, inputFocused}) {
-    if(!inputFocused) {
-      return;
-    }
+  'up'({tpl}) {
     tpl.selectPrevious();
   },
   'down'({tpl}) {
-    if(!inputFocused) {
-      return;
-    }
     tpl.selectNext();
   },
-  'esc'({tpl, inputFocused}) {
-    if(!inputFocused) {
-      return;
-    }
+  'esc'({tpl}) {
     tpl.clearSearch();
   }
 };
