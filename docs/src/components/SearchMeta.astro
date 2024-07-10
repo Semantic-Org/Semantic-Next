@@ -16,7 +16,7 @@ const props = each(Astro.props, (value, name) => {
 
 
 ---
-<searchMeta>
+<searchMeta data-pagefind-body>
   {meta.map((prop) => (
     <>
       <span data-pagefind-meta={prop.name}>{prop.value}</span>

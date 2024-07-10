@@ -16,6 +16,7 @@ const examplesCollection = defineCollection({
   schema: z.object({
     id: z.optional(z.string()),
     title: z.string(),
+    fold: z.optional(z.boolean()),
     shortTitle: z.optional(z.string()),
     category: z.string(),
     folder: z.optional(z.string()),

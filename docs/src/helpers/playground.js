@@ -237,7 +237,9 @@ export const getExampleFiles = async(example, allExampleFiles) => {
         const fileContent = await file();
         let fileText = fileContent.default;
         hasComponent = fileText.search('createComponent') > -1;
-        fileText = hideComponentBoilerplate(fileText);
+        if(example.fold !== false) {
+          fileText = hideComponentBoilerplate(fileText);
+        }
         exampleFiles['component.js'] = {
           contentType: 'text/javascript',
           content: fileText
