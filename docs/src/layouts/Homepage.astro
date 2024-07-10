@@ -7,7 +7,7 @@ let { title, description, searchMeta } = Astro.props;
 ---
 <Body title={title} description={description} searchMeta={searchMeta} >
   <TopBar floating showThemeSwitcher=false />
-  <page>
+  <page data-pagefind-body>
     <slot></slot>
   </page>
 </Body>
