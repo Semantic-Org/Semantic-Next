@@ -131,6 +131,8 @@
         }
         &:not(:first-of-type) .menu {
           border-top-right-radius: var(--border-radius);
+          border-left: none;
+          border-bottom: none;
         }
       }
 

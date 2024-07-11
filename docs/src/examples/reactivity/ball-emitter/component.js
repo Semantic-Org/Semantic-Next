@@ -1,33 +1,43 @@
 import { createComponent, getText } from '@semantic-ui/component';
-import { each, clone, generateID } from '@semantic-ui/utils';
+import { each, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const state = {
   balls: [],
-  isEmitting: false,
-  emitterX: 0,
-  emitterY: 0,
 };
 
 const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
-  lastTime: 0,
-  fps: 0,
-  emissionRate: 1, // balls per frame
-  initialBallCount: 100, // Number of balls to create at start
+
+  emitter: {
+    rate: 2, // balls per second
+    active: false,
+    x: 0,
+    y: 0,
+  },
 
   ball: {
+    initialCount: 50,
     r: { average: 2, variance: 1 },
     v: { average: 100, variance: 100 },
-    saturationDecayRate: 200, // percent per second
-    lightnessDecayRate: 20, // percent per second
-    minSaturation: 1,
-    minLightness: 15,
+    saturation: {
+      decayRate: 200,
+      min: 1
+    },
+    lightness: {
+      decayRate: 20,
+      min: 15,
+    },
+  },
+
+  render: {
+    lastTime: 0,
+    fps: 0,
   },
 
   startAnimation() {
-    tpl.lastTime = performance.now() * 0.001;
+    tpl.render.lastTime = performance.now() * 0.001;
     requestAnimationFrame(tpl.animate);
   },
 
@@ -37,12 +47,12 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 
   animate(currentTime) {
     currentTime *= 0.001;
-    const deltaTime = currentTime - tpl.lastTime;
-    tpl.lastTime = currentTime;
+    const deltaTime = currentTime - tpl.render.lastTime;
+    tpl.render.lastTime = currentTime;
 
-    tpl.fps = 1 / deltaTime;
+    tpl.render.fps = 1 / deltaTime;
 
-    if (state.isEmitting.peek()) {
+    if (tpl.emitter.active) {
       tpl.emitBalls();
     }
 
@@ -54,10 +64,10 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 
   emitBalls() {
     const newBalls = [];
-    for (let i = 0; i < tpl.emissionRate; i++) {
+    for (let i = 0; i < tpl.emitter.rate; i++) {
       newBalls.push(tpl.createBall({
-        x: state.emitterX.peek(),
-        y: state.emitterY.peek()
+        x: tpl.emitter.x,
+        y: tpl.emitter.y
       }));
     }
     const currentBalls = state.balls.peek();
@@ -113,14 +123,14 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     return {
       ...ball,
       saturation: Math.max(
-        tpl.ball.minSaturation,
-        ball.saturation - tpl.ball.saturationDecayRate * deltaTime
+        tpl.ball.saturation.min,
+        ball.saturation - tpl.ball.saturation.decayRate * deltaTime
       ),
       color: {
         ...ball.color,
         l: Math.max(
-          tpl.ball.minLightness,
-          ball.color.l - tpl.ball.lightnessDecayRate * deltaTime
+          tpl.ball.lightness.min,
+          ball.color.l - tpl.ball.lightness.decayRate * deltaTime
         )
       }
     };
@@ -222,7 +232,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     ctx.fillStyle = 'white';
     ctx.font = '12px Arial';
     ctx.textAlign = 'right';
-    ctx.fillText(`FPS: ${Math.round(tpl.fps)}`, canvas.width - 10, canvas.height - 10);
+    ctx.fillText(`FPS: ${Math.round(tpl.render.fps)}`, canvas.width - 10, canvas.height - 10);
   },
 
 });
@@ -230,7 +240,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 const onRendered = ({state, tpl}) => {
   const canvas = tpl.getCanvas();
   const initialBalls = [];
-  for (let i = 0; i < tpl.initialBallCount; i++) {
+  for (let i = 0; i < tpl.ball.initialCount; i++) {
     initialBalls.push(tpl.createBall({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height
@@ -243,30 +253,26 @@ const onRendered = ({state, tpl}) => {
 };
 
 const events = {
-  'mousedown canvas'({tpl, event, state}) {
+  'mousedown canvas'({tpl, event}) {
     const canvas = tpl.getCanvas();
     const rect = canvas.getBoundingClientRect();
-    state.emitterX.set(event.clientX - rect.left);
-    state.emitterY.set(event.clientY - rect.top);
-    state.isEmitting.set(true);
+    tpl.emitter.x = (event.clientX - rect.left);
+    tpl.emitter.y = (event.clientY - rect.top);
+    tpl.emitter.active = true;
   },
 
-  'mousemove canvas'({tpl, event, state}) {
-    if (state.isEmitting.peek()) {
+  'mousemove canvas'({tpl, event}) {
+    if (tpl.emitter.active) {
       const canvas = tpl.getCanvas();
       const rect = canvas.getBoundingClientRect();
-      state.emitterX.set(event.clientX - rect.left);
-      state.emitterY.set(event.clientY - rect.top);
+      tpl.emitter.x = (event.clientX - rect.left);
+      tpl.emitter.y = (event.clientY - rect.top);
     }
   },
 
-  'mouseup canvas'({state}) {
-    state.isEmitting.set(false);
+  'mouseup, mouseleave canvas'({tpl}) {
+    tpl.emitter.active = false;
   },
-
-  'mouseleave canvas'({state}) {
-    state.isEmitting.set(false);
-  }
 };
 
 export const BallSimulation = createComponent({
