@@ -24,6 +24,7 @@ const createInstance = ({state, tpl}) => ({
 });
 
 const events = {
+  // data-dimension and data-helper are passed through as data
   'click ui-button'({tpl, data}) {
     tpl.adjustSize(data);
   }

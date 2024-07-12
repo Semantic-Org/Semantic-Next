@@ -10,18 +10,10 @@ const state = {
 
 const createInstance = ({state, tpl}) => ({
   delta: 50,
-  increaseWidth() {
-    state.width.increment(tpl.delta);
-  },
-  decreaseWidth() {
-    state.width.decrement(tpl.delta);
-  },
-  increaseHeight() {
-    state.height.increment(tpl.delta);
-  },
-  decreaseHeight() {
-    state.height.decrement(tpl.delta);
-  },
+  increaseWidth: () =>  state.width.increment(tpl.delta),
+  decreaseWidth: () =>  state.width.decrement(tpl.delta),
+  increaseHeight: () => state.height.increment(tpl.delta),
+  decreaseHeight: () => state.height.decrement(tpl.delta),
   getStyle() {
     const width = state.width.get();
     const height = state.height.get();
