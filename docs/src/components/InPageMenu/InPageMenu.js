@@ -79,7 +79,7 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   // returns all titles and items as a flat ordered list
   getFlattenedMenu() {
     const menuArrays = settings.menu.map(section => {
-      const parentItem = { title: section?.title, _id: section?.id };
+      const parentItem = { title: section?.title, id: section?.id };
       return (section?.items)
         ? [parentItem, ...section.items]
         : [parentItem]
@@ -221,7 +221,6 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 
   onIntersection(entries) {
 
-    let activeEntry;
     const currentVisibleItems = state.visibleItems.get();
     let newVisibleItems = [...currentVisibleItems];
 
@@ -239,24 +238,9 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 
     state.visibleItems.set(newVisibleItems);
 
-    if(!state.currentItem.get()) {
-      activeEntry = entries[0];
-    }
-    else {
-      let eligibleEntries = entries.filter(entry => entry.boundingClientRect.top < 100);
-      activeEntry = (tpl.scrollingDown)
-        ? last(eligibleEntries)
-        : first(eligibleEntries)
-      ;
-
-      activeEntry = activeEntry || eligibleEntries[0];
-    }
-
-    if(!tpl.isScrolling && activeEntry) {
-      const itemID = settings.getActiveElementID(activeEntry.target);
-      if(itemID) {
-        tpl.setActiveItem(itemID);
-      }
+    if(!tpl.isScrolling && newVisibleItems.length) {
+      const visibleItems = tpl.getFlattenedMenu().map(item => item.id).filter(item => inArray(item, newVisibleItems));
+      tpl.setActiveItem(visibleItems[0]);
     }
   },
 

@@ -22,11 +22,13 @@
   --standard-10: oklch(var(--standard-color) / 10%);
   --standard-15: oklch(var(--standard-color) / 15%);
   --standard-20: oklch(var(--standard-color) / 20%);
+  --standard-25: oklch(var(--standard-color) / 25%);
   --standard-30: oklch(var(--standard-color) / 30%);
   --standard-40: oklch(var(--standard-color) / 40%);
   --standard-50: oklch(var(--standard-color) / 50%);
   --standard-60: oklch(var(--standard-color) / 60%);
   --standard-70: oklch(var(--standard-color) / 70%);
+  --standard-75: oklch(var(--standard-color) / 75%);
   --standard-80: oklch(var(--standard-color) / 80%);
   --standard-85: oklch(var(--standard-color) / 85%);
   --standard-90: oklch(var(--standard-color) / 90%);
@@ -38,11 +40,13 @@
   --inverted-10: oklch(var(--inverted-color) / 10%);
   --inverted-15: oklch(var(--inverted-color) / 15%);
   --inverted-20: oklch(var(--inverted-color) / 20%);
+  --inverted-25: oklch(var(--inverted-color) / 25%);
   --inverted-30: oklch(var(--inverted-color) / 30%);
   --inverted-40: oklch(var(--inverted-color) / 40%);
   --inverted-50: oklch(var(--inverted-color) / 50%);
   --inverted-60: oklch(var(--inverted-color) / 60%);
   --inverted-70: oklch(var(--inverted-color) / 70%);
+  --inverted-75: oklch(var(--inverted-color) / 75%);
   --inverted-80: oklch(var(--inverted-color) / 80%);
   --inverted-85: oklch(var(--inverted-color) / 85%);
   --inverted-90: oklch(var(--inverted-color) / 90%);

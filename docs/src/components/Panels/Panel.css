@@ -13,10 +13,9 @@
 :host {
   --panel-handle-height: 20px;
   --panel-divider-width: 1px;
-  --panel-divider-shadow-color: #181818;
 
-  --panel-divider-color: #232323;
-  --panel-divider-color-hover: #333333;
+  --panel-divider-color: var(--solid-border-color);
+  --panel-divider-color-hover: var(--selected-border-color);
   --panel-divider-color-resize: var(--primary-text-color);
 }
 
@@ -105,7 +104,6 @@
     margin: 0 auto;
     width: var(--panel-divider-width);
     height: 100%;
-    box-shadow: calc( var(--panel-divider-width) * -1) 0px 0px 0px var(--panel-divider-shadow-color);
   }
 }
 
@@ -121,7 +119,6 @@
     margin: auto 0;
     width: 100%;
     height: var(--panel-divider-width);
-    box-shadow: 0px calc( var(--panel-divider-width) * -1) 0px 0px var(--panel-divider-shadow-color);
   }
 }
 
