@@ -231,20 +231,6 @@ export const getExampleFiles = async(example, allExampleFiles) => {
           content: fileContent.default
         };
       }
-      else if(inArray(fileName, ['component.html', `${exampleID}.html`])) {
-        const fileContent = await file();
-        exampleFiles['component.html'] = {
-          contentType: 'text/html',
-          content: fileContent.default
-        };
-      }
-      else if(inArray(fileName, ['component.css', `${exampleID}.css`])) {
-        const fileContent = await file();
-        exampleFiles['component.css'] = {
-          contentType: 'text/css',
-          content: fileContent.default
-        };
-      }
       else if(inArray(fileName, ['component.js', `${exampleID}.js`])) {
         const fileContent = await file();
         let fileText = fileContent.default;
@@ -264,6 +250,20 @@ export const getExampleFiles = async(example, allExampleFiles) => {
           content: fileContent.default
         };
         return;
+      }
+      else if(inArray(fileName, ['component.html', `${exampleID}.html`])) {
+        const fileContent = await file();
+        exampleFiles['component.html'] = {
+          contentType: 'text/html',
+          content: fileContent.default
+        };
+      }
+      else if(inArray(fileName, ['component.css', `${exampleID}.css`])) {
+        const fileContent = await file();
+        exampleFiles['component.css'] = {
+          contentType: 'text/css',
+          content: fileContent.default
+        };
       }
     }
   });

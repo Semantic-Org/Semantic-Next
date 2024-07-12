@@ -1,9 +1,8 @@
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { createComponent } from '@semantic-ui/component';
+import { createComponent, getText } from '@semantic-ui/component';
 
-
-import template from './todo-header.html?raw';
-import css from './todo-header.css?raw';
+const css = await getText('./todo-header.css');
+const template = await getText('./todo-header.html');
 
 const createInstance = ({ tpl, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),

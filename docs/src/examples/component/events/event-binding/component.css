@@ -1,0 +1,17 @@
+.circle {
+  background: var(--blue) var(--strong-angled-gradient);
+  box-shadow: var(--subtle-shadow);
+  border: var(--border);
+  transition: all 500ms ease-in-out;
+  border-radius: var(--circular-radius)
+}
+p {
+  margin-top: var(--margin);
+  color: var(--standard-50);
+}
+hr {
+  margin: var(--vertically-spaced);
+  border-bottom: var(--border);
+  outline: none;
+  background: none;
+}
