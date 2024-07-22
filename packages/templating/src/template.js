@@ -337,7 +337,7 @@ export const Template = class Template {
         // BUG: iOS Safari will not bubble the touchstart / touchend events
         // if theres no handler on the actual element
         if(selector) {
-          $(selector, { root: this.renderRoot }).on(eventName, noop);
+          $(selector, { root: this.renderRoot }).on(eventName, noop, { abortController: this.eventController });
         }
         $(this.renderRoot).on(
           eventName,
@@ -370,7 +370,7 @@ export const Template = class Template {
 
   removeEvents() {
     if (this.eventController) {
-      this.eventController.abort();
+      this.eventController.abort('Template destroyed');
     }
   }
 
@@ -416,7 +416,7 @@ export const Template = class Template {
         this.resetSequence = setTimeout(() => { this.currentSequence = ''; }, sequenceTimeout);
 
       }, eventSettings)
-      .on('keyup', (event) => { this.currentKey = ''; })
+      .on('keyup', (event) => { this.currentKey = ''; }, eventSettings)
     ;
   }
 
