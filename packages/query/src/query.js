@@ -352,7 +352,7 @@ export class Query {
         abortController,
         delegated: targetSelector !== undefined,
         handler,
-        abort: () => abortController.abort(),
+        abort: (reason) => abortController.abort(reason),
       };
       eventHandlers.push(eventHandler);
     });

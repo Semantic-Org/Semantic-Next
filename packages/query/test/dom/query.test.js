@@ -554,6 +554,18 @@ describe('query', () => {
       expect(eventHandler).toBeInstanceOf(Object);
     });
 
+    it('should be able to remove event handlers using custom abortController', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+      const abortController = new AbortController();;
+      const eventHandler = $('div').on('click', callback, { abortController });
+      div.click();
+      abortController.abort();
+      div.click();
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
     it('should be able to remove event handlers using returned abortController', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
