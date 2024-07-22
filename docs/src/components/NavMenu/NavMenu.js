@@ -119,9 +119,9 @@ const onCreated = function ({ tpl }) {
 const onDestroyed = function ({ tpl }) {
 };
 
-const onRendered = function ({ $, tpl, isClient }) {
+const onRendered = function ({ $, tpl, attachEvent, isClient }) {
   if(isClient) {
-    $(document).on('astro:after-swap', tpl.onPageChange);
+    attachEvent(document, 'astro:after-swap', tpl.onPageChange);
   }
 };
 
