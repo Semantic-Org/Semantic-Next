@@ -104,6 +104,7 @@ export const TemplateHelpers = {
     return a == b;
   },
   not(a, b) {
+    console.log('not', a, b);
     if(b == undefined) {
       return a == false;
     }
