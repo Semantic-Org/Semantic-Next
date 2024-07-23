@@ -56,7 +56,6 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     ;
   },
   getIndex() {
-    console.log(el, $(el).index());
     return $(el).index();
   },
   isResizable() {
