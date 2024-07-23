@@ -237,6 +237,7 @@ export class LitRenderer {
       }
       return result;
     };
+    console.log(parse(tokens));
     return parse(tokens);
   }
 
@@ -260,6 +261,7 @@ export class LitRenderer {
       }
       else {
         const tokenValue = this.lookupTokenValue(token, data);
+        console.log(token, tokenValue);
         if (isFunction(tokenValue)) {
           result = tokenValue(...funcArguments);
           funcArguments = [result]; // Reset arguments after function call
