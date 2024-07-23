@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, fatal, isArray, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -12,9 +12,8 @@ export class LitRenderer {
 
   static html = html;
 
+  static PARENS_REGEXP = /('[^']*'|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
-  static OUTER_PARENS_REGEXP = /^\((.+)\)$/;
-  static EXPRESSION_REGEXP = /('[^']*'|[^\s]+)/g;
 
   constructor({ ast, data, subTemplates, snippets, helpers }) {
     this.ast = ast || '';
@@ -221,91 +220,134 @@ export class LitRenderer {
     return expression;
   }
 
+  // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
+  getExpressionArray(expr) {
+    const tokens = expr.match(LitRenderer.PARENS_REGEXP) || [];
+    const parse = (tokens) => {
+      const result = [];
+      while (tokens.length > 0) {
+        const token = tokens.shift();
+        if (token === '(') {
+          result.push(parse(tokens));
+        } else if (token === ')') {
+          return result;
+        } else {
+          result.push(token);
+        }
+      }
+      return result;
+    };
+    return parse(tokens);
+  }
+
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
-  // i.e. {{format sayWord 'balloon' 'dog'}} => format(sayWord('balloon', 'dog'))
-  lookupExpressionValue(
-    expressionString = '',
-    data = {},
-    { unsafeHTML = false } = {}
-  ) {
-    // if the whole expression is a string we want to return that
-    const stringRegExp = LitRenderer.STRING_REGEXP;
-    const stringMatches = expressionString.match(stringRegExp);
+  lookupExpressionValue(expression = '', data = {}) {
+    const expressionArray = isArray(expression)
+      ? expression
+      : this.getExpressionArray(expression)
+    ;
+
+    let funcArguments = [];
+    let result;
+
+    let index = expressionArray.length;
+    while(index--) {
+      const token = expressionArray[index];
+      if(isArray(token)) {
+        result = this.lookupExpressionValue(token, data);
+        funcArguments.unshift(result);
+      }
+      else {
+        const tokenValue = this.lookupTokenValue(token, data);
+        if (isFunction(tokenValue)) {
+          result = tokenValue(...funcArguments);
+          funcArguments = [result]; // Reset arguments after function call
+        }
+        else {
+          result = tokenValue;
+          funcArguments.unshift(result);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  lookupTokenValue(token = '', data) {
+
+    if (isArray(token)) {
+      // Recursively evaluate nested expressions
+      return this.lookupExpressionValue(token, data);
+    }
+
+    // check if this is a value not requiring lookup
+    const literalValue = this.getLiteralValue(token);
+    if(literalValue !== undefined) {
+      return literalValue;
+    }
+
+    // check if this is a global helper
+    const helper = this.helpers[token];
+    if (isFunction(helper)) {
+      return helper;
+    }
+
+    const getDeepValue = (obj, path) => {
+      return path.split('.').reduce((acc, part) => {
+        if (acc === undefined) {
+          return undefined;
+        }
+        const current = wrapFunction(acc)();
+        if (current == undefined) {
+          fatal(`Error evaluating expression "${path}"`);
+        }
+        return current[part];
+      }, obj);
+    };
+
+
+    const getThisContext = (token, data) => {
+      const path = token.split('.').slice(0, -1).join('.');
+      return getDeepValue(data, path);
+    };
+
+    // otherwise retrieve this value from the data context
+    let dataValue = getDeepValue(data, token);
+
+    // bind context for functions with '.'
+    if(isFunction(dataValue) && token.search('.') !== -1) {
+      const thisContext = getThisContext(token, data);
+      dataValue = dataValue.bind(thisContext);
+    }
+
+    // retrieve reactive value
+    if (dataValue !== undefined) {
+      return (dataValue instanceof ReactiveVar)
+        ? dataValue.value
+        : dataValue;
+    }
+
+    return undefined;
+  }
+
+  getLiteralValue(token) {
+    // check if this is a string literal
+    const stringMatches = token.match(LitRenderer.STRING_REGEXP);
     if (stringMatches && stringMatches.length > 0) {
       return stringMatches[1];
     }
 
+    // check if this is a boolean
+    const boolString = { true: true, false: false };
+    if(boolString[token] !== undefined) {
+      return boolString[token];
+    }
 
-    // converts "foo baz 'wiz bang'" => ["foo", "baz", "'wiz bang'"]
-    const splitExpressionString = (str) => {
-      const regex = LitRenderer.EXPRESSION_REGEXP;
-      const matches = str.match(regex);
-      return matches || [];
-    };
-
-    // we can safely remove outer parens
-    expressionString = expressionString.replace(LitRenderer.OUTER_PARENS_REGEXP, '$1');
-
-    const expressions = splitExpressionString(expressionString).reverse();
-    let funcArguments = [];
-    let result;
-    each(expressions, (expression, index) => {
-      // This lookups a deep value in an object, calling any intermediary functions
-      const getDeepValue = (obj, path) =>
-        path.split('.').reduce((acc, part) => {
-          if (acc === undefined) {
-            return undefined;
-          }
-          const current = wrapFunction(acc)();
-          if (current == undefined) {
-            fatal(`Error evaluating expression "${expressionString}"`);
-          }
-          return current[part];
-        }, obj);
-
-      // the 'this' context' is the path up to expression
-      // i.e. 'deep.path.reactive.get()' -> 'deep.path.reactive'
-      const getContext = () => {
-        const path = expression.split('.').slice(0, -1).join('.');
-        const context = getDeepValue(data, path);
-        return context;
-      };
-
-      let dataValue = getDeepValue(data, expression);
-      const helper = this.helpers[expression];
-      // check if we have a global helper with this name
-      if (!dataValue && isFunction(helper)) {
-        dataValue = helper;
-      }
-
-      let stringMatches;
-      if (isFunction(dataValue)) {
-        // Binding the function to a dynamic context and invoking it with accumulated arguments RTL
-        const boundFunc = dataValue.bind(getContext());
-        result = boundFunc(...funcArguments);
-      }
-      else if (dataValue !== undefined) {
-        result = (dataValue instanceof ReactiveVar)
-          ? dataValue.value
-          : dataValue;
-      }
-      else if (
-        (stringMatches = stringRegExp.exec(expression)) !== null &&
-        stringMatches.length > 1
-      ) {
-        result = stringMatches[1];
-      }
-      else if (!Number.isNaN(parseFloat(expression))) {
-        // Numbers should be passed as their numerical values to functions
-        result = Number(expression);
-      }
-      else {
-        result = undefined;
-      }
-      funcArguments.unshift(result);
-    });
-    return result;
+    // check if this is a number
+    if (!Number.isNaN(parseFloat(token))) {
+      return Number(token);
+    }
   }
 
   addHTML(html) {
