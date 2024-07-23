@@ -14,6 +14,11 @@
   import 'playground-elements/playground-file-editor.js';
   import 'playground-elements/playground-preview.js';
 </script>
+<style>
+  :root {
+    --sidebar-width: 0px;
+  }
+</style>
 <Playground>
   <CodePlayground client:only files={files} sandboxURL={sandboxURL}></CodePlayground>
 </Playground>
