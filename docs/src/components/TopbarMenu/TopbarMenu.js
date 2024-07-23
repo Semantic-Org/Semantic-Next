@@ -19,7 +19,7 @@ const createInstance = function ({ tpl, settings }) {
     getItemStates(item) {
       return {
         active: tpl.isActiveItem(item)
-      }
+      };
     },
     shouldShow(item) {
       if (isFunction(item.shouldShow)) {
