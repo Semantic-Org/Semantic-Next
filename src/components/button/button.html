@@ -8,19 +8,6 @@
   </div>
 {{/if}}
 
-{{#snippet icon}}
-  <ui-icon icon={{icon}} class="icon" part="icon"></ui-icon>
-{{/snippet}}
-
-{{#snippet animated}}
-  <span class="hidden content">
-    {{>slot hidden}}
-  </span>
-  <span class="visible content">
-    {{>slot visible}}
-  </span>
-{{/snippet}}
-
 {{#snippet content}}
   {{#if animated}}
     {{> animated}}
@@ -34,4 +21,17 @@
   {{#if isIconAfter}}
     {{> icon}}
   {{/if}}
+{{/snippet}}
+
+{{#snippet icon}}
+  <ui-icon icon={{icon}} class="icon" part="icon"></ui-icon>
+{{/snippet}}
+
+{{#snippet animated}}
+  <span class="hidden content">
+    {{>slot hidden}}
+  </span>
+  <span class="visible content">
+    {{>slot visible}}
+  </span>
 {{/snippet}}
