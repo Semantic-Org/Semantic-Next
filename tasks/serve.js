@@ -17,11 +17,11 @@ await buildProject({
   outDir: 'dev/',
 });
 
-// serve
 await buildDeps({
   watch: true,
 });
 
+// serve
 await buildProject({
   watch: true,
   minify: false,
