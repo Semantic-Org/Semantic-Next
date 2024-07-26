@@ -70,7 +70,7 @@ const events = {
 
 You can use `attachEvent` which is passed to all component callbacks to attach an dynamically attach events, either to parts of a component or to external selectors like the page's `body` tag, or slotted content.
 
-All events attached with `attachEvent` will automatically be removed when the component is destroyed using `abortSignals`.
+> All events attached with `attachEvent` will automatically be removed when the component is destroyed using `abortSignals`.
 
 ```javascript
 const onCreated = ({attachEvent, isClient}) => {
