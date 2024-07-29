@@ -129,6 +129,41 @@ describe('query', () => {
       expect($result[0]).toBe(customElement);
     });
 
+    it('should create an element from an HTML string', () => {
+      const $div = $('<div>Hello world</div>');
+      expect($div.length).toBe(1);
+      expect($div[0].tagName).toBe('DIV');
+      expect($div[0].textContent).toBe('Hello world');
+    });
+
+    // Additional test case for HTML parsing with attributes
+    it('should create an element from an HTML string with attributes', () => {
+      const $div = $('<div class="test" id="myDiv">Hello world</div>');
+      expect($div.length).toBe(1);
+      expect($div[0].tagName).toBe('DIV');
+      expect($div[0].textContent).toBe('Hello world');
+      expect($div[0].className).toBe('test');
+      expect($div[0].id).toBe('myDiv');
+    });
+
+    it('should create multiple elements from an HTML string', () => {
+      const $elements = $('<p>One</p><p>Two</p>');
+      expect($elements.length).toBe(2);
+      expect($elements[0].tagName).toBe('P');
+      expect($elements[0].textContent).toBe('One');
+      expect($elements[1].tagName).toBe('P');
+      expect($elements[1].textContent).toBe('Two');
+    });
+
+    // Additional test case for mixed content
+    it('should handle mixed content in HTML string', () => {
+      const $elements = $('<p>Paragraph</p><!-- Comment -->');
+      expect($elements.length).toBe(2);
+      expect($elements[0].nodeType).toBe(Node.ELEMENT_NODE);
+      expect($elements[0].tagName).toBe('P');
+      expect($elements[0].textContent).toBe('Paragraph');
+      expect($elements[1].nodeType).toBe(Node.COMMENT_NODE);
+    });
 
   });
 
@@ -715,6 +750,90 @@ describe('query', () => {
 
   });
 
+  describe('trigger', () => {
+    it('should trigger a custom event on elements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').on('customEvent', callback);
+      $('div').trigger('customEvent');
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should trigger a custom event with extra parameters', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').on('customEvent', callback);
+      $('div').trigger('customEvent', { detail: 'test' });
+
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({
+        detail: 'test'
+      }));
+    });
+
+    it('should trigger events on multiple elements', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+
+      $('div').eq(0).on('customEvent', callback1);
+      $('div').eq(1).on('customEvent', callback2);
+      $('div').trigger('customEvent');
+
+      expect(callback1).toHaveBeenCalled();
+      expect(callback2).toHaveBeenCalled();
+    });
+  });
+
+  describe('click', () => {
+    it('should trigger a click event on elements', () => {
+      const button = document.createElement('button');
+      document.body.appendChild(button);
+      const callback = vi.fn();
+
+      $('button').on('click', callback);
+      $('button').click();
+
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should trigger a click event with extra parameters', () => {
+      const button = document.createElement('button');
+      document.body.appendChild(button);
+      const callback = vi.fn();
+
+      $('button').on('click', callback);
+      $('button').click({ detail: 'test' });
+
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({
+        detail: 'test'
+      }));
+    });
+
+    it('should trigger click events on multiple elements', () => {
+      const button1 = document.createElement('button');
+      const button2 = document.createElement('button');
+      document.body.appendChild(button1);
+      document.body.appendChild(button2);
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+
+      $('button').eq(0).on('click', callback1);
+      $('button').eq(1).on('click', callback2);
+      $('button').click();
+
+      expect(callback1).toHaveBeenCalled();
+      expect(callback2).toHaveBeenCalled();
+    });
+  });
+
   describe('remove', () => {
 
     it('remove should remove an element', () => {
@@ -1033,6 +1152,21 @@ describe('query', () => {
       document.body.appendChild(div2);
       expect($('div').css('color')).toStrictEqual(['red','blue']);
     });
+
+    it('should handle camelCase and kebab-case property names', () => {
+      const div = document.createElement('div');
+      $(div).css('backgroundColor', 'red');
+      expect(div.style.backgroundColor).toBe('red');
+      $(div).css('background-color', 'blue');
+      expect(div.style.backgroundColor).toBe('blue');
+    });
+
+    it('should return computed styles when requested', () => {
+      const div = document.createElement('div');
+      div.style.fontSize = '16px';
+      document.body.appendChild(div);
+      expect($(div).css('font-size', null, { includeComputed: true })).toBe('16px');
+    });
   });
 
   describe('attr', () => {
@@ -1065,7 +1199,14 @@ describe('query', () => {
       div2.setAttribute('test', 'test2');
       document.body.appendChild(div);
       document.body.appendChild(div2);
-      expect($('div').attr('test')).toStrictEqual(['test','test2']);
+      expect($('div').attr('test')).toStrictEqual(['test', 'test2']);
+    });
+
+    it('should handle properties that are not reflected as attributes', () => {
+      const input = document.createElement('input');
+      $(input).prop('value', 'test');
+      expect(input.value).toBe('test');
+      expect(input.getAttribute('value')).toBe(null);
     });
   });
 
@@ -1193,34 +1334,48 @@ describe('query', () => {
     });
   });
 
-  describe('insertAfter', () => {
-    it('should move elements after each target element', () => {
-      const div1 = document.createElement('div');
-      div1.textContent = 'Div 1';
-      const div2 = document.createElement('div');
-      div2.textContent = 'Div 2';
-      const p1 = document.createElement('p');
-      p1.textContent = 'Paragraph 1';
-      const p2 = document.createElement('p');
-      p2.textContent = 'Paragraph 2';
 
-      document.body.appendChild(div1);
-      document.body.appendChild(p1);
-      document.body.appendChild(div2);
-      document.body.appendChild(p2);
+  describe('Insertion Methods', () => {
 
-      $('div').insertAfter('p');
-
-      expect(document.body.children[0].tagName).toBe('P');
-      expect(document.body.children[0].textContent).toBe('Paragraph 1');
-      expect(document.body.children[1].tagName).toBe('DIV');
-      expect(document.body.children[1].textContent).toBe('Div 1');
-      expect(document.body.children[2].tagName).toBe('P');
-      expect(document.body.children[2].textContent).toBe('Paragraph 2');
-      expect(document.body.children[3].tagName).toBe('DIV');
-      expect(document.body.children[3].textContent).toBe('Div 2');
+    beforeEach(() => {
+      document.body.innerHTML = '<div id="target"></div><div id="target2"></div>';
     });
+
+    describe('prepend', () => {
+      it('should prepend content to the target', () => {
+        $('#target').prepend('<p>Test</p>');
+        expect(document.getElementById('target').innerHTML).toBe('<p>Test</p>');
+      });
+    });
+
+    describe('append', () => {
+      it('should append content to the target', () => {
+        $('#target').append('<p>Test</p>');
+        expect(document.getElementById('target').innerHTML).toBe('<p>Test</p>');
+      });
+    });
+
+    describe('insertBefore', () => {
+      it('should insert elements before the target', () => {
+        $('<p>Test</p>').insertBefore('#target');
+        expect(document.body.innerHTML).toBe('<p>Test</p><div id="target"></div><div id="target2"></div>');
+      });
+    });
+
+    describe('insertAfter', () => {
+      it('should insert elements after the target', () => {
+        $('<p>Test</p>').insertAfter('#target');
+        expect(document.body.innerHTML).toBe('<div id="target"></div><p>Test</p><div id="target2"></div>');
+      });
+
+      it('should insert elements after each target element', () => {
+        $('<p>Test</p>').insertAfter('div');
+        expect(document.body.innerHTML).toBe('<div id="target"></div><p>Test</p><div id="target2"></div><p>Test</p>');
+      });
+    });
+
   });
+
   describe('next', () => {
     it('should return the next sibling element', () => {
       const div1 = document.createElement('div');
@@ -1284,6 +1439,85 @@ describe('query', () => {
 
       const $prev = $(div).prev('.target');
       expect($prev.length).toBe(0);
+    });
+  });
+
+
+  describe('Value-returning methods', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    describe('attr', () => {
+      it('should return undefined when getting attribute on non-existent element', () => {
+        expect($('.non-existent').attr('id')).toBe(undefined);
+      });
+    });
+
+    describe('prop', () => {
+      it('should return undefined when getting property on non-existent element', () => {
+        expect($('.non-existent').prop('id')).toBe(undefined);
+      });
+    });
+
+    describe('css', () => {
+      it('should return undefined when getting style on non-existent element', () => {
+        expect($('.non-existent').css('color')).toBe(undefined);
+      });
+    });
+
+    describe('html', () => {
+      it('should return undefined when getting HTML on non-existent element', () => {
+        expect($('.non-existent').html()).toBe(undefined);
+      });
+    });
+
+    describe('text', () => {
+      it('should return undefined when getting text on non-existent element', () => {
+        expect($('.non-existent').text()).toBe(undefined);
+      });
+    });
+
+    describe('val', () => {
+      it('should return undefined when getting value on non-existent element', () => {
+        expect($('.non-existent').val()).toBe(undefined);
+      });
+    });
+
+    describe('height', () => {
+      it('should return undefined when getting height on non-existent element', () => {
+        expect($('.non-existent').height()).toBe(undefined);
+      });
+    });
+
+    describe('width', () => {
+      it('should return undefined when getting width on non-existent element', () => {
+        expect($('.non-existent').width()).toBe(undefined);
+      });
+    });
+
+    describe('scrollHeight', () => {
+      it('should return undefined when getting scrollHeight on non-existent element', () => {
+        expect($('.non-existent').scrollHeight()).toBe(undefined);
+      });
+    });
+
+    describe('scrollWidth', () => {
+      it('should return undefined when getting scrollWidth on non-existent element', () => {
+        expect($('.non-existent').scrollWidth()).toBe(undefined);
+      });
+    });
+
+    describe('scrollLeft', () => {
+      it('should return undefined when getting scrollLeft on non-existent element', () => {
+        expect($('.non-existent').scrollLeft()).toBe(undefined);
+      });
+    });
+
+    describe('scrollTop', () => {
+      it('should return undefined when getting scrollTop on non-existent element', () => {
+        expect($('.non-existent').scrollTop()).toBe(undefined);
+      });
     });
   });
 

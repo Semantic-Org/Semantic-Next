@@ -5,26 +5,27 @@ A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
 
-const tagRegExp = /^<(\w+)(\s*\/)?>$/;
-
-
-/*
-  This avoids keeping a copy of window/globalThis in
-  memory when an element references the global object
-  reducing memory footprint
-*/
-const globalThisProxy = new Proxy({}, {
-  get(target, prop) {
-    return globalThis[prop];
-  },
-  set(target, prop, value) {
-    globalThis[prop] = value;
-    return true;
-  },
-});
-
 
 export class Query {
+
+  /*
+    This avoids keeping a copy of window/globalThis in
+    memory when an element references the global object
+    reducing memory footprint
+  */
+  static globalThisProxy = new Proxy({}, {
+    get(target, prop) {
+      return globalThis[prop];
+    },
+    set(target, prop, value) {
+      globalThis[prop] = value;
+      return true;
+    },
+  });
+
+  /*
+    We keep an array of event handlers for teardown
+  */
   static eventHandlers = [];
 
   constructor(selector, { root = document, pierceShadow = false } = {}) {
@@ -35,7 +36,7 @@ export class Query {
     }
     if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
       // We dont want to store a copy of globalThis in each query instance
-      elements = [globalThisProxy];
+      elements = [Query.globalThisProxy];
       this.isBrowser = isClient;
       this.isGlobal = true;
     }
@@ -45,8 +46,9 @@ export class Query {
     }
     else if (isString(selector)) {
       if (selector.slice(0, 1) == '<') {
-        const tagName = selector.match(tagRegExp)[1];
-        elements = [document.createElement(tagName)];
+        const template = document.createElement('template');
+        template.innerHTML = selector.trim();
+        elements = Array.from(template.content.childNodes);
       } else {
         // Use querySelectorAll for normal selectors
         elements = (pierceShadow)
@@ -160,7 +162,7 @@ export class Query {
   }
 
   removeAllEvents() {
-    Query._eventHandlers = [];
+    Query.eventHandlers = [];
   }
 
   find(selector) {
@@ -357,10 +359,10 @@ export class Query {
       eventHandlers.push(eventHandler);
     });
 
-    if (!Query._eventHandlers) {
-      Query._eventHandlers = [];
+    if (!Query.eventHandlers) {
+      Query.eventHandlers = [];
     }
-    Query._eventHandlers.push(...eventHandlers);
+    Query.eventHandlers.push(...eventHandlers);
 
     if(options?.returnHandler) {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
@@ -394,7 +396,7 @@ export class Query {
   }
 
   off(event, handler) {
-    Query._eventHandlers = Query._eventHandlers.filter((eventHandler) => {
+    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
         eventHandler.event === event &&
         (!handler ||
@@ -413,6 +415,24 @@ export class Query {
     });
     return this;
   }
+
+  trigger(eventType, eventParams) {
+    return this.each(el => {
+      if (typeof el.dispatchEvent !== 'function') {
+        return;
+      }
+      const event = new Event(eventType, { bubbles: true, cancelable: true });
+      if(eventParams) {
+        Object.assign(event, eventParams);
+      }
+      el.dispatchEvent(event);
+    });
+  }
+
+  click(eventParams) {
+    return this.trigger('click', eventParams);
+  }
+
 
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
     const eventOptions = {
@@ -456,10 +476,9 @@ export class Query {
     if (newHTML !== undefined) {
       return this.each((el) => (el.innerHTML = newHTML));
     }
-    else if (this.length) {
-      return this.map(el => el.innerHTML || el.nodeValue).join('');;
+    else if (this.length > 0) {
+      return this.map(el => el.innerHTML || el.nodeValue).join('');
     }
-    return this;
   }
 
   outerHTML(newHTML) {
@@ -629,7 +648,7 @@ export class Query {
       );
       return attributes.length > 1 ? attributes : attributes[0];
     }
-    return this;
+    return;
   }
 
   removeAttr(attributeName) {
@@ -749,16 +768,48 @@ export class Query {
     return this.chain(fragment.childNodes);
   }
 
+  reverse() {
+    const els = this.get().reverse();
+    return this.chain(els);
+  }
+
+  insertContent(target, content, position) {
+    const $content = this.chain(content);
+    $content.each(el => {
+      target.insertAdjacentElement(position, el);
+    });
+  }
+
+  prepend(content) {
+    return this.each((el) => {
+      this.insertContent(el, content, 'afterbegin');
+    });
+  }
+
+  append(content) {
+    return this.each((el) => {
+      this.insertContent(el, content, 'beforeend');
+    });
+  }
+
+  insertBefore(selector) {
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this.selector, 'beforebegin');
+    });
+  }
+
   insertAfter(selector) {
-    const targets = this.chain(selector);
-    const elements = this.get();
-    targets.each((target, index) => {
-      const element = elements[index] || elements[elements.length - 1];
-      if (target.parentNode) {
-        target.parentNode.insertBefore(element, target.nextSibling);
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this.selector, 'afterend');
+    });
+  }
+
+  detach() {
+    return this.each((el) => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
       }
     });
-    return this;
   }
 
   naturalWidth() {

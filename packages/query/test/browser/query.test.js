@@ -131,14 +131,6 @@ describe('query', () => {
       expect(window.customProp).toBe(customProp);
     });
 
-    it('should handle invoking methods on the globalThisProxy object', () => {
-      const $window = $('window');
-      const alertSpy = vi.spyOn(window, 'alert');
-
-      $window.prop('alert')('Test alert');
-      expect(alertSpy).toHaveBeenCalledWith('Test alert');
-    });
-
     it('should handle dimension properties correctly for the window object', () => {
       const $window = $('window');
       expect($window.height()).toBe(window.innerHeight);
@@ -147,6 +139,18 @@ describe('query', () => {
       expect($window.scrollWidth()).toBe(document.documentElement.scrollWidth);
       expect($window.scrollLeft()).toBe(window.scrollX);
       expect($window.scrollTop()).toBe(window.scrollY);
+    });
+
+    it('should proxy method calls to the global object', () => {
+      const alertMock = vi.fn();
+      globalThis.alert = alertMock;
+      $('window').prop('alert')('test');
+      expect(alertMock).toHaveBeenCalledWith('test');
+    });
+
+    it('should allow setting global properties', () => {
+      $('window').prop('testProp', 'testValue');
+      expect(globalThis.testProp).toBe('testValue');
     });
   });
 });
