@@ -5,9 +5,10 @@ import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
+import '@semantic-ui/core/src/components/button';
+
 import '../Panels/Panels.js';
 import '../Panels/Panel.js';
-import '@semantic-ui/core/src/components/button';
 
 import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
@@ -224,6 +225,13 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     afterFlush(() => {
       tpl.initializePanels();
     });
+  },
+
+  selectFile(number) {
+    const menu = $('ui-menu.files').getComponent();
+    if(menu) {
+      menu.selectIndex(number - 1);
+    }
   }
 
 });
@@ -241,8 +249,16 @@ const onThemeChanged = ({tpl}) => {
 };
 
 const keys = {
-  'tab'({state, $}) {
-  }
+  // select file with keyboard
+  'ctrl + 1': ({tpl}) => tpl.selectFile(1),
+  'ctrl + 2': ({tpl}) => tpl.selectFile(2),
+  'ctrl + 3': ({tpl}) => tpl.selectFile(3),
+  'ctrl + 4': ({tpl}) => tpl.selectFile(4),
+  'ctrl + 5': ({tpl}) => tpl.selectFile(5),
+  'ctrl + 6': ({tpl}) => tpl.selectFile(6),
+  'ctrl + 7': ({tpl}) => tpl.selectFile(7),
+  'ctrl + 8': ({tpl}) => tpl.selectFile(8),
+  'ctrl + 9': ({tpl}) => tpl.selectFile(9),
 };
 
 const events = {
@@ -262,6 +278,7 @@ const events = {
 
 const CodePlayground = createComponent({
   tagName: 'code-playground',
+  delegatesFocus: true,
   template,
   css,
   createInstance,

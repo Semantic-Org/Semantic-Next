@@ -24,26 +24,11 @@ The templates data context is a combination of several data sources.
 * **Template Instance** - An object literal which stores methods and data accessible by your component
 * **Subtemplate Data** - Subtemplates can have data directly passed in from their parent component's data context
 
-## Looking up Expressions
-
-When you use an expression in a template it will look at the component's data context to find what the value represents.
-
-You can think of the data context as a flattened copy of settings, state, your template instance and global helpers.
-
-So for example if you look up an expression `{{iconName}}` in a template it will first look
-* If there is a global template helper called `iconName`
-* If a setting is specified and a default value or DOM attribute or DOM property is set for `iconName`
-* If an internal state property is named `iconName`
-* If there is a function or property on your template instance named `iconName`
-
-
 ## Settings
 
 Settings are values which you want users of your component to be able to modify. To specify settings for a component simply pass in a settings object when defining a component.
 
 These values can then be overridden with values passed in by the user. You can see how this is accomplished in the following example, be sure to view `index.html` and `index.js` to see how data can be both passed in as attributes or properties.
-
-<PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
 
 You can pass any type of javascript primitive as a setting however there may be serialization requirements depending on the date type.
 
@@ -95,6 +80,22 @@ Subtemplate example goes here
 Global helpers are special global functions that make it easier to manipulate data in your template. This may include things like formatting dates, concatenating strings, mapping class names to conditions and more.
 
 For a complete reference check out the section on [global helpers](/templates/helpers).
+
+## Looking up Expressions
+
+When you use an expression in a template it will look at the component's data context to find what the value represents.
+
+You can think of the data context as a flattened copy of settings, state, your template instance and global helpers.
+
+So for example if you look up an expression `{{iconName}}` in a template it will first look
+* If there is a global template helper called `iconName`
+* If a setting is specified and a default value or DOM attribute or DOM property is set for `iconName`
+* If an internal state property is named `iconName`
+* If there is a function or property on your template instance named `iconName`
+
+
+<PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
+
 
 ## Order of Data Lookups
 

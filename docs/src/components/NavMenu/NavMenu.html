@@ -11,7 +11,9 @@
     {{#if section.description}}
       <span class="description">{{section.description}}</span>
     {{/if}}
-    <ui-icon icon={{getNavigationIcon section}} class="dropdown" part="nav-icon"></ui-icon>
+    {{#if isExpandable}}
+      <ui-icon icon={{getNavigationIcon section}} class="dropdown" part="nav-icon"></ui-icon>
+    {{/if}}
   </a>
   {{#if section.pages}}
     <div class="{{activeIf isActiveItem section}}{{classIf hasIcons 'indented'}}content">
@@ -20,7 +22,9 @@
           {{#if page.pages}}
             <div class="{{classes getTitleStates page}}title item">
               <div class="text">{{page.name}}</div>
-              <ui-icon {{getNavigationIcon section}} class="dropdown" part="nav-icon"></ui-icon>
+              {{#if isExpandable}}
+                <ui-icon {{getNavigationIcon section}} class="dropdown" part="nav-icon"></ui-icon>
+              {{/if}}
             </div>
             <div class="{{activeIf isActiveItem page}} content">
               <div class="menu">

@@ -4,9 +4,9 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const state = {
-  text: 'Not Clicked'
+  text: 'Not Clicked',
+  counter: 0,
 };
-
 
 const onCreated = ({state, $, attachEvent}) => {
   // event will teardown when component is destroyed

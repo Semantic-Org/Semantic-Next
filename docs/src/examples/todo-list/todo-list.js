@@ -6,8 +6,8 @@ import { todoItem } from './todo-item.js';
 import { todoHeader } from './todo-header.js';
 import { todoFooter } from './todo-footer.js';
 
-const css = await getText('./todo-list.css');
-const template = await getText('./todo-list.html');
+const css = await getText('./component.css');
+const template = await getText('./component.html');
 
 const createInstance = ({ tpl, $ }) => ({
   // global state

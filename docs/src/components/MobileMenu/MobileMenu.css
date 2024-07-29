@@ -12,6 +12,8 @@
   --mobile-menu-box-shadow: none;
   --mobile-menu-padding: 10px 20px 20px;
 
+  --mobile-menu-max-height: 60vh;
+
   --mobile-menu-dimmer-background: var(--black-70);
 
 }
@@ -51,28 +53,31 @@ dialog {
   box-shadow: var(--mobile-menu-box-shadow);
   z-index: var(--overlay-layer);
 
+  .layer {
+    contain: layout paint;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
   .container {
     display: flex;
     width: 200vw;
-    height: 100%;
     overflow: visible;
-    transform: translateX(0%);
+    transform: translate3d(0%, 0, 0);
     transition: transform 0.35s cubic-bezier(0.33, 0.01, 0, 1);
 
     &.animate {
-      transform: translateX(-100%);
+      transform: translate3d(-50%, 0, 0);
     }
   }
 
 
   .content {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    flex: 0 0 auto;
     padding: var(--mobile-menu-padding);
-
-    &.next {
-      left: 100%;
-    }
+    max-height: var(--mobile-menu-max-height);
+    overflow: auto;
   }
 
 

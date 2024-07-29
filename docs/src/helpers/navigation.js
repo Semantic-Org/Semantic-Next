@@ -97,12 +97,16 @@ export const sidebarMenuFramework = [
     icon: 'package',
     pages: [
       {
-        name: 'Lifecycle',
-        url: '/components/lifecycle'
+        name: 'Create Component',
+        url: '/components/create'
       },
       {
-        name: 'Instances',
+        name: 'Component Instances',
         url: '/components/instances'
+      },
+      {
+        name: 'Lifecycle',
+        url: '/components/lifecycle'
       },
       {
         name: 'Data Sources',
@@ -436,7 +440,6 @@ export const getTopbarMenu = async () => {
 
 export const getRailMenu = (headings) => {
   let menu = [];
-  let items = [];
   let menuGroup;
 
   const headingLevels = unique(headings.map(heading => heading.depth)).sort();

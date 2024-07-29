@@ -1,7 +1,7 @@
 import { createComponent, getText } from '@semantic-ui/component';
 
-const css = await getText('./subcomponent.css');
-const template = await getText('./subcomponent.html');
+const css = await getText('./row.css');
+const template = await getText('./row.html');
 
 const createInstance = ({ findParent }) => ({
   getTitle() {
@@ -9,7 +9,7 @@ const createInstance = ({ findParent }) => ({
   }
 });
 
-export const tableRow = createComponent({
+export const row = createComponent({
   createInstance,
   template,
   css,

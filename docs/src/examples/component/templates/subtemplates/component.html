@@ -1,0 +1,17 @@
+<h3>{{title}}</h3>
+<table>
+  <thead>
+    <tr>
+      <th>First</th>
+      <th>Last</th>
+      <th>Age</th>
+      <th>Gender</th>
+      <th>Company</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each row in rows}}
+      {{>row row=row company=company}}
+    {{/each}}
+  </tbody>
+</table>

@@ -5,6 +5,7 @@
   :root {
     --global-search-input-font-size: 14px;
     --topbar-icon-size: 20px;
+    --topbar-logo-size: 30px;
   }
 
   topbar {
@@ -15,7 +16,10 @@
     bottom: 0;
     width: 100%;
     align-items: center;
-
+    topbar-menu {
+      width: 0px;
+      margin: 0rem var(--compact-spacing);
+    }
     mobile-menu-toggle {
       display: inline-block;
     }

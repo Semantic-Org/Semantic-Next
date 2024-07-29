@@ -30,10 +30,11 @@
   --nav-menu-dropdown-icon-font-size: 12px;
 
   --nav-menu-content-indent-distance: 0.5rem;
+  --nav-menu-content-space-after: var(--compact-spacing);
   --nav-menu-content-icon-indent-distance: calc(var(--nav-menu-title-icon-width) + var(--nav-menu-title-icon-distance));
 
   --nav-menu-sub-title-font-size: 13px;
-  --nav-menu-sub-title-padding: 4px 0px;
+  --nav-menu-sub-title-padding: 6px 0px;
 
   --nav-menu-sub-content-indent-distance: 0.25rem;
 
@@ -52,8 +53,8 @@ a {
 }
 
 .title {
+  cursor: default;
   display: flex;
-  cursor: pointer;
   flex-direction: row;
   text-align: left;
   font-size: var(--nav-menu-title-font-size);
@@ -61,8 +62,15 @@ a {
   font-weight: bold;
   align-items: center;
   padding: var(--nav-menu-title-padding);
-  color: var(--nav-menu-title-color);
   text-decoration: none;
+
+  &.expandable {
+    cursor: pointer;
+    color: var(--nav-menu-title-color);
+  }
+  &:not(.expandable) {
+    color: var(--nav-menu-title-active-color);
+  }
 
   .description {
     float: right;
@@ -93,7 +101,7 @@ a {
     opacity: var(--nav-menu-title-icon-opacity);
   }
   + .content {
-    padding: 0rem 0rem 0rem var(--nav-menu-content-indent-distance);
+    padding-left: var(--nav-menu-content-indent-distance);
   }
   + .indented.content {
     padding-left: var(--nav-menu-content-icon-indent-distance);
@@ -102,14 +110,11 @@ a {
 
 /* Nested Menu */
 .content {
-  .title {
-    display: flex;
-    font-size: var(--nav-menu-sub-title-font-size);
-    padding: var(--nav-menu-sub-title-padding);
-    + .content {
-      padding: 0rem 0rem 0rem var(--nav-menu-sub-content-indent-distance) !important;
-    }
+
+  &.active + .title {
+    padding-top: var(--nav-menu-content-space-after);
   }
+
 
   .menu {
     display: flex;
@@ -122,6 +127,16 @@ a {
       line-height: 1;
       font-size: var(--nav-menu-item-font-size);
       padding: var(--nav-menu-item-spacing) 0px;
+
+      &.title {
+        display: flex;
+        font-size: var(--nav-menu-sub-title-font-size);
+        padding: var(--nav-menu-sub-title-padding);
+
+        + .content {
+          padding-left: var(--nav-menu-sub-content-indent-distance) !important;
+        }
+      }
     }
 
     /* Third Level Menu */
@@ -130,6 +145,7 @@ a {
       .item {
         padding: 5px 0px;
       }
+
     }
   }
 }
@@ -139,7 +155,7 @@ a {
 *******************************/
 
 .title {
-  &:hover {
+  &.expandable:hover {
     transition: 0.3s color ease;
     color: var(--nav-menu-title-hover-color);
 

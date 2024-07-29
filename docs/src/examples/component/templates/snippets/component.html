@@ -1,0 +1,28 @@
+<h3>{{title}}</h3>
+<table>
+  <thead>
+    <tr>
+      <th>First</th>
+      <th>Last</th>
+      <th>Age</th>
+      <th>Gender</th>
+      <th>Company</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each row in rows}}
+      {{> row}}
+    {{/each}}
+  </tbody>
+</table>
+
+{{#snippet row}}
+  <tr>
+    {{#each value in row}}
+      <td>
+        {{value}}
+      </td>
+    {{/each}}
+    <td>{{company}}</td>
+  </tr>
+{{/snippet}}

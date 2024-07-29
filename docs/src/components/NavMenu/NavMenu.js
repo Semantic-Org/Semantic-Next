@@ -29,6 +29,9 @@ const createInstance = function ({ tpl, data, state, settings }) {
     },
     getTitleStates(title) {
       const classes = [];
+      if (tpl.isExpandable(title)) {
+        classes.push('expandable');
+      }
       if (tpl.isActiveItem(title)) {
         classes.push('active');
       }
@@ -76,6 +79,9 @@ const createInstance = function ({ tpl, data, state, settings }) {
     },
     isLinkItem(item) {
       return item.url && !tpl.isCurrentItem(item);
+    },
+    isExpandable(item) {
+      return !settings.expandAllDefault;
     },
     isActiveItem(item) {
       if(settings.expandAllDefault) {

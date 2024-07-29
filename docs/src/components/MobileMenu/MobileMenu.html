@@ -1,14 +1,16 @@
 <dialog part="dialog">
-  <div class="container">
-    <div class="visible content">
-      <h3>Test</h3>
-      <h3>Test</h3>
-      <h3>Test</h3>
-      <h3>Test</h3>
-      <h3>Test</h3>
-    </div>
-    <div class="next content">
-      <nav-menu menu={{menu}} navigationIcon="right-chevron"></nav-menu>
+  <div class="layer">
+    <div class="container">
+      <div class="visible content">
+        <nav-menu menu={{menu}} navigationIcon="right-chevron"></nav-menu>
+      </div>
+      <div class="next content">
+        <nav-menu
+          menu={{menu}}
+          expandAllDefault=true
+          navigationIcon="right-chevron"
+        ></nav-menu>
+      </div>
     </div>
   </div>
 </dialog>
