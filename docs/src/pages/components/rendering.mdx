@@ -1,0 +1,205 @@
+---
+layout: '@layouts/Guide.astro'
+title: Rendering HTML
+icon: package
+description: An overview of how data is used in components
+---
+
+import { Image } from 'astro:assets';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import contextImage from '@images/data-context-diagram.png';
+
+
+Semantic UI components rely on a **template** and a **data context** to generate your component's html.
+
+> **Comparing to React** - Instead of using a `render()` function to return `jsx` each component's  template provides the high level logic for explaining how html should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
+
+
+## Data Context
+
+The templates data context is a combination of several data sources that are looked up in sequence.
+
+For instance the expression in a template like could be defined in several locations
+```html
+Greetings, {{name}}
+```
+
+* **Global Helpers** - A global helper registered across templates called `name`
+* **Template Instance** - A value or function on your template instance called `name`
+* **Settings** - A value `name` passed in via html attribute or property
+* **State** - An internal reactive state called `name`
+* **Subtemplate Data** - Data passed in from a parent template called `name`
+
+> **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance you may initially have a value on the `template instance` for performance, then move it to `state` to make it reactive, then finally move it to `settings` to make it user overridable.
+
+## Global Helpers
+
+[Global helpers](/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat` `stringify` that can be used to format values for output.
+
+> For a list of global helpers please visit the dedicated [global helper page](/templates/helpers) in templating.
+
+### Types of Helpers
+
+
+### Helper Example
+
+In this example `formatDate` is used to format the display of a date set in the components [state](#reactive-state).
+
+```html
+{{formatDate currentTime 'h:mm:ss a'}}
+```
+
+<PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
+
+For a complete list of available global helpers see [global helpers](/templates/helpers).
+
+
+## Settings
+
+### Defining Settings
+
+Settings are values which you want users of your component to be able to modify. To specify settings for a component simply pass in a settings object when defining a component.
+
+> **Data Types** - A settings type will be inferred from its default value. This means you do not need to formally declare them as `String` or `Date`.
+
+```javascript
+const settings = {
+  name: 'Jack'
+};
+
+createComponent({
+  tagName: 'name-card',
+  settings
+});
+```
+
+### Overriding Defaults
+
+Settings specified for a component are defaults which can be overridden by anyone using your component by passing in different data through the DOM.
+
+#### HTML Attributes
+```html
+<name-card name="Sally"></name-card>
+```
+
+#### DOM Properties
+```javascript
+const el = document.querySelector('name-card');
+el.name = 'Sam';
+```
+
+#### Functions
+
+Functions cannot be serialized so they must be passed in via Javascript. This can be handled using Query's `settings` method after DOM Ready or `initialize` method at any point in page load.
+
+You can also manually set the function on the corresponding DOM element.
+
+<PlaygroundExample height="265" id="basic-settings" direction="horizontal"></PlaygroundExample>
+
+## Reactive State
+
+State is a [reactive data store](/reactivity) that uses Signals to recompute references to a value when its underlying vaalue is modified.
+
+### Defining State
+
+State is designed you to store internal reactive values that can be used to re-render portions of a template when a value changes, or to rerun reactive computations when underlying reactive data changes.
+
+
+```javascript
+const state = {
+  name: 'Jack'
+};
+
+createComponent({
+  tagName: 'name-card',
+  state
+});
+```
+
+### Using State
+
+When you declare your components state it creates an internal copy assigning your defaults to `ReactiveVar` values for each instance of a component.
+
+
+```javascript
+// underlying value passed to callbacks for state = { name: 'Jack' };
+state = {
+  name: ReactiveVar('Jack')
+}
+```
+
+#### Inside a Component
+When using this value internally you can grab the value from the callback arguments
+```javascript
+
+const createInstance = ({tpl, state}) => ({
+  getGreeting() {
+    return `Hello ${state.name.value}`
+  }
+});
+```
+
+#### In Templates
+When accessing this value in a template you can access it without calling `value` or `get()`.
+```
+Hello {{name}}}}
+```
+
+
+## Template Instance
+
+Template instances are object literals that store properties and methods that can be invoked for your component. Methods and properties defined on the instance can be directly accessed in your template's data context, and can also be invoked by end users using query's `getComponent` helper.
+
+
+## Subtemplates
+
+SUI components can either be rendered to a tagname as a web component or exported to be used as subtemplates in other components. This is dependent on whether `tagName` is specified
+
+When no tag name is specified they are returned as [Subtemplates](/templates/sub-templates) which can be passed in to other components.
+
+When components are rendered as subtemplates, their data context is defined explicitly from the parent template.
+
+For example, you might want to have a table that uses a subtemplate to output a table row, definining the data context as the row's data for each initialization.
+
+
+Subtemplate example goes here
+
+## Looking up Expressions
+
+When you use an expression in a template it will look at the component's data context to find what the value represents.
+
+You can think of the data context as a flattened copy of settings, state, your template instance and global helpers.
+
+So for example if you look up an expression `{{iconName}}` in a template it will first look
+* If there is a global template helper called `iconName`
+* If a setting is specified and a default value or DOM attribute or DOM property is set for `iconName`
+* If an internal state property is named `iconName`
+* If there is a function or property on your template instance named `iconName`
+
+You can see how this is accomplished in the following example, be sure to view `index.html` and `index.js` to see how data can be both passed in as attributes or properties.
+
+### Data Types
+
+You can pass any type of javascript primitive as a setting however there may be serialization requirements depending on the date type.
+
+#### Strings, Numbers
+
+Strings and numbers can be passed in either through html attributes or directly as properties.
+
+#### Arrays, Objects, Dates
+
+Arrays, objects and dates can be passed in either through attributes or properties.
+
+When passed in as attributes the data must be passed through `JSON.stringify` to serialize the value as a string.
+
+If you are passing it in as a property you can specify the value without serialization.
+
+
+<PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
+
+
+## Order of Data Lookups
+
+For a complete picture of how an expression is looked up from inside your template's data context, please refer to the following chart:
+
+<Image src={contextImage} alt="Component Lifecycle" width="826" loading="eager"></Image>

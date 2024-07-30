@@ -10,6 +10,7 @@ table {
   border-collapse: collapse;
 }
 table td {
+  border: var(--solid-border);
   padding: 10px 20px;
 }
 td:first-child {

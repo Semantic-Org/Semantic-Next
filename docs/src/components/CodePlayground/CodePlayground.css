@@ -90,7 +90,7 @@
     overflow: hidden;
   }
 
-  .inline {
+  ui-panels.inline {
     position: relative;
     display: flex;
     flex-direction: row;
@@ -120,6 +120,9 @@
       playground-preview {
         flex: 1 1 auto;
       }
+      playground-file-editor {
+        border-radius: 0px 0px 0px var(--border-radius);
+      }
       ui-panel {
         .menu {
           border-radius: var(--attached-border-radius);
@@ -140,7 +143,7 @@
       pretty-json {
         border: var(--border);
         border-left: none;
-        border-radius: var(--right-attached-border-radius);
+        border-radius: 0px 0px var(--border-radius) 0px;
       }
 
     }
@@ -148,6 +151,9 @@
     &.vertical {
       playground-preview {
         border-top: none;
+      }
+      playground-file-editor {
+        border-bottom: none;
       }
       ui-panel {
         .menu {
@@ -176,7 +182,6 @@
       border: var(--border);
       overflow: hidden;
       flex: 1 1 auto;
-      border-bottom: none;
       border-radius: var(--attached-border-radius);
     }
     playground-preview {

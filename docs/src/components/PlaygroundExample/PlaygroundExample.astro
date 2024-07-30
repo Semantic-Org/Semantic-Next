@@ -4,7 +4,7 @@ import { getExampleFiles, addPlaygroundInjections, getExampleID, getSandboxURL }
 
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
-const { id, direction } = Astro.props;
+const { id, direction, height } = Astro.props;
 const matchingExamples = await getCollection('examples', ({ data }) => {
   return getExampleID(data) == id;
 });
@@ -26,6 +26,7 @@ const saveID = `example-${id}`;
 <CodePlayground client:only
   files={files}
   example={example}
+  maxHeight={height}
   inline=true
   saveState=true
   saveID={saveID}

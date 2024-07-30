@@ -1,0 +1,40 @@
+---
+layout: '@layouts/Guide.astro'
+title: Snippets
+description: Using snippets for repeated content
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+### Snippets
+Snippets are a special kind of subtemplate that are defined inline for convenience.
+
+### Creating Snippets
+
+Snippets are similar to [subtemplates](templates/subtemplates) but can be defined in the same file as where they are used.
+
+```handlebars
+{{#snippet hello}}
+  Hello World
+{{/snippet}}
+
+{{> hello}} {{>hello}}
+```
+
+### Data Context
+
+By default a snippet inherits its parents data context, but you can modify its data context by passing in data
+
+```handlebars
+{{#snippet greeting}}
+  {{greeting}} {{name}}
+{{/snippet}}
+
+{{> greeting greeting='hello' name='Sally'}}
+{{> greeting greeting='goodbye' name='Sally'}}
+```
+
+#### Snippet Example
+
+This example shows a common pattern of using a snippet to define a table row
+
+<PlaygroundExample id="snippets" direction="horizontal"></PlaygroundExample>

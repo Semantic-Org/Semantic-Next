@@ -97,7 +97,11 @@
     font-size: 16px;
   }
   layout page.text-content h2 {
-    margin: 4rem 0rem 1rem;
+    margin: 4rem 0rem 3rem;
+    font-size: 28px;
+    letter-spacing: 0.03rem;
+    padding-top: 4rem;
+    border-top: var(--internal-border);
   }
   layout page.text-content h3 {
     margin: 3rem 0rem 1rem;
@@ -121,6 +125,9 @@
   layout page.text-content ul strong,
   layout page.text-content p strong {
     color: var(--standard-100);
+  }
+  layout page.text-content blockquote p strong {
+    color: var(--white-100);
   }
   layout page.centered main > ui-container {
     max-width: none;

@@ -97,11 +97,11 @@ export const sidebarMenuFramework = [
     icon: 'package',
     pages: [
       {
-        name: 'Create Component',
+        name: 'Creating Components',
         url: '/components/create'
       },
       {
-        name: 'Component Instances',
+        name: 'Defining Functionality',
         url: '/components/instances'
       },
       {
@@ -109,11 +109,11 @@ export const sidebarMenuFramework = [
         url: '/components/lifecycle'
       },
       {
-        name: 'Data Sources',
-        url: '/components/data'
+        name: 'Rendering HTML',
+        url: '/components/rendering'
       },
       {
-        name: 'DOM Manipulation',
+        name: 'Accessing DOM',
         url: '/components/dom'
       },
       {

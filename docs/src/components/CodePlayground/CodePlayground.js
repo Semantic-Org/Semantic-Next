@@ -29,6 +29,7 @@ const settings = {
   saveID: 'sandbox',
   example: {},
   tabSize: 2,
+  maxHeight: 0,
   inline: false,
   inlineDirection: 'vertical',
   sortOrder: [
@@ -85,6 +86,17 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     $('ui-panel').settings({
       getNaturalSize: tpl.getNaturalPanelSize
     });
+  },
+  getClassMap() {
+    return {
+      resizing: state.resizing.get(),
+    };
+  },
+  getStyle() {
+    console.log('height', settings.maxHeight);
+    if(settings.maxHeight > 0) {
+      return `height: ${settings.maxHeight}px;`;
+    }
   },
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding

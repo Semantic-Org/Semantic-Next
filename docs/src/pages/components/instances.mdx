@@ -1,18 +1,27 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Creating Components
-icon: command
+title: Defining Functionality
+icon: package
 description: Defining your components behavior and exposed properties
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Your component instance is a definition of the behaviors of your component and the values it stores.
+When defining your component you can use the `createInstance` callback to define the behaviors of your component so that they can be accessed in various other locations that might need to reference or invoke them.
 
-Unlike internal data like `state` which is only accessible internally, your template instance is accessible from the DOM and from any component in your page.
+For instance you might need to invoke a behavior from:
+
+* **Outside Component**
+  * From the DOM
+  * Other components and subtemplates
+* **Inside Component**
+  * Lifecycle callbacks in your component
+  * Event handlers
+  * Keybindings
+  * Your component template
 
 ### Creating Instances
 
-The `createInstance` callback is used to define the behavior of your component including any static properties and methods that you might want to access.
+The `createInstance` callback is used to define your component instance including methods that define your components behavior.
 
 ```javascript
 const state = { counter: 0 };
@@ -30,9 +39,16 @@ const createInstance = ({tpl, state, settings}) => ({
   },
 });
 ```
+
+You you can access other data like `settings`, `state`, as well as the DOM using `$` and `$$` from inside your component instance, allowing you to manipulate data from the DOM, access sources of reactivity, and settings passed through to your component.
+
+For more information see [component lifecycle](/components/lifecycle#callback-arguments).
+
+
+
 ## Accessing Instances
 
-### Inside Component
+### From Lifecycle Callbacks
 
 Instances are passed through to all other callbacks as `tpl` allowing you to reference methods and values directly from [events](/component/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
 
@@ -55,8 +71,8 @@ const keys = {
 }
 ```
 
+### From Events
 
-##### Events
 
 ```javascript
 const events = {
@@ -132,11 +148,13 @@ const createInstance = ({tpl, findTemplate}) => {
 ```
 
 
-## From Page
+## From DOM
 
 You can access your template instance directly from the DOM to modify its internal state, or access values.
 
-You can use Query's `getComponent()` helper
+Each copy of your component will have a separate instance which will store its values and is accessible directly from the dom as `el.tpl`
+
+You can use Query's `getComponent()` helper to easily access a component instance
 
 With Query
 ```javascript
@@ -151,7 +169,10 @@ const { tpl } = document.querySelector('ui-counter');
 tpl.setCounter(2);
 ```
 
-### Page Access Example
+> **Storage in the DOM** - Your template instance is stored as `el.tpl` i.e. `el.tpl.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
+
+
+### DOM Access Example
 In this example the external input on the page updates the internal reactive state of the web component, preventing the counter from running when the external input is focused.
 
 You can view this interaction in `index.js`.

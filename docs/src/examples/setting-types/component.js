@@ -4,14 +4,23 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const settings = {
+
+  // attribute or prop
   age: 24,
+
+  // attribute or prop
   job: 'Sailor',
-  birthday: {
-    month: 'January',
-    day: '1st',
-  },
+
+  // serialized attribute or prop
+  birthday: { month: 'January', day: '1st' },
+
+  // attribute
   married: true,
+
+  // serialized attribute or prop
   siblings: ['John', 'James'],
+
+  // prop only
   getName: () => 'Jill',
 };
 

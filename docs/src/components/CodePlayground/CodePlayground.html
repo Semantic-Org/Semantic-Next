@@ -1,17 +1,21 @@
-<div class="playground {{classIf resizing 'resizing'}}" part="playground">
+<div class="playground {{classMap getClassMap}}" style={{getStyle}} part="playground">
   {{#if example.title}}
     <div class="masthead" part="masthead">
-      <ui-button right-floated transparent small compact inverted class="tabs">
-        {{#if useTabs}}
-          Use Panels
-        {{else}}
-          Use Tabs
-        {{/if}}
-      </ui-button>
-      <ui-button right-floated transparent small compact inverted>
-        <ui-icon copy></ui-icon>
-        Fork
-      </ui-button>
+      {{#if inline}}
+
+      {{else}}
+        <ui-button right-floated transparent small compact inverted class="tabs">
+          {{#if useTabs}}
+            Use Panels
+          {{else}}
+            Use Tabs
+          {{/if}}
+        </ui-button>
+        <ui-button right-floated transparent small compact inverted>
+          <ui-icon copy></ui-icon>
+          Fork
+        </ui-button>
+      {{/if}}
       <h3 class="title" part="title">{{example.title}}</h3>
       <p part="description">{{example.description}}</p>
     </div>
