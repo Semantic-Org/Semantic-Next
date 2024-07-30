@@ -108,6 +108,9 @@
     border-top: none;
     padding-top: 0rem;
   }
+  layout page.text-content h2:first-child {
+    margin-top: 0rem;
+  }
   layout page.text-content h3 {
     margin: 3rem 0rem 1rem;
   }

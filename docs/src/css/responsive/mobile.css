@@ -44,6 +44,9 @@
         font-size: 18px;
         margin: 2rem 0rem 1rem;
       }
+      h2:first-child {
+        margin-top: 0rem;
+      }
       ul li,
       p {
         font-size: 15px;
