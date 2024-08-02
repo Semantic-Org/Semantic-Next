@@ -88,7 +88,7 @@
   layout page.text-content pageContent > ul,
   layout page.text-content pageContent > ul li,
   layout page.text-content pageContent > p {
-    line-height: 1.5;
+    line-height: 1.66;
   }
   layout page.text-content pageContent > ul li {
     margin-bottom: 0.5rem

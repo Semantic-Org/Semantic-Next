@@ -18,8 +18,8 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   ball: {
-    initialCount: 50,
-    r: { average: 2, variance: 1 },
+    initialCount: 80,
+    r: { average: 3, variance: 1 },
     v: { average: 100, variance: 100 },
     saturation: {
       decayRate: 200,

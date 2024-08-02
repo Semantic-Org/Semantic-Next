@@ -38,10 +38,10 @@
     main {
 
       h1 {
-        font-size: 22px;
+        font-size: 24px;
       }
       h2 {
-        font-size: 18px;
+        font-size: 20px;
         margin: 2rem 0rem 1rem;
       }
       h2:first-child {
@@ -49,7 +49,8 @@
       }
       ul li,
       p {
-        font-size: 15px;
+        font-size: 16px;
+        line-height: 1.7;
       }
 
       ui-container {
@@ -58,7 +59,7 @@
       }
 
       code-example::part(header) {
-        font-size: 15px;
+        font-size: 16px;
       }
       code-example::part(description) {
         font-size: 13px;
