@@ -101,7 +101,7 @@ export const sidebarMenuFramework = [
         url: '/components/create'
       },
       {
-        name: 'Defining Functionality',
+        name: 'Instances',
         url: '/components/instances'
       },
       {
@@ -113,11 +113,15 @@ export const sidebarMenuFramework = [
         url: '/components/rendering'
       },
       {
-        name: 'Accessing DOM',
+        name: 'Reactivity',
+        url: '/components/reactivity'
+      },
+      {
+        name: 'DOM Queries',
         url: '/components/dom'
       },
       {
-        name: 'CSS Design System',
+        name: 'CSS & Styling',
         url: '/components/styling'
       },
       {
@@ -127,10 +131,6 @@ export const sidebarMenuFramework = [
       {
         name: 'Key Bindings',
         url: '/components/keys'
-      },
-      {
-        name: 'Reactivity',
-        url: '/components/reactivity'
       },
     ]
   },

@@ -11,7 +11,7 @@ The heart of this functionality is `createComponent` which allows you to define 
 
 SUI aims to remove the road-blocks and workarounds typically encountered when using vanilla web components to make it easier to build component that you are confident you can take with you regardless of your decision on front end stack.
 
-> **Web Components vs Svelte/React/Vue** - SUI components are built specifically for developers who want to ensure components they create can be taken inbetween front end infrastructures, as web components are a native browser standard. You can choose to render these web components in a front end framework or simply use the tags directly in your HTML as these docs do without an overarching framework.
+> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components are a native browser standard designed to allow for interchange between front end frameworks. When choosing `semantic-ui/component` you can choose to render these web components in any supporting front end framework or simply use the html tags directly in your app with vanilla js.
 
 ## Creating Components
 
@@ -59,6 +59,21 @@ In real world cases you will often need to specify several additional properties
 
 ## Component Parts
 
+
+### Instance
+
+[`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
+
+For instance you might have a helper `isEven` used to display whether the counter is currently an even value in your template, or to let end-users query whether your component is outputting an even value.
+
+```javascript
+const createInstance = ({ state }) => ({
+  initialize: () => setInterval(() => state.counter.increment(), 1000),
+  isEven: (number) => (number % 2 == 0)
+});
+
+```
+
 ### Template
 
 Your template defines how your component should render. It includes things like
@@ -89,44 +104,21 @@ const template = `<div class="counter">
 
 ```
 
-### Component Instance
-
-[`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
-
-For instance you might have a helper `isEven` used to display whether the counter is currently an even value in your template, or to let end-users query whether your component is outputting an even value.
-
-```javascript
-const createInstance = ({ state }) => ({
-  initialize: () => setInterval(() => state.counter.increment(), 1000),
-  isEven: (number) => (number % 2 == 0)
-});
-
-```
-
 ### CSS
 
-`css` defines CSS that will be attached to your web component. The css is scoped specifically to the component.
+`css` defines CSS that will be attached to your web component. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
 
+The css is scoped specifically to the component.
 
-```javascripts
-
+```javascript
 const css = `
   .counter {
-    border: var(--border);
-    padding: var(--padding);
-    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1em;
+    border-radius: 4px;
   }
 `;
-createComponent({
-  tagName: 'ui-counter',
-  css,
-  template,
-  state,
-  createInstance
-});
 ```
-
-
 > **Shadow DOM** - CSS is scoped to a portion of your web app using a special concept called the "Shadow DOM" which is part of the web component spec and allows portions of HTML to be isolated from other parts of the page. This means that CSS defined in the page scope will not affect your component and vice versa. **CSS variables however can penetrate your component** which is the primary reason they are used extensively for styling web components.
 
 
@@ -134,4 +126,89 @@ createComponent({
 It is not essential to use Semantic's UI framework when creating your own custom components, however using `@semantic-ui/core` provides some additional benefits like a robust CSS theming framework that exposes primitives like `--border`, `--padding`
  and other values that can be used to create a custom design system.
 
-###
+```javascript
+const css = `
+  .counter {
+    border: var(--border);
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+  }
+`;
+```
+
+#### Light CSS
+
+Light CSS is CSS scoped to the light or logical DOM. It is recommended to only use this in cases where CSS selectors have specific limitations which can only be surmounted by including external rules, for instance combining `::slotted` with `::part`.
+
+See [web component limitations and gotcha](/gotchas) for some examples when this might be necessary.
+
+```javascript
+const lightCSS = `
+  ui-counter ui-button::part(button) {
+    color: var(--red);
+  }
+`;
+```
+
+### Events
+
+Events is an object literal which allows for you to assign code that should run when events are triggered.
+
+For more information on events please see the [dedicated subsection for events](/components/events)
+
+These can be browser events like `click`
+
+```javascript
+const events = {
+  'click .increase.width'({tpl}) {
+    tpl.increaseWidth();
+  },
+};
+```
+
+or custom events like `resizestart` dispatched from another nested component
+```javascript
+const events = {
+  'resizestart ui-panel'() {
+    // do something
+  },
+};
+```
+
+### Keys
+
+Components can also include keybindings that will be attached to the page during the lifecycle of the component.
+
+> [Dynamic Keybinding](/components/keys#dynamic-keybinding) - For more advanced usecases you can use `bindKey` and `unbindKey` to also dynamically assign key bindings based on app state
+
+## Organizing Code
+
+### Importing Template / CSS
+
+Semantic UI docs by convention include `html` and `css` as separate files that are imported as plaintext.
+
+#### Browser / Node
+You can achieve this in a browser or node environment using `getText` a helper used to grab plaintext content using `fetch`.
+
+```javascript
+import { getText } from '@semantic-ui/component';
+const html = await getText('./component.html');
+const css = await getText('./component.css');
+```
+
+#### Webpack / Vite / Esbuild etc.
+
+If you are using build tools to compile your project, you can use the `?raw` query parameter to import a file as text.
+
+Related Docs
+* Vite - [Import Assets as a String](https://vitejs.dev/guide/assets#importing-asset-as-string)
+* Webpack - [Raw Loader](https://v4.webpack.js.org/loaders/raw-loader/)
+* ESBuild - []
+
+```javascript
+const html = await getText('./component.html?raw');
+const css = await getText('./component.css?raw');
+```
+
+
+
