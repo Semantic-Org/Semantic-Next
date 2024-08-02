@@ -36,7 +36,6 @@ export const createComponent = ({
 
   subTemplates = {},
   renderingEngine,
-  beforeRendered = noop,
 } = {}) => {
 
   // AST shared across instances

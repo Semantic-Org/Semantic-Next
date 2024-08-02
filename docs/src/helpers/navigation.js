@@ -117,6 +117,10 @@ export const sidebarMenuFramework = [
         url: '/components/dom'
       },
       {
+        name: 'CSS Design System',
+        url: '/components/styling'
+      },
+      {
         name: 'Events',
         url: '/components/events'
       },

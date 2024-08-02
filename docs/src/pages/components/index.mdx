@@ -9,21 +9,22 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 Semantic UI provides a reactive framework for authoring web components that can be used to build custom UI on top of the primitives provided from the UI library.
 
+> **Getting Started** - It is recommended to check out our [interactive tutorial](/tutorial) before getting started here. This is designed to get you up to speed before diving into the guides found here.
+
 #### Developer Experience
 
 Components provides everything you'd expect from other modern front end frameworks, but is developed specifically for web components.
 
 Each UI component you author will give you access to a custom html tag which you can compose just like you compose `<input>` `<p>` and other tags in your page.
 
-Semantic UI components are separated into three parts
-* **Definition** - Define what your component can do, events it consumes and emits, render lifecycle, and  settings that can be modified from outside the component.
-* **Template** - Use looping, conditionals, and template partials to produce html from your component
-* **CSS** - Define CSS that may either attach to your component's [shadow root](/web-components) or the page and style content.
+Semantic UI components provide an overall framework for creating complex web apps using web components.
 
-<PlaygroundExample id="counter"></PlaygroundExample>
+* [Templating](/templating/) - An expressive signals based templating system that allows you to precisely reconstruct portions of a component when data changes, and includes features like, snippets, subtemplating, template helpers, control structures, looping, and more.
+* [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
+* [DOM Manipulation](/components/dom) - A jQuery like chainable DOM manipulation library that is built to handle shadow DOM and nested components.
+* [Keybindings](/components/events) - Robust, built in systems for handling event listeners and dispatching custom events.
+* [Keybindings](/components/keys) - Built in keybinding system attached to component lifecycles
+* [Lifecycle Events](/components/lifecycle) - Granular control over tear
 
-#### Key Features
-  * Uniform bindings for attaching events both inside and outside components, built with event delegation and uniform control using `AbortSignals`.
-  * A tightly integrated signals library for reactivity.
-  * A easy to read templating syntax that compiles to an AST and renders to web components.
-  * Full ecosystem of helpers for things like reactive slotting, shadow DOM style injection, and other tools that help avoid pain and keep code easy to understand while still working close to bare-metal browser APIs.
+
+<PlaygroundExample id="minimal" height="480"></PlaygroundExample>

@@ -1,0 +1,137 @@
+---
+layout: '@layouts/Guide.astro'
+title: Creating Components
+icon: package
+description: Creating a new component
+---
+
+Semantic UI is built with an underlying component framework that can be used to define reusable sections of your app.
+
+The heart of this functionality is `createComponent` which allows you to define a custom element or [web component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components).
+
+SUI aims to remove the road-blocks and workarounds typically encountered when using vanilla web components to make it easier to build component that you are confident you can take with you regardless of your decision on front end stack.
+
+> **Web Components vs Svelte/React/Vue** - SUI components are built specifically for developers who want to ensure components they create can be taken inbetween front end infrastructures, as web components are a native browser standard. You can choose to render these web components in a front end framework or simply use the tags directly in your HTML as these docs do without an overarching framework.
+
+## Creating Components
+
+### Minimal Case
+
+In essence a component is a subset of HTML that has an html structure, events and behaviors.
+
+The only requirement however to render a template is an html template.
+
+```javascript
+import { createComponent } from '@semantic-ui/component';
+
+const HelloWorld = createComponent({
+  template: `<p>Hello World</p>`,
+});
+```
+
+In most cases however you want to specify a tag name. This will make it available as a web component allowing you include it in pages in your application.
+```javascript
+import { createComponent } from '@semantic-ui/component';
+
+createComponent({
+  tagName: 'hello-world',
+  template: `<p>Hello World</p>`,
+});
+```
+
+```html
+<hello-world></hello-world>
+```
+
+### Standard Case
+
+In real world cases you will often need to specify several additional properties of your component.
+
+* **Component Instance** - An object returned from `createInstance` defines what methods and properties are attached to the DOM element associated with the component
+* **CSS** - The css scoped to this component, `css` or scoped to the page, `lightCSS`
+* **Template** - The control structures, loops, subtemplates etc defining how to render your component. This can be passed in as a string `template` or rendered from a precompiled `ast`.
+* **Events** - The event listeners attached to your component, passed in as an object literal string `events`.
+* **State** - Reactive internal `state` associated with your component and its default values
+* **Settings** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
+* **Lifecycle Events** - Actions that should occur `onCreated`, `onRendered` and `onDestroyed` for your component
+* **Keybindings** - `keys` defines keyboard events associated with your component
+
+
+## Component Parts
+
+### Template
+
+Your template defines how your component should render. It includes things like
+
+* [control structures](/templates/control) to handle branching content using `if` `elseif` `else`
+* [looping structures](/templates/looping) to iterate through values using `each`
+* [reactive data](/templates/data) to display the current value of data inside html
+* [function calls](/templates/data) to pass data into functions and return their results
+* [subtemplates](/templates/subtemplates) to reference other components or parts of a component
+* [slots](/templates/slots) to allow users to place their own DOM content inside your component
+* [snippets](/templates/snippets) to allow for reusable html structures inside a component
+
+```javascript
+const template = `<div class="counter">
+  <div class="parity">
+    {{#if isEven counter}}
+     Even
+    {{else}}
+     Odd
+    {{/if}}
+  </div>
+  <span class="text">
+    The counter is {{counter}}
+  </span>
+</div>
+`;
+
+
+```
+
+### Component Instance
+
+[`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
+
+For instance you might have a helper `isEven` used to display whether the counter is currently an even value in your template, or to let end-users query whether your component is outputting an even value.
+
+```javascript
+const createInstance = ({ state }) => ({
+  initialize: () => setInterval(() => state.counter.increment(), 1000),
+  isEven: (number) => (number % 2 == 0)
+});
+
+```
+
+### CSS
+
+`css` defines CSS that will be attached to your web component. The css is scoped specifically to the component.
+
+
+```javascripts
+
+const css = `
+  .counter {
+    border: var(--border);
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+  }
+`;
+createComponent({
+  tagName: 'ui-counter',
+  css,
+  template,
+  state,
+  createInstance
+});
+```
+
+
+> **Shadow DOM** - CSS is scoped to a portion of your web app using a special concept called the "Shadow DOM" which is part of the web component spec and allows portions of HTML to be isolated from other parts of the page. This means that CSS defined in the page scope will not affect your component and vice versa. **CSS variables however can penetrate your component** which is the primary reason they are used extensively for styling web components.
+
+
+#### Theming
+It is not essential to use Semantic's UI framework when creating your own custom components, however using `@semantic-ui/core` provides some additional benefits like a robust CSS theming framework that exposes primitives like `--border`, `--padding`
+ and other values that can be used to create a custom design system.
+
+###

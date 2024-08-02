@@ -93,7 +93,6 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     };
   },
   getStyle() {
-    console.log('height', settings.maxHeight);
     if(settings.maxHeight > 0) {
       return `height: ${settings.maxHeight}px;`;
     }

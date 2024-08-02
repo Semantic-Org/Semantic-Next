@@ -1,0 +1,34 @@
+---
+layout: '@layouts/Guide.astro'
+title: Creating Components
+icon: package
+description: Creating a new component
+---
+
+To create a new component in Semantic UI you pass in a set of arguments to `createComponent` which help define aspects of how your component functions. In the most simple case you only need to specify what HTML will be rendered for your component.
+
+```javascript
+const counter = createComponent({
+  template: '<p>Hello World</p>',
+});
+```
+
+
+### Defining a Web Component
+
+If a `tagName` is specified the component will become a web component and be defined automatically meaning you can render the component simply by using the tag.
+
+```javascript
+const counter = createComponent({
+  tagName: 'hello-world'
+  template: '<p>Hello World</p>',
+});
+```
+
+```html
+<hello-world></hello-world>
+```
+
+### Adding Settings
+
+In most cases you will want to expose some settings so that other users can modify your component. Let's take the simple example of a counter.
