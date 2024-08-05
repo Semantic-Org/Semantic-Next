@@ -70,7 +70,7 @@ const createInstance = ({ el, $, settings, reaction, darkMode, tpl }) => ({
           '#e1e4e8': '#979797',
           '#b392f0': '#58C1FE', // attr
           '#032F62': '#6F42C1',
-          '#FFAB70': '58C1FE'
+          '#FFAB70': '#58C1FE',
           // light mode
           '#22863a': '#777',
           '#24292e': '#777',
