@@ -5,11 +5,9 @@ icon: package
 description: Creating a new component
 ---
 
-Semantic UI is built with an underlying component framework that can be used to define reusable sections of your app.
+Semantic UI extends [native web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to support [reactive data](/components/reactivity), [event binding](/components/events), [templating](/components/rendering), [DOM Querying](/components/dom), [keybindings](/components/keys) and more to allow you to build complex web applications purely with web components.
 
-The heart of this functionality is `createComponent` which allows you to define a custom element or [web component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components).
-
-SUI aims to remove the road-blocks and workarounds typically encountered when using vanilla web components to make it easier to build component that you are confident you can take with you regardless of your decision on front end stack.
+`createComponent` exported from `@semantic-ui/component` is the primary way to define your app's components.
 
 > **Web Components vs Frameworks (Svelte/React/Vue)** - Web components are a native browser standard designed to allow for interchange between front end frameworks. When choosing `semantic-ui/component` you can choose to render these web components in any supporting front end framework or simply use the html tags directly in your app with vanilla js.
 
@@ -17,9 +15,9 @@ SUI aims to remove the road-blocks and workarounds typically encountered when us
 
 ### Minimal Case
 
-In essence a component is a subset of HTML that has an html structure, events and behaviors.
+At its essence, a component is a portion of HTML that has a template, events and behaviors.
 
-The only requirement however to render a template is an html template.
+The minimum requirement to render a template is an html template.
 
 ```javascript
 import { createComponent } from '@semantic-ui/component';
@@ -45,34 +43,37 @@ createComponent({
 
 ### Standard Case
 
-In real world cases you will often need to specify several additional properties of your component.
+In most application you will need to do many more things provided by a larger framework like Svelte, React or Vue. `createComponent` provides features that allow this to be accomplished with web components.
 
-* **Component Instance** - An object returned from `createInstance` defines what methods and properties are attached to the DOM element associated with the component
-* **CSS** - The css scoped to this component, `css` or scoped to the page, `lightCSS`
+* **Functionality** - An object returned from `createInstance` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
 * **Template** - The control structures, loops, subtemplates etc defining how to render your component. This can be passed in as a string `template` or rendered from a precompiled `ast`.
+* **CSS** - The `css` scoped to this component or that should be attached once to the page with the compnent, `lightCSS`
 * **Events** - The event listeners attached to your component, passed in as an object literal string `events`.
 * **State** - Reactive internal `state` associated with your component and its default values
 * **Settings** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
 * **Lifecycle Events** - Actions that should occur `onCreated`, `onRendered` and `onDestroyed` for your component
 * **Keybindings** - `keys` defines keyboard events associated with your component
 
+> **Destructured Params** - Semantic callbacks provide a variety of parameters that are returned from functions called inside the component and allow you to access data and
+
 
 ## Component Parts
 
 
-### Instance
+### Functionality
 
 [`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
-For instance you might have a helper `isEven` used to display whether the counter is currently an even value in your template, or to let end-users query whether your component is outputting an even value.
+For instance, you might have a helper `isEven` used to display whether the counter is currently an even value in your template, or to let end-users query whether your component is outputting an even value.
 
 ```javascript
 const createInstance = ({ state }) => ({
   initialize: () => setInterval(() => state.counter.increment(), 1000),
   isEven: (number) => (number % 2 == 0)
 });
-
 ```
+> For more information on `createInstance` see our dedicated subsection on [definining functionality](/components/instances).
+
 
 ### Template
 
@@ -152,21 +153,20 @@ const lightCSS = `
 
 ### Events
 
-Events is an object literal which allows for you to assign code that should run when events are triggered.
+Most components will need to listen to and react to events triggered from the browser or other components. When creating a component you can assign events that are bound to parts of your component and trigger functionality.
 
-For more information on events please see the [dedicated subsection for events](/components/events)
 
-These can be browser events like `click`
+These can be browser events like `click`, perhaps to save something when a button with class `save` is clicked.
 
 ```javascript
 const events = {
-  'click .increase.width'({tpl}) {
-    tpl.increaseWidth();
+  'click ui-button.save'({tpl}) {
+    tpl.save();
   },
 };
 ```
 
-or custom events like `resizestart` dispatched from another nested component
+or custom events like `resizestart` dispatched from another component
 ```javascript
 const events = {
   'resizestart ui-panel'() {
@@ -174,6 +174,8 @@ const events = {
   },
 };
 ```
+
+For more information on events please see the [dedicated subsection for events](/components/events)
 
 ### Keys
 

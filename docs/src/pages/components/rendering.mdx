@@ -14,23 +14,66 @@ Semantic UI components rely on a **template** and a **data context** to generate
 
 > **Comparing to React** - Instead of using a `render()` function to return `jsx` each component's  template provides the high level logic for explaining how html should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
 
+## Templates
+
+Templates provide primitives for constructing html like [control structures](/templates/control), [expressions](templates/data),  content slots, conditionals, subtemplates, snippets and more.
+
+For more information on all the features of templates check our dedicated subsection [on templates](/templates).
 
 ## Data Context
 
 The templates data context is a combination of several data sources that are looked up in sequence.
 
-For instance the expression in a template like could be defined in several locations
+For instance our template might include something like
 ```html
 Greetings, {{name}}
 ```
+
+This will check each of these locations in sequence and return the first available value.
 
 * **Global Helpers** - A global helper registered across templates called `name`
 * **Template Instance** - A value or function on your template instance called `name`
 * **Settings** - A value `name` passed in via html attribute or property
 * **State** - An internal reactive state called `name`
 * **Subtemplate Data** - Data passed in from a parent template called `name`
+> **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance you may initially have a value as a `property` on your component, then move it to `state` to make it reactive, then finally move it to `settings` to make it user overridable without having to modify the underlying template.
 
-> **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance you may initially have a value on the `template instance` for performance, then move it to `state` to make it reactive, then finally move it to `settings` to make it user overridable.
+
+## Evaluating Values
+
+Expressions are evaluated right to left with values being retreived from the data context.
+```html
+{{concat firstName ' ' lastName}}
+```
+
+```javascript
+concat(firstName, ' ', lastName);
+```
+
+
+### Evaluation Order
+
+If an intermediary function is found it will pass the result through naively
+
+```html
+{{titleCase concat firstName ' ' lastName}}
+```
+
+```javascript
+titleCase(concat(fistName, ' ', lastName))
+```
+
+### Parenthesis
+
+If parenthesis are used it will respect the evaluation order
+```html
+formatDate (getDate now) 'h:mm'
+```
+
+```javascript
+formatDate(getDate(now), 'h:mm'))
+```
+
 
 ## Global Helpers
 
@@ -161,22 +204,8 @@ When components are rendered as subtemplates, their data context is defined expl
 
 For example, you might want to have a table that uses a subtemplate to output a table row, definining the data context as the row's data for each initialization.
 
+<PlaygroundExample id="subtemplates" direction="horizontal"></PlaygroundExample>
 
-Subtemplate example goes here
-
-## Looking up Expressions
-
-When you use an expression in a template it will look at the component's data context to find what the value represents.
-
-You can think of the data context as a flattened copy of settings, state, your template instance and global helpers.
-
-So for example if you look up an expression `{{iconName}}` in a template it will first look
-* If there is a global template helper called `iconName`
-* If a setting is specified and a default value or DOM attribute or DOM property is set for `iconName`
-* If an internal state property is named `iconName`
-* If there is a function or property on your template instance named `iconName`
-
-You can see how this is accomplished in the following example, be sure to view `index.html` and `index.js` to see how data can be both passed in as attributes or properties.
 
 ### Data Types
 

@@ -1,6 +1,6 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Lifecycle Callbacks
+title: Lifecycle Events
 icon: refresh-cw
 description: An overview of component lifecycle
 ---
@@ -14,16 +14,16 @@ Each web component has lifecycle callbacks that help you define behavior at each
 
 Semantic UI components wrap native web components but provide additional callbacks that give you more granular control over how the component is defined.
 
-* **createInstance** - Defines your [component instance](/component/instance) that includes the invokable functionality of your component and exposed variables.
+* **createInstance** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
 * **onCreated** - Callback after your component instance is initialized but before it is attached to the DOM
 * **onRendered** - Callback after your component is rendered to the DOM
 * **onDestroyed** - Callback after your component is removed from the DOM
 
-For a more detailed description of how callbacks are fired refer to the [event sequence diagram](/components/lifecycle#event-sequence).
+For a more detailed description of how callbacks are fired refer to the [callback event sequence diagram](/components/lifecycle#callback-sequence).
 
 > **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/templates) passed to `createComponent`.
 
-## Callbacks
+## Lifecycle Callbacks
 
 ### createInstance
 
@@ -102,7 +102,7 @@ Event handlers also have access to a few additional arguments
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
 
-## Event Sequence
+## Callback Sequence
 
 The following diagram shows the sequence of events that occur when a component is rendered to the page.
 

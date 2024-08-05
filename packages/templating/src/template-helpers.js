@@ -27,8 +27,8 @@ export const TemplateHelpers = {
   hasAny(a) {
     return a?.length > 0;
   },
-  concat(a, b) {
-    return a + b;
+  concat(...args) {
+    return args.join('');
   },
   both(a, b) {
     return a && b;

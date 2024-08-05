@@ -10,10 +10,14 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 When authoring templates you may find you need to implement custom reactivity. This may be something that you want to re-run when something else changes, or perhaps to engineer a simpler way to handle a computation.
 
-`Reaction` is  exposed in user templates via `tpl.reaction` which will automatically attach itself to the template lifecycle teardown events.
+All [lifecycle events and callbacks](/components/lifecycle) will return `reactiveVar` and `reaction`. These can be used to create new sources of reactivity, `reactiveVar`, and `reaction` computations that will re-run when a source of reactivity changes.
+
+> **Signals** - Semantic UI uses a signals based approach for reactivity. This works by tracking references to reactive variables and then running a flush which triggers those reactions after their values change. For more information see our dedicated section on [reactivity](/reactivity).
+
+###
 
 ```javascript
-const createInstance = ({ tpl }) => {
+const createInstance = ({ tpl, reactiveVar, reaction }) => {
   return {
     count: new ReactiveVar(0),
     increment() {

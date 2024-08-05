@@ -101,7 +101,7 @@ export const sidebarMenuFramework = [
         url: '/components/create'
       },
       {
-        name: 'Instances',
+        name: 'Defining Functionality',
         url: '/components/instances'
       },
       {
@@ -113,20 +113,20 @@ export const sidebarMenuFramework = [
         url: '/components/rendering'
       },
       {
-        name: 'Reactivity',
+        name: 'Event Listeners',
+        url: '/components/events'
+      },
+      {
+        name: 'Reactive Data',
         url: '/components/reactivity'
       },
       {
-        name: 'DOM Queries',
+        name: 'Accessing DOM',
         url: '/components/dom'
       },
       {
         name: 'CSS & Styling',
         url: '/components/styling'
-      },
-      {
-        name: 'Events',
-        url: '/components/events'
       },
       {
         name: 'Key Bindings',
@@ -144,24 +144,20 @@ export const sidebarMenuFramework = [
         url: '/templates/control'
       },
       {
+        name: 'Evaluating Expressions',
+        url: '/templates/data'
+      },
+      {
         name: 'Looping',
         url: '/templates/looping'
       },
       {
-        name: 'Outputting Values',
-        url: '/templates/data'
-      },
-      {
-        name: 'Calling Methods',
-        url: '/templates/methods'
+        name: 'Content Slots',
+        url: '/templates/slots'
       },
       {
         name: 'Global Helpers',
         url: '/templates/helpers'
-      },
-      {
-        name: 'Outputting HTML',
-        url: '/templates/html'
       },
       {
         name: 'Subtemplates',
