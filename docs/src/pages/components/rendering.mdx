@@ -14,13 +14,24 @@ Semantic UI components rely on a **template** and a **data context** to generate
 
 > **Comparing to React** - Instead of using a `render()` function to return `jsx` each component's  template provides the high level logic for explaining how html should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
 
-## Templates
+## Rendering Templates
 
-Templates provide primitives for constructing html like [control structures](/templates/control), [expressions](templates/data),  content slots, conditionals, subtemplates, snippets and more.
 
-For more information on all the features of templates check our dedicated subsection [on templates](/templates).
+### Templates
+Your template defines how your component should render. It includes things like
 
-## Data Context
+* [control structures](/templates/control) to handle branching content using `if` `elseif` `else`
+* [looping structures](/templates/looping) to iterate through values using `each`
+* [reactive data](/templates/data) to display the current value of data inside html
+* [function calls](/templates/data) to pass data into functions and return their results
+* [subtemplates](/templates/subtemplates) to reference other components or parts of a component
+* [slots](/templates/slots) to allow users to place their own DOM content inside your component
+* [snippets](/templates/snippets) to allow for reusable html structures inside a component
+
+
+> For more information on all the features of templates check our dedicated subsection [on templates](/templates).
+
+### Data Context
 
 The templates data context is a combination of several data sources that are looked up in sequence.
 
