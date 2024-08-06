@@ -2,7 +2,7 @@
 
     /* Transparent */
   --button-transparent-background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.08));
-  --button-transparent-background-color: transparent;
+  --button-transparent-background-color: rgba(0, 0, 0, 0.03);
   --button-transparent-text-color: var(--button-text-color);
   --button-transparent-box-shadow: var(--button-box-shadow);
 
@@ -23,7 +23,7 @@
 
   /* Transparent Inverted */
   --button-transparent-inverted-background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.08));
-  --button-transparent-inverted-background-color: transparent;
+  --button-transparent-inverted-background-color: rgba(255, 255, 255, 0.03);
   --button-transparent-inverted-text-color: var(--button-inverted-text-color);
   --button-transparent-inverted-box-shadow: var(--button-box-shadow);
 
