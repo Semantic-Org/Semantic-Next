@@ -490,7 +490,7 @@ export class SpecReader {
 
         // get default value
         const defaultValue = this.getDefaultValue(spec, propertyType, section);
-        if (defaultValue) {
+        if (defaultValue !== undefined) {
           componentSpec.defaultValues[propertyName] = defaultValue;
         }
 
@@ -605,7 +605,7 @@ export class SpecReader {
   }
 
   getDefaultValue(spec, type, section) {
-    if(spec.defaultValue) {
+    if(spec.defaultValue !== undefined) {
       return spec.defaultValue;
     }
     if(section !== 'settings') {

@@ -1,4 +1,4 @@
-import { get, each, unique, firstMatch, inArray, isString } from '@semantic-ui/utils';
+import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, camelToKebab } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -40,14 +40,13 @@ const tokenizeSpaces = (string) => {
 */
 export const adjustPropertyFromAttribute = (el, attribute, attributeValue, componentSpec) => {
 
-  // This is used to search for potential values that should
-  // to the canonical way. This is because we support swapping ordering and spaces for dashes
+  // This is used to search for potential values that should match to the canonical value.
+  // This is because we support swapping ordering and spaces for dashes
 
   // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
   // i.e <ui-button left-attached="somevalue">
 
   const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
-
     // "arrow down" -> arrow-down
     optionValue = tokenizeSpaces(optionValue);
 
@@ -86,6 +85,10 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
   // this assigns the value to the DOM element
   const setProperty = (property, value) => {
+
+    // convert <div icon-after> to => el.iconAfter
+    property = kebabToCamel(property);
+
     if(value !== undefined) {
       el[property] = value;
     }
@@ -93,6 +96,10 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
   // this removes the related propery from the element
   const removeProperty = (property) => {
+
+    // convert <div icon-after> to => el.iconAfter
+    property = kebabToCamel(property);
+
     el[property] = undefined;
   };
 
@@ -110,8 +117,8 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
     // we can check if this property is defined
     else if (inArray(attribute, componentSpec.attributes)) {
 
-      if(attributeValue === '') {
-        // boolean attribute
+      // boolean attribute
+      if(componentSpec.propertyTypes[attribute] == Boolean && inArray(attributeValue, ['', true])) {
         attributeValue = true;
         setProperty(attribute, attributeValue);
         return;

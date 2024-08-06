@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isNumber, isString, isPlainObject, keys, unique, isServer, inArray, get, isBoolean, isArray } from '@semantic-ui/utils';
+import { each, isFunction, kebabToCamel, keys, unique, isServer, inArray, get } from '@semantic-ui/utils';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
 
@@ -279,6 +279,9 @@ class WebComponentBase extends LitElement {
         // we dont record this into settings
         return;
       }
+
+      property = kebabToCamel(property);
+
       const elementProp = this[property];
       const setting = elementProp  // check element setting
         ?? this.defaultSettings[property]  // check default setting on this component
@@ -290,7 +293,7 @@ class WebComponentBase extends LitElement {
       }
       // boolean attribute case
       if (componentSpec && settings[elementProp] !== undefined) {
-        settings[elementProp] = true;
+        settings[property] = true;
       }
     });
     return settings;
@@ -317,9 +320,6 @@ class WebComponentBase extends LitElement {
           componentSpec,
           properties
         });
-        if(property == 'activeFile') {
-          console.log('getting setting', settings, property, get(settings, property));
-        }
         return get(settings, property);
       },
       set: (target, property, value, receiver) => {

@@ -6,5 +6,9 @@ const items = [{label: 'One', value: '1'}, { label: 'Two', value: '2' },{label: 
 ---
 <Body padded>
 
-<ui-button primary icon-after icon="right-chevron">View Guide</ui-button>
+<UIButton primary icon-after icon="right-chevron">View Guide</UIButton>
+<UIButton fade-animated>
+  <span slot="visible">Hover Me</span>
+  <span slot="hidden">Hidden</span>
+</UIButton>
 </Body>
