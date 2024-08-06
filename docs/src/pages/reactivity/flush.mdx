@@ -1,0 +1,34 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Reactive Flush
+description: Flushing reactive changes
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Reactivity changes do not happen immediately when values change but are "flushed" together with other changes. This is performed as a [`microtask` in the browser](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide).
+
+### Async Behavior
+
+Flushes occur asynchronously when the microtask queue is processed. This means if multiple updates occur in sequence the reaction will only trigger once with the final value.
+
+> Flushes are performed asynchronously to avoid performance issues when updating UI, ensuring that the UI only renders once with the final value of a reactive variable.
+
+<PlaygroundExample id="reactive-async" direction="horizontal"></PlaygroundExample>
+
+### Forcing Flush
+
+You can trigger the queue to be immediately flushed to prevent this by using the `Reaction.flush()`.
+
+This can make sure intermediate values trigger reactive updates.
+
+<PlaygroundExample id="reactive-flush" direction="horizontal"></PlaygroundExample>
+
+
+### After Flush Callback
+
+You can use `Reaction.afterFlush` to trigger a callback once after all reactions have been flushed.
+
+This can be useful in cases where you want to query the DOM, trigger focus or other actions that should only occur after the UI has been updated.
+
+<PlaygroundExample id="after-flush" direction="horizontal"></PlaygroundExample>

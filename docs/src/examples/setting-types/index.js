@@ -5,7 +5,7 @@ $('user-profile').settings({
   getName: () => 'Sam',
   birthday: {
     month: 'January',
-    day: '1st',
+    day: 2,
   },
 });
 
@@ -14,7 +14,7 @@ $('.change').on('click', (event) => {
   $('user-profile').settings({
     birthday: {
       month: 'May',
-      day: '2',
+      day: 3,
     },
   });
   event.preventDefault();

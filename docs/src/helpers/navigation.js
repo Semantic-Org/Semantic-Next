@@ -204,11 +204,11 @@ export const sidebarMenuFramework = [
         url: '/reactivity/flush'
       },
       {
-        name: 'First Run & Stop',
-        url: '/reactivity/peek'
+        name: 'Reactive Computations',
+        url: '/reactivity/computations'
       },
       {
-        name: 'Guard & Reactivity Controls',
+        name: 'Controlling Reactivity',
         url: '/reactivity/peek'
       },
       {
@@ -225,7 +225,7 @@ export const sidebarMenuFramework = [
       },
       {
         name: 'Debugging',
-        url: '/reactivity/sizing'
+        url: '/reactivity/debugging'
       },
     ]
   },

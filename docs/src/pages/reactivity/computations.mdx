@@ -1,0 +1,34 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Reactive Computations
+description: Controlling reactivity and stopping reactions
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Reactions return a reference to the current `reaction` which can provide additional granular control over reactivity.
+
+### Stopping Reactivity
+
+You may find you want to stop a reaction from occuring at some point after setting it up. Reactions are passed to their callbacks as the first argument and provide a `stop` method for stopping the reaction.
+
+
+```javascript
+Reaction((reaction) => {
+  if(someCondition) {
+    reaction.stop();
+  }
+});
+```
+
+### First Run Flag
+
+You may need to define special behavior on the first run of a reaction, for instance to setup variables or to skip certain sections of code. You can use `reaction.firstRun` to handle this.
+
+```javascript
+Reaction((reaction) => {
+  if(reaction.firstRun) {
+    // special logic
+  }
+});
+```

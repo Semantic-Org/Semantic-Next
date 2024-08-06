@@ -6,15 +6,8 @@ description: Using reactive variables with Semantic UI
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Basic Example
 
-`ReactiveVar` are the only values that cause reactivity to occur in a reaction. When you create a `Reaction` it **will run immediately** then **re-run whenever a reactive value is updated**.
-
-<PlaygroundExample id="basic-reactivity"></PlaygroundExample>
-
-## Step by Step
-
-### Creating a Reactive Variable
+### Setting Values
 
 To create a reactive variable, you can use the `ReactiveVar` class from the `@semantic-ui/reactivity` package.
 
@@ -22,9 +15,6 @@ To create a reactive variable, you can use the `ReactiveVar` class from the `@se
 import { ReactiveVar } from '@semantic-ui/reactivity';
 const count = new ReactiveVar(0);
 ```
-
-In this example, we create a reactive variable named `count` with an initial value of `0`.
-
 ### Accessing Values
 
 To access the current value of a reactive variable, you can use the `get()` method:
@@ -35,7 +25,7 @@ console.log(count.get()); // Output: 0
 console.log(count.value); // Output: 0
 ```
 
-### Updating the Value
+### Updating Values
 
 To update the value of a reactive variable, you can use the `set()` method:
 
@@ -50,6 +40,52 @@ Alternatively, you can directly assign a new value to the `value` property:
 count.value = 2;
 console.log(count.get()); // Output: 2
 ```
+
+## Reactions
+
+Reactive variables are typically used within a reactive context, such as a `Reaction` or a reactive computation. When a reactive variable is accessed within a reactive context, it establishes a dependency between the variable and the context. Whenever the value of the reactive variable changes, the reactive context is automatically re-run.
+
+### Creating a Reaction
+
+In this example we set up a reaction by calling `count.get()` inside a `reaction`.
+
+```javascript
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+
+const count = new ReactiveVar(0);
+
+Reaction.create(() => {
+  console.log('Count:', count.get());
+});
+
+count.set(1); // Output: Count: 1
+count.set(2); // Output: Count: 2
+```
+
+### Creating a Subscription
+
+Another way to set up a reactive reference is to create a `subscription`.
+
+Unlike a `reaction` which tracks any reactive variable that is referenced and reruns when **any value is updated** a subscription will only rerun when a specified value is updated.
+
+> Subscriptions are an alternative approach to reactivity and may simplify code in some use cases
+
+```javascript
+const subscription = count.subscribe((newValue) => {
+  console.log('Count changed:', newValue);
+});
+
+count.set(3); // Output: Count changed: 3
+```
+
+Subscriptions return a reference to the current subscription. You can call `subscription.stop()` to stop the callback from occurring.
+
+```javascript
+subscription.stop();
+```
+
+
+## Reactive Conditions
 
 ### Equality Comparison
 
@@ -76,37 +112,8 @@ const customEquality = (a, b) => {
 const customVar = new ReactiveVar(initialValue, customEquality);
 ```
 
-### Subscribing to Changes
+## Reactivity Example
 
-You can subscribe to changes in a reactive variable using the `subscribe()` method:
+`ReactiveVar` are the only values that cause reactivity to occur in a reaction. When you create a `Reaction` it **will run immediately** then **re-run whenever a reactive value is updated**.
 
-```javascript
-const subscription = count.subscribe((newValue) => {
-  console.log('Count changed:', newValue);
-});
-
-count.set(3); // Output: Count changed: 3
-```
-
-The `subscribe()` method returns a subscription object that you can use to stop the subscription when needed:
-
-```javascript
-subscription.stop();
-```
-
-### Reactive Context
-
-Reactive variables are typically used within a reactive context, such as a `Reaction` or a reactive computation. When a reactive variable is accessed within a reactive context, it establishes a dependency between the variable and the context. Whenever the value of the reactive variable changes, the reactive context is automatically re-run.
-
-```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-
-const count = new ReactiveVar(0);
-
-Reaction(() => {
-  console.log('Count:', count.get());
-});
-
-count.set(1); // Output: Count: 1
-count.set(2); // Output: Count: 2
-```
+<PlaygroundExample id="basic-reactivity"></PlaygroundExample>

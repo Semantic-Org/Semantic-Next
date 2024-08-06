@@ -14,11 +14,20 @@ This is typically implemented using a `value` accessor or a `get()` function tha
 
 The name for this "rerunning function" can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/). The value that changes is typically called a **signal**.
 
-### Naming
+> **Signals vs Reaction** Although Semantic UI uses a signals based reactivity system the exported
+primitives are called `ReactiveVar` and `Reaction` instead of `Signal` and `Computation` to help convey their underlying purpose as an implementation of a reactivity system.
 
-Semantic UI uses the name `ReactiveVar` and `Reaction` for `Signal` and `Computation` because these names help convey their underlying purpose as an implementation of a reactivity system, with the latter terminology being the particular means they use to achieve that aim--something that may not been intuitive when encountering the word "signal" for the first time.
 
-Both names may be used in the documentation depending on if we are referring to the library implementation in specific `@semantic-ui/reactivity` or the underlying reactivity concept of Signals.
+### Usage in Semantic UI
+
+Semantic UI includes a package [`@semantic-ui/reactivity`](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/reactivity) which exports `ReactiveVar`, `Dependency` and `Reaction`.
+
+The reactivity system is implemented as a standalone package and can be used without adopting templating, components or other parts of Semantic UI components.
+
+If you are using Semantic UI, reactivity is available natively from inside component lifecycle callbacks.
+
+> Learn more about reactivity in components in the dedicated [component reactivity](/components/reactivity) section.
+
 
 ## Birthday Example
 
@@ -81,66 +90,3 @@ Semantic UI includes various helpers to make it easy to manipulate data like arr
 
 You can learn more about this in the documentation for [array helpers](#), [record helpers](), [date helpers](), and [boolean helpers]().
 
-### Flushing
-
-Reactivity changes do not happen immediately when values change but are "flushed" together with other changes. This is performed as a [`microtask` in the browser](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide).
-
-If you need to control the flushing behavior you can manually call `Reaction.flush()` to make sure the changes occur immediately before additional code is run.
-
-You can also use the callback `Reaction.afterFlush` if you have code that depends on the changes from a reaction but do not need it to run immediately.
-
-Learn more about reactivity lifecycle in the documentation for [flushing changes]().
-
-### Stopping Reactivity
-
-Because of the cascading nature of reactivity, it's imperative to have tight controls over what triggers reactivity, and
-
-Semantic UI provides various helpers like `peek`, `subscribe`, `guard`
-
-You may find you want to stop a reaction from occuring at some point after setting it up. Reactions are passed to their callbacks as the first argument and provide a `stop` method for stopping the reaction.
-
-
-```javascript
-Reaction((reaction) => {
-  if(someCondition) {
-    reaction.stop();
-  }
-});
-```
-
-### Special Behavior on First Run
-
-You may need to define special behavior on the first run of a reaction, for instance to setup variables or to skip certain sections of code. You can use `reaction.firstRun` to handle this.
-
-
-```javascript
-Reaction((reaction) => {
-  if(reaction.firstRun) {
-    // special logic
-  }
-});
-```
-
-### Debugging
-
-Reactivity can be complicated to debug as it requires an understanding of "what caused what" which is not as intuitive as simply seeing the callee of a function.
-
-Semantic UI's reactivity implementation provides several different ways to handle debugging. For starters if you are adding your own custom breakpoints in code, `Reaction.current` will always reference the current Reaction being run (if any). You can check this to see what the source of a reaction is.
-
-To make this even more simple `Reaction` exposes a special helpers `Reaction.getSource()` this will return a trace of the current context which causes a reaction specifically for debugging;
-
-```javascript
-// example output
-Reaction triggered by:
-    at Object.setActiveItem (https://dev.semantic-ui.com/src/components/InPageMenu/InPageMenu.js:126:23)
-    at IntersectionObserver.onIntersection (https://dev.semantic-ui.com/src/components/InPageMenu/InPageMenu.js:244:13)
-```
-
-If you are trying to debug reactivity inside a template, you can add `{{debugReactivity}}`, this will trigger a breakpoint at this context in the template and call `Reaction.getSource()`.
-
-
-## Usage in Semantic UI
-
-Semantic UI includes a package [`@semantic-ui/reactivity`](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/reactivity) which exports `ReactiveVar`, `Dependency` and `Reaction` the primitives used in our reactivity system. You can use this package without Semantic UI library if you'd like to simply use our signals implementation.
-
-If you are using Semantic UI, reactivity can be used at a template level by importing the package in your template and assigning it to values in your template instance. Learn more in [component reactivity](/components/reactivity).
