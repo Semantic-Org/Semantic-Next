@@ -483,6 +483,12 @@
       "attribute": "icon-after",
       "defaultValue": false,
       "description": "Enable to position the icon after the text"
+    },
+    {
+      "name": "href",
+      "type": "string",
+      "attribute": "href",
+      "description": "link to a webpage"
     }
   ],
   "supportsPlural": true,
