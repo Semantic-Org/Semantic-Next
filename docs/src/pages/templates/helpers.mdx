@@ -6,8 +6,19 @@ description: Using helpers for common template operations
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 
-## Helpers
-Global helpers are special functions that can be used with [template expressions](templates/data) and provide common utilities when presenting content for display.
+[Global helpers](/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat` `stringify` that can be used to format values for output.
+
+## Helper Example
+
+In this example `formatDate` is used to format the display of a date set in the components [state](#reactive-state).
+
+```html
+{{formatDate currentTime 'h:mm:ss a'}}
+```
+
+<PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
+
+## Helpers Functions
 
 ### Logical
 

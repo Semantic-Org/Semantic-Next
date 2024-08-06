@@ -6,14 +6,14 @@
 }
 
 .selection {
-  margin-top: 1rem;
+  margin-top: var(--spacing);
   display: inline-block;
 }
 
 .results {
 
   border: var(--border);
-  padding: 0.5rem;
+  padding: var(--compact-padding);
   border-radius: var(--border-radius);
 
   .result {
@@ -33,7 +33,6 @@
   }
 
   .empty {
-    font-size: 15px;
     margin: var(--spacing);
     color: var(--standard-50);
   }

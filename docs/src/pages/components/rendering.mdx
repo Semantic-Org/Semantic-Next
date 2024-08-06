@@ -40,7 +40,7 @@ For instance our template might include something like
 Greetings, {{name}}
 ```
 
-This will check each of these locations in sequence and return the first available value.
+This will check for `name` in each of these locations and then return the first available defined value.
 
 * **Global Helpers** - A global helper registered across templates called `name`
 * **Template Instance** - A value or function on your template instance called `name`
@@ -50,49 +50,12 @@ This will check each of these locations in sequence and return the first availab
 > **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance you may initially have a value as a `property` on your component, then move it to `state` to make it reactive, then finally move it to `settings` to make it user overridable without having to modify the underlying template.
 
 
-## Evaluating Values
-
-Expressions are evaluated right to left with values being retreived from the data context.
-```html
-{{concat firstName ' ' lastName}}
-```
-
-```javascript
-concat(firstName, ' ', lastName);
-```
-
-
-### Evaluation Order
-
-If an intermediary function is found it will pass the result through naively
-
-```html
-{{titleCase concat firstName ' ' lastName}}
-```
-
-```javascript
-titleCase(concat(fistName, ' ', lastName))
-```
-
-### Parenthesis
-
-If parenthesis are used it will respect the evaluation order
-```html
-formatDate (getDate now) 'h:mm'
-```
-
-```javascript
-formatDate(getDate(now), 'h:mm'))
-```
-
 
 ## Global Helpers
 
 [Global helpers](/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat` `stringify` that can be used to format values for output.
 
 > For a list of global helpers please visit the dedicated [global helper page](/templates/helpers) in templating.
-
-### Types of Helpers
 
 
 ### Helper Example

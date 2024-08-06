@@ -6,18 +6,37 @@ description: Using snippets for repeated content
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 ### Snippets
-Snippets are a special kind of subtemplate that are defined inline for convenience.
+Snippets are a special kind of subtemplate that are defined inline. Snippets are useful when multiple portions of a single template should reference the same logic or structure.
+
 
 ### Creating Snippets
 
 Snippets are similar to [subtemplates](templates/subtemplates) but can be defined in the same file as where they are used.
 
+Snippets are defined using the syntax
+```
+{{#snippet snippetName}}
+  Snippet Content
+{{/snippet}}
+```
+
+A common use of a snippet is to repeat portions of a template in two locations, for instance to display some content as a link if `href` is defined.
+
+> **Snippet Location** - Snippets are not dependent on the order they are included and can be defined either before and after where they are invoked.
+
 ```handlebars
-{{#snippet hello}}
-  Hello World
+{{#if href}}
+  <a href={{href}}>
+    {{>content}}
+  </a>
+{{else}}
+  {{>content}}
+{{/if}}
+
+{{#snippet content}}
+  {{beforeText}} {{text}} {{afterText}}
 {{/snippet}}
 
-{{> hello}} {{>hello}}
 ```
 
 ### Data Context
