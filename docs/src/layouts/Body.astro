@@ -3,9 +3,6 @@ let { title, description, searchMeta, padded } = Astro.props;
 
 import SearchMeta from '@components/SearchMeta.astro';
 
-import '../css/layers.css';
-import '../css/fonts.css';
-
 import './Body.css';
 import '../css/responsive.css';
 import '../css/legacy-sui/input.css';
@@ -25,11 +22,6 @@ searchMeta = {
 ---
 <html lang="en">
   <head>
-    <style>
-      @layer global, baseTheme, component, theme, overrides, utilities, layout, page, responsive;
-
-      astro-island, astro-slot, astro-static-slot { display: contents; }
-    </style>
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Language" content="en">
     <meta name="description" content={description} />
