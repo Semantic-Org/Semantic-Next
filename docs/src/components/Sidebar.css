@@ -1,7 +1,7 @@
 @layer layout {
 
   :root {
-    --sidebar-background-color: var(--panel-color);
+    --sidebar-background-color: var(--ui-background);
     --sidebar-box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
     --sidebar-width: 250px;
   }

@@ -43,7 +43,7 @@
   }
 
   .navigation::part(panels) {
-    background-color: var(--sidebar-background-color);
+    background-color: var(--ui-background);
   }
   .navigation ui-panel::part(handle) {
     opacity: 0.1;

@@ -18,7 +18,7 @@
   }
 
   global-search {
-    --global-search-modal-background: var(--sidebar-background-color);
+    --global-search-modal-background: var(--ui-background);
   }
   html.dark {
     --topbar-background-color: #151A1E;

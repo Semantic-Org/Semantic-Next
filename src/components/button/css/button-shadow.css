@@ -437,6 +437,11 @@
     margin: 0em;
     vertical-align: top;
   }
+  .icon-after.buttons .button > ui-icon,
+  .icon-after.button > ui-icon {
+    margin-right: 0rem;
+    margin-left: var(--icon-distance-from-text);
+  }
 }
 
 /* src/components/button/css/shadow/types/labeled.css */

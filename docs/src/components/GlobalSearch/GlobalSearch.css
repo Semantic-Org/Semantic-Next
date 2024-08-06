@@ -147,7 +147,7 @@ ui-modal {
     min-height: 500px;
     padding: 1rem;
     color: #FFFFFF;
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 200px);
     overflow: auto;
 
     .result {

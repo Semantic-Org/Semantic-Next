@@ -11,6 +11,7 @@
   topbar {
     position: fixed;
     z-index: var(--float-layer);
+    background-color: var(--topbar-background-color);
     top: auto;
     height: 70px;
     bottom: 0;
@@ -20,8 +21,18 @@
       width: 0px;
       margin: 0rem var(--compact-spacing);
     }
+    .logo {
+      margin-left: var(--spacing);
+    }
     mobile-menu-toggle {
       display: inline-block;
+    }
+    global-search {
+      max-width: none;
+      margin-left: var(--spacing);
+    }
+    topbar-menu {
+      display: none;
     }
     theme-switcher {
       margin-left: 0;
