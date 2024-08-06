@@ -328,10 +328,10 @@ export class LitRenderer {
   }
 
   getLiteralValue(token) {
-    // check if this is a string literal
-    const stringMatches = token.match(LitRenderer.STRING_REGEXP);
-    if (stringMatches && stringMatches.length > 0) {
-      return stringMatches[1];
+
+    // Check if this is a string literal (single or double quotes)
+    if (token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
+      return token.slice(1, -1).replace(/\\(['"])/g, '$1');
     }
 
     // check if this is a boolean

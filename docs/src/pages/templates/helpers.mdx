@@ -1,0 +1,317 @@
+---
+layout: '@layouts/Guide.astro'
+title: Global Helpers
+description: Using helpers for common template operations
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+
+## Helpers
+Global helpers are special functions that can be used with [template expressions](templates/data) and provide common utilities when presenting content for display.
+
+### Logical
+
+#### exists
+Checks if a value is not empty.
+
+```handlebars
+{{#if exists valueToCheck}}
+  Value exists
+{{/if}}
+```
+
+#### isEmpty
+Checks if a value is empty.
+
+```handlebars
+{{#if isEmpty collectionToCheck}}
+  Collection is empty
+{{/if}}
+```
+
+#### hasAny
+Checks if an array has any elements.
+
+```handlebars
+{{#if hasAny arrayToCheck}}
+  Array has elements
+{{/if}}
+```
+
+#### both
+Checks if both a and b are truthy.
+
+```handlebars
+{{#if both conditionA conditionB}}
+  Both conditions are true
+{{/if}}
+```
+
+#### either
+Checks if either a or b is truthy.
+
+```handlebars
+{{#if either conditionA conditionB}}
+  At least one condition is true
+{{/if}}
+```
+
+#### maybe
+Returns trueExpr if expr is truthy, falseExpr otherwise.
+
+```handlebars
+{{maybe condition 'True result' 'False result'}}
+```
+
+
+### String
+
+#### stringify
+Converts a value to JSON string.
+
+```handlebars
+{{stringify objectToStringify}}
+```
+
+#### concat
+Concatenates all arguments.
+
+```handlebars
+{{concat firstName ' ' lastName}}
+```
+
+#### capitalize
+Capitalizes the first letter of text.
+
+```handlebars
+{{capitalize textToCapitalize}}
+```
+
+#### titleCase
+Converts text to title case.
+
+```handlebars
+{{titleCase textToTitleCase}}
+```
+
+#### tokenize
+Tokenizes a string.
+
+```handlebars
+{{tokenize stringToTokenize}}
+```
+
+### Array and Object
+
+#### join
+Joins array elements with a delimiter.
+
+```handlebars
+{{join itemsArray ', ' true}}
+```
+
+#### joinComma
+Joins array elements with commas.
+
+```handlebars
+{{joinComma itemsArray true false}}
+```
+
+#### arrayFromObject
+Converts an object to an array.
+
+```handlebars
+{{arrayFromObject objectToConvert}}
+```
+
+#### object
+Returns the object.
+
+```handlebars
+{{object key=valueForKey}}
+```
+
+### CSS
+
+#### classes
+Joins CSS classes.
+
+```handlebars
+{{classes classNamesArray true}}
+```
+
+#### classIf
+Conditionally applies a CSS class.
+
+```handlebars
+{{classIf isActive 'active' 'inactive'}}
+```
+
+#### classMap
+Applies multiple CSS classes based on conditions.
+
+```handlebars
+{{classMap (object active=isActive disabled=isDisabled)}}
+```
+
+#### activeIf
+Adds 'active' class if expression is truthy.
+
+```handlebars
+{{activeIf isCurrentPage}}
+```
+
+#### selectedIf
+Adds 'selected' class if expression is truthy.
+
+```handlebars
+{{selectedIf isOptionSelected}}
+```
+
+#### disabledIf
+Adds 'disabled' class if expression is truthy.
+
+```handlebars
+{{disabledIf isElementDisabled}}
+```
+
+#### checkedIf
+Adds 'checked' class if expression is truthy.
+
+```handlebars
+{{checkedIf isOptionChecked}}
+```
+
+### Comparison
+
+#### is
+Checks equality (==).
+
+```handlebars
+{{#if is valueA valueB}}
+  Values are equal
+{{/if}}
+```
+
+#### not
+Checks inequality (!=).
+
+```handlebars
+{{#if not valueA valueB}}
+  Values are not equal
+{{/if}}
+```
+
+#### isEqual
+Checks strict equality (===).
+
+```handlebars
+{{#if isEqual valueA valueB}}
+  Values are strictly equal
+{{/if}}
+```
+
+#### isNotEqual
+Checks strict inequality (!==).
+
+```handlebars
+{{#if isNotEqual valueA valueB}}
+  Values are strictly not equal
+{{/if}}
+```
+
+#### greaterThan
+Checks if a > b.
+
+```handlebars
+{{#if greaterThan numberA numberB}}
+  A is greater than B
+{{/if}}
+```
+
+#### lessThan
+Checks if a < b.
+
+```handlebars
+{{#if lessThan numberA numberB}}
+  A is less than B
+{{/if}}
+```
+
+#### greaterThanEquals
+Checks if a is greater than or equal to b.
+
+```handlebars
+{{#if greaterThanEquals numberA numberB}}
+  A is greater than or equal to B
+{{/if}}
+```
+
+#### lessThanEquals
+Checks if a is less than or equal to b.
+
+```handlebars
+{{#if lessThanEquals numberA numberB}}
+  A is less than or equal to B
+{{/if}}
+```
+
+### Numeric and Date
+
+#### numberFromIndex
+Returns a + 1.
+
+```handlebars
+{{numberFromIndex indexValue}}
+```
+
+#### maybePlural
+Adds plural suffix if value is not 1.
+
+```handlebars
+{{maybePlural itemCount 's'}}
+```
+
+#### formatDate
+Formats a date.
+
+```handlebars
+{{formatDate dateToFormat 'YYYY-MM-DD' (object timezone='UTC')}}
+```
+
+#### formatDateTime
+Formats a date with time.
+
+```handlebars
+{{formatDateTime dateTimeToFormat 'YYYY-MM-DD HH:mm' (object timezone='local')}}
+```
+
+#### formatDateTimeSeconds
+Formats a date with time and seconds.
+
+```handlebars
+{{formatDateTimeSeconds dateTimeToFormat 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}}
+```
+
+### Debug
+
+#### log
+Logs arguments to console.
+
+```handlebars
+{{log 'Debug message' (object data=dataToLog)}}
+```
+
+#### debugger
+Triggers debugger.
+
+```handlebars
+{{debugger}}
+```
+
+#### debugReactivity
+Debugs reactivity.
+
+```handlebars
+{{debugReactivity}}
+```

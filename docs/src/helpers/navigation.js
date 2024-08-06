@@ -140,12 +140,12 @@ export const sidebarMenuFramework = [
     icon: 'table',
     pages: [
       {
-        name: 'Control Structures',
-        url: '/templates/control'
-      },
-      {
         name: 'Evaluating Expressions',
         url: '/templates/data'
+      },
+      {
+        name: 'Control Structures',
+        url: '/templates/control'
       },
       {
         name: 'Looping',
