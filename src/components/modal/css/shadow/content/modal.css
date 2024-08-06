@@ -10,13 +10,14 @@ dialog {
 
 /* Dialog */
 dialog {
-  display: flex;
+  display: none;
   flex-direction: column;
   opacity: 0;
   scale: 0.8;
   transition: var(--modal-dialog-transition);
 }
 dialog[open] {
+  display: flex;
   opacity: 1;
   scale: 1;
 }

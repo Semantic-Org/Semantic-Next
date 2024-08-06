@@ -6,10 +6,8 @@ import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
 import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
 const createInstance = ({tpl, settings, data, el, $}) => ({
-  getTag() {
-    return settings.href ? 'a' : 'div';
-  },
   isIconBefore() {
+    console.log(settings.href);
     return settings.icon && !settings.iconAfter;
   },
   isIconAfter() {
