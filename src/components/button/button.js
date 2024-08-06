@@ -7,7 +7,6 @@ import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
 const createInstance = ({tpl, settings, data, el, $}) => ({
   isIconBefore() {
-    console.log(settings.href);
     return settings.icon && !settings.iconAfter;
   },
   isIconAfter() {
