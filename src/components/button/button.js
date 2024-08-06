@@ -60,7 +60,6 @@ const events = {
   }
 };
 
-console.log(ButtonComponentSpec);
 export const UIButton = createComponent({
   tagName: 'ui-button',
   componentSpec: ButtonComponentSpec,
