@@ -64,95 +64,28 @@ In most real world use-cases you will need to provide additional information to 
 
 [`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
-For instance, you might have a helper `isEven` used to display whether the counter is currently an even value in your template, or to let end-users query whether your component is outputting an even value.
-
-```javascript
-const createInstance = ({ state }) => ({
-  initialize: () => setInterval(() => state.counter.increment(), 1000),
-  isEven: (number) => (number % 2 == 0)
-});
-```
-> For more information on `createInstance` see our dedicated subsection on [definining functionality](/components/instances).
+> For more information on `createInstance` see our dedicated subsection on [defining functionality](/components/instances).
 
 
 ### Template
 
-Your template defines how your component should render. It includes things like
+The [`template`](/components/rendering) defines the html your component should render from the data present in your component.
 
-* [conditionals](/templates/conditionals) to handle branching content using `if` `elseif` `else`
-* [looping structures](/templates/looping) to iterate through values using `each`
-* [expressions](/templates/expressions) to display values and invoke functions from inside templates
-* [subtemplates](/templates/subtemplates) to reference other components or parts of a component
-* [slots](/templates/slots) to allow users to place their own DOM content inside your component
-* [snippets](/templates/snippets) to allow for reusable html structures inside a component
-
-```javascript
-const template = `<div class="counter">
-  <div class="parity">
-    {{#if isEven counter}}
-     Even
-    {{else}}
-     Odd
-    {{/if}}
-  </div>
-  <span class="text">
-    The counter is {{counter}}
-  </span>
-</div>
-`;
-
-
-```
+> For more information on templating see the [dedicated subsection for templating](/components/rendering)
 
 ### CSS
 
-`css` defines CSS that will be attached to your web component. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
+`css` defines scoped CSS that will be attached to your web component and not apply to other elements on the page. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
 
-The css is scoped specifically to the component.
+You can use `lightCSS` to add addiitional css that will be included once in the page scope when you component is created.
 
-```javascript
-const css = `
-  .counter {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 1em;
-    border-radius: 4px;
-  }
-`;
-```
-> **Shadow DOM** - CSS is scoped to a portion of your web app using a special concept called the "Shadow DOM" which is part of the web component spec and allows portions of HTML to be isolated from other parts of the page. This means that component CSS will not affect the rest of your app and vice versa. **CSS variables however can affect your component** which is the primary reason they are used extensively for styling web components.
+> For more information see the [dedicated css styling section](/components/styling).
 
 
-#### Theming
-It is not essential to use Semantic's UI framework when creating your own custom components, however using `@semantic-ui/core` provides some additional benefits like a robust CSS theming framework that exposes primitives like `--border`, `--padding`
- and other values that can be used to create a custom design system.
-
-```javascript
-const css = `
-  .counter {
-    border: var(--border);
-    padding: var(--padding);
-    border-radius: var(--border-radius);
-  }
-`;
-```
-
-#### Light CSS
-
-Light CSS is CSS scoped to the light or logical DOM. It is recommended to only use this in cases where CSS selectors have specific limitations which can only be surmounted by including external rules, for instance combining `::slotted` with `::part`.
-
-See [web component limitations and gotcha](/gotchas) for some examples when this might be necessary.
-
-```javascript
-const lightCSS = `
-  ui-counter ui-button::part(button) {
-    color: var(--red);
-  }
-`;
-```
 
 ### Events
 
-Most components will need to listen to and react to events triggered from the browser or other components. When creating a component you can assign events that are bound to parts of your component and trigger functionality.
+Most components will need to listen to and react to events triggered from the browser or other components. When creating a component you can assign `events` that are bound to parts of your component and trigger functionality.
 
 
 These can be browser events like `click`, perhaps to save something when a button with class `save` is clicked.
@@ -174,11 +107,14 @@ const events = {
 };
 ```
 
-For more information on events please see the [dedicated subsection for events](/components/events)
+> For more information on events please see the [dedicated subsection for events](/components/events)
 
 ### Keys
 
 Components can also include keybindings that will be attached to the page during the lifecycle of the component.
+
+> For more information please see the [dedicated subsection for keybindings](/components/keys)
+
 
 > [Dynamic Keybinding](/components/keys#dynamic-keybinding) - For more advanced usecases you can use `bindKey` and `unbindKey` to also dynamically assign key bindings based on app state
 

@@ -145,6 +145,20 @@ el.addEventListener('itemactive', (event) => {
 });
 ```
 
+## Built In Events
+Components all emit lifecycle events as native DOM events that can be used to respond to the lifecycle of subcomponents.
+
+```javascript
+const events = {
+  'rendered inpage-menu'({tpl,data}) {
+    // component is rendered
+  }
+  'destoryed inpage-menu'({tpl,data}) {
+    // component is destroyed
+  }
+};
+```
+
 ## Event Handlers
 
 In addition to the [standard arguments](/components/lifecycle) that are passed to all component callbacks, event handlers get access to a few extra arguments.

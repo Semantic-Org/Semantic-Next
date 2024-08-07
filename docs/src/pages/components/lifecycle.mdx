@@ -102,8 +102,25 @@ Event handlers also have access to a few additional arguments
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
 
+
+## DOM Lifecycle Events
+
+Each component will also emit a DOM event when a lifecycle event fires. This can be useful to respond to the render cycle of subcomponents from elsewhere in the page
+
+| event         | when fired                                              |
+|-------------------|--------------------------------------------------|
+| created|  Callback after your component instance is initialized but before it is attached to the DOM
+| onRendered|  Callback after your component is rendered to the DOM
+| onDestroyed|  Callback after your component is removed from the DOM
+
+These can be listened to from other components in the same way as other DOM or custom events.
+
+>  For more information on custom events see the [dedicated subsection](/components/events)
+
 ## Callback Sequence
 
 The following diagram shows the sequence of events that occur when a component is rendered to the page.
 
 <Image src={lifecycleImage} alt="Component Lifecycle" width="826" loading="eager"></Image>
+
+
