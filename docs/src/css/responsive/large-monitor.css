@@ -1,4 +1,8 @@
 /* 1920 + */
 @layer responsive.largeMonitor {
 
+  layout page.text-content code-playground {
+    margin-left: -15%;
+    margin-right: -15%;
+  }
 }
