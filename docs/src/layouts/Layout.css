@@ -82,7 +82,7 @@
   }
   layout page.text-content pageContent {
     display: block;
-    width: 910px;
+    max-width: 910px;
     margin: 0 auto;
   }
   layout page.text-content pageContent,
