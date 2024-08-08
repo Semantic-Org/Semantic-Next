@@ -20,15 +20,61 @@ Templates support common control structures like `if`, `elseif` and `else` to ha
 {{/if}}
 ```
 
-### Negation
+## Conditional Helpers
 
-Templates include a `not` [template helper](/templates/helpers) which can be used to negate evaluated expressions
+> For a full list of comparators view the [dedicated section on comparison helpers](/templates/helpers#comparison)
 
+
+### Existence
+
+You can use `exists` and `isEmpty` to handle value existence. Values are checked against the `isEmpty` utility.
+
+
+```handlebars
+{{#if exists valueToCheck}}
+  Value exists
+{{/if}}
+```
+
+```handlebars
+{{#if isEmpty collectionToCheck}}
+  Collection is empty
+{{/if}}
+```
+
+### Equality
+
+You can use `is` `not`, `isExactly` and `isNotExactly` helpers to compare values
+
+> Exactly helpers use `===` comparison while `is` and `not` use `==`
+
+```handlebars
+{{#if is valueA valueB}}
+  Values are equal
+{{/if}}
+```
 
 ```handlebars
 {{#if not isEven number}}
   Odd
 {{else}}
   Even
+{{/if}}
+```
+
+
+### Comparisons
+
+You can use `greaterThan`, `lessThan`, `greaterThanEquals`, `lessThanEquals` to compare numeric values
+
+```handlebars
+{{#if greaterThan numberA numberB}}
+  A is greater than B
+{{/if}}
+```
+
+```handlebars
+{{#if lessThanEquals numberA numberB}}
+  A is less than or equal to B
 {{/if}}
 ```

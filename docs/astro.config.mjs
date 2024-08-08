@@ -34,5 +34,7 @@ export default defineConfig({
     force: true,
     exclude: ['playground-elements']
   },
-  integrations: [lit(), expressiveCode(), mdx(), starlight({title: 'Semantic UI'})]
+  integrations: [lit(), expressiveCode(), mdx(), starlight({
+    title: 'Semantic UI'
+  })]
 });

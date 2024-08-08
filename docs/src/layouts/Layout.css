@@ -70,8 +70,20 @@
   }
 
   layout page.text-content main > ui-container {
-    max-width: 910px;
+    /*max-width: 910px;*/
+    max-width: none;
     padding: 2em 3em 7em;
+    margin: 0;
+    width: calc(100% - var(--rail-width));
+  }
+  layout page.text-content code-playground {
+    display: block;
+    margin: 0rem -20%;
+  }
+  layout page.text-content pageContent {
+    display: block;
+    width: 910px;
+    margin: 0 auto;
   }
   layout page.text-content pageContent,
   layout page.text-content li,
@@ -269,9 +281,9 @@
     color: var(--primary-text-color);
   }*/
   layout main h1 {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: bold;
-    margin: 3rem 0rem 1rem;
+    margin: 3rem 0rem 4rem;
     letter-spacing: 0.05em;
   }
   layout main h3 {
@@ -319,13 +331,13 @@
       box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
     }
     page {
-      /*
+
       background-image: linear-gradient(to bottom,
         oklch(0.16 0 0),
         oklch(0.19 0.01 258.64) 100px,
         oklch(0 0 0)
       );
-      */
+
     }
     page > main {
       background: none;

@@ -31,7 +31,7 @@ const settings = {
   tabSize: 2,
   maxHeight: 0,
   inline: false,
-  inlineDirection: 'vertical',
+  inlineDirection: 'horizontal',
   sortOrder: [
     'component.js',
     'component.html',

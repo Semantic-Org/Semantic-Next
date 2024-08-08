@@ -6,17 +6,14 @@ description: Evaluating expressions inside templates
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 
-### Data Context
+### Evaluating Expressions
 
 Template expressions are evaluated against the template's data context which includes the values and functions that are invokable for a template.
 
-
 > For an explanation of how a component's data context is determined see [component data context](/components/rendering#data-context)
 
-## Evaluating Expressions
-
 Expressions are evaluated right to left with variables being read from the component's data context
-```html
+```handlebars
 {{concat firstName ' ' lastName}}
 ```
 
@@ -30,7 +27,7 @@ concat(firstName, ' ', lastName);
 
 If an intermediary function is found it will pass the result through naively
 
-```html
+```handlebars
 {{titleCase concat firstName ' ' lastName}}
 ```
 
@@ -42,8 +39,8 @@ titleCase(concat(fistName, ' ', lastName))
 ### Parenthesis
 
 If parenthesis are used it will respect the evaluation order
-```html
-formatDate (getDate now) 'h:mm'
+```handlebars
+{{formatDate (getDate now) 'h:mm'}}
 ```
 
 evaluates to
@@ -59,12 +56,12 @@ formatDate(getDate(now), 'h:mm'))
 If an attribute expression **includes quotes** it will output as a string regardless of the expression value.
 
 For instance
-```html
+```handlebars
 <a data-number="{{getZero}}">
 ```
 
 will output as
-```html
+```handlebars
 <a data-number="0"></a>
 ```
 
@@ -72,16 +69,16 @@ will output as
 
 If an attribute expression **omits quotes** the entire attribute will be removed if the expression is falsey
 
-```html
+```handlebars
 <input type="checkbox" checked={{isChecked}} />
 ```
 
 If `true` will output
-```html
+```handlebars
 <input type="checkbox" checked />
 ```
 
 and if `false` will output
-```html
+```handlebars
 <input type="checkbox" />
 ```

@@ -4,23 +4,74 @@ title: Templating
 description: Using template features in Semantic UI
 ---
 
+## Component Templating
 
-Semantic includes a templating language that can be used to construct your web component's DOM and bind data and events.
+Components include a custom templating language built for web components. This language compiles to an Abstract Syntax Tree or `AST` that is used to render your component and surgically update portions of the DOM when reactive data sources change.
 
-This language is used to define Semantic UI's components and make it easier for handling **data binding**, **event binding**, **reactivity**, and other features.
+### [Expressions](templates/expressions)
 
-### Extensible
+Value Output
+```handlebars
+{{name}}
+```
 
-Semantic UI's component architecture makes it easy for you to write your own components that are built using similar principles as the Semantic UI design system.
+Function Calls
+```handlebars
+{{someMethod argumentOne argumentTwo}}
+```
 
-This makes it easy for third party developers to extend the library and publish additional components, as well as to built private UI components for an organization that look and feel the same as the core library.
+Complex Nested Expressions
+```handlebars
+{{formatDateTime someDate 'YYYY-MM-DD HH:mm' (object timezone='local')}}
+```
 
+Nested expressions
+```handlebars
+{{formatDate (getDate now) 'h:mm a'}}
+```
 
-### Features
+HTML Output
+```handlebars
+{{{someHTML}}}
+```
 
-SCM can be used for any DOM structure but includes additional features which make it particularly useful for describing the Shadow DOM used in web components like `<slot>`.
+### Conditionals
 
-### Slots
+If / elseif / else
+```handlebars
+{{#if isColor 'red'}}
+  Red
+{{else if isColor 'blue'}}
+  Blue
+{{else}}
+  Another color
+{{/if}}
+```
+
+### Loops
+
+With intermediate value
+```handlebars
+{{#each row in someCollection}}
+  {{row.name}}
+{{/each}}
+```
+
+With inner data context
+```handlebars
+{{#each someCollection}}
+  {{name}}
+{{/each}}
+```
+
+With array index
+```handlebars
+{{#each someCollection}}
+  {{@index}}
+{{/each}}
+```
+
+### Content Slots
 
 Default Slot
 ```handlebars
@@ -31,24 +82,19 @@ Named Slot
 {{>slot icon}}
 ```
 
-### Data
+### Global Helpers
 
-HTML Sanitized Output
+
+Built-in helpers
 ```handlebars
-{{escaped}}
-```
-HTML Output
-```handlebars
-{{{someHTML}}}
-```
-Built in helpers
-```handlebars
-{{formatDate date 'MM/DD/YYYY'}}
+{{stringify someObject}}
+{{formatDate someDate}}
+{{log 'Hello World'}}
 ```
 
 ### Subtemplates
 
-Template Support
+Named Templates
 ```handlebars
 {{> exampleSubtemplate}}
 ```
@@ -77,3 +123,21 @@ Reactive Data Controls
 }}
 ```
 
+### Snippets
+
+```handlebars
+{{#snippet fullName}}
+  {{#if both firstName lastName}}
+    {{firstName}} {{lastName}}
+  {{else}}
+    {{lastName}}
+  {{/if}}
+{{/snippet}}
+
+{{#if isLoggedOut}}
+  Login, {{>fullName}}
+{{else if hasName}}
+  Login, {{>fullName}}
+{{else}}
+  Login
+{{/if}}
