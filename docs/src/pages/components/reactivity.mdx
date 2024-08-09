@@ -1,19 +1,87 @@
 ---
 layout: '@layouts/Guide.astro'
-title: 'Reactivity in Components'
+title: 'Reactivity'
 description: 'How to use reactivity inside of components'
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+This guide focuses primarily on reactivity in the context of components.
 
-## Custom Reactivity
+> **Signals** - Semantic UI uses a signals based approach for reactivity. This works by tracking references to reactive variables and then running a flush which triggers those reactions after their values change. For more information see our dedicated section on [reactivity](/reactivity).
 
-When authoring templates you may find you need to implement custom reactivity. This may be something that you want to re-run when something else changes, or perhaps to engineer a simpler way to handle a computation.
+## Sources of Reactivity
+
+
+### Reactive Data
+
+Reactivity occurs when a reactive value is modified inside of a reactive context. If you want a value to render reactively, you must have **both a reactive value and a reactive context**.
+
+
+#### Reactive Data Sources
+* State
+* Settings
+* ReactiveVar
+
+#### Reactive Data Contexts
+* Template Conditionals
+* Template Loops
+* Template Expressions
+* `Reaction` created inside your component
+
+### Non-Reactive Data
+
+If you want to use or set a variable without triggering reactivity **either a value or context must be non-reactive**.
+
+#### Non-Reactive Data Sources
+* DOM Elements or Properties
+* Properties set on your component
+* `$` or `$$` DOM Query Collections
+
+#### Non-Reactive Data Contexts
+* Component Methods
+* Lifecycle Callbacks
+* Event & Keyboard Handlers
+
+> **Avoiding Reactivity** - You can access reactive values with `peek` to avoid reactivity, and use `Reaction.nonreactive` to control the reactivity of a function.For more information see [controlling reactivity](/reactivity/controls).
+
+
+## Triggering Reactivity
+
+
+### Built In Reactivity
+
+All contexts (conditionals, loops, expressions) inside templates are reactive context by default. This means that expressions that access reactive data like `state` or `settings` will be reactive.
+
+
+### Custom Reactivity
+
+### Using Reactive Var and Reaction
+
+Your components `state` can be used as an internal reactivity source, but in some cases you might need to add reactive data after your component is initialized, or to expose a `reactiveVar` on your component instance so other components can use it to trigger reactivity.
+
+#### Exposing Reactivity
+
+
+
+```javascript title="todo.js"
+const createInstance = ({ tpl, reactiveVar, reaction }) => {
+  return {
+    todos: new ReactiveVar([]),
+  };
+};
+```
+
+```javascript title="todo-item.js"
+const createInstance = ({ findParent }) => {
+  getTodos() {
+    return findParent('todo').todos.get();
+  }
+};
+```
 
 All [lifecycle events and callbacks](/components/lifecycle) will return `reactiveVar` and `reaction`. These can be used to create new sources of reactivity, `reactiveVar`, and `reaction` computations that will re-run when a source of reactivity changes.
 
-> **Signals** - Semantic UI uses a signals based approach for reactivity. This works by tracking references to reactive variables and then running a flush which triggers those reactions after their values change. For more information see our dedicated section on [reactivity](/reactivity).
 
 ###
 

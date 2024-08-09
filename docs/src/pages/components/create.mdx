@@ -13,16 +13,15 @@ Semantic UI extends [native web components](https://developer.mozilla.org/en-US/
 
 ## Creating Components
 
-### Your First Component
+### Installing Dependencies
 
-To begin creating your first component install the `@semantic-ui/component` package into your project
+The only package necessary to create components is the `@semantic-ui/component` package.
 
 ```bash
 npm install @semantic-ui/component
 ```
 
-At its essence, a component is a portion of HTML that has a template, events and behaviors.
-
+### Minimal Component
 
 The minimum requirement to create a component is an html template.
 
@@ -48,12 +47,12 @@ createComponent({
 <hello-world></hello-world>
 ```
 
-### Standard Case
+### Standard Component
 
 In most real world use-cases you will need to provide additional information to `createComponent`
 
 * **createInstance** - An object returned from `createInstance` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
-* **Template** - The control structures, loops, subtemplates defining how to render your component. This can be passed in as a string `template` or rendered from a precompiled `ast`.
+* **Template** - The logic that controls how your html is rendered including conditionals, loops, subtemplates, and expressions. This can be passed in as a string `template` or rendered from a precompiled `ast`.
 * **CSS** - The `css` scoped to this component or that should be attached once to the page with the compnent, `lightCSS`
 * **Events** - The event listeners attached to your component, passed in as an object literal string `events`.
 * **State** - Reactive internal `state` associated with your component and its default values
@@ -71,8 +70,20 @@ In most real world use-cases you will need to provide additional information to 
 
 [`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
+Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), template instance `tpl` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createInstance`.
+
 > For more information on `createInstance` see our dedicated subsection on [defining functionality](/components/instances).
 
+```javascript
+const createInstance = ({ state }) => ({
+  getCounter() {
+    return state.counter.get();
+  },
+  incrementCounter() {
+    state.counter.increment();
+  },
+});
+```
 
 ### Template
 
@@ -87,8 +98,6 @@ The [`template`](/components/rendering) defines the html your component should r
 You can use `lightCSS` to add addiitional css that will be included once in the page scope when you component is created.
 
 > For more information see the [dedicated css styling section](/components/styling).
-
-
 
 ### Events
 

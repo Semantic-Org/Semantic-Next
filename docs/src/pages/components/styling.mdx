@@ -90,8 +90,9 @@ const onCreated = ({darkMode}) {
 
 ### Triggering Theme Callback
 
-To trigger this callback you can either use our `theme-switcher` component or manually trigger an event on the page
+To cause `onThemeChanged` to fire on your components you will need to dipatch a `themechange` event from the page.
 
+You can use the `theme-switcher` component to implement a standard 'dark-mode' theme switcher button, or manually dispatch this event from a custom component.
 
 ```javascript
 import { $ } from '@semantic-ui/query';
@@ -116,7 +117,7 @@ The easiest way to expose some styling as being modifiable from outside your com
 }
 ```
 
-### Adjusting CSS Variables from Page
+### Modifying from Page
 
 This can then be modified from outside the component by adjusting the values for a particular instance of your component
 
@@ -129,7 +130,7 @@ my-component.special-case {
 }
 ```
 
-### Adjusting Nested Component Styles
+### Modifying for Subcomponents
 
 It can also be useful for a component to modify variables of other components nested inside.
 
@@ -155,6 +156,8 @@ Web components also include an additional new standard for exposing [css parts](
 Unlike css variables which only expose particular css values as being modifiable, using a [`part`](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) will allow **any CSS property to be adjusted**.
 
 This will allow you apply arbitrary css not present in the original component.
+
+### Parts Example
 
 For instance your `counter` component might include a `part` to expose the value of the counter.
 ```html

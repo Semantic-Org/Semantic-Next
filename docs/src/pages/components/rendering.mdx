@@ -20,10 +20,10 @@ Semantic UI components rely on a **template** and a **data context** to generate
 ### Templates
 Your template defines how your component should render. It includes things like
 
-* [control structures](/templates/control) to handle branching content using `if` `elseif` `else`
+* [conditionals](/templates/conditionals) to handle branching content using `if` `elseif` `else`
 * [looping structures](/templates/looping) to iterate through values using `each`
-* [reactive data](/templates/data) to display the current value of data inside html
-* [function calls](/templates/data) to pass data into functions and return their results
+* [reactive data](/templates/expressions) to display the current value of data inside html
+* [function calls](/templates/expressions) to pass data into functions and return their results
 * [subtemplates](/templates/subtemplates) to reference other components or parts of a component
 * [slots](/templates/slots) to allow users to place their own DOM content inside your component
 * [snippets](/templates/snippets) to allow for reusable html structures inside a component
@@ -60,7 +60,7 @@ This will check for `name` in each of these locations and then return the first 
 
 ### Helper Example
 
-In this example `formatDate` is used to format the display of a date set in the components [state](#reactive-state).
+In this example `formatDate` is used to format the display of a date set in the components [state](#state).
 
 ```html
 {{formatDate currentTime 'h:mm:ss a'}}
@@ -113,7 +113,7 @@ You can also manually set the function on the corresponding DOM element.
 
 <PlaygroundExample height="265" id="basic-settings" direction="horizontal"></PlaygroundExample>
 
-## Reactive State
+## State
 
 State is a [reactive data store](/reactivity) that uses Signals to recompute references to a value when its underlying vaalue is modified.
 

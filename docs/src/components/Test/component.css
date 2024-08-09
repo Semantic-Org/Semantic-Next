@@ -1,0 +1,8 @@
+.source {
+  color: var(--standard-60);
+  margin-right: var(--compact-spacing);
+}
+.counter {
+  font-weight: bold;
+  color: var(--primary-text-color);
+}

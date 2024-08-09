@@ -17,17 +17,29 @@ The name for this "rerunning function" can be called a ***watcher*** like in the
 > **Signals vs Reaction** Although Semantic UI uses a signals based reactivity system the exported
 primitives are called `ReactiveVar` and `Reaction` instead of `Signal` and `Computation` to help convey their underlying purpose as an implementation of a reactivity system.
 
-
-### Usage in Semantic UI
+### Standalone Usage
 
 Semantic UI includes a package [`@semantic-ui/reactivity`](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/reactivity) which exports `ReactiveVar`, `Dependency` and `Reaction`.
 
-The reactivity system is implemented as a standalone package and can be used without adopting templating, components or other parts of Semantic UI components.
+The reactivity system is implemented as a standalone package and can be used without other parts of the framework.
 
-If you are using Semantic UI, reactivity is available natively from inside component lifecycle callbacks.
+```javascript
+import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(1);
+
+Reaction.create(() => {
+  console.log(counter.value);
+  // outputs 1 2
+});
+counter.increment();
+```
+
+### Usage in Components
+
+If you are using `@semantic-ui/component`, reactivity is [built into templating](/templates) and available directly from [lifecycle callbacks](/components/lifecycle#callback-arguments).
 
 > Learn more about reactivity in components in the dedicated [component reactivity](/components/reactivity) section.
-
 
 ## Birthday Example
 

@@ -117,7 +117,7 @@ export const sidebarMenuFramework = [
         url: '/components/events'
       },
       {
-        name: 'Reactive Data',
+        name: 'Reactivity',
         url: '/components/reactivity'
       },
       {
@@ -209,7 +209,7 @@ export const sidebarMenuFramework = [
       },
       {
         name: 'Controlling Reactivity',
-        url: '/reactivity/peek'
+        url: '/reactivity/controls'
       },
       {
         name: 'Performance',
