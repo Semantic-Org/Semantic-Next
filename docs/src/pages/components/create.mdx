@@ -135,7 +135,7 @@ const css = await getText('./component.css');
 
 #### Webpack / Vite / Esbuild etc.
 
-If you are using build tools to compile your project, you can use the `?raw` query parameter to import a file as text.
+If you are using build tools to compile your project, you can use the `?raw` query parameter to import a file directly as a text string.
 
 Related Docs
 * Vite - [Import Assets as a String](https://vitejs.dev/guide/assets#importing-asset-as-string)
@@ -143,8 +143,8 @@ Related Docs
 * ESBuild - []
 
 ```javascript
-const html = await getText('./component.html?raw');
-const css = await getText('./component.css?raw');
+import html from './component.html?raw';
+import css from './component.css?raw';
 ```
 
 
