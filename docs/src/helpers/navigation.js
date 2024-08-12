@@ -105,11 +105,11 @@ export const sidebarMenuFramework = [
         url: '/components/instances'
       },
       {
-        name: 'Lifecycle',
+        name: 'Lifecycle Events',
         url: '/components/lifecycle'
       },
       {
-        name: 'Templates & HTML',
+        name: 'Templates & Data Context',
         url: '/components/rendering'
       },
       {

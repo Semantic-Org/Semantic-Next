@@ -1,0 +1,23 @@
+<svg viewBox="-50 -50 100 100">
+  <circle class="clock-face" r="48" />
+
+  <!-- markers -->
+  {{#each minute in majorMarkers}}
+    <line class="major" y1="35" y2="45" transform="{{getRotation 'minorAxis' minute}}"></line>
+    {{#each offset in minorMarkers}}
+      <line class="minor" y1="42" y2="45" transform="{{getRotation 'minorAxis' minute offset}}"></line>
+    {{/each}}
+  {{/each}}
+
+  <!-- hour hand -->
+  <line class="hour" y1="2" y2="-20" transform="{{getRotation 'hourHand'}}"></line>
+
+  <!-- minute hand -->
+  <line class="minute" y1="4" y2="-30" transform="{{getRotation 'minuteHand'}}"></line>
+
+  <!-- second hand -->
+  <g transform="{{getRotation 'secondHand'}}">
+    <line class="second" y1="10" y2="-38"></line>
+    <line class="second-counterweight" y1="10" y2="2"></line>
+  </g>
+</svg>

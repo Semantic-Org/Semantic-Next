@@ -65,9 +65,9 @@ Components use a [powerful templating system](/components/rendering) that suppor
 {{/each}}
 ```
 
-### Styling
+### Design System
 
-Components provide [scoped CSS](/components/styling) using native encapsulation provided by the Shadow DOM. Provide your own variables inside your component or use the reasonable defaults passed through from SUI's design system.
+Components provides an [integrated design system](/components/styling) powered by css layers and variables with native encapsulation provided by the Shadow DOM.
 
 ```css
 
@@ -89,32 +89,49 @@ Components provide [scoped CSS](/components/styling) using native encapsulation 
 
 ### Events & Keybindings
 
-Components have robust tools for listening to and dispatching events.
+Components include a [built in event management](/components/events) built around [native DOM events, making it easy to dispatch events
 
 ```javascript
-createComponent({
-  events: {
-    'click .increment'({state}) {
-      state.counter.increment();
-    },
-    'click .decrement'({state}) {
-      state.counter.decrement();
-    },
+const createInstance = ({state, dispatchEvent}) => ({
+  increment(amount) {
+
+    // update internal counter
+    state.counter.increment(amount);
+
+    // dispatches a dom event 'increment' from this web component
+    dispatchEvent('increment', {
+      counter: state.counter.value,
+      amount
+    });
   },
-  keys: {
-    'up'({state}) {
-      state.counter.increment();
-    },
-    'down'({state}) {
-      state.counter.decrement();
-    },
-    'shift + up'({state}) {
-      state.counter.increment(10);
-    },
-    'shift+down'({state}) {
-      state.counter.decrement(10);
-    },
+  decrement(amount) {
+    // update internal counter
+    state.counter.decrement(amount);
+
+    // dispatches a dom event 'decrement' from this web component
+    dispatchEvent('decrement', {
+      counter: state.counter.value,
+      amount
+    });
   }
-  // rest
 });
+```
+
+Listen to events and trigger functionality.
+
+```javascript
+const events = {
+  'click .increment': ({tpl}) => tpl.increment(),
+  'click .decrement': ({tpl}) => tpl.decrement(),
+};
+```
+
+Or [bind keybindings](/components/keybindings) scoped to your component.
+```javascript
+const keys = {
+  'up': ({tpl}) => tpl.decrement(),
+  'down': ({tpl}) => tpl.increment(),
+  'shift + up': ({tpl}) => tpl.decrement(10),
+  'shift + down': ({tpl}) => tpl.increment(10),
+};
 ```

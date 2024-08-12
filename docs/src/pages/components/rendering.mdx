@@ -9,16 +9,14 @@ import { Image } from 'astro:assets';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import contextImage from '@images/data-context-diagram.png';
 
+## Rendering HTML
 
-Semantic UI components rely on a **template** and a **data context** to generate your component's html.
+Your components HTML structure is defined by **template** and a **data context** to generate your component's html.
 
 > **Comparing to React** - Instead of using a `render()` function to return `jsx` each component's  template provides the high level logic for explaining how html should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
 
-## Rendering Templates
-
-
 ### Templates
-Your template defines how your component should render. It includes things like
+Your template defines how your component should render.
 
 * [conditionals](/templates/conditionals) to handle branching content using `if` `elseif` `else`
 * [looping structures](/templates/looping) to iterate through values using `each`

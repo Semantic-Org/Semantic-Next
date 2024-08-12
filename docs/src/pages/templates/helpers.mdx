@@ -129,18 +129,25 @@ Joins array elements with commas.
 ```
 
 #### arrayFromObject
-Converts an object to an array.
+Converts an object to an array for use with {{#each}}
 
 ```handlebars
 {{arrayFromObject objectToConvert}}
 ```
 
 #### object
-Returns the object.
+Can be used to pass arbitary data as an object to other functions.
 
 ```handlebars
 {{object key=valueForKey}}
 ```
+
+### range
+
+Returns an array with range
+{{#each range 1 6}}
+  {{this}}
+{{/each}}
 
 ### CSS
 

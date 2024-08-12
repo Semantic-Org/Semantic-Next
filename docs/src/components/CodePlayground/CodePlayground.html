@@ -1,4 +1,4 @@
-<div class="playground {{classMap getClassMap}}" style={{getStyle}} part="playground">
+<div class="playground {{classMap getClassMap}}" part="playground">
   {{#if example.title}}
     <div class="masthead" part="masthead">
       {{#if inline}}
@@ -31,6 +31,7 @@
     <ui-panels
       class={{classMap getTabPanelsClass}}
       direction="{{getTabDirection}}"
+      style={{getStyle}}
       saveState={{saveState}}
       saveStateID="{{getSaveID}}"
       exportparts="panels"

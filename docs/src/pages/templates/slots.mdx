@@ -5,80 +5,76 @@ description: Evaluating expressions inside templates
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+## Using Slots
 
-### Evaluating Expressions
+Slots allow your component to expose locations that can receive arbitrary html. This is very useful to expose portions of your component to be built into.
 
-Template expressions are evaluated against the template's data context which includes the values and functions that are invokable for a template.
+### Default Slot
 
-> For an explanation of how a component's data context is determined see [component data context](/components/rendering#data-context)
+Using the syntax `{{>slot}}` without a name will create a default slot which will allow all html nested inside a web component to be slotted.
 
-Expressions are evaluated right to left with variables being read from the component's data context
+```handlbars
+{{> slot}}
+```
+```html
+<my-component>
+  <p>This content is slotted</p>
+</my-component>
+```
+
+### Named Slot
+
+Named slots allow content that is specified with same name for `slot` to be slotted when a component is used.
+
+Template
 ```handlebars
-{{concat firstName ' ' lastName}}
+<div class="card">
+  <div class="header">
+    {{> slot name="header"}}
+  </div>
+  <div class="content">
+    {{> slot name="content"}}
+  </div>
+</div>
+```
+HTML
+```html
+<ui-card>
+  <div slot="header">Johnny Montana</div>
+  <div slot="content">
+    <p>Johnny was a cowboy, the best we ever had.</p>
+    <p>He rode through the wilderness day and night.</p>
+  </div>
+</ui-card>
 ```
 
-evaluates to
-```javascript
-concat(firstName, ' ', lastName);
-```
 
+## Slots vs Settings
 
-### Evaluation Order
+Depending on your use case you might consider using a `slot` or a setting which is passed through using an html `attribute` or `property`.
 
-If an intermediary function is found it will pass the result through naively
+Both allow you to pass simple string contents into your component however there are advantages and drawbacks to each approach
 
-```handlebars
-{{titleCase concat firstName ' ' lastName}}
-```
+> **Server Side Rendering with Slots** - Slotted content can make achieving full server side rendering more difficult unless you are cautious of how you access slotted content from inside your component. For more information see our [dedicated section on server side rendering](/ssr).
 
-evaluates to
-```javascript
-titleCase(concat(fistName, ' ', lastName))
-```
+### Settings
 
-### Parenthesis
+#### Pros
+* Components have access to the value of `settings` meaning they can provide alternative content if the values are empty.
+* `settings` are defined on the server, which means they can be rendered using SSR
 
-If parenthesis are used it will respect the evaluation order
-```handlebars
-{{formatDate (getDate now) 'h:mm'}}
-```
+#### Cons
+* May not be as SEO friendly for web crawlers
+* Passing through HTML requires serializing data and properly handling script injection
+* Requires defining `part` to expose them to the component
 
-evaluates to
-```javascript
-formatDate(getDate(now), 'h:mm'))
-```
+### Slots
 
-## Expression Locations
+#### Pros
+* Slots allow nested html to be passed through to a component
+* Slots are easy to style from page css without `part` syntax
 
-
-### Attributes
-
-If an attribute expression **includes quotes** it will output as a string regardless of the expression value.
-
-For instance
-```handlebars
-<a data-number="{{getZero}}">
-```
-
-will output as
-```handlebars
-<a data-number="0"></a>
-```
-
-### Boolean Attribute
-
-If an attribute expression **omits quotes** the entire attribute will be removed if the expression is falsey
-
-```handlebars
-<input type="checkbox" checked={{isChecked}} />
-```
-
-If `true` will output
-```handlebars
-<input type="checkbox" checked />
-```
-
-and if `false` will output
-```handlebars
-<input type="checkbox" />
-```
+#### Cons
+* Slotted content is not available in a template data context, meaning they cant be used for expressions like conditionals. i.e. `{{#if slottedContent}}`
+* Slotted content is unavailable during server side rendering
+* Slotted content is harder to style from inside a component `::slotted` pseudo selector does not work with other css selectors like `:first-child`
