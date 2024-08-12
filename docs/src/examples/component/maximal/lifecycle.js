@@ -1,9 +1,27 @@
-export const createInstance = ({ state }) => ({
-  initialize: () => setInterval(() => state.counter.increment(), 1000),
-  isEven: (number) => (number % 2 == 0)
+export const createInstance = ({settings}) => ({
+  decrease() {
+    settings.number--;
+  },
+  increase() {
+    settings.number++;
+  },
+  set(value) {
+    settings.number = value;
+  }
 });
 
-
-export const onCreated = () => console.log('Created');
-export const onRendered = () => console.log('Rendered');
-export const onDestroyed = () => console.log('Destroyed');
+export const onCreated = () => {
+  console.log('Created');
+};
+export const onRendered = () => {
+  console.log('Rendered');
+};
+export const onDestroyed = () => {
+  console.log('Destroyed');
+};
+export const onThemeChanged = (darkMode) => {
+  console.log('Theme changed', darkMode);
+};
+export const onAttributeChanged = (name, value) => {
+  console.log('Attribute changed', name, value);
+};

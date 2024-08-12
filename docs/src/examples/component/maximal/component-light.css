@@ -1,3 +1,7 @@
-number-adjust + number-adjust {
-  margin-top: 1rem;
+/*
+  This css will be applied across components
+  so we can do things like style based on sibling content
+*/
+number-adjust ~ number-adjust::part(counter) {
+  color: var(--primary-text-color);
 }

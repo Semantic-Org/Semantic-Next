@@ -1,0 +1,20 @@
+<div class="search">
+  <input type="text" placeholder="Search fruit..." value={{searchTerm}} />
+  {{#if canSearch}}
+    <div class="results">
+      {{#if isSearching}}
+        <div class="loading">Retrieving fruit...</div>
+      {{else}}
+        {{#if hasAny searchResults}}
+          {{#each searchResults}}
+            <div class="result" data-id="{{id}}" data-title="{{title}}">
+              {{title}}
+            </div>
+          {{/each}}
+        {{else}}
+          No results found for "<b>{{searchTerm}}</b>"
+        {{/if}}
+      {{/if}}
+    </div>
+  {{/if}}
+</div>

@@ -109,7 +109,7 @@ export const sidebarMenuFramework = [
         url: '/components/lifecycle'
       },
       {
-        name: 'Rendering HTML',
+        name: 'Templates & HTML',
         url: '/components/rendering'
       },
       {

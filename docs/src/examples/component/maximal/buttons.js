@@ -1,10 +1,19 @@
-import { createComponent } from '@semantic-ui/component';
+import { createComponent, getText } from '@semantic-ui/component';
 
-const template = `
-  <span class="decrease">Decrease (-)</span>
-  <span class="increase">Increase (+)</span>
-`;
+const template = await getText('./buttons.html');
+
+const events = {
+  'click .decrease'({findParent}) {
+    const parent = findParent('numberAdjust');
+    parent.decrease();
+  },
+  'click .increase'({findParent}) {
+    const parent = findParent('numberAdjust');
+    parent.increase();
+  },
+};
 
 export const buttons = createComponent({
-  template
+  template,
+  events
 });
