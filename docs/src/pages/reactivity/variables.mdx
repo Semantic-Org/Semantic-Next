@@ -17,7 +17,7 @@ const counter = new ReactiveVar(0);
 ```
 ### Accessing Values
 
-To access the current value of a reactive variable, you can use the `get()` method:
+To access the current value of a reactive variable, you can use `get()` or `value`
 
 > To access a value without triggering reactivity you can use `peek`. See [controlling reactivity](/reactivity/controls).
 
@@ -48,7 +48,9 @@ console.log(counter.get()); // Output: 2
 
 ## Reactions
 
-Reactive variables are typically used within a `Reaction` or a reactive context. When a reactive variable is accessed within a reactive context, it establishes a dependency between the variable and the context. Whenever the value of the reactive variable changes, the reactive context is automatically re-run.
+Reactive variables are typically used within a reactive context, this is a function that reruns when a reactive variable changes.
+
+When a reactive variable is accessed within a reactive context, it establishes a dependency between the variable and the context. Whenever the value of the reactive variable changes, the reactive context is automatically re-run.
 
 ### Creating a Reaction
 

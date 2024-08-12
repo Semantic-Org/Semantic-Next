@@ -1,3 +1,9 @@
-b {
-  color: var(--primary-text-color);
+:host {
+  display: block;
+}
+
+.counter {
+  margin-bottom: var(--spacing);
+  padding-bottom: var(--spacing);
+  border-bottom: var(--border);
 }

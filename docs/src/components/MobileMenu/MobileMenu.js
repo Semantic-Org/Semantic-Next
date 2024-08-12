@@ -10,27 +10,28 @@ const settings = {
 };
 
 const state = {
-  visibleMenu: [],
+  previousMenu: [],
   nextMenu: [],
+  activeMenu: [],
 };
 
 const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
   getDialog() {
     return $('dialog').el();
   },
+  getActiveMenu() {
+    // find active item
+    // if none top level
+  },
   initialize() {
-    state.visibleMenu.set(settings.menu);
+    state.activeMenu.set(settings.menu);
   },
   show(callback = noop) {
-    if(callback() !== false) {
-      tpl.getDialog().showModal();
-    }
+    tpl.getDialog().showModal();
     dispatchEvent('show');
   },
   hide(callback = noop) {
-    if(callback() !== false) {
-      tpl.getDialog().close();
-    }
+    tpl.getDialog().close();
     dispatchEvent('hide');
   }
 });

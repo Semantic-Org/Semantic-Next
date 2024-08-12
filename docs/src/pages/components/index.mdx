@@ -4,14 +4,14 @@ title: Components
 icon: package
 description: An overview of component features
 ---
-
+## What are Components
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Semantic UI provides a reactive framework for authoring web components that can be used to build custom UI using the same primitives as was used to build the UI framework.
 
 > **Getting Started** - It is recommended to check out our [interactive tutorial](/tutorial) before getting started here. This is designed to get you up to speed before diving into the guides found here.
 
-#### Developer Experience
+### Developer Experience
 
 Components provides everything you'd expect from other modern front end frameworks, but is developed specifically for web components.
 
@@ -19,12 +19,102 @@ Each UI component you author will give you access to a custom html tag which you
 
 Semantic UI components provide an overall framework for creating complex web apps using web components.
 
-* [Templating](/templating/) - An expressive signals based templating system that allows you to precisely reconstruct portions of a component when data changes, and includes features like, snippets, subtemplating, template helpers, conditionals, looping, and more.
+* [Templating](/components/rendering) - An expressive signals based templating system that allows you to precisely reconstruct portions of a component when data changes, and includes features like, snippets, subtemplating, template helpers, control structures, looping, and more.
 * [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
-* [DOM Manipulation](/components/dom) - A jQuery like chainable DOM manipulation library that is built to handle shadow DOM and nested components.
+* [DOM Manipulation](/query) - A jQuery like chainable DOM manipulation library that is built to handle shadow DOM and nested components.
 * [Events](/components/events) - Robust, built in systems for handling event listeners and dispatching custom events.
 * [Keybindings](/components/keys) - Built in keybinding system attached to component lifecycles
 * [Lifecycle Events](/components/lifecycle) - Granular control over tear
-
+* [Reactivity](/components/reactivity) - A powerful reactivity system based on signals for efficient updates.
 
 <PlaygroundExample id="minimal" height="300"></PlaygroundExample>
+
+## Key Features
+
+### Interchangeable
+
+Components are defined using [`createComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
+
+```javascript
+createComponent({
+  tagName: 'my-component',
+  template: '...',
+  css: '...',
+  state: { ... },
+  settings: { ... },
+  createInstance: () => ({ ... }),
+  onCreated: () => { ... },
+  onRendered: () => { ... },
+  onDestroyed: () => { ... },
+});
+```
+### Templating
+
+Components use a [powerful templating system](/components/rendering) that supports expressions, slots, conditionals, loops, and more.
+
+```handlebars
+{{#each user in users}}
+  <div class="user">
+    {{#if user}}
+      <h2>{{user.name}}</h2>
+      <p>{{user.email}}</p>
+    {{else}}
+      <p>No info provided.</p>
+    {{/if}}
+  </div>
+{{/each}}
+```
+
+### Styling
+
+Components provide [scoped CSS](/components/styling) using native encapsulation provided by the Shadow DOM. Provide your own variables inside your component or use the reasonable defaults passed through from SUI's design system.
+
+```css
+
+/* expose theming variables for your component
+   inherited from design system
+*/
+:host {
+  --counter-padding: var(--padding);
+  --counter-value-color: var(--primary-text-color);
+}
+.counter {
+  padding: var(--counter-padding);
+
+  .value {
+    color: var(--counter-color);
+  }
+}
+```
+
+### Events & Keybindings
+
+Components have robust tools for listening to and dispatching events.
+
+```javascript
+createComponent({
+  events: {
+    'click .increment'({state}) {
+      state.counter.increment();
+    },
+    'click .decrement'({state}) {
+      state.counter.decrement();
+    },
+  },
+  keys: {
+    'up'({state}) {
+      state.counter.increment();
+    },
+    'down'({state}) {
+      state.counter.decrement();
+    },
+    'shift + up'({state}) {
+      state.counter.increment(10);
+    },
+    'shift+down'({state}) {
+      state.counter.decrement(10);
+    },
+  }
+  // rest
+});
+```
