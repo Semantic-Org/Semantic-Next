@@ -23,7 +23,7 @@
     "vitest": "^1.5.2"
   },
   "dependencies": {
-    "@semantic-ui/utils": "^0.0.32"
+    "@semantic-ui/utils": "^0.0.33"
   },
-  "version": "0.0.32"
+  "version": "0.0.33"
 }
