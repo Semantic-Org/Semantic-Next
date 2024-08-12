@@ -7,6 +7,7 @@ import {
   formatDate,
   each,
   escapeHTML,
+  range,
   tokenize,
 } from '@semantic-ui/utils';
 
@@ -26,6 +27,9 @@ export const TemplateHelpers = {
   },
   hasAny(a) {
     return a?.length > 0;
+  },
+  range(start, stop, step = 1) {
+    return range(start, stop, step);
   },
   concat(...args) {
     return args.join('');
