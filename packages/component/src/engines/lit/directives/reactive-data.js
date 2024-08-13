@@ -38,6 +38,9 @@ export class ReactiveDataDirective extends AsyncDirective {
 
     // Create a new reaction to rerun the computation function
     let value;
+    if (this.reaction) {
+      this.reaction.stop();
+    }
     this.reaction = Reaction.create((computation) => {
       if(!this.isConnected) {
         computation.stop();
