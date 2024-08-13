@@ -110,7 +110,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     const itemID = this.getItemID(item, index);
     const sameIndex = this.templateCachedIndex.get(itemID) == index;
     const sameData = isEqual(this.templateCachedData.get(itemID), eachData);
-    if (false && sameIndex && sameData) {
+    if (sameIndex && sameData) {
       // reuse the template nothing to rerender
       return {
         cached: true,
@@ -129,128 +129,138 @@ export class ReactiveEachDirective extends AsyncDirective {
       };
     }
   }
+  updatePart(oldPart, newValue, index) {
+    const template = newValue(index);
+    if (template.cached) {
+      return oldPart; // Reuse the old part without re-rendering
+    } else {
+      return setChildPartValue(oldPart, template.content);
+    }
+  }
 
-  /*
-    Adapted from Lit's Repeat Directive
-    The key difference is we dont want to rerender templates (call content())
-    if the position doesnt move.
-  */
+  detectShift(oldKeys, newKeys) {
+    if (oldKeys.length === 0 || newKeys.length === 0) return 0;
+
+    // Check for a positive shift (insertion at the beginning)
+    if (oldKeys.every((key, index) => key === newKeys[index + 1])) {
+      return 1;
+    }
+
+    // Check for a negative shift (deletion at the beginning)
+    if (newKeys.every((key, index) => key === oldKeys[index + 1])) {
+      return -1;
+    }
+
+    return 0; // No shift detected
+  }
+
   updateItems(items = this.getItems()) {
     const containerPart = this.part;
-    if (!this.part) {
-      return;
-    }
+    if (!containerPart) return;
+
     const oldParts = getCommittedValue(containerPart);
     const { values: newValues, keys: newKeys } = this.getValuesAndKeys(items);
+
     if (!Array.isArray(oldParts)) {
       this._itemKeys = newKeys;
       return newValues;
     }
 
-    const oldKeys = (this._itemKeys ??= []);
-    const newParts = [];
-    let newKeyToIndexMap;
-    let oldKeyToIndexMap;
+    const oldKeys = this._itemKeys || [];
+    let newParts = [];
+
+    // Detect shift
+    const shift = this.detectShift(oldKeys, newKeys);
+
+    if (shift === 1) {
+      // Handle insertion at the beginning
+      const newPart = insertPart(containerPart, oldParts[0]);
+      newParts[0] = this.updatePart(newPart, newValues[0], 0);
+      for (let i = 1; i < newKeys.length; i++) {
+        if (i - 1 < oldParts.length) {
+          newParts[i] = oldParts[i - 1];
+        } else {
+          // Handle case where new items are added at the end after a shift
+          const newEndPart = insertPart(containerPart, newParts[i - 1]);
+          newParts[i] = this.updatePart(newEndPart, newValues[i], i);
+        }
+      }
+      this._itemKeys = newKeys;
+      setCommittedValue(containerPart, newParts);
+      return newParts;
+    } else if (shift === -1) {
+      // Handle deletion at the beginning
+      removePart(oldParts[0]);
+      newParts = oldParts.slice(1);
+      this._itemKeys = newKeys;
+      setCommittedValue(containerPart, newParts);
+      return newParts;
+    }
+
+    // Regular diffing algorithm (unchanged)
     let oldHead = 0;
     let oldTail = oldParts.length - 1;
     let newHead = 0;
     let newTail = newValues.length - 1;
+
     while (oldHead <= oldTail && newHead <= newTail) {
       if (oldParts[oldHead] === null) {
         oldHead++;
-      }
-      else if (oldParts[oldTail] === null) {
+      } else if (oldParts[oldTail] === null) {
         oldTail--;
-      }
-      else if (oldKeys[oldHead] === newKeys[newHead]) {
-        // MODIFIED FROM REPEAT
-        // WE DONT WANT TO REPULL TEMPLATE HERE
-        const template = newValues[newHead](newHead);
-        if (template.cached) {
-          newParts[newHead] = oldParts[oldHead];
-        }
-        else {
-          newParts[newHead] = setChildPartValue(
-            oldParts[oldHead],
-            template.content
-          );
-        }
+      } else if (oldKeys[oldHead] === newKeys[newHead]) {
+        newParts[newHead] = this.updatePart(oldParts[oldHead], newValues[newHead], newHead);
         oldHead++;
         newHead++;
-      }
-      else if (oldKeys[oldTail] === newKeys[newTail]) {
-        newParts[newTail] = setChildPartValue(
-          oldParts[oldTail],
-          newValues[newTail](newTail).content
-        );
+      } else if (oldKeys[oldTail] === newKeys[newTail]) {
+        newParts[newTail] = this.updatePart(oldParts[oldTail], newValues[newTail], newTail);
         oldTail--;
         newTail--;
-      }
-      else if (oldKeys[oldHead] === newKeys[newTail]) {
-        newParts[newTail] = setChildPartValue(
-          oldParts[oldHead],
-          newValues[newTail](newTail).content
-        );
+      } else if (oldKeys[oldHead] === newKeys[newTail]) {
+        newParts[newTail] = this.updatePart(oldParts[oldHead], newValues[newTail], newTail);
         insertPart(containerPart, newParts[newTail + 1], oldParts[oldHead]);
         oldHead++;
         newTail--;
-      }
-      else if (oldKeys[oldTail] === newKeys[newHead]) {
-        newParts[newHead] = setChildPartValue(
-          oldParts[oldTail],
-          newValues[newHead](newHead).content
-        );
+      } else if (oldKeys[oldTail] === newKeys[newHead]) {
+        newParts[newHead] = this.updatePart(oldParts[oldTail], newValues[newHead], newHead);
         insertPart(containerPart, oldParts[oldHead], oldParts[oldTail]);
         oldTail--;
         newHead++;
-      }
-      else {
-        if (newKeyToIndexMap === undefined) {
-          newKeyToIndexMap = generateMap(newKeys, newHead, newTail);
-          oldKeyToIndexMap = generateMap(oldKeys, oldHead, oldTail);
+      } else {
+        const oldIndex = oldKeys.indexOf(newKeys[newHead]);
+        if (oldIndex === -1) {
+          // New item
+          const newPart = insertPart(containerPart, oldParts[oldHead]);
+          newParts[newHead] = this.updatePart(newPart, newValues[newHead], newHead);
+        } else {
+          // Moved item
+          newParts[newHead] = this.updatePart(oldParts[oldIndex], newValues[newHead], newHead);
+          insertPart(containerPart, oldParts[oldHead], oldParts[oldIndex]);
+          oldParts[oldIndex] = null;
         }
-        if (!newKeyToIndexMap.has(oldKeys[oldHead])) {
-          removePart(oldParts[oldHead]);
-          oldHead++;
-        }
-        else if (!newKeyToIndexMap.has(oldKeys[oldTail])) {
-          removePart(oldParts[oldTail]);
-          oldTail--;
-        }
-        else {
-          const oldIndex = oldKeyToIndexMap.get(newKeys[newHead]);
-          const oldPart = oldIndex !== undefined ? oldParts[oldIndex] : null;
-          if (oldPart === null) {
-            const newPart = insertPart(containerPart, oldParts[oldHead]);
-            setChildPartValue(newPart, newValues[newHead](newHead).content);
-            newParts[newHead] = newPart;
-          }
-          else {
-            newParts[newHead] = setChildPartValue(
-              oldPart,
-              newValues[newHead](newHead).content
-            );
-            insertPart(containerPart, oldParts[oldHead], oldPart);
-            oldParts[oldIndex] = null;
-          }
-          newHead++;
-        }
+        newHead++;
       }
     }
+
+    // Add remaining new items
     while (newHead <= newTail) {
       const newPart = insertPart(containerPart, newParts[newTail + 1]);
-      setChildPartValue(newPart, newValues[newHead]().content);
-      newParts[newHead++] = newPart;
+      newParts[newHead] = this.updatePart(newPart, newValues[newHead], newHead);
+      newHead++;
     }
+
+    // Remove remaining old items
     while (oldHead <= oldTail) {
-      const oldPart = oldParts[oldHead++];
+      const oldPart = oldParts[oldHead];
       if (oldPart !== null) {
         removePart(oldPart);
       }
+      oldHead++;
     }
+
     this._itemKeys = newKeys;
     setCommittedValue(containerPart, newParts);
-    return noChange;
+    return newParts;
   }
 }
 
