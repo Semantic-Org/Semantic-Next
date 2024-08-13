@@ -23,15 +23,21 @@ const createInstance = ({tpl, state}) => ({
       seconds: time.getSeconds()
     };
   },
-  getRotation(name, ...offsets) {
+  getMarkerRotation(name, ...offsets) {
     const offset = sum(offsets);
+    const degreeMap = {
+      minor: 30 * offset,
+      major: 6 * (offset),
+    };
+    const degrees = degreeMap[name];
+    return `rotate(${degrees})`;
+  },
+  getTimeRotation(name) {
     const { hours, minutes, seconds } = tpl.getTime();
     const degreeMap = {
-      minorAxis: 30 * offset,
-      majorAxis: 6 * (offset),
-      hourHand: 30 * hours + minutes / 2,
-      minuteHand: 6 * minutes + seconds / 10,
-      secondHand: 6 * seconds
+      hour: 30 * hours + minutes / 2,
+      minute: 6 * minutes + seconds / 10,
+      second: 6 * seconds
     };
     const degrees = degreeMap[name];
     return `rotate(${degrees})`;

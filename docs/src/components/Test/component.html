@@ -3,21 +3,20 @@
 
   <!-- markers -->
   {{#each minute in majorMarkers}}
-    <line class="major" y1="35" y2="45" transform="rotate(0)"></line>
-    <line class="major" y1="35" y2="45" transform="{{getRotation 'minorAxis' minute}}"></line>
+    <line class="major" y1="35" y2="45" id="{{@index}}-major" transform="{{getMarkerRotation 'minor' minute}}"></line>
     {{#each offset in minorMarkers}}
-      <line class="minor" y1="42" y2="45" transform="{{getRotation 'minorAxis' minute offset}}"></line>
+      <line class="minor" y1="42" y2="45" id="{{@index}}-minor" transform="{{getMarkerRotation 'major' minute offset}}"></line>
     {{/each}}
   {{/each}}
 
   <!-- hour hand -->
-  <line class="hour" y1="2" y2="-20" transform="{{getRotation 'hourHand'}}"></line>
+  <line class="hour" y1="2" y2="-20" transform="{{getTimeRotation 'hour'}}"></line>
 
   <!-- minute hand -->
-  <line class="minute" y1="4" y2="-30" transform="{{getRotation 'minuteHand'}}"></line>
+  <line class="minute" y1="4" y2="-30" transform="{{getTimeRotation 'minute'}}"></line>
 
   <!-- second hand -->
-  <g transform="{{getRotation 'secondHand'}}">
+  <g transform="{{getTimeRotation 'second'}}">
     <line class="second" y1="10" y2="-38"></line>
     <line class="second-counterweight" y1="10" y2="2"></line>
   </g>
