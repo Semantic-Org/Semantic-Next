@@ -1,18 +1,8 @@
 ---
 import Body from '../layouts/Body.astro';
 
-import { UICounter } from '../components/Test/component.js';
-import { UIButton } from '@semantic-ui/core';
-
-const items = [{label: 'One', value: '1'}, { label: 'Two', value: '2' },{label: 'Three', value: '3' }];
+import { UIClock } from '../components/Test/component.js';
 ---
 <Body padded>
-<!--
-<UIButton primary icon-after icon="right-chevron" href="/tutorial">View Guide</UIButton>
-<UIButton fade-animated>
-  <span slot="visible">Hover Me</span>
-  <span slot="hidden">Hidden</span>
-</UIButton>
- -->
-<UICounter client:only></UICounter>
+  <UIClock client:only></UIClock>
 </Body>

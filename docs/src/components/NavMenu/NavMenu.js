@@ -7,7 +7,7 @@ import css from './NavMenu.css?raw';
 const settings = {
   menu: [],
   linkCurrentPage: false,
-  expandAllDefault: false,
+  expandAll: false,
   navigationIcon: '',
   activeURL: '',
 };
@@ -81,10 +81,10 @@ const createInstance = function ({ tpl, data, state, settings }) {
       return item.url && !tpl.isCurrentItem(item);
     },
     isExpandable(item) {
-      return !settings.expandAllDefault;
+      return !settings.expandAll;
     },
     isActiveItem(item) {
-      if(settings.expandAllDefault) {
+      if(settings.expandAll) {
         return true;
       }
       if (tpl.isCurrentItem(item)) {

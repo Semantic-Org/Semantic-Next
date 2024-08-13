@@ -1,5 +1,5 @@
 ---
-const { sidebarMenu } = Astro.props;
+const { sidebarMenu, expandAll } = Astro.props;
 import './Sidebar.css';
 import NavMenu from '@components/NavMenu/NavMenu.js';
 import { getSidebarMenu } from '@helpers/navigation.js';
@@ -12,6 +12,7 @@ const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 	<NavMenu
 		client:load
     menu={menu}
+    expandAll={expandAll}
     activeURL={Astro.url.pathname}
   />
   <slot name="after"/>

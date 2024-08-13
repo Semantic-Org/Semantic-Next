@@ -1,35 +1,24 @@
-<h3>Reactive Sources</h3>
-<ul>
-  <li>
-    <span class="source">Setting</span>
-    <span class="counter">{{reactiveCounter1}}</span>
-  </li>
-  <li>
-    <span class="source">State</span>
-    <span class="counter">{{reactiveCounter2}}</span>
-  </li>
-  <li>
-    <span class="source">Reactive Prop</span>
-    <span class="counter">{{reactiveCounter3}}</span>
-  </li>
-</ul>
+<svg viewBox="-50 -50 100 100">
+  <circle class="clock-face" r="48" />
 
-<h3>Non-Reactive Sources</h3>
-<ul>
-  <li>
-    <span class="source">$ in Function</span>
-    <span class="counter">{{staticCounter1}}</span>
-  </li>
-  <li>
-    <span class="source">Setting Untouched</span>
-    <span class="counter">{{staticCounter2}}</span>
-  </li>
-  <li>
-    <span class="source">Prop</span>
-    <span class="counter">{{staticCounter3}}</span>
-  </li>
-  <li>
-    <span class="source">Prop in Function</span>
-    <span class="counter">{{staticCounter4}}</span>
-  </li>
-</ul>
+  <!-- markers -->
+  {{#each minute in majorMarkers}}
+    <line class="major" y1="35" y2="45" transform="rotate(0)"></line>
+    <line class="major" y1="35" y2="45" transform="{{getRotation 'minorAxis' minute}}"></line>
+    {{#each offset in minorMarkers}}
+      <line class="minor" y1="42" y2="45" transform="{{getRotation 'minorAxis' minute offset}}"></line>
+    {{/each}}
+  {{/each}}
+
+  <!-- hour hand -->
+  <line class="hour" y1="2" y2="-20" transform="{{getRotation 'hourHand'}}"></line>
+
+  <!-- minute hand -->
+  <line class="minute" y1="4" y2="-30" transform="{{getRotation 'minuteHand'}}"></line>
+
+  <!-- second hand -->
+  <g transform="{{getRotation 'secondHand'}}">
+    <line class="second" y1="10" y2="-38"></line>
+    <line class="second-counterweight" y1="10" y2="2"></line>
+  </g>
+</svg>

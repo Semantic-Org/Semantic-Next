@@ -311,7 +311,6 @@
     --black-solid-5: oklch(0.95 0 0 / 100%);
     --facebook-color: #1877F2;
     --twitter-color: #55ACEE;
-    --google-plus-color: #DD4B39;
     --linked-in-color: #1F88BE;
     --youtube-color: #FF0000;
     --pinterest-color: #BD081C;
@@ -729,7 +728,7 @@
     --subtle-bottom-lip-shadow: 0px var(--subtle-lip-distance-inverse) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset ;
     --subtle-left-lip-shadow: var(--subtle-lip-distance) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset ;
     --subtle-right-lip-shadow: var(--subtle-lip-distance-inverse) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset ;
-    --floating-shadow: 0px 2px 4px 0px rgb(34 36 38 12%), 0px 2px 10px 0px rgb(34 36 38 15%) ;
+    --floating-shadow: 0px 2px 4px 0px rgb(34 36 38 / 12%), 0px 2px 10px 0px rgb(34 36 38 / 15%) ;
     --success-background-color: var(--positive-background-color);
     --success-color: var(--positive-color);
     --success-border-color: var(--positive-border-color);

@@ -9,7 +9,7 @@ import { eventsTab } from './tabs/events.js';
 
 const createInstance = function ({ tpl, $ }) {
   return {
-    tab: new ReactiveVar('basic'),
+    tab: new ReactiveVar('events'),
     morningActivity: new ReactiveVar('running'),
     eveningActivity: new ReactiveVar('reading'),
     maybeActive(tab) {

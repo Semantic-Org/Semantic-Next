@@ -43,7 +43,10 @@ const searchMeta = {
 
 <Playground searchMeta={searchMeta} showSidebar=true>
   <page data-pagefind-body>
-    <Sidebar></SideBar>
+    <Sidebar
+      expandAll=true
+    >
+    </SideBar>
     <CodePlayground client:only
       files={files}
       example={example}

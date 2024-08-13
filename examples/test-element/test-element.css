@@ -14,7 +14,7 @@
   background-color: #DDD;
 }
 
-.number {
+li, .number {
   animation: alert 0.5s ease;
   will-change: background;
 }

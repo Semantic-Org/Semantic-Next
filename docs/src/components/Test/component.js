@@ -1,45 +1,51 @@
-import { createComponent } from '@semantic-ui/component';
+import { createComponent} from '@semantic-ui/component';
+import { sum } from '@semantic-ui/utils';
 
-import template from './component.html?raw';
 import css from './component.css?raw';
-
-const settings = {
-  reactiveCounter1: 0,
-  staticCounter2: 0,
-};
-
+import template from './component.html?raw';
 const state = {
-  reactiveCounter2: 0
+  time: new Date(),
 };
 
-const createInstance = ({reactiveVar, tpl}) => ({
-  reactiveCounter3: reactiveVar(0),
-  staticCounter3: 0,
-  staticCounter4: () => tpl.staticCounter3,
+const createInstance = ({tpl, state}) => ({
+  majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+  minorMarkers: [1, 2, 3, 4],
+  initialize() {
+    tpl.interval = tpl.startClock();
+  },
+  startClock: () => setInterval(() => state.time.now(), 1000),
+  getTime() {
+    const time = state.time.get();
+    return {
+      hours: time.getHours(),
+      minutes: time.getMinutes(),
+      seconds: time.getSeconds()
+    };
+  },
+  getRotation(name, ...offsets) {
+    const offset = sum(offsets);
+    const { hours, minutes, seconds } = tpl.getTime();
+    const degreeMap = {
+      minorAxis: 30 * offset,
+      majorAxis: 6 * (offset),
+      hourHand: 30 * hours + minutes / 2,
+      minuteHand: 6 * minutes + seconds / 10,
+      secondHand: 6 * seconds
+    };
+    const degrees = degreeMap[name];
+    return `rotate(${degrees})`;
+  }
 });
 
-
-const onCreated = function({settings, state, tpl}) {
-  setInterval(() => {
-    settings.reactiveCounter1++;
-    state.reactiveCounter2.increment();
-    tpl.reactiveCounter3.increment();
-    tpl.staticCounter3++;
-  }, 1000);
+const onDestroyed = ({tpl}) => {
+  clearInterval(tpl.interval);
 };
 
-const onRendered = function({tpl, $}) {
-  tpl.staticCounter1 = $('.counter').first().text();
-};
-
-
-export const UICounter = createComponent({
-  tagName: 'ui-counter',
-  template,
-  css,
+export const UIClock = createComponent({
+  tagName: 'ui-clock',
   createInstance,
-  onCreated,
-  onRendered,
+  template,
   state,
-  settings,
+  css,
+  onDestroyed
 });
