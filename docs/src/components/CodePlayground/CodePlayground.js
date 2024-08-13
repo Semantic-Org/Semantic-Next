@@ -76,6 +76,7 @@ const settings = {
 const state = {
   activeFile: undefined,
   resizing: true,
+  displayMode: 'desktop'
 };
 
 const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
@@ -144,6 +145,9 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
   getTabDirection() {
     if(settings.inline) {
       return settings.inlineDirection;
+    }
+    if(state.displayMode.value == 'tablet') {
+      return 'vertical';
     }
     return 'horizontal';
   },
@@ -243,11 +247,32 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     if(menu) {
       menu.selectIndex(number - 1);
     }
-  }
+  },
+
+  setDisplayMode() {
+    const width = $('window').width();
+    let displayMode = 'computer';
+    if(width < 1200) {
+      displayMode = 'tablet';
+    }
+    if(width < 768) {
+      displayMode = 'mobile';
+    }
+    console.log($('window').length, width, displayMode);
+    state.displayMode.set(displayMode);
+  },
 
 });
 
-const onRendered = ({ $, $$, tpl, state, settings }) => {
+const onCreated = ({tpl, attachEvent}) => {
+  // resize layout for tablet/mobile
+  attachEvent('window', 'resize', () => {
+    requestAnimationFrame(tpl.setDisplayMode);
+  });
+  tpl.setDisplayMode();
+};
+
+const onRendered = ({ tpl, state }) => {
   addSearch(CodeMirror);
   requestIdleCallback(() => {
     tpl.initializePanels();
@@ -294,6 +319,7 @@ const CodePlayground = createComponent({
   css,
   createInstance,
   settings,
+  onCreated,
   onRendered,
   events,
   state,
