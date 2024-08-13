@@ -35,7 +35,7 @@
   <li>
     <input type="checkbox" id="{{person._id}}">
     <label for="{{person._id}}">
-      {{person.name}} - Age {{person.age}}
+      #{{numberFromIndex @index}} {{person.name}} - Age {{person.age}}
     </label>
   </li>
 {{/each}}
