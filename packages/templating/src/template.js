@@ -693,7 +693,7 @@ export const Template = class Template {
       }
       return match;
     }
-    return template.parentTemplate;
+    return template._parentTemplate || template?.tpl?._parentTemplate;
   }
 
   static findChildTemplates(template, templateName) {
