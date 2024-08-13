@@ -333,6 +333,45 @@ export const memoize = (fn) => {
   };
 };
 
+export const debounce = (fn, options) => {
+  // allow just number to be passed in
+  if(typeof options == 'number') {
+    options = { delay: options };
+  }
+  const {
+    delay = 200,
+    immediate = false
+  } = options;
+
+  let timeout;
+  let callbackCalled = false;
+
+  function debounced(...args) {
+    const later = () => {
+      timeout = null;
+      if (!immediate) fn.apply(this, args);
+      callbackCalled = false;
+    };
+
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, delay);
+
+    if (callNow && !callbackCalled) {
+      callbackCalled = true;
+      fn.apply(this, args);
+    }
+  }
+
+  debounced.cancel = () => {
+    clearTimeout(timeout);
+    timeout = null;
+    callbackCalled = false;
+  };
+
+  return debounced;
+};
+
 /*-------------------
        Strings
 --------------------*/

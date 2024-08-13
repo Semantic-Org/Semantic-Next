@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { tokenize,
   arrayFromObject,
   asyncEach,
@@ -7,6 +7,7 @@ import { tokenize,
   camelToKebab,
   capitalizeWords,
   clone,
+  debounce,
   each,
   escapeHTML,
   escapeRegExp,
@@ -1272,6 +1273,101 @@ describe('function utilities', () => {
       expect(originalFunction).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('debounce', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should delay function execution', () => {
+      const func = vi.fn();
+      const debouncedFunc = debounce(func, { delay: 1000 });
+
+      debouncedFunc();
+      expect(func).not.toBeCalled();
+
+      vi.advanceTimersByTime(500);
+      expect(func).not.toBeCalled();
+
+      vi.advanceTimersByTime(500);
+      expect(func).toBeCalledTimes(1);
+    });
+
+    it('should only execute once for multiple calls within delay', () => {
+      const func = vi.fn();
+      const debouncedFunc = debounce(func, { delay: 1000 });
+
+      debouncedFunc();
+      debouncedFunc();
+      debouncedFunc();
+
+      vi.advanceTimersByTime(1000);
+      expect(func).toBeCalledTimes(1);
+    });
+    it('should accept a number as the second argument for delay', () => {
+      const func = vi.fn();
+      const debouncedFunc = debounce(func, 500);
+
+      debouncedFunc();
+      vi.advanceTimersByTime(499);
+      expect(func).not.toBeCalled();
+
+      vi.advanceTimersByTime(1);
+      expect(func).toBeCalledTimes(1);
+    });
+
+    it('should execute immediately if immediate option is true', () => {
+      const func = vi.fn();
+      const debouncedFunc = debounce(func, { delay: 1000, immediate: true });
+
+      debouncedFunc();
+      expect(func).toBeCalledTimes(1);
+
+      debouncedFunc();
+      vi.advanceTimersByTime(1000);
+      expect(func).toBeCalledTimes(1);
+    });
+
+    it('should allow to cancel delayed execution', () => {
+      const func = vi.fn();
+      const debouncedFunc = debounce(func, { delay: 1000 });
+
+      debouncedFunc();
+      debouncedFunc.cancel();
+
+      vi.advanceTimersByTime(1000);
+      expect(func).not.toBeCalled();
+    });
+
+    it('should pass correct arguments to the debounced function', () => {
+      const func = vi.fn();
+      const debouncedFunc = debounce(func, { delay: 1000 });
+
+      debouncedFunc('a', 'b');
+      vi.advanceTimersByTime(1000);
+
+      expect(func).toBeCalledWith('a', 'b');
+    });
+
+    it('should maintain correct context', () => {
+      const obj = {
+        value: 'test',
+        method: vi.fn(function() { return this.value; })
+      };
+      const debouncedMethod = debounce(obj.method, { delay: 1000 });
+
+      debouncedMethod.call(obj);
+      vi.advanceTimersByTime(1000);
+
+      expect(obj.method).toBeCalled();
+      expect(obj.method.mock.results[0].value).toBe('test');
+    });
+  });
+
 });
 
 describe('String Utilities', () => {
