@@ -34,7 +34,7 @@ export class Query {
     if (!root) {
       return;
     }
-    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])) {
+    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis']) || selector == Query.globalThisProxy) {
       // We dont want to store a copy of globalThis in each query instance
       elements = [Query.globalThisProxy];
       this.isBrowser = isClient;
@@ -71,7 +71,10 @@ export class Query {
   }
 
   chain(elements) {
-    return new Query(elements, this.options);
+    return (this.isGlobal)
+      ? new Query(globalThis, this.options)
+      : new Query(elements, this.options)
+    ;
   }
 
   /* Note this is a naive implementation for performance reasons
@@ -736,6 +739,7 @@ export class Query {
   }
 
   width(value) {
+    console.log(this.isGlobal);
     const prop = (this.isGlobal) ? 'innerWidth' : 'clientWidth';
     return this.prop(prop, value);
   }
