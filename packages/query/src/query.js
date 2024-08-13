@@ -739,7 +739,6 @@ export class Query {
   }
 
   width(value) {
-    console.log(this.isGlobal);
     const prop = (this.isGlobal) ? 'innerWidth' : 'clientWidth';
     return this.prop(prop, value);
   }
