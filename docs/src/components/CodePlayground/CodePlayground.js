@@ -258,7 +258,6 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
     if(width < 768) {
       displayMode = 'mobile';
     }
-    console.log($('window').length, width, displayMode);
     state.displayMode.set(displayMode);
   },
 
