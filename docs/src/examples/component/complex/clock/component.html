@@ -10,13 +10,13 @@
   {{/each}}
 
   <!-- hour hand -->
-  <line class="hour" y1="2" y2="-20" transform="{{getTimeRotation 'hourHand'}}"></line>
+  <line class="hour" y1="2" y2="-20" transform="{{getTimeRotation 'hour'}}"></line>
 
   <!-- minute hand -->
-  <line class="minute" y1="4" y2="-30" transform="{{getTimeRotation 'minuteHand'}}"></line>
+  <line class="minute" y1="4" y2="-30" transform="{{getTimeRotation 'minute'}}"></line>
 
   <!-- second hand -->
-  <g transform="{{getTimeRotation 'secondHand'}}">
+  <g transform="{{getTimeRotation 'second'}}">
     <line class="second" y1="10" y2="-38"></line>
     <line class="second-counterweight" y1="10" y2="2"></line>
   </g>
