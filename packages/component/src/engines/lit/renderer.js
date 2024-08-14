@@ -1,7 +1,7 @@
-import { html } from 'lit';
+import { html, svg } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isArray, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, findIndex, fatal, isArray, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -15,7 +15,7 @@ export class LitRenderer {
   static PARENS_REGEXP = /('[^']*'|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
 
-  constructor({ ast, data, subTemplates, snippets, helpers }) {
+  constructor({ ast, data, subTemplates, snippets, helpers, isSVG }) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = [];
@@ -23,6 +23,7 @@ export class LitRenderer {
     this.resetHTML();
     this.snippets = snippets || {};
     this.helpers = helpers || {};
+    this.isSVG = isSVG;
   }
 
   resetHTML() {
@@ -39,15 +40,26 @@ export class LitRenderer {
     this.resetHTML();
     this.readAST({ ast, data });
     this.clearTemp();
-    this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
+    const renderer = (this.isSVG) ? svg : html;
+    this.litTemplate = renderer.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
   }
 
   readAST({ ast = this.ast, data = this.data } = {}) {
-    each(ast, (node) => {
+
+    let stopParsing = false;
+
+    each(ast, (node, index) => {
       switch (node.type) {
         case 'html':
-          this.addHTML(node.html);
+          // if html is encountered that is svg it will need to stop parsing rest of tree
+          if(this.hasSVG(node.html)) {
+            this.addSVG(node.html, ast.slice(index));
+            stopParsing = true;
+          }
+          else {
+            this.addHTML(node.html);
+          }
           break;
 
         case 'expression':
@@ -84,6 +96,7 @@ export class LitRenderer {
           }
           break;
       }
+      return !stopParsing;
     });
   }
 
@@ -346,6 +359,64 @@ export class LitRenderer {
     }
   }
 
+  hasSVG(html = '') {
+    return html.includes('<svg');
+  }
+
+  addSVG(html, restAST) {
+
+    // this is used to find index of closing svg tag
+    // or closing open svg tag
+    const findASTIndex = (match) => {
+      return findIndex(restAST, node => node.type == 'html' && node.html.includes(match));
+    };
+
+    const splitCloseTag = (html) => {
+      const parts = html.split('>');
+      const inside = `${parts[0]}>`;
+      const outside = parts[1];
+      return { insideTag, outsideTag };
+    };
+    const splitOpenTag = (html) => {
+      const parts = html.split('<');
+      const inside = parts[0];
+      const outside = `<${parts[1]}`;
+      return { insideTag, outsideTag };
+    };
+
+    const openTagStartIndex = findASTIndex('<svg'); // this should always be 0 as we are checking before
+    const openTagEndIndex = findASTIndex('>'); // this is the end of the svg open tag
+    const closeTagStartIndex = findASTIndex('</svg'); // this is the start of the svg close tag
+
+    let svgAST = restAST.slice(openTagEndIndex + 1, closeTagStartIndex);
+    console.log(openTagStartIndex, openTagEndIndex, closeTagStartIndex);
+    console.log(restAST[closeTagStartIndex]);
+
+
+
+    if(openTagEndIndex == 0) {
+      const { insideTag, outsideTag } = splitCloseTag(html);
+      this.addHTML(insideTag);
+      svgAST.push({ type: 'html', html: outsideTag });
+    }
+    // <svg> tag has expressions like <svg viewBox="{{getViewBox}}">
+    else {
+      // add <svg portion
+      this.addHTML(html);
+      // read dynamic portion
+      const svgTagAST = restAST.slice(openTagStartIndex + 1, openTagEndIndex);
+    }
+
+    // split contents of close index
+    startClose
+
+    // we need to parse AST up until end of <svg> tag
+
+    // then we need to create a subtree for contents
+
+    // then we need to read rest of AST
+  }
+
   addHTML(html) {
     // we want to concat all html added consecutively
     if (this.lastHTML) {
@@ -355,6 +426,7 @@ export class LitRenderer {
     this.html.push(html);
     this.html.raw.push(String.raw({ raw: html }));
     this.lastHTML = true;
+    return true;
   }
 
   addHTMLSpacer() {
@@ -376,6 +448,7 @@ export class LitRenderer {
       subTemplates: this.subTemplates,
       snippets: this.snippets,
       helpers: this.helpers,
+      isSVG: this.isSVG,
     });
     this.renderTrees.push(tree);
     return tree.render();

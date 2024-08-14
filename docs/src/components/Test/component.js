@@ -25,8 +25,8 @@ const createInstance = ({tpl, state}) => ({
   getMarkerRotation(name, ...offsets) {
     const offset = sum(offsets);
     const degreeMap = {
-      minor: 30 * offset,
-      major: 6 * (offset),
+      minor: 6 * offset,
+      major: 30 * (offset),
     };
     const degrees = degreeMap[name];
     return `rotate(${degrees})`;
