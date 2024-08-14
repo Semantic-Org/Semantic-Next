@@ -25,9 +25,16 @@
   --playground-code-meta-color: #c9d1d9;
   --playground-code-qualifier-color: #c9d1d9;
   --playground-code-builtin-color: #c9d1d9;
-  --playground-code-tag-color: #d2a8ff;
-  --playground-code-attribute-color: var(--primary-text-color);
   --playground-code-callee-color: #d2a8ff;
+
+  --playground-code-attribute-color: var(--primary-text-color);
+  --playground-code-tag-color: #656565;
+  --playground-code-bracket: #656565;
+
+  --playground-code-templating-string: var(--primary-text-color);
+  --playground-code-templating-keyword: #d2a8ff;
+  --playground-code-templating-variable: #d2a8ff;
+
 
   --playground-tab-bar-background: #ffffff;
   --playground-bar-height: 32px;

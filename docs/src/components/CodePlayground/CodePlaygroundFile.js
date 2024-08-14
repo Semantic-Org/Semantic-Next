@@ -1,11 +1,20 @@
 import { createComponent, adoptStylesheet } from '@semantic-ui/component';
 
 import codeMirrorCSS from './lib/codemirror.css?raw';
-
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const createInstance = ({tpl, settings, data, $, $$}) => ({
+const createInstance = ({tpl, settings, data, $, $$, reaction}) => ({
+
+  setMode(filename) {
+    if(filename.search('.html') !== -1) {
+      setTimeout(() => {
+        const cm = $$('playground-code-editor').get(0)?._codemirror;
+        cm.setOption('mode', 'text/ui-template');
+        cm.refresh();
+      }, 10);
+    }
+  },
 
   configureCodeEditors() {
     const el = $$('playground-code-editor').get(0);

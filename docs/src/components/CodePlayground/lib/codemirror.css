@@ -17,3 +17,15 @@
 .CodeMirror-foldmarker:hover {
   color: #009FDA;
 }
+.cm-bracket:not(.cm-tag) {
+  color: var(--playground-code-bracket);
+}
+.cm-keyword.cm-templating {
+  color: var(--playground-code-templating-keyword);
+}
+.cm-variable.cm-templating {
+  color: var(--playground-code-templating-variable);
+}
+.cm-string.cm-templating {
+  color: var(--playground-code-templating-string);
+}
