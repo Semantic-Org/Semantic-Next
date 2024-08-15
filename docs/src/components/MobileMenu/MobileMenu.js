@@ -26,19 +26,20 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
   },
   getMenuMatchingURL(menu, url) {
     let result = {
-      menu: menu,
+      menu: null,
       parentMenu: null,
       depth: 0
     };
     const searchMenu = (menu, depth, parentMenu) => {
       each(menu, (item) => {
-        // for top level menu we dont want to count it a match if url is matched
+        // for topbar menu we dont want to count it a match if url is matched
         if(depth > 0 && item.url && (tpl.isSameURL(item.url, url))) {
           result = {
             menu,
             depth,
             parentMenu,
           };
+          return false;
         }
         if (item.pages) {
           each(item.pages, (page) => {
@@ -48,16 +49,21 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
                 depth,
                 parentMenu,
               };
-              return;
+              return false;
             }
           });
         }
-        if (!result.menu && item.menu) {
+        if (item.menu && !result.menu) {
           searchMenu(item.menu, depth + 1, menu);
         }
       });
     };
     searchMenu(menu, 0);
+    // always return top level if no result
+    if(!result.menu ) {
+      result.menu = menu;
+    }
+    console.log(result);
     return result;
   },
   addTrailingSlash(url) {
