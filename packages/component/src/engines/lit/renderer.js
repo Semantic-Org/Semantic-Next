@@ -389,50 +389,61 @@ export class LitRenderer {
   */
   getSVGAST(html, restAST) {
 
+    // find the index of an AST node containing a specific HTML string
     const findASTIndex = (match) => {
       return findIndex(restAST, node => node.type == 'html' && node.html.includes(match));
     };
 
-    const splitSVGStart = (html) => {
-      const openTagEnd = html.indexOf('>');
-      const insideStartTag = html.slice(0, openTagEnd + 1);
-      const outsideStartTag = html.slice(openTagEnd + 1).trim();
-      return { insideStartTag, outsideStartTag };
-    };
-    const splitSVGEnd = (html) => {
-      const parts = html.split('</svg');
-      const insideEndTag = parts[0];
-      const outsideEndTag = `</svg${parts[1]}`;
-      return { insideEndTag, outsideEndTag };
+    // split <svg> and </svg> tag to content before after tag
+    const splitSVGTag = (html, tag, isClosing = false) => {
+      if (isClosing) {
+        const parts = html.split(tag);
+        return {
+          insideTag: parts[0],
+          outsideTag: tag + (parts[1] || '')
+        };
+      }
+      else {
+        const tagEnd = html.indexOf('>', html.indexOf(tag)) + 1;
+        return {
+          insideTag: html.slice(0, tagEnd),
+          outsideTag: html.slice(tagEnd).trim()
+        };
+      }
     };
 
-    const openTagStartIndex = findASTIndex('<svg'); // this should always be 0 as we are checking before
-    const openTagEndIndex = findASTIndex('>'); // this is the end of the svg open tag
-    const closeTagStartIndex = findASTIndex('</svg'); // this is the start of the svg close tag
+    // Find key indices in the AST
+    const openTagStartIndex = findASTIndex('<svg'); // Start of SVG opening tag
+    const openTagEndIndex = findASTIndex('>');      // End of SVG opening tag
+    const closeTagStartIndex = findASTIndex('</svg'); // Start of SVG closing tag
 
     const openTagEndNode = restAST[openTagEndIndex];
     const closeTagStartNode = restAST[closeTagStartIndex];
 
-    const { insideStartTag, outsideStartTag } = splitSVGStart(openTagEndNode.html);
-    const { insideEndTag, outsideEndTag } = splitSVGEnd(closeTagStartNode.html);
-    // content before SVG
+    // Split the opening and closing SVG tags
+    const { insideTag: insideStartTag, outsideTag: outsideStartTag } = splitSVGTag(openTagEndNode.html, '<svg');
+    const { insideTag: insideEndTag, outsideTag: outsideEndTag } = splitSVGTag(closeTagStartNode.html, '</svg', true);
+
+    // Construct preSVG array: content before SVG, including the opening tag
     const preSVG = restAST.slice(openTagStartIndex, openTagEndIndex);
     preSVG[openTagEndIndex] = { type: 'html', html: insideStartTag };
 
-    // content inside svg
+    // Construct svg array: content inside SVG tags
     let svg = [];
     if(outsideStartTag) {
       svg.push({ type: 'html', html: outsideStartTag });
     }
+    // Include all nodes between opening and closing tags
     let svgNodes = restAST.slice(openTagEndIndex + 1, closeTagStartIndex);
     svg = [...svg, ...svgNodes];
     if(insideEndTag) {
       svg.push({ type: 'html', html: insideEndTag });
     }
 
-    // content after svg
+    // Construct postSVG array: content after SVG closing tag
     let postSVG = restAST.slice(closeTagStartIndex);
     postSVG[0] = { type: 'html', html: outsideEndTag };
+
     return { preSVG, svg, postSVG };
   }
 
