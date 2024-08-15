@@ -2,32 +2,42 @@
   <line class="{{class}}" y1="{{y1}}" y2="{{y2}}" transform={{transform}}></line>
 {{/snippet}}
 
-<svg viewBox="-50 -50 100 100">
-  <circle class="clock-face" r="48" />
+<svg viewBox="{{viewBox}}">
+  <circle class="clock-face" r="48"></circle>
 
   <!-- markers -->
   {{#each minute in majorMarkers}}
     {{>line
-      class='minor'
-      y1=42
+      class='major'
+      y1=35
       y2=45
-      transform=(getMarkerRotation 'minor' minute)
+      transform=(getMarkerRotation 'major' minute)
     }}
     {{#each offset in minorMarkers}}
       {{>line
-        class='major'
-        y1=35
+        class='minor'
+        y1=42
         y2=45
-        transform=(getMarkerRotation 'major' minute offset)
+        transform=(getMarkerRotation 'minor' minute offset)
       }}
     {{/each}}
   {{/each}}
 
   <!-- hour hand -->
-  {{>line class='hour' y1='2' y2='-20' transform=(getTimeRotation 'hour')}}
+  {{>line
+    class='hour'
+    y1='2'
+    y2='-20'
+    transform=(getTimeRotation 'hour')
+  }}
 
   <!-- minute hand -->
-  {{>line class='minute' y1="4" y2="-30" transform=(getTimeRotation 'minute')}}
+  {{>line
+    class='minute'
+    y1="4"
+    y2="-30"
+    transform=(getTimeRotation 'minute')
+  }}
 
   <!-- second hand -->
   <g transform="{{getTimeRotation 'second'}}">

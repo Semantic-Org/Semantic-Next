@@ -9,11 +9,15 @@ const state = {
 };
 
 const createInstance = ({tpl, state}) => ({
+
   majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
   minorMarkers: [1, 2, 3, 4],
+  viewBox: '-50 -50 100 100',
+
   initialize() {
     tpl.interval = tpl.startClock();
   },
+
   startClock: () => setInterval(() => state.time.now(), 1000),
   getTime() {
     const time = state.time.get();
@@ -26,8 +30,8 @@ const createInstance = ({tpl, state}) => ({
   getMarkerRotation(name, ...offsets) {
     const offset = sum(offsets);
     const degreeMap = {
-      minor: 30 * offset,
-      major: 6 * (offset),
+      minor: 6 * offset,
+      major: 30 * (offset),
     };
     const degrees = degreeMap[name];
     return `rotate(${degrees})`;

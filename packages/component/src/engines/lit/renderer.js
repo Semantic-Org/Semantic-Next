@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, svg } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
 import { each, mapObject, wrapFunction, fatal, isArray, isFunction } from '@semantic-ui/utils';
@@ -15,7 +15,7 @@ export class LitRenderer {
   static PARENS_REGEXP = /('[^']*'|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
 
-  constructor({ ast, data, subTemplates, snippets, helpers }) {
+  constructor({ ast, data, subTemplates, snippets, helpers, isSVG }) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = [];
@@ -23,6 +23,7 @@ export class LitRenderer {
     this.resetHTML();
     this.snippets = snippets || {};
     this.helpers = helpers || {};
+    this.isSVG = isSVG;
   }
 
   resetHTML() {
@@ -39,7 +40,8 @@ export class LitRenderer {
     this.resetHTML();
     this.readAST({ ast, data });
     this.clearTemp();
-    this.litTemplate = html.apply(this, [this.html, ...this.expressions]);
+    const renderer = (this.isSVG) ? svg : html;
+    this.litTemplate = renderer.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
   }
 
@@ -48,6 +50,10 @@ export class LitRenderer {
       switch (node.type) {
         case 'html':
           this.addHTML(node.html);
+          break;
+
+        case 'svg':
+          this.addValue(this.evaluateSVG(node.content, data));
           break;
 
         case 'expression':
@@ -139,6 +145,10 @@ export class LitRenderer {
     else {
       return this.evaluateSubTemplate(node, data);
     }
+  }
+
+  evaluateSVG(svg, data) {
+    return this.renderContent({ ast: svg, isSVG: true, data });
   }
 
   evaluateSnippet(node, data = {}) {
@@ -369,10 +379,11 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts
-  renderContent({ ast, data, subTemplates }) {
+  renderContent({ ast, data, isSVG = this.isSVG } = {}) {
     const tree = new LitRenderer({
       ast,
       data,
+      isSVG,
       subTemplates: this.subTemplates,
       snippets: this.snippets,
       helpers: this.helpers,
