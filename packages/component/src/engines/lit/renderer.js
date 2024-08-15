@@ -148,7 +148,11 @@ export class LitRenderer {
   }
 
   evaluateSVG(svg, data) {
-    return this.renderContent({ ast: svg, isSVG: true, data });
+    return this.renderContent({
+      isSVG: true,
+      ast: svg,
+      data
+    });
   }
 
   evaluateSnippet(node, data = {}) {
