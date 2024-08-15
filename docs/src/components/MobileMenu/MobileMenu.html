@@ -1,19 +1,32 @@
 <dialog part="dialog">
   <div class="layer">
     <div class="container">
+      <div class="previous content">
+        <nav-menu
+          menu={{previousMenu}}
+          activeURL={{activeURL}}
+          expandAll=true
+          navigationIcon="right-chevron"
+        ></nav-menu>
+      </div>
       <div class="visible content">
         <nav-menu
           menu={{activeMenu}}
+          activeURL={{activeURL}}
           expandAll=true
           navigationIcon="right-chevron"
         ></nav-menu>
         {{#if hasAny previousMenu}}
-
+          <div class="return">
+            <ui-icon icon="left-chevron"></ui-icon>
+            Return to main menu
+          </div>
         {{/if}}
       </div>
       <div class="next content">
         <nav-menu
-          menu={{menu}}
+          menu={{nextMenu}}
+          activeURL={{activeURL}}
           expandAll=true
           navigationIcon="right-chevron"
         ></nav-menu>

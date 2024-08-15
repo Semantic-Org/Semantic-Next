@@ -12,7 +12,7 @@
   --mobile-menu-box-shadow: none;
   --mobile-menu-padding: 10px 20px 20px;
 
-  --mobile-menu-max-height: 60vh;
+  --mobile-menu-max-height: 80vh;
 
   --mobile-menu-dimmer-background: var(--black-70);
 
@@ -54,6 +54,8 @@ dialog {
   z-index: var(--overlay-layer);
 
   .layer {
+    display: block;
+    max-height: fit-content;
     contain: layout paint;
     backface-visibility: hidden;
     transform: translateZ(0);
@@ -63,11 +65,14 @@ dialog {
     display: flex;
     width: 200vw;
     overflow: visible;
-    transform: translate3d(0%, 0, 0);
+    transform: translate3d(-50%, 0, 0);
     transition: transform 0.35s cubic-bezier(0.33, 0.01, 0, 1);
 
-    &.animate {
-      transform: translate3d(-50%, 0, 0);
+    &.animate.left {
+      transform: translate3d(0%, 0, 0);
+    }
+    &.animate.right {
+      transform: translate3d(-100%, 0, 0);
     }
   }
 
@@ -75,9 +80,20 @@ dialog {
   .content {
     width: 100vw;
     flex: 0 0 auto;
-    padding: var(--mobile-menu-padding);
     max-height: var(--mobile-menu-max-height);
     overflow: auto;
+
+    nav-menu {
+      margin: var(--mobile-menu-padding);
+    }
+
+    .return {
+      border-top: 1px solid var(--white-5);
+      padding: 1rem 0.5rem;
+      font-size: 14px;
+      background: var(--black-10);
+      color: var(--white-60);
+    }
   }
 
 

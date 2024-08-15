@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 import { topbarMenu, sidebarMenuUI, sidebarMenuFramework } from './menus.js';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, inArray, isString, any, unique } from '@semantic-ui/utils';
+import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
 
 const examples = await getCollection('examples');
 const examplePages = examples.map(page => ({
@@ -131,7 +131,7 @@ export const getFlattenedSidebarMenu = async (topbarSection) => {
   Topbar Menu
 */
 export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
-  const menu = topbarMenu;
+  const menu = clone(topbarMenu);
   if(includeURLS) {
     await asyncEach(menu, async item => {
       // get all urls that represent this topbar section

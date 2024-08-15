@@ -19,19 +19,21 @@ const state = {
 const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
   initialize() {
     const result = tpl.getMenuMatchingURL(settings.menu, settings.activeURL);
+    console.log(result.menu);
     state.depth.set(result.depth);
     state.activeMenu.set(result.menu);
     state.previousMenu.set(result.parentMenu);
   },
   getMenuMatchingURL(menu, url) {
     let result = {
-      menu: null,
+      menu: menu,
       parentMenu: null,
-      depth: -1
+      depth: 0
     };
     const searchMenu = (menu, depth, parentMenu) => {
       each(menu, (item) => {
-        if(item.url && (tpl.isSameURL(item.url, url))) {
+        // for top level menu we dont want to count it a match if url is matched
+        if(depth > 0 && item.url && (tpl.isSameURL(item.url, url))) {
           result = {
             menu,
             depth,
@@ -51,7 +53,7 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
           });
         }
         if (!result.menu && item.menu) {
-          searchMenu(item.pages, depth + 1, menu);
+          searchMenu(item.menu, depth + 1, menu);
         }
       });
     };
@@ -85,14 +87,24 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
   hide(callback = noop) {
     tpl.getDialog().close();
     dispatchEvent('hide');
-  }
+  },
+  showPreviousMenu() {
+    $('.container').addClass('animate left');
+  },
+  showNextMenu() {
+    $('.container').addClass('animate left');
+  },
 });
 
 const events = {
-  'click dialog'({event, settings, data, tpl}) {
+  'click dialog'({event, tpl}) {
     if($(event.target).is('dialog')) {
       tpl.hide();
     }
+  },
+  'click .return'({ state, tpl }) {
+    state.nextMenu.set(state.previousMenu.get());
+    tpl.showPreviousMenu();
   }
 };
 
