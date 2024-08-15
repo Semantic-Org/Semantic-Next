@@ -8,17 +8,17 @@
   <!-- markers -->
   {{#each minute in majorMarkers}}
     {{>line
-      class='minor'
-      y1=42
+      class='major'
+      y1=35
       y2=45
-      transform=(getMarkerRotation 'minor' minute)
+      transform=(getMarkerRotation 'major' minute)
     }}
     {{#each offset in minorMarkers}}
       {{>line
-        class='major'
-        y1=35
+        class='minor'
+        y1=42
         y2=45
-        transform=(getMarkerRotation 'major' minute offset)
+        transform=(getMarkerRotation 'minor' minute offset)
       }}
     {{/each}}
   {{/each}}
