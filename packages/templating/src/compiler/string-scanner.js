@@ -96,7 +96,6 @@ export class StringScanner {
 
   getContext() {
     let insideTag = false;
-    let attributeName = '';
     let i = this.pos - 1;
     let tagPos;
 

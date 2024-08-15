@@ -25,8 +25,8 @@ class TemplateCompiler {
   };
 
   static htmlRegExp = {
-    SVG_OPEN: /<svg\s*/i,
-    SVG_CLOSE: /<\/svg>/i,
+    SVG_OPEN: /^\<svg\s*/i,
+    SVG_CLOSE: /^\<\/svg\s*/i,
   };
 
   static preprocessRegExp = {
@@ -40,6 +40,9 @@ class TemplateCompiler {
     DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
     SINGLE_QUOTES: /\'/g,
   };
+
+  // used to advance scanner to either a parseable expression or svg tag
+  static nextTagRegExp = /(\{\{|\<svg|\<\/svg)/;
 
   /*
     Creates an AST representation of a template
@@ -70,8 +73,8 @@ class TemplateCompiler {
       }
       for (let type in htmlRegExp) {
         if (scanner.matches(htmlRegExp[type])) {
-          const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(htmlRegExp[type]);
+          const context = scanner.getContext(); // context is used for better error handling
           const content = this.getValue(scanner.consumeUntil('>').trim());
           scanner.consume('>');
           return { type, content, ...context }; // Include context in the return value
@@ -91,10 +94,8 @@ class TemplateCompiler {
     while (!scanner.isEOF()) {
       const tag = parseTag(scanner);
 
-      const lastNode = last(stack);
       const conditionTarget = last(conditionStack);
-      const contentTarget = contentBranch?.content || lastNode || ast;
-
+      const contentTarget = contentBranch?.content || ast;
 
       if (tag) {
         let newNode = {
@@ -183,7 +184,6 @@ class TemplateCompiler {
             }
             stack.pop();
             contentStack.pop();
-            conditionStack.pop();
             contentBranch = last(contentStack); // Reset current branch
             break;
 
@@ -259,36 +259,43 @@ class TemplateCompiler {
             break;
 
           case 'SVG_OPEN':
+            // AST inside <svg> open tag is not included
+            contentTarget.push({ type: 'html', html: '<svg ' });
+            contentTarget.push(...this.compile(tag.content));
+            contentTarget.push({ type: 'html', html: '>' });
             newNode = {
               type: 'svg',
-              openTag: [{ type: 'html', html: '<svg' }, ...this.parseSVGOpenTag(scanner)],
               content: [],
             };
+            contentStack.push(newNode);
             contentTarget.push(newNode);
-            stack.push(newNode);
             contentBranch = newNode;
             break;
 
           case 'SVG_CLOSE':
-            if (stack.length === 0 || last(stack).type !== 'svg') {
-              scanner.fatal('</svg> close tag found without open svg tag');
-            }
-            last(stack).closeTag = '</svg>';
             stack.pop();
-            contentBranch = last(stack);
+            contentStack.pop();
+            contentBranch = last(contentStack); // Reset current branch
+            newNode = {
+              type: 'html',
+              html: '</svg>',
+            };
+            (contentBranch || ast).push(newNode);
             break;
         }
       }
       else {
-        const OPEN_TAG = /\{\{/;
-        const html = scanner.consumeUntil(OPEN_TAG);
+        // advanced to next expression or open svg tag
+        // this advances the scanner adding html
+        const html = scanner.consumeUntil(TemplateCompiler.nextTagRegExp);
         if (html) {
           const htmlNode = { type: 'html', html };
           contentTarget.push(htmlNode);
         }
       }
     }
-    return ast;
+
+    return TemplateCompiler.optimizeAST(ast);
   }
 
   getValue(expression) {
@@ -334,23 +341,6 @@ class TemplateCompiler {
     return templateInfo;
   }
 
-  parseSVGOpenTag(scanner) {
-    const content = [];
-    while (!scanner.matches(/>/)) {
-      const tag = parseTag(scanner);
-      if (tag) {
-        content.push(tag);
-      } else {
-        const text = scanner.consumeUntil(/\{\{|>/);
-        if (text) {
-          content.push({ type: 'html', html: text });
-        }
-      }
-    }
-    scanner.consume('>');
-    return content;
-  }
-
   static getObjectFromString(objectString = '') {
     const regExp = TemplateCompiler.templateRegExp.DATA_OBJECT;
     const obj = {};
@@ -379,6 +369,35 @@ class TemplateCompiler {
       }
     );
     return templateString;
+  }
+
+  // joins neighboring html nodes into a single node
+  static optimizeAST(ast) {
+    const optimizedAST = [];
+    let currentHtmlNode = null;
+
+    const processNode = (node) => {
+      if (node.type === 'html') {
+        if (currentHtmlNode) {
+          currentHtmlNode.html += node.html;
+        } else {
+          currentHtmlNode = { ...node };
+          optimizedAST.push(currentHtmlNode);
+        }
+      } else {
+        if (currentHtmlNode) {
+          currentHtmlNode = null;
+        }
+        if (Array.isArray(node.content)) {
+          node.content = this.optimizeAST(node.content);
+        }
+        optimizedAST.push(node);
+      }
+    };
+
+    ast.forEach(processNode);
+
+    return optimizedAST;
   }
 }
 

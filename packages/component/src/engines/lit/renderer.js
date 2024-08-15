@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, findIndex, fatal, isArray, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, fatal, isArray, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -46,20 +46,14 @@ export class LitRenderer {
   }
 
   readAST({ ast = this.ast, data = this.data } = {}) {
-
-    let stopParsing = false;
-
-    each(ast, (node, index) => {
+    each(ast, (node) => {
       switch (node.type) {
         case 'html':
-          // if html is encountered that is svg it will need to stop parsing rest of tree
-          if(this.hasSVG(node.html)) {
-            this.addSVG(node.html, ast.slice(index), data);
-            stopParsing = true;
-          }
-          else {
-            this.addHTML(node.html);
-          }
+          this.addHTML(node.html);
+          break;
+
+        case 'svg':
+          this.addValue(this.evaluateSVG(node.content, data));
           break;
 
         case 'expression':
@@ -96,7 +90,6 @@ export class LitRenderer {
           }
           break;
       }
-      return !stopParsing;
     });
   }
 
@@ -152,6 +145,10 @@ export class LitRenderer {
     else {
       return this.evaluateSubTemplate(node, data);
     }
+  }
+
+  evaluateSVG(svg, data) {
+    return this.renderContent({ ast: svg, isSVG: true, data });
   }
 
   evaluateSnippet(node, data = {}) {
@@ -359,94 +356,6 @@ export class LitRenderer {
     }
   }
 
-  hasSVG(html = '') {
-    return html.includes('<svg');
-  }
-
-
-  addSVG(html, restAST, data) {
-    let { preSVG, svg, postSVG } = this.getSVGAST(html, restAST);
-    // the first node contains <svg> we need to add this manually
-    // to avoid recursion in readAST calling addSVG
-    const svgHTML = preSVG.shift();
-    this.addHTML(svgHTML.html);
-
-    // we render the svg as a subtemplate ;)
-    // render pre <svg>
-    this.readAST({ast: preSVG});
-
-    // render inner svg
-    const svgTemplate = this.renderContent({ ast: svg, isSVG: true, data});
-    this.addValue(svgTemplate);
-
-    // render post <svg>
-    this.readAST({ast: postSVG});
-  }
-
-  /* We want to breakup AST into nodes before <svg>
-     nodes inside an SVG
-     and nodes after an SVG breaking up html blocks as necessary
-  */
-  getSVGAST(html, restAST) {
-
-    // find the index of an AST node containing a specific HTML string
-    const findASTIndex = (match) => {
-      return findIndex(restAST, node => node.type == 'html' && node.html.includes(match));
-    };
-
-    // split <svg> and </svg> tag to content before after tag
-    const splitSVGTag = (html, tag, isClosing = false) => {
-      if (isClosing) {
-        const parts = html.split(tag);
-        return {
-          insideTag: parts[0],
-          outsideTag: tag + (parts[1] || '')
-        };
-      }
-      else {
-        const tagEnd = html.indexOf('>', html.indexOf(tag)) + 1;
-        return {
-          insideTag: html.slice(0, tagEnd),
-          outsideTag: html.slice(tagEnd).trim()
-        };
-      }
-    };
-
-    // Find key indices in the AST
-    const openTagStartIndex = findASTIndex('<svg'); // Start of SVG opening tag
-    const openTagEndIndex = findASTIndex('>');      // End of SVG opening tag
-    const closeTagStartIndex = findASTIndex('</svg'); // Start of SVG closing tag
-
-    const openTagEndNode = restAST[openTagEndIndex];
-    const closeTagStartNode = restAST[closeTagStartIndex];
-
-    // Split the opening and closing SVG tags
-    const { insideTag: insideStartTag, outsideTag: outsideStartTag } = splitSVGTag(openTagEndNode.html, '<svg');
-    const { insideTag: insideEndTag, outsideTag: outsideEndTag } = splitSVGTag(closeTagStartNode.html, '</svg', true);
-
-    // Construct preSVG array: content before SVG, including the opening tag
-    const preSVG = restAST.slice(openTagStartIndex, openTagEndIndex);
-    preSVG[openTagEndIndex] = { type: 'html', html: insideStartTag };
-
-    // Construct svg array: content inside SVG tags
-    let svg = [];
-    if(outsideStartTag) {
-      svg.push({ type: 'html', html: outsideStartTag });
-    }
-    // Include all nodes between opening and closing tags
-    let svgNodes = restAST.slice(openTagEndIndex + 1, closeTagStartIndex);
-    svg = [...svg, ...svgNodes];
-    if(insideEndTag) {
-      svg.push({ type: 'html', html: insideEndTag });
-    }
-
-    // Construct postSVG array: content after SVG closing tag
-    let postSVG = restAST.slice(closeTagStartIndex);
-    postSVG[0] = { type: 'html', html: outsideEndTag };
-
-    return { preSVG, svg, postSVG };
-  }
-
   addHTML(html) {
     // we want to concat all html added consecutively
     if (this.lastHTML) {
@@ -456,7 +365,6 @@ export class LitRenderer {
     this.html.push(html);
     this.html.raw.push(String.raw({ raw: html }));
     this.lastHTML = true;
-    return true;
   }
 
   addHTMLSpacer() {
@@ -471,21 +379,14 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts
-  renderContent({
-    ast,
-    data = this.data,
-    helpers = this.helpers,
-    snippets = this.snippets,
-    isSVG = this.isSVG,
-    subTemplates = this.subTemplates
-  } = {}) {
+  renderContent({ ast, data, isSVG = this.isSVG } = {}) {
     const tree = new LitRenderer({
       ast,
       data,
-      subTemplates,
-      snippets,
-      helpers,
       isSVG,
+      subTemplates: this.subTemplates,
+      snippets: this.snippets,
+      helpers: this.helpers,
     });
     this.renderTrees.push(tree);
     return tree.render();

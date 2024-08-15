@@ -37,7 +37,6 @@ export const createComponent = ({
   subTemplates = {},
   renderingEngine,
 } = {}) => {
-
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
