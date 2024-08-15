@@ -54,7 +54,7 @@ export class LitRenderer {
         case 'html':
           // if html is encountered that is svg it will need to stop parsing rest of tree
           if(this.hasSVG(node.html)) {
-            this.addSVG(node.html, ast.slice(index));
+            this.addSVG(node.html, ast.slice(index), data);
             stopParsing = true;
           }
           else {
@@ -363,58 +363,78 @@ export class LitRenderer {
     return html.includes('<svg');
   }
 
-  addSVG(html, restAST) {
 
-    // this is used to find index of closing svg tag
-    // or closing open svg tag
+  addSVG(html, restAST, data) {
+    let { preSVG, svg, postSVG } = this.getSVGAST(html, restAST);
+
+    // the first node contains <svg> we need to add this manually
+    // to avoid recursion in readAST calling addSVG
+    const svgHTML = preSVG.shift();
+    this.addHTML(svgHTML.html);
+
+    // we render the svg as a subtemplate ;)
+    // render pre <svg>
+    this.readAST({ast: preSVG});
+
+    // render inner svg
+    const svgTemplate = this.renderContent({ ast: svg, isSVG: true, data});
+    this.addValue(svgTemplate);
+
+    // render post <svg>
+    this.readAST({ast: postSVG});
+  }
+
+  /* We want to breakup AST into nodes before <svg>
+     nodes inside an SVG
+     and nodes after an SVG breaking up html blocks as necessary
+  */
+  getSVGAST(html, restAST) {
+
     const findASTIndex = (match) => {
       return findIndex(restAST, node => node.type == 'html' && node.html.includes(match));
     };
 
-    const splitCloseTag = (html) => {
-      const parts = html.split('>');
-      const inside = `${parts[0]}>`;
-      const outside = parts[1];
-      return { insideTag, outsideTag };
+    const splitSVGStart = (html) => {
+      const openTagEnd = html.indexOf('>');
+      const insideStartTag = html.slice(0, openTagEnd + 1);
+      const outsideStartTag = html.slice(openTagEnd + 1).trim();
+      return { insideStartTag, outsideStartTag };
     };
-    const splitOpenTag = (html) => {
-      const parts = html.split('<');
-      const inside = parts[0];
-      const outside = `<${parts[1]}`;
-      return { insideTag, outsideTag };
+    const splitSVGEnd = (html) => {
+      const parts = html.split('</svg');
+      const insideEndTag = parts[0];
+      const outsideEndTag = `</svg${parts[1]}`;
+      return { insideEndTag, outsideEndTag };
     };
 
     const openTagStartIndex = findASTIndex('<svg'); // this should always be 0 as we are checking before
     const openTagEndIndex = findASTIndex('>'); // this is the end of the svg open tag
     const closeTagStartIndex = findASTIndex('</svg'); // this is the start of the svg close tag
 
-    let svgAST = restAST.slice(openTagEndIndex + 1, closeTagStartIndex);
-    console.log(openTagStartIndex, openTagEndIndex, closeTagStartIndex);
-    console.log(restAST[closeTagStartIndex]);
+    const openTagEndNode = restAST[openTagEndIndex];
+    const closeTagStartNode = restAST[closeTagStartIndex];
 
+    const { insideStartTag, outsideStartTag } = splitSVGStart(openTagEndNode.html);
+    const { insideEndTag, outsideEndTag } = splitSVGEnd(closeTagStartNode.html);
+    // content before SVG
+    const preSVG = restAST.slice(openTagStartIndex, openTagEndIndex);
+    preSVG[openTagEndIndex] = { type: 'html', html: insideStartTag };
 
-
-    if(openTagEndIndex == 0) {
-      const { insideTag, outsideTag } = splitCloseTag(html);
-      this.addHTML(insideTag);
-      svgAST.push({ type: 'html', html: outsideTag });
+    // content inside svg
+    let svg = [];
+    if(outsideStartTag) {
+      svg.push({ type: 'html', html: outsideStartTag });
     }
-    // <svg> tag has expressions like <svg viewBox="{{getViewBox}}">
-    else {
-      // add <svg portion
-      this.addHTML(html);
-      // read dynamic portion
-      const svgTagAST = restAST.slice(openTagStartIndex + 1, openTagEndIndex);
+    let svgNodes = restAST.slice(openTagEndIndex + 1, closeTagStartIndex);
+    svg = [...svg, ...svgNodes];
+    if(insideEndTag) {
+      svg.push({ type: 'html', html: insideEndTag });
     }
 
-    // split contents of close index
-    startClose
-
-    // we need to parse AST up until end of <svg> tag
-
-    // then we need to create a subtree for contents
-
-    // then we need to read rest of AST
+    // content after svg
+    let postSVG = restAST.slice(closeTagStartIndex);
+    postSVG[0] = { type: 'html', html: outsideEndTag };
+    return { preSVG, svg, postSVG };
   }
 
   addHTML(html) {
@@ -441,14 +461,21 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts
-  renderContent({ ast, data, subTemplates }) {
+  renderContent({
+    ast,
+    data = this.data,
+    helpers = this.helpers,
+    snippets = this.snippets,
+    isSVG = this.isSVG,
+    subTemplates = this.subTemplates
+  } = {}) {
     const tree = new LitRenderer({
       ast,
       data,
-      subTemplates: this.subTemplates,
-      snippets: this.snippets,
-      helpers: this.helpers,
-      isSVG: this.isSVG,
+      subTemplates,
+      snippets,
+      helpers,
+      isSVG,
     });
     this.renderTrees.push(tree);
     return tree.render();
