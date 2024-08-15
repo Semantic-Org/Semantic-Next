@@ -24,6 +24,11 @@ class TemplateCompiler {
     EXPRESSION: /^{{\s*/,
   };
 
+  static htmlRegExp = {
+    SVG_OPEN: /<svg\s*/i,
+    SVG_CLOSE: /<\/svg>/i,
+  };
+
   static preprocessRegExp = {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+-\w+)([^>]*)\/>/g,
   };
@@ -51,6 +56,7 @@ class TemplateCompiler {
 
     // quicker to compile regExp once
     const tagRegExp = TemplateCompiler.tagRegExp;
+    const htmlRegExp = TemplateCompiler.htmlRegExp;
 
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
@@ -59,6 +65,15 @@ class TemplateCompiler {
           scanner.consume(tagRegExp[type]);
           const content = this.getValue(scanner.consumeUntil('}}').trim());
           scanner.consume('}}');
+          return { type, content, ...context }; // Include context in the return value
+        }
+      }
+      for (let type in htmlRegExp) {
+        if (scanner.matches(htmlRegExp[type])) {
+          const context = scanner.getContext(); // context is used for better error handling
+          scanner.consume(htmlRegExp[type]);
+          const content = this.getValue(scanner.consumeUntil('>').trim());
+          scanner.consume('>');
           return { type, content, ...context }; // Include context in the return value
         }
       }
@@ -72,7 +87,6 @@ class TemplateCompiler {
     let contentBranch = null; // Track the current node to add content
     let conditionStack = []; // Track the current condition stack
     let contentStack = []; // Track the current content target stack
-    let currentSnippet = null; // Track the current snippet being rendered
 
     while (!scanner.isEOF()) {
       const tag = parseTag(scanner);
@@ -243,6 +257,26 @@ class TemplateCompiler {
             contentStack.pop();
             contentBranch = last(contentStack); // Reset current branch
             break;
+
+          case 'SVG_OPEN':
+            newNode = {
+              type: 'svg',
+              openTag: [{ type: 'html', html: '<svg' }, ...this.parseSVGOpenTag(scanner)],
+              content: [],
+            };
+            contentTarget.push(newNode);
+            stack.push(newNode);
+            contentBranch = newNode;
+            break;
+
+          case 'SVG_CLOSE':
+            if (stack.length === 0 || last(stack).type !== 'svg') {
+              scanner.fatal('</svg> close tag found without open svg tag');
+            }
+            last(stack).closeTag = '</svg>';
+            stack.pop();
+            contentBranch = last(stack);
+            break;
         }
       }
       else {
@@ -298,6 +332,23 @@ class TemplateCompiler {
       templateInfo.data = data;
     }
     return templateInfo;
+  }
+
+  parseSVGOpenTag(scanner) {
+    const content = [];
+    while (!scanner.matches(/>/)) {
+      const tag = parseTag(scanner);
+      if (tag) {
+        content.push(tag);
+      } else {
+        const text = scanner.consumeUntil(/\{\{|>/);
+        if (text) {
+          content.push({ type: 'html', html: text });
+        }
+      }
+    }
+    scanner.consume('>');
+    return content;
   }
 
   static getObjectFromString(objectString = '') {
