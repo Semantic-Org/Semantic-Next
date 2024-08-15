@@ -12,7 +12,7 @@ import MobileMenu from '@components/MobileMenu/MobileMenu.js';
 
 import './Layout.css';
 
-import { getSidebarMenu } from '@helpers/navigation.js';
+import { getSidebarMenu, getSiteMenu } from '@helpers/navigation.js';
 
 let {
 	title,
@@ -32,7 +32,8 @@ let {
 header = header || title;
 
 const activeURL = Astro.url.pathname;
-const mobileMenu = await getSidebarMenu({url: activeURL});
+const mobileMenu = await getSiteMenu();
+console.log('menu is', mobileMenu)
 ---
 <Body title={title} description={description} searchMeta={searchMeta}>
 	<TopBar></TopBar>
@@ -66,6 +67,6 @@ const mobileMenu = await getSidebarMenu({url: activeURL});
 	<MobileMenu
 		menu={mobileMenu}
   	activeURL={activeURL}
-		client:load
+		client:only
 	/>
 </Body>

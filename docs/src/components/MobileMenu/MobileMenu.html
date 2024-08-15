@@ -2,12 +2,19 @@
   <div class="layer">
     <div class="container">
       <div class="visible content">
-        <nav-menu menu={{menu}} navigationIcon="right-chevron"></nav-menu>
+        <nav-menu
+          menu={{activeMenu}}
+          expandAll=true
+          navigationIcon="right-chevron"
+        ></nav-menu>
+        {{#if hasAny previousMenu}}
+
+        {{/if}}
       </div>
       <div class="next content">
         <nav-menu
           menu={{menu}}
-          expandAllDefault=true
+          expandAll=true
           navigationIcon="right-chevron"
         ></nav-menu>
       </div>

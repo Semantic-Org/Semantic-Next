@@ -75,7 +75,7 @@ You can also use a `subscription` to call a specific callback everytime a value 
 
 Unlike a `reaction` which tracks any reactive variable that is referenced and reruns when **any value is updated** a subscription will only rerun when a specified value is updated.
 
-> Subscriptions are an alternative approach to reactivity which preventvalues in the callback from triggering reactivity.
+> Subscriptions are an alternative approach to reactivity which prevent values in the callback from triggering reactivity.
 
 ```javascript
 const subscription = counter.subscribe((newValue) => {
