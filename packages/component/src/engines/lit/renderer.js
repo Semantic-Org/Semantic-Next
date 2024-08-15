@@ -366,7 +366,6 @@ export class LitRenderer {
 
   addSVG(html, restAST, data) {
     let { preSVG, svg, postSVG } = this.getSVGAST(html, restAST);
-
     // the first node contains <svg> we need to add this manually
     // to avoid recursion in readAST calling addSVG
     const svgHTML = preSVG.shift();
