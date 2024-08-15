@@ -24,10 +24,20 @@
   {{/each}}
 
   <!-- hour hand -->
-  {{>line class='hour' y1='2' y2='-20' transform=(getTimeRotation 'hour')}}
+  {{>line
+    class='hour'
+    y1='2'
+    y2='-20'
+    transform=(getTimeRotation 'hour')
+  }}
 
   <!-- minute hand -->
-  {{>line class='minute' y1="4" y2="-30" transform=(getTimeRotation 'minute')}}
+  {{>line
+    class='minute'
+    y1="4"
+    y2="-30"
+    transform=(getTimeRotation 'minute')
+  }}
 
   <!-- second hand -->
   <g transform="{{getTimeRotation 'second'}}">
