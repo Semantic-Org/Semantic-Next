@@ -139,15 +139,21 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
       inline: settings.inline,
       tabs: settings.useTabs
     };
-    classes[settings.inlineDirection] = true;
+    // defer to preference unless its tablet
+    if(state.displayMode.value == 'tablet') {
+      classes.vertical = true;
+    }
+    else {
+      classes[settings.inlineDirection] = true;
+    }
     return classes;
   },
   getTabDirection() {
-    if(settings.inline) {
-      return settings.inlineDirection;
-    }
     if(state.displayMode.value == 'tablet') {
       return 'vertical';
+    }
+    if(settings.inline) {
+      return settings.inlineDirection;
     }
     return 'horizontal';
   },
