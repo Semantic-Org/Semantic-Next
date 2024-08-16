@@ -308,7 +308,10 @@ export class LitRenderer {
         if (acc === undefined) {
           return undefined;
         }
-        const current = wrapFunction(acc)();
+        const current = (acc instanceof ReactiveVar)
+          ? acc.get()
+          : wrapFunction(acc)()
+        ;
         if (current == undefined) {
           fatal(`Error evaluating expression "${path}"`);
         }
