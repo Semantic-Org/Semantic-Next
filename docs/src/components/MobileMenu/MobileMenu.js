@@ -86,7 +86,6 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
   show(callback = noop) {
     tpl.getDialog().showModal();
-    console.log('zz');
     dispatchEvent('show');
     tpl.setMenuHeight('active');
     callback();
@@ -111,7 +110,6 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
       .filter(`.${name}`)
       .height()
     ;
-    console.log(name, height);
     $('.container').css({height: `${height}px`});
   },
   showNextMenu() {
