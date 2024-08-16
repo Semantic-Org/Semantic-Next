@@ -143,7 +143,7 @@ export const sidebarMenuFramework = [
       },
       {
         name: 'Loops',
-        url: '/templates/looping'
+        url: '/templates/loops'
       },
       {
         name: 'Content Slots',

@@ -163,7 +163,37 @@ Hello {{name}}}}
 
 ## Template Instance
 
-Template instances are object literals that store properties and methods that can be invoked for your component. Methods and properties defined on the instance can be directly accessed in your template's data context, and can also be invoked by end users using query's `getComponent` helper.
+
+### Definining Functionality
+Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/lifecycle/events) as `tpl` to invoke methods or access properties.
+
+```javascript
+const createInstance = ({ state }) => ({
+  getCounter() {
+    return state.counter.get();
+  },
+  incrementCounter() {
+    state.counter.increment();
+  },
+});
+```
+
+### Accessing Internally
+You can access your template instancec as `tpl` from other callbacks to invoke functionality.
+
+```javascript
+const onRendered = ({tpl}) => {
+  tpl.incrementCounter();
+};
+```
+
+### Accessing Externally
+You can also access your component instance directly from the DOM
+
+```javascript
+const { tpl } = document.querySelector('ui-counter');
+tpl.incrementCounter();
+```
 
 
 ## Subtemplates

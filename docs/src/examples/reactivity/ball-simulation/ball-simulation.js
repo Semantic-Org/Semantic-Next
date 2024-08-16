@@ -114,7 +114,7 @@ const onRendered = ({tpl}) => {
 };
 
 const events = {
-  'click canvas'({tpl, event}) {
+  'pointerdown canvas'({tpl, event}) {
     const canvas = tpl.getCanvas();
     const rect = canvas.getBoundingClientRect();
     tpl.createBall({

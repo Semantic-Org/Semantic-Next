@@ -55,7 +55,26 @@ The `onThemeChanged` callback is a special callback that fires when a user swaps
 
 ## Callback Arguments
 
-Each callback receives a destructurable set of arguments that can be used to interact with the internals of the component
+### Using Callback Arguments
+
+
+Each callback receives a destructurable set of arguments that can be used to interact with the internals of the component. This allows you to pull into any function scope necessary values without managing imports or the `this` context.
+
+These are accessible from all lifecycle callbacks, as well as inside event listeners and keybindings.
+
+```javascript
+const onCreated = ({isServer, darkMode, tpl}) {
+  if(!isServer && isDarkMode) {
+    tpl.setDarkMode();
+  }
+};
+```
+
+You can use these to do things like [query the DOM](/components/dom), setting up [custom reactivity](/components/reactivity#exposing-reactivity) and much more.
+
+### Standard Arguments
+
+The following parameters are destructurable from all callbacks.
 
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|

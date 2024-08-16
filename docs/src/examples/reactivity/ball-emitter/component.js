@@ -253,7 +253,7 @@ const onRendered = ({state, tpl}) => {
 };
 
 const events = {
-  'mousedown canvas'({tpl, event}) {
+  'pointerdown canvas'({tpl, event}) {
     const canvas = tpl.getCanvas();
     const rect = canvas.getBoundingClientRect();
     tpl.emitter.x = (event.clientX - rect.left);
@@ -261,7 +261,7 @@ const events = {
     tpl.emitter.active = true;
   },
 
-  'mousemove canvas'({tpl, event}) {
+  'pointermove canvas'({tpl, event}) {
     if (tpl.emitter.active) {
       const canvas = tpl.getCanvas();
       const rect = canvas.getBoundingClientRect();
@@ -270,7 +270,7 @@ const events = {
     }
   },
 
-  'mouseup, mouseleave canvas'({tpl}) {
+  'pointerup, pointerleave canvas'({tpl}) {
     tpl.emitter.active = false;
   },
 };

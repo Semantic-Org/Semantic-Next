@@ -91,6 +91,12 @@ The [`template`](/components/rendering) defines the html your component should r
 
 > For more information on templating see the [dedicated subsection for templating](/components/rendering)
 
+```html
+Counter is {{counter}}
+<ui-button class="increment">Increment</ui-button>
+<ui-button class="decrement">Decrement</ui-button>
+```
+
 ### CSS
 
 `css` defines scoped CSS that will be attached to your web component and not apply to other elements on the page. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
@@ -105,6 +111,8 @@ Most components will need to listen to and react to events triggered from the br
 
 
 These can be browser events like `click`, perhaps to save something when a button with class `save` is clicked.
+
+> For more information on events please see the [dedicated subsection for events](/components/events)
 
 ```javascript
 const events = {
@@ -123,16 +131,21 @@ const events = {
 };
 ```
 
-> For more information on events please see the [dedicated subsection for events](/components/events)
-
 ### Keys
 
 Components can also include keybindings that will be attached to the page during the lifecycle of the component.
 
 > For more information please see the [dedicated subsection for keybindings](/components/keys)
 
-
-> [Dynamic Keybinding](/components/keys#dynamic-keybinding) - For more advanced usecases you can use `bindKey` and `unbindKey` to also dynamically assign key bindings based on app state
+```javascript
+createComponent({
+  keys: {
+    'up': ({ tpl }) => tpl.selectPreviousResult(),
+    'down': ({ tpl }) => pl.selectNextResult(),
+    'esc': ({ tpl }) => tpl.blurSearch(),
+  }
+});
+```
 
 ## Organizing Code
 

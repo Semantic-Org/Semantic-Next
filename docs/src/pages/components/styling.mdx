@@ -14,7 +14,7 @@ Components defined with `createComponent` can include `css` that applies only to
 
 `css` defines CSS that will be attached to your web component. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
 
-The css is scoped specifically to the component.
+`css` is scoped to the component and will not affect nested web components or the page.
 
 ```javascript
 const css = `
