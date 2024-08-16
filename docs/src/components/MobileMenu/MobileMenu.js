@@ -16,9 +16,12 @@ const state = {
   nextMenu: [],
 };
 
-const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
+const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
   initialize() {
-    const result = tpl.getMenuMatchingURL(settings.menu, settings.activeURL);
+    tpl.setMenusFromURL(settings.activeURL);
+  },
+  setMenusFromURL(activeURL) {
+    const result = tpl.getMenuMatchingURL(settings.menu, activeURL);
     state.depth.set(result.depth);
     state.activeMenu.set(result.menu);
     state.previousMenu.set(result.parentMenu);
@@ -53,8 +56,7 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
           });
         }
         if (item.menu && !result.menu) {
-          console.log(item.name, item.menu);
-          searchMenu({ header: item.name, menu: item.menu}, depth + 1, { header: item?.name, menu: item.menu });
+          searchMenu({ header: item.name, menu: item.menu}, depth + 1, { header, menu });
         }
       });
     };
@@ -91,11 +93,35 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
     dispatchEvent('hide');
   },
   showPreviousMenu() {
-    $('.container').addClass('animate left');
+    $('.container')
+      .addClass('animate left')
+      .one('transitionend', () => {
+        requestAnimationFrame(tpl.moveToPreviousMenu);
+      })
+    ;
   },
   showNextMenu() {
     $('.container').addClass('animate left');
   },
+  resetAnimation() {
+    $('.container').removeClass('animate left right');
+  },
+  moveToPreviousMenu() {
+    const previousMenu = state.previousMenu.value;
+    const depth = state.depth.get() - 1;
+    // if we are at top level we know no previous menu
+    if(depth == 0) {
+      state.activeMenu.set(state.previousMenu.get());
+      state.previousMenu.set({});
+    }
+    else {
+      // otherwise just use the first menu item url to get the menu
+      const activeURL = previousMenu.menu[0].url;
+      tpl.setMenusFromURL(activeURL);
+    }
+    afterFlush(tpl.resetAnimation);
+    flush();
+  }
 });
 
 const events = {

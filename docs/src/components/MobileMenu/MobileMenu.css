@@ -28,6 +28,27 @@ nav-menu {
 * {
   box-sizing: border-box;
 }
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-height);
+}
+::-webkit-scrollbar-track {
+  background: var(--track-background);
+  border-radius: var(--track-border-radius);
+}
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: var(--thumb-border-radius);
+  background: var(--thumb-background);
+  transition: var(--thumb-transition);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inactive-background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hover-background);
+}
 
 dialog {
   position: fixed;
@@ -66,13 +87,15 @@ dialog {
     width: 200vw;
     overflow: visible;
     transform: translate3d(-50%, 0, 0);
-    transition: transform 0.35s cubic-bezier(0.33, 0.01, 0, 1);
 
-    &.animate.left {
-      transform: translate3d(0%, 0, 0);
-    }
-    &.animate.right {
-      transform: translate3d(-100%, 0, 0);
+    &.animate {
+      transition: transform 0.35s cubic-bezier(0.33, 0.01, 0, 1);
+      &.left {
+        transform: translate3d(0%, 0, 0);
+      }
+      &.right {
+        transform: translate3d(-100%, 0, 0);
+      }
     }
   }
 
@@ -96,11 +119,15 @@ dialog {
     }
 
     .return {
+      cursor: pointer;
       border-top: 1px solid var(--white-5);
       padding: 1rem 0.5rem;
       font-size: 14px;
       background: var(--black-10);
       color: var(--white-60);
+    }
+    .return:hover {
+      color: var(--white);
     }
   }
 
