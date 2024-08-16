@@ -343,9 +343,7 @@ export const Template = class Template {
           eventName,
           selector,
           (event) => {
-            console.log('here', this.tpl.templateName, event.target);
             if (!this.isNodeInTemplate(event.target)) {
-              console.log('not in template', event.target);
               return;
             }
             if (inArray(eventName, ['mouseover', 'mouseout'])
