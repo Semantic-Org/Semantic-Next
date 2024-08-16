@@ -796,13 +796,13 @@ export class Query {
   }
 
   insertBefore(selector) {
-    this.chain(selector).each((el) => {
+    return this.chain(selector).each((el) => {
       this.insertContent(el, this.selector, 'beforebegin');
     });
   }
 
   insertAfter(selector) {
-    this.chain(selector).each((el) => {
+    return this.chain(selector).each((el) => {
       this.insertContent(el, this.selector, 'afterend');
     });
   }
@@ -817,13 +817,16 @@ export class Query {
 
   naturalWidth() {
     const widths = this.map((el) => {
-      const $clone = $(el).clone().insertAfter(el);
-      $clone.css({
-        position: 'absolute',
-        display: 'block',
-        transform: 'translate(-9999px, -9999px)',
-        zIndex: '-1',
-      });
+      const $clone = $(el).clone();
+      $clone
+        .insertAfter(el)
+        .css({
+          position: 'absolute',
+          display: 'block',
+          transform: 'translate(-9999px, -9999px)',
+          zIndex: '-1',
+        })
+      ;
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -832,19 +835,22 @@ export class Query {
   }
 
   naturalHeight() {
-    const widths = this.map((el) => {
-      const $clone = $(el).clone().insertAfter(el);
-      $clone.css({
-        position: 'absolute',
-        display: 'block',
-        transform: 'translate(-9999px, -9999px)',
-        zIndex: '-1',
-      });
+    const height = this.map((el) => {
+      const $clone = $(el).clone();
+      $clone
+        .insertAfter(el)
+        .css({
+          position: 'absolute',
+          display: 'block',
+          transform: 'translate(-9999px, -9999px)',
+          zIndex: '-1',
+        })
+      ;
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
     });
-    return widths.length > 1 ? widths : widths[0];
+    return height.length > 1 ? height : height[0];
   }
 
   // offsetParent does not return the true offset parent
