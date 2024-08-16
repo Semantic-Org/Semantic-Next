@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, clone, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -336,9 +336,20 @@ export class Query {
       let delegateHandler;
       if (targetSelector) {
         delegateHandler = (e) => {
-          const target = e.target.closest(targetSelector);
+          let target;
+          // if this event is composed from a web component
+          // this is required to get the original path
+          if (e.composed && e.composedPath) {
+            const path = e.composedPath();
+            target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+          } else {
+            // keep things simple for most basic uses
+            target = e.target.closest(targetSelector);
+          }
+
           if (target) {
-            handler.call(target, e);
+            // If a matching target is found, call the handler with the correct context
+            handler.call(target, event);
           }
         };
       }
