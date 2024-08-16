@@ -22,7 +22,6 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
     state.depth.set(result.depth);
     state.activeMenu.set(result.menu);
     state.previousMenu.set(result.parentMenu);
-    console.log(state.activeMenu.get());
   },
   getMenuMatchingURL(menu, url) {
     let result = {
@@ -35,7 +34,7 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
         // for topbar menu we dont want to count it a match if url is matched
         if(depth > 0 && item.url && (tpl.isSameURL(item.url, url))) {
           result = {
-            menu: { header: item?.name, menu },
+            menu: { header, menu },
             depth,
             parentMenu,
           };
@@ -45,7 +44,7 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
           each(item.pages, (page) => {
             if(page.url && (tpl.isSameURL(page.url, url))) {
               result = {
-                menu: { header: item?.name, menu },
+                menu: { header, menu },
                 depth,
                 parentMenu,
               };
@@ -54,6 +53,7 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
           });
         }
         if (item.menu && !result.menu) {
+          console.log(item.name, item.menu);
           searchMenu({ header: item.name, menu: item.menu}, depth + 1, { header: item?.name, menu: item.menu });
         }
       });

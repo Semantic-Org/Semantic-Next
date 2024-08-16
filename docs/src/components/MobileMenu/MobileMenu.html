@@ -1,38 +1,45 @@
+{{#snippet menu}}
+  {{#if header}}
+    <div class="header">{{header}}</div>
+  {{/if}}
+  <nav-menu
+    menu={{menu}}
+    activeURL={{activeURL}}
+    expandAll=true
+    navigationIcon="right-chevron"
+  ></nav-menu>
+  {{#if hasAny previousMenu}}
+    <div class="return">
+      <ui-icon icon="left-chevron"></ui-icon>
+      Return to main menu
+    </div>
+  {{/if}}
+{{/snippet}}
+
 <dialog part="dialog">
   <div class="layer">
     <div class="container">
       <div class="previous content">
-        <nav-menu
-          menu={{previousMenu.menu}}
-          activeURL={{activeURL}}
-          expandAll=true
-          navigationIcon="right-chevron"
-        ></nav-menu>
+        {{>menu
+          header=previousMenu.header
+          menu=previousMenu.menu
+          activeURL=activeURL
+        }}
       </div>
       <div class="visible content">
-        {{#if activeMenu.header}}
-          <div class="header">{{activeMenu.header}}</div>
-        {{/if}}
-        <nav-menu
-          menu={{activeMenu.menu}}
-          activeURL={{activeURL}}
-          expandAll=true
-          navigationIcon="right-chevron"
-        ></nav-menu>
-        {{#if hasAny previousMenu}}
-          <div class="return">
-            <ui-icon icon="left-chevron"></ui-icon>
-            Return to main menu
-          </div>
-        {{/if}}
+        {{>menu
+          header=activeMenu.header
+          menu=activeMenu.menu
+          activeURL=activeURL
+          previousMenu=previousMenu
+        }}
       </div>
       <div class="next content">
-        <nav-menu
-          menu={{nextMenu.menu}}
-          activeURL={{activeURL}}
-          expandAll=true
-          navigationIcon="right-chevron"
-        ></nav-menu>
+        {{>menu
+          header=nextMenu.header
+          menu=nextMenu.menu
+          activeURL=activeURL
+        }}
       </div>
     </div>
   </div>

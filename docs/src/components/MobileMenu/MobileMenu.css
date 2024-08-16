@@ -82,8 +82,11 @@ dialog {
     flex: 0 0 auto;
 
     .header {
-      font-size: var(--large);
-      color: var(--white);
+      font-size: 12px;
+      padding: 1rem 2rem 0;
+      color: var(--white-50);
+      font-weight: bold;
+      text-transform: uppercase;
     }
 
     nav-menu {
