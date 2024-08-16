@@ -87,9 +87,11 @@ dialog {
     width: 200vw;
     overflow: visible;
     transform: translate3d(-50%, 0, 0);
+    align-items: flex-start;
+    transition: none;
 
     &.animate {
-      transition: transform 0.35s cubic-bezier(0.33, 0.01, 0, 1);
+      transition: all 0.35s cubic-bezier(0.33, 0.01, 0, 1);
       &.left {
         transform: translate3d(0%, 0, 0);
       }

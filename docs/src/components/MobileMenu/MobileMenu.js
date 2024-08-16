@@ -86,13 +86,19 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
   show(callback = noop) {
     tpl.getDialog().showModal();
+    console.log('zz');
     dispatchEvent('show');
+    tpl.setMenuHeight('active');
+    callback();
   },
   hide(callback = noop) {
     tpl.getDialog().close();
     dispatchEvent('hide');
+    callback();
+    tpl.resetMenu();
   },
   showPreviousMenu() {
+    tpl.setMenuHeight('previous');
     $('.container')
       .addClass('animate left')
       .one('transitionend', () => {
@@ -100,11 +106,22 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
       })
     ;
   },
+  setMenuHeight(name) {
+    const height = $('.container .content')
+      .filter(`.${name}`)
+      .height()
+    ;
+    console.log(name, height);
+    $('.container').css({height: `${height}px`});
+  },
   showNextMenu() {
     $('.container').addClass('animate left');
   },
   resetAnimation() {
     $('.container').removeClass('animate left right');
+  },
+  resetMenu() {
+    tpl.setMenusFromURL(settings.activeURL);
   },
   moveToPreviousMenu() {
     const previousMenu = state.previousMenu.value;
