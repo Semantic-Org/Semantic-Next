@@ -8,6 +8,7 @@ const settings = {
   menu: [],
   linkCurrentPage: false,
   expandAll: false,
+  useAccordion: false,
   navigationIcon: '',
   activeURL: '',
 };
@@ -39,6 +40,9 @@ const createInstance = function ({ tpl, data, state, settings }) {
         classes.push('current');
       }
       return classes;
+    },
+    canShowNavIcon() {
+      return tpl.isExpandable() || settings.navigationIcon;
     },
     hasIcons() {
       return any(settings.menu, section => section.icon);
@@ -80,8 +84,8 @@ const createInstance = function ({ tpl, data, state, settings }) {
     isLinkItem(item) {
       return item.url && !tpl.isCurrentItem(item);
     },
-    isExpandable(item) {
-      return !settings.expandAll;
+    isExpandable() {
+      return settings.useAccordion && !settings.expandAll;
     },
     isActiveItem(item) {
       if(settings.expandAll) {
@@ -132,12 +136,15 @@ const onRendered = function ({ $, tpl, attachEvent, isClient }) {
 };
 
 const events = {
-  'click .title': function({event, $, tpl}) {
+  'click .title': function({event, settings, $, tpl}) {
+    if(!settings.useAccordion) {
+      return;
+    }
     const $title = $(this);
     const $content = $title.next('.content');
     $title.toggleClass('active');
     $content.toggleClass('active');
-  }
+  },
 };
 
 const NavMenu = createComponent({

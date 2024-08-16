@@ -148,6 +148,9 @@ const events = {
   'click .return'({ state, tpl }) {
     state.nextMenu.set(state.previousMenu.get());
     tpl.showPreviousMenu();
+  },
+  'click .nav-icon'() {
+    console.log('did it');
   }
 };
 
