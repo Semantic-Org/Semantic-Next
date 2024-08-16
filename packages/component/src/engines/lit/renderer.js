@@ -313,7 +313,12 @@ export class LitRenderer {
           : wrapFunction(acc)()
         ;
         if (current == undefined) {
-          fatal(`Error evaluating expression "${path}"`);
+          return undefined;
+          /* erroring on intermediate undefined
+             feels better not as an error state
+            but this may change
+          */
+          //fatal(`Error evaluating expression "${path}"`);
         }
         return current[part];
       }, obj);
