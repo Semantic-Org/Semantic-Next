@@ -343,7 +343,9 @@ export const Template = class Template {
           eventName,
           selector,
           (event) => {
+            console.log('here', this.tpl.templateName, event.target);
             if (!this.isNodeInTemplate(event.target)) {
+              console.log('not in template', event.target);
               return;
             }
             if (inArray(eventName, ['mouseover', 'mouseout'])
@@ -357,8 +359,8 @@ export const Template = class Template {
             ;
             const boundEvent = eventHandler.bind(targetElement);
             const eventData = event?.detail || {};
-            const elData = targetElement.dataset;
-            const elValue = targetElement.value;
+            const elData = targetElement?.dataset;
+            const elValue = targetElement?.value;
             template.call(boundEvent, {
               additionalData: {
                 event: event,
