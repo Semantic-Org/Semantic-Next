@@ -80,10 +80,15 @@ dialog {
   .content {
     width: 100vw;
     flex: 0 0 auto;
-    max-height: var(--mobile-menu-max-height);
-    overflow: auto;
+
+    .header {
+      font-size: var(--large);
+      color: var(--white);
+    }
 
     nav-menu {
+      max-height: var(--mobile-menu-max-height);
+      overflow: auto;
       margin: var(--mobile-menu-padding);
     }
 

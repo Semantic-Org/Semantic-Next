@@ -19,10 +19,10 @@ const state = {
 const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
   initialize() {
     const result = tpl.getMenuMatchingURL(settings.menu, settings.activeURL);
-    console.log(result.menu);
     state.depth.set(result.depth);
     state.activeMenu.set(result.menu);
     state.previousMenu.set(result.parentMenu);
+    console.log(state.activeMenu.get());
   },
   getMenuMatchingURL(menu, url) {
     let result = {
@@ -30,12 +30,12 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
       parentMenu: null,
       depth: 0
     };
-    const searchMenu = (menu, depth, parentMenu) => {
+    const searchMenu = ({header, menu}, depth, parentMenu) => {
       each(menu, (item) => {
         // for topbar menu we dont want to count it a match if url is matched
         if(depth > 0 && item.url && (tpl.isSameURL(item.url, url))) {
           result = {
-            menu,
+            menu: { header: item?.name, menu },
             depth,
             parentMenu,
           };
@@ -45,7 +45,7 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
           each(item.pages, (page) => {
             if(page.url && (tpl.isSameURL(page.url, url))) {
               result = {
-                menu,
+                menu: { header: item?.name, menu },
                 depth,
                 parentMenu,
               };
@@ -54,16 +54,16 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
           });
         }
         if (item.menu && !result.menu) {
-          searchMenu(item.menu, depth + 1, menu);
+          searchMenu({ header: item.name, menu: item.menu}, depth + 1, { header: item?.name, menu: item.menu });
         }
       });
     };
-    searchMenu(menu, 0);
+    // top level has no header
+    searchMenu({header: undefined, menu }, 0);
     // always return top level if no result
     if(!result.menu ) {
       result.menu = menu;
     }
-    console.log(result);
     return result;
   },
   addTrailingSlash(url) {
@@ -81,10 +81,6 @@ const createInstance = ({tpl, settings, $, state, dispatchEvent}) => ({
 
   getDialog() {
     return $('dialog').el();
-  },
-  getActiveMenu() {
-    // find active item
-    // if none top level
   },
   show(callback = noop) {
     tpl.getDialog().showModal();

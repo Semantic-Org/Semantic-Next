@@ -3,15 +3,18 @@
     <div class="container">
       <div class="previous content">
         <nav-menu
-          menu={{previousMenu}}
+          menu={{previousMenu.menu}}
           activeURL={{activeURL}}
           expandAll=true
           navigationIcon="right-chevron"
         ></nav-menu>
       </div>
       <div class="visible content">
+        {{#if activeMenu.header}}
+          <div class="header">{{activeMenu.header}}</div>
+        {{/if}}
         <nav-menu
-          menu={{activeMenu}}
+          menu={{activeMenu.menu}}
           activeURL={{activeURL}}
           expandAll=true
           navigationIcon="right-chevron"
@@ -25,7 +28,7 @@
       </div>
       <div class="next content">
         <nav-menu
-          menu={{nextMenu}}
+          menu={{nextMenu.menu}}
           activeURL={{activeURL}}
           expandAll=true
           navigationIcon="right-chevron"
