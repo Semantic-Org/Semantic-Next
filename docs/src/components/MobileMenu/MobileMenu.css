@@ -91,7 +91,10 @@ dialog {
     transition: none;
 
     &.animate {
-      transition: all 0.35s cubic-bezier(0.33, 0.01, 0, 1);
+      transition:
+        height 0.25s ease,
+        transform 0.4s cubic-bezier(0.33, 0.01, 0, 1)
+      ;
       &.left {
         transform: translate3d(0%, 0, 0);
       }
