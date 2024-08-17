@@ -349,7 +349,7 @@ export class Query {
 
           if (target) {
             // If a matching target is found, call the handler with the correct context
-            handler.call(target, event);
+            handler.call(target, e);
           }
         };
       }
