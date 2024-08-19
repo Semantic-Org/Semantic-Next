@@ -40,16 +40,18 @@ export class Query {
       this.isBrowser = isClient;
       this.isGlobal = true;
     }
-    else if (isArray(selector)) {
+    else if (isArray(selector) || selector instanceof NodeList || selector instanceof HTMLCollection) {
       // Directly passed an array of elements
-      elements = selector;
+      elements = Array.from(selector);
     }
     else if (isString(selector)) {
+      // this is html like $('<div/>')
       if (selector.slice(0, 1) == '<') {
         const template = document.createElement('template');
         template.innerHTML = selector.trim();
         elements = Array.from(template.content.childNodes);
-      } else {
+      }
+      else {
         // Use querySelectorAll for normal selectors
         elements = (pierceShadow)
           ? this.querySelectorAllDeep(root, selector)
@@ -172,7 +174,8 @@ export class Query {
     const elements = Array.from(this).flatMap((el) => {
       if (this.options.pierceShadow) {
         return this.querySelectorAllDeep(el, selector, false);
-      } else {
+      }
+      else {
         return Array.from(el.querySelectorAll(selector));
       }
     });
@@ -210,20 +213,24 @@ export class Query {
     return selector ? this.chain(siblings).filter(selector) : this.chain(siblings);
   }
 
-  index(indexFilter) {
-    if(indexFilter) {
-      // if we are passed in a filter we are just grabbing el position
-      const els = this.get();
-      const el = this.filter(indexFilter).get(0);
-      return els.indexOf(el);
+  // returns the index of element only including siblings that match a filter
+  index(siblingFilter) {
+    const el = this.el();
+    if(!el?.parentNode) {
+      return -1;
     }
-    else {
-      // if we aren't we are grabbing sibling position
-      const $siblings = this.parent().children();
-      const siblingEls = $siblings.get();
-      const els = this.get();
-      return findIndex(siblingEls, el => inArray(el, els));
-    }
+    const $siblings = this.chain(el.parentNode.children).filter(siblingFilter);
+    const siblingEls = $siblings.get();
+    console.log(this.chain(el.parentNode.children), siblingEls);
+    const els = this.get();
+    return findIndex(siblingEls, el => inArray(el, els));
+  }
+
+  // returns the index of current collection that match filter
+  indexOf(filter) {
+    const els = this.get();
+    const el = this.filter(filter).get(0);
+    return els.indexOf(el);
   }
 
   filter(filter) {
@@ -239,11 +246,9 @@ export class Query {
           return el.matches && el.matches(filter);
         }
         else {
-          let els = isFunction(filter.get)
-            ? filter.get()
-            : isArray(filter)
-              ? filter
-              : [ filter]
+          let els = isArray(filter)
+            ? filter
+            : [ filter]
           ;
           return inArray(el, els);
         }
@@ -256,7 +261,8 @@ export class Query {
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
-      } else {
+      }
+      else {
         const elements = selector instanceof Query ? selector.get() : [selector];
         return elements.includes(el);
       }
@@ -269,7 +275,8 @@ export class Query {
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return !el.matches || (el.matches && !el.matches(selector));
-      } else {
+      }
+      else {
         const elements = selector instanceof Query ? selector.get() : [selector];
         return !elements.includes(el);
       }
@@ -342,7 +349,8 @@ export class Query {
           if (e.composed && e.composedPath) {
             const path = e.composedPath();
             target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
-          } else {
+          }
+          else {
             // keep things simple for most basic uses
             target = e.target.closest(targetSelector);
           }
@@ -708,7 +716,8 @@ export class Query {
       }
       else if (this.length === 1) {
         return this[0][name];
-      } else {
+      }
+      else {
         return this.map(el => el[name]);
       }
     }

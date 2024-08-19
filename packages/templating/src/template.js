@@ -342,8 +342,8 @@ export const Template = class Template {
         $(this.renderRoot).on(
           eventName,
           selector,
-          (event) => {
-            if (!this.isNodeInTemplate(event.target)) {
+          function(event) {
+            if (!template.isNodeInTemplate(event.target)) {
               return;
             }
             if (inArray(eventName, ['mouseover', 'mouseout'])
@@ -351,10 +351,7 @@ export const Template = class Template {
               && event.target.contains(event.relatedTarget)) {
               return;
             }
-            const targetElement = (selector)
-              ? $(event.target).closest(selector).get(0) // delegation
-              : event.target
-            ;
+            const targetElement = this;
             const boundEvent = eventHandler.bind(targetElement);
             const eventData = event?.detail || {};
             const elData = targetElement?.dataset;
