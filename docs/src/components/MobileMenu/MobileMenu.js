@@ -100,8 +100,8 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
     tpl.setMenuHeight('previous');
     $('.container')
       .addClass('animate left')
-      .one('transitionend', () => {
-        requestAnimationFrame(tpl.moveToPreviousMenu);
+      .find('.previous.content').one('transitionend', () => {
+        //requestAnimationFrame(tpl.moveToPreviousMenu);
       })
     ;
   },
