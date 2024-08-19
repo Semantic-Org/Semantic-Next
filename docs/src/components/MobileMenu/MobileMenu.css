@@ -132,6 +132,8 @@ dialog {
 
   .content {
     position: absolute;
+    top: auto;
+    bottom: 0px;
     width: 100vw;
     flex: 0 0 auto;
 
