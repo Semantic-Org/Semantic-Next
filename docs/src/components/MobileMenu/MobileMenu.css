@@ -18,12 +18,12 @@
 
   --mobile-menu-dimmer-background: var(--black-70);
 
-  --mobile-menu-transform-distance: 25%;
+  --mobile-menu-transform-distance: 15%;
   --mobile-menu-transform-left: translateX(calc(var(--mobile-menu-transform-distance) * -1));
   --mobile-menu-transform-right: translateX(var(--mobile-menu-transform-distance));
   --mobile-menu-transform-final: translateX(0%);
   --mobile-menu-content-transition: all 0.3s ease;
-  --mobile-menu-new-content-transition-delay: 0.1s;
+  --mobile-menu-new-content-transition-delay: 0.2s;
 }
 
 nav-menu {
@@ -140,7 +140,6 @@ dialog {
       padding: 10px 20px;
       color: var(--white-50);
       font-weight: bold;
-      box-shadow: 0px 3px 5px -2px rgba(0, 0, 0, 0.4);
       text-transform: uppercase;
     }
 
@@ -164,11 +163,12 @@ dialog {
 
     .return {
       cursor: pointer;
-      border-top: 1px solid var(--white-5);
+      /*border-top: 1px solid var(--white-5);*/
       padding: 1rem 0.5rem;
       font-size: 14px;
       background: var(--black-10);
       color: var(--white-60);
+      box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.14);
     }
     .return:hover {
       color: var(--white);
