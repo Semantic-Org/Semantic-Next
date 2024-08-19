@@ -25,7 +25,7 @@ import './TopBar.css';
   $(window).on('scroll', function() {
     const isMobile = $(window).width() < 768;
     const scrollTop = $('html').scrollTop();
-    scrollingDown = Boolean(scrollTop > lastScrollPosition);
+    scrollingDown = Boolean(scrollTop >= lastScrollPosition);
     lastScrollPosition = scrollTop;
     requestAnimationFrame(() => {
       if(isMobile && scrollingDown && scrollTop !== 0) {
