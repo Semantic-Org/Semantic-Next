@@ -207,10 +207,10 @@ const events = {
       tpl.hide();
     }
   },
-  'click .return'({ state, tpl }) {
+  'pointerdown .return'({ state, tpl }) {
     tpl.showPreviousMenu();
   },
-  'click .nav-icon'({tpl, target, state, event, $, afterFlush}) {
+  'pointerdown .nav-icon'({tpl, target, state, event, $, afterFlush}) {
     const $title = $(target).closest('.title');
     const index = $title.index('.title');
 
