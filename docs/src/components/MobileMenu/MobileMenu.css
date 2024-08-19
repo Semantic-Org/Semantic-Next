@@ -171,6 +171,7 @@ dialog {
       cursor: pointer;
       border-top: 1px solid var(--white-5);
       padding: 1rem 0.5rem;
+      line-height: 20px;
       font-size: 14px;
       background: var(--black-10);
       color: var(--white-60);
