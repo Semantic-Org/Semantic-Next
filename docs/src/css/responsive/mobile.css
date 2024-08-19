@@ -17,6 +17,14 @@
     bottom: 0;
     width: 100%;
     align-items: center;
+    transform: translateY(0);
+    transition: transform 0.3s ease 0.1s;
+
+
+    &.hidden {
+      transform: translateY(100%);
+    }
+
     topbar-menu {
       width: 0px;
       margin: 0rem var(--compact-spacing);
