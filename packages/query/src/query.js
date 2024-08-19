@@ -42,7 +42,8 @@ export class Query {
     }
     else if (isArray(selector) || selector instanceof NodeList || selector instanceof HTMLCollection) {
       // Directly passed an array of elements
-      elements = Array.from(selector);
+      selector = Array.from(selector);
+      elements = selector;
     }
     else if (isString(selector)) {
       // this is html like $('<div/>')
@@ -221,7 +222,6 @@ export class Query {
     }
     const $siblings = this.chain(el.parentNode.children).filter(siblingFilter);
     const siblingEls = $siblings.get();
-    console.log(this.chain(el.parentNode.children), siblingEls);
     const els = this.get();
     return findIndex(siblingEls, el => inArray(el, els));
   }
@@ -234,6 +234,9 @@ export class Query {
   }
 
   filter(filter) {
+    if(!filter) {
+      return this;
+    }
     let filteredElements = [];
     // If a function is provided, use it directly to filter elements
     if (isFunction(filter)) {
