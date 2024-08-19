@@ -1,0 +1,12 @@
+---
+import MobileMenu from '@components/MobileMenu/MobileMenu.js';
+import { getSiteMenu } from '@helpers/navigation.js';
+const siteMenu = await getSiteMenu();
+const activeURL = Astro.url.pathname;
+---
+
+<MobileMenu
+  menu={siteMenu}
+  activeURL={activeURL}
+  client:only
+/>

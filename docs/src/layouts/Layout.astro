@@ -8,11 +8,9 @@ import Sidebar from '@components/Sidebar.astro';
 import DocsMasthead from '@components/DocsMasthead.astro';
 import TopBar from '@components/TopBar.astro';
 import DocsRail from '@components/DocsRail.astro';
-import MobileMenu from '@components/MobileMenu/MobileMenu.js';
+import MobileMenu from '@components/MobileMenu.astro';
 
 import './Layout.css';
-
-import { getSidebarMenu, getSiteMenu } from '@helpers/navigation.js';
 
 let {
 	title,
@@ -32,7 +30,6 @@ let {
 header = header || title;
 
 const activeURL = Astro.url.pathname;
-const mobileMenu = await getSiteMenu();
 ---
 <Body title={title} description={description} searchMeta={searchMeta}>
 	<TopBar></TopBar>
@@ -63,9 +60,5 @@ const mobileMenu = await getSiteMenu();
 			</main>
 		</page>
 	</layout>
-	<MobileMenu
-		menu={mobileMenu}
-  	activeURL={activeURL}
-		client:only
-	/>
+	<MobileMenu></MobileMenu>
 </Body>
