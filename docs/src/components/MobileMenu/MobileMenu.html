@@ -6,7 +6,6 @@
           menu={{previousMenu.menu}}
           activeURL={{activeURL}}
           expandAll=true
-          navigationIcon="right-chevron"
         ></nav-menu>
       </div>
       <div class="active content">
@@ -17,7 +16,6 @@
           menu={{activeMenu.menu}}
           activeURL={{activeURL}}
           expandAll=true
-          navigationIcon="right-chevron"
         ></nav-menu>
         {{#if hasAny previousMenu.menu}}
           <div class="return">
@@ -27,12 +25,18 @@
         {{/if}}
       </div>
       <div class="next content">
+        {{#if nextMenu.header}}
+          <div class="header">{{nextMenu.header}}</div>
+        {{/if}}
         <nav-menu
           menu={{nextMenu.menu}}
           activeURL={{activeURL}}
           expandAll=true
-          navigationIcon="right-chevron"
         ></nav-menu>
+        <div class="return">
+          <ui-icon icon="left-chevron"></ui-icon>
+          Return to main menu
+        </div>
       </div>
     </div>
   </div>

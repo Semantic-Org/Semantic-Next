@@ -152,6 +152,7 @@ dialog {
 
     &.previous,
     &.next {
+      pointer-events: none;
       opacity: 0;
     }
 
@@ -159,11 +160,15 @@ dialog {
       max-height: var(--mobile-menu-max-height);
       overflow: auto;
       padding: var(--mobile-menu-padding);
+
+      &::part(nav-icon) {
+        font-size: 18px;
+        padding: 2px;
+      }
     }
 
     .return {
       cursor: pointer;
-      /*border-top: 1px solid var(--white-5);*/
       padding: 1rem 0.5rem;
       font-size: 14px;
       background: var(--black-10);

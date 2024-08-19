@@ -11,8 +11,8 @@
     {{#if section.description}}
       <span class="description">{{section.description}}</span>
     {{/if}}
-    {{#if canShowNavIcon}}
-      <ui-icon icon={{getNavigationIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
+    {{#if canShowNavIcon section}}
+      <ui-icon icon={{getNavIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
     {{/if}}
   </a>
   {{#if section.pages}}
@@ -23,7 +23,7 @@
             <div class="{{classes getTitleStates page}}title item">
               <div class="text">{{page.name}}</div>
               {{#if canShowNavIcon}}
-                <ui-icon {{getNavigationIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
+                <ui-icon {{getNavIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
               {{/if}}
             </div>
             <div class="{{activeIf isActiveItem page}} content">

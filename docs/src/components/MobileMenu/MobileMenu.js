@@ -7,25 +7,30 @@ import css from './MobileMenu.css?raw';
 const settings = {
   menu: [],
   activeURL: '',
+  navIcon: 'right-chevron'
 };
 
 const state = {
   depth: 0,
-  activeMenu: [],
-  previousMenu: [],
-  nextMenu: [],
+  activeMenu: {},
+  previousMenu: {},
+  nextMenu: {},
 };
 
 const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
+
   initialize() {
     tpl.setMenusFromURL(settings.activeURL);
   },
+
   setMenusFromURL(activeURL) {
     const result = tpl.getMenuMatchingURL(settings.menu, activeURL);
     state.depth.set(result.depth);
-    state.activeMenu.set(result.menu);
-    state.previousMenu.set(result.parentMenu);
+    state.activeMenu.set(tpl.addNavIcons(result.menu));
+    state.previousMenu.set(tpl.addNavIcons(result.parentMenu));
   },
+
+  // looks at current active url and determines where in menu heirarchy the current menu is
   getMenuMatchingURL(menu, url) {
     let result = {
       menu: null,
@@ -60,13 +65,31 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
         }
       });
     };
+
     // top level has no header
     searchMenu({header: undefined, menu }, 0);
+
     // always return top level if no result
     if(!result.menu ) {
-      result.menu = menu;
+      result.menu = { menu };
     }
+    result.parentMenu = tpl.addNavIcons(result.parentMenu);
+    result.menu = tpl.addNavIcons(result.menu);
     return result;
+  },
+
+  // add -> icon if the menu has a sub menu
+  addNavIcons(menu) {
+    if(!settings.navIcon) {
+      return menu;
+    }
+    (menu?.menu || []).map(item => {
+      if(item.menu) {
+        item.navIcon = settings.navIcon;
+      }
+      return item;
+    });
+    return menu;
   },
   addTrailingSlash(url) {
     return (url.substr(-1) === '/')
@@ -84,18 +107,21 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   getDialog() {
     return $('dialog').el();
   },
+
   show(callback = noop) {
     tpl.getDialog().showModal();
     dispatchEvent('show');
     tpl.setMenuHeight('active');
     callback();
   },
+
   hide(callback = noop) {
     tpl.getDialog().close();
     dispatchEvent('hide');
     callback();
     tpl.resetMenu();
   },
+
   showPreviousMenu() {
     tpl.setMenuHeight('previous');
     $('.container')
@@ -105,6 +131,29 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
       })
     ;
   },
+
+  // use the menu index to find the next menu
+  setNextMenu(index) {
+    const activeMenu = state.activeMenu.get();
+    const activeItem = activeMenu?.menu[index];
+    const menu = {
+      header: activeItem.name,
+      menu: tpl.addNavIcons(activeItem.menu)
+    };
+    state.previousMenu.set(state.activeMenu.get());
+    state.nextMenu.set(menu);
+  },
+
+  showNextMenu() {
+    tpl.setMenuHeight('next');
+    $('.container')
+      .addClass('animate right')
+      .find('.next.content').one('transitionend', () => {
+        requestAnimationFrame(tpl.moveToNextMenu);
+      })
+    ;
+  },
+
   setMenuHeight(name) {
     const height = $('.container .content')
       .filter(`.${name}`)
@@ -112,21 +161,21 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
     ;
     $('.container').css({height: `${height}px`});
   },
-  showNextMenu() {
-    $('.container').addClass('animate left');
-  },
+
   resetAnimation() {
     $('.container').removeClass('animate left right');
   },
+
   resetMenu() {
     tpl.setMenusFromURL(settings.activeURL);
   },
+
   moveToPreviousMenu() {
     const previousMenu = state.previousMenu.value;
     const depth = state.depth.get() - 1;
     // if we are at top level we know no previous menu
     if(depth == 0) {
-      state.activeMenu.set(state.previousMenu.get());
+      state.activeMenu.set(previousMenu);
       state.previousMenu.set({});
     }
     else {
@@ -134,6 +183,15 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
       const activeURL = previousMenu.menu[0].url;
       tpl.setMenusFromURL(activeURL);
     }
+    state.depth.set(depth);
+    afterFlush(tpl.resetAnimation);
+    flush();
+  },
+  moveToNextMenu() {
+    const depth = state.depth.get() + 1;
+    state.previousMenu.set(state.activeMenu.get());
+    state.activeMenu.set(state.nextMenu.get());
+    state.depth.set(depth);
     afterFlush(tpl.resetAnimation);
     flush();
   }
@@ -146,11 +204,19 @@ const events = {
     }
   },
   'click .return'({ state, tpl }) {
-    state.nextMenu.set(state.previousMenu.get());
     tpl.showPreviousMenu();
   },
-  'click .nav-icon'() {
-    console.log('did it');
+  'click .nav-icon'({tpl, target, state, event, $, afterFlush}) {
+    const $title = $(target).closest('.title');
+    const index = $title.index('.title');
+
+    // set the next menu from the index
+    tpl.setNextMenu(index);
+
+    // wait for web component rerender before animating
+    $('.next.content nav-menu').one('updated', tpl.showNextMenu);
+
+    event.stopImmediatePropagation();
   }
 };
 

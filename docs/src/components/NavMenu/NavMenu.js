@@ -9,7 +9,7 @@ const settings = {
   linkCurrentPage: false,
   expandAll: false,
   useAccordion: false,
-  navigationIcon: '',
+  navIcon: '',
   activeURL: '',
 };
 
@@ -25,8 +25,12 @@ const createInstance = function ({ tpl, data, state, settings }) {
     getMenu() {
       return tpl.filterVisibleSections(settings.menu);
     },
-    getNavigationIcon(section, defaultIcon = 'chevron-down') {
-      return section?.navigationIcon || settings.navigationIcon || defaultIcon;
+    getNavIcon(section) {
+      const defaultIcon = (settings.useAccordion)
+        ? 'chevron-down'
+        : ''
+      ;
+      return section?.navIcon || settings.navIcon || defaultIcon;
     },
     getTitleStates(title) {
       const classes = [];
@@ -41,8 +45,8 @@ const createInstance = function ({ tpl, data, state, settings }) {
       }
       return classes;
     },
-    canShowNavIcon() {
-      return tpl.isExpandable() || settings.navigationIcon;
+    canShowNavIcon(section) {
+      return tpl.getNavIcon(section);
     },
     hasIcons() {
       return any(settings.menu, section => section.icon);
@@ -123,20 +127,20 @@ const createInstance = function ({ tpl, data, state, settings }) {
   };
 };
 
-const onCreated = function ({ tpl }) {
+const onCreated =  ({ tpl }) => {
 };
 
-const onDestroyed = function ({ tpl }) {
+const onDestroyed =  ({ tpl }) => {
 };
 
-const onRendered = function ({ $, tpl, attachEvent, isClient }) {
+const onRendered =  ({ $, tpl, attachEvent, isClient }) => {
   if(isClient) {
     attachEvent(document, 'astro:after-swap', tpl.onPageChange);
   }
 };
 
 const events = {
-  'click .title': function({event, settings, $, tpl}) {
+  'click .title': ({event, settings, $, tpl}) => {
     if(!settings.useAccordion) {
       return;
     }
@@ -145,6 +149,9 @@ const events = {
     $title.toggleClass('active');
     $content.toggleClass('active');
   },
+  'click .nav-icon'({event}) {
+    event.preventDefault();
+  }
 };
 
 const NavMenu = createComponent({
