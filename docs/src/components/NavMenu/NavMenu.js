@@ -20,7 +20,6 @@ const state = {
 const createInstance = function ({ tpl, data, state, settings }) {
   return {
     initialize() {
-      console.log(settings.menu);
       state.url.set(settings.activeURL);
     },
     getMenu() {

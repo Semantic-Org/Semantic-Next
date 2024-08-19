@@ -1,4 +1,4 @@
-import NavMenu from '@components/NavMenu/NavMenu.js';
+import NavMenu from '../NavMenu/NavMenu.js';
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
 import { noop, each } from '@semantic-ui/utils';
@@ -26,8 +26,6 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
 
   setMenusFromURL(activeURL) {
     const result = tpl.getMenuMatchingURL(settings.menu, activeURL);
-    console.log(result.menu);
-    console.log(result.parentMenu);
     state.depth.set(result.depth);
     state.activeMenu.set(tpl.addNavIcons(result.menu));
     state.previousMenu.set(tpl.addNavIcons(result.parentMenu));
