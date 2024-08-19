@@ -183,6 +183,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
       const activeURL = previousMenu.menu[0].url;
       tpl.setMenusFromURL(activeURL);
     }
+    state.nextMenu.set({});
     state.depth.set(depth);
     afterFlush(tpl.resetAnimation);
     flush();
@@ -213,7 +214,7 @@ const events = {
     // set the next menu from the index
     tpl.setNextMenu(index);
 
-    // wait for web component rerender before animating
+    // wait for web component to update before animating
     $('.next.content nav-menu').one('updated', tpl.showNextMenu);
 
     event.stopImmediatePropagation();
