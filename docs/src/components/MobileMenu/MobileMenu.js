@@ -101,7 +101,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
     $('.container')
       .addClass('animate left')
       .find('.previous.content').one('transitionend', () => {
-        //requestAnimationFrame(tpl.moveToPreviousMenu);
+        requestAnimationFrame(tpl.moveToPreviousMenu);
       })
     ;
   },

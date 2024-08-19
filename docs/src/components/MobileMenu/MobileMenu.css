@@ -23,7 +23,7 @@
   --mobile-menu-transform-right: translateX(var(--mobile-menu-transform-distance));
   --mobile-menu-transform-final: translateX(0%);
   --mobile-menu-content-transition: all 0.3s ease;
-  --mobile-menu-new-content-transition-delay: 0.2s;
+  --mobile-menu-new-content-transition-delay: 0.15s;
 }
 
 nav-menu {
