@@ -212,3 +212,20 @@ dialog[open]::backdrop {
     background: rgb(0 0 0 / 0%);
   }
 }
+
+
+/* Sticky Headers */
+dialog.sticky {
+  background: var(--mobile-menu-background-color);
+
+  nav-menu {
+    padding-top: 0;
+
+    &::part(title) {
+      background: var(--mobile-menu-background-color);
+      position: sticky;
+      top: 0;
+    }
+  }
+
+}

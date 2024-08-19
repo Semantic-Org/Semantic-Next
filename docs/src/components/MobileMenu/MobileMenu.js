@@ -8,6 +8,7 @@ import css from './MobileMenu.css?raw';
 const settings = {
   menu: [],
   activeURL: '',
+  stickyHeaders: true,
   navIcon: 'right-chevron'
 };
 
@@ -22,6 +23,12 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
 
   initialize() {
     tpl.setMenusFromURL(settings.activeURL);
+  },
+
+  getClasses() {
+    return {
+      sticky: settings.stickyHeaders
+    };
   },
 
   setMenusFromURL(activeURL) {
