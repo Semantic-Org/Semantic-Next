@@ -30,6 +30,7 @@ export const Template = class Template {
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
     onRendered = noop,
+    onUpdated = noop,
     onDestroyed = noop,
     onThemeChanged = noop,
   }) {
@@ -140,6 +141,10 @@ export const Template = class Template {
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
       this.dispatchEvent('rendered', { tpl: this.tpl }, {}, { triggerCallback: false });
+    };
+    this.onUpdated = () => {
+      this.call(this.onRenderedCallback);
+      this.dispatchEvent('updated', { tpl: this.tpl }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
       this.call(this.onThemeChangedCallback, ...args);
@@ -499,6 +504,7 @@ export const Template = class Template {
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
+    setTimeout(this.onUpdated, 0);
     return this.html;
   }
 
