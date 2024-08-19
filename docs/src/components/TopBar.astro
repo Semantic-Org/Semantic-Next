@@ -28,7 +28,7 @@ import './TopBar.css';
     scrollingDown = Boolean(scrollTop > lastScrollPosition);
     lastScrollPosition = scrollTop;
     requestAnimationFrame(() => {
-      if(isMobile && scrollingDown) {
+      if(isMobile && scrollingDown && scrollTop !== 0) {
         $('topbar').addClass('hidden');
       }
       else {
