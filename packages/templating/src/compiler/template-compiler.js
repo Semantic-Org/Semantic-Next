@@ -10,19 +10,21 @@ class TemplateCompiler {
   }
 
   static tagRegExp = {
-    IF: /^{{\s*#if\s+/,
-    ELSEIF: /^{{\s*else\s*if\s+/,
-    ELSE: /^{{\s*else\s*/,
-    EACH: /^{{\s*#each\s+/,
-    SNIPPET: /^{{\s*#snippet\s+/,
-    CLOSE_IF: /^{{\s*\/(if)\s*/,
-    CLOSE_EACH: /^{{\s*\/(each)\s*/,
-    CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
-    SLOT: /^{{>\s*slot\s*/,
-    TEMPLATE: /^{{>\s*/,
-    HTML_EXPRESSION: /^{{{\s*/,
-    EXPRESSION: /^{{\s*/,
+    IF: /^{(?:{)?#if\s+/,
+    ELSEIF: /^{(?:{)?else\s*if\s+/,
+    ELSE: /^{(?:{)?else\s*/,
+    EACH: /^{(?:{)?#each\s+/,
+    SNIPPET: /^{(?:{)?#snippet\s+/,
+    CLOSE_IF: /^{(?:{)?\/(if)\s*/,
+    CLOSE_EACH: /^{(?:{)?\/(each)\s*/,
+    CLOSE_SNIPPET: /^{(?:{)?\/(snippet)\s*/,
+    SLOT: /^{(?:{)?>\s*slot\s*/,
+    TEMPLATE: /^{(?:{)?>\s*/,
+    HTML_EXPRESSION: /^{(?:{)?#html\s*/,
+    EXPRESSION: /^{(?:{)?\s*/,
   };
+
+  static bracketEndRegExp = /}(?:})?/;
 
   static htmlRegExp = {
     SVG_OPEN: /^\<svg\s*/i,
@@ -37,17 +39,13 @@ class TemplateCompiler {
     VERBOSE_KEYWORD: /^(template|snippet)\W/g,
     VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
     STANDARD: /(\w+)\s*=\s*((?:(?!\n|$|\w+\s*=).)+)/g,
-    DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
+    DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g,
     SINGLE_QUOTES: /\'/g,
   };
 
   // used to advance scanner to either a parseable expression or svg tag
-  static nextTagRegExp = /(\{\{|\<svg|\<\/svg)/;
+  static nextTagRegExp = /(\{|\<svg|\<\/svg)/;
 
-  /*
-    Creates an AST representation of a template
-    from a template string
-  */
   compile(templateString = this.templateString) {
     templateString = TemplateCompiler.preprocessTemplate(templateString);
 
@@ -57,17 +55,17 @@ class TemplateCompiler {
       scanner.fatal('Template is not a string', templateString);
     }
 
-    // quicker to compile regExp once
     const tagRegExp = TemplateCompiler.tagRegExp;
     const htmlRegExp = TemplateCompiler.htmlRegExp;
+    const bracketEndRegExp = TemplateCompiler.bracketEndRegExp;
 
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
         if (scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
-          const content = this.getValue(scanner.consumeUntil('}}').trim());
-          scanner.consume('}}');
+          const content = this.getValue(scanner.consumeUntil(bracketEndRegExp).trim());
+          scanner.consume(bracketEndRegExp);
           return { type, content, ...context }; // Include context in the return value
         }
       }
@@ -294,7 +292,6 @@ class TemplateCompiler {
         }
       }
     }
-
     return TemplateCompiler.optimizeAST(ast);
   }
 
