@@ -7,19 +7,19 @@ description: Creating a new component
 
 Semantic UI extends [native web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to support [reactive data](/components/reactivity), [event binding](/components/events), [templating](/components/rendering), [DOM Querying](/components/dom), [keybindings](/components/keys) and more to allow you to build complex web applications purely with web components.
 
-`createComponent` exported from `@semantic-ui/component` is the primary way to define your app's components.
 
-> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components are a native browser standard designed to allow for interchange between front end frameworks. Components created with `semantic-ui/component` can render in any [supported front end framework](framework-integration) or simply use the html tags directly in your app with vanilla js.
-
-## Creating Components
-
-### Installing Dependencies
+## Installing Dependencies
 
 The only package necessary to create components is the `@semantic-ui/component` package.
 
 ```bash
 npm install @semantic-ui/component
 ```
+
+## Creating Components
+
+`createComponent` exported from `@semantic-ui/component` can be used to create a new web component.
+
 
 ### Minimal Component
 
@@ -66,7 +66,7 @@ In most real world use-cases you will need to provide additional information to 
 ## Component Parts
 
 
-### Functionality
+### Instance
 
 [`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
@@ -149,32 +149,44 @@ createComponent({
 
 ## Organizing Code
 
-### Importing Template / CSS
+To keep your code organized you might consider keeping your `html` and `css` as separate files with your component.
 
-Semantic UI docs by convention include `html` and `css` as separate files that are imported as plaintext.
-
-#### Browser / Node
-You can achieve this in a browser or node environment using `getText` a helper used to grab plaintext content using `fetch`.
+### Browser / Node
+In a browser or `node` you can import static assets using `getText` a helper that uses `fetch`.
 
 ```javascript
 import { getText } from '@semantic-ui/component';
-const html = await getText('./component.html');
+const template = await getText('./component.html');
 const css = await getText('./component.css');
 ```
 
-#### Webpack / Vite / Esbuild etc.
+### Webpack / Vite / Esbuild etc.
 
-If you are using build tools to compile your project, you can use the `?raw` query parameter to import a file directly as a text string.
+In a project with build tools like you can use the `?raw` query parameter to import a plaintext file directly.
 
-Related Docs
+#### Related Docs
 * Vite - [Import Assets as a String](https://vitejs.dev/guide/assets#importing-asset-as-string)
 * Webpack - [Raw Loader](https://v4.webpack.js.org/loaders/raw-loader/)
-* ESBuild - []
 
 ```javascript
-import html from './component.html?raw';
+import template from './component.html?raw';
 import css from './component.css?raw';
 ```
 
+#### Single File Components
 
+If you prefer single file components you can just inline your html and css.
+
+
+```javascript
+const createComponent({
+  tagName: 'ui-counter',
+  template: `<div class="counter">{{counter}}</div>`,
+  css: `
+    .counter {
+      color: var(--primary-text-color);
+    }
+  `
+});
+```
 
