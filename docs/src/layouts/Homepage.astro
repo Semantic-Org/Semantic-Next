@@ -3,7 +3,8 @@ import '../css/layers.css';
 import '../css/fonts.css';
 import Body from '../layouts/Body.astro';
 import TopBar from '@components/TopBar.astro';
-import MobileMenu from '@components/MobileMenu.astro';
+import NavMenu from '@components/NavMenu/NavMenu.js';
+import SiteMobileMenu from '@components/SiteMobileMenu.astro';
 import './Layout.css';
 import './Homepage.css';
 let { title, description, searchMeta } = Astro.props;
@@ -13,5 +14,5 @@ let { title, description, searchMeta } = Astro.props;
   <page data-pagefind-body>
     <slot></slot>
   </page>
-  <MobileMenu></MobileMenu>
+  <SiteMobileMenu></SiteMobileMenu>
 </Body>

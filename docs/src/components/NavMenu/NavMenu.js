@@ -26,7 +26,7 @@ const createInstance = function ({ tpl, data, state, settings }) {
       return tpl.filterVisibleSections(settings.menu);
     },
     getNavIcon(section) {
-      const defaultIcon = (settings.useAccordion)
+      const defaultIcon = (settings.useAccordion && section?.pages)
         ? 'chevron-down'
         : ''
       ;
@@ -46,7 +46,7 @@ const createInstance = function ({ tpl, data, state, settings }) {
       return classes;
     },
     canShowNavIcon(section) {
-      return tpl.getNavIcon(section);
+      return tpl.getNavIcon(section) !== undefined;
     },
     hasIcons() {
       return any(settings.menu, section => section.icon);
@@ -140,11 +140,11 @@ const onRendered =  ({ $, tpl, attachEvent, isClient }) => {
 };
 
 const events = {
-  'click .title': ({event, settings, $, tpl}) => {
+  'click .title': ({target, event, settings, $, tpl}) => {
     if(!settings.useAccordion) {
       return;
     }
-    const $title = $(this);
+    const $title = $(target);
     const $content = $title.next('.content');
     $title.toggleClass('active');
     $content.toggleClass('active');

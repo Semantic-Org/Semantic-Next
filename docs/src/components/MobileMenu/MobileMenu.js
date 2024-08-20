@@ -1,4 +1,3 @@
-import NavMenu from '../NavMenu/NavMenu.js';
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
 import { noop, each } from '@semantic-ui/utils';
