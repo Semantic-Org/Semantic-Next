@@ -218,6 +218,10 @@ dialog[open]::backdrop {
 dialog.sticky {
   background: var(--mobile-menu-background-color);
 
+  .header {
+    padding-bottom: 0;
+  }
+
   nav-menu {
     padding-top: 0;
 
