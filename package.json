@@ -90,6 +90,7 @@
     "lint-staged": "^15.2.7",
     "underscore": "^1.13.6",
     "vitest": "^1.4.0",
+    "playwright": "^1.46.1",
     "wireit": "^0.14.5"
   },
   "ciDependencies": {
