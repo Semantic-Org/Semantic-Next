@@ -171,6 +171,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
 
   resetAnimation() {
+    $('.active.content').scrollTop(0);
     $('.container').removeClass('animate left right');
   },
 
