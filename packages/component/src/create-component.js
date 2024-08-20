@@ -6,8 +6,6 @@ import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { WebComponentBase } from './web-component.js';
 
-const tags = {};
-
 export const createComponent = ({
   template = '',
   ast,
@@ -207,10 +205,7 @@ export const createComponent = ({
         return html;
       }
     };
-    if(!tags[tagName]) {
-      customElements.define(tagName, webComponent);
-      tags[tagName] = true;
-    }
+    customElements.define(tagName, webComponent);
   }
   return tagName ? webComponent : litTemplate;
 };
