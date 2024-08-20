@@ -5,5 +5,3 @@
 [![Coverage](https://badgen.net/https/fnipttzwzg6ieemy4winuladuu0jhqef.lambda-url.us-east-1.on.aws)](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml)
 
 Semantic UI Next is a UI framework built with web components.
-
-This is published for testing purposes, and should not be used.
