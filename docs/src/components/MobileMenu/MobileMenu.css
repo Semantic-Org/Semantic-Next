@@ -101,6 +101,10 @@ dialog {
     &.animate {
       transition: height 0.4s ease;
 
+      nav-menu {
+        overscroll-behavior: none;
+      }
+
       .content {
         transition: var(--mobile-menu-content-transition);
       }

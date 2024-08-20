@@ -1,7 +1,7 @@
 import NavMenu from '../NavMenu/NavMenu.js';
 import { UIIcon } from '@semantic-ui/core';
 import { createComponent } from '@semantic-ui/component';
-import { noop, each } from '@semantic-ui/utils';
+import { noop, each, any } from '@semantic-ui/utils';
 import template from './MobileMenu.html?raw';
 import css from './MobileMenu.css?raw';
 
@@ -14,6 +14,7 @@ const settings = {
 
 const state = {
   depth: 0,
+  useSticky: false,
   activeMenu: {},
   previousMenu: {},
   nextMenu: {},
@@ -27,7 +28,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
 
   getClasses() {
     return {
-      sticky: settings.stickyHeaders
+      sticky: settings.stickyHeaders && state.useSticky.get()
     };
   },
 
@@ -131,7 +132,9 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
 
   showPreviousMenu() {
-    tpl.setMenuHeight('previous');
+    afterFlush(() => tpl.setMenuHeight('previous'));
+    const useSticky = any(state.previousMenu.value?.menu, (menu) => menu.pages);
+    state.useSticky.set(useSticky);
     $('.container')
       .addClass('animate left')
       .find('.previous.content').one('transitionend', () => {
@@ -153,7 +156,9 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
 
   showNextMenu() {
-    tpl.setMenuHeight('next');
+    afterFlush(() => tpl.setMenuHeight('next'));
+    const useSticky = any(state.nextMenu.value?.menu, (menu) => menu.pages);
+    state.useSticky.set(useSticky);
     $('.container')
       .addClass('animate right')
       .find('.next.content').one('transitionend', () => {
@@ -171,6 +176,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
 
   resetAnimation() {
+    $('.active.content').scrollTop(0);
     $('.container').removeClass('animate left right');
   },
 
@@ -179,7 +185,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
 
   moveToPreviousMenu() {
-    const previousMenu = state.previousMenu.value;
+    const previousMenu = state.previousMenu.get();
     const depth = state.depth.get() - 1;
     // if we are at top level we know no previous menu
     if(depth == 0) {
@@ -198,6 +204,7 @@ const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEve
   },
   moveToNextMenu() {
     const depth = state.depth.get() + 1;
+    const nextMenu = state.nextMenu.get();
     state.previousMenu.set(state.activeMenu.get());
     state.activeMenu.set(state.nextMenu.get());
     state.depth.set(depth);
