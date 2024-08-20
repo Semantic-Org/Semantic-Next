@@ -74,7 +74,7 @@ export class Query {
   }
 
   chain(elements) {
-    return (this.isGlobal)
+    return (this.isGlobal && !elements)
       ? new Query(globalThis, this.options)
       : new Query(elements, this.options)
     ;
@@ -247,6 +247,10 @@ export class Query {
       filteredElements = Array.from(this).filter((el) => {
         if(isString(filter)) {
           return el.matches && el.matches(filter);
+        }
+        else if (filter instanceof Query) {
+          // If filter is a Query object, check if the element is in the Query's collection
+          return filter.get().includes(el);
         }
         else {
           let els = isArray(filter)
