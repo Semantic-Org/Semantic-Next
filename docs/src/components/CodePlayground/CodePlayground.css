@@ -310,11 +310,10 @@ ui-menu.mobile {
   display: none;
 }
 
-.mobile-code ui-panel.files {
-  flex-grow: 1 !important;
-}
+.mobile-code ui-panel.files,
 .mobile-preview ui-panel.preview {
   flex-grow: 1 !important;
+  content-visibility: visible;
 }
 
 @media only screen and (max-width: 767px) {
@@ -324,6 +323,7 @@ ui-menu.mobile {
 
   ui-panels.tabs ui-panel {
     flex-grow: 0 !important;
+    content-visibility: hidden;
   }
   ui-menu.mobile {
     display: block;

@@ -151,7 +151,7 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: settings.useTabs
+      tabs: tpl.shouldUseTabs()
     };
     // defer to preference unless its tablet
     if(state.displayMode.value == 'tablet') {
@@ -161,6 +161,14 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
       classes[settings.inlineDirection] = true;
     }
     return classes;
+  },
+  shouldUseTabs() {
+    const displayMode = state.displayMode.get();
+    // panels is only an option if on computer
+    if(displayMode == 'computer') {
+      return settings.useTabs;
+    }
+    return true;
   },
   getTabDirection() {
     if(state.displayMode.value == 'tablet') {

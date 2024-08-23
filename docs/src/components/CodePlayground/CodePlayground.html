@@ -3,7 +3,7 @@
     <div class="masthead" part="masthead">
       {{#if canShowButtons}}
         <ui-button right-floated transparent small compact inverted class="tabs">
-          {{#if useTabs}}
+          {{#if shouldUseTabs}}
             Use Panels
           {{else}}
             Use Tabs
@@ -25,7 +25,7 @@
       {{/each}}
     </playground-project>
   {{/if}}
-  {{#if either useTabs inline}}
+  {{#if either shouldUseTabs inline}}
     <ui-panels
       class={{classMap getTabPanelsClass}}
       direction="{{getTabDirection}}"
