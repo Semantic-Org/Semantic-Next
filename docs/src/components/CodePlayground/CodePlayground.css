@@ -333,4 +333,7 @@ ui-menu.mobile {
   ui-panel::part(handle) {
     display: none;
   }
+  ::part(file) {
+    max-width: none;
+  }
 }

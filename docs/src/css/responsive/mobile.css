@@ -103,7 +103,7 @@
     margin: 0rem;
   }
 
-  code-playground::part(file) {
+  layout main code-playground::part(file) {
     max-width: calc(100vw - 3rem);
   }
 
