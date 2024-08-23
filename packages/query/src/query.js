@@ -761,13 +761,11 @@ export class Query {
   }
 
   height(value) {
-    const prop = (this.isGlobal) ? 'innerHeight' : 'clientHeight';
-    return this.prop(prop, value);
+    return this.prop('innerHeight', value) || this.prop('clientHeight', value);
   }
 
   width(value) {
-    const prop = (this.isGlobal) ? 'innerWidth' : 'clientWidth';
-    return this.prop(prop, value);
+    return this.prop('innerWidth', value) || this.prop('clientWidth', value);
   }
 
   scrollHeight(value) {
