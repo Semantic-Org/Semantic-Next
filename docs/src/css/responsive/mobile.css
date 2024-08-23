@@ -6,6 +6,7 @@
     --global-search-input-font-size: 14px;
     --topbar-icon-size: 20px;
     --topbar-logo-size: 30px;
+    --topbar-height: 70px;
   }
 
   topbar {
@@ -13,7 +14,6 @@
     z-index: var(--float-layer);
     background-color: var(--topbar-background-color);
     top: auto;
-    height: 70px;
     bottom: 0;
     width: 100%;
     align-items: center;
