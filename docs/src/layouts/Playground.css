@@ -19,6 +19,7 @@
     --topbar-site-name-distance: 10px;
     --topbar-site-name-color: var(--white);
     --topbar-menu-distance: 10px;
+    --topbar-logo-margin: 4px 16px 0px 10px;
     --topbar-icon-size: 14px;
     --topbar-background-color: var(--playground-code-background);
     --topbar-menu-item-spacing: 3px;
@@ -118,3 +119,10 @@
     height: 100%;
   }
 }
+
+@media only screen and (max-width: 767px) {
+  sidebar {
+    display: none;
+  }
+}
+

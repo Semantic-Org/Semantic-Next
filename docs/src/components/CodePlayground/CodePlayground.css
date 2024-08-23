@@ -304,3 +304,33 @@
   }
 
 }
+
+
+ui-menu.mobile {
+  display: none;
+}
+
+.mobile-code ui-panel.files {
+  flex-grow: 1 !important;
+}
+.mobile-preview ui-panel.preview {
+  flex-grow: 1 !important;
+}
+
+@media only screen and (max-width: 767px) {
+  .masthead ui-button {
+    display: none;
+  }
+
+  ui-panels.tabs ui-panel {
+    flex-grow: 0 !important;
+  }
+  ui-menu.mobile {
+    display: block;
+    width: 90vw;
+    margin: var(--spacing) auto;
+  }
+  ui-panel::part(handle) {
+    display: none;
+  }
+}

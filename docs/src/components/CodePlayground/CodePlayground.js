@@ -75,6 +75,7 @@ const settings = {
 
 const state = {
   activeFile: undefined,
+  mobileView: 'code',
   resizing: true,
   displayMode: 'desktop'
 };
@@ -83,20 +84,33 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
   },
+  mobileMenu: [
+    { label: 'Code', value: 'code' },
+    { label: 'Preview', value: 'preview' },
+  ],
   initializePanels() {
     $('ui-panel').settings({
       getNaturalSize: tpl.getNaturalPanelSize
     });
   },
   getClassMap() {
-    return {
+    const classMap = {
       resizing: state.resizing.get(),
     };
+    const mobileView = state.mobileView.get();
+    const displayMode = state.displayMode.get();
+    if(displayMode == 'mobile') {
+      classMap[`mobile-${mobileView}`] = true;
+    }
+    return classMap;
   },
   getStyle() {
     if(settings.maxHeight > 0) {
       return `height: ${settings.maxHeight}px;`;
     }
+  },
+  canShowButtons() {
+    return !settings.inline && state.displayMode.get() !== 'mobile';
   },
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding
@@ -305,6 +319,9 @@ const keys = {
 const events = {
   'change ui-menu.files'({state, data}) {
     state.activeFile.set(data.value);
+  },
+  'change ui-menu.mobile'({state, data}) {
+    state.mobileView.set(data.value);
   },
   'click ui-button.tabs'({tpl}) {
     tpl.toggleTabs();
