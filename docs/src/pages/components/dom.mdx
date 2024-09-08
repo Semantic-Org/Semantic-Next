@@ -6,13 +6,12 @@ description: 'Querying the DOM from your components'
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic provides a standalone library called [Query](/query) designed from the ground up to work with the Shadow DOM for accessing the DOM imperatively, built with modern ECMAScript and browser standards.
+Semantic provides a standalone library called [Query](/query) designed from the ground up to work with the Shadow DOM for accessing the DOM, built with modern ECMAScript and browser standards, and tightly coupled into the component framework.
 
 ### Use of Query
 
 [Query](/query) provides a chaining interface similar to jQuery for accessing the DOM.
 
-> For a full list of available methods from Query check the dedicated [Query documentation](/query).
 
 You can do things like create HTML nodes
 ```javascript
@@ -35,32 +34,45 @@ $('body')
 ;
 ```
 
-## Inside Components
+> This section covers only the specific integration of Query inside of components, for a full explaination of the library check out the [Query documentation](/query).
 
-When creating components you may find that you might need to access the DOM, both of your web component or the page.
+## Using Query in Components
+
+Query provides an interface for accessing the DOM you can use to access portions of your component or the page. This is primarily handled by using the `$` and `$$` exports which are passed through to all lifecycle callbacks in your component.
 
 ### DOM in Lifecycle Callbacks
 
-Semantic provides two primary primitives for accessing the DOM `$` and `$$` available from [lifecycle callbacks](/components/lifecycle#callback-arguments), which can be used to allow you to manipulate the DOM from your component.
+The `$` and `$$` arguments are available from [lifecycle callbacks](/components/lifecycle#callback-arguments) and allow you to manipulate the DOM from your component.
 
 
 ### Using $
 
-`$` allows you to retrieve elements from the DOM. Under the hood this uses the highly performant `querySelectorAll`. `$` will not however recurse into elements that are attached to web components shadow DOM, which means you cannot enter the shadow DOM of components.
+`$` allows you to retrieve elements **without crossing shadow boundaries**.
 
-For instance inside a component you can use `$` to access any part of that component, however to access the DOM of a nested web component you would need to use `$$`.
+`$` is a naive implementation using the highly performant `querySelectorAll`. Nodes returned will only be part of the page's regular DOM.  It cannot access nodes that are part of a web component, which are nodes in a shadow DOM tree.
 
 ### Using $$
 
-`$$` allows you to access any part of the DOM both the visible DOM and the hidden parts of the DOM accessible from shadow DOM trees.
+`$$` allows you to access any part of the DOM, both the visible DOM and the hidden parts of the DOM accessible from shadow DOM trees.
 
-> Query exports a separate primitive `$$` because recursively searching the page's DOM is less performant than naively using `querySelectorAll`.
+> `$` uses the highly performant `querySelectorAll` and is more performant, while `$$` requires a custom implementation `querySelectorAllDeep` which recurses through the shadow DOM. It is recommended to use `$` for performance unless you need to access nodes that are part of a web component.
 
-In the following example you can see several elements with the class `matches`, one in the main page, one in the slotted DOM, and one in the shadow DOM tree of a component's template.
+### Example of $ vs $$
+
+In the following example you can see several elements with the class `matches` both in the document's DOM, the web component's DOM and the DOM slotted to a web component.
+
+You can see that `$` matches 2 elements
+* Page DOM
+* Slotted DOM
+
+and `$$` matches 3 elements
+* Page DOM
+* Slotted DOM
+* Shadow DOM
 
 <PlaygroundExample id="shadow-dom" direction="horizontal"></PlaygroundExample>
 
-## Common Uses
+## Query in Callbacks
 
 ### createInstance
 
@@ -138,10 +150,11 @@ Query provides a few special methods that can be used to manipulate your compone
 
 Query provides a helper `getComponent` which can be used to access your components instance from anywhere in the DOM.
 
+This can be used to trigger functionality defined on your component from anywhere in your page. This
 
 ```javascript
 // somewhere in your custom codebase
-const seleectMenuIndex = (index) => {
+const selectMenuIndex = (index) => {
   const menu = $('ui-menu').getComponent();
   if(menu) {
     menu.selectIndex(index);
@@ -162,5 +175,23 @@ $('ui-panel').settings({
 ```
 
 
+### initialize
 
+You can use `initialize` to initialize a component with settings on `DOMContentLoaded`. Initialize can be used before the element it references.
 
+```html
+<script>
+$('ui-panel').initialize({
+  getNaturalSize: (panel, { direction, minimized }) => {
+    // some custom logic
+  }
+});
+</script>
+<ui-panels>
+  <ui-panel>1</ui-panel>
+  <ui-panel>2</ui-panel>
+  <ui-panel>3</ui-panel>
+</ui-panels>
+```
+
+> **Settings vs Initialize** Initialize allows you to include your code to initialize a component anywhere in a page, even before the DOM element it references. This can be useful with some frameworks where `script` blocks may not be processed sequentially or are hoisted.
