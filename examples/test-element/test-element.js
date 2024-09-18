@@ -1,5 +1,4 @@
 import { createComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 
 import template from './test-element.html?raw';
 import css from './test-element.css?raw';
@@ -7,11 +6,11 @@ import css from './test-element.css?raw';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createInstance = function ({ tpl, $ }) {
+const createInstance = function ({ tpl, reactiveVar, $ }) {
   return {
-    tab: new ReactiveVar('events'),
-    morningActivity: new ReactiveVar('running'),
-    eveningActivity: new ReactiveVar('reading'),
+    tab: reactiveVar('events'),
+    morningActivity: reactiveVar('running'),
+    eveningActivity: reactiveVar('reading'),
     maybeActive(tab) {
       return tpl.tab.get() == tab ? 'active' : '';
     },
