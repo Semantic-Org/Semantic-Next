@@ -12,7 +12,7 @@ export class LitRenderer {
 
   static html = html;
 
-  static PARENS_REGEXP = /('[^']*'|\(|\)|[^\s()]+)/g;
+  static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
 
   constructor({ ast, data, subTemplates, snippets, helpers, isSVG }) {
