@@ -305,7 +305,7 @@ class TemplateCompiler {
     else if (expression == 'false') {
       return false;
     }
-    else if (!Number.isNaN(parseFloat(expression, 10))) {
+    else if (!Number.isNaN(parseFloat(expression))) {
       return +expression;
     }
     return expression;
