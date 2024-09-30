@@ -137,6 +137,7 @@ export const getIndexHTMLBefore = function(type) {
     window.addEventListener('blur', function() {
       dispatchCustomEvent('iframeblur');
     }, true);
+    document.addEventListener('touchstart', {});
   </script>
   <!-- This defines the component tag and makes it available on your page !-->
   ${getScriptCode()}
