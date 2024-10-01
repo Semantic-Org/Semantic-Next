@@ -28,7 +28,7 @@
   --panel-label-active-color: rgb(255 255 255 / 80%);
   --panel-label-active-background: rgb(255 255 255 / 3%);
 
-  --panel-label-minimized-background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 30%));
+  --panel-label-minimized-background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 10%));
   --panel-label-minimized-color: rgba(255, 255, 255, 0.1);
 
   --panel-divider-color: var(--solid-border-color);

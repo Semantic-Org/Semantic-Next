@@ -20,8 +20,8 @@
     --topbar-site-name-distance: 10px;
     --topbar-site-name-color: var(--white);
     --topbar-menu-distance: 10px;
-    --topbar-logo-margin: 4px 16px 0px 10px;
-    --topbar-icon-size: 14px;
+    --topbar-logo-margin: 1px 0px 0px 13px;
+    --topbar-icon-size: 16px;
     --topbar-background-color: var(--playground-code-background);
     --topbar-menu-item-spacing: 3px;
     --topbar-menu-item-padding: 2px 2px;
@@ -33,33 +33,6 @@
     --topbar-menu-item-active-font-weight: bold;
     --topbar-border-bottom: 1px solid #232323;
 
-  }
-
-  html.light {
-    --playground-page-background: #FFFFFF;
-    --topbar-background-color: #000000;
-  }
-  html.light {
-    code-playground::part(playground) {
-      --playground-code-background: #F7F7F7;
-      --playground-border: var(--border);
-      --playground-button-background-color: #333333;
-
-      --playground-header-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
-      --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
-      --playground-header-color: rgba(255, 255, 255, 0.8);
-      --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
-
-      --code-purple: #8B1FFF;
-      --code-grey: #353535;
-      --code-default: #777777;
-      --playground-code-comment-color: #AAAAAA;
-    }
-    code-playground::part(panel) {
-      --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
-      --panel-label-color: #333;
-      --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;
-    }
   }
 
 
@@ -149,6 +122,40 @@
   }
 }
 
+/* Light Theme */
+html.light {
+  --playground-page-background: #FFFFFF;
+  --topbar-background-color: #000000;
+
+  code-playground::part(playground) {
+    --playground-code-background: #F7F7F7;
+    --playground-border: var(--border);
+    --playground-button-background-color: #333333;
+
+    --playground-header-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
+    --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
+    --playground-header-color: rgba(255, 255, 255, 0.8);
+    --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
+
+    --code-purple: #8B1FFF;
+    --code-grey: #353535;
+    --code-default: #777777;
+    --playground-code-comment-color: #AAAAAA;
+  }
+  code-playground::part(panel) {
+    --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
+    --panel-label-color: var(--black-70);
+    --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;
+
+    --panel-label-active-color: var(--black-90);
+    --panel-label-active-background: rgb(0 0 0 / 3%);
+
+    --panel-label-minimized-background: linear-gradient(rgba(0, 0, 0, 0.02), rgb(15 17 22 / 30%));
+    --panel-label-minimized-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Tablet */
 @media only screen and (max-width: 767px) {
   sidebar {
     display: none;
