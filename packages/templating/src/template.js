@@ -597,8 +597,8 @@ export const Template = class Template {
   }
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
-  attachEvent(selector, eventName, eventHandler, eventSettings) {
-    return $(selector, document, { pierceShadow: true }).on(eventName, eventHandler, {
+  attachEvent(selector, eventName, eventHandler, { eventSettings = {}, querySettings = { pierceShadow: true } } = {}) {
+    return $(selector, document, querySettings).on(eventName, eventHandler, {
       abortController: this.eventController,
       returnHandler: true,
       ...eventSettings
@@ -622,7 +622,7 @@ export const Template = class Template {
   }
 
   /*******************************
-           Reactive Helpers
+          Reactive Helpers
   *******************************/
 
   // reactions bound with this.reaction will be scoped to template

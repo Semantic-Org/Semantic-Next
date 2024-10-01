@@ -20,7 +20,6 @@ let originalDoubleDollar;
 const exportGlobals = function({ dollar = true, doubleDollar = true, query = true} = {}) {
   if (isClient) {
 
-
     if(dollar) {
       originalDollar = window.$;
       window.$ = $;
@@ -35,7 +34,7 @@ const exportGlobals = function({ dollar = true, doubleDollar = true, query = tru
       window.Query = Query;
     }
   }
-}
+};
 
 // Add a restoreGlobals method to restore the original values of $ and $$
 const restoreGlobals = function(settings) {

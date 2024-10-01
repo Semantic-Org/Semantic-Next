@@ -1,10 +1,9 @@
-import { isPlainObject, clone, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
-
 
 export class Query {
 
