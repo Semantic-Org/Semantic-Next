@@ -3,10 +3,11 @@
 
     --theme-switcher-hitbox-padding: 13px 12px 8px;
 
-    --playground-code-background: #080C10;
     --sidebar-width: 200px;
+    --playground-code-background: #080C10;
     --sidebar-box-shadow: none;
 
+    --playground-page-background: #080C10;
     --playground-border-color: #222222;
     --playground-border: 1px solid var(--playground-border-color);
 
@@ -33,6 +34,34 @@
     --topbar-border-bottom: 1px solid #232323;
 
   }
+
+  html.light {
+    --playground-page-background: #FFFFFF;
+    --topbar-background-color: #000000;
+  }
+  html.light {
+    code-playground::part(playground) {
+      --playground-code-background: #F7F7F7;
+      --playground-border: var(--border);
+      --playground-button-background-color: #333333;
+
+      --playground-header-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
+      --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
+      --playground-header-color: rgba(255, 255, 255, 0.8);
+      --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
+
+      --code-purple: #8B1FFF;
+      --code-grey: #353535;
+      --code-default: #777777;
+      --playground-code-comment-color: #AAAAAA;
+    }
+    code-playground::part(panel) {
+      --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
+      --panel-label-color: #333;
+      --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;
+    }
+  }
+
 
   code-playground::part(playground) {
     width: calc(100dvw - var(--sidebar-width));
@@ -79,7 +108,7 @@
   page {
     display: flex;
     flex-direction: row;
-    background: #080C10 !important;
+    background: var(--playground-page-background);
     height: calc(100vh - var(--topbar-height));
   }
 
