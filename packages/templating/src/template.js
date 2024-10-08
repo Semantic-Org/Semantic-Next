@@ -270,7 +270,6 @@ export const Template = class Template {
     let keywords = ['deep', 'global'];
     each(keywords, (keyword) => {
       if(eventString.startsWith(keyword)) {
-        console.log(keyword, 'found');
         eventString = eventString.replace(keyword, '');
         eventType = keyword;
       }

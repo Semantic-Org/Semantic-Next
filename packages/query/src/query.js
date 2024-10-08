@@ -324,7 +324,7 @@ export class Query {
     return;
   }
 
-  on(event, targetSelectorOrHandler, handlerOrOptions, options) {
+  on(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
     let handler;
@@ -377,12 +377,12 @@ export class Query {
       // will cause illegal invocation if used from proxy object
       const domEL = (this.isGlobal) ? globalThis : el;
       if (domEL.addEventListener) {
-        domEL.addEventListener(event, eventListener, { signal, ...eventSettings });
+        domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
       }
 
       const eventHandler = {
         el,
-        event,
+        eventName,
         eventListener,
         abortController,
         delegated: targetSelector !== undefined,
@@ -403,7 +403,7 @@ export class Query {
     return this;
   }
 
-  one(event, targetSelectorOrHandler, handlerOrOptions, options) {
+  one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
@@ -420,18 +420,18 @@ export class Query {
     const wrappedHandler = (...args) => {
       handler.apply(this, args);
       // Unbind the event handler after it has been invoked once
-      this.off(event, wrappedHandler);
+      this.off(eventName, wrappedHandler);
     };
     return (targetSelector)
-      ? this.on(event, targetSelector, wrappedHandler, options)
-      : this.on(event, wrappedHandler, options)
+      ? this.on(eventName, targetSelector, wrappedHandler, options)
+      : this.on(eventName, wrappedHandler, options)
     ;
   }
 
-  off(event, handler) {
+  off(eventName, handler) {
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        eventHandler.event === event &&
+        eventHandler.eventName === eventName &&
         (!handler ||
           handler?.eventListener == eventHandler.eventListener ||
           eventHandler.eventListener === handler ||
@@ -440,7 +440,7 @@ export class Query {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if(el.removeEventListener) {
-          el.removeEventListener(event, eventHandler.eventListener);
+          el.removeEventListener(eventName, eventHandler.eventListener);
         }
         return false;
       }
@@ -449,12 +449,12 @@ export class Query {
     return this;
   }
 
-  trigger(eventType, eventParams) {
+  trigger(eventName, eventParams) {
     return this.each(el => {
       if (typeof el.dispatchEvent !== 'function') {
         return;
       }
-      const event = new Event(eventType, { bubbles: true, cancelable: true });
+      const event = new Event(eventName, { bubbles: true, cancelable: true });
       if(eventParams) {
         Object.assign(event, eventParams);
       }
