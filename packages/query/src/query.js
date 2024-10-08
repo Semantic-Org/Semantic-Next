@@ -348,22 +348,27 @@ export class Query {
     this.each((el) => {
       let delegateHandler;
       if (targetSelector) {
-        delegateHandler = (e) => {
+        delegateHandler = (event) => {
           let target;
           // if this event is composed from a web component
           // this is required to get the original path
-          if (e.composed && e.composedPath) {
-            const path = e.composedPath();
+          if (event.composed && event.composedPath) {
+
+            // look through composed path bubbling into the attached element to see if any match target
+            let path = event.composedPath();
+            const elIndex = findIndex(path, thisEl => thisEl == el);
+            path = path.slice(0, elIndex);
             target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+
           }
           else {
             // keep things simple for most basic uses
-            target = e.target.closest(targetSelector);
+            target = event.target.closest(targetSelector);
           }
 
           if (target) {
             // If a matching target is found, call the handler with the correct context
-            handler.call(target, e);
+            handler.call(target, event);
           }
         };
       }

@@ -215,7 +215,7 @@ const events = {
   'pointerdown .return'({ state, tpl }) {
     tpl.showPreviousMenu();
   },
-  'pointerdown .nav-icon'({tpl, target, state, event, $, afterFlush}) {
+  'deep pointerdown .nav-icon'({tpl, target, state, event, $, afterFlush}) {
     const $title = $(target).closest('.title');
     const index = $title.index('.title');
 

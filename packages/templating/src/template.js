@@ -261,6 +261,23 @@ export const Template = class Template {
   }
 
   parseEventString(eventString) {
+
+    // we want to allow 3 types of event syntax
+    // 'deep eventType selector' - attach event to an
+    // 'global eventType selector' - attach event to an element on the page
+    // 'eventType selector' - bind to an element inside the web component
+    let eventType = 'delegated';
+    let keywords = ['deep', 'global'];
+    each(keywords, (keyword) => {
+      if(eventString.startsWith(keyword)) {
+        console.log(keyword, 'found');
+        eventString = eventString.replace(keyword, '');
+        eventType = keyword;
+      }
+    });
+
+    eventString = eventString.trim();
+
     // we are using event delegation so we will have to bind
     // some events to their corresponding event that bubbles
     const getBubbledEvent = (eventName) => {
@@ -277,7 +294,6 @@ export const Template = class Template {
       }
       return eventName;
     };
-
     let events = [];
     let parts = eventString.split(/\s+/);
 
@@ -285,6 +301,7 @@ export const Template = class Template {
     let addedSelectors = false;
     const eventNames = [];
     const selectors = [];
+    // parse out various syntax like `click, mousedown foo`, `click .foo, .bar`
     each(parts, (part, index) => {
       const value = part.replace(/(\,|\W)+$/, '').trim();
       const hasComma = part.includes(',');
@@ -306,7 +323,7 @@ export const Template = class Template {
         selectors.push('');
       }
       each(selectors, (selector) => {
-        events.push({ eventName, selector });
+        events.push({ eventName, eventType, selector });
       });
     });
     return events;
@@ -334,47 +351,68 @@ export const Template = class Template {
       }, { abortController: this.eventController });
     }
 
-    each(events, (eventHandler, eventString) => {
+    each(events, (userHandler, eventString) => {
       const subEvents = this.parseEventString(eventString);
       const template = this;
       each(subEvents, (event) => {
-        const { eventName, selector } = event;
+        const { eventName, selector, eventType } = event;
+
         // BUG: iOS Safari will not bubble the touchstart / touchend events
         // if theres no handler on the actual element
         if(selector) {
           $(selector, { root: this.renderRoot }).on(eventName, noop, { abortController: this.eventController });
         }
-        $(this.renderRoot).on(
-          eventName,
-          selector,
-          function(event) {
-            if (!template.isNodeInTemplate(event.target)) {
-              return;
-            }
-            if (inArray(eventName, ['mouseover', 'mouseout'])
-              && event.relatedTarget
-              && event.target.contains(event.relatedTarget)) {
-              return;
-            }
-            const targetElement = this;
-            const boundEvent = eventHandler.bind(targetElement);
-            const eventData = event?.detail || {};
-            const elData = targetElement?.dataset;
-            const elValue = targetElement?.value;
-            template.call(boundEvent, {
-              additionalData: {
-                event: event,
-                target: targetElement,
-                value: elValue,
-                data: {
-                  ...elData,
-                  ...eventData
-                }
-              },
-            });
-          },
-          { abortController: this.eventController }
-        );
+
+        const eventHandler = function(event) {
+
+          // check if the event occurred in the current template if not global
+          if (eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
+            return;
+          }
+          // handle related target use case for special events
+          if (inArray(eventName, ['mouseover', 'mouseout'])
+            && event.relatedTarget
+            && event.target.contains(event.relatedTarget)) {
+            return;
+          }
+
+          // check if the event occurred in a slotted element or nested web component
+          const isDeep = $(event.target).filter(selector).length == 0;
+          if(isDeep && eventType !== 'deep') {
+            return;
+          }
+
+          // prepare data for users event handler
+          const targetElement = this;
+          const boundEvent = userHandler.bind(targetElement);
+          const eventData = event?.detail || {};
+          const elData = targetElement?.dataset;
+          const elValue = targetElement?.value;
+
+          template.call(boundEvent, {
+            additionalData: {
+              event: event,
+              isDeep,
+              target: targetElement,
+              value: elValue,
+              data: {
+                ...elData,
+                ...eventData
+              }
+            },
+          });
+        };
+
+        const eventSettings = { abortController: this.eventController };
+
+        if(eventType == 'global') {
+          // allow user to bind to global selectors if they opt in using the 'global' keyword
+          $(selector, { root: document }).on(eventName, eventHandler, eventSettings);
+        }
+        else {
+          // otherwise use event delegation at the components shadow root
+          $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+        }
       });
     });
   }
