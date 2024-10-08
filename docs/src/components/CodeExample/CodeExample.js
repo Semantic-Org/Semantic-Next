@@ -53,6 +53,7 @@ const onCreated = function({tpl, isClient, settings}) {
 };
 
 const onRendered = function({tpl, isClient, settings}) {
+  console.log('hi');
   tpl.setSlottedContent();
 };
 
@@ -60,6 +61,7 @@ const onRendered = function({tpl, isClient, settings}) {
 
 const events = {
   'click .code.link'({event, tpl}) {
+    console.log('here');
     tpl.codeVisible.toggle();
   }
 };
