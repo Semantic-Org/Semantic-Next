@@ -376,7 +376,7 @@ export const Template = class Template {
           }
 
           // check if the event occurred in a slotted element or nested web component
-          const isDeep = $(event.target).filter(selector).length == 0;
+          const isDeep = $(event.target).closest(selector).length == 0;
           if(isDeep && eventType !== 'deep') {
             return;
           }
