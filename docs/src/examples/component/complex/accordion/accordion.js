@@ -3,7 +3,7 @@ import { createComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({tpl, reactiveVar}) => ({
+const createInstance = ({self, reactiveVar}) => ({
   sections: [
     { title: 'Section 1', content: 'Content for section 1', expanded: reactiveVar(false) },
     { title: 'Section 2', content: 'Content for section 2', expanded: reactiveVar(false) },
@@ -11,14 +11,14 @@ const createInstance = ({tpl, reactiveVar}) => ({
   ],
 
   toggleSection(index) {
-    const section = tpl.sections[index];
+    const section = self.sections[index];
     section.expanded.toggle();
   }
 });
 
 const events = {
-  'click .header'({tpl, data}) {
-    tpl.toggleSection(data.index);
+  'click .header'({self, data}) {
+    self.toggleSection(data.index);
   }
 };
 

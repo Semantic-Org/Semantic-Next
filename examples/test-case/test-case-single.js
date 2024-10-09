@@ -2,7 +2,7 @@ import { createComponent } from '@semantic-ui/component';
 
 const template = `{{getValue}}`;
 
-const createInstance = (tpl) => ({
+const createInstance = (self) => ({
    getValue: () => 'test'
 });
 

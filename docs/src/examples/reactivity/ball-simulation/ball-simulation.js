@@ -9,10 +9,10 @@ const state = {
   time: 0,
 };
 
-const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
+const createInstance = ({self, $, reaction, reactiveVar, state}) => ({
 
   startTime() {
-    tpl.tick();
+    self.tick();
   },
 
   getCanvas() {
@@ -24,12 +24,12 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     state.time.increment();
     // schedule next tick in 1 frame (144fps)
     const frame = 1000 / 144;
-    setTimeout(tpl.tick, frame);
+    setTimeout(self.tick, frame);
   },
 
   createBalls(count) {
     while(count--) {
-      tpl.createBall({x: 250, y: 250});
+      self.createBall({x: 250, y: 250});
     }
   },
 
@@ -46,8 +46,8 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
         ${Math.random()} ${Math.random() * 255} /
         ${Math.random() * 50 + 50}%
       )`,
-      vx: Math.random() * 3,
-      vy: Math.random() * 3,
+      vx: Math.random() * 1.2,
+      vy: Math.random() * 1.2,
     });
 
 
@@ -55,7 +55,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     state.balls.push(ball);
 
     // we setup a reaction so it updates as time changes
-    reaction(() => tpl.updateBallPosition(ball));
+    reaction(() => self.updateBallPosition(ball));
   },
 
   updateBallPosition(ball) {
@@ -71,7 +71,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     ballData.y += ballData.vy * t;
 
     // Check for collision with walls
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     if (ballData.x + ballData.radius > canvas.width || ballData.x - ballData.radius < 0) {
       ballData.vx = -ballData.vx;
     }
@@ -83,20 +83,20 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   draw() {
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     const ctx = canvas.getContext(`2d`);
     reaction(comp => {
       const balls = state.balls.get();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       each(balls, (ball) => {
         const ballData = ball.get();
-        tpl.drawBall(ballData);
+        self.drawBall(ballData);
       });
     });
   },
 
   drawBall(ball) {
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     const ctx = canvas.getContext(`2d`);
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -107,17 +107,17 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 
 });
 
-const onRendered = ({tpl}) => {
-  tpl.startTime();
-  tpl.draw();
-  tpl.createBalls(25);
+const onRendered = ({self}) => {
+  self.startTime();
+  self.draw();
+  self.createBalls(25);
 };
 
 const events = {
-  'pointerdown canvas'({tpl, event}) {
-    const canvas = tpl.getCanvas();
+  'pointerdown canvas'({self, event}) {
+    const canvas = self.getCanvas();
     const rect = canvas.getBoundingClientRect();
-    tpl.createBall({
+    self.createBall({
       x: event.clientX - rect.left,
       y: event.clientY - rect.top
     });

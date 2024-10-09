@@ -354,6 +354,7 @@
     --h3: 18px;
     --h4: 15px;
     --h5: 14px;
+    --box-sizing: border-box;
     --em-size: var(--medium-size-px);
     --mini-size-px: 11;
     --tiny-size-px: 12;
@@ -692,6 +693,11 @@
     --gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
     --strong-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
     --very-strong-gradient: linear-gradient(var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+    --very-subtle-inverted-gradient: linear-gradient(var(--very-subtle-transparent-black), var(--very-subtle-transparent-white));
+    --subtle-inverted-gradient: linear-gradient(var(--subtle-transparent-black), var(--subtle-transparent-white));
+    --inverted-gradient: linear-gradient(var(--transparent-black), var(--transparent-white));
+    --strong-inverted-gradient: linear-gradient(var(--strong-transparent-black), var(--strong-transparent-white));
+    --very-strong-inverted-gradient: linear-gradient(var(--very-strong-transparent-black), var(--very-strong-transparent-white));
     --very-subtle-angled-gradient:
       linear-gradient(
         45deg,

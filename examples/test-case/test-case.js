@@ -3,16 +3,16 @@ import { createComponent } from '@semantic-ui/component';
 import template from './test-case.html?raw';
 import css from './test-case.css?raw';
 
-const createInstance = function ({ tpl, $ }) {
+const createInstance = function ({ self, $ }) {
   // test instance
   return {};
 };
 
-const onCreated = function ({ tpl }) {
+const onCreated = function ({ self }) {
   // test created
 };
 
-const onDestroyed = function ({ tpl }) {
+const onDestroyed = function ({ self }) {
   // test destroyed
 };
 
