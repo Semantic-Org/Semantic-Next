@@ -295,7 +295,7 @@ export class Query {
       if (this.options.pierceShadow) {
         return this.closestDeep(el, selector);
       }
-      else {
+      else if(selector) {
         return el.closest(selector);
       }
     }).filter(Boolean);
@@ -361,9 +361,13 @@ export class Query {
             target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
 
           }
-          else {
+          else if(targetSelector) {
             // keep things simple for most basic uses
             target = event.target.closest(targetSelector);
+          }
+          else {
+            // no target selector
+            target = event.target;
           }
 
           if (target) {

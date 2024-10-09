@@ -369,16 +369,17 @@ export const Template = class Template {
           if (eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
             return;
           }
+
+          // check if event occured on a deep event handler and the handler type isnt 'deep'
+          const isDeep = selector && $(event.target).closest(selector).length == 0;
+          if(eventType !== 'deep' && isDeep) {
+            return;
+          }
+
           // handle related target use case for special events
           if (inArray(eventName, ['mouseover', 'mouseout'])
             && event.relatedTarget
             && event.target.contains(event.relatedTarget)) {
-            return;
-          }
-
-          // check if the event occurred in a slotted element or nested web component
-          const isDeep = $(event.target).closest(selector).length == 0;
-          if(isDeep && eventType !== 'deep') {
             return;
           }
 
