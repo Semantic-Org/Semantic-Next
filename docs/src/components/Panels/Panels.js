@@ -10,7 +10,7 @@ const settings = {
   saveStateID: 'panels',
 };
 
-const createInstance = ({tpl, el, settings, $}) => ({
+const createInstance = ({self, el, settings, $}) => ({
   panels: [],
   renderedPanels: [],
   cache: {
@@ -26,14 +26,14 @@ const createInstance = ({tpl, el, settings, $}) => ({
     if(!settings.saveState) {
       return;
     }
-    const panelSizes = tpl.panels.map((panel, index) => {
-      const size = roundNumber(tpl.getPanelSize(panel));
+    const panelSizes = self.panels.map((panel, index) => {
+      const size = roundNumber(self.getPanelSize(panel));
       return {
         size,
-        minimized: tpl.isMinimized(index)
+        minimized: self.isMinimized(index)
       };
     });
-    if(tpl.isLayoutCorrectSize(panelSizes)) {
+    if(self.isLayoutCorrectSize(panelSizes)) {
       localStorage.setItem(settings.saveStateID, JSON.stringify({ panels: panelSizes }));
     }
   },
@@ -72,30 +72,30 @@ const createInstance = ({tpl, el, settings, $}) => ({
     let $childPanelGroupPanels = $childPanelGroups.find('ui-panel');
     let $allPanels = $(el).find('ui-panel');
     let $panels = $allPanels.not($childPanelGroupPanels);
-    tpl.panels = $panels.get();
+    self.panels = $panels.get();
   },
 
   setPanelRendered(el) {
-    tpl.renderedPanels.push(el);
-    if(tpl.renderedPanels.length == tpl.panels.length) {
-      requestAnimationFrame(() => tpl.setPanelInitialSizes());
+    self.renderedPanels.push(el);
+    if(self.renderedPanels.length == self.panels.length) {
+      requestAnimationFrame(() => self.setPanelInitialSizes());
     }
   },
 
   setPanelInitialSizes() {
-    let storedLayout = tpl.getStoredLayout();
-    if(tpl.canUseStoredSizes(storedLayout)) {
-      tpl.setPanelStoredSizes(storedLayout);
+    let storedLayout = self.getStoredLayout();
+    if(self.canUseStoredSizes(storedLayout)) {
+      self.setPanelStoredSizes(storedLayout);
     }
     else {
-      tpl.setPanelCalculatedSizes();
+      self.setPanelCalculatedSizes();
     }
   },
   canUseStoredSizes(storedLayout = []) {
-    if(storedLayout.length != tpl.panels.length) {
+    if(storedLayout.length != self.panels.length) {
       return false;
     }
-    if(!tpl.isLayoutCorrectSize(storedLayout)) {
+    if(!self.isLayoutCorrectSize(storedLayout)) {
       return false;
     }
     return true;
@@ -117,18 +117,18 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
 
     each(storedLayout, (stored, index) => {
-      let panel = tpl.panels[index];
+      let panel = self.panels[index];
       if(stored.minimized) {
         panel.minimized = true;
-        let naturalSize = tpl.getNaturalPanelSize(index);
-        const relativeSize = tpl.getRelativeSize(naturalSize);
-        tpl.setPanelSize(index, relativeSize);
+        let naturalSize = self.getNaturalPanelSize(index);
+        const relativeSize = self.getRelativeSize(naturalSize);
+        self.setPanelSize(index, relativeSize);
       }
       else {
-        tpl.setPanelSize(index, stored.size);
+        self.setPanelSize(index, stored.size);
       }
       if(stored.size !== undefined) {
-        tpl.setPanelInitialized(panel);
+        self.setPanelInitialized(panel);
       }
     });
   },
@@ -144,82 +144,82 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
   },
   setPanelCalculatedSizes() {
-    let exactPanels = tpl.getExactPanels();
+    let exactPanels = self.getExactPanels();
     each(exactPanels, (panel) => {
-      let index = tpl.panels.indexOf(panel);
+      let index = self.panels.indexOf(panel);
       const size = panel.settings.size;
-      let relativeSize = tpl.getRelativeSettingSize(size, index);
-      tpl.setPanelSize(index, relativeSize);
-      tpl.setPanelInitialized(panel);
+      let relativeSize = self.getRelativeSettingSize(size, index);
+      self.setPanelSize(index, relativeSize);
+      self.setPanelInitialized(panel);
     });
 
     // we have to perform grow stage after setting fixed size panels
-    let growPanels = tpl.getGrowingPanels();
-    const availableWidth = tpl.getAvailableGrowWidth();
+    let growPanels = self.getGrowingPanels();
+    const availableWidth = self.getAvailableGrowWidth();
 
     if(growPanels.length == 0 && availableWidth > 0) {
       console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
-      growPanels = tpl.panels.slice(-1);
+      growPanels = self.panels.slice(-1);
     }
 
     each(growPanels, (panel) => {
       let relativeSize = availableWidth / growPanels.length;
-      let index = tpl.panels.indexOf(panel);
-      const minSize = tpl.getRelativeSettingSize(panel.settings.minSize);
-      const maxSize = tpl.getRelativeSettingSize(panel.settings.minSize);
+      let index = self.panels.indexOf(panel);
+      const minSize = self.getRelativeSettingSize(panel.settings.minSize);
+      const maxSize = self.getRelativeSettingSize(panel.settings.minSize);
       if(relativeSize < minSize) {
         relativeSize = minSize;
       }
       if(maxSize && relativeSize > maxSize) {
         relativeSize = maxSize;
       }
-      tpl.setPanelSize(index, relativeSize);
-      tpl.setPanelInitialized(panel);
+      self.setPanelSize(index, relativeSize);
+      self.setPanelInitialized(panel);
     });
   },
 
   // cache some sizing on pane group
   setGroupCalculations() {
-    tpl.cache.groupSize = tpl.getGroupSize();
-    tpl.cache.groupScrollOffset = tpl.getGroupScrollOffset();
-    tpl.cache.naturalSizes = tpl.panels.map((panel, index) => tpl.getNaturalPanelSize(index));
+    self.cache.groupSize = self.getGroupSize();
+    self.cache.groupScrollOffset = self.getGroupScrollOffset();
+    self.cache.naturalSizes = self.panels.map((panel, index) => self.getNaturalPanelSize(index));
   },
   removeGroupCalculations() {
-    delete tpl.cache.groupSize;
-    delete tpl.cache.groupScrollOffset;
-    delete tpl.cache.naturalSizes;
+    delete self.cache.groupSize;
+    delete self.cache.groupScrollOffset;
+    delete self.cache.naturalSizes;
   },
 
   // store current resize position when starting drag
   setDragStartCalculations(panel, eventData) {
     // handle is after the pane it's resizing
-    tpl.cache.resizeIndex = tpl.getPanelIndex(panel) - 1;
-    tpl.cache.resizeStart = eventData.startPosition + tpl.cache.groupScrollOffset;
+    self.cache.resizeIndex = self.getPanelIndex(panel) - 1;
+    self.cache.resizeStart = eventData.startPosition + self.cache.groupScrollOffset;
   },
 
   // remove calculations after drag end
   removeDragStartCalculations() {
-    delete tpl.cache.resizeStart;
-    delete tpl.cache.resizeIndex;
+    delete self.cache.resizeStart;
+    delete self.cache.resizeIndex;
   },
 
   setPointerCalculations(panel, eventData) {
-    tpl.cache.resizeEnd = eventData.endPosition + tpl.cache.groupScrollOffset;
-    tpl.cache.resizeDelta = tpl.cache.resizeEnd - tpl.cache.resizeStart;
+    self.cache.resizeEnd = eventData.endPosition + self.cache.groupScrollOffset;
+    self.cache.resizeDelta = self.cache.resizeEnd - self.cache.resizeStart;
   },
   setEndPointerCalculations() {
-    tpl.cache.resizeStart = tpl.cache.resizeEnd;
-    tpl.cache.resizeDelta = 0;
+    self.cache.resizeStart = self.cache.resizeEnd;
+    self.cache.resizeDelta = 0;
   },
 
   isMinimized(index) {
-    return tpl.getPanelSetting(index, 'minimized');
+    return self.getPanelSetting(index, 'minimized');
   },
 
   // get available width for elements set to 'grow'
   getAvailableGrowWidth() {
     let availableWidth = 100;
-    each(tpl.panels, (panel) => {
+    each(self.panels, (panel) => {
       const setWidth = $(panel).css('flex-grow');
       if(panel.settings.width !== 'grow' && setWidth) {
         availableWidth -= setWidth;
@@ -229,21 +229,21 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
 
   getGrowingPanels() {
-    return tpl.panels.filter(panel => !tpl.isPanelInitialized(panel) && panel.settings.size == 'grow');
+    return self.panels.filter(panel => !self.isPanelInitialized(panel) && panel.settings.size == 'grow');
   },
   getExactPanels() {
-    return tpl.panels.filter(panel => !tpl.isPanelInitialized(panel) && panel.settings.size !== 'grow');
+    return self.panels.filter(panel => !self.isPanelInitialized(panel) && panel.settings.size !== 'grow');
   },
 
   getRelativeSettingSize(size, index) {
     if(size == 'natural') {
-      let pixels = tpl.getNaturalPanelSize(index);
-      return tpl.getRelativeSize(pixels);
+      let pixels = self.getNaturalPanelSize(index);
+      return self.getRelativeSize(pixels);
     }
     else if(isString(size) && size.includes('px')) {
       const parts = size.split('px');
       const pixels = Number(parts[0]);
-      return tpl.getRelativeSize(pixels);
+      return self.getRelativeSize(pixels);
     }
     else if(size && size !== 'grow') {
       return parseFloat(size);
@@ -252,7 +252,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   getPixelSettingSize(size, index) {
     if(size == 'natural') {
-      return tpl.getNaturalPanelSize(index);
+      return self.getNaturalPanelSize(index);
     }
     else if(isString(size) && size.includes('px')) {
       const parts = size.split('px');
@@ -260,19 +260,19 @@ const createInstance = ({tpl, el, settings, $}) => ({
       return pixels;
     }
     else if(size && size !== 'grow') {
-      return tpl.getPixelSize(size);
+      return self.getPixelSize(size);
     }
   },
 
   getPanelSetting(index, setting) {
-    let panel = tpl.panels[index];
+    let panel = self.panels[index];
     return panel.settings[setting];
   },
   getPanelIndex(el) {
-    return tpl.panels.indexOf(el);
+    return self.panels.indexOf(el);
   },
   getChangeAmount(delta) {
-    const panelSize = tpl.getGroupSize();
+    const panelSize = self.getGroupSize();
     return Math.abs(delta / panelSize * 100);
   },
   getPanelSize(panel) {
@@ -281,7 +281,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
   getPanelSizePixels(index) {
     let panel = this.panels[index];
-    return (tpl.getPanelSize(panel) / 100) * tpl.getGroupSize();
+    return (self.getPanelSize(panel) / 100) * self.getGroupSize();
   },
 
   getGroupScrollOffset() {
@@ -292,8 +292,8 @@ const createInstance = ({tpl, el, settings, $}) => ({
   },
   getAvailableFlex() {
     let usedFlex = 0;
-    each(tpl.panels, (panel, index) => {
-      const size = tpl.getPanelSize(panel);
+    each(self.panels, (panel, index) => {
+      const size = self.getPanelSize(panel);
       if(size) {
         usedFlex += size;
       }
@@ -301,8 +301,8 @@ const createInstance = ({tpl, el, settings, $}) => ({
     return 100 - usedFlex;
   },
   getGroupSize() {
-    if(tpl.cache.groupSize) {
-      return tpl.cache.groupSize;
+    if(self.cache.groupSize) {
+      return self.cache.groupSize;
     }
     return (settings.direction == 'horizontal')
       ? $('.panels', { pierceShadow: false }).width()
@@ -310,77 +310,77 @@ const createInstance = ({tpl, el, settings, $}) => ({
     ;
   },
   getRelativeSize(pixelSize) {
-    const relativeSize = pixelSize / tpl.getGroupSize() * 100;
+    const relativeSize = pixelSize / self.getGroupSize() * 100;
     return Math.min(relativeSize, 100);
   },
   getPixelSize(relativeSize) {
-    return (relativeSize / 100) * tpl.getGroupSize();
+    return (relativeSize / 100) * self.getGroupSize();
   },
 
   getNaturalPanelSize(index) {
-    let panel = tpl.panels[index];
-    let getPanelNaturalSize = tpl.getPanelSetting(index, 'getNaturalSize');
+    let panel = self.panels[index];
+    let getPanelNaturalSize = self.getPanelSetting(index, 'getNaturalSize');
     let naturalSize = getPanelNaturalSize(panel, { direction: settings.direction, minimized: panel.settings.minimized });
     return naturalSize;
   },
 
   setNaturalPanelSize(index) {
-    let naturalSize = tpl.getNaturalPanelSize(index);
+    let naturalSize = self.getNaturalPanelSize(index);
     if(naturalSize == 0) {
       return;
     }
-    const relativeSize = tpl.getRelativeSize(naturalSize);
-    tpl.changePanelSize(index, relativeSize);
-    tpl.saveLayout();
+    const relativeSize = self.getRelativeSize(naturalSize);
+    self.changePanelSize(index, relativeSize);
+    self.saveLayout();
   },
 
   setPanelMinimized(index) {
-    let naturalSize = tpl.getNaturalPanelSize(index);
-    const relativeSize = tpl.getRelativeSize(naturalSize);
-    tpl.changePanelSize(index, relativeSize, { manualResize: true });
+    let naturalSize = self.getNaturalPanelSize(index);
+    const relativeSize = self.getRelativeSize(naturalSize);
+    self.changePanelSize(index, relativeSize, { manualResize: true });
     if(naturalSize == 0) {
       return;
     }
-    tpl.saveLayout();
+    self.saveLayout();
   },
 
   setPanelMaximized(index, previousSize) {
-    let naturalSize = tpl.getNaturalPanelSize(index);
-    const relativeSize = tpl.getRelativeSize(naturalSize);
+    let naturalSize = self.getNaturalPanelSize(index);
+    const relativeSize = self.getRelativeSize(naturalSize);
     const openSize = (previousSize)
       ? Math.min(previousSize, relativeSize)
       : relativeSize
     ;
-    tpl.changePanelSize(index, openSize, { manualResize: true });
-    tpl.saveLayout();
+    self.changePanelSize(index, openSize, { manualResize: true });
+    self.saveLayout();
   },
 
 
   changePanelSize(index, newRelativeSize, resizeSettings) {
-    let currentSize = tpl.getPanelSizePixels(index) || 0;
-    let newSize = tpl.getPixelSize(newRelativeSize) || 0;
+    let currentSize = self.getPanelSizePixels(index) || 0;
+    let newSize = self.getPixelSize(newRelativeSize) || 0;
     let sizeDelta = newSize - currentSize;
 
-    tpl.setGroupCalculations();
-    tpl.resizePanels(index, sizeDelta, resizeSettings);
-    tpl.removeGroupCalculations();
+    self.setGroupCalculations();
+    self.resizePanels(index, sizeDelta, resizeSettings);
+    self.removeGroupCalculations();
   },
 
   setPanelSize(index, relativeSize) {
-    let panel = tpl.panels[index];
+    let panel = self.panels[index];
     $(panel).css('flex-grow', relativeSize);
   },
 
   setPanelSizePixels(index, pixelSize, settings) {
-    let relativeSize = tpl.getRelativeSize(pixelSize);
-    tpl.setPanelSize(index, relativeSize, settings);
+    let relativeSize = self.getRelativeSize(pixelSize);
+    self.setPanelSize(index, relativeSize, settings);
   },
 
   debugSizes() {
     let total = 0;
     let sizes = [];
-    each(tpl.panels, (panel) => {
-      const size = tpl.getPanelSize(panel);
+    each(self.panels, (panel) => {
+      const size = self.getPanelSize(panel);
       total += size;
       sizes.push(size);
     });
@@ -392,7 +392,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
 
   resizePanels(index, delta, { manualResize = false } = {}) {
     let
-      lastIndex = tpl.panels.length - 1,
+      lastIndex = self.panels.length - 1,
       standard = delta > 0,
       hasMinimized = false,
       // if the handle is on the other side
@@ -400,29 +400,29 @@ const createInstance = ({tpl, el, settings, $}) => ({
         return index;
       },
       getRightIndex = () => {
-        if(index + 1 >= tpl.panels.length) {
+        if(index + 1 >= self.panels.length) {
           return index - 1;
         }
         return index + 1;
       },
       getNaturalSize = memoize((index) => {
-        let naturalSize = tpl.cache.naturalSizes[index];
+        let naturalSize = self.cache.naturalSizes[index];
         return naturalSize;
       }),
       getMaxSize = memoize((index) => {
-        let maxSize = tpl.getPanelSetting(index, 'maxSize');
-        return tpl.getPixelSettingSize(maxSize) || 0;
+        let maxSize = self.getPanelSetting(index, 'maxSize');
+        return self.getPixelSettingSize(maxSize) || 0;
       }),
       isMinimized = memoize((index) => {
-        let minimized = tpl.isMinimized(index);
+        let minimized = self.isMinimized(index);
         return minimized || false;
       }),
       getMinSize = memoize((index) => {
-        let minSize = tpl.getPanelSetting(index, 'minSize');
-        return tpl.getPixelSettingSize(minSize) || 0;
+        let minSize = self.getPanelSetting(index, 'minSize');
+        return self.getPixelSettingSize(minSize) || 0;
       }),
       getSize = (index) => {
-        let panelSize = tpl.getPanelSizePixels(index);
+        let panelSize = self.getPanelSizePixels(index);
         return panelSize;
       },
       cannotResize = (resizeIndex) => {
@@ -439,7 +439,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
         if(manualResize && sizeIndex == index) {
           hasMinimized = true;
         }
-        tpl.setPanelSizePixels(sizeIndex, size);
+        self.setPanelSizePixels(sizeIndex, size);
       },
       pixelsToAdd,
       pixelsToTake
@@ -586,7 +586,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       Check All Collapsed
     -----------------------*/
 
-    let i = tpl.panels.length;
+    let i = self.panels.length;
     let collapseCount = 0;
     while(i--) {
       if(cannotResize(i)) {
@@ -594,7 +594,7 @@ const createInstance = ({tpl, el, settings, $}) => ({
       }
     }
     // When all but one panel are collapsed we cant resize
-    if(collapseCount + 1 >= tpl.panels.length) {
+    if(collapseCount + 1 >= self.panels.length) {
       return;
     }
 
@@ -665,53 +665,53 @@ const createInstance = ({tpl, el, settings, $}) => ({
     }
 
 
-    tpl.debugSizes();
+    self.debugSizes();
   },
 });
 
-const onCreated = ({ el, tpl }) => {
-  tpl.addPanels();
+const onCreated = ({ el, self }) => {
+  self.addPanels();
 };
 
-const onDestroyed = ({ tpl }) => {
+const onDestroyed = ({ self }) => {
 };
 
-const onRendered = ({ $, el, tpl, settings }) => {
+const onRendered = ({ $, el, self, settings }) => {
 };
 
 const events = {
-  'rendered ui-panel'({tpl, event, data}) {
+  'rendered ui-panel'({self, event, data}) {
     const panel = event.target;
-    if(inArray(panel, tpl.panels)) {
-      tpl.setPanelRendered(panel, data);
+    if(inArray(panel, self.panels)) {
+      self.setPanelRendered(panel, data);
     }
   },
-  'resizeStart ui-panel'({tpl, event, data}) {
+  'resizeStart ui-panel'({self, event, data}) {
     const panel = event.target;
-    if(inArray(panel, tpl.panels)) {
-      tpl.setGroupCalculations();
-      tpl.setDragStartCalculations(panel, data);
+    if(inArray(panel, self.panels)) {
+      self.setGroupCalculations();
+      self.setDragStartCalculations(panel, data);
     }
   },
-  'resizeDrag ui-panel'({tpl, event, data}) {
+  'resizeDrag ui-panel'({self, event, data}) {
     // note: the handle event fires on the preceding panel to the handle
     // so for | 1 || 2 | the handle fires on '2'
     const panel = event.target;
-    if(inArray(panel, tpl.panels)) {
+    if(inArray(panel, self.panels)) {
       requestAnimationFrame(() => {
-        tpl.setPointerCalculations(panel, data);
-        let { resizeIndex, resizeDelta } = tpl.cache;
-        tpl.resizePanels(resizeIndex, resizeDelta);
-        tpl.setEndPointerCalculations();
+        self.setPointerCalculations(panel, data);
+        let { resizeIndex, resizeDelta } = self.cache;
+        self.resizePanels(resizeIndex, resizeDelta);
+        self.setEndPointerCalculations();
       });
     }
   },
-  'resizeEnd ui-panel'({tpl, event, data}) {
+  'resizeEnd ui-panel'({self, event, data}) {
     const panel = event.target;
-    if(inArray(panel, tpl.panels)) {
-      tpl.removeDragStartCalculations();
-      tpl.removeGroupCalculations();
-      tpl.saveLayout();
+    if(inArray(panel, self.panels)) {
+      self.removeDragStartCalculations();
+      self.removeGroupCalculations();
+      self.saveLayout();
     }
   },
 };

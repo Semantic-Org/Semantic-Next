@@ -17,7 +17,7 @@ const settings = {
   showCode: false, // show code on start
 };
 
-const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
+const createInstance = ({ $, isServer, reaction, settings, self }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
   slottedContent: new ReactiveVar(),
   code: new ReactiveVar(settings.code),
@@ -25,7 +25,7 @@ const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
     return input.replace(/<!--[\s\S]*?-->/g, '');
   },
   canShowCode() {
-    return tpl.code.get() && tpl.codeVisible.get();
+    return self.code.get() && self.codeVisible.get();
   },
   setSlottedContent() {
     if(isServer) {
@@ -36,33 +36,31 @@ const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
       slottedNodes = defaultSlot.assignedNodes(),
       $content = $(slottedNodes).not('script, style'),
       html = $content.outerHTML(),
-      code = tpl.removeComments( html )
+      code = self.removeComments( html )
     ;
-    tpl.slottedContent.set(code);
+    self.slottedContent.set(code);
   },
   calculateCodeVisible() {
     reaction(() => {
-      const code = settings.code || tpl.slottedContent.get();
-      tpl.code.set(code);
+      const code = settings.code || self.slottedContent.get();
+      self.code.set(code);
     });
   }
 });
 
-const onCreated = function({tpl, isClient, settings}) {
-  tpl.calculateCodeVisible();
+const onCreated = function({self, isClient, settings}) {
+  self.calculateCodeVisible();
 };
 
-const onRendered = function({tpl, isClient, settings}) {
-  console.log('hi');
-  tpl.setSlottedContent();
+const onRendered = function({self, isClient, settings}) {
+  self.setSlottedContent();
 };
 
 
 
 const events = {
-  'click .code.link'({event, tpl}) {
-    console.log('here');
-    tpl.codeVisible.toggle();
+  'click .code.link'({event, self}) {
+    self.codeVisible.toggle();
   }
 };
 
