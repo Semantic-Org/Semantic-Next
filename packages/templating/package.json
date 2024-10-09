@@ -5,11 +5,11 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/component": "^0.0.40",
-    "@semantic-ui/query": "^0.0.40",
-    "@semantic-ui/reactivity": "^0.0.40",
-    "@semantic-ui/templating": "^0.0.40",
-    "@semantic-ui/utils": "^0.0.40"
+    "@semantic-ui/component": "^0.0.41",
+    "@semantic-ui/query": "^0.0.41",
+    "@semantic-ui/reactivity": "^0.0.41",
+    "@semantic-ui/templating": "^0.0.41",
+    "@semantic-ui/utils": "^0.0.41"
   },
-  "version": "0.0.40"
+  "version": "0.0.41"
 }
