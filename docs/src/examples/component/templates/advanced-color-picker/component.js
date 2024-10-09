@@ -14,7 +14,7 @@ const state = {
   hoveredColor: '',
 };
 
-const createInstance = ({tpl, settings, $, dispatchEvent}) => ({
+const createInstance = ({self, settings, $, dispatchEvent}) => ({
   selectColor(color) {
     settings.color = color;
     dispatchEvent('color-selected', { color });
@@ -23,9 +23,9 @@ const createInstance = ({tpl, settings, $, dispatchEvent}) => ({
 
 const events = {
 
-  'click .option': function({ $, tpl }) {
+  'click .option': function({ $, self }) {
     const color = $(this).computedStyle('background-color');
-    tpl.selectColor(color);
+    self.selectColor(color);
   },
 
   'mouseover, mouseleave .option'({event, data, state}) {
@@ -36,9 +36,9 @@ const events = {
     state.hoveredColor.set(color);
   },
 
-  'click ui-button'({$, tpl}) {
+  'click ui-button'({$, self}) {
     const color = $('.custom-color').val();
-    tpl.selectColor(color);
+    self.selectColor(color);
   },
 
   'input .custom-color'({event, state }) {

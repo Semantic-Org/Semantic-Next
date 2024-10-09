@@ -29,8 +29,8 @@ const createInstance = ({ self, findParent, $ }) => ({
   },
 
   scrollToBottom() {
-    const todoList = $('.todo-list')[0];
-    todoList.scrollTop = todoList.scrollHeight;
+    const listEl = $('.todo-list').get(0);
+    listEl.scrollTop = listEl.scrollHeight;
   },
 
   clearCompleted() {

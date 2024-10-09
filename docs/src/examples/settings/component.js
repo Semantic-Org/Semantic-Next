@@ -7,16 +7,16 @@ const settings = {
   startingNumber: 0
 };
 
-const createInstance = ({tpl, reactiveVar, settings}) => ({
+const createInstance = ({ self, reactiveVar, settings }) => ({
   counter: reactiveVar(),
   initialize() {
-    tpl.counter.set(settings.startingNumber);
+    self.counter.set(settings.startingNumber);
   },
   isEven: (number) => (number % 2 == 0)
 });
 
-const onCreated = ({tpl}) => {
-  setInterval(() => tpl.counter.increment(), 1000);
+const onCreated = ({ self }) => {
+  setInterval(() => self.counter.increment(), 1000);
 };
 
 createComponent({
