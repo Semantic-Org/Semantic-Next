@@ -70,7 +70,7 @@ In most real world use-cases you will need to provide additional information to 
 
 [`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
-Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), template instance `tpl` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createInstance`.
+Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), component instance `self` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createInstance`.
 
 > For more information on `createInstance` see our dedicated subsection on [defining functionality](/components/instances).
 
@@ -116,8 +116,8 @@ These can be browser events like `click`, perhaps to save something when a butto
 
 ```javascript
 const events = {
-  'click ui-button.save'({tpl}) {
-    tpl.save();
+  'click ui-button.save'({ self }) {
+    self.save();
   },
 };
 ```
@@ -140,9 +140,9 @@ Components can also include keybindings that will be attached to the page during
 ```javascript
 createComponent({
   keys: {
-    'up': ({ tpl }) => tpl.selectPreviousResult(),
-    'down': ({ tpl }) => pl.selectNextResult(),
-    'esc': ({ tpl }) => tpl.blurSearch(),
+    'up': ({ self }) => self.selectPreviousResult(),
+    'down': ({ self }) => pl.selectNextResult(),
+    'esc': ({ self }) => self.blurSearch(),
   }
 });
 ```

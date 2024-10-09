@@ -147,7 +147,7 @@ state = {
 When using this value internally you can grab the value from the callback arguments
 ```javascript
 
-const createInstance = ({tpl, state}) => ({
+const createInstance = ({self, state}) => ({
   getGreeting() {
     return `Hello ${state.name.value}`
   }
@@ -164,8 +164,8 @@ Hello {{name}}}}
 ## Template Instance
 
 
-### Definining Functionality
-Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/lifecycle/events) as `tpl` to invoke methods or access properties.
+### Defining Functionality
+Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/lifecycle/events) as `self` to invoke methods or access properties.
 
 ```javascript
 const createInstance = ({ state }) => ({
@@ -179,20 +179,22 @@ const createInstance = ({ state }) => ({
 ```
 
 ### Accessing Internally
-You can access your template instancec as `tpl` from other callbacks to invoke functionality.
+You can access your template instancec as `self` from other callbacks to invoke functionality.
 
 ```javascript
-const onRendered = ({tpl}) => {
-  tpl.incrementCounter();
+const onRendered = ({ self }) => {
+  self.incrementCounter();
 };
 ```
 
 ### Accessing Externally
-You can also access your component instance directly from the DOM
+You can also access your component instance directly from the DOM from the `component` property.
+
+> For more information see [from DOM](/components/instances#from-dom).
 
 ```javascript
-const { tpl } = document.querySelector('ui-counter');
-tpl.incrementCounter();
+const { component } = document.querySelector('ui-counter');
+component.incrementCounter();
 ```
 
 

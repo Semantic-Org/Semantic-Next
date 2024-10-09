@@ -132,9 +132,9 @@ You can use `$` from event handlers to immediately access the element
 You can use `target` to access the element that matches the selector specified by the event handler.
 ```javascript
 const events = {
-  'click .option': function({ $, target }) {
+  'click .option': function({ $, self, target }) {
     const color = $(target).computedStyle('background-color');
-    tpl.selectColor(color);
+    self.selectColor(color);
   },
 });
 ```

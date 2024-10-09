@@ -25,17 +25,17 @@ The `createInstance` callback is used to define your component instance includin
 
 ```javascript
 const state = { counter: 0 };
-const createInstance = ({tpl, state, settings}) => ({
+const createInstance = ({self, state, settings}) => ({
   setCounter(number) {
     state.counter.set(number);
   },
   startCounter() {
     state.running.set(true);
-    tpl.interval = setInterval(() => state.counter.increment(), 1000);
+    self.interval = setInterval(() => state.counter.increment(), 1000);
   },
   stopCounter() {
     state.running.set(false);
-    clearInterval(tpl.interval);
+    clearInterval(self.interval);
   },
 });
 ```
@@ -50,14 +50,14 @@ For more information see [component lifecycle](/components/lifecycle#callback-ar
 
 ### From Lifecycle Callbacks
 
-Instances are passed through to all other callbacks as `tpl` allowing you to reference methods and values directly from [events](/component/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
+Component instances are passed through to all other callbacks as `self` allowing you to reference methods and values directly from [events](/component/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
 
 ##### Lifecycle
 ```javascript
 
-const onRendered(({ tpl, isClient }) => {
+const onRendered(({ self, isClient }) => {
   if(isClient) {
-    tpl.draw();
+    self.draw();
   }
 });
 ```
@@ -65,8 +65,8 @@ const onRendered(({ tpl, isClient }) => {
 ##### Keybindings
 ```javascript
 const keys = {
-  'f'({ tpl }) {
-    tpl.search();
+  'f'({ self }) {
+    self.search();
   }
 }
 ```
@@ -76,14 +76,37 @@ const keys = {
 
 ```javascript
 const events = {
-  'click .stop'({ tpl }) {
-    tpl.stopCounter();
-  }
-  'click .start'({ tpl }) {
-    tpl.startCounter();
+  'click .start'({ self }) {
+    self.startCounter();
+  },
+  'click .stop'({ self }) {
+    self.stopCounter();
   }
 }
 ```
+
+#### "Self" Aliases
+
+Component callbacks provide additional aliases for `self` that your team may prefer to use.
+
+| alias     | why use                                                                                         |
+|-----------|-------------------------------------------------------------------------------------------------|
+| tpl       | **tpl** is short for template instance and is a shorter, albeit idiosyncratic keyword than self |
+| component | **component** provides more clarity than **self** but is a bit more verbose                     |
+
+> For consistency the documentation will use `self` but these aliases can be used interchangeably
+
+```javascript
+const events = {
+  'click .start'({ tpl }) {
+    tpl.startCounter();
+  },
+  'click .stop'({ component }) {
+    component.stopCounter();
+  }
+}
+```
+
 
 ### In Templates
 
@@ -96,7 +119,7 @@ Your template's [data context](/components/data) can be used to access values fr
 
 ### Accordion Example
 
-The following example shows using `tpl` to access behaviors from inside event handlers, and when iterating through `sections` from the template.
+The following example shows using `self` to access behaviors from inside event handlers, and when iterating through `sections` from the template.
 
 <PlaygroundExample id="accordion" direction="horizontal"></PlaygroundExample>
 
@@ -112,10 +135,10 @@ The most common scenario will require you to access some functionality on a pare
 The `findParent` helper can be used in this scenario, allowing you to walk up the render tree looking for a component matching the specified name.
 
 ```javascript
-const createInstance = ({tpl, findParent}) => {
+const createInstance = ({ findParent }) => {
   getTodos() => {
-    const parent = findParent('todo-list');
-    return parent.todos;
+    const todoList = findParent('todo-list');
+    return todoList.todos;
   }
 };
 ```
@@ -125,10 +148,10 @@ const createInstance = ({tpl, findParent}) => {
 You can use `findChild` and `findChildren` to look down the render tree for any subtemplates that match a given component name
 
 ```javascript
-const createInstance = ({tpl, findChildren}) => {
+const createInstance = ({ findChildren }) => {
   getRowName(id) => {
-    const rows = findChildren('table-rows');
-    const row = rows.filter(row => row._id == id);
+    const tableRows = findChildren('table-rows');
+    const row = tableRows.filter(row => row.id == id);
     return row.name;
   }
 };
@@ -139,10 +162,10 @@ const createInstance = ({tpl, findChildren}) => {
 If you need to access an arbitrary template from any other template you can use `findTemplate`
 
 ```javascript
-const createInstance = ({tpl, findTemplate}) => {
+const createInstance = ({ findTemplate }) => {
   getTodos() => {
-    const sibling = findTemplate('sibling-component');
-    return sibling.someMethod();
+    const component = findTemplate('sibling-component');
+    return component.someMethod();
   }
 };
 ```
@@ -152,24 +175,24 @@ const createInstance = ({tpl, findTemplate}) => {
 
 You can access your template instance directly from the DOM to modify its internal state, or access values.
 
-Each copy of your component will have a separate instance which will store its values and is accessible directly from the dom as `el.tpl`
+Each copy of your component will have a separate instance which will store its values and is accessible directly from the dom as `el.component`
 
 You can use Query's `getComponent()` helper to easily access a component instance
 
 With Query
 ```javascript
 import { $ } from '@semantic-ui/query';
-const tpl = $('ui-counter').getComponent();
-tpl.setCounter(2);
+const counter = $('ui-counter').getComponent();
+counter.setCounter(2);
 ```
 
 With Pure JS
 ```javascript
-const { tpl } = document.querySelector('ui-counter');
-tpl.setCounter(2);
+const { component } = document.querySelector('ui-counter');
+component.setCounter(2);
 ```
 
-> **Storage in the DOM** - Your template instance is stored as `el.tpl` i.e. `el.tpl.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
+> **Storage in the DOM** - Your template instance is stored as `el.self` i.e. `el.self.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
 
 
 ### DOM Access Example
