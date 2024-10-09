@@ -17,13 +17,13 @@ const state = {
   url: ''
 };
 
-const createInstance = function ({ tpl, data, state, settings }) {
+const createInstance = function ({ self, data, state, settings }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
     },
     getMenu() {
-      return tpl.filterVisibleSections(settings.menu);
+      return self.filterVisibleSections(settings.menu);
     },
     getNavIcon(section) {
       const defaultIcon = (settings.useAccordion && section?.pages)
@@ -34,26 +34,26 @@ const createInstance = function ({ tpl, data, state, settings }) {
     },
     getTitleStates(title) {
       const classes = [];
-      if (tpl.isExpandable(title)) {
+      if (self.isExpandable(title)) {
         classes.push('expandable');
       }
-      if (tpl.isActiveItem(title)) {
+      if (self.isActiveItem(title)) {
         classes.push('active');
       }
-      if (tpl.isCurrentItem(title)) {
+      if (self.isCurrentItem(title)) {
         classes.push('current');
       }
       return classes;
     },
     canShowNavIcon(section) {
-      return tpl.getNavIcon(section) !== undefined;
+      return self.getNavIcon(section) !== undefined;
     },
     hasIcons() {
       return any(settings.menu, section => section.icon);
     },
     getPageStates(page) {
       const classes = [];
-      if (tpl.isCurrentItem(page)) {
+      if (self.isCurrentItem(page)) {
         classes.push('current');
       }
       return classes;
@@ -71,7 +71,7 @@ const createInstance = function ({ tpl, data, state, settings }) {
         }
         // recursively filter pages
         const filteredPages = isArray(pages)
-          ? tpl.filterVisibleSections(pages)
+          ? self.filterVisibleSections(pages)
           : [];
         const result =
           filteredPages.length > 0 ? { ...item, pages: filteredPages } : item;
@@ -80,13 +80,13 @@ const createInstance = function ({ tpl, data, state, settings }) {
       }, []);
     },
     getLink(item) {
-      if (settings.linkCurrentPage || !tpl.isCurrentItem(item)) {
+      if (settings.linkCurrentPage || !self.isCurrentItem(item)) {
         return item?.url;
       }
       return;
     },
     isLinkItem(item) {
-      return item.url && !tpl.isCurrentItem(item);
+      return item.url && !self.isCurrentItem(item);
     },
     isExpandable() {
       return settings.useAccordion && !settings.expandAll;
@@ -95,11 +95,11 @@ const createInstance = function ({ tpl, data, state, settings }) {
       if(settings.expandAll) {
         return true;
       }
-      if (tpl.isCurrentItem(item)) {
+      if (self.isCurrentItem(item)) {
         return true;
       }
       if (isArray(item.pages)) {
-        return any(item.pages, tpl.isActiveItem);
+        return any(item.pages, self.isActiveItem);
       }
       return false;
     },
@@ -116,10 +116,10 @@ const createInstance = function ({ tpl, data, state, settings }) {
       if(!url1 || !url2) {
         return false;
       }
-      return tpl.addTrailingSlash(url1) == tpl.addTrailingSlash(url2);
+      return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
     },
     isCurrentItem(item) {
-      return tpl.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
+      return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
     },
     onPageChange() {
       state.url.set(window.location.pathname);
@@ -127,20 +127,20 @@ const createInstance = function ({ tpl, data, state, settings }) {
   };
 };
 
-const onCreated =  ({ tpl }) => {
+const onCreated =  ({ self }) => {
 };
 
-const onDestroyed =  ({ tpl }) => {
+const onDestroyed =  ({ self }) => {
 };
 
-const onRendered =  ({ $, tpl, attachEvent, isClient }) => {
+const onRendered =  ({ $, self, attachEvent, isClient }) => {
   if(isClient) {
-    attachEvent(document, 'astro:after-swap', tpl.onPageChange);
+    attachEvent(document, 'astro:after-swap', self.onPageChange);
   }
 };
 
 const events = {
-  'click .title': ({target, event, settings, $, tpl}) => {
+  'click .title': ({target, event, settings, $, self}) => {
     if(!settings.useAccordion) {
       return;
     }

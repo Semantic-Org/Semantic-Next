@@ -133,14 +133,14 @@ const createInstance = ({tpl, el, settings, $}) => ({
     });
   },
   isPanelInitialized(panel) {
-    if(panel?.tpl) {
-      return panel.tpl.initialized.get();
+    if(panel.component) {
+      return panel.component.initialized.get();
     }
     return false;
   },
   setPanelInitialized(panel) {
-    if(panel?.tpl) {
-      panel.tpl.initialized.set(true);
+    if(panel.component) {
+      panel.component.initialized.set(true);
     }
   },
   setPanelCalculatedSizes() {
