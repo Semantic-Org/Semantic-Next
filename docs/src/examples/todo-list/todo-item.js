@@ -4,52 +4,52 @@ import { Reaction } from '@semantic-ui/reactivity';
 const css = await getText('./todo-item.css');
 const template = await getText('./todo-item.html');
 
-const createInstance = ({ tpl, data, reactiveVar, findParent, $ }) => ({
+const createInstance = ({ self, data, reactiveVar, findParent, $ }) => ({
   editing: reactiveVar(false),
   getClasses() {
     return {
       completed: data.todo.completed,
-      editing: tpl.editing.get()
+      editing: self.editing.get()
     };
   },
   getTodos() {
     return findParent('todoList').todos;
   },
   toggleCompleted() {
-    const todos = tpl.getTodos();
+    const todos = self.getTodos();
     const todo = data.todo;
     todos.setProperty(todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
-    const todos = tpl.getTodos();
+    const todos = self.getTodos();
     todos.setProperty(data.todo._id, 'text', text);
   },
   removeTodo() {
-    tpl.getTodos().removeItem(data.todo._id);
+    self.getTodos().removeItem(data.todo._id);
   },
 });
 
 const events = {
-  'change .toggle'({ event, tpl, $ }) {
-    tpl.toggleCompleted();
+  'change .toggle'({ event, self, $ }) {
+    self.toggleCompleted();
   },
-  'click .destroy'({ event, tpl }) {
-    tpl.removeTodo();
+  'click .destroy'({ event, self }) {
+    self.removeTodo();
   },
-  'dblclick li'({ event, tpl, $ }) {
-    tpl.editing.set(true);
+  'dblclick li'({ event, self, $ }) {
+    self.editing.set(true);
     Reaction.afterFlush(() => {
       $('input.edit').focus();
     });
   },
-  'keydown input.edit'({ event, tpl, $ }) {
+  'keydown input.edit'({ event, self, $ }) {
     if (event.key === 'Enter') {
       $(this).blur();
     }
   },
-  'blur input.edit'({ event, tpl, $ }) {
-    tpl.changeText($(this).val());
-    tpl.editing.set(false);
+  'blur input.edit'({ event, self, $ }) {
+    self.changeText($(this).val());
+    self.editing.set(false);
   },
 };
 
