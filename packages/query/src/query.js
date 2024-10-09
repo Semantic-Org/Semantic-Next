@@ -268,6 +268,9 @@ export class Query {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
       }
+      else if(this.isGlobal) {
+        return inArray(selector, ['window', 'globalThis']);
+      }
       else {
         const elements = selector instanceof Query ? selector.get() : [selector];
         return elements.includes(el);
@@ -281,6 +284,9 @@ export class Query {
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return !el.matches || (el.matches && !el.matches(selector));
+      }
+      else if(this.isGlobal) {
+        return !inArray(selector, ['window', 'globalThis']);
       }
       else {
         const elements = selector instanceof Query ? selector.get() : [selector];
@@ -297,6 +303,9 @@ export class Query {
       }
       else if(selector) {
         return el.closest(selector);
+      }
+      else if(this.isGlobal) {
+        return inArray(selector, ['window', 'globalThis']);
       }
     }).filter(Boolean);
 

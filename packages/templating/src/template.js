@@ -407,8 +407,9 @@ export const Template = class Template {
         const eventSettings = { abortController: this.eventController };
 
         if(eventType == 'global') {
+          console.log('global');
           // allow user to bind to global selectors if they opt in using the 'global' keyword
-          $(selector, { root: document }).on(eventName, eventHandler, eventSettings);
+          $(selector).on(eventName, eventHandler, eventSettings);
         }
         else {
           // otherwise use event delegation at the components shadow root
