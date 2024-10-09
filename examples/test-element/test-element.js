@@ -6,16 +6,16 @@ import css from './test-element.css?raw';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createInstance = function ({ tpl, reactiveVar, $ }) {
+const createInstance = function ({ self, reactiveVar, $ }) {
   return {
     tab: reactiveVar('events'),
     morningActivity: reactiveVar('running'),
     eveningActivity: reactiveVar('reading'),
     maybeActive(tab) {
-      return tpl.tab.get() == tab ? 'active' : '';
+      return self.tab.get() == tab ? 'active' : '';
     },
     maybeDisabled() {
-      return tpl.tab.get() == 'basic' ? 'disabled' : '';
+      return self.tab.get() == 'basic' ? 'disabled' : '';
     },
     getText() {
       return 'banana';
@@ -23,23 +23,23 @@ const createInstance = function ({ tpl, reactiveVar, $ }) {
   };
 };
 
-const onCreated = ({ tpl }) => {
+const onCreated = ({ self }) => {
   // nothing
 };
 
-const onDestroyed = ({ tpl }) => {
+const onDestroyed = ({ self }) => {
   // nothing
 };
 
 const events = {
-  'click .tab'({ event, tpl, $, data }) {
-    tpl.tab.set(data.tab);
+  'click .tab'({ event, self, $, data }) {
+    self.tab.set(data.tab);
   },
-  'click .morning'({ event, tpl }) {
-    tpl.morningActivity.set('Mowing the lawn');
+  'click .morning'({ event, self }) {
+    self.morningActivity.set('Mowing the lawn');
   },
-  'click .evening'({ event, tpl }) {
-    tpl.eveningActivity.set('Reading');
+  'click .evening'({ event, self }) {
+    self.eveningActivity.set('Reading');
   },
 };
 

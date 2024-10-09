@@ -15,11 +15,11 @@ const state = {
   selectedIndex: -1,
 };
 
-const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $}) => ({
+const createInstance = ({ self, reaction, state, settings, bindKey, unbindKey, $ }) => ({
 
   initialize() {
-    tpl.calculateResults();
-    tpl.calculateKeybindings();
+    self.calculateResults();
+    self.calculateKeybindings();
   },
 
   /*
@@ -32,7 +32,7 @@ const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $})
       const selectedIndex = state.selectedIndex.get();
       unbindKey('enter');
       if(selectedIndex > -1) {
-        bindKey('enter', () => tpl.selectResult());
+        bindKey('enter', () => self.selectResult());
       }
     });
   },
@@ -77,7 +77,7 @@ const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $})
     const selectedResult = results[selectedIndex];
     if(selectedResult) {
       state.selectedResult.set(selectedResult);
-      tpl.clearSearch();
+      self.clearSearch();
     }
   },
 
@@ -95,26 +95,26 @@ const createInstance = ({tpl, reaction, state, settings, bindKey, unbindKey, $})
 */
 
 const keys = {
-  'ctrl + f'({tpl}) {
-    tpl.focusSearch();
+  'ctrl + f'({ self }) {
+    self.focusSearch();
   },
-  'up'({tpl}) {
-    tpl.selectPrevious();
+  'up'({ self }) {
+    self.selectPrevious();
   },
-  'down'({tpl}) {
-    tpl.selectNext();
+  'down'({ self }) {
+    self.selectNext();
   },
-  'esc'({tpl}) {
-    tpl.clearSearch();
+  'esc'({ self }) {
+    self.clearSearch();
   }
 };
 
 const events = {
-  'input .search'({event, state }) {
+  'input .search'({ event, state }) {
     state.searchTerm.set(event.target.value);
   },
-  'click .result'({tpl, data}) {
-    tpl.selectResult(data.index);
+  'click .result'({ self, data }) {
+    self.selectResult(data.index);
   }
 };
 

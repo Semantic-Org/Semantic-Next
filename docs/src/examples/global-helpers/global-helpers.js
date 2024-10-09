@@ -7,7 +7,7 @@ const state = {
   currentTime: new Date()
 };
 
-const createInstance = ({tpl, state}) => ({
+const createInstance = ({ state }) => ({
   initialize() {
     setInterval(() => state.currentTime.now(), 1000);
   },

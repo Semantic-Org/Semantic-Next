@@ -8,14 +8,14 @@ const state = {
   time: new Date(),
 };
 
-const createInstance = ({tpl, state}) => ({
+const createInstance = ({self, state}) => ({
 
   majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
   minorMarkers: [1, 2, 3, 4],
   viewBox: '-50 -50 100 100',
 
   initialize() {
-    tpl.interval = tpl.startClock();
+    self.interval = self.startClock();
   },
 
   startClock: () => setInterval(() => state.time.now(), 1000),
@@ -37,7 +37,7 @@ const createInstance = ({tpl, state}) => ({
     return `rotate(${degrees})`;
   },
   getTimeRotation(name) {
-    const { hours, minutes, seconds } = tpl.getTime();
+    const { hours, minutes, seconds } = self.getTime();
     const degreeMap = {
       hour: 30 * hours + minutes / 2,
       minute: 6 * minutes + seconds / 10,
@@ -48,8 +48,8 @@ const createInstance = ({tpl, state}) => ({
   }
 });
 
-const onDestroyed = ({tpl}) => {
-  clearInterval(tpl.interval);
+const onDestroyed = ({self}) => {
+  clearInterval(self.interval);
 };
 
 const onRendered = ({ $ }) => {

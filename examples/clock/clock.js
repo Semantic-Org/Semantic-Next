@@ -8,11 +8,11 @@ const state = {
   time: new Date(),
 };
 
-const createInstance = ({tpl, state}) => ({
+const createInstance = ({self, state}) => ({
   majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
   minorMarkers: [1, 2, 3, 4],
   initialize() {
-    tpl.interval = tpl.startClock();
+    self.interval = self.startClock();
   },
   startClock: () => setInterval(() => state.time.now(), 1000),
   getTime() {
@@ -25,7 +25,7 @@ const createInstance = ({tpl, state}) => ({
   },
   getRotation(name, ...offsets) {
     const offset = sum(offsets);
-    const { hours, minutes, seconds } = tpl.getTime();
+    const { hours, minutes, seconds } = self.getTime();
     const degreeMap = {
       minorAxis: 30 * offset,
       majorAxis: 6 * (offset),
@@ -38,8 +38,8 @@ const createInstance = ({tpl, state}) => ({
   }
 });
 
-const onDestroyed = ({tpl}) => {
-  clearInterval(tpl.interval);
+const onDestroyed = ({self}) => {
+  clearInterval(self.interval);
 };
 
 const onRendered = ({ $ }) => {

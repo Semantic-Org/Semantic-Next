@@ -3,7 +3,7 @@ import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './basic.html?raw';
 import css from './basic.css?raw';
 
-const createInstance = ({ tpl, $, findParent }) => ({
+const createInstance = ({ self, $, findParent }) => ({
   date: new ReactiveVar(new Date()),
   slogan: new ReactiveVar(),
   second: new ReactiveVar(),
@@ -20,48 +20,48 @@ const createInstance = ({ tpl, $, findParent }) => ({
     9: 'Number 9 for the win',
   },
   setCurrentDate() {
-    tpl.date.value = new Date();
+    self.date.value = new Date();
   },
   callParentMethod() {
     return findParent().getText();
   },
   calculateCurrentSeconds() {
-    let date = tpl.date.get();
+    let date = self.date.get();
     let second = Math.abs(date.getSeconds()) % 10;
-    tpl.second.set(second);
+    self.second.set(second);
   },
   getFormattedText() {
     return `This is <b>bolded text</b> in a sentence`;
   },
   calculateCurrentSlogan() {
-    let second = tpl.second.get();
-    tpl.slogan.value = tpl.slogans[second];
+    let second = self.second.get();
+    self.slogan.value = self.slogans[second];
   },
   echo(value) {
     return value;
   },
 });
 
-const onRendered = ({ tpl, reaction }) => {
-  tpl.setCurrentDate();
+const onRendered = ({ self, reaction }) => {
+  self.setCurrentDate();
 
   // update date every 1 sec
-  tpl.interval = setInterval(tpl.setCurrentDate, 1000);
+  self.interval = setInterval(self.setCurrentDate, 1000);
 
   // calculate seconds from date (reactive on date)
-  reaction(tpl.calculateCurrentSeconds);
+  reaction(self.calculateCurrentSeconds);
 
   // calculate slogan from seconds (reactive on seconds);
-  reaction(tpl.calculateCurrentSlogan);
+  reaction(self.calculateCurrentSlogan);
 };
 
-const onDestroyed = ({ tpl }) => {
+const onDestroyed = ({ self }) => {
   console.log('basic destroyed');
-  clearInterval(tpl.interval);
+  clearInterval(self.interval);
 };
 
 const events = {
-  'click button'({ event, tpl }) {
+  'click button'({ event, self }) {
     console.log('button clicked');
   },
 };

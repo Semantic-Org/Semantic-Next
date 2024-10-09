@@ -9,7 +9,7 @@ import { todoFooter } from './footer/todo-footer.js';
 import template from './todo-list.html?raw';
 import css from './todo-list.css?raw';
 
-const createInstance = ({ tpl, $ }) => ({
+const createInstance = ({ self, $ }) => ({
   // global state
   todos: new ReactiveVar([
     { _id: '1', completed: false, text: 'Take out trash' },
@@ -24,8 +24,8 @@ const createInstance = ({ tpl, $ }) => ({
   filter: new ReactiveVar('all'),
 
   getVisibleTodos() {
-    const filter = tpl.filter.get();
-    const todos = tpl.todos.get();
+    const filter = self.filter.get();
+    const todos = self.todos.get();
     each(todos, (todo) => {
       if (!todo._id) {
         todo._id = todo.text;
@@ -47,41 +47,36 @@ const createInstance = ({ tpl, $ }) => ({
     todoList.scrollTop = todoList.scrollHeight;
   },
 
-  // handle state
-  addRouter() {
-    tpl.hashEvent = $(window).on('hashchange', tpl.setRouteFilter);
-  },
   getRouteFilter() {
     return window.location.hash.substring(2) || 'all'; // #/foo
   },
   setRouteFilter() {
-    tpl.filter.set(tpl.getRouteFilter());
+    self.filter.set(self.getRouteFilter());
   },
   removeRouter() {
-    $(window).off(tpl.hashEvent);
+    $(window).off(self.hashEvent);
   },
 });
 
-const onCreated = ({ tpl, isClient }) => {
+const onRendered = ({ self, isClient }) => {
   if (isClient) {
-    tpl.addRouter();
+    self.setRouteFilter();
   }
 };
 
-const onRendered = ({ tpl, isClient }) => {
-  if (isClient) {
-    tpl.setRouteFilter();
-  }
-};
-
-const onDestroyed = ({ tpl }) => {
-  tpl.removeRouter();
+const onDestroyed = ({ self }) => {
+  self.removeRouter();
 };
 
 const events = {
+
+  'global hashchange window'({ self }) {
+    self.setRouteFilter();
+  },
+
   // toggle all checkbox is in the main html although its functionality is in the header
   // this is per todo-mvc spec
-  'change .toggle-all'({ event, tpl, findChild, $ }) {
+  'change .toggle-all'({ event, self, findChild, $ }) {
     const headerTpl = findChild('todoHeader');
     $(event.target).attr('checked', !$(event.target).attr('checked'));
     headerTpl.allCompleted.toggle();
@@ -99,7 +94,6 @@ const TodoList = createComponent({
   css,
   events,
   createInstance,
-  onCreated,
   onRendered,
   onDestroyed,
 });

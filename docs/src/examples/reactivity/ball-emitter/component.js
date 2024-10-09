@@ -8,7 +8,7 @@ const state = {
   balls: [],
 };
 
-const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
+const createInstance = ({self, $, reaction, reactiveVar, state}) => ({
 
   emitter: {
     rate: 2, // balls per second
@@ -37,8 +37,8 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   startAnimation() {
-    tpl.render.lastTime = performance.now() * 0.001;
-    requestAnimationFrame(tpl.animate);
+    self.render.lastTime = performance.now() * 0.001;
+    requestAnimationFrame(self.animate);
   },
 
   getCanvas() {
@@ -47,27 +47,30 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 
   animate(currentTime) {
     currentTime *= 0.001;
-    const deltaTime = currentTime - tpl.render.lastTime;
-    tpl.render.lastTime = currentTime;
+    const deltaTime = currentTime - self.render.lastTime;
+    self.render.lastTime = currentTime;
 
-    tpl.render.fps = 1 / deltaTime;
-
-    if (tpl.emitter.active) {
-      tpl.emitBalls();
+    let fps = 1 / deltaTime;
+    if(fps !== Infinity) {
+      self.render.fps = 1 / deltaTime;
     }
 
-    tpl.updateBalls(deltaTime);
-    tpl.draw();
+    if (self.emitter.active) {
+      self.emitBalls();
+    }
 
-    requestAnimationFrame(tpl.animate);
+    self.updateBalls(deltaTime);
+    self.draw();
+
+    requestAnimationFrame(self.animate);
   },
 
   emitBalls() {
     const newBalls = [];
-    for (let i = 0; i < tpl.emitter.rate; i++) {
-      newBalls.push(tpl.createBall({
-        x: tpl.emitter.x,
-        y: tpl.emitter.y
+    for (let i = 0; i < self.emitter.rate; i++) {
+      newBalls.push(self.createBall({
+        x: self.emitter.x,
+        y: self.emitter.y
       }));
     }
     const currentBalls = state.balls.peek();
@@ -75,7 +78,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   createBall({x, y}) {
-    const { ball } = tpl;
+    const { ball } = self;
     const randomInRange = (average, variance) => average + (Math.random() - 0.5) * 2 * variance;
 
     const angle = Math.random() * 2 * Math.PI;
@@ -86,7 +89,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
       x,
       y,
       radius: randomInRange(ball.r.average, ball.r.variance),
-      color: tpl.getRandomColor(),
+      color: self.getRandomColor(),
       saturation: 100, // Start at full saturation
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
@@ -100,17 +103,17 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   updateBalls(deltaTime) {
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     const currentBalls = state.balls.peek();
     const updatedBalls = currentBalls.map(ball =>
-      tpl.pipe(ball,
-        b => tpl.decayColor(b, deltaTime),
-        b => tpl.updatePosition(b, deltaTime),
-        b => tpl.checkWalls(b, canvas)
+      self.pipe(ball,
+        b => self.decayColor(b, deltaTime),
+        b => self.updatePosition(b, deltaTime),
+        b => self.checkWalls(b, canvas)
       )
     );
 
-    tpl.checkCollisions(updatedBalls);
+    self.checkCollisions(updatedBalls);
 
     state.balls.set(updatedBalls);
   },
@@ -123,14 +126,14 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
     return {
       ...ball,
       saturation: Math.max(
-        tpl.ball.saturation.min,
-        ball.saturation - tpl.ball.saturation.decayRate * deltaTime
+        self.ball.saturation.min,
+        ball.saturation - self.ball.saturation.decayRate * deltaTime
       ),
       color: {
         ...ball.color,
         l: Math.max(
-          tpl.ball.lightness.min,
-          ball.color.l - tpl.ball.lightness.decayRate * deltaTime
+          self.ball.lightness.min,
+          ball.color.l - self.ball.lightness.decayRate * deltaTime
         )
       }
     };
@@ -167,7 +170,7 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance < ball1.radius + ball2.radius) {
-          tpl.handleCollision(ball1, ball2, dx, dy, distance);
+          self.handleCollision(ball1, ball2, dx, dy, distance);
         }
       });
     });
@@ -175,8 +178,8 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
 
   handleCollision(ball1, ball2, dx, dy, distance) {
     // Revive colors
-    ball1.color = tpl.getRandomColor();
-    ball2.color = tpl.getRandomColor();
+    ball1.color = self.getRandomColor();
+    ball2.color = self.getRandomColor();
     ball1.saturation = 100;
     ball2.saturation = 100;
 
@@ -206,19 +209,19 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   draw() {
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     each(state.balls.peek(), (ball) => {
-      tpl.drawBall(ball);
+      self.drawBall(ball);
     });
 
-    tpl.drawFPS(ctx);
+    self.drawFPS(ctx);
   },
 
   drawBall(ball) {
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -228,50 +231,54 @@ const createInstance = ({tpl, $, reaction, reactiveVar, state}) => ({
   },
 
   drawFPS(ctx) {
-    const canvas = tpl.getCanvas();
+    const canvas = self.getCanvas();
     ctx.fillStyle = 'white';
     ctx.font = '12px Arial';
     ctx.textAlign = 'right';
-    ctx.fillText(`FPS: ${Math.round(tpl.render.fps)}`, canvas.width - 10, canvas.height - 10);
+    let fps = Math.round(self.render.fps);
+    if(fps < 100) {
+      fps = `0${fps}`;
+    }
+    ctx.fillText(`FPS: ${fps}`, canvas.width - 10, canvas.height - 10);
   },
 
 });
 
-const onRendered = ({state, tpl}) => {
-  const canvas = tpl.getCanvas();
+const onRendered = ({state, self}) => {
+  const canvas = self.getCanvas();
   const initialBalls = [];
-  for (let i = 0; i < tpl.ball.initialCount; i++) {
-    initialBalls.push(tpl.createBall({
+  for (let i = 0; i < self.ball.initialCount; i++) {
+    initialBalls.push(self.createBall({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height
     }));
   }
   state.balls.set(initialBalls);
 
-  tpl.draw();
-  tpl.startAnimation();
+  self.draw();
+  self.startAnimation();
 };
 
 const events = {
-  'pointerdown canvas'({tpl, event}) {
-    const canvas = tpl.getCanvas();
+  'pointerdown canvas'({self, event}) {
+    const canvas = self.getCanvas();
     const rect = canvas.getBoundingClientRect();
-    tpl.emitter.x = (event.clientX - rect.left);
-    tpl.emitter.y = (event.clientY - rect.top);
-    tpl.emitter.active = true;
+    self.emitter.x = (event.clientX - rect.left);
+    self.emitter.y = (event.clientY - rect.top);
+    self.emitter.active = true;
   },
 
-  'pointermove canvas'({tpl, event}) {
-    if (tpl.emitter.active) {
-      const canvas = tpl.getCanvas();
+  'pointermove canvas'({self, event}) {
+    if (self.emitter.active) {
+      const canvas = self.getCanvas();
       const rect = canvas.getBoundingClientRect();
-      tpl.emitter.x = (event.clientX - rect.left);
-      tpl.emitter.y = (event.clientY - rect.top);
+      self.emitter.x = (event.clientX - rect.left);
+      self.emitter.y = (event.clientY - rect.top);
     }
   },
 
-  'pointerup, pointerleave canvas'({tpl}) {
-    tpl.emitter.active = false;
+  'pointerup, pointerleave canvas'({self}) {
+    self.emitter.active = false;
   },
 };
 

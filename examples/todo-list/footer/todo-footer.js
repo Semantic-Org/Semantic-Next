@@ -2,7 +2,7 @@ import { createComponent } from '@semantic-ui/component';
 import template from './todo-footer.html?raw';
 import css from './todo-footer.css?raw';
 
-const createInstance = ({ tpl, findParent, $ }) => ({
+const createInstance = ({ self, findParent, $ }) => ({
   filters: ['all', 'active', 'complete'],
 
   todoList() {
@@ -10,20 +10,20 @@ const createInstance = ({ tpl, findParent, $ }) => ({
   },
 
   getIncomplete() {
-    const todos = tpl.todoList().todos.get();
+    const todos = self.todoList().todos.get();
     return todos.filter((todo) => !todo.completed);
   },
 
   hasAnyCompleted() {
-    return tpl.todoList().todos.value.some((todo) => todo.completed);
+    return self.todoList().todos.value.some((todo) => todo.completed);
   },
 
   isActiveFilter(filter) {
-    return tpl.todoList().filter.get() == filter;
+    return self.todoList().filter.get() == filter;
   },
 
   setFilter(filter) {
-    tpl.todoList().filter.set(filter);
+    self.todoList().filter.set(filter);
   },
 
   scrollToBottom() {
@@ -32,13 +32,13 @@ const createInstance = ({ tpl, findParent, $ }) => ({
   },
 
   clearCompleted() {
-    tpl.todoList().todos.filter((todo) => !todo.completed);
+    self.todoList().todos.filter((todo) => !todo.completed);
   },
 });
 
 const events = {
-  'click .clear-completed'({ event, tpl }) {
-    tpl.clearCompleted();
+  'click .clear-completed'({ event, self }) {
+    self.clearCompleted();
   },
 };
 
