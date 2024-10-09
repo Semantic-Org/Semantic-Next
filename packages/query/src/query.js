@@ -295,7 +295,7 @@ export class Query {
       if (this.options.pierceShadow) {
         return this.closestDeep(el, selector);
       }
-      else if(selector) {
+      else if(selector && el?.closest) {
         return el.closest(selector);
       }
     }).filter(Boolean);
