@@ -418,7 +418,7 @@ class WebComponentBase extends LitElement {
   // calls callback if defined with consistent params and this context
   call(
     func,
-    { firstArg, additionalArgs, args = [this.tpl, this.$.bind(this)] } = {}
+    { firstArg, additionalArgs, args = [this.component, this.$.bind(this)] } = {}
   ) {
     if (firstArg) {
       args.unshift(firstArg);

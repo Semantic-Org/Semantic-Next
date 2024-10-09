@@ -109,7 +109,7 @@ export const Template = class Template {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-    this.tpl._parentTemplate = parentTemplate;
+    this.instance._parentTemplate = parentTemplate;
   }
 
   setElement(element) {
@@ -122,29 +122,30 @@ export const Template = class Template {
   }
 
   initialize() {
-    let tpl = this;
+    let template = this;
+    let instance;
     if (isFunction(this.createInstance)) {
-      this.tpl = {};
-      tpl = this.call(this.createInstance) || {};
-      extend(this.tpl, tpl);
+      this.instance = {};
+      instance = this.call(this.createInstance) || {};
+      extend(template.instance, instance);
     }
-    if (isFunction(tpl.initialize)) {
-      this.call(tpl.initialize.bind(this));
+    if (isFunction(instance.initialize)) {
+      this.call(instance.initialize.bind(template));
     }
-    this.tpl.templateName = this.templateName;
+    template.instance.templateName = this.templateName;
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
-      this.dispatchEvent('created', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('created', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
-      this.dispatchEvent('rendered', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('rendered', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onUpdated = () => {
       this.call(this.onRenderedCallback);
-      this.dispatchEvent('updated', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('updated', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
       this.call(this.onThemeChangedCallback, ...args);
@@ -155,7 +156,7 @@ export const Template = class Template {
       this.clearReactions();
       this.removeEvents();
       this.call(this.onDestroyedCallback);
-      this.dispatchEvent('destroyed', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('destroyed', { component: this.instance }, {}, { triggerCallback: false });
     };
 
     this.initialized = true;
@@ -204,7 +205,7 @@ export const Template = class Template {
     return {
       ...this.data,
       ...this.state,
-      ...this.tpl,
+      ...this.instance,
     };
   }
 
@@ -583,7 +584,12 @@ export const Template = class Template {
       params = {
 
         el: this.element,
-        tpl: this.tpl,
+
+        // provide 3 options for referring to self
+        tpl: this.instance,
+        self: this.instance,
+        component: this.instance,
+
         $: this.$.bind(this),
         $$: this.$$.bind(this),
 
@@ -616,7 +622,7 @@ export const Template = class Template {
         findChildren: this.findChildren.bind(this),
 
         // not yet implemented
-        content: this.tpl.content,
+        content: this.instance.content,
 
         // on demand since requires  computing styles
         get darkMode() { return element.isDarkMode(); },
@@ -718,7 +724,7 @@ export const Template = class Template {
         let parentNode = template.element?.parentNode;
         while(parentNode) {
           if(parentNode.template?.templateName == templateName) {
-            match = parentNode.template.tpl;
+            match = parentNode.template.component;
             break;
           }
           parentNode = parentNode.parentNode;
@@ -726,7 +732,7 @@ export const Template = class Template {
       }
       // this matches on nested partials (less common)
       while (template) {
-        template = template._parentTemplate || template?.tpl?._parentTemplate;
+        template = template._parentTemplate || template?.component?._parentTemplate;
         if (!match && template?.templateName == templateName) {
           match = template;
           break;
@@ -734,7 +740,7 @@ export const Template = class Template {
       }
       return match;
     }
-    return template._parentTemplate || template?.tpl?._parentTemplate;
+    return template._parentTemplate || template?.component?._parentTemplate;
   }
 
   static findChildTemplates(template, templateName) {
@@ -742,10 +748,10 @@ export const Template = class Template {
     // recursive lookup
     function search(template, templateName) {
       if (template.templateName === templateName) {
-        result.push(template.tpl);
+        result.push(template.component);
       }
-      if (template.tpl._childTemplates) {
-        template.tpl._childTemplates.forEach((childTemplate) => {
+      if (template.component._childTemplates) {
+        template.component._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });
       }

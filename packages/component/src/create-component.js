@@ -132,7 +132,7 @@ export const createComponent = ({
             this.template.initialize();
           }
           // make this easier to access in dom
-          this.tpl = this.template.tpl;
+          this.component = this.template.instance;
         }
         // property change callbacks wont call on SSR
         if(isServer) {
