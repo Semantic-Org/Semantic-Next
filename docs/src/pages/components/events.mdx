@@ -19,11 +19,11 @@ Semantic components can include events by passing in an object mapping events to
 ```javascript
 createComponent({
   events: {
-    'click .submit'({ tpl }) {
-      tpl.submit();
+    'click .submit'({ self }) {
+      self.submit();
     },
-    'click .menu ui-button'({}) {
-      tpl.doSomething();
+    'click .menu ui-button'({ self }) {
+      self.doSomething();
     }
   }
 });
@@ -83,7 +83,7 @@ In the following example events are attached to four separate buttons to control
 
 ## Special Event Keywords
 
-Keywords are special leading terms that modify how events are attached permitting you to bind events to elements other than those found in your [component's template](/templates).
+Keywords are special preceding terms that modify how events are attached permitting you to bind events to elements other than those found in your [component's template](/templates).
 
 ### Global
 
@@ -103,7 +103,7 @@ const events = {
 
 You can use the `deep` keyword to attach events to nested web components or slotted content. The deep content may be a nested web component or slotted content.
 
-> **Deep Usage** -By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
+> **Deep Usage** - By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
 
 ```html
 <ui-button>Submit</ui-button>
@@ -132,8 +132,8 @@ HTML metadata can be added using data attributes and will be available directly 
 
 ```javascript
 const events = {
-  'click .increment'({tpl, data]}) {
-    tpl.increment(data.amount);
+  'click .increment'({self, data]}) {
+    self.increment(data.amount);
   }
 };
 ```
@@ -182,7 +182,7 @@ You can use `attachEvent` which is passed to all component callbacks to attach e
 ```javascript
 const onCreated = ({attachEvent, settings, isClient}) => {
   if(isClient) {
-    attachEvent(settings.scrollContext, 'scroll', tpl.onPageScroll)
+    attachEvent(settings.scrollContext, 'scroll', self.onPageScroll)
   }
 };
 ```
@@ -238,7 +238,7 @@ You can listen to a custom event the same way as a normal browser event, however
 ```javascript
 // from another component
 const events = {
-  'itemactive inpage-menu'({tpl,data}) {
+  'itemactive inpage-menu'({self, data}) {
     const { itemID, position } = data;
     // do something with metadata
   }
@@ -272,9 +272,9 @@ The custom event will also include a reference to the component which you can us
 
 ```javascript
 const events = {
-  'rendered inpage-menu'({tpl,data}) {
-    // menu component is rendered lets call something on it
-    const menu = data.tpl;
+  'rendered inpage-menu'({self, data}) {
+    // component lifecycle event passes through component instance at data
+    const menu = data.component;
     menu.setActive();
   }
   'destroyed inpage-menu'() {

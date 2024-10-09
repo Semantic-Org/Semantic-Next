@@ -939,7 +939,7 @@ export class Query {
 
   // special helper for SUI components
   getComponent() {
-    const tpls = this.map(el => el.tpl).filter(Boolean);
-    return tpls.length > 1 ? tpls : tpls[0];
+    const components = this.map(el => el.component).filter(Boolean);
+    return components.length > 1 ? components : components[0];
   }
 }

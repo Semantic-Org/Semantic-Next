@@ -123,17 +123,17 @@ const createInstance = ({state, dispatchEvent}) => ({
 
 ```javascript
 const events = {
-  'click .increment': ({tpl}) => tpl.increment(),
-  'click .decrement': ({tpl}) => tpl.decrement(),
+  'click .increment': ({ self }) => self.increment(),
+  'click .decrement': ({ self }) => self.decrement(),
 };
 ```
 
 Or [bind keybindings](/components/keybindings) scoped to your component.
 ```javascript
 const keys = {
-  'up': ({tpl}) => tpl.decrement(),
-  'down': ({tpl}) => tpl.increment(),
-  'shift + up': ({tpl}) => tpl.decrement(10),
-  'shift + down': ({tpl}) => tpl.increment(10),
+  'up': ({ self }) => self.decrement(),
+  'down': ({ self }) => self.increment(),
+  'shift + up': ({ self }) => self.decrement(10),
+  'shift + down': ({ self }) => self.increment(10),
 };
 ```

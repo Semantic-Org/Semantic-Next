@@ -136,9 +136,8 @@ You can expose a `reactiveVar` on your component instance to allow other compone
 > Component `state` and `settings` are not accessible outside your component unless they are exposed on your component instance.
 
 
-
 ```javascript title="todo.js"
-const createInstance = ({ tpl, reactiveVar, reaction }) => {
+const createInstance = ({ self, reactiveVar, reaction }) => {
   return {
     todos: new ReactiveVar([]),
   };
@@ -148,7 +147,8 @@ const createInstance = ({ tpl, reactiveVar, reaction }) => {
 ```javascript title="todo-item.js"
 const createInstance = ({ findParent }) => {
   getTodos() {
-    return findParent('todo').todos.get();
+    const todoList = findParent('todoList');
+    return todoList.todos.get();
   }
 };
 ```

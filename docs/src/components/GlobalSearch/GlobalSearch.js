@@ -24,23 +24,23 @@ const state = {
   modalOpen: false,
 };
 
-const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings, $}) => ({
+const createInstance = ({self, el, bindKey, reaction, state, isRendered, settings, $}) => ({
 
   initialize() {
-    bindKey(settings.openKey, tpl.openModal);
-    tpl.calculateResults();
-    tpl.calculateLoadSearch();
-    tpl.calculateSelected();
+    bindKey(settings.openKey, self.openModal);
+    self.calculateResults();
+    self.calculateLoadSearch();
+    self.calculateSelected();
   },
 
   openModal() {
     const val = $('.inline-search input').val();
-    $('ui-modal').get(0).tpl.show();
+    $('ui-modal').getComponent().show();
     $('ui-modal').find('.search input').focus().val(val);
   },
 
   hideModal() {
-    $('ui-modal').get(0).tpl.hide();
+    $('ui-modal').get(0).component.hide();
   },
 
   async calculateLoadSearch() {
@@ -69,7 +69,7 @@ const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings
       state.results.set(results);
 
       const displayResults = results
-        .map(result => tpl.mapResult(result))
+        .map(result => self.mapResult(result))
         .filter(result => result.title)
       ;
       state.selectedIndex.set(0);
@@ -82,7 +82,7 @@ const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings
       let index = state.selectedIndex.get();
       let result = state.displayResults.getIndex(index);
       state.selectedResult.set(result);
-      tpl.scrollIntoView(index);
+      self.scrollIntoView(index);
     });
   },
 
@@ -160,39 +160,39 @@ const createInstance = ({tpl, el, bindKey, reaction, state, isRendered, settings
   visitResult() {
     let result =  state.selectedResult.get();
     window.location.href = result.url;
-    tpl.hideModal();
+    self.hideModal();
   }
 
 });
 
 const keys = {
-  'up'({tpl, state}) {
+  'up'({self, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    tpl.selectPrevious();
+    self.selectPrevious();
   },
-  'down'({tpl, state}) {
+  'down'({self, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    tpl.selectNext();
+    self.selectNext();
   },
-  'enter'({tpl, state}) {
+  'enter'({self, state}) {
     if(!state.modalOpen.get()) {
       return;
     }
-    tpl.visitResult();
+    self.visitResult();
   }
 };
 
 const events = {
-  'input, click .inline-search input'({tpl}) {
-    tpl.openModal();
+  'input, click .inline-search input'({self}) {
+    self.openModal();
   },
-  'input .search input'({tpl, event}) {
+  'input .search input'({self, event}) {
     let searchTerm = $(event.target).val();
-    tpl.search.triggerSearch(searchTerm);
+    self.search.triggerSearch(searchTerm);
   },
   'show ui-modal'({state}) {
     state.modalOpen.set(true);

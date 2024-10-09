@@ -63,9 +63,9 @@ Each callback receives a destructurable set of arguments that can be used to int
 These are accessible from all lifecycle callbacks, as well as inside event listeners and keybindings.
 
 ```javascript
-const onCreated = ({isServer, darkMode, tpl}) {
+const onCreated = ({isServer, darkMode, self}) {
   if(!isServer && isDarkMode) {
-    tpl.setDarkMode();
+    self.setDarkMode();
   }
 };
 ```
@@ -76,10 +76,14 @@ You can use these to do things like [query the DOM](/components/dom), setting up
 
 The following parameters are destructurable from all callbacks.
 
+> For information on `self` aliases see [self aliases](/components/instances#self-aliases).
+
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|
 | el                | the DOM element of the web component                  |
-| tpl               | the template instance from createInstance             |
+| self              | the template instance from createInstance             |
+| tpl               | alias for self                                        |
+| component         | alias for self                                        |
 | $                 | allows you to query the shadow dom of the component   |
 | $$                | allows querying deep nested content including slots   |
 | reaction          | a reactive context for computations                   |
@@ -104,6 +108,7 @@ The following parameters are destructurable from all callbacks.
 | findChild         | helper to find a child template                       |
 | findChildren      | helper to find multiple child templates               |
 | darkMode          | boolean for if dark mode is active                    |
+
 
 ### Event Callbacks
 

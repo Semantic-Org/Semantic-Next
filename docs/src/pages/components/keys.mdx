@@ -11,17 +11,17 @@ Keybindings can be attached to any component by passing in `keys` to `createComp
 ```javascript
 createComponent({
   keys: {
-    'ctrl + f'({ tpl }) {
-      tpl.focusSearch()
+    'ctrl + f'({ self }) {
+      self.focusSearch()
     },
-    'up'({ tpl }) {
-      tpl.selectPreviousResult();
+    'up'({ self }) {
+      self.selectPreviousResult();
     },
-    'down'({ tpl }) {
-      tpl.selectNextResult();
+    'down'({ self }) {
+      self.selectNextResult();
     },
-    'esc'({ tpl }) {
-      tpl.blurSearch();
+    'esc'({ self }) {
+      self.blurSearch();
     },
   }
 });
@@ -114,8 +114,8 @@ This is often used with [componet reactivity](/component/reactivity) to adjust k
 const createInstance = ({ reaction, bindKey, unbindKey }) => ({
   initialize() {
     reaction(() => {
-      if(tpl.isSomeCondition()) {
-        bindKey('enter', tpl.submitForm());
+      if(self.isSomeCondition()) {
+        bindKey('enter', self.submitForm());
       }
       else {
         unbindKey('enter');

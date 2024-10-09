@@ -4,13 +4,13 @@ import { IconComponentSpec } from '@semantic-ui/specs';;
 import CSS from './css/icon-shadow.css?raw';
 import Template from './icon.html?raw';
 
-const createInstance = ({tpl, $}) => ({
+const createInstance = ({self, $}) => ({
 
 
 });
 
 
-const onCreated = ({tpl, el}) => {
+const onCreated = ({self, el}) => {
 };
 
 const onRendered = function({$, isClient}) {

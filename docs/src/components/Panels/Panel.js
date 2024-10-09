@@ -31,19 +31,19 @@ const state = {
   lastPanelSize: undefined
 };
 
-const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
+const createInstance = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
 
   getClassMap: () => ({
-    resizing: tpl.resizing.get(),
+    resizing: self.resizing.get(),
     minimized: settings.minimized,
-    initialized: tpl.initialized.get()
+    initialized: self.initialized.get()
   }),
 
   getHandleClassMap: () => ({
-    initialized: tpl.initialized.get(),
-    disabled: !tpl.isResizable()
+    initialized: self.initialized.get(),
+    disabled: !self.isResizable()
   }),
 
   getCurrentFlex() {
@@ -59,7 +59,7 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     return $(el).index();
   },
   isResizable() {
-    return settings.resizable && tpl.getIndex() > 0;
+    return settings.resizable && self.getIndex() > 0;
   },
   getPanels() {
     return findParent('uiPanels');
@@ -75,31 +75,31 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
     ;
   },
   startResize(event) {
-    tpl.resizing.set(true);
-    tpl.initialSize = tpl.getCurrentFlex();
+    self.resizing.set(true);
+    self.initialSize = self.getCurrentFlex();
     dispatchEvent('resizeStart', {
-      initialSize: tpl.initialSize,
+      initialSize: self.initialSize,
       direction: settings.direction,
-      startPosition: tpl.getPointerPosition(event),
+      startPosition: self.getPointerPosition(event),
     });
     $('body')
       .addClass('resizing')
-      .css('cursor', tpl.getResizeCursor())
+      .css('cursor', self.getResizeCursor())
       .on('mousemove', (event) => {
-        tpl.resizeDrag(event);
+        self.resizeDrag(event);
       })
-      .on('touchmove', tpl.resizeDrag)
+      .on('touchmove', self.resizeDrag)
     ;
     $('body')
       .one('pointerup', (event) => {
-        tpl.endResize(event);
+        self.endResize(event);
       })
     ;
   },
   resizeDrag(event) {
     dispatchEvent('resizeDrag', {
-      initialSize: tpl.initialSize,
-      endPosition: tpl.getPointerPosition(event),
+      initialSize: self.initialSize,
+      endPosition: self.getPointerPosition(event),
     });
   },
   endResize() {
@@ -109,34 +109,34 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
       .removeClass('resizing')
       .css('cursor', '')
     ;
-    tpl.resizing.set(false);
-    delete tpl.initialPosition;
-    delete tpl.initialSize;
+    self.resizing.set(false);
+    delete self.initialPosition;
+    delete self.initialSize;
     dispatchEvent('resizeEnd', {
-      initialSize: tpl.initialSize,
-      finalSize: tpl.getCurrentFlex()
+      initialSize: self.initialSize,
+      finalSize: self.getCurrentFlex()
     });
   },
   setPreviousNaturalSize() {
-    const panels = tpl.getPanels();
+    const panels = self.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setNaturalPanelSize(index - 1);
   },
   setNaturalSize() {
-    const panels = tpl.getPanels();
+    const panels = self.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setNaturalPanelSize(index);
   },
   toggleMinimize() {
     if(settings.minimized) {
-      tpl.maximize();
+      self.maximize();
     }
     else {
-      tpl.minimize();
+      self.minimize();
     }
   },
   minimize() {
-    const panels = tpl.getPanels();
+    const panels = self.getPanels();
     settings.minimized = true;
     // confirm not all panels are minimized at once as this is not possible
     if(panels.panels.every((panel, index) => panels.isMinimized(index))) {
@@ -151,24 +151,24 @@ const createInstance = ({el, tpl, isServer, reactiveVar, findParent, settings, d
   },
   maximize() {
     settings.minimized = false;
-    const panels = tpl.getPanels();
+    const panels = self.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setPanelMaximized(index, state.lastPanelSize);
   }
 });
 
 const events = {
-  'click .toggle-size'({ tpl }) {
-    tpl.toggleMinimize();
+  'click .toggle-size'({ self }) {
+    self.toggleMinimize();
   },
-  'dblclick .label'({ tpl }) {
-    tpl.toggleMinimize();
+  'dblclick .label'({ self }) {
+    self.toggleMinimize();
   },
-  'dblclick .handle': function({ tpl }) {
-    tpl.setPreviousNaturalSize();
+  'dblclick .handle': function({ self }) {
+    self.setPreviousNaturalSize();
   },
-  'mousedown, touchstart .handle'({event, tpl}) {
-    tpl.startResize(event);
+  'mousedown, touchstart .handle'({event, self}) {
+    self.startResize(event);
     event.preventDefault();
   },
 };

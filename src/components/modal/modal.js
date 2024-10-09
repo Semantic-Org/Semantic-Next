@@ -28,12 +28,12 @@ const onRendered = function({}) {
 };
 
 const events = {
-  'click ui-icon.close'({event, tpl}) {
-    tpl.hide();
+  'click ui-icon.close'({event, self}) {
+    self.hide();
   },
-  'click dialog'({event, settings, data, tpl}) {
+  'click dialog'({event, settings, data, self}) {
     if(settings.closeable && $(event.target).is('dialog')) {
-      tpl.hide();
+      self.hide();
     }
   }
 };
