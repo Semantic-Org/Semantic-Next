@@ -724,8 +724,8 @@ export const Template = class Template {
       if(!match) {
         let parentNode = template.element?.parentNode;
         while(parentNode) {
-          if(parentNode.template?.templateName == templateName) {
-            match = parentNode.template.component;
+          if(parentNode.component?.templateName == templateName) {
+            match = parentNode.component;
             break;
           }
           parentNode = parentNode.parentNode;
@@ -733,7 +733,7 @@ export const Template = class Template {
       }
       // this matches on nested partials (less common)
       while (template) {
-        template = template._parentTemplate || template?.component?._parentTemplate;
+        template = template._parentTemplate || template?.instance?._parentTemplate;
         if (!match && template?.templateName == templateName) {
           match = template;
           break;
