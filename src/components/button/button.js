@@ -5,7 +5,7 @@ import { ButtonComponentSpec } from '@semantic-ui/specs';
 import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
 import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
-const createInstance = ({tpl, settings, data, el, $}) => ({
+const createInstance = ({self, settings, data, el, $}) => ({
   isIconBefore() {
     return settings.icon && !settings.iconAfter;
   },
@@ -25,26 +25,26 @@ const createInstance = ({tpl, settings, data, el, $}) => ({
 });
 
 
-const onCreated = ({tpl}) => {
+const onCreated = ({self}) => {
 
 };
-const onRendered = function({tpl}){
+const onRendered = function({self}){
 
 };
 
 const events = {
-  'touchstart .button'({event, tpl, $}) {
+  'touchstart .button'({event, self, $}) {
     $(this).addClass('pressed');
   },
-  'touchend .button'({event, tpl, $}) {
+  'touchend .button'({event, self, $}) {
     $(this).removeClass('pressed');
   },
-  'click .button'({event, tpl, $}) {
+  'click .button'({event, self, $}) {
     $(this).blur();
   },
-  'keydown .button'({event, tpl, $}) {
+  'keydown .button'({event, self, $}) {
     let $button = $(this);
-    if (tpl.isSubmitKey(event.keyCode)) {
+    if (self.isSubmitKey(event.keyCode)) {
       $button.addClass('pressed');
       event.preventDefault();
     }
@@ -52,9 +52,9 @@ const events = {
       $button.blur();
     }
   },
-  'keyup .button'({event, tpl, $}) {
+  'keyup .button'({event, self, $}) {
     let $button = $(this);
-    if (tpl.isSubmitKey(event.keyCode)) {
+    if (self.isSubmitKey(event.keyCode)) {
       $button.removeClass('pressed');
     }
   }
