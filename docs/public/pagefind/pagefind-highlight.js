@@ -228,8 +228,8 @@ var require_mark = __commonJS({
             return document.createNodeIterator(ctx, whatToShow, filter, false);
           }
         }, {
-          key: "createComponentOnIframe",
-          value: function createComponentOnIframe(contents) {
+          key: "createInstanceOnIframe",
+          value: function createInstanceOnIframe(contents) {
             return new DOMIterator2(contents.querySelector("html"), this.iframes);
           }
         }, {
@@ -299,7 +299,7 @@ var require_mark = __commonJS({
             ifr.forEach(function(ifrDict) {
               if (!ifrDict.handled) {
                 _this4.getIframeContents(ifrDict.val, function(con) {
-                  _this4.createComponentOnIframe(con).forEachNode(whatToShow, eCb, fCb);
+                  _this4.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb);
                 });
               }
             });
@@ -320,7 +320,7 @@ var require_mark = __commonJS({
                 this.forEachIframe(ctx, function(currIfr) {
                   return _this5.checkIframeFilter(node, prevNode, currIfr, ifr);
                 }, function(con) {
-                  _this5.createComponentOnIframe(con).forEachNode(whatToShow, function(ifrNode) {
+                  _this5.createInstanceOnIframe(con).forEachNode(whatToShow, function(ifrNode) {
                     return elements.push(ifrNode);
                   }, filterCb);
                 });
