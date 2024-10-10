@@ -33,6 +33,12 @@ class TemplateCompiler {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+-\w+)([^>]*)\/>/g,
   };
 
+  static parserRegExp = {
+    NEXT_TAG: /(\{\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_END: /\}\}/, // end of expression }} or }
+    TAG_CLOSE: /\>/,
+  };
+
   static templateRegExp = {
     VERBOSE_KEYWORD: /^(template|snippet)\W/g,
     VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
@@ -41,8 +47,6 @@ class TemplateCompiler {
     SINGLE_QUOTES: /\'/g,
   };
 
-  // used to advance scanner to either a parseable expression or svg tag
-  static nextTagRegExp = /(\{\{|\<svg|\<\/svg)/;
 
   /*
     Creates an AST representation of a template
@@ -57,17 +61,16 @@ class TemplateCompiler {
       scanner.fatal('Template is not a string', templateString);
     }
 
-    // quicker to compile regExp once
-    const tagRegExp = TemplateCompiler.tagRegExp;
-    const htmlRegExp = TemplateCompiler.htmlRegExp;
+    // compile regexp globally once
+    const { tagRegExp, htmlRegExp, parserRegExp } = TemplateCompiler;
 
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
         if (scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
-          const content = this.getValue(scanner.consumeUntil('}}').trim());
-          scanner.consume('}}');
+          const content = this.getValue(scanner.consumeUntil(parserRegExp.EXPRESSION_END).trim());
+          scanner.consume(parserRegExp.EXPRESSION_END);
           return { type, content, ...context }; // Include context in the return value
         }
       }
@@ -75,8 +78,8 @@ class TemplateCompiler {
         if (scanner.matches(htmlRegExp[type])) {
           scanner.consume(htmlRegExp[type]);
           const context = scanner.getContext(); // context is used for better error handling
-          const content = this.getValue(scanner.consumeUntil('>').trim());
-          scanner.consume('>');
+          const content = this.getValue(scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim());
+          scanner.consume(parserRegExp.TAG_CLOSE);
           return { type, content, ...context }; // Include context in the return value
         }
       }
@@ -287,7 +290,7 @@ class TemplateCompiler {
       else {
         // advanced to next expression or open svg tag
         // this advances the scanner adding html
-        const html = scanner.consumeUntil(TemplateCompiler.nextTagRegExp);
+        const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
         if (html) {
           const htmlNode = { type: 'html', html };
           contentTarget.push(htmlNode);
