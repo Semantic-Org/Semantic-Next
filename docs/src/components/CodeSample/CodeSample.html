@@ -19,7 +19,7 @@
   {{#if formattedCode}}
     <code class="code {{language}}">
       {{#if formattedCode}}
-        {{{formattedCode}}}
+        {{#html formattedCode}}}
       {{else}}
         {{>slot}}
       {{/if}}
