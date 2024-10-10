@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -15,7 +15,7 @@ const settings = {
   minChars: 1
 };
 
-const createInstance = ({ $, state, settings, self, reaction }) => ({
+const createComponent = ({ $, state, settings, self, reaction }) => ({
 
   initialize() {
     self.calculateResults();
@@ -108,12 +108,12 @@ const events = {
   }
 };
 
-createComponent({
+defineComponent({
   tagName: 'ui-search',
   template,
   events,
   css,
   state,
   settings,
-  createInstance,
+  createComponent,
 });

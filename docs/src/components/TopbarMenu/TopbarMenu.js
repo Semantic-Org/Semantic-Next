@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, isFunction, first, isArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './TopbarMenu.html?raw';
@@ -10,7 +10,7 @@ const settings = {
   activeURL: '',
 };
 
-const createInstance = function ({ self, settings }) {
+const createComponent = function ({ self, settings }) {
   return {
     url: new ReactiveVar(settings.activeURL),
     getMenu() {
@@ -79,11 +79,11 @@ const onRendered = function ({ $, self, attachEvent, isClient }) {
 const events = {
 };
 
-const TopbarMenu = createComponent({
+const TopbarMenu = defineComponent({
   tagName: 'topbar-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onRendered,
   events,

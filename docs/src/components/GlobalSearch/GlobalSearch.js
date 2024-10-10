@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { findIndex, isEqual } from '@semantic-ui/utils';
 
 import template from './GlobalSearch.html?raw';
@@ -24,7 +24,7 @@ const state = {
   modalOpen: false,
 };
 
-const createInstance = ({self, el, bindKey, reaction, state, isRendered, settings, $}) => ({
+const createComponent = ({self, el, bindKey, reaction, state, isRendered, settings, $}) => ({
 
   initialize() {
     bindKey(settings.openKey, self.openModal);
@@ -202,11 +202,11 @@ const events = {
   }
 };
 
-const GlobalSearch = createComponent({
+const GlobalSearch = defineComponent({
   tagName: 'global-search',
   template,
   css,
-  createInstance,
+  createComponent,
   events,
   state,
   keys,

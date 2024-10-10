@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { each, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -8,7 +8,7 @@ const state = {
   balls: [],
 };
 
-const createInstance = ({self, $, reaction, reactiveVar, state}) => ({
+const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   emitter: {
     rate: 2, // balls per second
@@ -282,11 +282,11 @@ const events = {
   },
 };
 
-export const BallSimulation = createComponent({
+export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,
-  createInstance,
+  createComponent,
   onRendered,
   events,
   state

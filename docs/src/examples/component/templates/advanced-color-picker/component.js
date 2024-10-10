@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -14,7 +14,7 @@ const state = {
   hoveredColor: '',
 };
 
-const createInstance = ({self, settings, $, dispatchEvent}) => ({
+const createComponent = ({self, settings, $, dispatchEvent}) => ({
   selectColor(color) {
     settings.color = color;
     dispatchEvent('color-selected', { color });
@@ -47,12 +47,12 @@ const events = {
 
 };
 
-createComponent({
+defineComponent({
   tagName: 'advanced-color-picker',
   events,
   template,
   css,
   settings,
   state,
-  createInstance
+  createComponent
 });

@@ -1,11 +1,11 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 import { ButtonComponentSpec } from '@semantic-ui/specs';
 
 import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
 import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
-const createInstance = ({self, settings, data, el, $}) => ({
+const createComponent = ({self, settings, data, el, $}) => ({
   isIconBefore() {
     return settings.icon && !settings.iconAfter;
   },
@@ -60,12 +60,12 @@ const events = {
   }
 };
 
-export const UIButton = createComponent({
+export const UIButton = defineComponent({
   tagName: 'ui-button',
   componentSpec: ButtonComponentSpec,
   template: ButtonTemplate,
   css: ButtonCSS,
-  createInstance,
+  createComponent,
   onCreated,
   onRendered,
   events,

@@ -1,8 +1,8 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import template from './todo-footer.html?raw';
 import css from './todo-footer.css?raw';
 
-const createInstance = ({ self, findParent, $ }) => ({
+const createComponent = ({ self, findParent, $ }) => ({
   filters: ['all', 'active', 'complete'],
 
   todoList() {
@@ -42,11 +42,11 @@ const events = {
   },
 };
 
-const todoFooter = createComponent({
+const todoFooter = defineComponent({
   templateName: 'todoFooter',
   template,
   css,
-  createInstance,
+  createComponent,
   events,
 });
 

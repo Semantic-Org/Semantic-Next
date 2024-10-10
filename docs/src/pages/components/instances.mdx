@@ -6,7 +6,7 @@ description: Defining your components behavior and exposed properties
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The `createInstance` callback can be used when [creating a component](/components/create) to define the behaviors of your component so that they can be accessed in various other locations that might need to reference or invoke them.
+The `createComponent` callback can be used when [creating a component](/components/create) to define the behaviors of your component so that they can be accessed in various other locations that might need to reference or invoke them.
 
 For instance you might need to invoke a behavior from:
 
@@ -21,11 +21,11 @@ For instance you might need to invoke a behavior from:
 
 ### Creating Instances
 
-The `createInstance` callback is used to define your component instance including methods that define your components behavior.
+The `createComponent` callback is used to define your component instance including methods that define your components behavior.
 
 ```javascript
 const state = { counter: 0 };
-const createInstance = ({self, state, settings}) => ({
+const createComponent = ({self, state, settings}) => ({
   setCounter(number) {
     state.counter.set(number);
   },
@@ -135,7 +135,7 @@ The most common scenario will require you to access some functionality on a pare
 The `findParent` helper can be used in this scenario, allowing you to walk up the render tree looking for a component matching the specified name.
 
 ```javascript
-const createInstance = ({ findParent }) => {
+const createComponent = ({ findParent }) => {
   getTodos() => {
     const todoList = findParent('todo-list');
     return todoList.todos;
@@ -148,7 +148,7 @@ const createInstance = ({ findParent }) => {
 You can use `findChild` and `findChildren` to look down the render tree for any subtemplates that match a given component name
 
 ```javascript
-const createInstance = ({ findChildren }) => {
+const createComponent = ({ findChildren }) => {
   getRowName(id) => {
     const tableRows = findChildren('table-rows');
     const row = tableRows.filter(row => row.id == id);
@@ -162,7 +162,7 @@ const createInstance = ({ findChildren }) => {
 If you need to access an arbitrary template from any other template you can use `findTemplate`
 
 ```javascript
-const createInstance = ({ findTemplate }) => {
+const createComponent = ({ findTemplate }) => {
   getTodos() => {
     const component = findTemplate('sibling-component');
     return component.someMethod();

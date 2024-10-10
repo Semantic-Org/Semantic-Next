@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, each, flatten, noop, first, inArray, last, isServer } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
@@ -32,7 +32,7 @@ const state = {
   visibleItems: [],
 };
 
-const createInstance = ({self, state, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
+const createComponent = ({self, state, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
@@ -322,11 +322,11 @@ const events = {
   }
 };
 
-const InPageMenu = createComponent({
+const InPageMenu = defineComponent({
   tagName: 'inpage-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   state,
   onRendered,

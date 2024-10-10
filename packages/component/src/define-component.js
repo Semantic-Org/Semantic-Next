@@ -6,11 +6,11 @@ import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { WebComponentBase } from './web-component.js';
 
-export const createComponent = ({
+export const defineComponent = ({
   template = '',
   ast,
   css = false,
-  lightCSS = false,
+  pageCSS = false,
   componentSpec = false,
   tagName,
   delegatesFocus = false,
@@ -23,7 +23,7 @@ export const createComponent = ({
   events = {},
   keys = {},
 
-  createInstance = noop,
+  createComponent = noop,
   onCreated = noop,
   onRendered = noop,
   onDestroyed = noop,
@@ -49,8 +49,10 @@ export const createComponent = ({
     }
   });
 
-  if(lightCSS) {
-    adoptStylesheet(lightCSS);
+  // allow component to assign page css associated with the component
+  // this will only be added once when the component is defined
+  if(pageCSS) {
+    adoptStylesheet(pageCSS);
   }
 
   /*
@@ -72,7 +74,7 @@ export const createComponent = ({
     onRendered,
     onDestroyed,
     onThemeChanged,
-    createInstance,
+    createComponent,
   });
   let webComponent;
 
@@ -110,7 +112,7 @@ export const createComponent = ({
       createRenderRoot() {
         this.useLight = this.getAttribute('expose') !== null;
         if (this.useLight) {
-          this.addLightCSS(webComponent, 'light', this.css, { scopeSelector: this.tagName });
+          this.addPageCSS(webComponent, 'page', this.css, { scopeSelector: this.tagName });
           this.storeOriginalContent.apply(this);
           return this;
         }

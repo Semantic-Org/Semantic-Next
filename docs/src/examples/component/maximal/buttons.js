@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const template = await getText('./buttons.html');
 
@@ -13,7 +13,7 @@ const events = {
   },
 };
 
-export const buttons = createComponent({
+export const buttons = defineComponent({
   template,
   events
 });

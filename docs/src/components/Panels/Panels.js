@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { each, isString, isNumber, roundNumber, inArray, sum, memoize } from '@semantic-ui/utils';
 
 import template from './Panels.html?raw';
@@ -10,7 +10,7 @@ const settings = {
   saveStateID: 'panels',
 };
 
-const createInstance = ({self, el, settings, $}) => ({
+const createComponent = ({self, el, settings, $}) => ({
   panels: [],
   renderedPanels: [],
   cache: {
@@ -716,12 +716,12 @@ const events = {
   },
 };
 
-const UIPanels = createComponent({
+const UIPanels = defineComponent({
   tagName: 'ui-panels',
   plural: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onDestroyed,

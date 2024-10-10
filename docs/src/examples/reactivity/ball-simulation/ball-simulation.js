@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { each, clone, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -9,7 +9,7 @@ const state = {
   time: 0,
 };
 
-const createInstance = ({self, $, reaction, reactiveVar, state}) => ({
+const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   startTime() {
     self.tick();
@@ -124,11 +124,11 @@ const events = {
   }
 };
 
-export const BallSimulation = createComponent({
+export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,
-  createInstance,
+  createComponent,
   onRendered,
   events,
   state

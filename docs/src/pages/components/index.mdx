@@ -35,16 +35,16 @@ Semantic UI components provide an overall framework for creating complex web app
 
 ### Portable
 
-Components are defined using [`createComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
+Components are defined using [`defineComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
 
 ```javascript
-createComponent({
+defineComponent({
   tagName: 'my-component',
   template: '...',
   css: '...',
   state: { ... },
   settings: { ... },
-  createInstance: () => ({ ... }),
+  createComponent: () => ({ ... }),
   onCreated: () => { ... },
   onRendered: () => { ... },
   onDestroyed: () => { ... },
@@ -91,10 +91,10 @@ Components provides an [integrated design system](/components/styling) powered b
 
 ### Events & Keybindings
 
-Components include a [built in event management](/components/events) built around [native DOM events, making it easy to dispatch events
+Components include a [built in event management](/components/events) built around [native DOM events](/components/events#creating-events), making it easy to dispatch events
 
 ```javascript
-const createInstance = ({state, dispatchEvent}) => ({
+const createComponent = ({state, dispatchEvent}) => ({
   increment(amount) {
 
     // update internal counter

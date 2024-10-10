@@ -14,20 +14,20 @@ Each web component has lifecycle callbacks that help you define behavior at each
 
 Semantic UI components wrap native web components but provide additional callbacks that give you more granular control over how the component is defined.
 
-* **createInstance** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
+* **createComponent** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
 * **onCreated** - Callback after your component instance is initialized but before it is attached to the DOM
 * **onRendered** - Callback after your component is rendered to the DOM
 * **onDestroyed** - Callback after your component is removed from the DOM
 
 For a more detailed description of how callbacks are fired refer to the [callback event sequence diagram](/components/lifecycle#callback-sequence).
 
-> **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/templates) passed to `createComponent`.
+> **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/templates) passed to `defineComponent`.
 
 ## Lifecycle Callbacks
 
-### createInstance
+### createComponent
 
-`createInstance` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
+`createComponent` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
 
 For more information see the dedicated section to [component instances](/components/instances).
 
@@ -81,7 +81,7 @@ The following parameters are destructurable from all callbacks.
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|
 | el                | the DOM element of the web component                  |
-| self              | the template instance from createInstance             |
+| self              | the template instance from createComponent             |
 | tpl               | alias for self                                        |
 | component         | alias for self                                        |
 | $                 | allows you to query the shadow dom of the component   |

@@ -1,9 +1,9 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 import template from './test-case.html?raw';
 import css from './test-case.css?raw';
 
-const createInstance = function ({ self, $ }) {
+const createComponent = function ({ self, $ }) {
   // test instance
   return {};
 };
@@ -20,11 +20,11 @@ const events = {
   // test events
 };
 
-const TestCase = createComponent({
+const TestCase = defineComponent({
   tagName: 'test-case',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   events,

@@ -74,12 +74,12 @@ and `$$` matches 3 elements
 
 ## Query in Callbacks
 
-### createInstance
+### createComponent
 
 A common use case is having component functionality that requires accessing some portion of the DOM, to manipulate its contents.
 
 ```javascript
-const createInstance = ({el, $}) => ({
+const createComponent = ({el, $}) => ({
   startRezize(value) {
     $('.body').css('cursor', 'resize');
   },
@@ -92,7 +92,7 @@ const createInstance = ({el, $}) => ({
 If you need to access the component itself you can use `el`.
 
 ```javascript
-const createInstance = ({el, $}) => ({
+const createComponent = ({el, $}) => ({
   getWidth() {
     return $(el).width();
   }
@@ -102,7 +102,7 @@ const createInstance = ({el, $}) => ({
 If you need to access a nested component you can use `$$`
 
 ```javascript
-const createInstance = ({ $$ }) => ({
+const createComponent = ({ $$ }) => ({
   changeMenuButtonText(text) {
     return $$('ui-menu ui-button').text(text);
   }

@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -80,7 +80,7 @@ const state = {
   displayMode: 'desktop'
 };
 
-const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
+const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
   },
@@ -342,12 +342,12 @@ const events = {
   },
 };
 
-const CodePlayground = createComponent({
+const CodePlayground = defineComponent({
   tagName: 'code-playground',
   delegatesFocus: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onRendered,

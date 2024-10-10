@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 import template from './test-element.html?raw';
 import css from './test-element.css?raw';
@@ -6,7 +6,7 @@ import css from './test-element.css?raw';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createInstance = function ({ self, reactiveVar, $ }) {
+const createComponent = function ({ self, reactiveVar, $ }) {
   return {
     tab: reactiveVar('events'),
     morningActivity: reactiveVar('running'),
@@ -43,11 +43,11 @@ const events = {
   },
 };
 
-const TestElement = createComponent({
+const TestElement = defineComponent({
   tagName: 'test-element',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   events,

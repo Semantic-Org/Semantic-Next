@@ -18,7 +18,7 @@ npm install @semantic-ui/component
 
 ## Creating Components
 
-`createComponent` exported from `@semantic-ui/component` can be used to create a new web component.
+`defineComponent` exported from `@semantic-ui/component` can be used to create a new web component.
 
 
 ### Minimal Component
@@ -26,18 +26,18 @@ npm install @semantic-ui/component
 The minimum requirement to create a component is an html template.
 
 ```javascript
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
-const HelloWorld = createComponent({
+const HelloWorld = defineComponent({
   template: `<p>Hello World</p>`,
 });
 ```
 
 If you specify a `tagName` your component will be available as a web component allowing you include it in pages in your application.
 ```javascript
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
-createComponent({
+defineComponent({
   tagName: 'hello-world',
   template: `<p>Hello World</p>`,
 });
@@ -49,11 +49,12 @@ createComponent({
 
 ### Standard Component
 
-In most real world use-cases you will need to provide additional information to `createComponent`
+In most real world use-cases you will need to provide additional information to `defineComponent`
 
-* **createInstance** - An object returned from `createInstance` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
+* **createComponent** - An object returned from `createComponent` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
 * **Template** - The logic that controls how your html is rendered including conditionals, loops, subtemplates, and expressions. This can be passed in as a string `template` or rendered from a precompiled `ast`.
-* **CSS** - The `css` scoped to this component or that should be attached once to the page with the compnent, `lightCSS`
+* **CSS** - The `css` scoped to this component or that should be attached once to the page with the component,
+ * **Page CSS** - The `pageCSS` scoped to the page that will added to the page when a component is defined.
 * **Events** - The event listeners attached to your component, passed in as an object literal string `events`.
 * **State** - Reactive internal `state` associated with your component and its default values
 * **Settings** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
@@ -68,14 +69,14 @@ In most real world use-cases you will need to provide additional information to 
 
 ### Instance
 
-[`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
+[`createComponent`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
-Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), component instance `self` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createInstance`.
+Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), component instance `self` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createComponent`.
 
-> For more information on `createInstance` see our dedicated subsection on [defining functionality](/components/instances).
+> For more information on `createComponent` see our dedicated subsection on [defining functionality](/components/instances).
 
 ```javascript
-const createInstance = ({ state }) => ({
+const createComponent = ({ state }) => ({
   getCounter() {
     return state.counter.get();
   },
@@ -101,7 +102,7 @@ Counter is {{counter}}
 
 `css` defines scoped CSS that will be attached to your web component and not apply to other elements on the page. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
 
-You can use `lightCSS` to add addiitional css that will be included once in the page scope when you component is created.
+You can use `pageCSS` to add additional css that will be included once in the page scope when you component is created.
 
 > For more information see the [dedicated css styling section](/components/styling).
 
@@ -138,7 +139,7 @@ Components can also include keybindings that will be attached to the page during
 > For more information please see the [dedicated subsection for keybindings](/components/keys)
 
 ```javascript
-createComponent({
+defineComponent({
   keys: {
     'up': ({ self }) => self.selectPreviousResult(),
     'down': ({ self }) => pl.selectNextResult(),
@@ -179,7 +180,7 @@ If you prefer single file components you can just inline your html and css.
 
 
 ```javascript
-const createComponent({
+const defineComponent({
   tagName: 'ui-counter',
   template: `<div class="counter">{{counter}}</div>`,
   css: `

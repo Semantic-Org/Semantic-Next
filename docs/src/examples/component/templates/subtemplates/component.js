@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 import { row } from './row.js';
 
@@ -10,7 +10,7 @@ const settings = {
   company: 'Metatron Industries',
 };
 
-const createInstance = ({ settings }) => ({
+const createComponent = ({ settings }) => ({
   rows: [
     ['Jane', 'Fonda', '55', 'Female'],
     ['Matt', 'Stone', '23', 'Male'],
@@ -18,12 +18,12 @@ const createInstance = ({ settings }) => ({
   ]
 });
 
-createComponent({
+defineComponent({
   tagName: 'ui-table',
   template,
   css,
   settings,
-  createInstance,
+  createComponent,
   subTemplates: {
     row
   }

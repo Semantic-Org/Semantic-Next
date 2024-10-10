@@ -23,7 +23,7 @@ export const Template = class Template {
     keys,
     stateConfig,
     subTemplates,
-    createInstance,
+    createComponent,
     parentTemplate, // the parent template when nested
     renderingEngine = 'lit',
     isPrototype = false,
@@ -49,7 +49,7 @@ export const Template = class Template {
     this.state = this.createReactiveState(stateConfig, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
-    this.createInstance = createInstance;
+    this.createComponent = createComponent;
     this.onCreated = noop;
     this.onDestroyed = noop;
     this.onRendered = noop;
@@ -124,9 +124,9 @@ export const Template = class Template {
   initialize() {
     let template = this;
     let instance;
-    if (isFunction(this.createInstance)) {
+    if (isFunction(this.createComponent)) {
       this.instance = {};
-      instance = this.call(this.createInstance) || {};
+      instance = this.call(this.createComponent) || {};
       extend(template.instance, instance);
     }
     if (isFunction(instance.initialize)) {
@@ -252,7 +252,7 @@ export const Template = class Template {
       onRendered: this.onRenderedCallback,
       parentTemplate: this.parentTemplate,
       onDestroyed: this.onDestroyedCallback,
-      createInstance: this.createInstance,
+      createComponent: this.createComponent,
     };
     const templateSettings = {
       ...defaultSettings,

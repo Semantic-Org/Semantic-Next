@@ -1,9 +1,9 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({self, reactiveVar}) => ({
+const createComponent = ({self, reactiveVar}) => ({
   sections: [
     { title: 'Section 1', content: 'Content for section 1', expanded: reactiveVar(false) },
     { title: 'Section 2', content: 'Content for section 2', expanded: reactiveVar(false) },
@@ -22,10 +22,10 @@ const events = {
   }
 };
 
-createComponent({
+defineComponent({
   tagName: 'ui-accordion',
   events,
   template,
   css,
-  createInstance
+  createComponent
 });

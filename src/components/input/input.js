@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { InputComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/input-shadow.css?raw';
@@ -8,7 +8,7 @@ const state = {
   focused: false,
 };
 
-const createInstance = ({$, state}) => ({
+const createComponent = ({$, state}) => ({
 
   getStateClasses() {
     return {
@@ -38,12 +38,12 @@ const events = {
   }
 };
 
-const UIInput = createComponent({
+const UIInput = defineComponent({
   tagName: 'ui-input',
   componentSpec: InputComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
   events,
   onCreated,
   onRendered,

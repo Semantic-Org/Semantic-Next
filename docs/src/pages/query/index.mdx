@@ -102,7 +102,7 @@ exportGlobals();
 `$` and `$$` are integrated into all lifecycle callbacks and events in Semantic UI components.
 
 ```javascript
-const createInstance = ({$, $$}) => ({
+const createComponent = ({$, $$}) => ({
   getDiv() {
     return $('div').get(0);
   }

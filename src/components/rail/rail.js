@@ -1,19 +1,19 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { RailComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/rail-shadow.css?raw';
 import Template from './rail.html?raw';
 
-const createInstance = ({$}) => ({
+const createComponent = ({$}) => ({
 });
 
 
-const UIRail = createComponent({
+const UIRail = defineComponent({
   tagName: 'ui-rail',
   componentSpec: RailComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
 });
 
 export { UIRail };

@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { noop, each } from '@semantic-ui/utils';
 import template from './MobileMenu.html?raw';
 import css from './MobileMenu.css?raw';
@@ -18,7 +18,7 @@ const state = {
   nextMenu: {},
 };
 
-const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
+const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
 
   initialize() {
     tpl.setMenusFromURL(settings.activeURL);
@@ -229,11 +229,11 @@ const events = {
   }
 };
 
-const MobileMenu = createComponent({
+const MobileMenu = defineComponent({
   tagName: 'mobile-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   events,
   state

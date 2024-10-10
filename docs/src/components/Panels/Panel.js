@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { sum } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
@@ -31,7 +31,7 @@ const state = {
   lastPanelSize: undefined
 };
 
-const createInstance = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
+const createComponent = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
 
@@ -173,12 +173,12 @@ const events = {
   },
 };
 
-const UIPanel = createComponent({
+const UIPanel = defineComponent({
   tagName: 'ui-panel',
   plural: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   events,
 });

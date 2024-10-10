@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, isFunction, isArray } from '@semantic-ui/utils';
 import template from './NavMenu.html?raw';
 import css from './NavMenu.css?raw';
@@ -17,7 +17,7 @@ const state = {
   url: ''
 };
 
-const createInstance = function ({ self, data, state, settings }) {
+const createComponent = function ({ self, data, state, settings }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
@@ -154,11 +154,11 @@ const events = {
   }
 };
 
-const NavMenu = createComponent({
+const NavMenu = defineComponent({
   tagName: 'nav-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onDestroyed,

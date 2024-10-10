@@ -1,11 +1,11 @@
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createInstance = ({ self, $, reaction, findParent }) => ({
+const createComponent = ({ self, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodoList() {
@@ -68,11 +68,11 @@ const onCreated = ({ self }) => {
   self.calculateAllCompleted();
 };
 
-const todoHeader = createComponent({
+const todoHeader = defineComponent({
   templateName: 'todoHeader',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   events,
 });

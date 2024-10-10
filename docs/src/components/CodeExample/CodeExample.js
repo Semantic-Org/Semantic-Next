@@ -1,11 +1,11 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { UIIcon } from '@semantic-ui/core';
 import { tokenize } from '@semantic-ui/utils';
 
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
-import lightCSS from './CodeExampleLight.css?raw';
+import pageCSS from './CodeExamplePage.css?raw';
 
 import CodeSample from '../CodeSample/CodeSample.js';
 
@@ -17,7 +17,7 @@ const settings = {
   showCode: false, // show code on start
 };
 
-const createInstance = ({ $, isServer, reaction, settings, self }) => ({
+const createComponent = ({ $, isServer, reaction, settings, self }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
   slottedContent: new ReactiveVar(),
   code: new ReactiveVar(settings.code),
@@ -64,15 +64,15 @@ const events = {
   }
 };
 
-const CodeExample = createComponent({
+const CodeExample = defineComponent({
   tagName: 'code-example',
   template,
   events,
   css,
-  lightCSS,
+  pageCSS,
   onCreated,
   onRendered,
-  createInstance,
+  createComponent,
   settings,
 });
 
