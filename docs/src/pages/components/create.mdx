@@ -54,7 +54,7 @@ In most real world use-cases you will need to provide additional information to 
 * **createComponent** - An object returned from `createComponent` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
 * **Template** - The logic that controls how your html is rendered including conditionals, loops, subtemplates, and expressions. This can be passed in as a string `template` or rendered from a precompiled `ast`.
 * **CSS** - The `css` scoped to this component or that should be attached once to the page with the component,
- * `pageCSS` - CSS that is scoped to the page that will be added once when the component is first defined
+ * **Page CSS** - The `pageCSS` scoped to the page that will added to the page when a component is defined.
 * **Events** - The event listeners attached to your component, passed in as an object literal string `events`.
 * **State** - Reactive internal `state` associated with your component and its default values
 * **Settings** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`

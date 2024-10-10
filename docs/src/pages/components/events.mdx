@@ -81,11 +81,11 @@ In the following example events are attached to four separate buttons to control
 <PlaygroundExample id="event-binding" direction="horizontal"></PlaygroundExample>
 
 
-## Special Event Keywords
+## Special Event Bindings
 
-Keywords are special preceding terms that modify how events are attached permitting you to bind events to elements other than those found in your [component's template](/templates).
+You can add special keywords to that modify how events are attached permitting you to bind events to elements other than those found in your [component's template](/templates).
 
-### Global
+### Global Events
 
 You can use the `global` keyword to attach an event globally to any element outside of your component.
 
@@ -99,20 +99,22 @@ const events = {
 };
 ```
 
-### Deep
+### Deep Events
 
-You can use the `deep` keyword to attach events to nested web components or slotted content. The deep content may be a nested web component or slotted content.
+You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's shadow DOM or slotted content which a person using your component might include.
 
 > **Deep Usage** - By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
 
 ```html
-<ui-button>Submit</ui-button>
+<div class="component">
+  <ui-button>Submit</ui-button>
+</div>
 ```
 
 ```javascript
 const events = {
-  'deep .button .icon'() => {
-    // the icon on a button is clicked
+  'deep ui-button .icon'() => {
+    // the icon is part of `ui-button` shadow DOM
   }
 };
 ```
