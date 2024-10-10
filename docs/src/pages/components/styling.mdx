@@ -7,7 +7,7 @@ description: Creating a new component
 
 ## CSS
 
-Components defined with `createComponent` can include `css` that applies only to the component or `lightCSS` that should apply globally to the page.
+Components defined with `defineComponent` can include `css` that applies only to the component or `lightCSS` that should apply globally to the page.
 
 
 ### Component CSS
@@ -63,7 +63,7 @@ const css = `
 
 ### onThemeChanged Callback
 
-When definining your component with `createComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
+When definining your component with `defineComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
 
 ```javascript
 const onThemeChanged = ({darkMode}) => {

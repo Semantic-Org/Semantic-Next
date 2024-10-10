@@ -1,6 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
@@ -76,7 +76,7 @@ const events = {
   },
 };
 
-const ThemeSwitcher = createComponent({
+const ThemeSwitcher = defineComponent({
   tagName: 'theme-switcher',
   template,
   events,

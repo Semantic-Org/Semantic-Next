@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { sum, range } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -55,7 +55,7 @@ const onDestroyed = ({self}) => {
 const onRendered = ({ $ }) => {
 };
 
-createComponent({
+defineComponent({
   tagName: 'ui-clock',
   createInstance,
   template,

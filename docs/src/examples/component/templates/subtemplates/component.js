@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 import { row } from './row.js';
 
@@ -18,7 +18,7 @@ const createInstance = ({ settings }) => ({
   ]
 });
 
-createComponent({
+defineComponent({
   tagName: 'ui-table',
   template,
   css,

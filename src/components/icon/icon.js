@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { IconComponentSpec } from '@semantic-ui/specs';;
 
 import CSS from './css/icon-shadow.css?raw';
@@ -16,7 +16,7 @@ const onCreated = ({self, el}) => {
 const onRendered = function({$, isClient}) {
 };
 
-const UIIcon = createComponent({
+const UIIcon = defineComponent({
   tagName: 'ui-icon',
   componentSpec: IconComponentSpec,
   template: Template,

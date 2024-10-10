@@ -6,7 +6,7 @@ import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { WebComponentBase } from './web-component.js';
 
-export const createComponent = ({
+export const defineComponent = ({
   template = '',
   ast,
   css = false,

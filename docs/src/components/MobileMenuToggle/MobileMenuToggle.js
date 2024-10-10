@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import template from './MobileMenuToggle.html?raw';
 import css from './MobileMenuToggle.css?raw';
 
@@ -37,7 +37,7 @@ const events = {
   },
 };
 
-const MobileMenuToggle = createComponent({
+const MobileMenuToggle = defineComponent({
   tagName: 'mobile-menu-toggle',
   template,
   events,

@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 import css from './component.css?raw';
 import template from './component.html?raw';
@@ -39,7 +39,7 @@ const events = {
   },
 };
 
-export const CircleExpand = createComponent({
+export const CircleExpand = defineComponent({
   tagName: 'circle-expand',
   template,
   css,

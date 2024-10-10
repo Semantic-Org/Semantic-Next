@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { InputComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/input-shadow.css?raw';
@@ -38,7 +38,7 @@ const events = {
   }
 };
 
-const UIInput = createComponent({
+const UIInput = defineComponent({
   tagName: 'ui-input',
   componentSpec: InputComponentSpec,
   template: Template,

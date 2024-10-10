@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { formatDate } from '@semantic-ui/utils';
 
@@ -63,7 +63,7 @@ const events = {
   }
 };
 
-createComponent({
+defineComponent({
   tagName: 'birthday-calendar',
   events,
   template,

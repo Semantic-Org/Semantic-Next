@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 const css = await getText('./component.css');
@@ -20,7 +20,7 @@ const events = {
   }
 };
 
-createComponent({
+defineComponent({
   tagName: 'color-picker',
   events,
   template,

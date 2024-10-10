@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { each, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -282,7 +282,7 @@ const events = {
   },
 };
 
-export const BallSimulation = createComponent({
+export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,

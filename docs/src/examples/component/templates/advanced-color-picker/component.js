@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -47,7 +47,7 @@ const events = {
 
 };
 
-createComponent({
+defineComponent({
   tagName: 'advanced-color-picker',
   events,
   template,

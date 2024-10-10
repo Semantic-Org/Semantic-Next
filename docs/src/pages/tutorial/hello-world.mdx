@@ -5,10 +5,10 @@ icon: package
 description: Creating a new component
 ---
 
-To create a new component in Semantic UI you pass in a set of arguments to `createComponent` which help define aspects of how your component functions. In the most simple case you only need to specify what HTML will be rendered for your component.
+To create a new component in Semantic UI you pass in a set of arguments to `defineComponent` which help define aspects of how your component functions. In the most simple case you only need to specify what HTML will be rendered for your component.
 
 ```javascript
-const counter = createComponent({
+const counter = defineComponent({
   template: '<p>Hello World</p>',
 });
 ```
@@ -19,7 +19,7 @@ const counter = createComponent({
 If a `tagName` is specified the component will become a web component and be defined automatically meaning you can render the component simply by using the tag.
 
 ```javascript
-const counter = createComponent({
+const counter = defineComponent({
   tagName: 'hello-world'
   template: '<p>Hello World</p>',
 });

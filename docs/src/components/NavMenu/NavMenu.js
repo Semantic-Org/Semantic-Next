@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, isFunction, isArray } from '@semantic-ui/utils';
 import template from './NavMenu.html?raw';
 import css from './NavMenu.css?raw';
@@ -154,7 +154,7 @@ const events = {
   }
 };
 
-const NavMenu = createComponent({
+const NavMenu = defineComponent({
   tagName: 'nav-menu',
   template,
   css,

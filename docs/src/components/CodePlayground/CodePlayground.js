@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -342,7 +342,7 @@ const events = {
   },
 };
 
-const CodePlayground = createComponent({
+const CodePlayground = defineComponent({
   tagName: 'code-playground',
   delegatesFocus: true,
   template,

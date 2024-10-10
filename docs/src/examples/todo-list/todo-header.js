@@ -1,5 +1,5 @@
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./todo-header.css');
 const template = await getText('./todo-header.html');
@@ -67,7 +67,7 @@ const onCreated = ({ self }) => {
   self.calculateAllCompleted();
 };
 
-const todoHeader = createComponent({
+const todoHeader = defineComponent({
   templateName: 'todoHeader',
   template,
   css,

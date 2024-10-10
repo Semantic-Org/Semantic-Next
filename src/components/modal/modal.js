@@ -1,5 +1,5 @@
 import { noop } from '@semantic-ui/utils';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ModalComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/modal-shadow.css?raw';
@@ -38,7 +38,7 @@ const events = {
   }
 };
 
-const UIModal = createComponent({
+const UIModal = defineComponent({
   tagName: 'ui-modal',
   componentSpec: ModalComponentSpec,
   template: Template,

@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { range } from '@semantic-ui/utils';
 
@@ -63,7 +63,7 @@ const events = {
   },
 };
 
-const eventsTab = createComponent({
+const eventsTab = defineComponent({
   templateName: 'events',
   template,
   createInstance,

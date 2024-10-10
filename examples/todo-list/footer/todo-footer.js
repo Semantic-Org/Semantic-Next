@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import template from './todo-footer.html?raw';
 import css from './todo-footer.css?raw';
 
@@ -42,7 +42,7 @@ const events = {
   },
 };
 
-const todoFooter = createComponent({
+const todoFooter = defineComponent({
   templateName: 'todoFooter',
   template,
   css,

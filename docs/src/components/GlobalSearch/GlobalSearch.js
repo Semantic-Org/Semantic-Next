@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { findIndex, isEqual } from '@semantic-ui/utils';
 
 import template from './GlobalSearch.html?raw';
@@ -202,7 +202,7 @@ const events = {
   }
 };
 
-const GlobalSearch = createComponent({
+const GlobalSearch = defineComponent({
   tagName: 'global-search',
   template,
   css,

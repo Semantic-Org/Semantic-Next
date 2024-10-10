@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { sum } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
@@ -173,7 +173,7 @@ const events = {
   },
 };
 
-const UIPanel = createComponent({
+const UIPanel = defineComponent({
   tagName: 'ui-panel',
   plural: true,
   template,

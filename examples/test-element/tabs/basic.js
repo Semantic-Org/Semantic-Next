@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './basic.html?raw';
 import css from './basic.css?raw';
@@ -66,7 +66,7 @@ const events = {
   },
 };
 
-const basicTab = createComponent({
+const basicTab = defineComponent({
   templateName: 'basic',
   createInstance,
   template,

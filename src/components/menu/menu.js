@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { MenuComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/menu-shadow.css?raw';
@@ -45,7 +45,7 @@ const events = {
   }
 };
 
-const UIMenu = createComponent({
+const UIMenu = defineComponent({
   tagName: 'ui-menu',
   componentSpec: MenuComponentSpec,
   template: Template,

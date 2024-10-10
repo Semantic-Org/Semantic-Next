@@ -1,4 +1,4 @@
-import { createComponent, adoptStylesheet } from '@semantic-ui/component';
+import { defineComponent, adoptStylesheet } from '@semantic-ui/component';
 
 import codeMirrorCSS from './lib/codemirror.css?raw';
 
@@ -111,7 +111,7 @@ const onRendered = ({ tpl }) => {
   tpl.configureCodeEditors();
 };
 
-const CodePlaygroundFile = createComponent({
+const CodePlaygroundFile = defineComponent({
   template,
   css,
   createInstance,

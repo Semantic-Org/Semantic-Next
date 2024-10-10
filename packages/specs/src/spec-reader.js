@@ -422,7 +422,7 @@ export class SpecReader {
     }
   }
 
-  /* This is a format that is consumed by createComponent to determine valid attributes
+  /* This is a format that is consumed by defineComponent to determine valid attributes
      for the web component. It is a subset of the component spec that can be searched quickly
      and has a reduced filesize.
   */

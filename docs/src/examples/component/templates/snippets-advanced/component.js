@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { sum } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -52,7 +52,7 @@ const onDestroyed = ({self}) => {
   clearInterval(self.interval);
 };
 
-export const UIClock = createComponent({
+export const UIClock = defineComponent({
   tagName: 'ui-clock',
   createInstance,
   template,

@@ -17,7 +17,7 @@ Semantic components can include events by passing in an object mapping events to
 > **Event Delegation** Event handlers are attached to the shadow root of your component using a pattern called event delegation where the component listens for the bubbled event. This means that even if you add or remove content that matches the selector after render the event will still fire if the selector matches.
 
 ```javascript
-createComponent({
+defineComponent({
   events: {
     'click .submit'({ self }) {
       self.submit();

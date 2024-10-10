@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { UIIcon } from '@semantic-ui/core';
 import { tokenize } from '@semantic-ui/utils';
@@ -64,7 +64,7 @@ const events = {
   }
 };
 
-const CodeExample = createComponent({
+const CodeExample = defineComponent({
   tagName: 'code-example',
   template,
   events,

@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
 
@@ -86,7 +86,7 @@ const events = {
   },
 };
 
-const TodoList = createComponent({
+const TodoList = defineComponent({
   tagName: 'todo-list',
   subTemplates: {
     todoHeader,

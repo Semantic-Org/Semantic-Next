@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -16,7 +16,7 @@ const createInstance = ({ settings }) => ({
   ]
 });
 
-createComponent({
+defineComponent({
   tagName: 'ui-table',
   template,
   css,

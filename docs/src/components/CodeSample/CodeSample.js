@@ -1,7 +1,7 @@
 import pretty from 'pretty';
 import { codeToHtml } from 'shiki';
 
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import template from './CodeSample.html?raw';
 import css from './CodeSample.css?raw';
 
@@ -144,7 +144,7 @@ const events = {
   }
 };
 
-const CodeSample = createComponent({
+const CodeSample = defineComponent({
   tagName: 'code-sample',
   template,
   events,

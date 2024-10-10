@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { TemplateCompiler } from '@semantic-ui/templating';
 import template from './CodePlaygroundPreview.html?raw';
 import css from './CodePlaygroundPreview.css?raw';
@@ -51,7 +51,7 @@ const events = {
   },
 };
 
-const CodePlaygroundPreview = createComponent({
+const CodePlaygroundPreview = defineComponent({
   template,
   css,
   createInstance,

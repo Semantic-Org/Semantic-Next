@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 const template = `{{getValue}}`;
 
@@ -6,7 +6,7 @@ const createInstance = (self) => ({
    getValue: () => 'test'
 });
 
-createComponent({
+defineComponent({
   tagName: 'ui-counter',
   template: template,
   createInstance,

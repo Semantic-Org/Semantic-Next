@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 import template from './test-element.html?raw';
 import css from './test-element.css?raw';
@@ -43,7 +43,7 @@ const events = {
   },
 };
 
-const TestElement = createComponent({
+const TestElement = defineComponent({
   tagName: 'test-element',
   template,
   css,

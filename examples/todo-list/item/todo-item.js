@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { Reaction } from '@semantic-ui/reactivity';
 
 import template from './todo-item.html?raw';
@@ -53,7 +53,7 @@ const events = {
   },
 };
 
-const todoItem = createComponent({
+const todoItem = defineComponent({
   templateName: 'todoItem',
   template,
   css,

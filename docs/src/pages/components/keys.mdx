@@ -6,10 +6,10 @@ description: Attaching keyboard events to components
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Keybindings can be attached to any component by passing in `keys` to `createComponent`
+Keybindings can be attached to any component by passing in `keys` to `defineComponent`
 
 ```javascript
-createComponent({
+defineComponent({
   keys: {
     'ctrl + f'({ self }) {
       self.focusSearch()

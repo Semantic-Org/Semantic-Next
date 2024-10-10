@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { LabelComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './css/label-shadow.css?raw';
@@ -8,7 +8,7 @@ const createInstance = ({$}) => ({
 });
 
 
-const UILabel = createComponent({
+const UILabel = defineComponent({
   tagName: 'ui-label',
   componentSpec: LabelComponentSpec,
   template: Template,

@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import template from './CodePlaygroundPanel.html?raw';
 import css from './CodePlaygroundPanel.css?raw';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
@@ -22,7 +22,7 @@ const events = {
 const onRendered = ({ $, tpl, attachEvent }) => {
 };
 
-const CodePlaygroundPanel = createComponent({
+const CodePlaygroundPanel = defineComponent({
   template,
   css,
   createInstance,

@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./row.css');
 const template = await getText('./row.html');
@@ -9,7 +9,7 @@ const createInstance = ({ findParent }) => ({
   }
 });
 
-export const row = createComponent({
+export const row = defineComponent({
   createInstance,
   template,
   css,

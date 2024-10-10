@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, each, flatten, noop, first, inArray, last, isServer } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
@@ -322,7 +322,7 @@ const events = {
   }
 };
 
-const InPageMenu = createComponent({
+const InPageMenu = defineComponent({
   tagName: 'inpage-menu',
   template,
   css,

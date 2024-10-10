@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { sum } from '@semantic-ui/utils';
 
 import css from './clock.css';
@@ -45,7 +45,7 @@ const onDestroyed = ({self}) => {
 const onRendered = ({ $ }) => {
 };
 
-const UIClock = createComponent({
+const UIClock = defineComponent({
   tagName: 'ui-clock',
   createInstance,
   template,

@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 import { ButtonComponentSpec } from '@semantic-ui/specs';
 
@@ -60,7 +60,7 @@ const events = {
   }
 };
 
-export const UIButton = createComponent({
+export const UIButton = defineComponent({
   tagName: 'ui-button',
   componentSpec: ButtonComponentSpec,
   template: ButtonTemplate,
