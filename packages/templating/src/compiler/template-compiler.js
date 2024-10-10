@@ -20,7 +20,7 @@ class TemplateCompiler {
     CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
     SLOT: /^{{>\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
-    HTML_EXPRESSION: /^{{{\s*/,
+    HTML_EXPRESSION: /^{{\s*#html\s*/,
     EXPRESSION: /^{{\s*/,
   };
 
