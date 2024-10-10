@@ -4,10 +4,8 @@ import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
-  This extends the base Lit element class
-  to handle rendering slots to light dom
-  as well as applying scoped styles to light DOM
-  and several useful helpers for querying DOM
+  This extends the base Lit element class to include
+  additional functionality useful for Semantic UI
 */
 
 class WebComponentBase extends LitElement {
@@ -40,20 +38,20 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   /* Modifies shadow dom rules to be scoped to component tag */
-  addLightCSS(webComponent, id, css, { scopeSelector } = {}) {
+  addPageCSS(webComponent, id, css, { scopeSelector } = {}) {
     if(isServer) {
       return;
     }
     const stylesheet = new CSSStyleSheet();
-    if(!webComponent.lightStylesheets) {
-      webComponent.lightStylesheets = {};
+    if(!webComponent.pageStylesheets) {
+      webComponent.pageStylesheets = {};
     }
-    if (!webComponent.lightStylesheets[id]) {
+    if (!webComponent.pageStylesheets[id]) {
       if(scopeSelector) {
         css = scopeStyles(css, scopeSelector);
       }
       stylesheet.replaceSync(css);
-      webComponent.lightStylesheets[id] = stylesheet;
+      webComponent.pageStylesheets[id] = stylesheet;
     }
     // we add a new stylesheet to document scoped to component name
     document.adoptedStyleSheets = [

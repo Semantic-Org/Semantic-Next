@@ -10,7 +10,7 @@ export const defineComponent = ({
   template = '',
   ast,
   css = false,
-  lightCSS = false,
+  pageCSS = false,
   componentSpec = false,
   tagName,
   delegatesFocus = false,
@@ -49,8 +49,10 @@ export const defineComponent = ({
     }
   });
 
-  if(lightCSS) {
-    adoptStylesheet(lightCSS);
+  // allow component to assign page css associated with the component
+  // this will only be added once when the component is defined
+  if(pageCSS) {
+    adoptStylesheet(pageCSS);
   }
 
   /*
@@ -110,7 +112,7 @@ export const defineComponent = ({
       createRenderRoot() {
         this.useLight = this.getAttribute('expose') !== null;
         if (this.useLight) {
-          this.addLightCSS(webComponent, 'light', this.css, { scopeSelector: this.tagName });
+          this.addPageCSS(webComponent, 'page', this.css, { scopeSelector: this.tagName });
           this.storeOriginalContent.apply(this);
           return this;
         }
