@@ -34,11 +34,11 @@ export const buildDeps = async ({
 
   /*
     This is CSS that will be imported into
-    the page to style the light dom
+    the page to style the page
   */
-  const cssLightConcat = await esbuilder({
+  const cssPageConcat = await esbuilder({
     entryPoints: [
-      'src/**/css/light/*.css'
+      'src/**/css/page/*.css'
     ],
     target: BROWSER_TARGET,
     bundle: true,
@@ -46,20 +46,20 @@ export const buildDeps = async ({
     loader: {
       '.css': 'css',
     },
-    entryNames: '[dir]/../[name]-light',
+    entryNames: '[dir]/../[name]-page',
     outbase: 'src',
     outdir: 'src',
   });
 
   if(watch) {
     return await Promise.all([
-      cssLightConcat.watch(),
+      cssPageConcat.watch(),
       cssShadowConcat.watch(),
     ]);
   }
   else {
     return await Promise.all([
-      cssLightConcat,
+      cssPageConcat,
       cssShadowConcat,
     ]);
   }
