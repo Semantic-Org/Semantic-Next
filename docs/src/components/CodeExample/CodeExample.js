@@ -5,7 +5,7 @@ import { tokenize } from '@semantic-ui/utils';
 
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
-import lightCSS from './CodeExampleLight.css?raw';
+import pageCSS from './CodeExamplePage.css?raw';
 
 import CodeSample from '../CodeSample/CodeSample.js';
 
@@ -69,7 +69,7 @@ const CodeExample = defineComponent({
   template,
   events,
   css,
-  lightCSS,
+  pageCSS,
   onCreated,
   onRendered,
   createComponent,
