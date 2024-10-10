@@ -4,7 +4,7 @@ import { ContainerComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/container-shadow.css?raw';
 import Template from './container.html?raw';
 
-const createInstance = ({$}) => ({
+const createComponent = ({$}) => ({
 });
 
 
@@ -13,7 +13,7 @@ const UIContainer = defineComponent({
   componentSpec: ContainerComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
 });
 
 export { UIContainer };

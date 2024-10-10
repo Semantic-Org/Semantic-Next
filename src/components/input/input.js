@@ -8,7 +8,7 @@ const state = {
   focused: false,
 };
 
-const createInstance = ({$, state}) => ({
+const createComponent = ({$, state}) => ({
 
   getStateClasses() {
     return {
@@ -43,7 +43,7 @@ const UIInput = defineComponent({
   componentSpec: InputComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
   events,
   onCreated,
   onRendered,

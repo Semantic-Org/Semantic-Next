@@ -5,7 +5,7 @@ import { ModalComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/modal-shadow.css?raw';
 import Template from './modal.html?raw';
 
-const createInstance = ({$, dispatchEvent}) => ({
+const createComponent = ({$, dispatchEvent}) => ({
   show(callback = noop) {
     if(callback() !== false) {
       $('dialog').get(0).showModal();
@@ -43,7 +43,7 @@ const UIModal = defineComponent({
   componentSpec: ModalComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
   events,
   onCreated,
   onRendered,

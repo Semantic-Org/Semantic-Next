@@ -4,7 +4,7 @@ import { IconComponentSpec } from '@semantic-ui/specs';;
 import CSS from './css/icon-shadow.css?raw';
 import Template from './icon.html?raw';
 
-const createInstance = ({self, $}) => ({
+const createComponent = ({self, $}) => ({
 
 
 });
@@ -21,7 +21,7 @@ const UIIcon = defineComponent({
   componentSpec: IconComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
   onCreated,
   onRendered,
 });

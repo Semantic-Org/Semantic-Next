@@ -4,7 +4,7 @@ import { SegmentComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/segment-shadow.css?raw';
 import Template from './segment.html?raw';
 
-const createInstance = ({$}) => ({
+const createComponent = ({$}) => ({
 });
 
 
@@ -13,7 +13,7 @@ const UISegment = defineComponent({
   componentSpec: SegmentComponentSpec,
   template: Template,
   css: CSS,
-  createInstance,
+  createComponent,
 });
 
 export { UISegment };

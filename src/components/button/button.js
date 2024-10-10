@@ -5,7 +5,7 @@ import { ButtonComponentSpec } from '@semantic-ui/specs';
 import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
 import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
 
-const createInstance = ({self, settings, data, el, $}) => ({
+const createComponent = ({self, settings, data, el, $}) => ({
   isIconBefore() {
     return settings.icon && !settings.iconAfter;
   },
@@ -65,7 +65,7 @@ export const UIButton = defineComponent({
   componentSpec: ButtonComponentSpec,
   template: ButtonTemplate,
   css: ButtonCSS,
-  createInstance,
+  createComponent,
   onCreated,
   onRendered,
   events,
