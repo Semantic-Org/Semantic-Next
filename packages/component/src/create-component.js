@@ -23,7 +23,7 @@ export const defineComponent = ({
   events = {},
   keys = {},
 
-  createInstance = noop,
+  createComponent = noop,
   onCreated = noop,
   onRendered = noop,
   onDestroyed = noop,
@@ -72,7 +72,7 @@ export const defineComponent = ({
     onRendered,
     onDestroyed,
     onThemeChanged,
-    createInstance,
+    createComponent,
   });
   let webComponent;
 
