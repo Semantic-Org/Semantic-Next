@@ -11,7 +11,7 @@ const state = {
   running: false
 };
 
-const createInstance = ({self, state, settings}) => ({
+const createComponent = ({self, state, settings}) => ({
   initialize() {
     self.setCounter(settings.startingNumber);
     self.startCounter();
@@ -32,7 +32,7 @@ const createInstance = ({self, state, settings}) => ({
 
 defineComponent({
   tagName: 'ui-counter',
-  createInstance,
+  createComponent,
   css,
   template,
   state,

@@ -8,7 +8,7 @@ const state = {
   height: 250,
 };
 
-const createInstance = ({ state, self }) => ({
+const createComponent = ({ state, self }) => ({
   delta: 50,
   increaseWidth: () =>  state.width.increment(self.delta),
   decreaseWidth: () =>  state.width.decrement(self.delta),
@@ -45,5 +45,5 @@ defineComponent({
   css,
   state,
   events,
-  createInstance,
+  createComponent,
 });

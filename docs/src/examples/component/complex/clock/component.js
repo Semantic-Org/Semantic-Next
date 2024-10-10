@@ -8,7 +8,7 @@ const state = {
   time: new Date(),
 };
 
-const createInstance = ({self, state}) => ({
+const createComponent = ({self, state}) => ({
 
   majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
   minorMarkers: [1, 2, 3, 4],
@@ -57,7 +57,7 @@ const onRendered = ({ $ }) => {
 
 defineComponent({
   tagName: 'ui-clock',
-  createInstance,
+  createComponent,
   template,
   state,
   css,

@@ -9,7 +9,7 @@ const state = {
   time: 0,
 };
 
-const createInstance = ({self, $, reaction, reactiveVar, state}) => ({
+const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   startTime() {
     self.tick();
@@ -128,7 +128,7 @@ export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,
-  createInstance,
+  createComponent,
   onRendered,
   events,
   state

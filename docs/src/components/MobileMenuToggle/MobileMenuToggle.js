@@ -3,7 +3,7 @@ import { defineComponent } from '@semantic-ui/component';
 import template from './MobileMenuToggle.html?raw';
 import css from './MobileMenuToggle.css?raw';
 
-const createInstance = function ({ $, isServer, attachEvent, tpl }) {
+const createComponent = function ({ $, isServer, attachEvent, tpl }) {
   return {
     getMenu() {
       return $('mobile-menu', { root: document }).getComponent();
@@ -42,7 +42,7 @@ const MobileMenuToggle = defineComponent({
   template,
   events,
   css,
-  createInstance,
+  createComponent,
 });
 
 export default MobileMenuToggle;

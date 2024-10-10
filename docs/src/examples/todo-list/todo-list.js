@@ -9,7 +9,7 @@ import { todoFooter } from './todo-footer.js';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({ self, $ }) => ({
+const createComponent = ({ self, $ }) => ({
   // global state
   todos: new ReactiveVar([
     { _id: '1', completed: false, text: 'Take out trash' },
@@ -96,7 +96,7 @@ const TodoList = defineComponent({
   template,
   css,
   events,
-  createInstance,
+  createComponent,
   onCreated,
   onRendered,
   onDestroyed,

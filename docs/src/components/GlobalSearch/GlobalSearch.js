@@ -24,7 +24,7 @@ const state = {
   modalOpen: false,
 };
 
-const createInstance = ({self, el, bindKey, reaction, state, isRendered, settings, $}) => ({
+const createComponent = ({self, el, bindKey, reaction, state, isRendered, settings, $}) => ({
 
   initialize() {
     bindKey(settings.openKey, self.openModal);
@@ -206,7 +206,7 @@ const GlobalSearch = defineComponent({
   tagName: 'global-search',
   template,
   css,
-  createInstance,
+  createComponent,
   events,
   state,
   keys,

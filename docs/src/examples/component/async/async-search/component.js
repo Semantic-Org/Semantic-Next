@@ -15,7 +15,7 @@ const settings = {
   minChars: 1
 };
 
-const createInstance = ({ $, state, settings, self, reaction }) => ({
+const createComponent = ({ $, state, settings, self, reaction }) => ({
 
   initialize() {
     self.calculateResults();
@@ -115,5 +115,5 @@ defineComponent({
   css,
   state,
   settings,
-  createInstance,
+  createComponent,
 });

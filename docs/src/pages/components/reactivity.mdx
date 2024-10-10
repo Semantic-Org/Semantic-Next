@@ -137,7 +137,7 @@ You can expose a `reactiveVar` on your component instance to allow other compone
 
 
 ```javascript title="todo.js"
-const createInstance = ({ self, reactiveVar, reaction }) => {
+const createComponent = ({ self, reactiveVar, reaction }) => {
   return {
     todos: new ReactiveVar([]),
   };
@@ -145,7 +145,7 @@ const createInstance = ({ self, reactiveVar, reaction }) => {
 ```
 
 ```javascript title="todo-item.js"
-const createInstance = ({ findParent }) => {
+const createComponent = ({ findParent }) => {
   getTodos() {
     const todoList = findParent('todoList');
     return todoList.todos.get();

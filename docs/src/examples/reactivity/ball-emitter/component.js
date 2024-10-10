@@ -8,7 +8,7 @@ const state = {
   balls: [],
 };
 
-const createInstance = ({self, $, reaction, reactiveVar, state}) => ({
+const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   emitter: {
     rate: 2, // balls per second
@@ -286,7 +286,7 @@ export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,
-  createInstance,
+  createComponent,
   onRendered,
   events,
   state

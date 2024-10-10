@@ -18,7 +18,7 @@ const state = {
   nextMenu: {},
 };
 
-const createInstance = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
+const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
 
   initialize() {
     tpl.setMenusFromURL(settings.activeURL);
@@ -233,7 +233,7 @@ const MobileMenu = defineComponent({
   tagName: 'mobile-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   events,
   state

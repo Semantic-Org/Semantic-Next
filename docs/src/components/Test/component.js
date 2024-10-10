@@ -8,7 +8,7 @@ const state = {
   height: 250,
 };
 
-const createInstance = ({state, tpl}) => ({
+const createComponent = ({state, tpl}) => ({
   delta: 50,
   increaseWidth: () =>  state.width.increment(tpl.delta),
   decreaseWidth: () =>  state.width.decrement(tpl.delta),
@@ -45,5 +45,5 @@ export const CircleExpand = defineComponent({
   css,
   state,
   events,
-  createInstance,
+  createComponent,
 });

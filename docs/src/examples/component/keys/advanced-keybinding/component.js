@@ -15,7 +15,7 @@ const state = {
   selectedIndex: -1,
 };
 
-const createInstance = ({ self, reaction, state, settings, bindKey, unbindKey, $ }) => ({
+const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, $ }) => ({
 
   initialize() {
     self.calculateResults();
@@ -124,7 +124,7 @@ defineComponent({
   template,
   css,
   events,
-  createInstance,
+  createComponent,
   settings,
   state
 });

@@ -10,7 +10,7 @@ const state = {
   theme: undefined
 };
 
-const createInstance = function ({ $, isServer, reaction, state, self }) {
+const createComponent = function ({ $, isServer, reaction, state, self }) {
   return {
     getLocalTheme() {
       if(isServer) {
@@ -83,7 +83,7 @@ const ThemeSwitcher = defineComponent({
   css,
   state,
   onCreated,
-  createInstance,
+  createComponent,
 });
 
 export default ThemeSwitcher;

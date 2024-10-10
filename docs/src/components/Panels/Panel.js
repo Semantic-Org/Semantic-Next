@@ -31,7 +31,7 @@ const state = {
   lastPanelSize: undefined
 };
 
-const createInstance = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
+const createComponent = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
 
@@ -178,7 +178,7 @@ const UIPanel = defineComponent({
   plural: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   events,
 });

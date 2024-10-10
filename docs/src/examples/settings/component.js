@@ -7,7 +7,7 @@ const settings = {
   startingNumber: 0
 };
 
-const createInstance = ({ self, reactiveVar, settings }) => ({
+const createComponent = ({ self, reactiveVar, settings }) => ({
   counter: reactiveVar(),
   initialize() {
     self.counter.set(settings.startingNumber);
@@ -23,7 +23,7 @@ defineComponent({
   tagName: 'ui-counter',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
 });

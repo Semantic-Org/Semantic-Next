@@ -10,7 +10,7 @@ const settings = {
   company: 'Metatron Industries',
 };
 
-const createInstance = ({ settings }) => ({
+const createComponent = ({ settings }) => ({
   rows: [
     ['Jane', 'Fonda', '55', 'Female'],
     ['Matt', 'Stone', '23', 'Male'],
@@ -23,7 +23,7 @@ defineComponent({
   template,
   css,
   settings,
-  createInstance,
+  createComponent,
   subTemplates: {
     row
   }

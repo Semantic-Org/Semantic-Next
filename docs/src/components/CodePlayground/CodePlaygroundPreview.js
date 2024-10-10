@@ -10,7 +10,7 @@ const state = {
   template: '',
 };
 
-const createInstance = ({tpl, findParent, state, $, $$}) => ({
+const createComponent = ({tpl, findParent, state, $, $$}) => ({
 
   getMenu: () => {
     let menu = [
@@ -54,7 +54,7 @@ const events = {
 const CodePlaygroundPreview = defineComponent({
   template,
   css,
-  createInstance,
+  createComponent,
   events,
   state,
   onRendered,

@@ -10,7 +10,7 @@ const settings = {
   activeURL: '',
 };
 
-const createInstance = function ({ self, settings }) {
+const createComponent = function ({ self, settings }) {
   return {
     url: new ReactiveVar(settings.activeURL),
     getMenu() {
@@ -83,7 +83,7 @@ const TopbarMenu = defineComponent({
   tagName: 'topbar-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onRendered,
   events,

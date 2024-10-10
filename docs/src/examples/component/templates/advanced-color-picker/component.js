@@ -14,7 +14,7 @@ const state = {
   hoveredColor: '',
 };
 
-const createInstance = ({self, settings, $, dispatchEvent}) => ({
+const createComponent = ({self, settings, $, dispatchEvent}) => ({
   selectColor(color) {
     settings.color = color;
     dispatchEvent('color-selected', { color });
@@ -54,5 +54,5 @@ defineComponent({
   css,
   settings,
   state,
-  createInstance
+  createComponent
 });

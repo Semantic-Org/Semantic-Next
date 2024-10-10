@@ -17,7 +17,7 @@ const state = {
   url: ''
 };
 
-const createInstance = function ({ self, data, state, settings }) {
+const createComponent = function ({ self, data, state, settings }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
@@ -158,7 +158,7 @@ const NavMenu = defineComponent({
   tagName: 'nav-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onDestroyed,

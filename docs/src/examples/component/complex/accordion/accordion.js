@@ -3,7 +3,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({self, reactiveVar}) => ({
+const createComponent = ({self, reactiveVar}) => ({
   sections: [
     { title: 'Section 1', content: 'Content for section 1', expanded: reactiveVar(false) },
     { title: 'Section 2', content: 'Content for section 2', expanded: reactiveVar(false) },
@@ -27,5 +27,5 @@ defineComponent({
   events,
   template,
   css,
-  createInstance
+  createComponent
 });

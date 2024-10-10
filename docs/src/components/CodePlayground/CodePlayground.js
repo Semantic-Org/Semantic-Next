@@ -80,7 +80,7 @@ const state = {
   displayMode: 'desktop'
 };
 
-const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
+const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
   },
@@ -347,7 +347,7 @@ const CodePlayground = defineComponent({
   delegatesFocus: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onRendered,

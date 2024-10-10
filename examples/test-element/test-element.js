@@ -6,7 +6,7 @@ import css from './test-element.css?raw';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createInstance = function ({ self, reactiveVar, $ }) {
+const createComponent = function ({ self, reactiveVar, $ }) {
   return {
     tab: reactiveVar('events'),
     morningActivity: reactiveVar('running'),
@@ -47,7 +47,7 @@ const TestElement = defineComponent({
   tagName: 'test-element',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   events,

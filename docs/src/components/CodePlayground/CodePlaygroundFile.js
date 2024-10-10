@@ -5,7 +5,7 @@ import codeMirrorCSS from './lib/codemirror.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const createInstance = ({tpl, settings, data, $, $$}) => ({
+const createComponent = ({tpl, settings, data, $, $$}) => ({
 
   configureCodeEditors() {
     const el = $$('playground-code-editor').get(0);
@@ -114,7 +114,7 @@ const onRendered = ({ tpl }) => {
 const CodePlaygroundFile = defineComponent({
   template,
   css,
-  createInstance,
+  createComponent,
   onRendered,
   events,
 });

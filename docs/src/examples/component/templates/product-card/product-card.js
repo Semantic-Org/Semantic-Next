@@ -3,7 +3,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = () => ({
+const createComponent = () => ({
   imageUrl: '/images/avatar/eve.png',
   title: 'Sample Product',
   description: 'This is a sample product description.',
@@ -14,5 +14,5 @@ defineComponent({
   tagName: 'product-card',
   template,
   css,
-  createInstance,
+  createComponent,
 });

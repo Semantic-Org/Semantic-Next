@@ -4,7 +4,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 import template from './todo-item.html?raw';
 import css from './todo-item.css?raw';
 
-const createInstance = ({ self, data, reactiveVar, findParent, $ }) => ({
+const createComponent = ({ self, data, reactiveVar, findParent, $ }) => ({
   editing: reactiveVar(false),
   getClasses() {
     return {
@@ -57,7 +57,7 @@ const todoItem = defineComponent({
   templateName: 'todoItem',
   template,
   css,
-  createInstance,
+  createComponent,
   events,
 });
 

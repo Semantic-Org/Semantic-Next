@@ -12,7 +12,7 @@ const state = {
   counter2: 0
 };
 
-const createInstance = ({ reactiveVar, self }) => ({
+const createComponent = ({ reactiveVar, self }) => ({
   counter3: reactiveVar(0),
   counter4: 0,
   counter5: () => self.counter4,
@@ -37,7 +37,7 @@ defineComponent({
   tagName: 'ui-counter',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   onRendered,
   state,

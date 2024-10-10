@@ -5,7 +5,7 @@ import { formatDate } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({ self, reaction, dispatchEvent }) => ({
+const createComponent = ({ self, reaction, dispatchEvent }) => ({
 
   today: new ReactiveVar(''),
 
@@ -69,5 +69,5 @@ defineComponent({
   template,
   css,
   onCreated,
-  createInstance
+  createComponent
 });

@@ -4,7 +4,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./todo-header.css');
 const template = await getText('./todo-header.html');
 
-const createInstance = ({ self, $, reaction, findParent }) => ({
+const createComponent = ({ self, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodoList() {
@@ -71,7 +71,7 @@ const todoHeader = defineComponent({
   templateName: 'todoHeader',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   events,
 });

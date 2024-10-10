@@ -5,7 +5,7 @@ import { defineComponent } from '@semantic-ui/component';
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createInstance = ({ self, $, reaction, findParent }) => ({
+const createComponent = ({ self, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodoList() {
@@ -72,7 +72,7 @@ const todoHeader = defineComponent({
   templateName: 'todoHeader',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   events,
 });

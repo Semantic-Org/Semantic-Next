@@ -17,7 +17,7 @@ const settings = {
   showCode: false, // show code on start
 };
 
-const createInstance = ({ $, isServer, reaction, settings, self }) => ({
+const createComponent = ({ $, isServer, reaction, settings, self }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
   slottedContent: new ReactiveVar(),
   code: new ReactiveVar(settings.code),
@@ -72,7 +72,7 @@ const CodeExample = defineComponent({
   lightCSS,
   onCreated,
   onRendered,
-  createInstance,
+  createComponent,
   settings,
 });
 

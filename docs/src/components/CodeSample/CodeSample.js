@@ -19,7 +19,7 @@ const settings = {
   onCodeVisible: function(){},
 };
 
-const createInstance = ({ el, $, settings, reaction, darkMode, tpl }) => ({
+const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
 
   // internal
   code          : new ReactiveVar(false),
@@ -151,7 +151,7 @@ const CodeSample = defineComponent({
   css,
   onCreated,
   onThemeChanged,
-  createInstance,
+  createComponent,
   settings,
 });
 

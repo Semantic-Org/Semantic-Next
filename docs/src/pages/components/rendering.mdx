@@ -147,7 +147,7 @@ state = {
 When using this value internally you can grab the value from the callback arguments
 ```javascript
 
-const createInstance = ({self, state}) => ({
+const createComponent = ({self, state}) => ({
   getGreeting() {
     return `Hello ${state.name.value}`
   }
@@ -168,7 +168,7 @@ Hello {{name}}}}
 Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/lifecycle/events) as `self` to invoke methods or access properties.
 
 ```javascript
-const createInstance = ({ state }) => ({
+const createComponent = ({ state }) => ({
   getCounter() {
     return state.counter.get();
   },

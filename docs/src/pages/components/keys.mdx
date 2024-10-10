@@ -111,7 +111,7 @@ All [lifecycle callbacks](/components/lifecycle) receive as a parameter two meth
 This is often used with [componet reactivity](/component/reactivity) to adjust key bindings when something significant has changed with a component.
 
 ```javascript
-const createInstance = ({ reaction, bindKey, unbindKey }) => ({
+const createComponent = ({ reaction, bindKey, unbindKey }) => ({
   initialize() {
     reaction(() => {
       if(self.isSomeCondition()) {

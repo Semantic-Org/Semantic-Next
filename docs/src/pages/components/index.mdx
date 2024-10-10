@@ -44,7 +44,7 @@ defineComponent({
   css: '...',
   state: { ... },
   settings: { ... },
-  createInstance: () => ({ ... }),
+  createComponent: () => ({ ... }),
   onCreated: () => { ... },
   onRendered: () => { ... },
   onDestroyed: () => { ... },
@@ -94,7 +94,7 @@ Components provides an [integrated design system](/components/styling) powered b
 Components include a [built in event management](/components/events) built around [native DOM events, making it easy to dispatch events
 
 ```javascript
-const createInstance = ({state, dispatchEvent}) => ({
+const createComponent = ({state, dispatchEvent}) => ({
   increment(amount) {
 
     // update internal counter

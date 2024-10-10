@@ -14,7 +14,7 @@ import { buttons } from './buttons.js';
   for "enterprisification"
 */
 import {
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   onThemeChanged,
@@ -26,7 +26,7 @@ import { settings } from './config.js';
 defineComponent({
   tagName: 'number-adjust',
   subTemplates: { buttons },
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   onThemeChanged,

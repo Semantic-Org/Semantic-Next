@@ -30,7 +30,7 @@ const state = {
   },
 };
 
-const createInstance = ({ state }) => ({
+const createComponent = ({ state }) => ({
 });
 
 defineComponent({
@@ -38,5 +38,5 @@ defineComponent({
   template,
   css,
   state,
-  createInstance
+  createComponent
 });

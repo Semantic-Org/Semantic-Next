@@ -10,7 +10,7 @@ const settings = {
   saveStateID: 'panels',
 };
 
-const createInstance = ({self, el, settings, $}) => ({
+const createComponent = ({self, el, settings, $}) => ({
   panels: [],
   renderedPanels: [],
   cache: {
@@ -721,7 +721,7 @@ const UIPanels = defineComponent({
   plural: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onDestroyed,
