@@ -139,7 +139,7 @@ You can expose a `reactiveVar` on your component instance to allow other compone
 ```javascript title="todo.js"
 const createComponent = ({ self, reactiveVar, reaction }) => {
   return {
-    todos: new ReactiveVar([]),
+    todos: reactiveVar([]),
   };
 };
 ```
