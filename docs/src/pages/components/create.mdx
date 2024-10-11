@@ -93,7 +93,7 @@ The [`template`](/components/rendering) defines the html your component should r
 > For more information on templating see the [dedicated subsection for templating](/components/rendering)
 
 ```html
-Counter is {{counter}}
+Counter is {counter}
 <ui-button class="increment">Increment</ui-button>
 <ui-button class="decrement">Decrement</ui-button>
 ```
@@ -182,7 +182,7 @@ If you prefer single file components you can just inline your html and css.
 ```javascript
 const defineComponent({
   tagName: 'ui-counter',
-  template: `<div class="counter">{{counter}}</div>`,
+  template: `<div class="counter">{counter}</div>`,
   css: `
     .counter {
       color: var(--primary-text-color);

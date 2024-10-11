@@ -35,7 +35,7 @@ The templates data context is a combination of several data sources that are loo
 
 For instance our template might include something like
 ```html
-Greetings, {{name}}
+Greetings, {name}
 ```
 
 This will check for `name` in each of these locations and then return the first available defined value.
@@ -61,7 +61,7 @@ This will check for `name` in each of these locations and then return the first 
 In this example `formatDate` is used to format the display of a date set in the components [state](#state).
 
 ```html
-{{formatDate currentTime 'h:mm:ss a'}}
+{formatDate currentTime 'h:mm:ss a'}
 ```
 
 <PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
@@ -157,7 +157,7 @@ const createComponent = ({self, state}) => ({
 #### In Templates
 When accessing this value in a template you can access it without calling `value` or `get()`.
 ```
-Hello {{name}}}}
+Hello {name}}
 ```
 
 

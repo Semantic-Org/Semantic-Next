@@ -55,16 +55,16 @@ defineComponent({
 Components use a [built-in templating system](/components/rendering) that supports expressions, slots, conditionals, snippets, loops, and more.
 
 ```handlebars
-{{#each user in users}}
+{#each user in users}
   <div class="user">
-    {{#if user}}
-      <h2>{{user.name}}</h2>
-      <p>{{user.email}}</p>
-    {{else}}
+    {#if user}
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+    {else}
       <p>No info provided.</p>
-    {{/if}}
+    {/if}
   </div>
-{{/each}}
+{/each}
 ```
 
 ### Design System

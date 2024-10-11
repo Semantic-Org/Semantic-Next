@@ -14,7 +14,7 @@ Template expressions are evaluated against the template's data context which inc
 
 Expressions are evaluated right to left with variables being read from the component's data context
 ```handlebars
-{{concat firstName ' ' lastName}}
+{concat firstName ' ' lastName}
 ```
 
 evaluates to
@@ -28,7 +28,7 @@ concat(firstName, ' ', lastName);
 If an intermediary function is found it will pass the result through naively
 
 ```handlebars
-{{titleCase concat firstName ' ' lastName}}
+{titleCase concat firstName ' ' lastName}
 ```
 
 evaluates to
@@ -40,7 +40,7 @@ titleCase(concat(fistName, ' ', lastName))
 
 If parenthesis are used it will respect the evaluation order
 ```handlebars
-{{formatDate (getDate now) 'h:mm'}}
+{formatDate (getDate now) 'h:mm'}
 ```
 
 evaluates to
@@ -57,7 +57,7 @@ If an attribute expression **includes quotes** it will output as a string regard
 
 For instance
 ```handlebars
-<a data-number="{{getZero}}">
+<a data-number="{getZero}">
 ```
 
 will output as
@@ -70,7 +70,7 @@ will output as
 If an attribute expression **omits quotes** the entire attribute will be removed if the expression is falsey
 
 ```handlebars
-<input type="checkbox" checked={{isChecked}} />
+<input type="checkbox" checked={isChecked} />
 ```
 
 If `true` will output
