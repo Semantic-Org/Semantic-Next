@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { range } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -30,13 +30,13 @@ const state = {
   },
 };
 
-const createInstance = ({ state }) => ({
+const createComponent = ({ state }) => ({
 });
 
-createComponent({
+defineComponent({
   tagName: 'ui-list',
   template,
   css,
   state,
-  createInstance
+  createComponent
 });

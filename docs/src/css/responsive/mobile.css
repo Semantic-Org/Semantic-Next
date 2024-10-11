@@ -6,6 +6,7 @@
     --global-search-input-font-size: 14px;
     --topbar-icon-size: 20px;
     --topbar-logo-size: 30px;
+    --topbar-height: 70px;
   }
 
   topbar {
@@ -13,10 +14,17 @@
     z-index: var(--float-layer);
     background-color: var(--topbar-background-color);
     top: auto;
-    height: 70px;
     bottom: 0;
     width: 100%;
     align-items: center;
+    transform: translateY(0);
+    transition: transform 0.3s ease 0s;
+
+
+    &.hidden {
+      transform: translateY(100%);
+    }
+
     topbar-menu {
       width: 0px;
       margin: 0rem var(--compact-spacing);
@@ -95,7 +103,7 @@
     margin: 0rem;
   }
 
-  code-playground::part(file) {
+  layout main code-playground::part(file) {
     max-width: calc(100vw - 3rem);
   }
 

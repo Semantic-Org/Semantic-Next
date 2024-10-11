@@ -1,16 +1,16 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./row.css');
 const template = await getText('./row.html');
 
-const createInstance = ({ findParent }) => ({
+const createComponent = ({ findParent }) => ({
   getTitle() {
     return findParent('ui-table').getTitle();
   }
 });
 
-export const row = createComponent({
-  createInstance,
+export const row = defineComponent({
+  createComponent,
   template,
   css,
 });

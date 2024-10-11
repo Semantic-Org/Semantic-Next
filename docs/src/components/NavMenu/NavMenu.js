@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, isFunction, isArray } from '@semantic-ui/utils';
 import template from './NavMenu.html?raw';
 import css from './NavMenu.css?raw';
@@ -8,7 +8,8 @@ const settings = {
   menu: [],
   linkCurrentPage: false,
   expandAll: false,
-  navigationIcon: '',
+  useAccordion: false,
+  navIcon: '',
   activeURL: '',
 };
 
@@ -16,36 +17,43 @@ const state = {
   url: ''
 };
 
-const createInstance = function ({ tpl, data, state, settings }) {
+const createComponent = function ({ self, data, state, settings }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
     },
     getMenu() {
-      return tpl.filterVisibleSections(settings.menu);
+      return self.filterVisibleSections(settings.menu);
     },
-    getNavigationIcon(section, defaultIcon = 'chevron-down') {
-      return section?.navigationIcon || settings.navigationIcon || defaultIcon;
+    getNavIcon(section) {
+      const defaultIcon = (settings.useAccordion && section?.pages)
+        ? 'chevron-down'
+        : ''
+      ;
+      return section?.navIcon || settings.navIcon || defaultIcon;
     },
     getTitleStates(title) {
       const classes = [];
-      if (tpl.isExpandable(title)) {
+      if (self.isExpandable(title)) {
         classes.push('expandable');
       }
-      if (tpl.isActiveItem(title)) {
+      if (self.isActiveItem(title)) {
         classes.push('active');
       }
-      if (tpl.isCurrentItem(title)) {
+      if (self.isCurrentItem(title)) {
         classes.push('current');
       }
       return classes;
+    },
+    canShowNavIcon(section) {
+      return self.getNavIcon(section) !== undefined;
     },
     hasIcons() {
       return any(settings.menu, section => section.icon);
     },
     getPageStates(page) {
       const classes = [];
-      if (tpl.isCurrentItem(page)) {
+      if (self.isCurrentItem(page)) {
         classes.push('current');
       }
       return classes;
@@ -63,7 +71,7 @@ const createInstance = function ({ tpl, data, state, settings }) {
         }
         // recursively filter pages
         const filteredPages = isArray(pages)
-          ? tpl.filterVisibleSections(pages)
+          ? self.filterVisibleSections(pages)
           : [];
         const result =
           filteredPages.length > 0 ? { ...item, pages: filteredPages } : item;
@@ -72,26 +80,26 @@ const createInstance = function ({ tpl, data, state, settings }) {
       }, []);
     },
     getLink(item) {
-      if (settings.linkCurrentPage || !tpl.isCurrentItem(item)) {
+      if (settings.linkCurrentPage || !self.isCurrentItem(item)) {
         return item?.url;
       }
       return;
     },
     isLinkItem(item) {
-      return item.url && !tpl.isCurrentItem(item);
+      return item.url && !self.isCurrentItem(item);
     },
-    isExpandable(item) {
-      return !settings.expandAll;
+    isExpandable() {
+      return settings.useAccordion && !settings.expandAll;
     },
     isActiveItem(item) {
       if(settings.expandAll) {
         return true;
       }
-      if (tpl.isCurrentItem(item)) {
+      if (self.isCurrentItem(item)) {
         return true;
       }
       if (isArray(item.pages)) {
-        return any(item.pages, tpl.isActiveItem);
+        return any(item.pages, self.isActiveItem);
       }
       return false;
     },
@@ -108,10 +116,10 @@ const createInstance = function ({ tpl, data, state, settings }) {
       if(!url1 || !url2) {
         return false;
       }
-      return tpl.addTrailingSlash(url1) == tpl.addTrailingSlash(url2);
+      return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
     },
     isCurrentItem(item) {
-      return tpl.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
+      return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
     },
     onPageChange() {
       state.url.set(window.location.pathname);
@@ -119,32 +127,38 @@ const createInstance = function ({ tpl, data, state, settings }) {
   };
 };
 
-const onCreated = function ({ tpl }) {
+const onCreated =  ({ self }) => {
 };
 
-const onDestroyed = function ({ tpl }) {
+const onDestroyed =  ({ self }) => {
 };
 
-const onRendered = function ({ $, tpl, attachEvent, isClient }) {
+const onRendered =  ({ $, self, attachEvent, isClient }) => {
   if(isClient) {
-    attachEvent(document, 'astro:after-swap', tpl.onPageChange);
+    attachEvent(document, 'astro:after-swap', self.onPageChange);
   }
 };
 
 const events = {
-  'click .title': function({event, $, tpl}) {
-    const $title = $(this);
+  'click .title': ({target, event, settings, $, self}) => {
+    if(!settings.useAccordion) {
+      return;
+    }
+    const $title = $(target);
     const $content = $title.next('.content');
     $title.toggleClass('active');
     $content.toggleClass('active');
+  },
+  'click .nav-icon'({event}) {
+    event.preventDefault();
   }
 };
 
-const NavMenu = createComponent({
+const NavMenu = defineComponent({
   tagName: 'nav-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onDestroyed,

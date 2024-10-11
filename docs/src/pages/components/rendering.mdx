@@ -1,6 +1,6 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Rendering HTML
+title: Templates & Data Context
 icon: package
 description: An overview of how data is used in components
 ---
@@ -82,7 +82,7 @@ const settings = {
   name: 'Jack'
 };
 
-createComponent({
+defineComponent({
   tagName: 'name-card',
   settings
 });
@@ -125,7 +125,7 @@ const state = {
   name: 'Jack'
 };
 
-createComponent({
+defineComponent({
   tagName: 'name-card',
   state
 });
@@ -147,7 +147,7 @@ state = {
 When using this value internally you can grab the value from the callback arguments
 ```javascript
 
-const createInstance = ({tpl, state}) => ({
+const createComponent = ({self, state}) => ({
   getGreeting() {
     return `Hello ${state.name.value}`
   }
@@ -163,7 +163,39 @@ Hello {{name}}}}
 
 ## Template Instance
 
-Template instances are object literals that store properties and methods that can be invoked for your component. Methods and properties defined on the instance can be directly accessed in your template's data context, and can also be invoked by end users using query's `getComponent` helper.
+
+### Defining Functionality
+Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/lifecycle/events) as `self` to invoke methods or access properties.
+
+```javascript
+const createComponent = ({ state }) => ({
+  getCounter() {
+    return state.counter.get();
+  },
+  incrementCounter() {
+    state.counter.increment();
+  },
+});
+```
+
+### Accessing Internally
+You can access your template instancec as `self` from other callbacks to invoke functionality.
+
+```javascript
+const onRendered = ({ self }) => {
+  self.incrementCounter();
+};
+```
+
+### Accessing Externally
+You can also access your component instance directly from the DOM from the `component` property.
+
+> For more information see [from DOM](/components/instances#from-dom).
+
+```javascript
+const { component } = document.querySelector('ui-counter');
+component.incrementCounter();
+```
 
 
 ## Subtemplates

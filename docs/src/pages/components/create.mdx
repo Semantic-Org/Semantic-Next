@@ -7,13 +7,8 @@ description: Creating a new component
 
 Semantic UI extends [native web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to support [reactive data](/components/reactivity), [event binding](/components/events), [templating](/components/rendering), [DOM Querying](/components/dom), [keybindings](/components/keys) and more to allow you to build complex web applications purely with web components.
 
-`createComponent` exported from `@semantic-ui/component` is the primary way to define your app's components.
 
-> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components are a native browser standard designed to allow for interchange between front end frameworks. Components created with `semantic-ui/component` can render in any [supported front end framework](framework-integration) or simply use the html tags directly in your app with vanilla js.
-
-## Creating Components
-
-### Installing Dependencies
+## Installing Dependencies
 
 The only package necessary to create components is the `@semantic-ui/component` package.
 
@@ -21,23 +16,28 @@ The only package necessary to create components is the `@semantic-ui/component` 
 npm install @semantic-ui/component
 ```
 
+## Creating Components
+
+`defineComponent` exported from `@semantic-ui/component` can be used to create a new web component.
+
+
 ### Minimal Component
 
 The minimum requirement to create a component is an html template.
 
 ```javascript
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
-const HelloWorld = createComponent({
+const HelloWorld = defineComponent({
   template: `<p>Hello World</p>`,
 });
 ```
 
 If you specify a `tagName` your component will be available as a web component allowing you include it in pages in your application.
 ```javascript
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
-createComponent({
+defineComponent({
   tagName: 'hello-world',
   template: `<p>Hello World</p>`,
 });
@@ -49,11 +49,12 @@ createComponent({
 
 ### Standard Component
 
-In most real world use-cases you will need to provide additional information to `createComponent`
+In most real world use-cases you will need to provide additional information to `defineComponent`
 
-* **createInstance** - An object returned from `createInstance` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
+* **createComponent** - An object returned from `createComponent` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
 * **Template** - The logic that controls how your html is rendered including conditionals, loops, subtemplates, and expressions. This can be passed in as a string `template` or rendered from a precompiled `ast`.
-* **CSS** - The `css` scoped to this component or that should be attached once to the page with the compnent, `lightCSS`
+* **CSS** - The `css` scoped to this component or that should be attached once to the page with the component,
+ * **Page CSS** - The `pageCSS` scoped to the page that will added to the page when a component is defined.
 * **Events** - The event listeners attached to your component, passed in as an object literal string `events`.
 * **State** - Reactive internal `state` associated with your component and its default values
 * **Settings** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
@@ -66,16 +67,16 @@ In most real world use-cases you will need to provide additional information to 
 ## Component Parts
 
 
-### Functionality
+### Instance
 
-[`createInstance`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
+[`createComponent`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
-Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), template instance `tpl` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createInstance`.
+Your components [`state`](/components/rendering#state), [`settings`](/components/rendering#settings), component instance `self` and other data sources are passed through to each [lifecycle arguments](/components/lifecycle#callback-arguments) like `createComponent`.
 
-> For more information on `createInstance` see our dedicated subsection on [defining functionality](/components/instances).
+> For more information on `createComponent` see our dedicated subsection on [defining functionality](/components/instances).
 
 ```javascript
-const createInstance = ({ state }) => ({
+const createComponent = ({ state }) => ({
   getCounter() {
     return state.counter.get();
   },
@@ -91,11 +92,17 @@ The [`template`](/components/rendering) defines the html your component should r
 
 > For more information on templating see the [dedicated subsection for templating](/components/rendering)
 
+```html
+Counter is {{counter}}
+<ui-button class="increment">Increment</ui-button>
+<ui-button class="decrement">Decrement</ui-button>
+```
+
 ### CSS
 
 `css` defines scoped CSS that will be attached to your web component and not apply to other elements on the page. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
 
-You can use `lightCSS` to add addiitional css that will be included once in the page scope when you component is created.
+You can use `pageCSS` to add additional css that will be included once in the page scope when you component is created.
 
 > For more information see the [dedicated css styling section](/components/styling).
 
@@ -106,10 +113,12 @@ Most components will need to listen to and react to events triggered from the br
 
 These can be browser events like `click`, perhaps to save something when a button with class `save` is clicked.
 
+> For more information on events please see the [dedicated subsection for events](/components/events)
+
 ```javascript
 const events = {
-  'click ui-button.save'({tpl}) {
-    tpl.save();
+  'click ui-button.save'({ self }) {
+    self.save();
   },
 };
 ```
@@ -123,45 +132,62 @@ const events = {
 };
 ```
 
-> For more information on events please see the [dedicated subsection for events](/components/events)
-
 ### Keys
 
 Components can also include keybindings that will be attached to the page during the lifecycle of the component.
 
 > For more information please see the [dedicated subsection for keybindings](/components/keys)
 
-
-> [Dynamic Keybinding](/components/keys#dynamic-keybinding) - For more advanced usecases you can use `bindKey` and `unbindKey` to also dynamically assign key bindings based on app state
+```javascript
+defineComponent({
+  keys: {
+    'up': ({ self }) => self.selectPreviousResult(),
+    'down': ({ self }) => pl.selectNextResult(),
+    'esc': ({ self }) => self.blurSearch(),
+  }
+});
+```
 
 ## Organizing Code
 
-### Importing Template / CSS
+To keep your code organized you might consider keeping your `html` and `css` as separate files with your component.
 
-Semantic UI docs by convention include `html` and `css` as separate files that are imported as plaintext.
-
-#### Browser / Node
-You can achieve this in a browser or node environment using `getText` a helper used to grab plaintext content using `fetch`.
+### Browser / Node
+In a browser or `node` you can import static assets using `getText` a helper that uses `fetch`.
 
 ```javascript
 import { getText } from '@semantic-ui/component';
-const html = await getText('./component.html');
+const template = await getText('./component.html');
 const css = await getText('./component.css');
 ```
 
-#### Webpack / Vite / Esbuild etc.
+### Webpack / Vite / Esbuild etc.
 
-If you are using build tools to compile your project, you can use the `?raw` query parameter to import a file directly as a text string.
+In a project with build tools like you can use the `?raw` query parameter to import a plaintext file directly.
 
-Related Docs
+#### Related Docs
 * Vite - [Import Assets as a String](https://vitejs.dev/guide/assets#importing-asset-as-string)
 * Webpack - [Raw Loader](https://v4.webpack.js.org/loaders/raw-loader/)
-* ESBuild - []
 
 ```javascript
-import html from './component.html?raw';
+import template from './component.html?raw';
 import css from './component.css?raw';
 ```
 
+#### Single File Components
 
+If you prefer single file components you can just inline your html and css.
+
+
+```javascript
+const defineComponent({
+  tagName: 'ui-counter',
+  template: `<div class="counter">{{counter}}</div>`,
+  css: `
+    .counter {
+      color: var(--primary-text-color);
+    }
+  `
+});
+```
 

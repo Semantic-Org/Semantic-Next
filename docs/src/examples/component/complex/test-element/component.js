@@ -1,22 +1,22 @@
 /* playground-fold */
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 /* playground-fold-end */
 
-const createInstance = ({tpl}) => ({
+const createComponent = () => ({
 });
 
-const onCreated = ({tpl}) => {
+const onCreated = () => {
   console.log('on created');
 };
 
-createComponent({
+defineComponent({
   tagName: 'test-component',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
 });

@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, each, flatten, noop, first, inArray, last, isServer } from '@semantic-ui/utils';
 
 import template from './InPageMenu.html?raw';
@@ -32,7 +32,7 @@ const state = {
   visibleItems: [],
 };
 
-const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
+const createComponent = ({self, state, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
@@ -49,7 +49,7 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   },
 
   getScrollHeight(index) {
-    const $content = tpl.getContent();
+    const $content = self.getContent();
     return $content.get(0).scrollHeight;
   },
 
@@ -57,8 +57,8 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
     if(isServer) {
       return;
     }
-    if(tpl.isOpenIndex(index)) {
-      const $content = tpl.getContent();
+    if(self.isOpenIndex(index)) {
+      const $content = self.getContent();
       const scrollHeight = $content.scrollHeight();
       return `max-height: ${scrollHeight}px;`;
     }
@@ -90,19 +90,19 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   },
 
   setFirstItemActive() {
-    const menu = tpl.getFlattenedMenu();
+    const menu = self.getFlattenedMenu();
     const itemID = first(menu)?.id;
-    tpl.setActiveItem(itemID);
+    self.setActiveItem(itemID);
   },
 
   setLastItemActive() {
-    const menu = tpl.getFlattenedMenu();
+    const menu = self.getFlattenedMenu();
     const itemID = last(menu)?.id;
-    tpl.setActiveItem(itemID);
+    self.setActiveItem(itemID);
   },
 
   setActiveItem(itemID) {
-    tpl.isActivating = true;
+    self.isActivating = true;
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
       item?.items && item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
@@ -112,32 +112,32 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
       state.openIndex.set(menuIndex);
       state.currentItem.set(itemID);
       Reaction.afterFlush(() => {
-        tpl.isActivating = false;
+        self.isActivating = false;
       });
     }
   },
 
   hasVisibleItems(section) {
-    return any(section?.items || [], (item) => tpl.isVisibleItem(item));
+    return any(section?.items || [], (item) => self.isVisibleItem(item));
   },
 
   getContentClasses(index) {
     return {
-      active: !settings.useAccordion || tpl.isOpenIndex(index)
+      active: !settings.useAccordion || self.isOpenIndex(index)
     };
   },
 
   getTitleClasses(section, index) {
     return {
-      current: tpl.isOpenIndex(index),
-      visible: tpl.hasVisibleItems(section)
+      current: self.isOpenIndex(index),
+      visible: self.hasVisibleItems(section)
     };
   },
 
   getItemClasses(item) {
     return {
-      current: tpl.isCurrentItem(item),
-      visible: tpl.isVisibleItem(item),
+      current: self.isCurrentItem(item),
+      visible: self.isVisibleItem(item),
       item: true
     };
   },
@@ -159,7 +159,7 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
     if (element) {
       const targetPosition = element.offsetTop + offset;
       state.currentItem.set(itemID);
-      tpl.scrollToPosition(targetPosition, {
+      self.scrollToPosition(targetPosition, {
         onSamePage() {
           dispatchEvent('samePageActive', { element, itemID });
         }
@@ -176,8 +176,8 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   },
 
   scrollToPosition(position, { onSamePage = noop } = {}) {
-    const scrollContext = tpl.getScrollContext();
-    tpl.isScrolling = true;
+    const scrollContext = self.getScrollContext();
+    self.isScrolling = true;
 
     // special callback if we are at bottom this can be used to make it clear
     // what we are scrolling to (as it may not be the top of the page)
@@ -188,7 +188,7 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
     // we want to ignore intersection observer while smoothscroll is happening
     $(scrollContext).one('scrollend', (event) => {
       requestIdleCallback(() => {
-        tpl.isScrolling = false;
+        self.isScrolling = false;
         dispatchEvent('finishScroll', { position });
       });
     });
@@ -205,18 +205,18 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
       threshold: [0, 1],
       rootMargin: `0px 0px 0px 0px`
     };
-    tpl.observer = new IntersectionObserver(tpl.onIntersection, observerSettings);
+    self.observer = new IntersectionObserver(self.onIntersection, observerSettings);
     // observe intersection of each id in menu items
     each(settings.menu, (section) => {
       each(section?.items, (item) => {
         const itemID = settings.getAnchorID(item);
         const sectionElement = settings.getElement(itemID);
         if (sectionElement) {
-          tpl.observer.observe(sectionElement);
+          self.observer.observe(sectionElement);
         }
       });
     });
-    return tpl.observer;
+    return self.observer;
   },
 
   onIntersection(entries) {
@@ -238,9 +238,9 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 
     state.visibleItems.set(newVisibleItems);
 
-    if(!tpl.isScrolling && newVisibleItems.length) {
-      const visibleItems = tpl.getFlattenedMenu().map(item => item.id).filter(item => inArray(item, newVisibleItems));
-      tpl.setActiveItem(visibleItems[0]);
+    if(!self.isScrolling && newVisibleItems.length) {
+      const visibleItems = self.getFlattenedMenu().map(item => item.id).filter(item => inArray(item, newVisibleItems));
+      self.setActiveItem(visibleItems[0]);
     }
   },
 
@@ -248,11 +248,11 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
     const scrollToHash = (event) => {
       const itemID = location.hash.substr(1);
       if(itemID) {
-        tpl.setActiveItem(itemID);
-        tpl.scrollToItem(itemID);
+        self.setActiveItem(itemID);
+        self.scrollToItem(itemID);
       }
       else {
-        tpl.setFirstItemActive();
+        self.setFirstItemActive();
       }
     };
     attachEvent(window, 'hashchange', (event) => {
@@ -263,21 +263,21 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
   },
 
   bindScroll() {
-    attachEvent(tpl.getScrollContext(), 'scroll', function() {
-      tpl.scrollingDown = Boolean(this.scrollTop > tpl.lastScrollPosition);
-      tpl.lastScrollPosition = this.scrollTop;
+    attachEvent(self.getScrollContext(), 'scroll', function() {
+      self.scrollingDown = Boolean(this.scrollTop > self.lastScrollPosition);
+      self.lastScrollPosition = this.scrollTop;
     }, { passive: true });
   },
 
   bindPageEvents() {
-    tpl.bindScroll();
-    tpl.bindHashChange();
-    tpl.bindIntersectionObserver();
+    self.bindScroll();
+    self.bindHashChange();
+    self.bindIntersectionObserver();
   },
 
   unbindPageEvents() {
-    if (tpl.observer) {
-      tpl.observer.disconnect();
+    if (self.observer) {
+      self.observer.disconnect();
     }
   },
 
@@ -292,19 +292,19 @@ const createInstance = ({tpl, state, isServer, reactiveVar, reaction, el, dispat
 });
 
 
-const onRendered = function ({ tpl, isServer, settings}) {
+const onRendered = function ({ self, isServer, settings}) {
   if(isServer || !settings.menu.length) {
     return;
   }
-  tpl.bindPageEvents();
-  tpl.calculateScrollHeight();
+  self.bindPageEvents();
+  self.calculateScrollHeight();
 };
 
-const onDestroyed = function ({ tpl, isServer }) {
+const onDestroyed = function ({ self, isServer }) {
   if(isServer) {
     return;
   }
-  tpl.unbindPageEvents();
+  self.unbindPageEvents();
 };
 
 const events = {
@@ -314,19 +314,19 @@ const events = {
     const newIndex = (currentIndex !== thisIndex) ? thisIndex : -1;
     state.openIndex.set(newIndex);
   },
-  'click [data-id]'({event, tpl, data}) {
+  'click [data-id]'({event, self, data}) {
     // this avoids triggering scroll behavior or hashchange
-    tpl.setHash(data.id);
-    tpl.scrollToItem(data.id);
+    self.setHash(data.id);
+    self.scrollToItem(data.id);
     event.preventDefault();
   }
 };
 
-const InPageMenu = createComponent({
+const InPageMenu = defineComponent({
   tagName: 'inpage-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   state,
   onRendered,

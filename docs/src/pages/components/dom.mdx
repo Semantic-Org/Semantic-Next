@@ -1,0 +1,197 @@
+---
+layout: '@layouts/Guide.astro'
+title: 'Accessing DOM'
+description: 'Querying the DOM from your components'
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Semantic provides a standalone library called [Query](/query) designed from the ground up to work with the Shadow DOM for accessing the DOM, built with modern ECMAScript and browser standards, and tightly coupled into the component framework.
+
+### Use of Query
+
+[Query](/query) provides a chaining interface similar to jQuery for accessing the DOM.
+
+
+You can do things like create HTML nodes
+```javascript
+$('<div />').addClass('test').insertAfter('body');
+```
+
+Retrieve values from the DOM
+```javascript
+const html = $('.some-element').html();
+```
+
+and chain expressions similar to jQuery
+```javascript
+$('body')
+  .addClass('resizing')
+  .css('cursor', 'resize')
+  .on('pointermove', (event) => {
+    // handle resize
+  })
+;
+```
+
+> This section covers only the specific integration of Query inside of components, for a full explaination of the library check out the [Query documentation](/query).
+
+## Using Query in Components
+
+Query provides an interface for accessing the DOM you can use to access portions of your component or the page. This is primarily handled by using the `$` and `$$` exports which are passed through to all lifecycle callbacks in your component.
+
+### DOM in Lifecycle Callbacks
+
+The `$` and `$$` arguments are available from [lifecycle callbacks](/components/lifecycle#callback-arguments) and allow you to manipulate the DOM from your component.
+
+
+### Using $
+
+`$` allows you to retrieve elements **without crossing shadow boundaries**.
+
+`$` is a naive implementation using the highly performant `querySelectorAll`. Nodes returned will only be part of the page's regular DOM.  It cannot access nodes that are part of a web component, which are nodes in a shadow DOM tree.
+
+### Using $$
+
+`$$` allows you to access any part of the DOM, both the visible DOM and the hidden parts of the DOM accessible from shadow DOM trees.
+
+> `$` uses the highly performant `querySelectorAll` and is more performant, while `$$` requires a custom implementation `querySelectorAllDeep` which recurses through the shadow DOM. It is recommended to use `$` for performance unless you need to access nodes that are part of a web component.
+
+### Example of $ vs $$
+
+In the following example you can see several elements with the class `matches` both in the document's DOM, the web component's DOM and the DOM slotted to a web component.
+
+You can see that `$` matches 2 elements
+* Page DOM
+* Slotted DOM
+
+and `$$` matches 3 elements
+* Page DOM
+* Slotted DOM
+* Shadow DOM
+
+<PlaygroundExample id="shadow-dom" direction="horizontal"></PlaygroundExample>
+
+## Query in Callbacks
+
+### createComponent
+
+A common use case is having component functionality that requires accessing some portion of the DOM, to manipulate its contents.
+
+```javascript
+const createComponent = ({el, $}) => ({
+  startRezize(value) {
+    $('.body').css('cursor', 'resize');
+  },
+  endResize() {
+    $('.body').css('cursor', '');
+  }
+});
+```
+
+If you need to access the component itself you can use `el`.
+
+```javascript
+const createComponent = ({el, $}) => ({
+  getWidth() {
+    return $(el).width();
+  }
+});
+```
+
+If you need to access a nested component you can use `$$`
+
+```javascript
+const createComponent = ({ $$ }) => ({
+  changeMenuButtonText(text) {
+    return $$('ui-menu ui-button').text(text);
+  }
+});
+```
+
+### onRendered
+
+You can use `$` from `onRendered` to immediately manipulate a component, just keep in mind this wont work with [ssr](/ssr).
+
+You can use `isServer` or `isClient` to determine the location the component is being rendered.
+
+```javascript
+const onRendered = function({isClient, settings, $}) {
+  if(isClient) {
+    $(el).addClass(settings.theme);
+  }
+};
+```
+
+
+### Events
+
+You can use `$` from event handlers to immediately access the element
+
+
+You can use `target` to access the element that matches the selector specified by the event handler.
+```javascript
+const events = {
+  'click .option': function({ $, self, target }) {
+    const color = $(target).computedStyle('background-color');
+    self.selectColor(color);
+  },
+});
+```
+
+
+## Outside Components
+
+You can use Query as a standalone library outside of your components, for more information see [browser usage](/query#browser)
+
+Query provides a few special methods that can be used to manipulate your components from the page.
+
+### getComponent
+
+Query provides a helper `getComponent` which can be used to access your components instance from anywhere in the DOM.
+
+This can be used to trigger functionality defined on your component from anywhere in your page. This
+
+```javascript
+// somewhere in your custom codebase
+const selectMenuIndex = (index) => {
+  const menu = $('ui-menu').getComponent();
+  if(menu) {
+    menu.selectIndex(index);
+  }
+};
+```
+
+### settings
+
+You can use `settings` to initialize a component with settings programatically. This can be particularly useful for components that can be initialized with functions.
+
+```javascript
+$('ui-panel').settings({
+  getNaturalSize: (panel, { direction, minimized }) => {
+    // some custom logic
+  }
+});
+```
+
+
+### initialize
+
+You can use `initialize` to initialize a component with settings on `DOMContentLoaded`. Initialize can be used before the element it references.
+
+```html
+<script>
+$('ui-panel').initialize({
+  getNaturalSize: (panel, { direction, minimized }) => {
+    // some custom logic
+  }
+});
+</script>
+<ui-panels>
+  <ui-panel>1</ui-panel>
+  <ui-panel>2</ui-panel>
+  <ui-panel>3</ui-panel>
+</ui-panels>
+```
+
+> **Settings vs Initialize** Initialize allows you to include your code to initialize a component anywhere in a page, even before the DOM element it references. This can be useful with some frameworks where `script` blocks may not be processed sequentially or are hoisted.

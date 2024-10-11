@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -15,17 +15,17 @@ const settings = {
   minChars: 1
 };
 
-const createInstance = ({ $, state, settings, tpl, reaction }) => ({
+const createComponent = ({ $, state, settings, self, reaction }) => ({
 
   initialize() {
-    tpl.calculateResults();
+    self.calculateResults();
   },
 
   calculateResults() {
     reaction(() => {
       const term = state.searchTerm.get();
-      if (tpl.canSearch()) {
-        tpl.query(term);
+      if (self.canSearch()) {
+        self.query(term);
       }
       else {
         state.searchResults.set([]);
@@ -36,7 +36,7 @@ const createInstance = ({ $, state, settings, tpl, reaction }) => ({
   async query(term) {
     state.isSearching.set(true);
     try {
-      const results = await tpl.getResults(term);
+      const results = await self.getResults(term);
       state.searchResults.set(results);
     }
     catch (error) {
@@ -97,8 +97,8 @@ const events = {
   'input input'({ event, state }) {
     state.searchTerm.set(event.target.value);
   },
-  'mousedown .result'({ tpl, data }) {
-    tpl.setValue(data);
+  'mousedown .result'({ self, data }) {
+    self.setValue(data);
   },
   'focus input'({state}) {
     state.focused.set(true);
@@ -108,12 +108,12 @@ const events = {
   }
 };
 
-createComponent({
+defineComponent({
   tagName: 'ui-search',
   template,
   events,
   css,
   state,
   settings,
-  createInstance,
+  createComponent,
 });

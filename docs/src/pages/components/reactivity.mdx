@@ -46,65 +46,61 @@ If you want to use or set a variable without triggering reactivity **either a va
 > **Avoiding Reactivity** - You can access reactive values with `peek` to avoid reactivity, and use `Reaction.nonreactive` to control the reactivity of a function.For more information see [controlling reactivity](/reactivity/controls).
 
 
-## Triggering Reactivity
+## Component Reactivity
 
+### State Reactivity
 
-### Built In Reactivity
-
-All contexts (conditionals, loops, expressions) inside templates are reactive context by default. This means that expressions that access reactive data like `state` or `settings` will be reactive.
-
-
-### Custom Reactivity
-
-### Using Reactive Var and Reaction
-
-Your components `state` can be used as an internal reactivity source, but in some cases you might need to add reactive data after your component is initialized, or to expose a `reactiveVar` on your component instance so other components can use it to trigger reactivity.
-
-#### Exposing Reactivity
-
-
-
-```javascript title="todo.js"
-const createInstance = ({ tpl, reactiveVar, reaction }) => {
-  return {
-    todos: new ReactiveVar([]),
-  };
-};
-```
-
-```javascript title="todo-item.js"
-const createInstance = ({ findParent }) => {
-  getTodos() {
-    return findParent('todo').todos.get();
-  }
-};
-```
-
-All [lifecycle events and callbacks](/components/lifecycle) will return `reactiveVar` and `reaction`. These can be used to create new sources of reactivity, `reactiveVar`, and `reaction` computations that will re-run when a source of reactivity changes.
-
-
-###
+Your component's `state` is the internal store of reactivity for your component. When your component is initialized each `state` property will become a [`reactiveVar`](/reactivity/variables) and will trigger reactivity inside a `Reaction`.
 
 ```javascript
-const createInstance = ({ tpl, reactiveVar, reaction }) => {
-  return {
-    count: new ReactiveVar(0),
-    increment() {
-      tpl.count.set(tpl.count.get() + 1);
-    },
-  };
-};
+const state = {
+  counter: 0;
+}
 
-const onCreated = ({tpl}) {
-  // log will not occur after template is removed from page
-  tpl.reaction(() => {
-    console.log(`Count: ${count.get()}`);
+const onCreated = ({state, reaction}) {
+  reaction(() => {
+    // counter will not update when the value changes below
+    console.log(`Count: ${state.counter.get()}`);
   });
+  // update value
+  state.counter.increment();
 }
 ```
+
+State will also trigger reactivity in your template.
+```html
+Counter is: {{counter}}
+```
+
+
+### Settings Reactivity
+
+Settings are **not reactive inside a `reaction`** because they are not instances of `reactiveVar`.
+
+```javascript
+const settings = {
+  counter: 0;
+}
+
+const onCreated = ({settings, reaction}) {
+  reaction(() => {
+    // counter will not update when the value changes below
+    console.log(`Count: ${settings.counter}`);
+  });
+  // update value
+  settings.counter++;
+}
+```
+
+However  **settings are reactive inside templates**, and will trigger updates when their underlying value changes.
+```html
+Counter is: {{counter}}
+```
+
+
 ### Template Reactivity
 
-Reactive variables can be accessed from inside a template without calling its `get` helper.
+Reactive variables can be accessed from inside a template without calling its `get` or `value` helper.
 
 ```html
 <ul>
@@ -114,7 +110,7 @@ Reactive variables can be accessed from inside a template without calling its `g
 </ul>
 ```
 
-in addition any conditionals will be reactive context
+Expressions, loops, and conditionals are reactive contexts by default. If `items` in this example grows the results will update automatically.
 
 ```html
 <ul>
@@ -122,13 +118,53 @@ in addition any conditionals will be reactive context
     Has items
   {{else}}
     No items
-  {{/each}}
+  {{/if}}
 </ul>
 ```
 
-If the underlying data for `items` is a reactive var then it will rerender, however if it is just a property it will not update when the underlying value changes.
-
-This is to avoid templates being overly reactive on data, allowing you to opt-in to when you need values to update.
+## Advanced Use
 
 
+All [lifecycle events and callbacks](/components/lifecycle) will return `reactiveVar` and
+`reaction`. These can be used to create scoped reactions that will be tied to the component's lifecycle, and automatically torn down when the component is destroyed.
 
+
+### Exposing Reactivity
+
+You can expose a `reactiveVar` on your component instance to allow other components to rely on it as a source of reactivity. This can be a useful way to share reactivity across related parts of your app.
+
+> Component `state` and `settings` are not accessible outside your component unless they are exposed on your component instance.
+
+
+```javascript title="todo.js"
+const createComponent = ({ self, reactiveVar, reaction }) => {
+  return {
+    todos: reactiveVar([]),
+  };
+};
+```
+
+```javascript title="todo-item.js"
+const createComponent = ({ findParent }) => {
+  getTodos() {
+    const todoList = findParent('todoList');
+    return todoList.todos.get();
+  }
+};
+```
+
+
+
+### Reducing Reactivity
+
+Template expressions are reactive by default but this might not always be ideal. Template reactivity can be removed by using the `nonreactive` helper
+
+> Learn more about controlling reactivity in the dedicated subsection for [controlling reactivity](reactivity/controls)
+
+```html
+<ul>
+  {{#each item in nonreactive items}}
+    {{item}}
+  {{/each}}
+</ul>
+```

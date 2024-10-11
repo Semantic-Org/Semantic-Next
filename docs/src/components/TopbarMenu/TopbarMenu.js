@@ -1,5 +1,5 @@
 import { UIIcon } from '@semantic-ui/core';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { any, isFunction, first, isArray } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import template from './TopbarMenu.html?raw';
@@ -10,7 +10,7 @@ const settings = {
   activeURL: '',
 };
 
-const createInstance = function ({ tpl, settings }) {
+const createComponent = function ({ self, settings }) {
   return {
     url: new ReactiveVar(settings.activeURL),
     getMenu() {
@@ -18,7 +18,7 @@ const createInstance = function ({ tpl, settings }) {
     },
     getItemStates(item) {
       return {
-        active: tpl.isActiveItem(item)
+        active: self.isActiveItem(item)
       };
     },
     shouldShow(item) {
@@ -28,17 +28,17 @@ const createInstance = function ({ tpl, settings }) {
       return true;
     },
     getLink(item) {
-      if (!tpl.isCurrentItem(item)) {
+      if (!self.isCurrentItem(item)) {
         return item?.url;
       }
       return;
     },
     getActiveID() {
-      const activeItem = first(settings.menu, (item) => tpl.isActiveItem(item));
+      const activeItem = first(settings.menu, (item) => self.isActiveItem(item));
       return activeItem?._id;
     },
     isActiveItem(item) {
-      let activeURL = tpl.url.get();
+      let activeURL = self.url.get();
       if(isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
         return true;
       }
@@ -52,38 +52,38 @@ const createInstance = function ({ tpl, settings }) {
     },
     // the current url is the link from this topbar menu
     isCurrentItem(item) {
-      const url = tpl.url.get();
+      const url = self.url.get();
       if(item.activeURL) {
         return isArray(item.activeURL)
           ? any(item.activeURL, (activeURL) => url.startsWith(activeURL))
           : url.startsWith(item.activeURL)
         ;
       }
-      if (item?.url === tpl.url.get()) {
+      if (item?.url === self.url.get()) {
         return true;
       }
     },
     onPageChange() {
-      tpl.url.set(window.location.pathname);
+      self.url.set(window.location.pathname);
     }
   };
 };
 
 
-const onRendered = function ({ $, tpl, attachEvent, isClient }) {
+const onRendered = function ({ $, self, attachEvent, isClient }) {
   if(isClient) {
-    attachEvent(document, 'astro:after-swap', tpl.onPageChange);
+    attachEvent(document, 'astro:after-swap', self.onPageChange);
   }
 };
 
 const events = {
 };
 
-const TopbarMenu = createComponent({
+const TopbarMenu = defineComponent({
   tagName: 'topbar-menu',
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onRendered,
   events,

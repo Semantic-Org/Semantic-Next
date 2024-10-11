@@ -23,13 +23,14 @@ export const Template = class Template {
     keys,
     stateConfig,
     subTemplates,
-    createInstance,
+    createComponent,
     parentTemplate, // the parent template when nested
     renderingEngine = 'lit',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
     onRendered = noop,
+    onUpdated = noop,
     onDestroyed = noop,
     onThemeChanged = noop,
   }) {
@@ -48,7 +49,7 @@ export const Template = class Template {
     this.state = this.createReactiveState(stateConfig, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
-    this.createInstance = createInstance;
+    this.createComponent = createComponent;
     this.onCreated = noop;
     this.onDestroyed = noop;
     this.onRendered = noop;
@@ -108,7 +109,7 @@ export const Template = class Template {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-    this.tpl._parentTemplate = parentTemplate;
+    this.instance._parentTemplate = parentTemplate;
   }
 
   setElement(element) {
@@ -121,25 +122,30 @@ export const Template = class Template {
   }
 
   initialize() {
-    let tpl = this;
-    if (isFunction(this.createInstance)) {
-      this.tpl = {};
-      tpl = this.call(this.createInstance) || {};
-      extend(this.tpl, tpl);
+    let template = this;
+    let instance;
+    if (isFunction(this.createComponent)) {
+      this.instance = {};
+      instance = this.call(this.createComponent) || {};
+      extend(template.instance, instance);
     }
-    if (isFunction(tpl.initialize)) {
-      this.call(tpl.initialize.bind(this));
+    if (isFunction(instance.initialize)) {
+      this.call(instance.initialize.bind(template));
     }
-    this.tpl.templateName = this.templateName;
+    template.instance.templateName = this.templateName;
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
-      this.dispatchEvent('created', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('created', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
-      this.dispatchEvent('rendered', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('rendered', { component: this.instance }, {}, { triggerCallback: false });
+    };
+    this.onUpdated = () => {
+      this.call(this.onRenderedCallback);
+      this.dispatchEvent('updated', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
       this.call(this.onThemeChangedCallback, ...args);
@@ -150,7 +156,7 @@ export const Template = class Template {
       this.clearReactions();
       this.removeEvents();
       this.call(this.onDestroyedCallback);
-      this.dispatchEvent('destroyed', { tpl: this.tpl }, {}, { triggerCallback: false });
+      this.dispatchEvent('destroyed', { component: this.instance }, {}, { triggerCallback: false });
     };
 
     this.initialized = true;
@@ -199,7 +205,7 @@ export const Template = class Template {
     return {
       ...this.data,
       ...this.state,
-      ...this.tpl,
+      ...this.instance,
     };
   }
 
@@ -246,7 +252,7 @@ export const Template = class Template {
       onRendered: this.onRenderedCallback,
       parentTemplate: this.parentTemplate,
       onDestroyed: this.onDestroyedCallback,
-      createInstance: this.createInstance,
+      createComponent: this.createComponent,
     };
     const templateSettings = {
       ...defaultSettings,
@@ -256,6 +262,22 @@ export const Template = class Template {
   }
 
   parseEventString(eventString) {
+
+    // we want to allow 3 types of event syntax
+    // 'deep eventType selector' - attach event to an
+    // 'global eventType selector' - attach event to an element on the page
+    // 'eventType selector' - bind to an element inside the web component
+    let eventType = 'delegated';
+    let keywords = ['deep', 'global'];
+    each(keywords, (keyword) => {
+      if(eventString.startsWith(keyword)) {
+        eventString = eventString.replace(keyword, '');
+        eventType = keyword;
+      }
+    });
+
+    eventString = eventString.trim();
+
     // we are using event delegation so we will have to bind
     // some events to their corresponding event that bubbles
     const getBubbledEvent = (eventName) => {
@@ -272,7 +294,6 @@ export const Template = class Template {
       }
       return eventName;
     };
-
     let events = [];
     let parts = eventString.split(/\s+/);
 
@@ -280,6 +301,7 @@ export const Template = class Template {
     let addedSelectors = false;
     const eventNames = [];
     const selectors = [];
+    // parse out various syntax like `click, mousedown foo`, `click .foo, .bar`
     each(parts, (part, index) => {
       const value = part.replace(/(\,|\W)+$/, '').trim();
       const hasComma = part.includes(',');
@@ -301,7 +323,7 @@ export const Template = class Template {
         selectors.push('');
       }
       each(selectors, (selector) => {
-        events.push({ eventName, selector });
+        events.push({ eventName, eventType, selector });
       });
     });
     return events;
@@ -329,50 +351,70 @@ export const Template = class Template {
       }, { abortController: this.eventController });
     }
 
-    each(events, (eventHandler, eventString) => {
+    each(events, (userHandler, eventString) => {
       const subEvents = this.parseEventString(eventString);
       const template = this;
       each(subEvents, (event) => {
-        const { eventName, selector } = event;
+        const { eventName, selector, eventType } = event;
+
         // BUG: iOS Safari will not bubble the touchstart / touchend events
         // if theres no handler on the actual element
         if(selector) {
           $(selector, { root: this.renderRoot }).on(eventName, noop, { abortController: this.eventController });
         }
-        $(this.renderRoot).on(
-          eventName,
-          selector,
-          (event) => {
-            if (!this.isNodeInTemplate(event.target)) {
-              return;
-            }
-            if (inArray(eventName, ['mouseover', 'mouseout'])
-              && event.relatedTarget
-              && event.target.contains(event.relatedTarget)) {
-              return;
-            }
-            const targetElement = (selector)
-              ? $(event.target).closest(selector).get(0) // delegation
-              : event.target
-            ;
-            const boundEvent = eventHandler.bind(targetElement);
-            const eventData = event?.detail || {};
-            const elData = targetElement.dataset;
-            const elValue = targetElement.value;
-            template.call(boundEvent, {
-              additionalData: {
-                event: event,
-                target: targetElement,
-                value: elValue,
-                data: {
-                  ...elData,
-                  ...eventData
-                }
-              },
-            });
-          },
-          { abortController: this.eventController }
-        );
+
+        const eventHandler = function(event) {
+
+          // check if the event occurred in the current template if not global
+          if (eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
+            return;
+          }
+
+          // check if event occured on a deep event handler and the handler type isnt 'deep'
+          const isDeep = selector && $(event.target).closest(selector).length == 0;
+          if(eventType !== 'deep' && isDeep) {
+            return;
+          }
+
+          // handle related target use case for special events
+          if (inArray(eventName, ['mouseover', 'mouseout'])
+            && event.relatedTarget
+            && event.target.contains(event.relatedTarget)) {
+            return;
+          }
+
+          // prepare data for users event handler
+          const targetElement = this;
+          const boundEvent = userHandler.bind(targetElement);
+          const eventData = event?.detail || {};
+          const elData = targetElement?.dataset;
+          const elValue = targetElement?.value;
+
+          template.call(boundEvent, {
+            additionalData: {
+              event: event,
+              isDeep,
+              target: targetElement,
+              value: elValue,
+              data: {
+                ...elData,
+                ...eventData
+              }
+            },
+          });
+        };
+
+        const eventSettings = { abortController: this.eventController };
+
+        if(eventType == 'global') {
+          console.log('global');
+          // allow user to bind to global selectors if they opt in using the 'global' keyword
+          $(selector).on(eventName, eventHandler, eventSettings);
+        }
+        else {
+          // otherwise use event delegation at the components shadow root
+          $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+        }
       });
     });
   }
@@ -502,6 +544,7 @@ export const Template = class Template {
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
+    setTimeout(this.onUpdated, 0);
     return this.html;
   }
 
@@ -543,13 +586,19 @@ export const Template = class Template {
       params = {
 
         el: this.element,
-        tpl: this.tpl,
+
+        // provide 3 options for referring to self
+        tpl: this.instance,
+        self: this.instance,
+        component: this.instance,
+
         $: this.$.bind(this),
         $$: this.$$.bind(this),
 
         reaction: this.reaction.bind(this),
         reactiveVar: this.reactiveVar.bind(this),
         afterFlush: Reaction.afterFlush,
+        flush: Reaction.flush,
 
         data: this.data,
         settings: this.element.settings,
@@ -575,7 +624,7 @@ export const Template = class Template {
         findChildren: this.findChildren.bind(this),
 
         // not yet implemented
-        content: this.tpl.content,
+        content: this.instance.content,
 
         // on demand since requires  computing styles
         get darkMode() { return element.isDarkMode(); },
@@ -593,8 +642,8 @@ export const Template = class Template {
   }
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
-  attachEvent(selector, eventName, eventHandler, eventSettings) {
-    return $(selector, document, { pierceShadow: true }).on(eventName, eventHandler, {
+  attachEvent(selector, eventName, eventHandler, { eventSettings = {}, querySettings = { pierceShadow: true } } = {}) {
+    return $(selector, document, querySettings).on(eventName, eventHandler, {
       abortController: this.eventController,
       returnHandler: true,
       ...eventSettings
@@ -618,7 +667,7 @@ export const Template = class Template {
   }
 
   /*******************************
-           Reactive Helpers
+          Reactive Helpers
   *******************************/
 
   // reactions bound with this.reaction will be scoped to template
@@ -676,8 +725,8 @@ export const Template = class Template {
       if(!match) {
         let parentNode = template.element?.parentNode;
         while(parentNode) {
-          if(parentNode.template?.templateName == templateName) {
-            match = parentNode.template.tpl;
+          if(parentNode.component?.templateName == templateName) {
+            match = parentNode.component;
             break;
           }
           parentNode = parentNode.parentNode;
@@ -685,7 +734,7 @@ export const Template = class Template {
       }
       // this matches on nested partials (less common)
       while (template) {
-        template = template._parentTemplate || template?.tpl?._parentTemplate;
+        template = template._parentTemplate || template?.instance?._parentTemplate;
         if (!match && template?.templateName == templateName) {
           match = template;
           break;
@@ -693,7 +742,7 @@ export const Template = class Template {
       }
       return match;
     }
-    return template._parentTemplate || template?.tpl?._parentTemplate;
+    return template._parentTemplate || template?.component?._parentTemplate;
   }
 
   static findChildTemplates(template, templateName) {
@@ -701,10 +750,10 @@ export const Template = class Template {
     // recursive lookup
     function search(template, templateName) {
       if (template.templateName === templateName) {
-        result.push(template.tpl);
+        result.push(template.component);
       }
-      if (template.tpl._childTemplates) {
-        template.tpl._childTemplates.forEach((childTemplate) => {
+      if (template.component._childTemplates) {
+        template.component._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });
       }

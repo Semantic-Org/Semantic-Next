@@ -1,6 +1,6 @@
 import { UIIcon } from '@semantic-ui/core';
 
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
@@ -10,13 +10,13 @@ const state = {
   theme: undefined
 };
 
-const createInstance = function ({ $, isServer, reaction, state, tpl }) {
+const createComponent = function ({ $, isServer, reaction, state, self }) {
   return {
     getLocalTheme() {
       if(isServer) {
         return 'light';
       }
-      return tpl.getThemePreference() || tpl.getSystemPreference();
+      return self.getThemePreference() || self.getSystemPreference();
     },
     getThemePreference() {
       return localStorage.getItem('theme');
@@ -53,16 +53,16 @@ const createInstance = function ({ $, isServer, reaction, state, tpl }) {
   };
 };
 
-const onCreated = function({tpl, reaction, reactiveVar, state, isClient}) {
-  state.theme.set(tpl.getLocalTheme());
+const onCreated = function({self, reaction, reactiveVar, state, isClient}) {
+  state.theme.set(self.getLocalTheme());
   if(isClient) {
-    tpl.calculateTheme();
+    self.calculateTheme();
   }
 };
 
 
 const events = {
-  'click'({tpl, state}) {
+  'click'({self, state}) {
     const currentTheme = state.theme.get();
     const newTheme = (currentTheme == 'light')
       ? 'dark'
@@ -76,14 +76,14 @@ const events = {
   },
 };
 
-const ThemeSwitcher = createComponent({
+const ThemeSwitcher = defineComponent({
   tagName: 'theme-switcher',
   template,
   events,
   css,
   state,
   onCreated,
-  createInstance,
+  createComponent,
 });
 
 export default ThemeSwitcher;

@@ -1,11 +1,11 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { UIIcon } from '@semantic-ui/core';
 import { tokenize } from '@semantic-ui/utils';
 
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
-import lightCSS from './CodeExampleLight.css?raw';
+import pageCSS from './CodeExamplePage.css?raw';
 
 import CodeSample from '../CodeSample/CodeSample.js';
 
@@ -17,7 +17,7 @@ const settings = {
   showCode: false, // show code on start
 };
 
-const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
+const createComponent = ({ $, isServer, reaction, settings, self }) => ({
   codeVisible : new ReactiveVar(settings.showCode),
   slottedContent: new ReactiveVar(),
   code: new ReactiveVar(settings.code),
@@ -25,7 +25,7 @@ const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
     return input.replace(/<!--[\s\S]*?-->/g, '');
   },
   canShowCode() {
-    return tpl.code.get() && tpl.codeVisible.get();
+    return self.code.get() && self.codeVisible.get();
   },
   setSlottedContent() {
     if(isServer) {
@@ -36,43 +36,43 @@ const createInstance = ({ $, isServer, reaction, settings, tpl }) => ({
       slottedNodes = defaultSlot.assignedNodes(),
       $content = $(slottedNodes).not('script, style'),
       html = $content.outerHTML(),
-      code = tpl.removeComments( html )
+      code = self.removeComments( html )
     ;
-    tpl.slottedContent.set(code);
+    self.slottedContent.set(code);
   },
   calculateCodeVisible() {
     reaction(() => {
-      const code = settings.code || tpl.slottedContent.get();
-      tpl.code.set(code);
+      const code = settings.code || self.slottedContent.get();
+      self.code.set(code);
     });
   }
 });
 
-const onCreated = function({tpl, isClient, settings}) {
-  tpl.calculateCodeVisible();
+const onCreated = function({self, isClient, settings}) {
+  self.calculateCodeVisible();
 };
 
-const onRendered = function({tpl, isClient, settings}) {
-  tpl.setSlottedContent();
+const onRendered = function({self, isClient, settings}) {
+  self.setSlottedContent();
 };
 
 
 
 const events = {
-  'click .code.link'({event, tpl}) {
-    tpl.codeVisible.toggle();
+  'click .code.link'({event, self}) {
+    self.codeVisible.toggle();
   }
 };
 
-const CodeExample = createComponent({
+const CodeExample = defineComponent({
   tagName: 'code-example',
   template,
   events,
   css,
-  lightCSS,
+  pageCSS,
   onCreated,
   onRendered,
-  createInstance,
+  createComponent,
   settings,
 });
 

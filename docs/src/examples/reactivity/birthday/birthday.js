@@ -1,11 +1,11 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { formatDate } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createInstance = ({tpl, reaction, dispatchEvent}) => ({
+const createComponent = ({ self, reaction, dispatchEvent }) => ({
 
   today: new ReactiveVar(''),
 
@@ -31,43 +31,43 @@ const createInstance = ({tpl, reaction, dispatchEvent}) => ({
     reaction(() => {
 
       // setup reaction on today
-      let today = tpl.today.get();
+      let today = self.today.get();
 
       // find people whose birthday is today
-      let birthdayNames = tpl.birthdayCalendar
+      let birthdayNames = self.birthdayCalendar
         .filter(person => person.birthday == today)
         .map(person => person.name)
       ;
       if(birthdayNames.length) {
-        tpl.birthdayNames.set(birthdayNames.join(', '));
+        self.birthdayNames.set(birthdayNames.join(', '));
       }
       else {
-        tpl.birthdayNames.set(undefined);
+        self.birthdayNames.set(undefined);
       }
     });
   }
 });
 
-const onCreated = ({ tpl }) => {
-  tpl.today.set( tpl.getDisplayDate() );
-  tpl.checkBirthdays();
+const onCreated = ({ self }) => {
+  self.today.set( self.getDisplayDate() );
+  self.checkBirthdays();
 };
 
 const events = {
-  'change .date-picker'({tpl }) {
+  'change .date-picker'({ self }) {
     const newDay = new Date(this.value);
-    tpl.today.set( tpl.getDisplayDate(newDay) );
+    self.today.set( self.getDisplayDate(newDay) );
   },
-  'click a.birthday'({tpl, data}) {
-    tpl.today.set( data.birthday );
+  'click a.birthday'({ self, data }) {
+    self.today.set( data.birthday );
   }
 };
 
-createComponent({
+defineComponent({
   tagName: 'birthday-calendar',
   events,
   template,
   css,
   onCreated,
-  createInstance
+  createComponent
 });

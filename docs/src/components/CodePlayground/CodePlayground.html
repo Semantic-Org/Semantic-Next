@@ -1,11 +1,9 @@
 <div class="playground {{classMap getClassMap}}" part="playground">
   {{#if example.title}}
     <div class="masthead" part="masthead">
-      {{#if inline}}
-
-      {{else}}
+      {{#if canShowButtons}}
         <ui-button right-floated transparent small compact inverted class="tabs">
-          {{#if useTabs}}
+          {{#if shouldUseTabs}}
             Use Panels
           {{else}}
             Use Tabs
@@ -27,7 +25,7 @@
       {{/each}}
     </playground-project>
   {{/if}}
-  {{#if either useTabs inline}}
+  {{#if either shouldUseTabs inline}}
     <ui-panels
       class={{classMap getTabPanelsClass}}
       direction="{{getTabDirection}}"
@@ -101,4 +99,14 @@
       {{/each}}
     </ui-panels>
   {{/if}}
+  <ui-menu
+    dark
+    fluid
+    evenly-spaced=true
+    selection
+    items={{mobileMenu}}
+    value={{mobileView}}
+    class="mobile"
+    part="mobile-menu"
+  ></ui-menu>
 </div>

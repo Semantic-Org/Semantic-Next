@@ -1,4 +1,4 @@
-export const createInstance = ({settings}) => ({
+export const createComponent = ({settings}) => ({
   decrease() {
     settings.number--;
   },

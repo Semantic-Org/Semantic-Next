@@ -163,6 +163,9 @@ ui-modal {
       &.active {
         border-color: var(--primary-text-color);
       }
+      &:hover {
+        border: 1px solid rgb(165 165 165 / 60%);
+      }
 
     }
     .result h3 {

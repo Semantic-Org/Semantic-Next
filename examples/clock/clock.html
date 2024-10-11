@@ -3,9 +3,9 @@
 
   <!-- markers -->
   {{#each minute in majorMarkers}}
-    <line class="major" y1="35" y2="45" transform="{{getRotation 'minorAxis' minute}}"></line>
+    <line class="major" y1="35" y2="45" transform="{{getRotation 'major' minute}}"></line>
     {{#each offset in minorMarkers}}
-      <line class="minor" y1="42" y2="45" transform="{{getRotation 'minorAxis' minute offset}}"></line>
+      <line class="minor" y1="42" y2="45" transform="{{getRotation 'minor' minute offset}}"></line>
     {{/each}}
   {{/each}}
 

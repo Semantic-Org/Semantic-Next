@@ -12,6 +12,7 @@ const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 	<NavMenu
 		client:load
     menu={menu}
+    useAccordion=true
     expandAll={expandAll}
     activeURL={Astro.url.pathname}
   />

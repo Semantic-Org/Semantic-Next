@@ -17,13 +17,13 @@ Semantic components can include events by passing in an object mapping events to
 > **Event Delegation** Event handlers are attached to the shadow root of your component using a pattern called event delegation where the component listens for the bubbled event. This means that even if you add or remove content that matches the selector after render the event will still fire if the selector matches.
 
 ```javascript
-createComponent({
+defineComponent({
   events: {
-    'click .submit'({ tpl }) {
-      tpl.submit();
+    'click .submit'({ self }) {
+      self.submit();
     },
-    'click .menu ui-button'({}) {
-      tpl.doSomething();
+    'click .menu ui-button'({ self }) {
+      self.doSomething();
     }
   }
 });
@@ -31,7 +31,11 @@ createComponent({
 
 ### Multiple Events + One Selector
 
-You can specify multiple events using a comma separated list with a single selector
+You can specify multiple events using a comma separated list with a single selector.
+
+This example binds `mouseup` and `mouseleave` to `.selector`
+
+
 ```javascript
 const events = {
   'mouseup, mouseleave .selector'({state}) => {
@@ -44,6 +48,8 @@ const events = {
 
 You can also specify multiple selectors when specifying an event by passing in a comma separated list.
 
+This example binds `click` to `.selector1` and `.selector2`
+
 ```javascript
 const events = {
   'click .selector1, click .selector2' () => {
@@ -52,8 +58,10 @@ const events = {
 };
 ```
 
-### Component Events
-To attach events to your entire component you can pass in an event name without a selector
+### Component-Wide Events
+To attach events to your entire component you can pass in an event name without a selector.
+
+For example if you have a component called `ui-button` this would fire when the mouse hovered over any part of the component.
 
 ```javascript
 const events = {
@@ -66,22 +74,134 @@ const events = {
 };
 ```
 
-### Attaching Events Externally
+### Event Binding Example
 
-You can use `attachEvent` which is passed to all component callbacks to attach an dynamically attach events, either to parts of a component or to external selectors like the page's `body` tag, or slotted content.
+In the following example events are attached to four separate buttons to control the size of the shape.
 
-> All events attached with `attachEvent` will automatically be removed when the component is destroyed using `abortSignals`.
+<PlaygroundExample id="event-binding" direction="horizontal"></PlaygroundExample>
+
+
+## Special Event Bindings
+
+You can add special keywords to that modify how events are attached permitting you to bind events to elements other than those found in your [component's template](/templates).
+
+### Global Events
+
+You can use the `global` keyword to attach an event globally to any element outside of your component.
+
+For instance this can be used with global events like `scroll` or `hashchange`
 
 ```javascript
-const onCreated = ({attachEvent, isClient}) => {
-  if(isClient) {
-    attachEvent('body', 'scroll', tpl.onPageScroll)
+const events = {
+  'global scroll window'() => {
+    // page scrolled
   }
 };
 ```
 
-<PlaygroundExample id="event-binding" direction="horizontal"></PlaygroundExample>
+### Deep Events
 
+You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's shadow DOM or slotted content which a person using your component might include.
+
+> **Deep Usage** - By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
+
+```html
+<div class="component">
+  <ui-button>Submit</ui-button>
+</div>
+```
+
+```javascript
+const events = {
+  'deep ui-button .icon'() => {
+    // the icon is part of `ui-button` shadow DOM
+  }
+};
+```
+
+## Event Data
+
+In many cases you want to access data particular to an event. Event handlers can use `data` to achieve this.
+
+### HTML Metadata
+
+HTML metadata can be added using data attributes and will be available directly from the data object
+
+```html
+<div class="increment" data-amount="1">Increment 1</div>
+<div class="increment" data-amount="10">Increment 10</div>
+```
+
+```javascript
+const events = {
+  'click .increment'({self, data]}) {
+    self.increment(data.amount);
+  }
+};
+```
+
+### Custom Event Data
+
+Any custom event metadata will also be available in the `data` attribute.
+
+Another component creates an event
+```
+const createComponent = ({dispatchEvent}) {
+  startResize() {
+    dispatchEvent('resizeStart', {
+      startPosition: currentPosition,
+    });
+  }
+}
+```
+
+Your component's listens to the event
+```javascript
+const events = {
+  'resizeStart custom-component'({data}) {
+    // data is { startPosition }
+  },
+};
+```
+
+### Data Example
+
+In the following example html data attributes control whether the width or height is mutated and whether it is growing or shrinking.
+
+<PlaygroundExample id="event-data" direction="horizontal"></PlaygroundExample>
+
+## Advanced Use Cases
+
+In some scenarios you may want to manually bind and unbind events that are part of your components lifecycle.
+
+
+### Binding Events Dynamically
+
+You can use `attachEvent` which is passed to all component callbacks to attach events dynamically where you may not know the selector until the component is created
+
+> All events attached with `attachEvent` will automatically be removed when the component is destroyed using `abortSignals`.
+
+```javascript
+const onCreated = ({attachEvent, settings, isClient}) => {
+  if(isClient) {
+    attachEvent(settings.scrollContext, 'scroll', self.onPageScroll)
+  }
+};
+```
+
+### Manually Removing Events
+
+When you use `attachEvent` it will return an event handler that you can use to unbind an event later using `off`
+
+
+```javascript
+const onCreated = ({attachEvent, $, isClient}) => {
+  const handler = attachEvent('body', 'click', () => {
+    console.log('You clicked me');
+  })
+  $('body').off('click', handler)
+};
+```
 
 ## Creating Events
 
@@ -90,7 +210,7 @@ const onCreated = ({attachEvent, isClient}) => {
 Custom events can be emitted from your component using `dispatchEvent` and can include custom metadata which will be passed along as `data` to events.
 
 ```javascript
-const createInstance = ({dispatchEvent}) => {
+const createComponent = ({dispatchEvent}) => {
   scrollToItem(itemID) {
     // handle scrolling to item
     dispatchEvent('itemactive', { itemID, position });
@@ -120,7 +240,7 @@ You can listen to a custom event the same way as a normal browser event, however
 ```javascript
 // from another component
 const events = {
-  'itemactive inpage-menu'({tpl,data}) {
+  'itemactive inpage-menu'({self, data}) {
     const { itemID, position } = data;
     // do something with metadata
   }
@@ -146,15 +266,21 @@ el.addEventListener('itemactive', (event) => {
 ```
 
 ## Built In Events
-Components all emit lifecycle events as native DOM events that can be used to respond to the lifecycle of subcomponents.
+
+### Lifecycle Events
+You can listen to any [components lifecycle events](/components/lifecycle) with event listeners similar to Components all emit lifecycle events as native DOM events that can be used to respond to the lifecycle of subcomponents.
+
+The custom event will also include a reference to the component which you can use to invoke behaviors on that component.
 
 ```javascript
 const events = {
-  'rendered inpage-menu'({tpl,data}) {
-    // component is rendered
+  'rendered inpage-menu'({self, data}) {
+    // component lifecycle event passes through component instance at data
+    const menu = data.component;
+    menu.setActive();
   }
-  'destoryed inpage-menu'({tpl,data}) {
-    // component is destroyed
+  'destroyed inpage-menu'() {
+    // menu component is destroyed
   }
 };
 ```
@@ -163,16 +289,11 @@ const events = {
 
 In addition to the [standard arguments](/components/lifecycle) that are passed to all component callbacks, event handlers get access to a few extra arguments.
 
-| parameter         | use                                              |
-|-------------------|--------------------------------------------------|
-| el                | the dom element that dispatched the event        |
-| event             | the native event object                          |
-| data              | event.detail + data attributes on dom element    |
+| parameter         | use                                                   |
+|-------------------|-------------------------------------------------------|
+| el                | the dom element that dispatched the event             |
+| event             | the native event object                               |
+| data              | event.detail + data attributes on dom element         |
+| isDeep            | the event occurred on a nested web coomponent or slot |
 
 
-### Data
-
-Data is a combination of html metadata on the target element as well as `event.details` from any dispatched custom event.
-
-
-<PlaygroundExample id="event-data" direction="horizontal"></PlaygroundExample>

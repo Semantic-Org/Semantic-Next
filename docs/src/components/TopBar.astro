@@ -18,6 +18,25 @@ showThemeSwitcher = (showThemeSwitcher === 'false') ? false : true;
 
 import './TopBar.css';
 ---
+<script>
+  import { $ } from '@semantic-ui/query';
+  let scrollingDown;
+  let lastScrollPosition;
+  $(window).on('scroll', function() {
+    const isMobile = $(window).width() < 768;
+    const scrollTop = $('html').scrollTop();
+    scrollingDown = Boolean(scrollTop >= lastScrollPosition);
+    lastScrollPosition = scrollTop;
+    requestAnimationFrame(() => {
+      if(isMobile && scrollingDown && scrollTop !== 0) {
+        $('topbar').addClass('hidden');
+      }
+      else {
+        $('topbar').removeClass('hidden');
+      }
+    });
+  }, { passive: true });
+</script>
 <topbar class={floating ? 'floating' : 'fluid'} transition:persist>
   <div class="content">
     <span class="left">

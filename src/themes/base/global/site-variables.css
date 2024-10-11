@@ -31,6 +31,8 @@
           Sizes
   -------------------- */
 
+  --box-sizing: border-box;
+
   /*
 
     For em sizes to resolve to exact pixels you will need to adjust the scaling values below
@@ -39,7 +41,6 @@
     **medium size will become the overall site's EM size**
 
   */
-
   --em-size: var(--medium-size-px);
 
   --mini-size-px: 11;

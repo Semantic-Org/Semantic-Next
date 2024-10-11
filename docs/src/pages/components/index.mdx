@@ -17,40 +17,42 @@ Components provides everything you'd expect from other modern front end framewor
 
 Each UI component you author will give you access to a custom html tag which you can compose just like you compose `<input>` `<p>` and other tags in your page.
 
+> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components are a native browser standard designed to allow for interchange between front end frameworks. Components created with `semantic-ui/component` can render in any [supported front end framework](framework-integration) or simply use the html tags directly in your app with vanilla js.
+
 Semantic UI components provide an overall framework for creating complex web apps using web components.
 
-* [Templating](/components/rendering) - An expressive signals based templating system that allows you to precisely reconstruct portions of a component when data changes, and includes features like, snippets, subtemplating, template helpers, control structures, looping, and more.
+* [Templating](/components/rendering) - An expressive signals based templating system that allows you to precisely reconstruct portions of a component when data changes with features like snippets, subtemplating, template helpers, control structures, looping, and more.
 * [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
 * [DOM Manipulation](/query) - A jQuery like chainable DOM manipulation library that is built to handle shadow DOM and nested components.
-* [Events](/components/events) - Robust, built in systems for handling event listeners and dispatching custom events.
-* [Keybindings](/components/keys) - Built in keybinding system attached to component lifecycles
-* [Lifecycle Events](/components/lifecycle) - Granular control over tear
+* [Events](/components/events) - Robust systems for handling event listeners and dispatching custom events.
+* [Keybindings](/components/keys) - Built in keybinding attached to component lifecycles
+* [Lifecycle Events](/components/lifecycle) - Run code during creation, rendering and teardown
 * [Reactivity](/components/reactivity) - A powerful reactivity system based on signals for efficient updates.
 
 <PlaygroundExample id="minimal" height="300"></PlaygroundExample>
 
 ## Key Features
 
-### Interchangeable
+### Portable
 
-Components are defined using [`createComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
+Components are defined using [`defineComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
 
 ```javascript
-createComponent({
+defineComponent({
   tagName: 'my-component',
   template: '...',
   css: '...',
   state: { ... },
   settings: { ... },
-  createInstance: () => ({ ... }),
+  createComponent: () => ({ ... }),
   onCreated: () => { ... },
   onRendered: () => { ... },
   onDestroyed: () => { ... },
 });
 ```
-### Templating
+### Robust Templating
 
-Components use a [powerful templating system](/components/rendering) that supports expressions, slots, conditionals, loops, and more.
+Components use a [built-in templating system](/components/rendering) that supports expressions, slots, conditionals, snippets, loops, and more.
 
 ```handlebars
 {{#each user in users}}
@@ -89,10 +91,10 @@ Components provides an [integrated design system](/components/styling) powered b
 
 ### Events & Keybindings
 
-Components include a [built in event management](/components/events) built around [native DOM events, making it easy to dispatch events
+Components include a [built in event management](/components/events) built around [native DOM events](/components/events#creating-events), making it easy to dispatch events
 
 ```javascript
-const createInstance = ({state, dispatchEvent}) => ({
+const createComponent = ({state, dispatchEvent}) => ({
   increment(amount) {
 
     // update internal counter
@@ -117,21 +119,21 @@ const createInstance = ({state, dispatchEvent}) => ({
 });
 ```
 
-Listen to events and trigger functionality.
+[Listen to events](/components/events) and trigger functionality.
 
 ```javascript
 const events = {
-  'click .increment': ({tpl}) => tpl.increment(),
-  'click .decrement': ({tpl}) => tpl.decrement(),
+  'click .increment': ({ self }) => self.increment(),
+  'click .decrement': ({ self }) => self.decrement(),
 };
 ```
 
 Or [bind keybindings](/components/keybindings) scoped to your component.
 ```javascript
 const keys = {
-  'up': ({tpl}) => tpl.decrement(),
-  'down': ({tpl}) => tpl.increment(),
-  'shift + up': ({tpl}) => tpl.decrement(10),
-  'shift + down': ({tpl}) => tpl.increment(10),
+  'up': ({ self }) => self.decrement(),
+  'down': ({ self }) => self.increment(),
+  'shift + up': ({ self }) => self.decrement(10),
+  'shift + down': ({ self }) => self.increment(10),
 };
 ```

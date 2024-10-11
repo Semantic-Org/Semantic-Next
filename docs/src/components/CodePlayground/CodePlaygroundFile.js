@@ -1,10 +1,10 @@
-import { createComponent, adoptStylesheet } from '@semantic-ui/component';
+import { defineComponent, adoptStylesheet } from '@semantic-ui/component';
 
 import codeMirrorCSS from './lib/codemirror.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const createInstance = ({tpl, settings, data, $, $$, reaction}) => ({
+const createComponent = ({tpl, settings, data, $, $$, reaction}) => ({
 
   setMode(filename) {
     if(filename.search('.html') !== -1) {
@@ -120,10 +120,10 @@ const onRendered = ({ tpl }) => {
   tpl.configureCodeEditors();
 };
 
-const CodePlaygroundFile = createComponent({
+const CodePlaygroundFile = defineComponent({
   template,
   css,
-  createInstance,
+  createComponent,
   onRendered,
   events,
 });

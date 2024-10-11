@@ -1,15 +1,42 @@
-<dialog part="dialog">
+<dialog class={{classMap getClasses}} part="dialog">
   <div class="layer">
     <div class="container">
-      <div class="visible content">
-        <nav-menu menu={{menu}} navigationIcon="right-chevron"></nav-menu>
+      <div class="previous content">
+        <nav-menu
+          menu={{previousMenu.menu}}
+          activeURL={{activeURL}}
+          expandAll=true
+        ></nav-menu>
+      </div>
+      <div class="active content">
+        {{#if activeMenu.header}}
+          <div class="header">{{activeMenu.header}}</div>
+        {{/if}}
+        <nav-menu
+          menu={{activeMenu.menu}}
+          activeURL={{activeURL}}
+          expandAll=true
+        ></nav-menu>
+        {{#if hasAny previousMenu.menu}}
+          <div class="return">
+            <ui-icon icon="left-chevron"></ui-icon>
+            Return to main menu
+          </div>
+        {{/if}}
       </div>
       <div class="next content">
+        {{#if nextMenu.header}}
+          <div class="header">{{nextMenu.header}}</div>
+        {{/if}}
         <nav-menu
-          menu={{menu}}
-          expandAllDefault=true
-          navigationIcon="right-chevron"
+          menu={{nextMenu.menu}}
+          activeURL={{activeURL}}
+          expandAll=true
         ></nav-menu>
+        <div class="return">
+          <ui-icon icon="left-chevron"></ui-icon>
+          Return to main menu
+        </div>
       </div>
     </div>
   </div>

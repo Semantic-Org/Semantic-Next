@@ -4,18 +4,18 @@ import { $ } from '@semantic-ui/query';
 const getComponent = () => $('ui-counter').getComponent();
 
 $('button').on('click', () => {
-  let tpl = getComponent();
+  let counter = getComponent();
   let number = Number($('input').val());
-  tpl.setCounter(number);
+  counter.setCounter(number);
 });
 
 $('input')
   .on('focus', () => {
-    let tpl = getComponent();
-    tpl.stopCounter();
+    let counter = getComponent();
+    counter.stopCounter();
   })
   .on('blur', () => {
-    let tpl = getComponent();
-    tpl.startCounter();
+    let counter = getComponent();
+    counter.startCounter();
   })
 ;

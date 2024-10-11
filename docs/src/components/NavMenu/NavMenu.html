@@ -1,5 +1,5 @@
 {{#each section in getMenu}}
-  <a class="{{classes getTitleStates section}}title" href={{getLink section}}>
+  <a class="{{classes getTitleStates section}}title" href={{getLink section}} part="title">
     {{#if section.icon}}
       <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
     {{else if section.image}}
@@ -11,19 +11,19 @@
     {{#if section.description}}
       <span class="description">{{section.description}}</span>
     {{/if}}
-    {{#if isExpandable}}
-      <ui-icon icon={{getNavigationIcon section}} class="dropdown" part="nav-icon"></ui-icon>
+    {{#if canShowNavIcon section}}
+      <ui-icon icon={{getNavIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
     {{/if}}
   </a>
   {{#if section.pages}}
-    <div class="{{activeIf isActiveItem section}}{{classIf hasIcons 'indented'}}content">
+    <div class="{{activeIf isActiveItem section}}{{classIf hasIcons 'indented'}}content" part="content">
       <div class="menu" part="menu">
         {{#each page in section.pages}}
           {{#if page.pages}}
-            <div class="{{classes getTitleStates page}}title item">
+            <div class="{{classes getTitleStates page}}title item" part="item-title">
               <div class="text">{{page.name}}</div>
-              {{#if isExpandable}}
-                <ui-icon {{getNavigationIcon section}} class="dropdown" part="nav-icon"></ui-icon>
+              {{#if canShowNavIcon}}
+                <ui-icon {{getNavIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
               {{/if}}
             </div>
             <div class="{{activeIf isActiveItem page}} content">

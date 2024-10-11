@@ -1,5 +1,5 @@
 import {
-  createComponent,
+  defineComponent,
   getText
 } from '@semantic-ui/component';
 
@@ -14,7 +14,7 @@ import { buttons } from './buttons.js';
   for "enterprisification"
 */
 import {
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   onThemeChanged,
@@ -23,10 +23,10 @@ import {
 
 import { settings } from './config.js';
 
-createComponent({
+defineComponent({
   tagName: 'number-adjust',
   subTemplates: { buttons },
-  createInstance,
+  createComponent,
   onCreated,
   onDestroyed,
   onThemeChanged,

@@ -5,7 +5,6 @@ A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
 
-
 export class Query {
 
   /*
@@ -40,16 +39,19 @@ export class Query {
       this.isBrowser = isClient;
       this.isGlobal = true;
     }
-    else if (isArray(selector)) {
+    else if (isArray(selector) || selector instanceof NodeList || selector instanceof HTMLCollection) {
       // Directly passed an array of elements
+      selector = Array.from(selector);
       elements = selector;
     }
     else if (isString(selector)) {
+      // this is html like $('<div/>')
       if (selector.slice(0, 1) == '<') {
         const template = document.createElement('template');
         template.innerHTML = selector.trim();
         elements = Array.from(template.content.childNodes);
-      } else {
+      }
+      else {
         // Use querySelectorAll for normal selectors
         elements = (pierceShadow)
           ? this.querySelectorAllDeep(root, selector)
@@ -71,7 +73,7 @@ export class Query {
   }
 
   chain(elements) {
-    return (this.isGlobal)
+    return (this.isGlobal && !elements)
       ? new Query(globalThis, this.options)
       : new Query(elements, this.options)
     ;
@@ -172,7 +174,8 @@ export class Query {
     const elements = Array.from(this).flatMap((el) => {
       if (this.options.pierceShadow) {
         return this.querySelectorAllDeep(el, selector, false);
-      } else {
+      }
+      else {
         return Array.from(el.querySelectorAll(selector));
       }
     });
@@ -210,23 +213,29 @@ export class Query {
     return selector ? this.chain(siblings).filter(selector) : this.chain(siblings);
   }
 
-  index(indexFilter) {
-    if(indexFilter) {
-      // if we are passed in a filter we are just grabbing el position
-      const els = this.get();
-      const el = this.filter(indexFilter).get(0);
-      return els.indexOf(el);
+  // returns the index of element only including siblings that match a filter
+  index(siblingFilter) {
+    const el = this.el();
+    if(!el?.parentNode) {
+      return -1;
     }
-    else {
-      // if we aren't we are grabbing sibling position
-      const $siblings = this.parent().children();
-      const siblingEls = $siblings.get();
-      const els = this.get();
-      return findIndex(siblingEls, el => inArray(el, els));
-    }
+    const $siblings = this.chain(el.parentNode.children).filter(siblingFilter);
+    const siblingEls = $siblings.get();
+    const els = this.get();
+    return findIndex(siblingEls, el => inArray(el, els));
+  }
+
+  // returns the index of current collection that match filter
+  indexOf(filter) {
+    const els = this.get();
+    const el = this.filter(filter).get(0);
+    return els.indexOf(el);
   }
 
   filter(filter) {
+    if(!filter) {
+      return this;
+    }
     let filteredElements = [];
     // If a function is provided, use it directly to filter elements
     if (isFunction(filter)) {
@@ -238,12 +247,14 @@ export class Query {
         if(isString(filter)) {
           return el.matches && el.matches(filter);
         }
+        else if (filter instanceof Query) {
+          // If filter is a Query object, check if the element is in the Query's collection
+          return filter.get().includes(el);
+        }
         else {
-          let els = isFunction(filter.get)
-            ? filter.get()
-            : isArray(filter)
-              ? filter
-              : [ filter]
+          let els = isArray(filter)
+            ? filter
+            : [ filter]
           ;
           return inArray(el, els);
         }
@@ -256,7 +267,11 @@ export class Query {
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
-      } else {
+      }
+      else if(this.isGlobal) {
+        return inArray(selector, ['window', 'globalThis']);
+      }
+      else {
         const elements = selector instanceof Query ? selector.get() : [selector];
         return elements.includes(el);
       }
@@ -269,7 +284,11 @@ export class Query {
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return !el.matches || (el.matches && !el.matches(selector));
-      } else {
+      }
+      else if(this.isGlobal) {
+        return !inArray(selector, ['window', 'globalThis']);
+      }
+      else {
         const elements = selector instanceof Query ? selector.get() : [selector];
         return !elements.includes(el);
       }
@@ -282,8 +301,11 @@ export class Query {
       if (this.options.pierceShadow) {
         return this.closestDeep(el, selector);
       }
-      else {
+      else if(selector && el?.closest) {
         return el.closest(selector);
+      }
+      else if(this.isGlobal) {
+        return inArray(selector, ['window', 'globalThis']);
       }
     }).filter(Boolean);
 
@@ -311,7 +333,7 @@ export class Query {
     return;
   }
 
-  on(event, targetSelectorOrHandler, handlerOrOptions, options) {
+  on(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
     let handler;
@@ -335,10 +357,31 @@ export class Query {
     this.each((el) => {
       let delegateHandler;
       if (targetSelector) {
-        delegateHandler = (e) => {
-          const target = e.target.closest(targetSelector);
+        delegateHandler = (event) => {
+          let target;
+          // if this event is composed from a web component
+          // this is required to get the original path
+          if (event.composed && event.composedPath) {
+
+            // look through composed path bubbling into the attached element to see if any match target
+            let path = event.composedPath();
+            const elIndex = findIndex(path, thisEl => thisEl == el);
+            path = path.slice(0, elIndex);
+            target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+
+          }
+          else if(targetSelector) {
+            // keep things simple for most basic uses
+            target = event.target.closest(targetSelector);
+          }
+          else {
+            // no target selector
+            target = event.target;
+          }
+
           if (target) {
-            handler.call(target, e);
+            // If a matching target is found, call the handler with the correct context
+            handler.call(target, event);
           }
         };
       }
@@ -347,12 +390,12 @@ export class Query {
       // will cause illegal invocation if used from proxy object
       const domEL = (this.isGlobal) ? globalThis : el;
       if (domEL.addEventListener) {
-        domEL.addEventListener(event, eventListener, { signal, ...eventSettings });
+        domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
       }
 
       const eventHandler = {
         el,
-        event,
+        eventName,
         eventListener,
         abortController,
         delegated: targetSelector !== undefined,
@@ -373,7 +416,7 @@ export class Query {
     return this;
   }
 
-  one(event, targetSelectorOrHandler, handlerOrOptions, options) {
+  one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
@@ -390,18 +433,18 @@ export class Query {
     const wrappedHandler = (...args) => {
       handler.apply(this, args);
       // Unbind the event handler after it has been invoked once
-      this.off(event, wrappedHandler);
+      this.off(eventName, wrappedHandler);
     };
     return (targetSelector)
-      ? this.on(event, targetSelector, wrappedHandler, options)
-      : this.on(event, wrappedHandler, options)
+      ? this.on(eventName, targetSelector, wrappedHandler, options)
+      : this.on(eventName, wrappedHandler, options)
     ;
   }
 
-  off(event, handler) {
+  off(eventName, handler) {
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        eventHandler.event === event &&
+        eventHandler.eventName === eventName &&
         (!handler ||
           handler?.eventListener == eventHandler.eventListener ||
           eventHandler.eventListener === handler ||
@@ -410,7 +453,7 @@ export class Query {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if(el.removeEventListener) {
-          el.removeEventListener(event, eventHandler.eventListener);
+          el.removeEventListener(eventName, eventHandler.eventListener);
         }
         return false;
       }
@@ -419,12 +462,12 @@ export class Query {
     return this;
   }
 
-  trigger(eventType, eventParams) {
+  trigger(eventName, eventParams) {
     return this.each(el => {
       if (typeof el.dispatchEvent !== 'function') {
         return;
       }
-      const event = new Event(eventType, { bubbles: true, cancelable: true });
+      const event = new Event(eventName, { bubbles: true, cancelable: true });
       if(eventParams) {
         Object.assign(event, eventParams);
       }
@@ -697,7 +740,8 @@ export class Query {
       }
       else if (this.length === 1) {
         return this[0][name];
-      } else {
+      }
+      else {
         return this.map(el => el[name]);
       }
     }
@@ -734,13 +778,11 @@ export class Query {
   }
 
   height(value) {
-    const prop = (this.isGlobal) ? 'innerHeight' : 'clientHeight';
-    return this.prop(prop, value);
+    return this.prop('innerHeight', value) || this.prop('clientHeight', value);
   }
 
   width(value) {
-    const prop = (this.isGlobal) ? 'innerWidth' : 'clientWidth';
-    return this.prop(prop, value);
+    return this.prop('innerWidth', value) || this.prop('clientWidth', value);
   }
 
   scrollHeight(value) {
@@ -796,13 +838,13 @@ export class Query {
   }
 
   insertBefore(selector) {
-    this.chain(selector).each((el) => {
+    return this.chain(selector).each((el) => {
       this.insertContent(el, this.selector, 'beforebegin');
     });
   }
 
   insertAfter(selector) {
-    this.chain(selector).each((el) => {
+    return this.chain(selector).each((el) => {
       this.insertContent(el, this.selector, 'afterend');
     });
   }
@@ -817,13 +859,16 @@ export class Query {
 
   naturalWidth() {
     const widths = this.map((el) => {
-      const $clone = $(el).clone().insertAfter(el);
-      $clone.css({
-        position: 'absolute',
-        display: 'block',
-        transform: 'translate(-9999px, -9999px)',
-        zIndex: '-1',
-      });
+      const $clone = $(el).clone();
+      $clone
+        .insertAfter(el)
+        .css({
+          position: 'absolute',
+          display: 'block',
+          transform: 'translate(-9999px, -9999px)',
+          zIndex: '-1',
+        })
+      ;
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -832,19 +877,22 @@ export class Query {
   }
 
   naturalHeight() {
-    const widths = this.map((el) => {
-      const $clone = $(el).clone().insertAfter(el);
-      $clone.css({
-        position: 'absolute',
-        display: 'block',
-        transform: 'translate(-9999px, -9999px)',
-        zIndex: '-1',
-      });
+    const height = this.map((el) => {
+      const $clone = $(el).clone();
+      $clone
+        .insertAfter(el)
+        .css({
+          position: 'absolute',
+          display: 'block',
+          transform: 'translate(-9999px, -9999px)',
+          zIndex: '-1',
+        })
+      ;
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
     });
-    return widths.length > 1 ? widths : widths[0];
+    return height.length > 1 ? height : height[0];
   }
 
   // offsetParent does not return the true offset parent
@@ -904,7 +952,7 @@ export class Query {
 
   // special helper for SUI components
   getComponent() {
-    const tpls = this.map(el => el.tpl).filter(Boolean);
-    return tpls.length > 1 ? tpls : tpls[0];
+    const components = this.map(el => el.component).filter(Boolean);
+    return components.length > 1 ? components : components[0];
   }
 }

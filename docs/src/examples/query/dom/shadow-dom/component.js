@@ -1,9 +1,9 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const template = await getText('./component.html');
 const css = await getText('./component.css');
 
-const TestElement = createComponent({
+const TestElement = defineComponent({
   tagName: 'test-element',
   template,
   css,

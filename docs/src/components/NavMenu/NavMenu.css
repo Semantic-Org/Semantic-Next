@@ -26,8 +26,8 @@
   --nav-menu-title-hover-color: var(--white);
   --nav-menu-title-active-color: var(--white);
 
-  --nav-menu-dropdown-icon-opacity: 0.3;
-  --nav-menu-dropdown-icon-font-size: 12px;
+  --nav-menu-nav-icon-icon-opacity: 0.3;
+  --nav-menu-nav-icon-icon-font-size: 12px;
 
   --nav-menu-content-indent-distance: 0.5rem;
   --nav-menu-content-space-after: var(--compact-spacing);
@@ -79,9 +79,9 @@ a {
     font-size: var(--nav-menu-description-font-size);
   }
 
-  .dropdown {
-    opacity: var(--nav-menu-dropdown-icon-opacity);
-    font-size: var(--nav-menu-dropdown-icon-font-size);
+  .nav-icon {
+    opacity: var(--nav-menu-nav-icon-icon-opacity);
+    font-size: var(--nav-menu-nav-icon-icon-font-size);
     transition: transform 0.3s ease;
     transform: rotate(0deg);
     width: auto;
@@ -166,10 +166,10 @@ a {
     .icon {
       opacity: var(--nav-menu-title-icon-active-opacity);
     }
-    .dropdown {
+    .nav-icon {
       opacity: 0.8;
     }
-    .dropdown[icon="chevron-down"] {
+    .nav-icon[icon="chevron-down"] {
       transform: rotate(180deg);
     }
   }

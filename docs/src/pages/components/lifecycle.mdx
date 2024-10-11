@@ -14,20 +14,20 @@ Each web component has lifecycle callbacks that help you define behavior at each
 
 Semantic UI components wrap native web components but provide additional callbacks that give you more granular control over how the component is defined.
 
-* **createInstance** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
+* **createComponent** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
 * **onCreated** - Callback after your component instance is initialized but before it is attached to the DOM
 * **onRendered** - Callback after your component is rendered to the DOM
 * **onDestroyed** - Callback after your component is removed from the DOM
 
 For a more detailed description of how callbacks are fired refer to the [callback event sequence diagram](/components/lifecycle#callback-sequence).
 
-> **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/templates) passed to `createComponent`.
+> **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/templates) passed to `defineComponent`.
 
 ## Lifecycle Callbacks
 
-### createInstance
+### createComponent
 
-`createInstance` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
+`createComponent` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
 
 For more information see the dedicated section to [component instances](/components/instances).
 
@@ -55,16 +55,40 @@ The `onThemeChanged` callback is a special callback that fires when a user swaps
 
 ## Callback Arguments
 
-Each callback receives a destructurable set of arguments that can be used to interact with the internals of the component
+### Using Callback Arguments
+
+
+Each callback receives a destructurable set of arguments that can be used to interact with the internals of the component. This allows you to pull into any function scope necessary values without managing imports or the `this` context.
+
+These are accessible from all lifecycle callbacks, as well as inside event listeners and keybindings.
+
+```javascript
+const onCreated = ({isServer, darkMode, self}) {
+  if(!isServer && isDarkMode) {
+    self.setDarkMode();
+  }
+};
+```
+
+You can use these to do things like [query the DOM](/components/dom), setting up [custom reactivity](/components/reactivity#exposing-reactivity) and much more.
+
+### Standard Arguments
+
+The following parameters are destructurable from all callbacks.
+
+> For information on `self` aliases see [self aliases](/components/instances#self-aliases).
 
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|
 | el                | the DOM element of the web component                  |
-| tpl               | the template instance from createInstance             |
+| self              | the template instance from createComponent             |
+| tpl               | alias for self                                        |
+| component         | alias for self                                        |
 | $                 | allows you to query the shadow dom of the component   |
 | $$                | allows querying deep nested content including slots   |
 | reaction          | a reactive context for computations                   |
 | reactiveVar       | a function to define a reactive variable              |
+| flush             | a function to immediately trigger queued reactions    |
 | afterFlush        | a callback after reactive computations are flushed    |
 | settings          | a read-write copy of the component's settings         |
 | state             | a reactive data store for internal state              |
@@ -84,6 +108,7 @@ Each callback receives a destructurable set of arguments that can be used to int
 | findChild         | helper to find a child template                       |
 | findChildren      | helper to find multiple child templates               |
 | darkMode          | boolean for if dark mode is active                    |
+
 
 ### Event Callbacks
 

@@ -269,17 +269,6 @@ describe('query', () => {
       expect($('span').index()).toBe(1);
     });
 
-    it('index should return the index of an element among its siblings matching a selector', () => {
-      const div = document.createElement('div');
-      const span = document.createElement('span');
-      const span2 = document.createElement('span');
-      span2.classList.add('test');
-      document.body.appendChild(div);
-      document.body.appendChild(span);
-      document.body.appendChild(span2);
-      expect($('span').index('.test')).toBe(1);
-    });
-
     it('index should return the index of the first element when no argument is passed', () => {
       const div = document.createElement('div');
       const span1 = document.createElement('span');
@@ -288,26 +277,6 @@ describe('query', () => {
       document.body.appendChild(span1);
       document.body.appendChild(span2);
       expect($('span').index()).toBe(1);
-    });
-
-    it('index should return the index of the element within the collection when a DOM element is passed', () => {
-      const div = document.createElement('div');
-      const span1 = document.createElement('span');
-      const span2 = document.createElement('span');
-      document.body.appendChild(div);
-      document.body.appendChild(span1);
-      document.body.appendChild(span2);
-      expect($('span').index(span2)).toBe(1);
-    });
-
-    it('index should return the index of the element within the collection when a Query object is passed', () => {
-      const div = document.createElement('div');
-      const span1 = document.createElement('span');
-      const span2 = document.createElement('span');
-      document.body.appendChild(div);
-      document.body.appendChild(span1);
-      document.body.appendChild(span2);
-      expect($('span').index($('span').eq(1))).toBe(1);
     });
 
     it('index should return -1 when the element is not found within the collection', () => {
@@ -324,6 +293,40 @@ describe('query', () => {
       document.body.appendChild(div);
       document.body.appendChild(span);
       expect($('span').index('.non-existent')).toBe(-1);
+    });
+  });
+
+  describe('indexOf', () => {
+
+    it('index should return the index of an element among its siblings matching a selector', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      const span2 = document.createElement('span');
+      span2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(span);
+      document.body.appendChild(span2);
+      expect($('span').indexOf('.test')).toBe(1);
+    });
+
+    it('index should return the index of the element within the collection when a DOM element is passed', () => {
+      const div = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span1);
+      document.body.appendChild(span2);
+      expect($('span').indexOf(span2)).toBe(1);
+    });
+
+    it('index should return the index of the element within the collection when a Query object is passed', () => {
+      const div = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      document.body.appendChild(div);
+      document.body.appendChild(span1);
+      document.body.appendChild(span2);
+      expect($('span').indexOf($('span').eq(1))).toBe(1);
     });
   });
 

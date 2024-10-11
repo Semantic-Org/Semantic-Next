@@ -1,17 +1,17 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { range } from '@semantic-ui/utils';
 
 import template from './events.html?raw';
 
-const createInstance = ({ tpl, $ }) => {
+const createComponent = ({ self, $ }) => {
   return {
     number: new ReactiveVar(6),
     getRange() {
-      if (!Number.isFinite(+tpl.number.value)) {
+      if (!Number.isFinite(+self.number.value)) {
         return [];
       }
-      return range(tpl.number.value);
+      return range(self.number.value);
     },
 
     persons: new ReactiveVar([
@@ -26,47 +26,47 @@ const createInstance = ({ tpl, $ }) => {
     addedCount: 0,
     getPerson() {
       let person = {
-        ...tpl.newPerson,
+        ...self.newPerson,
       };
-      if (tpl.addedCount > 0) {
-        person._id = `${person._id}${tpl.addedCount}`;
-        person.name = `${person.name} #${tpl.addedCount}`;
+      if (self.addedCount > 0) {
+        person._id = `${person._id}${self.addedCount}`;
+        person.name = `${person.name} #${self.addedCount}`;
       }
-      tpl.addedCount++;
+      self.addedCount++;
       return person;
     },
   };
 };
 
 const events = {
-  'input input[type="text"]'({ event, tpl, $ }) {
-    tpl.number.value = $(this).value();
+  'input input[type="text"]'({ event, self, $ }) {
+    self.number.value = $(this).value();
   },
-  'click .set'({ event, tpl, $ }) {
-    tpl.number.value = 5;
+  'click .set'({ event, self, $ }) {
+    self.number.value = 5;
     $('input').value(5);
   },
-  'click .add.end'({ event, tpl }) {
-    tpl.persons.push(tpl.getPerson());
+  'click .add.end'({ event, self }) {
+    self.persons.push(self.getPerson());
   },
-  'click .add.front'({ event, tpl }) {
-    tpl.persons.unshift(tpl.getPerson());
+  'click .add.front'({ event, self }) {
+    self.persons.unshift(self.getPerson());
   },
-  'click .replace.second'({ event, tpl }) {
-    tpl.persons.setIndex(1, tpl.getPerson());
+  'click .replace.second'({ event, self }) {
+    self.persons.setIndex(1, self.getPerson());
   },
-  'click .remove.front'({ event, tpl }) {
-    tpl.persons.removeIndex(0);
+  'click .remove.front'({ event, self }) {
+    self.persons.removeIndex(0);
   },
-  'click .remove.end'({ event, tpl }) {
-    tpl.persons.splice(-1);
+  'click .remove.end'({ event, self }) {
+    self.persons.splice(-1);
   },
 };
 
-const eventsTab = createComponent({
+const eventsTab = defineComponent({
   templateName: 'events',
   template,
-  createInstance,
+  createComponent,
   events,
 });
 

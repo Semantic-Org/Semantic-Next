@@ -1,4 +1,4 @@
-import { createComponent, getText } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -14,7 +14,7 @@ const state = {
   hoveredColor: '',
 };
 
-const createInstance = ({tpl, settings, $, dispatchEvent}) => ({
+const createComponent = ({self, settings, $, dispatchEvent}) => ({
   selectColor(color) {
     settings.color = color;
     dispatchEvent('color-selected', { color });
@@ -23,9 +23,9 @@ const createInstance = ({tpl, settings, $, dispatchEvent}) => ({
 
 const events = {
 
-  'click .option': function({ $, tpl }) {
+  'click .option': function({ $, self }) {
     const color = $(this).computedStyle('background-color');
-    tpl.selectColor(color);
+    self.selectColor(color);
   },
 
   'mouseover, mouseleave .option'({event, data, state}) {
@@ -36,9 +36,9 @@ const events = {
     state.hoveredColor.set(color);
   },
 
-  'click ui-button'({$, tpl}) {
+  'click ui-button'({$, self}) {
     const color = $('.custom-color').val();
-    tpl.selectColor(color);
+    self.selectColor(color);
   },
 
   'input .custom-color'({event, state }) {
@@ -47,12 +47,12 @@ const events = {
 
 };
 
-createComponent({
+defineComponent({
   tagName: 'advanced-color-picker',
   events,
   template,
   css,
   settings,
   state,
-  createInstance
+  createComponent
 });

@@ -1,4 +1,4 @@
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -77,28 +77,42 @@ const settings = {
 
 const state = {
   activeFile: undefined,
+  mobileView: 'code',
   resizing: true,
   displayMode: 'desktop'
 };
 
-const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
+const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
   initialize() {
     state.activeFile.set(tpl.getFirstFile()?.filename);
   },
+  mobileMenu: [
+    { label: 'Code', value: 'code' },
+    { label: 'Preview', value: 'preview' },
+  ],
   initializePanels() {
     $('ui-panel').settings({
       getNaturalSize: tpl.getNaturalPanelSize
     });
   },
   getClassMap() {
-    return {
+    const classMap = {
       resizing: state.resizing.get(),
     };
+    const mobileView = state.mobileView.get();
+    const displayMode = state.displayMode.get();
+    if(displayMode == 'mobile') {
+      classMap[`mobile-${mobileView}`] = true;
+    }
+    return classMap;
   },
   getStyle() {
     if(settings.maxHeight > 0) {
       return `height: ${settings.maxHeight}px;`;
     }
+  },
+  canShowButtons() {
+    return !settings.inline && state.displayMode.get() !== 'mobile';
   },
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding
@@ -139,17 +153,31 @@ const createInstance = ({afterFlush, tpl, state, settings, $, $$}) => ({
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: settings.useTabs
+      tabs: tpl.shouldUseTabs()
     };
-    classes[settings.inlineDirection] = true;
+    // defer to preference unless its tablet
+    if(state.displayMode.value == 'tablet') {
+      classes.vertical = true;
+    }
+    else {
+      classes[settings.inlineDirection] = true;
+    }
     return classes;
   },
-  getTabDirection() {
-    if(settings.inline) {
-      return settings.inlineDirection;
+  shouldUseTabs() {
+    const displayMode = state.displayMode.get();
+    // panels is only an option if on computer
+    if(displayMode == 'computer') {
+      return settings.useTabs;
     }
+    return true;
+  },
+  getTabDirection() {
     if(state.displayMode.value == 'tablet') {
       return 'vertical';
+    }
+    if(settings.inline) {
+      return settings.inlineDirection;
     }
     return 'horizontal';
   },
@@ -304,6 +332,9 @@ const events = {
   'change ui-menu.files'({state, data}) {
     state.activeFile.set(data.value);
   },
+  'change ui-menu.mobile'({state, data}) {
+    state.mobileView.set(data.value);
+  },
   'click ui-button.tabs'({tpl}) {
     tpl.toggleTabs();
   },
@@ -315,12 +346,12 @@ const events = {
   },
 };
 
-const CodePlayground = createComponent({
+const CodePlayground = defineComponent({
   tagName: 'code-playground',
   delegatesFocus: true,
   template,
   css,
-  createInstance,
+  createComponent,
   settings,
   onCreated,
   onRendered,

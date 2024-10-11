@@ -1,11 +1,11 @@
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-import { createComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createInstance = ({ tpl, $, reaction, findParent }) => ({
+const createComponent = ({ self, $, reaction, findParent }) => ({
   allCompleted: new ReactiveVar(false),
 
   getTodoList() {
@@ -13,19 +13,19 @@ const createInstance = ({ tpl, $, reaction, findParent }) => ({
   },
 
   getTodos() {
-    return tpl.getTodoList().todos;
+    return self.getTodoList().todos;
   },
 
   completeAll() {
-    tpl.getTodos().setArrayProperty('completed', true);
+    self.getTodos().setArrayProperty('completed', true);
   },
 
   completeNone() {
-    tpl.getTodos().setArrayProperty('completed', false);
+    self.getTodos().setArrayProperty('completed', false);
   },
 
   addTodo(text) {
-    tpl.getTodos().push({
+    self.getTodos().push({
       _id: text,
       text: text,
       completed: false,
@@ -34,45 +34,45 @@ const createInstance = ({ tpl, $, reaction, findParent }) => ({
 
   calculateAllCompleted() {
     reaction((comp) => {
-      const allCompleted = tpl.allCompleted.get();
+      const allCompleted = self.allCompleted.get();
       if (comp.firstRun) {
         return;
       }
       if (allCompleted) {
-        tpl.completeAll();
+        self.completeAll();
       }
       else {
-        tpl.completeNone();
+        self.completeNone();
       }
     });
   },
 });
 
 const events = {
-  'keydown input.new-todo'({ event, tpl, $, $$ }) {
+  'keydown input.new-todo'({ event, self, $, $$ }) {
     if (event.key === 'Enter') {
       const text = $(this).val();
       if (!text) {
         return;
       }
-      tpl.addTodo(text);
+      self.addTodo(text);
       $(this).val('');
       Reaction.afterFlush(() => {
-        tpl.getTodoList().scrollToBottom();
+        self.getTodoList().scrollToBottom();
       });
     }
   },
 };
 
-const onCreated = ({ tpl }) => {
-  tpl.calculateAllCompleted();
+const onCreated = ({ self }) => {
+  self.calculateAllCompleted();
 };
 
-const todoHeader = createComponent({
+const todoHeader = defineComponent({
   templateName: 'todoHeader',
   template,
   css,
-  createInstance,
+  createComponent,
   onCreated,
   events,
 });

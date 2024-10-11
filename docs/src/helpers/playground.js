@@ -137,6 +137,7 @@ export const getIndexHTMLBefore = function(type) {
     window.addEventListener('blur', function() {
       dispatchCustomEvent('iframeblur');
     }, true);
+    document.addEventListener('touchstart', {});
   </script>
   <!-- This defines the component tag and makes it available on your page !-->
   ${getScriptCode()}
@@ -171,8 +172,8 @@ export const hideComponentBoilerplate = (code) => {
   // Regex to match everything up to and including the last line with getText
   const getTextRegex = /^[\s\S]*(?:getText\([^)]*\)[;\s]*$)/m;
 
-  // Regex to match from createComponent to the end of the file
-  const createComponentRegex = /^createComponent[\s\S]*$/m;
+  // Regex to match from defineComponent to the end of the file
+  const defineComponentRegex = /^defineComponent[\s\S]*$/m;
 
   // Apply the first fold
   let foldedCode = code.replace(getTextRegex, (match) => {
@@ -180,7 +181,7 @@ export const hideComponentBoilerplate = (code) => {
   });
 
   // Apply the second fold
-  foldedCode = foldedCode.replace(createComponentRegex, (match) => {
+  foldedCode = foldedCode.replace(defineComponentRegex, (match) => {
     return `// click ellipsus to show exports ${foldMarkerStart}\n\n${match}\n${foldMarkerEnd}\n`;
   });
 
@@ -234,7 +235,7 @@ export const getExampleFiles = async(example, allExampleFiles) => {
       else if(inArray(fileName, ['component.js', `${exampleID}.js`])) {
         const fileContent = await file();
         let fileText = fileContent.default;
-        hasComponent = fileText.search('createComponent') > -1;
+        hasComponent = fileText.search('defineComponent') > -1;
         if(example.fold !== false) {
           fileText = hideComponentBoilerplate(fileText);
         }

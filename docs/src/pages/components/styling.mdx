@@ -7,14 +7,14 @@ description: Creating a new component
 
 ## CSS
 
-Components defined with `createComponent` can include `css` that applies only to the component or `lightCSS` that should apply globally to the page.
+Components defined with `defineComponent` can include `css` that applies only to the component or `pageCSS` that should apply globally to the page.
 
 
 ### Component CSS
 
 `css` defines CSS that will be attached to your web component. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
 
-The css is scoped specifically to the component.
+`css` is scoped to the component and will not affect nested web components or the page.
 
 ```javascript
 const css = `
@@ -28,12 +28,16 @@ const css = `
 > **Shadow DOM** - Web component use a special system of encapsulation called the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) which allows the web component to render in isolation from other parts of the page. This means that component CSS will not affect the rest of your app and your components will not inherit styles from the page besides [css variables](#using-css-variables).
 
 
-### Light CSS
+### Page CSS
 
-Light CSS is CSS scoped to the page. This can be used to assign a single stylesheet globally when your component is defined. This can be used to apply styles to your component based on where it is rendered and work around the necessary limitations of scoped css.
+Page CSS is CSS scoped to the page. This can be used to assign styles globally when your component is defined.
+
+This is useful to apply styles to your component based on where it is rendered, or work  around the necessary limitations of scoped css.
+
+> *Layout Shift* - Be cautious using page css to define rules as they will not be present during server side rendering and can cause layout shift in your component.
 
 ```javascript
-const lightCSS = `
+const pageCSS = `
   body.dark my-component {
     color: #FFFFFF;
   }
@@ -63,7 +67,7 @@ const css = `
 
 ### onThemeChanged Callback
 
-When definining your component with `createComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
+When definining your component with `defineComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
 
 ```javascript
 const onThemeChanged = ({darkMode}) => {

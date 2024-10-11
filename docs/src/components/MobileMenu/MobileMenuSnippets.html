@@ -1,0 +1,52 @@
+{{#snippet navMenu}}
+  {{#if navMenu.header}}
+    <div class="header">{{navMenu.header}}</div>
+  {{/if}}
+  <nav-menu
+    menu={{navMenu.menu}}
+    activeURL={{activeURL}}
+    expandAll=true
+    navigationIcon="right-chevron"
+  ></nav-menu>
+  {{#if hasAny previousMenu.menu}}
+    <div class="return">
+      <ui-icon icon="left-chevron"></ui-icon>
+      Return to main menu
+    </div>
+  {{/if}}
+{{/snippet}}
+
+<dialog part="dialog">
+  <div class="layer">
+    <div class="container">
+      <div class="previous content">
+        {{>template
+          name='navMenu'
+          reactiveData = {
+            navMenu: previousMenu,
+            activeURL: activeURL
+          }
+        }}
+      </div>
+      <div class="visible content">
+        {{>template
+          name='navMenu'
+          reactiveData = {
+            navMenu: activeMenu,
+            activeURL: activeURL
+            previousMenu: previousMenu
+          }
+        }}
+      </div>
+      <div class="next content">
+        {{>template
+          name='navMenu'
+          reactiveData = {
+            navMenu: nextMenu,
+            activeURL: activeURL
+          }
+        }}
+      </div>
+    </div>
+  </div>
+</dialog>
