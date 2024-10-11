@@ -9,7 +9,28 @@ class TemplateCompiler {
     this.snippets = {};
   }
 
-  static tagRegExp = {
+  static singleBracketRegExp = {
+    IF: /^{\s*#if\s+/,
+    ELSEIF: /^{\s*else\s*if\s+/,
+    ELSE: /^{\s*else\s*/,
+    EACH: /^{\s*#each\s+/,
+    SNIPPET: /^{\s*#snippet\s+/,
+    CLOSE_IF: /^{\s*\/(if)\s*/,
+    CLOSE_EACH: /^{\s*\/(each)\s*/,
+    CLOSE_SNIPPET: /^{\s*\/(snippet)\s*/,
+    SLOT: /^{>\s*slot\s*/,
+    TEMPLATE: /^{>\s*/,
+    HTML_EXPRESSION: /^{\s*#html\s*/,
+    EXPRESSION: /^{\s*/,
+  };
+
+  static singleBracketParserRegExp = {
+    NEXT_TAG: /(\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_END: /\}/,
+    TAG_CLOSE: /\>/,
+  };
+
+  static doubleBracketRegExp = {
     IF: /^{{\s*#if\s+/,
     ELSEIF: /^{{\s*else\s*if\s+/,
     ELSE: /^{{\s*else\s*/,
@@ -24,6 +45,12 @@ class TemplateCompiler {
     EXPRESSION: /^{{\s*/,
   };
 
+  static doubleBracketParserRegExp = {
+    NEXT_TAG: /(\{\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_END: /\}\}/,
+    TAG_CLOSE: /\>/,
+  };
+
   static htmlRegExp = {
     SVG_OPEN: /^\<svg\s*/i,
     SVG_CLOSE: /^\<\/svg\s*/i,
@@ -31,12 +58,6 @@ class TemplateCompiler {
 
   static preprocessRegExp = {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+-\w+)([^>]*)\/>/g,
-  };
-
-  static parserRegExp = {
-    NEXT_TAG: /(\{\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
-    EXPRESSION_END: /\}\}/, // end of expression }} or }
-    TAG_CLOSE: /\>/,
   };
 
   static templateRegExp = {
@@ -54,15 +75,27 @@ class TemplateCompiler {
   */
   compile(templateString = this.templateString) {
     templateString = TemplateCompiler.preprocessTemplate(templateString);
-
     const scanner = new StringScanner(templateString);
 
+    console.log(templateString);
     if (!isString(templateString)) {
       scanner.fatal('Template is not a string', templateString);
     }
 
     // compile regexp globally once
-    const { tagRegExp, htmlRegExp, parserRegExp } = TemplateCompiler;
+    const { htmlRegExp } = TemplateCompiler;
+
+    // support either {{}} or {} syntax but only one across a file
+    const syntax = TemplateCompiler.detectSyntax(templateString);
+    const tagRegExp = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketRegExp
+      : TemplateCompiler.singleBracketRegExp
+    ;
+    const parserRegExp = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketParserRegExp
+      : TemplateCompiler.singleBracketParserRegExp
+    ;
+    console.log(syntax);
 
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
@@ -99,7 +132,7 @@ class TemplateCompiler {
 
       const conditionTarget = last(conditionStack);
       const contentTarget = contentBranch?.content || ast;
-
+      console.log(tag);
       if (tag) {
         let newNode = {
           type: tag.type.toLowerCase(),
@@ -290,6 +323,7 @@ class TemplateCompiler {
       else {
         // advanced to next expression or open svg tag
         // this advances the scanner adding html
+        console.log(parserRegExp.NEXT_TAG);
         const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
         if (html) {
           const htmlNode = { type: 'html', html };
@@ -297,7 +331,7 @@ class TemplateCompiler {
         }
       }
     }
-
+    console.log(ast);
     return TemplateCompiler.optimizeAST(ast);
   }
 
@@ -355,6 +389,16 @@ class TemplateCompiler {
     }
     // if this isnt an object we want to return the string value which may be an expression
     return isObject ? obj : objectString.trim();
+  }
+
+  static detectSyntax(templateString = '') {
+    // look for first expression
+    const doubleIndex = templateString.search(/{{\s*/);
+    const singleIndex = templateString.search(/{[^{]\s*/);
+    if(doubleIndex !== -1 && doubleIndex < singleIndex) {
+      return 'doubleBracket';
+    }
+    return 'singleBracket';
   }
 
   static preprocessTemplate(templateString = '') {
