@@ -2,8 +2,15 @@ import { defineConfig } from 'astro/config';
 import fs from 'fs';
 import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
-import expressiveCode from 'astro-expressive-code';
+import astroExpressiveCode from 'astro-expressive-code';
 import starlight from '@astrojs/starlight';
+
+
+const sui = {
+  name: 'sui',
+  scopeName: 'sui',
+  ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8'))
+};
 
 // https://astro.build/config
 export default defineConfig({
@@ -34,7 +41,27 @@ export default defineConfig({
     force: true,
     exclude: ['playground-elements']
   },
-  integrations: [lit(), expressiveCode(), mdx(), starlight({
-    title: 'Semantic UI'
-  })]
+  integrations: [
+    lit(),
+    astroExpressiveCode({
+      shiki: {
+        langs: [ sui ],
+      },
+    }),
+    mdx({
+      expressiveCode: {
+        shiki: {
+          langs: [ sui ],
+        },
+      },
+    }),
+    starlight({
+      title: 'Semantic UI',
+      expressiveCode: {
+        shiki: {
+          langs: [ sui ],
+        },
+      },
+    })
+  ]
 });
