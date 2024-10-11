@@ -34,8 +34,8 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          <p>{{{ '<b>John</b>' }}}</p>
-          <p>{{{ '<img src="img.png">' }}}</p>
+          <p>{{#html '<b>John</b>' }}</p>
+          <p>{{#html '<img src="img.png">' }}</p>
         </div>
       `;
       const ast = compiler.compile(template);

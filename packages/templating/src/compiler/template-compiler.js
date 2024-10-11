@@ -77,7 +77,6 @@ class TemplateCompiler {
     templateString = TemplateCompiler.preprocessTemplate(templateString);
     const scanner = new StringScanner(templateString);
 
-    console.log(templateString);
     if (!isString(templateString)) {
       scanner.fatal('Template is not a string', templateString);
     }
@@ -95,7 +94,6 @@ class TemplateCompiler {
       ? TemplateCompiler.doubleBracketParserRegExp
       : TemplateCompiler.singleBracketParserRegExp
     ;
-    console.log(syntax);
 
     const parseTag = (scanner) => {
       for (let type in tagRegExp) {
@@ -132,7 +130,7 @@ class TemplateCompiler {
 
       const conditionTarget = last(conditionStack);
       const contentTarget = contentBranch?.content || ast;
-      console.log(tag);
+
       if (tag) {
         let newNode = {
           type: tag.type.toLowerCase(),
@@ -323,7 +321,6 @@ class TemplateCompiler {
       else {
         // advanced to next expression or open svg tag
         // this advances the scanner adding html
-        console.log(parserRegExp.NEXT_TAG);
         const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
         if (html) {
           const htmlNode = { type: 'html', html };
@@ -331,7 +328,6 @@ class TemplateCompiler {
         }
       }
     }
-    console.log(ast);
     return TemplateCompiler.optimizeAST(ast);
   }
 
