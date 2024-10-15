@@ -3,6 +3,7 @@ import fs from 'fs';
 import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
+import starlight from '@astrojs/starlight';
 
 // Load the custom language definition
 const sui = {
@@ -50,10 +51,9 @@ export default defineConfig({
         langs: [sui],
       },
     }),
-    mdx({
-      shikiConfig: {
-        langs: [sui],
-      },
-    }),
+    mdx({}),
+    starlight({
+      title: 'Semantic UI'
+    })
   ]
 });

@@ -80,9 +80,10 @@ const state = {
   displayMode: 'desktop'
 };
 
-const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
+const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
   initialize() {
-    state.activeFile.set(tpl.getFirstFile()?.filename);
+    console.log(self);
+    state.activeFile.set(self.getFirstFile()?.filename);
   },
   mobileMenu: [
     { label: 'Code', value: 'code' },
@@ -90,7 +91,7 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
   ],
   initializePanels() {
     $('ui-panel').settings({
-      getNaturalSize: tpl.getNaturalPanelSize
+      getNaturalSize: self.getNaturalPanelSize
     });
   },
   getClassMap() {
@@ -151,7 +152,7 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: tpl.shouldUseTabs()
+      tabs: self.shouldUseTabs()
     };
     // defer to preference unless its tablet
     if(state.displayMode.value == 'tablet') {
@@ -182,7 +183,7 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
   getFileArray() {
     let files = [];
     each(settings.files, (file, filename) => {
-      const fileData = tpl.getFile(file, filename);
+      const fileData = self.getFile(file, filename);
       files.push(fileData);
     });
     return sortBy(files, 'sortIndex');
@@ -192,10 +193,10 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
       _id: filename,
       filename,
       ...file,
-      scriptType: tpl.getScriptType(file.contentType),
-      panelIndex: tpl.getPanelIndex(filename),
-      sortIndex: tpl.getSort(filename),
-      label: tpl.getFileLabel(filename)
+      scriptType: self.getScriptType(file.contentType),
+      panelIndex: self.getPanelIndex(filename),
+      sortIndex: self.getSort(filename),
+      label: self.getFileLabel(filename)
     };
   },
   getPanelIndex(filename) {
@@ -212,7 +213,7 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
     return settings.panelGroupWidth[index];
   },
   getFileMenuItems({indexOnly = false } = {}) {
-    const menu = tpl.getFileArray().map(file => {
+    const menu = self.getFileArray().map(file => {
       if(file.generated && !settings.includeGeneratedInline) {
         return false;
       }
@@ -229,14 +230,14 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
     return menu;
   },
   getFirstFile() {
-    return firstMatch(tpl.getFileArray(), file => !file.generated && !file.hidden);
+    return firstMatch(self.getFileArray(), file => !file.generated && !file.hidden);
   },
   getSaveID(group, index) {
     return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
   },
   getPanels() {
     let panels = [[], []];
-    let files = tpl.getFileArray().filter(file => !file.hidden);
+    let files = self.getFileArray().filter(file => !file.hidden);
     each(files, file => {
       if(file.panelIndex >= 0) {
         panels[file.panelIndex].push({
@@ -266,7 +267,7 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
     localStorage.setItem('codeplayground-tabs', storedValue);
     settings.useTabs = useTabs;
     afterFlush(() => {
-      tpl.initializePanels();
+      self.initializePanels();
     });
   },
 
@@ -291,37 +292,37 @@ const createComponent = ({afterFlush, tpl, state, settings, $, $$}) => ({
 
 });
 
-const onCreated = ({tpl, attachEvent}) => {
+const onCreated = ({self, attachEvent}) => {
   // resize layout for tablet/mobile
   attachEvent('window', 'resize', () => {
-    requestAnimationFrame(tpl.setDisplayMode);
+    requestAnimationFrame(self.setDisplayMode);
   });
-  tpl.setDisplayMode();
+  self.setDisplayMode();
 };
 
-const onRendered = ({ tpl, state }) => {
+const onRendered = ({ self, state }) => {
   addSearch(CodeMirror);
   requestIdleCallback(() => {
-    tpl.initializePanels();
+    self.initializePanels();
     state.resizing.set(false);
   });
 };
 
-const onThemeChanged = ({tpl}) => {
-  tpl.reloadPreview();
+const onThemeChanged = ({self}) => {
+  self.reloadPreview();
 };
 
 const keys = {
   // select file with keyboard
-  'ctrl + 1': ({tpl}) => tpl.selectFile(1),
-  'ctrl + 2': ({tpl}) => tpl.selectFile(2),
-  'ctrl + 3': ({tpl}) => tpl.selectFile(3),
-  'ctrl + 4': ({tpl}) => tpl.selectFile(4),
-  'ctrl + 5': ({tpl}) => tpl.selectFile(5),
-  'ctrl + 6': ({tpl}) => tpl.selectFile(6),
-  'ctrl + 7': ({tpl}) => tpl.selectFile(7),
-  'ctrl + 8': ({tpl}) => tpl.selectFile(8),
-  'ctrl + 9': ({tpl}) => tpl.selectFile(9),
+  'ctrl + 1': ({self}) => self.selectFile(1),
+  'ctrl + 2': ({self}) => self.selectFile(2),
+  'ctrl + 3': ({self}) => self.selectFile(3),
+  'ctrl + 4': ({self}) => self.selectFile(4),
+  'ctrl + 5': ({self}) => self.selectFile(5),
+  'ctrl + 6': ({self}) => self.selectFile(6),
+  'ctrl + 7': ({self}) => self.selectFile(7),
+  'ctrl + 8': ({self}) => self.selectFile(8),
+  'ctrl + 9': ({self}) => self.selectFile(9),
 };
 
 const events = {
@@ -331,8 +332,8 @@ const events = {
   'change ui-menu.mobile'({state, data}) {
     state.mobileView.set(data.value);
   },
-  'click ui-button.tabs'({tpl}) {
-    tpl.toggleTabs();
+  'click ui-button.tabs'({self}) {
+    self.toggleTabs();
   },
   'resizeStart ui-panel'({state}) {
     state.resizing.set(true);

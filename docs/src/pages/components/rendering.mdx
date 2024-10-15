@@ -34,7 +34,7 @@ Your template defines how your component should render.
 The templates data context is a combination of several data sources that are looked up in sequence.
 
 For instance our template might include something like
-```html
+```sui
 Greetings, {name}
 ```
 
@@ -60,7 +60,7 @@ This will check for `name` in each of these locations and then return the first 
 
 In this example `formatDate` is used to format the display of a date set in the components [state](#state).
 
-```html
+```sui
 {formatDate currentTime 'h:mm:ss a'}
 ```
 
@@ -93,7 +93,7 @@ defineComponent({
 Settings specified for a component are defaults which can be overridden by anyone using your component by passing in different data through the DOM.
 
 #### HTML Attributes
-```html
+```sui
 <name-card name="Sally"></name-card>
 ```
 
@@ -115,7 +115,7 @@ You can also manually set the function on the corresponding DOM element.
 
 State is a [reactive data store](/reactivity) that uses Signals to recompute references to a value when its underlying vaalue is modified.
 
-### Defining State
+### Declaring State
 
 State is designed you to store internal reactive values that can be used to re-render portions of a template when a value changes, or to rerun reactive computations when underlying reactive data changes.
 
@@ -133,31 +133,27 @@ defineComponent({
 
 ### Using State
 
-When you declare your components state it creates an internal copy assigning your defaults to `ReactiveVar` values for each instance of a component.
+Each component will have its own copy of `state` initialized with its default value set based off your configuration.
 
-
-```javascript
-// underlying value passed to callbacks for state = { name: 'Jack' };
-state = {
-  name: ReactiveVar('Jack')
-}
-```
 
 #### Inside a Component
-When using this value internally you can grab the value from the callback arguments
-```javascript
+You can use state inside a component by destructuring `state` from any [lifecycle events](/components/lifecycle#callback-arguments).
+
+```javascript title="component.js"
 
 const createComponent = ({self, state}) => ({
   getGreeting() {
+    // state is { name: ReactiveVar('Jack') }
     return `Hello ${state.name.value}`
   }
 });
 ```
 
-#### In Templates
-When accessing this value in a template you can access it without calling `value` or `get()`.
-```
-Hello {name}}
+#### Using In Templates
+`state` like other reactive values can be accessed by name directly in templates without having to use `value` or `get`
+
+```sui title="component.html"
+Hello {name}
 ```
 
 
@@ -165,7 +161,7 @@ Hello {name}}
 
 
 ### Defining Functionality
-Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/lifecycle/events) as `self` to invoke methods or access properties.
+Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/components/lifecycle) as `self` to invoke methods or access properties.
 
 ```javascript
 const createComponent = ({ state }) => ({
