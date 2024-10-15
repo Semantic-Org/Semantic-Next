@@ -3,49 +3,49 @@
     <tbody>
       <tr>
         <td>Name</td>
-        <td>{{getName}}</td>
+        <td>{getName}</td>
       </tr>
       <tr>
         <td>Age</td>
         <td>
-          {{age}}
+          {age}
         </td>
       </tr>
       <tr>
         <td>Age Range</td>
         <td>
-          {{#if greaterThan age 65}}
+          {#if greaterThan age 65}
             Senior
-          {{else if greaterThan age 18}}
+          {else if greaterThan age 18}
             Adult
-          {{else if greaterThan age 14}}
+          {else if greaterThan age 14}
             Adolescent
-          {{else if greaterThan age 5}}
+          {else if greaterThan age 5}
             Child
-          {{else}}
+          {else}
             Infant
-          {{/if}}
+          {/if}
         </td>
       </tr>
       <tr>
         <td>Job</td>
-        <td>{{job}}</td>
+        <td>{job}</td>
       </tr>
       <tr>
         <td>Birthday</td>
-        <td>{{birthday.month}} {{birthday.day}}</td>
+        <td>{birthday.month} {birthday.day}</td>
       </tr>
       <tr>
         <td>Married</td>
-        <td>{{maybe married 'Yes' 'No'}}</td>
+        <td>{maybe married 'Yes' 'No'}</td>
       </tr>
       <tr>
         <td>Siblings</td>
         <td>
           <ul>
-            {{#each sibling in siblings}}
-              <li>{{sibling}}</li>
-            {{/each}}
+            {#each sibling in siblings}
+              <li>{sibling}</li>
+            {/each}
           </ul>
         </td>
       </tr>
