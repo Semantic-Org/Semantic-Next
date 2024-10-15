@@ -16,15 +16,16 @@ Your components HTML structure is defined by **template** and a **data context**
 > **Comparing to React** - Instead of using a `render()` function to return `jsx` each component's  template provides the high level logic for explaining how html should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
 
 ### Templates
-Your template defines how your component should render.
+Your template defines how your component's html is rendered:
 
-* [conditionals](/templates/conditionals) to handle branching content using `if` `elseif` `else`
-* [looping structures](/templates/looping) to iterate through values using `each`
-* [reactive data](/templates/expressions) to display the current value of data inside html
-* [function calls](/templates/expressions) to pass data into functions and return their results
-* [subtemplates](/templates/subtemplates) to reference other components or parts of a component
-* [slots](/templates/slots) to allow users to place their own DOM content inside your component
-* [snippets](/templates/snippets) to allow for reusable html structures inside a component
+* [Conditionals](/templates/conditionals) - Branching structures like `if` `else if` and `else`
+* [Looping structures](/templates/loops) - Structures to iterate through data like arrays or objects
+* [Reactive data](/templates/expressions) - State stored with your component that should update the page when it updates
+* [Function calls](/templates/expressions) - Methods on your component that allow you to access content and perform tasks
+* [Subtemplates](/templates/subtemplates) - Reusable pieces of html organized as a separate file
+* [Snippets](/templates/subtemplates) - Reusable pieces of html included elsewhere in a template
+* [Slots](/templates/slots) - Locations where content can be placed inside your component
+* [Snippets](/templates/snippets) - reusable html structures inside a component
 
 
 > For more information on all the features of templates check our dedicated subsection [on templates](/templates).
@@ -40,11 +41,11 @@ Greetings, {name}
 
 This will check for `name` in each of these locations and then return the first available defined value.
 
-* **Global Helpers** - A global helper registered across templates called `name`
-* **Template Instance** - A value or function on your template instance called `name`
-* **Settings** - A value `name` passed in via html attribute or property
-* **State** - An internal reactive state called `name`
-* **Subtemplate Data** - Data passed in from a parent template called `name`
+* **[Global Helpers](#global-helpers)** - A global helper registered across templates called `name`
+* **[Component Instance](components/create#instance)** - A value or function on your component called `name`
+* **[Settings](#settings)** - A value `name` passed in via html attribute or property
+* **[State](#state)** - An internal reactive state called `name`
+* **[Subtemplate Data](/templates/subtemplates)** - Data passed in from a parent template called `name`
 > **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance you may initially have a value as a `property` on your component, then move it to `state` to make it reactive, then finally move it to `settings` to make it user overridable without having to modify the underlying template.
 
 
@@ -157,25 +158,24 @@ Hello {name}
 ```
 
 
-## Template Instance
-
+## Component Instance
 
 ### Defining Functionality
-Your template instance stores methods and properties that implement the functionality of your component. You can access your template instance directly from [lifecycle events](/components/lifecycle) as `self` to invoke methods or access properties.
+Your component instance stores methods and properties that implement the functionality of your component. These can be various locations where you might want to access functionality, like from other parts of the component, templates, or externally via the DOM.
 
-```javascript
-const createComponent = ({ state }) => ({
-  getCounter() {
-    return state.counter.get();
-  },
-  incrementCounter() {
-    state.counter.increment();
-  },
-});
+### Accessing in Templates
+
+Templates can access your component directly from its data context.
+
+```sui
+Counter is {{getCounter}}
 ```
 
+
 ### Accessing Internally
-You can access your template instancec as `self` from other callbacks to invoke functionality.
+You can access your template instance as `self`, `component,` or `tpl` from other callbacks to invoke functionality.
+
+> For more information see [lifecycle events](/components/lifecycle#callback-arguments).
 
 ```javascript
 const onRendered = ({ self }) => {

@@ -14,10 +14,11 @@ Each web component has lifecycle callbacks that help you define behavior at each
 
 Semantic UI components wrap native web components but provide additional callbacks that give you more granular control over how the component is defined.
 
-* **createComponent** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
-* **onCreated** - Callback after your component instance is initialized but before it is attached to the DOM
-* **onRendered** - Callback after your component is rendered to the DOM
-* **onDestroyed** - Callback after your component is removed from the DOM
+* **[createComponent](#createcomponent)** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
+* **[onCreated](#oncreated)** - Callback after your component instance is initialized but before it is attached to the DOM
+* **[onRendered](#onrendered)** - Callback after your component is rendered to the DOM
+* **[onDestroyed](#ondestroyed)** - Callback after your component is removed from the DOM
+* **[onThemeChanged](#onthemechanged)** - Callback when your components theme is updated
 
 For a more detailed description of how callbacks are fired refer to the [callback event sequence diagram](/components/lifecycle#callback-sequence).
 

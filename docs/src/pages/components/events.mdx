@@ -14,6 +14,8 @@ import lifecycleImage from '@images/lifecycle-diagram.png';
 
 Semantic components can include events by passing in an object mapping events to event handlers when creating your component. Events take the form of `eventName selector`, for instance `click .submit`.
 
+See below for [an example](#event-arguments) of how this works.
+
 > **Event Delegation** Event handlers are attached to the shadow root of your component using a pattern called event delegation where the component listens for the bubbled event. This means that even if you add or remove content that matches the selector after render the event will still fire if the selector matches.
 
 ```javascript
@@ -74,12 +76,6 @@ const events = {
 };
 ```
 
-### Event Binding Example
-
-In the following example events are attached to four separate buttons to control the size of the shape.
-
-<PlaygroundExample id="event-binding" direction="horizontal"></PlaygroundExample>
-
 
 ## Special Event Bindings
 
@@ -118,6 +114,23 @@ const events = {
   }
 };
 ```
+
+## Event Arguments
+
+In addition to the [standard arguments](/components/lifecycle) that are passed to all component callbacks, event handlers get access to a few extra arguments.
+
+| parameter         | use                                                   |
+|-------------------|-------------------------------------------------------|
+| el                | the dom element that dispatched the event             |
+| event             | the native event object                               |
+| data              | event.detail + data attributes on dom element         |
+| isDeep            | the event occurred on a nested web component or slot |
+
+
+In the following example events are attached to four separate buttons to control the size of the shape accessing methods using `self`.
+
+<PlaygroundExample id="event-binding" direction="horizontal"></PlaygroundExample>
+
 
 ## Event Data
 
@@ -284,16 +297,3 @@ const events = {
   }
 };
 ```
-
-## Event Handlers
-
-In addition to the [standard arguments](/components/lifecycle) that are passed to all component callbacks, event handlers get access to a few extra arguments.
-
-| parameter         | use                                                   |
-|-------------------|-------------------------------------------------------|
-| el                | the dom element that dispatched the event             |
-| event             | the native event object                               |
-| data              | event.detail + data attributes on dom element         |
-| isDeep            | the event occurred on a nested web coomponent or slot |
-
-
