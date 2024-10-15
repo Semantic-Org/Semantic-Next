@@ -362,9 +362,6 @@ class TemplateCompiler {
       }
     }
     const optimizedAST = TemplateCompiler.optimizeAST(ast);
-    if(optimizedAST[0]?.html == '<div class="playground ') {
-      console.log(ast[7].content[17]);
-    }
     return optimizedAST;
   }
 
