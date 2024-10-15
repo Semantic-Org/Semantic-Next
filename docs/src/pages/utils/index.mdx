@@ -1,3 +1,58 @@
 ---
 layout: '@layouts/Guide.astro'
+title: Introduction
+icon: package
+description: A comprehensive collection of utility functions for Semantic UI
 ---
+
+Semantic UI includes this standalone library to avoid external dependencies and to allow for performant and opinionated uses of common utils like `clone`  as well as some particular to the use of web components.
+
+
+## Getting Started
+
+### Installation
+
+The Utils library is part of the Semantic UI web components framework. If you're using the framework, these utilities are already available to you. If you want to use them standalone, you can import them directly:
+
+```javascript
+import { isString, clone, capitalize } from '@semantic-ui/utils';
+```
+
+### Usage Example
+
+Here's a quick example demonstrating some of the utility functions:
+
+```javascript
+import { isArray, capitalize, clone } from '@semantic-ui/utils';
+
+const myArray = [1, 2, 3];
+console.log(isArray(myArray)); // true
+
+const myString = "hello world";
+console.log(capitalize(myString)); // "Hello world"
+
+const myObject = { a: 1, b: { c: 2 } };
+const clonedObject = clone(myObject);
+console.log(clonedObject); // { a: 1, b: { c: 2 } }
+```
+
+### Util Categories
+
+The Utils library is organized into several categories:
+
+- **Types**: Functions for checking and manipulating data types.
+- **Arrays**: Utilities for working with arrays.
+- **Objects**: Helpers for object manipulation and traversal.
+- **Strings**: String formatting and manipulation functions.
+- **Regular Expressions**: Helpers for working with regular expressions.
+- **Looping**: Iteration utilities for arrays and objects.
+- **Equality**: Deep equality comparison functions.
+- **Cloning**: Deep cloning utilities.
+- **Crypto**: Cryptographic helpers like hashing functions.
+- **Errors**: Error handling and creation utilities.
+- **SSR**: Helpers for server-side rendering scenarios.
+
+
+### Further Reading
+
+For detailed information on each utility function, please refer to the specific category pages in this documentation.

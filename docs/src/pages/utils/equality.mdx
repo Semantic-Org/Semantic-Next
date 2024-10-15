@@ -1,0 +1,43 @@
+---
+layout: '@layouts/Guide.astro'
+title: Equality Utilities
+icon: equals
+description: API reference for equality comparison functions
+---
+
+The Equality utilities provide functions for comparing values and objects in JavaScript. These functions offer more comprehensive equality checks than the built-in equality operators, particularly for complex data structures.
+
+## Functions
+
+### isEqual
+
+```javascript
+function isEqual(a, b)
+```
+
+Performs a deep equality comparison between two values.
+
+> **Deep Comparison** This function performs a recursive comparison for objects and arrays, ensuring that nested structures are also checked for equality. It handles various edge cases, including `NaN` comparisons.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The first value to compare |
+| b    | any  | The second value to compare |
+
+#### Returns
+
+`boolean` - `true` if the values are deeply equal, `false` otherwise.
+
+#### Example
+
+```javascript
+import { isEqual } from '@semantic-ui/utils';
+
+console.log(isEqual({a: 1, b: {c: 2}}, {a: 1, b: {c: 2}})); // true
+console.log(isEqual([1, 2, 3], [1, 2, 3])); // true
+console.log(isEqual({a: 1, b: 2}, {b: 2, a: 1})); // true
+console.log(isEqual(NaN, NaN)); // true
+console.log(isEqual({a: 1, b: 2}, {a: 1, b: 3})); // false
+```

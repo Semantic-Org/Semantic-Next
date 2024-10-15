@@ -1,0 +1,52 @@
+---
+layout: '@layouts/Guide.astro'
+title: Error Utilities
+icon: alert-triangle
+description: API reference for error handling utility functions
+---
+
+The Error utilities provide functions for enhanced error handling and throwing in JavaScript.
+
+## Functions
+
+### fatal
+
+```javascript
+function fatal(message, { errorType = Error, metadata = {}, onError = null, removeStackLines = 1 } = {})
+```
+
+Throws an error with enhanced control over the error type, metadata, and stack trace.
+
+> **Asynchronous Error Throwing** This function uses `queueMicrotask` to throw the error asynchronously, allowing the current execution context to complete.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| message | string | The error message |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name             | Type     | Default | Description |
+|------------------|----------|---------|-------------|
+| errorType        | function | Error   | The type of error to throw |
+| metadata         | object   | {}      | Additional data to attach to the error |
+| onError          | function | null    | Callback to execute before throwing the error |
+| removeStackLines | number   | 1       | Number of stack trace lines to remove |
+
+#### Example
+
+```javascript
+import { fatal } from '@semantic-ui/utils';
+
+try {
+  fatal("Something went wrong", {
+    errorType: TypeError,
+    metadata: { code: "ERR_001" },
+    onError: (err) => console.log("Error occurred:", err.message)
+  });
+} catch (error) {
+  console.error(error);
+}
+```

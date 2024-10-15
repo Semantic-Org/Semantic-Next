@@ -1,0 +1,358 @@
+---
+layout: '@layouts/Guide.astro'
+title: Object Utilities
+icon: box
+description: API reference for object manipulation functions
+---
+
+The Object utilities provide a set of functions for working with objects in JavaScript. These functions help in manipulating, transforming, and querying objects efficiently.
+
+## Functions
+
+### keys
+
+```javascript
+function keys(obj)
+```
+
+Return keys from an object.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to get keys from |
+
+#### Returns
+
+An array of the object's keys, or undefined if the input is not an object.
+
+#### Example
+
+```javascript
+import { keys } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3 };
+console.log(keys(obj)); // ['a', 'b', 'c']
+```
+
+### values
+
+```javascript
+function values(obj)
+```
+
+Return values from an object.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to get values from |
+
+#### Returns
+
+An array of the object's values, or undefined if the input is not an object.
+
+#### Example
+
+```javascript
+import { values } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3 };
+console.log(values(obj)); // [1, 2, 3]
+```
+
+### filterObject
+
+```javascript
+function filterObject(obj, callback)
+```
+
+Filter an object based on a callback function.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| obj      | object   | The object to filter |
+| callback | function | The callback function to test each key-value pair |
+
+#### Returns
+
+A new object with the key-value pairs that passed the test.
+
+#### Example
+
+```javascript
+import { filterObject } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3, d: 4 };
+const result = filterObject(obj, (value) => value % 2 === 0);
+console.log(result); // { b: 2, d: 4 }
+```
+
+### mapObject
+
+```javascript
+function mapObject(obj, callback)
+```
+
+Transform an object's values based on a callback function.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| obj      | object   | The object to transform |
+| callback | function | The callback function to transform each value |
+
+#### Returns
+
+A new object with transformed values.
+
+#### Example
+
+```javascript
+import { mapObject } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3 };
+const result = mapObject(obj, (value) => value * 2);
+console.log(result); // { a: 2, b: 4, c: 6 }
+```
+
+### extend
+
+```javascript
+function extend(obj, ...sources)
+```
+
+Extend an object with properties from other objects, properly handling getter/setters.
+
+#### Parameters
+
+| Name    | Type     | Description |
+|---------|----------|-------------|
+| obj     | object   | The target object to extend |
+| sources | ...object| One or more source objects |
+
+#### Returns
+
+The extended object.
+
+#### Example
+
+```javascript
+import { extend } from '@semantic-ui/utils';
+
+const obj1 = { a: 1, b: 2 };
+const obj2 = { c: 3 };
+const obj3 = { d: 4 };
+const result = extend(obj1, obj2, obj3);
+console.log(result); // { a: 1, b: 2, c: 3, d: 4 }
+```
+
+### pick
+
+```javascript
+function pick(obj, ...keys)
+```
+
+Create a new object with only the specified keys from the original object.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The source object |
+| keys | ...string| The keys to pick |
+
+#### Returns
+
+A new object with only the specified keys.
+
+#### Example
+
+```javascript
+import { pick } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3, d: 4 };
+const result = pick(obj, 'a', 'c');
+console.log(result); // { a: 1, c: 3 }
+```
+
+### arrayFromObject
+
+```javascript
+function arrayFromObject(obj)
+```
+
+Convert an object to an array of key-value pairs.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to convert |
+
+#### Returns
+
+An array of key-value pair objects.
+
+#### Example
+
+```javascript
+import { arrayFromObject } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3 };
+const result = arrayFromObject(obj);
+console.log(result); // [{ key: 'a', value: 1 }, { key: 'b', value: 2 }, { key: 'c', value: 3 }]
+```
+
+### get
+
+```javascript
+function get(obj, path = '')
+```
+
+Access a nested object field from a string path, like 'a.b.c'.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to access |
+| path | string | The path to the desired property |
+
+#### Returns
+
+The value at the specified path, or undefined if not found.
+
+#### Example
+
+```javascript
+import { get } from '@semantic-ui/utils';
+
+const obj = { a: { b: { c: 42 } } };
+console.log(get(obj, 'a.b.c')); // 42
+console.log(get(obj, 'a.b.d')); // undefined
+```
+
+### proxyObject
+
+```javascript
+function proxyObject(sourceObj = noop, referenceObj = {})
+```
+
+Create a proxy object that combines properties from a source object and a reference object.
+
+#### Parameters
+
+| Name         | Type     | Description |
+|--------------|----------|-------------|
+| sourceObj    | function | A function that returns the source object |
+| referenceObj | object   | The reference object |
+
+#### Returns
+
+A proxy object combining properties from both objects.
+
+#### Example
+
+```javascript
+import { proxyObject } from '@semantic-ui/utils';
+
+const source = () => ({ a: 1, b: 2 });
+const reference = { c: 3 };
+const proxy = proxyObject(source, reference);
+console.log(proxy.a); // 1
+console.log(proxy.c); // 3
+```
+
+### onlyKeys
+
+```javascript
+function onlyKeys(obj, keysToKeep)
+```
+
+Create a new object with only the specified keys from the original object.
+
+#### Parameters
+
+| Name       | Type     | Description |
+|------------|----------|-------------|
+| obj        | object   | The source object |
+| keysToKeep | array    | The keys to keep in the new object |
+
+#### Returns
+
+A new object with only the specified keys.
+
+#### Example
+
+```javascript
+import { onlyKeys } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3, d: 4 };
+const result = onlyKeys(obj, ['a', 'c']);
+console.log(result); // { a: 1, c: 3 }
+```
+
+### hasProperty
+
+```javascript
+function hasProperty(obj, prop)
+```
+
+Check if an object has a non-inherited property.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to check |
+| prop | string | The property name to check for |
+
+#### Returns
+
+True if the object has the property, false otherwise.
+
+#### Example
+
+```javascript
+import { hasProperty } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2 };
+console.log(hasProperty(obj, 'a')); // true
+console.log(hasProperty(obj, 'toString')); // false
+```
+
+### reverseKeys
+
+```javascript
+function reverseKeys(obj)
+```
+
+Reverse the keys and values of an object.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to reverse |
+
+#### Returns
+
+A new object with reversed keys and values.
+
+#### Example
+
+```javascript
+import { reverseKeys } from '@semantic-ui/utils';
+
+const obj = { a: '1', b: ['2', '3'] };
+const result = reverseKeys(obj);
+console.log(result); // { '1': 'a', '2': 'b', '3': 'b' }
+```
+
+These object utilities provide a robust set of tools for working with objects in JavaScript, enhancing productivity and code readability.

@@ -1,0 +1,465 @@
+---
+layout: '@layouts/Guide.astro'
+title: Array Utilities
+icon: list
+description: API reference for array manipulation functions
+---
+
+The Array utilities provide a set of functions for working with arrays in JavaScript. These functions help in manipulating, transforming, and querying arrays efficiently.
+
+## Functions
+
+### unique
+
+```javascript
+function unique(arr)
+```
+
+Remove duplicates from an array.
+
+#### Parameters
+
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to remove duplicates from |
+
+#### Returns
+
+A new array with duplicates removed.
+
+#### Example
+
+```javascript
+import { unique } from '@semantic-ui/utils';
+
+const arr = [1, 2, 2, 3, 4, 4, 5];
+console.log(unique(arr)); // [1, 2, 3, 4, 5]
+```
+
+### filterEmpty
+
+```javascript
+function filterEmpty(arr)
+```
+
+Remove undefined values from an array.
+
+#### Parameters
+
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to filter |
+
+#### Returns
+
+A new array with undefined values removed.
+
+#### Example
+
+```javascript
+import { filterEmpty } from '@semantic-ui/utils';
+
+const arr = [1, undefined, 2, null, 3, '', 4];
+console.log(filterEmpty(arr)); // [1, 2, null, 3, '', 4]
+```
+
+### last
+
+```javascript
+function last(array, number = 1)
+```
+
+Get the last element(s) from an array.
+
+#### Parameters
+
+| Name   | Type   | Description | Default |
+|--------|--------|-------------|---------|
+| array  | array  | The input array | |
+| number | number | The number of elements to return | 1 |
+
+#### Returns
+
+The last element, an array of the last n elements, or undefined if the array is empty.
+
+#### Example
+
+```javascript
+import { last } from '@semantic-ui/utils';
+
+const arr = [1, 2, 3, 4, 5];
+console.log(last(arr)); // 5
+console.log(last(arr, 2)); // [4, 5]
+```
+
+### first
+
+```javascript
+function first(array, number = 1)
+```
+
+Get the first element(s) from an array.
+
+#### Parameters
+
+| Name   | Type   | Description | Default |
+|--------|--------|-------------|---------|
+| array  | array  | The input array | |
+| number | number | The number of elements to return | 1 |
+
+#### Returns
+
+The first element, an array of the first n elements, or undefined if the array is empty.
+
+#### Example
+
+```javascript
+import { first } from '@semantic-ui/utils';
+
+const arr = [1, 2, 3, 4, 5];
+console.log(first(arr)); // 1
+console.log(first(arr, 2)); // [1, 2]
+```
+
+### firstMatch
+
+```javascript
+function firstMatch(array, callback)
+```
+
+Iterate through an array and return the first value that matches the callback condition.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| array    | array    | The input array |
+| callback | function | The callback function to test each element |
+
+#### Returns
+
+The first matching element or undefined if no match is found.
+
+#### Example
+
+```javascript
+import { firstMatch } from '@semantic-ui/utils';
+
+const arr = [1, 2, 3, 4, 5];
+const result = firstMatch(arr, (value) => value > 3);
+console.log(result); // 4
+```
+
+### findIndex
+
+```javascript
+function findIndex(array, callback)
+```
+
+Find the index of the first element in the array that satisfies the provided testing function.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| array    | array    | The input array |
+| callback | function | The callback function to test each element |
+
+#### Returns
+
+The index of the first matching element, or -1 if no match is found.
+
+#### Example
+
+```javascript
+import { findIndex } from '@semantic-ui/utils';
+
+const arr = [1, 2, 3, 4, 5];
+const index = findIndex(arr, (value) => value > 3);
+console.log(index); // 3
+```
+
+### remove
+
+```javascript
+function remove(array, callbackOrValue)
+```
+
+Remove an element from the array that matches the provided callback or value.
+
+#### Parameters
+
+| Name            | Type                | Description |
+|-----------------|---------------------|-------------|
+| array           | array               | The input array |
+| callbackOrValue | function or any     | The callback function to test each element or the value to remove |
+
+#### Returns
+
+True if an element was removed, false otherwise.
+
+#### Example
+
+```javascript
+import { remove } from '@semantic-ui/utils';
+
+const arr = [1, 2, 3, 4, 5];
+remove(arr, 3);
+console.log(arr); // [1, 2, 4, 5]
+
+remove(arr, (value) => value > 4);
+console.log(arr); // [1, 2, 4]
+```
+
+### inArray
+
+```javascript
+function inArray(value, array = [])
+```
+
+Check if a value is in the array.
+
+#### Parameters
+
+| Name  | Type | Description |
+|-------|------|-------------|
+| value | any  | The value to search for |
+| array | array| The array to search in |
+
+#### Returns
+
+True if the value is in the array, false otherwise.
+
+#### Example
+
+```javascript
+import { inArray } from '@semantic-ui/utils';
+
+const arr = [1, 2, 3, 4, 5];
+console.log(inArray(3, arr)); // true
+console.log(inArray(6, arr)); // false
+```
+
+### range
+
+```javascript
+function range(start, stop, step = 1)
+```
+
+Generate an array of numbers within a specified range.
+
+#### Parameters
+
+| Name  | Type   | Description | Default |
+|-------|--------|-------------|---------|
+| start | number | The start of the range (or end if stop is not provided) | |
+| stop  | number | The end of the range (optional) | |
+| step  | number | The step between numbers | 1 |
+
+#### Returns
+
+An array of numbers within the specified range.
+
+#### Example
+
+```javascript
+import { range } from '@semantic-ui/utils';
+
+console.log(range(5)); // [0, 1, 2, 3, 4]
+console.log(range(1, 5)); // [1, 2, 3, 4]
+console.log(range(0, 10, 2)); // [0, 2, 4, 6, 8]
+```
+
+### sum
+
+```javascript
+function sum(values)
+```
+
+Calculate the sum of an array of numbers.
+
+#### Parameters
+
+| Name   | Type  | Description |
+|--------|-------|-------------|
+| values | array | An array of numbers |
+
+#### Returns
+
+The sum of all numbers in the array.
+
+#### Example
+
+```javascript
+import { sum } from '@semantic-ui/utils';
+
+const numbers = [1, 2, 3, 4, 5];
+console.log(sum(numbers)); // 15
+```
+
+### where
+
+```javascript
+function where(array, properties)
+```
+
+Filter an array of objects based on matching properties.
+
+#### Parameters
+
+| Name       | Type   | Description |
+|------------|--------|-------------|
+| array      | array  | The array of objects to filter |
+| properties | object | An object with properties to match |
+
+#### Returns
+
+An array of objects that match all the specified properties.
+
+#### Example
+
+```javascript
+import { where } from '@semantic-ui/utils';
+
+const people = [
+  { name: 'John', age: 30 },
+  { name: 'Jane', age: 25 },
+  { name: 'Bob', age: 30 }
+];
+const result = where(people, { age: 30 });
+console.log(result); // [{ name: 'John', age: 30 }, { name: 'Bob', age: 30 }]
+```
+
+### flatten
+
+```javascript
+function flatten(arr)
+```
+
+Flatten a nested array structure.
+
+#### Parameters
+
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to flatten |
+
+#### Returns
+
+A new, flattened array.
+
+#### Example
+
+```javascript
+import { flatten } from '@semantic-ui/utils';
+
+const nestedArray = [1, [2, [3, 4]], 5];
+console.log(flatten(nestedArray)); // [1, 2, 3, 4, 5]
+```
+
+### some
+
+```javascript
+function some(collection, predicate)
+```
+
+Check if at least one element in the collection satisfies the predicate.
+
+#### Parameters
+
+| Name       | Type     | Description |
+|------------|----------|-------------|
+| collection | array    | The collection to iterate over |
+| predicate  | function | The function invoked per iteration |
+
+#### Returns
+
+True if any element passes the predicate check, else false.
+
+#### Example
+
+```javascript
+import { some } from '@semantic-ui/utils';
+
+const numbers = [1, 2, 3, 4, 5];
+const result = some(numbers, (num) => num > 3);
+console.log(result); // true
+```
+
+### any
+
+An alias for `some`.
+
+### sortBy
+
+```javascript
+function sortBy(arr, key, comparator)
+```
+
+Sort an array of objects by a specific key.
+
+#### Parameters
+
+| Name       | Type     | Description |
+|------------|----------|-------------|
+| arr        | array    | The array to sort |
+| key        | string   | The key to sort by |
+| comparator | function | Optional custom comparison function |
+
+#### Returns
+
+A new sorted array.
+
+#### Example
+
+```javascript
+import { sortBy } from '@semantic-ui/utils';
+
+const people = [
+  { name: 'John', age: 30 },
+  { name: 'Jane', age: 25 },
+  { name: 'Bob', age: 35 }
+];
+const sorted = sortBy(people, 'age');
+console.log(sorted);
+// [{ name: 'Jane', age: 25 }, { name: 'John', age: 30 }, { name: 'Bob', age: 35 }]
+```
+
+### groupBy
+
+```javascript
+function groupBy(array, property)
+```
+
+Group an array of objects by a specific property.
+
+#### Parameters
+
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| array    | array  | The array to group |
+| property | string | The property to group by |
+
+#### Returns
+
+An object where keys are distinct values of the specified property, and values are arrays of elements that have that property value.
+
+#### Example
+
+```javascript
+import { groupBy } from '@semantic-ui/utils';
+
+const people = [
+  { name: 'John', age: 30 },
+  { name: 'Jane', age: 25 },
+  { name: 'Bob', age: 30 }
+];
+const grouped = groupBy(people, 'age');
+console.log(grouped);
+// {
+//   '25': [{ name: 'Jane', age: 25 }],
+//   '30': [{ name: 'John', age: 30 }, { name: 'Bob', age: 30 }]
+// }
+```
+
+These array utilities provide a robust set of tools for working with arrays in JavaScript, enhancing productivity and code readability.

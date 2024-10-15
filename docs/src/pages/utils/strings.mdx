@@ -1,0 +1,262 @@
+---
+layout: '@layouts/Guide.astro'
+title: String Utilities
+icon: type
+description: API reference for string manipulation functions
+---
+
+The String utilities provide a set of functions for working with strings in JavaScript. These functions help in manipulating, transforming, and analyzing string data efficiently.
+
+## Functions
+
+### kebabToCamel
+
+```javascript
+function kebabToCamel(str = '')
+```
+
+Converts a kebab-case string to camelCase.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The kebab-case string to convert |
+
+#### Returns
+
+The camelCase version of the input string.
+
+#### Example
+
+```javascript
+import { kebabToCamel } from '@semantic-ui/utils';
+
+console.log(kebabToCamel('foo-bar')); // 'fooBar'
+console.log(kebabToCamel('background-color')); // 'backgroundColor'
+```
+
+### camelToKebab
+
+```javascript
+function camelToKebab(str = '')
+```
+
+Converts a camelCase string to kebab-case.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The camelCase string to convert |
+
+#### Returns
+
+The kebab-case version of the input string.
+
+#### Example
+
+```javascript
+import { camelToKebab } from '@semantic-ui/utils';
+
+console.log(camelToKebab('fooBar')); // 'foo-bar'
+console.log(camelToKebab('backgroundColor')); // 'background-color'
+```
+
+### capitalize
+
+```javascript
+function capitalize(str = '')
+```
+
+Capitalizes the first character of a string.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The string to capitalize |
+
+#### Returns
+
+The input string with its first character capitalized.
+
+#### Example
+
+```javascript
+import { capitalize } from '@semantic-ui/utils';
+
+console.log(capitalize('hello')); // 'Hello'
+console.log(capitalize('WORLD')); // 'WORLD'
+```
+
+### capitalizeWords
+
+```javascript
+function capitalizeWords(str = '')
+```
+
+Capitalizes the first character of each word in a string.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The string to capitalize |
+
+#### Returns
+
+The input string with the first character of each word capitalized.
+
+#### Example
+
+```javascript
+import { capitalizeWords } from '@semantic-ui/utils';
+
+console.log(capitalizeWords('hello world')); // 'Hello World'
+console.log(capitalizeWords('THE QUICK BROWN FOX')); // 'The Quick Brown Fox'
+```
+
+### toTitleCase
+
+```javascript
+function toTitleCase(str = '')
+```
+
+Converts a string to title case, taking into account common English articles, conjunctions, and prepositions.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The string to convert to title case |
+
+#### Returns
+
+The input string converted to title case.
+
+#### Example
+
+```javascript
+import { toTitleCase } from '@semantic-ui/utils';
+
+console.log(toTitleCase('the quick brown fox')); // 'The Quick Brown Fox'
+console.log(toTitleCase('a tale of two cities')); // 'A Tale of Two Cities'
+```
+
+### joinWords
+
+```javascript
+function joinWords(words, options = {})
+```
+
+Joins an array of words into a string with customizable separators and formatting.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| words   | array  | The array of words to join |
+| options | object | Optional configuration object |
+
+##### Options
+
+| Name           | Type     | Default | Description |
+|----------------|----------|---------|-------------|
+| separator      | string   | ', '    | The separator between words |
+| lastSeparator  | string   | ' and ' | The separator before the last word |
+| oxford         | boolean  | true    | Whether to use an Oxford comma |
+| quotes         | boolean  | false   | Whether to wrap words in quotes |
+| transform      | function | null    | A function to transform each word |
+
+#### Returns
+
+A string of joined words according to the specified options.
+
+#### Example
+
+```javascript
+import { joinWords } from '@semantic-ui/utils';
+
+const fruits = ['apple', 'banana', 'cherry'];
+
+console.log(joinWords(fruits));
+// 'apple, banana, and cherry'
+
+console.log(joinWords(fruits, { oxford: false }));
+// 'apple, banana and cherry'
+
+console.log(joinWords(fruits, { quotes: true }));
+// '"apple", "banana", and "cherry"'
+
+console.log(joinWords(fruits, { transform: word => word.toUpperCase() }));
+// 'APPLE, BANANA, and CHERRY'
+```
+
+### getArticle
+
+```javascript
+function getArticle(word, settings = {})
+```
+
+Determines the appropriate indefinite article ('a' or 'an') for a given word.
+
+> **Handling Special Cases** This function uses a simple vowel check to determine the article. While this works for most cases, it may not be accurate for all words (e.g., "hour" or "unicorn"). For more complex cases, a more sophisticated algorithm or dictionary lookup might be necessary.
+
+#### Parameters
+
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| word     | string | The word to determine the article for |
+| settings | object | Optional settings object |
+
+##### Settings
+
+| Name       | Type    | Default | Description |
+|------------|---------|---------|-------------|
+| capitalize | boolean | false   | Whether to capitalize the article |
+
+#### Returns
+
+The appropriate indefinite article ('a' or 'an') for the given word.
+
+#### Example
+
+```javascript
+import { getArticle } from '@semantic-ui/utils';
+
+console.log(getArticle('apple')); // 'an'
+console.log(getArticle('banana')); // 'a'
+console.log(getArticle('hour', { capitalize: true })); // 'An'
+```
+
+These string utilities provide a robust set of tools for working with strings in JavaScript, enhancing productivity and code readability. The notes highlight some of the unique aspects and potential limitations of certain functions.
+
+### tokenize
+
+```javascript
+function tokenize(str = '')
+```
+
+Converts a string into a token by replacing spaces with hyphens and removing non-word characters.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The string to tokenize |
+
+#### Returns
+
+A tokenized version of the input string.
+
+#### Example
+
+```javascript
+import { tokenize } from '@semantic-ui/utils';
+
+console.log(tokenize("Hello World!")); // "hello-world"
+console.log(tokenize("User's Name_123")); // "users-name-123"
+```
+
+These regular expression utilities provide helpful tools for working with strings and patterns in JavaScript, enhancing string manipulation capabilities and security in web applications.
