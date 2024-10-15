@@ -26,6 +26,7 @@ class TemplateCompiler {
 
   static singleBracketParserRegExp = {
     NEXT_TAG: /(\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_START: /\{/,
     EXPRESSION_END: /\}/,
     TAG_CLOSE: /\>/,
   };
@@ -47,6 +48,7 @@ class TemplateCompiler {
 
   static doubleBracketParserRegExp = {
     NEXT_TAG: /(\{\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_START: /\{\{/,
     EXPRESSION_END: /\}\}/,
     TAG_CLOSE: /\>/,
   };
@@ -96,15 +98,45 @@ class TemplateCompiler {
     ;
 
     const parseTag = (scanner) => {
+
+      // if this expression contains nested expressions like { one { two } }
+      // we want tag content to include all nested expressions
+      const getTagContent = (outerContent = '') => {
+        let content = scanner.consumeUntil(parserRegExp.EXPRESSION_END);
+
+        // nested expression found
+        if(content.search(parserRegExp.EXPRESSION_START) >= 0) {
+          content += scanner.consumeUntil(parserRegExp.EXPRESSION_START);
+          content += scanner.consume(parserRegExp.EXPRESSION_START);
+          content += getTagContent(content);
+          content += scanner.consumeUntil(parserRegExp.EXPRESSION_END);
+          content += scanner.consume(parserRegExp.EXPRESSION_END);
+          return content;
+        }
+
+        // if we have outer content we will need to return the closing bracket
+        // otherwise we just eat it
+        const bracket = scanner.consume(parserRegExp.EXPRESSION_END);
+        if(outerContent) {
+          content += bracket;
+        }
+
+        return content;
+      };
+
+      // look for each special expression like if/each/else
       for (let type in tagRegExp) {
         if (scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
-          const content = this.getValue(scanner.consumeUntil(parserRegExp.EXPRESSION_END).trim());
+          const rawContent = getTagContent().trim();
           scanner.consume(parserRegExp.EXPRESSION_END);
+          const content = this.getValue(rawContent);
           return { type, content, ...context }; // Include context in the return value
         }
       }
+
+      // look for each primitive like <svg>
       for (let type in htmlRegExp) {
         if (scanner.matches(htmlRegExp[type])) {
           scanner.consume(htmlRegExp[type]);
@@ -114,6 +146,7 @@ class TemplateCompiler {
           return { type, content, ...context }; // Include context in the return value
         }
       }
+
       // Return null if no tag is matched
       return null;
     };
@@ -328,7 +361,11 @@ class TemplateCompiler {
         }
       }
     }
-    return TemplateCompiler.optimizeAST(ast);
+    const optimizedAST = TemplateCompiler.optimizeAST(ast);
+    if(optimizedAST[0]?.html == '<div class="playground ') {
+      console.log(ast[7].content[17]);
+    }
+    return optimizedAST;
   }
 
   getValue(expression) {
