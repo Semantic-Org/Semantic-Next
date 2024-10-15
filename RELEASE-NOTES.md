@@ -1,6 +1,12 @@
-Note this is a pre-production build, and APIs will change until 1.0 release. For the purpose of this pre-release SemVer will not be followed. Instead minor releases will be bumped for breaking changes, and all features will be patches.
+### Important Note
 
-SemVer will begin after 1.0 launch.
+This is a pre-release version and APIs will change quickly. Before `1.0` release all breaking changes will be `minor` releases and features `patch` releases.
+
+Please note after `1.0` Semver will be followed using normal protocols.
+
+# Version 0.1.1
+
+* Templating now supports either single or double bracket syntax `{{getName}}` or `{getName}`
 
 # Version 0.1.0
 
@@ -8,6 +14,3 @@ SemVer will begin after 1.0 launch.
 * `createInstance` has been renamed to `createComponent`
 * `lightCSS` has been renamed to `pageCSS`
 
-# Version 0.1.1
-
-* Templating now supports either single or double bracket syntax `{{getName}}` or `{getName}`
