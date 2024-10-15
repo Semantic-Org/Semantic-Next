@@ -17,11 +17,11 @@ Templates all support either single or double bracket syntax and are whitespace 
 #### Single Bracket
 ```sui
 <p>Test</p>
-Welcome, {getFirstName}
+Welcome, { getFirstName }
 ```
 
 #### Double Bracket
-```handlebars
+```sui
 Welcome, {{ getFirstName }}
 ```
 
@@ -45,34 +45,34 @@ Components include a custom templating language built for web components. This l
 [Expressions](templates/expressions) allow values to be ouput and functions to be executed from the template's data context.
 
 #### Value Output
-```handlebars
+```sui
 {name}
 ```
 
 #### Function Calls
-```handlebars
+```sui
 {someMethod argumentOne argumentTwo}
 ```
 
 #### Complex Nested Expressions
-```handlebars
+```sui
 {formatDateTime someDate 'YYYY-MM-DD HH:mm' (object timezone='local')}
 ```
 
 #### Nested expressions
-```handlebars
+```sui
 {formatDate (getDate now) 'h:mm a'}
 ```
 
 #### HTML Output
-```handlebars
+```sui
 {#html someHTML}
 ```
 
 ### Conditionals
 
 If / elseif / else
-```handlebars
+```sui
 {#if isColor 'red'}
   Red
 {else if isColor 'blue'}
@@ -85,21 +85,21 @@ If / elseif / else
 ### Loops
 
 With intermediate value
-```handlebars
+```sui
 {#each row in someCollection}
   {row.name}
 {/each}
 ```
 
 With inner data context
-```handlebars
+```sui
 {#each someCollection}
   {name}
 {/each}
 ```
 
 With array index
-```handlebars
+```sui
 {#each someCollection}
   {@index}
 {/each}
@@ -108,11 +108,11 @@ With array index
 ### Content Slots
 
 Default Slot
-```handlebars
+```sui
 {>slot}
 ```
 Named Slot
-```handlebars
+```sui
 {>slot icon}
 ```
 
@@ -120,7 +120,7 @@ Named Slot
 
 
 Built-in helpers
-```handlebars
+```sui
 {stringify someObject}
 {formatDate someDate}
 {log 'Hello World'}
@@ -129,11 +129,11 @@ Built-in helpers
 ### Subtemplates
 
 Named Templates
-```handlebars
+```sui
 {> exampleSubtemplate}
 ```
 Dynamic Template Support
-```handlebars
+```sui
 {>template
   name=getTemplateName
   data={
@@ -144,7 +144,7 @@ Dynamic Template Support
 ```
 
 Reactive Data Controls
-```handlebars
+```sui
 {>template
   name=getTemplateName
   reactiveData={
@@ -159,7 +159,7 @@ Reactive Data Controls
 
 ### Snippets
 
-```handlebars
+```sui
 {#snippet fullName}
   {#if both firstName lastName}
     {firstName} {lastName}

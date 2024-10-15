@@ -10,7 +10,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 Templates support common control structures like `if`, `elseif` and `else` to handle branching paths in your template.
 
-```handlebars
+```sui
 {#if isEven number}
   Even
 {else if isZero number}
@@ -30,13 +30,13 @@ Templates support common control structures like `if`, `elseif` and `else` to ha
 You can use `exists` and `isEmpty` to handle value existence. Values are checked against the `isEmpty` utility.
 
 
-```handlebars
+```sui
 {#if exists valueToCheck}
   Value exists
 {/if}
 ```
 
-```handlebars
+```sui
 {#if isEmpty collectionToCheck}
   Collection is empty
 {/if}
@@ -48,13 +48,13 @@ You can use `is` `not`, `isExactly` and `isNotExactly` helpers to compare values
 
 > Exactly helpers use `===` comparison while `is` and `not` use `==`
 
-```handlebars
+```sui
 {#if is valueA valueB}
   Values are equal
 {/if}
 ```
 
-```handlebars
+```sui
 {#if not isEven number}
   Odd
 {else}
@@ -67,13 +67,13 @@ You can use `is` `not`, `isExactly` and `isNotExactly` helpers to compare values
 
 You can use `greaterThan`, `lessThan`, `greaterThanEquals`, `lessThanEquals` to compare numeric values
 
-```handlebars
+```sui
 {#if greaterThan numberA numberB}
   A is greater than B
 {/if}
 ```
 
-```handlebars
+```sui
 {#if lessThanEquals numberA numberB}
   A is less than or equal to B
 {/if}

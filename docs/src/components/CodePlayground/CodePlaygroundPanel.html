@@ -1,15 +1,15 @@
-{{#if is panel.type 'preview'}}
+{#if is panel.type 'preview'}
   <ui-panel
     class="preview"
     size="grow"
     exportparts="panel, handle"
   >
-    {{>CodePlaygroundPreview}}
+    {>CodePlaygroundPreview}
   </ui-panel>
-{{else if is panel.type 'file'}}
-  <ui-panel class="{{classIf minimized 'minimized' ''}}code" size="{{size}}" label="{{panel.label}}" exportparts="panel, handle">
-    {{>CodePlaygroundFile
+{else if is panel.type 'file'}
+  <ui-panel class="{classIf minimized 'minimized' ''}code" size="{size}" label="{panel.label}" exportparts="panel, handle">
+    {>CodePlaygroundFile
       filename=panel.filename
-    }}
+    }
   </ui-panel>
-{{/if}}
+{/if}

@@ -16,7 +16,6 @@
   "dependencies": {
     "@astrojs/lit": "^4.3.0",
     "@astrojs/mdx": "^3.1.3",
-    "@astrojs/starlight": "^0.25.2",
     "@pagefind/modular-ui": "^1.1.0",
     "@webcomponents/template-shadowroot": "^0.2.1",
     "astro": "^4.12.2",

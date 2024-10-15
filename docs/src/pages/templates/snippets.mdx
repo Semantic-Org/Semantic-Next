@@ -14,7 +14,7 @@ Snippets are a special kind of subtemplate that are defined inline. Snippets are
 Snippets are similar to [subtemplates](templates/subtemplates) but can be defined in the same file as where they are used.
 
 Snippets are defined using the syntax
-```handlebars
+```sui
 {#snippet snippetName}
   Snippet Content
 {/snippet}
@@ -24,7 +24,7 @@ A common use of a snippet is to repeat portions of a template in two locations, 
 
 > **Snippet Location** - Snippets are not dependent on the order they are included and can be defined either before and after where they are invoked.
 
-```handlebars
+```sui
 {#if href}
   <a href={href}>
     {>content}
@@ -43,7 +43,7 @@ A common use of a snippet is to repeat portions of a template in two locations, 
 
 By default a snippet inherits its parents data context, but you can modify its data context by passing in data
 
-```handlebars
+```sui
 {#snippet greeting}
   {greeting} {name}
 {/snippet}

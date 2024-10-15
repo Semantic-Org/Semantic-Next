@@ -25,7 +25,7 @@ In this example `formatDate` is used to format the display of a date set in the 
 #### exists
 Checks if a value is not empty.
 
-```handlebars
+```sui
 {#if exists valueToCheck}
   Value exists
 {/if}
@@ -34,7 +34,7 @@ Checks if a value is not empty.
 #### isEmpty
 Checks if a value is empty.
 
-```handlebars
+```sui
 {#if isEmpty collectionToCheck}
   Collection is empty
 {/if}
@@ -43,7 +43,7 @@ Checks if a value is empty.
 #### hasAny
 Checks if an array has any elements.
 
-```handlebars
+```sui
 {#if hasAny arrayToCheck}
   Array has elements
 {/if}
@@ -52,7 +52,7 @@ Checks if an array has any elements.
 #### both
 Checks if both a and b are truthy.
 
-```handlebars
+```sui
 {#if both conditionA conditionB}
   Both conditions are true
 {/if}
@@ -61,7 +61,7 @@ Checks if both a and b are truthy.
 #### either
 Checks if either a or b is truthy.
 
-```handlebars
+```sui
 {#if either conditionA conditionB}
   At least one condition is true
 {/if}
@@ -70,7 +70,7 @@ Checks if either a or b is truthy.
 #### maybe
 Returns trueExpr if expr is truthy, falseExpr otherwise.
 
-```handlebars
+```sui
 {maybe condition 'True result' 'False result'}
 ```
 
@@ -80,35 +80,35 @@ Returns trueExpr if expr is truthy, falseExpr otherwise.
 #### stringify
 Converts a value to JSON string.
 
-```handlebars
+```sui
 {stringify objectToStringify}
 ```
 
 #### concat
 Concatenates all arguments.
 
-```handlebars
+```sui
 {concat firstName ' ' lastName}
 ```
 
 #### capitalize
 Capitalizes the first letter of text.
 
-```handlebars
+```sui
 {capitalize textToCapitalize}
 ```
 
 #### titleCase
 Converts text to title case.
 
-```handlebars
+```sui
 {titleCase textToTitleCase}
 ```
 
 #### tokenize
 Tokenizes a string.
 
-```handlebars
+```sui
 {tokenize stringToTokenize}
 ```
 
@@ -117,34 +117,34 @@ Tokenizes a string.
 #### join
 Joins array elements with a delimiter.
 
-```handlebars
+```sui
 {join itemsArray ', ' true}
 ```
 
 #### joinComma
 Joins array elements with commas.
 
-```handlebars
+```sui
 {joinComma itemsArray true false}
 ```
 
 #### arrayFromObject
 Converts an object to an array for use with `{#each}`
 
-```handlebars
+```sui
 {arrayFromObject objectToConvert}
 ```
 
 #### object
 Can be used to pass arbitary data as an object to other functions.
 
-```handlebars
+```sui
 {object key=valueForKey}
 ```
 
 ### range
 Returns an array with range
-```handlebars
+```sui
 {#each range 1 6}
   {this}
 {/each}
@@ -155,49 +155,49 @@ Returns an array with range
 #### classes
 Joins CSS classes, the second param `spaceAfter` adds a space after the final class name.
 
-```handlebars
+```sui
 {classes classNamesArray true}
 ```
 
 #### classIf
 Conditionally applies a CSS class.
 
-```handlebars
+```sui
 {classIf isActive 'active' 'inactive'}
 ```
 
 #### classMap
 Applies multiple CSS classes based on conditions.
 
-```handlebars
+```sui
 {classMap (object active=isActive disabled=isDisabled)}
 ```
 
 #### activeIf
 Adds 'active' class if expression is truthy.
 
-```handlebars
+```sui
 {activeIf isCurrentPage}
 ```
 
 #### selectedIf
 Adds 'selected' class if expression is truthy.
 
-```handlebars
+```sui
 {selectedIf isOptionSelected}
 ```
 
 #### disabledIf
 Adds 'disabled' class if expression is truthy.
 
-```handlebars
+```sui
 {disabledIf isElementDisabled}
 ```
 
 #### checkedIf
 Adds 'checked' class if expression is truthy.
 
-```handlebars
+```sui
 {checkedIf isOptionChecked}
 ```
 
@@ -206,7 +206,7 @@ Adds 'checked' class if expression is truthy.
 #### is
 Checks equality (==).
 
-```handlebars
+```sui
 {#if is valueA valueB}
   Values are equal
 {/if}
@@ -215,7 +215,7 @@ Checks equality (==).
 #### not
 Checks inequality (!=).
 
-```handlebars
+```sui
 {#if not valueA valueB}
   Values are not equal
 {/if}
@@ -224,7 +224,7 @@ Checks inequality (!=).
 #### isEqual
 Checks strict equality (===).
 
-```handlebars
+```sui
 {#if isEqual valueA valueB}
   Values are strictly equal
 {/if}
@@ -233,7 +233,7 @@ Checks strict equality (===).
 #### isNotEqual
 Checks strict inequality (!==).
 
-```handlebars
+```sui
 {#if isNotEqual valueA valueB}
   Values are strictly not equal
 {/if}
@@ -242,7 +242,7 @@ Checks strict inequality (!==).
 #### greaterThan
 Checks if a > b.
 
-```handlebars
+```sui
 {#if greaterThan numberA numberB}
   A is greater than B
 {/if}
@@ -251,7 +251,7 @@ Checks if a > b.
 #### lessThan
 Checks if a < b.
 
-```handlebars
+```sui
 {#if lessThan numberA numberB}
   A is less than B
 {/if}
@@ -260,7 +260,7 @@ Checks if a < b.
 #### greaterThanEquals
 Checks if a is greater than or equal to b.
 
-```handlebars
+```sui
 {#if greaterThanEquals numberA numberB}
   A is greater than or equal to B
 {/if}
@@ -269,7 +269,7 @@ Checks if a is greater than or equal to b.
 #### lessThanEquals
 Checks if a is less than or equal to b.
 
-```handlebars
+```sui
 {#if lessThanEquals numberA numberB}
   A is less than or equal to B
 {/if}
@@ -280,35 +280,35 @@ Checks if a is less than or equal to b.
 #### numberFromIndex
 Returns a + 1.
 
-```handlebars
+```sui
 {numberFromIndex indexValue}
 ```
 
 #### maybePlural
 Adds plural suffix if value is not 1.
 
-```handlebars
+```sui
 {maybePlural itemCount 's'}
 ```
 
 #### formatDate
 Formats a date.
 
-```handlebars
+```sui
 {formatDate dateToFormat 'YYYY-MM-DD' (object timezone='UTC')}
 ```
 
 #### formatDateTime
 Formats a date with time.
 
-```handlebars
+```sui
 {formatDateTime dateTimeToFormat 'YYYY-MM-DD HH:mm' (object timezone='local')}
 ```
 
 #### formatDateTimeSeconds
 Formats a date with time and seconds.
 
-```handlebars
+```sui
 {formatDateTimeSeconds dateTimeToFormat 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}
 ```
 
@@ -317,20 +317,20 @@ Formats a date with time and seconds.
 #### log
 Logs arguments to console.
 
-```handlebars
+```sui
 {log 'Debug message' (object data=dataToLog)}
 ```
 
 #### debugger
 Triggers debugger.
 
-```handlebars
+```sui
 {debugger}
 ```
 
 #### debugReactivity
 Debugs reactivity.
 
-```handlebars
+```sui
 {debugReactivity}
 ```

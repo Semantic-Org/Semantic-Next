@@ -11,7 +11,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 A basic each loop allows you to access properties of a collection inside the loop directly
 
-```handlebars
+```sui
 {#each people}
   {name} - {age}
 {/each}
@@ -19,7 +19,7 @@ A basic each loop allows you to access properties of a collection inside the loo
 
 
 `each` loops can improve readability of templates in simple use-cases.
-```handlebars
+```sui
 {#each todos}
   <span class="description">
     {description}
@@ -34,7 +34,7 @@ A basic each loop allows you to access properties of a collection inside the loo
 
 You can define each item of a loop using `each...in` syntax.
 
-```handlebars
+```sui
 {#each member in team.members}
   <li>{member.name} - {member.age}</li>
 {/each}
@@ -42,7 +42,7 @@ You can define each item of a loop using `each...in` syntax.
 
 `each...in` loops can help make templates more readable when using multiple levels of looping.
 
-```handlebars
+```sui
 {#each team in teams}
   <h4>{team.name}</h4>
   <ul>
@@ -59,7 +59,7 @@ You can define each item of a loop using `each...in` syntax.
 
 The value `@index` can be used to get the current loop index.
 
-```handlebars
+```sui
 {#each item in items}
   {@index} - {item}
 {/each}
@@ -67,7 +67,7 @@ The value `@index` can be used to get the current loop index.
 
 This can be used with [helpers](/templates/helpers) like `numberFromIndex` to output non-zero indexed values.
 
-```handlebars
+```sui
 {#each person in team}
   {person.name}
   Employee #{numberFromIndex @index})
@@ -78,7 +78,7 @@ This can be used with [helpers](/templates/helpers) like `numberFromIndex` to ou
 
 When looping over values like strings or numbers without the `each...in` syntax you can use the keyword `this` to access the value.
 
-```handlebars
+```sui
 {#each numbers}
   {this}
 {/each}
@@ -90,7 +90,7 @@ When looping over values like strings or numbers without the `each...in` syntax 
 
 Iterables can be the results of expressions, for instance pulling a set of values from your component
 
-```handlebars
+```sui
 {#each item in getVisibleMenu}
   {item}
 {/each}

@@ -3,13 +3,15 @@ import fs from 'fs';
 import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
-import starlight from '@astrojs/starlight';
 
-
+// Load the custom language definition
 const sui = {
+  id: 'sui',
+  scopeName: 'source.sui',
+  embeddedLangs: ['html'],
+  aliases: ['sui-template'],
+  ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8')),
   name: 'sui',
-  scopeName: 'sui',
-  ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8'))
 };
 
 // https://astro.build/config
@@ -45,23 +47,13 @@ export default defineConfig({
     lit(),
     astroExpressiveCode({
       shiki: {
-        langs: [ sui ],
+        langs: [sui],
       },
     }),
     mdx({
-      expressiveCode: {
-        shiki: {
-          langs: [ sui ],
-        },
+      shikiConfig: {
+        langs: [sui],
       },
     }),
-    starlight({
-      title: 'Semantic UI',
-      expressiveCode: {
-        shiki: {
-          langs: [ sui ],
-        },
-      },
-    })
   ]
 });
