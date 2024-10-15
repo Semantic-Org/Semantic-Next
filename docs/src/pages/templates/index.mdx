@@ -5,7 +5,30 @@ description: Using template features in Semantic UI
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Component Templating
+
+## What is Templating
+
+Templates provide a syntax for generating html that can be used to power your components. They allow for looping, conditionals, expressions, and a data context to make it easier to retrieve data when rendering web components.
+
+## Template Syntax
+
+Templates all support either single or double bracket syntax and are whitespace insensitive. Use what style you and your team prefer.
+
+#### Single Bracket
+```sui
+Welcome, { getFirstName }
+```
+
+#### Double Bracket
+```sui
+Welcome, {{ getFirstName }}
+```
+
+> **Flexible Dialects** - Compiling templates is inexpensive so supporting additional syntaxes comes at little cost. For people coming from a `jsx` or `svelte` background single bracket notation might feel more familiar. For those coming from `meteor`, `rails`, or `php` using double brackets might be more at home. Both achieve the same results, but allow for developer and team preference.
+
+### Template Usage
+
+Templates compile to an `ast` that is used to create the Shadow DOM of web components. This makes sure that only the parts that need updating in your component are modified when [reactive changes](/components/reactivity) occur.
 
 Components include a custom templating language built for web components. This language compiles to an Abstract Syntax Tree or `AST` that is used to render your component and surgically update portions of the DOM when reactive data sources change.
 
@@ -14,114 +37,114 @@ Components include a custom templating language built for web components. This l
 
 <PlaygroundExample id="advanced-color-picker" height="480"></PlaygroundExample>
 
-## Template Syntax
+## Template Features
 
 ### Expressions
 
 [Expressions](templates/expressions) allow values to be ouput and functions to be executed from the template's data context.
 
 #### Value Output
-```handlebars
-{{name}}
+```sui
+{name}
 ```
 
 #### Function Calls
-```handlebars
-{{someMethod argumentOne argumentTwo}}
+```sui
+{someMethod argumentOne argumentTwo}
 ```
 
 #### Complex Nested Expressions
-```handlebars
-{{formatDateTime someDate 'YYYY-MM-DD HH:mm' (object timezone='local')}}
+```sui
+{formatDateTime someDate 'YYYY-MM-DD HH:mm' (object timezone='local')}
 ```
 
 #### Nested expressions
-```handlebars
-{{formatDate (getDate now) 'h:mm a'}}
+```sui
+{formatDate (getDate now) 'h:mm a'}
 ```
 
 #### HTML Output
-```handlebars
-{{{someHTML}}}
+```sui
+{#html someHTML}
 ```
 
 ### Conditionals
 
 If / elseif / else
-```handlebars
-{{#if isColor 'red'}}
+```sui
+{#if isColor 'red'}
   Red
-{{else if isColor 'blue'}}
+{else if isColor 'blue'}
   Blue
-{{else}}
+{else}
   Another color
-{{/if}}
+{/if}
 ```
 
 ### Loops
 
 With intermediate value
-```handlebars
-{{#each row in someCollection}}
-  {{row.name}}
-{{/each}}
+```sui
+{#each row in someCollection}
+  {row.name}
+{/each}
 ```
 
 With inner data context
-```handlebars
-{{#each someCollection}}
-  {{name}}
-{{/each}}
+```sui
+{#each someCollection}
+  {name}
+{/each}
 ```
 
 With array index
-```handlebars
-{{#each someCollection}}
-  {{@index}}
-{{/each}}
+```sui
+{#each someCollection}
+  {@index}
+{/each}
 ```
 
 ### Content Slots
 
 Default Slot
-```handlebars
-{{>slot}}
+```sui
+{>slot}
 ```
 Named Slot
-```handlebars
-{{>slot icon}}
+```sui
+{>slot icon}
 ```
 
 ### Global Helpers
 
 
 Built-in helpers
-```handlebars
-{{stringify someObject}}
-{{formatDate someDate}}
-{{log 'Hello World'}}
+```sui
+{stringify someObject}
+{formatDate someDate}
+{log 'Hello World'}
 ```
 
 ### Subtemplates
 
 Named Templates
-```handlebars
-{{> exampleSubtemplate}}
+```sui
+{> exampleSubtemplate}
 ```
 Dynamic Template Support
-```handlebars
-{{>template
+```sui
+{>template
   name=getTemplateName
   data={
     afternoon: 'Biking',
     evening: getEveningActivity,
   }
-}}
+}
 ```
 
 Reactive Data Controls
-```handlebars
-{{>template
+```sui
+{>template
   name=getTemplateName
   reactiveData={
     morning: morningActivity,
@@ -130,25 +153,25 @@ Reactive Data Controls
     afternoon: 'Biking',
     evening: eveningActivity,
   }
-}}
+}
 ```
 
 ### Snippets
 
-```handlebars
-{{#snippet fullName}}
-  {{#if both firstName lastName}}
-    {{firstName}} {{lastName}}
-  {{else}}
-    {{lastName}}
-  {{/if}}
-{{/snippet}}
+```sui
+{#snippet fullName}
+  {#if both firstName lastName}
+    {firstName} {lastName}
+  {else}
+    {lastName}
+  {/if}
+{/snippet}
 
-{{#if isLoggedOut}}
-  Login, {{>fullName}}
-{{else if hasName}}
-  Login, {{>fullName}}
-{{else}}
+{#if isLoggedOut}
+  Login, {>fullName}
+{else if hasName}
+  Login, {>fullName}
+{else}
   Login
-{{/if}}
+{/if}
 ```

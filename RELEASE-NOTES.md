@@ -7,3 +7,7 @@ SemVer will begin after 1.0 launch.
 * `createComponent` has been renamed to `defineComponent`
 * `createInstance` has been renamed to `createComponent`
 * `lightCSS` has been renamed to `pageCSS`
+
+# Version 0.1.1
+
+* Templating now supports either single or double bracket syntax `{{getName}}` or `{getName}`

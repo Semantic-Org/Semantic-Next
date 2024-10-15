@@ -10,14 +10,14 @@ const state = {
   template: '',
 };
 
-const createComponent = ({tpl, findParent, state, $, $$}) => ({
+const createComponent = ({self, findParent, state, $, $$}) => ({
 
   getMenu: () => {
     let menu = [
       { label: 'Preview', value: 'preview' },
       //{ label: 'Console', value: 'console' },
     ];
-    if(tpl.getFile()) {
+    if(self.getFile()) {
       menu.push({ label: 'AST', value: 'ast' });
     }
     return menu;
@@ -40,8 +40,8 @@ const createComponent = ({tpl, findParent, state, $, $$}) => ({
 
 });
 
-const onRendered = ({tpl, state}) => {
-  const fileContent = tpl.getFile();
+const onRendered = ({self, state}) => {
+  const fileContent = self.getFile();
   state.template.set(fileContent);
 };
 

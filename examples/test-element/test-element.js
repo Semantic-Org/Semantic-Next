@@ -8,7 +8,7 @@ import { eventsTab } from './tabs/events.js';
 
 const createComponent = function ({ self, reactiveVar, $ }) {
   return {
-    tab: reactiveVar('events'),
+    tab: reactiveVar('basic'),
     morningActivity: reactiveVar('running'),
     eveningActivity: reactiveVar('reading'),
     maybeActive(tab) {

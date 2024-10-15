@@ -69,7 +69,7 @@ const onCreated = ({state, reaction}) {
 
 State will also trigger reactivity in your template.
 ```html
-Counter is: {{counter}}
+Counter is: {counter}
 ```
 
 
@@ -94,7 +94,7 @@ const onCreated = ({settings, reaction}) {
 
 However  **settings are reactive inside templates**, and will trigger updates when their underlying value changes.
 ```html
-Counter is: {{counter}}
+Counter is: {counter}
 ```
 
 
@@ -104,9 +104,9 @@ Reactive variables can be accessed from inside a template without calling its `g
 
 ```html
 <ul>
-  {{#each item in items}}
-    <li>{{item}}</li>
-  {{/each}}
+  {#each item in items}
+    <li>{item}</li>
+  {/each}
 </ul>
 ```
 
@@ -114,11 +114,11 @@ Expressions, loops, and conditionals are reactive contexts by default. If `items
 
 ```html
 <ul>
-  {{#if hasAny items}}
+  {#if hasAny items}
     Has items
-  {{else}}
+  {else}
     No items
-  {{/if}}
+  {/if}
 </ul>
 ```
 
@@ -163,8 +163,8 @@ Template expressions are reactive by default but this might not always be ideal.
 
 ```html
 <ul>
-  {{#each item in nonreactive items}}
-    {{item}}
-  {{/each}}
+  {#each item in nonreactive items}
+    {item}
+  {/each}
 </ul>
 ```

@@ -9,7 +9,29 @@ class TemplateCompiler {
     this.snippets = {};
   }
 
-  static tagRegExp = {
+  static singleBracketRegExp = {
+    IF: /^{\s*#if\s+/,
+    ELSEIF: /^{\s*else\s*if\s+/,
+    ELSE: /^{\s*else\s*/,
+    EACH: /^{\s*#each\s+/,
+    SNIPPET: /^{\s*#snippet\s+/,
+    CLOSE_IF: /^{\s*\/(if)\s*/,
+    CLOSE_EACH: /^{\s*\/(each)\s*/,
+    CLOSE_SNIPPET: /^{\s*\/(snippet)\s*/,
+    SLOT: /^{>\s*slot\s*/,
+    TEMPLATE: /^{>\s*/,
+    HTML_EXPRESSION: /^{\s*#html\s*/,
+    EXPRESSION: /^{\s*/,
+  };
+
+  static singleBracketParserRegExp = {
+    NEXT_TAG: /(\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_START: /\{/,
+    EXPRESSION_END: /\}/,
+    TAG_CLOSE: /\>/,
+  };
+
+  static doubleBracketRegExp = {
     IF: /^{{\s*#if\s+/,
     ELSEIF: /^{{\s*else\s*if\s+/,
     ELSE: /^{{\s*else\s*/,
@@ -20,8 +42,15 @@ class TemplateCompiler {
     CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
     SLOT: /^{{>\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
-    HTML_EXPRESSION: /^{{{\s*/,
+    HTML_EXPRESSION: /^{{\s*#html\s*/,
     EXPRESSION: /^{{\s*/,
+  };
+
+  static doubleBracketParserRegExp = {
+    NEXT_TAG: /(\{\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_START: /\{\{/,
+    EXPRESSION_END: /\}\}/,
+    TAG_CLOSE: /\>/,
   };
 
   static htmlRegExp = {
@@ -41,8 +70,6 @@ class TemplateCompiler {
     SINGLE_QUOTES: /\'/g,
   };
 
-  // used to advance scanner to either a parseable expression or svg tag
-  static nextTagRegExp = /(\{\{|\<svg|\<\/svg)/;
 
   /*
     Creates an AST representation of a template
@@ -50,36 +77,76 @@ class TemplateCompiler {
   */
   compile(templateString = this.templateString) {
     templateString = TemplateCompiler.preprocessTemplate(templateString);
-
     const scanner = new StringScanner(templateString);
 
     if (!isString(templateString)) {
       scanner.fatal('Template is not a string', templateString);
     }
 
-    // quicker to compile regExp once
-    const tagRegExp = TemplateCompiler.tagRegExp;
-    const htmlRegExp = TemplateCompiler.htmlRegExp;
+    // compile regexp globally once
+    const { htmlRegExp } = TemplateCompiler;
+
+    // support either {{}} or {} syntax but only one across a file
+    const syntax = TemplateCompiler.detectSyntax(templateString);
+    const tagRegExp = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketRegExp
+      : TemplateCompiler.singleBracketRegExp
+    ;
+    const parserRegExp = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketParserRegExp
+      : TemplateCompiler.singleBracketParserRegExp
+    ;
 
     const parseTag = (scanner) => {
+
+      // if this expression contains nested expressions like { one { two } }
+      // we want tag content to include all nested expressions
+      const getTagContent = (outerContent = '') => {
+        let content = scanner.consumeUntil(parserRegExp.EXPRESSION_END);
+
+        // nested expression found
+        if(content.search(parserRegExp.EXPRESSION_START) >= 0) {
+          content += scanner.consumeUntil(parserRegExp.EXPRESSION_START);
+          content += scanner.consume(parserRegExp.EXPRESSION_START);
+          content += getTagContent(content);
+          content += scanner.consumeUntil(parserRegExp.EXPRESSION_END);
+          content += scanner.consume(parserRegExp.EXPRESSION_END);
+          return content;
+        }
+
+        // if we have outer content we will need to return the closing bracket
+        // otherwise we just eat it
+        const bracket = scanner.consume(parserRegExp.EXPRESSION_END);
+        if(outerContent) {
+          content += bracket;
+        }
+
+        return content;
+      };
+
+      // look for each special expression like if/each/else
       for (let type in tagRegExp) {
         if (scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
-          const content = this.getValue(scanner.consumeUntil('}}').trim());
-          scanner.consume('}}');
+          const rawContent = getTagContent().trim();
+          scanner.consume(parserRegExp.EXPRESSION_END);
+          const content = this.getValue(rawContent);
           return { type, content, ...context }; // Include context in the return value
         }
       }
+
+      // look for each primitive like <svg>
       for (let type in htmlRegExp) {
         if (scanner.matches(htmlRegExp[type])) {
           scanner.consume(htmlRegExp[type]);
           const context = scanner.getContext(); // context is used for better error handling
-          const content = this.getValue(scanner.consumeUntil('>').trim());
-          scanner.consume('>');
+          const content = this.getValue(scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim());
+          scanner.consume(parserRegExp.TAG_CLOSE);
           return { type, content, ...context }; // Include context in the return value
         }
       }
+
       // Return null if no tag is matched
       return null;
     };
@@ -287,15 +354,18 @@ class TemplateCompiler {
       else {
         // advanced to next expression or open svg tag
         // this advances the scanner adding html
-        const html = scanner.consumeUntil(TemplateCompiler.nextTagRegExp);
+        const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
         if (html) {
           const htmlNode = { type: 'html', html };
           contentTarget.push(htmlNode);
         }
       }
     }
-
-    return TemplateCompiler.optimizeAST(ast);
+    const optimizedAST = TemplateCompiler.optimizeAST(ast);
+    if(optimizedAST[0]?.html == '<div class="playground ') {
+      console.log(ast[7].content[17]);
+    }
+    return optimizedAST;
   }
 
   getValue(expression) {
@@ -352,6 +422,16 @@ class TemplateCompiler {
     }
     // if this isnt an object we want to return the string value which may be an expression
     return isObject ? obj : objectString.trim();
+  }
+
+  static detectSyntax(templateString = '') {
+    // look for first expression
+    const doubleIndex = templateString.search(/{{\s*/);
+    const singleIndex = templateString.search(/{[^{]\s*/);
+    if(doubleIndex !== -1 && doubleIndex < singleIndex) {
+      return 'doubleBracket';
+    }
+    return 'singleBracket';
   }
 
   static preprocessTemplate(templateString = '') {

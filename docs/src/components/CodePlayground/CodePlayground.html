@@ -1,41 +1,41 @@
-<div class="playground {{classMap getClassMap}}" part="playground">
-  {{#if example.title}}
+<div class="playground {classMap getClassMap}" part="playground">
+  {#if example.title}
     <div class="masthead" part="masthead">
-      {{#if canShowButtons}}
+      {#if canShowButtons}
         <ui-button right-floated transparent small compact inverted class="tabs">
-          {{#if shouldUseTabs}}
+          {#if shouldUseTabs}
             Use Panels
-          {{else}}
+          {else}
             Use Tabs
-          {{/if}}
+          {/if}
         </ui-button>
         <ui-button right-floated transparent small compact inverted>
           <ui-icon copy></ui-icon>
           Fork
         </ui-button>
-      {{/if}}
-      <h3 class="title" part="title">{{example.title}}</h3>
-      <p part="description">{{example.description}}</p>
+      {/if}
+      <h3 class="title" part="title">{example.title}</h3>
+      <p part="description">{example.description}</p>
     </div>
-  {{/if}}
-  {{#if exists files}}
-    <playground-project id="source" sandbox-base-url="{{sandboxURL}}">
-      {{#each file in getFileArray}}
-        <script type="{{file.scriptType}}" filename="{{file.filename}}">{{#if is file.type 'text/html'}}{{{escapeHTML file.content}}}{{else}}{{file.content}}{{/if}}</script>
-      {{/each}}
+  {/if}
+  {#if exists files}
+    <playground-project id="source" sandbox-base-url="{sandboxURL}">
+      {#each file in getFileArray}
+        <script type="{file.scriptType}" filename="{file.filename}">{#if is file.type 'text/html'}{#html escapeHTML file.content}{else}{file.content}{/if}</script>
+      {/each}
     </playground-project>
-  {{/if}}
-  {{#if either shouldUseTabs inline}}
+  {/if}
+  {#if either shouldUseTabs inline}
     <ui-panels
-      class={{classMap getTabPanelsClass}}
-      direction="{{getTabDirection}}"
-      style={{getStyle}}
-      saveState={{saveState}}
-      saveStateID="{{getSaveID}}"
+      class={classMap getTabPanelsClass}
+      direction="{getTabDirection}"
+      style={getStyle}
+      saveState={saveState}
+      saveStateID="{getSaveID}"
       exportparts="panels"
     >
       <ui-panel
-        direction="{{getTabDirection}}"
+        direction="{getTabDirection}"
         size="60"
         class="files"
         exportparts="panel, handle"
@@ -44,40 +44,40 @@
           <ui-menu
             dark
             selection
-            items={{getFileMenuItems}}
-            value={{activeFile}}
+            items={getFileMenuItems}
+            value={activeFile}
             class="files"
             part="menu"
           ></ui-menu>
         </div>
-        {{>template
+        {>template
           name='CodePlaygroundFile'
           data={inline: true}
           reactiveData={filename: activeFile}
-        }}
+        }
       </ui-panel>
       <ui-panel
-        direction="{{getTabDirection}}"
+        direction="{getTabDirection}"
         size=40
         class="preview"
         exportparts="panel, handle"
       >
-        {{>CodePlaygroundPreview exampleURL=exampleURL}}
+        {>CodePlaygroundPreview exampleURL=exampleURL}
       </ui-panel>
     </ui-panels>
-  {{else}}
+  {else}
     <ui-panels
       class="fullscreen"
       direction="horizontal"
-      saveState={{saveState}}
-      saveStateID="{{getSaveID 'row'}}"
+      saveState={saveState}
+      saveStateID="{getSaveID 'row'}"
       exportparts="panels"
       part="full-panels"
     >
-      {{#each panelGroup in getPanels}}
+      {#each panelGroup in getPanels}
         <ui-panel
           direction="horizontal"
-          size={{getPanelGroupWidth @index}}
+          size={getPanelGroupWidth @index}
           class="code-group"
           exportparts="panel, handle"
 
@@ -85,27 +85,27 @@
           <ui-panels
             class="files"
             saveState=true
-            saveStateID="{{getSaveID 'column' @index}}"
+            saveStateID="{getSaveID 'column' @index}"
             exportparts="panels"
           >
-            {{#each panel in panelGroup}}
-              {{>CodePlaygroundPanel
+            {#each panel in panelGroup}
+              {>CodePlaygroundPanel
                 panel=panel
                 size=(getPanelSize panel)
-              }}
-            {{/each}}
+              }
+            {/each}
           </ui-panels>
         </ui-panel>
-      {{/each}}
+      {/each}
     </ui-panels>
-  {{/if}}
+  {/if}
   <ui-menu
     dark
     fluid
     evenly-spaced=true
     selection
-    items={{mobileMenu}}
-    value={{mobileView}}
+    items={mobileMenu}
+    value={mobileView}
     class="mobile"
     part="mobile-menu"
   ></ui-menu>

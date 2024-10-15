@@ -13,7 +13,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 In this example `formatDate` is used to format the display of a date set in the components [state](#reactive-state).
 
 ```html
-{{formatDate currentTime 'h:mm:ss a'}}
+{formatDate currentTime 'h:mm:ss a'}
 ```
 
 <PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
@@ -25,53 +25,53 @@ In this example `formatDate` is used to format the display of a date set in the 
 #### exists
 Checks if a value is not empty.
 
-```handlebars
-{{#if exists valueToCheck}}
+```sui
+{#if exists valueToCheck}
   Value exists
-{{/if}}
+{/if}
 ```
 
 #### isEmpty
 Checks if a value is empty.
 
-```handlebars
-{{#if isEmpty collectionToCheck}}
+```sui
+{#if isEmpty collectionToCheck}
   Collection is empty
-{{/if}}
+{/if}
 ```
 
 #### hasAny
 Checks if an array has any elements.
 
-```handlebars
-{{#if hasAny arrayToCheck}}
+```sui
+{#if hasAny arrayToCheck}
   Array has elements
-{{/if}}
+{/if}
 ```
 
 #### both
 Checks if both a and b are truthy.
 
-```handlebars
-{{#if both conditionA conditionB}}
+```sui
+{#if both conditionA conditionB}
   Both conditions are true
-{{/if}}
+{/if}
 ```
 
 #### either
 Checks if either a or b is truthy.
 
-```handlebars
-{{#if either conditionA conditionB}}
+```sui
+{#if either conditionA conditionB}
   At least one condition is true
-{{/if}}
+{/if}
 ```
 
 #### maybe
 Returns trueExpr if expr is truthy, falseExpr otherwise.
 
-```handlebars
-{{maybe condition 'True result' 'False result'}}
+```sui
+{maybe condition 'True result' 'False result'}
 ```
 
 
@@ -80,36 +80,36 @@ Returns trueExpr if expr is truthy, falseExpr otherwise.
 #### stringify
 Converts a value to JSON string.
 
-```handlebars
-{{stringify objectToStringify}}
+```sui
+{stringify objectToStringify}
 ```
 
 #### concat
 Concatenates all arguments.
 
-```handlebars
-{{concat firstName ' ' lastName}}
+```sui
+{concat firstName ' ' lastName}
 ```
 
 #### capitalize
 Capitalizes the first letter of text.
 
-```handlebars
-{{capitalize textToCapitalize}}
+```sui
+{capitalize textToCapitalize}
 ```
 
 #### titleCase
 Converts text to title case.
 
-```handlebars
-{{titleCase textToTitleCase}}
+```sui
+{titleCase textToTitleCase}
 ```
 
 #### tokenize
 Tokenizes a string.
 
-```handlebars
-{{tokenize stringToTokenize}}
+```sui
+{tokenize stringToTokenize}
 ```
 
 ### Array and Object
@@ -117,37 +117,37 @@ Tokenizes a string.
 #### join
 Joins array elements with a delimiter.
 
-```handlebars
-{{join itemsArray ', ' true}}
+```sui
+{join itemsArray ', ' true}
 ```
 
 #### joinComma
 Joins array elements with commas.
 
-```handlebars
-{{joinComma itemsArray true false}}
+```sui
+{joinComma itemsArray true false}
 ```
 
 #### arrayFromObject
-Converts an object to an array for use with `{{#each}}`
+Converts an object to an array for use with `{#each}`
 
-```handlebars
-{{arrayFromObject objectToConvert}}
+```sui
+{arrayFromObject objectToConvert}
 ```
 
 #### object
 Can be used to pass arbitary data as an object to other functions.
 
-```handlebars
-{{object key=valueForKey}}
+```sui
+{object key=valueForKey}
 ```
 
 ### range
 Returns an array with range
-```handlebars
-{{#each range 1 6}}
-  {{this}}
-{{/each}}
+```sui
+{#each range 1 6}
+  {this}
+{/each}
 ```
 
 ### CSS
@@ -155,50 +155,50 @@ Returns an array with range
 #### classes
 Joins CSS classes, the second param `spaceAfter` adds a space after the final class name.
 
-```handlebars
-{{classes classNamesArray true}}
+```sui
+{classes classNamesArray true}
 ```
 
 #### classIf
 Conditionally applies a CSS class.
 
-```handlebars
-{{classIf isActive 'active' 'inactive'}}
+```sui
+{classIf isActive 'active' 'inactive'}
 ```
 
 #### classMap
 Applies multiple CSS classes based on conditions.
 
-```handlebars
-{{classMap (object active=isActive disabled=isDisabled)}}
+```sui
+{classMap (object active=isActive disabled=isDisabled)}
 ```
 
 #### activeIf
 Adds 'active' class if expression is truthy.
 
-```handlebars
-{{activeIf isCurrentPage}}
+```sui
+{activeIf isCurrentPage}
 ```
 
 #### selectedIf
 Adds 'selected' class if expression is truthy.
 
-```handlebars
-{{selectedIf isOptionSelected}}
+```sui
+{selectedIf isOptionSelected}
 ```
 
 #### disabledIf
 Adds 'disabled' class if expression is truthy.
 
-```handlebars
-{{disabledIf isElementDisabled}}
+```sui
+{disabledIf isElementDisabled}
 ```
 
 #### checkedIf
 Adds 'checked' class if expression is truthy.
 
-```handlebars
-{{checkedIf isOptionChecked}}
+```sui
+{checkedIf isOptionChecked}
 ```
 
 ### Comparison
@@ -206,73 +206,73 @@ Adds 'checked' class if expression is truthy.
 #### is
 Checks equality (==).
 
-```handlebars
-{{#if is valueA valueB}}
+```sui
+{#if is valueA valueB}
   Values are equal
-{{/if}}
+{/if}
 ```
 
 #### not
 Checks inequality (!=).
 
-```handlebars
-{{#if not valueA valueB}}
+```sui
+{#if not valueA valueB}
   Values are not equal
-{{/if}}
+{/if}
 ```
 
 #### isEqual
 Checks strict equality (===).
 
-```handlebars
-{{#if isEqual valueA valueB}}
+```sui
+{#if isEqual valueA valueB}
   Values are strictly equal
-{{/if}}
+{/if}
 ```
 
 #### isNotEqual
 Checks strict inequality (!==).
 
-```handlebars
-{{#if isNotEqual valueA valueB}}
+```sui
+{#if isNotEqual valueA valueB}
   Values are strictly not equal
-{{/if}}
+{/if}
 ```
 
 #### greaterThan
 Checks if a > b.
 
-```handlebars
-{{#if greaterThan numberA numberB}}
+```sui
+{#if greaterThan numberA numberB}
   A is greater than B
-{{/if}}
+{/if}
 ```
 
 #### lessThan
 Checks if a < b.
 
-```handlebars
-{{#if lessThan numberA numberB}}
+```sui
+{#if lessThan numberA numberB}
   A is less than B
-{{/if}}
+{/if}
 ```
 
 #### greaterThanEquals
 Checks if a is greater than or equal to b.
 
-```handlebars
-{{#if greaterThanEquals numberA numberB}}
+```sui
+{#if greaterThanEquals numberA numberB}
   A is greater than or equal to B
-{{/if}}
+{/if}
 ```
 
 #### lessThanEquals
 Checks if a is less than or equal to b.
 
-```handlebars
-{{#if lessThanEquals numberA numberB}}
+```sui
+{#if lessThanEquals numberA numberB}
   A is less than or equal to B
-{{/if}}
+{/if}
 ```
 
 ### Numeric and Date
@@ -280,36 +280,36 @@ Checks if a is less than or equal to b.
 #### numberFromIndex
 Returns a + 1.
 
-```handlebars
-{{numberFromIndex indexValue}}
+```sui
+{numberFromIndex indexValue}
 ```
 
 #### maybePlural
 Adds plural suffix if value is not 1.
 
-```handlebars
-{{maybePlural itemCount 's'}}
+```sui
+{maybePlural itemCount 's'}
 ```
 
 #### formatDate
 Formats a date.
 
-```handlebars
-{{formatDate dateToFormat 'YYYY-MM-DD' (object timezone='UTC')}}
+```sui
+{formatDate dateToFormat 'YYYY-MM-DD' (object timezone='UTC')}
 ```
 
 #### formatDateTime
 Formats a date with time.
 
-```handlebars
-{{formatDateTime dateTimeToFormat 'YYYY-MM-DD HH:mm' (object timezone='local')}}
+```sui
+{formatDateTime dateTimeToFormat 'YYYY-MM-DD HH:mm' (object timezone='local')}
 ```
 
 #### formatDateTimeSeconds
 Formats a date with time and seconds.
 
-```handlebars
-{{formatDateTimeSeconds dateTimeToFormat 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}}
+```sui
+{formatDateTimeSeconds dateTimeToFormat 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}
 ```
 
 ### Debug
@@ -317,20 +317,20 @@ Formats a date with time and seconds.
 #### log
 Logs arguments to console.
 
-```handlebars
-{{log 'Debug message' (object data=dataToLog)}}
+```sui
+{log 'Debug message' (object data=dataToLog)}
 ```
 
 #### debugger
 Triggers debugger.
 
-```handlebars
-{{debugger}}
+```sui
+{debugger}
 ```
 
 #### debugReactivity
 Debugs reactivity.
 
-```handlebars
-{{debugReactivity}}
+```sui
+{debugReactivity}
 ```

@@ -13,8 +13,8 @@ Template expressions are evaluated against the template's data context which inc
 > For an explanation of how a component's data context is determined see [component data context](/components/rendering#data-context)
 
 Expressions are evaluated right to left with variables being read from the component's data context
-```handlebars
-{{concat firstName ' ' lastName}}
+```sui
+{concat firstName ' ' lastName}
 ```
 
 evaluates to
@@ -27,20 +27,20 @@ concat(firstName, ' ', lastName);
 
 If an intermediary function is found it will pass the result through naively
 
-```handlebars
-{{titleCase concat firstName ' ' lastName}}
+```sui
+{titleCase concat firstName ' ' lastName}
 ```
 
 evaluates to
 ```javascript
-titleCase(concat(fistName, ' ', lastName))
+titleCase(concat(firstName, ' ', lastName))
 ```
 
 ### Parenthesis
 
 If parenthesis are used it will respect the evaluation order
-```handlebars
-{{formatDate (getDate now) 'h:mm'}}
+```sui
+{formatDate (getDate now) 'h:mm'}
 ```
 
 evaluates to
@@ -56,12 +56,12 @@ formatDate(getDate(now), 'h:mm'))
 If an attribute expression **includes quotes** it will output as a string regardless of the expression value.
 
 For instance
-```handlebars
-<a data-number="{{getZero}}">
+```sui
+<a data-number="{getZero}">
 ```
 
 will output as
-```handlebars
+```sui
 <a data-number="0"></a>
 ```
 
@@ -69,16 +69,16 @@ will output as
 
 If an attribute expression **omits quotes** the entire attribute will be removed if the expression is falsey
 
-```handlebars
-<input type="checkbox" checked={{isChecked}} />
+```sui
+<input type="checkbox" checked={isChecked} />
 ```
 
 If `true` will output
-```handlebars
+```sui
 <input type="checkbox" checked />
 ```
 
 and if `false` will output
-```handlebars
+```sui
 <input type="checkbox" />
 ```

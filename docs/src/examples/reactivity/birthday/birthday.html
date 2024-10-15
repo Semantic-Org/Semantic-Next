@@ -1,27 +1,27 @@
 <div class="group">
   <h3>Birthday Calendar</h3>
   <ul>
-    {{#each friend in birthdayCalendar}}
+    {#each friend in birthdayCalendar}
       <li>
-        {{friend.name}} - {{friend.birthday}}
-        <a class="birthday" data-birthday="{{friend.birthday}}">
+        {friend.name} - {friend.birthday}
+        <a class="birthday" data-birthday="{friend.birthday}">
           Make it Today
         </a>
       </li>
-    {{/each}}
+    {/each}
   </ul>
 </div>
 <div class="group">
   <h3>Current Day</h3>
-  <input type="date" class="date-picker" value={{getInputDate today}}>
+  <input type="date" class="date-picker" value={getInputDate today}>
   <div class="info">
-    <p>Today is <b>{{today}}</b>.</p>
+    <p>Today is <b>{today}</b>.</p>
     <p>
-      {{#if birthdayNames}}
-        Happy birthday <b>{{birthdayNames}}</b>
-      {{else}}
+      {#if birthdayNames}
+        Happy birthday <b>{birthdayNames}</b>
+      {else}
        No birthdays today :(
-      {{/if}}
+      {/if}
     </p>
   </div>
 </div>

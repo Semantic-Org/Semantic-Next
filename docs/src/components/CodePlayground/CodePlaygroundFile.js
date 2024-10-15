@@ -5,13 +5,13 @@ import codeMirrorCSS from './lib/codemirror.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const createComponent = ({tpl, settings, data, $, $$}) => ({
+const createComponent = ({self, settings, data, $, $$}) => ({
 
   configureCodeEditors() {
     const el = $$('playground-code-editor').get(0);
     if(el) {
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
-      tpl.modifyCodeMirror(el._codemirror);
+      self.modifyCodeMirror(el._codemirror);
     }
   },
 
@@ -107,8 +107,8 @@ const events = {
   }
 };
 
-const onRendered = ({ tpl }) => {
-  tpl.configureCodeEditors();
+const onRendered = ({ self }) => {
+  self.configureCodeEditors();
 };
 
 const CodePlaygroundFile = defineComponent({

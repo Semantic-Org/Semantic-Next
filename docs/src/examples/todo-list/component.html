@@ -1,5 +1,5 @@
 <header class="header">
-  {{>todoHeader}}
+  {>todoHeader}
 </header>
 <main class="main">
   <div class="toggle-all-container">
@@ -7,11 +7,11 @@
     <label class="toggle-all-label" htmlFor="toggle-all">Toggle All Input</label>
   </div>
   <ul class="todo-list">
-    {{#each todo in getVisibleTodos}}
-      {{>todoItem todo=todo index=@index}}
-    {{/each}}
+    {#each todo in getVisibleTodos}
+      {>todoItem todo=todo index=@index}
+    {/each}
   </ul>
 </main>
 <footer class="footer">
-  {{>todoFooter}}
+  {>todoFooter}
 </footer>

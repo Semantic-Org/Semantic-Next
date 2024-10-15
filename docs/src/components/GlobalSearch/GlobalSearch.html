@@ -13,28 +13,28 @@
     </div>
   </div>
   <div class="results">
-    {{#if hasAny displayResults}}
-      {{#each displayResults}}
-        <a class="result {{activeIf is @index selectedIndex}}" href="{{url}}">
+    {#if hasAny displayResults}
+      {#each displayResults}
+        <a class="result {activeIf is @index selectedIndex}" href="{url}">
           <h3>
-            {{title}}
-            {{#if subtitle}}
-              <span class="subtitle"><span>in</span> {{subtitle}}</span>
-            {{/if}}
+            {title}
+            {#if subtitle}
+              <span class="subtitle"><span>in</span> {subtitle}</span>
+            {/if}
             <div class="tags">
-              {{#if hasAny tags}}
-                {{#each tags}}
-                  <span class="{{color}} tag">{{text}}</span>
-                {{/each}}
-              {{/if}}
+              {#if hasAny tags}
+                {#each tags}
+                  <span class="{color} tag">{text}</span>
+                {/each}
+              {/if}
             </div>
           </h3>
-          <div class="description">{{description}}</div>
+          <div class="description">{description}</div>
         </a>
-      {{/each}}
-    {{else}}
+      {/each}
+    {else}
       <ui-segment placeholder header="Enter a search term to see results." icon="search">
       </ui-segment>
-    {{/if}}
+    {/if}
   </div>
 </ui-modal>

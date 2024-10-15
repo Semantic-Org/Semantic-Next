@@ -14,28 +14,28 @@ Snippets are a special kind of subtemplate that are defined inline. Snippets are
 Snippets are similar to [subtemplates](templates/subtemplates) but can be defined in the same file as where they are used.
 
 Snippets are defined using the syntax
-```handlebars
-{{#snippet snippetName}}
+```sui
+{#snippet snippetName}
   Snippet Content
-{{/snippet}}
+{/snippet}
 ```
 
 A common use of a snippet is to repeat portions of a template in two locations, for instance to display some content as a link if `href` is defined.
 
 > **Snippet Location** - Snippets are not dependent on the order they are included and can be defined either before and after where they are invoked.
 
-```handlebars
-{{#if href}}
-  <a href={{href}}>
-    {{>content}}
+```sui
+{#if href}
+  <a href={href}>
+    {>content}
   </a>
-{{else}}
-  {{>content}}
-{{/if}}
+{else}
+  {>content}
+{/if}
 
-{{#snippet content}}
-  {{beforeText}} {{text}} {{afterText}}
-{{/snippet}}
+{#snippet content}
+  {beforeText} {text} {afterText}
+{/snippet}
 
 ```
 
@@ -43,13 +43,13 @@ A common use of a snippet is to repeat portions of a template in two locations, 
 
 By default a snippet inherits its parents data context, but you can modify its data context by passing in data
 
-```handlebars
-{{#snippet greeting}}
-  {{greeting}} {{name}}
-{{/snippet}}
+```sui
+{#snippet greeting}
+  {greeting} {name}
+{/snippet}
 
-{{> greeting greeting='hello' name='Sally'}}
-{{> greeting greeting='goodbye' name='Sally'}}
+{> greeting greeting='hello' name='Sally'}
+{> greeting greeting='goodbye' name='Sally'}
 ```
 
 #### Snippet Example

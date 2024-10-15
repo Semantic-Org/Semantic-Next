@@ -1,12 +1,12 @@
 <button>Test button</button>
 <h4>Default Slot Content</h4>
-{{>slot}}
+{>slot}
 
 <h4>Data Context</h4>
 <ul>
-  <li>Morning - {{morning}}</li>
-  <li>Afternoon - {{afternoon}}</li>
-  <li>Evening - {{evening}}</li>
+  <li>Morning - {morning}</li>
+  <li>Afternoon - {afternoon}</li>
+  <li>Evening - {evening}</li>
 </ul>
 
 <h4>Partial CSS</h4>
@@ -18,27 +18,27 @@
 
 <h4>Data Context</h4>
 <p>Referencing parent template</p>
-<p>{{callParentMethod}} - {{parent.getText}}</p>
+<p>{callParentMethod}</p>
 
 <h4>Reactive Computations & Helpers</h4>
-<p>Today's date is {{formatDate}}, the exact time is <span>{{formatDateTimeSeconds date}}</span></p>
+<p>Today's date is {formatDate}, the exact time is <span>{formatDateTimeSeconds date}</span></p>
 <p>
   Slogan for
-  <b>{{second}} second{{maybePlural second}} is "{{slogan}}"</b>
+  <b>{second} second{maybePlural second} is "{slogan}"</b>
 </p>
 
 <h4>Escaping HTML</h4>
 <p>This is escaped:</p>
-<p>{{getFormattedText}}</p>
+<blockquote>{getFormattedText}</blockquote>
 <p>This is unescaped:</p>
-<p>{{{getFormattedText}}}</p>
+<blockquote>{#html getFormattedText}</blockquote>
 
 <hr>
 <h4>Named Slot "Text"</h4>
-<p>Text slot is "{{slot 'text'}}"</p>
+<p>Text slot is "{slot 'text'}"</p>
 <p>Add a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot" target="_blank">slot element</a> with name text to have it appear here.</p>
 
 <hr>
 <h4>Template Functions</h4>
-{{echo 'hello!'}}
+{echo 'hello!'}
 

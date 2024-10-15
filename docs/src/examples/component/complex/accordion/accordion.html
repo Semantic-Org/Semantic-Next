@@ -1,21 +1,21 @@
 <div class="accordion">
-  {{#each sections}}
+  {#each sections}
     <div class="section">
-      <div class="header" data-index="{{@index}}">
-        <span class="title">{{title}}</span>
+      <div class="header" data-index="{@index}">
+        <span class="title">{title}</span>
         <span class="icon">
-          {{#if expanded}}
+          {#if expanded}
             <ui-icon icon="up-chevron"></ui-icon>
-          {{else}}
+          {else}
             <ui-icon icon="down-chevron"></ui-icon>
-          {{/if}}
+          {/if}
         </span>
       </div>
-      {{#if expanded}}
+      {#if expanded}
         <div class="content">
-          {{content}}
+          {content}
         </div>
-      {{/if}}
+      {/if}
     </div>
-  {{/each}}
+  {/each}
 </div>

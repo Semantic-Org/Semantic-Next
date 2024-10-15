@@ -742,7 +742,7 @@ export const Template = class Template {
       }
       return match;
     }
-    return template._parentTemplate || template?.component?._parentTemplate;
+    return template._parentTemplate || template?.instance?._parentTemplate;
   }
 
   static findChildTemplates(template, templateName) {
