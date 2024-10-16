@@ -1,0 +1,101 @@
+---
+layout: '@layouts/Guide.astro'
+title: Browser Utilities
+icon: globe
+description: API reference for browser-specific utility functions
+---
+
+The Browser utilities provide functions for common tasks in browser environments, such as copying text, handling keyboard events, and fetching text content.
+
+## Functions
+
+### copyText
+
+```javascript
+function copyText(text)
+```
+
+Copies the provided text to the clipboard.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to copy to the clipboard |
+
+#### Example
+
+```javascript
+import { copyText } from '@semantic-ui/utils';
+
+copyText('Hello, world!');
+console.log('Text copied to clipboard');
+```
+
+> **Browser Support** This function uses the modern `navigator.clipboard.writeText` API. Ensure compatibility with your target browsers or provide a fallback for older browsers.
+
+### getKeyFromEvent
+
+```javascript
+function getKeyFromEvent(event)
+```
+
+Extracts a standardized key representation from a keyboard event.
+
+#### Parameters
+
+| Name  | Type        | Description |
+|-------|-------------|-------------|
+| event | KeyboardEvent | The keyboard event object |
+
+#### Returns
+
+A string representing the key pressed, including any modifier keys (e.g., "ctrl+a").
+
+#### Example
+
+```javascript
+import { getKeyFromEvent } from '@semantic-ui/utils';
+
+document.addEventListener('keydown', (event) => {
+  const key = getKeyFromEvent(event);
+  console.log(`Key pressed: ${key}`);
+});
+```
+
+> **Modifier Keys** This function handles modifier keys (Ctrl, Alt, Shift, Meta) and combines them with the pressed key. It also normalizes some key names for consistency.
+
+### getText
+
+```javascript
+async function getText(src)
+```
+
+Fetches text content from a given URL.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| src  | string | The URL to fetch the text from |
+
+#### Returns
+
+A Promise that resolves with the fetched text content.
+
+#### Example
+
+```javascript
+import { defineComponent } from '@semantic-ui/core';
+import { getText } from '@semantic-ui/utils';
+
+const template = await getText('/templates/component.html');
+const css = await getText('/templates/component.css');
+
+defineComponent({
+  template,
+  css
+});
+```
+
+> **Usage Note** This can be used on the server to load static assets like [templates](/templating) or [css](/components/styling)

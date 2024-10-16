@@ -1,0 +1,64 @@
+---
+layout: '@layouts/Guide.astro'
+title: Object Helpers
+icon: box
+description: API reference for object manipulation template helpers
+---
+
+Object helpers provide utilities for working with objects in templates.
+
+## Functions
+
+### arrayFromObject
+Converts an object to an array for use with `{#each}`.
+
+#### Template Syntax
+```sui
+{#each arrayFromObject objectToConvert}
+  {key}: {value}
+{/each}
+```
+
+#### JavaScript Syntax
+```javascript
+arrayFromObject(objectToConvert)
+```
+
+#### Parameters
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| obj    | object | The object to convert |
+
+#### Returns
+`array` - An array of key-value pair objects.
+
+#### Example
+```javascript
+arrayFromObject({ a: 1, b: 2 }) // [{ key: 'a', value: 1 }, { key: 'b', value: 2 }]
+```
+
+### object
+Can be used to pass arbitrary data as an object to other functions.
+
+#### Template Syntax
+```sui
+{someFunction (object key=valueForKey)}
+```
+
+#### JavaScript Syntax
+```javascript
+object({ obj })
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to return |
+
+#### Returns
+`object` - The input object.
+
+#### Example
+```javascript
+object({ key: 'value' }) // { key: 'value' }
+```

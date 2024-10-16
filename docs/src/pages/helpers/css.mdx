@@ -1,0 +1,195 @@
+---
+layout: '@layouts/Guide.astro'
+title: CSS Helpers
+icon: layout
+description: API reference for CSS-related template helpers
+---
+
+CSS helpers provide utilities for working with CSS classes and styles in templates.
+
+## Functions
+
+### classes
+Joins CSS classes, optionally adding a space after the final class name.
+
+#### Template Syntax
+```sui
+<div class="{classes classNamesArray true}">Content</div>
+```
+
+#### JavaScript Syntax
+```javascript
+classes(classNamesArray, spaceAfter)
+```
+
+#### Parameters
+| Name         | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| classNames   | array   |         | Array of class names |
+| spaceAfter   | boolean | true    | Whether to add a space after the final class name |
+
+#### Returns
+`string` - Joined class names.
+
+#### Example
+```javascript
+classes(['btn', 'btn-primary'], true) // "btn btn-primary "
+```
+
+### classIf
+Conditionally applies a CSS class.
+
+#### Template Syntax
+```sui
+<button class="{classIf isActive 'active' 'inactive'}">Click me</button>
+```
+
+#### JavaScript Syntax
+```javascript
+classIf(expr, trueClass, falseClass)
+```
+
+#### Parameters
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| expr      | boolean |         | Condition to evaluate |
+| trueClass | string  | ''      | Class to apply if condition is true |
+| falseClass| string  | ''      | Class to apply if condition is false |
+
+#### Returns
+`string` - The resulting class name with a trailing space.
+
+#### Example
+```javascript
+classIf(true, 'active', 'inactive') // "active "
+```
+
+### classMap
+Applies multiple CSS classes based on conditions.
+
+#### Template Syntax
+```sui
+<div class="{classMap (object active=isActive disabled=isDisabled)}">Content</div>
+```
+
+#### JavaScript Syntax
+```javascript
+classMap(classObj)
+```
+
+#### Parameters
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| classObj | object | Object with class names as keys and conditions as values |
+
+#### Returns
+`string` - Resulting class names with a trailing space.
+
+#### Example
+```javascript
+classMap({ active: true, disabled: false }) // "active "
+```
+
+### activeIf
+Adds 'active' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<li class="{activeIf isCurrentPage}">Menu Item</li>
+```
+
+#### JavaScript Syntax
+```javascript
+activeIf(expr)
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'active ' if condition is true, otherwise an empty string.
+
+#### Example
+```javascript
+activeIf(true) // "active "
+```
+
+### selectedIf
+Adds 'selected' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<option {selectedIf isOptionSelected}>Option</option>
+```
+
+#### JavaScript Syntax
+```javascript
+selectedIf(expr)
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'selected ' if condition is true, otherwise an empty string.
+
+#### Example
+```javascript
+selectedIf(true) // "selected "
+```
+
+### disabledIf
+Adds 'disabled' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<button class="{disabledIf isButtonDisabled}">Submit</button>
+```
+
+#### JavaScript Syntax
+```javascript
+disabledIf(expr)
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'disabled ' if condition is true, otherwise an empty string.
+
+#### Example
+```javascript
+disabledIf(true) // "disabled "
+```
+
+### checkedIf
+Adds 'checked' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<input type="checkbox" class="{checkedIf isOptionChecked}">
+```
+
+#### JavaScript Syntax
+```javascript
+checkedIf(expr)
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'checked ' if condition is true, otherwise an empty string.
+
+#### Example
+```javascript
+checkedIf(true) // "checked "
+```

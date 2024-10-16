@@ -1,0 +1,43 @@
+---
+layout: '@layouts/Guide.astro'
+title: Number Utilities
+icon: hash
+description: API reference for number manipulation functions
+---
+
+The Number utilities provide functions for manipulating and formatting numbers in JavaScript.
+
+## Functions
+
+### roundNumber
+
+```javascript
+function roundNumber(number, digits = 5)
+```
+
+Rounds a number to a specified number of decimal places.
+
+> **Precision Handling** This function uses a scaling factor to handle floating-point precision issues that can occur with simple `Math.round()` calls.
+
+#### Parameters
+
+| Name   | Type   | Default | Description |
+|--------|--------|---------|-------------|
+| number | number |         | The number to round |
+| digits | number | 5       | The number of decimal places to round to |
+
+#### Returns
+
+The rounded number.
+
+#### Example
+
+```javascript
+import { roundNumber } from '@semantic-ui/utils';
+
+console.log(roundNumber(3.14159, 2)); // 3.14
+console.log(roundNumber(1.005, 2)); // 1.01
+console.log(roundNumber(1234.5678)); // 1234.56780 (default 5 digits)
+```
+
+This number utility provides a reliable way to round numbers, addressing common floating-point precision issues in JavaScript.

@@ -270,32 +270,12 @@ export const sidebarMenuFramework = [
     icon: 'tool',
     pages: [
       {
-        name: 'Types',
-        url: '/utils/types'
-      },
-      {
         name: 'Arrays',
         url: '/utils/arrays'
       },
       {
-        name: 'Objects',
-        url: '/utils/objects'
-      },
-      {
-        name: 'Strings',
-        url: '/utils/strings'
-      },
-      {
-        name: 'Regular Expressions',
-        url: '/utils/regex'
-      },
-      {
-        name: 'Looping',
-        url: '/utils/looping'
-      },
-      {
-        name: 'Equality',
-        url: '/utils/equality'
+        name: 'Browser',
+        url: '/utils/browser'
       },
       {
         name: 'Cloning',
@@ -306,12 +286,83 @@ export const sidebarMenuFramework = [
         url: '/utils/crypto'
       },
       {
+        name: 'Dates',
+        url: '/utils/dates'
+      },
+      {
+        name: 'Equality',
+        url: '/utils/equality'
+      },
+      {
         name: 'Errors',
         url: '/utils/errors'
       },
       {
+        name: 'Functions',
+        url: '/utils/functions'
+      },
+      {
+        name: 'Looping',
+        url: '/utils/looping'
+      },
+      {
+        name: 'Numbers',
+        url: '/utils/numbers'
+      },
+      {
+        name: 'Types',
+        url: '/utils/types'
+      },
+      {
+        name: 'Objects',
+        url: '/utils/objects'
+      },
+      {
+        name: 'Regular Expressions',
+        url: '/utils/regex'
+      },
+      {
         name: 'SSR',
         url: '/utils/ssr'
+      },
+      {
+        name: 'Strings',
+        url: '/utils/strings'
+      },
+    ]
+  },
+  {
+    name: 'Template Helpers',
+    url: '/helpers',
+    icon: 'table',
+    pages: [
+      {
+        name: 'Logical Operators',
+        url: '/helpers/logical'
+      },
+      {
+        name: 'Dates',
+        url: '/helpers/dates'
+      },
+      {
+        name: 'Strings',
+        url: '/helpers/strings'
+      },
+      {
+        name: 'Arrays',
+        url: '/helpers/arrays'
+      },
+      {
+        name: 'Objects',
+        url: '/helpers/objects'
+      },
+      {
+        name: 'CSS',
+        url: '/helpers/css'
+      },
+      {
+        name: 'Comparison',
+        url: '/helpers/comparison'
       },
     ]
   },

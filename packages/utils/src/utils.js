@@ -316,11 +316,11 @@ export const wrapFunction = (x) => {
 /*
   Memoize
 */
-export const memoize = (fn) => {
+export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(args))) => {
   const cache = new Map();
 
   return function(...args) {
-    const key = hashCode(JSON.stringify(args));
+    const key = hashFunction(args);
 
     if (cache.has(key)) {
       return cache.get(key);

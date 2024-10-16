@@ -1,17 +1,18 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Type Utilities
+title: Types Utilities
+icon: type
 description: API reference for type checking and manipulation functions
 ---
 
-The utility library provides various helpers for checking `types`
+The Types utilities provide a set of functions for checking and manipulating data types in JavaScript. These functions help in writing more robust and type-safe code.
 
 ## Functions
 
 ### isObject
 
-```typescript
-function isObject(x: any): boolean
+```javascript
+function isObject(x)
 ```
 
 Checks if the given value is an object.
@@ -24,22 +25,22 @@ Checks if the given value is an object.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is an object, false otherwise.
 
 #### Example
 
 ```javascript
 import { isObject } from '@semantic-ui/utils';
 
-isObject({}); // true
-isObject([]); // true
-isObject(null); // false
+console.log(isObject({})); // true
+console.log(isObject([])); // true
+console.log(isObject(null)); // false
 ```
 
 ### isPlainObject
 
-```typescript
-function isPlainObject(x: any): boolean
+```javascript
+function isPlainObject(x)
 ```
 
 Checks if the given value is a plain JavaScript object (created using object literal notation or Object.create(null)).
@@ -52,22 +53,22 @@ Checks if the given value is a plain JavaScript object (created using object lit
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a plain object, false otherwise.
 
 #### Example
 
 ```javascript
 import { isPlainObject } from '@semantic-ui/utils';
 
-isPlainObject({}); // true
-isPlainObject([]); // false
-isPlainObject(new Date()); // false
+console.log(isPlainObject({})); // true
+console.log(isPlainObject([])); // false
+console.log(isPlainObject(new Date())); // false
 ```
 
 ### isString
 
-```typescript
-function isString(x: any): boolean
+```javascript
+function isString(x)
 ```
 
 Checks if the given value is a string.
@@ -80,22 +81,22 @@ Checks if the given value is a string.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a string, false otherwise.
 
 #### Example
 
 ```javascript
 import { isString } from '@semantic-ui/utils';
 
-isString("hello"); // true
-isString(new String("hello")); // true
-isString(123); // false
+console.log(isString("hello")); // true
+console.log(isString(new String("hello"))); // true
+console.log(isString(123)); // false
 ```
 
 ### isBoolean
 
-```typescript
-function isBoolean(x: any): boolean
+```javascript
+function isBoolean(x)
 ```
 
 Checks if the given value is a boolean.
@@ -108,22 +109,22 @@ Checks if the given value is a boolean.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a boolean, false otherwise.
 
 #### Example
 
 ```javascript
 import { isBoolean } from '@semantic-ui/utils';
 
-isBoolean(true); // true
-isBoolean(false); // true
-isBoolean(1); // false
+console.log(isBoolean(true)); // true
+console.log(isBoolean(false)); // true
+console.log(isBoolean(1)); // false
 ```
 
 ### isNumber
 
-```typescript
-function isNumber(x: any): boolean
+```javascript
+function isNumber(x)
 ```
 
 Checks if the given value is a number.
@@ -136,22 +137,22 @@ Checks if the given value is a number.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a number, false otherwise.
 
 #### Example
 
 ```javascript
 import { isNumber } from '@semantic-ui/utils';
 
-isNumber(123); // true
-isNumber(NaN); // true
-isNumber("123"); // false
+console.log(isNumber(123)); // true
+console.log(isNumber(NaN)); // true
+console.log(isNumber("123")); // false
 ```
 
 ### isArray
 
-```typescript
-function isArray(x: any): boolean
+```javascript
+function isArray(x)
 ```
 
 Checks if the given value is an array.
@@ -164,22 +165,22 @@ Checks if the given value is an array.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is an array, false otherwise.
 
 #### Example
 
 ```javascript
 import { isArray } from '@semantic-ui/utils';
 
-isArray([]); // true
-isArray([1, 2, 3]); // true
-isArray({}); // false
+console.log(isArray([])); // true
+console.log(isArray([1, 2, 3])); // true
+console.log(isArray({})); // false
 ```
 
 ### isBinary
 
-```typescript
-function isBinary(x: any): boolean
+```javascript
+function isBinary(x)
 ```
 
 Checks if the given value is a binary (Uint8Array).
@@ -192,21 +193,21 @@ Checks if the given value is a binary (Uint8Array).
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a binary, false otherwise.
 
 #### Example
 
 ```javascript
 import { isBinary } from '@semantic-ui/utils';
 
-isBinary(new Uint8Array()); // true
-isBinary(new ArrayBuffer(8)); // false
+console.log(isBinary(new Uint8Array())); // true
+console.log(isBinary(new ArrayBuffer(8))); // false
 ```
 
 ### isFunction
 
-```typescript
-function isFunction(x: any): boolean
+```javascript
+function isFunction(x)
 ```
 
 Checks if the given value is a function.
@@ -219,25 +220,25 @@ Checks if the given value is a function.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a function, false otherwise.
 
 #### Example
 
 ```javascript
 import { isFunction } from '@semantic-ui/utils';
 
-isFunction(() => {}); // true
-isFunction(function() {}); // true
-isFunction({}); // false
+console.log(isFunction(() => {})); // true
+console.log(isFunction(function() {})); // true
+console.log(isFunction({})); // false
 ```
 
 ### isPromise
 
-```typescript
-function isPromise(x: any): boolean
+```javascript
+function isPromise(x)
 ```
 
-Checks if the given value is a promise.
+Checks if the given value is a Promise.
 
 #### Parameters
 
@@ -247,22 +248,52 @@ Checks if the given value is a promise.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a Promise, false otherwise.
 
 #### Example
 
 ```javascript
 import { isPromise } from '@semantic-ui/utils';
 
-isPromise(Promise.resolve()); // true
-isPromise({ then: () => {} }); // true
-isPromise({}); // false
+console.log(isPromise(Promise.resolve())); // true
+console.log(isPromise({ then: () => {} })); // true
+console.log(isPromise({})); // false
+```
+
+### isArguments
+
+```javascript
+function isArguments(obj)
+```
+
+Checks if the given value is an arguments object.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| obj  | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is an arguments object, false otherwise.
+
+#### Example
+
+```javascript
+import { isArguments } from '@semantic-ui/utils';
+
+function test() {
+  console.log(isArguments(arguments)); // true
+}
+
+console.log(isArguments([])); // false
 ```
 
 ### isDOM
 
-```typescript
-function isDOM(element: any): boolean
+```javascript
+function isDOM(element)
 ```
 
 Checks if the given value is a DOM element.
@@ -275,25 +306,54 @@ Checks if the given value is a DOM element.
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is a DOM element, false otherwise.
 
 #### Example
 
 ```javascript
 import { isDOM } from '@semantic-ui/utils';
 
-isDOM(document.body); // true
-isDOM(document.createElement('div')); // true
-isDOM({}); // false
+console.log(isDOM(document.body)); // true
+console.log(isDOM(document.createElement('div'))); // true
+console.log(isDOM({})); // false
+```
+
+### isNode
+
+```javascript
+function isNode(el)
+```
+
+Checks if the given value is a DOM node.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| el   | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is a DOM node, false otherwise.
+
+#### Example
+
+```javascript
+import { isNode } from '@semantic-ui/utils';
+
+console.log(isNode(document.createElement('div'))); // true
+console.log(isNode({})); // false
 ```
 
 ### isEmpty
 
-```typescript
-function isEmpty(x: any): boolean
+```javascript
+function isEmpty(x)
 ```
 
-Checks if the given value is empty (null, undefined, empty string, empty array, or empty object).
+Checks if the given value is empty'ish (null, undefined, empty string, empty array, or empty object).
+
+> This is useful in scenarios where you want to treat any general empty value as non existent.
 
 #### Parameters
 
@@ -303,37 +363,39 @@ Checks if the given value is empty (null, undefined, empty string, empty array, 
 
 #### Returns
 
-`boolean`
+`boolean` - True if the value is empty, false otherwise.
 
 #### Example
 
 ```javascript
 import { isEmpty } from '@semantic-ui/utils';
 
-isEmpty(null); // true
-isEmpty([]); // true
-isEmpty({}); // true
-isEmpty(""); // true
-isEmpty([1, 2, 3]); // false
+console.log(isEmpty(null)); // true
+console.log(isEmpty([])); // true
+console.log(isEmpty({})); // true
+console.log(isEmpty("")); // true
+console.log(isEmpty([1, 2, 3])); // false
 ```
 
 ### isClassInstance
 
-```typescript
-function isClassInstance(obj: any): boolean
+```javascript
+function isClassInstance(obj)
 ```
 
 Checks if the given object is an instance of a custom class (not a built-in object).
+
+> **Built-in Types Exclusion** This helper is specifically for determining whether a variable is an instance of a custom class. It will return `false` for built-in types like Object, Array, Date, etc., focusing on identifying instances of custom classes.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| obj  | any  | Any object to check |
+| obj  | any  | The object to check |
 
 #### Returns
 
-`boolean`
+`boolean` - True if the object is an instance of a custom class, false otherwise.
 
 #### Example
 
@@ -341,43 +403,9 @@ Checks if the given object is an instance of a custom class (not a built-in obje
 import { isClassInstance } from '@semantic-ui/utils';
 
 class MyClass {}
-isClassInstance(new MyClass()); // true
-isClassInstance({}); // false
-isClassInstance(new Date()); // false
+const myInstance = new MyClass();
+
+console.log(isClassInstance(myInstance)); // true
+console.log(isClassInstance({})); // false
+console.log(isClassInstance(new Date())); // false
 ```
-
-## Constants
-
-### isServer
-
-A boolean constant indicating whether the current environment is server-side.
-
-- **Type:** `boolean`
-
-#### Example
-
-```javascript
-import { isServer } from '@semantic-ui/utils';
-
-if (isServer) {
-  // Perform server-side specific operations
-}
-```
-
-### isClient
-
-A boolean constant indicating whether the current environment is client-side (browser).
-
-- **Type:** `boolean`
-
-#### Example
-
-```javascript
-import { isClient } from '@semantic-ui/utils';
-
-if (isClient) {
-  // Perform client-side specific operations
-}
-```
-
-These type checking utilities provide a robust set of tools for validating and working with different data types in JavaScript, enhancing code reliability and reducing type-related errors.

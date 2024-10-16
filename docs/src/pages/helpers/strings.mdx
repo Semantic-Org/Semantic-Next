@@ -1,0 +1,166 @@
+---
+layout: '@layouts/Guide.astro'
+title: String Helpers
+icon: type
+description: API reference for string manipulation template helpers
+---
+
+String helpers provide utilities for manipulating and formatting strings in templates.
+
+## Functions
+
+### stringify
+Converts a value to JSON string.
+
+#### Template Syntax
+```sui
+{stringify objectToStringify}
+```
+
+#### JavaScript Syntax
+```javascript
+stringify(objectToStringify)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to stringify |
+
+#### Returns
+`string` - JSON string representation of the input.
+
+#### Example
+```javascript
+stringify({ name: "John", age: 30 }) // '{"name":"John","age":30}'
+```
+
+### concat
+Concatenates all arguments.
+
+#### Template Syntax
+```sui
+{concat firstName ' ' lastName}
+```
+
+#### JavaScript Syntax
+```javascript
+concat(...args)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| args | ...any | Values to concatenate |
+
+#### Returns
+`string` - Concatenated string of all arguments.
+
+#### Example
+```javascript
+concat("Hello", " ", "World") // "Hello World"
+```
+
+### capitalize
+Capitalizes the first letter of text.
+
+#### Template Syntax
+```sui
+{capitalize textToCapitalize}
+```
+
+#### JavaScript Syntax
+```javascript
+capitalize(textToCapitalize)
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to capitalize |
+
+#### Returns
+`string` - The input text with the first letter capitalized.
+
+#### Example
+```javascript
+capitalize("hello world") // "Hello world"
+```
+
+### titleCase
+Converts text to title case.
+
+#### Template Syntax
+```sui
+{titleCase textToTitleCase}
+```
+
+#### JavaScript Syntax
+```javascript
+titleCase(textToTitleCase)
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to convert |
+
+#### Returns
+`string` - The input text converted to title case.
+
+#### Example
+```javascript
+titleCase("hello world") // "Hello World"
+```
+
+### tokenize
+Tokenizes a string.
+
+#### Template Syntax
+```sui
+{tokenize stringToTokenize}
+```
+
+#### JavaScript Syntax
+```javascript
+tokenize(stringToTokenize)
+```
+
+#### Parameters
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string to tokenize |
+
+#### Returns
+`string` - The tokenized string.
+
+#### Example
+```javascript
+tokenize("Hello World!") // "hello-world"
+```
+
+### escapeHTML
+Escapes HTML special characters in a string.
+
+#### Template Syntax
+```sui
+{escapeHTML stringToEscape}
+```
+
+#### JavaScript Syntax
+```javascript
+escapeHTML(stringToEscape)
+```
+
+#### Parameters
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string to escape |
+
+#### Returns
+`string` - The input string with HTML special characters escaped.
+
+#### Example
+```javascript
+escapeHTML("<script>alert('XSS')</script>") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"
+```

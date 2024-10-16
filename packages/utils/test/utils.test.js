@@ -1272,6 +1272,37 @@ describe('function utilities', () => {
       expect(result3).toBe(8);
       expect(originalFunction).toHaveBeenCalledTimes(2);
     });
+    it('should allow custom hashing function', () => {
+      const originalFunction = vi.fn((obj) => obj.a + obj.b);
+      const customHash = (args) => args[0].id;
+      const memoizedFunction = memoize(originalFunction, customHash);
+
+      const result1 = memoizedFunction({id: 1, a: 2, b: 3});
+      expect(result1).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction({id: 1, a: 3, b: 4});
+      expect(result2).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same id
+
+      const result3 = memoizedFunction({id: 2, a: 2, b: 3});
+      expect(result3).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(2); // Should be called again due to different id
+    });
+
+    it('should handle edge cases with custom hashing', () => {
+      const originalFunction = vi.fn((a, b) => a + b);
+      const alwaysSameHash = () => 'same';
+      const memoizedFunction = memoize(originalFunction, alwaysSameHash);
+
+      const result1 = memoizedFunction(2, 3);
+      expect(result1).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction(4, 5);
+      expect(result2).toBe(5); // Note: This is the memoized result, not 9
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same hash
+    });
   });
 
   describe('debounce', () => {

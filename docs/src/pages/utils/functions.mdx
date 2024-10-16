@@ -1,0 +1,171 @@
+---
+layout: '@layouts/Guide.astro'
+title: Function Utilities
+icon: command
+description: API reference for function manipulation utility functions
+---
+
+The Function utilities provide helper functions for creating, wrapping, and optimizing functions in JavaScript. These utilities can help improve performance and simplify common function-related tasks.
+
+### noop
+
+```javascript
+function noop()
+```
+
+A function that does nothing (no operation).
+
+> **Performance Optimization** The primary purpose of `noop` is to provide a reusable, empty function that avoids the performance memory and performance overhead of creating new empty functions. This is particularly beneficial when used as a default value for optional function arguments or callbacks.
+
+#### Returns
+
+`undefined`
+
+#### Example
+
+```javascript
+import { noop } from '@semantic-ui/utils';
+
+// this reuses the same function which is a micro-optimization
+function someFunction(callback = noop) {
+  callback();
+}
+
+// This creates a new empty function each time
+function lessEfficientFunction(callback = function() {}) {
+  callback();
+}
+```
+
+### wrapFunction
+
+```javascript
+function wrapFunction(x)
+```
+
+Ensures that the given value is a function. If it's not, it returns a function that returns the value.
+
+> **When to use** Wrap function is helpful if you are unsure a function is defined but you want to call it. It can be simpler in some cases than type checking on a function.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| x    | any  | The value to wrap |
+
+#### Returns
+
+A function that either calls the input function or returns the input value.
+
+#### Example
+
+```javascript
+import { wrapFunction } from '@semantic-ui/utils';
+
+const f1 = wrapFunction(() => 'Hello');
+console.log(f1()); // 'Hello'
+
+const f2 = wrapFunction('World');
+console.log(f2()); // 'World'
+```
+
+### memoize
+
+```javascript
+function memoize(fn, hashFunction)
+```
+
+Creates a memoized version of a function, caching its results for repeated calls with the same arguments.
+
+> **Custom Hashing** This implementation allows for a custom hashing function, enabling more control over how arguments are compared for caching. The default hashing function uses `JSON.stringify` and a hash code function, which may not be suitable for all use cases, especially with complex objects or circular references.
+
+#### Parameters
+
+| Name         | Type     | Description |
+|--------------|----------|-------------|
+| fn           | function | The function to memoize |
+| hashFunction | function | (Optional) A function to generate a cache key from the arguments |
+
+#### Returns
+
+A new function that caches results based on its arguments.
+
+#### Example
+
+```javascript
+import { memoize, hashCode } from '@semantic-ui/utils';
+
+// Using default hashing
+const expensiveOperation = (a, b) => {
+  console.log('Calculating...');
+  return a + b;
+};
+
+const memoizedOperation = memoize(expensiveOperation);
+
+console.log(memoizedOperation(2, 3)); // Logs: Calculating... 5
+console.log(memoizedOperation(2, 3)); // Logs: 5 (no recalculation)
+
+// Using custom hashing
+const customHashOperation = (obj) => {
+  console.log('Processing object...');
+  return obj.a + obj.b;
+};
+
+const customHash = (args) => args[0].id; // Hash based on object id
+
+const memoizedCustomOperation = memoize(customHashOperation, customHash);
+
+console.log(memoizedCustomOperation({id: 1, a: 2, b: 3})); // Logs: Processing object... 5
+console.log(memoizedCustomOperation({id: 1, a: 2, b: 3})); // Logs: 5 (no reprocessing)
+console.log(memoizedCustomOperation({id: 2, a: 3, b: 4})); // Logs: Processing object... 7
+```
+
+### debounce
+
+```javascript
+function debounce(fn, options)
+```
+
+Creates a debounced version of a function, which will only invoke the function after it stops being called for a specified time period.
+
+#### Parameters
+
+| Name    | Type                | Description |
+|---------|---------------------|-------------|
+| fn      | function            | The function to debounce |
+| options | number or object    | Delay in milliseconds or options object |
+
+##### Options Object
+
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| delay     | number  | 200     | Delay in milliseconds |
+| immediate | boolean | false   | If true, trigger the function on the leading edge instead of the trailing edge |
+
+#### Returns
+
+A new debounced function.
+
+#### Example
+
+```javascript
+import { debounce } from '@semantic-ui/utils';
+
+const expensiveOperation = () => {
+  console.log('Calculating...');
+};
+
+const debouncedOperation = debounce(expensiveOperation, 300);
+
+// Rapid calls
+debouncedOperation();
+debouncedOperation();
+debouncedOperation();
+
+// Only one 'Calculating...' will be logged after 300ms
+```
+
+> **Cancellation** The debounced function has a `cancel` method that can be used to cancel delayed invocations.
+
+These function utilities provide powerful tools for manipulating and optimizing function behavior in JavaScript. They can help improve performance, reduce unnecessary computations, and simplify common programming patterns.

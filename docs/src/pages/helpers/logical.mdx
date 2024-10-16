@@ -1,0 +1,192 @@
+---
+layout: '@layouts/Guide.astro'
+title: Logical Helpers
+icon: toggle-left
+description: API reference for logical template helpers
+---
+
+Logical helpers provide utilities for conditional checks and logical operations in templates.
+
+## Functions
+
+### exists
+Checks if a value is not empty.
+
+#### Template Syntax
+```sui
+{#if exists valueToCheck}
+  Value exists
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+exists(valueToCheck)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to check |
+
+#### Returns
+`boolean` - `true` if the value is not empty, `false` otherwise.
+
+#### Example
+```javascript
+exists([1, 2, 3]) // true
+exists([]) // false
+exists(null) // false
+```
+
+### isEmpty
+Checks if a value is empty.
+
+#### Template Syntax
+```sui
+{#if isEmpty collectionToCheck}
+  Collection is empty
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+isEmpty(collectionToCheck)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to check |
+
+#### Returns
+`boolean` - `true` if the value is empty, `false` otherwise.
+
+#### Example
+```javascript
+isEmpty([]) // true
+isEmpty({}) // true
+isEmpty('') // true
+isEmpty([1, 2, 3]) // false
+```
+
+### hasAny
+Checks if an array has any elements.
+
+#### Template Syntax
+```sui
+{#if hasAny arrayToCheck}
+  Array has elements
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+hasAny(arrayToCheck)
+```
+
+#### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| a    | array | The array to check |
+
+#### Returns
+`boolean` - `true` if the array has elements, `false` otherwise.
+
+#### Example
+```javascript
+hasAny([1, 2, 3]) // true
+hasAny([]) // false
+```
+
+### both
+Checks if both a and b are truthy.
+
+#### Template Syntax
+```sui
+{#if both conditionA conditionB}
+  Both conditions are true
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+both(conditionA, conditionB)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to check |
+| b    | any  | Second value to check |
+
+#### Returns
+`boolean` - `true` if both values are truthy, `false` otherwise.
+
+#### Example
+```javascript
+both(true, 1) // true
+both(true, false) // false
+both(0, 'string') // false
+```
+
+### either
+Checks if either a or b is truthy.
+
+#### Template Syntax
+```sui
+{#if either conditionA conditionB}
+  At least one condition is true
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+either(conditionA, conditionB)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to check |
+| b    | any  | Second value to check |
+
+#### Returns
+`boolean` - `true` if either value is truthy, `false` otherwise.
+
+#### Example
+```javascript
+either(true, false) // true
+either(false, 1) // true
+either(0, '') // false
+```
+
+### maybe
+Returns trueExpr if expr is truthy, falseExpr otherwise.
+
+#### Template Syntax
+```sui
+{maybe condition 'True result' 'False result'}
+```
+
+#### JavaScript Syntax
+```javascript
+maybe(condition, trueResult, falseResult)
+```
+
+#### Parameters
+| Name     | Type | Description |
+|----------|------|-------------|
+| expr     | any  | The expression to evaluate |
+| trueExpr | any  | Value to return if expr is truthy |
+| falseExpr| any  | Value to return if expr is falsy |
+
+#### Returns
+The value of `trueExpr` if `expr` is truthy, `falseExpr` otherwise.
+
+#### Example
+```javascript
+maybe(true, 'Yes', 'No') // 'Yes'
+maybe(false, 'Yes', 'No') // 'No'
+maybe(1 > 0, 'Greater', 'Less or Equal') // 'Greater'
+```

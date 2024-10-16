@@ -1,0 +1,56 @@
+---
+layout: '@layouts/Guide.astro'
+title: Date Utilities
+icon: calendar
+description: API reference for date manipulation and formatting functions
+---
+
+The Date utilities provide functions for formatting and manipulating dates in JavaScript.
+
+## Functions
+
+### formatDate
+
+```javascript
+function formatDate(date, format = 'LLL', options = {})
+```
+
+Formats a date according to the specified format string and options.
+
+> **International Support** This function uses `Intl.DateTimeFormat` internally, please refer to the [associated docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat) for details on timezone and formatting usage.
+
+> **Local Timezone Usage** When the 'local' keyword is used for the timezone option, the function will use the local timezone of the environment where the code is running. This is particularly useful for displaying dates in the user's local time without needing to detect the timezone programmatically.
+
+
+#### Parameters
+
+| Name    | Type   | Default | Description |
+|---------|--------|---------|-------------|
+| date    | Date   |         | The date to format |
+| format  | string | 'LLL'   | The format string (e.g., 'YYYY-MM-DD', 'LT', 'LL') |
+| options | object | {}      | Additional formatting options |
+
+##### Options
+
+| Name     | Type    | Default   | Description |
+|----------|---------|-----------|-------------|
+| locale   | string  | 'default' | The locale to use for formatting |
+| hour12   | boolean | true      | Whether to use 12-hour time |
+| timezone | string  | 'UTC'     | The timezone to use. Use 'local' for the local timezone. |
+
+#### Returns
+
+A formatted date string.
+
+#### Example
+
+```javascript
+import { formatDate } from '@semantic-ui/utils';
+
+const date = new Date('2023-05-15T14:30:00Z');
+
+console.log(formatDate(date)); // "May 15, 2023 2:30 PM"
+console.log(formatDate(date, 'YYYY-MM-DD')); // "2023-05-15"
+console.log(formatDate(date, 'LT', { timezone: 'America/New_York' })); // "10:30 AM"
+console.log(formatDate(date, 'LT', { timezone: 'local' })); // Formats using the local timezone
+```

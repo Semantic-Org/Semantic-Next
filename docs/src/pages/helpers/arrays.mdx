@@ -1,0 +1,97 @@
+---
+layout: '@layouts/Guide.astro'
+title: Array Helpers
+icon: list
+description: API reference for array manipulation template helpers
+---
+
+Array helpers provide utilities for working with arrays in templates.
+
+## Functions
+
+### join
+Joins array elements with a delimiter.
+
+#### Template Syntax
+```sui
+{join itemsArray ', ' true}
+```
+
+#### JavaScript Syntax
+```javascript
+join(itemsArray, delimiter, spaceAfter)
+```
+
+#### Parameters
+| Name       | Type    | Default | Description |
+|------------|---------|---------|-------------|
+| array      | array   | []      | The array to join |
+| delimiter  | string  | ' '     | The delimiter to use |
+| spaceAfter | boolean | false   | Whether to add a space after the joined string |
+
+#### Returns
+`string` - The joined string.
+
+#### Example
+```javascript
+join(['apple', 'banana', 'cherry'], ', ', true) // "apple, banana, cherry "
+```
+
+### joinComma
+Joins array elements with commas.
+
+#### Template Syntax
+```sui
+{joinComma itemsArray true false}
+```
+
+#### JavaScript Syntax
+```javascript
+joinComma(itemsArray, oxford, quotes)
+```
+
+#### Parameters
+| Name   | Type    | Default | Description |
+|--------|---------|---------|-------------|
+| array  | array   | []      | The array to join |
+| oxford | boolean | false   | Whether to use Oxford comma |
+| quotes | boolean | false   | Whether to wrap items in quotes |
+
+#### Returns
+`string` - The comma-joined string.
+
+#### Example
+```javascript
+joinComma(['apple', 'banana', 'cherry'], true, false) // "apple, banana, and cherry"
+```
+
+### range
+Returns an array with a range of numbers.
+
+#### Template Syntax
+```sui
+{#each number in range 1 6}
+  {number}
+{/each}
+```
+
+#### JavaScript Syntax
+```javascript
+range(start, stop, step)
+```
+
+#### Parameters
+| Name  | Type   | Default | Description |
+|-------|--------|---------|-------------|
+| start | number |         | The start of the range |
+| stop  | number |         | The end of the range |
+| step  | number | 1       | The step between numbers |
+
+#### Returns
+`array` - An array containing the range of numbers.
+
+#### Example
+```javascript
+range(1, 6) // [1, 2, 3, 4, 5]
+range(0, 10, 2) // [0, 2, 4, 6, 8]
+```
