@@ -1,0 +1,231 @@
+---
+layout: '@layouts/Guide.astro'
+title: Basic Usage
+icon: box
+description: Getting started with Query and its core functionality
+---
+
+## Constructor
+
+The Query constructor is the foundation of the library, allowing you to create Query objects from various types of inputs.
+
+> **Web Component Support** - Semantic exports two separate helpers for handling DOM `$` and Shadow DOM `$$` that will recursively cross shadow boundaries. Note: `$$` is the equivalent of `$('foo', { pierceShadow: true})`
+
+### Arguments
+
+| Name     | Type                                        | Description                    |
+|----------|--------------------------------------------|--------------------------------|
+| selector | string \| Element \| NodeList \| Array\<Element\> \| Window | The selector or elements to query |
+| options  | object                                     | Configuration options          |
+
+### Options
+
+| Name         | Type    | Default   | Description                                      |
+|--------------|---------|-----------|--------------------------------------------------|
+| root         | Element | document  | The root element to start the query from         |
+| pierceShadow | boolean | false     | Whether to pierce through Shadow DOM boundaries  |
+
+## DOM Examples
+
+### DOM Selectors
+
+You can pass in a string selector to select the matching elements in the page.
+> Note: Selecting elements using Query performs identically to `querySelectorAll`.
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const $divs = $('div');
+```
+
+### HTML Strings
+
+You can pass through html directly into `$` to create new nodes.
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const $newElement = $('<div class="example">Hello, world!</div>');
+```
+
+### DOM Element
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const element = document.getElementById('example');
+const $element = $(element);
+```
+
+### NodeList or HTMLCollection
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const nodeList = document.querySelectorAll('p');
+const $paragraphs = $(nodeList);
+```
+
+### Element Arrays
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const elements = [document.body, document.head];
+const $bodyAndHead = $(elements);
+```
+
+### DocumentFragment
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const fragment = document.createDocumentFragment();
+fragment.appendChild(document.createElement('div'));
+const $fragmentContent = $(fragment);
+```
+
+#### Globals
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const $window = $(window);
+```
+
+> **Memory Usage** - When creating a Query object for `window` or `globalThis`, Query uses a proxy object to avoid keeping a full copy of the global object in memory. This optimization helps reduce the memory footprint of your application.
+
+## Shadow DOM Examples
+
+Query has special support for piercing shadow DOM boundaries using `$$` or `pierceShadow`. This can allow you to access content that might be difficult to access normally using standard DOM APIs.
+
+### Querying Shadow DOM
+
+```javascript
+import { $$ } from '@semantic-ui/query';
+
+const $shadowContent = $$('my-component .shadow-content');
+```
+
+### Selecting Slotted Content
+
+```javascript
+import { $$ } from '@semantic-ui/query';
+
+const $slottedContent = $$('my-component .slotted-content');
+```
+
+
+
+## The Query Object
+
+When you use the `$()` or `$$()` function, it returns a Query object. This object contains a collection of DOM elements that have been selected from the document or created from an HTML string.
+
+### Properties of a Query Object
+
+- **length**: The number of elements in the Query object.
+- **selector**: The original selector used to create the Query object (if applicable).
+- **options**: The options used when creating the Query object.
+
+
+### Chaining
+
+Query methods can be chained for concise and readable code:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('div')
+  .addClass('highlight')
+  .css('color', 'red')
+  .on('click', function() {
+    console.log('Clicked!');
+  });
+```
+
+### Iteration
+
+Use the `each` method to iterate over selected elements:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('p').each(function(el, index) {
+  console.log(`Paragraph ${index}:`, el.textContent);
+});
+```
+
+### Manipulation
+
+You can use dedicated helpers like `filter` and `map` to manipulate Query content.
+
+> For more information see the dedicated page for [utilities](query/utilities)
+
+#### Map
+```javascript
+import { $ } from '@semantic-ui/query';
+const inputValues = $('input').map(input => input.val())
+```
+
+#### Filter
+```javascript
+import { $ } from '@semantic-ui/query';
+const userValues = $('input').filter(input => input.val() === '');
+```
+
+### Accessing Elements
+
+You can access a single DOM element using the `el` helper.
+
+
+#### Single Element
+You can access a single element using `el`
+```javascript
+import { $ } from '@semantic-ui/query';
+const divEl = $('div').el();
+```
+
+#### Single Index
+To get a particular index you can use `get`
+
+```javascript
+import { $ } from '@semantic-ui/query';
+const divEl = $('div').get(1);
+```
+
+### Empty Query Objects
+
+A Query object may be empty if no elements match the selector or if all elements have been filtered out by chained methods. This allows chaining to continue unabated even with no results.
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('.non-existent').css('color', 'red'); // No effect if the class doesn't exist
+```
+
+### Differences from Native Arrays
+
+The Query Object is array-like meaning you can also access elements idiosyncratically using bracket notation `$('div')[0]`, however this is not recommended, as many other array functions like `push` or `pop` are not supported
+
+## Custom Root
+
+You can use the `root` option to change the root which is used for query. This can be useful when using `Query` in custom implementations scoped to an element.
+
+> **SUI Components** - Semantic UI components use this technique when returning `$` and `$$` [inside components](/components/dom#using-query-in-components)
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+export const MyClass = class MyClass {
+
+  $(selector) {
+    // limit query to only searching this web component
+    return $(selector, { root: this.renderRoot });
+  }
+};
+
+
+myQuery = new Query()
+
+const $elements = $$('div', { root: document.body, pierceShadow: true });
+```

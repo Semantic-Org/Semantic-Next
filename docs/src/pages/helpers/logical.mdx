@@ -9,35 +9,11 @@ Logical helpers provide utilities for conditional checks and logical operations 
 
 ## Functions
 
-### exists
-Checks if a value is not empty.
-
-#### Template Syntax
-```sui
-{#if exists valueToCheck}
-  Value exists
-{/if}
-```
-
-#### Parameters
-| Name | Type | Description |
-|------|------|-------------|
-| a    | any  | The value to check |
-
-#### Returns
-`boolean` - `true` if the value is not empty, `false` otherwise.
-
-#### Example
-```sui
-{#if exists user.name}
-  <p>Welcome, {user.name}!</p>
-{else}
-  <p>Welcome, guest!</p>
-{/if}
-```
 
 ### isEmpty
 Checks if a value is empty.
+
+> Note: empty includes falsey values like `false`, `0` `undefined` etc.
 
 #### Template Syntax
 ```sui
@@ -64,6 +40,35 @@ Checks if a value is empty.
       <li>{this.title}</li>
     {/each}
   </ul>
+{/if}
+```
+
+### exists
+Checks if a value is not empty.
+
+> Note: the same conditions as `isEmpty` apply, all falsey values will return `false`
+
+#### Template Syntax
+```sui
+{#if exists valueToCheck}
+  Value exists
+{/if}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to check |
+
+#### Returns
+`boolean` - `true` if the value is not empty, `false` otherwise.
+
+#### Example
+```sui
+{#if exists user.name}
+  <p>Welcome, {user.name}!</p>
+{else}
+  <p>Welcome, guest!</p>
 {/if}
 ```
 

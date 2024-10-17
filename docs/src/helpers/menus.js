@@ -230,6 +230,10 @@ export const sidebarMenuFramework = [
     icon: 'mouse-pointer',
     pages: [
       {
+        name: 'Basic Usage',
+        url: '/query/basic'
+      },
+      {
         name: 'DOM Traversal',
         url: '/query/dom'
       },
