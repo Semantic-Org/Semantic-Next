@@ -79,9 +79,8 @@ export class Query {
     ;
   }
 
-  /* Note this is a naive implementation for performance reasons
-     we will add all elements across shadow root boundaries but without
-     matching complex selectors that would match ACROSS shadow root boundaries
+  /* we will add all elements across shadow root boundaries while matching
+     intermediate selectors at shadow boundaries
   */
   querySelectorAllDeep(root, selector, includeRoot = true) {
     let elements = [];
@@ -112,7 +111,7 @@ export class Query {
       queriedRoot = false;
     }
 
-    const addElements = (node) => {
+    const addElements = (node, selector) => {
       if(domSelector && (node === selector || node.contains)) {
         if(node.contains(selector)) {
           elements.push(selector);
@@ -125,7 +124,21 @@ export class Query {
       }
     };
 
-    const findElements = (node, query) => {
+    const getRemainingSelector = (el, selector) => {
+      const parts = selector.split(' ');
+      let partialSelector;
+      let remainingSelector;
+      each(parts, (part, index) => {
+        partialSelector = parts.slice(0, index + 1).join(' ');
+        if(el.matches(partialSelector)) {
+          remainingSelector = parts.slice(index + 1).join(' ');
+          return;
+        }
+      });
+      return remainingSelector || selector;
+    };
+
+    const findElements = (node, selector, query) => {
 
       // if we are querying for a DOM element we can stop searching once we've found it
       if(domFound) {
@@ -135,24 +148,26 @@ export class Query {
       // if root element did not support querySelectorAll
       // we query each child node then stop
       if(query === true) {
-        addElements(node);
+        addElements(node, selector);
         queriedRoot = true;
       }
 
       // query at each shadow root
       if (node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
-        addElements(node.shadowRoot);
-        findElements(node.shadowRoot, !queriedRoot);
+        selector = getRemainingSelector(node, selector);
+        addElements(node.shadowRoot, selector);
+        findElements(node.shadowRoot, selector, !queriedRoot);
       }
 
       if(node.assignedNodes) {
-        node.assignedNodes().forEach((node) => findElements(node, queriedRoot));
+        selector = getRemainingSelector(node, selector);
+        node.assignedNodes().forEach((node) => findElements(node, selector, queriedRoot));
       }
       if (node.childNodes.length) {
-        node.childNodes.forEach((node) => findElements(node, queriedRoot));
+        node.childNodes.forEach((node) => findElements(node, selector, queriedRoot));
       }
     };
-    findElements(root);
+    findElements(root, selector);
     return [...new Set(elements)];
   }
 

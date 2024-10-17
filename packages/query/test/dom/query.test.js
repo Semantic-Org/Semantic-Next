@@ -1,4 +1,4 @@
-import { describe, beforeEach, afterEach, expect, it, vi } from 'vitest';
+import { describe, beforeEach, afterEach, beforeAll, expect, it, vi } from 'vitest';
 import { $, $$, Query, exportGlobals, restoreGlobals, useAlias } from '@semantic-ui/query';
 
 describe('query', () => {
