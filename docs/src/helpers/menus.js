@@ -19,12 +19,12 @@ export const topbarMenu =  [
     name: 'Tech Guide',
     url: '/components',
   },
-  /*
+
   {
     _id: 'api',
     name: 'API Reference',
     url: '/api',
-  },*/
+  },
   {
     _id: 'examples',
     name: 'Examples',
@@ -337,32 +337,44 @@ export const sidebarMenuFramework = [
     icon: 'table',
     pages: [
       {
-        name: 'Logical Operators',
-        url: '/helpers/logical'
-      },
-      {
-        name: 'Dates',
-        url: '/helpers/dates'
-      },
-      {
-        name: 'Strings',
-        url: '/helpers/strings'
-      },
-      {
         name: 'Arrays',
         url: '/helpers/arrays'
       },
       {
-        name: 'Objects',
-        url: '/helpers/objects'
+        name: 'Comparison',
+        url: '/helpers/comparison'
       },
       {
         name: 'CSS',
         url: '/helpers/css'
       },
       {
-        name: 'Comparison',
-        url: '/helpers/comparison'
+        name: 'Dates',
+        url: '/helpers/dates'
+      },
+      {
+        name: 'Debug',
+        url: '/helpers/debug'
+      },
+      {
+        name: 'Logical Operators',
+        url: '/helpers/logical'
+      },
+      {
+        name: 'Numeric',
+        url: '/helpers/numeric'
+      },
+      {
+        name: 'Objects',
+        url: '/helpers/objects'
+      },
+      {
+        name: 'Reactivity',
+        url: '/helpers/reactivity'
+      },
+      {
+        name: 'Strings',
+        url: '/helpers/strings'
       },
     ]
   },

@@ -17,11 +17,6 @@ Converts a value to JSON string.
 {stringify objectToStringify}
 ```
 
-#### JavaScript Syntax
-```javascript
-stringify(objectToStringify)
-```
-
 #### Parameters
 | Name | Type | Description |
 |------|------|-------------|
@@ -31,8 +26,8 @@ stringify(objectToStringify)
 `string` - JSON string representation of the input.
 
 #### Example
-```javascript
-stringify({ name: "John", age: 30 }) // '{"name":"John","age":30}'
+```sui
+<pre>{stringify user}</pre>
 ```
 
 ### concat
@@ -41,11 +36,6 @@ Concatenates all arguments.
 #### Template Syntax
 ```sui
 {concat firstName ' ' lastName}
-```
-
-#### JavaScript Syntax
-```javascript
-concat(...args)
 ```
 
 #### Parameters
@@ -57,8 +47,8 @@ concat(...args)
 `string` - Concatenated string of all arguments.
 
 #### Example
-```javascript
-concat("Hello", " ", "World") // "Hello World"
+```sui
+<h1>Welcome, {concat user.firstName ' ' user.lastName}!</h1>
 ```
 
 ### capitalize
@@ -67,11 +57,6 @@ Capitalizes the first letter of text.
 #### Template Syntax
 ```sui
 {capitalize textToCapitalize}
-```
-
-#### JavaScript Syntax
-```javascript
-capitalize(textToCapitalize)
 ```
 
 #### Parameters
@@ -83,8 +68,8 @@ capitalize(textToCapitalize)
 `string` - The input text with the first letter capitalized.
 
 #### Example
-```javascript
-capitalize("hello world") // "Hello world"
+```sui
+<p>{capitalize pageTitle}</p>
 ```
 
 ### titleCase
@@ -93,11 +78,6 @@ Converts text to title case.
 #### Template Syntax
 ```sui
 {titleCase textToTitleCase}
-```
-
-#### JavaScript Syntax
-```javascript
-titleCase(textToTitleCase)
 ```
 
 #### Parameters
@@ -109,8 +89,8 @@ titleCase(textToTitleCase)
 `string` - The input text converted to title case.
 
 #### Example
-```javascript
-titleCase("hello world") // "Hello World"
+```sui
+<h2>{titleCase article.title}</h2>
 ```
 
 ### tokenize
@@ -119,11 +99,6 @@ Tokenizes a string.
 #### Template Syntax
 ```sui
 {tokenize stringToTokenize}
-```
-
-#### JavaScript Syntax
-```javascript
-tokenize(stringToTokenize)
 ```
 
 #### Parameters
@@ -135,8 +110,10 @@ tokenize(stringToTokenize)
 `string` - The tokenized string.
 
 #### Example
-```javascript
-tokenize("Hello World!") // "hello-world"
+```sui
+<div id="{tokenize sectionTitle}">
+  <h3>{sectionTitle}</h3>
+</div>
 ```
 
 ### escapeHTML
@@ -145,11 +122,6 @@ Escapes HTML special characters in a string.
 #### Template Syntax
 ```sui
 {escapeHTML stringToEscape}
-```
-
-#### JavaScript Syntax
-```javascript
-escapeHTML(stringToEscape)
 ```
 
 #### Parameters
@@ -161,6 +133,15 @@ escapeHTML(stringToEscape)
 `string` - The input string with HTML special characters escaped.
 
 #### Example
-```javascript
-escapeHTML("<script>alert('XSS')</script>") // "&lt;script&gt;alert('XSS')&lt;/script&gt;"
+```sui
+<div title="{escapeHTML userInput}">
+  {userInput}
+</div>
+```
+
+```sui
+<h3>User Bio</h3>
+<p>
+  {#html escapeHTML bioHTML}
+</p>
 ```

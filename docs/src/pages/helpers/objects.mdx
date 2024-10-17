@@ -19,22 +19,22 @@ Converts an object to an array for use with `{#each}`.
 {/each}
 ```
 
-#### JavaScript Syntax
-```javascript
-arrayFromObject(objectToConvert)
-```
-
 #### Parameters
-| Name   | Type   | Description |
-|--------|--------|-------------|
-| obj    | object | The object to convert |
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to convert |
 
 #### Returns
 `array` - An array of key-value pair objects.
 
 #### Example
-```javascript
-arrayFromObject({ a: 1, b: 2 }) // [{ key: 'a', value: 1 }, { key: 'b', value: 2 }]
+```sui
+<dl>
+  {#each arrayFromObject user}
+    <dt>{key}</dt>
+    <dd>{value}</dd>
+  {/each}
+</dl>
 ```
 
 ### object
@@ -45,20 +45,19 @@ Can be used to pass arbitrary data as an object to other functions.
 {someFunction (object key=valueForKey)}
 ```
 
-#### JavaScript Syntax
-```javascript
-object({ obj })
-```
-
 #### Parameters
 | Name | Type   | Description |
 |------|--------|-------------|
-| obj  | object | The object to return |
+| obj  | object | The object to create |
 
 #### Returns
-`object` - The input object.
+`object` - The created object.
 
 #### Example
-```javascript
-object({ key: 'value' }) // { key: 'value' }
+```sui
+<ui-dropdown options="{object
+  placeholder='Select a country'
+  selection=true
+  options=countries
+}"></ui-dropdown>
 ```

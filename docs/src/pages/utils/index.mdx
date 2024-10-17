@@ -5,22 +5,22 @@ icon: package
 description: A comprehensive collection of utility functions for Semantic UI
 ---
 
-Semantic UI includes this standalone library to avoid external dependencies and to allow for performant and opinionated uses of common utils like `clone`  as well as some particular to the use of web components.
+Semantic UI includes this standalone library to avoid external dependencies and to allow for performant and opinionated uses of common utils like `clone` and `isEqual` as well as some particular use cases for web components.
 
 
 ## Getting Started
 
 ### Installation
 
-The Utils library is part of the Semantic UI web components framework. If you're using the framework, these utilities are already available to you. If you want to use them standalone, you can import them directly:
+The utils library is a standalone package that can be used without any other dependencies.
 
 ```javascript
 import { isString, clone, capitalize } from '@semantic-ui/utils';
 ```
 
-### Usage Example
+### Usage
 
-Here's a quick example demonstrating some of the utility functions:
+Utilities can be used by importing them in your project.
 
 ```javascript
 import { isArray, capitalize, clone } from '@semantic-ui/utils';
@@ -40,18 +40,22 @@ console.log(clonedObject); // { a: 1, b: { c: 2 } }
 
 The Utils library is organized into several categories:
 
-- **Types**: Functions for checking and manipulating data types.
-- **Arrays**: Utilities for working with arrays.
-- **Objects**: Helpers for object manipulation and traversal.
-- **Dates**: Helpers for handling date formats.
-- **Strings**: String formatting and manipulation functions.
-- **Regular Expressions**: Helpers for working with regular expressions.
-- **Looping**: Iteration utilities for arrays and objects.
-- **Equality**: Deep equality comparison functions.
-- **Cloning**: Deep cloning utilities.
-- **Crypto**: Cryptographic helpers like hashing functions.
-- **Errors**: Error handling and creation utilities.
-- **SSR**: Helpers for server-side rendering scenarios.
+- **[Arrays](/utils/arrays)**: Utilities for working with arrays.
+- **[Browser](/utils/browser)**: Utilities for handling functionality on the client.
+- **[Cloning](/utils/cloning)**: Deep cloning utilities.
+- **[Crypto](/utils/crypto)**: Cryptographic helpers like hashing functions.
+- **[Dates](/utils/dates)**: Helpers for handling date formats.
+- **[Equality](/utils/dates)**: Helpers for comparing equality.
+- **[Errors](/utils/errors)**: Error handling and creation utilities.
+- **[Equality](/utils/equality)**: Deep equality comparison functions.
+- **[Functions](/utils/functions)**: Helpers for manipulating functions.
+- **[Looping](/utils/looping)**: Iteration utilities for arrays and objects.
+- **[Numbers](/utils/looping)**: Helpers for manipulating numbers
+- **[Types](/utils/types)**: Functions for checking and manipulating data types.
+- **[Objects](/utils/objects)**: Helpers for object manipulation and traversal.
+- **[Regular Expressions](/utils/regex)**: Helpers for working with regular expressions.
+- **[SSR](/utils/ssr)**: Helpers for server-side rendering scenarios.
+- **[Strings](/utils/ssr)**: String formatting and manipulation functions.
 
 
 ### Further Reading

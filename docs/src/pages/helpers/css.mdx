@@ -17,11 +17,6 @@ Joins CSS classes, optionally adding a space after the final class name.
 <div class="{classes classNamesArray true}">Content</div>
 ```
 
-#### JavaScript Syntax
-```javascript
-classes(classNamesArray, spaceAfter)
-```
-
 #### Parameters
 | Name         | Type    | Default | Description |
 |--------------|---------|---------|-------------|
@@ -32,8 +27,10 @@ classes(classNamesArray, spaceAfter)
 `string` - Joined class names.
 
 #### Example
-```javascript
-classes(['btn', 'btn-primary'], true) // "btn btn-primary "
+```sui
+<button class="{classes ['primary', size, color] true}">
+  {buttonText}
+</button>
 ```
 
 ### classIf
@@ -42,11 +39,6 @@ Conditionally applies a CSS class.
 #### Template Syntax
 ```sui
 <button class="{classIf isActive 'active' 'inactive'}">Click me</button>
-```
-
-#### JavaScript Syntax
-```javascript
-classIf(expr, trueClass, falseClass)
 ```
 
 #### Parameters
@@ -60,8 +52,10 @@ classIf(expr, trueClass, falseClass)
 `string` - The resulting class name with a trailing space.
 
 #### Example
-```javascript
-classIf(true, 'active', 'inactive') // "active "
+```sui
+<li class="item {classIf isSelected 'selected' ''}">
+  {itemName}
+</li>
 ```
 
 ### classMap
@@ -70,11 +64,6 @@ Applies multiple CSS classes based on conditions.
 #### Template Syntax
 ```sui
 <div class="{classMap (object active=isActive disabled=isDisabled)}">Content</div>
-```
-
-#### JavaScript Syntax
-```javascript
-classMap(classObj)
 ```
 
 #### Parameters
@@ -86,8 +75,15 @@ classMap(classObj)
 `string` - Resulting class names with a trailing space.
 
 #### Example
-```javascript
-classMap({ active: true, disabled: false }) // "active "
+```sui
+<form class="{classMap (object
+  'form': true,
+  'loading': isLoading,
+  'error': hasErrors,
+  'success': isSubmitted
+)}">
+  <!-- Form content -->
+</form>
 ```
 
 ### activeIf
@@ -96,11 +92,6 @@ Adds 'active' class if expression is truthy.
 #### Template Syntax
 ```sui
 <li class="{activeIf isCurrentPage}">Menu Item</li>
-```
-
-#### JavaScript Syntax
-```javascript
-activeIf(expr)
 ```
 
 #### Parameters
@@ -112,8 +103,12 @@ activeIf(expr)
 `string` - 'active ' if condition is true, otherwise an empty string.
 
 #### Example
-```javascript
-activeIf(true) // "active "
+```sui
+<nav>
+  {#each menuItems}
+    <a href="{this.path}" class="{activeIf this.path === currentPath}">{this.name}</a>
+  {/each}
+</nav>
 ```
 
 ### selectedIf
@@ -122,11 +117,6 @@ Adds 'selected' class if expression is truthy.
 #### Template Syntax
 ```sui
 <option {selectedIf isOptionSelected}>Option</option>
-```
-
-#### JavaScript Syntax
-```javascript
-selectedIf(expr)
 ```
 
 #### Parameters
@@ -138,8 +128,12 @@ selectedIf(expr)
 `string` - 'selected ' if condition is true, otherwise an empty string.
 
 #### Example
-```javascript
-selectedIf(true) // "selected "
+```sui
+<select>
+  {#each options}
+    <option value="{value}" {selectedIf value === selectedValue}>{label}</option>
+  {/each}
+</select>
 ```
 
 ### disabledIf
@@ -148,11 +142,6 @@ Adds 'disabled' class if expression is truthy.
 #### Template Syntax
 ```sui
 <button class="{disabledIf isButtonDisabled}">Submit</button>
-```
-
-#### JavaScript Syntax
-```javascript
-disabledIf(expr)
 ```
 
 #### Parameters
@@ -164,8 +153,10 @@ disabledIf(expr)
 `string` - 'disabled ' if condition is true, otherwise an empty string.
 
 #### Example
-```javascript
-disabledIf(true) // "disabled "
+```sui
+<div class="{disabledIf !isEditable}">
+  <input type="text" value="{inputValue}">
+</div>
 ```
 
 ### checkedIf
@@ -173,12 +164,10 @@ Adds 'checked' class if expression is truthy.
 
 #### Template Syntax
 ```sui
-<input type="checkbox" class="{checkedIf isOptionChecked}">
-```
-
-#### JavaScript Syntax
-```javascript
-checkedIf(expr)
+<div class="checkbox {checkedIf isOptionChecked}">
+  <input type="checkbox" name="example">
+  <label>Check me</label>
+</div>
 ```
 
 #### Parameters
@@ -190,6 +179,11 @@ checkedIf(expr)
 `string` - 'checked ' if condition is true, otherwise an empty string.
 
 #### Example
-```javascript
-checkedIf(true) // "checked "
+```sui
+{#each preferences}
+  <div class="checkbox {checkedIf this.enabled}">
+    <input type="checkbox" name="{this.name}">
+    <label>{this.label}</label>
+  </div>
+{/each}
 ```

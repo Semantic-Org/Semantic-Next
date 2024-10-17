@@ -1,0 +1,83 @@
+---
+layout: '@layouts/Guide.astro'
+title: Debug Helpers
+icon: bug
+description: API reference for debugging template helpers
+---
+
+Debug helpers provide utilities for troubleshooting and debugging in templates.
+
+## Functions
+
+### log
+Logs arguments to the console.
+
+#### Template Syntax
+```sui
+{log 'Debug message' (object data=someValue)}
+```
+
+#### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| args | ...any| The values to log |
+
+#### Returns
+`undefined`
+
+#### Example
+```sui
+<div>
+  {log 'Current user state:' (object name=userName age=userAge)}
+  <h2>{userName}</h2>
+  <p>Age: {userAge}</p>
+</div>
+```
+
+### debugger
+Triggers the JavaScript debugger, allowing you to inspect the current state of your application.
+
+#### Template Syntax
+```sui
+{debugger}
+```
+
+#### Parameters
+None
+
+#### Returns
+`undefined`
+
+#### Example
+```sui
+<div>
+  Current count: {count}
+  {debugger}
+  <button onclick="{increment}">Increment</button>
+</div>
+```
+
+### debugReactivity
+Debugs reactivity by logging the current reaction source and triggering the debugger. This is particularly useful for understanding which reactive dependencies triggered a re-computation.
+
+#### Template Syntax
+```sui
+{debugReactivity}
+```
+
+#### Parameters
+None
+
+#### Returns
+`undefined`
+
+#### Example
+```sui
+<div>
+  <p>Total: {total}</p>
+  {debugReactivity}
+  <p>Items: {items.length}</p>
+</div>
+```
+
+> Note: The `debugReactivity` helper is specific to the reactivity system and provides detailed information about the current reactive computation. It can be helpful in tracking down unexpected re-renders or understanding the flow of reactivity in your application.

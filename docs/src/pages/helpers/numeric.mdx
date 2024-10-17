@@ -1,0 +1,55 @@
+---
+layout: '@layouts/Guide.astro'
+title: Numeric Helpers
+icon: hash
+description: API reference for numeric template helpers
+---
+
+Numeric helpers provide utilities for working with numbers in templates.
+
+## Functions
+
+### numberFromIndex
+Returns the index plus one, useful for human-readable numbering.
+
+#### Template Syntax
+```sui
+{numberFromIndex @index}
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | number | The index value |
+
+#### Returns
+`number` - The index plus one.
+
+#### Example
+```sui
+{#each items}
+  Item {numberFromIndex @index}: {this}
+{/each}
+```
+
+### maybePlural
+Adds a plural suffix if the value is not 1.
+
+#### Template Syntax
+```sui
+{maybePlural itemCount 's'}
+```
+
+#### Parameters
+| Name   | Type   | Default | Description |
+|--------|--------|---------|-------------|
+| value  | number |         | The count to check |
+| plural | string | 's'     | The plural suffix to add |
+
+#### Returns
+`string` - The plural suffix if the value is not 1, otherwise an empty string.
+
+#### Example
+```sui
+<p>You have {itemCount} item{maybePlural itemCount} in your cart.</p>
+```

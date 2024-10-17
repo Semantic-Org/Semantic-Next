@@ -17,11 +17,6 @@ Joins array elements with a delimiter.
 {join itemsArray ', ' true}
 ```
 
-#### JavaScript Syntax
-```javascript
-join(itemsArray, delimiter, spaceAfter)
-```
-
 #### Parameters
 | Name       | Type    | Default | Description |
 |------------|---------|---------|-------------|
@@ -33,8 +28,8 @@ join(itemsArray, delimiter, spaceAfter)
 `string` - The joined string.
 
 #### Example
-```javascript
-join(['apple', 'banana', 'cherry'], ', ', true) // "apple, banana, cherry "
+```sui
+<p>Categories: {join categories ', ' false}</p>
 ```
 
 ### joinComma
@@ -43,11 +38,6 @@ Joins array elements with commas.
 #### Template Syntax
 ```sui
 {joinComma itemsArray true false}
-```
-
-#### JavaScript Syntax
-```javascript
-joinComma(itemsArray, oxford, quotes)
 ```
 
 #### Parameters
@@ -61,8 +51,8 @@ joinComma(itemsArray, oxford, quotes)
 `string` - The comma-joined string.
 
 #### Example
-```javascript
-joinComma(['apple', 'banana', 'cherry'], true, false) // "apple, banana, and cherry"
+```sui
+<p>This product comes in {joinComma colors true true}.</p>
 ```
 
 ### range
@@ -73,11 +63,6 @@ Returns an array with a range of numbers.
 {#each number in range 1 6}
   {number}
 {/each}
-```
-
-#### JavaScript Syntax
-```javascript
-range(start, stop, step)
 ```
 
 #### Parameters
@@ -91,7 +76,10 @@ range(start, stop, step)
 `array` - An array containing the range of numbers.
 
 #### Example
-```javascript
-range(1, 6) // [1, 2, 3, 4, 5]
-range(0, 10, 2) // [0, 2, 4, 6, 8]
+```sui
+<select name="birthyear">
+  {#each range 1900 2024}
+    <option value="{this}">{this}</option>
+  {/each}
+</select>
 ```

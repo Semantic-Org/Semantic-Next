@@ -19,11 +19,6 @@ Checks if a value is not empty.
 {/if}
 ```
 
-#### JavaScript Syntax
-```javascript
-exists(valueToCheck)
-```
-
 #### Parameters
 | Name | Type | Description |
 |------|------|-------------|
@@ -33,10 +28,12 @@ exists(valueToCheck)
 `boolean` - `true` if the value is not empty, `false` otherwise.
 
 #### Example
-```javascript
-exists([1, 2, 3]) // true
-exists([]) // false
-exists(null) // false
+```sui
+{#if exists user.name}
+  <p>Welcome, {user.name}!</p>
+{else}
+  <p>Welcome, guest!</p>
+{/if}
 ```
 
 ### isEmpty
@@ -49,11 +46,6 @@ Checks if a value is empty.
 {/if}
 ```
 
-#### JavaScript Syntax
-```javascript
-isEmpty(collectionToCheck)
-```
-
 #### Parameters
 | Name | Type | Description |
 |------|------|-------------|
@@ -63,11 +55,16 @@ isEmpty(collectionToCheck)
 `boolean` - `true` if the value is empty, `false` otherwise.
 
 #### Example
-```javascript
-isEmpty([]) // true
-isEmpty({}) // true
-isEmpty('') // true
-isEmpty([1, 2, 3]) // false
+```sui
+{#if isEmpty user.posts}
+  <p>You haven't made any posts yet.</p>
+{else}
+  <ul>
+    {#each user.posts}
+      <li>{this.title}</li>
+    {/each}
+  </ul>
+{/if}
 ```
 
 ### hasAny
@@ -80,11 +77,6 @@ Checks if an array has any elements.
 {/if}
 ```
 
-#### JavaScript Syntax
-```javascript
-hasAny(arrayToCheck)
-```
-
 #### Parameters
 | Name | Type  | Description |
 |------|-------|-------------|
@@ -94,9 +86,16 @@ hasAny(arrayToCheck)
 `boolean` - `true` if the array has elements, `false` otherwise.
 
 #### Example
-```javascript
-hasAny([1, 2, 3]) // true
-hasAny([]) // false
+```sui
+{#if hasAny searchResults}
+  <ul>
+    {#each searchResults}
+      <li>{this.title}</li>
+    {/each}
+  </ul>
+{else}
+  <p>No results found.</p>
+{/if}
 ```
 
 ### both
@@ -109,11 +108,6 @@ Checks if both a and b are truthy.
 {/if}
 ```
 
-#### JavaScript Syntax
-```javascript
-both(conditionA, conditionB)
-```
-
 #### Parameters
 | Name | Type | Description |
 |------|------|-------------|
@@ -124,10 +118,12 @@ both(conditionA, conditionB)
 `boolean` - `true` if both values are truthy, `false` otherwise.
 
 #### Example
-```javascript
-both(true, 1) // true
-both(true, false) // false
-both(0, 'string') // false
+```sui
+{#if both isLoggedIn hasPermission}
+  <button>Perform Action</button>
+{else}
+  <p>You don't have permission to perform this action.</p>
+{/if}
 ```
 
 ### either
@@ -140,11 +136,6 @@ Checks if either a or b is truthy.
 {/if}
 ```
 
-#### JavaScript Syntax
-```javascript
-either(conditionA, conditionB)
-```
-
 #### Parameters
 | Name | Type | Description |
 |------|------|-------------|
@@ -155,10 +146,12 @@ either(conditionA, conditionB)
 `boolean` - `true` if either value is truthy, `false` otherwise.
 
 #### Example
-```javascript
-either(true, false) // true
-either(false, 1) // true
-either(0, '') // false
+```sui
+{#if either isAdmin isModerator}
+  <button>Edit Content</button>
+{else}
+  <p>You don't have permission to edit this content.</p>
+{/if}
 ```
 
 ### maybe
@@ -167,11 +160,6 @@ Returns trueExpr if expr is truthy, falseExpr otherwise.
 #### Template Syntax
 ```sui
 {maybe condition 'True result' 'False result'}
-```
-
-#### JavaScript Syntax
-```javascript
-maybe(condition, trueResult, falseResult)
 ```
 
 #### Parameters
@@ -185,8 +173,6 @@ maybe(condition, trueResult, falseResult)
 The value of `trueExpr` if `expr` is truthy, `falseExpr` otherwise.
 
 #### Example
-```javascript
-maybe(true, 'Yes', 'No') // 'Yes'
-maybe(false, 'Yes', 'No') // 'No'
-maybe(1 > 0, 'Greater', 'Less or Equal') // 'Greater'
+```sui
+<p>The light is {maybe isOn 'on' 'off'}.</p>
 ```
