@@ -1,106 +1,102 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Query Content Methods
+title: Query - Content
 icon: file-text
 description: API reference for Query methods related to element content
 ---
 
-The Content methods in Query allow you to get and set the content of DOM elements. These methods are crucial for manipulating the text, HTML, and value of elements in your Semantic UI components.
-
-
-
-Gets or sets the value of form elements.
+Content methods in Query allow you to manipulate content accessing form data, text and html.
 
 ## Value
+Gets or sets the value of form elements.
 
-### Get Value
+### Syntax
 
-#### Syntax
-
+#### Get
 ```javascript
 $('input').value();
 ```
 
-#### Alias
-The `val` alias is provided for shorthand and for people who've grown accustomed to jQuery
+#### Set
+
+```javascript
+$('input').val(newValue)
+```
+
+| Name      | Type   | Description        |
+|-----------|--------|--------------------|
+| newValue  | any    | The new value to set |
+
+
+
+### Alias
+`value` is also available as `val`
+
 ```javascript
 $('input').val(); // identical;
 ```
 
-#### Parameters
-None
+### Returns
 
-#### Returns
+#### Get
+[Query object](/query/basic#the-query-object) (for chaining).
+
+#### Set
 The value of the first element in the set.
 
-#### Example
+### Usage
+
+
+#### Geting a Value
 ```javascript
 // Get the value of an input
 const inputValue = $('input').val();
 console.log(inputValue);
 ```
 
-### Set Value
-
-#### Syntax
-```javascript
-$('input').val(newValue)
-```
-
-#### Parameters
-| Name      | Type   | Description        |
-|-----------|--------|--------------------|
-| newValue  | any    | The new value to set |
-
-#### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
-
-#### Example
+#### Setting a Value
 ```javascript
 // Set the value of an input
 $('input').val('New value');
 ```
 
 ## Text
+Gets or sets the text content of elements.
 
-### Get Text
+### Syntax
 
-Gets the text content of elements.
-
-#### Syntax
+#### Get
 ```javascript
 $('p').text()
 ```
 
-#### Parameters
-None
+#### Set
+```javascript
+$('p').text(newText)
+```
 
-#### Returns
+| Name    | Type   | Description              |
+|---------|--------|--------------------------|
+| newText | string | The new text content to set |
+
+### Returns
+
+#### Get
 The combined text content of all elements in the set.
 
-#### Example
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Getting Text
 ```javascript
 // Get the text of an element
 const buttonText = $('button').text();
 console.log(buttonText);
 ```
 
-### Set Text
-
-#### Syntax
-```javascript
-$('p').text(newText)
-```
-
-#### Parameters
-| Name    | Type   | Description              |
-|---------|--------|--------------------------|
-| newText | string | The new text content to set |
-
-#### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
-
-#### Example
+#### Setting Text
 ```javascript
 // Set the text of an element
 $('button').text('Click me!');
@@ -108,42 +104,40 @@ $('button').text('Click me!');
 
 ## HTML
 
-### Get HTML
+### Syntax
 
-#### Syntax
+#### Get
 ```javascript
 $('.container').html()
 ```
 
-#### Parameters
-None
+#### Set
+```javascript
+$('.container').html(newHtml)
+```
 
-#### Returns
+| Name    | Type   | Description              |
+|---------|--------|--------------------------|
+| newHtml | string | The new HTML content to set |
+
+### Returns
+
+#### Get
 The HTML content of the first element in the set.
 
-#### Example
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Getting HTML
 ```javascript
 // Get the HTML content
 const containerHtml = $('.container').html();
 console.log(containerHtml);
 ```
 
-### Set HTML
-
-#### Syntax
-```javascript
-$('.container').html(newHtml)
-```
-
-#### Parameters
-| Name    | Type   | Description              |
-|---------|--------|--------------------------|
-| newHtml | string | The new HTML content to set |
-
-#### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
-
-#### Example
+#### Setting HTML
 ```javascript
 // Set the HTML content
 $('.container').html('<p>New content</p>');
@@ -151,44 +145,45 @@ $('.container').html('<p>New content</p>');
 
 ## Outer HTML
 
-### Get Outer HTML
-
 > **Difference from HTML** - Outerhtml returns the element including its own tag
 
-#### Syntax
+### Syntax
+
+#### Get
 ```javascript
 $('.element').outerHTML()
 ```
 
-#### Parameters
-None
+#### Set
+```javascript
+$('.element').outerHTML(newHtml)
+```
 
-#### Returns
-The outer HTML content of the elements in the set.
+| Name    | Type   | Description                    |
+|---------|--------|--------------------------------|
+| newHtml | string | The new outer HTML content to set |
 
-#### Example
+### Returns
+
+#### Get
+
+- **Single Element** - The outer html of that element.
+- **Multiple Elements** - An array of outer html , one for each matched element.
+
+
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Getting Outer HTML
 ```javascript
 // Get the outer HTML
 const elementOuterHtml = $('.element').outerHTML();
 console.log(elementOuterHtml);
 ```
 
-### Set Outer HTML
-
-#### Syntax
-```javascript
-$('.element').outerHTML(newHtml)
-```
-
-#### Parameters
-| Name    | Type   | Description                    |
-|---------|--------|--------------------------------|
-| newHtml | string | The new outer HTML content to set |
-
-#### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
-
-#### Example
+#### Setting Outer HTML
 ```javascript
 // Set the outer HTML
 $('.element').outerHTML('<div class="new-element">Replaced content</div>');
@@ -196,24 +191,23 @@ $('.element').outerHTML('<div class="new-element">Replaced content</div>');
 
 ## Text Node
 
-### Get Text Node
-
-Gets the text content of the immediate text node children of elements.
-
 > **Versus text()** - `text` will return text content recursively of nested nodes while `textNode` will only return the text content of the selected node, in some cases this distinction can be essential.
 
-#### Syntax
+### Syntax
+
+#### Get
 ```javascript
 $('p').textNode()
 ```
 
-#### Parameters
-None
+### Returns
 
-#### Returns
-The combined text content of immediate text node.
+#### Get
+The combined text content of immediate text node children.
 
-#### Example
+### Usage
+
+#### Getting Text Node Content
 ```javascript
 // Get only the immediate text content, ignoring nested elements
 const immediateText = $('p').textNode();

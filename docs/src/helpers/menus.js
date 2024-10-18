@@ -234,36 +234,48 @@ export const sidebarMenuFramework = [
         url: '/query/basic'
       },
       {
-        name: 'DOM Traversal',
-        url: '/query/dom'
-      },
-      {
         name: 'Attributes',
         url: '/query/attributes'
       },
       {
-        name: 'Events',
-        url: '/query/events'
+        name: 'Components',
+        url: '/query/components'
       },
       {
         name: 'Content',
         url: '/query/content'
       },
       {
-        name: 'Sizing',
-        url: '/query/sizing'
+        name: 'CSS',
+        url: '/query/css'
+      },
+      {
+        name: 'Size & Dimensions',
+        url: '/query/dimensions'
       },
       {
         name: 'DOM Manipulation',
         url: '/query/dom-manipulation'
       },
       {
-        name: 'Utilities',
-        url: '/query/utilities'
+        name: 'DOM Traversal',
+        url: '/query/dom-traversal'
       },
       {
-        name: 'Forms',
-        url: '/query/form'
+        name: 'Events',
+        url: '/query/events'
+      },
+      {
+        name: 'Iterators',
+        url: '/query/iterators'
+      },
+      {
+        name: 'Logical Operators',
+        url: '/query/logical-operators'
+      },
+      {
+        name: 'Utilities',
+        url: '/query/utilities'
       },
     ]
   },

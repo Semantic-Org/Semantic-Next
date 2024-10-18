@@ -9,7 +9,7 @@ description: Getting started with Query and its core functionality
 
 The Query constructor is the foundation of the library, allowing you to create Query objects from various types of inputs.
 
-> **Web Component Support** - Semantic exports two separate helpers for handling DOM `$` and Shadow DOM `$$` that will recursively cross shadow boundaries. Note: `$$` is the equivalent of `$('foo', { pierceShadow: true})`
+> **Web Component Support** - Semantic exports two separate helpers for handling DOM `$` and Shadow DOM `$$` that will recursively cross shadow boundaries.
 
 ### Arguments
 
@@ -85,12 +85,21 @@ fragment.appendChild(document.createElement('div'));
 const $fragmentContent = $(fragment);
 ```
 
-#### Globals
+### Globals
 
 ```javascript
 import { $ } from '@semantic-ui/query';
 
 const $window = $(window);
+```
+
+### Query Object
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const $div = $('div');
+const $copy = $($div);
 ```
 
 > **Memory Usage** - When creating a Query object for `window` or `globalThis`, Query uses a proxy object to avoid keeping a full copy of the global object in memory. This optimization helps reduce the memory footprint of your application.
@@ -147,6 +156,8 @@ $('div')
 
 Use the `each` method to iterate over selected elements:
 
+> For more information see the dedicated page for [utilities](query/utilities)
+
 ```javascript
 import { $ } from '@semantic-ui/query';
 
@@ -159,7 +170,6 @@ $('p').each(function(el, index) {
 
 You can use dedicated helpers like `filter` and `map` to manipulate Query content.
 
-> For more information see the dedicated page for [utilities](query/utilities)
 
 #### Map
 ```javascript

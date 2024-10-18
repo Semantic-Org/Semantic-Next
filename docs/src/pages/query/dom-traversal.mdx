@@ -1,0 +1,213 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - DOM Traversal
+icon: git-branch
+description: API reference for Query methods related to DOM traversal
+---
+
+The DOM Traversal methods allow you to get from one element to another based off their relationship. Query supports piercing shadow DOM boundaries when using `$$`
+
+## find
+
+Finds descendant elements that match the specified selector.
+
+### Syntax
+```javascript
+$('selector').find(childSelector)
+```
+
+### Parameters
+| Name          | Type   | Description                           |
+|---------------|--------|---------------------------------------|
+| childSelector | string | A selector to match descendant elements |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the matched elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Find all paragraphs within a div
+$('div').find('p').addClass('highlight');
+```
+
+#### Shadow DOM
+```javascript
+$$('my-component').find('p').addClass('highlight');
+```
+
+## parent
+
+Gets the parent of each element in the current set of matched elements.
+
+### Syntax
+```javascript
+$('selector').parent(parentSelector)
+```
+
+### Parameters
+| Name           | Type   | Description                                    |
+|----------------|--------|------------------------------------------------|
+| parentSelector | string | (Optional) A selector to filter parent elements |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the parent elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Get the parent of a button
+$('button').parent().addClass('button-group');
+```
+
+#### Shadow DOM
+```javascript
+$$('my-component menu-item').parent().addClass('menu-styling');
+```
+
+## children
+
+Gets the children of each element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').children(childSelector)
+```
+
+### Parameters
+| Name          | Type   | Description                                     |
+|---------------|--------|-------------------------------------------------|
+| childSelector | string | (Optional) A selector to filter children elements |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the child elements.
+
+### Usage
+
+```javascript
+// Get all direct child list items of an unordered list
+$('ul').children('li').css('color', 'red');
+```
+
+
+## siblings
+
+Gets the siblings of each element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').siblings(siblingSelector)
+```
+
+### Parameters
+| Name             | Type   | Description                                       |
+|------------------|--------|---------------------------------------------------|
+| siblingSelector  | string | (Optional) A selector to filter sibling elements   |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the sibling elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Get all siblings of a selected element
+$('.selected').siblings().addClass('dimmed');
+```
+
+#### Shadow DOM
+```javascript
+$$('my-component').find('.shadow-selected').siblings().addClass('shadow-dimmed');
+```
+
+## closest
+
+Finds the closest ancestor element that matches the selector.
+
+### Syntax
+```javascript
+$('selector').closest(ancestorSelector)
+```
+
+### Parameters
+| Name              | Type   | Description                           |
+|-------------------|--------|---------------------------------------|
+| ancestorSelector  | string | A selector to match ancestor elements |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the closest matching ancestor.
+
+### Usage
+
+#### Standard
+```javascript
+// Find the closest form ancestor
+$('input').closest('form').submit();
+```
+
+#### Shadow DOM
+```javascript
+$$('my-component').find('input').closest('.shadow-form').addClass('validated');
+```
+
+## next
+
+Gets the immediately following sibling of each element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').next(nextSelector)
+```
+
+### Parameters
+| Name          | Type   | Description                                            |
+|---------------|--------|--------------------------------------------------------|
+| nextSelector  | string | (Optional) A selector to filter the next element        |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the next sibling elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Get the next sibling of a paragraph
+$('p').next().css('margin-top', '20px');
+```
+
+#### Shadow DOM
+```javascript
+$$('my-component').find('.shadow-paragraph').next().css('margin-top', '10px');
+```
+
+## prev
+
+Gets the immediately preceding sibling of each element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').prev(prevSelector)
+```
+
+### Parameters
+| Name          | Type   | Description                                            |
+|---------------|--------|--------------------------------------------------------|
+| prevSelector  | string | (Optional) A selector to filter the previous element    |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the previous sibling elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Get the previous sibling of a heading
+$('h2').prev().css('color', 'red');
+```
+
+#### Shadow DOM
+```javascript
+$$('my-component').find('.shadow-heading').prev().css('margin-bottom', '5px');
+```

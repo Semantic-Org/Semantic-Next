@@ -1,0 +1,73 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Size & Position
+icon: move
+description: API reference for Query methods related to element dimensions and positioning
+---
+
+Size and position methods in Query allow you to get information about element dimensions, scroll positions, and their position in the DOM.
+
+## count
+
+Get the number of elements in the Query object.
+
+> **Count Usage** - `count()` is preferred although the [Query object](/query/basic#the-query-object) is `array-like` and `length` will also work. If it's really important to you -- you can still do that.
+
+### Syntax
+```javascript
+$('selector').count()
+```
+
+### Returns
+`number` - The number of elements in the [Query object](/query/basic#the-query-object).
+
+### Usage
+```javascript
+const paragraphCount = $('p').count();
+console.log(`There are ${paragraphCount} paragraphs on the page.`);
+```
+
+## index
+
+Get the index of an element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').index()
+```
+
+### Returns
+`number` - The index of the first element within the [Query object](/query/basic#the-query-object) relative to its sibling elements, or -1 if not found.
+
+### Usage
+```javascript
+const index = $('li.active').index();
+console.log(`The active list item is at index ${index}`);
+```
+
+> **DOM Position** - `index()` is useful for determining the position of an element among its siblings.
+
+## offsetParent
+
+Get the closest positioned ancestor element.
+
+### Syntax
+```javascript
+$('selector').offsetParent(options)
+```
+
+### Parameters
+| Name    | Type   | Description                           |
+|---------|--------|---------------------------------------|
+| options | Object | Configuration options for the method  |
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the offset parent element(s).
+
+### Usage
+```javascript
+const offsetParent = $('.child-element').offsetParent();
+console.log('Offset parent:', offsetParent.get(0));
+```
+
+> **Positioning Context** - `offsetParent()` is particularly useful when working with absolutely positioned elements.

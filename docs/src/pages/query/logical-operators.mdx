@@ -1,0 +1,56 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Logical Operators
+icon: filter
+description: API reference for Query logical operator methods
+---
+
+Logical operator methods in Query allow you to perform checks and filtering operations on sets of elements.
+
+## is
+
+Checks the current matched set of elements against a selector, element, or jQuery object and returns true if at least one of these elements matches the given arguments.
+
+### Syntax
+```javascript
+$('selector').is(selector)
+```
+
+### Parameters
+| Name     | Type               | Description                      |
+|----------|--------------------|----------------------------------|
+| selector | String or Function | A string containing a selector expression to match elements against or a function to test each element |
+
+### Returns
+`boolean` - `true` if at least one element matches, `false` otherwise.
+
+### Usage
+```javascript
+if ($('#myElement').is('.active')) {
+  console.log('The element is active');
+}
+```
+
+## not
+
+Remove elements from the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').not(selector)
+```
+
+### Parameters
+| Name     | Type               | Description                      |
+|----------|--------------------|----------------------------------|
+| selector | String or Function | A string containing a selector expression to match elements against or a function to test each element |
+
+### Returns
+A new Query object with elements that do not match the selector.
+
+### Usage
+```javascript
+$('div').not('.ignore').addClass('highlight');
+```
+
+> **Inverse Selection** - `not()` is particularly useful for excluding specific elements from a larger set based on various criteria.

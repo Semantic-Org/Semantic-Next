@@ -1,0 +1,248 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Dimensions
+icon: maximize-2
+description: API reference for Query methods related to element dimensions and positioning
+---
+
+The Dimension methods in Query provide tools for getting and setting various dimensional properties of elements, including their size, position, and scroll-related attributes.
+
+## width
+
+Gets or sets the width of elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').width()
+```
+
+#### Set
+```javascript
+$('selector').width(value)
+```
+
+### Parameters
+| Name  | Type         | Description                           |
+|-------|--------------|---------------------------------------|
+| value | number/string| The width to set for the element(s)   |
+
+### Returns
+
+#### Get
+- **Single Element** - The width of that element in pixels.
+- **Multiple Elements** - An array of widths, one for each matched element.
+
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Get Width
+```javascript
+// Get the width of an element
+const width = $('#myElement').width();
+console.log(width);
+```
+
+#### Set Width
+```javascript
+// Set the width of an element
+$('#myElement').width(200);
+```
+
+## height
+
+Gets or sets the height of elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').height()
+```
+
+#### Set
+```javascript
+$('selector').height(value)
+```
+
+### Parameters
+| Name  | Type         | Description                           |
+|-------|--------------|---------------------------------------|
+| value | number/string| The height to set for the element(s)  |
+
+### Returns
+
+#### Get
+- **Single Element** - The height of that element in pixels.
+- **Multiple Elements** - An array of heights, one for each matched element.
+
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Get Height
+```javascript
+// Get the height of an element
+const height = $('#myElement').height();
+console.log(height);
+```
+
+#### Set Height
+```javascript
+// Set the height of an element
+$('#myElement').height(150);
+```
+
+## scrollTop
+
+Gets or sets the vertical scroll position of elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').scrollTop()
+```
+
+#### Set
+```javascript
+$('selector').scrollTop(value)
+```
+
+### Parameters
+| Name  | Type   | Description                                  |
+|-------|--------|----------------------------------------------|
+| value | number | The vertical scroll position to set in pixels|
+
+### Returns
+
+#### Get
+- **Single Element** - The vertical scroll position of that element in pixels.
+- **Multiple Elements** - An array of vertical scroll positions, one for each matched element.
+
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Get Scroll Position
+```javascript
+// Get the vertical scroll position of an element
+const scrollPosition = $('.scrollable-div').scrollTop();
+console.log(scrollPosition);
+```
+
+#### Set Scroll Position
+```javascript
+// Set the vertical scroll position of an element
+$('.scrollable-div').scrollTop(100);
+```
+
+## scrollLeft
+
+Gets or sets the horizontal scroll position of elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').scrollLeft()
+```
+
+#### Set
+```javascript
+$('selector').scrollLeft(value)
+```
+
+### Parameters
+| Name  | Type   | Description                                    |
+|-------|--------|------------------------------------------------|
+| value | number | The horizontal scroll position to set in pixels|
+
+### Returns
+
+#### Get
+- **Single Element** - The horizontal scroll position of that element in pixels.
+- **Multiple Elements** - An array of horizontal scroll positions, one for each matched element.
+
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Get Scroll Position
+```javascript
+// Get the horizontal scroll position of an element
+const scrollPosition = $('.scrollable-div').scrollLeft();
+console.log(scrollPosition);
+```
+
+#### Set Scroll Position
+```javascript
+// Set the horizontal scroll position of an element
+$('.scrollable-div').scrollLeft(50);
+```
+## naturalWidth
+
+Gets the natural width of an element, including images and other HTML elements.
+
+> **Natural Width** - This method works by creating a clone of the element, positioning it off-screen, and measuring its dimensions. While this approach allows for accurate measurements of complex elements like tables, it can cause a reflow in the document. Use judiciously, especially in performance-critical situations.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').naturalWidth()
+```
+
+### Returns
+
+#### Get
+- **Single Element** - The natural width of the element in pixels.
+- **Multiple Elements** - An array of natural widths, one for each matched element.
+
+### Usage
+
+#### Get Natural Width
+```javascript
+// Get the natural width of an image
+const imageNaturalWidth = $('img').naturalWidth();
+console.log(imageNaturalWidth);
+
+// Get the natural width of a table
+const tableNaturalWidth = $('table').naturalWidth();
+console.log(tableNaturalWidth);
+```
+## naturalHeight
+
+Gets the natural height of an element, including images and other HTML elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').naturalHeight()
+```
+
+### Returns
+
+#### Get
+- **Single Element** - The natural height of the element in pixels.
+- **Multiple Elements** - An array of natural heights, one for each matched element.
+
+### Usage
+
+#### Get Natural Height
+```javascript
+// Get the natural height of an image
+const imageNaturalHeight = $('img').naturalHeight();
+console.log(imageNaturalHeight);
+
+// Get the natural height of a div with content
+const divNaturalHeight = $('div.content').naturalHeight();
+console.log(divNaturalHeight);
+```
