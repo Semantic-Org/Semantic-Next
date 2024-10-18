@@ -197,7 +197,7 @@ $('selector').off(eventName, handler)
 ### Usage
 ```javascript
 function clickHandler(event) {
-    console.log('Clicked!');
+  console.log('Clicked!');
 }
 
 $('button').on('click', clickHandler);
@@ -274,6 +274,46 @@ $('selector').dispatchEvent(eventName, eventData, eventSettings)
 [Query object](/query/basic#the-query-object) (for chaining).
 
 ### Usage
+
+#### Passing Custom Metadata
 ```javascript
-$('.container').dispatchEvent('customEvent', { detail: 'Some data' }, { bubbles: true });
+const eventData = {
+  delta: getResizeDelta() // pass along resize delta with event
+}
+$('.container').dispatchEvent('resize', eventData);
+```
+## focus
+
+Gives focus to the first element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').focus()
+```
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Focus on an input element
+$('input.username').focus();
+```
+
+## blur
+
+Removes focus from the first element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').blur()
+```
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Remove focus from whatever is focused
+$(document.activeElement).blur();
 ```

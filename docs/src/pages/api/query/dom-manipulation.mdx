@@ -215,3 +215,30 @@ $posts.addClass('updated');
 $$('user-profile').find('.posts-container').append($posts);
 ```
 
+### Usage
+```javascript
+// Reverse the order of list items
+$('ul.my-list li').reverse().each((el, index) => {
+  console.log(`Reversed order: Item ${index + 1}`);
+});
+```
+
+## clone
+
+Creates a deep copy of the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').clone()
+```
+
+### Returns
+A new [Query object](/query/basic#the-query-object) containing cloned elements.
+
+### Usage
+```javascript
+// Clone a template and append it to a container
+const $template = $('#item-template').clone();
+$('#container').append($template);
+```
+

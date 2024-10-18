@@ -231,166 +231,179 @@ export const sidebarMenuFramework = [
     pages: [
       {
         name: 'Basic Usage',
-        url: '/query/basic'
+        url: '/api/query/basic'
       },
       {
         name: 'Attributes',
-        url: '/query/attributes'
+        url: '/api/query/attributes'
       },
       {
         name: 'Components',
-        url: '/query/components'
+        url: '/api/query/components'
       },
       {
         name: 'Content',
-        url: '/query/content'
+        url: '/api/query/content'
       },
       {
         name: 'CSS',
-        url: '/query/css'
+        url: '/api/query/css'
       },
       {
         name: 'Size & Dimensions',
-        url: '/query/dimensions'
+        url: '/api/query/dimensions'
       },
       {
         name: 'DOM Manipulation',
-        url: '/query/dom-manipulation'
+        url: '/api/query/dom-manipulation'
       },
       {
         name: 'DOM Traversal',
-        url: '/query/dom-traversal'
+        url: '/api/query/dom-traversal'
       },
       {
         name: 'Events',
-        url: '/query/events'
+        url: '/api/query/events'
       },
       {
         name: 'Iterators',
-        url: '/query/iterators'
+        url: '/api/query/iterators'
       },
       {
         name: 'Logical Operators',
-        url: '/query/logical-operators'
+        url: '/api/query/logical-operators'
       },
       {
         name: 'Utilities',
-        url: '/query/utilities'
+        url: '/api/query/utilities'
       },
     ]
   },
   {
     name: 'Utils',
     description: 'JS Helpers',
-    url: '/utils',
+    url: '/api/utils',
     icon: 'tool',
     pages: [
       {
         name: 'Arrays',
-        url: '/utils/arrays'
+        url: '/api/utils/arrays'
       },
       {
         name: 'Browser',
-        url: '/utils/browser'
+        url: '/api/utils/browser'
       },
       {
         name: 'Cloning',
-        url: '/utils/cloning'
+        url: '/api/utils/cloning'
       },
       {
         name: 'Crypto',
-        url: '/utils/crypto'
+        url: '/api/utils/crypto'
       },
       {
         name: 'Dates',
-        url: '/utils/dates'
+        url: '/api/utils/dates'
       },
       {
         name: 'Equality',
-        url: '/utils/equality'
+        url: '/api/utils/equality'
       },
       {
         name: 'Errors',
-        url: '/utils/errors'
+        url: '/api/utils/errors'
       },
       {
         name: 'Functions',
-        url: '/utils/functions'
+        url: '/api/utils/functions'
       },
       {
         name: 'Looping',
-        url: '/utils/looping'
+        url: '/api/utils/looping'
       },
       {
         name: 'Numbers',
-        url: '/utils/numbers'
+        url: '/api/utils/numbers'
       },
       {
         name: 'Types',
-        url: '/utils/types'
+        url: '/api/utils/types'
       },
       {
         name: 'Objects',
-        url: '/utils/objects'
+        url: '/api/utils/objects'
       },
       {
         name: 'Regular Expressions',
-        url: '/utils/regex'
+        url: '/api/utils/regex'
       },
       {
         name: 'SSR',
-        url: '/utils/ssr'
+        url: '/api/utils/ssr'
       },
       {
         name: 'Strings',
-        url: '/utils/strings'
+        url: '/api/utils/strings'
       },
     ]
   },
   {
     name: 'Template Helpers',
-    url: '/helpers',
+    url: '/api/helpers',
     icon: 'table',
     pages: [
       {
         name: 'Arrays',
-        url: '/helpers/arrays'
+        url: '/api/helpers/arrays'
       },
       {
         name: 'Comparison',
-        url: '/helpers/comparison'
+        url: '/api/helpers/comparison'
       },
       {
         name: 'CSS',
-        url: '/helpers/css'
+        url: '/api/helpers/css'
       },
       {
         name: 'Dates',
-        url: '/helpers/dates'
+        url: '/api/helpers/dates'
       },
       {
         name: 'Debug',
-        url: '/helpers/debug'
+        url: '/api/helpers/debug'
       },
       {
         name: 'Logical Operators',
-        url: '/helpers/logical'
+        url: '/api/helpers/logical'
       },
       {
         name: 'Numeric',
-        url: '/helpers/numeric'
+        url: '/api/helpers/numeric'
       },
       {
         name: 'Objects',
-        url: '/helpers/objects'
+        url: '/api/helpers/objects'
       },
       {
         name: 'Reactivity',
-        url: '/helpers/reactivity'
+        url: '/api/helpers/reactivity'
       },
       {
         name: 'Strings',
-        url: '/helpers/strings'
+        url: '/api/helpers/strings'
+      },
+    ]
+  },
+  {
+    name: 'Reactivity',
+    description: 'Signals',
+    url: '/api/reactivity',
+    icon: 'cpu',
+    pages: [
+      {
+        name: 'Reactive Var',
+        description: 'Signal',
+        url: '/api/reactivity/reactive-var'
       },
     ]
   },

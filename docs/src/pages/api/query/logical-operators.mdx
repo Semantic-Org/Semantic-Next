@@ -9,7 +9,7 @@ Logical operator methods in Query allow you to perform checks and filtering oper
 
 ## is
 
-Checks the current matched set of elements against a selector, element, or jQuery object and returns true if at least one of these elements matches the given arguments.
+Checks the current matched set of elements against a selector, element, or Query object and returns true if at least one of these elements matches the given arguments.
 
 ### Syntax
 ```javascript
@@ -30,6 +30,29 @@ if ($('#myElement').is('.active')) {
   console.log('The element is active');
 }
 ```
+
+## exists
+
+Checks if there are any elements in the current Query object.
+
+### Syntax
+```javascript
+$('selector').exists()
+```
+
+### Returns
+`boolean` - `true` if the Query object contains at least one element, `false` otherwise.
+
+### Usage
+```javascript
+if ($('.my-element').exists()) {
+  console.log('The element exists in the DOM');
+} else {
+  console.log('The element does not exist in the DOM');
+}
+```
+
+> **Quick Check** - `exists()` is a convenient way to check for the presence of elements without needing to compare the length property.
 
 ## not
 

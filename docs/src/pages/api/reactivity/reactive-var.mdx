@@ -1,0 +1,208 @@
+---
+layout: '@layouts/Guide.astro'
+icon: box
+title: ReactiveVar
+description: API reference for ReactiveVar in Semantic UI's reactivity system
+---
+
+`ReactiveVar` is the core class for creating reactive variables in Semantic UI's reactivity system. It allows you to create values that can be observed and will trigger reactions when changed.
+
+## Constructor
+Creates a new reactive variable with the given initial value.
+
+### Syntax
+```javascript
+new ReactiveVar(initialValue, options);
+```
+
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| `initialValue` | `any` | The initial value of the reactive variable |
+| `options` | `Object` | (Optional) Configuration options |
+
+### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `equalityFunction` | `Function` | `isEqual` | Custom function to determine if the value has changed |
+| `allowClone` | `boolean` | `true` | Whether to clone the value when getting/setting |
+| `cloneFunction` | `Function` | `clone` | Custom function to clone the value |
+
+### Usage
+
+#### Basic Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(0);
+```
+
+#### Custom Equality Function
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const person = new ReactiveVar({ name: 'John', age: 30 }, {
+  equalityFunction: (a, b) => a.name === b.name && a.age === b.age
+});
+```
+
+#### Disabling Cloning for Custom Classes
+
+To avoid mutating the source object naively, by default values are cloned when set. However some objects cannot be naively cloned like custom classes.
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+class CustomClass {
+  constructor(value) {
+    this.value = value;
+  }
+}
+
+const customInstance = new ReactiveVar(new CustomClass(42), {
+  allowClone: false,
+  equalityFunction: (a, b) => a.value === b.value
+});
+
+// The CustomClass instance won't be cloned when accessed
+console.log(customInstance.get().value); // Output: 42
+```
+
+## `Get`
+
+Returns the current value of the reactive variable.
+
+### Syntax
+```javascript
+someValue.get();
+```
+
+
+### Alias
+
+`value` can be used as an alias for `get()` if preferred
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(0);
+console.log(counter.value); // Output: 0
+counter.value = 1;
+console.log(counter.value); // Output: 1
+```
+
+
+### Returns
+
+`any` - The current value of the reactive variable.
+
+### Usage
+
+#### Retrieving the Current Value
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+const counter = new ReactiveVar(0);
+console.log(counter.get()); // Output: 0
+```
+
+## `Set`
+
+Sets a new value for the reactive variable.
+
+### Syntax
+```javascript
+someValue.set(newValue);
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| `newValue` | `any` | The new value to set |
+
+### Usage
+
+#### Setting a New Value
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(0);
+counter.set(1);
+console.log(counter.get()); // Output: 1
+```
+
+## `Subscribe`
+
+Creates a subscription that runs the callback whenever the value changes.
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| `callback` | `Function` | Function to be called when the value changes |
+
+### Returns
+
+`Object` - A subscription object with a `stop()` method to unsubscribe.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(0);
+const subscription = counter.subscribe((newValue) => {
+  console.log('Counter changed:', newValue);
+});
+
+counter.set(1); // Console: "Counter changed: 1"
+subscription.stop(); // Stops the subscription
+```
+
+## `Peek`
+
+Returns the current value without triggering reactions.
+
+### Syntax
+```javascript
+someValue.peek();
+```
+
+### Returns
+
+`any` - The current value of the reactive variable.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(0);
+console.log(counter.peek()); // Output: 0
+```
+
+## `Clear`
+
+Sets the value of the reactive variable to `undefined` and trigger reactions.
+
+### Syntax
+```javascript
+someValue.clear();
+```
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const counter = new ReactiveVar(0);
+counter.clear();
+console.log(counter.get()); // Output: undefined
+```
