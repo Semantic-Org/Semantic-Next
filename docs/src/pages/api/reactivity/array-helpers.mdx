@@ -1,0 +1,201 @@
+---
+layout: '@layouts/Guide.astro'
+icon: list
+title: Array Helpers
+description: API reference for Array Helpers in Semantic UI's reactivity system
+---
+
+These helpers provide convenient ways to modify arrays reactively, ensuring that dependent computations are updated when the array changes.
+
+> **Collection Helpers** - For arrays of records see [collection helpers](/api/reactivity/collection-helpers) which handle manipulating arrays of records with unique ids.
+
+### Usage Note
+
+Array helpers allow you to update reactive values without having to call `get` then an array function like `push` and finally `set` to triger the reaction.
+
+We've also included a few common advanced use cases for arrays like [`setIndex`](#setindex) [`removeIndex`](#removeindex) and [`setArrayProperty`](#setarrayproperty) to handle replacing a specific element in an array.
+
+## push
+
+Adds one or more elements to the end of the array and returns the new length of the array.
+
+### Syntax
+```javascript
+reactiveVar.push(...elements)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| ...elements | any | One or more elements to add to the end of the array |
+
+### Returns
+
+number - The new length of the array.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const fruits = new ReactiveVar(['apple', 'banana']);
+
+fruits.push('orange');
+console.log(fruits.get()); // Output: ['apple', 'banana', 'orange']
+
+fruits.push('grape', 'kiwi');
+console.log(fruits.get()); // Output: ['apple', 'banana', 'orange', 'grape', 'kiwi']
+```
+
+## unshift
+
+Adds one or more elements to the beginning of the array and returns the new length of the array.
+
+### Syntax
+```javascript
+reactiveVar.unshift(...elements)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| ...elements | any | One or more elements to add to the beginning of the array |
+
+### Returns
+
+number - The new length of the array.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const numbers = new ReactiveVar([3, 4, 5]);
+
+numbers.unshift(1, 2);
+console.log(numbers.get()); // Output: [1, 2, 3, 4, 5]
+```
+
+## splice
+
+Changes the contents of the array by removing or replacing existing elements and/or adding new elements in place.
+
+### Syntax
+```javascript
+reactiveVar.splice(start, deleteCount, ...items)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| start | number | The index at which to start changing the array |
+| deleteCount | number | An integer indicating the number of elements to remove |
+| ...items | any | The elements to add to the array, beginning from `start` |
+
+### Returns
+
+Array - An array containing the deleted elements.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const colors = new ReactiveVar(['red', 'green', 'blue']);
+
+colors.splice(1, 1, 'yellow', 'orange');
+console.log(colors.get()); // Output: ['red', 'yellow', 'orange', 'blue']
+```
+
+## setIndex
+
+Sets the value at a specific index in the array.
+
+### Syntax
+```javascript
+reactiveVar.setIndex(index, value)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | The index at which to set the value |
+| value | any | The value to set at the specified index |
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const letters = new ReactiveVar(['a', 'b', 'c']);
+
+letters.setIndex(1, 'x');
+console.log(letters.get()); // Output: ['a', 'x', 'c']
+```
+
+## removeIndex
+
+Removes the element at a specific index from the array.
+
+### Syntax
+```javascript
+reactiveVar.removeIndex(index)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | The index of the element to remove |
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const pets = new ReactiveVar(['dog', 'cat', 'fish']);
+
+pets.removeIndex(1);
+console.log(pets.get()); // Output: ['dog', 'fish']
+```
+
+## setArrayProperty
+
+Sets a property on an object at a specific index in the array, or on all objects if no index is specified.
+
+### Syntax
+```javascript
+reactiveVar.setArrayProperty(indexOrProperty, property, value)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| indexOrProperty | number or string | The index of the object to modify, or the property name if modifying all objects |
+| property | string | The name of the property to set (only if first argument is a number) |
+| value | any | The value to set for the property |
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const users = new ReactiveVar([
+  { name: 'Alice', age: 30 },
+  { name: 'Bob', age: 25 }
+]);
+
+// Set a property on a specific object
+users.setArrayProperty(0, 'age', 31);
+console.log(users.get()); // Output: [{ name: 'Alice', age: 31 }, { name: 'Bob', age: 25 }]
+
+// Set a property on all objects
+users.setArrayProperty('isActive', true);
+console.log(users.get()); 
+// Output: [{ name: 'Alice', age: 31, isActive: true }, { name: 'Bob', age: 25, isActive: true }]
+```

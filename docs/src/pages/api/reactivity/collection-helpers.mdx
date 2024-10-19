@@ -1,0 +1,213 @@
+---
+layout: '@layouts/Guide.astro'
+icon: database
+title: Collection Helpers
+description: API reference for Collection Helpers in Semantic UI's reactivity system
+---
+
+Collection Helpers are methods available on ReactiveVar instances that contain arrays of objects. These helpers provide convenient ways to manipulate and update specific objects within the collection based on their unique id.
+
+### Element IDs
+
+Unique ids for each row are the first set value in the following list
+* `_id`
+* `id`
+* `hash`
+* `key`
+
+If none are set then the record will be ignored
+
+## setProperty
+
+Sets a property on an object in the collection that matches the given id.
+
+### Syntax
+```javascript
+reactiveVar.setProperty(id, property, value)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | any | The id of the object to modify |
+| property | string | The name of the property to set |
+| value | any | The value to set for the property |
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const users = new ReactiveVar([
+  { id: 1, name: 'Alice', age: 30 },
+  { id: 2, name: 'Bob', age: 25 }
+]);
+
+users.setProperty(2, 'age', 26);
+console.log(users.get());
+// Output: [{ id: 1, name: 'Alice', age: 30 }, { id: 2, name: 'Bob', age: 26 }]
+```
+
+## replaceItem
+
+Replaces an entire object in the collection that matches the given id.
+
+### Syntax
+```javascript
+reactiveVar.replaceItem(id, newItem)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | any | The id of the object to replace |
+| newItem | Object | The new object to replace the old one |
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const tasks = new ReactiveVar([
+  { id: 1, task: 'Buy groceries', completed: false },
+  { id: 2, task: 'Walk the dog', completed: true }
+]);
+
+tasks.replaceItem(1, { id: 1, task: 'Buy groceries', completed: true });
+console.log(tasks.get());
+// Output: [{ id: 1, task: 'Buy groceries', completed: true }, { id: 2, task: 'Walk the dog', completed: true }]
+```
+
+## removeItem
+
+Removes an object from the collection that matches the given id.
+
+### Syntax
+```javascript
+reactiveVar.removeItem(id)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | any | The id of the object to remove |
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const books = new ReactiveVar([
+  { id: 1, title: 'The Great Gatsby' },
+  { id: 2, title: 'To Kill a Mockingbird' }
+]);
+
+books.removeItem(1);
+console.log(books.get());
+// Output: [{ id: 2, title: 'To Kill a Mockingbird' }]
+```
+
+## getIndex
+
+Returns the index of an object in the collection that matches the given id.
+
+### Syntax
+```javascript
+reactiveVar.getIndex(id)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | any | The id of the object to find |
+
+### Returns
+
+number - The index of the object, or -1 if not found.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const fruits = new ReactiveVar([
+  { id: 'a', name: 'apple' },
+  { id: 'b', name: 'banana' },
+  { id: 'c', name: 'cherry' }
+]);
+
+const index = fruits.getIndex('b');
+console.log(index); // Output: 1
+```
+
+## getID
+
+Returns the id of an object at a specific index in the collection.
+
+### Syntax
+```javascript
+reactiveVar.getID(index)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | The index of the object |
+
+### Returns
+
+any - The id of the object at the specified index, or undefined if the index is out of bounds.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const animals = new ReactiveVar([
+  { id: 'dog1', species: 'dog' },
+  { id: 'cat1', species: 'cat' },
+  { id: 'fish1', species: 'fish' }
+]);
+
+const id = animals.getID(1);
+console.log(id); // Output: 'cat1'
+```
+
+## hasID
+
+Checks if an object at a specific index in the collection has an id.
+
+### Syntax
+```javascript
+reactiveVar.hasID(index)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | The index of the object to check |
+
+### Returns
+
+boolean - True if the object at the specified index has an id, false otherwise.
+
+### Usage
+
+```javascript
+import { ReactiveVar } from '@semantic-ui/reactivity';
+
+const mixed = new ReactiveVar([
+  { id: 1, value: 'has id' },
+  { value: 'no id' },
+  { id: 2, value: 'has id too' }
+]);
+
+console.log(mixed.hasID(0)); // Output: true
+console.log(mixed.hasID(1)); // Output: false
+```

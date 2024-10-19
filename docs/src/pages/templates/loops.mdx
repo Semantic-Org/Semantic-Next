@@ -65,7 +65,7 @@ The value `@index` can be used to get the current loop index.
 {/each}
 ```
 
-This can be used with [helpers](/templates/helpers) like `numberFromIndex` to output non-zero indexed values.
+This can be used with [helpers](/api/templates/helpers) like `numberFromIndex` to output non-zero indexed values.
 
 ```sui
 {#each person in team}
@@ -99,7 +99,7 @@ Iterables can be the results of expressions, for instance pulling a set of value
 
 ### Global Helpers
 
-[Global helpers](/templates/helpers) can be used to generate iterables like number ranges.
+[Global helpers](/api/templates/helpers) can be used to generate iterables like number ranges.
 
 ```handlerbars
 {#each number in range 0 4}
@@ -109,6 +109,6 @@ Iterables can be the results of expressions, for instance pulling a set of value
 
 ## Example
 
-The following example uses loops with [snippets](/templates/snippets) to output values into a table.
+The following example uses loops with [snippets](/api/templates/snippets) to output values into a table.
 
 <PlaygroundExample id="snippets" direction="horizontal"></PlaygroundExample>

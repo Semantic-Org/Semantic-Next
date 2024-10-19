@@ -226,7 +226,7 @@ export const sidebarMenuFramework = [
   {
     name: 'Query',
     description: 'DOM Helpers',
-    url: '/query',
+    url: '/api/query',
     icon: 'mouse-pointer',
     pages: [
       {
@@ -396,14 +396,44 @@ export const sidebarMenuFramework = [
   },
   {
     name: 'Reactivity',
-    description: 'Signals',
     url: '/api/reactivity',
     icon: 'cpu',
     pages: [
       {
         name: 'Reactive Var',
-        description: 'Signal',
         url: '/api/reactivity/reactive-var'
+      },
+      {
+        name: 'Reaction',
+        url: '/api/reactivity/reaction'
+      },
+      {
+        name: 'Flushing Reactions',
+        url: '/api/reactivity/flushing'
+      },
+      {
+        name: 'Dependency',
+        url: '/api/reactivity/dependency'
+      },
+      {
+        name: 'Number Helpers',
+        url: '/api/reactivity/number-helpers'
+      },
+      {
+        name: 'Boolean Helpers',
+        url: '/api/reactivity/boolean-helpers'
+      },
+      {
+        name: 'Array Helpers',
+        url: '/api/reactivity/array-helpers'
+      },
+      {
+        name: 'Collection Helpers',
+        url: '/api/reactivity/collection-helpers'
+      },
+      {
+        name: 'Date Helpers',
+        url: '/api/reactivity/date-helpers'
       },
     ]
   },

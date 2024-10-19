@@ -20,16 +20,16 @@ new ReactiveVar(initialValue, options);
 
 | Name | Type | Description |
 |------|------|-------------|
-| `initialValue` | `any` | The initial value of the reactive variable |
-| `options` | `Object` | (Optional) Configuration options |
+| initialValue | any | The initial value of the reactive variable |
+| options | Object | (Optional) Configuration options |
 
 ### Options
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| `equalityFunction` | `Function` | `isEqual` | Custom function to determine if the value has changed |
-| `allowClone` | `boolean` | `true` | Whether to clone the value when getting/setting |
-| `cloneFunction` | `Function` | `clone` | Custom function to clone the value |
+| equalityFunction | Function | isEqual | Custom function to determine if the value has changed |
+| allowClone | boolean | true | Whether to clone the value when getting/setting |
+| cloneFunction | Function | clone | Custom function to clone the value |
 
 ### Usage
 
@@ -124,7 +124,7 @@ someValue.set(newValue);
 
 | Name | Type | Description |
 |------|------|-------------|
-| `newValue` | `any` | The new value to set |
+| newValue | any | The new value to set |
 
 ### Usage
 
@@ -146,7 +146,7 @@ Creates a subscription that runs the callback whenever the value changes.
 
 | Name | Type | Description |
 |------|------|-------------|
-| `callback` | `Function` | Function to be called when the value changes |
+| callback | Function | Function to be called when the value changes |
 
 ### Returns
 
