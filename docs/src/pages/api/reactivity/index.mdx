@@ -1,0 +1,46 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Reactivity with Signals
+description: Learn how Semantic UI uses signals to produce reactivity
+---
+
+## Installation
+
+Reactivity can be used as a standalone package or alongside [Semantic UI components](/components).
+
+```bash
+npm install @semantic-ui/reactivity
+```
+
+## What's Inside
+
+### Data Type Helpers
+
+Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
+
+##### Number Helpers
+- `increment(amount)`, `decrement(amount)` - increments by amount
+
+##### Boolean Helper
+- `toggle()` - toggles from `false` to `true`
+
+##### Array Mutation Helpers
+- `push()`, `unshift()`, `splice()` - same as native but reactive
+- `setIndex(index, value)` - Sets value at index
+- `removeIndex(index)` - Remove index
+- `setArrayProperty(indexOrProp, property, value)` - Set property at index or across all
+
+##### Record Helpers (Array of Objects)
+- `setProperty(id, property, value)` - set property on item matching id
+- `replaceItem(item, id)` - replace item matching id
+- `removeItem(id)` - Remove a specific item from array by id
+- `getIndex(id)` - get index from id
+- `getID(index)` - get id at an index
+- `hasID(index)` - checks if index has an id
+
+##### Date Helpers
+- `now` - Set to current time
+
+
+You can learn more about this in the documentation for [array helpers](#), [record helpers](), [date helpers](), and [boolean helpers]().

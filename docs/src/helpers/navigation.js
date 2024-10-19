@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { topbarMenu, sidebarMenuUI, sidebarMenuFramework } from './menus.js';
+import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
 import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
 
 const examples = await getCollection('examples');
@@ -94,6 +94,9 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   }
   else if(topbarSection == 'framework') {
     menu = sidebarMenuFramework;
+  }
+  else if(topbarSection == 'api') {
+    menu = sidebarMenuAPI;
   }
   else if(topbarSection == 'examples') {
     menu = sidebarMenuExamples;

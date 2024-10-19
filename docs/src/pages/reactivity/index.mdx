@@ -6,30 +6,24 @@ description: Learn how Semantic UI uses signals to produce reactivity
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+### Understanding Signals Based Reactivity
+
 Reactivity put simply is **values changing causes stuff to happen**.
 
-Signals are a **mechanism for implementing reactivity** that works by tracking dependencies of a reactive value.
+Signals are a **mechanism for implementing reactivity** that works by tracking the dependencies of a reactive value.
 
 This is typically implemented using a `value` accessor or a `get()` function that tracks a reference to each time it is called, then re-runs each dependency when a value changes.
 
-The name for this "rerunning function" can be called a ***watcher*** like in the [signals proposal](https://github.com/tc39/proposal-signals), or a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/). The value that changes is typically called a **signal**.
+The value that changes is typically called a **signal**.
 
-> **Signals vs Reaction** Although Semantic UI uses a signals based reactivity system the exported
-primitives are called `ReactiveVar` and `Reaction` instead of `Signal` and `Computation` to help convey their underlying purpose as an implementation of a reactivity system.
+The function that re-runs when the value changes can be called many different things, for instance a ***watcher***  in the [signals proposal](https://github.com/tc39/proposal-signals), a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/) or simply `watch` like in [Lit](https://lit.dev/docs/data/signals/).
 
-## Installation
 
-Reactivity can be used as a standalone package or alongside [Semantic UI components](/components).
+> **Naming Conventions** - Semantic UI chooses to call a `Signal` a `ReactiveVar` which separates the implementation from the name. The function that changes is simply called a `Reaction`, making it easy to remember that a `ReactiveVar` causes a `Reaction`.
 
-```bash
-npm install @semantic-ui/reactivity
-```
+### Usage
 
-### Standalone Usage
-
-Semantic UI includes a package [`@semantic-ui/reactivity`](https://github.com/Semantic-Org/Semantic-Next/tree/main/packages/reactivity) which exports `ReactiveVar`, `Dependency` and `Reaction`.
-
-The reactivity system is implemented as a standalone package and can be used without other parts of the framework.
+Semantic UI includes a package [`@semantic-ui/reactivity`](/api/reactivity) which exports [`ReactiveVar`](/api/reactivity/reactive-var), [`Reaction`](/api/reactivity/reaction), and [`Dependency`](/api/reactivity/dependency) and can be used as a standalone package without using [Semantic UI components](/components).
 
 ```javascript
 import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
@@ -78,35 +72,4 @@ const checkBirthdays = Reaction(() => {
 
 <PlaygroundExample id="birthday" direction="horizontal"></PlaygroundExample>
 
-## What's Inside
-
-### Data Type Helpers
-
-Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
-
-##### Number Helpers
-- `increment(amount)`, `decrement(amount)` - increments by amount
-
-##### Boolean Helper
-- `toggle()` - toggles from `false` to `true`
-
-##### Array Mutation Helpers
-- `push()`, `unshift()`, `splice()` - same as native but reactive
-- `setIndex(index, value)` - Sets value at index
-- `removeIndex(index)` - Remove index
-- `setArrayProperty(indexOrProp, property, value)` - Set property at index or across all
-
-##### Record Helpers (Array of Objects)
-- `setProperty(id, property, value)` - set property on item matching id
-- `replaceItem(item, id)` - replace item matching id
-- `removeItem(id)` - Remove a specific item from array by id
-- `getIndex(id)` - get index from id
-- `getID(index)` - get id at an index
-- `hasID(index)` - checks if index has an id
-
-##### Date Helpers
-- `now` - Set to current time
-
-
-You can learn more about this in the documentation for [array helpers](#), [record helpers](), [date helpers](), and [boolean helpers]().
 

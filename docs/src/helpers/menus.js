@@ -16,7 +16,7 @@ export const topbarMenu =  [
   },
   {
     _id: 'framework',
-    name: 'Tech Guide',
+    name: 'Guide',
     url: '/components',
   },
 
@@ -150,7 +150,7 @@ export const sidebarMenuFramework = [
         url: '/templates/slots'
       },
       {
-        name: 'Global Helpers',
+        name: 'Template Helpers',
         url: '/templates/helpers'
       },
       {
@@ -162,7 +162,7 @@ export const sidebarMenuFramework = [
         url: '/templates/snippets'
       },
     ]
-  },
+  },/*
   {
     name: 'Server Side Rendering',
     url: '/ssr',
@@ -181,7 +181,7 @@ export const sidebarMenuFramework = [
         url: '/ssr/gotchas'
       },
     ]
-  },
+  },*/
   {
     name: 'Reactivity',
     description: 'Signals',
@@ -223,9 +223,73 @@ export const sidebarMenuFramework = [
       },
     ]
   },
+];
+
+
+export const sidebarMenuAPI = [
+  {
+    name: 'Components',
+    url: '/api/components',
+    icon: 'package',
+    pages: [
+    ]
+  },
+  {
+    name: 'Templating',
+    url: '/api/templating',
+    icon: 'table',
+    pages: [
+    ]
+  },
+  {
+    name: 'Template Helpers',
+    url: '/api/helpers',
+    icon: 'book-open',
+    pages: [
+      {
+        name: 'Arrays',
+        url: '/api/helpers/arrays'
+      },
+      {
+        name: 'Comparison',
+        url: '/api/helpers/comparison'
+      },
+      {
+        name: 'CSS',
+        url: '/api/helpers/css'
+      },
+      {
+        name: 'Dates',
+        url: '/api/helpers/dates'
+      },
+      {
+        name: 'Debug',
+        url: '/api/helpers/debug'
+      },
+      {
+        name: 'Logical Operators',
+        url: '/api/helpers/logical'
+      },
+      {
+        name: 'Numeric',
+        url: '/api/helpers/numeric'
+      },
+      {
+        name: 'Objects',
+        url: '/api/helpers/objects'
+      },
+      {
+        name: 'Reactivity',
+        url: '/api/helpers/reactivity'
+      },
+      {
+        name: 'Strings',
+        url: '/api/helpers/strings'
+      },
+    ]
+  },
   {
     name: 'Query',
-    description: 'DOM Helpers',
     url: '/api/query',
     icon: 'mouse-pointer',
     pages: [
@@ -280,8 +344,50 @@ export const sidebarMenuFramework = [
     ]
   },
   {
+    name: 'Reactivity',
+    url: '/api/reactivity',
+    icon: 'cpu',
+    pages: [
+      {
+        name: 'Reactive Var',
+        url: '/api/reactivity/reactive-var'
+      },
+      {
+        name: 'Reaction',
+        url: '/api/reactivity/reaction'
+      },
+      {
+        name: 'Flushing Reactions',
+        url: '/api/reactivity/flushing'
+      },
+      {
+        name: 'Dependency',
+        url: '/api/reactivity/dependency'
+      },
+      {
+        name: 'Number Helpers',
+        url: '/api/reactivity/number-helpers'
+      },
+      {
+        name: 'Boolean Helpers',
+        url: '/api/reactivity/boolean-helpers'
+      },
+      {
+        name: 'Array Helpers',
+        url: '/api/reactivity/array-helpers'
+      },
+      {
+        name: 'Collection Helpers',
+        url: '/api/reactivity/collection-helpers'
+      },
+      {
+        name: 'Date Helpers',
+        url: '/api/reactivity/date-helpers'
+      },
+    ]
+  },
+  {
     name: 'Utils',
-    description: 'JS Helpers',
     url: '/api/utils',
     icon: 'tool',
     pages: [
@@ -344,96 +450,6 @@ export const sidebarMenuFramework = [
       {
         name: 'Strings',
         url: '/api/utils/strings'
-      },
-    ]
-  },
-  {
-    name: 'Template Helpers',
-    url: '/api/helpers',
-    icon: 'table',
-    pages: [
-      {
-        name: 'Arrays',
-        url: '/api/helpers/arrays'
-      },
-      {
-        name: 'Comparison',
-        url: '/api/helpers/comparison'
-      },
-      {
-        name: 'CSS',
-        url: '/api/helpers/css'
-      },
-      {
-        name: 'Dates',
-        url: '/api/helpers/dates'
-      },
-      {
-        name: 'Debug',
-        url: '/api/helpers/debug'
-      },
-      {
-        name: 'Logical Operators',
-        url: '/api/helpers/logical'
-      },
-      {
-        name: 'Numeric',
-        url: '/api/helpers/numeric'
-      },
-      {
-        name: 'Objects',
-        url: '/api/helpers/objects'
-      },
-      {
-        name: 'Reactivity',
-        url: '/api/helpers/reactivity'
-      },
-      {
-        name: 'Strings',
-        url: '/api/helpers/strings'
-      },
-    ]
-  },
-  {
-    name: 'Reactivity',
-    url: '/api/reactivity',
-    icon: 'cpu',
-    pages: [
-      {
-        name: 'Reactive Var',
-        url: '/api/reactivity/reactive-var'
-      },
-      {
-        name: 'Reaction',
-        url: '/api/reactivity/reaction'
-      },
-      {
-        name: 'Flushing Reactions',
-        url: '/api/reactivity/flushing'
-      },
-      {
-        name: 'Dependency',
-        url: '/api/reactivity/dependency'
-      },
-      {
-        name: 'Number Helpers',
-        url: '/api/reactivity/number-helpers'
-      },
-      {
-        name: 'Boolean Helpers',
-        url: '/api/reactivity/boolean-helpers'
-      },
-      {
-        name: 'Array Helpers',
-        url: '/api/reactivity/array-helpers'
-      },
-      {
-        name: 'Collection Helpers',
-        url: '/api/reactivity/collection-helpers'
-      },
-      {
-        name: 'Date Helpers',
-        url: '/api/reactivity/date-helpers'
       },
     ]
   },

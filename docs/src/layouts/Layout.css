@@ -69,6 +69,9 @@
     height: calc(100dvh - var(--topbar-height));
   }
 
+  layout page pageContent {
+    text-wrap: pretty;
+  }
   layout page.text-content main > ui-container {
     /*max-width: 910px;*/
     max-width: none;
