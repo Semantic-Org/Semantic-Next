@@ -193,12 +193,6 @@ class WebComponentBase extends LitElement {
     return settings;
   }
 
-  /* This may become more complex if we choose to support
-     reverse attribute lookups like setSetting('large');
-  */
-  setSetting(name, value) {
-    this[name] = value;
-  }
 
 
   /* Create a proxy object which returns the current setting

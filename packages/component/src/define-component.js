@@ -175,8 +175,16 @@ export const defineComponent = ({
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
+      /*******************************
+                  Settings
+      *******************************/
+
+
       getSettings() {
         return this.getSettingsFromConfig({componentSpec, properties: webComponent.properties });
+      }
+      setSetting(name, value) {
+        this[name] = value;
       }
 
       getData() {
