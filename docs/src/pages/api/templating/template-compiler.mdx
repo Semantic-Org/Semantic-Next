@@ -1,0 +1,190 @@
+---
+layout: '@layouts/Guide.astro'
+title: TemplateCompiler
+icon: code
+description: API reference for the TemplateCompiler class in Semantic UI Templating
+---
+
+The `TemplateCompiler` class is responsible for compiling template strings into an Abstract Syntax Tree (AST). This precompilation step enables efficient rendering and updates, especially useful for server-side rendering (SSR) and advanced use cases.
+
+## Constructor
+
+### Syntax
+```javascript
+new TemplateCompiler(templateString)
+```
+
+### Parameters
+| Name           | Type   | Description                    |
+|----------------|--------|--------------------------------|
+| templateString | string | The template string to compile |
+
+### Usage
+```javascript
+import { TemplateCompiler } from '@semantic-ui/templating';
+
+const compiler = new TemplateCompiler('<div>{{name}}</div>');
+```
+
+## Methods
+
+### compile
+
+Compiles the template string into an [Abstract Syntax Tree (AST)](/api/templating/ast).
+
+#### Syntax
+```javascript
+compiler.compile()
+```
+
+#### Returns
+`Object` - The compiled [AST]](/api/templating/ast) representation of the template.
+
+#### Usage
+```javascript
+const ast = compiler.compile();
+console.log(ast);
+```
+
+### parseTemplateString
+
+Parses a template string, typically used for partial templates or snippets.
+
+#### Syntax
+```javascript
+TemplateCompiler.parseTemplateString(expression)
+```
+
+#### Parameters
+| Name       | Type   | Description                      |
+|------------|--------|----------------------------------|
+| expression | string | The template string to parse     |
+
+#### Returns
+`Object` - An object containing parsed template information.
+
+#### Usage
+```javascript
+const templateInfo = TemplateCompiler.parseTemplateString('{{> partialName data1=value1 data2=value2}}');
+console.log(templateInfo);
+```
+
+### detectSyntax
+
+Detects whether the template uses single `{}` or double `{{}}` bracket syntax.
+
+#### Syntax
+```javascript
+TemplateCompiler.detectSyntax(templateString)
+```
+
+#### Parameters
+| Name           | Type   | Description                    |
+|----------------|--------|--------------------------------|
+| templateString | string | The template string to analyze |
+
+#### Returns
+`string` - Either `'singleBracket'` or `'doubleBracket'`.
+
+#### Usage
+```javascript
+const syntax = TemplateCompiler.detectSyntax('{{name}}');
+console.log(syntax); // 'doubleBracket'
+```
+
+### preprocessTemplate
+
+Preprocesses the template string, handling special cases like self-closing web component tags.
+
+#### Syntax
+```javascript
+TemplateCompiler.preprocessTemplate(templateString)
+```
+
+#### Parameters
+| Name           | Type   | Description                    |
+|----------------|--------|--------------------------------|
+| templateString | string | The template string to preprocess |
+
+#### Returns
+`string` - The preprocessed template string.
+
+#### Usage
+```javascript
+const processed = TemplateCompiler.preprocessTemplate('<ui-icon icon="foo" />');
+console.log(processed); // '<ui-icon icon="foo"></ui-icon>'
+```
+
+### optimizeAST
+
+Optimizes the compiled [AST](/api/templating/ast) by joining neighboring HTML nodes.
+
+#### Syntax
+```javascript
+TemplateCompiler.optimizeAST(ast)
+```
+
+#### Parameters
+| Name | Type     | Description             |
+|------|----------|-------------------------|
+| ast  | Object[] | The AST to optimize     |
+
+#### Returns
+`Object[]` - The optimized AST.
+
+#### Usage
+```javascript
+const optimizedAST = TemplateCompiler.optimizeAST(ast);
+```
+
+
+## Server Side Compilations
+
+You can precompile your templates on the serve then load them on the client using modern build tooling like esbuild or rollup and JSON imports.
+
+### Server
+
+On the server we want to render our templates to an AST.
+
+```javascript
+import { TemplateCompiler } from '@semantic-ui/templating';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+async function precompileTemplates(templateName) {
+  const templatePath = path.join(__dirname, 'templates', `${templateName}.html`);
+  const outputPath = path.join(__dirname, 'ast', `${templateName}.json`);
+
+  const template = await fs.readFile(templatePath, 'utf-8');
+  const compiler = new TemplateCompiler(template);
+  const ast = compiler.compile();
+
+  await fs.writeFile(outputPath, JSON.stringify(ast, null, 2));
+}
+```
+
+
+```javascript
+// somewhere else
+precompileTemplates('user-profile');
+```
+
+### Client
+
+Then on the client we can import that files directly as `JSON` file directly and pass as the `ast` parameter in `defineComponent`.
+
+```javascript
+import { defineComponent } from '@semantic-ui/component';
+import ast from './ast/user-profile.json' assert { type: 'json' };
+
+export function defineUserProfile() {
+  defineComponent({
+    tagName: 'user-profile',
+    ast,
+    // rest of component
+  });
+}
+```

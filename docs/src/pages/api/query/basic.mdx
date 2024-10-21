@@ -124,8 +124,6 @@ import { $$ } from '@semantic-ui/query';
 const $slottedContent = $$('my-component .slotted-content');
 ```
 
-
-
 ## The Query Object
 
 When you use the `$()` or `$$()` function, it returns a Query object. This object contains a collection of DOM elements that have been selected from the document or created from an HTML string.
@@ -216,6 +214,39 @@ $('.non-existent').css('color', 'red'); // No effect if the class doesn't exist
 ### Differences from Native Arrays
 
 The Query Object is array-like meaning you can also access elements idiosyncratically using bracket notation `$('div')[0]`, however this is not recommended, as many other array functions like `push` or `pop` are not supported
+## Browser Helpers
+
+A few additional helpers are provided specifically for using Query in browser environments.
+
+### Export Globals
+If you need to restore the previous values before calling export globals.
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+// $ and $$ are defined in page
+exportGlobals();
+```
+### Restore Globals
+If you need to restore the previous values before calling export globals.
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+// $ and $$ are defined in page
+exportGlobals();
+
+// $ and $$ are now their original values
+restoreGlobals();
+```
+
+## Custom Aliases
+You can also choose to use Query as a custom alias
+```javascript
+import { useAlias } from '@semantic-ui/query';
+
+const myQuery = useAlias();
+const $div = myQuery('div');
+```
+
 
 ## Custom Root
 
@@ -223,7 +254,7 @@ You can use the `root` option to change the root which is used for query. This c
 
 > **SUI Components** - Semantic UI components use this technique when returning `$` and `$$` [inside components](/components/dom#using-query-in-components)
 
-```javascript
+```javascript title="Inside Web Component"
 import { $ } from '@semantic-ui/query';
 
 export const MyClass = class MyClass {
@@ -233,9 +264,9 @@ export const MyClass = class MyClass {
     return $(selector, { root: this.renderRoot });
   }
 };
+```
 
-
-myQuery = new Query()
-
-const $elements = $$('div', { root: document.body, pierceShadow: true });
+```javascript title="Standalone"
+myQuery = new Query({ root: someEl, pierceShadow: true })
+const $elements = myQuery('div');
 ```

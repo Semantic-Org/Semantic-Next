@@ -82,7 +82,6 @@ const state = {
 
 const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
   initialize() {
-    console.log(self);
     state.activeFile.set(self.getFirstFile()?.filename);
   },
   mobileMenu: [

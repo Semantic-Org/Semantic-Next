@@ -231,12 +231,30 @@
       padding: 0.5rem 1rem;
     }
 
+    header,
     &:not(.inline) .menu {
       min-height: 27px;
       background: var(--playground-header-background);
       border-bottom: var(--playground-header-border);
       box-shadow: var(--playground-header-box-shadow);
       transition: background-color 0.1s ease, color 0.1s ease-in-out;
+    }
+
+    header {
+      display: block;
+      box-shadow: none;
+      border-bottom: var(--subtle-border);
+      padding: 8px 16px 0px;
+      height: auto;
+      color: var(--standard-50);
+      font-size: var(--small);
+
+      a {
+        color: var(--link-color);
+      }
+      a:hover {
+        color: var(--link-hover-color);
+      }
     }
 
     .menu ui-menu {

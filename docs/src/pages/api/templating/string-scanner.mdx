@@ -1,0 +1,209 @@
+---
+layout: '@layouts/Guide.astro'
+title: StringScanner
+icon: search
+description: API reference for the StringScanner class in Semantic UI Templating
+---
+
+The `StringScanner` class is a utility used internally by the TemplateCompiler to scan and parse template strings. It provides methods for moving through a string, matching patterns, and extracting relevant information during the template compilation process.
+
+This library should not generally be used unless you plan on writing a custom string templating language.
+
+## Constructor
+
+### Syntax
+```javascript
+new StringScanner(input)
+```
+
+### Parameters
+| Name  | Type   | Description                    |
+|-------|--------|--------------------------------|
+| input | string | The input string to be scanned |
+
+### Usage
+```javascript
+import { StringScanner } from '@semantic-ui/templating';
+
+const scanner = new StringScanner('<div>{{name}}</div>');
+```
+
+## Properties
+
+### input
+The original input string.
+
+### pos
+The current position in the input string.
+
+## Methods
+
+### matches
+
+Checks if the rest of the input matches a given regular expression.
+
+#### Syntax
+```javascript
+scanner.matches(regex)
+```
+
+#### Parameters
+| Name  | Type   | Description                   |
+|-------|--------|-------------------------------|
+| regex | RegExp | The regular expression to test |
+
+#### Returns
+`boolean` - `true` if the rest of the input matches the regex, `false` otherwise.
+
+#### Usage
+```javascript
+if (scanner.matches(/\{\{/)) {
+  // Handle opening double curly braces
+}
+```
+
+### rest
+
+Returns the rest of the input string from the current position.
+
+#### Syntax
+```javascript
+scanner.rest()
+```
+
+#### Returns
+`string` - The remaining unscanned portion of the input.
+
+#### Usage
+```javascript
+const remaining = scanner.rest();
+console.log(remaining);
+```
+
+### isEOF
+
+Checks if the scanner has reached the end of the input.
+
+#### Syntax
+```javascript
+scanner.isEOF()
+```
+
+#### Returns
+`boolean` - `true` if the scanner is at or past the end of the input, `false` otherwise.
+
+#### Usage
+```javascript
+while (!scanner.isEOF()) {
+  // Process next token
+}
+```
+
+### peek
+
+Returns the character at the current position without advancing.
+
+#### Syntax
+```javascript
+scanner.peek()
+```
+
+#### Returns
+`string` - The character at the current position.
+
+#### Usage
+```javascript
+const nextChar = scanner.peek();
+if (nextChar === '{') {
+  // Handle opening curly brace
+}
+```
+
+### consume
+
+Consumes and returns a portion of the input that matches a given pattern.
+
+#### Syntax
+```javascript
+scanner.consume(pattern)
+```
+
+#### Parameters
+| Name    | Type           | Description                      |
+|---------|----------------|----------------------------------|
+| pattern | string\|RegExp | The pattern to match and consume |
+
+#### Returns
+`string|null` - The matched string if found, otherwise `null`.
+
+#### Usage
+```javascript
+const tag = scanner.consume(/\{\{[^}]+\}\}/);
+if (tag) {
+  // Process the found tag
+}
+```
+
+### consumeUntil
+
+Consumes and returns the portion of the input up to a given pattern.
+
+#### Syntax
+```javascript
+scanner.consumeUntil(pattern)
+```
+
+#### Parameters
+| Name    | Type           | Description                   |
+|---------|----------------|-------------------------------|
+| pattern | string\|RegExp | The pattern to stop consuming |
+
+#### Returns
+`string` - The consumed string up to the pattern.
+
+#### Usage
+```javascript
+const content = scanner.consumeUntil('{{');
+console.log(content); // Everything before the next '{{'
+```
+
+### getContext
+
+Returns context information about the current position in the input.
+
+#### Syntax
+```javascript
+scanner.getContext()
+```
+
+#### Returns
+`Object` - An object containing context information.
+
+#### Usage
+```javascript
+const context = scanner.getContext();
+if (context.insideTag) {
+  // Handle being inside a tag
+}
+```
+
+### fatal
+
+Throws an error with the given message and current position information.
+
+#### Syntax
+```javascript
+scanner.fatal(msg)
+```
+
+#### Parameters
+| Name | Type   | Description        |
+|------|--------|--------------------|
+| msg  | string | The error message  |
+
+#### Usage
+```javascript
+if (unexpectedCharacter) {
+  scanner.fatal('Unexpected character in template');
+}
+```

@@ -13,6 +13,9 @@
 {else if is tab 'console'}
   console
 {else if is tab 'ast'}
+  <header>
+      The AST is a representation of the template content, for more information <a href="/api/templating/ast" target="_blank">see the AST docs</a>.
+  </header>
   <pretty-json expand="4">
     {getAST}
   </pretty-json>

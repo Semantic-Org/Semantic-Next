@@ -11,12 +11,12 @@ const componentPages = components.map(page => ({
 export const topbarMenu =  [
   {
     _id: 'ui',
-    name: 'UI Framework',
+    name: 'UI Components',
     url: '/introduction',
   },
   {
     _id: 'framework',
-    name: 'Guide',
+    name: 'Framework',
     url: '/components',
   },
 
@@ -223,15 +223,27 @@ export const sidebarMenuFramework = [
       },
     ]
   },
+  {
+    name: 'Query',
+    description: 'DOM Helpers',
+    url: '/query',
+    icon: 'mouse-pointer',
+    pages: [
+    ]
+  },
 ];
 
 
 export const sidebarMenuAPI = [
   {
     name: 'Components',
-    url: '/api/components',
+    url: '/api/component',
     icon: 'package',
     pages: [
+      {
+        name: 'Define Component',
+        url: '/api/component/define-component'
+      },
     ]
   },
   {
@@ -239,52 +251,21 @@ export const sidebarMenuAPI = [
     url: '/api/templating',
     icon: 'table',
     pages: [
-    ]
-  },
-  {
-    name: 'Template Helpers',
-    url: '/api/helpers',
-    icon: 'book-open',
-    pages: [
       {
-        name: 'Arrays',
-        url: '/api/helpers/arrays'
+        name: 'Template Compiler',
+        url: '/api/templating/template-compiler'
       },
       {
-        name: 'Comparison',
-        url: '/api/helpers/comparison'
+        name: 'Abstract Syntax Tree (AST)',
+        url: '/api/templating/ast'
       },
       {
-        name: 'CSS',
-        url: '/api/helpers/css'
+        name: 'Template',
+        url: '/api/templating/template'
       },
       {
-        name: 'Dates',
-        url: '/api/helpers/dates'
-      },
-      {
-        name: 'Debug',
-        url: '/api/helpers/debug'
-      },
-      {
-        name: 'Logical Operators',
-        url: '/api/helpers/logical'
-      },
-      {
-        name: 'Numeric',
-        url: '/api/helpers/numeric'
-      },
-      {
-        name: 'Objects',
-        url: '/api/helpers/objects'
-      },
-      {
-        name: 'Reactivity',
-        url: '/api/helpers/reactivity'
-      },
-      {
-        name: 'Strings',
-        url: '/api/helpers/strings'
+        name: 'String Scanner',
+        url: '/api/templating/string-scanner'
       },
     ]
   },
@@ -450,6 +431,53 @@ export const sidebarMenuAPI = [
       {
         name: 'Strings',
         url: '/api/utils/strings'
+      },
+    ]
+  },
+  {
+    name: 'Template Helpers',
+    url: '/api/helpers',
+    icon: 'book-open',
+    pages: [
+      {
+        name: 'Arrays',
+        url: '/api/helpers/arrays'
+      },
+      {
+        name: 'Comparison',
+        url: '/api/helpers/comparison'
+      },
+      {
+        name: 'CSS',
+        url: '/api/helpers/css'
+      },
+      {
+        name: 'Dates',
+        url: '/api/helpers/dates'
+      },
+      {
+        name: 'Debug',
+        url: '/api/helpers/debug'
+      },
+      {
+        name: 'Logical Operators',
+        url: '/api/helpers/logical'
+      },
+      {
+        name: 'Numeric',
+        url: '/api/helpers/numeric'
+      },
+      {
+        name: 'Objects',
+        url: '/api/helpers/objects'
+      },
+      {
+        name: 'Reactivity',
+        url: '/api/helpers/reactivity'
+      },
+      {
+        name: 'Strings',
+        url: '/api/helpers/strings'
       },
     ]
   },

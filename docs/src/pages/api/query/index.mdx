@@ -4,13 +4,9 @@ layout: '@layouts/Guide.astro'
 
 
 
-## Introduction
-
 Query is a library built specifically for web components to make it easy to interact with a page's DOM and shadow DOM in a chainable way.
 
-Query includes many of the helpers which make it easy to interact with web components, emit and consume events, traverse the DOM tree, retreive common values and much more.
-
-It is extremely small and uses modern browser APIs, defering to native implementations wherever possible.
+> **Usage Guide** - If you are new to Query it is recommended you check out the [user guide](/query/) before reading the API references.
 
 ## Installation
 
@@ -20,132 +16,19 @@ Query can be used as a standalone package or alongside templating and other core
 npm install @semantic-ui/query
 ```
 
+## Query Sections
 
-## Usage
+The Query library is organized into several categories:
 
-
-### DOM Usage with $
-
-Query provides two exports `$` and `$$`.
-
-`$` is used for querying the normal browser DOM and `$$` is for querying the shadow DOM (the DOM present in web components).
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-const $div = $('div');
-```
-
-#### Chaining
-
-Query is built on the concept of chaining, which was originally pioneered by [jQuery](https://www.jquery.com), where method can be called in a pipeline processing the results of previous method calls.
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-const pText = $('div').find('p').text();
-```
-
-To see more examples of chaining browse the Query API docs.
-
-
-### Shadow DOM Usage with $$
-
-Web components have portions of their DOM encapsulated in what is known as the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
-
-Typically native browsers cannot query this DOM without querying each shadow DOM root separately, however Query provides a separate export `$$` for this use-case allowing you to access DOM deeply nested inside web components.
-
-> `$$` is slightly less performant because it must pierce shadow DOM boundaries recursively unlike `$` which uses native `document.querySelectorAll`. For most but the most extreme use-cases this difference is negligible but it is recommended to use `$$` only when interacting with web components.
-
-
-### Additional Options
-
-You can specify additional options when initializing the `Query` class.
-
-#### Root
-In some advanced cases you might want to limit Query to a particular root element.
-
-```javascript
-// special $ scoped to my-root for some custom app
-const $ = function (selector) {
-  const myRoot = $('my-component').el().shadowRoot;
-  return new Query(selector, { root: myRoot });
-};
-```
-
-#### Pierce Shadow
-
-`$$` is the same as passing `pierceShadow: true` as an option to `$` but is provided for convenience as a separate export.
-```javascript
-import { $, $$ } from '@semantic-ui/query';
-
-// these are equivalent
-const $div = $$('my-component div');
-const $div = $('my-component div', { pierceShadow: true});
-```
-
-## Usage
-
-### Browser
-
-In a browser environment you can use `exportGlobals` to export $ and $$ for use in your page. For more fine grained control see the [browser helpers](#browser-helpers) section below
-
-```javascript
-import { exportGlobals } from '@semantic-ui/query';
-
-// make $ and $$ available globally
-exportGlobals();
-```
-
-### Components
-
-`$` and `$$` are integrated into all lifecycle callbacks and events in Semantic UI components.
-
-```javascript
-const createComponent = ({$, $$}) => ({
-  getDiv() {
-    return $('div').get(0);
-  }
-});
-```
-
-```javascript
-const onCreated = ({$, $$}) => {
-  const $div = $('div');
-};
-```
-
-```javascript
-const events =  {
-  'click div'({$ , $$}) {
-    const $div = $('div').trigger('click');
-  }
-};
-```
-
-## Browser Helpers
-
-A few additional helpers are provided specifically for using Query in browser environments.
-
-### Restoring Globals
-If you need to restore the previous values before calling export globals.
-```javascript
-import { exportGlobals, restoreGlobals } from '@semantic-ui/query';
-
-// $ and $$ are defined
-exportGlobals();
-
-// $ and $$ are now their original values
-restoreGlobals();
-```
-
-### Custom Aliases
-You can also choose to use Query as a custom alias
-```javascript
-import { useAlias } from '@semantic-ui/query';
-
-const myQuery = useAlias();
-const $div = myQuery('div');
-```
-
-
+- **[Basic Usage](/api/query/basic)** - Basic usage of Query and initialization.
+- **[Attributes](/api/query/attributes)** - Accessing attributes.
+- **[Components](/api/query/components)** - Accessing UI components.
+- **[Content](/api/query/content)** - Accessing DOM content.
+- **[CSS](/api/query/css)** - Getting and setting CSS values.
+- **[Size & Dimensions](/api/query/dimensions)** - Getting and setting width, height, offset and dimensions.
+- **[DOM Manipulation](/api/query/dom-manipulation)** - Inserting, removing, or creating DOM content.
+- **[DOM Traversal](/api/query/dom-traversal)** - Traversing the DOM to access content.
+- **[Events](/api/query/events)** - Binding, triggering and removing events.
+- **[Iterators](/api/query/iterators)** - Looping through DOM elements to execute a function, filter, or map.
+- **[Logical Operators](/api/query/logical-operators)** - Modifying a query collection using selectors or functions
+- **[Utilities](/api/query/utilities)** - Utilities for manipulating the query objecgt

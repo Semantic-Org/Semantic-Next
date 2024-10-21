@@ -1,0 +1,281 @@
+---
+layout: '@layouts/Guide.astro'
+title: Template
+icon: file-text
+description: API reference for the Template class in Semantic UI Templating
+---
+
+The `Template` class represents a compiled template and provides methods for manipulating and rendering it. It integrates with the Semantic UI component system and supports various rendering engines.
+
+SUI is designed to be flexible in terms of how components are rendered, currently Semantic ships with the [`Lit`](https://lit.dev/) rendering engine which will compile templates to `lit html` for use with web components.
+
+> **Advanced Use Only** - When using Semantic UI components, a template will automatically be created from `defineComponent`. It **is not recommended to use `Template` class on its own** except for advanced use-cases.
+
+## Constructor
+
+### Syntax
+```javascript
+new Template(options)
+```
+
+### Parameters
+| Name    | Type   | Description                    |
+|---------|--------|--------------------------------|
+| options | Object | Configuration options for the template |
+
+#### Options
+
+| Name           | Type     | Description                                |
+|----------------|----------|--------------------------------------------|
+| templateName   | string   | Name of the template                       |
+| ast            | Object[] | Compiled AST of the template               |
+| template       | string   | The template string                        |
+| data           | Object   | Initial data for the template              |
+| element        | Element  | The DOM element associated with the template |
+| renderRoot     | Element  | The root element for rendering             |
+| css            | string   | CSS styles associated with the template    |
+| events         | Object   | Event handlers for the template            |
+| keys           | Object   | Key bindings for the template              |
+| stateConfig    | Object   | Configuration for reactive state           |
+| subTemplates   | Object   | Sub-templates used within this template    |
+| createComponent| Function | Function to create the component instance  |
+| parentTemplate | Template | The parent template when nested            |
+| renderingEngine| string   | The rendering engine to use (default: 'lit') |
+| isPrototype    | boolean  | Whether this is a prototype template       |
+| attachStyles   | boolean  | Whether to attach styles to the renderRoot |
+| onCreated      | Function | Callback when the template is created      |
+| onRendered     | Function | Callback when the template is rendered     |
+| onUpdated      | Function | Callback when the template is updated      |
+| onDestroyed    | Function | Callback when the template is destroyed    |
+| onThemeChanged | Function | Callback when the theme changes            |
+
+### Usage Examples
+
+#### Basic Initialization with Template String
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b>',
+  data: { name: 'John' }
+});
+```
+
+#### Initialization with AST
+```javascript
+import { Template, TemplateCompiler } from '@semantic-ui/templating';
+
+const compiler = new TemplateCompiler('Welcome <b>{name}</b>');
+const ast = compiler.compile();
+
+const template = new Template({
+  templateName: 'greet-user',
+  ast,
+  data: { name: 'John' }
+});
+```
+
+#### Advanced Initialization
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'user-profile',
+  template: `
+    <div class="user-profile">
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+      <button class="update">Update</button>
+    </div>
+  `,
+  data: { user: { name: 'John Doe', email: 'john@example.com' } },
+  events: {
+    'click .update': ({ self }) => self.updateUser()
+  },
+  stateConfig: {
+    user: { name: 'John Doe', email: 'john@example.com' }
+  },
+  createComponent: ({ state }) => ({
+    updateUser() {
+      state.user.set({ name: 'Jane Doe', email: 'jane@example.com' });
+    }
+  }),
+  onRendered: () => console.log('User profile rendered'),
+  attachStyles: true,
+  css: `
+    .user-profile {
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+  `
+});
+```
+
+
+## Methods
+
+### initialize
+
+Initializes the template, setting up reactive state and event handlers.
+
+#### Syntax
+```javascript
+template.initialize()
+```
+
+#### Usage
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b>',
+  data: { name: 'John' }
+});
+
+template.initialize();
+```
+
+### render
+
+Renders the template with the current data.
+
+#### Syntax
+```javascript
+template.render(additionalData)
+```
+
+#### Parameters
+| Name           | Type   | Description                          |
+|----------------|--------|--------------------------------------|
+| additionalData | Object | Additional data to merge for rendering |
+
+#### Returns
+`TemplateResult` - The rendered template content (typically a Lit TemplateResult).
+
+#### Usage
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b>',
+  data: { name: 'John' }
+});
+
+const rendered = template.render({ title: 'Hello' });
+console.log(rendered);
+```
+
+### setDataContext
+
+Updates the data context of the template.
+
+#### Syntax
+```javascript
+template.setDataContext(data, options)
+```
+
+#### Parameters
+| Name    | Type   | Description                    |
+|---------|--------|--------------------------------|
+| data    | Object | New data to set                |
+| options | Object | Additional options             |
+
+#### Usage
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b>',
+  data: { name: 'John' }
+});
+
+template.setDataContext({ name: 'Jane' }, { rerender: true });
+```
+
+### clone
+
+Creates a copy of the template with optional new settings.
+
+#### Syntax
+```javascript
+template.clone(settings)
+```
+
+#### Parameters
+| Name     | Type   | Description                          |
+|----------|--------|--------------------------------------|
+| settings | Object | New settings to apply to the clone   |
+
+#### Returns
+`Template` - A new Template instance.
+
+#### Usage
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b>',
+  data: { name: 'John' }
+});
+
+const clonedTemplate = template.clone({ data: { name: 'Jane' } });
+```
+
+### attachEvents
+
+Attaches event handlers to the rendered template.
+
+#### Syntax
+```javascript
+template.attachEvents(events)
+```
+
+#### Parameters
+| Name   | Type   | Description                    |
+|--------|--------|--------------------------------|
+| events | Object | Event handlers to attach       |
+
+#### Usage
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b> <button class="greet">Greet</button>',
+  data: { name: 'John' }
+});
+
+template.attachEvents({
+  'click .greet': () => console.log('Greeting button clicked')
+});
+```
+
+## Lifecycle Hooks
+
+The Template class provides several lifecycle hooks that can be overridden to add custom behavior:
+
+- `onCreated`
+- `onRendered`
+- `onDestroyed`
+- `onThemeChanged`
+
+### Usage
+```javascript
+import { Template } from '@semantic-ui/templating';
+
+const template = new Template({
+  templateName: 'greet-user',
+  template: 'Welcome <b>{name}</b>',
+  data: { name: 'John' }
+});
+
+template.onCreated = () => console.log('Template created');
+template.onRendered = () => console.log('Template rendered');
+template.onDestroyed = () => console.log('Template destroyed');
+template.onThemeChanged = () => console.log('Theme changed');
+```

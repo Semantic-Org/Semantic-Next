@@ -5,21 +5,39 @@ icon: book-open
 description: Comprehensive index of all template helpers in Semantic UI
 ---
 
-Template helpers in Semantic UI are utility functions that can be used within templates to perform various operations, from simple logical checks to complex data manipulations.
 
-These helpers enhance the expressiveness and functionality of your templates, allowing for more dynamic and efficient rendering.
 
-> **Tech Guide** For a guide to using global helpers in practice see the dedicated subsection for [template helpers](templates/helpers)
+## Introduction
+Template helpers are used as part of [component templating](/templates) and provide access to a standard set of utilities useful for manipulating template data.
 
+> **Templating Guide** - To learn how to use global helpers in templates see the dedicated [user guide for template helpers](/templates/helpers)
+
+## Installation
+
+Template helpers are part of the [templating package](/api/templating) and is a standalone package that can be used without any other dependencies.
+
+```bash
+npm install @semantic-ui/templating
+```
+
+
+## Usage
+
+Template helpers can be used directly from any template
+
+
+```sui
+{{formatDate myDate 'h:mm A'}}
+```
 
 ## Helper Categories
-* **[Logical Helpers](/api/helpers/logical)** - Utilities for conditional checks and logical operations.
-* **[String Helpers](/api/helpers/string)** - Functions for string manipulation and formatting.
-* **[Array Helpers](/api/helpers/array)** - Tools for working with arrays and lists.
-* **[Object Helpers](/api/helpers/object)** - Utilities for manipulating and transforming objects.
-* **[CSS Helpers](/api/helpers/css)** - Functions for working with CSS classes and styles.
-* **[Comparison Helpers](/api/helpers/comparison)** - Tools for comparing values and making decisions.
-* **[Numeric Helpers](/api/helpers/numeric)** - Utilities for working with numbers.
-* **[Date Helpers](/api/helpers/date)** - Functions for formatting and manipulating dates.
-* **[Debug Helpers](/api/helpers/debug)** - Tools for debugging and logging within templates.
-* **[Reactivity Helpers](/api/helpers/reactivity)** - Utilities for working with reactive computations.
+* **[Array Helpers](/api/helpers/arrays)** - working with arrays and lists.
+* **[Comparison Helpers](/api/helpers/comparison)** - comparing values and making decisions.
+* **[CSS Helpers](/api/helpers/css)** - working with CSS classes and styles.
+* **[Date Helpers](/api/helpers/dates)** - formatting and manipulating dates.
+* **[Debug Helpers](/api/helpers/debug)** - debugging and logging within templates.
+* **[Logical Helpers](/api/helpers/logical)** - conditional checks and logical operations.
+* **[Numeric Helpers](/api/helpers/numeric)** - working with numbers.
+* **[Object Helpers](/api/helpers/objects)** - manipulating and transforming objects.
+* **[Reactivity Helpers](/api/helpers/reactivity)** - working with reactive computations.
+* **[String Helpers](/api/helpers/strings)** - string manipulation and formatting.
