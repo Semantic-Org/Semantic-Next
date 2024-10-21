@@ -162,7 +162,7 @@ class WebComponentBase extends LitElement {
     This returns a list of settings which may include both attributes and properties
     as specified in the spec for the component. It will extend them from default settings
   */
-  getSettings({componentSpec, properties}) {
+  getSettingsFromConfig({componentSpec, properties}) {
     let settings = {};
     each(properties, (propSettings, property) => {
       if (property == 'class' || propSettings.observe === false) {

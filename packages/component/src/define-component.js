@@ -175,8 +175,12 @@ export const defineComponent = ({
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
+      getSettings() {
+        return this.getSettingsFromConfig({componentSpec, properties: webComponent.properties });
+      }
+
       getData() {
-        let settings = this.getSettings({componentSpec, properties: webComponent.properties });
+        let settings = this.getSettings();
         let data = {
           ...settings,
           ...this.getContent({componentSpec}),
