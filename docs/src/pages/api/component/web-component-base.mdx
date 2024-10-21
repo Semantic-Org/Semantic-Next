@@ -1,0 +1,191 @@
+---
+layout: '@layouts/Guide.astro'
+title: Web Component Base
+icon: box
+description: API reference for the WebComponentBase class in Semantic UI Component system
+---
+
+The `WebComponentBase` class is a core part of the Semantic UI Component system. It extends the base `LitElement` class and provides additional functionality useful for Semantic UI components, including support for light DOM rendering, reactive state management, and enhanced event handling.
+
+## Import
+
+```javascript
+import { WebComponentBase } from '@semantic-ui/component';
+```
+
+## Class: WebComponentBase
+
+`WebComponentBase` extends `LitElement` and serves as the foundation for Semantic UI web components.
+
+### Static Properties
+
+| Name                | Type   | Description                                          |
+|---------------------|--------|------------------------------------------------------|
+| shadowRootOptions   | Object | Options for the shadow root, including delegatesFocus |
+| scopedStyleSheet    | CSSStyleSheet | Scoped stylesheet for use with light DOM rendering |
+
+### Instance Properties
+
+| Name            | Type    | Description                                     |
+|-----------------|---------|--------------------------------------------------|
+| useLight        | boolean | Indicates if the component uses light DOM rendering |
+| renderCallbacks | Array   | Array of callbacks to be executed after rendering |
+
+### Methods
+
+#### constructor()
+
+Creates a new instance of the WebComponentBase class.
+
+#### updated()
+
+Lifecycle method called after the component updates. Handles slotting of light DOM content if necessary.
+
+#### addRenderCallback(callback)
+
+Adds a callback to be executed after rendering.
+
+| Parameter | Type     | Description                  |
+|-----------|----------|------------------------------|
+| callback  | Function | The callback to be executed |
+
+#### addPageCSS(webComponent, id, css, options)
+
+Adds scoped CSS to the page for light DOM rendering.
+
+| Parameter     | Type   | Description                               |
+|---------------|--------|-------------------------------------------|
+| webComponent  | Object | The web component class                   |
+| id            | string | Identifier for the stylesheet             |
+| css           | string | The CSS content                           |
+| options       | Object | Additional options (e.g., scopeSelector)  |
+
+#### storeOriginalContent()
+
+Stores the original content of the element for use with light DOM rendering.
+
+#### slotLightContent()
+
+Handles the slotting of light DOM content.
+
+#### watchSlottedContent(settings)
+
+Sets up observers for slotted content changes.
+
+| Parameter | Type   | Description                        |
+|-----------|--------|------------------------------------|
+| settings  | Object | Settings for content observation   |
+
+#### onSlotChange(slotEl, settings)
+
+Handles changes to slotted content.
+
+| Parameter | Type     | Description                      |
+|-----------|----------|----------------------------------|
+| slotEl    | Element  | The slot element that changed    |
+| settings  | Object   | Settings for handling the change |
+
+#### getSettings(options)
+
+Retrieves the current settings of the component.
+
+| Parameter | Type   | Description                    |
+|-----------|--------|--------------------------------|
+| options   | Object | Options for getting settings   |
+
+#### setSetting(name, value)
+
+Sets a specific setting on the component.
+
+| Parameter | Type   | Description             |
+|-----------|--------|-------------------------|
+| name      | string | The name of the setting |
+| value     | any    | The value to set        |
+
+#### createSettingsProxy(options)
+
+Creates a proxy object for reactive access to component settings.
+
+| Parameter | Type   | Description                           |
+|-----------|--------|---------------------------------------|
+| options   | Object | Options for creating the settings proxy |
+
+#### getUIClasses(options)
+
+Generates CSS classes based on the component's current state and attributes.
+
+| Parameter | Type   | Description                        |
+|-----------|--------|------------------------------------|
+| options   | Object | Options for generating UI classes  |
+
+#### getContent(options)
+
+Retrieves the content (slotted or attribute-based) of the component.
+
+| Parameter | Type   | Description                     |
+|-----------|--------|---------------------------------|
+| options   | Object | Options for getting the content |
+
+#### isDarkMode()
+
+Checks if the component is in dark mode.
+
+#### $(selector, options)
+
+Queries the component's render root for elements matching the selector.
+
+| Parameter | Type   | Description                    |
+|-----------|--------|--------------------------------|
+| selector  | string | CSS selector to query          |
+| options   | Object | Additional options for querying |
+
+#### $$(selector)
+
+Queries the original DOM content of the component.
+
+| Parameter | Type   | Description           |
+|-----------|--------|--------------------|
+| selector  | string | CSS selector to query |
+
+#### call(func, options)
+
+Calls a function with consistent parameters and context.
+
+| Parameter | Type     | Description                    |
+|-----------|----------|--------------------------------|
+| func      | Function | The function to call           |
+| options   | Object   | Options for calling the function |
+
+## Example
+
+```javascript
+import { WebComponentBase } from '@semantic-ui/component';
+
+class MyCustomElement extends WebComponentBase {
+  static properties = {
+    myProp: { type: String }
+  };
+
+  constructor() {
+    super();
+    this.myProp = 'Initial Value';
+  }
+
+  render() {
+    return html`
+      <div>My Custom Element: ${this.myProp}</div>
+    `;
+  }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+```
+
+## Notes
+
+* `WebComponentBase` provides a robust foundation for creating Semantic UI components, handling many common tasks and providing useful utilities.
+* The class supports both shadow DOM and light DOM rendering, allowing for flexibility in component implementation.
+* Built-in support for reactive settings and UI class generation helps in creating dynamic and responsive components.
+* The `$` and `$$` methods provide convenient ways to query elements within the component's render root and original content, respectively.
+
+> **Light DOM Rendering** - When using light DOM rendering (by setting `useLight` to `true`), be aware of potential style conflicts with the parent document. Use the `addPageCSS` method to scope styles appropriately.

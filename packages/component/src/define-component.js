@@ -100,6 +100,7 @@ export const defineComponent = ({
       constructor() {
         super();
         this.css = css;
+        this.componentSpec = componentSpec;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
         this.setDefaultSettings({settings, componentSpec});
       }
