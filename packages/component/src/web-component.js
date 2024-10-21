@@ -23,9 +23,6 @@ class WebComponentBase extends LitElement {
 
   updated() {
     super.updated();
-    if (this.useLight) {
-      this.slotLightContent();
-    }
     each(this.renderCallbacks, (callback) => callback());
   }
 
@@ -58,107 +55,6 @@ class WebComponentBase extends LitElement {
       ...document.adoptedStyleSheets,
       stylesheet,
     ];
-  }
-
-  storeOriginalContent() {
-    this.originalDOM = document.createElement('template');
-    this.originalDOM.innerHTML = this.innerHTML;
-    this.innerHTML = '';
-  }
-
-  slotLightContent() {
-    const $slots = this.$('slot');
-    $slots.each((slot) => {
-      const $slot = $(slot);
-      let html;
-      if ($slot.attr('name')) {
-        let slotName = $slot.attr('name');
-        const $slotContent = this.$$(`[slot="${slotName}"]`);
-        if ($slotContent.length) {
-          html = $slotContent.outerHTML();
-        }
-      }
-      else {
-        // default slot takes all DOM content that is not slotted
-        const $originalDOM = this.$$(this.originalDOM.content);
-        const $defaultContent = $originalDOM.children().not('[slot]');
-        const defaultHTML = $defaultContent.html() || '';
-        const defaultText = $originalDOM.textNode() || '';
-        html = defaultHTML + defaultText;
-      }
-      if ($slot && html) {
-        $slot.html(html);
-      }
-    });
-  }
-  /*******************************
-         Nested Components
-  *******************************/
-
-  /* This is currently not being called out because
-     it cannot ever work for SSR.
-
-     including it would mean breaking parity of functionality
-
-    *
-  */
-  watchSlottedContent(settings) {
-    const $slot = this.$('slot');
-    // initial render
-    $slot.each((el) => {
-      this.onSlotChange(el, settings);
-    });
-    // on change
-    $slot.on('slotchange', (event) => {
-      this.onSlotChange(event.target, settings);
-    });
-  }
-  onSlotChange(slotEl, {singularTag, componentSpec, properties}) {
-    const nodes = slotEl.assignedNodes();
-    const name = slotEl.name || 'default';
-    const settings = this.getSettings({componentSpec, properties});
-    if(!this.slottedContent) {
-      this.slottedContent = {};
-    }
-    this.slottedContent[name] = nodes;
-    if(singularTag) {
-
-      // we use this element to track last-child
-      let lastSingularNode;
-
-      const isSingular = (node) => {
-        return node.tagName && node.tagName.toLowerCase() == singularTag;
-      };
-      const addSingularProps = (node) => {
-        if(!isSingular(node)) {
-          return;
-        }
-        if(!lastSingularNode) {
-          node.setAttribute('first', '');
-        }
-        node.setAttribute('grouped', '');
-        lastSingularNode = node;
-        each(componentSpec?.inheritedPluralVariations, (variation) => {
-          const pluralVariation = settings[variation];
-          if(pluralVariation && !node[variation]) {
-            node.setAttribute(variation, pluralVariation);
-          }
-        });
-      };
-
-      /*
-        We look a max of two levels deep
-        this is because sometimes rendering tools like Astro
-        will wrap a component in an arbitrary tag (island).
-      */
-      nodes.forEach(node => {
-        addSingularProps(node);
-        each(node.children, addSingularProps);
-      });
-      if(lastSingularNode) {
-        lastSingularNode.setAttribute('last', '');
-      }
-    }
   }
 
   /*******************************

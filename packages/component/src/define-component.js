@@ -147,12 +147,6 @@ export const defineComponent = ({
 
       firstUpdated() {
         super.firstUpdated();
-        // shared variations are passed through to singular
-        /*this.watchSlottedContent({
-          singularTag,
-          componentSpec,
-          properties: webComponent.properties
-        });*/
       }
 
       updated() {
