@@ -35,22 +35,35 @@ counter.set(1); // Console: "Counter value: 1"
 * **[Reaction](/api/reactivity/reaction)** - Managing reactive computations
 * **[Dependency](/api/reactivity/dependency)** - Low-level dependency tracking
 * **[Flushing](/api/reactivity/flushing)** - Controlling the execution of reactions
-* **[Array Helpers](/api/reactivity/array-helpers)** - Helpers for working with reactive arrays
-* **[Collection Helpers](/api/reactivity/collection-helpers)** - Helpers for working with collections of objects
-* **[Number Helpers](/api/reactivity/number-helpers)** - Helpers for working with numeric reactive variables
-* **[Boolean Helpers](/api/reactivity/boolean-helpers)** - Helpers for working with boolean reactive variables
-* **[Date Helpers](/api/reactivity/date-helpers)** - Helpers for working with reactive date objects
-
-## What's Inside
 
 ### Data Type Helpers
 
 Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
 
-* **Number Helpers** - [`increment(amount)`](/api/reactivity/number-helpers#increment), [`decrement(amount)`](/api/reactivity/number-helpers#decrement) for incrementing by amount
-* **Boolean Helper** - [`toggle()`](/api/reactivity/boolean-helpers#toggle) for toggling between `false` and `true`
-* **Array Mutation Helpers** - [`push()`](/api/reactivity/array-helpers#push), [`unshift()`](/api/reactivity/array-helpers#unshift), [`splice()`](/api/reactivity/array-helpers#splice), [`setIndex(index, value)`](/api/reactivity/array-helpers#setindex), [`removeIndex(index)`](/api/reactivity/array-helpers#removeindex), [`setArrayProperty(indexOrProp, property, value)`](/api/reactivity/array-helpers#setarrayproperty)
-* **Record Helpers** (Array of Objects) - [`setProperty(id, property, value)`](/api/reactivity/collection-helpers#setproperty), [`replaceItem(item, id)`](/api/reactivity/collection-helpers#replaceitem), [`removeItem(id)`](/api/reactivity/collection-helpers#removeitem), [`getIndex(id)`](/api/reactivity/collection-helpers#getindex), [`getID(index)`](/api/reactivity/collection-helpers#getid), [`hasID(index)`](/api/reactivity/collection-helpers#hasid)
-* **Date Helpers** - [`now()`](/api/reactivity/date-helpers#now) for setting to current time
+* **[Number Helpers](/api/reactivity/number-helpers)**
+  - [`increment(amount)`](/api/reactivity/number-helpers#increment)
+  - [`decrement(amount)`](/api/reactivity/number-helpers#decrement)
 
-You can learn more about these helpers in the documentation for [array helpers](/api/reactivity/array-helpers), [collection helpers](/api/reactivity/collection-helpers), [date helpers](/api/reactivity/date-helpers), and [boolean helpers](/api/reactivity/boolean-helpers).
+* **[Boolean Helpers](/api/reactivity/boolean-helpers)**
+  - [`toggle()`](/api/reactivity/boolean-helpers#toggle) for toggling between `false` and `true`
+
+* **[Array Helpers](/api/reactivity/array-helpers)**
+  - [`push()`](/api/reactivity/array-helpers#push)
+  - [`unshift()`](/api/reactivity/array-helpers#unshift)
+  - [`splice()`](/api/reactivity/array-helpers#splice)
+  - [`setIndex(index, value)`](/api/reactivity/array-helpers#setindex)
+  - [`removeIndex(index)`](/api/reactivity/array-helpers#removeindex)
+  - [`setArrayProperty(indexOrProp, property, value)`](/api/reactivity/array-helpers#setarrayproperty)
+
+* **[Collection Helpers](/api/reactivity/collection-helpers)** (Array of Objects)
+  - [`setProperty(id, property, value)`](/api/reactivity/collection-helpers#setproperty)
+  - [`replaceItem(item, id)`](/api/reactivity/collection-helpers#replaceitem)
+  - [`removeItem(id)`](/api/reactivity/collection-helpers#removeitem)
+  - [`getIndex(id)`](/api/reactivity/collection-helpers#getindex)
+  - [`getID(index)`](/api/reactivity/collection-helpers#getid)
+  - [`hasID(index)`](/api/reactivity/collection-helpers#hasid)
+
+* **[Date Helpers](/api/reactivity/date-helpers)**
+  - [`now()`](/api/reactivity/date-helpers#now) for setting to current time
+
+These helpers provide convenient ways to manipulate reactive data structures and streamline common operations in your reactive computations.
