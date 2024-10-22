@@ -1,0 +1,36 @@
+.learn {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+
+  .masthead {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: var(--internal-border);
+    white-space: nowrap;
+
+    ui-button::part(button) {
+      background-color: var(--playground-button-background-color);
+    }
+
+    .menu {
+    }
+
+    .title {
+      margin-left: var(--spacing);
+      font-size: var(--large);
+      font-weight: bold;
+      color: var(--standard-100);
+    }
+
+    .actions {
+      margin-left: auto;
+    }
+  }
+
+  code-playground {
+    display: contents;
+  }
+}

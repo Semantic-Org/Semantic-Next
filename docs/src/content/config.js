@@ -27,7 +27,21 @@ const examplesCollection = defineCollection({
   })
 });
 
+const learnCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    id: z.optional(z.string()),
+    order: z.optional(z.string()),
+    title: z.string(),
+    category: z.string(),
+    shortTitle: z.optional(z.string()),
+    tags: z.optional(z.array(z.string())),
+  })
+});
+
+
 export const collections = {
   components: componentsCollection,
   examples: examplesCollection,
+  learn: learnCollection,
 };

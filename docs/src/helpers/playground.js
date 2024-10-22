@@ -1,4 +1,4 @@
-import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, each } from '@semantic-ui/utils';
+import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
 /* These are top level to make it easier to format */
 
@@ -164,6 +164,9 @@ export const getSandboxURL = () => {
 };
 
 export const getExampleID = (example) => {
+  if(isString(example)) {
+    return example;
+  }
   const exampleID = example?.id || tokenize(example?.title);
   return exampleID;
 };
@@ -188,7 +191,7 @@ export const hideComponentBoilerplate = (code) => {
   return foldedCode;
 };
 
-export const getExampleFiles = async(example, allExampleFiles) => {
+export const getExampleFiles = async(example, allExampleFiles, basePath = '../../examples/') => {
   const exampleID = getExampleID(example);
   if(!exampleID) {
     return;
@@ -196,7 +199,7 @@ export const getExampleFiles = async(example, allExampleFiles) => {
   let hasComponent = false;
   const exampleFiles = {};
   await asyncEach(allExampleFiles, async (file, path) => {
-    const pathRegExp = new RegExp(`../../examples/.*${exampleID}/`);
+    const pathRegExp = new RegExp(`${basePath}.*${exampleID}/`);
     if (path.match(pathRegExp)) {
 
       const fileName = path.replace(pathRegExp, '');

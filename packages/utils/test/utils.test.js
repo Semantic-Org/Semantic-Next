@@ -799,6 +799,48 @@ describe('Object Utilities', () => {
       const result = mapObject({ a: 1, b: 2 }, (val) => val * 2);
       expect(result).toEqual({ a: 2, b: 4 });
     });
+    it('should create a new object without mutating the original', () => {
+      const original = { a: 1, b: 2, c: 3 };
+      const mapped = mapObject(original, x => x * 2);
+
+      // Check mapped values are correct
+      expect(mapped).toEqual({ a: 2, b: 4, c: 6 });
+
+      // Verify original wasn't mutated
+      expect(original).toEqual({ a: 1, b: 2, c: 3 });
+
+      // Verify it's a different object reference
+      expect(mapped).not.toBe(original);
+    });
+
+    it('should pass both value and key to the callback', () => {
+      const original = { a: 1, b: 2 };
+      const spy = vi.fn((value, key) => value);
+
+      mapObject(original, spy);
+
+      expect(spy).toHaveBeenCalledWith(1, 'a');
+      expect(spy).toHaveBeenCalledWith(2, 'b');
+    });
+
+    it('should handle empty objects', () => {
+      const original = {};
+      const mapped = mapObject(original, x => x * 2);
+      expect(mapped).toEqual({});
+    });
+
+    it('should handle non-numeric values', () => {
+      const original = { a: 'hello', b: 'world' };
+      const mapped = mapObject(original, str => str.toUpperCase());
+      expect(mapped).toEqual({ a: 'HELLO', b: 'WORLD' });
+      expect(original).toEqual({ a: 'hello', b: 'world' });
+    });
+
+    it('should preserve keys while mapping values', () => {
+      const original = { key1: 1, key2: 2, key3: 3 };
+      const mapped = mapObject(original, x => x.toString());
+      expect(mapped).toEqual({ key1: '1', key2: '2', key3: '3' });
+    });
   });
 
   describe('extend', () => {

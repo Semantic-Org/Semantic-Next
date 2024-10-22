@@ -72,85 +72,85 @@
   layout page pageContent {
     text-wrap: pretty;
   }
-  layout page.text-content main > ui-container {
+  page.text-content main > ui-container {
     /*max-width: 910px;*/
     max-width: none;
     padding: 2em 3em 7em;
     margin: 0;
     width: calc(100% - var(--rail-width));
   }
-  layout page.text-content code-playground {
+  page.text-content code-playground {
     display: block;
     margin: 1rem 0rem;
   }
-  layout page.text-content pageContent {
+  page.text-content pageContent {
     display: block;
     max-width: 910px;
     margin: 0 auto;
   }
-  layout page.text-content pageContent,
-  layout page.text-content li,
-  layout page.text-content p {
+  page.text-content pageContent,
+  page.text-content li,
+  page.text-content p {
     font-size: 16px;
   }
-  layout page.text-content li,
-  layout page.text-content p {
+  page.text-content li,
+  page.text-content p {
     color: var(--standard-90);
   }
-  layout page.text-content pageContent img {
+  page.text-content pageContent img {
     max-width: 100%;
   }
-  layout page.text-content pageContent > ul,
-  layout page.text-content pageContent > ul li,
-  layout page.text-content pageContent section > p,
-  layout page.text-content pageContent > p {
+  page.text-content pageContent > ul,
+  page.text-content pageContent > ul li,
+  page.text-content pageContent section > p,
+  page.text-content pageContent > p {
     line-height: 1.66;
   }
-  layout page.text-content pageContent > ul li {
+  page.text-content pageContent > ul li {
     margin-bottom: 0.5rem
   }
-  layout page.text-content pre code {
+  page.text-content pre code {
     font-size: 16px;
   }
-  layout page.text-content h2 {
+  page.text-content h2 {
     margin: 4rem 0rem 3rem;
     font-size: 28px;
     letter-spacing: 0.03rem;
     padding-top: 4rem;
     border-top: var(--internal-border);
   }
-  layout page.text-content h2:first-child,
-  layout page.text-content h1 + h2 {
+  page.text-content h2:first-child,
+  page.text-content h1 + h2 {
     border-top: none;
     padding-top: 0rem;
   }
-  layout page.text-content h2:first-child {
+  page.text-content h2:first-child {
     margin-top: 0rem;
   }
-  layout page.text-content h3 {
+  page.text-content h3 {
     margin: 3rem 0rem 1rem;
   }
-  layout page.text-content h1 + h2 {
+  page.text-content h1 + h2 {
     margin-top: 2rem;
   }
-  layout page.text-content h2 + h3,
-  layout page.text-content h3 + h4 {
+  page.text-content h2 + h3,
+  page.text-content h3 + h4 {
     margin-top: 2rem;
   }
-  layout page.text-content h5 {
+  page.text-content h5 {
     font-size: 12px;
     text-transform: uppercase;
     color: var(--standard-50);
   }
-  layout page.text-content img {
+  page.text-content img {
     max-width: 100%;
     height: auto;
   }
-  layout page.text-content ul strong,
-  layout page.text-content p strong {
+  page.text-content ul strong,
+  page.text-content p strong {
     color: var(--standard-100);
   }
-  layout page.text-content blockquote p strong {
+  page.text-content blockquote p strong {
     color: var(--white-100);
   }
   layout page.centered main > ui-container {
@@ -361,8 +361,8 @@
 
   html.dark {
 
-    layout page.text-content li,
-    layout page.text-content p {
+    page.text-content li,
+    page.text-content p {
       color: var(--standard-70);
     }
   }

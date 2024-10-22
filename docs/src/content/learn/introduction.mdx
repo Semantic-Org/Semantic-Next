@@ -1,0 +1,30 @@
+---
+title: 'Welcome'
+category: 'Introduction'
+sort: '1.1.1'
+---
+
+## Welcome to Semantic UI
+
+Semantic UI is a component framework designed to make it easier to build websites using web components.
+
+### Minimal Example
+
+We use `createComponent` to create a component. The only **essential** parameters to create a component are a template and a tagname.
+
+* **Template** - A template described the html that corresponds with your component
+* **tagName** - A tag name specifies what tag the web component should be assigned to
+
+
+```javascript title="component.js"
+const foo = 'baz';
+```
+
+A template
+```sui title="component.html"
+<p>
+  {{#if someCondition}}
+    {{ helloWorld }}
+  {{/if}}
+</p>
+```

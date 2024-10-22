@@ -1,0 +1,34 @@
+<div class="learn" part="learn">
+  <ui-panels
+    direction="horizontal"
+    exportparts="panels"
+  >
+    <ui-panel direction="horizontal" size="700px" minsize="350px">
+      <div class="masthead">
+        <ui-button class="menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
+        <div class="title">
+          Introduction
+        </div>
+        <div class="actions">
+          <ui-button transparent inverted>Use Tabs</ui-button>
+          <ui-button icon="left arrow" transparent compact inverted icon-only="true"></ui-button>
+          <ui-button icon="right arrow" transparent compact inverted icon-only="true"></ui-button>
+        </div>
+      </div>
+      <div class="instructions">
+        {>slot}
+      </div>
+    </ui-panel>
+    <ui-panel direction="horizontal">
+      <code-playground
+        files={playgroundConfig.files}
+        example={playgroundConfig.example}
+        sandboxURL={playgroundConfig.sandboxURL}
+        panelIndexes={playgroundConfig.panelIndexes}
+        useTabs=true
+      >
+      </code-playground>
+    </ui-panel>
+  </ui-panels>
+</div>
+

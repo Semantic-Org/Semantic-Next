@@ -85,8 +85,15 @@
     height: calc(100vh - var(--topbar-height));
   }
 
+  page learn-example,
   page code-playground {
     display: contents;
+  }
+
+  learn-example {
+    pageContent {
+      margin: 2rem 1rem;
+    }
   }
 
   playground {
@@ -127,6 +134,7 @@ html.light {
   --playground-page-background: #FFFFFF;
   --topbar-background-color: #000000;
 
+  learn-example,
   code-playground::part(playground) {
     --playground-code-background: #F7F7F7;
     --playground-border: var(--border);

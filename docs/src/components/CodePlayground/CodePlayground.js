@@ -42,7 +42,11 @@ const settings = {
   // prefix local storage values with this
   saveID: 'sandbox',
 
-  example: {},
+  // title to appear on top of example
+  title: '',
+
+  // description to appear on top of example
+  description: '',
 
   // tab size for code
   tabSize: 2,
@@ -122,7 +126,7 @@ const state = {
   displayMode: 'desktop'
 };
 
-const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
+const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
   initialize() {
     state.activeFile.set(self.getFirstFile()?.filename);
   },
