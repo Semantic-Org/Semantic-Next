@@ -20,18 +20,43 @@ import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
 
 const settings = {
+
+  // an object containing the files for the project
   files: {},
+
+  // use for security
   sandboxURL: '/sandbox',
+
+  // a link to example that should appear in topbar
   exampleURL: '',
+
+  // whether a file marked as generated (needed to execute code) should appear to user
   includeGeneratedInline: false,
+
+  // whether to use tabs or panels
   useTabs: localStorage.getItem('codeplayground-tabs') == 'yes' || false,
+
+  // whether to save the panel positions
   saveState: true,
+
+  // prefix local storage values with this
   saveID: 'sandbox',
+
   example: {},
+
+  // tab size for code
   tabSize: 2,
-  maxHeight: 0,
+
+  // whether code example is inline in the page
   inline: false,
+
+  // direction of code when inline
   inlineDirection: 'horizontal',
+
+  // max height when using inline
+  maxHeight: 0,
+
+  // order of code
   sortOrder: [
     'component.js',
     'component.html',
@@ -40,12 +65,16 @@ const settings = {
     'index.css',
     'index.js',
   ],
+
+  // types to use
   scriptTypes: {
     'text/css': 'sample/css',
     'text/html': 'sample/html',
     'text/javascript': 'sample/js',
     'text/typescript': 'sample/ts',
   },
+
+  // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
     'component.html': 'component.html',
@@ -54,6 +83,8 @@ const settings = {
     'index.css': 'index.css',
     'index.js': 'index.js',
   },
+
+  // which panel should code appear in 0 is left and 1 is right
   panelIndexes: {
     'component.js': 0,
     'component.html': 0,
@@ -62,6 +93,8 @@ const settings = {
     'index.css': 1,
     'index.js': 1,
   },
+
+  // how to split up code in panel view
   panelSizes: {
     'component.js': 'grow',
     'component.html': 'grow',
@@ -70,13 +103,22 @@ const settings = {
     'index.css': (1 / 9 * 100),
     'index.js': (1 / 9 * 100),
   },
+
+  // default left right panel width
   panelGroupWidth: [50, 50]
 };
 
 const state = {
+  // which file is currently visible in tab view
   activeFile: undefined,
+
+  // current view in mobile code/preview
   mobileView: 'code',
+
+  // currently resizing
   resizing: true,
+
+  // current display mode
   displayMode: 'desktop'
 };
 

@@ -10,9 +10,10 @@ const componentPages = components.map(page => ({
 /* Topbar Menu */
 export const topbarMenu =  [
   {
-    _id: 'ui',
-    name: 'UI Components',
-    url: '/introduction',
+    _id: 'learn',
+    name: 'Learn',
+    url: '/learn',
+    baseURL: '/learn'
   },
   {
     _id: 'framework',
@@ -24,6 +25,11 @@ export const topbarMenu =  [
     _id: 'api',
     name: 'API Reference',
     url: '/api',
+  },
+  {
+    _id: 'ui',
+    name: 'UI Components',
+    url: '/introduction',
   },
   {
     _id: 'examples',
@@ -43,20 +49,20 @@ export const topbarMenu =  [
 /* UI Component Sidebar */
 export const sidebarMenuUI = [
   {
-    name: 'Getting Started',
+    name: 'Usage Guide',
     url: '/introduction',
     icon: 'open book',
     pages: [
       {
-        name: 'Quick Start',
+        name: 'Project Setup',
         url: '/getting-started'
       },
       {
-        name: 'Framework Integration',
+        name: 'Framework Usage',
         url: '/framework-integration'
       },
       {
-        name: 'Using Components',
+        name: 'Usage in HTML',
         url: '/usage'
       },
       {
@@ -66,21 +72,16 @@ export const sidebarMenuUI = [
     ]
   },
   {
-    name: 'Tutorial',
-    url: '/tutorial',
-    icon: 'help circle',
-  },
-  {
     name: 'UI Components',
     url: '/ui',
     icon: 'layers',
     pages: componentPages,
-  },
+  },/*
   {
     name: 'Test',
     url: '/test',
     icon: 'code',
-  },
+  },*/
 ];
 
 /* Component Framework Sidebar */
@@ -230,7 +231,12 @@ export const sidebarMenuFramework = [
     icon: 'mouse-pointer',
     pages: [
     ]
-  },
+  },/*
+  {
+    name: 'Errata',
+    icon: 'book',
+    url: '/getting-started'
+  },*/
 ];
 
 

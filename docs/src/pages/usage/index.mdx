@@ -1,17 +1,31 @@
 ---
 layout: '@layouts/Guide.astro'
 icon: code
-title: Using Web Components
-description: Using Semantic UI components
+title: Using Components in HTML
+description: An overview of using web components in your html codebase.
 ---
 import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
 import { UIButton, UIButtons } from '@semantic-ui/core';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
 
-## Adding Web Components
+## Adding UI Components
 
-After [importing the component](/getting-started) they can be used in your page without additional code similar to native tags like `<p>` `<h3>` etc.
+Components can be used in your html like regular tags
 
+```html title=Head
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core/dist/themes/button.css">
+    <script type="module" src="https://unpkg.com/@semantic-ui/core/components/button"></script>
+  </head>
+```
+
+```html title=Page
+<ui-menu>
+  <menu-item>Home</menu-item>
+  <menu-item>2</menu-item>
+  <menu-item>3</menu-item>
+</ui-menu>
+```
 Web components can be quickly identified because they are [required by spec](/) to have a `-` dash in their names so `<ui-button>` but not `<button>`.
 
 ## Using UI Components

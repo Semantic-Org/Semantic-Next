@@ -102,6 +102,7 @@
   }
   layout page.text-content pageContent > ul,
   layout page.text-content pageContent > ul li,
+  layout page.text-content pageContent section > p,
   layout page.text-content pageContent > p {
     line-height: 1.66;
   }
