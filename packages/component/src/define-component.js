@@ -89,6 +89,8 @@ export const defineComponent = ({
         return unsafeCSS(css);
       }
 
+      static template = litTemplate;
+
       static properties = WebComponentBase.getProperties({
         properties,
         componentSpec,
