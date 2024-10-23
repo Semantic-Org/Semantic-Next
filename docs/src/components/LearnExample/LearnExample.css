@@ -1,7 +1,18 @@
+:host {
+  --learn-panel-background: linear-gradient(rgb(13, 13, 13), rgb(17, 20, 24) 100px, oklch(0.08 0.02 266.92));
+}
+
 .learn {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+
+  ui-panel.lesson {
+    background: var(--learn-panel-background);
+    box-shadow: var(--subtle-left-lip-shadow);
+    z-index: var(--page-layer-3);
+  }
+
 
   .segment {
     display: flex;
@@ -9,15 +20,7 @@
     align-items: center;
     flex-grow: 0;
     padding: 0.5rem;
-    border-bottom: var(--internal-border);
     white-space: nowrap;
-/*
-    ui-button::part(button) {
-      background-color: var(--playground-button-background-color);
-    }
-*/
-    .menu {
-    }
 
     .title {
       margin-left: var(--spacing);

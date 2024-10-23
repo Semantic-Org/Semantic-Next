@@ -5,23 +5,29 @@ import { get } from '@semantic-ui/utils';
 import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
 
+const settings = {
+  defaultTheme: 'light'
+};
 
 const state = {
   theme: undefined
 };
 
-const createComponent = function ({ $, isServer, reaction, state, self }) {
+const createComponent = function ({ $, isServer, reaction, state, settings, self }) {
   return {
     getLocalTheme() {
-      if(isServer) {
-        return 'light';
-      }
-      return self.getThemePreference() || self.getSystemPreference();
+      return self.getThemePreference() || settings.defaultTheme || self.getSystemPreference();
     },
     getThemePreference() {
+      if(isServer) {
+        return;
+      }
       return localStorage.getItem('theme');
     },
     getSystemPreference() {
+      if(isServer) {
+        return;
+      }
       return window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
@@ -54,6 +60,7 @@ const createComponent = function ({ $, isServer, reaction, state, self }) {
 };
 
 const onCreated = function({self, reaction, reactiveVar, state, isClient}) {
+  console.log('setting theme', self.getLocalTheme());
   state.theme.set(self.getLocalTheme());
   if(isClient) {
     self.calculateTheme();
@@ -82,6 +89,7 @@ const ThemeSwitcher = defineComponent({
   events,
   css,
   state,
+  settings,
   onCreated,
   createComponent,
 });

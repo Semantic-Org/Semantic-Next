@@ -92,7 +92,13 @@
 
   learn-example {
     pageContent {
-      margin: 2rem 1rem;
+      margin: 1.5rem;
+
+      h2 {
+        font-size: 22px;
+        color: var(--primary-light-text-color);
+        margin: 0rem 0rem 1rem;
+      }
     }
   }
 
@@ -133,9 +139,17 @@
 html.light {
   --playground-page-background: #FFFFFF;
   --topbar-background-color: #000000;
+  --button-transparent-inverted-background-color: var(--black-80);
+  --button-transparent-inverted-hover-background-color: var(--black-90);
+  --button-transparent-inverted-pressed-background-color: var(--black-80);
+
+  --ec-frm-edActTabFg: var(--black-80);
+  figcaption .header {
+    background-color: var(--angled-gradient);
+  }
 
   learn-example,
-  code-playground::part(playground) {
+  ::part(playground) {
     --playground-code-background: #F7F7F7;
     --playground-border: var(--border);
     --playground-button-background-color: #333333;
@@ -149,8 +163,11 @@ html.light {
     --code-grey: #353535;
     --code-default: #777777;
     --playground-code-comment-color: #AAAAAA;
+
+    --learn-panel-background: transparent;
+
   }
-  code-playground::part(panel) {
+  ::part(panel) {
     --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
     --panel-label-color: var(--black-70);
     --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;

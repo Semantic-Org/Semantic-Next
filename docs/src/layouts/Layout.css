@@ -69,7 +69,7 @@
     height: calc(100dvh - var(--topbar-height));
   }
 
-  layout page pageContent {
+  page pageContent {
     text-wrap: pretty;
   }
   page.text-content main > ui-container {

@@ -3,13 +3,13 @@
     direction="horizontal"
     exportparts="panels"
   >
-    <ui-panel direction="horizontal" size="700px" minsize="350px">
+    <ui-panel class="lesson" direction="horizontal" size="33.33" minsize="350px" naturalSize="600px">
       <div class="masthead segment">
+        <ui-button class="menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
         <div class="title">
           Introduction
         </div>
         <div class="actions">
-          <ui-button class="menu" icon="menu" transparent compact inverted>Menu</ui-button>
           <ui-button icon="left arrow" transparent compact inverted icon-only="true"></ui-button>
           <ui-button icon="right arrow" transparent compact inverted icon-only="true"></ui-button>
         </div>
@@ -27,12 +27,13 @@
         </div>
       </div>
     </ui-panel>
-    <ui-panel direction="horizontal">
+    <ui-panel class="code" direction="horizontal">
       <code-playground
         files={playgroundConfig.files}
         example={playgroundConfig.example}
         sandboxURL={playgroundConfig.sandboxURL}
         panelIndexes={playgroundConfig.panelIndexes}
+        exportparts="panel, handle, panels, playground"
         useTabs=true
       >
       </code-playground>
