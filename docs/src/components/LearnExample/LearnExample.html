@@ -4,19 +4,27 @@
     exportparts="panels"
   >
     <ui-panel direction="horizontal" size="700px" minsize="350px">
-      <div class="masthead">
-        <ui-button class="menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
+      <div class="masthead segment">
         <div class="title">
           Introduction
         </div>
         <div class="actions">
-          <ui-button transparent inverted>Use Tabs</ui-button>
+          <ui-button class="menu" icon="menu" transparent compact inverted>Menu</ui-button>
           <ui-button icon="left arrow" transparent compact inverted icon-only="true"></ui-button>
           <ui-button icon="right arrow" transparent compact inverted icon-only="true"></ui-button>
         </div>
       </div>
       <div class="instructions">
         {>slot}
+      </div>
+      <div class="actions segment">
+        <div class="left">
+          <ui-button large icon="info">Hint</ui-button>
+          <ui-button large button transparent inverted>Use Panels</ui-button>
+        </div>
+        <div class="right">
+          <ui-button large primary icon="book">Related Resources</ui-button>
+        </div>
       </div>
     </ui-panel>
     <ui-panel direction="horizontal">

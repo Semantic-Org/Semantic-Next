@@ -3,18 +3,19 @@
   flex: 1 1 auto;
   flex-direction: column;
 
-  .masthead {
+  .segment {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-grow: 0;
     padding: 0.5rem;
     border-bottom: var(--internal-border);
     white-space: nowrap;
-
+/*
     ui-button::part(button) {
       background-color: var(--playground-button-background-color);
     }
-
+*/
     .menu {
     }
 
@@ -26,6 +27,24 @@
     }
 
     .actions {
+      margin-left: auto;
+    }
+  }
+
+  .instructions {
+    flex-grow: 1;
+  }
+
+  .actions.segment {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    background: var(--angled-gradient);
+
+    .left {
+      margin-right: auto;
+    }
+    .right {
       margin-left: auto;
     }
   }
