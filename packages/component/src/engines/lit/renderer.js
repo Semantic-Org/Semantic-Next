@@ -161,6 +161,7 @@ export class LitRenderer {
       const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
       return value;
     };
+    console.log(data, reactive);
     return (reactive)
       ? () => getValue(expression)
       : () => Reaction.nonreactive(() => getValue(expression))
@@ -172,19 +173,20 @@ export class LitRenderer {
     const getPackedData = (unpackedData, options = {}) => {
       let packedData = {};
       // this is a data object like {> someTemplate data=getData }
-      // we need to get the data first
+      // we need to get the data first before we can wrap it
       if(isString(unpackedData)) {
         unpackedData = this.evaluateExpression(unpackedData, data, options);
       }
+      // okay now we have the data in both cases, lets pack it
+      // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
       if(isPlainObject(unpackedData)) {
-        // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
         packedData = mapObject(unpackedData, (expression) => this.getPackedValue(expression, data, options));
       }
       return packedData;
     };
 
     const packedStaticData = getPackedData(node.data);
-    const packedReactiveData = getPackedData(node.reactiveData);
+    const packedReactiveData = getPackedData(node.reactiveData, { reactive: true });
 
     // only inherit parent data context if specified
     let parentData = (inheritParent)
