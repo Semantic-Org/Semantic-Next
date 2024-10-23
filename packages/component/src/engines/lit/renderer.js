@@ -161,7 +161,6 @@ export class LitRenderer {
       const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
       return value;
     };
-    console.log(data, reactive);
     return (reactive)
       ? () => getValue(expression)
       : () => Reaction.nonreactive(() => getValue(expression))
