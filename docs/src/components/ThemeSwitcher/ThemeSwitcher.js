@@ -60,7 +60,6 @@ const createComponent = function ({ $, isServer, reaction, state, settings, self
 };
 
 const onCreated = function({self, reaction, reactiveVar, state, isClient}) {
-  console.log('setting theme', self.getLocalTheme());
   state.theme.set(self.getLocalTheme());
   if(isClient) {
     self.calculateTheme();

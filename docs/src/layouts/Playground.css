@@ -92,15 +92,27 @@
 
   learn-example {
     pageContent {
-      margin: 1.5rem;
+      display: block;
+      container: pageContent / size;
+      margin: 0 auto;
+      padding: 1.5rem;
 
       h2 {
-        font-size: 22px;
-        color: var(--primary-light-text-color);
+        font-size: 20px;
         margin: 0rem 0rem 1rem;
+      }
+      p, li {
+        color: var(--standard-60);
+        transition: var(--easing)
+      }
+      @container pageContent (max-width: 400px) {
+        p, li {
+          font-size: 14px;
+        }
       }
     }
   }
+
 
   playground {
 
@@ -164,7 +176,7 @@ html.light {
     --code-default: #777777;
     --playground-code-comment-color: #AAAAAA;
 
-    --learn-panel-background: transparent;
+    --learn-panel-background: linear-gradient(rgb(229 229 229), rgb(253 253 253) 100px, oklch(0.92 0.01 0));
 
   }
   ::part(panel) {

@@ -4,6 +4,7 @@
   flex-direction: column;
   overflow: hidden;
   will-change: flex;
+  container: panel;
 }
 
 ::slotted(*) {
