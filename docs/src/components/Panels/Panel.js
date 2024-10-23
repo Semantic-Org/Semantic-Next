@@ -100,7 +100,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
       .on('touchmove', self.resizeDrag)
     ;
     $('body')
-      .one('pointerup', (event) => {
+      .one('pointerup mouseleave', (event) => {
         self.endResize(event);
       })
     ;

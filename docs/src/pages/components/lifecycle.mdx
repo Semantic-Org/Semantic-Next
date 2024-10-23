@@ -30,7 +30,7 @@ For a more detailed description of how callbacks are fired refer to the [callbac
 
 `createComponent` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
 
-For more information see the dedicated section to [component instances](/components/instances).
+For more information see the dedicated section for [component instances](/components/instances).
 
 #### Initialize
 
@@ -53,6 +53,27 @@ The `onDestroyed` callback is called after the component is removed from the pag
 ### onThemeChanged
 
 The `onThemeChanged` callback is a special callback that fires when a user swaps themes. This can be used to modify the component based on whether the user prefers light or dark mode.
+
+## Server Side Rendering
+
+### Hydration
+
+The default rendering engine for Semantic UI components is `lit` this means you can use [any existing Lit SSR package](https://lit.dev/docs/ssr/overview/#library-status) to render components on the server.
+
+> **UI Components** - All [UI framework components](/ui) in Semantic UI are designed to work with server side hydration out of the box.
+
+### Lifecycle Events on Server
+All lifecycle events will fire on the server in the same order as on the client.
+
+This means you should use `isServer` or `isClient` during server side rendering to handle checking for globals that may not be defined.
+
+```javascript
+const onRendered = function ({ isClient, self }) {
+  if(isClient) {
+    self.url.set(window.location.pathname);
+  }
+};
+```
 
 ## Callback Arguments
 
@@ -129,6 +150,8 @@ Event handlers also have access to a few additional arguments
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
 
+
+Lifecycle events provide two helpers `isClient` and `iServer` which can be used to handle
 
 ## DOM Lifecycle Events
 
