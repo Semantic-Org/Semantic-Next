@@ -10,20 +10,13 @@ const settings = {
   itemCount: 'auto',
   minSize: '0px',
   maxSize: '0px',
+  naturalSize: '',
   size: 'grow',
   label: '',
   canMinimize: true,
   minimized: false,
   getNaturalSize: (panel, { direction, minimized }) => {
-    const $children = $(panel).children();
-    return (direction == 'horizontal')
-      ? ($children.length > 1)
-        ? sum($children.width())
-        : $children.width()
-      : ($children.length > 1)
-        ? sum($children.height())
-        : $children.height()
-    ;
+    return panel?.component.getNaturalSize(panel, { direction, minimized });
   }
 };
 
@@ -40,6 +33,22 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     minimized: settings.minimized,
     initialized: self.initialized.get()
   }),
+
+  getNaturalSize(panel, { direction, minimized }) {
+    if(settings.naturalSize) {
+      const panels = self.getPanels();
+      return panels.getPixelSettingSize(settings.naturalSize);
+    }
+    const $children = $(panel).children();
+    return (direction == 'horizontal')
+      ? ($children.length > 1)
+        ? sum($children.width())
+        : $children.width()
+      : ($children.length > 1)
+        ? sum($children.height())
+        : $children.height()
+    ;
+  },
 
   getHandleClassMap: () => ({
     initialized: self.initialized.get(),
