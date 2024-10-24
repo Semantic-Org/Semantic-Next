@@ -4,14 +4,14 @@
     <ui-input placeholder="Search friends..." value={search} class="search"></ui-input>
   </div>
   <div class="cards">
-    {#each getFilteredFriends}
+    {#each friend in getVisibleFriends}
       {> card
-        name=name
-        location=location
-        role=role
-        joined=joined
-        image=image
-        contacts=contacts
+        name=friend.name
+        location=friend.location
+        role=friend.role
+        joined=friend.joined
+        image=friend.image
+        contacts=friend.contacts
       }
     {/each}
   </div>
