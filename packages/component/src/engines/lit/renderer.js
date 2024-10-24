@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isArray, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -155,31 +155,58 @@ export class LitRenderer {
     });
   }
 
-  evaluateSnippet(node, data = {}) {
+  // returns a function that returns the value in the current data context
+  getPackedValue = (expression, data, { reactive = false } = {}) => {
     const getValue = (expressionString) => {
-      return this.lookupExpressionValue(expressionString, data);
+      const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
+      return value;
+    };
+    return (reactive)
+      ? () => getValue(expression)
+      : () => Reaction.nonreactive(() => getValue(expression))
+    ;
+  };
+
+  getPackedNodeData(node, data, { inheritParent = false } = {}) {
+
+    const getPackedData = (unpackedData, options = {}) => {
+      let packedData = {};
+      // this is a data object like {> someTemplate data=getData }
+      // we need to get the data first before we can wrap it
+      if(isString(unpackedData)) {
+        unpackedData = this.evaluateExpression(unpackedData, data, options);
+      }
+      // okay now we have the data in both cases, lets pack it
+      // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
+      if(isPlainObject(unpackedData)) {
+        packedData = mapObject(unpackedData, (expression) => this.getPackedValue(expression, data, options));
+      }
+      return packedData;
     };
 
-    const snippetName = getValue(node.name);
-    const snippet = this.snippets[snippetName];
+    const packedStaticData = getPackedData(node.data);
+    const packedReactiveData = getPackedData(node.reactiveData, { reactive: true });
 
+    // only inherit parent data context if specified
+    let parentData = (inheritParent)
+      ? data
+      : {}
+    ;
+    const packedData = {
+      ...parentData,
+      ...packedStaticData,
+      ...packedReactiveData
+    };
+    return packedData;
+  }
+
+  evaluateSnippet(node, data = {}) {
+    const snippetName = this.lookupExpressionValue(node.name, data);
+    const snippet = this.snippets[snippetName];
     if (!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
-
-    // Prepare snippet data
-    const staticValues = mapObject(node.data || {}, (value) => {
-      return Reaction.nonreactive(() => getValue(value));
-    });
-    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
-      return getValue(value);
-    });
-    const snippetData = {
-      ...data,
-      ...staticValues,
-      ...reactiveValues,
-    };
-
+    const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
     return this.renderContent({
       ast: snippet.content,
       data: snippetData,
@@ -187,28 +214,10 @@ export class LitRenderer {
   }
 
   evaluateSubTemplate(node, data = {}) {
-    const getValue = (expressionString) => {
-      const value = this.evaluateExpression(expressionString, data);
-      return value;
-    };
-
-    // template names can be dynamic
-    const getTemplateName = () => getValue(node.name);
-
-    // data can either be reactive or nonreactive
-    const staticValues = mapObject(node.data || {}, (value) => {
-      return () => Reaction.nonreactive(() => getValue(value));
-    });
-    const reactiveValues = mapObject(node.reactiveData || {}, (value) => {
-      return () => getValue(value);
-    });
-    const templateData = {
-      ...staticValues,
-      ...reactiveValues,
-    };
+    const templateData = this.getPackedNodeData(node, data);
     return renderTemplate({
       subTemplates: this.subTemplates,
-      getTemplateName: getTemplateName,
+      getTemplateName: () => this.evaluateExpression(node.name, data), // template name can be dynamic
       data: templateData,
       parentTemplate: data,
     });

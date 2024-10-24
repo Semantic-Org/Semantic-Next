@@ -1,5 +1,5 @@
 :root {
-  --button-disabled-cursor: default;
+  --button-disabled-cursor: not-allowed;
   --button-disabled-opacity: 1;
   --button-disabled-background-color: #FFFFFF;
   --button-disabled-background-image: var(--button-background-image);

@@ -669,6 +669,115 @@ describe('query', () => {
       expect(callback).not.toHaveBeenCalled();
     });
 
+    it('should attach multiple event handlers when passing space-separated events', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').on('mouseup touchmove', callback);
+
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      div.dispatchEvent(new Event('touchmove'));
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle multiple events with delegation', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').on('mouseup touchmove', 'span', callback);
+
+      span.dispatchEvent(new Event('mouseup', { bubbles: true }));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      span.dispatchEvent(new Event('touchmove', { bubbles: true }));
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle multiple events with options', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+      const abortController = new AbortController();
+
+      $('div').on('mouseup touchmove', callback, { abortController });
+
+      div.dispatchEvent(new Event('mouseup'));
+      div.dispatchEvent(new Event('touchmove'));
+      expect(callback).toHaveBeenCalledTimes(2);
+
+      abortController.abort();
+      div.dispatchEvent(new Event('mouseup'));
+      div.dispatchEvent(new Event('touchmove'));
+      expect(callback).toHaveBeenCalledTimes(2); // Count shouldn't increase
+    });
+
+    it('should handle multiple events with delegation and options', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+      const callback = vi.fn();
+      const abortController = new AbortController();
+
+      $('div').on('mouseup touchmove', 'span', callback, { abortController });
+
+      span.dispatchEvent(new Event('mouseup', { bubbles: true }));
+      span.dispatchEvent(new Event('touchmove', { bubbles: true }));
+      expect(callback).toHaveBeenCalledTimes(2);
+
+      abortController.abort();
+      span.dispatchEvent(new Event('mouseup', { bubbles: true }));
+      span.dispatchEvent(new Event('touchmove', { bubbles: true }));
+      expect(callback).toHaveBeenCalledTimes(2); // Count shouldn't increase
+    });
+
+    it('should handle empty spaces in event string', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').on('  mouseup   touchmove  ', callback);
+
+      div.dispatchEvent(new Event('mouseup'));
+      div.dispatchEvent(new Event('touchmove'));
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return handlers for all events when returnHandler is true', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      const handlers = $('div').on('mouseup touchmove', callback, { returnHandler: true });
+      expect(Array.isArray(handlers)).toBe(true);
+      expect(handlers.length).toBe(2);
+      expect(handlers[0].eventName).toBe('mouseup');
+      expect(handlers[1].eventName).toBe('touchmove');
+    });
+
+    it('should properly remove specific events using off()', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').on('mouseup touchmove', callback);
+
+      div.dispatchEvent(new Event('mouseup'));
+      div.dispatchEvent(new Event('touchmove'));
+      expect(callback).toHaveBeenCalledTimes(2);
+
+      $('div').off('mouseup');
+      div.dispatchEvent(new Event('mouseup'));
+      div.dispatchEvent(new Event('touchmove'));
+      expect(callback).toHaveBeenCalledTimes(3); // Only touchmove should trigger
+    });
+
   });
 
   describe('one', () => {

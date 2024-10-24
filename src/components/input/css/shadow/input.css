@@ -9,3 +9,4 @@
 
 /* Types */
 @import url('./variations/sizing.css') layer(component.input.variations.sizing);
+@import url('./variations/fluid.css') layer(component.input.variations.fluid);

@@ -348,7 +348,7 @@ export class Query {
     return;
   }
 
-  on(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
+  on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
     let handler;
@@ -365,59 +365,62 @@ export class Query {
       handler = targetSelectorOrHandler;
     }
 
-    const abortController = options?.abortController || new AbortController();
-    const eventSettings = options?.eventSettings || {};
-    const signal = abortController.signal;
+    // Split event names by spaces and attach handlers for each
+    const events = eventNames.split(' ').filter(Boolean);
 
-    this.each((el) => {
-      let delegateHandler;
-      if (targetSelector) {
-        delegateHandler = (event) => {
-          let target;
-          // if this event is composed from a web component
-          // this is required to get the original path
-          if (event.composed && event.composedPath) {
+    events.forEach(eventName => {
+      const abortController = options?.abortController || new AbortController();
+      const eventSettings = options?.eventSettings || {};
+      const signal = abortController.signal;
 
-            // look through composed path bubbling into the attached element to see if any match target
-            let path = event.composedPath();
-            const elIndex = findIndex(path, thisEl => thisEl == el);
-            path = path.slice(0, elIndex);
-            target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+      this.each((el) => {
+        let delegateHandler;
+        if (targetSelector) {
+          delegateHandler = (event) => {
+            let target;
+            // if this event is composed from a web component
+            // this is required to get the original path
+            if (event.composed && event.composedPath) {
+              // look through composed path bubbling into the attached element to see if any match target
+              let path = event.composedPath();
+              const elIndex = findIndex(path, thisEl => thisEl == el);
+              path = path.slice(0, elIndex);
+              target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+            }
+            else if(targetSelector) {
+              // keep things simple for most basic uses
+              target = event.target.closest(targetSelector);
+            }
+            else {
+              // no target selector
+              target = event.target;
+            }
 
-          }
-          else if(targetSelector) {
-            // keep things simple for most basic uses
-            target = event.target.closest(targetSelector);
-          }
-          else {
-            // no target selector
-            target = event.target;
-          }
+            if (target) {
+              // If a matching target is found, call the handler with the correct context
+              handler.call(target, event);
+            }
+          };
+        }
+        const eventListener = delegateHandler || handler;
 
-          if (target) {
-            // If a matching target is found, call the handler with the correct context
-            handler.call(target, event);
-          }
+        // will cause illegal invocation if used from proxy object
+        const domEL = (this.isGlobal) ? globalThis : el;
+        if (domEL.addEventListener) {
+          domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
+        }
+
+        const eventHandler = {
+          el,
+          eventName,
+          eventListener,
+          abortController,
+          delegated: targetSelector !== undefined,
+          handler,
+          abort: (reason) => abortController.abort(reason),
         };
-      }
-      const eventListener = delegateHandler || handler;
-
-      // will cause illegal invocation if used from proxy object
-      const domEL = (this.isGlobal) ? globalThis : el;
-      if (domEL.addEventListener) {
-        domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
-      }
-
-      const eventHandler = {
-        el,
-        eventName,
-        eventListener,
-        abortController,
-        delegated: targetSelector !== undefined,
-        handler,
-        abort: (reason) => abortController.abort(reason),
-      };
-      eventHandlers.push(eventHandler);
+        eventHandlers.push(eventHandler);
+      });
     });
 
     if (!Query.eventHandlers) {

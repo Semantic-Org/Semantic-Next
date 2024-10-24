@@ -33,8 +33,8 @@ const events = {
   'blur input'({ state }) {
     state.focused.set(false);
   },
-  'input input'({event, el, settings, dispatchEvent}) {
-    el.value = $(event.target).val();
+  'input input'({event, el, settings, value, dispatchEvent}) {
+    el.value = value;
   }
 };
 
