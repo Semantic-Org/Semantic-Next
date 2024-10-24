@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { each, escapeRegExp, get, isString } from '@semantic-ui/utils';
+import { each, escapeRegExp, get } from '@semantic-ui/utils';
 import { card } from './card.js';
 import { friends } from './data.js';
 
@@ -137,19 +137,24 @@ const createComponent = ({ state }) => ({
     { label: 'Male', value: 'male' },
   ],
 
-  getFilteredFriends() {
+  getVisibleFriends() {
     const friends = state.friends.get();
-    const filter = state.filter.get();
-    const searchTerm = state.searchTerm.get();
-    
-    const filteredByGender = (filter === 'all') 
-      ? friends 
-      : friends.filter(friend => friend.gender === filter);
 
-    const results = weightedObjectSearch(searchTerm, filteredByGender, {
-      propertiesToMatch: ['name', 'location', 'role']
-    });
-    return results;
+    // filter by gender
+    const filter = state.filter.get();
+    if(filter !== 'all') {
+      friends = friends.filter(friend => friend.gender === filter);
+    }
+
+    // filter by search term
+    const searchTerm = state.searchTerm.get();
+    if(searchTerm) {
+      friends = weightedObjectSearch(searchTerm, friends, {
+        propertiesToMatch: ['name', 'location', 'role']
+      });
+    }
+
+    return friends;
   }
 });
 

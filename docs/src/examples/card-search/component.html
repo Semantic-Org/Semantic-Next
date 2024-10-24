@@ -3,7 +3,6 @@
     <ui-menu selection value="{filter}" items="{filters}" class="menu"></ui-menu>
     <ui-input placeholder="Search friends..." value={search} class="search"></ui-input>
   </div>
-
   <div class="cards">
     {#each getFilteredFriends}
       {> card

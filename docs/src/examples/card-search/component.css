@@ -1,38 +1,67 @@
+@layer component, card, responsive;
+
 :host {
+  --card-min: var(250px);
   --card-gap: var(--spacing);
   --card-image-max-height: 150px;
 }
 
-.component {
-  container: component / inline-size;
-}
 
-.actions {
-  display: flex;
-  margin-bottom: var(--spacing);
+@layer component {
 
-  .menu {
-    margin: 0;
+  .component {
+    container: component / inline-size;
   }
-  .search {
-    margin-left: auto;
+
+  .actions {
+    display: flex;
+    margin-bottom: var(--spacing);
+
+    .menu {
+      margin: 0;
+    }
+    .search {
+      margin-left: auto;
+    }
   }
-}
-
-
-.cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  flex-wrap: wrap;
-  gap: var(--card-gap);
-}
-
-
-@container component (max-width: 500px) {
   .cards {
+    display: grid;
     grid-template-columns: 1fr;
+    flex-wrap: wrap;
+    gap: var(--card-gap);
   }
-  .card {
-    width: 100%;
+}
+
+
+@layer responsive {
+
+  @container component (max-width: 300px) {
+    .card {
+      flex-direction: column;
+
+      .image {
+        width: 100%;
+        height: 100px;
+      }
+    }
   }
+
+  @container component (min-width: 500px) {
+    .cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @container component (min-width: 900px) {
+    .cards {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+
+  @container component (min-width: 1200px) {
+    .cards {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+  }
+
 }
