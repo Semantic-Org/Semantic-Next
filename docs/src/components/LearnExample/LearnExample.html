@@ -16,14 +16,35 @@
       </div>
       <div class="instructions">
         {>slot}
+        <div class="divider"></div>
+        <div class="navigation">
+          <div class="previous">
+            <div class="direction">
+              Previous
+              <ui-icon icon="left chevron"></ui-icon>
+            </div>
+            <div class="name">
+              Using the Guide
+            </div>
+          </div>
+          <div class="next">
+            <div class="direction">
+              Next
+              <ui-icon icon="right chevron"></ui-icon>
+            </div>
+            <div class="name">
+              Using the Guide
+            </div>
+          </div>
+        </div>
       </div>
       <div class="actions segment">
         <div class="left">
-          <ui-button large icon="info">Hint</ui-button>
-          <ui-button large button transparent inverted>Use Panels</ui-button>
+          <ui-button transparent inverted icon="book">Related Resources</ui-button>
+          <ui-button button transparent icon="table" inverted>Change Layout</ui-button>
         </div>
         <div class="right">
-          <ui-button large primary icon="book">Related Resources</ui-button>
+          <ui-button icon="info">Hint</ui-button>
         </div>
       </div>
     </ui-panel>

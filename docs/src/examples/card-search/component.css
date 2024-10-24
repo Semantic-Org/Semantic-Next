@@ -1,0 +1,38 @@
+:host {
+  --card-gap: var(--spacing);
+  --card-image-max-height: 150px;
+}
+
+.component {
+  container: component / inline-size;
+}
+
+.actions {
+  display: flex;
+  margin-bottom: var(--spacing);
+
+  .menu {
+    margin: 0;
+  }
+  .search {
+    margin-left: auto;
+  }
+}
+
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex-wrap: wrap;
+  gap: var(--card-gap);
+}
+
+
+@container component (max-width: 500px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    width: 100%;
+  }
+}

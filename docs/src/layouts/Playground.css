@@ -93,9 +93,8 @@
   learn-example {
     pageContent {
       display: block;
-      container: pageContent / size;
+      container: pageContent / inline-size;
       margin: 0 auto;
-      padding: 1.5rem;
 
       h2 {
         font-size: 20px;

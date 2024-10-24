@@ -28,14 +28,30 @@
       font-weight: bold;
       color: var(--standard-100);
     }
-
     .actions {
       margin-left: auto;
     }
   }
 
+  .divider {
+    margin: var(--vertically-spaced);
+    height: 1px;
+    background-color: var(--border-color);
+  }
+
   .instructions {
     flex-grow: 1;
+    padding: 1rem 1.5rem;
+  }
+
+  .next {
+    color: var(--standard-30);
+    font-size: var(--small);
+    font-weight: var(--bold);
+    .name {
+      color: var(--standard-80);
+      font-size: var(--large);
+    }
   }
 
   .actions.segment {
