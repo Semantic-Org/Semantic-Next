@@ -61,6 +61,7 @@ import { tokenize,
   tokenize,
   unique,
   values,
+  weightedObjectSearch,
   where,
   wrapFunction
 } from '@semantic-ui/utils';
