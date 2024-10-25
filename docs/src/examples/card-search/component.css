@@ -1,4 +1,3 @@
-@layer component, card, responsive;
 
 :host {
   --card-min: var(250px);
@@ -6,8 +5,6 @@
   --card-image-max-height: 150px;
 }
 
-
-@layer component {
 
   .component {
     container: component / inline-size;
@@ -38,35 +35,33 @@
 }
 
 
-@layer responsive {
 
-  @container component (max-width: 300px) {
-    .card {
-      flex-direction: column;
+@container component (max-width: 300px) {
+  .card {
+    flex-direction: column !important;
 
-      .image {
-        width: 100%;
-        height: 100px;
-      }
+    .image {
+      width: 100%;
+      height: 100px;
     }
   }
-
-  @container component (min-width: 500px) {
-    .cards {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @container component (min-width: 900px) {
-    .cards {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-  }
-
-  @container component (min-width: 1200px) {
-    .cards {
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-    }
-  }
-
 }
+
+@container component (min-width: 500px) {
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@container component (min-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@container component (min-width: 1200px) {
+  .cards {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+
