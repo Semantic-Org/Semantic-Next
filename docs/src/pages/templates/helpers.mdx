@@ -203,6 +203,16 @@ Adds 'checked' class if expression is truthy.
 
 ### Comparison
 
+
+#### not
+Checks negation (!)
+
+```sui
+{#if not someCondition}
+  Some condition is not true
+{/if}
+```
+
 #### is
 Checks equality (==).
 
@@ -212,11 +222,11 @@ Checks equality (==).
 {/if}
 ```
 
-#### not
+#### notEqual
 Checks inequality (!=).
 
 ```sui
-{#if not valueA valueB}
+{#if notEqual valueA valueB}
   Values are not equal
 {/if}
 ```

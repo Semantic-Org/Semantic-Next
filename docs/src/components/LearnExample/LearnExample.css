@@ -82,6 +82,7 @@
 
   .navigation {
 
+
     .label {
       color: var(--standard-30);
       font-size: var(--small);
@@ -102,16 +103,21 @@
       transition: var(--transition);
     }
 
-    .direction:hover:not(.disabled) {
+    .direction {
       cursor: pointer;
+      text-decoration: none;
 
-      .label {
-        color: var(--primary-text-color);
-      }
-      .name {
-        color: var(--standard-90);
+      &:hover:not(.disabled) {
+
+        .label {
+          color: var(--primary-text-color);
+        }
+        .name {
+          color: var(--standard-90);
+        }
       }
     }
+
   }
 
   .actions.segment {

@@ -9,6 +9,21 @@ Comparison helpers provide utilities for comparing values in templates.
 
 ## Functions
 
+### not
+Checks negation (!).
+
+#### Template Syntax
+```sui
+{#if not someCondition}
+  someCondition is not true
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+not(a)
+```
+
 ### is
 Checks equality (==).
 
@@ -38,19 +53,19 @@ is(a, b)
 is(5, "5") // true
 ```
 
-### not
+### notEqual
 Checks inequality (!=).
 
 #### Template Syntax
 ```sui
-{#if not valueA valueB}
+{#if notEqual valueA valueB}
   Values are not equal
 {/if}
 ```
 
 #### JavaScript Syntax
 ```javascript
-not(a, b)
+notEqual(a, b)
 ```
 
 #### Parameters

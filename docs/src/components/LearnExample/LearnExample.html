@@ -7,11 +7,11 @@
       <div class="masthead segment">
         <ui-button class="toggle-menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
         <div class="title">
-          {title}
+          {lesson.title}
         </div>
         <div class="actions">
-          <ui-button icon="left arrow" transparent compact inverted icon-only="true"></ui-button>
-          <ui-button icon="right arrow" transparent compact inverted icon-only="true"></ui-button>
+          <ui-button href={previousLesson.url} icon="left arrow" transparent compact inverted disabled={not hasPreviousLesson} icon-only="true"></ui-button>
+          <ui-button href={nextLesson.url} icon="right arrow" transparent compact inverted disabled={not hasNextLesson} icon-only="true"></ui-button>
         </div>
       </div>
       <div class="menu">
@@ -25,24 +25,48 @@
         {>slot}
         <div class="divider"></div>
         <div class="navigation segment">
-          <div class="previous direction disabled">
-            <div class="label">
-              <ui-icon icon="left chevron"></ui-icon>
-              Previous
+          {#if exists previousLesson}
+            <a class="previous direction" href={previousLesson.url}>
+              <div class="label">
+                <ui-icon icon="left chevron"></ui-icon>
+                Previous
+              </div>
+              <div class="name disabled">
+                {previousLesson.title}
+              </div>
             </div>
-            <div class="name disabled">
-              None
+          {else}
+            <div class="previous direction disabled">
+              <div class="label">
+                <ui-icon icon="left chevron"></ui-icon>
+                Previous
+              </div>
+              <div class="name disabled">
+                None
+              </div>
             </div>
-          </div>
-          <div class="next direction">
-            <div class="label">
-              Next
-              <ui-icon icon="right chevron"></ui-icon>
+          {/if}
+          {#if exists nextLesson}
+            <a class="next direction" href={nextLesson.url}>
+              <div class="label">
+                Next
+                <ui-icon icon="right chevron"></ui-icon>
+              </div>
+              <div class="name disabled">
+                {nextLesson.title}
+              </div>
             </div>
-            <div class="name">
-              Using the Guide
+          {else}
+            <div class="next direction disabled">
+              <div class="label">
+                Next
+                <ui-icon icon="right chevron"></ui-icon>
+              </div>
+              <div class="name disabled">
+                None
+              </div>
             </div>
-          </div>
+          {/if}
         </div>
       </div>
       <div class="actions segment">

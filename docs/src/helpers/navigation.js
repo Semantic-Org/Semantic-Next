@@ -28,7 +28,7 @@ const lessonDocs = lessons.map((lesson) => {
     patch: semverPatch(lesson.data.sort),
   };
 });
-const lessonPages = lessonDocs.sort((a, b) => {
+export const lessonPages = lessonDocs.sort((a, b) => {
   return semverCompare(a.sort, b.sort);
 });
 

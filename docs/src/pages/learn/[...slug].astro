@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
-import { each, tokenize } from '@semantic-ui/utils';
+import { each, findIndex, tokenize } from '@semantic-ui/utils';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
-import { getSidebarMenu } from '@helpers/navigation.js';
+import { lessonPages, getSidebarMenu } from '@helpers/navigation.js';
 import NavMenu from '@components/NavMenu/NavMenu.js';
 
 import Playground from '@layouts/Playground.astro';
@@ -23,9 +23,12 @@ export async function getStaticPaths() {
   });
   return paths;
 }
+const activeURL = Astro.url.pathname;
 
 const lesson = entry.data;
-
+const lessonIndex = findIndex(lessonPages, lesson => lesson.url == activeURL);
+const previousLesson = (lessonIndex > -1) ? lessonPages[lessonIndex - 1] : {};
+const nextLesson = (lessonIndex > -1) ? lessonPages[lessonIndex + 1] : {};
 
 /* Get associated example */
 const sandboxURL = getSandboxURL();
@@ -45,7 +48,6 @@ const searchMeta = {
   pageType: 'Learn',
 }
 
-const activeURL = Astro.url.pathname;
 const menu = await getSidebarMenu({url: activeURL});
 
 const playgroundConfig = {
@@ -60,7 +62,9 @@ const playgroundConfig = {
 <Playground searchMeta={searchMeta} showSidebar=true>
   <page data-pagefind-body class="text-content">
     <LearnExample client:only
-      title={lesson.title}
+      lesson={lesson}
+      previousLesson={previousLesson}
+      nextLesson={nextLesson}
       menu={menu}
       activeURL={activeURL}
       playgroundConfig={playgroundConfig}

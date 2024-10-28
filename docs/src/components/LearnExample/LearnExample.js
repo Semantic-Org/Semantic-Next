@@ -1,9 +1,11 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each } from '@semantic-ui/utils';
+import { isEmpty } from '@semantic-ui/utils';
 
+/* Subcomponents */
 import { CodePlayground } from '../CodePlayground/CodePlayground.js';
 import { NavMenu } from '../NavMenu/NavMenu.js';
 
+/* UI */
 import '@semantic-ui/core/src/components/button';
 
 import template from './LearnExample.html?raw';
@@ -11,9 +13,13 @@ import css from './LearnExample.css?raw';
 
 
 const settings = {
-  title: '',
-  hint: '',
-  references: [],
+  lesson: {
+    title: '',
+    hint: '',
+    references: [],
+  },
+  previousLesson: {},
+  nextLesson: {},
   menu: [],
   playgroundConfig: {
     files: [],
@@ -26,7 +32,7 @@ const settings = {
 const state = {
 };
 
-const createComponent = ({ $ }) => ({
+const createComponent = ({ $, settings }) => ({
   isNavMenuVisible() {
     return $('.menu').hasClass('visible');
   },
@@ -38,11 +44,16 @@ const createComponent = ({ $ }) => ({
   },
   hideNavMenu() {
     $('.menu').removeClass('visible');
-  }
+  },
+  hasPreviousLesson() {
+    return !isEmpty(settings.previousLesson);
+  },
+  hasNextLesson() {
+    return !isEmpty(settings.nextLesson);
+  },
 });
 
-const onCreated = ({ settings }) => {
-  console.log('here');
+const onCreated = ({ data }) => {
 };
 
 const onRendered = ({}) => {
@@ -55,7 +66,10 @@ const keys = {
 };
 
 const events = {
-  'click'({ self }) {
+  'click'({ self, event, $ }) {
+    if($(event.target).closest('.toggle-menu').exists()) {
+      return;
+    }
     if(self.isNavMenuVisible()) {
       self.hideNavMenu();
     }

@@ -170,7 +170,7 @@ const events = {
   'click .toggle-size'({ self }) {
     self.toggleMinimize();
   },
-  'dblclick .label'({ self }) {
+  'dblclick .self.label'({ self }) {
     self.toggleMinimize();
   },
   'dblclick .handle': function({ self }) {

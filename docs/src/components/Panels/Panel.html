@@ -1,6 +1,6 @@
 <div class="{classMap getClassMap}{direction} panel" part="panel">
   {#if label}
-    <span class="label">
+    <span class="self label">
       {label}
       <div class="actions">
         {#if canMinimize}
@@ -15,7 +15,7 @@
   {/if}
   {>slot}
 </div>
-{#if not getIndex 0}
+{#if notEqual getIndex 0}
   <span class="{classMap getHandleClassMap}handle" part="handle">
     <span class="divider"></span>
   </span>
