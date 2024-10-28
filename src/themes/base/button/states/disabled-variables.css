@@ -1,6 +1,6 @@
 :root {
   --button-disabled-cursor: not-allowed;
-  --button-disabled-opacity: 1;
+  --button-disabled-opacity: 0.4;
   --button-disabled-background-color: #FFFFFF;
   --button-disabled-background-image: var(--button-background-image);
   --button-disabled-border-box-shadow: 0px 0px 0px var(--button-border-width) rgba(0, 0, 0, 0.1) inset;
