@@ -5,30 +5,37 @@
   >
     <ui-panel class="lesson" direction="horizontal" size="33.33" minsize="350px" naturalSize="600px">
       <div class="masthead segment">
-        <ui-button class="menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
+        <ui-button class="toggle-menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
         <div class="title">
-          Introduction
+          {title}
         </div>
         <div class="actions">
           <ui-button icon="left arrow" transparent compact inverted icon-only="true"></ui-button>
           <ui-button icon="right arrow" transparent compact inverted icon-only="true"></ui-button>
         </div>
       </div>
+      <div class="menu">
+        <nav-menu
+          menu={menu}
+          activeURL={activeURL}
+          expandAll=true
+        ></nav-menu>
+      </div>
       <div class="instructions">
         {>slot}
         <div class="divider"></div>
-        <div class="navigation">
-          <div class="previous">
-            <div class="direction">
-              Previous
+        <div class="navigation segment">
+          <div class="previous direction disabled">
+            <div class="label">
               <ui-icon icon="left chevron"></ui-icon>
+              Previous
             </div>
-            <div class="name">
-              Using the Guide
+            <div class="name disabled">
+              None
             </div>
           </div>
-          <div class="next">
-            <div class="direction">
+          <div class="next direction">
+            <div class="label">
               Next
               <ui-icon icon="right chevron"></ui-icon>
             </div>
@@ -44,7 +51,7 @@
           <ui-button button transparent icon="table" inverted>Change Layout</ui-button>
         </div>
         <div class="right">
-          <ui-button icon="info">Hint</ui-button>
+          <ui-button green icon="info">Hint</ui-button>
         </div>
       </div>
     </ui-panel>

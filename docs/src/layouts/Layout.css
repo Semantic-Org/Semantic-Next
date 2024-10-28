@@ -127,6 +127,12 @@
   page.text-content h2:first-child {
     margin-top: 0rem;
   }
+  page.text-content h1:first-child,
+  page.text-content h2:first-child,
+  page.text-content h3:first-child {
+    margin-top: 0rem;
+    padding-top: 0rem;
+  }
   page.text-content h3 {
     margin: 3rem 0rem 1rem;
   }

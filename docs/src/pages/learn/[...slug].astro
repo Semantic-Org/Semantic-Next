@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import { each, tokenize } from '@semantic-ui/utils';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
+import { getSidebarMenu } from '@helpers/navigation.js';
+import NavMenu from '@components/NavMenu/NavMenu.js';
 
 import Playground from '@layouts/Playground.astro';
 import LearnExample from '@components/LearnExample/LearnExample.js';
@@ -11,10 +13,9 @@ const { entry } = Astro.props;
 
 /* Make paths */
 export async function getStaticPaths() {
-  const entries = await getCollection('learn');
+  const entries = await getCollection('lessons');
   const paths = [];
   each(entries, (entry) => {
-    console.log(entry.slug);
     paths.push({
       params: { slug: `${entry.slug}` },
       props: { entry },
@@ -23,8 +24,12 @@ export async function getStaticPaths() {
   return paths;
 }
 
+const lesson = entry.data;
+
+
+/* Get associated example */
 const sandboxURL = getSandboxURL();
-const example = 'counter' || entry.data;
+const example = 'counter';
 const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
@@ -40,6 +45,9 @@ const searchMeta = {
   pageType: 'Learn',
 }
 
+const activeURL = Astro.url.pathname;
+const menu = await getSidebarMenu({url: activeURL});
+
 const playgroundConfig = {
   files,
   example,
@@ -52,6 +60,9 @@ const playgroundConfig = {
 <Playground searchMeta={searchMeta} showSidebar=true>
   <page data-pagefind-body class="text-content">
     <LearnExample client:only
+      title={lesson.title}
+      menu={menu}
+      activeURL={activeURL}
       playgroundConfig={playgroundConfig}
     >
       <pageContent>

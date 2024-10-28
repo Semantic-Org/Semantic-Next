@@ -1,12 +1,36 @@
 import { getCollection } from 'astro:content';
 import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
+import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, sortBy, unique } from '@semantic-ui/utils';
+
+/* Used to sort lessons */
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
+import semverPatch from 'semver/functions/patch';
+import semverCompare from 'semver/functions/compare';
 
 const examples = await getCollection('examples');
-const examplePages = examples.map(page => ({
-  ...page.data,
-  url: `/examples/${page.slug}`,
+const examplePages = examples.map(doc => ({
+  ...doc.data,
+  url: `/examples/${doc.slug}`,
 }));
+
+const lessons = await getCollection('lessons');
+const lessonDocs = lessons.map((lesson) => {
+  return {
+    ...lesson.data,
+    url: `/learn/${lesson.slug}`,
+    sort: lesson.data.sort,
+    hint: lesson.data.hint,
+    category: lesson.data.category,
+    subcategory: lesson.data.subcategory,
+    major: semverMajor(lesson.data.sort),
+    minor: semverMinor(lesson.data.sort),
+    patch: semverPatch(lesson.data.sort),
+  };
+});
+const lessonPages = lessonDocs.sort((a, b) => {
+  return semverCompare(a.sort, b.sort);
+});
 
 
 
@@ -54,6 +78,42 @@ const createExampleMenu = () => {
 };
 export const sidebarMenuExamples = createExampleMenu();
 
+
+/* Gets Sidebar Menu for Examples Section */
+const createLearnMenu = () => {
+  let menu = [];
+  let categories = groupBy(lessonPages, 'major');
+  each(categories, (lessons, majorVersion) => {
+    let subcategories = groupBy(lessons, 'minor');
+    let pages = [];
+    if(keys(subcategories).length) {
+      // has subcategories
+      each(subcategories, (lessons, subcategory) => {
+        pages.push({
+          name: lessons[0].subcategory,
+          pages: lessons.map(example => ({
+            name: example.shortTitle || example.title,
+            url: example.url
+          }))
+        });
+      });
+    }
+    else {
+      // no subcategories
+      pages = lessons.map(example => ({
+        name: example.shortTitle || example.title,
+        url: example.url
+      }));
+    }
+    menu.push({
+      name: lessons[0].category,
+      pages
+    });
+  });
+  return menu.filter(menu => menu);
+};
+export const sidebarMenuLearn = createLearnMenu();
+
 /* Removes trailing slash which can cause issues between build and serve */
 export const removeTrailingSlash = (url = '') => {
   return isString(url)
@@ -100,6 +160,9 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   }
   else if(topbarSection == 'examples') {
     menu = sidebarMenuExamples;
+  }
+  else if(topbarSection == 'learn') {
+    menu = sidebarMenuLearn;
   }
   return menu;
 };
