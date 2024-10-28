@@ -101,11 +101,14 @@ export const TemplateHelpers = {
   maybePlural(value, plural = 's') {
     return value == 1 ? '' : plural;
   },
+  not(a) {
+    return !a;
+  },
   is(a, b) {
     return a == b;
   },
-  not(a, b) {
-    return a != b;
+  notEqual(a, b) {
+    return a !== b;
   },
   isExactly(a, b) {
     return a === b;
