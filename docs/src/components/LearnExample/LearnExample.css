@@ -57,7 +57,7 @@
     transition-behavior: allow-discrete;
     position: absolute;
     height: max-content;
-    background-color: var(--inverted-100);
+    background-color: var(--black-solid-90);
     background-image: var(--angled-gradient);
     box-shadow: var(--inset-shadow);
     width: 100%;
@@ -84,7 +84,7 @@
 
     nav-menu {
       --nav-menu-content-indent-distance: 0rem;
-      --nav-menu-sub-title-active-color: var(--standard-10);
+      --nav-menu-sub-title-active-color: var(--white-10);
     }
   }
 
