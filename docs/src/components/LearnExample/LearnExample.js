@@ -21,6 +21,7 @@ const settings = {
   previousLesson: {},
   nextLesson: {},
   menu: [],
+  activeURL: '',
   playgroundConfig: {
     files: [],
     example: '',
@@ -54,6 +55,7 @@ const createComponent = ({ $, settings }) => ({
 });
 
 const onCreated = ({ data }) => {
+  console.log(data);
 };
 
 const onRendered = ({}) => {

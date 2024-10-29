@@ -14,23 +14,60 @@
     z-index: var(--page-layer-3);
   }
 
+  .masthead {
+    background-color: #10141b;
+    position: relative;
+    z-index: var(--page-layer-3);
+    box-shadow: 0px 3px 5px rgb(0 0 0 / 37%);
+
+    .location {
+      margin-left: var(--spacing);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      line-height: 1;
+
+      .category {
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: var(--mini);
+        letter-spacing: -0.02em;
+        color: var(--standard-20);
+      }
+      .title {
+        font-size: var(--large);
+        font-weight: bold;
+        color: var(--standard-100);
+      }
+      ui-icon {
+        font-size: 16px;
+        margin: 0 5px 0 0;
+        opacity: 0.4;
+      }
+    }
+  }
+
   .menu {
+    display: none;
+    transition-behavior: allow-discrete;
     position: absolute;
-    top: auto;
     left: auto;
-    background: #0A0A0A var(--angled-gradient);
-    box-shadow: var(--floating-shadow);
-    width: 100%;
+    background: linear-gradient(-165deg, oklch(0.19 0 0), oklch(0.15 0 0));
+    box-shadow: 0px 3px 5px rgb(0 0 0 / 37%);
     height: max-content;
+    width: 100%;
     display: block;
-    z-index: var(--page-layer-5);
+    z-index: var(--page-layer-2);
     top: 50px;
-    padding: 0.5rem 1.5rem 1rem;
-    opacity: 0;
-    transition: all 0.3s ease;
+    padding: 1.5rem 1.5rem 1rem;
+    opacity: 1;
+    transform: translateY(-100%);
+    transition: all 0.3s cubic-bezier(0.135, 1.175, 0.490, 1.310);
 
     &.visible {
+      pointer-events: auto;
       opacity: 1;
+      transform: translateY(-1em);
       pointer-events: auto;
     }
 
@@ -49,12 +86,6 @@
     padding: 0.5rem;
     white-space: nowrap;
 
-    .title {
-      margin-left: var(--spacing);
-      font-size: var(--large);
-      font-weight: bold;
-      color: var(--standard-100);
-    }
     .actions {
       margin-left: auto;
     }
@@ -77,7 +108,7 @@
 
   .instructions {
     flex-grow: 1;
-    padding: 1rem 1.5rem;
+    padding: 2rem 1.5rem;
   }
 
   .navigation {

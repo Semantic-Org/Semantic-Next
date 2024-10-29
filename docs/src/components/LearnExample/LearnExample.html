@@ -6,8 +6,10 @@
     <ui-panel class="lesson" direction="horizontal" size="33.33" minsize="350px" naturalSize="600px">
       <div class="masthead segment">
         <ui-button class="toggle-menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
-        <div class="title">
-          {lesson.title}
+        <div class="location">
+          <span class="category">{lesson.subcategory}</span>
+          <ui-icon icon="right-chevron"></ui-icon>
+          <span class="title">{lesson.title}</span>
         </div>
         <div class="actions">
           <ui-button href={previousLesson.url} icon="left arrow" transparent compact inverted disabled={not hasPreviousLesson} icon-only="true"></ui-button>

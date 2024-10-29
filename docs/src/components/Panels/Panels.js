@@ -140,7 +140,7 @@ const createComponent = ({self, el, settings, $}) => ({
   },
   setPanelInitialized(panel) {
     if(panel.component) {
-      panel.component.initialized.set(true);
+      panel.component.setInitialized();
     }
   },
   setPanelCalculatedSizes() {

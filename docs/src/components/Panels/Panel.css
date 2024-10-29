@@ -141,10 +141,12 @@
 }
 
 .handle,
-.panel {
+.panel,
+.panel ::slotted(*) {
   opacity: 0;
 }
 .handle.initialized,
-.panel.initialized {
+.panel.initialized,
+.panel.initialized ::slotted(*) {
   opacity: 1;
 }

@@ -119,6 +119,7 @@ const createComponent = function ({ self, data, state, settings }) {
       return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
     },
     isCurrentItem(item) {
+      console.log('item', item?.url, 'state', state.url.get());
       return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
     },
     onPageChange() {

@@ -34,6 +34,11 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     initialized: self.initialized.get()
   }),
 
+  setInitialized() {
+    self.initialized.set(true);
+    dispatchEvent('initialized');
+  },
+
   getNaturalSize(panel, { direction, minimized }) {
     if(settings.naturalSize) {
       const panels = self.getPanels();
