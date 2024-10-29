@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, sortBy, unique } from '@semantic-ui/utils';
+import { firstMatch, groupBy, asyncEach, each, findIndex, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
 
 /* Used to sort lessons */
 import semverMajor from 'semver/functions/major';
@@ -14,10 +14,10 @@ const examplePages = examples.map(doc => ({
   url: `/examples/${doc.slug}`,
 }));
 
-const lessons = await getCollection('lessons');
-const lessonDocs = lessons.map((lesson) => {
+export const getLessonContent = (lesson) => {
   return {
     ...lesson.data,
+    id: lesson.slug,
     url: `/learn/${lesson.slug}`,
     sort: lesson.data.sort,
     hint: lesson.data.hint,
@@ -27,12 +27,26 @@ const lessonDocs = lessons.map((lesson) => {
     minor: semverMinor(lesson.data.sort),
     patch: semverPatch(lesson.data.sort),
   };
-});
+};
+
+const lessons = await getCollection('lessons');
+const lessonDocs = lessons.map(getLessonContent);
 export const lessonPages = lessonDocs.sort((a, b) => {
   return semverCompare(a.sort, b.sort);
 });
 
 
+export const getNextLesson = (currentLesson) => {
+  const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
+  const previousLesson = (lessonIndex > -1) ? lessonPages[lessonIndex + 1] : {};
+  return previousLesson;
+};
+
+export const getPreviousLesson = (currentLesson) => {
+  const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
+  const nextLesson = (lessonIndex > -1) ? lessonPages[lessonIndex - 1] : {};
+  return nextLesson;
+};
 
 /* Gets Sidebar Menu for Examples Section */
 const createExampleMenu = () => {

@@ -18,11 +18,21 @@ const settings = {
     hint: '',
     references: [],
   },
+
+  // whether to save the learn/example panes
   saveState: true,
   saveStateID: 'learn',
+
+  // preload content
+
+
+  // populates previous / next buttons
   previousLesson: {},
   nextLesson: {},
+
+  // populates menu
   menu: [],
+
   activeURL: '',
   playgroundConfig: {
     files: [],
@@ -57,6 +67,7 @@ const createComponent = ({ $, settings }) => ({
 });
 
 const onCreated = ({ data }) => {
+  console.log(data.nextLesson);
 };
 
 const onRendered = ({}) => {

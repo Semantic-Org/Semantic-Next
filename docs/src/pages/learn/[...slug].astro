@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import { each, findIndex, tokenize } from '@semantic-ui/utils';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
-import { lessonPages, getSidebarMenu } from '@helpers/navigation.js';
+import { lessonPages, getLessonContent, getPreviousLesson, getNextLesson, getSidebarMenu } from '@helpers/navigation.js';
 import NavMenu from '@components/NavMenu/NavMenu.js';
 
 import Playground from '@layouts/Playground.astro';
@@ -25,10 +25,10 @@ export async function getStaticPaths() {
 }
 const activeURL = Astro.url.pathname;
 
-const lesson = entry.data;
+const lesson = getLessonContent(entry);
 const lessonIndex = findIndex(lessonPages, lesson => lesson.url == activeURL);
-const previousLesson = (lessonIndex > -1) ? lessonPages[lessonIndex - 1] : {};
-const nextLesson = (lessonIndex > -1) ? lessonPages[lessonIndex + 1] : {};
+const previousLesson = getPreviousLesson(lesson);
+const nextLesson = getNextLesson(lesson);
 
 /* Get associated example */
 const sandboxURL = getSandboxURL();

@@ -599,7 +599,7 @@ const createComponent = ({self, el, settings, $}) => ({
     }
 
     /*
-      Standard (Postive Delta)
+      Standard (Positive Delta)
       ------------------------
       Growing Above / Left
       Shrinking Below / Right
