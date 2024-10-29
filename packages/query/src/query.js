@@ -405,7 +405,7 @@ export class Query {
         const eventListener = delegateHandler || handler;
 
         // will cause illegal invocation if used from proxy object
-        const domEL = (this.isGlobal) ? globalThis : el;
+        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
         if (domEL.addEventListener) {
           domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
         }
