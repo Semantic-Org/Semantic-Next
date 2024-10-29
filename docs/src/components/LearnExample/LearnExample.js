@@ -91,6 +91,10 @@ const events = {
   'click .toggle-menu'({ self }) {
     self.toggleNavMenu();
   },
+  'click ui-button[href]'({ self, event }) {
+    const href = $(event.target).attr('href');
+    //event.preventDefault();
+  },
 };
 
 
