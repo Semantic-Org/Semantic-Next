@@ -1,9 +1,11 @@
 <div class="learn" part="learn">
   <ui-panels
     direction="horizontal"
+    saveState={saveState}
+    saveStateID={saveStateID}
     exportparts="panels"
   >
-    <ui-panel class="lesson" direction="horizontal" size="33.33" minsize="350px" naturalSize="600px">
+    <ui-panel class="lesson" direction="horizontal" size="33.33" minsize="350px" maxSize="800px" naturalSize="600px">
       <div class="masthead segment">
         <ui-button class="toggle-menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
         <div class="location">
@@ -57,7 +59,7 @@
           <ui-button button transparent icon="table" inverted>Change Layout</ui-button>
         </div>
         <div class="right">
-          <ui-button green icon="info">Hint</ui-button>
+          <ui-button icon="info">Hint</ui-button>
         </div>
       </div>
     </ui-panel>

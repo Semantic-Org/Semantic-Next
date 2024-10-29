@@ -18,6 +18,8 @@ const settings = {
     hint: '',
     references: [],
   },
+  saveState: true,
+  saveStateID: 'learn',
   previousLesson: {},
   nextLesson: {},
   menu: [],
@@ -55,7 +57,6 @@ const createComponent = ({ $, settings }) => ({
 });
 
 const onCreated = ({ data }) => {
-  console.log(data);
 };
 
 const onRendered = ({}) => {
