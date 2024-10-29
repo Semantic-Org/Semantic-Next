@@ -46,7 +46,7 @@ export class Query {
     }
     else if (isString(selector)) {
       // this is html like $('<div/>')
-      if (selector.slice(0, 1) == '<') {
+      if (selector.trim().slice(0, 1) == '<') {
         const template = document.createElement('template');
         template.innerHTML = selector.trim();
         elements = Array.from(template.content.childNodes);
@@ -839,7 +839,25 @@ export class Query {
   insertContent(target, content, position) {
     const $content = this.chain(content);
     $content.each(el => {
-      target.insertAdjacentElement(position, el);
+      if (target.insertAdjacentElement) {
+        target.insertAdjacentElement(position, el);
+      }
+      else {
+        switch(position) {
+          case 'beforebegin':
+            target.parentNode?.insertBefore(el, target);
+            break;
+          case 'afterbegin':
+            target.insertBefore(el, target.firstChild);
+            break;
+          case 'beforeend':
+            target.appendChild(el);
+            break;
+          case 'afterend':
+            target.parentNode?.insertBefore(el, target.nextSibling);
+            break;
+        }
+      }
     });
   }
 
