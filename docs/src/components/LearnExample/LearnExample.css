@@ -59,16 +59,22 @@
     display: block;
     z-index: var(--page-layer-2);
     top: 50px;
-    padding: 1.5rem 1.5rem 1rem;
-    opacity: 1;
+    padding: 0.5rem 1.5rem 1rem;
+    nav-menu {
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
     transform: translateY(-100%);
-    transition: all 0.3s cubic-bezier(0.135, 1.175, 0.490, 1.310);
+    transition: all 0.2s ease;
 
     &.visible {
       pointer-events: auto;
-      opacity: 1;
-      transform: translateY(-1em);
+      transform: translateY(0em);
       pointer-events: auto;
+
+      nav-menu {
+        opacity: 1;
+      }
     }
 
     nav-menu {
