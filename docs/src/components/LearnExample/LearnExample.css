@@ -6,6 +6,7 @@
   box-sizing: border-box;
 }
 
+
 .learn {
   display: flex;
   flex: 1 1 auto;
@@ -119,13 +120,23 @@
   }
 
   .instructions {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
-    padding: 2rem 1.5rem;
+    overflow: auto;
+
+    .text {
+      overflow: auto;
+      padding: 2rem 1.5rem;
+      flex-grow: 1;
+    }
   }
+
 
   .navigation {
 
-    padding: 0;
+    border-top: var(--internal-border);
+    padding: var(--padding);
 
     .label {
       color: var(--primary-text-color);
@@ -175,8 +186,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    background: var(--angled-gradient);
-
+    padding: 0 var(--padding) var(--padding);
   }
 
   code-playground {

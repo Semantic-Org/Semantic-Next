@@ -26,8 +26,9 @@
         ></nav-menu>
       </div>
       <div class="instructions">
-        {>slot}
-        <div class="divider"></div>
+        <div class="text">
+          {>slot}
+        </div>
         <div class="navigation segment">
           {#if exists previousLesson}
             <a class="previous direction" href={previousLesson.url}>
