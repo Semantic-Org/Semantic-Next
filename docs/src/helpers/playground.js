@@ -1,176 +1,9 @@
 import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
-/* These are top level to make it easier to format */
-
-export const htmlHideMarkerStart = `<!-- playground-hide -->`;
-export const htmlHideMarkerEnd = `<!-- playground-hide-end -->`;
-
-export const hideMarkerStart = `/* playground-hide */`;
-export const hideMarkerEnd = `/* playground-hide-end */`;
-
-export const foldMarkerStart = `/* playground-fold */`;
-export const foldMarkerEnd = `/* playground-fold-end */`;
-
-export const componentJSBefore = ``;
-export const componentJSAfter = ``;
-
-export const componentHTMLBefore = ``;
-export const componentHTMLAfter = ``;
-
-export const componentCSSBefore = ``;
-export const componentCSSAfter = ``;
-
-export const logJS = `${hideMarkerStart}
-const oldLog = console.log;
-console.log = function() {
-  oldLog.apply(console, arguments); // Keep default logging to the console
-
-  // Create the container for logs if it does not exist
-  let logContainer = document.getElementById('log-container');
-  if (!logContainer) {
-    const body = document.body;
-
-    // Create a container for logs
-    logContainer = document.createElement('div');
-    logContainer.id = 'log-container';
-    logContainer.style.fontFamily = 'Consolas, "Courier New", monospace';
-    logContainer.style.color = '#AAAAAA';
-    logContainer.style.margin = '0';
-    logContainer.style.width = '100%'; // Full width
-    logContainer.style.boxSizing = 'border-box'; // Box-sizing
-
-    // Append the log container to the body
-    body.appendChild(logContainer);
-  }
-
-  // Convert all arguments to a readable string with styling
-  const messages = Array.from(arguments).map(arg => {
-    const skipFormat = typeof arg == 'string';
-    return formatJSON(arg, skipFormat);
-  }).join(' ');
-
-  // Create and append the formatted message to the log container
-  const formattedMessage = document.createElement('div'); // Use div to replicate console line
-  formattedMessage.innerHTML = \`\${messages}\`; // Use innerHTML to include styled spans
-  logContainer.appendChild(formattedMessage);
-};
-
-function formatJSON(value, skipFormat = false) {
-  if(skipFormat) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    return \`<span class="json-string">"\${value}"</span>\`;
-  } else if (typeof value === 'number') {
-    return \`<span class="json-number">\${value}</span>\`;
-  } else if (typeof value === 'boolean') {
-    return \`<span class="json-boolean">\${value}</span>\`;
-  } else if (Array.isArray(value)) {
-    const contents = value.map(item => formatJSON(item)).join(', ');
-    return \`[\${contents}]\`;
-  } else if (typeof value === 'object' && value !== null) {
-    const keys = Object.keys(value);
-    const formattedObject = keys.map(key => {
-      return \`<span class="json-key">"\${key}"</span>: \${formatJSON(value[key])}\`;
-    }).join(', ');
-    return \`{\${formattedObject}}\`;
-  } else {
-    return String(value);
-  }
-}
-${hideMarkerEnd}`;
-
-// TODO
-const wrapConsole = `${hideMarkerStart}
-${hideMarkerEnd}`;
-
-
-export const logCSS = `${hideMarkerStart}
-  .json-key { color: #656565; }
-  .json-string { color: #58A6FF; }
-  .json-number { color: #58A6FF; }
-  .json-boolean { color: #58A6FF; }
-${hideMarkerEnd}`;
-
-export const getIndexHTMLBefore = function(type) {
-  const pageScripts = [
-    'component.js',
-    'index.js',
-    'index.css',
-  ];
-
-  if(type == 'log') {
-    pageScripts.unshift('log.js');
-    pageScripts.unshift('log.css');
-  }
-
-  const getScriptCode = function() {
-    let html = '';
-    each(pageScripts, (src) => {
-      if(src.search('.js') >= 0) {
-        html += `\n<script src="./${src}" type="module"></script>`;
-      }
-      else if(src.search('.css') >= 0) {
-        html += `\n<link href="./${src}" rel="stylesheet">`;
-      }
-    });
-    return html;
-  };
-
-  return `${htmlHideMarkerStart}
-  <html>
-  <head>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
-  <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
-  <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
-  <script>
-    function dispatchCustomEvent(eventName) {
-      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
-      window.frameElement.dispatchEvent(event);
-    }
-    window.addEventListener('focus', function() {
-      dispatchCustomEvent('iframefocus');
-    }, true);
-    window.addEventListener('blur', function() {
-      dispatchCustomEvent('iframeblur');
-    }, true);
-    document.addEventListener('touchstart', {});
-  </script>
-  <!-- This defines the component tag and makes it available on your page !-->
-  ${getScriptCode()}
-  </head>
-  <body>
-  ${htmlHideMarkerEnd}`;
-};
-
-
-export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
-
-export const indexJSBefore = `${hideMarkerStart}
-document.querySelector('html').removeAttribute('style');
-if(localStorage.getItem('theme') == 'dark') {
-  document.querySelector('html').classList.add('dark');
-}${hideMarkerEnd}`;
-export const indexJSAfter = ``;
-
-export const indexCSSBefore = `${hideMarkerStart}body { height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
-export const indexCSSAfter = ``;
-
-export const getSandboxURL = () => {
-  return `/sandbox/`;
-};
-
-export const getExampleID = (example) => {
-  if(isString(example)) {
-    return example;
-  }
-  const exampleID = example?.id || tokenize(example?.title);
-  return exampleID;
-};
-
+import { addPlaygroundInjections, logJS, logCSS } from './injections.js';
+/*
+  Helper to add code folding for import export statements
+*/
 export const hideComponentBoilerplate = (code) => {
   // Regex to match everything up to and including the last line with getText
   const getTextRegex = /^[\s\S]*(?:getText\([^)]*\)[;\s]*$)/m;
@@ -191,18 +24,30 @@ export const hideComponentBoilerplate = (code) => {
   return foldedCode;
 };
 
-export const getExampleFiles = async(example, allExampleFiles, basePath = '../../examples/') => {
-  const exampleID = getExampleID(example);
-  if(!exampleID) {
+/*
+  Gets example files from a folder for a given content id
+  this is used in the learn and examples section to load
+  examples
+*/
+export const getExampleFiles = async({
+  contentID, // content id
+  allFiles = {}, // import.meta.glob cannot be used here so you must pass in file collection
+  basePath = '../../examples/', // base path to content collection from file location
+  subFolder = '', // sub folder inside content collection that contains example
+  hideBoilerplate = true, // whether import/export code should be collapsed
+  includeFolder = false, // whether all files in folder should be included regardless of the filename
+  includeLog = false, // whether to include script to intercept console logs,
+  includePlaygroundInjections = false,
+} = {}) => {
+  if(!contentID) {
     return;
   }
   let hasComponent = false;
   const exampleFiles = {};
-  await asyncEach(allExampleFiles, async (file, path) => {
-    const pathRegExp = new RegExp(`${basePath}.*${exampleID}/`);
+  await asyncEach(allFiles, async (file, path) => {
+    const pathRegExp = new RegExp(`${basePath}.*${contentID}/${subFolder}`);
     if (path.match(pathRegExp)) {
-
-      const fileName = path.replace(pathRegExp, '');
+      const fileName = path.replace(pathRegExp, '').replace('/', '');
 
       const getContentType = (filename) => {
         const extension = filename.split('.').pop();
@@ -235,11 +80,11 @@ export const getExampleFiles = async(example, allExampleFiles, basePath = '../..
           content: fileContent.default
         };
       }
-      else if(inArray(fileName, ['component.js', `${exampleID}.js`])) {
+      else if(inArray(fileName, ['component.js', `${contentID}.js`])) {
         const fileContent = await file();
         let fileText = fileContent.default;
         hasComponent = fileText.search('defineComponent') > -1;
-        if(example.fold !== false) {
+        if(hideBoilerplate) {
           fileText = hideComponentBoilerplate(fileText);
         }
         exampleFiles['component.js'] = {
@@ -247,7 +92,7 @@ export const getExampleFiles = async(example, allExampleFiles, basePath = '../..
           content: fileText
         };
       }
-      else if(example.exampleType == 'folder') {
+      else if(includeFolder) {
         const fileContent = await file();
         exampleFiles[fileName] = {
           contentType: getContentType(fileName),
@@ -255,14 +100,14 @@ export const getExampleFiles = async(example, allExampleFiles, basePath = '../..
         };
         return;
       }
-      else if(inArray(fileName, ['component.html', `${exampleID}.html`])) {
+      else if(inArray(fileName, ['component.html', `${contentID}.html`])) {
         const fileContent = await file();
         exampleFiles['component.html'] = {
           contentType: 'text/html',
           content: fileContent.default
         };
       }
-      else if(inArray(fileName, ['component.css', `${exampleID}.css`])) {
+      else if(inArray(fileName, ['component.css', `${contentID}.css`])) {
         const fileContent = await file();
         exampleFiles['component.css'] = {
           contentType: 'text/css',
@@ -282,7 +127,7 @@ export const getExampleFiles = async(example, allExampleFiles, basePath = '../..
         tagName = matches[1];
       }
       else {
-        tagName = camelToKebab(exampleID);
+        tagName = camelToKebab(contentID);
       }
     }
 
@@ -295,7 +140,7 @@ export const getExampleFiles = async(example, allExampleFiles, basePath = '../..
     };
   }
 
-  if(example.exampleType == 'log') {
+  if(includeLog) {
     exampleFiles['log.js'] = {
       contentType: 'text/javascript',
       generated: true,
@@ -332,51 +177,17 @@ export const getExampleFiles = async(example, allExampleFiles, basePath = '../..
       content: ''
     };
   }
+
+  if(includePlaygroundInjections) {
+    addPlaygroundInjections(exampleFiles, { includeLog });
+  }
+
   return exampleFiles;
 };
 
-export const getPlaygroundInjections = (type) => {
-  const indexHTMLBefore = getIndexHTMLBefore(type);
-  let injections = {
-    'component.js': {
-      before: componentJSBefore,
-      after: componentJSAfter,
-    },
-    'component.html': {
-      before: componentHTMLBefore,
-      after: componentHTMLAfter
-    },
-    'component.css': {
-      before: componentCSSBefore,
-      after: componentCSSAfter,
-    },
-    'index.js': {
-      before: indexJSBefore,
-      after: indexJSAfter,
-    },
-    'index.html': {
-      before: indexHTMLBefore,
-      after: indexHTMLAfter
-    },
-    'index.css': {
-      before: indexCSSBefore,
-      after: indexCSSAfter,
-    },
-  };
-  return injections;
-};
-
-export const addPlaygroundInjections = (files, type) => {
-  const fileInjections = getPlaygroundInjections(type);
-  each(files, (file, name) => {
-    if(fileInjections[name]) {
-      const { before, after } = fileInjections[name];
-      files[name].content = (before || '') + files[name].content + (after || '').trim();
-    }
-  });
-  return files;
-};
-
+/*
+  Returns empty versions of essential files for use with playground
+*/
 export const getEmptyProjectFiles = ({
   withInjections = false
 } = {}) => {
@@ -413,7 +224,11 @@ export const getEmptyProjectFiles = ({
 };
 
 
-export const getPanelIndexes = (files, type) => {
+/*
+  Returns default horizontal panel index for file types
+  in panel layout of playground
+*/
+export const getPanelIndexes = (files = {}, { type } = {}) => {
   let indexes;
   if(type == 'log') {
     indexes = {
@@ -442,4 +257,16 @@ export const getPanelIndexes = (files, type) => {
     indexes['component.css'] = 1;
   }
   return indexes;
+};
+
+export const getSandboxURL = () => {
+  return `/sandbox/`;
+};
+
+export const getExampleID = (example) => {
+  if(isString(example)) {
+    return example;
+  }
+  const exampleID = example?.id || tokenize(example?.title);
+  return exampleID;
 };

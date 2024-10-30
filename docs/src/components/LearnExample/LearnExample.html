@@ -56,17 +56,18 @@
       </div>
       <div class="actions segment">
         <div class="left">
-          <ui-button transparent inverted icon="book">Related Resources</ui-button>
-          <ui-button button transparent icon="table" inverted>Change Layout</ui-button>
+          <ui-button transparent inverted icon="book" class="resources">Resources</ui-button>
+          <ui-button button transparent icon="table" inverted class="layout">Layout</ui-button>
         </div>
         <div class="right">
-          <ui-button icon="info">Hint</ui-button>
+          <ui-button transparent inverted class="hint">Hint</ui-button>
+          <ui-button icon="check" class="solve">Solve</ui-button>
         </div>
       </div>
     </ui-panel>
     <ui-panel class="code" direction="horizontal">
       <code-playground
-        files={playgroundConfig.files}
+        files={currentFiles}
         example={playgroundConfig.example}
         sandboxURL={playgroundConfig.sandboxURL}
         panelIndexes={playgroundConfig.panelIndexes}

@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { each, tokenize } from '@semantic-ui/utils';
 import {
   getExampleFiles,
+  getExampleID,
   addPlaygroundInjections,
   getSandboxURL,
   getPanelIndexes,
@@ -30,10 +31,19 @@ const exampleID = example.id || tokenize(example.title);
 const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
-let files = await getExampleFiles(example, allExampleFiles, '../../examples/');
-files = addPlaygroundInjections(files, example.exampleType);
+let files = await getExampleFiles({
+  contentID: getExampleID(example),
+  allFiles: allExampleFiles,
+  basePath: '../../examples/',
+  includeFolder: example.exampleType == 'folder',
+  hideBoilerplate: example.fold === true,
+  includePlaygroundInjections: true,
+  includeLog: example.exampleType == 'log',
+});
 
-const panelIndexes = getPanelIndexes(files, example.exampleType);
+const panelIndexes = getPanelIndexes(files, {
+  type: example.exampleType
+});
 
 const searchMeta = {
   ...entry.data,

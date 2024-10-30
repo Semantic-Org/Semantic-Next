@@ -10,6 +10,7 @@ import LearnExample from '@components/LearnExample/LearnExample.js';
 import Sidebar from '@components/Sidebar.astro';
 
 const { entry } = Astro.props;
+const { Content } = await entry.render();
 
 /* Make paths */
 export async function getStaticPaths() {
@@ -31,29 +32,41 @@ const previousLesson = getPreviousLesson(lesson);
 const nextLesson = getNextLesson(lesson);
 
 /* Get associated example */
-const sandboxURL = getSandboxURL();
-const example = 'counter';
-const allExampleFiles = await import.meta.glob(`../../examples/**`, {
+const allLessonFiles = await import.meta.glob(`../../content/lessons/**`, {
   query: '?raw',
 });
-let files = await getExampleFiles(example, allExampleFiles, '../../examples/');
-files = addPlaygroundInjections(files, example.exampleType);
+let files = await getExampleFiles({
+  contentID: lesson.id,
+  allFiles: allLessonFiles,
+  basePath: '../../content/lessons/',
+  subFolder: 'problem',
+  includeFolder: true,
+  hideBoilerplate: false,
+  includePlaygroundInjections: true,
+  includeLog: false,
+});
 
-const panelIndexes = getPanelIndexes(files, example.exampleType);
+const panelIndexes = getPanelIndexes(files);
 
-const { Content } = await entry.render();
+let solutionFiles = await getExampleFiles({
+  contentID: lesson.id,
+  allFiles: allLessonFiles,
+  basePath: '../../content/lessons/',
+  subFolder: 'solution',
+  includeFolder: true,
+  hideBoilerplate: false,
+  includePlaygroundInjections: true,
+  includeLog: false,
+});
 
 const searchMeta = {
   ...entry.data,
-  pageType: 'Learn',
+  pageType: 'Tutorial',
 }
 
 const menu = await getSidebarMenu({url: activeURL});
 
 const playgroundConfig = {
-  files,
-  example,
-  sandboxURL,
   panelIndexes,
   saveID: 'learn',
 };
@@ -67,6 +80,8 @@ const playgroundConfig = {
       previousLesson={previousLesson}
       nextLesson={nextLesson}
       menu={menu}
+      files={files}
+      solutionFiles={solutionFiles}
       activeURL={activeURL}
       playgroundConfig={playgroundConfig}
     >

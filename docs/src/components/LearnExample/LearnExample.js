@@ -23,8 +23,8 @@ const settings = {
   saveState: true,
   saveStateID: 'learn',
 
-  // preload content
-
+  files: {}, // files to display alongside lesson
+  solutionFiles: {}, // solution files for lessons with a solve button
 
   // populates previous / next buttons
   previousLesson: {},
@@ -43,9 +43,13 @@ const settings = {
 };
 
 const state = {
+  currentFiles: [],
 };
 
-const createComponent = ({ $, settings }) => ({
+const createComponent = ({ $, state, settings }) => ({
+  initialize() {
+    state.currentFiles.set(settings.files);
+  },
   isNavMenuVisible() {
     return $('.menu').hasClass('visible');
   },
@@ -67,7 +71,7 @@ const createComponent = ({ $, settings }) => ({
 });
 
 const onCreated = ({ data }) => {
-  console.log(data.nextLesson);
+  console.log(data);
 };
 
 const onRendered = ({}) => {
@@ -87,6 +91,9 @@ const events = {
     if(self.isNavMenuVisible()) {
       self.hideNavMenu();
     }
+  },
+  'click .solve'({settings, data, state}) {
+    state.currentFiles.set(settings.solutionFiles);
   },
   'click .toggle-menu'({ self }) {
     self.toggleNavMenu();
