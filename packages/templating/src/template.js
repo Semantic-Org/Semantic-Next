@@ -144,7 +144,7 @@ export const Template = class Template {
       this.dispatchEvent('rendered', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onUpdated = () => {
-      this.call(this.onRenderedCallback);
+      this.call(this.onUpdatedCallback);
       this.dispatchEvent('updated', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
