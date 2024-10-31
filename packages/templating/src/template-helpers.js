@@ -154,7 +154,6 @@ export const TemplateHelpers = {
   },
   debugReactivity() {
     Reaction.getSource();
-    debugger;
   },
   arrayFromObject(obj) {
     return arrayFromObject(obj);
