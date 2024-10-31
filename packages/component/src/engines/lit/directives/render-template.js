@@ -68,12 +68,10 @@ export class RenderTemplateDirective extends AsyncDirective {
       }
 
       const hasCreated = maybeCreateTemplate(); // reactive reference
-      const dataContext = unpackData(data);
+      const dataContext = unpackData(data); // reactive reference
       if (!computation.firstRun) {
         attachTemplate();
-        if (!hasCreated) {
-          this.template.setDataContext(dataContext, { rerender: false });
-        }
+        this.template.setDataContext(dataContext, { rerender: true });
         this.setValue(renderTemplate());
       }
     });
