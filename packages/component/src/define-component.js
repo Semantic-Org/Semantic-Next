@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { each, noop, isServer, get, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
@@ -104,6 +104,7 @@ export const defineComponent = ({
         this.css = css;
         this.componentSpec = componentSpec;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
+        this.data = this.createDataProxy();
         this.setDefaultSettings({settings, componentSpec});
       }
 
@@ -129,7 +130,7 @@ export const defineComponent = ({
         super.willUpdate();
         if(!this.template) {
           this.template = litTemplate.clone({
-            data: this.getData(),
+            data: this.data,
             element: this,
             renderRoot: this.renderRoot,
           });
@@ -189,30 +190,44 @@ export const defineComponent = ({
         this[name] = value;
       }
 
-      getData() {
-        let settings = this.getSettings();
-        let data = {
-          ...settings,
-          ...this.getContent({componentSpec}),
-        };
-        if (!isServer) {
-          data.darkMode = this.isDarkMode();
+      getDataValue(name) {
+        if(this.settings[name]) {
+          return this.settings[name];
         }
-        if (componentSpec) {
-          data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
+        if(get(this.tpl, name)) {
+          return get(this.tpl, name);
         }
-        if(plural === true) {
-          data.plural = true;
+        if(name == 'darkMode') {
+          return this.isDarkMode();
         }
-        return data;
+        if(name == 'ui') {
+          return this.getUIClasses({componentSpec, properties: webComponent.properties });
+        }
+        if(name == 'plural') {
+          return plural;
+        }
+      }
+
+      createDataProxy() {
+        console.log('creating proxy');
+        return new Proxy({}, {
+          get: (target, property) => {
+            console.log('proxy called!');
+            const value = this.getDataValue(property);
+            console.log(value);
+            return value;
+          },
+          set: (target, property, value, receiver) => {
+            console.log('set??');
+            // no setting data context
+            return false;
+          }
+        });
       }
 
       render() {
-        const data = {
-          ...this.getData(),
-          ...this.tpl,
-        };
-        const html = this.template.render(data);
+        console.log('rendering with', this.data);
+        const html = this.template.render(this.data);
         return html;
       }
     };
