@@ -206,7 +206,7 @@ class WebComponentBase extends LitElement {
       To make settings reactive references we need to create
       reactive references for any setting
     */
-    let reactiveVars = new Map();
+    component.settingsVars = new Map();
     return new Proxy({}, {
       get: (target, property) => {
         const settings = component.getSettings({
@@ -214,25 +214,25 @@ class WebComponentBase extends LitElement {
           properties
         });
         const setting = get(settings, property);
-        let reactiveVar = reactiveVars.get(property);
+        let reactiveVar = component.settingsVars.get(property);
         if(reactiveVar) {
           reactiveVar.get();
         }
         else {
           reactiveVar = new ReactiveVar(setting);
-          reactiveVars.set(property, reactiveVar);
+          component.settingsVars.set(property, reactiveVar);
         }
         return setting;
       },
       set: (target, property, value, receiver) => {
         component.setSetting(property, value);
-        let reactiveVar = reactiveVars.get(property);
+        let reactiveVar = component.settingsVars.get(property);
         if(reactiveVar) {
           reactiveVar.set(value);
         }
         else {
           reactiveVar = new ReactiveVar(value);
-          reactiveVars.set(property, reactiveVar);
+          component.settingsVars.set(property, reactiveVar);
         }
         return true;
       }
