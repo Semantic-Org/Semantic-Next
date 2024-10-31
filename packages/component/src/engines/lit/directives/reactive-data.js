@@ -15,47 +15,59 @@ export class ReactiveDataDirective extends AsyncDirective {
   }
 
   render(expression, settings = {}) {
+    this.expression = expression;
+    this.settings = settings;
+
     // Stop and clean up any existing reaction
     if (this.reaction) {
       this.reaction.stop();
     }
 
-    const getValue = (value) => {
-      let reactiveValue = expression.value();
-      if(settings.ifDefined) {
-        // useful for things like <input checked="{{isChecked}}">
-        // template compiler does this automatically for boolean attrs
-        if(inArray(reactiveValue, [undefined, null, false, 0])) {
-          return ifDefined(undefined);
-        }
-      }
-      // we need to serialize arrays and objects that are rendered to html
-      if(isArray(reactiveValue) || isObject(reactiveValue)) {
-        reactiveValue = JSON.stringify(reactiveValue);
-      }
-      return reactiveValue;
-    };
+    // Create a new reaction to rerun the computation function if reactive data updates
+    // that dont trigger rerender occur
 
-    // Create a new reaction to rerun the computation function
-    let value;
-    if (this.reaction) {
-      this.reaction.stop();
+    if(this.reaction) {
+      // if reaction already set up just return value for rerender
+      return this.getReactiveValue();
     }
-    this.reaction = Reaction.create((computation) => {
-      if(!this.isConnected) {
-        computation.stop();
-        return;
+    else {
+      // Create a new reaction to rerun the computation function if reactive data updates
+      // that dont trigger rerender occur
+      let value;
+      this.reaction = Reaction.create((computation) => {
+        if(!this.isConnected) {
+          computation.stop();
+          return;
+        }
+        value = this.getReactiveValue();
+        if(this.settings.unsafeHTML) {
+          value = unsafeHTML(value);
+        }
+        if (!computation.firstRun) {
+          this.setValue(value);
+        }
+      });
+      return value;
+    }
+  }
+
+  getReactiveValue() {
+    let reactiveValue = this.expression.value();
+
+    // useful for things like <input checked="{{isChecked}}">
+    // template compiler does this automatically for boolean attrs
+    if(this.settings.ifDefined) {
+      if(inArray(reactiveValue, [undefined, null, false, 0])) {
+        return ifDefined(undefined);
       }
-      value = getValue();
-      if(settings.unsafeHTML) {
-        value = unsafeHTML(value);
-      }
-      if (!computation.firstRun) {
-        this.setValue(value);
-      }
-    });
-    // Return the initial result of the computation function
-    return value;
+    }
+
+    // arrays and objects are serialized for use in web component attributes
+    // maybe should check part?
+    if(isArray(reactiveValue) || isObject(reactiveValue)) {
+      reactiveValue = JSON.stringify(reactiveValue);
+    }
+    return reactiveValue;
   }
 
   disconnected() {
