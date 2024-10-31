@@ -128,7 +128,7 @@
     .text {
       overflow: auto;
       padding: 2rem 1.5rem;
-      flex-grow: 1;
+      flex-grow: 0;
     }
   }
 

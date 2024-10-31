@@ -17,6 +17,9 @@ export async function getStaticPaths() {
   const entries = await getCollection('examples');
   const paths = [];
   each(entries, (entry) => {
+    if(entry.data.hidden) {
+      return;
+    }
     paths.push({
       params: { slug: `${entry.slug}` },
       props: { entry },

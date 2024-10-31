@@ -9,10 +9,13 @@ import semverPatch from 'semver/functions/patch';
 import semverCompare from 'semver/functions/compare';
 
 const examples = await getCollection('examples');
-const examplePages = examples.map(doc => ({
-  ...doc.data,
-  url: `/examples/${doc.slug}`,
-}));
+const examplePages = examples
+  .filter(doc => !doc?.data?.hidden)
+  .map(doc => ({
+    ...doc.data,
+    url: `/examples/${doc.slug}`,
+  }))
+;
 
 export const getLessonContent = (lesson) => {
   return {
@@ -30,7 +33,10 @@ export const getLessonContent = (lesson) => {
 };
 
 const lessons = await getCollection('lessons');
-const lessonDocs = lessons.map(getLessonContent);
+const lessonDocs = lessons
+  .filter(doc => !doc?.data?.hidden)
+  .map(getLessonContent)
+;
 export const lessonPages = lessonDocs.sort((a, b) => {
   return semverCompare(a.sort, b.sort);
 });

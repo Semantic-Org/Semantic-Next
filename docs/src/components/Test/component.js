@@ -29,8 +29,7 @@ const onCreated = function({ settings, state, self }) {
 };
 
 const onRendered = function({ self, $ }) {
-  console.log($('.counter').first().text());
-  self.counter6 = $('.counter').first().text();
+  self.counter6 = Number($('.counter').first().text());
 };
 
 

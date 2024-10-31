@@ -16,6 +16,7 @@ const examplesCollection = defineCollection({
   schema: z.object({
     id: z.optional(z.string()),
     title: z.string(),
+    hidden: z.optional(z.boolean()),
     exampleType: z.string(),
     folder: z.optional(z.string()), // whether all files in folder should be included in example
     fold: z.optional(z.boolean()),
@@ -31,6 +32,7 @@ const lessonCollection = defineCollection({
   type: 'content',
   schema: z.object({
 
+    hidden: z.optional(z.boolean()),
     id: z.optional(z.string()), // use instead of slug
     order: z.optional(z.string()), // when not included will not show in guide
     sort: z.string(), // the actual sort like 1.1.1
