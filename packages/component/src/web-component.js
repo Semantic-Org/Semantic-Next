@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
 import { each, isFunction, kebabToCamel, keys, unique, isServer, inArray, get } from '@semantic-ui/utils';
+import { ReactiveVar } from '@semantic-ui/reactivity';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
 
@@ -194,24 +195,45 @@ class WebComponentBase extends LitElement {
   }
 
 
-
   /* Create a proxy object which returns the current setting
      we need this over a getter/setter because settings are
-     destructured in function arguments
+     destructured in function arguments which locks their value in time
      i.e. onCreated({settings}) { }
   */
   createSettingsProxy({componentSpec, properties}) {
     let component = this;
+    /*
+      To make settings reactive references we need to create
+      reactive references for any setting
+    */
+    let reactiveVars = new Map();
     return new Proxy({}, {
       get: (target, property) => {
         const settings = component.getSettings({
           componentSpec,
           properties
         });
-        return get(settings, property);
+        const setting = get(settings, property);
+        let reactiveVar = reactiveVars.get(property);
+        if(reactiveVar) {
+          reactiveVar.get();
+        }
+        else {
+          reactiveVar = new ReactiveVar(setting);
+          reactiveVars.set(property, reactiveVar);
+        }
+        return setting;
       },
       set: (target, property, value, receiver) => {
         component.setSetting(property, value);
+        let reactiveVar = reactiveVars.get(property);
+        if(reactiveVar) {
+          reactiveVar.set(value);
+        }
+        else {
+          reactiveVar = new ReactiveVar(value);
+          reactiveVars.set(property, reactiveVar);
+        }
         return true;
       }
     });
