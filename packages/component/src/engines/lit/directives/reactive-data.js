@@ -1,4 +1,4 @@
-import { nothing } from 'lit';
+import { noChange } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 
@@ -14,14 +14,14 @@ export class ReactiveDataDirective extends AsyncDirective {
     this.reaction = null;
   }
 
-  render(computeFunc, settings = {}) {
+  render(expression, settings = {}) {
     // Stop and clean up any existing reaction
     if (this.reaction) {
-      this.reaction.stop();
+      return noChange;
     }
 
     const getValue = (value) => {
-      let reactiveValue = computeFunc();
+      let reactiveValue = expression.value();
       if(settings.ifDefined) {
         // useful for things like <input checked="{{isChecked}}">
         // template compiler does this automatically for boolean attrs
@@ -38,19 +38,17 @@ export class ReactiveDataDirective extends AsyncDirective {
 
     // Create a new reaction to rerun the computation function
     let value;
-    if (this.reaction) {
-      this.reaction.stop();
-    }
     this.reaction = Reaction.create((computation) => {
       if(!this.isConnected) {
         computation.stop();
+        delete this.reaction;
         return;
       }
       value = getValue();
       if(settings.unsafeHTML) {
         value = unsafeHTML(value);
       }
-      if (!computation.firstRun) {
+      if(!computation.firstRun) {
         this.setValue(value);
       }
     });

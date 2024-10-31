@@ -1,4 +1,4 @@
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
@@ -13,12 +13,13 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   render(conditional) {
     // Ensure existing reaction is stopped
     if (this.reaction) {
-      this.reaction.stop();
+      return noChange;
     }
     let html = nothing;
-    this.reaction = Reaction.create((comp) => {
+    this.reaction = Reaction.create((computation) => {
       if(!this.isConnected) {
-        comp.stop();
+        computation.stop();
+        delete this.reaction;
         return;
       }
       if(conditional.condition()) {
@@ -44,10 +45,9 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       if(!html) {
         html = nothing;
       }
-      if(!comp.firstRun) {
+      if(!computation.firstRun) {
         this.setValue(html);
       }
-      return html;
     });
     return html;
   }

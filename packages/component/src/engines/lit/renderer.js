@@ -82,7 +82,7 @@ export class LitRenderer {
           break;
 
         case 'slot':
-          if (node.name) {
+          if(node.name) {
             this.addHTML(`<slot name="${node.name}"></slot>`);
           }
           else {
@@ -100,30 +100,36 @@ export class LitRenderer {
   */
   evaluateConditional(node, data) {
     const directiveMap = (value, key) => {
-      if (key == 'branches') {
-        return value.map((branch) => mapObject(branch, directiveMap));
+      if(key == 'branches') {
+        return value.map((branch) => {
+          if(branch.condition) {
+            branch.expression = branch.condition;
+          }
+          return mapObject(branch, directiveMap);
+        });
       }
-      if (key == 'condition') {
+      if(key == 'condition') {
         return () => this.evaluateExpression(value, data);
       }
-      if (key == 'content') {
+      if(key == 'content') {
         return () => this.renderContent({ ast: value, data });
       }
       return value;
     };
+    node.expression = node.condition; // store original expression for debugging
     let conditionalArguments = mapObject(node, directiveMap);
     return reactiveConditional(conditionalArguments);
   }
 
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
-      if (key == 'over') {
+      if(key == 'over') {
         return (expressionString) => {
           const computedValue = this.evaluateExpression(value, data);
           return computedValue;
         };
       }
-      if (key == 'content') {
+      if(key == 'content') {
         return (eachData) => {
           return this.renderContent({
             ast: value,
@@ -139,7 +145,7 @@ export class LitRenderer {
 
   evaluateTemplate(node, data = {}) {
     const templateName = this.lookupExpressionValue(node.name, data);
-    if (this.snippets[templateName]) {
+    if(this.snippets[templateName]) {
       return this.evaluateSnippet(node, data);
     }
     else {
@@ -203,7 +209,7 @@ export class LitRenderer {
   evaluateSnippet(node, data = {}) {
     const snippetName = this.lookupExpressionValue(node.name, data);
     const snippet = this.snippets[snippetName];
-    if (!snippet) {
+    if(!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
     const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
@@ -217,6 +223,7 @@ export class LitRenderer {
     const templateData = this.getPackedNodeData(node, data);
     return renderTemplate({
       subTemplates: this.subTemplates,
+      templateName: node.name,
       getTemplateName: () => this.evaluateExpression(node.name, data), // template name can be dynamic
       data: templateData,
       parentTemplate: data,
@@ -229,12 +236,13 @@ export class LitRenderer {
     data = this.data,
     { asDirective = false, ifDefined = false, unsafeHTML = false } = {}
   ) {
-    if (typeof expression === 'string') {
-      if (asDirective) {
-        return reactiveData(
-          () => this.lookupExpressionValue(expression, this.data),
-          { ifDefined, unsafeHTML }
-        );
+    if(typeof expression === 'string') {
+      if(asDirective) {
+        const dataArguments = {
+          expression,
+          value: () => this.lookupExpressionValue(expression, this.data)
+        };
+        return reactiveData(dataArguments, { ifDefined, unsafeHTML });
       }
       else {
         return this.lookupExpressionValue(expression, data);
@@ -250,9 +258,9 @@ export class LitRenderer {
       const result = [];
       while (tokens.length > 0) {
         const token = tokens.shift();
-        if (token === '(') {
+        if(token === '(') {
           result.push(parse(tokens));
-        } else if (token === ')') {
+        } else if(token === ')') {
           return result;
         } else {
           result.push(token);
@@ -295,7 +303,7 @@ export class LitRenderer {
 
   lookupTokenValue(token = '', data) {
 
-    if (isArray(token)) {
+    if(isArray(token)) {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
     }
@@ -308,20 +316,20 @@ export class LitRenderer {
 
     // check if this is a global helper
     const helper = this.helpers[token];
-    if (isFunction(helper)) {
+    if(isFunction(helper)) {
       return helper;
     }
 
     const getDeepValue = (obj, path) => {
       return path.split('.').reduce((acc, part) => {
-        if (acc === undefined) {
+        if(acc === undefined) {
           return undefined;
         }
         const current = (acc instanceof ReactiveVar)
           ? acc.get()
           : wrapFunction(acc)()
         ;
-        if (current == undefined) {
+        if(current == undefined) {
           return undefined;
           /* erroring on intermediate undefined
              feels better not as an error state
@@ -349,7 +357,7 @@ export class LitRenderer {
     }
 
     // retrieve reactive value
-    if (dataValue !== undefined) {
+    if(dataValue !== undefined) {
       return (dataValue instanceof ReactiveVar)
         ? dataValue.value
         : dataValue;
@@ -361,7 +369,7 @@ export class LitRenderer {
   getLiteralValue(token) {
 
     // Check if this is a string literal (single or double quotes)
-    if (token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
+    if(token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
       return token.slice(1, -1).replace(/\\(['"])/g, '$1');
     }
 
@@ -372,14 +380,14 @@ export class LitRenderer {
     }
 
     // check if this is a number
-    if (!Number.isNaN(parseFloat(token))) {
+    if(!Number.isNaN(parseFloat(token))) {
       return Number(token);
     }
   }
 
   addHTML(html) {
     // we want to concat all html added consecutively
-    if (this.lastHTML) {
+    if(this.lastHTML) {
       const lastHTML = this.html.pop();
       html = `${lastHTML}${html}`;
     }

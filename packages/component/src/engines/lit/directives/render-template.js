@@ -11,7 +11,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.template = null;
     this.part = null;
   }
-  render({ getTemplateName, subTemplates, data, parentTemplate }) {
+  render({ getTemplateName, templateName, subTemplates, data, parentTemplate }) {
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
@@ -56,16 +56,23 @@ export class RenderTemplateDirective extends AsyncDirective {
       let html = this.template.render();
       return html;
     };
-    Reaction.create((comp) => {
+
+    if (this.reaction) {
+      return noChange;
+    }
+
+    this.reaction = Reaction.create((computation) => {
       if (!this.isConnected) {
-        comp.stop();
+        computation.stop();
         return;
       }
+
       const hasCreated = maybeCreateTemplate(); // reactive reference
-      if (!comp.firstRun) {
+      const dataContext = unpackData(data);
+      if (!computation.firstRun) {
         attachTemplate();
         if (!hasCreated) {
-          this.template.setDataContext(unpackData(data), { rerender: false });
+          this.template.setDataContext(dataContext, { rerender: false });
         }
         this.setValue(renderTemplate());
       }
