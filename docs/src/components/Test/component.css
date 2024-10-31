@@ -1,23 +1,8 @@
-ui-button {
-  padding: 10px 15px;
-  background-color: #DDD;
-  color: #000;
+.source {
+  color: var(--standard-60);
+  margin-right: var(--compact-spacing);
 }
-.circle {
-  background: var(--blue) var(--strong-angled-gradient);
-  box-shadow: var(--subtle-shadow);
-  border: var(--border);
-  transition: all 500ms ease-in-out;
-  border-radius: var(--circular-radius)
+.counter {
+  font-weight: bold;
+  color: var(--primary-text-color);
 }
-p {
-  margin-top: var(--margin);
-  color: var(--standard-50);
-}
-hr {
-  margin: var(--vertically-spaced);
-  border-bottom: var(--border);
-  outline: none;
-  background: none;
-}
-
