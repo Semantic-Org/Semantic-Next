@@ -105,11 +105,15 @@ export const Template = class Template {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
+
+    // add child templates to parent for searching with getChild
     if(!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-    this.instance._parentTemplate = parentTemplate;
+
+    // add parent template to this element for searching with getParent
+    this._parentTemplate = parentTemplate;
   }
 
   setElement(element) {
@@ -407,7 +411,6 @@ export const Template = class Template {
         const eventSettings = { abortController: this.eventController };
 
         if(eventType == 'global') {
-          console.log('global');
           // allow user to bind to global selectors if they opt in using the 'global' keyword
           $(selector).on(eventName, eventHandler, eventSettings);
         }
@@ -750,10 +753,10 @@ export const Template = class Template {
     // recursive lookup
     function search(template, templateName) {
       if (template.templateName === templateName) {
-        result.push(template.component);
+        result.push(template.instance);
       }
-      if (template.component._childTemplates) {
-        template.component._childTemplates.forEach((childTemplate) => {
+      if (template._childTemplates) {
+        template._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });
       }
