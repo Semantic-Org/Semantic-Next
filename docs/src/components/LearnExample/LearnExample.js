@@ -1,7 +1,11 @@
 import { defineComponent } from '@semantic-ui/component';
 import { isEmpty } from '@semantic-ui/utils';
 
-/* Subcomponents */
+/* Sub Components */
+import { HintModal } from './subtemplates/HintModal.js';
+import { ReferenceModal } from './subtemplates/ReferenceModal.js';
+
+/* Components */
 import { CodePlayground } from '../CodePlayground/CodePlayground.js';
 import { NavMenu } from '../NavMenu/NavMenu.js';
 
@@ -70,19 +74,6 @@ const createComponent = ({ $, state, settings }) => ({
   },
 });
 
-const onCreated = ({ data }) => {
-  console.log(data);
-};
-
-const onRendered = ({}) => {
-};
-
-const onThemeChanged = ({}) => {
-};
-
-const keys = {
-};
-
 const events = {
   'click'({ self, event, $ }) {
     if($(event.target).closest('.toggle-menu').exists()) {
@@ -98,8 +89,19 @@ const events = {
   'click .toggle-menu'({ self }) {
     self.toggleNavMenu();
   },
+  'click ui-button.layout'({ $ }) {
+    $('code-playground').getComponent().toggleTabs();
+  },
+  'click ui-button.hint'({findChild}) {
+    findChild('hintModal').show();
+  },
+  'click ui-button.references'({findChild, settings}) {
+    console.log(settings.lesson);
+    findChild('referenceModal').show();
+  },
   'click ui-button[href]'({ self, event }) {
     const href = $(event.target).attr('href');
+    // self.loadPage(href);
     //event.preventDefault();
   },
 };
@@ -112,12 +114,12 @@ const LearnExample = defineComponent({
   css,
   createComponent,
   settings,
-  onCreated,
-  onRendered,
   events,
   state,
-  keys,
-  onThemeChanged,
+  subTemplates: {
+    hintModal: HintModal,
+    referenceModal: ReferenceModal,
+  }
 });
 
 export default LearnExample;

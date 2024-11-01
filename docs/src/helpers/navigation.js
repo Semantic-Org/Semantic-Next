@@ -19,13 +19,13 @@ const examplePages = examples
 
 export const getLessonContent = (lesson) => {
   return {
-    ...lesson.data,
     id: lesson.slug,
     url: `/learn/${lesson.slug}`,
     sort: lesson.data.sort,
     hint: lesson.data.hint,
     category: lesson.data.category,
     subcategory: lesson.data.subcategory,
+    references: lesson.data.references,
     major: semverMajor(lesson.data.sort),
     minor: semverMinor(lesson.data.sort),
     patch: semverPatch(lesson.data.sort),

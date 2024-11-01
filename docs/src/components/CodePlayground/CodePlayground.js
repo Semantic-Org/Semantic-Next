@@ -123,22 +123,50 @@ const state = {
   resizing: true,
 
   // current display mode
-  displayMode: 'desktop'
+  displayMode: 'desktop',
+
+  // whether to use panels or tabs
+  layout: 'tabs',
 };
 
-const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
-  initialize() {
-    state.activeFile.set(self.getFirstFile()?.filename);
-  },
+const createComponent = ({afterFlush, self, reaction, state, data, settings, $, $$}) => ({
+
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
   ],
+
+  initialize() {
+    state.activeFile.set(self.getFirstFile()?.filename);
+    reaction(self.calculateLayout);
+  },
+
   initializePanels() {
     $('ui-panel').settings({
       getNaturalSize: self.getNaturalPanelSize
     });
   },
+
+  calculateLayout() {
+    let layout = settings.useTabs
+      ? 'tabs'
+      : 'panels'
+    ;
+    // force tabs for small screens or inline examples
+    const displayMode = state.displayMode.get();
+    if(displayMode == 'tablet' || settings.inline) {
+      layout = 'tabs';
+    }
+    self.setLayout(layout);
+  },
+
+  getLayout() {
+    return state.layout.get();
+  },
+  setLayout(layout) {
+    state.layout.set(layout);
+  },
+
   getClassMap() {
     const classMap = {
       resizing: state.resizing.get(),
@@ -155,9 +183,11 @@ const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
       return `height: ${settings.maxHeight}px;`;
     }
   },
+
   canShowButtons() {
     return !settings.inline && state.displayMode.get() !== 'mobile';
   },
+
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding
     if(direction == 'horizontal') {
@@ -184,6 +214,7 @@ const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
       }
     }
   },
+
   getScriptType(type) {
     return get(settings.scriptTypes, type);
   },
@@ -197,7 +228,7 @@ const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: self.shouldUseTabs()
+      tabs: state.layout.get() == 'tabs'
     };
     // defer to preference unless its tablet
     if(state.displayMode.value == 'tablet') {
@@ -207,14 +238,6 @@ const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
       classes[settings.inlineDirection] = true;
     }
     return classes;
-  },
-  shouldUseTabs() {
-    const displayMode = state.displayMode.get();
-    // panels is only an option if on computer
-    if(displayMode == 'computer') {
-      return settings.useTabs;
-    }
-    return true;
   },
   getTabDirection() {
     if(state.displayMode.value == 'tablet') {
@@ -307,13 +330,17 @@ const createComponent = ({afterFlush, self, state, data, settings, $, $$}) => ({
   },
 
   toggleTabs() {
-    const useTabs = !settings.useTabs;
-    const storedValue = useTabs ? 'yes' : 'no';
-    localStorage.setItem('codeplayground-tabs', storedValue);
-    settings.useTabs = useTabs;
+    const newLayout = (state.layout.get() == 'tabs')
+      ? 'panels'
+      : 'tabs'
+    ;
+    state.layout.set(newLayout);
     afterFlush(() => {
       self.initializePanels();
     });
+    // store preference
+    const storedValue = layout == 'tabs' ? 'yes' : 'no';
+    localStorage.setItem('codeplayground-tabs', storedValue);
   },
 
   selectFile(number) {

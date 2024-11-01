@@ -1,0 +1,13 @@
+<ui-modal mini class="references">
+  <div class="title">
+    <ui-icon book></ui-icon>
+    Relate Resources
+  </div>
+  <div class="links">
+    {#each references}
+      <a class="link" href="{link}" target="_blank">
+        {title}
+      </a>
+    {/each}
+  </div>
+</ui-modal>

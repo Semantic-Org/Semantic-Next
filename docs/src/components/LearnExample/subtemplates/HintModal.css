@@ -1,0 +1,24 @@
+ui-modal.hint {
+
+  &::part(modal) {
+    padding: 2rem;
+    align-content: center;
+    text-align: center;
+    background: linear-gradient(to bottom right,
+      oklch(0.16 0.02 234.44),
+      oklch(0.17 0.03 219),
+      oklch(0.21 0.08 256.72)
+    );
+  }
+  .title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--primary-text-color);
+    margin-bottom: var(--spacing);
+  }
+  .text {
+    line-height: 1.8;
+    font-size: 16px;
+    color: var(--standard-80);
+  }
+}

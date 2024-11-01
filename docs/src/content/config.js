@@ -28,10 +28,14 @@ const examplesCollection = defineCollection({
   })
 });
 
+const resourceSchema = z.object({
+  title: z.string(),
+  link: z.string()
+});
+
 const lessonCollection = defineCollection({
   type: 'content',
   schema: z.object({
-
     hidden: z.optional(z.boolean()),
     id: z.optional(z.string()), // use instead of slug
     order: z.optional(z.string()), // when not included will not show in guide
@@ -39,7 +43,8 @@ const lessonCollection = defineCollection({
     category: z.string(), // 1.x.x - name for category
     subcategory: z.string(), // x.1.x - name for subcategory
     title: z.string(), // x.x.1 - lesson title
-
+    hint: z.optional(z.string()), // a hint to help solve coding problems
+    references: z.array(resourceSchema).optional(), // array of related ref links
     shortTitle: z.optional(z.string()), // name for appearance in small menus
     tags: z.optional(z.array(z.string())), // for search
 
