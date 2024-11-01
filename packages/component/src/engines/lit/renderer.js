@@ -15,10 +15,11 @@ export class LitRenderer {
   static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
 
-  constructor({ ast, data, subTemplates, snippets, helpers, isSVG }) {
+  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG }) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = [];
+    this.template = template;
     this.subTemplates = subTemplates;
     this.resetHTML();
     this.snippets = snippets || {};
@@ -226,7 +227,7 @@ export class LitRenderer {
       templateName: node.name,
       getTemplateName: () => this.evaluateExpression(node.name, data), // template name can be dynamic
       data: templateData,
-      parentTemplate: data,
+      parentTemplate: this.template,
     });
   }
 
