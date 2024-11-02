@@ -38,7 +38,6 @@ const lessonCollection = defineCollection({
   schema: z.object({
     hidden: z.optional(z.boolean()),
     id: z.optional(z.string()), // use instead of slug
-    order: z.optional(z.string()), // when not included will not show in guide
     sort: z.string(), // the actual sort like 1.1.1
     category: z.string(), // 1.x.x - name for category
     subcategory: z.string(), // x.1.x - name for subcategory

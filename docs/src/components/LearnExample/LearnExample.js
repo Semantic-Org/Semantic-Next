@@ -50,8 +50,9 @@ const state = {
   currentFiles: [],
 };
 
-const createComponent = ({ $, state, settings }) => ({
+const createComponent = ({ $, data, state, settings }) => ({
   initialize() {
+    console.log(data);
     state.currentFiles.set(settings.files);
   },
   isNavMenuVisible() {
@@ -96,7 +97,6 @@ const events = {
     findChild('hintModal').show();
   },
   'click ui-button.references'({findChild, settings}) {
-    console.log(settings.lesson);
     findChild('referenceModal').show();
   },
   'click ui-button[href]'({ self, event }) {

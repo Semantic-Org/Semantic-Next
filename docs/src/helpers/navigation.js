@@ -20,12 +20,15 @@ const examplePages = examples
 export const getLessonContent = (lesson) => {
   return {
     id: lesson.slug,
-    url: `/learn/${lesson.slug}`,
-    sort: lesson.data.sort,
-    hint: lesson.data.hint,
+    title: lesson.data.title,
     category: lesson.data.category,
     subcategory: lesson.data.subcategory,
+    url: `/learn/${lesson.slug}`,
+    hidden: lesson.data.hidden,
+    sort: lesson.data.sort,
+    hint: lesson.data.hint,
     references: lesson.data.references,
+    shortTitle: lesson.data.shortTitle,
     major: semverMajor(lesson.data.sort),
     minor: semverMinor(lesson.data.sort),
     patch: semverPatch(lesson.data.sort),
@@ -111,18 +114,18 @@ const createLearnMenu = () => {
       each(subcategories, (lessons, subcategory) => {
         pages.push({
           name: lessons[0].subcategory,
-          pages: lessons.map(example => ({
-            name: example.shortTitle || example.title,
-            url: example.url
+          pages: lessons.map(lesson => ({
+            name: lesson.shortTitle || lesson.title,
+            url: lesson.url
           }))
         });
       });
     }
     else {
       // no subcategories
-      pages = lessons.map(example => ({
-        name: example.shortTitle || example.title,
-        url: example.url
+      pages = lessons.map(lesson => ({
+        name: lesson.shortTitle || lesson.title,
+        url: lesson.url
       }));
     }
     menu.push({
