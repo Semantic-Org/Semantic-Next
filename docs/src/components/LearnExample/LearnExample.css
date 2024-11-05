@@ -199,9 +199,10 @@
       width: 100%;
       height: 100vh;
       background:
-        oklch(0.08 0.02 257.26 / 0.81)
-        var(--strong-horizontal-gradient)
+        oklch(0.17 0.05 244.14 / 0.51)
+        var(--angled-gradient)
       ;
+      box-shadow: 7px 0px 10px -7px oklch(0 0 0 / 0.58) inset;
       z-index: 1;
       display: block;
       align-content: center;
