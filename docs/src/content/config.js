@@ -46,7 +46,7 @@ const lessonCollection = defineCollection({
     references: z.array(resourceSchema).optional(), // array of related ref links
     shortTitle: z.optional(z.string()), // name for appearance in small menus
     tags: z.optional(z.array(z.string())), // for search
-
+    hideNavigation: z.optional(z.boolean()),
   })
 });
 

@@ -22,6 +22,7 @@ export async function getStaticPaths() {
       props: { entry },
     });
   });
+  console.log(paths);
   return paths;
 }
 const activeURL = Astro.url.pathname;
@@ -52,7 +53,6 @@ each(files, (file) => {
     noFiles = false;
   }
 });
-
 if(noFiles) {
   files = {};
 }
@@ -69,6 +69,15 @@ let solutionFiles = await getExampleFiles({
   includePlaygroundInjections: true,
   includeLog: false,
 });
+let noSolution = true;
+each(files, (file) => {
+  if(!file.generated) {
+    noSolution = false;
+  }
+});
+if(noSolution) {
+  solutionFiles = {};
+}
 
 const searchMeta = {
   ...entry.data,

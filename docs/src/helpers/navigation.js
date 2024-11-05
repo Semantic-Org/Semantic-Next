@@ -32,6 +32,7 @@ export const getLessonContent = (lesson) => {
     major: semverMajor(lesson.data.sort),
     minor: semverMinor(lesson.data.sort),
     patch: semverPatch(lesson.data.sort),
+    hideNavigation: lesson.data.hideNavigation,
   };
 };
 

@@ -134,22 +134,30 @@
 
 
   .navigation {
-
     background: var(--angled-background);
     border-top: var(--internal-border);
     padding: var(--padding);
+  }
+
+  .direction {
+    cursor: pointer;
+    text-decoration: none;
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+    border: var(--internal-border);
+    transition: var(--transition);
+
+    &.previous {
+      margin-right: auto;
+    }
+    &.next {
+      margin-left: auto;
+    }
 
     .label {
       color: var(--primary-text-color);
       font-size: var(--small);
       transition: var(--transition);
-    }
-
-    .previous {
-      margin-right: auto;
-    }
-    .next {
-      margin-left: auto;
     }
 
     .name {
@@ -159,26 +167,17 @@
       transition: var(--transition);
     }
 
-    .direction {
-      cursor: pointer;
-      text-decoration: none;
-      padding: var(--padding);
-      border-radius: var(--border-radius);
-      border: var(--internal-border);
-      transition: var(--transition);
 
-      &:not(.disabled) {
+    &:not(.disabled) {
 
-        &:hover {
-          .label {
-            color: var(--primary-text-color);
-          }
-          .name {
-            color: var(--standard-90);
-          }
+      &:hover {
+        .label {
+          color: var(--primary-text-color);
+        }
+        .name {
+          color: var(--standard-90);
         }
       }
-
     }
 
   }
@@ -205,7 +204,31 @@
       align-content: center;
       text-align: center;
 
-      .text {
+      .placeholder {
+        max-width: 300px;
+        margin: auto;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        ui-icon {
+          display: block;
+          font-size: 32px;
+          opacity: 0.5;
+          margin-bottom: var(--compact-spacing);
+        }
+        .header {
+          font-size: 18px;
+          font-weight: var(--bold);
+          color: var(--standard-100);
+          margin-bottom: var(--compact-spacing);
+        }
+        .text {
+          color: var(--standard-40);
+        }
+      }
+      .missing {
         transform: rotate(-45deg);
         display: block;
         letter-spacing: 0.25em;

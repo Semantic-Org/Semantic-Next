@@ -7,11 +7,20 @@
   >
     <ui-panel class="lesson" direction="horizontal" size="33.33" minsize="350px" maxSize="800px" naturalSize="600px">
       <div class="masthead segment">
-        <ui-button class="toggle-menu" icon="menu" transparent compact inverted icon-only="true"></ui-button>
+        <ui-button
+          class="toggle-menu"
+          icon="menu"
+          transparent compact inverted
+          icon-only="true"
+        ></ui-button>
         <div class="location">
-          <span class="category">{lesson.subcategory}</span>
+          <span class="category">
+            {lesson.subcategory}
+          </span>
           <ui-icon icon="right-chevron"></ui-icon>
-          <span class="title">{lesson.title}</span>
+          <span class="title">
+            {lesson.title}
+          </span>
         </div>
         <div class="actions">
           <ui-button href={previousLesson.url} icon="left arrow" transparent compact inverted disabled={not hasPreviousLesson} icon-only="true"></ui-button>
@@ -29,50 +38,64 @@
         <div class="text">
           {>slot}
         </div>
-        <div class="navigation segment">
-          {#if exists previousLesson}
-            <a class="previous direction" href={previousLesson.url}>
-              <div class="label">
-                <ui-icon icon="left chevron"></ui-icon>
-                Previous
+        {#if not lesson.hideNavigation}
+          <div class="navigation segment">
+            {#if exists previousLesson}
+              <a class="previous direction" href={previousLesson.url}>
+                <div class="label">
+                  <ui-icon icon="left chevron"></ui-icon>
+                  Previous
+                </div>
+                <div class="name">
+                  {previousLesson.title}
+                </div>
               </div>
-              <div class="name">
-                {previousLesson.title}
+            {/if}
+            {#if exists nextLesson}
+              <a class="next direction" href={nextLesson.url}>
+                <div class="label">
+                  Next
+                  <ui-icon icon="right chevron"></ui-icon>
+                </div>
+                <div class="name">
+                  {nextLesson.title}
+                </div>
               </div>
-            </div>
-          {/if}
-          {#if exists nextLesson}
-            <a class="next direction" href={nextLesson.url}>
-              <div class="label">
-                Next
-                <ui-icon icon="right chevron"></ui-icon>
-              </div>
-              <div class="name">
-                {nextLesson.title}
-              </div>
-            </div>
-          {/if}
-        </div>
+            {/if}
+          </div>
+        {/if}
       </div>
       <div class="actions segment">
         <div class="left">
           {#if hasAny lesson.references}
             <ui-button transparent inverted icon="book" class="references">Resources</ui-button>
           {/if}
+          {#if not isEmpty files}
           <ui-button button transparent icon="table" inverted class="layout">Layout</ui-button>
+          {/if}
         </div>
         <div class="right">
           {#if lesson.hint}
             <ui-button transparent inverted class="hint">Hint</ui-button>
           {/if}
-          <ui-button icon="check" class="solve">Solve</ui-button>
+          {#if not isEmpty solutionFiles}
+            <ui-button icon="check" class="solve">Solve</ui-button>
+          {/if}
         </div>
       </div>
     </ui-panel>
     <ui-panel class="code" direction="horizontal">
       {#if isEmpty files}
         <div class="overlay">
-          <span class="text">No Example</span>
+          <div class="placeholder">
+            <ui-icon info></ui-icon>
+            <div class="header">
+              No Code Example
+            </div>
+            <div class="text">
+              Some lessons will include interactive examples that will appear here.
+            </div>
+          </div>
         </div>
       {else}
         <code-playground
