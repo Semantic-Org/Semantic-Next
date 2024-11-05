@@ -12,7 +12,7 @@ export const topbarMenu =  [
   {
     _id: 'learn',
     name: 'Learn',
-    url: '/learn/111-introduction',
+    url: '/learn/selection',
     baseURL: '/learn'
   },
   {

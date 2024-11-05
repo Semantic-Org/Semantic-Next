@@ -141,6 +141,12 @@
   --strong-angled-gradient: linear-gradient(45deg, var(--strong-transparent-white), var(--strong-transparent-black));
   --very-strong-angled-gradient: linear-gradient(45deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
 
+  --very-subtle-horizontal-gradient: linear-gradient(-90deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-horizontal-gradient: linear-gradient(-90deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --horizontal-gradient: linear-gradient(-90deg, var(--transparent-white), var(--transparent-black));
+  --strong-horizontal-gradient: linear-gradient(-90deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-horizontal-gradient: linear-gradient(-90deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
   /* -------------------
          Shadows
   -------------------- */

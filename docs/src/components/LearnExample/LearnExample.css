@@ -198,8 +198,11 @@
       left: 0;
       width: 100%;
       height: 100vh;
-      background: oklch(0.08 0.02 257.26 / 0.81) var(--angled-gradient);
-      z-index: 1000;
+      background:
+        oklch(0.08 0.02 257.26 / 0.81)
+        var(--strong-horizontal-gradient)
+      ;
+      z-index: 1;
       display: block;
       align-content: center;
       text-align: center;
@@ -215,7 +218,7 @@
         ui-icon {
           display: block;
           font-size: 32px;
-          opacity: 0.5;
+          color: var(--primary-light-text-color);
           margin-bottom: var(--compact-spacing);
         }
         .header {
