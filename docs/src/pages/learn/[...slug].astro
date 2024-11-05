@@ -46,6 +46,17 @@ let files = await getExampleFiles({
   includeLog: false,
 });
 
+let noFiles = true;
+each(files, (file) => {
+  if(!file.generated) {
+    noFiles = false;
+  }
+});
+
+if(noFiles) {
+  files = {};
+}
+
 const panelIndexes = getPanelIndexes(files);
 
 let solutionFiles = await getExampleFiles({

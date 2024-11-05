@@ -56,30 +56,35 @@
       </div>
       <div class="actions segment">
         <div class="left">
-          <ui-button transparent inverted icon="book" class="references">Resources</ui-button>
+          {#if hasAny lesson.references}
+            <ui-button transparent inverted icon="book" class="references">Resources</ui-button>
+          {/if}
           <ui-button button transparent icon="table" inverted class="layout">Layout</ui-button>
         </div>
         <div class="right">
-          <ui-button transparent inverted class="hint">Hint</ui-button>
+          {#if lesson.hint}
+            <ui-button transparent inverted class="hint">Hint</ui-button>
+          {/if}
           <ui-button icon="check" class="solve">Solve</ui-button>
         </div>
       </div>
     </ui-panel>
     <ui-panel class="code" direction="horizontal">
-      {#if hasNoExample}
+      {#if isEmpty files}
         <div class="overlay">
           <span class="text">No Example</span>
         </div>
+      {else}
+        <code-playground
+          files={currentFiles}
+          example={playgroundConfig.example}
+          sandboxURL={playgroundConfig.sandboxURL}
+          panelIndexes={playgroundConfig.panelIndexes}
+          exportparts="panel, handle, panels, playground"
+          useTabs=true
+        >
+        </code-playground>
       {/if}
-      <code-playground
-        files={currentFiles}
-        example={playgroundConf`ig.example}
-        sandboxURL={playgroundConfig.sandboxURL}
-        panelIndexes={playgroundConfig.panelIndexes}
-        exportparts="panel, handle, panels, playground"
-        useTabs=true
-      >
-      </code-playground>
     </ui-panel>
   </ui-panels>
   {> hintModal hint=lesson.hint}

@@ -135,6 +135,7 @@
 
   .navigation {
 
+    background: var(--angled-background);
     border-top: var(--internal-border);
     padding: var(--padding);
 
