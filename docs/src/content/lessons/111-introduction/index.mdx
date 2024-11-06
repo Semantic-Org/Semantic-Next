@@ -1,0 +1,27 @@
+---
+title: Introduction
+category: 'Quickstart'
+subcategory: 'Components'
+description: Learn how to create your first web component with Semantic UI
+sort: '1.1.1'
+---
+
+## Basics
+Components in Semantic UI are created using `defineComponent`.
+
+```javascript
+import { defineComponent } from '@semantic-ui/component';
+
+defineComponent({
+  tagName: 'current-time',
+  // ..rest
+});
+```
+
+If a tag name is included it will also be defined as a web component that can be used in a page immediately.
+
+```html
+<current-time></current-time>
+```
+
+

@@ -244,6 +244,9 @@
         h3 + h4 {
           margin-top: 2rem;
         }
+        p:first-child {
+          margin-top: 0;
+        }
       }
       pageContent,
       li,

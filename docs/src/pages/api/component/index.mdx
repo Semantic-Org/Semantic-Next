@@ -5,11 +5,11 @@ icon: box
 description: API reference for the Semantic UI Component system
 ---
 
-The Semantic UI Component system provides a powerful framework for defining and creating web components with advanced features such as key bindings, events, component instances, and integrated templating. This system is designed to work seamlessly with other Semantic UI packages, including the templating engine and reactivity system.
+Component is the core library for defining UI components in Semantic UI and provides access to `defineComponent` the primary interface for creating new web components.
 
 ## Installation
 
-To use the Semantic UI Component system, install the package:
+To use Component, install the package:
 
 ```bash
 npm install @semantic-ui/component
@@ -17,10 +17,18 @@ npm install @semantic-ui/component
 
 ## Basic Usage
 
-Import the necessary functions from the package:
-
 ```javascript
 import { defineComponent } from '@semantic-ui/component';
+
+defineComponent({
+  tagName: 'current-time',
+  template: `Time is <b>{formatDate time "h:mm:ss a"}</b>`,
+  css: 'b { color: var(--primary-text-color); }',
+  state: { time: new Date() },
+  onCreated({state}) {
+    setInterval(() => state.time.now(), 1000);
+  }
+});
 ```
 
 ## API Sections
