@@ -41,11 +41,23 @@ export const fatal = (
 };
 
 /*-------------------
-        Browser
+      Browser
 --------------------*/
 
 export const copyText = (text) => {
   navigator.clipboard.writeText(text);
+};
+
+export const openLink = (url, { newWindow = false, target, event } = {}) => {
+  if(newWindow) {
+    window.open(url);
+  }
+  else {
+    window.location.href = url;
+  }
+  if(event) {
+    event.preventDefault();
+  }
 };
 
 export const getKeyFromEvent = (event) => {
