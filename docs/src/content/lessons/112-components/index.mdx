@@ -6,12 +6,14 @@ description: Create interactive components with templates and styling
 sort: '1.1.2'
 ---
 
-## Templates
+### A Real World Example
+To help us learn about key features of Semantic we will be building a layout to filter employees at a company.
 
-A template defines how to construct the html for your component. It can include things like expressions, conditions, loops and more.
+First we will build out a card, then add a card list and finally add filtering and searching.
 
-Templates and css can be imported in the browser using the `getText` helper to let you store them separately.
+## A Simple Card
 
-> With a compile step like esbuild or vite they can also be imported using esm string imports directly
-
-For now lets just create some html to display a simple image.
+This example includes three files that define our card
+* A javascript file `component.js` housing our card definition
+* A css file `component.css` that is scoped to the component and uses some theme-aware variables like `angled-gradient` or `primary-text-color`
+* A template file `component.html` which specifies the html from our card and uses expressions like `{name}` to output values

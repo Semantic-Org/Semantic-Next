@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { each, findIndex, tokenize } from '@semantic-ui/utils';
+import { each, asyncEach, isEmpty, findIndex, tokenize } from '@semantic-ui/utils';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
 import { lessonPages, getLessonContent, getPreviousLesson, getNextLesson, getSidebarMenu } from '@helpers/navigation.js';
 import NavMenu from '@components/NavMenu/NavMenu.js';
@@ -22,7 +22,6 @@ export async function getStaticPaths() {
       props: { entry },
     });
   });
-  console.log(paths);
   return paths;
 }
 const activeURL = Astro.url.pathname;
@@ -36,28 +35,30 @@ const nextLesson = getNextLesson(lesson);
 const allLessonFiles = await import.meta.glob(`../../content/lessons/**`, {
   query: '?raw',
 });
-let files = await getExampleFiles({
-  contentID: lesson.id,
-  allFiles: allLessonFiles,
-  basePath: '../../content/lessons/',
-  subFolder: 'problem',
-  includeFolder: true,
-  hideBoilerplate: false,
-  includePlaygroundInjections: true,
-  includeLog: false,
-});
 
-let noFiles = true;
-each(files, (file) => {
-  if(!file.generated) {
-    noFiles = false;
+
+// can either be an example or a problem/solution set
+const fileFolders = ['problem', 'example'];
+let files;
+let panelIndexes;
+await asyncEach(fileFolders, async (folder) => {
+  files = await getExampleFiles({
+    contentID: lesson.id,
+    allFiles: allLessonFiles,
+    basePath: '../../content/lessons/',
+    subFolder: folder,
+    includeFolder: true,
+    hideBoilerplate: false,
+    includePlaygroundInjections: true,
+    includeLog: false,
+    emptyIfAllGenerated: true,
+  });
+  if(isEmpty(files)) {
+    return true;
   }
+  panelIndexes = getPanelIndexes(files);
+  return false;
 });
-if(noFiles) {
-  files = {};
-}
-
-const panelIndexes = getPanelIndexes(files);
 
 let solutionFiles = await getExampleFiles({
   contentID: lesson.id,
@@ -68,16 +69,8 @@ let solutionFiles = await getExampleFiles({
   hideBoilerplate: false,
   includePlaygroundInjections: true,
   includeLog: false,
+  emptyIfAllGenerated: true,
 });
-let noSolution = true;
-each(files, (file) => {
-  if(!file.generated) {
-    noSolution = false;
-  }
-});
-if(noSolution) {
-  solutionFiles = {};
-}
 
 const searchMeta = {
   ...entry.data,

@@ -4,7 +4,15 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 defineComponent({
-  tagName: 'image-gallery',
+  tagName: 'employee-card',
   template,
-  css
+  css,
+  settings: {
+    name: '',
+    location: '',
+    role: '',
+    joined: 2024,
+    image: '',
+    gender: 'female'
+  }
 });

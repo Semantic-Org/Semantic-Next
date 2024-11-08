@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { isEmpty } from '@semantic-ui/utils';
+import { isEmpty, openLink } from '@semantic-ui/utils';
 
 /* Sub Components */
 import { HintModal } from './subtemplates/HintModal.js';
@@ -52,7 +52,6 @@ const state = {
 
 const createComponent = ({ $, data, state, settings }) => ({
   initialize() {
-    console.log(data);
     state.currentFiles.set(settings.files);
   },
   isNavMenuVisible() {
@@ -98,6 +97,10 @@ const events = {
   },
   'click ui-button.references'({findChild, settings}) {
     findChild('referenceModal').show();
+  },
+  'click a[href]'({ self, target, event }) {
+    const href = $(target).attr('href');
+    openLink(href, { newWindow: true, event });
   },
   'click ui-button[href]'({ self, event }) {
     const href = $(event.target).attr('href');

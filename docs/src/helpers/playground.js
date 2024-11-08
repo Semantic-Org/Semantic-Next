@@ -37,13 +37,14 @@ export const getExampleFiles = async({
   hideBoilerplate = true, // whether import/export code should be collapsed
   includeFolder = false, // whether all files in folder should be included regardless of the filename
   includeLog = false, // whether to include script to intercept console logs,
-  includePlaygroundInjections = false,
+  includePlaygroundInjections = false, // whether to inject values to make repl work
+  emptyIfAllGenerated = false, // if all files are generated return an empty object
 } = {}) => {
   if(!contentID) {
     return;
   }
   let hasComponent = false;
-  const exampleFiles = {};
+  let exampleFiles = {};
   await asyncEach(allFiles, async (file, path) => {
     const pathRegExp = new RegExp(`${basePath}.*${contentID}/${subFolder}`);
     if (path.match(pathRegExp)) {
@@ -180,6 +181,18 @@ export const getExampleFiles = async({
 
   if(includePlaygroundInjections) {
     addPlaygroundInjections(exampleFiles, { includeLog });
+  }
+
+  if(emptyIfAllGenerated) {
+    let allGenerated = true;
+    each(exampleFiles, (file) => {
+      if(!file.generated) {
+        allGenerated = false;
+      }
+    });
+    if(allGenerated) {
+      exampleFiles = {};
+    }
   }
 
   return exampleFiles;

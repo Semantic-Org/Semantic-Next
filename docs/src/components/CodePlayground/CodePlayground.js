@@ -339,7 +339,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       self.initializePanels();
     });
     // store preference
-    const storedValue = layout == 'tabs' ? 'yes' : 'no';
+    const storedValue = newLayout == 'tabs' ? 'yes' : 'no';
     localStorage.setItem('codeplayground-tabs', storedValue);
   },
 
