@@ -50,7 +50,7 @@ const state = {
   currentFiles: [],
 };
 
-const createComponent = ({ $, data, state, settings }) => ({
+const createComponent = ({ $, data, state, isRendered, settings }) => ({
   initialize() {
     state.currentFiles.set(settings.files);
   },
@@ -65,6 +65,10 @@ const createComponent = ({ $, data, state, settings }) => ({
   },
   hideNavMenu() {
     $('.menu').removeClass('visible');
+  },
+  getPlaygroundLayout() {
+    const playground = $('codePlayground').getComponent();
+    return 'Tabs'; // finish later
   },
   hasPreviousLesson() {
     return !isEmpty(settings.previousLesson);

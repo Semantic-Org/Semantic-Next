@@ -189,6 +189,18 @@
     padding: 0 var(--padding) var(--padding);
   }
 
+  ui-button label {
+    display: inline-block;
+    font-size: 10px;
+    background-color: var(--standard-10);
+    color: #FFFFFF;
+    vertical-align: text-top;
+    border-radius: var(--border-radius);
+    padding: 3px;
+    margin: -3px;
+    margin-left: 3px;
+  }
+
   ui-panel.code {
     position: relative;
 
@@ -249,6 +261,11 @@
 
 
 @container style(--dark-mode: true) {
+
+  .learn ui-button label {
+    background-color: rgb(2 41 72);
+    color: var(--primary-text-color);
+  }
 
   .masthead {
     background-color: #10141b;

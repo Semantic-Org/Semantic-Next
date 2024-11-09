@@ -68,10 +68,16 @@
       <div class="actions segment">
         <div class="left">
           {#if hasAny lesson.references}
-            <ui-button transparent inverted icon="book" class="references">Resources</ui-button>
+            <ui-button transparent inverted icon="book" class="references">
+              Resources
+              <label>{lesson.references.length}</label>
+            </ui-button>
           {/if}
           {#if not isEmpty files}
-          <ui-button button transparent icon="table" inverted class="layout">Layout</ui-button>
+          <ui-button button transparent icon="table" inverted class="layout">
+            Layout
+            <label>{getPlaygroundLayout}</label>
+          </ui-button>
           {/if}
         </div>
         <div class="right">
