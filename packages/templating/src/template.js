@@ -729,7 +729,11 @@ export const Template = class Template {
         let parentNode = template.element?.parentNode;
         while(parentNode) {
           if(parentNode.component?.templateName == templateName) {
-            match = parentNode.component;
+            match = {
+              ...parentNode.component,
+              ...parentNode.dataContext,
+            };
+            break;
           }
           parentNode = parentNode.parentNode;
         }

@@ -126,6 +126,7 @@ export const defineComponent = ({
           }
           // make this easier to access in dom
           this.component = this.template.instance;
+          this.dataContext = this.template.data;
         }
         // property change callbacks wont call on SSR
         if(isServer) {
