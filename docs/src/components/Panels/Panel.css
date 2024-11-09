@@ -95,7 +95,6 @@
   top: auto;
   left: auto;
   user-select: none;
-  border-radius: 5px;
 
   &.disabled {
     pointer-events: none;

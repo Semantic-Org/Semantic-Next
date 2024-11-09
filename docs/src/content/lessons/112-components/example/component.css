@@ -1,27 +1,26 @@
 :host {
-  --card-min: var(250px);
-  --card-gap: var(--spacing);
-  --card-image-max-height: 150px;
+  --card-image-width: 30%;
+  --card-image-max-height: 250px;
 }
 
 .card {
   cursor: pointer;
-  background: var(--angled-gradient);
+  background: var(--gradient);
   box-shadow: var(--raised-shadow);
   border: var(--border);
   border-radius: var(--border-radius);
   display: flex;
   flex-direction: row;
-  transition: transform 0.2s ease;
+  transition: var(--transition);
+  will-change: transform;
 
   &:hover {
-    background-color: var(--standard-10);
-    transform: translateY(-3%);
+    transform: translateY(-5px);
   }
 
   .image {
     display: block;
-    width: 30%;
+    width: var(--card-image-width);
     height: auto;
     max-height: var(--card-image-max-height);
     object-fit: cover;
@@ -48,10 +47,20 @@
     .detail {
       display: flex;
       flex-direction: row;
-      font-size: 11px;
+      margin-top: 5px;
+      gap: 5px;
+      line-height: 1;
+      font-size: 10px;
       flex-wrap: wrap;
       color: var(--standard-40);
       margin-bottom: var(--compact-spacing);
+      span {
+        border-right: var(--border);
+        padding-right: 5px;
+      }
+      :last-child {
+        border-right: none;
+      }
     }
   }
 
