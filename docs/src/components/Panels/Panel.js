@@ -76,7 +76,8 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     return settings.resizable && self.getIndex() > 0;
   },
   getPanels() {
-    return findParent('uiPanels');
+    const panels = findParent('uiPanels');
+    return panels;
   },
   getPointerPosition(event) {
     const positionObj = event.touches
