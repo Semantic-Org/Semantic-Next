@@ -36,6 +36,7 @@ export const defineComponent = ({
   subTemplates = {},
   renderingEngine,
 } = {}) => {
+
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
@@ -110,19 +111,6 @@ export const defineComponent = ({
       // callback when added to dom
       connectedCallback() {
         super.connectedCallback();
-      }
-
-      createRenderRoot() {
-        this.useLight = this.getAttribute('expose') !== null;
-        if (this.useLight) {
-          this.addPageCSS(webComponent, 'page', this.css, { scopeSelector: this.tagName });
-          this.storeOriginalContent.apply(this);
-          return this;
-        }
-        else {
-          const renderRoot = super.createRenderRoot(this.css);
-          return renderRoot;
-        }
       }
 
       willUpdate() {
