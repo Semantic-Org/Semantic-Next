@@ -417,6 +417,7 @@ export class LitRenderer {
       subTemplates: this.subTemplates,
       snippets: this.snippets,
       helpers: this.helpers,
+      template: this.template,
     });
     this.renderTrees.push(tree);
     return tree.render();

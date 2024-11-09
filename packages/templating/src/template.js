@@ -729,7 +729,10 @@ export const Template = class Template {
         let parentNode = template.element?.parentNode;
         while(parentNode) {
           if(parentNode.component?.templateName == templateName) {
-            match = parentNode.component;
+            match = {
+              ...parentNode.component.instance,
+              ...parentNode.component.data,
+            };
             break;
           }
           parentNode = parentNode.parentNode;
@@ -737,9 +740,12 @@ export const Template = class Template {
       }
       // this matches on nested partials (less common)
       while (template) {
-        template = template._parentTemplate || template?.instance?._parentTemplate;
+        template = template._parentTemplate;
         if (!match && template?.templateName == templateName) {
-          match = template;
+          match = {
+            ...template.instance,
+            ...template.data
+          };
           break;
         }
       }
@@ -753,7 +759,10 @@ export const Template = class Template {
     // recursive lookup
     function search(template, templateName) {
       if (template.templateName === templateName) {
-        result.push(template.instance);
+        result.push({
+          ...template.instance,
+          ...template.data
+        });
       }
       if (template._childTemplates) {
         template._childTemplates.forEach((childTemplate) => {
