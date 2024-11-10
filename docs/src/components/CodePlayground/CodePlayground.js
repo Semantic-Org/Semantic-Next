@@ -349,6 +349,24 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       menu.selectIndex(number - 1);
     }
   },
+  selectFilename(filename) {
+    if(state.layout.get() == 'tabs') {
+      const menu = self.getFileMenuItems();
+      each(menu, (item, index) => {
+        if(item.value == filename) {
+          self.selectFile(index + 1);
+          return false;
+        }
+      });
+    }
+    else {
+      console.log($$(`playground-file-editor[filename="${filename}"]`)
+        .find('playground-code-editor'));
+      $$(`playground-file-editor[filename="${filename}"]`)
+        .find('playground-code-editor')
+        .focus();
+    }
+  },
 
   setDisplayMode() {
     const width = $('window').width();

@@ -6,29 +6,35 @@ description: Access data from templates
 sort: '1.1.3'
 ---
 
-A template defines how to construct your component's DOM from available data.
+A template defines how to construct your component's DOM from available data, it combines to an AST (Abstract Syntax Tree) which is used to create your component.
 
-Expressions are wrapped in either `{ }` or `{{ }}` and can be used to access your data context.
+> You can view the AST using the menu to the right next to 'preview'
 
+### Syntax
+Expressions can be used to access your data context and are either be wrapped in `{ }` or `{{ }}`, it doesn't matter as long as its consistent across the file.
 ```sui
-The caption is {caption}
+<img src={src}>
+```
+```sui
+<img src={{src}}>
 ```
 
-Methods can also be accessed with parameters passed to the right
+### Functions
+
+Your data context can also include functions and nested expressions with parenthesis.
+
 ```sui
-The caption is {{getCaption 'short'}}
+<img src={getProfileImage (getUser userID) 'large'}>
 ```
+
 ```javascript
-getCaption('short');
+getProfileImage(getUser(userID), 'large');
 ```
+
 
 ### Data Context
 
-The simplest form of data store is `state` which is a reactive data store for internal state.
-
-
-In this example we are using `state` to store details that we might want to update for an image like `caption` and `src`.
-
+Your data context includes a variety of sources that we'll cover in upcoming lessons, but for now lets talk about `state` which is an internal reactive data store.
 
 ```javascript
 defineComponent({

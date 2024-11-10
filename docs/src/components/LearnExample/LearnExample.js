@@ -48,9 +48,10 @@ const settings = {
 
 const state = {
   currentFiles: [],
+  layout: 'tabs',
 };
 
-const createComponent = ({ $, data, state, isRendered, settings }) => ({
+const createComponent = ({ $, $$, data, self, state, reaction, settings }) => ({
   initialize() {
     state.currentFiles.set(settings.files);
   },
@@ -67,14 +68,40 @@ const createComponent = ({ $, data, state, isRendered, settings }) => ({
     $('.menu').removeClass('visible');
   },
   getPlaygroundLayout() {
-    const playground = $('codePlayground').getComponent();
-    return 'Tabs'; // finish later
+    return state.layout.get();
   },
   hasPreviousLesson() {
     return !isEmpty(settings.previousLesson);
   },
   hasNextLesson() {
     return !isEmpty(settings.nextLesson);
+  },
+  isFile(file) {
+    return Boolean(settings.files[file]);
+  },
+  getPlayground() {
+    return $('code-playground').getComponent();
+  },
+  calculateCodeLayout() {
+    const playground = self.getPlayground();
+    if(!playground) {
+      return;
+    }
+    reaction(() => {
+      const codeLayout = playground.getLayout();
+      state.layout.set(codeLayout);
+    });
+  },
+  linkifyFiles() {
+    $$('code').each((el) => {
+      const text = $(el).text();
+      if(self.isFile(text)) {
+        $(el).html(`<a href="#${text}">${text}</a>`);
+      }
+    });
+  },
+  openFile(filename) {
+    self.getPlayground().selectFilename(filename);
   },
 });
 
@@ -104,13 +131,27 @@ const events = {
   },
   'click a[href]'({ self, target, event }) {
     const href = $(target).attr('href');
-    openLink(href, { newWindow: true, event });
+    const file = href.replace(/^#/, '');
+    if(self.isFile(file)) {
+      self.openFile(file);
+      event.preventDefault();
+    }
+    else {
+      openLink(href, { newWindow: true, event });
+    }
   },
   'click ui-button[href]'({ self, event }) {
     const href = $(event.target).attr('href');
+
+
     // self.loadPage(href);
     //event.preventDefault();
   },
+};
+
+const onRendered = ({ self }) => {
+  self.calculateCodeLayout();
+  self.linkifyFiles();
 };
 
 
@@ -120,6 +161,7 @@ const LearnExample = defineComponent({
   template,
   css,
   createComponent,
+  onRendered,
   settings,
   events,
   state,

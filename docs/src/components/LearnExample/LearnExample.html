@@ -38,33 +38,33 @@
         <div class="text">
           {>slot}
         </div>
-        {#if not lesson.hideNavigation}
-          <div class="navigation segment">
-            {#if exists previousLesson}
-              <a class="previous direction" href={previousLesson.url}>
-                <div class="label">
-                  <ui-icon icon="left chevron"></ui-icon>
-                  Previous
-                </div>
-                <div class="name">
-                  {previousLesson.title}
-                </div>
-              </div>
-            {/if}
-            {#if exists nextLesson}
-              <a class="next direction" href={nextLesson.url}>
-                <div class="label">
-                  Next
-                  <ui-icon icon="right chevron"></ui-icon>
-                </div>
-                <div class="name">
-                  {nextLesson.title}
-                </div>
-              </div>
-            {/if}
-          </div>
-        {/if}
       </div>
+      {#if not lesson.hideNavigation}
+        <div class="navigation segment">
+          {#if exists previousLesson}
+            <a class="previous direction" href={previousLesson.url}>
+              <div class="label">
+                <ui-icon icon="left chevron"></ui-icon>
+                Previous
+              </div>
+              <div class="name">
+                {previousLesson.title}
+              </div>
+            </div>
+          {/if}
+          {#if exists nextLesson}
+            <a class="next direction" href={nextLesson.url}>
+              <div class="label">
+                Next
+                <ui-icon icon="right chevron"></ui-icon>
+              </div>
+              <div class="name">
+                {nextLesson.title}
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/if}
       <div class="actions segment">
         <div class="left">
           {#if hasAny lesson.references}
@@ -76,7 +76,7 @@
           {#if not isEmpty files}
           <ui-button button transparent icon="table" inverted class="layout">
             Layout
-            <label>{getPlaygroundLayout}</label>
+            <label>{titleCase layout}</label>
           </ui-button>
           {/if}
         </div>
