@@ -991,4 +991,8 @@ export class Query {
     const components = this.map(el => el.component).filter(Boolean);
     return components.length > 1 ? components : components[0];
   }
+  getDataContext() {
+    const contexts = this.map(el => el.dataContext).filter(Boolean);
+    return contexts.length > 1 ? contexts : contexts[0];
+  }
 }
