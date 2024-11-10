@@ -360,8 +360,6 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       });
     }
     else {
-      console.log($$(`playground-file-editor[filename="${filename}"]`)
-        .find('playground-code-editor'));
       $$(`playground-file-editor[filename="${filename}"]`)
         .find('playground-code-editor')
         .focus();

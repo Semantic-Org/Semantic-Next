@@ -34,14 +34,13 @@ getProfileImage(getUser(userID), 'large');
 
 ### Data Context
 
-Your data context includes a variety of sources that we'll cover in upcoming lessons, but for now lets talk about `state` which is an internal reactive data store.
+Your data context includes a variety of sources that we'll cover in upcoming lessons, but to keep things simple this example lets uses the internal reactive data store `state`.
 
 ```javascript
 defineComponent({
   state: {
     currentImage: '/images/avatar/jenny.jpg',
-    caption: 'First Image'
+    caption: 'Jenny'
   },
-  // other config
 });
 ```
