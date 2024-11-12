@@ -9,8 +9,8 @@ import { WebComponentBase } from './web-component.js';
 export const defineComponent = ({
   template = '',
   ast,
-  css = false,
-  pageCSS = false,
+  css = '',
+  pageCSS = '',
   componentSpec = false,
   tagName,
   delegatesFocus = false,
