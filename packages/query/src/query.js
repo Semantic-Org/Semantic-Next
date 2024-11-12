@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, camelToKebab, inArray, isClient, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -659,16 +659,16 @@ export class Query {
     if (isPlainObject(property) || value !== null) {
       if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
-          elements.forEach((el) => (el.style[prop] = val));
+          elements.forEach((el) => el.style.setProperty(camelToKebab(prop), val));
         });
       }
       else {
-        elements.forEach((el) => (el.style[property] = value));
+        elements.forEach((el) => el.style.setProperty(camelToKebab(property), value));
       }
       return this; // Return the Query instance for chaining
     }
     else {
-      // Attempt to get a style directly
+      // Getting a value
       if (elements?.length) {
         const styles = elements.map((el) => {
           const inlineStyle = el.style[property];
