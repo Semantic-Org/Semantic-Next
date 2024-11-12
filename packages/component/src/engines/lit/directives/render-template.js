@@ -29,7 +29,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       const template = subTemplates[templateName];
       if (!template) {
         fatal(
-          `Could not find template named "${getTemplateName()}`,
+          `Could not find template named "${getTemplateName()}"`,
           subTemplates
         );
       }
