@@ -15,14 +15,16 @@ references:
     link: /web-components
 ---
 
-Semantic is a lightweight framework providing **templating**, **reactivity**, **event management** and more so you can build your next project entirely with web standards like web components.
+### What is Semantic
 
-Semantic components can be used **directly in the browser without a compile step** or with frameworks like React, Vue, or Svelte making your UI portable between projects.
+Semantic provides reactive templating, event management, and opinionated primitives for handling everything you need to ship UI that can be used and scaled by large teams with web standards like web components.
 
-### Hello World Time
-This lesson includes a simple web component to output the current time.
+Components can be used directly in the browser without compilation as well as with existing frameworks like React, Vue, or Svelte so that your UI can be portable between projects.
 
-We'll dive into how this works in a bit, but perhaps this can help you get oriented to the feel of the API.
+
+### It's Time To Begin
+
+The key to scaling design frameworks is consistent APIs. Web components allow you to encapsulate functionality into a custom element that can be used by front end developers in the same way they use other tags in the page.
 
 ```javascript
 defineComponent({
@@ -31,6 +33,19 @@ defineComponent({
 ```
 ```html
 <current-time></current-time>
+```
+
+However everything that is a component is not part of your UI framework.
+```javascript
+const currentTime = defineComponent({ template, html, css });
+
+defineComponent({
+  tagName: 'greet-user',
+  subTemplates: { currentTime }
+});
+```
+```html
+<greet-user></greet-user>
 ```
 
 > **Explore the Docs** - The resources button in the bottom left can be used to see related docs to further explore concepts on a page.

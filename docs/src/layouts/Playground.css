@@ -101,7 +101,7 @@
         margin: 0rem 0rem 1rem;
       }
       p, li {
-        color: var(--standard-60);
+        color: var(--text-color);
         transition: var(--easing)
       }
       @container pageContent (max-width: 400px) {

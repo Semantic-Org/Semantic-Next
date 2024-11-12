@@ -137,6 +137,9 @@ const events = {
       event.preventDefault();
     }
     else {
+      if(href.startsWith('/learn')) {
+        return;
+      }
       openLink(href, { newWindow: true, event });
     }
   },
