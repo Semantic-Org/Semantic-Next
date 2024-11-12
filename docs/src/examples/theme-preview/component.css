@@ -1,0 +1,97 @@
+/* component.css */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+}
+
+.picker {
+  background: var(--standard-solid-5);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  border: var(--border);
+}
+
+.preview {
+  padding: var(--spacing);
+  background: var(--standard-solid-10);
+  border-bottom: var(--border);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--spacing);
+  justify-content: center;
+}
+
+.content {
+  padding: var(--spacing);
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing);
+  margin-bottom: var(--spacing);
+}
+
+.preset {
+  aspect-ratio: 16/9;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s var(--easing);
+  overflow: hidden;
+  padding: var(--spacing);
+  display: flex;
+  flex-direction: column;
+}
+
+.preset:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}
+
+.preset .name {
+  color: #FFF;
+  font-size: var(--small);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+
+.preset .check {
+  margin-top: auto;
+  align-self: flex-end;
+  color: #FFF;
+  opacity: 0;
+  transition: opacity 0.2s var(--easing);
+}
+
+.preset.active .check {
+  opacity: 1;
+}
+
+.colors {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing);
+}
+
+.color {
+  display: flex;
+  flex-direction: column;
+  gap: var(--compact-spacing);
+}
+
+.color label {
+  font-size: var(--small);
+  color: var(--standard-60);
+}
+
+.color-input {
+  width: 100%;
+  height: 40px;
+  padding: 0;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
