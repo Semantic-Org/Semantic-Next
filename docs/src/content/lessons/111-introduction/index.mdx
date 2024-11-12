@@ -17,36 +17,46 @@ references:
 
 ### What is Semantic
 
-Semantic provides reactive templating, event management, and opinionated primitives for handling everything you need to ship UI that can be used and scaled by large teams with web standards like web components.
+Semantic provides reactive templating, event management, and opinionated primitives for handling everything you need to ship UI to scale codebases for growing teams with web standards like web components.
+
+### Framework Agnostic
 
 Components can be used directly in the browser without compilation as well as with existing frameworks like React, Vue, or Svelte so that your UI can be portable between projects.
 
 
-### It's Time To Begin
+### Building Apps with Web Components
 
-The key to scaling design frameworks is consistent APIs. Web components allow you to encapsulate functionality into a custom element that can be used by front end developers in the same way they use other tags in the page.
+Components can be assigned a `tagName` to make it easy to build new pages or layouts with them. You can use this to build a design framework for your team.
 
 ```javascript
-defineComponent({
-  tagName: 'current-time',
-});
-```
-```html
-<current-time></current-time>
-```
-
-However everything that is a component is not part of your UI framework.
-```javascript
-const currentTime = defineComponent({ template, html, css });
-
 defineComponent({
   tagName: 'greet-user',
-  subTemplates: { currentTime }
 });
 ```
+
 ```html
-<greet-user></greet-user>
+<greet-user name="jack"></greet-user>
 ```
+
+You can also use components without assigning them to tag names. These components can be used inside other components to build entire apps just like you would with other front end frameworks.
+
+```javascript
+export const topbar = defineComponent({ template, css, createComponent });
+export const sidebar = defineComponent({ template, css, createComponent });
+export const content = defineComponent({ template, css, createComponent });
+
+defineComponent({
+  tagName: 'my-app',
+  template: `
+    {>topbar}
+    {>sidebar}
+    {>content}
+  `
+  subTemplates: { topbar, sidebar, content }
+});
+```
+
+It's up to you to decide which components are exposed with public interfaces and which are not.
 
 > **Explore the Docs** - The resources button in the bottom left can be used to see related docs to further explore concepts on a page.
 
