@@ -1,4 +1,4 @@
-:root {
+:root, :defined {
 
   /* Primary */
   --button-primary-color: var(--primary-color);

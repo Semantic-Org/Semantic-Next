@@ -1,18 +1,25 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
 ---
-
 <Homepage>
   <aboveFold>
+    <content>
     <ui-container>
-      <div class="left">
-        <h2>This is the title</h2>
-        <p>This is the copy</p>
-        <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try It Out</ui-button>
-        <ui-button transparent inverted href="/components"> Visit Docs</ui-button>
+      <div class="center">
+        <h2>Build Once. Use Anywhere.</h2>
+        <p>Create your next in house UI framework using <b>web standards</b> with robust <b>ui primitives</b>, rich <b>templating</b>, signals based <b>reactivity</b>, and all the bells & whistles to work at scale.</p>
+        <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
+        <ui-button secondary href="/components">View Docs</ui-button>
       </div>
     </ui-container>
+    </content>
   </aboveFold>
+  <script is:inline>
+    const el = document.querySelector('aboveFold');
+    requestAnimationFrame(function() {
+      el.classList.add('animate');
+    });
+  </script>
   <ribbons>
     <ribbon>
       1
