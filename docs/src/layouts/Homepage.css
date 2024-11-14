@@ -1,25 +1,22 @@
 @layer page {
   :root {
-
   }
-
   topbar {
     position: absolute;
     top: 1rem;
     width: 100%;
     z-index: var(--float-layer);
   }
-
   aboveFold {
     color: var(--standard-80);
     background-image: var(--angled-gradient);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    contain: content;
+    contain: layout paint;
     height: 620px;
     perspective: 1000px;
-
+    transform: translateZ(0);
 
     content {
       position: relative;
@@ -28,6 +25,8 @@
       z-index: 2;
       line-height: 1.18;
       align-content: center;
+      transform: translateZ(0);
+      will-change: transform;
 
       &:before {
         position: absolute;
@@ -37,12 +36,17 @@
         left: 0;
         height: 100%;
         opacity: 0;
-        transition: opacity 3s ease-in-out;
-        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        transition: opacity 1200ms ease-in-out;
+        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.07 199.33 / 0.66) 600px, oklch(0 0 0 / 0.95) 1200px);
+        background-image:
+          linear-gradient(#000, transparent 300px),
+          radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px)
+        ;
         pointer-events: none;
+        transform: translateZ(0);
       }
 
-      * {
+      .center {
         position: relative;
         z-index: 2;
         opacity: 0;
@@ -50,16 +54,15 @@
       }
     }
 
-
     h2 {
       font-size: 48px;
       margin: 0;
     }
+
     p {
       font-size: 20px;
       line-height: 1.8;
       margin-top: 0.5rem;
-
       b {
         color: #52B5FF;
       }
@@ -68,72 +71,72 @@
     ui-button {
       font-size: 18px;
     }
+
     .center {
       margin: 0 auto;
       text-align: center;
       max-width: 800px;
     }
 
-
     &:before {
       position: absolute;
       z-index: 1;
-      width: 135%;
-      height: 170%;
-      top: 0;
-      left: 0px;
+      /* Double the height and shift up to center */
+      top: -62.5%;
+      height: 250%;
+      width: 100%;
+      left: 0%;
       content: '';
       pointer-events: none;
-      background: url(/images/ui.png);
+      /* Set background to repeat twice within the height */
+      background: url(/images/ui.png) repeat-y;
+      background-size: auto;
+      background-repeat: repeat;
       transform-origin: 50% 50%;
       transform-style: preserve-3d;
-      animation-name: masthead;
-      transition: filter 500ms ease-in-out, opacity 3000ms ease-in-out, transform 3000ms ease-in-out;
       opacity: 0;
-      animation-duration: 15s;
-      animation-fill-mode: both;
+      transition: filter 500ms ease-in-out, opacity 2000ms ease-in-out;
       filter: blur(0px);
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-      transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateY(0%) translateX(0%) translateZ(0px);
+      animation: masthead-gpu 15s linear infinite;
+      will-change: transform;
+      contain: paint;
     }
 
-    &.animate{
+    &.animate {
       content:before {
         opacity: 1;
       }
-
       &:before {
-        opacity: 0.03;
+        opacity: 0.05;
         filter: blur(3px);
-        transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
+        transform: rotateX(30deg) translateY(-7%) translateZ(0);
       }
-
-      * {
+      .center {
         opacity: 1;
       }
     }
-
   }
 
   ribbon {
     display: block;
     color: var(--standard-80);
-
     min-height: 300px;
-
-
   }
-
-
 }
 
 
-@keyframes masthead {
- 0% {
-    background-position: 0% 0%;
- }
- 100% {
-    background-position: 0% -475px;
- }
+@keyframes masthead-gpu {
+  0% {
+    transform: rotateX(30deg) translateY(0) translateZ(0);
+  }
+  100% {
+    /* Move up by 125% to match one full pattern repeat */
+    transform: rotateX(30deg) translateY(-50%) translateZ(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  aboveFold:before {
+    animation: none;
+  }
 }

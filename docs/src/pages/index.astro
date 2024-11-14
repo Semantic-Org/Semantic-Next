@@ -3,15 +3,16 @@ import Homepage from '../layouts/Homepage.astro';
 ---
 <Homepage>
   <aboveFold>
+    <div class="background-layer"></div>
     <content>
-    <ui-container>
-      <div class="center">
-        <h2>Design Once. Use Anywhere.</h2>
-        <p>Create your next in house UI framework using <b>web standards</b> with robust <b>ui primitives</b>, rich <b>templating</b>, signals based <b>reactivity</b>, and all the bells & whistles to work at scale.</p>
-        <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
-        <ui-button secondary href="/components">View Docs</ui-button>
-      </div>
-    </ui-container>
+      <ui-container>
+        <div class="center">
+          <h2>Design Once. Use Anywhere.</h2>
+          <p>Create your next in house UI framework using <b>web standards</b> with robust <b>ui primitives</b>, rich <b>templating</b>, signals based <b>reactivity</b>, and all the bells & whistles to work at scale.</p>
+          <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
+          <ui-button secondary href="/components">View Docs</ui-button>
+        </div>
+      </ui-container>
     </content>
   </aboveFold>
   <script is:inline>
