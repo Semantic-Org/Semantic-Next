@@ -26,7 +26,7 @@ const createComponent = function ({ self, data, state, settings }) {
       return self.filterVisibleSections(settings.menu);
     },
     getNavIcon(section) {
-      const defaultIcon = (settings.useAccordion && section?.pages)
+      const defaultIcon = (settings.useAccordion && section?.pages && !settings.expandAll)
         ? 'chevron-down'
         : ''
       ;

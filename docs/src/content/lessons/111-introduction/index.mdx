@@ -35,7 +35,8 @@ defineComponent({
 <current-time></current-time>
 ```
 
-However everything that is a component is not part of your UI framework.
+Components do not need to be assigned to tags, they can also be used in other components compositionally. This lets you build apps similar to how you might in a framework like React or Vue.
+
 ```javascript
 const currentTime = defineComponent({ template, html, css });
 
