@@ -4,6 +4,13 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.1.5
+* Add `openLink` to utils
+* Refactor settings to trigger reactivity in any reactive context
+* Fixes for `getChild` `getParent` and other helpers
+* Store data context in DOM
+* Fix DOM manip in query to work in some locations it was not working before `shadowRoot` etc.
+
 # Version 0.1.4
 * Added `weightedObjectSearch* utility
 * Refactors snippet and subtemplate data context to support `data={getData}` type expressions
