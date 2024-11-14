@@ -27,10 +27,27 @@
       flex-grow: 1;
       z-index: 2;
       line-height: 1.18;
-      background-image: radial-gradient(circle at 50% 50%, oklch(0.34 0.08 192.2 / 0.59) 0%, oklch(0.24 0.07 240.07 / 0.61) 400px, oklch(0.11 0 0) 1500px);
-      background-image: radial-gradient(circle at 50% 50%, oklch(0.15 0 0) 0%, oklch(0.23 0.06 239.71 / 0.59) 600px, oklch(0.38 0.09 218.29) 1500px);
       align-content: center;
-      transition: background 1000ms;
+
+      &:before {
+        position: absolute;
+        width: 100%;
+        content: '';
+        top: 0;
+        left: 0;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 3s ease-in-out;
+        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        pointer-events: none;
+      }
+
+      * {
+        position: relative;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+      }
     }
 
 
@@ -71,25 +88,29 @@
       transform-origin: 50% 50%;
       transform-style: preserve-3d;
       animation-name: masthead;
-      transition: filter 500ms ease-in-out, opacity 3000ms ease-in-out, transform 6000ms ease-in-out;
+      transition: filter 500ms ease-in-out, opacity 3000ms ease-in-out, transform 3000ms ease-in-out;
       opacity: 0;
       animation-duration: 15s;
       animation-fill-mode: both;
       filter: blur(0px);
       animation-timing-function: linear;
       animation-iteration-count: infinite;
-        transform: rotateX(10deg) rotateZ(0deg) rotateY(0deg) translateY(0%) translateX(0%) translateZ(0px);
+      transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateY(0%) translateX(0%) translateZ(0px);
     }
 
     &.animate{
-      .content {
-        background-image: radial-gradient(circle at 50% 50%, oklch(0.34 0.08 192.2 / 0.59) 0%, oklch(0.24 0.07 240.07 / 0.61) 400px, oklch(0.11 0 0) 1500px);
+      content:before {
+        opacity: 1;
       }
 
       &:before {
         opacity: 0.03;
         filter: blur(3px);
-        transform: rotateX(47deg) rotateZ(0deg) rotateY(0deg) translateY(-14%) translateX(0%) translateZ(370px);
+        transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
+      }
+
+      * {
+        opacity: 1;
       }
     }
 
