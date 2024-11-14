@@ -9,8 +9,8 @@ import { WebComponentBase } from './web-component.js';
 export const defineComponent = ({
   template = '',
   ast,
-  css = false,
-  pageCSS = false,
+  css = '',
+  pageCSS = '',
   componentSpec = false,
   tagName,
   delegatesFocus = false,
@@ -36,6 +36,7 @@ export const defineComponent = ({
   subTemplates = {},
   renderingEngine,
 } = {}) => {
+
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
@@ -112,19 +113,6 @@ export const defineComponent = ({
         super.connectedCallback();
       }
 
-      createRenderRoot() {
-        this.useLight = this.getAttribute('expose') !== null;
-        if (this.useLight) {
-          this.addPageCSS(webComponent, 'page', this.css, { scopeSelector: this.tagName });
-          this.storeOriginalContent.apply(this);
-          return this;
-        }
-        else {
-          const renderRoot = super.createRenderRoot(this.css);
-          return renderRoot;
-        }
-      }
-
       willUpdate() {
         super.willUpdate();
         if(!this.template) {
@@ -138,6 +126,7 @@ export const defineComponent = ({
           }
           // make this easier to access in dom
           this.component = this.template.instance;
+          this.dataContext = this.template.data;
         }
         // property change callbacks wont call on SSR
         if(isServer) {

@@ -1,0 +1,38 @@
+ui-modal.references {
+
+  &::part(modal) {
+    padding: 2rem;
+    align-content: center;
+    text-align: center;
+    background: var(--black-90) var(--angled-gradient);
+  }
+  .title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--white-50);
+    margin-bottom: var(--spacing);
+  }
+
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+
+    a {
+      display: block;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      color: var(--link-color);
+      padding: 0.5rem;
+      border: var(--border);
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+    }
+    a:hover {
+      background-color: var(--white-10);
+      color: var(--link-hover-color);
+    }
+  }
+
+}

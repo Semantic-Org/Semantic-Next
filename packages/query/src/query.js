@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, camelToKebab, inArray, isClient, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -46,7 +46,7 @@ export class Query {
     }
     else if (isString(selector)) {
       // this is html like $('<div/>')
-      if (selector.slice(0, 1) == '<') {
+      if (selector.trim().slice(0, 1) == '<') {
         const template = document.createElement('template');
         template.innerHTML = selector.trim();
         elements = Array.from(template.content.childNodes);
@@ -405,7 +405,7 @@ export class Query {
         const eventListener = delegateHandler || handler;
 
         // will cause illegal invocation if used from proxy object
-        const domEL = (this.isGlobal) ? globalThis : el;
+        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
         if (domEL.addEventListener) {
           domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
         }
@@ -659,16 +659,16 @@ export class Query {
     if (isPlainObject(property) || value !== null) {
       if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
-          elements.forEach((el) => (el.style[prop] = val));
+          elements.forEach((el) => el.style.setProperty(camelToKebab(prop), val));
         });
       }
       else {
-        elements.forEach((el) => (el.style[property] = value));
+        elements.forEach((el) => el.style.setProperty(camelToKebab(property), value));
       }
       return this; // Return the Query instance for chaining
     }
     else {
-      // Attempt to get a style directly
+      // Getting a value
       if (elements?.length) {
         const styles = elements.map((el) => {
           const inlineStyle = el.style[property];
@@ -839,7 +839,25 @@ export class Query {
   insertContent(target, content, position) {
     const $content = this.chain(content);
     $content.each(el => {
-      target.insertAdjacentElement(position, el);
+      if (target.insertAdjacentElement) {
+        target.insertAdjacentElement(position, el);
+      }
+      else {
+        switch(position) {
+          case 'beforebegin':
+            target.parentNode?.insertBefore(el, target);
+            break;
+          case 'afterbegin':
+            target.insertBefore(el, target.firstChild);
+            break;
+          case 'beforeend':
+            target.appendChild(el);
+            break;
+          case 'afterend':
+            target.parentNode?.insertBefore(el, target.nextSibling);
+            break;
+        }
+      }
     });
   }
 
@@ -972,5 +990,9 @@ export class Query {
   getComponent() {
     const components = this.map(el => el.component).filter(Boolean);
     return components.length > 1 ? components : components[0];
+  }
+  getDataContext() {
+    const contexts = this.map(el => el.dataContext).filter(Boolean);
+    return contexts.length > 1 ? contexts : contexts[0];
   }
 }

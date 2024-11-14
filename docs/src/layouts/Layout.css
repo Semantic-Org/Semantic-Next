@@ -69,88 +69,275 @@
     height: calc(100dvh - var(--topbar-height));
   }
 
-  layout page pageContent {
+  page {
     text-wrap: pretty;
-  }
-  layout page.text-content main > ui-container {
-    /*max-width: 910px;*/
-    max-width: none;
-    padding: 2em 3em 7em;
-    margin: 0;
-    width: calc(100% - var(--rail-width));
-  }
-  layout page.text-content code-playground {
-    display: block;
-    margin: 1rem 0rem;
-  }
-  layout page.text-content pageContent {
-    display: block;
-    max-width: 910px;
-    margin: 0 auto;
-  }
-  layout page.text-content pageContent,
-  layout page.text-content li,
-  layout page.text-content p {
-    font-size: 16px;
-  }
-  layout page.text-content li,
-  layout page.text-content p {
-    color: var(--standard-90);
-  }
-  layout page.text-content pageContent img {
-    max-width: 100%;
-  }
-  layout page.text-content pageContent > ul,
-  layout page.text-content pageContent > ul li,
-  layout page.text-content pageContent > p {
-    line-height: 1.66;
-  }
-  layout page.text-content pageContent > ul li {
-    margin-bottom: 0.5rem
-  }
-  layout page.text-content pre code {
-    font-size: 16px;
-  }
-  layout page.text-content h2 {
-    margin: 4rem 0rem 3rem;
-    font-size: 28px;
-    letter-spacing: 0.03rem;
-    padding-top: 4rem;
-    border-top: var(--internal-border);
-  }
-  layout page.text-content h2:first-child,
-  layout page.text-content h1 + h2 {
-    border-top: none;
-    padding-top: 0rem;
-  }
-  layout page.text-content h2:first-child {
-    margin-top: 0rem;
-  }
-  layout page.text-content h3 {
-    margin: 3rem 0rem 1rem;
-  }
-  layout page.text-content h1 + h2 {
-    margin-top: 2rem;
-  }
-  layout page.text-content h2 + h3,
-  layout page.text-content h3 + h4 {
-    margin-top: 2rem;
-  }
-  layout page.text-content h5 {
-    font-size: 12px;
-    text-transform: uppercase;
-    color: var(--standard-50);
-  }
-  layout page.text-content img {
-    max-width: 100%;
-    height: auto;
-  }
-  layout page.text-content ul strong,
-  layout page.text-content p strong {
-    color: var(--standard-100);
-  }
-  layout page.text-content blockquote p strong {
-    color: var(--white-100);
+
+    &.text-content {
+
+      main > ui-container {
+        max-width: none;
+        padding: 2em 3em 7em;
+        margin: 0;
+        width: calc(100% - var(--rail-width));
+      }
+      code-playground {
+        display: block;
+        margin: 1rem 0rem;
+      }
+
+
+      .card {
+        display: block;
+        cursor: pointer;
+        margin: var(--vertically-spaced);
+        text-decoration: none;
+        padding: var(--padding);
+        border-radius: var(--border-radius);
+        border: var(--internal-border);
+        transition: var(--transition);
+
+        &.previous {
+          margin-right: auto;
+        }
+        &.next {
+          margin-left: auto;
+        }
+
+        & > ui-icon {
+          font-size: var(--massive);
+          float: left;
+          margin-right: 1rem;
+        }
+
+        .header {
+          color: var(--primary-text-color);
+          font-size: var(--large);
+          font-weight: var(--bold);
+          transition: var(--transition);
+        }
+
+        .description {
+          color: var(--standard-60);
+          font-size: var(--medium);
+          transition: var(--transition);
+        }
+
+
+        &:not(.disabled) {
+
+          &:hover {
+            .header {
+              color: var(--primary-text-color);
+            }
+            .description {
+              color: var(--standard-90);
+            }
+          }
+        }
+
+      }
+
+      @container style(--dark-mode: true) {
+
+      .card {
+        background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
+        box-shadow: 0px 0px 5px rgb(255 255 255 / 6%);
+        display: flex;
+        flex-direction: row;
+
+
+        &:not(.disabled) {
+
+          &:hover {
+            background-color: oklch(0.17 0.04 225.68);
+            box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+            background-image: var(--subtle-gradient);
+          }
+
+          &:active {
+            background-color: oklch(0.13 0.03 219.75);
+            box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+            background-image: var(--subtle-gradient);
+          }
+        }
+      }
+      }
+
+      pageContent {
+        display: block;
+        max-width: 910px;
+        margin: 0 auto;
+
+        li,
+        p {
+          font-size: 16px;
+        }
+
+        /* Lists */
+        & > ul,
+        & > ul li,
+        & section > p,
+        & > p {
+          line-height: 1.66;
+        }
+        & > ul li {
+          margin-bottom: 0.5rem
+        }
+
+
+        .expressive-code {
+          margin: var(--vertically-spaced);
+        }
+
+        blockquote {
+          border: var(--border-color);
+          padding: var(--padding);
+          background-color: oklch(0.21 0.06 236.29);
+          background-image: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+          font-style: italic;
+          border: var(--black-100);
+          background-clip: padding-box;
+          display: flex;
+          border-radius: var(--border-radius);
+          margin: var(--vertically-padded);
+          flex-direction: row;
+
+          p code {
+            color: var(--white);
+          }
+          p {
+            color: var(--white-60) !important;
+            line-height: 1.8;
+          }
+          p:first-child {
+            margin-top: 0rem;
+          }
+          p:last-child {
+            margin-bottom: 0rem;
+          }
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+
+          th {
+            font-weight: bold;
+            font-size: 12px;
+            color: var(--primary-text-color);
+            text-align: left;
+            padding: 3px 11px;
+            text-transform: uppercase;
+          }
+
+          tr {
+
+            &:first-child {
+              td:first-child {
+                border-top-left-radius: var(--border-radius);
+              }
+            }
+            &:hover {
+              td:first-child {
+                color: var(--primary-text-color);
+              }
+              td:last-child {
+                color: var(--standard-100);
+              }
+            }
+          }
+
+
+          td {
+            padding: 3px 11px;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: var(--standard-80);
+            border: 1px solid var(--inverted-100);
+
+            &:first-child {
+              background-color: var(--standard-5);
+              font-weight: bold;
+              color: #696969;
+              white-space: nowrap;
+            }
+            &:last-child {
+              border-left: none;
+            }
+          }
+        }
+
+        /* Headers */
+        h2 {
+          margin: 4rem 0rem 3rem;
+          font-size: 28px;
+          letter-spacing: 0.03rem;
+          padding-top: 4rem;
+          border-top: var(--internal-border);
+        }
+        h3 {
+          margin: 3rem 0rem 1rem;
+        }
+        h5 {
+          font-size: 12px;
+          text-transform: uppercase;
+          color: var(--standard-50);
+        }
+
+        /* Images */
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+
+        /* Code */
+        pre code {
+          font-size: 16px;
+        }
+
+        /* Bold in context */
+        ul strong,
+        p strong {
+          color: var(--standard-100);
+        }
+
+        blockquote p strong {
+          color: var(--white-100);
+        }
+
+        /* Header Position */
+        h2:first-child,
+        h1 + h2 {
+          border-top: none;
+          padding-top: 0rem;
+        }
+        h2:first-child {
+          margin-top: 0rem;
+        }
+        h1:first-child,
+        h2:first-child,
+        h3:first-child {
+          margin-top: 0rem;
+          padding-top: 0rem;
+        }
+        h1 + h2 {
+          margin-top: 2rem;
+        }
+        h2 + h3,
+        h3 + h4 {
+          margin-top: 2rem;
+        }
+        p:first-child {
+          margin-top: 0;
+        }
+      }
+      pageContent,
+      li,
+      p {
+        color: var(--standard-90);
+      }
+
+    }
   }
   layout page.centered main > ui-container {
     max-width: none;
@@ -166,85 +353,6 @@
     left: calc(var(--sidebar-width) / -2);
   }
 
-  layout page .expressive-code {
-    margin: var(--vertically-spaced)
-  }
-  layout page blockquote {
-    border: var(--border-color);
-    padding: var(--padding);
-    background-color: oklch(0.21 0.06 236.29);
-    background-image: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
-    font-style: italic;
-    border: var(--black-100);
-    background-clip: padding-box;
-    display: flex;
-    border-radius: var(--border-radius);
-    margin: var(--vertically-padded);
-    flex-direction: row;
-  }
-  layout page blockquote p code {
-    color: var(--white);
-  }
-  layout page blockquote p {
-    color: var(--white-60) !important;
-    line-height: 1.8;
-  }
-  layout page blockquote p:first-child {
-    margin-top: 0rem;
-  }
-  layout page blockquote p:last-child {
-    margin-bottom: 0rem;
-  }
-
-  layout table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th {
-      font-weight: bold;
-      font-size: 12px;
-      color: var(--primary-text-color);
-      text-align: left;
-      padding: 3px 11px;
-      text-transform: uppercase;
-    }
-
-    tr {
-
-      &:first-child {
-        td:first-child {
-          border-top-left-radius: var(--border-radius);
-        }
-      }
-      &:hover {
-        td:first-child {
-          color: var(--primary-text-color);
-        }
-        td:last-child {
-          color: var(--standard-100);
-        }
-      }
-    }
-
-
-    td {
-      padding: 3px 11px;
-      border-collapse: collapse;
-      font-size: 14px;
-      color: var(--standard-80);
-      border: 1px solid var(--inverted-100);
-
-      &:first-child {
-        background-color: var(--standard-5);
-        font-weight: bold;
-        color: #696969;
-        white-space: nowrap;
-      }
-      &:last-child {
-        border-left: none;
-      }
-    }
-  }
 
   layout h1,
   layout h2,
@@ -267,55 +375,49 @@
     padding-left: 0.5rem;
   }
 
-  layout main h1:first-child,
-  layout main h2:first-child,
-  layout main h3:first-child {
-    margin-top: 0rem;
-  }/*
-  layout main h1 {
-    font-size: 17px;
-    margin: 3rem 0rem 2rem;
+  layout main {
+
+    background-color: #F5F5F6;
+
+    ui-container {
+      background-color: #FFFFFF;
+    }
+
+    h1:first-child,
+    h2:first-child,
+    h3:first-child {
+      margin-top: 0rem;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 3rem 0rem 4rem;
+      letter-spacing: 0.05em;
+    }
+    h3 {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 2rem 0rem 1rem;
+      letter-spacing: 0.05em;
+    }
   }
-  layout main h1 + h2 {
-    margin-top: 2rem;
-  }
-  layout main h1 ui-icon {
-    margin-right: 1rem;
-    color: var(--primary-text-color);
-  }*/
-  layout main h1 {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 3rem 0rem 4rem;
-    letter-spacing: 0.05em;
-  }
-  layout main h3 {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 2rem 0rem 1rem;
-    letter-spacing: 0.05em;
-  }
+
 
 
   /* Headers are smaller with masthead  */
-  layout masthead + main h2 {
-    border-bottom: var(--internal-border);
-    padding-bottom: 8px;
-    font-size: 20px;
-  }
-  layout masthead + main h3 {
-    font-size: 16px;
-    font-weight: bold;
-    color: #000;
-    padding-left: 0px;
-    padding-bottom: 5px;
-  }
-
-  layout main {
-    background-color: #F5F5F6;
-  }
-  layout main ui-container {
-    background-color: #FFFFFF;
+  layout masthead + main {
+    h2 {
+      border-bottom: var(--internal-border);
+      padding-bottom: 8px;
+      font-size: 20px;
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      padding-left: 0px;
+      padding-bottom: 5px;
+    }
   }
 
   html.dark {
@@ -334,13 +436,11 @@
       box-shadow: 0px 2px 2px 0 rgba(34, 36, 38, 0.15);
     }
     page {
-
       background-image: linear-gradient(to bottom,
         oklch(0.16 0 0),
         oklch(0.19 0.01 258.64) 100px,
         oklch(0 0 0)
       );
-
     }
     page > main {
       background: none;
@@ -360,8 +460,8 @@
 
   html.dark {
 
-    layout page.text-content li,
-    layout page.text-content p {
+    page.text-content li,
+    page.text-content p {
       color: var(--standard-70);
     }
   }

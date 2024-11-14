@@ -18,6 +18,7 @@
     "dev": "wireit",
     "build-docs": "wireit",
     "serve": "wireit",
+    "watch": "wireit",
     "publish": "wireit",
     "test:case": "wireit",
     "prettify": "prettierx ./ --write --ignore-unknown",

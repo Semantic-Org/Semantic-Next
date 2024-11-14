@@ -260,7 +260,22 @@ ui-modal {
       background-color: #009fda;
       color: #FFFFFF;
     }
+  }
 
+  .placeholder {
+    min-height: 350px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    justify-content: center;
+    flex-direction: column;
+
+    ui-icon {
+      display: block;
+      opacity: 0.5;
+      font-size: 48px;
+      margin-bottom: 1rem;
+    }
   }
 }
 

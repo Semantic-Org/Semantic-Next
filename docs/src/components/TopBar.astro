@@ -54,7 +54,7 @@ import './TopBar.css';
     ></TopbarMenu>
     <GlobalSearch client:load></GlobalSearch>
     {showThemeSwitcher && (
-      <ThemeSwitcher client:load transition:name="theme"></ThemeSwitcher>
+      <ThemeSwitcher client:load transition:name="theme" defaultTheme="dark" ></ThemeSwitcher>
     )}
     <MobileMenuToggle client:load></MobileMenuToggle>
   </div>

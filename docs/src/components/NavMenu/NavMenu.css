@@ -35,6 +35,7 @@
 
   --nav-menu-sub-title-font-size: 13px;
   --nav-menu-sub-title-padding: 6px 0px;
+  --nav-menu-sub-title-active-color: var(--nav-menu-title-active-color);
 
   --nav-menu-sub-content-indent-distance: 0.25rem;
 
@@ -135,6 +136,10 @@ a {
 
         + .content {
           padding-left: var(--nav-menu-sub-content-indent-distance) !important;
+        }
+
+        &.active {
+          color: var(--nav-menu-sub-title-active-color);
         }
       }
     }

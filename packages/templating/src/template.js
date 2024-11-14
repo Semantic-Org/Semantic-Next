@@ -105,11 +105,15 @@ export const Template = class Template {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
+
+    // add child templates to parent for searching with getChild
     if(!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-    this.instance._parentTemplate = parentTemplate;
+
+    // add parent template to this element for searching with getParent
+    this._parentTemplate = parentTemplate;
   }
 
   setElement(element) {
@@ -144,7 +148,7 @@ export const Template = class Template {
       this.dispatchEvent('rendered', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onUpdated = () => {
-      this.call(this.onRenderedCallback);
+      this.call(this.onUpdatedCallback);
       this.dispatchEvent('updated', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
@@ -407,7 +411,6 @@ export const Template = class Template {
         const eventSettings = { abortController: this.eventController };
 
         if(eventType == 'global') {
-          console.log('global');
           // allow user to bind to global selectors if they opt in using the 'global' keyword
           $(selector).on(eventName, eventHandler, eventSettings);
         }
@@ -726,7 +729,10 @@ export const Template = class Template {
         let parentNode = template.element?.parentNode;
         while(parentNode) {
           if(parentNode.component?.templateName == templateName) {
-            match = parentNode.component;
+            match = {
+              ...parentNode.component,
+              ...parentNode.dataContext,
+            };
             break;
           }
           parentNode = parentNode.parentNode;
@@ -734,9 +740,12 @@ export const Template = class Template {
       }
       // this matches on nested partials (less common)
       while (template) {
-        template = template._parentTemplate || template?.instance?._parentTemplate;
+        template = template._parentTemplate;
         if (!match && template?.templateName == templateName) {
-          match = template;
+          match = {
+            ...template.instance,
+            ...template.data
+          };
           break;
         }
       }
@@ -750,10 +759,13 @@ export const Template = class Template {
     // recursive lookup
     function search(template, templateName) {
       if (template.templateName === templateName) {
-        result.push(template.component);
+        result.push({
+          ...template.instance,
+          ...template.data
+        });
       }
-      if (template.component._childTemplates) {
-        template.component._childTemplates.forEach((childTemplate) => {
+      if (template._childTemplates) {
+        template._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });
       }

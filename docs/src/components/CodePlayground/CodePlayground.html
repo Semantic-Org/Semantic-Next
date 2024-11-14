@@ -1,9 +1,9 @@
 <div class="playground {classMap getClassMap}" part="playground">
-  {#if example.title}
+  {#if title}
     <div class="masthead" part="masthead">
       {#if canShowButtons}
         <ui-button right-floated transparent small compact inverted class="tabs">
-          {#if shouldUseTabs}
+          {#if is layout 'tabs'}
             Use Panels
           {else}
             Use Tabs
@@ -14,8 +14,8 @@
           Fork
         </ui-button>
       {/if}
-      <h3 class="title" part="title">{example.title}</h3>
-      <p part="description">{example.description}</p>
+      <h3 class="title" part="title">{title}</h3>
+      <p part="description">{description}</p>
     </div>
   {/if}
   {#if exists files}
@@ -25,7 +25,7 @@
       {/each}
     </playground-project>
   {/if}
-  {#if either shouldUseTabs inline}
+  {#if is layout 'tabs'}
     <ui-panels
       class={classMap getTabPanelsClass}
       direction="{getTabDirection}"

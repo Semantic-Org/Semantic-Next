@@ -1,21 +1,21 @@
-.playground {
-
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
+:host {
 
   --playground-header-background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
   --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
   --playground-header-color: rgba(255, 255, 255, 0.4);
   --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
 
-  --playground-code-background: #080C10;
+  --playground-tab-bar-background: #ffffff;
+
+  --inline-code-height: 350px;
+  --playground-bar-height: 32px;
 
   --code-purple: #D2A8FF;
   --code-grey: #656565;
   --code-default: #c9d1d9;
   --code-blue: var(--primary-text-color);
 
+  --playground-code-background: #080C10;
   --playground-code-comment-color: #444444;
   --playground-code-linenumber-color: #25272B;
   --playground-code-font-size: 14px;
@@ -39,11 +39,13 @@
   --playground-code-attribute-color: var(--code-blue);
   --playground-code-callee-color: var(--code-purple);
 
-  --playground-tab-bar-background: #ffffff;
-  --playground-bar-height: 32px;
+}
 
+.playground {
 
-  --inline-code-height: 350px;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
 
   ::-webkit-scrollbar {
     -webkit-appearance: none;
@@ -218,6 +220,27 @@
 
   }
 
+  header {
+    display: block;
+    box-shadow: none;
+    min-height: 0px;
+    border-bottom: var(--subtle-border);
+    padding: 8px 16px 8px;
+    height: auto;
+    color: var(--standard-50);
+    font-size: var(--small);
+    background: var(--playground-header-background);
+    border-bottom: var(--playground-header-border);
+    box-shadow: var(--playground-header-box-shadow);
+
+    a {
+      color: var(--link-color);
+    }
+    a:hover {
+      color: var(--link-hover-color);
+    }
+  }
+
   .tabs {
 
     .menu {
@@ -231,30 +254,12 @@
       padding: 0.5rem 1rem;
     }
 
-    header,
     &:not(.inline) .menu {
       min-height: 27px;
       background: var(--playground-header-background);
       border-bottom: var(--playground-header-border);
       box-shadow: var(--playground-header-box-shadow);
       transition: background-color 0.1s ease, color 0.1s ease-in-out;
-    }
-
-    header {
-      display: block;
-      box-shadow: none;
-      border-bottom: var(--subtle-border);
-      padding: 8px 16px 0px;
-      height: auto;
-      color: var(--standard-50);
-      font-size: var(--small);
-
-      a {
-        color: var(--link-color);
-      }
-      a:hover {
-        color: var(--link-hover-color);
-      }
     }
 
     .menu ui-menu {

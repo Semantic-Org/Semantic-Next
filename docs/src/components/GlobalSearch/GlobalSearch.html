@@ -33,6 +33,10 @@
         </a>
       {/each}
     {else}
+      <div class="placeholder">
+        <ui-icon icon="search"></ui-icon>
+        Enter a search term above to see results...
+      </div>
       <ui-segment placeholder header="Enter a search term to see results." icon="search">
       </ui-segment>
     {/if}

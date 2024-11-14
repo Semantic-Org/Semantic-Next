@@ -1,14 +1,62 @@
 import { getCollection } from 'astro:content';
 import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
+import { firstMatch, groupBy, asyncEach, each, findIndex, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
+
+/* Used to sort lessons */
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
+import semverPatch from 'semver/functions/patch';
+import semverCompare from 'semver/functions/compare';
 
 const examples = await getCollection('examples');
-const examplePages = examples.map(page => ({
-  ...page.data,
-  url: `/examples/${page.slug}`,
-}));
+const examplePages = examples
+  .filter(doc => !doc?.data?.hidden)
+  .map(doc => ({
+    ...doc.data,
+    url: `/examples/${doc.slug}`,
+  }))
+;
+
+export const getLessonContent = (lesson) => {
+  return {
+    id: lesson.slug,
+    title: lesson.data.title,
+    category: lesson.data.category,
+    subcategory: lesson.data.subcategory,
+    url: `/learn/${lesson.slug}`,
+    hidden: lesson.data.hidden,
+    sort: lesson.data.sort,
+    hint: lesson.data.hint,
+    references: lesson.data.references,
+    shortTitle: lesson.data.shortTitle,
+    major: semverMajor(lesson.data.sort),
+    minor: semverMinor(lesson.data.sort),
+    patch: semverPatch(lesson.data.sort),
+    hideNavigation: lesson.data.hideNavigation,
+  };
+};
+
+const lessons = await getCollection('lessons');
+const lessonDocs = lessons
+  .filter(doc => !doc?.data?.hidden)
+  .map(getLessonContent)
+;
+export const lessonPages = lessonDocs.sort((a, b) => {
+  return semverCompare(a.sort, b.sort);
+});
 
 
+export const getNextLesson = (currentLesson) => {
+  const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
+  const previousLesson = (lessonIndex > -1) ? lessonPages[lessonIndex + 1] : {};
+  return previousLesson;
+};
+
+export const getPreviousLesson = (currentLesson) => {
+  const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
+  const nextLesson = (lessonIndex > -1) ? lessonPages[lessonIndex - 1] : {};
+  return nextLesson;
+};
 
 /* Gets Sidebar Menu for Examples Section */
 const createExampleMenu = () => {
@@ -53,6 +101,42 @@ const createExampleMenu = () => {
   return menu.filter(menu => menu);
 };
 export const sidebarMenuExamples = createExampleMenu();
+
+
+/* Gets Sidebar Menu for Examples Section */
+const createLearnMenu = () => {
+  let menu = [];
+  let categories = groupBy(lessonPages, 'major');
+  each(categories, (lessons, majorVersion) => {
+    let subcategories = groupBy(lessons, 'minor');
+    let pages = [];
+    if(keys(subcategories).length) {
+      // has subcategories
+      each(subcategories, (lessons, subcategory) => {
+        pages.push({
+          name: lessons[0].subcategory,
+          pages: lessons.map(lesson => ({
+            name: lesson.shortTitle || lesson.title,
+            url: lesson.url
+          }))
+        });
+      });
+    }
+    else {
+      // no subcategories
+      pages = lessons.map(lesson => ({
+        name: lesson.shortTitle || lesson.title,
+        url: lesson.url
+      }));
+    }
+    menu.push({
+      name: lessons[0].category,
+      pages
+    });
+  });
+  return menu.filter(menu => menu);
+};
+export const sidebarMenuLearn = createLearnMenu();
 
 /* Removes trailing slash which can cause issues between build and serve */
 export const removeTrailingSlash = (url = '') => {
@@ -100,6 +184,9 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   }
   else if(topbarSection == 'examples') {
     menu = sidebarMenuExamples;
+  }
+  else if(topbarSection == 'learn') {
+    menu = sidebarMenuLearn;
   }
   return menu;
 };

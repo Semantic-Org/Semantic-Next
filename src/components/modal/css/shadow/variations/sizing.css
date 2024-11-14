@@ -1,0 +1,46 @@
+:host {
+  width: var(--modal-medium);
+}
+
+:host([size="mini"]),
+:host([mini]),
+:host.mini {
+  width: var(--modal-mini);
+}
+
+:host([size="tiny"]),
+:host([tiny]),
+:host.tiny {
+  width: var(--modal-tiny);
+}
+
+:host([size="small"]),
+:host([small]),
+:host.small {
+  width: var(--modal-small);
+}
+
+:host([size="large"]),
+:host([large]),
+:host.large {
+  width: var(--modal-large);
+}
+
+:host([size="big"]),
+:host([big]),
+:host.big {
+  width: var(--modal-big);
+}
+
+:host([size="huge"]),
+:host([huge]),
+:host.huge {
+  width: var(--modal-huge);
+}
+
+:host([size="massive"]),
+:host([massive]),
+:host.massive {
+  width: var(--modal-massive);
+}
+

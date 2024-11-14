@@ -85,9 +85,33 @@
     height: calc(100vh - var(--topbar-height));
   }
 
+  page learn-example,
   page code-playground {
     display: contents;
   }
+
+  learn-example {
+    pageContent {
+      display: block;
+      container: pageContent / inline-size;
+      margin: 0 auto;
+
+      h2 {
+        font-size: 20px;
+        margin: 0rem 0rem 1rem;
+      }
+      p, li {
+        color: var(--text-color);
+        transition: var(--easing)
+      }
+      @container pageContent (max-width: 400px) {
+        p, li {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
 
   playground {
 
@@ -126,8 +150,17 @@
 html.light {
   --playground-page-background: #FFFFFF;
   --topbar-background-color: #000000;
+  --button-transparent-inverted-background-color: var(--black-80);
+  --button-transparent-inverted-hover-background-color: var(--black-90);
+  --button-transparent-inverted-pressed-background-color: var(--black-80);
 
-  code-playground::part(playground) {
+  --ec-frm-edActTabFg: var(--black-80);
+  figcaption .header {
+    background-color: var(--angled-gradient);
+  }
+
+  learn-example,
+  ::part(playground) {
     --playground-code-background: #F7F7F7;
     --playground-border: var(--border);
     --playground-button-background-color: #333333;
@@ -141,8 +174,11 @@ html.light {
     --code-grey: #353535;
     --code-default: #777777;
     --playground-code-comment-color: #AAAAAA;
+
+    --learn-panel-background: linear-gradient(rgb(229 229 229), rgb(253 253 253) 100px, oklch(0.92 0.01 0));
+
   }
-  code-playground::part(panel) {
+  ::part(panel) {
     --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
     --panel-label-color: var(--black-70);
     --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;

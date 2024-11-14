@@ -140,7 +140,7 @@ const createComponent = ({self, el, settings, $}) => ({
   },
   setPanelInitialized(panel) {
     if(panel.component) {
-      panel.component.initialized.set(true);
+      panel.component.setInitialized();
     }
   },
   setPanelCalculatedSizes() {
@@ -599,7 +599,7 @@ const createComponent = ({self, el, settings, $}) => ({
     }
 
     /*
-      Standard (Postive Delta)
+      Standard (Positive Delta)
       ------------------------
       Growing Above / Left
       Shrinking Below / Right

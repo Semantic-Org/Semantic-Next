@@ -29,7 +29,7 @@
             <div class="{activeIf isActiveItem page} content">
               <div class="menu">
                 {#each page in page.pages}
-                  <a class="{classes getTitleStates page}item" href={getLink page} part="page link">
+                  <a class="{classes getPageStates page}item" href={getLink page} part="page link">
                     {page.name}
                     {#if page.description}
                       <span class="description">{page.description}</span>

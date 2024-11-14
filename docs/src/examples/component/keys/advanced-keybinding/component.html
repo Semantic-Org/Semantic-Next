@@ -11,7 +11,7 @@
       {#each result in results}
         <div class="{activeIf is @index selectedIndex}result" data-index="{@index}">{result}</div>
       {/each}
-    {else}
+    {else if searchTerm}
       <div class="empty">
         No results for "<b>{searchTerm}</b>"
       </div>

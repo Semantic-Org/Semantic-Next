@@ -1,0 +1,106 @@
+---
+import { getCollection } from 'astro:content';
+import { each, asyncEach, isEmpty, findIndex, tokenize } from '@semantic-ui/utils';
+import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
+import { lessonPages, getLessonContent, getPreviousLesson, getNextLesson, getSidebarMenu } from '@helpers/navigation.js';
+import NavMenu from '@components/NavMenu/NavMenu.js';
+
+import Playground from '@layouts/Playground.astro';
+import LearnExample from '@components/LearnExample/LearnExample.js';
+import Sidebar from '@components/Sidebar.astro';
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+/* Make paths */
+export async function getStaticPaths() {
+  const entries = await getCollection('lessons');
+  const paths = [];
+  each(entries, (entry) => {
+    paths.push({
+      params: { slug: `${entry.slug}` },
+      props: { entry },
+    });
+  });
+  return paths;
+}
+const activeURL = Astro.url.pathname;
+
+const lesson = getLessonContent(entry);
+const lessonIndex = findIndex(lessonPages, lesson => lesson.url == activeURL);
+const previousLesson = getPreviousLesson(lesson);
+const nextLesson = getNextLesson(lesson);
+
+/* Get associated example */
+const allLessonFiles = await import.meta.glob(`../../content/lessons/**`, {
+  query: '?raw',
+});
+
+
+// can either be an example or a problem/solution set
+const fileFolders = ['problem', 'example'];
+let files;
+let panelIndexes;
+await asyncEach(fileFolders, async (folder) => {
+  files = await getExampleFiles({
+    contentID: lesson.id,
+    allFiles: allLessonFiles,
+    basePath: '../../content/lessons/',
+    subFolder: folder,
+    includeFolder: true,
+    hideBoilerplate: false,
+    includePlaygroundInjections: true,
+    includeLog: false,
+    emptyIfAllGenerated: true,
+  });
+  if(isEmpty(files)) {
+    return true;
+  }
+  panelIndexes = getPanelIndexes(files);
+  return false;
+});
+
+let solutionFiles = await getExampleFiles({
+  contentID: lesson.id,
+  allFiles: allLessonFiles,
+  basePath: '../../content/lessons/',
+  subFolder: 'solution',
+  includeFolder: true,
+  hideBoilerplate: false,
+  includePlaygroundInjections: true,
+  includeLog: false,
+  emptyIfAllGenerated: true,
+});
+
+const searchMeta = {
+  ...entry.data,
+  pageType: 'Tutorial',
+}
+
+const menu = await getSidebarMenu({url: activeURL});
+
+const playgroundConfig = {
+  panelIndexes,
+  saveID: 'learn',
+};
+
+---
+
+<Playground searchMeta={searchMeta} showSidebar=true>
+  <page data-pagefind-body class="text-content">
+    <LearnExample client:only
+      lesson={lesson}
+      previousLesson={previousLesson}
+      nextLesson={nextLesson}
+      menu={menu}
+      files={files}
+      solutionFiles={solutionFiles}
+      activeURL={activeURL}
+      playgroundConfig={playgroundConfig}
+    >
+      <pageContent>
+        <Content />
+      </pageConent>
+    </LearnExample>
+  </page>
+</Playground>

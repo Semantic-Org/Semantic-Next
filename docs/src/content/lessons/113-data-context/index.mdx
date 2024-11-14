@@ -1,0 +1,53 @@
+---
+title: Data Context
+category: 'Quickstart'
+subcategory: 'Templates'
+description: Access data from templates
+sort: '1.1.3'
+---
+
+A template defines how to construct your component's DOM from available data.
+
+Template strings are compiled to an AST (Abstract Syntax Tree) which provides instructions on how to recreate your component.
+
+> You can view the AST using the menu to the right next to 'preview'
+
+### Syntax
+
+Templates **use your components data context to produce the html for your component**. Reactive data sources surgically update only the parts of the DOM that need  to rerender when your data changes.
+
+Expressions can be used to access your data context and are either be wrapped in `{ }` or `{{ }}`, it doesn't matter as long as its consistent across the file.
+```sui
+<img src={src}>
+```
+```sui
+<img src={{src}}>
+```
+
+### Data
+
+A components data context is a combination of internal `state`, `settings` (user settable state), and methods and properties on your component instance.
+
+```javascript
+data = {
+  ...state,
+  ...settings,
+  ...component
+};
+```
+
+### Complex Data
+
+Expressions can also access functions and supports nested expressions with `()`.
+
+Arguments are parsed right to left.
+
+```sui
+<img src={getProfileImage (getUser userID) 'large'}>
+```
+
+```javascript
+getProfileImage(getUser(userID), 'large');
+```
+
+

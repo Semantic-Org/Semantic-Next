@@ -67,7 +67,6 @@ export class ReactiveVar {
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
-      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
     }
   }
 

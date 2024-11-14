@@ -1,49 +1,45 @@
-import { defineComponent, getText } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
 import css from './component.css?raw';
 import template from './component.html?raw';
 
-const state = {
-  width: 250,
-  height: 250,
+const settings = {
+  counter1: 0,
+  counter7: 0,
 };
 
-const createComponent = ({state, tpl}) => ({
-  delta: 50,
-  increaseWidth: () =>  state.width.increment(tpl.delta),
-  decreaseWidth: () =>  state.width.decrement(tpl.delta),
-  increaseHeight: () => state.height.increment(tpl.delta),
-  decreaseHeight: () => state.height.decrement(tpl.delta),
-  getStyle() {
-    const width = state.width.get();
-    const height = state.height.get();
-    return `
-      width: ${width > 0 ? width : 0}px;
-      height: ${height > 0 ? height : 0}px;
-    `;
-  }
+const state = {
+  counter2: 0
+};
+
+const createComponent = ({ reactiveVar, self }) => ({
+  counter3: reactiveVar(0),
+  counter4: 0,
+  counter5: () => self.counter4,
 });
 
-const events = {
-  'click .decrease.width'({tpl}) {
-    tpl.decreaseWidth();
-  },
-  'click .increase.width'({tpl}) {
-    tpl.increaseWidth();
-  },
-  'click .decrease.height'({tpl}) {
-    tpl.decreaseHeight();
-  },
-  'click .increase.height'({tpl}) {
-    tpl.increaseHeight();
-  },
+
+const onCreated = function({ settings, state, self }) {
+  setInterval(() => {
+    settings.counter1++;
+    state.counter2.increment();
+    self.counter3.increment();
+    self.counter4++;
+  }, 1000);
 };
 
-export const CircleExpand = defineComponent({
-  tagName: 'circle-expand',
+const onRendered = function({ self, $ }) {
+  self.counter6 = Number($('.counter').first().text());
+};
+
+
+export const UICounter = defineComponent({
+  tagName: 'ui-counter',
   template,
   css,
-  state,
-  events,
   createComponent,
+  onCreated,
+  onRendered,
+  state,
+  settings,
 });

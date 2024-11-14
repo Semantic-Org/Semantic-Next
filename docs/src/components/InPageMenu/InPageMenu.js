@@ -7,7 +7,7 @@ import css from './InPageMenu.css?raw';
 import { Reaction } from '@semantic-ui/reactivity';
 
 const settings = {
-  showHeader: true,
+  showHeader: false,
   header: 'On This Page',
   menu: [],
   scrollContext: (isServer) ? null : window,

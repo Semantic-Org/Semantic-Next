@@ -1,0 +1,18 @@
+<div class="component">
+  <div class="actions">
+    <ui-menu selection value="{filter}" items="{filters}" class="menu"></ui-menu>
+    <ui-input placeholder="Search friends..." value={search} class="search"></ui-input>
+  </div>
+  <div class="cards">
+    {#each friend in getVisibleFriends}
+      {> card
+        name=friend.name
+        location=friend.location
+        role=friend.role
+        joined=friend.joined
+        image=friend.image
+        contacts=friend.contacts
+      }
+    {/each}
+  </div>
+</div>

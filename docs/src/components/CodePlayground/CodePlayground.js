@@ -20,18 +20,47 @@ import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
 
 const settings = {
+
+  // an object containing the files for the project
   files: {},
+
+  // use for security
   sandboxURL: '/sandbox',
+
+  // a link to example that should appear in topbar
   exampleURL: '',
+
+  // whether a file marked as generated (needed to execute code) should appear to user
   includeGeneratedInline: false,
+
+  // whether to use tabs or panels
   useTabs: localStorage.getItem('codeplayground-tabs') == 'yes' || false,
+
+  // whether to save the panel positions
   saveState: true,
+
+  // prefix local storage values with this
   saveID: 'sandbox',
-  example: {},
+
+  // title to appear on top of example
+  title: '',
+
+  // description to appear on top of example
+  description: '',
+
+  // tab size for code
   tabSize: 2,
-  maxHeight: 0,
+
+  // whether code example is inline in the page
   inline: false,
+
+  // direction of code when inline
   inlineDirection: 'horizontal',
+
+  // max height when using inline
+  maxHeight: 0,
+
+  // order of code
   sortOrder: [
     'component.js',
     'component.html',
@@ -40,12 +69,16 @@ const settings = {
     'index.css',
     'index.js',
   ],
+
+  // types to use
   scriptTypes: {
     'text/css': 'sample/css',
     'text/html': 'sample/html',
     'text/javascript': 'sample/js',
     'text/typescript': 'sample/ts',
   },
+
+  // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
     'component.html': 'component.html',
@@ -54,6 +87,8 @@ const settings = {
     'index.css': 'index.css',
     'index.js': 'index.js',
   },
+
+  // which panel should code appear in 0 is left and 1 is right
   panelIndexes: {
     'component.js': 0,
     'component.html': 0,
@@ -62,6 +97,8 @@ const settings = {
     'index.css': 1,
     'index.js': 1,
   },
+
+  // how to split up code in panel view
   panelSizes: {
     'component.js': 'grow',
     'component.html': 'grow',
@@ -70,29 +107,66 @@ const settings = {
     'index.css': (1 / 9 * 100),
     'index.js': (1 / 9 * 100),
   },
+
+  // default left right panel width
   panelGroupWidth: [50, 50]
 };
 
 const state = {
+  // which file is currently visible in tab view
   activeFile: undefined,
+
+  // current view in mobile code/preview
   mobileView: 'code',
+
+  // currently resizing
   resizing: true,
-  displayMode: 'desktop'
+
+  // current display mode
+  displayMode: 'desktop',
+
+  // whether to use panels or tabs
+  layout: 'tabs',
 };
 
-const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
-  initialize() {
-    state.activeFile.set(self.getFirstFile()?.filename);
-  },
+const createComponent = ({afterFlush, self, reaction, state, data, settings, $, $$}) => ({
+
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
   ],
+
+  initialize() {
+    state.activeFile.set(self.getFirstFile()?.filename);
+    reaction(self.calculateLayout);
+  },
+
   initializePanels() {
     $('ui-panel').settings({
       getNaturalSize: self.getNaturalPanelSize
     });
   },
+
+  calculateLayout() {
+    let layout = settings.useTabs
+      ? 'tabs'
+      : 'panels'
+    ;
+    // force tabs for small screens or inline examples
+    const displayMode = state.displayMode.get();
+    if(displayMode == 'tablet' || settings.inline) {
+      layout = 'tabs';
+    }
+    self.setLayout(layout);
+  },
+
+  getLayout() {
+    return state.layout.get();
+  },
+  setLayout(layout) {
+    state.layout.set(layout);
+  },
+
   getClassMap() {
     const classMap = {
       resizing: state.resizing.get(),
@@ -109,9 +183,11 @@ const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
       return `height: ${settings.maxHeight}px;`;
     }
   },
+
   canShowButtons() {
     return !settings.inline && state.displayMode.get() !== 'mobile';
   },
+
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding
     if(direction == 'horizontal') {
@@ -138,6 +214,7 @@ const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
       }
     }
   },
+
   getScriptType(type) {
     return get(settings.scriptTypes, type);
   },
@@ -151,7 +228,7 @@ const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: self.shouldUseTabs()
+      tabs: state.layout.get() == 'tabs'
     };
     // defer to preference unless its tablet
     if(state.displayMode.value == 'tablet') {
@@ -161,14 +238,6 @@ const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
       classes[settings.inlineDirection] = true;
     }
     return classes;
-  },
-  shouldUseTabs() {
-    const displayMode = state.displayMode.get();
-    // panels is only an option if on computer
-    if(displayMode == 'computer') {
-      return settings.useTabs;
-    }
-    return true;
   },
   getTabDirection() {
     if(state.displayMode.value == 'tablet') {
@@ -261,19 +330,39 @@ const createComponent = ({afterFlush, self, state, settings, $, $$}) => ({
   },
 
   toggleTabs() {
-    const useTabs = !settings.useTabs;
-    const storedValue = useTabs ? 'yes' : 'no';
-    localStorage.setItem('codeplayground-tabs', storedValue);
-    settings.useTabs = useTabs;
+    const newLayout = (state.layout.get() == 'tabs')
+      ? 'panels'
+      : 'tabs'
+    ;
+    state.layout.set(newLayout);
     afterFlush(() => {
       self.initializePanels();
     });
+    // store preference
+    const storedValue = newLayout == 'tabs' ? 'yes' : 'no';
+    localStorage.setItem('codeplayground-tabs', storedValue);
   },
 
   selectFile(number) {
     const menu = $('ui-menu.files').getComponent();
     if(menu) {
       menu.selectIndex(number - 1);
+    }
+  },
+  selectFilename(filename) {
+    if(state.layout.get() == 'tabs') {
+      const menu = self.getFileMenuItems();
+      each(menu, (item, index) => {
+        if(item.value == filename) {
+          self.selectFile(index + 1);
+          return false;
+        }
+      });
+    }
+    else {
+      $$(`playground-file-editor[filename="${filename}"]`)
+        .find('playground-code-editor')
+        .focus();
     }
   },
 

@@ -4,6 +4,7 @@
   flex-direction: column;
   overflow: hidden;
   will-change: flex;
+  container: panel / inline-size;
 }
 
 ::slotted(*) {
@@ -94,7 +95,6 @@
   top: auto;
   left: auto;
   user-select: none;
-  border-radius: 5px;
 
   &.disabled {
     pointer-events: none;
@@ -140,10 +140,12 @@
 }
 
 .handle,
-.panel {
+.panel,
+.panel ::slotted(*) {
   opacity: 0;
 }
 .handle.initialized,
-.panel.initialized {
+.panel.initialized,
+.panel.initialized ::slotted(*) {
   opacity: 1;
 }

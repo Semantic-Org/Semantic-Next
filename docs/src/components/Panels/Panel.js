@@ -10,20 +10,13 @@ const settings = {
   itemCount: 'auto',
   minSize: '0px',
   maxSize: '0px',
+  naturalSize: '',
   size: 'grow',
   label: '',
   canMinimize: true,
   minimized: false,
   getNaturalSize: (panel, { direction, minimized }) => {
-    const $children = $(panel).children();
-    return (direction == 'horizontal')
-      ? ($children.length > 1)
-        ? sum($children.width())
-        : $children.width()
-      : ($children.length > 1)
-        ? sum($children.height())
-        : $children.height()
-    ;
+    return panel?.component.getNaturalSize(panel, { direction, minimized });
   }
 };
 
@@ -40,6 +33,27 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     minimized: settings.minimized,
     initialized: self.initialized.get()
   }),
+
+  setInitialized() {
+    self.initialized.set(true);
+    dispatchEvent('initialized');
+  },
+
+  getNaturalSize(panel, { direction, minimized }) {
+    if(settings.naturalSize) {
+      const panels = self.getPanels();
+      return panels.getPixelSettingSize(settings.naturalSize);
+    }
+    const $children = $(panel).children();
+    return (direction == 'horizontal')
+      ? ($children.length > 1)
+        ? sum($children.width())
+        : $children.width()
+      : ($children.length > 1)
+        ? sum($children.height())
+        : $children.height()
+    ;
+  },
 
   getHandleClassMap: () => ({
     initialized: self.initialized.get(),
@@ -62,7 +76,8 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     return settings.resizable && self.getIndex() > 0;
   },
   getPanels() {
-    return findParent('uiPanels');
+    const panels = findParent('uiPanels');
+    return panels;
   },
   getPointerPosition(event) {
     const positionObj = event.touches
@@ -90,8 +105,11 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
       })
       .on('touchmove', self.resizeDrag)
     ;
+    $$('iframe').one('pointerenter', (event) => {
+      self.endResize(event);
+    });
     $('body')
-      .one('pointerup', (event) => {
+      .one('pointerup mouseleave', (event) => {
         self.endResize(event);
       })
     ;
@@ -109,6 +127,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
       .removeClass('resizing')
       .css('cursor', '')
     ;
+    $$('iframe').off('pointerenter');
     self.resizing.set(false);
     delete self.initialPosition;
     delete self.initialSize;
@@ -161,7 +180,7 @@ const events = {
   'click .toggle-size'({ self }) {
     self.toggleMinimize();
   },
-  'dblclick .label'({ self }) {
+  'dblclick .self.label'({ self }) {
     self.toggleMinimize();
   },
   'dblclick .handle': function({ self }) {

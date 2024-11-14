@@ -11,7 +11,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.template = null;
     this.part = null;
   }
-  render({ getTemplateName, subTemplates, data, parentTemplate }) {
+  render({ getTemplateName, templateName, subTemplates, data, parentTemplate }) {
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
@@ -29,12 +29,12 @@ export class RenderTemplateDirective extends AsyncDirective {
       const template = subTemplates[templateName];
       if (!template) {
         fatal(
-          `Could not find template named "${getTemplateName()}`,
+          `Could not find template named "${getTemplateName()}"`,
           subTemplates
         );
       }
       // clone if it has changed
-      this.template = template.clone({ templateName: templateName, data: unpackData(data) });
+      this.template = template.clone({ templateName, subTemplates, data: unpackData(data) });
       return true;
     };
     const attachTemplate = () => {
@@ -56,17 +56,22 @@ export class RenderTemplateDirective extends AsyncDirective {
       let html = this.template.render();
       return html;
     };
-    Reaction.create((comp) => {
+
+    if (this.reaction) {
+      return noChange;
+    }
+
+    this.reaction = Reaction.create((computation) => {
       if (!this.isConnected) {
-        comp.stop();
+        computation.stop();
         return;
       }
+
       const hasCreated = maybeCreateTemplate(); // reactive reference
-      if (!comp.firstRun) {
+      const dataContext = unpackData(data); // reactive reference
+      if (!computation.firstRun) {
         attachTemplate();
-        if (!hasCreated) {
-          this.template.setDataContext(unpackData(data), { rerender: false });
-        }
+        this.template.setDataContext(dataContext, { rerender: true });
         this.setValue(renderTemplate());
       }
     });

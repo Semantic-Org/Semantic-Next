@@ -8,17 +8,21 @@ const { id, direction, height } = Astro.props;
 const matchingExamples = await getCollection('examples', ({ data }) => {
   return getExampleID(data) == id;
 });
-const example = matchingExamples[0];
-const exampleType = example.data.exampleType;
+const example = matchingExamples[0].data;
+const exampleType = example.exampleType;
 const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
-let files = await getExampleFiles(example.data, allExampleFiles);
-files = addPlaygroundInjections(files, exampleType);
+let files = await getExampleFiles({
+  contentID: getExampleID(example),
+  allFiles: allExampleFiles,
+  basePath: '../../examples/',
+  includeFolder: example.exampleType == 'folder',
+  hideBoilerplate: example.fold === true,
+  includePlaygroundInjections: true,
+  includeLog: example.exampleType == 'log',
+});
 const sandboxURL = getSandboxURL();
-const projectConfig = {
-  files: files
-};
 const inlineDirection = direction;
 const exampleURL = `/examples/${id}/`;
 const saveID = `example-${id}`;
