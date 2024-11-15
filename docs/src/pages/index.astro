@@ -1,5 +1,39 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
+import { Code } from '@astrojs/starlight/components';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+const code1=`
+<ui-buttons large>
+  <ui-button subtle-negative>
+    <ui-icon x></ui-icon>
+    Delete
+  </ui-button>
+  <ui-button>
+    <ui-icon edit></ui-icon>
+    Edit
+  </ui-button>
+  <ui-button primary>
+    <ui-icon save></ui-icon>
+    Save
+  </ui-button>
+</ui-buttons>
+`.trim();
+const code2=`
+<user-panel>
+  <h3 class="header">
+    Welcome {getDisplayName (getUser userId) }
+  </h3>
+  <ui-buttons large>
+    {#each actions}
+      <ui-button {style}>
+        <ui-icon {icon}>
+        {text}
+      </ui-button>
+    {/each}
+  </ui-buttons>
+</user-panel>
+`.trim();
 
 ---
 <Homepage>
@@ -8,7 +42,7 @@ import Homepage from '../layouts/Homepage.astro';
     <content>
     <ui-container>
       <div class="center">
-        <h2>Native Components,<br> Modern Reactivity</h2>
+        <h1>Native Components,<br> Modern Reactivity</h1>
         <p>Build UI components with <b>web standards</b>, <b>signals-based reactivity</b>, and <b>zero abstraction cost</b>. Create truly portable design systems that work everywhere.</p>
         <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
         <ui-button secondary href="/components">View Docs</ui-button>
@@ -26,27 +60,133 @@ import Homepage from '../layouts/Homepage.astro';
       <ui-container>
         <div class="cards">
           <div class="card">
-            <img src="https://vaccinebutler.com/images/hero2.png">
-            <!-- <ui-icon layers></ui-icon> -->
-            <div class="header">Zero Framework Lock-in</div>
-            <p>Pure web components that work in React, Vue, or vanilla JS. True interoperability without compromise.</p>
+            <!-- <img src="https://vaccinebutler.com/images/hero2.png"> -->
+            <ui-icon layers></ui-icon>
+            <h4 class="header">Zero Framework Lock-in</h4>
+            <p>Author web components that work in React, Vue, or vanilla JS. True interoperability without compromise.</p>
           </div>
           <div class="card">
-            <img src="https://vaccinebutler.com/images/hero.png">
-            <!-- <ui-icon zap></ui-icon> -->
-            <div class="header">Fine-Grained Reactivity</div>
-            <p>Built on signals for granular updates with native performance. Complex state management made simple and accessible directly from the DOM.</p>
+            <!-- <img src="https://vaccinebutler.com/images/hero.png"> -->
+            <ui-icon zap></ui-icon>
+            <h4 class="header">Fine-Grained Reactivity</h4>
+            <p>Built with signals for fine-grained updates. Access reactivity directly from the DOM with vanilla js.</p>
           </div>
           <div class="card">
-            <img src="https://vaccinebutler.com/images/hero2.png">
-            <!-- <ui-icon box></ui-icon> -->
-            <div class="header">Semantic By Design</div>
-            <p>Write clean, readable components that express their meaning through their markup. The intuitive development experience you love, now with web components.</p>
+            <!-- <img src="https://vaccinebutler.com/images/hero2.png"> -->
+            <ui-icon box></ui-icon>
+            <h4 class="header">Semantic By Design</h4>
+            <p>Powerful templating that reads like natural language but compiles to an AST for interop.</p>
           </div>
         </div>
       </ui-container>
     </ribbon>
-    <ribbon class="inverted">
+    <ribbon class="tour">
+      <ui-container>
+        <div class="fixed">
+          <div class="container">
+            <div class="segment">
+              <div class="one">
+                <ui-buttons large>
+                  <ui-button subtle-negative>
+                    <ui-icon x></ui-icon>
+                    Delete
+                  </ui-button>
+                  <ui-button>
+                    <ui-icon edit></ui-icon>
+                    Edit
+                  </ui-button>
+                  <ui-button primary>
+                    <ui-icon save></ui-icon>
+                    Save
+                  </ui-button>
+                </ui-buttons>
+                <Code
+                  code={code1}
+                  lang="html"
+                />
+              </div>
+              <div class="two">
+                <Code
+                  code={code2}
+                  lang="sui"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="copy">
+          <h4 class="sub header">Start Fast</h4>
+          <h3 class="header">Build Layouts with UI Primitives</h3>
+          <p>Semantic provides a growing library for first-party UI components like dropdowns, buttons, menus, inputs that you can use as baseline to design your own custom design system.</p>
+
+          <ul class="feature-list">
+            <li>
+              <ui-icon check></ui-icon>
+              Built using principles from natural language that make using UI as simple as describing it.
+            </li>
+            <li>
+              <ui-icon check></ui-icon>
+              Three syntaxes that provide flexibility in how you describe your UI.
+            </li>
+            <li>
+              <ui-icon check></ui-icon>
+              UI components can be used anywhere you use html, even if you decide not to adopt the component framework.
+            </li>
+          </ul>
+        </div>
+        <div class="copy">
+          <h4 class="sub header">Build Flexibly</h4>
+          <h3 class="header">Design Custom Components Easily</h3>
+          <p>Semantic includes a robust component framework that makes it easy to compose complex components that build off primitives and handle your app's specific use cases.</p>
+          <ul class="feature-list">
+            <li>
+              <ui-icon check></ui-icon>
+              Reactive expressions with natural syntax
+            </li>
+            <li>
+              <ui-icon check></ui-icon>
+              Robust AST based compilation
+            </li>
+            <li>
+              <ui-icon check></ui-icon>
+              Performant rendering powered by Google's Lit
+            </li>
+          </ul>
+          <p>
+        </div>
+
+        <div class="copy">
+          <h4 class="sub header">Developers</h4>
+          <h3 class="header">Intuitive Templating</h3>
+          <p>Write templates that read like plain English. Semantic UI's template syntax makes components self-documenting and easier to maintain.</p>
+
+          <ul class="feature-list">
+            <li>
+              <ui-icon check></ui-icon>
+              Reactive expressions with natural syntax
+            </li>
+            <li>
+              <ui-icon check></ui-icon>
+              Automatic state synchronization
+            </li>
+            <li>
+              <ui-icon check></ui-icon>
+              Built-in conditional and loop helpers
+            </li>
+          </ul>
+        </div>
+      </ui-container>
+    </ribbon>
+    <ribbon>
+      <ui-container>
+        <h3 class="ui header">
+          Try It Out
+        </h3>
+        <PlaygroundExample height="500" id="card-search"></PlaygroundExample>
+      </ui-container>
     </ribbon>
   </ribbons>
+  <footer>
+
+  </footer>
 </Homepage>

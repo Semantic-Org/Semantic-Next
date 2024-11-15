@@ -1,6 +1,7 @@
 @layer page {
   :root {
-
+    --secondary-text-color: #EAB59F;
+    --glow-border: 1px solid oklch(0.22 0.02 277.72);
   }
 
   topbar {
@@ -9,6 +10,24 @@
     width: 100%;
     z-index: var(--float-layer);
   }
+
+  p, li {
+    font-size: 18px;
+    color: var(--text-color);
+    line-height: 1.66;
+  }
+
+  ul {
+    padding-left: 0;
+    margin-left: 0;
+  }
+  li {
+    list-style-type: none;
+  }
+  li ui-icon[check] {
+    color: var(--secondary-text-color);
+  }
+
 
   aboveFold {
     position: relative;
@@ -54,7 +73,7 @@
     }
 
 
-    h2 {
+    h1 {
       font-size: 48px;
       margin: 0;
     }
@@ -82,9 +101,9 @@
       width: 100%;
       height: 100%;
       --gradient-color-1: #001019;
-      --gradient-color-2: #032e49;
+      --gradient-color-2: #c7824b;
       --gradient-color-3: #02403f;
-      --gradient-color-4: #004766;
+      --gradient-color-4: #0a76a5;
     }
   /*
     &:before {
@@ -116,13 +135,62 @@
     display: block;
     color: var(--standard-80);
     min-height: 300px;
+
+    padding: 5rem 0rem;
+
+    ui-container {
+      position: relative;
+    }
+
+    .sub.header {
+      color: var(--secondary-text-color);
+      font-size: 16px;
+      margin-bottom: 0;
+      + .header {
+        margin-top: 1rem;
+      }
+    }
+    .header {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .fixed {
+      position: absolute;
+      right: 0rem;
+      width: 550px;
+
+      .container {
+        position: sticky;
+        top: 1rem;
+      }
+      .segment {
+        padding: 2rem;
+        border: var(--glow-border);
+        background: oklch(0.15 0.05 240.81 / 0.52) var(--angled-gradient);
+        background-image: var(--angled-gradient);
+      }
+      .expressive-code {
+        margin-top: 1rem;
+      }
+
+    }
+    .copy {
+      width: 450px;
+    }
+  }
+
+  .tour {
+    .copy {
+      height: 500px;
+    }
   }
 
   .cards {
     display: flex;
     flex-direction: row;
     gap: 2rem;
-    margin-top: -5rem;
+    margin-top: -10rem;
     text-wrap: pretty;
     flex-wrap: wrap;
 
@@ -133,6 +201,7 @@
       flex-grow: 1;
       flex-basis: calc(33.333% - 1.5rem);
       border-radius: var(--border-radius);
+      border: var(--glow-border);
       padding: 1.5rem;
       text-align: center;
       color: var(--white);
@@ -152,13 +221,10 @@
         font-size: 24px;
         line-height: 1.2;
         font-weight: bold;
-        color: #eab59f;
+        color: var(--primary-text-color);
         margin-bottom: 0.5rem;
       }
       p {
-        color: var(--text-color);
-        font-size: 18px;
-        line-height: 1.66;
         max-width: 500px;
         margin: 0 auto;
       }
@@ -170,11 +236,11 @@
 
 @keyframes masthead {
  0% {
-    background-position: 0% 0%;
- }
- 100% {
-    background-position: 0% -475px;
- }
+  background-position: 0% 0%;
+}
+100% {
+  background-position: 0% -475px;
+}
 }
 
 
@@ -189,5 +255,16 @@
     ribbon .cards {
       margin-top: 5rem;
     }
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

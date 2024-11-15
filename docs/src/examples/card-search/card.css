@@ -1,3 +1,7 @@
+:host {
+  --input-padding: 6px 6px;
+}
+
 .card {
   cursor: pointer;
   background: var(--angled-gradient);

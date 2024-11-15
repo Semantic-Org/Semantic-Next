@@ -35,7 +35,6 @@ const events = {
   },
   'input input'({event, el, settings, value, dispatchEvent}) {
     el.value = value;
-    dispatchEvent('input', { value });
   }
 };
 

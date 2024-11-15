@@ -11,12 +11,12 @@
   --font-name: 'Lato';
   --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
   --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
-  --line-height: var(--20px);
+  --line-height: var(--relative-20px);
   --bold: bold;
   --normal: normal;
 
   --header-font-weight: var(--bold);
-  --header-line-height: var(--18px);
+  --header-line-height: var(--relative-18px);
 
   --link-text-decoration: none;
   --link-hover-text-decoration: var(--link-text-decoration);

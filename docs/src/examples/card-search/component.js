@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { each, escapeRegExp, get } from '@semantic-ui/utils';
+import { each, escapeRegExp, get, weightedObjectSearch } from '@semantic-ui/utils';
 
 // sub templates
 import { card } from './card.js';
@@ -39,7 +39,7 @@ const createComponent = ({ state }) => ({
     const searchTerm = state.searchTerm.get();
     if(searchTerm) {
       friends = weightedObjectSearch(searchTerm, friends, {
-        propertiesToMatch: ['name', 'location', 'role']
+        propertiesToMatch: ['name', 'joined', 'location', 'role']
       });
     }
     return friends;

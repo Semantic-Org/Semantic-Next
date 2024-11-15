@@ -1871,6 +1871,9 @@
   .small.button {
     font-size: var(--button-small);
   }
+  :host {
+    font-size: var(--button-medium);
+  }
   .large.button {
     font-size: var(--button-large);
   }
