@@ -11,6 +11,7 @@
   }
 
   aboveFold {
+    position: relative;
     color: var(--standard-80);
     background-image: var(--angled-gradient);
     display: flex;
@@ -28,6 +29,7 @@
       z-index: 2;
       line-height: 1.18;
       align-content: center;
+      text-shadow: 0px 3px 8px rgba(0, 0, 0, 0.6);
 
       &:before {
         position: absolute;
@@ -36,16 +38,17 @@
         top: 0;
         left: 0;
         height: 100%;
-        opacity: 0;
-        transition: opacity 3s ease-in-out;
         background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
+
         pointer-events: none;
       }
 
       * {
         position: relative;
         z-index: 2;
-        opacity: 0;
         transition: opacity 1s ease-in-out;
       }
     }
@@ -74,57 +77,83 @@
       max-width: 800px;
     }
 
-
+    canvas#gradient {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      --gradient-color-1: #001019;
+      --gradient-color-2: #032e49;
+      --gradient-color-3: #02403f;
+      --gradient-color-4: #004766;
+    }
+  /*
     &:before {
       position: absolute;
       z-index: 1;
-      width: 135%;
-      height: 170%;
-      top: 0;
-      left: 0px;
+      width: 150%;
+      height: 277%;
+      top: -130%;
+      left: -25%;
       content: '';
       pointer-events: none;
       background: url(/images/ui.png);
       transform-origin: 50% 50%;
       transform-style: preserve-3d;
       animation-name: masthead;
-      transition: filter 500ms ease-in-out, opacity 3000ms ease-in-out, transform 3000ms ease-in-out;
-      opacity: 0;
+      opacity: 0.03;
       animation-duration: 15s;
       animation-fill-mode: both;
       filter: blur(0px);
       animation-timing-function: linear;
       animation-iteration-count: infinite;
-      transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateY(0%) translateX(0%) translateZ(0px);
-    }
-
-    &.animate{
-      content:before {
-        opacity: 1;
-      }
-
-      &:before {
-        opacity: 0.03;
-        filter: blur(3px);
-        transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
-      }
-
-      * {
-        opacity: 1;
-      }
-    }
+      transform: rotateX(60deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
+    }*/
 
   }
 
   ribbon {
+    position: relative;
     display: block;
     color: var(--standard-80);
 
     min-height: 300px;
-
-
   }
 
+  .cards {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    margin-top: -5rem;
+
+    .card {
+      background-color: oklch(0.13 0.02 238.07);
+      background-image: var(--subtle-gradient);
+      box-shadow: var(--floating-shadow);
+      bord-grow: 1;
+      flex-basis: 33.333%;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--white);
+
+      ui-icon {
+        font-size: 48px;
+        margin-bottom: 0.5rem;
+        color: var(--primary-text-color);
+      }
+      .header {
+        font-size: 24px;
+        line-height: 1.2;
+        font-weight: bold;
+        color: var(--primary-text-color);
+      }
+      p {
+        color: var(--text-color);
+        font-size: 18px;
+        line-height: 1.66;
+      }
+    }
+  }
 
 }
 

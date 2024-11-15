@@ -1,8 +1,10 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
+
 ---
 <Homepage>
   <aboveFold>
+    <canvas id="gradient"></canvas>
     <content>
     <ui-container>
       <div class="center">
@@ -14,15 +16,32 @@ import Homepage from '../layouts/Homepage.astro';
     </ui-container>
     </content>
   </aboveFold>
-  <script is:inline>
-    const el = document.querySelector('aboveFold');
-    requestAnimationFrame(function() {
-      el.classList.add('animate');
-    });
+  <script>
+    import { Gradient } from '../javascript/gradient.js'
+    const gradient = new Gradient()
+    gradient.initGradient('#gradient')
   </script>
   <ribbons>
     <ribbon>
-      1
+      <ui-container>
+        <div class="cards">
+          <div class="card">
+            <ui-icon layers></ui-icon>
+            <div class="header"> Write Components, Not Framework Code</div>
+            <p>Build UI with pure web components that work anywhere. No framework lock-in means your components are truly portable and future-proof.</p>
+          </div>
+          <div class="card">
+            <ui-icon zap></ui-icon>
+            <div class="header">Powerful Built-in Reactivity</div>
+            <p>A signals-based reactive system that efficiently updates only what changed. Build complex reactive UIs without the complexity of state management libraries.</p>
+          </div>
+          <div class="card">
+            <ui-icon box></ui-icon>
+            <div class="header">Rich Templating That Just Works</div>
+            <p>Familiar template syntax with conditionals, loops, and slots built-in. Write declarative templates that feel natural while leveraging the full power of web components.</p>
+          </div>
+        </div>
+      </ui-container>
     </ribbon>
     <ribbon class="inverted">
       2

@@ -253,25 +253,92 @@ export const sidebarMenuAPI = [
     ]
   },
   {
-    name: 'Templating',
-    url: '/api/templating',
-    icon: 'table',
+    name: 'Template Helpers',
+    url: '/api/helpers',
+    icon: 'book-open',
     pages: [
       {
-        name: 'Template Compiler',
-        url: '/api/templating/template-compiler'
+        name: 'Arrays',
+        url: '/api/helpers/arrays'
       },
       {
-        name: 'Abstract Syntax Tree (AST)',
-        url: '/api/templating/ast'
+        name: 'Comparison',
+        url: '/api/helpers/comparison'
       },
       {
-        name: 'Template',
-        url: '/api/templating/template'
+        name: 'CSS',
+        url: '/api/helpers/css'
       },
       {
-        name: 'String Scanner',
-        url: '/api/templating/string-scanner'
+        name: 'Dates',
+        url: '/api/helpers/dates'
+      },
+      {
+        name: 'Debug',
+        url: '/api/helpers/debug'
+      },
+      {
+        name: 'Logical Operators',
+        url: '/api/helpers/logical'
+      },
+      {
+        name: 'Numeric',
+        url: '/api/helpers/numeric'
+      },
+      {
+        name: 'Objects',
+        url: '/api/helpers/objects'
+      },
+      {
+        name: 'Reactivity',
+        url: '/api/helpers/reactivity'
+      },
+      {
+        name: 'Strings',
+        url: '/api/helpers/strings'
+      },
+    ]
+  },
+  {
+    name: 'Reactivity',
+    url: '/api/reactivity',
+    icon: 'cpu',
+    pages: [
+      {
+        name: 'Reactive Var',
+        url: '/api/reactivity/reactive-var'
+      },
+      {
+        name: 'Reaction',
+        url: '/api/reactivity/reaction'
+      },
+      {
+        name: 'Flushing Reactions',
+        url: '/api/reactivity/flushing'
+      },
+      {
+        name: 'Dependency',
+        url: '/api/reactivity/dependency'
+      },
+      {
+        name: 'Number Helpers',
+        url: '/api/reactivity/number-helpers'
+      },
+      {
+        name: 'Boolean Helpers',
+        url: '/api/reactivity/boolean-helpers'
+      },
+      {
+        name: 'Array Helpers',
+        url: '/api/reactivity/array-helpers'
+      },
+      {
+        name: 'Collection Helpers',
+        url: '/api/reactivity/collection-helpers'
+      },
+      {
+        name: 'Date Helpers',
+        url: '/api/reactivity/date-helpers'
       },
     ]
   },
@@ -327,49 +394,6 @@ export const sidebarMenuAPI = [
       {
         name: 'Utilities',
         url: '/api/query/utilities'
-      },
-    ]
-  },
-  {
-    name: 'Reactivity',
-    url: '/api/reactivity',
-    icon: 'cpu',
-    pages: [
-      {
-        name: 'Reactive Var',
-        url: '/api/reactivity/reactive-var'
-      },
-      {
-        name: 'Reaction',
-        url: '/api/reactivity/reaction'
-      },
-      {
-        name: 'Flushing Reactions',
-        url: '/api/reactivity/flushing'
-      },
-      {
-        name: 'Dependency',
-        url: '/api/reactivity/dependency'
-      },
-      {
-        name: 'Number Helpers',
-        url: '/api/reactivity/number-helpers'
-      },
-      {
-        name: 'Boolean Helpers',
-        url: '/api/reactivity/boolean-helpers'
-      },
-      {
-        name: 'Array Helpers',
-        url: '/api/reactivity/array-helpers'
-      },
-      {
-        name: 'Collection Helpers',
-        url: '/api/reactivity/collection-helpers'
-      },
-      {
-        name: 'Date Helpers',
-        url: '/api/reactivity/date-helpers'
       },
     ]
   },
@@ -441,49 +465,25 @@ export const sidebarMenuAPI = [
     ]
   },
   {
-    name: 'Template Helpers',
-    url: '/api/helpers',
-    icon: 'book-open',
+    name: 'Template Compiler',
+    url: '/api/templating',
+    icon: 'table',
     pages: [
       {
-        name: 'Arrays',
-        url: '/api/helpers/arrays'
+        name: 'Template Compiler',
+        url: '/api/templating/template-compiler'
       },
       {
-        name: 'Comparison',
-        url: '/api/helpers/comparison'
+        name: 'Abstract Syntax Tree (AST)',
+        url: '/api/templating/ast'
       },
       {
-        name: 'CSS',
-        url: '/api/helpers/css'
+        name: 'Template',
+        url: '/api/templating/template'
       },
       {
-        name: 'Dates',
-        url: '/api/helpers/dates'
-      },
-      {
-        name: 'Debug',
-        url: '/api/helpers/debug'
-      },
-      {
-        name: 'Logical Operators',
-        url: '/api/helpers/logical'
-      },
-      {
-        name: 'Numeric',
-        url: '/api/helpers/numeric'
-      },
-      {
-        name: 'Objects',
-        url: '/api/helpers/objects'
-      },
-      {
-        name: 'Reactivity',
-        url: '/api/helpers/reactivity'
-      },
-      {
-        name: 'Strings',
-        url: '/api/helpers/strings'
+        name: 'String Scanner',
+        url: '/api/templating/string-scanner'
       },
     ]
   },
