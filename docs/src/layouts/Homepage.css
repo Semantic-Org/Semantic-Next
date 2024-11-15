@@ -115,7 +115,6 @@
     position: relative;
     display: block;
     color: var(--standard-80);
-
     min-height: 300px;
   }
 
@@ -124,6 +123,7 @@
     flex-direction: row;
     gap: 2rem;
     margin-top: -5rem;
+    text-wrap: pretty;
 
     .card {
       background-color: oklch(0.13 0.02 238.07);
@@ -136,6 +136,11 @@
       text-align: center;
       color: var(--white);
 
+      img {
+        display: block;
+        height: 165px;
+        margin: -60px auto 1rem;
+      }
       ui-icon {
         font-size: 48px;
         margin-bottom: 0.5rem;
@@ -145,7 +150,7 @@
         font-size: 24px;
         line-height: 1.2;
         font-weight: bold;
-        color: var(--primary-text-color);
+        color: #eab59f;
       }
       p {
         color: var(--text-color);

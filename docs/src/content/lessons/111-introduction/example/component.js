@@ -11,7 +11,6 @@ const currentTime = defineComponent({
 
 const greetUser = defineComponent({
   tagName: 'greet-user',
-  css: '',
   template: `Hello {user} the time is {> currentTime}`,
   settings: { user: '' },
   subTemplates: { currentTime }
