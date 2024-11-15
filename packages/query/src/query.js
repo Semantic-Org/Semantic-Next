@@ -387,13 +387,9 @@ export class Query {
               path = path.slice(0, elIndex);
               target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
             }
-            else if(targetSelector) {
-              // keep things simple for most basic uses
-              target = event.target.closest(targetSelector);
-            }
             else {
-              // no target selector
-              target = event.target;
+              // target selector is target
+              target = event.target.closest(targetSelector);
             }
 
             if (target) {
