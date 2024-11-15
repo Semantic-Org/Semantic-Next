@@ -42,7 +42,7 @@
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
-
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
         pointer-events: none;
       }
 
@@ -64,7 +64,7 @@
       margin-top: 0.5rem;
 
       b {
-        color: #52B5FF;
+        color: var(--primary-light-text-color);
       }
     }
 
@@ -124,17 +124,19 @@
     gap: 2rem;
     margin-top: -5rem;
     text-wrap: pretty;
+    flex-wrap: wrap;
 
     .card {
       background-color: oklch(0.13 0.02 238.07);
       background-image: var(--subtle-gradient);
       box-shadow: var(--floating-shadow);
-      bord-grow: 1;
-      flex-basis: 33.333%;
+      flex-grow: 1;
+      flex-basis: calc(33.333% - 1.5rem);
       border-radius: var(--border-radius);
       padding: 1.5rem;
       text-align: center;
       color: var(--white);
+      margin-bottom: 5rem;
 
       img {
         display: block;
@@ -151,11 +153,14 @@
         line-height: 1.2;
         font-weight: bold;
         color: #eab59f;
+        margin-bottom: 0.5rem;
       }
       p {
         color: var(--text-color);
         font-size: 18px;
         line-height: 1.66;
+        max-width: 500px;
+        margin: 0 auto;
       }
     }
   }
@@ -170,4 +175,19 @@
  100% {
     background-position: 0% -475px;
  }
+}
+
+
+@layer responsive.mobile {
+
+  @media only screen and (max-width: 767px) {
+
+    aboveFold content:before {
+      background-image: none;
+    }
+
+    ribbon .cards {
+      margin-top: 0rem;
+    }
+  }
 }
