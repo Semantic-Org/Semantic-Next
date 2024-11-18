@@ -48,7 +48,7 @@
       z-index: 2;
       line-height: 1.18;
       align-content: center;
-      text-shadow: 0px 3px 8px rgba(0, 0, 0, 0.6);
+      text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
 
       &:before {
         position: absolute;
@@ -59,9 +59,9 @@
         height: 100%;
         background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
         pointer-events: none;
       }
 
@@ -100,12 +100,12 @@
       position: absolute;
       width: 100%;
       height: 100%;
+
       --gradient-color-1: #001019;
-      --gradient-color-2: #c7824b;
-      --gradient-color-3: #02403f;
-      --gradient-color-4: #0a76a5;
+      --gradient-color-2: #001019;
+      --gradient-color-3: #112129;
+      --gradient-color-4: #174557;
     }
-  /*
     &:before {
       position: absolute;
       z-index: 1;
@@ -126,7 +126,9 @@
       animation-timing-function: linear;
       animation-iteration-count: infinite;
       transform: rotateX(60deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
-    }*/
+    }
+
+
 
   }
 
@@ -155,34 +157,39 @@
       font-weight: bold;
     }
 
-    .fixed {
-      position: absolute;
-      right: 0rem;
-      width: 550px;
-
-      .container {
-        position: sticky;
-        top: 1rem;
-      }
-      .segment {
-        padding: 2rem;
-        border: var(--glow-border);
-        background: oklch(0.15 0.05 240.81 / 0.52) var(--angled-gradient);
-        background-image: var(--angled-gradient);
-      }
-      .expressive-code {
-        margin-top: 1rem;
-      }
-
+    .expressive-code {
+      margin-top: 1rem;
     }
-    .copy {
-      width: 450px;
-    }
+
+
   }
 
   .tour {
     .copy {
-      height: 500px;
+      min-height: 500px;
+      margin-bottom: 3rem;
+    }
+    ui-container {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    .container {
+      position: sticky;
+      top: 1rem;
+    }
+    .segment {
+      padding: 2rem;
+      border: var(--glow-border);
+      background: oklch(0.15 0.05 240.81 / 0.52) var(--angled-gradient);
+      background-image: var(--angled-gradient);
+    }
+    .left {
+      flex: 1 1 auto;
+      padding-right: 5rem;
+    }
+    .right {
+      width: 500px;
+      flex: 0 0 auto;
     }
   }
 
@@ -222,7 +229,7 @@
         line-height: 1.2;
         font-weight: bold;
         color: var(--primary-text-color);
-        margin-bottom: 0.5rem;
+        margin: 0rem 0rem 0.5rem;
       }
       p {
         max-width: 500px;
@@ -234,13 +241,24 @@
 }
 
 
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes masthead {
- 0% {
-  background-position: 0% 0%;
-}
-100% {
-  background-position: 0% -475px;
-}
+   0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% -475px;
+  }
 }
 
 
@@ -252,19 +270,36 @@
       background-image: none;
     }
 
-    ribbon .cards {
-      margin-top: 5rem;
-    }
-  }
-}
+    ribbon  {
+      padding: 2rem 1rem;
 
-@keyframes fade {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+      .cards {
+        margin-top: 0rem;
+        .card {
+          margin: 0;
+          flex-basis: 100%;
+        }
+      }
+
+      &.tour {
+        .left {
+          padding-right: 0rem;
+        }
+        .right {
+          display: none;
+        }
+      }
+    }
+
+    canvas#gradient {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+
+      --gradient-color-1: #001019;
+      --gradient-color-2: #001019;
+      --gradient-color-3: #001019;
+      --gradient-color-4: #001019;
+    }
   }
 }

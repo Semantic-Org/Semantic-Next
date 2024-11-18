@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { firstMatch, get, each, sortBy } from '@semantic-ui/utils';
+import { firstMatch, get, each, inArray, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
@@ -154,7 +154,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     ;
     // force tabs for small screens or inline examples
     const displayMode = state.displayMode.get();
-    if(displayMode == 'tablet' || settings.inline) {
+    if(inArray(displayMode, ['tablet', 'mobile']) || settings.inline) {
       layout = 'tabs';
     }
     self.setLayout(layout);
