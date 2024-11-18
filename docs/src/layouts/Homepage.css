@@ -26,6 +26,11 @@
   }
   li ui-icon[check] {
     color: var(--secondary-text-color);
+    background-color: #eab59f1c;
+    border-radius: var(--circular-radius);
+    padding: 3px;
+    height: 17px;
+    font-size: 12px;
   }
 
 
@@ -129,6 +134,15 @@
     }
 
 
+    &.offscreen {
+      canvas {
+        display: none;
+      }
+
+      &:before {
+        display: none;
+      }
+    }
 
   }
 
@@ -257,7 +271,7 @@
     background-position: 0% 0%;
   }
   100% {
-    background-position: 0% -475px;
+    background-position: 0% 475px;
   }
 }
 

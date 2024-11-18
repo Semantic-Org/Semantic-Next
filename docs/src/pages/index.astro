@@ -42,7 +42,7 @@ const code2=`
     <content>
     <ui-container>
       <div class="center">
-        <h1>Web Components Ready for Scale</h1>
+        <h1>Scalable Web Components</h1>
         <p>Build UI components with <b>web standards</b>, <b>signals-based reactivity</b>, and <b>zero abstraction cost</b>. Create truly <b>portable in house design systems</b> that work everywhere.</p>
         <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
         <ui-button secondary href="/components">View Docs</ui-button>
@@ -54,6 +54,19 @@ const code2=`
     import { Gradient } from '../javascript/gradient.js'
     const gradient = new Gradient()
     gradient.initGradient('#gradient')
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          entry.target.classList.toggle('offscreen', !entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0,
+        rootMargin: '0px'
+      }
+    );
+    const el = document.querySelector('aboveFold');
+    observer.observe(el);
   </script>
   <ribbons>
     <ribbon>
