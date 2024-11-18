@@ -9,8 +9,10 @@ class ScrollNav {
 
     // Configuration with defaults
     this.options = {
-      deltaThreshold: 5,
-      velocityThreshold: 15,
+      hideThreshold: 5,
+      showThreshold: 15,
+      hideVelocity: 10,
+      showVelocity: 20,
       hideClass: 'hidden',
       ...options
     };
@@ -19,8 +21,6 @@ class ScrollNav {
     this.lastScrollY = window.scrollY;
     this.currentScrollY = window.scrollY;
     this.isVisible = true;
-    this.isScrolling = false;
-    this.scrollTimeout = null;
     this.ticking = false;
 
     // Bind methods
@@ -32,45 +32,35 @@ class ScrollNav {
   }
 
   init() {
-    // Initial state
     this.show();
-
-    // Attach scroll listener using passive event for performance
     window.addEventListener('scroll', this.onScroll, { passive: true });
   }
 
   onScroll() {
     this.currentScrollY = window.scrollY;
 
-    // Only request animation frame if we're not already processing one
     if (!this.ticking) {
       requestAnimationFrame(this.update);
       this.ticking = true;
     }
-
-    // Reset scroll end timer
-    clearTimeout(this.scrollTimeout);
-    this.scrollTimeout = setTimeout(() => {
-      this.isScrolling = false;
-    }, 150);
   }
 
   update() {
-    // Calculate delta and velocity
     const delta = this.currentScrollY - this.lastScrollY;
     const velocity = Math.abs(delta);
 
-    // Only trigger if we've crossed our thresholds
-    if (velocity > this.options.velocityThreshold &&
-        Math.abs(delta) > this.options.deltaThreshold) {
-      if (delta > 0) {  // Scrolling down
+    if (delta > 0) {  // Scrolling down
+      if (velocity > this.options.hideVelocity &&
+          Math.abs(delta) > this.options.hideThreshold) {
         this.hide();
-      } else {  // Scrolling up
+      }
+    } else {  // Scrolling up
+      if (velocity > this.options.showVelocity &&
+          Math.abs(delta) > this.options.showThreshold) {
         this.show();
       }
     }
 
-    // Update state for next frame
     this.lastScrollY = this.currentScrollY;
     this.ticking = false;
   }
@@ -91,8 +81,6 @@ class ScrollNav {
 
   destroy() {
     window.removeEventListener('scroll', this.onScroll);
-    clearTimeout(this.scrollTimeout);
   }
 }
-
 export { ScrollNav };

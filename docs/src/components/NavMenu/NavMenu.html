@@ -5,11 +5,11 @@
     {else if section.image}
       <img src="{section.image}">
     {/if}
-    <span class="text">
+    <span class="text" part="text">
       {section.name}
     </span>
     {#if section.description}
-      <span class="description">{section.description}</span>
+      <span class="description" part="description">{section.description}</span>
     {/if}
     {#if canShowNavIcon section}
       <ui-icon icon={getNavIcon section} class="nav-icon" part="nav-icon"></ui-icon>

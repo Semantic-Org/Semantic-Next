@@ -361,8 +361,8 @@ ui-menu.mobile {
   }
   ui-menu.mobile {
     display: block;
-    width: 90vw;
-    margin: var(--spacing) auto;
+    width: calc(100% - 1rem);
+    margin: var(--compact-spacing) auto;
   }
   ui-panel::part(handle) {
     display: none;

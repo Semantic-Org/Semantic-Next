@@ -12,6 +12,8 @@
   --mobile-menu-box-shadow: none;
   --mobile-menu-padding: 10px 20px 20px;
 
+  --mobile-menu-item-padding: 5px 0px;
+
   --mobile-menu-scrollbar-padding: 15px;
 
   --mobile-menu-max-height: 60dvh;
@@ -29,7 +31,6 @@
 nav-menu {
   --nav-menu-title-font-size: 15px;
   --nav-menu-title-color: var(--mobile-menu-color);
-  --nav-menu-title-padding: 10px 0px;
   --nav-menu-dropdown-icon-font-size: 16px;
 }
 
@@ -163,9 +164,16 @@ dialog {
       overflow: auto;
       padding: var(--mobile-menu-padding);
 
+      &::part(title) {
+        padding: 0;
+      }
+      &::part(text) {
+        padding: var(--nav-menu-title-padding);
+      }
       &::part(nav-icon) {
         font-size: 18px;
-        padding: 2px;
+        padding: 8px 20px;
+        margin: -4px -20px -4px auto;
       }
     }
 
@@ -220,10 +228,14 @@ dialog.sticky {
 
   .header {
     padding-bottom: 0;
+
+    + nav-menu {
+      padding-top: 0;
+    }
   }
 
   nav-menu {
-    padding-top: 0;
+    padding-top: 1rem;
 
     &::part(title) {
       background: var(--mobile-menu-background-color);

@@ -196,5 +196,8 @@ html.light {
   sidebar {
     display: none;
   }
+  :root {
+    --topbar-logo-margin: 1px 13px 0px 13px;
+  }
 }
 
