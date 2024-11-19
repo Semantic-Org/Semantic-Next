@@ -18,7 +18,7 @@ const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
   },
 
   ball: {
-    initialCount: 80,
+    initialCount: 50,
     r: { average: 3, variance: 1 },
     v: { average: 100, variance: 100 },
     saturation: {
@@ -38,7 +38,13 @@ const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   startAnimation() {
     self.render.lastTime = performance.now() * 0.001;
-    requestAnimationFrame(self.animate);
+
+    // this is the main render loop, it does not need to call itself
+    // as the reactivity handles rerendering
+    reaction(() => {
+      state.balls.get(); // reactive source
+      requestAnimationFrame(self.animate);
+    });
   },
 
   getCanvas() {
@@ -62,7 +68,6 @@ const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
     self.updateBalls(deltaTime);
     self.draw();
 
-    requestAnimationFrame(self.animate);
   },
 
   emitBalls() {
@@ -114,7 +119,6 @@ const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
     );
 
     self.checkCollisions(updatedBalls);
-
     state.balls.set(updatedBalls);
   },
 
