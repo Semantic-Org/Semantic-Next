@@ -10,15 +10,14 @@ const componentPages = components.map(page => ({
 /* Topbar Menu */
 export const topbarMenu =  [
   {
-    _id: 'learn',
-    name: 'Learn',
-    url: '/learn/selection',
-    baseURL: '/learn'
+    _id: 'framework',
+    name: 'Components',
+    url: '/components',
   },
   {
-    _id: 'framework',
-    name: 'Framework',
-    url: '/components',
+    _id: 'ui',
+    name: 'UI Primitives',
+    url: '/introduction',
   },
 
   {
@@ -27,9 +26,10 @@ export const topbarMenu =  [
     url: '/api',
   },
   {
-    _id: 'ui',
-    name: 'UI Components',
-    url: '/introduction',
+    _id: 'learn',
+    name: 'Learn',
+    url: '/learn/selection',
+    baseURL: '/learn'
   },
   {
     _id: 'examples',
@@ -49,7 +49,7 @@ export const topbarMenu =  [
 /* UI Component Sidebar */
 export const sidebarMenuUI = [
   {
-    name: 'Usage Guide',
+    name: 'Usage',
     url: '/introduction',
     icon: 'open book',
     pages: [
@@ -72,7 +72,7 @@ export const sidebarMenuUI = [
     ]
   },
   {
-    name: 'UI Components',
+    name: 'UI Primitives',
     url: '/ui',
     icon: 'layers',
     pages: componentPages,
