@@ -22,7 +22,7 @@
     "astro": "^4.16.13",
     "astro-expressive-code": "^0.38.3",
     "link": "^2.1.1",
-    "playground-elements": "^0.19.1",
+    "playground-elements": "^0.18.1",
     "pretty": "^2.0.0",
     "pretty-json-custom-element": "^1.1.16",
     "semver": "^7.6.3",
