@@ -38,16 +38,17 @@ export default defineConfig({
       // Example: Force a broken package to skip SSR processing, if needed
       //external: ['playground-ide'],
     }
-  },
+  },/*
   optimizeDeps: {
     force: true,
-    exclude: ['playground-elements']
-  },
+    exclude: ['playground-elements'],
+    needsInterop: ['playground-elements'],
+  },*/
   integrations: [
     lit(),
     astroExpressiveCode({
       shiki: {
-        langs: ['html', sui],
+        langs: [sui],
       },
     }),
     mdx({}),
