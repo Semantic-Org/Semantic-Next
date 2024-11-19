@@ -9,7 +9,6 @@ import starlight from '@astrojs/starlight';
 const sui = {
   id: 'sui',
   scopeName: 'source.sui',
-  embeddedLangs: ['html'],
   aliases: ['sui-template'],
   ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8')),
   name: 'sui',
@@ -48,7 +47,7 @@ export default defineConfig({
     lit(),
     astroExpressiveCode({
       shiki: {
-        langs: [sui],
+        langs: ['html', sui],
       },
     }),
     mdx({}),
