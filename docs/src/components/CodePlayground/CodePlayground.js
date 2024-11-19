@@ -75,7 +75,6 @@ const settings = {
     'text/css': 'sample/css',
     'text/html': 'sample/html',
     'text/javascript': 'sample/js',
-    'text/typescript': 'sample/ts',
   },
 
   // titles to appear to users
