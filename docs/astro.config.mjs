@@ -9,7 +9,6 @@ import starlight from '@astrojs/starlight';
 const sui = {
   id: 'sui',
   scopeName: 'source.sui',
-  embeddedLangs: ['html'],
   aliases: ['sui-template'],
   ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8')),
   name: 'sui',
@@ -38,11 +37,11 @@ export default defineConfig({
     ssr: {
       // Example: Force a broken package to skip SSR processing, if needed
       //external: ['playground-ide'],
-    }
-  },
-  optimizeDeps: {
-    force: true,
-    exclude: ['playground-elements']
+    },
+    optimizeDeps: {
+      force: true,
+      exclude: ['playground-elements'],
+    },
   },
   integrations: [
     lit(),
