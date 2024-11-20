@@ -1,8 +1,11 @@
-.source {
-  color: var(--standard-60);
-  margin-right: var(--compact-spacing);
+table {
+  border-collapse: collapse;
+  width: 100%;
 }
-.counter {
-  font-weight: bold;
-  color: var(--primary-text-color);
+th {
+  font-weight: var(--bold);
+  color: var(--white);
+}
+th {
+  padding: 5px 8px;
 }

@@ -1,35 +1,20 @@
-<h3>Reactive Sources</h3>
-<ul>
-  <li>
-    <span class="source">Setting</span>
-    <span class="counter">{counter1}</span>
-  </li>
-  <li>
-    <span class="source">State</span>
-    <span class="counter">{counter2}</span>
-  </li>
-  <li>
-    <span class="source">Reactive Prop</span>
-    <span class="counter">{counter3}</span>
-  </li>
-</ul>
-
-<h3>Non-Reactive Sources</h3>
-<ul>
-  <li>
-    <span class="source">Prop</span>
-    <span class="counter">{counter4}</span>
-  </li>
-  <li>
-    <span class="source">Prop in Function</span>
-    <span class="counter">{counter5}</span>
-  </li>
-  <li>
-    <span class="source">$ in Function</span>
-    <span class="counter">{counter6}</span>
-  </li>
-  <li>
-    <span class="source">Setting Untouched</span>
-    <span class="counter">{counter7}</span>
-  </li>
-</ul>
+<table>
+  <thead>
+    <tr>
+      {#each header in headers}
+        <th>{header}</th>
+      {/each}
+    </tr>
+  </thead>
+  <tbody>
+    {#if not hasAny rows}
+      No rows
+    {/if}
+    {#each row in rows}
+      {> template
+        name=rowTemplate
+        data=row
+      }
+    {/each}
+  </tbody>
+</table>

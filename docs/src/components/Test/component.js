@@ -1,45 +1,30 @@
-import { defineComponent } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
+import { Template } from '@semantic-ui/templating';
 
 import css from './component.css?raw';
 import template from './component.html?raw';
 
+
 const settings = {
-  counter1: 0,
-  counter7: 0,
+  rowTemplate: new Template(), // user can specify a template to render the rows
+  headers: [],
+  rows: [
+    { firstName: 'Buck', lastName: 'Pencilsworth', age: '42', gender: 'Male' },
+    { firstName: 'Mildred', lastName: 'Staplegun', age: '67', gender: 'Female' },
+    { firstName: 'Chip', lastName: 'Windowsill', age: '23', gender: 'Male' },
+    { firstName: 'Peggy', lastName: 'Lunchroom', age: '51', gender: 'Female' },
+    { firstName: 'Duke', lastName: 'Coffeebean', age: '38', gender: 'Male' },
+    { firstName: 'Dot', lastName: 'Keyboarder', age: '29', gender: 'Female' },
+    { firstName: 'Brick', lastName: 'Wallman', age: '45', gender: 'Male' },
+    { firstName: 'Betty', lastName: 'Mouseclicks', age: '33', gender: 'Female' },
+    { firstName: 'Rod', lastName: 'Sockdrawer', age: '58', gender: 'Male' },
+    { firstName: 'Penny', lastName: 'Deskchair', age: '31', gender: 'Female' },
+  ],
 };
 
-const state = {
-  counter2: 0
-};
-
-const createComponent = ({ reactiveVar, self }) => ({
-  counter3: reactiveVar(0),
-  counter4: 0,
-  counter5: () => self.counter4,
-});
-
-
-const onCreated = function({ settings, state, self }) {
-  setInterval(() => {
-    settings.counter1++;
-    state.counter2.increment();
-    self.counter3.increment();
-    self.counter4++;
-  }, 1000);
-};
-
-const onRendered = function({ self, $ }) {
-  self.counter6 = Number($('.counter').first().text());
-};
-
-
-export const UICounter = defineComponent({
-  tagName: 'ui-counter',
+export const DynamicTable = defineComponent({
+  tagName: 'dynamic-table',
   template,
   css,
-  createComponent,
-  onCreated,
-  onRendered,
-  state,
   settings,
 });

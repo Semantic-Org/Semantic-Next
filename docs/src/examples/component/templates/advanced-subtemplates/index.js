@@ -2,7 +2,7 @@ import { $ } from '@semantic-ui/query';
 import { row } from './row.js';
 
 // use same row template across instances
-$('dynamic-table.one').initialize({
+$('dynamic-table').initialize({
   rowTemplate: row,
   headers: [
     'Name',
@@ -11,7 +11,7 @@ $('dynamic-table.one').initialize({
   ]
 });
 
-
+console.log($('dynamic-table').length);
 // use different data for each table
 $('dynamic-table.one').initialize({
   rows: [
