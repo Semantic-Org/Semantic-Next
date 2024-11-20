@@ -1,7 +1,9 @@
+import { noChange } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { fatal, mapObject } from '@semantic-ui/utils';
+import { fatal, isString, mapObject } from '@semantic-ui/utils';
+import { Template } from '@semantic-ui/templating';
 
 // Define directive
 export class RenderTemplateDirective extends AsyncDirective {
@@ -11,28 +13,43 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.template = null;
     this.part = null;
   }
-  render({ getTemplateName, templateName, subTemplates, data, parentTemplate }) {
+  render({ getTemplate, templateName, subTemplates, data, parentTemplate }) {
     const unpackData = (dataObj) => {
       return mapObject(dataObj, (val) => val());
     };
     const maybeCreateTemplate = () => {
 
-      const templateName = getTemplateName();
+      // expression can evaluate to a template or a string
+      // in the case of a string we will pull from subtemplates
+      let templateName;
+      let template;
 
-      // check if the template name is set and is the same as current
-      if (this.template && this.templateName == templateName) {
+      const templateOrName = getTemplate();
+
+      // find template to render
+      if(isString(templateOrName)) {
+        templateName = templateOrName;
+        template = subTemplates[templateName];
+        if (!template) {
+          fatal(
+            `Could not find template named "${templateName}"`,
+            subTemplates
+          );
+          return false;
+        }
+      }
+      else if(templateOrName instanceof Template) {
+        // support passing in full templates using expressions
+        template = templateOrName;
+        templateName = template.templateName;
+      }
+
+      // avoid recreating prototype if rendered already
+      if(templateName == this.templateName) {
         return false;
       }
       this.templateName = templateName;
 
-      // find template to render
-      const template = subTemplates[templateName];
-      if (!template) {
-        fatal(
-          `Could not find template named "${getTemplateName()}"`,
-          subTemplates
-        );
-      }
       // clone if it has changed
       this.template = template.clone({ templateName, subTemplates, data: unpackData(data) });
       return true;

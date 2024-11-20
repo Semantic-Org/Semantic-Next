@@ -225,7 +225,7 @@ export class LitRenderer {
     return renderTemplate({
       subTemplates: this.subTemplates,
       templateName: node.name,
-      getTemplateName: () => this.evaluateExpression(node.name, data), // template name can be dynamic
+      getTemplate: () => this.evaluateExpression(node.name, data), // template can be dynamic
       data: templateData,
       parentTemplate: this.template,
     });
