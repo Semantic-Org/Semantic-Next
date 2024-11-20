@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { each, noop, isServer, isClient, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
@@ -205,6 +205,9 @@ export const defineComponent = ({
         return html;
       }
     };
+    if(isClient && customElements.get(tagName)) {
+      return webComponent;
+    }
     customElements.define(tagName, webComponent);
   }
   return tagName ? webComponent : litTemplate;

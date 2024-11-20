@@ -1,4 +1,4 @@
-import { noChange } from 'lit';
+import { nothing, noChange } from 'lit';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
@@ -31,10 +31,6 @@ export class RenderTemplateDirective extends AsyncDirective {
         templateName = templateOrName;
         template = subTemplates[templateName];
         if (!template) {
-          fatal(
-            `Could not find template named "${templateName}"`,
-            subTemplates
-          );
           return false;
         }
       }
@@ -92,7 +88,10 @@ export class RenderTemplateDirective extends AsyncDirective {
         this.setValue(renderTemplate());
       }
     });
-    maybeCreateTemplate();
+    const hasCreated = maybeCreateTemplate();
+    if(!hasCreated) {
+      return nothing;
+    }
     attachTemplate();
     this.template.setDataContext(unpackData(data));
     return renderTemplate();

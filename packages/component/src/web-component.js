@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { each, isFunction, kebabToCamel, keys, unique, isServer, inArray, get } from '@semantic-ui/utils';
+import { each, isFunction, isClassInstance, kebabToCamel, keys, unique, isServer, inArray, get } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
@@ -92,23 +92,30 @@ class WebComponentBase extends LitElement {
         // this can either be a settings object or a default value
         // i.e. { foo: 'baz' } // basic
         // or { foo: { type: String, defaultValue: 'baz' } // expert
+
+        // we cant serialize custom classes
+        const propertySettings = {
+          propertyOnly: isClassInstance(defaultValue)
+        };
+
         properties[name] = (defaultValue?.type)
           ? settings
-          : WebComponentBase.getPropertySettings(name, defaultValue?.constructor)
+          : WebComponentBase.getPropertySettings(name, defaultValue?.constructor, propertySettings)
         ;
       });
     }
+    console.log(properties);
     return properties;
   }
 
-  static getPropertySettings(name, type = String) {
+  static getPropertySettings(name, type = String, { propertyOnly = false } = {}) {
     let property = {
       type,
       attribute: true,
       //hasChanged: isEqual,
     };
     // functions cannot be serialized
-    if (type == Function) {
+    if (propertyOnly || type == Function) {
       property.attribute = false;
     }
     else if (type == Boolean) {

@@ -33,7 +33,7 @@ export const Template = class Template {
     onUpdated = noop,
     onDestroyed = noop,
     onThemeChanged = noop,
-  }) {
+  } = {}) {
     // if we are rendering many of same template we want to pass in AST for performance
     if (!ast) {
       const compiler = new TemplateCompiler(template);
