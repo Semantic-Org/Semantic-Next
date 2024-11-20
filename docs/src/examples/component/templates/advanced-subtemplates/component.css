@@ -1,0 +1,11 @@
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th {
+  font-weight: var(--bold);
+  color: var(--white);
+}
+th {
+  padding: 5px 8px;
+}

@@ -66,14 +66,21 @@
 
     nav-menu {
       margin-top: 0rem;
+      --nav-menu-title-padding: 5px 0px 10px;
       --nav-menu-title-icon-font-size: 13px;
       --nav-menu-title-icon-width: 1rem;
       --nav-menu-title-icon-distance: 9px;
       --nav-menu-content-icon-indent-distance: 7px;
-      --nav-menu-sub-content-indent-distance: 0.25rem;
+      --nav-menu-sub-content-indent-distance: 0px;
       --nav-menu-menu-item-font-size: 12px;
       --nav-menu-menu-item-spacing: 6px;
-      --nav-menu-content-icon-indent-distance: 2px;
+      --nav-menu-content-icon-indent-distance: 5px;
+      --nav-menu-sub-title-font-size: 10px;
+      --nav-menu-sub-title-padding: 7px 0px 4px;
+    }
+    nav-menu::part(item-title) {
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
   }

@@ -73,12 +73,12 @@ If an attribute expression **omits quotes** the entire attribute will be removed
 <input type="checkbox" checked={isChecked} />
 ```
 
-If `true` will output
+If `isChecked == true` will output
 ```sui
 <input type="checkbox" checked />
 ```
 
-and if `false` will output
+and if `isChecked == false` it will omit the attribute altogether
 ```sui
 <input type="checkbox" />
 ```

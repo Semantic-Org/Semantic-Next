@@ -1,0 +1,74 @@
+---
+layout: '@layouts/Guide.astro'
+title: Subtemplates
+description: Using subtemplate syntax from inside templates
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Subtemplates
+
+Sub templates let you render components from inside another component. This lets you scale your architecture for complex apps.
+
+A template includes two values, the `name` or template name to render and `data` the data to pass into the subtemplate.
+
+## Using Subtemplates
+
+To use a subtemplate you must export the template from
+
+### Shorthand
+
+To add a subtemplate to a template you can use the syntax
+
+```sui
+{> templateName value1=1 value2=2}
+```
+
+This would initialize the template `templateName` with the data object
+
+```json
+{ value1: 1, value2: 2 }
+```
+
+
+### Verbose
+
+Verbose syntax allows you to explicitly define the template name and data. This might make it easier to read in cases where the data or template name is dynamic and [uses an expression](/templates/expressions) to return a value.
+
+```sui
+{> template
+  name='templateName'
+  data={
+    one: 'one',
+    two: 'two',
+  }
+}
+```
+
+### Dynamic Templates
+
+
+### Dynamic Data Values
+
+
+### Dynamic Data Object
+
+You can return the entire data object from an [expression](/templates/expressions)
+
+```sui
+{> template
+  name='templateName'
+  data=(getData arg1 arg2)
+}
+```
+
+```javascript
+// component instance
+const createInstance = () => ({
+  getData(arg1, arg2) {
+    return {
+      some: 'object',
+      data: 'values'
+    };
+  }
+});
+```

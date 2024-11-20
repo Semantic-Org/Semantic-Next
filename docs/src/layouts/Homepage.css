@@ -4,6 +4,10 @@
     --glow-border: 1px solid oklch(0.22 0.02 277.72);
   }
 
+  body {
+    text-wrap: pretty;
+  }
+
   topbar {
     position: absolute;
     top: 1rem;
@@ -95,10 +99,16 @@
     ui-button {
       font-size: 18px;
     }
-    .center {
-      margin: 0 auto;
-      text-align: center;
-      max-width: 800px;
+
+    .image {
+      float: right;
+      width: 450px;
+      margin-left: 2rem;
+    }
+
+    .text {
+      margin: 0;
+      max-width : 550px;
     }
 
     canvas#gradient {
@@ -107,7 +117,7 @@
       height: 100%;
 
       --gradient-color-1: #001019;
-      --gradient-color-2: #001019;
+      --gradient-color-2: #0a5471;
       --gradient-color-3: #112129;
       --gradient-color-4: #174557;
     }
@@ -118,6 +128,7 @@
       height: 277%;
       top: -130%;
       left: -25%;
+      transform: rotateX(60deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
       content: '';
       pointer-events: none;
       background: url(/images/ui.png);
@@ -130,7 +141,7 @@
       filter: blur(0px);
       animation-timing-function: linear;
       animation-iteration-count: infinite;
-      transform: rotateX(60deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
+      display: none;
     }
 
 
@@ -212,7 +223,7 @@
     flex-direction: row;
     gap: 2rem;
     margin-top: -10rem;
-    text-wrap: pretty;
+
     flex-wrap: wrap;
 
     .card {

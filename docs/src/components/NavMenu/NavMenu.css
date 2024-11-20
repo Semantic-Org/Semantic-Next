@@ -134,6 +134,9 @@ a {
         font-size: var(--nav-menu-sub-title-font-size);
         padding: var(--nav-menu-sub-title-padding);
 
+        &:first-child {
+          padding-top: 0;
+        }
         + .content {
           padding-left: var(--nav-menu-sub-content-indent-distance) !important;
         }
