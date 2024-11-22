@@ -1,20 +1,27 @@
-<table>
-  <thead>
-    <tr>
-      {#each header in headers}
-        <th>{header}</th>
-      {/each}
-    </tr>
-  </thead>
-  <tbody>
-    {#if not hasAny rows}
-      No rows
-    {/if}
-    {#each row in rows}
+<h2>Hello World</h2>
+{#each header in headers}
+  {header}
+{/each}
+{stringify rowTemplate}
+{log headers}
+<div class="wrapper">
+  {#each row in rows}
+    <div>
+      {log rowTemplate}
       {> template
         name=rowTemplate
         data=row
       }
-    {/each}
-  </tbody>
-</table>
+    </div>
+  {/each}
+</div>
+<h2>Second</h2>
+{> template
+  name=rowTemplate
+  data={ firstName: 'johnny', lastName: 'fingers', age: 22}
+}
+<h3>Third</h3>
+
+{#each row in rows}
+  {stringify row}
+{/each}

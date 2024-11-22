@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { Template } from '@semantic-ui/templating';
 
-import css from './component.css?raw';
-import template from './component.html?raw';
+import css from './dynamic-table.css?raw';
+import template from './dynamic-table.html?raw';
 
 
 const settings = {
