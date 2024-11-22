@@ -766,7 +766,7 @@ export const Template = class Template {
     let result = [];
     // recursive lookup
     function search(template, templateName) {
-      if (template.templateName === templateName) {
+      if (!templateName || (template.templateName === templateName)) {
         result.push({
           ...template.instance,
           ...template.data
