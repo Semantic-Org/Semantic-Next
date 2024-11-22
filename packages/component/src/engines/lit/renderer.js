@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -25,6 +25,7 @@ export class LitRenderer {
     this.snippets = snippets || {};
     this.helpers = helpers || {};
     this.isSVG = isSVG;
+    this.id = hashCode(ast);
   }
 
   resetHTML() {
@@ -132,9 +133,11 @@ export class LitRenderer {
       }
       if(key == 'content') {
         return (eachData) => {
+          // each data is @index, this, alias from curent position
+          data = { ...this.data, ...eachData };
           return this.renderContent({
             ast: value,
-            data: { ...data, ...eachData },
+            data,
           });
         };
       }
@@ -175,17 +178,20 @@ export class LitRenderer {
   };
 
   getPackedNodeData(node, data, { inheritParent = false } = {}) {
-
     const getPackedData = (unpackedData, options = {}) => {
       let packedData = {};
       // this is a data object like {> someTemplate data=getData }
       // we need to get the data first before we can wrap it
       if(isString(unpackedData)) {
-        unpackedData = this.evaluateExpression(unpackedData, data, options);
+        // note this is currently not reactive on the 'getData' expression
+        // so it will be locked in when evaluated
+        const expression = unpackedData; // this is an expression like data=getData
+        unpackedData = this.evaluateExpression(expression, data, options);
+        packedData = mapObject(unpackedData, wrapFunction);
+
       }
-      // okay now we have the data in both cases, lets pack it
-      // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
-      if(isPlainObject(unpackedData)) {
+      else if(isPlainObject(unpackedData)) {
+        // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
         packedData = mapObject(unpackedData, (expression) => this.getPackedValue(expression, data, options));
       }
       return packedData;
@@ -195,16 +201,12 @@ export class LitRenderer {
     const packedReactiveData = getPackedData(node.reactiveData, { reactive: true });
 
     // only inherit parent data context if specified
-    let parentData = (inheritParent)
-      ? data
-      : {}
-    ;
-    const packedData = {
-      ...parentData,
+    data = {
+      ...(inheritParent) ? this.data : {},
       ...packedStaticData,
       ...packedReactiveData
     };
-    return packedData;
+    return data;
   }
 
   evaluateSnippet(node, data = {}) {
@@ -425,6 +427,10 @@ export class LitRenderer {
 
   setData(data) {
     this.data = data;
+    this.updateSubtreeData(data);
+  }
+
+  updateSubtreeData(data) {
     each(this.renderTrees, (tree) => {
       tree.updateData(data);
     });
