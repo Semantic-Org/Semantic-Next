@@ -348,6 +348,16 @@ export class Query {
     return;
   }
 
+  ready(handler) {
+    if(this.is(document) && document.readyState == 'loading') {
+      this.on('ready', handler);
+    }
+    else {
+      handler.call(document, new Event('DOMContentLoaded'));
+    }
+    return this;
+  }
+
   on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
@@ -365,8 +375,16 @@ export class Query {
       handler = targetSelectorOrHandler;
     }
 
+    // support some more friendly names
+    const aliases = {
+      ready: 'DOMContentLoaded'
+    };
+
     // Split event names by spaces and attach handlers for each
-    const events = eventNames.split(' ').filter(Boolean);
+    const events = eventNames.split(' ')
+      .map(name => aliases[name] ? aliases[name] : name)
+      .filter(Boolean)
+    ;
 
     events.forEach(eventName => {
       const abortController = options?.abortController || new AbortController();
