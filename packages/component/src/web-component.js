@@ -104,7 +104,6 @@ class WebComponentBase extends LitElement {
         ;
       });
     }
-    console.log(properties);
     return properties;
   }
 
@@ -117,6 +116,9 @@ class WebComponentBase extends LitElement {
     // functions cannot be serialized
     if (propertyOnly || type == Function) {
       property.attribute = false;
+      property.hasChanged = (newVal, oldVal) => {
+        return true;
+      };
     }
     else if (type == Boolean) {
       property.converter = {
