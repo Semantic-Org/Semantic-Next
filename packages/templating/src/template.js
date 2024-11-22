@@ -128,14 +128,15 @@ export const Template = class Template {
   initialize() {
     let template = this;
     let instance;
+    this.instance = {};
     if (isFunction(this.createComponent)) {
-      this.instance = {};
       instance = this.call(this.createComponent) || {};
       extend(template.instance, instance);
     }
-    if (isFunction(instance.initialize)) {
-      this.call(instance.initialize.bind(template));
+    if (isFunction(template.instance.initialize)) {
+      this.call(template.instance.initialize.bind(template));
     }
+    // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
     this.onCreated = () => {
@@ -604,7 +605,7 @@ export const Template = class Template {
         flush: Reaction.flush,
 
         data: this.data,
-        settings: this.element.settings,
+        settings: this.element?.settings,
         state: this.state,
 
         isRendered: () => this.rendered,
