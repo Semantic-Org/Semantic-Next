@@ -3,4 +3,4 @@ export { TestElement } from './test-element';
 export { TestCase } from './test-case';
 export { UIClock } from './clock';
 export { CurrentTime } from './current-time';
-export { DynamicTable } from './dynamic-table';
+export { DynamicTable, Row, Row2 } from './dynamic-table';

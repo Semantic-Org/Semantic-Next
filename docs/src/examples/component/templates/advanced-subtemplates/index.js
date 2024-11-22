@@ -1,5 +1,6 @@
 import { $ } from '@semantic-ui/query';
 import { row } from './row.js';
+import { row2 } from './row.js';
 
 // use same row template across instances
 $('dynamic-table').initialize({
