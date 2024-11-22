@@ -4,8 +4,19 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.1.7
+
+### Features
+* Added `ready` to Query and `on('ready')` as aliases for `domcontentloaded`.
+* You can now specify full templates as settings, not just template names. i.e. `settings = { rowTemplate = new Template() };`
+
+### Fixes
+* Calling `defineComponent` multiple times on client will no longer produce error (useful when multiple components need to req another one to be defined)
+* Renderer now probably gcs subtrees using weakref
+* Components now support custom classes as settings
+
 # Version 0.1.6
-* You can now specify full templates as settings, not just template names
+* Fixed some issues related to data staleness in AST subtrees like {#each}
 
 # Version 0.1.5
 * Add `openLink` to utils

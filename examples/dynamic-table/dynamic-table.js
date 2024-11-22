@@ -1,20 +1,14 @@
 import { defineComponent } from '@semantic-ui/component';
 import { Template } from '@semantic-ui/templating';
 
-import css from './component.css?raw';
-import template from './component.html?raw';
+import css from './dynamic-table.css?raw';
+import template from './dynamic-table.html?raw';
 
 
 const settings = {
   rowTemplate: new Template(), // user can specify a template to render the rows
-  headers: [
-    'Name',
-    'Age',
-    'Gender',
-  ],
-  rows: [
-    { firstName: 'Buck', lastName: 'Pencilsworth', age: '42', gender: 'Male' },
-  ],
+  headers: [],
+  rows: [],
 };
 
 const createComponent = ({self, state, settings}) => ({

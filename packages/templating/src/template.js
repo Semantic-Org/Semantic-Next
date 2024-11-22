@@ -33,7 +33,7 @@ export const Template = class Template {
     onUpdated = noop,
     onDestroyed = noop,
     onThemeChanged = noop,
-  }) {
+  } = {}) {
     // if we are rendering many of same template we want to pass in AST for performance
     if (!ast) {
       const compiler = new TemplateCompiler(template);
@@ -128,14 +128,15 @@ export const Template = class Template {
   initialize() {
     let template = this;
     let instance;
+    this.instance = {};
     if (isFunction(this.createComponent)) {
-      this.instance = {};
       instance = this.call(this.createComponent) || {};
       extend(template.instance, instance);
     }
-    if (isFunction(instance.initialize)) {
-      this.call(instance.initialize.bind(template));
+    if (isFunction(template.instance.initialize)) {
+      this.call(template.instance.initialize.bind(template));
     }
+    // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
     this.onCreated = () => {
@@ -604,7 +605,7 @@ export const Template = class Template {
         flush: Reaction.flush,
 
         data: this.data,
-        settings: this.element.settings,
+        settings: this.element?.settings,
         state: this.state,
 
         isRendered: () => this.rendered,
@@ -722,43 +723,50 @@ export const Template = class Template {
     return Template.getTemplates(templateName)[0];
   }
   static findParentTemplate(template, templateName) {
+    // this matches on DOM (common)
     let match;
-    if (templateName) {
-      // this matches on DOM (common)
-      if(!match) {
-        let parentNode = template.element?.parentNode;
-        while(parentNode) {
-          if(parentNode.component?.templateName == templateName) {
-            match = {
-              ...parentNode.component,
-              ...parentNode.dataContext,
-            };
-            break;
-          }
-          parentNode = parentNode.parentNode;
-        }
+    const isMatch = (component) => {
+      if(match || !component?.templateName) {
+        return false;
       }
-      // this matches on nested partials (less common)
-      while (template) {
-        template = template._parentTemplate;
-        if (!match && template?.templateName == templateName) {
+      if(templateName && component?.templateName !== templateName) {
+        return false;
+      }
+      return true;
+    };
+
+    if(!match) {
+      let parentNode = template.element?.parentNode;
+      while(parentNode) {
+        if(isMatch(parentNode.component)) {
           match = {
-            ...template.instance,
-            ...template.data
+            ...parentNode.component,
+            ...parentNode.dataContext,
           };
           break;
         }
+        parentNode = parentNode.parentNode;
       }
-      return match;
     }
-    return template._parentTemplate || template?.instance?._parentTemplate;
+    // this matches on nested partials (less common)
+    while (template) {
+      template = template._parentTemplate;
+      if (isMatch(template)) {
+        match = {
+          ...template.instance,
+          ...template.data
+        };
+        break;
+      }
+    }
+    return match;
   }
 
   static findChildTemplates(template, templateName) {
     let result = [];
     // recursive lookup
     function search(template, templateName) {
-      if (template.templateName === templateName) {
+      if (!templateName || (template.templateName === templateName)) {
         result.push({
           ...template.instance,
           ...template.data

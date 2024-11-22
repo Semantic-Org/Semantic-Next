@@ -102,6 +102,7 @@
 
     .image {
       float: right;
+      filter: saturate(0);
       width: 450px;
       margin-left: 2rem;
     }
