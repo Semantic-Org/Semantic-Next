@@ -723,36 +723,43 @@ export const Template = class Template {
     return Template.getTemplates(templateName)[0];
   }
   static findParentTemplate(template, templateName) {
+    // this matches on DOM (common)
     let match;
-    if (templateName) {
-      // this matches on DOM (common)
-      if(!match) {
-        let parentNode = template.element?.parentNode;
-        while(parentNode) {
-          if(parentNode.component?.templateName == templateName) {
-            match = {
-              ...parentNode.component,
-              ...parentNode.dataContext,
-            };
-            break;
-          }
-          parentNode = parentNode.parentNode;
-        }
+    const isMatch = (component) => {
+      if(match || !component?.templateName) {
+        return false;
       }
-      // this matches on nested partials (less common)
-      while (template) {
-        template = template._parentTemplate;
-        if (!match && template?.templateName == templateName) {
+      if(templateName && component?.templateName !== templateName) {
+        return false;
+      }
+      return true;
+    };
+
+    if(!match) {
+      let parentNode = template.element?.parentNode;
+      while(parentNode) {
+        if(isMatch(parentNode.component)) {
           match = {
-            ...template.instance,
-            ...template.data
+            ...parentNode.component,
+            ...parentNode.dataContext,
           };
           break;
         }
+        parentNode = parentNode.parentNode;
       }
-      return match;
     }
-    return template._parentTemplate || template?.instance?._parentTemplate;
+    // this matches on nested partials (less common)
+    while (template) {
+      template = template._parentTemplate;
+      if (isMatch(template)) {
+        match = {
+          ...template.instance,
+          ...template.data
+        };
+        break;
+      }
+    }
+    return match;
   }
 
   static findChildTemplates(template, templateName) {
