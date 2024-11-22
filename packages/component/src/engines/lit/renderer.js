@@ -165,7 +165,7 @@ export class LitRenderer {
   }
 
   // returns a function that returns the value in the current data context
-  getPackedValue = (expression, data, { reactive = false } = {}) => {
+  getPackedValue = (expression, { reactive = false } = {}) => {
     const getValue = (expressionString) => {
       const value = this.evaluateExpression(expressionString); // easier for breakpoints
       return value;
@@ -176,7 +176,7 @@ export class LitRenderer {
     ;
   };
 
-  getPackedNodeData(node, data, { inheritParent = false } = {}) {
+  getPackedNodeData(node, { inheritParent = false } = {}) {
 
     const getPackedData = (unpackedData, options = {}) => {
       let packedData = {};
@@ -188,7 +188,7 @@ export class LitRenderer {
       // okay now we have the data in both cases, lets pack it
       // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
       if(isPlainObject(unpackedData)) {
-        packedData = mapObject(unpackedData, (expression) => this.getPackedValue(expression, data, options));
+        packedData = mapObject(unpackedData, (expression) => this.getPackedValue(expression, options));
       }
       return packedData;
     };
@@ -198,7 +198,7 @@ export class LitRenderer {
 
     // only inherit parent data context if specified
     let parentData = (inheritParent)
-      ? data
+      ? this.data
       : {}
     ;
     const packedData = {
@@ -209,21 +209,21 @@ export class LitRenderer {
     return packedData;
   }
 
-  evaluateSnippet(node, data = {}) {
+  evaluateSnippet(node) {
     const snippetName = this.lookupExpressionValue(node.name);
     const snippet = this.snippets[snippetName];
     if(!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
-    const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
+    const snippetData = this.getPackedNodeData(node, { inheritParent: true });
     return this.renderContent({
       ast: snippet.content,
       data: snippetData,
     });
   }
 
-  evaluateSubTemplate(node, data = {}) {
-    const templateData = this.getPackedNodeData(node, data);
+  evaluateSubTemplate(node) {
+    const templateData = this.getPackedNodeData(node);
     return renderTemplate({
       subTemplates: this.subTemplates,
       templateName: node.name,
@@ -411,6 +411,7 @@ export class LitRenderer {
 
   // subtrees are rendered as separate contexts
   renderContent({ ast, data = this.data, isSVG = this.isSVG } = {}) {
+    console.log('rendering content', data);
     const tree = new LitRenderer({
       ast,
       data,
