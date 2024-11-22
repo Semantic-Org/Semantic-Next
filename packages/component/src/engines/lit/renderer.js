@@ -37,16 +37,19 @@ export class LitRenderer {
     Creates an AST representation of a template
     this can be cached on the web component class
   */
-  render({ ast = this.ast, data = this.data } = {}) {
+  render({ ast = this.ast, data } = {}) {
     this.resetHTML();
-    this.readAST({ ast, data });
+    if(data) {
+      this.data = data;
+    }
+    this.readAST({ ast });
     this.clearTemp();
     const renderer = (this.isSVG) ? svg : html;
     this.litTemplate = renderer.apply(this, [this.html, ...this.expressions]);
     return this.litTemplate;
   }
 
-  readAST({ ast = this.ast, data = this.data } = {}) {
+  readAST({ ast = this.ast } = {}) {
     each(ast, (node) => {
       switch (node.type) {
         case 'html':
@@ -54,11 +57,11 @@ export class LitRenderer {
           break;
 
         case 'svg':
-          this.addValue(this.evaluateSVG(node.content, data));
+          this.addValue(this.evaluateSVG(node.content));
           break;
 
         case 'expression':
-          const value = this.evaluateExpression(node.value, data, {
+          const value = this.evaluateExpression(node.value, {
             unsafeHTML: node.unsafeHTML,
             ifDefined: node.ifDefined,
             asDirective: true,
@@ -67,15 +70,15 @@ export class LitRenderer {
           break;
 
         case 'if':
-          this.addValue(this.evaluateConditional(node, data));
+          this.addValue(this.evaluateConditional(node));
           break;
 
         case 'each':
-          this.addValue(this.evaluateEach(node, data));
+          this.addValue(this.evaluateEach(node));
           break;
 
         case 'template':
-          this.addValue(this.evaluateTemplate(node, data));
+          this.addValue(this.evaluateTemplate(node));
           break;
 
         case 'snippet':
@@ -99,7 +102,7 @@ export class LitRenderer {
     but does not have access to LitRenderer and evaluateExpression
     so we have to pass through functions that do this
   */
-  evaluateConditional(node, data) {
+  evaluateConditional(node) {
     const directiveMap = (value, key) => {
       if(key == 'branches') {
         return value.map((branch) => {
@@ -110,10 +113,10 @@ export class LitRenderer {
         });
       }
       if(key == 'condition') {
-        return () => this.evaluateExpression(value, data);
+        return () => this.evaluateExpression(value);
       }
       if(key == 'content') {
-        return () => this.renderContent({ ast: value, data });
+        return () => this.renderContent({ ast: value });
       }
       return value;
     };
@@ -122,11 +125,11 @@ export class LitRenderer {
     return reactiveConditional(conditionalArguments);
   }
 
-  evaluateEach(node, data) {
+  evaluateEach(node) {
     const directiveMap = (value, key) => {
       if(key == 'over') {
         return (expressionString) => {
-          const computedValue = this.evaluateExpression(value, data);
+          const computedValue = this.evaluateExpression(value);
           return computedValue;
         };
       }
@@ -134,38 +137,37 @@ export class LitRenderer {
         return (eachData) => {
           return this.renderContent({
             ast: value,
-            data: { ...data, ...eachData },
+            data: { ...this.data, ...eachData },
           });
         };
       }
       return value;
     };
     let eachArguments = mapObject(node, directiveMap);
-    return reactiveEach(eachArguments, data);
+    return reactiveEach(eachArguments, this.data);
   }
 
-  evaluateTemplate(node, data = {}) {
-    const templateName = this.lookupExpressionValue(node.name, data);
+  evaluateTemplate(node) {
+    const templateName = this.lookupExpressionValue(node.name);
     if(this.snippets[templateName]) {
-      return this.evaluateSnippet(node, data);
+      return this.evaluateSnippet(node);
     }
     else {
-      return this.evaluateSubTemplate(node, data);
+      return this.evaluateSubTemplate(node);
     }
   }
 
-  evaluateSVG(svg, data) {
+  evaluateSVG(svg) {
     return this.renderContent({
       isSVG: true,
-      ast: svg,
-      data
+      ast: svg
     });
   }
 
   // returns a function that returns the value in the current data context
   getPackedValue = (expression, data, { reactive = false } = {}) => {
     const getValue = (expressionString) => {
-      const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
+      const value = this.evaluateExpression(expressionString); // easier for breakpoints
       return value;
     };
     return (reactive)
@@ -181,7 +183,7 @@ export class LitRenderer {
       // this is a data object like {> someTemplate data=getData }
       // we need to get the data first before we can wrap it
       if(isString(unpackedData)) {
-        unpackedData = this.evaluateExpression(unpackedData, data, options);
+        unpackedData = this.evaluateExpression(unpackedData, options);
       }
       // okay now we have the data in both cases, lets pack it
       // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
@@ -208,7 +210,7 @@ export class LitRenderer {
   }
 
   evaluateSnippet(node, data = {}) {
-    const snippetName = this.lookupExpressionValue(node.name, data);
+    const snippetName = this.lookupExpressionValue(node.name);
     const snippet = this.snippets[snippetName];
     if(!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
@@ -225,7 +227,7 @@ export class LitRenderer {
     return renderTemplate({
       subTemplates: this.subTemplates,
       templateName: node.name,
-      getTemplate: () => this.evaluateExpression(node.name, data), // template can be dynamic
+      getTemplate: () => this.evaluateExpression(node.name), // template can be dynamic
       data: templateData,
       parentTemplate: this.template,
     });
@@ -234,19 +236,18 @@ export class LitRenderer {
   // i.e foo.baz = { foo: { baz: 'value' } }
   evaluateExpression(
     expression,
-    data = this.data,
     { asDirective = false, ifDefined = false, unsafeHTML = false } = {}
   ) {
     if(typeof expression === 'string') {
       if(asDirective) {
         const dataArguments = {
           expression,
-          value: () => this.lookupExpressionValue(expression, this.data)
+          value: () => this.lookupExpressionValue(expression)
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
       }
       else {
-        return this.lookupExpressionValue(expression, data);
+        return this.lookupExpressionValue(expression);
       }
     }
     return expression;
@@ -274,7 +275,7 @@ export class LitRenderer {
 
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
-  lookupExpressionValue(expression = '', data = {}) {
+  lookupExpressionValue(expression = '', data = this.data) {
     const expressionArray = isArray(expression)
       ? expression
       : this.getExpressionArray(expression)
@@ -409,7 +410,7 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts
-  renderContent({ ast, data, isSVG = this.isSVG } = {}) {
+  renderContent({ ast, data = this.data, isSVG = this.isSVG } = {}) {
     const tree = new LitRenderer({
       ast,
       data,

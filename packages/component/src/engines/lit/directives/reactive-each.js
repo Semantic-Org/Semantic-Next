@@ -28,7 +28,7 @@ export class ReactiveEachDirective extends AsyncDirective {
         computation.stop();
         return;
       }
-      this.items = this.getItems(this.eachCondition);
+      this.items = this.getItems();
       const rendered = this.renderItems();
       if (!computation.firstRun) {
         this.setValue(rendered);
@@ -40,7 +40,7 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   renderItems() {
     return repeat(
-      this.items,
+      this.getItems(),
       (item, index) => this.getItemID(item, index),
       (item, index) => this.getTemplate(item, index)
     );

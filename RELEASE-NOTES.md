@@ -4,6 +4,9 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.1.7
+* findParent and findChild now support no template name (returns first)
+
 # Version 0.1.6
 * You can now specify full templates as settings, not just template names
 
