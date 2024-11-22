@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, firstMatch, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -15,17 +15,24 @@ export class LitRenderer {
   static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
 
+  static useSubtreeCache = false; // experimental
+
+  static getID({ ast, data, isSVG } = {}) {
+    return hashCode({ ast, data, isSVG });
+  }
+
   constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG }) {
     this.ast = ast || '';
     this.data = data;
-    this.renderTrees = [];
+    this.renderTrees = {}; // stores templates but garbage collectable
+    this.treeIDs = []; // stored content ids
     this.template = template;
     this.subTemplates = subTemplates;
     this.resetHTML();
     this.snippets = snippets || {};
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.id = hashCode(ast);
+    this.id = LitRenderer.getID({ ast, data, isSVG });
   }
 
   resetHTML() {
@@ -44,6 +51,13 @@ export class LitRenderer {
     this.clearTemp();
     const renderer = (this.isSVG) ? svg : html;
     this.litTemplate = renderer.apply(this, [this.html, ...this.expressions]);
+    return this.litTemplate;
+  }
+
+  cachedRender(data) {
+    if(data) {
+      this.updateData(data);
+    }
     return this.litTemplate;
   }
 
@@ -123,6 +137,11 @@ export class LitRenderer {
     return reactiveConditional(conditionalArguments);
   }
 
+  /*
+    The conditional directive takes an each conditions
+    with over() and content(). it needs to
+    return reactive values from renderer
+  */
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
       if(key == 'over') {
@@ -410,8 +429,15 @@ export class LitRenderer {
     this.addHTMLSpacer();
   }
 
-  // subtrees are rendered as separate contexts
+  // subtrees are rendered as separate contexts stored as weakrefs for gc
   renderContent({ ast, data, isSVG = this.isSVG } = {}) {
+    const contentID = LitRenderer.getID({ast, data, isSVG});
+    const treeRef = this.renderTrees[contentID];
+    const existingTree = treeRef ? treeRef.deref() : undefined;
+    // disabled for now
+    if (LitRenderer.useSubtreeCache && existingTree) {
+      return existingTree.cachedRender(data);
+    }
     const tree = new LitRenderer({
       ast,
       data,
@@ -421,24 +447,39 @@ export class LitRenderer {
       helpers: this.helpers,
       template: this.template,
     });
-    this.renderTrees.push(tree);
+    this.treeIDs.push(contentID);
+    this.renderTrees[contentID] = new WeakRef(tree);
     return tree.render();
   }
-
-  setData(data) {
-    this.data = data;
-    this.updateSubtreeData(data);
+  cleanup() {
+    this.renderTrees = [];
   }
 
-  updateSubtreeData(data) {
-    each(this.renderTrees, (tree) => {
-      tree.updateData(data);
+  setData(newData) {
+    this.updateData(newData);
+    this.updateSubtreeData(newData);
+  }
+
+  // yeah we're going there, weakrefs
+  updateSubtreeData(newData) {
+    each(this.renderTrees, (ref, contentID) => {
+      const tree = ref.deref();
+      if(tree) {
+        tree.updateData(newData);
+      }
     });
   }
 
-  updateData(data) {
-    each(data, (value, name) => {
-      if(this.data[name] !== undefined && this.data[name] !== value) {
+  /*
+    Note this is important to preserve the object reference vs clobbering
+    const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
+  */
+  updateData(newData) {
+    each(this.data, (value, name) => {
+      delete this.data[name];
+    });
+    each(newData, (value, name) => {
+      if(this.data[name] !== value) {
         this.data[name] = value;
       }
     });

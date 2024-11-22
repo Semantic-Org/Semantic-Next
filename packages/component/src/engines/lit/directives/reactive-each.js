@@ -1,3 +1,4 @@
+import { nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
@@ -39,9 +40,10 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   renderItems() {
+    const items = this.getItems(this.eachCondition);
     return repeat(
-      this.items,
-      (item, index) => this.getItemID(item, index),
+      items,
+      (item, index) => (this.getItemID(item, index)),
       (item, index) => this.getTemplate(item, index)
     );
   }
