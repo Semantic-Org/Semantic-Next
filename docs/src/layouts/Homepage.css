@@ -292,8 +292,26 @@
 
   @media only screen and (max-width: 767px) {
 
-    aboveFold content:before {
-      background-image: none;
+    aboveFold {
+      height: 550px;
+
+      content:before {
+        background-image: none;
+      }
+      .image {
+        max-width: calc(100% - 2rem);
+        max-height: 175px;
+        object-fit: contain;
+        margin: 0rem auto 1rem;
+        float: none;
+        display: block;
+      }
+      .text {
+        text-align: center;
+      }
+      h1 {
+        font-size: 32px;
+      }
     }
 
     ribbon  {
