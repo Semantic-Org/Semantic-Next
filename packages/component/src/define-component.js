@@ -132,7 +132,12 @@ export const defineComponent = ({
         if(isServer) {
           each(webComponent.properties, (propSettings, property) => {
             const newValue = this[property];
-            adjustPropertyFromAttribute(this, property, newValue, componentSpec);
+            adjustPropertyFromAttribute({
+              el: this,
+              attribute: camelToKebab(property),
+              attributeValue: newValue,
+              componentSpec
+            });
           });
         }
       }
@@ -163,7 +168,12 @@ export const defineComponent = ({
       attributeChangedCallback(attribute, oldValue, newValue) {
         console.log(attribute, `old: ${oldValue}`, `new: ${newValue}`);
         super.attributeChangedCallback(attribute, oldValue, newValue);
-        adjustPropertyFromAttribute(this, attribute, newValue, componentSpec);
+        adjustPropertyFromAttribute({
+          el: this,
+          attribute,
+          attributeValue: newValue,
+          componentSpec
+        });
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 

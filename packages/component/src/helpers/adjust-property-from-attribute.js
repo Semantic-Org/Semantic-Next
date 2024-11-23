@@ -40,8 +40,7 @@ const tokenizeSpaces = (string) => {
   - The option is the attribute "primary" or "primary=true"
   - The option is a class class="primary"
 */
-export const adjustPropertyFromAttribute = (el, attribute, attributeValue, componentSpec) => {
-
+export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, componentSpec}) => {
   // This is used to search for potential values that should match to the canonical value.
   // This is because we support swapping ordering and spaces for dashes
 
@@ -88,10 +87,9 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
   // this assigns the value to the DOM element
   const setProperty = (attribute, value) => {
-
     // convert <div icon-after> to => el.iconAfter
     const property = kebabToCamel(attribute);
-    if(value !== undefined && el[property]) {
+    if(value !== undefined) {
       el[property] = value;
     }
 
@@ -134,14 +132,18 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
     // we want to check attribute for each class
     if (attribute == 'class' && attributeValue) {
       each(attributeValue.split(' '), (className) => {
-        adjustPropertyFromAttribute(el, className, true, componentSpec);
+        adjustPropertyFromAttribute({
+          el,
+          attribute: className,
+          attributeValue: true,
+          componentSpec
+        });
       });
     }
 
     // syntax <ui-button size="large">
     // we can check if this property is defined
     else if (inArray(attribute, componentSpec.attributes)) {
-
       // check if this is a boolean value
       if(isBooleanValue(attribute, attributeValue)) {
         attributeValue = true;
@@ -152,10 +154,6 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
       // check if the attribute was removed (null)
       if(attributeValue === null) {
         removeProperty(attribute);
-        return;
-      }
-
-      if(attributeValue === undefined) {
         return;
       }
 
@@ -190,7 +188,6 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
         }
         return;
       }
-
       if (matchingAttribute && matchingValue) {
         setProperty(matchingAttribute, matchingValue);
       }
