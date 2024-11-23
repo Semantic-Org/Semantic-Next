@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, isClient, kebabToCamel } from '@semantic-ui/utils';
+import { each, noop, isServer, isClient, camelToKebab, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
@@ -166,7 +166,6 @@ export const defineComponent = ({
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {
-        console.log(attribute, `old: ${oldValue}`, `new: ${newValue}`);
         super.attributeChangedCallback(attribute, oldValue, newValue);
         adjustPropertyFromAttribute({
           el: this,
