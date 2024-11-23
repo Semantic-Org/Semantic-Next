@@ -25,8 +25,8 @@ const createComponent = ({self, settings, data, el, $}) => ({
 });
 
 
-const onCreated = ({self}) => {
-
+const onCreated = ({data}) => {
+  console.log(data);
 };
 const onRendered = function({self}){
 
