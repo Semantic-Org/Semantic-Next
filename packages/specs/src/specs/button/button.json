@@ -64,7 +64,7 @@
         },
         {
           "name": "Fade Animated",
-          "value": "fade-animated",
+          "value": ["fade-animated"],
           "description": "formatted to fade in hidden content",
           "exampleCode": "<ui-button fade-animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
         }
