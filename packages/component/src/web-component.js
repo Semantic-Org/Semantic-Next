@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { each, isFunction, isClassInstance, kebabToCamel, keys, unique, isServer, inArray, get } from '@semantic-ui/utils';
+import { each, isFunction, isClassInstance, kebabToCamel, camelToKebab, keys, unique, isServer, isEqual, inArray, get } from '@semantic-ui/utils';
 import { ReactiveVar } from '@semantic-ui/reactivity';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
@@ -70,25 +70,28 @@ class WebComponentBase extends LitElement {
       properties.class = { type: String };
 
       // emphasis="primary" but also setting props
-      each(componentSpec.attributes, (name) => {
-        const propertyType = componentSpec.propertyTypes[name];
-        properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
+      each(componentSpec.attributes, (attributeName) => {
+        const propertyType = componentSpec.propertyTypes[attributeName];
+        const propertyName = kebabToCamel(attributeName);
+        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
       });
 
       // these are values that can only be set on the DOM el as properties
       // but do not have attributes -- for instance functions
-      each(componentSpec.properties, (name) => {
-        const propertyType = componentSpec.propertyTypes[name];
-        properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
+      each(componentSpec.properties, (attributeName) => {
+        const propertyType = componentSpec.propertyTypes[attributeName];
+        const propertyName = kebabToCamel(attributeName);
+        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
       });
 
       // primary -> emphasis="primary"
-      each(componentSpec.optionAttributes, (attributeValues, attribute) => {
-        properties[attribute] = { type: String, noAccessor: true };
+      each(componentSpec.optionAttributes, (attributeValues, attributeName) => {
+        const propertyName = kebabToCamel(attributeName);
+        properties[propertyName] = { type: String, noAccessor: true, attribute: attributeName };
       });
     }
     if (settings) {
-      each(settings, (defaultValue, name) => {
+      each(settings, (defaultValue, propertyName) => {
         // this can either be a settings object or a default value
         // i.e. { foo: 'baz' } // basic
         // or { foo: { type: String, defaultValue: 'baz' } // expert
@@ -97,21 +100,28 @@ class WebComponentBase extends LitElement {
         const propertySettings = {
           propertyOnly: isClassInstance(defaultValue)
         };
-
-        properties[name] = (defaultValue?.type)
+        const attributeName = camelToKebab(propertyName);
+        properties[propertyName] = (defaultValue?.type)
           ? settings
-          : WebComponentBase.getPropertySettings(name, defaultValue?.constructor, propertySettings)
+          : WebComponentBase.getPropertySettings(attributeName, defaultValue?.constructor, propertySettings)
         ;
       });
     }
     return properties;
   }
 
-  static getPropertySettings(name, type = String, { propertyOnly = false } = {}) {
+  static getPropertySettings(propName, type = String, { propertyOnly = false } = {}) {
     let property = {
       type,
-      attribute: true,
-      //hasChanged: isEqual,
+      /*
+        Lit converts properties to lowercase name instead of kebab case
+        i.e. firstName -> <my-component firstname="John">
+        we want `first-name="John"`, this means we need to manually specify attribute
+      */
+      attribute: camelToKebab(propName),
+      hasChanged: (a, b) => {
+        return !isEqual(a, b);
+      },
     };
     // functions cannot be serialized
     if (propertyOnly || type == Function) {
@@ -126,16 +136,15 @@ class WebComponentBase extends LitElement {
           if (inArray(value, ['false', '0', 'null', 'undefined'])) {
             return false;
           }
+          if (inArray(value, ['', true, 'true'])) {
+            return true;
+          }
           return Boolean(value);
         },
         toAttribute: (value, type) => {
           return String(value);
         }
       };
-    }
-    // adding accessors to reserved browser DOM props causes issues
-    if(inArray(name, ['disabled'])) {
-      property.noAccessor = true;
     }
     return property;
   }
@@ -174,30 +183,30 @@ class WebComponentBase extends LitElement {
   */
   getSettingsFromConfig({componentSpec, properties}) {
     let settings = {};
-    each(properties, (propSettings, property) => {
-      if (property == 'class' || propSettings.observe === false) {
+    each(properties, (propSettings, propertyName) => {
+      if (propertyName == 'class' || propSettings.observe === false) {
         return;
       }
-      if(componentSpec && !get(componentSpec.allowedValues, property) && get(componentSpec.optionAttributes, property)) {
-        // this property is used to lookup a setting like 'large' -> sizing
-        // we dont record this into settings
-        return;
-      }
-
-      property = kebabToCamel(property);
-
-      const elementProp = this[property];
+      const attributeName = camelToKebab(propertyName);
+      const elementProp = this[propertyName];
       const setting = elementProp  // check element setting
-        ?? this.defaultSettings[property]  // check default setting on this component
-        ?? (componentSpec?.defaultSettings || {})[property] // check default setting on component spec
+        ?? this.defaultSettings[propertyName]  // check default setting on this component
+        ?? (componentSpec?.defaultSettings || {})[propertyName] // check default setting on component spec
       ;
       // only pass through setting if it is defined
       if(setting !== undefined) {
-        settings[property] = setting;
+
+        // if setting is a composite like emphasis="primary"
+        // and this is "primary" we pass this as a boolean
+        if(componentSpec && !get(componentSpec.allowedValues, attributeName) && get(componentSpec.optionAttributes, attributeName)) {
+          settings[propertyName] = true;
+          return;
+        }
+        settings[propertyName] = setting;
       }
       // boolean attribute case
       if (componentSpec && settings[elementProp] !== undefined) {
-        settings[property] = true;
+        settings[propertyName] = true;
       }
     });
     return settings;
@@ -260,11 +269,11 @@ class WebComponentBase extends LitElement {
       return;
     }
     const classes = [];
-
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
 
-      const value = this[attribute];
+      const property = kebabToCamel(attribute);
+      const value = this[property];
 
       if(value) {
         const allowedValues = componentSpec.allowedValues[attribute];
@@ -272,6 +281,10 @@ class WebComponentBase extends LitElement {
         if(propertyType == Boolean) {
           // this is a variation like active=true
           // it receives the class "active"
+          classes.push(attribute);
+        }
+        else if(value == attribute && allowedValues && inArray(value, allowedValues)) {
+          // disabled="disabled" use case operates like boolean
           classes.push(attribute);
         }
         else if(allowedValues && inArray(value, allowedValues)) {

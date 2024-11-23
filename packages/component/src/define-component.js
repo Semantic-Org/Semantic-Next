@@ -161,6 +161,7 @@ export const defineComponent = ({
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {
+        console.log(attribute, `old: ${oldValue}`, `new: ${newValue}`);
         super.attributeChangedCallback(attribute, oldValue, newValue);
         adjustPropertyFromAttribute(this, attribute, newValue, componentSpec);
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });

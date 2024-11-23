@@ -14,6 +14,8 @@ import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, camelTo
 */
 const SPACE_REGEX = /\s+/mg;
 
+const SPECIAL_ATTRIBUTES = ['disabled', 'value'];
+
 // allow 'arrow-down' or 'down-arrow'
 const reverseDashes = (string) => {
   if(isString(string)) {
@@ -47,6 +49,7 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
   // i.e <ui-button left-attached="somevalue">
 
   const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
+
     // "arrow down" -> arrow-down
     optionValue = tokenizeSpaces(optionValue);
 
@@ -84,23 +87,45 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
 
   // this assigns the value to the DOM element
-  const setProperty = (property, value) => {
+  const setProperty = (attribute, value) => {
 
     // convert <div icon-after> to => el.iconAfter
-    property = kebabToCamel(property);
-
-    if(value !== undefined) {
+    const property = kebabToCamel(attribute);
+    if(value !== undefined && el[property]) {
       el[property] = value;
+    }
+
+    // this appears to be necessary for special attributes like "disabled"
+    if(inArray(attribute, SPECIAL_ATTRIBUTES)) {
+      el.requestUpdate();
     }
   };
 
   // this removes the related propery from the element
-  const removeProperty = (property) => {
-
+  const removeProperty = (attribute) => {
     // convert <div icon-after> to => el.iconAfter
-    property = kebabToCamel(property);
+    const property = kebabToCamel(attribute);
+    el[property] = null;
 
-    el[property] = undefined;
+    // this appears to be necessary for special attributes like "disabled"
+    if(inArray(attribute, SPECIAL_ATTRIBUTES)) {
+      el.requestUpdate();
+    }
+  };
+
+  // this checks for boolean values like <ui-button disabled>
+  const isBooleanValue = (attribute, attributeValue) => {
+
+    // handles basic booleans of type Boolean in spec
+    const isBooleanType = componentSpec.propertyTypes[attribute] == Boolean;
+
+    // handles complex booleans where one value of allowed values is a identity, i.e. disabled, clickable-disabled
+    const isIdentityBoolean = componentSpec.optionAttributes[attribute] == attribute;
+
+    // this is a scenario where a grouping has a default styling like `animated`
+    const isAttributeClass = inArray(attribute, componentSpec.attributeClasses);
+
+    return (isBooleanType || isAttributeClass || isIdentityBoolean) && inArray(attributeValue, ['', true, attribute]);
   };
 
   if (componentSpec) {
@@ -117,14 +142,14 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
     // we can check if this property is defined
     else if (inArray(attribute, componentSpec.attributes)) {
 
-      // boolean attribute
-      if(componentSpec.propertyTypes[attribute] == Boolean && inArray(attributeValue, ['', true])) {
+      // check if this is a boolean value
+      if(isBooleanValue(attribute, attributeValue)) {
         attributeValue = true;
         setProperty(attribute, attributeValue);
         return;
       }
 
-      // this means the attribute was removed
+      // check if the attribute was removed (null)
       if(attributeValue === null) {
         removeProperty(attribute);
         return;
@@ -155,6 +180,16 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
         optionValue: attribute,
         optionAttributeValue: attributeValue
       });
+
+      // remove the matching attribute if the value is removed
+      // but ONLY if the current value is the option value
+      // this is because attribute changed handlers can fire in any order
+      if(matchingAttribute && attributeValue === null) {
+        if(el[matchingAttribute] == attribute) {
+          removeProperty(matchingAttribute);
+        }
+        return;
+      }
 
       if (matchingAttribute && matchingValue) {
         setProperty(matchingAttribute, matchingValue);
