@@ -85,11 +85,6 @@ export class RenderTemplateDirective extends AsyncDirective {
       return false;
     }
 
-    // avoid recreating if identical template (ast + data)
-    if(template && isEqual(template.id, this.templateID)) {
-      return false;
-    }
-
     // store template id
     this.templateID = template.id;
     this.template = template.clone({

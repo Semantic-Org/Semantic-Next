@@ -18,7 +18,7 @@ export class LitRenderer {
   static useSubtreeCache = false; // experimental
 
   static getID({ ast, data, isSVG } = {}) {
-    return hashCode({ ast, data, isSVG });
+    return hashCode({ ast });
   }
 
   constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG }) {
