@@ -4,8 +4,15 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.1.7
+# Version 0.2.0
 
+### Breaking Changes
+* Settings now convert from prop values `camelCase` to `<my-component kebab-case>`. Previously they followed the Lit convention of converting to `<my-component kebabcase>`. This seems more conventional since native attributes use dashes.
+
+### Fixes
+* Fix several issues related to attribute updates when spec is used (i.e. button and other ui primitives) particularly with boolean attributes and multiple attribute changes at once.
+
+# Version 0.1.7
 ### Features
 * Added `ready` to Query and `on('ready')` as aliases for `domcontentloaded`.
 * You can now specify full templates as settings, not just template names. i.e. `settings = { rowTemplate = new Template() };`
