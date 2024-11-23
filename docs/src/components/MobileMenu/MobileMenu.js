@@ -151,12 +151,10 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
       menu: tpl.addNavIcons(activeItem.menu)
     };
     state.previousMenu.set(state.activeMenu.get());
-    console.log('next menu is', menu);
     state.nextMenu.set(menu);
   },
 
   showNextMenu() {
-    console.log('updated');
     tpl.setMenuHeight('next');
     $('.container')
       .addClass('animate right')
