@@ -36,7 +36,7 @@ export class RenderTemplateDirective extends AsyncDirective {
         return;
       }
       // this is an empty template
-      if(this.template?.ast.length == 0) {
+      if(!this.template || this.template?.ast.length == 0) {
         return;
       }
 
@@ -47,7 +47,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.maybeCreateTemplate();
 
     // this is an empty template
-    if(this.template?.ast.length == 0) {
+    if(!this.template || this.template?.ast.length == 0) {
       return nothing;
     }
     return this.renderTemplate();
@@ -73,9 +73,6 @@ export class RenderTemplateDirective extends AsyncDirective {
     if(isString(templateOrName)) {
       templateName = templateOrName;
       template = this.subTemplates[templateName];
-      if (!template) {
-        return false;
-      }
     }
     else if(templateOrName instanceof Template) {
       // support passing in full templates using expressions
@@ -83,12 +80,18 @@ export class RenderTemplateDirective extends AsyncDirective {
       templateName = template.templateName;
     }
 
-    // avoid recreating if identical template
-    if(isEqual(template.ast, this.ast)) {
-      return;
+    // make sure we have something to create
+    if (!template) {
+      return false;
     }
-    // use ast for unique id
-    this.ast = template.ast;
+
+    // avoid recreating if identical template (ast + data)
+    if(template && isEqual(template.id, this.templateID)) {
+      return false;
+    }
+
+    // store template id
+    this.templateID = template.id;
     this.template = template.clone({
       templateName,
       subTemplates: this.subTemplates,
