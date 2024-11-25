@@ -166,6 +166,7 @@
 @layer component.input.variations.fluid {
   .fluid {
     display: flex;
+    flex-grow: 1;
   }
 }
 
