@@ -24,7 +24,7 @@
   --global-search-label-border: var(--white-border);
   --global-search-label-border-radius: var(--border-radius);
 
-  --global-search-input-padding: var(--input-padding);
+  --global-search-input-padding: 8px 10px;
 
 
   --global-search-modal-background: var(--page-background);
@@ -45,14 +45,20 @@ input {
   cursor: text;
   display: flex;
   align-items: center;
-  background-color: var(--global-search-background-color);
-  border-radius: var(--global-search-border-radius);
-  transition: var(--global-search-transition);
-  border: var(--global-search-input-border);
 
-  &:hover {
-    background-color: var(--global-search-hover-background-color);
+  &::part(input) {
+    border: var(--global-search-input-border);
+    background-color: var(--global-search-background-color);
+    border-radius: var(--global-search-border-radius);
+    transition: var(--global-search-transition);
+    padding: var(--global-search-input-padding);
   }
+  &:hover {
+    &::part(input) {
+      background-color: var(--global-search-hover-background-color);
+    }
+  }
+
 
   .label {
     display: inline-block;
@@ -73,7 +79,6 @@ input {
     font-family: var(--global-search-input-font);
     color: var(--global-search-input-color);
     background-color: transparent;
-    padding: var(--global-search-input-padding);
     flex-grow: 1;
   }
   input::placeholder {
@@ -81,12 +86,6 @@ input {
   }
   input:focus {
     outline: none;
-  }
-  ui-icon {
-    margin-left: auto;
-    flex-grow: 0;
-    width: var(--global-search-icon-width);
-    color: var(--global-search-icon-color);
   }
 }
 
@@ -111,29 +110,13 @@ ui-modal {
     box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.4);
     background-image: linear-gradient(to bottom right, rgb(255 255 255 / 2%), rgb(0 0 0 / 33%));
 
+
     .input {
-      display: flex;
-      flex-direction: row;
-      background-color: var(--white-10);
-      width: 100%;
-      border-radius: var(--circular-radius);
-      border: var(--white-border);
-      overflow: hidden;
       font-size: var(--global-search-modal-input-font-size);
-      padding: 0rem 1rem;
-      align-items: center;
-      color: #FFFFFF;
 
-      input {
-        background-color: transparent;
-        width: 100%;
-        color: inherit;
-        font-size: inherit;
-        color: #FFFFFF;
-        padding: var(--input-padding);
-      }
-      ui-icon {
-
+      &::part(input) {
+        background-color: var(--white-10);
+        border-radius: var(--circular-radius);
       }
     }
   }
@@ -162,6 +145,7 @@ ui-modal {
 
       &.active {
         border-color: var(--primary-text-color);
+        background-color: oklch(0.29 0.03 233.5);
       }
       &:hover {
         border: 1px solid rgb(165 165 165 / 60%);
@@ -275,6 +259,12 @@ ui-modal {
       opacity: 0.5;
       font-size: 48px;
       margin-bottom: 1rem;
+    }
+    p {
+      margin: 0rem;
+      b {
+        color: var(--primary-text-color);
+      }
     }
   }
 }

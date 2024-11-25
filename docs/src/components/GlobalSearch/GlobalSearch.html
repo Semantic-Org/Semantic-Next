@@ -1,16 +1,7 @@
-<div class="inline-search">
-  <input placeholder="Search site...">
-  <div class="label" part="input-label">
-    ctrl + k
-  </div>
-  <ui-icon search></ui-icon>
-</div>
-<ui-modal>
+<ui-input icon="search" label="ctrl+k" placeholder="Search..." class="inline-search"></ui-input>
+<ui-modal glass>
   <div class="search">
-    <div class="input">
-      <input type="text" placeholder="Search..." autofocus>
-      <ui-icon search></ui-icon>
-    </div>
+    <ui-input fluid class="input" placeholder="Search..." autofocus></ui-input>
   </div>
   <div class="results">
     {#if hasAny displayResults}
@@ -32,13 +23,16 @@
           <div class="description">{description}</div>
         </a>
       {/each}
+    {else if noResults}
+      <div class="placeholder">
+        <ui-icon icon="x circle"></ui-icon>
+        <p>There are no results for "<b>{searchTerm}</b>".</p>
+      </div>
     {else}
       <div class="placeholder">
         <ui-icon icon="search"></ui-icon>
-        Enter a search term above to see results...
+        <p>Enter a search term above to see results...</p>
       </div>
-      <ui-segment placeholder header="Enter a search term to see results." icon="search">
-      </ui-segment>
     {/if}
   </div>
 </ui-modal>
