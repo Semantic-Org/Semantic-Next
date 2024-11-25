@@ -367,6 +367,7 @@
 
     ui-panels.tabs ui-panel {
       flex-grow: 0 !important;
+      content-visibility: hidden;
     }
     ui-menu.mobile {
       display: block;
