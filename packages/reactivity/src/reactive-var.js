@@ -4,7 +4,7 @@ import { Dependency } from './dependency.js';
 
 export class ReactiveVar {
 
-  constructor(initialValue, { equalityFunction, allowClone = false, cloneFunction } = {}) {
+  constructor(initialValue, { equalityFunction, allowClone = true, cloneFunction } = {}) {
     this.dependency = new Dependency();
 
     // allow user to opt out of value cloning
