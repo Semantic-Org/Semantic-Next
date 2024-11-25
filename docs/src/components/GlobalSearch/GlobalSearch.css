@@ -44,7 +44,7 @@ input {
 .inline-search {
   cursor: text;
   display: flex;
-  align-items: center;
+  justify-content: stretch;
 
   &::part(input) {
     border: var(--global-search-input-border);

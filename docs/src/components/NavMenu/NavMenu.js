@@ -17,7 +17,7 @@ const state = {
   url: ''
 };
 
-const createComponent = function ({ self, settings, data, state, reaction }) {
+const createComponent = function ({ el, self, settings, data, state, reaction }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);

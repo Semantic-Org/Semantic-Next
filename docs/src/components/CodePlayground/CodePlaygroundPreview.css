@@ -1,16 +1,20 @@
-ui-menu.preview {
-  font-size: 11px !important;
-  text-transform: uppercase;
-  margin: 4px 8px 2px;
-  border-bottom-width: 1px;
-}
+@layer playground.component.preview {
 
-playground-preview {
-  position: relative;
-}
+  ui-menu.preview {
+    font-size: 11px !important;
+    text-transform: uppercase;
+    margin: 4px 8px 2px;
+    border-bottom-width: 1px;
+  }
 
-pretty-json {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: var(--spacing);
+  playground-preview {
+    position: relative;
+  }
+
+  pretty-json {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: var(--spacing);
+  }
+
 }

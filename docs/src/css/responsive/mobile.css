@@ -45,7 +45,7 @@
     theme-switcher {
       margin-left: 0;
     }
-    global-search::part(input-label) {
+    global-search::part(search-label) {
       display: none;
     }
   }
@@ -58,6 +58,7 @@
 
       h1 {
         font-size: 24px;
+        margin-bottom: 1rem;
       }
       h2 {
         font-size: 20px;
@@ -105,6 +106,7 @@
 
   layout main code-playground::part(file) {
     max-width: calc(100vw - 3rem);
+    border-radius: 0px 0px var(--border-radius);
   }
 
 }
