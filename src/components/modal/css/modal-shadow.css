@@ -71,6 +71,15 @@
   }
 }
 
+/* src/components/modal/css/shadow/types/glass.css */
+@layer component.types.glass {
+  .glass.modal {
+    backdrop-filter: var(--modal-glass-backdrop-filter);
+    box-shadow: var(--modal-glass-box-shadow);
+    background: var(--modal-glass-background);
+  }
+}
+
 /* src/components/modal/css/shadow/variations/aligned.css */
 @layer component.variations.aligned;
 

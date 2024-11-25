@@ -1,0 +1,5 @@
+.glass.modal {
+  backdrop-filter: var(--modal-glass-backdrop-filter);
+  box-shadow: var(--modal-glass-box-shadow);
+  background: var(--modal-glass-background);
+}

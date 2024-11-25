@@ -2,7 +2,7 @@
 @import url('./content/modal.css') layer(component.content.modal);
 
 /* Types */
-/*@import url('./types/selection.css') layer(component.types.selection);*/
+@import url('./types/glass.css') layer(component.types.glass);
 
 
 /* Types */
