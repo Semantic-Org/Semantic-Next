@@ -29,6 +29,12 @@
   "types": [
   ],
   "variations": [
+    {
+      "name": "Fluid",
+      "attribute": "fluid",
+      "usageLevel": 1,
+      "description": "take the width of its container"
+    }
   ],
   "events": [
     {
