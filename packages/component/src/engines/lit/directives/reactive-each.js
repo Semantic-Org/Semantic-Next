@@ -49,7 +49,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getItems() {
-    return this.eachCondition.over() || [];
+    return this.eachCondition.over();
   }
 
   getTemplate(item, index) {

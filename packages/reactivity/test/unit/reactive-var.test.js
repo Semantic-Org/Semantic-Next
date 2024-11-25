@@ -310,13 +310,14 @@ describe.concurrent('ReactiveVar', () => {
 
   describe.concurrent('ID Helpers', () => {
 
-    const arrayItems = [
+    // need separate copy for each test
+    const arrayItems = () => [
       { id: 1, name: 'Item 1' },
       { id: 2, name: 'Item 2' }
     ];
 
     it('setProperty should set the property of the item matching an id', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       items.setProperty(1, 'name', 'Updated Item 1');
       expect(items.get()).toEqual([
         { id: 1, name: 'Updated Item 1' },
@@ -325,13 +326,13 @@ describe.concurrent('ReactiveVar', () => {
     });
 
     it('getItem should get the item with matching id', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       const index = items.getItem(2);
       expect(index).toBe(1);
     });
 
     it('replaceItem should replace an item matching an ID', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       items.replaceItem(1, { id: 1, name: 'Replaced Item 1' });
       expect(items.get()).toEqual([
         { id: 1, name: 'Replaced Item 1' },
@@ -340,7 +341,7 @@ describe.concurrent('ReactiveVar', () => {
     });
 
     it('removeItem should remove an item matching an ID', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       items.removeItem(1);
       expect(items.get()).toEqual([
         { id: 2, name: 'Item 2' }
@@ -348,7 +349,7 @@ describe.concurrent('ReactiveVar', () => {
     });
 
     it('setProperty should set the property of the item matching a given id', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       items.setProperty(2, 'status', 'active');
       expect(items.get()).toEqual([
         { id: 1, name: 'Item 1' },
@@ -357,26 +358,26 @@ describe.concurrent('ReactiveVar', () => {
     });
 
     it('setArrayProperty should set an object property at index', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       items.setArrayProperty(1, 'status', 'pending');
       expect(items.get()[1].status).toBe('pending');
     });
 
     it('setArrayProperty should set all object properties when no index specified', () => {
-      const items = new ReactiveVar(arrayItems);
+      const items = new ReactiveVar(arrayItems());
       items.setArrayProperty('status', 'active');
       expect(items.get()).toEqual([
         { id: 1, name: 'Item 1', status: 'active' },
         { id: 2, name: 'Item 2', status: 'active' }
       ]);
-    });
 
+    });
   });
 
   describe.concurrent('Cloning Behavior with ReactiveVars', () => {
     it('should maintain reactivity when using a ReactiveVar inside another ReactiveVar', () => {
       const innerCallback = vi.fn();
-      const innerVar = new ReactiveVar(1);
+      const innerVar = new ReactiveVar(1, { allowClone: true });
 
       const outerCallback = vi.fn();
       const outerVar = new ReactiveVar(innerVar);
@@ -401,8 +402,8 @@ describe.concurrent('ReactiveVar', () => {
       const data1 = { id: 1, text: 'test object'};
       const data2 = { id: 2, text: 'test object 2'};
 
-      const innerVar1 = new ReactiveVar(data1);
-      const innerVar2 = new ReactiveVar(data2);
+      const innerVar1 = new ReactiveVar(data1, { allowClone: true });
+      const innerVar2 = new ReactiveVar(data2, { allowClone: true });
 
       innerVar1.subscribe(innerCallback1);
       innerVar2.subscribe(innerCallback2);
