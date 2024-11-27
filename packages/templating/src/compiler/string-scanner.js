@@ -1,4 +1,4 @@
-import { escapeRegExp, each } from '@semantic-ui/utils';
+import { escapeRegExp, camelToKebab, each } from '@semantic-ui/utils';
 
 // A StringScanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
@@ -94,28 +94,57 @@ export class StringScanner {
     return;
   }
 
-  getContext() {
-    let insideTag = false;
+  getTag() {
     let i = this.pos - 1;
-    let tagPos;
+    let insideTag = false;
+    let startPos;
+    let endPos;
 
     // Step 1: Search backwards to confirm we're inside a tag.
     while (i >= 0) {
       if (this.input[i] === '>') break; // Stop if we find the end of a previous tag
       if (this.input[i] === '<') {
         insideTag = true; // Confirm we're inside a tag
-        tagPos = i; // Save the position of the tag
+        startPos = i; // Save the position of the tag
         break;
       }
       i--;
     }
+    if(insideTag) {
+      i = this.pos - 1;
+      while (i <= this.input.length) {
+        if (this.input[i] === '<') break; // Stop if we find the end of a previous tag
+        if (this.input[i] === '>') {
+          endPos = i; // Save the position of the tag
+          break;
+        }
+        i++;
+      }
+    }
+    return {
+      startPos,
+      endPos,
+      insideTag
+    };
+  }
 
+  getContext() {
+    const { insideTag, startPos, endPos } = this.getTag();
     if (insideTag) {
-      const tagText = this.input.substring(tagPos, this.pos);
+      const tagText = this.input.substring(startPos, this.pos);
 
       const attrPattern = /([a-zA-Z-]+)(?=\s*=\s*[^=]*$)/;
       const attrMatch = tagText.match(attrPattern); // Grab the last sequence of non-space characters
-      const attrName = attrMatch ? attrMatch[1] : '';
+      let attrName = attrMatch ? attrMatch[1] : '';
+
+      /* make things easier in templates for camel to kebab conversion i.e.
+         input: <nav-menu expandAll={true}>
+         output: <nav-menu expand-all>
+         note this only will affect case where user uses camelCase for an attribute
+         so <nav-menu expandall={true}> will still be untouched
+      */
+      const kebabName = camelToKebab(attrName);
+      let isMultipleWords = (kebabName !== attrName);
 
       const booleanAttributes = [
         'allowfullscreen',
@@ -159,6 +188,9 @@ export class StringScanner {
         return {
           insideTag: true,
           attribute: attrName,
+          tagStart: startPos,
+          tagEnd: endPos,
+          renamedAttribute: (isMultipleWords) ? kebabName : undefined,
           booleanAttribute,
         };
       }

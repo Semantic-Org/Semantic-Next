@@ -1,4 +1,4 @@
-import { each, isString, last } from '@semantic-ui/utils';
+import { each, isString, camelToKebab, last } from '@semantic-ui/utils';
 
 import { StringScanner } from './string-scanner.js';
 
@@ -28,6 +28,7 @@ class TemplateCompiler {
     NEXT_TAG: /(\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
     EXPRESSION_START: /\{/,
     EXPRESSION_END: /\}/,
+    TAG_OPEN: /\</,
     TAG_CLOSE: /\>/,
   };
 
@@ -150,6 +151,14 @@ class TemplateCompiler {
       // Return null if no tag is matched
       return null;
     };
+
+    const processAttributes = (html = '', context) => {
+      console.log('--------');
+      console.log(context);
+      console.log(html);
+      return html;
+    };
+
 
     const ast = [];
     const stack = [];
@@ -354,9 +363,11 @@ class TemplateCompiler {
       else {
         // advanced to next expression or open svg tag
         // this advances the scanner adding html
+        const context = scanner.getContext();
         const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
+        const processedHTML = processAttributes(html, context);
         if (html) {
-          const htmlNode = { type: 'html', html };
+          const htmlNode = { type: 'html', html: processedHTML };
           contentTarget.push(htmlNode);
         }
       }
@@ -431,20 +442,23 @@ class TemplateCompiler {
     return 'singleBracket';
   }
 
-  static preprocessTemplate(templateString = '') {
-    templateString = templateString.trim();
-
-    /*
-      support self closing web component tags
-      this allows you to do <ui-icon icon="foo" />
-      instead of <ui-icon icon="foo"></ui-icon>
-    */
-    templateString = templateString.replace(
+  /*
+    support self closing web component tags
+    this allows you to do <ui-icon icon="foo" />
+    instead of <ui-icon icon="foo"></ui-icon>
+  */
+  static preprocessSelfClosing(templateString = '') {
+    return templateString.replace(
       TemplateCompiler.preprocessRegExp.WEB_COMPONENT_SELF_CLOSING,
       (match, tagName, attributes) => {
         return `<${tagName}${attributes}></${tagName}>`;
       }
     );
+  }
+
+  static preprocessTemplate(templateString = '') {
+    templateString = templateString.trim();
+    templateString = this.preprocessSelfClosing(templateString);
     return templateString;
   }
 

@@ -100,25 +100,24 @@ class WebComponentBase extends LitElement {
         const propertySettings = {
           propertyOnly: isClassInstance(defaultValue)
         };
-        const attributeName = camelToKebab(propertyName);
         properties[propertyName] = (defaultValue?.type)
           ? settings
-          : WebComponentBase.getPropertySettings(attributeName, defaultValue?.constructor, propertySettings)
+          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings)
         ;
       });
     }
     return properties;
   }
 
-  static getPropertySettings(propName, type = String, { propertyOnly = false } = {}) {
+  static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {}) {
+    /*
+      Lit converts properties to lowercase name instead of kebab case
+      i.e. firstName -> <my-component firstname="John">
+      we want `first-name="John"`, this means we need to manually specify attribute
+    */
     let property = {
       type,
-      /*
-        Lit converts properties to lowercase name instead of kebab case
-        i.e. firstName -> <my-component firstname="John">
-        we want `first-name="John"`, this means we need to manually specify attribute
-      */
-      attribute: camelToKebab(propName),
+      attribute: camelToKebab(propertyName),
       hasChanged: (a, b) => {
         return !isEqual(a, b);
       },

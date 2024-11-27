@@ -192,10 +192,13 @@ export const defineComponent = ({
         let settings = this.getSettings();
         let data = {
           ...settings,
-          ...this.getContent({componentSpec}),
+          ...this.getContent({componentSpec})
         };
         if (!isServer) {
-          data.darkMode = this.isDarkMode();
+          // isDarkMode requires css var check which has performance implications
+          Object.defineProperty(data, 'darkMode', {
+            get: this.isDarkMode
+          });
         }
         if (componentSpec) {
           data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });

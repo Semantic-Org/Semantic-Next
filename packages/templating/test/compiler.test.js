@@ -868,4 +868,108 @@ describe('TemplateCompiler', () => {
       } catch (e) {}
     });
   });
+
+  /*
+  describe('TemplateCompiler - preprocessAttributes', () => {
+    it('should convert camelCase attributes to kebab-case', () => {
+      const template = `<ui-menu expandAll="true" itemsPerPage="10"></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `<ui-menu expand-all="true" items-per-page="10"></ui-menu>`;
+      expect(result).toBe(expected);
+    });
+
+    it('should convert boolean camelCase attributes to kebab-case', () => {
+      const template = `<ui-menu expandAll></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `<ui-menu expand-all></ui-menu>`;
+      expect(result).toBe(expected);
+    });
+
+    it('should preserve already kebab-case attributes', () => {
+      const template = `<ui-menu expand-all="true" items-per-page="10"></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      expect(result).toBe(template);
+    });
+
+    it('should not modify dynamic expressions in attributes', () => {
+      const template = `<ui-menu class="{getClass section}" href={getLink section}></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      expect(result).toBe(template);
+    });
+
+    it('should handle dynamic expressions with {{}}', () => {
+      const template = `<ui-menu class="{{getClass section}}" href="{{getLink section}}"></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      expect(result).toBe(template);
+    });
+
+    it('should handle mixed attributes correctly', () => {
+      const template = `<ui-menu expandAll="true" itemsPerPage="10" class="{getClass section}" href="{{getLink section}}"></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `<ui-menu expand-all="true" items-per-page="10" class="{getClass section}" href="{{getLink section}}"></ui-menu>`;
+      expect(result).toBe(expected);
+    });
+
+    it('should process self-closing tags with boolean attributes', () => {
+      const template = `<ui-menu expandAll itemsPerPage />`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `<ui-menu expand-all items-per-page />`;
+      expect(result).toBe(expected);
+    });
+
+    it('should process mixed boolean and dynamic attributes', () => {
+      const template = `<ui-menu expandAll class="{getClass section}" itemsPerPage></ui-menu>`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `<ui-menu expand-all class="{getClass section}" items-per-page></ui-menu>`;
+      expect(result).toBe(expected);
+    });
+
+    it('should handle attributes with complex expression values', () => {
+      const template = `<div class="{activeIf isActiveItem section}{classIf hasIcons 'indented'}content" part="content">`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      expect(result).toBe(template);
+    });
+
+    it('should not mangle nested expressions', () => {
+      const template = `<div class="{classes getTitleStates section}title">`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      expect(result).toBe(template);
+    });
+
+    it('should not mangle templates with attributes', () => {
+      const template = `{>CodePlaygroundFile filename=panel.filename someAttr=value }`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `{>CodePlaygroundFile filename=panel.filename someAttr=value }`;
+      expect(result).toBe(expected);
+    });
+
+    it('should handle multi-line attributes with whitespace', () => {
+      const template = `<div
+        someAttr = "value"
+        dataValue = {expr}
+        thirdAttr = "test"
+      >`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `<div
+        some-attr = "value"
+        data-value = {expr}
+        third-attr = "test"
+      >`;
+      expect(result).toBe(expected);
+    });
+
+    it('should preserve markdown attributes in class specifications', () => {
+      const template = `### {title} {#title .title part="title"}`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      expect(result).toBe(template);
+    });
+
+    it('should handle conditional template syntax', () => {
+      const template = `{#if is layout 'tabs'} <div dataAttr="value">`;
+      const result = TemplateCompiler.preprocessAttributes(template);
+      const expected = `{#if is layout 'tabs'} <div data-attr="value">`;
+      expect(result).toBe(expected);
+    });
+  });
+  */
 });
