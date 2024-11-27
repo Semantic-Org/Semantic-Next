@@ -6,7 +6,7 @@
           menu={previousMenu.menu}
           activeURL={activeURL}
           expandAll=true
-        ></nav-menu>
+        />
       </div>
       <div class="active content">
         {#if activeMenu.header}
@@ -16,7 +16,7 @@
           menu={activeMenu.menu}
           activeURL={activeURL}
           expandAll=true
-        ></nav-menu>
+        />
         {#if hasAny previousMenu.menu}
           <div class="return">
             <ui-icon icon="left-chevron"></ui-icon>
@@ -32,9 +32,9 @@
           menu={nextMenu.menu}
           activeURL={activeURL}
           expandAll=true
-        ></nav-menu>
+        />
         <div class="return">
-          <ui-icon icon="left-chevron"></ui-icon>
+          <ui-icon icon="left-chevron" />
           Return to main menu
         </div>
       </div>

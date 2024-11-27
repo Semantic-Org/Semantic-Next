@@ -12,12 +12,12 @@ export const topbarMenu =  [
   {
     _id: 'framework',
     name: 'Tech Guide',
-    url: '/components',
+    url: '/introduction',
   },
   {
     _id: 'ui',
     name: 'UI Primitives',
-    url: '/introduction',
+    url: '/usage',
   },
 
   {
@@ -50,25 +50,21 @@ export const topbarMenu =  [
 export const sidebarMenuUI = [
   {
     name: 'Usage',
-    url: '/introduction',
+    url: '/usage',
     icon: 'open book',
     pages: [
       {
-        name: 'Project Setup',
-        url: '/getting-started'
+        name: 'HTML Usage',
+        url: '/usage/html'
       },
       {
-        name: 'Framework Usage',
-        url: '/framework-integration'
-      },
+        name: 'Frameworks Usage',
+        url: '/usage/framework'
+      },/*
       {
-        name: 'Usage in HTML',
-        url: '/usage'
-      },
-      {
-        name: 'What are Web Components',
-        url: '/web-components'
-      },
+        name: 'Web Components',
+        url: '/usage/web-components'
+      },*/
     ]
   },
   {
@@ -86,6 +82,11 @@ export const sidebarMenuUI = [
 
 /* Component Framework Sidebar */
 export const sidebarMenuFramework = [
+  {
+    name: 'Introduction',
+    url: '/introduction',
+    icon: 'open book',
+  },
   {
     name: 'Components',
     url: '/components',
