@@ -1,141 +1,55 @@
 ---
 layout: '@layouts/Guide.astro'
 icon: code
-title: Using Components in HTML
-description: An overview of using web components in your html codebase.
+title: Quick Start
+description: Learn how to setup Semantic UI
 ---
 import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
-import { UIButton, UIButtons } from '@semantic-ui/core';
-import { CodeExample } from '@components/CodeExample/CodeExample.js';
 
-## Adding UI Components
 
-Components can be used in your html like regular tags
+## Installation
 
-```html title=Head
-  <head>
-    <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core/dist/themes/button.css">
-    <script type="module" src="https://unpkg.com/@semantic-ui/core/components/button"></script>
-  </head>
+To get started, install the package using npm:
+
+```bash
+npm install @semantic-ui/core
 ```
 
-```html title=Page
-<ui-menu>
-  <menu-item>Home</menu-item>
-  <menu-item>2</menu-item>
-  <menu-item>3</menu-item>
-</ui-menu>
-```
-Web components can be quickly identified because they are [required by spec](/) to have a `-` dash in their names so `<ui-button>` but not `<button>`.
-
-## Using UI Components
-
-### Modifiers
-
-Semantic UI components that have a `specification` like button, label, or menu all support three ways to pass in descriptive modifiers to the components. These are designed to give your team flexibility and choice in how their codebase is structured.
-
-<CodeExample
-  client:only showCode="true" code="<ui-button primary>Primary</ui-button>">
-  <ui-button primary>Primary</ui-button>
-</CodeExample>
-
-### Syntax Types
-* **Standard** - Standard syntax allows you to use modifiers directly without specifying their grouping. This is the most similar to natural language.
-* **Technical** - Technical syntax includes groupings and is the most similar to normal html components.
-* **Classic** - Classic syntax uses the `class` attribute to specify styling modifiers.
+## Usage
 
 <Tabs>
-  <TabItem label="Standard">
-    ```html
-    <ui-button large primary>Primary</ui-button>
+  <TabItem label="JavaScript">
+
+    If you're using a module bundler like webpack, Rollup, or Parcel, you can import the components and themes directly into your JavaScript files. Make sure your bundler is configured to handle CSS imports.
+
+    ```javascript
+    import '@semantic-ui/core/components/button';
+    import '@semantic-ui/core/themes/button.css';
     ```
   </TabItem>
-      <TabItem label="Verbose">
-    ```html
-    <ui-button size="large" emphasis="primary">Primary</ui-button>
-    ```
-  </TabItem>
-  <TabItem label="Classic">
-    ```html
-    <ui-button class="large primary">Primary</ui-button>
+  <TabItem label="HTML">
+
+    ```html title="index.html"
+    <html>
+    <head>
+      <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core/dist/themes/button.css">
+      <script type="module" src="https://unpkg.com/@semantic-ui/core/components/button"></script>
+    </head>
+    <body>
+      <ui-button primary>Click me</ui-button>
+    </body>
+    </html>
     ```
   </TabItem>
 </Tabs>
+## Theming
 
+Semantic UI Web Components provides pre-defined themes that you can use out of the box. However, you can also customize the components by overriding their CSS variables.
 
-## Passing in Data
+It's recommended to scope variables to `:root`, so they will pierce multiple shadow DOM boundaries.
 
-Web components allow you to pass in a variety of information outside of styling modifiers, these can include callback functions, events, and structured data like objects or arrays.
-
-### Arrays and Objects
-
-
-When using vanilla HTML array or object data must be serialized when specified as an attribute. This can be simplified when using a modern UI framework.
-
-```html
-<ui-menu items='[{"label":"One","value":"1"},{"label":"Two","value":"2"},{"label":"Three","value":"3"}]'></ui-menu>
+```css
+:root {
+  --button-primary-color: var(--red);
+}
 ```
-
-
-If you are authoring a SUI template serialization will be handled for you automatically.
-```html
-<ui-menu items={menuItems}></ui-menu>
-```
-
-### Functions
-
-Some components allow you to pass in callback functions, for instance `<ui-panel>` has a callback to determine the natural size of a panel `getNaturalSize`. Functions cannot be serialized as attributes so you must pass them in as properties after the component is defined.
-
-### Events
-
-Events are dispatched using native custom events which means you can attach event handlers similar to any other event on the page.
-
-```javascript
-const menu = document.querySelectorAll('ui-menu');
-menu.addEventListener('change', (event) => {
-  console.log(`new value is ${event.details.value}`);
-});
-```
-
-
-## Plurality
-
-Some components support plurality, attributes assigned to the group pass through to the children. For instance in this example a button group is large so all child buttons are `large`, with one also being `primary`.
-
-
-<UIButtons large>
-  <UIButton primary>Large Primary</UIButton>
-  <UIButton>Large</UIButton>
-  <UIButton>Large</UIButton>
-</UIButtons>
-<br/><br/>
-
-<Tabs>
-  <TabItem label="Standard">
-    ```html
-    <ui-buttons large>
-      <ui-button primary>Large Primary</ui-button>
-      <ui-button>Large</ui-button>
-      <ui-button>Large</ui-button>
-    </ui-buttons>
-    ```
-  </TabItem>
-      <TabItem label="Verbose">
-    ```html
-    <ui-buttons size="large">
-      <ui-button emphasis="primary">Primary</ui-button>
-      <ui-button>Large</ui-button>
-      <ui-button>Large</ui-button>
-    </ui-buttons>
-    ```
-  </TabItem>
-  <TabItem label="Classic">
-    ```html
-    <ui-buttons class="large">
-      <ui-button class="primary">Primary</ui-button>
-      <ui-button>Large</ui-button>
-      <ui-button>Large</ui-button>
-    </ui-buttons>
-    ```
-  </TabItem>
-</Tabs>
