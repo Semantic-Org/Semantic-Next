@@ -11,7 +11,7 @@ const componentPages = components.map(page => ({
 export const topbarMenu =  [
   {
     _id: 'framework',
-    name: 'Tech Guide',
+    name: 'Docs',
     url: '/introduction',
   },
   {
@@ -19,7 +19,6 @@ export const topbarMenu =  [
     name: 'UI Primitives',
     url: '/usage',
   },
-
   {
     _id: 'api',
     name: 'API Reference',

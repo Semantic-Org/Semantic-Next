@@ -1,8 +1,11 @@
 ---
 import {
   UIButton,
+  UIButtons,
+  UICard,
   UIContainer,
   UIIcon,
+  UILabel,
   UIMenu,
   MenuItem,
   UIInput,
@@ -18,22 +21,44 @@ const { name, attributes } = Astro.props;
     <slot />
   </UIButton>
 )}
+{name === 'UIButtons' && (
+  <UIButtons {...attributes} client:load>
+    <slot />
+  </UIButtons>
+)}
+
+{name === 'UICard' && (
+  <UICard {...attributes} client:load>
+    <slot />
+  </UICard>
+)}
+
 {name === 'UIContainer' && (
   <UIContainer {...attributes}>
     <slot />
   </UIContainer>
 )}
+
+{name === 'UILabel' && (
+  <UILabel {...attributes} client:load>
+    <slot />
+  </UILabel>
+)}
+
 {name === 'UIIcon' && (
   <UIIcon {...attributes} />
 )}
+
 {name === 'UIInput' && (
   <UIInput {...attributes} />
 )}
+
 {name === 'UIRail' && (
   <UIRail {...attributes}>
     <slot />
   </UIRail>
 )}
+
 {name === 'UIMenu' && (
   <UIMenu {...attributes} client:load>
     <slot />

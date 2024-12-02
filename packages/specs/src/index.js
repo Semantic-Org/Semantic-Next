@@ -11,6 +11,7 @@ export { MenuSpec, MenuComponentSpec, MenuItemSpec, MenuItemComponentSpec } from
 export { LabelSpec, LabelComponentSpec } from './specs/label/index.js';
 export { InputSpec, InputComponentSpec } from './specs/input/index.js';
 export { SegmentSpec, SegmentComponentSpec } from './specs/segment/index.js';
+export { CardSpec, CardComponentSpec } from './specs/card/index.js';
 
 /* Components */
 export { ModalSpec, ModalComponentSpec } from './specs/modal/index.js';

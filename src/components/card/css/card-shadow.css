@@ -1,0 +1,105 @@
+/* src/components/card/css/shadow/content/card.css */
+@layer component.card.content.card {
+  :host {
+    margin: var(--vertically-spaced);
+  }
+  .card {
+    display: block;
+    cursor: pointer;
+    text-decoration: none;
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+    border: var(--internal-border);
+    transition: var(--transition);
+    box-shadow: var(--floating-shadow);
+  }
+  .card ::slotted(ui-icon),
+  .card ::slotted(.icon),
+  .card .icon {
+    font-size: var(--massive);
+  }
+  .card ::slotted(.header),
+  .card .header {
+    color: var(--primary-text-color);
+    font-size: var(--large);
+    font-weight: var(--bold);
+    transition: var(--transition);
+  }
+  .card ::slotted(.description),
+  .card .description {
+    color: var(--standard-60);
+    font-size: var(--medium);
+    transition: var(--transition);
+  }
+  .card ::slotted(.meta),
+  .card .meta {
+    margin-top: var(--compact-spacing);
+    padding-top: var(--compact-spacing);
+    border-top: var(--border);
+    display: flex;
+    gap: var(--compact-spacing);
+  }
+  .card .meta > * {
+    color: var(--standard-90);
+    font-weight: bold;
+  }
+  .link.card,
+  a.card {
+    cursor: pointer;
+    color: inherit;
+  }
+  .link.card:hover,
+  a.card:hover {
+    border: 1px solid var(--primary-text-color);
+  }
+  .four.cards ::slotted(*) {
+    flex-basis: 25%;
+  }
+  .horizontal {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+/* src/components/card/css/shadow/plural/cards.css */
+@layer component.card.plural {
+  .cards {
+    display: grid;
+    grid-auto-rows: 1fr;
+    gap: 1rem;
+    width: 100%;
+  }
+  ::slotted(ui-card) {
+    display: contents;
+  }
+  .cards.one {
+    grid-template-columns: 1fr;
+  }
+  .cards.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cards.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .cards.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .cards.five {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .cards.six {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .cards.seven {
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .cards.eight {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* src/components/card/css/shadow/variations/fluid.css */
+@layer component.card.variations.fluid;
+
+/* src/components/card/css/shadow/card.css */
