@@ -81,8 +81,8 @@ Utility includes the following helpers:
 
 ### Looping
 - `each(iterable, func, context)` - Calls function for each element of an iterable.
-- `asyncEach(iterable, func, context) - Calls iteratee awaiting each function
-- `asyncMap(iterable, func, context) - Calls each func awaiting the mapped result
+- `asyncEach(iterable, func, context)` - Calls iteratee awaiting each function
+- `asyncMap(iterable, func, context)` - Calls each func awaiting the mapped result
 
 ### Equality
 - `isEqual(a, b)` - Deep compares two values to determine if they are equivalent.

@@ -4,7 +4,6 @@
 /* Types */
 @import url('./types/glass.css') layer(component.types.glass);
 
-
 /* Types */
 @import url('./variations/aligned.css') layer(component.variations.aligned);
 @import url('./variations/sizing.css') layer(component.variations.sizing);
