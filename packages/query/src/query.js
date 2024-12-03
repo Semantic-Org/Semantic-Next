@@ -390,7 +390,6 @@ export class Query {
       const abortController = options?.abortController || new AbortController();
       const eventSettings = options?.eventSettings || {};
       const signal = abortController.signal;
-
       this.each((el) => {
         let delegateHandler;
         if (targetSelector) {
@@ -462,10 +461,14 @@ export class Query {
     else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
-    const wrappedHandler = (...args) => {
+
+    // We add a custom abort controller so that we can remove all events at once
+    options = options || {};
+    const abortController = new AbortController();
+    options.abortController = abortController;
+
+    const wrappedHandler = function (...args) {
       handler.apply(this, args);
-      // Unbind the event handler after it has been invoked once
-      this.off(eventName, wrappedHandler);
     };
     return (targetSelector)
       ? this.on(eventName, targetSelector, wrappedHandler, options)
@@ -476,7 +479,9 @@ export class Query {
   off(eventName, handler) {
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        eventHandler.eventName === eventName &&
+        (!eventName ||
+          eventHandler.eventName === eventName
+        ) &&
         (!handler ||
           handler?.eventListener == eventHandler.eventListener ||
           eventHandler.eventListener === handler ||
@@ -485,7 +490,7 @@ export class Query {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if(el.removeEventListener) {
-          el.removeEventListener(eventName, eventHandler.eventListener);
+          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
         }
         return false;
       }

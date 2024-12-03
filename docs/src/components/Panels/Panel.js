@@ -105,9 +105,11 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
       })
       .on('touchmove', self.resizeDrag)
     ;
-    $$('iframe').one('pointerenter', (event) => {
-      self.endResize(event);
-    });
+    $$('iframe')
+      .one('pointerenter', (event) => {
+        self.endResize(event);
+      })
+    ;
     $('body')
       .one('pointerup mouseleave', (event) => {
         self.endResize(event);
@@ -127,6 +129,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
       .removeClass('resizing')
       .css('cursor', '')
     ;
+    $$('body').off('pointerup mouseleave');
     $$('iframe').off('pointerenter');
     self.resizing.set(false);
     delete self.initialPosition;

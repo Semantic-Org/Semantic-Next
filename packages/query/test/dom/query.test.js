@@ -793,6 +793,120 @@ describe('query', () => {
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
+
+    it('should handle multiple space-separated events and remove all handlers after any one fires', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').one('mouseup mouseleave', callback);
+
+      // First event should trigger callback
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      // Second event shouldn't trigger since handlers were removed
+      div.dispatchEvent(new Event('mouseleave'));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      // Original event also shouldn't trigger again
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle multiple events with delegation', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').one('mouseup mouseleave', 'span', callback);
+
+      span.dispatchEvent(new Event('mouseup', { bubbles: true }));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      span.dispatchEvent(new Event('mouseleave', { bubbles: true }));
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle three or more space-separated events', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').one('mouseup mouseleave click', callback);
+
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      div.dispatchEvent(new Event('mouseleave'));
+      div.dispatchEvent(new Event('click'));
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should group one handlers not calling others in group', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn();
+
+      $('div').one('mouseup mouseleave', callback);
+
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      div.dispatchEvent(new Event('mouseleave'));
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+
+    it('should remove handlers based on grouping', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+
+      $('div')
+        .one('mouseup mouseleave', callback1)
+        .one('click mouseup', callback2);  // mouseup added twice
+
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback1).toHaveBeenCalledTimes(1);
+      expect(callback2).toHaveBeenCalledTimes(1);
+
+      div.dispatchEvent(new Event('click'));
+      div.dispatchEvent(new Event('mouseleave'));
+      expect(callback1).toHaveBeenCalledTimes(1);
+      expect(callback2).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle nested events correctly', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const callback = vi.fn(() => {
+        // Trigger another event inside the handler
+        div.dispatchEvent(new Event('mouseleave'));
+      });
+
+      $('div').one('mouseup mouseleave', callback);
+
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should work with dynamically added elements', () => {
+      const callback = vi.fn();
+      $(document).one('click mouseup', 'div', callback);
+
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      div.click();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      div.dispatchEvent(new Event('mouseup'));
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
   });
   
   describe('off', () => {
