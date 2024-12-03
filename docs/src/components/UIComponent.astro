@@ -5,6 +5,7 @@ import {
   UICard,
   UIContainer,
   UIIcon,
+  UIInput,
   UILabel,
   UIMenu,
   MenuItem,
@@ -26,7 +27,6 @@ const { name, attributes } = Astro.props;
     <slot />
   </UIButtons>
 )}
-
 {name === 'UICard' && (
   <UICard {...attributes} client:load>
     <slot />
@@ -39,12 +39,6 @@ const { name, attributes } = Astro.props;
   </UIContainer>
 )}
 
-{name === 'UILabel' && (
-  <UILabel {...attributes} client:load>
-    <slot />
-  </UILabel>
-)}
-
 {name === 'UIIcon' && (
   <UIIcon {...attributes} />
 )}
@@ -53,12 +47,17 @@ const { name, attributes } = Astro.props;
   <UIInput {...attributes} />
 )}
 
+{name === 'UILabel' && (
+  <UILabel {...attributes} client:load>
+    <slot />
+  </UILabel>
+)}
+
 {name === 'UIRail' && (
   <UIRail {...attributes}>
     <slot />
   </UIRail>
 )}
-
 {name === 'UIMenu' && (
   <UIMenu {...attributes} client:load>
     <slot />
