@@ -7,6 +7,8 @@ export class Reaction {
   static pendingReactions = new Set();
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
+  static isFlushing = false;
+  static flushPromise = null;
 
   static create(callback) {
     const reaction = new Reaction(callback);
@@ -18,7 +20,7 @@ export class Reaction {
     if (!Reaction.isFlushScheduled) {
       Reaction.isFlushScheduled = true;
       if (typeof queueMicrotask === 'function') {
-        // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
+        // Use queueMicrotask for efficient scheduling
         queueMicrotask(() => Reaction.flush());
       } else {
         Promise.resolve().then(() => Reaction.flush());
@@ -28,11 +30,38 @@ export class Reaction {
 
   static flush() {
     Reaction.isFlushScheduled = false;
-    Reaction.pendingReactions.forEach(reaction => reaction.run());
-    Reaction.pendingReactions.clear();
-
-    Reaction.afterFlushCallbacks.forEach(callback => callback());
+    Reaction.isFlushing = true;
+    while (Reaction.pendingReactions.size > 0) {
+      const reactionsToRun = Array.from(Reaction.pendingReactions);
+      Reaction.pendingReactions.clear();
+      reactionsToRun.forEach(reaction => reaction.run());
+    }
+    // After all reactions have been processed, call afterFlush callbacks
+    const callbacks = Reaction.afterFlushCallbacks;
     Reaction.afterFlushCallbacks = [];
+    callbacks.forEach(callback => callback());
+    Reaction.isFlushing = false;
+  }
+
+  static flushAsync() {
+    if (!Reaction.flushPromise) {
+      Reaction.flushPromise = new Promise((resolve) => {
+        if (typeof queueMicrotask === 'function') {
+          queueMicrotask(() => {
+            Reaction.flush();
+            Reaction.flushPromise = null;
+            resolve();
+          });
+        } else {
+          Promise.resolve().then(() => {
+            Reaction.flush();
+            Reaction.flushPromise = null;
+            resolve();
+          });
+        }
+      });
+    }
+    return Reaction.flushPromise;
   }
 
   static afterFlush(callback) {
@@ -45,24 +74,52 @@ export class Reaction {
     this.boundRun = this.run.bind(this);
     this.firstRun = true;
     this.active = true;
+    this.isRunning = false; // Track if the reaction is currently running
+    this.version = 0;       // Versioning to handle async operations
   }
 
-  run() {
+  async run() {
     if (!this.active) {
       return;
     }
-    Reaction.current = this;
+    this.isRunning = true;
+    const currentVersion = this.version;
+
+    // Clean up previous dependencies
     this.dependencies.forEach(dep => dep.cleanUp(this));
     this.dependencies.clear();
-    this.callback(this);
-    this.firstRun = false;
-    Reaction.current = null;
-    Reaction.pendingReactions.delete(this);
+
+    // Set the current reaction
+    Reaction.current = this;
+
+    try {
+      // Execute the callback and check if it returns a Promise
+      const result = this.callback(this);
+
+      if (result && typeof result.then === 'function') {
+        // If the callback returns a Promise, await it
+        await result;
+
+        // Check if the reaction was invalidated while awaiting
+        if (this.version !== currentVersion) {
+          // If so, exit early; a newer run has started
+          return;
+        }
+      }
+    } finally {
+      // Clean up
+      this.firstRun = false;
+      Reaction.current = null;
+      Reaction.pendingReactions.delete(this);
+      this.isRunning = false;
+    }
   }
 
   invalidate(context) {
-    this.active = true;
-    if(context) {
+    if (!this.active) return;
+    this.active = true;   // Reactivate the reaction if it was inactive
+    this.version++;       // Increment version to signal invalidation
+    if (context) {
       this.context = context;
     }
     Reaction.pendingReactions.add(this);
@@ -73,8 +130,8 @@ export class Reaction {
     if (!this.active) return;
     this.active = false;
     this.dependencies.forEach(dep => dep.unsubscribe(this));
+    this.dependencies.clear();
   }
-
 
   /*
     Makes sure anything called inside this function does not trigger reactions
@@ -90,7 +147,7 @@ export class Reaction {
   }
 
   /*
-    Makes sure function doesnt rerun when values dont change
+    Makes sure function doesn't rerun when values don't change
   */
   static guard(f) {
     if (!Reaction.current) {

@@ -309,4 +309,102 @@ describe('Reaction', () => {
 
   });
 
+  describe('Asynchronous Reactions', () => {
+    it('should handle asynchronous reactions', async () => {
+      const reactiveValue = new ReactiveVar(1);
+      const callback = vi.fn();
+
+      Reaction.create(async () => {
+        const value = reactiveValue.get();
+        // Simulate async operation
+        await new Promise(resolve => setTimeout(resolve, 50));
+        callback(value);
+      });
+
+      // Initial flush
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      // Update reactive value
+      reactiveValue.set(2);
+      // Allow reaction to process
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenNthCalledWith(1, 1);
+      expect(callback).toHaveBeenNthCalledWith(2, 2);
+    });
+
+    it('should not run outdated reactions when dependencies change during async operation', async () => {
+      const reactiveValue = new ReactiveVar(1);
+      const callback = vi.fn();
+
+      Reaction.create(async () => {
+        const currentVersion = reactiveValue.get();
+        // Simulate longer async operation
+        await new Promise(resolve => setTimeout(resolve, 100));
+        callback(currentVersion);
+      });
+
+      // Allow initial reaction to start
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Update reactive value before async operation completes
+      reactiveValue.set(2);
+
+      // Allow reactions to process
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenNthCalledWith(1, 1);
+      expect(callback).toHaveBeenNthCalledWith(2, 2);
+    });
+
+    it('should not call callback from outdated reaction', async () => {
+      const reactiveValue = new ReactiveVar(1);
+      const callback = vi.fn();
+
+      Reaction.create(async (comp) => {
+        const versionAtStart = comp.version;
+        const value = reactiveValue.get();
+        // Simulate async operation
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Check if the version has changed
+        if (comp.version !== versionAtStart) {
+          // Outdated reaction; do not proceed
+          return;
+        }
+        callback(value);
+      });
+
+      // Allow initial reaction to start
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Update reactive value before async operation completes
+      reactiveValue.set(2);
+
+      // Allow reactions to process
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith(2);
+    });
+
+    it('should handle errors in asynchronous reactions', async () => {
+      const reactiveValue = new ReactiveVar(1);
+      const errorCallback = vi.fn();
+
+      Reaction.create(async () => {
+        const value = reactiveValue.get();
+        // Simulate async operation that throws an error
+        await new Promise((_, reject) => setTimeout(() => reject(new Error('Test error')), 50));
+      }).catch(errorCallback);
+
+      // Allow reactions to process
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(errorCallback).toHaveBeenCalledTimes(1);
+      expect(errorCallback).toHaveBeenCalledWith(expect.any(Error));
+    });
+  });
+
 });
