@@ -358,6 +358,21 @@ export class Query {
     return this;
   }
 
+  getEventAlias(eventName) {
+    // support some more friendly names
+    const aliases = {
+      ready: 'DOMContentLoaded'
+    };
+    return aliases[eventName] || eventName;
+  }
+
+  getEventArray(eventNames) {
+    return eventNames.split(' ')
+      .map(name => this.getEventAlias(name))
+      .filter(Boolean)
+    ;
+  }
+
   on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
@@ -375,22 +390,12 @@ export class Query {
       handler = targetSelectorOrHandler;
     }
 
-    // support some more friendly names
-    const aliases = {
-      ready: 'DOMContentLoaded'
-    };
-
-    // Split event names by spaces and attach handlers for each
-    const events = eventNames.split(' ')
-      .map(name => aliases[name] ? aliases[name] : name)
-      .filter(Boolean)
-    ;
+    const events = this.getEventArray(eventNames);
 
     events.forEach(eventName => {
       const abortController = options?.abortController || new AbortController();
       const eventSettings = options?.eventSettings || {};
       const signal = abortController.signal;
-
       this.each((el) => {
         let delegateHandler;
         if (targetSelector) {
@@ -462,10 +467,14 @@ export class Query {
     else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
-    const wrappedHandler = (...args) => {
+
+    // We add a custom abort controller so that we can remove all events at once
+    options = options || {};
+    const abortController = new AbortController();
+    options.abortController = abortController;
+    const wrappedHandler = function (...args) {
+      abortController.abort();
       handler.apply(this, args);
-      // Unbind the event handler after it has been invoked once
-      this.off(eventName, wrappedHandler);
     };
     return (targetSelector)
       ? this.on(eventName, targetSelector, wrappedHandler, options)
@@ -473,10 +482,13 @@ export class Query {
     ;
   }
 
-  off(eventName, handler) {
+  off(eventNames, handler) {
+    const events = this.getEventArray(eventNames);
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        eventHandler.eventName === eventName &&
+        (!eventNames ||
+          inArray(eventHandler.eventName, events)
+        ) &&
         (!handler ||
           handler?.eventListener == eventHandler.eventListener ||
           eventHandler.eventListener === handler ||
@@ -485,7 +497,7 @@ export class Query {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if(el.removeEventListener) {
-          el.removeEventListener(eventName, eventHandler.eventListener);
+          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
         }
         return false;
       }
