@@ -264,6 +264,11 @@
     }
   }
 
+  playground-example {
+    display: block;
+    margin-bottom: 5rem;
+  }
+
 }
 
 

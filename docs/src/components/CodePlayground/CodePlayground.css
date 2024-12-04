@@ -102,6 +102,7 @@
     .menu {
       flex: 0 0 auto;
       overflow: auto hidden;
+      scrollbar-width: thin;
       white-space: nowrap;
     }
 
