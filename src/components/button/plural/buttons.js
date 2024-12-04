@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ButtonComponentSpec } from '@semantic-ui/specs';
+import { ButtonPluralComponentSpec } from '@semantic-ui/specs';
 
 import ButtonShadowCSS from '../css/button-shadow.css?raw';
 import ButtonPageCSS from '../css/button-page.css?raw';
@@ -11,7 +11,7 @@ export const UIButtons = defineComponent({
   plural: true,
   singularTag: 'ui-button',
   delegateFocus: true,
-  componentSpec: ButtonComponentSpec,
+  componentSpec: ButtonPluralComponentSpec,
   template: ButtonsTemplate,
   css: ButtonShadowCSS,
   pageCSS: ButtonPageCSS,
