@@ -920,6 +920,19 @@ describe('query', () => {
       div.click();
       expect(callback).not.toHaveBeenCalled();
     });
+    it('should remove an array of event names', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      div.tabIndex = 1;
+      const callback = vi.fn();
+
+      $('div').on('click', callback);
+      $('div').on('focus', callback);
+      $('div').off('click focus', callback);
+      div.click();
+      div.focus();
+      expect(callback).not.toHaveBeenCalled();
+    });
     
     it('should remove a specific event handler', () => {
       const div = document.createElement('div');
