@@ -4,6 +4,7 @@ title: Template Helpers
 icon: book-open
 description: Comprehensive index of all template helpers in Semantic UI
 ---
+import { UICards, UICard } from '@semantic-ui/core';
 
 
 
@@ -27,17 +28,61 @@ Template helpers can be used directly from any template
 
 
 ```sui
-{{formatDate myDate 'h:mm A'}}
+{formatDate myDate 'h:mm A'}
 ```
 
 ## Helper Categories
-* **[Array Helpers](/api/helpers/arrays)** - working with arrays and lists.
-* **[Comparison Helpers](/api/helpers/comparison)** - comparing values and making decisions.
-* **[CSS Helpers](/api/helpers/css)** - working with CSS classes and styles.
-* **[Date Helpers](/api/helpers/dates)** - formatting and manipulating dates.
-* **[Debug Helpers](/api/helpers/debug)** - debugging and logging within templates.
-* **[Logical Helpers](/api/helpers/logical)** - conditional checks and logical operations.
-* **[Numeric Helpers](/api/helpers/numeric)** - working with numbers.
-* **[Object Helpers](/api/helpers/objects)** - manipulating and transforming objects.
-* **[Reactivity Helpers](/api/helpers/reactivity)** - working with reactive computations.
-* **[String Helpers](/api/helpers/strings)** - string manipulation and formatting.
+
+
+<UICards two horizontal>
+  <UICard horizontal
+    header="Array Helpers"
+    href="/api/helpers/arrays"
+    description="working with arrays and lists."
+  ></UICard>
+  <UICard horizontal
+    header="Comparison Helpers"
+    href="/api/helpers/comparison"
+    description="comparing values and making decisions."
+  ></UICard>
+  <UICard horizontal
+    header="CSS Helpers"
+    href="/api/helpers/css"
+    description="working with CSS classes and styles."
+  ></UICard>
+  <UICard horizontal
+    header="Date Helpers"
+    href="/api/helpers/dates"
+    description="formatting and manipulating dates."
+  ></UICard>
+  <UICard horizontal
+    header="Debug Helpers"
+    href="/api/helpers/debug"
+    description="debugging and logging within templates."
+  ></UICard>
+  <UICard horizontal
+    header="Logical Helpers"
+    href="/api/helpers/logical"
+    description="conditional checks and logical operations."
+  ></UICard>
+  <UICard horizontal
+    header="Numeric Helpers"
+    href="/api/helpers/numeric"
+    description="working with numbers."
+  ></UICard>
+  <UICard horizontal
+    header="Object Helpers"
+    href="/api/helpers/objects"
+    description="manipulating and transforming objects."
+  ></UICard>
+  <UICard horizontal
+    header="Reactivity Helpers"
+    href="/api/helpers/reactivity"
+    description="working with reactive computations."
+  ></UICard>
+  <UICard horizontal
+    header="String Helpers"
+    href="/api/helpers/strings"
+    description="string manipulation and formatting."
+  ></UICard>
+</UICards>

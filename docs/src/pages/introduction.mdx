@@ -8,16 +8,18 @@ import { UICards, UICard } from '@semantic-ui/core';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic UI is designed to be an interchange format for UI components that wraps web components adding in the missing features necessary to ship UI using web components.
+The two main ways to use Semantic UI
+* **Creating UI Components** - Semantic provides all the tools to build custom UI components whether your goal is to build an inhouse design system, build a website, or contribute UI components to the open source community.
+* **Use UI Components** - Semantic provides an out of the box set of ui components similar to the original version or other UI frameworks
+
+> Semantic UI's component framework is designed to provide the missing toolkit to make web components easy to author and ship at scale, with features like reactivity, templating, tools for events and keybindings, and a robust css framework for styling.
 
 
-You can choose to adopt Semantic UI to author your entire app or website using web components or simply use web components as an end-user integrating them into another codebase written in HTML or in many other frameworks like React, Svelte, Angular that natively support web components.
+## Creating UI Components
 
-## Create Components
+Semantic provides several core libraries to make it easy to ship custom UI as web components.
 
-If you choose to use Semantic UI entirely, you can use the [component framework](/components) to create custom components which render to web components, which you can use directly in your layout as HTML similar to the in-house UI primitives.
-
-<UICards four horizontal>
+<UICards two horizontal>
   <UICard horizontal
     header="@semantic-ui/component"
     icon="package"
@@ -51,7 +53,7 @@ If you choose to use Semantic UI entirely, you can use the [component framework]
 </UICards>
 
 
-## Use Components
+## Using UI Components
 
 If you prefer to use Semantic UI purely as a UI framework and not author your own custom UI, you can simply use web components directly wherever you write your code from `@semantic-ui/core`
 

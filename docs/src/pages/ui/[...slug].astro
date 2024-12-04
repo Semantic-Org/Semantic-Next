@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { each, toTitleCase, inArray, toTitleCase } from '@semantic-ui/utils';
+import { each, toTitleCase, inArray } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
 import * as SpecExports from '@semantic-ui/specs';
@@ -32,6 +32,7 @@ const definitionDisplayed = inArray(displayedTab, ['singular', 'definition', 'pl
 const { SpecReader, ...Specs } = SpecExports;
 const spec = Specs[data.specName];
 const componentSpec = new SpecReader(spec, { plural });
+console.log(componentSpec, plural);
 const componentName = componentSpec.getComponentName();
 const definition = componentSpec.getDefinition();
 
