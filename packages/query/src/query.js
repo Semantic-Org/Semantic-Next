@@ -358,6 +358,21 @@ export class Query {
     return this;
   }
 
+  getEventAlias(eventName) {
+    // support some more friendly names
+    const aliases = {
+      ready: 'DOMContentLoaded'
+    };
+    return aliases[eventName] || eventName;
+  }
+
+  getEventArray(eventNames) {
+    return eventNames.split(' ')
+      .map(name => this.getEventAlias(name))
+      .filter(Boolean)
+    ;
+  }
+
   on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
@@ -375,16 +390,7 @@ export class Query {
       handler = targetSelectorOrHandler;
     }
 
-    // support some more friendly names
-    const aliases = {
-      ready: 'DOMContentLoaded'
-    };
-
-    // Split event names by spaces and attach handlers for each
-    const events = eventNames.split(' ')
-      .map(name => aliases[name] ? aliases[name] : name)
-      .filter(Boolean)
-    ;
+    const events = this.getEventArray(eventNames);
 
     events.forEach(eventName => {
       const abortController = options?.abortController || new AbortController();
@@ -466,8 +472,8 @@ export class Query {
     options = options || {};
     const abortController = new AbortController();
     options.abortController = abortController;
-
     const wrappedHandler = function (...args) {
+      abortController.abort();
       handler.apply(this, args);
     };
     return (targetSelector)
@@ -476,11 +482,12 @@ export class Query {
     ;
   }
 
-  off(eventName, handler) {
+  off(eventNames, handler) {
+    const events = this.getEventArray(eventNames);
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        (!eventName ||
-          eventHandler.eventName === eventName
+        (!eventNames ||
+          inArray(eventHandler.eventName, events)
         ) &&
         (!handler ||
           handler?.eventListener == eventHandler.eventListener ||
