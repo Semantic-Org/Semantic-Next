@@ -124,12 +124,10 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
   },
   endResize() {
     $('body')
-      .off('mousemove')
-      .off('touchmove')
+      .off('pointerup mouseleave mousemove touchmove')
       .removeClass('resizing')
       .css('cursor', '')
     ;
-    $$('body').off('pointerup mouseleave');
     $$('iframe').off('pointerenter');
     self.resizing.set(false);
     delete self.initialPosition;
