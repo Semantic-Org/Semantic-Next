@@ -58,6 +58,7 @@ export class SpecReader {
       types: [],
       states: [],
       variations: [],
+      settings: [],
     };
 
     // user can specify only portions of definition appears of a certain usage level
@@ -70,7 +71,7 @@ export class SpecReader {
     const spec = this.spec;
 
     // standard example
-    const defaultContent = spec?.examples?.defaultContent;
+    const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
     definition.types.push({
       title: spec.name,
