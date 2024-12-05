@@ -9,6 +9,7 @@ body {
 
 html {
   font-size: var(--font-size);
+  container: page / normal;
 }
 
 *,

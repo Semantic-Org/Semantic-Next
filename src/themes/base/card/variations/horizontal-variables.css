@@ -1,0 +1,8 @@
+:root {
+  --card-horizontal-flex-direction: row;
+  --card-horizontal-gap: var(--padding);
+
+  --card-horizontal-icon-size: var(--massive);
+  --card-horizontal-header-size: var(--large);
+}
+

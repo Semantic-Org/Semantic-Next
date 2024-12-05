@@ -1,0 +1,12 @@
+.horizontal {
+  flex-direction: var(--card-horizontal-flex-direction);
+  gap: var(--card-horizontal-gap);
+  text-align: left;
+
+  .icon * {
+    font-size: var(--massive);
+  }
+  .header {
+    font-size: var(--large);
+  }
+}

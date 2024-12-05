@@ -1,8 +1,18 @@
+
 /* Content */
 @import url('./content/card.css') layer(component.card.content.card);
+@import url('./content/description.css') layer(component.card.content.description);
+@import url('./content/header.css') layer(component.card.content.header);
+@import url('./content/icon.css') layer(component.card.content.icon);
+@import url('./content/meta.css') layer(component.card.content.icon);
 
-/* Group */
-@import url('./plural/cards.css') layer(component.card.plural);
+/* Types */
+@import url('./types/selection.css') layer(component.card.type.selection);
 
 /* Variations */
 @import url('./variations/fluid.css') layer(component.card.variations.fluid);
+@import url('./variations/count.css') layer(component.card.variations.count);
+@import url('./variations/link.css') layer(component.card.variations.link);
+@import url('./variations/horizontal.css') layer(component.card.variations.horizontal);
+@import url('./variations/basic.css') layer(component.card.variations.basic);
+

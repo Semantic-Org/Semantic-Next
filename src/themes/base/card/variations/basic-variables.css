@@ -1,0 +1,5 @@
+:root {
+  --card-basic-background: transparent;
+  --card-basic-box-shadow: var(--floating-shadow);
+}
+

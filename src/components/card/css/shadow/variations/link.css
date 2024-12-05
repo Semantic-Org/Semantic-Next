@@ -1,0 +1,12 @@
+.link.card,
+a.card {
+  cursor: pointer;
+  color: inherit;
+
+  &:hover {
+    border: 1px solid var(--primary-text-color);
+    background-color: oklch(0.17 0.04 225.68);
+    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+    background-image: var(--subtle-gradient);
+  }
+}

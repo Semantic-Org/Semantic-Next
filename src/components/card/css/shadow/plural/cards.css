@@ -2,48 +2,25 @@
             Groups
 *******************************/
 
+:host(ui-cards) {
+  display: block;
+  margin: var(--vertically-spaced);
+}
 .cards {
   display: grid;
   grid-auto-rows: 1fr;
   gap: 1rem;
   width: 100%;
+}
 
+.spaced.cards {
+  gap: 2rem;
+}
+
+.very-spaced.cards {
+  gap: 3em;
 }
 
 ::slotted(ui-card) {
   display: contents;
-}
-
-.cards {
-  &.one {
-    grid-template-columns: 1fr;
-  }
-
-  &.two {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  &.three {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  &.four {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  &.five {
-    grid-template-columns: repeat(5, 1fr);
-  }
-
-  &.six {
-    grid-template-columns: repeat(6, 1fr);
-  }
-
-  &.seven {
-    grid-template-columns: repeat(7, 1fr);
-  }
-
-  &.eight {
-    grid-template-columns: repeat(8, 1fr);
-  }
 }

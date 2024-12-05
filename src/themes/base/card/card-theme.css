@@ -1,14 +1,22 @@
 /*******************************
-            Button
+            Card
 *******************************/
 
 /* Content */
 @import url('./content/card-variables.css') layer(content.card);
+@import url('./content/description-variables.css') layer(content.description);
+@import url('./content/header-variables.css') layer(content.header);
+@import url('./content/icon-variables.css') layer(content.icon);
+@import url('./content/meta-variables.css') layer(content.meta);
 
 /* Types */
 @import url('./types/selection-variables.css') layer(type.selection);
 
 /* Variations */
-@import url('./variations/fluid-variables.css') layer(variations.evenlySpaced);
+@import url('./variations/fluid-variables.css') layer(variations.fluid);
+@import url('./variations/count-variables.css') layer(variations.count);
+@import url('./variations/link-variables.css') layer(variations.link);
+@import url('./variations/horizontal-variables.css') layer(variations.horizontal);
+@import url('./variations/basic-variables.css') layer(variations.basic);
 
 

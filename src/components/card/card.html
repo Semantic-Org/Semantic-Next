@@ -15,23 +15,26 @@
       {>header}
       {>image}
       {>description}
+      {> slot}
     </div>
   {else}
     <div class="content">
+      {>icon}
       {>header}
       {>image}
       {>description}
+      {> slot}
     </div>
   {/if}
-  {> slot}
 {/snippet}
 
 {#snippet icon}
-  {#if icon}
-    <div class="icon">
-      <ui-icon icon={icon} class="icon" part="icon"></ui-icon>
-    </div>
-  {/if}
+  <div class="icon" part="icon">
+    {#if icon}
+      <ui-icon icon={icon}></ui-icon>
+    {/if}
+    {> slot icon}
+  </div>
 {/snippet}
 
 {#snippet header}

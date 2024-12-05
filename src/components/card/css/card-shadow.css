@@ -1,35 +1,40 @@
 /* src/components/card/css/shadow/content/card.css */
 @layer component.card.content.card {
   :host {
+    display: inline-block;
     margin: var(--vertically-spaced);
   }
   .card {
-    display: block;
-    cursor: pointer;
+    display: flex;
+    flex-direction: var(--card-flex-direction);
+    gap: var(--card-gap);
     text-decoration: none;
-    padding: var(--padding);
-    border-radius: var(--border-radius);
-    border: var(--internal-border);
-    transition: var(--transition);
-    box-shadow: var(--floating-shadow);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    border: var(--card-border);
+    transition: var(--card-transition);
+    box-shadow: var(--card-box-shadow);
+    background: var(--card-background);
+    text-align: center;
   }
   .card ::slotted(ui-icon),
   .card ::slotted(.icon),
-  .card .icon {
-    font-size: var(--massive);
+  .card .icon * {
+    font-size: var(--card-icon-font-size);
+    margin: var(--card-icon-margin);
   }
   .card ::slotted(.header),
   .card .header {
-    color: var(--primary-text-color);
-    font-size: var(--large);
-    font-weight: var(--bold);
-    transition: var(--transition);
+    color: var(--card-header-color);
+    font-size: var(--card-header-font-size);
+    font-weight: var(--card-header-font-weight);
+    transition: var(--card-header-transition);
   }
   .card ::slotted(.description),
   .card .description {
-    color: var(--standard-60);
-    font-size: var(--medium);
-    transition: var(--transition);
+    color: var(--card-description-color);
+    font-size: var(--card-description-font-size);
+    transition: var(--card-description-transition);
   }
   .card ::slotted(.meta),
   .card .meta {
@@ -51,28 +56,53 @@
   .link.card:hover,
   a.card:hover {
     border: 1px solid var(--primary-text-color);
-  }
-  .four.cards ::slotted(*) {
-    flex-basis: 25%;
+    background-color: #00121a;
+    background-color: oklch(0.17 0.04 225.68);
+    box-shadow: rgba(0, 133, 182, .25) 0px 0px 7px 2px;
+    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+    background-image: var(--subtle-gradient);
   }
   .horizontal {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
+    flex-direction: var(--card-horizontal-flex-direction);
+    gap: var(--card-horizontal-gap);
+    text-align: left;
+  }
+  .horizontal .icon * {
+    font-size: var(--massive);
+  }
+  .horizontal .header {
+    font-size: var(--large);
   }
 }
 
 /* src/components/card/css/shadow/plural/cards.css */
 @layer component.card.plural {
+  :host(ui-cards) {
+    display: block;
+    margin: var(--vertically-spaced);
+  }
   .cards {
     display: grid;
     grid-auto-rows: 1fr;
     gap: 1rem;
     width: 100%;
   }
+  .spaced.cards {
+    gap: 2rem;
+  }
+  .very-spaced.cards {
+    gap: 3em;
+  }
   ::slotted(ui-card) {
     display: contents;
   }
+}
+
+/* src/components/card/css/shadow/variations/fluid.css */
+@layer component.card.variations.fluid;
+
+/* src/components/card/css/shadow/variations/count.css */
+@layer component.card.variations.count {
   .cards.one {
     grid-template-columns: 1fr;
   }
@@ -98,8 +128,5 @@
     grid-template-columns: repeat(8, 1fr);
   }
 }
-
-/* src/components/card/css/shadow/variations/fluid.css */
-@layer component.card.variations.fluid;
 
 /* src/components/card/css/shadow/card.css */
