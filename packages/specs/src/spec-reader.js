@@ -73,19 +73,19 @@ export class SpecReader {
     // standard example
     const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
-    console.log('default mods are');
     definition.types.push({
       title: spec.name,
       description: '',
       examples: [
         {
           showCode: false,
-          code: this.getCode(defaultModifiers, { html: defaultContent }),
+          code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent }),
           components: [ this.getComponentParts(defaultModifiers, { html: defaultContent }) ]
         }
       ]
     });
 
+    // returns specs in the same sequence 'types', 'content', 'states', 'variations'
     const parts = this.getOrderedParts();
     each(parts, (partName) => {
       each(spec[partName], part => {
@@ -107,7 +107,7 @@ export class SpecReader {
     Returns the sequencing for a spec when displaying in a structured way
   */
   getOrderedParts() {
-    return ['types', 'content', 'states', 'variations'];
+    return ['types', 'content', 'states', 'variations', 'settings'];
   }
 
   /*
@@ -235,7 +235,7 @@ export class SpecReader {
           if(defaultAttributes) {
             modifiers = `${modifiers} ${defaultAttributes}`;
           }
-          code = this.getCode(modifiers, { html: defaultContent });
+          code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
           componentParts = this.getComponentParts(modifiers, { html: defaultContent });
         }
         const example = {
@@ -268,7 +268,7 @@ export class SpecReader {
         componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
-        code = this.getCode(modifiers, { html: defaultContent });
+        code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
         componentParts = this.getComponentParts(modifiers, { html: defaultContent });
       }
       const example = {
@@ -312,7 +312,8 @@ export class SpecReader {
     return componentParts;
   }
 
-  getCode(modifiers, settings) {
+  /* Returns the html for a component with a given set of modifiers */
+  getCodeFromModifiers(modifiers, settings) {
     const { componentName, attributeString, html } = this.getComponentParts(modifiers, settings);
     return `<${componentName}${attributeString}>${html}</${componentName}>`;
   }

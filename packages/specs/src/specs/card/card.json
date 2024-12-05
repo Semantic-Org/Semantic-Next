@@ -5,9 +5,6 @@
   "tagName": "ui-card",
   "exportName": "UICard",
   "examples" : {
-    "defaultAttributes": {
-      "icon": "check-circle"
-    }
   },
   "content": [
     {
@@ -22,25 +19,26 @@
       "name": "Header",
       "attribute": "header",
       "description": "include an header",
-      "exampleCode": "<ui-card header=\"Header\"></ui-card>"
+      "exampleCode": "<ui-card header=\"Header\"></ui-card>\n<ui-card>\n  <div class=\"header\">Header</div>\n</ui-card>\n<ui-card>\n  <div slot=\"header\">Header</div>\n</ui-card>"
     },
     {
       "name": "Description",
       "attribute": "description",
       "description": "include a description",
-      "exampleCode": "<ui-card description=\"Learn more about this card.\"></ui-card>"
+      "exampleCode": "<ui-card description=\"Description\"></ui-card>\n<ui-card>\n  <div class=\"description\">Description</div>\n</ui-card>\n<ui-card>\n  <div slot=\"description\">Description</div>\n</ui-card>"
     },
     {
       "name": "Subheader",
       "attribute": "subheader",
       "description": "include an subheader",
-      "exampleCode": "<ui-card header=\"Get Started\" subheader=\"Click anywhere to get started\">Get started with your new card.</ui-card>"
+      "exampleCode": "<ui-card header=\"Header\" subheader=\"Subheader\"></ui-card>\n<ui-card>\n  <div class=\"header\">Header</div>\n  <div class=\"subheader\">Subheader</div>\n</ui-card>\n<ui-card>\n  <div slot=\"header\">Header</div>\n  <div slot=\"subheader\">Subheader</div>\n</ui-card>"
     },
     {
       "name": "Image",
       "attribute": "image",
       "couplesWith": ["ui-image"],
-      "description": "include an image"
+      "description": "include an image",
+      "exampleCode": "<ui-card image=\"/images/avatar/jenny.jpg\">Get started with your new card.</ui-card>"
     }
   ],
   "types": [],

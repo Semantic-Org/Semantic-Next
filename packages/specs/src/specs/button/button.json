@@ -488,7 +488,7 @@
       "description": "Enable to position the icon after the text"
     },
     {
-      "name": "href",
+      "name": "Link",
       "type": "string",
       "attribute": "href",
       "description": "link to a webpage"
