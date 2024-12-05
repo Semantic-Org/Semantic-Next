@@ -1,0 +1,165 @@
+{
+  "uiType": "element",
+  "name": "Card",
+  "description": "A button indicates a possible user action",
+  "tagName": "ui-card",
+  "exportName": "UICard",
+  "content": [
+    {
+      "name": "Icon",
+      "includeAttributeClass": true,
+      "attribute": "icon",
+      "couplesWith": ["ui-icon"],
+      "description": "include an icon",
+      "exampleCode": "<ui-card icon=\"pause\">Pause</ui-card>"
+    },
+    {
+      "name": "Header",
+      "attribute": "header",
+      "description": "include an icon",
+      "exampleCode": "<ui-card header=\"Get Started\">Get started with your new card.</ui-card>"
+    },
+    {
+      "name": "Description",
+      "attribute": "description",
+      "description": "include a description",
+      "exampleCode": "<ui-card description=\"Learn more about this card.\"></ui-card>"
+    },
+    {
+      "name": "Subheader",
+      "attribute": "subheader",
+      "description": "include an subheader",
+      "exampleCode": "<ui-card header=\"Get Started\" subheader=\"Click anywhere to get started\">Get started with your new card.</ui-card>"
+    },
+    {
+      "name": "Image",
+      "attribute": "image",
+      "couplesWith": ["ui-image"],
+      "description": "include an image",
+      "exampleCode": "<ui-card image=\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDcuMTUgMjA3LjE1Ij4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZTZlMmQ2OwogICAgICAgIHN0cm9rZS13aWR0aDogNy4xNXB4OwogICAgICB9CgogICAgICAuY2xzLTEsIC5jbHMtMiB7CiAgICAgICAgc3Ryb2tlOiAjZTQ0NjM3OwogICAgICAgIHN0cm9rZS1taXRlcmxpbWl0OiAxMDsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjZTQ0NjM3OwogICAgICAgIHN0cm9rZS13aWR0aDogMy4wNHB4OwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Y2lyY2xlIGNsYXNzPSJjbHMtMSIgY3g9IjEwMy41OCIgY3k9IjEwMy41OCIgcj0iMTAwIi8+CiAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjAxLjM1LDExOS4yM2gtNjguNWMtOC4yNCwwLTE0LjkyLDYuNjgtMTQuOTIsMTQuOTJ2NjguNWgtMjkuODN2LTcwLjk4YzAtMjMuMzQsMTguOTItNDIuMjYsNDIuMjYtNDIuMjZoNzAuOTh2MjkuODNaIi8+Cjwvc3ZnPg==\">Automation</ui-card>"
+    }
+  ],
+  "types": [
+    {
+      "name": "Selection",
+      "attribute": "selection",
+      "description": "allow for selection between choices",
+      "usageLevel": 1
+    }
+  ],
+  "states": [
+    {
+      "name": "Hover",
+      "attribute": "hover",
+      "description": "be hovered"
+    },
+    {
+      "name": "Focus",
+      "attribute": "focused",
+      "description": "be focused by the keyboard"
+    },
+    {
+      "name": "Disabled",
+      "attribute": "disabled",
+      "includeAttributeClass": true,
+      "description": "have interactions disabled",
+      "options": [
+        {
+          "name": "Disabled",
+          "value": "disabled",
+          "description": "disable interactions"
+        },
+        {
+          "name": "Clickable Disabled",
+          "value": "clickable-disabled",
+          "description": "allow interactions but appear disabled"
+        }
+      ]
+    }
+  ],
+  "variations": [
+    {
+      "name": "Fluid",
+      "attribute": "fluid",
+      "usageLevel": 1,
+      "description": "take the width of its container"
+    },
+    {
+      "name": "Link",
+      "attribute": "link",
+      "usageLevel": 1,
+      "description": "can be formatted as if the card can be clicked"
+    },
+    {
+      "name": "Horizontal",
+      "attribute": "horizontal",
+      "usageLevel": 1,
+      "description": "can have content horizontally oriented"
+    }
+  ],
+  "settings": [
+    {
+      "name": "Href",
+      "type": "string",
+      "attribute": "href",
+      "description": "link to a url"
+    }
+  ],
+  "supportsPlural": true,
+  "pluralName": "Cards",
+  "pluralTagName": "ui-cards",
+  "pluralExportName": "UICards",
+  "pluralDescription": "Cards can exist together as a group",
+  "pluralContent": [],
+  "pluralSharedTypes": ["link"],
+  "pluralOnlyTypes": [],
+  "pluralOnlyVariations": [
+    {
+      "name": "doubling",
+      "attribute": "doubling",
+      "description": "A group of cards can double its column width for mobile",
+      "usageLevel": 3
+    },
+    {
+      "name": "stackable",
+      "attribute": "stackable",
+      "description": "A group of cards can automatically stack rows to a single columns on mobile devices",
+      "usageLevel": 3
+    },
+    {
+      "name": "Count",
+      "attribute": "count",
+      "description": "A group of cards can set how many cards should exist in a row",
+      "usageLevel": 3,
+      "options": [
+        {
+          "name": "Two",
+          "value": "two",
+          "description": "A card group can have two items per row"
+        },
+        {
+          "name": "Three",
+          "value": "three",
+          "description": "A card group can have three items per row"
+        },
+        {
+          "name": "Four",
+          "value": "four",
+          "description": "A card group can have four items per row"
+        },
+        {
+          "name": "Five",
+          "value": "five",
+          "description": "A card group can have five items per row"
+        },
+        {
+          "name": "Six",
+          "value": "six",
+          "description": "A card group can have six items per row"
+        }
+      ]
+    }
+  ],
+  "pluralSharedVariations": [
+  ]
+}

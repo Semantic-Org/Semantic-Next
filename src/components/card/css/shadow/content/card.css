@@ -1,0 +1,74 @@
+:host {
+  margin: var(--vertically-spaced);
+}
+
+.card {
+
+  display: block;
+  cursor: pointer;
+  text-decoration: none;
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  border: var(--internal-border);
+  transition: var(--transition);
+  box-shadow: var(--floating-shadow);
+
+  ::slotted(ui-icon),
+  ::slotted(.icon),
+  .icon {
+    font-size: var(--massive);
+  }
+
+  ::slotted(.header),
+  .header {
+    color: var(--primary-text-color);
+    font-size: var(--large);
+    font-weight: var(--bold);
+    transition: var(--transition);
+  }
+
+  ::slotted(.description),
+  .description {
+    color: var(--standard-60);
+    font-size: var(--medium);
+    transition: var(--transition);
+  }
+
+  ::slotted(.meta),
+  .meta {
+    margin-top: var(--compact-spacing);
+    padding-top: var(--compact-spacing);
+    border-top: var(--border);
+    display: flex;
+    gap: var(--compact-spacing);
+
+    & > * {
+      color: var(--standard-90);
+      font-weight: bold;
+    }
+  }
+
+
+}
+
+.link.card,
+a.card {
+  cursor: pointer;
+  color: inherit;
+
+  &:hover {
+    border: 1px solid var(--primary-text-color);
+  }
+}
+
+
+.four.cards ::slotted(*) {
+  flex-basis: 25%;
+}
+
+
+.horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}

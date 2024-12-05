@@ -4,3 +4,48 @@ icon: cpu
 title: API Reference
 description: An API reference documenting available packages
 ---
+import { UICards, UICard } from '@semantic-ui/core';
+
+## Reference Sections
+
+The API reference guides are designed to provide exhaustive documentation for the underlying `@semantic-ui` packages.
+
+
+<UICards two horizontal>
+  <UICard horizontal
+    header="UI Components"
+    icon="package"
+    href="/api/component"
+    description="A reference guide for functionality available in @semantic-ui/component"
+  ></UICard>
+  <UICard horizontal
+    header="Templating Helpers"
+    icon="book"
+    href="/api/helpers"
+    description="A reference guide to helpers available in templates."
+  ></UICard>
+  <UICard horizontal
+    header="Reactivity"
+    icon="cpu"
+    href="/api/reactivity"
+    description="A reference guide for using reactions and reactive variables."
+  ></UICard>
+  <UICard horizontal
+    header="Query"
+    icon="mouse-pointer"
+    href="/api/query"
+    description="A reference guide for functionality available in @semantic-ui/query."
+  ></UICard>
+  <UICard horizontal
+    header="Utils"
+    icon="tool"
+    href="/api/utils"
+    description="A guide to functions available in @semantic-ui/utils."
+  ></UICard>
+  <UICard horizontal
+    header="Template Compiler"
+    icon="table"
+    href="/api/utils"
+    description="A guide to compiling templates in the template compiler in @semantic-ui/templating."
+  ></UICard>
+</UICards>

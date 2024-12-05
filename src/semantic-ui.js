@@ -4,6 +4,7 @@ export { UIRail } from './components/rail/index.js';
 
 /* Primitives */
 export { UIButton, UIButtons } from './components/button/index.js';
+export { UICard, UICards } from './components/card/index.js';
 export { UIIcon } from './components/icon/index.js';
 export { UIMenu, MenuItem } from './components/menu/index.js';
 export { UIInput } from './components/input/index.js';

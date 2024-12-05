@@ -4,6 +4,9 @@
   "description": "A button indicates a possible user action",
   "tagName": "ui-button",
   "exportName": "UIButton",
+  "examples": {
+    "defaultPluralContent": "\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n"
+  },
   "content": [
     {
       "name": "Icon",
