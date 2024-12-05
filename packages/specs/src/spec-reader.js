@@ -73,6 +73,7 @@ export class SpecReader {
     // standard example
     const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
+    console.log('default mods are');
     definition.types.push({
       title: spec.name,
       description: '',

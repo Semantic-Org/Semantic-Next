@@ -1,4 +1,5 @@
 :root {
+  --card-margin: 0 var(--spacing) var(--spacing) 0;
   --card-padding: 1.5rem;
   --card-flex-direction: column;
   --card-border-radius: var(--border-radius);

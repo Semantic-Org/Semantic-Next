@@ -1,9 +1,14 @@
 {
   "uiType": "element",
   "name": "Card",
-  "description": "A button indicates a possible user action",
+  "description": "A card displays segmented content in a manner similar to a playing card.",
   "tagName": "ui-card",
   "exportName": "UICard",
+  "examples" : {
+    "defaultAttributes": {
+      "icon": "check-circle"
+    }
+  },
   "content": [
     {
       "name": "Icon",
@@ -11,13 +16,13 @@
       "attribute": "icon",
       "couplesWith": ["ui-icon"],
       "description": "include an icon",
-      "exampleCode": "<ui-card icon=\"pause\">Pause</ui-card>"
+      "exampleCode": "<ui-card icon=\"pause\"></ui-card>\n<ui-card>\n  <ui-icon pause slot=\"icon\"></ui-icon>\n</ui-card>"
     },
     {
       "name": "Header",
       "attribute": "header",
-      "description": "include an icon",
-      "exampleCode": "<ui-card header=\"Get Started\">Get started with your new card.</ui-card>"
+      "description": "include an header",
+      "exampleCode": "<ui-card header=\"Header\"></ui-card>"
     },
     {
       "name": "Description",
@@ -35,18 +40,10 @@
       "name": "Image",
       "attribute": "image",
       "couplesWith": ["ui-image"],
-      "description": "include an image",
-      "exampleCode": "<ui-card image=\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDcuMTUgMjA3LjE1Ij4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZTZlMmQ2OwogICAgICAgIHN0cm9rZS13aWR0aDogNy4xNXB4OwogICAgICB9CgogICAgICAuY2xzLTEsIC5jbHMtMiB7CiAgICAgICAgc3Ryb2tlOiAjZTQ0NjM3OwogICAgICAgIHN0cm9rZS1taXRlcmxpbWl0OiAxMDsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjZTQ0NjM3OwogICAgICAgIHN0cm9rZS13aWR0aDogMy4wNHB4OwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Y2lyY2xlIGNsYXNzPSJjbHMtMSIgY3g9IjEwMy41OCIgY3k9IjEwMy41OCIgcj0iMTAwIi8+CiAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjAxLjM1LDExOS4yM2gtNjguNWMtOC4yNCwwLTE0LjkyLDYuNjgtMTQuOTIsMTQuOTJ2NjguNWgtMjkuODN2LTcwLjk4YzAtMjMuMzQsMTguOTItNDIuMjYsNDIuMjYtNDIuMjZoNzAuOTh2MjkuODNaIi8+Cjwvc3ZnPg==\">Automation</ui-card>"
+      "description": "include an image"
     }
   ],
-  "types": [
-    {
-      "name": "Selection",
-      "attribute": "selection",
-      "description": "allow for selection between choices",
-      "usageLevel": 1
-    }
-  ],
+  "types": [],
   "states": [
     {
       "name": "Hover",
@@ -125,6 +122,24 @@
       "attribute": "stackable",
       "description": "A group of cards can automatically stack rows to a single columns on mobile devices",
       "usageLevel": 3
+    },
+    {
+      "name": "Spaced",
+      "attribute": "spaced",
+      "description": "A group of cards can adjust its spacing",
+      "usageLevel": 2,
+      "options": [
+        {
+          "name": "Spaced",
+          "value": "spaced",
+          "description": "A card group have increased spacing"
+        },
+        {
+          "name": "Three",
+          "value": "very-spaced",
+          "description": "A card group can have very increased spacing"
+        }
+      ]
     },
     {
       "name": "Count",

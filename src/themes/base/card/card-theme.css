@@ -6,6 +6,8 @@
 @import url('./content/card-variables.css') layer(content.card);
 @import url('./content/description-variables.css') layer(content.description);
 @import url('./content/header-variables.css') layer(content.header);
+@import url('./content/subheader-variables.css') layer(content.subheader);
+@import url('./content/image-variables.css') layer(content.image);
 @import url('./content/icon-variables.css') layer(content.icon);
 @import url('./content/meta-variables.css') layer(content.meta);
 

@@ -11,17 +11,19 @@
 {#snippet content}
   {#if horizontal}
     {>icon}
+    {>image}
     <div class="content">
       {>header}
-      {>image}
+      {>subheader}
       {>description}
       {> slot}
     </div>
   {else}
+    {>image}
     <div class="content">
       {>icon}
       {>header}
-      {>image}
+      {>subheader}
       {>description}
       {> slot}
     </div>
@@ -44,9 +46,18 @@
   </div>
 {/snippet}
 
+{#snippet subheader}
+  <div class="subheader">
+    {subheader}
+    {> slot subheader}
+  </div>
+{/snippet}
+
 {#snippet image}
   <div class="image">
-    {image}
+    {#if image}
+      <img src="{image}">
+    {/if}
     {> slot image}
   </div>
 {/snippet}

@@ -2,76 +2,100 @@
 @layer component.card.content.card {
   :host {
     display: inline-block;
-    margin: var(--vertically-spaced);
+    margin: var(--card-margin);
   }
   .card {
     display: flex;
     flex-direction: var(--card-flex-direction);
     gap: var(--card-gap);
     text-decoration: none;
-    padding: var(--card-padding);
     border-radius: var(--card-border-radius);
     border: var(--card-border);
     transition: var(--card-transition);
     box-shadow: var(--card-box-shadow);
     background: var(--card-background);
     text-align: center;
+    padding: var(--card-padding);
   }
-  .card ::slotted(ui-icon),
-  .card ::slotted(.icon),
-  .card .icon * {
+  .card :first-child {
+    border-radius: inherit;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .card :last-child {
+    border-radius: inherit;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+/* src/components/card/css/shadow/content/image.css */
+@layer component.card.content.image {
+  ::slotted(.image),
+  ::slotted(ui-image),
+  .image img {
+    display: block;
+    width: var(--card-image-width);
+    margin: -1.5em -1.5em 1.5em;
+    max-width: var(--card-image-max-width);
+  }
+}
+
+/* src/components/card/css/shadow/content/icon.css */
+@layer component.card.content.icon {
+  ::slotted(ui-icon),
+  ::slotted(.icon),
+  .icon ui-icon {
     font-size: var(--card-icon-font-size);
     margin: var(--card-icon-margin);
   }
-  .card ::slotted(.header),
-  .card .header {
+}
+
+/* src/components/card/css/shadow/content/description.css */
+@layer component.card.content.description {
+  ::slotted(.description),
+  .description {
+    color: var(--card-description-color);
+    font-size: var(--card-description-font-size);
+    transition: var(--card-description-transition);
+  }
+}
+
+/* src/components/card/css/shadow/content/header.css */
+@layer component.card.content.header {
+  ::slotted(.header),
+  .header {
     color: var(--card-header-color);
     font-size: var(--card-header-font-size);
     font-weight: var(--card-header-font-weight);
     transition: var(--card-header-transition);
   }
-  .card ::slotted(.description),
-  .card .description {
-    color: var(--card-description-color);
-    font-size: var(--card-description-font-size);
-    transition: var(--card-description-transition);
+}
+
+/* src/components/card/css/shadow/content/subheader.css */
+@layer component.card.content.subheader {
+  ::slotted(.subheader),
+  .subheader {
+    color: var(--card-subheader-color);
+    font-size: var(--card-subheader-font-size);
+    font-weight: var(--card-subheader-font-weight);
+    transition: var(--card-subheader-transition);
   }
-  .card ::slotted(.meta),
-  .card .meta {
-    margin-top: var(--compact-spacing);
-    padding-top: var(--compact-spacing);
-    border-top: var(--border);
+}
+
+/* src/components/card/css/shadow/content/meta.css */
+@layer component.card.content.meta {
+  ::slotted(.meta),
+  .meta {
+    margin-top: var(--card-meta-margin);
+    padding-top: var(--card-meta-spacing);
+    border-top: var(--card-meta-border);
     display: flex;
-    gap: var(--compact-spacing);
+    gap: var(--card-meta-gap);
   }
-  .card .meta > * {
-    color: var(--standard-90);
+  .meta > * {
+    color: var(--card-meta-text-color);
     font-weight: bold;
-  }
-  .link.card,
-  a.card {
-    cursor: pointer;
-    color: inherit;
-  }
-  .link.card:hover,
-  a.card:hover {
-    border: 1px solid var(--primary-text-color);
-    background-color: #00121a;
-    background-color: oklch(0.17 0.04 225.68);
-    box-shadow: rgba(0, 133, 182, .25) 0px 0px 7px 2px;
-    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
-    background-image: var(--subtle-gradient);
-  }
-  .horizontal {
-    flex-direction: var(--card-horizontal-flex-direction);
-    gap: var(--card-horizontal-gap);
-    text-align: left;
-  }
-  .horizontal .icon * {
-    font-size: var(--massive);
-  }
-  .horizontal .header {
-    font-size: var(--large);
   }
 }
 
@@ -99,7 +123,11 @@
 }
 
 /* src/components/card/css/shadow/variations/fluid.css */
-@layer component.card.variations.fluid;
+@layer component.card.variations.fluid {
+  .fluid.card {
+    width: 100%;
+  }
+}
 
 /* src/components/card/css/shadow/variations/count.css */
 @layer component.card.variations.count {
@@ -126,6 +154,58 @@
   }
   .cards.eight {
     grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* src/components/card/css/shadow/variations/link.css */
+@layer component.card.variations.link {
+  .link.card,
+  a.card {
+    cursor: pointer;
+    color: inherit;
+  }
+  .link.card:hover,
+  a.card:hover {
+    border: 1px solid var(--primary-text-color);
+    background-color: #00121a;
+    background-color: oklch(0.17 0.04 225.68);
+    box-shadow: rgba(0, 133, 182, .25) 0px 0px 7px 2px;
+    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+    background-image: var(--subtle-gradient);
+  }
+}
+
+/* src/components/card/css/shadow/variations/horizontal.css */
+@layer component.card.variations.horizontal {
+  .horizontal {
+    flex-direction: var(--card-horizontal-flex-direction);
+    gap: var(--card-horizontal-gap);
+    text-align: left;
+  }
+  .horizontal .icon * {
+    font-size: var(--massive);
+  }
+  .horizontal .header {
+    font-size: var(--large);
+  }
+  .horizontal :first-child {
+    border-radius: inherit;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .horizontal :last-child {
+    border-radius: inherit;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+/* src/components/card/css/shadow/variations/basic.css */
+@layer component.card.variations.basic {
+  .basic.card {
+    background: var(--card-basic-background);
+    box-shadow: var(--card-basic-box-shadow);
+    border: var(--card-basic-border);
   }
 }
 

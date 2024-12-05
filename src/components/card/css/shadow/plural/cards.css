@@ -6,6 +6,7 @@
   display: block;
   margin: var(--vertically-spaced);
 }
+
 .cards {
   display: grid;
   grid-auto-rows: 1fr;

@@ -131,10 +131,17 @@ export const defineComponent = ({
         // property change callbacks wont call on SSR
         if(isServer) {
           each(webComponent.properties, (propSettings, property) => {
-            const newValue = this[property];
+            let newValue = this[property];
+            const attribute = camelToKebab(property);
+
+            // this is necessary to handle how lit handles boolean attributes
+            // otherwise you get <ui-button primary="true">
+            if(newValue === true) {
+              this.setAttribute(attribute, '');
+            }
             adjustPropertyFromAttribute({
               el: this,
-              attribute: camelToKebab(property),
+              attribute,
               attributeValue: newValue,
               componentSpec
             });

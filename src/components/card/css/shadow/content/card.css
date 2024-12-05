@@ -1,6 +1,6 @@
 :host {
   display: inline-block;
-  margin: var(--vertically-spaced);
+  margin: var(--card-margin);
 }
 
 .card {
@@ -8,12 +8,22 @@
   flex-direction: var(--card-flex-direction);
   gap: var(--card-gap);
   text-decoration: none;
-  padding: var(--card-padding);
   border-radius: var(--card-border-radius);
   border: var(--card-border);
   transition: var(--card-transition);
   box-shadow: var(--card-box-shadow);
   background: var(--card-background);
   text-align: center;
+  padding: var(--card-padding);
 
+  :first-child {
+    border-radius: inherit;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  :last-child {
+    border-radius: inherit;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
 }

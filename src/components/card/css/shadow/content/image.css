@@ -1,0 +1,8 @@
+::slotted(.image),
+::slotted(ui-image),
+.image img {
+  display: block;
+  width: var(--card-image-width);
+  margin: -1.5em -1.5em 1.5em;
+  max-width: var(--card-image-max-width);
+}

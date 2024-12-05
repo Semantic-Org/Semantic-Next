@@ -1,13 +1,15 @@
 
 /* Content */
 @import url('./content/card.css') layer(component.card.content.card);
+@import url('./content/image.css') layer(component.card.content.image);
+@import url('./content/icon.css') layer(component.card.content.icon);
 @import url('./content/description.css') layer(component.card.content.description);
 @import url('./content/header.css') layer(component.card.content.header);
-@import url('./content/icon.css') layer(component.card.content.icon);
-@import url('./content/meta.css') layer(component.card.content.icon);
+@import url('./content/subheader.css') layer(component.card.content.subheader);
+@import url('./content/meta.css') layer(component.card.content.meta);
 
-/* Types */
-@import url('./types/selection.css') layer(component.card.type.selection);
+/* Group */
+@import url('./plural/cards.css') layer(component.card.plural);
 
 /* Variations */
 @import url('./variations/fluid.css') layer(component.card.variations.fluid);
