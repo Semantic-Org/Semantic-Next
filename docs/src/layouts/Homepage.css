@@ -167,6 +167,13 @@
 
     padding: 5rem 0rem;
 
+    &.proof {
+      ui-cards {
+        margin-top: -10rem;
+        font-size: 16px;
+      }
+    }
+
     ui-container {
       position: relative;
     }
@@ -179,7 +186,7 @@
         margin-top: 1rem;
       }
     }
-    .header {
+    h3.header {
       font-size: 24px;
       font-weight: bold;
     }
@@ -224,7 +231,7 @@
     display: flex;
     flex-direction: row;
     gap: 2rem;
-    margin-top: -10rem;
+    /*margin-top: -10rem;*/
 
     flex-wrap: wrap;
 

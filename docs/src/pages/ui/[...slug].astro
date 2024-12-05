@@ -32,7 +32,6 @@ const definitionDisplayed = inArray(displayedTab, ['singular', 'definition', 'pl
 const { SpecReader, ...Specs } = SpecExports;
 const spec = Specs[data.specName];
 const componentSpec = new SpecReader(spec, { plural });
-console.log(componentSpec, plural);
 const componentName = componentSpec.getComponentName();
 const definition = componentSpec.getDefinition();
 

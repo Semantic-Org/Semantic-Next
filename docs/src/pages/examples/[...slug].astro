@@ -39,7 +39,7 @@ let files = await getExampleFiles({
   allFiles: allExampleFiles,
   basePath: '../../examples/',
   includeFolder: example.exampleType == 'folder',
-  hideBoilerplate: example.fold === true,
+  hideBoilerplate: example.fold !== false,
   includePlaygroundInjections: true,
   includeLog: example.exampleType == 'log',
 });

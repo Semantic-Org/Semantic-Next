@@ -70,16 +70,38 @@ const code2=`
     observer.observe(el);
   </script>
   <ribbons>
-    <ribbon>
+    <ribbon class="proof">
       <ui-container>
-        <div class="cards">
+        <ui-cards three spaced>
+          <ui-card>
+            <ui-icon layers></ui-icon>
+            <div class="header">Enterprise Ready</div>
+            <div class="description">
+              Create apps with robust AST based templating, css layers based theming, and a composable architecture designed for large codebases.
+            </div>
+          </ui-card>
+          <ui-card>
+            <ui-icon unlock></ui-icon>
+            <div class="header">Zero Framework Lock-in</div>
+            <div class="description">
+              Author native web components that work in React, Vue, Vanilla JS, or whatever framework comes next. True interoperability without compromise.
+            </div>
+          </ui-card>
+          <ui-card>
+            <ui-icon tool></ui-icon>
+            <div class="header">Built to Customize</div>
+            <div class="description">
+              Hit the ground running with robust UI primitives, then author custom UI with a component framework designed for developer experience.
+            </div>
+          </ui-card>
+        </ui-cards>
+        <!-- <div class="cards">
          <div class="card">
            <ui-icon layers></ui-icon>
            <h4 class="header">Enterprise Ready</h4>
            <p>Create apps with robust AST based templating, css layers based theming, and a composable architecture designed for large codebases.</p>
          </div>
         <div class="card">
-          <!-- <img src="https://vaccinebutler.com/images/hero2.png"> -->
           <ui-icon unlock></ui-icon>
           <h4 class="header">Zero Framework Lock-in</h4>
           <p>Author native web components that work in React, Vue, Vanilla JS, or whatever framework comes next. True interoperability without compromise.</p>
@@ -89,7 +111,7 @@ const code2=`
            <h4 class="header">Built to Customize</h4>
            <p>Hit the ground running with robust UI primitives, then author custom UI with a component framework designed for developer experience.</p>
          </div>
-        </div>
+        </div> -->
       </ui-container>
     </ribbon>
     <ribbon class="tour">

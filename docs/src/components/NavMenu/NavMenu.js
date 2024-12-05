@@ -92,7 +92,6 @@ const createComponent = function ({ el, self, settings, data, state, reaction })
       return settings.useAccordion && !settings.expandAll;
     },
     isActiveItem(item) {
-      //console.log('checking item', settings.expandAll);
       if(settings.expandAll) {
         return true;
       }

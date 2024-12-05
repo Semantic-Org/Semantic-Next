@@ -8,6 +8,17 @@ const state = {
   balls: [],
 };
 
+
+/*
+  This animation loop uses the ball position as the main source of reactivity
+  updating the positions using requestAnimationFrame as the browser will permit
+  the animation loop to update the view
+
+  The reactivity occurs in updateBalls()
+  and the reaction is in startAnimation()
+*/
+
+
 const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   emitter: {

@@ -74,7 +74,6 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
         return;
       }
       const results = await Promise.all(rawResults.results.slice(startIndex, endIndex).map(r => r.data()));
-      console.log(results);
       state.results.set(results);
       const displayResults = results
         .map(result => self.mapResult(result))

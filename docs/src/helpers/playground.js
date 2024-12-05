@@ -1,6 +1,6 @@
 import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, logJS, logCSS } from './injections.js';
+import { addPlaygroundInjections, logJS, logCSS, foldMarkerStart, foldMarkerEnd } from './injections.js';
 /*
   Helper to add code folding for import export statements
 */

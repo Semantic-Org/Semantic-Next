@@ -9,6 +9,14 @@ const state = {
   time: 0,
 };
 
+/*
+  This animation loop uses the time as the main source of reactivity
+  you can see this is driven by
+  reaction(() => self.updateBallPosition(ball));
+
+  which has a reactive reference to state.time()
+*/
+
 const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
 
   startTime() {

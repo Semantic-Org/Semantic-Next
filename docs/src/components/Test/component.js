@@ -19,7 +19,6 @@ const settings = {
 
 const createComponent = ({self, state, settings}) => ({
   getData() {
-    console.log('setting data in row');
     return { firstName: 'Buck', lastName: 'Pencilsworth', age: '42', gender: 'Male' };
   },
 });
