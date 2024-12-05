@@ -271,3 +271,13 @@ export const getRailMenu = (headings) => {
   return menu.filter(Boolean);
 };
 
+
+
+const componentDocs = await getCollection('components');
+export const componentPages = componentDocs.map(page => ({
+  name: page.data.title,
+  image: page.data.image,
+  description: page.data.description,
+  meta: page.data,
+  url: `/ui/${page.slug}`,
+}));
