@@ -5,9 +5,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.2.2
+* UI: Adds new UI card component with minimal featureset
+* Bugfix: Fixed issue with SSR `<ui-button primary>` being rendered as `<ui-button primary="true">`
 * Bugfix: Fix `off` not allowing an array of events like `$('div').off('touchend mouseleave');`
 * Bugfix: Fix issue with `one` not properly removing events when attached together like `$('body').one('mouseup touchend');`
-* Adds basic `card` primitive
 
 # Version 0.2.1
 * Added `glass` modal
