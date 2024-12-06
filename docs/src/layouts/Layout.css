@@ -72,6 +72,39 @@
   page {
     text-wrap: pretty;
 
+    .traversal {
+      border-top: var(--border);
+
+      ui-container {
+        display: flex;
+
+      }
+
+      ui-card {
+        text-align: left;
+        min-width: 150px;
+        .label {
+          color: var(--primary-text-color);
+          font-weight: bold;
+          font-size: var(--small);
+          transition: var(--transition);
+        }
+        .header {
+          color: var(--standard-60);
+          font-size: var(--large);
+          font-weight: var(--bold);
+          transition: var(--transition);
+        }
+      }
+
+      [previous] {
+        margin-right: auto;
+      }
+      [next]{
+        margin-left: auto;
+      }
+    }
+
     &.text-content {
 
       main > ui-container {

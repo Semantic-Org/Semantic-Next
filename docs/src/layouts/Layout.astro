@@ -9,6 +9,7 @@ import DocsMasthead from '@components/DocsMasthead.astro';
 import TopBar from '@components/TopBar.astro';
 import DocsRail from '@components/DocsRail.astro';
 import SiteMobileMenu from '@components/SiteMobileMenu.astro';
+import { getPageTraversalLinks } from '@helpers/navigation.js';
 
 import './Layout.css';
 
@@ -24,10 +25,17 @@ let {
 	textContent,
 	expandRailMenu,
 	railMenuScrollOffset,
-	railMenu
+	railMenu,
+	showPageTraversal
 } = Astro.props;
 
 header = header || title;
+
+showPageTraversal = 'true';
+
+const pageTraversal = await getPageTraversalLinks({
+	url: Astro.url.pathname
+});
 
 const activeURL = Astro.url.pathname;
 ---
@@ -57,6 +65,34 @@ const activeURL = Astro.url.pathname;
 						<slot />
 					</pageContent>
 				</ui-container>
+				{showPageTraversal == 'true' && pageTraversal && (pageTraversal.previous || pageTraversal.next) && (
+					<div class="traversal">
+						<ui-container>
+							{pageTraversal.previous && (
+								<ui-card href={pageTraversal.previous} previous>
+		              <div class="label">
+		                <ui-icon icon="left chevron"></ui-icon>
+		                Previous
+		              </div>
+		              <div class="header">
+		                {pageTraversal.previous.name}
+		              </div>
+								</ui-card>
+							)}
+							{pageTraversal.next && (
+								<ui-card href={pageTraversal.next.url} next>
+		              <div class="label">
+		                Next
+		                <ui-icon icon="right chevron"></ui-icon>
+		              </div>
+		              <div class="header">
+		                {pageTraversal.next.name}
+		              </div>
+								</ui-card>
+							)}
+						</ui-container>
+					</div>
+				)}
 			</main>
 		</page>
 	</layout>

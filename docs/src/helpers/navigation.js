@@ -191,6 +191,26 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   return menu;
 };
 
+
+/* Adds links for prev/next page used at bottom of guide pages */
+export const getPageTraversalLinks = async ({url}) => {
+  const menu = await await getFlattenedSidebarMenu({ url });
+  const currentIndex = findIndex(menu, item => item.url == url);
+
+  let next;
+  let previous;
+  if(currentIndex >= 0) {
+    previous = menu[currentIndex - 1];
+    if(currentIndex != menu.length - 1) {
+      next = menu[currentIndex + 1];
+    }
+  }
+  return {
+    previous,
+    next
+  };
+};
+
 /*
   Gets Entire Site Menu Deeply Nested
 */
@@ -205,8 +225,13 @@ export const getSiteMenu = async () => {
 /*
   Flattened Version of Sidebar Menu
 */
-export const getFlattenedSidebarMenu = async (topbarSection) => {
-  const menu = await getSidebarMenu({ topbarSection: topbarSection });
+export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) => {
+  if(!menu) {
+    if(!topbarSection && url) {
+      topbarSection = await getActiveTopbarSection(url);
+    }
+    menu = await getSidebarMenu({ topbarSection });
+  }
   const menuArrays = menu.map(section => {
     const parentItem = { name: section.name, url: section.url };
     return [
@@ -225,7 +250,9 @@ export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
   if(includeURLS) {
     await asyncEach(menu, async item => {
       // get all urls that represent this topbar section
-      const flattenedMenu = await getFlattenedSidebarMenu(item._id);
+      const flattenedMenu = await getFlattenedSidebarMenu({
+        topbarSection: item._id
+      });
       const urls = flattenedMenu.map(page => page.url).filter(Boolean);
       item.baseURLs = urls;
     });
