@@ -1,6 +1,7 @@
 :root {
-  --card-margin: 0 var(--spacing) var(--spacing) 0;
-  --card-padding: 1.5rem;
+  --card-margin: 0;
+  --card-text-align: center;
+  --card-padding: var(--spacing);
   --card-flex-direction: column;
   --card-border-radius: var(--border-radius);
   --card-transition: var(--transition);

@@ -1,5 +1,6 @@
 :host {
   display: inline-block;
+  text-align: var(--card-text-align);
   margin: var(--card-margin);
 }
 
@@ -13,7 +14,6 @@
   transition: var(--card-transition);
   box-shadow: var(--card-box-shadow);
   background: var(--card-background);
-  text-align: center;
   padding: var(--card-padding);
 
   :first-child {

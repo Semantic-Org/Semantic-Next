@@ -2,6 +2,7 @@
 @layer component.card.content.card {
   :host {
     display: inline-block;
+    text-align: var(--card-text-align);
     margin: var(--card-margin);
   }
   .card {
@@ -14,7 +15,6 @@
     transition: var(--card-transition);
     box-shadow: var(--card-box-shadow);
     background: var(--card-background);
-    text-align: center;
     padding: var(--card-padding);
   }
   .card :first-child {
