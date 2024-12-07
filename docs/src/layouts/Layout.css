@@ -107,7 +107,7 @@
 
     &.text-content {
 
-      main > ui-container {
+      main ui-container {
         max-width: none;
         padding: 2em 3em 7em;
         margin: 0;

@@ -69,7 +69,7 @@ const activeURL = Astro.url.pathname;
 					<div class="traversal">
 						<ui-container>
 							{pageTraversal.previous && (
-								<ui-card href={pageTraversal.previous} previous>
+								<ui-card href={pageTraversal.previous.url} previous>
 		              <div class="label">
 		                <ui-icon icon="left chevron"></ui-icon>
 		                Previous
