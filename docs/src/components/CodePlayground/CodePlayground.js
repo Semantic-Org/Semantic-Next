@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { firstMatch, get, each, inArray, sortBy } from '@semantic-ui/utils';
+import { firstMatch, get, each, moveToFront, inArray, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
@@ -32,6 +32,9 @@ const settings = {
 
   // whether a file marked as generated (needed to execute code) should appear to user
   includeGeneratedInline: false,
+
+  // the initial selected file
+  selectedFile: '',
 
   // whether to use tabs or panels
   useTabs: localStorage.getItem('codeplayground-tabs') == 'yes' || false,
@@ -136,7 +139,11 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   ],
 
   initialize() {
-    state.activeFile.set(self.getFirstFile()?.filename);
+    const initialFile = (settings.selectedFile)
+      ? settings.selectedFile
+      : self.getFirstFile()?.filename
+    ;
+    state.activeFile.set(initialFile);
     reaction(self.calculateLayout);
   },
 
@@ -280,7 +287,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     return settings.panelGroupWidth[index];
   },
   getFileMenuItems({indexOnly = false } = {}) {
-    const menu = self.getFileArray().map(file => {
+    let menu = self.getFileArray().map(file => {
       if(file.generated && !settings.includeGeneratedInline) {
         return false;
       }
@@ -294,6 +301,9 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       }
       return Boolean(value);
     });
+    if(settings.selectedFile) {
+      menu = moveToFront(menu, file => file.value == settings.selectedFile);
+    }
     return menu;
   },
   getFirstFile() {
@@ -380,10 +390,6 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
 });
 
 const onCreated = ({self, attachEvent}) => {
-  // resize layout for tablet/mobile
-  attachEvent('window', 'resize', () => {
-    requestAnimationFrame(self.setDisplayMode);
-  });
   self.setDisplayMode();
 };
 
@@ -413,6 +419,9 @@ const keys = {
 };
 
 const events = {
+  'global window resize'({state}) {
+    requestAnimationFrame(self.setDisplayMode);
+  },
   'change ui-menu.files'({state, data}) {
     state.activeFile.set(data.value);
   },
