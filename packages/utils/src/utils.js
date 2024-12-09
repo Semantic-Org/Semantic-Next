@@ -666,6 +666,20 @@ export const groupBy = function(array, property) {
   }, {});
 };
 
+export const moveToFront = (array = [], callbackOrValue) => {
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue);
+  let index =  findIndex(array, callback);
+  if (index === -1) {
+    return array;
+  }
+  const [item] = array.splice(index, 1);
+  array.unshift(item);
+
+  return array;
+};
+
 /*-------------------
        Objects
 --------------------*/

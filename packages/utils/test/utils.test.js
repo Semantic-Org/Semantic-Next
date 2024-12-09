@@ -43,6 +43,7 @@ import { tokenize,
   last,
   mapObject,
   memoize,
+  moveToFront,
   onlyKeys,
   noop,
   pick,
@@ -497,6 +498,31 @@ describe('Type Checking Utilities', () => {
       expect(groupBy(array, 'city')).toEqual(expected);
     });
 
+  });
+
+  describe('moveToFront', () => {
+
+    it('should move item matching predicate function to front', () => {
+      const arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ];
+      const result = moveToFront(arr, item => item.name === 'Jane');
+      expect(result[0]).toEqual({ id: 2, name: 'Jane' });
+    });
+
+    it('should move item matching direct value to front', () => {
+      const arr = [1, 2, 3, 4];
+      const result = moveToFront(arr, 3);
+      expect(result).toEqual([3, 1, 2, 4]);
+    });
+
+    it('should return original array if no match is found', () => {
+      const arr = [1, 2, 3];
+      expect(moveToFront(arr, x => x > 5)).toEqual(arr);
+      expect(moveToFront(arr, 5)).toEqual(arr);
+    });
   });
 
   describe('sortBy', () => {
