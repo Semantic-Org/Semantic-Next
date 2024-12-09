@@ -21,6 +21,7 @@ const examplesCollection = defineCollection({
     folder: z.optional(z.string()), // whether all files in folder should be included in example
     fold: z.optional(z.boolean()),
     category: z.optional(z.string()),
+    selectedFile: z.optional(z.string()),
     subcategory: z.string(),
     description: z.string(),
     tags: z.array(z.string()),

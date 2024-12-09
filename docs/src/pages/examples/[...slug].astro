@@ -44,6 +44,7 @@ let files = await getExampleFiles({
   includeLog: example.exampleType == 'log',
 });
 
+
 const panelIndexes = getPanelIndexes(files, {
   type: example.exampleType
 });
@@ -52,7 +53,6 @@ const searchMeta = {
   ...entry.data,
   pageType: 'Example',
 }
-
 ---
 
 <Playground searchMeta={searchMeta} showSidebar=true>
@@ -64,6 +64,7 @@ const searchMeta = {
     <CodePlayground client:only
       files={files}
       title={example.title}
+      selectedFile={example.selectedFile}
       description={example.description}
       sandboxURL={sandboxURL}
       panelIndexes={panelIndexes}
