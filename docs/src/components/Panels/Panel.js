@@ -20,19 +20,17 @@ const settings = {
   }
 };
 
-const state = {
-  lastPanelSize: undefined
-};
-
-const createComponent = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
+const createComponent = ({el, self, state, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
   resizing: reactiveVar(false),
   initialized: reactiveVar(false),
 
-  getClassMap: () => ({
-    resizing: self.resizing.get(),
-    minimized: settings.minimized,
-    initialized: self.initialized.get()
-  }),
+  getClassMap() {
+    return {
+      resizing: self.resizing.get(),
+      minimized: settings.minimized,
+      initialized: self.initialized.get()
+    };
+  },
 
   setInitialized() {
     self.initialized.set(true);
@@ -165,7 +163,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     }
     // store size when maximizing again
     let currentSize = $(el).css('flex-grow');
-    state.lastPanelSize = Math.max(currentSize, 10);
+    self.lastPanelSize = Math.max(currentSize, 10);
     const index = panels.getPanelIndex(el);
     panels.setPanelMinimized(index);
   },
@@ -173,7 +171,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     settings.minimized = false;
     const panels = self.getPanels();
     const index = panels.getPanelIndex(el);
-    panels.setPanelMaximized(index, state.lastPanelSize);
+    panels.setPanelMaximized(index, self.lastPanelSize);
   }
 });
 
