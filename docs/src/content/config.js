@@ -24,6 +24,7 @@ const examplesCollection = defineCollection({
     selectedFile: z.optional(z.string()),
     subcategory: z.string(),
     description: z.string(),
+    tip: z.optional(z.string()),
     tags: z.array(z.string()),
     shortTitle: z.optional(z.string()), // name for appearance in small menus
   })

@@ -1,0 +1,6 @@
+body {
+  cursor: pointer;
+}
+ui-clicker {
+  user-select: none;
+}

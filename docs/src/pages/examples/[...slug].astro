@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { markdown } from '@astropub/md'
 import { each, tokenize } from '@semantic-ui/utils';
 import {
   getExampleFiles,
@@ -8,6 +9,7 @@ import {
   getSandboxURL,
   getPanelIndexes,
 } from '@helpers/playground.js';
+import { markdownToHtml } from 'astro/components';
 import Playground from '@layouts/Playground.astro';
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 import Sidebar from '@components/Sidebar.astro';
@@ -34,6 +36,7 @@ const exampleID = example.id || tokenize(example.title);
 const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
+
 let files = await getExampleFiles({
   contentID: getExampleID(example),
   allFiles: allExampleFiles,
@@ -48,6 +51,9 @@ let files = await getExampleFiles({
 const panelIndexes = getPanelIndexes(files, {
   type: example.exampleType
 });
+
+const tip = String(await markdown.inline(example.tip));
+console.log('tip is', String(tip));
 
 const searchMeta = {
   ...entry.data,
@@ -68,6 +74,7 @@ const searchMeta = {
       description={example.description}
       sandboxURL={sandboxURL}
       panelIndexes={panelIndexes}
+      tip={tip}
       ></CodePlayground>
   </page>
 </Playground>

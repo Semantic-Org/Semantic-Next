@@ -17,7 +17,7 @@ const state = {
 const createComponent = ({self, settings, $, dispatchEvent}) => ({
   selectColor(color) {
     settings.color = color;
-    dispatchEvent('color-selected', { color });
+    dispatchEvent('colorselected', { color });
   }
 });
 

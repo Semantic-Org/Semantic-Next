@@ -7,3 +7,9 @@ $('.change').on('click', (event) => {
   });
   event.preventDefault();
 });
+
+
+/* vanilla js
+const el = document.querySelector('name-card');
+el.name = 'Simon'
+*/

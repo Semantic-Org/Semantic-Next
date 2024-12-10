@@ -27,5 +27,8 @@
     "pretty-json-custom-element": "^1.1.16",
     "semver": "^7.6.3",
     "shiki": "^1.23.1"
+  },
+  "devDependencies": {
+    "@astropub/md": "^1.0.0"
   }
 }

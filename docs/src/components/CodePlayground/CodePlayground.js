@@ -51,6 +51,9 @@ const settings = {
   // description to appear on top of example
   description: '',
 
+  // tip to appear below title and descripton
+  tip: '',
+
   // tab size for code
   tabSize: 2,
 
@@ -419,7 +422,7 @@ const keys = {
 };
 
 const events = {
-  'global window resize'({state}) {
+  'global resize window'({state}) {
     requestAnimationFrame(self.setDisplayMode);
   },
   'change ui-menu.files'({state, data}) {

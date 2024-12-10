@@ -4,20 +4,15 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const state = {
-  text: 'Not Clicked',
-  counter: 0,
+  text: 'Initial',
 };
 
 const onCreated = ({state, $, attachEvent}) => {
-  // event will teardown when component is destroyed
-  attachEvent('body', 'click', () => {
-    state.text.set('Clicked');
-    state.counter.increment();
-  });
+  state.text.set('Created');
 };
 
 defineComponent({
-  tagName: 'ui-clicker',
+  tagName: 'ui-text',
   template,
   css,
   state,
