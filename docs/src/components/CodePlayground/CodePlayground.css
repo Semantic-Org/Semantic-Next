@@ -76,8 +76,13 @@
     }
 
     .masthead {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
       padding: 1rem 1rem;
       border-bottom: var(--playground-border);
+      gap: 0.5rem;
+      align-items: center;
 
       ui-button::part(button) {
         background-color: var(--playground-button-background-color);
@@ -86,16 +91,19 @@
 
       .title {
         display: inline-block;
-        margin: 0rem 0.5rem 0rem 0rem;
+        margin: 0;
         font-size: 16px;
         color: var(--standard-100);
         font-weight: bold;
+        margin: 0;
       }
-      .title + p {
-        display: inline-block;
-        margin: 0rem 0.5rem 0rem 0rem;
-        padding: 0rem;
+      .description {
+        margin: 0;
+        padding: 0;
         color: var(--standard-40);
+      }
+      .buttons {
+        margin-left: auto;
       }
       .tip {
         background: var(--standard-5);
