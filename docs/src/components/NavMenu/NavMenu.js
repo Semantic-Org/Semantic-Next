@@ -20,6 +20,7 @@ const state = {
 const createComponent = function ({ el, self, settings, data, state, reaction }) {
   return {
     initialize() {
+      console.log('expand all is', settings.expandAll);
       state.url.set(settings.activeURL);
     },
     getMenu() {
