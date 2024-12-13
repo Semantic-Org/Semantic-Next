@@ -4,6 +4,9 @@ import Body from '../layouts/Body.astro';
 import '../components/Test/component.js';
 ---
 <Body padded>
+  Overriding Camel boolean attr <br>should be false true<br>
+  <setting-test first-setting="false" second-setting></setting-test>
+  <hr>
   Overriding Camel <br>should be false true<br>
   <setting-test first-setting="false" second-setting="true"></setting-test>
   <hr>
