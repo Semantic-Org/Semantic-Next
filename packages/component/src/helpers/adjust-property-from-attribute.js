@@ -1,4 +1,4 @@
-import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, wrapFunction } from '@semantic-ui/utils';
+import { get, each, unique, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -40,7 +40,7 @@ const tokenizeSpaces = (string) => {
   - The option is the attribute "primary" or "primary=true"
   - The option is a class class="primary"
 */
-export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, settings, componentSpec}) => {
+export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, properties, componentSpec}) => {
   // This is used to search for potential values that should match to the canonical value.
   // This is because we support swapping ordering and spaces for dashes
 
@@ -194,18 +194,23 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, sett
       }
     }
   }
-  else if(settings) {
+  else if(properties && attributeValue !== undefined && attribute.includes('-')) {
 
-    /* This handles the case of multiword settings like `useAccordion`
+    /* This handles the case of multiword properties like `useAccordion`
        maps to <ui-menu use-accordion> or <ui-menu useaccordion>
        the kebab case is just an alias which will update the base setting
     */
     const propertyName = kebabToCamel(attribute);
-    const propertySettings = settings[propertyName];
-    if(propertyName !== attribute && propertySettings !== undefined) {
-      const convertFunc = propertySettings?.converter?.fromAttribute;
-      let propertyValue = wrapFunction(convertFunc)(attributeValue);
-      setProperty(propertyName, propertyValue);
+    const attributeSettings = properties[attribute];
+    if(propertyName !== attribute && attributeSettings?.alias) {
+      const convertFunc = attributeSettings?.converter?.fromAttribute;
+      let propertyValue = (convertFunc)
+        ? convertFunc(attributeValue)
+        : attributeValue
+      ;
+      if(propertyValue) {
+        setProperty(propertyName, propertyValue);
+      }
       return;
     }
   }
