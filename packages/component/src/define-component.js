@@ -113,8 +113,32 @@ export const defineComponent = ({
         super.connectedCallback();
       }
 
+      triggerAttributeChange() {
+        each(webComponent.properties, (propSettings, property) => {
+          const attribute = camelToKebab(property);
+
+          let newValue = this[property];
+          // this is necessary to handle how lit handles boolean attributes
+          // otherwise you get <ui-button primary="true">
+          if(newValue === true) {
+            this.setAttribute(attribute, '');
+          }
+          adjustPropertyFromAttribute({
+            el: this,
+            attribute,
+            settings,
+            attributeValue: newValue,
+            componentSpec
+          });
+        });
+      }
+
       willUpdate() {
-        super.willUpdate();
+        if(isServer) {
+          // property change callbacks wont call on SSR
+          // we need this to get proper settings for server render
+          this.triggerAttributeChange();
+        }
         if(!this.template) {
           this.template = litTemplate.clone({
             data: this.getData(),
@@ -128,25 +152,7 @@ export const defineComponent = ({
           this.component = this.template.instance;
           this.dataContext = this.template.data;
         }
-        // property change callbacks wont call on SSR
-        if(isServer) {
-          each(webComponent.properties, (propSettings, property) => {
-            let newValue = this[property];
-            const attribute = camelToKebab(property);
-
-            // this is necessary to handle how lit handles boolean attributes
-            // otherwise you get <ui-button primary="true">
-            if(newValue === true) {
-              this.setAttribute(attribute, '');
-            }
-            adjustPropertyFromAttribute({
-              el: this,
-              attribute,
-              attributeValue: newValue,
-              componentSpec
-            });
-          });
-        }
+        super.willUpdate();
       }
 
       firstUpdated() {
@@ -178,6 +184,7 @@ export const defineComponent = ({
           el: this,
           attribute,
           attributeValue: newValue,
+          settings,
           componentSpec
         });
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });

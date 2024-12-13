@@ -67,7 +67,7 @@ class WebComponentBase extends LitElement {
       return properties;
     }
     if (componentSpec) {
-      properties.class = { type: String };
+      properties.class = { type: String, noAccessor: true, alias: true };
 
       // emphasis="primary" but also setting props
       each(componentSpec.attributes, (attributeName) => {
@@ -77,17 +77,18 @@ class WebComponentBase extends LitElement {
       });
 
       // these are values that can only be set on the DOM el as properties
-      // but do not have attributes -- for instance functions
+      // but do not have attributes like functions or classes
       each(componentSpec.properties, (attributeName) => {
         const propertyType = componentSpec.propertyTypes[attributeName];
         const propertyName = kebabToCamel(attributeName);
         properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
       });
 
-      // primary -> emphasis="primary"
+      // this handles syntax where allowed value is used as attribute
+      // <ui-button primary> -> emphasis="primary"
       each(componentSpec.optionAttributes, (attributeValues, attributeName) => {
         const propertyName = kebabToCamel(attributeName);
-        properties[propertyName] = { type: String, noAccessor: true, attribute: attributeName };
+        properties[propertyName] = { type: String, noAccessor: true, alias: true, attribute: attributeName };
       });
     }
     if (settings) {
@@ -100,25 +101,35 @@ class WebComponentBase extends LitElement {
         const propertySettings = {
           propertyOnly: isClassInstance(defaultValue)
         };
-        const attributeName = camelToKebab(propertyName);
+
         properties[propertyName] = (defaultValue?.type)
           ? settings
-          : WebComponentBase.getPropertySettings(attributeName, defaultValue?.constructor, propertySettings)
+          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings)
         ;
       });
     }
+
+    /* This handles the case of multiword settings like `useAccordion`
+       we support 2 syntax <ui-menu use-accordion> or <ui-menu useaccordion>'
+       the kebab attr serves as an alias with no accessor
+    */
+    each(properties, (propertySettings, propertyName) => {
+      const attributeName = camelToKebab(propertyName);
+      if(attributeName !== propertyName && !properties[attributeName] && properties[propertyName]) {
+        properties[attributeName] = {
+          ...properties[propertyName],
+          noAccessor: true,
+          alias: true,
+        };
+      }
+    });
     return properties;
   }
 
-  static getPropertySettings(propName, type = String, { propertyOnly = false } = {}) {
+  static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {}) {
     let property = {
       type,
-      /*
-        Lit converts properties to lowercase name instead of kebab case
-        i.e. firstName -> <my-component firstname="John">
-        we want `first-name="John"`, this means we need to manually specify attribute
-      */
-      attribute: camelToKebab(propName),
+      attribute: true,
       hasChanged: (a, b) => {
         return !isEqual(a, b);
       },
@@ -184,10 +195,9 @@ class WebComponentBase extends LitElement {
   getSettingsFromConfig({componentSpec, properties}) {
     let settings = {};
     each(properties, (propSettings, propertyName) => {
-      if (propertyName == 'class' || propSettings.observe === false) {
+      if (propSettings.alias === true) {
         return;
       }
-      const attributeName = camelToKebab(propertyName);
       const elementProp = this[propertyName];
       const setting = elementProp  // check element setting
         ?? this.defaultSettings[propertyName]  // check default setting on this component
@@ -195,13 +205,6 @@ class WebComponentBase extends LitElement {
       ;
       // only pass through setting if it is defined
       if(setting !== undefined) {
-
-        // if setting is a composite like emphasis="primary"
-        // and this is "primary" we pass this as a boolean
-        if(componentSpec && !get(componentSpec.allowedValues, attributeName) && get(componentSpec.optionAttributes, attributeName)) {
-          settings[propertyName] = true;
-          return;
-        }
         settings[propertyName] = setting;
       }
       // boolean attribute case

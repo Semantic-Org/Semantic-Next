@@ -1,4 +1,4 @@
-import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, camelToKebab } from '@semantic-ui/utils';
+import { get, each, unique, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -40,12 +40,13 @@ const tokenizeSpaces = (string) => {
   - The option is the attribute "primary" or "primary=true"
   - The option is a class class="primary"
 */
-export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, componentSpec}) => {
+export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, settings, componentSpec}) => {
   // This is used to search for potential values that should match to the canonical value.
   // This is because we support swapping ordering and spaces for dashes
 
   // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
   // i.e <ui-button left-attached="somevalue">
+
 
   const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
 
@@ -191,6 +192,18 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, comp
       if (matchingAttribute && matchingValue) {
         setProperty(matchingAttribute, matchingValue);
       }
+    }
+  }
+  else if(settings) {
+
+    /* This handles the case of multiword settings like `useAccordion`
+       maps to <ui-menu use-accordion> or <ui-menu useaccordion>
+       the kebab case is just an alias which will update the base setting
+    */
+    const propertyName = kebabToCamel(attribute);
+    if(propertyName !== attribute && settings[propertyName] !== undefined) {
+      setProperty(propertyName, attributeValue);
+      return;
     }
   }
 
