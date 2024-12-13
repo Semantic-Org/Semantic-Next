@@ -14,8 +14,8 @@ const canExpand = true;
 		client:load
     menu={menu}
     use-accordion=true
-    expand-all={expandAll}
-    active-url={Astro.url.pathname}
+    expand-all={expandAll || false}
+    activeurl={Astro.url.pathname}
   />
   <slot name="after"/>
 </sidebar>
