@@ -422,7 +422,7 @@ const keys = {
 };
 
 const events = {
-  'global resize window'({state}) {
+  'global resize window'({self, state}) {
     requestAnimationFrame(self.setDisplayMode);
   },
   'change ui-menu.files'({state, data}) {

@@ -4,6 +4,11 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.3.0
+
+### API Changes
+* All settings now permit attributes with either kebab or lowercased conversion. i.e. settings = { showLink: false } can be set either like `<my-component showlink>` or `<my-component show-link>` as an alias.
+
 # Version 0.2.2
 * UI: Adds new UI card component with minimal featureset
 * Bugfix: Fixed issue with SSR `<ui-button primary>` being rendered as `<ui-button primary="true">`

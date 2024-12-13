@@ -1,26 +1,14 @@
 ---
 import Body from '../layouts/Body.astro';
 
-import '../components/Test/component.js';
+import NavMenu from '@components/NavMenu/NavMenu.js';
+const menu = [];
 ---
 <Body padded>
-  Overriding Camel boolean attr <br>should be false true<br>
-  <setting-test first-setting="false" second-setting></setting-test>
-  <hr>
-  Overriding Camel <br>should be false true<br>
-  <setting-test first-setting="false" second-setting="true"></setting-test>
-  <hr>
-
-  Overriding Camel <br>should be true false<br>
-  <setting-test first-setting="true" second-setting="false"></setting-test>
-  <hr>
-  Overriding No camel <br>should be false true<br>
-  <setting-test firstsetting="false" secondsetting="true"></setting-test>
-  <hr>
-  Overriding Camel <br>should be true false<br>
-  <setting-test firstsetting="true" secondsetting="false"></setting-test>
-  <hr>
-  Defaults <br>should be true false<br>
-  <setting-test></setting-test>
-
+  <NavMenu
+    menu={menu}
+    use-accordion=true
+    expand-all=true
+    activeurl={Astro.url.pathname}
+  />
 </Body>
