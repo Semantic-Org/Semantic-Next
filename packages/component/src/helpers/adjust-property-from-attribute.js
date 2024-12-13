@@ -1,4 +1,4 @@
-import { get, each, unique, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
+import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, wrapFunction } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -201,8 +201,11 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, sett
        the kebab case is just an alias which will update the base setting
     */
     const propertyName = kebabToCamel(attribute);
-    if(propertyName !== attribute && settings[propertyName] !== undefined) {
-      setProperty(propertyName, attributeValue);
+    const propertySettings = settings[propertyName];
+    if(propertyName !== attribute && propertySettings !== undefined) {
+      const convertFunc = propertySettings?.converter?.fromAttribute;
+      let propertyValue = wrapFunction(convertFunc)(attributeValue);
+      setProperty(propertyName, propertyValue);
       return;
     }
   }
