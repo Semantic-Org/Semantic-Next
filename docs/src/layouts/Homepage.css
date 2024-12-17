@@ -1,7 +1,17 @@
+body {
+  --dark-mode: true;
+  --card-padding: 1.5rem 2rem;
+  --card-description-line-height: 1.6;
+  --cards-gap: 2rem;
+}
+
 @layer page {
+
+
   :root {
     --secondary-text-color: #EAB59F;
     --glow-border: 1px solid oklch(0.22 0.02 277.72);
+
   }
 
   body {
@@ -37,7 +47,6 @@
     font-size: 12px;
   }
 
-
   aboveFold {
     position: relative;
     color: var(--standard-80);
@@ -49,6 +58,13 @@
     height: 620px;
     perspective: 1000px;
 
+
+    h1 {
+      color: var(--white);
+    }
+    p {
+      color: var(--white-60);
+    }
 
     content {
       position: relative;

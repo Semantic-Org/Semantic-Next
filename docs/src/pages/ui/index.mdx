@@ -1,3 +1,17 @@
 ---
 layout: '@layouts/Guide.astro'
+
 ---
+
+import { componentPages } from '@helpers/navigation.js';
+import { UICards, UICard } from '@semantic-ui/core';
+
+<UICards three>
+  {componentPages.map((page) => (
+    <UICard
+        header={page.name}
+        href={page.url}
+        description={page.description}
+      ></UICard>
+  ))}
+</UICards>
