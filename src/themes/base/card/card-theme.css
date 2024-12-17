@@ -11,14 +11,19 @@
 @import url('./content/icon-variables.css') layer(content.icon);
 @import url('./content/meta-variables.css') layer(content.meta);
 
-/* Types */
-@import url('./types/selection-variables.css') layer(type.selection);
+/* Group */
+@import url('./plural/cards-variables.css') layer(plural);
+
 
 /* Variations */
-@import url('./variations/fluid-variables.css') layer(variations.fluid);
-@import url('./variations/count-variables.css') layer(variations.count);
-@import url('./variations/link-variables.css') layer(variations.link);
-@import url('./variations/horizontal-variables.css') layer(variations.horizontal);
 @import url('./variations/basic-variables.css') layer(variations.basic);
+@import url('./variations/count-variables.css') layer(variations.count);
+@import url('./variations/fluid-variables.css') layer(variations.fluid);
+@import url('./variations/horizontal-variables.css') layer(variations.horizontal);
+@import url('./variations/link-variables.css') layer(variations.link);
+@import url('./variations/spaced-variables.css') layer(variations.spaced);
 
+/* Responsive Variations */
+@import url('./variations/doubling-variables.css') layer(component.card.variations.doubling);
+@import url('./variations/stackable-variables.css') layer(component.card.variations.stackable);
 

@@ -2,11 +2,13 @@
 @layer component.card.content.card {
   :host {
     display: inline-block;
+    container: component / inline-size;
     text-align: var(--card-text-align);
     margin: var(--card-margin);
   }
   .card {
     display: flex;
+    container: card / inline-size;
     flex-direction: var(--card-flex-direction);
     gap: var(--card-gap);
     text-decoration: none;
@@ -26,28 +28,6 @@
     border-radius: inherit;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-  }
-}
-
-/* src/components/card/css/shadow/content/image.css */
-@layer component.card.content.image {
-  ::slotted(.image),
-  ::slotted(ui-image),
-  .image img {
-    display: block;
-    width: var(--card-image-width);
-    margin: -1.5em -1.5em 1.5em;
-    max-width: var(--card-image-max-width);
-  }
-}
-
-/* src/components/card/css/shadow/content/icon.css */
-@layer component.card.content.icon {
-  ::slotted(ui-icon),
-  ::slotted(.icon),
-  .icon ui-icon {
-    font-size: var(--card-icon-font-size);
-    margin: var(--card-icon-margin);
   }
 }
 
@@ -83,6 +63,28 @@
   }
 }
 
+/* src/components/card/css/shadow/content/image.css */
+@layer component.card.content.image {
+  ::slotted(.image),
+  ::slotted(ui-image),
+  .image img {
+    display: block;
+    width: var(--card-image-width);
+    margin: -1.5em -1.5em 1.5em;
+    max-width: var(--card-image-max-width);
+  }
+}
+
+/* src/components/card/css/shadow/content/icon.css */
+@layer component.card.content.icon {
+  ::slotted(ui-icon),
+  ::slotted(.icon),
+  .icon ui-icon {
+    font-size: var(--card-icon-font-size);
+    margin: var(--card-icon-margin);
+  }
+}
+
 /* src/components/card/css/shadow/content/meta.css */
 @layer component.card.content.meta {
   ::slotted(.meta),
@@ -103,29 +105,30 @@
 @layer component.card.plural {
   :host(ui-cards) {
     display: block;
-    margin: var(--vertically-spaced);
+    margin: var(--cards-margin);
+  }
+  .container {
+    display: block;
+    container: component / inline-size;
   }
   .cards {
     display: grid;
+    container: cards / inline-size;
+    gap: var(--cards-gap);
     grid-auto-rows: 1fr;
-    gap: 1rem;
     width: 100%;
-  }
-  .spaced.cards {
-    gap: 2rem;
-  }
-  .very-spaced.cards {
-    gap: 3em;
   }
   ::slotted(ui-card) {
     display: contents;
   }
 }
 
-/* src/components/card/css/shadow/variations/fluid.css */
-@layer component.card.variations.fluid {
-  .fluid.card {
-    width: 100%;
+/* src/components/card/css/shadow/variations/basic.css */
+@layer component.card.variations.basic {
+  .basic.card {
+    background: var(--card-basic-background);
+    box-shadow: var(--card-basic-box-shadow);
+    border: var(--card-basic-border);
   }
 }
 
@@ -157,21 +160,10 @@
   }
 }
 
-/* src/components/card/css/shadow/variations/link.css */
-@layer component.card.variations.link {
-  .link.card,
-  a.card {
-    cursor: pointer;
-    color: inherit;
-  }
-  .link.card:hover,
-  a.card:hover {
-    border: 1px solid var(--primary-text-color);
-    background-color: #00121a;
-    background-color: oklch(0.17 0.04 225.68);
-    box-shadow: rgba(0, 133, 182, .25) 0px 0px 7px 2px;
-    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
-    background-image: var(--subtle-gradient);
+/* src/components/card/css/shadow/variations/fluid.css */
+@layer component.card.variations.fluid {
+  .fluid.card {
+    width: 100%;
   }
 }
 
@@ -200,12 +192,53 @@
   }
 }
 
-/* src/components/card/css/shadow/variations/basic.css */
-@layer component.card.variations.basic {
-  .basic.card {
-    background: var(--card-basic-background);
-    box-shadow: var(--card-basic-box-shadow);
-    border: var(--card-basic-border);
+/* src/components/card/css/shadow/variations/link.css */
+@layer component.card.variations.link {
+  .link.card,
+  a.card {
+    cursor: pointer;
+    color: inherit;
+  }
+  .link.card:hover,
+  a.card:hover {
+    border: 1px solid var(--primary-text-color);
+    background-color: #00121a;
+    background-color: oklch(0.17 0.04 225.68);
+    box-shadow: rgba(0, 133, 182, .25) 0px 0px 7px 2px;
+    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+    background-image: var(--subtle-gradient);
+  }
+}
+
+/* src/components/card/css/shadow/variations/spaced.css */
+@layer component.card.variations.spaced {
+  .cards.spaced {
+    gap: var(--cards-spaced-gap);
+  }
+  .cards.very-spaced {
+    gap: var(--cards-very-spaced-gap);
+  }
+}
+
+/* src/components/card/css/shadow/variations/doubling.css */
+@layer component.card.variations.doubling {
+  @container component (max-width: var(--card-doubling-breakpoint)) {
+    .doubling.cards {
+    }
+  }
+}
+
+/* src/components/card/css/shadow/variations/stackable.css */
+@layer component.card.variations.stackable {
+  @property --card-stackable-comparison { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  :host {
+    --card-stackable-comparison: max(calc(100% - var(--card-stackable-breakpoint)), 0px);
+  }
+  @container component style(--card-stackable-comparison: 0px) {
+    .stackable.cards {
+      display: flex;
+      flex-direction: column;
+    }
   }
 }
 

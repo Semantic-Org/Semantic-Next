@@ -4,22 +4,20 @@
 
 :host(ui-cards) {
   display: block;
-  margin: var(--vertically-spaced);
+  margin: var(--cards-margin);
+}
+
+.container {
+  display: block;
+  container: component / inline-size;
 }
 
 .cards {
   display: grid;
+  container: cards / inline-size;
+  gap: var(--cards-gap);
   grid-auto-rows: 1fr;
-  gap: 1rem;
   width: 100%;
-}
-
-.spaced.cards {
-  gap: 2rem;
-}
-
-.very-spaced.cards {
-  gap: 3em;
 }
 
 ::slotted(ui-card) {
