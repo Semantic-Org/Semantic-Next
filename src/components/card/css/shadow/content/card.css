@@ -1,13 +1,13 @@
 :host {
   display: inline-block;
-  container: component / inline-size;
+  container: component / normal;
   text-align: var(--card-text-align);
   margin: var(--card-margin);
 }
 
 .card {
-  display: flex;
-  container: card / inline-size;
+  display: inline-flex;
+  container: card / normal;
   flex-direction: var(--card-flex-direction);
   gap: var(--card-gap);
   text-decoration: none;

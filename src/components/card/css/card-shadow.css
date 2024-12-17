@@ -2,13 +2,13 @@
 @layer component.card.content.card {
   :host {
     display: inline-block;
-    container: component / inline-size;
+    container: component / normal;
     text-align: var(--card-text-align);
     margin: var(--card-margin);
   }
   .card {
-    display: flex;
-    container: card / inline-size;
+    display: inline-flex;
+    container: card / normal;
     flex-direction: var(--card-flex-direction);
     gap: var(--card-gap);
     text-decoration: none;
@@ -38,6 +38,7 @@
     color: var(--card-description-color);
     font-size: var(--card-description-font-size);
     transition: var(--card-description-transition);
+    line-height: var(--card-description-line-height);
   }
 }
 
@@ -201,12 +202,9 @@
   }
   .link.card:hover,
   a.card:hover {
-    border: 1px solid var(--primary-text-color);
-    background-color: #00121a;
-    background-color: oklch(0.17 0.04 225.68);
-    box-shadow: rgba(0, 133, 182, .25) 0px 0px 7px 2px;
-    box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
-    background-image: var(--subtle-gradient);
+    background: var(--card-link-hover-background);
+    box-shadow: var(--card-link-hover-box-shadow);
+    border: var(--card-link-hover-border);
   }
 }
 

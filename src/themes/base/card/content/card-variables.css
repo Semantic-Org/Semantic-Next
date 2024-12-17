@@ -5,8 +5,8 @@
   --card-flex-direction: column;
   --card-border-radius: var(--border-radius);
   --card-transition: var(--transition);
-  --card-box-shadow: 0px 0px 5px var(--standard-5);
   --card-background: linear-gradient(140deg, oklch(0.98 0.01 282.32), oklch(1 0 0), oklch(0.98 0.01 272.79));
+  --card-box-shadow: 0px 0px 5px var(--standard-5);
   --card-text-align: center;
   --card-border: var(--internal-border);
   --card-gap: 0;
