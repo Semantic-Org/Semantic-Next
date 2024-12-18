@@ -43,7 +43,9 @@ import { tokenize,
   last,
   mapObject,
   memoize,
+  moveItem,
   moveToFront,
+  moveToBack,
   onlyKeys,
   noop,
   pick,
@@ -500,31 +502,118 @@ describe('Type Checking Utilities', () => {
 
   });
 
-  describe('moveToFront', () => {
+  describe('moveItem', () => {
+    it('should move item to a specific index when using number', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 2, 1)).toEqual([1, 2, 3, 4]);
+      expect(moveItem(arr, 1, 3)).toEqual([2, 3, 4, 1]);
+      expect(moveItem(arr, 4, 0)).toEqual([4, 2, 3, 1]);
+    });
 
-    it('should move item matching predicate function to front', () => {
+    it('should move item to first position when using "first"', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 3, 'first')).toEqual([3, 1, 2, 4]);
+    });
+
+    it('should move item to last position when using "last"', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 2, 'last')).toEqual([1, 3, 4, 2]);
+    });
+
+    it('should handle moving item that matches predicate function', () => {
       const arr = [
         { id: 1, name: 'John' },
         { id: 2, name: 'Jane' },
         { id: 3, name: 'Bob' }
       ];
-      const result = moveToFront(arr, item => item.name === 'Jane');
-      expect(result[0]).toEqual({ id: 2, name: 'Jane' });
+      expect(moveItem(arr, item => item.name === 'Jane', 0))
+        .toEqual([
+          { id: 2, name: 'Jane' },
+          { id: 1, name: 'John' },
+          { id: 3, name: 'Bob' }
+        ]);
     });
 
-    it('should move item matching direct value to front', () => {
+    it('should clamp target index to valid array bounds', () => {
       const arr = [1, 2, 3, 4];
-      const result = moveToFront(arr, 3);
-      expect(result).toEqual([3, 1, 2, 4]);
+      expect(moveItem(arr, 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
+      expect(moveItem(arr, 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
     });
 
-    it('should return original array if no match is found', () => {
-      const arr = [1, 2, 3];
-      expect(moveToFront(arr, x => x > 5)).toEqual(arr);
-      expect(moveToFront(arr, 5)).toEqual(arr);
+    it('should return original array if item not found', () => {
+      const arr = [1, 2, 3, 4];
+      const originalArr = [...arr];
+      expect(moveItem(arr, 5, 0)).toEqual(originalArr);
+      expect(moveItem(arr, x => x > 10, 0)).toEqual(originalArr);
+    });
+
+    it('should not modify array if source and target indices are the same', () => {
+      const arr = [1, 2, 3, 4];
+      const originalArr = [...arr];
+      expect(moveItem(arr, 2, 1)).toEqual(originalArr); // 2 is already at index 1
+    });
+
+    it('should handle arrays with single item', () => {
+      const arr = [1];
+      expect(moveItem(arr, 1, 0)).toEqual([1]);
+      expect(moveItem(arr, 1, 'first')).toEqual([1]);
+      expect(moveItem(arr, 1, 'last')).toEqual([1]);
     });
   });
 
+  describe('moveToFront', () => {
+    it('should be equivalent to moveItem with "first"', () => {
+      const arr1 = [1, 2, 3, 4];
+      const arr2 = [...arr1];
+      expect(moveToFront(arr1, 3)).toEqual(moveItem(arr2, 3, 'first'));
+    });
+
+    it('should move matching item to front of array', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveToFront(arr, 3)).toEqual([3, 1, 2, 4]);
+    });
+
+    it('should handle predicate function', () => {
+      const arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ];
+      expect(moveToFront(arr, item => item.name === 'Jane'))
+        .toEqual([
+          { id: 2, name: 'Jane' },
+          { id: 1, name: 'John' },
+          { id: 3, name: 'Bob' }
+        ]);
+    });
+  });
+
+  describe('moveToBack', () => {
+    it('should be equivalent to moveItem with "last"', () => {
+      const arr1 = [1, 2, 3, 4];
+      const arr2 = [...arr1];
+      expect(moveToBack(arr1, 2)).toEqual(moveItem(arr2, 2, 'last'));
+    });
+
+    it('should move matching item to end of array', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveToBack(arr, 2)).toEqual([1, 3, 4, 2]);
+    });
+
+    it('should handle predicate function', () => {
+      const arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ];
+      expect(moveToBack(arr, item => item.name === 'Jane'))
+        .toEqual([
+          { id: 1, name: 'John' },
+          { id: 3, name: 'Bob' },
+          { id: 2, name: 'Jane' }
+        ]);
+    });
+  });
   describe('sortBy', () => {
     it('should sort by a simple key', () => {
       const input = [{a: 2}, {a: 3}, {a: 1}];

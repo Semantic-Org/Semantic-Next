@@ -666,18 +666,42 @@ export const groupBy = function(array, property) {
   }, {});
 };
 
-export const moveToFront = (array = [], callbackOrValue) => {
+export const moveItem = (array = [], callbackOrValue, index) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
     : (val) => isEqual(val, callbackOrValue);
-  let index =  findIndex(array, callback);
-  if (index === -1) {
+
+  let sourceIndex = findIndex(array, callback);
+  if (sourceIndex === -1) {
     return array;
   }
-  const [item] = array.splice(index, 1);
-  array.unshift(item);
 
+  // Handle special index values
+  let targetIndex;
+  if (index === 'first') {
+    targetIndex = 0;
+  } else if (index === 'last') {
+    targetIndex = array.length - 1;
+  } else {
+    targetIndex = Math.min(Math.max(0, index), array.length - 1);
+  }
+
+  // Don't move if already at target index
+  if (sourceIndex === targetIndex) {
+    return array;
+  }
+
+  const [item] = array.splice(sourceIndex, 1);
+  array.splice(targetIndex, 0, item);
   return array;
+};
+
+export const moveToFront = (array = [], callbackOrValue) => {
+  return moveItem(array, callbackOrValue, 'first');
+};
+
+export const moveToBack = (array = [], callbackOrValue) => {
+  return moveItem(array, callbackOrValue, 'last');
 };
 
 /*-------------------
