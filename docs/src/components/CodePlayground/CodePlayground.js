@@ -39,6 +39,8 @@ const settings = {
   // whether to use tabs or panels
   useTabs: localStorage.getItem('codeplayground-tabs') == 'yes' || false,
 
+  allowLayoutSwap: true,
+
   // whether to save the panel positions
   saveState: true,
 

@@ -16,13 +16,15 @@
       {/if}
       {#if canShowButtons}
         <div class="buttons">
-          <ui-button transparent small compact inverted class="tabs">
-            {#if is layout 'tabs'}
-              Use Panels
-            {else}
-              Use Tabs
-            {/if}
-          </ui-button>
+          {#if allowLayoutSwap}
+            <ui-button transparent small compact inverted class="tabs">
+              {#if is layout 'tabs'}
+                Use Panels
+              {else}
+                Use Tabs
+              {/if}
+            </ui-button>
+          {/if}
           <!-- <ui-button transparent small compact inverted class="fork">
             <ui-icon copy></ui-icon>
             Fork

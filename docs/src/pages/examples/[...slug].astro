@@ -37,11 +37,13 @@ const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
 
+const isFolder = example.exampleType == 'folder';
+
 let files = await getExampleFiles({
   contentID: getExampleID(example),
   allFiles: allExampleFiles,
   basePath: '../../examples/',
-  includeFolder: example.exampleType == 'folder',
+  includeFolder: isFolder,
   hideBoilerplate: example.fold !== false,
   includePlaygroundInjections: true,
   includeLog: example.exampleType == 'log',
@@ -53,7 +55,6 @@ const panelIndexes = getPanelIndexes(files, {
 });
 
 const tip = String(await markdown.inline(example.tip));
-console.log('tip is', String(tip));
 
 const searchMeta = {
   ...entry.data,
@@ -72,6 +73,8 @@ const searchMeta = {
       title={example.title}
       selectedFile={example.selectedFile}
       description={example.description}
+      useTabs={isFolder}
+      allowLayoutSwap={!isFolder}
       sandboxURL={sandboxURL}
       panelIndexes={panelIndexes}
       tip={tip}
