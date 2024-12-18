@@ -32,8 +32,13 @@ const el2 = $$('my-button .button');
 ```javascript title="Crossing Slotted Boundaries"
 import { $$ } from '@semantic-ui/query'
 
-// from inside a web component
+// this will not query the web component shadow dom
+let el1 = document.querySelector('my-component .content');
 
+// $$ will pierce shadow dom and slotted boundaries
+$$('my-component .content');
+
+// from inside a web component into its slots
 // this will not return content in slot
 let el1 = this.shadowRoot.querySelector('slot .content');
 

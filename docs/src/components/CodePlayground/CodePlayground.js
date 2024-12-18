@@ -434,6 +434,9 @@ const events = {
   'click ui-button.tabs'({self}) {
     self.toggleTabs();
   },
+  'click ui-button.fork'({self}) {
+    window.alert('Not yet implemented');
+  },
   'resizeStart ui-panel'({state}) {
     state.resizing.set(true);
   },

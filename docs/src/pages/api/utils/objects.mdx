@@ -356,3 +356,114 @@ console.log(result); // { '1': 'a', '2': 'b', '3': 'b' }
 ```
 
 These object utilities provide a robust set of tools for working with objects in JavaScript, enhancing productivity and code readability.
+
+### filterObject
+
+```javascript
+function filterObject(obj, callback)
+```
+
+Filter an object based on a callback function.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| obj      | object   | The object to filter |
+| callback | function | Function to test each key-value pair |
+
+#### Returns
+
+A new object with the key-value pairs that passed the test.
+
+#### Example
+
+```javascript
+import { filterObject } from '@semantic-ui/utils';
+
+const obj = { a: 1, b: 2, c: 3, d: 4 };
+const result = filterObject(obj, value => value % 2 === 0);
+console.log(result); // { b: 2, d: 4 }
+```
+
+### weightedObjectSearch
+
+```javascript
+function weightedObjectSearch(query = '', objectArray = [], {
+  returnMatches = false,
+  matchAllWords = true,
+  propertiesToMatch = []
+} = {})
+```
+
+Performs a weighted search across an array of objects, with matches prioritized by where they occur in the text.
+
+> **Search Priority** - Results are **sorted by match quality**, with highest priority given to **exact start of string matches** (e.g., searching "cat" matching "category"), followed by **word-start matches** (e.g., "category" in "my category"), then **substring matches anywhere**, and finally **partial word matches**. When searching multiple words, matches are weighted by how many words were found in the text.
+
+#### Parameters
+
+| Name        | Type     | Description |
+|-------------|----------|-------------|
+| query       | string   | The search query |
+| objectArray | array    | Array of objects to search |
+| options     | object   | Search configuration |
+
+##### Options
+
+| Name             | Type     | Default | Description |
+|------------------|----------|---------|-------------|
+| returnMatches    | boolean  | false   | Include match details in results |
+| matchAllWords    | boolean  | true    | Require all words to match |
+| propertiesToMatch| array    | []      | Properties to search within objects |
+
+> **Understanding Matches** - You can use the option `returnMatches` to return details of how each result matched alongside the result.
+
+
+#### Returns
+
+Array of matching objects sorted by relevance.
+
+#### Example
+
+```javascript
+import { weightedObjectSearch } from '@semantic-ui/utils';
+
+const items = [
+  { title: 'Hello World', desc: 'A greeting' },
+  { title: 'World News', desc: 'Current events' }
+];
+
+const results = weightedObjectSearch('world', items, {
+  propertiesToMatch: ['title', 'desc']
+});
+```
+
+### proxyObject
+
+```javascript
+function proxyObject(sourceObj = noop, referenceObj = {})
+```
+
+Create a proxy object that combines properties from a source object and a reference object.
+
+> **Source Function Requirement** The sourceObj parameter must be a function that returns the source object, not the object itself. This ensures the proxy always accesses the current state of the source object.
+
+#### Parameters
+
+| Name         | Type     | Description |
+|--------------|----------|-------------|
+| sourceObj    | function | Function that returns the source object |
+| referenceObj | object   | The reference object |
+
+#### Example
+
+```javascript
+import { proxyObject } from '@semantic-ui/utils';
+
+// Correct usage - passing a function
+const source = () => ({ a: 1, b: 2 });
+const proxy = proxyObject(source, { c: 3 });
+
+// Incorrect usage - passing object directly
+const wrong = proxyObject({ a: 1 }, { c: 3 }); // Won't work as expected
+```

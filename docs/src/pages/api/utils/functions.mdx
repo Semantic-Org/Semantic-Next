@@ -7,6 +7,8 @@ description: API reference for function manipulation utility functions
 
 The Function utilities provide helper functions for creating, wrapping, and optimizing functions in JavaScript. These utilities can help improve performance and simplify common function-related tasks.
 
+## Functions
+
 ### noop
 
 ```javascript
@@ -165,4 +167,48 @@ debouncedOperation();
 
 > **Cancellation** The debounced function has a `cancel` method that can be used to cancel delayed invocations.
 
-These function utilities provide powerful tools for manipulating and optimizing function behavior in JavaScript. They can help improve performance, reduce unnecessary computations, and simplify common programming patterns.
+
+### memoize
+
+```javascript
+function memoize(fn, hashFunction = (args) => hashCode(JSON.stringify(args)))
+```
+
+Creates a memoized version of a function, caching its results for repeated calls with the same arguments.
+
+#### Parameters
+
+| Name         | Type     | Description |
+|--------------|----------|-------------|
+| fn           | function | The function to memoize |
+| hashFunction | function | Optional function to generate cache keys from arguments |
+
+#### Returns
+
+A new memoized function that caches results based on its arguments.
+
+> **Hash Function Usage** The default hash function uses JSON.stringify and hashCode to create cache keys. For complex objects or special caching requirements, provide a custom hash function that returns a string or number to be used as the cache key.
+
+#### Example
+
+```javascript
+import { memoize } from '@semantic-ui/utils';
+
+// Default hashing
+const expensiveOperation = memoize((a, b) => {
+  console.log('Calculating...');
+  return a + b;
+});
+
+// Custom hashing for object arguments
+const customHashOperation = memoize(
+  (obj) => obj.value * 2,
+  (args) => args[0].id // Hash based on object id
+);
+
+expensiveOperation(2, 3); // Logs: Calculating... Returns: 5
+expensiveOperation(2, 3); // Returns: 5 (cached)
+
+customHashOperation({id: 1, value: 5}); // Returns: 10
+customHashOperation({id: 1, value: 6}); // Returns: 10 (cached due to same id)
+```
