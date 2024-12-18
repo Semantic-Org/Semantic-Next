@@ -39,7 +39,6 @@
 @container component (max-width: 300px) {
   .card {
     flex-direction: column !important;
-
     .image {
       width: 100%;
       height: 100px;
