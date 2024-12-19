@@ -45,7 +45,10 @@ export const getExampleFiles = async({
   }
   let hasComponent = false;
   let exampleFiles = {};
-  const pathRegExpString = `${basePath}.*/${contentID}/${subFolder}`;
+
+  let deepPath = `${basePath}.*/${contentID}/${subFolder}`;
+  let shallowPath = `${basePath}${contentID}/${subFolder}`;
+  let pathRegExpString = `${deepPath}|${shallowPath}`;
   const pathRegExp = new RegExp(pathRegExpString);
   await asyncEach(allFiles, async (file, path) => {
     if (path.match(pathRegExp)) {
