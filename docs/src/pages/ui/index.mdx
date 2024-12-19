@@ -6,6 +6,8 @@ layout: '@layouts/Guide.astro'
 import { componentPages } from '@helpers/navigation.js';
 import { UICards, UICard } from '@semantic-ui/core';
 
+> **Note on Technical Preview** - Semantic UI is in technical preview, the primary focus has been on authoring the [component framework](/components) which UI components will be written. It is recommended if you are looking to use Semantic UI primarily as a UI framework to check back in 2025 for more robust components. The following components may be partially complete or miss some use cases supported in classic Semantic.
+
 <UICards three>
   {componentPages.map((page) => (
     <UICard

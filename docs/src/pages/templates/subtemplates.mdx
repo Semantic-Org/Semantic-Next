@@ -5,8 +5,6 @@ description: Using subtemplate syntax from inside templates
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Subtemplates
-
 Sub templates let you render components from inside another component. This lets you scale your architecture for complex apps.
 
 
@@ -59,7 +57,9 @@ Verbose syntax uses the syntax `{> template name=templateName data=someData}` an
 }
 ```
 
-#### Dynamic Templates
+## Advanced Uses
+
+### Dynamic Templates
 
 Verbose syntax supports using an expression to return a template name. This means you can dynamically swap templates based on the returned value of a function. This can be incredibly useful in many advanced use cases.
 ```javascript title='component.js'
@@ -83,7 +83,7 @@ const createInstance = ({ self }) => ({
 }
 ```
 
-#### Template Specified by Setting
+### Specifying Templates in Settings
 
 You can use dynamic template names to even let users specify templates directly from settings objects. This can let users author their own templates that are then consumed by your component.
 
@@ -110,7 +110,9 @@ By default all data passed into subtemplates is not automatically reactive. Reac
 
 ```
 
-## Example
+## Examples
+
+### Basic Example
 
 A template includes two values, the `name` or template name to render and `data` the data to pass into the subtemplate. Templates must be passed to the `defineComponent` call of a component that references a subtemplate.
 
@@ -148,9 +150,14 @@ Or using a verbose syntax that specifies the template name explicitly
 
 ### Advanced Example
 
+Exposing templates as a setting allows for complex use cases where a portion of the rendered template can be dynamic and specified by the user at run time.
+
+This allows for more complex components that let users control how a portion of the component renders.
+
 The following example shows [exposing a setting](/components/rendering#settings) which lets a user specify a template to render a row.
 
-This allows for complex components like dynamic tables where users can specify templated rows or other meta components where a portion of the html can be specified by the user and run in the data context specified by the component.
+In `index.js` you can see where the template is imported and specified by the user who is consuming the component.
+
 
 <PlaygroundExample id="advanced-subtemplates" height="800" direction="vertical"></PlaygroundExample>
 
