@@ -15,5 +15,8 @@ Semantic provides several helpers which can help reduce reactivity by allowing y
 
 Guard is a special type of reactive context that only reruns when the returned value has changed. This can be useful to control triggering downstream reactivity for a reactive value that is dependent on another reactive value.
 
+It can be used to make sure a subcalculation does not trigger a parent calculation if the value doesnt change.
+
+<PlaygroundExample id="guard" direction="horizontal"></PlaygroundExample>
 
 
