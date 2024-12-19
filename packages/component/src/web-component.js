@@ -18,7 +18,6 @@ class WebComponentBase extends LitElement {
 
   constructor() {
     super();
-    this.useLight = false;
     this.renderCallbacks = [];
   }
 
@@ -29,33 +28,6 @@ class WebComponentBase extends LitElement {
 
   addRenderCallback(callback) {
     this.renderCallbacks.push(callback);
-  }
-
-  /*******************************
-         Light DOM Rendering
-  *******************************/
-
-  /* Modifies shadow dom rules to be scoped to component tag */
-  addPageCSS(webComponent, id, css, { scopeSelector } = {}) {
-    if(isServer) {
-      return;
-    }
-    const stylesheet = new CSSStyleSheet();
-    if(!webComponent.pageStylesheets) {
-      webComponent.pageStylesheets = {};
-    }
-    if (!webComponent.pageStylesheets[id]) {
-      if(scopeSelector) {
-        css = scopeStyles(css, scopeSelector);
-      }
-      stylesheet.replaceSync(css);
-      webComponent.pageStylesheets[id] = stylesheet;
-    }
-    // we add a new stylesheet to document scoped to component name
-    document.adoptedStyleSheets = [
-      ...document.adoptedStyleSheets,
-      stylesheet,
-    ];
   }
 
   /*******************************
@@ -309,21 +281,6 @@ class WebComponentBase extends LitElement {
       classString += ' ';
     }
     return classString;
-  }
-
-  /* Returns content (slotted content) from a component spec */
-  getContent({componentSpec}) {
-    const content = {};
-    if(!componentSpec) {
-      return;
-    }
-    // slotted content is stored in onSlotChange
-    each(componentSpec.content, (contentName) => {
-      if(this[contentName] && this.slottedContent) {
-        content[contentName] = this.slottedContent[contentName];
-      }
-    });
-    return content;
   }
 
   isDarkMode() {

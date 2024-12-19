@@ -206,7 +206,6 @@ export const defineComponent = ({
         let settings = this.getSettings();
         let data = {
           ...settings,
-          ...this.getContent({componentSpec}),
         };
         if (!isServer) {
           data.darkMode = this.isDarkMode();
