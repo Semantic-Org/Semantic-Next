@@ -120,7 +120,7 @@ export const defineComponent = ({
           let newValue = this[property];
           // this is necessary to handle how lit handles boolean attributes
           // otherwise you get <ui-button primary="true">
-          if(!propSettings.alias && newValue === true) {
+          if(!propSettings.alias && attribute && newValue === true) {
             this.setAttribute(attribute, '');
           }
           adjustPropertyFromAttribute({

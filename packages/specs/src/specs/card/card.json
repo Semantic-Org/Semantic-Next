@@ -89,7 +89,8 @@
       "name": "Horizontal",
       "attribute": "horizontal",
       "usageLevel": 1,
-      "description": "can have content horizontally oriented"
+      "description": "can have content horizontally oriented",
+      "exampleCode": "<ui-card horizontal image=\"/images/avatar/jenny.jpg\">Get started with your new card.</ui-card>"
     }
   ],
   "settings": [
