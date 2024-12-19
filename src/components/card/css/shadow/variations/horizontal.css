@@ -3,6 +3,10 @@
   gap: var(--card-horizontal-gap);
   text-align: left;
 
+  .image {
+    margin: var(--card-reverse-padding);
+    max-width: var(--card-horizontal-image-max-width);
+  }
   .icon * {
     font-size: var(--massive);
   }
@@ -13,12 +17,12 @@
 
   :first-child {
     border-radius: inherit;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
   :last-child {
     border-radius: inherit;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
 }

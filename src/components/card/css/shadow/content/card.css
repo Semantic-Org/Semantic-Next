@@ -6,7 +6,6 @@
 
 .card {
   display: flex;
-  container: card / inline-size;
   flex-direction: var(--card-flex-direction);
   gap: var(--card-gap);
   text-decoration: none;
@@ -16,13 +15,12 @@
   box-shadow: var(--card-box-shadow);
   background: var(--card-background);
   padding: var(--card-padding);
-
-  :first-child {
+  > :first-child {
     border-radius: inherit;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-  :last-child {
+  > :last-child {
     border-radius: inherit;
     border-top-left-radius: 0;
     border-top-right-radius: 0;

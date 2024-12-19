@@ -7,7 +7,6 @@
   }
   .card {
     display: flex;
-    container: card / inline-size;
     flex-direction: var(--card-flex-direction);
     gap: var(--card-gap);
     text-decoration: none;
@@ -18,12 +17,12 @@
     background: var(--card-background);
     padding: var(--card-padding);
   }
-  .card :first-child {
+  .card > :first-child {
     border-radius: inherit;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-  .card :last-child {
+  .card > :last-child {
     border-radius: inherit;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -65,13 +64,17 @@
 
 /* src/components/card/css/shadow/content/image.css */
 @layer component.card.content.image {
+  .image {
+    overflow: hidden;
+    margin: var(--card-reverse-padding) var(--card-reverse-padding) 1em;
+  }
   ::slotted(.image),
   ::slotted(ui-image),
   .image img {
     display: block;
     width: var(--card-image-width);
-    margin: -1.5em -1.5em 1.5em;
     max-width: var(--card-image-max-width);
+    object-fit: contain;
   }
 }
 
@@ -98,6 +101,17 @@
   .meta > * {
     color: var(--card-meta-text-color);
     font-weight: bold;
+  }
+}
+
+/* src/components/card/css/shadow/states/disabled.css */
+@layer component.states.disabled {
+  .disabled {
+    pointer-events: none;
+    opacity: var(--disabled-opacity);
+  }
+  .clickable-disabled {
+    pointer-events: allowed;
   }
 }
 
@@ -173,6 +187,10 @@
     gap: var(--card-horizontal-gap);
     text-align: left;
   }
+  .horizontal .image {
+    margin: var(--card-reverse-padding);
+    max-width: var(--card-horizontal-image-max-width);
+  }
   .horizontal .icon * {
     font-size: var(--massive);
   }
@@ -181,13 +199,13 @@
   }
   .horizontal :first-child {
     border-radius: inherit;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
   .horizontal :last-child {
     border-radius: inherit;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
 }
 

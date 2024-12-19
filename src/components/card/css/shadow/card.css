@@ -8,6 +8,9 @@
 @import url('./content/icon.css') layer(component.card.content.icon);
 @import url('./content/meta.css') layer(component.card.content.meta);
 
+/* States */
+@import url('./states/disabled.css') layer(component.states.disabled);
+
 /* Group */
 @import url('./plural/cards.css') layer(component.card.plural);
 
