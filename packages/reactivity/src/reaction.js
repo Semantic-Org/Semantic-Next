@@ -1,4 +1,4 @@
-import { isEqual } from '@semantic-ui/utils';
+import { isEqual, clone } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
@@ -90,24 +90,26 @@ export class Reaction {
   }
 
   /*
-    Makes sure function doesnt rerun when values dont change
+    Guard prevents a value from triggering reactions if the value is identical
   */
-  static guard(f) {
+  static guard(f, equalCheck = isEqual) {
+
+    // guard is not necessary if this is not a reactive context
     if (!Reaction.current) {
       return f();
     }
     let dep = new Dependency();
     let value, newValue;
+    dep.depend(); // Create dependency on guard function
     const comp = new Reaction(() => {
       newValue = f();
-      if (!comp.firstRun && !isEqual(newValue, value)) {
+      if (!comp.firstRun && !equalCheck(newValue, value)) {
         dep.changed();
       }
-      value = newValue;
+      value = clone(newValue);
     });
     comp.run(); // Initial run to capture dependencies
-    dep.depend(); // Create dependency on guard function
-    return value;
+    return newValue;
   }
 
   static getSource() {

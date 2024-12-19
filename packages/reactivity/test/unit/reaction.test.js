@@ -101,11 +101,11 @@ describe('Reaction', () => {
       const callback = vi.fn();
 
       Reaction.create(() => {
-        Reaction.guard(() => {
-          let user = { name: userName.get(), age: userAge.get() };
-          callback(`User Info: ${user.name}, ${user.age}`);
-          return user;
-        });
+        const user = Reaction.guard(() => ({
+          name: userName.get(),
+          age: userAge.get()
+        }));
+        callback(`User Info: ${user.name}, ${user.age}`);
       });
 
       // Initial flush to account for the setup of reactive computation
@@ -122,6 +122,31 @@ describe('Reaction', () => {
 
       // Should include initial run plus updates that trigger guard
       expect(callback).toHaveBeenCalledTimes(3);
+    });
+
+    it('guard should control reactivity - example 2', () => {
+
+      const counter = new ReactiveVar(0);
+      const callback = vi.fn();
+
+      const isEven = () => Reaction.guard(() => {
+        return (counter.get() % 2 === 0);
+      });
+
+      Reaction.create((comp) => {
+        if(isEven()) {
+          callback(`${counter.peek()} is even`);
+        }
+      });
+
+      counter.set(1); // No output guard is same
+      Reaction.flush();
+      counter.set(2); // Output
+      Reaction.flush();
+      counter.set(3); // No output guard is same
+
+      // only odd numbers should trigger
+      expect(callback).toHaveBeenCalledTimes(2);
     });
 
     it('guard should not re-run for identical objects', () => {

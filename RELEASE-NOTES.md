@@ -4,6 +4,11 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.3.1
+
+### Bugs
+* Fix `Reaction.guard` not behaving as expected in `@semantic-ui/reactivity`
+
 # Version 0.3.0
 
 ### API Changes
