@@ -37,7 +37,7 @@ const settings = {
   selectedFile: '',
 
   // whether to use tabs or panels
-  useTabs: localStorage.getItem('codeplayground-tabs') == 'yes' || false,
+  useTabs: true,
 
   allowLayoutSwap: true,
 
@@ -148,6 +148,9 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       ? settings.selectedFile
       : self.getFirstFile()?.filename
     ;
+    if(settings.allowLayoutSwap) {
+      settings.useTabs = localStorage.getItem('codeplayground-tabs') == 'yes';
+    }
     state.activeFile.set(initialFile);
     reaction(self.calculateLayout);
   },

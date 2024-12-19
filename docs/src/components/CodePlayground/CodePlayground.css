@@ -406,7 +406,7 @@
 
 @layer playground.responsive {
 
-  @container component (max-width: 767px) {
+  @media only screen and (max-width: 767px) {
     .masthead ui-button {
       display: none;
     }
@@ -421,11 +421,11 @@
     }
     ui-panel::part(handle) {
       display: none;
-    }
+    }/*
     .menu,
     playground-preview {
       border-left: var(--border);
-    }
+    }*/
     ui-menu.preview {
       margin: 1px 8px 0px 0px;
     }
