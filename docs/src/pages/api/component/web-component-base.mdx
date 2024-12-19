@@ -5,7 +5,9 @@ icon: box
 description: API reference for the WebComponentBase class in Semantic UI Component system
 ---
 
-The `WebComponentBase` class is a core part of the Semantic UI Component system. It extends the base `LitElement` class and provides additional functionality useful for Semantic UI components, including support for light DOM rendering, reactive state management, and enhanced event handling.
+`WebComponentBase` is the base web component class used to create web components with `defineComponent`. It handles internal utilities related to component lifecycle and other internals of the framework.
+
+> **Advanced Use Only** - It is not recommended to use this base class directly except in use cases where you want to create custom web components without `defineComponent`
 
 ## Import
 
@@ -13,179 +15,356 @@ The `WebComponentBase` class is a core part of the Semantic UI Component system.
 import { WebComponentBase } from '@semantic-ui/component';
 ```
 
-## Class: WebComponentBase
-
-`WebComponentBase` extends `LitElement` and serves as the foundation for Semantic UI web components.
-
-### Static Properties
+## Static Properties
 
 | Name                | Type   | Description                                          |
 |---------------------|--------|------------------------------------------------------|
 | shadowRootOptions   | Object | Options for the shadow root, including delegatesFocus |
 | scopedStyleSheet    | CSSStyleSheet | Scoped stylesheet for use with light DOM rendering |
 
-### Instance Properties
+## Instance Properties
 
 | Name            | Type    | Description                                     |
 |-----------------|---------|--------------------------------------------------|
-| useLight        | boolean | Indicates if the component uses light DOM rendering |
 | renderCallbacks | Array   | Array of callbacks to be executed after rendering |
 
-### Methods
+## Static Methods
 
-#### constructor()
+### getProperties
 
-Creates a new instance of the WebComponentBase class.
+```javascript
+static getProperties({ properties, settings, componentSpec })
+```
 
-#### updated()
+Defines property configurations for a web component.
 
-Lifecycle method called after the component updates. Handles slotting of light DOM content if necessary.
+#### Parameters
 
-#### addRenderCallback(callback)
+| Name           | Type   | Description                    |
+|----------------|--------|--------------------------------|
+| properties     | Object | Initial properties configuration |
+| settings       | Object | Component settings configuration |
+| componentSpec  | Object | Component specification object |
+
+#### Returns
+
+An object containing the configured properties.
+
+#### Example
+
+```javascript
+const properties = WebComponentBase.getProperties({
+  properties: {
+    value: String,
+  },
+  settings: {
+    theme: 'light'
+  },
+  componentSpec: mySpec
+});
+```
+
+### getPropertySettings
+
+```javascript
+static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {})
+```
+
+Creates property configuration for a single property.
+
+#### Parameters
+
+| Name         | Type    | Description                        |
+|-------------|----------|-----------------------------------|
+| propertyName | string  | Name of the property              |
+| type        | Function | Constructor for property type      |
+| options     | Object   | Property configuration options     |
+
+#### Options Object
+
+| Name         | Type    | Default | Description                  |
+|-------------|----------|---------|------------------------------|
+| propertyOnly | boolean | false   | If true, no attribute created |
+
+#### Returns
+
+Property configuration object.
+
+#### Example
+
+```javascript
+const propConfig = WebComponentBase.getPropertySettings(
+  'theme',
+  String,
+  { propertyOnly: false }
+);
+```
+
+## Instance Methods
+
+### addRenderCallback
+
+```javascript
+addRenderCallback(callback)
+```
 
 Adds a callback to be executed after rendering.
 
-| Parameter | Type     | Description                  |
-|-----------|----------|------------------------------|
-| callback  | Function | The callback to be executed |
+#### Parameters
 
-#### addPageCSS(webComponent, id, css, options)
+| Name     | Type     | Description                  |
+|----------|----------|------------------------------|
+| callback | Function | The callback to be executed |
 
-Adds scoped CSS to the page for light DOM rendering.
+#### Example
 
-| Parameter     | Type   | Description                               |
-|---------------|--------|-------------------------------------------|
-| webComponent  | Object | The web component class                   |
-| id            | string | Identifier for the stylesheet             |
-| css           | string | The CSS content                           |
-| options       | Object | Additional options (e.g., scopeSelector)  |
+```javascript
+this.addRenderCallback(() => {
+  console.log('Render complete');
+});
+```
 
-#### storeOriginalContent()
+### setDefaultSettings
 
-Stores the original content of the element for use with light DOM rendering.
+```javascript
+setDefaultSettings({settings, componentSpec})
+```
 
-#### slotLightContent()
+Sets default settings for a component.
 
-Handles the slotting of light DOM content.
+#### Parameters
 
-#### watchSlottedContent(settings)
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| settings      | Object | Default settings values        |
+| componentSpec | Object | Component specification object |
 
-Sets up observers for slotted content changes.
+#### Example
 
-| Parameter | Type   | Description                        |
-|-----------|--------|------------------------------------|
-| settings  | Object | Settings for content observation   |
+```javascript
+this.setDefaultSettings({
+  settings: {
+    theme: 'light',
+    size: 'medium'
+  },
+  componentSpec: mySpec
+});
+```
 
-#### onSlotChange(slotEl, settings)
+### getSettingsFromConfig
 
-Handles changes to slotted content.
+```javascript
+getSettingsFromConfig({componentSpec, properties})
+```
 
-| Parameter | Type     | Description                      |
-|-----------|----------|----------------------------------|
-| slotEl    | Element  | The slot element that changed    |
-| settings  | Object   | Settings for handling the change |
+Returns current settings including both attributes and properties.
 
-#### getSettings(options)
+#### Parameters
 
-Retrieves the current settings of the component.
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+| properties    | Object | Component properties object    |
 
-| Parameter | Type   | Description                    |
-|-----------|--------|--------------------------------|
-| options   | Object | Options for getting settings   |
+#### Returns
 
-#### setSetting(name, value)
+Current settings object.
 
-Sets a specific setting on the component.
+#### Example
 
-| Parameter | Type   | Description             |
-|-----------|--------|-------------------------|
-| name      | string | The name of the setting |
-| value     | any    | The value to set        |
+```javascript
+const settings = this.getSettingsFromConfig({
+  componentSpec: mySpec,
+  properties: this.constructor.properties
+});
+```
 
-#### createSettingsProxy(options)
+### createSettingsProxy
 
-Creates a proxy object for reactive access to component settings.
+```javascript
+createSettingsProxy({componentSpec, properties})
+```
 
-| Parameter | Type   | Description                           |
-|-----------|--------|---------------------------------------|
-| options   | Object | Options for creating the settings proxy |
+Creates a proxy object for reactive settings access.
 
-#### getUIClasses(options)
+#### Parameters
 
-Generates CSS classes based on the component's current state and attributes.
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+| properties    | Object | Component properties object    |
 
-| Parameter | Type   | Description                        |
-|-----------|--------|------------------------------------|
-| options   | Object | Options for generating UI classes  |
+#### Returns
 
-#### getContent(options)
+A Proxy object for reactive settings.
 
-Retrieves the content (slotted or attribute-based) of the component.
+#### Example
 
-| Parameter | Type   | Description                     |
-|-----------|--------|---------------------------------|
-| options   | Object | Options for getting the content |
+```javascript
+this.settings = this.createSettingsProxy({
+  componentSpec,
+  properties: this.constructor.properties
+});
+```
 
-#### isDarkMode()
+### getUIClasses
+
+```javascript
+getUIClasses({componentSpec, properties})
+```
+
+Generates CSS classes based on component attributes.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+| properties    | Object | Component properties object    |
+
+#### Returns
+
+A string of space-separated CSS classes.
+
+#### Example
+
+```javascript
+const classes = this.getUIClasses({
+  componentSpec,
+  properties: this.constructor.properties
+});
+```
+
+### getContent
+
+```javascript
+getContent({componentSpec})
+```
+
+Retrieves slotted content from a component.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+
+#### Returns
+
+An object containing slotted content.
+
+#### Example
+
+```javascript
+const content = this.getContent({
+  componentSpec: mySpec
+});
+```
+
+### isDarkMode
+
+```javascript
+isDarkMode()
+```
 
 Checks if the component is in dark mode.
 
-#### $(selector, options)
+#### Returns
 
-Queries the component's render root for elements matching the selector.
+Boolean indicating if dark mode is active, or undefined if server-side.
 
-| Parameter | Type   | Description                    |
-|-----------|--------|--------------------------------|
-| selector  | string | CSS selector to query          |
-| options   | Object | Additional options for querying |
-
-#### $$(selector)
-
-Queries the original DOM content of the component.
-
-| Parameter | Type   | Description           |
-|-----------|--------|--------------------|
-| selector  | string | CSS selector to query |
-
-#### call(func, options)
-
-Calls a function with consistent parameters and context.
-
-| Parameter | Type     | Description                    |
-|-----------|----------|--------------------------------|
-| func      | Function | The function to call           |
-| options   | Object   | Options for calling the function |
-
-## Example
+#### Example
 
 ```javascript
-import { WebComponentBase } from '@semantic-ui/component';
-
-class MyCustomElement extends WebComponentBase {
-  static properties = {
-    myProp: { type: String }
-  };
-
-  constructor() {
-    super();
-    this.myProp = 'Initial Value';
-  }
-
-  render() {
-    return html`
-      <div>My Custom Element: ${this.myProp}</div>
-    `;
-  }
+if (this.isDarkMode()) {
+  this.theme = 'dark';
 }
-
-customElements.define('my-custom-element', MyCustomElement);
 ```
 
-## Notes
+### $(selector, options)
 
-* `WebComponentBase` provides a robust foundation for creating Semantic UI components, handling many common tasks and providing useful utilities.
-* The class supports both shadow DOM and light DOM rendering, allowing for flexibility in component implementation.
-* Built-in support for reactive settings and UI class generation helps in creating dynamic and responsive components.
-* The `$` and `$$` methods provide convenient ways to query elements within the component's render root and original content, respectively.
+```javascript
+$(selector, { root } = {})
+```
 
-> **Light DOM Rendering** - When using light DOM rendering (by setting `useLight` to `true`), be aware of potential style conflicts with the parent document. Use the `addPageCSS` method to scope styles appropriately.
+Queries the component's render root.
+
+#### Parameters
+
+| Name     | Type   | Description              |
+|----------|--------|--------------------------|
+| selector | string | CSS selector to query    |
+| options  | Object | Query configuration      |
+
+#### Options Object
+
+| Name | Type    | Description          |
+|------|---------|---------------------|
+| root | Element | Root to query from  |
+
+#### Returns
+
+Query result set.
+
+#### Example
+
+```javascript
+const buttons = this.$('button');
+```
+
+### $$(selector)
+
+```javascript
+$$(selector)
+```
+
+Queries the original DOM content.
+
+#### Parameters
+
+| Name     | Type   | Description              |
+|----------|--------|--------------------------|
+| selector | string | CSS selector to query    |
+
+#### Returns
+
+Query result set.
+
+#### Example
+
+```javascript
+const content = this.$$('.content');
+```
+
+### call
+
+```javascript
+call(func, { firstArg, additionalArgs, args } = {})
+```
+
+Calls a function with standard parameters.
+
+#### Parameters
+
+| Name           | Type     | Description                   |
+|----------------|----------|-------------------------------|
+| func           | Function | Function to call              |
+| options        | Object   | Call configuration options    |
+
+#### Options Object
+
+| Name           | Type     | Default            | Description                  |
+|----------------|----------|-------------------|------------------------------|
+| firstArg       | any      | undefined         | First argument to pass       |
+| additionalArgs | Array    | undefined         | Additional arguments         |
+| args           | Array    | [component, $]    | Default arguments           |
+
+#### Example
+
+```javascript
+this.call(callback, {
+  firstArg: 'value',
+  additionalArgs: ['extra'],
+  args: [this.component, this.$]
+});
+```

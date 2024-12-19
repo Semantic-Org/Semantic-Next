@@ -1,0 +1,37 @@
+---
+layout: '@layouts/Guide.astro'
+title: Renderer API Reference
+icon: edit-3
+description: API reference for Semantic UI's rendering engine
+---
+
+The Semantic UI Renderer system provides the core templating and rendering functionality for UI components. It currently uses Lit as its primary rendering engine, with the possibility of supporting other rendering targets in the future.
+
+## Installation
+
+The renderer is included as part of the component package:
+
+```bash
+npm install @semantic-ui/component
+```
+
+## API Sections
+
+* [Lit Renderer](/api/renderer/lit-renderer) - Core rendering engine based on Lit
+* [Lit Directives](/api/renderer/lit-directives) - Custom directives for reactive rendering
+
+## Basic Usage
+
+```javascript
+import { LitRenderer } from '@semantic-ui/component';
+
+const renderer = new LitRenderer({
+  ast: templateAST,
+  data: {
+    user: { name: 'John' }
+  },
+  template: parentTemplate
+});
+
+const html = renderer.render();
+```

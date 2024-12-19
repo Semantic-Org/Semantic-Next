@@ -250,6 +250,14 @@ export const sidebarMenuAPI = [
         name: 'Define Component',
         url: '/api/component/define-component'
       },
+      {
+        name: 'Utility Functions',
+        url: '/api/component/utilities'
+      },
+      {
+        name: 'Base Class',
+        url: '/api/component/web-component-base'
+      },
     ]
   },
   {
@@ -484,6 +492,21 @@ export const sidebarMenuAPI = [
       {
         name: 'String Scanner',
         url: '/api/templating/string-scanner'
+      },
+    ]
+  },
+  {
+    name: 'Renderer',
+    url: '/api/renderer',
+    icon: 'edit-3',
+    pages: [
+      {
+        name: 'Lit Renderer',
+        url: '/api/renderer/lit-renderer'
+      },
+      {
+        name: 'Lit Directives',
+        url: '/api/renderer/lit-directives'
       },
     ]
   },

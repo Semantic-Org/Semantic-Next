@@ -1,0 +1,321 @@
+---
+layout: '@layouts/Guide.astro'
+title: Lit Renderer
+icon: code
+description: API reference for the Lit rendering engine in Semantic UI
+---
+
+Semantic templates compile to an AST that can be read by a rendering engine to generate the html for your UI component.
+
+The renderer handles things like dynamic expression evaluation, reactive DOM updates, and all the gnitty gritty to render your component to a page.
+
+Semantic ships with a single primary rendering engine written to wrap Lit's powerful and efficient rendering called `LitRenderer`.
+
+Additional rendering engines may be written in the future to render UI components to other targets than just web.
+
+> **Advanced Use** - It is not recommended to use the LitRenderer class directly unless you are wrapping SUI for a custom implementation. `LitRenderer` is used automatically from `defineComponent` to render your component.
+
+## Import
+
+```javascript
+import { LitRenderer } from '@semantic-ui/component';
+```
+
+## Constructor
+
+```javascript
+new LitRenderer(options)
+```
+
+### Parameters
+
+| Name      | Type   | Required | Description                            |
+|-----------|--------|----------|----------------------------------------|
+| options   | Object | Yes      | Configuration options for the renderer |
+
+### Options Object
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| ast | Array | Yes | Abstract syntax tree of the template |
+| data | Object | No | Initial data context |
+| template | Template | Yes | Parent template instance |
+| subTemplates | Object | No | Map of available subtemplates |
+| snippets | Object | No | Map of template snippets |
+| helpers | Object | No | Map of template helper functions |
+| isSVG | boolean | No | Whether content should be rendered as SVG |
+
+### Example
+
+```javascript
+const renderer = new LitRenderer({
+  ast: templateAST,
+  data: {
+    user: { name: 'John' }
+  },
+  template: parentTemplate,
+  subTemplates: {
+    header: headerTemplate,
+    footer: footerTemplate
+  }
+});
+```
+
+## Methods
+
+### render
+
+```javascript
+render({ ast, data } = {})
+```
+
+Renders the template with the current data context and returns a Lit template result.
+
+#### Parameters
+
+| Name    | Type    | Required | Description                    |
+|---------|---------|----------|--------------------------------|
+| options | Object  | No       | Render configuration options   |
+
+#### Options Object
+
+| Property | Type  | Default | Description                |
+|----------|-------|---------|----------------------------|
+| ast      | Array | this.ast| Template AST to render     |
+| data     | Object| this.data| Data context for rendering |
+
+#### Returns
+
+A Lit template result.
+
+#### Example
+
+```javascript
+// Basic render
+const html = renderer.render();
+
+// Render with new data
+const html = renderer.render({
+  data: { count: 5 }
+});
+
+// Render with new AST and data
+const html = renderer.render({
+  ast: newTemplateAST,
+  data: { items: ['one', 'two'] }
+});
+```
+
+### setData
+
+```javascript
+setData(newData)
+```
+
+Updates the data context and triggers reactive updates.
+
+#### Parameters
+
+| Name    | Type   | Required | Description         |
+|---------|--------|----------|---------------------|
+| newData | Object | Yes      | New data context    |
+
+#### Example
+
+```javascript
+renderer.setData({
+  count: 10,
+  user: { name: 'Jane' }
+});
+```
+
+### evaluateExpression
+
+```javascript
+evaluateExpression(expression, data, options)
+```
+
+Evaluates a template expression in the given data context.
+
+#### Parameters
+
+| Name       | Type   | Required | Description                  |
+|------------|--------|----------|------------------------------|
+| expression | string | Yes      | Expression to evaluate       |
+| data       | Object | No       | Data context for evaluation  |
+| options    | Object | No       | Evaluation options          |
+
+#### Options Object
+
+| Property    | Type    | Default | Description                          |
+|-------------|---------|---------|--------------------------------------|
+| asDirective | boolean | false   | Return result as a Lit directive     |
+| ifDefined   | boolean | false   | Use Lit's ifDefined directive        |
+| unsafeHTML  | boolean | false   | Use Lit's unsafeHTML directive      |
+
+#### Returns
+
+The evaluated expression result or a Lit directive if `asDirective` is true.
+
+#### Example
+
+```javascript
+// Simple property access
+const value = renderer.evaluateExpression('user.name', {
+  user: { name: 'John' }
+});
+
+// With directive options
+const directive = renderer.evaluateExpression('content', data, {
+  asDirective: true,
+  unsafeHTML: true
+});
+```
+
+### evaluateTemplate
+
+```javascript
+evaluateTemplate(node, data)
+```
+
+Evaluates a template node with given data.
+
+#### Parameters
+
+| Name | Type   | Required | Description              |
+|------|--------|----------|--------------------------|
+| node | Object | Yes      | Template node to evaluate |
+| data | Object | No       | Data context            |
+
+#### Node Object
+
+| Property | Type   | Required | Description            |
+|----------|--------|----------|------------------------|
+| name     | string | Yes      | Template name to render |
+| data     | Object | No       | Template data context  |
+
+#### Returns
+
+A Lit template result.
+
+#### Example
+
+```javascript
+const result = renderer.evaluateTemplate({
+  name: 'itemTemplate',
+  data: {
+    item: { id: 1, text: 'Test' }
+  }
+}, contextData);
+```
+
+### evaluateConditional
+
+```javascript
+evaluateConditional(node, data)
+```
+
+Evaluates a conditional template node.
+
+#### Parameters
+
+| Name | Type   | Required | Description                |
+|------|--------|----------|----------------------------|
+| node | Object | Yes      | Conditional node to evaluate|
+| data | Object | No       | Data context              |
+
+#### Node Object
+
+| Property  | Type    | Required | Description           |
+|-----------|---------|----------|-----------------------|
+| condition | string  | Yes      | Condition to evaluate |
+| content   | Array   | Yes      | Content if true      |
+| branches  | Array   | No       | Else/elseif branches |
+
+#### Returns
+
+A Lit directive for conditional rendering.
+
+#### Example
+
+```javascript
+const result = renderer.evaluateConditional({
+  condition: 'isVisible',
+  content: [/* template content */],
+  branches: [
+    {
+      type: 'elseif',
+      condition: 'isLoading',
+      content: [/* loading content */]
+    },
+    {
+      type: 'else',
+      content: [/* else content */]
+    }
+  ]
+}, data);
+```
+
+### evaluateEach
+
+```javascript
+evaluateEach(node, data)
+```
+
+Evaluates an iteration template node.
+
+#### Parameters
+
+| Name | Type   | Required | Description              |
+|------|--------|----------|--------------------------|
+| node | Object | Yes      | Each node to evaluate    |
+| data | Object | No       | Data context            |
+
+#### Node Object
+
+| Property | Type   | Required | Description            |
+|----------|--------|----------|------------------------|
+| over     | string | Yes      | Array to iterate over |
+| content  | Array  | Yes      | Template for each item|
+| as       | string | No       | Item alias name       |
+
+#### Returns
+
+A Lit directive for iteration.
+
+#### Example
+
+```javascript
+const result = renderer.evaluateEach({
+  over: 'items',
+  content: [/* item template */],
+  as: 'item'
+}, {
+  items: ['one', 'two', 'three']
+});
+```
+
+## Expression Types
+
+The renderer supports various expression types in templates, for more information see the documentation on [template expression](/templates/expressions).
+
+### Simple Properties
+```javascript
+{ user.name }
+```
+
+### Nested Expressions
+```javascript
+{ helper (otherHelper value) }
+```
+
+### Boolean Attributes
+```javascript
+<div hidden={ isHidden }></div>
+```
+
+### Template Helpers
+```javascript
+{ formatDate date "MM/DD/YYYY" }
+```
+
