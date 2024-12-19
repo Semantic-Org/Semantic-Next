@@ -1,4 +1,4 @@
-/* property declarations so math works  */
+/* property declarations are required for use to use calc in style queries */
 @property --three-column-flag {
   syntax: "<length>";
   inherits: true;
@@ -16,21 +16,20 @@
 }
 
 .card {
-  font-family: sans-serif;
-  padding: 1rem;
-  text-align: center;
-  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  padding: var(--spacing);
+  font-weight: var(--bold);
   border: var(--border);
   box-shadow: var(--raised-shadow);
   border-radius: var(--border-radius);
-  min-height: 100px;
   font-size: var(--large);
-  align-items: center;
-  display: flex;
-  justify-content: center;
 }
 
 .card:hover {
   cursor: pointer;
-  background-color: var(--standard-5);
+  background-color: var(--standard-5););
+  color: var(--primary-text-color);
 }
