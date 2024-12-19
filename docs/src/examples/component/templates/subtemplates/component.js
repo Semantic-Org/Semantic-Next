@@ -1,5 +1,6 @@
 import { defineComponent, getText } from '@semantic-ui/component';
 
+// subtemplates are exported explicitly
 import { row } from './row.js';
 
 const css = await getText('./component.css');
@@ -24,6 +25,7 @@ defineComponent({
   css,
   settings,
   createComponent,
+  // subtemplates are passed in explicitly
   subTemplates: {
     row
   }
