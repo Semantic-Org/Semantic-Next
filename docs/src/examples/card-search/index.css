@@ -1,0 +1,15 @@
+@property --card-three-col-flag {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
+}
+@property --card-two-col-flag {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
+}
+@property --card-one-col-flag {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}

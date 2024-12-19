@@ -2,13 +2,12 @@
 @layer component.card.content.card {
   :host {
     display: inline-block;
-    container: component / normal;
     text-align: var(--card-text-align);
     margin: var(--card-margin);
   }
   .card {
-    display: inline-flex;
-    container: card / normal;
+    display: flex;
+    container: card / inline-size;
     flex-direction: var(--card-flex-direction);
     gap: var(--card-gap);
     text-decoration: none;
@@ -106,15 +105,14 @@
 @layer component.card.plural {
   :host(ui-cards) {
     display: block;
+    container: host / inline-size;
     margin: var(--cards-margin);
   }
-  .container {
-    display: block;
+  .component {
     container: component / inline-size;
   }
   .cards {
     display: grid;
-    container: cards / inline-size;
     gap: var(--cards-gap);
     grid-auto-rows: 1fr;
     width: 100%;
@@ -228,11 +226,10 @@
 
 /* src/components/card/css/shadow/variations/stackable.css */
 @layer component.card.variations.stackable {
-  @property --card-stackable-comparison { syntax: "<length>"; inherits: true; initial-value: 0px; }
-  :host {
-    --card-stackable-comparison: max(calc(100% - var(--card-stackable-breakpoint)), 0px);
+  .component {
+    --card-stackable-comparison: max(calc(100cqi - var(--card-stackable-breakpoint)), 0px);
   }
-  @container component style(--card-stackable-comparison: 0px) {
+  @container component style(--card-stackable-comparison: 0) {
     .stackable.cards {
       display: flex;
       flex-direction: column;

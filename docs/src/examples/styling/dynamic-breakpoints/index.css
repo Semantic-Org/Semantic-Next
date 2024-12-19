@@ -1,0 +1,36 @@
+/* property declarations so math works  */
+@property --three-column-flag {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
+}
+@property --two-column-flag {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
+}
+@property --one-column-flag {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.card {
+  font-family: sans-serif;
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  border: var(--border);
+  box-shadow: var(--raised-shadow);
+  border-radius: var(--border-radius);
+  min-height: 100px;
+  font-size: var(--large);
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.card:hover {
+  cursor: pointer;
+  background-color: var(--standard-5);
+}

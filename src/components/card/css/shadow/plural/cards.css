@@ -4,17 +4,16 @@
 
 :host(ui-cards) {
   display: block;
+  container: host / inline-size;
   margin: var(--cards-margin);
 }
 
-.container {
-  display: block;
+.component {
   container: component / inline-size;
 }
 
 .cards {
   display: grid;
-  container: cards / inline-size;
   gap: var(--cards-gap);
   grid-auto-rows: 1fr;
   width: 100%;
