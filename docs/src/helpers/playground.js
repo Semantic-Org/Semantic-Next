@@ -45,7 +45,8 @@ export const getExampleFiles = async({
   }
   let hasComponent = false;
   let exampleFiles = {};
-  const pathRegExp = new RegExp(`${basePath}.*${contentID}/${subFolder}`);
+  const pathRegExpString = `${basePath}.*/${contentID}/${subFolder}`;
+  const pathRegExp = new RegExp(pathRegExpString);
   await asyncEach(allFiles, async (file, path) => {
     if (path.match(pathRegExp)) {
       const fileName = path.replace(pathRegExp, '').replace('/', '');
