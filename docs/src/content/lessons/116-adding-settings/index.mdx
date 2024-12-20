@@ -1,0 +1,34 @@
+---
+title: Using Settings
+category: 'Quickstart'
+subcategory: 'Components'
+description: Using settings to expose parts of your component
+sort: '1.1.6'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
+---
+
+### Exposing Settings
+
+Your components are not just limited to internal `state`. You can use `settings` to let each instance have its own configuration.
+
+Since we are using `tagName` our components `settings` can be configured by adjusting the html attributes or properties on the DOM element associated with the component.
+
+### Explaining the Example
+
+We are adding `city` and `timezone` which can now be used to modify the time display.
+
+You can see in [`index.html`](/#index.html)
+```html
+<current-time city="Norfolk" timezone="EST"></current-time>
+<current-time city="Los Angeles" timezone="PST"></current-time>
+```
+
+This adjusts the `settings` in `createComponent` to be a different `setting.city` and `setting.timezone` for each instance.

@@ -29,6 +29,7 @@ export const getLessonContent = (lesson) => {
     hint: lesson.data.hint,
     references: lesson.data.references,
     shortTitle: lesson.data.shortTitle,
+    selectedFile: lesson.data.selectedFile,
     major: semverMajor(lesson.data.sort),
     minor: semverMinor(lesson.data.sort),
     patch: semverPatch(lesson.data.sort),

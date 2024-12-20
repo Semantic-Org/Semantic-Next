@@ -1,0 +1,35 @@
+---
+title: More on Data Context
+category: 'Quickstart'
+subcategory: 'Components'
+description: Expaning the explanation of data context
+selectedFile: component.html
+sort: '1.1.7'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
+---
+
+### Data Context Expanded
+
+Lets now look at how `dateSettings` retrieves the current timezone.
+
+Your component's [data context](/components/rendering#data-context) can retrieve values from many different places in Semantic.
+
+In this example you can see we are now adding a new value to our expression in `component.html`
+
+```sui
+{formatDate time "h:mm:ss a" dateSettings}
+```
+
+The new value `dateSettings` is retreived from the component instance and returns a settings object for use with `formatDate`.
+
+
+> **Whats in a Context** - Your data context can pull values from many different places, internal state, external setting, properties or methods on your component, other components, or by passing in data directly through subtemplating.
+

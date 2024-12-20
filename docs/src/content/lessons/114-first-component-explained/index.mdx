@@ -1,0 +1,32 @@
+---
+title: How it Works
+category: 'Quickstart'
+subcategory: 'Components'
+description: Explaining the first component
+sort: '1.1.4'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
+---
+
+### Understanding the Example
+
+Lets delve into what exactly is happening in this example.
+
+* `date` is defined in [`state`](/components/rendering#state) and set to a default value of `new Date()`.
+
+* The [`onCreated` callback](/components/lifecycle#oncreated) creates an interval that updates the value of `state.date` every second using  [`now()`](/api/reactivity/date-helpers#now).
+
+* The date is output using the expression `formatDate time "h:mm:ss a"`
+
+* Time is retrieved from the template's [data context](components/rendering#data-context).
+
+* [`formatDate`](/api/helpers/dates#formatdate) is an included [ helper](/templates/helpers) this is called with the results of the other expressions evaluated right to left. `formatDate(time, 'h:mm ss a')`.
+
+* The css includes a CSS token `primary-text-color` which is defined in the CSS framework. Variables can be used in your components to reference global styling like, font, size, padding and more.

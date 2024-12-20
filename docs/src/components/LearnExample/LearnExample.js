@@ -140,13 +140,11 @@ const events = {
       if(href.startsWith('/learn')) {
         return;
       }
-      openLink(href, { newWindow: true, event });
+      openLink(href, { newWindow: true, target: '_help', event });
     }
   },
   'click ui-button[href]'({ self, event }) {
     const href = $(event.target).attr('href');
-
-
     // self.loadPage(href);
     //event.preventDefault();
   },

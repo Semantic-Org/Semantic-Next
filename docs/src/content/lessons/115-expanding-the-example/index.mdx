@@ -1,0 +1,36 @@
+---
+title: Expanding the Example
+category: 'Quickstart'
+subcategory: 'Components'
+description: Starting to write your first multifile component
+sort: '1.1.5'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
+---
+
+### Developing in Practice
+
+When coding a component it can be very helpful to see your styling, the structure of your component, and what it does side by side.
+
+Semantic is designed around this harmonious separation between styling, structure and behavior.
+
+### Separating Files
+
+In browser or stateless environments you can load the contents of html and css from separate files using the included helper [`getText`](/api/utils/browser/#gettext). This will return the text value of an external file.
+
+```javascript
+const css = await getText('./component.css');
+```
+
+In compiled environments like ESbuild, Vite, or other build pipelines you can use
+
+```javascript
+import css from './component.css' assert { type: 'css' };
+```
