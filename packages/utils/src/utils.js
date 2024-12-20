@@ -48,9 +48,9 @@ export const copyText = (text) => {
   navigator.clipboard.writeText(text);
 };
 
-export const openLink = (url, { newWindow = false, target, event } = {}) => {
+export const openLink = (url, { newWindow = false, settings, target, event } = {}) => {
   if(newWindow) {
-    window.open(url);
+    window.open(url, target, settings);
   }
   else {
     window.location.href = url;
