@@ -17,39 +17,27 @@ references:
 
 ### What is Semantic
 
-Semantic provides reactive templating, event management, and opinionated primitives for handling everything you need to ship UI that can be used and scaled by large teams with web standards like web components.
+Semantic is a fully featured framework including everything you need to ship UI for large teams with web components.
 
-Components can be used directly in the browser without compilation as well as with existing frameworks like React, Vue, or Svelte so that your UI can be portable between projects.
+* **Templating** - A reactive templating framework
+* **Styling** - A css framework for building your components from useful defaults
+* **Primitives** - A first party UI toolkit including primitives like button, menu and others.
+* **Robustness** - Integrated systems for event management, key bindings and everything else to ship complex UI that can be used at scale by large steams
+* **Portability** - Use web components directly in the browser or in React, Vue, Svelte, Angular or whatever comes next.
 
+### How To Use This Guide
 
-### It's Time To Begin
+* **Resources** - Click the resources button to see a list of related resources to any particular lesson
+* **Navigating** - Use next/previous below to navigate between lessons or <ui-icon menu></ui-icon> above to jump ahead.
+* **Layout** - Click the layout button to swap between code panels and tabs (this may not be available on small screen sizes).
 
-The key to scaling design frameworks is consistent APIs. Web components allow you to encapsulate functionality into a custom element that can be used by front end developers in the same way they use other html tags when creating new pages.
+### Your First Component
 
-```javascript
-defineComponent({
-  tagName: 'current-time',
-});
-```
-```html
-<current-time></current-time>
-```
+The following example shows the minimal code required to generate a component.
 
-Components do not need to be assigned to tags, they can also be used in other components compositionally. This lets you build apps similar to how you might in a framework like React or Vue.
-
-```javascript
-const currentTime = defineComponent({ template, html, css });
-
-defineComponent({
-  tagName: 'greet-user',
-  subTemplates: { currentTime }
-});
-```
-```html
-<greet-user></greet-user>
-```
-
-> **Explore the Docs** - The resources button in the bottom left can be used to see related docs to further explore concepts on a page.
-
-
-
+Things to notice:
+* The `defineComponent` function creates a new web component
+* `tagName` determines your tag name `<hello-world></hello-world>`
+* The component updates automatically when state changes
+* Both template and styles are encapsulated inside the component
+* Styles can use css tokens like `primary-text-color`

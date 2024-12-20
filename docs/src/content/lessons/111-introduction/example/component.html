@@ -1,0 +1,26 @@
+<div class="container">
+  <svg viewBox="-10 -10 520 220">
+
+    <!-- Base text path -->
+    <path id="textPath"
+          d="{getTextPath}"
+          fill="none"
+          stroke="none"/>
+
+    <!-- Distortion waves -->
+    {#each wave in waves}
+      <path
+        class="wave"
+        d="{wave.path}"
+        style="opacity: {wave.opacity}"
+      />
+    {/each}
+
+    <!-- Main text -->
+    <text class="text">
+      <textPath href="#textPath" startOffset="50%" text-anchor="middle">
+        {text}
+      </textPath>
+    </text>
+  </svg>
+</div>

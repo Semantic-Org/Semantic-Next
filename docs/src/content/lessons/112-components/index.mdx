@@ -1,19 +1,27 @@
 ---
-title: Templates
+title: Introduction
 category: 'Quickstart'
 subcategory: 'Components'
-description: Create interactive components with templates and styling
-sort: '1.1.2'
+description: Learn how to create your first web component with Semantic UI
+sort: '1.1.1'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
 ---
 
-### A Real World Example
-To help us learn about key features of Semantic we will be building a **filterable card layout**.
+### Web Component Essentials
 
-First we will build out a card, then add a card list and finally add filtering and searching.
+`defineComponent` will generate a custom html tag that you can use anywhere that you normally use html.
 
-## Separating Concerns
+### Using Settings
 
-This example includes three files that define our card
-* A javascript file `component.js` housing our card definition
-* A css file `component.css` that is scoped to the component and uses some theme-aware variables like `angled-gradient` or `primary-text-color`
-* A template file `component.html` which specifies the html from our card and uses expressions like `{name}` to output values
+You can use `settings` in a component to allow each component to be configured in a different way.
+
+In `index.html` we include multiple instances of `<hello-world>` with different configurations.
+
