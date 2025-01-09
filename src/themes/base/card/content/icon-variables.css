@@ -1,6 +1,6 @@
 :root {
   --card-icon-font-size: var(--relative-32px);
   --card-icon-color: var(--standard-100);
-  --card-icon-margin: 0 0 0 var(--spacing);
+  --card-icon-margin: 0 0 var(--spacing) 0;
 }
 

@@ -5,6 +5,5 @@
 }
 
 :root {
-  /*--card-stackable-breakpoint: var(--largest-mobile-screen);*/
-  --card-stackable-breakpoint: 1000px;
+  --card-stackable-breakpoint: var(--largest-mobile-screen);
 }

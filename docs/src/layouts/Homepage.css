@@ -346,6 +346,13 @@ body {
     ribbon  {
       padding: 2rem 1rem;
 
+      &.proof {
+        ui-cards {
+          margin-top: -3rem;
+          font-size: 15px;
+        }
+      }
+
       .cards {
         margin-top: 0rem;
         .card {
