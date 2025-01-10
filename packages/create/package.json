@@ -1,0 +1,23 @@
+{
+  "name": "create-semantic",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "author": "Jack Lukic",
+  "license": "ISC",
+  "devDependencies": {
+    "@clack/core": "^0.4.1",
+    "@clack/prompts": "^0.9.1",
+    "arg": "^5.0.2",
+    "lit": "^3.1.2",
+    "nanospinner": "^1.2.2"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "^0.2.1",
+    "@semantic-ui/query": "^0.2.1",
+    "@semantic-ui/reactivity": "^0.2.1",
+    "@semantic-ui/templating": "^0.2.1",
+    "@semantic-ui/utils": "^0.2.1"
+  },
+  "version": "0.2.1"
+}
