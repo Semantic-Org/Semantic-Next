@@ -3,17 +3,23 @@
   gap: var(--card-horizontal-gap);
   text-align: left;
 
-  .image {
+  ::slotted(.image),
+  ::slotted(ui-image),
+  .image img {
     margin: var(--card-reverse-padding);
     max-width: var(--card-horizontal-image-max-width);
   }
-  .icon * {
-    font-size: var(--massive);
-  }
-  .header {
-    font-size: var(--large);
-  }
 
+  ::slotted(ui-icon),
+  ::slotted(.icon),
+  .icon ui-icon {
+    font-size: var(--card-horizontal-icon-font-size);
+    margin: var(--card-horizontal-icon-margin);
+  }
+  ::slotted(.header),
+  .header {
+    font-size: var(--card-horizontal-header-size);
+  }
 
   :first-child {
     border-radius: inherit;

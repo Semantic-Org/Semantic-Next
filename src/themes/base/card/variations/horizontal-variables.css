@@ -3,6 +3,8 @@
   --card-horizontal-gap: var(--padding);
   --card-horizontal-image-max-width: 125px;
   --card-horizontal-icon-size: var(--massive);
+  --card-horizontal-icon-margin: 0 0 0 var(--spacing);
   --card-horizontal-header-size: var(--large);
+  --card-horizontal-icon-font-size: var(--massive);
 }
 

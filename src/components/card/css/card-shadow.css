@@ -187,15 +187,21 @@
     gap: var(--card-horizontal-gap);
     text-align: left;
   }
-  .horizontal .image {
+  .horizontal ::slotted(.image),
+  .horizontal ::slotted(ui-image),
+  .horizontal .image img {
     margin: var(--card-reverse-padding);
     max-width: var(--card-horizontal-image-max-width);
   }
-  .horizontal .icon * {
-    font-size: var(--massive);
+  .horizontal ::slotted(ui-icon),
+  .horizontal ::slotted(.icon),
+  .horizontal .icon ui-icon {
+    font-size: var(--card-horizontal-icon-font-size);
+    margin: var(--card-horizontal-icon-margin);
   }
+  .horizontal ::slotted(.header),
   .horizontal .header {
-    font-size: var(--large);
+    font-size: var(--card-horizontal-header-size);
   }
   .horizontal :first-child {
     border-radius: inherit;
