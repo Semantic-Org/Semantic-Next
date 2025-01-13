@@ -5,20 +5,14 @@ import template from './component.html?raw';
 
 
 const settings = {
-  firstSetting: true,
-  secondSetting: false,
+  value: 0
 };
 
 const createComponent = ({self, data, settings}) => ({
-  initialize() {
-    console.log('data is', data);
-    console.log('first', settings.firstSetting);
-    console.log('second', settings.secondSetting);
-  }
 });
 
-export const SettingTest = defineComponent({
-  tagName: 'setting-test',
+export const TestComponent = defineComponent({
+  tagName: 'test-component',
   template,
   css,
   settings,
