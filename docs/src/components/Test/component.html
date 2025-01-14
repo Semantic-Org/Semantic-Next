@@ -2,10 +2,10 @@
 <div class="row">
 {formatDate now 'h:mm:ss a' { timezone: timezone } }
 <hr>
-{classMap {one: true, two: true, three: now}}
+{classMap {one: true, two: true, three: now} }
 <hr>
-{join ['1', '2', '3'] ' and '}
-{join([1,2,3], ' and ')}
+{join ['1', '2', '3'] ' and '}<br>
+{join([1,2,3],' and ')}
 <hr>
 {value}
 <hr>
@@ -18,13 +18,18 @@
 {addOne (value + 1) (value + 2)}
 <hr>
 {addOne(value + 1)}
+<hr>
+{getValue {one: 'two'} 'one'}
+<hr>
+{log getValue({one: 'two'}, 'one')}
 </div>
 <div class="row">
 N/A
 <hr>
 one two three
 <hr>
-1 and 2 and 3 1 and 2 and 3
+1 and 2 and 3<br>
+1 and 2 and 3
 <hr>
 0
 <hr>
@@ -37,5 +42,9 @@ one two three
 4
 <hr>
 2
+<hr>
+two
+<hr>
+two
 </div>
 </div>

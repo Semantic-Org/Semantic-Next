@@ -13,6 +13,9 @@ const settings = {
 const createComponent = ({self, data, settings}) => ({
   addOne(value, value2 = 0) {
     return value + value2 + 1;
+  },
+  getValue(obj, prop) {
+    return obj[prop];
   }
 });
 
