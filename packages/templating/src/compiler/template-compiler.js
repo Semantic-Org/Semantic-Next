@@ -102,16 +102,20 @@ class TemplateCompiler {
       // if this expression contains nested expressions like { one { two } }
       // we want tag content to include all nested expressions
       const getTagContent = (outerContent = '') => {
-        let content = scanner.consumeUntil(parserRegExp.EXPRESSION_END);
 
-        // nested expression found
-        if(content.search(parserRegExp.EXPRESSION_START) >= 0) {
-          content += scanner.consumeUntil(parserRegExp.EXPRESSION_START);
-          content += scanner.consume(parserRegExp.EXPRESSION_START);
-          content += getTagContent(content);
-          content += scanner.consumeUntil(parserRegExp.EXPRESSION_END);
-          content += scanner.consume(parserRegExp.EXPRESSION_END);
-          return content;
+        let openTags = 1;
+        let content = scanner.peek();
+        while(openTags > 0 && !scanner.isEOF()) {
+          scanner.step();
+          if(scanner.peek() == '{') {
+            openTags++;
+          }
+          if(scanner.peek() == '}') {
+            openTags--;
+          }
+          if(openTags > 0) {
+            content += scanner.peek();
+          }
         }
 
         // if we have outer content we will need to return the closing bracket
