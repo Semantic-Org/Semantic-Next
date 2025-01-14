@@ -43,9 +43,6 @@ export const defineComponent = ({
     const compiler = new TemplateCompiler(template);
     ast = compiler.compile();
   }
-  if(templateName == 'topbarMenu') {
-    console.log(ast[1].content);
-  }
 
   // to support SSR we need to include all subtemplate css in base template
   each(subTemplates, (template) => {
