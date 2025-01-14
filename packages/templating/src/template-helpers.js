@@ -132,7 +132,6 @@ export const TemplateHelpers = {
     return a + 1;
   },
   formatDate(date = new Date(), format = 'L', options = { timezone: 'local' }) {
-    console.log(options);
     return formatDate(date, format, options);
   },
   formatDateTime(date = new Date(), format = 'LLL', options = { timezone: 'local' }) {

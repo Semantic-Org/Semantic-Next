@@ -37,10 +37,14 @@ export const defineComponent = ({
   renderingEngine,
 } = {}) => {
 
+
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
     ast = compiler.compile();
+  }
+  if(templateName == 'topbarMenu') {
+    console.log(ast[1].content);
   }
 
   // to support SSR we need to include all subtemplate css in base template
