@@ -330,7 +330,8 @@ export class LitRenderer {
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
     if(jsValue !== undefined) {
-      return this.getTokenValue(jsValue);
+      const value = this.getTokenValue(jsValue);
+      return wrapFunction(value)();
     }
 
     let funcArguments = [];
@@ -360,12 +361,6 @@ export class LitRenderer {
     if(isArray(token)) {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
-    }
-
-    // check if this token evaluates to a js expression
-    const jsValue = this.evaluateJavascript(token, data);
-    if(jsValue !== undefined) {
-      return jsValue;
     }
 
     // check if this is a value not requiring lookup
@@ -416,23 +411,15 @@ export class LitRenderer {
       dataValue = dataValue.bind(thisContext);
     }
 
-    // retrieve reactive value
-    if(dataValue !== undefined) {
-      return (dataValue instanceof ReactiveVar)
-        ? dataValue.value
-        : dataValue;
-    }
-
     return this.getTokenValue(dataValue);
   }
 
-  // retrieve token value
-  // calling reactive var getter if avail
+  // retrieve token value accessing getter for reactive vars
   getTokenValue(tokenValue) {
     if(tokenValue !== undefined) {
       return (tokenValue instanceof ReactiveVar)
         ? tokenValue.value
-        : wrapFunction(tokenValue)()
+        : tokenValue
       ;
     }
     return undefined;
