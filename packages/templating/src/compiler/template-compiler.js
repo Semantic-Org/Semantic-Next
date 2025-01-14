@@ -101,8 +101,16 @@ class TemplateCompiler {
 
       // if this expression contains nested expressions like { one { two } }
       // we want tag content to include all nested expressions
-      const getTagContent = (outerContent = '') => {
+      let getTagContent = (outerContent = '', type) => {
 
+        // break if we are already at the end of the expr
+        if(scanner.peek() == '}') {
+          scanner.consumeUntil(parserRegExp.EXPRESSION_END);
+          return;
+        }
+
+        // step through expression evaluating sub expressions
+        // stopping when the final sub expression completes
         let openTags = 1;
         let content = scanner.peek();
         while(openTags > 0 && !scanner.isEOF()) {
@@ -113,18 +121,20 @@ class TemplateCompiler {
           if(scanner.peek() == '}') {
             openTags--;
           }
-          if(openTags > 0) {
-            content += scanner.peek();
+          if(openTags == 0) {
+            scanner.rewind();
+            break;
           }
+          content += scanner.peek();
         }
 
-        // if we have outer content we will need to return the closing bracket
-        // otherwise we just eat it
-        const bracket = scanner.consume(parserRegExp.EXPRESSION_END);
-        if(outerContent) {
-          content += bracket;
-        }
+        // move pointer to the end of the expression
+        // we need to rewind as it is at '}'
+        scanner.consumeUntil(parserRegExp.EXPRESSION_END);
+        scanner.consume(parserRegExp.EXPRESSION_END);
 
+        // remove whitespace
+        content = content.trim();
         return content;
       };
 
@@ -133,7 +143,7 @@ class TemplateCompiler {
         if (scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
-          const rawContent = getTagContent().trim();
+          const rawContent = getTagContent('', type);
           scanner.consume(parserRegExp.EXPRESSION_END);
           const content = this.getValue(rawContent);
           return { type, content, ...context }; // Include context in the return value
