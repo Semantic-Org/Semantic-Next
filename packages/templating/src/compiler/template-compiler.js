@@ -122,6 +122,7 @@ class TemplateCompiler {
             openTags--;
           }
           if(openTags == 0) {
+            // we need to rewind as it is at '}'
             scanner.rewind();
             break;
           }
@@ -129,7 +130,6 @@ class TemplateCompiler {
         }
 
         // move pointer to the end of the expression
-        // we need to rewind as it is at '}'
         scanner.consumeUntil(parserRegExp.EXPRESSION_END);
         scanner.consume(parserRegExp.EXPRESSION_END);
 
