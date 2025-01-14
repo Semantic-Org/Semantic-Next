@@ -1,0 +1,13 @@
+.group {
+  display: flex;
+  flex-direction: row;
+}
+.row {
+  border-left: var(--border);
+  flex-grow: 0;
+  width: 200px;
+  padding: 1rem;
+}
+.row:first-child {
+  border-left: none;
+}

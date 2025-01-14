@@ -1,8 +1,41 @@
+<div class="group">
+<div class="row">
+{formatDate now 'h:mm:ss a' { timezone: timezone } }
+<hr>
+{classMap {one: true, two: true, three: now}}
+<hr>
+{join ['1', '2', '3'] ' and '}
+{join([1,2,3], ' and ')}
+<hr>
 {value}
 <hr>
 {value + 1}
 <hr>
-{addOne (value + 1)}
+{(value + 2) * 5}
+<hr>
+{addOne value}
+<hr>
+{addOne (value + 1) (value + 2)}
 <hr>
 {addOne(value + 1)}
+</div>
+<div class="row">
+N/A
 <hr>
+one two three
+<hr>
+1 and 2 and 3 1 and 2 and 3
+<hr>
+0
+<hr>
+1
+<hr>
+10
+<hr>
+1
+<hr>
+4
+<hr>
+2
+</div>
+</div>
