@@ -101,7 +101,7 @@ class TemplateCompiler {
 
       // if this expression contains nested expressions like { one { two } }
       // we want tag content to include all nested expressions
-      let getTagContent = (outerContent = '', type) => {
+      let getTagContent = () => {
 
         // break if we are already at the end of the expr
         if(scanner.peek() == '}') {
@@ -143,7 +143,7 @@ class TemplateCompiler {
         if (scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
-          const rawContent = getTagContent('', type);
+          const rawContent = getTagContent();
           scanner.consume(parserRegExp.EXPRESSION_END);
           const content = this.getValue(rawContent);
           return { type, content, ...context }; // Include context in the return value
