@@ -330,7 +330,7 @@ export class LitRenderer {
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
     if(jsValue !== undefined) {
-      return jsValue;
+      return this.getTokenValue(jsValue);
     }
 
     let funcArguments = [];
@@ -423,6 +423,18 @@ export class LitRenderer {
         : dataValue;
     }
 
+    return this.getTokenValue(dataValue);
+  }
+
+  // retrieve token value
+  // calling reactive var getter if avail
+  getTokenValue(tokenValue) {
+    if(tokenValue !== undefined) {
+      return (tokenValue instanceof ReactiveVar)
+        ? tokenValue.value
+        : wrapFunction(tokenValue)()
+      ;
+    }
     return undefined;
   }
 
