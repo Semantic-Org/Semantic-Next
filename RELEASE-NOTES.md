@@ -4,6 +4,12 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+
+# Version 0.4.0
+
+### Improvements
+* Templates now will evaluate javascript expressions like `{index + 1}`, {getThing(foo, bar)} and even nested objects like `{getValue { foo: 'baz'} }`
+
 # Version 0.3.1
 
 ### Bugs
