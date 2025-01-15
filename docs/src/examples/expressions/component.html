@@ -48,6 +48,12 @@
       <td>one two three</td>
     </tr>
     <tr>
+      <td>creating and invoking a custom function</td>
+      <td>{#html "(() => {return 'hi';})()" }</td>
+      <td>{(() => {return 'hi';})()}</td>
+      <td>hi</td>
+    </tr>
+    <tr>
       <td>Calling method with inline array definition</td>
       <td>join ['1', '2', '3'] ' and '</td>
       <td>{ join ['1', '2', '3'] ' and '}</td>
