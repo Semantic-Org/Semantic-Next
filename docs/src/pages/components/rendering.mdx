@@ -165,10 +165,21 @@ Your component instance stores methods and properties that implement the functio
 
 ### Accessing in Templates
 
-Templates can access your component directly from its data context.
+You can use your component instance to store specialized logic that is necessary for your component.
+Any method or property declared in `createComponent` can be accessed directly from your template.
 
-```sui
-Counter is {{getCounter}}
+```javascript title='component.js'
+const createComponent = ({self, state}) => ({
+  // get user's current age
+  getAge(user) {
+    // 31557600000 = 365.25 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds
+    return Math.floor((new Date() - new Date(user.born_date)) / 31557600000);
+  }
+});
+```
+
+```sui title='component.html'
+{getAge user}
 ```
 
 
