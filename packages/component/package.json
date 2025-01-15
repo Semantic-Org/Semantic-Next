@@ -12,10 +12,10 @@
     "lit": "^3.1.2"
   },
   "dependencies": {
-    "@semantic-ui/query": "^0.2.1",
-    "@semantic-ui/reactivity": "^0.2.1",
-    "@semantic-ui/templating": "^0.2.1",
-    "@semantic-ui/utils": "^0.2.1"
+    "@semantic-ui/query": "^0.4.0",
+    "@semantic-ui/reactivity": "^0.4.0",
+    "@semantic-ui/templating": "^0.4.0",
+    "@semantic-ui/utils": "^0.4.0"
   },
-  "version": "0.2.1"
+  "version": "0.4.0"
 }
