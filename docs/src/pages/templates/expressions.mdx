@@ -5,12 +5,66 @@ description: Evaluating expressions inside templates
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+## Using Expressions
 
-### Evaluating Expressions
+Expressions let you access variables and methods from your [data context](/components/rendering#data-context) as well as [template helpers](/templates/helpers) that can be used to output dynamic values in your html.
 
-Template expressions are evaluated against the template's data context which includes the values and functions that are invokable for a template.
+Expressions are a reactive context meaning they will automatically update when the underlying value changes.
 
-> For an explanation of how a component's data context is determined see [component data context](/components/rendering#data-context)
+## Expression Syntax
+
+> It is recommended to [check out the expression evaluation example](/examples/expressions) to see expression evaluation in practice.
+
+Expressions support two separate syntaxes, spaced arguments or "semantic style" and regular javascript style arguments.
+
+### Semantic Style
+
+Spaced arguments do not require parenthesis or commas, simply include a space between arguments
+
+```sui
+{doSomething arg1 arg2}
+```
+
+If theres a preferred evaluation order you will need to add parenthesis
+
+```sui
+{doSomething arg1 (doSomethingElse arg1) }
+```
+
+### Javascript Style
+
+You can also simply specify any valid javascript inside an expression
+
+```sui
+{ doSomething(arg1, arg2) }
+```
+
+Any valid javascript can be used inside an expression
+```sui
+{ doSomething(arg1 + 2, arg2 + 3)}
+```
+
+Including nested objects
+
+```sui
+{ doSomething({a: 1, b: 2}) }
+```
+
+### Mixed Style
+
+It's okay to mix between Semantic and Javascript style expressions. If you need to embed a javascript expression inside a SUI one just wrap it in parenthesis.
+
+```sui
+{ doSomething (arg1 + 2) (arg2 + 3) {a: 1, b: 2} }
+```
+
+## How Expressions are Evaluated
+
+### Finding Data
+
+Template expressions are evaluated against the template's [data context](/components/rendering#data-context) which includes the values and functions that are invokable for a template.
+
+Your data context includes [settings](rendering#settings), [state](/rendering#state), [template helpers](/templates/helpers), values set on your [component instance](/components/create#instance), and in the special case of [subtemplates](/templates/subtemplates) data passed in directly.
 
 Expressions are evaluated right to left with variables being read from the component's data context
 ```sui
@@ -21,11 +75,12 @@ evaluates to
 ```javascript
 concat(firstName, ' ', lastName);
 ```
+> For an explanation of how a component's data context is determined see [component data context](/components/rendering#data-context)
 
 
 ### Evaluation Order
 
-If an intermediary function is found it will pass the result through naively
+If an intermediary function is found it will pass the result through
 
 ```sui
 {titleCase concat firstName ' ' lastName}
@@ -61,7 +116,7 @@ For instance
 ```
 
 will output as
-```sui
+```html
 <a data-number="0"></a>
 ```
 
@@ -74,11 +129,11 @@ If an attribute expression **omits quotes** the entire attribute will be removed
 ```
 
 If `isChecked == true` will output
-```sui
+```html
 <input type="checkbox" checked />
 ```
 
 and if `isChecked == false` it will omit the attribute altogether
-```sui
+```html
 <input type="checkbox" />
 ```

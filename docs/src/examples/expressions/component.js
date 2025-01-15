@@ -5,11 +5,12 @@ const template = await getText('./component.html');
 
 const settings = {
   value: 1,
-  now: new Date(),
+  date: new Date(),
   timezone: 'PST'
 };
 
-const createComponent = ({self, data, settings}) => ({
+const createComponent = ({ settings }) => ({
+  //initialize: () => setInterval(() => settings.date = new Date(), 1000),
   addOne(value, value2 = 0) {
     return value + value2 + 1;
   },
@@ -25,3 +26,4 @@ export const TestComponent = defineComponent({
   settings,
   createComponent
 });
+

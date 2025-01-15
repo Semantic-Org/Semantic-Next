@@ -1,25 +1,3 @@
-<h4>Data Context</h4>
-<table class="group">
-  <thead>
-    <th>Name</th>
-    <th>Value</th>
-  </thead>
-  <tbody>
-    <tr>
-      <td>value</td>
-      <td>{value}</td>
-    </tr>
-    <tr>
-      <td>now</td>
-      <td>{now}</td>
-    </tr>
-    <tr>
-      <td>timezone</td>
-      <td>{timezone}</td>
-    </tr>
-  </tbody>
-</table>
-
 <h4>Expressions</h4>
 <table class="group">
   <thead>
@@ -31,21 +9,21 @@
   <tbody>
     <tr>
       <td>Calling method in data context with object using spaced arguments</td>
-      <td>{#html "formatDate now 'h:mm:ss a' { timezone: timezone }"}</td>
-      <td>{ formatDate now 'h:mm:ss a' { timezone: timezone } }</td>
+      <td>{#html "formatDate date 'h:mm:ss a' { timezone: timezone }"}</td>
+      <td>{ formatDate date 'h:mm:ss a' { timezone: timezone } }</td>
       <td>Current time PST</td>
     </tr>
     <tr>
       <td>Calling helper method in data context with js arguments</td>
-      <td>{#html "formatDate(now, 'h:mm:ss a', { timezone: timezone })"}</td>
-      <td>{ formatDate(now, 'h:mm:ss a', { timezone: timezone }) }</td>
+      <td>{#html "formatDate(date, 'h:mm:ss a', { timezone: timezone })"}</td>
+      <td>{ formatDate(date, 'h:mm:ss a', { timezone: timezone }) }</td>
       <td>Current time PST</td>
     </tr>
     <tr>
       <td>Calling helper method with inline object definition</td>
-      <td>{#html 'classMap { one: true, two: true, three: now }' }</td>
-      <td>{ classMap { one: true, two: true, three: now } }</td>
-      <td>one two three</td>
+      <td>{#html 'classMap { one: false, two: true, three: (value == 1) }' }</td>
+      <td>{ classMap { one: false, two: true, three: (value == 1) } }</td>
+      <td>two three</td>
     </tr>
     <tr>
       <td>creating and invoking a custom function</td>
@@ -96,10 +74,56 @@
       <td>3</td>
     </tr>
     <tr>
-      <td>Calling a method with inline object</td>
-      <td>getValue {one: 'two'} 'one'</td>
+      <td>Calling a method with spaced arguments and inline object</td>
+      <td>{#html "getValue {one: 'two'} 'one'"}</td>
       <td>{getValue {one: 'two'} 'one'}</td>
       <td>two</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Data Context</h4>
+<table class="group">
+  <thead>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Source</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>value</td>
+      <td>{value}</td>
+      <td>Settings</td>
+    </tr>
+    <tr>
+      <td>timezone</td>
+      <td>{timezone}</td>
+      <td>Settings</td>
+    </tr>
+    <tr>
+      <td>date</td>
+      <td>{date}</td>
+      <td>Settings</td>
+    </tr>
+    <tr>
+      <td>addOne</td>
+      <td>function on component adding 1 to arguments</td>
+      <td>Component Instance</td>
+    </tr>
+    <tr>
+      <td>getValue</td>
+      <td>function on component returning object property</td>
+      <td>Component Instance</td>
+    </tr>
+    <tr>
+      <td>formatDate</td>
+      <td>returns formatted date</td>
+      <td>Global Helper</td>
+    </tr>
+    <tr>
+      <td>classMap</td>
+      <td>returns class names if true</td>
+      <td>Global Helper</td>
     </tr>
   </tbody>
 </table>

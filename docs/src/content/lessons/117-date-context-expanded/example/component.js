@@ -16,9 +16,6 @@ const createComponent = ({ state, settings }) => ({
   initialize() {
     setInterval(() => state.time.now(), 1000);
   },
-  dateSettings: () => ({
-    timezone: settings.timezone
-  })
 });
 
 

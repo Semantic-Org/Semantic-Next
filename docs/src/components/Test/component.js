@@ -1,15 +1,16 @@
-import { defineComponent, getText } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 
-const css = await getText('./component.css');
-const template = await getText('./component.html');
+import css from './component.css?raw';
+import template from './component.html?raw';
 
 const settings = {
   value: 1,
-  now: new Date(),
+  date: new Date(),
   timezone: 'PST'
 };
 
-const createComponent = ({self, data, settings}) => ({
+const createComponent = ({ settings }) => ({
+  initialize: () => setInterval(() => settings.date = new Date(), 1000),
   addOne(value, value2 = 0) {
     return value + value2 + 1;
   },

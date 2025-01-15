@@ -10,8 +10,8 @@
       <td>{value}</td>
     </tr>
     <tr>
-      <td>now</td>
-      <td>{now}</td>
+      <td>date</td>
+      <td>{date}</td>
     </tr>
     <tr>
       <td>timezone</td>
@@ -31,24 +31,24 @@
   <tbody>
     <tr>
       <td>Calling method in data context with object using spaced arguments</td>
-      <td>{#html "formatDate now 'h:mm:ss a' { timezone: timezone }"}</td>
-      <td>{ formatDate now 'h:mm:ss a' { timezone: timezone } }</td>
+      <td>{#html "formatDate date 'h:mm:ss a' { timezone: timezone }"}</td>
+      <td>{ formatDate date 'h:mm:ss a' { timezone: timezone } }</td>
       <td>Current time PST</td>
     </tr>
     <tr>
       <td>Calling helper method in data context with js arguments</td>
-      <td>{#html "formatDate(now, 'h:mm:ss a', { timezone: timezone })"}</td>
-      <td>{ formatDate(now, 'h:mm:ss a', { timezone: timezone }) }</td>
+      <td>{#html "formatDate(date, 'h:mm:ss a', { timezone: timezone })"}</td>
+      <td>{ formatDate(date, 'h:mm:ss a', { timezone: timezone }) }</td>
       <td>Current time PST</td>
     </tr>
     <tr>
       <td>Calling helper method with inline object definition</td>
-      <td>{#html 'classMap { one: true, two: true, three: now }' }</td>
-      <td>{ classMap { one: true, two: true, three: now } }</td>
+      <td>{#html 'classMap { one: true, two: true, three: date }' }</td>
+      <td>{ classMap { one: true, two: true, three: date } }</td>
       <td>one two three</td>
     </tr>
     <tr>
-      <td>Calling method with inline array definition</td>
+      <td>Calling method with spaced arguments and inline array definition</td>
       <td>join ['1', '2', '3'] ' and '</td>
       <td>{ join ['1', '2', '3'] ' and '}</td>
       <td>1 and 2 and 3</td>

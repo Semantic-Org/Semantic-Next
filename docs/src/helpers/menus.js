@@ -11,18 +11,18 @@ const componentPages = components.map(page => ({
 export const topbarMenu =  [
   {
     _id: 'framework',
-    name: 'Docs',
+    name: 'Tech Guide',
     url: '/introduction',
-  },
-  {
-    _id: 'ui',
-    name: 'UI Primitives',
-    url: '/usage',
   },
   {
     _id: 'api',
     name: 'API Reference',
     url: '/api',
+  },
+  {
+    _id: 'ui',
+    name: 'UI Kit',
+    url: '/usage',
   },
   {
     _id: 'learn',
