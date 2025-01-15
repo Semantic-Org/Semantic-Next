@@ -525,6 +525,119 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
   });
+  describe('nested expressions', () => {
+    it('should handle single level of nesting in expressions', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{ getValue { nested: value } }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        { type: 'expression', value: 'getValue { nested: value }' },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should handle multiple levels of nesting in expressions', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{ formatData { user: { name: userName, details: { age: userAge } } } }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        { type: 'expression', value: 'formatData { user: { name: userName, details: { age: userAge } } }' },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should handle nested method calls with object parameters', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{ processUser(getData({ id: userId })) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        { type: 'expression', value: 'processUser(getData({ id: userId }))' },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should handle mixed bracket types in nested expressions', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{ formatList([{ id: 1 }, { id: 2 }]) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        { type: 'expression', value: 'formatList([{ id: 1 }, { id: 2 }])' },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should handle deeply nested conditional expressions', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{ isValid({ user: { permissions: { admin: checkAdmin({ org: orgId }) } } }) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        { type: 'expression', value: 'isValid({ user: { permissions: { admin: checkAdmin({ org: orgId }) } } })' },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should handle nested array expressions with objects', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{ processItems([ { type: 'user', data: { id: 1 } }, { type: 'admin', data: { id: 2 } } ]) }}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          ' },
+        { type: 'expression', value: 'processItems([ { type: \'user\', data: { id: 1 } }, { type: \'admin\', data: { id: 2 } } ])' },
+        { type: 'html', html: '\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should handle nested expressions in boolean attributes', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div disabled={{ isDisabled({ user: { status: getStatus({ id: userId }) } }) }}>
+          Content
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div disabled=' },
+        { type: 'expression', value: 'isDisabled({ user: { status: getStatus({ id: userId }) } })', ifDefined: true },
+        { type: 'html', html: '>\n          Content\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+  });
 
   describe('each loops', () => {
     it('should compile a template with an each loop', () => {
