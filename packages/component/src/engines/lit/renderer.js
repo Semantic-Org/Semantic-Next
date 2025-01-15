@@ -14,6 +14,7 @@ export class LitRenderer {
 
   static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
+  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
 
   static useSubtreeCache = false; // experimental
 
@@ -293,13 +294,45 @@ export class LitRenderer {
     return parse(tokens);
   }
 
+  // evaluate javascript expressions
+  evaluateJavascript(code, context = {}, { includeHelpers = true } = {}) {
+    let result;
+    if(includeHelpers) {
+      context = {
+        ...context,
+        ...this.helpers
+      };
+      delete context.debugger; // this is a reserved word
+    }
+    try {
+      const keys = Object.keys(context);
+      const values = Object.values(context);
+      result = new Function(...keys, `return ${code}`)(...values);
+    }
+    catch(e) {
+      // nothing
+    }
+    return result;
+  }
+
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
   lookupExpressionValue(expression = '', data = {}) {
+
+    // wrap {} or [] in parens
+    expression = this.addParensToExpression(expression);
+
     const expressionArray = isArray(expression)
       ? expression
       : this.getExpressionArray(expression)
     ;
+
+    // check if whole expression is JS before tokenizing
+    const jsValue = this.evaluateJavascript(expression, data);
+    if(jsValue !== undefined) {
+      const value = this.getTokenValue(jsValue);
+      return wrapFunction(value)();
+    }
 
     let funcArguments = [];
     let result;
@@ -308,7 +341,7 @@ export class LitRenderer {
     while(index--) {
       const token = expressionArray[index];
       if(isArray(token)) {
-        result = this.lookupExpressionValue(token, data);
+        result = this.lookupExpressionValue(token.join(' '), data);
         funcArguments.unshift(result);
       }
       else {
@@ -323,8 +356,8 @@ export class LitRenderer {
     return result;
   }
 
-  lookupTokenValue(token = '', data) {
 
+  lookupTokenValue(token = '', data) {
     if(isArray(token)) {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
@@ -378,14 +411,25 @@ export class LitRenderer {
       dataValue = dataValue.bind(thisContext);
     }
 
-    // retrieve reactive value
-    if(dataValue !== undefined) {
-      return (dataValue instanceof ReactiveVar)
-        ? dataValue.value
-        : dataValue;
-    }
+    return this.getTokenValue(dataValue);
+  }
 
+  // retrieve token value accessing getter for reactive vars
+  getTokenValue(tokenValue) {
+    if(tokenValue !== undefined) {
+      return (tokenValue instanceof ReactiveVar)
+        ? tokenValue.value
+        : tokenValue
+      ;
+    }
     return undefined;
+  }
+
+  addParensToExpression(expression) {
+    // Match either an object {...} or array [...] at the start or after whitespace
+    return expression.replace(LitRenderer.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
+      return `${before}(${brackets})${after}`;
+    });
   }
 
   getLiteralValue(token) {

@@ -1,30 +1,12 @@
 ---
 import Body from '../layouts/Body.astro';
+import TopBar from '@components/TopBar.astro';
 
-import NavMenu from '@components/NavMenu/NavMenu.js';
+import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
+import {TestComponent} from '@components/Test/';
 const menu = [];
 ---
 <Body padded>
-  <script>
-    import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
-    const counter = new ReactiveVar(0);
-
-    const isEven = () => Reaction.guard(() => {
-      return (counter.get() % 2 === 0);
-    });
-
-    Reaction.create((comp) => {
-      if(isEven()) {
-        console.log(`${counter.peek()} is even`);
-      }
-    });
-
-    counter.set(1); // No output guard is same
-    Reaction.flush();
-    counter.set(2); // Output
-    Reaction.flush();
-    counter.set(3); // No output guard is same
-
-
-  </script>
+  <TopbarMenu client:only></TopbarMenu>
+  <TestComponent></TestComponent>
 </Body>

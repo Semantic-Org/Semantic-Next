@@ -37,6 +37,7 @@ export const defineComponent = ({
   renderingEngine,
 } = {}) => {
 
+
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
