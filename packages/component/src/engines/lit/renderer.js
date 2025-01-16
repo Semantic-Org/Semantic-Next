@@ -1,6 +1,6 @@
 import { html, svg } from 'lit';
 
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, firstMatch, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
@@ -380,7 +380,7 @@ export class LitRenderer {
         if(acc === undefined) {
           return undefined;
         }
-        const current = (acc instanceof ReactiveVar)
+        const current = (acc instanceof Signal)
           ? acc.get()
           : wrapFunction(acc)()
         ;
@@ -417,7 +417,7 @@ export class LitRenderer {
   // retrieve token value accessing getter for reactive vars
   getTokenValue(tokenValue) {
     if(tokenValue !== undefined) {
-      return (tokenValue instanceof ReactiveVar)
+      return (tokenValue instanceof Signal)
         ? tokenValue.value
         : tokenValue
       ;

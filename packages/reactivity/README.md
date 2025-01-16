@@ -3,7 +3,7 @@
 This is a paired down signal/reactivity library loosely inspired by [Tracker](https://github.com/meteor/meteor/tree/devel/packages/tracker) from [Meteor JS](https://github.com/meteor/meteor/). It is used to control reactive updates from Semantic and is built into its templating system.
 
 
-`ReactiveVar` lets you define a variable which will trigger any `Reaction` or functions called by a reaction to retrigger when it is modified.
+`Signal` lets you define a variable which will trigger any `Reaction` or functions called by a reaction to retrigger when it is modified.
 
 `Reaction` is a reactive context, this will rerun when referenced reactive values are modified.
 
@@ -32,9 +32,9 @@ You can create a reaction by simply creating a variable then modifying its value
 
 ```javascript
 
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let reactiveValue = new ReactiveVar('first');
+let reactiveValue = new Signal('first');
 Reaction.create(computation => {
   console.log(reactiveValue.get());
 });
@@ -50,9 +50,9 @@ saying.set('second');  // option 2
 
 ```javascript
 
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let saying = new ReactiveVar('hello');
+let saying = new Signal('hello');
 Reaction.create(comp => {
   if(comp.firstRun) {
     console.log('First run!');
@@ -75,7 +75,7 @@ Objects
 
 let obj1 = { name: 'Sally', age: 22 };
 let obj2 = { name: 'Sally', age: 22 };
-let reactiveObj = new ReactiveVar(obj1);
+let reactiveObj = new Signal(obj1);
 Reaction.create(comp => {
   console.log(reactiveObj.get());
 });
@@ -89,7 +89,7 @@ reactiveObj.set(obj2);
 
 let obj1 = { name: 'Sally', age: 22 };
 let obj2 = { name: 'Sally', age: 23 };
-let reactiveObj = new ReactiveVar(obj1);
+let reactiveObj = new Signal(obj1);
 
 Reaction.create(comp => {
   console.log(reactiveObj.get());
@@ -106,7 +106,7 @@ reactiveObj.set(obj2);
 const customIsEqual = (a, b) => {
   return false;
 }
-let reactiveObj = new ReactiveVar({ name: 'Sally', age: 22 }, customIsEqual);
+let reactiveObj = new Signal({ name: 'Sally', age: 22 }, customIsEqual);
 
 Reaction.create(comp => {
   const obj = reactiveObj.get();
@@ -123,13 +123,13 @@ You can use the `set` helper to declaratively update values like arrays and obje
 Objects
 
 ```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 let person = {
   name: 'Jack',
   age: 32,
 }
-let reactivePerson = new ReactiveVar(person);
+let reactivePerson = new Signal(person);
 Reaction.create(comp => {
   console.log(reactivePerson.get().name);
 });
@@ -148,7 +148,7 @@ let rows = [
   { name: 'Sally', age: 22 },
   { name: 'Jack', age: 32 }
 ];
-let reactiveRows = new ReactiveVar(rows);
+let reactiveRows = new Signal(rows);
 
 Reaction.create(comp => {
   console.log(reactiveRows.get().length);
@@ -161,7 +161,7 @@ reactiveRows.set(rows);
 ```
 
 ```javascript
-const numbers = new ReactiveVar([10, 20, 30]);
+const numbers = new Signal([10, 20, 30]);
 
 // Add an item to the end
 numbers.push(40);
@@ -182,10 +182,10 @@ numbers.removeIndex(1);
 
 ### Booleans
 
-Boolean helpers allow you to toggle the state of a ReactiveVar that holds a boolean value.
+Boolean helpers allow you to toggle the state of a Signal that holds a boolean value.
 
 ```javascript
-const isToggled = new ReactiveVar(false);
+const isToggled = new Signal(false);
 
 // Toggle the boolean value
 isToggled.toggle();
@@ -200,9 +200,9 @@ console.log('Value is now false again');
 You can use `firstRun` to determine if this calculation is running from an initial value being set. Keep in mind though if you leave the function early on first run it will never set up a reactive reference to unreachable code.
 
 ```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let saying = new ReactiveVar('hello');
+let saying = new Signal('hello');
 Reaction.create(comp => {
   if(comp.firstRun) {
     return;
@@ -232,9 +232,9 @@ saying.set('goodbye');
 You can help fine-tune reactivity by using guard to only pay attention to certain parts of a reactive context
 
 ```javascript
-  const userAge = new ReactiveVar(30);
-  const userName = new ReactiveVar('John Doe');
-  const lastUpdated = new ReactiveVar(new Date()); // Assume this updates frequently
+  const userAge = new Signal(30);
+  const userName = new Signal('John Doe');
+  const lastUpdated = new Signal(new Date()); // Assume this updates frequently
   const getUserInfo = () => {
     return {
       name: userName,
@@ -268,10 +268,10 @@ You can help fine-tune reactivity by using guard to only pay attention to certai
 
 ### Peeking at Current Value
 
-To get the current value of a `ReactiveVar` without establishing a reactive dependency, use the `peek()` method. This is particularly useful when you need to access the value for read-only purposes outside of a reactive computation and do not want to trigger reactivity.
+To get the current value of a `Signal` without establishing a reactive dependency, use the `peek()` method. This is particularly useful when you need to access the value for read-only purposes outside of a reactive computation and do not want to trigger reactivity.
 
 ```javascript
-const counter = new ReactiveVar(10);
+const counter = new Signal(10);
 
 // Access the value without triggering reactivity
 const currentValue = counter.peek();
@@ -282,7 +282,7 @@ console.log(`Current value without establishing dependency: ${currentValue}`);
 The `Reaction.nonreactive` function allows you to perform computations or access reactive variables without establishing a reactive dependency. This is useful when you need to read from a reactive source but don't want the surrounding computation to re-run when the source changes.
 
 ```javascript
-const reactiveValue = new ReactiveVar('Initial Value');
+const reactiveValue = new Signal('Initial Value');
 
 // Perform a non-reactive read
 Reaction.nonreactive(() => {
@@ -295,21 +295,21 @@ reactiveValue.set('Updated Value'); // Does not trigger the console.log inside n
 
 ### Flushing Changes
 
-When a `ReactiveVar` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.
+When a `Signal` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.
 
 You can trigger the queue to be immediately flushed to prevent this by using the `Reaction.flush()` helper.
 
 ```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let number = new ReactiveVar(1);
+let number = new Signal(1);
 Reaction.create(comp => {
   console.log(number.get());
 });
 
 [1,2,3,4,5].forEach(value => number.set(value));
 
-let number = new ReactiveVar(1);
+let number = new Signal(1);
 Reaction.create(comp => {
   console.log(number.get());
 });
@@ -329,9 +329,9 @@ This can be helpful to inspect the listeners or to stop the computation using th
 
 
 ```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let number = new ReactiveVar(1);
+let number = new Signal(1);
 Reaction.create(comp => {
   if(number.get() > 3) {
     comp.stop();
@@ -360,31 +360,31 @@ let comp = Reaction.create(() => {
 
 ### Numbers
 
-`ReactiveVar` includes a couple helpers numbers
+`Signal` includes a couple helpers numbers
 
 ```javascript
-  let count = new ReactiveVar(0);
+  let count = new Signal(0);
   count.increment(); // set to 1
 ```
 ```javascript
-  let count = new ReactiveVar(0);
+  let count = new Signal(0);
   count.increment(2); // set to 2
 ```
 ```javascript
-  let count = new ReactiveVar(2);
+  let count = new Signal(2);
   count.decrement(); // set to 1
 ```
 ```javascript
-  let count = new ReactiveVar(0);
+  let count = new Signal(0);
   count.decrement(2); // set to 1
 ```
 
 ### Date
 
-`ReactiveVar` includes a helper to make dates asier
+`Signal` includes a helper to make dates asier
 
 ```javascript
-  let date = new ReactiveVar(new Date()); // initializes as now
+  let date = new Signal(new Date()); // initializes as now
   setTimeout(() => {
     date.now(); // now 1 second later
   }, 1000);
@@ -395,31 +395,31 @@ let comp = Reaction.create(() => {
 
 ### Array Mutation Helpers
 
-`ReactiveVar` includes a few helpers for some of the most common usecases for manipulating arrays
+`Signal` includes a few helpers for some of the most common usecases for manipulating arrays
 
 ```javascript
-  let items = new ReactiveVar([0,1,2]);
+  let items = new Signal([0,1,2]);
   items.removeIndex(1); // outputs 0, 2
 ```
 ```javascript
-  let items = new ReactiveVar([0,2,2]);
+  let items = new Signal([0,2,2]);
   items.setIndex(1); // outputs 0, 1, 2
 ```
 ```javascript
-  let items = new ReactiveVar([0,1,2]);
+  let items = new Signal([0,1,2]);
   items.unshift(); // outputs 1, 2
 ```
 ```javascript
-  let items = new ReactiveVar([0,1,2]);
+  let items = new Signal([0,1,2]);
   items.push(3); // outputs 0, 1, 2, 3
 ```
 
 ### Array of Objects
 
-`ReactiveVar` provides several helpers for manipulating arrays of objects a common data structure when handling structured data.
+`Signal` provides several helpers for manipulating arrays of objects a common data structure when handling structured data.
 
 ```javascript
-const tasks = new ReactiveVar([
+const tasks = new Signal([
   { _id: 'task1_uuid', task: 'Implement feature', completed: true }
   { _id: 'task2_uuid', task: 'Write Tests', completed: true }
   { _id: 'task3_uuid', task: 'Write documentation', completed: false },

@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import { each, isFunction, isClassInstance, kebabToCamel, camelToKebab, keys, unique, isServer, isEqual, inArray, get } from '@semantic-ui/utils';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
 
@@ -207,25 +207,25 @@ class WebComponentBase extends LitElement {
           properties
         });
         const setting = get(settings, property);
-        let reactiveVar = component.settingsVars.get(property);
-        if(reactiveVar) {
-          reactiveVar.get();
+        let signal = component.settingsVars.get(property);
+        if(signal) {
+          signal.get();
         }
         else {
-          reactiveVar = new ReactiveVar(setting);
-          component.settingsVars.set(property, reactiveVar);
+          signal = new Signal(setting);
+          component.settingsVars.set(property, signal);
         }
         return setting;
       },
       set: (target, property, value, receiver) => {
         component.setSetting(property, value);
-        let reactiveVar = component.settingsVars.get(property);
-        if(reactiveVar) {
-          reactiveVar.set(value);
+        let signal = component.settingsVars.get(property);
+        if(signal) {
+          signal.set(value);
         }
         else {
-          reactiveVar = new ReactiveVar(value);
-          component.settingsVars.set(property, reactiveVar);
+          signal = new Signal(value);
+          component.settingsVars.set(property, signal);
         }
         return true;
       }
