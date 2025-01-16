@@ -10,7 +10,7 @@ const settings = {
 };
 
 const createComponent = ({ settings }) => ({
-  initialize: () => setInterval(() => settings.date = new Date(), 1000),
+  //initialize: () => setInterval(() => settings.date = new Date(), 1000),
   addOne(value, value2 = 0) {
     return value + value2 + 1;
   },

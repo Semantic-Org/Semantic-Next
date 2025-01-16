@@ -386,9 +386,6 @@ class TemplateCompiler {
     else if (expression == 'false') {
       return false;
     }
-    else if (!Number.isNaN(parseFloat(expression))) {
-      return +expression;
-    }
     return expression;
   }
   parseTemplateString(expression = '') {
