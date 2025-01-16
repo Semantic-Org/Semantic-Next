@@ -2,7 +2,7 @@ import { clone, isObject, isEqual, wrapFunction, isClassInstance, isArray, findI
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
-export class ReactiveVar {
+export class Signal {
 
   constructor(initialValue, { equalityFunction, allowClone = true, cloneFunction } = {}) {
     this.dependency = new Dependency();
@@ -13,13 +13,13 @@ export class ReactiveVar {
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
       ? wrapFunction(equalityFunction)
-      : ReactiveVar.equalityFunction
+      : Signal.equalityFunction
     ;
 
     // allow custom clone function
     this.clone = (cloneFunction)
       ? wrapFunction(cloneFunction)
-      : ReactiveVar.cloneFunction
+      : Signal.cloneFunction
     ;
     this.currentValue = this.maybeClone(initialValue);
   }
@@ -28,7 +28,7 @@ export class ReactiveVar {
   static cloneFunction = clone;
 
   get value() {
-    // Record this ReactiveVar as a dependency if inside a Reaction computation
+    // Record this Signal as a dependency if inside a Reaction computation
     this.dependency.depend();
     const value = this.currentValue;
 

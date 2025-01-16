@@ -1,6 +1,6 @@
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 const isEven = () => Reaction.guard(() => {
   return (counter.get() % 2 === 0);

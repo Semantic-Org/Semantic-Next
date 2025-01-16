@@ -1,9 +1,9 @@
-import { ReactiveVar } from './reactive-var.js';
+import { Signal } from './signal.js';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
 
 export {
-  ReactiveVar,
+  Signal,
   Reaction,
   Dependency,
 };

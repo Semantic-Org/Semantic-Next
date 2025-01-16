@@ -3,11 +3,11 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createComponent = ({self, reactiveVar}) => ({
+const createComponent = ({self, signal}) => ({
   sections: [
-    { title: 'Section 1', content: 'Content for section 1', expanded: reactiveVar(false) },
-    { title: 'Section 2', content: 'Content for section 2', expanded: reactiveVar(false) },
-    { title: 'Section 3', content: 'Content for section 3', expanded: reactiveVar(false) }
+    { title: 'Section 1', content: 'Content for section 1', expanded: signal(false) },
+    { title: 'Section 2', content: 'Content for section 2', expanded: signal(false) },
+    { title: 'Section 3', content: 'Content for section 3', expanded: signal(false) }
   ],
 
   toggleSection(index) {

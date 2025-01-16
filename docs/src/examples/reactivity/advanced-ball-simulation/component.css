@@ -9,5 +9,9 @@
     color: var(--standard-30);
     user-select: none;
   }
+  input {
+   vertical-align: middle;
+    margin-left: var(--compact-spacing);
+  }
 }
 

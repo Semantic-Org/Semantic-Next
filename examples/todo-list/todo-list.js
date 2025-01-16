@@ -1,5 +1,4 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
 
 import { todoItem } from './item/todo-item.js';
@@ -9,9 +8,9 @@ import { todoFooter } from './footer/todo-footer.js';
 import template from './todo-list.html?raw';
 import css from './todo-list.css?raw';
 
-const createComponent = ({ self, $ }) => ({
+const createComponent = ({ self, signal, $ }) => ({
   // global state
-  todos: new ReactiveVar([
+  todos: signal([
     { _id: '1', completed: false, text: 'Take out trash' },
     { _id: '2', completed: false, text: 'Mow lawn' },
     { _id: '3', completed: false, text: 'Do dishes' },
@@ -21,7 +20,7 @@ const createComponent = ({ self, $ }) => ({
     { _id: '7', completed: false, text: 'Take children to daycare' },
     { _id: '8', completed: false, text: 'Buy easter eggs' },
   ]),
-  filter: new ReactiveVar('all'),
+  filter: signal('all'),
 
   getVisibleTodos() {
     const filter = self.filter.get();

@@ -313,7 +313,7 @@ export const sidebarMenuAPI = [
     icon: 'cpu',
     pages: [
       {
-        name: 'Reactive Var',
+        name: 'Signal',
         url: '/api/reactivity/reactive-var'
       },
       {

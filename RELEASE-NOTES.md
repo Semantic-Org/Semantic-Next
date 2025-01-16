@@ -5,6 +5,12 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 
+# Version 0.5.0
+
+### Breaking Changes
+* Renamed `ReactiveVar` to `Signal` and updated all libraries to reference new name. The change is purely cosmetic and does not adjust underlying behavior.
+* `@semantic-ui/reactivity` now exports `Signal` and no longer `ReactiveVar`.
+
 # Version 0.4.0
 
 ### Improvements

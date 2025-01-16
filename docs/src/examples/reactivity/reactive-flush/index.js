@@ -1,6 +1,6 @@
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let number = new ReactiveVar(0);
+let number = new Signal(0);
 
 Reaction.create(() => {
   console.log(`Called with ${number.get()}`);

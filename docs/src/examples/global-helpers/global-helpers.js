@@ -1,5 +1,4 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 
 const template = await getText('./component.html');
 

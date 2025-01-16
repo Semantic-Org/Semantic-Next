@@ -17,7 +17,7 @@ const state = {
   which has a reactive reference to state.time()
 */
 
-const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
+const createComponent = ({self, $, reaction, signal, state}) => ({
 
   startTime() {
     self.tick();
@@ -44,7 +44,7 @@ const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
   createBall({x, y}) {
 
     // create ball
-    const ball = reactiveVar({
+    const ball = signal({
       _id: generateID(),
       x,
       y,

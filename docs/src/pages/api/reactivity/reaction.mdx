@@ -35,9 +35,9 @@ Reaction - The created reaction instance.
 #### Basic Usage
 
 ```javascript
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 Reaction.create((reaction) => {
   console.log('Counter value:', counter.get());
@@ -55,9 +55,9 @@ counter.set(1);
 You can stop a reaction from within its callback or externally using the returned reaction instance.
 
 ```javascript
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 const reaction = Reaction.create((reaction) => {
   console.log('Counter value:', counter.get());
@@ -83,9 +83,9 @@ counter.set(3); // This won't trigger the reaction
 The `firstRun` property allows you to perform specific actions only on the initial execution of the reaction.
 
 ```javascript
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const data = new ReactiveVar({ value: 0 });
+const data = new Signal({ value: 0 });
 
 Reaction.create((reaction) => {
   const currentData = data.get();
@@ -104,7 +104,7 @@ data.set({ value: 1 });
 // Updated data: { value: 1 }
 ```
 
-> **Note**: Be cautious when using early returns with `firstRun`. If you return early on the first run, the reaction won't establish dependencies on reactive variables accessed after the return statement.
+> **Note**: Be cautious when using early returns with `firstRun`. If you return early on the first run, the reaction won't establish dependencies on signals accessed after the return statement.
 
 
 ## nonreactive
@@ -129,9 +129,9 @@ any - The return value of the provided function.
 ### Usage
 
 ```javascript
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 Reaction.nonreactive(() => {
   console.log('Counter value (non-reactive):', counter.get());
@@ -170,9 +170,9 @@ any - The return value of the guarded function.
 ### Usage
 
 ```javascript
-import { Reaction, ReactiveVar } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 Reaction.create(() => {
   const isEven = Reaction.guard(() => counter.get() % 2 === 0);

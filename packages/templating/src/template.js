@@ -1,6 +1,6 @@
 import { $ } from '@semantic-ui/query';
 import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/component';
 import { TemplateCompiler } from './compiler/template-compiler.js';
@@ -86,11 +86,11 @@ export const Template = class Template {
       const initialValue = getInitialValue(config, name);
       if(config?.options) {
         // complex config { counter: { value: 0, options: { equalityFunction }}}
-        reactiveState[name] = new ReactiveVar(initialValue, config.options);
+        reactiveState[name] = new Signal(initialValue, config.options);
       }
       else {
         // simple config i.e. { counter: 0 }
-        reactiveState[name] = new ReactiveVar(initialValue);
+        reactiveState[name] = new Signal(initialValue);
       }
     });
     return reactiveState;
@@ -600,7 +600,7 @@ export const Template = class Template {
         $$: this.$$.bind(this),
 
         reaction: this.reaction.bind(this),
-        reactiveVar: this.reactiveVar.bind(this),
+        signal: this.signal.bind(this),
         afterFlush: Reaction.afterFlush,
         flush: Reaction.flush,
 
@@ -680,8 +680,8 @@ export const Template = class Template {
     this.reactions.push(Reaction.create(reaction));
   }
 
-  reactiveVar(value, options) {
-    return new ReactiveVar(value, options);
+  signal(value, options) {
+    return new Signal(value, options);
   }
 
   clearReactions() {

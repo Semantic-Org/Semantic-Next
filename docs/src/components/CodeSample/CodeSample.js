@@ -5,7 +5,7 @@ import { defineComponent } from '@semantic-ui/component';
 import template from './CodeSample.html?raw';
 import css from './CodeSample.css?raw';
 
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 import { copyText } from '@semantic-ui/utils';
 
 
@@ -22,11 +22,11 @@ const settings = {
 const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
 
   // internal
-  code          : new ReactiveVar(false),
-  language      : new ReactiveVar(''),
-  languages     : new ReactiveVar([]),
-  slottedCode   : new ReactiveVar(false),
-  formattedCode : new ReactiveVar(''),
+  code          : new Signal(false),
+  language      : new Signal(''),
+  languages     : new Signal([]),
+  slottedCode   : new Signal(false),
+  formattedCode : new Signal(''),
 
   getCode() {
     let code;

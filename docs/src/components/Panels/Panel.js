@@ -20,9 +20,9 @@ const settings = {
   }
 };
 
-const createComponent = ({el, self, state, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
-  resizing: reactiveVar(false),
-  initialized: reactiveVar(false),
+const createComponent = ({el, self, state, isServer, signal, findParent, settings, dispatchEvent, $}) => ({
+  resizing: signal(false),
+  initialized: signal(false),
 
   getClassMap() {
     return {

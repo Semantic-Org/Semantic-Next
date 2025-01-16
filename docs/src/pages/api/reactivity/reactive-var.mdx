@@ -1,18 +1,18 @@
 ---
 layout: '@layouts/Guide.astro'
 icon: box
-title: ReactiveVar
-description: API reference for ReactiveVar in Semantic UI's reactivity system
+title: Signal
+description: API reference for Signal in Semantic UI's reactivity system
 ---
 
-`ReactiveVar` is the core class for creating reactive variables in Semantic UI's reactivity system. It allows you to create values that can be observed and will trigger reactions when changed.
+`Signal` is the core class for creating signals in Semantic UI's reactivity system. It allows you to create values that can be observed and will trigger reactions when changed.
 
 ## Constructor
 Creates a new reactive variable with the given initial value.
 
 ### Syntax
 ```javascript
-new ReactiveVar(initialValue, options);
+new Signal(initialValue, options);
 ```
 
 
@@ -36,17 +36,17 @@ new ReactiveVar(initialValue, options);
 #### Basic Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 ```
 
 #### Custom Equality Function
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const person = new ReactiveVar({ name: 'John', age: 30 }, {
+const person = new Signal({ name: 'John', age: 30 }, {
   equalityFunction: (a, b) => a.name === b.name && a.age === b.age
 });
 ```
@@ -56,7 +56,7 @@ const person = new ReactiveVar({ name: 'John', age: 30 }, {
 To avoid mutating the source object naively, by default values are cloned when set. However some objects cannot be naively cloned like custom classes.
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
 class CustomClass {
   constructor(value) {
@@ -64,7 +64,7 @@ class CustomClass {
   }
 }
 
-const customInstance = new ReactiveVar(new CustomClass(42), {
+const customInstance = new Signal(new CustomClass(42), {
   allowClone: false,
   equalityFunction: (a, b) => a.value === b.value
 });
@@ -88,9 +88,9 @@ someValue.get();
 `value` can be used as an alias for `get()` if preferred
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 console.log(counter.value); // Output: 0
 counter.value = 1;
 console.log(counter.value); // Output: 1
@@ -106,8 +106,8 @@ console.log(counter.value); // Output: 1
 #### Retrieving the Current Value
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
-const counter = new ReactiveVar(0);
+import { Signal } from '@semantic-ui/reactivity';
+const counter = new Signal(0);
 console.log(counter.get()); // Output: 0
 ```
 
@@ -131,9 +131,9 @@ someValue.set(newValue);
 #### Setting a New Value
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 counter.set(1);
 console.log(counter.get()); // Output: 1
 ```
@@ -155,9 +155,9 @@ Creates a subscription that runs the callback whenever the value changes.
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 const subscription = counter.subscribe((newValue) => {
   console.log('Counter changed:', newValue);
 });
@@ -182,9 +182,9 @@ someValue.peek();
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 console.log(counter.peek()); // Output: 0
 ```
 
@@ -200,9 +200,9 @@ someValue.clear();
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 counter.clear();
 console.log(counter.get()); // Output: undefined
 ```

@@ -144,7 +144,7 @@ You can use state inside a component by destructuring `state` from any [lifecycl
 
 const createComponent = ({self, state}) => ({
   getGreeting() {
-    // state is { name: ReactiveVar('Jack') }
+    // state is { name: Signal('Jack') }
     return `Hello ${state.name.value}`
   }
 });

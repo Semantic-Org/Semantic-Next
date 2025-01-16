@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 import { UIIcon } from '@semantic-ui/core';
 import { tokenize } from '@semantic-ui/utils';
 
@@ -18,9 +18,9 @@ const settings = {
 };
 
 const createComponent = ({ $, isServer, reaction, settings, self }) => ({
-  codeVisible : new ReactiveVar(settings.showCode),
-  slottedContent: new ReactiveVar(),
-  code: new ReactiveVar(settings.code),
+  codeVisible : new Signal(settings.showCode),
+  slottedContent: new Signal(),
+  code: new Signal(settings.code),
   removeComments(input = '') {
     return input.replace(/<!--[\s\S]*?-->/g, '');
   },

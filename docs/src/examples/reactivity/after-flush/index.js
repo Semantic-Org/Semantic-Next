@@ -1,6 +1,6 @@
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-let number = new ReactiveVar(0);
+let number = new Signal(0);
 
 // add reactive reference to trigger a flush
 Reaction.create(() => {

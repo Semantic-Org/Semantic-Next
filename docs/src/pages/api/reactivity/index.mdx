@@ -5,7 +5,7 @@ title: Reactivity with Signals
 description: Learn how Semantic UI uses signals to produce reactivity
 ---
 
-Reactivity provides primitives for a signals-based reactivity system. It is used internally to power templating and rendering components, but can also be used as reactivity primitives for any custom project.
+`@semantic-ui/reactivity` is a standalone implementation of a signals based reactivity system. It is used internally to power templating and rendering components, but can also be used as reactivity primitives for any custom project.
 
 ## Installation
 
@@ -18,9 +18,9 @@ npm install @semantic-ui/reactivity
 ## Basic Usage
 
 ```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 Reaction.create(() => {
   console.log('Counter value:', counter.get());
@@ -31,7 +31,7 @@ counter.set(1); // Console: "Counter value: 1"
 
 ## API Sections
 
-* **[ReactiveVar](/api/reactivity/reactive-var)** - Core class for creating reactive variables
+* **[Signal](/api/reactivity/reactive-var)** - Core class for creating signals
 * **[Reaction](/api/reactivity/reaction)** - Managing reactive computations
 * **[Dependency](/api/reactivity/dependency)** - Low-level dependency tracking
 * **[Flushing](/api/reactivity/flushing)** - Controlling the execution of reactions
