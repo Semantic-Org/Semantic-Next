@@ -19,7 +19,7 @@ const state = {
 */
 
 
-const createComponent = ({self, $, reaction, reactiveVar, state}) => ({
+const createComponent = ({self, $, reaction, signal, state}) => ({
 
   emitter: {
     rate: 2, // balls per second

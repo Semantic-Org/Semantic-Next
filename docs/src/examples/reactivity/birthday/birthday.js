@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 import { formatDate } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
@@ -7,9 +7,9 @@ const template = await getText('./component.html');
 
 const createComponent = ({ self, reaction, dispatchEvent }) => ({
 
-  today: new ReactiveVar(''),
+  today: new Signal(''),
 
-  birthdayNames: new ReactiveVar(),
+  birthdayNames: new Signal(),
 
   birthdayCalendar: [
     { name: 'Jack', birthday: 'August 10' },

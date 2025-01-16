@@ -4,8 +4,8 @@ import { Reaction } from '@semantic-ui/reactivity';
 const css = await getText('./todo-item.css');
 const template = await getText('./todo-item.html');
 
-const createComponent = ({ self, data, reactiveVar, findParent, $ }) => ({
-  editing: reactiveVar(false),
+const createComponent = ({ self, data, signal, findParent, $ }) => ({
+  editing: signal(false),
   getClasses() {
     return {
       completed: data.todo.completed,

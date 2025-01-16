@@ -21,7 +21,7 @@ Adds one or more elements to the end of the array and returns the new length of 
 
 ### Syntax
 ```javascript
-reactiveVar.push(...elements)
+signal.push(...elements)
 ```
 
 ### Parameters
@@ -37,9 +37,9 @@ number - The new length of the array.
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const fruits = new ReactiveVar(['apple', 'banana']);
+const fruits = new Signal(['apple', 'banana']);
 
 fruits.push('orange');
 console.log(fruits.get()); // Output: ['apple', 'banana', 'orange']
@@ -54,7 +54,7 @@ Adds one or more elements to the beginning of the array and returns the new leng
 
 ### Syntax
 ```javascript
-reactiveVar.unshift(...elements)
+signal.unshift(...elements)
 ```
 
 ### Parameters
@@ -70,9 +70,9 @@ number - The new length of the array.
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const numbers = new ReactiveVar([3, 4, 5]);
+const numbers = new Signal([3, 4, 5]);
 
 numbers.unshift(1, 2);
 console.log(numbers.get()); // Output: [1, 2, 3, 4, 5]
@@ -84,7 +84,7 @@ Changes the contents of the array by removing or replacing existing elements and
 
 ### Syntax
 ```javascript
-reactiveVar.splice(start, deleteCount, ...items)
+signal.splice(start, deleteCount, ...items)
 ```
 
 ### Parameters
@@ -102,9 +102,9 @@ Array - An array containing the deleted elements.
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const colors = new ReactiveVar(['red', 'green', 'blue']);
+const colors = new Signal(['red', 'green', 'blue']);
 
 colors.splice(1, 1, 'yellow', 'orange');
 console.log(colors.get()); // Output: ['red', 'yellow', 'orange', 'blue']
@@ -116,7 +116,7 @@ Sets the value at a specific index in the array.
 
 ### Syntax
 ```javascript
-reactiveVar.setIndex(index, value)
+signal.setIndex(index, value)
 ```
 
 ### Parameters
@@ -129,9 +129,9 @@ reactiveVar.setIndex(index, value)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const letters = new ReactiveVar(['a', 'b', 'c']);
+const letters = new Signal(['a', 'b', 'c']);
 
 letters.setIndex(1, 'x');
 console.log(letters.get()); // Output: ['a', 'x', 'c']
@@ -143,7 +143,7 @@ Removes the element at a specific index from the array.
 
 ### Syntax
 ```javascript
-reactiveVar.removeIndex(index)
+signal.removeIndex(index)
 ```
 
 ### Parameters
@@ -155,9 +155,9 @@ reactiveVar.removeIndex(index)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const pets = new ReactiveVar(['dog', 'cat', 'fish']);
+const pets = new Signal(['dog', 'cat', 'fish']);
 
 pets.removeIndex(1);
 console.log(pets.get()); // Output: ['dog', 'fish']
@@ -169,7 +169,7 @@ Sets a property on an object at a specific index in the array, or on all objects
 
 ### Syntax
 ```javascript
-reactiveVar.setArrayProperty(indexOrProperty, property, value)
+signal.setArrayProperty(indexOrProperty, property, value)
 ```
 
 ### Parameters
@@ -183,9 +183,9 @@ reactiveVar.setArrayProperty(indexOrProperty, property, value)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const users = new ReactiveVar([
+const users = new Signal([
   { name: 'Alice', age: 30 },
   { name: 'Bob', age: 25 }
 ]);

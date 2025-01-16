@@ -6,29 +6,37 @@ description: Learn how Semantic UI uses signals to produce reactivity
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-### Understanding Signals Based Reactivity
+
+> See the [Reactivity API Reference](/api/reactivity) for a full reference guide to the reactivity library.
+
+## Understanding Reactivity
 
 Reactivity put simply is **values changing causes stuff to happen**.
 
-Signals are a **mechanism for implementing reactivity** that works by tracking the dependencies of a reactive value.
+### Signals
 
-This is typically implemented using a `value` accessor or a `get()` function that tracks a reference to each time it is called, then re-runs each dependency when a value changes.
+Signals are a **mechanism for implementing reactivity** that works by tracking what functions reference a variable. These references are called [dependencies](/api/reactivity/dependency) and are used to track references to update when an underyling value is updated.
 
-The value that changes is typically called a **signal**.
+To ensure dependencies are properly tracked signals are accessed using a `value` (accessor) or a `get()` function.
 
-The function that re-runs when the value changes can be called many different things, for instance a ***watcher***  in the [signals proposal](https://github.com/tc39/proposal-signals), a **computation** like in [Preact](https://preactjs.com/guide/v10/signals/) or simply `watch` like in [Lit](https://lit.dev/docs/data/signals/).
+### Reactions
+
+The function that re-runs when a signal is changed is called a `Reaction`. When a signal is referenced inside a reaction it will cause the `reaction` to rerun when the value changes.
 
 
-> **Naming Conventions** - Semantic UI chooses to call a `Signal` a `ReactiveVar` which separates the implementation from the name. The function that changes is simply called a `Reaction`, making it easy to remember that a `ReactiveVar` causes a `Reaction`.
+> **Naming Conventions** - Signals implementations vary in their naming conventions a reactive context is called ***watcher***  in the [signals proposal](https://github.com/tc39/proposal-signals), a **computation** in [Preact](https://preactjs.com/guide/v10/signals/) and `watch` in [Lit](https://lit.dev/docs/data/signals/).
 
-### Usage
 
-Semantic UI includes a package [`@semantic-ui/reactivity`](/api/reactivity) which exports [`ReactiveVar`](/api/reactivity/reactive-var), [`Reaction`](/api/reactivity/reaction), and [`Dependency`](/api/reactivity/dependency) and can be used as a standalone package without using [Semantic UI components](/components).
+## Usage
+
+
+### Standalone
+Semantic UI includes a package [`@semantic-ui/reactivity`](/api/reactivity) which exports [`Signal`](/api/reactivity/reactive-var), [`Reaction`](/api/reactivity/reaction), and [`Dependency`](/api/reactivity/dependency) and can be used as a standalone package without using [Semantic UI components](/components).
 
 ```javascript
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(1);
+const counter = new Signal(1);
 
 Reaction.create(() => {
   console.log(counter.value);
@@ -37,36 +45,55 @@ Reaction.create(() => {
 counter.increment();
 ```
 
-### Usage in Components
+### Component
 
 If you are using `@semantic-ui/component`, reactivity is [built into templating](/api/templates) and available directly from [lifecycle callbacks](/components/lifecycle#callback-arguments).
 
+You can use `reaction` and `signal` directly from all lifecycle callbacks. Reactions created this way will automatically be tied to the component lifecycle.
+
 > Learn more about reactivity in components in the dedicated [component reactivity](/components/reactivity) section.
 
-## Birthday Example
-
-Imagine keeping a birthday calendar for your friends birthdays. Your friends birthdays on the calendar can be thought of as **dependencies**, they rely on knowing the current date to know if your friend's birthday is today. In a signal based reactivity system you can view the current day as the **signal**.
-
-When you wake up each day, you may look at the calendar and then compare the birthday to the circled birthdays on the calendar. This is like rerunning a calculation in your head.
-
-This calculations is a `reaction` which depends on a source of truth, a signal or `ReactiveVar`.
 
 ```javascript
-const today = new ReactiveVar( new Date() );
+const createComponent = ({ self, reaction, signal }) => ({
+  value: signal(0),
+  initialize() {
+    // this will log whenever the value updates
+    reaction(() => {
+      console.log(self.value);
+    });
+  }
+});
+```
+
+## Example
+
+### Birthday Calendar
+
+Imagine keeping a birthday calendar for your friends birthdays.
+
+In a signal based reactivity system the current day could be thought of as a **signal**.
+
+Each day you might wake up and notice that the `day` has updated. You can then run a `reaction` to check if any of your friends' birthdays are today.
+
+```javascript
+const today = new Signal( new Date() );
 
 // each day when you wake up
-const setToday() => {
+const newDay() => {
   today.set(new Date());
 }
 
 const checkBirthdays = Reaction(() => {
   const today = today.get();
-  if(today == friendsBirthday) {
-    // wish them happy birthday
-  }
-  else {
-    // no birthdays today
-  }
+  each(friendsBirthdays, (birthday) => {
+    if(today == birthday) {
+      // wish them happy birthday
+    }
+    else {
+      // no birthdays today
+    }
+  });
 }
 ```
 

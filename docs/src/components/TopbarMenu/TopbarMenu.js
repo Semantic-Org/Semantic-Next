@@ -1,7 +1,7 @@
 import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
 import { any, isFunction, first, isArray } from '@semantic-ui/utils';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 import template from './TopbarMenu.html?raw';
 import css from './TopbarMenu.css?raw';
 
@@ -12,7 +12,7 @@ const settings = {
 
 const createComponent = function ({ self, settings }) {
   return {
-    url: new ReactiveVar(settings.activeURL),
+    url: new Signal(settings.activeURL),
     getMenu() {
       return settings.menu;
     },

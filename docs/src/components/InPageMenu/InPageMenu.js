@@ -32,7 +32,7 @@ const state = {
   visibleItems: [],
 };
 
-const createComponent = ({self, state, isServer, reactiveVar, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
+const createComponent = ({self, state, isServer, signal, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
 
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction

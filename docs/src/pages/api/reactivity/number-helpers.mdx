@@ -5,15 +5,15 @@ title: Number Helpers
 description: API reference for Number Helpers in Semantic UI's reactivity system
 ---
 
-Number Helpers are methods available on ReactiveVar instances that contain numeric values. These helpers provide convenient ways to manipulate and update numeric reactive variables.
+Number Helpers are methods available on Signal instances that contain numeric values. These helpers provide convenient ways to manipulate and update numeric signals.
 
 ## increment
 
-Increases the value of the ReactiveVar by a specified amount or by 1 if no amount is provided.
+Increases the value of the Signal by a specified amount or by 1 if no amount is provided.
 
 ### Syntax
 ```javascript
-reactiveVar.increment(amount)
+signal.increment(amount)
 ```
 
 ### Parameters
@@ -25,9 +25,9 @@ reactiveVar.increment(amount)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(0);
+const counter = new Signal(0);
 
 counter.increment();
 console.log(counter.get()); // Output: 1
@@ -38,11 +38,11 @@ console.log(counter.get()); // Output: 6
 
 ## decrement
 
-Decreases the value of the ReactiveVar by a specified amount or by 1 if no amount is provided.
+Decreases the value of the Signal by a specified amount or by 1 if no amount is provided.
 
 ### Syntax
 ```javascript
-reactiveVar.decrement(amount)
+signal.decrement(amount)
 ```
 
 ### Parameters
@@ -54,9 +54,9 @@ reactiveVar.decrement(amount)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const counter = new ReactiveVar(10);
+const counter = new Signal(10);
 
 counter.decrement();
 console.log(counter.get()); // Output: 9

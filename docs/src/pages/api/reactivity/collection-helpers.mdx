@@ -5,7 +5,7 @@ title: Collection Helpers
 description: API reference for Collection Helpers in Semantic UI's reactivity system
 ---
 
-Collection Helpers are methods available on ReactiveVar instances that contain arrays of objects. These helpers provide convenient ways to manipulate and update specific objects within the collection based on their unique id.
+Collection Helpers are methods available on Signal instances that contain arrays of objects. These helpers provide convenient ways to manipulate and update specific objects within the collection based on their unique id.
 
 ### Element IDs
 
@@ -23,7 +23,7 @@ Sets a property on an object in the collection that matches the given id.
 
 ### Syntax
 ```javascript
-reactiveVar.setProperty(id, property, value)
+signal.setProperty(id, property, value)
 ```
 
 ### Parameters
@@ -37,9 +37,9 @@ reactiveVar.setProperty(id, property, value)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const users = new ReactiveVar([
+const users = new Signal([
   { id: 1, name: 'Alice', age: 30 },
   { id: 2, name: 'Bob', age: 25 }
 ]);
@@ -55,7 +55,7 @@ Replaces an entire object in the collection that matches the given id.
 
 ### Syntax
 ```javascript
-reactiveVar.replaceItem(id, newItem)
+signal.replaceItem(id, newItem)
 ```
 
 ### Parameters
@@ -68,9 +68,9 @@ reactiveVar.replaceItem(id, newItem)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const tasks = new ReactiveVar([
+const tasks = new Signal([
   { id: 1, task: 'Buy groceries', completed: false },
   { id: 2, task: 'Walk the dog', completed: true }
 ]);
@@ -86,7 +86,7 @@ Removes an object from the collection that matches the given id.
 
 ### Syntax
 ```javascript
-reactiveVar.removeItem(id)
+signal.removeItem(id)
 ```
 
 ### Parameters
@@ -98,9 +98,9 @@ reactiveVar.removeItem(id)
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const books = new ReactiveVar([
+const books = new Signal([
   { id: 1, title: 'The Great Gatsby' },
   { id: 2, title: 'To Kill a Mockingbird' }
 ]);
@@ -116,7 +116,7 @@ Returns the index of an object in the collection that matches the given id.
 
 ### Syntax
 ```javascript
-reactiveVar.getIndex(id)
+signal.getIndex(id)
 ```
 
 ### Parameters
@@ -132,9 +132,9 @@ number - The index of the object, or -1 if not found.
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const fruits = new ReactiveVar([
+const fruits = new Signal([
   { id: 'a', name: 'apple' },
   { id: 'b', name: 'banana' },
   { id: 'c', name: 'cherry' }
@@ -150,7 +150,7 @@ Returns the id of an object at a specific index in the collection.
 
 ### Syntax
 ```javascript
-reactiveVar.getID(index)
+signal.getID(index)
 ```
 
 ### Parameters
@@ -166,9 +166,9 @@ any - The id of the object at the specified index, or undefined if the index is 
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const animals = new ReactiveVar([
+const animals = new Signal([
   { id: 'dog1', species: 'dog' },
   { id: 'cat1', species: 'cat' },
   { id: 'fish1', species: 'fish' }
@@ -184,7 +184,7 @@ Checks if an object at a specific index in the collection has an id.
 
 ### Syntax
 ```javascript
-reactiveVar.hasID(index)
+signal.hasID(index)
 ```
 
 ### Parameters
@@ -200,9 +200,9 @@ boolean - True if the object at the specified index has an id, false otherwise.
 ### Usage
 
 ```javascript
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 
-const mixed = new ReactiveVar([
+const mixed = new Signal([
   { id: 1, value: 'has id' },
   { value: 'no id' },
   { id: 2, value: 'has id too' }

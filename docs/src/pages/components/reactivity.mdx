@@ -8,7 +8,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 This guide focuses primarily on reactivity in the context of components.
 
-> **Signals** - Semantic UI uses a signals based approach for reactivity. This works by tracking references to reactive variables and then running a flush which triggers those reactions after their values change. For more information see our dedicated section on [reactivity](/reactivity).
+> **Signals** - Semantic UI uses a signals based approach for reactivity. This works by tracking references to signals and then running a flush which triggers those reactions after their values change. For more information see our dedicated section on [reactivity](/reactivity).
 
 ## Sources of Reactivity
 
@@ -21,7 +21,7 @@ Reactivity occurs when a reactive value is modified inside of a reactive context
 #### Reactive Data Sources
 * State
 * Settings
-* ReactiveVar
+* Signal
 
 #### Reactive Data Contexts
 * Template Conditionals
@@ -50,7 +50,7 @@ If you want to use or set a variable without triggering reactivity **either a va
 
 ### State Reactivity
 
-Your component's `state` is the internal store of reactivity for your component. When your component is initialized each `state` property will become a [`reactiveVar`](/reactivity/variables) and will trigger reactivity inside a `Reaction`.
+Your component's `state` is the internal store of reactivity for your component. When your component is initialized each `state` property will become a [`signal`](/reactivity/variables) and will trigger reactivity inside a `Reaction`.
 
 ```javascript
 const state = {
@@ -75,7 +75,7 @@ Counter is: {counter}
 
 ### Settings Reactivity
 
-Settings are **not reactive inside a `reaction`** because they are not instances of `reactiveVar`.
+Settings are **not reactive inside a `reaction`** because they are not instances of `signal`.
 
 ```javascript
 const settings = {
@@ -125,21 +125,21 @@ Expressions, loops, and conditionals are reactive contexts by default. If `items
 ## Advanced Use
 
 
-All [lifecycle events and callbacks](/components/lifecycle) will return `reactiveVar` and
+All [lifecycle events and callbacks](/components/lifecycle) will return `signal` and
 `reaction`. These can be used to create scoped reactions that will be tied to the component's lifecycle, and automatically torn down when the component is destroyed.
 
 
 ### Exposing Reactivity
 
-You can expose a `reactiveVar` on your component instance to allow other components to rely on it as a source of reactivity. This can be a useful way to share reactivity across related parts of your app.
+You can expose a `signal` on your component instance to allow other components to rely on it as a source of reactivity. This can be a useful way to share reactivity across related parts of your app.
 
 > Component `state` and `settings` are not accessible outside your component unless they are exposed on your component instance.
 
 
 ```javascript title="todo.js"
-const createComponent = ({ self, reactiveVar, reaction }) => {
+const createComponent = ({ self, signal, reaction }) => {
   return {
-    todos: reactiveVar([]),
+    todos: signal([]),
   };
 };
 ```

@@ -12,8 +12,8 @@ const state = {
   counter2: 0
 };
 
-const createComponent = ({ reactiveVar, self }) => ({
-  counter3: reactiveVar(0),
+const createComponent = ({ signal, self }) => ({
+  counter3: signal(0),
   counter4: 0,
   counter5: () => self.counter4,
 });
