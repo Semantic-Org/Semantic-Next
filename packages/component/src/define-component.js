@@ -19,7 +19,9 @@ export const defineComponent = ({
   plural = false,
   singularTag,
 
-  state = {},
+  defaultState = {},
+  defaultSettings, // settings for js functionality like callbacks etc
+
   events = {},
   keys = {},
 
@@ -31,7 +33,6 @@ export const defineComponent = ({
   onAttributeChanged = noop,
 
   properties, // allow overriding properties
-  settings, // settings for js functionality like callbacks etc
 
   subTemplates = {},
   renderingEngine,
@@ -64,7 +65,7 @@ export const defineComponent = ({
 
   let litTemplate = new Template({
     templateName: templateName,
-    stateConfig: state,
+    stateConfig: defaultState,
     isPrototype: true,
     renderingEngine,
     ast,
@@ -94,9 +95,9 @@ export const defineComponent = ({
       static template = litTemplate;
 
       static properties = WebComponentBase.getProperties({
+        defaultSettings,
         properties,
         componentSpec,
-        settings,
       });
 
       defaultSettings = {};
@@ -106,7 +107,7 @@ export const defineComponent = ({
         this.css = css;
         this.componentSpec = componentSpec;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
-        this.setDefaultSettings({settings, componentSpec});
+        this.setDefaultSettings({defaultSettings, componentSpec});
       }
 
       // callback when added to dom

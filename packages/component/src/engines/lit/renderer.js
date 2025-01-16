@@ -318,10 +318,9 @@ export class LitRenderer {
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
   lookupExpressionValue(expression = '', data = {}) {
-
     // wrap {} or [] in parens
     expression = this.addParensToExpression(expression);
-
+    console.log(expression);
     const expressionArray = isArray(expression)
       ? expression
       : this.getExpressionArray(expression)

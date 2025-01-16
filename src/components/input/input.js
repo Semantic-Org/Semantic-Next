@@ -4,7 +4,7 @@ import { InputComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/input-shadow.css?raw';
 import Template from './input.html?raw';
 
-const state = {
+const defaultState = {
   focused: false,
 };
 
@@ -47,7 +47,7 @@ const UIInput = defineComponent({
   events,
   onCreated,
   onRendered,
-  state,
+  defaultState,
 });
 
 export { UIInput };
