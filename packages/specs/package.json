@@ -6,7 +6,7 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.4.0"
+    "@semantic-ui/utils": "^0.5.0"
   },
-  "version": "0.4.0"
+  "version": "0.5.0"
 }
