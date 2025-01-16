@@ -196,8 +196,8 @@ class WebComponentBase extends LitElement {
   createSettingsProxy({componentSpec, properties}) {
     let component = this;
     /*
-      To make settings reactive references we need to create
-      reactive references for any setting
+      To make settings reactive in Reactions
+      we need to map them to signals
     */
     component.settingsVars = new Map();
     return new Proxy({}, {
