@@ -1,12 +1,11 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
 import { range } from '@semantic-ui/utils';
 
 import template from './events.html?raw';
 
-const createComponent = ({ self, $ }) => {
+const createComponent = ({ self, signal, $ }) => {
   return {
-    number: new ReactiveVar(6),
+    number: signal(6),
     getRange() {
       if (!Number.isFinite(+self.number.value)) {
         return [];
@@ -14,7 +13,7 @@ const createComponent = ({ self, $ }) => {
       return range(self.number.value);
     },
 
-    persons: new ReactiveVar([
+    persons: signal([
       { _id: 'a', name: 'Firstman', age: 23 },
       { _id: 'b', name: 'Seconder', age: 36 },
       { _id: 'c', name: 'Thirdman', age: 36 },

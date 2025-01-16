@@ -1,12 +1,10 @@
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import { defineComponent } from '@semantic-ui/component';
-
 
 import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
 
-const createComponent = ({ self, $, reaction, findParent }) => ({
-  allCompleted: new ReactiveVar(false),
+const createComponent = ({ self, $, reaction, signal, findParent }) => ({
+  allCompleted: signal(false),
 
   getTodoList() {
     return findParent('todoList');
