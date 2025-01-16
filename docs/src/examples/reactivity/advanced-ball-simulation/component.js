@@ -19,19 +19,20 @@ const state = {
 };
 
 const settings = {
-  ballCount: 50, // initial ball count
-  ballRadiusAverage: 3, // average ball radius
-  ballRadiusVariance: 1, // variance in ball radius
-  ballVelocityAverage: 100, // average ball velocity
-  ballVelocityVariance: 100, // variance in ball velocity
-  saturationDecayRate: 200, // how quickly ball saturation decays after collision
-  lightnessDecayRate: 20, // how quickly ball lightness decays after collission
+  count: 0, // initial ball count
+  radius: 3, // average ball radius
+  velocity: 100, // average ball velocity
+  emitRate: 2, // rate which balls are emitted from pointer
+  saturationDecay: 500, // how quickly ball saturation decays after collision
+  lightnessDecay: 20, // how quickly ball lightness decays after collission
   minSaturation: 1, // min saturation of ball
   minLightness: 10, // min lightness of ball
-  emitterRate: 2, // rate which balls are emitted from pointer
+  radiusVariance: 1, // variance in ball radius
+  velocityVariance: 100, // variance in ball velocity
+  speed: 1, // relative speed of entire animation
 };
 
-const createComponent = ({self, $, reaction, state}) => ({
+const createComponent = ({self, $, reaction, settings, state}) => ({
 
   emitter: { active: false, x: 0, y: 0 },
   render: { lastTime: 0, fps: 0 },
@@ -72,7 +73,7 @@ const createComponent = ({self, $, reaction, state}) => ({
 
   emitBalls() {
     const newBalls = [];
-    for (let i = 0; i < settings.emitterRate; i++) {
+    for (let i = 0; i < settings.emitRate; i++) {
       newBalls.push(self.createBall({
         x: self.emitter.x,
         y: self.emitter.y
@@ -83,19 +84,17 @@ const createComponent = ({self, $, reaction, state}) => ({
   },
 
   createBall({x, y}) {
-    const { ball } = self;
     const randomInRange = (average, variance) => {
       const value = average + (Math.random() - 0.5) * 2 * variance;
       return (value < 1) ? 1 : value;
     };
     const angle = Math.random() * 2 * Math.PI;
-    const speed = randomInRange(settings.ballVelocityAverage, settings.ballVelocityVariance);
-
+    const speed = randomInRange(settings.velocity, settings.velocityVariance);
     return {
       _id: generateID(),
       x,
       y,
-      radius: randomInRange(settings.ballRadiusAverage, settings.ballRadiusVariance),
+      radius: randomInRange(settings.radius, settings.radiusVariance),
       color: self.getRandomColor(),
       saturation: 100, // Start at full saturation
       vx: Math.cos(angle) * speed,
@@ -110,6 +109,8 @@ const createComponent = ({self, $, reaction, state}) => ({
   },
 
   updateBalls(deltaTime) {
+    deltaTime = deltaTime * settings.speed;
+
     const canvas = self.getCanvas();
     const currentBalls = state.balls.peek();
     const updatedBalls = currentBalls.map(ball =>
@@ -133,13 +134,13 @@ const createComponent = ({self, $, reaction, state}) => ({
       ...ball,
       saturation: Math.max(
         settings.minSaturation,
-        ball.saturation - settings.saturationDecayRate * deltaTime
+        ball.saturation - settings.saturationDecay * deltaTime
       ),
       color: {
         ...ball.color,
         l: Math.max(
           settings.minLightness,
-          ball.color.l - settings.lightnessDecayRate * deltaTime
+          ball.color.l - settings.lightnessDecay * deltaTime
         )
       }
     };
@@ -156,10 +157,12 @@ const createComponent = ({self, $, reaction, state}) => ({
   checkWalls(ball, canvas) {
     let { x, y, vx, vy, radius } = ball;
 
+    // left/right
     if (x + radius > canvas.width || x - radius < 0) {
       vx = -vx;
       x = Math.max(radius, Math.min(canvas.width - radius, x));
     }
+    // top/bottom wall
     if (y + radius > canvas.height || y - radius < 0) {
       vy = -vy;
       y = Math.max(radius, Math.min(canvas.height - radius, y));
@@ -174,7 +177,6 @@ const createComponent = ({self, $, reaction, state}) => ({
         const dx = ball2.x - ball1.x;
         const dy = ball2.y - ball1.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-
         if (distance < ball1.radius + ball2.radius) {
           self.handleCollision(ball1, ball2, dx, dy, distance);
         }
@@ -250,10 +252,10 @@ const createComponent = ({self, $, reaction, state}) => ({
 
 });
 
-const onRendered = ({state, self}) => {
+const onRendered = ({state, data, settings, self}) => {
   const canvas = self.getCanvas();
   const initialBalls = [];
-  for (let i = 0; i < settings.ballCount; i++) {
+  for (let i = 0; i < settings.count; i++) {
     initialBalls.push(self.createBall({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height
@@ -286,6 +288,10 @@ const events = {
   'pointerup, pointerleave canvas'({self}) {
     self.emitter.active = false;
   },
+
+  'change input.speed'({value, settings}) {
+    settings.speed = value / 100;
+  }
 };
 
 export const BallSimulation = defineComponent({
