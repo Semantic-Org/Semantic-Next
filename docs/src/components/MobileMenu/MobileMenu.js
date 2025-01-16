@@ -7,14 +7,14 @@ import css from './MobileMenu.css?raw';
 
 import { NavMenu } from '../NavMenu/NavMenu.js';
 
-const settings = {
+const defaultSettings = {
   menu: [],
   activeURL: '',
   stickyHeaders: true,
   navIcon: 'right-chevron'
 };
 
-const state = {
+const defaultState =  {
   depth: 0,
   activeMenu: {},
   previousMenu: {},
@@ -239,9 +239,9 @@ const MobileMenu = defineComponent({
   template,
   css,
   createComponent,
-  settings,
+  defaultSettings,
   events,
-  state
+  defaultState
 });
 
 export default MobileMenu;

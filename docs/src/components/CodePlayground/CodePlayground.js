@@ -19,7 +19,7 @@ import 'playground-elements/playground-project.js';
 import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
 
-const settings = {
+const defaultSettings = {
 
   // an object containing the files for the project
   files: {},
@@ -119,7 +119,7 @@ const settings = {
   panelGroupWidth: [50, 50]
 };
 
-const state = {
+const defaultState =  {
   // which file is currently visible in tab view
   activeFile: undefined,
 
@@ -456,11 +456,11 @@ const CodePlayground = defineComponent({
   template,
   css,
   createComponent,
-  settings,
+  defaultSettings,
   onCreated,
   onRendered,
   events,
-  state,
+  defaultState,
   keys,
   onThemeChanged,
   subTemplates: {

@@ -4,7 +4,7 @@ import { sum } from '@semantic-ui/utils';
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
 
-const settings = {
+const defaultSettings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
@@ -197,7 +197,7 @@ const UIPanel = defineComponent({
   template,
   css,
   createComponent,
-  settings,
+  defaultSettings,
   events,
 });
 

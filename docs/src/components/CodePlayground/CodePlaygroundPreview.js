@@ -4,7 +4,7 @@ import template from './CodePlaygroundPreview.html?raw';
 import css from './CodePlaygroundPreview.css?raw';
 import './PrettyJSON.js';
 
-const state = {
+const defaultState =  {
   tab: 'preview',
   useTabs: true,
   template: '',
@@ -56,7 +56,7 @@ const CodePlaygroundPreview = defineComponent({
   css,
   createComponent,
   events,
-  state,
+  defaultState,
   onRendered,
 });
 

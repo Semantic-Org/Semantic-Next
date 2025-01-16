@@ -9,7 +9,7 @@ import { Signal, Reaction } from '@semantic-ui/reactivity';
 import { copyText } from '@semantic-ui/utils';
 
 
-const settings = {
+const defaultSettings = {
   language: 'html',
   languageMenu: 'auto',
   code: '',
@@ -152,7 +152,7 @@ const CodeSample = defineComponent({
   onCreated,
   onThemeChanged,
   createComponent,
-  settings,
+  defaultSettings,
 });
 
 export default CodeSample;

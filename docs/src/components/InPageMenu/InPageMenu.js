@@ -6,7 +6,7 @@ import template from './InPageMenu.html?raw';
 import css from './InPageMenu.css?raw';
 import { Reaction } from '@semantic-ui/reactivity';
 
-const settings = {
+const defaultSettings = {
   showHeader: false,
   header: 'On This Page',
   menu: [],
@@ -26,7 +26,7 @@ const settings = {
   getActiveElementID: (element) => element?.id
 };
 
-const state = {
+const defaultState =  {
   openIndex: 0,
   currentItem: null,
   visibleItems: [],
@@ -327,8 +327,8 @@ const InPageMenu = defineComponent({
   template,
   css,
   createComponent,
-  settings,
-  state,
+  defaultSettings,
+  defaultState,
   onRendered,
   onDestroyed,
   events,

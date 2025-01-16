@@ -5,11 +5,11 @@ import { get } from '@semantic-ui/utils';
 import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
 
-const settings = {
+const defaultSettings = {
   defaultTheme: 'light'
 };
 
-const state = {
+const defaultState =  {
   theme: undefined
 };
 
@@ -87,8 +87,8 @@ const ThemeSwitcher = defineComponent({
   template,
   events,
   css,
-  state,
-  settings,
+  defaultState,
+  defaultSettings,
   onCreated,
   createComponent,
 });

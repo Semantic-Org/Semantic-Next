@@ -4,7 +4,7 @@ import { any, isFunction, isArray } from '@semantic-ui/utils';
 import template from './NavMenu.html?raw';
 import css from './NavMenu.css?raw';
 
-const settings = {
+const defaultSettings = {
   menu: [],
   linkCurrentPage: false,
   expandAll: false,
@@ -13,7 +13,7 @@ const settings = {
   activeURL: '',
 };
 
-const state = {
+const defaultState =  {
   url: ''
 };
 
@@ -159,12 +159,12 @@ const NavMenu = defineComponent({
   template,
   css,
   createComponent,
-  settings,
+  defaultSettings,
   onCreated,
   onDestroyed,
   onRendered,
   events,
-  state
+  defaultState
 });
 
 export default NavMenu;

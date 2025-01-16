@@ -6,7 +6,7 @@ import css from './GlobalSearch.css?raw';
 
 import { UIModal } from '@semantic-ui/core';
 
-const settings = {
+const defaultSettings = {
   baseURL: '/',
   bundlePath: '/pagefind/',
   importPath: 'pagefind.js',
@@ -15,7 +15,7 @@ const settings = {
   debounceTime: 200
 };
 
-const state = {
+const defaultState =  {
   rawResults: [],
   results: [],
   displayResults: [],
@@ -223,9 +223,9 @@ const GlobalSearch = defineComponent({
   css,
   createComponent,
   events,
-  state,
+  defaultState,
   keys,
-  settings,
+  defaultSettings,
 });
 
 export default GlobalSearch;

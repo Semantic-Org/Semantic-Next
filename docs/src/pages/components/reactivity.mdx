@@ -73,30 +73,6 @@ Counter is: {counter}
 ```
 
 
-### Settings Reactivity
-
-Settings are **not reactive inside a `reaction`** because they are not instances of `signal`.
-
-```javascript
-const settings = {
-  counter: 0;
-}
-
-const onCreated = ({settings, reaction}) {
-  reaction(() => {
-    // counter will not update when the value changes below
-    console.log(`Count: ${settings.counter}`);
-  });
-  // update value
-  settings.counter++;
-}
-```
-
-However  **settings are reactive inside templates**, and will trigger updates when their underlying value changes.
-```html
-Counter is: {counter}
-```
-
 
 ### Template Reactivity
 

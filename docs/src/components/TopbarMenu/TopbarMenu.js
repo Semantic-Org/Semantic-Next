@@ -5,7 +5,7 @@ import { Signal } from '@semantic-ui/reactivity';
 import template from './TopbarMenu.html?raw';
 import css from './TopbarMenu.css?raw';
 
-const settings = {
+const defaultSettings = {
   menu: [],
   activeURL: '',
 };
@@ -84,7 +84,7 @@ const TopbarMenu = defineComponent({
   template,
   css,
   createComponent,
-  settings,
+  defaultSettings,
   onRendered,
   events,
 });
