@@ -4,14 +4,14 @@
       <div class="header" data-index="{@index}">
         <span class="title">{title}</span>
         <span class="icon">
-          {#if expanded}
+          {#if isExpanded @index}
             <ui-icon icon="up-chevron"></ui-icon>
           {else}
             <ui-icon icon="down-chevron"></ui-icon>
           {/if}
         </span>
       </div>
-      {#if expanded}
+      {#if isExpanded @index}
         <div class="content">
           {content}
         </div>
