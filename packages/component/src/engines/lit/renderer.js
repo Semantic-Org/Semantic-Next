@@ -330,7 +330,7 @@ export class LitRenderer {
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
     if(jsValue !== undefined) {
-      const value = this.getTokenValue(jsValue);
+      const value = this.accessTokenValue(jsValue, expression, data);
       return wrapFunction(value)();
     }
 
@@ -375,47 +375,46 @@ export class LitRenderer {
       return helper;
     }
 
-    const getDeepValue = (obj, path) => {
-      return path.split('.').reduce((acc, part) => {
-        if(acc === undefined) {
-          return undefined;
-        }
-        const current = (acc instanceof Signal)
-          ? acc.get()
-          : wrapFunction(acc)()
-        ;
-        if(current == undefined) {
-          return undefined;
-          /* erroring on intermediate undefined
-             feels better not as an error state
-            but this may change
-          */
-          //fatal(`Error evaluating expression "${path}"`);
-        }
-        return current[part];
-      }, obj);
-    };
-
-
-    const getThisContext = (token, data) => {
-      const path = token.split('.').slice(0, -1).join('.');
-      return getDeepValue(data, path);
-    };
-
     // otherwise retrieve this value from the data context
-    let dataValue = getDeepValue(data, token);
+    let dataValue = this.getDeepDataValue(data, token);
 
-    // bind context for functions with '.'
-    if(isFunction(dataValue) && token.search('.') !== -1) {
-      const thisContext = getThisContext(token, data);
-      dataValue = dataValue.bind(thisContext);
-    }
+    return this.accessTokenValue(dataValue, token, data);
+  }
 
-    return this.getTokenValue(dataValue);
+  getDeepDataValue(obj, path) {
+    return path.split('.').reduce((acc, part) => {
+      if(acc === undefined) {
+        return undefined;
+      }
+      const current = (acc instanceof Signal)
+        ? acc.get()
+        : wrapFunction(acc)()
+      ;
+      if(current == undefined) {
+        return undefined;
+        /* erroring on intermediate undefined
+           feels better not as an error state
+          but this may change
+        */
+        //fatal(`Error evaluating expression "${path}"`);
+      }
+      return current[part];
+    }, obj);
   }
 
   // retrieve token value accessing getter for reactive vars
-  getTokenValue(tokenValue) {
+  accessTokenValue(tokenValue, token, data) {
+
+    const getThisContext = (token, data) => {
+      const path = token.split('.').slice(0, -1).join('.');
+      return this.getDeepDataValue(data, path);
+    };
+
+    // bind context for functions with '.'
+    if(isFunction(tokenValue) && token.search('.') !== -1) {
+      const thisContext = getThisContext(token, data);
+      tokenValue = tokenValue.bind(thisContext);
+    }
     if(tokenValue !== undefined) {
       return (tokenValue instanceof Signal)
         ? tokenValue.value
