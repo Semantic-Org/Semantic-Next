@@ -138,7 +138,7 @@ export const getExampleFiles = async({
 
     exampleFiles['index.html'] = {
       contentType: 'text/html',
-      generated: true,
+      generated: false,
       content: (tagName)
         ? `<${tagName}></${tagName}>`
         : ``

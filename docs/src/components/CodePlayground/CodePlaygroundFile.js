@@ -7,6 +7,10 @@ import css from './CodePlaygroundFile.css?raw';
 
 const createComponent = ({self, settings, data, $, $$}) => ({
 
+  initialize() {
+    console.log(data);
+  },
+
   configureCodeEditors() {
     const el = $$('playground-code-editor').get(0);
     if(el) {

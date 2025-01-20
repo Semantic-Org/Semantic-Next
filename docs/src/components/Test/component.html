@@ -20,6 +20,12 @@
   </tbody>
 </table>
 
+
+
+{#snippet test}
+  {obj.a}
+{/snippet}
+
 <h4>Expressions</h4>
 <table class="group">
   <thead>
@@ -57,7 +63,7 @@
       <td>Outputting value from data context</td>
       <td>value</td>
       <td>{value}</td>
-      <td>0</td>
+      <td>1</td>
     </tr>
     <tr>
       <td>Inline addition</td>
@@ -100,6 +106,12 @@
       <td>2 + 3</td>
       <td>{2 + 3}</td>
       <td>5</td>
+    </tr>
+    <tr>
+      <td>Passed through to snippet</td>
+      <td>{#html "{>test obj={a: 1} }"}</td>
+      <td>{>test obj={a: 1}}</td>
+      <td>a</td>
     </tr>
   </tbody>
 </table>

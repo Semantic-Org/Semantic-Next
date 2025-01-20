@@ -41,78 +41,9 @@
     </playground-project>
   {/if}
   {#if is layout 'tabs'}
-    <ui-panels
-      class={classMap getTabPanelsClass}
-      direction="{getTabDirection}"
-      style={getStyle}
-      saveState={saveState}
-      saveStateID="{getSaveID}"
-      exportparts="panels"
-    >
-      <ui-panel
-        direction="{getTabDirection}"
-        size="60"
-        class="files"
-        exportparts="panel, handle"
-      >
-        <div class="menu">
-          <ui-menu
-            dark
-            selection
-            items={getFileMenuItems}
-            value={activeFile}
-            class="files"
-            part="menu"
-          ></ui-menu>
-        </div>
-        {>template
-          name='CodePlaygroundFile'
-          data={inline: true}
-          reactiveData={filename: activeFile}
-        }
-      </ui-panel>
-      <ui-panel
-        direction="{getTabDirection}"
-        size=40
-        class="preview"
-        exportparts="panel, handle"
-      >
-        {>CodePlaygroundPreview exampleURL=exampleURL}
-      </ui-panel>
-    </ui-panels>
+    {>tabLayout}
   {else}
-    <ui-panels
-      class="fullscreen"
-      direction="horizontal"
-      saveState={saveState}
-      saveStateID="{getSaveID 'row'}"
-      exportparts="panels"
-      part="full-panels"
-    >
-      {#each panelGroup in getPanels}
-        <ui-panel
-          direction="horizontal"
-          size={getPanelGroupWidth @index}
-          class="code-group"
-          exportparts="panel, handle"
-
-        >
-          <ui-panels
-            class="files"
-            saveState=true
-            saveStateID="{getSaveID 'column' @index}"
-            exportparts="panels"
-          >
-            {#each panel in panelGroup}
-              {>CodePlaygroundPanel
-                panel=panel
-                size=(getPanelSize panel)
-              }
-            {/each}
-          </ui-panels>
-        </ui-panel>
-      {/each}
-    </ui-panels>
+    {>panelLayout}
   {/if}
   <ui-menu
     dark
@@ -125,3 +56,103 @@
     part="mobile-menu"
   ></ui-menu>
 </div>
+
+{#snippet tabLayout}
+  <ui-panels
+    class={classMap getTabPanelsClass}
+    direction="{getTabDirection}"
+    style={getStyle}
+    saveState={saveState}
+    saveStateID="{getSaveID}"
+    exportparts="panels"
+  >
+    <ui-panel
+      direction="{getTabDirection}"
+      size="60"
+      class="files"
+      exportparts="panel, handle"
+    >
+      <div class="menu">
+        <ui-menu
+          dark
+          selection
+          items="{getFileMenuItems { filter: 'main' } }"
+          value={activeFile}
+          class="component files"
+          part="menu"
+        ></ui-menu>
+      </div>
+      {>CodePlaygroundFile
+        inline=true
+        filename=activeFile
+      }
+    </ui-panel>
+    <ui-panel
+      direction="{getTabDirection}"
+      size=40
+      class="preview"
+      exportparts="panel, handle"
+    >
+      <div class="menu">
+        <ui-menu
+          dark
+          selection
+          items="{getFileMenuItems { filter: 'page' } }"
+          value={activePageFile}
+          class="page files"
+          part="menu"
+        ></ui-menu>
+      </div>
+      <ui-panels
+        class="files"
+        saveState=true
+        saveStateID="{getSaveID 'tab-column' @index}"
+        exportparts="panels"
+      >
+        {>CodePlaygroundPanel
+          panel={type: 'file', filename: activePageFile }
+          size='natural'
+        }
+        {>CodePlaygroundPanel
+          panel={type: 'preview'}
+          size='grow'
+        }
+      </ui-panels>
+    </ui-panel>
+  </ui-panels>
+{/snippet}
+
+{#snippet panelLayout}
+  <ui-panels
+    class="fullscreen"
+    direction="horizontal"
+    saveState={saveState}
+    saveStateID="{getSaveID 'row'}"
+    exportparts="panels"
+    part="full-panels"
+  >
+    {#each panelGroup in getPanels}
+      <ui-panel
+        direction="horizontal"
+        size={getPanelGroupWidth @index}
+        class="code-group"
+        exportparts="panel, handle"
+
+      >
+        <ui-panels
+          class="files"
+          saveState=true
+          saveStateID="{getSaveID 'column' @index}"
+          exportparts="panels"
+        >
+          {#each panel in panelGroup}
+            {>CodePlaygroundPanel
+              panel=panel
+              size=(getPanelSize panel)
+            }
+          {/each}
+        </ui-panels>
+      </ui-panel>
+    {/each}
+  </ui-panels>
+{/snippet}

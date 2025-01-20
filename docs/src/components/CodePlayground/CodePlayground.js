@@ -120,8 +120,10 @@ const settings = {
 };
 
 const state = {
-  // which file is currently visible in tab view
+  // which file is currently visible in tab component view
   activeFile: undefined,
+
+  activePageFile: undefined,
 
   // current view in mobile code/preview
   mobileView: 'code',
@@ -146,12 +148,15 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   initialize() {
     const initialFile = (settings.selectedFile)
       ? settings.selectedFile
-      : self.getFirstFile()?.filename
+      : self.getFirstFile({filter: 'main'})?.filename
+    ;
+    const initialPageFile = self.getFirstFile({filter: 'page'})?.filename
     ;
     if(settings.allowLayoutSwap) {
       settings.useTabs = localStorage.getItem('codeplayground-tabs') == 'yes';
     }
     state.activeFile.set(initialFile);
+    state.activePageFile.set(initialPageFile);
     reaction(self.calculateLayout);
   },
 
@@ -262,10 +267,16 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     }
     return 'horizontal';
   },
-  getFileArray() {
+  getFileArray({filter} = {}) {
     let files = [];
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
+      if(filter == 'main' && fileData?.filename?.includes('index')) {
+        return;
+      }
+      if(filter == 'page' && !fileData?.filename?.includes('index')) {
+        return;
+      }
       files.push(fileData);
     });
     return sortBy(files, 'sortIndex');
@@ -294,8 +305,8 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   getPanelGroupWidth(index) {
     return settings.panelGroupWidth[index];
   },
-  getFileMenuItems({indexOnly = false } = {}) {
-    let menu = self.getFileArray().map(file => {
+  getFileMenuItems({ filter } = {}) {
+    let menu = self.getFileArray({filter}).map(file => {
       if(file.generated && !settings.includeGeneratedInline) {
         return false;
       }
@@ -303,10 +314,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
         label: file.filename,
         value: file.filename,
       };
-    }).filter(value => {
-      if(indexOnly) {
-        return file.filename && file.filename.includes('index');
-      }
+    }).filter(({value} = {}) => {
       return Boolean(value);
     });
     if(settings.selectedFile) {
@@ -314,8 +322,11 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     }
     return menu;
   },
-  getFirstFile() {
-    return firstMatch(self.getFileArray(), file => !file.generated && !file.hidden);
+  getFirstFile({ filter } = {}) {
+    return firstMatch(self.getFileArray({ filter }), file => !file.generated && !file.hidden);
+  },
+  getFirstPageFile() {
+
   },
   getSaveID(group, index) {
     return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
@@ -430,8 +441,12 @@ const events = {
   'global resize window'({self, state}) {
     requestAnimationFrame(self.setDisplayMode);
   },
-  'change ui-menu.files'({state, data}) {
+  'change ui-menu.main.files'({state, data}) {
     state.activeFile.set(data.value);
+  },
+  'change ui-menu.page.files'({state, data}) {
+    console.log(data.value);
+    state.activePageFile.set(data.value);
   },
   'change ui-menu.mobile'({state, data}) {
     state.mobileView.set(data.value);
