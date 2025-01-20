@@ -414,7 +414,8 @@ class TemplateCompiler {
         let value = match[2].trim();
         data[name] = value;
       });
-      templateInfo.data = data;
+      // standard notation defaults to reactive data
+      templateInfo.reactiveData = data;
     }
     return templateInfo;
   }
