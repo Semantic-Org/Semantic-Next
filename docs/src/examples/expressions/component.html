@@ -1,3 +1,29 @@
+<h4>Data Context</h4>
+<table class="group">
+  <thead>
+    <th>Name</th>
+    <th>Value</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>value</td>
+      <td>{value}</td>
+    </tr>
+    <tr>
+      <td>date</td>
+      <td>{date}</td>
+    </tr>
+    <tr>
+      <td>timezone</td>
+      <td>{timezone}</td>
+    </tr>
+  </tbody>
+</table>
+
+{#snippet test}
+  {obj.a}
+{/snippet}
+
 <h4>Expressions</h4>
 <table class="group">
   <thead>
@@ -21,18 +47,12 @@
     </tr>
     <tr>
       <td>Calling helper method with inline object definition</td>
-      <td>{#html 'classMap { one: false, two: true, three: (value == 1) }' }</td>
-      <td>{ classMap { one: false, two: true, three: (value == 1) } }</td>
-      <td>two three</td>
+      <td>{#html 'classMap { one: true, two: true, three: date }' }</td>
+      <td>{ classMap { one: true, two: true, three: date } }</td>
+      <td>one two three</td>
     </tr>
     <tr>
-      <td>creating and invoking a custom function</td>
-      <td>{#html "(() => {return 'hi';})()" }</td>
-      <td>{(() => {return 'hi';})()}</td>
-      <td>hi</td>
-    </tr>
-    <tr>
-      <td>Calling method with inline array definition</td>
+      <td>Calling method with spaced arguments and inline array definition</td>
       <td>join ['1', '2', '3'] ' and '</td>
       <td>{ join ['1', '2', '3'] ' and '}</td>
       <td>1 and 2 and 3</td>
@@ -41,7 +61,7 @@
       <td>Outputting value from data context</td>
       <td>value</td>
       <td>{value}</td>
-      <td>0</td>
+      <td>1</td>
     </tr>
     <tr>
       <td>Inline addition</td>
@@ -74,56 +94,22 @@
       <td>3</td>
     </tr>
     <tr>
-      <td>Calling a method with spaced arguments and inline object</td>
-      <td>{#html "getValue {one: 'two'} 'one'"}</td>
+      <td>Calling a method with inline object</td>
+      <td>getValue {one: 'two'} 'one'</td>
       <td>{getValue {one: 'two'} 'one'}</td>
       <td>two</td>
     </tr>
-  </tbody>
-</table>
-
-<h4>Data Context</h4>
-<table class="group">
-  <thead>
-    <th>Name</th>
-    <th>Value</th>
-    <th>Source</th>
-  </thead>
-  <tbody>
     <tr>
-      <td>value</td>
-      <td>{value}</td>
-      <td>Settings</td>
+      <td>Adding numbers</td>
+      <td>2 + 3</td>
+      <td>{2 + 3}</td>
+      <td>5</td>
     </tr>
     <tr>
-      <td>timezone</td>
-      <td>{timezone}</td>
-      <td>Settings</td>
-    </tr>
-    <tr>
-      <td>date</td>
-      <td>{date}</td>
-      <td>Settings</td>
-    </tr>
-    <tr>
-      <td>addOne</td>
-      <td>function on component adding 1 to arguments</td>
-      <td>Component Instance</td>
-    </tr>
-    <tr>
-      <td>getValue</td>
-      <td>function on component returning object property</td>
-      <td>Component Instance</td>
-    </tr>
-    <tr>
-      <td>formatDate</td>
-      <td>returns formatted date</td>
-      <td>Global Helper</td>
-    </tr>
-    <tr>
-      <td>classMap</td>
-      <td>returns class names if true</td>
-      <td>Global Helper</td>
+      <td>Passed through to snippet</td>
+      <td>{#html "{>test obj={a: 1} }"}</td>
+      <td>{>test obj={a: 1}}</td>
+      <td>a</td>
     </tr>
   </tbody>
 </table>
