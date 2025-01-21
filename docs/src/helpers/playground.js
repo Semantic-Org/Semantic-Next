@@ -13,7 +13,7 @@ export const hideComponentBoilerplate = (code) => {
 
   // Apply the first fold
   let foldedCode = code.replace(getTextRegex, (match) => {
-    return `// click ellipsus to show imports ${foldMarkerStart}\n\n${match.trim()}\n${foldMarkerEnd}\n\n`;
+    return `// click ellipsus to show imports ${foldMarkerStart}\n\n${match.trim()}\n${foldMarkerEnd}\n`;
   });
 
   // Apply the second fold
