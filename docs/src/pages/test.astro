@@ -2,10 +2,9 @@
 import Body from '../layouts/Body.astro';
 import TopBar from '@components/TopBar.astro';
 
-import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
-import {TestComponent} from '@components/Test/';
-const menu = [];
+import { UIButton } from '@semantic-ui/core';
 ---
 <Body padded>
-<TestComponent client:only></TestComponent>
+
+<ui-button class="large primary disabled">Test</ui-button>
 </Body>

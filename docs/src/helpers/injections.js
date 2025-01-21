@@ -150,8 +150,8 @@ ${hideMarkerEnd}`;
 export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   const pageScripts = [
     'component.js',
-    'index.js',
-    'index.css',
+    'page.js',
+    'page.css',
   ];
 
   if(includeLog) {
@@ -222,15 +222,15 @@ export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
       before: componentCSSBefore,
       after: componentCSSAfter,
     },
-    'index.js': {
+    'page.js': {
       before: indexJSBefore,
       after: indexJSAfter,
     },
-    'index.html': {
+    'page.html': {
       before: indexHTMLBefore,
       after: indexHTMLAfter
     },
-    'index.css': {
+    'page.css': {
       before: indexCSSBefore,
       after: indexCSSAfter,
     },
@@ -250,7 +250,7 @@ export const addPlaygroundInjections = (files, {
     if(fileInjections[name]) {
       const { before = '', after = '' } = fileInjections[name];
       let content = files[name].content.trim();
-      if(name == 'index.html') {
+      if(name == 'page.html') {
         content = indentLines(content, 4);
       }
       files[name].content = `${before}${content}${after}`;

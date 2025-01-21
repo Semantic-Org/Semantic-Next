@@ -73,9 +73,9 @@ const settings = {
     'component.js',
     'component.html',
     'component.css',
-    'index.html',
-    'index.css',
-    'index.js',
+    'page.html',
+    'page.css',
+    'page.js',
   ],
 
   // types to use
@@ -90,9 +90,9 @@ const settings = {
     'component.js': 'component.js',
     'component.html': 'component.html',
     'component.css': 'component.css',
-    'index.html': 'index.html',
-    'index.css': 'index.css',
-    'index.js': 'index.js',
+    'page.html': 'page.html',
+    'page.css': 'page.css',
+    'page.js': 'page.js',
   },
 
   // which panel should code appear in 0 is left and 1 is right
@@ -100,9 +100,9 @@ const settings = {
     'component.js': 0,
     'component.html': 0,
     'component.css': 0,
-    'index.html': 1,
-    'index.css': 1,
-    'index.js': 1,
+    'page.html': 1,
+    'page.css': 1,
+    'page.js': 1,
   },
 
   // how to split up code in panel view
@@ -110,9 +110,9 @@ const settings = {
     'component.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
-    'index.html': (1 / 9 * 100),
-    'index.css': (1 / 9 * 100),
-    'index.js': (1 / 9 * 100),
+    'page.html': (1 / 9 * 100),
+    'page.css': (1 / 9 * 100),
+    'page.js': (1 / 9 * 100),
   },
 
   // default left right panel width
@@ -150,17 +150,20 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       ? settings.selectedFile
       : self.getFirstFile({filter: 'main'})?.filename
     ;
-    const initialPageFile = self.getFirstFile({filter: 'page'})?.filename
-    ;
+    const initialPageFile = self.getFirstFile({filter: 'page'})?.filename;
+
+    // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
       settings.useTabs = localStorage.getItem('codeplayground-tabs') == 'yes';
     }
+
     state.activeFile.set(initialFile);
     state.activePageFile.set(initialPageFile);
     reaction(self.calculateLayout);
   },
 
-  initializePanels() {
+  addPanelSettings() {
+    console.log('add nat size func');
     $('ui-panel').settings({
       getNaturalSize: self.getNaturalPanelSize
     });
@@ -227,6 +230,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
         return labelHeight;
       }
       else {
+        let height;
         const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
         const size = codeHeight + labelHeight + menuHeight + extraSpacing;
         return Math.max(size, 100);
@@ -271,10 +275,10 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     let files = [];
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
-      if(filter == 'main' && fileData?.filename?.includes('index')) {
+      if(filter == 'main' && fileData?.filename?.includes('page')) {
         return;
       }
-      if(filter == 'page' && !fileData?.filename?.includes('index')) {
+      if(filter == 'page' && !fileData?.filename?.includes('page')) {
         return;
       }
       files.push(fileData);
@@ -307,7 +311,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
   getFileMenuItems({ filter } = {}) {
     let menu = self.getFileArray({filter}).map(file => {
-      if(file.generated && !settings.includeGeneratedInline) {
+      if(file.generated && !file.filename ==) {
         return false;
       }
       return {
@@ -323,7 +327,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     return menu;
   },
   getFirstFile({ filter } = {}) {
-    return firstMatch(self.getFileArray({ filter }), file => !file.generated && !file.hidden);
+    return firstMatch(self.getFileArray({ filter }), file => !file.hidden);
   },
   getFirstPageFile() {
 
@@ -364,7 +368,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     ;
     state.layout.set(newLayout);
     afterFlush(() => {
-      self.initializePanels();
+      self.addPanelSettings();
     });
     // store preference
     const storedValue = newLayout == 'tabs' ? 'yes' : 'no';
@@ -414,9 +418,11 @@ const onCreated = ({self, attachEvent}) => {
 
 const onRendered = ({ self, state }) => {
   addSearch(CodeMirror);
+
+  self.addPanelSettings();
   requestIdleCallback(() => {
-    self.initializePanels();
     state.resizing.set(false);
+    self.addPanelSettings()
   });
 };
 
@@ -445,7 +451,6 @@ const events = {
     state.activeFile.set(data.value);
   },
   'change ui-menu.page.files'({state, data}) {
-    console.log(data.value);
     state.activePageFile.set(data.value);
   },
   'change ui-menu.mobile'({state, data}) {

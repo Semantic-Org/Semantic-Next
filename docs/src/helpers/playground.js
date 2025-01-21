@@ -64,23 +64,23 @@ export const getExampleFiles = async({
         return get(contentTypes, extension) || 'text/html';
       };
 
-      if(inArray(fileName, ['index.html'])) {
+      if(inArray(fileName, ['page.html'])) {
         const fileContent = await file();
-        exampleFiles['index.html'] = {
+        exampleFiles['page.html'] = {
           contentType: 'text/html',
           content: fileContent.default
         };
       }
-      else if(inArray(fileName, ['index.css'])) {
+      else if(inArray(fileName, ['page.css'])) {
         const fileContent = await file();
-        exampleFiles['index.css'] = {
+        exampleFiles['page.css'] = {
           contentType: 'text/css',
           content: fileContent.default
         };
       }
-      else if(inArray(fileName, ['index.js'])) {
+      else if(inArray(fileName, ['page.js'])) {
         const fileContent = await file();
-        exampleFiles['index.js'] = {
+        exampleFiles['page.js'] = {
           contentType: 'text/javascript',
           content: fileContent.default
         };
@@ -121,8 +121,8 @@ export const getExampleFiles = async({
       }
     }
   });
-  // auto generate index.html if not specified for component
-  if(!exampleFiles['index.html']?.content) {
+  // auto generate page.html if not specified for component
+  if(!exampleFiles['page.html']?.content) {
 
     // get tag name from contents
     let tagName;
@@ -136,7 +136,7 @@ export const getExampleFiles = async({
       }
     }
 
-    exampleFiles['index.html'] = {
+    exampleFiles['page.html'] = {
       contentType: 'text/html',
       generated: true,
       content: (tagName)
@@ -160,9 +160,9 @@ export const getExampleFiles = async({
     };
   }
 
-  // auto generate index.css/js if not specified for component
-  if(!exampleFiles['index.css']?.content) {
-    exampleFiles['index.css'] = {
+  // auto generate page.css/js if not specified for component
+  if(!exampleFiles['page.css']?.content) {
+    exampleFiles['page.css'] = {
       contentType: 'text/css',
       generated: true,
       content: ''
@@ -175,8 +175,8 @@ export const getExampleFiles = async({
       content: ''
     };
   }
-  if(!exampleFiles['index.js']?.content) {
-    exampleFiles['index.js'] = {
+  if(!exampleFiles['page.js']?.content) {
+    exampleFiles['page.js'] = {
       contentType: 'text/javascript',
       generated: true,
       content: ''
@@ -191,7 +191,6 @@ export const getExampleFiles = async({
     let allGenerated = true;
     each(exampleFiles, (file, name) => {
       if(!file.generated) {
-        console.log('not all generated', name);
         allGenerated = false;
       }
     });
@@ -199,6 +198,16 @@ export const getExampleFiles = async({
       exampleFiles = {};
     }
   }
+
+  /*
+  // rename index files to page
+  each(exampleFiles, (file, name) => {
+    let newName = name.replace('index', 'page');
+    if(newName !== name) {
+      exampleFiles[newName] = file;
+      delete exampleFiles[name];
+    }
+  })*/
 
   return exampleFiles;
 };
@@ -222,15 +231,15 @@ export const getEmptyProjectFiles = ({
       contentType: 'text/css',
       content: '',
     },
-    'index.js': {
+    'page.js': {
       contentType: 'text/javascript',
       content: '',
     },
-    'index.html': {
+    'page.html': {
       contentType: 'text/html',
       content: '',
     },
-    'index.css': {
+    'page.css': {
       contentType: 'text/css',
       content: '',
     },
@@ -250,7 +259,7 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
   let indexes;
   if(type == 'log') {
     indexes = {
-      'index.js': 0,
+      'page.js': 0,
     };
   }
   else {
@@ -258,9 +267,9 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
       'component.js': 0,
       'component.html': 0,
       'component.css': 0,
-      'index.html': 1,
-      'index.css': 1,
-      'index.js': 1,
+      'page.html': 1,
+      'page.css': 1,
+      'page.js': 1,
     };
   }
   // filter out generated and absent files
@@ -271,7 +280,7 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
     return true;
   });
   // use right pane for css if no index files
-  if(!indexes['index.html'] && !indexes['index.css'] && !indexes['index.js']) {
+  if(!indexes['page.html'] && !indexes['page.css'] && !indexes['page.js']) {
     indexes['component.css'] = 1;
   }
   return indexes;
