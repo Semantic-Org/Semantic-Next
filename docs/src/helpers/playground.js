@@ -138,7 +138,7 @@ export const getExampleFiles = async({
 
     exampleFiles['index.html'] = {
       contentType: 'text/html',
-      generated: false,
+      generated: true,
       content: (tagName)
         ? `<${tagName}></${tagName}>`
         : ``
@@ -189,8 +189,9 @@ export const getExampleFiles = async({
 
   if(emptyIfAllGenerated) {
     let allGenerated = true;
-    each(exampleFiles, (file) => {
+    each(exampleFiles, (file, name) => {
       if(!file.generated) {
+        console.log('not all generated', name);
         allGenerated = false;
       }
     });

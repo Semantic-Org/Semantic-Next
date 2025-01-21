@@ -52,6 +52,12 @@
       <td>one two three</td>
     </tr>
     <tr>
+      <td>Expressions in each</td>
+      <td>{#html `{#each number in [value, 2, 3]}{number}{/each}`}</td>
+      <td>{#each number in [value, 2, 3]}{number} {/each}</td>
+      <td>1 2  3</td>
+    </tr>
+    <tr>
       <td>Calling method with spaced arguments and inline array definition</td>
       <td>join ['1', '2', '3'] ' and '</td>
       <td>{ join ['1', '2', '3'] ' and '}</td>
