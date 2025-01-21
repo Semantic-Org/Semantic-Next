@@ -311,9 +311,6 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
   getFileMenuItems({ filter } = {}) {
     let menu = self.getFileArray({filter}).map(file => {
-      if(file.generated && !file.filename ==) {
-        return false;
-      }
       return {
         label: file.filename,
         value: file.filename,
@@ -451,6 +448,7 @@ const events = {
     state.activeFile.set(data.value);
   },
   'change ui-menu.page.files'({state, data}) {
+    console.log('change page file');
     state.activePageFile.set(data.value);
   },
   'change ui-menu.mobile'({state, data}) {
