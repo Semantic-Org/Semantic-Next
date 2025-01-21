@@ -441,7 +441,7 @@ const events = {
   'global resize window'({self, state}) {
     requestAnimationFrame(self.setDisplayMode);
   },
-  'change ui-menu.main.files'({state, data}) {
+  'change ui-menu.component.files'({state, data}) {
     state.activeFile.set(data.value);
   },
   'change ui-menu.page.files'({state, data}) {
@@ -453,9 +453,6 @@ const events = {
   },
   'click ui-button.tabs'({self}) {
     self.toggleTabs();
-  },
-  'click ui-button.fork'({self}) {
-    window.alert('Not yet implemented');
   },
   'resizeStart ui-panel'({state}) {
     state.resizing.set(true);

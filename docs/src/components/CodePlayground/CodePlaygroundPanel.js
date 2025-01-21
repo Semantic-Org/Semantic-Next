@@ -6,7 +6,7 @@ import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 const createComponent = ({data}) => ({
   initialize() {
-    console.log(data);
+    // nothing yet
   }
 });
 

@@ -8,7 +8,7 @@ import css from './CodePlaygroundFile.css?raw';
 const createComponent = ({self, settings, data, $, $$}) => ({
 
   initialize() {
-    console.log(data);
+    // nothing yet
   },
 
   configureCodeEditors() {
