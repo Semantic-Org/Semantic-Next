@@ -145,7 +145,6 @@ const createComponent = ({self, el, settings, $}) => ({
     return false;
   },
   setPanelInitialized(panel) {
-    console.log('initing panel', panel);
     if(panel.component) {
       panel.component.setInitialized();
     }
