@@ -183,6 +183,10 @@ export const getExampleFiles = async({
     };
   }
 
+  if(exampleFiles['page.js'].generated && exampleFiles['page.css']) {
+    exampleFiles['page.html'].generated = false;
+  }
+
   if(includePlaygroundInjections) {
     addPlaygroundInjections(exampleFiles, { includeLog });
   }
@@ -198,16 +202,6 @@ export const getExampleFiles = async({
       exampleFiles = {};
     }
   }
-
-  /*
-  // rename index files to page
-  each(exampleFiles, (file, name) => {
-    let newName = name.replace('index', 'page');
-    if(newName !== name) {
-      exampleFiles[newName] = file;
-      delete exampleFiles[name];
-    }
-  })*/
 
   return exampleFiles;
 };

@@ -20,7 +20,7 @@ export const hideCode = ({ text = '', isHTML = false, removeLines = true } = {})
   let html = `${start}${text}${end}`;
   if(removeLines) {
     html = html.replace(/[\r\n]+/g, '');
-  };
+  }
   return html;
 };
 export const foldCode = ({ text = '', isHTML = false, removeLines = true } = {}) => {
@@ -29,7 +29,7 @@ export const foldCode = ({ text = '', isHTML = false, removeLines = true } = {})
   let html = `${start}${text}${end}`;
   if(removeLines) {
     html = html.replace(/[\r\n]+/g, '');
-  };
+  }
   return html;
 };
 const indentLines = (str, spaces = 2) => {
@@ -169,7 +169,7 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
         html += `\n    <script src="./${src}" type="module"></script>`;
       }
       else if(src.search('.css') >= 0) {
-        html += `\n    <link href="./${src}" rel="stylesheet">`;
+        html += `\n\n    <link href="./${src}" rel="stylesheet">`;
       }
       if(files[src]?.generated) {
         html += `${htmlHideMarkerEnd}`;
@@ -187,19 +187,19 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
 };
 
 
-export const indexHTMLAfter = `
+export const pageHTMLAfter = `
   </body>
 </html>`;
 
-export const indexJSBefore = `${hideMarkerStart}
+export const pageJSBefore = `${hideMarkerStart}
 document.querySelector('html').removeAttribute('style');
 if(localStorage.getItem('theme') == 'dark') {
   document.querySelector('html').classList.add('dark');
 }${hideMarkerEnd}`;
-export const indexJSAfter = ``;
+export const pageJSAfter = ``;
 
-export const indexCSSBefore = `${hideMarkerStart}body { height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
-export const indexCSSAfter = ``;
+export const pageCSSBefore = `${hideMarkerStart}body { height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
+export const pageCSSAfter = ``;
 
 
 /*
@@ -208,7 +208,7 @@ export const indexCSSAfter = ``;
   based off filename
 */
 export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
-  const indexHTMLBefore = getIndexHTMLBefore({ files, includeLog});
+  const pageHTMLBefore = getIndexHTMLBefore({ files, includeLog});
   let injections = {
     'component.js': {
       before: componentJSBefore,
@@ -223,16 +223,16 @@ export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
       after: componentCSSAfter,
     },
     'page.js': {
-      before: indexJSBefore,
-      after: indexJSAfter,
+      before: pageJSBefore,
+      after: pageJSAfter,
     },
     'page.html': {
-      before: indexHTMLBefore,
-      after: indexHTMLAfter
+      before: pageHTMLBefore,
+      after: pageHTMLAfter
     },
     'page.css': {
-      before: indexCSSBefore,
-      after: indexCSSAfter,
+      before: pageCSSBefore,
+      after: pageCSSAfter,
     },
   };
   return injections;
