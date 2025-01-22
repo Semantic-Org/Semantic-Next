@@ -9,7 +9,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 * Standard template syntax now defaults to reactiveData to avoid confusion when using subtemplates naively. You can still specify non reactive data using verbose syntax.
 * Fix issue with js expression passthrough to snippets and subtemplates
-
+* Added cyclical detection to to expression lookup to avoid recursion
 
 # Version 0.5.0
 

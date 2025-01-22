@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, firstMatch, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -317,15 +317,25 @@ export class LitRenderer {
 
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
-  lookupExpressionValue(expression = '', data = {}) {
+  lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
 
     // wrap {} or [] in parens
-    expression = this.addParensToExpression(expression);
+    if(isString(expression)) {
+      expression = this.addParensToExpression(expression);
+    }
+
+    // detect recursion
+    if (visited.has(expression)) {
+      // throw new Error(`Cyclical expression detected: "${expression}"`);
+      return undefined;
+    }
+    visited.add(expression);
 
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
     if(jsValue !== undefined) {
       const value = this.accessTokenValue(jsValue, expression, data);
+      visited.delete(expression);
       return wrapFunction(value)();
     }
 
@@ -341,7 +351,7 @@ export class LitRenderer {
     while(index--) {
       const token = expressionArray[index];
       if(isArray(token)) {
-        result = this.lookupExpressionValue(token.join(' '), data);
+        result = this.lookupExpressionValue(token.join(' '), data, visited);
         funcArguments.unshift(result);
       }
       else {
@@ -353,6 +363,7 @@ export class LitRenderer {
         funcArguments.unshift(result);
       }
     }
+    visited.delete(expression);
     return result;
   }
 
