@@ -235,7 +235,7 @@ export class LitRenderer {
     if(!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
-    const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
+    const snippetData = this.getPackedNodeData(node, data, { inheritParent: false });
     return this.renderContent({
       ast: snippet.content,
       data: snippetData,
@@ -322,11 +322,6 @@ export class LitRenderer {
     // wrap {} or [] in parens
     expression = this.addParensToExpression(expression);
 
-    const expressionArray = isArray(expression)
-      ? expression
-      : this.getExpressionArray(expression)
-    ;
-
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
     if(jsValue !== undefined) {
@@ -337,6 +332,11 @@ export class LitRenderer {
     let funcArguments = [];
     let result;
 
+    // unpack expression to array and expand values
+    const expressionArray = isArray(expression)
+      ? expression
+      : this.getExpressionArray(expression)
+    ;
     let index = expressionArray.length;
     while(index--) {
       const token = expressionArray[index];
@@ -424,9 +424,9 @@ export class LitRenderer {
     return undefined;
   }
 
-  addParensToExpression(expression) {
+  addParensToExpression(expression = '') {
     // Match either an object {...} or array [...] at the start or after whitespace
-    return expression.replace(LitRenderer.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
+    return String(expression).replace(LitRenderer.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
       return `${before}(${brackets})${after}`;
     });
   }
