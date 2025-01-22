@@ -191,18 +191,18 @@ export const getExampleFiles = async({
   if(emptyIfAllGenerated) {
     let allGenerated = true;
     each(exampleFiles, (file, name) => {
-      if(!file.generated) {
+      if(file.generated !== true) {
         allGenerated = false;
+        return;
       }
     });
     if(allGenerated) {
-      exampleFiles = {};
+      return {};
     }
   }
-  else if(exampleFiles['page.js'].generated && exampleFiles['page.css']) {
+  if(exampleFiles['page.js'].generated && exampleFiles['page.css']) {
     exampleFiles['page.html'].generated = false;
   }
-
   return exampleFiles;
 };
 

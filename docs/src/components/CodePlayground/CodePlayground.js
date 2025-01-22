@@ -39,6 +39,7 @@ const settings = {
   // whether to use tabs or panels
   useTabs: true,
 
+  // allow swapping between tabs and panels
   allowLayoutSwap: true,
 
   // whether to save the panel positions
@@ -159,7 +160,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
 
     // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
-      settings.useTabs = localStorage.getItem('codeplayground-tabs') == 'yes';
+      settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
     }
 
     state.activeFile.set(initialFile);
@@ -385,7 +386,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
 
   selectFile(number) {
-    const menu = $('ui-menu.files').getComponent();
+    const menu = $('ui-menu.component').getComponent();
     if(menu) {
       menu.selectIndex(number - 1);
     }
@@ -431,7 +432,7 @@ const onRendered = ({ self, state }) => {
   self.addPanelSettings();
   requestIdleCallback(() => {
     state.resizing.set(false);
-    self.addPanelSettings()
+    self.addPanelSettings();
   });
 };
 
@@ -474,13 +475,6 @@ const events = {
   'resizeEnd ui-panel'({state}) {
     state.resizing.set(false);
   },
-  'deep click .CodeMirror-foldmarker'({target, self}) {
-    console.log('zz');
-    const $target = $(target);
-    console.log($target);
-    $comment = $target.parent().prev('.cm-comment');
-    self.removeFoldComment();
-  }
 };
 
 const CodePlayground = defineComponent({
