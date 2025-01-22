@@ -14,7 +14,12 @@ const state = {
   amplitude: 0
 };
 
+// click ellipsus to view implementation
+// dont study it too closely for now this is just "hello world"
+
+/* playground-fold */
 const createComponent = ({ state }) => ({
+
   getTextPath() {
     // Create smooth curve for text to follow
     const width = 500;
@@ -73,6 +78,8 @@ const events = {
     state.amplitude.set(0);
   }
 };
+  /* playground-fold-end */
+
 
 defineComponent({
   tagName: 'hello-world',
