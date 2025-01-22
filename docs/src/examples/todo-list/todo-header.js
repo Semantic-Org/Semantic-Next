@@ -1,4 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
+import { generateID } from '@semantic-ui/utils';
 
 const css = await getText('./todo-header.css');
 const template = await getText('./todo-header.html');
@@ -24,7 +25,7 @@ const createComponent = ({ self, $, signal, reaction, findParent }) => ({
 
   addTodo(text) {
     self.getTodos().push({
-      _id: text,
+      _id: generateID(),
       text: text,
       completed: false,
     });
