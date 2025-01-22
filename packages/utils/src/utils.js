@@ -93,13 +93,13 @@ export const getKeyFromEvent = (event) => {
          XHR
 --------------------*/
 
-export const getText = async (src) => {
-  const response = await fetch(src);
+export const getText = async (src, settings) => {
+  const response = await fetch(src, settings);
   return await response.text();
 };
 
-export const getJSON = async (src) => {
-  const response = await fetch(src);
+export const getJSON = async (src, settings) => {
+  const response = await fetch(src, settings);
   return await response.json();
 };
 
