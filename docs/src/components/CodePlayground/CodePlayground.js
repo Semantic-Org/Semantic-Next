@@ -474,6 +474,13 @@ const events = {
   'resizeEnd ui-panel'({state}) {
     state.resizing.set(false);
   },
+  'deep click .CodeMirror-foldmarker'({target, self}) {
+    console.log('zz');
+    const $target = $(target);
+    console.log($target);
+    $comment = $target.parent().prev('.cm-comment');
+    self.removeFoldComment();
+  }
 };
 
 const CodePlayground = defineComponent({

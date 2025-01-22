@@ -13,12 +13,12 @@ export const hideComponentBoilerplate = (code) => {
 
   // Apply the first fold
   let foldedCode = code.replace(getTextRegex, (match) => {
-    return `// click ellipsus to show imports ${foldMarkerStart}\n\n${match.trim()}\n${foldMarkerEnd}\n`;
+    return `// click ellipsus to show imports ${foldMarkerStart}\n${match.trim()}\n${foldMarkerEnd}\n`;
   });
 
   // Apply the second fold
   foldedCode = foldedCode.replace(defineComponentRegex, (match) => {
-    return `// click ellipsus to show exports ${foldMarkerStart}\n\n${match}\n${foldMarkerEnd}\n`;
+    return `// click ellipsus to show exports ${foldMarkerStart}\n${match}\n${foldMarkerEnd}\n`;
   });
 
   return foldedCode;
@@ -183,9 +183,6 @@ export const getExampleFiles = async({
     };
   }
 
-  if(exampleFiles['page.js'].generated && exampleFiles['page.css']) {
-    exampleFiles['page.html'].generated = false;
-  }
 
   if(includePlaygroundInjections) {
     addPlaygroundInjections(exampleFiles, { includeLog });
@@ -201,6 +198,9 @@ export const getExampleFiles = async({
     if(allGenerated) {
       exampleFiles = {};
     }
+  }
+  else if(exampleFiles['page.js'].generated && exampleFiles['page.css']) {
+    exampleFiles['page.html'].generated = false;
   }
 
   return exampleFiles;

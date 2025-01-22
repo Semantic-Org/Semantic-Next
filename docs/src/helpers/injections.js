@@ -141,7 +141,6 @@ export const logCSS = `${hideMarkerStart}
 ${hideMarkerEnd}`;
 
 
-
 /*
   Handles files that should be included in iframe
   for injecting scripts
