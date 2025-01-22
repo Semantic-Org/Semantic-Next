@@ -71,6 +71,7 @@ const settings = {
 
   // order of code
   sortOrder: [
+    'index.js',
     'component.js',
     'component.html',
     'component.css',
@@ -89,31 +90,37 @@ const settings = {
   // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
+    'index.js': 'index.js',
     'component.html': 'component.html',
     'component.css': 'component.css',
     'page.html': 'page.html',
     'page.css': 'page.css',
     'page.js': 'page.js',
+
   },
 
   // which panel should code appear in 0 is left and 1 is right
   panelIndexes: {
     'component.js': 0,
+    'index.js': 0,
     'component.html': 0,
     'component.css': 0,
     'page.html': 1,
     'page.css': 1,
     'page.js': 1,
+
   },
 
   // how to split up code in panel view
   panelSizes: {
     'component.js': 'grow',
+    'index.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
     'page.html': (1 / 9 * 100),
     'page.css': (1 / 9 * 100),
     'page.js': (1 / 9 * 100),
+
   },
 
   // default left right panel width
@@ -147,7 +154,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   ],
 
   initialize() {
-
+    console.log('hi');
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
       filter: 'main'
@@ -157,6 +164,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       selectedFile: settings.selectedFile,
       filter: 'page'
     });
+    console.log('init page', initialPageFile);
 
     // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
@@ -213,6 +221,20 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
 
   canShowButtons() {
     return !settings.inline && state.displayMode.get() !== 'mobile';
+  },
+
+  canShowPageFiles() {
+    let pageFiles = self.getFileArray({ filter: 'page' });
+    if(pageFiles.length == 0) {
+      return false;
+    }
+    if(pageFiles.every(file => file.generated)) {
+      return false;
+    }
+    if(self.getTabDirection() == 'vertical') {
+      return false;
+    }
+    return true;
   },
 
   getNaturalPanelSize(panel, { direction, minimized }) {
@@ -278,13 +300,17 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
   getFileArray({filter} = {}) {
     let files = [];
+    let tabDirection = self.getTabDirection();
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
-      if(filter == 'main' && fileData?.filename?.startsWith('page')) {
-        return;
-      }
-      if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
-        return;
+      if(tabDirection !== 'vertical') {
+          // only have left/right menus when its horizontally stacked
+          if(filter == 'main' && fileData?.filename?.startsWith('page')) {
+            return;
+          }
+          if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
+            return;
+          }
       }
       files.push(fileData);
     });
@@ -335,8 +361,10 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     const files = self.getFileArray({ filter });
     const matchingFile = firstMatch(files, file => (file.filename == selectedFile));
     if(matchingFile) {
+      console.log(filter, matchingFile);
       return matchingFile?.filename;
     }
+    console.log(filter, firstMatch(files, file => !file.hidden)?.filename);
     return firstMatch(files, file => !file.hidden)?.filename;
   },
   getFirstPageFile() {

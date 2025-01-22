@@ -93,29 +93,33 @@
       class="preview"
       exportparts="panel, handle"
     >
-      <div class="menu">
-        <ui-menu
-          dark
-          selection
-          items="{getFileMenuItems { filter: 'page' } }"
-          value={activePageFile}
-          class="page files"
-          part="menu"
-        ></ui-menu>
-      </div>
-      <ui-panels
-        class="files"
-        exportparts="panels"
-      >
-        {>CodePlaygroundPanel
-          panel={type: 'file', filename: activePageFile }
-          size='natural'
-        }
-        {>CodePlaygroundPanel
-          panel={type: 'preview'}
-          size='grow'
-        }
-      </ui-panels>
+      {#if canShowPageFiles}
+        <div class="menu">
+          <ui-menu
+            dark
+            selection
+            items="{getFileMenuItems { filter: 'page' } }"
+            value={activePageFile}
+            class="page files"
+            part="menu"
+          ></ui-menu>
+        </div>
+        <ui-panels
+          class="files"
+          exportparts="panels"
+        >
+          {>CodePlaygroundPanel
+            panel={type: 'file', filename: activePageFile }
+            size='natural'
+          }
+          {>CodePlaygroundPanel
+            panel={type: 'preview'}
+            size='grow'
+          }
+        </ui-panels>
+      {else}
+        {>CodePlaygroundPreview exampleURL=exampleURL}
+      {/if}
     </ui-panel>
   </ui-panels>
 {/snippet}

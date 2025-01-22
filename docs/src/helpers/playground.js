@@ -119,6 +119,13 @@ export const getExampleFiles = async({
           content: fileContent.default
         };
       }
+      if(includeLog && inArray(fileName, ['index.js', `${contentID}.js`])) {
+        const fileContent = await file();
+        exampleFiles['index.js'] = {
+          contentType: 'text/javascript',
+          content: fileContent.default
+        };
+      }
     }
   });
   // auto generate page.html if not specified for component
@@ -200,8 +207,11 @@ export const getExampleFiles = async({
       return {};
     }
   }
-  if(exampleFiles['page.js'].generated && exampleFiles['page.css']) {
+  if(!includeLog && exampleFiles['page.js'].generated && exampleFiles['page.css']) {
     exampleFiles['page.html'].generated = false;
+  }
+  if(includeLog) {
+    exampleFiles['page.html'].hidden = true;
   }
   return exampleFiles;
 };

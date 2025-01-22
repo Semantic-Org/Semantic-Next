@@ -154,6 +154,7 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   ];
 
   if(includeLog) {
+    pageScripts.unshift('index.js');
     pageScripts.unshift('log.js');
     pageScripts.unshift('log.css');
   }
@@ -165,10 +166,10 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
         html += `${htmlHideMarkerStart}`;
       }
       if(src.search('.js') >= 0) {
-        html += `\n    <script src="./${src}" type="module"></script>`;
+        html += `   <script src="./${src}" type="module"></script>\n`;
       }
       else if(src.search('.css') >= 0) {
-        html += `\n\n    <link href="./${src}" rel="stylesheet">`;
+        html += `   <link href="./${src}" rel="stylesheet">\n`;
       }
       if(files[src]?.generated) {
         html += `${htmlHideMarkerEnd}`;
@@ -178,9 +179,8 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   };
 
   return `<html>
-  <head>${getScriptCode()} ${hideCode({ text: headLibraryJS, isHTML: true })}
-
-  </head>
+  <head>
+${getScriptCode()} ${hideCode({ text: headLibraryJS, isHTML: true })}  </head>
   <body>
 `;
 };
@@ -249,6 +249,7 @@ export const addPlaygroundInjections = (files, {
     if(fileInjections[name]) {
       const { before = '', after = '' } = fileInjections[name];
       let content = files[name].content.trim();
+      // html will be inside <body> tag so we need to indent
       if(name == 'page.html') {
         content = indentLines(content, 4);
       }
