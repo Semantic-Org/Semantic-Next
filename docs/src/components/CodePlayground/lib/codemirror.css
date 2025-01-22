@@ -11,9 +11,17 @@
 
 .CodeMirror-foldmarker {
   font-family: sans-serif;
-  color: #3a3b3c;
-  font-size: 18px;
+  color: var(--white-40);
+  background-color: var(--white-10);
+  border-radius: var(--border-radius);
+  font-size: var(--medium);
+  vertical-align: 3px;
+  margin-left: 8px;
+  display: inline-block;
+  padding: 0px 5px 6px 4px;
+  line-height: 1;
 }
 .CodeMirror-foldmarker:hover {
-  color: #009FDA;
+  background-color: #183a528f;
+  color: var(--primary-text-color);
 }

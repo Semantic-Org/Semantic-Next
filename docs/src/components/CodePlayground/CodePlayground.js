@@ -146,11 +146,16 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   ],
 
   initialize() {
-    const initialFile = (settings.selectedFile)
-      ? settings.selectedFile
-      : self.getFirstFile({filter: 'main'})?.filename
-    ;
-    const initialPageFile = self.getFirstFile({filter: 'page'})?.filename;
+
+    const initialFile = self.getFirstFile({
+      selectedFile: settings.selectedFile,
+      filter: 'main'
+    });
+
+    const initialPageFile = self.getFirstFile({
+      selectedFile: settings.selectedFile,
+      filter: 'page'
+    });
 
     // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
@@ -163,7 +168,6 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
 
   addPanelSettings() {
-    console.log('add nat size func');
     $('ui-panel').settings({
       getNaturalSize: self.getNaturalPanelSize
     });
@@ -275,10 +279,10 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     let files = [];
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
-      if(filter == 'main' && fileData?.filename?.includes('page')) {
+      if(filter == 'main' && fileData?.filename?.startsWith('page')) {
         return;
       }
-      if(filter == 'page' && !fileData?.filename?.includes('page')) {
+      if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
         return;
       }
       files.push(fileData);
@@ -311,6 +315,9 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
   getFileMenuItems({ filter } = {}) {
     let menu = self.getFileArray({filter}).map(file => {
+      if(!settings.includeGeneratedInline && file?.generated) {
+        return;
+      }
       return {
         label: file.filename,
         value: file.filename,
@@ -323,8 +330,13 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     }
     return menu;
   },
-  getFirstFile({ filter } = {}) {
-    return firstMatch(self.getFileArray({ filter }), file => !file.hidden);
+  getFirstFile({ selectedFile = '', filter } = {}) {
+    const files = self.getFileArray({ filter });
+    const matchingFile = firstMatch(files, file => (file.filename == selectedFile));
+    if(matchingFile) {
+      return matchingFile?.filename;
+    }
+    return firstMatch(files, file => !file.hidden)?.filename;
   },
   getFirstPageFile() {
 
@@ -448,7 +460,6 @@ const events = {
     state.activeFile.set(data.value);
   },
   'change ui-menu.page.files'({state, data}) {
-    console.log('change page file');
     state.activePageFile.set(data.value);
   },
   'change ui-menu.mobile'({state, data}) {

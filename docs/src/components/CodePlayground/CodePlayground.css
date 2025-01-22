@@ -275,7 +275,8 @@
     header {
       display: block;
       box-shadow: none;
-      min-height: 0px;
+      min-height: 18px;
+      font-size: 10px;
       border-bottom: var(--subtle-border);
       padding: 8px 16px 8px;
       height: auto;
@@ -322,7 +323,9 @@
         font-size: 18px;
       }
       playground-file-editor {
-        flex: 1 1 auto;
+        flex: 1 1 0px;
+        height: 100%;
+        overflow: hidden;
       }
       playground-preview::part(preview-reload-button) {
         margin-top: -1px;

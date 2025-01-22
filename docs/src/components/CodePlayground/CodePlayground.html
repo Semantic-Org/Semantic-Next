@@ -134,15 +134,12 @@
         direction="horizontal"
         size={getPanelGroupWidth @index}
         class="code-group"
-        exportparts="panel, handle"
-
-      >
+        exportparts="panel, handle">
         <ui-panels
           class="files"
           saveState=true
           saveStateID="{getSaveID 'column' @index}"
-          exportparts="panels"
-        >
+          exportparts="panels">
           {#each panel in panelGroup}
             {>CodePlaygroundPanel
               panel=panel
