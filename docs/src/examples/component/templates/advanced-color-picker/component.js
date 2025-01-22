@@ -3,13 +3,11 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-// these can be passed in as attributes or properties
 const settings = {
   colorOptions: ['red', 'yellow', 'green', 'blue', 'purple', 'pink'],
   color: '#FF0000',
 };
 
-// this is a reactive internal state store
 const state = {
   hoveredColor: '',
 };
@@ -23,8 +21,8 @@ const createComponent = ({self, settings, $, dispatchEvent}) => ({
 
 const events = {
 
-  'click .option': function({ $, self }) {
-    const color = $(this).computedStyle('background-color');
+  'click .option'({ target, $, self }) {
+    const color = $(target).computedStyle('background-color');
     self.selectColor(color);
   },
 

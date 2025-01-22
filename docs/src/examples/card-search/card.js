@@ -5,7 +5,5 @@ const template = await getText('./card.html');
 
 export const card = defineComponent({
   template,
-  onCreated: ({data}) => {
-  },
   css
 });

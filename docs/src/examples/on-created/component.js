@@ -7,7 +7,7 @@ const state = {
   text: 'Initial',
 };
 
-const onCreated = ({state, $, attachEvent}) => {
+const onCreated = ({state}) => {
   state.text.set('Created');
 };
 
