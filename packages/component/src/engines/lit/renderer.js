@@ -235,7 +235,7 @@ export class LitRenderer {
     if(!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
-    const snippetData = this.getPackedNodeData(node, data, { inheritParent: false });
+    const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
     return this.renderContent({
       ast: snippet.content,
       data: snippetData,
@@ -329,14 +329,14 @@ export class LitRenderer {
       return wrapFunction(value)();
     }
 
-    let funcArguments = [];
-    let result;
-
-    // unpack expression to array and expand values
     const expressionArray = isArray(expression)
       ? expression
       : this.getExpressionArray(expression)
     ;
+
+    let funcArguments = [];
+    let result;
+
     let index = expressionArray.length;
     while(index--) {
       const token = expressionArray[index];
