@@ -114,7 +114,9 @@ const createComponent = ({self, settings, data, $, $$}) => ({
         marker.on('clear', () => {
           let foldComment = $(marker._widgetNode).prev('.cm-comment').text();
           // remove comment mentioning folding
-          self.removeMatchingLine(cm, foldComment);
+          requestAnimationFrame(() => {
+            self.removeMatchingLine(cm, foldComment);
+          });
         });
       }
     });
