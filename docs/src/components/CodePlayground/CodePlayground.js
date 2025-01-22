@@ -231,7 +231,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     if(pageFiles.every(file => file.generated)) {
       return false;
     }
-    if(self.getTabDirection() == 'vertical') {
+    if(self.shouldCombineMenus()) {
       return false;
     }
     return true;
@@ -298,12 +298,14 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     }
     return 'horizontal';
   },
+  shouldCombineMenus() {
+    return self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
+  },
   getFileArray({filter} = {}) {
     let files = [];
-    let tabDirection = self.getTabDirection();
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
-      if(tabDirection !== 'vertical') {
+      if(!self.shouldCombineMenus()) {
           // only have left/right menus when its horizontally stacked
           if(filter == 'main' && fileData?.filename?.startsWith('page')) {
             return;
