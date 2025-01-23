@@ -154,7 +154,6 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   ],
 
   initialize() {
-    console.log('hi');
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
       filter: 'main'
@@ -164,7 +163,6 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
       selectedFile: settings.selectedFile,
       filter: 'page'
     });
-    console.log('init page', initialPageFile);
 
     // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
@@ -299,20 +297,20 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     return 'horizontal';
   },
   shouldCombineMenus() {
-    return self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
+    return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
   getFileArray({filter} = {}) {
     let files = [];
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
       if(!self.shouldCombineMenus()) {
-          // only have left/right menus when its horizontally stacked
-          if(filter == 'main' && fileData?.filename?.startsWith('page')) {
-            return;
-          }
-          if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
-            return;
-          }
+        // only have left/right menus when its horizontally stacked
+        if(filter == 'main' && fileData?.filename?.startsWith('page')) {
+          return;
+        }
+        if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
+          return;
+        }
       }
       files.push(fileData);
     });
