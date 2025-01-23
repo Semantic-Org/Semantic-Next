@@ -326,17 +326,17 @@ export class LitRenderer {
     }
     visited.add(expression);
 
-    // wrap {} or [] in parens
-    if(isString(expression)) {
-      expression = this.addParensToExpression(expression);
-    }
-
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
     if(jsValue !== undefined) {
       const value = this.accessTokenValue(jsValue, expression, data);
       visited.delete(expression);
       return wrapFunction(value)();
+    }
+
+    // wrap {} or [] in parens
+    if(isString(expression)) {
+      expression = this.addParensToExpression(expression);
     }
 
     const expressionArray = isArray(expression)
@@ -380,14 +380,14 @@ export class LitRenderer {
       return literalValue;
     }
 
-    // retrieve this value from the data context
+    // retrieve token value from data context
     let dataValue = this.getDeepDataValue(data, token);
     let value = this.accessTokenValue(dataValue, token, data);
     if(value !== undefined) {
       return value;
     }
 
-    // otherwise check if this is a global helper
+    // if undefined check if global helper
     const helper = this.helpers[token];
     if(isFunction(helper)) {
       return helper;
