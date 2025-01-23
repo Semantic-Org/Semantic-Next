@@ -1,7 +1,4 @@
-import {
-  defineComponent,
-  getText
-} from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const pageCSS = await getText('./component-page.css');

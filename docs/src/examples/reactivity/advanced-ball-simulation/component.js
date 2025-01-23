@@ -275,7 +275,6 @@ const events = {
     self.emitter.y = (event.clientY - rect.top);
     self.emitter.active = true;
   },
-
   'pointermove canvas'({self, event}) {
     if (self.emitter.active) {
       const canvas = self.getCanvas();
@@ -284,11 +283,9 @@ const events = {
       self.emitter.y = (event.clientY - rect.top);
     }
   },
-
   'pointerup, pointerleave canvas'({self}) {
     self.emitter.active = false;
   },
-
   'change input.speed'({value, settings}) {
     settings.speed = value / 100;
   }

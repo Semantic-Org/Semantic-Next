@@ -1,15 +1,41 @@
-import { asyncEach, get, each } from '@semantic-ui/utils';
+import { each } from '@semantic-ui/utils';
 
 /* These are top level to make it easier to format */
 
 export const htmlHideMarkerStart = `<!-- playground-hide -->`;
 export const htmlHideMarkerEnd = `<!-- playground-hide-end -->`;
+export const htmlFoldMarkerStart = `<!-- playground-fold -->`;
+export const htmlFoldMarkerEnd = `<!-- playground-fold-end -->`;
 
 export const hideMarkerStart = `/* playground-hide */`;
 export const hideMarkerEnd = `/* playground-hide-end */`;
 
 export const foldMarkerStart = `/* playground-fold */`;
 export const foldMarkerEnd = `/* playground-fold-end */`;
+
+
+export const hideCode = ({ text = '', isHTML = false, removeLines = true } = {}) => {
+  const start = (isHTML) ? htmlHideMarkerStart : hideMarkerStart;
+  const end = (isHTML) ? htmlHideMarkerEnd : hideMarkerEnd;
+  let html = `${start}${text}${end}`;
+  if(removeLines) {
+    html = html.replace(/[\r\n]+/g, '');
+  }
+  return html;
+};
+export const foldCode = ({ text = '', isHTML = false, removeLines = true } = {}) => {
+  const start = (isHTML) ? htmlFoldMarkerStart : foldMarkerStart;
+  const end = (isHTML) ? htmlFoldMarkerEnd : foldMarkerEnd;
+  let html = `${start}${text}${end}`;
+  if(removeLines) {
+    html = html.replace(/[\r\n]+/g, '');
+  }
+  return html;
+};
+const indentLines = (str, spaces = 2) => {
+  const indent = ' '.repeat(spaces);
+  return str.split('\n').map(line => `${indent}${line}`).join('\n');
+};
 
 export const componentJSBefore = ``;
 export const componentJSAfter = ``;
@@ -19,6 +45,28 @@ export const componentHTMLAfter = ``;
 
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
+
+export const headLibraryJS = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css">
+<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css">
+<script>
+  function dispatchCustomEvent(eventName) {
+    const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
+    window.frameElement.dispatchEvent(event);
+  }
+  window.addEventListener('focus', function() {
+    dispatchCustomEvent('iframefocus');
+  }, true);
+  window.addEventListener('blur', function() {
+    dispatchCustomEvent('iframeblur');
+  }, true);
+  document.addEventListener('touchstart', function(){});
+</script>
+`;
 
 export const logJS = `${hideMarkerStart}
 const oldLog = console.log;
@@ -93,20 +141,20 @@ export const logCSS = `${hideMarkerStart}
 ${hideMarkerEnd}`;
 
 
-
 /*
   Handles files that should be included in iframe
   for injecting scripts
 */
 
-export const getIndexHTMLBefore = function({ includeLog } = {}) {
+export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   const pageScripts = [
     'component.js',
-    'index.js',
-    'index.css',
+    'page.js',
+    'page.css',
   ];
 
   if(includeLog) {
+    pageScripts.unshift('index.js');
     pageScripts.unshift('log.js');
     pageScripts.unshift('log.css');
   }
@@ -114,57 +162,43 @@ export const getIndexHTMLBefore = function({ includeLog } = {}) {
   const getScriptCode = function() {
     let html = '';
     each(pageScripts, (src) => {
+      if(files[src]?.generated) {
+        html += `${htmlHideMarkerStart}`;
+      }
       if(src.search('.js') >= 0) {
-        html += `\n<script src="./${src}" type="module"></script>`;
+        html += `   <script src="./${src}" type="module"></script>\n`;
       }
       else if(src.search('.css') >= 0) {
-        html += `\n<link href="./${src}" rel="stylesheet">`;
+        html += `   <link href="./${src}" rel="stylesheet">\n`;
+      }
+      if(files[src]?.generated) {
+        html += `${htmlHideMarkerEnd}`;
       }
     });
     return html;
   };
 
-  return `${htmlHideMarkerStart}
-  <html>
+  return `<html>
   <head>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
-  <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css"></link>
-  <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css"></link>
-  <script>
-    function dispatchCustomEvent(eventName) {
-      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
-      window.frameElement.dispatchEvent(event);
-    }
-    window.addEventListener('focus', function() {
-      dispatchCustomEvent('iframefocus');
-    }, true);
-    window.addEventListener('blur', function() {
-      dispatchCustomEvent('iframeblur');
-    }, true);
-    document.addEventListener('touchstart', {});
-  </script>
-  <!-- This defines the component tag and makes it available on your page !-->
-  ${getScriptCode()}
-  </head>
+${getScriptCode()} ${hideCode({ text: headLibraryJS, isHTML: true })}  </head>
   <body>
-  ${htmlHideMarkerEnd}`;
+`;
 };
 
 
-export const indexHTMLAfter = `${htmlHideMarkerStart}</body></html>${htmlHideMarkerEnd}`;
+export const pageHTMLAfter = `
+  </body>
+</html>`;
 
-export const indexJSBefore = `${hideMarkerStart}
+export const pageJSBefore = `${hideMarkerStart}
 document.querySelector('html').removeAttribute('style');
 if(localStorage.getItem('theme') == 'dark') {
   document.querySelector('html').classList.add('dark');
 }${hideMarkerEnd}`;
-export const indexJSAfter = ``;
+export const pageJSAfter = ``;
 
-export const indexCSSBefore = `${hideMarkerStart}body { height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
-export const indexCSSAfter = ``;
+export const pageCSSBefore = `${hideMarkerStart}body { height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
+export const pageCSSAfter = ``;
 
 
 /*
@@ -172,8 +206,8 @@ export const indexCSSAfter = ``;
   before and after file contents for playground
   based off filename
 */
-export const getPlaygroundInjections = ({ includeLog } = {}) => {
-  const indexHTMLBefore = getIndexHTMLBefore({includeLog});
+export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
+  const pageHTMLBefore = getIndexHTMLBefore({ files, includeLog});
   let injections = {
     'component.js': {
       before: componentJSBefore,
@@ -187,17 +221,17 @@ export const getPlaygroundInjections = ({ includeLog } = {}) => {
       before: componentCSSBefore,
       after: componentCSSAfter,
     },
-    'index.js': {
-      before: indexJSBefore,
-      after: indexJSAfter,
+    'page.js': {
+      before: pageJSBefore,
+      after: pageJSAfter,
     },
-    'index.html': {
-      before: indexHTMLBefore,
-      after: indexHTMLAfter
+    'page.html': {
+      before: pageHTMLBefore,
+      after: pageHTMLAfter
     },
-    'index.css': {
-      before: indexCSSBefore,
-      after: indexCSSAfter,
+    'page.css': {
+      before: pageCSSBefore,
+      after: pageCSSAfter,
     },
   };
   return injections;
@@ -210,11 +244,16 @@ export const getPlaygroundInjections = ({ includeLog } = {}) => {
 export const addPlaygroundInjections = (files, {
   includeLog = false,
 } = {}) => {
-  const fileInjections = getPlaygroundInjections({ includeLog });
+  const fileInjections = getPlaygroundInjections({ files, includeLog });
   each(files, (file, name) => {
     if(fileInjections[name]) {
-      const { before, after } = fileInjections[name];
-      files[name].content = (before || '') + files[name].content + (after || '').trim();
+      const { before = '', after = '' } = fileInjections[name];
+      let content = files[name].content.trim();
+      // html will be inside <body> tag so we need to indent
+      if(name == 'page.html') {
+        content = indentLines(content, 4);
+      }
+      files[name].content = `${before}${content}${after}`;
     }
   });
   return files;

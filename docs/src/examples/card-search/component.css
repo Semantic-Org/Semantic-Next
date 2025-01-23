@@ -5,36 +5,32 @@
   --card-image-max-height: 150px;
 }
 
-
-  .component {
-    container: component / inline-size;
-  }
-
-  .actions {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--spacing);
-
-    .menu {
-      margin: 0;
-      border-radius: var(--border-radius);
-      padding: 3px;
-      background: var(--standard-5) var(--angled-gradient);
-      box-shadow: var(--inset-shadow);
-    }
-    .search {
-      margin-left: auto;
-    }
-  }
-  .cards {
-    display: grid;
-    grid-template-columns: 1fr;
-    flex-wrap: wrap;
-    gap: var(--card-gap);
-  }
+.component {
+  container: component / inline-size;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing);
 
+  .menu {
+    margin: 0;
+    border-radius: var(--border-radius);
+    padding: 3px;
+    background: var(--standard-5) var(--angled-gradient);
+    box-shadow: var(--inset-shadow);
+  }
+  .search {
+    margin-left: auto;
+  }
+}
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  flex-wrap: wrap;
+  gap: var(--card-gap);
+}
 
 @container component (max-width: 300px) {
   .card {

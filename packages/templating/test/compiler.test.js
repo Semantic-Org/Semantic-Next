@@ -732,7 +732,7 @@ describe('TemplateCompiler', () => {
       // should match template
       const expectedAST = [
         { type: 'html', html: '<div>\n          ' },
-        { type: 'template', name: `'partialName'`, data: {} },
+        { type: 'template', name: `'partialName'`, reactiveData: {} },
         { type: 'html', html: '\n        </div>' },
       ];
       expect(ast).toEqual(expectedAST);
@@ -751,7 +751,7 @@ describe('TemplateCompiler', () => {
         {
           type: 'template',
           name: "'partialName'",
-          data: { data1: 'value', data2: 'value' },
+          reactiveData: { data1: 'value', data2: 'value' },
         },
         { type: 'html', html: '\n        </div>' },
       ];
@@ -790,7 +790,7 @@ describe('TemplateCompiler', () => {
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
-          data: { size: '(getPanelSize)' },
+          reactiveData: { size: '(getPanelSize)' },
         },
         { type: 'html', html: '\n        </div>' },
       ];
@@ -810,7 +810,7 @@ describe('TemplateCompiler', () => {
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
-          data: { size: '(getPanelSize panel)' },
+          reactiveData: { size: '(getPanelSize panel)' },
         },
         { type: 'html', html: '\n        </div>' },
       ];
@@ -833,7 +833,7 @@ describe('TemplateCompiler', () => {
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
-          data: { panel: 'panel', size: '(getPanelSize panel)' },
+          reactiveData: { panel: 'panel', size: '(getPanelSize panel)' },
         },
         { type: 'html', html: '\n        </div>' },
       ];
@@ -853,7 +853,7 @@ describe('TemplateCompiler', () => {
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
-          data: { size: '(getPanelSize (getPanel))' },
+          reactiveData: { size: '(getPanelSize (getPanel))' },
         },
         { type: 'html', html: '\n        </div>' },
       ];

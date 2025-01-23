@@ -11,9 +11,9 @@ const createComponent = ({ self, findParent, $ }) => ({
     return findParent('todoList');
   },
 
-  getIncomplete() {
+  getIncompleteCount() {
     const todos = self.todoList().todos.get();
-    return todos.filter((todo) => !todo.completed);
+    return todos.filter((todo) => !todo.completed)?.length;
   },
 
   hasAnyCompleted() {

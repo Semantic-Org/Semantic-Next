@@ -39,6 +39,7 @@ const settings = {
   // whether to use tabs or panels
   useTabs: true,
 
+  // allow swapping between tabs and panels
   allowLayoutSwap: true,
 
   // whether to save the panel positions
@@ -70,12 +71,13 @@ const settings = {
 
   // order of code
   sortOrder: [
+    'index.js',
     'component.js',
     'component.html',
     'component.css',
-    'index.html',
-    'index.css',
-    'index.js',
+    'page.html',
+    'page.css',
+    'page.js',
   ],
 
   // types to use
@@ -88,31 +90,37 @@ const settings = {
   // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
+    'index.js': 'index.js',
     'component.html': 'component.html',
     'component.css': 'component.css',
-    'index.html': 'index.html',
-    'index.css': 'index.css',
-    'index.js': 'index.js',
+    'page.html': 'page.html',
+    'page.css': 'page.css',
+    'page.js': 'page.js',
+
   },
 
   // which panel should code appear in 0 is left and 1 is right
   panelIndexes: {
     'component.js': 0,
+    'index.js': 0,
     'component.html': 0,
     'component.css': 0,
-    'index.html': 1,
-    'index.css': 1,
-    'index.js': 1,
+    'page.html': 1,
+    'page.css': 1,
+    'page.js': 1,
+
   },
 
   // how to split up code in panel view
   panelSizes: {
     'component.js': 'grow',
+    'index.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
-    'index.html': (1 / 9 * 100),
-    'index.css': (1 / 9 * 100),
-    'index.js': (1 / 9 * 100),
+    'page.html': (1 / 9 * 100),
+    'page.css': (1 / 9 * 100),
+    'page.js': (1 / 9 * 100),
+
   },
 
   // default left right panel width
@@ -120,8 +128,10 @@ const settings = {
 };
 
 const state = {
-  // which file is currently visible in tab view
+  // which file is currently visible in tab component view
   activeFile: undefined,
+
+  activePageFile: undefined,
 
   // current view in mobile code/preview
   mobileView: 'code',
@@ -144,18 +154,27 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   ],
 
   initialize() {
-    const initialFile = (settings.selectedFile)
-      ? settings.selectedFile
-      : self.getFirstFile()?.filename
-    ;
+    const initialFile = self.getFirstFile({
+      selectedFile: settings.selectedFile,
+      filter: 'main'
+    });
+
+    const initialPageFile = self.getFirstFile({
+      selectedFile: settings.selectedFile,
+      filter: 'page'
+    });
+
+    // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
-      settings.useTabs = localStorage.getItem('codeplayground-tabs') == 'yes';
+      settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
     }
+
     state.activeFile.set(initialFile);
+    state.activePageFile.set(initialPageFile);
     reaction(self.calculateLayout);
   },
 
-  initializePanels() {
+  addPanelSettings() {
     $('ui-panel').settings({
       getNaturalSize: self.getNaturalPanelSize
     });
@@ -202,6 +221,20 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     return !settings.inline && state.displayMode.get() !== 'mobile';
   },
 
+  canShowPageFiles() {
+    let pageFiles = self.getFileArray({ filter: 'page' });
+    if(pageFiles.length == 0) {
+      return false;
+    }
+    if(pageFiles.every(file => file.generated)) {
+      return false;
+    }
+    if(self.shouldCombineMenus()) {
+      return false;
+    }
+    return true;
+  },
+
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding
     if(direction == 'horizontal') {
@@ -222,6 +255,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
         return labelHeight;
       }
       else {
+        let height;
         const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
         const size = codeHeight + labelHeight + menuHeight + extraSpacing;
         return Math.max(size, 100);
@@ -262,10 +296,22 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     }
     return 'horizontal';
   },
-  getFileArray() {
+  shouldCombineMenus() {
+    return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
+  },
+  getFileArray({filter} = {}) {
     let files = [];
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
+      if(!self.shouldCombineMenus()) {
+        // only have left/right menus when its horizontally stacked
+        if(filter == 'main' && fileData?.filename?.startsWith('page')) {
+          return;
+        }
+        if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
+          return;
+        }
+      }
       files.push(fileData);
     });
     return sortBy(files, 'sortIndex');
@@ -294,19 +340,16 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   getPanelGroupWidth(index) {
     return settings.panelGroupWidth[index];
   },
-  getFileMenuItems({indexOnly = false } = {}) {
-    let menu = self.getFileArray().map(file => {
-      if(file.generated && !settings.includeGeneratedInline) {
-        return false;
+  getFileMenuItems({ filter } = {}) {
+    let menu = self.getFileArray({filter}).map(file => {
+      if(!settings.includeGeneratedInline && file?.generated) {
+        return;
       }
       return {
         label: file.filename,
         value: file.filename,
       };
-    }).filter(value => {
-      if(indexOnly) {
-        return file.filename && file.filename.includes('index');
-      }
+    }).filter(({value} = {}) => {
       return Boolean(value);
     });
     if(settings.selectedFile) {
@@ -314,8 +357,18 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     }
     return menu;
   },
-  getFirstFile() {
-    return firstMatch(self.getFileArray(), file => !file.generated && !file.hidden);
+  getFirstFile({ selectedFile = '', filter } = {}) {
+    const files = self.getFileArray({ filter });
+    const matchingFile = firstMatch(files, file => (file.filename == selectedFile));
+    if(matchingFile) {
+      console.log(filter, matchingFile);
+      return matchingFile?.filename;
+    }
+    console.log(filter, firstMatch(files, file => !file.hidden)?.filename);
+    return firstMatch(files, file => !file.hidden)?.filename;
+  },
+  getFirstPageFile() {
+
   },
   getSaveID(group, index) {
     return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
@@ -353,7 +406,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     ;
     state.layout.set(newLayout);
     afterFlush(() => {
-      self.initializePanels();
+      self.addPanelSettings();
     });
     // store preference
     const storedValue = newLayout == 'tabs' ? 'yes' : 'no';
@@ -361,7 +414,7 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
 
   selectFile(number) {
-    const menu = $('ui-menu.files').getComponent();
+    const menu = $('ui-menu.component').getComponent();
     if(menu) {
       menu.selectIndex(number - 1);
     }
@@ -403,9 +456,11 @@ const onCreated = ({self, attachEvent}) => {
 
 const onRendered = ({ self, state }) => {
   addSearch(CodeMirror);
+
+  self.addPanelSettings();
   requestIdleCallback(() => {
-    self.initializePanels();
     state.resizing.set(false);
+    self.addPanelSettings();
   });
 };
 
@@ -430,17 +485,17 @@ const events = {
   'global resize window'({self, state}) {
     requestAnimationFrame(self.setDisplayMode);
   },
-  'change ui-menu.files'({state, data}) {
+  'change ui-menu.component.files'({state, data}) {
     state.activeFile.set(data.value);
+  },
+  'change ui-menu.page.files'({state, data}) {
+    state.activePageFile.set(data.value);
   },
   'change ui-menu.mobile'({state, data}) {
     state.mobileView.set(data.value);
   },
   'click ui-button.tabs'({self}) {
     self.toggleTabs();
-  },
-  'click ui-button.fork'({self}) {
-    window.alert('Not yet implemented');
   },
   'resizeStart ui-panel'({state}) {
     state.resizing.set(true);

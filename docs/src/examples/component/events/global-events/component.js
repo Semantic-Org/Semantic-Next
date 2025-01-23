@@ -9,6 +9,9 @@ const state = {
 };
 
 const events = {
+  'click'({state}) {
+    state.text.set('Clicked');
+  },
   'global click body'({state}) {
     state.counter.increment();
   }

@@ -68,6 +68,7 @@ const createComponent = ({ $, state, settings, self, reaction }) => ({
     ];
     const matchResult = (result) => result.title.toLowerCase().includes(term.toLowerCase());
     return new Promise((resolve) => {
+      // simulate async search
       setTimeout(() => {
         const matchingFruits = fruits.filter(matchResult);
         resolve(matchingFruits);

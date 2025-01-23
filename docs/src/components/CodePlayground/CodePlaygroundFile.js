@@ -7,6 +7,10 @@ import css from './CodePlaygroundFile.css?raw';
 
 const createComponent = ({self, settings, data, $, $$}) => ({
 
+  initialize() {
+    // nothing yet
+  },
+
   configureCodeEditors() {
     const el = $$('playground-code-editor').get(0);
     if(el) {
@@ -75,6 +79,8 @@ const createComponent = ({self, settings, data, $, $$}) => ({
       },
     });
 
+    self.patchFold(cm);
+
     if(data.inline) {
       cm.on('change', (instance, changeObj) => {
         setTimeout(() => {
@@ -91,6 +97,42 @@ const createComponent = ({self, settings, data, $, $$}) => ({
           }
         }, 1);
       });
+    }
+  },
+
+  // used to remove code comment in front of wrappers
+  patchFold(cm) {
+    cm.getAllMarks().forEach((marker) => {
+      if (marker.__isFold) {
+        // Before we attach the 'clear' listener, store the fold info.
+        const range = marker.find();
+        marker._foldRange = range;
+        // If there is a widget, you can also store the widget node:
+        if (marker.widgetNode) {
+          marker._widgetNode = marker.widgetNode;
+        }
+        marker.on('clear', () => {
+          let foldComment = $(marker._widgetNode).prev('.cm-comment').text();
+          // remove comment mentioning folding
+          requestAnimationFrame(() => {
+            self.removeMatchingLine(cm, foldComment);
+          });
+        });
+      }
+    });
+  },
+  removeMatchingLine(cm, searchString) {
+    const doc = cm.getDoc();
+    const cursor = doc.getSearchCursor(searchString, {line: 0, ch: 0});
+    if (cursor.findNext()) {
+      const lineIndex = cursor.from().line;
+      // Remove all text from this line start to the next line start.
+      // This effectively deletes the entire line (including the trailing newline).
+      doc.replaceRange(
+        '',
+        {line: lineIndex, ch: 0},
+        {line: lineIndex + 1, ch: 0}
+      );
     }
   }
 });

@@ -10,16 +10,7 @@ const template = await getText('./component.html');
 
 const createComponent = ({ self, signal, $ }) => ({
   // global state
-  todos: signal([
-    { _id: '1', completed: false, text: 'Take out trash' },
-    { _id: '2', completed: false, text: 'Mow lawn' },
-    { _id: '3', completed: false, text: 'Do dishes' },
-    { _id: '4', completed: false, text: 'Go to work' },
-    { _id: '5', completed: false, text: 'Play the trombone' },
-    { _id: '6', completed: false, text: 'Win the lottery' },
-    { _id: '7', completed: false, text: 'Take children to daycare' },
-    { _id: '8', completed: false, text: 'Buy easter eggs' },
-  ]),
+  todos: signal([]),
   filter: signal('all'),
 
   getVisibleTodos() {

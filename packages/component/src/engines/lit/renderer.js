@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, firstMatch, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -299,8 +299,8 @@ export class LitRenderer {
     let result;
     if(includeHelpers) {
       context = {
+        ...this.helpers,
         ...context,
-        ...this.helpers
       };
       delete context.debugger; // this is a reserved word
     }
@@ -317,22 +317,32 @@ export class LitRenderer {
 
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
-  lookupExpressionValue(expression = '', data = {}) {
+  lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
+
+    // detect recursion
+    if (visited.has(expression)) {
+      // throw new Error(`Cyclical expression detected: "${expression}"`);
+      return undefined;
+    }
+    visited.add(expression);
+
+    // check if whole expression is JS before tokenizing
+    const jsValue = this.evaluateJavascript(expression, data);
+    if(jsValue !== undefined) {
+      const value = this.accessTokenValue(jsValue, expression, data);
+      visited.delete(expression);
+      return wrapFunction(value)();
+    }
 
     // wrap {} or [] in parens
-    expression = this.addParensToExpression(expression);
+    if(isString(expression)) {
+      expression = this.addParensToExpression(expression);
+    }
 
     const expressionArray = isArray(expression)
       ? expression
       : this.getExpressionArray(expression)
     ;
-
-    // check if whole expression is JS before tokenizing
-    const jsValue = this.evaluateJavascript(expression, data);
-    if(jsValue !== undefined) {
-      const value = this.getTokenValue(jsValue);
-      return wrapFunction(value)();
-    }
 
     let funcArguments = [];
     let result;
@@ -341,7 +351,7 @@ export class LitRenderer {
     while(index--) {
       const token = expressionArray[index];
       if(isArray(token)) {
-        result = this.lookupExpressionValue(token.join(' '), data);
+        result = this.lookupExpressionValue(token.join(' '), data, visited);
         funcArguments.unshift(result);
       }
       else {
@@ -353,6 +363,7 @@ export class LitRenderer {
         funcArguments.unshift(result);
       }
     }
+    visited.delete(expression);
     return result;
   }
 
@@ -369,53 +380,54 @@ export class LitRenderer {
       return literalValue;
     }
 
-    // check if this is a global helper
+    // retrieve token value from data context
+    let dataValue = this.getDeepDataValue(data, token);
+    let value = this.accessTokenValue(dataValue, token, data);
+    if(value !== undefined) {
+      return value;
+    }
+
+    // if undefined check if global helper
     const helper = this.helpers[token];
     if(isFunction(helper)) {
       return helper;
     }
+  }
 
-    const getDeepValue = (obj, path) => {
-      return path.split('.').reduce((acc, part) => {
-        if(acc === undefined) {
-          return undefined;
-        }
-        const current = (acc instanceof Signal)
-          ? acc.get()
-          : wrapFunction(acc)()
-        ;
-        if(current == undefined) {
-          return undefined;
-          /* erroring on intermediate undefined
-             feels better not as an error state
-            but this may change
-          */
-          //fatal(`Error evaluating expression "${path}"`);
-        }
-        return current[part];
-      }, obj);
-    };
-
-
-    const getThisContext = (token, data) => {
-      const path = token.split('.').slice(0, -1).join('.');
-      return getDeepValue(data, path);
-    };
-
-    // otherwise retrieve this value from the data context
-    let dataValue = getDeepValue(data, token);
-
-    // bind context for functions with '.'
-    if(isFunction(dataValue) && token.search('.') !== -1) {
-      const thisContext = getThisContext(token, data);
-      dataValue = dataValue.bind(thisContext);
-    }
-
-    return this.getTokenValue(dataValue);
+  getDeepDataValue(obj, path) {
+    return path.split('.').reduce((acc, part) => {
+      if(acc === undefined) {
+        return undefined;
+      }
+      const current = (acc instanceof Signal)
+        ? acc.get()
+        : wrapFunction(acc)()
+      ;
+      if(current == undefined) {
+        return undefined;
+        /* erroring on intermediate undefined
+           feels better not as an error state
+          but this may change
+        */
+        //fatal(`Error evaluating expression "${path}"`);
+      }
+      return current[part];
+    }, obj);
   }
 
   // retrieve token value accessing getter for reactive vars
-  getTokenValue(tokenValue) {
+  accessTokenValue(tokenValue, token, data) {
+
+    const getThisContext = (token, data) => {
+      const path = token.split('.').slice(0, -1).join('.');
+      return this.getDeepDataValue(data, path);
+    };
+
+    // bind context for functions with '.'
+    if(isFunction(tokenValue) && token.search('.') !== -1) {
+      const thisContext = getThisContext(token, data);
+      tokenValue = tokenValue.bind(thisContext);
+    }
     if(tokenValue !== undefined) {
       return (tokenValue instanceof Signal)
         ? tokenValue.value
@@ -425,9 +437,9 @@ export class LitRenderer {
     return undefined;
   }
 
-  addParensToExpression(expression) {
+  addParensToExpression(expression = '') {
     // Match either an object {...} or array [...] at the start or after whitespace
-    return expression.replace(LitRenderer.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
+    return String(expression).replace(LitRenderer.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
       return `${before}(${brackets})${after}`;
     });
   }

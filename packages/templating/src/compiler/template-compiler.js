@@ -386,6 +386,9 @@ class TemplateCompiler {
     else if (expression == 'false') {
       return false;
     }
+    else if (isString(expression) && expression.trim() !== '' && Number.isFinite(+expression)) {
+      return Number(expression);
+    }
     return expression;
   }
   parseTemplateString(expression = '') {
@@ -414,7 +417,8 @@ class TemplateCompiler {
         let value = match[2].trim();
         data[name] = value;
       });
-      templateInfo.data = data;
+      // standard notation defaults to reactive data
+      templateInfo.reactiveData = data;
     }
     return templateInfo;
   }
