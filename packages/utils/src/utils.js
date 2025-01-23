@@ -96,7 +96,7 @@ export const getKeyFromEvent = (event) => {
 export const getText = async (src, settings) => {
   const response = (settings)
     ? await fetch(src, settings)
-    : await(fetch)
+    : await fetch(src)
   ;
   return await response.text();
 };
@@ -104,7 +104,7 @@ export const getText = async (src, settings) => {
 export const getJSON = async (src, settings) => {
   const response = (settings)
     ? await fetch(src, settings)
-    : await(fetch)
+    : await fetch(src)
   ;
   return await response.json();
 };
