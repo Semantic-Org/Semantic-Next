@@ -23,8 +23,8 @@ function renderASTtoText({ast, data, snippets}) {
   const container = document.createElement('div');
   render(result, container);
 
-  // get html but remove lit comments
   let html = container.innerHTML;
+  // remove lit comments from html
   html = html.replace(/<!--[\s\S]*?-->/g, '').trim();
 
   return html;
@@ -217,32 +217,33 @@ const expressionTests = [
   },
   {
     name: 'Inline object and array',
-    expression: `doSomething ({ key: 'value' }) [1, 2, 3]`,
+    expression: `doSomething { text: 'apple' } arr`,
     result: 'gotIt',
     data: {
-      doSomething: (obj, arr) => {
-        console.log(obj, arr);
+      doSomething(obj, arr) {
         // e.g. obj = { nested: { key: 'value' }, arr: [1,2,3] }
-        if (obj?.key === 'value' && arr?.length === 3) {
+        if (obj?.text === 'apple' && arr?.length === 3) {
           return 'gotIt';
         }
         return 'wrong';
-      }
+      },
+      arr: [1, 2, 3]
     }
   },
   {
     name: 'Nested inline object and array',
-    expression: `doSomething({ nested: { key: 'value' }, arr: [1, 2, 3] })`,
+    expression: `doSomething({ nested: { key: value }, arr: [1, 2, 3] })`,
     result: 'gotIt',
     data: {
-      doSomething: (obj) => {
+      doSomething(obj) {
         // e.g. obj = { nested: { key: 'value' }, arr: [1,2,3] }
-        if (obj?.nested?.key === 'value' && obj?.arr?.length === 3) {
+        if (obj?.nested?.key == 1 && obj?.arr?.length == 3) {
           return 'gotIt';
         }
         return 'wrong';
-      }
-    }
+      },
+      value: 1
+    },
   },
   {
     name: 'JS ternary operator in expression',
