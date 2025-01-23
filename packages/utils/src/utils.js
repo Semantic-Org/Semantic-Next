@@ -94,12 +94,18 @@ export const getKeyFromEvent = (event) => {
 --------------------*/
 
 export const getText = async (src, settings) => {
-  const response = await fetch(src, settings);
+  const response = (settings)
+    ? await fetch(src, settings)
+    : await(fetch)
+  ;
   return await response.text();
 };
 
 export const getJSON = async (src, settings) => {
-  const response = await fetch(src, settings);
+  const response = (settings)
+    ? await fetch(src, settings)
+    : await(fetch)
+  ;
   return await response.json();
 };
 
