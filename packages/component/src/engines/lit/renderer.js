@@ -299,8 +299,8 @@ export class LitRenderer {
     let result;
     if(includeHelpers) {
       context = {
+        ...this.helpers,
         ...context,
-        ...this.helpers
       };
       delete context.debugger; // this is a reserved word
     }
@@ -319,17 +319,17 @@ export class LitRenderer {
   // then looking up the value
   lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
 
-    // wrap {} or [] in parens
-    if(isString(expression)) {
-      expression = this.addParensToExpression(expression);
-    }
-
     // detect recursion
     if (visited.has(expression)) {
       // throw new Error(`Cyclical expression detected: "${expression}"`);
       return undefined;
     }
     visited.add(expression);
+
+    // wrap {} or [] in parens
+    if(isString(expression)) {
+      expression = this.addParensToExpression(expression);
+    }
 
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
@@ -380,16 +380,18 @@ export class LitRenderer {
       return literalValue;
     }
 
-    // check if this is a global helper
+    // retrieve this value from the data context
+    let dataValue = this.getDeepDataValue(data, token);
+    let value = this.accessTokenValue(dataValue, token, data);
+    if(value !== undefined) {
+      return value;
+    }
+
+    // otherwise check if this is a global helper
     const helper = this.helpers[token];
     if(isFunction(helper)) {
       return helper;
     }
-
-    // otherwise retrieve this value from the data context
-    let dataValue = this.getDeepDataValue(data, token);
-
-    return this.accessTokenValue(dataValue, token, data);
   }
 
   getDeepDataValue(obj, path) {
