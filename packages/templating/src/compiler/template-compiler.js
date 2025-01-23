@@ -386,6 +386,9 @@ class TemplateCompiler {
     else if (expression == 'false') {
       return false;
     }
+    else if (isString(expression) && expression.trim() !== '' && Number.isFinite(+expression)) {
+      return Number(expression);
+    }
     return expression;
   }
   parseTemplateString(expression = '') {
