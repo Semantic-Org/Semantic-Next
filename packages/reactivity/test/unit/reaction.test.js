@@ -1,13 +1,13 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction, Scheduler } from '@semantic-ui/reactivity';
 
 describe('Reaction', () => {
 
   beforeEach(() => {
     // Reset Reaction state before each test if needed
-    Reaction.current = null;
-    Reaction.pendingReactions.clear();
-    Reaction.afterFlushCallbacks = [];
+    Scheduler.current = null;
+    Scheduler.pendingReactions.clear();
+    Scheduler.afterFlushCallbacks = [];
   });
 
   describe('Basic Usage', () => {

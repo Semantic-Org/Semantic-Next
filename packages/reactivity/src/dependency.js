@@ -1,4 +1,4 @@
-import { Reaction } from './reaction.js';
+import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor() {
@@ -6,9 +6,9 @@ export class Dependency {
   }
 
   depend() {
-    if (Reaction.current) {
-      this.subscribers.add(Reaction.current);
-      Reaction.current.dependencies.add(this);
+    if (Scheduler.current) {
+      this.subscribers.add(Scheduler.current);
+      Scheduler.current.dependencies.add(this);
     }
   }
 
