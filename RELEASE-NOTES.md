@@ -5,11 +5,17 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 
-# Version 0.5.1
+# Version 0.6.0
 
+### Breaking Changes
 * Standard template syntax now defaults to reactiveData to avoid confusion when using subtemplates naively. You can still specify non reactive data using verbose syntax.
-* Fix issue with js expression passthrough to snippets and subtemplates
+
+### Improvements
 * Added cyclical detection to to expression lookup to avoid recursion
+
+### Bug Fixes
+* Fix bug with class names "classic syntax" for components with specs like button, menu etc
+* Fix issue with js expression passthrough to snippets and subtemplates
 
 # Version 0.5.0
 
