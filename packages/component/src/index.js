@@ -6,10 +6,3 @@ export { extractCSS } from './helpers/extract-css.js';
 
 export { defineComponent } from './define-component.js';
 export { WebComponentBase } from './web-component.js';
-
-// lit renderer
-export { LitRenderer } from './engines/lit/renderer.js';
-export { ReactiveDataDirective } from './engines/lit/directives/reactive-data.js';
-export { ReactiveConditionalDirective } from './engines/lit/directives/reactive-conditional.js';
-export { ReactiveEachDirective } from './engines/lit/directives/reactive-each.js';
-export { RenderTemplateDirective } from './engines/lit/directives/render-template.js';
