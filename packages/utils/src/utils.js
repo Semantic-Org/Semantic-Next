@@ -1493,6 +1493,3 @@ export const isClient = (() => {
   return typeof window !== 'undefined';
 })();
 
-
-import * as _ from './utils.js';
-export default _;

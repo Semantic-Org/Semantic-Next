@@ -2,7 +2,7 @@ import { $ } from '@semantic-ui/query';
 import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-import { LitRenderer } from '@semantic-ui/component';
+import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 

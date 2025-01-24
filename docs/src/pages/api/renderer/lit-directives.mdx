@@ -9,20 +9,14 @@ Semantic UI builds on [Lit's directive system](https://lit.dev/docs/templates/cu
 
 > **Advanced Use** - It is not recommended to use these directives directly unless you are building custom template functionality. The template syntax will automatically use the appropriate directive.
 
-## Import
-
-```javascript
-import { reactiveData } from '@semantic-ui/component';
-import { reactiveConditional } from '@semantic-ui/component';
-import { reactiveEach } from '@semantic-ui/component';
-import { renderTemplate } from '@semantic-ui/component';
-```
-
 ## Directives
 
 ### reactiveData
 
 Handles reactive data bindings in templates. Updates the DOM automatically when reactive values change.
+```javascript
+import { reactiveData } from '@semantic-ui/renderer';
+```
 
 ```javascript
 reactiveData(expression, options)
@@ -51,14 +45,16 @@ reactiveData(expression, options)
 
 #### Example
 
+Template syntax
 ```javascript
-// Template: {{ count }}
 const expr = reactiveData({
   expression: 'count',
   value: () => count.get()
 });
+```
 
-// With options
+Equivalent Directive
+```
 const expr = reactiveData({
   expression: 'content',
   value: () => content.get()
@@ -70,6 +66,10 @@ const expr = reactiveData({
 ### reactiveConditional 
 
 Handles conditional rendering in templates. Re-renders content when conditions change.
+
+```javascript
+import { reactiveConditional } from '@semantic-ui/renderer';
+```
 
 ```javascript
 reactiveConditional(options)
@@ -118,6 +118,10 @@ const conditional = reactiveConditional({
 Handles array iteration in templates. Re-renders when array content changes.
 
 ```javascript
+import { reactiveEach } from '@semantic-ui/renderer';
+```
+
+```javascript
 reactiveEach(options)
 ```
 
@@ -151,6 +155,10 @@ const list = reactiveEach({
 Renders sub-templates within a template. Manages template lifecycle and cleanup.
 
 ```javascript
+import { renderTemplate } from '@semantic-ui/renderer';
+```
+
+```javascript
 renderTemplate(options)
 ```
 
@@ -172,8 +180,13 @@ renderTemplate(options)
 
 #### Example
 
+Template syntax
+```sui
+{> header data=headerData}
+```
+
+Equivalent directive
 ```javascript
-// Template: {{> header data=headerData}}
 const template = renderTemplate({
   subTemplates: {
     header: HeaderTemplate
@@ -191,11 +204,13 @@ While these directives are typically used through template syntax, understanding
 
 ### Data Binding
 
-```javascript
-// Template syntax
-{{ value }}
+Template Syntax
+```sui
+{ value }
+```
 
-// Equivalent directive
+Equivalent Directive
+```javascript
 reactiveData({
   expression: 'value',
   value: () => value.get()
@@ -204,15 +219,17 @@ reactiveData({
 
 ### Conditional Rendering
 
-```javascript
-// Template syntax
-{{#if condition}}
+Template syntax
+```sui
+{#if condition}
   content
-{{else}}
+{else}
   alternate
-{{/if}}
+{/if}
+```
 
-// Equivalent directive
+Equivalent Directive
+```javascript
 reactiveConditional({
   condition: () => condition.get(),
   content: () => html`content`,
@@ -225,13 +242,15 @@ reactiveConditional({
 
 ### Iteration
 
-```javascript
-// Template syntax
-{{#each items as item}}
-  {{ item.name }}
-{{/each}}
+Template syntax
+```sui
+{#each items as item}
+  { item.name }
+{/each}
+```
 
-// Equivalent directive
+Equivalent Directive
+```javascript
 reactiveEach({
   over: () => items.get(),
   content: (item) => html`${item.name}`,
@@ -241,11 +260,13 @@ reactiveEach({
 
 ### Sub-templates
 
-```javascript
-// Template syntax
-{{> header data=headerData}}
+Template syntax
+```sui
+{> header data=headerData}
+```
 
-// Equivalent directive
+Equivalent Directive
+```javascript
 renderTemplate({
   templateName: 'header',
   data: headerData,

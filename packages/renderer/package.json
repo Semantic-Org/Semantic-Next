@@ -1,13 +1,19 @@
 {
-  "name": "@semantic-ui/templating",
+  "name": "@semantic-ui/renderer",
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
+  "peerDependencies": {
+    "lit": "^3.1.2"
+  },
+  "devDependencies": {
+    "lit": "^3.1.2"
+  },
   "dependencies": {
-    "@semantic-ui/renderer": "^0.6.1",
-    "@semantic-ui/query": "^0.6.1",
     "@semantic-ui/reactivity": "^0.6.1",
+    "@semantic-ui/templating": "^0.6.1",
     "@semantic-ui/utils": "^0.6.1"
   },
   "version": "0.6.1"

@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from 'lit-html';
 
-import { LitRenderer } from '@semantic-ui/component';
+import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateHelpers } from '@semantic-ui/templating';
 
 /**
