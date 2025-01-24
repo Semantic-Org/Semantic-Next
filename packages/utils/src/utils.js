@@ -710,6 +710,75 @@ export const moveToBack = (array = [], callbackOrValue) => {
   return moveItem(array, callbackOrValue, 'last');
 };
 
+
+/* In perf testing in Chrome 131
+  this seems like a reasonable crossover
+  lodash puts this at 120
+  <https://jsperf.app/quzoto/3>
+*/
+const ARRAY_SIZE_THRESHOLD = 58;
+
+/* Returns the common items between two arrays */
+export const intersection = (...arrays) => {
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return [...new Set(arrays[0])];
+
+  const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
+
+  const [first, ...rest] = arrays;
+  const firstUnique = [...new Set(first)];
+
+  if (useSet) {
+    const sets = rest.map(arr => new Set(arr));
+    return firstUnique.filter(item => sets.every(set => set.has(item)));
+  }
+
+  return firstUnique.filter(item => rest.every(arr => arr.includes(item)));
+};
+
+/* Returns the difference between two arrays */
+export const difference = (...arrays) => {
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return [...new Set(arrays[0])];
+
+  const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
+
+  const [first, ...rest] = arrays;
+  const firstUnique = [...new Set(first)];
+
+  if (useSet) {
+    const sets = rest.map(arr => new Set(arr));
+    return firstUnique.filter(item => !sets.some(set => set.has(item)));
+  }
+
+  return firstUnique.filter(item => !rest.some(arr => arr.includes(item)));
+};
+
+/* Returns only items unique to an array */
+export const uniqueItems = (...arrays) => {
+  if (arrays.length <= 1) return [];
+
+  const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
+
+  if (useSet) {
+    const sets = arrays.map(arr => new Set(arr));
+    return arrays.flatMap((arr, i) =>
+      [...new Set(arr)].filter(item =>
+        !sets.some((set, j) => i !== j && set.has(item))
+      )
+    );
+  }
+
+  return arrays.flatMap((arr, i) =>
+    [...new Set(arr)].filter(item =>
+      !arrays.some((otherArr, j) => i !== j && otherArr.includes(item))
+    )
+  );
+};
+
 /*-------------------
        Objects
 --------------------*/

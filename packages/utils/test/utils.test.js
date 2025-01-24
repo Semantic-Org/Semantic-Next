@@ -25,6 +25,9 @@ import { tokenize,
   hashCode,
   hasProperty,
   inArray,
+  intersection,
+  difference,
+  uniqueItems,
   isArguments,
   isArray,
   isEmpty,
@@ -614,6 +617,81 @@ describe('Type Checking Utilities', () => {
         ]);
     });
   });
+
+  describe('intersection', () => {
+    it('returns common elements between arrays', () => {
+      expect(intersection([1, 2, 3], [2, 3, 4], [3, 4, 5])).toEqual([3]);
+    });
+
+    it('handles arrays with no common elements', () => {
+      expect(intersection([1, 2], [3, 4], [5, 6])).toEqual([]);
+    });
+
+    it('returns array for single input', () => {
+      expect(intersection([1, 1, 2, 2])).toEqual([1, 2]);
+    });
+
+    it('returns empty array for no input', () => {
+      expect(intersection()).toEqual([]);
+    });
+
+    it('handles arrays with duplicates', () => {
+      expect(intersection([1, 1, 2], [1, 2, 2], [1, 1, 1])).toEqual([1]);
+    });
+
+    it('maintains element order from first array', () => {
+      expect(intersection([3, 1, 2], [2, 3, 1], [1, 2, 3])).toEqual([3, 1, 2]);
+    });
+
+  });
+
+  describe('difference', () => {
+    it('returns elements only in first array', () => {
+      expect(difference([1, 2, 3], [2, 3, 4], [3, 4, 5])).toEqual([1]);
+    });
+
+    it('returns first array when no others provided', () => {
+      expect(difference([1, 1, 2])).toEqual([1, 2]);
+    });
+
+    it('returns empty array for no input', () => {
+      expect(difference()).toEqual([]);
+    });
+
+    it('handles arrays with no common elements', () => {
+      expect(difference([1, 2], [3, 4], [5, 6])).toEqual([1, 2]);
+    });
+
+    it('handles arrays with duplicates', () => {
+      expect(difference([1, 1, 2], [2, 2], [2, 3])).toEqual([1]);
+    });
+
+    it('maintains element order', () => {
+      expect(difference([3, 1, 2], [2], [3])).toEqual([1]);
+    });
+
+  });
+
+  describe('uniqueItems', () => {
+    it('returns elements unique to each array', () => {
+      expect(uniqueItems([1, 2], [2, 3], [3, 4])).toEqual([1, 4]);
+    });
+
+    it('returns empty array for single input array', () => {
+      expect(uniqueItems([1, 2, 3])).toEqual([]);
+    });
+
+    it('returns empty array for no input', () => {
+      expect(uniqueItems()).toEqual([]);
+    });
+
+    it('handles arrays with duplicates', () => {
+      expect(uniqueItems([1, 1, 2], [2, 2, 3], [3, 3, 4])).toEqual([1, 4]);
+    });
+
+  });
+
+
   describe('sortBy', () => {
     it('should sort by a simple key', () => {
       const input = [{a: 2}, {a: 3}, {a: 1}];
