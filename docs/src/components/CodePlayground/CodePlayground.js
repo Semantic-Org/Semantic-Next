@@ -361,10 +361,8 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     const files = self.getFileArray({ filter });
     const matchingFile = firstMatch(files, file => (file.filename == selectedFile));
     if(matchingFile) {
-      console.log(filter, matchingFile);
       return matchingFile?.filename;
     }
-    console.log(filter, firstMatch(files, file => !file.hidden)?.filename);
     return firstMatch(files, file => !file.hidden)?.filename;
   },
   getFirstPageFile() {
