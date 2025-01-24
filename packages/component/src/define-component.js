@@ -186,6 +186,7 @@ export const defineComponent = ({
           attribute,
           attributeValue: newValue,
           properties: webComponent.properties,
+          oldValue,
           componentSpec
         });
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });

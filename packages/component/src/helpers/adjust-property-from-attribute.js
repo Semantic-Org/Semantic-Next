@@ -1,4 +1,4 @@
-import { get, each, unique, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
+import { get, each, unique, difference, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -40,7 +40,7 @@ const tokenizeSpaces = (string) => {
   - The option is the attribute "primary" or "primary=true"
   - The option is a class class="primary"
 */
-export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, properties, componentSpec}) => {
+export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, properties, componentSpec, oldValue}) => {
   // This is used to search for potential values that should match to the canonical value.
   // This is because we support swapping ordering and spaces for dashes
 
@@ -132,7 +132,25 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
     // syntax <ui-button class="large primary"></ui-button>
     // we want to check attribute for each class
     if (attribute == 'class' && attributeValue) {
-      each(attributeValue.split(' '), (className) => {
+
+
+      // trigger callback for each removed/added class
+      const previousClasses = isString(oldValue)
+        ? oldValue.split(' ')
+        : []
+      ;
+      const currentClasses =  attributeValue.split(' ');
+      const classesToRemove = difference(previousClasses, currentClasses);
+      const classesToAdd = difference(currentClasses, previousClasses);
+      each(classesToRemove, (className) => {
+        adjustPropertyFromAttribute({
+          el,
+          attribute: className,
+          attributeValue: null,
+          componentSpec
+        });
+      });
+      each(classesToAdd, (className) => {
         adjustPropertyFromAttribute({
           el,
           attribute: className,
