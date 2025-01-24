@@ -108,7 +108,6 @@ const settings = {
     'page.html': 1,
     'page.css': 1,
     'page.js': 1,
-
   },
 
   // how to split up code in panel view
@@ -120,8 +119,11 @@ const settings = {
     'page.html': (1 / 9 * 100),
     'page.css': (1 / 9 * 100),
     'page.js': (1 / 9 * 100),
-
   },
+
+  // additional files which should be considered page files
+  // for purpose of separate menus
+  additionalPageFiles: [],
 
   // default left right panel width
   panelGroupWidth: [50, 50]
@@ -301,14 +303,17 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
   },
   getFileArray({filter} = {}) {
     let files = [];
+    const isPageFile = (filename) => {
+      return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));
+    };
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
       if(!self.shouldCombineMenus()) {
         // only have left/right menus when its horizontally stacked
-        if(filter == 'main' && fileData?.filename?.startsWith('page')) {
+        if(filter == 'main' && isPageFile(fileData?.filename)) {
           return;
         }
-        if(filter == 'page' && !fileData?.filename?.startsWith('page')) {
+        if(filter == 'page' && !isPageFile(fileData?.filename)) {
           return;
         }
       }
