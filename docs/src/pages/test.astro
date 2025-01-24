@@ -3,9 +3,16 @@ import Body from '../layouts/Body.astro';
 import TopBar from '@components/TopBar.astro';
 
 import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
-import {TestComponent} from '@components/Test/';
+import {UIButton} from '@semantic-ui/core';
 const menu = [];
 ---
 <Body padded>
-<TestComponent client:only></TestComponent>
+  <UIButton client:only class="disabled one">Test</UIButton>
+  <UIButton client:only class="toggle">Toggle</UIButton>
+  <script>
+    import { $ } from '@semantic-ui/query';
+    $('.toggle').on('click', () => {
+      $('.one').toggleClass('disabled');
+    });
+  </script>
 </Body>
