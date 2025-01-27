@@ -1,7 +1,8 @@
 {
-  "name": "SUI",
+  "name": "SUI (UI Template)",
   "scopeName": "source.sui",
   "fileTypes": ["sui", "html"],
+
   "patterns": [
     {
       "include": "#html"
@@ -13,6 +14,7 @@
       "include": "#control-structures"
     }
   ],
+
   "repository": {
     "html": {
       "patterns": [
@@ -21,24 +23,32 @@
         }
       ]
     },
+
     "sui-expressions": {
       "patterns": [
         {
           "name": "meta.template.expression.sui",
-          "begin": "{{|{(?!{)",
+          "begin": "(\\{\\{|\\{(?!\\{))",
           "beginCaptures": {
-            "0": { "name": "punctuation.definition.template-expression.begin.sui" }
+            "0": {
+              "name": "punctuation.definition.template-expression.begin.sui"
+            }
           },
-          "end": "}}|}(?!})",
+          "end": "(\\}\\}|\\}(?!\\}))",
           "endCaptures": {
-            "0": { "name": "punctuation.definition.template-expression.end.sui" }
+            "0": {
+              "name": "punctuation.definition.template-expression.end.sui"
+            }
           },
           "patterns": [
-            { "include": "#expression-content" }
+            {
+              "include": "#expression-content"
+            }
           ]
         }
       ]
     },
+
     "expression-content": {
       "patterns": [
         { "include": "#keywords" },
@@ -51,15 +61,12 @@
         { "include": "#parentheses" }
       ]
     },
-    "variables-and-functions": {
-      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\b",
-      "name": "variable.parameter.sui"
-    },
+
     "keywords": {
       "patterns": [
         {
           "name": "keyword.control.sui",
-          "match": "\\b(if|else|else\\s+if|each|in|snippet|template|slot)\\b"
+          "match": "(#[a-zA-Z_][a-zA-Z0-9_]*)|(\\/[a-zA-Z_][a-zA-Z0-9_]*)|\\b(if|else|else\\s+if|each|in|snippet|template|slot)\\b"
         },
         {
           "name": "keyword.operator.logical.sui",
@@ -71,6 +78,7 @@
         }
       ]
     },
+
     "operators": {
       "patterns": [
         {
@@ -83,6 +91,7 @@
         }
       ]
     },
+
     "strings": {
       "patterns": [
         {
@@ -109,18 +118,26 @@
         }
       ]
     },
+
     "numbers": {
       "name": "constant.numeric.sui",
-      "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+      "match": "\\b\\d+(\\.\\d+)?\\b"
     },
+
     "booleans": {
       "name": "constant.language.boolean.sui",
       "match": "\\b(true|false)\\b"
     },
+
+    "variables-and-functions": {
+      "match": "\\b(@?[a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*\\b",
+      "name": "variable.parameter.sui"
+    },
+
     "objects": {
       "name": "meta.object.sui",
       "begin": "\\bobject\\b",
-      "end": "(?=}}|}(?!}))",
+      "end": "(?=\\}\\}|\\}(?!\\}))",
       "patterns": [
         {
           "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)",
@@ -132,6 +149,7 @@
         { "include": "#expression-content" }
       ]
     },
+
     "parentheses": {
       "begin": "\\(",
       "end": "\\)",
@@ -139,16 +157,20 @@
         { "include": "#expression-content" }
       ]
     },
+
     "control-structures": {
       "patterns": [
         {
           "name": "meta.control.each.sui",
-          "begin": "({\\s*(#each)\\s+)",
+          "begin": "(\\{\\s*(#each)\\s+)",
           "beginCaptures": {
             "1": { "name": "meta.brace.curly.sui" },
             "2": { "name": "keyword.control.each.sui" }
           },
-          "end": "}",
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
           "patterns": [
             {
               "match": "\\b(in)\\b",
@@ -159,31 +181,37 @@
         },
         {
           "name": "meta.control.if.sui",
-          "begin": "({\\s*(#if)\\s+)",
+          "begin": "(\\{\\s*(#if)\\s+)",
           "beginCaptures": {
             "1": { "name": "meta.brace.curly.sui" },
             "2": { "name": "keyword.control.if.sui" }
           },
-          "end": "}",
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
           "patterns": [
             { "include": "#expression-content" }
           ]
         },
         {
           "name": "meta.control.else-if.sui",
-          "begin": "({\\s*(else\\s+if)\\s+)",
+          "begin": "(\\{\\s*(else\\s+if)\\s+)",
           "beginCaptures": {
             "1": { "name": "meta.brace.curly.sui" },
             "2": { "name": "keyword.control.else-if.sui" }
           },
-          "end": "}",
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
           "patterns": [
             { "include": "#expression-content" }
           ]
         },
         {
           "name": "meta.control.else.sui",
-          "match": "({\\s*(else)\\s*})",
+          "match": "(\\{\\s*(else)\\s*\\})",
           "captures": {
             "1": { "name": "meta.brace.curly.sui" },
             "2": { "name": "keyword.control.else.sui" }

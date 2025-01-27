@@ -16,6 +16,8 @@
   --code-grey: #656565;
   --code-default: #c9d1d9;
   --code-blue: var(--primary-text-color);
+  --code-red: #FFADAD;
+  --code-white: var(--standard-60);
 
   --playground-code-background: #080C10;
   --playground-code-comment-color: #444444;
@@ -41,6 +43,22 @@
   --playground-code-attribute-color: var(--code-blue);
   --playground-code-callee-color: var(--code-purple);
 
+  --playground-code-attribute-color: var(--primary-text-color);
+  --playground-code-bracket: var(--code-grey);
+
+  --playground-code-tag-color: var(--code-purple);
+  --playground-code-templating-html-string: var(--code-blue);
+  --playground-code-templating-attribute: var(--code-grey);
+  --playground-code-templating-html-quote: var(--code-grey);
+  --playground-code-templating-html-string: var(--code-white);
+  --playground-code-templating-quote: var(--code-grey);
+  --playground-code-templating-string: var(--code-white);
+  --playground-code-templating-keyword: var(--code-red);
+  --playground-code-templating-variable: var(--code-blue);
+
+
+  --playground-tab-bar-background: #ffffff;
+  --playground-bar-height: 32px;
 }
 
 @layer playground.component {

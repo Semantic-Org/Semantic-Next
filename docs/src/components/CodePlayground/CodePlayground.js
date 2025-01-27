@@ -14,6 +14,8 @@ import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
 
 import { addSearch } from './lib/codemirror-search.js';
+import { addSimpleMode } from './lib/codemirror-simple.js';
+import { defineSyntax } from './lib/codemirror-syntax.js';
 
 import 'playground-elements/playground-project.js';
 import 'playground-elements/playground-file-editor.js';
@@ -458,7 +460,11 @@ const onCreated = ({self, attachEvent}) => {
 };
 
 const onRendered = ({ self, state }) => {
+
+  // external mods to codemirror
   addSearch(CodeMirror);
+  addSimpleMode(CodeMirror);
+  defineSyntax(CodeMirror);
 
   self.addPanelSettings();
   requestIdleCallback(() => {

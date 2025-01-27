@@ -1,14 +1,24 @@
 import { defineComponent, adoptStylesheet } from '@semantic-ui/component';
 
 import codeMirrorCSS from './lib/codemirror.css?raw';
-
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const createComponent = ({self, settings, data, $, $$}) => ({
+const state = {
+  initialized: false, // avoid the flash when mode is set from changing file types
+};
+
+const createComponent = ({self, settings, state, data, $, $$}) => ({
 
   initialize() {
     // nothing yet
+    state.initialized.set(false);
+  },
+
+  getClassMap() {
+    return {
+      initialized: state.initialized.get()
+    };
   },
 
   configureCodeEditors() {
@@ -16,6 +26,16 @@ const createComponent = ({self, settings, data, $, $$}) => ({
     if(el) {
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
       self.modifyCodeMirror(el._codemirror);
+    }
+    if(data.filename.search('.html') !== -1) {
+      requestAnimationFrame(() => {
+        const cm = $$('playground-code-editor').get(0)?._codemirror;
+        cm.setOption('mode', 'text/ui-template');
+        state.initialized.set(true);
+      });
+    }
+    else {
+      state.initialized.set(true);
     }
   },
 
@@ -149,7 +169,7 @@ const events = {
   }
 };
 
-const onRendered = ({ self }) => {
+const onRendered = ({ self, data }) => {
   self.configureCodeEditors();
 };
 
@@ -159,6 +179,7 @@ const CodePlaygroundFile = defineComponent({
   createComponent,
   onRendered,
   events,
+  state,
 });
 
 export default CodePlaygroundFile;

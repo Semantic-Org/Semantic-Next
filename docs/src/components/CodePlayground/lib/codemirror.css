@@ -11,7 +11,7 @@
 
 .CodeMirror-foldmarker {
   color: var(--white-40);
-  background: var(--standard-5) var(--angled-gradient);
+  background: var(--standard-10) var(--angled-gradient);
   border-radius: var(--border-radius);
   font-size: var(--medium);
   vertical-align: 3px;
@@ -25,4 +25,29 @@
 .CodeMirror-foldmarker:hover {
   background-color: #183a528f;
   color: var(--primary-text-color);
+}
+.cm-bracket:not(.cm-tag) {
+  color: var(--playground-code-bracket);
+}
+.cm-html.cm-quote {
+  color: var(--playground-code-templating-html-quote);
+}
+.cm-html.cm-string {
+  color: var(--playground-code-templating-html-string);
+}
+.cm-html.cm-templating.cm-string {
+  color: var(--playground-code-templating-html-string);
+}
+.cm-operator.cm-attribute,
+.cm-name.cm-attribute {
+  color: var(--playground-code-templating-attribute);
+}
+.cm-keyword.cm-templating {
+  color: var(--playground-code-templating-keyword);
+}
+.cm-variable.cm-templating {
+  color: var(--playground-code-templating-variable);
+}
+.cm-string.cm-templating {
+  color: var(--playground-code-templating-string);
 }
