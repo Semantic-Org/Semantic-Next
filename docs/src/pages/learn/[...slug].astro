@@ -42,7 +42,6 @@ const fileFolders = ['problem', 'example'];
 let files;
 let panelIndexes;
 await asyncEach(fileFolders, async (folder) => {
-  console.log('getting');
   files = await getExampleFiles({
     contentID: lesson.id,
     allFiles: allLessonFiles,
@@ -54,7 +53,6 @@ await asyncEach(fileFolders, async (folder) => {
     includeLog: false,
     emptyIfAllGenerated: true,
   });
-  console.log('got');
   if(isEmpty(files)) {
     return true;
   }
