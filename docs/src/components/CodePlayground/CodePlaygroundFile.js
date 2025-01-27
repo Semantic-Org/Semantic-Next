@@ -18,7 +18,7 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
   getClassMap() {
     return {
       initialized: state.initialized.get()
-    }
+    };
   },
 
   configureCodeEditors() {
