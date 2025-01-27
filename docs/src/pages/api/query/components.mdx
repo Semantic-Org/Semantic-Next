@@ -1,0 +1,127 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component Interaction
+icon: box
+description: API reference for interacting with Semantic UI components externally
+---
+
+Semantic UI components provide several methods for interacting with component instances from outside the component itself. These methods are particularly useful for initializing, configuring, and accessing component functionality programmatically.
+
+> **Important Note** - Please be sure to read the [component documentation](/components) for more information on the usage of these helpers.
+
+## getComponent
+
+Retrieves the [component instance](/components/create#instance) from a web component.
+
+### Syntax
+```javascript
+$('selector').getComponent()
+```
+
+### Returns
+The component instance if found, otherwise `undefined`.
+
+### Usage
+```javascript
+const menu = $('ui-menu').getComponent();
+if (menu) {
+  menu.selectIndex(2);
+}
+```
+
+> **Access Component Methods** - `getComponent()` allows you to access methods and properties defined in the component's `createComponent` function.
+
+## settings
+
+Initializes or updates [a component's settings](/components/rendering#settings) programmatically.
+
+### Syntax
+```javascript
+$('selector').settings(settingsObject)
+```
+
+> **Passing Functions** - `settings()` is particularly useful for passing data to your component that cannot be stringified into an attribute, or that is easier to retreive from javascript.
+
+### Parameters
+| Name           | Type   | Description                           |
+|----------------|--------|---------------------------------------|
+| settingsObject | Object | An object containing setting key-value pairs |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('ui-panel').settings({
+  getNaturalSize: (panel, { direction, minimized }) => {
+    // Custom logic for determining panel size
+    return { width: 300, height: 200 };
+  }
+});
+```
+
+
+## initialize
+
+Initializes a component with settings, typically used before the component is rendered in the DOM.
+
+### Syntax
+```javascript
+$('selector').initialize(settingsObject)
+```
+
+> **Using Initialize** - Initialize helps in scenarios where you would like to pass in settings before the component is rendered and can help facilitate load-order issues for some front end architectures.
+
+### Parameters
+| Name           | Type   | Description                           |
+|----------------|--------|---------------------------------------|
+| settingsObject | Object | An object containing setting key-value pairs |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```html
+<script>
+$('ui-panel').initialize({
+  direction: 'vertical',
+  minSize: 100,
+  maxSize: 500
+});
+</script>
+<ui-panel></ui-panel>
+```
+
+> **Early Initialization** - `initialize()` allows you to set up component settings even before the component is rendered, which can be useful in single-page applications or when working with dynamically loaded content.
+
+## Additional Information
+
+### Practical Usage
+
+While both `settings()` and `initialize()` are used to configure components, they have different use cases:
+
+- `settings()` is typically used after a component is already rendered in the DOM, allowing you to update its configuration dynamically.
+- `initialize()` is used to set up initial configurations, often before the component is fully rendered. It's particularly useful in scenarios where you need to set up components that haven't been added to the DOM yet.
+
+### Example
+
+Here's an example demonstrating how to interact with a [`circle-expand` sample component](examples/event-binding) using these methods:
+
+```javascript
+// Get the component instance
+const circle = $('circle-expand').getComponent();
+
+// Use a component method
+circle.increaseWidth();
+
+// Update settings
+$('circle-expand').settings({
+  delta: 100 // Change the increment/decrement amount
+});
+
+// Initialize a new component before it's rendered
+$('circle-expand').initialize({
+  width: 300,
+  height: 300
+});
+```

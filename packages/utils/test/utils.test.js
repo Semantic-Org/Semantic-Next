@@ -25,6 +25,9 @@ import { tokenize,
   hashCode,
   hasProperty,
   inArray,
+  intersection,
+  difference,
+  uniqueItems,
   isArguments,
   isArray,
   isEmpty,
@@ -43,6 +46,9 @@ import { tokenize,
   last,
   mapObject,
   memoize,
+  moveItem,
+  moveToFront,
+  moveToBack,
   onlyKeys,
   noop,
   pick,
@@ -61,6 +67,7 @@ import { tokenize,
   tokenize,
   unique,
   values,
+  weightedObjectSearch,
   where,
   wrapFunction
 } from '@semantic-ui/utils';
@@ -498,6 +505,193 @@ describe('Type Checking Utilities', () => {
 
   });
 
+  describe('moveItem', () => {
+    it('should move item to a specific index when using number', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 2, 1)).toEqual([1, 2, 3, 4]);
+      expect(moveItem(arr, 1, 3)).toEqual([2, 3, 4, 1]);
+      expect(moveItem(arr, 4, 0)).toEqual([4, 2, 3, 1]);
+    });
+
+    it('should move item to first position when using "first"', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 3, 'first')).toEqual([3, 1, 2, 4]);
+    });
+
+    it('should move item to last position when using "last"', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 2, 'last')).toEqual([1, 3, 4, 2]);
+    });
+
+    it('should handle moving item that matches predicate function', () => {
+      const arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ];
+      expect(moveItem(arr, item => item.name === 'Jane', 0))
+        .toEqual([
+          { id: 2, name: 'Jane' },
+          { id: 1, name: 'John' },
+          { id: 3, name: 'Bob' }
+        ]);
+    });
+
+    it('should clamp target index to valid array bounds', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveItem(arr, 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
+      expect(moveItem(arr, 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
+    });
+
+    it('should return original array if item not found', () => {
+      const arr = [1, 2, 3, 4];
+      const originalArr = [...arr];
+      expect(moveItem(arr, 5, 0)).toEqual(originalArr);
+      expect(moveItem(arr, x => x > 10, 0)).toEqual(originalArr);
+    });
+
+    it('should not modify array if source and target indices are the same', () => {
+      const arr = [1, 2, 3, 4];
+      const originalArr = [...arr];
+      expect(moveItem(arr, 2, 1)).toEqual(originalArr); // 2 is already at index 1
+    });
+
+    it('should handle arrays with single item', () => {
+      const arr = [1];
+      expect(moveItem(arr, 1, 0)).toEqual([1]);
+      expect(moveItem(arr, 1, 'first')).toEqual([1]);
+      expect(moveItem(arr, 1, 'last')).toEqual([1]);
+    });
+  });
+
+  describe('moveToFront', () => {
+    it('should be equivalent to moveItem with "first"', () => {
+      const arr1 = [1, 2, 3, 4];
+      const arr2 = [...arr1];
+      expect(moveToFront(arr1, 3)).toEqual(moveItem(arr2, 3, 'first'));
+    });
+
+    it('should move matching item to front of array', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveToFront(arr, 3)).toEqual([3, 1, 2, 4]);
+    });
+
+    it('should handle predicate function', () => {
+      const arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ];
+      expect(moveToFront(arr, item => item.name === 'Jane'))
+        .toEqual([
+          { id: 2, name: 'Jane' },
+          { id: 1, name: 'John' },
+          { id: 3, name: 'Bob' }
+        ]);
+    });
+  });
+
+  describe('moveToBack', () => {
+    it('should be equivalent to moveItem with "last"', () => {
+      const arr1 = [1, 2, 3, 4];
+      const arr2 = [...arr1];
+      expect(moveToBack(arr1, 2)).toEqual(moveItem(arr2, 2, 'last'));
+    });
+
+    it('should move matching item to end of array', () => {
+      const arr = [1, 2, 3, 4];
+      expect(moveToBack(arr, 2)).toEqual([1, 3, 4, 2]);
+    });
+
+    it('should handle predicate function', () => {
+      const arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ];
+      expect(moveToBack(arr, item => item.name === 'Jane'))
+        .toEqual([
+          { id: 1, name: 'John' },
+          { id: 3, name: 'Bob' },
+          { id: 2, name: 'Jane' }
+        ]);
+    });
+  });
+
+  describe('intersection', () => {
+    it('returns common elements between arrays', () => {
+      expect(intersection([1, 2, 3], [2, 3, 4], [3, 4, 5])).toEqual([3]);
+    });
+
+    it('handles arrays with no common elements', () => {
+      expect(intersection([1, 2], [3, 4], [5, 6])).toEqual([]);
+    });
+
+    it('returns array for single input', () => {
+      expect(intersection([1, 1, 2, 2])).toEqual([1, 2]);
+    });
+
+    it('returns empty array for no input', () => {
+      expect(intersection()).toEqual([]);
+    });
+
+    it('handles arrays with duplicates', () => {
+      expect(intersection([1, 1, 2], [1, 2, 2], [1, 1, 1])).toEqual([1]);
+    });
+
+    it('maintains element order from first array', () => {
+      expect(intersection([3, 1, 2], [2, 3, 1], [1, 2, 3])).toEqual([3, 1, 2]);
+    });
+
+  });
+
+  describe('difference', () => {
+    it('returns elements only in first array', () => {
+      expect(difference([1, 2, 3], [2, 3, 4], [3, 4, 5])).toEqual([1]);
+    });
+
+    it('returns first array when no others provided', () => {
+      expect(difference([1, 1, 2])).toEqual([1, 2]);
+    });
+
+    it('returns empty array for no input', () => {
+      expect(difference()).toEqual([]);
+    });
+
+    it('handles arrays with no common elements', () => {
+      expect(difference([1, 2], [3, 4], [5, 6])).toEqual([1, 2]);
+    });
+
+    it('handles arrays with duplicates', () => {
+      expect(difference([1, 1, 2], [2, 2], [2, 3])).toEqual([1]);
+    });
+
+    it('maintains element order', () => {
+      expect(difference([3, 1, 2], [2], [3])).toEqual([1]);
+    });
+
+  });
+
+  describe('uniqueItems', () => {
+    it('returns elements unique to each array', () => {
+      expect(uniqueItems([1, 2], [2, 3], [3, 4])).toEqual([1, 4]);
+    });
+
+    it('returns empty array for single input array', () => {
+      expect(uniqueItems([1, 2, 3])).toEqual([]);
+    });
+
+    it('returns empty array for no input', () => {
+      expect(uniqueItems()).toEqual([]);
+    });
+
+    it('handles arrays with duplicates', () => {
+      expect(uniqueItems([1, 1, 2], [2, 2, 3], [3, 3, 4])).toEqual([1, 4]);
+    });
+
+  });
+
+
   describe('sortBy', () => {
     it('should sort by a simple key', () => {
       const input = [{a: 2}, {a: 3}, {a: 1}];
@@ -798,6 +992,48 @@ describe('Object Utilities', () => {
     it('mapObject should create an object with the same keys and mapped values', () => {
       const result = mapObject({ a: 1, b: 2 }, (val) => val * 2);
       expect(result).toEqual({ a: 2, b: 4 });
+    });
+    it('should create a new object without mutating the original', () => {
+      const original = { a: 1, b: 2, c: 3 };
+      const mapped = mapObject(original, x => x * 2);
+
+      // Check mapped values are correct
+      expect(mapped).toEqual({ a: 2, b: 4, c: 6 });
+
+      // Verify original wasn't mutated
+      expect(original).toEqual({ a: 1, b: 2, c: 3 });
+
+      // Verify it's a different object reference
+      expect(mapped).not.toBe(original);
+    });
+
+    it('should pass both value and key to the callback', () => {
+      const original = { a: 1, b: 2 };
+      const spy = vi.fn((value, key) => value);
+
+      mapObject(original, spy);
+
+      expect(spy).toHaveBeenCalledWith(1, 'a');
+      expect(spy).toHaveBeenCalledWith(2, 'b');
+    });
+
+    it('should handle empty objects', () => {
+      const original = {};
+      const mapped = mapObject(original, x => x * 2);
+      expect(mapped).toEqual({});
+    });
+
+    it('should handle non-numeric values', () => {
+      const original = { a: 'hello', b: 'world' };
+      const mapped = mapObject(original, str => str.toUpperCase());
+      expect(mapped).toEqual({ a: 'HELLO', b: 'WORLD' });
+      expect(original).toEqual({ a: 'hello', b: 'world' });
+    });
+
+    it('should preserve keys while mapping values', () => {
+      const original = { key1: 1, key2: 2, key3: 3 };
+      const mapped = mapObject(original, x => x.toString());
+      expect(mapped).toEqual({ key1: '1', key2: '2', key3: '3' });
     });
   });
 
@@ -1271,6 +1507,37 @@ describe('function utilities', () => {
       const result3 = memoizedFunction.call(context, 4);
       expect(result3).toBe(8);
       expect(originalFunction).toHaveBeenCalledTimes(2);
+    });
+    it('should allow custom hashing function', () => {
+      const originalFunction = vi.fn((obj) => obj.a + obj.b);
+      const customHash = (args) => args[0].id;
+      const memoizedFunction = memoize(originalFunction, customHash);
+
+      const result1 = memoizedFunction({id: 1, a: 2, b: 3});
+      expect(result1).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction({id: 1, a: 3, b: 4});
+      expect(result2).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same id
+
+      const result3 = memoizedFunction({id: 2, a: 2, b: 3});
+      expect(result3).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(2); // Should be called again due to different id
+    });
+
+    it('should handle edge cases with custom hashing', () => {
+      const originalFunction = vi.fn((a, b) => a + b);
+      const alwaysSameHash = () => 'same';
+      const memoizedFunction = memoize(originalFunction, alwaysSameHash);
+
+      const result1 = memoizedFunction(2, 3);
+      expect(result1).toBe(5);
+      expect(originalFunction).toHaveBeenCalledTimes(1);
+
+      const result2 = memoizedFunction(4, 5);
+      expect(result2).toBe(5); // Note: This is the memoized result, not 9
+      expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same hash
     });
   });
 

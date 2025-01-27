@@ -1,19 +1,22 @@
 <div class="menu">
-  <ui-menu value={{tab}} items={{getMenu}} class="preview" part="menu"></ui-menu>
-  {{#if exampleURL}}
+  <ui-menu value={tab} items={getMenu} class="preview" part="menu"></ui-menu>
+  {#if exampleURL}
     <div class="links">
-      <a href="{{exampleURL}}" class="sandbox link">
+      <a href="{exampleURL}" class="sandbox link">
         <ui-icon codesandbox link></ui-icon>
       </a>
     </div>
-  {{/if}}
+  {/if}
 </div>
-{{#if is tab 'preview'}}
-  <playground-preview part="preview" project="source"> </playground-preview>
-{{else if is tab 'console'}}
+{#if is tab 'preview'}
+  <playground-preview part="preview" project="source" html-file="page.html"> </playground-preview>
+{else if is tab 'console'}
   console
-{{else if is tab 'ast'}}
+{else if is tab 'ast'}
+  <header>
+      The AST is a representation of the template content, for more information <a href="/api/templating/ast" target="_blank">see the AST docs</a>.
+  </header>
   <pretty-json expand="4">
-    {{getAST}}
+    {getAST}
   </pretty-json>
-{{/if}}
+{/if}

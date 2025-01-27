@@ -1,34 +1,63 @@
 ---
 layout: '@layouts/Guide.astro'
 ---
-
-
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 ## Introduction
 
-Query is a library built specifically for web components to make it easy to interact with a page's DOM and shadow DOM in a chainable way.
+Query is a library built to make it easy to interact with a page's DOM and shadow DOM in a chainable way. Query was custom built to make it easy to handle web components and access their inner DOM trees using a single jQuery like syntax.
 
 Query includes many of the helpers which make it easy to interact with web components, emit and consume events, traverse the DOM tree, retreive common values and much more.
 
-It is extremely small and uses modern browser APIs, defering to native implementations wherever possible.
+> **API Reference** -- For a more thorough explanation of functionality visit the [API reference guide](/api/query).
 
-## Installation
+### Why Create a Library
 
-Query can be used as a standalone package or alongside templating and other core features.
+Web components are built around encapsulating portions of the DOM in the Shadow DOM, which prevent easy access or reference from other scopes.
 
-```bash
-npm install @semantic-ui/query
+Many common usage patterns for developers require traversing the DOM, but with native APIs these will stop at shadow DOM root or slotted content boundaries. Doing this deeply or recursively is also basically impossible without writing your own helpers.
+
+Query helps give you all the utilities like [`closest`](/api/query/dom-traversal#closest), [`find`](/api/query/dom-traversal#find), [`siblings`](/api/query/dom-traversal#siblings) but while giving you options for traversing these boundaries.
+
+```javascript title="Crossing Shadow Boundaries"
+import { $$ } from '@semantic-ui/query'
+
+// this will not return content in shadow dom
+let el1 = document.querySelector('my-button .button');
+
+// this will return content in shadow dom
+const el2 = $$('my-button .button');
 ```
 
+```javascript title="Crossing Slotted Boundaries"
+import { $$ } from '@semantic-ui/query'
 
-## Usage
+// this will not query the web component shadow dom
+let el1 = document.querySelector('my-component .content');
 
+// $$ will pierce shadow dom and slotted boundaries
+$$('my-component .content');
 
-### DOM Usage with $
+// from inside a web component into its slots
+// this will not return content in slot
+let el1 = this.shadowRoot.querySelector('slot .content');
+
+// this will return content in slot
+const el2 = $$('slot .content', { root: this.shadowRoot });
+```
+
+## Accessing DOM
+
 
 Query provides two exports `$` and `$$`.
 
 `$` is used for querying the normal browser DOM and `$$` is for querying the shadow DOM (the DOM present in web components).
+
+### $ - Standard DOM
+
+`$` is designed to allow for extremely performant chaining for normal DOM nodes.
+
+> **$ Performance** - Query uses native `querySelector` and modern DOM APIs which means the performance implications are low when using `$`.
 
 ```javascript
 import { $ } from '@semantic-ui/query';
@@ -36,7 +65,26 @@ import { $ } from '@semantic-ui/query';
 const $div = $('div');
 ```
 
-#### Chaining
+
+### $$ - Shadow DOM
+
+`$$` allows for accessing DOM nodes regardless of where they are in the page.
+
+Web components have portions of their DOM encapsulated in what is known as the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) which can only be accessed with `el.shadowRoot.querySelector`, and portions of shadow DOM have content [slots](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot) which can only access content via `el.slottedNodes`.
+
+The `$$` helps traverse these boundaries to access children or parent nodes in a way similar to `$`.
+
+
+> **$$ Performance** - `$$` must pierce shadow DOM boundaries recursively which can reduce perfomance over `$`. For most use-cases this difference is negligible (less than 1ms), but for complex DOM trees the cost can be more significant. For this reason it is recommended to use `$$` only when necessary to avoid performance roadblocks in your app.
+
+### DOM Example
+
+The following example shows the difference in selectors between `$` and `$$` from inside a web component.
+
+<PlaygroundExample height="475" id="shadow-dom" direction="horizontal"></PlaygroundExample>
+
+## Chaining
+
 
 Query is built on the concept of chaining, which was originally pioneered by [jQuery](https://www.jquery.com), where method can be called in a pipeline processing the results of previous method calls.
 
@@ -47,16 +95,6 @@ const pText = $('div').find('p').text();
 ```
 
 To see more examples of chaining browse the Query API docs.
-
-
-### Shadow DOM Usage with $$
-
-Web components have portions of their DOM encapsulated in what is known as the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
-
-Typically native browsers cannot query this DOM without querying each shadow DOM root separately, however Query provides a separate export `$$` for this use-case allowing you to access DOM deeply nested inside web components.
-
-> `$$` is slightly less performant because it must pierce shadow DOM boundaries recursively unlike `$` which uses native `document.querySelectorAll`. For most but the most extreme use-cases this difference is negligible but it is recommended to use `$$` only when interacting with web components.
-
 
 ### Additional Options
 
@@ -99,7 +137,7 @@ exportGlobals();
 
 ### Components
 
-`$` and `$$` are integrated into all lifecycle callbacks and events in Semantic UI components.
+`$` and `$$` are integrated into all [lifecycle callbacks](/components/lifecycle) and events in Semantic UI components.
 
 ```javascript
 const createComponent = ({$, $$}) => ({
@@ -127,6 +165,8 @@ const events =  {
 
 A few additional helpers are provided specifically for using Query in browser environments.
 
+For more information see the [API reference](/api/query/basic).
+
 ### Restoring Globals
 If you need to restore the previous values before calling export globals.
 ```javascript
@@ -139,7 +179,7 @@ exportGlobals();
 restoreGlobals();
 ```
 
-### Custom Alias
+### Custom Aliases
 You can also choose to use Query as a custom alias
 ```javascript
 import { useAlias } from '@semantic-ui/query';

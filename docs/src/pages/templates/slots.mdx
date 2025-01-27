@@ -11,10 +11,10 @@ Slots allow your component to expose locations that can receive arbitrary html. 
 
 ### Default Slot
 
-Using the syntax `{{>slot}}` without a name will create a default slot which will allow all html nested inside a web component to be slotted.
+Using the syntax `{>slot}` without a name will create a default slot which will allow all html nested inside a web component to be slotted.
 
-```handlbars
-{{> slot}}
+```sui
+{> slot}
 ```
 ```html
 <my-component>
@@ -27,13 +27,13 @@ Using the syntax `{{>slot}}` without a name will create a default slot which wil
 Named slots allow content that is specified with same name for `slot` to be slotted when a component is used.
 
 Template
-```handlebars
+```sui
 <div class="card">
   <div class="header">
-    {{> slot name="header"}}
+    {> slot name="header"}
   </div>
   <div class="content">
-    {{> slot name="content"}}
+    {> slot name="content"}
   </div>
 </div>
 ```
@@ -75,6 +75,6 @@ Both allow you to pass simple string contents into your component however there 
 * Slots are easy to style from page css without `part` syntax
 
 #### Cons
-* Slotted content is not available in a template data context, meaning they cant be used for expressions like conditionals. i.e. `{{#if slottedContent}}`
+* Slotted content is not available in a template data context, meaning they cant be used for expressions like conditionals. i.e. `{#if slottedContent}`
 * Slotted content is unavailable during server side rendering
 * Slotted content is harder to style from inside a component `::slotted` pseudo selector does not work with other css selectors like `:first-child`

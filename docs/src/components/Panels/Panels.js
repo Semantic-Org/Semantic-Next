@@ -78,7 +78,13 @@ const createComponent = ({self, el, settings, $}) => ({
   setPanelRendered(el) {
     self.renderedPanels.push(el);
     if(self.renderedPanels.length == self.panels.length) {
-      requestAnimationFrame(() => self.setPanelInitialSizes());
+      if (document.visibilityState === 'visible') {
+        requestAnimationFrame(() => self.setPanelInitialSizes());
+      }
+      else {
+        // we cant rely on request animation frame if tab is not visible
+        self.setPanelInitialSizes();
+      }
     }
   },
 
@@ -140,7 +146,7 @@ const createComponent = ({self, el, settings, $}) => ({
   },
   setPanelInitialized(panel) {
     if(panel.component) {
-      panel.component.initialized.set(true);
+      panel.component.setInitialized();
     }
   },
   setPanelCalculatedSizes() {
@@ -599,7 +605,7 @@ const createComponent = ({self, el, settings, $}) => ({
     }
 
     /*
-      Standard (Postive Delta)
+      Standard (Positive Delta)
       ------------------------
       Growing Above / Left
       Shrinking Below / Right

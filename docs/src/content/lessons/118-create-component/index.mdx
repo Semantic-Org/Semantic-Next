@@ -1,0 +1,31 @@
+---
+title: Definining Behaviors
+category: 'Quickstart'
+subcategory: 'Components'
+selectedFile: component.js
+description: Using createComponent to add methods and properties to your component
+sort: '1.1.8'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
+---
+
+## Create Component
+
+`createComponent` is used to return the component instance. This is why createComponent is a function that returns an object.
+
+We have now added a new method on our component `dateSettings`, this is invoked directly from our template to return the settings object for the date.
+
+## Everything Destructured
+
+The primary way callbacks interface with data in a component is through destructuring [lifecycle callback arguments](/components/lifecycle#callback-arguments). There are many things you can access from callbacks, special flags like `isServer`, `isDarkMode`, the rendering `el`, the `state`, or `settings`, or much more.
+
+In our example we are now accessing `settings` to pull the **run-time settings for this instance of the component**.
+
+Underneath the hood `settings`  uses a [`ProxyObject`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), so the value is always up to date without a `get()` or `value` accessor.

@@ -1,0 +1,146 @@
+---
+layout: '@layouts/Guide.astro'
+title: Abstract Syntax Tree (AST)
+icon: server
+description: Reference for the Abstract Syntax Tree structure used in Semantic UI Templating
+---
+
+The Abstract Syntax Tree (AST) is a representation of your template that is used by a rendering pipeline to generate your component.
+
+## Overview
+
+When the `TemplateCompiler` [compiles a template string](/api/templating/template-compiler#compile), it generates an AST. This intermediate representation serves several purposes:
+
+* Can be used to precompile templates for use with SSR.
+* Allows for render immutability if templating syntax is adjusted
+* Can be used in development to debug issues with templates
+* Can be used to render an AST to different rendering pipelines outside of default Lit rendering engine.
+
+## AST Node Types
+
+The AST consists of various node types, each representing a specific element or control structure in the template. Below are the main types of nodes you'll encounter in the AST:
+
+### HTML
+
+Represents static HTML content.
+
+#### Example
+```javascript
+{
+  type: 'html',
+  html: '<div class="container">'
+}
+```
+
+### Expression
+
+Represents a dynamic expression to be evaluated.
+
+#### Example
+```javascript
+{
+  type: 'expression',
+  value: 'user.name',
+  unsafeHTML: false
+}
+```
+
+### If Conditional
+
+Represents an if/else if/else control structure.
+
+#### Example
+```javascript
+{
+  type: 'if',
+  condition: 'user.isLoggedIn',
+  content: [/* nested AST nodes */],
+  branches: [
+    {
+      type: 'else',
+      content: [/* nested AST nodes */]
+    }
+  ]
+}
+```
+
+### Each Loop
+
+Represents a loop structure for iterating over arrays or objects.
+
+#### Example
+```javascript
+{
+  type: 'each',
+  over: 'items',
+  as: 'item',
+  content: [/* nested AST nodes */]
+}
+```
+
+### Template
+
+Represents a nested template or partial.
+
+#### Example
+```javascript
+{
+  type: 'template',
+  name: 'partialName',
+  data: {
+    key1: 'value1',
+    key2: 'value2'
+  }
+}
+```
+
+### Snippet
+
+Represents a reusable template snippet.
+
+#### Example
+```javascript
+{
+  type: 'snippet',
+  name: 'snippetName',
+  content: [/* nested AST nodes */]
+}
+```
+
+### Slot
+
+Represents a slot for content projection in web components.
+
+#### Example
+```javascript
+{
+  type: 'slot',
+  name: 'header'
+}
+```
+
+### SVG
+
+Represents SVG content, which may require special handling during rendering.
+
+#### Example
+```javascript
+{
+  type: 'svg',
+  content: [/* nested AST nodes representing SVG content */]
+}
+```
+
+## Rendering Engines
+
+Semantic UI ships with a Lit rendering engine, but Semantic UI templates can hypothetically be used with any custom renderering engine that supports dynamic expressions.
+
+For example, a basic renderer might:
+
+* Render 'html' nodes directly
+* Evaluate and insert the results of 'expression' nodes
+* Conditionally render the content of 'if' nodes based on the condition
+* Iterate over the 'over' property for 'each' nodes, rendering the content for each iteration
+* Recursively render nested templates and snippets
+
+By working with this AST structure, you can create highly optimized and flexible rendering systems that suit your specific needs while leveraging the powerful parsing capabilities of the Semantic UI Templating system.

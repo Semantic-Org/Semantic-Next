@@ -1,0 +1,54 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: API Reference
+description: An API reference documenting available packages
+---
+import { UICards, UICard } from '@semantic-ui/core';
+
+> **Getting Started** - It is recommended to check out the [user docs](/introduction) for an overview of the library before beginning here. The API references are designed to be used primarily as a reference guide while working with code in the library.
+
+<UICards two stackable>
+  <UICard
+    header="UI Components"
+    icon="package"
+    href="/api/component"
+    description="A reference guide for functionality available in @semantic-ui/component"
+  ></UICard>
+  <UICard
+    header="Templating Helpers"
+    icon="book"
+    href="/api/helpers"
+    description="A reference guide for helpers available inside templates rendered with @semantic-ui/templating."
+  ></UICard>
+  <UICard
+    header="Reactivity"
+    icon="cpu"
+    href="/api/reactivity"
+    description="A reference guide for using signals and reactions in @semantic-ui/reactivity."
+  ></UICard>
+  <UICard
+    header="Query"
+    icon="mouse-pointer"
+    href="/api/query"
+    description="A reference guide for functionality available in @semantic-ui/query."
+  ></UICard>
+  <UICard
+    header="Utils"
+    icon="tool"
+    href="/api/utils"
+    description="A guide to functions available in @semantic-ui/utils."
+  ></UICard>
+  <UICard
+    header="Template Compiler"
+    icon="table"
+    href="/api/utils"
+    description="A guide to compiling templates in the template compiler in @semantic-ui/templating."
+  ></UICard>
+  <UICard
+    header="Renderer"
+    icon="table"
+    href="/api/renderer"
+    description="A guide to for the packaged Lit Renderer for components."
+  ></UICard>
+</UICards>

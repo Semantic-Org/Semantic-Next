@@ -462,7 +462,8 @@
   "pluralTagName":  "ui-icons",
   "pluralDescription":  "Icons can exist together as a group",
   "pluralVariations": [
-    "colored"
+    "colored",
+    "size"
   ],
   "examples": {
     "defaultAttributes": {

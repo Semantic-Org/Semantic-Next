@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { each, noop, isServer, isClient, camelToKebab, kebabToCamel } from '@semantic-ui/utils';
 import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
@@ -9,8 +9,8 @@ import { WebComponentBase } from './web-component.js';
 export const defineComponent = ({
   template = '',
   ast,
-  css = false,
-  pageCSS = false,
+  css = '',
+  pageCSS = '',
   componentSpec = false,
   tagName,
   delegatesFocus = false,
@@ -36,6 +36,8 @@ export const defineComponent = ({
   subTemplates = {},
   renderingEngine,
 } = {}) => {
+
+
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
@@ -89,6 +91,8 @@ export const defineComponent = ({
         return unsafeCSS(css);
       }
 
+      static template = litTemplate;
+
       static properties = WebComponentBase.getProperties({
         properties,
         componentSpec,
@@ -100,6 +104,7 @@ export const defineComponent = ({
       constructor() {
         super();
         this.css = css;
+        this.componentSpec = componentSpec;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
         this.setDefaultSettings({settings, componentSpec});
       }
@@ -109,21 +114,32 @@ export const defineComponent = ({
         super.connectedCallback();
       }
 
-      createRenderRoot() {
-        this.useLight = this.getAttribute('expose') !== null;
-        if (this.useLight) {
-          this.addPageCSS(webComponent, 'page', this.css, { scopeSelector: this.tagName });
-          this.storeOriginalContent.apply(this);
-          return this;
-        }
-        else {
-          const renderRoot = super.createRenderRoot(this.css);
-          return renderRoot;
-        }
+      triggerAttributeChange() {
+        each(webComponent.properties, (propSettings, property) => {
+          const attribute = camelToKebab(property);
+
+          let newValue = this[property];
+          // this is necessary to handle how lit handles boolean attributes
+          // otherwise you get <ui-button primary="true">
+          if(!propSettings.alias && attribute && newValue === true) {
+            this.setAttribute(attribute, '');
+          }
+          adjustPropertyFromAttribute({
+            el: this,
+            attribute,
+            properties: webComponent.properties,
+            attributeValue: newValue,
+            componentSpec
+          });
+        });
       }
 
       willUpdate() {
-        super.willUpdate();
+        if(isServer) {
+          // property change callbacks wont call on SSR
+          // we need this to get proper settings for server render
+          this.triggerAttributeChange();
+        }
         if(!this.template) {
           this.template = litTemplate.clone({
             data: this.getData(),
@@ -135,24 +151,13 @@ export const defineComponent = ({
           }
           // make this easier to access in dom
           this.component = this.template.instance;
+          this.dataContext = this.template.data;
         }
-        // property change callbacks wont call on SSR
-        if(isServer) {
-          each(webComponent.properties, (propSettings, property) => {
-            const newValue = this[property];
-            adjustPropertyFromAttribute(this, property, newValue, componentSpec);
-          });
-        }
+        super.willUpdate();
       }
 
       firstUpdated() {
         super.firstUpdated();
-        // shared variations are passed through to singular
-        /*this.watchSlottedContent({
-          singularTag,
-          componentSpec,
-          properties: webComponent.properties
-        });*/
       }
 
       updated() {
@@ -176,15 +181,33 @@ export const defineComponent = ({
 
       attributeChangedCallback(attribute, oldValue, newValue) {
         super.attributeChangedCallback(attribute, oldValue, newValue);
-        adjustPropertyFromAttribute(this, attribute, newValue, componentSpec);
+        adjustPropertyFromAttribute({
+          el: this,
+          attribute,
+          attributeValue: newValue,
+          properties: webComponent.properties,
+          oldValue,
+          componentSpec
+        });
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
       }
 
+      /*******************************
+                  Settings
+      *******************************/
+
+
+      getSettings() {
+        return this.getSettingsFromConfig({componentSpec, properties: webComponent.properties });
+      }
+      setSetting(name, value) {
+        this[name] = value;
+      }
+
       getData() {
-        let settings = this.getSettings({componentSpec, properties: webComponent.properties });
+        let settings = this.getSettings();
         let data = {
           ...settings,
-          ...this.getContent({componentSpec}),
         };
         if (!isServer) {
           data.darkMode = this.isDarkMode();
@@ -207,6 +230,9 @@ export const defineComponent = ({
         return html;
       }
     };
+    if(isClient && customElements.get(tagName)) {
+      return webComponent;
+    }
     customElements.define(tagName, webComponent);
   }
   return tagName ? webComponent : litTemplate;

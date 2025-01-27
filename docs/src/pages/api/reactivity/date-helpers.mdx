@@ -1,0 +1,41 @@
+---
+layout: '@layouts/Guide.astro'
+icon: calendar
+title: Date Helpers
+description: API reference for Date Helpers in Semantic UI's reactivity system
+---
+
+Date Helpers are methods available on Signal instances that contain Date objects. These helpers provide a convenient way to update the date value reactively.
+
+## now
+
+Sets the value of the Signal to the current date and time.
+
+### Syntax
+```javascript
+signal.now()
+```
+
+### Returns
+
+Date - The new Date object representing the current date and time.
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const currentTime = new Signal(new Date());
+
+console.log(currentTime.get()); // Output: current date and time
+
+// After some time...
+currentTime.now();
+console.log(currentTime.get()); // Output: updated current date and time
+```
+
+### Notes
+
+- The `now()` method is particularly useful when you need to update a reactive date variable to the current time, such as for timestamps or when refreshing time-based data.
+- Remember that like all Signal modifications, using `now()` will trigger any reactive computations that depend on this variable.
+- The returned Date object represents the time at which `now()` was called, not when it's later accessed.

@@ -1,0 +1,34 @@
+---
+layout: '@layouts/Guide.astro'
+icon: code
+title: Web Components
+description: An overview of web components
+---
+
+Web components are an underlying web standard designed for sharing UI across apps.
+
+They can be difficult to work with (see [web component gotchas](/web-component/gotchas)) but the underlying technology is sound, highly performant, and [well adopted by browsers](https://caniuse.com/custom-elementsv1).
+
+## Key Features
+### Blazingly Fast
+
+Web components are native to the browser and so they are fast, almost as fast as vanilla JS, see [benchmark comparisons](https://krausest.github.io/js-framework-benchmark/2024/table_chrome_121.0.6167.86_win.html#eyJmcmFtZXdvcmtzIjpbImtleWVkL2xpdCIsImtleWVkL2xpdC1odG1sIiwia2V5ZWQvcHJlYWN0LXNpZ25hbHMiLCJrZXllZC9yZWFjdC1ob29rcy11c2UtdHJhbnNpdGlvbiIsImtleWVkL3JlYWN0LXJlZHV4Iiwia2V5ZWQvc3ZlbHRlIiwia2V5ZWQvc3ZlbHRlLWNsYXNzaWMiLCJrZXllZC92YW5pbGxhanMiLCJrZXllZC92dWUiXSwiYmVuY2htYXJrcyI6WyIwMV9ydW4xayIsIjAyX3JlcGxhY2UxayIsIjAzX3VwZGF0ZTEwdGgxa194MTYiLCIwNF9zZWxlY3QxayIsIjA1X3N3YXAxayIsIjA2X3JlbW92ZS1vbmUtMWsiLCIwN19jcmVhdGUxMGsiLCIwOF9jcmVhdGUxay1hZnRlcjFrX3gyIiwiMDlfY2xlYXIxa194OCIsIjIxX3JlYWR5LW1lbW9yeSIsIjIyX3J1bi1tZW1vcnkiLCIyM191cGRhdGU1LW1lbW9yeSIsIjI1X3J1bi1jbGVhci1tZW1vcnkiLCIyNl9ydW4tMTBrLW1lbW9yeSIsIjQxX3NpemUtdW5jb21wcmVzc2VkIiwiNDJfc2l6ZS1jb21wcmVzc2VkIiwiNDNfZmlyc3QtcGFpbnQiXSwiZGlzcGxheU1vZGUiOjF9)
+
+### Native Web Standard
+
+Web components are built right into the browser with improvements being made each year, for instance [open-styleable](https://github.com/WICG/webcomponents/issues/909) shadow DOM roots will soon clear the way for easy style overrides.
+
+### Well Adopted By Community
+
+Most user frameworks already support web components or are planning major overhauls to support them in upcoming versions. This means that the community is aligned that web components will be here for the long haul.
+
+For more information on web component compatibility see related guides
+  * [React](/compatibility/react)
+  * [Angular](/compatibility/angular)
+  * [VueJS](/compatibility/vue)
+  * [Svelte](/compatibility/svelte)
+
+### Portable Across UI Frameworks
+
+If you build your underlying base UI components with Semantic's component system, you can keep your UI even if you decide to change the underlying framework used by your website.
+

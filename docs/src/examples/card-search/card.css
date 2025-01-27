@@ -1,0 +1,80 @@
+:host {
+  --input-padding: 6px 6px;
+}
+
+.card {
+  cursor: pointer;
+  background: var(--angled-gradient);
+  box-shadow: var(--raised-shadow);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: row;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    background-color: var(--standard-10);
+    transform: translateY(-3%);
+  }
+
+  .image {
+    display: block;
+    width: 30%;
+    height: auto;
+    max-height: var(--card-image-max-height);
+    object-fit: cover;
+    border-radius: var(--right-attached-border-radius);
+  }
+
+  .content {
+
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: var(--compact-spacing);
+
+    .main {
+      flex-grow: 1;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--standard-100);
+    }
+
+    .detail {
+      display: flex;
+      flex-direction: row;
+      font-size: 11px;
+      flex-wrap: wrap;
+      color: var(--standard-40);
+      margin-bottom: var(--compact-spacing);
+    }
+  }
+
+  .meta {
+    margin-top: var(--compact-spacing);
+    padding-top: var(--compact-spacing);
+    border-top: var(--border);
+    display: flex;
+    gap: var(--compact-spacing);
+
+    & > * {
+      color: var(--standard-90);
+      font-weight: bold;
+    }
+  }
+
+  .emphasis {
+    color: var(--primary-text-color);
+  }
+
+  .small {
+    font-size: var(--small);
+  }
+  .right {
+    margin-left: auto;
+  }
+
+}

@@ -6,15 +6,16 @@ import { getSidebarMenu } from '@helpers/navigation.js';
 import { Template } from '@semantic-ui/component';
 
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
+const canExpand = true;
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
 	<NavMenu
 		client:load
     menu={menu}
-    useAccordion=true
-    expandAll={expandAll}
-    activeURL={Astro.url.pathname}
+    use-accordion=true
+    expand-all={expandAll || false}
+    activeurl={Astro.url.pathname}
   />
   <slot name="after"/>
 </sidebar>

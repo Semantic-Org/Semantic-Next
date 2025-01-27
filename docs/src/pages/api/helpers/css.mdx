@@ -1,0 +1,189 @@
+---
+layout: '@layouts/Guide.astro'
+title: CSS Helpers
+icon: layout
+description: API reference for CSS-related template helpers
+---
+
+CSS helpers provide utilities for working with CSS classes and styles in templates.
+
+## Functions
+
+### classes
+Joins CSS classes, optionally adding a space after the final class name.
+
+#### Template Syntax
+```sui
+<div class="{classes classNamesArray true}">Content</div>
+```
+
+#### Parameters
+| Name         | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| classNames   | array   |         | Array of class names |
+| spaceAfter   | boolean | true    | Whether to add a space after the final class name |
+
+#### Returns
+`string` - Joined class names.
+
+#### Example
+```sui
+<button class="{classes ['primary', size, color] true}">
+  {buttonText}
+</button>
+```
+
+### classIf
+Conditionally applies a CSS class.
+
+#### Template Syntax
+```sui
+<button class="{classIf isActive 'active' 'inactive'}">Click me</button>
+```
+
+#### Parameters
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| expr      | boolean |         | Condition to evaluate |
+| trueClass | string  | ''      | Class to apply if condition is true |
+| falseClass| string  | ''      | Class to apply if condition is false |
+
+#### Returns
+`string` - The resulting class name with a trailing space.
+
+#### Example
+```sui
+<li class="item {classIf isSelected 'selected' ''}">
+  {itemName}
+</li>
+```
+
+### classMap
+Applies multiple CSS classes based on conditions.
+
+#### Template Syntax
+```sui
+<div class="{classMap { active: isActive disabled: isDisabled} }">Content</div>
+```
+
+#### Parameters
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| classObj | object | Object with class names as keys and conditions as values |
+
+#### Returns
+`string` - Resulting class names with a trailing space.
+
+#### Example
+```sui
+<form class="{classMap (object
+  'form': true,
+  'loading': isLoading,
+  'error': hasErrors,
+  'success': isSubmitted
+)}">
+  <!-- Form content -->
+</form>
+```
+
+### activeIf
+Adds 'active' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<li class="{activeIf isCurrentPage}">Menu Item</li>
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'active ' if condition is true, otherwise an empty string.
+
+#### Example
+```sui
+<nav>
+  {#each menuItems}
+    <a href="{this.path}" class="{activeIf this.path === currentPath}">{this.name}</a>
+  {/each}
+</nav>
+```
+
+### selectedIf
+Adds 'selected' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<option {selectedIf isOptionSelected}>Option</option>
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'selected ' if condition is true, otherwise an empty string.
+
+#### Example
+```sui
+<select>
+  {#each options}
+    <option value="{value}" {selectedIf value === selectedValue}>{label}</option>
+  {/each}
+</select>
+```
+
+### disabledIf
+Adds 'disabled' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<button class="{disabledIf isButtonDisabled}">Submit</button>
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'disabled ' if condition is true, otherwise an empty string.
+
+#### Example
+```sui
+<div class="{disabledIf !isEditable}">
+  <input type="text" value="{inputValue}">
+</div>
+```
+
+### checkedIf
+Adds 'checked' class if expression is truthy.
+
+#### Template Syntax
+```sui
+<div class="checkbox {checkedIf isOptionChecked}">
+  <input type="checkbox" name="example">
+  <label>Check me</label>
+</div>
+```
+
+#### Parameters
+| Name | Type    | Description |
+|------|---------|-------------|
+| expr | boolean | Condition to evaluate |
+
+#### Returns
+`string` - 'checked ' if condition is true, otherwise an empty string.
+
+#### Example
+```sui
+{#each preferences}
+  <div class="checkbox {checkedIf this.enabled}">
+    <input type="checkbox" name="{this.name}">
+    <label>{this.label}</label>
+  </div>
+{/each}
+```

@@ -3,5 +3,6 @@
   --input-focused-border-color: var(--form-focused-border-color);
   --input-focused-background: var(--input-background);
   --input-focused-color: var(--input-text-color);
+  --input-focused-placeholder-color: var(--white-15);
   --input-focused-box-shadow: none;
 }

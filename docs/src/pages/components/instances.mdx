@@ -11,13 +11,14 @@ The `createComponent` callback can be used when [creating a component](/componen
 For instance you might need to invoke a behavior from:
 
 * **Outside Component**
-  * From the DOM
-  * Other components and subtemplates
+  * Inside your [component](#from-other-components) and its [subtemplates](#findparent)
+  * Externally using [the DOM](#from-dom)
+
 * **Inside Component**
-  * Lifecycle callbacks in your component
-  * Event handlers
-  * Keybindings
-  * Your component template
+  * From [lifecycle callbacks](/components/rendering#component-instance)
+  * From [event handlers](#from-events)
+  * From [keybindings](/components/keys)
+  * Inside your [component template](#in-templates)
 
 ### Creating Instances
 
@@ -110,11 +111,11 @@ const events = {
 
 ### In Templates
 
-Your template's [data context](/components/data) can be used to access values from your component instance directly.
+Your template's [data context](/components/rendering#data-context) can be used to access values from your component instance directly.
 
 ##### Templates
 ```html
-<p>Your name is {{getName}}</p>
+<p>Your name is {getName}</p>
 ```
 
 ### Accordion Example

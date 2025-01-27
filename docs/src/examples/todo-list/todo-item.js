@@ -1,11 +1,9 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { Reaction } from '@semantic-ui/reactivity';
-
 const css = await getText('./todo-item.css');
 const template = await getText('./todo-item.html');
 
-const createComponent = ({ self, data, reactiveVar, findParent, $ }) => ({
-  editing: reactiveVar(false),
+const createComponent = ({ self, data, signal, findParent, $ }) => ({
+  editing: signal(false),
   getClasses() {
     return {
       completed: data.todo.completed,
@@ -36,9 +34,9 @@ const events = {
   'click .destroy'({ event, self }) {
     self.removeTodo();
   },
-  'dblclick li'({ event, self, $ }) {
+  'dblclick li'({ event, self, afterFlush, $ }) {
     self.editing.set(true);
-    Reaction.afterFlush(() => {
+    afterFlush(() => {
       $('input.edit').focus();
     });
   },

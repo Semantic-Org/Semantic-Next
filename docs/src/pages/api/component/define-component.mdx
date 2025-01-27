@@ -1,0 +1,156 @@
+---
+layout: '@layouts/Guide.astro'
+title: Define Component
+icon: code
+description: API reference for defining components in Semantic UI
+---
+
+The `defineComponent` function is a core part of the Semantic UI Component system. It allows you to create web components or subtemplates with advanced features such as templating, state management, and event handling.
+
+> **API Reference Only** - Please refer to the [extensive component usage guide](/components/create) for how to use components in practices and [component examples](/examples/counter) for practical examples.
+
+### Usage Notes
+
+* When `tagName` is provided, the component is registered as a custom element and can be used in HTML like any other tag.
+* When creating a subtemplate, export the result of `defineComponent` to use it in other component by passing in through the `subTemplates` object
+
+## Import
+
+```javascript
+import { defineComponent } from '@semantic-ui/component';
+```
+
+## Usage
+
+`defineComponent` is used to define a new component. It can be used to define web components or components to be used elsewhere like subtemplates.
+
+### Syntax
+
+```javascript
+defineComponent(options)
+```
+
+### Parameters
+
+| Name    | Type   | Description                    |
+|---------|--------|--------------------------------|
+| options | Object | Configuration options for the component |
+
+#### Options
+
+| Name             | Type     | Description                                                |
+|------------------|-----------|------------------------------------------------------------|
+| tagName          | string   | The custom element name for the web component               |
+| template         | string   | The HTML template string for the component                  |
+| ast              | Object[] | Precompiled Abstract Syntax Tree of the template            |
+| css              | string   | CSS styles for the component                                |
+| pageCSS          | string   | Global CSS styles to be added when the component is defined |
+| state            | Object   | Initial state configuration for the component               |
+| events           | Object   | Event handlers for the component                            |
+| keys             | Object   | Key bindings for the component                              |
+| createComponent  | Function | Function that returns the component instance                |
+| onCreated        | Function | Callback function called when the component is created      |
+| onRendered       | Function | Callback function called when the component is rendered     |
+| onDestroyed      | Function | Callback function called when the component is destroyed    |
+| onThemeChanged   | Function | Callback function called when the theme changes             |
+| properties       | Object   | Custom properties for the component                         |
+| settings         | Object   | Settings for JavaScript functionality                       |
+| subTemplates     | Object   | Subtemplates used within this component                     |
+
+### Return Value
+
+* If `tagName` is provided: Returns the defined web component class.
+* If `tagName` is omitted: Returns a `Template` instance for use as a subtemplate.
+
+## Examples
+
+### Creating a Web Component
+
+```javascript
+defineComponent({
+  tagName: 'my-button',
+  template: '<button><slot></slot></button>',
+  css: 'button { background-color: blue; color: white; }',
+  events: {
+    'click button': ({ self }) => {
+      console.log('Button clicked!');
+    }
+  }
+});
+```
+
+### Creating a Subtemplate
+
+```javascript
+export const MySubtemplate = defineComponent({
+  template: '<div class="subtemplate">{{content}}</div>',
+  createComponent: ({ state }) => ({
+    content: state.content
+  }),
+  state: {
+    content: 'Default content'
+  }
+});
+```
+
+### Advanced Web Component with State and Lifecycle Methods
+
+```javascript
+defineComponent({
+  tagName: 'counter-component',
+  template: '<button>Clicks: {{count}}</button>',
+  state: {
+    count: 0
+  },
+  events: {
+    'click button': ({ self, state }) => {
+      state.count.set(state.count.get() + 1);
+    }
+  },
+  onCreated: ({ self, state }) => {
+    console.log('Counter created with initial count:', state.count.get());
+  },
+  onRendered: ({ self }) => {
+    console.log('Counter rendered');
+  },
+  onDestroyed: ({ self }) => {
+    console.log('Counter destroyed');
+  }
+});
+```
+
+## Using Subtemplates
+
+`defineComponent` can export components that can be consumed in other components as subTemplates.
+
+### Example
+
+
+```javascript title='row.js'
+// export row as subtemplate
+export const tableRow = defineComponent({
+  template: `<tr>
+    <td>{name}</td>
+    <td>{age}</td>
+  </tr>`,
+});
+```
+
+```javascript title=table.js
+// import row template
+import { tableRow } from './row.js';
+
+defineComponent({
+  tagName: 'parent-component',
+  template: `
+  <table><tbody>
+    {#each row in rows}
+      {>template name='tableRow' data=row}
+    {/each}
+  </tbody></table>
+  `,
+  subTemplates: {
+    tableRow
+  }
+});
+```

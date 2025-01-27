@@ -1,43 +1,8 @@
-import { isEqual } from '@semantic-ui/utils';
+import { Scheduler } from './scheduler.js';
+import { isEqual, clone } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 
 export class Reaction {
-
-  static current = null;
-  static pendingReactions = new Set();
-  static afterFlushCallbacks = [];
-  static isFlushScheduled = false;
-
-  static create(callback) {
-    const reaction = new Reaction(callback);
-    reaction.run();
-    return reaction;
-  }
-
-  static scheduleFlush() {
-    if (!Reaction.isFlushScheduled) {
-      Reaction.isFlushScheduled = true;
-      if (typeof queueMicrotask === 'function') {
-        // <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
-        queueMicrotask(() => Reaction.flush());
-      } else {
-        Promise.resolve().then(() => Reaction.flush());
-      }
-    }
-  }
-
-  static flush() {
-    Reaction.isFlushScheduled = false;
-    Reaction.pendingReactions.forEach(reaction => reaction.run());
-    Reaction.pendingReactions.clear();
-
-    Reaction.afterFlushCallbacks.forEach(callback => callback());
-    Reaction.afterFlushCallbacks = [];
-  }
-
-  static afterFlush(callback) {
-    Reaction.afterFlushCallbacks.push(callback);
-  }
 
   constructor(callback) {
     this.callback = callback;
@@ -51,13 +16,13 @@ export class Reaction {
     if (!this.active) {
       return;
     }
-    Reaction.current = this;
+    Scheduler.current = this;
     this.dependencies.forEach(dep => dep.cleanUp(this));
     this.dependencies.clear();
     this.callback(this);
     this.firstRun = false;
-    Reaction.current = null;
-    Reaction.pendingReactions.delete(this);
+    Scheduler.current = null;
+    Scheduler.pendingReactions.delete(this);
   }
 
   invalidate(context) {
@@ -65,8 +30,7 @@ export class Reaction {
     if(context) {
       this.context = context;
     }
-    Reaction.pendingReactions.add(this);
-    Reaction.scheduleFlush();
+    Scheduler.scheduleReaction(this);
   }
 
   stop() {
@@ -75,50 +39,44 @@ export class Reaction {
     this.dependencies.forEach(dep => dep.unsubscribe(this));
   }
 
+  // Static proxies for developer experience
+  static get current() { return Scheduler.current; }
+  static flush = Scheduler.flush;
+  static scheduleFlush = Scheduler.scheduleFlush;
+  static afterFlush = Scheduler.afterFlush;
+  static getSource = Scheduler.getSource;
 
-  /*
-    Makes sure anything called inside this function does not trigger reactions
-  */
+  static create(callback) {
+    const reaction = new Reaction(callback);
+    reaction.run();
+    return reaction;
+  }
+
   static nonreactive(func) {
-    const previousReaction = Reaction.current;
-    Reaction.current = null;
+    const previousReaction = Scheduler.current;
+    Scheduler.current = null;
     try {
       return func();
     } finally {
-      Reaction.current = previousReaction;
+      Scheduler.current = previousReaction;
     }
   }
 
-  /*
-    Makes sure function doesnt rerun when values dont change
-  */
-  static guard(f) {
-    if (!Reaction.current) {
+  static guard(f, equalCheck = isEqual) {
+    if (!Scheduler.current) {
       return f();
     }
     let dep = new Dependency();
     let value, newValue;
+    dep.depend();
     const comp = new Reaction(() => {
       newValue = f();
-      if (!comp.firstRun && !isEqual(newValue, value)) {
+      if (!comp.firstRun && !equalCheck(newValue, value)) {
         dep.changed();
       }
-      value = newValue;
+      value = clone(newValue);
     });
-    comp.run(); // Initial run to capture dependencies
-    dep.depend(); // Create dependency on guard function
-    return value;
-  }
-
-  static getSource() {
-    if (!Reaction.current || !Reaction.current.context || !Reaction.current.context.trace) {
-      console.log('No source available or no current reaction.');
-      return;
-    }
-    let trace = Reaction.current.context.trace;
-    trace = trace.split('\n').slice(2).join('\n');
-    trace = `Reaction triggered by:\n${trace}`;
-    console.info(trace);
-    return trace;
+    comp.run();
+    return newValue;
   }
 }

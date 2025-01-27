@@ -1,0 +1,40 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component API Reference
+icon: box
+description: API reference for the Semantic UI Component system
+---
+
+Component is the core library for defining UI components in Semantic UI and provides access to `defineComponent` the primary interface for creating new web components.
+
+> **Reference Guide Only** - It is recommended to check out the [user docs](/components) for a technical overview of components. This guide is purely as a reference guide for the package.
+
+## Installation
+
+To use Component, install the package:
+
+```bash
+npm install @semantic-ui/component
+```
+
+## Basic Usage
+
+```javascript
+import { defineComponent } from '@semantic-ui/component';
+
+defineComponent({
+  tagName: 'current-time',
+  template: `Time is <b>{formatDate time "h:mm:ss a"}</b>`,
+  css: 'b { color: var(--primary-text-color); }',
+  state: { time: new Date() },
+  onCreated({state}) {
+    setInterval(() => state.time.now(), 1000);
+  }
+});
+```
+
+## API Sections
+
+* [Define Component](/api/component/define-component) - Methods for defining and creating web components
+* [Web Component Base](/api/component/web-component-base) - Base class for Semantic UI web components
+* [Component Utilities](/api/component/utilities) - Utility functions used internally by the component package.

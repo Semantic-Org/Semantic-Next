@@ -4,32 +4,36 @@ title: Components
 icon: package
 description: An overview of component features
 ---
-## What are Components
+## Creating Components
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic UI provides a reactive framework for authoring web components that can be used to build custom UI using the same primitives as was used to build the UI framework.
+Semantic UI is a reactive framework to make it easier to build websites with web components by providing a robust set of tools that help avoid the common pitfalls that people experience when trying to leave front end frameworks like React, or Vue and "go native" with web components.
 
-> **Getting Started** - It is recommended to check out our [interactive tutorial](/tutorial) before getting started here. This is designed to get you up to speed before diving into the guides found here.
+> **Getting Started** - It's recommended to check out our [interactive tutorial](/learn/introduction) to introduce yourself to the features of Semantic UI before digging into the tech guides.
+
+Core features of Semantic UI
+
+* [Templating](/components/rendering) - An reactive templating system to render web components with [reactive expressions](/templates/expressions), [snippets](/templates/snippets), [subtemplating](/templates/subtemplates), [template helpers](templates/helpers), [loops](/templates/loops), [conditionals](/templates/conditionals), and more. An integrated [signals based reactivity system](/components/reactivity) make for precision updates. Supports [full composable components](api/component/define-component#using-subtemplates) in a similar fashion to React, Vue, Svelte or other front end frameworks.
+* [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
+* [DOM Manipulation](/query) - A jQuery like chainable DOM library that is built to handle the encapsulation of the shadow DOM.
+* [Events](/components/events) - Built in systems for handling event listeners, dispatching events and passing data through the DOM.
+* [Keybindings](/components/keys) - Fully featured keybinding library that makes every component fully accessible.
+* [Lifecycle Events](/components/lifecycle) - Feature packaged lifecycle events, built to make server side rendering robust and easy.
+* [Reactivity](/components/reactivity) - A powerful reactivity system based on signals but with [helpers to make your life easier](/api/reactivity).
+
+### Minimal Example
+The following is a minimal example to get you familiar with how components are defined.
+
+<PlaygroundExample id="minimal" height="300"></PlaygroundExample>
 
 ### Developer Experience
 
+
 Components provides everything you'd expect from other modern front end frameworks, but is developed specifically for web components.
 
-Each UI component you author will give you access to a custom html tag which you can compose just like you compose `<input>` `<p>` and other tags in your page.
+UI component can attach themselves to an html tags that can be used immediately in your site, or be used as partials inside other components.
 
-> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components are a native browser standard designed to allow for interchange between front end frameworks. Components created with `semantic-ui/component` can render in any [supported front end framework](framework-integration) or simply use the html tags directly in your app with vanilla js.
-
-Semantic UI components provide an overall framework for creating complex web apps using web components.
-
-* [Templating](/components/rendering) - An expressive signals based templating system that allows you to precisely reconstruct portions of a component when data changes with features like snippets, subtemplating, template helpers, control structures, looping, and more.
-* [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
-* [DOM Manipulation](/query) - A jQuery like chainable DOM manipulation library that is built to handle shadow DOM and nested components.
-* [Events](/components/events) - Robust systems for handling event listeners and dispatching custom events.
-* [Keybindings](/components/keys) - Built in keybinding attached to component lifecycles
-* [Lifecycle Events](/components/lifecycle) - Run code during creation, rendering and teardown
-* [Reactivity](/components/reactivity) - A powerful reactivity system based on signals for efficient updates.
-
-<PlaygroundExample id="minimal" height="300"></PlaygroundExample>
+> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components can render without compilation in the browser making them extremely potent and portable. All major frameworks support web components making them accessible and portable if you choose to write part or all of your stack using a major framework.
 
 ## Key Features
 
@@ -54,17 +58,17 @@ defineComponent({
 
 Components use a [built-in templating system](/components/rendering) that supports expressions, slots, conditionals, snippets, loops, and more.
 
-```handlebars
-{{#each user in users}}
+```sui
+{#each user in users}
   <div class="user">
-    {{#if user}}
-      <h2>{{user.name}}</h2>
-      <p>{{user.email}}</p>
-    {{else}}
+    {#if user}
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+    {else}
       <p>No info provided.</p>
-    {{/if}}
+    {/if}
   </div>
-{{/each}}
+{/each}
 ```
 
 ### Design System

@@ -1,4 +1,4 @@
-import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, camelToKebab } from '@semantic-ui/utils';
+import { get, each, unique, difference, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -13,6 +13,8 @@ import { get, each, unique, firstMatch, inArray, isString, kebabToCamel, camelTo
 
 */
 const SPACE_REGEX = /\s+/mg;
+
+const SPECIAL_ATTRIBUTES = ['disabled', 'value'];
 
 // allow 'arrow-down' or 'down-arrow'
 const reverseDashes = (string) => {
@@ -38,15 +40,16 @@ const tokenizeSpaces = (string) => {
   - The option is the attribute "primary" or "primary=true"
   - The option is a class class="primary"
 */
-export const adjustPropertyFromAttribute = (el, attribute, attributeValue, componentSpec) => {
-
+export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, properties, componentSpec, oldValue}) => {
   // This is used to search for potential values that should match to the canonical value.
   // This is because we support swapping ordering and spaces for dashes
 
   // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
   // i.e <ui-button left-attached="somevalue">
 
+
   const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
+
     // "arrow down" -> arrow-down
     optionValue = tokenizeSpaces(optionValue);
 
@@ -84,23 +87,44 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
 
 
   // this assigns the value to the DOM element
-  const setProperty = (property, value) => {
-
+  const setProperty = (attribute, value) => {
     // convert <div icon-after> to => el.iconAfter
-    property = kebabToCamel(property);
-
+    const property = kebabToCamel(attribute);
     if(value !== undefined) {
       el[property] = value;
+    }
+
+    // this appears to be necessary for special attributes like "disabled"
+    if(inArray(attribute, SPECIAL_ATTRIBUTES)) {
+      el.requestUpdate();
     }
   };
 
   // this removes the related propery from the element
-  const removeProperty = (property) => {
-
+  const removeProperty = (attribute) => {
     // convert <div icon-after> to => el.iconAfter
-    property = kebabToCamel(property);
+    const property = kebabToCamel(attribute);
+    el[property] = null;
 
-    el[property] = undefined;
+    // this appears to be necessary for special attributes like "disabled"
+    if(inArray(attribute, SPECIAL_ATTRIBUTES)) {
+      el.requestUpdate();
+    }
+  };
+
+  // this checks for boolean values like <ui-button disabled>
+  const isBooleanValue = (attribute, attributeValue) => {
+
+    // handles basic booleans of type Boolean in spec
+    const isBooleanType = componentSpec.propertyTypes[attribute] == Boolean;
+
+    // handles complex booleans where one value of allowed values is a identity, i.e. disabled, clickable-disabled
+    const isIdentityBoolean = componentSpec.optionAttributes[attribute] == attribute;
+
+    // this is a scenario where a grouping has a default styling like `animated`
+    const isAttributeClass = inArray(attribute, componentSpec.attributeClasses);
+
+    return (isBooleanType || isAttributeClass || isIdentityBoolean) && inArray(attributeValue, ['', true, attribute]);
   };
 
   if (componentSpec) {
@@ -108,29 +132,47 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
     // syntax <ui-button class="large primary"></ui-button>
     // we want to check attribute for each class
     if (attribute == 'class' && attributeValue) {
-      each(attributeValue.split(' '), (className) => {
-        adjustPropertyFromAttribute(el, className, true, componentSpec);
+
+
+      // trigger callback for each removed/added class
+      const previousClasses = isString(oldValue)
+        ? oldValue.split(' ')
+        : []
+      ;
+      const currentClasses =  attributeValue.split(' ');
+      const classesToRemove = difference(previousClasses, currentClasses);
+      const classesToAdd = difference(currentClasses, previousClasses);
+      each(classesToRemove, (className) => {
+        adjustPropertyFromAttribute({
+          el,
+          attribute: className,
+          attributeValue: null,
+          componentSpec
+        });
+      });
+      each(classesToAdd, (className) => {
+        adjustPropertyFromAttribute({
+          el,
+          attribute: className,
+          attributeValue: true,
+          componentSpec
+        });
       });
     }
 
     // syntax <ui-button size="large">
     // we can check if this property is defined
     else if (inArray(attribute, componentSpec.attributes)) {
-
-      // boolean attribute
-      if(componentSpec.propertyTypes[attribute] == Boolean && inArray(attributeValue, ['', true])) {
+      // check if this is a boolean value
+      if(isBooleanValue(attribute, attributeValue)) {
         attributeValue = true;
         setProperty(attribute, attributeValue);
         return;
       }
 
-      // this means the attribute was removed
+      // check if the attribute was removed (null)
       if(attributeValue === null) {
         removeProperty(attribute);
-        return;
-      }
-
-      if(attributeValue === undefined) {
         return;
       }
 
@@ -156,9 +198,38 @@ export const adjustPropertyFromAttribute = (el, attribute, attributeValue, compo
         optionAttributeValue: attributeValue
       });
 
+      // remove the matching attribute if the value is removed
+      // but ONLY if the current value is the option value
+      // this is because attribute changed handlers can fire in any order
+      if(matchingAttribute && attributeValue === null) {
+        if(el[matchingAttribute] == attribute) {
+          removeProperty(matchingAttribute);
+        }
+        return;
+      }
       if (matchingAttribute && matchingValue) {
         setProperty(matchingAttribute, matchingValue);
       }
+    }
+  }
+  else if(properties && attributeValue !== undefined && attribute.includes('-')) {
+
+    /* This handles the case of multiword properties like `useAccordion`
+       maps to <ui-menu use-accordion> or <ui-menu useaccordion>
+       the kebab case is just an alias which will update the base setting
+    */
+    const propertyName = kebabToCamel(attribute);
+    const attributeSettings = properties[attribute];
+    if(propertyName !== attribute && attributeSettings?.alias) {
+      const convertFunc = attributeSettings?.converter?.fromAttribute;
+      let propertyValue = (convertFunc)
+        ? convertFunc(attributeValue)
+        : attributeValue
+      ;
+      if(propertyValue) {
+        setProperty(propertyName, propertyValue);
+      }
+      return;
     }
   }
 

@@ -16,7 +16,7 @@ The only package necessary to create components is the `@semantic-ui/component` 
 npm install @semantic-ui/component
 ```
 
-## Creating Components
+## Defining Components
 
 `defineComponent` exported from `@semantic-ui/component` can be used to create a new web component.
 
@@ -51,6 +51,24 @@ defineComponent({
 
 In most real world use-cases you will need to provide additional information to `defineComponent`
 
+```javascript
+// for examples of each config option see below
+defineComponent({
+  createComponent, // function that returns component methods and props stored in DOM
+  template, // component template
+  css, // scoped css
+  pageCSS, // page css added with component
+  events, // dom events
+  keys, // keybinding events
+  state, // private reactive store
+  settings, // exposed settings
+  onCreated, // after attached to dom
+  onRendered, // after shadow dom rendered
+  onDestroyed, // when removed from dom
+  onThemeChanged, // callback when component theme changes
+});
+```
+
 * **createComponent** - An object returned from `createComponent` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
 * **Template** - The logic that controls how your html is rendered including conditionals, loops, subtemplates, and expressions. This can be passed in as a string `template` or rendered from a precompiled `ast`.
 * **CSS** - The `css` scoped to this component or that should be attached once to the page with the component,
@@ -64,10 +82,10 @@ In most real world use-cases you will need to provide additional information to 
 > **Destructured Params** - Semantic callbacks provide a variety of parameters that are returned from functions called inside the component. For more information see [callback arguments](/components/lifecycle#callback-arguments)
 
 
-## Component Parts
+## Definition Parts
 
 
-### Instance
+### Create Component
 
 [`createComponent`](/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
 
@@ -93,7 +111,7 @@ The [`template`](/components/rendering) defines the html your component should r
 > For more information on templating see the [dedicated subsection for templating](/components/rendering)
 
 ```html
-Counter is {{counter}}
+Counter is {counter}
 <ui-button class="increment">Increment</ui-button>
 <ui-button class="decrement">Decrement</ui-button>
 ```
@@ -148,6 +166,12 @@ defineComponent({
 });
 ```
 
+### Lifecycle Events
+
+Lifecycle events let you run arbitray code during different parts of a components lifecycle either on the client or during server side hydration.
+
+> For more information please see the [dedicated subsection for lifecycle events](/components/lifecycle)
+
 ## Organizing Code
 
 To keep your code organized you might consider keeping your `html` and `css` as separate files with your component.
@@ -182,7 +206,7 @@ If you prefer single file components you can just inline your html and css.
 ```javascript
 const defineComponent({
   tagName: 'ui-counter',
-  template: `<div class="counter">{{counter}}</div>`,
+  template: `<div class="counter">{counter}</div>`,
   css: `
     .counter {
       color: var(--primary-text-color);

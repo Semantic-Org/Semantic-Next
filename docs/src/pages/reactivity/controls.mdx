@@ -1,0 +1,22 @@
+---
+layout: '@layouts/Guide.astro'
+icon: sliders
+title: Controlling Reactivity
+description: Controlling reactivity and stopping reactions
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Reactivity relies on dependency tracking and for complex reactive patterns there can be a performance overhead of spurious reactivity.
+
+Semantic provides several helpers which can help reduce reactivity by allowing you to control reactive contexts more granularly.
+
+
+### Guard
+
+Guard is a special type of reactive context that only reruns when the returned value has changed. This can be useful to control triggering downstream reactivity for a reactive value that is dependent on another reactive value.
+
+It can be used to make sure a subcalculation does not trigger a parent calculation if the value doesnt change.
+
+<PlaygroundExample id="guard" direction="horizontal"></PlaygroundExample>
+
+

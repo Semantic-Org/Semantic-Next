@@ -1,0 +1,66 @@
+---
+layout: '@layouts/Guide.astro'
+icon: hash
+title: Number Helpers
+description: API reference for Number Helpers in Semantic UI's reactivity system
+---
+
+Number Helpers are methods available on Signal instances that contain numeric values. These helpers provide convenient ways to manipulate and update numeric signals.
+
+## increment
+
+Increases the value of the Signal by a specified amount or by 1 if no amount is provided.
+
+### Syntax
+```javascript
+signal.increment(amount)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Number | (Optional) The amount to increment by. Defaults to 1 if not specified. |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+
+counter.increment();
+console.log(counter.get()); // Output: 1
+
+counter.increment(5);
+console.log(counter.get()); // Output: 6
+```
+
+## decrement
+
+Decreases the value of the Signal by a specified amount or by 1 if no amount is provided.
+
+### Syntax
+```javascript
+signal.decrement(amount)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Number | (Optional) The amount to decrement by. Defaults to 1 if not specified. |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(10);
+
+counter.decrement();
+console.log(counter.get()); // Output: 9
+
+counter.decrement(3);
+console.log(counter.get()); // Output: 6
+```

@@ -17,6 +17,7 @@
     border-radius: var(--input-border-radius);
     transition: var(--input-transition);
     box-shadow: var(--input-box-shadow);
+    gap: var(--input-item-spacing);
     align-items: center;
   }
   .input input {
@@ -30,6 +31,9 @@
     color: inherit;
     border: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+  .input input::placeholder {
+    color: var(--white-10);
   }
   .input ui-icon {
     margin: 0rem;
@@ -128,34 +132,42 @@
 
 /* src/components/input/css/shadow/states/disabled.css */
 @layer component.input.variations.disabled {
-  .disabled.button,
-  .disabled.button:hover,
-  .disabled.active.button {
-    cursor: var(--button-disabled-cursor);
-    opacity: var(--button-disabled-opacity) !important;
-    color: var(--button-disabled-color);
-    background-color: var(--button-disabled-background-color) !important;
-    background-image: var(--button-disabled-background-image) !important;
-    box-shadow: var(--button-disabled-box-shadow) !important;
+  .disabled.input,
+  .disabled.input:hover,
+  .disabled.active.input {
+    cursor: var(--input-disabled-cursor);
+    opacity: var(--input-disabled-opacity) !important;
+    color: var(--input-disabled-color);
+    background-color: var(--input-disabled-background-color) !important;
+    background-image: var(--input-disabled-background-image) !important;
+    box-shadow: var(--input-disabled-box-shadow) !important;
   }
-  ui-button[disabled] {
-    cursor: var(--button-disabled-cursor);
+  ui-input[disabled] {
+    cursor: var(--input-disabled-cursor);
     pointer-events: none !important;
   }
-  .clickable-disabled.button {
+  .clickable-disabled.input {
     pointer-events: auto !important;
-    cursor: var(--button-clickable-disabled-cursor) !important;
+    cursor: var(--input-clickable-disabled-cursor) !important;
   }
-  .clickable-disabled.button:active {
-    box-shadow: var(--button-pressed-box-shadow) !important;
+  .clickable-disabled.input:active {
+    box-shadow: var(--input-pressed-box-shadow) !important;
   }
-  ui-button[clickable-disabled] {
+  ui-input[clickable-disabled] {
     pointer-events: auto !important;
-    cursor: var(--button-clickable-disabled-cursor) !important;
+    cursor: var(--input-clickable-disabled-cursor) !important;
   }
 }
 
 /* src/components/input/css/shadow/variations/sizing.css */
 @layer component.input.variations.sizing;
+
+/* src/components/input/css/shadow/variations/fluid.css */
+@layer component.input.variations.fluid {
+  .fluid {
+    display: flex;
+    flex-grow: 1;
+  }
+}
 
 /* src/components/input/css/shadow/input.css */

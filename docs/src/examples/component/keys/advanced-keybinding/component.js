@@ -45,11 +45,15 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
       const initialIndex = searchTerm == '' ? -1 : 0;
       state.selectedIndex.set(initialIndex);
 
-      // Simulating search results
-      const results = settings.options;
-      const matchResult = (result) => result.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchingResults = results.filter(matchResult);
-      state.results.set(matchingResults);
+      // in a real-world example this would pull from db
+      let results = settings.options;
+
+      // if search term filter results
+      if(searchTerm) {
+        const matchResult = (result) => result.toLowerCase().includes(searchTerm.toLowerCase());
+        results = results.filter(matchResult);
+      }
+      state.results.set(results);
     });
   },
 

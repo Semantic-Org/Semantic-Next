@@ -1,0 +1,159 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component Utility Functions
+icon: tool
+description: API reference for helper functions in the Semantic UI Component system
+---
+
+`@semantic-ui/component` includes a few additional helpers in its exports which are used internally and may prove useful for some advanced use cases.
+## Import
+
+```javascript
+import { adoptStylesheet, scopeStyles, extractCSS } from '@semantic-ui/component';
+```
+
+## Styles
+
+### adoptStylesheet
+
+```javascript
+adoptStylesheet(css, adoptedElement, options)
+```
+
+Adopts a stylesheet into an element's adoptedStyleSheets. Each stylesheet is only added once, tracked by a hash of its content.
+
+#### Parameters
+
+| Name           | Type    | Required | Description                    |
+|----------------|---------|----------|--------------------------------|
+| css            | string  | Yes      | CSS to be adopted             |
+| adoptedElement | Element | No       | Element to adopt styles into. Defaults to document |
+| options        | Object  | No       | Configuration options         |
+
+#### Options Object
+
+| Name          | Type   | Default | Description                    |
+|---------------|--------|---------|--------------------------------|
+| scopeSelector | string | undefined | Selector to scope styles to   |
+
+#### Example
+
+```javascript
+// Add to document
+adoptStylesheet(`
+  .ui.button {
+    padding: 0.5em 1em;
+  }
+`);
+
+// Add to specific element with scoping
+adoptStylesheet(
+  '.button { color: blue; }',
+  myElement,
+  { scopeSelector: '.my-component' }
+);
+```
+
+### scopeStyles
+
+```javascript
+scopeStyles(css, scopeSelector)
+```
+
+Scopes CSS rules to a specific selector, handling various CSS rule types including media queries, supports rules, and layer statements.
+
+#### Parameters
+
+| Name          | Type   | Required | Description                    |
+|---------------|--------|----------|--------------------------------|
+| css           | string | Yes      | CSS content to be scoped      |
+| scopeSelector | string | Yes      | Selector to scope styles to   |
+
+#### Returns
+
+The scoped CSS string.
+
+#### Example
+
+```javascript
+const css = `
+  .button { color: blue; }
+  @media (max-width: 768px) {
+    .button { padding: 0.5em; }
+  }
+  @layer theme {
+    .button { background: var(--primary); }
+  }
+`;
+
+const scopedCSS = scopeStyles(css, '.ui-button');
+```
+
+### extractCSS
+
+```javascript
+extractCSS(tagName)
+```
+
+Extracts all CSS rules that match a specific tag name from document stylesheets. Creates a new stylesheet containing only matching rules.
+
+#### Parameters
+
+| Name    | Type   | Required | Description              |
+|---------|--------|----------|--------------------------|
+| tagName | string | Yes      | Tag name to extract CSS for |
+
+#### Returns
+
+A new CSSStyleSheet containing matching rules.
+
+#### Example
+
+```javascript
+// Extract all styles for ui-button
+const buttonStyles = extractCSS('ui-button');
+```
+
+## Properties
+
+
+### adjustPropertyFromAttribute
+
+```javascript
+adjustPropertyFromAttribute({ el, attribute, attributeValue, properties, componentSpec })
+```
+
+Synchronizes component properties when attributes change, handling Semantic UI's attribute dialects and spec-based property mapping.
+
+#### Parameters
+
+| Name           | Type     | Required | Description                          |
+|----------------|----------|----------|--------------------------------------|
+| el             | Element  | Yes      | Web component element instance       |
+| attribute      | string   | Yes      | Attribute name that changed         |
+| attributeValue | any      | Yes      | New value of the attribute          |
+| properties     | Object   | No       | Component property definitions      |
+| componentSpec  | Object   | No       | Component specification object      |
+
+#### Example
+
+```javascript
+// With component spec
+adjustPropertyFromAttribute({
+  el: buttonElement,
+  attribute: 'size',
+  attributeValue: 'large',
+  componentSpec: ButtonComponentSpec
+});
+
+// With property definitions
+adjustPropertyFromAttribute({
+  el: customElement,
+  attribute: 'icon-after',
+  attributeValue: true,
+  properties: {
+    iconAfter: { type: Boolean },
+    'icon-after': { type: Boolean, alias: true }
+  }
+});
+```

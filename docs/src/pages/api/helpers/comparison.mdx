@@ -1,0 +1,258 @@
+---
+layout: '@layouts/Guide.astro'
+title: Comparison Helpers
+icon: git-compare
+description: API reference for comparison template helpers
+---
+
+Comparison helpers provide utilities for comparing values in templates.
+
+## Functions
+
+### not
+Checks negation (!).
+
+#### Template Syntax
+```sui
+{#if not someCondition}
+  someCondition is not true
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+not(a)
+```
+
+### is
+Checks equality (==).
+
+#### Template Syntax
+```sui
+{#if is valueA valueB}
+  Values are equal
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+is(a, b)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to compare |
+| b    | any  | Second value to compare |
+
+#### Returns
+`boolean` - True if values are equal, false otherwise.
+
+#### Example
+```javascript
+is(5, "5") // true
+```
+
+### notEqual
+Checks inequality (!=).
+
+#### Template Syntax
+```sui
+{#if notEqual valueA valueB}
+  Values are not equal
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+notEqual(a, b)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to compare |
+| b    | any  | Second value to compare |
+
+#### Returns
+`boolean` - True if values are not equal, false otherwise.
+
+#### Example
+```javascript
+not(5, "6") // true
+```
+
+### isExactly
+Checks strict equality (===).
+
+#### Template Syntax
+```sui
+{#if isExactly valueA valueB}
+  Values are strictly equal
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+isExactly(a, b)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to compare |
+| b    | any  | Second value to compare |
+
+#### Returns
+`boolean` - True if values are strictly equal, false otherwise.
+
+#### Example
+```javascript
+isExactly(5, 5) // true
+isExactly(5, "5") // false
+```
+
+### isNotExactly
+Checks strict inequality (!==).
+
+#### Template Syntax
+```sui
+{#if isNotExactly valueA valueB}
+  Values are strictly not equal
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+isNotExactly(a, b)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to compare |
+| b    | any  | Second value to compare |
+
+#### Returns
+`boolean` - True if values are strictly not equal, false otherwise.
+
+#### Example
+```javascript
+isNotExactly(5, "5") // true
+```
+
+### greaterThan
+Checks if a > b.
+
+#### Template Syntax
+```sui
+{#if greaterThan numberA numberB}
+  A is greater than B
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+greaterThan(a, b)
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | number | First number to compare |
+| b    | number | Second number to compare |
+
+#### Returns
+`boolean` - True if a is greater than b, false otherwise.
+
+#### Example
+```javascript
+greaterThan(10, 5) // true
+```
+
+### lessThan
+Checks if a < b.
+
+#### Template Syntax
+```sui
+{#if lessThan numberA numberB}
+  A is less than B
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+lessThan(a, b)
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | number | First number to compare |
+| b    | number | Second number to compare |
+
+#### Returns
+`boolean` - True if a is less than b, false otherwise.
+
+#### Example
+```javascript
+lessThan(5, 10) // true
+```
+
+### greaterThanEquals
+Checks if a >= b.
+
+#### Template Syntax
+```sui
+{#if greaterThanEquals numberA numberB}
+  A is greater than or equal to B
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+greaterThanEquals(a, b)
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | number | First number to compare |
+| b    | number | Second number to compare |
+
+#### Returns
+`boolean` - True if a is greater than or equal to b, false otherwise.
+
+#### Example
+```javascript
+greaterThanEquals(10, 10) // true
+```
+
+### lessThanEquals
+Checks if a \<= b.
+
+#### Template Syntax
+```sui
+{#if lessThanEquals numberA numberB}
+  A is less than or equal to B
+{/if}
+```
+
+#### JavaScript Syntax
+```javascript
+lessThanEquals(a, b)
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | number | First number to compare |
+| b    | number | Second number to compare |
+
+#### Returns
+`boolean` - True if a is less than or equal to b, false otherwise.
+
+#### Example
+```javascript
+lessThanEquals(5, 5) // true
+```

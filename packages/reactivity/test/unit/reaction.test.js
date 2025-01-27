@@ -1,18 +1,18 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction, Scheduler } from '@semantic-ui/reactivity';
 
 describe('Reaction', () => {
 
   beforeEach(() => {
     // Reset Reaction state before each test if needed
-    Reaction.current = null;
-    Reaction.pendingReactions.clear();
-    Reaction.afterFlushCallbacks = [];
+    Scheduler.current = null;
+    Scheduler.pendingReactions.clear();
+    Scheduler.afterFlushCallbacks = [];
   });
 
   describe('Basic Usage', () => {
     it('should trigger reaction on reactive value change', () => {
-      const reactiveValue = new ReactiveVar('first');
+      const reactiveValue = new Signal('first');
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -28,7 +28,7 @@ describe('Reaction', () => {
     });
 
     it('should handle firstRun and stop computation', () => {
-      const saying = new ReactiveVar('hello');
+      const saying = new Signal('hello');
       const callback = vi.fn();
 
       Reaction.create((comp) => {
@@ -55,7 +55,7 @@ describe('Reaction', () => {
     it('should not re-run for identical objects with isEqual', () => {
       let obj1 = { name: 'Sally', age: 22 };
       let obj2 = { name: 'Sally', age: 22 };
-      let reactiveObj = new ReactiveVar(obj1);
+      let reactiveObj = new Signal(obj1);
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -72,7 +72,7 @@ describe('Reaction', () => {
     it('should always re-run when custom isEqual returns false', () => {
       const customIsEqual = () => false;
       let obj = { name: 'Sally', age: 22 };
-      let reactiveObj = new ReactiveVar(obj, { equalityFunction: customIsEqual });
+      let reactiveObj = new Signal(obj, { equalityFunction: customIsEqual });
       const callback = vi.fn();
 
       Reaction.create(function() {
@@ -95,17 +95,17 @@ describe('Reaction', () => {
   describe('Controlling Reactivity', () => {
 
     it('guard should control reactivity', () => {
-      const userAge = new ReactiveVar(30);
-      const userName = new ReactiveVar('John Doe');
-      const lastUpdated = new ReactiveVar(new Date());
+      const userAge = new Signal(30);
+      const userName = new Signal('John Doe');
+      const lastUpdated = new Signal(new Date());
       const callback = vi.fn();
 
       Reaction.create(() => {
-        Reaction.guard(() => {
-          let user = { name: userName.get(), age: userAge.get() };
-          callback(`User Info: ${user.name}, ${user.age}`);
-          return user;
-        });
+        const user = Reaction.guard(() => ({
+          name: userName.get(),
+          age: userAge.get()
+        }));
+        callback(`User Info: ${user.name}, ${user.age}`);
       });
 
       // Initial flush to account for the setup of reactive computation
@@ -124,9 +124,34 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledTimes(3);
     });
 
+    it('guard should control reactivity - example 2', () => {
+
+      const counter = new Signal(0);
+      const callback = vi.fn();
+
+      const isEven = () => Reaction.guard(() => {
+        return (counter.get() % 2 === 0);
+      });
+
+      Reaction.create((comp) => {
+        if(isEven()) {
+          callback(`${counter.peek()} is even`);
+        }
+      });
+
+      counter.set(1); // No output guard is same
+      Reaction.flush();
+      counter.set(2); // Output
+      Reaction.flush();
+      counter.set(3); // No output guard is same
+
+      // only odd numbers should trigger
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
     it('guard should not re-run for identical objects', () => {
       const user = { name: 'John Doe', age: 30 };
-      const reactiveUser = new ReactiveVar(user);
+      const reactiveUser = new Signal(user);
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -147,7 +172,7 @@ describe('Reaction', () => {
     });
 
     it('peek should not establish reactive dependency', () => {
-      const counter = new ReactiveVar(10);
+      const counter = new Signal(10);
       let peekedValue;
 
       Reaction.create(() => {
@@ -161,7 +186,7 @@ describe('Reaction', () => {
     });
 
     it('nonreactive should prevent reactive updates within its scope', () => {
-      const reactiveValue = new ReactiveVar('Initial Value');
+      const reactiveValue = new Signal('Initial Value');
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -179,7 +204,7 @@ describe('Reaction', () => {
     });
 
     it('flush should process updates immediately', () => {
-      const number = new ReactiveVar(1);
+      const number = new Signal(1);
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -220,7 +245,7 @@ describe('Reaction', () => {
 
   describe('Helper Functions', () => {
     it('should correctly manipulate array with helpers', () => {
-      const items = new ReactiveVar([0, 1, 2]);
+      const items = new Signal([0, 1, 2]);
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -244,24 +269,24 @@ describe('Reaction', () => {
 
     it('Reaction should track current context for debugging', () => {
       const callback = vi.fn();
-      let reactiveVar = new ReactiveVar(1);
+      let signal = new Signal(1);
       Reaction.create((comp) => {
-        reactiveVar.get();
+        signal.get();
         if(comp.firstRun) {
           return;
         }
         callback(Reaction.current.context.value);
       });
-      reactiveVar.set(2);
+      signal.set(2);
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(2);
     });
 
     it('Reaction should have no source on first run', () => {
       const callback = vi.fn();
-      let reactiveVar = new ReactiveVar(1);
+      let signal = new Signal(1);
       Reaction.create((comp) => {
-        reactiveVar.get();
+        signal.get();
         if(comp.firstRun) {
           let trace;
           try {
@@ -276,7 +301,7 @@ describe('Reaction', () => {
           callback(trace);
         }
       });
-      reactiveVar.set(2);
+      signal.set(2);
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(undefined);
     });
@@ -284,9 +309,9 @@ describe('Reaction', () => {
 
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
-      let reactiveVar = new ReactiveVar(1);
+      let signal = new Signal(1);
       Reaction.create((comp) => {
-        reactiveVar.get();
+        signal.get();
         if(comp.firstRun) {
           return;
         }
@@ -302,7 +327,7 @@ describe('Reaction', () => {
         }
         callback(trace);
       });
-      reactiveVar.set(2);
+      signal.set(2);
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(expect.any(String));
     });

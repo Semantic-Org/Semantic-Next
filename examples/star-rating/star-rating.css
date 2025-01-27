@@ -1,0 +1,59 @@
+:host {
+  display: inline-block;
+  margin-right: var(--spacing);
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+
+  &.locked {
+    cursor: default;
+    pointer-events: none;
+    .star:hover {
+      color: var(--standard-20);
+    }
+    .star.filled:hover {
+      color: var(--primary-text-color);
+    }
+  }
+
+  &.small .star ui-icon {
+    font-size: var(--small);
+  }
+  &.large .star ui-icon {
+    font-size: var(--huge);
+  }
+}
+
+.stars {
+  display: flex;
+}
+
+.star {
+  cursor: pointer;
+  color: var(--standard-20);
+  transition: var(--transition);
+  padding: 0;
+
+  &.hovered {
+    color: var(--primary-text-color);
+    opacity: 0.8;
+  }
+
+  &.filled {
+    color: var(--primary-text-color);
+    opacity: 1;
+  }
+
+  ui-icon {
+    display: block;
+    font-size: var(--large);
+  }
+}
+
+.value {
+  margin-left: var(--compact-spacing);
+  font-size: var(--small);
+  color: var(--standard-60);
+}

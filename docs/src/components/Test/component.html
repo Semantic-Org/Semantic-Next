@@ -1,8 +1,115 @@
-<p>Width</p>
-<ui-button class="decrease width">-</ui-button>
-<ui-button class="increase width">+</ui-button>
-<p>Height</p>
-<ui-button class="decrease height">-</ui-button>
-<ui-button class="increase height">+</ui-button>
-<hr/>
-<div class="circle" style="{{getStyle}}"></div>
+<h4>Data Context</h4>
+<table class="group">
+  <thead>
+    <th>Name</th>
+    <th>Value</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>value</td>
+      <td>{value}</td>
+    </tr>
+    <tr>
+      <td>date</td>
+      <td>{date}</td>
+    </tr>
+    <tr>
+      <td>timezone</td>
+      <td>{timezone}</td>
+    </tr>
+  </tbody>
+</table>
+
+{#snippet test}
+  {obj.a}
+{/snippet}
+
+<h4>Expressions</h4>
+<table class="group">
+  <thead>
+    <th>Example</th>
+    <th>Expression</th>
+    <th>Result</th>
+    <th>Should Match</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Calling method in data context with object using spaced arguments</td>
+      <td>{#html "formatDate date 'h:mm:ss a' { timezone: timezone }"}</td>
+      <td>{ formatDate date 'h:mm:ss a' { timezone: timezone } }</td>
+      <td>Current time PST</td>
+    </tr>
+    <tr>
+      <td>Calling helper method in data context with js arguments</td>
+      <td>{#html "formatDate(date, 'h:mm:ss a', { timezone: timezone })"}</td>
+      <td>{ formatDate(date, 'h:mm:ss a', { timezone: timezone}) }</td>
+      <td>Current time PST</td>
+    </tr>
+    <tr>
+      <td>Calling helper method with inline object definition</td>
+      <td>{#html 'classMap { one: true, two: true, three: date }' }</td>
+      <td>{ classMap { one: true, two: true, three: date } }</td>
+      <td>one two three</td>
+    </tr>
+    <tr>
+      <td>Calling method with spaced arguments and inline array definition</td>
+      <td>join ['1', '2', '3'] ' and '</td>
+      <td>{ join ['1', '2', '3'] ' and '}</td>
+      <td>1 and 2 and 3</td>
+    </tr>
+    <tr>
+      <td>Outputting value from data context</td>
+      <td>value</td>
+      <td>{value}</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Inline addition</td>
+      <td>value + 1</td>
+      <td>{value + 1}</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Inline arithmetic</td>
+      <td>value + 2 * 5</td>
+      <td>{value + 2 * 5}</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>Inline arithmetic with order of operations</td>
+      <td>(value + 2) * 5</td>
+      <td>{(value + 2) * 5}</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>Calling a method with spaced arguments</td>
+      <td>addOne value</td>
+      <td>{addOne value}</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Calling a method with js arguments and inline addition</td>
+      <td>addOne(value + 1)</td>
+      <td>{addOne(value + 1)}</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>Calling a method with inline object</td>
+      <td>getValue {one: 'two'} 'one'</td>
+      <td>{getValue {one: 'two'} 'one'}</td>
+      <td>two</td>
+    </tr>
+    <tr>
+      <td>Adding numbers</td>
+      <td>2 + 3</td>
+      <td>{2 + 3}</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>Passed through to snippet</td>
+      <td>{#html "{>test obj={a: 1} }"}</td>
+      <td>{>test obj={a: 1}}</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>

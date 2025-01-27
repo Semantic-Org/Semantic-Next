@@ -1,0 +1,95 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Iterators
+icon: repeat
+description: API reference for Query iterator methods
+---
+
+Iterator methods in Query allow you to loop through, manipulate, and filter sets of elements efficiently.
+
+## each
+
+Iterates over a Query object, executing a function for each matched element.
+
+### Syntax
+```javascript
+$('selector').each(function(element, index) {
+  // Your code here
+})
+```
+
+### Parameters
+| Name     | Type     | Description                           |
+|----------|----------|---------------------------------------|
+| function | Function | Function to execute for each element  |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('div').each(function(el, index) {
+  console.log(`Div ${index}:`, el.textContent);
+});
+```
+
+> **Execution Context** - Inside the callback, `this` refers to the current DOM element.
+
+## map
+
+Creates a new array with the results of calling a provided function on every element in the set.
+
+### Syntax
+```javascript
+$('selector').map(function(element, index) {
+  // Your code here
+  return someValue;
+})
+```
+
+### Parameters
+| Name     | Type     | Description                           |
+|----------|----------|---------------------------------------|
+| function | Function | Function to execute for each element  |
+
+### Returns
+A new array with the results of the function calls.
+
+### Usage
+```javascript
+const textContents = $('p').map(function(el, index) {
+  return el.textContent;
+});
+console.log(textContents);
+```
+
+> **Return Values** - The `map()` method collects the return value of your callback function for each element into a new array.
+
+## filter
+
+Creates a new Query object with all elements that pass the test implemented by the provided function.
+
+### Syntax
+```javascript
+$('selector').filter(function(element, index) {
+  // Your code here
+  return true; // or false
+})
+```
+
+### Parameters
+| Name     | Type               | Description                           |
+|----------|--------------------|---------------------------------------|
+| function | Function or String | Function or selector to test elements |
+
+### Returns
+A new Query object with the filtered elements.
+
+### Usage
+```javascript
+const visibleElements = $('div').filter(function(el) {
+  return $(el).css('display') !== 'none';
+});
+```
+
+> **Flexible Filtering** - You can pass either a function or a selector string to `filter()`. When using a function, return `true` to include the element, `false` to exclude it.

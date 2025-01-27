@@ -4,6 +4,9 @@ import { noop, each } from '@semantic-ui/utils';
 import template from './MobileMenu.html?raw';
 import css from './MobileMenu.css?raw';
 
+
+import { NavMenu } from '../NavMenu/NavMenu.js';
+
 const settings = {
   menu: [],
   activeURL: '',
@@ -186,7 +189,7 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
       state.activeMenu.set(previousMenu);
       state.previousMenu.set({});
     }
-    else {
+    else if(previousMenu.length) {
       // otherwise just use the first menu item url to get the menu
       const activeURL = previousMenu.menu[0].url;
       tpl.setMenusFromURL(activeURL);
@@ -224,7 +227,9 @@ const events = {
 
     // wait for web component to update before animating
     $('.next.content nav-menu').one('updated', tpl.showNextMenu);
-
+  },
+  'deep click .nav-icon'({tpl, target, state, event, $, afterFlush}) {
+    event.preventDefault();
     event.stopImmediatePropagation();
   }
 };

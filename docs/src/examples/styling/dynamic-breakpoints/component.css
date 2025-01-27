@@ -1,0 +1,46 @@
+:host {
+
+  --three-column-breakpoint: 1200px;
+  --two-column-breakpoint: 900px;
+  --one-column-breakpoint: 500px;
+
+  display: block;
+  container: host / inline-size;
+}
+
+.container {
+  container: container / inline-size;
+
+  /* this is where the magic happens, we use cqi to get the width of the component container
+     we then match this against our breakpoint, which will turn the flag to "0" when it is surpassed
+  */
+  --three-column-flag: max(calc(100cqi - var(--three-column-breakpoint)), 0px);
+  --two-column-flag: max(calc(100cqi - var(--two-column-breakpoint)), 0px);
+  --one-column-flag: max(calc(100cqi - var(--one-column-breakpoint)), 0px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Responsive Styling */
+@container container style(--three-column-flag: 0) {
+  .grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@container container style(--two-column-flag: 0) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@container container style(--one-column-flag: 0) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

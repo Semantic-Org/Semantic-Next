@@ -1,14 +1,63 @@
 import { getCollection } from 'astro:content';
-import { topbarMenu, sidebarMenuUI, sidebarMenuFramework } from './menus.js';
-import { firstMatch, groupBy, asyncEach, each, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
+import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
+import { firstMatch, groupBy, asyncEach, each, findIndex, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
+
+/* Used to sort lessons */
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
+import semverPatch from 'semver/functions/patch';
+import semverCompare from 'semver/functions/compare';
 
 const examples = await getCollection('examples');
-const examplePages = examples.map(page => ({
-  ...page.data,
-  url: `/examples/${page.slug}`,
-}));
+const examplePages = examples
+  .filter(doc => !doc?.data?.hidden)
+  .map(doc => ({
+    ...doc.data,
+    url: `/examples/${doc.slug}`,
+  }))
+;
+
+export const getLessonContent = (lesson) => {
+  return {
+    id: lesson.slug,
+    title: lesson.data.title,
+    category: lesson.data.category,
+    subcategory: lesson.data.subcategory,
+    url: `/learn/${lesson.slug}`,
+    hidden: lesson.data.hidden,
+    sort: lesson.data.sort,
+    hint: lesson.data.hint,
+    references: lesson.data.references,
+    shortTitle: lesson.data.shortTitle,
+    selectedFile: lesson.data.selectedFile,
+    major: semverMajor(lesson.data.sort),
+    minor: semverMinor(lesson.data.sort),
+    patch: semverPatch(lesson.data.sort),
+    hideNavigation: lesson.data.hideNavigation,
+  };
+};
+
+const lessons = await getCollection('lessons');
+const lessonDocs = lessons
+  .filter(doc => !doc?.data?.hidden)
+  .map(getLessonContent)
+;
+export const lessonPages = lessonDocs.sort((a, b) => {
+  return semverCompare(a.sort, b.sort);
+});
 
 
+export const getNextLesson = (currentLesson) => {
+  const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
+  const previousLesson = (lessonIndex > -1) ? lessonPages[lessonIndex + 1] : {};
+  return previousLesson;
+};
+
+export const getPreviousLesson = (currentLesson) => {
+  const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
+  const nextLesson = (lessonIndex > -1) ? lessonPages[lessonIndex - 1] : {};
+  return nextLesson;
+};
 
 /* Gets Sidebar Menu for Examples Section */
 const createExampleMenu = () => {
@@ -54,6 +103,42 @@ const createExampleMenu = () => {
 };
 export const sidebarMenuExamples = createExampleMenu();
 
+
+/* Gets Sidebar Menu for Examples Section */
+const createLearnMenu = () => {
+  let menu = [];
+  let categories = groupBy(lessonPages, 'major');
+  each(categories, (lessons, majorVersion) => {
+    let subcategories = groupBy(lessons, 'minor');
+    let pages = [];
+    if(keys(subcategories).length) {
+      // has subcategories
+      each(subcategories, (lessons, subcategory) => {
+        pages.push({
+          name: lessons[0].subcategory,
+          pages: lessons.map(lesson => ({
+            name: lesson.shortTitle || lesson.title,
+            url: lesson.url
+          }))
+        });
+      });
+    }
+    else {
+      // no subcategories
+      pages = lessons.map(lesson => ({
+        name: lesson.shortTitle || lesson.title,
+        url: lesson.url
+      }));
+    }
+    menu.push({
+      name: lessons[0].category,
+      pages
+    });
+  });
+  return menu.filter(menu => menu);
+};
+export const sidebarMenuLearn = createLearnMenu();
+
 /* Removes trailing slash which can cause issues between build and serve */
 export const removeTrailingSlash = (url = '') => {
   return isString(url)
@@ -95,10 +180,36 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   else if(topbarSection == 'framework') {
     menu = sidebarMenuFramework;
   }
+  else if(topbarSection == 'api') {
+    menu = sidebarMenuAPI;
+  }
   else if(topbarSection == 'examples') {
     menu = sidebarMenuExamples;
   }
+  else if(topbarSection == 'learn') {
+    menu = sidebarMenuLearn;
+  }
   return menu;
+};
+
+
+/* Adds links for prev/next page used at bottom of guide pages */
+export const getPageTraversalLinks = async ({url}) => {
+  const menu = await await getFlattenedSidebarMenu({ url });
+  const currentIndex = findIndex(menu, item => item.url == url);
+
+  let next;
+  let previous;
+  if(currentIndex >= 0) {
+    previous = menu[currentIndex - 1];
+    if(currentIndex != menu.length - 1) {
+      next = menu[currentIndex + 1];
+    }
+  }
+  return {
+    previous,
+    next
+  };
 };
 
 /*
@@ -115,8 +226,13 @@ export const getSiteMenu = async () => {
 /*
   Flattened Version of Sidebar Menu
 */
-export const getFlattenedSidebarMenu = async (topbarSection) => {
-  const menu = await getSidebarMenu({ topbarSection: topbarSection });
+export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) => {
+  if(!menu) {
+    if(!topbarSection && url) {
+      topbarSection = await getActiveTopbarSection(url);
+    }
+    menu = await getSidebarMenu({ topbarSection });
+  }
   const menuArrays = menu.map(section => {
     const parentItem = { name: section.name, url: section.url };
     return [
@@ -135,7 +251,9 @@ export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
   if(includeURLS) {
     await asyncEach(menu, async item => {
       // get all urls that represent this topbar section
-      const flattenedMenu = await getFlattenedSidebarMenu(item._id);
+      const flattenedMenu = await getFlattenedSidebarMenu({
+        topbarSection: item._id
+      });
       const urls = flattenedMenu.map(page => page.url).filter(Boolean);
       item.baseURLs = urls;
     });
@@ -181,3 +299,13 @@ export const getRailMenu = (headings) => {
   return menu.filter(Boolean);
 };
 
+
+
+const componentDocs = await getCollection('components');
+export const componentPages = componentDocs.map(page => ({
+  name: page.data.title,
+  image: page.data.image,
+  description: page.data.description,
+  meta: page.data,
+  url: `/ui/${page.slug}`,
+}));

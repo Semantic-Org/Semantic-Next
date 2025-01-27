@@ -1,7 +1,7 @@
 <h2>Array</h2>
-{{#each number in numbers}}
-  <li>{{number}}</li>
-{{/each}}
+{#each number in numbers}
+  <li>{number}</li>
+{/each}
 
 <h2>Collection (each/as)</h2>
 <table>
@@ -11,13 +11,13 @@
     <th>Taste</th>
   </thead>
   <tbody>
-  {{#each fruit in fruits}}
+  {#each fruit in fruits}
     <tr>
-      <td>{{numberFromIndex @index}}</td>
-      <td>{{fruit.name}}</td>
-      <td>{{fruit.taste}}</td>
+      <td>{numberFromIndex @index}</td>
+      <td>{fruit.name}</td>
+      <td>{fruit.taste}</td>
     </tr>
-  {{/each}}
+  {/each}
   </tbody>
 </table>
 
@@ -29,22 +29,22 @@
     <th>Taste</th>
   </thead>
   <tbody>
-  {{#each fruits}}
+  {#each fruits}
     <tr>
-      <td>{{numberFromIndex @index}}</td>
-      <td>{{name}}</td>
-      <td>{{taste}}</td>
+      <td>{numberFromIndex @index}</td>
+      <td>{name}</td>
+      <td>{taste}</td>
     </tr>
-  {{/each}}
+  {/each}
   </tbody>
 </table>
 
 <h2>Collection (object)</h2>
 <ul>
-  {{#each arrayFromObject person}}
+  {#each arrayFromObject person}
     <li>
-      <span class="name">{{titleCase key}}</span>
-      <span class="value">{{value}}</span>
+      <span class="name">{titleCase key}</span>
+      <span class="value">{value}</span>
     </li>
-  {{/each}}
+  {/each}
 </ul>

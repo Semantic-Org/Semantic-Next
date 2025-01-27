@@ -1,50 +1,50 @@
-{{#each section in getMenu}}
-  <a class="{{classes getTitleStates section}}title" href={{getLink section}} part="title">
-    {{#if section.icon}}
-      <ui-icon icon={{section.icon}} class="icon" exportparts="icon:title-icon" />
-    {{else if section.image}}
-      <img src="{{section.image}}">
-    {{/if}}
-    <span class="text">
-      {{section.name}}
+{#each section in getMenu}
+  <a class="{classes getTitleStates section}title" href={getLink section} part="title">
+    {#if section.icon}
+      <ui-icon icon={section.icon} class="icon" exportparts="icon:title-icon" />
+    {else if section.image}
+      <img src="{section.image}">
+    {/if}
+    <span class="text" part="text">
+      {section.name}
     </span>
-    {{#if section.description}}
-      <span class="description">{{section.description}}</span>
-    {{/if}}
-    {{#if canShowNavIcon section}}
-      <ui-icon icon={{getNavIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
-    {{/if}}
+    {#if section.description}
+      <span class="description" part="description">{section.description}</span>
+    {/if}
+    {#if canShowNavIcon section}
+      <ui-icon icon={getNavIcon section} class="nav-icon" part="nav-icon"></ui-icon>
+    {/if}
   </a>
-  {{#if section.pages}}
-    <div class="{{activeIf isActiveItem section}}{{classIf hasIcons 'indented'}}content" part="content">
+  {#if section.pages}
+    <div class="{activeIf isActiveItem section}{classIf hasIcons 'indented'}content" part="content">
       <div class="menu" part="menu">
-        {{#each page in section.pages}}
-          {{#if page.pages}}
-            <div class="{{classes getTitleStates page}}title item" part="item-title">
-              <div class="text">{{page.name}}</div>
-              {{#if canShowNavIcon}}
-                <ui-icon {{getNavIcon section}} class="nav-icon" part="nav-icon"></ui-icon>
-              {{/if}}
+        {#each page in section.pages}
+          {#if page.pages}
+            <div class="{classes getTitleStates page}title item" part="item-title">
+              <div class="text">{page.name}</div>
+              {#if canShowNavIcon}
+                <ui-icon {getNavIcon section} class="nav-icon" part="nav-icon"></ui-icon>
+              {/if}
             </div>
-            <div class="{{activeIf isActiveItem page}} content">
+            <div class="{activeIf isActiveItem page} content">
               <div class="menu">
-                {{#each page in page.pages}}
-                  <a class="{{classes getTitleStates page}}item" href={{getLink page}} part="page link">
-                    {{page.name}}
-                    {{#if page.description}}
-                      <span class="description">{{page.description}}</span>
-                    {{/if}}
+                {#each page in page.pages}
+                  <a class="{classes getPageStates page}item" href={getLink page} part="page link">
+                    {page.name}
+                    {#if page.description}
+                      <span class="description">{page.description}</span>
+                    {/if}
                   </a>
-                {{/each}}
+                {/each}
               </div>
             </div>
-          {{else}}
-            <a class="{{classes getPageStates page}}item" href={{getLink page}} part="page link">
-              {{page.name}}
+          {else}
+            <a class="{classes getPageStates page}item" href={getLink page} part="page link">
+              {page.name}
             </a>
-          {{/if}}
-        {{/each}}
+          {/if}
+        {/each}
       </div>
     </div>
-  {{/if}}
-{{/each}}
+  {/if}
+{/each}

@@ -1,8 +1,8 @@
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 let obj1 = { name: 'Sally', age: 22 };
 let obj2 = { name: 'Tom', age: 28 };
-let reactiveObj = new ReactiveVar(obj1);
+let reactiveObj = new Signal(obj1);
 Reaction.create(reaction => {
   const inner1 = reactiveObj.get(); // reactivity source
   const inner2 = obj2; // not reactive

@@ -1,0 +1,17 @@
+<table>
+  <thead>
+    <tr>
+      {#each header in headers}
+        <th>{header}</th>
+      {/each}
+    </tr>
+  </thead>
+  <tbody>
+    {#each row in rows}
+      {> template
+        name=rowTemplate
+        data=row
+      }
+    {/each}
+  </tbody>
+</table>

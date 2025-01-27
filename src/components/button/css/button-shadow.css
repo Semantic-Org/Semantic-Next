@@ -152,12 +152,15 @@
   .disabled.button,
   .disabled.button:hover,
   .disabled.active.button {
+    pointer-events: none;
     cursor: var(--button-disabled-cursor);
     opacity: var(--button-disabled-opacity) !important;
     color: var(--button-disabled-color);
+    box-shadow: var(--button-disabled-box-shadow) !important;
+  }
+  .disabled.button.standard {
     background-color: var(--button-disabled-background-color) !important;
     background-image: var(--button-disabled-background-image) !important;
-    box-shadow: var(--button-disabled-box-shadow) !important;
   }
   ui-button[disabled] {
     cursor: var(--button-disabled-cursor);
@@ -1867,6 +1870,9 @@
   }
   .small.button {
     font-size: var(--button-small);
+  }
+  :host {
+    font-size: var(--button-medium);
   }
   .large.button {
     font-size: var(--button-large);

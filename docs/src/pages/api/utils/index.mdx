@@ -1,0 +1,58 @@
+---
+layout: '@layouts/Guide.astro'
+title: Introduction
+icon: package
+description: A comprehensive collection of utility functions for Semantic UI
+---
+
+Semantic UI includes this standalone library to avoid external dependencies and to allow for performant and opinionated uses of common utils like `clone` and `isEqual` as well as some particular use cases for web components.
+
+
+## Installation
+
+
+The utils library is a standalone package that can be used without any other dependencies.
+
+```bash
+npm install @semantic-ui/utils
+```
+
+## Usage
+
+Utilities can be used by importing them in your project.
+
+```javascript
+import { isArray, capitalize, clone } from '@semantic-ui/utils';
+
+const myArray = [1, 2, 3];
+console.log(isArray(myArray)); // true
+
+const myString = "hello world";
+console.log(capitalize(myString)); // "Hello world"
+
+const myObject = { a: 1, b: { c: 2 } };
+const clonedObject = clone(myObject);
+console.log(clonedObject); // { a: 1, b: { c: 2 } }
+```
+
+## Utility Categories
+
+The Utils library is organized into several categories:
+
+- **[Arrays](/api/utils/arrays)**: Utilities for working with arrays.
+- **[Browser](/api/utils/browser)**: Utilities for handling functionality on the client.
+- **[Cloning](/api/utils/cloning)**: Deep cloning utilities.
+- **[Crypto](/api/utils/crypto)**: Cryptographic helpers like hashing functions.
+- **[Dates](/api/utils/dates)**: Helpers for handling date formats.
+- **[Equality](/api/utils/dates)**: Helpers for comparing equality.
+- **[Errors](/api/utils/errors)**: Error handling and creation utilities.
+- **[Equality](/api/utils/equality)**: Deep equality comparison functions.
+- **[Functions](/api/utils/functions)**: Helpers for manipulating functions.
+- **[Looping](/api/utils/looping)**: Iteration utilities for arrays and objects.
+- **[Numbers](/api/utils/looping)**: Helpers for manipulating numbers
+- **[Types](/api/utils/types)**: Functions for checking and manipulating data types.
+- **[Objects](/api/utils/objects)**: Helpers for object manipulation and traversal.
+- **[Regular Expressions](/api/utils/regex)**: Helpers for working with regular expressions.
+- **[SSR](/api/utils/ssr)**: Helpers for server-side rendering scenarios.
+- **[Strings](/api/utils/ssr)**: String formatting and manipulation functions.
+

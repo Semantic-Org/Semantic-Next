@@ -26,6 +26,18 @@ export class StringScanner {
     return this.input.slice(this.pos);
   }
 
+  step(step = 1) {
+    if(!this.isEOF()) {
+      this.pos = this.pos + step;
+    }
+  }
+
+  rewind(step = 1) {
+    if(this.pos !== 0) {
+      this.pos = this.pos - step;
+    }
+  }
+
   isEOF() {
     return this.pos >= this.input.length;
   }

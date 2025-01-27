@@ -1,0 +1,183 @@
+---
+layout: '@layouts/Guide.astro'
+title: Logical Helpers
+icon: toggle-left
+description: API reference for logical template helpers
+---
+
+Logical helpers provide utilities for conditional checks and logical operations in templates.
+
+## Functions
+
+
+### isEmpty
+Checks if a value is empty.
+
+> Note: empty includes falsey values like `false`, `0` `undefined` etc.
+
+#### Template Syntax
+```sui
+{#if isEmpty collectionToCheck}
+  Collection is empty
+{/if}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to check |
+
+#### Returns
+`boolean` - `true` if the value is empty, `false` otherwise.
+
+#### Example
+```sui
+{#if isEmpty user.posts}
+  <p>You haven't made any posts yet.</p>
+{else}
+  <ul>
+    {#each user.posts}
+      <li>{this.title}</li>
+    {/each}
+  </ul>
+{/if}
+```
+
+### exists
+Checks if a value is not empty.
+
+> Note: the same conditions as `isEmpty` apply, all falsey values will return `false`
+
+#### Template Syntax
+```sui
+{#if exists valueToCheck}
+  Value exists
+{/if}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to check |
+
+#### Returns
+`boolean` - `true` if the value is not empty, `false` otherwise.
+
+#### Example
+```sui
+{#if exists user.name}
+  <p>Welcome, {user.name}!</p>
+{else}
+  <p>Welcome, guest!</p>
+{/if}
+```
+
+### hasAny
+Checks if an array has any elements.
+
+#### Template Syntax
+```sui
+{#if hasAny arrayToCheck}
+  Array has elements
+{/if}
+```
+
+#### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| a    | array | The array to check |
+
+#### Returns
+`boolean` - `true` if the array has elements, `false` otherwise.
+
+#### Example
+```sui
+{#if hasAny searchResults}
+  <ul>
+    {#each searchResults}
+      <li>{this.title}</li>
+    {/each}
+  </ul>
+{else}
+  <p>No results found.</p>
+{/if}
+```
+
+### both
+Checks if both a and b are truthy.
+
+#### Template Syntax
+```sui
+{#if both conditionA conditionB}
+  Both conditions are true
+{/if}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to check |
+| b    | any  | Second value to check |
+
+#### Returns
+`boolean` - `true` if both values are truthy, `false` otherwise.
+
+#### Example
+```sui
+{#if both isLoggedIn hasPermission}
+  <button>Perform Action</button>
+{else}
+  <p>You don't have permission to perform this action.</p>
+{/if}
+```
+
+### either
+Checks if either a or b is truthy.
+
+#### Template Syntax
+```sui
+{#if either conditionA conditionB}
+  At least one condition is true
+{/if}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | First value to check |
+| b    | any  | Second value to check |
+
+#### Returns
+`boolean` - `true` if either value is truthy, `false` otherwise.
+
+#### Example
+```sui
+{#if either isAdmin isModerator}
+  <button>Edit Content</button>
+{else}
+  <p>You don't have permission to edit this content.</p>
+{/if}
+```
+
+### maybe
+Returns trueExpr if expr is truthy, falseExpr otherwise.
+
+#### Template Syntax
+```sui
+{maybe condition 'True result' 'False result'}
+```
+
+#### Parameters
+| Name     | Type | Description |
+|----------|------|-------------|
+| expr     | any  | The expression to evaluate |
+| trueExpr | any  | Value to return if expr is truthy |
+| falseExpr| any  | Value to return if expr is falsy |
+
+#### Returns
+The value of `trueExpr` if `expr` is truthy, `falseExpr` otherwise.
+
+#### Example
+```sui
+<p>The light is {maybe isOn 'on' 'off'}.</p>
+```

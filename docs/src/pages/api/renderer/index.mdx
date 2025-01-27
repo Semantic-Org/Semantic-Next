@@ -1,0 +1,37 @@
+---
+layout: '@layouts/Guide.astro'
+title: Renderer API Reference
+icon: edit-3
+description: API reference for Semantic UI's rendering engine
+---
+
+These docs provide a reference to how template `AST` are rendered to the DOM for UI components.
+
+Semantic currently uses [Google's Lit](https://www.lit.dev) as its primary rendering engine, with the possibility of supporting other rendering targets in the future.
+
+## Installation
+
+```bash
+npm install @semantic-ui/renderer
+```
+
+## API Sections
+
+* [Lit Renderer](/api/renderer/lit-renderer) - Core rendering engine based on Lit
+* [Lit Directives](/api/renderer/lit-directives) - Custom directives for reactive rendering
+
+## Basic Usage
+
+```javascript
+import { LitRenderer } from '@semantic-ui/renderer';
+
+const renderer = new LitRenderer({
+  ast: templateAST,
+  data: {
+    user: { name: 'John' }
+  },
+  template: parentTemplate
+});
+
+const html = renderer.render();
+```

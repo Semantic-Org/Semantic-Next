@@ -1,0 +1,96 @@
+---
+layout: '@layouts/Guide.astro'
+title: Crypto Utilities
+icon: lock
+description: API reference for cryptographic utility functions
+---
+
+The Crypto utilities provide functions for generating unique identifiers and hash codes in JavaScript. These functions are useful for creating unique keys, generating consistent hashes for objects, and other cryptographic purposes.
+
+## Functions
+
+### hashCode
+
+```javascript
+function hashCode(input, { prettify = false, seed = 0x12345678 } = {})
+```
+
+Generates a hash code for the given input using an adapted UMASH algorithm.
+
+> **Collision Resistance** This is based on the [UMASH algorithm](https://github.com/backtrace-labs/umash) which provides good performance and collission resistance.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| input    | any     | The value to hash |
+| options  | object  | Optional configuration |
+
+##### Options
+
+| Name     | Type    | Default     | Description |
+|----------|---------|-------------|-------------|
+| prettify | boolean | false       | If true, returns a prettified string representation |
+| seed     | number  | 0x12345678  | Seed value for the hash function |
+
+#### Returns
+
+A 32-bit integer hash code, or a prettified string if `prettify` is true.
+
+#### Example
+
+```javascript
+import { hashCode } from '@semantic-ui/utils';
+
+console.log(hashCode("Hello, world!")); // 2686193689
+console.log(hashCode("Hello, world!", { prettify: true })); // "9ZX3P"
+console.log(hashCode({ a: 1, b: [2, 3] })); // 3608339170
+```
+
+### generateID
+
+```javascript
+function generateID()
+```
+
+Generates a unique identifier.
+
+#### Returns
+
+A string representing a unique identifier.
+
+#### Example
+
+```javascript
+import { generateID } from '@semantic-ui/utils';
+
+console.log(generateID()); // "1A2B3C4D"
+console.log(generateID()); // "5E6F7G8H"
+```
+
+### prettifyID
+
+```javascript
+function prettifyID(num)
+```
+
+Converts a number into a more readable string representation.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| num  | number | The number to convert |
+
+#### Returns
+
+A string representation of the number using alphanumeric characters.
+
+#### Example
+
+```javascript
+import { prettifyID } from '@semantic-ui/utils';
+
+console.log(prettifyID(123456)); // "1E240"
+console.log(prettifyID(0)); // "0"
+```

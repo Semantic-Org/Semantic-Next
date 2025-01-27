@@ -1,22 +1,22 @@
-<div class="{{classMap getClassMap}}{{direction}} panel" part="panel">
-  {{#if label}}
-    <span class="label">
-      {{label}}
+<div class="{classMap getClassMap}{direction} panel" part="panel">
+  {#if label}
+    <span class="self label">
+      {label}
       <div class="actions">
-        {{#if canMinimize}}
-          {{#if minimized}}
+        {#if canMinimize}
+          {#if minimized}
             <ui-icon link maximize class="toggle-size"></ui-icon>
-          {{else}}
+          {else}
             <ui-icon link minus class="toggle-size"></ui-icon>
-          {{/if}}
-        {{/if}}
+          {/if}
+        {/if}
       </div>
     </span>
-  {{/if}}
-  {{>slot}}
+  {/if}
+  {>slot}
 </div>
-{{#if not getIndex 0}}
-  <span class="{{classMap getHandleClassMap}}handle" part="handle">
+{#if notEqual getIndex 0}
+  <span class="{classMap getHandleClassMap}handle" part="handle">
     <span class="divider"></span>
   </span>
-{{/if}}
+{/if}

@@ -24,6 +24,7 @@ const createComponent = ({settings, self, $, dispatchEvent}) => ({
     }
     return false;
   },
+
   selectIndex(eq) {
     const value = $('menu-item').eq(eq).attr('data-value');
     if(value !== undefined) {

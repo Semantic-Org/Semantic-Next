@@ -1,0 +1,153 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Attributes
+icon: tag
+description: API reference for Query methods related to attribute manipulation
+---
+
+Attribute methods in Query allow you to get, set, and remove attributes on DOM elements.
+
+## attr
+
+Gets or sets attributes on elements.
+
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').attr(attributeName)
+```
+
+#### Set
+```javascript
+$('selector').attr(attributeName, value)
+$('selector').attr({attribute1: value1, attribute2: value2})
+```
+
+### Parameters
+| Name          | Type   | Description           |
+|---------------|----- |-----------------------|
+| attributeName | string | The name of the attribute to get |
+
+
+### Returns
+
+#### Get
+[Query object](/query/basic#the-query-object) (for chaining).
+
+#### Set
+- **Single Element** - The attribute value of that element.
+- **Multiple Elements** - An array of attribute value , one for each matched element.
+
+### Usage
+
+#### Get an Attribute
+```javascript
+// Get an attribute value
+const href = $('a').attr('href');
+console.log(href);
+```
+
+#### Set an Attribute
+```javascript
+// Set a single attribute
+$('img').attr('alt', 'Profile picture');
+```
+
+#### Set Multiple Attributes
+```javascript
+// Set multiple attributes
+$('input').attr({
+  'type': 'text',
+  'placeholder': 'Enter your name'
+});
+```
+
+## removeAttr
+
+Removes an attribute from each element in the set of matched elements.
+
+> **Boolean Attributes** - This is helpful for boolean attributes where setting a value like `checked="false"` will actually result in checked being set.
+
+### Syntax
+```javascript
+$('selector').removeAttr(attributeName)
+```
+
+### Parameters
+| Name          | Type   | Description                 |
+|---------------|--------|-----------------------------|
+| attributeName | string | The name of the attribute to remove |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Example
+```javascript
+// Remove the 'disabled' attribute from all buttons
+$('button').removeAttr('disabled');
+```
+
+## prop
+
+Gets or sets properties on an element.
+
+> **Component Properties** - There are special helpers `setting` and `settings` to set component properties for web components.
+
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').prop(propertyName)
+```
+
+#### Set
+
+```javascript
+$('selector').prop(propertyName, value)
+$('selector').prop({property1: value1, property2: value2})
+```
+
+### Parameters
+
+#### Parameters
+| Name         | Type   | Description           |
+|--------------|----- |-----------------------|
+| propertyName | string | The name of the property to set |
+| value        | any    | The value to set for the property |
+
+
+### Returns
+
+#### Get
+- **Single Element** - The property value of that element.
+- **Multiple Elements** - An array of property value , one for each matched element.
+
+#### Set
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Get a Property
+```javascript
+// Get a property value
+const isChecked = $('input[type="checkbox"]').prop('checked');
+console.log(isChecked);
+```
+
+#### Set a Property
+```javascript
+// Set a single property
+$('input[type="checkbox"]').prop('checked', true);
+```
+
+#### Set Multiple Properties
+```javascript
+// Set multiple properties
+$('select').prop({
+  disabled: false,
+  selectedIndex: 0
+});
+```

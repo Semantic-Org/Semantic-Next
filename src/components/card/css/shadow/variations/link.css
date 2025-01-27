@@ -1,0 +1,11 @@
+.link.card,
+a.card {
+  cursor: pointer;
+  color: inherit;
+
+  &:hover {
+    background: var(--card-link-hover-background);
+    box-shadow: var(--card-link-hover-box-shadow);
+    border: var(--card-link-hover-border);
+  }
+}

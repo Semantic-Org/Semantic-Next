@@ -1,0 +1,112 @@
+---
+layout: '@layouts/Guide.astro'
+title: Looping Utilities
+icon: repeat
+description: API reference for looping and iteration utility functions
+---
+
+The Looping utilities provide functions for iterating over arrays and objects in JavaScript. These functions offer flexible ways to loop through data structures, often providing more concise alternatives to traditional for loops.
+
+## Functions
+
+### each
+
+```javascript
+function each(obj, func, context)
+```
+
+Iterates over an object or array, invoking the provided function for each element.
+
+#### Parameters
+
+| Name    | Type     | Description |
+|---------|----------|-------------|
+| obj     | object/array | The object or array to iterate over |
+| func    | function | The function to invoke for each element |
+| context | object   | Optional. The context to bind the function to |
+
+#### Returns
+
+The original object or array.
+
+#### Example
+
+```javascript
+import { each } from '@semantic-ui/utils';
+
+each([1, 2, 3], (num, index) => {
+  console.log(`Number at index ${index}: ${num}`);
+});
+
+each({ a: 1, b: 2 }, (value, key) => {
+  console.log(`${key}: ${value}`);
+});
+```
+
+> **Flexible Iteration** This function can iterate over arrays, array-like objects (e.g., NodeList), and plain objects. It uses `for...of` for arrays and array-likes, and `Object.keys()` for plain objects, providing consistent behavior across different data types.
+
+### asyncEach
+
+```javascript
+function asyncEach(obj, func, context)
+```
+
+Asynchronously iterates over an object or array, invoking the provided function for each element.
+
+#### Parameters
+
+| Name    | Type     | Description |
+|---------|----------|-------------|
+| obj     | object/array | The object or array to iterate over |
+| func    | async function | The async function to invoke for each element |
+| context | object   | Optional. The context to bind the function to |
+
+#### Returns
+
+A Promise that resolves to the original object or array.
+
+#### Example
+
+```javascript
+import { asyncEach } from '@semantic-ui/utils';
+
+await asyncEach([1, 2, 3], async (num, index) => {
+  await someAsyncOperation(num);
+  console.log(`Processed number at index ${index}: ${num}`);
+});
+```
+
+### asyncMap
+
+```javascript
+function asyncMap(obj, func, context)
+```
+
+Asynchronously maps over an object or array, invoking the provided function for each element and collecting the results.
+
+#### Parameters
+
+| Name    | Type     | Description |
+|---------|----------|-------------|
+| obj     | object/array | The object or array to map over |
+| func    | async function | The async function to invoke for each element |
+| context | object   | Optional. The context to bind the function to |
+
+#### Returns
+
+A Promise that resolves to a new object or array with the mapped values.
+
+#### Example
+
+```javascript
+import { asyncMap } from '@semantic-ui/utils';
+
+const numbers = [1, 2, 3];
+const doubled = await asyncMap(numbers, async (num) => {
+  await someAsyncOperation();
+  return num * 2;
+});
+console.log(doubled); // [2, 4, 6]
+```
+
+These looping utilities provide powerful tools for iterating over and manipulating data structures in JavaScript, supporting both synchronous and asynchronous operations. They offer more flexibility and often more concise syntax compared to traditional looping methods.

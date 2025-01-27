@@ -1,5 +1,5 @@
 import { describe, vi, beforeAll, beforeEach, afterEach, afterAll, it, expect } from 'vitest';
-import { $ } from '@semantic-ui/query';
+import { $, $$ } from '@semantic-ui/query';
 
 describe('query', () => {
 
@@ -153,4 +153,158 @@ describe('query', () => {
       expect(globalThis.testProp).toBe('testValue');
     });
   });
+
+  describe('Shadow DOM Traversal', () => {
+    beforeAll(() => {
+      // Register custom elements once in this suite
+
+      // Open Shadow DOM component
+      class TestDOMInnerComponent extends HTMLElement {
+        constructor() {
+          super();
+          const shadow = this.attachShadow({ mode: 'open' });
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'title';
+          titleDiv.textContent = 'Inside Nested Component';
+          shadow.appendChild(titleDiv);
+        }
+        connectedCallback() {
+          this.dispatchEvent(new CustomEvent('initialized', { bubbles: true }));
+        }
+      }
+      customElements.define('test-dom-inner', TestDOMInnerComponent);
+
+      // Nested component
+      class TestDOMComponent extends HTMLElement {
+        constructor() {
+          super();
+          const shadow = this.attachShadow({ mode: 'open' });
+          const myComponent = document.createElement('test-dom-inner');
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'title';
+          titleDiv.textContent = 'Inside Web Component';
+          shadow.appendChild(myComponent);
+          shadow.appendChild(titleDiv);
+        }
+        async connectedCallback() {
+          const el = this.shadowRoot.querySelector('test-dom-inner');
+          if(el) {
+            el.addEventListener('initialized', () => {
+              this.dispatchEvent(new CustomEvent('initialized', { bubbles: true }));
+            });
+          }
+        }
+      }
+      customElements.define('test-dom', TestDOMComponent);
+
+    });
+
+    afterEach(() => {
+      // Clean up after each test
+      document.body.innerHTML = '';
+    });
+
+    it('should return outer elements and nested shadow elements', async () => {
+      // Create an element with class 'title' outside
+      const outsideDiv = document.createElement('div');
+      outsideDiv.className = 'title';
+      outsideDiv.textContent = 'Outside Shadow DOM';
+      document.body.appendChild(outsideDiv);
+
+      const testComponent = document.createElement('test-dom');
+
+      // Create a Promise that resolves when the 'initialized' event is dispatched
+      const componentInit = new Promise((resolve) => {
+        testComponent.addEventListener('initialized', resolve);
+      });
+
+      document.body.appendChild(testComponent);
+
+      // Wait for the component to initialize
+      await componentInit;
+
+      // selects outer title, nested component title and inner component title
+      const $allElements = $$('.title');
+      expect($allElements.length).toBe(3);
+
+    });
+
+
+    it('should select nested items', async () => {
+      // Create an element with class 'title' outside
+      const outsideDiv = document.createElement('div');
+      outsideDiv.className = 'title';
+      outsideDiv.textContent = 'Outside Shadow DOM';
+      document.body.appendChild(outsideDiv);
+
+      const testComponent = document.createElement('test-dom');
+
+      // Create a Promise that resolves when the 'initialized' event is dispatched
+      const componentInit = new Promise((resolve) => {
+        testComponent.addEventListener('initialized', resolve);
+      });
+
+      document.body.appendChild(testComponent);
+
+      // Wait for the component to initialize
+      await componentInit;
+
+      // selects nested component title and inner component title
+      const $elements = $$('test-dom .title');
+      expect($elements.length).toBe(2);
+
+    });
+
+    it('should not match items not at shadow root', async () => {
+      // Create an element with class 'title' outside
+      const outsideDiv = document.createElement('div');
+      outsideDiv.className = 'title';
+      outsideDiv.textContent = 'Outside Shadow DOM';
+      document.body.appendChild(outsideDiv);
+
+      const testComponent = document.createElement('test-dom');
+
+      // Create a Promise that resolves when the 'initialized' event is dispatched
+      const componentInit = new Promise((resolve) => {
+        testComponent.addEventListener('initialized', resolve);
+      });
+
+      document.body.appendChild(testComponent);
+
+      // Wait for the component to initialize
+      await componentInit;
+
+      // selects nested component title
+      const $elements = $$('not-component .title');
+      expect($elements.length).toBe(0);
+
+    });
+
+    it('should select deeply nested items', async () => {
+      // Create an element with class 'title' outside
+      const outsideDiv = document.createElement('div');
+      outsideDiv.className = 'title';
+      outsideDiv.textContent = 'Outside Shadow DOM';
+      document.body.appendChild(outsideDiv);
+
+      const testComponent = document.createElement('test-dom');
+
+      // Create a Promise that resolves when the 'initialized' event is dispatched
+      const componentInit = new Promise((resolve) => {
+        testComponent.addEventListener('initialized', resolve);
+      });
+
+      document.body.appendChild(testComponent);
+
+      // Wait for the component to initialize
+      await componentInit;
+
+      // selects nested component title
+      const $innerElements = $$('test-dom test-dom-inner .title');
+      expect($innerElements.length).toBe(1);
+
+    });
+
+  });
+
 });

@@ -9,6 +9,7 @@ const createComponent = ({ findParent }) => ({
   }
 });
 
+// if no tagName is provided a template will be returned for export
 export const row = defineComponent({
   createComponent,
   template,

@@ -1,0 +1,275 @@
+---
+layout: '@layouts/Guide.astro'
+title: Lit Directives
+icon: code
+description: API reference for Semantic UI's Lit directives
+---
+
+Semantic UI builds on [Lit's directive system](https://lit.dev/docs/templates/custom-directives/) to provide reactive data binding, conditional rendering, iteration, and template rendering. These directives are used internally by the template system and are automatically applied based on your template syntax.
+
+> **Advanced Use** - It is not recommended to use these directives directly unless you are building custom template functionality. The template syntax will automatically use the appropriate directive.
+
+## Directives
+
+### reactiveData
+
+Handles reactive data bindings in templates. Updates the DOM automatically when reactive values change.
+```javascript
+import { reactiveData } from '@semantic-ui/renderer';
+```
+
+```javascript
+reactiveData(expression, options)
+```
+
+#### Parameters
+
+| Name       | Type   | Required | Description                        |
+|------------|--------|----------|------------------------------------|
+| expression | Object | Yes      | Expression configuration object    |
+| options    | Object | No       | Directive options                  |
+
+#### Expression Object
+
+| Property   | Type     | Required | Description                     |
+|------------|----------|----------|---------------------------------|
+| value      | Function | Yes      | Function that returns the value |
+| expression | string   | Yes      | Original template expression    |
+
+#### Options Object
+
+| Property   | Type    | Default | Description                    |
+|------------|---------|---------|--------------------------------|
+| ifDefined  | boolean | false   | Use ifDefined directive        |
+| unsafeHTML | boolean | false   | Use unsafeHTML directive       |
+
+#### Example
+
+Template syntax
+```javascript
+const expr = reactiveData({
+  expression: 'count',
+  value: () => count.get()
+});
+```
+
+Equivalent Directive
+```
+const expr = reactiveData({
+  expression: 'content',
+  value: () => content.get()
+}, {
+  unsafeHTML: true
+});
+```
+
+### reactiveConditional 
+
+Handles conditional rendering in templates. Re-renders content when conditions change.
+
+```javascript
+import { reactiveConditional } from '@semantic-ui/renderer';
+```
+
+```javascript
+reactiveConditional(options)
+```
+
+#### Parameters
+
+| Name    | Type   | Required | Description                    |
+|---------|--------|----------|--------------------------------|
+| options | Object | Yes      | Conditional rendering options  |
+
+#### Options Object
+
+| Property  | Type     | Required | Description                  |
+|-----------|----------|----------|------------------------------|
+| condition | Function | Yes      | Condition evaluation function|
+| content   | Function | Yes      | Content rendering function   |
+| branches  | Array    | No       | Additional else/elseif branches |
+
+#### Branch Object
+
+| Property  | Type     | Required | Description                  |
+|-----------|----------|----------|------------------------------|
+| type      | string   | Yes      | 'else' or 'elseif'          |
+| condition | Function | No       | Condition for 'elseif'       |
+| content   | Function | Yes      | Content rendering function   |
+
+#### Example
+
+```javascript
+// Template: {{#if isVisible}} content {{/if}}
+const conditional = reactiveConditional({
+  condition: () => isVisible.get(),
+  content: () => html`<div>Visible Content</div>`,
+  branches: [
+    {
+      type: 'else',
+      content: () => html`<div>Hidden Content</div>`
+    }
+  ]
+});
+```
+
+### reactiveEach
+
+Handles array iteration in templates. Re-renders when array content changes.
+
+```javascript
+import { reactiveEach } from '@semantic-ui/renderer';
+```
+
+```javascript
+reactiveEach(options)
+```
+
+#### Parameters
+
+| Name    | Type   | Required | Description               |
+|---------|--------|----------|---------------------------|
+| options | Object | Yes      | Iteration options         |
+
+#### Options Object
+
+| Property | Type     | Required | Description                 |
+|----------|----------|----------|-----------------------------|
+| over     | Function | Yes      | Function returning array    |
+| content  | Function | Yes      | Item rendering function     |
+| as       | string   | No       | Variable name for each item |
+
+#### Example
+
+```javascript
+// Template: {{#each items}} {{name}} {{/each}}
+const list = reactiveEach({
+  over: () => items.get(),
+  content: (item) => html`<li>${item.name}</li>`,
+  as: 'item'
+});
+```
+
+### renderTemplate
+
+Renders sub-templates within a template. Manages template lifecycle and cleanup.
+
+```javascript
+import { renderTemplate } from '@semantic-ui/renderer';
+```
+
+```javascript
+renderTemplate(options)
+```
+
+#### Parameters
+
+| Name    | Type   | Required | Description                |
+|---------|--------|----------|----------------------------|
+| options | Object | Yes      | Template rendering options |
+
+#### Options Object
+
+| Property       | Type     | Required | Description                       |
+|---------------|----------|----------|-----------------------------------|
+| subTemplates  | Object   | Yes      | Available templates               |
+| templateName  | string   | Yes      | Name of template to render        |
+| getTemplate   | Function | No       | Dynamic template getter           |
+| data          | Object   | No       | Template data context            |
+| parentTemplate| Template | No       | Parent template reference         |
+
+#### Example
+
+Template syntax
+```sui
+{> header data=headerData}
+```
+
+Equivalent directive
+```javascript
+const template = renderTemplate({
+  subTemplates: {
+    header: HeaderTemplate
+  },
+  templateName: 'header',
+  data: {
+    title: 'Page Header'
+  }
+});
+```
+
+## Usage in Templates
+
+While these directives are typically used through template syntax, understanding how they work can be helpful for debugging or custom implementations.
+
+### Data Binding
+
+Template Syntax
+```sui
+{ value }
+```
+
+Equivalent Directive
+```javascript
+reactiveData({
+  expression: 'value',
+  value: () => value.get()
+})
+```
+
+### Conditional Rendering
+
+Template syntax
+```sui
+{#if condition}
+  content
+{else}
+  alternate
+{/if}
+```
+
+Equivalent Directive
+```javascript
+reactiveConditional({
+  condition: () => condition.get(),
+  content: () => html`content`,
+  branches: [{
+    type: 'else',
+    content: () => html`alternate`
+  }]
+})
+```
+
+### Iteration
+
+Template syntax
+```sui
+{#each items as item}
+  { item.name }
+{/each}
+```
+
+Equivalent Directive
+```javascript
+reactiveEach({
+  over: () => items.get(),
+  content: (item) => html`${item.name}`,
+  as: 'item'
+})
+```
+
+### Sub-templates
+
+Template syntax
+```sui
+{> header data=headerData}
+```
+
+Equivalent Directive
+```javascript
+renderTemplate({
+  templateName: 'header',
+  data: headerData,
+  subTemplates: availableTemplates
+})
+```

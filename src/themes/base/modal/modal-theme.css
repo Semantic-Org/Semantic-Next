@@ -6,6 +6,7 @@
 @import url('./content/modal-variables.css') layer(content.modal);
 
 /* Types */
+@import url('./types/glass-variables.css') layer(types.glass);
 
 /* Variations */
 @import url('./variations/aligned-variables.css') layer(variations.aligned);

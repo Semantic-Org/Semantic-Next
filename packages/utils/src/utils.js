@@ -41,11 +41,23 @@ export const fatal = (
 };
 
 /*-------------------
-        Browser
+      Browser
 --------------------*/
 
 export const copyText = (text) => {
   navigator.clipboard.writeText(text);
+};
+
+export const openLink = (url, { newWindow = false, settings, target, event } = {}) => {
+  if(newWindow) {
+    window.open(url, target, settings);
+  }
+  else {
+    window.location.href = url;
+  }
+  if(event) {
+    event.preventDefault();
+  }
 };
 
 export const getKeyFromEvent = (event) => {
@@ -81,9 +93,20 @@ export const getKeyFromEvent = (event) => {
          XHR
 --------------------*/
 
-export const getText = async (src) => {
-  const response = await fetch(src);
+export const getText = async (src, settings) => {
+  const response = (settings)
+    ? await fetch(src, settings)
+    : await fetch(src)
+  ;
   return await response.text();
+};
+
+export const getJSON = async (src, settings) => {
+  const response = (settings)
+    ? await fetch(src, settings)
+    : await fetch(src)
+  ;
+  return await response.json();
 };
 
 /*-------------------
@@ -316,11 +339,11 @@ export const wrapFunction = (x) => {
 /*
   Memoize
 */
-export const memoize = (fn) => {
+export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(args))) => {
   const cache = new Map();
 
   return function(...args) {
-    const key = hashCode(JSON.stringify(args));
+    const key = hashFunction(args);
 
     if (cache.has(key)) {
       return cache.get(key);
@@ -649,6 +672,113 @@ export const groupBy = function(array, property) {
   }, {});
 };
 
+export const moveItem = (array = [], callbackOrValue, index) => {
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue);
+
+  let sourceIndex = findIndex(array, callback);
+  if (sourceIndex === -1) {
+    return array;
+  }
+
+  // Handle special index values
+  let targetIndex;
+  if (index === 'first') {
+    targetIndex = 0;
+  } else if (index === 'last') {
+    targetIndex = array.length - 1;
+  } else {
+    targetIndex = Math.min(Math.max(0, index), array.length - 1);
+  }
+
+  // Don't move if already at target index
+  if (sourceIndex === targetIndex) {
+    return array;
+  }
+
+  const [item] = array.splice(sourceIndex, 1);
+  array.splice(targetIndex, 0, item);
+  return array;
+};
+
+export const moveToFront = (array = [], callbackOrValue) => {
+  return moveItem(array, callbackOrValue, 'first');
+};
+
+export const moveToBack = (array = [], callbackOrValue) => {
+  return moveItem(array, callbackOrValue, 'last');
+};
+
+
+/* In perf testing in Chrome 131
+  this seems like a reasonable crossover
+  lodash puts this at 120
+  <https://jsperf.app/quzoto/3>
+*/
+const ARRAY_SIZE_THRESHOLD = 58;
+
+/* Returns the common items between two arrays */
+export const intersection = (...arrays) => {
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return [...new Set(arrays[0])];
+
+  const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
+
+  const [first, ...rest] = arrays;
+  const firstUnique = [...new Set(first)];
+
+  if (useSet) {
+    const sets = rest.map(arr => new Set(arr));
+    return firstUnique.filter(item => sets.every(set => set.has(item)));
+  }
+
+  return firstUnique.filter(item => rest.every(arr => arr.includes(item)));
+};
+
+/* Returns the difference between two arrays */
+export const difference = (...arrays) => {
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return [...new Set(arrays[0])];
+
+  const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
+
+  const [first, ...rest] = arrays;
+  const firstUnique = [...new Set(first)];
+
+  if (useSet) {
+    const sets = rest.map(arr => new Set(arr));
+    return firstUnique.filter(item => !sets.some(set => set.has(item)));
+  }
+
+  return firstUnique.filter(item => !rest.some(arr => arr.includes(item)));
+};
+
+/* Returns only items unique to an array */
+export const uniqueItems = (...arrays) => {
+  if (arrays.length <= 1) return [];
+
+  const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
+
+  if (useSet) {
+    const sets = arrays.map(arr => new Set(arr));
+    return arrays.flatMap((arr, i) =>
+      [...new Set(arr)].filter(item =>
+        !sets.some((set, j) => i !== j && set.has(item))
+      )
+    );
+  }
+
+  return arrays.flatMap((arr, i) =>
+    [...new Set(arr)].filter(item =>
+      !arrays.some((otherArr, j) => i !== j && otherArr.includes(item))
+    )
+  );
+};
+
 /*-------------------
        Objects
 --------------------*/
@@ -854,6 +984,133 @@ export const reverseKeys = (obj) => {
     }
   });
   return newObj;
+};
+
+
+
+/*
+  Searches a search object
+  returning matches for a query
+
+  Matches are sorted
+    - Start of word
+    - Start of any word
+    - Anywhere in string
+*/
+export const weightedObjectSearch = (query = '', objectArray = [], {
+  returnMatches = false,
+  matchAllWords = true,
+  propertiesToMatch = []
+} = {}) => {
+  if(!query) {
+    return objectArray;
+  }
+  query = query.trim();
+  query = escapeRegExp(query);
+  let
+    words       = query.split(' '),
+    wordRegexes = [],
+    regexes     = {
+      startsWith     : new RegExp(`^${query}`, 'i'),
+      wordStartsWith : new RegExp(`\\s${query}`, 'i'),
+      anywhere       : new RegExp(query, 'i')
+    },
+    weights = {
+      startsWith     : 1,
+      wordStartsWith : 2,
+      anywhere       : 3,
+      anyWord        : 4,
+    },
+    calculateWeight = (obj) => {
+      let
+        matchDetails = [],
+        weight
+      ;
+      // do a weighted search across all fields
+      each(propertiesToMatch, (field) => {
+        let
+          value = get(obj, field),
+          fieldWeight
+        ;
+        if(value) {
+          each(regexes, (regex, name) => {
+            if(fieldWeight) {
+              return;
+            }
+            if(String(value).search(regex) !== -1) {
+              fieldWeight = weights[name];
+              if(returnMatches) {
+                matchDetails.push({
+                  field,
+                  query,
+                  name,
+                  value,
+                  weight: fieldWeight,
+                });
+              }
+            }
+          });
+          // match any word higher score for more words
+          if(!weight && wordRegexes.length) {
+            let wordsMatching = 0;
+            each(wordRegexes, regex => {
+              if(String(value).search(regex) !== -1) {
+                wordsMatching++;
+              }
+            });
+            if(wordsMatching > 0) {
+              if(!matchAllWords || (matchAllWords && wordsMatching === wordRegexes.length)) {
+                fieldWeight = weights['anyWord'] / wordsMatching;
+                if(returnMatches) {
+                  matchDetails.push({
+                    field,
+                    query,
+                    name: 'anyWord',
+                    value,
+                    matchCount: wordsMatching
+                  });
+                }
+              }
+            }
+          }
+          if(fieldWeight && (!weight || fieldWeight < weight)) {
+            weight = fieldWeight;
+          }
+        }
+      });
+      // flag for removal if not a match
+      if(returnMatches) {
+        obj.matches = matchDetails;
+      }
+      obj.remove = !weight;
+      return weight;
+    }
+  ;
+  if(objectArray.length == 1) {
+    objectArray.push([]);
+  }
+
+  if(words.length > 1) {
+    each(words, word => {
+      wordRegexes.push(new RegExp(`(\W|^)${word}(\W|$)`, 'i'));
+    });
+  }
+
+  each(objectArray, obj => {
+    // clear previous remove flag and weight if present
+    delete obj.remove;
+    delete obj.weight;
+
+    obj.weight = calculateWeight(obj);
+  });
+
+  let result = objectArray
+    .filter(obj => !obj.remove)
+    .sort((a, b) => {
+      return a.weight - b.weight;
+    })
+  ;
+  return result;
 };
 
 /*-------------------
@@ -1236,6 +1493,3 @@ export const isClient = (() => {
   return typeof window !== 'undefined';
 })();
 
-
-import * as _ from './utils.js';
-export default _;

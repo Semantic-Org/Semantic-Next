@@ -7,30 +7,12 @@
   <link rel="stylesheet" href="./index.css">
   <link rel="stylesheet" href="./ui/semantic-ui.css">
   <link rel="stylesheet" href="./theme/base.css">
+  <script src="./reload.js" type="module"></script>
   <script src="./ui/semantic-ui.js" type="module"></script>
-  <script>
-new EventSource('/esbuild').addEventListener('change', e => {
-  /* Rebuilds page after JS changes */
-  const { added, removed, updated } = JSON.parse(e.data);
-  if(!added.length && !removed.length && updated.length === 1) {
-    for(const link of document.getElementsByTagName('link')) {
-      const url = new URL(link.href);
-
-      if(url.host === location.host && url.pathname === updated[0]) {
-        const next = link.cloneNode();
-        next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
-        next.onload = () => link.remove();
-        link.parentNode.insertBefore(next, link.nextSibling);
-        return;
-      }
-    }
-  }
-  location.reload();
-});
-</script>
+  <script src="./examples/star-rating.js" type="module"></script>
 </head>
 <body>
   <div class="container">
-    <ui-button icon="check"></ui-button>
+    <star-rating value="7" size="large" max-value="10"></star-rating>
   </div>
 </body>

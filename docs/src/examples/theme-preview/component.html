@@ -1,0 +1,46 @@
+<div class="{classMap getThemeClasses}">
+  <div class="preview">
+    <div class="buttons">
+      <ui-button emphasis="primary">Primary Button</ui-button>
+      <ui-button emphasis="secondary">Secondary Button</ui-button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="presets">
+      {#each preset in presets}
+        <div
+          class="{classMap getPresetClasses preset}"
+          data-index="{@index}"
+          style="background: linear-gradient(45deg, {preset.primary}, {preset.secondary})"
+        >
+          <div class="name">{preset.name}</div>
+          <div class="check">
+            <ui-icon icon="check"></ui-icon>
+          </div>
+        </div>
+      {/each}
+    </div>
+
+    <div class="colors">
+      <div class="color">
+        <label>Primary</label>
+        <input
+          type="color"
+          class="color-input"
+          data-type="primary"
+          value="{activeTheme.primary}"
+        >
+      </div>
+      <div class="color">
+        <label>Secondary</label>
+        <input
+          type="color"
+          class="color-input"
+          data-type="secondary"
+          value="{activeTheme.secondary}"
+        >
+      </div>
+    </div>
+  </div>
+</div>

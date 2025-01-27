@@ -1,0 +1,43 @@
+---
+layout: '@layouts/Guide.astro'
+icon: toggle-left
+title: Boolean Helpers
+description: API reference for Boolean Helpers in Semantic UI's reactivity system
+---
+
+Boolean Helpers are methods available on Signal instances that contain boolean values. These helpers provide a convenient way to toggle the state of a boolean reactive variable.
+
+## toggle
+
+Switches the boolean value of the Signal to its opposite state.
+
+### Syntax
+```javascript
+signal.toggle()
+```
+
+### Returns
+
+boolean - The new value after toggling.
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const isActive = new Signal(false);
+
+console.log(isActive.get()); // Output: false
+
+isActive.toggle();
+console.log(isActive.get()); // Output: true
+
+isActive.toggle();
+console.log(isActive.get()); // Output: false
+```
+
+### Notes
+
+- The `toggle()` method is particularly useful for managing binary states in your application, such as showing/hiding elements, enabling/disabling features, or switching between two modes.
+- It provides a clean and readable way to flip boolean states without explicitly checking and setting the opposite value.
+- Remember that like all Signal modifications, using `toggle()` will trigger any reactive computations that depend on this variable.

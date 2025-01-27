@@ -1,21 +1,27 @@
 ---
 import { getCollection } from 'astro:content';
+import { markdown } from '@astropub/md'
 import { each, tokenize } from '@semantic-ui/utils';
 import {
   getExampleFiles,
+  getExampleID,
   addPlaygroundInjections,
   getSandboxURL,
   getPanelIndexes,
 } from '@helpers/playground.js';
+import { markdownToHtml } from 'astro/components';
 import Playground from '@layouts/Playground.astro';
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 import Sidebar from '@components/Sidebar.astro';
 
-const { entry } = Astro.props;
+/* Make paths */
 export async function getStaticPaths() {
   const entries = await getCollection('examples');
   const paths = [];
   each(entries, (entry) => {
+    if(entry.data.hidden) {
+      return;
+    }
     paths.push({
       params: { slug: `${entry.slug}` },
       props: { entry },
@@ -23,22 +29,37 @@ export async function getStaticPaths() {
   });
   return paths;
 }
+const { entry } = Astro.props;
 const sandboxURL = getSandboxURL();
 const example = entry.data;
 const exampleID = example.id || tokenize(example.title);
 const allExampleFiles = await import.meta.glob(`../../examples/**`, {
   query: '?raw',
 });
-let files = await getExampleFiles(example, allExampleFiles);
-files = addPlaygroundInjections(files, example.exampleType);
 
-const panelIndexes = getPanelIndexes(files, example.exampleType);
+const isFolder = example.exampleType == 'folder';
+
+let files = await getExampleFiles({
+  contentID: getExampleID(example),
+  allFiles: allExampleFiles,
+  basePath: '../../examples/',
+  includeFolder: isFolder,
+  hideBoilerplate: example.fold !== false,
+  includePlaygroundInjections: true,
+  includeLog: example.exampleType == 'log',
+});
+
+
+const panelIndexes = getPanelIndexes(files, {
+  type: example.exampleType
+});
+
+const tip = String(await markdown.inline(example.tip));
 
 const searchMeta = {
   ...entry.data,
   pageType: 'Example',
 }
-
 ---
 
 <Playground searchMeta={searchMeta} showSidebar=true>
@@ -47,11 +68,17 @@ const searchMeta = {
       expandAll=true
     >
     </SideBar>
-    <CodePlayground client:only
+    <CodePlayground client:only="lit"
       files={files}
-      example={example}
+      title={example.title}
+      selectedFile={example.selectedFile}
+      description={example.description}
+      useTabs={isFolder}
+      allowLayoutSwap={!isFolder}
       sandboxURL={sandboxURL}
       panelIndexes={panelIndexes}
+      additionalPageFiles={example.additionalPageFiles}
+      tip={tip}
       ></CodePlayground>
   </page>
 </Playground>

@@ -1,0 +1,29 @@
+.container {
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  cursor: pointer;
+
+  .text {
+    font-size: 8vw;
+    font-weight: var(--bold);
+    fill: var(--standard-80);
+    text-shadow: var(--subtle-shadow);
+  }
+
+  .wave {
+    fill: var(--primary-color);
+    transition: opacity 0.3s ease;
+  }
+
+  svg {
+    animation: float 3s ease-in-out infinite;
+  }
+
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}

@@ -1,0 +1,71 @@
+---
+layout: '@layouts/Guide.astro'
+icon: refresh-cw
+title: Flushing Reactions
+description: API reference for triggering reactivity
+---
+
+Flushing triggers all reactive contexts to update with their current value.
+
+> See [the dedicated tutorial on flushing](/reactivity/flush) for more information on how to use.
+
+## scheduleFlush
+
+Schedules a flush of all pending reactions.
+
+> **Async Flush** - Reactions run using [`microtask`](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide) queues which means that they will not immediately occur unless `flush` is used.
+
+### Syntax
+```javascript
+Reaction.scheduleFlush()
+```
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+Reaction.scheduleFlush();
+```
+
+## flush
+
+Immediately runs all pending reactions.
+
+### Syntax
+```javascript
+Reaction.flush()
+```
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+Reaction.flush();
+```
+
+## afterFlush
+
+Schedules a callback to run after the next flush.
+
+### Syntax
+```javascript
+Reaction.afterFlush(callback)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| callback | Function | The function to run after the flush |
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+Reaction.afterFlush(() => {
+  console.log('Flush completed');
+});
+```

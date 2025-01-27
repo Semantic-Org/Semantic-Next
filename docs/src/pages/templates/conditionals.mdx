@@ -10,19 +10,19 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 Templates support common control structures like `if`, `elseif` and `else` to handle branching paths in your template.
 
-```handlebars
-{{#if isEven number}}
+```sui
+{#if isEven number}
   Even
-{{else if isZero number}}
+{else if isZero number}
   Zero
-{{else}}
+{else}
   Odd
-{{/if}}
+{/if}
 ```
 
 ## Conditional Helpers
 
-> For a full list of comparators view the [dedicated section on comparison helpers](/templates/helpers#comparison)
+> For a full list of comparators view the [dedicated section on comparison helpers](/api/templates/helpers#comparison)
 
 
 ### Existence
@@ -30,16 +30,16 @@ Templates support common control structures like `if`, `elseif` and `else` to ha
 You can use `exists` and `isEmpty` to handle value existence. Values are checked against the `isEmpty` utility.
 
 
-```handlebars
-{{#if exists valueToCheck}}
+```sui
+{#if exists valueToCheck}
   Value exists
-{{/if}}
+{/if}
 ```
 
-```handlebars
-{{#if isEmpty collectionToCheck}}
+```sui
+{#if isEmpty collectionToCheck}
   Collection is empty
-{{/if}}
+{/if}
 ```
 
 ### Equality
@@ -48,18 +48,18 @@ You can use `is` `not`, `isExactly` and `isNotExactly` helpers to compare values
 
 > Exactly helpers use `===` comparison while `is` and `not` use `==`
 
-```handlebars
-{{#if is valueA valueB}}
+```sui
+{#if is valueA valueB}
   Values are equal
-{{/if}}
+{/if}
 ```
 
-```handlebars
-{{#if not isEven number}}
+```sui
+{#if not isEven number}
   Odd
-{{else}}
+{else}
   Even
-{{/if}}
+{/if}
 ```
 
 
@@ -67,14 +67,14 @@ You can use `is` `not`, `isExactly` and `isNotExactly` helpers to compare values
 
 You can use `greaterThan`, `lessThan`, `greaterThanEquals`, `lessThanEquals` to compare numeric values
 
-```handlebars
-{{#if greaterThan numberA numberB}}
+```sui
+{#if greaterThan numberA numberB}
   A is greater than B
-{{/if}}
+{/if}
 ```
 
-```handlebars
-{{#if lessThanEquals numberA numberB}}
+```sui
+{#if lessThanEquals numberA numberB}
   A is less than or equal to B
-{{/if}}
+{/if}
 ```

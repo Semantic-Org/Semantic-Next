@@ -1,7 +1,12 @@
 ---
 let { title, description, searchMeta, padded } = Astro.props;
 
+if(!title) {
+  title = 'Semantic UI';
+}
+
 import SearchMeta from '@components/SearchMeta.astro';
+import NavMenu from '@components/NavMenu/NavMenu.js';
 
 import './Body.css';
 import '../css/responsive.css';

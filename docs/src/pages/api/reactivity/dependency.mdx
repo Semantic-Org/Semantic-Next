@@ -1,0 +1,141 @@
+---
+layout: '@layouts/Guide.astro'
+icon: link
+title: Dependency
+description: API reference for Dependency in Semantic UI's reactivity system
+---
+
+`Dependency` is a core class in Semantic UI's reactivity system that manages dependencies between reactive computations and data sources.
+
+> **Advanced Use Only** - Dependency **should not be used by most developers directly** to control dependencies, but is instead used internally by `Signal` and `Reaction` to establish reactivity. Only some particular advanced use cases or metaframeworks will need to access this class directly.
+
+## constructor
+
+Creates a new Dependency instance.
+
+### Syntax
+```javascript
+new Dependency()
+```
+
+### Usage
+
+```javascript
+import { Dependency } from '@semantic-ui/reactivity';
+
+const dep = new Dependency();
+```
+
+## depend
+
+Registers the current reaction as dependent on this Dependency.
+
+### Syntax
+```javascript
+dependency.depend()
+```
+
+### Usage
+
+```javascript
+import { Dependency, Reaction } from '@semantic-ui/reactivity';
+
+const dep = new Dependency();
+
+Reaction.create(() => {
+  dep.depend();
+  console.log('This will re-run when dep.changed() is called');
+});
+```
+
+## changed
+
+Notifies all dependent reactions that this dependency has changed, causing them to re-run.
+
+### Syntax
+```javascript
+dependency.changed(context)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| context | any | (Optional) Additional context information to pass to invalidated reactions |
+
+### Usage
+
+```javascript
+import { Dependency, Reaction } from '@semantic-ui/reactivity';
+
+const dep = new Dependency();
+
+Reaction.create(() => {
+  dep.depend();
+  console.log('Reaction ran');
+});
+
+dep.changed(); // Triggers the reaction to re-run
+```
+
+## cleanUp
+
+Removes a specific reaction from this dependency's list of dependents.
+
+### Syntax
+```javascript
+dependency.cleanUp(reaction)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| reaction | Reaction | The reaction to remove from the dependency list |
+
+### Usage
+
+```javascript
+import { Dependency, Reaction } from '@semantic-ui/reactivity';
+
+const dep = new Dependency();
+
+const reaction = Reaction.create(() => {
+  dep.depend();
+  console.log('Reaction ran');
+});
+
+// Later, when you want to remove this specific reaction:
+dep.cleanUp(reaction);
+```
+
+## unsubscribe
+
+Alias for `cleanUp`. Removes a specific reaction from this dependency's list of dependents.
+
+### Syntax
+```javascript
+dependency.unsubscribe(reaction)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| reaction | Reaction | The reaction to unsubscribe from the dependency |
+
+### Usage
+
+```javascript
+import { Dependency, Reaction } from '@semantic-ui/reactivity';
+
+const dep = new Dependency();
+
+const reaction = Reaction.create(() => {
+  dep.depend();
+  console.log('Reaction ran');
+});
+
+// Later, when you want to unsubscribe this specific reaction:
+dep.unsubscribe(reaction);
+```

@@ -143,9 +143,9 @@ For instance imagine your component includes a primary `ui-button`, but you woul
 You can do this from inside your component's css by adjusting the css variables.
 
 ```html
-{{#if canSave}}
+{#if canSave}
   <ui-button primary>Save</ui-button>
-{{/if}}
+{/if}
 ```
 ```css
 ui-button {
@@ -165,7 +165,7 @@ This will allow you apply arbitrary css not present in the original component.
 
 For instance your `counter` component might include a `part` to expose the value of the counter.
 ```html
-<div class="counter" part="counter">{{counter}}</div>
+<div class="counter" part="counter">{counter}</div>
 ```
 
 This can be adjusted directly from the page

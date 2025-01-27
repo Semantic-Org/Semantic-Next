@@ -1,0 +1,50 @@
+---
+layout: '@layouts/Guide.astro'
+title: SSR Utilities
+icon: server
+description: API reference for server-side rendering utility functions
+---
+
+The SSR utilities provide constants for detecting whether the code is running on the server or client side.
+
+## Constants
+
+### isServer
+
+```javascript
+const isServer
+```
+
+A boolean constant indicating whether the current environment is server-side.
+
+#### Example
+
+```javascript
+import { isServer } from '@semantic-ui/utils';
+
+if (isServer) {
+  console.log("This code is running on the server");
+} else {
+  console.log("This code is running in the browser");
+}
+```
+
+### isClient
+
+```javascript
+const isClient
+```
+
+A boolean constant indicating whether the current environment is client-side (browser).
+
+#### Example
+
+```javascript
+import { isClient } from '@semantic-ui/utils';
+
+if (isClient) {
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM is fully loaded and parsed");
+  });
+}
+```

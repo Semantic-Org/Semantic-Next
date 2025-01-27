@@ -1,24 +1,245 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
----
+import { Code } from '@astrojs/starlight/components';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+const code1=`
+<ui-buttons large>
+  <ui-button subtle-negative>
+    <ui-icon x></ui-icon>
+    Delete
+  </ui-button>
+  <ui-button>
+    <ui-icon edit></ui-icon>
+    Edit
+  </ui-button>
+  <ui-button primary>
+    <ui-icon save></ui-icon>
+    Save
+  </ui-button>
+</ui-buttons>
+`.trim();
+const code2=`
+<user-panel>
+  <h3 class="header">
+    Welcome {getDisplayName (getUser userId) }
+  </h3>
+  <ui-buttons large>
+    {#each actions}
+      <ui-button {style}>
+        <ui-icon {icon}>
+        {text}
+      </ui-button>
+    {/each}
+  </ui-buttons>
+</user-panel>
+`.trim();
+
+---
 <Homepage>
   <aboveFold>
-    <ui-container>
-      <div class="left">
-        <h2>This is the title</h2>
-        <p>This is the copy</p>
-        <ui-button primary icon-after icon="right-chevron" href="/tutorial">View Guide</ui-button>
-        <ui-button transparent inverted href="/components"> Visit Docs</ui-button>
-      </div>
-    </ui-container>
+    <canvas id="gradient"></canvas>
+    <content>
+      <ui-container>
+        <img src="/images/api-banner-image.png" class="image">
+        <div class="text">
+          <h1>A Next-Gen UI Framework Built To Scale</h1>
+          <p>Create truly <b>portable in house design systems</b> that work everywhere usings <b>web standards</b>, <b>signals-based reactivity</b>, and <b>zero abstraction cost</b>. </p>
+          <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
+          <ui-button secondary href="/components">View Docs</ui-button>
+        </div>
+      </ui-container>
+    </content>
   </aboveFold>
+  <script>
+    import { Gradient } from '../javascript/gradient.js'
+    const gradient = new Gradient()
+    gradient.initGradient('#gradient')
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          entry.target.classList.toggle('offscreen', !entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0,
+        rootMargin: '0px'
+      }
+    );
+    const el = document.querySelector('aboveFold');
+    observer.observe(el);
+  </script>
   <ribbons>
-    <ribbon>
-      1
+    <ribbon class="proof">
+      <ui-container>
+        <ui-cards three spaced stackable>
+          <ui-card>
+            <ui-icon layers></ui-icon>
+            <div class="header">Future Tech Included</div>
+            <div class="description">
+              Signals based reactivity, AST based templating, CSS layers based theming, and everything baseline in 2024.
+            </div>
+          </ui-card>
+          <ui-card>
+            <ui-icon unlock></ui-icon>
+            <div class="header">Zero Framework Lock-in</div>
+            <div class="description">
+              Author native web components that work in React, Vue, Vanilla JS, or whatever framework comes next. True interoperability without compromise.
+            </div>
+          </ui-card>
+          <ui-card>
+            <ui-icon tool></ui-icon>
+            <div class="header">Built to Customize</div>
+            <div class="description">
+              Hit the ground running with robust UI primitives, then author custom UI with a component framework designed for developer experience.
+            </div>
+          </ui-card>
+        </ui-cards>
+        <!-- <div class="cards">
+         <div class="card">
+           <ui-icon layers></ui-icon>
+           <h4 class="header">Enterprise Ready</h4>
+           <p>Create apps with robust AST based templating, css layers based theming, and a composable architecture designed for large codebases.</p>
+         </div>
+        <div class="card">
+          <ui-icon unlock></ui-icon>
+          <h4 class="header">Zero Framework Lock-in</h4>
+          <p>Author native web components that work in React, Vue, Vanilla JS, or whatever framework comes next. True interoperability without compromise.</p>
+        </div>
+         <div class="card">
+           <ui-icon tool></ui-icon>
+           <h4 class="header">Built to Customize</h4>
+           <p>Hit the ground running with robust UI primitives, then author custom UI with a component framework designed for developer experience.</p>
+         </div>
+        </div> -->
+      </ui-container>
     </ribbon>
-    <ribbon class="inverted">
-      2
+    <ribbon class="tour">
+      <ui-container>
+        <div class="right">
+          <div class="container">
+            <div class="segment">
+              <div class="one">
+                <ui-buttons large>
+                  <ui-button subtle-negative>
+                    <ui-icon x></ui-icon>
+                    Delete
+                  </ui-button>
+                  <ui-button>
+                    <ui-icon edit></ui-icon>
+                    Edit
+                  </ui-button>
+                  <ui-button primary>
+                    <ui-icon save></ui-icon>
+                    Save
+                  </ui-button>
+                </ui-buttons>
+                <Code
+                  code={code1}
+                  lang="html"
+                />
+              </div>
+              <div class="two">
+                <Code
+                  code={code2}
+                  lang="sui"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="left">
+          <div class="copy">
+            <h3 class="header">A Framework for Distributable UI</h3>
+            <p>Semantic provides a growing library for first-party UI primitives like dropdowns, buttons, menus, inputs that you can use as baseline to design your own custom design system.</p>
+            <h4 class="sub header">Built for Scaling</h4>
+            <ul class="feature-list">
+              <li>
+                <ui-icon check></ui-icon>
+                Write your UI as web components and use anywhree.
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Singular end-user experience for handling settings, styling and more.
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Designed to be composable to make complex UI with web standards.
+              </li>
+            </ul>
+          </div>
+          <div class="copy">
+            <h3 class="header">UI Toolkit Built In</h3>
+            <p>Semantic provides a growing library for first-party UI primitives like dropdowns, buttons, menus, inputs that you can use as baseline to design your own custom design system.</p>
+            <h4 class="sub header">First Party Primitives</h4>
+            <ul class="feature-list">
+              <li>
+                <ui-icon check></ui-icon>
+                A growing library first-party library of primitives like button, menu, container that can be used to build complex UI.
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Robust, machine readable specification format provides a single source of truth.
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Written using useful principles of natural language that make using UI as simple as describing it.
+              </li>
+            </ul>
+          </div>
+          <div class="copy">
+            <h3 class="header">Ready for Advanced Use Cases</h3>
+            <p>Semantic is built to handle complex use-cases to build entire apps purely with web components.</p>
+            <h4 class="sub header">Enterprise Ready</h4>
+            <ul class="feature-list">
+              <li>
+                <ui-icon check></ui-icon>
+                Robust AST based templating with features like subtemplating, snippets, reactive expressions and more.
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Advanced tools for sharing state and data between components using web standards.
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Highly performant rendering engine powered by Google's Lit.
+              </li>
+            </ul>
+          </div>
+
+          <div class="copy">
+            <h4 class="sub header">Developers</h4>
+            <h3 class="header">Intuitive Templating</h3>
+            <p>Write templates that read like plain English. Semantic UI's template syntax makes components self-documenting and easier to maintain.</p>
+
+            <ul class="feature-list">
+              <li>
+                <ui-icon check></ui-icon>
+                Reactive expressions with natural syntax
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Automatic state synchronization
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Built-in conditional and loop helpers
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ui-container>
+    </ribbon>
+    <ribbon>
+      <ui-container>
+        <h3 class="ui header">
+          Try It Out
+        </h3>
+        <PlaygroundExample height="500" id="card-search"></PlaygroundExample>
+      </ui-container>
     </ribbon>
   </ribbons>
+  <footer>
+
+  </footer>
 </Homepage>

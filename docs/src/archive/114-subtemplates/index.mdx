@@ -1,0 +1,48 @@
+---
+title: Introduction
+category: 'Quickstart'
+subcategory: 'Components'
+description: Learn how to create your first web component with Semantic UI
+sort: '1.1.4'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: Template Expressions
+    link: /templates/expressions
+  - title: Reactive Date Helpers
+    link: /api/reactivity/date-helpers
+  - title: What are Web Components
+    link: /web-components
+---
+
+
+### It's Time To Begin
+
+The key to scaling design frameworks is consistent APIs. Web components allow you to encapsulate functionality into a custom element that can be used by front end developers in the same way they use other html tags when creating new pages.
+
+```javascript
+defineComponent({
+  tagName: 'current-time',
+});
+```
+```html
+<current-time></current-time>
+```
+
+Components do not need to be assigned to tags, they can also be used in other components compositionally. This lets you build apps similar to how you might in a framework like React or Vue.
+
+```javascript
+const currentTime = defineComponent({ template, html, css });
+
+defineComponent({
+  tagName: 'greet-user',
+  subTemplates: { currentTime }
+});
+```
+```html
+<greet-user></greet-user>
+```
+
+> **Explore the Docs** - The resources button in the bottom left can be used to see related docs to further explore concepts on a page.
+
+

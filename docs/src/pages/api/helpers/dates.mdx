@@ -1,0 +1,126 @@
+---
+layout: '@layouts/Guide.astro'
+title: Date Helpers
+icon: calendar
+description: API reference for date formatting template helpers
+---
+
+Date helpers provide utilities for formatting dates and times in templates.
+
+## Functions
+
+### formatDate
+Formats a date according to the specified format string.
+
+#### Template Syntax
+```sui
+{formatDate date 'YYYY-MM-DD' (object timezone='UTC')}
+```
+
+#### JavaScript Syntax
+```javascript
+formatDate(date, 'YYYY-MM-DD', { timezone: 'UTC' })
+```
+
+#### Parameters
+| Name    | Type   | Default | Description |
+|---------|--------|---------|-------------|
+| date    | Date   | new Date() | The date to format |
+| format  | string | 'L'     | The format string |
+| options | object | \{ timezone: 'local' \} | Additional options |
+
+##### Options
+
+| Name     | Type    | Default   | Description |
+|----------|---------|-----------|-------------|
+| locale   | string  | 'default' | The locale to use for formatting |
+| hour12   | boolean | true      | Whether to use 12-hour time |
+| timezone | string  | 'local'   | The timezone to use. Use 'local' for the local timezone |
+
+#### Returns
+`string` - The formatted date string.
+
+#### Example
+```javascript
+const date = new Date('2023-05-15T14:30:00Z');
+formatDate(date, 'YYYY-MM-DD'); // '2023-05-15'
+formatDate(date, 'YYYY-MM-DD', { timezone: 'America/New_York' }); // '2023-05-15'
+```
+
+### formatDateTime
+Formats a date with time according to the specified format string.
+
+#### Template Syntax
+```sui
+{formatDateTime someDate 'YYYY-MM-DD HH:mm' (object timezone='local')}
+```
+
+#### JavaScript Syntax
+```javascript
+formatDateTime(someDate, 'YYYY-MM-DD HH:mm', { timezone: 'local' })
+```
+
+#### Parameters
+| Name    | Type   | Default | Description |
+|---------|--------|---------|-------------|
+| date    | Date   | new Date() | The date to format |
+| format  | string | 'LLL'   | The format string |
+| options | object | \{ timezone: 'local' \} | Additional options |
+
+##### Options
+
+| Name     | Type    | Default   | Description |
+|----------|---------|-----------|-------------|
+| locale   | string  | 'default' | The locale to use for formatting |
+| hour12   | boolean | true      | Whether to use 12-hour time |
+| timezone | string  | 'local'   | The timezone to use. Use 'local' for the local timezone |
+
+#### Returns
+`string` - The formatted date and time string.
+
+#### Example
+```javascript
+const date = new Date('2023-05-15T14:30:00Z');
+formatDateTime(date, 'YYYY-MM-DD HH:mm'); // '2023-05-15 14:30'
+formatDateTime(date, 'YYYY-MM-DD hh:mm A', { hour12: true }); // '2023-05-15 02:30 PM'
+```
+
+### formatDateTimeSeconds
+Formats a date with time and seconds according to the specified format string.
+
+#### Template Syntax
+```sui
+{formatDateTimeSeconds someDate 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}
+```
+
+#### JavaScript Syntax
+```javascript
+formatDateTimeSeconds(someDate, 'YYYY-MM-DD HH:mm:ss', { timezone: 'America/New_York' })
+```
+
+#### Parameters
+| Name    | Type   | Default | Description |
+|---------|--------|---------|-------------|
+| date    | Date   | new Date() | The date to format |
+| format  | string | 'LTS'   | The format string |
+| options | object | \{ timezone: 'local' \} | Additional options |
+
+##### Options
+
+| Name     | Type    | Default   | Description |
+|----------|---------|-----------|-------------|
+| locale   | string  | 'default' | The locale to use for formatting |
+| hour12   | boolean | true      | Whether to use 12-hour time |
+| timezone | string  | 'local'   | The timezone to use. Use 'local' for the local timezone |
+
+#### Returns
+`string` - The formatted date, time, and seconds string.
+
+#### Example
+```javascript
+const date = new Date('2023-05-15T14:30:45Z');
+formatDateTimeSeconds(date, 'YYYY-MM-DD HH:mm:ss'); // '2023-05-15 14:30:45'
+formatDateTimeSeconds(date, 'YYYY-MM-DD hh:mm:ss A', \{ timezone: 'America/New_York', hour12: true }); // '2023-05-15 10:30:45 AM'
+```
+
+> **Note**: The 'local' timezone uses the timezone of the environment where the code is running. This is useful for displaying dates in the user's local time without needing to detect the timezone programmatically.

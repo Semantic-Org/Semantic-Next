@@ -1,8 +1,8 @@
-<div class="example {{classIf canShowCode 'visible'}} {{classIf title '' 'another'}}" part="example">
+<div class="example {classIf canShowCode 'visible'} {classIf title '' 'another'}" part="example">
   <div class="title">
     <div class="top">
       <span class="text" part="header">
-        {{title}}
+        {title}
       </span>
       <span class="links">
         <a class="sandbox link">
@@ -13,18 +13,18 @@
         </a>
       </span>
     </div>
-    {{#if both title description}}
+    {#if both title description}
       <p class="description" part="description">
-        {{{description}}}
+        {#html description}
       </p>
-    {{/if}}
+    {/if}
   </div>
   <div class="top segment" part="top-segment">
-    {{>slot}}
+    {>slot}
   </div>
   <div class="bottom segment" part="bottom-segment">
-    {{#if both code codeVisible}}
-      <code-sample code="{{code}}" segment="false"></code-sample>
-    {{/if}}
+    {#if both code codeVisible}
+      <code-sample code="{code}" segment="false"></code-sample>
+    {/if}
   </div>
 </div>

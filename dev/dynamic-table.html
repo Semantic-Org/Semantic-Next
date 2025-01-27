@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./reload.js" type="module"></script>
+  <link rel="stylesheet" href="./index.css">
+  <link rel="stylesheet" href="./ui/semantic-ui.css">
+  <link rel="stylesheet" href="./theme/base.css">
+  <script src="./ui/semantic-ui.js" type="module"></script>
+
+  <title>Test Element</title>
+  <script src="./examples/dynamic-table.js" type="module"></script>
+</head>
+<body>
+  <div class="container">
+    <dynamic-table></dynamic-table>
+    <br><br>
+    <ui-button primary class="one">Show Stats</ui-button>
+    <ui-button primary class="two">Show Hobbies</ui-button>
+    <script type="module">
+      import { Row, Row2 } from './examples/dynamic-table.js';
+
+      const table = document.querySelector('dynamic-table');
+      const button1 = document.querySelector('ui-button.one');
+      const button2 = document.querySelector('ui-button.two');
+      table.rows = [
+       { id: 'user1', firstName: 'Tank', lastName: 'Steelbeam', age: '47', gender: 'Male', occupation: 'Construction Safety Inspector', hobby: 'Competitive Origami', coffeeOrder: 'Decaf (secretly afraid of caffeine)' },
+       { id: 'user2', firstName: 'Flo', lastName: 'Watercooler', age: '55', gender: 'Female', occupation: 'Office Manager', hobby: 'Underground Fight Club Referee', coffeeOrder: 'Black, industrial strength' },
+       { id: 'user3', firstName: 'Chip', lastName: 'Windowsill', age: '23', gender: 'Male', occupation: 'Professional Plant Waterer', hobby: 'Extreme Knitting', coffeeOrder: 'Oat milk quadruple shot' },
+       { id: 'user4', firstName: 'Mabel', lastName: 'Clockwise', age: '84', gender: 'Female', occupation: 'Retired Time Zone Coordinator', hobby: 'Street Racing', coffeeOrder: 'Earl Grey with a shot of espresso' },
+       { id: 'user5', firstName: 'Buck', lastName: 'Pencilsworth', age: '42', gender: 'Male', occupation: 'Pencil Sharpness Consultant', hobby: 'Underwater Basket Weaving', coffeeOrder: 'Whatever was left in the pot' },
+       { id: 'user6', firstName: 'Dot', lastName: 'Keyboarder', age: '29', gender: 'Female', occupation: 'Keyboard Sound Effects Artist', hobby: 'Silent Disco DJ', coffeeOrder: 'Changes order daily to keep baristas on their toes' },
+       { id: 'user7', firstName: 'Rod', lastName: 'Sockdrawer', age: '58', gender: 'Male', occupation: 'Sock Matching Specialist', hobby: 'Competitive Staring Contests', coffeeOrder: 'Hot water, holds own tea bag' },
+       { id: 'user8', firstName: 'Pearl', lastName: 'Teacup', age: '61', gender: 'Female', occupation: 'Fortune Cookie Writer', hobby: 'Extreme Couponing', coffeeOrder: 'Strictly tea, judges coffee drinkers silently' },
+       { id: 'user9', firstName: 'Buzz', lastName: 'Lampshade', age: '36', gender: 'Male', occupation: 'Professional Lightbulb Moment Creator', hobby: 'Cloud Shape Categorization', coffeeOrder: 'Energy drinks only, banned from Starbucks' },
+       { id: 'user10', firstName: 'Dotty', lastName: 'Paperclips', age: '72', gender: 'Female', occupation: 'Paper Clip Chain World Record Holder', hobby: 'Competitive Power Walking', coffeeOrder: 'Irish coffee, hold the coffee' },
+       { id: 'user11', firstName: 'Biff', lastName: 'Strongarm', age: '39', gender: 'Male', occupation: 'Professional High-Fiver', hobby: 'Butterfly Wrestling', coffeeOrder: 'Protein shake with espresso shots' },
+       { id: 'user12', firstName: 'Pip', lastName: 'Kettlewood', age: '19', gender: 'Female', occupation: 'Apprentice Toast Inspector', hobby: 'Professional Blanket Fort Architect', coffeeOrder: 'Whatever has the most sugar' },
+       { id: 'user13', firstName: 'Chuck', lastName: 'Cheesewheel', age: '44', gender: 'Male', occupation: 'Cheese Wheel Racing Coach', hobby: 'Extreme Ironing', coffeeOrder: 'Lactose-free (ironic for a Cheesewheel)' },
+       { id: 'user14', firstName: 'Penny', lastName: 'Deskchair', age: '31', gender: 'Female', occupation: 'Chair Spinning Olympics Trainer', hobby: 'Competitive Cat Herding', coffeeOrder: 'Cold brew IV drip' },
+       { id: 'user15', firstName: 'Duke', lastName: 'Coffeebean', age: '38', gender: 'Male', occupation: 'Coffee Bean Counter', hobby: 'Professional Napping', coffeeOrder: 'Actually only drinks hot chocolate' }
+      ];
+
+      button1.addEventListener('click', () => {
+        table.rowTemplate = Row;
+        table.headers = ['ID', 'Name', 'Age', 'Gender' ];
+      });
+      button2.addEventListener('click', () => {
+        table.rowTemplate = Row2;
+        table.headers = ['Name', 'Occupation', 'Hobby' ];
+      });
+    </script>
+  </div>
+</body>

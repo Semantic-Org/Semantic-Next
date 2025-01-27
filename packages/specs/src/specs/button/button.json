@@ -4,6 +4,9 @@
   "description": "A button indicates a possible user action",
   "tagName": "ui-button",
   "exportName": "UIButton",
+  "examples": {
+    "defaultPluralContent": "\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n"
+  },
   "content": [
     {
       "name": "Icon",
@@ -37,13 +40,6 @@
       ]
     },
     {
-      "name": "Icon Only",
-      "attribute": "icon-only",
-      "description": "appear with only an icon",
-      "exampleCode": "<ui-button icon-only icon=\"pause\"></ui-button>",
-      "usageLevel": 2
-    },
-    {
       "name": "Toggle",
       "attribute": "toggle",
       "description": "emphasize its active state",
@@ -71,7 +67,7 @@
         },
         {
           "name": "Fade Animated",
-          "value": "fade-animated",
+          "value": ["fade-animated"],
           "description": "formatted to fade in hidden content",
           "exampleCode": "<ui-button fade-animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
         }
@@ -478,6 +474,13 @@
   ],
   "settings": [
     {
+      "name": "Icon Only",
+      "type": "boolean",
+      "attribute": "icon-only",
+      "defaultValue": false,
+      "description": "Enable to remove spacing for text"
+    },
+    {
       "name": "Icon After",
       "type": "boolean",
       "attribute": "icon-after",
@@ -485,7 +488,7 @@
       "description": "Enable to position the icon after the text"
     },
     {
-      "name": "href",
+      "name": "Link",
       "type": "string",
       "attribute": "href",
       "description": "link to a webpage"

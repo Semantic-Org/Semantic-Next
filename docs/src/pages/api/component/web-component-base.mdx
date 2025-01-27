@@ -1,0 +1,370 @@
+---
+layout: '@layouts/Guide.astro'
+title: Web Component Base
+icon: box
+description: API reference for the WebComponentBase class in Semantic UI Component system
+---
+
+`WebComponentBase` is the base web component class used to create web components with `defineComponent`. It handles internal utilities related to component lifecycle and other internals of the framework.
+
+> **Advanced Use Only** - It is not recommended to use this base class directly except in use cases where you want to create custom web components without `defineComponent`
+
+## Import
+
+```javascript
+import { WebComponentBase } from '@semantic-ui/component';
+```
+
+## Static Properties
+
+| Name                | Type   | Description                                          |
+|---------------------|--------|------------------------------------------------------|
+| shadowRootOptions   | Object | Options for the shadow root, including delegatesFocus |
+| scopedStyleSheet    | CSSStyleSheet | Scoped stylesheet for use with light DOM rendering |
+
+## Instance Properties
+
+| Name            | Type    | Description                                     |
+|-----------------|---------|--------------------------------------------------|
+| renderCallbacks | Array   | Array of callbacks to be executed after rendering |
+
+## Static Methods
+
+### getProperties
+
+```javascript
+static getProperties({ properties, settings, componentSpec })
+```
+
+Defines property configurations for a web component.
+
+#### Parameters
+
+| Name           | Type   | Description                    |
+|----------------|--------|--------------------------------|
+| properties     | Object | Initial properties configuration |
+| settings       | Object | Component settings configuration |
+| componentSpec  | Object | Component specification object |
+
+#### Returns
+
+An object containing the configured properties.
+
+#### Example
+
+```javascript
+const properties = WebComponentBase.getProperties({
+  properties: {
+    value: String,
+  },
+  settings: {
+    theme: 'light'
+  },
+  componentSpec: mySpec
+});
+```
+
+### getPropertySettings
+
+```javascript
+static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {})
+```
+
+Creates property configuration for a single property.
+
+#### Parameters
+
+| Name         | Type    | Description                        |
+|-------------|----------|-----------------------------------|
+| propertyName | string  | Name of the property              |
+| type        | Function | Constructor for property type      |
+| options     | Object   | Property configuration options     |
+
+#### Options Object
+
+| Name         | Type    | Default | Description                  |
+|-------------|----------|---------|------------------------------|
+| propertyOnly | boolean | false   | If true, no attribute created |
+
+#### Returns
+
+Property configuration object.
+
+#### Example
+
+```javascript
+const propConfig = WebComponentBase.getPropertySettings(
+  'theme',
+  String,
+  { propertyOnly: false }
+);
+```
+
+## Instance Methods
+
+### addRenderCallback
+
+```javascript
+addRenderCallback(callback)
+```
+
+Adds a callback to be executed after rendering.
+
+#### Parameters
+
+| Name     | Type     | Description                  |
+|----------|----------|------------------------------|
+| callback | Function | The callback to be executed |
+
+#### Example
+
+```javascript
+this.addRenderCallback(() => {
+  console.log('Render complete');
+});
+```
+
+### setDefaultSettings
+
+```javascript
+setDefaultSettings({settings, componentSpec})
+```
+
+Sets default settings for a component.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| settings      | Object | Default settings values        |
+| componentSpec | Object | Component specification object |
+
+#### Example
+
+```javascript
+this.setDefaultSettings({
+  settings: {
+    theme: 'light',
+    size: 'medium'
+  },
+  componentSpec: mySpec
+});
+```
+
+### getSettingsFromConfig
+
+```javascript
+getSettingsFromConfig({componentSpec, properties})
+```
+
+Returns current settings including both attributes and properties.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+| properties    | Object | Component properties object    |
+
+#### Returns
+
+Current settings object.
+
+#### Example
+
+```javascript
+const settings = this.getSettingsFromConfig({
+  componentSpec: mySpec,
+  properties: this.constructor.properties
+});
+```
+
+### createSettingsProxy
+
+```javascript
+createSettingsProxy({componentSpec, properties})
+```
+
+Creates a proxy object for reactive settings access.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+| properties    | Object | Component properties object    |
+
+#### Returns
+
+A Proxy object for reactive settings.
+
+#### Example
+
+```javascript
+this.settings = this.createSettingsProxy({
+  componentSpec,
+  properties: this.constructor.properties
+});
+```
+
+### getUIClasses
+
+```javascript
+getUIClasses({componentSpec, properties})
+```
+
+Generates CSS classes based on component attributes.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+| properties    | Object | Component properties object    |
+
+#### Returns
+
+A string of space-separated CSS classes.
+
+#### Example
+
+```javascript
+const classes = this.getUIClasses({
+  componentSpec,
+  properties: this.constructor.properties
+});
+```
+
+### getContent
+
+```javascript
+getContent({componentSpec})
+```
+
+Retrieves slotted content from a component.
+
+#### Parameters
+
+| Name          | Type   | Description                    |
+|---------------|--------|--------------------------------|
+| componentSpec | Object | Component specification object |
+
+#### Returns
+
+An object containing slotted content.
+
+#### Example
+
+```javascript
+const content = this.getContent({
+  componentSpec: mySpec
+});
+```
+
+### isDarkMode
+
+```javascript
+isDarkMode()
+```
+
+Checks if the component is in dark mode.
+
+#### Returns
+
+Boolean indicating if dark mode is active, or undefined if server-side.
+
+#### Example
+
+```javascript
+if (this.isDarkMode()) {
+  this.theme = 'dark';
+}
+```
+
+### $(selector, options)
+
+```javascript
+$(selector, { root } = {})
+```
+
+Queries the component's render root.
+
+#### Parameters
+
+| Name     | Type   | Description              |
+|----------|--------|--------------------------|
+| selector | string | CSS selector to query    |
+| options  | Object | Query configuration      |
+
+#### Options Object
+
+| Name | Type    | Description          |
+|------|---------|---------------------|
+| root | Element | Root to query from  |
+
+#### Returns
+
+Query result set.
+
+#### Example
+
+```javascript
+const buttons = this.$('button');
+```
+
+### $$(selector)
+
+```javascript
+$$(selector)
+```
+
+Queries the original DOM content.
+
+#### Parameters
+
+| Name     | Type   | Description              |
+|----------|--------|--------------------------|
+| selector | string | CSS selector to query    |
+
+#### Returns
+
+Query result set.
+
+#### Example
+
+```javascript
+const content = this.$$('.content');
+```
+
+### call
+
+```javascript
+call(func, { firstArg, additionalArgs, args } = {})
+```
+
+Calls a function with standard parameters.
+
+#### Parameters
+
+| Name           | Type     | Description                   |
+|----------------|----------|-------------------------------|
+| func           | Function | Function to call              |
+| options        | Object   | Call configuration options    |
+
+#### Options Object
+
+| Name           | Type     | Default            | Description                  |
+|----------------|----------|-------------------|------------------------------|
+| firstArg       | any      | undefined         | First argument to pass       |
+| additionalArgs | Array    | undefined         | Additional arguments         |
+| args           | Array    | [component, $]    | Default arguments           |
+
+#### Example
+
+```javascript
+this.call(callback, {
+  firstArg: 'value',
+  additionalArgs: ['extra'],
+  args: [this.component, this.$]
+});
+```

@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { findIndex, isEqual } from '@semantic-ui/utils';
+import { debounce, unique } from '@semantic-ui/utils';
 
 import template from './GlobalSearch.html?raw';
 import css from './GlobalSearch.css?raw';
@@ -12,6 +12,7 @@ const settings = {
   importPath: 'pagefind.js',
   openKey: 'ctrl + k',
   resultsPerPage: 20,
+  debounceTime: 200
 };
 
 const state = {
@@ -21,6 +22,8 @@ const state = {
   selectedIndex: 0,
   selectedResult: undefined,
   resultOffset: 0,
+  searchTerm: '',
+  noResults: false,
   modalOpen: false,
 };
 
@@ -49,6 +52,12 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
       this.search = new Instance({
         bundlePath: settings.bundlePath
       });
+      this.search.on('search', (term) => {
+        state.searchTerm.set(term);
+      });
+      this.search.on('loading', () => {
+        state.noResults.set(false);
+      });
       this.search.on('results', (rawResults) => {
         state.rawResults.set(rawResults);
       });
@@ -64,15 +73,16 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
       if(reaction.firstRun) {
         return;
       }
-
       const results = await Promise.all(rawResults.results.slice(startIndex, endIndex).map(r => r.data()));
       state.results.set(results);
-
       const displayResults = results
         .map(result => self.mapResult(result))
         .filter(result => result.title)
       ;
       state.selectedIndex.set(0);
+      if(displayResults.length == 0 && state.searchTerm.get()) {
+        state.noResults.set(true);
+      }
       state.displayResults.set(displayResults);
     });
   },
@@ -187,12 +197,17 @@ const keys = {
 };
 
 const events = {
-  'input, click .inline-search input'({self}) {
+  'input, click .inline-search'({self}) {
     self.openModal();
   },
-  'input .search input'({self, event}) {
-    let searchTerm = $(event.target).val();
-    self.search.triggerSearch(searchTerm);
+  'input .search'({self, settings, value}) {
+    if(self.doSearch) {
+      self.doSearch.cancel();
+    }
+    self.doSearch = debounce(() => {
+      self.search.triggerSearch(value);
+    }, settings.debounceTime);
+    self.doSearch();
   },
   'show ui-modal'({state}) {
     state.modalOpen.set(true);

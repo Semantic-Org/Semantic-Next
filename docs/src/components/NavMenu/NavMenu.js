@@ -17,7 +17,7 @@ const state = {
   url: ''
 };
 
-const createComponent = function ({ self, data, state, settings }) {
+const createComponent = function ({ $, el, self, settings, data, state, reaction }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
@@ -26,7 +26,7 @@ const createComponent = function ({ self, data, state, settings }) {
       return self.filterVisibleSections(settings.menu);
     },
     getNavIcon(section) {
-      const defaultIcon = (settings.useAccordion && section?.pages)
+      const defaultIcon = (settings.useAccordion && section?.pages && !settings.expandAll)
         ? 'chevron-down'
         : ''
       ;
@@ -123,6 +123,21 @@ const createComponent = function ({ self, data, state, settings }) {
     },
     onPageChange() {
       state.url.set(window.location.pathname);
+    },
+    scrollToActive() {
+      const el = $('.item.current').first().el();
+      if(el) {
+        const rect = el.getBoundingClientRect();
+        const isVisible = (
+          rect.top >= 0 &&
+          rect.left >= 0 &&
+          rect.bottom <= window.innerHeight &&
+          rect.right <= window.innerWidth
+        );
+        if (!isVisible) {
+          el.scrollIntoView();
+        }
+      }
     }
   };
 };
@@ -136,6 +151,7 @@ const onDestroyed =  ({ self }) => {
 const onRendered =  ({ $, self, attachEvent, isClient }) => {
   if(isClient) {
     attachEvent(document, 'astro:after-swap', self.onPageChange);
+    self.scrollToActive();
   }
 };
 

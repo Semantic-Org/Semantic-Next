@@ -1,12 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ReactiveVar } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 import template from './basic.html?raw';
 import css from './basic.css?raw';
 
-const createComponent = ({ self, $, findParent }) => ({
-  date: new ReactiveVar(new Date()),
-  slogan: new ReactiveVar(),
-  second: new ReactiveVar(),
+const createComponent = ({ self, $, signal, findParent }) => ({
+  date: signal(new Date()),
+  slogan: signal(),
+  second: signal(),
   slogans: {
     0: 'Awesome',
     1: 'Amazing',

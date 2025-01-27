@@ -58,6 +58,7 @@ export class SpecReader {
       types: [],
       states: [],
       variations: [],
+      settings: [],
     };
 
     // user can specify only portions of definition appears of a certain usage level
@@ -70,7 +71,7 @@ export class SpecReader {
     const spec = this.spec;
 
     // standard example
-    const defaultContent = spec?.examples?.defaultContent;
+    const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
     definition.types.push({
       title: spec.name,
@@ -78,12 +79,13 @@ export class SpecReader {
       examples: [
         {
           showCode: false,
-          code: this.getCode(defaultModifiers, { html: defaultContent }),
+          code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent }),
           components: [ this.getComponentParts(defaultModifiers, { html: defaultContent }) ]
         }
       ]
     });
 
+    // returns specs in the same sequence 'types', 'content', 'states', 'variations'
     const parts = this.getOrderedParts();
     each(parts, (partName) => {
       each(spec[partName], part => {
@@ -105,7 +107,7 @@ export class SpecReader {
     Returns the sequencing for a spec when displaying in a structured way
   */
   getOrderedParts() {
-    return ['types', 'content', 'states', 'variations'];
+    return ['types', 'content', 'states', 'variations', 'settings'];
   }
 
   /*
@@ -233,7 +235,7 @@ export class SpecReader {
           if(defaultAttributes) {
             modifiers = `${modifiers} ${defaultAttributes}`;
           }
-          code = this.getCode(modifiers, { html: defaultContent });
+          code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
           componentParts = this.getComponentParts(modifiers, { html: defaultContent });
         }
         const example = {
@@ -266,7 +268,7 @@ export class SpecReader {
         componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
-        code = this.getCode(modifiers, { html: defaultContent });
+        code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
         componentParts = this.getComponentParts(modifiers, { html: defaultContent });
       }
       const example = {
@@ -310,7 +312,8 @@ export class SpecReader {
     return componentParts;
   }
 
-  getCode(modifiers, settings) {
+  /* Returns the html for a component with a given set of modifiers */
+  getCodeFromModifiers(modifiers, settings) {
     const { componentName, attributeString, html } = this.getComponentParts(modifiers, settings);
     return `<${componentName}${attributeString}>${html}</${componentName}>`;
   }
@@ -426,7 +429,164 @@ export class SpecReader {
      for the web component. It is a subset of the component spec that can be searched quickly
      and has a reduced filesize.
   */
-  getWebComponentSpec(spec = this.spec) {
+  getWebComponentSpec(spec = this.spec, { plural = this.plural } = {}) {
+
+    if(spec == this.spec && this.componentSpec) {
+      return this.componentSpec;
+    }
+
+    let componentSpec = {
+      tagName: spec.tagName,
+      content: [],
+      contentAttributes: [],
+
+      types: [],
+      variations: [],
+      states: [],
+      events: [],
+      settings: [],
+
+      properties: [],
+      attributes: [],
+      optionAttributes: {},
+      propertyTypes: {},
+      allowedValues: {},
+      attributeClasses: [],
+      defaultValues: {},
+      inheritedPluralVariations: [],
+    };
+
+    const addSettingsFromPart = (section) => {
+      let specPart = spec[section] || [];
+
+      // plural spec uses a separate array to list which values are permitted to be shared
+      if(plural) {
+        const permittedListNames = {
+          types: 'pluralSharedTypes',
+          variations: 'pluralSharedVariations',
+          states: 'pluralSharedStates',
+          content: 'pluralSharedContent',
+          settings: 'pluralSharedSettings',
+          events: 'pluralSharedEvents',
+        };
+        const permittedListName = get(permittedListNames, section);
+        const permittedValues = get(spec, permittedListName) || [];
+        if(permittedListName) {
+          specPart = specPart.filter((spec) => {
+            const propertyName = this.getPropertyName(spec);
+            return inArray(propertyName, permittedValues);
+          });
+        }
+
+        // the section name will not corresponse to the section name passed in
+        section = section.replace('pluralOnly', '').toLowerCase();
+
+      }
+      each(specPart, (spec) => {
+        const propertyName = this.getPropertyName(spec);
+
+        // it is a requirement to have a property name defined
+        if(!propertyName) {
+          return;
+        }
+
+        // add to list of this grouping, i.e types: ['emphasis']
+        if(componentSpec[section]) {
+          componentSpec[section].push(propertyName);
+        }
+
+        // find allowed option values for this attribute i.e. emphasis: ['primary', 'secondary']
+        const allowedValues = this.getAllowedValues(spec);
+        if(allowedValues) {
+          componentSpec.allowedValues[propertyName] = allowedValues;
+        }
+
+        // find native type of this property i.e. String
+        const propertyType = this.getPropertyType(spec, section, allowedValues);
+        if (propertyType) {
+          componentSpec.propertyTypes[propertyName] = propertyType;
+        }
+
+        // find attribute name if it its not a function
+        const attributeName = this.getAttributeName(spec, propertyType);
+        if(attributeName) {
+          componentSpec.attributes.push(attributeName);
+        }
+        else {
+          componentSpec.properties.push(propertyName);
+        }
+
+        // find default values
+        const defaultValue = this.getDefaultValue(spec, propertyType, section);
+        if (defaultValue !== undefined) {
+          componentSpec.defaultValues[propertyName] = defaultValue;
+        }
+
+        /* Special Cases */
+
+        // "content" can be attribute or slot
+        if (section === 'content') {
+          if(spec.attribute) {
+            componentSpec.contentAttributes.push(spec.attribute);
+          }
+          else if(spec.slot) {
+            componentSpec.slots.push(spec.slot);
+          }
+        }
+
+        // attributes can opt in to having its attribute as a ui class name
+        // i.e. ['attached', 'left-attached'] includes 'attached' the attribute as a class
+        if (attributeName && spec.includeAttributeClass) {
+          componentSpec.attributeClasses.push(propertyName);
+        }
+
+      });
+    };
+
+    // Only process necessary parts of the spec
+    const singularParts = [
+      'content',
+      'types',
+      'states',
+      'variations',
+      'settings',
+      'events',
+    ];
+    each(singularParts, addSettingsFromPart);
+
+    if(plural) {
+      const pluralOnlyParts = [
+        'pluralOnlyContent',
+        'pluralOnlyTypes',
+        'pluralOnlyStates',
+        'pluralOnlySettings',
+        'pluralOnlyVariations',
+        'pluralOnlyEvents',
+      ];
+      each(pluralOnlyParts, addSettingsFromPart);
+    }
+
+    // avoid having to reverse array at runtime
+    let options = mapObject(componentSpec.allowedValues, (values, key) => {
+      return values = values.filter(value => isString(value));
+    });
+    componentSpec.optionAttributes = reverseKeys(options);
+
+    // store some details for plurality if present
+    componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
+
+    this.componentSpec = componentSpec;
+
+    return componentSpec;
+  }
+
+
+
+  /* This is a format that is consumed by defineComponent to determine valid attributes
+     for the web component. It is a subset of the component spec that can be searched quickly
+     and has a reduced filesize.
+  */
+  getPluralWebComponentSpec(spec = this.spec) {
 
     if(spec == this.spec && this.componentSpec) {
       return this.componentSpec;
@@ -488,7 +648,7 @@ export class SpecReader {
           componentSpec.properties.push(propertyName);
         }
 
-        // get default value
+        // find default values
         const defaultValue = this.getDefaultValue(spec, propertyType, section);
         if (defaultValue !== undefined) {
           componentSpec.defaultValues[propertyName] = defaultValue;
@@ -496,7 +656,7 @@ export class SpecReader {
 
         /* Special Cases */
 
-        // content can option to either using slots or attributes
+        // "content" can be attribute or slot
         if (section === 'content') {
           if(spec.attribute) {
             componentSpec.contentAttributes.push(spec.attribute);
@@ -506,8 +666,8 @@ export class SpecReader {
           }
         }
 
-        // components can opt in to having its attribute as a class name
-        // i.e. .attached + .left-attached
+        // attributes can opt in to having its attribute as a ui class name
+        // i.e. ['attached', 'left-attached'] includes 'attached' the attribute as a class
         if (attributeName && spec.includeAttributeClass) {
           componentSpec.attributeClasses.push(propertyName);
         }
@@ -520,6 +680,7 @@ export class SpecReader {
     addSettingsFromPart('types');
     addSettingsFromPart('states');
     addSettingsFromPart('variations');
+    addSettingsFromPart('pluralVariations');
     addSettingsFromPart('settings');
     addSettingsFromPart('events');
 

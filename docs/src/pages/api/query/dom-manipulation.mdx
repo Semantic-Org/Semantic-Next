@@ -1,0 +1,244 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - DOM Manipulation
+icon: edit-3
+description: API reference for Query methods related to DOM manipulation
+---
+
+The DOM Manipulation methods in Query allow you to insert, remove, and modify elements in the DOM. These methods are crucial for creating dynamic and interactive user interfaces in your Semantic UI components.
+
+## append
+
+Insert content to the end of each element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').append(content)
+```
+
+### Parameters
+| Name    | Type                | Description                           |
+|---------|---------------------|---------------------------------------|
+| content | string, DOM Element, or Query object | The content to insert |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Append a new paragraph to a div
+$('div').append('<p>New content</p>');
+```
+
+#### Shadow DOM
+```javascript
+// Append a new button to the action buttons in a user-profile
+$$('user-profile').find('.action-buttons').append('<button>Follow</button>');
+```
+
+## prepend
+
+Insert content to the beginning of each element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').prepend(content)
+```
+
+### Parameters
+| Name    | Type                | Description                           |
+|---------|---------------------|---------------------------------------|
+| content | string, DOM Element, or Query object | The content to insert |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Prepend a new heading to a section
+$('section').prepend('<h2>New Section Title</h2>');
+```
+
+#### Shadow DOM
+```javascript
+// Prepend a notification badge to the user name in a user-profile
+$$('user-profile').find('.user-name').prepend('<span class="badge">New</span>');
+```
+
+## remove
+
+Remove the set of matched elements from the DOM.
+
+### Syntax
+```javascript
+$('selector').remove()
+```
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Remove all paragraphs with a specific class
+$('p.outdated').remove();
+```
+
+#### Shadow DOM
+```javascript
+// Remove the offline status indicator from a user-profile
+$$('user-profile').find('.status-indicator.offline').remove();
+```
+
+## clone
+
+Create a deep copy of the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').clone()
+```
+
+### Returns
+A new [Query object](/query/basic#the-query-object) containing cloned elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Clone a template and append it to a container
+const $template = $('#item-template').clone();
+$('#container').append($template);
+```
+
+#### Shadow DOM
+```javascript
+// Clone a user badge and append it to a list in a user-profile
+const $badge = $$('user-profile').find('.user-badge').clone();
+$$('user-profile').find('.badge-list').append($badge);
+```
+
+## insertBefore
+
+Insert every element in the set of matched elements before the target.
+
+### Syntax
+```javascript
+$('selector').insertBefore(target)
+```
+
+### Parameters
+| Name   | Type   | Description                                        |
+|--------|--------|----------------------------------------------------|
+| target | string | A selector, element, or Query object before which the content will be inserted |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Insert a new paragraph before all existing paragraphs
+$('<p>New paragraph</p>').insertBefore('p');
+```
+
+#### Shadow DOM
+```javascript
+// Insert a new header before the user info in a user-profile
+$$('<h3>User Details</h3>').insertBefore($$('user-profile').find('.user-info'));
+```
+
+## insertAfter
+
+Insert every element in the set of matched elements after the target.
+
+### Syntax
+```javascript
+$('selector').insertAfter(target)
+```
+
+### Parameters
+| Name   | Type   | Description                                       |
+|--------|--------|---------------------------------------------------|
+| target | string | A selector, element, or Query object after which the content will be inserted |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Insert a new paragraph after all existing paragraphs
+$('<p>New paragraph</p>').insertAfter('p');
+```
+
+#### Shadow DOM
+```javascript
+// Insert a new footer after the user bio in a user-profile
+$$('<footer>Last updated: Today</footer>').insertAfter($$('user-profile').find('.user-bio'));
+```
+
+## detach
+
+Remove the set of matched elements from the DOM, but keep all associated data and events.
+
+### Syntax
+```javascript
+$('selector').detach()
+```
+
+### Returns
+[Query object](/query/basic#the-query-object) containing the removed elements.
+
+### Usage
+
+#### Standard
+```javascript
+// Detach all list items, modify them, and reattach
+const $items = $('ul li').detach();
+$items.addClass('modified');
+$('ul').append($items);
+```
+
+#### Shadow DOM
+```javascript
+// Detach user posts, modify them, and reattach in a user-profile
+const $posts = $$('user-profile').find('.user-posts').detach();
+$posts.addClass('updated');
+$$('user-profile').find('.posts-container').append($posts);
+```
+
+### Usage
+```javascript
+// Reverse the order of list items
+$('ul.my-list li').reverse().each((el, index) => {
+  console.log(`Reversed order: Item ${index + 1}`);
+});
+```
+
+## clone
+
+Creates a deep copy of the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').clone()
+```
+
+### Returns
+A new [Query object](/query/basic#the-query-object) containing cloned elements.
+
+### Usage
+```javascript
+// Clone a template and append it to a container
+const $template = $('#item-template').clone();
+$('#container').append($template);
+```
+

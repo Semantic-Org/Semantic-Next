@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import glob from 'glob';
+import { globSync } from 'glob';
 import { join } from 'path';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import semver from 'semver';
@@ -126,7 +126,7 @@ const workspaceGlobs = mainPackageJson.workspaces;
 
   const publishPromises = [];
   workspaceGlobs.forEach(workspaceGlob => {
-    const workspaceDirs = glob.sync(workspaceGlob, { realpath: true });
+    const workspaceDirs = globSync(workspaceGlob, { realpath: true });
     workspaceDirs.forEach(dir => {
       publishPromises.push(publishPackage(dir));
     });

@@ -1,0 +1,147 @@
+---
+layout: '@layouts/Guide.astro'
+title: String Helpers
+icon: type
+description: API reference for string manipulation template helpers
+---
+
+String helpers provide utilities for manipulating and formatting strings in templates.
+
+## Functions
+
+### stringify
+Converts a value to JSON string.
+
+#### Template Syntax
+```sui
+{stringify objectToStringify}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The value to stringify |
+
+#### Returns
+`string` - JSON string representation of the input.
+
+#### Example
+```sui
+<pre>{stringify user}</pre>
+```
+
+### concat
+Concatenates all arguments.
+
+#### Template Syntax
+```sui
+{concat firstName ' ' lastName}
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| args | ...any | Values to concatenate |
+
+#### Returns
+`string` - Concatenated string of all arguments.
+
+#### Example
+```sui
+<h1>Welcome, {concat user.firstName ' ' user.lastName}!</h1>
+```
+
+### capitalize
+Capitalizes the first letter of text.
+
+#### Template Syntax
+```sui
+{capitalize textToCapitalize}
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to capitalize |
+
+#### Returns
+`string` - The input text with the first letter capitalized.
+
+#### Example
+```sui
+<p>{capitalize pageTitle}</p>
+```
+
+### titleCase
+Converts text to title case.
+
+#### Template Syntax
+```sui
+{titleCase textToTitleCase}
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to convert |
+
+#### Returns
+`string` - The input text converted to title case.
+
+#### Example
+```sui
+<h2>{titleCase article.title}</h2>
+```
+
+### tokenize
+Tokenizes a string.
+
+#### Template Syntax
+```sui
+{tokenize stringToTokenize}
+```
+
+#### Parameters
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string to tokenize |
+
+#### Returns
+`string` - The tokenized string.
+
+#### Example
+```sui
+<div id="{tokenize sectionTitle}">
+  <h3>{sectionTitle}</h3>
+</div>
+```
+
+### escapeHTML
+Escapes HTML special characters in a string.
+
+#### Template Syntax
+```sui
+{escapeHTML stringToEscape}
+```
+
+#### Parameters
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string to escape |
+
+#### Returns
+`string` - The input string with HTML special characters escaped.
+
+#### Example
+```sui
+<div title="{escapeHTML userInput}">
+  {userInput}
+</div>
+```
+
+```sui
+<h3>User Bio</h3>
+<p>
+  {#html escapeHTML bioHTML}
+</p>
+```

@@ -49,7 +49,7 @@ The `$` and `$$` arguments are available from [lifecycle callbacks](/components/
 
 `$` allows you to retrieve elements **without crossing shadow boundaries**.
 
-`$` is a naive implementation using the highly performant `querySelectorAll`. Nodes returned will only be part of the page's regular DOM.  It cannot access nodes that are part of a web component, which are nodes in a shadow DOM tree.
+`$` naively uses the native `querySelectorAll`, which is performant but cannot pierce shadow DOM boundaries. Nodes returned will only be part of the page's regular DOM.  It cannot access nodes that are part of a web component, which are nodes in a shadow DOM tree.
 
 ### Using $$
 
@@ -101,6 +101,8 @@ const createComponent = ({el, $}) => ({
 
 If you need to access a nested component you can use `$$`
 
+> Note: This is for DOM access. You can also manipulate a nested component directly using `getChild` and other component traversal helpers.
+
 ```javascript
 const createComponent = ({ $$ }) => ({
   changeMenuButtonText(text) {
@@ -140,7 +142,7 @@ const events = {
 ```
 
 
-## Outside Components
+## Accessing Components
 
 You can use Query as a standalone library outside of your components, for more information see [browser usage](/query#browser)
 
@@ -164,7 +166,8 @@ const selectMenuIndex = (index) => {
 
 ### settings
 
-You can use `settings` to initialize a component with settings programatically. This can be particularly useful for components that can be initialized with functions.
+You can use `settings` to initialize a component **after it is included in the page** with settings programatically. This can be particularly useful for components that can be initialized with functions.
+
 
 ```javascript
 $('ui-panel').settings({
@@ -177,7 +180,7 @@ $('ui-panel').settings({
 
 ### initialize
 
-You can use `initialize` to initialize a component with settings on `DOMContentLoaded`. Initialize can be used before the element it references.
+You can use `initialize` to initialize a component with settings **before it is included in the page**. Initialize can be used before the element it references.
 
 ```html
 <script>

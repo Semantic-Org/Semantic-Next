@@ -1,8 +1,8 @@
 import { $ } from '@semantic-ui/query';
 import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-import { LitRenderer } from '@semantic-ui/component';
+import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 
@@ -33,7 +33,7 @@ export const Template = class Template {
     onUpdated = noop,
     onDestroyed = noop,
     onThemeChanged = noop,
-  }) {
+  } = {}) {
     // if we are rendering many of same template we want to pass in AST for performance
     if (!ast) {
       const compiler = new TemplateCompiler(template);
@@ -86,11 +86,11 @@ export const Template = class Template {
       const initialValue = getInitialValue(config, name);
       if(config?.options) {
         // complex config { counter: { value: 0, options: { equalityFunction }}}
-        reactiveState[name] = new ReactiveVar(initialValue, config.options);
+        reactiveState[name] = new Signal(initialValue, config.options);
       }
       else {
         // simple config i.e. { counter: 0 }
-        reactiveState[name] = new ReactiveVar(initialValue);
+        reactiveState[name] = new Signal(initialValue);
       }
     });
     return reactiveState;
@@ -105,11 +105,15 @@ export const Template = class Template {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
+
+    // add child templates to parent for searching with getChild
     if(!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-    this.instance._parentTemplate = parentTemplate;
+
+    // add parent template to this element for searching with getParent
+    this._parentTemplate = parentTemplate;
   }
 
   setElement(element) {
@@ -124,14 +128,15 @@ export const Template = class Template {
   initialize() {
     let template = this;
     let instance;
+    this.instance = {};
     if (isFunction(this.createComponent)) {
-      this.instance = {};
       instance = this.call(this.createComponent) || {};
       extend(template.instance, instance);
     }
-    if (isFunction(instance.initialize)) {
-      this.call(instance.initialize.bind(template));
+    if (isFunction(template.instance.initialize)) {
+      this.call(template.instance.initialize.bind(template));
     }
+    // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
     this.onCreated = () => {
@@ -144,7 +149,7 @@ export const Template = class Template {
       this.dispatchEvent('rendered', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onUpdated = () => {
-      this.call(this.onRenderedCallback);
+      this.call(this.onUpdatedCallback);
       this.dispatchEvent('updated', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
@@ -388,7 +393,7 @@ export const Template = class Template {
           const boundEvent = userHandler.bind(targetElement);
           const eventData = event?.detail || {};
           const elData = targetElement?.dataset;
-          const elValue = targetElement?.value;
+          const elValue = targetElement?.value || event.target?.value;
 
           template.call(boundEvent, {
             additionalData: {
@@ -407,7 +412,6 @@ export const Template = class Template {
         const eventSettings = { abortController: this.eventController };
 
         if(eventType == 'global') {
-          console.log('global');
           // allow user to bind to global selectors if they opt in using the 'global' keyword
           $(selector).on(eventName, eventHandler, eventSettings);
         }
@@ -596,12 +600,12 @@ export const Template = class Template {
         $$: this.$$.bind(this),
 
         reaction: this.reaction.bind(this),
-        reactiveVar: this.reactiveVar.bind(this),
+        signal: this.signal.bind(this),
         afterFlush: Reaction.afterFlush,
         flush: Reaction.flush,
 
         data: this.data,
-        settings: this.element.settings,
+        settings: this.element?.settings,
         state: this.state,
 
         isRendered: () => this.rendered,
@@ -676,8 +680,8 @@ export const Template = class Template {
     this.reactions.push(Reaction.create(reaction));
   }
 
-  reactiveVar(value, options) {
-    return new ReactiveVar(value, options);
+  signal(value, options) {
+    return new Signal(value, options);
   }
 
   clearReactions() {
@@ -709,7 +713,7 @@ export const Template = class Template {
       return;
     }
     let templates = Template.renderedTemplates.get(template.templateName) || [];
-    remove(templates, template);
+    remove(templates, (thisTemplate) => thisTemplate.id == template.id);
     Template.renderedTemplates.set(templates);
   }
   static getTemplates(templateName) {
@@ -719,41 +723,57 @@ export const Template = class Template {
     return Template.getTemplates(templateName)[0];
   }
   static findParentTemplate(template, templateName) {
+    // this matches on DOM (common)
     let match;
-    if (templateName) {
-      // this matches on DOM (common)
-      if(!match) {
-        let parentNode = template.element?.parentNode;
-        while(parentNode) {
-          if(parentNode.component?.templateName == templateName) {
-            match = parentNode.component;
-            break;
-          }
-          parentNode = parentNode.parentNode;
-        }
+    const isMatch = (component) => {
+      if(match || !component?.templateName) {
+        return false;
       }
-      // this matches on nested partials (less common)
-      while (template) {
-        template = template._parentTemplate || template?.instance?._parentTemplate;
-        if (!match && template?.templateName == templateName) {
-          match = template;
+      if(templateName && component?.templateName !== templateName) {
+        return false;
+      }
+      return true;
+    };
+
+    if(!match) {
+      let parentNode = template.element?.parentNode;
+      while(parentNode) {
+        if(isMatch(parentNode.component)) {
+          match = {
+            ...parentNode.component,
+            ...parentNode.dataContext,
+          };
           break;
         }
+        parentNode = parentNode.parentNode;
       }
-      return match;
     }
-    return template._parentTemplate || template?.component?._parentTemplate;
+    // this matches on nested partials (less common)
+    while (template) {
+      template = template._parentTemplate;
+      if (isMatch(template)) {
+        match = {
+          ...template.instance,
+          ...template.data
+        };
+        break;
+      }
+    }
+    return match;
   }
 
   static findChildTemplates(template, templateName) {
     let result = [];
     // recursive lookup
     function search(template, templateName) {
-      if (template.templateName === templateName) {
-        result.push(template.component);
+      if (!templateName || (template.templateName === templateName)) {
+        result.push({
+          ...template.instance,
+          ...template.data
+        });
       }
-      if (template.component._childTemplates) {
-        template.component._childTemplates.forEach((childTemplate) => {
+      if (template._childTemplates) {
+        template._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });
       }

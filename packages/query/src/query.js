@@ -1,4 +1,4 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, camelToKebab, inArray, isClient, isObject, each } from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -46,7 +46,7 @@ export class Query {
     }
     else if (isString(selector)) {
       // this is html like $('<div/>')
-      if (selector.slice(0, 1) == '<') {
+      if (selector.trim().slice(0, 1) == '<') {
         const template = document.createElement('template');
         template.innerHTML = selector.trim();
         elements = Array.from(template.content.childNodes);
@@ -79,9 +79,8 @@ export class Query {
     ;
   }
 
-  /* Note this is a naive implementation for performance reasons
-     we will add all elements across shadow root boundaries but without
-     matching complex selectors that would match ACROSS shadow root boundaries
+  /* we will add all elements across shadow root boundaries while matching
+     intermediate selectors at shadow boundaries
   */
   querySelectorAllDeep(root, selector, includeRoot = true) {
     let elements = [];
@@ -112,7 +111,7 @@ export class Query {
       queriedRoot = false;
     }
 
-    const addElements = (node) => {
+    const addElements = (node, selector) => {
       if(domSelector && (node === selector || node.contains)) {
         if(node.contains(selector)) {
           elements.push(selector);
@@ -125,7 +124,21 @@ export class Query {
       }
     };
 
-    const findElements = (node, query) => {
+    const getRemainingSelector = (el, selector) => {
+      const parts = selector.split(' ');
+      let partialSelector;
+      let remainingSelector;
+      each(parts, (part, index) => {
+        partialSelector = parts.slice(0, index + 1).join(' ');
+        if(el.matches(partialSelector)) {
+          remainingSelector = parts.slice(index + 1).join(' ');
+          return;
+        }
+      });
+      return remainingSelector || selector;
+    };
+
+    const findElements = (node, selector, query) => {
 
       // if we are querying for a DOM element we can stop searching once we've found it
       if(domFound) {
@@ -135,24 +148,26 @@ export class Query {
       // if root element did not support querySelectorAll
       // we query each child node then stop
       if(query === true) {
-        addElements(node);
+        addElements(node, selector);
         queriedRoot = true;
       }
 
       // query at each shadow root
       if (node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
-        addElements(node.shadowRoot);
-        findElements(node.shadowRoot, !queriedRoot);
+        selector = getRemainingSelector(node, selector);
+        addElements(node.shadowRoot, selector);
+        findElements(node.shadowRoot, selector, !queriedRoot);
       }
 
       if(node.assignedNodes) {
-        node.assignedNodes().forEach((node) => findElements(node, queriedRoot));
+        selector = getRemainingSelector(node, selector);
+        node.assignedNodes().forEach((node) => findElements(node, selector, queriedRoot));
       }
       if (node.childNodes.length) {
-        node.childNodes.forEach((node) => findElements(node, queriedRoot));
+        node.childNodes.forEach((node) => findElements(node, selector, queriedRoot));
       }
     };
-    findElements(root);
+    findElements(root, selector);
     return [...new Set(elements)];
   }
 
@@ -333,7 +348,32 @@ export class Query {
     return;
   }
 
-  on(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
+  ready(handler) {
+    if(this.is(document) && document.readyState == 'loading') {
+      this.on('ready', handler);
+    }
+    else {
+      handler.call(document, new Event('DOMContentLoaded'));
+    }
+    return this;
+  }
+
+  getEventAlias(eventName) {
+    // support some more friendly names
+    const aliases = {
+      ready: 'DOMContentLoaded'
+    };
+    return aliases[eventName] || eventName;
+  }
+
+  getEventArray(eventNames) {
+    return eventNames.split(' ')
+      .map(name => this.getEventAlias(name))
+      .filter(Boolean)
+    ;
+  }
+
+  on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
     const eventHandlers = [];
 
     let handler;
@@ -350,59 +390,56 @@ export class Query {
       handler = targetSelectorOrHandler;
     }
 
-    const abortController = options?.abortController || new AbortController();
-    const eventSettings = options?.eventSettings || {};
-    const signal = abortController.signal;
+    const events = this.getEventArray(eventNames);
 
-    this.each((el) => {
-      let delegateHandler;
-      if (targetSelector) {
-        delegateHandler = (event) => {
-          let target;
-          // if this event is composed from a web component
-          // this is required to get the original path
-          if (event.composed && event.composedPath) {
+    events.forEach(eventName => {
+      const abortController = options?.abortController || new AbortController();
+      const eventSettings = options?.eventSettings || {};
+      const signal = abortController.signal;
+      this.each((el) => {
+        let delegateHandler;
+        if (targetSelector) {
+          delegateHandler = (event) => {
+            let target;
+            // if this event is composed from a web component
+            // this is required to get the original path
+            if (event.composed && event.composedPath) {
+              // look through composed path bubbling into the attached element to see if any match target
+              let path = event.composedPath();
+              const elIndex = findIndex(path, thisEl => thisEl == el);
+              path = path.slice(0, elIndex);
+              target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+            }
+            else {
+              // target selector is target
+              target = event.target.closest(targetSelector);
+            }
 
-            // look through composed path bubbling into the attached element to see if any match target
-            let path = event.composedPath();
-            const elIndex = findIndex(path, thisEl => thisEl == el);
-            path = path.slice(0, elIndex);
-            target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
+            if (target) {
+              // If a matching target is found, call the handler with the correct context
+              handler.call(target, event);
+            }
+          };
+        }
+        const eventListener = delegateHandler || handler;
 
-          }
-          else if(targetSelector) {
-            // keep things simple for most basic uses
-            target = event.target.closest(targetSelector);
-          }
-          else {
-            // no target selector
-            target = event.target;
-          }
+        // will cause illegal invocation if used from proxy object
+        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
+        if (domEL.addEventListener) {
+          domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
+        }
 
-          if (target) {
-            // If a matching target is found, call the handler with the correct context
-            handler.call(target, event);
-          }
+        const eventHandler = {
+          el,
+          eventName,
+          eventListener,
+          abortController,
+          delegated: targetSelector !== undefined,
+          handler,
+          abort: (reason) => abortController.abort(reason),
         };
-      }
-      const eventListener = delegateHandler || handler;
-
-      // will cause illegal invocation if used from proxy object
-      const domEL = (this.isGlobal) ? globalThis : el;
-      if (domEL.addEventListener) {
-        domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
-      }
-
-      const eventHandler = {
-        el,
-        eventName,
-        eventListener,
-        abortController,
-        delegated: targetSelector !== undefined,
-        handler,
-        abort: (reason) => abortController.abort(reason),
-      };
-      eventHandlers.push(eventHandler);
+        eventHandlers.push(eventHandler);
+      });
     });
 
     if (!Query.eventHandlers) {
@@ -430,10 +467,14 @@ export class Query {
     else if (isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
-    const wrappedHandler = (...args) => {
+
+    // We add a custom abort controller so that we can remove all events at once
+    options = options || {};
+    const abortController = new AbortController();
+    options.abortController = abortController;
+    const wrappedHandler = function (...args) {
+      abortController.abort();
       handler.apply(this, args);
-      // Unbind the event handler after it has been invoked once
-      this.off(eventName, wrappedHandler);
     };
     return (targetSelector)
       ? this.on(eventName, targetSelector, wrappedHandler, options)
@@ -441,10 +482,13 @@ export class Query {
     ;
   }
 
-  off(eventName, handler) {
+  off(eventNames, handler) {
+    const events = this.getEventArray(eventNames);
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        eventHandler.eventName === eventName &&
+        (!eventNames ||
+          inArray(eventHandler.eventName, events)
+        ) &&
         (!handler ||
           handler?.eventListener == eventHandler.eventListener ||
           eventHandler.eventListener === handler ||
@@ -453,7 +497,7 @@ export class Query {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if(el.removeEventListener) {
-          el.removeEventListener(eventName, eventHandler.eventListener);
+          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
         }
         return false;
       }
@@ -641,16 +685,16 @@ export class Query {
     if (isPlainObject(property) || value !== null) {
       if (isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
-          elements.forEach((el) => (el.style[prop] = val));
+          elements.forEach((el) => el.style.setProperty(camelToKebab(prop), val));
         });
       }
       else {
-        elements.forEach((el) => (el.style[property] = value));
+        elements.forEach((el) => el.style.setProperty(camelToKebab(property), value));
       }
       return this; // Return the Query instance for chaining
     }
     else {
-      // Attempt to get a style directly
+      // Getting a value
       if (elements?.length) {
         const styles = elements.map((el) => {
           const inlineStyle = el.style[property];
@@ -821,7 +865,25 @@ export class Query {
   insertContent(target, content, position) {
     const $content = this.chain(content);
     $content.each(el => {
-      target.insertAdjacentElement(position, el);
+      if (target.insertAdjacentElement) {
+        target.insertAdjacentElement(position, el);
+      }
+      else {
+        switch(position) {
+          case 'beforebegin':
+            target.parentNode?.insertBefore(el, target);
+            break;
+          case 'afterbegin':
+            target.insertBefore(el, target.firstChild);
+            break;
+          case 'beforeend':
+            target.appendChild(el);
+            break;
+          case 'afterend':
+            target.parentNode?.insertBefore(el, target.nextSibling);
+            break;
+        }
+      }
     });
   }
 
@@ -954,5 +1016,9 @@ export class Query {
   getComponent() {
     const components = this.map(el => el.component).filter(Boolean);
     return components.length > 1 ? components : components[0];
+  }
+  getDataContext() {
+    const contexts = this.map(el => el.dataContext).filter(Boolean);
+    return contexts.length > 1 ? contexts : contexts[0];
   }
 }

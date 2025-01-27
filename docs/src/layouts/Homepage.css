@@ -1,45 +1,385 @@
-@layer page {
-  :root {
+body {
+  --dark-mode: true;
+  --card-padding: 1.5rem 2rem;
+  --card-description-line-height: 1.6;
+  --cards-gap: 2rem;
+}
 
+@layer page {
+
+
+  :root {
+    --secondary-text-color: #EAB59F;
+    --glow-border: 1px solid oklch(0.22 0.02 277.72);
+
+  }
+
+  body {
+    text-wrap: pretty;
   }
 
   topbar {
     position: absolute;
     top: 1rem;
     width: 100%;
+    z-index: var(--float-layer);
+  }
+
+  p, li {
+    font-size: 18px;
+    color: var(--text-color);
+    line-height: 1.66;
+  }
+
+  ul {
+    padding-left: 0;
+    margin-left: 0;
+  }
+  li {
+    list-style-type: none;
+  }
+  li ui-icon[check] {
+    color: var(--secondary-text-color);
+    background-color: #eab59f1c;
+    border-radius: var(--circular-radius);
+    padding: 3px;
+    height: 17px;
+    font-size: 12px;
   }
 
   aboveFold {
+    position: relative;
     color: var(--standard-80);
     background-image: var(--angled-gradient);
-    display: block;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
+    contain: strict;
     height: 620px;
+    perspective: 1000px;
 
-    h2 {
-      font-size: 24px;
+
+    h1 {
+      color: var(--white);
     }
     p {
-      font-size: 18px;
+      color: var(--white-60);
+    }
+
+    content {
+      position: relative;
+      width: 100%;
+      flex-grow: 1;
+      z-index: 2;
+      line-height: 1.18;
+      align-content: center;
+      text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+
+      &:before {
+        position: absolute;
+        width: 100%;
+        content: '';
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgb(0 0 0 / 0%) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
+        pointer-events: none;
+      }
+
+      * {
+        position: relative;
+        z-index: 2;
+        transition: opacity 1s ease-in-out;
+      }
+    }
+
+
+    h1 {
+      font-size: 48px;
+      margin: 0;
+    }
+    p {
+      font-size: 20px;
+      line-height: 1.8;
+      margin-top: 0.5rem;
+
+      b {
+        color: var(--primary-light-text-color);
+      }
     }
 
     ui-button {
       font-size: 18px;
     }
 
-    .left {
-      margin-top: 10rem;
+    .image {
+      float: right;
+      filter: saturate(0);
+      width: 450px;
+      margin-left: 2rem;
     }
+
+    .text {
+      margin: 0;
+      max-width : 550px;
+    }
+
+    canvas#gradient {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+
+      --gradient-color-1: #001019;
+      --gradient-color-2: #0a5471;
+      --gradient-color-3: #112129;
+      --gradient-color-4: #174557;
+    }
+    &:before {
+      position: absolute;
+      z-index: 1;
+      width: 150%;
+      height: 277%;
+      top: -130%;
+      left: -25%;
+      transform: rotateX(60deg) rotateZ(0deg) rotateY(0deg) translateY(-7%) translateX(0%) translateZ(0px);
+      content: '';
+      pointer-events: none;
+      background: url(/images/ui.png);
+      transform-origin: 50% 50%;
+      transform-style: preserve-3d;
+      animation-name: masthead;
+      opacity: 0.03;
+      animation-duration: 15s;
+      animation-fill-mode: both;
+      filter: blur(0px);
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      display: none;
+    }
+
+
+    &.offscreen {
+      canvas {
+        display: none;
+      }
+
+      &:before {
+        display: none;
+      }
+    }
+
   }
 
   ribbon {
+    position: relative;
     display: block;
     color: var(--standard-80);
-
     min-height: 300px;
+
+    padding: 5rem 0rem;
+
+    &.proof {
+      ui-cards {
+        margin-top: -10rem;
+        font-size: 16px;
+      }
+    }
+
+    ui-container {
+      position: relative;
+    }
+
+    .sub.header {
+      color: var(--secondary-text-color);
+      font-size: 16px;
+      margin-bottom: 0;
+      + .header {
+        margin-top: 1rem;
+      }
+    }
+    h3.header {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .expressive-code {
+      margin-top: 1rem;
+    }
 
 
   }
 
+  .tour {
+    .copy {
+      min-height: 500px;
+      margin-bottom: 3rem;
+    }
+    ui-container {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    .container {
+      position: sticky;
+      top: 1rem;
+    }
+    .segment {
+      padding: 2rem;
+      border: var(--glow-border);
+      background: oklch(0.15 0.05 240.81 / 0.52) var(--angled-gradient);
+      background-image: var(--angled-gradient);
+    }
+    .left {
+      flex: 1 1 auto;
+      padding-right: 5rem;
+    }
+    .right {
+      width: 500px;
+      flex: 0 0 auto;
+    }
+  }
 
+  .cards {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    /*margin-top: -10rem;*/
+
+    flex-wrap: wrap;
+
+    .card {
+      background-color: oklch(0.13 0.02 238.07);
+      background-image: var(--subtle-gradient);
+      box-shadow: var(--floating-shadow);
+      flex-grow: 1;
+      flex-basis: calc(33.333% - 1.5rem);
+      border-radius: var(--border-radius);
+      border: var(--glow-border);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--white);
+      margin-bottom: 5rem;
+
+      img {
+        display: block;
+        height: 165px;
+        margin: -60px auto 1rem;
+      }
+      ui-icon {
+        font-size: 48px;
+        margin-bottom: 0.5rem;
+        color: var(--primary-text-color);
+      }
+      .header {
+        font-size: 24px;
+        line-height: 1.2;
+        font-weight: bold;
+        color: var(--primary-text-color);
+        margin: 0rem 0rem 0.5rem;
+      }
+      p {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+    }
+  }
+
+  playground-example {
+    display: block;
+    margin-bottom: 5rem;
+  }
+
+}
+
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes masthead {
+   0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 475px;
+  }
+}
+
+
+@layer responsive.mobile {
+
+  @media only screen and (max-width: 767px) {
+
+    aboveFold {
+      height: 550px;
+
+      content:before {
+        background-image: none;
+      }
+      .image {
+        max-width: calc(100% - 2rem);
+        max-height: 175px;
+        object-fit: contain;
+        margin: 0rem auto 1rem;
+        float: none;
+        display: block;
+      }
+      .text {
+        text-align: center;
+      }
+      h1 {
+        font-size: 32px;
+      }
+    }
+
+    ribbon  {
+      padding: 2rem 1rem;
+
+      &.proof {
+        ui-cards {
+          margin-top: -3rem;
+          font-size: 15px;
+        }
+      }
+
+      .cards {
+        margin-top: 0rem;
+        .card {
+          margin: 0;
+          flex-basis: 100%;
+        }
+      }
+
+      &.tour {
+        .left {
+          padding-right: 0rem;
+        }
+        .right {
+          display: none;
+        }
+      }
+    }
+
+    canvas#gradient {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+
+      --gradient-color-1: #001019;
+      --gradient-color-2: #001019;
+      --gradient-color-3: #001019;
+      --gradient-color-4: #001019;
+    }
+  }
 }

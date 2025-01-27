@@ -1,4 +1,7 @@
 rail inpage-menu {
+  display: block;
   position: sticky;
   top: 1rem;
+  max-height: calc(100vh - 100px);
+  overflow: auto;
 }

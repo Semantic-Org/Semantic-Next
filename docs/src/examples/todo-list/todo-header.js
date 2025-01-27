@@ -1,11 +1,11 @@
-import { ReactiveVar, Reaction } from '@semantic-ui/reactivity';
 import { defineComponent, getText } from '@semantic-ui/component';
+import { generateID } from '@semantic-ui/utils';
 
 const css = await getText('./todo-header.css');
 const template = await getText('./todo-header.html');
 
-const createComponent = ({ self, $, reaction, findParent }) => ({
-  allCompleted: new ReactiveVar(false),
+const createComponent = ({ self, $, signal, reaction, findParent }) => ({
+  allCompleted: signal(false),
 
   getTodoList() {
     return findParent('todoList');
@@ -25,7 +25,7 @@ const createComponent = ({ self, $, reaction, findParent }) => ({
 
   addTodo(text) {
     self.getTodos().push({
-      _id: text,
+      _id: generateID(),
       text: text,
       completed: false,
     });
@@ -48,7 +48,7 @@ const createComponent = ({ self, $, reaction, findParent }) => ({
 });
 
 const events = {
-  'keydown input.new-todo'({ event, self, $, $$ }) {
+  'keydown input.new-todo'({ event, self, afterFlush, $, $$ }) {
     if (event.key === 'Enter') {
       const text = $(this).val();
       if (!text) {
@@ -56,7 +56,7 @@ const events = {
       }
       self.addTodo(text);
       $(this).val('');
-      Reaction.afterFlush(() => {
+      afterFlush(() => {
         self.getTodoList().scrollToBottom();
       });
     }

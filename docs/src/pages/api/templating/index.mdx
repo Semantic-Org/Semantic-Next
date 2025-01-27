@@ -1,0 +1,17 @@
+---
+layout: '@layouts/Guide.astro'
+title: Templating API Reference
+icon: code
+description: API reference for the Semantic UI Templating system exports
+---
+
+The Semantic UI Templating system provides a powerful and flexible way to define the structure and behavior of web components. It compiles template strings into an Abstract Syntax Tree (AST), enabling efficient rendering and updates. The templating system supports both single `{}` and double `{{}}` bracket syntax, and integrates deeply with the Semantic UI component framework.
+
+> **Template Helpers** - Template Helpers, which provide utility functions for use within templates, are documented in a separate section. See the [Template Helpers API Reference](/api/helpers) for a comprehensive list of all available helper functions.
+
+## API Sections
+
+* **[TemplateCompiler](/api/templating/template-compiler)** - Methods for precompiling templates to an AST for SSR, or some advanced use cases.
+* **[Abstract Syntax Tree](/api/templating/ast)** - An explanation of template abstract syntax trees and permitted syntaxes.
+* **[Template](/api/templating/template)** - Methods for manipulating a compiled template.
+* **[StringScanner](/api/templating/string-scanner)** - Internal utility library for scanning and parsing strings during template compilation

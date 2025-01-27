@@ -1,0 +1,34 @@
+.horizontal {
+  flex-direction: var(--card-horizontal-flex-direction);
+  gap: var(--card-horizontal-gap);
+  text-align: left;
+
+  ::slotted(.image),
+  ::slotted(ui-image),
+  .image img {
+    margin: var(--card-reverse-padding);
+    max-width: var(--card-horizontal-image-max-width);
+  }
+
+  ::slotted(ui-icon),
+  ::slotted(.icon),
+  .icon ui-icon {
+    font-size: var(--card-horizontal-icon-font-size);
+    margin: var(--card-horizontal-icon-margin);
+  }
+  ::slotted(.header),
+  .header {
+    font-size: var(--card-horizontal-header-size);
+  }
+
+  :first-child {
+    border-radius: inherit;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  :last-child {
+    border-radius: inherit;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}

@@ -1,0 +1,88 @@
+---
+layout: '@layouts/Guide.astro'
+title: Reactivity Helpers
+icon: zap
+description: API reference for reactivity-specific template helpers
+---
+
+Reactivity helpers provide utilities for controlling and debugging reactive behavior in templates.
+
+## Functions
+
+### guard
+Ensures that a computation only reruns when its result actually changes, optimizing performance by reducing unnecessary updates.
+
+#### Template Syntax
+```sui
+{guard expression}
+```
+
+#### Parameters
+| Name       | Type     | Description |
+|------------|----------|-------------|
+| expression | any      | The expression to guard |
+
+#### Returns
+The result of the guarded expression.
+
+#### Example
+```sui
+<div>
+  Expensive computation result: {guard expensiveFunction someValue anotherValue}
+</div>
+```
+
+> Note: Use `guard` when you want to prevent unnecessary re-computations of expensive operations. It's particularly useful for optimizing performance in reactive contexts.
+
+### nonreactive
+Prevents reactive updates on the wrapped expression. Useful when you want to access values without creating dependencies.
+
+#### Template Syntax
+```sui
+{nonreactive expression}
+```
+
+#### Parameters
+| Name       | Type     | Description |
+|------------|----------|-------------|
+| expression | any      | The expression to make non-reactive |
+
+#### Returns
+The result of the non-reactive expression.
+
+#### Example
+```sui
+<div>
+  Static value: {nonreactive someFunction staticValue}
+  Reactive value: {someReactiveValue}
+</div>
+```
+
+> Note: Use `nonreactive` when you need to access a value without creating a dependency in a reactive computation. This can be useful for optimizing your template's reactivity.
+
+### debugReactivity
+Debugs reactivity by logging the current reaction source and triggering the debugger. This is particularly useful for understanding which reactive dependencies triggered a re-computation.
+
+#### Template Syntax
+```sui
+{debugReactivity}
+```
+
+#### Parameters
+None
+
+#### Returns
+`undefined`
+
+#### Example
+```sui
+<div>
+  <p>Total: {total}</p>
+  {debugReactivity}
+  <p>Items: {items.length}</p>
+</div>
+```
+
+> Note: `debugReactivity` provides detailed information about the current reactive computation. It can be extremely helpful in tracking down unexpected re-renders or understanding the flow of reactivity in your application.
+
+These reactivity helpers are powerful tools for optimizing and debugging reactive computations in your templates. They interact directly with the underlying reactivity system, providing fine-grained control and insights into your application's reactive behavior.

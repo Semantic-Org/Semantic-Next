@@ -8,7 +8,8 @@
     {
       "name": "Placeholder",
       "attribute": "placeholder",
-      "description": "include placeholder text"
+      "description": "include placeholder text",
+      "exampleCode": "<ui-input placeholder=\"Search...\"></ui-input>"
     },
     {
       "name": "Icon",
@@ -29,6 +30,12 @@
   "types": [
   ],
   "variations": [
+    {
+      "name": "Fluid",
+      "attribute": "fluid",
+      "usageLevel": 1,
+      "description": "take the width of its container"
+    }
   ],
   "events": [
     {

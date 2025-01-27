@@ -1,0 +1,163 @@
+---
+layout: '@layouts/Guide.astro'
+title: Subtemplates
+description: Using subtemplate syntax from inside templates
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Sub templates let you render components from inside another component. This lets you scale your architecture for complex apps.
+
+
+## Syntax Types
+
+
+### Shorthand Syntax
+
+The simplest way to specify a subtemplate is to include the template name and its values inlined into the expression.
+
+```sui
+{> userProfile name=(getFullname user.id) age=user.age}
+```
+
+### Shorthand with Data Object
+
+If you would like to return the data context as an object [from an expression](/templates/expressions) you can do that using the `data` property.
+
+```javascript title='component.js'
+const createInstance = ({ self }) => ({
+  getData(user) {
+    return {
+      name: self.getFullname(user.id),
+      age: user.age
+    }
+  };
+});
+```
+
+```sui title='component.html'
+{> userProfile data=(getData user)
+```
+
+
+
+
+### Verbose Syntax
+
+Verbose syntax uses the syntax `{> template name=templateName data=someData}` and allows you to more explicitly define the name and data for a subtemplate. When using verbose expressions you can use an inline object for data or an expression.
+
+> **Name Syntax** - Be sure to use `'` to enclose template names that are strings when using the name syntax, otherwise it will look for an expression called `userProfile` to evaluate
+
+```sui
+{> template
+  name='userProfile'
+  data={
+    name: getFullname(user.id),
+    age: user.age
+  }
+}
+```
+
+## Advanced Uses
+
+### Dynamic Templates
+
+Verbose syntax supports using an expression to return a template name. This means you can dynamically swap templates based on the returned value of a function. This can be incredibly useful in many advanced use cases.
+```javascript title='component.js'
+const createInstance = ({ self }) => ({
+  getProfileTemplate(user) {
+    return user.isEmployee
+      ? 'employeeProfile'
+      : 'userProfile'
+    ;
+  };
+});
+```
+
+```sui
+{> template
+  name=(getProfileTemplate user)
+  data={
+    name: (getFullname user.id),
+    age: user.age
+  }
+}
+```
+
+### Specifying Templates in Settings
+
+You can use dynamic template names to even let users specify templates directly from settings objects. This can let users author their own templates that are then consumed by your component.
+
+You can see an [example of this in action below](#advanced-example).
+
+
+## Data Reactivity
+
+### Reactive vs Nonreactive Data
+
+By default all data passed into subtemplates is not automatically reactive. Reactivity is `opt in` and only supported in the verbose syntax. You can use the `reactiveData` syntax for data which you would like to be rendered in a reactive context
+
+```sui
+{> template
+  name='userProfile'
+  reactiveData={
+    isLoggedIn: getLoginStatus
+  }
+  data={
+    name: getFullname(user.id),
+    age: user.age
+  }
+}
+
+```
+
+## Examples
+
+### Basic Example
+
+A template includes two values, the `name` or template name to render and `data` the data to pass into the subtemplate. Templates must be passed to the `defineComponent` call of a component that references a subtemplate.
+
+This example uses the shorthand syntax for a subtemplate
+```sui title="Template Shorthand Syntax"
+{>row row=row company=company}
+```
+
+This will render a template named `row` with the data context set to
+```javascript
+data = {
+  row: row, // row in table is passed into row
+  company: company // company in table is pass into row
+};
+```
+
+<PlaygroundExample id="subtemplates" height="800" direction="vertical"></PlaygroundExample>
+
+
+This could also have been written with a helper that returns the data context `getRowData`
+```sui title="Data Helper Syntax"
+{>row data=getRowData}
+```
+
+Or using a verbose syntax that specifies the template name explicitly
+```sui title="Verbose Syntax"
+{> template
+  name='row'
+  data={
+    row: row,
+    company: company
+  }
+}
+```
+
+### Advanced Example
+
+Exposing templates as a setting allows for complex use cases where a portion of the rendered template can be dynamic and specified by the user at run time.
+
+This allows for more complex components that let users control how a portion of the component renders.
+
+The following example shows [exposing a setting](/components/rendering#settings) which lets a user specify a template to render a row.
+
+In `index.js` you can see where the template is imported and specified by the user who is consuming the component.
+
+
+<PlaygroundExample id="advanced-subtemplates" height="800" direction="vertical"></PlaygroundExample>
+

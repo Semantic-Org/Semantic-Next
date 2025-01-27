@@ -14,14 +14,15 @@ Each web component has lifecycle callbacks that help you define behavior at each
 
 Semantic UI components wrap native web components but provide additional callbacks that give you more granular control over how the component is defined.
 
-* **createComponent** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
-* **onCreated** - Callback after your component instance is initialized but before it is attached to the DOM
-* **onRendered** - Callback after your component is rendered to the DOM
-* **onDestroyed** - Callback after your component is removed from the DOM
+* **[createComponent](#createcomponent)** - Defines your [component instance](/components/instances) that includes the invokable functionality of your component and exposed variables.
+* **[onCreated](#oncreated)** - Callback after your component instance is initialized but before it is attached to the DOM
+* **[onRendered](#onrendered)** - Callback after your component is rendered to the DOM
+* **[onDestroyed](#ondestroyed)** - Callback after your component is removed from the DOM
+* **[onThemeChanged](#onthemechanged)** - Callback when your components theme is updated
 
 For a more detailed description of how callbacks are fired refer to the [callback event sequence diagram](/components/lifecycle#callback-sequence).
 
-> **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/templates) passed to `defineComponent`.
+> **Render Function** Unlike many front end frameworks which require your render function to return the html for your component, your component's html is defined in the [template](/api/templates) passed to `defineComponent`.
 
 ## Lifecycle Callbacks
 
@@ -29,7 +30,7 @@ For a more detailed description of how callbacks are fired refer to the [callbac
 
 `createComponent` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
 
-For more information see the dedicated section to [component instances](/components/instances).
+For more information see the dedicated section for [component instances](/components/instances).
 
 #### Initialize
 
@@ -52,6 +53,27 @@ The `onDestroyed` callback is called after the component is removed from the pag
 ### onThemeChanged
 
 The `onThemeChanged` callback is a special callback that fires when a user swaps themes. This can be used to modify the component based on whether the user prefers light or dark mode.
+
+## Server Side Rendering
+
+### Hydration
+
+The default rendering engine for Semantic UI components is `lit` this means you can use [any existing Lit SSR package](https://lit.dev/docs/ssr/overview/#library-status) to render components on the server.
+
+> **UI Components** - All [UI framework components](/ui) in Semantic UI are designed to work with server side hydration out of the box.
+
+### Lifecycle Events on Server
+All lifecycle events will fire on the server in the same order as on the client.
+
+This means you should use `isServer` or `isClient` during server side rendering to handle checking for globals that may not be defined.
+
+```javascript
+const onRendered = function ({ isClient, self }) {
+  if(isClient) {
+    self.url.set(window.location.pathname);
+  }
+};
+```
 
 ## Callback Arguments
 
@@ -87,7 +109,7 @@ The following parameters are destructurable from all callbacks.
 | $                 | allows you to query the shadow dom of the component   |
 | $$                | allows querying deep nested content including slots   |
 | reaction          | a reactive context for computations                   |
-| reactiveVar       | a function to define a reactive variable              |
+| signal       | a function to define a reactive variable              |
 | flush             | a function to immediately trigger queued reactions    |
 | afterFlush        | a callback after reactive computations are flushed    |
 | settings          | a read-write copy of the component's settings         |
@@ -128,6 +150,8 @@ Event handlers also have access to a few additional arguments
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
 
+
+Lifecycle events provide two helpers `isClient` and `iServer` which can be used to handle
 
 ## DOM Lifecycle Events
 

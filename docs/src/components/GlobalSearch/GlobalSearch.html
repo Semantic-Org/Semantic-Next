@@ -1,40 +1,38 @@
-<div class="inline-search">
-  <input placeholder="Search site...">
-  <div class="label" part="input-label">
-    ctrl + k
-  </div>
-  <ui-icon search></ui-icon>
-</div>
-<ui-modal>
+<ui-input fluid icon="search" label="ctrl+k" placeholder="Search..." class="inline-search" exportparts="input:search-input, icon:search-icon, label:search-label"></ui-input>
+<ui-modal glass>
   <div class="search">
-    <div class="input">
-      <input type="text" placeholder="Search..." autofocus>
-      <ui-icon search></ui-icon>
-    </div>
+    <ui-input fluid class="input" placeholder="Search..." autofocus></ui-input>
   </div>
   <div class="results">
-    {{#if hasAny displayResults}}
-      {{#each displayResults}}
-        <a class="result {{activeIf is @index selectedIndex}}" href="{{url}}">
+    {#if hasAny displayResults}
+      {#each displayResults}
+        <a class="result {activeIf is @index selectedIndex}" href="{url}">
           <h3>
-            {{title}}
-            {{#if subtitle}}
-              <span class="subtitle"><span>in</span> {{subtitle}}</span>
-            {{/if}}
+            {title}
+            {#if subtitle}
+              <span class="subtitle"><span>in</span> {subtitle}</span>
+            {/if}
             <div class="tags">
-              {{#if hasAny tags}}
-                {{#each tags}}
-                  <span class="{{color}} tag">{{text}}</span>
-                {{/each}}
-              {{/if}}
+              {#if hasAny tags}
+                {#each tags}
+                  <span class="{color} tag">{text}</span>
+                {/each}
+              {/if}
             </div>
           </h3>
-          <div class="description">{{description}}</div>
+          <div class="description">{description}</div>
         </a>
-      {{/each}}
-    {{else}}
-      <ui-segment placeholder header="Enter a search term to see results." icon="search">
-      </ui-segment>
-    {{/if}}
+      {/each}
+    {else if noResults}
+      <div class="placeholder">
+        <ui-icon icon="x circle"></ui-icon>
+        <p>There are no results for "<b>{searchTerm}</b>".</p>
+      </div>
+    {else}
+      <div class="placeholder">
+        <ui-icon icon="search"></ui-icon>
+        <p>Enter a search term above to see results...</p>
+      </div>
+    {/if}
   </div>
 </ui-modal>

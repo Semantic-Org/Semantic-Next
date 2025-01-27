@@ -6,32 +6,31 @@
   <title>Button</title>
   <link rel="stylesheet" href="./index.css">
   <link rel="stylesheet" href="./ui/semantic-ui.css">
-  <link rel="stylesheet" href="./ui/theme/base.css">
-  <script src="./ui/ui/semantic-ui.js" type="module"></script>
+  <link rel="stylesheet" href="./theme/base.css">
+  <script src="./ui/semantic-ui.js" type="module"></script>
   <script>
-new EventSource('/esbuild').addEventListener('change', e => {
-  /* Rebuilds page after JS changes */
-  const { added, removed, updated } = JSON.parse(e.data);
-  if(!added.length && !removed.length && updated.length === 1) {
-    for(const link of document.getElementsByTagName('link')) {
-      const url = new URL(link.href);
+    new EventSource('/esbuild').addEventListener('change', e => {
+      /* Rebuilds page after JS changes */
+      const { added, removed, updated } = JSON.parse(e.data);
+      if(!added.length && !removed.length && updated.length === 1) {
+        for(const link of document.getElementsByTagName('link')) {
+          const url = new URL(link.href);
 
-      if(url.host === location.host && url.pathname === updated[0]) {
-        const next = link.cloneNode();
-        next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
-        next.onload = () => link.remove();
-        link.parentNode.insertBefore(next, link.nextSibling);
-        return;
+          if(url.host === location.host && url.pathname === updated[0]) {
+            const next = link.cloneNode();
+            next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
+            next.onload = () => link.remove();
+            link.parentNode.insertBefore(next, link.nextSibling);
+            return;
+          }
+        }
       }
-    }
-  }
-  location.reload();
-});
-</script>
+      location.reload();
+    });
+  </script>
 </head>
 <body>
   <div class="container">
-
     <ui-button>Button</ui-button>
 
     <ui-button primary>Save</ui-button>
@@ -42,9 +41,13 @@ new EventSource('/esbuild').addEventListener('change', e => {
     <ui-button>Cancel</ui-button>
 
 
-    <ui-button icon="left arrow"></ui-button>
-    <ui-button icon="arrow left"></ui-button>
-    <ui-button icon="left-arrow"></ui-button>
+    <h3>Icon Only</h3>
+    <ui-button icon="left arrow" icon-only></ui-button>
+    <ui-button icon="arrow left" icon-only></ui-button>
+    <ui-button icon="left-arrow" icon-only></ui-button>
+
+    <h3>Icon After</h3>
+    <ui-button icon="right arrow" icon-after>Next</ui-button>
 
     <h3>Sizing</h3>
 
@@ -83,7 +86,7 @@ new EventSource('/esbuild').addEventListener('change', e => {
       <span slot="hidden">Shop</span>
     </ui-button>
 
-    <ui-button fade-animated>
+    <ui-button horizontal-animated>
       <span slot="visible">
         <ui-icon icon="shopping cart"></ui-icon>
       </span>
@@ -92,6 +95,5 @@ new EventSource('/esbuild').addEventListener('change', e => {
 
     <h3>Basic</h3>
     <ui-button basic icon="user">Add Friend</ui-button>
-
   </div>
 </body>

@@ -4,15 +4,20 @@ import codeMirrorCSS from './lib/codemirror.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const createComponent = ({tpl, settings, data, $, $$, reaction}) => ({
+const createComponent = ({self, settings, data, $, $$}) => ({
 
-  setMode(filename) {
+  initialize() {
+    // nothing yet
+  },
+
+  setMode() {
+    const filename = data.filename;
     if(filename.search('.html') !== -1) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const cm = $$('playground-code-editor').get(0)?._codemirror;
         cm.setOption('mode', 'text/ui-template');
         cm.refresh();
-      }, 10);
+      });
     }
   },
 
@@ -20,7 +25,7 @@ const createComponent = ({tpl, settings, data, $, $$, reaction}) => ({
     const el = $$('playground-code-editor').get(0);
     if(el) {
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
-      tpl.modifyCodeMirror(el._codemirror);
+      self.modifyCodeMirror(el._codemirror);
     }
   },
 
@@ -84,6 +89,8 @@ const createComponent = ({tpl, settings, data, $, $$, reaction}) => ({
       },
     });
 
+    self.patchFold(cm);
+
     if(data.inline) {
       cm.on('change', (instance, changeObj) => {
         setTimeout(() => {
@@ -101,6 +108,42 @@ const createComponent = ({tpl, settings, data, $, $$, reaction}) => ({
         }, 1);
       });
     }
+  },
+
+  // used to remove code comment in front of wrappers
+  patchFold(cm) {
+    cm.getAllMarks().forEach((marker) => {
+      if (marker.__isFold) {
+        // Before we attach the 'clear' listener, store the fold info.
+        const range = marker.find();
+        marker._foldRange = range;
+        // If there is a widget, you can also store the widget node:
+        if (marker.widgetNode) {
+          marker._widgetNode = marker.widgetNode;
+        }
+        marker.on('clear', () => {
+          let foldComment = $(marker._widgetNode).prev('.cm-comment').text();
+          // remove comment mentioning folding
+          requestAnimationFrame(() => {
+            self.removeMatchingLine(cm, foldComment);
+          });
+        });
+      }
+    });
+  },
+  removeMatchingLine(cm, searchString) {
+    const doc = cm.getDoc();
+    const cursor = doc.getSearchCursor(searchString, {line: 0, ch: 0});
+    if (cursor.findNext()) {
+      const lineIndex = cursor.from().line;
+      // Remove all text from this line start to the next line start.
+      // This effectively deletes the entire line (including the trailing newline).
+      doc.replaceRange(
+        '',
+        {line: lineIndex, ch: 0},
+        {line: lineIndex + 1, ch: 0}
+      );
+    }
   }
 });
 
@@ -116,8 +159,9 @@ const events = {
   }
 };
 
-const onRendered = ({ tpl }) => {
-  tpl.configureCodeEditors();
+const onRendered = ({ self, data }) => {
+  self.configureCodeEditors();
+  self.setMode();
 };
 
 const CodePlaygroundFile = defineComponent({

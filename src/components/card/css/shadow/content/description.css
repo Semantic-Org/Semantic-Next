@@ -1,0 +1,7 @@
+::slotted(.description),
+.description {
+  color: var(--card-description-color);
+  font-size: var(--card-description-font-size);
+  transition: var(--card-description-transition);
+  line-height: var(--card-description-line-height);
+}

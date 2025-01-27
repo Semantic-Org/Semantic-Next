@@ -1,0 +1,9 @@
+<p>
+  The time is
+  <b>{ formatDate time 'h:mm:ss a' { timezone: timezone } }</b>
+  {#if city}
+    in {city}.
+  {else}
+    where you are.
+  {/if}
+</p>

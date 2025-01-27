@@ -1,40 +1,40 @@
-<dialog class={{classMap getClasses}} part="dialog">
+<dialog class={classMap getClasses} part="dialog">
   <div class="layer">
     <div class="container">
       <div class="previous content">
         <nav-menu
-          menu={{previousMenu.menu}}
-          activeURL={{activeURL}}
-          expandAll=true
-        ></nav-menu>
+          menu={previousMenu.menu}
+          activeURL={activeURL}
+          expandAll
+        />
       </div>
       <div class="active content">
-        {{#if activeMenu.header}}
-          <div class="header">{{activeMenu.header}}</div>
-        {{/if}}
+        {#if activeMenu.header}
+          <div class="header">{activeMenu.header}</div>
+        {/if}
         <nav-menu
-          menu={{activeMenu.menu}}
-          activeURL={{activeURL}}
-          expandAll=true
-        ></nav-menu>
-        {{#if hasAny previousMenu.menu}}
+          menu={activeMenu.menu}
+          activeURL={activeURL}
+          expandAll
+        />
+        {#if hasAny previousMenu.menu}
           <div class="return">
             <ui-icon icon="left-chevron"></ui-icon>
             Return to main menu
           </div>
-        {{/if}}
+        {/if}
       </div>
       <div class="next content">
-        {{#if nextMenu.header}}
-          <div class="header">{{nextMenu.header}}</div>
-        {{/if}}
+        {#if nextMenu.header}
+          <div class="header">{nextMenu.header}</div>
+        {/if}
         <nav-menu
-          menu={{nextMenu.menu}}
-          activeURL={{activeURL}}
-          expandAll=true
-        ></nav-menu>
+          menu={nextMenu.menu}
+          activeURL={activeURL}
+          expandAll
+        />
         <div class="return">
-          <ui-icon icon="left-chevron"></ui-icon>
+          <ui-icon icon="left-chevron" />
           Return to main menu
         </div>
       </div>

@@ -1,7 +1,0 @@
-/*
-  This css will be applied across components
-  so we can do things like style based on sibling content
-*/
-number-adjust ~ number-adjust::part(counter) {
-  color: var(--primary-text-color);
-}

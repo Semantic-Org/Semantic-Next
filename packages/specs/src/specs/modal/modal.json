@@ -6,6 +6,12 @@
   "exportName": "UIModal",
   "content": [],
   "types": [
+    {
+      "name": "Glass",
+      "attribute": "glass",
+      "description": "can appear as glass",
+      "usageLevel": 3
+    }
   ],
   "variations": [
     {

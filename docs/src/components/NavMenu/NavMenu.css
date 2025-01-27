@@ -19,7 +19,7 @@
   --nav-menu-title-icon-color: inherit;
   --nav-menu-title-icon-opacity: 0.4;
   --nav-menu-title-icon-width: 1.5rem;
-  --nav-menu-title-icon-distance: 1rem;
+  --nav-menu-title-icon-distance: 10px;
 
   --nav-menu-title-icon-active-opacity: 1;
 
@@ -35,6 +35,7 @@
 
   --nav-menu-sub-title-font-size: 13px;
   --nav-menu-sub-title-padding: 6px 0px;
+  --nav-menu-sub-title-active-color: var(--nav-menu-title-active-color);
 
   --nav-menu-sub-content-indent-distance: 0.25rem;
 
@@ -133,8 +134,15 @@ a {
         font-size: var(--nav-menu-sub-title-font-size);
         padding: var(--nav-menu-sub-title-padding);
 
+        &:first-child {
+          padding-top: 0;
+        }
         + .content {
           padding-left: var(--nav-menu-sub-content-indent-distance) !important;
+        }
+
+        &.active {
+          color: var(--nav-menu-sub-title-active-color);
         }
       }
     }

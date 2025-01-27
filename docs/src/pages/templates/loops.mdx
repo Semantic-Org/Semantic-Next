@@ -11,46 +11,46 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 A basic each loop allows you to access properties of a collection inside the loop directly
 
-```handlebars
-{{#each people}}
-  {{name}} - {{age}}
-{{/each}}
+```sui
+{#each people}
+  {name} - {age}
+{/each}
 ```
 
 
 `each` loops can improve readability of templates in simple use-cases.
-```handlebars
-{{#each todos}}
+```sui
+{#each todos}
   <span class="description">
-    {{description}}
+    {description}
   </span>
   <span class="status">
-    {{maybe completed 'Completed' 'Incomplete'}}
+    {maybe completed 'Completed' 'Incomplete'}
   </span>
-{{/each}}
+{/each}
 ```
 
 ### Each...In
 
 You can define each item of a loop using `each...in` syntax.
 
-```handlebars
-{{#each member in team.members}}
-  <li>{{member.name}} - {{member.age}}</li>
-{{/each}}
+```sui
+{#each member in team.members}
+  <li>{member.name} - {member.age}</li>
+{/each}
 ```
 
 `each...in` loops can help make templates more readable when using multiple levels of looping.
 
-```handlebars
-{{#each team in teams}}
-  <h4>{{team.name}}</h4>
+```sui
+{#each team in teams}
+  <h4>{team.name}</h4>
   <ul>
-    {{#each member in team.members}}
-      <li>{{member.name}} - {{member.age}}</li>
-    {{/each}}
+    {#each member in team.members}
+      <li>{member.name} - {member.age}</li>
+    {/each}
   </ul>
-{{/each}}
+{/each}
 ```
 
 ## Special Values
@@ -59,29 +59,29 @@ You can define each item of a loop using `each...in` syntax.
 
 The value `@index` can be used to get the current loop index.
 
-```handlebars
-{{#each item in items}}
-  {{@index}} - {{item}}
-{{/each}}
+```sui
+{#each item in items}
+  {@index} - {item}
+{/each}
 ```
 
 This can be used with [helpers](/templates/helpers) like `numberFromIndex` to output non-zero indexed values.
 
-```handlebars
-{{#each person in team}}
-  {{person.name}}
-  Employee #{{numberFromIndex @index}})
-{{/each}}
+```sui
+{#each person in team}
+  {person.name}
+  Employee #{numberFromIndex @index})
+{/each}
 ```
 
 ### This
 
 When looping over values like strings or numbers without the `each...in` syntax you can use the keyword `this` to access the value.
 
-```handlebars
-{{#each numbers}}
-  {{this}}
-{{/each}}
+```sui
+{#each numbers}
+  {this}
+{/each}
 ```
 
 ## Using Expressions
@@ -90,10 +90,10 @@ When looping over values like strings or numbers without the `each...in` syntax 
 
 Iterables can be the results of expressions, for instance pulling a set of values from your component
 
-```handlebars
-{{#each item in getVisibleMenu}}
-  {{item}}
-{{/each}}
+```sui
+{#each item in getVisibleMenu}
+  {item}
+{/each}
 ```
 
 
@@ -101,14 +101,14 @@ Iterables can be the results of expressions, for instance pulling a set of value
 
 [Global helpers](/templates/helpers) can be used to generate iterables like number ranges.
 
-```handlerbars
-{{#each number in range 0 4}}
-  {{number}}
-{{/each}}
+```sui
+{#each number in range 0 4}
+  {number}
+{/each}
 ```
 
 ## Example
 
-The following example uses loops with [snippets](/templates/snippets) to output values into a table.
+The following example uses loops with [snippets](/api/templates/snippets) to output values into a table.
 
 <PlaygroundExample id="snippets" direction="horizontal"></PlaygroundExample>

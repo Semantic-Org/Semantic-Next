@@ -1,0 +1,11 @@
+<label class="switch">
+  <input type="checkbox" checked={checked}>
+  <span class="slider"></span>
+    <span class="label">
+      {#if label}
+        {label}
+      {else}
+        {>slot}
+      {/if}
+    </span>
+</label>

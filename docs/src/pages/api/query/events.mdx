@@ -1,0 +1,319 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Events
+icon: zap
+description: API reference for Query methods related to event handling
+---
+
+The Event methods in Query provide tools for attaching event listeners, triggering custom events, removing them, and triggering events.
+
+## On
+
+`on` provides various methods to attach event listeners to DOM elements. It supports standard event binding, event delegation, and special handling for shadow DOM.
+
+### Syntax
+
+#### Normal Event Binding
+```javascript
+$(target).on(eventName, handler, options)
+```
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | One or more space-separated event types and optional namespaces |
+| handler | function \| object | The event handler function, or additional options |
+| options | object | An object containing additional options |
+
+#### Event Delegation
+
+```javascript
+$(target).on(eventName, selector, handler, options)
+```
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | One or more space-separated event types and optional namespaces |
+| selector | string | A selector string to filter the descendants of the selected elements that trigger the event, or the event handler function|
+| handler | function | The event handler function, or additional options |
+| options | object | An object containing additional options |
+
+
+### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| returnHandler | boolean | false | If true, returns the event handler object instead of the Query object |
+| abortController | AbortController | new AbortController() | Custom AbortController for the event listener |
+| capture | boolean | false | Use capture phase for event listener |
+| once | boolean | false | Remove listener after it executes once |
+| passive | boolean | false | Indicates that the function will never call preventDefault() |
+
+### Returns
+
+#### Standard
+[Query object](/query/basic#the-query-object) (for chaining).
+
+#### Return Handler
+
+When `returnHandler` in `options` is set to `true`, the `on` method returns an event handler object (or an array of objects for multiple elements) with the following properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| el | Element | The DOM element the event is attached to |
+| eventName | string | The name of the event |
+| eventListener | function | The actual function attached as the event listener |
+| abortController | AbortController | The AbortController for this event listener |
+| delegated | boolean | Whether this is a delegated event listener |
+| handler | function | The original handler function provided |
+| abort | function | A function to abort (remove) this event listener |
+
+
+### Usage
+
+#### Standard Event Binding
+
+Attach a click event to all div elements:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('div').on('click', function(event) {
+  console.log('Div clicked!', this);
+});
+```
+
+#### Event Delegation
+
+Attach a click event to all current and future buttons within a container
+
+> When using event delegation, the handler is called with `this` set to the target element that matched the selector, not the element the listener was attached to.
+
+> **Event Delegation** - Event delegation allow you to add or remove elements from the DOM and still have them trigger the event so long as the parent element remains in the page.
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('#container').on('click', 'button', function(event) {
+  console.log('Button clicked!', this);
+});
+```
+
+#### Event Delegation with Shadow DOM
+
+When working with Shadow DOM, use the `$$` function to pierce shadow boundaries:
+
+```javascript
+import { $$ } from '@semantic-ui/query';
+
+$$('my-custom-element').on('click', 'button', function(event) {
+  console.log('Shadow DOM button clicked!', this);
+});
+```
+
+> **Composed Events**: The `on` method automatically handles delegation targets across shadow boundaries like wbe components using `event.composed` and `event.composedPath()` for events that cross shadow DOM boundaries. This allows the delegation to work correctly even when the target element is within a shadow root.
+
+#### Using Event Options
+
+You can pass additional options to the underlying `addEventListener` method:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('div').on('click', {
+  capture: true,
+  once: true
+}, function(event) {
+  console.log('This will only fire once, and in the capture phase');
+});
+```
+
+#### Using Returned Handler with Abort Signal
+
+You can get a reference to the event handler, which includes an abort method:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const handler = $('button').on('click', function() {
+  console.log('Button clicked!');
+}, { returnHandler: true });
+
+// Later, to remove the event listener:
+handler.abort();
+```
+
+#### Listening to a Custom Event
+
+Here's an example of dispatching a custom event from one element and listening to it on another:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// listen to a custom event
+$('my-component').on('customEvent', function(event) {
+  console.log('Custom event fired!', event.detail);
+});
+
+// Dispatch the custom event
+$('my-component').dispatchEvent('customEvent', { detail: 'Hello from custom event!' });
+```
+
+#### Using Custom Abort Controller
+
+You can provide your own AbortController for more fine-grained control:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const controller = new AbortController();
+
+$('button').on('click', function() {
+  console.log('Button clicked!');
+}, { abortController: controller });
+
+// Later, to remove the event listener:
+controller.abort();
+```
+
+
+## off
+
+Removes event handlers that were attached with `.on()`.
+
+### Syntax
+```javascript
+$('selector').off(eventName, handler)
+```
+
+### Parameters
+| Name      | Type     | Description                                   |
+|-----------|----------|-----------------------------------------------|
+| eventName | string   | One or more space-separated event types       |
+| handler   | function | The function to remove from the event handlers |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+function clickHandler(event) {
+  console.log('Clicked!');
+}
+
+$('button').on('click', clickHandler);
+// Later, to remove the event listener
+$('button').off('click', clickHandler);
+```
+
+## one
+
+Attaches a handler to an event for the elements. The handler is executed at most once per element per event type.
+
+### Syntax
+```javascript
+$('selector').one(eventName, handler)
+```
+
+### Parameters
+| Name      | Type     | Description                                   |
+|-----------|----------|-----------------------------------------------|
+| eventName | string   | One or more space-separated event types       |
+| handler   | function | The function to execute when the event occurs |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('button').one('click', function(event) {
+    console.log('This will only fire once!');
+});
+```
+
+## trigger
+
+Executes all handlers attached to the matched elements for the given event type.
+
+### Syntax
+```javascript
+$('selector').trigger(eventName)
+```
+
+### Parameters
+| Name      | Type   | Description             |
+|-----------|--------|-------------------------|
+| eventName | string | The type of event to trigger |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('button').trigger('click');
+```
+
+## dispatchEvent
+
+Creates and dispatches a custom event on the matched elements.
+
+> `dispatchEvent` is integrated into component callbacks, see [component events](/components/events#creating-events)
+
+#### Syntax
+```javascript
+$('selector').dispatchEvent(eventName, eventData, eventSettings)
+```
+
+### Parameters
+| Name           | Type   | Description                            |
+|----------------|--------|----------------------------------------|
+| eventName      | string | The name of the custom event to create |
+| eventData      | object | Custom data to pass with the event     |
+| eventSettings  | object | Additional event settings              |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Passing Custom Metadata
+```javascript
+const eventData = {
+  delta: getResizeDelta() // pass along resize delta with event
+}
+$('.container').dispatchEvent('resize', eventData);
+```
+## focus
+
+Gives focus to the first element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').focus()
+```
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Focus on an input element
+$('input.username').focus();
+```
+
+## blur
+
+Removes focus from the first element in the set of matched elements.
+
+### Syntax
+```javascript
+$('selector').blur()
+```
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Remove focus from whatever is focused
+$(document.activeElement).blur();
+```

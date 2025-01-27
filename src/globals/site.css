@@ -9,6 +9,7 @@ body {
 
 html {
   font-size: var(--font-size);
+  container: page / normal;
 }
 
 *,
@@ -60,14 +61,19 @@ input[type="text"], input[type="email"], input[type="search"], input[type="passw
   -moz-appearance: none; /* mobile firefox too! */
 }
 
+/* Scrollbars */
+* {
+  scrollbar-color: var(--thumb-background) var(--track-background);
+  scrollbar-width: var(--scrollbar-width);
+}
 
+/* Extra for Chrome */
 ::-webkit-scrollbar {
   -webkit-appearance: none;
   width: var(--scrollbar-width);
   height: var(--scrollbar-height);
 }
 
-/* Scrollbars */
 ::-webkit-scrollbar-track {
   background: var(--track-background);
   border-radius: var(--track-border-radius);

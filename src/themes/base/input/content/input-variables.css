@@ -19,6 +19,8 @@
   --input-border: var(--border);
   --input-border-radius: var(--border-radius);
 
+  --input-item-spacing: 5px;
+
   --input-placeholder-color: oklch(from var(--input-color) calc(l + 75) c h);
   --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
 

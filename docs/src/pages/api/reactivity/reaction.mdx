@@ -1,0 +1,298 @@
+---
+layout: '@layouts/Guide.astro'
+icon: refresh-cw
+title: Reaction
+description: API reference for Reaction in Semantic UI's reactivity system
+---
+
+`Reaction` a core class in Semantic UI's reactivity system that manages reactive computations. It allows you to create and control reactive contexts which re-run when reactive data sources are updated.
+
+> Please see the [dedicated section on reactivity](/reactivity) to learn more about writing and using reactivity in practice.
+
+# Reaction Class
+
+## create
+
+Creates a new reaction and runs it immediately. The reaction will re-run whenever any reactive dependencies accessed within the callback change.
+
+### Syntax
+```javascript
+Reaction.create(callback)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| callback | Function | The function to run reactively. Receives the reaction instance as its argument. |
+
+### Returns
+
+Reaction - The created reaction instance.
+
+### Usage
+
+#### Basic Usage
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+
+Reaction.create((reaction) => {
+  console.log('Counter value:', counter.get());
+});
+
+counter.set(1);
+
+// Console output:
+// Counter value: 0
+// Counter value: 1
+```
+
+#### Stopping a Reaction
+
+You can stop a reaction from within its callback or externally using the returned reaction instance.
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+
+const reaction = Reaction.create((reaction) => {
+  console.log('Counter value:', counter.get());
+  if (counter.get() >= 2) {
+    reaction.stop();
+    console.log('Reaction stopped');
+  }
+});
+
+counter.set(1);
+counter.set(2);
+counter.set(3); // This won't trigger the reaction
+
+// Console output:
+// Counter value: 0
+// Counter value: 1
+// Counter value: 2
+// Reaction stopped
+```
+
+#### Checking for First Run
+
+The `firstRun` property allows you to perform specific actions only on the initial execution of the reaction.
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const data = new Signal({ value: 0 });
+
+Reaction.create((reaction) => {
+  const currentData = data.get();
+
+  if (reaction.firstRun) {
+    console.log('Initial data:', currentData);
+  } else {
+    console.log('Updated data:', currentData);
+  }
+});
+
+data.set({ value: 1 });
+
+// Console output:
+// Initial data: { value: 0 }
+// Updated data: { value: 1 }
+```
+
+> **Note**: Be cautious when using early returns with `firstRun`. If you return early on the first run, the reaction won't establish dependencies on signals accessed after the return statement.
+
+
+## nonreactive
+
+Runs a function without establishing any reactive dependencies.
+
+### Syntax
+```javascript
+Reaction.nonreactive(func)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| func | Function | The function to run non-reactively |
+
+### Returns
+
+any - The return value of the provided function.
+
+### Usage
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+
+Reaction.nonreactive(() => {
+  console.log('Counter value (non-reactive):', counter.get());
+});
+
+counter.set(1); // No console output
+```
+
+## guard
+
+Wraps a function to only re-run when its return value changes.
+
+### Syntax
+```javascript
+Reaction.guard(func)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| func | Function | The function to guard |
+
+### Callback Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| reaction | class instance | The current running reaction |
+
+> See [reactivity controls](/reactivity/controls) for more info.
+
+### Returns
+
+any - The return value of the guarded function.
+
+### Usage
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+
+Reaction.create(() => {
+  const isEven = Reaction.guard(() => counter.get() % 2 === 0);
+  console.log('Counter is even:', isEven);
+});
+
+counter.set(1); // Console: "Counter is even: false"
+counter.set(3); // No console output (value didn't change)
+```
+
+## getSource
+
+Returns the stack trace of the current reaction for debugging purposes.
+
+> **Debugging Reactivity** - `getSource` is designed to be use inside of a breakpoint to determine what reaction is currently running.
+
+### Syntax
+```javascript
+Reaction.getSource()
+```
+
+### Returns
+
+string - The stack trace of the current reaction.
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+Reaction.create(() => {
+  console.log(Reaction.getSource());
+});
+```
+
+# Individual Reaction
+
+You can control each reaction by returning the result of `Reaction.create` with the following methods
+
+## run
+
+Runs the reaction manually.
+
+### Syntax
+```javascript
+const reaction = Reaction.create(() => {
+  console.log('Reaction ran');
+});
+reaction.run()
+// Console output:
+// Reaction ran
+```
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+const reaction = Reaction.create(() => {
+  console.log('Reaction ran');
+});
+
+reaction.run(); // Console: "Reaction ran"
+```
+
+## invalidate
+
+Marks the reaction as invalid, scheduling it to run again.
+
+### Syntax
+```javascript
+reaction.invalidate(context)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| context | any | (Optional) Context information for the invalidation |
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+const reaction = Reaction.create(() => {
+  console.log('Reaction ran');
+});
+
+reaction.invalidate();
+```
+
+## stop
+
+Stops the reaction from running again.
+
+### Syntax
+```javascript
+reaction.stop()
+```
+
+### Usage
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+const reaction = Reaction.create(() => {
+  console.log('Reaction ran');
+});
+
+reaction.stop();
+```
+
+### First Run
+
+```javascript
+import { Reaction } from '@semantic-ui/reactivity';
+
+const reaction = Reaction.create((reaction) => {
+  console.log(reaction.firstRun); // outputs true
+});
+
+```

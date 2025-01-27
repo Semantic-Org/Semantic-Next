@@ -1,12 +1,12 @@
 <ui-menu>
-  {{#each item in getMenu}}
-    <a class="{{classMap getItemStates item}}mobile-hidden item" href={{getLink item}} part="item">
-      {{#if item.icon}}
-        <ui-icon icon={{item.icon}} exportparts="icon:item-icon" />
-      {{else if item.image}}
-        <img src="{{item.image}}">
-      {{/if}}
-      <span class="text" part="item-text">{{item.name}}</span>
+  {#each item in getMenu}
+    <a class="{classMap getItemStates item}mobile-hidden item" href={getLink item} part="item">
+      {#if item.icon}
+        <ui-icon icon={item.icon} exportparts="icon:item-icon" />
+      {else if item.image}
+        <img src="{item.image}">
+      {/if}
+      <span class="text" part="item-text">{item.name}</span>
     </a>
-  {{/each}}
+  {/each}
 </ui-menu>

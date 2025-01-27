@@ -1,0 +1,24 @@
+/*******************************
+            Groups
+*******************************/
+
+:host(ui-cards) {
+  display: block;
+  container: host / inline-size;
+  margin: var(--cards-margin);
+}
+
+.component {
+  container: component / inline-size;
+}
+
+.cards {
+  display: grid;
+  gap: var(--cards-gap);
+  grid-auto-rows: 1fr;
+  width: 100%;
+}
+
+::slotted(ui-card) {
+  display: contents;
+}

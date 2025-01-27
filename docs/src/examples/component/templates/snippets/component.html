@@ -1,4 +1,4 @@
-<h3>{{title}}</h3>
+<h3>{title}</h3>
 <table>
   <thead>
     <tr>
@@ -10,19 +10,19 @@
     </tr>
   </thead>
   <tbody>
-    {{#each row in rows}}
-      {{> row}}
-    {{/each}}
+    {#each row in rows}
+      {> row}
+    {/each}
   </tbody>
 </table>
 
-{{#snippet row}}
+{#snippet row}
   <tr>
-    {{#each value in row}}
+    {#each value in row}
       <td>
-        {{value}}
+        {value}
       </td>
-    {{/each}}
-    <td>{{company}}</td>
+    {/each}
+    <td>{company}</td>
   </tr>
-{{/snippet}}
+{/snippet}

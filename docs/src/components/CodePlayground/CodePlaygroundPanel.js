@@ -4,7 +4,10 @@ import css from './CodePlaygroundPanel.css?raw';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
-const createComponent = ({tpl, settings, state, $, $$}) => ({
+const createComponent = ({data}) => ({
+  initialize() {
+    // nothing yet
+  }
 });
 
 const events = {
@@ -19,14 +22,10 @@ const events = {
   }
 };
 
-const onRendered = ({ $, tpl, attachEvent }) => {
-};
-
 const CodePlaygroundPanel = defineComponent({
   template,
   css,
   createComponent,
-  onRendered,
   events,
   subTemplates: {
     CodePlaygroundFile,

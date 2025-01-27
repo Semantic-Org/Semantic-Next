@@ -1,27 +1,27 @@
-{{#if both menu.length showHeader}}
-  <h5 class="header">{{header}}</h5>
-{{/if}}
-{{#each section in menu}}
-  <div class="{{classMap getTitleClasses section @index}}title" data-id={{getAnchorID section}} data-index="{{@index}}">
+{#if showHeader}
+  <h5 class="header">{header}</h5>
+{/if}
+{#each section in menu}
+  <div class="{classMap getTitleClasses section @index}title" data-id={getAnchorID section} data-index="{@index}">
     <span class="text">
-      {{section.title}}
+      {section.title}
     </span>
-    {{#if useAccordion}}
+    {#if useAccordion}
       <ui-icon chevron-down></ui-icon>
-    {{/if}}
+    {/if}
   </div>
-  {{#if section.items.length}}
-    <div class="{{classMap getContentClasses @index}}content">
+  {#if section.items.length}
+    <div class="{classMap getContentClasses @index}content">
       <div class="menu">
-        {{#each item in section.items}}
+        {#each item in section.items}
           <a
-            href="#{{getAnchorID item}}"
-            data-id="{{getAnchorID item}}"
-            class="{{classMap getItemClasses item}}">
-            {{item.title}}
+            href="#{getAnchorID item}"
+            data-id="{getAnchorID item}"
+            class="{classMap getItemClasses item}">
+            {item.title}
           </a>
-        {{/each}}
+        {/each}
       </div>
     </div>
-  {{/if}}
-{{/each}}
+  {/if}
+{/each}

@@ -1,21 +1,21 @@
 <span class="todo-count">
-  {{getIncomplete.length}} item{{maybeS getIncomplete.length}} left
+  {getIncompleteCount} item{maybeS getIncompleteCount} left
 </span>
 <ul class="filters">
-  {{#each filter in filters}}
+  {#each filter in filters}
     <li>
-      {{#if isActiveFilter filter}}
+      {#if isActiveFilter filter}
         <a class="selected">
-          {{capitalize filter}}
+          {capitalize filter}
         </a>
-      {{else}}
-        <a href="#/{{filter}}">
-          {{capitalize filter}}
+      {else}
+        <a href="#/{filter}">
+          {capitalize filter}
         </a>
-      {{/if}}
+      {/if}
     </li>
-  {{/each}}
+  {/each}
 </ul>
-{{#if hasAnyCompleted}}
+{#if hasAnyCompleted}
   <div class="clear-completed">Clear Completed</div>
-{{/if}}
+{/if}

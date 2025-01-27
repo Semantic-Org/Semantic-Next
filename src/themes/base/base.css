@@ -18,6 +18,7 @@
 @import url("./menu/menu-theme.css") layer(baseTheme.component.menu);
 @import url("./input/input-theme.css") layer(baseTheme.component.input);
 @import url("./label/label-theme.css") layer(baseTheme.component.label);
+@import url("./card/card-theme.css") layer(baseTheme.component.card);
 
 /* Components */
 @import url("./modal/modal-theme.css") layer(baseTheme.component.modal);

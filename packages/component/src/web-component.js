@@ -1,5 +1,6 @@
 import { LitElement } from 'lit';
-import { each, isFunction, kebabToCamel, keys, unique, isServer, inArray, get } from '@semantic-ui/utils';
+import { each, isFunction, isClassInstance, kebabToCamel, camelToKebab, keys, unique, isServer, isEqual, inArray, get } from '@semantic-ui/utils';
+import { Signal } from '@semantic-ui/reactivity';
 import { $ } from '@semantic-ui/query';
 import { scopeStyles } from './helpers/scope-styles.js';
 
@@ -17,148 +18,16 @@ class WebComponentBase extends LitElement {
 
   constructor() {
     super();
-    this.useLight = false;
     this.renderCallbacks = [];
   }
 
   updated() {
     super.updated();
-    if (this.useLight) {
-      this.slotLightContent();
-    }
     each(this.renderCallbacks, (callback) => callback());
   }
 
   addRenderCallback(callback) {
     this.renderCallbacks.push(callback);
-  }
-
-  /*******************************
-         Light DOM Rendering
-  *******************************/
-
-  /* Modifies shadow dom rules to be scoped to component tag */
-  addPageCSS(webComponent, id, css, { scopeSelector } = {}) {
-    if(isServer) {
-      return;
-    }
-    const stylesheet = new CSSStyleSheet();
-    if(!webComponent.pageStylesheets) {
-      webComponent.pageStylesheets = {};
-    }
-    if (!webComponent.pageStylesheets[id]) {
-      if(scopeSelector) {
-        css = scopeStyles(css, scopeSelector);
-      }
-      stylesheet.replaceSync(css);
-      webComponent.pageStylesheets[id] = stylesheet;
-    }
-    // we add a new stylesheet to document scoped to component name
-    document.adoptedStyleSheets = [
-      ...document.adoptedStyleSheets,
-      stylesheet,
-    ];
-  }
-
-  storeOriginalContent() {
-    this.originalDOM = document.createElement('template');
-    this.originalDOM.innerHTML = this.innerHTML;
-    this.innerHTML = '';
-  }
-
-  slotLightContent() {
-    const $slots = this.$('slot');
-    $slots.each((slot) => {
-      const $slot = $(slot);
-      let html;
-      if ($slot.attr('name')) {
-        let slotName = $slot.attr('name');
-        const $slotContent = this.$$(`[slot="${slotName}"]`);
-        if ($slotContent.length) {
-          html = $slotContent.outerHTML();
-        }
-      }
-      else {
-        // default slot takes all DOM content that is not slotted
-        const $originalDOM = this.$$(this.originalDOM.content);
-        const $defaultContent = $originalDOM.children().not('[slot]');
-        const defaultHTML = $defaultContent.html() || '';
-        const defaultText = $originalDOM.textNode() || '';
-        html = defaultHTML + defaultText;
-      }
-      if ($slot && html) {
-        $slot.html(html);
-      }
-    });
-  }
-  /*******************************
-         Nested Components
-  *******************************/
-
-  /* This is currently not being called out because
-     it cannot ever work for SSR.
-
-     including it would mean breaking parity of functionality
-
-    *
-  */
-  watchSlottedContent(settings) {
-    const $slot = this.$('slot');
-    // initial render
-    $slot.each((el) => {
-      this.onSlotChange(el, settings);
-    });
-    // on change
-    $slot.on('slotchange', (event) => {
-      this.onSlotChange(event.target, settings);
-    });
-  }
-  onSlotChange(slotEl, {singularTag, componentSpec, properties}) {
-    const nodes = slotEl.assignedNodes();
-    const name = slotEl.name || 'default';
-    const settings = this.getSettings({componentSpec, properties});
-    if(!this.slottedContent) {
-      this.slottedContent = {};
-    }
-    this.slottedContent[name] = nodes;
-    if(singularTag) {
-
-      // we use this element to track last-child
-      let lastSingularNode;
-
-      const isSingular = (node) => {
-        return node.tagName && node.tagName.toLowerCase() == singularTag;
-      };
-      const addSingularProps = (node) => {
-        if(!isSingular(node)) {
-          return;
-        }
-        if(!lastSingularNode) {
-          node.setAttribute('first', '');
-        }
-        node.setAttribute('grouped', '');
-        lastSingularNode = node;
-        each(componentSpec?.inheritedPluralVariations, (variation) => {
-          const pluralVariation = settings[variation];
-          if(pluralVariation && !node[variation]) {
-            node.setAttribute(variation, pluralVariation);
-          }
-        });
-      };
-
-      /*
-        We look a max of two levels deep
-        this is because sometimes rendering tools like Astro
-        will wrap a component in an arbitrary tag (island).
-      */
-      nodes.forEach(node => {
-        addSingularProps(node);
-        each(node.children, addSingularProps);
-      });
-      if(lastSingularNode) {
-        lastSingularNode.setAttribute('last', '');
-      }
-    }
   }
 
   /*******************************
@@ -170,49 +39,79 @@ class WebComponentBase extends LitElement {
       return properties;
     }
     if (componentSpec) {
-      properties.class = { type: String };
+      properties.class = { type: String, noAccessor: true, alias: true };
 
       // emphasis="primary" but also setting props
-      each(componentSpec.attributes, (name) => {
-        const propertyType = componentSpec.propertyTypes[name];
-        properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
+      each(componentSpec.attributes, (attributeName) => {
+        const propertyType = componentSpec.propertyTypes[attributeName];
+        const propertyName = kebabToCamel(attributeName);
+        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
       });
 
       // these are values that can only be set on the DOM el as properties
-      // but do not have attributes -- for instance functions
-      each(componentSpec.properties, (name) => {
-        const propertyType = componentSpec.propertyTypes[name];
-        properties[name] = WebComponentBase.getPropertySettings(name, propertyType);
+      // but do not have attributes like functions or classes
+      each(componentSpec.properties, (attributeName) => {
+        const propertyType = componentSpec.propertyTypes[attributeName];
+        const propertyName = kebabToCamel(attributeName);
+        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
       });
 
-      // primary -> emphasis="primary"
-      each(componentSpec.optionAttributes, (attributeValues, attribute) => {
-        properties[attribute] = { type: String, noAccessor: true };
+      // this handles syntax where allowed value is used as attribute
+      // <ui-button primary> -> emphasis="primary"
+      each(componentSpec.optionAttributes, (attributeValues, attributeName) => {
+        const propertyName = kebabToCamel(attributeName);
+        properties[propertyName] = { type: String, noAccessor: true, alias: true, attribute: attributeName };
       });
     }
     if (settings) {
-      each(settings, (defaultValue, name) => {
+      each(settings, (defaultValue, propertyName) => {
         // this can either be a settings object or a default value
         // i.e. { foo: 'baz' } // basic
         // or { foo: { type: String, defaultValue: 'baz' } // expert
-        properties[name] = (defaultValue?.type)
+
+        // we cant serialize custom classes
+        const propertySettings = {
+          propertyOnly: isClassInstance(defaultValue)
+        };
+
+        properties[propertyName] = (defaultValue?.type)
           ? settings
-          : WebComponentBase.getPropertySettings(name, defaultValue?.constructor)
+          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings)
         ;
       });
     }
+
+    /* This handles the case of multiword settings like `useAccordion`
+       we support 2 syntax <ui-menu use-accordion> or <ui-menu useaccordion>'
+       the kebab attr serves as an alias with no accessor
+    */
+    each(properties, (propertySettings, propertyName) => {
+      const attributeName = camelToKebab(propertyName);
+      if(attributeName !== propertyName && !properties[attributeName] && properties[propertyName]) {
+        properties[attributeName] = {
+          ...properties[propertyName],
+          noAccessor: true,
+          alias: true,
+        };
+      }
+    });
     return properties;
   }
 
-  static getPropertySettings(name, type = String) {
+  static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {}) {
     let property = {
       type,
       attribute: true,
-      //hasChanged: isEqual,
+      hasChanged: (a, b) => {
+        return !isEqual(a, b);
+      },
     };
     // functions cannot be serialized
-    if (type == Function) {
+    if (propertyOnly || type == Function) {
       property.attribute = false;
+      property.hasChanged = (newVal, oldVal) => {
+        return true;
+      };
     }
     else if (type == Boolean) {
       property.converter = {
@@ -220,16 +119,15 @@ class WebComponentBase extends LitElement {
           if (inArray(value, ['false', '0', 'null', 'undefined'])) {
             return false;
           }
+          if (inArray(value, ['', true, 'true'])) {
+            return true;
+          }
           return Boolean(value);
         },
         toAttribute: (value, type) => {
           return String(value);
         }
       };
-    }
-    // adding accessors to reserved browser DOM props causes issues
-    if(inArray(name, ['disabled'])) {
-      property.noAccessor = true;
     }
     return property;
   }
@@ -266,62 +164,69 @@ class WebComponentBase extends LitElement {
     This returns a list of settings which may include both attributes and properties
     as specified in the spec for the component. It will extend them from default settings
   */
-  getSettings({componentSpec, properties}) {
+  getSettingsFromConfig({componentSpec, properties}) {
     let settings = {};
-    each(properties, (propSettings, property) => {
-      if (property == 'class' || propSettings.observe === false) {
+    each(properties, (propSettings, propertyName) => {
+      if (propSettings.alias === true) {
         return;
       }
-      if(componentSpec && !get(componentSpec.allowedValues, property) && get(componentSpec.optionAttributes, property)) {
-        // this property is used to lookup a setting like 'large' -> sizing
-        // we dont record this into settings
-        return;
-      }
-
-      property = kebabToCamel(property);
-
-      const elementProp = this[property];
+      const elementProp = this[propertyName];
       const setting = elementProp  // check element setting
-        ?? this.defaultSettings[property]  // check default setting on this component
-        ?? (componentSpec?.defaultSettings || {})[property] // check default setting on component spec
+        ?? this.defaultSettings[propertyName]  // check default setting on this component
+        ?? (componentSpec?.defaultSettings || {})[propertyName] // check default setting on component spec
       ;
       // only pass through setting if it is defined
       if(setting !== undefined) {
-        settings[property] = setting;
+        settings[propertyName] = setting;
       }
       // boolean attribute case
       if (componentSpec && settings[elementProp] !== undefined) {
-        settings[property] = true;
+        settings[propertyName] = true;
       }
     });
     return settings;
   }
 
-  /* This may become more complex if we choose to support
-     reverse attribute lookups like setSetting('large');
-  */
-  setSetting(name, value) {
-    this[name] = value;
-  }
-
 
   /* Create a proxy object which returns the current setting
      we need this over a getter/setter because settings are
-     destructured in function arguments
+     destructured in function arguments which locks their value in time
      i.e. onCreated({settings}) { }
   */
   createSettingsProxy({componentSpec, properties}) {
     let component = this;
+    /*
+      To make settings reactive in Reactions
+      we need to map them to signals
+    */
+    component.settingsVars = new Map();
     return new Proxy({}, {
       get: (target, property) => {
         const settings = component.getSettings({
           componentSpec,
           properties
         });
-        return get(settings, property);
+        const setting = get(settings, property);
+        let signal = component.settingsVars.get(property);
+        if(signal) {
+          signal.get();
+        }
+        else {
+          signal = new Signal(setting);
+          component.settingsVars.set(property, signal);
+        }
+        return setting;
       },
       set: (target, property, value, receiver) => {
         component.setSetting(property, value);
+        let signal = component.settingsVars.get(property);
+        if(signal) {
+          signal.set(value);
+        }
+        else {
+          signal = new Signal(value);
+          component.settingsVars.set(property, signal);
+        }
         return true;
       }
     });
@@ -339,11 +244,11 @@ class WebComponentBase extends LitElement {
       return;
     }
     const classes = [];
-
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
 
-      const value = this[attribute];
+      const property = kebabToCamel(attribute);
+      const value = this[property];
 
       if(value) {
         const allowedValues = componentSpec.allowedValues[attribute];
@@ -351,6 +256,10 @@ class WebComponentBase extends LitElement {
         if(propertyType == Boolean) {
           // this is a variation like active=true
           // it receives the class "active"
+          classes.push(attribute);
+        }
+        else if(value == attribute && allowedValues && inArray(value, allowedValues)) {
+          // disabled="disabled" use case operates like boolean
           classes.push(attribute);
         }
         else if(allowedValues && inArray(value, allowedValues)) {
@@ -372,21 +281,6 @@ class WebComponentBase extends LitElement {
       classString += ' ';
     }
     return classString;
-  }
-
-  /* Returns content (slotted content) from a component spec */
-  getContent({componentSpec}) {
-    const content = {};
-    if(!componentSpec) {
-      return;
-    }
-    // slotted content is stored in onSlotChange
-    each(componentSpec.content, (contentName) => {
-      if(this[contentName] && this.slottedContent) {
-        content[contentName] = this.slottedContent[contentName];
-      }
-    });
-    return content;
   }
 
   isDarkMode() {

@@ -10,11 +10,38 @@ const settings = {
   itemCount: 'auto',
   minSize: '0px',
   maxSize: '0px',
+  naturalSize: '',
   size: 'grow',
   label: '',
   canMinimize: true,
   minimized: false,
   getNaturalSize: (panel, { direction, minimized }) => {
+    return panel?.component.getNaturalSize(panel, { direction, minimized });
+  }
+};
+
+const createComponent = ({el, self, state, isServer, signal, findParent, settings, dispatchEvent, $}) => ({
+  resizing: signal(false),
+  initialized: signal(false),
+
+  getClassMap() {
+    return {
+      resizing: self.resizing.get(),
+      minimized: settings.minimized,
+      initialized: self.initialized.get()
+    };
+  },
+
+  setInitialized() {
+    self.initialized.set(true);
+    dispatchEvent('initialized');
+  },
+
+  getNaturalSize(panel, { direction, minimized }) {
+    if(settings.naturalSize) {
+      const panels = self.getPanels();
+      return panels.getPixelSettingSize(settings.naturalSize);
+    }
     const $children = $(panel).children();
     return (direction == 'horizontal')
       ? ($children.length > 1)
@@ -24,22 +51,7 @@ const settings = {
         ? sum($children.height())
         : $children.height()
     ;
-  }
-};
-
-const state = {
-  lastPanelSize: undefined
-};
-
-const createComponent = ({el, self, isServer, reactiveVar, findParent, settings, dispatchEvent, $}) => ({
-  resizing: reactiveVar(false),
-  initialized: reactiveVar(false),
-
-  getClassMap: () => ({
-    resizing: self.resizing.get(),
-    minimized: settings.minimized,
-    initialized: self.initialized.get()
-  }),
+  },
 
   getHandleClassMap: () => ({
     initialized: self.initialized.get(),
@@ -62,7 +74,8 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     return settings.resizable && self.getIndex() > 0;
   },
   getPanels() {
-    return findParent('uiPanels');
+    const panels = findParent('uiPanels');
+    return panels;
   },
   getPointerPosition(event) {
     const positionObj = event.touches
@@ -90,8 +103,13 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
       })
       .on('touchmove', self.resizeDrag)
     ;
+    $$('iframe')
+      .one('pointerenter', (event) => {
+        self.endResize(event);
+      })
+    ;
     $('body')
-      .one('pointerup', (event) => {
+      .one('pointerup mouseleave', (event) => {
         self.endResize(event);
       })
     ;
@@ -104,11 +122,11 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
   },
   endResize() {
     $('body')
-      .off('mousemove')
-      .off('touchmove')
+      .off('pointerup mouseleave mousemove touchmove')
       .removeClass('resizing')
       .css('cursor', '')
     ;
+    $$('iframe').off('pointerenter');
     self.resizing.set(false);
     delete self.initialPosition;
     delete self.initialSize;
@@ -145,7 +163,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     }
     // store size when maximizing again
     let currentSize = $(el).css('flex-grow');
-    state.lastPanelSize = Math.max(currentSize, 10);
+    self.lastPanelSize = Math.max(currentSize, 10);
     const index = panels.getPanelIndex(el);
     panels.setPanelMinimized(index);
   },
@@ -153,7 +171,7 @@ const createComponent = ({el, self, isServer, reactiveVar, findParent, settings,
     settings.minimized = false;
     const panels = self.getPanels();
     const index = panels.getPanelIndex(el);
-    panels.setPanelMaximized(index, state.lastPanelSize);
+    panels.setPanelMaximized(index, self.lastPanelSize);
   }
 });
 
@@ -161,7 +179,7 @@ const events = {
   'click .toggle-size'({ self }) {
     self.toggleMinimize();
   },
-  'dblclick .label'({ self }) {
+  'dblclick .self.label'({ self }) {
     self.toggleMinimize();
   },
   'dblclick .handle': function({ self }) {
