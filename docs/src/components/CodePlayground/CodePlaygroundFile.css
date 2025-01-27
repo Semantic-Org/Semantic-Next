@@ -1,0 +1,7 @@
+playground-file-editor {
+  opacity: 0;
+
+  &.initialized {
+    opacity: 1;
+  }
+}
