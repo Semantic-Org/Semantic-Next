@@ -3,12 +3,12 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const settings = {
+const defaultSettings = {
   colorOptions: ['red', 'yellow', 'green', 'blue', 'purple', 'pink'],
   color: '#FF0000',
 };
 
-const state = {
+const defaultState = {
   hoveredColor: '',
 };
 
@@ -50,7 +50,7 @@ defineComponent({
   events,
   template,
   css,
-  settings,
-  state,
+  defaultSettings,
+  defaultState,
   createComponent
 });

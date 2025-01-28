@@ -2,7 +2,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const template = await getText('./component.html');
 const css = await getText('./component.css');
 
-const state = {
+const defaultState = {
   width: 250,
   height: 250
 };
@@ -23,5 +23,5 @@ defineComponent({
   template,
   css,
   keys,
-  state
+  defaultState
 });

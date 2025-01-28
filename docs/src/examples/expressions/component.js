@@ -3,7 +3,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const settings = {
+const defaultSettings = {
   value: 1,
   date: new Date(),
   timezone: 'PST'
@@ -23,7 +23,7 @@ export const TestComponent = defineComponent({
   tagName: 'test-component',
   template,
   css,
-  settings,
+  defaultSettings,
   createComponent
 });
 

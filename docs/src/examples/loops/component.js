@@ -4,7 +4,7 @@ import { range } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const state = {
+const defaultState = {
   numbers: range(1, 6),
   fruits: [
     { taste: 'Good', name: 'Apple' },
@@ -37,6 +37,6 @@ defineComponent({
   tagName: 'ui-list',
   template,
   css,
-  state,
+  defaultState,
   createComponent
 });

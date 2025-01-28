@@ -14,11 +14,11 @@ const template = await getText('./component.html');
   and the reaction is in startAnimation()
 */
 
-const state = {
+const defaultState = {
   balls: [],
 };
 
-const settings = {
+const defaultSettings = {
   count: 0, // initial ball count
   radius: 3, // average ball radius
   velocity: 100, // average ball velocity
@@ -298,6 +298,6 @@ export const BallSimulation = defineComponent({
   createComponent,
   onRendered,
   events,
-  state,
-  settings
+  defaultState,
+  defaultSettings
 });

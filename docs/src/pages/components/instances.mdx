@@ -25,7 +25,7 @@ For instance you might need to invoke a behavior from:
 The `createComponent` callback is used to define your component instance including methods that define your components behavior.
 
 ```javascript
-const state = { counter: 0 };
+const defaultState = { counter: 0 };
 const createComponent = ({self, state, settings}) => ({
   setCounter(number) {
     state.counter.set(number);

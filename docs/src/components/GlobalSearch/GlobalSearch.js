@@ -6,7 +6,7 @@ import css from './GlobalSearch.css?raw';
 
 import { UIModal } from '@semantic-ui/core';
 
-const settings = {
+const defaultSettings = {
   baseURL: '/',
   bundlePath: '/pagefind/',
   importPath: 'pagefind.js',
@@ -15,7 +15,7 @@ const settings = {
   debounceTime: 200
 };
 
-const state = {
+const defaultState = {
   rawResults: [],
   results: [],
   displayResults: [],
@@ -27,9 +27,12 @@ const state = {
   modalOpen: false,
 };
 
-const createComponent = ({self, el, bindKey, reaction, state, isRendered, settings, $}) => ({
+const createComponent = ({self, el, bindKey, reaction, state, isRendered, settings, isServer, $}) => ({
 
   initialize() {
+    if(isServer) {
+      return;
+    }
     bindKey(settings.openKey, self.openModal);
     self.calculateResults();
     self.calculateLoadSearch();
@@ -67,6 +70,7 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
 
   async calculateResults() {
     reaction(async (reaction) => {
+      console.log('state is', state);
       const rawResults = state.rawResults.get();
       const startIndex = state.resultOffset.get();
       const endIndex = startIndex + settings.resultsPerPage;
@@ -223,9 +227,9 @@ const GlobalSearch = defineComponent({
   css,
   createComponent,
   events,
-  state,
   keys,
-  settings,
+  defaultState,
+  defaultSettings,
 });
 
 export default GlobalSearch;

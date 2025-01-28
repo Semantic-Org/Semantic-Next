@@ -12,7 +12,7 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 
-const state = {
+const defaultState = {
   filter: 'all',
   searchTerm: '',
   friends
@@ -60,7 +60,7 @@ defineComponent({
   tagName: 'friend-directory',
   template,
   css,
-  state,
+  defaultState,
   events,
   createComponent,
   subTemplates: {

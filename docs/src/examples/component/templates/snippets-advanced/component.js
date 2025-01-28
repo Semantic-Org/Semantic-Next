@@ -4,7 +4,7 @@ import { sum } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const state = {
+const defaultState = {
   time: new Date(),
 };
 
@@ -55,7 +55,7 @@ export const UIClock = defineComponent({
   tagName: 'ui-clock',
   createComponent,
   template,
-  state,
+  defaultState,
   css,
   onDestroyed
 });

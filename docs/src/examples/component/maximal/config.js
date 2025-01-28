@@ -1,3 +1,3 @@
-export const settings = {
+export const defaultSettings = {
   number: 0
 };

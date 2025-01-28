@@ -53,7 +53,7 @@ If you want to use or set a variable without triggering reactivity **either a va
 Your component's `state` is the internal store of reactivity for your component. When your component is initialized each `state` property will become a [`signal`](/reactivity/variables) and will trigger reactivity inside a `Reaction`.
 
 ```javascript
-const state = {
+const defaultState = {
   counter: 0;
 }
 
@@ -78,7 +78,7 @@ Counter is: {counter}
 Settings are **not reactive inside a `reaction`** because they are not instances of `signal`.
 
 ```javascript
-const settings = {
+const defaultSettings = {
   counter: 0;
 }
 

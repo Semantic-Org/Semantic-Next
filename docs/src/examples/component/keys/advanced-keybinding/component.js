@@ -2,13 +2,13 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const template = await getText('./component.html');
 const css = await getText('./component.css');
 
-const settings = {
+const defaultSettings = {
   placeholder: 'Search...',
   options: [],
   noun: 'item',
 };
 
-const state = {
+const defaultState = {
   searchTerm: '',
   results: [],
   selectedResult: '',
@@ -129,6 +129,6 @@ defineComponent({
   css,
   events,
   createComponent,
-  settings,
-  state
+  defaultSettings,
+  defaultState
 });

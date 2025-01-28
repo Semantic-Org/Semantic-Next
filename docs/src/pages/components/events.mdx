@@ -235,7 +235,7 @@ const createComponent = ({dispatchEvent}) => {
 > **Callbacks versus events** Although you can use callback functions in [component settings](/component/settings) to alert of internal changes in a component, it is a better pattern to only use callbacks in settings if you need the function to return a value as dispatched events cannot achieve this.
 
 ```javascript
-const settings = {
+const defaultSettings = {
 
   // this could be useful to allow user to cancel an internal action
   shouldShow: () => true,

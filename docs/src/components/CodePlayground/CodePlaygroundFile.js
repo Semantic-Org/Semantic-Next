@@ -4,7 +4,7 @@ import codeMirrorCSS from './lib/codemirror.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
 
-const state = {
+const defaultState = {
   initialized: false, // avoid the flash when mode is set from changing file types
 };
 
@@ -179,7 +179,7 @@ const CodePlaygroundFile = defineComponent({
   createComponent,
   onRendered,
   events,
-  state,
+  defaultState,
 });
 
 export default CodePlaygroundFile;

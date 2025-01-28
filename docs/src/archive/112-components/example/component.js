@@ -7,7 +7,7 @@ defineComponent({
   tagName: 'employee-card',
   template,
   css,
-  settings: {
+  defaultSettings: {
     name: '',
     location: '',
     role: '',
