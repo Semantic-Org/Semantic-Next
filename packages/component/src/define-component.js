@@ -11,17 +11,13 @@ export const defineComponent = ({
   ast,
   css = '',
   pageCSS = '',
-  componentSpec = false,
   tagName,
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
-  plural = false,
-  singularTag,
+  events = {}, // event bindings
 
-  state = {},
-  events = {},
-  keys = {},
+  keys = {}, // key bindings
 
   createComponent = noop,
   onCreated = noop,
@@ -30,11 +26,22 @@ export const defineComponent = ({
   onThemeChanged = noop,
   onAttributeChanged = noop,
 
-  properties, // allow overriding properties
-  settings, // settings for js functionality like callbacks etc
+
+  defaultSettings = {},
+  defaultState = {},
+
+  settings = defaultSettings, // alias for defaultSettings
+  state = defaultState, // alias for defaultState
 
   subTemplates = {},
+
   renderingEngine,
+  properties, // allow overriding web component properties
+
+  // only used by components that provide a spec
+  componentSpec = false,
+  plural = false,
+  singularTag,
 } = {}) => {
 
 
@@ -64,13 +71,13 @@ export const defineComponent = ({
 
   let litTemplate = new Template({
     templateName: templateName,
-    stateConfig: state,
     isPrototype: true,
     renderingEngine,
     ast,
     css,
     events,
     keys,
+    defaultState,
     subTemplates,
     onCreated,
     onRendered,
@@ -106,7 +113,7 @@ export const defineComponent = ({
         this.css = css;
         this.componentSpec = componentSpec;
         this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
-        this.setDefaultSettings({settings, componentSpec});
+        this.setDefaultSettings({defaultSettings, componentSpec});
       }
 
       // callback when added to dom

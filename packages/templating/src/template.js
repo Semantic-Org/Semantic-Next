@@ -21,7 +21,7 @@ export const Template = class Template {
     css,
     events,
     keys,
-    stateConfig,
+    defaultState,
     subTemplates,
     createComponent,
     parentTemplate, // the parent template when nested
@@ -45,8 +45,8 @@ export const Template = class Template {
     this.css = css;
     this.data = data || {};
     this.reactions = [];
-    this.stateConfig = stateConfig;
-    this.state = this.createReactiveState(stateConfig, data) || {};
+    this.defaultState = defaultState;
+    this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
@@ -68,7 +68,7 @@ export const Template = class Template {
     }
   }
 
-  createReactiveState(stateConfig, data) {
+  createReactiveState(defaultState, data) {
     let reactiveState = {};
 
     // we want to allow data context to override default state
@@ -82,7 +82,7 @@ export const Template = class Template {
       return config?.value || config;
     };
 
-    each(stateConfig, (config, name) => {
+    each(defaultState, (config, name) => {
       const initialValue = getInitialValue(config, name);
       if(config?.options) {
         // complex config { counter: { value: 0, options: { equalityFunction }}}
@@ -247,7 +247,7 @@ export const Template = class Template {
       element: this.element,
       ast: this.ast,
       css: this.css,
-      stateConfig: this.stateConfig,
+      defaultState: this.defaultState,
       events: this.events,
       keys: this.keys,
       renderingEngine: this.renderingEngine,
