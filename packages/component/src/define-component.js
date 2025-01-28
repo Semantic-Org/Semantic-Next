@@ -15,23 +15,18 @@ export const defineComponent = ({
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
+  createComponent = noop,
   events = {}, // event bindings
-
   keys = {}, // key bindings
 
-  createComponent = noop,
   onCreated = noop,
   onRendered = noop,
   onDestroyed = noop,
   onThemeChanged = noop,
   onAttributeChanged = noop,
 
-
   defaultSettings = {},
   defaultState = {},
-
-  settings = defaultSettings, // alias for defaultSettings
-  state = defaultState, // alias for defaultState
 
   subTemplates = {},
 
