@@ -98,7 +98,7 @@ export const defineComponent = ({
       static properties = WebComponentBase.getProperties({
         properties,
         componentSpec,
-        settings,
+        defaultSettings,
       });
 
       defaultSettings = {};
