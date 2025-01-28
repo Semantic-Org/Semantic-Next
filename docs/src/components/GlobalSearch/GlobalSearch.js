@@ -70,7 +70,6 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
 
   async calculateResults() {
     reaction(async (reaction) => {
-      console.log('state is', state);
       const rawResults = state.rawResults.get();
       const startIndex = state.resultOffset.get();
       const endIndex = startIndex + settings.resultsPerPage;
