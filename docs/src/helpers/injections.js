@@ -68,6 +68,76 @@ export const headLibraryJS = `
 </script>
 `;
 
+export const errorJS = `
+  const ErrorInterceptor = {
+    init() {
+      // Store original error handler
+      this.originalOnerror = window.onerror;
+
+      // Create error container if it doesn't exist
+      if (!document.getElementById('error-container')) {
+        const container = document.createElement('div');
+        container.id = 'error-container';
+        container.style.cssText = \`
+          font-family: monospace;
+          white-space: pre-wrap;
+          margin: 10px 0;
+        \`;
+        document.body.appendChild(container);
+      }
+
+      // Set up error handlers
+      window.onerror = this.handleError.bind(this);
+      window.addEventListener('unhandledrejection', this.handleRejection.bind(this));
+    },
+
+    handleError(msg, source, line, col, error) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = \`
+        color: #d32f2f;
+        background-color: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+      \`;
+
+      const errorMessage = error?.stack || \`\${msg}\n    at \${source}:\${line}:\${col}\`;
+      errorDiv.textContent = errorMessage;
+
+      document.getElementById('error-container').appendChild(errorDiv);
+
+      // Call original error handler if it exists
+      if (this.originalOnerror) {
+        return this.originalOnerror(msg, source, line, col, error);
+      }
+
+      return false; // Prevents default browser error handling
+    },
+
+    handleRejection(event) {
+      this.handleError(
+        event.reason.message || 'Promise Rejection',
+        'Promise',
+        0,
+        0,
+        event.reason
+      );
+    },
+
+    clear() {
+      const container = document.getElementById('error-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+    }
+  };
+
+  // Auto-initialize
+  ErrorInterceptor.init();
+
+  export default ErrorInterceptor;
+`;
+
 export const logJS = `${hideMarkerStart}
 const oldLog = console.log;
 console.log = function() {
@@ -151,6 +221,7 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
     'component.js',
     'page.js',
     'page.css',
+    'error.js',
   ];
 
   if(includeLog) {

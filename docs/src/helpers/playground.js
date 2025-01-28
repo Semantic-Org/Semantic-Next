@@ -1,6 +1,6 @@
 import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, logJS, logCSS, foldMarkerStart, foldMarkerEnd } from './injections.js';
+import { addPlaygroundInjections, errorJS, logJS, logCSS, foldMarkerStart, foldMarkerEnd } from './injections.js';
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 
@@ -39,6 +39,7 @@ export const getExampleFiles = async({
   subFolder = '', // sub folder inside content collection that contains example
   hideBoilerplate = true, // whether import/export code should be collapsed
   includeFolder = false, // whether all files in folder should be included regardless of the filename
+  includeError = true, // whether to intercept and display js errors,
   includeLog = false, // whether to include script to intercept console logs,
   includePlaygroundInjections = false, // whether to inject values to make repl work
   emptyIfAllGenerated = false, // if all files are generated return an empty object
@@ -153,6 +154,15 @@ export const getExampleFiles = async({
       content: (tagName)
         ? `<${tagName}></${tagName}>`
         : ``
+    };
+  }
+
+  if(includeError) {
+    exampleFiles['error.js'] = {
+      contentType: 'text/javascript',
+      generated: true,
+      hidden: true,
+      content: errorJS
     };
   }
 
