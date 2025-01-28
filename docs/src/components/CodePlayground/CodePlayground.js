@@ -85,6 +85,7 @@ const defaultSettings = {
   // types to use
   scriptTypes: {
     'text/css': 'sample/css',
+    'text/importmap': 'sample/importmap',
     'text/html': 'sample/html',
     'text/javascript': 'sample/js',
   },
