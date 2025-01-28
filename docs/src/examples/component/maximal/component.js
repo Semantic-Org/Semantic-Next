@@ -18,7 +18,7 @@ import {
   onAttributeChanged
 } from './lifecycle.js';
 
-import { settings } from './config.js';
+import { defaultSettings } from './config.js';
 
 defineComponent({
   tagName: 'number-adjust',
@@ -31,5 +31,5 @@ defineComponent({
   template,
   css,
   pageCSS,
-  settings,
+  defaultSettings,
 });
