@@ -50,9 +50,9 @@ export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css">
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css">
+<script src="/node_modules/@semantic-ui/core/src/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="/node_modules/@semantic-ui/core/dist/semantic-ui.css"></link>
+<link rel="stylesheet" href="/node_modules/@semantic-ui/core/dist/theme/base.css"></link>
 <script>
   function dispatchCustomEvent(eventName) {
     const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
