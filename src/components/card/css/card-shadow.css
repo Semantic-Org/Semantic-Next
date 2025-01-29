@@ -85,6 +85,7 @@
   .icon ui-icon {
     font-size: var(--card-icon-font-size);
     margin: var(--card-icon-margin);
+    color: var(--card-icon-color);
   }
 }
 
@@ -189,8 +190,9 @@
   }
   .horizontal ::slotted(.image),
   .horizontal ::slotted(ui-image),
-  .horizontal .image img {
+  .horizontal .image {
     margin: var(--card-reverse-padding);
+    margin-bottom: 0;
     max-width: var(--card-horizontal-image-max-width);
   }
   .horizontal ::slotted(ui-icon),
@@ -227,6 +229,20 @@
     background: var(--card-link-hover-background);
     box-shadow: var(--card-link-hover-box-shadow);
     border: var(--card-link-hover-border);
+  }
+  .link.card:hover ::slotted(.header),
+  .link.card:hover .header,
+  a.card:hover ::slotted(.header),
+  a.card:hover .header {
+    color: var(--card-link-hover-header-color);
+  }
+  .link.card:hover ::slotted(ui-icon),
+  .link.card:hover ::slotted(.icon),
+  .link.card:hover .icon ui-icon,
+  a.card:hover ::slotted(ui-icon),
+  a.card:hover ::slotted(.icon),
+  a.card:hover .icon ui-icon {
+    color: var(--card-link-hover-icon-color);
   }
 }
 

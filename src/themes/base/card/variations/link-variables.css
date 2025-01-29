@@ -2,6 +2,8 @@
   --card-link-hover-background: oklch(0.98 0.01 227.13);
   --card-link-hover-box-shadow: 0px 0px 5px var(--standard-5);
   --card-link-hover-border: 1px solid var(--primary-text-color);
+  --card-link-hover-header-color: var(--primary-text-color);
+  --card-link-hover-icon-color: var(--primary-text-color);
 }
 
 

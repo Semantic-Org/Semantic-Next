@@ -2,6 +2,6 @@
   --card-header-font-size: var(--relative-20px);
   --card-header-font-weight: var(--bold);
   --card-header-transition: var(--transition);
-  --card-header-color: var(--primary-text-color);
+  --card-header-color: var(--standard-100);
 }
 

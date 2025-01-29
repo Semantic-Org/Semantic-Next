@@ -31,7 +31,7 @@ const events = {
   'click ui-icon.close'({event, self}) {
     self.hide();
   },
-  'click dialog'({event, settings, data, self}) {
+  'click dialog'({$, event, settings, self}) {
     if(settings.closeable && $(event.target).is('dialog')) {
       self.hide();
     }
