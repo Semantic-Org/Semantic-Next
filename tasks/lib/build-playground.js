@@ -8,8 +8,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const buildPlayground = async ({
   watch = false
 }) => {
+  return;
   const sourceCore = path.join(__dirname, '../../docs/node_modules/@semantic-ui/core');
-  const destCore = path.join(__dirname, '../../docs/public/repl-packages/@semantic-ui/core');
+  const destCore = path.join(__dirname, '../../docs/public/node_modules/@semantic-ui/core');
   const srcDir = path.join(__dirname, '../../src');
   const packagesDir = path.join(__dirname, '../../packages');
 
