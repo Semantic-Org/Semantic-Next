@@ -5,8 +5,5 @@
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
-  "devDependencies": {
-    "vitest": "^1.5.2"
-  },
   "version": "0.7.0"
 }
