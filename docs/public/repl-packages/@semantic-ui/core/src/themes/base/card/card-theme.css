@@ -1,0 +1,29 @@
+/*******************************
+            Card
+*******************************/
+
+/* Content */
+@import url('./content/card-variables.css') layer(content.card);
+@import url('./content/description-variables.css') layer(content.description);
+@import url('./content/header-variables.css') layer(content.header);
+@import url('./content/subheader-variables.css') layer(content.subheader);
+@import url('./content/image-variables.css') layer(content.image);
+@import url('./content/icon-variables.css') layer(content.icon);
+@import url('./content/meta-variables.css') layer(content.meta);
+
+/* Group */
+@import url('./plural/cards-variables.css') layer(plural);
+
+
+/* Variations */
+@import url('./variations/basic-variables.css') layer(variations.basic);
+@import url('./variations/count-variables.css') layer(variations.count);
+@import url('./variations/fluid-variables.css') layer(variations.fluid);
+@import url('./variations/horizontal-variables.css') layer(variations.horizontal);
+@import url('./variations/link-variables.css') layer(variations.link);
+@import url('./variations/spaced-variables.css') layer(variations.spaced);
+
+/* Responsive Variations */
+@import url('./variations/doubling-variables.css') layer(component.card.variations.doubling);
+@import url('./variations/stackable-variables.css') layer(component.card.variations.stackable);
+

@@ -1,0 +1,97 @@
+/*******************************
+          Dark Theme
+*******************************/
+
+html.dark,
+.dark.theme,
+[dark],
+[theme="dark"] {
+
+  --dark-mode: true;
+  --page-background: #000000;
+
+  --standard-color: var(--white-lch);
+  --inverted-color: var(--black-lch);
+
+  --standard-border-color: var(--white-border-lch);
+  --inverted-border-color: var(--black-border-lch);
+
+  --standard-solid-100: var(--white-solid-100);
+  --standard-solid-95: var(--white-solid-95);
+  --standard-solid-90: var(--white-solid-90);
+  --standard-solid-85: var(--white-solid-85);
+  --standard-solid-80: var(--white-solid-80);
+  --standard-solid-75: var(--white-solid-75);
+  --standard-solid-70: var(--white-solid-70);
+  --standard-solid-60: var(--white-solid-60);
+  --standard-solid-50: var(--white-solid-50);
+  --standard-solid-40: var(--white-solid-40);
+  --standard-solid-30: var(--white-solid-30);
+  --standard-solid-25: var(--white-solid-25);
+  --standard-solid-20: var(--white-solid-20);
+  --standard-solid-15: var(--white-solid-15);
+  --standard-solid-10: var(--white-solid-10);
+  --standard-solid-5: var(--white-solid-5);
+
+  --inverted-solid-100: var(--black-solid-100);
+  --inverted-solid-95: var(--black-solid-95);
+  --inverted-solid-90: var(--black-solid-90);
+  --inverted-solid-85: var(--black-solid-85);
+  --inverted-solid-80: var(--black-solid-80);
+  --inverted-solid-75: var(--black-solid-75);
+  --inverted-solid-70: var(--black-solid-70);
+  --inverted-solid-60: var(--black-solid-60);
+  --inverted-solid-50: var(--black-solid-50);
+  --inverted-solid-40: var(--black-solid-40);
+  --inverted-solid-30: var(--black-solid-30);
+  --inverted-solid-25: var(--black-solid-25);
+  --inverted-solid-20: var(--black-solid-20);
+  --inverted-solid-15: var(--black-solid-15);
+  --inverted-solid-10: var(--black-solid-10);
+  --inverted-solid-5: var(--black-solid-5);
+
+  /* -------------------
+          Text
+  -------------------- */
+
+  --text-color: var(--standard-90);
+  --header-color: var(--standard-100);
+  --primary-text-color: var(--primary-light-text-color);
+
+  /* -------------------
+         Links
+  -------------------- */
+
+  --link-color: oklch(0.74 0.15 249.95);
+  --link-hover-color: oklch(0.7 0.18 250.31);
+
+  /* -------------------
+         Borders
+  -------------------- */
+
+  --solid-border-color: #222222;
+  --solid-border: 1px solid var(--solid-border-color);
+
+
+  /* boost some black colors to be noticable in dark mode */
+  --subtle-transparent-black: oklch(var(--black-lch) / 5%);
+  --transparent-black: oklch(var(--black-lch) / 15%);
+  --strong-transparent-black: oklch(var(--black-lch) / 20%);
+  --very-strong-transparent-black: oklch(var(--black-lch) / 20%);
+
+  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
+
+  /* boost gradients to be noticable in dark mode */
+  --subtle-shadow: 0px 1px 2px 0 var(--transparent-black);
+  --subtle-inset-shadow: 0px 2px 3px 0 var(--transparent-black) inset;
+
+  /* increase shadow on lips for dark mode */
+  --subtle-top-lip-shadow: 0px var(--subtle-lip-distance) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+  --subtle-bottom-lip-shadow: 0px var(--subtle-lip-distance-inverse) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+  --subtle-left-lip-shadow: var(--subtle-lip-distance) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+  --subtle-right-lip-shadow: var(--subtle-lip-distance-inverse) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset;
+
+}

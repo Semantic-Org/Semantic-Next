@@ -1,0 +1,8 @@
+:root {
+  --button-animated-vertical-align: middle;
+  --button-animated-z-index: 1;
+  --button-animation-duration: 0.3s;
+  --button-animation-easing: ease;
+  --button-fade-scale-high: 1.5;
+  --button-fade-scale-low: 0.75;
+}

@@ -1,0 +1,15 @@
+:root {
+  --input-disabled-cursor: default;
+  --input-disabled-opacity: 1;
+  --input-disabled-background-color: #FFFFFF;
+  --input-disabled-background-image: var(--button-background-image);
+  --input-disabled-border-box-shadow: 0px 0px 0px var(--button-border-width) rgba(0, 0, 0, 0.1) inset;
+  --input-disabled-shadow-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.04);
+  --input-disabled-color: var(--black-20);
+  --input-disabled-box-shadow:
+    var(--button-sharpen-box-shadow),
+    var(--button-disabled-border-box-shadow),
+    var(--button-disabled-shadow-box-shadow)
+  ;
+  --input-clickable-disabled-cursor: not-allowed;
+}

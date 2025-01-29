@@ -1,0 +1,7 @@
+:root {
+  --button-loading-icon-duration: 2s;
+  --button-loading-opacity: 1;
+  --button-loading-transition:
+    opacity var(--button-transition-duration) var(--button-transition-easing)
+  ;
+}

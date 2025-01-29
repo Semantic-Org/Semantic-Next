@@ -1,0 +1,77 @@
+/*   Closed state of the dialog   */
+dialog {
+  position: fixed;
+  width: inherit;
+  outline: none;
+  border: none;
+  background-color: transparent;
+  overflow: visible;
+}
+
+/* Dialog */
+dialog {
+  display: none;
+  flex-direction: column;
+  opacity: 0;
+  scale: 0.8;
+  transition: var(--modal-dialog-transition);
+}
+dialog[open] {
+  display: flex;
+  opacity: 1;
+  scale: 1;
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
+/* Backdrop */
+dialog::backdrop {
+  background-color: rgb(0 0 0 / 0%);
+  transition: var(--modal-dimmer-transition);
+}
+dialog[open]::backdrop {
+  background: var(--modal-dimmer-background);
+}
+@starting-style {
+  dialog[open]::backdrop {
+    background: rgb(0 0 0 / 0%);
+  }
+}
+
+dialog .modal {
+  background: var(--modal-background);
+  max-width: var(--modal-max-width);
+  border-radius: var(--modal-border-radius);
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+  transition: var(--modal-transition);
+}
+dialog[open] .modal {
+  box-shadow: var(--modal-box-shadow);
+}
+@starting-style {
+  dialog[open] .modal {
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+  }
+}
+
+/* Close */
+dialog .close {
+  cursor: pointer;
+  align-self: flex-end;
+  color: #FFF;
+  margin: 0;
+  font-size: 22px;
+  padding: 1rem;
+  opacity: 0.6;
+  transition: var(--transition);
+}
+dialog .close:hover {
+  opacity: 1;
+}
+dialog .close + .modal {
+  margin-right: 3rem;
+}

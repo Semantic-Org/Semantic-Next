@@ -1,0 +1,77 @@
+{
+  "uiType": "element",
+  "name": "Input",
+  "description": "A menu displays grouped navigation actions",
+  "tagName": "ui-input",
+  "exportName": "UIInput",
+  "content": [
+    {
+      "name": "Placeholder",
+      "attribute": "placeholder",
+      "description": "include placeholder text",
+      "exampleCode": "<ui-input placeholder=\"Search...\"></ui-input>"
+    },
+    {
+      "name": "Icon",
+      "includeAttributeClass": true,
+      "attribute": "icon",
+      "couplesWith": ["ui-icon"],
+      "description": "include an icon",
+      "exampleCode": "<ui-input icon=\"search\"></ui-input>"
+    },
+    {
+      "name": "Label",
+      "includeAttributeClass": true,
+      "attribute": "label",
+      "description": "include a label",
+      "exampleCode": "<ui-input label=\"ctrl+k\"></ui-input>"
+    }
+  ],
+  "types": [
+  ],
+  "variations": [
+    {
+      "name": "Fluid",
+      "attribute": "fluid",
+      "usageLevel": 1,
+      "description": "take the width of its container"
+    }
+  ],
+  "events": [
+    {
+      "eventName": "change",
+      "description": "occurs after the value changes",
+      "arguments": [
+        {
+          "name": "value",
+          "description": "the updated value"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Name",
+      "type": "string",
+      "attribute": "name",
+      "description": "can specify the form field name"
+    },
+    {
+      "name": "Placeholder",
+      "type": "string",
+      "attribute": "placeholder",
+      "description": "can specify placeholder text"
+    },
+    {
+      "name": "Value",
+      "type": "string",
+      "attribute": "value",
+      "description": "can specify a value to store"
+    }
+  ],
+  "examples": {
+    "defaultAttributes": {
+      "icon": "check-circle"
+    }
+  }
+}

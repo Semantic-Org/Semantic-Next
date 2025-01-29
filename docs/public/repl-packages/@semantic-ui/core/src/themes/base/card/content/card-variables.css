@@ -1,0 +1,22 @@
+:root {
+  --card-margin: 0px 5px 5px 0px;
+  --card-text-align: center;
+  --card-padding: var(--spacing);
+  --card-reverse-padding: calc(var(--spacing) * -1);
+  --card-flex-direction: column;
+  --card-border-radius: var(--border-radius);
+  --card-transition: var(--transition);
+  --card-background: linear-gradient(140deg, oklch(0.98 0.01 282.32), oklch(1 0 0), oklch(0.98 0.01 272.79));
+  --card-box-shadow: 0px 0px 5px var(--standard-5);
+  --card-text-align: center;
+  --card-border: var(--internal-border);
+  --card-gap: 0;
+  --card-width: 290px;
+}
+
+
+@container page style(--dark-mode: true) {
+  body {
+    --card-background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));;
+  }
+}

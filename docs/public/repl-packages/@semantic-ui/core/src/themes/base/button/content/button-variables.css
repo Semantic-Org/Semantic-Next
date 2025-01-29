@@ -1,0 +1,59 @@
+:root {
+
+  --button-vertical-align: baseline;
+
+  --button-vertical-margin: 0em;
+  --button-horizontal-margin: var(--3px);
+
+
+  --button-background-color: oklch(0.98 0 0 / 1);
+  --button-background-image: var(--subtle-gradient);
+  --button-background: var(--button-background-color) var(--button-background-image);
+
+  --button-line-height: 1em;
+
+  /* button same height as input globally */
+  --button-vertical-padding: var(--input-vertical-padding);
+  --button-horizontal-padding: var(--relative-19px);
+
+  /* Text */
+  --button-text-transform: none;
+  --button-tap-color: transparent;
+  --button-font-family: var(--page-font);
+  --button-font-weight: var(--bold);
+  --button-text-color: var(--black-80);
+  --button-inverted-text-color: var(--white-80);
+  --button-text-shadow: none;
+  --button-inverted-text-shadow: var(--button-text-shadow);
+
+  /* Border */
+  --button-border-radius: var(--border-radius);
+  --button-border: none;
+
+  /* Border (For Alignment Require Box Shadow) */
+  --button-border-color: var(--black-border-color);
+  --button-border-width: 1px;
+
+  /* Box Shadow */
+  --button-sharpen-box-shadow: 0px -1px 0px 0px rgba(0, 0, 0, 0.05) inset;
+  --button-border-box-shadow: 0px 0px 0px var(--button-border-width) var(--button-border-color) inset;
+  --button-shadow-box-shadow: var(--subtle-shadow);
+  --button-box-shadow:
+    var(--button-sharpen-box-shadow),
+    var(--button-border-box-shadow),
+    var(--button-shadow-box-shadow)
+  ;
+
+  --button-transition-duration: var(--duration);
+  --button-transition-easing: var(--easing);
+
+  --button-transition:
+    opacity var(--button-transition-duration) var(--button-transition-easing),
+    background-color var(--button-transition-duration) var(--button-transition-easing),
+    color var(--button-transition-duration) var(--button-transition-easing),
+    box-shadow var(--button-transition-duration) var(--button-transition-easing),
+    background var(--button-transition-duration) var(--button-transition-easing)
+  ;
+  --button-will-change: initial;
+
+}

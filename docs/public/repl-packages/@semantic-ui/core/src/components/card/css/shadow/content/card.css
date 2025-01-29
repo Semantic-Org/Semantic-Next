@@ -1,0 +1,28 @@
+:host {
+  display: inline-block;
+  text-align: var(--card-text-align);
+  margin: var(--card-margin);
+}
+
+.card {
+  display: flex;
+  flex-direction: var(--card-flex-direction);
+  gap: var(--card-gap);
+  text-decoration: none;
+  border-radius: var(--card-border-radius);
+  border: var(--card-border);
+  transition: var(--card-transition);
+  box-shadow: var(--card-box-shadow);
+  background: var(--card-background);
+  padding: var(--card-padding);
+  > :first-child {
+    border-radius: inherit;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  > :last-child {
+    border-radius: inherit;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}

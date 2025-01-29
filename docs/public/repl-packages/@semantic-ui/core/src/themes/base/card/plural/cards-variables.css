@@ -1,0 +1,5 @@
+:root {
+  --cards-gap: var(--spacing);
+  --cards-margin: var(--vertical-spacing);
+}
+

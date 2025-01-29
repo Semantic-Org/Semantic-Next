@@ -1,0 +1,15 @@
+/*-------------
+      Focus
+---------------*/
+
+.input.focus,
+.input:focus-within {
+  border-color: var(--input-focused-border-color);
+  background: var(--input-focused-background);
+  color: var(--input-focused-color);
+  box-shadow: var(--input-focused-box-shadow);
+}
+.input:focus-within > input:placeholder,
+.input.focus > input::placeholder {
+  color: var(--input-placeholder-focused-color);
+}

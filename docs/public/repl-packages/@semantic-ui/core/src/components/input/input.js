@@ -1,0 +1,53 @@
+import { defineComponent } from '@semantic-ui/component';
+import { InputComponentSpec } from '@semantic-ui/specs';
+
+import CSS from './css/input-shadow.css?raw';
+import Template from './input.html?raw';
+
+const defaultState = {
+  focused: false,
+};
+
+const createComponent = ({$, state}) => ({
+
+  getStateClasses() {
+    return {
+      focus: state.focused.get()
+    };
+  },
+
+});
+
+
+const onCreated = ({}) => {
+};
+
+const onRendered = function({}) {
+
+};
+
+const events = {
+  'focus input'({ state }) {
+    state.focused.set(true);
+  },
+  'blur input'({ state }) {
+    state.focused.set(false);
+  },
+  'input input'({event, el, settings, value, dispatchEvent}) {
+    el.value = value;
+  }
+};
+
+const UIInput = defineComponent({
+  tagName: 'ui-input',
+  componentSpec: InputComponentSpec,
+  template: Template,
+  css: CSS,
+  createComponent,
+  events,
+  onCreated,
+  onRendered,
+  defaultState,
+});
+
+export { UIInput };

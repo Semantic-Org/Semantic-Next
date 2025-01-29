@@ -1,0 +1,8 @@
+:root {
+  --card-meta-margin: var(--compact-spacing) 0 0;
+  --card-meta-padding: var(--compact-spacing) 0 0;
+  --card-meta-border: var(--border);
+  --card-meta-gap: var(--compact-spacing);
+  --card-meta-text-color: var(--standard-90);
+}
+

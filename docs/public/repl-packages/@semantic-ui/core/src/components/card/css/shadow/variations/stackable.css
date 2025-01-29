@@ -1,0 +1,11 @@
+
+.component {
+  --card-stackable-comparison: max(calc(100cqi - var(--card-stackable-breakpoint)), 0px);
+}
+
+@container component style(--card-stackable-comparison: 0) {
+  .stackable.cards {
+    display: flex;
+    flex-direction: column;
+  }
+}

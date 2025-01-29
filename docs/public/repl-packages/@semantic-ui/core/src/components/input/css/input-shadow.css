@@ -1,0 +1,173 @@
+/* src/components/input/css/shadow/content/input.css */
+@layer component.input.content.input {
+  * {
+    box-sizing: border-box;
+  }
+  .input {
+    display: inline-flex;
+    position: relative;
+    font-style: normal;
+    font-weight: var(--input-font-weight);
+    font-family: var(--input-font-family);
+    line-height: var(--input-line-height);
+    padding: var(--input-padding);
+    color: var(--input-text-color);
+    background: var(--input-background);
+    border: var(--input-border);
+    border-radius: var(--input-border-radius);
+    transition: var(--input-transition);
+    box-shadow: var(--input-box-shadow);
+    gap: var(--input-item-spacing);
+    align-items: center;
+  }
+  .input input {
+    background-color: transparent;
+    margin: 0em;
+    border-radius: inherit;
+    outline: none;
+    max-width: 100%;
+    flex: 1 0 auto;
+    text-align: left;
+    color: inherit;
+    border: none;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+  .input input::placeholder {
+    color: var(--white-10);
+  }
+  .input ui-icon {
+    margin: 0rem;
+    width: 1rem;
+  }
+  .input .label {
+    display: inline-block;
+    text-wrap: nowrap;
+    margin-left: auto;
+    line-height: 1;
+    font-weight: var(--input-label-font-weight);
+    color: var(--input-label-color);
+    font-size: var(--input-label-font-size);
+    padding: var(--input-label-padding);
+    border: var(--input-label-border);
+    border-radius: var(--input-label-border-radius);
+  }
+}
+
+/* src/components/input/css/shadow/states/focused.css */
+@layer component.input.variations.focus {
+  .input.focus,
+  .input:focus-within {
+    border-color: var(--input-focused-border-color);
+    background: var(--input-focused-background);
+    color: var(--input-focused-color);
+    box-shadow: var(--input-focused-box-shadow);
+  }
+  .input:focus-within > input:placeholder,
+  .input.focus > input::placeholder {
+    color: var(--input-placeholder-focused-color);
+  }
+}
+
+/* src/components/input/css/shadow/states/loading.css */
+@layer component.input.variations.loading {
+  .loading.input:not(.icon) {
+    position: relative;
+    cursor: default;
+    text-shadow: none !important;
+    color: transparent !important;
+    opacity: var(--input-loading-opacity);
+    pointer-events: auto;
+    transition: var(--input-loading-transition);
+  }
+  .loading.icon.input .icon {
+    position: relative;
+    color: transparent !important;
+  }
+  .loading.icon.input > .icon:before,
+  .loading.input:not(.icon)::before {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: var(--loader-margin);
+    width: var(--loader-size);
+    height: var(--loader-size);
+    border-radius: var(--circular-radius);
+    border: var(--loader-line-width) solid var(--loader-fill-color);
+  }
+  .loading.icon.input > .icon:after,
+  .loading.input:not(.icon)::after {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: var(--loader-margin);
+    width: var(--loader-size);
+    height: var(--loader-size);
+    animation: input-spin var(--loader-speed) linear;
+    animation-iteration-count: infinite;
+    border-radius: var(--circular-radius);
+    border-color: var(--loader-line-color) transparent transparent;
+    border-style: solid;
+    border-width: var(--loader-line-width);
+    box-shadow: 0px 0px 0px 1px transparent;
+  }
+  @keyframes input-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .loading.input.inverted .icon:before,
+  .loading.input.inverted:before {
+    border-color: var(--inverted-loader-fill-color);
+  }
+  .loading.input.inverted .icon:after,
+  .loading.input.inverted:after {
+    border-top-color: var(--inverted-loader-line-color);
+  }
+}
+
+/* src/components/input/css/shadow/states/disabled.css */
+@layer component.input.variations.disabled {
+  .disabled.input,
+  .disabled.input:hover,
+  .disabled.active.input {
+    cursor: var(--input-disabled-cursor);
+    opacity: var(--input-disabled-opacity) !important;
+    color: var(--input-disabled-color);
+    background-color: var(--input-disabled-background-color) !important;
+    background-image: var(--input-disabled-background-image) !important;
+    box-shadow: var(--input-disabled-box-shadow) !important;
+  }
+  ui-input[disabled] {
+    cursor: var(--input-disabled-cursor);
+    pointer-events: none !important;
+  }
+  .clickable-disabled.input {
+    pointer-events: auto !important;
+    cursor: var(--input-clickable-disabled-cursor) !important;
+  }
+  .clickable-disabled.input:active {
+    box-shadow: var(--input-pressed-box-shadow) !important;
+  }
+  ui-input[clickable-disabled] {
+    pointer-events: auto !important;
+    cursor: var(--input-clickable-disabled-cursor) !important;
+  }
+}
+
+/* src/components/input/css/shadow/variations/sizing.css */
+@layer component.input.variations.sizing;
+
+/* src/components/input/css/shadow/variations/fluid.css */
+@layer component.input.variations.fluid {
+  .fluid {
+    display: flex;
+    flex-grow: 1;
+  }
+}
+
+/* src/components/input/css/shadow/input.css */

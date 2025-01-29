@@ -1,0 +1,12 @@
+{
+  "uiType": "element",
+  "name": "Label",
+  "description": "A label displays content classification",
+  "tagName": "ui-label",
+  "exportName": "UILabel",
+  "content": [],
+  "types": [],
+  "variations": [],
+  "events": [],
+  "settings": []
+}
