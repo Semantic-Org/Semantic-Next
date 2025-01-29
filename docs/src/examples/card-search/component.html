@@ -3,7 +3,8 @@
     <ui-menu selection value="{filter}" items="{filters}" class="menu"></ui-menu>
     <ui-input placeholder="Search friends..." value={search} class="search"></ui-input>
   </div>
-  <div class="cards">
+  {>modal}
+  <ui-cards three horizontal>
     {#each friend in getVisibleFriends}
       {> card
         name=friend.name
@@ -14,5 +15,14 @@
         contacts=friend.contacts
       }
     {/each}
-  </div>
+  </ui-cards>
 </div>
+
+{#snippet modal}
+  <ui-modal>
+    <div class="content">
+      <h3>{selectedFriend.name}</h3>
+      <p>{selectedFriend.gender}</p>
+    </div>
+  </ui-modal>
+{/snippet}

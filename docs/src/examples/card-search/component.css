@@ -25,15 +25,9 @@
     margin-left: auto;
   }
 }
-.cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  flex-wrap: wrap;
-  gap: var(--card-gap);
-}
 
 @container component (max-width: 300px) {
-  .card {
+  ui-card {
     flex-direction: column !important;
     .image {
       width: 100%;
@@ -43,19 +37,19 @@
 }
 
 @container component (min-width: 500px) {
-  .cards {
+  ui-cards::part(cards) {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @container component (min-width: 900px) {
-  .cards {
+  ui-cards::part(cards) {
     grid-template-columns: 1fr 1fr 1fr;
   }
 }
 
 @container component (min-width: 1200px) {
-  .cards {
+  ui-cards::part(cards) {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 }

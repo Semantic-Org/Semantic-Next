@@ -15,6 +15,7 @@ const template = await getText('./component.html');
 const defaultState = {
   filter: 'all',
   searchTerm: '',
+  selectedFriend: undefined,
   friends
 };
 
@@ -53,6 +54,11 @@ const events = {
   
   'input .search'({ state, value }) {
     state.searchTerm.set(value);
+  },
+
+  'click .card'({state, $}) {
+    state.selectedFriend.set({name: 'Hello World' + Math.random(), gender: 'Test'});
+    $('ui-modal').getComponent().show();
   }
 };
 
