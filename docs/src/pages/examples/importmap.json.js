@@ -43,7 +43,7 @@ for (const pkg of packages) {
     entry = entry.startsWith('./') ? entry : `./${entry}`;
 
     // Generate URL-safe path
-    const mappedUrl = `${base}/repl-packages/${pkg}/${entry.replace('./', '')}`;
+    const mappedUrl = `${base}/node_modules/${pkg}/${entry.replace('./', '')}`;
 
     // Add to import map
     packageImports.imports[pkgJson.name] = mappedUrl;
