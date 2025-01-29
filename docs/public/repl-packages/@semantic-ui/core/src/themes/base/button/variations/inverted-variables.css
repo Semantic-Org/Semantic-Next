@@ -1,8 +1,0 @@
-:root {
-  --button-inverted-border-size: 2px;
-  --button-inverted-text-color: var(--white);
-  --button-inverted-text-hover-color: var(--hover-color);
-  --button-inverted-text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
-  --button-inverted-group-button-offset: 0px 0px 0px calc(var(--button-inverted-border-size) * -1);
-  --button-inverted-vertical-group-button-offset: 0px 0px calc( var(--button-inverted-border-size) * -1) 0px;
-}

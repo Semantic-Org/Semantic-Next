@@ -1,9 +1,0 @@
-.cards {
-  &.spaced {
-    gap: var(--cards-spaced-gap);
-  }
-
-  &.very-spaced {
-    gap: var(--cards-very-spaced-gap);
-  }
-}

@@ -1,7 +1,0 @@
-:root {
-  --card-subheader-font-size: var(--relative-16px);
-  --card-subheader-font-weight: var(--bold);
-  --card-subheader-transition: var(--transition);
-  --card-subheader-color: var(--standard-80);
-}
-

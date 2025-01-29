@@ -1,7 +1,0 @@
-::slotted(.header),
-.header {
-  color: var(--card-header-color);
-  font-size: var(--card-header-font-size);
-  font-weight: var(--card-header-font-weight);
-  transition: var(--card-header-transition);
-}
