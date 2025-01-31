@@ -4,11 +4,11 @@ import { inArray } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const settings = {
+const defaultSettings = {
   sections: []
 };
 
-const state = {
+const defaultState = {
   openSections: [], // array of indexes that are open
 };
 
@@ -38,7 +38,7 @@ defineComponent({
   events,
   template,
   css,
-  settings,
-  state,
+  defaultSettings,
+  defaultState,
   createComponent
 });

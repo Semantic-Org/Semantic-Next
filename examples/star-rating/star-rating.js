@@ -3,7 +3,7 @@ import { defineComponent } from '@semantic-ui/component';
 import css from './star-rating.css?raw';
 import template from './star-rating.html?raw';
 
-const settings = {
+const defaultSettings = {
   value: 0,
   maxValue: 5,
   locked: false,
@@ -11,7 +11,7 @@ const settings = {
   size: 'medium'
 };
 
-const state = {
+const defaultState = {
   rating: 0,
   hoveredIndex: -1,
   starArray: []
@@ -64,7 +64,7 @@ export const StarRating = defineComponent({
   template,
   css,
   createComponent,
-  settings,
-  state,
+  defaultSettings,
+  defaultState,
   events
 });

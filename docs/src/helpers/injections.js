@@ -46,13 +46,28 @@ export const componentHTMLAfter = ``;
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
+export const isStaticBuild = Boolean(process.env.VERCEL_URL);
+
+// we can use the node_modules path for imports when running in server mode
+// this will let you check examples/playground against local versions of packages
+// instead of tagged npm versions
+export const packageBase = isStaticBuild
+  ? 'https://unpkg.com'
+  : `${import.meta.env.SITE}/node_modules`
+;
+
+const suiBase = isStaticBuild
+  ? `${packageBase}/@semantic-ui/core@latest`
+  : `${packageBase}/@semantic-ui/core`
+;
+
 export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/semantic-ui.css">
-<link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core@latest/dist/theme/base.css">
+<script src="${suiBase}/dist/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
+<link rel="stylesheet" href="${suiBase}/dist/theme/base.css"></link>
 <script>
   function dispatchCustomEvent(eventName) {
     const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
@@ -66,6 +81,76 @@ export const headLibraryJS = `
   }, true);
   document.addEventListener('touchstart', function(){});
 </script>
+`;
+
+export const errorJS = `
+  const ErrorInterceptor = {
+    init() {
+      // Store original error handler
+      this.originalOnerror = window.onerror;
+
+      // Create error container if it doesn't exist
+      if (!document.getElementById('error-container')) {
+        const container = document.createElement('div');
+        container.id = 'error-container';
+        container.style.cssText = \`
+          font-family: monospace;
+          white-space: pre-wrap;
+          margin: 10px 0;
+        \`;
+        document.body.appendChild(container);
+      }
+
+      // Set up error handlers
+      window.onerror = this.handleError.bind(this);
+      window.addEventListener('unhandledrejection', this.handleRejection.bind(this));
+    },
+
+    handleError(msg, source, line, col, error) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = \`
+        color: #d32f2f;
+        background-color: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+      \`;
+
+      const errorMessage = error?.stack || \`\${msg}\n    at \${source}:\${line}:\${col}\`;
+      errorDiv.textContent = errorMessage;
+
+      document.getElementById('error-container').appendChild(errorDiv);
+
+      // Call original error handler if it exists
+      if (this.originalOnerror) {
+        return this.originalOnerror(msg, source, line, col, error);
+      }
+
+      return false; // Prevents default browser error handling
+    },
+
+    handleRejection(event) {
+      this.handleError(
+        event.reason.message || 'Promise Rejection',
+        'Promise',
+        0,
+        0,
+        event.reason
+      );
+    },
+
+    clear() {
+      const container = document.getElementById('error-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+    }
+  };
+
+  // Auto-initialize
+  ErrorInterceptor.init();
+
+  export default ErrorInterceptor;
 `;
 
 export const logJS = `${hideMarkerStart}
@@ -151,6 +236,7 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
     'component.js',
     'page.js',
     'page.css',
+    'error.js',
   ];
 
   if(includeLog) {

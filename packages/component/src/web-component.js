@@ -34,7 +34,7 @@ class WebComponentBase extends LitElement {
            Lit Properties
   *******************************/
 
-  static getProperties({ properties = {}, settings, componentSpec }) {
+  static getProperties({ properties = {}, defaultSettings, componentSpec }) {
     if (keys(properties).length) {
       return properties;
     }
@@ -63,8 +63,8 @@ class WebComponentBase extends LitElement {
         properties[propertyName] = { type: String, noAccessor: true, alias: true, attribute: attributeName };
       });
     }
-    if (settings) {
-      each(settings, (defaultValue, propertyName) => {
+    if (defaultSettings) {
+      each(defaultSettings, (defaultValue, propertyName) => {
         // this can either be a settings object or a default value
         // i.e. { foo: 'baz' } // basic
         // or { foo: { type: String, defaultValue: 'baz' } // expert
@@ -75,7 +75,7 @@ class WebComponentBase extends LitElement {
         };
 
         properties[propertyName] = (defaultValue?.type)
-          ? settings
+          ? defaultSettings
           : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings)
         ;
       });
@@ -139,9 +139,9 @@ class WebComponentBase extends LitElement {
   /*
     This sets default settings for a component
   */
-  setDefaultSettings({settings = {}, componentSpec}) {
-    this.defaultSettings = settings;
-    each(settings, (setting, name) => {
+  setDefaultSettings({defaultSettings = {}, componentSpec}) {
+    this.defaultSettings = defaultSettings;
+    each(defaultSettings, (setting, name) => {
       if (setting?.default !== undefined) {
         // (expert) this is a settings object
         this.defaultSettings[name] = setting.default;
@@ -151,6 +151,7 @@ class WebComponentBase extends LitElement {
         this.defaultSettings[name] = setting;
       }
     });
+    // read default values from component spec if available
     if(componentSpec?.defaultValues) {
       this.defaultSettings = {
         ...componentSpec.defaultValues,

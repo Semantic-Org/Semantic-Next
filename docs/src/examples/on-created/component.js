@@ -3,7 +3,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const state = {
+const defaultState = {
   text: 'Initial',
 };
 
@@ -15,6 +15,6 @@ defineComponent({
   tagName: 'ui-text',
   template,
   css,
-  state,
+  defaultState,
   onCreated,
 });

@@ -40,37 +40,37 @@
 {/snippet}
 
 {#snippet header}
-  <div class="header">
+  <div class="header" part="header">
     {header}
     {> slot header}
   </div>
 {/snippet}
 
 {#snippet subheader}
-  <div class="subheader">
+  <div class="subheader" part="subheader">
     {subheader}
     {> slot subheader}
   </div>
 {/snippet}
 
 {#snippet image}
-  <div class="image">
+  <div class="image" part="image">
     {#if image}
-      <img src="{image}">
+      <img src="{image}" part="image-img">
     {/if}
     {> slot image}
   </div>
 {/snippet}
 
 {#snippet description}
-  <div class="description">
+  <div class="description" part="description">
     {description}
     {> slot description}
   </div>
 {/snippet}
 
 {#snippet meta}
-  <div class="meta">
+  <div class="meta" part="meta">
     {#each value in meta}
       <span>{value}</span>
     {/each}

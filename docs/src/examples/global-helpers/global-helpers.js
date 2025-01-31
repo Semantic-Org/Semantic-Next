@@ -2,7 +2,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 
 const template = await getText('./component.html');
 
-const state = {
+const defaultState = {
   currentTime: new Date()
 };
 
@@ -14,7 +14,7 @@ const createComponent = ({ state }) => ({
 
 defineComponent({
   tagName: 'current-time',
-  state,
+  defaultState,
   template,
   createComponent,
 });

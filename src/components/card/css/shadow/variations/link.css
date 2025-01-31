@@ -7,5 +7,17 @@ a.card {
     background: var(--card-link-hover-background);
     box-shadow: var(--card-link-hover-box-shadow);
     border: var(--card-link-hover-border);
+
+    ::slotted(.header),
+    .header {
+      color: var(--card-link-hover-header-color);
+    }
+
+    ::slotted(ui-icon),
+    ::slotted(.icon),
+    .icon ui-icon {
+      color: var(--card-link-hover-icon-color);
+    }
+
   }
 }

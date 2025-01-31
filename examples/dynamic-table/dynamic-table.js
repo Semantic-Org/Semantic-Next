@@ -4,7 +4,7 @@ import css from './dynamic-table.css?raw';
 import template from './dynamic-table.html?raw';
 
 
-const settings = {
+const defaultSettings = {
   rowTemplate: undefined,
   headers: [],
   rows: [],
@@ -20,6 +20,6 @@ export const DynamicTable = defineComponent({
   tagName: 'dynamic-table',
   template,
   css,
-  settings,
+  defaultSettings,
   createComponent
 });

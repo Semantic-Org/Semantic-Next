@@ -3,16 +3,16 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const state = {
+const defaultSettings = {
+  minChars: 1
+};
+
+const defaultState = {
   value: '',
   searchTerm: '',
   searchResults: [],
   focused: false,
   isSearching: false
-};
-
-const settings = {
-  minChars: 1
 };
 
 const createComponent = ({ $, state, settings, self, reaction }) => ({
@@ -114,7 +114,7 @@ defineComponent({
   template,
   events,
   css,
-  state,
-  settings,
+  defaultState,
+  defaultSettings,
   createComponent,
 });

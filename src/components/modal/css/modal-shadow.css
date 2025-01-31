@@ -53,6 +53,9 @@
       box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
     }
   }
+  dialog ::slotted(.content) {
+    padding: var(--padding);
+  }
   dialog .close {
     cursor: pointer;
     align-self: flex-end;

@@ -2,11 +2,11 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const settings = {
+const defaultSettings = {
   startingNumber: 0
 };
 
-const state = {
+const defaultState = {
   counter: 0,
   running: false
 };
@@ -35,6 +35,6 @@ defineComponent({
   createComponent,
   css,
   template,
-  state,
-  settings,
+  defaultState,
+  defaultSettings,
 });

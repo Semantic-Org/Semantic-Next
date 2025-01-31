@@ -4,6 +4,28 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.7.0
+
+### Breaking Changes
+* `defineComponent` arguments `settings` has been renamed to `defaultSettings`
+* `defineComponent` argument `state` has been renamed to `defaultState`
+
+Feedback from technical preview is that the use of `settings` in the outer scope and inside callbacks creates confusion because of the variable shadowing. The name `defaultSettings` / state accurately convey that this is the initial value for `settings` and `state` but not what is expected to return inside the callbacks.
+
+If you need to perform a find and replace you can use the following regex
+
+Settings
+```
+(?s)(defineComponent\s*\(\s*\{\s*[^}]*?)\bsettings\b(?=\s*(?::|[,}]))([^}]*?\})
+$1defaultSettings$2
+```
+
+State
+```
+(?s)(defineComponent\s*\(\s*\{\s*[^}]*?)\state\b(?=\s*(?::|[,}]))([^}]*?\})
+$defaultState$2
+```
+
 # Version 0.6.1
 
 * Fix npm publication issue.

@@ -16,7 +16,7 @@ import template from './LearnExample.html?raw';
 import css from './LearnExample.css?raw';
 
 
-const settings = {
+const defaultSettings = {
   lesson: {
     title: '',
     hint: '',
@@ -46,7 +46,7 @@ const settings = {
   },
 };
 
-const state = {
+const defaultState = {
   currentFiles: [],
   layout: 'tabs',
 };
@@ -163,9 +163,9 @@ const LearnExample = defineComponent({
   css,
   createComponent,
   onRendered,
-  settings,
+  defaultSettings,
   events,
-  state,
+  defaultState,
   subTemplates: {
     hintModal: HintModal,
     referenceModal: ReferenceModal,

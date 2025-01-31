@@ -1,5 +1,10 @@
 import chalk from 'chalk';
 
+export const log = (header, text) => {
+  let time = new Date();
+  console.log(chalk.red(header), chalk.blue(`(${text})`), chalk.grey(time.toLocaleTimeString()));
+};
+
 export const logPlugin = (text ='') => {
   return {
     name: 'log-build',
@@ -8,18 +13,10 @@ export const logPlugin = (text ='') => {
       build.onEnd(result => {
         let time = new Date();
         if(count++ === 0) {
-          console.log(
-            chalk.red('Initial Build'),
-            chalk.blue(`(${text})`),
-            chalk.grey(time.toLocaleTimeString()),
-          );
+          log('Initial Build', text);
         }
         else {
-          console.log(
-            chalk.cyan('Rebuild'),
-            chalk.blue(`(${text})`),
-            chalk.grey(time.toLocaleTimeString()),
-          );
+          log('Rebuild', text);
         }
       });
     },

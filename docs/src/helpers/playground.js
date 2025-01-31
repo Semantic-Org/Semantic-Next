@@ -1,6 +1,9 @@
 import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, logJS, logCSS, foldMarkerStart, foldMarkerEnd } from './injections.js';
+import { addPlaygroundInjections, errorJS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
+
+import { importMapJSON } from '../pages/examples/importmap.json.js';
+
 /*
   Helper to add code folding for import export statements
 */
@@ -36,9 +39,11 @@ export const getExampleFiles = async({
   subFolder = '', // sub folder inside content collection that contains example
   hideBoilerplate = true, // whether import/export code should be collapsed
   includeFolder = false, // whether all files in folder should be included regardless of the filename
+  includeError = true, // whether to intercept and display js errors,
   includeLog = false, // whether to include script to intercept console logs,
   includePlaygroundInjections = false, // whether to inject values to make repl work
   emptyIfAllGenerated = false, // if all files are generated return an empty object
+  includeImportMap = !isStaticBuild, // whether to map imports to node_modules
 } = {}) => {
   if(!contentID) {
     return;
@@ -152,6 +157,15 @@ export const getExampleFiles = async({
     };
   }
 
+  if(includeError) {
+    exampleFiles['error.js'] = {
+      contentType: 'text/javascript',
+      generated: true,
+      hidden: true,
+      content: errorJS
+    };
+  }
+
   if(includeLog) {
     exampleFiles['log.js'] = {
       contentType: 'text/javascript',
@@ -195,6 +209,10 @@ export const getExampleFiles = async({
     addPlaygroundInjections(exampleFiles, { includeLog });
   }
 
+  if(includeImportMap) {
+    exampleFiles['import-map.js'] = getImportMap();
+  }
+
   if(emptyIfAllGenerated) {
     let allGenerated = true;
     each(exampleFiles, (file, name) => {
@@ -213,6 +231,9 @@ export const getExampleFiles = async({
   if(includeLog) {
     exampleFiles['page.html'].hidden = true;
   }
+
+
+
   return exampleFiles;
 };
 
@@ -300,4 +321,14 @@ export const getExampleID = (example) => {
   }
   const exampleID = example?.id || tokenize(example?.title);
   return exampleID;
+};
+
+
+export const getImportMap = () => {
+  return {
+    contentType: 'text/importmap',
+    hidden: true,
+    generated: true,
+    content: importMapJSON
+  };
 };

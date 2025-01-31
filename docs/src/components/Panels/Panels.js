@@ -4,7 +4,7 @@ import { each, isString, isNumber, roundNumber, inArray, sum, memoize } from '@s
 import template from './Panels.html?raw';
 import css from './Panels.css?raw';
 
-const settings = {
+const defaultSettings = {
   direction: 'vertical',
   saveState: false,
   saveStateID: 'panels',
@@ -728,7 +728,7 @@ const UIPanels = defineComponent({
   template,
   css,
   createComponent,
-  settings,
+  defaultSettings,
   onCreated,
   onDestroyed,
   onRendered,

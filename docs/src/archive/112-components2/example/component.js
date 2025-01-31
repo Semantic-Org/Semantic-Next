@@ -5,7 +5,7 @@ const css = await getText('./component.css');
 
 defineComponent({
   tagName: 'hello-world',
-  settings: { user: 'World' },
+  defaultSettings: { user: 'World' },
   state: { count: 0 },
   createComponent: ({ state }) => ({
     getMessage() {

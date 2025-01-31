@@ -24,14 +24,6 @@ const createComponent = ({self, settings, data, el, $}) => ({
   }
 });
 
-
-const onCreated = ({}) => {
-
-};
-const onRendered = function({self}){
-
-};
-
 const events = {
   'touchstart .button'({event, self, $}) {
     $(this).addClass('pressed');
@@ -66,7 +58,5 @@ export const UIButton = defineComponent({
   template: ButtonTemplate,
   css: ButtonCSS,
   createComponent,
-  onCreated,
-  onRendered,
   events,
 });

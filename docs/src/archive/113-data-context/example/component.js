@@ -7,7 +7,7 @@ defineComponent({
   tagName: 'image-gallery',
   template,
   css,
-  state: {
+  defaultState: {
     currentImage: '/images/avatar/jenny.jpg',
     caption: 'Jenny'
   }

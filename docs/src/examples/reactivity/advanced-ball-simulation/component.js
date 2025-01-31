@@ -14,11 +14,11 @@ const template = await getText('./component.html');
   and the reaction is in startAnimation()
 */
 
-const state = {
+const defaultState = {
   balls: [],
 };
 
-const settings = {
+const defaultSettings = {
   count: 0, // initial ball count
   radius: 3, // average ball radius
   velocity: 100, // average ball velocity
@@ -228,6 +228,19 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     self.drawFPS(ctx);
   },
 
+  drawInitialBalls() {
+    const canvas = self.getCanvas();
+    const initialBalls = [];
+    for (let i = 0; i < settings.count; i++) {
+      initialBalls.push(self.createBall({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height
+      }));
+    }
+    state.balls.set(initialBalls);
+    self.draw();
+  },
+
   drawBall(ball) {
     const canvas = self.getCanvas();
     const ctx = canvas.getContext('2d');
@@ -253,17 +266,7 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
 });
 
 const onRendered = ({state, data, settings, self}) => {
-  const canvas = self.getCanvas();
-  const initialBalls = [];
-  for (let i = 0; i < settings.count; i++) {
-    initialBalls.push(self.createBall({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height
-    }));
-  }
-  state.balls.set(initialBalls);
-
-  self.draw();
+  self.drawInitialBalls();
   self.startAnimation();
 };
 
@@ -298,6 +301,6 @@ export const BallSimulation = defineComponent({
   createComponent,
   onRendered,
   events,
-  state,
-  settings
+  defaultState,
+  defaultSettings
 });

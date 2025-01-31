@@ -9,7 +9,7 @@ import pageCSS from './CodeExamplePage.css?raw';
 
 import CodeSample from '../CodeSample/CodeSample.js';
 
-const settings = {
+const defaultSettings = {
   title: undefined,
   description: undefined,
   language: 'html',
@@ -73,7 +73,7 @@ const CodeExample = defineComponent({
   onCreated,
   onRendered,
   createComponent,
-  settings,
+  defaultSettings,
 });
 
 export default CodeExample;

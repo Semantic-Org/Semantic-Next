@@ -4,11 +4,11 @@ import { each, range } from '@semantic-ui/utils';
 const template = await getText('./component.html');
 const css = await getText('./component.css');
 
-const settings = {
+const defaultSettings = {
   text: 'Default Text'
 };
 
-const state = {
+const defaultState = {
   waves: [],
   yOffset: 100,
   amplitude: 0
@@ -83,8 +83,8 @@ const events = {
 
 defineComponent({
   tagName: 'hello-world',
-  settings,
-  state,
+  defaultSettings,
+  defaultState,
   createComponent,
   events,
   template,

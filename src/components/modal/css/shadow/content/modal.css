@@ -58,6 +58,10 @@ dialog[open] .modal {
   }
 }
 
+dialog ::slotted(.content) {
+  padding: var(--padding);
+}
+
 /* Close */
 dialog .close {
   cursor: pointer;

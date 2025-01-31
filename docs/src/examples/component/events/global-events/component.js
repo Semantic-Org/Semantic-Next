@@ -3,7 +3,7 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const pageCSS = await getText('./page.css');
 const template = await getText('./component.html');
 
-const state = {
+const defaultState = {
   text: 'Not Clicked',
   counter: 0,
 };
@@ -20,7 +20,7 @@ const events = {
 defineComponent({
   tagName: 'ui-clicker',
   template,
-  state,
+  defaultState,
   events,
   pageCSS
 });
