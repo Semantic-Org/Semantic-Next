@@ -1,6 +1,6 @@
 import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, errorJS, logJS, logCSS, foldMarkerStart, foldMarkerEnd } from './injections.js';
+import { addPlaygroundInjections, errorJS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 
