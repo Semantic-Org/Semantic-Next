@@ -43,7 +43,7 @@ export const getExampleFiles = async({
   includeLog = false, // whether to include script to intercept console logs,
   includePlaygroundInjections = false, // whether to inject values to make repl work
   emptyIfAllGenerated = false, // if all files are generated return an empty object
-  includeImportMap = true, // whether to map imports to node_modules
+  includeImportMap = !isStaticBuild, // whether to map imports to node_modules
 } = {}) => {
   if(!contentID) {
     return;

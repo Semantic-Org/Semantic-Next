@@ -56,13 +56,18 @@ export const packageBase = isStaticBuild
   : `${import.meta.env.SITE}/node_modules`
 ;
 
+const suiBase = isStaticBuild
+  ? `${packageBase}/@semantic-ui/core@latest`
+  : `${packageBase}/@semantic-ui/core`
+;
+
 export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="${packageBase}/@semantic-ui/core/src/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="${packageBase}/@semantic-ui/core/dist/semantic-ui.css"></link>
-<link rel="stylesheet" href="${packageBase}/@semantic-ui/core/dist/theme/base.css"></link>
+<script src="${suiBase}/src/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
+<link rel="stylesheet" href="${suiBase}/dist/theme/base.css"></link>
 <script>
   function dispatchCustomEvent(eventName) {
     const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
