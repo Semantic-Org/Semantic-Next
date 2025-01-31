@@ -2,18 +2,30 @@
 import fs from 'fs';
 import path from 'path';
 
-import { packageBase } from '@helpers/injections.js';
+import { isStaticBuild, packageBase } from '@helpers/injections.js';
 
-const packages = [
-  '@semantic-ui/core',
-  '@semantic-ui/core/packages/component',
-  '@semantic-ui/core/packages/reactivity',
-  '@semantic-ui/core/packages/templating',
-  '@semantic-ui/core/packages/renderer',
-  '@semantic-ui/core/packages/query',
-  '@semantic-ui/core/packages/specs',
-  '@semantic-ui/core/packages/utils',
-];
+const packages = (isStaticBuild)
+  ? [
+      '@semantic-ui/core',
+      '@semantic-ui/component',
+      '@semantic-ui/reactivity',
+      '@semantic-ui/templating',
+      '@semantic-ui/renderer',
+      '@semantic-ui/query',
+      '@semantic-ui/specs',
+      '@semantic-ui/utils',
+    ]
+  : [
+      '@semantic-ui/core',
+      '@semantic-ui/core/packages/component',
+      '@semantic-ui/core/packages/reactivity',
+      '@semantic-ui/core/packages/templating',
+      '@semantic-ui/core/packages/renderer',
+      '@semantic-ui/core/packages/query',
+      '@semantic-ui/core/packages/specs',
+      '@semantic-ui/core/packages/utils',
+    ]
+;
 
 const base = import.meta.env.SITE || '';
 
