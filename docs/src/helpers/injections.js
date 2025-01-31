@@ -46,13 +46,23 @@ export const componentHTMLAfter = ``;
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
+export const isStaticBuild = Boolean(process.env.VERCEL_URL);
+
+// we can use the node_modules path for imports when running in server mode
+// this will let you check examples/playground against local versions of packages
+// instead of tagged npm versions
+export const packageBase = isStaticBuild
+  ? 'https://unpkg.com'
+  : `${import.meta.env.SITE}/node_modules`
+;
+
 export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="/node_modules/@semantic-ui/core/src/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="/node_modules/@semantic-ui/core/dist/semantic-ui.css"></link>
-<link rel="stylesheet" href="/node_modules/@semantic-ui/core/dist/theme/base.css"></link>
+<script src="${packageBase}/@semantic-ui/core/src/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="${packageBase}/@semantic-ui/core/dist/semantic-ui.css"></link>
+<link rel="stylesheet" href="${packageBase}/@semantic-ui/core/dist/theme/base.css"></link>
 <script>
   function dispatchCustomEvent(eventName) {
     const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });

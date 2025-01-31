@@ -2,6 +2,8 @@
 import fs from 'fs';
 import path from 'path';
 
+import { packageBase } from '@helpers/injections.js';
+
 const packages = [
   '@semantic-ui/core',
   '@semantic-ui/core/packages/component',
@@ -43,7 +45,7 @@ for (const pkg of packages) {
     entry = entry.startsWith('./') ? entry : `./${entry}`;
 
     // Generate URL-safe path
-    const mappedUrl = `${base}/node_modules/${pkg}/${entry.replace('./', '')}`;
+    const mappedUrl = `${packageBase}/${pkg}/${entry.replace('./', '')}`;
 
     // Add to import map
     packageImports.imports[pkgJson.name] = mappedUrl;
