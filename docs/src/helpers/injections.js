@@ -65,7 +65,7 @@ export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="${suiBase}/src/semantic-ui.js" type="module"></script>
+<script src="${suiBase}/dist/semantic-ui.js" type="module"></script>
 <link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
 <link rel="stylesheet" href="${suiBase}/dist/theme/base.css"></link>
 <script>
