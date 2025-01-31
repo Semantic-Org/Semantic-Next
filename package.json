@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.7.0",
+  "version": "0.6.1",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://www.semantic-ui.com",
@@ -71,28 +71,28 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "peerDependencies": {
-    "lit": "^3.2.1"
+    "lit": "^3.1.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.6.1",
+    "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
-    "@types/node": "^22.12.0",
-    "@typescript-eslint/eslint-plugin": "^8.22.0",
-    "@typescript-eslint/parser": "^8.22.0",
-    "@vitest/browser": "^3.0.4",
-    "@vitest/coverage-istanbul": "^3.0.4",
-    "@vitest/ui": "^3.0.4",
-    "chalk": "^5.4.1",
-    "dprint": "^0.48.0",
-    "esbuild": "^0.24.2",
+    "@types/node": "^22.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "@vitest/browser": "^2.1.5",
+    "@vitest/coverage-istanbul": "^2.1.5",
+    "@vitest/ui": "^2.1.5",
+    "chalk": "^5.3.0",
+    "dprint": "^0.47.5",
+    "esbuild": "^0.24.0",
     "husky": "^9.1.7",
-    "inquirer": "^12.3.3",
-    "jsdom": "^26.0.0",
-    "lint-staged": "^15.4.3",
-    "playwright": "^1.50.0",
+    "inquirer": "^12.1.0",
+    "jsdom": "^25.0.1",
+    "lint-staged": "^15.2.10",
+    "playwright": "^1.49.0",
     "underscore": "^1.13.7",
-    "vitest": "^3.0.4",
-    "wireit": "^0.14.10"
+    "vitest": "^2.1.5",
+    "wireit": "^0.14.9"
   },
   "ciDependencies": {
     "axios": "^1.6.8",
