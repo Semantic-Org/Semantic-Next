@@ -1,5 +1,6 @@
 {
   "name": "@semantic-ui/renderer",
+  "version": "0.7.0",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -13,5 +14,7 @@
     "@semantic-ui/templating": "^0.7.0",
     "@semantic-ui/utils": "^0.7.0"
   },
-  "version": "0.7.0"
+  "devDependencies": {
+    "vitest": "^3.0.4"
+  }
 }
