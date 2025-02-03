@@ -16,7 +16,6 @@ const createComponent = ({ self, data, signal, findParent, $ }) => ({
   toggleCompleted() {
     const todos = self.getTodos();
     const todo = data.todo;
-    console.log(todos.value);
     todos.setProperty(todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
