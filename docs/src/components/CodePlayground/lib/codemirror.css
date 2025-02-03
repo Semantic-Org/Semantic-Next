@@ -10,12 +10,12 @@
 }
 
 .CodeMirror-foldmarker {
-  color: var(--white-40);
+  color: var(--standard-40);
   background: var(--standard-10) var(--angled-gradient);
   border-radius: var(--border-radius);
   font-size: var(--medium);
   vertical-align: 3px;
-  box-shadow: 0px 3px 5px #000000;
+  box-shadow: var(--floating-shadow);
   margin-left: 8px;
   display: inline-block;
   padding: 0px 5px 6px 4px;
