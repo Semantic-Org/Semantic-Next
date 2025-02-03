@@ -3,6 +3,7 @@
   canvas {
     border: var(--border);
     border-radius: var(--border-radius);
+    max-width: 100%;
   }
   p {
     font-size: var(--small);
