@@ -283,7 +283,7 @@ if(localStorage.getItem('theme') == 'dark') {
 }${hideMarkerEnd}`;
 export const pageJSAfter = ``;
 
-export const pageCSSBefore = `${hideMarkerStart}body { height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
+export const pageCSSBefore = `${hideMarkerStart}body { touch-action: auto; height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
 export const pageCSSAfter = ``;
 
 
