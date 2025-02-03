@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { firstMatch, get, each, moveToFront, inArray, sortBy } from '@semantic-ui/utils';
+import { firstMatch, isFunction, get, each, moveToFront, inArray, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
@@ -151,7 +151,7 @@ const defaultState = {
   layout: 'tabs',
 };
 
-const createComponent = ({afterFlush, self, reaction, state, data, settings, $, $$}) => ({
+const createComponent = ({afterFlush, self, isServer, reaction, state, data, settings, $, $$}) => ({
 
   mobileMenu: [
     { label: 'Code', value: 'code' },
@@ -454,6 +454,19 @@ const createComponent = ({afterFlush, self, reaction, state, data, settings, $, 
     state.displayMode.set(displayMode);
   },
 
+  setupComponents() {
+    const doCallback = (callback) => {
+      return isFunction(window.requestIdleCallback)
+        ? requestIdleCallback(callback)
+        : setTimeout(callback, 1)
+      ;
+    };
+    doCallback(() => {
+      state.resizing.set(false);
+      self.addPanelSettings();
+    });
+  }
+
 });
 
 const onCreated = ({self, attachEvent}) => {
@@ -461,17 +474,13 @@ const onCreated = ({self, attachEvent}) => {
 };
 
 const onRendered = ({ self, state }) => {
-
   // external mods to codemirror
   addSearch(CodeMirror);
   addSimpleMode(CodeMirror);
   defineSyntax(CodeMirror);
 
   self.addPanelSettings();
-  requestIdleCallback(() => {
-    state.resizing.set(false);
-    self.addPanelSettings();
-  });
+  self.setupComponents();
 };
 
 const onThemeChanged = ({self}) => {
