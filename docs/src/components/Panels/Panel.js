@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { sum } from '@semantic-ui/utils';
+import { sum, isClient } from '@semantic-ui/utils';
 
 import template from './Panel.html?raw';
 import css from './Panel.css?raw';
@@ -28,8 +28,14 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
     return {
       resizing: self.resizing.get(),
       minimized: settings.minimized,
-      initialized: self.initialized.get()
+      initialized: self.isSafari() || self.initialized.get()
     };
+  },
+
+  // ios handles flex on opacity: 0 items in unexpected ways
+  isSafari() {
+    const userAgent = navigator.userAgent;
+    return isClient && !userAgent.includes('Chrome') && userAgent.includes('Safari') !== -1;
   },
 
   setInitialized() {
