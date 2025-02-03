@@ -37,6 +37,15 @@ const createComponent = ({ self, signal, $ }) => ({
     todoList.scrollTop = todoList.scrollHeight;
   },
 
+  markAllComplete() {
+    self.todos.setArrayProperty('completed', true);
+  },
+
+  markAllIncomplete() {
+    self.todos.setArrayProperty('completed', false);
+  },
+
+
   // handle state
   getRouteFilter() {
     return window.location.hash.substring(2) || 'all'; // #/foo
@@ -69,10 +78,13 @@ const events = {
 
   // toggle all checkbox is in the main html although its functionality is in the header
   // this is per todo-mvc spec
-  'change .toggle-all'({ event, self, findChild, $ }) {
-    const headerTpl = findChild('todoHeader');
-    $(event.target).attr('checked', !$(event.target).attr('checked'));
-    headerTpl.allCompleted.toggle();
+  'change .toggle-all'({ self, target }) {
+    if(target.checked) {
+      self.markAllComplete();
+    }
+    else {
+      self.markAllIncomplete();
+    }
   },
 };
 
