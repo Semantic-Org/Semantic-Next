@@ -9,6 +9,7 @@
 
   playground-preview {
     position: relative;
+    touch-action: none;
   }
 
   pretty-json {
