@@ -1,5 +1,5 @@
 ---
-let { title, description, searchMeta, padded } = Astro.props;
+let { title, description, searchMeta, noZoom, padded } = Astro.props;
 
 if(!title) {
   title = 'Semantic UI';
@@ -34,6 +34,10 @@ searchMeta = {
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    {noZoom !== undefined && (
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    )}
   </head>
   <body class={padded ? 'padded' : ''}>
     <script>
