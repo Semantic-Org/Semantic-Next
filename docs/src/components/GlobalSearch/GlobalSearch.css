@@ -47,6 +47,7 @@ input {
   justify-content: stretch;
 
   &::part(input) {
+    touch-action: none;
     border: var(--global-search-input-border);
     background-color: var(--global-search-background-color);
     border-radius: var(--global-search-border-radius);

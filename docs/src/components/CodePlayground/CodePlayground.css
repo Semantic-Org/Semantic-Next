@@ -380,7 +380,6 @@
     playground-preview {
       margin: 0rem;
       flex: 1 1 0;
-      max-height: calc(100vh - var(--topbar-height));
       background: var(--playground-code-background) !important;
     }
     playground-preview::part(preview-toolbar) {

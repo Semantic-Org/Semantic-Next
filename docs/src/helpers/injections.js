@@ -46,7 +46,7 @@ export const componentHTMLAfter = ``;
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
-export const isStaticBuild = Boolean(process.env.VERCEL_URL);
+export const isStaticBuild = Boolean(process.env.VERCEL_URL) || true;
 
 // we can use the node_modules path for imports when running in server mode
 // this will let you check examples/playground against local versions of packages

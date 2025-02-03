@@ -7,7 +7,7 @@ import '../css/layers.css';
 import '../css/fonts.css';
 let { title, description, searchMeta } = Astro.props;
 ---
-<Body title={title} description={description} searchMeta={searchMeta} >
+<Body title={title} description={description} searchMeta={searchMeta} noZoom>
   <TopBar/>
   <slot></slot>
 </Body>
