@@ -4,8 +4,7 @@ import { generateID } from '@semantic-ui/utils';
 const css = await getText('./todo-header.css');
 const template = await getText('./todo-header.html');
 
-const createComponent = ({ self, $, signal, reaction, findParent }) => ({
-  allCompleted: signal(false),
+const createComponent = ({ self, $, findParent }) => ({
 
   getTodoList() {
     return findParent('todoList');
@@ -13,14 +12,6 @@ const createComponent = ({ self, $, signal, reaction, findParent }) => ({
 
   getTodos() {
     return self.getTodoList().todos;
-  },
-
-  completeAll() {
-    self.getTodos().setArrayProperty('completed', true);
-  },
-
-  completeNone() {
-    self.getTodos().setArrayProperty('completed', false);
   },
 
   addTodo(text) {
@@ -31,40 +22,26 @@ const createComponent = ({ self, $, signal, reaction, findParent }) => ({
     });
   },
 
-  calculateAllCompleted() {
-    reaction((comp) => {
-      const allCompleted = self.allCompleted.get();
-      if (comp.firstRun) {
-        return;
-      }
-      if (allCompleted) {
-        self.completeAll();
-      }
-      else {
-        self.completeNone();
-      }
-    });
+  clearInput() {
+    $('input.todo').val('');
   },
+
 });
 
 const events = {
-  'keydown input.new-todo'({ event, self, afterFlush, $, $$ }) {
+  'keydown input.new-todo'({ self, event, value, afterFlush }) {
     if (event.key === 'Enter') {
-      const text = $(this).val();
-      if (!text) {
+      if (!value) {
         return;
       }
-      self.addTodo(text);
-      $(this).val('');
-      afterFlush(() => {
-        self.getTodoList().scrollToBottom();
-      });
+      self.addTodo(value);
+      self.clearInput();
+
+      // scroll to bottom after reactive update to the list
+      const todoList = self.getTodoList();
+      afterFlush(todoList.scrollToBottom);
     }
   },
-};
-
-const onCreated = ({ self }) => {
-  self.calculateAllCompleted();
 };
 
 const todoHeader = defineComponent({
@@ -72,7 +49,6 @@ const todoHeader = defineComponent({
   template,
   css,
   createComponent,
-  onCreated,
   events,
 });
 
