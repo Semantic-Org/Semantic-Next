@@ -602,6 +602,7 @@ export const Template = class Template {
         reaction: this.reaction.bind(this),
         signal: this.signal.bind(this),
         afterFlush: Reaction.afterFlush,
+        nonreactive: Reaction.nonreactive,
         flush: Reaction.flush,
 
         data: this.data,
