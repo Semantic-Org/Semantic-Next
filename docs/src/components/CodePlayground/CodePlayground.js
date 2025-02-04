@@ -478,13 +478,11 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     if(isServer) {
       return;
     }
-    console.log('set nat height');
     const codeHeight = $$('.CodeMirror-sizer').first().height();
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
     const panelHeight = menuHeight + codeHeight + offset;
-    console.log(codeHeight, menuHeight);
-    if(panelHeight < 400) {
+    if(panelHeight > 30 && panelHeight < 400) {
       $('ui-panels').first().css('height', `${panelHeight}px`);
     }
   }
