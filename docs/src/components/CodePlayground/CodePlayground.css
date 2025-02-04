@@ -380,7 +380,6 @@
     playground-preview {
       margin: 0rem;
       flex: 1 1 0;
-      max-height: calc(100vh - var(--topbar-height));
       background: var(--playground-code-background) !important;
     }
     playground-preview::part(preview-toolbar) {
@@ -416,6 +415,11 @@
 
   ui-menu.mobile {
     display: none;
+    margin-bottom: 0;
+
+    &::part(item) {
+      padding: 10px 6px;
+    }
   }
 
   .mobile-code ui-panel.files,
@@ -439,7 +443,7 @@
     ui-menu.mobile {
       display: block;
       width: calc(100% - 1rem);
-      margin: var(--compact-spacing) auto;
+      margin: auto var(--compact-spacing) 0;
     }
     ui-panel::part(handle) {
       display: none;

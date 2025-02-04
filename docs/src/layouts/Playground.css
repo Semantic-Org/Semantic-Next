@@ -35,25 +35,28 @@
 
   }
 
-
-  code-playground::part(playground) {
-    width: calc(100dvw - var(--sidebar-width));
-    height: calc(100dvh - var(--topbar-height));
-  }
-
   ui-panels::part(panels) {
     background-color: var(--playground-code-background);
   }
 
-  .navigation::part(panels) {
-    background-color: var(--ui-background);
+  topbar, topbar.fluid {
+    position: static;
   }
-  .navigation ui-panel::part(handle) {
-    opacity: 0.1;
+
+  .navigation {
+
+    ui-panel::part(handle) {
+      opacity: 0.1;
+    }
+    ui-panel::part(handle):hover {
+      opacity: 0.3;
+    }
+
+    &::part(panels) {
+      background-color: var(--ui-background);
+    }
   }
-  .navigation ui-panel::part(handle):hover {
-    opacity: 0.3;
-  }
+
   sidebar {
     flex: 0 0 auto;
     height: 100%;
@@ -88,8 +91,8 @@
   page {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
     background: var(--playground-page-background);
-    height: calc(100vh - var(--topbar-height));
   }
 
   page learn-example,
@@ -118,7 +121,6 @@
       }
     }
   }
-
 
   playground {
 
@@ -202,6 +204,9 @@ html.light {
 @media only screen and (max-width: 767px) {
   sidebar {
     display: none;
+  }
+  topbar, topbar.fluid {
+    position: static;
   }
   :root {
     --topbar-logo-margin: 1px 13px 0px 13px;
