@@ -1,7 +1,7 @@
 <div class="{{ui}} menu" part="menu">
   {{#if items}}
     {{#each item in items}}
-      <menu-item active={{isValueActive value item}} href={{item.href}} data-value={{item.value}}>
+      <menu-item active={{isValueActive value item}} href={{item.href}} data-value={{item.value}} exportparts="item">
         {{item.label}}
       </menu-item>
     {{/each}}
