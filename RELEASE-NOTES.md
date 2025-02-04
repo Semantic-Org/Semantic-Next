@@ -4,6 +4,11 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.8.0
+
+### Breaking Changes
+* `getComponent` and `getDataContext` in Query have been renamed to just `component` and `dataContext` this is to preserve consistency with other methods on Query which dont preface getters with 'get'
+
 # Version 0.7.0
 
 ### Breaking Changes

@@ -1013,11 +1013,11 @@ export class Query {
   }
 
   // special helper for SUI components
-  getComponent() {
+  component() {
     const components = this.map(el => el.component).filter(Boolean);
     return components.length > 1 ? components : components[0];
   }
-  getDataContext() {
+  dataContext() {
     const contexts = this.map(el => el.dataContext).filter(Boolean);
     return contexts.length > 1 ? contexts : contexts[0];
   }
