@@ -1,6 +1,4 @@
-// component.js
 import { defineComponent, getText } from '@semantic-ui/component';
-import { $ } from '@semantic-ui/query';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -35,7 +33,7 @@ const defaultState = {
   customizing: false
 };
 
-const createComponent = ({self, el, state, settings}) => ({
+const createComponent = ({self, el, $, state, settings}) => ({
   initialize() {
     if (settings.presets?.[0]) {
       self.applyTheme(settings.presets[0]);
