@@ -6,7 +6,7 @@ import css from './MobileMenuToggle.css?raw';
 const createComponent = function ({ $, isServer, attachEvent, tpl }) {
   return {
     getMenu() {
-      return $('mobile-menu', { root: document }).getComponent();
+      return $('mobile-menu', { root: document }).component();
     },
     isVisible() {
       const menu = tpl.getMenu();

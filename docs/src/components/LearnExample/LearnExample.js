@@ -80,7 +80,7 @@ const createComponent = ({ $, $$, data, self, state, reaction, settings }) => ({
     return Boolean(settings.files[file]);
   },
   getPlayground() {
-    return $('code-playground').getComponent();
+    return $('code-playground').component();
   },
   calculateCodeLayout() {
     const playground = self.getPlayground();
@@ -121,7 +121,7 @@ const events = {
     self.toggleNavMenu();
   },
   'click ui-button.layout'({ $ }) {
-    $('code-playground').getComponent().toggleTabs();
+    $('code-playground').component().toggleTabs();
   },
   'click ui-button.hint'({findChild}) {
     findChild('hintModal').show();
