@@ -1,8 +1,12 @@
 ---
-let { title, description, searchMeta, padded } = Astro.props;
+let { title, description, searchMeta, bodyClass = '', padded } = Astro.props;
 
 if(!title) {
   title = 'Semantic UI';
+}
+
+if(padded) {
+  bodyClass += ' padded';
 }
 
 import SearchMeta from '@components/SearchMeta.astro';
@@ -35,7 +39,7 @@ searchMeta = {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body class={padded ? 'padded' : ''}>
+  <body class={bodyClass}>
     <script>
       import { exportGlobals } from '@semantic-ui/query';
       exportGlobals();

@@ -71,6 +71,11 @@
     color: var(--page-text-color);
   }
 
+  body.reverse {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
   body.padded {
     padding: 2rem;
   }
