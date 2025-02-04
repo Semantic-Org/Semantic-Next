@@ -72,16 +72,18 @@
       class="files"
       exportparts="panel, handle"
     >
-      <div class="menu">
-        <ui-menu
-          dark
-          selection
-          items="{getFileMenuItems { filter: 'main' } }"
-          value={activeFile}
-          class="component files"
-          part="menu"
-        ></ui-menu>
-      </div>
+      {#if canShowMenu}
+        <div class="menu">
+          <ui-menu
+            dark
+            selection
+            items="{getFileMenuItems { filter: 'main' } }"
+            value={activeFile}
+            class="component files"
+            part="menu"
+          ></ui-menu>
+        </div>
+      {/if}
       {>CodePlaygroundFile
         inline=true
         filename=activeFile
@@ -118,7 +120,7 @@
           }
         </ui-panels>
       {else}
-        {>CodePlaygroundPreview exampleURL=exampleURL}
+        {>CodePlaygroundPreview showMenu=canShowMenu exampleURL=exampleURL}
       {/if}
     </ui-panel>
   </ui-panels>

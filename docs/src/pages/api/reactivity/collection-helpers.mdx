@@ -40,11 +40,11 @@ signal.setProperty(id, property, value)
 import { Signal } from '@semantic-ui/reactivity';
 
 const users = new Signal([
-  { id: 1, name: 'Alice', age: 30 },
-  { id: 2, name: 'Bob', age: 25 }
+  { id: 'user1', name: 'Alice', age: 30 },
+  { id: 'user2', name: 'Bob', age: 25 }
 ]);
 
-users.setProperty(2, 'age', 26);
+users.setProperty('user2', 'age', 26);
 console.log(users.get());
 // Output: [{ id: 1, name: 'Alice', age: 30 }, { id: 2, name: 'Bob', age: 26 }]
 ```

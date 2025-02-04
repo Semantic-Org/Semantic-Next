@@ -220,9 +220,9 @@ ${hideMarkerEnd}`;
 
 export const logCSS = `${hideMarkerStart}
   .json-key { color: #656565; }
-  .json-string { color: #58A6FF; }
-  .json-number { color: #58A6FF; }
-  .json-boolean { color: #58A6FF; }
+  .json-string { color: var(--primary-text-color); }
+  .json-number { color: var(--primary-text-color); }
+  .json-boolean { color: var(--primary-text-color); }
 ${hideMarkerEnd}`;
 
 

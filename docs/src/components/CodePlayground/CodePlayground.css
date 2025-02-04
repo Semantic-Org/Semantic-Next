@@ -93,6 +93,10 @@
       background: var(--thumb-hover-background);
     }
 
+    &.inline {
+      margin: var(--vertically-spaced);
+    }
+
     .masthead {
       display: flex;
       flex-direction: row;
