@@ -8,7 +8,7 @@ const defaultSettings = {
 
 const defaultState = {
   counter: 0,
-  running: false
+  running: true
 };
 
 const createComponent = ({self, state, settings}) => ({

@@ -69,7 +69,7 @@ const defaultSettings = {
   inlineDirection: 'horizontal',
 
   // max height when using inline
-  maxHeight: 0,
+  maxHeight: 'natural',
 
   // order of code
   sortOrder: [
@@ -207,6 +207,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   getClassMap() {
     const classMap = {
+      inline: settings.inline,
       resizing: state.resizing.get(),
     };
     const mobileView = state.mobileView.get();
@@ -348,6 +349,12 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   getPanelGroupWidth(index) {
     return settings.panelGroupWidth[index];
   },
+  canShowMenu() {
+    if(settings.inline && self.getFileMenuItems().length <= 1) {
+      return false;
+    }
+    return true;
+  },
   getFileMenuItems({ filter } = {}) {
     let menu = self.getFileArray({filter}).map(file => {
       if(!settings.includeGeneratedInline && file?.generated) {
@@ -465,6 +472,19 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
       state.resizing.set(false);
       self.addPanelSettings();
     });
+  },
+
+  setNaturalHeight() {
+    if(isServer) {
+      return;
+    }
+    const codeHeight = $$('.CodeMirror-sizer').first().height();
+    const menuHeight = $$('ui-panel .menu').first().height();
+    const offset = 5; // from trial & error avoids tiny scrollbars
+    const panelHeight = menuHeight + codeHeight + offset;
+    if(panelHeight < 400) {
+      $('ui-panels').first().css('height', `${panelHeight}px`);
+    }
   }
 
 });
@@ -473,7 +493,7 @@ const onCreated = ({self, attachEvent}) => {
   self.setDisplayMode();
 };
 
-const onRendered = ({ self, state }) => {
+const onRendered = ({ isClient, self, state, $, settings }) => {
   // external mods to codemirror
   addSearch(CodeMirror);
   addSimpleMode(CodeMirror);
@@ -481,6 +501,10 @@ const onRendered = ({ self, state }) => {
 
   self.addPanelSettings();
   self.setupComponents();
+
+  if(settings.inline && settings.maxHeight == 'natural') {
+    self.setNaturalHeight();
+  }
 };
 
 const onThemeChanged = ({self}) => {

@@ -1,13 +1,13 @@
-<div class="menu">
-  <ui-menu value={tab} items={getMenu} class="preview" part="menu"></ui-menu>
-  {#if exampleURL}
-    <div class="links">
-      <a href="{exampleURL}" class="sandbox link">
-        <ui-icon codesandbox link></ui-icon>
-      </a>
-    </div>
-  {/if}
-</div>
+{#if showMenu}
+  <div class="menu">
+    <ui-menu value={tab} items={getMenu} class="preview" part="menu"></ui-menu>
+    {#if exampleURL}
+      {>links}
+    {/if}
+  </div>
+{else}
+  {>links}
+{/if}
 {#if is tab 'preview'}
   <playground-preview part="preview" project="source" html-file="page.html"> </playground-preview>
 {else if is tab 'console'}
@@ -20,3 +20,11 @@
     {getAST}
   </pretty-json>
 {/if}
+
+{#snippet links}
+  <div class="links">
+    <a href="{exampleURL}" class="sandbox link">
+      <ui-icon codesandbox link></ui-icon>
+    </a>
+  </div>
+{/snippet}

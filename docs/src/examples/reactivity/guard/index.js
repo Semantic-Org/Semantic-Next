@@ -1,20 +1,33 @@
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
+const stringNumber = new Signal('');
+const number = new Signal(null);
 
-const isEven = () => Reaction.guard(() => {
-  return (counter.get() % 2 === 0);
+Reaction.create(() => {
+  // Guard prevents the number from triggering reactivity unless the parsed value changes
+  const parsedNumber = Reaction.guard(() => {
+    const value = stringNumber.get();
+    return Number(value.trim());
+  });
+  number.set(parsedNumber);
 });
 
-Reaction.create((comp) => {
-  if(isEven()) {
-    console.log(`${counter.peek()} is even`);
+// Downstream reaction
+Reaction.create(() => {
+  if(number.get()) {
+    console.log(`Number is ${number.get()}`);
   }
 });
 
-counter.set(1); // No output guard is same
-Reaction.flush();
-counter.set(2); // Output
-Reaction.flush();
-counter.set(3); // No output guard is same
+// Set number
+stringNumber.set('100');
+Reaction.flush(); // Logs: Processed value changed to: 100
+
+// Change stringNumber in a way that does not change the processed number.
+stringNumber.set('  100  ');
+Reaction.flush(); // No log, because 100 === 100
+
+// Change stringNumber so that the processed number changes.
+stringNumber.set('200');
+Reaction.flush(); // Logs: Processed value changed to: 200
 

@@ -23,7 +23,7 @@ const createComponent = ({ self, $, findParent }) => ({
   },
 
   clearInput() {
-    $('input.todo').val('');
+    $('input.new-todo').val('');
   },
 
 });

@@ -1,0 +1,81 @@
+---
+layout: '@layouts/Guide.astro'
+icon: edit
+title: Mutation Helpers
+description: Update reactive values without the boilerplate of manual get/mutate/set patterns
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { UICards, UICard } from '@semantic-ui/core';
+
+## Helper Usage
+
+A very common pattern when dealing with signals is to modify an existing signal value then update its underlying value triggering reactivity.
+
+This can create a lot of boilerplate because you will need to access the value nonreactively and then update the underlying value before finally setting the value again.
+
+```javascript title="Without Helpers"
+const numbers = signal([1, 2, 3]);
+const newNumbers = numbers.peek();
+newNumbers.push(4);
+numbers.set(newNumbers);
+```
+
+Helpers handle updating an underlying reactive value without having to retrieve and manipulate the value.
+
+```javascript title="With Helpers"
+const numbers = signal([1, 2, 3]);
+numbers.push(4);
+```
+
+## Types of Helpers
+
+Helpers are provided for various types of signal primitives that help with the most common ways they are used.
+
+### Array Helpers
+
+[Array helpers](/api/reactivity/collection-helpers) make it easy to update array values with `push`, `unshift` and non-standard helpers like `removeIndex`, `setIndex` and others.
+
+<PlaygroundExample id="reactive-set-index" direction="horizontal"></PlaygroundExample>
+
+
+### Collection Helpers
+
+[Collection helpers](/api/reactivity/collection-helpers) make it easy to update specific values in an array of records by their ID. `id` will match against `_id`, `id`, `hash`, `key` fields on any object in the array
+
+<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+
+
+### Boolean Helpers
+
+[Boolean helpers](/api/reactivity/boolean-helpers) like [`toggle`](/api/reactivity/boolean-helpers#toggle) make it easier to toggle boolean values.
+
+<PlaygroundExample id="reactive-toggle" direction="horizontal"></PlaygroundExample>
+
+
+### API Reference
+
+> **API Reference** - You can learn more about individual mutation helpers in the API reference guide for reactivity.
+
+<UICards two stackable>
+  <UICard
+    header="Number Helpers"
+    href="/api/reactivity/number-helpers"
+  ></UICard>
+  <UICard
+    header="Boolean Helpers"
+    href="/api/reactivity/boolean-helpers"
+  ></UICard>
+  <UICard
+    header="Array Helpers"
+    href="/api/reactivity/array-helpers"
+  ></UICard>
+  <UICard
+    header="Collection Helpers"
+    href="/api/reactivity/collection-helpers"
+  ></UICard>
+  <UICard
+    header="Date Helpers"
+    href="/api/reactivity/date-helpers"
+  ></UICard>
+</UICards>
+

@@ -10,7 +10,14 @@ const defaultState = {
   template: '',
 };
 
-const createComponent = ({self, findParent, state, $, $$}) => ({
+const createComponent = ({self, findParent, data, state, $, $$}) => ({
+
+  showMenu() {
+    if(data.showMenu == false) {
+      return false;
+    }
+    return true;
+  },
 
   getMenu: () => {
     let menu = [

@@ -195,6 +195,10 @@ export const sidebarMenuFramework = [
         url: '/reactivity/variables'
       },
       {
+        name: 'Mutation Helpers',
+        url: '/reactivity/mutation-helpers'
+      },
+      {
         name: 'Flushing',
         url: '/reactivity/flush'
       },
@@ -209,14 +213,6 @@ export const sidebarMenuFramework = [
       {
         name: 'Performance',
         url: '/reactivity/guard'
-      },
-      {
-        name: 'Array Helpers',
-        url: '/reactivity/events'
-      },
-      {
-        name: 'Object Helpers',
-        url: '/reactivity/content'
       },
       {
         name: 'Debugging',
