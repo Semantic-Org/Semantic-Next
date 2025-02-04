@@ -50,7 +50,7 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     const searchMenu = ({header, menu}, depth, parentMenu) => {
       each(menu, (item) => {
         // for topbar menu we dont want to count it a match if url is matched
-        if(depth > 0 && item.url && (tpl.isSameURL(item.url, url))) {
+        if(depth > 0 && tpl.isSameURL(item.url, url)) {
           result = {
             menu: { header, menu },
             depth,
@@ -58,15 +58,27 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
           };
           return false;
         }
+        // we stack exactly 2 levels in each mobile menu level
+        // hence repetitive logic here
         if (item.pages) {
           each(item.pages, (page) => {
-            if(page.url && (tpl.isSameURL(page.url, url))) {
+            if(tpl.isSameURL(page.url, url)) {
               result = {
                 menu: { header, menu },
                 depth,
                 parentMenu,
               };
-              return false;
+            }
+            else if(page.pages) {
+              each(page.pages, (subPage) => {
+                if(tpl.isSameURL(subPage.url, url)) {
+                  result = {
+                    menu: { header, menu },
+                    depth,
+                    parentMenu,
+                  };
+                }
+              });
             }
           });
         }
@@ -118,10 +130,21 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     return $('dialog').el();
   },
 
+  scrollIntoView() {
+    const $activeContent = $('.active.content');
+    const $current = $$('.active.content nav-menu .current.item');
+    const el = $current.first().el();
+    if(el) {
+      const rect = el.getBoundingClientRect();
+      console.log(rect);
+    }
+  },
+
   show(callback = noop) {
     tpl.getDialog().showModal();
     dispatchEvent('show');
     tpl.setMenuHeight('active');
+    tpl.scrollIntoView();
     callback();
   },
 
