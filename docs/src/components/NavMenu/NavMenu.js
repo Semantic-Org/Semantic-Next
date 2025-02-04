@@ -150,7 +150,6 @@ const onDestroyed =  ({ self }) => {
 
 const onRendered =  ({ $, self, attachEvent, isClient }) => {
   if(isClient) {
-    attachEvent(document, 'astro:after-swap', self.onPageChange);
     self.scrollToActive();
   }
 };
