@@ -502,7 +502,6 @@ const onRendered = ({ isClient, self, state, $, settings }) => {
   self.addPanelSettings();
   self.setupComponents();
 
-  console.log('render');
   if(settings.inline && settings.maxHeight == 'natural') {
     self.setNaturalHeight();
   }
