@@ -60,8 +60,8 @@ const createComponent = ({self, el, state, settings}) => ({
   applyTheme(theme) {
     state.activeTheme.set(theme);
     $(el)
-      .cssVar('primary-color', theme.primary)
-      .cssVar('secondary-color', theme.secondary)
+      .cssVar('button-primary-color', theme.primary)
+      .cssVar('button-secondary-color', theme.secondary)
     ;
   },
 
