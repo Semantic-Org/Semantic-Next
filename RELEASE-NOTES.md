@@ -9,6 +9,10 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ### Breaking Changes
 * `getComponent` and `getDataContext` in Query have been renamed to just `component` and `dataContext` this is to preserve consistency with other methods on Query which dont preface getters with 'get'
 
+### Bugs
+* Fix `ui-menu` did not export `item` for parts
+
+
 # Version 0.7.0
 
 ### Breaking Changes
