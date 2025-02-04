@@ -11,7 +11,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ### Bugs
 * Fix `ui-menu` did not export `item` for parts
-
+* Improve performance of signal's mutation helpers
 
 # Version 0.7.0
 
