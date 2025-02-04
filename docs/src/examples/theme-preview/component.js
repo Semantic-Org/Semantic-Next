@@ -77,7 +77,7 @@ const createComponent = ({self, el, state, settings}) => ({
 });
 
 const events = {
-  'click .preset'({self, data}) {
+  'click .preset'({self, settings, data}) {
     const preset = settings.presets[+data.index];
     self.applyTheme(preset);
   },
