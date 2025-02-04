@@ -86,26 +86,26 @@ export class Signal {
 
   // array helpers
   push(value) {
-    const arr = this.value;
+    const arr = this.peek();
     arr.push(value);
     this.set(arr);
   }
   unshift(value) {
-    const arr = this.value;
+    const arr = this.peek();
     arr.unshift(value);
     this.set(arr);
   }
   splice(...args) {
-    const arr = this.value;
+    const arr = this.peek();
     arr.splice(...args);
     this.set(arr);
   }
   map(mapFunction) {
-    const newValue = Array.prototype.map.call(this.value, mapFunction);
+    const newValue = Array.prototype.map.call(this.peek(), mapFunction);
     this.set(newValue);
   }
   filter(filterFunction) {
-    const newValue = Array.prototype.filter.call(this.value, filterFunction);
+    const newValue = Array.prototype.filter.call(this.peek(), filterFunction);
     this.set(newValue);
   }
 
@@ -113,12 +113,12 @@ export class Signal {
     return this.get()[index];
   }
   setIndex(index, value) {
-    let arr = this.value;
+    let arr = this.peek();
     arr[index] = value;
     this.set(arr);
   }
   removeIndex(index) {
-    let arr = this.value;
+    let arr = this.peek();
     arr.splice(index, 1);
     this.set(arr);
   }
@@ -134,7 +134,7 @@ export class Signal {
       value = property;
       property = indexOrProperty;
     }
-    const newValue = this.value.map((object, currentIndex) => {
+    const newValue = this.peek().map((object, currentIndex) => {
       if(index == 'all' || currentIndex == index) {
         object[property] = value;
       }
@@ -144,14 +144,14 @@ export class Signal {
   }
 
   toggle() {
-    return this.set(!this.value);
+    return this.set(!this.peek());
   }
 
   increment(amount = 1) {
-    return this.set(this.value + amount);
+    return this.set(this.peek() + amount);
   }
   decrement(amount = 1) {
-    return this.set(this.value - amount);
+    return this.set(this.peek() - amount);
   }
 
   now() {
@@ -182,7 +182,7 @@ export class Signal {
     else {
       value = property;
       property = idOrProperty;
-      const obj = this.value;
+      const obj = this.peek();
       obj[property] = value;
       this.set(obj);
     }
