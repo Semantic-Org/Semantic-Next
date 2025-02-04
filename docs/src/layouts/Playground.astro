@@ -10,7 +10,7 @@ import './Layout.css';
 import './Playground.css';
 let { title, description, searchMeta } = Astro.props;
 ---
-<Body bodyClass="reverse" title={title} description={description} searchMeta={searchMeta} >
+<Body title={title} description={description} searchMeta={searchMeta} >
   <TopBar/>
   <slot></slot>
   <SiteMobileMenu></SiteMobileMenu>
