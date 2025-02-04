@@ -1,0 +1,13 @@
+.fireworks {
+  text-align: center;
+  canvas {
+    border: var(--border);
+    border-radius: var(--border-radius);
+    background: black;
+  }
+  p {
+    font-size: var(--small);
+    color: white;
+    user-select: none;
+  }
+}
