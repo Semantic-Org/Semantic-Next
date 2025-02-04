@@ -1,7 +1,7 @@
 import { $ } from '@semantic-ui/query';
 
 // dry
-const getComponent = () => $('ui-counter').getComponent();
+const getComponent = () => $('ui-counter').component();
 
 $('button').on('click', () => {
   let counter = getComponent();

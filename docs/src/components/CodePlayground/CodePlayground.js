@@ -420,7 +420,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   },
 
   selectFile(number) {
-    const menu = $('ui-menu.component').getComponent();
+    const menu = $('ui-menu.component').component();
     if(menu) {
       menu.selectIndex(number - 1);
     }

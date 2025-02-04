@@ -6,10 +6,10 @@ import css from './ReferenceModal.css?raw';
 const createComponent = ({ $ }) => {
   return {
     show() {
-      $('ui-modal').getComponent().show();
+      $('ui-modal').component().show();
     },
     hide() {
-      $('ui-modal').getComponent().hide();
+      $('ui-modal').component().hide();
     },
   };
 };

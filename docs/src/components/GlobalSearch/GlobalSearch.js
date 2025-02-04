@@ -41,7 +41,7 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
 
   openModal() {
     const val = $('.inline-search input').val();
-    $('ui-modal').getComponent().show();
+    $('ui-modal').component().show();
     $('ui-modal').find('.search input').focus().val(val);
   },
 
