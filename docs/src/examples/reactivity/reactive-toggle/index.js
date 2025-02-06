@@ -1,11 +1,23 @@
-import { Signal } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 const isActive = new Signal(false);
 
-console.log(isActive.get()); // Output: false
+// Reaction logs when value changes
+Reaction.create((reaction) => {
+  const active = isActive.get();
+  if(!reaction.firstRun) {
+    console.log(active);
+  }
+});
+
+/* Manual flush prevents multiple updates in same render loop
+  from only rendering with final value
+*/
 
 isActive.toggle();
-console.log(isActive.get()); // Output: true
+Reaction.flush();
+// Output: true
 
 isActive.toggle();
-console.log(isActive.get()); // Output: false
+Reaction.flush();
+// Output: false

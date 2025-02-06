@@ -1,14 +1,21 @@
-import { Signal } from '@semantic-ui/reactivity';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 const users = new Signal([
   { id: 'aliceuser', name: 'Alice', health: 'Bad' },
   { id: 'samuser', name: 'Sam', health: 'Okay'},
 ]);
 
-// changes aliceuser's age
-users.setProperty('aliceuser', 'name', 'Allison');
-console.log(users.get());
+// Reaction logs when value changes
+Reaction.create((reaction) => {
+  const currentUsers = users.get();
+  if(!reaction.firstRun) {
+    console.log(currentUsers);
+  }
+});
 
-// changes everyone's health
+// changes aliceuser's name to 'Allison'
+users.setProperty('aliceuser', 'name', 'Allison');
+
+// changes everyone's health to 'Good'
 users.setArrayProperty('health', 'Good');
-console.log(users.get());
+Reaction.flush();
