@@ -211,10 +211,6 @@ export const sidebarMenuFramework = [
         url: '/reactivity/controls'
       },
       {
-        name: 'Performance',
-        url: '/reactivity/guard'
-      },
-      {
         name: 'Debugging',
         url: '/reactivity/debugging'
       },
