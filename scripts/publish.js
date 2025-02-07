@@ -134,6 +134,12 @@ const workspaceGlobs = mainPackageJson.workspaces;
 
   await Promise.all(publishPromises);
 
+  // Update the root package-lock.json to reflect updated sub-package versions.
+  if (!dryRun) {
+    console.log('Updating root package-lock.json...');
+    await execAsync('npm install', { cwd: process.cwd() });
+  }
+
   if (!dryRun && updatedFiles.length > 0) {
     try {
       // Stage changes
