@@ -185,24 +185,51 @@ describe.concurrent('Signal', () => {
 
   describe.concurrent('Array Utilities', () => {
 
-    it('Push should push values', () => {
-      const reactiveArray = new Signal([1, 2, 3]);
-      reactiveArray.push(4);
+    it('Push should handle multiple values', () => {
+      const reactiveArray = new Signal([1]);
+      reactiveArray.push(2, 3, 4);
       expect(reactiveArray.value).toEqual([1, 2, 3, 4]);
     });
 
-    it('Unshift should add values to front of array', () => {
-      const reactiveArray = new Signal([2, 3]);
-      reactiveArray.unshift(1);
-      expect(reactiveArray.value).toEqual([1, 2, 3]);
-    });
-
-
-    it('Splice should insert values', () => {
-      const reactiveArray = new Signal([1, 4]);
-      reactiveArray.splice(1, 0, 2, 3); // At index 1, delete 0 items, then add 2 and 3
+    it('Unshift should handle multiple values', () => {
+      const reactiveArray = new Signal([4]);
+      reactiveArray.unshift(1, 2, 3);
       expect(reactiveArray.value).toEqual([1, 2, 3, 4]);
     });
+
+    it('Splice should remove and insert elements', () => {
+      const reactiveArray = new Signal(['a', 'b', 'c', 'd']);
+      reactiveArray.splice(1, 1, 'x');
+      expect(reactiveArray.value).toEqual(['a', 'x', 'c', 'd']);
+    });
+
+    it('Splice should handle multiple inserts', () => {
+      const reactiveArray = new Signal(['a', 'b', 'c']);
+      reactiveArray.splice(1, 0, 'x', 'y');
+      expect(reactiveArray.value).toEqual(['a', 'x', 'y', 'b', 'c']);
+    });
+
+    it('Splice should handle deletion without insertion', () => {
+      const reactiveArray = new Signal(['a', 'b', 'c']);
+      reactiveArray.splice(1, 2);
+      expect(reactiveArray.value).toEqual(['a']);
+    });
+
+    it('Splice should trigger reactions when modified', () => {
+      const callback = vi.fn();
+      const reactiveArray = new Signal(['a', 'b', 'c']);
+
+      Reaction.create(() => {
+        callback(reactiveArray.get());
+      });
+
+      reactiveArray.splice(1, 1, 'x');
+      Reaction.flush();
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenLastCalledWith(['a', 'x', 'c']);
+    });
+
 
     it('setIndex should change value at index', () => {
       const reactiveArray = new Signal([1, 2, 3]);
@@ -234,15 +261,78 @@ describe.concurrent('Signal', () => {
   });
 
   describe.concurrent('Transformation Helpers', () => {
-
-    it('map should change each item based on a map function', () => {
-      // code here
+    it('map should transform each item in the array', () => {
+      const numbers = new Signal([1, 2, 3]);
+      numbers.map(num => num * 2);
+      expect(numbers.get()).toEqual([2, 4, 6]);
     });
 
-    it('filter should remove items based on a filter callback', () => {
-      // code here
+    it('map should trigger reactions', () => {
+      const callback = vi.fn();
+      const numbers = new Signal([1, 2, 3]);
+
+      Reaction.create(() => {
+        callback(numbers.get());
+      });
+
+      numbers.map(num => num * 2);
+      Reaction.flush();
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenLastCalledWith([2, 4, 6]);
     });
 
+    it('filter should remove items based on predicate', () => {
+      const numbers = new Signal([1, 2, 3, 4, 5]);
+      numbers.filter(num => num % 2 === 1);
+      expect(numbers.get()).toEqual([1, 3, 5]);
+    });
+
+    it('filter should trigger reactions', () => {
+      const callback = vi.fn();
+      const numbers = new Signal([1, 2, 3, 4, 5]);
+
+      Reaction.create(() => {
+        callback(numbers.get());
+      });
+
+      numbers.filter(num => num > 3);
+      Reaction.flush();
+
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenLastCalledWith([4, 5]);
+    });
+
+    it('filter should handle complex objects', () => {
+      const items = new Signal([
+        { id: 1, active: true },
+        { id: 2, active: false },
+        { id: 3, active: true }
+      ]);
+
+      items.filter(item => item.active);
+      expect(items.get()).toEqual([
+        { id: 1, active: true },
+        { id: 3, active: true }
+      ]);
+    });
+
+    it('map should handle complex transformations', () => {
+      const items = new Signal([
+        { id: 1, value: 10 },
+        { id: 2, value: 20 }
+      ]);
+
+      items.map(item => ({
+        ...item,
+        doubled: item.value * 2
+      }));
+
+      expect(items.get()).toEqual([
+        { id: 1, value: 10, doubled: 20 },
+        { id: 2, value: 20, doubled: 40 }
+      ]);
+    });
   });
 
   describe.concurrent('Boolean Helpers', () => {
