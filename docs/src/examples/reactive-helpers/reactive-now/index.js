@@ -8,6 +8,4 @@ Reaction.create((reaction) => {
 });
 
 // Update log every second
-setInterval(() => {
-  lastUpdated.now();
-}, 1000);
+setInterval(() => lastUpdated.now(), 1000);

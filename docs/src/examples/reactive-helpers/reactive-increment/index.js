@@ -9,12 +9,6 @@ Reaction.create((reaction) => {
   }
 });
 
-// Increment by 1
-counter.increment();
+counter.increment(); // Increment by 1
 Reaction.flush();
-// Output: Counter: 1
-
-// Increment by custom amount
-counter.increment(2);
-Reaction.flush();
-// Output: Counter: 3
+counter.increment(10); // Increment by 10

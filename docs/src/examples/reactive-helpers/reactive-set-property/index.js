@@ -5,13 +5,8 @@ const users = new Signal([
   { id: 'samuser', name: 'Sam', health: 'Okay'},
 ]);
 
-// Reaction logs when value changes
-Reaction.create((reaction) => {
-  const currentUsers = users.get();
-  if(!reaction.firstRun) {
-    console.log(currentUsers);
-  }
-});
+// Log any changes in users
+Reaction.create(() => console.log(users.value));
 
 // changes aliceuser's name to 'Allison'
 users.setProperty('aliceuser', 'name', 'Allison');

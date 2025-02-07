@@ -10,14 +10,6 @@ Reaction.create((reaction) => {
   }
 });
 
-/* Manual flush prevents multiple updates in same render loop
-  from only rendering with final value
-*/
-
 isActive.toggle();
 Reaction.flush();
-// Output: true
-
 isActive.toggle();
-Reaction.flush();
-// Output: false
