@@ -4,66 +4,99 @@ icon: cpu
 title: Reactivity with Signals
 description: Learn how Semantic UI uses signals to produce reactivity
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-`@semantic-ui/reactivity` is a standalone implementation of a signals based reactivity system. It is used internally to power templating and rendering components, but can also be used as reactivity primitives for any custom project.
 
-## Installation
+> See the [Reactivity API Reference](/api/reactivity) for a full reference guide to the reactivity library.
 
-Reactivity can be used as a standalone package or alongside [Semantic UI components](/components).
+## Understanding Reactivity
 
-```bash
-npm install @semantic-ui/reactivity
-```
+Reactivity put simply is **values changing causes stuff to happen**.
 
-## Basic Usage
+### Signals
+
+Signals are a **mechanism for implementing reactivity** that works by tracking what functions reference a variable. These references are called [dependencies](/api/reactivity/dependency) and are used to track references to update when an underyling value is updated.
+
+To ensure dependencies are properly tracked signals are accessed using a `value` (accessor) or a `get()` function.
+
+### Reactions
+
+The function that re-runs when a signal is changed is called a `Reaction`. When a signal is referenced inside a reaction it will cause the `reaction` to rerun when the value changes.
+
+
+> **Naming Conventions** - Signals implementations vary in their naming conventions a reactive context is called ***watcher***  in the [signals proposal](https://github.com/tc39/proposal-signals), a **computation** in [Preact](https://preactjs.com/guide/v10/signals/) and `watch` in [Lit](https://lit.dev/docs/data/signals/).
+
+
+## Usage
+
+
+### Standalone
+Semantic UI includes a package [`@semantic-ui/reactivity`](/api/reactivity) which exports [`Signal`](/api/reactivity/reactive-var), [`Reaction`](/api/reactivity/reaction), and [`Dependency`](/api/reactivity/dependency) and can be used as a standalone package without using [Semantic UI components](/components).
 
 ```javascript
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
+const counter = new Signal(1);
 
 Reaction.create(() => {
-  console.log('Counter value:', counter.get());
+  console.log(counter.value);
+  // outputs 1 2
 });
-
-counter.set(1); // Console: "Counter value: 1"
+counter.increment();
 ```
 
-## API Sections
+### Component
 
-* **[Signal](/api/reactivity/signal)** - Core class for creating signals
-* **[Reaction](/api/reactivity/reaction)** - Managing reactive computations
-* **[Scheduler](/api/reactivity/scheduler)** - Manages reaction scheduling and execution
-* **[Dependency](/api/reactivity/dependency)** - Low-level dependency tracking
+If you are using `@semantic-ui/component`, reactivity is [built into templating](/api/templates) and available directly from [lifecycle callbacks](/components/lifecycle#callback-arguments).
 
-### Data Type Helpers
+You can use `reaction` and `signal` directly from all lifecycle callbacks. Reactions created this way will automatically be tied to the component lifecycle.
 
-Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
+> Learn more about reactivity in components in the dedicated [component reactivity](/components/reactivity) section.
 
-* **[Number Helpers](/api/reactivity/number-helpers)**
-  - [`increment(amount)`](/api/reactivity/number-helpers#increment)
-  - [`decrement(amount)`](/api/reactivity/number-helpers#decrement)
 
-* **[Boolean Helpers](/api/reactivity/boolean-helpers)**
-  - [`toggle()`](/api/reactivity/boolean-helpers#toggle) for toggling between `false` and `true`
+```javascript
+const createComponent = ({ self, reaction, signal }) => ({
+  value: signal(0),
+  initialize() {
+    // this will log whenever the value updates
+    reaction(() => {
+      console.log(self.value);
+    });
+  }
+});
+```
 
-* **[Array Helpers](/api/reactivity/array-helpers)**
-  - [`push()`](/api/reactivity/array-helpers#push)
-  - [`unshift()`](/api/reactivity/array-helpers#unshift)
-  - [`splice()`](/api/reactivity/array-helpers#splice)
-  - [`setIndex(index, value)`](/api/reactivity/array-helpers#setindex)
-  - [`removeIndex(index)`](/api/reactivity/array-helpers#removeindex)
-  - [`setArrayProperty(indexOrProp, property, value)`](/api/reactivity/array-helpers#setarrayproperty)
+## Example
 
-* **[Collection Helpers](/api/reactivity/collection-helpers)** (Array of Objects)
-  - [`setProperty(id, property, value)`](/api/reactivity/collection-helpers#setproperty)
-  - [`replaceItem(item, id)`](/api/reactivity/collection-helpers#replaceitem)
-  - [`removeItem(id)`](/api/reactivity/collection-helpers#removeitem)
-  - [`getIndex(id)`](/api/reactivity/collection-helpers#getindex)
-  - [`getID(index)`](/api/reactivity/collection-helpers#getid)
-  - [`hasID(index)`](/api/reactivity/collection-helpers#hasid)
+### Birthday Calendar
 
-* **[Date Helpers](/api/reactivity/date-helpers)**
-  - [`now()`](/api/reactivity/date-helpers#now) for setting to current time
+Imagine keeping a birthday calendar for your friends birthdays.
 
-These helpers provide convenient ways to manipulate reactive data structures and streamline common operations in your reactive computations.
+In a signal based reactivity system the current day could be thought of as a **signal**.
+
+Each day you might wake up and notice that the `day` has updated. You can then run a `reaction` to check if any of your friends' birthdays are today.
+
+```javascript
+const today = new Signal( new Date() );
+
+// each day when you wake up
+const newDay() => {
+  today.set(new Date());
+}
+
+const checkBirthdays = Reaction(() => {
+  const today = today.get();
+  each(friendsBirthdays, (birthday) => {
+    if(today == birthday) {
+      // wish them happy birthday
+    }
+    else {
+      // no birthdays today
+    }
+  });
+}
+```
+
+<PlaygroundExample id="birthday" direction="horizontal"></PlaygroundExample>
+
+

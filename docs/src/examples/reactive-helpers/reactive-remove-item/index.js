@@ -16,5 +16,3 @@ Reaction.create((reaction) => {
 
 // Remove out of stock product
 products.removeItem('prod2');
-Reaction.flush();
-// Output: Shows product list without the Phone

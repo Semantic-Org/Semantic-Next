@@ -4,18 +4,11 @@ icon: database
 title: Collection Helpers
 description: API reference for Collection Helpers in Semantic UI's reactivity system
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Collection Helpers are methods available on Signal instances that contain arrays of objects. These helpers provide convenient ways to manipulate and update specific objects within the collection based on their unique id.
+Collection Helpers provide methods for manipulating arrays of objects with unique identifiers. These helpers make it easy to update, replace, or remove specific items in a collection while maintaining reactivity.
 
-### Element IDs
-
-Unique ids for each row are the first set value in the following list
-* `_id`
-* `id`
-* `hash`
-* `key`
-
-If none are set then the record will be ignored
+> An object's ID is determined by checking for properties in this order: `_id`, `id`, `hash`, `key`. The first defined value is used as the identifier.
 
 ## setProperty
 
@@ -40,14 +33,15 @@ signal.setProperty(id, property, value)
 import { Signal } from '@semantic-ui/reactivity';
 
 const users = new Signal([
-  { id: 'user1', name: 'Alice', age: 30 },
-  { id: 'user2', name: 'Bob', age: 25 }
+  { id: 'user1', name: 'Alice' },
+  { id: 'user2', name: 'Bob' }
 ]);
 
-users.setProperty('user2', 'age', 26);
-console.log(users.get());
-// Output: [{ id: 1, name: 'Alice', age: 30 }, { id: 2, name: 'Bob', age: 26 }]
+users.setProperty('user1', 'status', 'active');
 ```
+
+### Example
+<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
 
 ## replaceItem
 
@@ -70,15 +64,16 @@ signal.replaceItem(id, newItem)
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
 
-const tasks = new Signal([
-  { id: 1, task: 'Buy groceries', completed: false },
-  { id: 2, task: 'Walk the dog', completed: true }
+const users = new Signal([
+  { id: 'user1', name: 'Alice' },
+  { id: 'user2', name: 'Bob' }
 ]);
 
-tasks.replaceItem(1, { id: 1, task: 'Buy groceries', completed: true });
-console.log(tasks.get());
-// Output: [{ id: 1, task: 'Buy groceries', completed: true }, { id: 2, task: 'Walk the dog', completed: true }]
+users.replaceItem('user1', { id: 'user1', name: 'Alex' });
 ```
+
+### Example
+<PlaygroundExample id="reactive-replace-item" direction="horizontal"></PlaygroundExample>
 
 ## removeItem
 
@@ -100,114 +95,13 @@ signal.removeItem(id)
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
 
-const books = new Signal([
-  { id: 1, title: 'The Great Gatsby' },
-  { id: 2, title: 'To Kill a Mockingbird' }
+const users = new Signal([
+  { id: 'user1', name: 'Alice' },
+  { id: 'user2', name: 'Bob' }
 ]);
 
-books.removeItem(1);
-console.log(books.get());
-// Output: [{ id: 2, title: 'To Kill a Mockingbird' }]
+users.removeItem('user1');
 ```
 
-## getIndex
-
-Returns the index of an object in the collection that matches the given id.
-
-### Syntax
-```javascript
-signal.getIndex(id)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| id | any | The id of the object to find |
-
-### Returns
-
-number - The index of the object, or -1 if not found.
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const fruits = new Signal([
-  { id: 'a', name: 'apple' },
-  { id: 'b', name: 'banana' },
-  { id: 'c', name: 'cherry' }
-]);
-
-const index = fruits.getIndex('b');
-console.log(index); // Output: 1
-```
-
-## getID
-
-Returns the id of an object at a specific index in the collection.
-
-### Syntax
-```javascript
-signal.getID(index)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| index | number | The index of the object |
-
-### Returns
-
-any - The id of the object at the specified index, or undefined if the index is out of bounds.
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const animals = new Signal([
-  { id: 'dog1', species: 'dog' },
-  { id: 'cat1', species: 'cat' },
-  { id: 'fish1', species: 'fish' }
-]);
-
-const id = animals.getID(1);
-console.log(id); // Output: 'cat1'
-```
-
-## hasID
-
-Checks if an object at a specific index in the collection has an id.
-
-### Syntax
-```javascript
-signal.hasID(index)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| index | number | The index of the object to check |
-
-### Returns
-
-boolean - True if the object at the specified index has an id, false otherwise.
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const mixed = new Signal([
-  { id: 1, value: 'has id' },
-  { value: 'no id' },
-  { id: 2, value: 'has id too' }
-]);
-
-console.log(mixed.hasID(0)); // Output: true
-console.log(mixed.hasID(1)); // Output: false
-```
+### Example
+<PlaygroundExample id="reactive-remove-item" direction="horizontal"></PlaygroundExample>

@@ -154,6 +154,14 @@ export const errorJS = `
 `;
 
 export const logJS = `${hideMarkerStart}
+const oldClear = console.clear;
+console.clear = function() {
+  oldClear.apply(console, arguments); // Keep default logging to the console
+  const container = document.getElementById('log-container');
+  if(container) {
+    container.innerHTML = '';
+  }
+};
 const oldLog = console.log;
 console.log = function() {
   oldLog.apply(console, arguments); // Keep default logging to the console

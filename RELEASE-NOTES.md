@@ -4,6 +4,12 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.8.1
+
+### Improvements
+
+Reactivity helpers now handle multiple args to `push`, `unshift`. Added `unshift` for consistency.
+
 # Version 0.8.0
 
 ### Breaking Changes

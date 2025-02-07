@@ -5,39 +5,6 @@ title: Reactivity with Signals
 description: Learn how Semantic UI uses signals to produce reactivity
 ---
 
-`@semantic-ui/reactivity` is a standalone implementation of a signals based reactivity system. It is used internally to power templating and rendering components, but can also be used as reactivity primitives for any custom project.
-
-## Installation
-
-Reactivity can be used as a standalone package or alongside [Semantic UI components](/components).
-
-```bash
-npm install @semantic-ui/reactivity
-```
-
-## Basic Usage
-
-```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-const counter = new Signal(0);
-
-Reaction.create(() => {
-  console.log('Counter value:', counter.get());
-});
-
-counter.set(1); // Console: "Counter value: 1"
-```
-
-## API Sections
-
-* **[Signal](/api/reactivity/signal)** - Core class for creating signals
-* **[Reaction](/api/reactivity/reaction)** - Managing reactive computations
-* **[Dependency](/api/reactivity/dependency)** - Low-level dependency tracking
-* **[Flushing](/api/reactivity/flushing)** - Controlling the execution of reactions
-
-## Reactive Helpers
-
 Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
 
 * **[Number Helpers](/api/reactivity/number-helpers)**

@@ -4,6 +4,7 @@ icon: toggle-left
 title: Boolean Helpers
 description: API reference for Boolean Helpers in Semantic UI's reactivity system
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Boolean Helpers are methods available on Signal instances that contain boolean values. These helpers provide a convenient way to toggle the state of a boolean reactive variable.
 
@@ -26,15 +27,11 @@ boolean - The new value after toggling.
 import { Signal } from '@semantic-ui/reactivity';
 
 const isActive = new Signal(false);
-
-console.log(isActive.get()); // Output: false
-
 isActive.toggle();
-console.log(isActive.get()); // Output: true
-
-isActive.toggle();
-console.log(isActive.get()); // Output: false
 ```
+
+### Example
+<PlaygroundExample id="reactive-toggle" direction="horizontal"></PlaygroundExample>
 
 ### Notes
 

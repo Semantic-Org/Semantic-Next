@@ -482,7 +482,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
     const panelHeight = menuHeight + codeHeight + offset;
-    if(panelHeight > 30 && panelHeight < 400) {
+    if(panelHeight > 30 && panelHeight < 600) {
       $('ui-panels').first().css('height', `${panelHeight}px`);
     }
   }
