@@ -85,28 +85,20 @@ export class Signal {
   }
 
   // array helpers
-  push(value) {
+  push(...args) {
     const arr = this.peek();
-    arr.push(value);
+    arr.push(...args);
     this.set(arr);
   }
-  unshift(value) {
+  unshift(...args) {
     const arr = this.peek();
-    arr.unshift(value);
+    arr.unshift(...args);
     this.set(arr);
   }
   splice(...args) {
     const arr = this.peek();
     arr.splice(...args);
     this.set(arr);
-  }
-  map(mapFunction) {
-    const newValue = Array.prototype.map.call(this.peek(), mapFunction);
-    this.set(newValue);
-  }
-  filter(filterFunction) {
-    const newValue = Array.prototype.filter.call(this.peek(), filterFunction);
-    this.set(newValue);
   }
 
   getIndex(index) {
