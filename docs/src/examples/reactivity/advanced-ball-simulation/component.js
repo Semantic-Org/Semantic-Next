@@ -262,6 +262,16 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     }
     ctx.fillText(`FPS: ${fps}`, canvas.width - 10, canvas.height - 10);
   },
+  getPointerPosition(event) {
+    const canvas = this.getCanvas();
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
+    };
+  }
 
 });
 
@@ -272,18 +282,17 @@ const onRendered = ({state, data, settings, self}) => {
 
 const events = {
   'pointerdown canvas'({self, event}) {
-    const canvas = self.getCanvas();
-    const rect = canvas.getBoundingClientRect();
-    self.emitter.x = (event.clientX - rect.left);
-    self.emitter.y = (event.clientY - rect.top);
+    const pos = self.getPointerPosition(event);
+    self.emitter.x = pos.x;
+    self.emitter.y = pos.y;
     self.emitter.active = true;
   },
+
   'pointermove canvas'({self, event}) {
     if (self.emitter.active) {
-      const canvas = self.getCanvas();
-      const rect = canvas.getBoundingClientRect();
-      self.emitter.x = (event.clientX - rect.left);
-      self.emitter.y = (event.clientY - rect.top);
+      const pos = self.getPointerPosition(event);
+      self.emitter.x = pos.x;
+      self.emitter.y = pos.y;
     }
   },
   'pointerup, pointerleave canvas'({self}) {
@@ -291,7 +300,11 @@ const events = {
   },
   'change input.speed'({value, settings}) {
     settings.speed = value / 100;
-  }
+  },
+  'touchstart, touchmove canvas'({event}) {
+    // prevent highlight/scroll on mobile
+    event.preventDefault();
+  },
 };
 
 export const BallSimulation = defineComponent({

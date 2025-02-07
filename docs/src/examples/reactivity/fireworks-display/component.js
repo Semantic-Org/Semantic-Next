@@ -196,6 +196,17 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     return { h: hue, s: saturation, l: lightness };
   },
 
+  getPointerPosition(event) {
+    const canvas = this.getCanvas();
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
+    };
+  }
+
 });
 
 const onRendered = ({ self, state, settings }) => {
@@ -204,28 +215,29 @@ const onRendered = ({ self, state, settings }) => {
 
 const events = {
   'pointerdown canvas'({ self, event, state, $ }) {
-    const canvas = self.getCanvas();
-    const rect = canvas.getBoundingClientRect();
     let emitter = state.emitter.get();
-    emitter.x = event.clientX - rect.left;
-    emitter.y = event.clientY - rect.top;
+    const pos = self.getPointerPosition(event);
+    emitter.x = pos.x;
+    emitter.y = pos.y;
     emitter.active = true;
     state.emitter.set(emitter);
   },
   'pointermove canvas'({ self, event, state, $ }) {
     let emitter = state.emitter.get();
-    if (emitter.active) {
-      const canvas = self.getCanvas();
-      const rect = canvas.getBoundingClientRect();
-      emitter.x = event.clientX - rect.left;
-      emitter.y = event.clientY - rect.top;
-      state.emitter.set(emitter);
-    }
+    const pos = self.getPointerPosition(event);
+    emitter.x = pos.x;
+    emitter.y = pos.y;
+    emitter.active = true;
+    state.emitter.set(emitter);
   },
   'pointerup, mouseleave canvas'({ self, state }) {
     let emitter = state.emitter.get();
     emitter.active = false;
     state.emitter.set(emitter);
+  },
+  'touchstart, touchmove canvas'({event}) {
+    // prevent highlight/scroll on mobile
+    event.preventDefault();
   },
 };
 

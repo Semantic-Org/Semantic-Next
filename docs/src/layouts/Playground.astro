@@ -11,7 +11,9 @@ import './Playground.css';
 let { title, description, searchMeta } = Astro.props;
 ---
 <Body title={title} description={description} searchMeta={searchMeta} >
-  <TopBar/>
-  <slot></slot>
+  <layout id="playground">
+    <TopBar noanimation/>
+    <slot></slot>
+  </layout>
   <SiteMobileMenu></SiteMobileMenu>
 </Body>
