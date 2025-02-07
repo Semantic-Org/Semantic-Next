@@ -7,12 +7,10 @@ const products = new Signal([
   { id: 'prod3', name: 'Tablet', stock: 3 }
 ]);
 
-Reaction.create((reaction) => {
-  const currentProducts = products.get();
-  if(!reaction.firstRun) {
-    console.log('Available products:', currentProducts);
-  }
+Reaction.create(() => {
+  console.log('Available products:', products.value);
 });
 
 // Remove out of stock product
+console.log('removed prod2');
 products.removeItem('prod2');

@@ -6,18 +6,13 @@ const contacts = new Signal([
   { id: 'bob456', name: 'Bob', email: 'bob@email.com' }
 ]);
 
-Reaction.create((reaction) => {
-  const currentContacts = contacts.get();
-  if(!reaction.firstRun) {
-    console.log('Updated contacts:', currentContacts);
-  }
-});
+Reaction.create(() => console.log('Updated contacts:', contacts.value));
 
 // Replace entire contact record
-contacts.replaceItem('alice123', {
+const newContact = {
   id: 'alice123',
   name: 'Alice Smith',
   email: 'asmith@email.com'
-});
-Reaction.flush();
+};
+contacts.replaceItem('alice123', newContact);
 // Output: Shows updated contact list with Alice's new details

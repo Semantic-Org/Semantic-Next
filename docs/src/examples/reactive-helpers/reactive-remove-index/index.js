@@ -14,10 +14,5 @@ Reaction.create((reaction) => {
   }
 });
 
-// Remove completed task
+// Remove first task
 tasks.removeIndex(0);
-Reaction.flush();
-// Output: Remaining tasks: [
-//   { text: 'Write Tests', completed: false },
-//   { text: 'Update Docs', completed: false }
-// ]

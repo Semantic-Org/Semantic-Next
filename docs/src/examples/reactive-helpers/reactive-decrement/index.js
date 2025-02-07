@@ -10,12 +10,7 @@ Reaction.create((reaction) => {
   }
 });
 
-// Decrement by 1
-score.decrement();
-Reaction.flush();
-// Output: Score: 99
 
-// Decrement by custom amount
-score.decrement(10);
+score.decrement(); // Decrement by 1
 Reaction.flush();
-// Output: Score: 89
+score.decrement(10); // Decrement by 10
