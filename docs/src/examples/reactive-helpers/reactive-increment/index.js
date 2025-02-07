@@ -1,4 +1,3 @@
-// Helper: increment
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 const counter = new Signal(0);

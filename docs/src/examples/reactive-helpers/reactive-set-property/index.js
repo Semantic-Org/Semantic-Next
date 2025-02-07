@@ -18,4 +18,3 @@ users.setProperty('aliceuser', 'name', 'Allison');
 
 // changes everyone's health to 'Good'
 users.setArrayProperty('health', 'Good');
-Reaction.flush();
