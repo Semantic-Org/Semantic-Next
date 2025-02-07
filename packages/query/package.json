@@ -1,7 +1,7 @@
 {
   "name": "@semantic-ui/query",
   "type": "module",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "main": "src/index.cjs",
   "module": "src/index.js",
   "exports": {
@@ -21,7 +21,7 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.8.0"
+    "@semantic-ui/utils": "^0.8.1"
   },
   "devDependencies": {
     "vitest": "^3.0.4"
