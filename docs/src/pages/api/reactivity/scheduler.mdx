@@ -1,0 +1,166 @@
+---
+layout: '@layouts/Guide.astro'
+icon: clock
+title: Scheduler
+description: API reference for Scheduler in Semantic UI's reactivity system
+---
+
+`Scheduler` is a core class in Semantic UI's reactivity system that manages the scheduling and execution of reactive computations. It handles the queueing and flushing of reactions, ensuring efficient updates when reactive dependencies change.
+
+The Scheduler class is responsible for:
+- Managing the execution of reactive computations
+- Ensuring reactions run in the correct order
+- Providing debugging information
+- Handling the microtask queue for reaction scheduling
+- Managing post-flush callbacks
+
+
+> **Advanced Use Only** - Scheduler is primarily used internally by `Signal` and `Reaction`. Most developers should not need to interact with it directly unless building advanced reactive systems or meta-frameworks.
+
+## Static Properties
+
+### current
+
+The currently executing reaction.
+
+#### Syntax
+```javascript
+Scheduler.current
+```
+
+#### Returns
+
+Reaction | null - The currently executing reaction, or null if no reaction is executing.
+
+#### Usage
+
+```javascript
+import { Scheduler } from '@semantic-ui/reactivity';
+
+console.log(Scheduler.current); // null if outside a reaction
+```
+
+### pendingReactions
+
+Set of reactions waiting to be executed.
+
+#### Syntax
+```javascript
+Scheduler.pendingReactions
+```
+
+#### Returns
+
+Set - The set of pending reactions.
+
+## Static Methods
+
+### scheduleReaction
+
+Schedules a reaction to be executed during the next flush cycle.
+
+#### Syntax
+```javascript
+Scheduler.scheduleReaction(reaction)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| reaction | Reaction | The reaction to schedule for execution |
+
+#### Usage
+
+```javascript
+import { Scheduler, Reaction } from '@semantic-ui/reactivity';
+
+const reaction = Reaction.create(() => {
+  console.log('Reaction executed');
+});
+
+Scheduler.scheduleReaction(reaction);
+```
+
+### scheduleFlush
+
+Schedules a flush of all pending reactions using the microtask queue.
+
+#### Syntax
+```javascript
+Scheduler.scheduleFlush()
+```
+
+#### Usage
+
+```javascript
+import { Scheduler } from '@semantic-ui/reactivity';
+
+Scheduler.scheduleFlush();
+```
+
+### flush
+
+Immediately executes all pending reactions and afterFlush callbacks.
+
+#### Syntax
+```javascript
+Scheduler.flush()
+```
+
+#### Usage
+
+```javascript
+import { Scheduler } from '@semantic-ui/reactivity';
+
+Scheduler.flush(); // Executes all pending reactions immediately
+```
+
+### afterFlush
+
+Registers a callback to be executed after the next flush cycle completes.
+
+#### Syntax
+```javascript
+Scheduler.afterFlush(callback)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| callback | Function | Function to execute after flush completes |
+
+#### Usage
+
+```javascript
+import { Scheduler } from '@semantic-ui/reactivity';
+
+Scheduler.afterFlush(() => {
+  console.log('Flush completed');
+});
+```
+
+### getSource
+
+Returns the stack trace of the current reaction for debugging purposes.
+
+#### Syntax
+```javascript
+Scheduler.getSource()
+```
+
+#### Returns
+
+string | undefined - The stack trace of the current reaction, or undefined if no reaction is running.
+
+#### Usage
+
+```javascript
+import { Scheduler, Reaction } from '@semantic-ui/reactivity';
+
+Reaction.create(() => {
+  console.log(Scheduler.getSource());
+});
+```
+

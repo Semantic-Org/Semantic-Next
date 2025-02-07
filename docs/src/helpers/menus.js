@@ -306,15 +306,15 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Signal',
-        url: '/api/reactivity/reactive-var'
+        url: '/api/reactivity/signal'
       },
       {
         name: 'Reaction',
         url: '/api/reactivity/reaction'
       },
       {
-        name: 'Flushing Reactions',
-        url: '/api/reactivity/flushing'
+        name: 'Scheduler',
+        url: '/api/reactivity/scheduler'
       },
       {
         name: 'Dependency',
