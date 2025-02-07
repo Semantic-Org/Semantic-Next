@@ -1,5 +1,5 @@
 ---
-const { currentRoute, floating } = Astro.props;
+const { currentRoute, floating, noanimation } = Astro.props;
 let { showThemeSwitcher } = Astro.props;
 import { Image } from 'astro:assets';
 
@@ -16,20 +16,32 @@ const activeURL = removeTrailingSlash(Astro.url.pathname);
 
 showThemeSwitcher = (showThemeSwitcher === 'false') ? false : true;
 
+let topbarClasses = [];
+if(noanimation) {
+  topbarClasses.push('static');
+}
+if(floating) {
+  topbarClasses.push('floating');
+}
+topbarClasses.join(' ').trim();
+
 import './TopBar.css';
 ---
 <script>
   import { ScrollNav } from '../javascript/scrollnav.js';
   import { $ } from '@semantic-ui/query';
-  const nav = new ScrollNav($('topbar').el(), {
-    hideThreshold: 5,
-    showThreshold: 15,
-    hideVelocity: 5,
-    showVelocity: 5,
-    hideClass: 'hidden'
-  });
+  const topbar = $('topbar').not('.static').el();
+  if(topbar) {
+    const nav = new ScrollNav(topbar, {
+      hideThreshold: 5,
+      showThreshold: 15,
+      hideVelocity: 5,
+      showVelocity: 5,
+      hideClass: 'hidden'
+    });
+  }
 </script>
-<topbar class={floating ? 'floating' : 'fluid'} transition:persist>
+<topbar class={topbarClasses} transition:persist>
   <div class="content">
     <span class="left">
       <a class="logo" href="/">

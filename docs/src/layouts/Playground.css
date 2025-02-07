@@ -43,6 +43,11 @@
     position: static;
   }
 
+  layout#playground {
+    flex-direction: column;
+    height: 100dvh !important;
+  }
+
   .navigation {
 
     ui-panel::part(handle) {
@@ -206,23 +211,14 @@ html.light {
   sidebar {
     display: none;
   }
+  layout#playground {
+    flex-direction: column-reverse;
+  }
   topbar, topbar.fluid {
-    position: static;
+    position: static !important;
   }
   :root {
     --topbar-logo-margin: 1px 13px 0px 13px;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column-reverse;
-
-    topbar {
-      flex: 0 0 auto;
-    }
-    page {
-      flex: 1 0 auto;
-    }
   }
 }
 

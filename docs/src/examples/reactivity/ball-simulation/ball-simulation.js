@@ -113,6 +113,17 @@ const createComponent = ({self, $, reaction, signal, state}) => ({
     ctx.closePath();
   },
 
+  getPointerPosition(event) {
+    const canvas = this.getCanvas();
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
+    };
+  }
+
 });
 
 const onRendered = ({self}) => {
@@ -123,13 +134,13 @@ const onRendered = ({self}) => {
 
 const events = {
   'pointerdown canvas'({self, event}) {
-    const canvas = self.getCanvas();
-    const rect = canvas.getBoundingClientRect();
-    self.createBall({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top
-    });
-  }
+    const position = self.getPointerPosition(event);
+    self.createBall(position);
+  },
+  'touchstart, touchmove canvas'({event}) {
+    // prevent highlight/scroll on mobile
+    event.preventDefault();
+  },
 };
 
 export const BallSimulation = defineComponent({
