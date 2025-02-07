@@ -44,6 +44,10 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     return index == state.openIndex.get();
   },
 
+  canShowHeader() {
+    return settings.showHeader && settings.menu?.length;
+  },
+
   getContent(index = state.openIndex.get()) {
     return $('.content').eq(index);
   },
