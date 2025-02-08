@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+canvas {
+  max-width: 100%;
+  margin: var(--spacing) 0;
+  background: var(--inverted-100);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.controls {
+  display: flex;
+  gap: var(--spacing);
+  margin-top: var(--spacing);
+}
+
+.message {
+  text-align: center;
+  padding: var(--padding);
+  color: var(--standard-60);
+}

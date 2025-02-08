@@ -1,0 +1,18 @@
+<div class="analyzer">
+  <canvas class="visualizer" width="800" height="200"></canvas>
+  <div class="controls">
+    <ui-button secondary class="start">
+      {#if isRunning}Stop{else}Start{/if}
+    </ui-button>
+    <ui-button color={getColor} class="change">
+      Change Color
+    </ui-button>
+  </div>
+  <div class="message">
+    {#if isRunning}
+      Analyzing audio frequencies...
+    {else}
+      This example will use your microphone to show spectral analysis
+    {/if}
+  </div>
+</div>
