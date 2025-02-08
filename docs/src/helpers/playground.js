@@ -45,6 +45,7 @@ export const getExampleFiles = async({
   emptyIfAllGenerated = false, // if all files are generated return an empty object
   includeImportMap = !isStaticBuild, // whether to map imports to node_modules
 } = {}) => {
+  console.log(contentID);
   if(!contentID) {
     return;
   }
@@ -318,6 +319,9 @@ export const getSandboxURL = () => {
 export const getExampleID = (example) => {
   if(isString(example)) {
     return example;
+  }
+  if(example.data) {
+    example = example.data;
   }
   const exampleID = example?.id || tokenize(example?.title);
   return exampleID;

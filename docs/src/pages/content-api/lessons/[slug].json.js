@@ -8,7 +8,7 @@ import {
 export async function getStaticPaths() {
   const lessons = await getCollection('lessons');
 
-  return lessons.map(lessonDoc => {
+  const paths = lessons.map(lessonDoc => {
     const lesson = getLessonContent(lessonDoc);
     return {
       params: { slug: lesson.id },
@@ -19,6 +19,8 @@ export async function getStaticPaths() {
       }
     };
   });
+  console.log(paths);
+  return paths;
 }
 
 export function GET({ props }) {
