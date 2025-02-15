@@ -7,6 +7,9 @@
   --playground-header-color: rgba(255, 255, 255, 0.4);
   --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
 
+  --playground-code-cursor-color: var(--white-60);
+  --playground-code-qualifier-color: var(--primary-text-color);
+
   --playground-tab-bar-background: #ffffff;
 
   --inline-code-height: 350px;
