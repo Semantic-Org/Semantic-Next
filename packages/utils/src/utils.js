@@ -1,4 +1,4 @@
-/*
+  /*
   An simple utility belt
   to save time on common boilerplate
 */
@@ -530,7 +530,7 @@ export const filterEmpty = (arr) => {
 /*
   Get last element from array
 */
-export const last = (array, number = 1) => {
+export const last = (array = [], number = 1) => {
   const { length } = array;
   if (!length) return;
 
@@ -563,7 +563,7 @@ export const first = (array, number = 1) => {
 /*
   Iterate through returning first value
 */
-export const firstMatch = (array, callback) => {
+export const firstMatch = (array = [], callback) => {
   let result;
   each(array, (value, index) => {
     if (callback(value, index, array)) {
@@ -574,7 +574,7 @@ export const firstMatch = (array, callback) => {
   return result;
 };
 
-export const findIndex = (array, callback) => {
+export const findIndex = (array = [], callback) => {
   let matchedIndex = -1;
   each(array, (value, index) => {
     if (callback(value, index, array)) {
@@ -585,7 +585,7 @@ export const findIndex = (array, callback) => {
   return matchedIndex;
 };
 
-export const remove = (array, callbackOrValue) => {
+export const remove = (array = [], callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
     : (val) => isEqual(val, callbackOrValue);
@@ -614,17 +614,17 @@ export const range = (start, stop, step = 1) => {
     });
 };
 
-export const sum = (values) => {
+export const sum = (values = []) => {
   return values.reduce((acc, num) => acc + num, 0);
 };
 
-export const where = (array, properties) => {
+export const where = (array = [], properties) => {
   return array.filter((obj) =>
     Object.keys(properties).every((key) => obj[key] === properties[key])
   );
 };
 
-export const flatten = (arr) => {
+export const flatten = (arr = []) => {
   return arr.reduce((acc, val) => {
     return Array.isArray(val) ? acc.concat(flatten(val)) : acc.concat(val);
   }, []);
@@ -638,7 +638,7 @@ export const some = (collection, predicate) => {
 };
 export const any = some;
 
-export const sortBy = function (arr, key, comparator) {
+export const sortBy = function (arr = [], key, comparator) {
   const compare = (a, b) => {
     const valA = get(a, key);
     const valB = get(b, key);
@@ -659,7 +659,7 @@ export const sortBy = function (arr, key, comparator) {
   return arr.slice().sort(compare);
 };
 
-export const groupBy = function(array, property) {
+export const groupBy = function(array = [], property) {
   return array.reduce((result, obj) => {
     const key = get(obj, property);
     if (key !== undefined) {
