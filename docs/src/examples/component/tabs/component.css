@@ -1,0 +1,32 @@
+.tabs {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.headers {
+  display: flex;
+  background: var(--standard-5);
+
+  .header {
+    padding: var(--padding);
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    transition: var(--transition);
+
+    &:hover {
+      background: var(--standard-10);
+    }
+    &.active {
+      background: var(--standard-10);
+      color: var(--standard-80);
+      font-weight: bold;
+    }
+  }
+}
+
+.content {
+  padding: var(--padding);
+}
