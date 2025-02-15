@@ -210,7 +210,7 @@ export const getExampleFiles = async({
     addPlaygroundInjections(exampleFiles, { includeLog });
   }
 
-  if(false && includeImportMap) {
+  if(includeImportMap) {
     exampleFiles['import-map.js'] = getImportMap();
   }
 

@@ -49,8 +49,6 @@ let files = await getExampleFiles({
   includeLog: example.exampleType == 'log',
 });
 
-console.log(files);
-
 const panelIndexes = getPanelIndexes(files, {
   type: example.exampleType
 });
