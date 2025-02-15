@@ -42,10 +42,10 @@ export const getExampleFiles = async({
   includeError = true, // whether to intercept and display js errors,
   includeLog = false, // whether to include script to intercept console logs,
   includePlaygroundInjections = false, // whether to inject values to make repl work
+  useTypescript = true, // convert js files to ts files
   emptyIfAllGenerated = false, // if all files are generated return an empty object
   includeImportMap = !isStaticBuild, // whether to map imports to node_modules
 } = {}) => {
-  console.log(contentID);
   if(!contentID) {
     return;
   }
@@ -210,7 +210,7 @@ export const getExampleFiles = async({
     addPlaygroundInjections(exampleFiles, { includeLog });
   }
 
-  if(includeImportMap) {
+  if(false && includeImportMap) {
     exampleFiles['import-map.js'] = getImportMap();
   }
 
@@ -233,9 +233,18 @@ export const getExampleFiles = async({
     exampleFiles['page.html'].hidden = true;
   }
 
+  if(useTypescript) {
+    const typescriptExampleFiles = {};
+    each(exampleFiles, (content, filename) => {
+      filename = filename.replace('.js', '.ts');
+      typescriptExampleFiles[filename] = content;
+    });
+    return typescriptExampleFiles;
+  }
+  else {
+    return exampleFiles;
+  }
 
-
-  return exampleFiles;
 };
 
 /*
