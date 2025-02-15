@@ -1,261 +1,286 @@
-declare module '@semantic-ui/utils' {
-
-  /*-------------------
-         Errors
-  --------------------*/
-
-  export interface FatalOptions {
-    errorType?: ErrorConstructor;
+/*-------------------
+       Errors
+--------------------*/
+export function fatal(
+  message: string,
+  options?: {
+    errorType?: new (message: string) => Error;
     metadata?: Record<string, any>;
-    onError?: (error: Error) => void;
+    onError?: ((error: Error) => void) | null;
     removeStackLines?: number;
   }
+): void;
 
-  export function fatal(message: string, options?: FatalOptions): never;
+/*-------------------
+      Browser
+--------------------*/
 
-  /*-------------------
-         Browser
-  --------------------*/
+export function copyText(text: string): Promise<void>;
 
-  export function copyText(text: string): void;
-
-  export interface OpenLinkOptions {
+export function openLink(
+  url: string,
+  options?: {
     newWindow?: boolean;
     settings?: string;
     target?: string;
     event?: Event;
   }
-  export function openLink(url: string, options?: OpenLinkOptions): void;
-  export function getKeyFromEvent(event: KeyboardEvent): string;
+): void;
 
-  /*-------------------
-           XHR
-  --------------------*/
+export function getKeyFromEvent(event: KeyboardEvent): string;
 
-  export function getText(src: string, settings?: RequestInit): Promise<string>;
-  export function getJSON<T = any>(src: string, settings?: RequestInit): Promise<T>;
+/*-------------------
+         XHR
+--------------------*/
+export function getText(src: string, settings?: RequestInit): Promise<string>;
 
-  /*-------------------
-          Types
-  --------------------*/
+export function getJSON(src: string, settings?: RequestInit): Promise<any>;
 
-  export function isObject(x: any): x is object;
-  export function isPlainObject(x: any): x is Record<string, any>;
-  export function isString(x: any): x is string;
-  export function isBoolean(x: any): x is boolean;
-  export function isNumber(x: any): x is number;
-  export function isArray(x: any): x is Array<any>;
-  export function isBinary(x: any): x is Uint8Array;
-  export function isFunction(x: any): x is Function;
-  export function isPromise(x: any): x is Promise<any>;
-  export function isArguments(obj: any): boolean;
-  export function isDOM(element: any): boolean;
-  export function isNode(el: any): boolean;
-  export function isEmpty(x: any): boolean;
-  export function isClassInstance(obj: any): boolean;
+/*-------------------
+        Types
+--------------------*/
+export function isObject(x: any): boolean;
+export function isPlainObject(x: any): boolean;
+export function isString(x: any): boolean;
+export function isBoolean(x: any): boolean;
+export function isNumber(x: any): boolean;
+export function isArray(x: any): boolean;
+export function isBinary(x: any): boolean;
+export function isFunction(x: any): boolean;
+export function isPromise(x: any): boolean;
+export function isArguments(obj: any): boolean;
+export function isDOM(element: any): boolean;
+export function isNode(el: any): boolean;
+export function isEmpty(x: any): boolean;
+export function isClassInstance(obj: any): boolean;
 
-  /*-------------------
-          Date
-  --------------------*/
-
-  export interface FormatDateOptions {
+/*-------------------
+        Date
+--------------------*/
+export function formatDate(
+  date: Date,
+  format?: string,
+  options?: {
     locale?: string;
     hour12?: boolean;
     timezone?: string;
     [key: string]: any;
   }
+): string;
 
-  export function formatDate(date: Date, format?: string, options?: FormatDateOptions): string;
-
-  /*-------------------
+/*-------------------
       Functions
-  --------------------*/
-  export function noop(): void;
-  export function wrapFunction<T>(x: T | (() => T)): () => T;
+--------------------*/
+export function noop(): void;
 
-  export function memoize<T extends (...args: any[]) => any>(
-    fn: T,
-    hashFunction?: (...args: Parameters<T>) => string | number
-  ): T;
+export function wrapFunction<T>(x: T | (() => T)): () => T;
 
-  export interface DebounceOptions {
-    delay?: number;
-    immediate?: boolean;
-  }
-  export interface DebouncedFunction<T extends (...args: any[]) => any> {
-    (...args: Parameters<T>): void;
-    cancel(): void;
-  }
-  export function debounce<T extends (...args: any[]) => any>(
-    fn: T,
-    options: number | DebounceOptions
-  ): DebouncedFunction<T>;
+export function memoize<T extends (...args: any[]) => any>(
+  fn: T,
+  hashFunction?: (args: any[]) => any
+): T;
 
-  /*-------------------
-         Strings
-  --------------------*/
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  options: number | { delay?: number; immediate?: boolean }
+): T & { cancel: () => void };
 
-  export function kebabToCamel(str?: string): string;
-  export function camelToKebab(str?: string): string;
-  export function capitalize(str?: string): string;
-  export function capitalizeWords(str?: string): string;
-  
-  export interface JoinWordsOptions {
+/*-------------------
+      Strings
+--------------------*/
+export function kebabToCamel(str?: string): string;
+export function camelToKebab(str?: string): string;
+export function capitalize(str?: string): string;
+export function capitalizeWords(str?: string): string;
+export function toTitleCase(str: string): string;
+export function joinWords(
+  words: string[],
+  options?: {
     separator?: string;
     lastSeparator?: string;
     oxford?: boolean;
     quotes?: boolean;
-    transform?: (word: string) => string;
+    transform?: ((word: string) => string) | null;
   }
-  export function joinWords(words: string[], options?: JoinWordsOptions): string;
+): string;
+export function getArticle(word: string, settings?: { capitalize?: boolean }): string;
 
-  export function getArticle(word: string, settings?: { capitalize?: boolean }): string;
-  export function toTitleCase(str?: string): string;
+/*-------------------
+       Arrays
+--------------------*/
+export function unique<T>(arr: T[]): T[];
+export function filterEmpty<T>(arr: T[]): T[];
 
-  /*-------------------
-        Arrays
-  --------------------*/
-  export function unique<T>(arr: T[]): T[];
-  export function filterEmpty<T>(arr: T[]): NonNullable<T>[];
-  export function last<T>(array: T[], number?: number): T | T[] | undefined;
-  export function first<T>(array: T[], number?: number): T | T[] | undefined;
-  export function firstMatch<T>(array: T[], callback: (value: T, index: number, array: T[]) => boolean): T | undefined;
-  export function findIndex<T>(array: T[], callback: (value: T, index: number, array: T[]) => boolean): number;
-  export function remove<T>(array: T[], callbackOrValue: ((value: T, index: number, array: T[]) => boolean) | T): boolean;
-  export function inArray<T>(value: T, array?: T[]): boolean;
-  export function range(start: number, stop?: number, step?: number): number[];
-  export function sum(values: number[]): number;
-  export function where<T extends object>(array: T[], properties: Partial<T>): T[];
-  export function flatten<T>(arr: (T | T[])[]): T[];
-  export function some<T>(collection: T[], predicate: (value: T, index: number, array: T[]) => boolean): boolean;
-  export const any: typeof some;
+export function last<T>(array: T[]): T | undefined;
+export function last<T>(array: T[], number: number): T[];
 
-  export function sortBy<T>(
-    arr: T[],
-    key: keyof T | string,
-    comparator?: (valA: any, valB: any, objA: T, objB: T) => number
-  ): T[];
+export function first<T>(array: T[]): T | undefined;
+export function first<T>(array: T[], number: number): T[];
 
-  export function groupBy<T>(array: T[], property: keyof T | string): Record<string, T[]>;
-  export function moveItem<T>(array: T[], callbackOrValue: ((value: T, index: number, array: T[]) => boolean) | T, index: number | 'first' | 'last'): T[];
-  export function moveToFront<T>(array: T[], callbackOrValue: ((value: T, index: number, array: T[]) => boolean) | T): T[];
-  export function moveToBack<T>(array: T[], callbackOrValue: ((value: T, index: number, array: T[]) => boolean) | T): T[];
-  export function intersection<T>(...arrays: T[][]): T[];
-  export function difference<T>(...arrays: T[][]): T[];
-  export function uniqueItems<T>(...arrays: T[][]): T[];
+export function firstMatch<T>(
+  array: T[],
+  callback: (value: T, index: number, array: T[]) => boolean
+): T | undefined;
 
-  /*-------------------
-         Objects
-  --------------------*/
+export function findIndex<T>(
+  array: T[],
+  callback: (value: T, index: number, array: T[]) => boolean
+): number;
 
-  export function keys<T extends object>(obj: T): Array<keyof T>;
-  export function values<T extends object>(obj: T): Array<T[keyof T]>;
+export function remove<T>(
+  array: T[],
+  callbackOrValue: ((value: T) => boolean) | T
+): boolean;
 
-  export function filterObject<T extends object>(
-    obj: T,
-    callback: (value: T[keyof T], key: keyof T) => boolean
-  ): Partial<T>;
+export function inArray<T>(value: T, array?: T[]): boolean;
 
-  export function mapObject<T extends object, U>(
-    obj: T,
-    callback: (value: T[keyof T], key: keyof T) => U
-  ): Record<keyof T, U>;
+export function range(start: number, stop?: number, step?: number): number[];
 
-  export function extend<T extends object, U extends object[]>(
-    obj: T,
-    ...sources: U
-  ): T & U[number];
+export function sum(values: number[]): number;
 
-  export function pick<T extends object, K extends keyof T>(
-    obj: T,
-    ...keys: K[]
-  ): Pick<T, K>;
+export function where<T extends object>(
+  array: T[],
+  properties: Partial<T>
+): T[];
 
-  export function arrayFromObject<T extends object>(obj: T): Array<{ key: keyof T; value: T[keyof T] }>;
-  export function get(obj: any, path?: string): any;
-  export function proxyObject<T extends object>(sourceObj?: () => T, referenceObj?: object): T;
-  export function onlyKeys<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>;
-  export function hasProperty(obj: any, prop: PropertyKey): boolean;
-  export function reverseKeys(obj: Record<string, string | string[]>): Record<string, string | string[]>;
-  export function weightedObjectSearch<T extends object>(
-    query: string,
-    objectArray: T[],
-    options?: {
-      returnMatches?: boolean;
-      matchAllWords?: boolean;
-      propertiesToMatch?: Array<keyof T>;
-    }
-  ): T[];
+export function flatten(arr: any[]): any[];
 
-  /*-------------------
-       Numbers
-  --------------------*/
+export function some<T>(
+  collection: Array<T> | { some(predicate: (value: T, index: number, array: T[]) => boolean): boolean } | null | undefined,
+  predicate: (value: T, index: number, array: T[]) => boolean
+): boolean;
+export { some as any };
 
-  export function roundNumber(number: number, digits?: number): number;
+export function sortBy<T>(
+  arr: T[],
+  key: string,
+  comparator?: (valA: any, valB: any, a: T, b: T) => number
+): T[];
 
-  /*-------------------
-         RegExp
-  --------------------*/
+export function groupBy<T>(array: T[], property: string): { [key: string]: T[] };
 
-  export function escapeRegExp(string: string): string;
-  export function escapeHTML(string: string): string;
+export function moveItem<T>(
+  array: T[],
+  callbackOrValue: ((value: T) => boolean) | T,
+  index: number | 'first' | 'last'
+): T[];
 
-  /*-------------------
-         Identity
-  --------------------*/
+export function moveToFront<T>(
+  array: T[],
+  callbackOrValue: ((value: T) => boolean) | T
+): T[];
 
-  export function tokenize(str?: string): string;
-  export function prettifyID(num: number): string;
-  export function hashCode(
-    input: any,
-    options?: { prettify?: boolean; seed?: number }
-  ): number | string;
+export function moveToBack<T>(
+  array: T[],
+  callbackOrValue: ((value: T) => boolean) | T
+): T[];
 
-  export function generateID(): string;
+export function intersection<T>(...arrays: T[][]): T[];
 
-  /*-------------------
-         Clone
-  --------------------*/
+export function difference<T>(...arrays: T[][]): T[];
 
-  export function clone<T>(src: T): T;
+export function uniqueItems<T>(...arrays: T[][]): T[];
 
-  /*-------------------
-      Array / Object
-  --------------------*/
+/*-------------------
+      Objects
+--------------------*/
+export function keys(obj: any): string[] | undefined;
+export function values(obj: any): any[] | undefined;
 
-  export function each<T>(
-    obj: T[],
-    func: (value: T, index: number, array: T[]) => boolean | void,
-    context?: any
-  ): T[];
+export function filterObject<T extends object>(
+  obj: T,
+  callback: (value: T[keyof T], key: string) => boolean
+): Partial<T>;
 
-  export function each<T extends object>(
-    obj: T,
-    func: (value: T[keyof T], key: keyof T, obj: T) => boolean | void,
-    context?: any
-  ): T;
+export function mapObject<T extends object, U>(
+  obj: T,
+  callback: (value: T[keyof T], key: string) => U
+): { [K in keyof T]: U };
 
-  export function asyncEach<T>(
-    obj: T[],
-    func: (value: T, index: number, array: T[]) => Promise<boolean | void>,
-    context?: any
-  ): Promise<T[]>;
+export function extend(obj: any, ...sources: any[]): any;
 
-  export function asyncEach<T extends object>(
-    obj: T,
-    func: (value: T[keyof T], key: keyof T, obj: T) => Promise<boolean | void>,
-    context?: any
-  ): Promise<T>;
+export function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
 
-  export function asyncMap<T, U>(
-    obj: T[],
-    func: (value: T, index: number, array: T[]) => Promise<U>,
-    context?: any
-  ): Promise<U[]>;
-
-  export function asyncMap<T extends object, U>(
-    obj: T,
-    func: (value: T[keyof T], key: keyof T, obj: T) => Promise<U>,
-    context?: any
-  ): Promise<Record<keyof T, U>>;
+export interface KeyValue {
+  key: string;
+  value: any;
 }
+export function arrayFromObject(obj: any): KeyValue[];
+
+export function get(obj: any, path?: string): any;
+
+export function proxyObject<T extends object>(
+  sourceObj?: () => any,
+  referenceObj?: T
+): T;
+
+export function onlyKeys<T extends object>(
+  obj: T,
+  keysToKeep: (keyof T)[]
+): Partial<T>;
+
+export function hasProperty(obj: object, prop: PropertyKey): boolean;
+
+export function reverseKeys(obj: { [key: string]: any }): { [key: string]: string | string[] };
+
+export function weightedObjectSearch(
+  query?: string,
+  objectArray?: any[],
+  options?: {
+    returnMatches?: boolean;
+    matchAllWords?: boolean;
+    propertiesToMatch?: string[];
+  }
+): any[];
+
+/*-------------------
+   Array / Object
+--------------------*/
+export function clone<T>(src: T, seen?: Map<any, any>): T;
+
+export function each<T>(
+  obj: T[] | { [key: string]: T },
+  func: (value: T, key: number | string, obj: T[] | { [key: string]: T }) => any,
+  context?: any
+): T[] | { [key: string]: T };
+
+export function asyncEach<T>(
+  obj: T[] | { [key: string]: T },
+  func: (value: T, key: number | string, obj: T[] | { [key: string]: T }) => Promise<any>,
+  context?: any
+): Promise<T[] | { [key: string]: T }>;
+
+export function asyncMap<T, U>(
+  obj: T[] | { [key: string]: T },
+  func: (value: T, key: number | string, obj: T[] | { [key: string]: T }) => Promise<U>,
+  context?: any
+): Promise<U[] | { [key: string]: U }>;
+
+/*-------------------
+      Numbers
+--------------------*/
+export function roundNumber(number: number, digits?: number): number;
+
+/*-------------------
+      RegExp
+--------------------*/
+export function escapeRegExp(string: string): string;
+export function escapeHTML(string: string): string;
+
+/*-------------------
+     Identity
+--------------------*/
+export function tokenize(str?: string): string;
+export function prettifyID(num: number): string;
+export function hashCode(
+  input: any,
+  options?: { prettify?: boolean; seed?: number }
+): number | string;
+export function generateID(): string;
+export function isEqual(a: any, b: any, options?: any): boolean;
+
+/*-------------------
+     Constants
+--------------------*/
+export const isServer: boolean;
+export const isClient: boolean;
