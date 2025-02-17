@@ -37,7 +37,7 @@ export class Dependency {
    */
   changed(context?: {
     /** The new value that caused the change */
-    value: unknown;
+    value?: unknown;
     /** Stack trace showing where the change originated */
     trace?: string;
   }): void;
