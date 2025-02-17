@@ -26,11 +26,8 @@ export default defineWorkspace([
       name: 'browser',
       browser: {
         enabled: true,
-        headless: true,
         provider: 'playwright',
-        instances: [
-          { browser: 'chromium' }
-        ]
+        name: 'chromium'
       },
       setupFiles: ['tests/setup/browser-setup.js'],
     }
