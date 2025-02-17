@@ -4,11 +4,19 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+
+# Version 0.8.4
+
+### Improvements
+
+* Adds type definitions to reactivity library
+* Refactors and improves type definitions for utils
+
 # Version 0.8.3
 
 ### Improvements
 
-* Adds type definitions to utils library as a start
+* Adds type definitions to utils library
 
 # Version 0.8.2
 
