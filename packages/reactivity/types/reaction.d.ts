@@ -1,3 +1,5 @@
+import type { Dependency } from './dependency';
+
 /**
  * Represents a reactive computation that automatically re-runs when its dependencies change.
  * Used to create side effects and computations that respond to reactive state changes.
@@ -38,7 +40,7 @@ export class Reaction {
    * Set of current dependencies being tracked by this reaction.
    * Updated automatically when reactive values are accessed during execution.
    */
-  readonly dependencies: Set<unknown>;
+  readonly dependencies: Set<Dependency>;
 
   /**
    * Executes the reaction's callback, tracking accessed reactive values as dependencies.
