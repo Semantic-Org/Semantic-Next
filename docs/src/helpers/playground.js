@@ -3,6 +3,7 @@ import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString
 import { addPlaygroundInjections, errorJS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
+import { packageJSON } from '../pages/examples/package.json.js';
 
 /*
   Helper to add code folding for import export statements
@@ -45,6 +46,7 @@ export const getExampleFiles = async({
   useTypescript = true, // convert js files to ts files
   emptyIfAllGenerated = false, // if all files are generated return an empty object
   includeImportMap = !isStaticBuild, // whether to map imports to node_modules
+  includePackageJSON = true, // whether to include a package.json file defining project deps
 } = {}) => {
   if(!contentID) {
     return;
@@ -210,10 +212,6 @@ export const getExampleFiles = async({
     addPlaygroundInjections(exampleFiles, { includeLog });
   }
 
-  if(includeImportMap) {
-    exampleFiles['import-map.js'] = getImportMap();
-  }
-
   if(emptyIfAllGenerated) {
     let allGenerated = true;
     each(exampleFiles, (file, name) => {
@@ -239,11 +237,17 @@ export const getExampleFiles = async({
       filename = filename.replace('.js', '.ts');
       typescriptExampleFiles[filename] = content;
     });
-    return typescriptExampleFiles;
+    exampleFiles = typescriptExampleFiles;
   }
-  else {
-    return exampleFiles;
+
+  if(includeImportMap) {
+    exampleFiles['import-map.js'] = getImportMap();
   }
+  if(includePackageJSON) {
+    exampleFiles['package.json'] = getPackageJSON();
+  }
+
+  return exampleFiles;
 
 };
 
@@ -336,6 +340,15 @@ export const getExampleID = (example) => {
   return exampleID;
 };
 
+
+export const getPackageJSON = () => {
+  return {
+    contentType: 'text/json',
+    hidden: true,
+    generated: true,
+    content: packageJSON
+  };
+};
 
 export const getImportMap = () => {
   return {
