@@ -1,64 +1,69 @@
 /**
  * Represents a reactive computation that automatically re-runs when its dependencies change.
- * Reactions are used to create reactive side effects and computations that respond to changes
- * in Signal values.
+ * Used to create side effects and computations that respond to reactive state changes.
  */
 export class Reaction {
   /**
-   * Creates a new Reaction instance that will run the provided callback
-   * when its dependencies change
+   * Creates a new Reaction that runs the provided callback when dependencies change.
+   * The callback receives the Reaction instance as its parameter.
+   *
    * @param callback - Function to run when dependencies change
    */
   constructor(callback: (computation: Reaction) => void);
 
   /**
-   * Whether this is the first execution of the reaction
+   * Indicates if this is the first execution of the reaction.
+   * Useful for initialization logic that should only run once.
    */
   readonly firstRun: boolean;
 
   /**
-   * Whether the reaction is currently active and responding to changes
+   * Whether the reaction is currently active and responding to changes.
+   * False if the reaction has been stopped.
    */
   readonly active: boolean;
 
   /**
-   * The current dependency context
+   * The current dependency context that triggered this reaction.
+   * Contains information about the value change that caused the reaction to run.
    */
   readonly context: {
-    /**
-     * The value that triggered the reaction
-     */
-    value: any;
-    /**
-     * Stack trace of where the change originated
-     */
+    /** The value that triggered the reaction */
+    value: unknown;
+    /** Stack trace showing where the change originated */
     trace?: string;
   } | null;
 
   /**
-   * Set of current dependencies for this reaction
+   * Set of current dependencies being tracked by this reaction.
+   * Updated automatically when reactive values are accessed during execution.
    */
   readonly dependencies: Set<unknown>;
 
   /**
-   * Executes the reaction's callback, tracking any accessed reactive values
-   * as dependencies
+   * Executes the reaction's callback, tracking accessed reactive values as dependencies.
+   * Called automatically when dependencies change.
    */
   run(): void;
 
   /**
-   * Marks the reaction as invalid and schedules it to run again
-   * @param context - Optional context about what triggered the invalidation
+   * Marks the reaction as invalid and schedules it to run again.
+   * Called automatically when dependencies change.
+   *
+   * @param context - Optional metadata about what triggered the invalidation
    */
-  invalidate(context?: { value: any; trace?: string }): void;
+  invalidate(context?: { value: unknown; trace?: string }): void;
 
   /**
-   * Permanently stops the reaction from running
+   * Permanently stops the reaction from running.
+   * The reaction will no longer respond to dependency changes.
    */
   stop(): void;
 
   /**
-   * Creates and immediately runs a new reactive computation
+   * Creates and immediately runs a new reactive computation.
+   * Provides a more convenient way to create reactions than using the constructor.
+   *
    * @param callback - Function to run reactively
    * @returns The created Reaction instance
    * @example
@@ -74,34 +79,43 @@ export class Reaction {
   static create(callback: (computation: Reaction) => void): Reaction;
 
   /**
-   * Gets the currently running reaction, if any
+   * Gets the currently running reaction, if any.
+   * Used internally to track dependencies during reaction execution.
    */
   static get current(): Reaction | null;
 
   /**
-   * Immediately processes all pending reactive updates
+   * Immediately processes all pending reactive updates.
+   * Forces reactions to run synchronously instead of waiting for the microtask queue.
    */
   static flush(): void;
 
   /**
-   * Schedules reactive updates to be processed in the next microtask
+   * Schedules reactive updates to be processed in the next microtask.
+   * This is the default behavior when dependencies change.
    */
   static scheduleFlush(): void;
 
   /**
-   * Registers a callback to run after the next flush of reactive updates
+   * Registers a callback to run after the next flush of reactive updates.
+   * Useful for running side effects after all reactions have processed.
+   *
    * @param callback - Function to run after updates are processed
    */
   static afterFlush(callback: () => void): void;
 
   /**
-   * Gets the source location that triggered the current reaction
-   * @returns Stack trace string or undefined if no source is available
+   * Gets the source location that triggered the current reaction.
+   * Useful for debugging reactive updates and understanding update chains.
+   *
+   * @returns A formatted stack trace string, or undefined if no source is available
    */
   static getSource(): string | undefined;
 
   /**
-   * Runs a function without establishing any reactive dependencies
+   * Runs a function without establishing any reactive dependencies.
+   * Useful for reading reactive values without creating permanent dependencies.
+   *
    * @param callback - Function to run non-reactively
    * @returns The result of the callback
    * @example
@@ -116,7 +130,8 @@ export class Reaction {
 
   /**
    * Creates a guarded reactive computation that only triggers updates
-   * when its return value changes
+   * when its return value changes according to the equality check.
+   *
    * @param callback - Function that returns a value to guard
    * @param equalityCheck - Optional function to determine if the value has changed
    * @returns The current value of the guarded computation
