@@ -1,4 +1,4 @@
-export type { Signal, SignalOptions } from './signal';
-export type { Reaction } from './reaction';
-export type { Dependency } from './dependency';
-export type { Scheduler } from './scheduler';
+export { Signal, SignalOptions } from './signal';
+export { Reaction } from './reaction';
+export { Dependency } from './dependency';
+export { Scheduler } from './scheduler';
