@@ -1,5 +1,5 @@
-import { get, isEqual } from './objects.js';
-import { each } from './collections.js';
+import { get } from './objects.js';
+import { each, isEqual } from './collections.js';
 import { isFunction } from './types.js';
 
 /*-------------------
