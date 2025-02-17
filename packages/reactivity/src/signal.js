@@ -100,6 +100,14 @@ export class Signal {
     arr.splice(...args);
     this.set(arr);
   }
+  map(mapFunction) {
+    const newValue = Array.prototype.map.call(this.peek(), mapFunction);
+    this.set(newValue);
+  }
+  filter(filterFunction) {
+    const newValue = Array.prototype.filter.call(this.peek(), filterFunction);
+    this.set(newValue);
+  }
 
   getIndex(index) {
     return this.get()[index];
