@@ -1,7 +1,7 @@
 import * as _ from './utils.js'
 
-// use as single funtions
+// support single function imports
 export * from './utils.js'
 
-// use as utility belt
+// support as utility belt
 export default _
