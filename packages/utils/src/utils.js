@@ -588,7 +588,7 @@ export const findIndex = (array = [], callback) => {
 export const remove = (array = [], callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
-    : (val) => isEqual(val, callbackOrValue);
+    : (val) => isEqual(val, callbackOrValue);d
   const index = findIndex(array, callback);
   if (index > -1) {
     array.splice(index, 1);
