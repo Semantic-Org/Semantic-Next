@@ -57,16 +57,84 @@ export function isClassInstance(obj: any): boolean;
 /*-------------------
         Date
 --------------------*/
-export function formatDate(
-  date: Date,
-  format?: string,
-  options?: {
-    locale?: string;
-    hour12?: boolean;
-    timezone?: string;
-    [key: string]: any;
-  }
-): string;
+type DatePreset = 'LT' | 'LTS' | 'L' | 'l' | 'LL' | 'll' | 'LLL' | 'lll' | 'LLLL' | 'llll';
+type DateToken = 'YYYY' | 'YY' | 'MMMM' | 'MMM' | 'MM' | 'M' | 'DD' | 'D' | 'Do' | 'dddd' | 'ddd' | 'HH' | 'hh' | 'h' | 'mm' | 'ss' | 'a';
+type TimezonePreset =
+  | 'UTC'
+  | 'local'
+  | 'America/New_York'
+  | 'America/Los_Angeles'
+  | 'America/Chicago'
+  | 'Europe/London'
+  | 'Europe/Paris'
+  | 'Asia/Tokyo';
+
+type LocalePreset =
+  | 'default'
+  | 'en'
+  | 'en-US'
+  | 'en-GB'
+  | 'es'
+  | 'es-ES'
+  | 'es-MX'
+  | 'fr'
+  | 'fr-FR'
+  | 'de'
+  | 'de-DE'
+  | 'it'
+  | 'it-IT'
+  | 'ja'
+  | 'ja-JP'
+  | 'ko'
+  | 'ko-KR'
+  | 'zh'
+  | 'zh-CN'
+  | 'zh-TW';
+
+interface DateFormatOptionsPreset {
+  locale?: LocalePreset;
+  hour12?: boolean;
+  timezone?: TimezonePreset;
+}
+
+interface DateFormatOptionsCustom {
+  locale?: string;
+  hour12?: boolean;
+  timezone?: string;
+}
+
+/**
+ * Formats a date using preset patterns or format tokens
+ * 
+ * Presets:
+ * ────────────────────────────────────────
+ * LT   → 1:30 pm
+ * LTS  → 1:30:30 pm
+ * L    → 03/09/2024
+ * l    → 3/9/2024  
+ * LL   → March 9, 2024
+ * ll   → Mar 9, 2024
+ * LLL  → March 9, 2024 1:30 pm
+ * lll  → Mar 9, 2024 1:30 pm
+ * LLLL → Sunday, March 9, 2024 1:30 pm
+ * llll → Sun, Mar 9, 2024 1:30 pm
+ * 
+ * Tokens:
+ * ────────────────────────────────────────
+ * Year    │ YYYY │ 2024  │ YY │ 24
+ * Month   │ MMMM │ March │ MMM │ Mar │ MM │ 03 │ M │ 3
+ * Day     │ DD   │ 09    │ D  │ 9  │ Do │ 9th
+ * Weekday │ dddd │ Sunday│ ddd │ Sun
+ * Hour    │ HH   │ 13    │ hh │ 01 │ h  │ 1
+ * Minute  │ mm   │ 05
+ * Second  │ ss   │ 30
+ * Period  │ a    │ am/pm
+ */
+
+export function formatDate(date: Date, format: DatePreset | DateToken, options?: DateFormatOptionsPreset): string;
+export function formatDate(date: Date, format: string, options?: DateFormatOptionsCustom): string;
+export function formatDate(date: Date, format?: string, options?: DateFormatOptionsCustom): string;
+export function formatDate(date: Date, format: string = 'LLL', options?: DateFormatOptionsCustom): string;
 
 /*-------------------
       Functions

@@ -4,6 +4,7 @@
   "version": "0.8.3",
   "main": "src/index.js",
   "module": "src/index.js",
+  "types": "types/index.d.ts",
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
@@ -11,5 +12,10 @@
   },
   "devDependencies": {
     "vitest": "^3.0.4"
-  }
+  },
+  "files": [
+    "src",
+    "types",
+    "README.md"
+  ]
 }
