@@ -101,7 +101,7 @@ export const range = (start, stop, step = 1) => {
   }
   const length = stop - start;
   return Array(length)
-    .fill()
+    .fill(undefined)
     .map((x, index) => {
       return index * step + start;
     });
