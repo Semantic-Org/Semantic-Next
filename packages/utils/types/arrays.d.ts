@@ -10,10 +10,10 @@ export interface ArrayCallback<T> {
 }
 
 /**
- * predicate function for array operations that find items
- */
+* predicate function for array operations that find items
+*/
 export interface ArrayPredicate<T> {
-  (value: T, index: number, array: T[]): any;
+ (value: T, index: number, array: T[]): any;
 }
 
 /**
@@ -382,7 +382,7 @@ export function moveToFront<T>(
  * ```
  */
 export function moveToBack<T>(
-  array: T[],
-  callbackOrValue: T | ArrayPredicate<T>
+ array: T[],
+ callbackOrValue: T | ArrayPredicate<T>
 ): T[];
   
