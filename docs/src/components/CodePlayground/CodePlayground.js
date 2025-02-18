@@ -73,7 +73,7 @@ const defaultSettings = {
 
   // whether to use ts under the hood for autocompletion
   // but show js to users in menu bar
-  hideTypescriptExtensions: true,
+  hideTypescriptExtensions: false,
 
   // order of code
   sortOrder: [
@@ -489,10 +489,11 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     const codeHeight = $$('.CodeMirror-sizer').first().height();
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
-    const panelHeight = menuHeight + codeHeight + offset;
-    if(panelHeight > 30 && panelHeight < 600) {
-      $('ui-panels').first().css('height', `${panelHeight}px`);
-    }
+    let panelHeight = menuHeight + codeHeight + offset;
+    panelHeight = Math.min(panelHeight, 600);
+    panelHeight = Math.max(panelHeight, 30);
+    console.log('height is', panelHeight);
+    $('ui-panels').first().css('height', `${panelHeight}px`);
   }
 
 });
