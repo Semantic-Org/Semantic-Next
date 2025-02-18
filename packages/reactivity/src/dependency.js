@@ -1,4 +1,4 @@
-import type { Scheduler } from './scheduler.js';
+import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor() {
