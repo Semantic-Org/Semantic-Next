@@ -9,6 +9,57 @@
   border-radius: 100px;
 }
 
+/* Autocomplete */
+.CodeMirror-hints {
+  box-shadow: 1px 2px 10px #000;
+  background: #090c10 var(--subtle-angled-gradient);
+  font-size: var(--playground-code-font-size, 14px);
+  font-family: 'Lato';
+  max-height: 20em;
+  width: 600px;
+/*  max-width: min(600px, 100%);*/
+  max-width: -webkit-fill-available;
+  margin-right: 1rem;
+  border-radius: var(--border-radius);
+  border: var(--border);
+}
+
+.CodeMirror-hint {
+  line-height: 24px;
+  border-radius: var(--border-radius);
+}
+.CodeMirror-hint-active {
+  background: #152d37;
+  filter: none;
+}
+.CodeMirror-hint .hint-object-name {
+  color: #FFFFFF;
+  font-weight: bold;
+}
+.CodeMirror-hint .hint-object-details {
+  color: #818691;
+  opacity: 1;
+  line-height: 1.4;
+  margin-top: 3px;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  text-align: right;
+  flex-basis: 80%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.CodeMirror-hint mark {
+  color: var(--primary-text-color);
+  border-bottom: 1px solid #003351;
+  color: #90c0db;
+}
+
+
+/* Fold Markers */
 .CodeMirror-foldmarker {
   color: var(--standard-40);
   background: var(--standard-10) var(--angled-gradient);
