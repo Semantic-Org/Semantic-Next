@@ -26,14 +26,12 @@ export const localPackages = [
   '@semantic-ui/core/packages/query',
   '@semantic-ui/core/packages/specs',
   '@semantic-ui/core/packages/utils',
-]
+];
 
 const packages = (isStaticBuild)
   ? npmPackages
   : localPackages
 ;
-
-const base = import.meta.env.SITE || '';
 
 const packageImports = { imports: {} };
 
