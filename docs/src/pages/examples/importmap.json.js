@@ -28,14 +28,14 @@ export const localPackages = [
   '@semantic-ui/core/packages/utils',
 ];
 
-const packages = (isStaticBuild)
+const importPackages = (isStaticBuild)
   ? npmPackages
   : localPackages
 ;
 
 const packageImports = { imports: {} };
 
-for (const pkg of packages) {
+for (const pkg of importPackages) {
   try {
     const pkgPath = path.resolve(
       process.cwd(),
