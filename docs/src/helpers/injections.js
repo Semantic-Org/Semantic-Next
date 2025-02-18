@@ -61,82 +61,53 @@ const suiBase = isStaticBuild
   : `${packageBase}/@semantic-ui/core`
 ;
 
-export const headLibraryJS = `
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="${suiBase}/dist/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
-<link rel="stylesheet" href="${suiBase}/dist/theme/base.css"></link>
-<script>
-  function dispatchCustomEvent(eventName) {
-    const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
-    window.frameElement.dispatchEvent(event);
-  }
-  window.addEventListener('focus', function() {
-    dispatchCustomEvent('iframefocus');
-  }, true);
-  window.addEventListener('blur', function() {
-    dispatchCustomEvent('iframeblur');
-  }, true);
-  document.addEventListener('touchstart', function(){});
-</script>
-`;
-
 export const errorJS = `
   const ErrorInterceptor = {
     init() {
-      // Store original error handler
       this.originalOnerror = window.onerror;
-
-      // Create error container if it doesn't exist
-      if (!document.getElementById('error-container')) {
-        const container = document.createElement('div');
-        container.id = 'error-container';
-        container.style.cssText = \`
-          font-family: monospace;
-          white-space: pre-wrap;
-          margin: 10px 0;
-        \`;
-        document.body.appendChild(container);
-      }
-
-      // Set up error handlers
       window.onerror = this.handleError.bind(this);
       window.addEventListener('unhandledrejection', this.handleRejection.bind(this));
     },
 
+    formatError(error, source, line, col) {
+      let message = "";
+      const file = source.split('/').pop();
+      message += \`<span class="error-name">\${error.name}: \${error.message}</span>\`;
+      message += \`<div class="error-location">at \${file}:\${line}:\${col}</div>\`;
+      return message;
+    },
+
     handleError(msg, source, line, col, error) {
+      const newHash = \`\${msg}\${source}\${line}\`;
+      if(this.lastHash == newHash) {
+        return;
+      }
+      this.lastHash = newHash;
+      let container = document.getElementById('error-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'error-container';
+        document.body.appendChild(container);
+      };
+
       const errorDiv = document.createElement('div');
-      errorDiv.style.cssText = \`
-        color: #d32f2f;
-        background-color: #ffebee;
-        padding: 10px;
-        border-radius: 4px;
-        margin-top: 10px;
-      \`;
+      errorDiv.classList.add('error-item')
 
-      const errorMessage = error?.stack || \`\${msg}\n    at \${source}:\${line}:\${col}\`;
-      errorDiv.textContent = errorMessage;
+      const formattedError = this.formatError(error, source, line, col);
+      errorDiv.innerHTML = formattedError;
 
-      document.getElementById('error-container').appendChild(errorDiv);
+      container.appendChild(errorDiv);
 
-      // Call original error handler if it exists
       if (this.originalOnerror) {
         return this.originalOnerror(msg, source, line, col, error);
       }
-
-      return false; // Prevents default browser error handling
+      return false;
     },
 
     handleRejection(event) {
-      this.handleError(
-        event.reason.message || 'Promise Rejection',
-        'Promise',
-        0,
-        0,
-        event.reason
-      );
+      const reason = event.reason;
+      const message = reason?.message || 'Promise Rejection';
+      this.handleError(message, 'Promise', 0, 0, reason);
     },
 
     clear() {
@@ -145,7 +116,7 @@ export const errorJS = `
         container.innerHTML = '';
       }
     }
-  };
+};
 
   // Auto-initialize
   ErrorInterceptor.init();
@@ -173,12 +144,6 @@ console.log = function() {
 
     // Create a container for logs
     logContainer = document.createElement('div');
-    logContainer.id = 'log-container';
-    logContainer.style.fontFamily = 'Consolas, "Courier New", monospace';
-    logContainer.style.color = '#AAAAAA';
-    logContainer.style.margin = '0';
-    logContainer.style.width = '100%'; // Full width
-    logContainer.style.boxSizing = 'border-box'; // Box-sizing
 
     // Append the log container to the body
     body.appendChild(logContainer);
@@ -221,17 +186,113 @@ function formatJSON(value, skipFormat = false) {
 }
 ${hideMarkerEnd}`;
 
+
+export const headLibraryJS = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<script src="${suiBase}/dist/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
+<link rel="stylesheet" href="${suiBase}/dist/theme/base.css"></link>
+<script>
+  document.querySelector('html').removeAttribute('style');
+  if(localStorage.getItem('theme') == 'dark') {
+    document.querySelector('html').classList.add('dark');
+  }
+  function dispatchCustomEvent(eventName) {
+    const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true });
+    window.frameElement.dispatchEvent(event);
+  }
+  window.addEventListener('focus', function() {
+    dispatchCustomEvent('iframefocus');
+  }, true);
+  window.addEventListener('blur', function() {
+    dispatchCustomEvent('iframeblur');
+  }, true);
+  document.addEventListener('touchstart', function(){});
+</script>
+<style>
+  html.dark body { background-color: #000000; }
+  body { touch-action: auto; height: auto; overflow: auto; min-width: 0px; padding: 1rem }
+</style>
+`;
+
 // TODO
 const wrapConsole = `${hideMarkerStart}
 ${hideMarkerEnd}`;
 
+export const errorCSS = `
+  html #error-container {
+    color: rgb(99 11 11);
+    background-image: linear-gradient(45deg, oklch(0.93 0.05 14.52), oklch(0.94 0.02 14.16));
+    border-left: 3px solid oklch(0.53 0.13 20.81);
+  }
+  html.dark #error-container {
+    color: rgb(255 255 255);
+    border: none;
+    background-color: oklch(0.37 0.17 28.96);
+    background-image: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+    border-radius: 4px;
+  }
+  #error-container {
+    font-family: system-ui,
+     -apple-system, BlinkMacSystemFont,
+     "Roboto",
+     "Oxygen",
+     "Ubuntu",
+     "Cantarell",
+     "Fira Sans",
+     "Droid Sans",
+     "Lato",
+     sans-serif
+    ;
+    gap: 5px;
+    white-space: pre-wrap;
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-radius: 0px 4px 4px 0px;
+    overflow: auto;
+    max-height: 300px;
 
-export const logCSS = `${hideMarkerStart}
-  .json-key { color: #656565; }
-  .json-string { color: var(--primary-text-color); }
-  .json-number { color: var(--primary-text-color); }
-  .json-boolean { color: var(--primary-text-color); }
-${hideMarkerEnd}`;
+    .error-item {
+    }
+    .error-name {
+    }
+    .error-stack {
+      color: var(--standard-30);
+      margin-left: 20px;
+    }
+    .error-location {
+      color: var(--standard-70);
+      float: right;
+    }
+  }
+`
+
+export const logCSS = `
+  #log-container {
+    font-family: system-ui,
+     -apple-system, BlinkMacSystemFont,
+     "Segoe UI",
+     "Roboto",
+     "Oxygen",
+     "Ubuntu",
+     "Cantarell",
+     "Fira Sans",
+     "Droid Sans",
+     "Lato",
+     sans-serif
+    ;
+    width: 100%;
+    margin: 0;
+    color: var(--standard-60);
+
+    .json-key { color: #656565; }
+    .json-string { color: var(--primary-text-color); }
+    .json-number { color: var(--primary-text-color); }
+    .json-boolean { color: var(--primary-text-color); }
+  }
+`;
 
 
 /*
@@ -240,18 +301,27 @@ ${hideMarkerEnd}`;
 */
 
 export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
-  const pageScripts = [
-    'component.js',
-    'page.js',
-    'page.css',
-    'error.js',
-  ];
 
+  // page styling always first
+  const pageScripts = ['page.css'];
+
+  // log always next
   if(includeLog) {
-    pageScripts.unshift('index.js');
-    pageScripts.unshift('log.js');
-    pageScripts.unshift('log.css');
+    pageScripts.push('log.js');
+    pageScripts.push('log.css');
   }
+
+  // error always before component
+  pageScripts.push('error.js');
+  pageScripts.push('error.css');
+
+  // components always last
+  pageScripts.push('index.js');
+  pageScripts.push('component.js');
+  pageScripts.push('component.js');
+
+  // page code always last
+  pageScripts.push('page.js');
 
   const getScriptCode = function() {
     let html = '';
@@ -274,7 +344,7 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
 
   return `<html>
   <head>
-${getScriptCode()} ${hideCode({ text: headLibraryJS, isHTML: true })}  </head>
+${hideCode({ text: headLibraryJS, isHTML: true })} ${getScriptCode()}  </head>
   <body>
 `;
 };
@@ -284,14 +354,10 @@ export const pageHTMLAfter = `
   </body>
 </html>`;
 
-export const pageJSBefore = `${hideMarkerStart}
-document.querySelector('html').removeAttribute('style');
-if(localStorage.getItem('theme') == 'dark') {
-  document.querySelector('html').classList.add('dark');
-}${hideMarkerEnd}`;
+export const pageJSBefore = ``;
 export const pageJSAfter = ``;
 
-export const pageCSSBefore = `${hideMarkerStart}body { touch-action: auto; height: auto; overflow: auto; min-width: 0px; padding: 1rem }${hideMarkerEnd}`;
+export const pageCSSBefore = ``;
 export const pageCSSAfter = ``;
 
 

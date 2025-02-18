@@ -1,6 +1,6 @@
 import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, errorJS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
+import { addPlaygroundInjections, errorJS, errorCSS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 import { packageJSON } from '../pages/examples/package.json.js';
@@ -166,6 +166,12 @@ export const getExampleFiles = async({
       generated: true,
       hidden: true,
       content: errorJS
+    };
+    exampleFiles['error.css'] = {
+      contentType: 'text/css',
+      generated: true,
+      hidden: true,
+      content: errorCSS
     };
   }
 
