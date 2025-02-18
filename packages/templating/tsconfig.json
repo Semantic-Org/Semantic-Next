@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "noEmit": true,
     "declaration": true,
     "declarationDir": "types",
@@ -11,16 +11,10 @@
     "target": "es2020",
     "lib": ["es2020", "dom"],
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"],
-  "overrides": [
-    {
-      "files": ["src/**/*.js"],
-      "compilerOptions": {
-        "noImplicitAny": false
-      }
-    }
-  ]
 }
