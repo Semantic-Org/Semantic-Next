@@ -56,7 +56,7 @@ export interface EventHandler {
 /**
  * Options for CSS style retrieval.
  */
-export interface CssOptions {
+export interface CSSOptions {
   /**
    * If true, retrieves computed styles instead of inline styles.
    */
@@ -421,7 +421,7 @@ export class Query {
    * @param options - Optional settings for getting styles.
    * @returns If setting, the Query instance for chaining.  If getting, the value of the property for the *first* element, or an array of values.
    */
-  css(property: string, value?: string | null, options?: CssOptions): string | string[] | undefined | this;
+  css(property: string, value?: string | null, options?: CSSOptions): string | string[] | undefined | this;
   /**
    * Sets multiple CSS properties for each element in the current set.
    * @param property - An object of property-value pairs.

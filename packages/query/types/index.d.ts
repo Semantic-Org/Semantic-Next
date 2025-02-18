@@ -1,4 +1,4 @@
-import { Query } from './query';
+import { QueryOptions, EventHandler, EventOptions, CSSOptions, Query } from './query';
 
 /**
  * The main function for creating a Query instance.  This is often aliased as `$`.
@@ -41,4 +41,7 @@ declare function restoreGlobals(settings?: RestoreGlobalsOptions): typeof $;
 
 declare function useAlias(selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions): Query;
 
-export { Query, $, $$, exportGlobals, restoreGlobals, useAlias }; // Export Query directly
+export { 
+  Query, QueryOptions, EventHandler, EventOptions, CSSOptions, 
+  $, $$, exportGlobals, restoreGlobals, useAlias 
+};

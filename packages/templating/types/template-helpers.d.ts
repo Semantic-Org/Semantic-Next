@@ -1,0 +1,47 @@
+export interface TemplateHelpersType {
+    exists(a: any): boolean;
+    isEmpty(a: any): boolean;
+    stringify(a: any): string;
+    hasAny(a: any[] | undefined | null): boolean;
+    range(start: number, stop?: number, step?: number): number[];
+    concat(...args: string[]): string;
+    both(a: any, b: any): boolean;
+    either(a: any, b: any): boolean;
+    join(array: string[], delimiter?: string, spaceAfter?: boolean): string | undefined;
+    classes(classes: string[], spaceAfter?: boolean): string | undefined;
+    joinComma(array?: string[], oxford?: boolean, quotes?: boolean): string;
+    classIf(expr: any, trueClass?: string, falseClass?: string): string;
+    classMap(classObj: Record<string, any>): string;
+    maybe(expr: any, trueExpr: any, falseExpr: any): any;
+    activeIf(expr: any): string;
+    selectedIf(expr: any): string;
+    capitalize(text?: string): string;
+    titleCase(text?: string): string;
+    disabledIf(expr: any): string;
+    checkedIf(expr: any): string;
+    maybePlural(value: number, plural?: string): string;
+    not(a: any): boolean;
+    is(a: any, b: any): boolean;
+    notEqual(a: any, b: any): boolean;
+    isExactly(a: any, b: any): boolean;
+    isNotExactly(a: any, b: any): boolean;
+    greaterThan(a: number, b: number): boolean;
+    lessThan(a: number, b: number): boolean;
+    greaterThanEquals(a: number, b: number): boolean;
+    lessThanEquals(a: number, b: number): boolean;
+    numberFromIndex(a: number): number;
+    formatDate(date?: Date, format?: string, options?: { timezone?: string }): string;
+    formatDateTime(date?: Date, format?: string, options?: { timezone?: string }): string;
+    formatDateTimeSeconds(date?: Date, format?: string, options?: { timezone?: string }): string;
+    object(params: { obj: any }): any;
+    log(...args: any[]): void;
+    debugger(): void;
+    tokenize(string?: string): string[];
+    debugReactivity(): void;
+    arrayFromObject(obj: Record<string, any>): { key: string; value: any }[];
+    escapeHTML(string: string): string;
+    guard<T>(fn: () => T): T | undefined;
+    nonreactive<T>(fn: () => T): T;
+}
+
+export const TemplateHelpers: TemplateHelpersType;
