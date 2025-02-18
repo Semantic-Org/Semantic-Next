@@ -5,12 +5,6 @@
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./types/index.d.ts",
-      "default": "./src/index.js"
-    },
-  },
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
