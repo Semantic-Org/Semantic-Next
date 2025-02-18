@@ -4,6 +4,15 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+
+# Version 0.8.6
+
+### Improvements
+* Add type definitions to templating library
+
+### Bugs
+* Fix typo in utils that may have caused types not to load
+
 # Version 0.8.5
 
 ### Bugs
