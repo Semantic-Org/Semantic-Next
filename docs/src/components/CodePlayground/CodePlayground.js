@@ -71,6 +71,10 @@ const defaultSettings = {
   // max height when using inline
   maxHeight: 'natural',
 
+  // whether to use ts under the hood for autocompletion
+  // but show js to users in menu bar
+  hideTypescriptExtensions: true,
+
   // order of code
   sortOrder: [
     'index.js',
@@ -360,8 +364,12 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
       if(!settings.includeGeneratedInline && file?.generated) {
         return;
       }
+      const label = (settings.hideTypescriptExtensions)
+        ? file.filename.replace('ts', 'js')
+        : file.filename
+      ;
       return {
-        label: file.filename,
+        label: label,
         value: file.filename,
       };
     }).filter(({value} = {}) => {

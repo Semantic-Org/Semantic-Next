@@ -235,17 +235,7 @@ export const errorCSS = `
     border-radius: 4px;
   }
   #error-container {
-    font-family: system-ui,
-     -apple-system, BlinkMacSystemFont,
-     "Roboto",
-     "Oxygen",
-     "Ubuntu",
-     "Cantarell",
-     "Fira Sans",
-     "Droid Sans",
-     "Lato",
-     sans-serif
-    ;
+    font-family: "Lato", sans-serif;
     gap: 5px;
     white-space: pre-wrap;
     margin: 10px 0;
@@ -263,8 +253,8 @@ export const errorCSS = `
       margin-left: 20px;
     }
     .error-location {
+      font-size: 13px;
       color: var(--standard-70);
-      float: right;
     }
   }
 `
