@@ -618,6 +618,7 @@ export const Template = class Template {
         bindKey: this.bindKey.bind(this),
         unbindKey: this.unbindKey.bind(this),
         abortController: this.eventController,
+        helpers: TemplateHelpers,
 
         template: this,
         templateName: this.templateName,
