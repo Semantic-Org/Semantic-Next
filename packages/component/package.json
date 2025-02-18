@@ -4,6 +4,7 @@
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
+  "types": "types/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
   "peerDependencies": {
