@@ -5,6 +5,11 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 
+# Version 0.8.7
+
+### Bugs
+* Fix use of type import in uncompiled javascript
+
 # Version 0.8.6
 
 ### Improvements
