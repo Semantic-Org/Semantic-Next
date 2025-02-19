@@ -15,7 +15,7 @@ export interface JoinWordsOptions {
   /** Wrap words in quotes (default: false) */
   quotes?: boolean;
   /** Transform function to apply to each word */
-  transform?: (word: string) => string;
+  transform?: ((word: string) => string) | (() => void);
 }
 
 /**
