@@ -1,4 +1,4 @@
-import { isArray, isObject } from './types.js';
+import { isArray, isObject, isFunction } from './types.js';
 
 /*-------------------
      Collections
