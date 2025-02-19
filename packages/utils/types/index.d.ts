@@ -1,2 +1,7 @@
 export * from './utils';
-export { default } from './utils';
+
+// Export the default utility belt
+declare const Utils: {
+  [key: string]: any;
+};
+export default Utils;
