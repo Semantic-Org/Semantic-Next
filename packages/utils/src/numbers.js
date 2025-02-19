@@ -1,4 +1,4 @@
-import { isNumber } from './types';
+import { isNumber } from './types.js';
 
 /*-------------------
        Numbers
