@@ -21,7 +21,7 @@ export interface DebounceOptions {
  * const callback = shouldExecute ? actualCallback : noop;
  * ```
  */
-export function noop(): void;
+export function noop(...args: any[]): void;
 
 /**
  * Wraps a value in a function if it isn't already a function
