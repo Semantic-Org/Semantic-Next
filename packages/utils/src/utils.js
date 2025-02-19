@@ -5,11 +5,11 @@
 
 export * from './arrays.js';
 export * from './browser.js';
-export * from './collections.js';
+export * from './looping.js';
 export * from './dates.js';
 export * from './errors.js';
 export * from './functions.js';
-export * from './identity.js';
+export * from './crypto.js';
 export * from './numbers.js';
 export * from './objects.js';
 export * from './regexp.js';
