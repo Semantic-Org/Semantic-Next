@@ -1,5 +1,6 @@
 /**
  * Array manipulation utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays Array Utilities Documentation}
  */
 
 /**
@@ -32,6 +33,7 @@ export type MatchProperties<T> = {
 
 /**
  * Removes duplicates from an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#unique unique}
  *
  * @param arr - The array to remove duplicates from
  * @returns A new array with duplicate values removed
@@ -48,6 +50,7 @@ export function unique<T>(arr: T[]): T[];
  * Returns the common elements between two or more arrays
  * High-performance implementation that switches between Set and Array methods
  * based on input size
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#intersection intersection}
  *
  * @param arrays - Two or more arrays to find common elements
  * @returns Array of elements common to all input arrays
@@ -64,6 +67,7 @@ export function intersection<T>(...arrays: T[][]): T[];
  * Returns elements from the first array that are not present in subsequent arrays
  * High-performance implementation that switches between Set and Array methods
  * based on input size
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#difference difference}
  *
  * @param arrays - Two or more arrays to find differences
  * @returns Array of elements unique to the first array
@@ -80,6 +84,7 @@ export function difference<T>(...arrays: T[][]): T[];
  * Returns elements that appear in only one array (non-overlapping elements)
  * High-performance implementation that switches between Set and Array methods
  * based on input size
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#uniqueitems uniqueItems}
  *
  * @param arrays - Two or more arrays to find unique elements
  * @returns Array of elements that appear in exactly one array
@@ -94,6 +99,7 @@ export function uniqueItems<T>(...arrays: T[][]): T[];
 
 /**
  * Removes falsey values (false, null, 0, "", undefined, and NaN) from an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#filterempty filterEmpty}
  *
  * @param arr - The array to filter
  * @returns A new array with falsey values removed
@@ -107,6 +113,7 @@ export function filterEmpty<T>(arr: T[]): Exclude<T, null | undefined | false | 
 
 /**
  * Gets the last element(s) from an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#last last}
  *
  * @param array - The source array
  * @param number - Number of elements to return (default: 1)
@@ -124,6 +131,7 @@ export function last<T>(array: T[], number?: number): T | T[] | undefined; //com
 
 /**
  * Gets the first element(s) from an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#first first}
  *
  * @param array - The source array
  * @param number - Number of elements to return (default: 1)
@@ -141,6 +149,7 @@ export function first<T>(array: T[], number?: number): T | T[] | undefined; //co
 
 /**
  * Returns the first element that matches the callback criteria
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#firstmatch firstMatch}
  *
  * @param array - The array to search
  * @param callback - Function to test each element
@@ -155,6 +164,7 @@ export function firstMatch<T>(array: T[], callback: ArrayCallback<T>): T | undef
 
 /**
  * Finds the index of the first element that matches the callback criteria
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#findindex findIndex}
  *
  * @param array - The array to search
  * @param callback - Function to test each element
@@ -169,6 +179,7 @@ export function findIndex<T>(array: T[], callback: ArrayCallback<T>): number;
 
 /**
  * Removes elements from an array that match a value or callback
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#remove remove}
  *
  * @param array - The array to modify
  * @param callbackOrValue - Value to remove or function to test elements
@@ -184,6 +195,7 @@ export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): bo
 
 /**
  * Checks if a value exists in an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#inarray inArray}
  *
  * @param value - The value to search for
  * @param array - The array to search in
@@ -199,6 +211,7 @@ export function inArray<T>(array: T[], value: T): boolean;
 
 /**
  * Creates an array of numbers progressing from start up to, but not including, end
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#range range}
  *
  * @param start - The start number
  * @param stop - The end number
@@ -219,6 +232,7 @@ export function range(start: number, stop?: number, step?: number): number[]; //
 
 /**
  * Calculates the sum of an array of numbers
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#sum sum}
  *
  * @param values - Array of numbers to sum
  * @returns The sum of all numbers
@@ -232,6 +246,7 @@ export function sum(values: number[]): number;
 
 /**
  * Filters an array of objects by matching properties
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#where where}
  *
  * @param array - Array of objects to filter
  * @param properties - Object of properties to match
@@ -251,6 +266,7 @@ export function where<T extends object>(array: T[], properties: MatchProperties<
 
 /**
  * Flattens a nested array structure
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#flatten flatten}
  *
  * @param arr - The array to flatten
  * @returns A new flattened array
@@ -264,6 +280,7 @@ export function flatten<T>(arr: (T | T[])[]): T[];
 
 /**
  * Tests whether at least one element in the array passes the test
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#some some}
  *
  * @param collection - The array to test
  * @param predicate - Function to test each element
@@ -279,11 +296,13 @@ export function some<T>(collection: T[], predicate: ArrayCallback<T>): boolean;
 
 /**
  * Alias for some()
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#any any}
  */
 export const any: typeof some;
 
 /**
  * Sorts an array of objects by a specific key with optional comparator
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#sortby sortBy}
  *
  * @param arr - Array to sort
  * @param key - Key to sort by
@@ -308,6 +327,7 @@ export function sortBy<T>(
 
 /**
  * Groups an array of objects by a property value
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#groupby groupBy}
  *
  * @param array - Array to group
  * @param property - Property to group by
@@ -332,6 +352,7 @@ export function groupBy<T>(array: T[], property: keyof T): Record<string, T[]>;
 
 /**
  * Moves an element to a specific index in an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#moveitem moveItem}
  *
  * @param array - The array to modify
  * @param callbackOrValue - Value or callback to identify the element
@@ -353,6 +374,7 @@ export function moveItem<T>(
 
 /**
  * Moves an element to the start of an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#movetofront moveToFront}
  *
  * @param array - The array to modify
  * @param callbackOrValue - Value or callback to identify the element
@@ -371,6 +393,8 @@ export function moveToFront<T>(
 
 /**
  * Moves an element to the end of an array
+ * @see {@link https://next.semantic-ui.com/api/utils/arrays#movetoback moveToBack}
+ *
  * @param array - The array to modify
  * @param callbackOrValue - Value or callback to identify the element
  * @returns The modified array
