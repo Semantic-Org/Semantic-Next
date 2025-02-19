@@ -1,8 +1,3 @@
-  /*
-  An simple utility belt
-  to save time on common boilerplate
-*/
-
 /*-------------------
        Errors
 --------------------*/

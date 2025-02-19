@@ -1,4 +1,4 @@
-import { each } from './collections.js';
+import { each } from './looping.js';
 import { isArray, isObject } from './types.js';
 
 /*-------------------
