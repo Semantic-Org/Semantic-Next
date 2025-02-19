@@ -1,7 +1,6 @@
 import { clone, isObject, isEqual, wrapFunction, isClassInstance, isArray, findIndex, unique, isNumber } from '@semantic-ui/utils';
 import { Reaction } from './reaction.js';
 import { Dependency } from './dependency.js';
-
 export class Signal {
 
   constructor(initialValue, { equalityFunction, allowClone = true, cloneFunction } = {}) {
