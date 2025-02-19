@@ -1,5 +1,6 @@
 import { get } from './objects.js';
-import { each, isEqual } from './looping.js';
+import { each } from './looping.js';
+import { isEqual } from './equality.js';
 import { isFunction } from './types.js';
 
 /*-------------------
