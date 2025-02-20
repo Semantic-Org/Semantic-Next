@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "strictNullChecks": true,
     "allowJs": true,
+    "checkJs": true,
     "paths": {
       "@layouts/*": ["src/layouts/*"],
       "@components/*": ["src/components/*"],
