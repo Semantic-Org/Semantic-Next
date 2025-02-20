@@ -78,12 +78,15 @@ const defaultSettings = {
   // order of code
   sortOrder: [
     'index.js',
+    'index.ts',
     'component.js',
+    'component.ts',
     'component.html',
     'component.css',
     'page.html',
     'page.css',
     'page.js',
+    'page.ts',
   ],
 
   // types to use
@@ -97,34 +100,43 @@ const defaultSettings = {
   // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
+    'component.ts': 'component.js',
     'index.js': 'index.js',
+    'index.ts': 'index.js',
     'component.html': 'component.html',
     'component.css': 'component.css',
     'page.html': 'page.html',
     'page.css': 'page.css',
     'page.js': 'page.js',
+    'page.ts': 'page.js',
 
   },
 
   // which panel should code appear in 0 is left and 1 is right
   panelIndexes: {
+    'component.ts': 0,
     'component.js': 0,
+    'index.ts': 0,
     'index.js': 0,
     'component.html': 0,
     'component.css': 0,
     'page.html': 1,
     'page.css': 1,
+    'page.ts': 1,
     'page.js': 1,
   },
 
   // how to split up code in panel view
   panelSizes: {
+    'component.ts': 'grow',
     'component.js': 'grow',
+    'index.ts': 'grow',
     'index.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
     'page.html': (1 / 9 * 100),
     'page.css': (1 / 9 * 100),
+    'page.ts': (1 / 9 * 100),
     'page.js': (1 / 9 * 100),
   },
 
