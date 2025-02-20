@@ -51,7 +51,7 @@ export class Signal<T> {
    * Sets a new value, triggering updates if the value has changed.
    * Notifies all reactive contexts that depend on this Signal to re-run.
    */
-   set value(newValue: T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> : Partial<T> & Record<string, any>);
+   set value(newValue: T extends null | undefined ? any : T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> : Partial<T> & Record<string, any>);
 
    /**
    * Gets the current value and establishes a reactive dependency.
@@ -64,7 +64,7 @@ export class Signal<T> {
    * This is an alias for `value` setter.
    * @param newValue - The new value to set
    */
-   set(newValue: T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> : Partial<T> & Record<string, any>): void;
+   set(newValue: T extends null | undefined ? any : T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> : Partial<T> & Record<string, any>): void;
 
    /**
    * Returns the current value without establishing a reactive dependency.
@@ -168,35 +168,35 @@ export class Signal<T> {
    // These methods are available when the Signal's value is a boolean.
    /**
    * Toggles a boolean value between true and false.
-   * This method is only available when `T` is or extends `boolean`.
+   * This method is only available when `T` is or extends `boolean`, or is null/undefined.
    */
-   toggle(this: Signal<boolean>): void;
+   toggle(this: Signal<boolean | null | undefined>): void;
 
    // Numeric methods (only available when T is or extends number)
    // These methods are available when the Signal's value is a number.
    /**
    * Increments the numeric value.
-   * This method is only available when `T` is or extends `number`.
+   * This method is only available when `T` is or extends `number`, or is null/undefined.
    * @param amount - Amount to increment by
    * @default 1
    */
-   increment(this: Signal<number>, amount?: number): void;
+   increment(this: Signal<number | null | undefined>, amount?: number): void;
 
    /**
    * Decrements the numeric value.
-   * This method is only available when `T` is or extends `number`.
+   * This method is only available when `T` is or extends `number`, or is null/undefined.
    * @param amount - Amount to decrement by
    * @default 1
    */
-   decrement(this: Signal<number>, amount?: number): void;
+   decrement(this: Signal<number | null | undefined>, amount?: number): void;
 
    // Date methods (only available when T is or extends Date)
    // These methods are available when the Signal's value is a Date object.
    /**
    * Sets the value to the current date/time.
-   * This method is only available when `T` is or extends `Date`.
+   * This method is only available when `T` is or extends `Date`, or is null/undefined.
    */
-   now(this: Signal<Date>): void;
+   now(this: Signal<Date | null | undefined>): void;
 
    // Object ID related methods (for arrays or Signal values that are objects with IDs)
    // These methods facilitate working with objects that have identifier properties
