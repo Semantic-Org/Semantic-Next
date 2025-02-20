@@ -3,7 +3,7 @@
   "version": "0.8.13",
   "main": "src/index.js",
   "module": "src/index.js",
-  "types": "types/index.js",
+  "types": "types/index.d.ts",
   "author": "Jack Lukic",
   "license": "ISC",
   "peerDependencies": {
