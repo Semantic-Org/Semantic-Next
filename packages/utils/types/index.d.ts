@@ -3,6 +3,7 @@ export * from './browser';
 export * from './cloning';
 export * from './crypto';
 export * from './dates';
+export * from './equality';
 export * from './errors';
 export * from './functions';
 export * from './looping';

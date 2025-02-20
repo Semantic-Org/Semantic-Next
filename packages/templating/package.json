@@ -1,6 +1,5 @@
 {
   "name": "@semantic-ui/templating",
-  "type": "module",
   "version": "0.8.12",
   "main": "src/index.js",
   "module": "src/index.js",

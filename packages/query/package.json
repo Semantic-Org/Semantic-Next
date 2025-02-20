@@ -1,6 +1,5 @@
 {
   "name": "@semantic-ui/query",
-  "type": "module",
   "version": "0.8.12",
   "main": "src/index.cjs",
   "module": "src/index.js",
