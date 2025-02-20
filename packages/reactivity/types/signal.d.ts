@@ -252,7 +252,13 @@ export class Signal<T> {
    * @param property - Property name
    * @param value - Value to set
    */
-   setProperty<K extends keyof T>(id: string, property: K, value: T[K]): void;
+   setProperty<U extends Record<string, any>[]>(
+    this: Signal<U>,
+    id: string,
+    property: keyof U[number],
+    value: U[number][keyof U[number]]
+   ): void;
+
    /**
    * Sets a property directly on the Signal's value (if it's an object).
    * Assumes the Signal's value is an object.
