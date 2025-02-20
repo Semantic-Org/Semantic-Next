@@ -1,7 +1,6 @@
 {
   "name": "@semantic-ui/component",
   "version": "0.8.13",
-  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.js",
