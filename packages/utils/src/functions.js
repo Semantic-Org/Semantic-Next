@@ -8,7 +8,7 @@ import { hashCode } from './crypto.js';
 /*
   Efficient no operation func
 */
-export const noop = function () {};
+export const noop = (v) => v;
 
 /*
   Call function even if its not defined
