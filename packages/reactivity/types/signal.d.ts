@@ -51,7 +51,10 @@ export class Signal<T> {
    * Sets a new value, triggering updates if the value has changed.
    * Notifies all reactive contexts that depend on this Signal to re-run.
    */
-   set value(newValue: T extends null | undefined ? any : T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> : Partial<T> & Record<string, any>);
+   set value(newValue: T extends null | undefined ? any : 
+      T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> :
+      T extends object ? Partial<T> & Record<string, any> :
+      T);
 
    /**
    * Gets the current value and establishes a reactive dependency.
@@ -64,7 +67,10 @@ export class Signal<T> {
    * This is an alias for `value` setter.
    * @param newValue - The new value to set
    */
-   set(newValue: T extends null | undefined ? any : T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> : Partial<T> & Record<string, any>): void;
+   set(newValue: T extends null | undefined ? any :
+      T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>> :
+      T extends object ? Partial<T> & Record<string, any> :
+      T): void;
 
    /**
    * Returns the current value without establishing a reactive dependency.
