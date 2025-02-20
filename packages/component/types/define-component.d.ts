@@ -1,14 +1,20 @@
 import { CSSResult } from 'lit';
-import { Template } from '@semantic-ui/templating';
-import { WebComponentBase } from './web-component'; // Assuming web-component.d.ts exists and exports WebComponentBase
+import { Template, CallParams } from '@semantic-ui/templating';
+import { WebComponentBase } from './web-component';
 import { PropertyValues } from 'lit';
 
-export interface DefineComponentOptions {
+export interface DefineComponentOptions<
+  TState extends Record<string, any>,
+  TSettings extends Record<string, any>,
+  TCreateComponent extends () => any,
+  TProperties extends Record<string, any>
+> {
   /**
-   * The HTML tag name for the custom element (e.g., 'my-component').  Should be kebab-case.
+   * The HTML tag name for the custom element (e.g., 'my-component'). 
+   * Note: If you do not pass in a tag name the template instance will be returned for use as a subtemplate
    * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
    */
-  tagName: string;
+  tagName?: string;
   /**
    * The template string to use for the component's content.
    * See {@link https://next.semantic-ui.com/components/create#template Template} for more details.
@@ -42,10 +48,10 @@ export interface DefineComponentOptions {
    * A function that creates the component's instance methods and properties.
    * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
    */
-  createComponent?: () => any;
+  createComponent?: TCreateComponent; // Use generic type
   /**
    * An object mapping event strings (e.g., "click .button") to event handler functions.
-   * See {@link https://next.semantic-ui.com/components/eventss Events} for more details.
+   * See {@link https://next.semantic-ui.com/components/events Events} for more details.
    */
   events?: Record<string, Function>;
   /**
@@ -57,26 +63,33 @@ export interface DefineComponentOptions {
   /**
    * Lifecycle callback - invoked after the component is created.
    * See {@link https://next.semantic-ui.com/components/lifecycle#oncreated onCreated Callback} for more details.
+   * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onCreated?: () => void;
+  onCreated?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
    * Lifecycle callback - invoked after the component is rendered.
    * See {@link https://next.semantic-ui.com/components/lifecycle#onrendered onRendered Callback} for more details.
+   * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onRendered?: () => void;
+  onRendered?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
    * Lifecycle callback - invoked after the component is destroyed.
    * See {@link https://next.semantic-ui.com/components/lifecycle#ondestroyed onDestroyed Callback} for more details.
+   * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onDestroyed?: () => void;
+  onDestroyed?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
-   * Lifecycle callback - invoked after the theme is changed.
+   * Lifecycle callback - invoked after the theme changes.
    * See {@link https://next.semantic-ui.com/components/lifecycle#onthemechanged onThemeChanged Callback} for more details.
+   * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onThemeChanged?: () => void;
+  onThemeChanged?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
    * Lifecycle callback - invoked when an observed attribute changes.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#onattributechanged onattributechanged Callback} for more details.
+   * @param attributeName The name of the attribute that changed
+   * @param oldValue The previous value
+   * @param newValue The new value
+   * See {@link https://next.semantic-ui.com/components/lifecycle#onattributechanged onAttributeChanged Callback} for more details.
    */
   onAttributeChanged?: (attributeName: string, oldValue: string | null, newValue: string | null) => void;
 
@@ -84,12 +97,12 @@ export interface DefineComponentOptions {
    * Settings are reactive values which can be modified from outside the component.
    * See {@link https://next.semantic-ui.com/components/rendering#settings Component Settings} for more details.
    */
-  defaultSettings?: Record<string, any>;
+  defaultSettings?: TSettings; // Use generic type
   /**
    * State is an internal reactive data store for your component
    * See {@link https://next.semantic-ui.com/components/rendering#state Component State} for more details.
    */
-  defaultState?: Record<string, any>;
+  defaultState?: TState; // Use generic type
 
   /**
    * Subtemplates are a mapping of template names to template instances that can be used in your template.
@@ -107,7 +120,7 @@ export interface DefineComponentOptions {
    * This allows you to pass in Lit properties directly
    * which may be useful when porting existing components.
    */
-  properties?: Record<string, any>; // You might want a more specific type for property definitions.
+  properties?: TProperties; // Use generic type
 
   /**
    * Component specs allow you to pass in a JSON spec
@@ -134,8 +147,13 @@ export interface DefineComponentOptions {
  * @returns The custom element class (if `tagName` is provided) or template.
  * See {@link https://next.semantic-ui.com/components Creating Components} for more information.
  */
-export function defineComponent<T extends WebComponentBase>(options: DefineComponentOptions): string | typeof HTMLElement | T; // Return the custom element class
-
+export function defineComponent<
+  TState extends Record<string, any>,
+  TState extends Record<string, any> = Record<string, any>,
+  TSettings extends Record<string, any> = Record<string, any>,
+  TCreateComponent extends () => any = () => any,
+  TOptions extends DefineComponentOptions<TState, TSettings, TCreateComponent, TProperties> // Use generic options
+>(options: TOptions): string | typeof HTMLElement | (WebComponentBase & { new(): (WebComponentBase & TOptions['properties']) }); // Improved return type
 
 /**
  * The base class for the generated web components.

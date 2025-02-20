@@ -1,14 +1,14 @@
 import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers';
-import { Query, QueryOptions } from '@semantic-ui/query'; // Import Query and QueryOptions
-import { Signal, SignalOptions, Reaction } from '@semantic-ui/reactivity'; // Import Signal and Reaction
-
+import { Query, QueryOptions } from '@semantic-ui/query';
+import { Signal, SignalOptions, Reaction } from '@semantic-ui/reactivity';;
+import { ASTNode } from './compiler/template-compiler';
 
 export interface TemplateSettings {
   /** The name of the template. */
   templateName?: string;
   /** The compiled Abstract Syntax Tree (AST) of the template. */
-  ast?: import('./compiler/template-compiler').ASTNode[]; // Import ASTNode
+  ast?: ASTNode[];
   /** The raw template string. */
   template?: string;
   /** The data context for the template. */
@@ -38,15 +38,15 @@ export interface TemplateSettings {
   /** Whether to automatically attach styles to the renderRoot. */
   attachStyles?: boolean;
   /** Callback function invoked after the template is created. */
-  onCreated?: () => void;
+  onCreated?: (params: CallParams) => void;
   /** Callback function invoked after the template is rendered. */
-  onRendered?: () => void;
+  onRendered?: (params: CallParams) => void;
   /** Callback function invoked after the template is updated. */
-  onUpdated?: () => void;
+  onUpdated?: (params: CallParams) => void;
   /** Callback function invoked after the template is destroyed. */
-  onDestroyed?: () => void;
+  onDestroyed?: (params: CallParams) => void;
   /** Callback function invoked after the theme has changed */
-  onThemeChanged?: () => void;
+  onThemeChanged?: (params: CallParams) => void;
 }
 export type DataContext = Record<string, any>;
 
@@ -54,24 +54,34 @@ export type DataContext = Record<string, any>;
  * Represents a rendered template instance, merging the instance properties and data context.
  */
 export interface RenderedTemplate {
-  [key: string]: any; // Allows any other properties since it merges instance and data.
+    [key: string]: any; // Allows any other properties since it merges instance and data.
 }
 
+// Helper type to recursively extract Signal values from a record
+type ExtractSignalValues<T> = {
+  [K in keyof T]: T[K] extends Signal<infer U> ? U : T[K];
+};
 
-export interface CallParams {
+// Updated CallParams with generics
+export interface CallParams<
+    TState extends Record<string, any> = Record<string, any>,
+    TSettings extends Record<string, any> = Record<string, any>,
+    TComponentInstance extends Record<string, any> = Record<string, any>,
+    TProperties extends Record<string, any> = Record<string, any>  // For Lit properties
+> {
   /** The DOM element associated with the call. */
   el: HTMLElement;
-  /** The template instance (type might need refinement). */
-  tpl?: any;
+  /** The template instance. */
+  tpl?: TComponentInstance;  // Use generic type
   /** The 'this' context of the calling function. */
-  self?: any;
+  self?: TComponentInstance; // Use generic type
   /** The component instance. */
-  component?: any;
+  component?: TComponentInstance; // Use generic type
   /** A function for querying DOM elements (similar to jQuery). */
   $: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
   /** A function for querying DOM elements, piercing shadow DOM (similar to jQuery). */
   $$: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
-  /** Creates a reactive effect. See {@link Template.reaction}. */
+    /** Creates a reactive effect. See {@link Template.reaction}. */
   reaction: Template['reaction'];
   /** Creates a reactive signal. See {@link Template.signal}. */
   signal: Template['signal'];
@@ -83,10 +93,16 @@ export interface CallParams {
   flush: () => void;
   /** The data context for the call. */
   data?: DataContext;
-  /** Settings for the call (type might need refinement). */
-  settings?: any;
-  /** Reactive state variables. */
-  state?: Record<string, Signal<any>>;
+    /**
+ * Settings for the call (type might need refinement).
+ * See {@link https://next.semantic-ui.com/components/rendering#settings Component Settings} for more details.
+ */
+  settings?: TSettings & TProperties; // Use generic type. Lit properties are NOT exposed.
+  /**
+    * Reactive state variables.  The unwrapped values from the Signals.
+    * See {@link https://next.semantic-ui.com/components/rendering#state Component State} for more details.
+    */
+  state?: ExtractSignalValues<TState>; // Use ExtractSignalValues
   /** Checks if the template is rendered. */
   isRendered: () => boolean;
   /** Indicates if the rendering is happening on the server. */
@@ -116,15 +132,13 @@ export interface CallParams {
   /** Finds a parent template by name. */
   findParent: (templateName: string) => RenderedTemplate | undefined;
   /** Finds a child template by name */
-  findChild(templateName: string) => RenderedTemplate | undefined;
+  findChild: (templateName: string) => RenderedTemplate | undefined;
   /** Finds all child templates by name. */
   findChildren(templateName: string): RenderedTemplate[];
   /** Content of the template (type might need refinement). */
   content?: any;
   /** Indicates if dark mode is enabled. */
   darkMode: boolean;
-  /** Allows for additional data to be passed. */
-  [key: string]: any;
 }
 
 export interface EventData {
@@ -150,8 +164,8 @@ export interface ParsedEvent {
   eventName: string;
   /**
    * The type of event binding:
-   * - 'deep': Listens for the event deeply within the DOM, even if it originates from a descendant that doesn't match the selector.
-   * - 'global': Listens for the event on the global scope (document).
+   * - 'deep': Listens deeply within the DOM, even if originating from a descendant not matching the selector.
+   * - 'global': Listens on the global scope (document).
    * - 'delegated': Uses event delegation within the template's root.
    */
   eventType: 'deep' | 'global' | 'delegated';
@@ -188,7 +202,7 @@ export class Template {
   static renderedTemplates: Map<string, Template[]>;
 
   /** The compiled Abstract Syntax Tree (AST) of the template. */
-  ast: import('./compiler/template-compiler').ASTNode[]; // Import ASTNode
+  ast: ASTNode[];
   /** CSS styles for the template (as a string). */
   css?: string;
   /** The data context for the template. */
@@ -208,13 +222,13 @@ export class Template {
   /** Key bindings for the template. */
   keys: KeyBindings;
   /** Callback function invoked after the template is created. */
-  onCreatedCallback: Function;
+  onCreatedCallback: (params: CallParams) => void;
   /** Callback function invoked after the template is destroyed. */
-  onDestroyedCallback: Function;
+  onDestroyedCallback: (params: CallParams) => void;
   /** Callback function invoked after the template is rendered. */
-  onRenderedCallback: Function;
+  onRenderedCallback: (params: CallParams) => void;
   /** Callback function invoked when the theme changes. */
-  onThemeChangedCallback: Function;
+  onThemeChangedCallback: (params: CallParams) => void;
   /** The parent template (if this is a nested template). */
   parentTemplate?: Template;
   /** Array of reactive reactions associated with the template. */
@@ -261,7 +275,7 @@ export class Template {
   /** the current key */
   currentKey?: string;
   /** The key timeout */
-  resetSequence?:  ReturnType<typeof setTimeout>;
+  resetSequence?: ReturnType<typeof setTimeout>;
 
   /**
    * Creates a new Template instance.
@@ -296,7 +310,7 @@ export class Template {
    * @param element - The DOM element.
    */
   setElement(element: HTMLElement): void;
-    /**
+  /**
    * Generates a generic template name (e.g., "Anonymous #1").
    * @returns The generic template name.
    */
@@ -314,7 +328,7 @@ export class Template {
    */
   attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): Promise<void>;
 
-    /**
+  /**
    * Gets the combined data context, including data, state, and instance properties.
    * @returns The data context object.
    */
@@ -332,7 +346,7 @@ export class Template {
    */
   clone(settings?: Partial<TemplateSettings>): Template;
 
-    /**
+  /**
    * Parses an event string into its constituent parts (eventName, eventType, selector).
    * @param eventString - The event string to parse (e.g., "click .my-button", "global keydown .input").
    * @returns Parsed event array.
@@ -386,15 +400,14 @@ export class Template {
   /**
    * Queries for DOM elements within the template's renderRoot (similar to jQuery's $).
    * @param selector - The CSS selector.
-   * @param options - query settings
-   * @returns A Query object representing the matched elements.
-   */
+    * @param options - query settings
+    * @returns A Query object representing the matched elements.
+    */
   $(selector: string, options?: QuerySettings): Query;
-
-  /**
+/**
    * Queries for DOM elements within the template's renderRoot, piercing shadow DOM boundaries (similar to jQuery's $$).
    * @param selector - The CSS selector.
-    * @param options - query settings
+   * @param options - query settings
    * @returns A Query object representing the matched elements.
    */
   $$(selector: string, options?: QuerySettings): Query;
@@ -405,7 +418,15 @@ export class Template {
    * @param options - options
    * @returns The return value of the called function, or undefined if the function is not defined.
    */
-  call<T>(func: ((params: CallParams) => T) | undefined, options?: { params?: CallParams, additionalData?: Record<string, any>, firstArg?: any, additionalArgs?: any[] }): T | undefined;
+  call<T>(
+      func: ((params: CallParams) => T) | undefined,
+      options?: {
+          params?: CallParams;
+          additionalData?: Record<string, any>;
+          firstArg?: any;
+          additionalArgs?: any[];
+      }
+  ): T | undefined;
 
   /**
    * Attaches an event listener using event delegation.
@@ -423,11 +444,11 @@ export class Template {
    * Dispatches a custom event from the template's element.
    * @param eventName - The name of the custom event.
    * @param eventData - Data to be included in the event's detail property.
-   * @param eventSettings - event settings
-   * @param options
-   * @param options.triggerCallback - whether to trigger the callback. default `true`
-   * @returns A Query object for managing the event.
-   */
+    * @param eventSettings - event settings
+    * @param options
+    * @param options.triggerCallback - whether to trigger the callback. default `true`
+    * @returns A Query object for managing the event.
+    */
   dispatchEvent(eventName: string, eventData?: EventData, eventSettings?: EventSettings, options?: { triggerCallback?: boolean }): Query;
 
   /**
@@ -517,32 +538,31 @@ export class Template {
    */
   static findChildTemplates(template: Template, templateName: string): RenderedTemplate[];
 
-    /**
+  /**
    * Finds a single, direct child, template
    * @param {Template} template - template to search
    * @param {string} templateName - name of template to find
    * @returns {RenderedTemplate | undefined} Returns rendered template instance.
    */
   static findChildTemplate(template: Template, templateName: string): RenderedTemplate | undefined;
-
   /**
-   * Lifecycle callback invoked after the template is created.
-   */
+    * Lifecycle callback invoked after the template is created.
+    */
   onCreated: () => void;
   /**
-   * Lifecycle callback invoked after the template is destroyed.
-   */
+    * Lifecycle callback invoked after the template is destroyed.
+    */
   onDestroyed: () => void;
   /**
-   * Lifecycle callback invoked after the template is rendered.
-   */
+    * Lifecycle callback invoked after the template is rendered.
+    */
   onRendered: () => void;
   /**
-   * Lifecycle callback invoked after the template is updated.
-   */
+    * Lifecycle callback invoked after the template is updated.
+    */
   onUpdated: () => void;
   /**
-   * Lifecycle callback invoked after the theme changes.
-   */
+    * Lifecycle callback invoked after the theme changes.
+    */
   onThemeChanged: (...args: any[]) => void;
 }
