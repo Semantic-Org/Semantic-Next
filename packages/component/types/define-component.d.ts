@@ -10,7 +10,7 @@ export interface DefineComponentOptions<
   TProperties extends Record<string, any>
 > {
   /**
-   * The HTML tag name for the custom element (e.g., 'my-component'). 
+   * The HTML tag name for the custom element (e.g., 'my-component').
    * Note: If you do not pass in a tag name the template instance will be returned for use as a subtemplate
    * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
    */
