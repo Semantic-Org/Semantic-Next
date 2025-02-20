@@ -1,5 +1,6 @@
 import { get } from './objects.js';
-import { each, isEqual } from './collections.js';
+import { each } from './looping.js';
+import { isEqual } from './equality.js';
 import { isFunction } from './types.js';
 
 /*-------------------
@@ -101,7 +102,7 @@ export const range = (start, stop, step = 1) => {
   }
   const length = stop - start;
   return Array(length)
-    .fill()
+    .fill(undefined)
     .map((x, index) => {
       return index * step + start;
     });

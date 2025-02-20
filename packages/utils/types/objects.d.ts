@@ -75,23 +75,7 @@ export function filterObject<T extends object>(
  * extend({ a: 1 }, { b: 2 }, { c: 3 }) // returns { a: 1, b: 2, c: 3 }
  * ```
  */
-export function extend<T extends object, U extends object[]>(
-  obj: T,
-  ...sources: U
-): T & U[number];
 
-/**
- * Creates an object composed of the picked object properties
- * 
- * @param obj - The source object
- * @param keys - The property keys to pick
- * @returns New object with just the picked properties
- * 
- * @example
- * ```ts
- * pick({ a: 1, b: 2, c: 3 }, 'a', 'c') // returns { a: 1, c: 3 }
- * ```
- */
 export function pick<T extends object, K extends keyof T>(
   obj: T,
   ...keys: K[]

@@ -4,14 +4,19 @@
     "checkJs": true,
     "noEmit": true,
     "declaration": true,
-    "declarationDir": "types",
+    "declarationDir": "./types",
+    "declarationMap": true,
     "esModuleInterop": true,
     "moduleResolution": "nodenext",
+    "module": "NodeNext",
     "target": "es2020",
     "lib": ["es2020", "dom"],
     "strict": true,
-    "skipLibCheck": true
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

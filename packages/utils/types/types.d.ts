@@ -85,13 +85,3 @@ export function isEmpty(x: unknown): boolean;
  * @param obj - The value to check
  */
 export function isClassInstance(obj: unknown): boolean;
-
-/**
- * Constant indicating if code is running on server
- */
-export const isServer: boolean;
-
-/**
- * Constant indicating if code is running in browser
- */
-export const isClient: boolean;

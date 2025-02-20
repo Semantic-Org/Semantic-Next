@@ -1,5 +1,5 @@
 import { isFunction } from './types.js';
-import { hashCode } from './identity.js';
+import { hashCode } from './crypto.js';
 
 /*-------------------
       Functions
@@ -8,7 +8,7 @@ import { hashCode } from './identity.js';
 /*
   Efficient no operation func
 */
-export const noop = function () {};
+export const noop = (v) => v;
 
 /*
   Call function even if its not defined

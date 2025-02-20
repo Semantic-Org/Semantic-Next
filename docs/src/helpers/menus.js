@@ -443,12 +443,12 @@ export const sidebarMenuAPI = [
         url: '/api/utils/numbers'
       },
       {
-        name: 'Types',
-        url: '/api/utils/types'
-      },
-      {
         name: 'Objects',
         url: '/api/utils/objects'
+      },
+      {
+        name: 'Types',
+        url: '/api/utils/types'
       },
       {
         name: 'Regular Expressions',

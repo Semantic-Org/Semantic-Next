@@ -1,7 +1,15 @@
-import * as _ from './utils.js'
-
-// support single function imports
-export * from './utils.js'
-
-// support as utility belt
-export default _
+export * from './arrays.js';
+export * from './browser.js';
+export * from './cloning.js';
+export * from './crypto.js';
+export * from './dates.js';
+export * from './equality.js';
+export * from './errors.js';
+export * from './functions.js';
+export * from './looping.js';
+export * from './numbers.js';
+export * from './objects.js';
+export * from './regexp.js';
+export * from './ssr.js';
+export * from './strings.js';
+export * from './types.js';

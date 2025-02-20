@@ -4,34 +4,38 @@ import path from 'path';
 
 import { isStaticBuild, packageBase } from '@helpers/injections.js';
 
-const packages = (isStaticBuild)
-  ? [
-      '@semantic-ui/core',
-      '@semantic-ui/component',
-      '@semantic-ui/reactivity',
-      '@semantic-ui/templating',
-      '@semantic-ui/renderer',
-      '@semantic-ui/query',
-      '@semantic-ui/specs',
-      '@semantic-ui/utils',
-    ]
-  : [
-      '@semantic-ui/core',
-      '@semantic-ui/core/packages/component',
-      '@semantic-ui/core/packages/reactivity',
-      '@semantic-ui/core/packages/templating',
-      '@semantic-ui/core/packages/renderer',
-      '@semantic-ui/core/packages/query',
-      '@semantic-ui/core/packages/specs',
-      '@semantic-ui/core/packages/utils',
-    ]
-;
+export const npmPackages = [
+  '@semantic-ui/core',
+  '@semantic-ui/component',
+  '@semantic-ui/reactivity',
+  '@semantic-ui/templating',
+  '@semantic-ui/renderer',
+  '@semantic-ui/query',
+  '@semantic-ui/specs',
+  '@semantic-ui/utils',
+];
 
-const base = import.meta.env.SITE || '';
+// monorepo is symlinked as @semantic-ui/core
+// when developing locally
+export const localPackages = [
+  '@semantic-ui/core',
+  '@semantic-ui/core/packages/component',
+  '@semantic-ui/core/packages/reactivity',
+  '@semantic-ui/core/packages/templating',
+  '@semantic-ui/core/packages/renderer',
+  '@semantic-ui/core/packages/query',
+  '@semantic-ui/core/packages/specs',
+  '@semantic-ui/core/packages/utils',
+];
+
+const importPackages = (isStaticBuild)
+  ? npmPackages
+  : localPackages
+;
 
 const packageImports = { imports: {} };
 
-for (const pkg of packages) {
+for (const pkg of importPackages) {
   try {
     const pkgPath = path.resolve(
       process.cwd(),

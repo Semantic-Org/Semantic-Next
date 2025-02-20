@@ -1,7 +1,6 @@
 {
   "name": "@semantic-ui/utils",
-  "type": "module",
-  "version": "0.8.5",
+  "version": "0.8.13",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -9,5 +8,10 @@
   "license": "ISC",
   "devDependencies": {
     "vitest": "^3.0.4"
-  }
+  },
+  "files": [
+    "src",
+    "types",
+    "README.md"
+  ]
 }

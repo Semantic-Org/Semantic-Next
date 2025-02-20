@@ -1,5 +1,5 @@
 /*-------------------
-      Browser
+       Browser
 --------------------*/
 
 export const copyText = (text) => {
@@ -66,16 +66,3 @@ export const getJSON = async (src, settings) => {
   ;
   return await response.json();
 };
-
-/*-------------------
-      Constants
---------------------*/
-
-export const isServer = (() => {
-  return typeof window === 'undefined';
-})();
-
-export const isClient = (() => {
-  return typeof window !== 'undefined';
-})();
-

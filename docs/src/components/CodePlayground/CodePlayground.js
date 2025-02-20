@@ -71,15 +71,22 @@ const defaultSettings = {
   // max height when using inline
   maxHeight: 'natural',
 
+  // whether to use ts under the hood for autocompletion
+  // but show js to users in menu bar
+  hideTypescriptExtensions: false,
+
   // order of code
   sortOrder: [
     'index.js',
+    'index.ts',
     'component.js',
+    'component.ts',
     'component.html',
     'component.css',
     'page.html',
     'page.css',
     'page.js',
+    'page.ts',
   ],
 
   // types to use
@@ -87,40 +94,49 @@ const defaultSettings = {
     'text/css': 'sample/css',
     'text/importmap': 'sample/importmap',
     'text/html': 'sample/html',
-    'text/javascript': 'sample/js',
+    'text/javascript': 'sample/ts',
   },
 
   // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
+    'component.ts': 'component.js',
     'index.js': 'index.js',
+    'index.ts': 'index.js',
     'component.html': 'component.html',
     'component.css': 'component.css',
     'page.html': 'page.html',
     'page.css': 'page.css',
     'page.js': 'page.js',
+    'page.ts': 'page.js',
 
   },
 
   // which panel should code appear in 0 is left and 1 is right
   panelIndexes: {
+    'component.ts': 0,
     'component.js': 0,
+    'index.ts': 0,
     'index.js': 0,
     'component.html': 0,
     'component.css': 0,
     'page.html': 1,
     'page.css': 1,
+    'page.ts': 1,
     'page.js': 1,
   },
 
   // how to split up code in panel view
   panelSizes: {
+    'component.ts': 'grow',
     'component.js': 'grow',
+    'index.ts': 'grow',
     'index.js': 'grow',
     'component.html': 'grow',
     'component.css': 'grow',
     'page.html': (1 / 9 * 100),
     'page.css': (1 / 9 * 100),
+    'page.ts': (1 / 9 * 100),
     'page.js': (1 / 9 * 100),
   },
 
@@ -360,8 +376,12 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
       if(!settings.includeGeneratedInline && file?.generated) {
         return;
       }
+      const label = (settings.hideTypescriptExtensions)
+        ? file.filename.replace('ts', 'js')
+        : file.filename
+      ;
       return {
-        label: file.filename,
+        label: label,
         value: file.filename,
       };
     }).filter(({value} = {}) => {
@@ -481,10 +501,11 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     const codeHeight = $$('.CodeMirror-sizer').first().height();
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
-    const panelHeight = menuHeight + codeHeight + offset;
-    if(panelHeight > 30 && panelHeight < 600) {
-      $('ui-panels').first().css('height', `${panelHeight}px`);
-    }
+    let panelHeight = menuHeight + codeHeight + offset;
+    panelHeight = Math.min(panelHeight, 600);
+    panelHeight = Math.max(panelHeight, 30);
+    console.log('height is', panelHeight);
+    $('ui-panels').first().css('height', `${panelHeight}px`);
   }
 
 });

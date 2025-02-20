@@ -27,7 +27,8 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
       self.modifyCodeMirror(el._codemirror);
     }
-    if(data.filename.search('.html') !== -1) {
+    // we want to use custom template syntax for html files
+    if((data?.filename || '').search('.html') !== -1) {
       requestAnimationFrame(() => {
         const cm = $$('playground-code-editor').get(0)?._codemirror;
         cm.setOption('mode', 'text/ui-template');
