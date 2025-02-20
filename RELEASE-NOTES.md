@@ -4,6 +4,15 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.9.0
+
+### Improvements
+
+### Docs
+* After much experimenting with types (see ver 0.8.8.6-11) figured out stable way to get typescript autocomplete working in playground. This required pulling `type:module` from package.json for now.
+
+### Improvements
+* Added links to docs for some utils in jsdocs (utils, signal, templating) working through more types and jsdocs currently.
 
 # Version 0.8.9
 
