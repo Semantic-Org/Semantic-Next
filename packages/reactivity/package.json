@@ -4,7 +4,7 @@
   "version": "0.8.11",
   "main": "src/index.js",
   "module": "src/index.js",
-  "types": "types/index.d.ts",
+  "types": "src/index.d.ts",
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
