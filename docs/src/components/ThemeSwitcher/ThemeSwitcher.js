@@ -54,6 +54,7 @@ const createComponent = function ({ $, isServer, reaction, state, settings, self
         else {
           $('html').removeClass('light').addClass('dark');
         }
+        $('html').attr('data-theme', theme);
       });
     }
   };
