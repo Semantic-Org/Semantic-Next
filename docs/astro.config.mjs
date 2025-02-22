@@ -56,6 +56,7 @@ export default defineConfig({
   integrations: [
     lit(),
     astroExpressiveCode({
+      themes: ['github-dark'],
       useDarkModeMediaQuery: false,
       shiki: {
         langs: [sui],
