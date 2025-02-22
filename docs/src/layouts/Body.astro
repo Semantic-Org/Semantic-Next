@@ -56,7 +56,13 @@ searchMeta = {
             : 'light'
         ;
       }
-      document.querySelectorAll('html')[0].classList.add(currentTheme);
+      const darkModePaths = ['/'];
+      if(darkModePaths.indexOf(window.location.pathname) !== -1) {
+        currentTheme = 'dark';
+      }
+      const html = document.querySelectorAll('html')[0];
+      html.classList.add(currentTheme);
+      html.setAttribute('data-theme', currentTheme);
     </script>
     <SearchMeta {...searchMeta} />
     <slot />
