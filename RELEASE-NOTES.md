@@ -4,6 +4,15 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.9.2
+
+### Improvements
+
+* `getJSON` can now be imported directly from `@semantic-ui/component`
+
+### Bugsg
+* Fix issue where state changes may not trigger reactive updates
+
 # Version 0.9.1
 
 ### Improvements
