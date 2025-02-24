@@ -20,6 +20,10 @@
     width: var(--sidebar-width);
     border: none;
 
+    ui-menu[vertical] {
+      margin: 1rem 1rem 0rem;
+    }
+
     nav-menu {
       padding: 0rem 1rem;
     }

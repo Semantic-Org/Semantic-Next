@@ -7,21 +7,24 @@ import { Template } from '@semantic-ui/component';
 
 import { UIMenu } from '@semantic-ui/core'
 
-const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
+const url = Astro.url.pathname;
+const menu = sidebarMenu || await getSidebarMenu({url});
 const canExpand = true;
+/*
 const menuItems = [
-  { label: 'Guide', value: 'guide' },
-  { label: 'API Reference', value: 'api' },
-];
+  { label: 'Guide', href: '/introduction' },
+  { label: 'API Reference', href: '/api' },
+  { label: 'UI Kit', href: '/usage' },
+  { label: 'Integrations', href: '/integrations' },
+];*/
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
-  <UIMenu vertical items="{menuItems}"></UIMenu>
 	<NavMenu
 		client:load
     menu={menu}
     use-accordion=true
-    expand-all={expandAll || false}
+    expand-all={expandAll || true}
     activeurl={Astro.url.pathname}
   />
   <slot name="after"/>
