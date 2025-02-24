@@ -4,6 +4,7 @@ import lit from '@astrojs/lit';
 import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
 import starlight from '@astrojs/starlight';
+import db from '@astrojs/db';
 
 // Load the custom language definition
 const sui = {
@@ -68,6 +69,7 @@ export default defineConfig({
     mdx({}),
     starlight({
       title: 'Semantic UI'
-    })
+    }),
+    db(),
   ]
 });
