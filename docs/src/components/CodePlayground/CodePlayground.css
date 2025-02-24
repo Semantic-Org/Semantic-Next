@@ -303,6 +303,7 @@
       box-shadow: none;
       min-height: 18px;
       font-size: 10px;
+      flex-shrink: 0;
       border-bottom: var(--subtle-border);
       padding: 8px 16px 8px;
       height: auto;
