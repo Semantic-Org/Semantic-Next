@@ -17,8 +17,8 @@ To make this even more simple `Reaction` exposes a special helpers `Reaction.get
 ```javascript
 // example output
 Reaction triggered by:
-    at Object.setActiveItem (https://dev.semantic-ui.com/src/components/InPageMenu/InPageMenu.js:126:23)
-    at IntersectionObserver.onIntersection (https://dev.semantic-ui.com/src/components/InPageMenu/InPageMenu.js:244:13)
+    at Object.setActiveItem (/src/components/InPageMenu/InPageMenu.js:126:23)
+    at IntersectionObserver.onIntersection /src/components/InPageMenu/InPageMenu.js:244:13)
 ```
 
 If you are trying to debug reactivity inside a template, you can add `{debugReactivity}`, this will trigger a breakpoint at this context in the template and call `Reaction.getSource()`.

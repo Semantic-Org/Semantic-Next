@@ -25,7 +25,6 @@ const site = isProduction
 ;
 
 export default defineConfig({
-
   site,
   devToolbar: {
     enabled: false
@@ -42,6 +41,10 @@ export default defineConfig({
       https: {
         key: fs.readFileSync('./cert/dev.semantic-ui.com-key.pem'),
         cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem')
+      },
+      hmr: {
+        host: 'dev.semantic-ui.com',
+        protocol: 'wss'
       }
     },
     ssr: {

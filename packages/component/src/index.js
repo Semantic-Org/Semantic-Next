@@ -1,4 +1,4 @@
-export { getText } from '@semantic-ui/utils';
+export { getText, getJSON } from '@semantic-ui/utils';
 
 export { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 export { scopeStyles } from './helpers/scope-styles.js';
