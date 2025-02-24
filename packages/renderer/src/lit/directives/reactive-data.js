@@ -18,10 +18,12 @@ export class ReactiveDataDirective extends AsyncDirective {
     this.expression = expression;
     this.settings = settings;
 
-    // Stop and clean up any existing reaction
+    /*
+      We should be able to reuse reaction between renders
     if (this.reaction) {
       this.reaction.stop();
     }
+    */
 
     // Create a new reaction to rerun the computation function if reactive data updates
     // that dont trigger rerender occur
@@ -40,6 +42,7 @@ export class ReactiveDataDirective extends AsyncDirective {
           return;
         }
         value = this.getReactiveValue();
+        console.log('value changed', value);
         if(this.settings.unsafeHTML) {
           value = unsafeHTML(value);
         }
