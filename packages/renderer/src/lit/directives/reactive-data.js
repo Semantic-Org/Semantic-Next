@@ -42,7 +42,6 @@ export class ReactiveDataDirective extends AsyncDirective {
           return;
         }
         value = this.getReactiveValue();
-        console.log('value changed', value);
         if(this.settings.unsafeHTML) {
           value = unsafeHTML(value);
         }
