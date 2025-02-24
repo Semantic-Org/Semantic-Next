@@ -1,9 +1,6 @@
 /*-------------------
       Menu Item
 --------------------*/
-:host {
-  align-self: center;
-}
 
 .item {
   display: block;

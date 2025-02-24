@@ -1,0 +1,6 @@
+.inset.menu {
+  border: var(--menu-inset-border);
+  border-radius: var(--menu-inset-border-radius);
+  padding: var(--menu-inset-padding);
+  background: var(--menu-inset-background);
+}
