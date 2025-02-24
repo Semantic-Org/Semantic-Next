@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/renderer",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -10,9 +10,9 @@
     "lit": "^3.2.1"
   },
   "dependencies": {
-    "@semantic-ui/reactivity": "^0.9.1",
-    "@semantic-ui/templating": "^0.9.1",
-    "@semantic-ui/utils": "^0.9.1"
+    "@semantic-ui/reactivity": "^0.9.2",
+    "@semantic-ui/templating": "^0.9.2",
+    "@semantic-ui/utils": "^0.9.2"
   },
   "devDependencies": {
     "vitest": "^3.0.4"

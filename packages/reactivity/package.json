@@ -1,13 +1,13 @@
 {
   "name": "@semantic-ui/reactivity",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.9.1"
+    "@semantic-ui/utils": "^0.9.2"
   },
   "devDependencies": {
     "vitest": "^3.0.4"
