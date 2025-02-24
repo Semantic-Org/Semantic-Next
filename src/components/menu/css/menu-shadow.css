@@ -38,6 +38,16 @@
   }
 }
 
+/* src/components/menu/css/shadow/variations/inset.css */
+@layer component.variations.inset {
+  .inset.menu {
+    border: var(--menu-inset-border);
+    border-radius: var(--menu-inset-border-radius);
+    padding: var(--menu-inset-padding);
+    background: var(--menu-inset-background);
+  }
+}
+
 /* src/components/menu/css/shadow/variations/evenly-spaced.css */
 @layer component.variations.equalWidth {
   .evenly-spaced.menu {
@@ -45,6 +55,15 @@
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     --menu-item-text-align: var(--menu-evenly-spaced-item-text-align) ;
+  }
+}
+
+/* src/components/menu/css/shadow/variations/vertical.css */
+@layer component.variations.vertical {
+  .vertical.menu {
+    flex-direction: column;
+    align-items: var(--menu-vertical-align-items);
+    text-align: var(--menu-vertical-text-align);
   }
 }
 

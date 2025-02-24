@@ -1,0 +1,6 @@
+:root {
+  --menu-inset-padding: 3px 4px;
+  --menu-inset-border-radius: var(--border-radius);
+  --menu-inset-border: var(--internal-border);
+  --menu-inset-background: var(--inverted-15);
+}

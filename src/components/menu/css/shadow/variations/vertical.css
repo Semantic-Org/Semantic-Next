@@ -1,0 +1,5 @@
+.vertical.menu {
+  flex-direction: column;
+  align-items: var(--menu-vertical-align-items);
+  text-align: var(--menu-vertical-text-align);
+}
