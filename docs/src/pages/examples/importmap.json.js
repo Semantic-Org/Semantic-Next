@@ -20,12 +20,14 @@ export const npmPackages = [
 export const localPackages = [
   '@semantic-ui/core',
   '@semantic-ui/core/packages/component',
-  '@semantic-ui/core/packages/reactivity',
   '@semantic-ui/core/packages/templating',
   '@semantic-ui/core/packages/renderer',
   '@semantic-ui/core/packages/query',
   '@semantic-ui/core/packages/specs',
   '@semantic-ui/core/packages/utils',
+  /*
+  '@semantic-ui/core/packages/reactivity',
+  */
 ];
 
 const importPackages = (isStaticBuild)
