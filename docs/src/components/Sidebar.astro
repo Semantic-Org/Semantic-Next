@@ -5,11 +5,18 @@ import NavMenu from '@components/NavMenu/NavMenu.js';
 import { getSidebarMenu } from '@helpers/navigation.js';
 import { Template } from '@semantic-ui/component';
 
+import { UIMenu } from '@semantic-ui/core'
+
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 const canExpand = true;
+const menuItems = [
+  { label: 'Guide', value: 'guide' },
+  { label: 'API Reference', value: 'api' },
+];
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
+  <UIMenu vertical items="{menuItems}"></UIMenu>
 	<NavMenu
 		client:load
     menu={menu}
