@@ -306,8 +306,12 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   pageScripts.push('error.css');
 
   // components always last
-  pageScripts.push('index.js');
-  pageScripts.push('component.js');
+  if(files['index.js']) {
+    pageScripts.push('index.js');
+  }
+  if(files['component.js']) {
+    pageScripts.push('component.js');
+  }
 
   // page code always last
   pageScripts.push('page.js');
