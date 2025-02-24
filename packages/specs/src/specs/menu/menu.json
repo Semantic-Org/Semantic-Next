@@ -34,6 +34,18 @@
       "attribute": "evenly-spaced",
       "description": "have its items split space evenly",
       "usageLevel": 1
+    },
+    {
+      "name": "Vertical",
+      "attribute": "vertical",
+      "description": "can be displayed vertically",
+      "usageLevel": 1
+    },
+    {
+      "name": "Inset",
+      "attribute": "inset",
+      "description": "can have its menu items inset",
+      "usageLevel": 1
     }
   ],
   "events": [
