@@ -11,7 +11,7 @@ const componentPages = components.map(page => ({
 export const topbarMenu =  [
   {
     _id: 'framework',
-    name: 'Tech Guide',
+    name: 'User Guide',
     url: '/introduction',
   },
   {
@@ -92,23 +92,23 @@ export const sidebarMenuFramework = [
     icon: 'package',
     pages: [
       {
-        name: 'Creating Components',
+        name: 'Creating',
         url: '/components/create'
       },
       {
-        name: 'Defining Functionality',
+        name: 'Functionality',
         url: '/components/instances'
       },
       {
-        name: 'Lifecycle Events',
+        name: 'Lifecycle',
         url: '/components/lifecycle'
       },
       {
-        name: 'Templates & Data Context',
+        name: 'Templates & Data',
         url: '/components/rendering'
       },
       {
-        name: 'Event Listeners',
+        name: 'Events',
         url: '/components/events'
       },
       {
@@ -116,11 +116,11 @@ export const sidebarMenuFramework = [
         url: '/components/reactivity'
       },
       {
-        name: 'Accessing DOM',
+        name: 'DOM',
         url: '/components/dom'
       },
       {
-        name: 'CSS & Styling',
+        name: 'Styling',
         url: '/components/styling'
       },
       {
@@ -147,12 +147,8 @@ export const sidebarMenuFramework = [
         url: '/templates/loops'
       },
       {
-        name: 'Content Slots',
+        name: 'Slots',
         url: '/templates/slots'
-      },
-      {
-        name: 'Template Helpers',
-        url: '/templates/helpers'
       },
       {
         name: 'Subtemplates',
@@ -161,6 +157,10 @@ export const sidebarMenuFramework = [
       {
         name: 'Snippets',
         url: '/templates/snippets'
+      },
+      {
+        name: 'Helpers',
+        url: '/templates/helpers'
       },
     ]
   },/*
@@ -190,12 +190,12 @@ export const sidebarMenuFramework = [
     icon: 'cpu',
     pages: [
       {
-        name: 'Variables & Reactions',
+        name: 'Basics',
         description: 'Signal',
         url: '/reactivity/variables'
       },
       {
-        name: 'Mutation Helpers',
+        name: 'Mutations',
         url: '/reactivity/mutation-helpers'
       },
       {
@@ -203,11 +203,11 @@ export const sidebarMenuFramework = [
         url: '/reactivity/flush'
       },
       {
-        name: 'Reactive Computations',
+        name: 'Controls',
         url: '/reactivity/computations'
       },
       {
-        name: 'Controlling Reactivity',
+        name: 'Performance',
         url: '/reactivity/controls'
       },
       {
