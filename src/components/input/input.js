@@ -4,15 +4,16 @@ import { InputComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/input-shadow.css?raw';
 import Template from './input.html?raw';
 
-const defaultState = {
+const defaultSettings = {
   focused: false,
 };
 
-const createComponent = ({$, state}) => ({
+const createComponent = ({$, settings}) => ({
 
   getStateClasses() {
+    const focus = settings.focused;
     return {
-      focus: state.focused.get()
+      focus
     };
   },
 
@@ -27,11 +28,12 @@ const onRendered = function({}) {
 };
 
 const events = {
-  'focus input'({ state }) {
-    state.focused.set(true);
+  'focus input'({ settings }) {
+    console.log('set focus');
+    settings.focused = true;
   },
-  'blur input'({ state }) {
-    state.focused.set(false);
+  'blur input'({ settings }) {
+    settings.focused = false;
   },
   'input input'({event, el, settings, value, dispatchEvent}) {
     el.value = value;
@@ -47,7 +49,7 @@ const UIInput = defineComponent({
   events,
   onCreated,
   onRendered,
-  defaultState,
+  defaultSettings,
 });
 
 export { UIInput };
