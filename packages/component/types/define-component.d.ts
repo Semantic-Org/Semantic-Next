@@ -65,25 +65,25 @@ export interface DefineComponentOptions<
    * See {@link https://next.semantic-ui.com/components/lifecycle#oncreated onCreated Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onCreated?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
+  onCreated?: () => void;
   /**
    * Lifecycle callback - invoked after the component is rendered.
    * See {@link https://next.semantic-ui.com/components/lifecycle#onrendered onRendered Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onRendered?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
+  onRendered?: () => void;
   /**
    * Lifecycle callback - invoked after the component is destroyed.
    * See {@link https://next.semantic-ui.com/components/lifecycle#ondestroyed onDestroyed Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onDestroyed?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
+  onDestroyed?: () => void;
   /**
    * Lifecycle callback - invoked after the theme changes.
    * See {@link https://next.semantic-ui.com/components/lifecycle#onthemechanged onThemeChanged Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions
    */
-  onThemeChanged?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
+  onThemeChanged?: () => void;
   /**
    * Lifecycle callback - invoked when an observed attribute changes.
    * @param attributeName The name of the attribute that changed
