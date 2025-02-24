@@ -4,11 +4,13 @@ import { formatDate } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-const createComponent = ({ self, signal, reaction, dispatchEvent }) => ({
+// state is a reactive data store
+const defaultState = {
+  today: null,
+  birthdayNames: []
+};
 
-  today: signal(),
-
-  birthdayNames: signal(),
+const createComponent = ({ self, state, reaction }) => ({
 
   birthdayCalendar: [
     { name: 'Jack', birthday: 'August 10' },
@@ -30,7 +32,7 @@ const createComponent = ({ self, signal, reaction, dispatchEvent }) => ({
     reaction(() => {
 
       // setup reaction on today
-      let today = self.today.get();
+      let today = state.today.get();
 
       // find people whose birthday is today
       let birthdayNames = self.birthdayCalendar
@@ -38,17 +40,17 @@ const createComponent = ({ self, signal, reaction, dispatchEvent }) => ({
         .map(person => person.name)
       ;
       if(birthdayNames.length) {
-        self.birthdayNames.set(birthdayNames.join(', '));
+        state.birthdayNames.set(birthdayNames.join(', '));
       }
       else {
-        self.birthdayNames.set(undefined);
+        state.birthdayNames.set(undefined);
       }
     });
   }
 });
 
-const onCreated = ({ self }) => {
-  self.today.set( self.getDisplayDate() );
+const onCreated = ({ state, self }) => {
+  state.today.set( self.getDisplayDate() );
   self.checkBirthdays();
 };
 
@@ -68,5 +70,6 @@ defineComponent({
   template,
   css,
   onCreated,
+  defaultState,
   createComponent
 });
