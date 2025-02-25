@@ -222,23 +222,24 @@
         }
 
         blockquote {
-          border: var(--border-color);
           padding: var(--padding);
-          background-color: oklch(0.21 0.06 236.29);
           background-image: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
           font-style: italic;
           border: var(--black-100);
           background-clip: padding-box;
-          display: flex;
+          display: flex
+          flex-direction: row;
           border-radius: var(--border-radius);
           margin: var(--vertically-padded);
           flex-direction: row;
+          border: var(--very-subtle-border);
+          border-left: 2px solid var(--primary-text-color);
 
           p code {
-            color: var(--white);
+            color: var(--standard-100);
           }
           p {
-            color: var(--white-60) !important;
+            color: var(--standard-60) !important;
             line-height: 1.8;
           }
           p:first-child {
@@ -334,7 +335,11 @@
         }
 
         blockquote p strong {
-          color: var(--white-100);
+          display: block;
+          font-size: 13px;
+          font-style: normal;
+          font-weight: bold;
+          color: var(--standard-100);
         }
 
         /* Header Position */

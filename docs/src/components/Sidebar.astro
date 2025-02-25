@@ -9,9 +9,15 @@ import { UIMenu } from '@semantic-ui/core'
 
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 const canExpand = true;
+const items = [
+  { label: 'User Guide', active: true, href: '/introduction' },
+  { label: 'API Reference', href: '/api' },
+  { label: 'UI Kit', href: '/usage' },
+]
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
+  <UIMenu items={items} vertical inset selection></UIMenu>
 	<NavMenu
 		client:load
     menu={menu}

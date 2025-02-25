@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
+import { topbarMenu, topbarDisplayMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
 import { firstMatch, groupBy, asyncEach, each, findIndex, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
 
 /* Used to sort lessons */
@@ -244,7 +244,7 @@ export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) 
 };
 
 /*
-  Topbar Menu
+  Topbar Menu for mobile and that includes secondary navs
 */
 export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
   const menu = clone(topbarMenu);
@@ -255,6 +255,30 @@ export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
         topbarSection: item._id
       });
       const urls = flattenedMenu.map(page => page.url).filter(Boolean);
+      item.baseURLs = urls;
+    });
+  }
+  return menu;
+};
+
+
+/*
+  Topbar Menu that displays to users
+*/
+export const getTopbarDisplayMenu = async ({ includeURLS = true} = {}) => {
+  const menu = clone(topbarDisplayMenu);
+  if(includeURLS) {
+    await asyncEach(menu, async item => {
+      let urls = [];
+      const ids = item._ids || [item._id];
+      await asyncEach(ids, async (id) => {
+        // get all urls that represent this topbar section
+        const flattenedMenu = await getFlattenedSidebarMenu({
+          topbarSection: id
+        });
+        const idURLs = flattenedMenu.map(page => page.url).filter(Boolean);
+        urls.push(...idURLs);
+      });
       item.baseURLs = urls;
     });
   }
