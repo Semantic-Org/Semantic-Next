@@ -87,7 +87,7 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
 });
 
 const events = {
-  'pointerdown'({ self, state, event }) {
+  'pointerdown .slider'({ self, state, event }) {
     state.dragging.set(true);
     self.updateRatingFromEvent(event);
     event.preventDefault();
