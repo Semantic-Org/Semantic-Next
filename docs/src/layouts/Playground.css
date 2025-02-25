@@ -204,6 +204,18 @@ html.light {
     --panel-label-minimized-background: linear-gradient(rgba(0, 0, 0, 0.02), rgb(15 17 22 / 30%));
     --panel-label-minimized-color: rgba(0, 0, 0, 0.1);
   }
+
+  code-playground {
+    --code-purple: #922cff;
+    --code-grey: #4a4a4a;
+    --code-default: #232c34;
+    --code-blue: var(--primary-text-color);
+    --code-red: #d90f0f;
+    --code-white: #a1a1a1;
+    --playground-code-background: #080C10;
+    --playground-code-comment-color: #444444;
+    --playground-code-linenumber-color: #cfcfcf;
+  }
 }
 
 /* Tablet */
