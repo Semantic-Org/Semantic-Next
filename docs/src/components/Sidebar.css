@@ -1,9 +1,9 @@
 @layer layout {
 
   :root {
-    --sidebar-background-color: var(--ui-background);
+    --sidebar-background: var(--ui-background-emphasis);
     --sidebar-box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
-    --sidebar-width: 250px;
+    --sidebar-width: 220px;
   }
 
   html.dark {
@@ -14,11 +14,13 @@
     position: static;
     display: flex;
     flex-direction: column;
-    background-color: var(--sidebar-background-color);
+    background: var(--sidebar-background);
     color: #FFFFFF;
     box-shadow: var(--sidebar-box-shadow);
     width: var(--sidebar-width);
     border: none;
+    border-right: var(--very-subtle-border);
+    scrollbar-width: thin;
 
     nav-menu {
       padding: 0rem 1rem;
@@ -56,7 +58,7 @@
   }
 
   sidebar nav-menu {
-    margin-top: 1rem;
+    margin-top: var(--compact-spacing);
     flex-grow: 1;
   }
 }
