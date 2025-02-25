@@ -5,6 +5,7 @@ import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
 import starlight from '@astrojs/starlight';
 import db from '@astrojs/db';
+import vercel from '@astrojs/vercel/serverless';
 
 // Load the custom language definition
 const sui = {
@@ -34,6 +35,8 @@ export default defineConfig({
     host: true,
     port: 443
   },
+  output: 'hybrid',
+  adapter: vercel(),
   vite: {
     assetsInclude: ['**/*.html'],
     server: {
