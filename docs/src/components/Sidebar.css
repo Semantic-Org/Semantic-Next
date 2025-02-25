@@ -6,8 +6,8 @@
     --sidebar-width: 220px;
   }
 
-  html.dark {
-    --sidebar-background-color: oklch(0.17 0.01 234.61);
+  html.light {
+    --sidebar-background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
   }
 
   sidebar {
