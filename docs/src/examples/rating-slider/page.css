@@ -1,0 +1,32 @@
+body {
+  overflow-x: hidden;
+}
+
+.message {
+  display: none;
+  margin-top: var(--spacing);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  background: var(--standard-5) var(--subtle-gradient);
+  transition: var(--transition);
+  font-weight: bold;
+
+  &.visible {
+    display: block;
+  }
+
+  &.negative {
+    border-left: 1px solid var(--red);
+    color: var(--red);
+  }
+
+  &.neutral {
+    border-left: 1px solid var(--standard-50);
+  }
+
+  &.positive {
+    border-left: 1px solid var(--green);
+    color: var(--green);
+  }
+
+}

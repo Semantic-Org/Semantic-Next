@@ -1,0 +1,20 @@
+<div class="slider {classMap getSliderStyles}">
+  <div class="fill" style="width: {getPercentage}%"></div>
+  <div class="guide" style="width: {getGuidePercentage}%"></div>
+  <div class="track"></div>
+  <div class="area">
+    <div class="handle" style="left: {getPercentage}%"></div>
+  </div>
+</div>
+
+{#if showLabels}
+  <div class="labels">
+    {#each value in range(min, max + 1) }
+      <div class="{classMap getLabelStyles value} label">
+        {value}
+      </div>
+    {/each}
+  </div>
+{/if}
+
+<ui-button class="reset" blue>Reset</ui-button>
