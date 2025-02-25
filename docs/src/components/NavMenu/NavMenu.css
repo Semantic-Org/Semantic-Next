@@ -47,11 +47,10 @@
   --nav-menu-nested-item-color: var(--standard-40);
 
   --nav-menu-item-hover-color: var(--standard-90);
-  --nav-menu-item-current-color: var(--primary-light-text-color);
-
-  /* Aligned */
-  --nav-menu-aligned-content-icon-indent-distance: calc(var(--nav-menu-title-icon-width) + var(--nav-menu-title-icon-distance));
+  --nav-menu-item-current-color: var(--primary-text-color);
+  
 }
+
 
 a {
   outline: none;
@@ -225,3 +224,17 @@ a {
   }
 }
 
+/*******************************
+           Variations
+*******************************/
+
+.dark.menu {
+  --nav-menu-description-color: var(--white-40);
+  --nav-menu-title-hover-color: var(--white-100);
+  --nav-menu-title-active-color: var(--white-100);
+  --nav-menu-nested-item-color: var(--white-40);
+  --nav-menu-item-hover-color: var(--white-90);
+}
+.aligned.menu {
+  --nav-menu-content-icon-indent-distance: calc(var(--nav-menu-title-icon-width) + var(--nav-menu-title-icon-distance));
+}

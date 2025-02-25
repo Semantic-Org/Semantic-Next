@@ -11,13 +11,15 @@ const defaultSettings = {
   useAccordion: false,
   navIcon: '',
   activeURL: '',
+  dark: false,
+  aligned: false,
 };
 
 const defaultState = {
   url: ''
 };
 
-const createComponent = function ({ $, el, self, settings, data, state, reaction }) {
+const createComponent = function ({ $, self, settings, state }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
@@ -32,18 +34,18 @@ const createComponent = function ({ $, el, self, settings, data, state, reaction
       ;
       return section?.navIcon || settings.navIcon || defaultIcon;
     },
+    getMenuStyles() {
+      return {
+        dark: settings.dark,
+        aligned: settings.aligned,
+      };
+    },
     getTitleStates(title) {
-      const classes = [];
-      if (self.isExpandable(title)) {
-        classes.push('expandable');
-      }
-      if (self.isActiveItem(title)) {
-        classes.push('active');
-      }
-      if (self.isCurrentItem(title)) {
-        classes.push('current');
-      }
-      return classes;
+      return {
+        expandable: self.isExpandable(title),
+        active: self.isActiveItem(title),
+        current: self.isCurrentItem(title),
+      };
     },
     canShowNavIcon(section) {
       return self.getNavIcon(section) !== undefined;
@@ -52,11 +54,9 @@ const createComponent = function ({ $, el, self, settings, data, state, reaction
       return any(settings.menu, section => section.icon);
     },
     getPageStates(page) {
-      const classes = [];
-      if (self.isCurrentItem(page)) {
-        classes.push('current');
-      }
-      return classes;
+      return {
+        current: self.isCurrentItem(page)
+      };
     },
     shouldShow(item) {
       if (isFunction(item.shouldShow)) {
@@ -142,20 +142,14 @@ const createComponent = function ({ $, el, self, settings, data, state, reaction
   };
 };
 
-const onCreated =  ({ self }) => {
-};
-
-const onDestroyed =  ({ self }) => {
-};
-
-const onRendered =  ({ $, self, attachEvent, isClient }) => {
+const onRendered =  ({ self, isClient }) => {
   if(isClient) {
     self.scrollToActive();
   }
 };
 
 const events = {
-  'click .title': ({target, event, settings, $, self}) => {
+  'click .title': ({target, settings, $}) => {
     if(!settings.useAccordion) {
       return;
     }
@@ -176,8 +170,6 @@ const NavMenu = defineComponent({
   createComponent,
   defaultState,
   defaultSettings,
-  onCreated,
-  onDestroyed,
   onRendered,
   events,
 });
