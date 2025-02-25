@@ -9,35 +9,36 @@ import GlobalSearch from '@components/GlobalSearch/GlobalSearch.js';
 import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
 import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
 
-import { getTopbarMenu, removeTrailingSlash } from '@helpers/navigation.js';
+import { getTopbarDisplayMenu, removeTrailingSlash } from '@helpers/navigation.js';
 
-const menu = await getTopbarMenu();
+const menu = await getTopbarDisplayMenu();
 const activeURL = removeTrailingSlash(Astro.url.pathname);
 
-showThemeSwitcher = (showThemeSwitcher === 'false') ? false : true;
+showThemeSwitcher = showThemeSwitcher === 'false' ? false : true;
 
 let topbarClasses = [];
-if(noanimation) {
+if (noanimation) {
   topbarClasses.push('static');
 }
-if(floating) {
+if (floating) {
   topbarClasses.push('floating');
 }
 topbarClasses.join(' ').trim();
 
 import './TopBar.css';
 ---
+
 <script>
   import { ScrollNav } from '../javascript/scrollnav.js';
   import { $ } from '@semantic-ui/query';
   const topbar = $('topbar').not('.static').el();
-  if(topbar) {
+  if (topbar) {
     const nav = new ScrollNav(topbar, {
       hideThreshold: 5,
       showThreshold: 15,
       hideVelocity: 5,
       showVelocity: 5,
-      hideClass: 'hidden'
+      hideClass: 'hidden',
     });
   }
 </script>
@@ -45,21 +46,21 @@ import './TopBar.css';
   <div class="content">
     <span class="left">
       <a class="logo" href="/">
-        <Image src={logoImage} alt="Logo" height="35" loading="eager"></Image>
-        <span class="name">
-          Semantic UI
-        </span>
+        <Image src={logoImage} alt="Logo" height="35" loading="eager" />
+        <span class="name"> Semantic UI </span>
       </a>
     </span>
-    <TopbarMenu
-      client:load
-      menu={menu}
-      activeURL={activeURL}
-    ></TopbarMenu>
-    <GlobalSearch client:load></GlobalSearch>
-    {showThemeSwitcher && (
-      <ThemeSwitcher client:load transition:name="theme" defaultTheme="dark" ></ThemeSwitcher>
-    )}
-    <MobileMenuToggle client:load></MobileMenuToggle>
+    <TopbarMenu client:load menu={menu} activeURL={activeURL} />
+    <GlobalSearch client:load />
+    {
+      showThemeSwitcher && (
+        <ThemeSwitcher
+          client:load
+          transition:name="theme"
+          defaultTheme="dark"
+        />
+      )
+    }
+    <MobileMenuToggle client:load />
   </div>
 </topbar>
