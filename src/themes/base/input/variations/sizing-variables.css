@@ -1,0 +1,10 @@
+:root {
+  --input-mini: var(--mini);
+  --input-tiny: var(--tiny);
+  --input-small: var(--small);
+  --input-medium: inherit;
+  --input-large: var(--large);
+  --input-big: var(--big);
+  --input-huge: var(--huge);
+  --input-massive: var(--massive);
+}
