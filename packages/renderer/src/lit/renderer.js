@@ -348,9 +348,6 @@ export class LitRenderer {
 
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
-    if (expression == `isItem ? ' item' : ''`) {
-      console.log('js value', jsValue, expression);
-    }
     if(jsValue !== undefined) {
       const value = this.accessTokenValue(jsValue, expression, data);
       visited.delete(expression);
