@@ -20,7 +20,6 @@ const items = getSidebarItems(activeSection, currentPath);
   <NavMenu
     client:load
     menu={menu}
-    use-accordion=true
     expand-all={expandAll || canExpand}
     use-accordion=false
     activeurl={Astro.url.pathname}

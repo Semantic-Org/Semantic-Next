@@ -37,8 +37,8 @@ const createComponent = function ({ $, self, settings, state }) {
       return section?.navIcon || settings.navIcon || defaultIcon;
     },
     getMenuStyles() {
-      console.log(settings.aligned);
       return {
+        accordion: settings.useAccordion,
         dark: settings.dark,
         aligned: settings.aligned,
       };
