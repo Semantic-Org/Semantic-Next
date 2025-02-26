@@ -392,7 +392,7 @@ export const Template = class Template {
           const boundEvent = userHandler.bind(targetElement);
           const eventData = event?.detail || {};
           const elData = targetElement?.dataset;
-          const elValue = targetElement?.value || event.target?.value;
+          const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
 
           template.call(boundEvent, {
             additionalData: {
