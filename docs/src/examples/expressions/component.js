@@ -11,6 +11,7 @@ const defaultSettings = {
 
 const createComponent = ({ settings }) => ({
   initialize: () => setInterval(() => settings.date = new Date(), 1000),
+  isTrue: () => true,
   addOne(value = 0, value2 = 0) {
     return value + value2 + 1;
   },

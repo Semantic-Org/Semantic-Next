@@ -51,6 +51,8 @@ input {
     background-color: var(--global-search-background-color);
     border-radius: var(--global-search-border-radius);
     transition: var(--global-search-transition);
+  }
+  &::part(input-field) {
     padding: var(--global-search-input-padding);
   }
   &:hover {

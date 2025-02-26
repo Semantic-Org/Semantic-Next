@@ -504,7 +504,6 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     let panelHeight = menuHeight + codeHeight + offset;
     panelHeight = Math.min(panelHeight, 600);
     panelHeight = Math.max(panelHeight, 30);
-    console.log('height is', panelHeight);
     $('ui-panels').first().css('height', `${panelHeight}px`);
   }
 
