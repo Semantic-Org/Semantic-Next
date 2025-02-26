@@ -1,0 +1,30 @@
+<div class="trigger">
+  {>slot}
+</div>
+<div class="{classMap getMenuStates} menu" style="{getMenuStyle}" role="menu" part="menu">
+  <div class="items">
+    {#each item in items}
+      {#if isDivider item}
+        <div class="divider" data-divider="true"></div>
+      {else}
+        <div 
+          class="item {classMap getItemStates @index}"
+          data-index="{@index}"
+          role="menuitem"
+          part="menu-item"
+          tabindex="{(isItemActive(@index) ? '0' : '-1')}"
+        >
+          {#if hasIcon item}
+            <span class="icon" part="icon">
+              <ui-icon icon="{item.icon}"></ui-icon>
+            </span>
+          {/if}
+          <span class="label" part="label">{item.label}</span>
+          {#if hasShortcut item}
+            <span class="shortcut" part="shortcut">{item.shortcut}</span>
+          {/if}
+        </div>
+      {/if}
+    {/each}
+  </div>
+</div>
