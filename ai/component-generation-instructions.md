@@ -248,3 +248,240 @@ Use modern nested CSS with shadow DOM in mind:
 - In templates, the data context is flattened - properties from settings, state, and methods are all directly accessible
 - Always use shadow DOM principles for CSS (simple class names, nested selectors)
 - Use reaction() to set up reactive computations, not for side effects
+
+## Additional Best Practices
+
+### Class Naming in Shadow DOM
+- Keep class names simple and semantic (e.g., `.menu` instead of `.context-menu-container`)
+- No need for namespacing or prefixing since Shadow DOM provides encapsulation
+- Example: Use `.item`, `.divider`, `.header` instead of `.component-item`, etc.
+
+### State vs Settings
+- `settings`: Use for configurable properties that typically don't change after initialization
+  ```javascript
+  const defaultSettings = {
+    items: [],      // ✓ Configuration that the user provides
+    width: 180,     // ✓ Customizable property
+  };
+  ```
+- `state`: Use only for values that change during component lifetime due to user interaction
+  ```javascript
+  const defaultState = {
+    visible: false,    // ✓ Changes during component use
+    activeIndex: -1,   // ✓ Changes during component use
+    items: []          // ✗ Don't duplicate settings in state
+  };
+  ```
+
+### Template Syntax Clarifications
+- Iteration uses `@index` automatically, don't declare an index variable:
+  ```html
+  <!-- Correct -->
+  {#each item in items}
+    <div data-index="{@index}">{item.label}</div>
+  {/each}
+
+  <!-- Incorrect -->
+  {#each item, index in items}
+    <div data-index="{index}">{item.label}</div>
+  {/each}
+  ```
+
+- Use simple ternary expressions in attribute bindings:
+  ```html
+  <div tabindex="{isActive ? '0' : '-1'}"></div>
+  ```
+
+### Event Handling
+- Always use the provided `dispatchEvent` function rather than creating DOM events manually:
+  ```javascript
+  // Correct
+  dispatchEvent('select', { item, index });
+
+  // Incorrect
+  const event = new CustomEvent('select', {
+    detail: { item, index },
+    bubbles: true
+  });
+  element.dispatchEvent(event);
+  ```
+
+- For global events, use `body` rather than `document`:
+  ```javascript
+  // Correct
+  'global click body'({ self }) {
+    self.hideMenu();
+  }
+
+  // Avoid
+  'global click document'({ self }) {
+    self.hideMenu();
+  }
+  ```
+
+### Slotted Content Pattern
+- Use slots to create intuitive wrapper components:
+  ```html
+  <div class="container">
+    {>slot}
+  </div>
+  ```
+
+- This enables a natural usage pattern:
+  ```html
+  <my-component>
+    <div class="content">Wrapped content</div>
+  </my-component>
+  ```
+
+### Modern CSS Techniques
+- Use `@starting-style` for smooth enter animations:
+  ```css
+  .menu.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+  @starting-style {
+    .menu.visible {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+  ```
+
+- Use class-based visibility toggling instead of inline styles:
+  ```css
+  .menu {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .menu.visible {
+    visibility: visible;
+    opacity: 1;
+  }
+  ```
+
+### Class Binding with Object Maps
+- Return object maps from methods for conditional classes:
+  ```javascript
+  getMenuStates() {
+    return {
+      visible: state.visible.get(),
+      active: state.active.get()
+    };
+  }
+  ```
+
+- Use with `classMap` helper in templates:
+  ```html
+  <div class="{classMap getMenuStates}"></div>
+  ```
+
+### Performance Optimizations
+- Use `requestAnimationFrame` for DOM measurements and position calculations:
+  ```javascript
+  showElement() {
+    state.visible.set(true);
+    requestAnimationFrame(() => self.measureAndPosition());
+  }
+  ```
+
+- For non-reactive reads in calculations, use `.peek()` to avoid triggering reactions:
+  ```javascript
+  const position = state.position.peek();
+  ```
+
+### Lifecycle Events
+- Emit events for component lifecycle where appropriate:
+  ```javascript
+  showMenu() {
+    // Setup code...
+    dispatchEvent('show');
+  }
+
+  hideMenu() {
+    // Cleanup code...
+    dispatchEvent('hide');
+  }
+  ```
+
+### Proper Parameter Access
+- Access parameters directly as provided in function arguments:
+  ```javascript
+  // Correct
+  createComponent({ self, state, settings }) {
+    // Use state and settings directly
+  }
+
+  // Incorrect
+  createComponent({ self }) {
+    // Don't use self.state or self.settings
+  }
+  ```
+
+### DOM Element Access in Event Handlers
+- In event handlers, use `this` to refer to the element that triggered the event:
+  ```javascript
+  'input .field'({ state, $ }) {
+    const value = $(this).val();
+    state.inputValue.set(value);
+  }
+
+## Reference Examples
+
+When creating components, refer to these example implementations in the knowledgebase for guidance on common patterns:
+
+### Component Composition
+- **TodoMVC** - A complete task management implementation demonstrating:
+  - Parent-child component composition
+  - State management across multiple components
+  - Local storage persistence
+  - Filtering and computed values
+  - Reference files: `todo-list.js`, `todo-item.js`, `todo-header.js`, `todo-footer.js`
+
+### User Interface Patterns
+- **Context Menu** - Right-click menu system demonstrating:
+  - Slotted content pattern
+  - Position calculations
+  - Keyboard navigation
+  - Animation transitions
+  - Reference files: `component.js`, `component.html`, `component.css`
+
+- **UI-Panel** - Resizable panels demonstrating:
+  - Drag interaction handling
+  - Size calculations
+  - Layout persistence
+  - Reference files: `Panel.js`, `Panel.html`, `Panel.css`, `Panels.js`
+
+### Search & Input Patterns
+- **Search Component** - Search with dynamic results demonstrating:
+  - Asynchronous data handling
+  - Dynamic filtering
+  - Keyboard navigation of results
+  - Reference files: `component.js`, `component.html`, `component.css`
+
+### Data Visualization
+- **Spectrum Analyzer** - Audio visualization demonstrating:
+  - Canvas drawing
+  - Animation loops
+  - Media API integration
+  - Reference files: `component.js`
+
+### Context Menu
+- **Context Menu** - Customizable right-click menu demonstrating:
+  - Slotted content wrapper pattern for intuitive usage
+  - Dynamic positioning with viewport boundary detection
+  - Keyboard navigation with arrow keys, Enter, and Escape
+  - Modern CSS transitions with `@starting-style`
+  - Class-based state management with object maps
+  - Accessibility support with ARIA roles and keyboard focus
+  - Event delegation with `deep contextmenu` handling
+  - Reference files: `component.js`, `component.html`, `component.css`
+
+When implementing a new component, consider:
+1. Does an existing example demonstrate a similar interaction pattern?
+2. How does the reference example handle state management?
+3. What event handling patterns might be applicable?
+4. How is component composition structured?
+
+Refer to these examples for practical implementations of the patterns described in these instructions.
