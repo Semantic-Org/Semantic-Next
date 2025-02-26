@@ -111,11 +111,11 @@
       "description": "can specify the form field name"
     },
     {
-      "name": "Debounce",
+      "name": "Debounced",
       "type": "boolean",
-      "attribute": "debounce",
+      "attribute": "debounced",
       "defaultValue": false,
-      "description": "can specify the input value should be dounced"
+      "description": "can specify the input value should be debounced"
     },
     {
       "name": "Debounce Interval",
