@@ -203,14 +203,11 @@ const events = {
   'input, click .inline-search'({self}) {
     self.openModal();
   },
-  'input .search'({self, settings, value}) {
+  'change .search ui-input'({self, settings, value}) {
     if(self.doSearch) {
       self.doSearch.cancel();
     }
-    self.doSearch = debounce(() => {
-      self.search.triggerSearch(value);
-    }, settings.debounceTime);
-    self.doSearch();
+    self.search.triggerSearch(value);
   },
   'show ui-modal'({state}) {
     state.modalOpen.set(true);

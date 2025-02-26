@@ -5,18 +5,20 @@ import template from './NavMenu.html?raw';
 import css from './NavMenu.css?raw';
 
 const defaultSettings = {
-  menu: [],
-  linkCurrentPage: false,
-  expandAll: false,
-  useAccordion: false,
-  navIcon: '',
-  activeURL: '',
-  dark: false,
-  aligned: false,
+  menu: [], // menus to display
+  linkCurrentPage: false, // allow links for pages matching active URL
+  expandAll: false, // expand all sections by default
+  useAccordion: false, // allow accordion behavior
+  navIcon: '', // replace accordion nav icion
+  activeURL: '', // select active menu item
+  searchable: false, // allow searching menu
+  dark: false, // force dark mode
+  aligned: false, // align submenus to headers
 };
 
 const defaultState = {
-  url: ''
+  url: '',
+  search: undefined,
 };
 
 const createComponent = function ({ $, self, settings, state }) {
@@ -35,6 +37,7 @@ const createComponent = function ({ $, self, settings, state }) {
       return section?.navIcon || settings.navIcon || defaultIcon;
     },
     getMenuStyles() {
+      console.log(settings.aligned);
       return {
         dark: settings.dark,
         aligned: settings.aligned,
@@ -160,6 +163,9 @@ const events = {
   },
   'click .nav-icon'({event}) {
     event.preventDefault();
+  },
+  'change ui-input'({state, value}) {
+    state.search.set(value);
   }
 };
 

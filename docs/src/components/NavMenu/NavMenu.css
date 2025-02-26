@@ -48,12 +48,18 @@
 
   --nav-menu-item-hover-color: var(--standard-90);
   --nav-menu-item-current-color: var(--primary-text-color);
-  
+
+  --nav-menu-search-margin: 5px 0;
 }
 
 
 a {
   outline: none;
+}
+
+.search {
+  display: block;
+  margin: var(--nav-menu-search-margin);
 }
 
 .title {

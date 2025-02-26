@@ -4,6 +4,18 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+
+# Version 0.9.3
+
+### Improvements
+
+* `value` in event handlers will now automatically pass through value from custom events
+*  `input` component now includes `debounce`, `search`, `debounceInterval`
+*  `input` component now includes sizing and improvements to hitbox
+
+### Bugs
+* Fixed issue when evaluating js expressions passed through to subtemplates and snippets. Because data to subtemplates is wrapped to preserve reactivity, the js context of ternarties like `subTemplateData ? 'yes' : 'no` was expecting `subTemplateData() ? 'yes' : 'no'`
+
 # Version 0.9.2
 
 ### Improvements
