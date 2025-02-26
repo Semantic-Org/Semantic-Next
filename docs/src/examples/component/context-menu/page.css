@@ -1,0 +1,40 @@
+h2 {
+  margin-bottom: 20px;
+  color: var(--standard-80);
+}
+
+.output {
+  position: fixed;
+  top: 1em;
+  right: 1em;
+  background-color: var(--blue);
+  color: var(--white);
+  padding: 1em;
+}
+
+context-menu {
+
+  margin: var(--spacing);
+
+  .box {
+    width: 400px;
+    height: 300px;
+    background: var(--subtle-gradient);
+    color: var(--standard-70);
+    align-content: center;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border: var(--border);
+  }
+
+  .image {
+    max-width: 300px;
+
+    img {
+      display: block;
+      width: 100%;
+    }
+  }
+
+}

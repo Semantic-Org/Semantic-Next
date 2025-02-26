@@ -81,7 +81,7 @@
 
       ui-card {
         text-align: left;
-        min-width: 150px;
+        min-width: 300px;
         .label {
           color: var(--primary-text-color);
           font-weight: bold;
@@ -101,6 +101,7 @@
       }
       [next]{
         margin-left: auto;
+        text-align: right;
       }
     }
 
