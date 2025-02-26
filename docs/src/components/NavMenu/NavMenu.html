@@ -3,14 +3,20 @@
     <ui-input fluid tiny search dark={dark} class="search" placeholder="Search menu..."></ui-input>
   {/if}
   {#each section in getMenu}
-    {>title title=section isItem=false}
+    {>title
+      title=section
+      isItem=false
+    }
     {#if section.pages}
       <div class="{activeIf isActiveItem section}{classIf hasIcons 'indented'}content" part="content">
         <div class="menu" part="menu">
           {#each page in section.pages}
             {#if page.pages}
-              {>title title=page isItem=true}
-              <div class="{activeIf isActiveItem page} content">
+              {>title
+                title=page
+                isItem=true
+              }
+              <div class="{activeIf isActiveItem page} content" part="sub-content">
                 <div class="menu">
                   {#each page in page.pages}
                     <a class="{classMap getPageStates page}item" href={getLink page} part="page link">
@@ -51,8 +57,4 @@
       <ui-icon icon={getNavIcon title} class="nav-icon" part="nav-icon"></ui-icon>
     {/if}
   </a>
-{/snippet}
-
-{#snippet content}
-
 {/snippet}
