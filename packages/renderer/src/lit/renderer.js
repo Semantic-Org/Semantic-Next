@@ -1,7 +1,7 @@
 import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isArray, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
+import { each, mapObject, hashCode, wrapFunction, fatal, isArray, filterObject, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
 
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
@@ -15,6 +15,7 @@ export class LitRenderer {
   static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   static STRING_REGEXP = /^\'(.*)\'$/;
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
+  static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
 
   static useSubtreeCache = false; // experimental
 
@@ -302,15 +303,33 @@ export class LitRenderer {
         ...this.helpers,
         ...context,
       };
-      delete context.debugger; // this is a reserved word
+      // only allow valid javascript variable names
+      context = filterObject(context, (value, name) => {
+        const reservedWords = ['debugger'];
+        return !reservedWords.includes(name) && LitRenderer.VAR_NAME_REGEXP.test(name);
+      });
     }
+
     try {
       const keys = Object.keys(context);
-      const values = Object.values(context);
+      let values = Object.values(context);
+      // unbundle subtemplate/snippet data bundled in getPackedNodeData
+      // functions with no parameters are safe to evaluate
+      each(values, (value, index) => {
+        if (isFunction(value) && value.length === 0 && !value.name) {
+          Object.defineProperty(values, index, {
+            get() {
+              return value();
+            },
+            configurable: true,
+            enumerable: true
+          });
+        }
+      });
       result = new Function(...keys, `return ${code}`)(...values);
     }
-    catch(e) {
-      // nothing
+    catch (e) {
+      // this token is not valid javascript 
     }
     return result;
   }
@@ -326,8 +345,12 @@ export class LitRenderer {
     }
     visited.add(expression);
 
+
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
+    if (expression == `isItem ? ' item' : ''`) {
+      console.log('js value', jsValue, expression);
+    }
     if(jsValue !== undefined) {
       const value = this.accessTokenValue(jsValue, expression, data);
       visited.delete(expression);
@@ -366,7 +389,6 @@ export class LitRenderer {
     visited.delete(expression);
     return result;
   }
-
 
   lookupTokenValue(token = '', data) {
     if(isArray(token)) {
@@ -428,6 +450,7 @@ export class LitRenderer {
       const thisContext = getThisContext(token, data);
       tokenValue = tokenValue.bind(thisContext);
     }
+    
     if(tokenValue !== undefined) {
       return (tokenValue instanceof Signal)
         ? tokenValue.value
