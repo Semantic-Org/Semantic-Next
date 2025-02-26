@@ -49,7 +49,7 @@
   --nav-menu-item-hover-color: var(--standard-90);
   --nav-menu-item-current-color: var(--primary-text-color);
 
-  --nav-menu-search-margin: 5px 0;
+  --nav-menu-search-margin: var(--compact-spacing) 0;
 }
 
 

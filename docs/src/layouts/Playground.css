@@ -82,9 +82,11 @@
       --nav-menu-sub-content-indent-distance: 0px;
       --nav-menu-menu-item-font-size: 12px;
       --nav-menu-menu-item-spacing: 6px;
-      --nav-menu-content-icon-indent-distance: 5px;
       --nav-menu-sub-title-font-size: 10px;
       --nav-menu-sub-title-padding: 7px 0px 4px;
+    }
+    nav-menu::part(content) {
+      padding-left: 5px;
     }
     nav-menu::part(item-title) {
       text-transform: uppercase;
