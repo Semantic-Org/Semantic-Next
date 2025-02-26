@@ -305,16 +305,23 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
   if(type == 'log') {
     indexes = {
       'page.js': 0,
+      'page.ts': 0,
+      'index.js': 0,
+      'index.ts': 0,
     };
   }
   else {
     indexes = {
+      'index.js': 0,
+      'index.ts': 0,
       'component.js': 0,
+      'component.ts': 0,
       'component.html': 0,
       'component.css': 0,
       'page.html': 1,
       'page.css': 1,
       'page.js': 1,
+      'page.ts': 1,
     };
   }
   // filter out generated and absent files
