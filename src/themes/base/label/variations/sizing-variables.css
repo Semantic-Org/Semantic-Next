@@ -1,3 +1,10 @@
 :root {
-
+  --label-mini: var(--mini);
+  --label-tiny: var(--tiny);
+  --label-small: var(--small);
+  --label-medium: inherit;
+  --label-large: var(--large);
+  --label-big: var(--big);
+  --label-huge: var(--huge);
+  --label-massive: var(--massive);
 }

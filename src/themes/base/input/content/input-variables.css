@@ -2,6 +2,7 @@
 
   --input-background: var(--inverted-color);
 
+  --input-width: 150px;
   --input-vertical-padding: var(--relative-10px);
   --input-horizontal-padding: var(--relative-12px);
   --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
@@ -14,6 +15,7 @@
 
   /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */
   --input-line-height: var(--relative-17px);
+  --input-text-align: left;
 
   --input-box-shadow: var(--subtle-inset-shadow);
   --input-border: var(--border);
@@ -29,6 +31,10 @@
     border-color var(--duration) var(--easing)
   ;
 
+  --input-icon-right: var(--input-horizontal-padding);
+  --input-icon-width: 1em;
+
+  --input-label-right: var(--input-horizontal-padding);
   --input-label-font-size: var(--relative-11px);
   --input-label-font-weight: var(--bold);
   --input-label-padding: 2px 3px;
@@ -36,4 +42,5 @@
   --input-label-border: var(--standard-border);
   --input-label-border-radius: var(--border-radius);
 
+  --input-label-with-icon-right: calc( 1em + var(--input-icon-width) + var(--input-icon-right) );
 }
