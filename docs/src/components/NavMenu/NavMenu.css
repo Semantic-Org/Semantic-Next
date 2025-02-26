@@ -63,7 +63,7 @@ a {
 }
 
 .title {
-  cursor: default;
+  cursor: auto;
   display: flex;
   flex-direction: row;
   text-align: left;

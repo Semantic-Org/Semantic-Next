@@ -1,6 +1,6 @@
 <div class="{classMap getMenuStyles}menu">
   {#if searchable}
-    <ui-input fluid tiny search dark={dark} class="search" placeholder="Search menu..."></ui-input>
+    <ui-input fluid tiny search debounced dark={dark} class="search" placeholder="Search menu..."></ui-input>
   {/if}
   {#each section in getMenu}
     {>title
