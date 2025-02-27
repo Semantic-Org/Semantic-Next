@@ -1,0 +1,99 @@
+/* component.css */
+:host {
+  --slider-height: 10px;
+  --slider-border-radius: var(--border-radius);
+  --handle-size: 24px;
+  --track-color: var(--standard-10);
+  --fill-color: var(--yellow);
+  --guide-color: var(--standard-50);
+  --handle-color: var(--yellow);
+}
+
+
+.slider {
+  position: relative;
+  height: var(--slider-height);
+  background: var(--track-color);
+  border-radius: var(--slider-border-radius);
+  cursor: pointer;
+  margin: var(--spacing) 0;
+
+  .area {
+    margin: 0rem var(--spacing);
+    position: relative;
+    height: var(--slider-height);
+    width: calc(100% - 2em);
+  }
+
+
+  .track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--slider-border-radius);
+  }
+
+  .guide,
+  .fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--fill-color);
+    border-radius: var(--slider-border-radius);
+    transition: width 0.1s ease;
+  }
+
+  .guide {
+    background: var(--guide-color);
+  }
+
+  .handle {
+    position: absolute;
+    top: 50%;
+    width: var(--handle-size);
+    height: var(--handle-size);
+    background: var(--handle-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: var(--raised-shadow);
+    transition: left 0.1s ease;
+  }
+
+  &.dragging {
+    cursor: grabbing;
+
+    .fill,
+    .guide,
+    .handle {
+      transition: none;
+    }
+  }
+}
+
+
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--small);
+  color: var(--standard-60);
+  padding: 0 calc(var(--handle-size) / 2);
+
+  .label {
+
+    &.current {
+      font-weight: bold;
+      color: var(--yellow);
+    }
+  }
+}
+
+.reset {
+  display: inline-block;
+  margin-top: var(--spacing);
+}
+
+
