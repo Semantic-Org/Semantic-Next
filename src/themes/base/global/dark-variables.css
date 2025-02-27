@@ -80,6 +80,7 @@ html.dark,
   -------------------- */
 
   --solid-border-color: #222222;
+  --border: 1px solid var(--border-color);
   --solid-border: 1px solid var(--solid-border-color);
 
 
