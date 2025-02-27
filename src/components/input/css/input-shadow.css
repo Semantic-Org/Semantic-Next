@@ -226,7 +226,7 @@
     max-width: 100%;
   }
   .fluid input {
-    width: 0;
+    width: auto;
   }
 }
 
