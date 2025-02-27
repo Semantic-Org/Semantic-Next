@@ -7,7 +7,7 @@
   font-size: inherit;
   padding: 0rem;
 
-  --nav-menu-title-color: #798088;
+  --nav-menu-title-color: #FFF;
   --nav-menu-title-font-size: 14px;
   --nav-menu-title-padding: var(--compact-spacing) 0rem;
 
@@ -36,6 +36,7 @@
 
   --nav-menu-sub-title-font-size: 13px;
   --nav-menu-sub-title-padding: 6px 0px;
+  --nav-menu-sub-title-color: var(--nav-menu-title-color);
   --nav-menu-sub-title-active-color: var(--nav-menu-title-active-color);
 
   --nav-menu-sub-content-indent-distance: 0.25rem;
@@ -93,21 +94,8 @@ a {
   align-items: center;
   padding: var(--nav-menu-title-padding);
   text-decoration: none;
+  color: var(--nav-menu-title-color);
 
-  &[href] {
-    cursor: pointer;
-    &:hover {
-      color: var(--nav-menu-title-hover-color);
-      
-      .icon {
-        opacity: var(--nav-menu-title-icon-active-opacity);
-      }
-    }
-  }
-  &.expandable {
-    cursor: pointer;
-    color: var(--nav-menu-title-color);
-  }
   &:not(.expandable) {
     color: var(--nav-menu-title-active-color);
   }
@@ -172,6 +160,7 @@ a {
         display: flex;
         font-size: var(--nav-menu-sub-title-font-size);
         padding: var(--nav-menu-sub-title-padding);
+        color: var(--nav-menu-sub-title-color);
 
         &:first-child {
           padding-top: 0;
@@ -205,10 +194,7 @@ a {
   &.expandable:hover {
     transition: 0.3s color ease;
     color: var(--nav-menu-title-hover-color);
-    
-    .icon {
-      opacity: var(--nav-menu-title-icon-active-opacity);
-    }
+
   }
   &.active {
     color: var(--nav-menu-title-active-color);
@@ -226,7 +212,7 @@ a {
   &.current {
     cursor: default;
     color: var(--primary-light-text-color);
-    
+
     &[href] {
       cursor: pointer;
     }
@@ -247,12 +233,6 @@ a {
     opacity: 1;
     height: auto;
   }
-}
-
-/* Show content when not in accordion mode */
-:host(:not([accordion])) .content {
-  opacity: 1;
-  height: auto;
 
   .menu {
     .item:hover {
