@@ -96,6 +96,18 @@ a {
   text-decoration: none;
   color: var(--nav-menu-title-color);
 
+  &[href] {
+    cursor: pointer;
+
+    &:hover {
+      color: var(--nav-menu-title-hover-color);
+
+      .icon {
+        opacity: var(--nav-menu-title-icon-active-opacity);
+      }
+    }
+  }
+
   &:not(.expandable) {
     color: var(--nav-menu-title-active-color);
   }
@@ -149,7 +161,7 @@ a {
     flex-direction: column;
 
     .item {
-      display: flex;
+      display: block;
       text-decoration: none;
       color: var(--nav-menu-item-color);
       line-height: 1;
