@@ -3,14 +3,17 @@
   * {
     box-sizing: border-box;
   }
+  :host {
+    display: contents;
+  }
   .input {
+    cursor: text;
     display: inline-flex;
     position: relative;
     font-style: normal;
     font-weight: var(--input-font-weight);
     font-family: var(--input-font-family);
     line-height: var(--input-line-height);
-    padding: var(--input-padding);
     color: var(--input-text-color);
     background: var(--input-background);
     border: var(--input-border);
@@ -18,28 +21,49 @@
     transition: var(--input-transition);
     box-shadow: var(--input-box-shadow);
     gap: var(--input-item-spacing);
+    text-align: var(--input-text-align);
     align-items: center;
   }
   .input input {
+    width: var(--input-width);
+    padding: var(--input-padding);
     background-color: transparent;
     margin: 0em;
     border-radius: inherit;
     outline: none;
     max-width: 100%;
     flex: 1 0 auto;
-    text-align: left;
+    text-align: inherit;
+    font-size: inherit;
+    font-family: inherit;
     color: inherit;
     border: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    z-index: var(--page-layer-1);
   }
   .input input::placeholder {
     color: var(--white-10);
   }
-  .input ui-icon {
+  .input .icon {
+    position: absolute;
+    z-index: var(--page-layer-2);
+    right: var(--input-icon-right);
+    width: var(--input-icon-width);
+    pointer-events: none;
     margin: 0rem;
-    width: 1rem;
+  }
+  .input .icon.clickable {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .input .icon + .label {
+    right: var(--input-label-with-icon-right);
   }
   .input .label {
+    position: absolute;
+    z-index: var(--page-layer-2);
+    pointer-events: none;
+    right: var(--input-label-right);
     display: inline-block;
     text-wrap: nowrap;
     margin-left: auto;
@@ -53,8 +77,15 @@
   }
 }
 
+/* src/components/input/css/shadow/types/search.css */
+@layer component.input.types.search {
+  .search.input {
+    border-radius: var(--circular-radius);
+  }
+}
+
 /* src/components/input/css/shadow/states/focused.css */
-@layer component.input.variations.focus {
+@layer component.input.states.focus {
   .input.focus,
   .input:focus-within {
     border-color: var(--input-focused-border-color);
@@ -69,7 +100,7 @@
 }
 
 /* src/components/input/css/shadow/states/loading.css */
-@layer component.input.variations.loading {
+@layer component.input.states.loading {
   .loading.input:not(.icon) {
     position: relative;
     cursor: default;
@@ -131,7 +162,7 @@
 }
 
 /* src/components/input/css/shadow/states/disabled.css */
-@layer component.input.variations.disabled {
+@layer component.input.states.disabled {
   .disabled.input,
   .disabled.input:hover,
   .disabled.active.input {
@@ -160,13 +191,42 @@
 }
 
 /* src/components/input/css/shadow/variations/sizing.css */
-@layer component.input.variations.sizing;
+@layer component.input.variations.sizing {
+  .mini {
+    font-size: var(--input-mini);
+  }
+  .tiny {
+    font-size: var(--input-tiny);
+  }
+  .small {
+    font-size: var(--input-small);
+  }
+  :host {
+    font-size: var(--input-medium);
+  }
+  .large {
+    font-size: var(--input-large);
+  }
+  .big {
+    font-size: var(--input-big);
+  }
+  .huge {
+    font-size: var(--input-huge);
+  }
+  .massive {
+    font-size: var(--input-massive);
+  }
+}
 
 /* src/components/input/css/shadow/variations/fluid.css */
 @layer component.input.variations.fluid {
   .fluid {
     display: flex;
     flex-grow: 1;
+    max-width: 100%;
+  }
+  .fluid input {
+    width: auto;
   }
 }
 

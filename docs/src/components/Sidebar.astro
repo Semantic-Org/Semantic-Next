@@ -2,23 +2,30 @@
 const { sidebarMenu, expandAll } = Astro.props;
 import './Sidebar.css';
 import NavMenu from '@components/NavMenu/NavMenu.js';
-import { getSidebarMenu } from '@helpers/navigation.js';
-import { Template } from '@semantic-ui/component';
-
+import { getSidebarMenu, getActiveSidebarSection, getSidebarItems } from '@helpers/navigation.js';
 import { UIMenu } from '@semantic-ui/core'
 
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
-const canExpand = true;
+
+// trying out always expanded for now
+const canExpand = true; 
+
+const currentPath = Astro.url.pathname;
+const activeSection = getActiveSidebarSection(currentPath);
+const items = getSidebarItems(activeSection, currentPath);
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
-	<NavMenu
-		client:load
+  {items.length > 0 && <UIMenu items={items} vertical inset selection dark></UIMenu>}
+  <NavMenu
+    client:load
     menu={menu}
-    use-accordion=true
     expand-all={expandAll || canExpand}
     use-accordion=false
     activeurl={Astro.url.pathname}
+    searchable
+    aligned
+    dark
   />
   <slot name="after"/>
 </sidebar>

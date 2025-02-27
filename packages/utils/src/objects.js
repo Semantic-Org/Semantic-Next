@@ -1,5 +1,7 @@
 import { each } from './looping.js';
 import { isArray, isObject } from './types.js';
+import { escapeRegExp } from './regexp.js';
+import { noop } from './functions.js';
 
 /*-------------------
        Objects
@@ -156,7 +158,8 @@ export const get = function (obj, path = '') {
 export const proxyObject = (sourceObj = noop, referenceObj = {}) => {
   return new Proxy(referenceObj, {
     get: (target, property) => {
-      return get(referenceObj, property) || get(sourceObj(), property);
+      const propKey = typeof property === 'symbol' ? property.toString() : property;
+      return get(referenceObj, propKey) || get(sourceObj(), propKey);
     },
   });
 };
@@ -313,7 +316,7 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
   }
 
   if(words.length > 1) {
-    each(words, word => {
+    each(words, (word) => {
       wordRegexes.push(new RegExp(`(\W|^)${word}(\W|$)`, 'i'));
     });
   }

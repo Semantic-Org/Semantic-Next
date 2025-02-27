@@ -3,6 +3,7 @@ import {
   capitalize,
   toTitleCase,
   isEmpty,
+  joinWords,
   arrayFromObject,
   formatDate,
   each,
@@ -53,7 +54,7 @@ export const TemplateHelpers = {
   classes(classes, spaceAfter = true) {
     return TemplateHelpers.join(classes, ' ', true);
   },
-  joinComma(array = [], oxford = false, quotes = false) {
+  joinComma(array = [], oxford, quotes) {
     return joinWords(array, {
       separator: ', ',
       lastSeparator: ' and ',

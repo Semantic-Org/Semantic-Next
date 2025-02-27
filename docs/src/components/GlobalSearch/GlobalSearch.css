@@ -31,6 +31,9 @@
 
   --global-search-modal-input-font-size: 18px;
 
+  --input-text-color: rgba(255, 255, 255, 0.6);
+  --input-focused-color: rgba(255, 255, 255, 1);
+  --input-border: 1px solid oklch(.96 .01 279.32 / 15%);
 }
 
 * {
@@ -51,6 +54,8 @@ input {
     background-color: var(--global-search-background-color);
     border-radius: var(--global-search-border-radius);
     transition: var(--global-search-transition);
+  }
+  &::part(input-field) {
     padding: var(--global-search-input-padding);
   }
   &:hover {

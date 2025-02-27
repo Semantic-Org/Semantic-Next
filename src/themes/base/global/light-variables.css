@@ -2,7 +2,7 @@
           Light Theme
 *******************************/
 
-:root,
+html,
 .light.theme,
 [light],
 [theme="light"] {
@@ -20,6 +20,14 @@
   /* Used to emphasize text  */
   --primary-text-color: var(--blue-text-color);
   --primary-light-text-color: var(--light-blue);
+
+  /* -------------------
+        UI Colors
+  -------------------- */
+
+  --ui-emphasis-strong: oklch(0.98 0.01 282.32);
+  --ui-emphasis: oklch(0.98 0.01 272.79);
+  --ui-background-emphasis: linear-gradient(140deg, var(--ui-emphasis-strong), var(--inverted-100), var(--ui-emphasis));
 
   /* -------------------
        Invert Colors

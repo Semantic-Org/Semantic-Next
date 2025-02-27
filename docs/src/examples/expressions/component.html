@@ -46,6 +46,12 @@
       <td>Current time PST</td>
     </tr>
     <tr>
+      <td>Method calls with data context evaluation</td>
+      <td>{#html "{ activeIf(value == isTrue) }"}</td>
+      <td>{ activeIf(value == isTrue) }</td>
+      <td>active</td>
+    </tr>
+    <tr>
       <td>Calling helper method with inline object definition</td>
       <td>{#html 'classMap { one: true, two: true, three: date }' }</td>
       <td>{ classMap { one: true, two: true, three: date } }</td>
@@ -86,6 +92,18 @@
       <td>(value + 2) * 5</td>
       <td>{(value + 2) * 5}</td>
       <td>15</td>
+    </tr>
+    <tr>
+      <td>Using inline ternary on a boolean</td>
+      <td>isTrue ? 'yes' : 'no'</td>
+      <td>{isTrue ? 'yes' : 'no'}</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>Using inline ternary on a falsey boolean</td>
+      <td>!isTrue ? 'yes' : 'no'</td>
+      <td>{!isTrue ? 'yes' : 'no'}</td>
+      <td>no</td>
     </tr>
     <tr>
       <td>Calling a method with spaced arguments</td>

@@ -1,27 +1,55 @@
 @layer layout {
 
   :root {
-    --sidebar-background-color: var(--ui-background);
+    --sidebar-background: var(--ui-background-emphasis);
     --sidebar-box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3) inset;
-    --sidebar-width: 250px;
+    --sidebar-width: 220px;
   }
 
-  html.dark {
-    --sidebar-background-color: oklch(0.17 0.01 234.61);
+  html.light {
+    --sidebar-background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
+
+    ui-menu {
+
+    }
   }
 
   sidebar {
     position: static;
     display: flex;
     flex-direction: column;
-    background-color: var(--sidebar-background-color);
+    background: var(--sidebar-background);
     color: #FFFFFF;
     box-shadow: var(--sidebar-box-shadow);
     width: var(--sidebar-width);
     border: none;
+    border-right: var(--very-subtle-border);
+    scrollbar-width: thin;
 
+    ui-menu {
+      margin: 1rem 1rem 0rem;
+      --menu-selection-item-color: var(--standard-30);
+      --menu-selection-item-hover-color: var(--standard-90);
+      --menu-selection-item-active-background: #080b12;
+      --menu-selection-item-active-color: var(--primary-text-color);
+      --menu-selection-item-active-box-shadow: 0px 0px 2px rgb(40 160 255 / 31%);
+    }
     nav-menu {
       padding: 0rem 1rem;
+    }
+  }
+
+  html.light {
+    sidebar {
+      ui-menu {
+        --menu-inset-border: 1px solid oklch(.96 .01 279.32 / 15%);
+        --menu-inset-background: var(--inverted-15);
+      }
+      nav-menu {
+        --input-text-color: rgba(255, 255, 255, 0.6);
+        --input-focused-color: rgba(255, 255, 255, 1);
+        --input-border: 1px solid oklch(.96 .01 279.32 / 15%);
+      }
     }
   }
 
@@ -56,7 +84,7 @@
   }
 
   sidebar nav-menu {
-    margin-top: 1rem;
+    margin-top: var(--compact-spacing);
     flex-grow: 1;
   }
 }

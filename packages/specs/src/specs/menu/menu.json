@@ -36,6 +36,12 @@
       "usageLevel": 1
     },
     {
+      "name": "Fitted",
+      "attribute": "fitted",
+      "description": "can remove its margin",
+      "usageLevel": 2
+    },
+    {
       "name": "Vertical",
       "attribute": "vertical",
       "description": "can be displayed vertically",

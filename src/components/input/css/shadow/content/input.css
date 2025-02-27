@@ -2,8 +2,13 @@
   box-sizing: border-box;
 }
 
+:host {
+  display: contents;
+}
+
 .input {
 
+  cursor: text;
   display: inline-flex;
   position: relative;
   font-style: normal;
@@ -11,7 +16,6 @@
 
   font-family: var(--input-font-family);
   line-height: var(--input-line-height);
-  padding: var(--input-padding);
   color: var(--input-text-color);
   background: var(--input-background);
   border: var(--input-border);
@@ -19,31 +23,54 @@
   transition: var(--input-transition);
   box-shadow: var(--input-box-shadow);
   gap: var(--input-item-spacing);
+  text-align: var(--input-text-align);
   align-items: center;
 
   input {
+    width: var(--input-width);
+    padding: var(--input-padding);
     background-color: transparent;
     margin: 0em;
     border-radius: inherit;
     outline: none;
     max-width: 100%;
     flex: 1 0 auto;
-    text-align: left;
+    text-align: inherit;
+    font-size: inherit;
+    font-family: inherit;
     color: inherit;
     border: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    z-index: var(--page-layer-1);
 
     &::placeholder {
       color: var(--white-10);
     }
   }
 
-  ui-icon {
+  .icon {
+    position: absolute;
+    z-index: var(--page-layer-2);
+    right: var(--input-icon-right);
+    width: var(--input-icon-width);
+    pointer-events: none;
     margin: 0rem;
-    width: 1rem;
+    &.clickable {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    + .label {
+      right: var(--input-label-with-icon-right);
+    }
+
   }
 
   .label {
+    position: absolute;
+    z-index: var(--page-layer-2);
+    pointer-events: none;
+    right: var(--input-label-right);
     display: inline-block;
     text-wrap: nowrap;
     margin-left: auto;

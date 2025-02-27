@@ -6,7 +6,56 @@
   "exportName": "UILabel",
   "content": [],
   "types": [],
-  "variations": [],
+  "variations": [
+    {
+      "name": "Size",
+      "attribute": "size",
+      "usageLevel": 1,
+      "description": "vary in size",
+      "options": [
+        {
+          "name": "Mini",
+          "value": "mini",
+          "description": "appear extremely small"
+        },
+        {
+          "name": "Tiny",
+          "value": "tiny",
+          "description": "appear very small"
+        },
+        {
+          "name": "Small",
+          "value": "small",
+          "description": "appear small"
+        },
+        {
+          "name": "Medium",
+          "value": "medium",
+          "description": "appear normal sized"
+        },
+        {
+          "name": "Large",
+          "value": "large",
+          "description": "appear larger than normal"
+        },
+        {
+          "name": "Big",
+          "value": "big",
+          "description": "appear much larger than normal"
+        },
+        {
+          "name": "Huge",
+          "value": "huge",
+          "description": "appear very much larger than normal"
+        },
+        {
+          "name": "Massive",
+          "value": "massive",
+          "description": "appear extremely larger than normal"
+        }
+      ]
+    }
+  ],
   "events": [],
   "settings": []
 }

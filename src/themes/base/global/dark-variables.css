@@ -10,6 +10,16 @@ html.dark,
   --dark-mode: true;
   --page-background: #000000;
 
+  /* -------------------
+        UI Colors
+  -------------------- */
+  --ui-emphasis-strong: oklch(0.16 0.02 266.69);
+  --ui-emphasis: oklch(0.13 0.02 266.79);
+
+  /* -------------------
+      Invert Colors
+  -------------------- */
+
   --standard-color: var(--white-lch);
   --inverted-color: var(--black-lch);
 
@@ -70,6 +80,7 @@ html.dark,
   -------------------- */
 
   --solid-border-color: #222222;
+  --border: 1px solid var(--border-color);
   --solid-border: 1px solid var(--solid-border-color);
 
 

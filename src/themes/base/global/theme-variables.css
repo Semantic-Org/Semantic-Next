@@ -3,7 +3,11 @@
 *******************************/
 
 /* Derived theme values need to be defined at the same scope to recalculate */
-:root, .theme, [light], [dark], [theme] {
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
 
   /* -------------------
         Text Color
@@ -85,6 +89,7 @@
   --border-color: oklch(var(--standard-border-color) / 15%);
   --internal-border-color: oklch(var(--standard-border-color) / 10%);
   --subtle-border-color: oklch(var(--standard-border-color) / 8%);
+  --very-subtle-border-color: oklch(var(--standard-border-color) / 5%);
   --strong-border-color: oklch(var(--standard-border-color) / 22%);
   --selected-border-color: oklch(var(--standard-border-color) / 35%);
   --strong-selected-border-color: oklch(var(--standard-border-color) / 50%);
@@ -105,6 +110,7 @@
   --selected-white-border: 1px solid var(--selected-white-border-color);
 
   /* strength */
+  --very-subtle-border: 1px solid var(--very-subtle-border-color);
   --subtle-border: 1px solid var(--subtle-border-color);
   --strong-border: 1px solid var(--strong-border-color);
 
@@ -258,10 +264,13 @@
        UI BG Colors
   -------------------- */
 
-  /* UI Chrome Colors */
+  /* UI BG Subtle */
   --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
   --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
   --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
+
+  /* UI BG Emphasis */
+  --ui-background-emphasis: linear-gradient(140deg, var(--ui-emphasis-strong), var(--inverted-100), var(--ui-emphasis));
 
   /* -------------------
          Loader

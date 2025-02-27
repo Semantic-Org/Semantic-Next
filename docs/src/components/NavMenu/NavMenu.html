@@ -1,50 +1,78 @@
-{#each section in getMenu}
-  <a class="{classes getTitleStates section}title" href={getLink section} part="title">
-    {#if section.icon}
-      <ui-icon icon={section.icon} class="icon" exportparts="icon:title-icon" />
-    {else if section.image}
-      <img src="{section.image}">
+<div class="{classMap getMenuStyles}menu">
+  {#if searchable}
+    <ui-input fluid tiny search dark class="search" placeholder="Search menu..."></ui-input>
+  {/if}
+  {#if hasNoResults}
+    <div class="message">{getNoResultsMessage}</div>
+  {else}
+    {#each section in getMenu}
+      {>title
+        title=section
+        isItem=false
+      }
+      {#if section.pages}
+        <div class="{activeIf isActiveItem section}{classIf hasIcons 'indented'}content" part="content">
+          <div class="menu" part="menu">
+            {#each page in section.pages}
+              {#if page.pages}
+                {>title
+                  title=page
+                  isItem=true
+                }
+                <div class="{activeIf isActiveItem page} content" part="sub-content">
+                  <div class="menu">
+                    {#each page in page.pages}
+                      <a class="{classMap getPageStates page}item" href={getLink page} part="page link">
+                        {>highlight
+                          item=page
+                        }
+                        {#if page.description}
+                          <span class="description">{page.description}</span>
+                        {/if}
+                      </a>
+                    {/each}
+                  </div>
+                </div>
+              {else}
+                <a class="{classMap getPageStates page}item" href={getLink page} part="page link">
+                  {>highlight
+                    item=page
+                  }
+                </a>
+              {/if}
+            {/each}
+          </div>
+        </div>
+      {/if}
+    {/each}
+  {/if}
+</div>
+
+{#snippet highlight}
+  {#if item.highlightedName}
+    {item.highlightedName.before}<span class="highlight">{item.highlightedName.match}</span>{item.highlightedName.after}
+  {else}
+    {item.name}
+  {/if}
+{/snippet}
+
+{#snippet title}
+  <a class="{classMap getTitleStates title}title{isItem ? ' item' : ''}" href={getLink title} part="{isItem ? 'item-title' : 'title'}">
+    {#if title.icon}
+      <ui-icon icon={title.icon} class="icon" exportparts="icon:title-icon" />
+    {else if title.image}
+      <img src="{title.image}">
     {/if}
     <span class="text" part="text">
-      {section.name}
+      {>highlight
+        item=title
+      }
     </span>
-    {#if section.description}
-      <span class="description" part="description">{section.description}</span>
+    {#if title.description}
+      <span class="description" part="description">{title.description}</span>
     {/if}
-    {#if canShowNavIcon section}
-      <ui-icon icon={getNavIcon section} class="nav-icon" part="nav-icon"></ui-icon>
+    {#if canShowNavIcon title}
+      <ui-icon icon={getNavIcon title} class="nav-icon" part="nav-icon"></ui-icon>
     {/if}
   </a>
-  {#if section.pages}
-    <div class="{activeIf isActiveItem section}{classIf hasIcons 'indented'}content" part="content">
-      <div class="menu" part="menu">
-        {#each page in section.pages}
-          {#if page.pages}
-            <div class="{classes getTitleStates page}title item" part="item-title">
-              <div class="text">{page.name}</div>
-              {#if canShowNavIcon}
-                <ui-icon {getNavIcon section} class="nav-icon" part="nav-icon"></ui-icon>
-              {/if}
-            </div>
-            <div class="{activeIf isActiveItem page} content">
-              <div class="menu">
-                {#each page in page.pages}
-                  <a class="{classes getPageStates page}item" href={getLink page} part="page link">
-                    {page.name}
-                    {#if page.description}
-                      <span class="description">{page.description}</span>
-                    {/if}
-                  </a>
-                {/each}
-              </div>
-            </div>
-          {else}
-            <a class="{classes getPageStates page}item" href={getLink page} part="page link">
-              {page.name}
-            </a>
-          {/if}
-        {/each}
-      </div>
-    </div>
-  {/if}
-{/each}
+{/snippet}

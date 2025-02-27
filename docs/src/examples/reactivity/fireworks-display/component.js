@@ -227,7 +227,6 @@ const events = {
     const pos = self.getPointerPosition(event);
     emitter.x = pos.x;
     emitter.y = pos.y;
-    emitter.active = true;
     state.emitter.set(emitter);
   },
   'pointerup, mouseleave canvas'({ self, state }) {

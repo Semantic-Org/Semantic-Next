@@ -28,6 +28,12 @@
     }
   ],
   "types": [
+    {
+      "name": "Search",
+      "attribute": "search",
+      "description": "can be formatted to appear as a search",
+      "exampleCode": "<ui-input search></ui-input>"
+    }
   ],
   "variations": [
     {
@@ -35,6 +41,54 @@
       "attribute": "fluid",
       "usageLevel": 1,
       "description": "take the width of its container"
+    },
+    {
+      "name": "Size",
+      "attribute": "size",
+      "usageLevel": 1,
+      "description": "vary in size",
+      "options": [
+        {
+          "name": "Mini",
+          "value": "mini",
+          "description": "appear extremely small"
+        },
+        {
+          "name": "Tiny",
+          "value": "tiny",
+          "description": "appear very small"
+        },
+        {
+          "name": "Small",
+          "value": "small",
+          "description": "appear small"
+        },
+        {
+          "name": "Medium",
+          "value": "medium",
+          "description": "appear normal sized"
+        },
+        {
+          "name": "Large",
+          "value": "large",
+          "description": "appear larger than normal"
+        },
+        {
+          "name": "Big",
+          "value": "big",
+          "description": "appear much larger than normal"
+        },
+        {
+          "name": "Huge",
+          "value": "huge",
+          "description": "appear very much larger than normal"
+        },
+        {
+          "name": "Massive",
+          "value": "massive",
+          "description": "appear extremely larger than normal"
+        }
+      ]
     }
   ],
   "events": [
@@ -55,6 +109,26 @@
       "type": "string",
       "attribute": "name",
       "description": "can specify the form field name"
+    },
+    {
+      "name": "Debounced",
+      "type": "boolean",
+      "attribute": "debounced",
+      "defaultValue": false,
+      "description": "can specify the input value should be debounced"
+    },
+    {
+      "name": "Debounce Interval",
+      "type": "number",
+      "attribute": "debounce-interval",
+      "defaultValue": 150,
+      "description": "can specify the input debounce interval in milliseconds"
+    },
+    {
+      "name": "Clearable",
+      "type": "string",
+      "attribute": "clearable",
+      "description": "can show an icon to reset the inputted value"
     },
     {
       "name": "Placeholder",

@@ -1,21 +1,62 @@
 import { defineComponent } from '@semantic-ui/component';
 import { InputComponentSpec } from '@semantic-ui/specs';
+import { debounce } from '@semantic-ui/utils';
 
 import CSS from './css/input-shadow.css?raw';
 import Template from './input.html?raw';
 
-const defaultSettings = {
-  focused: false,
-};
 
-const createComponent = ({$, settings}) => ({
+const defaultState = {
+  focused: false,
+}
+
+const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
+
+  initialize() {
+    if(settings.search) {
+      self.configureSearch();
+    }
+  },
+
+  // allow default styling for search
+  configureSearch() {
+    settings.placeholder = settings.placeholder || 'Search...';
+    settings.icon = settings.icon || 'search';
+    settings.clearable = settings.clearable ?? true;
+    settings.debounce = true;
+  },
+
+  hasValue() {
+    return (settings.value || '').length > 0;
+  },
+
+  isClearable() {
+    return settings.clearable && self.hasValue();
+  },
 
   getStateClasses() {
-    const focus = settings.focused;
     return {
-      focus
+      focus: state.focused.get()
     };
   },
+
+  getIcon() {
+    if(settings.clearable && self.hasValue()) {
+      return 'x';
+    }
+    return settings.icon
+  },
+
+
+  setValue(value) {
+    el.value = value;
+    $('input').val(value);
+    dispatchEvent('change', { value });
+  },
+
+  setValueDebounced: debounce((value) => {
+    self.setValue(value)
+  }, { delay: settings.debounceInterval }),
 
 });
 
@@ -28,16 +69,25 @@ const onRendered = function({}) {
 };
 
 const events = {
-  'focus input'({ settings }) {
-    console.log('set focus');
-    settings.focused = true;
+  'click ui-icon'({ $, self }) {
+    if(self.isClearable()) {
+      self.setValue('');
+    }
   },
-  'blur input'({ settings }) {
-    settings.focused = false;
+  'focus input'({ state }) {
+    state.focused.set(true);
   },
-  'input input'({event, el, settings, value, dispatchEvent}) {
-    el.value = value;
-  }
+  'blur input'({ state }) {
+    state.focused.set(false);
+  },
+  'input input'({ el, self, value, settings }) {
+    if(settings.debounced) {
+      self.setValueDebounced(value);
+    }
+    else {
+      self.setValue(value);
+    }
+  },
 };
 
 const UIInput = defineComponent({
@@ -49,7 +99,7 @@ const UIInput = defineComponent({
   events,
   onCreated,
   onRendered,
-  defaultSettings,
+  defaultState,
 });
 
 export { UIInput };

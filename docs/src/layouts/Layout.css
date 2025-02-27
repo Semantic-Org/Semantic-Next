@@ -21,7 +21,6 @@
 
     left: 0;
     top: auto;
-    border: none;
     padding: 0;
     margin: 0;
 
@@ -82,7 +81,7 @@
 
       ui-card {
         text-align: left;
-        min-width: 150px;
+        min-width: 300px;
         .label {
           color: var(--primary-text-color);
           font-weight: bold;
@@ -102,6 +101,7 @@
       }
       [next]{
         margin-left: auto;
+        text-align: right;
       }
     }
 
@@ -223,23 +223,24 @@
         }
 
         blockquote {
-          border: var(--border-color);
           padding: var(--padding);
-          background-color: oklch(0.21 0.06 236.29);
           background-image: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
           font-style: italic;
           border: var(--black-100);
           background-clip: padding-box;
-          display: flex;
+          display: flex
+          flex-direction: row;
           border-radius: var(--border-radius);
           margin: var(--vertically-padded);
           flex-direction: row;
+          border: var(--very-subtle-border);
+          border-left: 2px solid var(--primary-text-color);
 
           p code {
-            color: var(--white);
+            color: var(--standard-100);
           }
           p {
-            color: var(--white-60) !important;
+            color: var(--standard-60) !important;
             line-height: 1.8;
           }
           p:first-child {
@@ -335,7 +336,11 @@
         }
 
         blockquote p strong {
-          color: var(--white-100);
+          display: block;
+          font-size: 13px;
+          font-style: normal;
+          font-weight: bold;
+          color: var(--standard-100);
         }
 
         /* Header Position */
@@ -487,6 +492,9 @@
     }
     layout main ui-container {
       background-color: rgb(0, 0, 0, 0.8);
+      box-shadow: 1px 0px 1px 0 rgba(34, 35, 37, 0.7);
+    }
+    sidebar  {
       box-shadow: 1px 0px 1px 0 rgba(34, 35, 37, 0.7);
     }
   }

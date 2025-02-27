@@ -1,7 +1,7 @@
 <ui-input fluid icon="search" label="ctrl+k" placeholder="Search..." class="inline-search" exportparts="input:search-input, icon:search-icon, label:search-label"></ui-input>
 <ui-modal glass>
   <div class="search">
-    <ui-input fluid class="input" placeholder="Search..." autofocus></ui-input>
+    <ui-input debounced fluid search autofocus></ui-input>
   </div>
   <div class="results">
     {#if hasAny displayResults}

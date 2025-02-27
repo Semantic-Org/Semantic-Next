@@ -1,0 +1,127 @@
+<h1>Dropdown Examples</h1>
+
+<div class="example-section">
+  <h2>Basic Dropdown</h2>
+  <div class="example-row">
+    <label for="basic-dropdown">Select a fruit:</label>
+    <ui-dropdown 
+      id="basic-dropdown"
+      name="fruit"
+      placeholder="Select a fruit"
+      options='[
+        {"value": "apple", "text": "Apple"},
+        {"value": "banana", "text": "Banana"},
+        {"value": "orange", "text": "Orange"},
+        {"value": "grape", "text": "Grape"},
+        {"value": "kiwi", "text": "Kiwi"}
+      ]'>
+    </ui-dropdown>
+    <div id="basic-result" class="selection-result">No selection yet</div>
+  </div>
+</div>
+
+<div class="example-section">
+  <h2>Dropdown with Icons</h2>
+  <div class="example-row">
+    <label for="icon-dropdown">Select a social platform:</label>
+    <ui-dropdown 
+      id="icon-dropdown"
+      name="platform"
+      placeholder="Select a platform"
+      options='[
+        {"value": "facebook", "text": "Facebook", "icon": "facebook"},
+        {"value": "twitter", "text": "Twitter", "icon": "twitter"},
+        {"value": "instagram", "text": "Instagram", "icon": "instagram"},
+        {"value": "linkedin", "text": "LinkedIn", "icon": "linkedin"},
+        {"value": "youtube", "text": "YouTube", "icon": "youtube"}
+      ]'>
+    </ui-dropdown>
+    <div id="icon-result" class="selection-result">No selection yet</div>
+  </div>
+</div>
+
+<div class="example-section">
+  <h2>Dropdown Variants</h2>
+  <div class="example-row">
+    <label>Sizes:</label>
+    <ui-dropdown 
+      small
+      placeholder="Small dropdown"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+    <br><br>
+    <ui-dropdown 
+      placeholder="Default size"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+    <br><br>
+    <ui-dropdown 
+      large
+      placeholder="Large dropdown"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+  </div>
+  
+  <div class="example-row">
+    <label>Fluid (full-width):</label>
+    <ui-dropdown 
+      fluid
+      placeholder="Fluid dropdown takes full width"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+  </div>
+  
+  <div class="example-row">
+    <label>States:</label>
+    <ui-dropdown 
+      id="variant-dropdown"
+      error
+      placeholder="Error state"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+    <br><br>
+    <ui-dropdown 
+      disabled
+      placeholder="Disabled state"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+    <div id="variant-result" class="selection-result">No selection yet</div>
+  </div>
+  
+  <div class="example-row">
+    <label>With empty option:</label>
+    <ui-dropdown 
+      allow-empty
+      empty-text="-- Select --"
+      options='[
+        {"value": "1", "text": "Option 1"},
+        {"value": "2", "text": "Option 2"},
+        {"value": "3", "text": "Option 3"}
+      ]'>
+    </ui-dropdown>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { topbarMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
+import { topbarMenu, topbarDisplayMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
 import { firstMatch, groupBy, asyncEach, each, findIndex, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
 
 /* Used to sort lessons */
@@ -147,7 +147,7 @@ export const removeTrailingSlash = (url = '') => {
   ;
 };
 
-/* Gets currently active topbar menu from url */
+/* Gets active section from topbar display menu based on current URL */
 export const getActiveTopbarSection = async (activeURL = '') => {
   activeURL = removeTrailingSlash(activeURL);
   const topbarMenuWithLinks = await getTopbarMenu();
@@ -167,6 +167,97 @@ export const getActiveTopbarSection = async (activeURL = '') => {
   return activeItem?._id;
 };
 
+/* Helper to check if a URL belongs to a section's menu */
+const isInSectionMenu = (sectionId, currentPath) => {
+  let menu = [];
+  if (sectionId === 'ui') {
+    menu = sidebarMenuUI;
+  }
+  else if (sectionId === 'framework') {
+    menu = sidebarMenuFramework;
+  }
+  else if (sectionId === 'api') {
+    menu = sidebarMenuAPI;
+  }
+  else if (sectionId === 'examples') {
+    menu = sidebarMenuExamples;
+  }
+  else if (sectionId === 'learn') {
+    menu = sidebarMenuLearn;
+  }
+
+  // Check if current path matches any URL in the menu or its nested pages
+  return any(menu, section => {
+    if (currentPath.startsWith(section.url)) {
+      return true;
+    }
+    // Check nested pages
+    if (section.pages) {
+      return any(section.pages, page => {
+        if (isArray(page.pages)) {
+          // Handle subcategories
+          return any(page.pages, subpage => currentPath.startsWith(subpage.url));
+        }
+        return currentPath.startsWith(page.url);
+      });
+    }
+    return false;
+  });
+};
+
+/* Gets active display section and its items for the sidebar */
+export const getActiveSidebarSection = (currentPath) => {
+  currentPath = removeTrailingSlash(currentPath);
+
+  const activeSection = firstMatch(topbarDisplayMenu, item => {
+    if (item._ids) {
+      // For grouped sections, check if URL matches any of the sections or their menu items
+      return any(item._ids, id => {
+        const section = firstMatch(topbarMenu, m => m._id === id);
+        return section && (
+          currentPath.startsWith(section.url) || 
+          isInSectionMenu(section._id, currentPath)
+        );
+      });
+    }
+    // For single sections, check if URL matches the section or its menu items
+    return item._id && (
+      currentPath.startsWith(item.url) || 
+      isInSectionMenu(item._id, currentPath)
+    );
+  });
+
+  return activeSection;
+};
+
+/* Generates sidebar items based on active section */
+export const getSidebarItems = (activeSection, currentPath) => {
+  if (!activeSection) return [];
+  currentPath = removeTrailingSlash(currentPath);
+
+  if (activeSection._ids) {
+    const items = activeSection._ids
+      .map(id => {
+        const section = firstMatch(topbarMenu, m => m._id === id);
+        return section ? {
+          label: section.name,
+          href: section.url,
+          active: currentPath.startsWith(section.url) || isInSectionMenu(section._id, currentPath)
+        } : null;
+      })
+      .filter(Boolean);
+    
+    // Don't show UIMenu if there's only one item
+    return items.length <= 1 ? [] : items;
+  }
+
+  if (activeSection._id) {
+    // Single sections don't need the UIMenu
+    return [];
+  }
+
+  return [];
+};
 
 /* Get Sidebar Menu for a given Topbar Section */
 export const getSidebarMenu = async ({url, topbarSection}) => {
@@ -174,20 +265,33 @@ export const getSidebarMenu = async ({url, topbarSection}) => {
   if(url && !topbarSection) {
     topbarSection = await getActiveTopbarSection(url);
   }
-  if(topbarSection == 'ui') {
-    menu = sidebarMenuUI;
-  }
-  else if(topbarSection == 'framework') {
-    menu = sidebarMenuFramework;
-  }
-  else if(topbarSection == 'api') {
-    menu = sidebarMenuAPI;
-  }
-  else if(topbarSection == 'examples') {
-    menu = sidebarMenuExamples;
-  }
-  else if(topbarSection == 'learn') {
-    menu = sidebarMenuLearn;
+  // Handle both direct section matches and sections that are part of _ids groups
+  const section = firstMatch(topbarDisplayMenu, item => {
+    if (item._ids && item._ids.includes(topbarSection)) {
+      return true;
+    }
+    return item._id === topbarSection;
+  });
+
+  // If section is part of a group (like Documentation), get the appropriate menu
+  if (section?._ids) {
+    if (topbarSection === 'ui') {
+      menu = sidebarMenuUI;
+    }
+    else if (topbarSection === 'framework') {
+      menu = sidebarMenuFramework;
+    }
+    else if (topbarSection === 'api') {
+      menu = sidebarMenuAPI;
+    }
+  } else {
+    // Handle individual sections
+    if (topbarSection === 'examples') {
+      menu = sidebarMenuExamples;
+    }
+    else if (topbarSection === 'learn') {
+      menu = sidebarMenuLearn;
+    }
   }
   return menu;
 };
@@ -244,7 +348,7 @@ export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) 
 };
 
 /*
-  Topbar Menu
+  Topbar Menu for mobile and that includes secondary navs
 */
 export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
   const menu = clone(topbarMenu);
@@ -255,6 +359,30 @@ export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
         topbarSection: item._id
       });
       const urls = flattenedMenu.map(page => page.url).filter(Boolean);
+      item.baseURLs = urls;
+    });
+  }
+  return menu;
+};
+
+
+/*
+  Topbar Menu that displays to users
+*/
+export const getTopbarDisplayMenu = async ({ includeURLS = true} = {}) => {
+  const menu = clone(topbarDisplayMenu);
+  if(includeURLS) {
+    await asyncEach(menu, async item => {
+      let urls = [];
+      const ids = item._ids || [item._id];
+      await asyncEach(ids, async (id) => {
+        // get all urls that represent this topbar section
+        const flattenedMenu = await getFlattenedSidebarMenu({
+          topbarSection: id
+        });
+        const idURLs = flattenedMenu.map(page => page.url).filter(Boolean);
+        urls.push(...idURLs);
+      });
       item.baseURLs = urls;
     });
   }
