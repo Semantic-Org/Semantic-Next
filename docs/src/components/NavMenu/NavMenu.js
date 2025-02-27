@@ -59,7 +59,7 @@ const createComponent = function ({ $, el, self, settings, state }) {
     getTitleStates(title) {
       return {
         expandable: self.isExpandable(title),
-        active: self.isActiveItem(title),
+        active: settings.useAccordion ? self.isActiveItem(title) : false,
         current: self.isCurrentItem(title),
       };
     },
@@ -244,9 +244,16 @@ const createComponent = function ({ $, el, self, settings, state }) {
   };
 };
 
-const onRendered =  ({ self, isClient }) => {
+const onRendered =  ({ self, isClient, el, settings }) => {
   if(isClient) {
     self.scrollToActive();
+  }
+  
+  // Set accordion attribute on host element if needed
+  if (settings.useAccordion) {
+    el.setAttribute('accordion', '');
+  } else {
+    el.removeAttribute('accordion');
   }
 };
 

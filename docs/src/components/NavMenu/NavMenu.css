@@ -94,6 +94,16 @@ a {
   padding: var(--nav-menu-title-padding);
   text-decoration: none;
 
+  &[href] {
+    cursor: pointer;
+    &:hover {
+      color: var(--nav-menu-title-hover-color);
+      
+      .icon {
+        opacity: var(--nav-menu-title-icon-active-opacity);
+      }
+    }
+  }
   &.expandable {
     cursor: pointer;
     color: var(--nav-menu-title-color);
@@ -195,7 +205,10 @@ a {
   &.expandable:hover {
     transition: 0.3s color ease;
     color: var(--nav-menu-title-hover-color);
-
+    
+    .icon {
+      opacity: var(--nav-menu-title-icon-active-opacity);
+    }
   }
   &.active {
     color: var(--nav-menu-title-active-color);
@@ -213,6 +226,10 @@ a {
   &.current {
     cursor: default;
     color: var(--primary-light-text-color);
+    
+    &[href] {
+      cursor: pointer;
+    }
   }
 }
 .content {
@@ -230,6 +247,12 @@ a {
     opacity: 1;
     height: auto;
   }
+}
+
+/* Show content when not in accordion mode */
+:host(:not([accordion])) .content {
+  opacity: 1;
+  height: auto;
 
   .menu {
     .item:hover {
@@ -240,7 +263,7 @@ a {
       color: var(--nav-menu-item-current-color);
     }
     .current.item[href] {
-      cursor: auto;
+      cursor: pointer;
     }
     .menu {
       .item:not(:hover):not(.current):not(.active) {
