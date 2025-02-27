@@ -10,8 +10,10 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ### Improvements
 
 * `value` in event handlers will now automatically pass through value from custom events
-*  `input` component now includes `debounce`, `search`, `debounceInterval`
-*  `input` component now includes sizing and improvements to hitbox
+* `input` component now includes `debounce`, `search`, `debounceInterval`
+* `input` component now includes sizing and improvements to hitbox
+* Adds performance improvements to expression lookup in templating shortcircuiting for common lookups.
+* Adds search to `NavMenu` component
 
 ### Bugs
 * Fixed issue when evaluating js expressions passed through to subtemplates and snippets. Because data to subtemplates is wrapped to preserve reactivity, the js context of ternarties like `subTemplateData ? 'yes' : 'no` was expecting `subTemplateData() ? 'yes' : 'no'`
