@@ -1,0 +1,35 @@
+.example-section {
+  padding: var(--padding);
+  margin-bottom: var(--compact-spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.example-row {
+  margin-bottom: 20px;
+}
+
+.example-row:last-child {
+  margin-bottom: 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+pre {
+  background-color: var(--inverted-10);
+  color: var(--standard-80);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  overflow: auto;
+}
+
+.selection-result {
+  background-color: var(--inverted-10);
+  color: var(--standard-80);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+}
