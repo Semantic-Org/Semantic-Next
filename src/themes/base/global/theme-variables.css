@@ -3,7 +3,11 @@
 *******************************/
 
 /* Derived theme values need to be defined at the same scope to recalculate */
-:root, .theme, [light], [dark], [theme] {
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
 
   /* -------------------
         Text Color

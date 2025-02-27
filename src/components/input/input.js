@@ -81,7 +81,7 @@ const events = {
     state.focused.set(false);
   },
   'input input'({ el, self, value, settings }) {
-    if(settings.debounce) {
+    if(settings.debounced) {
       self.setValueDebounced(value);
     }
     else {

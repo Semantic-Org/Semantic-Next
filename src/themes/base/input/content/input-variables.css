@@ -39,7 +39,7 @@
   --input-label-font-weight: var(--bold);
   --input-label-padding: 2px 3px;
   --input-label-color: var(--standard-20);
-  --input-label-border: var(--standard-border);
+  --input-label-border: var(--border);
   --input-label-border-radius: var(--border-radius);
 
   --input-label-with-icon-right: calc( 1em + var(--input-icon-width) + var(--input-icon-right) );
