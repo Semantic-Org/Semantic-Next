@@ -50,6 +50,12 @@
   --nav-menu-item-current-color: var(--primary-text-color);
 
   --nav-menu-search-margin: var(--compact-spacing) 0;
+
+  --nav-menu-highlight-color: var(--primary-text-color);
+  --nav-menu-highlight-underline-color: var(--primary-text-color);
+
+  --nav-menu-message-color: var(--standard-40);
+  --nav-menu-message-font-size: var(--small);
 }
 
 
@@ -60,6 +66,20 @@ a {
 .search {
   display: block;
   margin: var(--nav-menu-search-margin);
+}
+
+.message {
+  font-size: var(--nav-menu-message-font-size);
+  color: var(--nav-menu-message-color);
+  padding: var(--nav-menu-item-spacing) 0;
+  text-align: center;
+  font-style: italic;
+  margin-bottom: var(--compact-spacing);
+}
+
+.highlight {
+  color: var(--nav-menu-highlight-color);
+  box-shadow: 0px 1px 0px 0px var(--nav-menu-highlight-underline-color);
 }
 
 .title {
@@ -240,6 +260,7 @@ a {
   --nav-menu-title-active-color: var(--white-100);
   --nav-menu-nested-item-color: var(--white-40);
   --nav-menu-item-hover-color: var(--white-90);
+  --nav-menu-no-results-color: var(--white-40);
 }
 .aligned.menu {
   --nav-menu-content-icon-indent-distance: calc(var(--nav-menu-title-icon-width) + var(--nav-menu-title-icon-distance));
