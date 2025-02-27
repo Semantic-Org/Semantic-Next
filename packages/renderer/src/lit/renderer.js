@@ -217,7 +217,6 @@ export class LitRenderer {
       }
       return packedData;
     };
-
     const packedStaticData = getPackedData(node.data);
     const packedReactiveData = getPackedData(node.reactiveData, { reactive: true });
 
@@ -345,6 +344,15 @@ export class LitRenderer {
     }
     visited.add(expression);
 
+    // short circuit - check if whole expression is available in data context
+    // this will avoid overhead of evaluating as javascript
+    const simpleExpression = !expression.includes(' ');
+    if(simpleExpression) {
+      const value = this.lookupTokenValue(expression, data);
+      if(value !== undefined) {
+        return wrapFunction(value)();
+      }
+    }
 
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);

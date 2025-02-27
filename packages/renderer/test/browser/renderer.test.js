@@ -707,15 +707,24 @@ const expressionTests = [
   // - Arrow functions as parameters
   // - Self-referential functions
   // 
-  // Lessons learned from these tests:
-  // 1. JavaScript expressions are generally well supported with proper precedence
-  // 2. String literal handling with mixed quotes works as expected
+  // Lessons learned from these tests and implementation improvements:
+  // 1. JavaScript expressions are generally well supported through direct eval, but semantic style 
+  //    expressions (spaced arguments) are parsed separately and have different evaluation rules
+  // 2. String literal handling with mixed quotes works as expected in pure JS expressions
   // 3. Loose equality (==) works as in standard JavaScript (0 == "0" is true)
-  // 4. Some advanced JS features like destructuring and spread are not fully supported
-  // 5. The 'this' binding in recursive functions doesn't work as one might expect
+  // 4. Advanced JavaScript features like destructuring and spread operators are not fully supported
+  //    in the current parser implementation
+  // 5. Proper 'this' binding in recursive functions requires careful implementation to ensure
+  //    'this' context is preserved across nested calls
   // 6. The concat helper concatenates values without spaces between them
-  // 7. The classMap helper should be used for dynamic class generation rather than direct object evaluation
-  // 8. When working with operators, be explicit with parentheses to ensure correct order of operations
+  // 7. The expression evaluation engine has separate paths for handling pure JS expressions versus
+  //    semantic-style (spaced arguments) expressions
+  // 8. To improve the expression evaluation:
+  //    - Better `this` context preservation for method calls
+  //    - Enhanced JS expression evaluation with broader global object access
+  //    - More intelligent parenthesization for complex expressions
+  //    - Special handling for destructuring and spread operators
+  //    - Better debugging for expression evaluation errors
   {
     name: 'Expression with mixed quotes in string literals',
     expression: '`${label}: "${value}"` + \' (\'+ status + \')\'',
@@ -770,7 +779,7 @@ const expressionTests = [
     }
   },
   {
-    name: 'Function call with simple object',
+    name: 'Function call with object containing data variables',
     expression: 'formatUser({ name: name, age: age, role: role })',
     result: 'John (30) - admin',
     data: {
@@ -829,12 +838,13 @@ const expressionTests = [
     }
   },
   {
-    name: 'Self-referential function in expression',
+    name: 'Function with self reference via data context',
     expression: 'calculateFactorial(5)',
     result: '120',
     data: {
       calculateFactorial: function(n) {
-        // Non-recursive implementation to avoid 'this' binding issues
+        // Our implementation cannot handle this.calculateFactorial yet,
+        // so we need to use a non-recursive approach
         let result = 1;
         for (let i = 2; i <= n; i++) {
           result *= i;
