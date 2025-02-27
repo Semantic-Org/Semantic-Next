@@ -1,0 +1,21 @@
+<div class="{classMap getDropdownClasses} dropdown">
+  <input type="hidden" name={name} value={getSelectedValue()}>
+  <div class="text">{getSelectedText}</div>
+  <ui-icon icon="chevron-down" class="dropdown-icon"></ui-icon>
+  
+  <div class="menu {classIf isOpen 'visible'}">
+    {#if allowEmpty}
+      <div class="item" data-value="">
+        {getEmptyText()}
+      </div>
+    {/if}
+    {#each options}
+      <div class="{classMap getItemClasses value} item" data-value={value}>
+        {#if icon}
+          <ui-icon icon={icon} class="option-icon"></ui-icon>
+        {/if}
+        {text}
+      </div>
+    {/each}
+  </div>
+</div>
