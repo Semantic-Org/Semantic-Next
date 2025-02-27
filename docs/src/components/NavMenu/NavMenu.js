@@ -27,7 +27,8 @@ const createComponent = function ({ $, self, settings, state }) {
       state.url.set(settings.activeURL);
     },
     getMenu() {
-      return self.filterVisibleSections(settings.menu);
+      const menu = self.filterVisibleSections(settings.menu);
+      return self.filterBySearchTerm(menu, state.search.get());
     },
     getNavIcon(section) {
       const defaultIcon = (settings.useAccordion && section?.pages && !settings.expandAll)
@@ -66,6 +67,59 @@ const createComponent = function ({ $, self, settings, state }) {
         return item.shouldShow || false;
       }
       return true;
+    },
+    filterBySearchTerm(menu = [], searchTerm) {
+      if (!searchTerm) return menu;
+      
+      searchTerm = searchTerm.toLowerCase();
+      
+      return menu.reduce((acc, section) => {
+        // Check if section name matches search term
+        const sectionMatches = section.name?.toLowerCase().includes(searchTerm);
+        
+        // Filter pages that match search term
+        const filteredPages = isArray(section.pages)
+          ? section.pages.reduce((pagesAcc, page) => {
+              // Check if page name matches
+              const pageMatches = page.name?.toLowerCase().includes(searchTerm);
+              
+              // Check if any subpages match
+              let filteredSubpages = [];
+              let subpagesMatch = false;
+              
+              if (isArray(page.pages)) {
+                filteredSubpages = page.pages.filter(subpage => 
+                  subpage.name?.toLowerCase().includes(searchTerm)
+                );
+                subpagesMatch = filteredSubpages.length > 0;
+              }
+              
+              // Include page if it matches or any of its subpages match
+              if (pageMatches || subpagesMatch) {
+                if (subpagesMatch && page.pages) {
+                  pagesAcc.push({
+                    ...page,
+                    pages: filteredSubpages
+                  });
+                } else {
+                  pagesAcc.push(page);
+                }
+              }
+              
+              return pagesAcc;
+            }, [])
+          : [];
+          
+        // Include section if it matches or any of its pages match
+        if (sectionMatches || filteredPages.length > 0) {
+          acc.push({
+            ...section,
+            pages: sectionMatches ? section.pages : filteredPages
+          });
+        }
+        
+        return acc;
+      }, []);
     },
     filterVisibleSections(menu = []) {
       return menu.reduce((acc, { pages, shouldShow, ...item }) => {
