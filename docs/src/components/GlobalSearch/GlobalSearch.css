@@ -31,6 +31,9 @@
 
   --global-search-modal-input-font-size: 18px;
 
+  --input-text-color: rgba(255, 255, 255, 0.6);
+  --input-focused-color: rgba(255, 255, 255, 1);
+  --input-border: 1px solid oklch(.96 .01 279.32 / 15%);
 }
 
 * {

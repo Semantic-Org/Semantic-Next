@@ -8,6 +8,10 @@
 
   html.light {
     --sidebar-background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
+
+    ui-menu {
+
+    }
   }
 
   sidebar {
@@ -32,6 +36,20 @@
     }
     nav-menu {
       padding: 0rem 1rem;
+    }
+  }
+
+  html.light {
+    sidebar {
+      ui-menu {
+        --menu-inset-border: 1px solid oklch(.96 .01 279.32 / 15%);
+        --menu-inset-background: var(--inverted-15);
+      }
+      nav-menu {
+        --input-text-color: rgba(255, 255, 255, 0.6);
+        --input-focused-color: rgba(255, 255, 255, 1);
+        --input-border: 1px solid oklch(.96 .01 279.32 / 15%);
+      }
     }
   }
 
