@@ -4,22 +4,27 @@
 
 .menu {
   position: fixed;
+  pointer-events: none;
+  visibility: hidden;
+  overflow: hidden;
   z-index: var(--float-layer);
   border-radius: var(--border-radius);
   box-shadow: var(--floating-shadow);
   background: var(--inverted-100) var(--angled-gradient);
   border: var(--border);
-  overflow: hidden;
   opacity: 0;
-  pointer-events: auto;
-  visibility: hidden;
+  transform: scale(0.8);
   transition: var(--transition);
+  transition-property: opacity, transform, visibility;
 }
 
 .menu.visible {
-  visibility: visible;
+  pointer-events: auto;
   opacity: 1;
   transform: scale(1);
+  transition-property: top, left, opacity, transform, visibility;
+  pointer-events: auto;
+  visibility: visible;
 }
 @starting-style {
   .menu.visible {
