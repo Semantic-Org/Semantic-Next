@@ -266,6 +266,240 @@ const expressionTests = [
     data: {
       concat: (a, b) => `Local${a}${b}` // overshadow global helper
     }
+  },
+  
+  // Additional tests for expression evaluation in data context
+  // These tests cover various aspects of expression evaluation including:
+  // - Method binding and this context preservation
+  // - Deep property access and nested object traversal
+  // - Function composition and evaluation order
+  // - Template strings, logical operators, and other JS expressions
+  // - Mixed semantic and javascript style expressions
+  // - Optional chaining and literal values
+  
+  // Tests for method binding and this context
+  {
+    name: 'Method binding with this context',
+    expression: 'user.getFullName()',
+    result: 'John Doe',
+    data: { 
+      user: { 
+        firstName: 'John',
+        lastName: 'Doe',
+        getFullName() {
+          return `${this.firstName} ${this.lastName}`;
+        }
+      } 
+    }
+  },
+  {
+    name: 'Method with arguments and this context',
+    expression: 'counter.add(5)',
+    result: '10',
+    data: { 
+      counter: { 
+        value: 5,
+        add(n) {
+          return this.value + n;
+        }
+      } 
+    }
+  },
+  {
+    name: 'Deeply nested method call with this context',
+    expression: 'app.user.profile.formatBio()',
+    result: 'JOHN DOE - DEVELOPER',
+    data: { 
+      app: {
+        user: {
+          profile: {
+            name: 'John Doe',
+            title: 'Developer',
+            formatBio() {
+              return `${this.name} - ${this.title}`.toUpperCase();
+            }
+          }
+        }
+      } 
+    }
+  },
+  {
+    name: 'Method returning object properties',
+    expression: 'data.getConfig().theme',
+    result: 'dark',
+    data: { 
+      data: {
+        config: { theme: 'dark' },
+        getConfig() {
+          return this.config;
+        }
+      } 
+    }
+  },
+  
+  // Tests for deeply nested property access
+  {
+    name: 'Deep property access with multiple levels',
+    expression: 'site.settings.theme.colors.primary',
+    result: '#336699',
+    data: {
+      site: {
+        settings: {
+          theme: {
+            colors: {
+              primary: '#336699'
+            }
+          }
+        }
+      }
+    }
+  },
+  
+  // Tests for function composition
+  {
+    name: 'Function composition (titleCase of concat)',
+    expression: 'titleCase (concat firstName " " lastName)',
+    result: 'John Smith',
+    data: {
+      firstName: 'john',
+      lastName: 'smith'
+    }
+  },
+  
+  // Tests for complex expressions with mixed evaluation orders
+  {
+    name: 'Complex expression with parenthesized evaluation order',
+    expression: 'formatDate (getDate now) "h:mm"',
+    resultContains: [':'],
+    data: {
+      now: new Date(),
+      getDate: (date) => date,
+      formatDate: (date, format) => {
+        // Simple mock formatter that returns "h:MM" format
+        const hours = date.getHours() % 12 || 12;
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+      }
+    }
+  },
+  
+  // Tests for array and object methods
+  {
+    name: 'Array map method in expression',
+    expression: 'items.map(item => item.toUpperCase()).join(", ")',
+    result: 'APPLE, BANANA, CHERRY',
+    data: {
+      items: ['apple', 'banana', 'cherry']
+    }
+  },
+  
+  // Tests for template string expressions
+  {
+    name: 'Template string expression',
+    expression: '`Hello, ${name}!`',
+    result: 'Hello, Alice!',
+    data: {
+      name: 'Alice'
+    }
+  },
+  
+  // Tests for logical operators
+  {
+    name: 'Logical AND operator',
+    expression: 'isActive && isVisible ? "Shown" : "Hidden"',
+    result: 'Shown',
+    data: {
+      isActive: true,
+      isVisible: true
+    }
+  },
+  {
+    name: 'Logical OR operator with nullish values',
+    expression: 'userName || "Guest"',
+    result: 'Guest',
+    data: {
+      userName: null
+    }
+  },
+  {
+    name: 'Nullish coalescing operator',
+    expression: 'userName ?? "Guest"',
+    result: 'Guest',
+    data: {
+      userName: null
+    }
+  },
+  
+  // Tests for mixed semantic and javascript style expressions
+  {
+    name: 'Mixed semantic and JS style - passing JS expression to semantic style',
+    expression: 'doSomething (arg1 + 2) (arg2 + 3) {a: 1, b: 2}',
+    result: '7-8-a:1,b:2',
+    data: {
+      arg1: 5,
+      arg2: 5,
+      doSomething: (a, b, obj) => `${a}-${b}-a:${obj.a},b:${obj.b}`
+    }
+  },
+  
+  // Tests for function arguments with operators
+  {
+    name: 'Function call with complex condition argument',
+    expression: 'getMessage(isLoggedIn && hasPermission)',
+    result: 'Welcome!',
+    data: {
+      isLoggedIn: true,
+      hasPermission: true,
+      getMessage: (condition) => condition ? 'Welcome!' : 'Please login'
+    }
+  },
+  
+  // Tests for optional chaining
+  {
+    name: 'Optional chaining with existing property',
+    expression: 'user?.profile?.name',
+    result: 'Jane',
+    data: {
+      user: {
+        profile: {
+          name: 'Jane'
+        }
+      }
+    }
+  },
+  {
+    name: 'Optional chaining with missing property',
+    expression: 'user?.settings?.darkMode',
+    result: '',
+    data: {
+      user: {
+        profile: {
+          name: 'Jane'
+        }
+      }
+    }
+  },
+  
+  // Tests for literal values
+  {
+    name: 'String literal with quotes',
+    expression: "'Hello world'",
+    result: 'Hello world',
+  },
+  {
+    name: 'Boolean literal true',
+    expression: 'true',
+    result: 'true',
+  },
+  {
+    name: 'Boolean literal false',
+    expression: 'false',
+    result: 'false',
+  },
+  {
+    name: 'Numeric literal',
+    expression: '42',
+    result: '42',
   }
 ];
 
