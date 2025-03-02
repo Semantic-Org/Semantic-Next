@@ -9,13 +9,13 @@ Semantic UI components provide several methods for interacting with component in
 
 > **Important Note** - Please be sure to read the [component documentation](/components) for more information on the usage of these helpers.
 
-## getComponent
+## component
 
 Retrieves the [component instance](/components/create#instance) from a web component.
 
 ### Syntax
 ```javascript
-$('selector').getComponent()
+$('selector').component()
 ```
 
 ### Returns
@@ -23,13 +23,13 @@ The component instance if found, otherwise `undefined`.
 
 ### Usage
 ```javascript
-const menu = $('ui-menu').getComponent();
+const menu = $('ui-menu').component();
 if (menu) {
   menu.selectIndex(2);
 }
 ```
 
-> **Access Component Methods** - `getComponent()` allows you to access methods and properties defined in the component's `createComponent` function.
+> **Access Component Methods** - `component()` allows you to access methods and properties defined in the component's `createComponent` function.
 
 ## settings
 
@@ -109,7 +109,7 @@ Here's an example demonstrating how to interact with a [`circle-expand` sample c
 
 ```javascript
 // Get the component instance
-const circle = $('circle-expand').getComponent();
+const circle = $('circle-expand').component();
 
 // Use a component method
 circle.increaseWidth();
