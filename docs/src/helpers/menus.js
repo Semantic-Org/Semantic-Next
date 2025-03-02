@@ -37,17 +37,17 @@ export const topbarDisplayMenu =  [
 export const topbarMenu =  [
   {
     _id: 'framework',
-    name: 'Usage Guide',
+    name: 'Authoring Guide',
     url: '/introduction',
   },
   {
     _id: 'api',
-    name: 'API Reference',
+    name: 'API Docs',
     url: '/api',
   },
   {
     _id: 'ui',
-    name: 'UI Kit',
+    name: 'UI Library',
     url: '/usage',
   },
   {
