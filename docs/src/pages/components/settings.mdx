@@ -1,0 +1,164 @@
+---
+layout: '@layouts/Guide.astro'
+title: Settings
+icon: sliders
+description: Configurable values that can be customized by users of your component
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Overview
+
+Settings are values which you want users of your component to be able to modify. They act as the public API for your component, allowing developers to configure it for different use cases.
+
+## Defining Settings
+
+To specify settings for a component, pass in a settings object when [defining a component](/api/component/define-component):
+
+```javascript
+const defaultSettings = {
+  name: 'Jack',
+  color: 'blue',
+  size: 'medium',
+  count: 5
+};
+
+defineComponent({
+  tagName: 'name-card',
+  defaultSettings
+});
+```
+
+> A setting's type is inferred from its default value, so you don't need to explicitly declare types.
+
+## Settings vs. State
+
+Settings represent the external API for your component, while [state](/components/state) represents the internal configuration of your component.
+
+For example, in a dropdown component:
+- The list of options would be a **setting** (configured from outside)
+- Whether the dropdown is currently open would be **[state](/components/state)** (managed internally)
+
+## Specifying Settings
+
+Your component can have its default settings modified by an end user in several different ways.
+
+
+### Pure HTML
+
+The most common way to override settings is through HTML attributes:
+
+```html
+<name-card name="Sally" color="red" size="large" count="10"></name-card>
+```
+
+### Pure Javascript
+
+You can also set settings directly by modifying the properties of a component
+
+```javascript
+const el = document.querySelector('name-card');
+el.name = 'Sam';
+el.color = 'green';
+```
+
+### Query
+
+You can use [Query](/query) to access your component and update settings.
+
+#### The settings() Method
+
+Use the [`settings()`](/api/query/components#settings) method to set multiple properties on one or more components:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// Configure a single component
+$('name-card').settings({
+  name: 'Alex',
+  color: 'purple'
+});
+
+// Configure multiple components at once
+$('.user-cards name-card').settings({
+  showAvatar: true,
+  displayMode: 'compact'
+});
+```
+
+#### The setting() Method
+
+Use the [`setting()`](/api/query/components#setting) method to set a single property on one or more components:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// Set a single property
+$('name-card').setting('name', 'Alex');
+
+// Set a function property
+$('user-form').setting('onSubmit', (data) => {
+  saveUserData(data);
+});
+```
+
+#### The initialize() Method
+
+For components that need to be configured before they're used, the [`initialize()`](/api/query/components#initialize) method sets properties after the DOM is fully loaded:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// Wait for DOM to be ready, then set properties
+$('name-card').initialize({
+  onSelect: (value) => console.log('Selected:', value),
+  formatter: (text) => text.toUpperCase()
+});
+```
+
+This is especially useful for passing function references that can't be serialized as HTML attributes.
+
+<PlaygroundExample height="265" id="settings" direction="horizontal"></PlaygroundExample>
+
+## Data Types
+
+Different data types require different handling when passed as settings:
+
+### Strings and Numbers
+
+Pass strings and numbers directly through attributes or properties:
+
+```html
+<price-display amount="99.99" currency="USD"></price-display>
+```
+
+### Complex Types (Objects, Arrays, Dates)
+
+When passing complex types through attributes, serialize them with JSON:
+
+```html
+<user-list users='[{"name":"Alex","role":"admin"},{"name":"Sam","role":"user"}]'></user-list>
+```
+
+When using JavaScript properties, you can pass the values directly:
+
+```javascript
+const userList = document.querySelector('user-list');
+userList.users = [
+  { name: 'Alex', role: 'admin' },
+  { name: 'Sam', role: 'user' }
+];
+```
+
+### Functions
+
+Functions can only be passed through JavaScript:
+
+```javascript
+const form = document.querySelector('user-form');
+form.onSubmit = (data) => {
+  saveUserData(data);
+};
+```
+
+<PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>

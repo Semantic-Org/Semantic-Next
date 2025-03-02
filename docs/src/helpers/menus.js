@@ -133,6 +133,14 @@ export const sidebarMenuFramework = [
         url: '/components/rendering'
       },
       {
+        name: 'Settings',
+        url: '/components/settings'
+      },
+      {
+        name: 'State',
+        url: '/components/state'
+      },
+      {
         name: 'Events',
         url: '/components/events'
       },

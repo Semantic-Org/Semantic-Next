@@ -11,76 +11,54 @@ import contextImage from '@images/data-context-diagram.png';
 
 ## Rendering HTML
 
-Your components HTML structure is defined by **template** and a **data context** to generate your component's html.
+Your component's HTML structure is defined by a **template** and a **data context** to generate your component's HTML.
 
-> **Comparing to React** - Instead of using a `render()` function to return `jsx` each component's  template provides the high level logic for explaining how html should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
+> **Comparing to React** - Instead of using a `render()` function to return `jsx`, each component's template provides the high-level logic for explaining how HTML should be rendered from data for your component and will automatically re-render sections of a template depending on the reactivity of the data.
 
 ### Templates
-Your template defines how your component's html is rendered:
+Your template defines how your component's HTML is rendered:
 
 * [Conditionals](/templates/conditionals) - Branching structures like `if` `else if` and `else`
 * [Looping structures](/templates/loops) - Structures to iterate through data like arrays or objects
 * [Reactive data](/templates/expressions) - State stored with your component that should update the page when it updates
 * [Function calls](/templates/expressions) - Methods on your component that allow you to access content and perform tasks
-* [Subtemplates](/templates/subtemplates) - Reusable pieces of html organized as a separate file
-* [Snippets](/templates/subtemplates) - Reusable pieces of html included elsewhere in a template
+* [Subtemplates](/templates/subtemplates) - Reusable pieces of HTML organized as a separate file
+* [Snippets](/templates/subtemplates) - Reusable pieces of HTML included elsewhere in a template
 * [Slots](/templates/slots) - Locations where content can be placed inside your component
-* [Snippets](/templates/snippets) - reusable html structures inside a component
-
+* [Snippets](/templates/snippets) - Reusable HTML structures inside a component
 
 > For more information on all the features of templates check our dedicated subsection [on templates](/templates).
 
 ### Data Context
 
-The templates data context is a combination of several data sources that are looked up in sequence.
+The template's data context is a combination of several data sources that are looked up in sequence.
 
-For instance our template might include something like
+For instance, our template might include something like:
 ```sui
 Greetings, {name}
 ```
 
-This will check for `name` in each of these locations and then return the first available defined value.
+This will check for `name` in each of these locations and then return the first available defined value:
 
-* **[Global Helpers](#global-helpers)** - A global helper registered across templates called `name`
 * **[Component Instance](/components/create#instance)** - A value or function on your component called `name`
-* **[Settings](#settings)** - A value `name` passed in via html attribute or property
-* **[State](#state)** - An internal reactive state called `name`
+* **[Settings](/components/settings)** - A value `name` passed in via HTML attribute or property
+* **[State](/components/state)** - An internal reactive state called `name`
 * **[Subtemplate Data](/templates/subtemplates)** - Data passed in from a parent template called `name`
-> **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance you may initially have a value as a `property` on your component, then move it to `state` to make it reactive, then finally move it to `settings` to make it user overridable without having to modify the underlying template.
+* **[Global Helpers](#global-helpers)** - A global helper registered across templates called `name`
 
-
-
-## Global Helpers
-
-[Global helpers](/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat` `stringify` that can be used to format values for output.
-
-> For a list of global helpers please visit the dedicated [global helper page](/templates/helpers) in templating.
-
-
-### Helper Example
-
-In this example `formatDate` is used to format the display of a date set in the components [state](#state).
-
-```sui
-{formatDate currentTime 'h:mm:ss a'}
-```
-
-<PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
-
-For a complete list of available global helpers see [global helpers](/templates/helpers).
-
+> **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance, you may initially have a value as a `property` on your component, then move it to `state` to make it reactive, then finally move it to `settings` to make it user-overridable without having to modify the underlying template.
 
 ## Settings
 
-### Defining Settings
+> For comprehensive details on settings, see the dedicated [Settings documentation](/components/settings).
 
-Settings are values which you want users of your component to be able to modify. To specify settings for a component simply pass in a settings object when defining a component.
 
-> **Data Types** - A settings type will be inferred from its default value. This means you do not need to formally declare them as `String` or `Date`.
+[Settings](/components/settings) are values which you want users of your component to be able to modify. They provide a way to customize component behavior without modifying the component's internal code.
 
 ```javascript
 const defaultSettings = {
-  name: 'Jack'
+  name: 'Jack',
+  color: 'blue'
 };
 
 defineComponent({
@@ -89,90 +67,63 @@ defineComponent({
 });
 ```
 
-### Overriding Defaults
+You can override settings through HTML attributes or DOM properties:
 
-Settings specified for a component are defaults which can be overridden by anyone using your component by passing in different data through the DOM.
-
-#### HTML Attributes
-```sui
-<name-card name="Sally"></name-card>
+```html
+<name-card name="Sally" color="red"></name-card>
 ```
 
-#### DOM Properties
 ```javascript
 const el = document.querySelector('name-card');
 el.name = 'Sam';
 ```
 
-#### Functions
-
-Functions cannot be serialized so they must be passed in via Javascript. This can be handled using Query's `settings` method after DOM Ready or `initialize` method at any point in page load.
-
-You can also manually set the function on the corresponding DOM element.
-
-<PlaygroundExample height="265" id="settings" direction="horizontal"></PlaygroundExample>
-
 ## State
 
-State is a [reactive data store](/reactivity) that uses Signals to recompute references to a value when its underlying vaalue is modified.
+> For comprehensive details on state management, see the dedicated [State documentation](/components/state).
 
-### Declaring State
-
-State is designed you to store internal reactive values that can be used to re-render portions of a template when a value changes, or to rerun reactive computations when underlying reactive data changes.
-
+State is a [reactive data store](/reactivity) that uses Signals to recompute references to a value when its underlying value is modified. State represents the internal, changing data of your component.
 
 ```javascript
 const defaultState = {
-  name: 'Jack'
+  counter: 0,
+  isActive: false
 };
 
 defineComponent({
-  tagName: 'name-card',
+  tagName: 'interactive-component',
   defaultState
 });
 ```
 
-### Using State
+State can be accessed and modified inside component methods and automatically updates your UI:
 
-Each component will have its own copy of `state` initialized with its default value set based off your configuration.
-
-
-#### Inside a Component
-You can use state inside a component by destructuring `state` from any [lifecycle events](/components/lifecycle#callback-arguments).
-
-```javascript title="component.js"
-
+```javascript
 const createComponent = ({self, state}) => ({
-  getGreeting() {
-    // state is { name: Signal('Jack') }
-    return `Hello ${state.name.value}`
+  incrementCounter() {
+    state.counter.value += 1;
   }
 });
 ```
 
-#### Using In Templates
-`state` like other reactive values can be accessed by name directly in templates without having to use `value` or `get`
+In templates, state values can be accessed directly by name:
 
-```sui title="component.html"
-Hello {name}
+```sui
+Counter value: {counter}
 ```
 
 
-## Component Instance
+## Instance
 
-### Defining Functionality
-Your component instance stores methods and properties that implement the functionality of your component. These can be various locations where you might want to access functionality, like from other parts of the component, templates, or externally via the DOM.
+Your component instance stores methods and properties that implement the functionality of your component. These can be accessed from various locations:
 
 ### Accessing in Templates
 
-You can use your component instance to store specialized logic that is necessary for your component.
-Any method or property declared in `createComponent` can be accessed directly from your template.
+Any method or property declared in `createComponent` can be accessed directly from your template:
 
 ```javascript title='component.js'
 const createComponent = ({self, state}) => ({
-  // get user's current age
   getAge(user) {
-    // 31557600000 = 365.25 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds
     return Math.floor((new Date() - new Date(user.born_date)) / 31557600000);
   }
 });
@@ -182,11 +133,9 @@ const createComponent = ({self, state}) => ({
 {getAge user}
 ```
 
-
 ### Accessing Internally
-You can access your template instance as `self`, `component,` or `tpl` from other callbacks to invoke functionality.
 
-> For more information see [lifecycle events](/components/lifecycle#callback-arguments).
+You can access your template instance as `self`, `component,` or `tpl` from other callbacks:
 
 ```javascript
 const onRendered = ({ self }) => {
@@ -195,47 +144,47 @@ const onRendered = ({ self }) => {
 ```
 
 ### Accessing Externally
-You can also access your component instance directly from the DOM from the `component` property.
 
-> For more information see [from DOM](/components/instances#from-dom).
+You can also access your component instance directly from the DOM:
 
 ```javascript
 const { component } = document.querySelector('ui-counter');
 component.incrementCounter();
 ```
 
-
 ## Subtemplates
 
-SUI components can either be rendered to a tagname as a web component or exported to be used as subtemplates in other components. This is dependent on whether `tagName` is specified
+> For comprehensive details on subtemplates, see the dedicated [Subtemplates documentation](/templates/subtemplates).
 
-When no tag name is specified they are returned as [Subtemplates](/templates/subtemplates) which can be passed in to other components.
+SUI components can either be rendered to a tagname as a web component or exported to be used as subtemplates in other components. This is dependent on whether `tagName` is specified.
+
+When no tag name is specified, they are returned as [Subtemplates](/templates/subtemplates) which can be passed in to other components.
 
 When components are rendered as subtemplates, their data context is defined explicitly from the parent template.
 
-For example, you might want to have a table that uses a subtemplate to output a table row, definining the data context as the row's data for each initialization.
+### Subtemplate Example
 
 <PlaygroundExample id="subtemplates" direction="horizontal"></PlaygroundExample>
 
 
-### Data Types
 
-You can pass any type of javascript primitive as a setting however there may be serialization requirements depending on the date type.
+## Global Helpers
 
-#### Strings, Numbers
+[Global helpers](/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat`, `stringify` that can be used to format values for output.
 
-Strings and numbers can be passed in either through html attributes or directly as properties.
+> For a list of global helpers please visit the dedicated [global helper page](/templates/helpers) in templating.
 
-#### Arrays, Objects, Dates
+### Helper Example
 
-Arrays, objects and dates can be passed in either through attributes or properties.
+In this example, `formatDate` is used to format the display of a date set in the component's [state](/components/state).
 
-When passed in as attributes the data must be passed through `JSON.stringify` to serialize the value as a string.
+```sui
+{formatDate currentTime 'h:mm:ss a'}
+```
 
-If you are passing it in as a property you can specify the value without serialization.
+<PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
 
-
-<PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
+For a complete list of available global helpers see [global helpers](/templates/helpers).
 
 
 ## Order of Data Lookups

@@ -1,0 +1,291 @@
+---
+layout: '@layouts/Guide.astro'
+title: Internal State
+icon: database
+description: Reactive data storage for your component's internal behavior
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Introduction
+
+State is a [reactive data store](/reactivity) that manages the dynamic, internal data of your component. Unlike [settings](/components/settings) which are passed in from outside, state is maintained within the component and typically changes as users interact with it.
+
+> For a deeper understanding of reactivity concepts, see the [Reactivity Guide](/reactivity).
+
+## Declaring State
+
+When [defining a component](/api/component/define-component) you can provide default state values:
+
+When a component is initialized the state object will be mapped to a [Signal](/components/reactivity) that will let you update and modify the state for that instance.
+
+```js
+const defaultState = {
+  selectedItem: null,
+  items: []
+};
+
+defineComponent({
+  tagName: 'my-component',
+  defaultState
+});
+```
+
+
+
+## Accessing State
+
+### In Components
+
+Each component has its own state object with a copy of the default state defined from your component.
+
+You can access state from [lifecycle events](/components/lifecycle) like `createComponent` by destructuring it from the callback arguments.
+
+
+
+```js
+const createComponent = ({state}) => ({
+  incrementCounter() {
+    // Modify state with .value - triggers re-renders
+    state.counter.value += 1;
+  },
+  
+  getCount() {
+    // Read state using .value
+    return state.counter.value;
+    // Or using .get() method
+    // return state.counter.get();
+  }
+});
+```
+
+### Initialize
+
+In some cases you might want to use initialize to have `state` shadow a `setting` or to initialize state based off of another state value.
+
+> Both `.value` and `.get()` can be used to read state values. For more information see [basic reactivity](/reactivity/variables)
+
+```javascript
+
+const createComponent = ({state}) => ({
+  incrementCounter() {
+    // Modify state with .value - triggers re-renders
+    state.counter.value += 1;
+  },
+
+  getCount() {
+    // Read state using .value
+    return state.counter.value;
+    // Or using .get() method
+    // return state.counter.get();
+  }
+});
+
+
+### In Templates
+
+When working inside a template you can access state, settings, and other values in the data context directly.
+
+> As an added convenience state values in templates can be accessed by name directly without using `.value` or `.get()`
+
+```sui
+{state.selectedItem} <!-- Wrong !-->
+{selectedItem.get} <!--- Wrong !-->
+{selectedItem} <!--- Right !-- >
+```
+
+For instance for the following state configuration
+```javascript
+const defaultState = {
+  isActive: false,
+  items: []
+};
+```
+
+```sui
+<p>Count: {counter}</p>
+
+{#if isActive}
+  <div class="active-content">
+    <p>Currently active!</p>
+  </div>
+{else}
+  <button class="activate">Activate</button>
+{/if}
+
+{#each items}
+  <li class="{#if selectedItem === id}selected{/if}">
+    {title}
+  </li>
+{/each}
+```
+
+## Event Handlers & Keybindings
+
+All component methods can access state from the destructured arguments to make changes to values.
+
+```js
+defineComponent({
+  // ...other component options
+  events: {
+    'click .activate'({state}) {
+      state.isActive.toggle();
+    }
+  }
+});
+```
+
+```js
+defineComponent({
+  // ...other component options
+  keys: {
+    'up'({state}) {
+      state.x.decrement(10);
+    }
+  }
+});
+```
+
+
+
+## Updating State
+
+### Basic Updates
+
+Update state by modifying the `.value` property:
+
+```js
+const onButtonClick = ({state}) => {
+  state.counter.increment(1);
+  state.lastClicked.value = new Date();
+};
+```
+
+### Controlling Update Timing
+
+> For details on how the reactivity system processes updates, see the [Flushing Guide](/reactivity/flush).
+
+When multiple state changes need to happen together, you can use `afterFlush` to run code after all reactive updates are processed:
+
+```js
+const createComponent = ({state, afterFlush}) => ({
+  resetForm() {
+    // Make multiple state changes
+    state.username.value = '';
+    state.email.value = '';
+    state.isSubmitted.value = false;
+    state.errors.value = [];
+    
+    // Run code after all updates are processed
+    afterFlush(() => {
+      console.log('Form reset complete');
+      // Focus the first field
+      document.querySelector('input[name="username"]').focus();
+    });
+  }
+});
+```
+
+### Derived Values
+
+> Learn more in the [Reactivity Computations](/reactivity/computations) guide.
+
+Create derived values from state using reactive computations:
+
+```js
+const createComponent = ({state, signal, reaction}) => {
+  // Create signals for derived values
+  const fullName = signal('');
+  const isValid = signal(false);
+  
+  // Create a reaction that updates when dependencies change
+  reaction(() => {
+    // Reading state.firstName.value and state.lastName.value 
+    // automatically creates dependencies
+    fullName.value = `${state.firstName.value} ${state.lastName.value}`;
+    
+    isValid.value = 
+      state.email.value.includes('@') && 
+      state.password.value.length >= 8;
+  });
+  
+  return {
+    fullName,
+    isValid
+  };
+};
+```
+
+Derived values automatically update when their dependencies change.
+
+## Working with Collections
+
+> See the [Reactivity Variables](/reactivity/variables) guide for more details on Signal methods.
+
+State provides built-in methods for working with arrays and objects that handle reactivity for you:
+
+```js
+const createComponent = ({state}) => ({
+  // Adding items to an array
+  addItem() {
+    // Using the built-in push method
+    state.items.push({ id: generateId(), text: 'New Item' });
+  },
+
+  // Removing items by index
+  removeIndex(index) {
+    state.items.removeIndex(index);
+  },
+
+  // Removing items by ID
+  removeById(id) {
+    state.items.removeItem(id);
+  },
+
+  // Updating array items
+  updateItem(index, newText) {
+    // Update item at specific index
+    state.items.setIndex(index, { ...state.items.getIndex(index), text: newText });
+    
+    // Or update a property across all items
+    state.items.setArrayProperty('isActive', false);
+    
+    // Or update a property on a specific item
+    state.items.setArrayProperty(2, 'isActive', true);
+  },
+
+  // Object property updates
+  updateProperty() {
+    state.user.setProperty('name', 'Alex');
+  }
+});
+```
+
+These helper methods automatically handle reactivity updates and trigger re-renders as needed.
+
+## Lifecycle Integration
+
+> See the [Reactivity Controls](/reactivity/computations) guide for more information on creating reactive effects that respond to state changes.
+
+State often needs to be initialized or updated at specific points in a [component's lifecycle](/components/lifecycle):
+
+```js
+// Initialize state after component rendering
+const onRendered = ({state, settings}) => {
+  // Initialize state based on settings
+  state.items.value = settings.initialItems || [];
+  
+  // Start with first item selected if available
+  if (state.items.value.length > 0) {
+    state.selectedItem.value = state.items.value[0].id;
+  }
+};
+
+// Clean up state before component is removed
+const onDestroyed = ({state}) => {
+  // Clear any timers, subscriptions, etc.
+  if (state.updateTimer.value) {
+    clearInterval(state.updateTimer.value);
+  }
+};
+```
