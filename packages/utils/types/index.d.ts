@@ -13,10 +13,3 @@ export * from './regexp';
 export * from './ssr';
 export * from './strings';
 export * from './types';
-
-
-// Export the default utility belt
-declare const Utils: {
-  [key: string]: any;
-};
-export default Utils;

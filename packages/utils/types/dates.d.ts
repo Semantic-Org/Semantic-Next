@@ -1,3 +1,8 @@
+/**
+ * Date manipulation and formatting utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/dates Date Utilities Documentation}
+ */
+
 type DatePreset = 'LT' | 'LTS' | 'L' | 'l' | 'LL' | 'll' | 'LLL' | 'lll' | 'LLLL' | 'llll';
 type DateToken = 'YYYY' | 'YY' | 'MMMM' | 'MMM' | 'MM' | 'M' | 'DD' | 'D' | 'Do' | 'dddd' | 'ddd' | 'HH' | 'hh' | 'h' | 'mm' | 'ss' | 'a';
 type TimezonePreset =

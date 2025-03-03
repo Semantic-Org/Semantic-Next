@@ -1,4 +1,9 @@
 /**
+ * Object and array cloning utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/cloning Cloning Utilities Documentation}
+ */
+
+/**
  * Options for deep cloning
  */
 export interface CloneOptions {

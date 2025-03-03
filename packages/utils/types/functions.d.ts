@@ -1,4 +1,9 @@
 /**
+ * Function manipulation and optimization utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/functions Function Utilities Documentation}
+ */
+
+/**
  * Function utilities
  */
 
