@@ -428,6 +428,10 @@ export const sidebarMenuAPI = [
         name: 'Utilities',
         url: '/api/query/utilities'
       },
+      {
+        name: 'Internal',
+        url: '/api/query/internal'
+      },
     ]
   },
   {
