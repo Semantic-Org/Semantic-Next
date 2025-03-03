@@ -1,4 +1,9 @@
 /**
+ * Error handling and creation utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/errors Error Utilities Documentation}
+ */
+
+/**
  * Options for the fatal error function
  */
 export interface FatalOptions {

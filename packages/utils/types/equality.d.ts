@@ -1,4 +1,7 @@
 /**
+ * Deep equality comparison utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/equality Equality Utilities Documentation}
+ *
  * Deep equality comparison between two values
  * Handles arrays, objects, dates, regular expressions, and primitive types
  *

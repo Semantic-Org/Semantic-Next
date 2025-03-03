@@ -1,5 +1,6 @@
 /**
- * Number manipulation utilities
+ * Number manipulation and formatting utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/numbers Number Utilities Documentation}
  */
 
 /**

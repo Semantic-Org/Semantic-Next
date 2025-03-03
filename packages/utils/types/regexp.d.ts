@@ -1,5 +1,6 @@
 /**
- * Regular Expression utilities
+ * Regular expression utility functions
+ * @see {@link https://next.semantic-ui.com/api/utils/regex Regular Expression Utilities Documentation}
  */
 
 /**

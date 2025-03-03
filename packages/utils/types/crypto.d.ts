@@ -1,4 +1,9 @@
 /**
+ * Cryptographic utility functions
+ * @see {@link https://next.semantic-ui.com/api/utils/crypto Crypto Utilities Documentation}
+ */
+
+/**
  * Converts a string to a URL-friendly token.
  *
  * @param {string} [str=''] The input string.

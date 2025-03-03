@@ -1,5 +1,6 @@
 /**
- * String manipulation utilities
+ * String manipulation and formatting utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/strings String Utilities Documentation}
  */
 
 /**

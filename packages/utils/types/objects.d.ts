@@ -1,5 +1,6 @@
 /**
- * Object manipulation utilities
+ * Object manipulation and traversal utilities
+ * @see {@link https://next.semantic-ui.com/api/utils/objects Object Utilities Documentation}
  */
 
 /**
