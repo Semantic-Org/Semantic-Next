@@ -8,7 +8,8 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ### Bugs
 
-* Improved typing for `@semantic-ui/templating` and `@semantic-ui/components`.
+* Improved typing for `@semantic-ui/templating` for `CallParams`.
+* Improved jsdocs for callbacks like events, createComponent, keys in `@semantic-ui/components`.
 * Adds @links to jsdocs for reactivity query and utils library.
 * Adds missing docs for some methods in query and reactivity
 
