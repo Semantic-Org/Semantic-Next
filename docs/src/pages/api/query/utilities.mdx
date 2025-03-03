@@ -11,7 +11,7 @@ Size and position methods in Query allow you to get information about element di
 
 Get the number of elements in the Query object.
 
-> **Count Usage** - `count()` is preferred although the [Query object](/query/basic#the-query-object) is `array-like` and `length` will also work. If it's really important to you -- you can still do that.
+> **Count Usage** `count()` is preferred although the [Query object](/query/basic#the-query-object) is `array-like` and `length` will also work. If it's really important to you -- you can still do that.
 
 ### Syntax
 ```javascript
@@ -31,7 +31,7 @@ console.log(`There are ${paragraphCount} paragraphs on the page.`);
 
 Get the index of an element in the set of matched elements.
 
-> **DOM Position** - `index()` is useful for determining the position of an element among its siblings.
+> **DOM Position** `index()` is useful for determining the position of an element among its siblings.
 
 ### Syntax
 ```javascript
@@ -52,7 +52,7 @@ console.log(`The active list item is at index ${index}`);
 
 Get the closest positioned ancestor element.
 
-> **Edge-Case Improvements** - `offsetParent()` handles some [edge cases}(https://issues.chromium.org/issues/41131675) that prevent the naive use of `el.offsetParent`
+> **Edge-Case Improvements** `offsetParent()` handles some [edge cases}(https://issues.chromium.org/issues/41131675) that prevent the naive use of `el.offsetParent`
 
 ### Syntax
 ```javascript

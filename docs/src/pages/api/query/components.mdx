@@ -7,7 +7,7 @@ description: API reference for interacting with Semantic UI components externall
 
 Semantic UI components provide several methods for interacting with component instances from outside the component itself. These methods are particularly useful for initializing, configuring, and accessing component functionality programmatically.
 
-> **Important Note** - Please be sure to read the [component documentation](/components) for more information on the usage of these helpers.
+> **Important Note** Please be sure to read the [component documentation](/components) for more information on the usage of these helpers.
 
 ## component
 
@@ -29,7 +29,7 @@ if (menu) {
 }
 ```
 
-> **Access Component Methods** - `component()` allows you to access methods and properties defined in the component's `createComponent` function.
+> **Access Component Methods** `component()` allows you to access methods and properties defined in the component's `createComponent` function.
 
 ## settings
 
@@ -40,7 +40,7 @@ Initializes or updates [a component's settings](/components/rendering#settings) 
 $('selector').settings(settingsObject)
 ```
 
-> **Passing Functions** - `settings()` is particularly useful for passing data to your component that cannot be stringified into an attribute, or that is easier to retreive from javascript.
+> **Passing Functions** `settings()` is particularly useful for passing data to your component that cannot be stringified into an attribute, or that is easier to retreive from javascript.
 
 ### Parameters
 | Name           | Type   | Description                           |
@@ -60,6 +60,30 @@ $('ui-panel').settings({
 });
 ```
 
+## setting
+
+Updates a single setting on a component programmatically.
+
+### Syntax
+```javascript
+$('selector').setting(settingName, value)
+```
+
+### Parameters
+| Name        | Type   | Description                    |
+|-------------|--------|--------------------------------|
+| settingName | string | The name of the setting to set |
+| value       | any    | The value to set              |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('ui-panel').setting('direction', 'horizontal');
+```
+
+> **Single Setting Update** `setting()` provides a convenient way to update a single component setting without having to pass an entire settings object.
 
 ## initialize
 
@@ -70,7 +94,7 @@ Initializes a component with settings, typically used before the component is re
 $('selector').initialize(settingsObject)
 ```
 
-> **Using Initialize** - Initialize helps in scenarios where you would like to pass in settings before the component is rendered and can help facilitate load-order issues for some front end architectures.
+> **Using Initialize** Initialize helps in scenarios where you would like to pass in settings before the component is rendered and can help facilitate load-order issues for some front end architectures.
 
 ### Parameters
 | Name           | Type   | Description                           |
@@ -92,7 +116,7 @@ $('ui-panel').initialize({
 <ui-panel></ui-panel>
 ```
 
-> **Early Initialization** - `initialize()` allows you to set up component settings even before the component is rendered, which can be useful in single-page applications or when working with dynamically loaded content.
+> **Early Initialization** `initialize()` allows you to set up component settings even before the component is rendered, which can be useful in single-page applications or when working with dynamically loaded content.
 
 ## Additional Information
 
@@ -105,7 +129,7 @@ While both `settings()` and `initialize()` are used to configure components, the
 
 ### Example
 
-Here's an example demonstrating how to interact with a [`circle-expand` sample component](examples/event-binding) using these methods:
+Here's an example demonstrating how to interact with a [`circle-expand` sample component](/examples/event-binding) using these methods:
 
 ```javascript
 // Get the component instance
@@ -125,3 +149,25 @@ $('circle-expand').initialize({
   height: 300
 });
 ```
+
+## dataContext
+
+Retrieves the data context associated with a component. The data context is useful for accessing component-specific data that may be set during initialization or runtime.
+
+### Syntax
+```javascript
+$('selector').dataContext()
+```
+
+### Returns
+The data context object if found, otherwise `undefined`.
+
+### Usage
+```javascript
+const context = $('ui-list-item').dataContext();
+if (context) {
+  console.log('Item data:', context);
+}
+```
+
+> **Component Data** `dataContext()` provides access to component-specific data that may be used for rendering or internal component state management.

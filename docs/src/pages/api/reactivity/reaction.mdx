@@ -221,6 +221,56 @@ const reaction = Reaction.create((r) => {
 });
 ```
 
+### context
+
+Contains information about what triggered the current reaction run.
+
+#### Type
+```javascript
+{
+  value: any;
+  trace?: string;
+} | null
+```
+
+#### Properties
+
+| Name | Type | Description |
+|------|------|-------------|
+| value | any | The value that triggered the reaction |
+| trace | string? | Optional stack trace showing where the change originated |
+
+#### Usage
+
+```javascript
+const counter = new Signal(0);
+Reaction.create((r) => {
+  console.log('Counter:', counter.get());
+  if (r.context) {
+    console.log('Changed value:', r.context.value);
+  }
+});
+```
+
+### dependencies
+
+A Set containing all the dependencies being tracked by this reaction.
+
+#### Type
+```javascript
+Set<Dependency>
+```
+
+#### Usage
+
+```javascript
+const counter = new Signal(0);
+Reaction.create((r) => {
+  counter.get();
+  console.log('Number of dependencies:', r.dependencies.size);
+});
+```
+
 ## Scheduling Methods
 
 `Reaction` proxies several useful methods from [`Scheduler`](/api/reactivity/scheduler) so you can call them directly without having to import the [`Scheduler`](/api/reactivity/scheduler) class.

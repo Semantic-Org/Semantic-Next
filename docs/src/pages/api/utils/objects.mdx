@@ -398,7 +398,7 @@ function weightedObjectSearch(query = '', objectArray = [], {
 
 Performs a weighted search across an array of objects, with matches prioritized by where they occur in the text.
 
-> **Search Priority** - Results are **sorted by match quality**, with highest priority given to **exact start of string matches** (e.g., searching "cat" matching "category"), followed by **word-start matches** (e.g., "category" in "my category"), then **substring matches anywhere**, and finally **partial word matches**. When searching multiple words, matches are weighted by how many words were found in the text.
+> **Search Priority** Results are **sorted by match quality**, with highest priority given to **exact start of string matches** (e.g., searching "cat" matching "category"), followed by **word-start matches** (e.g., "category" in "my category"), then **substring matches anywhere**, and finally **partial word matches**. When searching multiple words, matches are weighted by how many words were found in the text.
 
 #### Parameters
 
@@ -416,7 +416,7 @@ Performs a weighted search across an array of objects, with matches prioritized 
 | matchAllWords    | boolean  | true    | Require all words to match |
 | propertiesToMatch| array    | []      | Properties to search within objects |
 
-> **Understanding Matches** - You can use the option `returnMatches` to return details of how each result matched alongside the result.
+> **Understanding Matches** You can use the option `returnMatches` to return details of how each result matched alongside the result.
 
 
 #### Returns

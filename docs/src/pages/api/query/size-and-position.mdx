@@ -25,7 +25,7 @@ const paragraphCount = $('p').count();
 console.log(`There are ${paragraphCount} paragraphs on the page.`);
 ```
 
-> **Quick Count** - `count()` is a convenient way to get the number of matched elements without converting to an array.
+> **Quick Count** `count()` is a convenient way to get the number of matched elements without converting to an array.
 
 ## index
 
@@ -45,7 +45,7 @@ const index = $('li.active').index();
 console.log(`The active list item is at index ${index}`);
 ```
 
-> **DOM Position** - `index()` is useful for determining the position of an element among its siblings.
+> **DOM Position** `index()` is useful for determining the position of an element among its siblings.
 
 ## offsetParent
 
@@ -70,7 +70,7 @@ const offsetParent = $('.child-element').offsetParent();
 console.log('Offset parent:', offsetParent.get(0));
 ```
 
-> **Positioning Context** - `offsetParent()` is particularly useful when working with absolutely positioned elements.
+> **Positioning Context** `offsetParent()` is particularly useful when working with absolutely positioned elements.
 
 ## naturalWidth
 
@@ -82,8 +82,8 @@ $('selector').naturalWidth()
 ```
 
 ### Returns
-- **Single Element** - The natural width of the element in pixels.
-- **Multiple Elements** - An array of natural widths, one for each matched element.
+- **Single Element** The natural width of the element in pixels.
+- **Multiple Elements** An array of natural widths, one for each matched element.
 
 ### Usage
 ```javascript
@@ -91,7 +91,7 @@ const imgNaturalWidth = $('img').naturalWidth();
 console.log('Natural width of the image:', imgNaturalWidth);
 ```
 
-> **Element Dimensions** - This method works by creating a clone of the element, positioning it off-screen, and measuring its dimensions. While accurate, it can cause a reflow in the document.
+> **Element Dimensions** This method works by creating a clone of the element, positioning it off-screen, and measuring its dimensions. While accurate, it can cause a reflow in the document.
 
 ## naturalHeight
 
@@ -103,8 +103,8 @@ $('selector').naturalHeight()
 ```
 
 ### Returns
-- **Single Element** - The natural height of the element in pixels.
-- **Multiple Elements** - An array of natural heights, one for each matched element.
+- **Single Element** The natural height of the element in pixels.
+- **Multiple Elements** An array of natural heights, one for each matched element.
 
 ### Usage
 ```javascript
@@ -112,4 +112,4 @@ const imgNaturalHeight = $('img').naturalHeight();
 console.log('Natural height of the image:', imgNaturalHeight);
 ```
 
-> **Element Dimensions** - Like `naturalWidth()`, this method creates an off-screen clone to measure dimensions, which may cause a reflow.
+> **Element Dimensions** Like `naturalWidth()`, this method creates an off-screen clone to measure dimensions, which may cause a reflow.

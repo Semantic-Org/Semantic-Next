@@ -105,3 +105,153 @@ users.removeItem('user1');
 
 ### Example
 <PlaygroundExample id="reactive-remove-item" direction="horizontal"></PlaygroundExample>
+
+## getIDs
+
+Gets all possible ID values from an object by checking for `_id`, `id`, `hash`, `key` properties.
+
+### Syntax
+```javascript
+signal.getIDs(item)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| item | Object or string | The object to get IDs from, or a string ID directly |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| Array | Array of ID values found in the object |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { _id: '1', id: 'user1', name: 'Alice' }
+]);
+
+// Using with an object
+const allIds = users.getIDs(users.value[0]); // ['1', 'user1']
+
+// Using with a string
+const stringId = users.getIDs('user1'); // ['user1']
+```
+
+## getID
+
+Gets the first available ID from an object by checking for properties in this order: `_id`, `id`, `hash`, `key`.
+
+### Syntax
+```javascript
+signal.getID(item)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| item | Object or string | The object to get ID from, or a string ID directly |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| string | The first available ID found, or the string passed if a string was provided |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { _id: '1', id: 'user1', name: 'Alice' }
+]);
+
+// Using with an object
+const id = users.getID(users.value[0]); // '1'
+
+// Using with a string
+const stringId = users.getID('user1'); // 'user1'
+```
+
+## hasID
+
+Checks if an object or string has a specific ID.
+
+### Syntax
+```javascript
+signal.hasID(item, id)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| item | Object or string | The object or string to check |
+| id | string | ID to look for |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| boolean | `true` if the object or string's ID matches the provided `id`, `false` otherwise |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { _id: '1', id: 'user1', name: 'Alice' }
+]);
+
+// Check if an object has a specific ID
+users.hasID(users.value[0], '1'); // true
+users.hasID(users.value[0], 'user1'); // true
+users.hasID(users.value[0], 'wrongId'); // false
+
+// Check if a string has a specific ID
+users.hasID('user1', 'user1'); // true
+users.hasID('user1', 'user2'); // false
+```
+
+## getItem
+
+Gets the index of an object with the specified ID within the Signal's array value.
+
+### Syntax
+```javascript
+signal.getItem(id)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | ID to look for |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| number | Index of the matching object in the array, or -1 if not found |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { id: 'user1', name: 'Alice' },
+  { id: 'user2', name: 'Bob' }
+]);
+
+const indexOfBob = users.getItem('user2'); // 1
+const indexOfUnknown = users.getItem('user3'); // -1
+```
