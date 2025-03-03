@@ -1,7 +1,7 @@
 import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers';
 import { Query, QueryOptions } from '@semantic-ui/query';
-import { Signal, SignalOptions, Reaction } from '@semantic-ui/reactivity';;
+import { Signal, SignalOptions, Reaction } from '@semantic-ui/reactivity';
 import { ASTNode } from './compiler/template-compiler';
 
 export interface TemplateSettings {
@@ -66,11 +66,11 @@ export interface CallParams<
     TComponentInstance extends Record<string, any> = Record<string, any>,
     TProperties extends Record<string, any> = Record<string, any>  // For Lit properties
 > {
-  /** The DOM element associated with the call. */
+  /** The DOM element associated with the component. */
   el: HTMLElement;
-  /** The template instance. */
+  /** The component instance. */
   tpl: TComponentInstance;  // Use generic type
-  /** The 'this' context of the calling function. */
+  /**  The component instance */
   self: TComponentInstance; // Use generic type
   /** The component instance. */
   component: TComponentInstance; // Use generic type
