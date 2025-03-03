@@ -57,14 +57,11 @@ export interface RenderedTemplate {
     [key: string]: any; // Allows any other properties since it merges instance and data.
 }
 
-// Helper type to recursively extract Signal values from a record
-type ExtractSignalValues<T> = {
-  [K in keyof T]: T[K] extends Signal<infer U> ? U : T[K];
-};
+// We don't need this helper anymore as we want to preserve Signal methods for autocomplete
 
-// Updated CallParams with generics
+// CallParams interface with generics
 export interface CallParams<
-    TState extends Record<string, any> = Record<string, any>,
+    TState extends Record<string, Signal<any>> = Record<string, Signal<any>>,
     TSettings extends Record<string, any> = Record<string, any>,
     TComponentInstance extends Record<string, any> = Record<string, any>,
     TProperties extends Record<string, any> = Record<string, any>  // For Lit properties
@@ -99,10 +96,10 @@ export interface CallParams<
  */
   settings: TSettings & TProperties; // Use generic type. Lit properties are NOT exposed.
   /**
-    * Reactive state variables.  The unwrapped values from the Signals.
+    * Reactive state variables. Each property is a Signal that can be accessed and modified.
     * See {@link https://next.semantic-ui.com/components/rendering#state Component State} for more details.
     */
-  state: ExtractSignalValues<TState>; // Use ExtractSignalValues
+  state: Record<string, Signal<any>>;
   /** Checks if the template is rendered. */
   isRendered: () => boolean;
   /** Indicates if the rendering is happening on the server. */
