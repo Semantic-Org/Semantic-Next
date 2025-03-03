@@ -3,6 +3,160 @@ import { Template, CallParams } from '@semantic-ui/templating';
 import { WebComponentBase } from './web-component';
 import { PropertyValues } from 'lit';
 
+/**
+ * Extended call parameters for event handlers, including event-specific data.
+ * 
+ * Extends the standard CallParams with additional event-related properties.
+ * 
+ * @template TState - Type of the component's reactive state variables
+ * @template TSettings - Type of the component's configuration settings
+ * @template TComponentInstance - Type of the component instance created by createComponent
+ * @template TProperties - Type of the properties for Lit components
+ * 
+ * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+ */
+export interface EventCallParams<
+  TState extends Record<string, any> = Record<string, any>,
+  TSettings extends Record<string, any> = Record<string, any>,
+  TComponentInstance extends Record<string, any> = Record<string, any>,
+  TProperties extends Record<string, any> = Record<string, any>
+> extends CallParams<TState, TSettings, TComponentInstance, TProperties> {
+  /**
+   * The original DOM event that triggered the handler.
+   * This gives you access to all standard event properties like preventDefault(),
+   * stopPropagation(), etc.
+   * 
+   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/components/events#event-object
+   */
+  event: Event;
+
+  /**
+   * Flag indicating if this was a deep event (across shadow DOM boundaries).
+   * When true, the event was triggered through deep event delegation, allowing
+   * events to cross shadow DOM boundaries.
+   * 
+   * @see https://next.semantic-ui.com/components/events#deep-events
+   */
+  isDeep: boolean;
+
+  /**
+   * The DOM element that matches the selector in the event binding.
+   * This might be different from event.target when the event was triggered by a child element.
+   * 
+   * For example, with "click .button", target is the .button element, even if
+   * a child span inside the button was the actudal event.target.
+   * 
+   * @see https://next.semantic-ui.com/components/events#event-delegation
+   */
+  target: HTMLElement;
+
+  /**
+   * The value of the element that triggered the event.
+   * For form elements, this is typically the input value.
+   * For custom events, this may come from event.detail.value.
+   * 
+   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   */
+  value: any;
+
+  /**
+   * Combined data from element data attributes and event detail.
+   * Includes both dataset properties from the DOM element and
+   * any data passed in the custom event's detail property.
+   * 
+   * This is useful for accessing data attributes set on elements:
+   * `<button data-id="123">Click</button>`
+   * 
+   * @example
+   * {
+   *   "click [data-id]": ({ data }) => {
+   *     console.log('Clicked item ID:', data.id);
+   *   }
+   * }
+   * 
+   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/components/events#data-attributes
+   */
+  data: Record<string, any>;
+}
+
+/**
+ * Extended call parameters for key binding handlers, including keyboard-specific data.
+ * 
+ * Extends the standard CallParams with additional keyboard-related properties.
+ * Key bindings allow components to respond to keyboard shortcuts and key combinations.
+ * 
+ * @template TState - Type of the component's reactive state variables
+ * @template TSettings - Type of the component's configuration settings
+ * @template TComponentInstance - Type of the component instance created by createComponent
+ * @template TProperties - Type of the properties for Lit components
+ * 
+ * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+ * @see https://next.semantic-ui.com/components/keys
+ */
+export interface KeyCallParams<
+  TState extends Record<string, any> = Record<string, any>,
+  TSettings extends Record<string, any> = Record<string, any>,
+  TComponentInstance extends Record<string, any> = Record<string, any>,
+  TProperties extends Record<string, any> = Record<string, any>
+> extends CallParams<TState, TSettings, TComponentInstance, TProperties> {
+  /**
+   * The original keyboard DOM event that triggered the handler.
+   * Contains information about the key press, including key code, modifier keys, etc.
+   * 
+   * You can call preventDefault() on this event to prevent the default browser action
+   * for this key combination.
+   * 
+   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/components/keys#key-event
+   */
+  event: KeyboardEvent;
+
+  /**
+   * Indicates whether an input, select, textarea element or contenteditable element is currently focused.
+   * This can be used to determine whether to execute certain key actions that should be suppressed 
+   * when typing in form controls.
+   * 
+   * @example
+   * {
+   *   "Ctrl+S": ({ inputFocused, event }) => {
+   *     if (!inputFocused) {
+   *       event.preventDefault();
+   *       // Save action
+   *     }
+   *   }
+   * }
+   * 
+   * @see https://next.semantic-ui.com/components/keys#input-focus
+   */
+  inputFocused: boolean;
+
+  /**
+   * Indicates whether this is a repeated key event (key is being held down).
+   * This can be used to implement different behaviors for key press vs. key hold.
+   * 
+   * When true, the user is holding down the key and this is a repeat event.
+   * When false, this is the initial key press.
+   * 
+   * @example
+   * {
+   *   'down': ({ repeatedKey }) => {
+   *     if (repeatedKey) {
+   *       // Fast scrolling when key is held
+   *       scrollFaster();
+   *     } else {
+   *       // Single scroll on initial press
+   *       scrollOnce();
+   *     }
+   *   }
+   * }
+   * 
+   * @see https://next.semantic-ui.com/components/keys#repeated-keys
+   */
+  repeatedKey: boolean;
+}
+
 export interface DefineComponentOptions<
   TState extends Record<string, any>,
   TSettings extends Record<string, any>,
@@ -51,14 +205,46 @@ export interface DefineComponentOptions<
   createComponent?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void; // Use generic type
   /**
    * An object mapping event strings (e.g., "click .button") to event handler functions.
-   * See {@link https://next.semantic-ui.com/components/events Events} for more details.
+   * Event handlers receive extended parameters including the DOM event, target element, and additional data.
+   * 
+   * @example
+   * {
+   *   "click .button": ({ event, target, value, data }) => {
+   *     console.log('Button clicked:', event);
+   *   },
+   *   "input .search": ({ value }) => {
+   *     console.log('Search input:', value);
+   *   }
+   * }
+   * 
+   * @see {@link https://next.semantic-ui.com/components/events Events} for more details.
+   * @see {@link https://next.semantic-ui.com/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
    */
-  events?: Record<string, (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>)>;
+  events?: Record<string, (params: EventCallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void>;
+  
   /**
    * An object mapping key sequences (e.g., "Ctrl+A") to handler functions.
-   * See {@link https://next.semantic-ui.com/components/keys Keys} for more details.
+   * Key handlers receive extended parameters including the keyboard event, input focus state, and key repeat information.
+   * 
+   * @example
+   * {
+   *   "Ctrl+S": ({ event, inputFocused }) => {
+   *     if (!inputFocused) {
+   *       event.preventDefault();
+   *       // Save action
+   *     }
+   *   },
+   *   "Esc": ({ repeatedKey }) => {
+   *     if (!repeatedKey) {
+   *       // Close dialog
+   *     }
+   *   }
+   * }
+   * 
+   * @see {@link https://next.semantic-ui.com/components/keys Keys} for more details.
+   * @see {@link https://next.semantic-ui.com/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
    */
-  keys?: Record<string, (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>)>;
+  keys?: Record<string, (params: KeyCallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void | boolean>;
 
   /**
    * Lifecycle callback - invoked after the component is created.
