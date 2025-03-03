@@ -53,12 +53,12 @@ export interface DefineComponentOptions<
    * An object mapping event strings (e.g., "click .button") to event handler functions.
    * See {@link https://next.semantic-ui.com/components/events Events} for more details.
    */
-  events?: Record<string, Function>;
+  events?: Record<string, (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>)>;
   /**
    * An object mapping key sequences (e.g., "Ctrl+A") to handler functions.
    * See {@link https://next.semantic-ui.com/components/keys Keys} for more details.
    */
-  keys?: Record<string, Function>;
+  keys?: Record<string, (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>)>;
 
   /**
    * Lifecycle callback - invoked after the component is created.
