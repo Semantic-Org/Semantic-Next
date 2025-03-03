@@ -48,7 +48,7 @@ export interface DefineComponentOptions<
    * A function that creates the component's instance methods and properties.
    * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
    */
-  createComponent?: TCreateComponent; // Use generic type
+  createComponent?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void; // Use generic type
   /**
    * An object mapping event strings (e.g., "click .button") to event handler functions.
    * See {@link https://next.semantic-ui.com/components/events Events} for more details.
