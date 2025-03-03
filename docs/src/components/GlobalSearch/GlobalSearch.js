@@ -1,5 +1,4 @@
 import { defineComponent } from '@semantic-ui/component';
-import { debounce, unique } from '@semantic-ui/utils';
 
 import template from './GlobalSearch.html?raw';
 import css from './GlobalSearch.css?raw';
