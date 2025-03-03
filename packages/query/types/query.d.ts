@@ -102,6 +102,7 @@ export class Query {
 
   /**
    * Creates a new Query instance with the provided elements, preserving the original options.
+   * @see https://next.semantic-ui.com/api/query/internal#chain
    * @param elements - The elements for the new Query instance.
    * @returns A new Query instance.
    */
@@ -109,6 +110,7 @@ export class Query {
 
   /**
    * Queries for elements deeply, traversing shadow DOM boundaries.
+   * @see https://next.semantic-ui.com/api/query/internal#queryselectoralldeep
    * @param root - The root element to search within.
    * @param selector - The CSS selector or DOM Element to search for.
    * @param includeRoot - Whether to include the root element in the search. Defaults to `true`.
@@ -215,6 +217,7 @@ export class Query {
 
   /**
    * Gets the closest ancestor of the provided element (including the element itself) that matches the selector, traversing shadow DOM boundaries.
+   * @see https://next.semantic-ui.com/api/query/internal#closestdeep
    * @param element - The element to start searching from.
    * @param selector - A CSS selector or a DOM element.
    * @returns The closest ancestor element, or `undefined` if not found.
@@ -400,6 +403,7 @@ export class Query {
 
   /**
    * Recursively retrieves the text content of a node and its descendants, including slotted content.
+   * @see https://next.semantic-ui.com/api/query/internal#gettextcontentrecursive
    * @param nodes The list of nodes
    */
   getTextContentRecursive(nodes: NodeListOf<ChildNode> | ChildNode[]): string;
@@ -505,12 +509,14 @@ export class Query {
 
   /**
    * Returns the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/utilities#el
    * @returns The first element, or `undefined` if the set is empty.
    */
   el(): Element | undefined;
 
   /**
    * Gets the element at the specified index, or all elements if no index is provided.
+   * @see https://next.semantic-ui.com/api/query/utilities#get
    * @param index - The index of the element to retrieve.
    * @returns The element at the specified index, or an array of all elements.
    */
@@ -518,6 +524,7 @@ export class Query {
 
   /**
    * Gets a new Query instance containing the element at the specified index.
+   * @see https://next.semantic-ui.com/api/query/utilities#eq
    * @param index - The index of the element.
    * @returns A new Query instance containing the element at the specified index.
    */
@@ -525,23 +532,27 @@ export class Query {
 
   /**
    * Gets a new Query instance containing the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/utilities#first
    * @returns A new Query instance containing the first element.
    */
   first(): Query;
 
   /**
    * Gets a new Query instance containing the last element in the current set.
+   * @see https://next.semantic-ui.com/api/query/utilities#last
    * @returns A new Query instance containing the last element.
    */
   last(): Query;
 
   /**
     * Get a property of the first element in the set.
+    * @see https://next.semantic-ui.com/api/query/utilities#prop
     * @param name Name of the property to get.
     */
   prop(name: string): any;
   /**
    * Sets a property on each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/utilities#prop
    * @param name - The name of the property.
    * @param value - The value to set.
    * @returns The Query object
@@ -628,6 +639,7 @@ export class Query {
 
   /**
    * Inserts content at a specified position relative to a target element.
+   * @see https://next.semantic-ui.com/api/query/internal#insertcontent
    * @param target - The target element.
    * @param content - The content to insert.
    * @param position - The position relative to the target element ('beforebegin', 'afterbegin', 'beforeend', 'afterend').
