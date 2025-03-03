@@ -78,19 +78,19 @@ export interface CallParams<
   /** The component instance. */
   component?: TComponentInstance; // Use generic type
   /** A function for querying DOM elements (similar to jQuery). */
-  $: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
+  $?: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
   /** A function for querying DOM elements, piercing shadow DOM (similar to jQuery). */
-  $$: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
+  $$?: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
     /** Creates a reactive effect. See {@link Template.reaction}. */
-  reaction: Template['reaction'];
+  reaction?: Template['reaction'];
   /** Creates a reactive signal. See {@link Template.signal}. */
-  signal: Template['signal'];
+  signal?: Template['signal'];
   /** Executes a callback after all pending reactive updates have been flushed. */
-  afterFlush: (callback: () => void) => void;
+  afterFlush?: (callback: () => void) => void;
   /** Runs a function without tracking reactive dependencies. */
-  nonreactive: <T>(fn: () => T) => T;
+  nonreactive?: <T>(fn: () => T) => T;
   /** Forces immediate execution of pending reactive updates. */
-  flush: () => void;
+  flush?: () => void;
   /** The data context for the call. */
   data?: DataContext;
     /**
@@ -104,41 +104,38 @@ export interface CallParams<
     */
   state?: ExtractSignalValues<TState>; // Use ExtractSignalValues
   /** Checks if the template is rendered. */
-  isRendered: () => boolean;
+  isRendered?: () => boolean;
   /** Indicates if the rendering is happening on the server. */
-  isServer: boolean;
+  isServer?: boolean;
   /** Indicates if the rendering is happening on the client. */
-  isClient: boolean;
+  isClient?: boolean;
   /** Dispatches a custom event from the template's element. */
-  dispatchEvent: Template['dispatchEvent'];
+  dispatchEvent?: Template['dispatchEvent'];
   /** Attaches an event listener using event delegation. */
-  attachEvent: Template['attachEvent']
+  attachEvent?: Template['attachEvent']
   /** Binds a key sequence to a handler. */
-  bindKey: Template['bindKey'];
+  bindKey?: Template['bindKey'];
   /** Unbinds a key sequence. */
-  unbindKey: Template['unbindKey'];
+  unbindKey?: Template['unbindKey'];
   /** An AbortController for managing asynchronous operations. */
   abortController?: AbortController;
   /** Template helper functions. */
-  helpers: typeof TemplateHelpers;
+  helpers?: typeof TemplateHelpers;
   /** The template instance. */
-  template: Template;
+  template?: Template;
   /** The name of the template. */
-  templateName: string;
+  templateName?: string;
   /** A Map containing all rendered templates. */
-  templates: Map<string, Template[]>;
+  templates?: Map<string, Template[]>;
   /** Finds a template by its name. */
-  findTemplate: (templateName: string) => Template | undefined;
+  findTemplate?: (templateName: string) => Template | undefined;
   /** Finds a parent template by name. */
-  findParent: (templateName: string) => RenderedTemplate | undefined;
+  findParent?: (templateName: string) => RenderedTemplate | undefined;
   /** Finds a child template by name */
-  findChild: (templateName: string) => RenderedTemplate | undefined;
+  findChild?: (templateName: string) => RenderedTemplate | undefined;
   /** Finds all child templates by name. */
-  findChildren(templateName: string): RenderedTemplate[];
-  /** Content of the template (type might need refinement). */
-  content?: any;
-  /** Indicates if dark mode is enabled. */
-  darkMode: boolean;
+  findChildren?: (templateName: string) => RenderedTemplate[];
+  darkMode?: boolean;
 }
 
 export interface EventData {
