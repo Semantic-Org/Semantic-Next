@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/component",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -10,11 +10,11 @@
     "lit": "^3.2.1"
   },
   "dependencies": {
-    "@semantic-ui/query": "^0.9.3",
-    "@semantic-ui/reactivity": "^0.9.3",
-    "@semantic-ui/renderer": "^0.9.3",
-    "@semantic-ui/templating": "^0.9.3",
-    "@semantic-ui/utils": "^0.9.3"
+    "@semantic-ui/query": "^0.9.4",
+    "@semantic-ui/reactivity": "^0.9.4",
+    "@semantic-ui/renderer": "^0.9.4",
+    "@semantic-ui/templating": "^0.9.4",
+    "@semantic-ui/utils": "^0.9.4"
   },
   "devDependencies": {
     "vitest": "^3.0.4"
