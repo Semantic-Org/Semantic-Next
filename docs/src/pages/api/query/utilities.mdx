@@ -2,10 +2,10 @@
 layout: '@layouts/Guide.astro'
 title: Query - Utilities
 icon: tool
-description: API reference for Query methods related to element dimensions and positioning
+description: API reference for Query methods related to element dimensions, positioning, and element access
 ---
 
-Size and position methods in Query allow you to get information about element dimensions, scroll positions, and their position in the DOM.
+Utility methods in Query allow you to get information about elements, access specific elements in a collection, and work with element dimensions and positioning in the DOM.
 
 ## count
 
@@ -73,4 +73,144 @@ const offsetParent = $('.child-element').offsetParent();
 console.log('Offset parent:', offsetParent.get(0));
 ```
 
+## Element Access Methods
 
+These methods provide access to individual elements in a Query collection.
+
+## el
+
+Returns the first DOM element in the current set.
+
+### Syntax
+```javascript
+$('selector').el()
+```
+
+### Returns
+The first DOM element in the collection, or `undefined` if the collection is empty.
+
+### Usage
+```javascript
+const firstParagraph = $('p').el();
+console.log(firstParagraph.textContent);
+```
+
+## get
+
+Gets the DOM element at the specified index, or all elements if no index is provided.
+
+### Syntax
+```javascript
+$('selector').get(index)
+```
+
+### Parameters
+| Name  | Type   | Description                      |
+|-------|--------|----------------------------------|
+| index | number | Optional index of the element to retrieve |
+
+### Returns
+The element at the specified index, an array of all elements, or `undefined` if the index is out of bounds.
+
+### Usage
+```javascript
+// Get the second paragraph element
+const secondParagraph = $('p').get(1);
+
+// Get all paragraph elements as an array
+const allParagraphs = $('p').get();
+```
+
+## eq
+
+Returns a new Query instance containing the element at the specified index.
+
+### Syntax
+```javascript
+$('selector').eq(index)
+```
+
+### Parameters
+| Name  | Type   | Description                         |
+|-------|--------|-------------------------------------|
+| index | number | Index of the element to retrieve    |
+
+### Returns
+A new Query instance containing the element at the specified index.
+
+### Usage
+```javascript
+// Get the second paragraph as a Query object
+const secondParagraph = $('p').eq(1);
+secondParagraph.addClass('highlighted');
+```
+
+## first
+
+Returns a new Query instance containing the first element in the current set.
+
+### Syntax
+```javascript
+$('selector').first()
+```
+
+### Returns
+A new Query instance containing the first element in the collection.
+
+### Usage
+```javascript
+// Get the first paragraph as a Query object
+const firstParagraph = $('p').first();
+firstParagraph.addClass('highlighted');
+```
+
+## last
+
+Returns a new Query instance containing the last element in the current set.
+
+### Syntax
+```javascript
+$('selector').last()
+```
+
+### Returns
+A new Query instance containing the last element in the collection.
+
+### Usage
+```javascript
+// Get the last paragraph as a Query object
+const lastParagraph = $('p').last();
+lastParagraph.addClass('highlighted');
+```
+
+## prop
+
+Gets or sets a property of elements in the current set.
+
+### Syntax
+```javascript
+// Get property
+$('selector').prop(name)
+
+// Set property
+$('selector').prop(name, value)
+```
+
+### Parameters
+| Name  | Type   | Description                         |
+|-------|--------|-------------------------------------|
+| name  | string | Name of the property to get or set  |
+| value | mixed  | Optional value to set for the property |
+
+### Returns
+When getting: The property value of the first element.
+When setting: The Query instance for chaining.
+
+### Usage
+```javascript
+// Get the checked state of a checkbox
+const isChecked = $('input[type="checkbox"]').prop('checked');
+
+// Set the disabled property on all buttons
+$('button').prop('disabled', true);
+```

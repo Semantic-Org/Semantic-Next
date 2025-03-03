@@ -1,0 +1,138 @@
+---
+layout: '@layouts/Guide.astro'
+title: Query - Internal Helpers
+icon: key
+description: API reference for internal methods used by the Query library
+---
+
+
+
+These internal methods handle specialized functionality needed by Query's public API methods. While they're exposed in the API surface, they're typically not called directly in application code.
+
+> **Internal Use Only**  The methods documented on this page are used internally by the Query library and aren't intended for direct use in application code.
+
+## chain
+
+Creates a new Query instance containing the provided elements, preserving the original Query options.
+
+### Syntax
+```javascript
+$('selector').chain(elements)
+```
+
+### Parameters
+| Name     | Type    | Description                      |
+|----------|---------|----------------------------------|
+| elements | mixed   | Elements for the new Query instance |
+
+### Returns
+A new Query instance with the provided elements and the same options as the original Query.
+
+### Usage
+```javascript
+// Internal usage example
+const newSet = $('div').chain(document.querySelectorAll('p'));
+```
+
+## querySelectorAllDeep
+
+Queries for elements deeply across Shadow DOM boundaries.
+
+### Syntax
+```javascript
+$('selector').querySelectorAllDeep(root, selector, includeRoot)
+```
+
+### Parameters
+| Name        | Type    | Description                      |
+|-------------|---------|----------------------------------|
+| root        | mixed   | The root element to search within |
+| selector    | mixed   | CSS selector or element to search for |
+| includeRoot | boolean | Whether to include the root element in the results |
+
+### Returns
+An array of all matching elements, including those within Shadow DOM.
+
+### Usage
+```javascript
+// Internal usage example
+const allButtons = $$().querySelectorAllDeep(document, 'button');
+```
+
+## closestDeep
+
+Finds the closest ancestor element that matches the selector, traversing through Shadow DOM boundaries.
+
+### Syntax
+```javascript
+$('selector').closestDeep(element, selector)
+```
+
+### Parameters
+| Name     | Type    | Description                       |
+|----------|---------|-----------------------------------|
+| element  | Element | The element to start searching from |
+| selector | mixed   | A selector to match ancestor elements |
+
+### Returns
+The closest matching ancestor element, even if it's outside the current Shadow DOM, or `undefined` if not found.
+
+### Usage
+```javascript
+// Internal usage example
+const parentComponent = $$().closestDeep(buttonElement, 'my-component');
+```
+
+## getTextContentRecursive
+
+Gets the text content of an element and all its descendants, including across Shadow DOM boundaries.
+
+### Syntax
+```javascript
+$('selector').getTextContentRecursive(nodes)
+```
+
+### Parameters
+| Name  | Type  | Description                  |
+|-------|-------|------------------------------|
+| nodes | mixed | The nodes to extract text from |
+
+### Returns
+A string containing the combined text content of all nodes and their descendants.
+
+### Usage
+```javascript
+// Internal usage example
+const allText = $$('my-component').getTextContentRecursive(componentElement.childNodes);
+```
+
+## insertContent
+
+Inserts content at a specified position relative to a target element.
+
+### Syntax
+```javascript
+$('selector').insertContent(target, content, position)
+```
+
+### Parameters
+| Name     | Type    | Description                      |
+|----------|---------|----------------------------------|
+| target   | Element | The target element               |
+| content  | mixed   | The content to insert            |
+| position | string  | Where to insert content relative to the element |
+
+### Returns
+void
+
+### Position Values
+- 'beforebegin': Before the element
+- 'afterbegin': Inside the element, before its first child
+- 'beforeend': Inside the element, after its last child
+- 'afterend': After the element
+
+### Usage
+```javascript
+// Internal usage example - used by append(), prepend(), before(), after()
+$().insertContent(targetElement, '<div>Content</div>', 'beforeend');
+```
