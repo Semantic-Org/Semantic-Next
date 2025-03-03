@@ -147,3 +147,75 @@ letters.removeIndex(1); // ['a', 'c']
 
 ### Example
 <PlaygroundExample id="reactive-remove-index" direction="horizontal"></PlaygroundExample>
+
+## getIndex
+
+Gets the element at a specific index in the array.
+
+### Syntax
+```javascript
+signal.getIndex(index)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | The index of the element to retrieve |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const letters = new Signal(['a', 'b', 'c']);
+const secondLetter = letters.getIndex(1); // 'b'
+```
+
+## filter
+
+Filters the array to only include elements that pass the test provided by the callback function.
+
+### Syntax
+```javascript
+signal.filter(predicate)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| predicate | Function | Function to test each element of the array. Takes three arguments: the current element, its index, and the array being processed |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const numbers = new Signal([1, 2, 3, 4, 5]);
+numbers.filter(n => n % 2 === 0); // [2, 4]
+```
+
+## map
+
+Transforms each element in the array using the provided mapping function.
+
+### Syntax
+```javascript
+signal.map(callback)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| callback | Function | Function to transform each element. Takes three arguments: the current element, its index, and the array being processed |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const numbers = new Signal([1, 2, 3]);
+numbers.map(n => n * 2); // [2, 4, 6]
+```

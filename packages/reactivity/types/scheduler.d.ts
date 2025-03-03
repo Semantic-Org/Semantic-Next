@@ -3,6 +3,7 @@ import type { Reaction } from './reaction';
 /**
  * Manages the scheduling and execution of reactive updates.
  * Batches and processes reactions efficiently using microtasks.
+ * @see {@link https://next.semantic-ui.com/api/reactivity/scheduler Scheduler Documentation}
  *
  * @internal This class is primarily used internally by the reactivity system.
  */
@@ -34,6 +35,7 @@ export class Scheduler {
   /**
    * Schedules a reaction to be processed in the next flush.
    * The reaction will be executed when the microtask queue is processed.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/scheduler#schedulereaction scheduleReaction}
    *
    * @param reaction - The reaction to schedule
    * @internal This method is called internally by the reactivity system.
@@ -43,6 +45,7 @@ export class Scheduler {
   /**
    * Schedules a flush of pending reactions to occur in the next microtask.
    * Uses queueMicrotask or Promise.resolve() for scheduling.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/scheduler#scheduleflush scheduleFlush}
    *
    * @internal This method is called internally by the reactivity system.
    */
@@ -51,12 +54,14 @@ export class Scheduler {
   /**
    * Immediately processes all pending reactions and after-flush callbacks.
    * Can be called manually to force immediate processing of pending updates.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/scheduler#flush flush}
    */
   static flush(): void;
 
   /**
    * Registers a callback to execute after the next flush completes.
    * Useful for running side effects after all reactive updates are processed.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/scheduler#afterflush afterFlush}
    *
    * @param callback - Function to execute after the next flush
    */
@@ -65,6 +70,7 @@ export class Scheduler {
   /**
    * Gets the source location that triggered the current reaction.
    * Useful for debugging reactive updates and understanding update chains.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/scheduler#getsource getSource}
    *
    * @returns A formatted stack trace string, or undefined if no source is available
    */
