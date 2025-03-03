@@ -712,18 +712,21 @@ export class Query {
 
   /**
    * Adds properties to element on DOMContentLoaded
+   * @see https://next.semantic-ui.com/api/query/components#initialize
    * @param settings The properties to add.
    */
   initialize(settings: PlainObject): void;
 
-    /**
+  /**
    * Adds multiple properties to each element in selection.
+   * @see https://next.semantic-ui.com/api/query/components#settings
    * @param settings The properties to add.
    */
   settings(settings: PlainObject): void;
 
-    /**
+  /**
    * Add a single property to all elements in selection.
+   * @see https://next.semantic-ui.com/api/query/components#setting
    * @param setting The setting to add.
    * @param value The value of the setting.
    */
@@ -739,6 +742,7 @@ export class Query {
 
   /**
    * Gets the data context (if any) associated with the *first* element in the current set.
+   * @see https://next.semantic-ui.com/api/query/components#datacontext
    * @returns The data context, or undefined.
    */
   dataContext(): any;
