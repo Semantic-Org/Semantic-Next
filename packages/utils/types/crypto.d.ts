@@ -5,6 +5,7 @@
 
 /**
  * Converts a string to a URL-friendly token.
+ * @see {@link https://next.semantic-ui.com/api/utils/crypto#tokenize tokenize}
  *
  * @param {string} [str=''] The input string.
  * @returns {string} The tokenized string.
@@ -13,6 +14,7 @@ export function tokenize(str?: string): string;
 
 /**
  * Converts a number to a prettified ID string using base-36 encoding.
+ * @see {@link https://next.semantic-ui.com/api/utils/crypto#prettifyid prettifyID}
  *
  * @param {number} num The number to convert.
  * @returns {string} The prettified ID string.  Returns "0" if input is 0.
@@ -37,6 +39,7 @@ interface HashCodeOptions {
 
 /**
  * Creates a unique ID (hash code) from a string using an adapted UMASH algorithm.
+ * @see {@link https://next.semantic-ui.com/api/utils/crypto#hashcode hashCode}
  *
  * @param {string | object | null | undefined} input The input string or object. Objects are stringified using JSON.stringify.  null and undefined become "".
  * @param {HashCodeOptions} [options] Options for the hash function.
@@ -46,6 +49,7 @@ export function hashCode(input: string | object | null | undefined, options?: Ha
 
 /**
  * Generates a random, prettified ID.
+ * @see {@link https://next.semantic-ui.com/api/utils/crypto#generateid generateID}
  *
  * @returns {string} A randomly generated, prettified ID.
  */

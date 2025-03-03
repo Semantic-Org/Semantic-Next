@@ -30,6 +30,7 @@ export interface GetArticleOptions {
 /**
  * Converts a kebab-case string to camelCase
  * Useful for converting HTML attributes to JavaScript property names
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#kebabtocamel kebabToCamel}
  * 
  * @param str - The kebab-case string to convert
  * @returns The camelCase version of the string
@@ -45,6 +46,7 @@ export function kebabToCamel(str?: string): string;
 /**
  * Converts a camelCase string to kebab-case
  * Useful for converting JavaScript property names to HTML attributes
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#cameltokebab camelToKebab}
  * 
  * @param str - The camelCase string to convert
  * @returns The kebab-case version of the string
@@ -59,6 +61,7 @@ export function camelToKebab(str?: string): string;
 
 /**
  * Capitalizes the first letter of a string
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#capitalize capitalize}
  * 
  * @param str - The string to capitalize
  * @returns The string with its first letter capitalized
@@ -73,6 +76,7 @@ export function capitalize(str?: string): string;
 
 /**
  * Capitalizes the first letter of each word in a string
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#capitalizewords capitalizeWords}
  * 
  * @param str - The string to capitalize
  * @returns The string with the first letter of each word capitalized
@@ -88,6 +92,7 @@ export function capitalizeWords(str?: string): string;
 /**
  * Converts a string to title case, following common English title capitalization rules
  * Handles stop words (a, an, the, etc.) appropriately
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#totitlecase toTitleCase}
  * 
  * @param str - The string to convert to title case
  * @returns The string in title case
@@ -103,6 +108,7 @@ export function toTitleCase(str?: string): string;
 /**
  * Joins an array of words into a grammatically correct sentence
  * Supports Oxford comma and custom separators
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#joinwords joinWords}
  * 
  * @param words - Array of words to join
  * @param options - Configuration options for joining words
@@ -118,6 +124,7 @@ export function joinWords(words: string[], options?: JoinWordsOptions): string;
 
 /**
  * Gets the appropriate indefinite article (a/an) for a word
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#getarticle getArticle}
  * 
  * @param word - The word to get the article for
  * @param options - Configuration options
