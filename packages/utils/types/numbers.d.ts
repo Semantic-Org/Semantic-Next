@@ -7,6 +7,7 @@
  * Rounds a number to a specified number of significant digits.
  * Handles very large and very small numbers correctly.
  * Returns the original value if it's not a finite number.
+ * @see {@link https://next.semantic-ui.com/api/utils/numbers#roundnumber roundNumber}
  * 
  * @param number - The number to round
  * @param digits - Number of significant digits (default: 5)

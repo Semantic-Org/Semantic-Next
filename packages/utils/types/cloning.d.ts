@@ -16,6 +16,7 @@ export interface CloneOptions {
   /**
    * Creates a deep clone of a value
    * Handles arrays, objects, dates, maps, sets, and primitive types
+   * @see {@link https://next.semantic-ui.com/api/utils/cloning#clone clone}
    *
    * @param src - Value to clone
    * @param options - Cloning options

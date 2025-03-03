@@ -20,6 +20,7 @@ export interface DebounceOptions {
 /**
  * A no-operation function that does nothing
  * Useful to avoid function creation overhead when using multiple noop functions
+ * @see {@link https://next.semantic-ui.com/api/utils/functions#noop noop}
  * 
  * @example
  * ```ts
@@ -30,6 +31,7 @@ export function noop(...args: any[]): void;
 
 /**
  * Wraps a value in a function if it isn't already a function
+ * @see {@link https://next.semantic-ui.com/api/utils/functions#wrapfunction wrapFunction}
  * 
  * @param x - Value or function to wrap
  * @returns A function that returns the value, or the original function
@@ -45,6 +47,7 @@ export function wrapFunction<T>(x: T | (() => T)): () => T;
 /**
  * Creates a memoized version of a function
  * Caches return values based on input arguments
+ * @see {@link https://next.semantic-ui.com/api/utils/functions#memoize memoize}
  * 
  * @param fn - Function to memoize
  * @param hashFunction - Optional function to generate cache keys
@@ -69,6 +72,7 @@ export function memoize<T extends (...args: any[]) => any>(
  * Creates a debounced version of a function
  * The debounced function will delay execution until after wait milliseconds
  * have elapsed since the last time it was called
+ * @see {@link https://next.semantic-ui.com/api/utils/functions#debounce debounce}
  * 
  * @param fn - Function to debounce
  * @param options - Debounce configuration options or delay in milliseconds

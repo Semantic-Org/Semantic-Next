@@ -4,7 +4,15 @@
  */
 
 /**
+ * Utility type that converts a union type to an intersection type
+ * Used by the extend function to properly type the result
+ */
+type UnionToIntersection<U> = 
+  (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
+
+/**
  * Returns the keys of an object
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#keys keys}
  * 
  * @param obj - The object to get keys from
  * @returns Array of object keys
@@ -18,6 +26,7 @@ export function keys<T extends object>(obj: T): Array<keyof T>;
 
 /**
  * Returns the values of an object
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#values values}
  * 
  * @param obj - The object to get values from
  * @returns Array of object values
@@ -31,6 +40,7 @@ export function values<T extends object>(obj: T): Array<T[keyof T]>;
 
 /**
  * Creates a new object with transformed values
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#mapobject mapObject}
  * 
  * @param obj - The source object
  * @param callback - Function to transform values
@@ -48,6 +58,7 @@ export function mapObject<T extends object, U>(
 
 /**
  * Creates a new object with filtered key-value pairs
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#filterobject filterObject}
  * 
  * @param obj - The source object
  * @param callback - Function to test each key-value pair
@@ -66,6 +77,7 @@ export function filterObject<T extends object>(
 /**
  * Extends an object with properties from additional sources
  * Properly handles getters and setters
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#extend extend}
  * 
  * @param obj - The target object
  * @param sources - Source objects to copy from
@@ -76,7 +88,24 @@ export function filterObject<T extends object>(
  * extend({ a: 1 }, { b: 2 }, { c: 3 }) // returns { a: 1, b: 2, c: 3 }
  * ```
  */
+export function extend<T extends object, S extends object[]>(
+  obj: T,
+  ...sources: S
+): T & UnionToIntersection<S[number]>;
 
+/**
+ * Returns an object with only the specified properties
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#pick pick}
+ *
+ * @param obj - The source object
+ * @param keys - Keys to include in the new object
+ * @returns New object with only specified properties
+ * 
+ * @example
+ * ```ts
+ * pick({ a: 1, b: 2, c: 3 }, 'a', 'c') // returns { a: 1, c: 3 }
+ * ```
+ */
 export function pick<T extends object, K extends keyof T>(
   obj: T,
   ...keys: K[]
@@ -84,6 +113,7 @@ export function pick<T extends object, K extends keyof T>(
 
 /**
  * Access a nested object field with a string path
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#get get}
  * 
  * @param obj - The object to traverse
  * @param path - The path string (e.g., 'a.b.c' or 'items[0].name')
@@ -104,6 +134,7 @@ export function get<T extends object, V = any>(
 
 /**
  * Creates a proxy that combines source and reference objects
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#proxyobject proxyObject}
  * 
  * @param sourceObj - Function that returns the source object
  * @param referenceObj - Reference object to combine with source
@@ -125,6 +156,7 @@ export function proxyObject<T extends object, U extends object>(
 
 /**
  * Returns an object with only the specified keys
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#onlykeys onlyKeys}
  * 
  * @param obj - The source object
  * @param keysToKeep - Array of keys to keep
@@ -142,6 +174,7 @@ export function onlyKeys<T extends object, K extends keyof T>(
 
 /**
  * Checks if an object has a specific property
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#hasproperty hasProperty}
  * 
  * @param obj - The object to check
  * @param prop - The property to check for
@@ -161,6 +194,7 @@ export function hasProperty<T extends object>(
 /**
  * Reverses a lookup object's keys and values
  * If multiple keys have the same value, creates an array
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#reversekeys reverseKeys}
  * 
  * @param obj - The object to reverse
  * @returns New object with reversed keys and values
@@ -177,6 +211,7 @@ export function reverseKeys<T extends object>(
 
 /**
  * Converts an object to an array of key-value pairs
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#arrayfromobject arrayFromObject}
  * 
  * @param obj - The object to convert
  * @returns Array of key-value pair objects
@@ -205,6 +240,7 @@ export interface WeightedSearchOptions {
 
 /**
  * Performs a weighted search across an array of objects
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#weightedobjectsearch weightedObjectSearch}
  * 
  * @param query - The search query
  * @param objectArray - Array of objects to search
