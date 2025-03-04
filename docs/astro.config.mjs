@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
-import lit from '@astrojs/lit';
+import lit from '@semantic-ui/astro-lit';
 import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
 import starlight from '@astrojs/starlight';
