@@ -40,7 +40,7 @@
       "service": true
     },
     "dev": {
-      "command": "cd docs && npm install && npx link ../ && npx link ../../astro/packages/integrations/lit && npm run dev",
+      "command": "cd docs && npm install && npx link ../ && npm run dev",
       "dependencies": [
         "watch"
       ]
