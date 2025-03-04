@@ -9,9 +9,11 @@ if(padded) {
   bodyClass += ' padded';
 }
 
+import { ClientRouter } from 'astro:transitions';
 import SearchMeta from '@components/SearchMeta.astro';
 import NavMenu from '@components/NavMenu/NavMenu.js';
 
+// CSS imports
 import './Body.css';
 import '../css/responsive.css';
 import '../css/legacy-sui/input.css';
@@ -38,31 +40,114 @@ searchMeta = {
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <!-- No font preloads to avoid potential HTTP/2 issues -->
+    <!-- Use standard ClientRouter with simpler fallback handling to avoid HTTP/2 errors -->
+    <ClientRouter fallback="swap" />
+    <!-- Make sure all style imports are marked to persist during transitions -->
+    <style is:global transition:persist>
+      /* Regular */
+      @font-face {
+        font-family: 'Lato';
+        src:
+          url(/fonts/lato/LatoLatin-Regular.woff2) format('woff2')
+        ;
+        font-style: normal;
+        font-weight: normal;
+      }
+      @font-face {
+        font-family: 'Lato';
+        src:
+          url(/fonts/lato/LatoLatin-Italic.woff2) format('woff2')
+        ;
+        font-style: italic;
+        font-weight: normal;
+      }
+
+      /* Bold */
+      @font-face {
+        font-family: 'Lato';
+        src:
+          url(/fonts/lato/LatoLatin-Bold.woff2) format('woff2')
+        ;
+        font-style: normal;
+        font-weight: 700;
+      }
+      @font-face {
+        font-family: 'Lato';
+        src:
+          url(/fonts/lato/LatoLatin-BoldItalic.woff2) format('woff2')
+        ;
+        font-style: italic;
+        font-weight: 700;
+      }
+    </style>
   </head>
   <body class={bodyClass}>
     <script>
       import { exportGlobals } from '@semantic-ui/query';
       exportGlobals();
     </script>
-    <script is:inline data-astro-rerun>
-      if(!window.systemPrefersDark) {
-        window.systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
-      if(!window.currentTheme) {
-        window.currentTheme = localStorage.getItem('theme')
-          ? localStorage.getItem('theme') :
-            systemPrefersDark
-            ? 'dark'
-            : 'light'
-        ;
-      }
-      const darkModePaths = ['/'];
-      if(darkModePaths.indexOf(window.location.pathname) !== -1) {
-        currentTheme = 'dark';
-      }
-      const html = document.querySelectorAll('html')[0];
-      html.classList.add(currentTheme);
-      html.setAttribute('data-theme', currentTheme);
+    <script>
+      // Use a self-executing function to avoid variable name conflicts
+      (function() {
+        if(!window.systemPrefersDark) {
+          window.systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        if(!window.currentTheme) {
+          window.currentTheme = localStorage.getItem('theme')
+            ? localStorage.getItem('theme') :
+              window.systemPrefersDark
+              ? 'dark'
+              : 'light'
+          ;
+        }
+        if(!window.darkModePaths) {
+          window.darkModePaths = ['/'];
+        }
+        if(window.darkModePaths.indexOf(window.location.pathname) !== -1) {
+          window.currentTheme = 'dark';
+        }
+        const html = document.documentElement;
+        html.classList.remove('dark', 'light');
+        html.classList.add(window.currentTheme);
+        html.setAttribute('data-theme', window.currentTheme);
+      })();
+    </script>
+
+    <script>
+      // Use a self-executing function to avoid variable name conflicts
+      (function() {
+        // Ensure theme is preserved during view transitions
+        function applyTheme(doc) {
+          const theme = window.currentTheme || localStorage.getItem('theme') ||
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+          // First remove any existing theme classes
+          doc.documentElement.classList.remove('dark', 'light');
+          // Then add the current theme
+          doc.documentElement.classList.add(theme);
+          doc.documentElement.setAttribute('data-theme', theme);
+        }
+
+        // Apply theme when transitioning between pages
+        document.addEventListener('astro:before-swap', (event) => {
+          applyTheme(event.newDocument);
+        });
+
+        // Simplified font handling to avoid HTTP/2 issues
+        document.addEventListener('astro:after-swap', () => {
+          // Just add a class that we've completed the swap
+          document.documentElement.classList.add('transition-complete');
+        });
+
+        // Handle any initialization that needs to happen after page navigation
+        document.addEventListener('astro:page-load', () => {
+          // Initialize UI components or event listeners that should run on every page
+          if (typeof window.initializePageComponents === 'function') {
+            window.initializePageComponents();
+          }
+        });
+      })();
     </script>
     <SearchMeta {...searchMeta} />
     <slot />

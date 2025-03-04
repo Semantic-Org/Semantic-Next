@@ -1,6 +1,5 @@
 ---
 import '../css/layers.css';
-import '../css/fonts.css';
 
 import { UIIcon } from '@semantic-ui/core';
 import Body from './Body.astro';
@@ -40,9 +39,9 @@ const pageTraversal = await getPageTraversalLinks({
 const activeURL = Astro.url.pathname;
 ---
 <Body title={title} description={description} searchMeta={searchMeta}>
-	<TopBar></TopBar>
+	<TopBar transition:persist transition:name="top-bar"></TopBar>
 	<layout id={id}>
-		<Sidebar/>
+		<Sidebar transition:persist transition:name="sidebar"/>
 		<page class={textContent ? 'text-content' : ''}>
 			<slot name="masthead">
 				{inlineHeader != 'true' && (
@@ -51,7 +50,7 @@ const activeURL = Astro.url.pathname;
 			</slot>
 			<main data-pagefind-body>
 				<ui-container>
-					<rail class="ui close right rail">
+					<rail class="ui close right rail" transition:persist transition:name="docs-rail">
 						<slot name="rail">
 							<DocsRail menu={railMenu} useAccordion={expandRailMenu != 'true'} scrollOffset={railMenuScrollOffset} />
 						</slot>
@@ -96,5 +95,5 @@ const activeURL = Astro.url.pathname;
 			</main>
 		</page>
 	</layout>
-	<SiteMobileMenu></SiteMobileMenu>
+	<SiteMobileMenu transition:persist transition:name="mobile-menu"></SiteMobileMenu>
 </Body>

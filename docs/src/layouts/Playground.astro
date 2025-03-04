@@ -1,6 +1,5 @@
 ---
 import '../css/layers.css';
-import '../css/fonts.css';
 
 import Body from '../layouts/Body.astro';
 import TopBar from '@components/TopBar.astro';
@@ -12,8 +11,10 @@ let { title, description, searchMeta } = Astro.props;
 ---
 <Body title={title} description={description} searchMeta={searchMeta} >
   <layout id="playground">
-    <TopBar noanimation/>
-    <slot></slot>
+    <TopBar noanimation transition:persist transition:name="top-bar"/>
+    <div>
+      <slot></slot>
+    </div>
   </layout>
-  <SiteMobileMenu></SiteMobileMenu>
+  <SiteMobileMenu transition:persist transition:name="mobile-menu"></SiteMobileMenu>
 </Body>

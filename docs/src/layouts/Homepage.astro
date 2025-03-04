@@ -1,6 +1,5 @@
 ---
 import '../css/layers.css';
-import '../css/fonts.css';
 import Body from '../layouts/Body.astro';
 import TopBar from '@components/TopBar.astro';
 import NavMenu from '@components/NavMenu/NavMenu.js';
@@ -10,9 +9,9 @@ import './Homepage.css';
 let { title, description, searchMeta } = Astro.props;
 ---
 <Body title={title} description={description} searchMeta={searchMeta} >
-  <TopBar floating showThemeSwitcher=false />
+  <TopBar floating showThemeSwitcher=false transition:persist transition:name="top-bar" />
   <page data-pagefind-body>
     <slot></slot>
   </page>
-  <SiteMobileMenu></SiteMobileMenu>
+  <SiteMobileMenu transition:persist transition:name="mobile-menu"></SiteMobileMenu>
 </Body>

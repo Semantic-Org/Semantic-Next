@@ -267,6 +267,12 @@ const events = {
     $title.toggleClass('active');
     $content.toggleClass('active');
   },
+  'click [href]'({target, settings, state}) {
+    const activeURL = $(target).attr('href');
+    settings.activeURL = activeURL;
+    console.log('new activeurl', activeURL);
+    state.url.set(activeURL);
+  },
   'click .nav-icon'({event}) {
     event.preventDefault();
   },
