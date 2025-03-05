@@ -61,7 +61,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getTemplate(item, index) {
-    const templateData = this.getEachData(item, index, this.eachCondition.as);
+    const templateData = this.getEachData(item, index, this.eachCondition);
     return this.eachCondition.content(templateData);
   }
 
@@ -75,10 +75,13 @@ export class ReactiveEachDirective extends AsyncDirective {
     return index;
   }
 
-  getEachData(item, index, alias) {
-    return alias
-      ? { [alias]: item, 'index': index }
-      : { ...item, this: item, 'index': index };
+  getEachData(item, index, eachCondition) {
+    const { as, indexAs = 'index' } = eachCondition;
+    // if 'as' is specified we pass the whole value as an item
+    // otherwise we spread the value to data context
+    return as
+      ? { [as]: item, [indexAs]: index }
+      : { ...item, this: item, [indexAs]: index };
   }
 
 
