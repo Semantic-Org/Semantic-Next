@@ -327,20 +327,40 @@ class TemplateCompiler {
 
             let iterateOver;
             let iterateAs;
+            let indexAs;
+            
             if (contentParts.length > 1) {
-              iterateAs = contentParts[0].trim();
+              // Get the iterator variables (item and possibly index)
+              let iteratorPart = contentParts[0].trim();
               iterateOver = contentParts[1].trim();
+              
+              // Look for comma separator in the iterator part
+              const commaIndex = iteratorPart.indexOf(',');
+              if (commaIndex !== -1) {
+                // We have both item and index specified
+                iterateAs = iteratorPart.substring(0, commaIndex).trim();
+                indexAs = iteratorPart.substring(commaIndex + 1).trim();
+              } else {
+                // Only item is specified
+                iterateAs = iteratorPart;
+              }
             }
             else {
               iterateOver = contentParts[0].trim();
             }
+            
             newNode = {
               ...newNode,
               over: iterateOver,
               content: [],
             };
+            
             if (iterateAs) {
               newNode.as = iterateAs;
+            }
+            
+            if (indexAs) {
+              newNode.indexAs = indexAs;
             }
 
             contentStack.push(newNode);

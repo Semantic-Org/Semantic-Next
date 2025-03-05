@@ -685,6 +685,144 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
+    
+    it('should compile a template with custom item and index names using comma syntax', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each product, idx in products}}
+          <p>{{ idx }}. {{ product.name }}</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'products',
+          as: 'product',
+          indexAs: 'idx',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'idx' },
+            { type: 'html', html: '. ' },
+            { type: 'expression', value: 'product.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+    
+    it('should handle expressions within the comma syntax', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each (product), position in products}}
+          <p>{{ position + 1 }}. {{ product.name }}</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'products',
+          as: '(product)',
+          indexAs: 'position',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'position + 1' },
+            { type: 'html', html: '. ' },
+            { type: 'expression', value: 'product.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+    
+    it('should handle expressions in both item and index positions', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each item.value, (index + offset) in items}}
+          <p>{{ index + offset }}. {{ item.value.name }}</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'items',
+          as: 'item.value',
+          indexAs: '(index + offset)',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'index + offset' },
+            { type: 'html', html: '. ' },
+            { type: 'expression', value: 'item.value.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+    
+    it('should handle various whitespace patterns in the each syntax', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each    product,    i    in    products}}
+          <p>{{ i + 1 }}. {{ product.name }}</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'products',
+          as: 'product',
+          indexAs: 'i',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'i + 1' },
+            { type: 'html', html: '. ' },
+            { type: 'expression', value: 'product.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+    
+    it('should work with else blocks when using custom item and index names', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each product, i in products}}
+          <p>{{ i + 1 }}. {{ product.name }}</p>
+        {{else}}
+          <p>No products available</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'products',
+          as: 'product',
+          indexAs: 'i',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'i + 1' },
+            { type: 'html', html: '. ' },
+            { type: 'expression', value: 'product.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+          else: {
+            type: 'else',
+            content: [
+              { type: 'html', html: '\n          <p>No products available</p>\n        ' },
+            ],
+          },
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
 
     it('should compile a template with an if condition inside an each loop', () => {
       const compiler = new TemplateCompiler();
