@@ -248,7 +248,7 @@ export function defineSyntax(CodeMirror) {
       }
 
       // Templating keywords
-      if (stream.match(/(#[a-zA-Z_][a-zA-Z0-9_]*)|\/[a-zA-Z_][a-zA-Z0-9_]*|\bin\b|elseif\b|(else\s+if)\b|else\b/)) {
+      if (stream.match(/(#[a-zA-Z_][a-zA-Z0-9_]*)|\/[a-zA-Z_][a-zA-Z0-9_]*|\bin\b|\bas\b|elseif\b|(else\s+if)\b|else\b/)) {
         return 'keyword templating';
       }
 
