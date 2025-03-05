@@ -227,20 +227,22 @@ class TemplateCompiler {
               );
               break;
             }
-            
+
             if (conditionTarget.type === 'if') {
               // Handling for if/else
               contentStack.pop();
               contentStack.push(newNode);
               conditionTarget.branches.push(newNode);
               contentBranch = newNode;
-            } else if (conditionTarget.type === 'each') {
+            }
+            else if (conditionTarget.type === 'each') {
               // Handling for each/else
               contentStack.pop();
               contentStack.push(newNode);
               conditionTarget.else = newNode;
               contentBranch = newNode;
-            } else {
+            }
+            else {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
                 '{{else}} encountered with unknown condition type: ' + conditionTarget.type
@@ -323,17 +325,21 @@ class TemplateCompiler {
             break;
 
           case 'EACH':
-            const contentParts = tag.content.split(' in ');
-
             let iterateOver;
             let iterateAs;
             let indexAs;
-            
-            if (contentParts.length > 1) {
+
+            // Check for 'each...in' syntax first
+            const inParts = tag.content.split(' in ');
+            // Check for 'each...as' syntax
+            const asParts = tag.content.split(' as ');
+
+            if (inParts.length > 1) {
+              // We have 'each...in' syntax
               // Get the iterator variables (item and possibly index)
-              let iteratorPart = contentParts[0].trim();
-              iterateOver = contentParts[1].trim();
-              
+              let iteratorPart = inParts[0].trim();
+              iterateOver = inParts[1].trim();
+
               // Look for comma separator in the iterator part
               const commaIndex = iteratorPart.indexOf(',');
               if (commaIndex !== -1) {
@@ -345,20 +351,37 @@ class TemplateCompiler {
                 iterateAs = iteratorPart;
               }
             }
-            else {
-              iterateOver = contentParts[0].trim();
+            else if (asParts.length > 1) {
+              // We have 'each...as' syntax
+              iterateOver = asParts[0].trim();
+              
+              // Check for comma in the second part (for index)
+              const iteratorPart = asParts[1].trim();
+              const commaIndex = iteratorPart.indexOf(',');
+              if (commaIndex !== -1) {
+                // We have both item and index specified
+                iterateAs = iteratorPart.substring(0, commaIndex).trim();
+                indexAs = iteratorPart.substring(commaIndex + 1).trim();
+              } else {
+                // Only item is specified
+                iterateAs = iteratorPart;
+              }
             }
-            
+            else {
+              // Simple each without 'in' or 'as'
+              iterateOver = tag.content.trim();
+            }
+
             newNode = {
               ...newNode,
               over: iterateOver,
               content: [],
             };
-            
+
             if (iterateAs) {
               newNode.as = iterateAs;
             }
-            
+
             if (indexAs) {
               newNode.indexAs = indexAs;
             }
@@ -519,6 +542,10 @@ class TemplateCompiler {
         }
         if (Array.isArray(node.content)) {
           node.content = this.optimizeAST(node.content);
+        }
+        // Process else block if it exists
+        if (node.else && node.else.content) {
+          node.else.content = this.optimizeAST(node.else.content);
         }
         optimizedAST.push(node);
       }

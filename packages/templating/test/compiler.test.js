@@ -663,7 +663,55 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
-    it('should compile a template with an each loop and an iterateAs', () => {
+    it('should compile a template with an each_as syntax', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each items as item}}
+          <p>{{ item.name }}</p>
+        {{/each}}
+      `;
+
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('each');
+      expect(ast[0].over).toBe('items');
+      expect(ast[0].as).toBe('item');
+    });
+
+    it('should compile a template with an each_as syntax with index', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each items as item, idx}}
+          <p>{{ idx + 1 }}. {{ item.name }}</p>
+        {{/each}}
+      `;
+
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('each');
+      expect(ast[0].over).toBe('items');
+      expect(ast[0].as).toBe('item');
+      expect(ast[0].indexAs).toBe('idx');
+    });
+
+    it('should compile a template with an each_as syntax with else condition', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each products as product}}
+          <div>{{ product.name }} - {{ product.price }}</div>
+        {{else}}
+          <div>No products available</div>
+        {{/each}}
+      `;
+
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('each');
+      expect(ast[0].over).toBe('products');
+      expect(ast[0].as).toBe('product');
+      expect(ast[0].else).toBeDefined();
+      expect(ast[0].else.type).toBe('else');
+      expect(ast[0].else.content.length).toBeGreaterThan(0);
+    });
+
+    it('should compile a template with an each-in loop syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
         {{#each item in getItems}}
@@ -681,6 +729,88 @@ describe('TemplateCompiler', () => {
             { type: 'expression', value: 'item.name' },
             { type: 'html', html: '</p>\n        ' },
           ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile a template with an each-as loop syntax', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each getItems as item}}
+          <p>{{ item.name }}</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'getItems',
+          as: 'item',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'item.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile a template with an each-as loop syntax with index', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each getItems as item, idx}}
+          <p>{{ idx + 1 }}. {{ item.name }}</p>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'getItems',
+          as: 'item',
+          indexAs: 'idx',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'idx + 1' },
+            { type: 'html', html: '. ' },
+            { type: 'expression', value: 'item.name' },
+            { type: 'html', html: '</p>\n        ' },
+          ],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile a template with an each-as loop syntax with else condition', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {{#each products as product}}
+          <div>{{ product.name }} - {{ product.price }}</div>
+        {{else}}
+          <div>No products available</div>
+        {{/each}}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'each',
+          over: 'products',
+          as: 'product',
+          content: [
+            { type: 'html', html: '\n          <div>' },
+            { type: 'expression', value: 'product.name' },
+            { type: 'html', html: ' - ' },
+            { type: 'expression', value: 'product.price' },
+            { type: 'html', html: '</div>\n        ' },
+          ],
+          else: {
+            type: 'else',
+            content: [
+              { type: 'html', html: '\n          <div>No products available</div>\n        ' },
+            ],
+          },
         },
       ];
       expect(ast).toEqual(expectedAST);
