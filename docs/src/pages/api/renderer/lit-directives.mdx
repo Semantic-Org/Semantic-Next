@@ -138,6 +138,7 @@ reactiveEach(options)
 | over     | Function | Yes      | Function returning array         |
 | content  | Function | Yes      | Item rendering function          |
 | as       | string   | No       | Variable name for each item      |
+| indexAs  | string   | No       | Custom name for the loop index   |
 | else     | Function | No       | Content to render if array empty |
 
 #### Example (basic)
@@ -294,6 +295,24 @@ reactiveEach({
   content: (item) => html`${item.name}`,
   as: 'item',
   else: () => html`No items available`
+})
+```
+
+#### Iteration with Custom Index
+Template syntax
+```sui
+{#each product, idx in products}
+  { idx + 1 }. { product.name }
+{/each}
+```
+
+Equivalent Directive
+```javascript
+reactiveEach({
+  over: () => products.get(),
+  content: (product, idx) => html`${idx + 1}. ${product.name}`,
+  as: 'product',
+  indexAs: 'idx'
 })
 ```
 

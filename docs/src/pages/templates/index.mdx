@@ -100,7 +100,16 @@ With inner data context
 With array index
 ```sui
 {#each someCollection}
-  {@index}
+  {index}
+{/each}
+```
+
+With else
+```sui
+{#each someCollection}
+  {index}
+{else}
+  No value
 {/each}
 ```
 

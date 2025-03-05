@@ -78,6 +78,17 @@ Represents a loop structure for iterating over arrays or objects, with optional 
 }
 ```
 
+#### Example (with custom index variable)
+```javascript
+{
+  type: 'each',
+  over: 'items',
+  as: 'item',
+  indexAs: 'i',
+  content: [/* nested AST nodes */]
+}
+```
+
 #### Example (with else)
 ```javascript
 {

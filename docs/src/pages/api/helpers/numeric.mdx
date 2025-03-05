@@ -14,7 +14,7 @@ Returns the index plus one, useful for human-readable numbering.
 
 #### Template Syntax
 ```sui
-{numberFromIndex @index}
+{numberFromIndex index}
 ```
 
 #### Parameters
@@ -28,7 +28,7 @@ Returns the index plus one, useful for human-readable numbering.
 #### Example
 ```sui
 {#each items}
-  Item {numberFromIndex @index}: {this}
+  Item {numberFromIndex index}: {this}
 {/each}
 ```
 
