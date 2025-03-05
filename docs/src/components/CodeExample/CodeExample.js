@@ -1,7 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { Signal } from '@semantic-ui/reactivity';
 import { UIIcon } from '@semantic-ui/core';
-import { tokenize } from '@semantic-ui/utils';
 
 import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
@@ -13,21 +11,37 @@ const defaultSettings = {
   title: undefined,
   description: undefined,
   language: 'html',
+  sandboxLink: undefined,
   code: undefined,
   showCode: false, // show code on start
 };
 
-const createComponent = ({ $, isServer, reaction, settings, self }) => ({
-  codeVisible : new Signal(settings.showCode),
-  slottedContent: new Signal(),
-  code: new Signal(settings.code),
+const defaultState = {
+  displayedCode: undefined,
+  codeVisible: false,
+};
+
+const createComponent = ({ $, isServer, reaction, state, settings, self }) => ({
+  initialize() {
+    self.calculateCodeVisible();
+    state.displayedCode.set(settings.code);
+    if(settings.showCode) {
+      state.codeVisible.set(true);
+    }
+  },
+  canShowCode() {
+    return state.displayedCode.get() && state.codeVisible.get();
+  },
   removeComments(input = '') {
     return input.replace(/<!--[\s\S]*?-->/g, '');
   },
-  canShowCode() {
-    return self.code.get() && self.codeVisible.get();
+  calculateCodeVisible() {
+    reaction(() => {
+      const code = settings.code || state.slottedContent.get();
+      state.displayedCode.set(code);
+    });
   },
-  setSlottedContent() {
+  /*setSlottedContent() {
     if(isServer) {
       return;
     }
@@ -38,29 +52,20 @@ const createComponent = ({ $, isServer, reaction, settings, self }) => ({
       html = $content.outerHTML(),
       code = self.removeComments( html )
     ;
-    self.slottedContent.set(code);
-  },
-  calculateCodeVisible() {
-    reaction(() => {
-      const code = settings.code || self.slottedContent.get();
-      self.code.set(code);
-    });
-  }
+    state.displayedCode.set(code);
+  },*/
 });
 
-const onCreated = function({self, isClient, settings}) {
-  self.calculateCodeVisible();
-};
 
-const onRendered = function({self, isClient, settings}) {
-  self.setSlottedContent();
+const onRendered = function({self}) {
+  //self.setSlottedContent();
 };
 
 
 
 const events = {
-  'click .code.link'({event, self}) {
-    self.codeVisible.toggle();
+  'click ui-icon.toggle'({state}) {
+    state.codeVisible.toggle();
   }
 };
 
@@ -70,10 +75,10 @@ const CodeExample = defineComponent({
   events,
   css,
   pageCSS,
-  onCreated,
   onRendered,
   createComponent,
   defaultSettings,
+  defaultState,
 });
 
 export default CodeExample;

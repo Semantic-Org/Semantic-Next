@@ -1,6 +1,6 @@
-<h2>Array</h2>
-{#each number in numbers}
-  <li>{number}</li>
+<h2>Collection</h2>
+{#each numbers}
+  <li>{this}</li>
 {/each}
 
 <h2>Collection (each/in)</h2>
@@ -20,6 +20,31 @@
   {/each}
   </tbody>
 </table>
+
+<h2>Collection (each/as)</h2>
+<table>
+  <thead>
+    <th>Number</th>
+    <th>Fruit</th>
+    <th>Taste</th>
+  </thead>
+  <tbody>
+  {#each fruits as fruit}
+    <tr>
+      <td>{index + 1}</td>
+      <td>{fruit.name}</td>
+      <td>{fruit.taste}</td>
+    </tr>
+  {/each}
+  </tbody>
+</table>
+
+<h2>Empty collection else</h2>
+{#each veggie in vegetables}
+  {veggie}
+{else}
+  No veggies!
+{/each}
 
 <h2>Collection (each/in) custom index</h2>
 <table>
@@ -57,12 +82,19 @@
   </tbody>
 </table>
 
+
 <h2>Collection (object)</h2>
-<ul>
-  {#each arrayFromObject person}
-    <li>
-      <span class="name">{titleCase key}</span>
-      <span class="value">{value}</span>
-    </li>
+<table>
+  <thead>
+    <th>Trait</th>
+    <th>Value</th>
+  </thead>
+  <tbody>
+  {#each value in person}
+    <tr>
+      <td>{titleCase key}</td>
+      <td>{value}</td>
+    </tr>
   {/each}
-</ul>
+  </tbody>
+</table>

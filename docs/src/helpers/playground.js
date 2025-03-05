@@ -4,6 +4,7 @@ import { addPlaygroundInjections, errorJS, errorCSS, logJS, logCSS, isStaticBuil
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 import { packageJSON } from '../pages/examples/package.json.js';
+import { makeBase64UrlSafe, fromBase64UrlSafe, encodeObject, decodeObject } from './link-encoder.js';
 
 /*
   Helper to add code folding for import export statements
@@ -261,7 +262,7 @@ export const getExampleFiles = async({
   Returns empty versions of essential files for use with playground
 */
 export const getEmptyProjectFiles = ({
-  withInjections = false
+  withInjections = false,
 } = {}) => {
   let emptyFiles = {
     'component.js': {
@@ -370,4 +371,53 @@ export const getImportMap = () => {
     generated: true,
     content: importMapJSON
   };
+};
+
+// Create a playground link from an object of parameters.
+// If a key is 'files', its value is encoded using encodeObject.
+// Other values are handled by URLSearchParams, which takes care of URL encoding.
+export const getPlaygroundLink = (params, baseUrl = '/playground') => {
+  const queryParams = new URLSearchParams();
+  each(params, (value, key) => {
+    if (key === 'files') {
+      queryParams.set(key, encodeObject(value));
+    }
+    else {
+      // URLSearchParams encodes the value automatically
+      queryParams.set(key, String(value));
+    }
+  });
+  return `${baseUrl}?${queryParams.toString()}`;
+};
+
+export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
+  const params = {
+    files: {
+      'page.html': code
+    }
+  };
+  return getPlaygroundLink(params);
+};
+
+
+// Read the query string and return the decoded parameters.
+// The 'files' parameter is decoded using decodeFiles.
+export const readPlaygroundLink = queryString => {
+  const params = new URLSearchParams(queryString);
+  const result = {};
+  for (const [key, value] of params.entries()) {
+    if (key === 'files') {
+      try {
+        result[key] = decodeObject(value);
+      }
+      catch (err) {
+        console.error('Error decoding files:', err);
+        result[key] = null;
+      }
+    }
+    else {
+      result[key] = value;
+    }
+  }
+  return result;
 };

@@ -10,11 +10,6 @@ const defaultState = {
 
 const createComponent = ({self, settings, state, data, $, $$}) => ({
 
-  initialize() {
-    // nothing yet
-    state.initialized.set(false);
-  },
-
   getClassMap() {
     return {
       initialized: state.initialized.get()
@@ -31,7 +26,9 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
     if((data?.filename || '').search('.html') !== -1) {
       requestAnimationFrame(() => {
         const cm = $$('playground-code-editor').get(0)?._codemirror;
-        cm.setOption('mode', 'text/ui-template');
+        if(cm) {
+          cm.setOption('mode', 'text/ui-template');
+        }
         state.initialized.set(true);
       });
     }

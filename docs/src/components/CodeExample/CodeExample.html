@@ -5,12 +5,10 @@
         {title}
       </span>
       <span class="links">
-        <a class="sandbox link">
-          <ui-icon codesandbox link></ui-icon>
-        </a>
-        <a class="code link">
-          <ui-icon code link></ui-icon>
-        </a>
+        {#if sandboxLink}
+          <ui-icon codesandbox link href="{sandboxLink}"></ui-icon>
+        {/if}
+        <ui-icon code link class="toggle"></ui-icon>
       </span>
     </div>
     {#if both title description}
@@ -23,8 +21,8 @@
     {>slot}
   </div>
   <div class="bottom segment" part="bottom-segment">
-    {#if both code codeVisible}
-      <code-sample code="{code}" segment="false"></code-sample>
+    {#if canShowCode}
+      <code-sample code="{displayedCode}" segment="false"></code-sample>
     {/if}
   </div>
 </div>

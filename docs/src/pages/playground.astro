@@ -9,16 +9,25 @@
   };
   const sandboxURL = getSandboxURL();
 ---
-<script>
-  import 'playground-elements/playground-project.js';
-  import 'playground-elements/playground-file-editor.js';
-  import 'playground-elements/playground-preview.js';
-</script>
 <style>
   :root {
     --sidebar-width: 0px;
   }
 </style>
 <Playground>
-  <CodePlayground client:only files={files} sandboxURL={sandboxURL}></CodePlayground>
+  <CodePlayground client:only="lit" files={files} sandboxURL={sandboxURL}></CodePlayground>
 </Playground>
+
+<script>
+  import { $ } from '@semantic-ui/query';
+  import { readPlaygroundLink } from '@helpers/link-encoder.js';
+  setTimeout(() => {
+    const link = readPlaygroundLink(window.location.search);
+    const files = $('code-playground').el().files;
+    files['page.html'] = `<html><head></head><body>Test</body></html>`;
+    $('code-playground').settings({
+      files: files
+    });
+    console.log($('code-playground').length, files, link.files);
+  }, 1000);
+</script>
