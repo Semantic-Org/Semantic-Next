@@ -7,9 +7,15 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.10.0
 
 ### Improvements
+
+#### Each
+* Each now supports iterating over objects with `key` instead of `index`
 * Each now supports else conditions
-* Each now supports custom index names {#each value, index in values}
+* Each now supports custom index / key names {#each value, index in values}
 * Default index name is always `index` in data context instead of `@index`. `@foo` is not a valid variable name in js so it was breaking js expressions.
+
+## UI
+* Added `href` to `ui-icon`. Added hitbox to links by default for mobile/touch.
 
 ### Bugs
 * You can now use signals like state in js expressions without get in templates i.e `{ someState == 'someValue' ? 'yes' : 'no' }` and not `{ someState.get() == 'someValue' ? 'yes' : 'no'}`
