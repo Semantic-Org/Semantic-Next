@@ -4,7 +4,7 @@ import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
 
-import { isPlainObject, isString } from '@semantic-ui/utils';
+import { isPlainObject, isArray, isString, arrayFromObject } from '@semantic-ui/utils';
 
 export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -40,7 +40,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   renderItems() {
-    const items = this.getItems(this.eachCondition);
+    let items = this.getItems(this.eachCondition);
     if(!items?.length > 0 && this.eachCondition.else) {
       // this is necessary to avoid lit errors
       return repeat(
@@ -49,39 +49,71 @@ export class ReactiveEachDirective extends AsyncDirective {
         () => this.eachCondition.else()
       );
     }
+    // this turns { a: 'b'} to [{key: 'a', value: 'b'}]
+    // for use with repeat
+    const collectionType = this.getCollectionType(items);
+    if(collectionType == 'object') {
+      items = arrayFromObject(items);
+    }
     return repeat(
       items,
-      (item, index) => (this.getItemID(item, index)),
-      (item, index) => this.getTemplate(item, index)
+      (item, indexOrKey) => this.getItemID(item, indexOrKey, collectionType),
+      (item, indexOrKey) => this.getTemplate(item, indexOrKey, collectionType)
     );
+  }
+
+  getCollectionType(items) {
+    if(isArray(items)) {
+      return 'array';
+    }
+    return 'object';
   }
 
   getItems() {
     return this.eachCondition.over() || [];
   }
 
-  getTemplate(item, index) {
-    const templateData = this.getEachData(item, index, this.eachCondition);
+  getTemplate(item, indexOrKey, collectionType) {
+    const templateData = this.getEachData(item, indexOrKey, collectionType, this.eachCondition);
     return this.eachCondition.content(templateData);
   }
 
-  getItemID(item, index) {
+  getItemID(item, indexOrKey, collectionType) {
     if (isPlainObject(item)) {
-      return item._id || item.id || item.value || item.key || item.hash || item._hash || index;
+      // if this is an object we want to prefer the object key as an id
+      const key = (collectionType == 'object')
+        ? indexOrKey
+        : undefined
+      ;
+      return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
     if (isString(item)) {
       return item;
     }
-    return index;
+    return indexOrKey;
   }
 
-  getEachData(item, index, eachCondition) {
-    const { as, indexAs = 'index' } = eachCondition;
+  getEachData(item, indexOrKey, collectionType, eachCondition) {
+    let { as, indexAs } = eachCondition;
+
+    // add default index/key values
+    if(!indexAs) {
+      indexAs = (collectionType == 'array')
+        ? 'index'
+        : 'key'
+      ;
+    }
+    // handle conversion of object to array
+    if(collectionType == 'object') {
+      item = item.value;
+      indexOrKey = item.key;
+    }
+
     // if 'as' is specified we pass the whole value as an item
     // otherwise we spread the value to data context
     return as
-      ? { [as]: item, [indexAs]: index }
-      : { ...item, this: item, [indexAs]: index };
+      ? { [as]: item, [indexAs]: indexOrKey }
+      : { ...item, this: item, [indexAs]: indexOrKey };
   }
 
 
