@@ -1,7 +1,7 @@
 <div class="rating {classMap getRatingClasses}">
   <div class="stars">
     {#each star in starArray}
-      <div class="star {classMap getStarClasses @index}" data-index="{@index}">
+      <div class="star {classMap getStarClasses index}" data-index="{index}">
         <ui-icon star></ui-icon>
       </div>
     {/each}

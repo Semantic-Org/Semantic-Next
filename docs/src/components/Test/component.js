@@ -10,10 +10,12 @@ const defaultSettings = {
 };
 
 const createComponent = ({ settings }) => ({
-  addOne(value, value2 = 0) {
+  //initialize: () => setInterval(() => settings.date = new Date(), 1000),
+  isTrue: () => true,
+  addOne(value = 0, value2 = 0) {
     return value + value2 + 1;
   },
-  getValue(obj, prop) {
+  getValue(obj = {}, prop) {
     return obj[prop];
   }
 });
@@ -25,3 +27,4 @@ export const TestComponent = defineComponent({
   defaultSettings,
   createComponent
 });
+

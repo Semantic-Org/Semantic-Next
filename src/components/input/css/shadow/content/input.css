@@ -2,9 +2,7 @@
   box-sizing: border-box;
 }
 
-:host {
-  display: contents;
-}
+
 
 .input {
 

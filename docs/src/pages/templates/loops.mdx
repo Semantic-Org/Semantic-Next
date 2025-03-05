@@ -40,6 +40,12 @@ You can define each item of a loop using `each...in` syntax.
 {/each}
 ```
 
+```sui
+{#each member, index in team.members}
+  <li>#{index + 1}: {member.name} - {member.age}</li>
+{/each}
+```
+
 `each...in` loops can help make templates more readable when using multiple levels of looping.
 
 ```sui
@@ -53,15 +59,27 @@ You can define each item of a loop using `each...in` syntax.
 {/each}
 ```
 
+### Else Conditions
+
+You can use an `else` block with an `each` loop to handle the case when the collection is empty or doesn't exist
+
+```sui
+{#each item in items}
+  <div class="item">{item.name}</div>
+{else}
+  <div class="empty-state">No items available</div>
+{/each}
+```
+
 ## Special Values
 
 ### Index
 
-The value `@index` can be used to get the current loop index.
+The value `index` can be used to get the current loop index.
 
 ```sui
 {#each item in items}
-  {@index} - {item}
+  {index} - {item}
 {/each}
 ```
 
@@ -70,7 +88,27 @@ This can be used with [helpers](/templates/helpers) like `numberFromIndex` to ou
 ```sui
 {#each person in team}
   {person.name}
-  Employee #{numberFromIndex @index})
+  Employee #{numberFromIndex index})
+{/each}
+```
+
+### Custom Index Variable
+
+You can define a custom variable name for the index using a comma after the item name:
+
+```sui
+{#each product, i in products}
+  <p>Item #{i + 1}: {product.name}</p>
+{/each}
+```
+
+This is especially useful when working with more complex templates or when you need to use the index in calculations:
+
+```sui
+{#each item, position in items}
+  <div class="item {position % 2 === 0 ? 'even' : 'odd'}">
+    {position + 1}. {item.name}
+  </div>
 {/each}
 ```
 
@@ -106,6 +144,7 @@ Iterables can be the results of expressions, for instance pulling a set of value
   {number}
 {/each}
 ```
+
 
 ## Example
 

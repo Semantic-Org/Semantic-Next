@@ -223,14 +223,29 @@ class TemplateCompiler {
             if (!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered without matching if condition'
+                '{{else}} encountered without matching if or each condition'
               );
               break;
             }
-            contentStack.pop();
-            contentStack.push(newNode);
-            conditionTarget.branches.push(newNode);
-            contentBranch = newNode;
+            
+            if (conditionTarget.type === 'if') {
+              // Handling for if/else
+              contentStack.pop();
+              contentStack.push(newNode);
+              conditionTarget.branches.push(newNode);
+              contentBranch = newNode;
+            } else if (conditionTarget.type === 'each') {
+              // Handling for each/else
+              contentStack.pop();
+              contentStack.push(newNode);
+              conditionTarget.else = newNode;
+              contentBranch = newNode;
+            } else {
+              scanner.returnTo(tagRegExp.ELSE);
+              scanner.fatal(
+                '{{else}} encountered with unknown condition type: ' + conditionTarget.type
+              );
+            }
             break;
 
           case 'CLOSE_IF':
@@ -312,23 +327,44 @@ class TemplateCompiler {
 
             let iterateOver;
             let iterateAs;
+            let indexAs;
+            
             if (contentParts.length > 1) {
-              iterateAs = contentParts[0].trim();
+              // Get the iterator variables (item and possibly index)
+              let iteratorPart = contentParts[0].trim();
               iterateOver = contentParts[1].trim();
+              
+              // Look for comma separator in the iterator part
+              const commaIndex = iteratorPart.indexOf(',');
+              if (commaIndex !== -1) {
+                // We have both item and index specified
+                iterateAs = iteratorPart.substring(0, commaIndex).trim();
+                indexAs = iteratorPart.substring(commaIndex + 1).trim();
+              } else {
+                // Only item is specified
+                iterateAs = iteratorPart;
+              }
             }
             else {
               iterateOver = contentParts[0].trim();
             }
+            
             newNode = {
               ...newNode,
               over: iterateOver,
               content: [],
             };
+            
             if (iterateAs) {
               newNode.as = iterateAs;
             }
+            
+            if (indexAs) {
+              newNode.indexAs = indexAs;
+            }
 
             contentStack.push(newNode);
+            conditionStack.push(newNode); // Add to condition stack to support else condition
             contentTarget.push(newNode);
             contentBranch = newNode;
             break;
@@ -336,6 +372,7 @@ class TemplateCompiler {
           case 'CLOSE_EACH':
             stack.pop();
             contentStack.pop();
+            conditionStack.pop(); // Pop from condition stack
             contentBranch = last(contentStack); // Reset current branch
             break;
 

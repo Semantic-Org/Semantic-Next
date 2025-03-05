@@ -30,8 +30,8 @@ export class ReactiveEachDirective extends AsyncDirective {
         return;
       }
       this.items = this.getItems(this.eachCondition);
-      const rendered = this.renderItems();
       if (!computation.firstRun) {
+        const rendered = this.renderItems();
         this.setValue(rendered);
       }
     });
@@ -41,6 +41,14 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   renderItems() {
     const items = this.getItems(this.eachCondition);
+    if(!items?.length > 0 && this.eachCondition.else) {
+      // this is necessary to avoid lit errors
+      return repeat(
+        [1],
+        () => 'else-case',
+        () => this.eachCondition.else()
+      );
+    }
     return repeat(
       items,
       (item, index) => (this.getItemID(item, index)),
@@ -53,7 +61,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getTemplate(item, index) {
-    const templateData = this.getEachData(item, index, this.eachCondition.as);
+    const templateData = this.getEachData(item, index, this.eachCondition);
     return this.eachCondition.content(templateData);
   }
 
@@ -67,10 +75,13 @@ export class ReactiveEachDirective extends AsyncDirective {
     return index;
   }
 
-  getEachData(item, index, alias) {
-    return alias
-      ? { [alias]: item, '@index': index }
-      : { ...item, this: item, '@index': index };
+  getEachData(item, index, eachCondition) {
+    const { as, indexAs = 'index' } = eachCondition;
+    // if 'as' is specified we pass the whole value as an item
+    // otherwise we spread the value to data context
+    return as
+      ? { [as]: item, [indexAs]: index }
+      : { ...item, this: item, [indexAs]: index };
   }
 
 

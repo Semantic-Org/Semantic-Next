@@ -2,7 +2,7 @@
   <h5 class="header">{header}</h5>
 {/if}
 {#each section in menu}
-  <div class="{classMap getTitleClasses section @index}title" data-id={getAnchorID section} data-index="{@index}">
+  <div class="{classMap getTitleClasses section index}title" data-id={getAnchorID section} data-index="{index}">
     <span class="text">
       {section.title}
     </span>
@@ -11,7 +11,7 @@
     {/if}
   </div>
   {#if section.items.length}
-    <div class="{classMap getContentClasses @index}content">
+    <div class="{classMap getContentClasses index}content">
       <div class="menu">
         {#each item in section.items}
           <a

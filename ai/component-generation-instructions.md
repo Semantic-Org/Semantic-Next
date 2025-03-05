@@ -274,11 +274,11 @@ Use modern nested CSS with shadow DOM in mind:
   ```
 
 ### Template Syntax Clarifications
-- Iteration uses `@index` automatically, don't declare an index variable:
+- Iteration uses `index` automatically, don't declare an index variable:
   ```html
   <!-- Correct -->
   {#each item in items}
-    <div data-index="{@index}">{item.label}</div>
+    <div data-index="{index}">{item.label}</div>
   {/each}
 
   <!-- Incorrect -->

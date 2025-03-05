@@ -154,11 +154,19 @@ export class LitRenderer {
       }
       if(key == 'content') {
         return (eachData) => {
-          // each data is @index, this, alias from curent position
+          // each data is (index, this, as) from curent position
           data = { ...this.data, ...eachData };
           return this.renderContent({
             ast: value,
             data,
+          });
+        };
+      }
+      if(key == 'else') {
+        return (data) => {
+          return this.renderContent({
+            ast: value.content,
+            data: this.data,
           });
         };
       }
@@ -315,6 +323,15 @@ export class LitRenderer {
       // unbundle subtemplate/snippet data bundled in getPackedNodeData
       // functions with no parameters are safe to evaluate
       each(values, (value, index) => {
+        if (value instanceof Signal) {
+          Object.defineProperty(values, index, {
+            get() {
+              return value.peek();
+            },
+            configurable: true,
+            enumerable: true
+          });
+        }
         if (isFunction(value) && value.length === 0 && !value.name) {
           Object.defineProperty(values, index, {
             get() {

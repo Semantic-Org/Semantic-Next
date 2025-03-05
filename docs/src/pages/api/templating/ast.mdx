@@ -66,15 +66,40 @@ Represents an if/else if/else control structure.
 
 ### Each Loop
 
-Represents a loop structure for iterating over arrays or objects.
+Represents a loop structure for iterating over arrays or objects, with optional handling for empty collections.
 
-#### Example
+#### Example (basic)
 ```javascript
 {
   type: 'each',
   over: 'items',
   as: 'item',
   content: [/* nested AST nodes */]
+}
+```
+
+#### Example (with custom index variable)
+```javascript
+{
+  type: 'each',
+  over: 'items',
+  as: 'item',
+  indexAs: 'i',
+  content: [/* nested AST nodes */]
+}
+```
+
+#### Example (with else)
+```javascript
+{
+  type: 'each',
+  over: 'items',
+  as: 'item',
+  content: [/* nested AST nodes for non-empty case */],
+  else: {
+    type: 'else',
+    content: [/* nested AST nodes for empty case */]
+  }
 }
 ```
 

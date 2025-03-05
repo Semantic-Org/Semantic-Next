@@ -6,7 +6,7 @@
   <div class="results">
     {#if hasAny displayResults}
       {#each displayResults}
-        <a class="result {activeIf is @index selectedIndex}" href="{url}">
+        <a class="result {activeIf is index selectedIndex}" href="{url}">
           <h3>
             {title}
             {#if subtitle}

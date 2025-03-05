@@ -202,7 +202,7 @@ const events = {
   'input, click .inline-search'({self}) {
     self.openModal();
   },
-  'change .search ui-input'({self, settings, value}) {
+  'input .search ui-input'({self, settings, value}) {
     if(self.doSearch) {
       self.doSearch.cancel();
     }
