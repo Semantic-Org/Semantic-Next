@@ -30,8 +30,8 @@ export class ReactiveEachDirective extends AsyncDirective {
         return;
       }
       this.items = this.getItems(this.eachCondition);
-      const rendered = this.renderItems();
       if (!computation.firstRun) {
+        const rendered = this.renderItems();
         this.setValue(rendered);
       }
     });
@@ -41,6 +41,14 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   renderItems() {
     const items = this.getItems(this.eachCondition);
+    if(!items?.length > 0 && this.eachCondition.else) {
+      // this is necessary to avoid lit errors
+      return repeat(
+        [1],
+        () => 'else-case',
+        () => this.eachCondition.else()
+      );
+    }
     return repeat(
       items,
       (item, index) => (this.getItemID(item, index)),
@@ -69,8 +77,8 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   getEachData(item, index, alias) {
     return alias
-      ? { [alias]: item, '@index': index }
-      : { ...item, this: item, '@index': index };
+      ? { [alias]: item, 'index': index }
+      : { ...item, this: item, 'index': index };
   }
 
 

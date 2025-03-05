@@ -154,11 +154,19 @@ export class LitRenderer {
       }
       if(key == 'content') {
         return (eachData) => {
-          // each data is @index, this, alias from curent position
+          // each data is (index, this, as) from curent position
           data = { ...this.data, ...eachData };
           return this.renderContent({
             ast: value,
             data,
+          });
+        };
+      }
+      if(key == 'else') {
+        return (data) => {
+          return this.renderContent({
+            ast: value.content,
+            data: this.data,
           });
         };
       }
