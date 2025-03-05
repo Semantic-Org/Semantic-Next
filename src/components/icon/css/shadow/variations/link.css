@@ -1,3 +1,16 @@
+.hitbox {
+  display: inline-block;
+  cursor: pointer;
+  box-sizing: border-box;
+  margin: calc(var(--icon-hitbox-area) * -1);
+  padding: var(--icon-hitbox-area);
+  color: var(--icon-link-color);
+
+  &:hover {
+    color: var(--icon-link-hover-color);
+  }
+}
+
 .link.icon,
 .link.icons {
   cursor: pointer;
