@@ -133,13 +133,14 @@ reactiveEach(options)
 
 #### Options Object
 
-| Property | Type     | Required | Description                 |
-|----------|----------|----------|-----------------------------|
-| over     | Function | Yes      | Function returning array    |
-| content  | Function | Yes      | Item rendering function     |
-| as       | string   | No       | Variable name for each item |
+| Property | Type     | Required | Description                      |
+|----------|----------|----------|----------------------------------|
+| over     | Function | Yes      | Function returning array         |
+| content  | Function | Yes      | Item rendering function          |
+| as       | string   | No       | Variable name for each item      |
+| else     | Function | No       | Content to render if array empty |
 
-#### Example
+#### Example (basic)
 
 ```javascript
 // Template: {{#each items}} {{name}} {{/each}}
@@ -147,6 +148,23 @@ const list = reactiveEach({
   over: () => items.get(),
   content: (item) => html`<li>${item.name}</li>`,
   as: 'item'
+});
+```
+
+#### Example (with else)
+
+```javascript
+// Template: 
+// {{#each items}}
+//   {{name}}
+// {{else}}
+//   No items available
+// {{/each}}
+const list = reactiveEach({
+  over: () => items.get(),
+  content: (item) => html`<li>${item.name}</li>`,
+  as: 'item',
+  else: () => html`<div class="empty-state">No items available</div>`
 });
 ```
 
@@ -242,6 +260,7 @@ reactiveConditional({
 
 ### Iteration
 
+#### Basic Iteration
 Template syntax
 ```sui
 {#each items as item}
@@ -255,6 +274,26 @@ reactiveEach({
   over: () => items.get(),
   content: (item) => html`${item.name}`,
   as: 'item'
+})
+```
+
+#### Iteration with Empty State
+Template syntax
+```sui
+{#each items as item}
+  { item.name }
+{else}
+  No items available
+{/each}
+```
+
+Equivalent Directive
+```javascript
+reactiveEach({
+  over: () => items.get(),
+  content: (item) => html`${item.name}`,
+  as: 'item',
+  else: () => html`No items available`
 })
 ```
 

@@ -223,14 +223,29 @@ class TemplateCompiler {
             if (!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered without matching if condition'
+                '{{else}} encountered without matching if or each condition'
               );
               break;
             }
-            contentStack.pop();
-            contentStack.push(newNode);
-            conditionTarget.branches.push(newNode);
-            contentBranch = newNode;
+            
+            if (conditionTarget.type === 'if') {
+              // Handling for if/else
+              contentStack.pop();
+              contentStack.push(newNode);
+              conditionTarget.branches.push(newNode);
+              contentBranch = newNode;
+            } else if (conditionTarget.type === 'each') {
+              // Handling for each/else
+              contentStack.pop();
+              contentStack.push(newNode);
+              conditionTarget.else = newNode;
+              contentBranch = newNode;
+            } else {
+              scanner.returnTo(tagRegExp.ELSE);
+              scanner.fatal(
+                '{{else}} encountered with unknown condition type: ' + conditionTarget.type
+              );
+            }
             break;
 
           case 'CLOSE_IF':
@@ -329,6 +344,7 @@ class TemplateCompiler {
             }
 
             contentStack.push(newNode);
+            conditionStack.push(newNode); // Add to condition stack to support else condition
             contentTarget.push(newNode);
             contentBranch = newNode;
             break;
@@ -336,6 +352,7 @@ class TemplateCompiler {
           case 'CLOSE_EACH':
             stack.pop();
             contentStack.pop();
+            conditionStack.pop(); // Pop from condition stack
             contentBranch = last(contentStack); // Reset current branch
             break;
 

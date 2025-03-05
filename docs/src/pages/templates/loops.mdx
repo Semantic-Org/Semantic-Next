@@ -53,6 +53,18 @@ You can define each item of a loop using `each...in` syntax.
 {/each}
 ```
 
+### Else Conditions
+
+You can use an `else` block with an `each` loop to handle the case when the collection is empty or doesn't exist
+
+```sui
+{#each item in items}
+  <div class="item">{item.name}</div>
+{else}
+  <div class="empty-state">No items available</div>
+{/each}
+```
+
 ## Special Values
 
 ### Index
@@ -106,6 +118,7 @@ Iterables can be the results of expressions, for instance pulling a set of value
   {number}
 {/each}
 ```
+
 
 ## Example
 
