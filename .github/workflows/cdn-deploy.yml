@@ -38,9 +38,36 @@ jobs:
           MAIN_PACKAGE=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
           echo "Main package name: $MAIN_PACKAGE"
 
-          # Copy the main package
+          # Get files to publish for the core package
+          core_files_array=$(node -e "
+            const pkg = require('./package.json');
+            if (pkg.files && pkg.files.length > 0) {
+              console.log(pkg.files.join(' '));
+            } else {
+              // Default if no files array
+              console.log('src dist types README.md');
+            }
+          ")
+          
+          # Create core package directory
           mkdir -p cdn/@semantic-ui/core/$VERSION
-          cp -r dist/* cdn/@semantic-ui/core/$VERSION/
+          
+          # Copy each directory/file from the files array
+          for file_entry in $core_files_array; do
+            if [ -e "$file_entry" ]; then
+              if [ -d "$file_entry" ]; then
+                # It's a directory, copy its contents
+                mkdir -p "cdn/@semantic-ui/core/$VERSION/$file_entry"
+                cp -r "$file_entry"/* "cdn/@semantic-ui/core/$VERSION/$file_entry/"
+              else
+                # It's a file, copy it
+                cp "$file_entry" "cdn/@semantic-ui/core/$VERSION/"
+              fi
+              echo "Copied $file_entry for core package"
+            else
+              echo "Warning: $file_entry specified in package.json for core package but not found"
+            fi
+          done
           
           # Copy and update core package.json template
           cp $GITHUB_WORKSPACE/scripts/assets/templates/core-package.json.template cdn/@semantic-ui/core/$VERSION/package.json
@@ -60,14 +87,33 @@ jobs:
             # Create directory in CDN structure
             mkdir -p ../cdn/@semantic-ui/$package_name/$pkg_version
             
-            # Copy source files to CDN
-            cp -r $package_name/src/* ../cdn/@semantic-ui/$package_name/$pkg_version/
+            # Get files to publish from package.json
+            files_array=$(node -e "
+              const pkg = require('./$package_name/package.json');
+              if (pkg.files && pkg.files.length > 0) {
+                console.log(pkg.files.join(' '));
+              } else {
+                // Default if no files array
+                console.log('src types README.md');
+              }
+            ")
             
-            # Copy type definitions if they exist
-            if [ -d "$package_name/types" ]; then
-              mkdir -p ../cdn/@semantic-ui/$package_name/$pkg_version/types
-              cp -r $package_name/types/* ../cdn/@semantic-ui/$package_name/$pkg_version/types/
-            fi
+            # Copy each directory/file from the files array
+            for file_entry in $files_array; do
+              if [ -e "$package_name/$file_entry" ]; then
+                if [ -d "$package_name/$file_entry" ]; then
+                  # It's a directory, copy its contents
+                  mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry"
+                  cp -r "$package_name/$file_entry"/* "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry/"
+                else
+                  # It's a file, copy it
+                  cp "$package_name/$file_entry" "../cdn/@semantic-ui/$package_name/$pkg_version/"
+                fi
+                echo "Copied $file_entry for $package_name"
+              else
+                echo "Warning: $file_entry specified in package.json for $package_name but not found"
+              fi
+            done
             
             # Create package.json for the CDN version using template
             cp $GITHUB_WORKSPACE/scripts/assets/templates/package.json.template ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
@@ -84,8 +130,19 @@ jobs:
           # Copy the importmap template
           cp $GITHUB_WORKSPACE/scripts/assets/templates/importmap.json.template cdn/importmap-$VERSION.json
           
-          # Replace version in core package import
+          # Get core package entrypoint
+          core_entry=$(node -e "
+            const pkg = require('./package.json');
+            // Prioritize module over main for ESM
+            let entry = pkg.module || pkg.main || 'index.js';
+            // Remove 'src/' prefix if present as we're flattening in the CDN
+            entry = entry.replace(/^src\//, '');
+            console.log(entry);
+          ")
+          
+          # Replace VERSION and update core entry point in importmap
           sed -i "s/VERSION/$VERSION/g" cdn/importmap-$VERSION.json
+          sed -i "s|/index.js|/$core_entry|g" cdn/importmap-$VERSION.json
           
           # Create a temporary file with package imports
           package_imports=""
@@ -94,17 +151,39 @@ jobs:
             package_name=${package%/}
             pkg_version=$(node -p "require('./$package_name/package.json').version")
             
+            # Get entrypoint from package.json
+            pkg_entry=$(node -e "
+              const pkg = require('./$package_name/package.json');
+              // Prioritize module over main for ESM
+              let entry = pkg.module || pkg.main || 'index.js';
+              // Remove 'src/' prefix if present as we're flattening in the CDN
+              entry = entry.replace(/^src\//, '');
+              console.log(entry);
+            ")
+            
             # Add to package imports with comma and newline
-            package_imports+=",\n    \"@semantic-ui/$package_name\": \"https://cdn.semantic-ui.com/@semantic-ui/$package_name/$pkg_version/index.js\""
+            package_imports+=",\n    \"@semantic-ui/$package_name\": \"https://cdn.semantic-ui.com/@semantic-ui/$package_name/$pkg_version/$pkg_entry\""
           done
           cd ..
           
           # Replace the PACKAGE_IMPORTS placeholder
-          # Using perl for better multiline replacement support
-          perl -i -pe "s|/\* PACKAGE_IMPORTS \*/|$package_imports|" cdn/importmap-$VERSION.json
+          # Using a temporary file to ensure proper line breaks and formatting
+          echo "$package_imports" > cdn/package_imports.txt
+          perl -i -pe 's|/\* PACKAGE_IMPORTS \*/|'"$(cat cdn/package_imports.txt)"'|' cdn/importmap-$VERSION.json
+          rm cdn/package_imports.txt
           
-          # Copy to latest.json as well
-          cp cdn/importmap-$VERSION.json cdn/importmap-latest.json
+          # Only update "latest" if this is not a test tag
+          if [[ ! "$VERSION" == *"-"* ]]; then
+            echo "This is a release version ($VERSION), updating latest importmap"
+            cp cdn/importmap-$VERSION.json cdn/importmap-latest.json
+          else
+            echo "This is a test/pre-release version ($VERSION), not updating latest importmap"
+            # If latest doesn't exist yet, create it
+            if [ ! -f cdn/importmap-latest.json ]; then
+              cp cdn/importmap-$VERSION.json cdn/importmap-latest.json
+              echo "Created initial latest importmap (no previous version found)"
+            fi
+          fi
           
           # Create CNAME file for GitHub Pages
           echo "cdn.semantic-ui.com" > cdn/CNAME
