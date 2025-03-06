@@ -1,0 +1,92 @@
+
+/*---------------
+     Info
+----------------*/
+
+/* Standard */
+.info.buttons .button,
+.info.button {
+  background-color: var(--button-info-color);
+  color: var(--button-info-text-color);
+  text-shadow: var(--button-info-text-shadow);
+  background-image: var(--button-colored-background-image);
+}
+.info.button {
+  box-shadow: var(--button-info-box-shadow);
+}
+.info.buttons .button:hover,
+.info.button:hover {
+  background-color: var(--button-info-color-hover);
+  color: var(--button-info-text-color);
+  text-shadow: var(--button-info-text-shadow);
+}
+.info.buttons .button:focus,
+.info.button:focus {
+  background-color: var(--button-info-color-focus);
+  color: var(--button-info-text-color);
+  text-shadow: var(--button-info-text-shadow);
+}
+.info.buttons .button.pressed,
+.info.button.pressed,
+.info.buttons .button:active,
+.info.button:active {
+  background-color: var(--button-info-color-down);
+  color: var(--button-info-text-color);
+  text-shadow: var(--button-info-text-shadow);
+}
+.info.buttons .active.button,
+.info.buttons .active.button:active,
+.info.active.button,
+.info.button .active.button:active {
+  background-color: var(--button-info-color-active);
+  color: var(--button-info-text-color);
+  text-shadow: var(--button-info-text-shadow);
+}
+
+/*-----------------
+  Subtle Info
+------------------*/
+
+.subtle-info.buttons .button,
+.subtle-info.button {
+  background-color: var(--button-subtle-info-color);
+  color: var(--button-subtle-info-text-color);
+  text-shadow: var(--button-subtle-info-text-shadow);
+  background-image: var(--button-subtle-info-background-image);
+}
+.subtle-info.button {
+  box-shadow: var(--button-subtle-info-box-shadow);
+}
+.subtle-info.buttons .button:hover,
+.subtle-info.button:hover {
+  background-color: var(--button-subtle-info-color-hover);
+  color: var(--button-subtle-info-text-color);
+  text-shadow: var(--button-subtle-info-text-shadow);
+}
+.subtle-info.buttons .button:focus,
+.subtle-info.button:focus {
+  background-color: var(--button-subtle-info-color-focus);
+  color: var(--button-subtle-info-text-color);
+  text-shadow: var(--button-subtle-info-text-shadow);
+}
+.subtle-info.buttons .button.pressed,
+.subtle-info.button.pressed,
+.subtle-info.buttons .button:active,
+.subtle-info.button:active {
+  background-color: var(--button-subtle-info-color-down);
+  color: var(--button-subtle-info-text-color);
+  text-shadow: var(--button-subtle-info-text-shadow);
+}
+.subtle-info.buttons .active.button,
+.subtle-info.buttons .active.button:active,
+.subtle-info.active.button,
+.subtle-info.button .active.button:active {
+  background-color: var(--button-subtle-info-color-active);
+  background-image: var(--button-subtle-info-background-image);
+  color: var(--button-subtle-info-text-color);
+  text-shadow: var(--button-subtle-info-text-shadow);
+}
+.subtle-info.buttons .button > .icon,
+.subtle-info.button > .icon {
+  color: var(--button-subtle-info-text-color);
+}

@@ -1,0 +1,21 @@
+/*-------------------
+       Compact
+--------------------*/
+
+.compact.buttons .button,
+.compact.button {
+  padding: var(--button-compact-vertical-padding) var(--button-compact-horizontal-padding);
+}
+.compact.icon.buttons .button,
+.compact.icon.button {
+  padding: var(--button-compact-icon-padding);
+}
+
+.very-compact.buttons .button,
+.very-compact.button {
+  padding: var(--button-very-compact-vertical-padding) var(--button-very-compact-horizontal-padding);
+}
+.very-compact.icon.buttons .button,
+.very-compact.icon.button {
+  padding: var(--button-very-compact-icon-padding);
+}

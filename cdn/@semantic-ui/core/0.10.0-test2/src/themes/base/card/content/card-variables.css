@@ -1,0 +1,15 @@
+:root {
+  --card-margin: 0px 5px 5px 0px;
+  --card-text-align: center;
+  --card-padding: var(--spacing);
+  --card-reverse-padding: calc(var(--spacing) * -1);
+  --card-flex-direction: column;
+  --card-border-radius: var(--border-radius);
+  --card-transition: var(--transition);
+  --card-background: var(--ui-background-emphasis);
+  --card-box-shadow: 0px 0px 5px var(--standard-5);
+  --card-text-align: center;
+  --card-border: var(--internal-border);
+  --card-gap: 0;
+  --card-width: 290px;
+}

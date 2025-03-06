@@ -1,0 +1,5 @@
+/* Content */
+@import url('./content/segment.css') layer(component.segment.content.segment);
+
+/* Types */
+@import url('./variations/aligned.css') layer(component.segment.variations.aligned);

@@ -1,0 +1,36 @@
+:host {
+  user-select: none;
+  font-size: 1rem;
+}
+*, :after, :before {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none; /* disable selection/Copy of UIWebView */
+  -webkit-touch-callout: none;
+}
+.button {
+  cursor: pointer;
+  display: inline-block;
+  min-height: 1em;
+  border: var(--button-border);
+  margin: 0em var(--button-horizontal-margin) var(--button-vertical-margin) 0em;
+  vertical-align: var(--button-vertical-align);
+  background: var(--button-background);
+  color: var(--button-text-color);
+  font-family: var(--button-font-family);
+  padding: var(--button-vertical-padding) var(--button-horizontal-padding);
+  text-transform: var(--button-text-transform);
+  text-shadow: var(--button-text-shadow);
+  font-weight: var(--button-font-weight);
+  line-height: var(--button-line-height);
+  font-style: normal;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--button-border-radius);
+  box-shadow: var(--button-box-shadow);
+  user-select: none;
+  transition: var(--button-transition);
+  will-change: var(--button-will-change);
+  -webkit-tap-highlight-color: var(--button-tap-color);
+  outline: var(--button-border);
+}

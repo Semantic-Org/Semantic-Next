@@ -1,0 +1,11 @@
+:root {
+  --icon-link-opacity: 0.6;
+  --icon-link-color: inherit;
+  --icon-link-transition:
+    opacity var(--duration) var(--easing),
+    color var(--duration) var(--easing)
+  ;
+  --icon-link-hover-opacity: 1;
+  --icon-link-hover-color: inherit;
+  --icon-hitbox-area: 5px;
+}

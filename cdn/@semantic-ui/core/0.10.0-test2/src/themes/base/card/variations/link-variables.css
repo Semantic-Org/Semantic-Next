@@ -1,0 +1,16 @@
+:root {
+  --card-link-hover-background: oklch(0.98 0.01 227.13);
+  --card-link-hover-box-shadow: 0px 0px 5px var(--standard-5);
+  --card-link-hover-border: 1px solid var(--primary-text-color);
+  --card-link-hover-header-color: var(--primary-text-color);
+  --card-link-hover-icon-color: var(--primary-text-color);
+}
+
+
+@container page style(--dark-mode: true) {
+  body {
+    --card-link-hover-background: oklch(0.17 0.04 225.68);
+    --card-link-hover-box-shadow: oklch(0.58 0.14 233.34 / 0.25) 0px 0px 7px 2px;
+    --card-link-hover-border: 1px solid var(--primary-text-color);
+  }
+}

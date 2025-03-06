@@ -1,0 +1,16 @@
+{{#snippet content}}
+  {{#if icon}}
+    <ui-icon icon={{icon}}></ui-icon>
+  {{/if}}
+  {{>slot}}
+{{/snippet}}
+
+{{#if href}}
+  <a class="{{ui}} item" href="{{href}}" part="item">
+    {{>content}}
+  </a>
+{{else}}
+  <div class="{{ui}} item" part="item">
+    {{>content}}
+  </div>
+{{/if}}

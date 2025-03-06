@@ -1,0 +1,26 @@
+:root {
+
+  --button-negative-color: var(--negative-color);
+  --button-negative-background-image: var(--button-colored-background-image);
+  --button-negative-text-color: var(--button-inverted-text-color);
+  --button-negative-text-shadow: var(--button-inverted-text-shadow);
+  --button-negative-box-shadow: var(--button-colored-box-shadow);
+
+  --button-negative-color-hover: oklch(from var(--button-negative-color) calc(l + var(--hover-lightness)) c h);
+  --button-negative-color-focus: oklch(from var(--button-negative-color) calc(l + var(--focus-lightness)) c h);
+  --button-negative-color-down: oklch(from var(--button-negative-color) calc(l + var(--down-lightness)) c h);
+  --button-negative-color-active: oklch(from var(--button-negative-color) calc(l + var(--active-lightness)) c h);
+
+  /* Subtle Positive */
+  --button-subtle-negative-color: #FFFAFA;
+  --button-subtle-negative-background-image: var(--button-colored-background-image);
+  --button-subtle-negative-text-color: rgba(145, 50, 50, 0.9);
+  --button-subtle-negative-text-shadow: var(--button-text-shadow);
+  --button-subtle-negative-box-shadow: var(--button-box-shadow);
+  
+  --button-subtle-negative-color-hover: #FFEAEA;
+  --button-subtle-negative-color-focus: #FFEAEA;
+  --button-subtle-negative-color-down: #FFEAEA;
+  --button-subtle-negative-color-active: #F1FFF7;
+  
+}

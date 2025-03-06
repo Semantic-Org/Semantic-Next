@@ -1,0 +1,29 @@
+/*-------------------
+        Sizing
+--------------------*/
+
+.mini {
+  font-size: var(--input-mini);
+}
+.tiny {
+  font-size: var(--input-tiny);
+}
+.small {
+  font-size: var(--input-small);
+}
+/* Allow override */
+:host {
+  font-size: var(--input-medium);
+}
+.large {
+  font-size: var(--input-large);
+}
+.big {
+  font-size: var(--input-big);
+}
+.huge {
+  font-size: var(--input-huge);
+}
+.massive {
+  font-size: var(--input-massive);
+}

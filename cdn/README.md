@@ -8,7 +8,7 @@ You can import packages directly from this CDN in your web applications:
 
 ```html
 <script type="module">
-  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0-test/index.js';
+  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0-test2/index.js';
 </script>
 ```
 
@@ -28,12 +28,12 @@ For a better developer experience, use our import maps:
 You can also use a specific version:
 
 ```html
-<script type="importmap" src="https://cdn.semantic-ui.com/importmap-0.10.0-test.json"></script>
+<script type="importmap" src="https://cdn.semantic-ui.com/importmap-0.10.0-test2.json"></script>
 ```
 
 ## Available Versions
 
-Each package is versioned independently. The core package is currently at version 0.10.0-test.
+Each package is versioned independently. The core package is currently at version 0.10.0-test2.
 
 ## Documentation
 

@@ -1,0 +1,284 @@
+/*******************************
+      Theme Derived Values
+*******************************/
+
+/* Derived theme values need to be defined at the same scope to recalculate */
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+        Text Color
+  -------------------- */
+
+
+  --header-color: var(--standard-90);
+  --text-color: var(--standard-80);
+
+  /* -------------------
+       Base Colors
+  -------------------- */
+
+  /* Black in Light Mode, White in Dark Mode */
+  --standard-5: oklch(var(--standard-color) / 5%);
+  --standard-10: oklch(var(--standard-color) / 10%);
+  --standard-15: oklch(var(--standard-color) / 15%);
+  --standard-20: oklch(var(--standard-color) / 20%);
+  --standard-25: oklch(var(--standard-color) / 25%);
+  --standard-30: oklch(var(--standard-color) / 30%);
+  --standard-40: oklch(var(--standard-color) / 40%);
+  --standard-50: oklch(var(--standard-color) / 50%);
+  --standard-60: oklch(var(--standard-color) / 60%);
+  --standard-70: oklch(var(--standard-color) / 70%);
+  --standard-75: oklch(var(--standard-color) / 75%);
+  --standard-80: oklch(var(--standard-color) / 80%);
+  --standard-85: oklch(var(--standard-color) / 85%);
+  --standard-90: oklch(var(--standard-color) / 90%);
+  --standard-95: oklch(var(--standard-color) / 95%);
+  --standard-100: oklch(var(--standard-color) / 100%);
+
+  /* White in Light Mode, Black in Dark Mode */
+  --inverted-5: oklch(var(--inverted-color) / 5%);
+  --inverted-10: oklch(var(--inverted-color) / 10%);
+  --inverted-15: oklch(var(--inverted-color) / 15%);
+  --inverted-20: oklch(var(--inverted-color) / 20%);
+  --inverted-25: oklch(var(--inverted-color) / 25%);
+  --inverted-30: oklch(var(--inverted-color) / 30%);
+  --inverted-40: oklch(var(--inverted-color) / 40%);
+  --inverted-50: oklch(var(--inverted-color) / 50%);
+  --inverted-60: oklch(var(--inverted-color) / 60%);
+  --inverted-70: oklch(var(--inverted-color) / 70%);
+  --inverted-75: oklch(var(--inverted-color) / 75%);
+  --inverted-80: oklch(var(--inverted-color) / 80%);
+  --inverted-85: oklch(var(--inverted-color) / 85%);
+  --inverted-90: oklch(var(--inverted-color) / 90%);
+  --inverted-95: oklch(var(--inverted-color) / 95%);
+  --inverted-100: oklch(var(--inverted-color) / 100%);
+
+  /* -------------------
+       Neutral Text
+  -------------------- */
+
+  --dark-text-color: rgb(var(--standard-color) / 85%);
+  --muted-text-color: rgb(var(--standard-color) / 60%);
+  --light-text-color: rgb(var(--standard-color) / 40%);
+
+  --unselected-text-color: rgb(var(--standard-color) / 40%);
+  --hovered-text-color: rgb(var(--standard-color) / 80%);
+  --pressed-text-color: rgb(var(--standard-color) / 90%);
+  --selected-text-color: rgb(var(--standard-color) / 95%);
+  --disabled-text-color: rgb(var(--standard-color) / 20%);
+
+  --inverted-text-color: rgb(var(--inverted-color) / 90%);
+  --inverted-muted-text-color: rgb(var(--inverted-color) / 80%);
+  --inverted-light-text-color: rgb(var(--inverted-color) / 70%);
+  --inverted-unselected-text-color: rgb(var(--inverted-color) / 50%);
+  --inverted-hovered-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-pressed-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-selected-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-disabled-text-color: rgb(var(--inverted-color) / 20%);
+
+  /* -------------------
+         Borders
+  -------------------- */
+
+
+  /* border colors swap on dark mode theme */
+  --border-color: oklch(var(--standard-border-color) / 15%);
+  --internal-border-color: oklch(var(--standard-border-color) / 10%);
+  --subtle-border-color: oklch(var(--standard-border-color) / 8%);
+  --very-subtle-border-color: oklch(var(--standard-border-color) / 5%);
+  --strong-border-color: oklch(var(--standard-border-color) / 22%);
+  --selected-border-color: oklch(var(--standard-border-color) / 35%);
+  --strong-selected-border-color: oklch(var(--standard-border-color) / 50%);
+  --disabled-border-color: oklch(var(--standard-border-color) / 5%);
+
+
+  /* dark / light theme - variant */
+  --border-color: oklch(var(--standard-border-color) / 15%);
+  --border: 1px solid var(--border-color);
+
+  /* black - theme invariant */
+  --black-border: 1px solid var(--black-border-color);
+  --selected-black-border: 1px solid var(--selected-black-border-color);
+  --internal-border: 1px solid var(--internal-border-color);
+
+  /* white - theme invariant */
+  --white-border: 1px solid var(--white-border-color);
+  --selected-white-border: 1px solid var(--selected-white-border-color);
+
+  /* strength */
+  --very-subtle-border: 1px solid var(--very-subtle-border-color);
+  --subtle-border: 1px solid var(--subtle-border-color);
+  --strong-border: 1px solid var(--strong-border-color);
+
+  /* states */
+  --selected-border: 1px solid var(--selected-border-color);
+  --strong-selected-border: 1px solid var(--strong-selected-border-color);
+  --disabled-border: 1px solid var(--disabled-border-color);
+
+  /* solids */
+  --solid-border: 1px solid var(--solid-border-color);
+
+  /* -------------------
+         Gradients
+  -------------------- */
+
+  /* Differentiating Neutrals */
+  --very-subtle-gradient: linear-gradient(var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-gradient: linear-gradient(var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
+  --strong-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-gradient: linear-gradient(var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* Reverse Direction */
+  --very-subtle-inverted-gradient: linear-gradient(var(--very-subtle-transparent-black), var(--very-subtle-transparent-white));
+  --subtle-inverted-gradient: linear-gradient(var(--subtle-transparent-black), var(--subtle-transparent-white));
+  --inverted-gradient: linear-gradient(var(--transparent-black), var(--transparent-white));
+  --strong-inverted-gradient: linear-gradient(var(--strong-transparent-black), var(--strong-transparent-white));
+  --very-strong-inverted-gradient: linear-gradient(var(--very-strong-transparent-black), var(--very-strong-transparent-white));
+
+  /* Angled */
+  --very-subtle-angled-gradient: linear-gradient(45deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-angled-gradient: linear-gradient(45deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --angled-gradient: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+  --strong-angled-gradient: linear-gradient(45deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-angled-gradient: linear-gradient(45deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  --very-subtle-horizontal-gradient: linear-gradient(90deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-horizontal-gradient: linear-gradient(90deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --horizontal-gradient: linear-gradient(90deg, var(--transparent-white), var(--transparent-black));
+  --strong-horizontal-gradient: linear-gradient(90deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-horizontal-gradient: linear-gradient(90deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* -------------------
+         Shadows
+  -------------------- */
+
+  /* Differentiating Layers */
+  --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
+
+  /* Pressed or inset */
+  --subtle-inset-shadow: 0px 1px 2px 0 var(--transparent-black) inset;
+  --inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
+
+  /* Lip Shadow */
+  --subtle-lip-distance: 2px;
+  --subtle-lip-distance-inverse: calc(var(--subtle-lip-distance) * -1);
+  --subtle-lip-spread: 10px;
+  --subtle-lip-reduce: -6px;
+
+  --subtle-top-lip-shadow:
+    0px var(--subtle-lip-distance) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+  --subtle-bottom-lip-shadow:
+    0px var(--subtle-lip-distance-inverse) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+  --subtle-left-lip-shadow:
+    var(--subtle-lip-distance) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+  --subtle-right-lip-shadow:
+    var(--subtle-lip-distance-inverse) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+
+  --floating-shadow:
+    0px 2px 4px 0px rgb(34 36 38 / 12%),
+    0px 2px 10px 0px rgb(34 36 38 / 15%)
+  ;
+
+  /* -------------------
+     Messages / Text
+  -------------------- */
+
+  --success-background-color: var(--positive-background-color);
+  --success-color: var(--positive-color);
+  --success-border-color: var(--positive-border-color);
+  --success-header-color: var(--positive-header-color);
+  --success-text-color: var(--positive-text-color);
+
+  --error-background-color: var(--negative-background-color);
+  --error-color: var(--negative-color);
+  --error-border-color: var(--negative-border-color);
+  --error-header-color: var(--negative-header-color);
+  --error-text-color: var(--negative-text-color);
+
+  /* --- Colored Text --- */
+  --red-text-color: var(--red);
+  --orange-text-color: var(--orange);
+  --yellow-text-color: #B58105; /* Yellow text is difficult to read */
+  --olive-text-color: #8ABC1E; /* Olive is difficult to read */
+  --green-text-color: #1EBC30; /* Green is difficult to read */
+  --teal-text-color: #10A3A3; /* Teal text is difficult to read */
+  --blue-text-color: #208BD7;
+  --violet-text-color: var(--violet);
+  --purple-text-color: var(--purple);
+  --pink-text-color: var(--pink);
+  --brown-text-color: var(--brown);
+
+  /* --- Colored Headers --- */
+  --red-header-color: oklch(from var(--red-text-color) calc(l - 0.05) c h);
+  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 0.05) c h);
+  --green-header-color: oklch(from var(--green-text-color) calc(l - 0.05) c h);
+  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 0.05) c h);
+  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 0.05) c h);
+  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 0.05) c h);
+  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 0.05) c h);
+  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 0.05) c h);
+  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 0.05) c h);
+  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 0.05) c h);
+  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 0.05) c h);
+
+
+  /* --- Colored Border --- */
+  --red-border-color: var(--red-text-color);
+  --orange-border-color: var(--orange-text-color);
+  --yellow-border-color: var(--yellow-text-color);
+  --olive-border-color: var(--olive-text-color);
+  --green-border-color: var(--green-text-color);
+  --teal-border-color: var(--teal-text-color);
+  --blue-border-color: var(--blue-text-color);
+  --violet-border-color: var(--violet-text-color);
+  --purple-border-color: var(--purple-text-color);
+  --pink-border-color: var(--pink-text-color);
+  --brown-border-color: var(--brown-text-color);
+
+  /* -------------------
+       Scroll Bars
+  -------------------- */
+
+  --track-background: oklch(var(--standard-color) / 10%);
+  --thumb-background: oklch(var(--standard-color) / 15%);
+
+  --thumb-inactive-background: oklch(var(--standard-color) / 15%);
+  --thumb-hover-background: oklch(var(--standard-color) / 20%);
+
+  /* Inverted */
+  --track-inverted-background: oklch(var(--inverted-color) / 5%);
+  --thumb-inverted-background: oklch(var(--inverted-color) / 10%);
+  --thumb-inverted-inactive-background: oklch(var(--inverted-color) / 5%);
+  --thumb-inverted-hover-background: oklch(var(--inverted-color) / 15%);
+
+  /* -------------------
+       UI BG Colors
+  -------------------- */
+
+  /* UI BG Subtle */
+  --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
+  --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
+  --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
+
+  /* UI BG Emphasis */
+  --ui-background-emphasis: linear-gradient(140deg, var(--ui-emphasis-strong), var(--inverted-100), var(--ui-emphasis));
+
+  /* -------------------
+         Loader
+  -------------------- */
+
+  --loader-fill-color: rgb(var(--standard-color) / 10%);
+  --loader-line-color: var(--grey);
+  --inverted-loader-fill-color: rgb(var(--inverted-color) / 15%);
+  --inverted-loader-line-color: var(--white);
+
+}

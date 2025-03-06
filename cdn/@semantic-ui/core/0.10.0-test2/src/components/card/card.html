@@ -1,0 +1,79 @@
+{#if href}
+  <a class="{ui}card" href="{href}">
+    {> content}
+  </a>
+{else}
+  <div class="{ui}card" part="card">
+    {> content}
+  </div>
+{/if}
+
+{#snippet content}
+  {#if horizontal}
+    {>image}
+    {>icon}
+    <div class="content">
+      {>header}
+      {>subheader}
+      {>description}
+      {> slot}
+    </div>
+  {else}
+    {>image}
+    <div class="content">
+      {>icon}
+      {>header}
+      {>subheader}
+      {>description}
+      {> slot}
+    </div>
+  {/if}
+{/snippet}
+
+{#snippet icon}
+  <div class="icon" part="icon">
+    {#if icon}
+      <ui-icon icon={icon}></ui-icon>
+    {/if}
+    {> slot icon}
+  </div>
+{/snippet}
+
+{#snippet header}
+  <div class="header" part="header">
+    {header}
+    {> slot header}
+  </div>
+{/snippet}
+
+{#snippet subheader}
+  <div class="subheader" part="subheader">
+    {subheader}
+    {> slot subheader}
+  </div>
+{/snippet}
+
+{#snippet image}
+  <div class="image" part="image">
+    {#if image}
+      <img src="{image}" part="image-img">
+    {/if}
+    {> slot image}
+  </div>
+{/snippet}
+
+{#snippet description}
+  <div class="description" part="description">
+    {description}
+    {> slot description}
+  </div>
+{/snippet}
+
+{#snippet meta}
+  <div class="meta" part="meta">
+    {#each value in meta}
+      <span>{value}</span>
+    {/each}
+    {> slot meta}
+  </div>
+{/snippet}
