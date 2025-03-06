@@ -1,0 +1,7 @@
+{
+  "name": "@semantic-ui/PACKAGE_NAME",
+  "version": "PACKAGE_VERSION",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "types/index.d.ts"
+}

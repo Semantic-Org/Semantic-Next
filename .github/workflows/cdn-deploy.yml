@@ -1,4 +1,4 @@
-name: Deploy Semantic UI CDN
+name: Deploy CDN
 
 on:
   push:
@@ -42,20 +42,9 @@ jobs:
           mkdir -p cdn/@semantic-ui/core/$VERSION
           cp -r dist/* cdn/@semantic-ui/core/$VERSION/
           
-          # Copy package.json to include metadata
-          node -e "
-            const pkg = require('./package.json');
-            const cdn_pkg = {
-              name: pkg.name,
-              version: '$VERSION',
-              description: pkg.description,
-              author: pkg.author,
-              license: pkg.license,
-              main: 'index.js',
-              module: 'index.js'
-            };
-            require('fs').writeFileSync('cdn/@semantic-ui/core/$VERSION/package.json', JSON.stringify(cdn_pkg, null, 2));
-          "
+          # Copy and update core package.json template
+          cp scripts/assets/templates/core-package.json.template cdn/@semantic-ui/core/$VERSION/package.json
+          sed -i "s/CORE_VERSION/$VERSION/g" cdn/@semantic-ui/core/$VERSION/package.json
           
           # Process each package in packages directory
           cd packages
@@ -80,52 +69,42 @@ jobs:
               cp -r $package_name/types/* ../cdn/@semantic-ui/$package_name/$pkg_version/types/
             fi
             
-            # Create package.json for the CDN version
-            cat > ../cdn/@semantic-ui/$package_name/$pkg_version/package.json << 'EOL'
-{
-  "name": "@semantic-ui/$package_name",
-  "version": "'$pkg_version'",
-  "main": "index.js",
-  "module": "index.js",
-  "types": "types/index.d.ts"
-}
-EOL
-            # Fix the version string (remove single quotes)
-            sed -i "s/'\\$pkg_version'/$pkg_version/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
+            # Create package.json for the CDN version using template
+            cp ../../scripts/assets/templates/package.json.template ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
+            
+            # Replace placeholders in the package.json
+            sed -i "s/PACKAGE_NAME/$package_name/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
+            sed -i "s/PACKAGE_VERSION/$pkg_version/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
           done
           cd ..
           
           # Generate importmap for this version
           echo "Generating importmap for version $VERSION"
           
-          # Create importmap
-          echo "{" > cdn/importmap-$VERSION.json
-          echo "  \"imports\": {" >> cdn/importmap-$VERSION.json
+          # Copy the importmap template
+          cp scripts/assets/templates/importmap.json.template cdn/importmap-$VERSION.json
           
-          # Add core package
-          echo "    \"@semantic-ui/core\": \"https://cdn.semantic-ui.com/@semantic-ui/core/$VERSION/index.js\"," >> cdn/importmap-$VERSION.json
+          # Replace version in core package import
+          sed -i "s/VERSION/$VERSION/g" cdn/importmap-$VERSION.json
           
-          # Process each package for importmap
+          # Create a temporary file with package imports
+          package_imports=""
           cd packages
-          packages=()
           for package in */; do
             package_name=${package%/}
             pkg_version=$(node -p "require('./$package_name/package.json').version")
             
-            packages+=("$package_name")
-            
-            # Add to importmap
-            echo "    \"@semantic-ui/$package_name\": \"https://cdn.semantic-ui.com/@semantic-ui/$package_name/$pkg_version/index.js\"," >> ../cdn/importmap-$VERSION.json
+            # Add to package imports with comma and newline
+            package_imports+=",\n    \"@semantic-ui/$package_name\": \"https://cdn.semantic-ui.com/@semantic-ui/$package_name/$pkg_version/index.js\""
           done
+          cd ..
           
-          # Remove trailing comma from last entry and close the JSON
-          sed -i '$ s/,$//' ../cdn/importmap-$VERSION.json
-          echo "  }" >> ../cdn/importmap-$VERSION.json
-          echo "}" >> ../cdn/importmap-$VERSION.json
+          # Replace the PACKAGE_IMPORTS placeholder
+          # Using perl for better multiline replacement support
+          perl -i -pe "s|/\* PACKAGE_IMPORTS \*/|$package_imports|" cdn/importmap-$VERSION.json
           
           # Copy to latest.json as well
-          cp ../cdn/importmap-$VERSION.json ../cdn/importmap-latest.json
-          cd ..
+          cp cdn/importmap-$VERSION.json cdn/importmap-latest.json
           
           # Create CNAME file for GitHub Pages
           echo "cdn.semantic-ui.com" > cdn/CNAME
