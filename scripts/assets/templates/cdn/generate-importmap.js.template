@@ -31,11 +31,10 @@ packages.forEach(pkg => {
   
   // Get the entry point
   const entry = packageData.module || packageData.main || 'index.js';
-  const entryPath = entry.replace(/^src\//, '');
   
   // Add to importmap
   importmap.imports[`@semantic-ui/${pkg}`] = 
-    `https://cdn.semantic-ui.com/@semantic-ui/${pkg}/${packageVersion}/${entryPath}`;
+    `https://cdn.semantic-ui.com/@semantic-ui/${pkg}/${packageVersion}/${entry}`;
 });
 
 // Write the importmap to the version-specific file

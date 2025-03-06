@@ -82,9 +82,8 @@ jobs:
             fi
           done
           
-          # Copy and update core package.json template
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/core-package.json.template cdn/@semantic-ui/core/$VERSION/package.json
-          sed -i "s/CORE_VERSION/$VERSION/g" cdn/@semantic-ui/core/$VERSION/package.json
+          # Copy the actual package.json file
+          cp package.json cdn/@semantic-ui/core/$VERSION/package.json
           
           # Create index.js and index.html files for the core package using templates
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$VERSION/index.js
@@ -136,20 +135,14 @@ jobs:
               fi
             done
             
-            # Create package.json for the CDN version using template
-            cp $GITHUB_WORKSPACE/scripts/assets/templates/package.json.template ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
-            
-            # Replace placeholders in the package.json
-            sed -i "s/PACKAGE_NAME/$package_name/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
-            sed -i "s/PACKAGE_VERSION/$pkg_version/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
+            # Copy the actual package.json file
+            cp "$package_name/package.json" "../cdn/@semantic-ui/$package_name/$pkg_version/package.json"
 
             # Get entrypoint from package.json for redirection
             pkg_entry=$(node -e "
               const pkg = require('./$package_name/package.json');
               // Prioritize module over main for ESM
               let entry = pkg.module || pkg.main || 'index.js';
-              // Remove 'src/' prefix if present
-              entry = entry.replace(/^src\//, '');
               console.log(entry);
             ")
             
@@ -172,8 +165,6 @@ jobs:
             const pkg = require('./package.json');
             // Prioritize module over main for ESM
             let entry = pkg.module || pkg.main || 'index.js';
-            // Remove 'src/' prefix if present as we're flattening in the CDN
-            entry = entry.replace(/^src\//, '');
             console.log(entry);
           ")
           
