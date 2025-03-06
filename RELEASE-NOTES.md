@@ -6,6 +6,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.10.0
 
+### Project
+* The project repo is now public.
+
 ### Improvements
 
 #### Each
@@ -20,6 +23,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ### Bugs
 * You can now use signals like state in js expressions without get in templates i.e `{ someState == 'someValue' ? 'yes' : 'no' }` and not `{ someState.get() == 'someValue' ? 'yes' : 'no'}`
 * Fix `change` event to only fire on blur for ui-input, fix `input` event.
+
+### Docs
+* Updated each docs, and added new examples
 
 # Version 0.9.4
 
