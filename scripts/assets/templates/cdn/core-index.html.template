@@ -96,7 +96,7 @@
 </head>
 <body>
   <div class="header">
-    <div class="logo">S</div>
+    <div class="logo"><img src="/images/logo.png" alt="Semantic UI Logo" width="40" height="40"></div>
     <h1>@semantic-ui/core <span style="font-weight: 300; opacity: 0.7;">vCORE_VERSION</span></h1>
   </div>
   

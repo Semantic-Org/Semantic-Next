@@ -70,7 +70,7 @@
   </style>
 </head>
 <body>
-  <div class="logo">S</div>
+  <div class="logo" style="text-align: center;"><img src="/images/logo.png" alt="Semantic UI Logo" width="40" height="40"></div>
   <h1>@semantic-ui/core</h1>
   <p>Redirecting to <a href="./CORE_VERSION/">latest version (CORE_VERSION)</a></p>
   <p><a href="/">Back to CDN home</a></p>

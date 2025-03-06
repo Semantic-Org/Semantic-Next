@@ -70,7 +70,7 @@
   </style>
 </head>
 <body>
-  <div class="logo">S</div>
+  <div class="logo" style="text-align: center;"><img src="/images/logo.png" alt="Semantic UI Logo" width="40" height="40"></div>
   <h1>PACKAGE_NAME</h1>
   <p>Redirecting to <a href="./PACKAGE_VERSION/">latest version (PACKAGE_VERSION)</a></p>
   <p><a href="/">Back to CDN home</a></p>

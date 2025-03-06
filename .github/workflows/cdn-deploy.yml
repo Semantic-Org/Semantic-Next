@@ -47,6 +47,10 @@ jobs:
           # Create CDN directory structure
           mkdir -p cdn
           
+          # Create images directory and copy logo
+          mkdir -p cdn/images
+          cp $GITHUB_WORKSPACE/scripts/assets/images/logo.png cdn/images/
+          
           # Get the main package name from package.json
           MAIN_PACKAGE=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
           echo "Main package name: $MAIN_PACKAGE"

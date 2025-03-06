@@ -271,7 +271,7 @@
 <body>
   <div class="header">
     <div class="logo">
-      <img src="http://next.semantic-ui.com/images/logo.png" alt="Semantic UI Logo">
+      <img src="/images/logo.png" alt="Semantic UI Logo">
     </div>
     <h1>Semantic UI Next <span style="font-weight: 300; opacity: 0.7;">CDN</span></h1>
   </div>
@@ -300,25 +300,24 @@
 &lt;script type="importmap"&gt;
 {
   "imports": {
-    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js",
-    "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/0.10.0/src/index.js",
-    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
-    "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/0.10.0/src/index.js",
-    "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/0.10.0/src/index.js",
-    "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/0.10.0/src/index.js",
-    "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/0.10.0/src/index.js",
-    "lit": "https://cdn.semantic-ui.com/lit/index.js"
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
   }
 }
 &lt;/script&gt;
 
 &lt;!-- Then import anywhere in your code --&gt;
 &lt;script type="module"&gt;
-  import { Button } from '@semantic-ui/core';
-  import { createSignal } from '@semantic-ui/reactivity';
+  import { defineComponent } from '@semantic-ui/component';
   
-  // Your code here
+  defineComponent({
+    tagName: 'current-time',
+    template: `Time is &lt;b&gt;{formatDate time "h:mm:ss a"}&lt;/b&gt;`,
+    css: 'b { color: blue; }',
+    defaultState: { time: new Date() },
+    onCreated({state}) {
+      setInterval(() => state.time.now(), 1000);
+    }
+  });
 &lt;/script&gt;</code></pre>
         </div>
       </div>
@@ -430,63 +429,34 @@ import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src
     <div class="section">
       <h2>Usage Example</h2>
       <div class="card">
-        <h3>Counter Component</h3>
+        <h3>Minimal Time Display</h3>
         <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;title&gt;Semantic UI Counter&lt;/title&gt;
+  &lt;title&gt;Semantic UI Minimal Example&lt;/title&gt;
   
-  &lt;!-- Import the CSS (optional) --&gt;
-  &lt;link rel="stylesheet" href="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.css"&gt;
-  
-  &lt;!-- Set up importmap --&gt;
+  &lt;!-- Import with importmap --&gt;
   &lt;script type="importmap"&gt;
   {
     "imports": {
-      "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
-      "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
-      "lit": "https://cdn.semantic-ui.com/lit/index.js"
+      "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
     }
   }
   &lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;h1&gt;Counter Example&lt;/h1&gt;
-  
-  &lt;ui-counter&gt;&lt;/ui-counter&gt;
+  &lt;current-time&gt;&lt;/current-time&gt;
   
   &lt;script type="module"&gt;
-    import { defineComponent } from '@semantic-ui/core';
-    import { createSignal } from '@semantic-ui/reactivity';
-    import { html } from 'lit';
+    import { defineComponent } from '@semantic-ui/component';
     
-    defineComponent('ui-counter', {
-      template: function() {
-        return html`
-          &lt;div class="ui segment"&gt;
-            &lt;h3&gt;Count: ${this.count}&lt;/h3&gt;
-            &lt;button class="ui primary button" @click=${this.increment}&gt;Increment&lt;/button&gt;
-            &lt;button class="ui button" @click=${this.decrement}&gt;Decrement&lt;/button&gt;
-          &lt;/div&gt;
-        `;
-      },
-      
-      setup() {
-        const count = createSignal(0);
-        
-        function increment() {
-          count.value++;
-        }
-        
-        function decrement() {
-          count.value--;
-        }
-        
-        return {
-          count,
-          increment,
-          decrement
-        };
+    defineComponent({
+      tagName: 'current-time',
+      template: `Time is &lt;b&gt;{formatDate time "h:mm:ss a"}&lt;/b&gt;`,
+      css: 'b { color: blue; }',
+      defaultState: { time: new Date() },
+      onCreated({state}) {
+        setInterval(() => state.time.now(), 1000);
       }
     });
   &lt;/script&gt;
@@ -524,56 +494,62 @@ import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src
 &lt;script type="importmap"&gt;
 {
   "imports": {
-    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js",
-    "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/0.10.0/src/index.js",
-    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
-    "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/0.10.0/src/index.js",
-    "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/0.10.0/src/index.js",
-    "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/0.10.0/src/index.js",
-    "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/0.10.0/src/index.js",
-    "lit": "https://cdn.semantic-ui.com/lit/index.js"
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
   }
 }
 &lt;/script&gt;
 
 &lt;!-- Then import anywhere in your code --&gt;
 &lt;script type="module"&gt;
-  import { Button } from '@semantic-ui/core';
-  import { createSignal } from '@semantic-ui/reactivity';
+  import { defineComponent } from '@semantic-ui/component';
   
-  // Your code here
+  defineComponent({
+    tagName: 'current-time',
+    template: \`Time is &lt;b&gt;{formatDate time "h:mm:ss a"}&lt;/b&gt;\`,
+    css: 'b { color: blue; }',
+    defaultState: { time: new Date() },
+    onCreated({state}) {
+      setInterval(() => state.time.now(), 1000);
+    }
+  });
 &lt;/script&gt;</code></pre>`;
             break;
           case 1: // Loader Script
             content.innerHTML = `<pre><code>&lt;!-- Add this to your HTML head --&gt;
 &lt;script src="https://cdn.semantic-ui.com/importmap.js"&gt;&lt;/script&gt;
 
-&lt;!-- Wait for the importmap to be loaded --&gt;
-&lt;script&gt;
-  window.addEventListener('importmap-ready', (event) => {
-    console.log('Importmap is ready:', event.detail.importmap);
-    // Initialize your application here
-  });
-&lt;/script&gt;
-
-&lt;!-- Or just use imports directly (they'll work once the importmap is loaded) --&gt;
+&lt;!-- Import directly --&gt;
 &lt;script type="module"&gt;
-  import { Button } from '@semantic-ui/core';
-  import { createSignal } from '@semantic-ui/reactivity';
+  import { defineComponent } from '@semantic-ui/component';
   
-  // Your code here
+  // Components will work once importmap is loaded
+  defineComponent({
+    tagName: 'current-time',
+    template: \`Time is &lt;b&gt;{formatDate time "h:mm:ss a"}&lt;/b&gt;\`,
+    css: 'b { color: blue; }',
+    defaultState: { time: new Date() },
+    onCreated({state}) {
+      setInterval(() => state.time.now(), 1000);
+    }
+  });
 &lt;/script&gt;</code></pre>`;
             break;
           case 2: // Direct Imports
             content.innerHTML = `<pre><code>&lt;!-- Add this to your HTML head --&gt;
 &lt;script type="module"&gt;
   // Import directly with full URLs
-  import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js';
-  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js';
-  import { html } from 'https://cdn.semantic-ui.com/lit/index.js';
+  import { defineComponent } from 'https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js';
   
-  // Your code here
+  // Use the components directly
+  defineComponent({
+    tagName: 'current-time',
+    template: \`Time is &lt;b&gt;{formatDate time "h:mm:ss a"}&lt;/b&gt;\`,
+    css: 'b { color: blue; }',
+    defaultState: { time: new Date() },
+    onCreated({state}) {
+      setInterval(() => state.time.now(), 1000);
+    }
+  });
 &lt;/script&gt;</code></pre>`;
             break;
         }

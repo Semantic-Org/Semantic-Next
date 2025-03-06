@@ -1,6 +1,0 @@
-{
-  "imports": {
-    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/VERSION/index.js"
-    /* PACKAGE_IMPORTS */
-  }
-}
