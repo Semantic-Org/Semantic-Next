@@ -43,7 +43,7 @@ jobs:
           cp -r dist/* cdn/@semantic-ui/core/$VERSION/
           
           # Copy and update core package.json template
-          cp scripts/assets/templates/core-package.json.template cdn/@semantic-ui/core/$VERSION/package.json
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/core-package.json.template cdn/@semantic-ui/core/$VERSION/package.json
           sed -i "s/CORE_VERSION/$VERSION/g" cdn/@semantic-ui/core/$VERSION/package.json
           
           # Process each package in packages directory
@@ -70,7 +70,7 @@ jobs:
             fi
             
             # Create package.json for the CDN version using template
-            cp ../../scripts/assets/templates/package.json.template ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
+            cp $GITHUB_WORKSPACE/scripts/assets/templates/package.json.template ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
             
             # Replace placeholders in the package.json
             sed -i "s/PACKAGE_NAME/$package_name/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
@@ -82,7 +82,7 @@ jobs:
           echo "Generating importmap for version $VERSION"
           
           # Copy the importmap template
-          cp scripts/assets/templates/importmap.json.template cdn/importmap-$VERSION.json
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/importmap.json.template cdn/importmap-$VERSION.json
           
           # Replace version in core package import
           sed -i "s/VERSION/$VERSION/g" cdn/importmap-$VERSION.json
@@ -110,11 +110,11 @@ jobs:
           echo "cdn.semantic-ui.com" > cdn/CNAME
           
           # Create README.md for the CDN using template
-          cp scripts/assets/templates/cdn-readme.md.template cdn/README.md
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn-readme.md.template cdn/README.md
           sed -i "s/VERSION/$VERSION/g" cdn/README.md
           
           # Create index file for the CDN root using template
-          cp scripts/assets/templates/cdn-index.html.template cdn/index.html
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn-index.html.template cdn/index.html
           sed -i "s/VERSION/$VERSION/g" cdn/index.html
 
       - name: Create root documentation
@@ -123,8 +123,8 @@ jobs:
           mkdir -p gh-pages-root
           
           # Copy GitHub Pages assets from scripts/assets
-          cp scripts/assets/gh-pages/README.md gh-pages-root/
-          cp scripts/assets/gh-pages/index.html gh-pages-root/
+          cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/README.md gh-pages-root/
+          cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/index.html gh-pages-root/
           
           # Replace version placeholders with actual version
           VERSION=${GITHUB_REF#refs/tags/v}
