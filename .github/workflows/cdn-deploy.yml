@@ -87,11 +87,12 @@ jobs:
           
           # Create index.js and index.html files for the core package using templates
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$VERSION/index.js
-          sed -i "s/CORE_ENTRY/$core_entry/g" cdn/@semantic-ui/core/$VERSION/index.js
+          # Use perl instead of sed for better handling of special characters
+          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$VERSION/index.js
           
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template cdn/@semantic-ui/core/$VERSION/index.html
-          sed -i "s/CORE_VERSION/$VERSION/g" cdn/@semantic-ui/core/$VERSION/index.html
-          sed -i "s/CORE_ENTRY/$core_entry/g" cdn/@semantic-ui/core/$VERSION/index.html
+          perl -i -pe "s|CORE_VERSION|$VERSION|g" cdn/@semantic-ui/core/$VERSION/index.html
+          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$VERSION/index.html
           
           # Process each package in packages directory
           cd packages
@@ -148,12 +149,13 @@ jobs:
             
             # Create index.js and index.html files using templates
             cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.js.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
-            sed -i "s/PACKAGE_ENTRY/$pkg_entry/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
+            # Use perl instead of sed for better handling of special characters
+            perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
             
             cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.html.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-            sed -i "s/PACKAGE_NAME/$package_name/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-            sed -i "s/PACKAGE_VERSION/$pkg_version/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-            sed -i "s/PACKAGE_ENTRY/$pkg_entry/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+            perl -i -pe "s|PACKAGE_NAME|$package_name|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+            perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+            perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
           done
           cd ..
           
