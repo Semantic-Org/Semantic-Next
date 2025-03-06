@@ -175,23 +175,27 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   ],
 
   initialize() {
+    console.log(settings.files);
+    // select first file for left tabs
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
       filter: 'main'
     });
+    state.activeFile.set(initialFile);
 
+    // select first file for right tabs
     const initialPageFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
       filter: 'page'
     });
+    state.activePageFile.set(initialPageFile);
 
     // only allow layout swap on pages that panels would work
     if(settings.allowLayoutSwap) {
       settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
     }
 
-    state.activeFile.set(initialFile);
-    state.activePageFile.set(initialPageFile);
+    // adjust layout when details of components change
     reaction(self.calculateLayout);
   },
 

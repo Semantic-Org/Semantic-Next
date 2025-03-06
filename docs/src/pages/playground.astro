@@ -1,12 +1,19 @@
 ---
+  import { readPlaygroundLink } from '@helpers/link-encoder.js';
+
+  export const prerender = false;
+
   import Playground from '@layouts/Playground.astro';
   import { getSandboxURL, getEmptyProjectFiles } from '@helpers/playground.js';
   import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
-  const files = getEmptyProjectFiles({withInjections: true, withStubs: true});
-  const projectConfig = {
-    files: files
+  const link = readPlaygroundLink(Astro.url.search) || {};
+  const emptyFiles = getEmptyProjectFiles({withInjections: true, withStubs: true});
+  const files = {
+    ...emptyFiles,
+    ...link?.files,
   };
+  console.log(files['page.html'].content);
   const sandboxURL = getSandboxURL();
 ---
 <style>
@@ -18,16 +25,3 @@
   <CodePlayground client:only="lit" files={files} sandboxURL={sandboxURL}></CodePlayground>
 </Playground>
 
-<script>
-  import { $ } from '@semantic-ui/query';
-  import { readPlaygroundLink } from '@helpers/link-encoder.js';
-  setTimeout(() => {
-    const link = readPlaygroundLink(window.location.search);
-    const files = $('code-playground').el().files;
-    files['page.html'] = `<html><head></head><body>Test</body></html>`;
-    $('code-playground').settings({
-      files: files
-    });
-    console.log($('code-playground').length, files, link.files);
-  }, 1000);
-</script>

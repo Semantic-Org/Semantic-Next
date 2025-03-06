@@ -56,7 +56,10 @@ export const getPlaygroundLink = (params, baseUrl = '/playground') => {
 export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
   const params = {
     files: {
-      'page.html': code
+      'page.html': {
+        contentType: 'text/html',
+        content: code
+      }
     }
   };
   return getPlaygroundLink(params);
