@@ -265,8 +265,8 @@ jobs:
           cd cdn
           # Copy the script template for adding Lit to importmaps
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/add-lit-to-importmap.js.template add-lit-to-importmap.js
-          # Execute the script with ESM support, passing the LIT_VERSION
-          LIT_VERSION=$LIT_VERSION node --input-type=module add-lit-to-importmap.js
+          # Execute the script using Node with type=module flag
+          LIT_VERSION=$LIT_VERSION node --no-warnings --input-type=module --eval "$(cat add-lit-to-importmap.js)"
           # Clean up
           rm add-lit-to-importmap.js
           cd ..

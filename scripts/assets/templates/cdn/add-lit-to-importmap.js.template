@@ -1,5 +1,8 @@
 import fs from 'fs';
 
+// Get the Lit version from environment variable
+const litVersion = process.env.LIT_VERSION || '3.0.0';
+
 // Find all importmap files in the current directory
 const files = fs.readdirSync('.').filter(f => f.startsWith('importmap-') && f.endsWith('.json'));
 
@@ -9,8 +12,6 @@ files.forEach(file => {
   
   // Add Lit to the importmap if it doesn't exist already
   if (!importmap.imports.lit) {
-    // Get the LIT_VERSION from the environment or use the file structure
-    const litVersion = process.env.LIT_VERSION || fs.readdirSync('./lit').filter(dir => /^\d/.test(dir))[0] || '3.0.0';
     importmap.imports.lit = `https://cdn.semantic-ui.com/lit/${litVersion}/index.js`;
     console.log(`Added Lit to ${file}`);
     
