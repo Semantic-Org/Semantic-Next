@@ -4,18 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@semantic-ui/core vCORE_VERSION</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; }
-    h1 { color: #2185d0; }
-    h2 { margin-top: 2rem; }
-    pre { background: #f5f5f5; padding: 1rem; border-radius: 5px; overflow-x: auto; }
-    code { background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 3px; }
-    a { color: #2185d0; text-decoration: none; }
+    :root {
+      --primary: #2185d0;
+      --text: #333;
+      --bg: #fff;
+      --code-bg: #f5f5f5;
+      --border: #eaeaea;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #54c8ff;
+        --text: #f0f0f0;
+        --bg: #121212;
+        --code-bg: #1e1e1e;
+        --border: #333;
+      }
+    }
+    
+    body { 
+      font-family: 'Lato', -apple-system, sans-serif; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 2rem; 
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.6;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    
+    .logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 1rem;
+      background: var(--primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 26px;
+    }
+    
+    h1, h2, h3 { color: var(--primary); }
+    h1 { margin-top: 0; font-weight: 400; }
+    h2 { margin-top: 2rem; font-weight: 400; }
+    
+    pre { 
+      background: var(--code-bg); 
+      padding: 1rem; 
+      border-radius: 5px; 
+      overflow-x: auto; 
+      border: 1px solid var(--border);
+    }
+    
+    code { 
+      background: var(--code-bg); 
+      padding: 0.2rem 0.4rem; 
+      border-radius: 3px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    
+    pre code {
+      padding: 0;
+      background-color: transparent;
+    }
+    
+    a { color: var(--primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
+    
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
-  <h1>@semantic-ui/core vCORE_VERSION</h1>
+  <div class="header">
+    <div class="logo">S</div>
+    <h1>@semantic-ui/core <span style="font-weight: 300; opacity: 0.7;">vCORE_VERSION</span></h1>
+  </div>
+  
   <p>This is the CDN package for the core Semantic UI Next package.</p>
   
   <h2>Usage</h2>
@@ -28,6 +112,12 @@
   <h2>Files</h2>
   <p>Main entry point: <a href="./CORE_ENTRY">./CORE_ENTRY</a></p>
   
-  <p><a href="https://semantic-ui.com">Back to documentation</a></p>
+  <div class="footer">
+    <p>
+      <a href="/">Back to CDN home</a> | 
+      <a href="https://semantic-ui.com">Documentation</a> | 
+      <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a>
+    </p>
+  </div>
 </body>
 </html>

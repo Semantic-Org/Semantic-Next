@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Semantic UI Next - GitHub Pages</title>
+  <title>Semantic UI Next - CDN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #2185d0;
@@ -11,6 +14,7 @@
       --bg: #fff;
       --code-bg: #f5f5f5;
       --border: #eaeaea;
+      --card-bg: #fcfcfc;
     }
     
     @media (prefers-color-scheme: dark) {
@@ -20,21 +24,56 @@
         --bg: #121212;
         --code-bg: #1e1e1e;
         --border: #333;
+        --card-bg: #1a1a1a;
       }
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: 'Lato', -apple-system, sans-serif;
       line-height: 1.6;
       color: var(--text);
       background-color: var(--bg);
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 2rem;
     }
     
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    
+    .logo {
+      width: 60px;
+      height: 60px;
+      margin-right: 1.5rem;
+      background: var(--primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 36px;
+    }
+    
     h1, h2, h3 {
       color: var(--primary);
+      font-weight: 400;
+    }
+    
+    h1 {
+      margin-top: 0;
+      font-size: 2.2rem;
+    }
+    
+    h2 {
+      margin-top: 2.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
     }
     
     a {
@@ -69,11 +108,10 @@
     .container {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
     }
     
     .section {
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
     
     .card {
@@ -81,12 +119,50 @@
       border-radius: 5px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      background-color: var(--card-bg);
     }
     
-    .example {
-      margin: 2rem 0;
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
     }
-
+    
+    .package-card {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1.25rem;
+      background-color: var(--card-bg);
+      transition: all 0.2s ease;
+    }
+    
+    .package-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      border-color: var(--primary);
+    }
+    
+    .package-name {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
+    .package-version {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+    
+    .package-desc {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    
     .btn {
       display: inline-block;
       background-color: var(--primary);
@@ -94,49 +170,46 @@
       padding: 0.5rem 1rem;
       border-radius: 4px;
       font-weight: 500;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
+      transition: opacity 0.2s;
     }
 
     .btn:hover {
       text-decoration: none;
       opacity: 0.9;
     }
+    
+    .example {
+      margin: 2rem 0;
+    }
+    
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
+  <div class="header">
+    <div class="logo">S</div>
+    <h1>Semantic UI Next <span style="font-weight: 300; opacity: 0.7;">CDN</span></h1>
+  </div>
+  
   <div class="container">
     <div class="section">
-      <h1>Semantic UI Next</h1>
-      <p>Welcome to the GitHub Pages for Semantic UI Next. This page hosts various resources including:</p>
-      <ul>
-        <li><a href="/cdn/">CDN for packages</a></li>
-        <li><a href="https://github.com/Semantic-Org/Semantic-Next">GitHub repository</a></li>
-        <li><a href="https://semantic-ui.com/">Main documentation</a></li>
-      </ul>
-    </div>
-
-    <div class="section">
-      <h2>CDN Usage</h2>
-      <p>Import Semantic UI Next packages directly from our CDN:</p>
+      <p>This is the official CDN for Semantic UI Next. Use it to easily import Semantic UI components and utilities directly in your browser using ES modules.</p>
       
       <div class="card">
-        <h3>Direct Import</h3>
-        <pre><code>&lt;script type="module"&gt;
-  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.9.4/index.js';
-&lt;/script&gt;</code></pre>
-      </div>
-      
-      <div class="card">
-        <h3>Using Import Maps</h3>
-        <p>For a better developer experience:</p>
-        <pre><code>&lt;!-- Latest version --&gt;
+        <h3>Quick Start</h3>
+        <p>The fastest way to get started is with an import map:</p>
+        <pre><code>&lt;!-- Add this to your HTML head --&gt;
 &lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest.json"&gt;&lt;/script&gt;
 
-&lt;!-- Or specific version --&gt;
-&lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-0.9.4.json"&gt;&lt;/script&gt;
-
+&lt;!-- Then import anywhere in your code --&gt;
 &lt;script type="module"&gt;
-  // Now you can import without version numbers or full URLs
   import { createSignal } from '@semantic-ui/reactivity';
   import { query } from '@semantic-ui/query';
   
@@ -146,14 +219,94 @@
     </div>
 
     <div class="section">
-      <h2>Try It Now</h2>
-      <p>Check out our CDN directory for all available packages and versions:</p>
-      <a href="/cdn/" class="btn">Explore the CDN</a>
+      <h2>Available Packages</h2>
+      <p>All packages are versioned independently. Click a package to view its details and available versions.</p>
+      
+      <div class="package-grid">
+        <a href="/@semantic-ui/core/" class="package-card">
+          <span class="package-name">@semantic-ui/core</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">Core package with all UI components and styles</p>
+        </a>
+        
+        <a href="/@semantic-ui/reactivity/" class="package-card">
+          <span class="package-name">@semantic-ui/reactivity</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">Reactive state management primitives</p>
+        </a>
+        
+        <a href="/@semantic-ui/component/" class="package-card">
+          <span class="package-name">@semantic-ui/component</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">Web component creation utilities</p>
+        </a>
+        
+        <a href="/@semantic-ui/query/" class="package-card">
+          <span class="package-name">@semantic-ui/query</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">DOM querying and traversal utilities</p>
+        </a>
+        
+        <a href="/@semantic-ui/templating/" class="package-card">
+          <span class="package-name">@semantic-ui/templating</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">HTML templating engine</p>
+        </a>
+        
+        <a href="/@semantic-ui/utils/" class="package-card">
+          <span class="package-name">@semantic-ui/utils</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">Common utility functions</p>
+        </a>
+        
+        <a href="/@semantic-ui/renderer/" class="package-card">
+          <span class="package-name">@semantic-ui/renderer</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">Rendering utilities</p>
+        </a>
+        
+        <a href="/@semantic-ui/specs/" class="package-card">
+          <span class="package-name">@semantic-ui/specs</span>
+          <span class="package-version">v0.10.0</span>
+          <p class="package-desc">Component specifications</p>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Import Methods</h2>
+      
+      <div class="card">
+        <h3>1. Direct Import</h3>
+        <p>Import directly with the full path including version:</p>
+        <pre><code>import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js';</code></pre>
+      </div>
+      
+      <div class="card">
+        <h3>2. Using Import Maps (Recommended)</h3>
+        <p>For a better developer experience with bare module specifiers:</p>
+        <pre><code>&lt;!-- Latest version --&gt;
+&lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest.json"&gt;&lt;/script&gt;
+
+&lt;!-- Or specific version --&gt;
+&lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-0.10.0.json"&gt;&lt;/script&gt;
+
+&lt;script type="module"&gt;
+  // Now you can import without version numbers or full URLs
+  import { createSignal } from '@semantic-ui/reactivity';
+  
+  // Your code here
+&lt;/script&gt;</code></pre>
+      </div>
     </div>
   </div>
 
-  <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: center;">
-    <p>© Semantic Org. <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a> | <a href="https://semantic-ui.com/">Documentation</a></p>
-  </footer>
+  <div class="footer">
+    <p>
+      © Semantic Org | 
+      <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a> | 
+      <a href="https://semantic-ui.com/">Documentation</a>
+    </p>
+  </div>
 </body>
 </html>

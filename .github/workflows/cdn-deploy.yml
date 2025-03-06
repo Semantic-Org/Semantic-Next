@@ -62,19 +62,23 @@ jobs:
             }
           ")
           
-          # Create core package directory
-          mkdir -p cdn/@semantic-ui/core/$VERSION
+          # Get the core package version from package.json
+          CORE_VERSION=$(node -p "require('./package.json').version")
+          echo "Core package version from package.json: $CORE_VERSION"
+          
+          # Create core package directory using the version from package.json
+          mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
           
           # Copy each directory/file from the files array
           for file_entry in $core_files_array; do
             if [ -e "$file_entry" ]; then
               if [ -d "$file_entry" ]; then
                 # It's a directory, copy its contents
-                mkdir -p "cdn/@semantic-ui/core/$VERSION/$file_entry"
-                cp -r "$file_entry"/* "cdn/@semantic-ui/core/$VERSION/$file_entry/"
+                mkdir -p "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry"
+                cp -r "$file_entry"/* "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry/"
               else
                 # It's a file, copy it
-                cp "$file_entry" "cdn/@semantic-ui/core/$VERSION/"
+                cp "$file_entry" "cdn/@semantic-ui/core/$CORE_VERSION/"
               fi
               echo "Copied $file_entry for core package"
             else
@@ -83,7 +87,7 @@ jobs:
           done
           
           # Copy the actual package.json file
-          cp package.json cdn/@semantic-ui/core/$VERSION/package.json
+          cp package.json cdn/@semantic-ui/core/$CORE_VERSION/package.json
           
           # Create index.js and index.html files for the core package using templates
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$VERSION/index.js
@@ -185,6 +189,29 @@ jobs:
           
           # Create CNAME file for GitHub Pages
           echo "cdn.semantic-ui.com" > cdn/CNAME
+          
+          # Create package root redirect files that point to latest version folders
+          echo "Creating package root redirects to latest versions..."
+          
+          # Create redirects for core package
+          mkdir -p cdn/@semantic-ui/core
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-redirect.html.template cdn/@semantic-ui/core/index.html
+          perl -i -pe "s|CORE_VERSION|$CORE_VERSION|g" cdn/@semantic-ui/core/index.html
+          
+          # Create redirects for each package
+          cd packages
+          for package in */; do
+            package_name=${package%/}
+            pkg_version=$(node -p "require('./$package_name/package.json').version")
+            
+            echo "Creating redirect for @semantic-ui/$package_name to version $pkg_version"
+            
+            mkdir -p "../cdn/@semantic-ui/$package_name"
+            cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-redirect.html.template "../cdn/@semantic-ui/$package_name/index.html"
+            perl -i -pe "s|PACKAGE_NAME|@semantic-ui/$package_name|g" "../cdn/@semantic-ui/$package_name/index.html"
+            perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/index.html"
+          done
+          cd ..
           
           # Create README.md for the CDN using the gh-pages README (better formatted)
           cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/README.md cdn/README.md

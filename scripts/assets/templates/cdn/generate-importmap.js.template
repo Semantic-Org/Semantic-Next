@@ -16,10 +16,14 @@ const packages = fs.readdirSync(packagesDir).filter(pkg =>
   fs.statSync(path.join(packagesDir, pkg)).isDirectory()
 );
 
+// Get core package version from its package.json
+const corePackageData = require(path.join(dirname, '..', '..', '..', '..', 'package.json'));
+const coreVersion = corePackageData.version;
+
 // Create the importmap object
 const importmap = {
   imports: {
-    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${process.env.VERSION}/${process.env.CORE_ENTRY}`
+    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/${process.env.CORE_ENTRY}`
   }
 };
 

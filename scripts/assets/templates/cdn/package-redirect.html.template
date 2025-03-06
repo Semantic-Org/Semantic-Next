@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="0;URL=./PACKAGE_VERSION/">
+  <title>Redirecting to latest version</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2185d0;
+      --text: #333;
+      --bg: #fff;
+      --border: #eaeaea;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #54c8ff;
+        --text: #f0f0f0;
+        --bg: #121212;
+        --border: #333;
+      }
+    }
+    
+    body { 
+      font-family: 'Lato', -apple-system, sans-serif; 
+      max-width: 800px; 
+      margin: 5rem auto; 
+      padding: 2rem; 
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.6;
+      text-align: center;
+    }
+    
+    .logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 2rem;
+      background: var(--primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 36px;
+    }
+    
+    h1 { 
+      color: var(--primary); 
+      font-weight: 400; 
+      margin-bottom: 1.5rem;
+    }
+    
+    p {
+      font-size: 1.1rem;
+    }
+    
+    a { 
+      color: var(--primary); 
+      text-decoration: none; 
+      font-weight: 600;
+    }
+    
+    a:hover { 
+      text-decoration: underline; 
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">S</div>
+  <h1>PACKAGE_NAME</h1>
+  <p>Redirecting to <a href="./PACKAGE_VERSION/">latest version (PACKAGE_VERSION)</a></p>
+  <p><a href="/">Back to CDN home</a></p>
+</body>
+</html>
