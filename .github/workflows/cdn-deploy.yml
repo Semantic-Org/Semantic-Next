@@ -223,22 +223,33 @@ jobs:
           sed -i "s/0.9.4/$VERSION/g" gh-pages-root/README.md
           sed -i "s/0.9.4/$VERSION/g" gh-pages-root/index.html
 
-      # Upload artifact for deployment
-      - name: Upload CDN artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: ./cdn
-          name: cdn-artifact
+      # Combine artifacts for deployment
+      - name: Prepare combined artifact
+        run: |
+          # Create a temporary directory for the combined content
+          mkdir -p combined-pages
+          
+          # Copy gh-pages-root contents to the root of combined-pages
+          cp -r gh-pages-root/* combined-pages/
+          
+          # Copy cdn directory to the cdn subdirectory
+          mkdir -p combined-pages/cdn
+          cp -r cdn/* combined-pages/cdn/
+          
+          # Debug what's being deployed
+          echo "Content of combined-pages (root):"
+          ls -la combined-pages/
+          echo "Content of combined-pages/cdn:"
+          ls -la combined-pages/cdn/ | head -n 10
 
-      - name: Upload root documentation artifact
+      # Upload combined artifact for deployment
+      - name: Upload combined artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: ./gh-pages-root
-          name: root-artifact
+          path: ./combined-pages
+          name: github-pages
 
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
-        with:
-          artifact_name: cdn-artifact  # First deploy the CDN
