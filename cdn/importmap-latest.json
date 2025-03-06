@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0-test/index.js"
+    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0-test/semantic-ui.js"
     ,
     "-ui/component": "https://cdn.semantic-ui.com/-ui/component/0.10.0/index.js",
     "-ui/query": "https://cdn.semantic-ui.com/-ui/query/0.10.0/index.js",

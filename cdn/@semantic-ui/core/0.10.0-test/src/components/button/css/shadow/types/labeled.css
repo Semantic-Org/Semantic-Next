@@ -1,0 +1,50 @@
+/*-------------------
+    Labeled Button
+--------------------*/
+
+.labeled.button:not(.icon) {
+  display: inline-flex;
+  flex-direction: row;
+  background: none !important;
+  padding: 0px !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.labeled.button > .button {
+  margin: 0px;
+}
+.labeled.button > .label {
+  display: flex;
+  align-items: var(--labeled-label-align);
+  margin: 0px 0px 0px var(--labeled-label-border-offset) !important;
+  padding: var(--labeled-label-padding);
+  font-size: var(--labeled-label-font-size);
+  border-color: var(--labeled-label-border-color);
+}
+
+/* Tag */
+.labeled.button > .tag.label::before {
+  width: var(--labeled-tag-label-size);
+  height: var(--labeled-tag-label-size);
+}
+
+/* Right */
+.labeled.button:not([class*="left labeled"]) > .button {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.labeled.button:not([class*="left labeled"]) > .label {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+/* Left Side */
+[class*="left labeled"].button > .button {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+[class*="left labeled"].button > .label {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}

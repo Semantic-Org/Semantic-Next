@@ -1,0 +1,7 @@
+.disabled {
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+.clickable-disabled {
+  pointer-events: allowed;
+}

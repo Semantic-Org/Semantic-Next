@@ -1,0 +1,31 @@
+/*--------------
+      Down
+---------------*/
+
+.disabled.input,
+.disabled.input:hover,
+.disabled.active.input {
+  cursor: var(--input-disabled-cursor);
+  opacity: var(--input-disabled-opacity) !important;
+  color: var(--input-disabled-color);
+  background-color: var(--input-disabled-background-color) !important;
+  background-image: var(--input-disabled-background-image) !important;
+  box-shadow: var(--input-disabled-box-shadow) !important;
+}
+ui-input[disabled] {
+  cursor: var(--input-disabled-cursor);
+  pointer-events: none !important;
+}
+
+
+.clickable-disabled.input {
+  pointer-events: auto !important;
+  cursor: var(--input-clickable-disabled-cursor) !important;
+}
+.clickable-disabled.input:active {
+  box-shadow: var(--input-pressed-box-shadow) !important;
+}
+ui-input[clickable-disabled] {
+  pointer-events: auto !important;
+  cursor: var(--input-clickable-disabled-cursor) !important;
+}

@@ -1,0 +1,7 @@
+::slotted(ui-icon),
+::slotted(.icon),
+.icon ui-icon {
+  font-size: var(--card-icon-font-size);
+  margin: var(--card-icon-margin);
+  color: var(--card-icon-color);
+}

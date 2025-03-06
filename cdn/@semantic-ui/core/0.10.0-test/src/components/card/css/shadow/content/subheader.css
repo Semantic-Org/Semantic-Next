@@ -1,0 +1,7 @@
+::slotted(.subheader),
+.subheader {
+  color: var(--card-subheader-color);
+  font-size: var(--card-subheader-font-size);
+  font-weight: var(--card-subheader-font-weight);
+  transition: var(--card-subheader-transition);
+}

@@ -1,0 +1,11 @@
+{#if either href link}
+  <a href={href} class="hitbox">
+    {>content}
+  </a>
+{else}
+  {> content}
+{/if}
+
+{#snippet content}
+  <i class="{ui}icon" part="icon"></i>
+{/snippet}
