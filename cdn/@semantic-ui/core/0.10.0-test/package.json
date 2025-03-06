@@ -1,0 +1,9 @@
+{
+  "name": "@semantic-ui/core",
+  "version": "0.10.0-test",
+  "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "main": "index.js",
+  "module": "index.js"
+}

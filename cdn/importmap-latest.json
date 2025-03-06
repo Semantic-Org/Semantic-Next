@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0-test/index.js"
+    ,
+    "-ui/component": "https://cdn.semantic-ui.com/-ui/component/0.10.0/index.js",
+    "-ui/query": "https://cdn.semantic-ui.com/-ui/query/0.10.0/index.js",
+    "-ui/reactivity": "https://cdn.semantic-ui.com/-ui/reactivity/0.10.0/index.js",
+    "-ui/renderer": "https://cdn.semantic-ui.com/-ui/renderer/0.10.0/index.js",
+    "-ui/specs": "https://cdn.semantic-ui.com/-ui/specs/0.10.0/index.js",
+    "-ui/templating": "https://cdn.semantic-ui.com/-ui/templating/0.10.0/index.js",
+    "-ui/utils": "https://cdn.semantic-ui.com/-ui/utils/0.10.0/index.js"
+  }
+}

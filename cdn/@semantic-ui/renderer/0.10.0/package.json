@@ -1,0 +1,7 @@
+{
+  "name": "@semantic-ui/renderer",
+  "version": "0.10.0",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "types/index.d.ts"
+}
