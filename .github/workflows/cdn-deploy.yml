@@ -244,7 +244,7 @@ jobs:
 
       # Upload combined artifact for deployment
       - name: Upload combined artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./combined-pages
           name: github-pages
@@ -252,4 +252,4 @@ jobs:
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
