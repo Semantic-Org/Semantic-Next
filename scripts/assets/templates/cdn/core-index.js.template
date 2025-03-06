@@ -1,0 +1,2 @@
+// This file re-exports from the main entry point
+export * from './CORE_ENTRY';

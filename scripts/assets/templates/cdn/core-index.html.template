@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@semantic-ui/core vCORE_VERSION</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; }
+    h1 { color: #2185d0; }
+    h2 { margin-top: 2rem; }
+    pre { background: #f5f5f5; padding: 1rem; border-radius: 5px; overflow-x: auto; }
+    code { background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 3px; }
+    a { color: #2185d0; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>@semantic-ui/core vCORE_VERSION</h1>
+  <p>This is the CDN package for the core Semantic UI Next package.</p>
+  
+  <h2>Usage</h2>
+  <p>You can import this package directly in your code:</p>
+  <pre><code>import { ... } from 'https://cdn.semantic-ui.com/@semantic-ui/core/CORE_VERSION/CORE_ENTRY';</code></pre>
+  
+  <p>Or use the bare import (which will use the main entry point):</p>
+  <pre><code>import { ... } from 'https://cdn.semantic-ui.com/@semantic-ui/core/CORE_VERSION/';</code></pre>
+
+  <h2>Files</h2>
+  <p>Main entry point: <a href="./CORE_ENTRY">./CORE_ENTRY</a></p>
+  
+  <p><a href="https://semantic-ui.com">Back to documentation</a></p>
+</body>
+</html>

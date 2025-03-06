@@ -1,0 +1,46 @@
+const fs = require('fs');
+const path = require('path');
+
+// Get package versions and entry points
+const packagesDir = path.join(__dirname, 'packages');
+const packages = fs.readdirSync(packagesDir).filter(pkg => 
+  fs.statSync(path.join(packagesDir, pkg)).isDirectory()
+);
+
+// Create the importmap object
+const importmap = {
+  imports: {
+    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${process.env.VERSION}/${process.env.CORE_ENTRY}`
+  }
+};
+
+// Add each package to the importmap
+packages.forEach(pkg => {
+  const packageJsonPath = path.join(packagesDir, pkg, 'package.json');
+  const packageData = require(packageJsonPath);
+  const packageVersion = packageData.version;
+  
+  // Get the entry point
+  const entry = packageData.module || packageData.main || 'index.js';
+  const entryPath = entry.replace(/^src\//, '');
+  
+  // Add to importmap
+  importmap.imports[`@semantic-ui/${pkg}`] = 
+    `https://cdn.semantic-ui.com/@semantic-ui/${pkg}/${packageVersion}/${entryPath}`;
+});
+
+// Write the importmap to the version-specific file
+fs.writeFileSync(`cdn/importmap-${process.env.VERSION}.json`, JSON.stringify(importmap, null, 2));
+
+// Optionally update the latest importmap if this is a release version (not a test/pre-release)
+if (!process.env.VERSION.includes('-')) {
+  console.log('This is a release version, updating latest importmap');
+  fs.writeFileSync('cdn/importmap-latest.json', JSON.stringify(importmap, null, 2));
+} else {
+  console.log('This is a test/pre-release version, not updating latest importmap');
+  // If latest doesn't exist yet, create it
+  if (!fs.existsSync('cdn/importmap-latest.json')) {
+    console.log('Created initial latest importmap (no previous version found)');
+    fs.writeFileSync('cdn/importmap-latest.json', JSON.stringify(importmap, null, 2));
+  }
+}

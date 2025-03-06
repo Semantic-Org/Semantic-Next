@@ -86,6 +86,14 @@ jobs:
           cp $GITHUB_WORKSPACE/scripts/assets/templates/core-package.json.template cdn/@semantic-ui/core/$VERSION/package.json
           sed -i "s/CORE_VERSION/$VERSION/g" cdn/@semantic-ui/core/$VERSION/package.json
           
+          # Create index.js and index.html files for the core package using templates
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$VERSION/index.js
+          sed -i "s/CORE_ENTRY/$core_entry/g" cdn/@semantic-ui/core/$VERSION/index.js
+          
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template cdn/@semantic-ui/core/$VERSION/index.html
+          sed -i "s/CORE_VERSION/$VERSION/g" cdn/@semantic-ui/core/$VERSION/index.html
+          sed -i "s/CORE_ENTRY/$core_entry/g" cdn/@semantic-ui/core/$VERSION/index.html
+          
           # Process each package in packages directory
           cd packages
           for package in */; do
@@ -134,14 +142,30 @@ jobs:
             # Replace placeholders in the package.json
             sed -i "s/PACKAGE_NAME/$package_name/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
             sed -i "s/PACKAGE_VERSION/$pkg_version/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
+
+            # Get entrypoint from package.json for redirection
+            pkg_entry=$(node -e "
+              const pkg = require('./$package_name/package.json');
+              // Prioritize module over main for ESM
+              let entry = pkg.module || pkg.main || 'index.js';
+              // Remove 'src/' prefix if present
+              entry = entry.replace(/^src\//, '');
+              console.log(entry);
+            ")
+            
+            # Create index.js and index.html files using templates
+            cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.js.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
+            sed -i "s/PACKAGE_ENTRY/$pkg_entry/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
+            
+            cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.html.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+            sed -i "s/PACKAGE_NAME/$package_name/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+            sed -i "s/PACKAGE_VERSION/$pkg_version/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+            sed -i "s/PACKAGE_ENTRY/$pkg_entry/g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
           done
           cd ..
           
           # Generate importmap for this version
           echo "Generating importmap for version $VERSION"
-          
-          # Copy the importmap template
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/importmap.json.template cdn/importmap-$VERSION.json
           
           # Get core package entrypoint
           core_entry=$(node -e "
@@ -153,50 +177,18 @@ jobs:
             console.log(entry);
           ")
           
-          # Replace VERSION and update core entry point in importmap
-          sed -i "s/VERSION/$VERSION/g" cdn/importmap-$VERSION.json
-          sed -i "s|/index.js|/$core_entry|g" cdn/importmap-$VERSION.json
+          # Collect all package information for importmap generation
+          echo "Collecting package information for importmap..."
           
-          # Create a temporary file with package imports
-          package_imports=""
-          cd packages
-          for package in */; do
-            package_name=${package%/}
-            pkg_version=$(node -p "require('./$package_name/package.json').version")
-            
-            # Get entrypoint from package.json
-            pkg_entry=$(node -e "
-              const pkg = require('./$package_name/package.json');
-              // Prioritize module over main for ESM
-              let entry = pkg.module || pkg.main || 'index.js';
-              // Remove 'src/' prefix if present as we're flattening in the CDN
-              entry = entry.replace(/^src\//, '');
-              console.log(entry);
-            ")
-            
-            # Add to package imports with comma and newline
-            package_imports+=",\n    \"@semantic-ui/$package_name\": \"https://cdn.semantic-ui.com/@semantic-ui/$package_name/$pkg_version/$pkg_entry\""
-          done
-          cd ..
+          # Copy and use the importmap generation script from templates
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/generate-importmap.js.template generate-importmap.js
           
-          # Replace the PACKAGE_IMPORTS placeholder
-          # Using a temporary file to ensure proper line breaks and formatting
-          echo "$package_imports" > cdn/package_imports.txt
-          perl -i -pe 's|/\* PACKAGE_IMPORTS \*/|'"$(cat cdn/package_imports.txt)"'|' cdn/importmap-$VERSION.json
-          rm cdn/package_imports.txt
+          # Execute the importmap generation script
+          echo "Executing importmap generation script..."
+          VERSION=$VERSION CORE_ENTRY=$core_entry node generate-importmap.js
+          rm generate-importmap.js
           
-          # Only update "latest" if this is not a test tag
-          if [[ ! "$VERSION" == *"-"* ]]; then
-            echo "This is a release version ($VERSION), updating latest importmap"
-            cp cdn/importmap-$VERSION.json cdn/importmap-latest.json
-          else
-            echo "This is a test/pre-release version ($VERSION), not updating latest importmap"
-            # If latest doesn't exist yet, create it
-            if [ ! -f cdn/importmap-latest.json ]; then
-              cp cdn/importmap-$VERSION.json cdn/importmap-latest.json
-              echo "Created initial latest importmap (no previous version found)"
-            fi
-          fi
+          # The importmap generation script also handles the latest importmap update logic
           
           # Create CNAME file for GitHub Pages
           echo "cdn.semantic-ui.com" > cdn/CNAME
@@ -238,8 +230,13 @@ jobs:
         with:
           path: ./cdn
           name: github-pages
+          # Don't clean up existing files - this is critical for maintaining previous versions
+          # The GitHub Pages action will merge the content with existing files
+          # rather than replacing everything
 
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        # This deployment preserves files not included in this artifact
+        # which allows us to maintain all historical package versions
