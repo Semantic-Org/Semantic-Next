@@ -236,7 +236,7 @@ jobs:
           ")
           echo "Using Lit version: $LIT_VERSION"
           
-          # Download and bundle Lit dependency (at top level, not in deps/)
+          # Download and bundle Lit dependency
           echo "Downloading Lit dependency from unpkg..."
           mkdir -p cdn/lit
           
@@ -276,12 +276,8 @@ jobs:
           sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
           sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
           
-          # Add updated importmap information to the README
+          # Add importmap information to the README
           sed -i '/## Usage/a\\\n### Using Importmaps\\\n\\\nFor the best developer experience, we recommend using importmaps with Semantic UI Next. There are two main approaches:\\\n\\\n#### 1. Inline Importmap (Recommended)\\\n\\\nFor the best compatibility, inline the importmap directly in your HTML:\\\n\\\n```html\\\n<script type="importmap">\\\n{\\\n  "imports": {\\\n    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",\\\n    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",\\\n    "lit": "https://cdn.semantic-ui.com/lit/index.js"\\\n    // ... add other packages as needed\\\n  }\\\n}\\\n</script>\\\n```\\\n\\\nYou can copy the full importmap from [importmap-latest.json](https://cdn.semantic-ui.com/importmap-latest.json).\\\n\\\n#### 2. Using the Importmap Loader\\\n\\\nFor a more dynamic approach, use our importmap loader script:\\\n\\\n```html\\\n<script src="https://cdn.semantic-ui.com/importmap.js"></script>\\\n```\\\n\\\nThis automatically loads the importmap with all packages and dependencies included. You can listen for the `importmap-ready` event to know when the importmap has been loaded:\\\n\\\n```javascript\\\nwindow.addEventListener("importmap-ready", (event) => {\\\n  console.log("Importmap is ready", event.detail.importmap);\\\n  // Start importing your modules\\\n});\\\n```' cdn/README.md
-          
-          # No need to add alert to index.html anymore since we've completely replaced it
-          # The new index.html already has a message element with this information
-
       # Verify deployment structure is ready
       - name: Verify deployment structure
         run: |
