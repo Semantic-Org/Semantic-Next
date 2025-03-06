@@ -18,13 +18,30 @@
       return response.json();
     })
     .then(importmap => {
-      // Add the lit dependency to the importmap
-      importmap.imports['lit'] = 'https://cdn.semantic-ui.com/lit/index.js';
-      
       // Create a script element with type="importmap"
       const script = document.createElement('script');
       script.type = 'importmap';
       script.textContent = JSON.stringify(importmap, null, 2);
+      
+      // The lit dependency should already be in the importmap
+      // from the server-side generation, but we'll add it if it's missing
+      if (!importmap.imports['lit']) {
+        // Fetch the latest lit version by checking the redirect
+        fetch('https://cdn.semantic-ui.com/lit/')
+          .then(response => {
+            // Extract version from URL pattern if possible
+            const version = response.url.match(/\/lit\/([0-9.]+)/)?.[1] || '3.0.0';
+            importmap.imports['lit'] = `https://cdn.semantic-ui.com/lit/${version}/index.js`;
+            
+            // Update the script with the new importmap
+            script.textContent = JSON.stringify(importmap, null, 2);
+          })
+          .catch(() => {
+            // Fallback to a hardcoded version if we can't determine it
+            importmap.imports['lit'] = 'https://cdn.semantic-ui.com/lit/3.0.0/index.js';
+            script.textContent = JSON.stringify(importmap, null, 2);
+          });
+      }
       
       // Insert it into the document
       document.head.appendChild(script);

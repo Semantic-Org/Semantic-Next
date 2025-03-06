@@ -194,7 +194,7 @@ jobs:
           
           # Execute the importmap generation script
           echo "Executing importmap generation script..."
-          VERSION=$VERSION CORE_VERSION=$CORE_VERSION CORE_ENTRY=$core_entry node generate-importmap.js
+          VERSION=$VERSION CORE_VERSION=$CORE_VERSION CORE_ENTRY=$core_entry LIT_VERSION=$LIT_VERSION node generate-importmap.js
           rm generate-importmap.js
           
           # The importmap generation script also handles the latest importmap update logic
@@ -229,41 +229,124 @@ jobs:
           echo "Copying importmap loader to CDN root..."
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-loader.js.template cdn/importmap.js
           
-          # Get Lit version from peerDependencies
-          echo "Getting Lit version from package.json peerDependencies..."
+          # Get Lit version from renderer package dependencies
+          echo "Getting Lit version from renderer package dependencies..."
           LIT_VERSION=$(node -e "
-            const pkg = require('./package.json');
-            const litVersion = pkg.peerDependencies && pkg.peerDependencies.lit 
-              ? pkg.peerDependencies.lit.replace(/[^0-9.]/g, '')
+            const pkg = require('./packages/renderer/package.json');
+            const litVersion = pkg.dependencies && pkg.dependencies.lit 
+              ? pkg.dependencies.lit.replace(/[^0-9.]/g, '')
               : '3.0.0';  // fallback to stable version if not specified
             console.log(litVersion);
           ")
           echo "Using Lit version: $LIT_VERSION"
           
-          # Download and bundle Lit dependency
+          # Download and bundle Lit dependency with version directory structure
           echo "Downloading Lit dependency from unpkg..."
-          mkdir -p cdn/lit
+          mkdir -p cdn/lit/$LIT_VERSION
           
           # Use curl to download the Lit package with specific version
-          curl -s "https://www.unpkg.com/lit@$LIT_VERSION/index.js" > cdn/lit/index.js
+          curl -s "https://www.unpkg.com/lit@$LIT_VERSION/index.js" > cdn/lit/$LIT_VERSION/index.js
+          
+          # Create an index.html file in the versioned directory
+          cat > cdn/lit/$LIT_VERSION/index.html << EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Lit v$LIT_VERSION</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2185d0;
+      --text: #333;
+      --bg: #fff;
+      --code-bg: #f5f5f5;
+      --border: #eaeaea;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #54c8ff;
+        --text: #f0f0f0;
+        --bg: #121212;
+        --code-bg: #1e1e1e;
+        --border: #333;
+      }
+    }
+    
+    body { 
+      font-family: 'Lato', -apple-system, sans-serif; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 2rem; 
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.6;
+    }
+    
+    h1, h2, h3 { color: var(--primary); }
+    
+    pre { 
+      background: var(--code-bg); 
+      padding: 1rem; 
+      border-radius: 5px; 
+      overflow-x: auto; 
+    }
+    
+    code { 
+      background: var(--code-bg); 
+      padding: 0.2rem 0.4rem; 
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    
+    a { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <h1>Lit <span style="opacity: 0.7;">v$LIT_VERSION</span></h1>
+  <p>This is the Lit library hosted for Semantic UI Next. It's a dependency for the renderer package.</p>
+  
+  <h2>Usage</h2>
+  <p>This package is automatically included in the importmap when using Semantic UI Next from the CDN:</p>
+  <pre><code>import { html } from 'lit';</code></pre>
+  
+  <p>Main entry point: <a href="./index.js">index.js</a></p>
+  
+  <h2>Documentation</h2>
+  <p>For Lit documentation, visit the <a href="https://lit.dev/" target="_blank">official Lit website</a>.</p>
+  
+  <p><a href="/index.html">Back to CDN home</a></p>
+</body>
+</html>
+EOF
+          
+          # Create a redirect at the base path
+          mkdir -p cdn/lit
+          echo "Creating redirect for lit to version $LIT_VERSION"
+          cat > cdn/lit/index.html << EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="0;URL=./$LIT_VERSION/">
+  <title>Redirecting to Lit $LIT_VERSION</title>
+</head>
+<body>
+  <p>Redirecting to <a href="./$LIT_VERSION/">Lit v$LIT_VERSION</a></p>
+</body>
+</html>
+EOF
           
           # Add Lit to our importmap
           echo "Adding Lit to importmap..."
           cd cdn
-          # Create a temporary script to add Lit to existing importmaps
-          cat > add-lit-to-importmap.js << 'EOF'
-          const fs = require('fs');
-          const files = fs.readdirSync('.').filter(f => f.startsWith('importmap-') && f.endsWith('.json'));
-          files.forEach(file => {
-            const importmap = JSON.parse(fs.readFileSync(file, 'utf8'));
-            if (!importmap.imports.lit) {
-              importmap.imports.lit = 'https://cdn.semantic-ui.com/lit/index.js';
-              fs.writeFileSync(file, JSON.stringify(importmap, null, 2));
-              console.log(`Added Lit to ${file}`);
-            }
-          });
-          EOF
-          node add-lit-to-importmap.js
+          # Copy the script template for adding Lit to importmaps
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/add-lit-to-importmap.js.template add-lit-to-importmap.js
+          # Execute the script with ESM support, passing the LIT_VERSION
+          LIT_VERSION=$LIT_VERSION node --input-type=module add-lit-to-importmap.js
+          # Clean up
           rm add-lit-to-importmap.js
           cd ..
           

@@ -19,12 +19,15 @@ const packages = fs.readdirSync(packagesDir).filter(pkg =>
 // Get core version from environment variable
 const coreVersion = process.env.CORE_VERSION;
 
+// Get the Lit version from the environment variable
+const litVersion = process.env.LIT_VERSION || '3.0.0';
+
 // Create the importmap object
 const importmap = {
   imports: {
     '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/${process.env.CORE_ENTRY}`,
-    // Add Lit dependency (will be hosted on our CDN)
-    'lit': 'https://cdn.semantic-ui.com/lit/index.js'
+    // Add Lit dependency with version path
+    'lit': `https://cdn.semantic-ui.com/lit/${litVersion}/index.js`
   }
 };
 
