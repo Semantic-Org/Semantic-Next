@@ -14,12 +14,15 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * Each now supports custom index / key names {#each value, index in values}
 * Default index name is always `index` in data context instead of `@index`. `@foo` is not a valid variable name in js so it was breaking js expressions.
 
-## UI
+## Expressions
+* You can now use signals like state in js expressions without get in templates i.e `{ someState == 'someValue' ? 'yes' : 'no' }` and not `{ someState.get() == 'someValue' ? 'yes' : 'no'}`
+* Fix `change` event to only fire on blur for ui-input, fix `input` event.
+
+## UI Icon
 * Added `href` to `ui-icon`. Added hitbox to links by default for mobile/touch.
 
 ### Bugs
-* You can now use signals like state in js expressions without get in templates i.e `{ someState == 'someValue' ? 'yes' : 'no' }` and not `{ someState.get() == 'someValue' ? 'yes' : 'no'}`
-* Fix `change` event to only fire on blur for ui-input, fix `input` event.
+* Fix bug where global events would ignore an event if it bubbled from a web component shadow dom (deep)
 
 # Version 0.9.4
 
