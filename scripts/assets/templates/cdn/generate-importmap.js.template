@@ -1,8 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+// Set up dirname equivalent for ES modules
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+
+// Create a require function for loading JSON
+const require = createRequire(import.meta.url);
 
 // Get package versions and entry points
-const packagesDir = path.join(__dirname, 'packages');
+const packagesDir = path.join(dirname, 'packages');
 const packages = fs.readdirSync(packagesDir).filter(pkg => 
   fs.statSync(path.join(packagesDir, pkg)).isDirectory()
 );
