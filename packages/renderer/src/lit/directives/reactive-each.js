@@ -54,6 +54,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     const collectionType = this.getCollectionType(items);
     if(collectionType == 'object') {
       items = arrayFromObject(items);
+      console.log(items);
     }
     return repeat(
       items,
@@ -105,8 +106,8 @@ export class ReactiveEachDirective extends AsyncDirective {
     }
     // handle conversion of object to array
     if(collectionType == 'object') {
-      item = item.value;
       indexOrKey = item.key;
+      item = item.value;
     }
 
     // if 'as' is specified we pass the whole value as an item
