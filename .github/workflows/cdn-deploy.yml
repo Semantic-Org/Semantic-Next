@@ -1,4 +1,4 @@
-name: Deploy CDN
+name: Deploy Semantic UI CDN
 
 on:
   push:
@@ -81,15 +81,17 @@ jobs:
             fi
             
             # Create package.json for the CDN version
-            cat > ../cdn/@semantic-ui/$package_name/$pkg_version/package.json << EOL
+            cat > ../cdn/@semantic-ui/$package_name/$pkg_version/package.json << 'EOL'
 {
   "name": "@semantic-ui/$package_name",
-  "version": "$pkg_version",
+  "version": "'$pkg_version'",
   "main": "index.js",
   "module": "index.js",
   "types": "types/index.d.ts"
 }
 EOL
+            # Fix the version string (remove single quotes)
+            sed -i "s/'\\$pkg_version'/$pkg_version/g" ../cdn/@semantic-ui/$package_name/$pkg_version/package.json
           done
           cd ..
           
