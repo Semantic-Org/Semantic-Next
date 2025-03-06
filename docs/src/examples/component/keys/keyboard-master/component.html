@@ -1,0 +1,91 @@
+<div class="keyboard-master">
+  <h2>Keyboard Master</h2>
+  
+  <div class="game-area">
+    <!-- Player character -->
+    <div class="player {activeIf activePower}" style="left: {x}px; top: {y}px;">
+      <div class="player-body"></div>
+      <div class="player-face"></div>
+    </div>
+    
+    <!-- Collectible items -->
+    {#each item in collectibles}
+      <div class="collectible {collectible.type}" style="left: {item.x}px; top: {item.y}px;"></div>
+    {/each}
+    
+    <!-- Power up indicator -->
+    {#if activePower}
+      <div class="power-indicator">
+        <div class="power-name">{titleCase activePower} Power!</div>
+        <div class="power-bar">
+          <div class="power-fill" style="width: {getPowerPercent}%;"></div>
+        </div>
+      </div>
+    {/if}
+  </div>
+  
+  <div class="dashboard">
+    <div class="score-section">
+      <div class="score">Score: {score}</div>
+      <div class="high-score">High Score: {highScore}</div>
+    </div>
+    
+    <div class="controls">
+      <ui-button class="speed" blue icon="zap">Speed Boost</ui-button>
+      <ui-button class="reset" red icon="refresh-cw">Reset Game</ui-button>
+    </div>
+    
+    <div class="input-section">
+      <label for="name-input">Type here to test inputFocused:</label>
+      <ui-input id="name-input" class="name-input" placeholder="Type here..." icon="type"></ui-input>
+    </div>
+    
+    <div class="message-log">
+      <h4>Event Log:</h4>
+      <ul>
+        {#each messages}
+          <li>{this}</li>
+        {/each}
+      </ul>
+    </div>
+  </div>
+  
+  {#if showTutorial}
+    <div class="tutorial">
+      <h3>Game Objective:</h3>
+      <p>Control the player (blue diamond) to collect coins and power-ups that appear around the edges and move toward you.</p>
+      
+      <h3>Keyboard Controls:</h3>
+      <ul>
+        <li><strong>Arrow Keys:</strong> Move character (uses repeatedKey parameter)</li>
+        <li><strong>Space:</strong> Activate speed power-up (uses inputFocused parameter)</li>
+        <li><strong>W,A,S,D:</strong> Alternative movement keys (example of multiple keys)</li>
+        <li><strong>Ctrl+S:</strong> Save game state (key combination example)</li>
+        <li><strong>Shift+R:</strong> Reset game (key combination example)</li>
+        <li><strong>ESC:</strong> Reset game</li>
+        <li><strong>↑↑↓↓←→←→:</strong> Konami code - try it! (key sequence example)</li>
+        <li><strong>H:</strong> Hide this tutorial</li>
+      </ul>
+      
+      <h3>Items:</h3>
+      <ul>
+        <li><strong>Yellow Coins:</strong> Collect for 5 points</li>
+        <li><strong>Blue Power-ups:</strong> Boost your speed for 5 seconds (10 points)</li>
+      </ul>
+      
+      <div class="note">
+        <strong>Note:</strong> This example demonstrates:
+        <ul>
+          <li>Single key bindings</li>
+          <li>Multiple key bindings</li>
+          <li>Key combinations (with +)</li>
+          <li>Key sequences (with spaces)</li>
+          <li>Key up events (handled with global events)</li>
+          <li>Dynamic key bindings (H and ? toggle)</li>
+          <li>Special inputFocused parameter (try typing in the input below)</li>
+          <li>Special repeatedKey parameter (smooth movement)</li>
+        </ul>
+      </div>
+    </div>
+  {/if}
+</div>
