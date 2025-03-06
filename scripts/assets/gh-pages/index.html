@@ -15,6 +15,13 @@
       --code-bg: #f5f5f5;
       --border: #eaeaea;
       --card-bg: #fcfcfc;
+      --subtle-bg: #f9f9f9;
+      --notice-bg: #e8f4ff;
+      --notice-border: #c8e1ff;
+      --success-bg: #e6ffed;
+      --success-border: #c3e6cb;
+      --warning-bg: #fff9e6;
+      --warning-border: #ffeeba;
     }
     
     @media (prefers-color-scheme: dark) {
@@ -25,6 +32,13 @@
         --code-bg: #1e1e1e;
         --border: #333;
         --card-bg: #1a1a1a;
+        --subtle-bg: #1c1c1c;
+        --notice-bg: #193649;
+        --notice-border: #234862;
+        --success-bg: #1e3a29;
+        --success-border: #2a5338;
+        --warning-bg: #3d341a;
+        --warning-border: #584c28;
       }
     }
     
@@ -33,7 +47,7 @@
       line-height: 1.6;
       color: var(--text);
       background-color: var(--bg);
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 2rem;
     }
@@ -47,17 +61,13 @@
     }
     
     .logo {
+      margin-right: 1.5rem;
+    }
+    
+    .logo img {
       width: 60px;
       height: 60px;
-      margin-right: 1.5rem;
-      background: var(--primary);
       border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 36px;
     }
     
     h1, h2, h3 {
@@ -76,6 +86,11 @@
       border-bottom: 1px solid var(--border);
     }
     
+    h3 {
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
     a {
       color: var(--primary);
       text-decoration: none;
@@ -90,6 +105,7 @@
       padding: 0.2rem 0.4rem;
       border-radius: 3px;
       font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.9em;
     }
     
     pre {
@@ -98,11 +114,13 @@
       border-radius: 5px;
       overflow-x: auto;
       border: 1px solid var(--border);
+      margin: 1rem 0;
     }
     
     pre code {
       padding: 0;
       background-color: transparent;
+      font-size: 0.9em;
     }
     
     .container {
@@ -111,35 +129,60 @@
     }
     
     .section {
-      margin-bottom: 2.5rem;
+      margin-bottom: 3rem;
     }
     
     .card {
       border: 1px solid var(--border);
-      border-radius: 5px;
+      border-radius: 8px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
       background-color: var(--card-bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .message {
+      padding: 1rem 1.5rem;
+      border: 1px solid var(--notice-border);
+      background-color: var(--notice-bg);
+      border-radius: 6px;
+      margin: 1.5rem 0;
+    }
+    
+    .message.success {
+      background-color: var(--success-bg);
+      border-color: var(--success-border);
+    }
+    
+    .message.warning {
+      background-color: var(--warning-bg);
+      border-color: var(--warning-border);
+    }
+    
+    .message-header {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
     }
     
     .package-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.25rem;
       margin-top: 1.5rem;
     }
     
     .package-card {
       border: 1px solid var(--border);
-      border-radius: 5px;
+      border-radius: 8px;
       padding: 1.25rem;
       background-color: var(--card-bg);
       transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
     
     .package-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
       border-color: var(--primary);
     }
     
@@ -148,6 +191,7 @@
       color: var(--primary);
       margin-bottom: 0.5rem;
       display: block;
+      font-size: 1.1rem;
     }
     
     .package-version {
@@ -167,34 +211,68 @@
       display: inline-block;
       background-color: var(--primary);
       color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
       font-weight: 500;
       margin-top: 0.5rem;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
     }
 
     .btn:hover {
       text-decoration: none;
       opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     
-    .example {
-      margin: 2rem 0;
+    .tabs {
+      display: flex;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .tab {
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab.active {
+      border-bottom: 2px solid var(--primary);
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .tab-content {
+      padding-top: 1rem;
     }
     
     .footer {
-      margin-top: 3rem;
-      padding-top: 1rem;
+      margin-top: 4rem;
+      padding-top: 1.5rem;
       border-top: 1px solid var(--border);
       text-align: center;
       font-size: 0.9rem;
+    }
+    
+    .recommended-badge {
+      display: inline-block;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 20px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="logo">S</div>
+    <div class="logo">
+      <img src="http://next.semantic-ui.com/images/logo.png" alt="Semantic UI Logo">
+    </div>
     <h1>Semantic UI Next <span style="font-weight: 300; opacity: 0.7;">CDN</span></h1>
   </div>
   
@@ -202,19 +280,47 @@
     <div class="section">
       <p>This is the official CDN for Semantic UI Next. Use it to easily import Semantic UI components and utilities directly in your browser using ES modules.</p>
       
+      <div class="message">
+        <div class="message-header">New importmap loader available!</div>
+        <p>Use <code>&lt;script src="https://cdn.semantic-ui.com/importmap.js"&gt;&lt;/script&gt;</code> to automatically set up all dependencies.</p>
+      </div>
+      
       <div class="card">
         <h3>Quick Start</h3>
-        <p>The fastest way to get started is with an import map:</p>
-        <pre><code>&lt;!-- Add this to your HTML head --&gt;
-&lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest.json"&gt;&lt;/script&gt;
+        <p>Choose the method that works best for your project:</p>
+        
+        <div class="tabs">
+          <div class="tab active">Inline Importmap (Recommended)</div>
+          <div class="tab">Loader Script</div>
+          <div class="tab">Direct Imports</div>
+        </div>
+        
+        <div class="tab-content">
+          <pre><code>&lt;!-- Add this to your HTML head --&gt;
+&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js",
+    "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/0.10.0/src/index.js",
+    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
+    "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/0.10.0/src/index.js",
+    "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/0.10.0/src/index.js",
+    "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/0.10.0/src/index.js",
+    "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/0.10.0/src/index.js",
+    "lit": "https://cdn.semantic-ui.com/lit/index.js"
+  }
+}
+&lt;/script&gt;
 
 &lt;!-- Then import anywhere in your code --&gt;
 &lt;script type="module"&gt;
+  import { Button } from '@semantic-ui/core';
   import { createSignal } from '@semantic-ui/reactivity';
-  import { query } from '@semantic-ui/query';
   
   // Your code here
 &lt;/script&gt;</code></pre>
+        </div>
       </div>
     </div>
 
@@ -277,26 +383,115 @@
       <h2>Import Methods</h2>
       
       <div class="card">
-        <h3>1. Direct Import</h3>
-        <p>Import directly with the full path including version:</p>
-        <pre><code>import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js';</code></pre>
+        <h3>1. Static Importmap <span class="recommended-badge">Recommended</span></h3>
+        <p>For the best compatibility, inline the importmap directly in your HTML:</p>
+        <pre><code>&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
+    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
+    "lit": "https://cdn.semantic-ui.com/lit/index.js"
+    // ... add other packages as needed
+  }
+}
+&lt;/script&gt;</code></pre>
+        <p>You can copy the full importmap from <a href="https://cdn.semantic-ui.com/importmap-latest.json">importmap-latest.json</a></p>
       </div>
       
       <div class="card">
-        <h3>2. Using Import Maps (Recommended)</h3>
-        <p>For a better developer experience with bare module specifiers:</p>
-        <pre><code>&lt;!-- Latest version --&gt;
-&lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest.json"&gt;&lt;/script&gt;
+        <h3>2. Using the Importmap Loader</h3>
+        <p>For dynamic loading with a simple script tag:</p>
+        <pre><code>&lt;script src="https://cdn.semantic-ui.com/importmap.js"&gt;&lt;/script&gt;
 
-&lt;!-- Or specific version --&gt;
-&lt;script type="importmap" src="https://cdn.semantic-ui.com/importmap-0.10.0.json"&gt;&lt;/script&gt;
+&lt;!-- Optional: Detect when importmap is ready --&gt;
+&lt;script&gt;
+  window.addEventListener("importmap-ready", (event) => {
+    console.log("Importmap loaded:", event.detail.importmap);
+    // Start your application here
+  });
+&lt;/script&gt;
 
 &lt;script type="module"&gt;
-  // Now you can import without version numbers or full URLs
-  import { createSignal } from '@semantic-ui/reactivity';
+  // Import after the importmap is loaded
+  import { Button } from '@semantic-ui/core';
   
   // Your code here
 &lt;/script&gt;</code></pre>
+      </div>
+      
+      <div class="card">
+        <h3>3. Direct URL Imports</h3>
+        <p>Import directly with full paths if you don't want to use importmaps:</p>
+        <pre><code>import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js';
+import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js';</code></pre>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Usage Example</h2>
+      <div class="card">
+        <h3>Counter Component</h3>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Semantic UI Counter&lt;/title&gt;
+  
+  &lt;!-- Import the CSS (optional) --&gt;
+  &lt;link rel="stylesheet" href="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.css"&gt;
+  
+  &lt;!-- Set up importmap --&gt;
+  &lt;script type="importmap"&gt;
+  {
+    "imports": {
+      "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
+      "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
+      "lit": "https://cdn.semantic-ui.com/lit/index.js"
+    }
+  }
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Counter Example&lt;/h1&gt;
+  
+  &lt;ui-counter&gt;&lt;/ui-counter&gt;
+  
+  &lt;script type="module"&gt;
+    import { defineComponent } from '@semantic-ui/core';
+    import { createSignal } from '@semantic-ui/reactivity';
+    import { html } from 'lit';
+    
+    defineComponent('ui-counter', {
+      template: function() {
+        return html`
+          &lt;div class="ui segment"&gt;
+            &lt;h3&gt;Count: ${this.count}&lt;/h3&gt;
+            &lt;button class="ui primary button" @click=${this.increment}&gt;Increment&lt;/button&gt;
+            &lt;button class="ui button" @click=${this.decrement}&gt;Decrement&lt;/button&gt;
+          &lt;/div&gt;
+        `;
+      },
+      
+      setup() {
+        const count = createSignal(0);
+        
+        function increment() {
+          count.value++;
+        }
+        
+        function decrement() {
+          count.value--;
+        }
+        
+        return {
+          count,
+          increment,
+          decrement
+        };
+      }
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
       </div>
     </div>
   </div>
@@ -305,8 +500,85 @@
     <p>
       © Semantic Org | 
       <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a> | 
-      <a href="https://semantic-ui.com/">Documentation</a>
+      <a href="https://next.semantic-ui.com/">Documentation</a>
     </p>
   </div>
+  
+  <script>
+    // Simple tabs implementation
+    document.querySelectorAll('.tab').forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => {
+          t.classList.remove('active');
+        });
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Update tab content based on index
+        const content = document.querySelector('.tab-content');
+        switch(index) {
+          case 0: // Inline Importmap
+            content.innerHTML = `<pre><code>&lt;!-- Add this to your HTML head --&gt;
+&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js",
+    "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/0.10.0/src/index.js",
+    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
+    "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/0.10.0/src/index.js",
+    "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/0.10.0/src/index.js",
+    "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/0.10.0/src/index.js",
+    "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/0.10.0/src/index.js",
+    "lit": "https://cdn.semantic-ui.com/lit/index.js"
+  }
+}
+&lt;/script&gt;
+
+&lt;!-- Then import anywhere in your code --&gt;
+&lt;script type="module"&gt;
+  import { Button } from '@semantic-ui/core';
+  import { createSignal } from '@semantic-ui/reactivity';
+  
+  // Your code here
+&lt;/script&gt;</code></pre>`;
+            break;
+          case 1: // Loader Script
+            content.innerHTML = `<pre><code>&lt;!-- Add this to your HTML head --&gt;
+&lt;script src="https://cdn.semantic-ui.com/importmap.js"&gt;&lt;/script&gt;
+
+&lt;!-- Wait for the importmap to be loaded --&gt;
+&lt;script&gt;
+  window.addEventListener('importmap-ready', (event) => {
+    console.log('Importmap is ready:', event.detail.importmap);
+    // Initialize your application here
+  });
+&lt;/script&gt;
+
+&lt;!-- Or just use imports directly (they'll work once the importmap is loaded) --&gt;
+&lt;script type="module"&gt;
+  import { Button } from '@semantic-ui/core';
+  import { createSignal } from '@semantic-ui/reactivity';
+  
+  // Your code here
+&lt;/script&gt;</code></pre>`;
+            break;
+          case 2: // Direct Imports
+            content.innerHTML = `<pre><code>&lt;!-- Add this to your HTML head --&gt;
+&lt;script type="module"&gt;
+  // Import directly with full URLs
+  import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js';
+  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js';
+  import { html } from 'https://cdn.semantic-ui.com/lit/index.js';
+  
+  // Your code here
+&lt;/script&gt;</code></pre>`;
+            break;
+        }
+      });
+    });
+  </script>
 </body>
 </html>

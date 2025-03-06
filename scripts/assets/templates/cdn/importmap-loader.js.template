@@ -1,0 +1,40 @@
+/**
+ * Semantic UI ImportMap Loader
+ * 
+ * This script dynamically fetches and applies the importmap for Semantic UI
+ * as a convenience for developers using CDN imports.
+ * 
+ * Usage:
+ * <script src="https://cdn.semantic-ui.com/importmap.js"></script>
+ */
+
+(function() {
+  // Fetch the importmap from the CDN
+  fetch('https://cdn.semantic-ui.com/importmap-latest.json')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load importmap: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(importmap => {
+      // Add the lit dependency to the importmap
+      importmap.imports['lit'] = 'https://cdn.semantic-ui.com/lit/index.js';
+      
+      // Create a script element with type="importmap"
+      const script = document.createElement('script');
+      script.type = 'importmap';
+      script.textContent = JSON.stringify(importmap, null, 2);
+      
+      // Insert it into the document
+      document.head.appendChild(script);
+      
+      // Optional: Dispatch an event when the importmap is loaded
+      window.dispatchEvent(new CustomEvent('importmap-ready', {
+        detail: { importmap }
+      }));
+    })
+    .catch(error => {
+      console.error('Error loading Semantic UI importmap:', error);
+    });
+})();

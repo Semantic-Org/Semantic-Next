@@ -1,0 +1,37 @@
+<html>
+  <head>
+    <!-- Add Semantic UI -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
+          "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js",
+          "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/0.10.0/src/index.js",
+          "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
+          "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/0.10.0/src/index.js",
+          "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/0.10.0/src/index.js",
+          "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/0.10.0/src/index.js",
+          "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/0.10.0/src/index.js"
+        }
+      }
+    </script>
+
+    <!-- Confirm modules loading -->
+    <script type="module">
+      import { defineComponent } from '@semantic-ui/component';
+
+      defineComponent({
+        tagName: 'current-time',
+        template: `Time is <b>{formatDate time "h:mm:ss a"}</b>`,
+        css: 'b { color: var(--primary-text-color); }',
+        defaultState: { time: new Date() },
+        onCreated({state}) {
+          setInterval(() => state.time.now(), 1000);
+        }
+      });
+    </script>
+  </head>
+  <body class="dark">
+    <current-time></current-time>
+  </body>
+</html>

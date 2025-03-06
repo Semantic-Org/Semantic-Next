@@ -22,7 +22,9 @@ const coreVersion = process.env.CORE_VERSION;
 // Create the importmap object
 const importmap = {
   imports: {
-    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/${process.env.CORE_ENTRY}`
+    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/${process.env.CORE_ENTRY}`,
+    // Add Lit dependency (will be hosted on our CDN)
+    'lit': 'https://cdn.semantic-ui.com/lit/index.js'
   }
 };
 
