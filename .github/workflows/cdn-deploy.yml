@@ -5,9 +5,22 @@ on:
     tags:
       - 'v*'  # Push events to tags matching v*, i.e. v1.0, v20.15.10
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -210,16 +223,22 @@ jobs:
           sed -i "s/0.9.4/$VERSION/g" gh-pages-root/README.md
           sed -i "s/0.9.4/$VERSION/g" gh-pages-root/index.html
 
-      - name: Deploy CDN to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      # Upload artifact for deployment
+      - name: Upload CDN artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          folder: cdn
-          clean: false  # Don't remove old files so we can keep multiple versions
-          target-folder: cdn  # Deploy to the cdn subfolder of gh-pages branch
-          
-      - name: Deploy root documentation to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+          path: ./cdn
+          name: cdn-artifact
+
+      - name: Upload root documentation artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          folder: gh-pages-root
-          clean-exclude: cdn/**  # Don't clean the cdn subfolder
-          target-folder: /  # Deploy to the root of gh-pages branch
+          path: ./gh-pages-root
+          name: root-artifact
+
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
+        with:
+          artifact_name: cdn-artifact  # First deploy the CDN
