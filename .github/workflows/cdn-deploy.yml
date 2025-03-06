@@ -201,52 +201,42 @@ jobs:
           # Create CNAME file for GitHub Pages
           echo "cdn.semantic-ui.com" > cdn/CNAME
           
-          # Create README.md for the CDN using template
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn-readme.md.template cdn/README.md
-          sed -i "s/VERSION/$VERSION/g" cdn/README.md
+          # Create README.md for the CDN using the gh-pages README (better formatted)
+          cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/README.md cdn/README.md
+          # Update the version references in the README
+          sed -i "s/0.9.4/$VERSION/g" cdn/README.md
           
-          # Create index file for the CDN root using template
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn-index.html.template cdn/index.html
-          sed -i "s/VERSION/$VERSION/g" cdn/index.html
+          # Create index file for the CDN root using the gh-pages version (better formatted)
+          cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/index.html cdn/index.html
+          # Update version references in the index.html
+          sed -i "s/0.9.4/$VERSION/g" cdn/index.html
+          # Fix the CDN link reference - remove the /cdn/ part since files are at root now
+          sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
+          sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
 
-      - name: Create root documentation
+      # Verify deployment structure is ready
+      - name: Verify deployment structure
         run: |
-          # Create a temp directory for the root
-          mkdir -p gh-pages-root
-          
-          # Copy GitHub Pages assets from scripts/assets
-          cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/README.md gh-pages-root/
-          cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/index.html gh-pages-root/
-          
-          # Replace version placeholders with actual version
-          VERSION=${GITHUB_REF#refs/tags/v}
-          sed -i "s/0.9.4/$VERSION/g" gh-pages-root/README.md
-          sed -i "s/0.9.4/$VERSION/g" gh-pages-root/index.html
-
-      # Combine artifacts for deployment
-      - name: Prepare combined artifact
-        run: |
-          # Create a temporary directory for the combined content
-          mkdir -p combined-pages
-          
-          # Copy gh-pages-root contents to the root of combined-pages
-          cp -r gh-pages-root/* combined-pages/
-          
-          # Copy cdn directory to the cdn subdirectory
-          mkdir -p combined-pages/cdn
-          cp -r cdn/* combined-pages/cdn/
-          
           # Debug what's being deployed
-          echo "Content of combined-pages (root):"
-          ls -la combined-pages/
-          echo "Content of combined-pages/cdn:"
-          ls -la combined-pages/cdn/ | head -n 10
+          echo "Content of cdn directory (root):"
+          ls -la cdn/
+          
+          # Verify CNAME file exists
+          if [ ! -f "cdn/CNAME" ]; then
+            echo "CNAME file missing, creating it"
+            echo "cdn.semantic-ui.com" > cdn/CNAME
+          fi
+          
+          if [ -d "cdn/@semantic-ui" ]; then
+            echo "Content of cdn/@semantic-ui:"
+            ls -la cdn/@semantic-ui/ | head -n 10
+          fi
 
-      # Upload combined artifact for deployment
-      - name: Upload combined artifact
+      # Upload CDN artifact for deployment
+      - name: Upload CDN artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./combined-pages
+          path: ./cdn
           name: github-pages
 
       # Deploy to GitHub Pages
