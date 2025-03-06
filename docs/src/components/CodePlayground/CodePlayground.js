@@ -175,7 +175,6 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   ],
 
   initialize() {
-    console.log(settings.files);
     // select first file for left tabs
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
