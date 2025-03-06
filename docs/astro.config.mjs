@@ -5,6 +5,8 @@ import mdx from '@astrojs/mdx';
 import astroExpressiveCode from 'astro-expressive-code';
 import starlight from '@astrojs/starlight';
 
+import vercel from '@astrojs/vercel';
+
 // Load the custom language definition
 const sui = {
   id: 'sui',
@@ -26,13 +28,16 @@ const site = isProduction
 
 export default defineConfig({
   site,
+
   devToolbar: {
     enabled: false
   },
+
   server: {
     host: true,
     port: 443
   },
+
   vite: {
     assetsInclude: ['**/*.html'],
     server: {
@@ -56,6 +61,7 @@ export default defineConfig({
       exclude: ['playground-elements'],
     },
   },
+
   integrations: [
     lit(),
     astroExpressiveCode({
@@ -69,5 +75,7 @@ export default defineConfig({
     starlight({
       title: 'Semantic UI'
     })
-  ]
+  ],
+
+  adapter: vercel()
 });
