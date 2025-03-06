@@ -69,16 +69,20 @@ jobs:
           # Create core package directory using the version from package.json
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
           
-          # Copy each directory/file from the files array
+          # Copy specified directories/files, preserving the exact directory structure
           for file_entry in $core_files_array; do
             if [ -e "$file_entry" ]; then
               if [ -d "$file_entry" ]; then
-                # It's a directory, copy its contents
+                # It's a directory, preserve the directory structure exactly
                 mkdir -p "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry"
-                cp -r "$file_entry"/* "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry/"
+                # Use cp -R to copy recursively, preserving the structure
+                cp -R "$file_entry" "cdn/@semantic-ui/core/$CORE_VERSION/$(dirname "$file_entry")/"
               else
-                # It's a file, copy it
-                cp "$file_entry" "cdn/@semantic-ui/core/$CORE_VERSION/"
+                # It's a file, make sure its directory exists
+                dir_path=$(dirname "$file_entry")
+                mkdir -p "cdn/@semantic-ui/core/$CORE_VERSION/$dir_path"
+                # Copy the file to the correct path
+                cp "$file_entry" "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry"
               fi
               echo "Copied $file_entry for core package"
             else
@@ -123,16 +127,20 @@ jobs:
               }
             ")
             
-            # Copy each directory/file from the files array
+            # Copy each directory/file from the files array, preserving the exact directory structure
             for file_entry in $files_array; do
               if [ -e "$package_name/$file_entry" ]; then
                 if [ -d "$package_name/$file_entry" ]; then
-                  # It's a directory, copy its contents
+                  # It's a directory, preserve the directory structure exactly
                   mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry"
-                  cp -r "$package_name/$file_entry"/* "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry/"
+                  # Use cp -R to copy recursively, preserving the structure
+                  cp -R "$package_name/$file_entry" "../cdn/@semantic-ui/$package_name/$pkg_version/$(dirname "$file_entry")/"
                 else
-                  # It's a file, copy it
-                  cp "$package_name/$file_entry" "../cdn/@semantic-ui/$package_name/$pkg_version/"
+                  # It's a file, make sure its directory exists
+                  dir_path=$(dirname "$file_entry")
+                  mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/$dir_path"
+                  # Copy the file to the correct path
+                  cp "$package_name/$file_entry" "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry"
                 fi
                 echo "Copied $file_entry for $package_name"
               else
