@@ -376,7 +376,7 @@ export const Template = class Template {
 
           // check if event occured on a deep event handler and the handler type isnt 'deep'
           const isDeep = selector && $(event.target).closest(selector).length == 0;
-          if(eventType !== 'deep' && isDeep) {
+          if(!inArray(eventType, ['deep', 'global']) && isDeep) {
             return;
           }
 
@@ -455,7 +455,11 @@ export const Template = class Template {
               (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) ||
                 document.activeElement.isContentEditable);
 
-            const eventResult = this.call(handler, { additionalData: { event: event, inputFocused, repeatedKey } });
+            const eventResult = this.call(handler, { additionalData: {
+              event: event,
+              inputFocused,
+              repeatedKey
+            } });
             if(eventResult !== true) {
               event.preventDefault();
             }
@@ -470,7 +474,9 @@ export const Template = class Template {
         this.resetSequence = setTimeout(() => { this.currentSequence = ''; }, sequenceTimeout);
 
       }, eventSettings)
-      .on('keyup', (event) => { this.currentKey = ''; }, eventSettings)
+      .on('keyup', (event) => {
+        this.currentKey = '';
+      }, eventSettings)
     ;
   }
 
