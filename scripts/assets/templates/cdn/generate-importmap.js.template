@@ -16,9 +16,8 @@ const packages = fs.readdirSync(packagesDir).filter(pkg =>
   fs.statSync(path.join(packagesDir, pkg)).isDirectory()
 );
 
-// Get core package version from its package.json
-const corePackageData = require(path.join(dirname, '..', '..', '..', '..', 'package.json'));
-const coreVersion = corePackageData.version;
+// Get core version from environment variable
+const coreVersion = process.env.CORE_VERSION;
 
 // Create the importmap object
 const importmap = {

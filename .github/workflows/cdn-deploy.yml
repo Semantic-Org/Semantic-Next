@@ -90,13 +90,13 @@ jobs:
           cp package.json cdn/@semantic-ui/core/$CORE_VERSION/package.json
           
           # Create index.js and index.html files for the core package using templates
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$VERSION/index.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$CORE_VERSION/index.js
           # Use perl instead of sed for better handling of special characters
-          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$VERSION/index.js
+          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.js
           
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template cdn/@semantic-ui/core/$VERSION/index.html
-          perl -i -pe "s|CORE_VERSION|$VERSION|g" cdn/@semantic-ui/core/$VERSION/index.html
-          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$VERSION/index.html
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template cdn/@semantic-ui/core/$CORE_VERSION/index.html
+          perl -i -pe "s|CORE_VERSION|$CORE_VERSION|g" cdn/@semantic-ui/core/$CORE_VERSION/index.html
+          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.html
           
           # Process each package in packages directory
           cd packages
@@ -182,7 +182,7 @@ jobs:
           
           # Execute the importmap generation script
           echo "Executing importmap generation script..."
-          VERSION=$VERSION CORE_ENTRY=$core_entry node generate-importmap.js
+          VERSION=$VERSION CORE_VERSION=$CORE_VERSION CORE_ENTRY=$core_entry node generate-importmap.js
           rm generate-importmap.js
           
           # The importmap generation script also handles the latest importmap update logic
