@@ -6,9 +6,6 @@
   "types": "types/index.d.ts",
   "author": "Jack Lukic",
   "license": "ISC",
-  "peerDependencies": {
-    "lit": "^3.2.1"
-  },
   "dependencies": {
     "@semantic-ui/query": "^0.10.0",
     "@semantic-ui/reactivity": "^0.10.0",

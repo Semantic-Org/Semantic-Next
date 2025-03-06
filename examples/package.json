@@ -8,7 +8,8 @@
   "license": "MIT",
   "type": "module",
   "module": "./examples.js",
-  "peerDependencies": {
-    "lit": "^3.2.1"
+  "dependencies": {
+    "@semantic-ui/core": "^0.10.0",
+    "@semantic-ui/components": "^0.10.0"
   }
 }

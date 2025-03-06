@@ -6,10 +6,8 @@
   "module": "src/index.js",
   "author": "Jack Lukic",
   "license": "ISC",
-  "peerDependencies": {
-    "lit": "^3.2.1"
-  },
   "dependencies": {
+    "lit": "3.2.1",
     "@semantic-ui/reactivity": "^0.10.0",
     "@semantic-ui/templating": "^0.10.0",
     "@semantic-ui/utils": "^0.10.0"
