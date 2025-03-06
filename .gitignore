@@ -48,3 +48,4 @@ nbproject
 /blob-report/
 /playwright/.cache/
 .wireit
+.vercel
