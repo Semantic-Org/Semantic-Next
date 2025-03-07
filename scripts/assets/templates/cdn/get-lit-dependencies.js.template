@@ -1,0 +1,26 @@
+/**
+ * Script to extract Lit dependencies from package.json
+ * Returns space-separated list of dependency names
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+try {
+  const litPkgPath = path.join('./node_modules/lit/package.json');
+  
+  if (fs.existsSync(litPkgPath)) {
+    const litPkg = require(litPkgPath);
+    if (litPkg.dependencies && Object.keys(litPkg.dependencies).length > 0) {
+      console.log(Object.keys(litPkg.dependencies).join(' '));
+    } else {
+      console.log(''); // No dependencies found
+    }
+  } else {
+    console.error('Lit package.json not found');
+    console.log(''); // Output empty string for shell script to handle
+  }
+} catch (err) {
+  console.error('Error processing Lit dependencies:', err.message);
+  console.log(''); // Output empty string for shell script to handle
+}

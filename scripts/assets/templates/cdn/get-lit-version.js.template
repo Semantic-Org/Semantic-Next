@@ -1,0 +1,53 @@
+/**
+ * Script to extract the Lit version from dependencies
+ * Tries multiple sources in order of specificity
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+// First try from package-lock.json
+let litVersion;
+try {
+  const lockfile = require('./package-lock.json');
+  const rendererPath = './node_modules/@semantic-ui/renderer';
+  
+  if (lockfile.packages && lockfile.packages[rendererPath]) {
+    const rendererPkg = lockfile.packages[rendererPath];
+    if (rendererPkg.dependencies && rendererPkg.dependencies.lit) {
+      litVersion = rendererPkg.dependencies.lit;
+      litVersion = litVersion.replace(/[^0-9.]/g, '');
+    }
+  }
+} catch (e) {
+  // Silent catch - try next source
+}
+
+// Fallback to package.json in renderer package
+if (!litVersion) {
+  try {
+    const rendererPkg = require('./packages/renderer/package.json');
+    if (rendererPkg.dependencies && rendererPkg.dependencies.lit) {
+      litVersion = rendererPkg.dependencies.lit;
+      litVersion = litVersion.replace(/[^0-9.]/g, '');
+    }
+  } catch (e) {
+    // Silent catch - try next source
+  }
+}
+
+// Final fallback to installed version
+if (!litVersion) {
+  try {
+    const litPkgPath = path.join('./node_modules/lit/package.json');
+    if (fs.existsSync(litPkgPath)) {
+      const litPkg = require(litPkgPath);
+      litVersion = litPkg.version;
+    }
+  } catch (e) {
+    // Silent catch
+  }
+}
+
+// Output the version or fallback to a stable version
+console.log(litVersion || '3.2.1');

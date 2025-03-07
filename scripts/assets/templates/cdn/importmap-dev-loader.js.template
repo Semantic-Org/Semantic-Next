@@ -1,0 +1,62 @@
+/**
+ * Semantic UI Development ImportMap Loader
+ * 
+ * This script dynamically fetches and applies the development importmap
+ * for better debugging and more verbose warnings.
+ * 
+ * Usage:
+ * <script src="https://cdn.semantic-ui.com/importmap-dev.js"></script>
+ */
+
+(function() {
+  // Support for older browsers that don't have import maps
+  if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) {
+    console.warn('Your browser does not support Import Maps. Consider using a newer browser or a polyfill.');
+  }
+  
+  // Function to detect and handle network/load errors 
+  function handleError(error) {
+    console.error('Error loading Semantic UI development importmap:', error);
+    
+    // Try to notify any listeners about the failure
+    try {
+      window.dispatchEvent(new CustomEvent('importmap-error', {
+        detail: { error, mode: 'development' }
+      }));
+    } catch (e) {
+      // Silent catch if CustomEvent isn't supported
+    }
+  }
+
+  console.info('Loading Semantic UI development importmap for enhanced debugging');
+
+  // Fetch the importmap from the CDN
+  fetch('https://cdn.semantic-ui.com/importmap-latest-dev.json')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load development importmap: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(importmap => {
+      try {
+        // Create a script element with type="importmap"
+        const script = document.createElement('script');
+        script.type = 'importmap';
+        script.textContent = JSON.stringify(importmap, null, 2);
+        
+        // Insert it into the document
+        document.head.appendChild(script);
+        
+        // Optional: Dispatch an event when the importmap is loaded
+        window.dispatchEvent(new CustomEvent('importmap-ready', {
+          detail: { importmap, mode: 'development' }
+        }));
+        
+        console.info('Semantic UI development importmap loaded successfully.');
+      } catch (error) {
+        handleError(error);
+      }
+    })
+    .catch(handleError);
+})();

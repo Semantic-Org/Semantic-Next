@@ -1,0 +1,22 @@
+/**
+ * Script to resolve the best entry point for a package
+ * Uses the resolveEntry function from resolve-entry.js
+ * 
+ * Usage: node resolve-package-entry.js [package-path]
+ * If no path is provided, assumes current directory
+ */
+
+const path = require('path');
+const { resolveEntry } = require('./resolve-entry.js');
+
+// Get package path from command line args or default to current directory
+const packagePath = process.argv[2] || '.';
+
+try {
+  const pkg = require(path.join(packagePath, 'package.json'));
+  const entry = resolveEntry(pkg);
+  console.log(entry);
+} catch (err) {
+  console.error('Error resolving entry point:', err.message);
+  console.log('index.js'); // Default fallback
+}

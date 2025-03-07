@@ -55,24 +55,38 @@ jobs:
           MAIN_PACKAGE=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
           echo "Main package name: $MAIN_PACKAGE"
 
-          # Get files to publish for the core package
-          core_files_array=$(node -e "
-            const pkg = require('./package.json');
-            if (pkg.files && pkg.files.length > 0) {
-              console.log(pkg.files.join(' '));
-            } else {
-              // Default if no files array
-              console.log('src dist types README.md');
-            }
-          ")
-          
           # Get the core package version from package.json
           CORE_VERSION=$(node -p "require('./package.json').version")
           echo "Core package version from package.json: $CORE_VERSION"
-          
-          # Create core package directory using the version from package.json
+
+          # Create scripts/helpers directory for script templates
+          mkdir -p scripts/helpers
+
+          # Copy the template files to the helpers directory
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/resolve-entry.js.template scripts/helpers/resolve-entry.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-loader.js.template scripts/helpers/importmap-loader.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/generate-importmap.js.template scripts/helpers/generate-importmap.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/latest-redirect.html.template scripts/helpers/latest-redirect.html.template
+
+          # Copy script templates for package handling
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-version.js.template scripts/helpers/get-lit-version.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-dependencies.js.template scripts/helpers/get-lit-dependencies.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-dependency-version.js.template scripts/helpers/get-dependency-version.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-package-files.js.template scripts/helpers/get-package-files.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/resolve-package-entry.js.template scripts/helpers/resolve-package-entry.js
+
+          # Create core package directories
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
-          
+          mkdir -p cdn/@semantic-ui/core/latest
+          mkdir -p cdn/@semantic-ui/core/$CORE_VERSION/development
+
+          # Get core entry point using resolution script
+          core_entry=$(node scripts/helpers/resolve-package-entry.js)
+          echo "Core entry resolved to: $core_entry"
+
+          # Get files to publish for the core package
+          core_files_array=$(node scripts/helpers/get-package-files.js)
+
           # Copy specified directories/files, preserving the exact directory structure
           for file_entry in $core_files_array; do
             if [ -e "$file_entry" ]; then
@@ -93,45 +107,103 @@ jobs:
               echo "Warning: $file_entry specified in package.json for core package but not found"
             fi
           done
-          
+
           # Copy the actual package.json file
           cp package.json cdn/@semantic-ui/core/$CORE_VERSION/package.json
-          
+
           # Create index.js and index.html files for the core package using templates
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$CORE_VERSION/index.js
           # Use perl instead of sed for better handling of special characters
           perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.js
-          
+
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template cdn/@semantic-ui/core/$CORE_VERSION/index.html
           perl -i -pe "s|CORE_VERSION|$CORE_VERSION|g" cdn/@semantic-ui/core/$CORE_VERSION/index.html
           perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.html
-          
+
+          # Create latest redirect for core
+          cp scripts/helpers/latest-redirect.html.template cdn/@semantic-ui/core/latest/index.html
+          perl -i -pe "s|\${VERSION}|$CORE_VERSION|g" cdn/@semantic-ui/core/latest/index.html
+          perl -i -pe "s|\${PACKAGE_NAME}|@semantic-ui/core|g" cdn/@semantic-ui/core/latest/index.html
+
+          # Get Lit version using the script
+          echo "Determining Lit version..."
+          LIT_VERSION=$(node scripts/helpers/get-lit-version.js)
+          echo "Using Lit version: $LIT_VERSION"
+
+          # Create directories for Lit
+          mkdir -p cdn/lit/$LIT_VERSION
+          mkdir -p cdn/lit/latest
+
+          # Copy Lit from node_modules (entire directory)
+          echo "Copying Lit from node_modules..."
+          cp -R ./node_modules/lit/* cdn/lit/$LIT_VERSION/
+
+          # Create latest redirect for Lit
+          cp scripts/helpers/latest-redirect.html.template cdn/lit/latest/index.html
+          perl -i -pe "s|\${VERSION}|$LIT_VERSION|g" cdn/lit/latest/index.html
+          perl -i -pe "s|\${PACKAGE_NAME}|lit|g" cdn/lit/latest/index.html
+
+          # Also create root redirect for Lit
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template cdn/lit/index.html
+          perl -i -pe "s|LIT_VERSION|$LIT_VERSION|g" cdn/lit/index.html
+
+          # Get Lit dependencies using the script
+          echo "Processing Lit dependencies..."
+          LIT_DEPS=$(node scripts/helpers/get-lit-dependencies.js)
+
+          # Process each Lit dependency
+          for dep in $LIT_DEPS; do
+            echo "Processing Lit dependency: $dep"
+
+            # Get the dependency version using the script
+            DEP_VERSION=$(node scripts/helpers/get-dependency-version.js $dep)
+
+            if [ "$DEP_VERSION" != "unknown" ]; then
+              echo "Found dependency: $dep@$DEP_VERSION"
+
+              # Create directory structure
+              mkdir -p "cdn/$dep/$DEP_VERSION"
+              mkdir -p "cdn/$dep/latest"
+
+              # Copy entire dependency directory
+              cp -R "./node_modules/$dep/"* "cdn/$dep/$DEP_VERSION/"
+
+              # Create latest redirect
+              cp scripts/helpers/latest-redirect.html.template "cdn/$dep/latest/index.html"
+              perl -i -pe "s|\${VERSION}|$DEP_VERSION|g" "cdn/$dep/latest/index.html"
+              perl -i -pe "s|\${PACKAGE_NAME}|$dep|g" "cdn/$dep/latest/index.html"
+
+              # Create root redirect
+              cp scripts/helpers/latest-redirect.html.template "cdn/$dep/index.html"
+              perl -i -pe "s|\${VERSION}|$DEP_VERSION|g" "cdn/$dep/index.html"
+              perl -i -pe "s|\${PACKAGE_NAME}|$dep|g" "cdn/$dep/index.html"
+            fi
+          done
+
           # Process each package in packages directory
           cd packages
           for package in */; do
             # Remove trailing slash
             package_name=${package%/}
-            
+
             # Read version from package.json
             pkg_version=$(node -p "require('./$package_name/package.json').version")
-            
+
             echo "Processing @semantic-ui/$package_name v$pkg_version"
-            
-            # Create directory in CDN structure
-            mkdir -p ../cdn/@semantic-ui/$package_name/$pkg_version
-            
+
+            # Create directory in CDN structure including latest and development
+            mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
+            mkdir -p "../cdn/@semantic-ui/$package_name/latest"
+            mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/development"
+
+            # Get entry point using resolution script
+            pkg_entry=$(node ../scripts/helpers/resolve-package-entry.js "./$package_name")
+            echo "$package_name entry resolved to: $pkg_entry"
+
             # Get files to publish from package.json
-            files_array=$(node -e "
-              const pkg = require('./$package_name/package.json');
-              if (pkg.files && pkg.files.length > 0) {
-                console.log(pkg.files.join(' '));
-              } else {
-                // Default if no files array
-                console.log('src types README.md');
-              }
-            ")
-            
-            # Copy each directory/file from the files array, preserving the exact directory structure
+            files_array=$(node ../scripts/helpers/get-package-files.js "./$package_name")
+
+            # Copy each directory/file from the files array
             for file_entry in $files_array; do
               if [ -e "$package_name/$file_entry" ]; then
                 if [ -d "$package_name/$file_entry" ]; then
@@ -151,154 +223,144 @@ jobs:
                 echo "Warning: $file_entry specified in package.json for $package_name but not found"
               fi
             done
-            
+
             # Copy the actual package.json file
             cp "$package_name/package.json" "../cdn/@semantic-ui/$package_name/$pkg_version/package.json"
 
-            # Get entrypoint from package.json for redirection
-            pkg_entry=$(node -e "
-              const pkg = require('./$package_name/package.json');
-              // Prioritize module over main for ESM
-              let entry = pkg.module || pkg.main || 'index.js';
-              console.log(entry);
-            ")
-            
             # Create index.js and index.html files using templates
             cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.js.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
             # Use perl instead of sed for better handling of special characters
             perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
-            
+
             cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.html.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
             perl -i -pe "s|PACKAGE_NAME|$package_name|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
             perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
             perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
+
+            # Create latest redirect
+            cp ../scripts/helpers/latest-redirect.html.template "../cdn/@semantic-ui/$package_name/latest/index.html"
+            perl -i -pe "s|\${VERSION}|$pkg_version|g" "../cdn/@semantic-ui/$package_name/latest/index.html"
+            perl -i -pe "s|\${PACKAGE_NAME}|@semantic-ui/$package_name|g" "../cdn/@semantic-ui/$package_name/latest/index.html"
           done
           cd ..
-          
-          # Generate importmap for this version
-          echo "Generating importmap for version $VERSION"
-          
-          # Get core package entrypoint
-          core_entry=$(node -e "
-            const pkg = require('./package.json');
-            // Prioritize module over main for ESM
-            let entry = pkg.module || pkg.main || 'index.js';
-            console.log(entry);
-          ")
-          
-          # Collect all package information for importmap generation
-          echo "Collecting package information for importmap..."
-          
-          # Copy and use the importmap generation script from templates
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/generate-importmap.js.template generate-importmap.js
-          
-          # Execute the importmap generation script
-          echo "Executing importmap generation script..."
-          VERSION=$VERSION CORE_VERSION=$CORE_VERSION CORE_ENTRY=$core_entry LIT_VERSION=$LIT_VERSION node generate-importmap.js
-          rm generate-importmap.js
-          
-          # The importmap generation script also handles the latest importmap update logic
-          
-          # Create CNAME file for GitHub Pages
-          echo "cdn.semantic-ui.com" > cdn/CNAME
-          
-          # Create package root redirect files that point to latest version folders
-          echo "Creating package root redirects to latest versions..."
-          
+
+          # Generate both production and development importmaps
+          echo "Generating importmaps for version $VERSION"
+
+          # Set environment variables for importmap generation
+          export VERSION=$VERSION
+          export CORE_VERSION=$CORE_VERSION
+          export CORE_ENTRY=$core_entry
+          export LIT_VERSION=$LIT_VERSION
+
+          # Create production importmap
+          node scripts/helpers/generate-importmap.js
+
+          # Create development importmap (duplicate and modify the production one)
+          node -e "
+            const fs = require('fs');
+
+            // Read the production importmap
+            const importmap = JSON.parse(fs.readFileSync('cdn/importmap-${VERSION}.json', 'utf8'));
+
+            // Create a development version by modifying paths
+            const devImportmap = JSON.stringify(importmap)
+              .replace(/\\/lit\\/${LIT_VERSION}\\//g, '/lit/${LIT_VERSION}/development/')
+              .replace(/\\/(@semantic-ui\\/[^/]+\\/[^/]+)\\/([^\"]+)/g, '/$1/development/$2');
+
+            // Write the development importmap
+            fs.writeFileSync('cdn/importmap-${VERSION}-dev.json', devImportmap);
+
+            // If this is not a pre-release, also update the latest-dev.json
+            if (!('${VERSION}'.includes('-'))) {
+              fs.writeFileSync('cdn/importmap-latest-dev.json', devImportmap);
+            } else if (!fs.existsSync('cdn/importmap-latest-dev.json')) {
+              // If latest-dev doesn't exist yet, create it
+              fs.writeFileSync('cdn/importmap-latest-dev.json', devImportmap);
+            }
+          "
+
+          # Create development importmap loader
+          cp scripts/helpers/importmap-loader.js cdn/importmap.js
+
+          # Create development importmap loader
+          node -e "
+            const fs = require('fs');
+
+            // Read the importmap loader
+            const loader = fs.readFileSync('cdn/importmap.js', 'utf8');
+
+            // Create a development version by changing the URL
+            const devLoader = loader.replace(
+              'https://cdn.semantic-ui.com/importmap-latest.json',
+              'https://cdn.semantic-ui.com/importmap-latest-dev.json'
+            );
+
+            // Write the development loader
+            fs.writeFileSync('cdn/importmap-dev.js', devLoader);
+          "
+
           # Create redirects for core package
           mkdir -p cdn/@semantic-ui/core
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-redirect.html.template cdn/@semantic-ui/core/index.html
           perl -i -pe "s|CORE_VERSION|$CORE_VERSION|g" cdn/@semantic-ui/core/index.html
-          
+
           # Create redirects for each package
           cd packages
           for package in */; do
             package_name=${package%/}
             pkg_version=$(node -p "require('./$package_name/package.json').version")
-            
+
             echo "Creating redirect for @semantic-ui/$package_name to version $pkg_version"
-            
+
             mkdir -p "../cdn/@semantic-ui/$package_name"
             cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-redirect.html.template "../cdn/@semantic-ui/$package_name/index.html"
             perl -i -pe "s|PACKAGE_NAME|@semantic-ui/$package_name|g" "../cdn/@semantic-ui/$package_name/index.html"
             perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/index.html"
           done
           cd ..
-          
-          # Copy the importmap loader to the CDN root with new name
-          echo "Copying importmap loader to CDN root..."
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-loader.js.template cdn/importmap.js
-          
-          # Get Lit version from renderer package dependencies
-          echo "Getting Lit version from renderer package dependencies..."
-          LIT_VERSION=$(node -e "
-            const pkg = require('./packages/renderer/package.json');
-            const litVersion = pkg.dependencies && pkg.dependencies.lit 
-              ? pkg.dependencies.lit.replace(/[^0-9.]/g, '')
-              : '3.0.0';  // fallback to stable version if not specified
-            console.log(litVersion);
-          ")
-          echo "Using Lit version: $LIT_VERSION"
-          
-          # Download and bundle Lit dependency with version directory structure
-          echo "Downloading Lit dependency from unpkg..."
-          mkdir -p cdn/lit/$LIT_VERSION
-          
-          # Use curl to download the Lit package with specific version
-          curl -s "https://www.unpkg.com/lit@$LIT_VERSION/index.js" > cdn/lit/$LIT_VERSION/index.js
-          
-          # Create an index.html file in the versioned directory from template
-          echo "Creating Lit version index.html..."
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-version-index.html.template cdn/lit/$LIT_VERSION/index.html
-          # Replace version placeholder
-          perl -i -pe "s|LIT_VERSION|$LIT_VERSION|g" cdn/lit/$LIT_VERSION/index.html
-          
-          # Create a redirect at the base path from template
-          mkdir -p cdn/lit
-          echo "Creating redirect for lit to version $LIT_VERSION"
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template cdn/lit/index.html
-          # Replace version placeholder  
-          perl -i -pe "s|LIT_VERSION|$LIT_VERSION|g" cdn/lit/index.html
-          
-          # Add Lit to our importmap
-          echo "Adding Lit to importmap..."
-          cd cdn
-          # Copy the script template for adding Lit to importmaps
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/add-lit-to-importmap.js.template add-lit-to-importmap.js
-          # Execute the script using Node with type=module flag
-          LIT_VERSION=$LIT_VERSION node add-lit-to-importmap.js
-          # Clean up
-          rm add-lit-to-importmap.js
-          cd ..
-          
-          # Create README.md for the CDN using the gh-pages README (better formatted)
+
+          # Create CNAME file for GitHub Pages
+          echo "cdn.semantic-ui.com" > cdn/CNAME
+
+          # Create README.md for the CDN using the gh-pages README
           cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/README.md cdn/README.md
           # Update the version references in the README
           sed -i "s/0.9.4/$VERSION/g" cdn/README.md
-          
-          # Create index file for the CDN root using the gh-pages version (better formatted)
+          # Correct project name
+          sed -i "s/Semantic UI Next/Semantic UI/g" cdn/README.md
+
+          # Add development information to README
+          sed -i '/## Usage/a\\n### Development Mode\n\nFor development, use our dev import maps:\n\n```html\n<!-- Development version -->\n<script src="https://cdn.semantic-ui.com/importmap-dev.js"></script>\n\n<!-- Or manually -->\n<script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest-dev.json"></script>\n```\n\nThis will load the development version of all packages, which includes more helpful warnings and debugging information.\n' cdn/README.md
+
+          # Create index file for the CDN root
           cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/index.html cdn/index.html
-          # Update version references in the index.html
+          # Update version references and correct project name
           sed -i "s/0.9.4/$VERSION/g" cdn/index.html
-          # Fix the CDN link reference - remove the /cdn/ part since files are at root now
+          sed -i "s/Semantic UI Next/Semantic UI/g" cdn/index.html
+          # Fix the CDN link reference
           sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
           sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
-          
-          # Add importmap information to the README
-          sed -i '/## Usage/a\\\n### Using Importmaps\\\n\\\nFor the best developer experience, we recommend using importmaps with Semantic UI Next. There are two main approaches:\\\n\\\n#### 1. Inline Importmap (Recommended)\\\n\\\nFor the best compatibility, inline the importmap directly in your HTML:\\\n\\\n```html\\\n<script type="importmap">\\\n{\\\n  "imports": {\\\n    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",\\\n    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",\\\n    "lit": "https://cdn.semantic-ui.com/lit/index.js"\\\n    // ... add other packages as needed\\\n  }\\\n}\\\n</script>\\\n```\\\n\\\nYou can copy the full importmap from [importmap-latest.json](https://cdn.semantic-ui.com/importmap-latest.json).\\\n\\\n#### 2. Using the Importmap Loader\\\n\\\nFor a more dynamic approach, use our importmap loader script:\\\n\\\n```html\\\n<script src="https://cdn.semantic-ui.com/importmap.js"></script>\\\n```\\\n\\\nThis automatically loads the importmap with all packages and dependencies included. You can listen for the `importmap-ready` event to know when the importmap has been loaded:\\\n\\\n```javascript\\\nwindow.addEventListener("importmap-ready", (event) => {\\\n  console.log("Importmap is ready", event.detail.importmap);\\\n  // Start importing your modules\\\n});\\\n```' cdn/README.md
+
+          # Add development mode information to the index page
+          sed -i '/<div class="message-header">New importmap loader available!<\/div>/a\<p>Development mode: <code>&lt;script src="https://cdn.semantic-ui.com/importmap-dev.js"&gt;&lt;/script&gt;</code> for debugging.</p>' cdn/index.html
+
+          # Clean up scripts directory
+          rm -rf scripts/helpers
+
       # Verify deployment structure is ready
       - name: Verify deployment structure
         run: |
           # Debug what's being deployed
           echo "Content of cdn directory (root):"
           ls -la cdn/
-          
+
           # Verify CNAME file exists
           if [ ! -f "cdn/CNAME" ]; then
             echo "CNAME file missing, creating it"
             echo "cdn.semantic-ui.com" > cdn/CNAME
           fi
-          
+
           if [ -d "cdn/@semantic-ui" ]; then
             echo "Content of cdn/@semantic-ui:"
             ls -la cdn/@semantic-ui/ | head -n 10

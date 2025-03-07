@@ -1,0 +1,31 @@
+/**
+ * Script to get the version of a specific dependency
+ * Usage: node get-dependency-version.js <dependency-name>
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+// Get dependency name from command line args
+const dependencyName = process.argv[2];
+
+if (!dependencyName) {
+  console.error('No dependency name provided');
+  console.log('unknown'); // Output fallback for shell script
+  process.exit(1);
+}
+
+try {
+  const depPkgPath = path.join('./node_modules', dependencyName, 'package.json');
+
+  if (fs.existsSync(depPkgPath)) {
+    const depPkg = require(depPkgPath);
+    console.log(depPkg.version || 'unknown');
+  } else {
+    console.error(`Package ${dependencyName} not found`);
+    console.log('unknown');
+  }
+} catch (err) {
+  console.error(`Error getting version for ${dependencyName}:`, err.message);
+  console.log('unknown');
+}
