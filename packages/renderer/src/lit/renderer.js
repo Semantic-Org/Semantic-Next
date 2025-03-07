@@ -323,15 +323,16 @@ export class LitRenderer {
       // unbundle subtemplate/snippet data bundled in getPackedNodeData
       // functions with no parameters are safe to evaluate
       each(values, (value, index) => {
+        /* Rollback change until fix reactivity issues
         if (value instanceof Signal) {
           Object.defineProperty(values, index, {
             get() {
-              return value.peek();
+              return value.get();
             },
             configurable: true,
             enumerable: true
           });
-        }
+        }*/
         if (isFunction(value) && value.length === 0 && !value.name) {
           Object.defineProperty(values, index, {
             get() {
