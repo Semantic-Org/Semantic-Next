@@ -26,18 +26,50 @@ try {
   const importmapText = fs.readFileSync(importmapPath, 'utf8');
   const importmap = JSON.parse(importmapText);
   
-  // Create a development version by modifying paths
-  const devImportmapText = importmapText
-    .replace(new RegExp(`/lit/${litVersion}/`, 'g'), `/lit/${litVersion}/development/`)
-    .replace(new RegExp(`/(@semantic-ui/[^/]+/[^/]+)/([^"]+)`, 'g'), '/$1/development/$2');
-  
-  // Parse back to object to make sure it's valid JSON
-  const devImportmap = JSON.parse(devImportmapText);
-  
+  // Create a development version by modifying paths for all entries
+  const devImportmap = {
+    imports: {}
+  };
+
+  // Process each import and replace with development version if available
+  for (const [key, value] of Object.entries(importmap.imports)) {
+    // For Lit modules
+    if (key === 'lit' || value.includes(`/lit/${litVersion}/`)) {
+      devImportmap.imports[key] = value.replace(`/lit/${litVersion}/`, `/lit/${litVersion}/development/`);
+    }
+    // For @semantic-ui packages
+    else if (key.startsWith('@semantic-ui/')) {
+      const parts = key.split('/');
+      const packageName = parts[1];
+      const packageVersion = value.match(/\/@semantic-ui\/[^\/]+\/([^\/]+)/)[1];
+
+      // Update to use development folder if it exists
+      devImportmap.imports[key] = value.replace(
+        `/@semantic-ui/${packageName}/${packageVersion}/`,
+        `/@semantic-ui/${packageName}/${packageVersion}/development/`
+      );
+    }
+    // For Lit dependencies and other packages
+    else {
+      // Attempt to add /development/ to path if it's a dependency
+      const match = value.match(/\/([^\/]+)\/([^\/]+)\/([^\/]+)/);
+      if (match) {
+        const [, packageName, packageVersion, entry] = match;
+        devImportmap.imports[key] = value.replace(
+          `/${packageName}/${packageVersion}/`,
+          `/${packageName}/${packageVersion}/development/`
+        );
+      } else {
+        // If we can't determine structure, just copy as-is
+        devImportmap.imports[key] = value;
+      }
+    }
+  }
+
   // Write the development importmap
   fs.writeFileSync(path.join('./cdn', `importmap-${version}-dev.json`), JSON.stringify(devImportmap, null, 2));
   console.log(`Created importmap-${version}-dev.json`);
-  
+
   // If this is not a pre-release, also update the latest-dev.json
   if (!version.includes('-')) {
     fs.writeFileSync(path.join('./cdn', 'importmap-latest-dev.json'), JSON.stringify(devImportmap, null, 2));
@@ -47,6 +79,10 @@ try {
     fs.writeFileSync(path.join('./cdn', 'importmap-latest-dev.json'), JSON.stringify(devImportmap, null, 2));
     console.log('Created initial importmap-latest-dev.json');
   }
+
+  // Log the final imports for verification
+  console.log('Final development importmap imports:');
+  console.log(JSON.stringify(devImportmap.imports, null, 2));
 } catch (err) {
   console.error('Error creating development importmap:', err.message);
   process.exit(1);

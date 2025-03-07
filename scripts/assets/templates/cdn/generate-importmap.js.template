@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { resolveEntry } from './resolve-entry.js';
 
 // Set up dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -11,6 +10,9 @@ const __dirname = path.dirname(__filename);
 const coreVersion = process.env.CORE_VERSION;
 const version = process.env.VERSION;
 const litVersion = process.env.LIT_VERSION || '3.2.1';
+
+// Import the entry resolver
+import { resolveEntry } from './resolve-entry.js';
 
 // Create the importmap object
 const importmap = {
@@ -52,24 +54,61 @@ try {
 
 // Add Lit dependencies to importmap
 try {
+  // Get Lit dependencies directly from node_modules directory contents
+  const litDepsDirPath = './node_modules/lit/node_modules';
+  if (fs.existsSync(litDepsDirPath)) {
+    const potentialDeps = fs.readdirSync(litDepsDirPath)
+      .filter(dir => fs.statSync(path.join(litDepsDirPath, dir)).isDirectory())
+      .filter(dir => !dir.startsWith('.'));
+
+    console.log(`Found potential direct Lit dependencies: ${potentialDeps.join(', ')}`);
+
+    for (const dep of potentialDeps) {
+      try {
+        const depPath = path.join(litDepsDirPath, dep, 'package.json');
+        if (fs.existsSync(depPath)) {
+          const depPkgText = fs.readFileSync(depPath, 'utf8');
+          const depPkg = JSON.parse(depPkgText);
+
+          const depVersion = depPkg.version;
+          const depEntry = resolveEntry(depPkg);
+
+          importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
+          console.log(`Added direct Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
+        }
+      } catch (err) {
+        console.error(`Error processing direct dependency ${dep}:`, err.message);
+      }
+    }
+  } else {
+    console.log('Lit dependencies not found in node_modules subdirectory, trying package.json');
+  }
+
+  // Also check package.json in case dependencies are hoisted
   const litPkgPath = './node_modules/lit/package.json';
   if (fs.existsSync(litPkgPath)) {
     const litPkgText = fs.readFileSync(litPkgPath, 'utf8');
     const litPkg = JSON.parse(litPkgText);
 
     if (litPkg.dependencies) {
+      console.log(`Found dependencies in lit package.json: ${Object.keys(litPkg.dependencies).join(', ')}`);
+
       for (const [dep, depVersionReq] of Object.entries(litPkg.dependencies)) {
         try {
-          const depPath = path.join('./node_modules', dep, 'package.json');
-          if (fs.existsSync(depPath)) {
-            const depPkgText = fs.readFileSync(depPath, 'utf8');
+          // Try to find at root node_modules first (hoisted dependencies)
+          const depRootPath = path.join('./node_modules', dep, 'package.json');
+          if (fs.existsSync(depRootPath)) {
+            const depPkgText = fs.readFileSync(depRootPath, 'utf8');
             const depPkg = JSON.parse(depPkgText);
 
             const depVersion = depPkg.version;
             const depEntry = resolveEntry(depPkg);
 
-            importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
-            console.log(`Added Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
+            // Only add if not already in importmap
+            if (!importmap.imports[dep]) {
+              importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
+              console.log(`Added hoisted Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
+            }
           }
         } catch (err) {
           console.error(`Error processing dependency ${dep}:`, err.message);
@@ -84,6 +123,10 @@ try {
 // Write the importmap to the version-specific file
 fs.writeFileSync(`cdn/importmap-${version}.json`, JSON.stringify(importmap, null, 2));
 console.log(`Created importmap-${version}.json`);
+
+// Log the final imports for verification
+console.log('Final importmap imports:');
+console.log(JSON.stringify(importmap.imports, null, 2));
 
 // Optionally update the latest importmap if this is a release version (not a test/pre-release)
 if (!version.includes('-')) {
