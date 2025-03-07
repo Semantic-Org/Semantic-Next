@@ -3,15 +3,20 @@
  * Tries multiple sources in order of specificity
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // First try from package-lock.json
 let litVersion;
 try {
-  const lockfile = require('./package-lock.json');
+  const lockfileText = fs.readFileSync('./package-lock.json', 'utf8');
+  const lockfile = JSON.parse(lockfileText);
   const rendererPath = './node_modules/@semantic-ui/renderer';
-  
+
   if (lockfile.packages && lockfile.packages[rendererPath]) {
     const rendererPkg = lockfile.packages[rendererPath];
     if (rendererPkg.dependencies && rendererPkg.dependencies.lit) {
@@ -26,7 +31,8 @@ try {
 // Fallback to package.json in renderer package
 if (!litVersion) {
   try {
-    const rendererPkg = require('./packages/renderer/package.json');
+    const rendererPkgText = fs.readFileSync('./packages/renderer/package.json', 'utf8');
+    const rendererPkg = JSON.parse(rendererPkgText);
     if (rendererPkg.dependencies && rendererPkg.dependencies.lit) {
       litVersion = rendererPkg.dependencies.lit;
       litVersion = litVersion.replace(/[^0-9.]/g, '');
@@ -41,7 +47,8 @@ if (!litVersion) {
   try {
     const litPkgPath = path.join('./node_modules/lit/package.json');
     if (fs.existsSync(litPkgPath)) {
-      const litPkg = require(litPkgPath);
+      const litPkgText = fs.readFileSync(litPkgPath, 'utf8');
+      const litPkg = JSON.parse(litPkgText);
       litVersion = litPkg.version;
     }
   } catch (e) {

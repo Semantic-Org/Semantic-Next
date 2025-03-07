@@ -1,79 +1,89 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
+import { resolveEntry } from './resolve-entry.js';
 
 // Set up dirname equivalent for ES modules
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Create a require function for loading JSON
-const require = createRequire(import.meta.url);
-
-// Load the entry resolver
-const { resolveEntry } = require('./resolve-entry.js');
-
-// Get package versions and entry points
-const packagesDir = path.join(dirname, 'packages');
-const packages = fs.readdirSync(packagesDir).filter(pkg =>
-  fs.statSync(path.join(packagesDir, pkg)).isDirectory()
-);
-
-// Get core version from environment variable
+// Access environment variables
 const coreVersion = process.env.CORE_VERSION;
 const version = process.env.VERSION;
-
-// Get the Lit version from the environment variable
-const litVersion = process.env.LIT_VERSION || '3.0.0';
+const litVersion = process.env.LIT_VERSION || '3.2.1';
 
 // Create the importmap object
 const importmap = {
   imports: {
-    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/${process.env.CORE_ENTRY}`,
-    // Add Lit dependency with version path
+    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/index.js`,
     'lit': `https://cdn.semantic-ui.com/lit/${litVersion}/index.js`
   }
 };
 
-// Add Lit dependencies to importmap
+// Read and process packages directory to get all Semantic UI packages
+const packagesDir = path.join('./packages');
 try {
-  const litPackageJson = require(path.join(dirname, 'node_modules/lit/package.json'));
-  if (litPackageJson.dependencies) {
-    Object.keys(litPackageJson.dependencies).forEach(dep => {
-      try {
-        const depPath = path.join(dirname, 'node_modules', dep, 'package.json');
-        if (fs.existsSync(depPath)) {
-          const depPackageJson = require(depPath);
-          const depVersion = depPackageJson.version;
-          const depEntry = resolveEntry(depPackageJson);
-          importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
-          console.log(`Added Lit dependency: ${dep}@${depVersion}`);
-        }
-      } catch (err) {
-        console.error(`Error processing dependency ${dep}: ${err.message}`);
-      }
-    });
+  const packages = fs.readdirSync(packagesDir)
+    .filter(pkg => fs.statSync(path.join(packagesDir, pkg)).isDirectory());
+
+  // Process each Semantic UI package
+  for (const pkg of packages) {
+    try {
+      const packageJsonPath = path.join(packagesDir, pkg, 'package.json');
+      const packageText = fs.readFileSync(packageJsonPath, 'utf8');
+      const packageData = JSON.parse(packageText);
+      const packageVersion = packageData.version;
+
+      // Get the entry point using our resolver
+      const entry = resolveEntry(packageData);
+
+      // Add to importmap
+      importmap.imports[`@semantic-ui/${pkg}`] =
+        `https://cdn.semantic-ui.com/@semantic-ui/${pkg}/${packageVersion}/${entry}`;
+
+      console.log(`Added @semantic-ui/${pkg}@${packageVersion} (${entry}) to importmap`);
+    } catch (err) {
+      console.error(`Error processing package ${pkg}:`, err.message);
+    }
   }
 } catch (err) {
-  console.error(`Error processing Lit dependencies: ${err.message}`);
+  console.error('Error reading packages directory:', err.message);
 }
 
-// Add each package to the importmap
-packages.forEach(pkg => {
-  const packageJsonPath = path.join(packagesDir, pkg, 'package.json');
-  const packageData = require(packageJsonPath);
-  const packageVersion = packageData.version;
+// Add Lit dependencies to importmap
+try {
+  const litPkgPath = './node_modules/lit/package.json';
+  if (fs.existsSync(litPkgPath)) {
+    const litPkgText = fs.readFileSync(litPkgPath, 'utf8');
+    const litPkg = JSON.parse(litPkgText);
 
-  // Get the entry point using the resolver
-  const entry = resolveEntry(packageData);
+    if (litPkg.dependencies) {
+      for (const [dep, depVersionReq] of Object.entries(litPkg.dependencies)) {
+        try {
+          const depPath = path.join('./node_modules', dep, 'package.json');
+          if (fs.existsSync(depPath)) {
+            const depPkgText = fs.readFileSync(depPath, 'utf8');
+            const depPkg = JSON.parse(depPkgText);
 
-  // Add to importmap
-  importmap.imports[`@semantic-ui/${pkg}`] =
-    `https://cdn.semantic-ui.com/@semantic-ui/${pkg}/${packageVersion}/${entry}`;
-});
+            const depVersion = depPkg.version;
+            const depEntry = resolveEntry(depPkg);
+
+            importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
+            console.log(`Added Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
+          }
+        } catch (err) {
+          console.error(`Error processing dependency ${dep}:`, err.message);
+        }
+      }
+    }
+  }
+} catch (err) {
+  console.error('Error processing Lit dependencies:', err.message);
+}
 
 // Write the importmap to the version-specific file
 fs.writeFileSync(`cdn/importmap-${version}.json`, JSON.stringify(importmap, null, 2));
+console.log(`Created importmap-${version}.json`);
 
 // Optionally update the latest importmap if this is a release version (not a test/pre-release)
 if (!version.includes('-')) {

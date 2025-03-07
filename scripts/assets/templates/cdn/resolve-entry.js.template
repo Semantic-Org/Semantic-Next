@@ -5,32 +5,32 @@
  * @param {Object} packageJson - The package.json contents as an object
  * @returns {string} The resolved entry point path
  */
-function resolveEntry(packageJson) {
+export function resolveEntry(packageJson) {
   // 1. Use the 'exports' field if available.
   if (packageJson.exports && packageJson.exports['.']) {
     const exportsEntry = packageJson.exports['.'];
-    
+
     // Handle object format
     if (typeof exportsEntry === 'object') {
       // Browser-specific entry takes highest priority
       if (exportsEntry.browser) return exportsEntry.browser;
-      
+
       // ESM imports for browser environments take second priority
       if (exportsEntry.import) return exportsEntry.import;
-      
+
       // Default export takes third priority
       if (exportsEntry.default) return exportsEntry.default;
-      
+
       // Check for nested browser conditions
       if (exportsEntry.module && exportsEntry.module.browser) {
         return exportsEntry.module.browser;
       }
     }
-    
+
     // Handle string format (direct export path)
     if (typeof exportsEntry === 'string') return exportsEntry;
   }
-  
+
   // 2. Fallback resolution order for traditional fields
   if (packageJson.browser) {
     // Handle both string and object formats for browser field
@@ -38,15 +38,13 @@ function resolveEntry(packageJson) {
       return packageJson.browser;
     }
   }
-  
+
   // ESM module field
   if (packageJson.module) return packageJson.module;
-  
+
   // Standard main field
   if (packageJson.main) return packageJson.main;
-  
+
   // Default fallback
   return 'index.js';
 }
-
-module.exports = { resolveEntry };

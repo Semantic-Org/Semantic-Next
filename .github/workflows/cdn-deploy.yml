@@ -65,10 +65,13 @@ jobs:
           # Copy the template files to the helpers directory
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/resolve-entry.js.template scripts/helpers/resolve-entry.js
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-loader.js.template scripts/helpers/importmap-loader.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-dev-loader.js.template scripts/helpers/importmap-dev-loader.js
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/generate-importmap.js.template scripts/helpers/generate-importmap.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/create-dev-importmap.js.template scripts/helpers/create-dev-importmap.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/create-dev-loader.js.template scripts/helpers/create-dev-loader.js
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/latest-redirect.html.template scripts/helpers/latest-redirect.html.template
 
-          # Copy script templates for package handling
+          # Copy script templates for package handling (all ESM versions)
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-version.js.template scripts/helpers/get-lit-version.js
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-dependencies.js.template scripts/helpers/get-lit-dependencies.js
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-dependency-version.js.template scripts/helpers/get-dependency-version.js
@@ -191,41 +194,16 @@ jobs:
 
             echo "Processing @semantic-ui/$package_name v$pkg_version"
 
-            # Create directory in CDN structure including latest and development
+            # Create directory in CDN structure including latest
             mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
             mkdir -p "../cdn/@semantic-ui/$package_name/latest"
-            mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/development"
+
+            # Copy entire package directory
+            cp -R "./$package_name/"* "../cdn/@semantic-ui/$package_name/$pkg_version/"
 
             # Get entry point using resolution script
             pkg_entry=$(node ../scripts/helpers/resolve-package-entry.js "./$package_name")
             echo "$package_name entry resolved to: $pkg_entry"
-
-            # Get files to publish from package.json
-            files_array=$(node ../scripts/helpers/get-package-files.js "./$package_name")
-
-            # Copy each directory/file from the files array
-            for file_entry in $files_array; do
-              if [ -e "$package_name/$file_entry" ]; then
-                if [ -d "$package_name/$file_entry" ]; then
-                  # It's a directory, preserve the directory structure exactly
-                  mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry"
-                  # Use cp -R to copy recursively, preserving the structure
-                  cp -R "$package_name/$file_entry" "../cdn/@semantic-ui/$package_name/$pkg_version/$(dirname "$file_entry")/"
-                else
-                  # It's a file, make sure its directory exists
-                  dir_path=$(dirname "$file_entry")
-                  mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version/$dir_path"
-                  # Copy the file to the correct path
-                  cp "$package_name/$file_entry" "../cdn/@semantic-ui/$package_name/$pkg_version/$file_entry"
-                fi
-                echo "Copied $file_entry for $package_name"
-              else
-                echo "Warning: $file_entry specified in package.json for $package_name but not found"
-              fi
-            done
-
-            # Copy the actual package.json file
-            cp "$package_name/package.json" "../cdn/@semantic-ui/$package_name/$pkg_version/package.json"
 
             # Create index.js and index.html files using templates
             cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-index.js.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
@@ -244,7 +222,7 @@ jobs:
           done
           cd ..
 
-          # Generate both production and development importmaps
+          # Generate production importmap
           echo "Generating importmaps for version $VERSION"
 
           # Set environment variables for importmap generation
@@ -253,52 +231,17 @@ jobs:
           export CORE_ENTRY=$core_entry
           export LIT_VERSION=$LIT_VERSION
 
-          # Create production importmap
+          # Run the importmap generation script
           node scripts/helpers/generate-importmap.js
 
-          # Create development importmap (duplicate and modify the production one)
-          node -e "
-            const fs = require('fs');
+          # Create development importmap
+          node scripts/helpers/create-dev-importmap.js
 
-            // Read the production importmap
-            const importmap = JSON.parse(fs.readFileSync('cdn/importmap-${VERSION}.json', 'utf8'));
-
-            // Create a development version by modifying paths
-            const devImportmap = JSON.stringify(importmap)
-              .replace(/\\/lit\\/${LIT_VERSION}\\//g, '/lit/${LIT_VERSION}/development/')
-              .replace(/\\/(@semantic-ui\\/[^/]+\\/[^/]+)\\/([^\"]+)/g, '/$1/development/$2');
-
-            // Write the development importmap
-            fs.writeFileSync('cdn/importmap-${VERSION}-dev.json', devImportmap);
-
-            // If this is not a pre-release, also update the latest-dev.json
-            if (!('${VERSION}'.includes('-'))) {
-              fs.writeFileSync('cdn/importmap-latest-dev.json', devImportmap);
-            } else if (!fs.existsSync('cdn/importmap-latest-dev.json')) {
-              // If latest-dev doesn't exist yet, create it
-              fs.writeFileSync('cdn/importmap-latest-dev.json', devImportmap);
-            }
-          "
-
-          # Create development importmap loader
+          # Copy the enhanced importmap loader to CDN root
           cp scripts/helpers/importmap-loader.js cdn/importmap.js
 
-          # Create development importmap loader
-          node -e "
-            const fs = require('fs');
-
-            // Read the importmap loader
-            const loader = fs.readFileSync('cdn/importmap.js', 'utf8');
-
-            // Create a development version by changing the URL
-            const devLoader = loader.replace(
-              'https://cdn.semantic-ui.com/importmap-latest.json',
-              'https://cdn.semantic-ui.com/importmap-latest-dev.json'
-            );
-
-            // Write the development loader
-            fs.writeFileSync('cdn/importmap-dev.js', devLoader);
-          "
+          # Create development loader
+          node scripts/helpers/create-dev-loader.js
 
           # Create redirects for core package
           mkdir -p cdn/@semantic-ui/core
