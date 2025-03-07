@@ -1,0 +1,53 @@
+/**
+ * Script to create a development version of the importmap
+ * Usage: node create-dev-importmap.js [version]
+ */
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Get version from environment variable or command line
+const version = process.env.VERSION || process.argv[2];
+
+if (!version) {
+  console.error('No version provided');
+  process.exit(1);
+}
+
+const litVersion = process.env.LIT_VERSION || '3.2.1';
+
+try {
+  // Read the production importmap
+  const importmapPath = path.join('./cdn', `importmap-${version}.json`);
+  const importmapText = fs.readFileSync(importmapPath, 'utf8');
+  const importmap = JSON.parse(importmapText);
+  
+  // Create a development version by modifying paths
+  const devImportmapText = importmapText
+    .replace(new RegExp(`/lit/${litVersion}/`, 'g'), `/lit/${litVersion}/development/`)
+    .replace(new RegExp(`/(@semantic-ui/[^/]+/[^/]+)/([^"]+)`, 'g'), '/$1/development/$2');
+  
+  // Parse back to object to make sure it's valid JSON
+  const devImportmap = JSON.parse(devImportmapText);
+  
+  // Write the development importmap
+  fs.writeFileSync(path.join('./cdn', `importmap-${version}-dev.json`), JSON.stringify(devImportmap, null, 2));
+  console.log(`Created importmap-${version}-dev.json`);
+  
+  // If this is not a pre-release, also update the latest-dev.json
+  if (!version.includes('-')) {
+    fs.writeFileSync(path.join('./cdn', 'importmap-latest-dev.json'), JSON.stringify(devImportmap, null, 2));
+    console.log('Updated importmap-latest-dev.json');
+  } else if (!fs.existsSync(path.join('./cdn', 'importmap-latest-dev.json'))) {
+    // If latest-dev doesn't exist yet, create it
+    fs.writeFileSync(path.join('./cdn', 'importmap-latest-dev.json'), JSON.stringify(devImportmap, null, 2));
+    console.log('Created initial importmap-latest-dev.json');
+  }
+} catch (err) {
+  console.error('Error creating development importmap:', err.message);
+  process.exit(1);
+}

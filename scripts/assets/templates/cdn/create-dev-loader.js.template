@@ -1,0 +1,51 @@
+/**
+ * Script to create the development version of the importmap loader
+ */
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+try {
+  // Read the importmap loader
+  const loaderPath = path.join('./cdn', 'importmap.js');
+  const loader = fs.readFileSync(loaderPath, 'utf8');
+  
+  // Create a development version by changing the URL and adding dev mode indicators
+  const devLoader = loader
+    .replace(
+      'https://cdn.semantic-ui.com/importmap-latest.json',
+      'https://cdn.semantic-ui.com/importmap-latest-dev.json'
+    )
+    .replace(
+      'Semantic UI ImportMap Loader',
+      'Semantic UI Development ImportMap Loader'
+    )
+    .replace(
+      'Error loading Semantic UI importmap:',
+      'Error loading Semantic UI development importmap:'
+    )
+    .replace(
+      'detail: { importmap }',
+      'detail: { importmap, mode: "development" }'
+    )
+    .replace(
+      'Semantic UI importmap loaded successfully.',
+      'Semantic UI development importmap loaded successfully. Development mode enabled.'
+    )
+    // Add console info message before the fetch
+    .replace(
+      'fetch(\'https://cdn.semantic-ui.com/importmap-latest',
+      'console.info(\'Loading Semantic UI development importmap for enhanced debugging\');\n\n  // Fetch the importmap from the CDN\n  fetch(\'https://cdn.semantic-ui.com/importmap-latest'
+    );
+  
+  // Write the development loader
+  fs.writeFileSync(path.join('./cdn', 'importmap-dev.js'), devLoader);
+  console.log('Created importmap-dev.js');
+} catch (err) {
+  console.error('Error creating development importmap loader:', err.message);
+  process.exit(1);
+}
