@@ -1,9 +1,9 @@
-<h2>Collection</h2>
+<h2>Array (Basic)</h2>
 {#each numbers}
   <li>{this}</li>
 {/each}
 
-<h2>Collection (each/in)</h2>
+<h2>Array (each/in)</h2>
 <table>
   <thead>
     <th>Number</th>
@@ -21,7 +21,24 @@
   </tbody>
 </table>
 
-<h2>Collection (each/as)</h2>
+<h2>Object (each/in)</h2>
+<table>
+  <thead>
+    <th>Trait</th>
+    <th>Value</th>
+  </thead>
+  <tbody>
+  {#each value in person}
+    <tr>
+      <td>{titleCase key}</td>
+      <td>{value}</td>
+    </tr>
+  {/each}
+  </tbody>
+</table>
+
+
+<h2>Array (each/as)</h2>
 <table>
   <thead>
     <th>Number</th>
@@ -59,41 +76,6 @@
       <td>{idx + 1}</td>
       <td>{fruit.name}</td>
       <td>{fruit.taste}</td>
-    </tr>
-  {/each}
-  </tbody>
-</table>
-
-<h2>Collection (each)</h2>
-<table>
-  <thead>
-    <th>Number</th>
-    <th>Fruit</th>
-    <th>Taste</th>
-  </thead>
-  <tbody>
-  {#each fruits}
-    <tr>
-      <td>{numberFromIndex index}</td>
-      <td>{name}</td>
-      <td>{taste}</td>
-    </tr>
-  {/each}
-  </tbody>
-</table>
-
-
-<h2>Collection (object)</h2>
-<table>
-  <thead>
-    <th>Trait</th>
-    <th>Value</th>
-  </thead>
-  <tbody>
-  {#each value in person}
-    <tr>
-      <td>{titleCase key}</td>
-      <td>{value}</td>
     </tr>
   {/each}
   </tbody>
