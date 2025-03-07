@@ -1,22 +1,52 @@
 /**
- * Script to resolve the best entry point for a package
- * Uses the resolveEntry function from resolve-entry.js
+ * Resolves the best entry point for a package based on standard package.json fields
+ * Prioritizes browser-friendly entry points.
  * 
- * Usage: node resolve-package-entry.js [package-path]
- * If no path is provided, assumes current directory
+ * @param {Object} packageJson - The package.json contents as an object
+ * @returns {string} The resolved entry point path
  */
-
-const path = require('path');
-const { resolveEntry } = require('./resolve-entry.js');
-
-// Get package path from command line args or default to current directory
-const packagePath = process.argv[2] || '.';
-
-try {
-  const pkg = require(path.join(packagePath, 'package.json'));
-  const entry = resolveEntry(pkg);
-  console.log(entry);
-} catch (err) {
-  console.error('Error resolving entry point:', err.message);
-  console.log('index.js'); // Default fallback
+function resolveEntry(packageJson) {
+  // 1. Use the 'exports' field if available.
+  if (packageJson.exports && packageJson.exports['.']) {
+    const exportsEntry = packageJson.exports['.'];
+    
+    // Handle object format
+    if (typeof exportsEntry === 'object') {
+      // Browser-specific entry takes highest priority
+      if (exportsEntry.browser) return exportsEntry.browser;
+      
+      // ESM imports for browser environments take second priority
+      if (exportsEntry.import) return exportsEntry.import;
+      
+      // Default export takes third priority
+      if (exportsEntry.default) return exportsEntry.default;
+      
+      // Check for nested browser conditions
+      if (exportsEntry.module && exportsEntry.module.browser) {
+        return exportsEntry.module.browser;
+      }
+    }
+    
+    // Handle string format (direct export path)
+    if (typeof exportsEntry === 'string') return exportsEntry;
+  }
+  
+  // 2. Fallback resolution order for traditional fields
+  if (packageJson.browser) {
+    // Handle both string and object formats for browser field
+    if (typeof packageJson.browser === 'string') {
+      return packageJson.browser;
+    }
+  }
+  
+  // ESM module field
+  if (packageJson.module) return packageJson.module;
+  
+  // Standard main field
+  if (packageJson.main) return packageJson.main;
+  
+  // Default fallback
+  return 'index.js';
 }
+
+module.exports = { resolveEntry };
