@@ -16,6 +16,7 @@ const mode = process.env.BUILD_ENV || 'production';
 import { resolveEntry } from './resolve-entry.js';
 
 // Create the importmap object
+// Since we're rewriting imports directly in files, we only need top-level package mappings
 const importmap = {
   imports: {
     '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/index.js`,

@@ -96,7 +96,8 @@
   },
   "ciDependencies": {
     "axios": "^1.6.8",
-    "decompress": "^4.2.1"
+    "decompress": "^4.2.1",
+    "glob": "^10.3.10"
   },
   "workspaces": [
     "packages/*",

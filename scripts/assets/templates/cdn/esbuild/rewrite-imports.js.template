@@ -1,0 +1,177 @@
+/**
+ * Script to rewrite imports in package files to use absolute CDN URLs
+ * 
+ * This allows bare imports like 'import { html } from "lit"' to work
+ * without needing explicit importmap entries for every nested dependency.
+ */
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { build } from 'esbuild';
+import glob from 'glob';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Access environment variables
+const version = process.env.VERSION;
+const cdnUrl = process.env.CDN_URL || 'https://cdn.semantic-ui.com';
+
+// Target directory to process
+const argv = process.argv.slice(2);
+const targetDir = argv[0];
+
+if (!targetDir) {
+  console.error('No target directory specified');
+  process.exit(1);
+}
+
+// Validate directories exist
+if (!fs.existsSync(targetDir)) {
+  console.error(`Target directory does not exist: ${targetDir}`);
+  process.exit(1);
+}
+
+// Config
+const tmpDir = path.join(process.cwd(), 'tmp-cdn-build');
+
+// Ensure tmp dir exists
+if (!fs.existsSync(tmpDir)) {
+  fs.mkdirSync(tmpDir, { recursive: true });
+}
+
+// Get package info from directory path
+function getPackageInfo(filePath) {
+  // Extract package info from path
+  // Expected format: cdn/@scope/package/version/...
+  const parts = filePath.split(path.sep);
+  const cdnIndex = parts.findIndex(part => part === 'cdn');
+  
+  if (cdnIndex === -1 || parts.length < cdnIndex + 4) {
+    return null;
+  }
+  
+  const scope = parts[cdnIndex + 1].startsWith('@') ? parts[cdnIndex + 1] : null;
+  const packageName = scope ? parts[cdnIndex + 2] : parts[cdnIndex + 1];
+  const packageVersion = scope ? parts[cdnIndex + 3] : parts[cdnIndex + 2];
+  
+  return {
+    scope,
+    packageName,
+    packageVersion,
+    fullName: scope ? `${scope}/${packageName}` : packageName
+  };
+}
+
+// Rewrite imports in a file
+async function rewriteFile(filePath) {
+  try {
+    // Skip non-JS files
+    if (!filePath.endsWith('.js') && !filePath.endsWith('.mjs')) {
+      return;
+    }
+
+    // Get package info from file path
+    const packageInfo = getPackageInfo(filePath);
+    if (!packageInfo) {
+      console.warn(`Could not determine package info for ${filePath}`);
+      return;
+    }
+
+    // Generate output file path (preserving directory structure)
+    const relativePath = path.relative(targetDir, filePath);
+    const outputPath = path.join(tmpDir, relativePath);
+    
+    // Ensure output directory exists
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+    // Use esbuild to transform the file
+    await build({
+      entryPoints: [filePath],
+      outfile: outputPath,
+      bundle: false,
+      format: 'esm',
+      write: true,
+      plugins: [
+        {
+          name: 'cdn-url-plugin',
+          setup(build) {
+            // Handle bare imports by rewriting to CDN URLs
+            build.onResolve({ filter: /^[^./]/ }, args => {
+              // Skip builtin Node.js modules
+              if (args.path.startsWith('node:')) {
+                return;
+              }
+              
+              let importPath = args.path;
+              
+              // Handle submodule imports (e.g., lit/directive.js)
+              const parts = importPath.split('/');
+              const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
+              const subPath = parts[0].startsWith('@') ? parts.slice(2).join('/') : parts.slice(1).join('/');
+              
+              // Get version from the nearest package.json if possible, otherwise use packageInfo.packageVersion
+              let importVersion = packageInfo.packageVersion;
+              
+              // Build the CDN URL
+              let cdnImportPath = `${cdnUrl}/${pkgName}/${importVersion}`;
+              
+              if (subPath) {
+                cdnImportPath += `/${subPath}`;
+              } else {
+                // Default to index.js if no subpath
+                cdnImportPath += '/index.js';
+              }
+              
+              return {
+                path: cdnImportPath,
+                external: true
+              };
+            });
+          }
+        }
+      ],
+      logLevel: 'info'
+    });
+
+    console.log(`Processed: ${filePath} -> ${outputPath}`);
+    
+    // Copy the output back to the original location
+    fs.copyFileSync(outputPath, filePath);
+    
+  } catch (error) {
+    console.error(`Error processing ${filePath}:`, error);
+  }
+}
+
+// Process all JS files in the target directory
+async function processDirectory() {
+  try {
+    // Find all JS files
+    const jsFiles = glob.sync('**/*.js', { 
+      cwd: targetDir,
+      absolute: true
+    });
+    
+    console.log(`Found ${jsFiles.length} JS files to process in ${targetDir}`);
+    
+    // Process files in parallel with a concurrency limit
+    const concurrency = 10;
+    for (let i = 0; i < jsFiles.length; i += concurrency) {
+      const batch = jsFiles.slice(i, i + concurrency);
+      await Promise.all(batch.map(rewriteFile));
+    }
+    
+    console.log('Import rewriting completed');
+  } catch (error) {
+    console.error('Error processing directory:', error);
+    process.exit(1);
+  } finally {
+    // Clean up tmp directory
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// Run the script
+processDirectory();

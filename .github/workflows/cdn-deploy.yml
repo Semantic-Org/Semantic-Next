@@ -235,6 +235,24 @@ jobs:
           done
           cd ..
 
+          # Rewrite imports to use absolute CDN URLs
+          echo "Rewriting imports for CDN compatibility..."
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/esbuild/rewrite-imports.js.template scripts/helpers/rewrite-imports.js
+          
+          # esbuild and glob are already installed as devDependencies
+          
+          # Process each package directory to rewrite imports
+          export CDN_URL="https://cdn.semantic-ui.com"
+          export VERSION=$VERSION
+          node scripts/helpers/rewrite-imports.js ./cdn/@semantic-ui
+          node scripts/helpers/rewrite-imports.js ./cdn/lit
+          # Process Lit dependencies 
+          for dep in $LIT_DEPS; do
+            if [ -d "./cdn/$dep" ]; then
+              node scripts/helpers/rewrite-imports.js "./cdn/$dep"
+            fi
+          done
+          
           # Generate production importmap
           echo "Generating importmaps for version $VERSION"
 
