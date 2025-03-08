@@ -18,7 +18,7 @@ if (!version) {
   process.exit(1);
 }
 
-const litVersion = process.env.LIT_VERSION || '3.2.1';
+const litVersion = process.env.LIT_VERSION;
 
 try {
   // Read the production importmap

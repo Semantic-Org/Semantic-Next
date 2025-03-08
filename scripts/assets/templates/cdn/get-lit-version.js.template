@@ -56,5 +56,10 @@ if (!litVersion) {
   }
 }
 
-// Output the version or fallback to a stable version
-console.log(litVersion || '3.2.1');
+if (!litVersion) {
+  console.error('Could not determine Lit version from any source');
+  process.exit(1);
+}
+
+// Output the version
+console.log(litVersion);

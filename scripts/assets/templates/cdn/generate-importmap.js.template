@@ -9,7 +9,8 @@ const __dirname = path.dirname(__filename);
 // Access environment variables
 const coreVersion = process.env.CORE_VERSION;
 const version = process.env.VERSION;
-const litVersion = process.env.LIT_VERSION || '3.2.1';
+const litVersion = process.env.LIT_VERSION;
+const mode = process.env.BUILD_ENV || 'production';
 
 // Import the entry resolver
 import { resolveEntry } from './resolve-entry.js';
@@ -37,7 +38,7 @@ try {
       const packageVersion = packageData.version;
 
       // Get the entry point using our resolver
-      const entry = resolveEntry(packageData);
+      const entry = resolveEntry(packageData, mode);
 
       // Add to importmap
       importmap.imports[`@semantic-ui/${pkg}`] =
@@ -71,7 +72,7 @@ try {
           const depPkg = JSON.parse(depPkgText);
 
           const depVersion = depPkg.version;
-          const depEntry = resolveEntry(depPkg);
+          const depEntry = resolveEntry(depPkg, mode);
 
           importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
           console.log(`Added direct Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
@@ -102,7 +103,7 @@ try {
             const depPkg = JSON.parse(depPkgText);
 
             const depVersion = depPkg.version;
-            const depEntry = resolveEntry(depPkg);
+            const depEntry = resolveEntry(depPkg, mode);
 
             // Only add if not already in importmap
             if (!importmap.imports[dep]) {

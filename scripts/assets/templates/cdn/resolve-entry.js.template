@@ -1,50 +1,184 @@
 /**
- * Resolves the best entry point for a package based on standard package.json fields
- * Prioritizes browser-friendly entry points.
+ * Resolves the best entry point for a package based on modern package.json fields
+ * Prioritizes browser-compatible ES modules entry points.
+ * 
+ * Based on CDN best practices from Skypack, Unpkg, and jsDelivr
  * 
  * @param {Object} packageJson - The package.json contents as an object
+ * @param {string} [mode='production'] - Whether to resolve 'development' or 'production' entry points when available
  * @returns {string} The resolved entry point path
  */
-export function resolveEntry(packageJson) {
-  // 1. Use the 'exports' field if available.
-  if (packageJson.exports && packageJson.exports['.']) {
-    const exportsEntry = packageJson.exports['.'];
-
-    // Handle object format
-    if (typeof exportsEntry === 'object') {
-      // Browser-specific entry takes highest priority
-      if (exportsEntry.browser) return exportsEntry.browser;
-
-      // ESM imports for browser environments take second priority
-      if (exportsEntry.import) return exportsEntry.import;
-
-      // Default export takes third priority
-      if (exportsEntry.default) return exportsEntry.default;
-
-      // Check for nested browser conditions
-      if (exportsEntry.module && exportsEntry.module.browser) {
-        return exportsEntry.module.browser;
+export function resolveEntry(packageJson, mode = 'production') {
+  // For CDN purposes:
+  // - 'production' means we want the optimized/minified versions (default)
+  // - 'development' means we want the debug/unminified versions
+  const isDev = mode === 'development';
+  // Normalize the entry path - ensure we get a usable string path
+  function normalizePath(entry) {
+    if (!entry) return null;
+    
+    // Handle the case where entry is an object (exports map)
+    if (typeof entry === 'object') {
+      // Try to find a usable string path in the object
+      if (entry.browser && typeof entry.browser === 'string') {
+        return entry.browser.replace(/^\.\//, '');
+      }
+      
+      if (entry.import && typeof entry.import === 'string') {
+        return entry.import.replace(/^\.\//, '');
+      }
+      
+      if (entry.default && typeof entry.default === 'string') {
+        return entry.default.replace(/^\.\//, '');
+      }
+      
+      // If we can't find a string, return a safe fallback
+      return 'index.js';
+    }
+    
+    if (typeof entry !== 'string') return 'index.js';
+    
+    // Convert paths like "./dist/index.js" or "dist/index.js" to standard format
+    return entry.replace(/^\.\//, '');
+  }
+  
+  let entryPoint = null;
+  
+  // 1. MODERN: Check exports field first (highest priority)
+  if (packageJson.exports) {
+    const exports = packageJson.exports;
+    
+    // Handle string shorthand
+    if (typeof exports === 'string') {
+      entryPoint = normalizePath(exports);
+      if (entryPoint) return entryPoint;
+    }
+    
+    // Handle main entry point (.)
+    const mainExport = exports['.'];
+    if (mainExport) {
+      // String format
+      if (typeof mainExport === 'string') {
+        entryPoint = normalizePath(mainExport);
+        if (entryPoint) return entryPoint;
+      }
+      
+      // Object format with conditions - priority order for browser ESM
+      if (typeof mainExport === 'object') {
+        // Handle complex browser conditions (with nested development/default)
+        if (mainExport.browser) {
+          if (typeof mainExport.browser === 'string') {
+            // Simple string path
+            entryPoint = normalizePath(mainExport.browser);
+            if (entryPoint) return entryPoint;
+          } else if (typeof mainExport.browser === 'object') {
+            // Object with conditional exports (like lit-html has)
+            
+            // Pick development or default based on mode
+            const preferredKey = isDev ? 'development' : 'default';
+            
+            if (mainExport.browser[preferredKey]) {
+              entryPoint = normalizePath(mainExport.browser[preferredKey]);
+              if (entryPoint) return entryPoint;
+            }
+            
+            // Fallback to any available key if preferred not found
+            const fallbackKey = isDev ? 'default' : 'development';
+            if (mainExport.browser[fallbackKey]) {
+              entryPoint = normalizePath(mainExport.browser[fallbackKey]);
+              if (entryPoint) return entryPoint;
+            }
+            
+            // Handle nested browser.import pattern
+            if (mainExport.browser.import) {
+              entryPoint = normalizePath(mainExport.browser.import);
+              if (entryPoint) return entryPoint;
+            }
+          }
+        }
+        
+        // Handle nested import.browser pattern
+        if (mainExport.import?.browser) {
+          entryPoint = normalizePath(mainExport.import.browser);
+          if (entryPoint) return entryPoint;
+        }
+        
+        // Direct development/production export based on mode
+        if (isDev && mainExport.development) {
+          if (typeof mainExport.development === 'string') {
+            entryPoint = normalizePath(mainExport.development);
+            if (entryPoint) return entryPoint;
+          }
+          
+          // Handle nested structure
+          if (typeof mainExport.development === 'object') {
+            if (mainExport.development.browser) {
+              entryPoint = normalizePath(mainExport.development.browser);
+              if (entryPoint) return entryPoint;
+            }
+            
+            if (mainExport.development.import) {
+              entryPoint = normalizePath(mainExport.development.import);
+              if (entryPoint) return entryPoint;
+            }
+          }
+        } else if (!isDev && mainExport.production) {
+          if (typeof mainExport.production === 'string') {
+            entryPoint = normalizePath(mainExport.production);
+            if (entryPoint) return entryPoint;
+          }
+          
+          // Handle nested structure
+          if (typeof mainExport.production === 'object') {
+            if (mainExport.production.browser) {
+              entryPoint = normalizePath(mainExport.production.browser);
+              if (entryPoint) return entryPoint;
+            }
+            
+            if (mainExport.production.import) {
+              entryPoint = normalizePath(mainExport.production.import);
+              if (entryPoint) return entryPoint;
+            }
+          }
+        }
+        
+        // Basic ES modules
+        if (mainExport.import) {
+          if (typeof mainExport.import === 'string') {
+            entryPoint = normalizePath(mainExport.import);
+            if (entryPoint) return entryPoint;
+          }
+        }
+        
+        // Default condition
+        if (mainExport.default) {
+          entryPoint = normalizePath(mainExport.default);
+          if (entryPoint) return entryPoint;
+        }
       }
     }
-
-    // Handle string format (direct export path)
-    if (typeof exportsEntry === 'string') return exportsEntry;
   }
-
-  // 2. Fallback resolution order for traditional fields
-  if (packageJson.browser) {
-    // Handle both string and object formats for browser field
-    if (typeof packageJson.browser === 'string') {
-      return packageJson.browser;
-    }
+  
+  // 2. Traditional fields - browser, module, main
+  
+  // Browser field (string format)
+  if (typeof packageJson.browser === 'string') {
+    entryPoint = normalizePath(packageJson.browser);
+    if (entryPoint) return entryPoint;
   }
-
-  // ESM module field
-  if (packageJson.module) return packageJson.module;
-
+  
+  // Module field for ES modules
+  if (packageJson.module) {
+    entryPoint = normalizePath(packageJson.module);
+    if (entryPoint) return entryPoint;
+  }
+  
   // Standard main field
-  if (packageJson.main) return packageJson.main;
-
-  // Default fallback
+  if (packageJson.main) {
+    entryPoint = normalizePath(packageJson.main);
+    if (entryPoint) return entryPoint;
+  }
+  
+  // Default fallback to index.js
   return 'index.js';
 }

@@ -12,7 +12,7 @@ Import packages directly with specific versions:
 
 ```html
 <script type="module">
-  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.9.4/index.js';
+  import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/${VERSION}/index.js';
 </script>
 ```
 
@@ -25,7 +25,7 @@ For a better developer experience, use our import maps:
 <script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest.json"></script>
 
 <!-- Or specific version -->
-<script type="importmap" src="https://cdn.semantic-ui.com/importmap-0.9.4.json"></script>
+<script type="importmap" src="https://cdn.semantic-ui.com/importmap-${VERSION}.json"></script>
 
 <script type="module">
   // Now you can import without version numbers or full URLs

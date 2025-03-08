@@ -93,17 +93,15 @@ jobs:
           # Copy specified directories/files, preserving the exact directory structure
           for file_entry in $core_files_array; do
             if [ -e "$file_entry" ]; then
+              # Create target directory
+              target_dir="cdn/@semantic-ui/core/$CORE_VERSION/$(dirname "$file_entry")"
+              mkdir -p "$target_dir"
+              
+              # Copy the file or directory
               if [ -d "$file_entry" ]; then
-                # It's a directory, preserve the directory structure exactly
-                mkdir -p "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry"
-                # Use cp -R to copy recursively, preserving the structure
-                cp -R "$file_entry" "cdn/@semantic-ui/core/$CORE_VERSION/$(dirname "$file_entry")/"
+                cp -R "$file_entry" "$target_dir"/
               else
-                # It's a file, make sure its directory exists
-                dir_path=$(dirname "$file_entry")
-                mkdir -p "cdn/@semantic-ui/core/$CORE_VERSION/$dir_path"
-                # Copy the file to the correct path
-                cp "$file_entry" "cdn/@semantic-ui/core/$CORE_VERSION/$file_entry"
+                cp "$file_entry" "$target_dir"/
               fi
               echo "Copied $file_entry for core package"
             else
@@ -119,14 +117,19 @@ jobs:
           # Use perl instead of sed for better handling of special characters
           perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.js
 
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template cdn/@semantic-ui/core/$CORE_VERSION/index.html
-          perl -i -pe "s|CORE_VERSION|$CORE_VERSION|g" cdn/@semantic-ui/core/$CORE_VERSION/index.html
-          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.html
+          # Create core index.html with proper escaping
+          awk -v version="$CORE_VERSION" -v entry="$core_entry" '{
+            gsub(/CORE_VERSION/, version);
+            gsub(/CORE_ENTRY/, entry);
+            print
+          }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.html.template > cdn/@semantic-ui/core/$CORE_VERSION/index.html
 
-          # Create latest redirect for core
-          cp scripts/helpers/latest-redirect.html.template cdn/@semantic-ui/core/latest/index.html
-          perl -i -pe "s|\${VERSION}|$CORE_VERSION|g" cdn/@semantic-ui/core/latest/index.html
-          perl -i -pe "s|\${PACKAGE_NAME}|@semantic-ui/core|g" cdn/@semantic-ui/core/latest/index.html
+          # Create latest redirect for core with proper escaping
+          awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
+            gsub(/\\${VERSION}/, version); 
+            gsub(/\\${PACKAGE_NAME}/, pkgname); 
+            print
+          }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/latest/index.html
 
           # Get Lit version using the script
           echo "Determining Lit version..."
@@ -141,14 +144,18 @@ jobs:
           echo "Copying Lit from node_modules..."
           cp -R ./node_modules/lit/* cdn/lit/$LIT_VERSION/
 
-          # Create latest redirect for Lit
-          cp scripts/helpers/latest-redirect.html.template cdn/lit/latest/index.html
-          perl -i -pe "s|\${VERSION}|$LIT_VERSION|g" cdn/lit/latest/index.html
-          perl -i -pe "s|\${PACKAGE_NAME}|lit|g" cdn/lit/latest/index.html
+          # Create latest redirect for Lit with proper escaping
+          awk -v version="$LIT_VERSION" -v pkgname="lit" '{
+            gsub(/\\${VERSION}/, version); 
+            gsub(/\\${PACKAGE_NAME}/, pkgname); 
+            print
+          }' scripts/helpers/latest-redirect.html.template > cdn/lit/latest/index.html
 
-          # Also create root redirect for Lit
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template cdn/lit/index.html
-          perl -i -pe "s|LIT_VERSION|$LIT_VERSION|g" cdn/lit/index.html
+          # Also create root redirect for Lit with proper escaping
+          awk -v version="$LIT_VERSION" '{
+            gsub(/LIT_VERSION/, version); 
+            print
+          }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template > cdn/lit/index.html
 
           # Get Lit dependencies using the script
           echo "Processing Lit dependencies..."
@@ -171,15 +178,19 @@ jobs:
               # Copy entire dependency directory
               cp -R "./node_modules/$dep/"* "cdn/$dep/$DEP_VERSION/"
 
-              # Create latest redirect
-              cp scripts/helpers/latest-redirect.html.template "cdn/$dep/latest/index.html"
-              perl -i -pe "s|\${VERSION}|$DEP_VERSION|g" "cdn/$dep/latest/index.html"
-              perl -i -pe "s|\${PACKAGE_NAME}|$dep|g" "cdn/$dep/latest/index.html"
+              # Create latest redirect with proper escaping
+              awk -v version="$DEP_VERSION" -v pkgname="$dep" '{
+                gsub(/\\${VERSION}/, version);
+                gsub(/\\${PACKAGE_NAME}/, pkgname);
+                print
+              }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/latest/index.html"
 
-              # Create root redirect
-              cp scripts/helpers/latest-redirect.html.template "cdn/$dep/index.html"
-              perl -i -pe "s|\${VERSION}|$DEP_VERSION|g" "cdn/$dep/index.html"
-              perl -i -pe "s|\${PACKAGE_NAME}|$dep|g" "cdn/$dep/index.html"
+              # Create root redirect with proper escaping
+              awk -v version="$DEP_VERSION" -v pkgname="$dep" '{
+                gsub(/\\${VERSION}/, version);
+                gsub(/\\${PACKAGE_NAME}/, pkgname);
+                print
+              }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/index.html"
             fi
           done
 
@@ -215,10 +226,12 @@ jobs:
             perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
             perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
 
-            # Create latest redirect
-            cp ../scripts/helpers/latest-redirect.html.template "../cdn/@semantic-ui/$package_name/latest/index.html"
-            perl -i -pe "s|\${VERSION}|$pkg_version|g" "../cdn/@semantic-ui/$package_name/latest/index.html"
-            perl -i -pe "s|\${PACKAGE_NAME}|@semantic-ui/$package_name|g" "../cdn/@semantic-ui/$package_name/latest/index.html"
+            # Create latest redirect with proper escaping
+            awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
+              gsub(/\\${VERSION}/, version);
+              gsub(/\\${PACKAGE_NAME}/, pkgname);
+              print
+            }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/latest/index.html"
           done
           cd ..
 
@@ -243,10 +256,13 @@ jobs:
           # Create development loader
           node scripts/helpers/create-dev-loader.js
 
+          # Copy the development importmap loader to CDN root
+          cp scripts/helpers/importmap-dev-loader.js cdn/importmap-dev.js
+
           # Create redirects for core package
           mkdir -p cdn/@semantic-ui/core
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-redirect.html.template cdn/@semantic-ui/core/index.html
-          perl -i -pe "s|CORE_VERSION|$CORE_VERSION|g" cdn/@semantic-ui/core/index.html
+          # Process core-redirect template with proper escaping
+          awk -v version="$CORE_VERSION" '{gsub(/CORE_VERSION/, version); print}' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-redirect.html.template > cdn/@semantic-ui/core/index.html
 
           # Create redirects for each package
           cd packages
@@ -257,9 +273,12 @@ jobs:
             echo "Creating redirect for @semantic-ui/$package_name to version $pkg_version"
 
             mkdir -p "../cdn/@semantic-ui/$package_name"
-            cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-redirect.html.template "../cdn/@semantic-ui/$package_name/index.html"
-            perl -i -pe "s|PACKAGE_NAME|@semantic-ui/$package_name|g" "../cdn/@semantic-ui/$package_name/index.html"
-            perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/index.html"
+            # Create package redirect with proper escaping
+            awk -v pkgname="@semantic-ui/$package_name" -v version="$pkg_version" '{
+              gsub(/PACKAGE_NAME/, pkgname);
+              gsub(/PACKAGE_VERSION/, version);
+              print
+            }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-redirect.html.template > "../cdn/@semantic-ui/$package_name/index.html"
           done
           cd ..
 
@@ -269,18 +288,15 @@ jobs:
           # Create README.md for the CDN using the gh-pages README
           cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/README.md cdn/README.md
           # Update the version references in the README
-          sed -i "s/0.9.4/$VERSION/g" cdn/README.md
-          # Correct project name
-          sed -i "s/Semantic UI Next/Semantic UI/g" cdn/README.md
+          sed -i "s/\${VERSION}/$VERSION/g" cdn/README.md
 
           # Add development information to README
           sed -i '/## Usage/a\\n### Development Mode\n\nFor development, use our dev import maps:\n\n```html\n<!-- Development version -->\n<script src="https://cdn.semantic-ui.com/importmap-dev.js"></script>\n\n<!-- Or manually -->\n<script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest-dev.json"></script>\n```\n\nThis will load the development version of all packages, which includes more helpful warnings and debugging information.\n' cdn/README.md
 
           # Create index file for the CDN root
           cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/index.html cdn/index.html
-          # Update version references and correct project name
-          sed -i "s/0.9.4/$VERSION/g" cdn/index.html
-          sed -i "s/Semantic UI Next/Semantic UI/g" cdn/index.html
+          # Update version references
+          sed -i "s/0.10.0/${VERSION}/g" cdn/index.html
           # Fix the CDN link reference
           sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
           sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
