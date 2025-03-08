@@ -64,6 +64,65 @@ function getPackageInfo(filePath) {
   };
 }
 
+// Extract the root path of a package from a file path
+function extractPackageRootPath(filePath, packageInfo) {
+  // Extract the root package directory path for a given file
+  // Expected format: cdn/@scope/package/version/...
+  if (!packageInfo) return null;
+  
+  const parts = filePath.split(path.sep);
+  const cdnIndex = parts.findIndex(part => part === 'cdn');
+  
+  if (cdnIndex === -1) return null;
+  
+  let packagePathLength;
+  if (packageInfo.scope) {
+    // @scope/package/version - need 3 parts after cdn
+    packagePathLength = cdnIndex + 4;
+  } else {
+    // package/version - need 2 parts after cdn
+    packagePathLength = cdnIndex + 3;
+  }
+  
+  if (parts.length < packagePathLength) return null;
+  
+  return parts.slice(0, packagePathLength).join(path.sep);
+}
+
+// Detects if a file is likely ESM or CommonJS
+function detectModuleFormat(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    
+    // Look for ESM indicators
+    const hasImportExport = /\b(import|export)\b/.test(content);
+    const hasModuleExports = /\b(module\.exports|exports\.\w+)\b/.test(content);
+    const hasRequire = /\brequire\s*\(/.test(content);
+    
+    // If the file has import/export statements, it's likely ESM
+    if (hasImportExport && !hasModuleExports) {
+      return 'esm';
+    }
+    
+    // If it has module.exports or require, it's likely CommonJS
+    if ((hasModuleExports || hasRequire) && !hasImportExport) {
+      return 'commonjs';
+    }
+    
+    // If it has both or neither, prefer ESM for .mjs files, otherwise default to ESM
+    if (filePath.endsWith('.mjs')) {
+      return 'esm';
+    }
+    
+    // Default to ESM for modern packages
+    return 'esm';
+  } catch (error) {
+    console.error(`Error detecting module format for ${filePath}:`, error);
+    // Default to ESM if detection fails
+    return 'esm';
+  }
+}
+
 // Rewrite imports in a file
 async function rewriteFile(filePath) {
   try {
@@ -79,6 +138,10 @@ async function rewriteFile(filePath) {
       return;
     }
 
+    // Detect module format
+    const format = detectModuleFormat(filePath);
+    console.log(`Detected ${format} format for ${path.basename(filePath)}`);
+
     // Generate output file path (preserving directory structure)
     const relativePath = path.relative(targetDir, filePath);
     const outputPath = path.join(tmpDir, relativePath);
@@ -91,7 +154,7 @@ async function rewriteFile(filePath) {
       entryPoints: [filePath],
       outfile: outputPath,
       bundle: false,
-      format: 'esm',
+      format: format, // Use the detected format (esm or commonjs)
       write: true,
       plugins: [
         {
@@ -111,8 +174,84 @@ async function rewriteFile(filePath) {
               const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
               const subPath = parts[0].startsWith('@') ? parts.slice(2).join('/') : parts.slice(1).join('/');
               
-              // Get version from the nearest package.json if possible, otherwise use packageInfo.packageVersion
-              let importVersion = packageInfo.packageVersion;
+              // Determine the version to use for the import based on package.json dependencies
+              let importVersion;
+              
+              // Helper to get dependency version from package.json
+              const getDependencyVersion = (pkgJsonPath, dependencyName) => {
+                try {
+                  if (fs.existsSync(pkgJsonPath)) {
+                    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
+                    
+                    // Check different dependency types
+                    const depTypes = ['dependencies', 'devDependencies', 'peerDependencies'];
+                    for (const type of depTypes) {
+                      if (pkgJson[type] && pkgJson[type][dependencyName]) {
+                        let version = pkgJson[type][dependencyName];
+                        // Clean up version string (remove ^, ~, etc.)
+                        version = version.replace(/^[\^~>=<]/, '');
+                        return version;
+                      }
+                    }
+                  }
+                } catch (e) {
+                  console.error(`Error reading dependency from ${pkgJsonPath}:`, e.message);
+                }
+                return null;
+              };
+              
+              // Try to get the original package.json for the current file
+              let originalPackageJsonPath;
+              
+              if (args.importer) {
+                // If we have the importer path, look in its directory
+                originalPackageJsonPath = path.join(path.dirname(args.importer), 'package.json');
+              } else {
+                // Fall back to the package's root package.json
+                const pkgRootPath = extractPackageRootPath(filePath, packageInfo);
+                if (pkgRootPath) {
+                  originalPackageJsonPath = path.join(pkgRootPath, 'package.json');
+                } else {
+                  // Last resort - just use the file's directory
+                  originalPackageJsonPath = path.join(path.dirname(filePath), 'package.json');
+                }
+              }
+              
+              let dependencyVersion = null;
+              
+              // Special handling for @semantic-ui packages
+              if (pkgName.startsWith('@semantic-ui/')) {
+                // For @semantic-ui packages, first try to get dependency version from package.json
+                dependencyVersion = getDependencyVersion(originalPackageJsonPath, pkgName);
+                
+                if (!dependencyVersion) {
+                  // If not found in package.json, all @semantic-ui packages should use the same version
+                  dependencyVersion = packageInfo.packageVersion;
+                }
+                
+                importVersion = dependencyVersion;
+              } else {
+                // For external packages like lit, first check the package.json
+                dependencyVersion = getDependencyVersion(originalPackageJsonPath, pkgName);
+                
+                // Special handling for lit packages - use LIT_VERSION if available
+                if (!dependencyVersion && 
+                    (pkgName === 'lit' || pkgName === 'lit-html' || pkgName === 'lit-element' || 
+                    pkgName.startsWith('@lit/'))) {
+                  if (process.env.LIT_VERSION) {
+                    dependencyVersion = process.env.LIT_VERSION;
+                  }
+                }
+                
+                // If we found a dependency version, use it
+                if (dependencyVersion) {
+                  importVersion = dependencyVersion;
+                } else {
+                  // Fallback to the current package version if we can't determine the dependency version
+                  console.warn(`Could not determine version for ${pkgName}, using package version ${packageInfo.packageVersion}`);
+                  importVersion = packageInfo.packageVersion;
+                }
+              }
               
               // Build the CDN URL
               let cdnImportPath = `${cdnUrl}/${pkgName}/${importVersion}`;
@@ -124,6 +263,8 @@ async function rewriteFile(filePath) {
                 cdnImportPath += '/index.js';
               }
               
+              console.log(`Rewriting import: ${importPath} → ${cdnImportPath}`);
+              
               return {
                 path: cdnImportPath,
                 external: true
@@ -132,7 +273,7 @@ async function rewriteFile(filePath) {
           }
         }
       ],
-      logLevel: 'info'
+      logLevel: 'warning'  // Reduce noise in logs
     });
 
     console.log(`Processed: ${filePath} -> ${outputPath}`);
@@ -148,22 +289,44 @@ async function rewriteFile(filePath) {
 // Process all JS files in the target directory
 async function processDirectory() {
   try {
-    // Find all JS files
-    const jsFiles = glob.sync('**/*.js', { 
-      cwd: targetDir,
+    // Ensure the directory is absolute
+    const absoluteTargetDir = path.resolve(targetDir);
+    
+    // Find all JS files (ensure we're handling .mjs files too)
+    const jsFiles = glob.sync('**/*.{js,mjs}', { 
+      cwd: absoluteTargetDir,
       absolute: true
     });
     
-    console.log(`Found ${jsFiles.length} JS files to process in ${targetDir}`);
+    console.log(`Found ${jsFiles.length} JS files to process in ${absoluteTargetDir}`);
+    
+    if (jsFiles.length === 0) {
+      console.warn(`No JS files found in ${absoluteTargetDir}. Check if the directory is correct.`);
+      return; // Exit early if no files found
+    }
+    
+    // Log the first few files to help with debugging
+    console.log("Sample files to process:");
+    jsFiles.slice(0, 3).forEach(file => console.log(`  - ${file}`));
     
     // Process files in parallel with a concurrency limit
     const concurrency = 10;
+    let processedCount = 0;
+    
     for (let i = 0; i < jsFiles.length; i += concurrency) {
       const batch = jsFiles.slice(i, i + concurrency);
-      await Promise.all(batch.map(rewriteFile));
+      await Promise.all(batch.map(async file => {
+        await rewriteFile(file);
+        processedCount++;
+      }));
+      
+      // Log progress for large directories
+      if (jsFiles.length > 20 && (i + concurrency) % 50 === 0) {
+        console.log(`Processed ${processedCount}/${jsFiles.length} files...`);
+      }
     }
     
-    console.log('Import rewriting completed');
+    console.log(`Import rewriting completed. Processed ${processedCount} files.`);
   } catch (error) {
     console.error('Error processing directory:', error);
     process.exit(1);

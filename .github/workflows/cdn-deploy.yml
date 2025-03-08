@@ -244,14 +244,28 @@ jobs:
           # Process each package directory to rewrite imports
           export CDN_URL="https://cdn.semantic-ui.com"
           export VERSION=$VERSION
+          export LIT_VERSION=$LIT_VERSION
+          
+          echo "Starting import rewriting process..."
+          echo "Using: VERSION=$VERSION, LIT_VERSION=$LIT_VERSION"
+          
+          # Process packages in order
+          echo "Processing @semantic-ui packages..."
           node scripts/helpers/rewrite-imports.js ./cdn/@semantic-ui
+          
+          echo "Processing lit package..."
           node scripts/helpers/rewrite-imports.js ./cdn/lit
+          
           # Process Lit dependencies 
+          echo "Processing Lit dependencies..."
           for dep in $LIT_DEPS; do
             if [ -d "./cdn/$dep" ]; then
+              echo "Processing $dep..."
               node scripts/helpers/rewrite-imports.js "./cdn/$dep"
             fi
           done
+          
+          echo "Import rewriting completed."
           
           # Generate production importmap
           echo "Generating importmaps for version $VERSION"
