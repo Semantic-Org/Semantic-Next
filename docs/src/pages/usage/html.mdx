@@ -50,7 +50,7 @@ Semantic UI components that have a `specification` like button, label, or menu a
     <ui-button large primary>Primary</ui-button>
     ```
   </TabItem>
-      <TabItem label="Verbose">
+      <TabItem label="Technical">
     ```html
     <ui-button size="large" emphasis="primary">Primary</ui-button>
     ```
@@ -77,7 +77,7 @@ When using vanilla HTML array or object data must be serialized when specified a
 ```
 
 
-If you are authoring a SUI template serialization will be handled for you automatically.
+Inside of [Semantic templates](/templates) serialization is handled automatically for objects, and arrays.
 ```html
 <ui-menu items={menuItems}></ui-menu>
 ```
@@ -91,7 +91,7 @@ Some components allow you to pass in callback functions, for instance `<ui-panel
 Events are dispatched using native custom events which means you can attach event handlers similar to any other event on the page.
 
 ```javascript
-const menu = document.querySelectorAll('ui-menu');
+const menu = document.querySelector('ui-menu');
 menu.addEventListener('change', (event) => {
   console.log(`new value is ${event.details.value}`);
 });
@@ -120,7 +120,7 @@ Some components support plurality, attributes assigned to the group pass through
     </ui-buttons>
     ```
   </TabItem>
-      <TabItem label="Verbose">
+  <TabItem label="Technical">
     ```html
     <ui-buttons size="large">
       <ui-button emphasis="primary">Primary</ui-button>

@@ -10,7 +10,7 @@ const componentPages = components.map(page => ({
 /* Topbar Menu */
 export const topbarDisplayMenu =  [
   {
-    _ids: ['framework', 'api', 'ui'],
+    _ids: ['start', 'framework', 'api', 'ui', 'integrations'],
     name: 'Documentation',
     url: '/introduction',
   },
@@ -36,8 +36,13 @@ export const topbarDisplayMenu =  [
 /* The menu including all menu groupings for secondary menus */
 export const topbarMenu =  [
   {
+    _id: 'start',
+    name: 'Getting Started',
+    url: '/start',
+  },
+  {
     _id: 'framework',
-    name: 'Authoring Guide',
+    name: 'Guide',
     url: '/introduction',
   },
   {
@@ -48,6 +53,11 @@ export const topbarMenu =  [
   {
     _id: 'ui',
     name: 'UI Library',
+    url: '/usage',
+  },
+  {
+    _id: 'integrations',
+    name: 'Integrations',
     url: '/usage',
   },
   {
