@@ -1,8 +1,0 @@
-{
-  "name": "@semantic-ui/PACKAGE_NAME",
-  "version": "PACKAGE_VERSION",
-  "main": "PACKAGE_ENTRY",
-  "module": "PACKAGE_ENTRY",
-  "types": "types/index.d.ts",
-  "license": "ISC"
-}

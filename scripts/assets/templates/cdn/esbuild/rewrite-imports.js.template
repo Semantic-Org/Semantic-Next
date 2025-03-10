@@ -149,6 +149,10 @@ async function rewriteFile(filePath) {
     // Ensure output directory exists
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
+    console.log(`Setting up esbuild for file: ${filePath}`);
+    console.log(`Output path: ${outputPath}`);
+    console.log(`Module format: ${format}`);
+    
     // Use esbuild to transform the file
     await build({
       entryPoints: [filePath],
@@ -156,23 +160,29 @@ async function rewriteFile(filePath) {
       bundle: false,
       format: format, // Use the detected format (esm or commonjs)
       write: true,
+      logLevel: 'info', // Increase log level for debugging
       plugins: [
         {
           name: 'cdn-url-plugin',
           setup(build) {
             // Handle bare imports by rewriting to CDN URLs
             build.onResolve({ filter: /^[^./]/ }, args => {
+              console.log(`onResolve called with path: ${args.path}, importer: ${args.importer}`);
+              
               // Skip builtin Node.js modules
               if (args.path.startsWith('node:')) {
+                console.log(`Skipping node: module: ${args.path}`);
                 return;
               }
               
               let importPath = args.path;
+              console.log(`Processing import: ${importPath}`);
               
               // Handle submodule imports (e.g., lit/directive.js)
               const parts = importPath.split('/');
               const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
               const subPath = parts[0].startsWith('@') ? parts.slice(2).join('/') : parts.slice(1).join('/');
+              console.log(`Parsed import: package=${pkgName}, subPath=${subPath || '(none)'}`);
               
               // Determine the version to use for the import based on package.json dependencies
               let importVersion;
@@ -289,14 +299,28 @@ async function rewriteFile(filePath) {
 // Process all JS files in the target directory
 async function processDirectory() {
   try {
+    console.log(`Starting processDirectory with target: ${targetDir}`);
+    
     // Ensure the directory is absolute
     const absoluteTargetDir = path.resolve(targetDir);
+    console.log(`Absolute target directory: ${absoluteTargetDir}`);
+    
+    // Check if directory exists
+    if (!fs.existsSync(absoluteTargetDir)) {
+      console.error(`ERROR: Target directory does not exist: ${absoluteTargetDir}`);
+      return;
+    }
+    
+    console.log(`Looking for JS files in: ${absoluteTargetDir}`);
     
     // Find all JS files (ensure we're handling .mjs files too)
     const jsFiles = glob.sync('**/*.{js,mjs}', { 
       cwd: absoluteTargetDir,
       absolute: true
     });
+    
+    console.log(`Glob pattern used: **/*.{js,mjs}`);
+    console.log(`Files found by glob: ${jsFiles.length}`);
     
     console.log(`Found ${jsFiles.length} JS files to process in ${absoluteTargetDir}`);
     
