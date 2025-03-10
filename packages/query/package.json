@@ -12,7 +12,7 @@
       },
       "module": {
         "import": "./src/index.js",
-        "default": "./src/bundler-require-wrapper.js"
+        "default": "./src/index.js"
       },
       "import": "./src/index.js",
       "require": "./src/index.cjs"

@@ -1,11 +1,48 @@
 {
   "name": "@semantic-ui/component",
+  "description": "A framework for creating web components.",
+  "author": "Jack Lukic",
+  "license": "ISC",
   "version": "0.10.0",
+  "sideEffects": false,
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
-  "author": "Jack Lukic",
-  "license": "ISC",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "development": "./src/index.js",
+      "default": "./dist/index.min.js"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "types",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "wireit",
+    "test": "vitest"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:minified",
+        "build:cdn"
+      ]
+    },
+    "build:minified": {
+      "dependencies": [
+        "../internal-scripts:build-minified"
+      ]
+    },
+    "build:cdn": {
+      "dependencies": [
+        "../internal-scripts:build-cdn"
+      ]
+    }
+  },
   "dependencies": {
     "@semantic-ui/query": "^0.10.0",
     "@semantic-ui/reactivity": "^0.10.0",
@@ -14,11 +51,7 @@
     "@semantic-ui/utils": "^0.10.0"
   },
   "devDependencies": {
-    "vitest": "^3.0.4"
-  },
-  "files": [
-    "src",
-    "types",
-    "LICENSE"
-  ]
+    "esbuild": "^0.25.1",
+    "vitest": "^3.0.8"
+  }
 }

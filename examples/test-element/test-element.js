@@ -6,11 +6,11 @@ import css from './test-element.css?raw';
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createComponent = function ({ self, reactiveVar, $ }) {
+const createComponent = function ({ self, signal, $ }) {
   return {
-    tab: reactiveVar('basic'),
-    morningActivity: reactiveVar('running'),
-    eveningActivity: reactiveVar('reading'),
+    tab: signal('basic'),
+    morningActivity: signal('running'),
+    eveningActivity: signal('reading'),
     maybeActive(tab) {
       return self.tab.get() == tab ? 'active' : '';
     },
