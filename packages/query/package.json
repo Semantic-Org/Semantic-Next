@@ -2,11 +2,15 @@
   "name": "@semantic-ui/query",
   "version": "0.10.1",
   "description": "DOM querying and manipulation library for Semantic UI",
-  "author": "Jack Lukic",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+
   "main": "src/index.cjs",
   "module": "src/index.js",
   "types": "types/index.d.ts",
+  "sideEffects": false,
+
   "exports": {
     ".": {
       "types": "./types/index.d.ts",

@@ -3,7 +3,9 @@
   "version": "0.10.1",
   "description": "High-performance template rendering system with reactive directives",
   "author": "Jack Lukic",
+  "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+
   "main": "src/index.js",
   "module": "src/index.js",
   "exports": {

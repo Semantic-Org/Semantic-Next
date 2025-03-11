@@ -18,17 +18,18 @@ export async function build(options = {}) {
     outDir = 'dist/',          // Output directory
     outFile = `index.min.js`,  // Output filename
     entrypoint = null,         // Custom entrypoint override
-    platform = 'browser',      // Target platform
+    platform = 'neutral',      // Target platform
+    logLevel = 'info',         // log level
     createPackageJson = true   // Whether to create a package.json
   } = options;
 
   try {
     // Read package.json
     const packageJsonPath = resolve(baseDir, 'package.json');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 
     // Determine entrypoint
-    const entry = entrypoint || packageJson.module || packageJson.main || 'src/index.js';
+    const entry = entrypoint || pkg.module || pkg.main || 'src/index.js';
     const entrypointPath = resolve(baseDir, entry);
 
     console.log(`📦 Using entrypoint: ${entry}`);
@@ -39,16 +40,32 @@ export async function build(options = {}) {
 
     const outputPath = resolve(outputDir, outFile);
 
+    const banner = `/**
+ * ${pkg.name} v${pkg.version}
+ * ${pkg.description || ''}
+ *
+ * @license ${pkg.license || 'MIT'}
+ * @copyright (c) ${new Date().getFullYear()} ${pkg.author || ''}
+ * @homepage ${pkg.homepage || ''}
+ *
+ * This source code is licensed under the ${pkg.license || 'MIT'} license found in the
+ * LICENSE file in the root directory of this source tree.
+ */`;
+
     console.log('🏗️ Building bundle with transformed imports...');
     // build with transformed imports
     const result = await esbuild.build({
       entryPoints: [entrypointPath],
       bundle: true,
       format,
+      platform,
       outfile: outputPath,
       target,
       minify,
+      logLevel
       sourcemap,
+      banner,
+      external: Object.keys(pkg.dependencies || {}),
       metafile: true,
     });
 

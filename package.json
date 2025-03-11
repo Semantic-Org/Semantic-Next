@@ -3,7 +3,7 @@
   "version": "0.10.1",
   "title": "Semantic UI Next",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
-  "homepage": "http://www.semantic-ui.com",
+  "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "main": "src/semantic-ui.js",
   "module": "src/semantic-ui.js",

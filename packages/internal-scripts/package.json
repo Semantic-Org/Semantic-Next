@@ -2,12 +2,14 @@
   "name": "@semantic-ui/internal-scripts",
   "version": "0.10.0",
   "description": "Internal build scripts for Semantic UI",
-  "sideEffects": false,
-  "author": "Jack Lukic",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "homepage": "https://next.semantic-ui.com",
   "license": "MIT",
+
   "main": "src/index.js",
   "module": "src/index.js",
-  "type": "module",
+  "sideEffects": false,
+
   "files": [
     "src"
   ],

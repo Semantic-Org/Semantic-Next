@@ -22,7 +22,7 @@ export async function buildCDN(options = {}) {
     outDir = 'dist/cdn',                // Output directory
     outFile = 'index.min.js',               // Output filename
     entrypoint = null,                  // Custom entrypoint override
-    platform = 'browser',               // Target platform
+    platform = 'neutral',               // Target platform
     createPackageJson = true            // Whether to create a package.json
   } = options;
   
@@ -45,6 +45,18 @@ export async function buildCDN(options = {}) {
     await fs.mkdir(outputDir, { recursive: true });
     
     const outputPath = resolve(outputDir, outFile);
+
+    const banner = `/**
+ * ${pkg.name} v${pkg.version}
+ * ${pkg.description || ''}
+ *
+ * @license ${pkg.license || 'MIT'}
+ * @copyright (c) ${new Date().getFullYear()} ${pkg.author || ''}
+ * @homepage ${pkg.homepage || ''}
+ *
+ * This source code is licensed under the ${pkg.license || 'MIT'} license found in the
+ * LICENSE file in the root directory of this source tree.
+ */`;
     
     console.log('🏗️ Building CDN bundle with transformed imports...');
     // CDN build with transformed imports
@@ -53,11 +65,12 @@ export async function buildCDN(options = {}) {
       bundle: true,
       format,
       outfile: outputPath,
-      platform: 'node', // Always use node platform to handle built-in modules
+      platform,
       target,
       minify,
       sourcemap,
       metafile: true,
+      banner,
       plugins: [
         resolveBareImports({
           packageJson,
