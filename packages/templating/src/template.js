@@ -460,7 +460,7 @@ export const Template = class Template {
           const keySequences = keySequence.split(',');
           if(any(keySequences, sequence => this.currentSequence.endsWith(sequence))) {
 
-            const inputFocused = document.activeElement instanceof HTMLElement &&
+            const inputFocused = document.activeElement &&
               (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) ||
                 document.activeElement.isContentEditable);
 
