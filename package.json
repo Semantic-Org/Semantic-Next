@@ -49,7 +49,7 @@
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
         "build",
-        "build:package"
+        "build:packages"
       ]
     },
     "build:packages": {
