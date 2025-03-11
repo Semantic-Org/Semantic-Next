@@ -56,7 +56,7 @@
     },
     "build:packages": {
       "dependencies": [
-        "./packages/component:build"
+        "./packages/component:build",
         "./packages/query:build",
         "./packages/reactivity:build",
         "./packages/renderer:build",
