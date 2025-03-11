@@ -5,7 +5,6 @@
   "license": "ISC",
   "version": "0.10.1",
   "sideEffects": false,
-  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
