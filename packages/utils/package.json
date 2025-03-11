@@ -2,6 +2,9 @@
   "name": "@semantic-ui/utils",
   "version": "0.10.1",
   "description": "Utility functions for arrays, objects, strings, type checking and more",
+  "author": "Jack Lukic",
+  "homepage": "https://next.semantic-ui.com",
+  "license": "ISC",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -10,15 +13,13 @@
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {
     "build": "wireit",
     "test": "vitest"
   },
-  "author": "Jack Lukic",
-  "license": "ISC",
   "devDependencies": {
     "vitest": "^3.0.4",
     "esbuild": "^0.25.1"
@@ -38,10 +39,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build.js"
+      "command": "node ../internal-scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/build-cdn.js"
+      "command": "node ../internal-scripts/src/do-build-cdn.js"
     }
   }
 }

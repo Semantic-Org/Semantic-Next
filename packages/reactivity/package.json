@@ -2,17 +2,21 @@
   "name": "@semantic-ui/reactivity",
   "version": "0.10.1",
   "description": "A signals based reactive state management system",
-  "author": "Jack Lukic",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
+  "sideEffects": false,
+
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {
@@ -41,10 +45,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build.js"
+      "command": "node ../internal-scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/build-cdn.js"
+      "command": "node ../internal-scripts/src/do-build-cdn.js"
     }
   }
 }

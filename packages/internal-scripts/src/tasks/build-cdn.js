@@ -7,8 +7,6 @@ import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
  * Builds a CDN-ready version with resolved imports
  */
 export async function buildCDN(options = {}) {
-  console.log('DEBUG: build-cdn.js script is being executed');
-  console.log('DEBUG: options:', JSON.stringify(options, null, 2));
   const {
     baseDir = process.cwd(),         // Root directory of the package
     cacheDir = '.cache',                // Cache directory for entrypoint resolution
@@ -22,7 +20,7 @@ export async function buildCDN(options = {}) {
     outDir = 'dist/cdn',                // Output directory
     outFile = 'index.min.js',               // Output filename
     entrypoint = null,                  // Custom entrypoint override
-    platform = 'browser',               // Target platform
+    platform = 'neutral',               // Target platform
     createPackageJson = true            // Whether to create a package.json
   } = options;
   
@@ -32,10 +30,10 @@ export async function buildCDN(options = {}) {
     
     // Read package.json
     const packageJsonPath = resolve(baseDir, 'package.json');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     
     // Determine entrypoint
-    const entry = entrypoint || packageJson.module || packageJson.main || 'src/index.js';
+    const entry = entrypoint || pkg.module || pkg.main || 'src/index.js';
     const entrypointPath = resolve(baseDir, entry);
     
     console.log(`📦 Using entrypoint: ${entry}`);
@@ -45,6 +43,18 @@ export async function buildCDN(options = {}) {
     await fs.mkdir(outputDir, { recursive: true });
     
     const outputPath = resolve(outputDir, outFile);
+
+    const banner = `/**
+ * ${pkg.name} v${pkg.version}
+ * ${pkg.description || ''}
+ *
+ * @license ${pkg.license || 'MIT'}
+ * @copyright (c) ${new Date().getFullYear()} ${pkg.author || ''}
+ * @homepage ${pkg.homepage || ''}
+ *
+ * This source code is licensed under the ${pkg.license || 'MIT'} license found in the
+ * LICENSE file in the root directory of this source tree.
+ */`;
     
     console.log('🏗️ Building CDN bundle with transformed imports...');
     // CDN build with transformed imports
@@ -53,14 +63,15 @@ export async function buildCDN(options = {}) {
       bundle: true,
       format,
       outfile: outputPath,
-      platform: 'node', // Always use node platform to handle built-in modules
+      platform,
       target,
       minify,
       sourcemap,
       metafile: true,
+      banner: { js: banner },
       plugins: [
         resolveBareImports({
-          packageJson,
+          packageJson: pkg,
           cacheDir: CACHE_DIR,
           cdnRoot,
           logging,
@@ -82,14 +93,14 @@ export async function buildCDN(options = {}) {
     // Create a package.json for the CDN build if requested
     if (createPackageJson) {
       const cdnPackageJson = {
-        name: packageJson.name,
-        version: packageJson.version,
-        type: "module",
+        name: pkg.name,
+        version: pkg.version,
+        type: 'module',
         main: `./${outFile}`,
         module: `./${outFile}`,
-        description: `CDN version of ${packageJson.name}`,
-        author: packageJson.author,
-        license: packageJson.license
+        description: `CDN version of ${pkg.name}`,
+        author: pkg.author,
+        license: pkg.license
       };
       
       await fs.writeFile(

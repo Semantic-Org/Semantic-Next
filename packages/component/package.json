@@ -13,11 +13,13 @@
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {
     "build": "wireit",
+    "build:minified": "wireit",
+    "build:cdn": "wireit",
     "test": "vitest"
   },
   "files": [
@@ -26,6 +28,9 @@
     "types",
     "LICENSE"
   ],
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "dependencies": {
     "@semantic-ui/query": "^0.10.1",
     "@semantic-ui/reactivity": "^0.10.1",
@@ -45,10 +50,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build.js"
+      "command": "node ../internal-scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/build-cdn.js"
+      "command": "node ../internal-scripts/src/do-build-cdn.js"
     }
   }
 }

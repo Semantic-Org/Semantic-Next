@@ -1,4 +1,4 @@
-import { SpecReader } from '@semantic-ui/specs';
+import { SpecReader } from '../../spec-reader.js';
 import LabelSpec from './label.json';
 
 const reader = new SpecReader();

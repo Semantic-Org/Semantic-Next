@@ -1,34 +1,31 @@
 import * as esbuild from 'esbuild';
 import { resolve } from 'path';
 import fs from 'fs/promises';
-import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
 
 /**
  * Builds a CDN-ready version with resolved imports
  */
 export async function build(options = {}) {
-  console.log('DEBUG: build.js script is being executed');
-  console.log('DEBUG: options:', JSON.stringify(options, null, 2));
   const {
     baseDir = process.cwd(),   // Root directory of the package
     target = ['esnext'],       // JavaScript target
-    minify = true,             // Whether to minify
+    minify = false,             // Whether to minify
     sourcemap = true,          // Whether to generate sourcemaps
     format = 'esm',            // Module format
     outDir = 'dist/',          // Output directory
     outFile = `index.min.js`,  // Output filename
     entrypoint = null,         // Custom entrypoint override
-    platform = 'browser',      // Target platform
-    createPackageJson = true   // Whether to create a package.json
+    platform = 'neutral',      // Target platform
+    logLevel = 'info',         // log level
   } = options;
 
   try {
     // Read package.json
     const packageJsonPath = resolve(baseDir, 'package.json');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 
     // Determine entrypoint
-    const entry = entrypoint || packageJson.module || packageJson.main || 'src/index.js';
+    const entry = entrypoint || pkg.module || pkg.main || 'src/index.js';
     const entrypointPath = resolve(baseDir, entry);
 
     console.log(`📦 Using entrypoint: ${entry}`);
@@ -39,16 +36,38 @@ export async function build(options = {}) {
 
     const outputPath = resolve(outputDir, outFile);
 
+    const externalDeps = {
+      ...pkg.dependencies,
+      ...pkg.peerDependencies,
+    };
+
+    const banner = `/**
+ * ${pkg.name} v${pkg.version}
+ * ${pkg.description || ''}
+ *
+ * @license ${pkg.license || 'MIT'}
+ * @copyright (c) ${new Date().getFullYear()} ${pkg.author || ''}
+ * @homepage ${pkg.homepage || ''}
+ *
+ * This source code is licensed under the ${pkg.license || 'MIT'} license found in the
+ * LICENSE file in the root directory of this source tree.
+ */`;
+
     console.log('🏗️ Building bundle with transformed imports...');
     // build with transformed imports
     const result = await esbuild.build({
       entryPoints: [entrypointPath],
       bundle: true,
       format,
+      platform,
       outfile: outputPath,
       target,
       minify,
+      logLevel,
       sourcemap,
+      banner: { js: banner },
+      legalComments: 'none', // we are not bundling external deps
+      external: Object.keys(externalDeps),
       metafile: true,
     });
 

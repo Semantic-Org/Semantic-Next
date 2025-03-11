@@ -3,14 +3,16 @@
   "version": "0.10.1",
   "description": "High-performance template rendering system with reactive directives",
   "author": "Jack Lukic",
+  "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+
   "main": "src/index.js",
   "module": "src/index.js",
   "exports": {
     ".": {
       "development": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {
@@ -23,8 +25,10 @@
     "README.md",
     "LICENSE"
   ],
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "dependencies": {
-    "lit": "3.2.1",
     "@semantic-ui/reactivity": "^0.10.1",
     "@semantic-ui/templating": "^0.10.1",
     "@semantic-ui/utils": "^0.10.1"
@@ -41,10 +45,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build.js"
+      "command": "node ../internal-scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/build-cdn.js"
+      "command": "node ../internal-scripts/src/do-build-cdn.js"
     }
   }
 }

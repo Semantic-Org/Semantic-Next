@@ -2,11 +2,15 @@
   "name": "@semantic-ui/query",
   "version": "0.10.1",
   "description": "DOM querying and manipulation library for Semantic UI",
-  "author": "Jack Lukic",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+
   "main": "src/index.cjs",
   "module": "src/index.js",
   "types": "types/index.d.ts",
+  "sideEffects": false,
+
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
@@ -16,7 +20,7 @@
       },
       "module": {
         "import": "./src/index.js",
-        "default": "./src/index.js"
+        "default": "./dist/index.min.js"
       },
       "importmap": "./dist/cdn/index.min.js",
       "import": "./src/index.js",
@@ -49,10 +53,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build.js"
+      "command": "node ../internal-scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/build-cdn.js"
+      "command": "node ../internal-scripts/src/do-build-cdn.js"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { SpecReader } from '@semantic-ui/specs';
+import { SpecReader } from '../../spec-reader.js';
 import InputSpec from './input.json';
 
 const reader = new SpecReader();
