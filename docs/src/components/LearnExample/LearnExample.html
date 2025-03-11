@@ -12,7 +12,7 @@
           class="toggle-menu"
           icon="menu"
           transparent compact inverted
-          icon-only="true"
+          icon-only
         ></ui-button>
         <div class="location">
           <span class="category">
@@ -24,8 +24,8 @@
           </span>
         </div>
         <div class="actions">
-          <ui-button href={previousLesson.url} icon="left arrow" transparent compact inverted disabled={not hasPreviousLesson} icon-only="true"></ui-button>
-          <ui-button href={nextLesson.url} icon="right arrow" transparent compact inverted disabled={not hasNextLesson} icon-only="true"></ui-button>
+          <ui-button href={previousLesson.url} icon="left arrow" transparent compact inverted disabled={not hasPreviousLesson} icon-only></ui-button>
+          <ui-button href={nextLesson.url} icon="right arrow" transparent compact inverted disabled={not hasNextLesson} icon-only></ui-button>
         </div>
       </div>
       <div class="menu">
