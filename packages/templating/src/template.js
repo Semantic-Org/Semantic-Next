@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
+import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, mapObject, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 import { LitRenderer } from '@semantic-ui/renderer';
@@ -391,9 +391,18 @@ export const Template = class Template {
           const targetElement = this;
           const boundEvent = userHandler.bind(targetElement);
           const eventData = event?.detail || {};
-          const elData = targetElement?.dataset;
+          // convert "1" to 1
+          const elData = mapObject({ ...targetElement?.dataset }, (stringValue) => {
+            let value;
+            try {
+              value = JSON.parse(stringValue);
+            }
+            catch(e) {
+              value = stringValue;
+            }
+            return value;
+          });
           const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
-
           template.call(boundEvent, {
             additionalData: {
               event: event,
