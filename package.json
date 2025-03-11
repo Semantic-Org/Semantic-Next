@@ -36,9 +36,6 @@
   "wireit": {
     "build": {
       "command": "node ./tasks/build.js",
-      "dependencies": [
-        "build:packages"
-      ]
     },
     "watch": {
       "command": "node ./tasks/watch.js",
@@ -81,7 +78,11 @@
       "command": "cd docs && npm run build"
     },
     "publish": {
-      "command": "node ./scripts/publish.js"
+      "command": "node ./scripts/publish.js",
+      "dependencies": [
+        "build",
+        "build:packages"
+      ]
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
