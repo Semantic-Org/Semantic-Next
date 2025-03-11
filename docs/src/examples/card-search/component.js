@@ -50,7 +50,7 @@ const events = {
   'change ui-menu'({ state, data }) {
     state.filter.set(data.value);
   },
-  'change ui-input'({ state, value, target }) {
+  'input ui-input'({ state, value, target }) {
     state.searchTerm.set(value);
   }
 };
