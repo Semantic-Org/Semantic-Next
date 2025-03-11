@@ -12,7 +12,7 @@
     ".": {
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
-      "browser": "./dist/index.min.js",
+      "production": "./dist/index.min.js",
       "importmap": "./dist/cdn/index.min.js",
       "default": "./src/index.js"
     }

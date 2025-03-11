@@ -58,6 +58,11 @@
     },
     "build:packages": {
       "dependencies": [
+        "./packages/utils:build",
+        "./packages/reactivity:build",
+        "./packages/query:build",
+        "./packages/templating:build",
+        "./packages/renderer:build",
         "./packages/component:build"
       ]
     },
