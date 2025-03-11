@@ -33,7 +33,7 @@
   },
   "wireit": {
     "build": {
-      "command": "node ./tasks/build.js",
+      "command": "node ./tasks/build.js"
     },
     "watch": {
       "command": "node ./tasks/watch.js",
