@@ -53,7 +53,7 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build.js"
+      "command": "node ../internal-scripts/src/build-minified.js"
     },
     "build:cdn": {
       "command": "node ../internal-scripts/src/build-cdn.js"

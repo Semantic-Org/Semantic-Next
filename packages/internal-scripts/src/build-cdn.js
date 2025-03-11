@@ -1,12 +1,11 @@
 import { buildCDN } from './tasks/build-cdn.js';
-import { resolve } from 'path';
 
 const baseDir = process.env.BASE_DIR;
 
-// Wrap in async function to handle top-level await
+// This is called from npm script to build a package with bare import rewrites
 (async function() {
   const result = await buildCDN({
-    baseDir: process.env.BASE_DIR
+    baseDir
   });
   if (!result.success) {
     process.exit(1);
