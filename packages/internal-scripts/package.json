@@ -5,11 +5,10 @@
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
   "license": "MIT",
-
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "sideEffects": false,
-
   "files": [
     "src"
   ],
@@ -40,10 +39,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ./src/build.js"
+      "command": "node ./src/do-build.js"
     },
     "build:cdn": {
-      "command": "node ./src/build-cdn.js"
+      "command": "node ./src/do-build-cdn.js"
     }
   },
   "private": true,

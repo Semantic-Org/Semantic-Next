@@ -32,10 +32,10 @@ export async function buildCDN(options = {}) {
     
     // Read package.json
     const packageJsonPath = resolve(baseDir, 'package.json');
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
     
     // Determine entrypoint
-    const entry = entrypoint || packageJson.module || packageJson.main || 'src/index.js';
+    const entry = entrypoint || pkg.module || pkg.main || 'src/index.js';
     const entrypointPath = resolve(baseDir, entry);
     
     console.log(`📦 Using entrypoint: ${entry}`);
@@ -70,10 +70,10 @@ export async function buildCDN(options = {}) {
       minify,
       sourcemap,
       metafile: true,
-      banner,
+      banner: { js: banner },
       plugins: [
         resolveBareImports({
-          packageJson,
+          packageJson: pkg,
           cacheDir: CACHE_DIR,
           cdnRoot,
           logging,
@@ -95,14 +95,14 @@ export async function buildCDN(options = {}) {
     // Create a package.json for the CDN build if requested
     if (createPackageJson) {
       const cdnPackageJson = {
-        name: packageJson.name,
-        version: packageJson.version,
+        name: pkg.name,
+        version: pkg.version,
         type: "module",
         main: `./${outFile}`,
         module: `./${outFile}`,
-        description: `CDN version of ${packageJson.name}`,
-        author: packageJson.author,
-        license: packageJson.license
+        description: `CDN version of ${pkg.name}`,
+        author: pkg.author,
+        license: pkg.license
       };
       
       await fs.writeFile(

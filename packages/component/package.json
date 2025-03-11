@@ -18,6 +18,8 @@
   },
   "scripts": {
     "build": "wireit",
+    "build:minified": "wireit",
+    "build:cdn": "wireit",
     "test": "vitest"
   },
   "files": [
@@ -45,10 +47,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/build-minified.js"
+      "command": "node ../internal-scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/build-cdn.js"
+      "command": "node ../internal-scripts/src/do-build-cdn.js"
     }
   }
 }

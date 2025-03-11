@@ -62,9 +62,10 @@ export async function build(options = {}) {
       outfile: outputPath,
       target,
       minify,
-      logLevel
+      logLevel,
       sourcemap,
-      banner,
+      banner: { js: banner },
+      legalComments: 'none', // we are not bundling external deps
       external: Object.keys(pkg.dependencies || {}),
       metafile: true,
     });
