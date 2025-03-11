@@ -195,7 +195,7 @@ const { component } = document.querySelector('ui-counter');
 component.setCounter(2);
 ```
 
-> **Storage in the DOM** - Your template instance is stored as `el.self` i.e. `el.self.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
+> **Storage in the DOM** Your template instance is stored as `el.self` i.e. `el.self.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
 
 
 ### DOM Access Example

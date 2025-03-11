@@ -57,7 +57,7 @@ Query provides two exports `$` and `$$`.
 
 `$` is designed to allow for extremely performant chaining for normal DOM nodes.
 
-> **$ Performance** - Query uses native `querySelector` and modern DOM APIs which means the performance implications are low when using `$`.
+> **$ Performance** Query uses native `querySelector` and modern DOM APIs which means the performance implications are low when using `$`.
 
 ```javascript
 import { $ } from '@semantic-ui/query';
@@ -75,7 +75,7 @@ Web components have portions of their DOM encapsulated in what is known as the [
 The `$$` helps traverse these boundaries to access children or parent nodes in a way similar to `$`.
 
 
-> **$$ Performance** - `$$` must pierce shadow DOM boundaries recursively which can reduce perfomance over `$`. For most use-cases this difference is negligible (less than 1ms), but for complex DOM trees the cost can be more significant. For this reason it is recommended to use `$$` only when necessary to avoid performance roadblocks in your app.
+> **$$ Performance** `$$` must pierce shadow DOM boundaries recursively which can reduce perfomance over `$`. For most use-cases this difference is negligible (less than 1ms), but for complex DOM trees the cost can be more significant. For this reason it is recommended to use `$$` only when necessary to avoid performance roadblocks in your app.
 
 ### DOM Example
 

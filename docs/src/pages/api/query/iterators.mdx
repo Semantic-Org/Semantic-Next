@@ -33,7 +33,7 @@ $('div').each(function(el, index) {
 });
 ```
 
-> **Execution Context** - Inside the callback, `this` refers to the current DOM element.
+> **Execution Context** Inside the callback, `this` refers to the current DOM element.
 
 ## map
 
@@ -63,7 +63,7 @@ const textContents = $('p').map(function(el, index) {
 console.log(textContents);
 ```
 
-> **Return Values** - The `map()` method collects the return value of your callback function for each element into a new array.
+> **Return Values** The `map()` method collects the return value of your callback function for each element into a new array.
 
 ## filter
 
@@ -92,4 +92,4 @@ const visibleElements = $('div').filter(function(el) {
 });
 ```
 
-> **Flexible Filtering** - You can pass either a function or a selector string to `filter()`. When using a function, return `true` to include the element, `false` to exclude it.
+> **Flexible Filtering** You can pass either a function or a selector string to `filter()`. When using a function, return `true` to include the element, `false` to exclude it.
