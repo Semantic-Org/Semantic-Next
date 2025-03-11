@@ -32,6 +32,7 @@ const defaultSettings = {
 
   // populates previous / next buttons
   previousLesson: {},
+  nextLesson: {},
 
   // populates menu
   menu: [],
@@ -51,7 +52,7 @@ const defaultState = {
   mobileView: 'lesson',
 };
 
-const createComponent = ({ $, $$, data, self, state, reaction, settings }) => ({
+const createComponent = ({ $, $$, data, self, state, reaction, isRendered, settings }) => ({
   mobileMenu: [
     { label: 'Lesson', value: 'lesson' },
     { label: 'Code', value: 'code' },
@@ -64,9 +65,12 @@ const createComponent = ({ $, $$, data, self, state, reaction, settings }) => ({
   calculateMobileView() {
     reaction(() => {
       const layout = state.mobileView.get();
+      if(!isRendered()) {
+        return;
+      }
+      const playground = $('code-playground').component();
       // we update the playground instance to change view
-      if(inArray(layout, ['code', 'preview'])) {
-        const playground = $('code-playground').component();
+      if(playground && inArray(layout, ['code', 'preview'])) {
         playground.setMobileView(layout);
       }
     });

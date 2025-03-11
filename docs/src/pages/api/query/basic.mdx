@@ -9,7 +9,7 @@ description: Getting started with Query and its core functionality
 
 The Query constructor is the foundation of the library, allowing you to create Query objects from various types of inputs.
 
-> **Web Component Support** - Semantic exports two separate helpers for handling DOM `$` and Shadow DOM `$$` that will recursively cross shadow boundaries.
+> **Web Component Support** Semantic exports two separate helpers for handling DOM `$` and Shadow DOM `$$` that will recursively cross shadow boundaries.
 
 ### Arguments
 
@@ -252,7 +252,7 @@ const $div = myQuery('div');
 
 You can use the `root` option to change the root which is used for query. This can be useful when using `Query` in custom implementations scoped to an element.
 
-> **SUI Components** - Semantic UI components use this technique when returning `$` and `$$` [inside components](/components/dom#using-query-in-components)
+> **SUI Components** Semantic UI components use this technique when returning `$` and `$$` [inside components](/components/dom#using-query-in-components)
 
 ```javascript title="Inside Web Component"
 import { $ } from '@semantic-ui/query';

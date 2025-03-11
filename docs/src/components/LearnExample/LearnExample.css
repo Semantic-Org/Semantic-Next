@@ -308,6 +308,11 @@
       display: none;
     }
 
+    /* no layout swapping */
+    ui-button.layout {
+      display: none;
+    }
+
     .instructions {
       .text {
         padding: 1.5rem 1rem;

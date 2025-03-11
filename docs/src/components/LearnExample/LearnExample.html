@@ -40,6 +40,30 @@
           {>slot}
         </div>
       </div>
+      <div class="actions segment">
+        <div class="left">
+          {#if hasAny lesson.references}
+            <ui-button transparent inverted icon="book" class="references">
+              Resources
+              <label>{lesson.references.length}</label>
+            </ui-button>
+          {/if}
+          {#if hasAny files}
+            <ui-button button transparent icon="table" inverted class="layout">
+              Layout
+              <label>{titleCase layout}</label>
+            </ui-button>
+          {/if}
+        </div>
+        <div class="right">
+          {#if lesson.hint}
+            <ui-button transparent inverted class="hint">Hint</ui-button>
+          {/if}
+          {#if not isEmpty solutionFiles}
+            <ui-button icon="check" class="solve">Solve</ui-button>
+          {/if}
+        </div>
+      </div>
       {#if not lesson.hideNavigation}
         <div class="navigation segment">
           {#if exists previousLesson}
@@ -66,30 +90,6 @@
           {/if}
         </div>
       {/if}
-      <div class="actions segment">
-        <div class="left">
-          {#if hasAny lesson.references}
-            <ui-button transparent inverted icon="book" class="references">
-              Resources
-              <label>{lesson.references.length}</label>
-            </ui-button>
-          {/if}
-          {#if not isEmpty files}
-          <ui-button button transparent icon="table" inverted class="layout">
-            Layout
-            <label>{titleCase layout}</label>
-          </ui-button>
-          {/if}
-        </div>
-        <div class="right">
-          {#if lesson.hint}
-            <ui-button transparent inverted class="hint">Hint</ui-button>
-          {/if}
-          {#if not isEmpty solutionFiles}
-            <ui-button icon="check" class="solve">Solve</ui-button>
-          {/if}
-        </div>
-      </div>
     </ui-panel>
     <ui-panel class="code" direction="horizontal">
       {#if isEmpty files}
@@ -119,15 +119,17 @@
       {/if}
     </ui-panel>
   </ui-panels>
-  <ui-menu
-    dark
-    fluid
-    evenly-spaced
-    items={mobileMenu}
-    value={mobileView}
-    class="mobile"
-    part="mobile-menu"
-  ></ui-menu>
+  {#if hasAny files}
+    <ui-menu
+      dark
+      fluid
+      evenly-spaced
+      items={mobileMenu}
+      value={mobileView}
+      class="mobile"
+      part="mobile-menu"
+    ></ui-menu>
+  {/if}
   {> hintModal hint=lesson.hint}
   {> referenceModal references=lesson.references}
 </div>

@@ -560,7 +560,7 @@ const events = {
   'change ui-menu.page.files'({state, data}) {
     state.activePageFile.set(data.value);
   },
-  'change ui-menu.mobile'({state, data}) {
+  'change ui-menu.mobile'({self, data}) {
     self.setMobileView(data.value);
   },
   'click ui-button.tabs'({self}) {
