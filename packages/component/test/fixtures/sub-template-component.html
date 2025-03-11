@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component with Sub-Templates Test</title>
+  <script type="module">
+    import { defineComponent } from '/packages/component/src/index.js';
+
+    // Define header sub-template
+    const headerTemplate = defineComponent({
+      template: `
+        <div class="header">Component Header</div>
+      `,
+      css: `
+        .header {
+          font-weight: bold;
+          background-color: #f0f0f0;
+          padding: 10px;
+          border-bottom: 1px solid #ccc;
+        }
+      `
+    });
+
+    // Define footer sub-template
+    const footerTemplate = defineComponent({
+      template: `
+        <div class="footer">Component Footer</div>
+      `,
+      css: `
+        .footer {
+          font-style: italic;
+          background-color: #f0f0f0;
+          padding: 10px;
+          border-top: 1px solid #ccc;
+          margin-top: 15px;
+        }
+      `
+    });
+
+    // Define parent component with sub-templates
+    defineComponent({
+      tagName: 'parent-component',
+      template: `
+        {{ >header }}
+        <div class="content">
+          <p>Main content of the component</p>
+        </div>
+        {{ >footer }}
+      `,
+      css: `
+        .content {
+          padding: 15px;
+        }
+      `,
+      subTemplates: {
+        header: headerTemplate,
+        footer: footerTemplate
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Component with Sub-Templates Test</h1>
+  
+  <parent-component></parent-component>
+</body>
+</html>

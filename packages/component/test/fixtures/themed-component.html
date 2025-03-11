@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Themed Component Test</title>
+  <script type="module">
+    import { defineComponent } from '/packages/component/src/index.js';
+
+    // Define a themed component with settings
+    defineComponent({
+      tagName: 'themed-component',
+      template: `
+        <div class="container {{ theme }}-theme">
+          <h2>Themed Component</h2>
+          <p>Current theme: {{ theme }}</p>
+        </div>
+      `,
+      css: `
+        .container {
+          padding: 20px;
+          border-radius: 5px;
+        }
+        
+        .light-theme {
+          background-color: #f8f8f8;
+          color: #333;
+        }
+        
+        .dark-theme {
+          background-color: #333;
+          color: #f8f8f8;
+        }
+      `,
+      defaultSettings: {
+        theme: 'light'
+      },
+      onThemeChanged(component) {
+        const themeLogs = document.getElementById('theme-logs');
+        themeLogs.textContent += `Theme changed to ${component.settings.theme}\n`;
+      }
+    });
+
+    // Set up theme toggle
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleButton = document.getElementById('toggle-theme');
+      const component = document.querySelector('themed-component');
+      
+      toggleButton.addEventListener('click', () => {
+        // Toggle theme
+        component.theme = component.theme === 'light' ? 'dark' : 'light';
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Themed Component Test</h1>
+  
+  <themed-component></themed-component>
+  
+  <div style="margin-top: 20px;">
+    <button id="toggle-theme">Toggle Theme</button>
+  </div>
+  
+  <div>
+    <h3>Theme Change Logs:</h3>
+    <pre id="theme-logs"></pre>
+  </div>
+</body>
+</html>

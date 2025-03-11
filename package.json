@@ -48,7 +48,18 @@
     "build-docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
-        "build"
+        "build",
+        "build:packages"
+      ]
+    },
+    "build:packages": {
+      "dependencies": [
+        "./packages/utils:build",
+        "./packages/reactivity:build",
+        "./packages/query:build",
+        "./packages/templating:build",
+        "./packages/renderer:build",
+        "./packages/component:build"
       ]
     },
     "test:case": {
@@ -66,30 +77,34 @@
       "command": "cd docs && npm run build"
     },
     "publish": {
-      "command": "node ./scripts/publish.js"
+      "command": "node ./scripts/publish.js",
+      "dependencies": [
+        "build",
+        "build:packages"
+      ]
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.10.0"
+    "@semantic-ui/component": "^0.10.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.7.1",
-    "@commitlint/config-conventional": "^19.7.1",
-    "@types/node": "^22.13.9",
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
     "@vitest/browser": "^3.0.8",
     "@vitest/coverage-istanbul": "^3.0.8",
     "@vitest/ui": "^3.0.8",
     "chalk": "^5.4.1",
     "dprint": "^0.49.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.25.1",
     "husky": "^9.1.7",
-    "inquirer": "^12.4.2",
+    "inquirer": "^12.4.3",
     "jsdom": "^26.0.0",
     "lint-staged": "^15.4.3",
-    "playwright": "^1.50.1",
+    "playwright": "^1.51.0",
     "underscore": "^1.13.7",
     "vitest": "^3.0.8",
     "wireit": "^0.14.11"

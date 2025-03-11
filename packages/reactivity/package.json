@@ -1,20 +1,50 @@
 {
   "name": "@semantic-ui/reactivity",
   "version": "0.10.1",
+  "description": "A signals based reactive state management system",
+  "author": "Jack Lukic",
+  "license": "ISC",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
-  "author": "Jack Lukic",
-  "license": "ISC",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "development": "./src/index.js",
+      "importmap": "./dist/cdn/index.min.js",
+      "default": "./src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit",
+    "test": "vitest"
+  },
   "dependencies": {
     "@semantic-ui/utils": "^0.10.1"
   },
   "devDependencies": {
-    "vitest": "^3.0.4"
+    "vitest": "^3.0.4",
+    "esbuild": "^0.25.1"
   },
   "files": [
     "src",
+    "dist",
     "types",
-    "README.md"
-  ]
+    "README.md",
+    "LICENSE"
+  ],
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:minified",
+        "build:cdn"
+      ]
+    },
+    "build:minified": {
+      "command": "node ../internal-scripts/src/build.js"
+    },
+    "build:cdn": {
+      "command": "node ../internal-scripts/src/build-cdn.js"
+    }
+  }
 }

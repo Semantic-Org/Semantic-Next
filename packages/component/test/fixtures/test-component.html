@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Test</title>
+  <script type="module">
+    import { defineComponent } from '/packages/component/src/index.js';
+
+    // Define a test component with lifecycle hooks
+    defineComponent({
+      tagName: 'test-component',
+      template: `
+        <div class="content">Hello, World!</div>
+        <div class="name">Name: {{ name }}</div>
+        <div class="counter">Count: {{ count }}</div>
+        <button class="increment">Increment</button>
+      `,
+      css: `
+        .content {
+          color: blue;
+          font-size: 18px;
+          margin-bottom: 10px;
+        }
+        button {
+          margin-top: 10px;
+          padding: 5px 10px;
+        }
+      `,
+      defaultSettings: {
+        name: 'Test User',
+        count: 0
+      },
+      events: {
+        'click .increment': function(event, component) {
+          component.settings.count++;
+        }
+      },
+      onCreated(component) {
+        // Log component creation
+        const logsEl = document.getElementById('lifecycle-logs');
+        logsEl.textContent += 'Component created\n';
+      },
+      onRendered(component) {
+        // Log component render
+        const logsEl = document.getElementById('lifecycle-logs');
+        logsEl.textContent += 'Component rendered\n';
+      },
+      onDestroyed() {
+        // Log component destruction
+        const logsEl = document.getElementById('lifecycle-logs');
+        logsEl.textContent += 'Component destroyed\n';
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Test Component</h1>
+  
+  <test-component name="Test User"></test-component>
+  
+  <div>
+    <h3>Lifecycle Logs:</h3>
+    <pre id="lifecycle-logs"></pre>
+  </div>
+</body>
+</html>

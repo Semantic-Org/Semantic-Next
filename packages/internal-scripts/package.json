@@ -1,0 +1,52 @@
+{
+  "name": "@semantic-ui/internal-scripts",
+  "version": "0.10.0",
+  "description": "Internal build scripts for Semantic UI",
+  "sideEffects": false,
+  "author": "Jack Lukic",
+  "license": "MIT",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "type": "module",
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "import": "./src/tasks/index.js",
+      "default": "./src/tasks/index.js"
+    },
+    "./build": {
+      "import": "./src/tasks/build.js",
+      "default": "./src/tasks/build.js"
+    },
+    "./build-cdn": {
+      "import": "./src/tasks/build-cdn.js",
+      "default": "./src/tasks/build-cdn.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit",
+    "build:minified": "wireit",
+    "build:cdn": "wireit"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:minified",
+        "build:cdn"
+      ]
+    },
+    "build:minified": {
+      "command": "node ./src/build.js"
+    },
+    "build:cdn": {
+      "command": "node ./src/build-cdn.js"
+    }
+  },
+  "private": true,
+  "dependencies": {
+    "@semantic-ui/esbuild-resolve-bare-imports": "^0.0.1",
+    "esbuild": "^0.25.0"
+  }
+}
