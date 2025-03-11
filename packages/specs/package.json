@@ -1,12 +1,45 @@
 {
   "name": "@semantic-ui/specs",
-  "type": "module",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "version": "0.10.1",
+  "description": "Component specifications and definitions for UI components",
   "author": "Jack Lukic",
   "license": "ISC",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": {
+      "development": "./src/index.js",
+      "importmap": "./dist/cdn/index.min.js",
+      "default": "./src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "@semantic-ui/utils": "^0.10.1"
   },
-  "version": "0.10.1"
+  "devDependencies": {
+    "esbuild": "^0.25.1"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:minified",
+        "build:cdn"
+      ]
+    },
+    "build:minified": {
+      "command": "node ../internal-scripts/src/build.js"
+    },
+    "build:cdn": {
+      "command": "node ../internal-scripts/src/build-cdn.js"
+    }
+  }
 }

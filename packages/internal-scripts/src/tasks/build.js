@@ -11,7 +11,7 @@ export async function build(options = {}) {
   console.log('DEBUG: options:', JSON.stringify(options, null, 2));
   const {
     baseDir = process.cwd(),   // Root directory of the package
-    target = ['es2020'],       // JavaScript target
+    target = ['esnext'],       // JavaScript target
     minify = true,             // Whether to minify
     sourcemap = true,          // Whether to generate sourcemaps
     format = 'esm',            // Module format
