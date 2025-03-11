@@ -12,7 +12,7 @@
     ".": {
       "development": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {
@@ -25,8 +25,10 @@
     "README.md",
     "LICENSE"
   ],
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "dependencies": {
-    "lit": "3.2.1",
     "@semantic-ui/reactivity": "^0.10.1",
     "@semantic-ui/templating": "^0.10.1",
     "@semantic-ui/utils": "^0.10.1"

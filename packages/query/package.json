@@ -20,7 +20,7 @@
       },
       "module": {
         "import": "./src/index.js",
-        "default": "./src/index.js"
+        "default": "./dist/index.min.js"
       },
       "importmap": "./dist/cdn/index.min.js",
       "import": "./src/index.js",

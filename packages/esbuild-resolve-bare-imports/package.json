@@ -15,7 +15,7 @@
   "exports": {
     ".": {
       "import": "./src/index.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "sideEffects": false,

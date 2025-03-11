@@ -1,18 +1,15 @@
 import * as esbuild from 'esbuild';
 import { resolve } from 'path';
 import fs from 'fs/promises';
-import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
 
 /**
  * Builds a CDN-ready version with resolved imports
  */
 export async function build(options = {}) {
-  console.log('DEBUG: build.js script is being executed');
-  console.log('DEBUG: options:', JSON.stringify(options, null, 2));
   const {
     baseDir = process.cwd(),   // Root directory of the package
     target = ['esnext'],       // JavaScript target
-    minify = true,             // Whether to minify
+    minify = false,             // Whether to minify
     sourcemap = true,          // Whether to generate sourcemaps
     format = 'esm',            // Module format
     outDir = 'dist/',          // Output directory
@@ -20,7 +17,6 @@ export async function build(options = {}) {
     entrypoint = null,         // Custom entrypoint override
     platform = 'neutral',      // Target platform
     logLevel = 'info',         // log level
-    createPackageJson = true   // Whether to create a package.json
   } = options;
 
   try {
@@ -39,6 +35,11 @@ export async function build(options = {}) {
     await fs.mkdir(outputDir, { recursive: true });
 
     const outputPath = resolve(outputDir, outFile);
+
+    const externalDeps = {
+      ...pkg.dependencies,
+      ...pkg.peerDependencies,
+    };
 
     const banner = `/**
  * ${pkg.name} v${pkg.version}
@@ -66,7 +67,7 @@ export async function build(options = {}) {
       sourcemap,
       banner: { js: banner },
       legalComments: 'none', // we are not bundling external deps
-      external: Object.keys(pkg.dependencies || {}),
+      external: Object.keys(externalDeps),
       metafile: true,
     });
 

@@ -7,8 +7,6 @@ import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
  * Builds a CDN-ready version with resolved imports
  */
 export async function buildCDN(options = {}) {
-  console.log('DEBUG: build-cdn.js script is being executed');
-  console.log('DEBUG: options:', JSON.stringify(options, null, 2));
   const {
     baseDir = process.cwd(),         // Root directory of the package
     cacheDir = '.cache',                // Cache directory for entrypoint resolution
@@ -97,7 +95,7 @@ export async function buildCDN(options = {}) {
       const cdnPackageJson = {
         name: pkg.name,
         version: pkg.version,
-        type: "module",
+        type: 'module',
         main: `./${outFile}`,
         module: `./${outFile}`,
         description: `CDN version of ${pkg.name}`,

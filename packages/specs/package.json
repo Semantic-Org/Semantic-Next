@@ -9,9 +9,8 @@
   "exports": {
     ".": {
       "development": "./src/index.js",
-      "production": "./dist/index.min.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {

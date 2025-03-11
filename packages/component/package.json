@@ -13,7 +13,7 @@
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/index.min.js"
     }
   },
   "scripts": {
@@ -28,6 +28,9 @@
     "types",
     "LICENSE"
   ],
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "dependencies": {
     "@semantic-ui/query": "^0.10.1",
     "@semantic-ui/reactivity": "^0.10.1",

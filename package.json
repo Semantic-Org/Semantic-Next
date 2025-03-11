@@ -33,7 +33,10 @@
   },
   "wireit": {
     "build": {
-      "command": "node ./tasks/build.js"
+      "command": "node ./tasks/build.js",
+      "dependencies": [
+        "build:packages"
+      ]
     },
     "watch": {
       "command": "node ./tasks/watch.js",
@@ -48,8 +51,7 @@
     "build-docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
-        "build",
-        "build:packages"
+        "build"
       ]
     },
     "build:packages": {
@@ -79,8 +81,7 @@
     "publish": {
       "command": "node ./scripts/publish.js",
       "dependencies": [
-        "build",
-        "build:packages"
+        "build"
       ]
     }
   },
