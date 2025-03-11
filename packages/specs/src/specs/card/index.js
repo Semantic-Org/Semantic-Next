@@ -1,4 +1,4 @@
-import { SpecReader } from '@semantic-ui/specs';
+import { SpecReader } from '../../spec-reader.js';
 
 import CardSpec from './card.json';
 

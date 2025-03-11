@@ -1,4 +1,4 @@
-import { SpecReader } from '@semantic-ui/specs';
+import { SpecReader } from '../../spec-reader.js';
 
 import ButtonSpec from './button.json';
 
