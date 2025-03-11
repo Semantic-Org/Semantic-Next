@@ -56,12 +56,13 @@
     },
     "build:packages": {
       "dependencies": [
-        "./packages/utils:build",
-        "./packages/reactivity:build",
-        "./packages/query:build",
-        "./packages/templating:build",
-        "./packages/renderer:build",
         "./packages/component:build"
+        "./packages/query:build",
+        "./packages/reactivity:build",
+        "./packages/renderer:build",
+        "./packages/specs:build",
+        "./packages/templating:build",
+        "./packages/utils:build"
       ]
     },
     "test:case": {
