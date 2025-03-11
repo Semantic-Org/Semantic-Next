@@ -4,7 +4,6 @@
   "description": "Component specifications and definitions for UI components",
   "author": "Jack Lukic",
   "license": "ISC",
-  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "exports": {
@@ -14,6 +13,9 @@
       "importmap": "./dist/cdn/index.min.js",
       "default": "./src/index.js"
     }
+  },
+  "scripts": {
+    "build": "wireit"
   },
   "files": [
     "src",
