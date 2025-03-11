@@ -1,6 +1,7 @@
 {
   "name": "@semantic-ui/templating",
-  "version": "0.10.0",
+  "version": "0.10.1",
+  "description": "HTML templating system with compiler and runtime for components",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -27,10 +28,10 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "dependencies": {
-    "@semantic-ui/renderer": "^0.10.0",
-    "@semantic-ui/query": "^0.10.0",
-    "@semantic-ui/reactivity": "^0.10.0",
-    "@semantic-ui/utils": "^0.10.0"
+    "@semantic-ui/renderer": "^0.10.1",
+    "@semantic-ui/query": "^0.10.1",
+    "@semantic-ui/reactivity": "^0.10.1",
+    "@semantic-ui/utils": "^0.10.1"
   },
   "devDependencies": {
     "vitest": "^3.0.4",

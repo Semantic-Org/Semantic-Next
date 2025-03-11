@@ -1,6 +1,9 @@
 {
   "name": "@semantic-ui/specs",
-  "version": "0.10.0",
+  "version": "0.10.1",
+  "description": "Component specifications and definitions for UI components",
+  "author": "Jack Lukic",
+  "license": "ISC",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -21,10 +24,8 @@
     "README.md",
     "LICENSE"
   ],
-  "author": "Jack Lukic",
-  "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.10.0"
+    "@semantic-ui/utils": "^0.10.1"
   },
   "devDependencies": {
     "esbuild": "^0.25.1"

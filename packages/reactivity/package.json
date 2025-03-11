@@ -1,6 +1,9 @@
 {
   "name": "@semantic-ui/reactivity",
-  "version": "0.10.0",
+  "version": "0.10.1",
+  "description": "A signals based reactive state management system",
+  "author": "Jack Lukic",
+  "license": "ISC",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -17,10 +20,8 @@
     "build": "wireit",
     "test": "vitest"
   },
-  "author": "Jack Lukic",
-  "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.10.0"
+    "@semantic-ui/utils": "^0.10.1"
   },
   "devDependencies": {
     "vitest": "^3.0.4",

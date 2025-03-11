@@ -1,6 +1,9 @@
 {
   "name": "@semantic-ui/query",
-  "version": "0.10.0",
+  "version": "0.10.1",
+  "description": "DOM querying and manipulation library for Semantic UI",
+  "author": "Jack Lukic",
+  "license": "ISC",
   "main": "src/index.cjs",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -32,10 +35,8 @@
     "README.md",
     "LICENSE"
   ],
-  "author": "Jack Lukic",
-  "license": "ISC",
   "dependencies": {
-    "@semantic-ui/utils": "^0.10.0"
+    "@semantic-ui/utils": "^0.10.1"
   },
   "devDependencies": {
     "vitest": "^3.0.4",

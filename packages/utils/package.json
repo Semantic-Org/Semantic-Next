@@ -1,6 +1,7 @@
 {
   "name": "@semantic-ui/utils",
-  "version": "0.10.0",
+  "version": "0.10.1",
+  "description": "Utility functions for arrays, objects, strings, type checking and more",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",

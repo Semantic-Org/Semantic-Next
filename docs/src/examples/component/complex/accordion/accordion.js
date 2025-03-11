@@ -29,7 +29,7 @@ const createComponent = ({self, state}) => ({
 
 const events = {
   'click .header'({self, data}) {
-    self.toggleSection(+data.index);
+    self.toggleSection(data.index);
   }
 };
 

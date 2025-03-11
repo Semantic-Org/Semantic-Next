@@ -6,6 +6,11 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.10.1
 
+## Improvements
+
+### Templates
+* Data passed through to event handlers now automatically type converts, for instance data-index="1" will be of type number when used in an event handler.
+
 ## Bugs
 
 ### Each

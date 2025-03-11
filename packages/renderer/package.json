@@ -1,6 +1,9 @@
 {
   "name": "@semantic-ui/renderer",
-  "version": "0.10.0",
+  "version": "0.10.1",
+  "description": "High-performance template rendering system with reactive directives",
+  "author": "Jack Lukic",
+  "license": "ISC",
   "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -22,13 +25,11 @@
     "README.md",
     "LICENSE"
   ],
-  "author": "Jack Lukic",
-  "license": "ISC",
   "dependencies": {
     "lit": "3.2.1",
-    "@semantic-ui/reactivity": "^0.10.0",
-    "@semantic-ui/templating": "^0.10.0",
-    "@semantic-ui/utils": "^0.10.0"
+    "@semantic-ui/reactivity": "^0.10.1",
+    "@semantic-ui/templating": "^0.10.1",
+    "@semantic-ui/utils": "^0.10.1"
   },
   "devDependencies": {
     "vitest": "^3.0.4",
