@@ -1,2 +1,2 @@
-export { build } from './builders/build.js';
-export { buildCDN } from './builders/build-cdn.js';
+export { build } from './build.js';
+export { buildCDN } from './build-cdn.js';

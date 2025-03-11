@@ -10,9 +10,11 @@
   "types": "types/index.d.ts",
   "exports": {
     ".": {
+      "default": "./src/index.js",
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
-      "default": "./dist/index.min.js"
+      "browser": "./dist/index.min.js",
+      "importmap": "./dist/cdn/index.min.js"
     }
   },
   "files": [
@@ -34,12 +36,12 @@
     },
     "build:minified": {
       "dependencies": [
-        "../internal-scripts:build-minified"
+        "../internal-scripts:build:minified"
       ]
     },
     "build:cdn": {
       "dependencies": [
-        "../internal-scripts:build-cdn"
+        "../internal-scripts:build:cdn"
       ]
     }
   },

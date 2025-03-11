@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
 import { resolve } from 'path';
 import fs from 'fs/promises';
-import { resolveBareImports } from 'esbuild-resolve-bare-imports';
+import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
 
 /**
  * Builds a CDN-ready version with resolved imports
@@ -114,5 +114,4 @@ export async function buildCDN(options = {}) {
   }
 }
 
-// Export default for convenience
 export default buildCDN;
