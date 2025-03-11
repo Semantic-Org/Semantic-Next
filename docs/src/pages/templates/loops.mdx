@@ -79,7 +79,17 @@ You can use an `else` block with an `each` loop to handle the case when the coll
 
 ### Index
 
-The value `key` can be used when iterating over an object
+The value `index` will automatically be added to data context when iterating over arrays
+
+```sui
+{#each item in items}
+  {index} - {item}
+{/each}
+```
+
+### Key
+
+The value `key` will be added to data context when iterating over an object
 
 ```sui
 {#each value, key in obj}
@@ -87,15 +97,6 @@ The value `key` can be used when iterating over an object
 {/each}
 ```
 
-### Index
-
-The value `index` can be used to get the current loop index.
-
-```sui
-{#each item in items}
-  {index} - {item}
-{/each}
-```
 
 This can be used with [helpers](/templates/helpers) like `numberFromIndex` to output non-zero indexed values.
 
@@ -114,15 +115,16 @@ Or you can just use regular js expressions
 {/each}
 ```
 
-#### Custom Index
+#### Custom Aliases
 
-You can define a custom variable name for the index using a comma after the item name:
+You can define a custom variable name for `index` using a comma after the item name
 
 ```sui
 {#each product, i in products}
   <p>Item #{i + 1}: {product.name}</p>
 {/each}
 ```
+
 
 This can be useful if you have multiple levels of each loops that need their own index
 
@@ -140,9 +142,18 @@ This can be useful if you have multiple levels of each loops that need their own
 {/each}
 ```
 
+You can also use custom alises for `key`
+
+```sui
+{#each objValue, objKey in someObj}
+  {objKey} - {objValue}
+{/each}
+```
+
+
 ### This
 
-When looping over values like strings or numbers without the `each...in` syntax you can use the keyword `this` to access the value.
+When using `each` without `in` or `as` you can use `this` to refer to the entire value
 
 ```sui
 {#each numbers}

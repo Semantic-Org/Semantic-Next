@@ -428,7 +428,8 @@
     margin-bottom: 0;
 
     &::part(item) {
-      padding: 10px 6px;
+      padding: 15px 6px;
+      border-radius: 0px;
     }
   }
 
@@ -452,8 +453,10 @@
     }
     ui-menu.mobile {
       display: block;
-      width: calc(100% - 1rem);
-      margin: auto var(--compact-spacing) 0;
+      margin: 0;
+    }
+    .playground .tabs .menu {
+      padding: 0.5rem 0.5rem 0.75rem;
     }
     ui-panel::part(handle) {
       display: none;
