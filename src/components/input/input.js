@@ -8,7 +8,7 @@ import Template from './input.html?raw';
 
 const defaultState = {
   focused: false,
-}
+};
 
 const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
 
@@ -55,18 +55,10 @@ const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
   },
 
   setValueDebounced: debounce((value) => {
-    self.setValue(value)
+    self.setValue(value);
   }, { delay: settings.debounceInterval }),
 
 });
-
-
-const onCreated = ({}) => {
-};
-
-const onRendered = function({}) {
-
-};
 
 const events = {
   'click ui-icon'({ $, self }) {
@@ -98,8 +90,6 @@ const UIInput = defineComponent({
   css: CSS,
   createComponent,
   events,
-  onCreated,
-  onRendered,
   defaultState,
 });
 
