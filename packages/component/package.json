@@ -10,12 +10,16 @@
   "types": "types/index.d.ts",
   "exports": {
     ".": {
-      "default": "./src/index.js",
       "types": "./types/index.d.ts",
       "development": "./src/index.js",
       "browser": "./dist/index.min.js",
-      "importmap": "./dist/cdn/index.min.js"
+      "importmap": "./dist/cdn/index.min.js",
+      "default": "./src/index.js"
     }
+  },
+  "scripts": {
+    "build": "wireit",
+    "test": "vitest"
   },
   "files": [
     "src",
@@ -23,28 +27,6 @@
     "types",
     "LICENSE"
   ],
-  "scripts": {
-    "build": "wireit",
-    "test": "vitest"
-  },
-  "wireit": {
-    "build": {
-      "dependencies": [
-        "build:minified",
-        "build:cdn"
-      ]
-    },
-    "build:minified": {
-      "dependencies": [
-        "../internal-scripts:build:minified"
-      ]
-    },
-    "build:cdn": {
-      "dependencies": [
-        "../internal-scripts:build:cdn"
-      ]
-    }
-  },
   "dependencies": {
     "@semantic-ui/query": "^0.10.0",
     "@semantic-ui/reactivity": "^0.10.0",
@@ -55,5 +37,19 @@
   "devDependencies": {
     "esbuild": "^0.25.1",
     "vitest": "^3.0.8"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:minified",
+        "build:cdn"
+      ]
+    },
+    "build:minified": {
+      "command": "node ../internal-scripts/src/build.js"
+    },
+    "build:cdn": {
+      "command": "node ../internal-scripts/src/build-cdn.js"
+    }
   }
 }

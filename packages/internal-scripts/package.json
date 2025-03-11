@@ -13,16 +13,16 @@
   ],
   "exports": {
     ".": {
-      "import": "./src/index.js",
-      "default": "./src/index.js"
+      "import": "./src/tasks/index.js",
+      "default": "./src/tasks/index.js"
     },
     "./build": {
-      "import": "./src/build.js",
-      "default": "./src/build.js"
+      "import": "./src/tasks/build.js",
+      "default": "./src/tasks/build.js"
     },
     "./build-cdn": {
-      "import": "./src/build-cdn.js",
-      "default": "./src/build-cdn.js"
+      "import": "./src/tasks/build-cdn.js",
+      "default": "./src/tasks/build-cdn.js"
     }
   },
   "scripts": {
