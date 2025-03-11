@@ -286,6 +286,19 @@
       margin: 0;
     }
 
+    .location {
+      .category {
+        font-size: 9px;
+      }
+      ui-icon {
+        font-size: 14px;
+        margin: 0px 0px 0 0;
+      }
+      .title {
+        font-size: 13px;
+      }
+    }
+
     /* mobile menu changes flex of panels */
     ui-panels.main ui-panel {
       flex-grow: 0 !important;
