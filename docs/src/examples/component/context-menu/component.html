@@ -8,11 +8,11 @@
         <div class="divider" data-divider="true"></div>
       {else}
         <div 
-          class="item {classMap getItemStates @index}"
-          data-index="{@index}"
+          class="item {classMap getItemStates index}"
+          data-index="{index}"
           role="menuitem"
           part="menu-item"
-          tabindex="{(isItemActive(@index) ? '0' : '-1')}"
+          tabindex="{(isItemActive(index) ? '0' : '-1')}"
         >
           {#if hasIcon item}
             <span class="icon" part="icon">
