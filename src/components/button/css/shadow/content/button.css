@@ -18,7 +18,7 @@
   background: var(--button-background);
   color: var(--button-text-color);
   font-family: var(--button-font-family);
-  padding: var(--button-vertical-padding) var(--button-horizontal-padding);
+  padding: var(--button-padding);
   text-transform: var(--button-text-transform);
   text-shadow: var(--button-text-shadow);
   font-weight: var(--button-font-weight);
