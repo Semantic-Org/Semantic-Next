@@ -204,6 +204,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     });
   },
 
+  setMobileView(layout) {
+    state.mobileView.set(layout);
+  },
+
   calculateLayout() {
     let layout = settings.useTabs
       ? 'tabs'
@@ -280,10 +284,9 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
         return labelHeight;
       }
       else {
-        let height;
         const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
-        const size = codeHeight + labelHeight + menuHeight + extraSpacing;
-        return Math.max(size, 100);
+        const height = codeHeight + labelHeight + menuHeight + extraSpacing;
+        return Math.max(height, 100);
       }
     }
   },
@@ -558,7 +561,7 @@ const events = {
     state.activePageFile.set(data.value);
   },
   'change ui-menu.mobile'({state, data}) {
-    state.mobileView.set(data.value);
+    self.setMobileView(data.value);
   },
   'click ui-button.tabs'({self}) {
     self.toggleTabs();

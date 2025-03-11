@@ -1,11 +1,12 @@
-<div class="learn" part="learn">
+<div class="{classMap getClassMap}" part="learn">
   <ui-panels
     direction="horizontal"
+    class="main"
     saveState={saveState}
     saveStateID={saveStateID}
     exportparts="panels"
   >
-    <ui-panel class="lesson" direction="horizontal" size="30" minsize="350px" naturalSize="600px">
+    <ui-panel class="lesson" size="30" minsize="350px" naturalSize="600px">
       <div class="masthead segment">
         <ui-button
           class="toggle-menu"
@@ -118,6 +119,15 @@
       {/if}
     </ui-panel>
   </ui-panels>
+  <ui-menu
+    dark
+    fluid
+    evenly-spaced
+    items={mobileMenu}
+    value={mobileView}
+    class="mobile"
+    part="mobile-menu"
+  ></ui-menu>
   {> hintModal hint=lesson.hint}
   {> referenceModal references=lesson.references}
 </div>

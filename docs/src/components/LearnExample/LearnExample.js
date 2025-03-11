@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { isEmpty, openLink } from '@semantic-ui/utils';
+import { isEmpty, inArray, openLink } from '@semantic-ui/utils';
 
 /* Sub Components */
 import { HintModal } from './subtemplates/HintModal.js';
@@ -32,7 +32,6 @@ const defaultSettings = {
 
   // populates previous / next buttons
   previousLesson: {},
-  nextLesson: {},
 
   // populates menu
   menu: [],
@@ -49,11 +48,35 @@ const defaultSettings = {
 const defaultState = {
   currentFiles: [],
   layout: 'tabs',
+  mobileView: 'lesson',
 };
 
 const createComponent = ({ $, $$, data, self, state, reaction, settings }) => ({
+  mobileMenu: [
+    { label: 'Lesson', value: 'lesson' },
+    { label: 'Code', value: 'code' },
+    { label: 'Preview', value: 'preview' },
+  ],
   initialize() {
     state.currentFiles.set(settings.files);
+    self.calculateMobileView();
+  },
+  calculateMobileView() {
+    reaction(() => {
+      const layout = state.mobileView.get();
+      // we update the playground instance to change view
+      if(inArray(layout, ['code', 'preview'])) {
+        const playground = $('code-playground').component();
+        playground.setMobileView(layout);
+      }
+    });
+  },
+  getClassMap() {
+    const classes = {
+      learn: true
+    };
+    classes[`mobile-${state.mobileView.get()}`] = true;
+    return classes;
   },
   isNavMenuVisible() {
     return $('.menu').hasClass('visible');
@@ -128,6 +151,9 @@ const events = {
   },
   'click ui-button.references'({findChild, settings}) {
     findChild('referenceModal').show();
+  },
+  'change ui-menu.mobile'({state, data}) {
+    state.mobileView.set(data.value);
   },
   'click a[href]'({ self, target, event }) {
     const href = $(target).attr('href');
