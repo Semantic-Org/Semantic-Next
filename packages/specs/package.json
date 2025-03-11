@@ -15,9 +15,6 @@
       "default": "./src/index.js"
     }
   },
-  "scripts": {
-    "build": "wireit"
-  },
   "files": [
     "src",
     "dist",
