@@ -1,14 +1,31 @@
 {
   "typescript": {
-    "indentWidth": 2,
-    "quoteStyle": "preferSingle",
-    "useBraces": "always",
-    "bracePosition": "sameLine",
-    "nextControlFlowPosition": "nextLine",
-    "trailingCommas": "onlyMultiLine",
-    "preferHanging": true,
-    "module.sortImportDeclarations": "maintain",
-    "ifStatement.spaceAfterIfKeyword": false
+    "indentWidth": 2, // default setting
+    "lineWidth": 120, // default setting
+    "useTabs": false, // default setting
+    "semiColons": "always", // default setting
+    "quoteStyle": "preferSingle", // default setting
+    "bracePosition": "sameLine", // same line for if{} (default)
+    "useBraces": "always", // dont allow single line if without braces
+    "quoteProps": "consistent", // if all props dont need quotes okay to omit
+    "nextControlFlowPosition": "nextLine", // newline for else
+    "trailingCommas": "onlyMultiLine", // only use trailing commas if content is multiline
+    "operatorPosition": "nextLine", // operator position on next line
+    "preferHanging": false, // dont use indented content when line width exceeded
+    "arrowFunction.useParentheses": "maintain", // self explanatory
+    "module.sortImportDeclarations": "caseInsensitive",
+    "module.sortExportDeclarations": "caseInsensitive",
+    "spaceAround": false, // myFunction(true) vs myFunction( true )
+    "spaceSurroundingProperties": true, // { one: 'two' } vs {one: 'two'}
+    "importDeclaration.spaceSurroundingNamedImports": true,
+    "exportDeclaration.spaceSurroundingNamedExports": true,
+    "importDeclaration.preferSingleLine": true,
+    "exportDeclaration.preferSingleLine": true,
+    "importDeclaration.sortNamedImports": "caseInsensitive",
+    "exportDeclaration.sortNamedExports": "caseInsensitive",
+    "forInStatement.spaceAfterForKeyword": false, // for(const prop of props)
+    "ifStatement.spaceAfterIfKeyword": false, // if(foo) vs if (foo)
+    "whileStatement.spaceAfterWhileKeyword": false
   },
   "json": {},
   "markdown": {},
