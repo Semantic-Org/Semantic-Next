@@ -3,7 +3,7 @@
 ## This will perform dprint on modified files only
 
 # Get the names of staged files with additions or modifications, filtered by extension
-FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.(ts|js|json|md|tsx|jsx)$" || true)
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.(ts|js|mjs|cjs|json|md|tsx|jsx)$" || true)
 
 # Check if there are any staged files that match our filter
 if [ -n "$FILES" ]; then
