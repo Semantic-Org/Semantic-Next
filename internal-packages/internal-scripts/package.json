@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/internal-scripts",
-  "version": "0.10.1",
+  "version": "1.0.0",
   "description": "Internal build scripts for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
@@ -47,7 +47,7 @@
   },
   "private": true,
   "dependencies": {
-    "@semantic-ui/esbuild-resolve-bare-imports": "^0.10.1",
+    "@semantic-ui/esbuild-resolve-bare-imports": "^1.0.0",
     "esbuild": "^0.25.0"
   }
 }

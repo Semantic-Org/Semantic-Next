@@ -118,6 +118,7 @@
     "glob": "^10.3.10"
   },
   "workspaces": [
+    "internal-packages/*",
     "packages/*",
     "docs/*",
     "examples/*"
