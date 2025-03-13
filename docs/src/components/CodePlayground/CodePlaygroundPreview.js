@@ -2,7 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 import { TemplateCompiler } from '@semantic-ui/templating';
 import template from './CodePlaygroundPreview.html?raw';
 import css from './CodePlaygroundPreview.css?raw';
-import './PrettyJSON.js';
+import './lib/pretty-json.js';
 
 const defaultState = {
   tab: 'preview',
