@@ -124,6 +124,6 @@
     "examples/*"
   ],
   "lint-staged": {
-    "**/*.js": "npx dprint fmt"
+    "**/*.js": "echo \"test\""
   }
 }
