@@ -1,32 +1,31 @@
-import { defineComponent, adoptStylesheet } from '@semantic-ui/component';
+import { adoptStylesheet, defineComponent } from '@semantic-ui/component';
 
-import codeMirrorCSS from './lib/codemirror.css?raw';
-import template from './CodePlaygroundFile.html?raw';
 import css from './CodePlaygroundFile.css?raw';
+import template from './CodePlaygroundFile.html?raw';
+import codeMirrorCSS from './lib/codemirror.css?raw';
 
 const defaultState = {
   initialized: false, // avoid the flash when mode is set from changing file types
 };
 
-const createComponent = ({self, settings, state, data, $, $$}) => ({
-
+const createComponent = ({ self, settings, state, data, $, $$ }) => ({
   getClassMap() {
     return {
-      initialized: state.initialized.get()
+      initialized: state.initialized.get(),
     };
   },
 
   configureCodeEditors() {
     const el = $$('playground-code-editor').get(0);
-    if(el) {
+    if (el) {
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
       self.modifyCodeMirror(el._codemirror);
     }
     // we want to use custom template syntax for html files
-    if((data?.filename || '').search('.html') !== -1) {
+    if ((data?.filename || '').search('.html') !== -1) {
       requestAnimationFrame(() => {
         const cm = $$('playground-code-editor').get(0)?._codemirror;
-        if(cm) {
+        if (cm) {
           cm.setOption('mode', 'text/ui-template');
         }
         state.initialized.set(true);
@@ -42,7 +41,6 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
   },
 
   modifyCodeMirror(cm) {
-
     cm.setSize(null, null);
 
     cm.refresh();
@@ -62,7 +60,8 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
       Tab: (cm) => {
         if (cm.somethingSelected()) {
           cm.indentSelection('add');
-        } else {
+        }
+        else {
           cm.execCommand('insertSoftTab');
         }
       },
@@ -99,7 +98,7 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
 
     self.patchFold(cm);
 
-    if(data.inline) {
+    if (data.inline) {
       cm.on('change', (instance, changeObj) => {
         setTimeout(() => {
           // Use setTimeout to allow the DOM to update
@@ -141,18 +140,18 @@ const createComponent = ({self, settings, state, data, $, $$}) => ({
   },
   removeMatchingLine(cm, searchString) {
     const doc = cm.getDoc();
-    const cursor = doc.getSearchCursor(searchString, {line: 0, ch: 0});
+    const cursor = doc.getSearchCursor(searchString, { line: 0, ch: 0 });
     if (cursor.findNext()) {
       const lineIndex = cursor.from().line;
       // Remove all text from this line start to the next line start.
       // This effectively deletes the entire line (including the trailing newline).
       doc.replaceRange(
         '',
-        {line: lineIndex, ch: 0},
-        {line: lineIndex + 1, ch: 0}
+        { line: lineIndex, ch: 0 },
+        { line: lineIndex + 1, ch: 0 },
       );
     }
-  }
+  },
 });
 
 const events = {
@@ -164,7 +163,7 @@ const events = {
   },
   'blur ui-panel'({ $$ }) {
     $$('.label').removeClass('active');
-  }
+  },
 };
 
 const onRendered = ({ self, data }) => {

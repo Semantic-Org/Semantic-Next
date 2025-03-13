@@ -10,8 +10,8 @@ defineComponent({
   createComponent: ({ state }) => ({
     getMessage() {
       return 'Hello';
-    }
+    },
   }),
   template,
-  css
+  css,
 });

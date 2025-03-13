@@ -17,5 +17,4 @@ $('input')
   .on('blur', () => {
     let counter = getComponent();
     counter.startCounter();
-  })
-;
+  });

@@ -10,13 +10,13 @@ const createComponent = ({ self, signal, dispatchEvent }) => ({
   selectColor(color) {
     self.selectedColor.set(color);
     dispatchEvent('color-selected', { color });
-  }
+  },
 });
 
 const events = {
   'click .option'({ self, data }) {
     self.selectColor(data.color);
-  }
+  },
 };
 
 defineComponent({
@@ -24,5 +24,5 @@ defineComponent({
   events,
   template,
   css,
-  createComponent
+  createComponent,
 });

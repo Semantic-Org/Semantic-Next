@@ -13,7 +13,6 @@ const createComponent = ({ state }) => ({
   },
 });
 
-
 defineComponent({
   tagName: 'current-time',
   defaultState,

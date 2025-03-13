@@ -21,7 +21,7 @@ const defaultState = {
     { taste: 'Yummy', name: 'Peach' },
     { taste: 'Yummy', name: 'Kiwi' },
     { taste: 'Sometimes', name: 'Plum' },
-    { taste: 'Okay', name: 'Raspberry' }
+    { taste: 'Okay', name: 'Raspberry' },
   ],
   person: {
     name: 'John Hellinger',
@@ -30,13 +30,12 @@ const defaultState = {
   },
 };
 
-const createComponent = ({ state }) => ({
-});
+const createComponent = ({ state }) => ({});
 
 defineComponent({
   tagName: 'ui-list',
   template,
   css,
   defaultState,
-  createComponent
+  createComponent,
 });

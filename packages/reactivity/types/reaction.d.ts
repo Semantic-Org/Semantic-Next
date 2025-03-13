@@ -58,7 +58,7 @@ export class Reaction {
    *
    * @param context - Optional metadata about what triggered the invalidation
    */
-  invalidate(context?: { value: unknown; trace?: string }): void;
+  invalidate(context?: { value: unknown; trace?: string; }): void;
 
   /**
    * Permanently stops the reaction from running.
@@ -158,6 +158,6 @@ export class Reaction {
    */
   static guard<T>(
     callback: () => T,
-    equalityCheck?: (oldValue: T, newValue: T) => boolean
+    equalityCheck?: (oldValue: T, newValue: T) => boolean,
   ): T;
 }

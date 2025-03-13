@@ -6,7 +6,7 @@ import { log } from './log.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const buildPlayground = async ({
-  watch = false
+  watch = false,
 }) => {
   return;
   const sourceCore = path.join(__dirname, '../../docs/node_modules/@semantic-ui/core');
@@ -34,7 +34,8 @@ export const buildPlayground = async ({
         if (fs.existsSync(sourcePath)) {
           log('Docs Playground', `Copying ${folder} folder`);
           await fs.promises.cp(sourcePath, destPath, { recursive: true });
-        } else {
+        }
+        else {
           log('Docs Playground', `Warning: ${folder} folder not found`);
         }
       }
@@ -42,8 +43,8 @@ export const buildPlayground = async ({
       // Verify final contents
       const finalContents = await fs.promises.readdir(destCore);
       log('Docs Playground', `Final contents: ${finalContents.join(', ')}`);
-
-    } catch (error) {
+    }
+    catch (error) {
       log('Docs Playground', `Error during copy: ${error.message}`);
       console.error(error);
     }
@@ -54,13 +55,13 @@ export const buildPlayground = async ({
 
   if (watch) {
     fs.watch(srcDir, { recursive: true }, async (eventType, filename) => {
-      if (filename?.includes('node_modules')) return;
+      if (filename?.includes('node_modules')) { return; }
       log('Docs Playground', `Change detected in src/${filename}`);
       await copyModules();
     });
 
     fs.watch(packagesDir, { recursive: true }, async (eventType, filename) => {
-      if (filename?.includes('node_modules')) return;
+      if (filename?.includes('node_modules')) { return; }
       log('Docs Playground', `Change detected in packages/${filename}`);
       await copyModules();
     });

@@ -32,8 +32,7 @@ export const localPackages = [
 
 const importPackages = (isStaticBuild)
   ? npmPackages
-  : localPackages
-;
+  : localPackages;
 
 const packageImports = { imports: {} };
 
@@ -43,7 +42,7 @@ for (const pkg of importPackages) {
       process.cwd(),
       'node_modules',
       pkg.replace(/\//g, path.sep),
-      'package.json'
+      'package.json',
     );
 
     if (!fs.existsSync(pkgPath)) {
@@ -67,7 +66,8 @@ for (const pkg of importPackages) {
 
     // Add to import map
     packageImports.imports[pkgJson.name] = mappedUrl;
-  } catch (error) {
+  }
+  catch (error) {
     console.error(`Error processing package ${pkg}:`, error);
   }
 }
@@ -80,6 +80,6 @@ export const GET = async () => {
     headers: {
       'Content-Type': 'application/importmap+json',
       'Cache-Control': 'public, max-age=31536000',
-    }
+    },
   });
 };

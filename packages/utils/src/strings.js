@@ -1,5 +1,5 @@
-import { isArray, isString, isFunction } from './types.js';
 import { noop } from './functions.js';
+import { isArray, isFunction, isString } from './types.js';
 
 /*-------------------
        Strings
@@ -49,7 +49,7 @@ export const toTitleCase = (str = '') => {
     'with',
     'as',
   ];
-  if(!isString(str)) {
+  if (!isString(str)) {
     return;
   }
   return str
@@ -70,7 +70,7 @@ export const joinWords = (words, {
   lastSeparator = ' and ',
   oxford = true,
   quotes = false,
-  transform = noop
+  transform = noop,
 } = {}) => {
   if (!isArray(words) || words.length === 0) {
     return '';
@@ -107,10 +107,8 @@ export const getArticle = (word, settings = {}) => {
   const firstLetter = word.toLowerCase()[0];
   const article = vowels.includes(firstLetter)
     ? 'an'
-    : 'a'
-  ;
+    : 'a';
   return (settings.capitalize)
     ? capitalize(article)
-    : article
-  ;
+    : article;
 };

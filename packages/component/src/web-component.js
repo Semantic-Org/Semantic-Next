@@ -1,7 +1,19 @@
-import { LitElement } from 'lit';
-import { each, isFunction, isClassInstance, kebabToCamel, camelToKebab, keys, unique, isServer, isEqual, inArray, get } from '@semantic-ui/utils';
-import { Signal } from '@semantic-ui/reactivity';
 import { $ } from '@semantic-ui/query';
+import { Signal } from '@semantic-ui/reactivity';
+import {
+  camelToKebab,
+  each,
+  get,
+  inArray,
+  isClassInstance,
+  isEqual,
+  isFunction,
+  isServer,
+  kebabToCamel,
+  keys,
+  unique,
+} from '@semantic-ui/utils';
+import { LitElement } from 'lit';
 import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
@@ -10,8 +22,7 @@ import { scopeStyles } from './helpers/scope-styles.js';
 */
 
 class WebComponentBase extends LitElement {
-
-  static shadowRootOptions = {...LitElement.shadowRootOptions, delegatesFocus: false};
+  static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: false };
 
   // for use with light dom rendering
   static scopedStyleSheet = null;
@@ -71,13 +82,12 @@ class WebComponentBase extends LitElement {
 
         // we cant serialize custom classes
         const propertySettings = {
-          propertyOnly: isClassInstance(defaultValue)
+          propertyOnly: isClassInstance(defaultValue),
         };
 
         properties[propertyName] = (defaultValue?.type)
           ? defaultSettings
-          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings)
-        ;
+          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings);
       });
     }
 
@@ -87,7 +97,7 @@ class WebComponentBase extends LitElement {
     */
     each(properties, (propertySettings, propertyName) => {
       const attributeName = camelToKebab(propertyName);
-      if(attributeName !== propertyName && !properties[attributeName] && properties[propertyName]) {
+      if (attributeName !== propertyName && !properties[attributeName] && properties[propertyName]) {
         properties[attributeName] = {
           ...properties[propertyName],
           noAccessor: true,
@@ -126,7 +136,7 @@ class WebComponentBase extends LitElement {
         },
         toAttribute: (value, type) => {
           return String(value);
-        }
+        },
       };
     }
     return property;
@@ -139,7 +149,7 @@ class WebComponentBase extends LitElement {
   /*
     This sets default settings for a component
   */
-  setDefaultSettings({defaultSettings = {}, componentSpec}) {
+  setDefaultSettings({ defaultSettings = {}, componentSpec }) {
     this.defaultSettings = defaultSettings;
     each(defaultSettings, (setting, name) => {
       if (setting?.default !== undefined) {
@@ -152,32 +162,31 @@ class WebComponentBase extends LitElement {
       }
     });
     // read default values from component spec if available
-    if(componentSpec?.defaultValues) {
+    if (componentSpec?.defaultValues) {
       this.defaultSettings = {
         ...componentSpec.defaultValues,
-        ...this.defaultSettings
+        ...this.defaultSettings,
       };
     }
   }
-
 
   /*
     This returns a list of settings which may include both attributes and properties
     as specified in the spec for the component. It will extend them from default settings
   */
-  getSettingsFromConfig({componentSpec, properties}) {
+  getSettingsFromConfig({ componentSpec, properties }) {
     let settings = {};
     each(properties, (propSettings, propertyName) => {
       if (propSettings.alias === true) {
         return;
       }
       const elementProp = this[propertyName];
-      const setting = elementProp  // check element setting
-        ?? this.defaultSettings[propertyName]  // check default setting on this component
+      const setting = elementProp // check element setting
+        ?? this.defaultSettings[propertyName] // check default setting on this component
         ?? (componentSpec?.defaultSettings || {})[propertyName] // check default setting on component spec
       ;
       // only pass through setting if it is defined
-      if(setting !== undefined) {
+      if (setting !== undefined) {
         settings[propertyName] = setting;
       }
       // boolean attribute case
@@ -188,13 +197,12 @@ class WebComponentBase extends LitElement {
     return settings;
   }
 
-
   /* Create a proxy object which returns the current setting
      we need this over a getter/setter because settings are
      destructured in function arguments which locks their value in time
      i.e. onCreated({settings}) { }
   */
-  createSettingsProxy({componentSpec, properties}) {
+  createSettingsProxy({ componentSpec, properties }) {
     let component = this;
     /*
       To make settings reactive in Reactions
@@ -205,11 +213,11 @@ class WebComponentBase extends LitElement {
       get: (target, property) => {
         const settings = component.getSettings({
           componentSpec,
-          properties
+          properties,
         });
         const setting = get(settings, property);
         let signal = component.settingsVars.get(property);
-        if(signal) {
+        if (signal) {
           signal.get();
         }
         else {
@@ -221,7 +229,7 @@ class WebComponentBase extends LitElement {
       set: (target, property, value, receiver) => {
         component.setSetting(property, value);
         let signal = component.settingsVars.get(property);
-        if(signal) {
+        if (signal) {
           signal.set(value);
         }
         else {
@@ -229,7 +237,7 @@ class WebComponentBase extends LitElement {
           component.settingsVars.set(property, signal);
         }
         return true;
-      }
+      },
     });
   }
 
@@ -238,8 +246,7 @@ class WebComponentBase extends LitElement {
     the template data context for the component based off
     component attributes
   */
-  getUIClasses({componentSpec, properties}) {
-
+  getUIClasses({ componentSpec, properties }) {
     // this is just a special feature of component specs and can be ignored otherwise
     if (!componentSpec) {
       return;
@@ -247,23 +254,22 @@ class WebComponentBase extends LitElement {
     const classes = [];
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
-
       const property = kebabToCamel(attribute);
       const value = this[property];
 
-      if(value) {
+      if (value) {
         const allowedValues = componentSpec.allowedValues[attribute];
         const propertyType = componentSpec.propertyTypes[attribute];
-        if(propertyType == Boolean) {
+        if (propertyType == Boolean) {
           // this is a variation like active=true
           // it receives the class "active"
           classes.push(attribute);
         }
-        else if(value == attribute && allowedValues && inArray(value, allowedValues)) {
+        else if (value == attribute && allowedValues && inArray(value, allowedValues)) {
           // disabled="disabled" use case operates like boolean
           classes.push(attribute);
         }
-        else if(allowedValues && inArray(value, allowedValues)) {
+        else if (allowedValues && inArray(value, allowedValues)) {
           // this is a variation like emphasis="primary"
           // it receives the class "primary"
           classes.push(value);
@@ -271,14 +277,14 @@ class WebComponentBase extends LitElement {
 
         // components can opt-in to including the attribute if it has a value set
         // for instance "icon" if it has an icon set
-        if(componentSpec.attributeClasses.includes(attribute)) {
+        if (componentSpec.attributeClasses.includes(attribute)) {
           classes.push(attribute);
         }
       }
     });
 
     let classString = unique(classes).join(' ');
-    if(classString) {
+    if (classString) {
       classString += ' ';
     }
     return classString;
@@ -287,8 +293,7 @@ class WebComponentBase extends LitElement {
   isDarkMode() {
     return (isServer)
       ? undefined
-      : $(this).cssVar('dark-mode') == 'true'
-    ;
+      : $(this).cssVar('dark-mode') == 'true';
   }
 
   /*******************************
@@ -296,7 +301,7 @@ class WebComponentBase extends LitElement {
   *******************************/
 
   // Rendered DOM (either shadow or regular)
-  $(selector, { root = this?.renderRoot || this.shadowRoot} = {}) {
+  $(selector, { root = this?.renderRoot || this.shadowRoot } = {}) {
     if (!root) {
       console.error('Cannot query DOM until element has rendered.');
     }
@@ -311,7 +316,7 @@ class WebComponentBase extends LitElement {
   // calls callback if defined with consistent params and this context
   call(
     func,
-    { firstArg, additionalArgs, args = [this.component, this.$.bind(this)] } = {}
+    { firstArg, additionalArgs, args = [this.component, this.$.bind(this)] } = {},
   ) {
     if (firstArg) {
       args.unshift(firstArg);

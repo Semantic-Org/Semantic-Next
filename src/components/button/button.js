@@ -1,11 +1,11 @@
 import { defineComponent } from '@semantic-ui/component';
-import { get } from '@semantic-ui/utils';
 import { ButtonComponentSpec } from '@semantic-ui/specs';
+import { get } from '@semantic-ui/utils';
 
-import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css'};
-import ButtonTemplate from './button.html?raw' assert { type: 'txt'};
+import ButtonTemplate from './button.html?raw' assert { type: 'txt' };
+import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css' };
 
-const createComponent = ({self, settings, data, el, $}) => ({
+const createComponent = ({ self, settings, data, el, $ }) => ({
   isIconBefore() {
     return settings.icon && !settings.iconAfter;
   },
@@ -21,35 +21,35 @@ const createComponent = ({self, settings, data, el, $}) => ({
   },
   isDisabled() {
     return settings.state == 'disabled';
-  }
+  },
 });
 
 const events = {
-  'touchstart .button'({event, self, $}) {
+  'touchstart .button'({ event, self, $ }) {
     $(this).addClass('pressed');
   },
-  'touchend .button'({event, self, $}) {
+  'touchend .button'({ event, self, $ }) {
     $(this).removeClass('pressed');
   },
-  'click .button'({event, self, $}) {
+  'click .button'({ event, self, $ }) {
     $(this).blur();
   },
-  'keydown .button'({event, self, $}) {
+  'keydown .button'({ event, self, $ }) {
     let $button = $(this);
     if (self.isSubmitKey(event.keyCode)) {
       $button.addClass('pressed');
       event.preventDefault();
     }
-    if(event.key == 'Escape') {
+    if (event.key == 'Escape') {
       $button.blur();
     }
   },
-  'keyup .button'({event, self, $}) {
+  'keyup .button'({ event, self, $ }) {
     let $button = $(this);
     if (self.isSubmitKey(event.keyCode)) {
       $button.removeClass('pressed');
     }
-  }
+  },
 };
 
 export const UIButton = defineComponent({

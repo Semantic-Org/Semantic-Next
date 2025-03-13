@@ -4,7 +4,6 @@ import { each, generateID } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-
 /*
   This animation loop uses the ball position as the main source of reactivity
   updating the positions using requestAnimationFrame as the browser will permit
@@ -32,8 +31,7 @@ const defaultSettings = {
   speed: 1, // relative speed of entire animation
 };
 
-const createComponent = ({self, $, reaction, settings, state}) => ({
-
+const createComponent = ({ self, $, reaction, settings, state }) => ({
   emitter: { active: false, x: 0, y: 0 },
   render: { lastTime: 0, fps: 0 },
 
@@ -58,7 +56,7 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     self.render.lastTime = currentTime;
 
     let fps = 1 / deltaTime;
-    if(fps !== Infinity) {
+    if (fps !== Infinity) {
       self.render.fps = 1 / deltaTime;
     }
 
@@ -68,7 +66,6 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
 
     self.updateBalls(deltaTime);
     self.draw();
-
   },
 
   emitBalls() {
@@ -76,14 +73,14 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     for (let i = 0; i < settings.emitRate; i++) {
       newBalls.push(self.createBall({
         x: self.emitter.x,
-        y: self.emitter.y
+        y: self.emitter.y,
       }));
     }
     const currentBalls = state.balls.peek();
     state.balls.set([...currentBalls, ...newBalls]);
   },
 
-  createBall({x, y}) {
+  createBall({ x, y }) {
     const randomInRange = (average, variance) => {
       const value = average + (Math.random() - 0.5) * 2 * variance;
       return (value < 1) ? 1 : value;
@@ -104,7 +101,7 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
 
   getRandomColor() {
     const hue = Math.random() * 360;
-    const lightness = 40 + Math.random() * 20;  // 40-60%
+    const lightness = 40 + Math.random() * 20; // 40-60%
     return { h: hue, s: 100, l: lightness }; // Start with full saturation
   },
 
@@ -114,10 +111,11 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     const canvas = self.getCanvas();
     const currentBalls = state.balls.peek();
     const updatedBalls = currentBalls.map(ball =>
-      self.pipe(ball,
+      self.pipe(
+        ball,
         b => self.decayColor(b, deltaTime),
         b => self.updatePosition(b, deltaTime),
-        b => self.checkWalls(b, canvas)
+        b => self.checkWalls(b, canvas),
       )
     );
 
@@ -134,15 +132,15 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
       ...ball,
       saturation: Math.max(
         settings.minSaturation,
-        ball.saturation - settings.saturationDecay * deltaTime
+        ball.saturation - settings.saturationDecay * deltaTime,
       ),
       color: {
         ...ball.color,
         l: Math.max(
           settings.minLightness,
-          ball.color.l - settings.lightnessDecay * deltaTime
-        )
-      }
+          ball.color.l - settings.lightnessDecay * deltaTime,
+        ),
+      },
     };
   },
 
@@ -150,7 +148,7 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     return {
       ...ball,
       x: ball.x + ball.vx * deltaTime,
-      y: ball.y + ball.vy * deltaTime
+      y: ball.y + ball.vy * deltaTime,
     };
   },
 
@@ -234,7 +232,7 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     for (let i = 0; i < settings.count; i++) {
       initialBalls.push(self.createBall({
         x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height
+        y: Math.random() * canvas.height,
       }));
     }
     state.balls.set(initialBalls);
@@ -257,7 +255,7 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     ctx.font = '12px Arial';
     ctx.textAlign = 'right';
     let fps = Math.round(self.render.fps);
-    if(fps < 100) {
+    if (fps < 100) {
       fps = `0${fps}`;
     }
     ctx.fillText(`FPS: ${fps}`, canvas.width - 10, canvas.height - 10);
@@ -269,39 +267,38 @@ const createComponent = ({self, $, reaction, settings, state}) => ({
     const scaleY = canvas.height / rect.height;
     return {
       x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY
+      y: (event.clientY - rect.top) * scaleY,
     };
-  }
-
+  },
 });
 
-const onRendered = ({state, data, settings, self}) => {
+const onRendered = ({ state, data, settings, self }) => {
   self.drawInitialBalls();
   self.startAnimation();
 };
 
 const events = {
-  'pointerdown canvas'({self, event}) {
+  'pointerdown canvas'({ self, event }) {
     const pos = self.getPointerPosition(event);
     self.emitter.x = pos.x;
     self.emitter.y = pos.y;
     self.emitter.active = true;
   },
 
-  'pointermove canvas'({self, event}) {
+  'pointermove canvas'({ self, event }) {
     if (self.emitter.active) {
       const pos = self.getPointerPosition(event);
       self.emitter.x = pos.x;
       self.emitter.y = pos.y;
     }
   },
-  'pointerup, pointerleave canvas'({self}) {
+  'pointerup, pointerleave canvas'({ self }) {
     self.emitter.active = false;
   },
-  'change input.speed'({value, settings}) {
+  'change input.speed'({ value, settings }) {
     settings.speed = value / 100;
   },
-  'touchstart, touchmove canvas'({event}) {
+  'touchstart, touchmove canvas'({ event }) {
     // prevent highlight/scroll on mobile
     event.preventDefault();
   },
@@ -315,5 +312,5 @@ export const BallSimulation = defineComponent({
   onRendered,
   events,
   defaultState,
-  defaultSettings
+  defaultSettings,
 });

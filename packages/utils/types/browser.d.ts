@@ -41,10 +41,10 @@ export function openLink(url: string, options?: OpenLinkOptions): void;
  * Extracts a standardized key string from a keyboard event
  * Handles modifiers (ctrl, alt, shift, meta) and special keys
  * @see {@link https://next.semantic-ui.com/api/utils/browser#getkeyfromEvent getKeyFromEvent}
- * 
+ *
  * @param event - The keyboard event
  * @returns A standardized key string (e.g. "ctrl+a", "shift+enter")
- * 
+ *
  * @example
  * ```ts
  * element.onkeydown = (e) => {

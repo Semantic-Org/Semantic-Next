@@ -1,6 +1,6 @@
 // scripts/plugins/resolve-bare-imports.js
-import fs from 'fs/promises';
 import { existsSync } from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
 /**
@@ -17,7 +17,7 @@ export function resolveBareImports(options = {}) {
     // Custom resolver function (packageName, version, entrypoint) => string
     resolver = null,
     // Direct replacements for packages - bypasses resolution
-    directReplacements = {}
+    directReplacements = {},
   } = options;
 
   // Default resolver function that converts to CDN URLs
@@ -34,23 +34,23 @@ export function resolveBareImports(options = {}) {
   // Determine which dependencies to process
   const dependencies = onlyDependencies || {
     ...packageJson.dependencies,
-    ...packageJson.peerDependencies
+    ...packageJson.peerDependencies,
   };
 
   // Logging utilities
   const log = {
     error: (...args) => {
-      if (logging !== 'silent') console.error(...args);
+      if (logging !== 'silent') { console.error(...args); }
     },
     warn: (...args) => {
-      if (logging !== 'silent') console.warn(...args);
+      if (logging !== 'silent') { console.warn(...args); }
     },
     info: (...args) => {
-      if (['normal', 'verbose'].includes(logging)) console.log(...args);
+      if (['normal', 'verbose'].includes(logging)) { console.log(...args); }
     },
     verbose: (...args) => {
-      if (logging === 'verbose') console.log(...args);
-    }
+      if (logging === 'verbose') { console.log(...args); }
+    },
   };
 
   // Function to parse a bare import into package name and subpath
@@ -62,7 +62,7 @@ export function resolveBareImports(options = {}) {
         // Just the scoped package name, no subpath
         return {
           packageName: importPath,
-          subPath: null
+          subPath: null,
         };
       }
 
@@ -71,16 +71,17 @@ export function resolveBareImports(options = {}) {
       const subPath = parts.slice(2).join('/');
       return {
         packageName,
-        subPath
+        subPath,
       };
-    } else {
+    }
+    else {
       // Regular package
       const parts = importPath.split('/');
       if (parts.length === 1) {
         // Just the package name, no subpath
         return {
           packageName: importPath,
-          subPath: null
+          subPath: null,
         };
       }
 
@@ -89,7 +90,7 @@ export function resolveBareImports(options = {}) {
       const subPath = parts.slice(1).join('/');
       return {
         packageName,
-        subPath
+        subPath,
       };
     }
   };
@@ -111,7 +112,8 @@ export function resolveBareImports(options = {}) {
         log.verbose(`📦 Cache hit for ${packageName}@${cleanVersion}: ${cache.entrypoint}`);
         return cache.entrypoint;
       }
-    } catch (error) {
+    }
+    catch (error) {
       log.warn(`⚠️ Cache read error for ${cacheKey}:`, error.message);
     }
 
@@ -125,13 +127,21 @@ export function resolveBareImports(options = {}) {
     const cachePath = path.join(cacheDir, `${cacheKey.replace(/\//g, '_')}.json`);
 
     try {
-      await fs.writeFile(cachePath, JSON.stringify({
-        entrypoint,
-        packageName,
-        version: cleanVersion
-      }, null, 2));
+      await fs.writeFile(
+        cachePath,
+        JSON.stringify(
+          {
+            entrypoint,
+            packageName,
+            version: cleanVersion,
+          },
+          null,
+          2,
+        ),
+      );
       log.verbose(`💾 Cached entrypoint for ${packageName}@${cleanVersion}: ${entrypoint}`);
-    } catch (error) {
+    }
+    catch (error) {
       log.warn(`⚠️ Failed to save cache for ${cacheKey}:`, error.message);
     }
   };
@@ -153,7 +163,7 @@ export function resolveBareImports(options = {}) {
 
       // Query jsDelivr API
       const response = await fetch(
-        `https://data.jsdelivr.com/v1/packages/npm/${packageName}@${cleanVersion}/entrypoints`
+        `https://data.jsdelivr.com/v1/packages/npm/${packageName}@${cleanVersion}/entrypoints`,
       );
 
       if (!response.ok) {
@@ -174,7 +184,8 @@ export function resolveBareImports(options = {}) {
       await saveEntrypointToCache(packageName, version, entrypoint);
 
       return entrypoint;
-    } catch (error) {
+    }
+    catch (error) {
       log.warn(`⚠️ Error fetching entrypoint for ${packageName}@${cleanVersion}:`, error.message);
       return 'dist/index.min.js';
     }
@@ -216,7 +227,7 @@ export function resolveBareImports(options = {}) {
           log.verbose(`🔄 Using direct replacement for ${importPath}: ${directReplacements[importPath]}`);
           return {
             path: directReplacements[importPath],
-            external: true
+            external: true,
           };
         }
 
@@ -232,14 +243,15 @@ export function resolveBareImports(options = {}) {
             log.verbose(`🔄 Using direct replacement for ${importPath}: ${resolvedUrl}`);
             return {
               path: resolvedUrl,
-              external: true
+              external: true,
             };
-          } else {
+          }
+          else {
             // Direct replacement with no subpath
             log.verbose(`🔄 Using direct replacement for ${packageName}: ${replacement}`);
             return {
               path: replacement,
-              external: true
+              external: true,
             };
           }
         }
@@ -269,7 +281,7 @@ export function resolveBareImports(options = {}) {
 
           return {
             path: resolvedUrl,
-            external: true
+            external: true,
           };
         }
 
@@ -284,9 +296,9 @@ export function resolveBareImports(options = {}) {
 
         return {
           path: resolvedUrl,
-          external: true
+          external: true,
         };
       });
-    }
+    },
   };
 }

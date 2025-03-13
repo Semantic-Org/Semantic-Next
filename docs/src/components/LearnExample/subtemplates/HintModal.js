@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './HintModal.html?raw';
 import css from './HintModal.css?raw';
+import template from './HintModal.html?raw';
 
 const createComponent = ({ $ }) => {
   return {

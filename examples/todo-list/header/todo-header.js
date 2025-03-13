@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
+import template from './todo-header.html?raw';
 
 const createComponent = ({ self, $, reaction, signal, findParent }) => ({
   allCompleted: signal(false),

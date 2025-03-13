@@ -1,7 +1,7 @@
-import type { PropertyDeclaration, PropertyValues, LitElement } from 'lit';
-import type { Signal } from '@semantic-ui/reactivity';
 import type { Query } from '@semantic-ui/query';
+import type { Signal } from '@semantic-ui/reactivity';
 import type { Template } from '@semantic-ui/templating';
+import type { LitElement, PropertyDeclaration, PropertyValues } from 'lit';
 
 /**
  * Base class for Semantic UI web components.
@@ -132,7 +132,7 @@ export declare class WebComponentBase extends LitElement {
   /**
    * Protected helper methods
    */
-  protected $(selector: string, options?: { root?: Element | ShadowRoot }): Query;
+  protected $(selector: string, options?: { root?: Element | ShadowRoot; }): Query;
   protected $$(selector: string): Query;
   protected isDarkMode(): boolean;
 }

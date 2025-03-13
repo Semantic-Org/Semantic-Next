@@ -6,9 +6,8 @@ const componentPages = components.map(page => ({
   matchSubPaths: true,
 }));
 
-
 /* Topbar Menu */
-export const topbarDisplayMenu =  [
+export const topbarDisplayMenu = [
   {
     _ids: ['framework', 'api', 'ui'],
     name: 'Documentation',
@@ -18,13 +17,13 @@ export const topbarDisplayMenu =  [
     _id: 'learn',
     name: 'Learn',
     url: '/learn/selection',
-    baseURL: '/learn'
+    baseURL: '/learn',
   },
   {
     _id: 'examples',
     name: 'Examples',
     url: '/examples/counter',
-    baseURL: '/examples'
+    baseURL: '/examples',
   },
   {
     _id: 'playground',
@@ -34,7 +33,7 @@ export const topbarDisplayMenu =  [
 ];
 
 /* The menu including all menu groupings for secondary menus */
-export const topbarMenu =  [
+export const topbarMenu = [
   {
     _id: 'framework',
     name: 'Authoring Guide',
@@ -54,13 +53,13 @@ export const topbarMenu =  [
     _id: 'learn',
     name: 'Learn',
     url: '/learn/selection',
-    baseURL: '/learn'
+    baseURL: '/learn',
   },
   {
     _id: 'examples',
     name: 'Examples',
     url: '/examples/counter',
-    baseURL: '/examples'
+    baseURL: '/examples',
   },
   {
     _id: 'playground',
@@ -68,7 +67,6 @@ export const topbarMenu =  [
     url: '/playground',
   },
 ];
-
 
 /* UI Component Sidebar */
 export const sidebarMenuUI = [
@@ -79,24 +77,24 @@ export const sidebarMenuUI = [
     pages: [
       {
         name: 'HTML Usage',
-        url: '/usage/html'
+        url: '/usage/html',
       },
       {
         name: 'Frameworks Usage',
-        url: '/usage/framework'
-      },/*
+        url: '/usage/framework',
+      }, /*
       {
         name: 'Web Components',
         url: '/usage/web-components'
       },*/
-    ]
+    ],
   },
   {
     name: 'UI Primitives',
     url: '/ui',
     icon: 'layers',
     pages: componentPages,
-  },/*
+  }, /*
   {
     name: 'Test',
     url: '/test',
@@ -118,49 +116,49 @@ export const sidebarMenuFramework = [
     pages: [
       {
         name: 'Creating',
-        url: '/components/create'
+        url: '/components/create',
       },
       {
         name: 'Functionality',
-        url: '/components/instances'
+        url: '/components/instances',
       },
       {
         name: 'Lifecycle',
-        url: '/components/lifecycle'
+        url: '/components/lifecycle',
       },
       {
         name: 'Templates & Data',
-        url: '/components/rendering'
+        url: '/components/rendering',
       },
       {
         name: 'Settings',
-        url: '/components/settings'
+        url: '/components/settings',
       },
       {
         name: 'State',
-        url: '/components/state'
+        url: '/components/state',
       },
       {
         name: 'Events',
-        url: '/components/events'
+        url: '/components/events',
       },
       {
         name: 'Reactivity',
-        url: '/components/reactivity'
+        url: '/components/reactivity',
       },
       {
         name: 'DOM',
-        url: '/components/dom'
+        url: '/components/dom',
       },
       {
         name: 'Styling',
-        url: '/components/styling'
+        url: '/components/styling',
       },
       {
         name: 'Key Bindings',
-        url: '/components/keys'
+        url: '/components/keys',
       },
-    ]
+    ],
   },
   {
     name: 'Templates',
@@ -169,34 +167,34 @@ export const sidebarMenuFramework = [
     pages: [
       {
         name: 'Expressions',
-        url: '/templates/expressions'
+        url: '/templates/expressions',
       },
       {
         name: 'Conditionals',
-        url: '/templates/conditionals'
+        url: '/templates/conditionals',
       },
       {
         name: 'Loops',
-        url: '/templates/loops'
+        url: '/templates/loops',
       },
       {
         name: 'Slots',
-        url: '/templates/slots'
+        url: '/templates/slots',
       },
       {
         name: 'Subtemplates',
-        url: '/templates/subtemplates'
+        url: '/templates/subtemplates',
       },
       {
         name: 'Snippets',
-        url: '/templates/snippets'
+        url: '/templates/snippets',
       },
       {
         name: 'Helpers',
-        url: '/templates/helpers'
+        url: '/templates/helpers',
       },
-    ]
-  },/*
+    ],
+  }, /*
   {
     name: 'Server Side Rendering',
     url: '/ssr',
@@ -225,45 +223,43 @@ export const sidebarMenuFramework = [
       {
         name: 'Basics',
         description: 'Signal',
-        url: '/reactivity/variables'
+        url: '/reactivity/variables',
       },
       {
         name: 'Mutations',
-        url: '/reactivity/mutation-helpers'
+        url: '/reactivity/mutation-helpers',
       },
       {
         name: 'Flushing',
-        url: '/reactivity/flush'
+        url: '/reactivity/flush',
       },
       {
         name: 'Controls',
-        url: '/reactivity/computations'
+        url: '/reactivity/computations',
       },
       {
         name: 'Performance',
-        url: '/reactivity/controls'
+        url: '/reactivity/controls',
       },
       {
         name: 'Debugging',
-        url: '/reactivity/debugging'
+        url: '/reactivity/debugging',
       },
-    ]
+    ],
   },
   {
     name: 'Query',
     description: 'DOM Helpers',
     url: '/query',
     icon: 'mouse-pointer',
-    pages: [
-    ]
-  },/*
+    pages: [],
+  }, /*
   {
     name: 'Errata',
     icon: 'book',
     url: '/getting-started'
   },*/
 ];
-
 
 export const sidebarMenuAPI = [
   {
@@ -273,17 +269,17 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Define Component',
-        url: '/api/component/define-component'
+        url: '/api/component/define-component',
       },
       {
         name: 'Utility Functions',
-        url: '/api/component/utilities'
+        url: '/api/component/utilities',
       },
       {
         name: 'Base Class',
-        url: '/api/component/web-component-base'
+        url: '/api/component/web-component-base',
       },
-    ]
+    ],
   },
   {
     name: 'Template Helpers',
@@ -292,45 +288,45 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Arrays',
-        url: '/api/helpers/arrays'
+        url: '/api/helpers/arrays',
       },
       {
         name: 'Comparison',
-        url: '/api/helpers/comparison'
+        url: '/api/helpers/comparison',
       },
       {
         name: 'CSS',
-        url: '/api/helpers/css'
+        url: '/api/helpers/css',
       },
       {
         name: 'Dates',
-        url: '/api/helpers/dates'
+        url: '/api/helpers/dates',
       },
       {
         name: 'Debug',
-        url: '/api/helpers/debug'
+        url: '/api/helpers/debug',
       },
       {
         name: 'Logical Operators',
-        url: '/api/helpers/logical'
+        url: '/api/helpers/logical',
       },
       {
         name: 'Numeric',
-        url: '/api/helpers/numeric'
+        url: '/api/helpers/numeric',
       },
       {
         name: 'Objects',
-        url: '/api/helpers/objects'
+        url: '/api/helpers/objects',
       },
       {
         name: 'Reactivity',
-        url: '/api/helpers/reactivity'
+        url: '/api/helpers/reactivity',
       },
       {
         name: 'Strings',
-        url: '/api/helpers/strings'
+        url: '/api/helpers/strings',
       },
-    ]
+    ],
   },
   {
     name: 'Reactivity',
@@ -339,41 +335,41 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Signal',
-        url: '/api/reactivity/signal'
+        url: '/api/reactivity/signal',
       },
       {
         name: 'Reaction',
-        url: '/api/reactivity/reaction'
+        url: '/api/reactivity/reaction',
       },
       {
         name: 'Scheduler',
-        url: '/api/reactivity/scheduler'
+        url: '/api/reactivity/scheduler',
       },
       {
         name: 'Dependency',
-        url: '/api/reactivity/dependency'
+        url: '/api/reactivity/dependency',
       },
       {
         name: 'Number Helpers',
-        url: '/api/reactivity/number-helpers'
+        url: '/api/reactivity/number-helpers',
       },
       {
         name: 'Boolean Helpers',
-        url: '/api/reactivity/boolean-helpers'
+        url: '/api/reactivity/boolean-helpers',
       },
       {
         name: 'Array Helpers',
-        url: '/api/reactivity/array-helpers'
+        url: '/api/reactivity/array-helpers',
       },
       {
         name: 'Collection Helpers',
-        url: '/api/reactivity/collection-helpers'
+        url: '/api/reactivity/collection-helpers',
       },
       {
         name: 'Date Helpers',
-        url: '/api/reactivity/date-helpers'
+        url: '/api/reactivity/date-helpers',
       },
-    ]
+    ],
   },
   {
     name: 'Query',
@@ -382,57 +378,57 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Basic Usage',
-        url: '/api/query/basic'
+        url: '/api/query/basic',
       },
       {
         name: 'Attributes',
-        url: '/api/query/attributes'
+        url: '/api/query/attributes',
       },
       {
         name: 'Components',
-        url: '/api/query/components'
+        url: '/api/query/components',
       },
       {
         name: 'Content',
-        url: '/api/query/content'
+        url: '/api/query/content',
       },
       {
         name: 'CSS',
-        url: '/api/query/css'
+        url: '/api/query/css',
       },
       {
         name: 'Size & Dimensions',
-        url: '/api/query/dimensions'
+        url: '/api/query/dimensions',
       },
       {
         name: 'DOM Manipulation',
-        url: '/api/query/dom-manipulation'
+        url: '/api/query/dom-manipulation',
       },
       {
         name: 'DOM Traversal',
-        url: '/api/query/dom-traversal'
+        url: '/api/query/dom-traversal',
       },
       {
         name: 'Events',
-        url: '/api/query/events'
+        url: '/api/query/events',
       },
       {
         name: 'Iterators',
-        url: '/api/query/iterators'
+        url: '/api/query/iterators',
       },
       {
         name: 'Logical Operators',
-        url: '/api/query/logical-operators'
+        url: '/api/query/logical-operators',
       },
       {
         name: 'Utilities',
-        url: '/api/query/utilities'
+        url: '/api/query/utilities',
       },
       {
         name: 'Internal',
-        url: '/api/query/internal'
+        url: '/api/query/internal',
       },
-    ]
+    ],
   },
   {
     name: 'Utils',
@@ -441,65 +437,65 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Arrays',
-        url: '/api/utils/arrays'
+        url: '/api/utils/arrays',
       },
       {
         name: 'Browser',
-        url: '/api/utils/browser'
+        url: '/api/utils/browser',
       },
       {
         name: 'Cloning',
-        url: '/api/utils/cloning'
+        url: '/api/utils/cloning',
       },
       {
         name: 'Crypto',
-        url: '/api/utils/crypto'
+        url: '/api/utils/crypto',
       },
       {
         name: 'Dates',
-        url: '/api/utils/dates'
+        url: '/api/utils/dates',
       },
       {
         name: 'Equality',
-        url: '/api/utils/equality'
+        url: '/api/utils/equality',
       },
       {
         name: 'Errors',
-        url: '/api/utils/errors'
+        url: '/api/utils/errors',
       },
       {
         name: 'Functions',
-        url: '/api/utils/functions'
+        url: '/api/utils/functions',
       },
       {
         name: 'Looping',
-        url: '/api/utils/looping'
+        url: '/api/utils/looping',
       },
       {
         name: 'Numbers',
-        url: '/api/utils/numbers'
+        url: '/api/utils/numbers',
       },
       {
         name: 'Objects',
-        url: '/api/utils/objects'
+        url: '/api/utils/objects',
       },
       {
         name: 'Types',
-        url: '/api/utils/types'
+        url: '/api/utils/types',
       },
       {
         name: 'Regular Expressions',
-        url: '/api/utils/regex'
+        url: '/api/utils/regex',
       },
       {
         name: 'SSR',
-        url: '/api/utils/ssr'
+        url: '/api/utils/ssr',
       },
       {
         name: 'Strings',
-        url: '/api/utils/strings'
+        url: '/api/utils/strings',
       },
-    ]
+    ],
   },
   {
     name: 'Template Compiler',
@@ -508,21 +504,21 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Template Compiler',
-        url: '/api/templating/template-compiler'
+        url: '/api/templating/template-compiler',
       },
       {
         name: 'Abstract Syntax Tree (AST)',
-        url: '/api/templating/ast'
+        url: '/api/templating/ast',
       },
       {
         name: 'Template',
-        url: '/api/templating/template'
+        url: '/api/templating/template',
       },
       {
         name: 'String Scanner',
-        url: '/api/templating/string-scanner'
+        url: '/api/templating/string-scanner',
       },
-    ]
+    ],
   },
   {
     name: 'Renderer',
@@ -531,12 +527,12 @@ export const sidebarMenuAPI = [
     pages: [
       {
         name: 'Lit Renderer',
-        url: '/api/renderer/lit-renderer'
+        url: '/api/renderer/lit-renderer',
       },
       {
         name: 'Lit Directives',
-        url: '/api/renderer/lit-directives'
+        url: '/api/renderer/lit-directives',
       },
-    ]
+    ],
   },
 ];

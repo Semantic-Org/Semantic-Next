@@ -1,13 +1,13 @@
 import { defineComponent } from '@semantic-ui/component';
-import template from './CodePlaygroundPanel.html?raw';
-import css from './CodePlaygroundPanel.css?raw';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
+import css from './CodePlaygroundPanel.css?raw';
+import template from './CodePlaygroundPanel.html?raw';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
-const createComponent = ({data}) => ({
+const createComponent = ({ data }) => ({
   initialize() {
     // nothing yet
-  }
+  },
 });
 
 const events = {
@@ -19,7 +19,7 @@ const events = {
   },
   'blur ui-panel'({ $$ }) {
     $$('.label').removeClass('active');
-  }
+  },
 };
 
 const CodePlaygroundPanel = defineComponent({
@@ -29,8 +29,8 @@ const CodePlaygroundPanel = defineComponent({
   events,
   subTemplates: {
     CodePlaygroundFile,
-    CodePlaygroundPreview
-  }
+    CodePlaygroundPreview,
+  },
 });
 
 export default CodePlaygroundPanel;

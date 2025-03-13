@@ -1,5 +1,5 @@
-import { isFunction } from './types.js';
 import { hashCode } from './crypto.js';
+import { isFunction } from './types.js';
 
 /*-------------------
       Functions
@@ -39,12 +39,12 @@ export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(arg
 
 export const debounce = (fn, options) => {
   // allow just number to be passed in
-  if(typeof options == 'number') {
+  if (typeof options == 'number') {
     options = { delay: options };
   }
   const {
     delay = 200,
-    immediate = false
+    immediate = false,
   } = options;
 
   let timeout;
@@ -53,7 +53,7 @@ export const debounce = (fn, options) => {
   function debounced(...args) {
     const later = () => {
       timeout = null;
-      if (!immediate) fn.apply(this, args);
+      if (!immediate) { fn.apply(this, args); }
       callbackCalled = false;
     };
 

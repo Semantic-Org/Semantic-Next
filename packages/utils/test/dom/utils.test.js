@@ -1,5 +1,5 @@
-import { describe, expect, beforeEach, afterEach, afterAll, beforeAll, it, vi } from 'vitest';
-import { clone, copyText, getText, isDOM, fatal } from '@semantic-ui/utils';
+import { clone, copyText, fatal, getText, isDOM } from '@semantic-ui/utils';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 beforeAll(() => {
   vi.spyOn(console, 'error').mockImplementation((...args) => {
@@ -11,15 +11,12 @@ afterAll(() => {
   console.error.mockRestore();
 });
 
-
 describe('clone', () => {
-
   it('should clone dom nodes', () => {
     const div = document.createElement('div');
     const clonedDiv = clone(div);
     expect(clonedDiv).not.toBe(div);
   });
-    
 });
 
 describe('copyText', () => {

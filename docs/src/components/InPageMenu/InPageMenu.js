@@ -1,10 +1,10 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import { any, each, flatten, noop, first, inArray, last, isServer } from '@semantic-ui/utils';
+import { UIIcon } from '@semantic-ui/core';
+import { any, each, first, flatten, inArray, isServer, last, noop } from '@semantic-ui/utils';
 
-import template from './InPageMenu.html?raw';
-import css from './InPageMenu.css?raw';
 import { Reaction } from '@semantic-ui/reactivity';
+import css from './InPageMenu.css?raw';
+import template from './InPageMenu.html?raw';
 
 const defaultSettings = {
   showHeader: false,
@@ -23,7 +23,7 @@ const defaultSettings = {
   getAnchorID: (item) => item?.id,
 
   // get menu item id from page element
-  getActiveElementID: (element) => element?.id
+  getActiveElementID: (element) => element?.id,
 };
 
 const defaultState = {
@@ -32,8 +32,7 @@ const defaultState = {
   visibleItems: [],
 };
 
-const createComponent = ({self, state, isServer, signal, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
-
+const createComponent = ({ self, state, isServer, signal, reaction, el, dispatchEvent, settings, attachEvent, $ }) => ({
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
   isScrolling: false, // to avoid intersection observes when scrolling to item
@@ -58,10 +57,10 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   },
 
   getContentStyle(index) {
-    if(isServer) {
+    if (isServer) {
       return;
     }
-    if(self.isOpenIndex(index)) {
+    if (self.isOpenIndex(index)) {
       const $content = self.getContent();
       const scrollHeight = $content.scrollHeight();
       return `max-height: ${scrollHeight}px;`;
@@ -70,7 +69,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
 
   calculateScrollHeight() {
     reaction(() => {
-      if(isServer) {
+      if (isServer) {
         return;
       }
       state.openIndex.get(); // reactivity source
@@ -86,8 +85,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
       const parentItem = { title: section?.title, id: section?.id };
       return (section?.items)
         ? [parentItem, ...section.items]
-        : [parentItem]
-      ;
+        : [parentItem];
     });
     const flattenedMenu = flatten(menuArrays);
     return flattenedMenu;
@@ -127,14 +125,14 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
 
   getContentClasses(index) {
     return {
-      active: !settings.useAccordion || self.isOpenIndex(index)
+      active: !settings.useAccordion || self.isOpenIndex(index),
     };
   },
 
   getTitleClasses(section, index) {
     return {
       current: self.isOpenIndex(index),
-      visible: self.hasVisibleItems(section)
+      visible: self.hasVisibleItems(section),
     };
   },
 
@@ -142,7 +140,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     return {
       current: self.isCurrentItem(item),
       visible: self.isVisibleItem(item),
-      item: true
+      item: true,
     };
   },
 
@@ -166,7 +164,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
       self.scrollToPosition(targetPosition, {
         onSamePage() {
           dispatchEvent('samePageActive', { element, itemID });
-        }
+        },
       });
       dispatchEvent('active', { itemID });
     }
@@ -175,8 +173,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   getScrollContext() {
     return (settings.scrollContext)
       ? $(settings.scrollContext, { root: document }).get(0)
-      : window
-    ;
+      : window;
   },
 
   scrollToPosition(position, { onSamePage = noop } = {}) {
@@ -185,7 +182,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
 
     // special callback if we are at bottom this can be used to make it clear
     // what we are scrolling to (as it may not be the top of the page)
-    if(position + scrollContext.clientHeight >= scrollContext.scrollHeight) {
+    if (position + scrollContext.clientHeight >= scrollContext.scrollHeight) {
       onSamePage();
     }
 
@@ -198,7 +195,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     });
     scrollContext.scrollTo({
       top: position,
-      behavior: (settings.smoothScroll) ? 'smooth' : 'auto'
+      behavior: (settings.smoothScroll) ? 'smooth' : 'auto',
     });
   },
 
@@ -207,7 +204,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     const observerSettings = {
       root: root,
       threshold: [0, 1],
-      rootMargin: `0px 0px 0px 0px`
+      rootMargin: `0px 0px 0px 0px`,
     };
     self.observer = new IntersectionObserver(self.onIntersection, observerSettings);
     // observe intersection of each id in menu items
@@ -224,17 +221,16 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   },
 
   onIntersection(entries) {
-
     const currentVisibleItems = state.visibleItems.get();
     let newVisibleItems = [...currentVisibleItems];
 
     entries.forEach(entry => {
       const itemID = settings.getActiveElementID(entry.target);
-      if(itemID) {
-        if(entry.isIntersecting && !newVisibleItems.includes(itemID)) {
+      if (itemID) {
+        if (entry.isIntersecting && !newVisibleItems.includes(itemID)) {
           newVisibleItems.push(itemID);
         }
-        else if(!entry.isIntersecting) {
+        else if (!entry.isIntersecting) {
           newVisibleItems = newVisibleItems.filter(id => id !== itemID);
         }
       }
@@ -242,7 +238,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
 
     state.visibleItems.set(newVisibleItems);
 
-    if(!self.isScrolling && newVisibleItems.length) {
+    if (!self.isScrolling && newVisibleItems.length) {
       const visibleItems = self.getFlattenedMenu().map(item => item.id).filter(item => inArray(item, newVisibleItems));
       self.setActiveItem(visibleItems[0]);
     }
@@ -251,7 +247,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   bindHashChange() {
     const scrollToHash = (event) => {
       const itemID = location.hash.substr(1);
-      if(itemID) {
+      if (itemID) {
         self.setActiveItem(itemID);
         self.scrollToItem(itemID);
       }
@@ -288,42 +284,40 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   setHash(itemID) {
     // this avoids triggering default scrolling behavior by using pushState
     const hash = `#${itemID}`;
-    if(window.location.hash !== hash) {
+    if (window.location.hash !== hash) {
       history.pushState(null, '', hash);
     }
-  }
-
+  },
 });
 
-
-const onRendered = function ({ self, isServer, settings}) {
-  if(isServer || !settings.menu.length) {
+const onRendered = function({ self, isServer, settings }) {
+  if (isServer || !settings.menu.length) {
     return;
   }
   self.bindPageEvents();
   self.calculateScrollHeight();
 };
 
-const onDestroyed = function ({ self, isServer }) {
-  if(isServer) {
+const onDestroyed = function({ self, isServer }) {
+  if (isServer) {
     return;
   }
   self.unbindPageEvents();
 };
 
 const events = {
-  'click .title'({event, state, data}) {
+  'click .title'({ event, state, data }) {
     const currentIndex = state.openIndex.get();
     const thisIndex = Number(data.index);
     const newIndex = (currentIndex !== thisIndex) ? thisIndex : -1;
     state.openIndex.set(newIndex);
   },
-  'click [data-id]'({event, self, data}) {
+  'click [data-id]'({ event, self, data }) {
     // this avoids triggering scroll behavior or hashchange
     self.setHash(data.id);
     self.scrollToItem(data.id);
     event.preventDefault();
-  }
+  },
 };
 
 const InPageMenu = defineComponent({

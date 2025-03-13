@@ -1,4 +1,4 @@
-import { z, defineCollection } from 'astro:content';
+import { defineCollection, z } from 'astro:content';
 
 const componentsCollection = defineCollection({
   type: 'content',
@@ -8,8 +8,8 @@ const componentsCollection = defineCollection({
     tabs: z.string().array(),
     specName: z.string(),
     description: z.string(),
-    tags: z.array(z.string())
-  })
+    tags: z.array(z.string()),
+  }),
 });
 const examplesCollection = defineCollection({
   type: 'content',
@@ -27,13 +27,13 @@ const examplesCollection = defineCollection({
     tip: z.optional(z.string()),
     tags: z.array(z.string()),
     shortTitle: z.optional(z.string()), // name for appearance in small menus
-    additionalPageFiles: z.optional(z.string().array()) // files that should appear as page files
-  })
+    additionalPageFiles: z.optional(z.string().array()), // files that should appear as page files
+  }),
 });
 
 const resourceSchema = z.object({
   title: z.string(),
-  link: z.string()
+  link: z.string(),
 });
 
 const lessonCollection = defineCollection({
@@ -51,9 +51,8 @@ const lessonCollection = defineCollection({
     tags: z.optional(z.array(z.string())), // for search
     selectedFile: z.optional(z.string()),
     hideNavigation: z.optional(z.boolean()),
-  })
+  }),
 });
-
 
 export const collections = {
   components: componentsCollection,

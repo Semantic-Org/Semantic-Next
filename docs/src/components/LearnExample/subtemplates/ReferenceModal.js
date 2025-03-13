@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './ReferenceModal.html?raw';
 import css from './ReferenceModal.css?raw';
+import template from './ReferenceModal.html?raw';
 
 const createComponent = ({ $ }) => {
   return {

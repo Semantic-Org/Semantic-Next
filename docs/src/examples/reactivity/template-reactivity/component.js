@@ -9,7 +9,7 @@ const defaultSettings = {
 };
 
 const defaultState = {
-  counter2: 0
+  counter2: 0,
 };
 
 const createComponent = ({ signal, self }) => ({
@@ -17,7 +17,6 @@ const createComponent = ({ signal, self }) => ({
   counter4: 0,
   counter5: () => self.counter4,
 });
-
 
 const onCreated = function({ settings, state, self }) {
   setInterval(() => {
@@ -31,7 +30,6 @@ const onCreated = function({ settings, state, self }) {
 const onRendered = function({ self, $ }) {
   self.counter6 = $('.counter').first().text();
 };
-
 
 defineComponent({
   tagName: 'ui-counter',

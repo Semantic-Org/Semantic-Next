@@ -1,7 +1,7 @@
-import { each } from './looping.js';
-import { isArray, isObject } from './types.js';
-import { escapeRegExp } from './regexp.js';
 import { noop } from './functions.js';
+import { each } from './looping.js';
+import { escapeRegExp } from './regexp.js';
+import { isArray, isObject } from './types.js';
 
 /*-------------------
        Objects
@@ -25,14 +25,14 @@ export const values = (obj) => {
 export const filterObject = (obj, callback) => {
   return Object.fromEntries(
     Object.entries(obj)
-      .filter(([key, value]) => callback(value, key))
+      .filter(([key, value]) => callback(value, key)),
   );
 };
 
 export const mapObject = (obj, callback) => {
   return Object.fromEntries(
     Object.entries(obj)
-      .map(([key, value]) => [key, callback(value, key)])
+      .map(([key, value]) => [key, callback(value, key)]),
   );
 };
 
@@ -59,7 +59,7 @@ export const extend = (obj, ...sources) => {
 
 export const pick = (obj, ...keys) => {
   let copy = {};
-  each(keys, function (key) {
+  each(keys, function(key) {
     if (key in obj) {
       copy[key] = obj[key];
     }
@@ -68,7 +68,7 @@ export const pick = (obj, ...keys) => {
 };
 
 export const arrayFromObject = (obj) => {
-  if(isArray(obj)) {
+  if (isArray(obj)) {
     return obj;
   }
   let arr = [];
@@ -84,7 +84,7 @@ export const arrayFromObject = (obj) => {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
-export const get = function (obj, path = '') {
+export const get = function(obj, path = '') {
   if (typeof path !== 'string') {
     return undefined;
   }
@@ -125,23 +125,28 @@ export const get = function (obj, path = '') {
 
       if (key in currentObject && isArray(currentObject[key]) && index < currentObject[key].length) {
         currentObject = currentObject[key][index];
-      } else {
+      }
+      else {
         return undefined;
       }
-    } else {
+    }
+    else {
       if (part in currentObject) {
         currentObject = currentObject[part];
-      } else {
+      }
+      else {
         const remainingPath = parts.slice(i).join('.');
         if (remainingPath in currentObject) {
           currentObject = currentObject[remainingPath];
           break;
-        } else {
+        }
+        else {
           const combinedKey = getCombinedKey(`${part}.${parts[i + 1]}`);
           if (combinedKey in currentObject) {
             currentObject = currentObject[combinedKey];
             i++;
-          } else {
+          }
+          else {
             return undefined;
           }
         }
@@ -211,8 +216,6 @@ export const reverseKeys = (obj) => {
   return newObj;
 };
 
-
-
 /*
   Searches a search object
   returning matches for a query
@@ -225,46 +228,41 @@ export const reverseKeys = (obj) => {
 export const weightedObjectSearch = (query = '', objectArray = [], {
   returnMatches = false,
   matchAllWords = true,
-  propertiesToMatch = []
+  propertiesToMatch = [],
 } = {}) => {
-  if(!query) {
+  if (!query) {
     return objectArray;
   }
   query = query.trim();
   query = escapeRegExp(query);
-  let
-    words       = query.split(' '),
+  let words = query.split(' '),
     wordRegexes = [],
-    regexes     = {
-      startsWith     : new RegExp(`^${query}`, 'i'),
-      wordStartsWith : new RegExp(`\\s${query}`, 'i'),
-      anywhere       : new RegExp(query, 'i')
+    regexes = {
+      startsWith: new RegExp(`^${query}`, 'i'),
+      wordStartsWith: new RegExp(`\\s${query}`, 'i'),
+      anywhere: new RegExp(query, 'i'),
     },
     weights = {
-      startsWith     : 1,
-      wordStartsWith : 2,
-      anywhere       : 3,
-      anyWord        : 4,
+      startsWith: 1,
+      wordStartsWith: 2,
+      anywhere: 3,
+      anyWord: 4,
     },
     calculateWeight = (obj) => {
-      let
-        matchDetails = [],
-        weight
-      ;
+      let matchDetails = [],
+        weight;
       // do a weighted search across all fields
       each(propertiesToMatch, (field) => {
-        let
-          value = get(obj, field),
-          fieldWeight
-        ;
-        if(value) {
+        let value = get(obj, field),
+          fieldWeight;
+        if (value) {
           each(regexes, (regex, name) => {
-            if(fieldWeight) {
+            if (fieldWeight) {
               return;
             }
-            if(String(value).search(regex) !== -1) {
+            if (String(value).search(regex) !== -1) {
               fieldWeight = weights[name];
-              if(returnMatches) {
+              if (returnMatches) {
                 matchDetails.push({
                   field,
                   query,
@@ -276,46 +274,45 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
             }
           });
           // match any word higher score for more words
-          if(!weight && wordRegexes.length) {
+          if (!weight && wordRegexes.length) {
             let wordsMatching = 0;
             each(wordRegexes, regex => {
-              if(String(value).search(regex) !== -1) {
+              if (String(value).search(regex) !== -1) {
                 wordsMatching++;
               }
             });
-            if(wordsMatching > 0) {
-              if(!matchAllWords || (matchAllWords && wordsMatching === wordRegexes.length)) {
+            if (wordsMatching > 0) {
+              if (!matchAllWords || (matchAllWords && wordsMatching === wordRegexes.length)) {
                 fieldWeight = weights['anyWord'] / wordsMatching;
-                if(returnMatches) {
+                if (returnMatches) {
                   matchDetails.push({
                     field,
                     query,
                     name: 'anyWord',
                     value,
-                    matchCount: wordsMatching
+                    matchCount: wordsMatching,
                   });
                 }
               }
             }
           }
-          if(fieldWeight && (!weight || fieldWeight < weight)) {
+          if (fieldWeight && (!weight || fieldWeight < weight)) {
             weight = fieldWeight;
           }
         }
       });
       // flag for removal if not a match
-      if(returnMatches) {
+      if (returnMatches) {
         obj.matches = matchDetails;
       }
       obj.remove = !weight;
       return weight;
-    }
-  ;
-  if(objectArray.length == 1) {
+    };
+  if (objectArray.length == 1) {
     objectArray.push([]);
   }
 
-  if(words.length > 1) {
+  if (words.length > 1) {
     each(words, (word) => {
       wordRegexes.push(new RegExp(`(\W|^)${word}(\W|$)`, 'i'));
     });
@@ -333,9 +330,6 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
     .filter(obj => !obj.remove)
     .sort((a, b) => {
       return a.weight - b.weight;
-    })
-  ;
+    });
   return result;
 };
-
-

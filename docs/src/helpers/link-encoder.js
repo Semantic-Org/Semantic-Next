@@ -58,13 +58,12 @@ export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
     files: {
       'page.html': {
         contentType: 'text/html',
-        content: code
-      }
-    }
+        content: code,
+      },
+    },
   };
   return getPlaygroundLink(params);
 };
-
 
 // Read the query string and return the decoded parameters.
 // The 'files' parameter is decoded using decodeObject.

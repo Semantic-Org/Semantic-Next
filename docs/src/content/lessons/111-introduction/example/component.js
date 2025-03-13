@@ -5,13 +5,13 @@ const template = await getText('./component.html');
 const css = await getText('./component.css');
 
 const defaultSettings = {
-  text: 'Default Text'
+  text: 'Default Text',
 };
 
 const defaultState = {
   waves: [],
   yOffset: 100,
-  amplitude: 0
+  amplitude: 0,
 };
 
 // click ellipsus to view implementation
@@ -19,7 +19,6 @@ const defaultState = {
 
 /* playground-fold */
 const createComponent = ({ state }) => ({
-
   getTextPath() {
     // Create smooth curve for text to follow
     const width = 500;
@@ -30,7 +29,7 @@ const createComponent = ({ state }) => ({
     let path = `M 0 ${y}`;
     const interval = 10;
     const values = range(0, width / interval, interval);
-    each(values, (x) =>{
+    each(values, (x) => {
       const newY = y + Math.sin(x * freq) * amp;
       path += ` L ${x} ${newY}`;
     });
@@ -54,12 +53,12 @@ const createComponent = ({ state }) => ({
 
       return {
         path: `M 0 ${yOffset} ${points.join(' ')}`,
-        opacity: 0.5 / i
+        opacity: 0.5 / i,
       };
     });
 
     state.waves.set(waves);
-  }
+  },
 });
 
 const events = {
@@ -76,10 +75,9 @@ const events = {
   'mouseleave .container'({ state }) {
     state.waves.set([]);
     state.amplitude.set(0);
-  }
+  },
 };
-  /* playground-fold-end */
-
+/* playground-fold-end */
 
 defineComponent({
   tagName: 'hello-world',
@@ -88,5 +86,5 @@ defineComponent({
   createComponent,
   events,
   template,
-  css
+  css,
 });

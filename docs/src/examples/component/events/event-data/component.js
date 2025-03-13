@@ -8,9 +8,9 @@ const defaultState = {
   height: 250,
 };
 
-const createComponent = ({state, self}) => ({
+const createComponent = ({ state, self }) => ({
   delta: 50,
-  adjustSize({dimension, helper}) {
+  adjustSize({ dimension, helper }) {
     state[dimension][helper](self.delta);
   },
   getStyle() {
@@ -20,14 +20,14 @@ const createComponent = ({state, self}) => ({
       width: ${width > 0 ? width : 0}px;
       height: ${height > 0 ? height : 0}px;
     `;
-  }
+  },
 });
 
 const events = {
   // data-dimension and data-helper are passed through as data
-  'click ui-button'({self, data}) {
+  'click ui-button'({ self, data }) {
     self.adjustSize(data);
-  }
+  },
 };
 
 defineComponent({
