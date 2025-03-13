@@ -36,6 +36,7 @@
   "excludes": [
     "dev/",
     "dist/",
+    "docs/src/components/**/lib/*",
     "tests/",
     "docs/public",
     "LICENSE.md",
