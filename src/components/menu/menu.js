@@ -4,8 +4,7 @@ import { MenuComponentSpec } from '@semantic-ui/specs';
 import CSS from './css/menu-shadow.css?raw';
 import Template from './menu.html?raw';
 
-const createComponent = ({settings, self, $, dispatchEvent}) => ({
-
+const createComponent = ({ settings, self, $, dispatchEvent }) => ({
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', { value });
@@ -33,17 +32,16 @@ const createComponent = ({settings, self, $, dispatchEvent}) => ({
   },
 });
 
-
-const onCreated = ({settings}) => {
+const onCreated = ({ settings }) => {
 };
 
-const onRendered = function({$}) {
+const onRendered = function({ $ }) {
 };
 
 const events = {
-  'click menu-item'({self, data}) {
+  'click menu-item'({ self, data }) {
     self.setValue(data.value);
-  }
+  },
 };
 
 const UIMenu = defineComponent({

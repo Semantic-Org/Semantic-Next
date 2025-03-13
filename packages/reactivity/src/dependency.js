@@ -6,7 +6,7 @@ export class Dependency {
   }
 
   depend() {
-    if (Scheduler.current) {
+    if(Scheduler.current) {
       this.subscribers.add(Scheduler.current);
       Scheduler.current.dependencies.add(this);
     }

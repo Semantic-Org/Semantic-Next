@@ -1,4 +1,4 @@
-export const createComponent = ({settings}) => ({
+export const createComponent = ({ settings }) => ({
   decrease() {
     settings.number--;
   },
@@ -7,7 +7,7 @@ export const createComponent = ({settings}) => ({
   },
   set(value) {
     settings.number = value;
-  }
+  },
 });
 
 export const onCreated = () => {

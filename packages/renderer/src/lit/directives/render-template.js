@@ -1,13 +1,12 @@
-import { nothing, noChange } from 'lit';
-import { directive } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { isString, isEqual, mapObject } from '@semantic-ui/utils';
 import { Template } from '@semantic-ui/templating';
+import { isEqual, isString, mapObject } from '@semantic-ui/utils';
+import { noChange, nothing } from 'lit';
+import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 
 // Define directive
 export class RenderTemplateDirective extends AsyncDirective {
-
   constructor(partInfo) {
     super(partInfo);
     this.renderRoot = partInfo.options?.host?.renderRoot;
@@ -27,7 +26,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       const dataContext = this.unpackData(this.data); // reactive reference to data
 
       // end computation if element destroyed
-      if (!this.isConnected) {
+      if(!this.isConnected) {
         computation.stop();
         return;
       }
@@ -81,7 +80,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     }
 
     // make sure we have something to create
-    if (!template) {
+    if(!template) {
       return false;
     }
 
@@ -90,7 +89,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.template = template.clone({
       templateName,
       subTemplates: this.subTemplates,
-      data: this.unpackData(this.data)
+      data: this.unpackData(this.data),
     });
   }
 
@@ -105,7 +104,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       startNode,
       endNode,
     });
-    if (this.parentTemplate) {
+    if(this.parentTemplate) {
       this.template.setParent(this.parentTemplate);
     }
   }
@@ -124,7 +123,7 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   disconnected() {
-    if (this.template) {
+    if(this.template) {
       this.template.onDestroyed();
     }
   }

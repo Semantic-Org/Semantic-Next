@@ -1,9 +1,5 @@
+import { getLessonContent, getNextLesson, getPreviousLesson } from '@helpers/navigation.js';
 import { getCollection } from 'astro:content';
-import {
-  getLessonContent,
-  getPreviousLesson,
-  getNextLesson,
-} from '@helpers/navigation.js';
 
 export async function getStaticPaths() {
   const lessons = await getCollection('lessons');
@@ -16,7 +12,7 @@ export async function getStaticPaths() {
         lesson,
         previousLesson: getPreviousLesson(lesson),
         nextLesson: getNextLesson(lesson),
-      }
+      },
     };
   });
   return paths;
@@ -25,7 +21,7 @@ export async function getStaticPaths() {
 export function GET({ props }) {
   return new Response(JSON.stringify(props), {
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   });
 }

@@ -11,15 +11,13 @@ import { friends } from './data.js';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-
 const defaultState = {
   filter: 'all',
   searchTerm: '',
-  friends
+  friends,
 };
 
 const createComponent = ({ state }) => ({
-
   filters: [
     { label: 'All', value: 'all' },
     { label: 'Female', value: 'female' },
@@ -39,11 +37,11 @@ const createComponent = ({ state }) => ({
     const searchTerm = state.searchTerm.get();
     if(searchTerm) {
       friends = weightedObjectSearch(searchTerm, friends, {
-        propertiesToMatch: ['name', 'joined', 'location', 'role']
+        propertiesToMatch: ['name', 'joined', 'location', 'role'],
       });
     }
     return friends;
-  }
+  },
 });
 
 const events = {
@@ -52,7 +50,7 @@ const events = {
   },
   'input ui-input'({ state, value, target }) {
     state.searchTerm.set(value);
-  }
+  },
 };
 
 defineComponent({
@@ -63,6 +61,6 @@ defineComponent({
   events,
   createComponent,
   subTemplates: {
-    card
-  }
+    card,
+  },
 });

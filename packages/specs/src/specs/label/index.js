@@ -7,7 +7,4 @@ const LabelComponentSpec = reader.getWebComponentSpec(LabelSpec);
 
 export default LabelSpec;
 
-export {
-  LabelSpec,
-  LabelComponentSpec,
-};
+export { LabelComponentSpec, LabelSpec };

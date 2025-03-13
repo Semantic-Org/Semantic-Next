@@ -9,15 +9,14 @@ const defaultState = {
 
 const defaultSettings = {
   city: '',
-  timezone: 'local'
+  timezone: 'local',
 };
 
 const createComponent = ({ state, settings }) => ({
   initialize() {
     setInterval(() => state.time.now(), 1000);
-  }
+  },
 });
-
 
 defineComponent({
   tagName: 'current-time',

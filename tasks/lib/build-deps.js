@@ -1,17 +1,13 @@
 import * as esbuild from 'esbuild';
+import { BROWSER_TARGET } from './config.js';
 import { logPlugin } from './log.js';
-import {
-  BROWSER_TARGET,
-} from './config.js';
 
 export const buildDeps = async ({
-  watch = false
+  watch = false,
 }) => {
-
-  const esbuilder = (watch)
+  const esbuilder = watch
     ? esbuild.context
-    : esbuild.build
-  ;
+    : esbuild.build;
 
   /*
     This is CSS that will be imported into the
@@ -19,11 +15,11 @@ export const buildDeps = async ({
   */
   const cssShadowConcat = await esbuilder({
     entryPoints: [
-      'src/**/css/shadow/*.css'
+      'src/**/css/shadow/*.css',
     ],
     target: BROWSER_TARGET,
     bundle: true,
-    plugins: [ logPlugin('CSS Concat') ],
+    plugins: [logPlugin('CSS Concat')],
     loader: {
       '.css': 'css',
     },
@@ -38,11 +34,11 @@ export const buildDeps = async ({
   */
   const cssPageConcat = await esbuilder({
     entryPoints: [
-      'src/**/css/page/*.css'
+      'src/**/css/page/*.css',
     ],
     target: BROWSER_TARGET,
     bundle: true,
-    plugins: [ logPlugin('CSS Concat') ],
+    plugins: [logPlugin('CSS Concat')],
     loader: {
       '.css': 'css',
     },
@@ -63,5 +59,4 @@ export const buildDeps = async ({
       cssShadowConcat,
     ]);
   }
-
 };

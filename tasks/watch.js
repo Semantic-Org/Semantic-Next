@@ -1,6 +1,6 @@
 import { buildDeps } from './lib/build-deps.js';
-import { buildProject } from './lib/build-project.js';
 import { buildPlayground } from './lib/build-playground.js';
+import { buildProject } from './lib/build-project.js';
 
 await buildDeps({
   watch: true,
@@ -14,10 +14,10 @@ await buildProject({
   includeThemes: true,
   includeExamples: false,
   uiDir: 'dist',
-  outDir: 'dist'
+  outDir: 'dist',
 });
 
 // copies packages for use in docs REPL environment
 await buildPlayground({
-  watch: true
+  watch: true,
 });

@@ -1,8 +1,17 @@
-import { clone, isObject, isEqual, wrapFunction, isClassInstance, isArray, findIndex, unique, isNumber } from '@semantic-ui/utils';
-import { Reaction } from './reaction.js';
+import {
+  clone,
+  findIndex,
+  isArray,
+  isClassInstance,
+  isEqual,
+  isNumber,
+  isObject,
+  unique,
+  wrapFunction,
+} from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
+import { Reaction } from './reaction.js';
 export class Signal {
-
   constructor(initialValue, { equalityFunction, allowClone = true, cloneFunction } = {}) {
     this.dependency = new Dependency();
 
@@ -10,16 +19,14 @@ export class Signal {
     this.allowClone = allowClone;
 
     // allow custom equality function
-    this.equalityFunction = (equalityFunction)
+    this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
-      : Signal.equalityFunction
-    ;
+      : Signal.equalityFunction;
 
     // allow custom clone function
-    this.clone = (cloneFunction)
+    this.clone = cloneFunction
       ? wrapFunction(cloneFunction)
-      : Signal.cloneFunction
-    ;
+      : Signal.cloneFunction;
     this.currentValue = this.maybeClone(initialValue);
   }
 
@@ -34,8 +41,7 @@ export class Signal {
     // otherwise previous value would be modified if the returned value is mutated negating the equality
     return (Array.isArray(value) || typeof value == 'object')
       ? this.maybeClone(value)
-      : value
-    ;
+      : value;
   }
 
   canCloneValue(value) {
@@ -43,7 +49,7 @@ export class Signal {
   }
 
   maybeClone(value) {
-    if (!this.canCloneValue(value)) {
+    if(!this.canCloneValue(value)) {
       return value;
     }
     if(isArray(value)) {
@@ -53,9 +59,9 @@ export class Signal {
   }
 
   set value(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
+    if(!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.maybeClone(newValue);
-      this.dependency.changed({ value: newValue, trace: new Error().stack}); // Pass context
+      this.dependency.changed({ value: newValue, trace: new Error().stack }); // Pass context
     }
   }
 
@@ -64,7 +70,7 @@ export class Signal {
   }
 
   set(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
+    if(!this.equalityFunction(this.currentValue, newValue)) {
       this.value = newValue;
     }
   }
@@ -192,5 +198,4 @@ export class Signal {
   removeItem(id) {
     return this.removeIndex(this.getItem(id));
   }
-
 }

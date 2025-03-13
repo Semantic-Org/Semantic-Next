@@ -10,5 +10,3 @@ $('test-element').on('rendered', () => {
   $('.matches .shadow.pre').text(`$$ before render matches ${$match2.count()} elements`);
   $('.matches .shadow.post').text(`$$ after render matches ${$match3.count()} elements`);
 });
-
-

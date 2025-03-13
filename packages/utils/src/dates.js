@@ -9,14 +9,14 @@ export const formatDate = function(date, format = 'LLL', {
   ...additionalOptions
 } = {}) {
   // Check for invalid dates
-  if (isNaN(date.getTime())) {
+  if(isNaN(date.getTime())) {
     return 'Invalid Date';
   }
 
   // Create a new Date object with the same timestamp as the original date
   const localDate = new Date(date.getTime());
 
-  if (timezone === 'local') {
+  if(timezone === 'local') {
     timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 
@@ -32,7 +32,7 @@ export const formatDate = function(date, format = 'LLL', {
     minute: 'numeric',
     second: 'numeric',
     hour12: hour12,
-    ...additionalOptions
+    ...additionalOptions,
   };
 
   // Create an Intl.DateTimeFormat instance with the specified timezone or user's local timezone
@@ -47,7 +47,7 @@ export const formatDate = function(date, format = 'LLL', {
   let { year, month, day, weekday, hour, minute, second, dayPeriod } = dateParts;
 
   // Handle midnight in 24-hour format
-  if (hour === '24') {
+  if(hour === '24') {
     hour = '00';
   }
 

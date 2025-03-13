@@ -1,15 +1,15 @@
 import { isClient } from '@semantic-ui/utils';
 import { Query } from './query.js';
 
-const $ = function (selector, args = {}) {
+const $ = function(selector, args = {}) {
   const isClient = typeof window !== 'undefined';
-  if (!args?.root && isClient) {
+  if(!args?.root && isClient) {
     args.root = document;
   }
   return new Query(selector, args);
 };
 
-const $$ = function (selector, args = {}) {
+const $$ = function(selector, args = {}) {
   args.pierceShadow = true;
   return $(selector, args);
 };
@@ -17,20 +17,19 @@ const $$ = function (selector, args = {}) {
 let originalDollar;
 let originalDoubleDollar;
 
-const exportGlobals = function({ dollar = true, doubleDollar = true, query = true} = {}) {
-  if (isClient) {
-
+const exportGlobals = function({ dollar = true, doubleDollar = true, query = true } = {}) {
+  if(isClient) {
     if(dollar) {
       originalDollar = window.$;
       window.$ = $;
     }
 
-    if (doubleDollar) {
+    if(doubleDollar) {
       originalDoubleDollar = window.$$;
       window.$$ = $$;
     }
 
-    if (query) {
+    if(query) {
       window.Query = Query;
     }
   }
@@ -38,13 +37,13 @@ const exportGlobals = function({ dollar = true, doubleDollar = true, query = tru
 
 // Add a restoreGlobals method to restore the original values of $ and $$
 const restoreGlobals = function(settings) {
-  if (window.$ === $) {
+  if(window.$ === $) {
     window.$ = originalDollar;
   }
-  if (window.$$ === $$) {
+  if(window.$$ === $$) {
     window.$$ = originalDoubleDollar;
   }
-  if (typeof settings == 'object' && settings.removeQuery && window.Query === Query) {
+  if(typeof settings == 'object' && settings.removeQuery && window.Query === Query) {
     window.Query = undefined;
   }
   return $;
@@ -55,4 +54,4 @@ const useAlias = function() {
   return new Query(...arguments);
 };
 
-export { Query, $, $$, exportGlobals, restoreGlobals, useAlias };
+export { $, $$, exportGlobals, Query, restoreGlobals, useAlias };

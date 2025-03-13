@@ -1,9 +1,9 @@
+import { Template, TemplateCompiler } from '@semantic-ui/templating';
+import { camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, isClient, camelToKebab, kebabToCamel } from '@semantic-ui/utils';
-import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
-import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
+import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { WebComponentBase } from './web-component.js';
 
 export const defineComponent = ({
@@ -38,8 +38,6 @@ export const defineComponent = ({
   plural = false,
   singularTag,
 } = {}) => {
-
-
   // AST shared across instances
   if(!ast) {
     const compiler = new TemplateCompiler(template);
@@ -48,7 +46,7 @@ export const defineComponent = ({
 
   // to support SSR we need to include all subtemplate css in base template
   each(subTemplates, (template) => {
-    if (template.css) {
+    if(template.css) {
       css += template.css;
     }
   });
@@ -82,13 +80,12 @@ export const defineComponent = ({
   });
   let webComponent;
 
-  if (tagName) {
+  if(tagName) {
     /*
       Web Component Base is the static portion of the web component which
       doesnt change based off component configuration
     */
     webComponent = class UIWebComponent extends WebComponentBase {
-
       static get styles() {
         return unsafeCSS(css);
       }
@@ -107,8 +104,8 @@ export const defineComponent = ({
         super();
         this.css = css;
         this.componentSpec = componentSpec;
-        this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
-        this.setDefaultSettings({defaultSettings, componentSpec});
+        this.settings = this.createSettingsProxy({ componentSpec, properties: webComponent.properties });
+        this.setDefaultSettings({ defaultSettings, componentSpec });
       }
 
       // callback when added to dom
@@ -131,7 +128,7 @@ export const defineComponent = ({
             attribute,
             properties: webComponent.properties,
             attributeValue: newValue,
-            componentSpec
+            componentSpec,
           });
         });
       }
@@ -189,18 +186,17 @@ export const defineComponent = ({
           attributeValue: newValue,
           properties: webComponent.properties,
           oldValue,
-          componentSpec
+          componentSpec,
         });
-        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
+        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
       }
 
       /*******************************
                   Settings
       *******************************/
 
-
       getSettings() {
-        return this.getSettingsFromConfig({componentSpec, properties: webComponent.properties });
+        return this.getSettingsFromConfig({ componentSpec, properties: webComponent.properties });
       }
       setSetting(name, value) {
         this[name] = value;
@@ -211,11 +207,11 @@ export const defineComponent = ({
         let data = {
           ...settings,
         };
-        if (!isServer) {
+        if(!isServer) {
           data.darkMode = this.isDarkMode();
         }
-        if (componentSpec) {
-          data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
+        if(componentSpec) {
+          data.ui = this.getUIClasses({ componentSpec, properties: webComponent.properties });
         }
         if(plural === true) {
           data.plural = true;

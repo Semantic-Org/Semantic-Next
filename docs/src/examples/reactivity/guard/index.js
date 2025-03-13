@@ -1,4 +1,4 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 const stringNumber = new Signal('');
 const number = new Signal(null);
@@ -30,4 +30,3 @@ Reaction.flush(); // No log, because 100 === 100
 // Change stringNumber so that the processed number changes.
 stringNumber.set('200');
 Reaction.flush(); // Logs: Processed value changed to: 200
-

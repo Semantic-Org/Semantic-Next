@@ -1,4 +1,4 @@
-import { escapeRegExp, each } from '@semantic-ui/utils';
+import { each, escapeRegExp } from '@semantic-ui/utils';
 
 // A StringScanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
@@ -48,15 +48,14 @@ export class StringScanner {
   }
 
   consume(pattern) {
-    const regex =
-      typeof pattern === 'string'
-        ? new RegExp(escapeRegExp(pattern))
-        : new RegExp(pattern);
+    const regex = typeof pattern === 'string'
+      ? new RegExp(escapeRegExp(pattern))
+      : new RegExp(pattern);
 
     // Match from the current position
     const substring = this.input.substring(this.pos);
     const match = regex.exec(substring);
-    if (match && match.index === 0) {
+    if(match && match.index === 0) {
       // Ensure match starts at the beginning of the substring
       this.pos += match[0].length; // Advance position by the length of the match
       return match[0];
@@ -65,12 +64,11 @@ export class StringScanner {
   }
 
   consumeUntil(pattern) {
-    const regex =
-      typeof pattern === 'string'
-        ? new RegExp(escapeRegExp(pattern))
-        : new RegExp(pattern);
+    const regex = typeof pattern === 'string'
+      ? new RegExp(escapeRegExp(pattern))
+      : new RegExp(pattern);
     const match = regex.exec(this.input.substring(this.pos));
-    if (!match) {
+    if(!match) {
       const consumedText = this.input.substr(this.pos);
       this.pos = this.input.length;
       return consumedText;
@@ -81,24 +79,23 @@ export class StringScanner {
   }
 
   returnTo(pattern) {
-    if (!pattern) {
+    if(!pattern) {
       return;
     }
-    const regex =
-      typeof pattern === 'string'
-        ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
-        : new RegExp(pattern, 'gm');
+    const regex = typeof pattern === 'string'
+      ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
+      : new RegExp(pattern, 'gm');
 
     let lastMatch = null;
     let match;
     const substring = this.input.substring(0, this.pos);
 
     // Find the last match of the regex
-    while ((match = regex.exec(substring)) !== null) {
+    while((match = regex.exec(substring)) !== null) {
       lastMatch = match;
     }
 
-    if (lastMatch) {
+    if(lastMatch) {
       const consumedText = this.input.substring(0, lastMatch.index);
       this.pos = lastMatch.index; // Update position to the start of the last match
       return consumedText;
@@ -112,9 +109,10 @@ export class StringScanner {
     let tagPos;
 
     // Step 1: Search backwards to confirm we're inside a tag.
-    while (i >= 0) {
-      if (this.input[i] === '>') break; // Stop if we find the end of a previous tag
-      if (this.input[i] === '<') {
+    while(i >= 0) {
+      if(this.input[i] === '>') { break; // Stop if we find the end of a previous tag
+       }
+      if(this.input[i] === '<') {
         insideTag = true; // Confirm we're inside a tag
         tagPos = i; // Save the position of the tag
         break;
@@ -122,7 +120,7 @@ export class StringScanner {
       i--;
     }
 
-    if (insideTag) {
+    if(insideTag) {
       const tagText = this.input.substring(tagPos, this.pos);
 
       const attrPattern = /([a-zA-Z-]+)(?=\s*=\s*[^=]*$)/;
@@ -156,7 +154,7 @@ export class StringScanner {
         'selected',
       ];
       let booleanAttribute = false;
-      if (booleanAttributes.includes(attrName)) {
+      if(booleanAttributes.includes(attrName)) {
         // this is a known attribute tag that is always boolean
         booleanAttribute = true;
       }
@@ -167,7 +165,7 @@ export class StringScanner {
         const quotedAttrName = quotedAttrMatch ? quotedAttrMatch[1] : '';
         booleanAttribute = attrName !== quotedAttrName;
       }
-      if (attrName) {
+      if(attrName) {
         return {
           insideTag: true,
           attribute: attrName,
@@ -189,7 +187,7 @@ export class StringScanner {
     let charCount = 0;
     for (const line of lines) {
       // Add 1 for the newline character that split removes
-      if (charCount + line.length + 1 > this.pos) {
+      if(charCount + line.length + 1 > this.pos) {
         break;
       }
       charCount += line.length + 1;
@@ -214,14 +212,13 @@ export class StringScanner {
     const normalStyle = 'color: grey';
     const errorStyle = 'color: red; font-weight: bold';
 
-    if (StringScanner.DEBUG_MODE) {
-      if (globalThis.document) {
+    if(StringScanner.DEBUG_MODE) {
+      if(globalThis.document) {
         let errorHTML = '';
         each(contextLines, (line, index) => {
-          const style =
-            index < linesBefore || index > linesBefore
-              ? normalStyle
-              : errorStyle;
+          const style = index < linesBefore || index > linesBefore
+            ? normalStyle
+            : errorStyle;
           errorHTML += `<div style="${style}">${line}</div>`;
         });
         const html = `
@@ -235,9 +232,7 @@ export class StringScanner {
       }
       console.error(
         msg + '\n' + consoleMsg,
-        ...contextLines.map((_, idx) =>
-          lineNumber - startLine === idx ? errorStyle : normalStyle
-        )
+        ...contextLines.map((_, idx) => lineNumber - startLine === idx ? errorStyle : normalStyle),
       );
 
       const e = new Error(msg);
@@ -245,4 +240,3 @@ export class StringScanner {
     }
   }
 }
-

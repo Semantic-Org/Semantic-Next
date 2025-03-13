@@ -98,7 +98,10 @@ export class Query {
    *                   or the window/globalThis object.
    * @param options - Optional settings for the Query instance.
    */
-  constructor(selector?: string | Node | NodeList | HTMLCollection | Element[] | typeof globalThis, options?: QueryOptions);
+  constructor(
+    selector?: string | Node | NodeList | HTMLCollection | Element[] | typeof globalThis,
+    options?: QueryOptions,
+  );
 
   /**
    * Creates a new Query instance with the provided elements, preserving the original options.
@@ -266,7 +269,7 @@ export class Query {
    * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
    */
   on(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
-    /**
+  /**
    * Attaches an event listener to each element in the current set, using standard options.
    * @param eventNames - A space-separated string of event names.
    * @param handler - The event handler function.
@@ -293,7 +296,7 @@ export class Query {
    * @returns The Query instance for chaining.
    */
   one(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
-    /**
+  /**
    * Attaches an event listener that is executed at most once to each element in the current set.
    * @param eventNames - A space-separated string of event names.
    * @param handler - The event handler function.
@@ -545,10 +548,10 @@ export class Query {
   last(): Query;
 
   /**
-    * Get a property of the first element in the set.
-    * @see https://next.semantic-ui.com/api/query/utilities#prop
-    * @param name Name of the property to get.
-    */
+   * Get a property of the first element in the set.
+   * @see https://next.semantic-ui.com/api/query/utilities#prop
+   * @param name Name of the property to get.
+   */
   prop(name: string): any;
   /**
    * Sets a property on each element in the current set.
@@ -644,7 +647,11 @@ export class Query {
    * @param content - The content to insert.
    * @param position - The position relative to the target element ('beforebegin', 'afterbegin', 'beforeend', 'afterend').
    */
-  insertContent(target: Element, content: string | Node | NodeList | HTMLCollection | Query, position: InsertPosition): void;
+  insertContent(
+    target: Element,
+    content: string | Node | NodeList | HTMLCollection | Query,
+    position: InsertPosition,
+  ): void;
 
   /**
    * Prepends content to each element in the current set.
@@ -706,7 +713,7 @@ export class Query {
    * @param options.calculate - Whether to calculate offset parent taking transform into account.
    * @returns An array of the offset parent elements.
    */
-  offsetParent(options?: { calculate?: boolean }): (HTMLElement | null)[];
+  offsetParent(options?: { calculate?: boolean; }): (HTMLElement | null)[];
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.

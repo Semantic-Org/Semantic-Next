@@ -1,9 +1,8 @@
-import { Scheduler } from './scheduler.js';
-import { isEqual, clone } from '@semantic-ui/utils';
+import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
+import { Scheduler } from './scheduler.js';
 
 export class Reaction {
-
   constructor(callback) {
     this.callback = callback;
     this.dependencies = new Set();
@@ -13,7 +12,7 @@ export class Reaction {
   }
 
   run() {
-    if (!this.active) {
+    if(!this.active) {
       return;
     }
     Scheduler.current = this;
@@ -34,13 +33,15 @@ export class Reaction {
   }
 
   stop() {
-    if (!this.active) return;
+    if(!this.active) { return; }
     this.active = false;
     this.dependencies.forEach(dep => dep.unsubscribe(this));
   }
 
   // Static proxies for developer experience
-  static get current() { return Scheduler.current; }
+  static get current() {
+    return Scheduler.current;
+  }
   static flush = Scheduler.flush;
   static scheduleFlush = Scheduler.scheduleFlush;
   static afterFlush = Scheduler.afterFlush;
@@ -57,13 +58,14 @@ export class Reaction {
     Scheduler.current = null;
     try {
       return func();
-    } finally {
+    }
+    finally {
       Scheduler.current = previousReaction;
     }
   }
 
   static guard(f, equalCheck = isEqual) {
-    if (!Scheduler.current) {
+    if(!Scheduler.current) {
       return f();
     }
     let dep = new Dependency();
@@ -71,7 +73,7 @@ export class Reaction {
     dep.depend();
     const comp = new Reaction(() => {
       newValue = f();
-      if (!comp.firstRun && !equalCheck(newValue, value)) {
+      if(!comp.firstRun && !equalCheck(newValue, value)) {
         dep.changed();
       }
       value = clone(newValue);

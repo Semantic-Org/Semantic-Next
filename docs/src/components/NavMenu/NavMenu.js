@@ -1,8 +1,8 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import { any, isFunction, clone, isArray } from '@semantic-ui/utils';
-import template from './NavMenu.html?raw';
+import { UIIcon } from '@semantic-ui/core';
+import { any, clone, isArray, isFunction } from '@semantic-ui/utils';
 import css from './NavMenu.css?raw';
+import template from './NavMenu.html?raw';
 
 const defaultSettings = {
   menu: [], // menus to display
@@ -22,7 +22,7 @@ const defaultState = {
   searchTerm: undefined,
 };
 
-const createComponent = function ({ $, el, self, settings, state }) {
+const createComponent = function({ $, el, self, settings, state }) {
   return {
     initialize() {
       state.url.set(settings.activeURL);
@@ -32,7 +32,7 @@ const createComponent = function ({ $, el, self, settings, state }) {
       let menu = clone(settings.menu);
       menu = self.filterVisibleSections(menu);
       if(settings.searchable && search) {
-        menu = self.filterBySearchTerm(menu, search)
+        menu = self.filterBySearchTerm(menu, search);
       }
       return menu;
     },
@@ -42,8 +42,7 @@ const createComponent = function ({ $, el, self, settings, state }) {
     getNavIcon(section) {
       const defaultIcon = (settings.useAccordion && section?.pages && !settings.expandAll)
         ? 'chevron-down'
-        : ''
-      ;
+        : '';
       return section?.navIcon || settings.navIcon || defaultIcon;
     },
     hasNoResults() {
@@ -71,23 +70,23 @@ const createComponent = function ({ $, el, self, settings, state }) {
     },
     getPageStates(page) {
       return {
-        current: self.isCurrentItem(page)
+        current: self.isCurrentItem(page),
       };
     },
     shouldShow(item) {
-      if (isFunction(item.shouldShow)) {
+      if(isFunction(item.shouldShow)) {
         return item.shouldShow || false;
       }
       return true;
     },
     highlightMatch(text, searchTerm) {
-      if (!searchTerm) return text;
+      if(!searchTerm) { return text; }
 
       const lowerText = text.toLowerCase();
       const lowerSearchTerm = searchTerm.toLowerCase();
       const index = lowerText.indexOf(lowerSearchTerm);
 
-      if (index === -1) return text;
+      if(index === -1) { return text; }
 
       const before = text.substring(0, index);
       const match = text.substring(index, index + searchTerm.length);
@@ -97,7 +96,7 @@ const createComponent = function ({ $, el, self, settings, state }) {
     },
 
     filterBySearchTerm(menu = [], searchTerm) {
-      if (!searchTerm) {
+      if(!searchTerm) {
         return menu;
       }
 
@@ -108,58 +107,63 @@ const createComponent = function ({ $, el, self, settings, state }) {
         const sectionMatches = section.name?.toLowerCase().includes(searchTerm);
 
         // Add highlighted text for section if it matches
-        const highlightedSection = sectionMatches ? {
-          ...section,
-          highlightedName: self.highlightMatch(section.name, searchTerm)
-        } : section;
+        const highlightedSection = sectionMatches
+          ? {
+            ...section,
+            highlightedName: self.highlightMatch(section.name, searchTerm),
+          }
+          : section;
 
         // Filter pages that match search term
         const filteredPages = isArray(section.pages)
           ? section.pages.reduce((pagesAcc, page) => {
-              // Check if page name matches
-              const pageMatches = page.name?.toLowerCase().includes(searchTerm);
+            // Check if page name matches
+            const pageMatches = page.name?.toLowerCase().includes(searchTerm);
 
-              // Add highlighted text for page if it matches
-              const highlightedPage = pageMatches ? {
+            // Add highlighted text for page if it matches
+            const highlightedPage = pageMatches
+              ? {
                 ...page,
-                highlightedName: self.highlightMatch(page.name, searchTerm)
-              } : page;
+                highlightedName: self.highlightMatch(page.name, searchTerm),
+              }
+              : page;
 
-              // Check if any subpages match
-              let filteredSubpages = [];
-              let subpagesMatch = false;
+            // Check if any subpages match
+            let filteredSubpages = [];
+            let subpagesMatch = false;
 
-              if (isArray(page.pages)) {
-                filteredSubpages = page.pages.filter(subpage =>
-                  subpage.name?.toLowerCase().includes(searchTerm)
-                ).map(subpage => ({
+            if(isArray(page.pages)) {
+              filteredSubpages = page.pages.filter(subpage => subpage.name?.toLowerCase().includes(searchTerm)).map(
+                subpage => ({
                   ...subpage,
-                  highlightedName: self.highlightMatch(subpage.name, searchTerm)
-                }));
-                subpagesMatch = filteredSubpages.length > 0;
-              }
+                  highlightedName: self.highlightMatch(subpage.name, searchTerm),
+                }),
+              );
+              subpagesMatch = filteredSubpages.length > 0;
+            }
 
-              // Include page if it matches or any of its subpages match
-              if (pageMatches || subpagesMatch) {
-                if (subpagesMatch && page.pages) {
-                  pagesAcc.push({
-                    ...highlightedPage,
-                    pages: filteredSubpages
-                  });
-                } else {
-                  pagesAcc.push(highlightedPage);
-                }
+            // Include page if it matches or any of its subpages match
+            if(pageMatches || subpagesMatch) {
+              if(subpagesMatch && page.pages) {
+                pagesAcc.push({
+                  ...highlightedPage,
+                  pages: filteredSubpages,
+                });
               }
+              else {
+                pagesAcc.push(highlightedPage);
+              }
+            }
 
-              return pagesAcc;
-            }, [])
+            return pagesAcc;
+          }, [])
           : [];
 
         // Include section if it matches or any of its pages match
-        if (sectionMatches || filteredPages.length > 0) {
+        if(sectionMatches || filteredPages.length > 0) {
           acc.push({
             ...highlightedSection,
-            pages: sectionMatches ? highlightedSection.pages : filteredPages
+            pages: sectionMatches ? highlightedSection.pages : filteredPages,
           });
         }
 
@@ -168,21 +172,20 @@ const createComponent = function ({ $, el, self, settings, state }) {
     },
     filterVisibleSections(menu = []) {
       return menu.reduce((acc, { pages, shouldShow, ...item }) => {
-        if (isFunction(shouldShow) && !shouldShow()) {
+        if(isFunction(shouldShow) && !shouldShow()) {
           return acc;
         }
         // recursively filter pages
         const filteredPages = isArray(pages)
           ? self.filterVisibleSections(pages)
           : [];
-        const result =
-          filteredPages.length > 0 ? { ...item, pages: filteredPages } : item;
+        const result = filteredPages.length > 0 ? { ...item, pages: filteredPages } : item;
         acc.push(result);
         return acc;
       }, []);
     },
     getLink(item) {
-      if (settings.linkCurrentPage || !self.isCurrentItem(item)) {
+      if(settings.linkCurrentPage || !self.isCurrentItem(item)) {
         return item?.url;
       }
       return;
@@ -197,10 +200,10 @@ const createComponent = function ({ $, el, self, settings, state }) {
       if(settings.expandAll) {
         return true;
       }
-      if (self.isCurrentItem(item)) {
+      if(self.isCurrentItem(item)) {
         return true;
       }
-      if (isArray(item.pages)) {
+      if(isArray(item.pages)) {
         return any(item.pages, self.isActiveItem);
       }
       return false;
@@ -208,8 +211,7 @@ const createComponent = function ({ $, el, self, settings, state }) {
     addTrailingSlash(url) {
       return (url.substr(-1) === '/')
         ? url
-        : `${url}/`
-      ;
+        : `${url}/`;
     },
     isSameURL(url1 = '', url2 = '', startsWith = false) {
       if(startsWith) {
@@ -230,35 +232,34 @@ const createComponent = function ({ $, el, self, settings, state }) {
       const el = $('.item.current').first().el();
       if(el) {
         const rect = el.getBoundingClientRect();
-        const isVisible = (
-          rect.top >= 0 &&
-          rect.left >= 0 &&
-          rect.bottom <= window.innerHeight &&
-          rect.right <= window.innerWidth
-        );
-        if (!isVisible) {
+        const isVisible = rect.top >= 0
+          && rect.left >= 0
+          && rect.bottom <= window.innerHeight
+          && rect.right <= window.innerWidth;
+        if(!isVisible) {
           el.scrollIntoView();
         }
       }
-    }
+    },
   };
 };
 
-const onRendered =  ({ self, isClient, el, settings }) => {
+const onRendered = ({ self, isClient, el, settings }) => {
   if(isClient) {
     self.scrollToActive();
   }
-  
+
   // Set accordion attribute on host element if needed
-  if (settings.useAccordion) {
+  if(settings.useAccordion) {
     el.setAttribute('accordion', '');
-  } else {
+  }
+  else {
     el.removeAttribute('accordion');
   }
 };
 
 const events = {
-  'click .title': ({target, settings, $}) => {
+  'click .title': ({ target, settings, $ }) => {
     if(!settings.useAccordion) {
       return;
     }
@@ -267,12 +268,12 @@ const events = {
     $title.toggleClass('active');
     $content.toggleClass('active');
   },
-  'click .nav-icon'({event}) {
+  'click .nav-icon'({ event }) {
     event.preventDefault();
   },
-  'change ui-input'({state, value}) {
+  'change ui-input'({ state, value }) {
     state.searchTerm.set(value);
-  }
+  },
 };
 
 const NavMenu = defineComponent({

@@ -1,11 +1,11 @@
-import { noop } from '@semantic-ui/utils';
 import { defineComponent } from '@semantic-ui/component';
 import { ModalComponentSpec } from '@semantic-ui/specs';
+import { noop } from '@semantic-ui/utils';
 
 import CSS from './css/modal-shadow.css?raw';
 import Template from './modal.html?raw';
 
-const createComponent = ({$, dispatchEvent}) => ({
+const createComponent = ({ $, dispatchEvent }) => ({
   show(callback = noop) {
     if(callback() !== false) {
       $('dialog').get(0).showModal();
@@ -17,9 +17,8 @@ const createComponent = ({$, dispatchEvent}) => ({
       $('dialog').get(0).close();
     }
     dispatchEvent('hide');
-  }
+  },
 });
-
 
 const onCreated = ({}) => {
 };
@@ -28,14 +27,14 @@ const onRendered = function({}) {
 };
 
 const events = {
-  'click ui-icon.close'({event, self}) {
+  'click ui-icon.close'({ event, self }) {
     self.hide();
   },
-  'click dialog'({$, event, settings, self}) {
+  'click dialog'({ $, event, settings, self }) {
     if(settings.closeable && $(event.target).is('dialog')) {
       self.hide();
     }
-  }
+  },
 };
 
 const UIModal = defineComponent({

@@ -1,9 +1,9 @@
+import mdx from '@astrojs/mdx';
+import starlight from '@astrojs/starlight';
+import lit from '@semantic-ui/astro-lit';
+import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
-import lit from '@semantic-ui/astro-lit';
-import mdx from '@astrojs/mdx';
-import astroExpressiveCode from 'astro-expressive-code';
-import starlight from '@astrojs/starlight';
 
 import vercel from '@astrojs/vercel';
 
@@ -22,20 +22,20 @@ const isProduction = process.env.VERCEL_ENV === 'production';
 const site = isProduction
   ? 'https://next.semantic-ui.com' // Your production URL
   : process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}` // Vercel preview URL
-    : 'https://dev.semantic-ui.com' // Local development URL
+  ? `https://${process.env.VERCEL_URL}` // Vercel preview URL
+  : 'https://dev.semantic-ui.com' // Local development URL
 ;
 
 export default defineConfig({
   site,
 
   devToolbar: {
-    enabled: false
+    enabled: false,
   },
 
   server: {
     host: true,
-    port: 443
+    port: 443,
   },
 
   vite: {
@@ -45,16 +45,16 @@ export default defineConfig({
       // add '127.0.0.1 dev.semantic-ui.com ' to your 'etc/hosts' file to use
       https: {
         key: fs.readFileSync('./cert/dev.semantic-ui.com-key.pem'),
-        cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem')
+        cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem'),
       },
       hmr: {
         host: 'dev.semantic-ui.com',
-        protocol: 'wss'
-      }
+        protocol: 'wss',
+      },
     },
     ssr: {
       // Example: Force a broken package to skip SSR processing, if needed
-      //external: ['playground-ide'],
+      // external: ['playground-ide'],
     },
     optimizeDeps: {
       force: true,
@@ -73,9 +73,8 @@ export default defineConfig({
     }),
     mdx({}),
     starlight({
-      title: 'Semantic UI'
-    })
+      title: 'Semantic UI',
+    }),
   ],
-
-  //adapter: vercel()
+  // adapter: vercel()
 });

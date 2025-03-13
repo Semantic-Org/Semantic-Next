@@ -1,8 +1,8 @@
-import { LitRenderer } from '@semantic-ui/renderer';
-import { TemplateHelpers } from './template-helpers';
 import { Query, QueryOptions } from '@semantic-ui/query';
-import { Signal, SignalOptions, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
+import { LitRenderer } from '@semantic-ui/renderer';
 import { ASTNode } from './compiler/template-compiler';
+import { TemplateHelpers } from './template-helpers';
 
 export interface TemplateSettings {
   /** The name of the template. */
@@ -54,227 +54,233 @@ export type DataContext = Record<string, any>;
  * Represents a rendered template instance, merging the instance properties and data context.
  */
 export interface RenderedTemplate {
-    [key: string]: any; // Allows any other properties since it merges instance and data.
+  [key: string]: any; // Allows any other properties since it merges instance and data.
 }
 
 // We don't need this helper anymore as we want to preserve Signal methods for autocomplete
 
 /**
  * Standard parameters provided to lifecycle callbacks and event handlers in Semantic UI components.
- * 
+ *
  * These parameters provide access to the component's DOM, state, data context, and utility functions
  * like event handling and reactivity. They are automatically provided as arguments to lifecycle
  * callbacks (onCreated, onRendered, onUpdated, onDestroyed) and event handlers.
- * 
+ *
  * @see https://next.semantic-ui.com/guide#standard-arguments
  * @see https://next.semantic-ui.com/components/lifecycle
- * 
+ *
  * @template TState - Type of the component's reactive state variables
  * @template TSettings - Type of the component's configuration settings
  * @template TComponentInstance - Type of the component instance created by createComponent
  * @template TProperties - Type of the properties for Lit components
  */
 export interface CallParams<
-    TState extends Record<string, Signal<any>> = Record<string, Signal<any>>,
-    TSettings extends Record<string, any> = Record<string, any>,
-    TComponentInstance extends Record<string, any> = Record<string, any>,
-    TProperties extends Record<string, any> = Record<string, any>
+  TState extends Record<string, Signal<any>> = Record<string, Signal<any>>,
+  TSettings extends Record<string, any> = Record<string, any>,
+  TComponentInstance extends Record<string, any> = Record<string, any>,
+  TProperties extends Record<string, any> = Record<string, any>,
 > {
   /**
    * The DOM element associated with the component.
-   * 
+   *
    * This is the actual HTMLElement for the custom element in the DOM.
-   * 
+   *
    * @example
    * // Change element style directly
    * el.style.backgroundColor = 'blue';
    */
   el: HTMLElement;
-  
+
   /**
    * The component instance created by createComponent.
-   * 
+   *
    * Provides access to instance methods and properties defined in the component.
-   * 
+   *
    * @see https://next.semantic-ui.com/components/rendering#component-instance
    */
   tpl: TComponentInstance;
-  
+
   /**
    * Alias for tpl - the component instance.
-   * 
+   *
    * @see tpl
    */
   self: TComponentInstance;
-  
+
   /**
    * Alias for tpl - the component instance.
-   * 
+   *
    * @see tpl
    */
   component: TComponentInstance;
-  
+
   /**
    * A function for querying DOM elements within the component's shadow DOM.
-   * 
+   *
    * Similar to jQuery, but scoped to the component and doesn't cross shadow DOM boundaries.
    * Uses querySelector/querySelectorAll for better performance.
-   * 
+   *
    * @param selector - CSS selector string or Node/NodeList to query
    * @param args - Optional query options
    * @returns A Query object with jQuery-like API
-   * 
+   *
    * @example
    * $('.button').addClass('active');
-   * 
+   *
    * @see https://next.semantic-ui.com/components/dom#querying-elements
    */
-  $: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
-  
+  $: (
+    selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
+    args?: QueryOptions,
+  ) => Query;
+
   /**
    * A function for querying DOM elements, piercing through shadow DOM boundaries.
-   * 
+   *
    * Similar to $, but can access elements across shadow DOM boundaries. Slower than $.
-   * 
+   *
    * @param selector - CSS selector string or Node/NodeList to query
    * @param args - Optional query options
    * @returns A Query object with jQuery-like API
-   * 
+   *
    * @example
    * $$('ui-icon .icon').attr('class');
-   * 
+   *
    * @see https://next.semantic-ui.com/components/dom#piercing-shadow-dom
    */
-  $$: (selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions) => Query;
-  
+  $$: (
+    selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
+    args?: QueryOptions,
+  ) => Query;
+
   /**
    * Creates a reactive effect that automatically re-runs when its dependencies change.
-   * 
+   *
    * Reactions are automatically cleaned up when the component is destroyed.
-   * 
+   *
    * @param fn - Function to execute reactively
-   * 
+   *
    * @example
    * reaction(() => {
    *   console.log('State changed:', state.count.get());
    * });
-   * 
+   *
    * @see https://next.semantic-ui.com/reactivity#reactions
    * @see {@link Template.reaction}
    */
   reaction: Template['reaction'];
-  
+
   /**
    * Creates a reactive signal (observable value).
-   * 
+   *
    * Signals are the building blocks of reactivity in Semantic UI components.
-   * 
+   *
    * @param value - Initial value of the signal
    * @param options - Signal configuration options
    * @returns A reactive signal
-   * 
+   *
    * @example
    * const count = signal(0);
    * count.get(); // Get value (0)
    * count.set(5); // Set value to 5
    * count.value = 5; // set value to 5
-   * 
+   *
    * @see https://next.semantic-ui.com/reactivity#signals
    * @see {@link Template.signal}
    */
   signal: Template['signal'];
-  
+
   /**
    * Executes a callback after all pending reactive updates have been processed.
-   * 
+   *
    * Useful for operations that need to happen after the DOM has been updated.
-   * 
+   *
    * @param callback - Function to execute after updates
-   * 
+   *
    * @example
    * state.set(newValue);
    * afterFlush(() => {
    *   // DOM is now updated
    * });
-   * 
+   *
    * @see https://next.semantic-ui.com/reactivity#batching-and-flushing
    */
   afterFlush: (callback: () => void) => void;
-  
+
   /**
    * Runs a function without tracking reactive dependencies.
-   * 
+   *
    * Prevents the function from creating dependencies on signals it reads.
-   * 
+   *
    * @param fn - Function to run without tracking
    * @returns The return value of the function
-   * 
+   *
    * @example
    * const value = nonreactive(() => state.get.count());
-   * 
+   *
    * @see https://next.semantic-ui.com/reactivity#nonreactive
    */
   nonreactive: <T>(fn: () => T) => T;
-  
+
   /**
    * Forces immediate execution of pending reactive updates.
-   * 
+   *
    * Normally updates are batched for performance, but this triggers them immediately.
-   * 
+   *
    * @example
    * state.count(state.count() + 1);
    * flush();
    * someFunc(); // dom is updated before someFunc
-   * 
+   *
    * @see https://next.semantic-ui.com/reactivity#batching-and-flushing
    */
   flush: () => void;
-  
+
   /**
    * The data context for the component.
-   * 
+   *
    * Contains all data available to the template for rendering, including
    * properties passed to the component.
-   * 
+   *
    * @see https://next.semantic-ui.com/components/rendering
    */
   data: DataContext;
-  
+
   /**
    * Component configuration settings.
-   * 
+   *
    * These are either passed as props to the component or set as default
    * values in the component definition.
-   * 
+   *
    * @example
    * // Access a setting
    * const color = settings.color || 'default';
-   * 
+   *
    * @see https://next.semantic-ui.com/components/settings
    */
   settings: TSettings & TProperties;
-  
+
   /**
    * Reactive state variables for the component.
-   * 
+   *
    * Each property is a Signal that can be accessed and modified.
    * Changes to state automatically trigger UI updates.
-   * 
+   *
    * @example
    * // Get state value
    * const count = state.count();
    * // Update state value
    * state.count(count + 1);
-   * 
+   *
    * @see https://next.semantic-ui.com/components/state
    */
   state: TState;
-  
+
   /**
    * Checks if the component is rendered in the DOM.
-   * 
+   *
    * @returns True if the component's DOM has been rendered
-   * 
+   *
    * @example
    * if (isRendered()) {
    *   // Safe to access DOM
@@ -282,12 +288,12 @@ export interface CallParams<
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   isRendered: () => boolean;
-  
+
   /**
    * Indicates if the component is rendering on the server.
-   * 
+   *
    * Useful for conditional SSR logic.
-   * 
+   *
    * @example
    * if (isServer) {
    *   // Skip client-only operations
@@ -295,12 +301,12 @@ export interface CallParams<
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   isServer: boolean;
-  
+
   /**
    * Indicates if the component is rendering in the browser.
-   * 
+   *
    * Useful for conditional client-side logic.
-   * 
+   *
    * @example
    * if (isClient) {
    *   // Perform browser-only operations
@@ -308,172 +314,172 @@ export interface CallParams<
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   isClient: boolean;
-  
+
   /**
    * Dispatches a custom event from the component's element.
-   * 
+   *
    * @param eventName - Name of the custom event
    * @param eventData - Data to include in the event detail
    * @param eventSettings - Event configuration options
    * @param options - Additional options for event dispatch
    * @returns A Query object for the element
-   * 
+   *
    * @example
    * dispatchEvent('change', { value: state.value() });
-   * 
+   *
    * @see https://next.semantic-ui.com/components/events#dispatching-events
    * @see {@link Template.dispatchEvent}
    */
   dispatchEvent: Template['dispatchEvent'];
-  
+
   /**
    * Attaches an event listener using event delegation.
-   * 
+   *
    * Handles attaching and cleaning up event listeners automatically.
-   * 
+   *
    * @param selector - CSS selector for target elements
    * @param eventName - Name of the event to listen for
    * @param eventHandler - Handler function for the event
    * @param options - Configuration options for the event
    * @returns A Query object for managing the event
-   * 
+   *
    * @example
    * attachEvent('.button', 'click', (e) => console.log('Button clicked'));
-   * 
+   *
    * @see https://next.semantic-ui.com/components/events#attaching-events
    * @see {@link Template.attachEvent}
    */
   attachEvent: Template['attachEvent'];
-  
+
   /**
    * Binds a key sequence to a handler function.
-   * 
+   *
    * Useful for creating keyboard shortcuts within components.
-   * 
+   *
    * @param key - Key sequence (e.g., "Ctrl+S", "Shift+Enter")
    * @param callback - Handler function for the key sequence
-   * 
+   *
    * @example
    * bindKey('Ctrl+Enter', (e) => submitForm());
-   * 
+   *
    * @see https://next.semantic-ui.com/components/keys
    * @see {@link Template.bindKey}
    */
   bindKey: Template['bindKey'];
-  
+
   /**
    * Unbinds a previously bound key sequence.
-   * 
+   *
    * @param key - Key sequence to unbind
-   * 
+   *
    * @example
    * unbindKey('Ctrl+Enter');
-   * 
+   *
    * @see https://next.semantic-ui.com/components/keys
    * @see {@link Template.unbindKey}
    */
   unbindKey: Template['unbindKey'];
-  
+
   /**
    * AbortController for managing asynchronous operations.
-   * 
+   *
    * Automatically aborts any pending operations when the component is destroyed.
-   * 
+   *
    * @example
    * fetch('/api/data', { signal: abortController.signal })
    *   .then(response => response.json())
    *   .then(data => state.data(data));
    */
   abortController: AbortController;
-  
+
   /**
    * Template helper functions for common operations.
-   * 
+   *
    * @see {@link TemplateHelpers}
    */
   helpers: typeof TemplateHelpers;
-  
+
   /**
    * The underlying template instance.
-   * 
+   *
    * Provides access to lower-level template APIs.
-   * 
+   *
    * @see {@link Template}
    */
   template: Template;
-  
+
   /**
    * The name of the current template.
-   * 
+   *
    * Useful for debugging and finding templates.
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   templateName: string;
-  
+
   /**
    * A Map containing all rendered templates on the page.
-   * 
+   *
    * Useful for accessing other components on the page.
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   templates: Map<string, Template[]>;
-  
+
   /**
    * Finds a template by its name.
-   * 
+   *
    * @param templateName - Name of the template to find
    * @returns The template instance or undefined if not found
-   * 
+   *
    * @example
    * const navTemplate = findTemplate('navigation');
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   findTemplate: (templateName: string) => Template | undefined;
-  
+
   /**
    * Finds a parent template by name.
-   * 
+   *
    * @param templateName - Name of the parent template to find
    * @returns The rendered template instance or undefined if not found
-   * 
+   *
    * @example
    * const parentForm = findParent('form');
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   findParent: (templateName: string) => RenderedTemplate | undefined;
-  
+
   /**
    * Finds a child template by name.
-   * 
+   *
    * @param templateName - Name of the child template to find
    * @returns The rendered template instance or undefined if not found
-   * 
+   *
    * @example
    * const childInput = findChild('input');
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   findChild: (templateName: string) => RenderedTemplate | undefined;
-  
+
   /**
    * Finds all child templates by name.
-   * 
+   *
    * @param templateName - Name of the child templates to find
    * @returns Array of rendered template instances
-   * 
+   *
    * @example
    * const allItems = findChildren('list-item');
    * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
    */
   findChildren: (templateName: string) => RenderedTemplate[];
-  
+
   /**
    * Indicates if dark mode is active.
-   * 
+   *
    * Useful for conditional styling based on theme.
-   * 
+   *
    * @example
    * const bgColor = darkMode ? '#333' : '#fff';
-   * 
+   *
    * @see https://next.semantic-ui.com/theming
    */
   darkMode: boolean;
@@ -529,7 +535,6 @@ export interface AttachSettings {
   /** Optional end marker node for insertion. */
   endNode?: Node;
 }
-
 
 export class Template {
   /** Static counter for the total number of templates created. */
@@ -635,7 +640,7 @@ export class Template {
    * @param options - Options.
    * @param options.rerender - whether to force a rerender. default true
    */
-  setDataContext(data: DataContext, options?: { rerender?: boolean }): void;
+  setDataContext(data: DataContext, options?: { rerender?: boolean; }): void;
 
   /**
    * Sets the parent template for this template instance.
@@ -738,11 +743,11 @@ export class Template {
   /**
    * Queries for DOM elements within the template's renderRoot (similar to jQuery's $).
    * @param selector - The CSS selector.
-    * @param options - query settings
-    * @returns A Query object representing the matched elements.
-    */
+   * @param options - query settings
+   * @returns A Query object representing the matched elements.
+   */
   $(selector: string, options?: QuerySettings): Query;
-/**
+  /**
    * Queries for DOM elements within the template's renderRoot, piercing shadow DOM boundaries (similar to jQuery's $$).
    * @param selector - The CSS selector.
    * @param options - query settings
@@ -757,13 +762,13 @@ export class Template {
    * @returns The return value of the called function, or undefined if the function is not defined.
    */
   call<T>(
-      func: ((params: CallParams) => T) | undefined,
-      options?: {
-          params?: CallParams;
-          additionalData?: Record<string, any>;
-          firstArg?: any;
-          additionalArgs?: any[];
-      }
+    func: ((params: CallParams) => T) | undefined,
+    options?: {
+      params?: CallParams;
+      additionalData?: Record<string, any>;
+      firstArg?: any;
+      additionalArgs?: any[];
+    },
   ): T | undefined;
 
   /**
@@ -776,18 +781,28 @@ export class Template {
    * @param options.querySettings - query settings
    * @returns A Query object for managing the event listener.
    */
-  attachEvent(selector: string, eventName: string, eventHandler: (event: Event) => void, options?: { eventSettings?: EventSettings, querySettings?: { pierceShadow?: boolean } }): Query;
+  attachEvent(
+    selector: string,
+    eventName: string,
+    eventHandler: (event: Event) => void,
+    options?: { eventSettings?: EventSettings; querySettings?: { pierceShadow?: boolean; }; },
+  ): Query;
 
   /**
    * Dispatches a custom event from the template's element.
    * @param eventName - The name of the custom event.
    * @param eventData - Data to be included in the event's detail property.
-    * @param eventSettings - event settings
-    * @param options
-    * @param options.triggerCallback - whether to trigger the callback. default `true`
-    * @returns A Query object for managing the event.
-    */
-  dispatchEvent(eventName: string, eventData?: EventData, eventSettings?: EventSettings, options?: { triggerCallback?: boolean }): Query;
+   * @param eventSettings - event settings
+   * @param options
+   * @param options.triggerCallback - whether to trigger the callback. default `true`
+   * @returns A Query object for managing the event.
+   */
+  dispatchEvent(
+    eventName: string,
+    eventData?: EventData,
+    eventSettings?: EventSettings,
+    options?: { triggerCallback?: boolean; },
+  ): Query;
 
   /**
    * Creates a reactive effect that will re-run whenever its dependencies change.  Reactions are automatically cleaned up when the component is destroyed.
@@ -830,9 +845,9 @@ export class Template {
   findChild(templateName: string): RenderedTemplate | undefined;
 
   /**
-    * @param {string} templateName - template to find
-    * @returns The rendered template instances, or an empty array if not found.
-    */
+   * @param {string} templateName - template to find
+   * @returns The rendered template instances, or an empty array if not found.
+   */
   findChildren(templateName: string): RenderedTemplate[];
 
   /**
@@ -884,23 +899,23 @@ export class Template {
    */
   static findChildTemplate(template: Template, templateName: string): RenderedTemplate | undefined;
   /**
-    * Lifecycle callback invoked after the template is created.
-    */
+   * Lifecycle callback invoked after the template is created.
+   */
   onCreated: () => void;
   /**
-    * Lifecycle callback invoked after the template is destroyed.
-    */
+   * Lifecycle callback invoked after the template is destroyed.
+   */
   onDestroyed: () => void;
   /**
-    * Lifecycle callback invoked after the template is rendered.
-    */
+   * Lifecycle callback invoked after the template is rendered.
+   */
   onRendered: () => void;
   /**
-    * Lifecycle callback invoked after the template is updated.
-    */
+   * Lifecycle callback invoked after the template is updated.
+   */
   onUpdated: () => void;
   /**
-    * Lifecycle callback invoked after the theme changes.
-    */
+   * Lifecycle callback invoked after the theme changes.
+   */
   onThemeChanged: (...args: any[]) => void;
 }

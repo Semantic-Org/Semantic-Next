@@ -1,8 +1,7 @@
-import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { Signal, Reaction, Scheduler } from '@semantic-ui/reactivity';
+import { Reaction, Scheduler, Signal } from '@semantic-ui/reactivity';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Reaction', () => {
-
   beforeEach(() => {
     // Reset Reaction state before each test if needed
     Scheduler.current = null;
@@ -32,10 +31,10 @@ describe('Reaction', () => {
       const callback = vi.fn();
 
       Reaction.create((comp) => {
-        if (comp.firstRun) {
+        if(comp.firstRun) {
           callback('First run!');
         }
-        if (saying.get() === 'goodbye') {
+        if(saying.get() === 'goodbye') {
           comp.stop();
           callback('Goodbye detected');
         }
@@ -48,7 +47,6 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledWith('Goodbye detected');
       expect(callback).toHaveBeenCalledTimes(2);
     });
-
   });
 
   describe('Equality', () => {
@@ -89,11 +87,9 @@ describe('Reaction', () => {
       // Log runs twice including the initial run due to custom equality function
       expect(callback).toHaveBeenCalledTimes(2);
     });
-
   });
 
   describe('Controlling Reactivity', () => {
-
     it('guard should control reactivity', () => {
       const userAge = new Signal(30);
       const userName = new Signal('John Doe');
@@ -103,7 +99,7 @@ describe('Reaction', () => {
       Reaction.create(() => {
         const user = Reaction.guard(() => ({
           name: userName.get(),
-          age: userAge.get()
+          age: userAge.get(),
         }));
         callback(`User Info: ${user.name}, ${user.age}`);
       });
@@ -125,13 +121,13 @@ describe('Reaction', () => {
     });
 
     it('guard should control reactivity - example 2', () => {
-
       const counter = new Signal(0);
       const callback = vi.fn();
 
-      const isEven = () => Reaction.guard(() => {
-        return (counter.get() % 2 === 0);
-      });
+      const isEven = () =>
+        Reaction.guard(() => {
+          return (counter.get() % 2 === 0);
+        });
 
       Reaction.create((comp) => {
         if(isEven()) {
@@ -221,7 +217,6 @@ describe('Reaction', () => {
   });
 
   describe('Flushing', () => {
-
     it('afterFlush should call registered callbacks after flushing', async () => {
       const mockCallback = vi.fn();
       Reaction.afterFlush(mockCallback);
@@ -240,7 +235,6 @@ describe('Reaction', () => {
       expect(mockCallback).toHaveBeenCalled();
       expect(mockCallback2).toHaveBeenCalled();
     });
-
   });
 
   describe('Helper Functions', () => {
@@ -266,7 +260,6 @@ describe('Reaction', () => {
   });
 
   describe('Debugging', () => {
-
     it('Reaction should track current context for debugging', () => {
       const callback = vi.fn();
       let signal = new Signal(1);
@@ -295,7 +288,7 @@ describe('Reaction', () => {
             trace = Reaction.getSource();
             console.log = consoleLog;
           }
-          catch(e) {
+          catch (e) {
             // avoid throwing error
           }
           callback(trace);
@@ -305,7 +298,6 @@ describe('Reaction', () => {
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(undefined);
     });
-
 
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
@@ -322,7 +314,7 @@ describe('Reaction', () => {
           trace = Reaction.getSource();
           console.info = consoleInfo;
         }
-        catch(e) {
+        catch (e) {
           // avoid throwing error
         }
         callback(trace);
@@ -331,7 +323,5 @@ describe('Reaction', () => {
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(expect.any(String));
     });
-
   });
-
 });

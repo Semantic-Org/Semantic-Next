@@ -1,10 +1,10 @@
 import { exec } from 'child_process';
-import { promisify } from 'util';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { globSync } from 'glob';
-import { join } from 'path';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import semver from 'semver';
 import inquirer from 'inquirer';
+import { join } from 'path';
+import semver from 'semver';
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
@@ -18,12 +18,12 @@ const getCurrentVersionFromNpm = async (packageName) => {
   try {
     const { stdout } = await execAsync(`npm show ${packageName} version`);
     return stdout.trim();
-  } catch (error) {
+  }
+  catch (error) {
     console.error(`Failed to get current version from npm: ${error.message}`);
     process.exit(1);
   }
 };
-
 
 // Load the main package.json to determine the version to set
 const mainPackageJsonPath = join(process.cwd(), 'package.json');
@@ -35,11 +35,10 @@ const ciOverride = process.argv.includes('--ci');
 let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
 let newVersion = mainPackageJson.version;
 
-
 // Handle version bump
 const handleVersionBump = async () => {
-  if (['patch', 'minor', 'major'].includes(versionArg)) {
-    if (!ciOverride && (versionArg === 'minor' || versionArg === 'major')) {
+  if(['patch', 'minor', 'major'].includes(versionArg)) {
+    if(!ciOverride && (versionArg === 'minor' || versionArg === 'major')) {
       const confirmation = await inquirer.prompt([
         {
           type: 'confirm',
@@ -50,7 +49,7 @@ const handleVersionBump = async () => {
         },
       ]);
 
-      if (!confirmation.confirm) {
+      if(!confirmation.confirm) {
         console.log('Version bump canceled.');
         process.exit(1);
       }
@@ -60,9 +59,11 @@ const handleVersionBump = async () => {
       console.error(`NPM version of ${npmVersion} is greater or equal to new version ${newVersion}`);
       process.exit(1);
     }
-  } else if (semver.valid(versionArg)) {
+  }
+  else if(semver.valid(versionArg)) {
     newVersion = versionArg;
-  } else if (versionArg) {
+  }
+  else if(versionArg) {
     console.error(`Invalid version argument: ${versionArg}`);
     process.exit(1);
   }
@@ -71,9 +72,9 @@ const handleVersionBump = async () => {
 const updatedFiles = [];
 
 // Update the version in the main package.json if a new version is set
-if (newVersion !== mainPackageJson.version) {
+if(newVersion !== mainPackageJson.version) {
   mainPackageJson.version = newVersion;
-  if (!dryRun) {
+  if(!dryRun) {
     writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
   }
   console.log(`Updated main package version to ${newVersion}`);
@@ -83,9 +84,9 @@ if (newVersion !== mainPackageJson.version) {
 // Function to update dependency versions in package.json
 function updateDependencyVersions(packageJson, newVersion) {
   ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depType => {
-    if (packageJson[depType]) {
+    if(packageJson[depType]) {
       Object.keys(packageJson[depType]).forEach(dep => {
-        if (dep.startsWith('@semantic-ui/')) {  // Simple scope check
+        if(dep.startsWith('@semantic-ui/')) { // Simple scope check
           packageJson[depType][dep] = `^${newVersion}`;
         }
       });
@@ -96,22 +97,23 @@ function updateDependencyVersions(packageJson, newVersion) {
 // Async function to publish a package
 async function publishPackage(dir) {
   const packageJsonPath = join(dir, 'package.json');
-  if (existsSync(packageJsonPath)) {
+  if(existsSync(packageJsonPath)) {
     const packageJson = loadJsonFile(packageJsonPath);
-    packageJson.version = newVersion;  // Update the package version
-    updateDependencyVersions(packageJson, newVersion);  // Update dependency versions
-    if (!dryRun) {
+    packageJson.version = newVersion; // Update the package version
+    updateDependencyVersions(packageJson, newVersion); // Update dependency versions
+    if(!dryRun) {
       writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
     }
     console.log(`Updated package version and dependencies in ${dir} to ${newVersion}`);
     updatedFiles.push(packageJsonPath);
 
-    if (!dryRun) {
+    if(!dryRun) {
       try {
         console.log(`Publishing package in ${dir}...`);
         await execAsync('npm publish', { cwd: dir });
         console.log(`Successfully published package from ${dir}.`);
-      } catch (error) {
+      }
+      catch (error) {
         console.error(`Failed to publish package from ${dir}: ${error.message}`);
       }
     }
@@ -135,12 +137,12 @@ const workspaceGlobs = mainPackageJson.workspaces;
   await Promise.all(publishPromises);
 
   // Update the root package-lock.json to reflect updated sub-package versions.
-  if (!dryRun) {
+  if(!dryRun) {
     console.log('Updating root package-lock.json...');
     await execAsync('npm install', { cwd: process.cwd() });
   }
 
-  if (!dryRun && updatedFiles.length > 0) {
+  if(!dryRun && updatedFiles.length > 0) {
     try {
       // Stage changes
       console.log('Staging changes...');
@@ -148,7 +150,7 @@ const workspaceGlobs = mainPackageJson.workspaces;
 
       // Check if there are changes to commit
       const statusOutput = await execAsync('git status --porcelain');
-      if (statusOutput.stdout.trim()) {
+      if(statusOutput.stdout.trim()) {
         // Commit changes
         console.log('Committing changes...');
         await execAsync(`git commit -m "chore: bump versions to ${newVersion}"`);
@@ -163,10 +165,12 @@ const workspaceGlobs = mainPackageJson.workspaces;
         await execAsync('git push --tags');
 
         console.log('Committed and pushed version updates and created a new tag.');
-      } else {
+      }
+      else {
         console.log('No changes to commit.');
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error(`Failed to commit and push changes: ${error.message}`);
     }
   }

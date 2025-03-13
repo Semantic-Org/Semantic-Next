@@ -1,15 +1,15 @@
 import { defineComponent } from '@semantic-ui/component';
 import { Reaction } from '@semantic-ui/reactivity';
 
-import template from './todo-item.html?raw';
 import css from './todo-item.css?raw';
+import template from './todo-item.html?raw';
 
 const createComponent = ({ self, data, reactiveVar, findParent, $ }) => ({
   editing: reactiveVar(false),
   getClasses() {
     return {
       completed: data.todo.completed,
-      editing: self.editing.get()
+      editing: self.editing.get(),
     };
   },
   getTodos() {
@@ -43,7 +43,7 @@ const events = {
     });
   },
   'keydown input.edit'({ event, self, $ }) {
-    if (event.key === 'Enter') {
+    if(event.key === 'Enter') {
       $(this).blur();
     }
   },

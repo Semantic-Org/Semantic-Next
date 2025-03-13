@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { isEmpty, inArray, openLink } from '@semantic-ui/utils';
+import { inArray, isEmpty, openLink } from '@semantic-ui/utils';
 
 /* Sub Components */
 import { HintModal } from './subtemplates/HintModal.js';
@@ -12,9 +12,8 @@ import { NavMenu } from '../NavMenu/NavMenu.js';
 /* UI */
 import '@semantic-ui/core/src/components/button';
 
-import template from './LearnExample.html?raw';
 import css from './LearnExample.css?raw';
-
+import template from './LearnExample.html?raw';
 
 const defaultSettings = {
   lesson: {
@@ -77,7 +76,7 @@ const createComponent = ({ $, $$, data, self, state, reaction, isRendered, setti
   },
   getClassMap() {
     const classes = {
-      learn: true
+      learn: true,
     };
     classes[`mobile-${state.mobileView.get()}`] = true;
     return classes;
@@ -141,7 +140,7 @@ const events = {
       self.hideNavMenu();
     }
   },
-  'click .solve'({settings, data, state}) {
+  'click .solve'({ settings, data, state }) {
     state.currentFiles.set(settings.solutionFiles);
   },
   'click .toggle-menu'({ self }) {
@@ -150,13 +149,13 @@ const events = {
   'click ui-button.layout'({ $ }) {
     $('code-playground').component().toggleTabs();
   },
-  'click ui-button.hint'({findChild}) {
+  'click ui-button.hint'({ findChild }) {
     findChild('hintModal').show();
   },
-  'click ui-button.references'({findChild, settings}) {
+  'click ui-button.references'({ findChild, settings }) {
     findChild('referenceModal').show();
   },
-  'change ui-menu.mobile'({state, data}) {
+  'change ui-menu.mobile'({ state, data }) {
     state.mobileView.set(data.value);
   },
   'click a[href]'({ self, target, event }) {
@@ -176,7 +175,7 @@ const events = {
   'click ui-button[href]'({ self, event }) {
     const href = $(event.target).attr('href');
     // self.loadPage(href);
-    //event.preventDefault();
+    // event.preventDefault();
   },
 };
 
@@ -184,7 +183,6 @@ const onRendered = ({ self }) => {
   self.calculateCodeLayout();
   self.linkifyFiles();
 };
-
 
 const LearnExample = defineComponent({
   tagName: 'learn-example',
@@ -199,7 +197,7 @@ const LearnExample = defineComponent({
   subTemplates: {
     hintModal: HintModal,
     referenceModal: ReferenceModal,
-  }
+  },
 });
 
 export default LearnExample;

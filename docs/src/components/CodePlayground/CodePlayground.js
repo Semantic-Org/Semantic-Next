@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
-import { firstMatch, isFunction, get, each, moveToFront, inArray, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
 
-import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
+import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 import '@semantic-ui/core/src/components/button';
@@ -10,8 +10,8 @@ import '@semantic-ui/core/src/components/button';
 import '../Panels/Panels.js';
 import '../Panels/Panel.js';
 
-import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
+import template from './CodePlayground.html?raw';
 
 import { addSearch } from './lib/codemirror-search.js';
 import { addSimpleMode } from './lib/codemirror-simple.js';
@@ -22,7 +22,6 @@ import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
 
 const defaultSettings = {
-
   // an object containing the files for the project
   files: {},
 
@@ -109,7 +108,6 @@ const defaultSettings = {
     'page.css': 'page.css',
     'page.js': 'page.js',
     'page.ts': 'page.js',
-
   },
 
   // which panel should code appear in 0 is left and 1 is right
@@ -145,7 +143,7 @@ const defaultSettings = {
   additionalPageFiles: [],
 
   // default left right panel width
-  panelGroupWidth: [50, 50]
+  panelGroupWidth: [50, 50],
 };
 
 const defaultState = {
@@ -167,8 +165,7 @@ const defaultState = {
   layout: 'tabs',
 };
 
-const createComponent = ({afterFlush, self, isServer, reaction, state, data, settings, $, $$}) => ({
-
+const createComponent = ({ afterFlush, self, isServer, reaction, state, data, settings, $, $$ }) => ({
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
@@ -178,14 +175,14 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     // select first file for left tabs
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
-      filter: 'main'
+      filter: 'main',
     });
     state.activeFile.set(initialFile);
 
     // select first file for right tabs
     const initialPageFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
-      filter: 'page'
+      filter: 'page',
     });
     state.activePageFile.set(initialPageFile);
 
@@ -200,7 +197,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   addPanelSettings() {
     $('ui-panel').settings({
-      getNaturalSize: self.getNaturalPanelSize
+      getNaturalSize: self.getNaturalPanelSize,
     });
   },
 
@@ -211,8 +208,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   calculateLayout() {
     let layout = settings.useTabs
       ? 'tabs'
-      : 'panels'
-    ;
+      : 'panels';
     // force tabs for small screens or inline examples
     const displayMode = state.displayMode.get();
     if(inArray(displayMode, ['tablet', 'mobile']) || settings.inline) {
@@ -304,7 +300,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: state.layout.get() == 'tabs'
+      tabs: state.layout.get() == 'tabs',
     };
     // defer to preference unless its tablet
     if(state.displayMode.value == 'tablet') {
@@ -327,7 +323,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   shouldCombineMenus() {
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
-  getFileArray({filter} = {}) {
+  getFileArray({ filter } = {}) {
     let files = [];
     const isPageFile = (filename) => {
       return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));
@@ -355,7 +351,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
       scriptType: self.getScriptType(file.contentType),
       panelIndex: self.getPanelIndex(filename),
       sortIndex: self.getSort(filename),
-      label: self.getFileLabel(filename)
+      label: self.getFileLabel(filename),
     };
   },
   getPanelIndex(filename) {
@@ -378,19 +374,18 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     return true;
   },
   getFileMenuItems({ filter } = {}) {
-    let menu = self.getFileArray({filter}).map(file => {
+    let menu = self.getFileArray({ filter }).map(file => {
       if(!settings.includeGeneratedInline && file?.generated) {
         return;
       }
       const label = (settings.hideTypescriptExtensions)
         ? file.filename.replace('ts', 'js')
-        : file.filename
-      ;
+        : file.filename;
       return {
         label: label,
         value: file.filename,
       };
-    }).filter(({value} = {}) => {
+    }).filter(({ value } = {}) => {
       return Boolean(value);
     });
     if(settings.selectedFile) {
@@ -407,7 +402,6 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     return firstMatch(files, file => !file.hidden)?.filename;
   },
   getFirstPageFile() {
-
   },
   getSaveID(group, index) {
     return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
@@ -419,7 +413,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
       if(file.panelIndex >= 0) {
         panels[file.panelIndex].push({
           type: 'file',
-          ...file
+          ...file,
         });
       }
     });
@@ -441,8 +435,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   toggleTabs() {
     const newLayout = (state.layout.get() == 'tabs')
       ? 'panels'
-      : 'tabs'
-    ;
+      : 'tabs';
     state.layout.set(newLayout);
     afterFlush(() => {
       self.addPanelSettings();
@@ -491,8 +484,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     const doCallback = (callback) => {
       return isFunction(window.requestIdleCallback)
         ? requestIdleCallback(callback)
-        : setTimeout(callback, 1)
-      ;
+        : setTimeout(callback, 1);
     };
     doCallback(() => {
       state.resizing.set(false);
@@ -511,11 +503,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     panelHeight = Math.min(panelHeight, 600);
     panelHeight = Math.max(panelHeight, 30);
     $('ui-panels').first().css('height', `${panelHeight}px`);
-  }
-
+  },
 });
 
-const onCreated = ({self, attachEvent}) => {
+const onCreated = ({ self, attachEvent }) => {
   self.setDisplayMode();
 };
 
@@ -533,43 +524,43 @@ const onRendered = ({ isClient, self, state, $, settings }) => {
   }
 };
 
-const onThemeChanged = ({self}) => {
+const onThemeChanged = ({ self }) => {
   self.reloadPreview();
 };
 
 const keys = {
   // select file with keyboard
-  'ctrl + 1': ({self}) => self.selectFile(1),
-  'ctrl + 2': ({self}) => self.selectFile(2),
-  'ctrl + 3': ({self}) => self.selectFile(3),
-  'ctrl + 4': ({self}) => self.selectFile(4),
-  'ctrl + 5': ({self}) => self.selectFile(5),
-  'ctrl + 6': ({self}) => self.selectFile(6),
-  'ctrl + 7': ({self}) => self.selectFile(7),
-  'ctrl + 8': ({self}) => self.selectFile(8),
-  'ctrl + 9': ({self}) => self.selectFile(9),
+  'ctrl + 1': ({ self }) => self.selectFile(1),
+  'ctrl + 2': ({ self }) => self.selectFile(2),
+  'ctrl + 3': ({ self }) => self.selectFile(3),
+  'ctrl + 4': ({ self }) => self.selectFile(4),
+  'ctrl + 5': ({ self }) => self.selectFile(5),
+  'ctrl + 6': ({ self }) => self.selectFile(6),
+  'ctrl + 7': ({ self }) => self.selectFile(7),
+  'ctrl + 8': ({ self }) => self.selectFile(8),
+  'ctrl + 9': ({ self }) => self.selectFile(9),
 };
 
 const events = {
-  'global resize window'({self, state}) {
+  'global resize window'({ self, state }) {
     requestAnimationFrame(self.setDisplayMode);
   },
-  'change ui-menu.component.files'({state, data}) {
+  'change ui-menu.component.files'({ state, data }) {
     state.activeFile.set(data.value);
   },
-  'change ui-menu.page.files'({state, data}) {
+  'change ui-menu.page.files'({ state, data }) {
     state.activePageFile.set(data.value);
   },
-  'change ui-menu.mobile'({self, data}) {
+  'change ui-menu.mobile'({ self, data }) {
     self.setMobileView(data.value);
   },
-  'click ui-button.tabs'({self}) {
+  'click ui-button.tabs'({ self }) {
     self.toggleTabs();
   },
-  'resizeStart ui-panel'({state}) {
+  'resizeStart ui-panel'({ state }) {
     state.resizing.set(true);
   },
-  'resizeEnd ui-panel'({state}) {
+  'resizeEnd ui-panel'({ state }) {
     state.resizing.set(false);
   },
 };
@@ -591,7 +582,7 @@ const CodePlayground = defineComponent({
     CodePlaygroundPanel,
     CodePlaygroundPreview,
     CodePlaygroundFile,
-  }
+  },
 });
 
 export default CodePlayground;

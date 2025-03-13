@@ -1,12 +1,25 @@
+import {
+  any,
+  asyncEach,
+  clone,
+  each,
+  findIndex,
+  firstMatch,
+  flatten,
+  groupBy,
+  isArray,
+  isString,
+  keys,
+  unique,
+} from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
-import { topbarMenu, topbarDisplayMenu, sidebarMenuUI, sidebarMenuFramework, sidebarMenuAPI } from './menus.js';
-import { firstMatch, groupBy, asyncEach, each, findIndex, flatten, keys, isArray, clone, isString, any, unique } from '@semantic-ui/utils';
+import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu } from './menus.js';
 
 /* Used to sort lessons */
+import semverCompare from 'semver/functions/compare';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 import semverPatch from 'semver/functions/patch';
-import semverCompare from 'semver/functions/compare';
 
 const examples = await getCollection('examples');
 const examplePages = examples
@@ -14,8 +27,7 @@ const examplePages = examples
   .map(doc => ({
     ...doc.data,
     url: `/examples/${doc.slug}`,
-  }))
-;
+  }));
 
 export const getLessonContent = (lesson) => {
   return {
@@ -40,12 +52,10 @@ export const getLessonContent = (lesson) => {
 const lessons = await getCollection('lessons');
 const lessonDocs = lessons
   .filter(doc => !doc?.data?.hidden)
-  .map(getLessonContent)
-;
+  .map(getLessonContent);
 export const lessonPages = lessonDocs.sort((a, b) => {
   return semverCompare(a.sort, b.sort);
 });
-
 
 export const getNextLesson = (currentLesson) => {
   const lessonIndex = findIndex(lessonPages, lesson => lesson.id == currentLesson.id);
@@ -65,7 +75,7 @@ const createExampleMenu = () => {
   let menu = [];
 
   const getCategoryIcon = (category) => {
-    const group = firstMatch(sidebarMenuFramework, (group => group.name == category));
+    const group = firstMatch(sidebarMenuFramework, group => group.name == category);
     if(group) {
       return group?.icon;
     }
@@ -81,8 +91,8 @@ const createExampleMenu = () => {
           name: subcategory,
           pages: examples.map(example => ({
             name: example.shortTitle || example.title,
-            url: example.url
-          }))
+            url: example.url,
+          })),
         });
       });
     }
@@ -90,19 +100,18 @@ const createExampleMenu = () => {
       // no subcategories
       pages = examples.map(example => ({
         name: example.shortTitle || example.title,
-        url: example.url
+        url: example.url,
       }));
     }
     menu.push({
       name: category,
       icon: getCategoryIcon(category),
-      pages
+      pages,
     });
   });
   return menu.filter(menu => menu);
 };
 export const sidebarMenuExamples = createExampleMenu();
-
 
 /* Gets Sidebar Menu for Examples Section */
 const createLearnMenu = () => {
@@ -118,8 +127,8 @@ const createLearnMenu = () => {
           name: lessons[0].subcategory,
           pages: lessons.map(lesson => ({
             name: lesson.shortTitle || lesson.title,
-            url: lesson.url
-          }))
+            url: lesson.url,
+          })),
         });
       });
     }
@@ -127,12 +136,12 @@ const createLearnMenu = () => {
       // no subcategories
       pages = lessons.map(lesson => ({
         name: lesson.shortTitle || lesson.title,
-        url: lesson.url
+        url: lesson.url,
       }));
     }
     menu.push({
       name: lessons[0].category,
-      pages
+      pages,
     });
   });
   return menu.filter(menu => menu);
@@ -143,8 +152,7 @@ export const sidebarMenuLearn = createLearnMenu();
 export const removeTrailingSlash = (url = '') => {
   return isString(url)
     ? url.replace(/\/$/, '')
-    : url
-  ;
+    : url;
 };
 
 /* Gets active section from topbar display menu based on current URL */
@@ -158,7 +166,7 @@ export const getActiveTopbarSection = async (activeURL = '') => {
     if(item.baseURL && activeURL.startsWith(item.baseURL)) {
       return true;
     }
-    if (item?.url === activeURL) {
+    if(item?.url === activeURL) {
       return true;
     }
     return false;
@@ -170,31 +178,31 @@ export const getActiveTopbarSection = async (activeURL = '') => {
 /* Helper to check if a URL belongs to a section's menu */
 const isInSectionMenu = (sectionId, currentPath) => {
   let menu = [];
-  if (sectionId === 'ui') {
+  if(sectionId === 'ui') {
     menu = sidebarMenuUI;
   }
-  else if (sectionId === 'framework') {
+  else if(sectionId === 'framework') {
     menu = sidebarMenuFramework;
   }
-  else if (sectionId === 'api') {
+  else if(sectionId === 'api') {
     menu = sidebarMenuAPI;
   }
-  else if (sectionId === 'examples') {
+  else if(sectionId === 'examples') {
     menu = sidebarMenuExamples;
   }
-  else if (sectionId === 'learn') {
+  else if(sectionId === 'learn') {
     menu = sidebarMenuLearn;
   }
 
   // Check if current path matches any URL in the menu or its nested pages
   return any(menu, section => {
-    if (currentPath.startsWith(section.url)) {
+    if(currentPath.startsWith(section.url)) {
       return true;
     }
     // Check nested pages
-    if (section.pages) {
+    if(section.pages) {
       return any(section.pages, page => {
-        if (isArray(page.pages)) {
+        if(isArray(page.pages)) {
           // Handle subcategories
           return any(page.pages, subpage => currentPath.startsWith(subpage.url));
         }
@@ -210,20 +218,20 @@ export const getActiveSidebarSection = (currentPath) => {
   currentPath = removeTrailingSlash(currentPath);
 
   const activeSection = firstMatch(topbarDisplayMenu, item => {
-    if (item._ids) {
+    if(item._ids) {
       // For grouped sections, check if URL matches any of the sections or their menu items
       return any(item._ids, id => {
         const section = firstMatch(topbarMenu, m => m._id === id);
         return section && (
-          currentPath.startsWith(section.url) || 
-          isInSectionMenu(section._id, currentPath)
+          currentPath.startsWith(section.url)
+          || isInSectionMenu(section._id, currentPath)
         );
       });
     }
     // For single sections, check if URL matches the section or its menu items
     return item._id && (
-      currentPath.startsWith(item.url) || 
-      isInSectionMenu(item._id, currentPath)
+      currentPath.startsWith(item.url)
+      || isInSectionMenu(item._id, currentPath)
     );
   });
 
@@ -232,26 +240,28 @@ export const getActiveSidebarSection = (currentPath) => {
 
 /* Generates sidebar items based on active section */
 export const getSidebarItems = (activeSection, currentPath) => {
-  if (!activeSection) return [];
+  if(!activeSection) { return []; }
   currentPath = removeTrailingSlash(currentPath);
 
-  if (activeSection._ids) {
+  if(activeSection._ids) {
     const items = activeSection._ids
       .map(id => {
         const section = firstMatch(topbarMenu, m => m._id === id);
-        return section ? {
-          label: section.name,
-          href: section.url,
-          active: currentPath.startsWith(section.url) || isInSectionMenu(section._id, currentPath)
-        } : null;
+        return section
+          ? {
+            label: section.name,
+            href: section.url,
+            active: currentPath.startsWith(section.url) || isInSectionMenu(section._id, currentPath),
+          }
+          : null;
       })
       .filter(Boolean);
-    
+
     // Don't show UIMenu if there's only one item
     return items.length <= 1 ? [] : items;
   }
 
-  if (activeSection._id) {
+  if(activeSection._id) {
     // Single sections don't need the UIMenu
     return [];
   }
@@ -260,45 +270,45 @@ export const getSidebarItems = (activeSection, currentPath) => {
 };
 
 /* Get Sidebar Menu for a given Topbar Section */
-export const getSidebarMenu = async ({url, topbarSection}) => {
+export const getSidebarMenu = async ({ url, topbarSection }) => {
   let menu = [];
   if(url && !topbarSection) {
     topbarSection = await getActiveTopbarSection(url);
   }
   // Handle both direct section matches and sections that are part of _ids groups
   const section = firstMatch(topbarDisplayMenu, item => {
-    if (item._ids && item._ids.includes(topbarSection)) {
+    if(item._ids && item._ids.includes(topbarSection)) {
       return true;
     }
     return item._id === topbarSection;
   });
 
   // If section is part of a group (like Documentation), get the appropriate menu
-  if (section?._ids) {
-    if (topbarSection === 'ui') {
+  if(section?._ids) {
+    if(topbarSection === 'ui') {
       menu = sidebarMenuUI;
     }
-    else if (topbarSection === 'framework') {
+    else if(topbarSection === 'framework') {
       menu = sidebarMenuFramework;
     }
-    else if (topbarSection === 'api') {
+    else if(topbarSection === 'api') {
       menu = sidebarMenuAPI;
     }
-  } else {
+  }
+  else {
     // Handle individual sections
-    if (topbarSection === 'examples') {
+    if(topbarSection === 'examples') {
       menu = sidebarMenuExamples;
     }
-    else if (topbarSection === 'learn') {
+    else if(topbarSection === 'learn') {
       menu = sidebarMenuLearn;
     }
   }
   return menu;
 };
 
-
 /* Adds links for prev/next page used at bottom of guide pages */
-export const getPageTraversalLinks = async ({url}) => {
+export const getPageTraversalLinks = async ({ url }) => {
   const menu = await await getFlattenedSidebarMenu({ url });
   const currentIndex = findIndex(menu, item => item.url == url);
 
@@ -312,7 +322,7 @@ export const getPageTraversalLinks = async ({url}) => {
   }
   return {
     previous,
-    next
+    next,
   };
 };
 
@@ -330,7 +340,7 @@ export const getSiteMenu = async () => {
 /*
   Flattened Version of Sidebar Menu
 */
-export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) => {
+export const getFlattenedSidebarMenu = async ({ topbarSection, url, menu } = {}) => {
   if(!menu) {
     if(!topbarSection && url) {
       topbarSection = await getActiveTopbarSection(url);
@@ -341,7 +351,7 @@ export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) 
     const parentItem = { name: section.name, url: section.url };
     return [
       parentItem,
-      ...(section.pages || [])
+      ...(section.pages || []),
     ];
   });
   return flatten(menuArrays).filter(Boolean);
@@ -350,13 +360,13 @@ export const getFlattenedSidebarMenu = async ({topbarSection, url, menu } = {}) 
 /*
   Topbar Menu for mobile and that includes secondary navs
 */
-export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
+export const getTopbarMenu = async ({ includeURLS = true } = {}) => {
   const menu = clone(topbarMenu);
   if(includeURLS) {
     await asyncEach(menu, async item => {
       // get all urls that represent this topbar section
       const flattenedMenu = await getFlattenedSidebarMenu({
-        topbarSection: item._id
+        topbarSection: item._id,
       });
       const urls = flattenedMenu.map(page => page.url).filter(Boolean);
       item.baseURLs = urls;
@@ -365,11 +375,10 @@ export const getTopbarMenu = async ({ includeURLS = true} = {}) => {
   return menu;
 };
 
-
 /*
   Topbar Menu that displays to users
 */
-export const getTopbarDisplayMenu = async ({ includeURLS = true} = {}) => {
+export const getTopbarDisplayMenu = async ({ includeURLS = true } = {}) => {
   const menu = clone(topbarDisplayMenu);
   if(includeURLS) {
     await asyncEach(menu, async item => {
@@ -378,7 +387,7 @@ export const getTopbarDisplayMenu = async ({ includeURLS = true} = {}) => {
       await asyncEach(ids, async (id) => {
         // get all urls that represent this topbar section
         const flattenedMenu = await getFlattenedSidebarMenu({
-          topbarSection: id
+          topbarSection: id,
         });
         const idURLs = flattenedMenu.map(page => page.url).filter(Boolean);
         urls.push(...idURLs);
@@ -388,7 +397,6 @@ export const getTopbarDisplayMenu = async ({ includeURLS = true} = {}) => {
   }
   return menu;
 };
-
 
 /*
   Gets In Page Menu
@@ -410,7 +418,7 @@ export const getRailMenu = (headings) => {
       menuGroup = {
         id: heading.slug,
         title: heading.text,
-        items: []
+        items: [],
       };
     }
     else if(menuGroup) {
@@ -418,7 +426,7 @@ export const getRailMenu = (headings) => {
       if(heading.depth == headingLevels[1]) {
         menuGroup.items.push({
           id: heading.slug,
-          title: heading.text
+          title: heading.text,
         });
       }
     }
@@ -426,8 +434,6 @@ export const getRailMenu = (headings) => {
   menu.push(menuGroup);
   return menu.filter(Boolean);
 };
-
-
 
 const componentDocs = await getCollection('components');
 export const componentPages = componentDocs.map(page => ({

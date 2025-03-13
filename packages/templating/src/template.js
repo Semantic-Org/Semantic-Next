@@ -1,6 +1,23 @@
 import { $ } from '@semantic-ui/query';
-import { capitalize, fatal, each, remove, any, get, generateID, getKeyFromEvent, isEqual, mapObject, noop, isServer, inArray, isFunction, extend, wrapFunction } from '@semantic-ui/utils';
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+import {
+  any,
+  capitalize,
+  each,
+  extend,
+  fatal,
+  generateID,
+  get,
+  getKeyFromEvent,
+  inArray,
+  isEqual,
+  isFunction,
+  isServer,
+  mapObject,
+  noop,
+  remove,
+  wrapFunction,
+} from '@semantic-ui/utils';
 
 import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateCompiler } from './compiler/template-compiler.js';
@@ -35,7 +52,7 @@ export const Template = class Template {
     onThemeChanged = noop,
   } = {}) {
     // if we are rendering many of same template we want to pass in AST for performance
-    if (!ast) {
+    if(!ast) {
       const compiler = new TemplateCompiler(template);
       ast = compiler.compile();
     }
@@ -63,7 +80,7 @@ export const Template = class Template {
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
-    if (renderRoot) {
+    if(renderRoot) {
       this.attach(renderRoot);
     }
   }
@@ -105,7 +122,6 @@ export const Template = class Template {
 
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
-
     // add child templates to parent for searching with getChild
     if(!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
@@ -129,11 +145,11 @@ export const Template = class Template {
     let template = this;
     let instance;
     this.instance = {};
-    if (isFunction(this.createComponent)) {
+    if(isFunction(this.createComponent)) {
       instance = this.call(this.createComponent) || {};
       extend(template.instance, instance);
     }
-    if (isFunction(template.instance.initialize)) {
+    if(isFunction(template.instance.initialize)) {
       this.call(template.instance.initialize.bind(template));
     }
     // this is necessary for tree traversal with findParent/getChild
@@ -183,12 +199,12 @@ export const Template = class Template {
 
   async attach(
     renderRoot,
-    { parentNode = renderRoot, startNode, endNode } = {}
+    { parentNode = renderRoot, startNode, endNode } = {},
   ) {
-    if (!this.initialized) {
+    if(!this.initialized) {
       this.initialize();
     }
-    if (this.renderRoot == renderRoot) {
+    if(this.renderRoot == renderRoot) {
       return;
     }
 
@@ -200,7 +216,7 @@ export const Template = class Template {
     this.endNode = endNode;
     this.attachEvents();
     this.bindKeys();
-    if (this.attachStyles) {
+    if(this.attachStyles) {
       await this.adoptStylesheet();
     }
   }
@@ -214,25 +230,23 @@ export const Template = class Template {
   }
 
   async adoptStylesheet() {
-    if (!this.css) {
+    if(!this.css) {
       return;
     }
-    if (!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
+    if(!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
       return;
     }
     const cssString = this.css;
-    if (!this.stylesheet) {
+    if(!this.stylesheet) {
       this.stylesheet = new CSSStyleSheet();
       await this.stylesheet.replace(cssString);
     }
     let styles = Array.from(this.renderRoot.adoptedStyleSheets);
 
     // check if already adopted
-    let hasStyles = styles.some((style) =>
-      isEqual(style.cssRules, this.stylesheet.cssRules)
-    );
+    let hasStyles = styles.some((style) => isEqual(style.cssRules, this.stylesheet.cssRules));
 
-    if (!hasStyles) {
+    if(!hasStyles) {
       this.renderRoot.adoptedStyleSheets = [
         ...this.renderRoot.adoptedStyleSheets,
         this.stylesheet,
@@ -266,7 +280,6 @@ export const Template = class Template {
   }
 
   parseEventString(eventString) {
-
     // we want to allow 3 types of event syntax
     // 'deep eventType selector' - attach event to an
     // 'global eventType selector' - attach event to an element on the page
@@ -334,7 +347,7 @@ export const Template = class Template {
   }
 
   attachEvents(events = this.events) {
-    if (!this.parentNode || !this.renderRoot) {
+    if(!this.parentNode || !this.renderRoot) {
       fatal('You must set a parent before attaching events');
     }
     this.removeEvents();
@@ -349,7 +362,7 @@ export const Template = class Template {
         this.onThemeChanged({
           additionalData: {
             event: event,
-            ...event.detail
+            ...event.detail,
           },
         });
       }, { abortController: this.eventController });
@@ -368,9 +381,8 @@ export const Template = class Template {
         }
 
         const eventHandler = function(event) {
-
           // check if the event occurred in the current template if not global
-          if (eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
+          if(eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
             return;
           }
 
@@ -381,9 +393,11 @@ export const Template = class Template {
           }
 
           // handle related target use case for special events
-          if (inArray(eventName, ['mouseover', 'mouseout'])
+          if(
+            inArray(eventName, ['mouseover', 'mouseout'])
             && event.relatedTarget
-            && event.target.contains(event.relatedTarget)) {
+            && event.target.contains(event.relatedTarget)
+          ) {
             return;
           }
 
@@ -397,7 +411,7 @@ export const Template = class Template {
             try {
               value = JSON.parse(stringValue);
             }
-            catch(e) {
+            catch (e) {
               value = stringValue;
             }
             return value;
@@ -411,8 +425,8 @@ export const Template = class Template {
               value: elValue,
               data: {
                 ...elData,
-                ...eventData
-              }
+                ...eventData,
+              },
             },
           });
         };
@@ -432,7 +446,7 @@ export const Template = class Template {
   }
 
   removeEvents() {
-    if (this.eventController) {
+    if(this.eventController) {
       this.eventController.abort('Template destroyed');
     }
   }
@@ -459,16 +473,17 @@ export const Template = class Template {
           keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
           const keySequences = keySequence.split(',');
           if(any(keySequences, sequence => this.currentSequence.endsWith(sequence))) {
+            const inputFocused = document.activeElement
+              && (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase())
+                || document.activeElement.isContentEditable);
 
-            const inputFocused = document.activeElement &&
-              (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) ||
-                document.activeElement.isContentEditable);
-
-            const eventResult = this.call(handler, { additionalData: {
-              event: event,
-              inputFocused,
-              repeatedKey
-            } });
+            const eventResult = this.call(handler, {
+              additionalData: {
+                event: event,
+                inputFocused,
+                repeatedKey,
+              },
+            });
             if(eventResult !== true) {
               event.preventDefault();
             }
@@ -480,13 +495,13 @@ export const Template = class Template {
 
         // end sequence if not occuring in time
         clearTimeout(this.resetSequence);
-        this.resetSequence = setTimeout(() => { this.currentSequence = ''; }, sequenceTimeout);
-
+        this.resetSequence = setTimeout(() => {
+          this.currentSequence = '';
+        }, sequenceTimeout);
       }, eventSettings)
       .on('keyup', (event) => {
         this.currentKey = '';
-      }, eventSettings)
-    ;
+      }, eventSettings);
   }
 
   bindKey(key, callback) {
@@ -508,10 +523,11 @@ export const Template = class Template {
   // then confirm position
   isNodeInTemplate(node) {
     const getRootChild = (node) => {
-      while (node && node.parentNode !== this.parentNode) {
-        if (node.parentNode === null && node.host) {
+      while(node && node.parentNode !== this.parentNode) {
+        if(node.parentNode === null && node.host) {
           node = node.host;
-        } else {
+        }
+        else {
           node = node.parentNode;
         }
       }
@@ -520,12 +536,12 @@ export const Template = class Template {
     const isNodeInRange = (
       node,
       startNode = this.startNode,
-      endNode = this.endNode
+      endNode = this.endNode,
     ) => {
-      if (!startNode || !endNode) {
+      if(!startNode || !endNode) {
         return true;
       }
-      if (node === null) {
+      if(node === null) {
         return false;
       }
       const startComparison = startNode.compareDocumentPosition(node);
@@ -535,17 +551,15 @@ export const Template = class Template {
         DOCUMENT_POSITION_FOLLOWING = 0x04, DOCUMENT_POSITION_PRECEDING = 0x02
         <https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition>
       */
-      const isAfterStart =
-        (startComparison & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
-      const isBeforeEnd =
-        (endComparison & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
+      const isAfterStart = (startComparison & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+      const isBeforeEnd = (endComparison & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
       return isAfterStart && isBeforeEnd;
     };
     return isNodeInRange(getRootChild(node));
   }
 
   render(additionalData = {}) {
-    if (!this.initialized) {
+    if(!this.initialized) {
       this.initialize();
     }
     const dataContext = {
@@ -557,7 +571,7 @@ export const Template = class Template {
     this.renderer.setData(dataContext);
 
     // render will rerender the AST creating new lit html
-    if (!this.rendered) {
+    if(!this.rendered) {
       this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
@@ -575,17 +589,17 @@ export const Template = class Template {
     if(!Template.isServer && inArray(selector, ['body', 'document', 'html'])) {
       root = document;
     }
-    if (!root) {
+    if(!root) {
       root = globalThis;
     }
-    if (root == this.renderRoot) {
+    if(root == this.renderRoot) {
       const $results = $(selector, { root, ...otherArgs });
       return filterTemplate
         ? $results.filter((node) => this.isNodeInTemplate(node))
         : $results;
     }
     else {
-      return $(selector, { root, ...otherArgs});
+      return $(selector, { root, ...otherArgs });
     }
   }
 
@@ -596,13 +610,12 @@ export const Template = class Template {
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalData = {}, firstArg, additionalArgs } = {}) {
     const args = [];
-    if (this.isPrototype) {
+    if(this.isPrototype) {
       return;
     }
-    if (!params) {
+    if(!params) {
       const element = this.element;
       params = {
-
         el: this.element,
 
         // provide 3 options for referring to self
@@ -647,16 +660,18 @@ export const Template = class Template {
         content: this.instance.content,
 
         // on demand since requires  computing styles
-        get darkMode() { return element.isDarkMode(); },
+        get darkMode() {
+          return element.isDarkMode();
+        },
 
         ...additionalData,
       };
       args.push(params);
     }
-    if (additionalArgs) {
+    if(additionalArgs) {
       args.push(...additionalArgs);
     }
-    if (isFunction(func)) {
+    if(isFunction(func)) {
       return func.apply(this.element, args);
     }
   }
@@ -666,7 +681,7 @@ export const Template = class Template {
     return $(selector, document, querySettings).on(eventName, eventHandler, {
       abortController: this.eventController,
       returnHandler: true,
-      ...eventSettings
+      ...eventSettings,
     });
   }
 
@@ -708,7 +723,6 @@ export const Template = class Template {
           Template Helpers
   *******************************/
 
-
   findTemplate = (templateName) => Template.findTemplate(templateName);
   findParent = (templateName) => Template.findParentTemplate(this, templateName);
   findChild = (templateName) => Template.findChildTemplate(this, templateName);
@@ -717,7 +731,7 @@ export const Template = class Template {
   static renderedTemplates = new Map();
 
   static addTemplate(template) {
-    if (template.isPrototype) {
+    if(template.isPrototype) {
       return;
     }
     let templates = Template.renderedTemplates.get(template.templateName) || [];
@@ -725,7 +739,7 @@ export const Template = class Template {
     Template.renderedTemplates.set(template.templateName, templates);
   }
   static removeTemplate(template) {
-    if (template.isPrototype) {
+    if(template.isPrototype) {
       return;
     }
     let templates = Template.renderedTemplates.get(template.templateName) || [];
@@ -765,12 +779,12 @@ export const Template = class Template {
       }
     }
     // this matches on nested partials (less common)
-    while (template) {
+    while(template) {
       template = template._parentTemplate;
-      if (isMatch(template)) {
+      if(isMatch(template)) {
         match = {
           ...template.instance,
-          ...template.data
+          ...template.data,
         };
         break;
       }
@@ -782,13 +796,13 @@ export const Template = class Template {
     let result = [];
     // recursive lookup
     function search(template, templateName) {
-      if (!templateName || (template.templateName === templateName)) {
+      if(!templateName || (template.templateName === templateName)) {
         result.push({
           ...template.instance,
-          ...template.data
+          ...template.data,
         });
       }
-      if (template._childTemplates) {
+      if(template._childTemplates) {
         template._childTemplates.forEach((childTemplate) => {
           search(childTemplate, templateName);
         });

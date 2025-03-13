@@ -3,11 +3,11 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const template = await getText('./buttons.html');
 
 const events = {
-  'click .decrease'({findParent}) {
+  'click .decrease'({ findParent }) {
     const parent = findParent('numberAdjust');
     parent.decrease();
   },
-  'click .increase'({findParent}) {
+  'click .increase'({ findParent }) {
     const parent = findParent('numberAdjust');
     parent.increase();
   },
@@ -15,5 +15,5 @@ const events = {
 
 export const buttons = defineComponent({
   template,
-  events
+  events,
 });

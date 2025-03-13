@@ -4,18 +4,18 @@ export class Scheduler {
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
 
-
   static scheduleReaction(reaction) {
     Scheduler.pendingReactions.add(reaction);
     Scheduler.scheduleFlush();
   }
 
   static scheduleFlush() {
-    if (!Scheduler.isFlushScheduled) {
+    if(!Scheduler.isFlushScheduled) {
       Scheduler.isFlushScheduled = true;
-      if (typeof queueMicrotask === 'function') {
+      if(typeof queueMicrotask === 'function') {
         queueMicrotask(() => Scheduler.flush());
-      } else {
+      }
+      else {
         Promise.resolve().then(() => Scheduler.flush());
       }
     }
@@ -35,7 +35,7 @@ export class Scheduler {
   }
 
   static getSource() {
-    if (!Scheduler.current || !Scheduler.current.context || !Scheduler.current.context.trace) {
+    if(!Scheduler.current || !Scheduler.current.context || !Scheduler.current.context.trace) {
       console.log('No source available or no current reaction.');
       return;
     }

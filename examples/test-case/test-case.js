@@ -1,18 +1,18 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './test-case.html?raw';
 import css from './test-case.css?raw';
+import template from './test-case.html?raw';
 
-const createComponent = function ({ self, $ }) {
+const createComponent = function({ self, $ }) {
   // test instance
   return {};
 };
 
-const onCreated = function ({ self }) {
+const onCreated = function({ self }) {
   // test created
 };
 
-const onDestroyed = function ({ self }) {
+const onDestroyed = function({ self }) {
   // test destroyed
 };
 

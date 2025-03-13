@@ -1,10 +1,19 @@
-import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
+import { asyncEach, camelToKebab, each, filterObject, get, inArray, isString, tokenize } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, errorJS, errorCSS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
+import {
+  addPlaygroundInjections,
+  errorCSS,
+  errorJS,
+  foldMarkerEnd,
+  foldMarkerStart,
+  isStaticBuild,
+  logCSS,
+  logJS,
+} from './injections.js';
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 import { packageJSON } from '../pages/examples/package.json.js';
-import { makeBase64UrlSafe, fromBase64UrlSafe, encodeObject, decodeObject } from './link-encoder.js';
+import { decodeObject, encodeObject, fromBase64UrlSafe, makeBase64UrlSafe } from './link-encoder.js';
 
 /*
   Helper to add code folding for import export statements
@@ -34,7 +43,7 @@ export const hideComponentBoilerplate = (code) => {
   this is used in the learn and examples section to load
   examples
 */
-export const getExampleFiles = async({
+export const getExampleFiles = async ({
   contentID, // content id
   allFiles = {}, // import.meta.glob cannot be used here so you must pass in file collection
   basePath = '../../examples/', // base path to content collection from file location
@@ -60,7 +69,7 @@ export const getExampleFiles = async({
   let pathRegExpString = `${deepPath}|${shallowPath}`;
   const pathRegExp = new RegExp(pathRegExpString);
   await asyncEach(allFiles, async (file, path) => {
-    if (path.match(pathRegExp)) {
+    if(path.match(pathRegExp)) {
       const fileName = path.replace(pathRegExp, '').replace('/', '');
 
       const getContentType = (filename) => {
@@ -68,7 +77,7 @@ export const getExampleFiles = async({
         const contentTypes = {
           html: 'text/html',
           css: 'text/css',
-          js: 'text/javascript'
+          js: 'text/javascript',
         };
         return get(contentTypes, extension) || 'text/html';
       };
@@ -77,21 +86,21 @@ export const getExampleFiles = async({
         const fileContent = await file();
         exampleFiles['page.html'] = {
           contentType: 'text/html',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
       else if(inArray(fileName, ['page.css'])) {
         const fileContent = await file();
         exampleFiles['page.css'] = {
           contentType: 'text/css',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
       else if(inArray(fileName, ['page.js'])) {
         const fileContent = await file();
         exampleFiles['page.js'] = {
           contentType: 'text/javascript',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
       else if(inArray(fileName, ['component.js', `${contentID}.js`])) {
@@ -103,14 +112,14 @@ export const getExampleFiles = async({
         }
         exampleFiles['component.js'] = {
           contentType: 'text/javascript',
-          content: fileText
+          content: fileText,
         };
       }
       else if(includeFolder) {
         const fileContent = await file();
         exampleFiles[fileName] = {
           contentType: getContentType(fileName),
-          content: fileContent.default
+          content: fileContent.default,
         };
         return;
       }
@@ -118,28 +127,27 @@ export const getExampleFiles = async({
         const fileContent = await file();
         exampleFiles['component.html'] = {
           contentType: 'text/html',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
       else if(inArray(fileName, ['component.css', `${contentID}.css`])) {
         const fileContent = await file();
         exampleFiles['component.css'] = {
           contentType: 'text/css',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
       if(includeLog && inArray(fileName, ['index.js', `${contentID}.js`])) {
         const fileContent = await file();
         exampleFiles['index.js'] = {
           contentType: 'text/javascript',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
     }
   });
   // auto generate page.html if not specified for component
   if(!exampleFiles['page.html']?.content) {
-
     // get tag name from contents
     let tagName;
     if(hasComponent) {
@@ -155,9 +163,9 @@ export const getExampleFiles = async({
     exampleFiles['page.html'] = {
       contentType: 'text/html',
       generated: true,
-      content: (tagName)
+      content: tagName
         ? `<${tagName}></${tagName}>`
-        : ``
+        : ``,
     };
   }
 
@@ -166,13 +174,13 @@ export const getExampleFiles = async({
       contentType: 'text/javascript',
       generated: true,
       hidden: true,
-      content: errorJS
+      content: errorJS,
     };
     exampleFiles['error.css'] = {
       contentType: 'text/css',
       generated: true,
       hidden: true,
-      content: errorCSS
+      content: errorCSS,
     };
   }
 
@@ -181,13 +189,13 @@ export const getExampleFiles = async({
       contentType: 'text/javascript',
       generated: true,
       hidden: true,
-      content: logJS
+      content: logJS,
     };
     exampleFiles['log.css'] = {
       contentType: 'text/css',
       generated: true,
       hidden: true,
-      content: logCSS
+      content: logCSS,
     };
   }
 
@@ -196,24 +204,23 @@ export const getExampleFiles = async({
     exampleFiles['page.css'] = {
       contentType: 'text/css',
       generated: true,
-      content: ''
+      content: '',
     };
   }
   if(!exampleFiles['component.js']?.content) {
     exampleFiles['component.js'] = {
       contentType: 'text/javascript',
       generated: true,
-      content: ''
+      content: '',
     };
   }
   if(!exampleFiles['page.js']?.content) {
     exampleFiles['page.js'] = {
       contentType: 'text/javascript',
       generated: true,
-      content: ''
+      content: '',
     };
   }
-
 
   if(includePlaygroundInjections) {
     addPlaygroundInjections(exampleFiles, { includeLog });
@@ -255,7 +262,6 @@ export const getExampleFiles = async({
   }
 
   return exampleFiles;
-
 };
 
 /*
@@ -295,7 +301,6 @@ export const getEmptyProjectFiles = ({
   }
   return emptyFiles;
 };
-
 
 /*
   Returns default horizontal panel index for file types
@@ -354,13 +359,12 @@ export const getExampleID = (example) => {
   return exampleID;
 };
 
-
 export const getPackageJSON = () => {
   return {
     contentType: 'text/json',
     hidden: true,
     generated: true,
-    content: packageJSON
+    content: packageJSON,
   };
 };
 
@@ -369,7 +373,7 @@ export const getImportMap = () => {
     contentType: 'text/importmap',
     hidden: true,
     generated: true,
-    content: importMapJSON
+    content: importMapJSON,
   };
 };
 
@@ -379,7 +383,7 @@ export const getImportMap = () => {
 export const getPlaygroundLink = (params, baseUrl = '/playground') => {
   const queryParams = new URLSearchParams();
   each(params, (value, key) => {
-    if (key === 'files') {
+    if(key === 'files') {
       queryParams.set(key, encodeObject(value));
     }
     else {
@@ -393,12 +397,11 @@ export const getPlaygroundLink = (params, baseUrl = '/playground') => {
 export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
   const params = {
     files: {
-      'page.html': code
-    }
+      'page.html': code,
+    },
   };
   return getPlaygroundLink(params);
 };
-
 
 // Read the query string and return the decoded parameters.
 // The 'files' parameter is decoded using decodeFiles.
@@ -406,7 +409,7 @@ export const readPlaygroundLink = queryString => {
   const params = new URLSearchParams(queryString);
   const result = {};
   for (const [key, value] of params.entries()) {
-    if (key === 'files') {
+    if(key === 'files') {
       try {
         result[key] = decodeObject(value);
       }

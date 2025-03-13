@@ -4,7 +4,7 @@
  * @see {@link https://next.semantic-ui.com/api/reactivity Reactivity Documentation}
  */
 
-export { Signal, SignalOptions } from './signal';
-export { Reaction } from './reaction';
 export { Dependency } from './dependency';
+export { Reaction } from './reaction';
 export { Scheduler } from './scheduler';
+export { Signal, SignalOptions } from './signal';

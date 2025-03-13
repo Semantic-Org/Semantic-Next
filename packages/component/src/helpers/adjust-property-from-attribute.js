@@ -1,4 +1,4 @@
-import { get, each, unique, difference, firstMatch, inArray, isString, kebabToCamel } from '@semantic-ui/utils';
+import { difference, each, firstMatch, get, inArray, isString, kebabToCamel, unique } from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -32,7 +32,6 @@ const tokenizeSpaces = (string) => {
   return string;
 };
 
-
 /* This handles adjusting the underlying properties to match when
   an attribute changes. This handles 3 primary cases
 
@@ -40,16 +39,14 @@ const tokenizeSpaces = (string) => {
   - The option is the attribute "primary" or "primary=true"
   - The option is a class class="primary"
 */
-export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, properties, componentSpec, oldValue}) => {
+export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, properties, componentSpec, oldValue }) => {
   // This is used to search for potential values that should match to the canonical value.
   // This is because we support swapping ordering and spaces for dashes
 
   // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
   // i.e <ui-button left-attached="somevalue">
 
-
-  const checkSpecForAllowedValue = ({attribute, optionValue, optionAttributeValue }) => {
-
+  const checkSpecForAllowedValue = ({ attribute, optionValue, optionAttributeValue }) => {
     // "arrow down" -> arrow-down
     optionValue = tokenizeSpaces(optionValue);
 
@@ -67,7 +64,10 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
     optionsToCheck = unique(optionsToCheck);
 
     // check each potential value to see if any match a known option
-    const matchingValue = firstMatch(optionsToCheck, (currentValue) => get(componentSpec.optionAttributes, currentValue));
+    const matchingValue = firstMatch(
+      optionsToCheck,
+      (currentValue) => get(componentSpec.optionAttributes, currentValue),
+    );
 
     // this attribute value does not seem to match any in spec
     if(!matchingValue) {
@@ -84,7 +84,6 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
     const matchingAttribute = get(componentSpec.optionAttributes, matchingValue);
     return { matchingAttribute: matchingAttribute, matchingValue: matchingValue };
   };
-
 
   // this assigns the value to the DOM element
   const setProperty = (attribute, value) => {
@@ -114,7 +113,6 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
 
   // this checks for boolean values like <ui-button disabled>
   const isBooleanValue = (attribute, attributeValue) => {
-
     // handles basic booleans of type Boolean in spec
     const isBooleanType = componentSpec.propertyTypes[attribute] == Boolean;
 
@@ -127,19 +125,15 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
     return (isBooleanType || isAttributeClass || isIdentityBoolean) && inArray(attributeValue, ['', true, attribute]);
   };
 
-  if (componentSpec) {
-
+  if(componentSpec) {
     // syntax <ui-button class="large primary"></ui-button>
     // we want to check attribute for each class
-    if (attribute == 'class' && attributeValue) {
-
-
+    if(attribute == 'class' && attributeValue) {
       // trigger callback for each removed/added class
       const previousClasses = isString(oldValue)
         ? oldValue.split(' ')
-        : []
-      ;
-      const currentClasses =  attributeValue.split(' ');
+        : [];
+      const currentClasses = attributeValue.split(' ');
       const classesToRemove = difference(previousClasses, currentClasses);
       const classesToAdd = difference(currentClasses, previousClasses);
       each(classesToRemove, (className) => {
@@ -147,7 +141,7 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
           el,
           attribute: className,
           attributeValue: null,
-          componentSpec
+          componentSpec,
         });
       });
       each(classesToAdd, (className) => {
@@ -155,14 +149,13 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
           el,
           attribute: className,
           attributeValue: true,
-          componentSpec
+          componentSpec,
         });
       });
     }
-
     // syntax <ui-button size="large">
     // we can check if this property is defined
-    else if (inArray(attribute, componentSpec.attributes)) {
+    else if(inArray(attribute, componentSpec.attributes)) {
       // check if this is a boolean value
       if(isBooleanValue(attribute, attributeValue)) {
         attributeValue = true;
@@ -179,7 +172,7 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
       // we still need to transform values from "arrow down" to "arrow-down" or "down-arrow"
       const { matchingValue } = checkSpecForAllowedValue({
         attribute,
-        optionValue: attributeValue
+        optionValue: attributeValue,
       });
 
       // any other value could be a property
@@ -187,15 +180,13 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
         setProperty(attribute, matchingValue);
       }
     }
-
     // syntax <ui-button primary>
     // we need to lookup the property using the optionAttributes lookup table
     else if(attributeValue !== undefined) {
-
       // lets check to see if this is a valid property by checking allowed values
       const { matchingAttribute, matchingValue } = checkSpecForAllowedValue({
         optionValue: attribute,
-        optionAttributeValue: attributeValue
+        optionAttributeValue: attributeValue,
       });
 
       // remove the matching attribute if the value is removed
@@ -207,13 +198,12 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
         }
         return;
       }
-      if (matchingAttribute && matchingValue) {
+      if(matchingAttribute && matchingValue) {
         setProperty(matchingAttribute, matchingValue);
       }
     }
   }
   else if(properties && attributeValue !== undefined && attribute.includes('-')) {
-
     /* This handles the case of multiword properties like `useAccordion`
        maps to <ui-menu use-accordion> or <ui-menu useaccordion>
        the kebab case is just an alias which will update the base setting
@@ -222,15 +212,13 @@ export const adjustPropertyFromAttribute = ({el, attribute, attributeValue, prop
     const attributeSettings = properties[attribute];
     if(propertyName !== attribute && attributeSettings?.alias) {
       const convertFunc = attributeSettings?.converter?.fromAttribute;
-      let propertyValue = (convertFunc)
+      let propertyValue = convertFunc
         ? convertFunc(attributeValue)
-        : attributeValue
-      ;
+        : attributeValue;
       if(propertyValue) {
         setProperty(propertyName, propertyValue);
       }
       return;
     }
   }
-
 };

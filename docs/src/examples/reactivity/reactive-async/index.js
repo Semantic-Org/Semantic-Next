@@ -1,4 +1,4 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 let number = new Signal(0);
 
@@ -9,4 +9,3 @@ Reaction.create(() => {
 // Because values are set immediately intermediate values are not flushed
 // So only the first and the last value will be logged
 [1, 2, 3, 4, 5].forEach(value => number.set(value));
-

@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { TemplateCompiler } from '@semantic-ui/templating';
-import template from './CodePlaygroundPreview.html?raw';
 import css from './CodePlaygroundPreview.css?raw';
+import template from './CodePlaygroundPreview.html?raw';
 import './PrettyJSON.js';
 
 const defaultState = {
@@ -10,8 +10,7 @@ const defaultState = {
   template: '',
 };
 
-const createComponent = ({self, findParent, data, state, $, $$}) => ({
-
+const createComponent = ({ self, findParent, data, state, $, $$ }) => ({
   showMenu() {
     if(data.showMenu == false) {
       return false;
@@ -22,7 +21,7 @@ const createComponent = ({self, findParent, data, state, $, $$}) => ({
   getMenu: () => {
     let menu = [
       { label: 'Preview', value: 'preview' },
-      //{ label: 'Console', value: 'console' },
+      // { label: 'Console', value: 'console' },
     ];
     if(self.getFile()) {
       menu.push({ label: 'AST', value: 'ast' });
@@ -43,17 +42,16 @@ const createComponent = ({self, findParent, data, state, $, $$}) => ({
     const compiler = new TemplateCompiler(template);
     const ast = compiler.compile();
     return JSON.stringify(ast);
-  }
-
+  },
 });
 
-const onRendered = ({self, state}) => {
+const onRendered = ({ self, state }) => {
   const fileContent = self.getFile();
   state.template.set(fileContent);
 };
 
 const events = {
-  'change ui-menu'({state, data}) {
+  'change ui-menu'({ state, data }) {
     state.tab.set(data.value);
   },
 };

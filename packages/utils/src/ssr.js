@@ -9,5 +9,3 @@ export const isServer = (() => {
 export const isClient = (() => {
   return typeof window !== 'undefined';
 })();
-
-  

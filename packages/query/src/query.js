@@ -1,4 +1,16 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, camelToKebab, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import {
+  camelToKebab,
+  each,
+  findIndex,
+  inArray,
+  isArray,
+  isClient,
+  isDOM,
+  isFunction,
+  isObject,
+  isPlainObject,
+  isString,
+} from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -6,7 +18,6 @@ across DOM nodes based off a selector
 */
 
 export class Query {
-
   /*
     This avoids keeping a copy of window/globalThis in
     memory when an element references the global object
@@ -30,39 +41,42 @@ export class Query {
   constructor(selector, { root = document, pierceShadow = false } = {}) {
     let elements = [];
 
-    if (!root) {
+    if(!root) {
       return;
     }
-    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis']) || selector == Query.globalThisProxy) {
+    if(
+      (selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])
+      || selector == Query.globalThisProxy
+    ) {
       // We dont want to store a copy of globalThis in each query instance
       elements = [Query.globalThisProxy];
       this.isBrowser = isClient;
       this.isGlobal = true;
     }
-    else if (isArray(selector) || selector instanceof NodeList || selector instanceof HTMLCollection) {
+    else if(isArray(selector) || selector instanceof NodeList || selector instanceof HTMLCollection) {
       // Directly passed an array of elements
       selector = Array.from(selector);
       elements = selector;
     }
-    else if (isString(selector)) {
+    else if(isString(selector)) {
       // this is html like $('<div/>')
-      if (selector.trim().slice(0, 1) == '<') {
+      if(selector.trim().slice(0, 1) == '<') {
         const template = document.createElement('template');
         template.innerHTML = selector.trim();
         elements = Array.from(template.content.childNodes);
       }
       else {
         // Use querySelectorAll for normal selectors
-        elements = (pierceShadow)
+        elements = pierceShadow
           ? this.querySelectorAllDeep(root, selector)
           : root.querySelectorAll(selector);
       }
     }
-    else if (isDOM(selector)) {
+    else if(isDOM(selector)) {
       // A single Element, Document, or DocumentFragment is provided
       elements = [selector];
     }
-    else if (selector instanceof NodeList) {
+    else if(selector instanceof NodeList) {
       // A NodeList is provided
       elements = selector;
     }
@@ -75,8 +89,7 @@ export class Query {
   chain(elements) {
     return (this.isGlobal && !elements)
       ? new Query(globalThis, this.options)
-      : new Query(elements, this.options)
-    ;
+      : new Query(elements, this.options);
   }
 
   /* we will add all elements across shadow root boundaries while matching
@@ -88,9 +101,8 @@ export class Query {
     let domFound = false;
     let queriedRoot;
 
-
     // add root if required
-    if (includeRoot) {
+    if(includeRoot) {
       if(domSelector && root == selector) {
         elements.push(root);
       }
@@ -116,7 +128,6 @@ export class Query {
         if(node.contains(selector)) {
           elements.push(selector);
           domFound = true;
-
         }
       }
       else if(node.querySelectorAll) {
@@ -139,7 +150,6 @@ export class Query {
     };
 
     const findElements = (node, selector, query) => {
-
       // if we are querying for a DOM element we can stop searching once we've found it
       if(domFound) {
         return;
@@ -153,7 +163,7 @@ export class Query {
       }
 
       // query at each shadow root
-      if (node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
+      if(node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
         selector = getRemainingSelector(node, selector);
         addElements(node.shadowRoot, selector);
         findElements(node.shadowRoot, selector, !queriedRoot);
@@ -163,7 +173,7 @@ export class Query {
         selector = getRemainingSelector(node, selector);
         node.assignedNodes().forEach((node) => findElements(node, selector, queriedRoot));
       }
-      if (node.childNodes.length) {
+      if(node.childNodes.length) {
         node.childNodes.forEach((node) => findElements(node, selector, queriedRoot));
       }
     };
@@ -187,7 +197,7 @@ export class Query {
 
   find(selector) {
     const elements = Array.from(this).flatMap((el) => {
-      if (this.options.pierceShadow) {
+      if(this.options.pierceShadow) {
         return this.querySelectorAllDeep(el, selector, false);
       }
       else {
@@ -206,9 +216,7 @@ export class Query {
 
   children(selector) {
     // Get all children of each element in the Query object
-    const allChildren = Array.from(this).flatMap((el) =>
-      Array.from(el.children)
-    );
+    const allChildren = Array.from(this).flatMap((el) => Array.from(el.children));
 
     // If a selector is provided, filter the children
     const filteredChildren = selector
@@ -253,7 +261,7 @@ export class Query {
     }
     let filteredElements = [];
     // If a function is provided, use it directly to filter elements
-    if (isFunction(filter)) {
+    if(isFunction(filter)) {
       filteredElements = Array.from(this).filter(filter);
     }
     else {
@@ -262,15 +270,14 @@ export class Query {
         if(isString(filter)) {
           return el.matches && el.matches(filter);
         }
-        else if (filter instanceof Query) {
+        else if(filter instanceof Query) {
           // If filter is a Query object, check if the element is in the Query's collection
           return filter.get().includes(el);
         }
         else {
           let els = isArray(filter)
             ? filter
-            : [ filter]
-          ;
+            : [filter];
           return inArray(el, els);
         }
       });
@@ -280,7 +287,7 @@ export class Query {
 
   is(selector) {
     const filteredElements = Array.from(this).filter((el) => {
-      if (typeof selector === 'string') {
+      if(typeof selector === 'string') {
         return el.matches && el.matches(selector);
       }
       else if(this.isGlobal) {
@@ -297,7 +304,7 @@ export class Query {
   not(selector) {
     // Filter out elements that match the provided selector
     const filteredElements = Array.from(this).filter((el) => {
-      if (typeof selector === 'string') {
+      if(typeof selector === 'string') {
         return !el.matches || (el.matches && !el.matches(selector));
       }
       else if(this.isGlobal) {
@@ -313,7 +320,7 @@ export class Query {
 
   closest(selector) {
     const closest = Array.from(this).map((el) => {
-      if (this.options.pierceShadow) {
+      if(this.options.pierceShadow) {
         return this.closestDeep(el, selector);
       }
       else if(selector && el?.closest) {
@@ -331,14 +338,14 @@ export class Query {
     let currentElement = element;
     const domSelector = isDOM(selector);
     const stringSelector = isString(selector);
-    while (currentElement) {
-      if ((domSelector && currentElement === selector) || (stringSelector && currentElement.matches(selector))) {
+    while(currentElement) {
+      if((domSelector && currentElement === selector) || (stringSelector && currentElement.matches(selector))) {
         return currentElement;
       }
-      if (currentElement.parentElement) {
+      if(currentElement.parentElement) {
         currentElement = currentElement.parentElement;
       }
-      else if (currentElement.parentNode && currentElement.parentNode.host) {
+      else if(currentElement.parentNode && currentElement.parentNode.host) {
         currentElement = currentElement.parentNode.host;
       }
       else {
@@ -361,7 +368,7 @@ export class Query {
   getEventAlias(eventName) {
     // support some more friendly names
     const aliases = {
-      ready: 'DOMContentLoaded'
+      ready: 'DOMContentLoaded',
     };
     return aliases[eventName] || eventName;
   }
@@ -369,8 +376,7 @@ export class Query {
   getEventArray(eventNames) {
     return eventNames.split(' ')
       .map(name => this.getEventAlias(name))
-      .filter(Boolean)
-    ;
+      .filter(Boolean);
   }
 
   on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
@@ -378,15 +384,15 @@ export class Query {
 
     let handler;
     let targetSelector;
-    if (isObject(handlerOrOptions)) {
+    if(isObject(handlerOrOptions)) {
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
-    else if (isString(targetSelectorOrHandler)) {
+    else if(isString(targetSelectorOrHandler)) {
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
-    else if (isFunction(targetSelectorOrHandler)) {
+    else if(isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
 
@@ -398,12 +404,12 @@ export class Query {
       const signal = abortController.signal;
       this.each((el) => {
         let delegateHandler;
-        if (targetSelector) {
+        if(targetSelector) {
           delegateHandler = (event) => {
             let target;
             // if this event is composed from a web component
             // this is required to get the original path
-            if (event.composed && event.composedPath) {
+            if(event.composed && event.composedPath) {
               // look through composed path bubbling into the attached element to see if any match target
               let path = event.composedPath();
               const elIndex = findIndex(path, thisEl => thisEl == el);
@@ -415,7 +421,7 @@ export class Query {
               target = event.target.closest(targetSelector);
             }
 
-            if (target) {
+            if(target) {
               // If a matching target is found, call the handler with the correct context
               handler.call(target, event);
             }
@@ -425,7 +431,7 @@ export class Query {
 
         // will cause illegal invocation if used from proxy object
         const domEL = (el == Query.globalThisProxy) ? globalThis : el;
-        if (domEL.addEventListener) {
+        if(domEL.addEventListener) {
           domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
         }
 
@@ -442,7 +448,7 @@ export class Query {
       });
     });
 
-    if (!Query.eventHandlers) {
+    if(!Query.eventHandlers) {
       Query.eventHandlers = [];
     }
     Query.eventHandlers.push(...eventHandlers);
@@ -456,15 +462,15 @@ export class Query {
   one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
     let handler;
     let targetSelector;
-    if (isObject(handlerOrOptions)) {
+    if(isObject(handlerOrOptions)) {
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
-    else if (isString(targetSelectorOrHandler)) {
+    else if(isString(targetSelectorOrHandler)) {
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
-    else if (isFunction(targetSelectorOrHandler)) {
+    else if(isFunction(targetSelectorOrHandler)) {
       handler = targetSelectorOrHandler;
     }
 
@@ -472,27 +478,25 @@ export class Query {
     options = options || {};
     const abortController = new AbortController();
     options.abortController = abortController;
-    const wrappedHandler = function (...args) {
+    const wrappedHandler = function(...args) {
       abortController.abort();
       handler.apply(this, args);
     };
-    return (targetSelector)
+    return targetSelector
       ? this.on(eventName, targetSelector, wrappedHandler, options)
-      : this.on(eventName, wrappedHandler, options)
-    ;
+      : this.on(eventName, wrappedHandler, options);
   }
 
   off(eventNames, handler) {
     const events = this.getEventArray(eventNames);
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
-      if (
-        (!eventNames ||
-          inArray(eventHandler.eventName, events)
-        ) &&
-        (!handler ||
-          handler?.eventListener == eventHandler.eventListener ||
-          eventHandler.eventListener === handler ||
-          eventHandler.handler === handler)
+      if(
+        (!eventNames
+          || inArray(eventHandler.eventName, events))
+        && (!handler
+          || handler?.eventListener == eventHandler.eventListener
+          || eventHandler.eventListener === handler
+          || eventHandler.handler === handler)
       ) {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
@@ -508,7 +512,7 @@ export class Query {
 
   trigger(eventName, eventParams) {
     return this.each(el => {
-      if (typeof el.dispatchEvent !== 'function') {
+      if(typeof el.dispatchEvent !== 'function') {
         return;
       }
       const event = new Event(eventName, { bubbles: true, cancelable: true });
@@ -523,14 +527,13 @@ export class Query {
     return this.trigger('click', eventParams);
   }
 
-
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
     const eventOptions = {
       bubbles: true,
       cancelable: true,
       composed: true,
       detail: eventData,
-      ...eventSettings
+      ...eventSettings,
     };
     this.each(el => {
       const event = new CustomEvent(eventName, eventOptions);
@@ -563,25 +566,25 @@ export class Query {
   }
 
   html(newHTML) {
-    if (newHTML !== undefined) {
+    if(newHTML !== undefined) {
       return this.each((el) => (el.innerHTML = newHTML));
     }
-    else if (this.length > 0) {
+    else if(this.length > 0) {
       return this.map(el => el.innerHTML || el.nodeValue).join('');
     }
   }
 
   outerHTML(newHTML) {
-    if (newHTML !== undefined) {
+    if(newHTML !== undefined) {
       return this.each((el) => (el.outerHTML = newHTML));
     }
-    else if (this.length) {
+    else if(this.length) {
       return this.map(el => el.outerHTML).join('');
     }
   }
 
   text(newText) {
-    if (newText !== undefined) {
+    if(newText !== undefined) {
       return this.each((el) => (el.textContent = newText));
     }
     else {
@@ -590,9 +593,7 @@ export class Query {
           ? el.assignedNodes({ flatten: true })
           : el.childNodes;
       };
-      const values = this.map((el) =>
-        this.getTextContentRecursive(childNodes(el))
-      );
+      const values = this.map((el) => this.getTextContentRecursive(childNodes(el)));
       return values.length > 1 ? values : values[0];
     }
   }
@@ -601,10 +602,10 @@ export class Query {
   getTextContentRecursive(nodes) {
     return Array.from(nodes)
       .map((node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
+        if(node.nodeType === Node.TEXT_NODE) {
           return node.nodeValue;
         }
-        else if (node.nodeName === 'SLOT') {
+        else if(node.nodeName === 'SLOT') {
           // If the node is a slot, retrieve its assigned nodes
           const slotNodes = node.assignedNodes({ flatten: true });
           return this.getTextContentRecursive(slotNodes);
@@ -634,13 +635,13 @@ export class Query {
   }
 
   value(newValue) {
-    if (newValue !== undefined) {
+    if(newValue !== undefined) {
       // Set the value for each element
       return this.each((el) => {
-        if (
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLSelectElement ||
-          el instanceof HTMLTextAreaElement
+        if(
+          el instanceof HTMLInputElement
+          || el instanceof HTMLSelectElement
+          || el instanceof HTMLTextAreaElement
         ) {
           el.value = newValue;
         }
@@ -649,10 +650,10 @@ export class Query {
     else {
       // Get the value of each element
       const values = this.map((el) => {
-        if (
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLSelectElement ||
-          el instanceof HTMLTextAreaElement
+        if(
+          el instanceof HTMLInputElement
+          || el instanceof HTMLSelectElement
+          || el instanceof HTMLTextAreaElement
         ) {
           return el.value;
         }
@@ -682,8 +683,8 @@ export class Query {
   css(property, value = null, settings = { includeComputed: false }) {
     const elements = Array.from(this);
     // Setting a value or multiple values
-    if (isPlainObject(property) || value !== null) {
-      if (isPlainObject(property)) {
+    if(isPlainObject(property) || value !== null) {
+      if(isPlainObject(property)) {
         Object.entries(property).forEach(([prop, val]) => {
           elements.forEach((el) => el.style.setProperty(camelToKebab(prop), val));
         });
@@ -695,14 +696,14 @@ export class Query {
     }
     else {
       // Getting a value
-      if (elements?.length) {
+      if(elements?.length) {
         const styles = elements.map((el) => {
           const inlineStyle = el.style[property];
-          if (settings.includeComputed) {
+          if(settings.includeComputed) {
             // return computed style if requested
             return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
           }
-          if (inlineStyle) {
+          if(inlineStyle) {
             // Return inline style if present
             return inlineStyle;
           }
@@ -722,20 +723,18 @@ export class Query {
   }
 
   attr(attribute, value) {
-    if (isPlainObject(attribute)) {
+    if(isPlainObject(attribute)) {
       // Handle object of attribute-value pairs
       Object.entries(attribute).forEach(([attr, val]) => {
         this.each((el) => el.setAttribute(attr, val));
       });
     }
-    else if (value !== undefined) {
+    else if(value !== undefined) {
       // Handle single attribute-value pair
       this.each((el) => el.setAttribute(attribute, value));
     }
-    else if (this.length) {
-      const attributes = this.map((el) =>
-        el.getAttribute(attribute)
-      );
+    else if(this.length) {
+      const attributes = this.map((el) => el.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
     return;
@@ -750,7 +749,7 @@ export class Query {
   }
 
   get(index) {
-    if (index !== undefined) {
+    if(index !== undefined) {
       return this[index];
     }
     else {
@@ -771,7 +770,7 @@ export class Query {
   }
 
   prop(name, value) {
-    if (value !== undefined) {
+    if(value !== undefined) {
       // Set the property value for each element
       return this.each(el => {
         el[name] = value;
@@ -782,7 +781,7 @@ export class Query {
       if(this.length == 0) {
         return undefined;
       }
-      else if (this.length === 1) {
+      else if(this.length === 1) {
         return this[0][name];
       }
       else {
@@ -794,8 +793,8 @@ export class Query {
   next(selector) {
     const nextSiblings = this.map((el) => {
       let nextSibling = el.nextElementSibling;
-      while (nextSibling) {
-        if (!selector || nextSibling.matches(selector)) {
+      while(nextSibling) {
+        if(!selector || nextSibling.matches(selector)) {
           return nextSibling;
         }
         nextSibling = nextSibling.nextElementSibling;
@@ -809,8 +808,8 @@ export class Query {
   prev(selector) {
     const prevSiblings = this.map((el) => {
       let prevSibling = el.previousElementSibling;
-      while (prevSibling) {
-        if (!selector || prevSibling.matches(selector)) {
+      while(prevSibling) {
+        if(!selector || prevSibling.matches(selector)) {
           return prevSibling;
         }
         prevSibling = prevSibling.previousElementSibling;
@@ -865,11 +864,11 @@ export class Query {
   insertContent(target, content, position) {
     const $content = this.chain(content);
     $content.each(el => {
-      if (target.insertAdjacentElement) {
+      if(target.insertAdjacentElement) {
         target.insertAdjacentElement(position, el);
       }
       else {
-        switch(position) {
+        switch (position) {
           case 'beforebegin':
             target.parentNode?.insertBefore(el, target);
             break;
@@ -913,7 +912,7 @@ export class Query {
 
   detach() {
     return this.each((el) => {
-      if (el.parentNode) {
+      if(el.parentNode) {
         el.parentNode.removeChild(el);
       }
     });
@@ -929,8 +928,7 @@ export class Query {
           display: 'block',
           transform: 'translate(-9999px, -9999px)',
           zIndex: '-1',
-        })
-      ;
+        });
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -948,8 +946,7 @@ export class Query {
           display: 'block',
           transform: 'translate(-9999px, -9999px)',
           zIndex: '-1',
-        })
-      ;
+        });
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
@@ -973,14 +970,13 @@ export class Query {
           parentNode = parentNode?.parentNode;
           if(parentNode) {
             $el = $(parentNode);
-            isPositioned = ($el.computedStyle('position') !== 'static');
-            isTransformed = ($el.computedStyle('transform') !== 'none');
+            isPositioned = $el.computedStyle('position') !== 'static';
+            isTransformed = $el.computedStyle('transform') !== 'none';
             isBody = $el.is('body');
           }
         }
         return parentNode;
-      })
-    ;
+      });
   }
 
   // alias

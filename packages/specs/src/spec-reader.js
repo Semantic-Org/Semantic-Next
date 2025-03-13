@@ -1,7 +1,22 @@
-import { reverseKeys, get, flatten, isString, isArray, clone, each, inArray, unique, mapObject, noop, values, tokenize, toTitleCase, capitalize } from '@semantic-ui/utils';
+import {
+  capitalize,
+  clone,
+  each,
+  flatten,
+  get,
+  inArray,
+  isArray,
+  isString,
+  mapObject,
+  noop,
+  reverseKeys,
+  tokenize,
+  toTitleCase,
+  unique,
+  values,
+} from '@semantic-ui/utils';
 
 export class SpecReader {
-
   static DEFAULT_DIALECT = 'standard';
 
   static DIALECT_TYPES = {
@@ -12,7 +27,7 @@ export class SpecReader {
 
   constructor(spec, {
     plural = false,
-    dialect = SpecReader.DEFAULT_DIALECT
+    dialect = SpecReader.DEFAULT_DIALECT,
   } = {}) {
     this.spec = spec || {};
     this.plural = plural;
@@ -25,10 +40,9 @@ export class SpecReader {
   */
   getComponentName({ plural = this.plural, lang = 'html' } = {}) {
     const spec = this.spec;
-    const name = (plural)
+    const name = plural
       ? spec.pluralExportName
-      : spec.exportName
-    ;
+      : spec.exportName;
     return name;
   }
 
@@ -37,10 +51,9 @@ export class SpecReader {
   */
   getTagName({ plural = this.plural, lang = 'html' } = {}) {
     const spec = this.spec;
-    const name = (plural)
+    const name = plural
       ? spec.pluralTagName
-      : spec.tagName
-    ;
+      : spec.tagName;
     return name;
   }
 
@@ -51,7 +64,7 @@ export class SpecReader {
   getDefinition({
     plural = this.plural,
     minUsageLevel,
-    dialect = this.dialect
+    dialect = this.dialect,
   } = {}) {
     let definition = {
       content: [],
@@ -71,7 +84,7 @@ export class SpecReader {
     const spec = this.spec;
 
     // standard example
-    const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
+    const defaultContent = plural ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
     definition.types.push({
       title: spec.name,
@@ -80,9 +93,9 @@ export class SpecReader {
         {
           showCode: false,
           code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent }),
-          components: [ this.getComponentParts(defaultModifiers, { html: defaultContent }) ]
-        }
-      ]
+          components: [this.getComponentParts(defaultModifiers, { html: defaultContent })],
+        },
+      ],
     });
 
     // returns specs in the same sequence 'types', 'content', 'states', 'variations'
@@ -94,7 +107,7 @@ export class SpecReader {
         }
         const examples = this.getCodeExamples(part, {
           defaultAttributes: spec?.examples?.defaultAttributes,
-          defaultContent: defaultContent
+          defaultContent: defaultContent,
         });
         definition[partName].push(examples);
       });
@@ -113,11 +126,11 @@ export class SpecReader {
   /*
     Returns an array of examples in the order specified in get ordered parts
   */
-  getOrderedExamples({plural = false, minUsageLevel, dialect = this.dialect } = {}) {
-    const definition = this.getDefinition({plural, minUsageLevel, dialect});
+  getOrderedExamples({ plural = false, minUsageLevel, dialect = this.dialect } = {}) {
+    const definition = this.getDefinition({ plural, minUsageLevel, dialect });
     return this.getOrderedParts().map((partName) => ({
       title: toTitleCase(partName),
-      examples: definition[partName]
+      examples: definition[partName],
     }));
   }
 
@@ -125,13 +138,13 @@ export class SpecReader {
     Gets the definition menu for a component for use with an inpage menu
   */
   getDefinitionMenu({ IDSuffix = '-example', plural = false, minUsageLevel } = {}) {
-    const orderedDefinition = this.getOrderedExamples({plural, minUsageLevel});
+    const orderedDefinition = this.getOrderedExamples({ plural, minUsageLevel });
     let menu = orderedDefinition.map(part => ({
       title: part.title,
       items: part.examples.map((example) => ({
         id: tokenize(`${example.title}${IDSuffix}`),
-        title: example.title
-      }))
+        title: example.title,
+      })),
     }));
     return menu;
   }
@@ -159,31 +172,30 @@ export class SpecReader {
     // complex examples arent supported
     if(componentName == 'div') {
       return {
-        html: html
+        html: html,
       };
     }
 
     // Extract the attribute string
     const attributeString = spaceIndex !== -1
       ? html.slice(spaceIndex, closingTagIndex).trim()
-      : ''
-    ;
+      : '';
 
     // Parse the attribute string into an object
     const attributes = {};
-    if (attributeString) {
+    if(attributeString) {
       const attributePairs = attributeString.split(' ');
       for (const pair of attributePairs) {
         const [key, value] = pair.split('=');
-        if (value) {
+        if(value) {
           attributes[key] = value.replace(/"/g, '');
-        } else {
+        }
+        else {
           attributes[key] = true;
         }
       }
     }
     const dialectAttributeString = this.getAttributeStringFromModifiers(html, { attributes, dialect });
-
 
     // Extract the inner HTML
     const innerHTML = html.slice(closingTagIndex + 1, html.lastIndexOf('<')).trim();
@@ -192,10 +204,10 @@ export class SpecReader {
       componentName: componentName,
       attributes: attributes,
       attributeString: dialectAttributeString,
-      html: innerHTML
+      html: innerHTML,
     };
   }
-  
+
   getCodeExamples(part, { defaultAttributes, defaultContent } = {}) {
     let examples = [];
     let attribute = this.getAttributeName(part);
@@ -240,7 +252,7 @@ export class SpecReader {
         }
         const example = {
           code,
-          components: [componentParts]
+          components: [componentParts],
         };
         if(part.separateExamples) {
           examples.push(example);
@@ -253,7 +265,7 @@ export class SpecReader {
       if(!part.separateExamples) {
         examples.push({
           code: examplesToJoin.map(ex => ex.code).join('\n'),
-          components: flatten([...examplesToJoin.map(ex => ex.components)])
+          components: flatten([...examplesToJoin.map(ex => ex.components)]),
         });
       }
     }
@@ -273,7 +285,7 @@ export class SpecReader {
       }
       const example = {
         code,
-        components: [componentParts]
+        components: [componentParts],
       };
       examples.push(example);
     }
@@ -286,16 +298,15 @@ export class SpecReader {
   }
 
   getComponentParts(modifiers, {
-    lang='html',
-    plural=this.plural,
+    lang = 'html',
+    plural = this.plural,
     text,
     html,
-    dialect = this.dialect
+    dialect = this.dialect,
   } = {}) {
     let componentName = (lang == 'html')
       ? this.getTagName({ plural })
-      : this.getComponentName({ plural, lang })
-    ;
+      : this.getComponentName({ plural, lang });
     // use the modifier as text or component name i.e. 'primary', 'emphasis' etc
     if(!text && !html) {
       const baseText = modifiers || String(componentName).replace(/^ui-/, '');
@@ -307,7 +318,7 @@ export class SpecReader {
       componentName: componentName,
       attributes: attributes,
       attributeString: this.getAttributeStringFromModifiers(modifiers, { attributes, dialect }),
-      html: html
+      html: html,
     };
     return componentParts;
   }
@@ -340,10 +351,9 @@ export class SpecReader {
     joinWith = '=',
     quoteCharacter = ':',
   } = {}) {
-    return (value == true || value==attribute)
+    return (value == true || value == attribute)
       ? `${attribute}`
-      : `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`
-    ;
+      : `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`;
   }
 
   /*
@@ -353,7 +363,7 @@ export class SpecReader {
   getAttributeString(attributes, {
     dialect = this.dialect,
     joinWith = '=',
-    quoteCharacter = `'`
+    quoteCharacter = `'`,
   } = {}) {
     let attributeString;
     let modifiers = [];
@@ -382,7 +392,7 @@ export class SpecReader {
     else if(dialect == SpecReader.DIALECT_TYPES.verbose || keys(categoryAttributes)) {
       let attributeString = ' ';
       each(attributes, (value, attribute) => {
-        const singleAttr = this.getSingleAttributeString(attribute, value, { joinWith, quoteCharacter});
+        const singleAttr = this.getSingleAttributeString(attribute, value, { joinWith, quoteCharacter });
         attributeString += ` ${singleAttr}`;
       });
     }
@@ -396,7 +406,7 @@ export class SpecReader {
     dialect = this.dialect,
     attributes,
     joinWith = '=',
-    quoteCharacter = `"`
+    quoteCharacter = `"`,
   } = {}) {
     if(!modifiers) {
       return '';
@@ -417,7 +427,7 @@ export class SpecReader {
       each(attributes, (value, attribute) => {
         const singleAttr = this.getSingleAttributeString(attribute, value, {
           joinWith,
-          quoteCharacter
+          quoteCharacter,
         });
         attributeString += ` ${singleAttr}`;
       });
@@ -430,7 +440,6 @@ export class SpecReader {
      and has a reduced filesize.
   */
   getWebComponentSpec(spec = this.spec, { plural = this.plural } = {}) {
-
     if(spec == this.spec && this.componentSpec) {
       return this.componentSpec;
     }
@@ -480,7 +489,6 @@ export class SpecReader {
 
         // the section name will not corresponse to the section name passed in
         section = section.replace('pluralOnly', '').toLowerCase();
-
       }
       each(specPart, (spec) => {
         const propertyName = this.getPropertyName(spec);
@@ -503,7 +511,7 @@ export class SpecReader {
 
         // find native type of this property i.e. String
         const propertyType = this.getPropertyType(spec, section, allowedValues);
-        if (propertyType) {
+        if(propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
 
@@ -518,14 +526,14 @@ export class SpecReader {
 
         // find default values
         const defaultValue = this.getDefaultValue(spec, propertyType, section);
-        if (defaultValue !== undefined) {
+        if(defaultValue !== undefined) {
           componentSpec.defaultValues[propertyName] = defaultValue;
         }
 
         /* Special Cases */
 
         // "content" can be attribute or slot
-        if (section === 'content') {
+        if(section === 'content') {
           if(spec.attribute) {
             componentSpec.contentAttributes.push(spec.attribute);
           }
@@ -536,10 +544,9 @@ export class SpecReader {
 
         // attributes can opt in to having its attribute as a ui class name
         // i.e. ['attached', 'left-attached'] includes 'attached' the attribute as a class
-        if (attributeName && spec.includeAttributeClass) {
+        if(attributeName && spec.includeAttributeClass) {
           componentSpec.attributeClasses.push(propertyName);
         }
-
       });
     };
 
@@ -580,14 +587,11 @@ export class SpecReader {
     return componentSpec;
   }
 
-
-
   /* This is a format that is consumed by defineComponent to determine valid attributes
      for the web component. It is a subset of the component spec that can be searched quickly
      and has a reduced filesize.
   */
   getPluralWebComponentSpec(spec = this.spec) {
-
     if(spec == this.spec && this.componentSpec) {
       return this.componentSpec;
     }
@@ -616,7 +620,6 @@ export class SpecReader {
     const addSettingsFromPart = (section) => {
       const specPart = spec[section] || [];
       each(specPart, (spec) => {
-
         const propertyName = this.getPropertyName(spec);
 
         // it is a requirement to have a property name defined
@@ -635,7 +638,7 @@ export class SpecReader {
 
         // find native type of this property i.e. String
         const propertyType = this.getPropertyType(spec, section, allowedValues);
-        if (propertyType) {
+        if(propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
 
@@ -650,14 +653,14 @@ export class SpecReader {
 
         // find default values
         const defaultValue = this.getDefaultValue(spec, propertyType, section);
-        if (defaultValue !== undefined) {
+        if(defaultValue !== undefined) {
           componentSpec.defaultValues[propertyName] = defaultValue;
         }
 
         /* Special Cases */
 
         // "content" can be attribute or slot
-        if (section === 'content') {
+        if(section === 'content') {
           if(spec.attribute) {
             componentSpec.contentAttributes.push(spec.attribute);
           }
@@ -668,10 +671,9 @@ export class SpecReader {
 
         // attributes can opt in to having its attribute as a ui class name
         // i.e. ['attached', 'left-attached'] includes 'attached' the attribute as a class
-        if (attributeName && spec.includeAttributeClass) {
+        if(attributeName && spec.includeAttributeClass) {
           componentSpec.attributeClasses.push(propertyName);
         }
-
       });
     };
 
@@ -683,7 +685,6 @@ export class SpecReader {
     addSettingsFromPart('pluralVariations');
     addSettingsFromPart('settings');
     addSettingsFromPart('events');
-
 
     // avoid having to reverse array at runtime
     let options = mapObject(componentSpec.allowedValues, (values, key) => {
@@ -707,10 +708,10 @@ export class SpecReader {
     return this.getPropertyName(specPart);
   }
   getPropertyName(specPart) {
-    if (specPart.attribute) {
+    if(specPart.attribute) {
       return specPart.attribute;
     }
-    if (isString(specPart.name)) {
+    if(isString(specPart.name)) {
       return specPart.name.toLowerCase();
     }
   }
@@ -721,7 +722,7 @@ export class SpecReader {
       boolean: Boolean,
       object: Object,
       array: Array,
-      function: Function
+      function: Function,
     };
     let type;
     let stringType;
@@ -756,7 +757,7 @@ export class SpecReader {
 
   getAllowedValues(spec) {
     let allowedValues;
-    if (spec.options) {
+    if(spec.options) {
       allowedValues = spec.options
         .map((option) => option?.value !== undefined ? option.value : option)
         .filter(Boolean);
@@ -778,7 +779,7 @@ export class SpecReader {
       boolean: false,
       function: noop,
       number: 0,
-      object: {}
+      object: {},
     };
     return get(defaultValues, type);
   }
@@ -789,5 +790,4 @@ export class SpecReader {
     }
     return true;
   }
-
 }

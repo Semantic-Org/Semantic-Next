@@ -8,8 +8,7 @@ $('rating-slider')
     const rating = event.detail.rating;
     updateFeedbackMessage(rating);
     console.log('Final rating:', rating);
-  })
-;
+  });
 
 function updateFeedbackMessage(value) {
   const $message = $('.message');

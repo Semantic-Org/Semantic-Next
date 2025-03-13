@@ -1,4 +1,3 @@
-
 /*-------------------
         Types
 --------------------*/
@@ -39,19 +38,19 @@ export const isPromise = (x) => {
   return x && isFunction(x.then);
 };
 
-export const isArguments = function (obj) {
+export const isArguments = function(obj) {
   return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
 export const isDOM = (element) => {
-  if (typeof window === 'undefined') {
+  if(typeof window === 'undefined') {
     return true; // ssr or not a browser
   }
   return (
-    element instanceof Element ||
-    element instanceof Document ||
-    element === window ||
-    element instanceof DocumentFragment
+    element instanceof Element
+    || element instanceof Document
+    || element === window
+    || element instanceof DocumentFragment
   );
 };
 
@@ -61,14 +60,14 @@ export const isNode = (el) => {
 
 export const isEmpty = (x) => {
   // we want nullish here
-  if (x == null) {
+  if(x == null) {
     return true;
   }
-  if (isArray(x) || isString(x)) {
+  if(isArray(x) || isString(x)) {
     return x.length === 0;
   }
-  for (let key in x) {
-    if (x[key]) {
+  for(let key in x) {
+    if(x[key]) {
       return false;
     }
   }
@@ -76,7 +75,7 @@ export const isEmpty = (x) => {
 };
 
 export const isClassInstance = (obj) => {
-  if (obj === null || typeof obj !== 'object') {
+  if(obj === null || typeof obj !== 'object') {
     return false;
   }
 

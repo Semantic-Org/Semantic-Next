@@ -1,8 +1,7 @@
-import { describe, beforeEach, afterEach, beforeAll, expect, it, vi } from 'vitest';
-import { $, $$, Query, exportGlobals, restoreGlobals, useAlias } from '@semantic-ui/query';
+import { $, $$, exportGlobals, Query, restoreGlobals, useAlias } from '@semantic-ui/query';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('query', () => {
-
   beforeEach(() => {
     document.body.innerHTML = '';
     $().removeAllEvents();
@@ -64,7 +63,6 @@ describe('query', () => {
   });
 
   describe('selectors', () => {
-    
     it('query should query DOM when given a selector', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -164,11 +162,9 @@ describe('query', () => {
       expect($elements[0].textContent).toBe('Paragraph');
       expect($elements[1].nodeType).toBe(Node.COMMENT_NODE);
     });
-
   });
 
   describe('find', () => {
-
     it('find should return all nested elements inside an element', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -191,7 +187,6 @@ describe('query', () => {
       expect($span[0]).toBe(span);
       expect($span[1]).toBe(span2);
     });
-
   });
 
   describe('siblings', () => {
@@ -240,7 +235,6 @@ describe('query', () => {
   });
 
   describe('index', () => {
-
     it('index should return -1 if no matching element is found among its siblings', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -297,7 +291,6 @@ describe('query', () => {
   });
 
   describe('indexOf', () => {
-
     it('index should return the index of an element among its siblings matching a selector', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -330,9 +323,7 @@ describe('query', () => {
     });
   });
 
-
   describe('not', () => {
-      
     it('not should filter out elements that match a selector', () => {
       const div = document.createElement('div');
       const div2 = document.createElement('div');
@@ -342,11 +333,9 @@ describe('query', () => {
       const $div = $('div').not('.test');
       expect($div[0]).toBe(div);
     });
-
   });
-  
-  describe('closest', () => {
 
+  describe('closest', () => {
     it('closest should return the closest parent matching a selector', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -365,7 +354,6 @@ describe('query', () => {
       const $span = $('span').closest('.test2');
       expect($span.length).toBe(0);
     });
-
   });
 
   describe('closestDeep', () => {
@@ -404,31 +392,28 @@ describe('query', () => {
   });
 
   describe('filter', () => {
-      
-      it('filter should return elements that match a selector', () => {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div2.classList.add('test');
-        document.body.appendChild(div);
-        document.body.appendChild(div2);
-        const $div = $('div').filter('.test');
-        expect($div[0]).toBe(div2);
-      });
+    it('filter should return elements that match a selector', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      const $div = $('div').filter('.test');
+      expect($div[0]).toBe(div2);
+    });
 
-      it('filter should return elements that match a function', () => {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div2.classList.add('test');
-        document.body.appendChild(div);
-        document.body.appendChild(div2);
-        const $div = $('div').filter((el) => el.classList.contains('test'));
-        expect($div[0]).toBe(div2);
-      });
-
+    it('filter should return elements that match a function', () => {
+      const div = document.createElement('div');
+      const div2 = document.createElement('div');
+      div2.classList.add('test');
+      document.body.appendChild(div);
+      document.body.appendChild(div2);
+      const $div = $('div').filter((el) => el.classList.contains('test'));
+      expect($div[0]).toBe(div2);
+    });
   });
 
   describe('children', () => {
-
     it('children should return all children of an element', () => {
       const div = document.createElement('div');
       const span = document.createElement('span');
@@ -463,7 +448,6 @@ describe('query', () => {
       expect($div[0]).toBe(span);
       expect($div[1]).toBe(span2);
     });
-
   });
 
   describe('parent', () => {
@@ -495,11 +479,9 @@ describe('query', () => {
       const $span = $('span').parent('.test2');
       expect($span.length).toBe(0);
     });
-
   });
 
   describe('dispatchEvent', () => {
-
     it('should dispatch custom events with different event options', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -528,18 +510,16 @@ describe('query', () => {
     });
   });
 
-
   describe('on', () => {
-
     it('should attach an event handler to elements', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', callback);
-      
+
       div.click();
-      
+
       expect(callback).toHaveBeenCalled();
     });
 
@@ -549,12 +529,12 @@ describe('query', () => {
       document.body.appendChild(div);
       document.body.appendChild(div2);
       const callback = vi.fn();
-      
+
       $('div').on('click', callback);
-      
+
       div.click();
       div2.click();
-      
+
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
@@ -563,12 +543,12 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       const callback2 = vi.fn();
-      
+
       $('div').on('click', callback);
       $('div').on('click', callback2);
-      
+
       div.click();
-      
+
       expect(callback).toHaveBeenCalled();
       expect(callback2).toHaveBeenCalled();
     });
@@ -578,16 +558,16 @@ describe('query', () => {
       document.body.appendChild(div);
       const div2 = document.createElement('div');
       document.body.appendChild(div2);
-      
+
       const eventHandlers = $('div').on('click', () => {});
-      
+
       expect(eventHandlers.length).toBe(2);
     });
 
     it('should return a single event handler when only one attached', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      
+
       const eventHandler = $('div').on('click', () => {}, { returnHandler: true });
       expect(eventHandler).toBeInstanceOf(Object);
     });
@@ -596,7 +576,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      const abortController = new AbortController();;
+      const abortController = new AbortController();
       const eventHandler = $('div').on('click', callback, { abortController });
       div.click();
       abortController.abort();
@@ -608,7 +588,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', callback, { returnHandler: true });
       div.click();
       eventHandler.abort();
@@ -622,10 +602,10 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', 'span', callback);
       span.click();
-      
+
       expect(callback).toHaveBeenCalled();
     });
 
@@ -634,7 +614,7 @@ describe('query', () => {
       document.body.appendChild(div);
       const callback = vi.fn();
       const abortController = new AbortController();
-      
+
       $('div').on('click', callback, { abortController });
       abortController.abort();
       div.click();
@@ -645,7 +625,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', 'span', callback, { returnHandler: true });
       expect(eventHandler.delegated).toBe(true);
     });
@@ -654,7 +634,7 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', 'span', callback, { returnHandler: true });
       expect(eventHandler.delegated).toBe(true);
     });
@@ -777,7 +757,6 @@ describe('query', () => {
       div.dispatchEvent(new Event('touchmove'));
       expect(callback).toHaveBeenCalledTimes(3); // Only touchmove should trigger
     });
-
   });
 
   describe('one', () => {
@@ -859,7 +838,6 @@ describe('query', () => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
-
     it('should remove handlers based on grouping', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -868,7 +846,7 @@ describe('query', () => {
 
       $('div')
         .one('mouseup mouseleave', callback1)
-        .one('click mouseup', callback2);  // mouseup added twice
+        .one('click mouseup', callback2); // mouseup added twice
 
       div.dispatchEvent(new Event('mouseup'));
       expect(callback1).toHaveBeenCalledTimes(1);
@@ -908,13 +886,13 @@ describe('query', () => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
-  
+
   describe('off', () => {
     it('should remove a given event type', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', callback);
       $('div').off('click');
       div.click();
@@ -933,13 +911,13 @@ describe('query', () => {
       div.focus();
       expect(callback).not.toHaveBeenCalled();
     });
-    
+
     it('should remove a specific event handler', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
       const callback2 = vi.fn();
-      
+
       $('div').on('click', callback);
       $('div').on('click', callback2);
       $('div').off('click', callback);
@@ -952,13 +930,12 @@ describe('query', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const eventHandler = $('div').on('click', callback, { returnHandler: true });
-      
+
       div.removeEventListener('click', callback);
       div.click();
       expect(callback).not.toHaveBeenCalled();
-      
     });
 
     it('should remove delegated events', () => {
@@ -967,7 +944,7 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       $('div').on('click', 'span', callback);
       $('div').off('click', callback);
       span.click();
@@ -980,13 +957,12 @@ describe('query', () => {
       div.appendChild(span);
       document.body.appendChild(div);
       const callback = vi.fn();
-      
+
       const event = $('div').on('click', 'span', callback, { returnHandler: true });
       $('div').off('click', event);
       span.click();
       expect(callback).not.toHaveBeenCalled();
     });
-
   });
 
   describe('trigger', () => {
@@ -1010,7 +986,7 @@ describe('query', () => {
       $('div').trigger('customEvent', { detail: 'test' });
 
       expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-        detail: 'test'
+        detail: 'test',
       }));
     });
 
@@ -1052,7 +1028,7 @@ describe('query', () => {
       $('button').click({ detail: 'test' });
 
       expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-        detail: 'test'
+        detail: 'test',
       }));
     });
 
@@ -1074,14 +1050,13 @@ describe('query', () => {
   });
 
   describe('remove', () => {
-
     it('remove should remove an element', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       $('div').remove();
       expect(document.body.innerHTML).toBe('');
     });
-    
+
     it('remove should remove multiple elements that match selector', () => {
       const div = document.createElement('div');
       const div2 = document.createElement('div');
@@ -1090,12 +1065,9 @@ describe('query', () => {
       $('div').remove();
       expect(document.body.innerHTML).toBe('');
     });
-
-
   });
 
   describe('add class', () => {
-
     it('add class should add a class', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -1119,7 +1091,6 @@ describe('query', () => {
       const $div = $('div').addClass('test');
       expect($div.hasClass('test')).toBe(true);
     });
-
   });
 
   describe('has class', () => {
@@ -1155,11 +1126,9 @@ describe('query', () => {
       expect($div.hasClass('test')).toBe(false);
       expect($div.hasClass('test2')).toBe(false);
     });
-
   });
 
   describe('html', () => {
-
     it('html should return the innerHTML of an element', () => {
       const div = document.createElement('div');
       div.innerHTML = 'test';
@@ -1174,9 +1143,8 @@ describe('query', () => {
       expect(div.innerHTML).toBe('test');
     });
   });
-  
+
   describe('outerHTML', () => {
-    
     it('outerHTML should return the outerHTML of an element', () => {
       const div = document.createElement('div');
       div.innerHTML = 'test';
@@ -1192,9 +1160,8 @@ describe('query', () => {
       $('div div').outerHTML('<div>test</div>');
       expect(div.outerHTML).toBe('<div><div>test</div></div>');
     });
-
   });
-  
+
   describe('text', () => {
     it('text should return the textContent of an element', () => {
       const div = document.createElement('div');
@@ -1259,7 +1226,6 @@ describe('query', () => {
     });
   });
   describe('value', () => {
-
     it('value should return the value of an input', () => {
       const input = document.createElement('input');
       input.value = 'test';
@@ -1326,7 +1292,6 @@ describe('query', () => {
       document.body.appendChild(input);
       expect($('input').val()).toBe('test');
     });
-
   });
 
   describe('attr', () => {
@@ -1346,7 +1311,8 @@ describe('query', () => {
       document.body.appendChild(div);
       $('div').attr('data-custom', 'value');
       expect(div.getAttribute('data-custom')).toBe('value');
-      expect($('div').attr('data-custom')).toBe('value'); });
+      expect($('div').attr('data-custom')).toBe('value');
+    });
   });
 
   describe('prop', () => {
@@ -1389,7 +1355,7 @@ describe('query', () => {
       div2.style.color = 'blue';
       document.body.appendChild(div);
       document.body.appendChild(div2);
-      expect($('div').css('color')).toStrictEqual(['red','blue']);
+      expect($('div').css('color')).toStrictEqual(['red', 'blue']);
     });
 
     it('should handle camelCase and kebab-case property names', () => {
@@ -1450,7 +1416,6 @@ describe('query', () => {
   });
 
   describe('removeAttr', () => {
-    
     it('removeAttr should remove an attribute', () => {
       const div = document.createElement('div');
       div.setAttribute('test', 'test');
@@ -1470,7 +1435,6 @@ describe('query', () => {
       expect(div.getAttribute('test')).toBe(null);
       expect(div2.getAttribute('test')).toBe(null);
     });
-
   });
 
   describe('each', () => {
@@ -1507,7 +1471,6 @@ describe('query', () => {
       document.body.appendChild(div2);
       expect($('div').get()).toStrictEqual([div, div2]);
     });
-
   });
 
   describe('eq', () => {
@@ -1519,7 +1482,6 @@ describe('query', () => {
       expect($('div').eq(0)[0]).toBe(div);
       expect($('div').eq(1)[0]).toBe(div2);
     });
-
   });
 
   describe('textNode', () => {
@@ -1533,7 +1495,6 @@ describe('query', () => {
       document.body.appendChild(div);
       expect($('div').textNode()).toStrictEqual('test');
     });
-
   });
 
   describe('focus', () => {
@@ -1543,9 +1504,8 @@ describe('query', () => {
       $('input').focus();
       expect(document.activeElement).toBe(input);
     });
-
   });
-  
+
   describe('blur', () => {
     it('blur should blur an element', () => {
       const input = document.createElement('input');
@@ -1554,7 +1514,6 @@ describe('query', () => {
       $('input').blur();
       expect(document.activeElement).not.toBe(input);
     });
-
   });
 
   describe('clone', () => {
@@ -1573,9 +1532,7 @@ describe('query', () => {
     });
   });
 
-
   describe('Insertion Methods', () => {
-
     beforeEach(() => {
       document.body.innerHTML = '<div id="target"></div><div id="target2"></div>';
     });
@@ -1612,7 +1569,6 @@ describe('query', () => {
         expect(document.body.innerHTML).toBe('<div id="target"></div><p>Test</p><div id="target2"></div><p>Test</p>');
       });
     });
-
   });
 
   describe('next', () => {
@@ -1680,7 +1636,6 @@ describe('query', () => {
       expect($prev.length).toBe(0);
     });
   });
-
 
   describe('Value-returning methods', () => {
     beforeEach(() => {
@@ -1759,5 +1714,4 @@ describe('query', () => {
       });
     });
   });
-
 });

@@ -20,10 +20,10 @@ export interface FatalOptions {
 /**
  * Throws an error asynchronously with enhanced error handling capabilities.
  * The error is thrown in the next microtask to avoid interrupting the current execution context.
- * 
+ *
  * @param message - The error message
  * @param options - Configuration options for the error
- * 
+ *
  * @example
  * ```ts
  * fatal("Invalid configuration", {

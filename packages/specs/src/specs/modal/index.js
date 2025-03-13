@@ -7,7 +7,4 @@ const ModalComponentSpec = reader.getWebComponentSpec(ModalSpec);
 
 export default ModalSpec;
 
-export {
-  ModalSpec,
-  ModalComponentSpec,
-};
+export { ModalComponentSpec, ModalSpec };

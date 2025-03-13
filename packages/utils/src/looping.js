@@ -1,4 +1,4 @@
-import { isArray, isObject, isFunction } from './types.js';
+import { isArray, isFunction, isObject } from './types.js';
 
 /*-------------------
       Looping
@@ -7,18 +7,18 @@ import { isArray, isObject, isFunction } from './types.js';
   Simplify iterating over objects and arrays
 */
 export const each = (obj, func, context) => {
-  if (obj === null || obj === undefined) {
+  if(obj === null || obj === undefined) {
     return obj;
   }
   const iteratee = context ? func.bind(context) : func;
-  if (isObject(obj) || isFunction(obj)) {
-    if (obj.length !== undefined && typeof obj.length === 'number') {
+  if(isObject(obj) || isFunction(obj)) {
+    if(obj.length !== undefined && typeof obj.length === 'number') {
       obj = Array.from(obj);
     }
   }
-  if (isArray(obj)) {
+  if(isArray(obj)) {
     for (let i = 0; i < obj.length; ++i) {
-      if (iteratee(obj[i], i, obj) === false) {
+      if(iteratee(obj[i], i, obj) === false) {
         break;
       }
     }
@@ -26,7 +26,7 @@ export const each = (obj, func, context) => {
   else {
     const keys = Object.keys(obj);
     for (let key of keys) {
-      if (iteratee(obj[key], key, obj) === false) {
+      if(iteratee(obj[key], key, obj) === false) {
         break;
       }
     }
@@ -35,18 +35,18 @@ export const each = (obj, func, context) => {
 };
 
 export const asyncEach = async (obj, func, context) => {
-  if (obj === null || obj === undefined) {
+  if(obj === null || obj === undefined) {
     return obj;
   }
   const iteratee = context ? func.bind(context) : func;
-  if (isObject(obj) || isFunction(obj)) {
-    if (obj.length !== undefined && typeof obj.length === 'number') {
+  if(isObject(obj) || isFunction(obj)) {
+    if(obj.length !== undefined && typeof obj.length === 'number') {
       obj = Array.from(obj);
     }
   }
-  if (isArray(obj)) {
+  if(isArray(obj)) {
     for (let i = 0; i < obj.length; ++i) {
-      if (await iteratee(obj[i], i, obj) === false) {
+      if(await iteratee(obj[i], i, obj) === false) {
         break;
       }
     }
@@ -54,7 +54,7 @@ export const asyncEach = async (obj, func, context) => {
   else {
     const keys = Object.keys(obj);
     for (let key of keys) {
-      if (await iteratee(obj[key], key, obj) === false) {
+      if(await iteratee(obj[key], key, obj) === false) {
         break;
       }
     }
@@ -66,17 +66,17 @@ export const asyncEach = async (obj, func, context) => {
   Asynchronous mapping over objects and arrays
 */
 export const asyncMap = async (obj, func, context) => {
-  if (obj === null || obj === undefined) {
+  if(obj === null || obj === undefined) {
     return obj;
   }
   const iteratee = context ? func.bind(context) : func;
   const result = isArray(obj) ? [] : {};
-  if (isObject(obj) || isFunction(obj)) {
-    if (obj.length !== undefined && typeof obj.length === 'number') {
+  if(isObject(obj) || isFunction(obj)) {
+    if(obj.length !== undefined && typeof obj.length === 'number') {
       obj = Array.from(obj);
     }
   }
-  if (isArray(obj)) {
+  if(isArray(obj)) {
     for (let i = 0; i < obj.length; ++i) {
       result[i] = await iteratee(obj[i], i, obj);
     }
@@ -89,4 +89,3 @@ export const asyncMap = async (obj, func, context) => {
   }
   return result;
 };
-

@@ -1,16 +1,16 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import { any, isFunction, first, isArray } from '@semantic-ui/utils';
+import { UIIcon } from '@semantic-ui/core';
 import { Signal } from '@semantic-ui/reactivity';
-import template from './TopbarMenu.html?raw';
+import { any, first, isArray, isFunction } from '@semantic-ui/utils';
 import css from './TopbarMenu.css?raw';
+import template from './TopbarMenu.html?raw';
 
 const defaultSettings = {
   menu: [],
   activeURL: '',
 };
 
-const createComponent = function ({ self, settings }) {
+const createComponent = function({ self, settings }) {
   return {
     url: new Signal(settings.activeURL),
     getMenu() {
@@ -18,17 +18,17 @@ const createComponent = function ({ self, settings }) {
     },
     getItemStates(item) {
       return {
-        active: self.isActiveItem(item)
+        active: self.isActiveItem(item),
       };
     },
     shouldShow(item) {
-      if (isFunction(item.shouldShow)) {
+      if(isFunction(item.shouldShow)) {
         return item.shouldShow || false;
       }
       return true;
     },
     getLink(item) {
-      if (!self.isCurrentItem(item)) {
+      if(!self.isCurrentItem(item)) {
         return item?.url;
       }
       return;
@@ -45,7 +45,7 @@ const createComponent = function ({ self, settings }) {
       if(item.baseURL && activeURL.startsWith(item.baseURL)) {
         return true;
       }
-      if (item?.url === activeURL) {
+      if(item?.url === activeURL) {
         return true;
       }
       return false;
@@ -56,28 +56,25 @@ const createComponent = function ({ self, settings }) {
       if(item.activeURL) {
         return isArray(item.activeURL)
           ? any(item.activeURL, (activeURL) => url.startsWith(activeURL))
-          : url.startsWith(item.activeURL)
-        ;
+          : url.startsWith(item.activeURL);
       }
-      if (item?.url === self.url.get()) {
+      if(item?.url === self.url.get()) {
         return true;
       }
     },
     onPageChange() {
       self.url.set(window.location.pathname);
-    }
+    },
   };
 };
 
-
-const onRendered = function ({ $, self, attachEvent, isClient }) {
+const onRendered = function({ $, self, attachEvent, isClient }) {
   if(isClient) {
     attachEvent(document, 'astro:after-swap', self.onPageChange);
   }
 };
 
-const events = {
-};
+const events = {};
 
 const TopbarMenu = defineComponent({
   tagName: 'topbar-menu',

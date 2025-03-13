@@ -4,13 +4,15 @@ export const scopeStyles = (css, scopeSelector = '') => {
   scopeSelector = scopeSelector.toLowerCase();
 
   const scopeRule = (rule, scopeSelector) => {
-    if (rule.type === CSSRule.STYLE_RULE) {
+    if(rule.type === CSSRule.STYLE_RULE) {
       return `${scopeSelector} ${rule.selectorText} { ${rule.style.cssText} }`;
     }
-    else if (rule.type === CSSRule.MEDIA_RULE || rule.type === CSSRule.SUPPORTS_RULE) {
-      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${scopeRule(rule.cssText, scopeSelector)} }`;
+    else if(rule.type === CSSRule.MEDIA_RULE || rule.type === CSSRule.SUPPORTS_RULE) {
+      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${
+        scopeRule(rule.cssText, scopeSelector)
+      } }`;
     }
-    else if (rule.type === CSSRule.LAYER_STATEMENT_RULE || rule.type == 0 && rule.cssRules) {
+    else if(rule.type === CSSRule.LAYER_STATEMENT_RULE || rule.type == 0 && rule.cssRules) {
       let scopedInnerRules = [];
       each(rule.cssRules, (innerRule) => {
         scopedInnerRules.push(scopeRule(innerRule, scopeSelector));

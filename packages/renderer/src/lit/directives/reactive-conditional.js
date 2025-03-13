@@ -1,8 +1,8 @@
-import { nothing } from 'lit';
-import { directive } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
+import { nothing } from 'lit';
+import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 
 export class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -12,7 +12,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
 
   render(conditional) {
     // Ensure existing reaction is stopped
-    if (this.reaction) {
+    if(this.reaction) {
       this.reaction.stop();
     }
     let html = nothing;
@@ -53,7 +53,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   }
 
   disconnected() {
-    if (this.reaction) {
+    if(this.reaction) {
       this.reaction.stop();
       this.reaction = null;
     }

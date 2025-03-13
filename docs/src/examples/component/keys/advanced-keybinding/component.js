@@ -16,7 +16,6 @@ const defaultState = {
 };
 
 const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, $ }) => ({
-
   initialize() {
     self.calculateResults();
     self.calculateKeybindings();
@@ -90,7 +89,6 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
     state.searchTerm.set('');
     state.selectedIndex.set(-1);
   },
-
 });
 
 /*
@@ -110,7 +108,7 @@ const keys = {
   },
   'esc'({ self }) {
     self.clearSearch();
-  }
+  },
 };
 
 const events = {
@@ -119,7 +117,7 @@ const events = {
   },
   'click .result'({ self, data }) {
     self.selectResult(data.index);
-  }
+  },
 };
 
 defineComponent({
@@ -130,5 +128,5 @@ defineComponent({
   events,
   createComponent,
   defaultSettings,
-  defaultState
+  defaultState,
 });

@@ -1,8 +1,8 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 const users = new Signal([
   { id: 'aliceuser', name: 'Alice', health: 'Bad' },
-  { id: 'samuser', name: 'Sam', health: 'Okay'},
+  { id: 'samuser', name: 'Sam', health: 'Okay' },
 ]);
 
 // Log any changes in users

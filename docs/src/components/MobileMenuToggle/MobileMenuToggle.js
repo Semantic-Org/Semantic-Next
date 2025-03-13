@@ -1,9 +1,9 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import template from './MobileMenuToggle.html?raw';
+import { UIIcon } from '@semantic-ui/core';
 import css from './MobileMenuToggle.css?raw';
+import template from './MobileMenuToggle.html?raw';
 
-const createComponent = function ({ $, isServer, attachEvent, tpl }) {
+const createComponent = function({ $, isServer, attachEvent, tpl }) {
   return {
     getMenu() {
       return $('mobile-menu', { root: document }).component();
@@ -27,7 +27,7 @@ const createComponent = function ({ $, isServer, attachEvent, tpl }) {
 };
 
 const events = {
-  'click .hitbox'({tpl}) {
+  'click .hitbox'({ tpl }) {
     if(tpl.isVisible()) {
       tpl.hideMenu();
     }

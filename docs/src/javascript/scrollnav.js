@@ -1,6 +1,6 @@
 class ScrollNav {
   constructor(element, options = {}) {
-    if (!(element instanceof Element)) {
+    if(!(element instanceof Element)) {
       throw new Error('ScrollNav requires a DOM element');
     }
 
@@ -14,7 +14,7 @@ class ScrollNav {
       hideVelocity: 10,
       showVelocity: 20,
       hideClass: 'hidden',
-      ...options
+      ...options,
     };
 
     // State
@@ -39,7 +39,7 @@ class ScrollNav {
   onScroll() {
     this.currentScrollY = window.scrollY;
 
-    if (!this.ticking) {
+    if(!this.ticking) {
       requestAnimationFrame(this.update);
       this.ticking = true;
     }
@@ -49,14 +49,19 @@ class ScrollNav {
     const delta = this.currentScrollY - this.lastScrollY;
     const velocity = Math.abs(delta);
 
-    if (delta > 0) {  // Scrolling down
-      if (velocity > this.options.hideVelocity &&
-          Math.abs(delta) > this.options.hideThreshold) {
+    if(delta > 0) { // Scrolling down
+      if(
+        velocity > this.options.hideVelocity
+        && Math.abs(delta) > this.options.hideThreshold
+      ) {
         this.hide();
       }
-    } else {  // Scrolling up
-      if (velocity > this.options.showVelocity &&
-          Math.abs(delta) > this.options.showThreshold) {
+    }
+    else { // Scrolling up
+      if(
+        velocity > this.options.showVelocity
+        && Math.abs(delta) > this.options.showThreshold
+      ) {
         this.show();
       }
     }
@@ -66,14 +71,14 @@ class ScrollNav {
   }
 
   show() {
-    if (!this.isVisible) {
+    if(!this.isVisible) {
       this.element.classList.remove(this.options.hideClass);
       this.isVisible = true;
     }
   }
 
   hide() {
-    if (this.isVisible) {
+    if(this.isVisible) {
       this.element.classList.add(this.options.hideClass);
       this.isVisible = false;
     }

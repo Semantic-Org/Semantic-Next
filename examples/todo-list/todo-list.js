@@ -1,12 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
 import { each } from '@semantic-ui/utils';
 
-import { todoItem } from './item/todo-item.js';
-import { todoHeader } from './header/todo-header.js';
 import { todoFooter } from './footer/todo-footer.js';
+import { todoHeader } from './header/todo-header.js';
+import { todoItem } from './item/todo-item.js';
 
-import template from './todo-list.html?raw';
 import css from './todo-list.css?raw';
+import template from './todo-list.html?raw';
 
 const createComponent = ({ self, signal, $ }) => ({
   // global state
@@ -26,15 +26,15 @@ const createComponent = ({ self, signal, $ }) => ({
     const filter = self.filter.get();
     const todos = self.todos.get();
     each(todos, (todo) => {
-      if (!todo._id) {
+      if(!todo._id) {
         todo._id = todo.text;
       }
     });
     return todos.filter((todo) => {
-      if (filter == 'active') {
+      if(filter == 'active') {
         return !todo.completed;
       }
-      else if (filter == 'complete') {
+      else if(filter == 'complete') {
         return todo.completed;
       }
       return true;
@@ -58,7 +58,7 @@ const createComponent = ({ self, signal, $ }) => ({
 });
 
 const onRendered = ({ self, isClient }) => {
-  if (isClient) {
+  if(isClient) {
     self.setRouteFilter();
   }
 };
@@ -68,7 +68,6 @@ const onDestroyed = ({ self }) => {
 };
 
 const events = {
-
   'global hashchange window'({ self }) {
     self.setRouteFilter();
   },

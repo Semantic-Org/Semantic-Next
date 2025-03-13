@@ -11,10 +11,10 @@ export interface ArrayCallback<T> {
 }
 
 /**
-* predicate function for array operations that find items
-*/
+ * predicate function for array operations that find items
+ */
 export interface ArrayPredicate<T> {
- (value: T, index: number, array: T[]): any;
+  (value: T, index: number, array: T[]): any;
 }
 
 /**
@@ -109,7 +109,7 @@ export function uniqueItems<T>(...arrays: T[][]): T[];
  * filterEmpty([0, 1, false, 2, '', 3]) // returns [1, 2, 3]
  * ```
  */
-export function filterEmpty<T>(arr: T[]): Exclude<T, null | undefined | false | 0 | "">[];
+export function filterEmpty<T>(arr: T[]): Exclude<T, null | undefined | false | 0 | ''>[];
 
 /**
  * Gets the last element(s) from an array
@@ -126,8 +126,8 @@ export function filterEmpty<T>(arr: T[]): Exclude<T, null | undefined | false | 
  * ```
  */
 export function last<T>(array: T[]): T | undefined; // No 'number' parameter
-export function last<T>(array: T[], number: number): T[];  // 'number' parameter is required
-export function last<T>(array: T[], number?: number): T | T[] | undefined; //combined for ease of use, optional 'number' parameter
+export function last<T>(array: T[], number: number): T[]; // 'number' parameter is required
+export function last<T>(array: T[], number?: number): T | T[] | undefined; // combined for ease of use, optional 'number' parameter
 
 /**
  * Gets the first element(s) from an array
@@ -145,7 +145,7 @@ export function last<T>(array: T[], number?: number): T | T[] | undefined; //com
  */
 export function first<T>(array: T[]): T | undefined; // No 'number' parameter
 export function first<T>(array: T[], number: number): T[]; // 'number' parameter is required
-export function first<T>(array: T[], number?: number): T | T[] | undefined; //combined for ease of use, optional 'number' parameter
+export function first<T>(array: T[], number?: number): T | T[] | undefined; // combined for ease of use, optional 'number' parameter
 
 /**
  * Returns the first element that matches the callback criteria
@@ -227,8 +227,8 @@ export function inArray<T>(array: T[], value: T): boolean;
  */
 export function range(stop: number): number[]; // Only 'stop' provided
 export function range(start: number, stop: number): number[]; // 'start' and 'stop' provided
-export function range(start: number, stop: number, step: number): number[];// 'start', 'stop', and 'step' provided
-export function range(start: number, stop?: number, step?: number): number[]; //combined for ease of use
+export function range(start: number, stop: number, step: number): number[]; // 'start', 'stop', and 'step' provided
+export function range(start: number, stop?: number, step?: number): number[]; // combined for ease of use
 
 /**
  * Calculates the sum of an array of numbers
@@ -322,7 +322,7 @@ export const any: typeof some;
 export function sortBy<T>(
   arr: T[],
   key: keyof T,
-  comparator?: (a: T[keyof T], b: T[keyof T], objA: T, objB: T) => number
+  comparator?: (a: T[keyof T], b: T[keyof T], objA: T, objB: T) => number,
 ): T[];
 
 /**
@@ -369,7 +369,7 @@ export function groupBy<T>(array: T[], property: keyof T): Record<string, T[]>;
 export function moveItem<T>(
   array: T[],
   callbackOrValue: T | ArrayPredicate<T>,
-  index: number | 'first' | 'last'
+  index: number | 'first' | 'last',
 ): T[];
 
 /**
@@ -388,7 +388,7 @@ export function moveItem<T>(
  */
 export function moveToFront<T>(
   array: T[],
-  callbackOrValue: T | ArrayPredicate<T>
+  callbackOrValue: T | ArrayPredicate<T>,
 ): T[];
 
 /**
@@ -406,7 +406,6 @@ export function moveToFront<T>(
  * ```
  */
 export function moveToBack<T>(
- array: T[],
- callbackOrValue: T | ArrayPredicate<T>
+  array: T[],
+  callbackOrValue: T | ArrayPredicate<T>,
 ): T[];
-  

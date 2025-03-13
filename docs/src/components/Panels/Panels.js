@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, isString, isNumber, roundNumber, inArray, sum, memoize } from '@semantic-ui/utils';
+import { each, inArray, isNumber, isString, memoize, roundNumber, sum } from '@semantic-ui/utils';
 
-import template from './Panels.html?raw';
 import css from './Panels.css?raw';
+import template from './Panels.html?raw';
 
 const defaultSettings = {
   direction: 'vertical',
@@ -10,7 +10,7 @@ const defaultSettings = {
   saveStateID: 'panels',
 };
 
-const createComponent = ({self, el, settings, $}) => ({
+const createComponent = ({ self, el, settings, $ }) => ({
   panels: [],
   renderedPanels: [],
   cache: {
@@ -19,7 +19,7 @@ const createComponent = ({self, el, settings, $}) => ({
     resizeStart: undefined,
     resizeEnd: undefined,
     resizeIndex: undefined,
-    resizeDelta: undefined
+    resizeDelta: undefined,
   },
 
   saveLayout() {
@@ -30,7 +30,7 @@ const createComponent = ({self, el, settings, $}) => ({
       const size = roundNumber(self.getPanelSize(panel));
       return {
         size,
-        minimized: self.isMinimized(index)
+        minimized: self.isMinimized(index),
       };
     });
     if(self.isLayoutCorrectSize(panelSizes)) {
@@ -55,7 +55,8 @@ const createComponent = ({self, el, settings, $}) => ({
       let details;
       try {
         details = JSON.parse(storedLayout)?.panels;
-      } catch(e) {
+      }
+      catch (e) {
         // nothing
       }
       return details;
@@ -78,7 +79,7 @@ const createComponent = ({self, el, settings, $}) => ({
   setPanelRendered(el) {
     self.renderedPanels.push(el);
     if(self.renderedPanels.length == self.panels.length) {
-      if (document.visibilityState === 'visible') {
+      if(document.visibilityState === 'visible') {
         requestAnimationFrame(() => self.setPanelInitialSizes());
       }
       else {
@@ -107,7 +108,6 @@ const createComponent = ({self, el, settings, $}) => ({
     return true;
   },
   setPanelStoredSizes(storedLayout = []) {
-
     let sizeDelta = 100 - sum(storedLayout.map(p => p.size));
 
     // correcting imprecise sizing
@@ -293,8 +293,7 @@ const createComponent = ({self, el, settings, $}) => ({
   getGroupScrollOffset() {
     return (settings.direction == 'horizontal')
       ? $('.panels', { pierceShadow: false }).scrollLeft()
-      : $('.panels', { pierceShadow: false }).scrollTop()
-    ;
+      : $('.panels', { pierceShadow: false }).scrollTop();
   },
   getAvailableFlex() {
     let usedFlex = 0;
@@ -312,8 +311,7 @@ const createComponent = ({self, el, settings, $}) => ({
     }
     return (settings.direction == 'horizontal')
       ? $('.panels', { pierceShadow: false }).width()
-      : $('.panels', { pierceShadow: false }).height()
-    ;
+      : $('.panels', { pierceShadow: false }).height();
   },
   getRelativeSize(pixelSize) {
     const relativeSize = pixelSize / self.getGroupSize() * 100;
@@ -326,7 +324,10 @@ const createComponent = ({self, el, settings, $}) => ({
   getNaturalPanelSize(index) {
     let panel = self.panels[index];
     let getPanelNaturalSize = self.getPanelSetting(index, 'getNaturalSize');
-    let naturalSize = getPanelNaturalSize(panel, { direction: settings.direction, minimized: panel.settings.minimized });
+    let naturalSize = getPanelNaturalSize(panel, {
+      direction: settings.direction,
+      minimized: panel.settings.minimized,
+    });
     return naturalSize;
   },
 
@@ -353,14 +354,12 @@ const createComponent = ({self, el, settings, $}) => ({
   setPanelMaximized(index, previousSize) {
     let naturalSize = self.getNaturalPanelSize(index);
     const relativeSize = self.getRelativeSize(naturalSize);
-    const openSize = (previousSize)
+    const openSize = previousSize
       ? Math.min(previousSize, relativeSize)
-      : relativeSize
-    ;
+      : relativeSize;
     self.changePanelSize(index, openSize, { manualResize: true });
     self.saveLayout();
   },
-
 
   changePanelSize(index, newRelativeSize, resizeSettings) {
     let currentSize = self.getPanelSizePixels(index) || 0;
@@ -397,8 +396,7 @@ const createComponent = ({self, el, settings, $}) => ({
   },
 
   resizePanels(index, delta, { manualResize = false } = {}) {
-    let
-      lastIndex = self.panels.length - 1,
+    let lastIndex = self.panels.length - 1,
       standard = delta > 0,
       hasMinimized = false,
       // if the handle is on the other side
@@ -448,8 +446,7 @@ const createComponent = ({self, el, settings, $}) => ({
         self.setPanelSizePixels(sizeIndex, size);
       },
       pixelsToAdd,
-      pixelsToTake
-    ;
+      pixelsToTake;
 
     // call a function either leftward descending or rightward ascending
     // i.e. if the resizing panel is 3
@@ -462,8 +459,7 @@ const createComponent = ({self, el, settings, $}) => ({
         callback(direction);
         return;
       }
-      const
-        directions = {
+      const directions = {
           all: {
             getIndex: () => 0,
             condition: (index) => (index <= lastIndex),
@@ -480,8 +476,7 @@ const createComponent = ({self, el, settings, $}) => ({
             incrementor: (index) => (index + 1),
           },
         },
-        { getIndex, condition, incrementor } = directions[direction]
-      ;
+        { getIndex, condition, incrementor } = directions[direction];
       let index = getIndex();
       while(condition(index)) {
         if(callback(index) === false) {
@@ -493,7 +488,6 @@ const createComponent = ({self, el, settings, $}) => ({
 
     /* Loops in a direction taking pixels from any columns that exceed a max size */
     const takePixels = (direction, pixelsToTake, getMaxSize) => {
-
       let pixelsLeftToTake = pixelsToTake;
 
       performLoop(direction, (donorIndex) => {
@@ -506,16 +500,16 @@ const createComponent = ({self, el, settings, $}) => ({
 
         // check if this panel exceeds max size test
         if(currentSize > maxSize) {
-
           const pixelsAvailableToDonate = currentSize - maxSize;
 
           // make sure to only take the pixels necessary
-          if (pixelsAvailableToDonate >= pixelsLeftToTake) {
+          if(pixelsAvailableToDonate >= pixelsLeftToTake) {
             const newSize = currentSize - pixelsLeftToTake;
             setSize(donorIndex, newSize);
             pixelsLeftToTake = 0;
             return false;
-          } else {
+          }
+          else {
             // can only get some pixels needed from this panel
             setSize(donorIndex, maxSize);
             pixelsLeftToTake -= pixelsAvailableToDonate;
@@ -523,14 +517,11 @@ const createComponent = ({self, el, settings, $}) => ({
         }
       });
       return pixelsLeftToTake;
-
     };
 
     const addPixels = (direction, pixelsToAdd, getMaxSize) => {
-
       let pixelsLeftToAdd = pixelsToAdd;
       performLoop(direction, (growIndex) => {
-
         // dont grow panels that cannot resize
         if(cannotResize(growIndex)) {
           return;
@@ -541,16 +532,16 @@ const createComponent = ({self, el, settings, $}) => ({
 
         // check if this panel is below max size test
         if(currentSize <= maxSize) {
-
           const pixelsAvailableToGrow = maxSize - currentSize;
 
-          if (pixelsAvailableToGrow >= pixelsLeftToAdd) {
+          if(pixelsAvailableToGrow >= pixelsLeftToAdd) {
             // we can add all the pixels to this panel
             const newSize = currentSize + pixelsLeftToAdd;
             setSize(growIndex, newSize);
             pixelsLeftToAdd = 0;
             return false;
-          } else {
+          }
+          else {
             // we can only add some pixels to this panel
             setSize(growIndex, maxSize);
             pixelsLeftToAdd -= pixelsAvailableToGrow;
@@ -558,15 +549,12 @@ const createComponent = ({self, el, settings, $}) => ({
         }
       });
       return pixelsLeftToAdd;
-
     };
 
     const distributeExcessPixels = (direction, pixelsToAdd) => {
-
       let directions = (direction == 'leftFirst')
         ? ['left', 'right']
-        : ['right', 'left']
-      ;
+        : ['right', 'left'];
       let pixelsAdded = false;
 
       // add pixels
@@ -585,7 +573,6 @@ const createComponent = ({self, el, settings, $}) => ({
           pixelsAdded = true;
         });
       });
-
     };
 
     /*-----------------------
@@ -625,9 +612,9 @@ const createComponent = ({self, el, settings, $}) => ({
       shareStrategy = 'all';
     }
     else {
-      takeDirection = (standard) ? 'right' : 'left';
-      addDirection = (standard) ? 'left' : 'right';
-      shareStrategy = (standard) ? 'leftFirst': 'rightFirst';
+      takeDirection = standard ? 'right' : 'left';
+      addDirection = standard ? 'left' : 'right';
+      shareStrategy = standard ? 'leftFirst' : 'rightFirst';
     }
 
     /*--------------
@@ -648,7 +635,11 @@ const createComponent = ({self, el, settings, $}) => ({
     ---------------*/
 
     /* First check if we can take pixels from panels exceeding max or natural size */
-    pixelsToTake = takePixels(takeDirection, pixelsToTake, donorIndex => (getMaxSize(donorIndex) || Math.max(getNaturalSize(donorIndex), getMinSize(donorIndex))) );
+    pixelsToTake = takePixels(
+      takeDirection,
+      pixelsToTake,
+      donorIndex => (getMaxSize(donorIndex) || Math.max(getNaturalSize(donorIndex), getMinSize(donorIndex))),
+    );
 
     /* If we still need pixels lets donate from any panels that exceed their min width */
     if(pixelsToTake > 0) {
@@ -663,13 +654,16 @@ const createComponent = ({self, el, settings, $}) => ({
     pixelsToAdd = pixelsToAdd - pixelsToTake;
 
     // grow all content to match their max width or natural width
-    pixelsToAdd = addPixels(addDirection, pixelsToAdd, growIndex => (getMaxSize(growIndex) || getNaturalSize(growIndex)));
+    pixelsToAdd = addPixels(
+      addDirection,
+      pixelsToAdd,
+      growIndex => (getMaxSize(growIndex) || getNaturalSize(growIndex)),
+    );
 
     // if we still have additional pixels left to grow find the best place to place them
     if(pixelsToAdd > 0) {
       distributeExcessPixels(shareStrategy, pixelsToAdd);
     }
-
 
     self.debugSizes();
   },
@@ -686,20 +680,20 @@ const onRendered = ({ $, el, self, settings }) => {
 };
 
 const events = {
-  'rendered ui-panel'({self, event, data}) {
+  'rendered ui-panel'({ self, event, data }) {
     const panel = event.target;
     if(inArray(panel, self.panels)) {
       self.setPanelRendered(panel, data);
     }
   },
-  'resizeStart ui-panel'({self, event, data}) {
+  'resizeStart ui-panel'({ self, event, data }) {
     const panel = event.target;
     if(inArray(panel, self.panels)) {
       self.setGroupCalculations();
       self.setDragStartCalculations(panel, data);
     }
   },
-  'resizeDrag ui-panel'({self, event, data}) {
+  'resizeDrag ui-panel'({ self, event, data }) {
     // note: the handle event fires on the preceding panel to the handle
     // so for | 1 || 2 | the handle fires on '2'
     const panel = event.target;
@@ -712,7 +706,7 @@ const events = {
       });
     }
   },
-  'resizeEnd ui-panel'({self, event, data}) {
+  'resizeEnd ui-panel'({ self, event, data }) {
     const panel = event.target;
     if(inArray(panel, self.panels)) {
       self.removeDragStartCalculations();

@@ -7,7 +7,7 @@ const defaultState = {
   text: 'Initial',
 };
 
-const onCreated = ({state}) => {
+const onCreated = ({ state }) => {
   state.text.set('Created');
 };
 

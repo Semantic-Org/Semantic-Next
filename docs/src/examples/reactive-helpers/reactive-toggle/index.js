@@ -1,4 +1,4 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 const isActive = new Signal(false);
 

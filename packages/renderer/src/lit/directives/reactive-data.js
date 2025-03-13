@@ -1,11 +1,11 @@
 import { nothing } from 'lit';
-import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { isArray, isObject, inArray } from '@semantic-ui/utils';
+import { inArray, isArray, isObject } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 export class ReactiveDataDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -45,7 +45,7 @@ export class ReactiveDataDirective extends AsyncDirective {
         if(this.settings.unsafeHTML) {
           value = unsafeHTML(value);
         }
-        if (!computation.firstRun) {
+        if(!computation.firstRun) {
           this.setValue(value);
         }
       });
@@ -73,7 +73,7 @@ export class ReactiveDataDirective extends AsyncDirective {
   }
 
   disconnected() {
-    if (this.reaction) {
+    if(this.reaction) {
       this.reaction.stop();
       this.reaction = null;
     }

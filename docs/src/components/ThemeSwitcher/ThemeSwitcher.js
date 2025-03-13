@@ -2,18 +2,18 @@ import { UIIcon } from '@semantic-ui/core';
 
 import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
-import template from './ThemeSwitcher.html?raw';
 import css from './ThemeSwitcher.css?raw';
+import template from './ThemeSwitcher.html?raw';
 
 const defaultSettings = {
-  defaultTheme: 'light'
+  defaultTheme: 'light',
 };
 
 const defaultState = {
-  theme: undefined
+  theme: undefined,
 };
 
-const createComponent = function ({ $, isServer, reaction, state, settings, self }) {
+const createComponent = function({ $, isServer, reaction, state, settings, self }) {
   return {
     getLocalTheme() {
       return self.getThemePreference() || settings.defaultTheme || self.getSystemPreference();
@@ -30,13 +30,12 @@ const createComponent = function ({ $, isServer, reaction, state, settings, self
       }
       return window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
-        : 'light'
-      ;
+        : 'light';
     },
     getIcon() {
       const icons = {
         dark: 'moon',
-        light: 'sun'
+        light: 'sun',
       };
       const icon = get(icons, state.theme.get());
       return icon;
@@ -56,29 +55,27 @@ const createComponent = function ({ $, isServer, reaction, state, settings, self
         }
         $('html').attr('data-theme', theme);
       });
-    }
+    },
   };
 };
 
-const onCreated = function({self, reaction, signal, state, isClient}) {
+const onCreated = function({ self, reaction, signal, state, isClient }) {
   state.theme.set(self.getLocalTheme());
   if(isClient) {
     self.calculateTheme();
   }
 };
 
-
 const events = {
-  'click'({self, state}) {
+  click({ self, state }) {
     const currentTheme = state.theme.get();
     const newTheme = (currentTheme == 'light')
       ? 'dark'
-      : 'light'
-    ;
+      : 'light';
     state.theme.set(newTheme);
     $('html').dispatchEvent('themechange', {
       theme: newTheme,
-      darkMode: newTheme == 'dark'
+      darkMode: newTheme == 'dark',
     });
   },
 };

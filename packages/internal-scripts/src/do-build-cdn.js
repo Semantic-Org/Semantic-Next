@@ -5,9 +5,9 @@ const baseDir = process.env.BASE_DIR;
 // This is called from npm script to build a package with bare import rewrites
 (async function() {
   const result = await buildCDN({
-    baseDir
+    baseDir,
   });
-  if (!result.success) {
+  if(!result.success) {
     process.exit(1);
   }
 })();

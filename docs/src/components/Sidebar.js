@@ -1,10 +1,9 @@
-
 export function renderMenu(menu) {
   let html = '';
 
   menu.forEach(section => {
     html += `<div class="title">${section.name}</div>\n`;
-    if (section.pages.some(page => page.pages)) {
+    if(section.pages.some(page => page.pages)) {
       // Has subsections
       section.pages.forEach(subsection => {
         html += `<div class="title">${subsection.name}</div>\n<div class="menu">\n`;
@@ -13,7 +12,8 @@ export function renderMenu(menu) {
         });
         html += `</div>\n`; // Close menu
       });
-    } else {
+    }
+    else {
       // No subsections, direct pages
       html += `<div class="content">\n<div class="menu">\n`;
       section.pages.forEach(page => {
@@ -23,4 +23,4 @@ export function renderMenu(menu) {
     }
   });
   return html;
-};
+}

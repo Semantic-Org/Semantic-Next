@@ -8,11 +8,11 @@
  * Handles very large and very small numbers correctly.
  * Returns the original value if it's not a finite number.
  * @see {@link https://next.semantic-ui.com/api/utils/numbers#roundnumber roundNumber}
- * 
+ *
  * @param number - The number to round
  * @param digits - Number of significant digits (default: 5)
  * @returns The rounded number
- * 
+ *
  * @example
  * ```ts
  * roundNumber(123.456789, 4) // returns 123.5

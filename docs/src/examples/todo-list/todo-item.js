@@ -7,7 +7,7 @@ const createComponent = ({ self, data, signal, findParent, $ }) => ({
   getClasses() {
     return {
       completed: data.todo.completed,
-      editing: self.editing.get()
+      editing: self.editing.get(),
     };
   },
   getTodos() {
@@ -41,7 +41,7 @@ const events = {
     });
   },
   'keydown input.edit'({ event, self, $ }) {
-    if (event.key === 'Enter') {
+    if(event.key === 'Enter') {
       $(this).blur();
     }
   },

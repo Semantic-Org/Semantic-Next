@@ -7,7 +7,7 @@ const createComponent = ({ self, signal, $ }) => {
   return {
     number: signal(6),
     getRange() {
-      if (!Number.isFinite(+self.number.value)) {
+      if(!Number.isFinite(+self.number.value)) {
         return [];
       }
       return range(self.number.value);
@@ -27,7 +27,7 @@ const createComponent = ({ self, signal, $ }) => {
       let person = {
         ...self.newPerson,
       };
-      if (self.addedCount > 0) {
+      if(self.addedCount > 0) {
         person._id = `${person._id}${self.addedCount}`;
         person.name = `${person.name} #${self.addedCount}`;
       }

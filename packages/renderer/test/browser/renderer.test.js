@@ -1,6 +1,6 @@
 // renderer.test.js
-import { describe, it, expect } from 'vitest';
 import { render } from 'lit-html';
+import { describe, expect, it } from 'vitest';
 
 import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateHelpers } from '@semantic-ui/templating';
@@ -8,8 +8,7 @@ import { TemplateHelpers } from '@semantic-ui/templating';
 /**
  * Renders a given AST (array of nodes) with LitRenderer into text.
  */
-function renderASTtoText({ast, data, snippets}) {
-
+function renderASTtoText({ ast, data, snippets }) {
   // render ast to lit
   const renderer = new LitRenderer({
     ast,
@@ -32,7 +31,7 @@ function renderASTtoText({ast, data, snippets}) {
 
 function getRendererConfig({ name, expression, data, snippet, snippets, ifDefined = false, unsafeHTML = false }) {
   let ast = [];
-  if (snippet) {
+  if(snippet) {
     ast.push({ type: 'template', name: snippet.name, data: snippet.data });
   }
   else {
@@ -49,7 +48,7 @@ const expressionTests = [
     data: {
       timezone: 'PST',
       date: new Date('2025-01-01T12:00:00Z'),
-    }
+    },
   },
   {
     name: 'Calling helper method in data context with js arguments',
@@ -58,7 +57,7 @@ const expressionTests = [
     data: {
       timezone: 'PST',
       date: new Date('2025-01-01T12:00:00Z'),
-    }
+    },
   },
   {
     name: 'Calling helper method with inline object definition',
@@ -66,7 +65,7 @@ const expressionTests = [
     result: 'one two three', // from the example
     data: {
       isThree: true,
-    }
+    },
   },
   {
     name: 'Calling method with spaced arguments and inline array definition',
@@ -78,32 +77,32 @@ const expressionTests = [
     expression: 'value',
     result: '1',
     data: {
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Inline addition',
     expression: 'value + 1',
     result: '2',
     data: {
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Inline arithmetic',
     expression: 'value + 2 * 5',
     result: '11',
     data: {
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Inline arithmetic with order of operations',
     expression: '(value + 2) * 5',
     result: '15',
     data: {
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Calling a method with spaced arguments',
@@ -111,8 +110,8 @@ const expressionTests = [
     result: '2',
     data: {
       addOne: (value) => value + 1,
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Calling a method with js arguments and inline addition',
@@ -120,8 +119,8 @@ const expressionTests = [
     result: '3',
     data: {
       addOne: (value) => value + 1,
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Calling a method with inline object',
@@ -129,8 +128,8 @@ const expressionTests = [
     result: 'two',
     data: {
       getValue: (obj, prop) => obj[prop],
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     name: 'Adding numbers',
@@ -148,35 +147,35 @@ const expressionTests = [
         type: 'snippet',
         name: 'test',
         content: [
-          { type: 'expression', value: 'obj.a' }
-        ]
-      }
+          { type: 'expression', value: 'obj.a' },
+        ],
+      },
     },
     result: '1',
     data: {
       getValue: (obj, prop) => obj[prop],
-    }
+    },
   },
   {
     name: 'Nested object property access',
     expression: 'user.name',
     result: 'Jack',
     data: {
-      user: { name: 'Jack' }
-    }
+      user: { name: 'Jack' },
+    },
   },
   {
     name: 'Missing property returns undefined',
     expression: 'user.age',
     result: '',
     data: {
-      user: { name: 'Jack' }
-    }
+      user: { name: 'Jack' },
+    },
   },
   {
     name: 'Missing method call yields no result',
     expression: 'someUndefinedFn',
-    result: ''
+    result: '',
   },
   {
     name: 'Mixed spaced & JS arguments with nested calls',
@@ -185,8 +184,8 @@ const expressionTests = [
     data: {
       numberVal: 10,
       innerFn: (val) => `Inner(${val})`,
-      outerFn: (a, b) => `Outer(${a}, ${b.foo})`
-    }
+      outerFn: (a, b) => `Outer(${a}, ${b.foo})`,
+    },
   },
   {
     name: 'Method returning null',
@@ -194,8 +193,8 @@ const expressionTests = [
     result: '',
     data: {
       dataVal: 1,
-      returnsNull: (val) => null
-    }
+      returnsNull: (val) => null,
+    },
   },
   {
     name: 'Unsafe html should preserve html',
@@ -213,7 +212,7 @@ const expressionTests = [
     expression: 'isChecked',
     result: 'true',
     ifDefined: true,
-    data: { isChecked: true }
+    data: { isChecked: true },
   },
   {
     name: 'Inline object and array',
@@ -222,13 +221,13 @@ const expressionTests = [
     data: {
       doSomething(obj, arr) {
         // e.g. obj = { nested: { key: 'value' }, arr: [1,2,3] }
-        if (obj?.text === 'apple' && arr?.length === 3) {
+        if(obj?.text === 'apple' && arr?.length === 3) {
           return 'gotIt';
         }
         return 'wrong';
       },
-      arr: [1, 2, 3]
-    }
+      arr: [1, 2, 3],
+    },
   },
   {
     name: 'Nested inline object and array',
@@ -237,37 +236,37 @@ const expressionTests = [
     data: {
       doSomething(obj) {
         // e.g. obj = { nested: { key: 'value' }, arr: [1,2,3] }
-        if (obj?.nested?.key == 1 && obj?.arr?.length == 3) {
+        if(obj?.nested?.key == 1 && obj?.arr?.length == 3) {
           return 'gotIt';
         }
         return 'wrong';
       },
-      value: 1
+      value: 1,
     },
   },
   {
     name: 'JS ternary operator in expression',
     expression: '(someFlag ? "Y" : "N")',
     result: 'Y',
-    data: { someFlag: true }
+    data: { someFlag: true },
   },
   {
     name: 'Array indexing (numbers[1])',
     expression: 'numbers[1]',
     result: '2',
     data: {
-      numbers: [1, 2, 3]
-    }
+      numbers: [1, 2, 3],
+    },
   },
   {
     name: 'Local property overriding global helper',
     expression: `concat "Hello" "World"`,
     result: 'LocalHelloWorld',
     data: {
-      concat: (a, b) => `Local${a}${b}` // overshadow global helper
-    }
+      concat: (a, b) => `Local${a}${b}`, // overshadow global helper
+    },
   },
-  
+
   // Additional tests for expression evaluation in data context
   // These tests cover various aspects of expression evaluation including:
   // - Method binding and this context preservation
@@ -276,40 +275,40 @@ const expressionTests = [
   // - Template strings, logical operators, and other JS expressions
   // - Mixed semantic and javascript style expressions
   // - Optional chaining and literal values
-  
+
   // Tests for method binding and this context
   {
     name: 'Method binding with this context',
     expression: 'user.getFullName()',
     result: 'John Doe',
-    data: { 
-      user: { 
+    data: {
+      user: {
         firstName: 'John',
         lastName: 'Doe',
         getFullName() {
           return `${this.firstName} ${this.lastName}`;
-        }
-      } 
-    }
+        },
+      },
+    },
   },
   {
     name: 'Method with arguments and this context',
     expression: 'counter.add(5)',
     result: '10',
-    data: { 
-      counter: { 
+    data: {
+      counter: {
         value: 5,
         add(n) {
           return this.value + n;
-        }
-      } 
-    }
+        },
+      },
+    },
   },
   {
     name: 'Deeply nested method call with this context',
     expression: 'app.user.profile.formatBio()',
     result: 'JOHN DOE - DEVELOPER',
-    data: { 
+    data: {
       app: {
         user: {
           profile: {
@@ -317,26 +316,26 @@ const expressionTests = [
             title: 'Developer',
             formatBio() {
               return `${this.name} - ${this.title}`.toUpperCase();
-            }
-          }
-        }
-      } 
-    }
+            },
+          },
+        },
+      },
+    },
   },
   {
     name: 'Method returning object properties',
     expression: 'data.getConfig().theme',
     result: 'dark',
-    data: { 
+    data: {
       data: {
         config: { theme: 'dark' },
         getConfig() {
           return this.config;
-        }
-      } 
-    }
+        },
+      },
+    },
   },
-  
+
   // Tests for deeply nested property access
   {
     name: 'Deep property access with multiple levels',
@@ -347,14 +346,14 @@ const expressionTests = [
         settings: {
           theme: {
             colors: {
-              primary: '#336699'
-            }
-          }
-        }
-      }
-    }
+              primary: '#336699',
+            },
+          },
+        },
+      },
+    },
   },
-  
+
   // Tests for function composition
   {
     name: 'Function composition (titleCase of concat)',
@@ -362,10 +361,10 @@ const expressionTests = [
     result: 'John Smith',
     data: {
       firstName: 'john',
-      lastName: 'smith'
-    }
+      lastName: 'smith',
+    },
   },
-  
+
   // Tests for complex expressions with mixed evaluation orders
   {
     name: 'Complex expression with parenthesized evaluation order',
@@ -379,30 +378,30 @@ const expressionTests = [
         const hours = date.getHours() % 12 || 12;
         const minutes = date.getMinutes().toString().padStart(2, '0');
         return `${hours}:${minutes}`;
-      }
-    }
+      },
+    },
   },
-  
+
   // Tests for array and object methods
   {
     name: 'Array map method in expression',
     expression: 'items.map(item => item.toUpperCase()).join(", ")',
     result: 'APPLE, BANANA, CHERRY',
     data: {
-      items: ['apple', 'banana', 'cherry']
-    }
+      items: ['apple', 'banana', 'cherry'],
+    },
   },
-  
+
   // Tests for template string expressions
   {
     name: 'Template string expression',
     expression: '`Hello, ${name}!`',
     result: 'Hello, Alice!',
     data: {
-      name: 'Alice'
-    }
+      name: 'Alice',
+    },
   },
-  
+
   // Tests for logical operators
   {
     name: 'Logical AND operator',
@@ -410,26 +409,26 @@ const expressionTests = [
     result: 'Shown',
     data: {
       isActive: true,
-      isVisible: true
-    }
+      isVisible: true,
+    },
   },
   {
     name: 'Logical OR operator with nullish values',
     expression: 'userName || "Guest"',
     result: 'Guest',
     data: {
-      userName: null
-    }
+      userName: null,
+    },
   },
   {
     name: 'Nullish coalescing operator',
     expression: 'userName ?? "Guest"',
     result: 'Guest',
     data: {
-      userName: null
-    }
+      userName: null,
+    },
   },
-  
+
   // Tests for mixed semantic and javascript style expressions
   {
     name: 'Mixed semantic and JS style - passing JS expression to semantic style',
@@ -438,10 +437,10 @@ const expressionTests = [
     data: {
       arg1: 5,
       arg2: 5,
-      doSomething: (a, b, obj) => `${a}-${b}-a:${obj.a},b:${obj.b}`
-    }
+      doSomething: (a, b, obj) => `${a}-${b}-a:${obj.a},b:${obj.b}`,
+    },
   },
-  
+
   // Tests for function arguments with operators
   {
     name: 'Function call with complex condition argument',
@@ -450,10 +449,10 @@ const expressionTests = [
     data: {
       isLoggedIn: true,
       hasPermission: true,
-      getMessage: (condition) => condition ? 'Welcome!' : 'Please login'
-    }
+      getMessage: (condition) => condition ? 'Welcome!' : 'Please login',
+    },
   },
-  
+
   // Tests for optional chaining
   {
     name: 'Optional chaining with existing property',
@@ -462,10 +461,10 @@ const expressionTests = [
     data: {
       user: {
         profile: {
-          name: 'Jane'
-        }
-      }
-    }
+          name: 'Jane',
+        },
+      },
+    },
   },
   {
     name: 'Optional chaining with missing property',
@@ -474,12 +473,12 @@ const expressionTests = [
     data: {
       user: {
         profile: {
-          name: 'Jane'
-        }
-      }
-    }
+          name: 'Jane',
+        },
+      },
+    },
   },
-  
+
   // Tests for literal values
   {
     name: 'String literal with quotes',
@@ -501,9 +500,9 @@ const expressionTests = [
     expression: '42',
     result: '42',
   },
-  
+
   // Real-world edge cases and common patterns
-  
+
   // Inline activeIf and other helper patterns
   {
     name: 'Inline activeIf helper with comparison in object',
@@ -513,18 +512,18 @@ const expressionTests = [
       selected: 5,
       current: 5,
       isDisabled: true,
-      activeIf: (condition) => condition ? 'active' : ''
-    }
+      activeIf: (condition) => condition ? 'active' : '',
+    },
   },
   {
     name: 'Nested helpers with data context values',
     expression: 'concat "primary " buttonSize (isSelected(itemId) ? " selected" : "")',
-    result: 'primary largetrue',  // The concat is concatenating without spaces between arguments
+    result: 'primary largetrue', // The concat is concatenating without spaces between arguments
     data: {
       buttonSize: 'large',
       itemId: 42,
-      isSelected: (id) => id === 42
-    }
+      isSelected: (id) => id === 42,
+    },
   },
   {
     name: 'Expression with array methods and data manipulation',
@@ -534,17 +533,17 @@ const expressionTests = [
       items: [
         { name: 'Item 1', status: 'active' },
         { name: 'Item 2', status: 'inactive' },
-        { name: 'Item 3', status: 'active' }
-      ]
-    }
+        { name: 'Item 3', status: 'active' },
+      ],
+    },
   },
   {
     name: 'Expression with string methods from data context',
     expression: 'title.toLowerCase().split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")',
     result: 'Hello World',
     data: {
-      title: 'HELLO WORLD'
-    }
+      title: 'HELLO WORLD',
+    },
   },
   {
     name: 'Dynamic class composition with conditions',
@@ -553,8 +552,8 @@ const expressionTests = [
     data: {
       variant: 'primary',
       size: 'large',
-      isDisabled: true
-    }
+      isDisabled: true,
+    },
   },
   {
     name: 'Expression with data-driven object access',
@@ -564,9 +563,9 @@ const expressionTests = [
       fieldName: 'count',
       data: {
         count: { value: 42 },
-        status: { value: 'active' }
-      }
-    }
+        status: { value: 'active' },
+      },
+    },
   },
   {
     name: 'Expression with property check and fallback',
@@ -574,8 +573,8 @@ const expressionTests = [
     result: 'No address',
     data: {
       user: { name: 'John' },
-      exists: (val) => val !== undefined
-    }
+      exists: (val) => val !== undefined,
+    },
   },
   {
     name: 'Format date with multiple parameters',
@@ -587,8 +586,8 @@ const expressionTests = [
       timeZone: 'UTC',
       formatDate: (date, locale, options) => {
         return '2023-01-15'; // Mock for testing
-      }
-    }
+      },
+    },
   },
   {
     name: 'Decimal calculation with rounding',
@@ -596,8 +595,8 @@ const expressionTests = [
     result: '89.1',
     data: {
       price: 99,
-      discount: 10
-    }
+      discount: 10,
+    },
   },
   {
     name: 'Calculated property with dynamic field name',
@@ -608,12 +607,12 @@ const expressionTests = [
       currency: 'usd',
       settings: {
         usdRate: 1,
-        eurRate: 0.85
+        eurRate: 0.85,
       },
       calculateTotal: (items, rate) => {
         return items.reduce((total, item) => total + item.price, 0) * rate;
-      }
-    }
+      },
+    },
   },
   {
     name: 'Complex conditional rendering expression',
@@ -621,16 +620,16 @@ const expressionTests = [
     result: 'View',
     data: {
       isLoggedIn: true,
-      hasPermission: false
-    }
+      hasPermission: false,
+    },
   },
   {
     name: 'Object with expressions and methods',
     expression: '{ count: items.length, isEmpty: items.length === 0, label: items.length === 1 ? "item" : "items" }',
     result: '{"count":3,"isEmpty":false,"label":"items"}',
     data: {
-      items: [1, 2, 3]
-    }
+      items: [1, 2, 3],
+    },
   },
   {
     name: 'Conditional method call with nullish coalescing',
@@ -639,11 +638,11 @@ const expressionTests = [
     data: {
       user: {
         settings: {
-          getTheme: () => 'dark'
-        }
+          getTheme: () => 'dark',
+        },
       },
-      defaultTheme: 'light'
-    }
+      defaultTheme: 'light',
+    },
   },
   {
     name: 'Object key with dynamic property accessor',
@@ -654,10 +653,10 @@ const expressionTests = [
       key: 'welcome',
       translations: {
         'en.welcome': 'Welcome',
-        'fr.welcome': 'Bienvenue'
+        'fr.welcome': 'Bienvenue',
       },
-      defaultText: 'Hello'
-    }
+      defaultText: 'Hello',
+    },
   },
   {
     name: 'String template with conditional parts',
@@ -666,8 +665,8 @@ const expressionTests = [
     data: {
       prefix: 'User',
       showDetails: true,
-      details: 'Premium account'
-    }
+      details: 'Premium account',
+    },
   },
   {
     name: 'Numeric formatting with localization',
@@ -679,8 +678,8 @@ const expressionTests = [
       locale: 'en-US',
       formatNumber: (num, options) => {
         return options.currency === 'USD' ? '$1,234.56' : '1.234,56 €';
-      }
-    }
+      },
+    },
   },
   {
     name: 'Array manipulation with multiple methods',
@@ -688,10 +687,10 @@ const expressionTests = [
     result: 'css, html, javascript',
     data: {
       tags: ['html', 'css'],
-      defaultTags: ['javascript', 'html']
-    }
+      defaultTags: ['javascript', 'html'],
+    },
   },
-  
+
   // Edge cases that might challenge the parser and evaluation
   // These tests cover potential challenges for the expression evaluator, including:
   // - Complex string literal handling with mixed quote types
@@ -706,9 +705,9 @@ const expressionTests = [
   // - Chained semantic style calls
   // - Arrow functions as parameters
   // - Self-referential functions
-  // 
+  //
   // Lessons learned from these tests and implementation improvements:
-  // 1. JavaScript expressions are generally well supported through direct eval, but semantic style 
+  // 1. JavaScript expressions are generally well supported through direct eval, but semantic style
   //    expressions (spaced arguments) are parsed separately and have different evaluation rules
   // 2. String literal handling with mixed quotes works as expected in pure JS expressions
   // 3. Loose equality (==) works as in standard JavaScript (0 == "0" is true)
@@ -727,13 +726,13 @@ const expressionTests = [
   //    - Better debugging for expression evaluation errors
   {
     name: 'Expression with mixed quotes in string literals',
-    expression: '`${label}: "${value}"` + \' (\'+ status + \')\'',
+    expression: "`${label}: \"${value}\"` + ' ('+ status + ')'",
     result: 'Count: "42" (active)',
     data: {
       label: 'Count',
       value: 42,
-      status: 'active'
-    }
+      status: 'active',
+    },
   },
   {
     name: 'Nested ternary operators with comparisons',
@@ -741,24 +740,24 @@ const expressionTests = [
     result: 'Limited Access',
     data: {
       status: 'active',
-      role: 'user'
-    }
+      role: 'user',
+    },
   },
   {
     name: 'Bitwise operations in expression',
     expression: '((flags & 1) ? "Read" : "") + ((flags & 2) ? "Write" : "") + ((flags & 4) ? "Execute" : "")',
     result: 'ReadWriteExecute',
     data: {
-      flags: 7 // 111 in binary (read, write, execute)
-    }
+      flags: 7, // 111 in binary (read, write, execute)
+    },
   },
   {
     name: 'Expression with lookalike comparisons',
     expression: 'value == "0" ? "Equals zero string" : value === 0 ? "Equals zero number" : "Non-zero"',
     result: 'Equals zero string', // JS loose equality: 0 == "0" is true
     data: {
-      value: 0
-    }
+      value: 0,
+    },
   },
   {
     name: 'Object property with spaces',
@@ -766,17 +765,17 @@ const expressionTests = [
     result: 'value with spaces',
     data: {
       data: {
-        'property with spaces': 'value with spaces'
-      }
-    }
+        'property with spaces': 'value with spaces',
+      },
+    },
   },
   {
     name: 'Deeply nested parentheses in expression',
     expression: '((((value + 1) * 2) - 3) / 4)',
     result: '1.75', // ((((4 + 1) * 2) - 3) / 4) = ((10 - 3) / 4) = (7 / 4) = 1.75
     data: {
-      value: 4
-    }
+      value: 4,
+    },
   },
   {
     name: 'Function call with object containing data variables',
@@ -787,8 +786,8 @@ const expressionTests = [
       age: 30,
       role: 'admin',
       active: true,
-      formatUser: (user) => `${user.name} (${user.age}) - ${user.role}`
-    }
+      formatUser: (user) => `${user.name} (${user.age}) - ${user.role}`,
+    },
   },
   {
     name: 'Semantic style calling JS style function',
@@ -797,8 +796,8 @@ const expressionTests = [
     data: {
       value: 75,
       threshold: 50,
-      classIf: (condition, trueClass, falseClass) => condition ? trueClass : falseClass
-    }
+      classIf: (condition, trueClass, falseClass) => condition ? trueClass : falseClass,
+    },
   },
   {
     name: 'Expression with escaped characters',
@@ -814,9 +813,9 @@ const expressionTests = [
       user: {
         name() {
           return 'JOHN';
-        }
-      }
-    }
+        },
+      },
+    },
   },
   {
     name: 'Chained semantic style calls',
@@ -825,8 +824,8 @@ const expressionTests = [
     data: {
       trim: (str) => str.trim(),
       lowercase: (str) => str.toLowerCase(),
-      uppercase: (str) => str.toUpperCase()
-    }
+      uppercase: (str) => str.toUpperCase(),
+    },
   },
   {
     name: 'Method call with arrow function argument',
@@ -834,8 +833,8 @@ const expressionTests = [
     result: '20,30',
     data: {
       items: [{ value: 5 }, { value: 20 }, { value: 30 }],
-      process: (array, filterFn) => array.filter(filterFn).map(i => i.value).join(',')
-    }
+      process: (array, filterFn) => array.filter(filterFn).map(i => i.value).join(','),
+    },
   },
   {
     name: 'Function with self reference via data context',
@@ -850,19 +849,17 @@ const expressionTests = [
           result *= i;
         }
         return result;
-      }
-    }
-  }
+      },
+    },
+  },
 ];
 
 describe('LitRenderer', () => {
-
   describe('Expression', () => {
-
     expressionTests.forEach((test) => {
       it(test.name, () => {
-        const {ast, data, helpers, snippets} = getRendererConfig(test);
-        const output = renderASTtoText({ast, data, helpers, snippets});
+        const { ast, data, helpers, snippets } = getRendererConfig(test);
+        const output = renderASTtoText({ ast, data, helpers, snippets });
 
         if(test.result !== undefined) {
           // expect an exact match
@@ -876,6 +873,5 @@ describe('LitRenderer', () => {
         }
       });
     });
-
   });
 });

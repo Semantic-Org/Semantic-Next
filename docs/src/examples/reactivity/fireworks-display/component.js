@@ -21,21 +21,20 @@ const defaultState = {
 };
 
 const defaultSettings = {
-  rocketSpeed: 300,        // upward speed in pixels/second
-  rocketTimer: 1.5,        // base seconds until explosion
-  rocketTimerVariance: 0.5,  // variance in explosion timer (seconds)
-  sparkCount: 30,          // sparks per explosion
-  sparkSpeed: 200,         // base spark speed
+  rocketSpeed: 300, // upward speed in pixels/second
+  rocketTimer: 1.5, // base seconds until explosion
+  rocketTimerVariance: 0.5, // variance in explosion timer (seconds)
+  sparkCount: 30, // sparks per explosion
+  sparkSpeed: 200, // base spark speed
   sparkSpeedVariance: 50,
-  gravity: 200,            // gravity acceleration in pixels/second^2
-  fadeRate: 0.8,           // alpha fade per second
-  minAlpha: 0,             // minimum alpha value before removal
-  emitRate: 10,             // rockets per second when pointer is down,
-  maxLaunchHeight: 0.5     // max height you can launch a rocket from
+  gravity: 200, // gravity acceleration in pixels/second^2
+  fadeRate: 0.8, // alpha fade per second
+  minAlpha: 0, // minimum alpha value before removal
+  emitRate: 10, // rockets per second when pointer is down,
+  maxLaunchHeight: 0.5, // max height you can launch a rocket from
 };
 
 const createComponent = ({ self, $, reaction, settings, state }) => ({
-
   render: { lastTime: 0, fps: 0 },
 
   startAnimation() {
@@ -57,7 +56,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     self.render.lastTime = currentTime;
 
     const emitter = state.emitter.get();
-    if (emitter.active) {
+    if(emitter.active) {
       self.emitRocket(deltaTime);
     }
 
@@ -68,7 +67,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   emitRocket(deltaTime) {
     let emitter = state.emitter.get();
     emitter.lastEmission += deltaTime;
-    if (emitter.lastEmission >= 1 / settings.emitRate) {
+    if(emitter.lastEmission >= 1 / settings.emitRate) {
       const canvas = self.getCanvas();
       // Adjust launchY so rockets start near the bottom of the canvas
       const launchX = emitter.x;
@@ -87,29 +86,29 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     let newParticles = [];
 
     currentParticles.forEach(particle => {
-      if (particle.type === 'rocket') {
+      if(particle.type === 'rocket') {
         particle.x += particle.vx * deltaTime;
         particle.y += particle.vy * deltaTime;
         particle.timer -= deltaTime;
-        if (particle.timer <= 0) {
+        if(particle.timer <= 0) {
           const sparks = self.explodeRocket(particle);
           newParticles.push(...sparks);
         }
-        else if (particle.y > 0) {
+        else if(particle.y > 0) {
           newParticles.push(particle);
         }
       }
-      else if (particle.type === 'spark') {
+      else if(particle.type === 'spark') {
         particle.vy += settings.gravity * deltaTime;
         particle.x += particle.vx * deltaTime;
         particle.y += particle.vy * deltaTime;
         particle.alpha -= settings.fadeRate * deltaTime;
-        if (
-          particle.alpha > settings.minAlpha &&
-          particle.x >= 0 &&
-          particle.x <= canvas.width &&
-          particle.y >= 0 &&
-          particle.y <= canvas.height
+        if(
+          particle.alpha > settings.minAlpha
+          && particle.x >= 0
+          && particle.x <= canvas.width
+          && particle.y >= 0
+          && particle.y <= canvas.height
         ) {
           newParticles.push(particle);
         }
@@ -124,10 +123,10 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     state.particles.peek().forEach(particle => {
-      if (particle.type === 'rocket') {
+      if(particle.type === 'rocket') {
         self.drawRocket(particle, ctx);
       }
-      else if (particle.type === 'spark') {
+      else if(particle.type === 'spark') {
         self.drawSpark(particle, ctx);
       }
     });
@@ -153,8 +152,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   },
 
   createRocket({ x, y }) {
-    const randomInRange = (avg, variance) =>
-      avg + (Math.random() - 0.5) * 2 * variance;
+    const randomInRange = (avg, variance) => avg + (Math.random() - 0.5) * 2 * variance;
     return {
       _id: generateID(),
       type: 'rocket',
@@ -172,9 +170,8 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     const sparks = [];
     for (let i = 0; i < settings.sparkCount; i++) {
       const angle = Math.random() * 2 * Math.PI;
-      const speed =
-        settings.sparkSpeed +
-        (Math.random() - 0.5) * 2 * settings.sparkSpeedVariance;
+      const speed = settings.sparkSpeed
+        + (Math.random() - 0.5) * 2 * settings.sparkSpeedVariance;
       sparks.push({
         _id: generateID(),
         type: 'spark',
@@ -203,10 +200,9 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     const scaleY = canvas.height / rect.height;
     return {
       x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY
+      y: (event.clientY - rect.top) * scaleY,
     };
-  }
-
+  },
 });
 
 const onRendered = ({ self, state, settings }) => {
@@ -234,7 +230,7 @@ const events = {
     emitter.active = false;
     state.emitter.set(emitter);
   },
-  'touchstart, touchmove canvas'({event}) {
+  'touchstart, touchmove canvas'({ event }) {
     // prevent highlight/scroll on mobile
     event.preventDefault();
   },

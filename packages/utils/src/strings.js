@@ -1,5 +1,5 @@
-import { isArray, isString, isFunction } from './types.js';
 import { noop } from './functions.js';
+import { isArray, isFunction, isString } from './types.js';
 
 /*-------------------
        Strings
@@ -57,7 +57,7 @@ export const toTitleCase = (str = '') => {
     .split(' ')
     .map((word, index) => {
       // Always capitalize the first word and any word not in stopWords
-      if (index === 0 || !stopWords.includes(word)) {
+      if(index === 0 || !stopWords.includes(word)) {
         return word.charAt(0).toUpperCase() + word.slice(1);
       }
       return word;
@@ -70,32 +70,32 @@ export const joinWords = (words, {
   lastSeparator = ' and ',
   oxford = true,
   quotes = false,
-  transform = noop
+  transform = noop,
 } = {}) => {
-  if (!isArray(words) || words.length === 0) {
+  if(!isArray(words) || words.length === 0) {
     return '';
   }
 
   const processedWords = words.map(word => {
     let processed = word;
-    if (isFunction(transform)) {
+    if(isFunction(transform)) {
       processed = transform(word);
     }
     return quotes ? `"${processed}"` : processed;
   });
 
-  if (processedWords.length === 1) {
+  if(processedWords.length === 1) {
     return processedWords[0];
   }
 
-  if (processedWords.length === 2) {
+  if(processedWords.length === 2) {
     return processedWords.join(lastSeparator);
   }
 
   const lastWord = processedWords.pop();
   let result = processedWords.join(separator);
 
-  if (oxford && separator.trim() !== lastSeparator.trim()) {
+  if(oxford && separator.trim() !== lastSeparator.trim()) {
     result += separator.trim();
   }
 
@@ -107,10 +107,8 @@ export const getArticle = (word, settings = {}) => {
   const firstLetter = word.toLowerCase()[0];
   const article = vowels.includes(firstLetter)
     ? 'an'
-    : 'a'
-  ;
+    : 'a';
   return (settings.capitalize)
     ? capitalize(article)
-    : article
-  ;
+    : article;
 };

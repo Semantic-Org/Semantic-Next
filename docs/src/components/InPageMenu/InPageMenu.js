@@ -1,16 +1,16 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import { any, each, flatten, noop, first, inArray, last, isServer } from '@semantic-ui/utils';
+import { UIIcon } from '@semantic-ui/core';
+import { any, each, first, flatten, inArray, isServer, last, noop } from '@semantic-ui/utils';
 
-import template from './InPageMenu.html?raw';
-import css from './InPageMenu.css?raw';
 import { Reaction } from '@semantic-ui/reactivity';
+import css from './InPageMenu.css?raw';
+import template from './InPageMenu.html?raw';
 
 const defaultSettings = {
   showHeader: false,
   header: 'On This Page',
   menu: [],
-  scrollContext: (isServer) ? null : window,
+  scrollContext: isServer ? null : window,
   scrollOffset: 0,
   intersectionContext: null,
   smoothScroll: true,
@@ -23,7 +23,7 @@ const defaultSettings = {
   getAnchorID: (item) => item?.id,
 
   // get menu item id from page element
-  getActiveElementID: (element) => element?.id
+  getActiveElementID: (element) => element?.id,
 };
 
 const defaultState = {
@@ -32,8 +32,7 @@ const defaultState = {
   visibleItems: [],
 };
 
-const createComponent = ({self, state, isServer, signal, reaction, el, dispatchEvent, settings, attachEvent, $}) => ({
-
+const createComponent = ({ self, state, isServer, signal, reaction, el, dispatchEvent, settings, attachEvent, $ }) => ({
   observer: null, // intersection observer
   lastScrollPosition: 0, // used to track scroll direction
   isScrolling: false, // to avoid intersection observes when scrolling to item
@@ -86,8 +85,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
       const parentItem = { title: section?.title, id: section?.id };
       return (section?.items)
         ? [parentItem, ...section.items]
-        : [parentItem]
-      ;
+        : [parentItem];
     });
     const flattenedMenu = flatten(menuArrays);
     return flattenedMenu;
@@ -111,7 +109,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     const menuItem = menu.find((item) =>
       item?.items && item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
     );
-    if (menuItem) {
+    if(menuItem) {
       const menuIndex = menu.indexOf(menuItem);
       state.openIndex.set(menuIndex);
       state.currentItem.set(itemID);
@@ -127,14 +125,14 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
 
   getContentClasses(index) {
     return {
-      active: !settings.useAccordion || self.isOpenIndex(index)
+      active: !settings.useAccordion || self.isOpenIndex(index),
     };
   },
 
   getTitleClasses(section, index) {
     return {
       current: self.isOpenIndex(index),
-      visible: self.hasVisibleItems(section)
+      visible: self.hasVisibleItems(section),
     };
   },
 
@@ -142,7 +140,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     return {
       current: self.isCurrentItem(item),
       visible: self.isVisibleItem(item),
-      item: true
+      item: true,
     };
   },
 
@@ -160,13 +158,13 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
 
   scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
     const element = settings.getElement(itemID);
-    if (element) {
+    if(element) {
       const targetPosition = element.offsetTop + offset;
       state.currentItem.set(itemID);
       self.scrollToPosition(targetPosition, {
         onSamePage() {
           dispatchEvent('samePageActive', { element, itemID });
-        }
+        },
       });
       dispatchEvent('active', { itemID });
     }
@@ -175,8 +173,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   getScrollContext() {
     return (settings.scrollContext)
       ? $(settings.scrollContext, { root: document }).get(0)
-      : window
-    ;
+      : window;
   },
 
   scrollToPosition(position, { onSamePage = noop } = {}) {
@@ -198,7 +195,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     });
     scrollContext.scrollTo({
       top: position,
-      behavior: (settings.smoothScroll) ? 'smooth' : 'auto'
+      behavior: (settings.smoothScroll) ? 'smooth' : 'auto',
     });
   },
 
@@ -207,7 +204,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     const observerSettings = {
       root: root,
       threshold: [0, 1],
-      rootMargin: `0px 0px 0px 0px`
+      rootMargin: `0px 0px 0px 0px`,
     };
     self.observer = new IntersectionObserver(self.onIntersection, observerSettings);
     // observe intersection of each id in menu items
@@ -215,7 +212,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
       each(section?.items, (item) => {
         const itemID = settings.getAnchorID(item);
         const sectionElement = settings.getElement(itemID);
-        if (sectionElement) {
+        if(sectionElement) {
           self.observer.observe(sectionElement);
         }
       });
@@ -224,7 +221,6 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   },
 
   onIntersection(entries) {
-
     const currentVisibleItems = state.visibleItems.get();
     let newVisibleItems = [...currentVisibleItems];
 
@@ -280,7 +276,7 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
   },
 
   unbindPageEvents() {
-    if (self.observer) {
+    if(self.observer) {
       self.observer.disconnect();
     }
   },
@@ -291,12 +287,10 @@ const createComponent = ({self, state, isServer, signal, reaction, el, dispatchE
     if(window.location.hash !== hash) {
       history.pushState(null, '', hash);
     }
-  }
-
+  },
 });
 
-
-const onRendered = function ({ self, isServer, settings}) {
+const onRendered = function({ self, isServer, settings }) {
   if(isServer || !settings.menu.length) {
     return;
   }
@@ -304,7 +298,7 @@ const onRendered = function ({ self, isServer, settings}) {
   self.calculateScrollHeight();
 };
 
-const onDestroyed = function ({ self, isServer }) {
+const onDestroyed = function({ self, isServer }) {
   if(isServer) {
     return;
   }
@@ -312,18 +306,18 @@ const onDestroyed = function ({ self, isServer }) {
 };
 
 const events = {
-  'click .title'({event, state, data}) {
+  'click .title'({ event, state, data }) {
     const currentIndex = state.openIndex.get();
     const thisIndex = Number(data.index);
     const newIndex = (currentIndex !== thisIndex) ? thisIndex : -1;
     state.openIndex.set(newIndex);
   },
-  'click [data-id]'({event, self, data}) {
+  'click [data-id]'({ event, self, data }) {
     // this avoids triggering scroll behavior or hashchange
     self.setHash(data.id);
     self.scrollToItem(data.id);
     event.preventDefault();
-  }
+  },
 };
 
 const InPageMenu = defineComponent({

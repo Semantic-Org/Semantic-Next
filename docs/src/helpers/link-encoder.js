@@ -42,7 +42,7 @@ export const decodeObject = encodedData => {
 export const getPlaygroundLink = (params, baseUrl = '/playground') => {
   const queryParams = new URLSearchParams();
   each(params, (value, key) => {
-    if (key === 'files') {
+    if(key === 'files') {
       queryParams.set(key, encodeObject(value));
     }
     else {
@@ -58,13 +58,12 @@ export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
     files: {
       'page.html': {
         contentType: 'text/html',
-        content: code
-      }
-    }
+        content: code,
+      },
+    },
   };
   return getPlaygroundLink(params);
 };
-
 
 // Read the query string and return the decoded parameters.
 // The 'files' parameter is decoded using decodeObject.
@@ -72,7 +71,7 @@ export const readPlaygroundLink = queryString => {
   const params = new URLSearchParams(queryString);
   const result = {};
   for (const [key, value] of params.entries()) {
-    if (key === 'files') {
+    if(key === 'files') {
       try {
         result[key] = decodeObject(value);
       }

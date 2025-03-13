@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 
 export default class SlotElement extends LitElement {
   render() {

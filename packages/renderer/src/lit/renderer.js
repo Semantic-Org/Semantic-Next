@@ -1,15 +1,25 @@
 import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isArray, filterObject, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
+import {
+  each,
+  fatal,
+  filterObject,
+  hashCode,
+  isArray,
+  isFunction,
+  isPlainObject,
+  isString,
+  mapObject,
+  wrapFunction,
+} from '@semantic-ui/utils';
 
-import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
+import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
 import { renderTemplate } from './directives/render-template.js';
 
 export class LitRenderer {
-
   static html = html;
 
   static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
@@ -190,7 +200,7 @@ export class LitRenderer {
     return this.renderContent({
       isSVG: true,
       ast: svg,
-      data
+      data,
     });
   }
 
@@ -200,10 +210,9 @@ export class LitRenderer {
       const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
       return value;
     };
-    return (reactive)
+    return reactive
       ? () => getValue(expression)
-      : () => Reaction.nonreactive(() => getValue(expression))
-    ;
+      : () => Reaction.nonreactive(() => getValue(expression));
   };
 
   getPackedNodeData(node, data, { inheritParent = false } = {}) {
@@ -217,7 +226,6 @@ export class LitRenderer {
         const expression = unpackedData; // this is an expression like data=getData
         unpackedData = this.evaluateExpression(expression, data, options);
         packedData = mapObject(unpackedData, wrapFunction);
-
       }
       else if(isPlainObject(unpackedData)) {
         // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
@@ -230,9 +238,9 @@ export class LitRenderer {
 
     // only inherit parent data context if specified
     data = {
-      ...(inheritParent) ? this.data : {},
+      ...inheritParent ? this.data : {},
       ...packedStaticData,
-      ...packedReactiveData
+      ...packedReactiveData,
     };
     return data;
   }
@@ -265,13 +273,13 @@ export class LitRenderer {
   evaluateExpression(
     expression,
     data = this.data,
-    { asDirective = false, ifDefined = false, unsafeHTML = false } = {}
+    { asDirective = false, ifDefined = false, unsafeHTML = false } = {},
   ) {
     if(typeof expression === 'string') {
       if(asDirective) {
         const dataArguments = {
           expression,
-          value: () => this.lookupExpressionValue(expression, this.data)
+          value: () => this.lookupExpressionValue(expression, this.data),
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
       }
@@ -287,13 +295,15 @@ export class LitRenderer {
     const tokens = expr.match(LitRenderer.PARENS_REGEXP) || [];
     const parse = (tokens) => {
       const result = [];
-      while (tokens.length > 0) {
+      while(tokens.length > 0) {
         const token = tokens.shift();
         if(token === '(') {
           result.push(parse(tokens));
-        } else if(token === ')') {
+        }
+        else if(token === ')') {
           return result;
-        } else {
+        }
+        else {
           result.push(token);
         }
       }
@@ -333,20 +343,20 @@ export class LitRenderer {
             enumerable: true
           });
         }*/
-        if (isFunction(value) && value.length === 0 && !value.name) {
+        if(isFunction(value) && value.length === 0 && !value.name) {
           Object.defineProperty(values, index, {
             get() {
               return value();
             },
             configurable: true,
-            enumerable: true
+            enumerable: true,
           });
         }
       });
       result = new Function(...keys, `return ${code}`)(...values);
     }
     catch (e) {
-      // this token is not valid javascript 
+      // this token is not valid javascript
     }
     return result;
   }
@@ -354,9 +364,8 @@ export class LitRenderer {
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
   lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
-
     // detect recursion
-    if (visited.has(expression)) {
+    if(visited.has(expression)) {
       // throw new Error(`Cyclical expression detected: "${expression}"`);
       return undefined;
     }
@@ -387,8 +396,7 @@ export class LitRenderer {
 
     const expressionArray = isArray(expression)
       ? expression
-      : this.getExpressionArray(expression)
-    ;
+      : this.getExpressionArray(expression);
 
     let funcArguments = [];
     let result;
@@ -404,8 +412,7 @@ export class LitRenderer {
         const tokenValue = this.lookupTokenValue(token, data);
         result = isFunction(tokenValue)
           ? tokenValue(...funcArguments)
-          : tokenValue
-        ;
+          : tokenValue;
         funcArguments.unshift(result);
       }
     }
@@ -446,15 +453,14 @@ export class LitRenderer {
       }
       const current = (acc instanceof Signal)
         ? acc.get()
-        : wrapFunction(acc)()
-      ;
+        : wrapFunction(acc)();
       if(current == undefined) {
         return undefined;
         /* erroring on intermediate undefined
            feels better not as an error state
           but this may change
         */
-        //fatal(`Error evaluating expression "${path}"`);
+        // fatal(`Error evaluating expression "${path}"`);
       }
       return current[part];
     }, obj);
@@ -462,7 +468,6 @@ export class LitRenderer {
 
   // retrieve token value accessing getter for reactive vars
   accessTokenValue(tokenValue, token, data) {
-
     const getThisContext = (token, data) => {
       const path = token.split('.').slice(0, -1).join('.');
       return this.getDeepDataValue(data, path);
@@ -473,12 +478,11 @@ export class LitRenderer {
       const thisContext = getThisContext(token, data);
       tokenValue = tokenValue.bind(thisContext);
     }
-    
+
     if(tokenValue !== undefined) {
       return (tokenValue instanceof Signal)
         ? tokenValue.value
-        : tokenValue
-      ;
+        : tokenValue;
     }
     return undefined;
   }
@@ -491,7 +495,6 @@ export class LitRenderer {
   }
 
   getLiteralValue(token) {
-
     // Check if this is a string literal (single or double quotes)
     if(token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
       return token.slice(1, -1).replace(/\\(['"])/g, '$1');
@@ -533,11 +536,11 @@ export class LitRenderer {
 
   // subtrees are rendered as separate contexts stored as weakrefs for gc
   renderContent({ ast, data, isSVG = this.isSVG } = {}) {
-    const contentID = LitRenderer.getID({ast, data, isSVG});
+    const contentID = LitRenderer.getID({ ast, data, isSVG });
     const treeRef = this.renderTrees[contentID];
     const existingTree = treeRef ? treeRef.deref() : undefined;
     // disabled for now
-    if (LitRenderer.useSubtreeCache && existingTree) {
+    if(LitRenderer.useSubtreeCache && existingTree) {
       return existingTree.cachedRender(data);
     }
     const tree = new LitRenderer({

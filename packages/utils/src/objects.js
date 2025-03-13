@@ -1,7 +1,7 @@
-import { each } from './looping.js';
-import { isArray, isObject } from './types.js';
-import { escapeRegExp } from './regexp.js';
 import { noop } from './functions.js';
+import { each } from './looping.js';
+import { escapeRegExp } from './regexp.js';
+import { isArray, isObject } from './types.js';
 
 /*-------------------
        Objects
@@ -11,13 +11,13 @@ import { noop } from './functions.js';
   Return keys from object
 */
 export const keys = (obj) => {
-  if (isObject(obj)) {
+  if(isObject(obj)) {
     return Object.keys(obj);
   }
 };
 
 export const values = (obj) => {
-  if (isObject(obj)) {
+  if(isObject(obj)) {
     return Object.values(obj);
   }
 };
@@ -25,14 +25,14 @@ export const values = (obj) => {
 export const filterObject = (obj, callback) => {
   return Object.fromEntries(
     Object.entries(obj)
-      .filter(([key, value]) => callback(value, key))
+      .filter(([key, value]) => callback(value, key)),
   );
 };
 
 export const mapObject = (obj, callback) => {
   return Object.fromEntries(
     Object.entries(obj)
-      .map(([key, value]) => [key, callback(value, key)])
+      .map(([key, value]) => [key, callback(value, key)]),
   );
 };
 
@@ -42,10 +42,10 @@ export const mapObject = (obj, callback) => {
 export const extend = (obj, ...sources) => {
   sources.forEach((source) => {
     let descriptor, prop;
-    if (source) {
-      for (prop in source) {
+    if(source) {
+      for(prop in source) {
         descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if (descriptor === undefined) {
+        if(descriptor === undefined) {
           obj[prop] = source[prop];
         }
         else {
@@ -59,8 +59,8 @@ export const extend = (obj, ...sources) => {
 
 export const pick = (obj, ...keys) => {
   let copy = {};
-  each(keys, function (key) {
-    if (key in obj) {
+  each(keys, function(key) {
+    if(key in obj) {
       copy[key] = obj[key];
     }
   });
@@ -84,8 +84,8 @@ export const arrayFromObject = (obj) => {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
-export const get = function (obj, path = '') {
-  if (typeof path !== 'string') {
+export const get = function(obj, path = '') {
+  if(typeof path !== 'string') {
     return undefined;
   }
 
@@ -97,16 +97,16 @@ export const get = function (obj, path = '') {
 
   function getCombinedKey(path) {
     const dotIndex = path.indexOf('.');
-    if (dotIndex !== -1) {
+    if(dotIndex !== -1) {
       const nextDotIndex = path.indexOf('.', dotIndex + 1);
-      if (nextDotIndex !== -1) {
+      if(nextDotIndex !== -1) {
         return path.slice(0, nextDotIndex);
       }
     }
     return path;
   }
 
-  if (obj === null || !isObject(obj)) {
+  if(obj === null || !isObject(obj)) {
     return undefined;
   }
 
@@ -114,34 +114,39 @@ export const get = function (obj, path = '') {
   let currentObject = obj;
 
   for (let i = 0; i < parts.length; i++) {
-    if (currentObject === null || !isObject(currentObject)) {
+    if(currentObject === null || !isObject(currentObject)) {
       return undefined;
     }
 
     let part = parts[i];
 
-    if (part.includes('[')) {
+    if(part.includes('[')) {
       const { key, index } = extractArrayLikeAccess(part);
 
-      if (key in currentObject && isArray(currentObject[key]) && index < currentObject[key].length) {
+      if(key in currentObject && isArray(currentObject[key]) && index < currentObject[key].length) {
         currentObject = currentObject[key][index];
-      } else {
+      }
+      else {
         return undefined;
       }
-    } else {
-      if (part in currentObject) {
+    }
+    else {
+      if(part in currentObject) {
         currentObject = currentObject[part];
-      } else {
+      }
+      else {
         const remainingPath = parts.slice(i).join('.');
-        if (remainingPath in currentObject) {
+        if(remainingPath in currentObject) {
           currentObject = currentObject[remainingPath];
           break;
-        } else {
+        }
+        else {
           const combinedKey = getCombinedKey(`${part}.${parts[i + 1]}`);
-          if (combinedKey in currentObject) {
+          if(combinedKey in currentObject) {
             currentObject = currentObject[combinedKey];
             i++;
-          } else {
+          }
+          else {
             return undefined;
           }
         }
@@ -166,7 +171,7 @@ export const proxyObject = (sourceObj = noop, referenceObj = {}) => {
 
 export const onlyKeys = (obj, keysToKeep) => {
   return keysToKeep.reduce((accumulator, key) => {
-    if (obj.hasOwnProperty(key)) {
+    if(obj.hasOwnProperty(key)) {
       accumulator[key] = obj[key];
     }
     return accumulator;
@@ -188,10 +193,10 @@ export const hasProperty = (obj, prop) => {
 export const reverseKeys = (obj) => {
   const newObj = {};
   const pushValue = (key, value) => {
-    if (isArray(newObj[key])) {
+    if(isArray(newObj[key])) {
       newObj[key].push(value);
     }
-    else if (newObj[key]) {
+    else if(newObj[key]) {
       newObj[key] = [newObj[key], value];
     }
     else {
@@ -199,7 +204,7 @@ export const reverseKeys = (obj) => {
     }
   };
   Object.keys(obj).forEach((key) => {
-    if (isArray(obj[key])) {
+    if(isArray(obj[key])) {
       each(obj[key], (subKey) => {
         pushValue(subKey, key);
       });
@@ -210,8 +215,6 @@ export const reverseKeys = (obj) => {
   });
   return newObj;
 };
-
-
 
 /*
   Searches a search object
@@ -225,38 +228,33 @@ export const reverseKeys = (obj) => {
 export const weightedObjectSearch = (query = '', objectArray = [], {
   returnMatches = false,
   matchAllWords = true,
-  propertiesToMatch = []
+  propertiesToMatch = [],
 } = {}) => {
   if(!query) {
     return objectArray;
   }
   query = query.trim();
   query = escapeRegExp(query);
-  let
-    words       = query.split(' '),
+  let words = query.split(' '),
     wordRegexes = [],
-    regexes     = {
-      startsWith     : new RegExp(`^${query}`, 'i'),
-      wordStartsWith : new RegExp(`\\s${query}`, 'i'),
-      anywhere       : new RegExp(query, 'i')
+    regexes = {
+      startsWith: new RegExp(`^${query}`, 'i'),
+      wordStartsWith: new RegExp(`\\s${query}`, 'i'),
+      anywhere: new RegExp(query, 'i'),
     },
     weights = {
-      startsWith     : 1,
-      wordStartsWith : 2,
-      anywhere       : 3,
-      anyWord        : 4,
+      startsWith: 1,
+      wordStartsWith: 2,
+      anywhere: 3,
+      anyWord: 4,
     },
     calculateWeight = (obj) => {
-      let
-        matchDetails = [],
-        weight
-      ;
+      let matchDetails = [],
+        weight;
       // do a weighted search across all fields
       each(propertiesToMatch, (field) => {
-        let
-          value = get(obj, field),
-          fieldWeight
-        ;
+        let value = get(obj, field),
+          fieldWeight;
         if(value) {
           each(regexes, (regex, name) => {
             if(fieldWeight) {
@@ -292,7 +290,7 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
                     query,
                     name: 'anyWord',
                     value,
-                    matchCount: wordsMatching
+                    matchCount: wordsMatching,
                   });
                 }
               }
@@ -309,8 +307,7 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
       }
       obj.remove = !weight;
       return weight;
-    }
-  ;
+    };
   if(objectArray.length == 1) {
     objectArray.push([]);
   }
@@ -333,9 +330,6 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
     .filter(obj => !obj.remove)
     .sort((a, b) => {
       return a.weight - b.weight;
-    })
-  ;
+    });
   return result;
 };
-
-

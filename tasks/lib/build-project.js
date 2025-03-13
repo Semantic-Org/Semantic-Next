@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
-import { logPlugin } from './log.js';
-import { BROWSER_TARGET, JS_LOADER_CONFIG, CSS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './config.js';
 import * as fs from 'fs';
+import { BROWSER_TARGET, CSS_LOADER_CONFIG, JS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './config.js';
+import { logPlugin } from './log.js';
 
 export const buildProject = async ({
   watch = false, // watch for changes
@@ -20,8 +20,7 @@ export const buildProject = async ({
   const esbuilder = watch ? esbuild.context : esbuild.build;
   let tasks = [];
 
-  if (includeJavascript) {
-
+  if(includeJavascript) {
     /*
       Export Concat Components
     */
@@ -41,8 +40,7 @@ export const buildProject = async ({
     tasks.push(jsBuild);
   }
 
-  if (includeComponents) {
-
+  if(includeComponents) {
     /*
       Exports Individual Components
     */
@@ -62,7 +60,7 @@ export const buildProject = async ({
     tasks.push(componentBuild);
   }
 
-  if (includeCSS) {
+  if(includeCSS) {
     /*
       Exports global css
     */
@@ -77,11 +75,9 @@ export const buildProject = async ({
       target: BROWSER_TARGET,
     });
     tasks.push(cssBuild);
-
   }
 
-  if (includeThemes) {
-
+  if(includeThemes) {
     /*
       Exports themes as separate css
     */
@@ -101,7 +97,7 @@ export const buildProject = async ({
   /*
     Exports Examples
   */
-  if (includeExamples) {
+  if(includeExamples) {
     let exampleBuild = await esbuilder({
       entryPoints: ['./examples/**/index.js'],
       tsconfigRaw: { compilerOptions: TS_COMPILER_OPTIONS },
@@ -123,7 +119,7 @@ export const buildProject = async ({
     });
     console.log(`Server up ${host}:${port}`);
   }
-  if (watch) {
+  if(watch) {
     tasks = tasks.map((task) => task.watch());
   }
   return await Promise.all(tasks);

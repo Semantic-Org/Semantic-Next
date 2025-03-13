@@ -10,10 +10,10 @@ export const dependencies = {};
 
 for (const pkg of npmPackages) {
   dependencies[pkg] = version;
-};
+}
 
 export const packageFile = {
-  dependencies
+  dependencies,
 };
 
 export const packageJSON = JSON.stringify(packageFile, null, 2);
@@ -23,6 +23,6 @@ export const GET = async () => {
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'public, max-age=31536000',
-    }
+    },
   });
 };

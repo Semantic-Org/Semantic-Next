@@ -4,7 +4,7 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultSettings = {
-  minChars: 1
+  minChars: 1,
 };
 
 const defaultState = {
@@ -12,11 +12,10 @@ const defaultState = {
   searchTerm: '',
   searchResults: [],
   focused: false,
-  isSearching: false
+  isSearching: false,
 };
 
 const createComponent = ({ $, state, settings, self, reaction }) => ({
-
   initialize() {
     self.calculateResults();
   },
@@ -24,7 +23,7 @@ const createComponent = ({ $, state, settings, self, reaction }) => ({
   calculateResults() {
     reaction(() => {
       const term = state.searchTerm.get();
-      if (self.canSearch()) {
+      if(self.canSearch()) {
         self.query(term);
       }
       else {
@@ -64,7 +63,7 @@ const createComponent = ({ $, state, settings, self, reaction }) => ({
       { id: 'peach', title: 'Peach' },
       { id: 'kiwi', title: 'Kiwi' },
       { id: 'plum', title: 'Plum' },
-      { id: 'raspberry', title: 'Raspberry' }
+      { id: 'raspberry', title: 'Raspberry' },
     ];
     const matchResult = (result) => result.title.toLowerCase().includes(term.toLowerCase());
     return new Promise((resolve) => {
@@ -80,7 +79,7 @@ const createComponent = ({ $, state, settings, self, reaction }) => ({
     return state.focused.get() && state.searchTerm.value.length >= settings.minChars;
   },
 
-  setValue({title, id}) {
+  setValue({ title, id }) {
     // clear search
     state.searchTerm.set('');
 
@@ -89,9 +88,7 @@ const createComponent = ({ $, state, settings, self, reaction }) => ({
 
     // set component value
     state.value.set(id);
-
   },
-
 });
 
 const events = {
@@ -101,12 +98,12 @@ const events = {
   'mousedown .result'({ self, data }) {
     self.setValue(data);
   },
-  'focus input'({state}) {
+  'focus input'({ state }) {
     state.focused.set(true);
   },
-  'blur input'({state}) {
+  'blur input'({ state }) {
     state.focused.set(false);
-  }
+  },
 };
 
 defineComponent({

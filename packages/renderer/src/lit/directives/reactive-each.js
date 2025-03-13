@@ -1,10 +1,10 @@
-import { nothing } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
-import { directive } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
+import { nothing } from 'lit';
+import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-import { isPlainObject, isArray, isString, arrayFromObject } from '@semantic-ui/utils';
+import { arrayFromObject, isArray, isPlainObject, isString } from '@semantic-ui/utils';
 
 export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -18,19 +18,19 @@ export class ReactiveEachDirective extends AsyncDirective {
     this.eachCondition = eachCondition;
 
     // Stop existing reaction
-    if (this.reaction) {
+    if(this.reaction) {
       this.reaction.stop();
       this.reaction = null;
     }
 
     // Create a new reaction
     this.reaction = Reaction.create((computation) => {
-      if (!this.isConnected) {
+      if(!this.isConnected) {
         computation.stop();
         return;
       }
       this.items = this.getItems(this.eachCondition);
-      if (!computation.firstRun) {
+      if(!computation.firstRun) {
         const rendered = this.renderItems();
         this.setValue(rendered);
       }
@@ -46,7 +46,7 @@ export class ReactiveEachDirective extends AsyncDirective {
       return repeat(
         [1],
         () => 'else-case',
-        () => this.eachCondition.else()
+        () => this.eachCondition.else(),
       );
     }
     // this turns { a: 'b'} to [{key: 'a', value: 'b'}]
@@ -59,7 +59,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     return repeat(
       items,
       (item, indexOrKey) => this.getItemID(item, indexOrKey, collectionType),
-      (item, indexOrKey) => this.getTemplate(item, indexOrKey, collectionType)
+      (item, indexOrKey) => this.getTemplate(item, indexOrKey, collectionType),
     );
   }
 
@@ -80,15 +80,14 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getItemID(item, indexOrKey, collectionType) {
-    if (isPlainObject(item)) {
+    if(isPlainObject(item)) {
       // if this is an object we want to prefer the object key as an id
       const key = (collectionType == 'object')
         ? indexOrKey
-        : undefined
-      ;
+        : undefined;
       return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
-    if (isString(item)) {
+    if(isString(item)) {
       return item;
     }
     return indexOrKey;
@@ -101,8 +100,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     if(!indexAs) {
       indexAs = (collectionType == 'array')
         ? 'index'
-        : 'key'
-      ;
+        : 'key';
     }
     // handle conversion of object to array
     if(collectionType == 'object') {
@@ -117,9 +115,8 @@ export class ReactiveEachDirective extends AsyncDirective {
       : { ...item, this: item, [indexAs]: indexOrKey };
   }
 
-
   disconnected() {
-    if (this.reaction) {
+    if(this.reaction) {
       this.reaction.stop();
       this.reaction = null;
     }

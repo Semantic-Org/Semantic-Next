@@ -6,8 +6,4 @@ const CardComponentSpec = new SpecReader(CardSpec).getWebComponentSpec();
 const CardPluralComponentSpec = new SpecReader(CardSpec, { plural: true }).getWebComponentSpec();
 
 export default CardSpec;
-export {
-  CardSpec,
-  CardComponentSpec,
-  CardPluralComponentSpec,
-};
+export { CardComponentSpec, CardPluralComponentSpec, CardSpec };

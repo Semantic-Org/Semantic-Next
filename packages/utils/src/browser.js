@@ -38,8 +38,8 @@ export const getKeyFromEvent = (event) => {
   }
   // standardize key names
   const specialKeys = {
-    Control: 'ctrl',
-    Escape: 'esc',
+    'Control': 'ctrl',
+    'Escape': 'esc',
     ' ': 'space',
   };
   pressedKey = pressedKey.replace('Arrow', ''); // ArrowUp -> up
@@ -52,17 +52,15 @@ export const getKeyFromEvent = (event) => {
 --------------------*/
 
 export const getText = async (src, settings) => {
-  const response = (settings)
+  const response = settings
     ? await fetch(src, settings)
-    : await fetch(src)
-  ;
+    : await fetch(src);
   return await response.text();
 };
 
 export const getJSON = async (src, settings) => {
-  const response = (settings)
+  const response = settings
     ? await fetch(src, settings)
-    : await fetch(src)
-  ;
+    : await fetch(src);
   return await response.json();
 };

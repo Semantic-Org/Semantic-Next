@@ -6,16 +6,15 @@ export const tokenize = (str = '') => {
   return (str || '').replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, '')
     .replace(/_/g, '-')
-    .toLowerCase()
-  ;
+    .toLowerCase();
 };
 
 export const prettifyID = (num) => {
   num = parseInt(num, 10);
-  if (num === 0) return '0';
+  if(num === 0) { return '0'; }
   let result = '';
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  while (num > 0) {
+  while(num > 0) {
     result = chars[num % chars.length] + result;
     num = Math.floor(num / chars.length);
   }
@@ -33,10 +32,10 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
 
   let inputData;
 
-  if (input === null || input === undefined) {
+  if(input === null || input === undefined) {
     inputData = new TextEncoder().encode('');
   }
-  else if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
+  else if(input && input.toString === Object.prototype.toString && typeof input === 'object') {
     try {
       inputData = new TextEncoder().encode(JSON.stringify(input));
     }
@@ -51,7 +50,7 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
 
   let hash;
 
-  if (inputData.length <= 8) {
+  if(inputData.length <= 8) {
     // optimize performance for short inputs
     hash = seed;
     for (let i = 0; i < inputData.length; i++) {
@@ -78,7 +77,7 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
   hash = Math.imul(hash, prime3);
   hash ^= hash >>> 13;
 
-  if (prettify) {
+  if(prettify) {
     return prettifyID(hash >>> 0);
   }
 

@@ -1,15 +1,15 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import {
-  capitalize,
-  toTitleCase,
-  isEmpty,
-  joinWords,
   arrayFromObject,
-  formatDate,
+  capitalize,
   each,
   escapeHTML,
+  formatDate,
+  isEmpty,
+  joinWords,
   range,
   tokenize,
+  toTitleCase,
 } from '@semantic-ui/utils';
 
 /*
@@ -46,10 +46,9 @@ export const TemplateHelpers = {
       return;
     }
     const value = array.join(delimiter).trim();
-    return (spaceAfter)
+    return spaceAfter
       ? `${value} `
-      : value
-    ;
+      : value;
   },
   classes(classes, spaceAfter = true) {
     return TemplateHelpers.join(classes, ' ', true);
@@ -64,10 +63,9 @@ export const TemplateHelpers = {
   },
   classIf(expr, trueClass = '', falseClass = '') {
     let val = expr ? trueClass : falseClass;
-    return (val)
+    return val
       ? `${val} `
-      : ''
-    ;
+      : '';
   },
   classMap(classObj) {
     let classNames = [];
@@ -76,7 +74,7 @@ export const TemplateHelpers = {
         classNames.push(className);
       }
     });
-    return (classNames.length) ? `${classNames.join(' ')} `: '';
+    return (classNames.length) ? `${classNames.join(' ')} ` : '';
   },
   maybe(expr, trueExpr, falseExpr) {
     return expr ? trueExpr : falseExpr;

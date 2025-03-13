@@ -4,19 +4,18 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultSettings = {
-  tabs: []
+  tabs: [],
 };
 
 const defaultState = {
-  tabIndex: 0
+  tabIndex: 0,
 };
 
-const createComponent = ({ self, state, settings}) => ({
+const createComponent = ({ self, state, settings }) => ({
   maybeActive(index) {
     return (state.tabIndex.get() === index)
       ? 'active'
-      : ''
-    ;
+      : '';
   },
   getTabContent() {
     return settings.tabs[state.tabIndex.value]?.content;
@@ -27,7 +26,7 @@ const events = {
   'click .header'({ state, event }) {
     const index = Number(event.target.dataset.index);
     state.tabIndex.set(index);
-  }
+  },
 };
 
 defineComponent({
@@ -37,5 +36,5 @@ defineComponent({
   defaultSettings,
   defaultState,
   createComponent,
-  events
+  events,
 });

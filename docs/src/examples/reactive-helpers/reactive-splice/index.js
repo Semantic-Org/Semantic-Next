@@ -1,11 +1,11 @@
 // Helper: splice
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 const playlist = new Signal([
   'Track 1',
   'Track 2',
   'Track 3',
-  'Track 4'
+  'Track 4',
 ]);
 
 Reaction.create((reaction) => {

@@ -1,11 +1,7 @@
-import { getCollection } from 'astro:content';
-import {
-  getLessonContent,
-  getPreviousLesson,
-  getNextLesson,
-} from '@helpers/navigation.js';
-import { asyncMap, each, mapObject } from '@semantic-ui/utils';
+import { getLessonContent, getNextLesson, getPreviousLesson } from '@helpers/navigation.js';
 import { getExampleFiles, getExampleID } from '@helpers/playground.js';
+import { asyncMap, each, mapObject } from '@semantic-ui/utils';
+import { getCollection } from 'astro:content';
 
 const examples = await getCollection('examples');
 const allExampleFiles = await import.meta.glob(`../../../examples/**`, {
@@ -35,7 +31,7 @@ export async function getStaticPaths() {
       props: {
         ...example.data,
         files,
-      }
+      },
     };
     return path;
   });
@@ -46,8 +42,8 @@ export async function getStaticPaths() {
   });
 
   paths.push({
-    params: { slug: 'all'},
-    props: allProps
+    params: { slug: 'all' },
+    props: allProps,
   });
   return paths;
 }
@@ -55,7 +51,7 @@ export async function getStaticPaths() {
 export function GET({ props }) {
   return new Response(JSON.stringify(props), {
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   });
 }

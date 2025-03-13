@@ -54,7 +54,7 @@ module.exports = {
     'no-dupe-keys': 2, // disallow duplicate keys when creating object literals
     'no-eq-null': 2, // disallow null eq, use undefined instead
     'no-label-var': 2, // disallow labels that share a name with a variable
-    radix: 2, // require use of the second argument for parseInt()
+    'radix': 2, // require use of the second argument for parseInt()
     'no-unreachable': 2, // disallow unreachable statements after a return, throw, continue, or break statement
     'no-extra-boolean-cast': 1, // disallow redundant negation !!baz etc.
     'no-invalid-regexp': 1, // disallow invalid regular expression strings in the RegExp constructor
@@ -70,8 +70,8 @@ module.exports = {
     /* Code Style */
     'brace-style': [0, 'stroustrup'], // enforce if/else new line (stoustrup-style)
     'comma-style': [2, 'last'], // enforce one true comma style (off by default)
-    camelcase: [1, { properties: 'never' }], // require camel case names (but not for properties)
-    quotes: [
+    'camelcase': [1, { properties: 'never' }], // require camel case names (but not for properties)
+    'quotes': [
       1,
       'single',
       {
@@ -79,13 +79,13 @@ module.exports = {
       },
     ], // specify whether double or single quotes should be used
     'quote-props': [1, 'as-needed'], // requires { "foo baz": '' } but not { foo: ''}
-    semi: [2, 'always'], // require semicolons whenever possible
+    'semi': [2, 'always'], // require semicolons whenever possible
     'comma-spacing': 1, // enforce spacing before and after comma
-    curly: [1, 'multi-line'], // prevents if/else with implicit curly brackets
+    'curly': [1, 'multi-line'], // prevents if/else with implicit curly brackets
     'eol-last': 1, // enforce newline at the end of file, with no multiple empty lines
     'no-irregular-whitespace': 1,
     'no-var': 1, // require let or const instead of var (off by default)
-    yoda: 2, // allow (foo == 'red') but not ('red' == foo)
+    'yoda': 2, // allow (foo == 'red') but not ('red' == foo)
     'no-multi-spaces': [
       2,
       {
@@ -125,7 +125,7 @@ module.exports = {
     /* Should implement (but lets not freak us out) */
     'one-var': 0, // allow just one var statement per function (off by default)
     'key-spacing': [0, { align: 'colon' }], // require colons to be aligned (valign colon)
-    complexity: 0, // specify the maximum cyclomatic complexity allowed in a program (off by default)
+    'complexity': 0, // specify the maximum cyclomatic complexity allowed in a program (off by default)
 
     /*--------------
          Disabled
@@ -152,7 +152,7 @@ module.exports = {
     'consistent-return': 0, // require return statements to either always or never specify values
     'default-case': 0, // require default case in switch statements (off by default)
     'dot-notation': 0, // encourages use of dot notation whenever possible
-    eqeqeq: 0, // require the use of === and !==
+    'eqeqeq': 0, // require the use of === and !==
     'guard-for-in': 0, // make sure for-in loops have an if statement (off by default)
     'no-div-regex': 0, // disallow division operators explicitly at beginning of regular expression (off by default)
     'no-else-return': 0, // disallow else after a return in an if (off by default)
@@ -228,7 +228,7 @@ module.exports = {
     'wrap-regex': 0, // require regex literals to be wrapped in parentheses (off by default)
     // removing this rule until we can agree on a max length "max-len"                    : [1, { "code": 100, "ignoreComments": true }],
     'object-curly-newline': [1, { consistent: true }],
-    indent: [
+    'indent': [
       1,
       2,
       { MemberExpression: 1, SwitchCase: 1, VariableDeclarator: 'first' },

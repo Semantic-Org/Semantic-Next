@@ -1,13 +1,9 @@
-import { describe, vi, beforeAll, beforeEach, afterEach, afterAll, it, expect } from 'vitest';
 import { $, $$ } from '@semantic-ui/query';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('query', () => {
-
-  
   describe('text', () => {
-
     it('text should get text content of slotted nodes from shadow DOM', () => {
-
       // initialize a web component then add slotted content
       // that slotted content should have the specified text content when using text
       class TestComponent extends HTMLElement {
@@ -29,20 +25,18 @@ describe('query', () => {
         getDivText() {
           return this.$('div').text();
         }
-
       }
       customElements.define('test-component', TestComponent);
       const customElement = document.createElement('test-component');
       const span = document.createElement('span');
       span.slot = 'test';
 
-      span.textContent = 'passed in text';  
+      span.textContent = 'passed in text';
       customElement.appendChild(span);
 
       document.body.appendChild(customElement);
       expect(customElement.getSlotText()).toBe('passed in text');
       expect(customElement.getDivText()).toBe('passed in text');
-
     });
   });
 
@@ -196,7 +190,6 @@ describe('query', () => {
         }
       }
       customElements.define('test-dom', TestDOMComponent);
-
     });
 
     afterEach(() => {
@@ -226,9 +219,7 @@ describe('query', () => {
       // selects outer title, nested component title and inner component title
       const $allElements = $$('.title');
       expect($allElements.length).toBe(3);
-
     });
-
 
     it('should select nested items', async () => {
       // Create an element with class 'title' outside
@@ -252,7 +243,6 @@ describe('query', () => {
       // selects nested component title and inner component title
       const $elements = $$('test-dom .title');
       expect($elements.length).toBe(2);
-
     });
 
     it('should not match items not at shadow root', async () => {
@@ -277,7 +267,6 @@ describe('query', () => {
       // selects nested component title
       const $elements = $$('not-component .title');
       expect($elements.length).toBe(0);
-
     });
 
     it('should select deeply nested items', async () => {
@@ -302,9 +291,6 @@ describe('query', () => {
       // selects nested component title
       const $innerElements = $$('test-dom test-dom-inner .title');
       expect($innerElements.length).toBe(1);
-
     });
-
   });
-
 });

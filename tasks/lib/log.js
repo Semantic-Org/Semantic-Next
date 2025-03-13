@@ -5,7 +5,7 @@ export const log = (header, text) => {
   console.log(chalk.red(header), chalk.blue(`(${text})`), chalk.grey(time.toLocaleTimeString()));
 };
 
-export const logPlugin = (text ='') => {
+export const logPlugin = (text = '') => {
   return {
     name: 'log-build',
     setup(build) {

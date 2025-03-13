@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './todo-header.html?raw';
 import css from './todo-header.css?raw';
+import template from './todo-header.html?raw';
 
 const createComponent = ({ self, $, reaction, signal, findParent }) => ({
   allCompleted: signal(false),
@@ -33,10 +33,10 @@ const createComponent = ({ self, $, reaction, signal, findParent }) => ({
   calculateAllCompleted() {
     reaction((comp) => {
       const allCompleted = self.allCompleted.get();
-      if (comp.firstRun) {
+      if(comp.firstRun) {
         return;
       }
-      if (allCompleted) {
+      if(allCompleted) {
         self.completeAll();
       }
       else {
@@ -48,9 +48,9 @@ const createComponent = ({ self, $, reaction, signal, findParent }) => ({
 
 const events = {
   'keydown input.new-todo'({ event, self, $, $$ }) {
-    if (event.key === 'Enter') {
+    if(event.key === 'Enter') {
       const text = $(this).val();
-      if (!text) {
+      if(!text) {
         return;
       }
       self.addTodo(text);

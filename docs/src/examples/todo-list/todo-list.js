@@ -1,9 +1,9 @@
 import { defineComponent, getText } from '@semantic-ui/component';
 import { each } from '@semantic-ui/utils';
 
-import { todoItem } from './todo-item.js';
-import { todoHeader } from './todo-header.js';
 import { todoFooter } from './todo-footer.js';
+import { todoHeader } from './todo-header.js';
+import { todoItem } from './todo-item.js';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -17,15 +17,15 @@ const createComponent = ({ self, signal, $ }) => ({
     const filter = self.filter.get();
     const todos = self.todos.get();
     each(todos, (todo) => {
-      if (!todo._id) {
+      if(!todo._id) {
         todo._id = todo.text;
       }
     });
     return todos.filter((todo) => {
-      if (filter == 'active') {
+      if(filter == 'active') {
         return !todo.completed;
       }
-      else if (filter == 'complete') {
+      else if(filter == 'complete') {
         return todo.completed;
       }
       return true;
@@ -45,7 +45,6 @@ const createComponent = ({ self, signal, $ }) => ({
     self.todos.setArrayProperty('completed', false);
   },
 
-
   // handle state
   getRouteFilter() {
     return window.location.hash.substring(2) || 'all'; // #/foo
@@ -62,7 +61,7 @@ const onCreated = ({ self, isClient }) => {
 };
 
 const onRendered = ({ self, isClient }) => {
-  if (isClient) {
+  if(isClient) {
     self.setRouteFilter();
   }
 };

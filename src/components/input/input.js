@@ -5,13 +5,11 @@ import { debounce } from '@semantic-ui/utils';
 import CSS from './css/input-shadow.css?raw';
 import Template from './input.html?raw';
 
-
 const defaultState = {
   focused: false,
 };
 
-const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
-
+const createComponent = ({ $, el, self, state, dispatchEvent, settings }) => ({
   initialize() {
     if(settings.search) {
       self.configureSearch();
@@ -36,7 +34,7 @@ const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
 
   getStateClasses() {
     return {
-      focus: state.focused.get()
+      focus: state.focused.get(),
     };
   },
 
@@ -44,9 +42,8 @@ const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
     if(settings.clearable && self.hasValue()) {
       return 'x';
     }
-    return settings.icon
+    return settings.icon;
   },
-
 
   setValue(value) {
     el.value = value;
@@ -57,7 +54,6 @@ const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
   setValueDebounced: debounce((value) => {
     self.setValue(value);
   }, { delay: settings.debounceInterval }),
-
 });
 
 const events = {

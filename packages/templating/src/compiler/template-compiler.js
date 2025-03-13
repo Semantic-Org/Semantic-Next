@@ -3,7 +3,6 @@ import { each, isString, last } from '@semantic-ui/utils';
 import { StringScanner } from './string-scanner.js';
 
 class TemplateCompiler {
-
   constructor(templateString) {
     this.templateString = templateString || '';
     this.snippets = {};
@@ -70,7 +69,6 @@ class TemplateCompiler {
     SINGLE_QUOTES: /\'/g,
   };
 
-
   /*
     Creates an AST representation of a template
     from a template string
@@ -79,7 +77,7 @@ class TemplateCompiler {
     templateString = TemplateCompiler.preprocessTemplate(templateString);
     const scanner = new StringScanner(templateString);
 
-    if (!isString(templateString)) {
+    if(!isString(templateString)) {
       scanner.fatal('Template is not a string', templateString);
     }
 
@@ -90,19 +88,15 @@ class TemplateCompiler {
     const syntax = TemplateCompiler.detectSyntax(templateString);
     const tagRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketRegExp
-      : TemplateCompiler.singleBracketRegExp
-    ;
+      : TemplateCompiler.singleBracketRegExp;
     const parserRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketParserRegExp
-      : TemplateCompiler.singleBracketParserRegExp
-    ;
+      : TemplateCompiler.singleBracketParserRegExp;
 
     const parseTag = (scanner) => {
-
       // if this expression contains nested expressions like { one { two } }
       // we want tag content to include all nested expressions
       let getTagContent = () => {
-
         // break if we are already at the end of the expr
         if(scanner.peek() == '}') {
           scanner.consumeUntil(parserRegExp.EXPRESSION_END);
@@ -139,8 +133,8 @@ class TemplateCompiler {
       };
 
       // look for each special expression like if/each/else
-      for (let type in tagRegExp) {
-        if (scanner.matches(tagRegExp[type])) {
+      for(let type in tagRegExp) {
+        if(scanner.matches(tagRegExp[type])) {
           const context = scanner.getContext(); // context is used for better error handling
           scanner.consume(tagRegExp[type]);
           const rawContent = getTagContent();
@@ -151,8 +145,8 @@ class TemplateCompiler {
       }
 
       // look for each primitive like <svg>
-      for (let type in htmlRegExp) {
-        if (scanner.matches(htmlRegExp[type])) {
+      for(let type in htmlRegExp) {
+        if(scanner.matches(htmlRegExp[type])) {
           scanner.consume(htmlRegExp[type]);
           const context = scanner.getContext(); // context is used for better error handling
           const content = this.getValue(scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim());
@@ -172,13 +166,13 @@ class TemplateCompiler {
     let conditionStack = []; // Track the current condition stack
     let contentStack = []; // Track the current content target stack
 
-    while (!scanner.isEOF()) {
+    while(!scanner.isEOF()) {
       const tag = parseTag(scanner);
 
       const conditionTarget = last(conditionStack);
       const contentTarget = contentBranch?.content || ast;
 
-      if (tag) {
+      if(tag) {
         let newNode = {
           type: tag.type.toLowerCase(),
         };
@@ -203,10 +197,10 @@ class TemplateCompiler {
               condition: tag.content,
               content: [],
             };
-            if (!conditionTarget) {
+            if(!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSEIF);
               scanner.fatal(
-                '{{elseif}} encountered without matching if condition'
+                '{{elseif}} encountered without matching if condition',
               );
             }
             contentStack.pop();
@@ -220,22 +214,22 @@ class TemplateCompiler {
               ...newNode,
               content: [],
             };
-            if (!conditionTarget) {
+            if(!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered without matching if or each condition'
+                '{{else}} encountered without matching if or each condition',
               );
               break;
             }
 
-            if (conditionTarget.type === 'if') {
+            if(conditionTarget.type === 'if') {
               // Handling for if/else
               contentStack.pop();
               contentStack.push(newNode);
               conditionTarget.branches.push(newNode);
               contentBranch = newNode;
             }
-            else if (conditionTarget.type === 'each') {
+            else if(conditionTarget.type === 'each') {
               // Handling for each/else
               contentStack.pop();
               contentStack.push(newNode);
@@ -245,13 +239,13 @@ class TemplateCompiler {
             else {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered with unknown condition type: ' + conditionTarget.type
+                '{{else}} encountered with unknown condition type: ' + conditionTarget.type,
               );
             }
             break;
 
           case 'CLOSE_IF':
-            if (conditionStack.length == 0) {
+            if(conditionStack.length == 0) {
               scanner.returnTo(tagRegExp.CLOSE_IF);
               scanner.fatal('{{/if}} close tag found without open if tag');
             }
@@ -276,7 +270,7 @@ class TemplateCompiler {
             break;
 
           case 'CLOSE_SNIPPET':
-            if (conditionStack.length == 0) {
+            if(conditionStack.length == 0) {
               scanner.returnTo(tagRegExp.CLOSE_IF);
               scanner.fatal('{{/snippet}} close tag found without open if tag');
             }
@@ -301,7 +295,7 @@ class TemplateCompiler {
               ...newNode,
               value: tag.content,
             };
-            if (tag.booleanAttribute) {
+            if(tag.booleanAttribute) {
               newNode.ifDefined = true;
             }
             contentTarget.push(newNode);
@@ -334,7 +328,7 @@ class TemplateCompiler {
             // Check for 'each...as' syntax
             const asParts = tag.content.split(' as ');
 
-            if (inParts.length > 1) {
+            if(inParts.length > 1) {
               // We have 'each...in' syntax
               // Get the iterator variables (item and possibly index)
               let iteratorPart = inParts[0].trim();
@@ -342,27 +336,29 @@ class TemplateCompiler {
 
               // Look for comma separator in the iterator part
               const commaIndex = iteratorPart.indexOf(',');
-              if (commaIndex !== -1) {
+              if(commaIndex !== -1) {
                 // We have both item and index specified
                 iterateAs = iteratorPart.substring(0, commaIndex).trim();
                 indexAs = iteratorPart.substring(commaIndex + 1).trim();
-              } else {
+              }
+              else {
                 // Only item is specified
                 iterateAs = iteratorPart;
               }
             }
-            else if (asParts.length > 1) {
+            else if(asParts.length > 1) {
               // We have 'each...as' syntax
               iterateOver = asParts[0].trim();
-              
+
               // Check for comma in the second part (for index)
               const iteratorPart = asParts[1].trim();
               const commaIndex = iteratorPart.indexOf(',');
-              if (commaIndex !== -1) {
+              if(commaIndex !== -1) {
                 // We have both item and index specified
                 iterateAs = iteratorPart.substring(0, commaIndex).trim();
                 indexAs = iteratorPart.substring(commaIndex + 1).trim();
-              } else {
+              }
+              else {
                 // Only item is specified
                 iterateAs = iteratorPart;
               }
@@ -378,11 +374,11 @@ class TemplateCompiler {
               content: [],
             };
 
-            if (iterateAs) {
+            if(iterateAs) {
               newNode.as = iterateAs;
             }
 
-            if (indexAs) {
+            if(indexAs) {
               newNode.indexAs = indexAs;
             }
 
@@ -429,7 +425,7 @@ class TemplateCompiler {
         // advanced to next expression or open svg tag
         // this advances the scanner adding html
         const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
-        if (html) {
+        if(html) {
           const htmlNode = { type: 'html', html };
           contentTarget.push(htmlNode);
         }
@@ -440,13 +436,13 @@ class TemplateCompiler {
   }
 
   getValue(expression) {
-    if (expression == 'true') {
+    if(expression == 'true') {
       return true;
     }
-    else if (expression == 'false') {
+    else if(expression == 'false') {
       return false;
     }
-    else if (isString(expression) && expression.trim() !== '' && Number.isFinite(+expression)) {
+    else if(isString(expression) && expression.trim() !== '' && Number.isFinite(+expression)) {
       return Number(expression);
     }
     return expression;
@@ -457,7 +453,7 @@ class TemplateCompiler {
     let templateInfo = {};
 
     regExp.VERBOSE_KEYWORD.lastIndex = 0;
-    if (regExp.VERBOSE_KEYWORD.test(expression)) {
+    if(regExp.VERBOSE_KEYWORD.test(expression)) {
       // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
       const matches = [...expression.matchAll(regExp.VERBOSE_PROPERTIES)];
       each(matches, (match, index) => {
@@ -488,7 +484,7 @@ class TemplateCompiler {
     const obj = {};
     let match;
     let isObject = false;
-    while ((match = regExp.exec(objectString)) !== null) {
+    while((match = regExp.exec(objectString)) !== null) {
       isObject = true;
       obj[match[1]] = match[2].trim();
     }
@@ -518,7 +514,7 @@ class TemplateCompiler {
       TemplateCompiler.preprocessRegExp.WEB_COMPONENT_SELF_CLOSING,
       (match, tagName, attributes) => {
         return `<${tagName}${attributes}></${tagName}>`;
-      }
+      },
     );
     return templateString;
   }
@@ -529,22 +525,24 @@ class TemplateCompiler {
     let currentHtmlNode = null;
 
     const processNode = (node) => {
-      if (node.type === 'html') {
-        if (currentHtmlNode) {
+      if(node.type === 'html') {
+        if(currentHtmlNode) {
           currentHtmlNode.html += node.html;
-        } else {
+        }
+        else {
           currentHtmlNode = { ...node };
           optimizedAST.push(currentHtmlNode);
         }
-      } else {
-        if (currentHtmlNode) {
+      }
+      else {
+        if(currentHtmlNode) {
           currentHtmlNode = null;
         }
-        if (Array.isArray(node.content)) {
+        if(Array.isArray(node.content)) {
           node.content = this.optimizeAST(node.content);
         }
         // Process else block if it exists
-        if (node.else && node.else.content) {
+        if(node.else && node.else.content) {
           node.else.content = this.optimizeAST(node.else.content);
         }
         optimizedAST.push(node);

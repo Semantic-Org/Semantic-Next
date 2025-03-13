@@ -5,7 +5,6 @@ const css = await getText('./todo-header.css');
 const template = await getText('./todo-header.html');
 
 const createComponent = ({ self, $, findParent }) => ({
-
   getTodoList() {
     return findParent('todoList');
   },
@@ -25,13 +24,12 @@ const createComponent = ({ self, $, findParent }) => ({
   clearInput() {
     $('input.new-todo').val('');
   },
-
 });
 
 const events = {
   'keydown input.new-todo'({ self, event, value, afterFlush }) {
-    if (event.key === 'Enter') {
-      if (!value) {
+    if(event.key === 'Enter') {
+      if(!value) {
         return;
       }
       self.addTodo(value);

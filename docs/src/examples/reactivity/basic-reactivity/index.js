@@ -1,4 +1,4 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 let obj1 = { name: 'Sally', age: 22 };
 let obj2 = { name: 'Tom', age: 28 };
