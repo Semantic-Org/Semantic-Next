@@ -1,3 +1,7 @@
+## This is a lightweight precomit hook
+## That should perform much faster than lint-staging
+## This will perform dprint on modified files only
+
 # Get the names of staged files with additions or modifications, filtered by extension
 FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.(ts|js|json|md|tsx|jsx)$" || true)
 
@@ -10,15 +14,15 @@ if [ -n "$FILES" ]; then
       EXISTING_FILES="$EXISTING_FILES $file"
     fi
   done
-  
+
   # Only process files that exist
   if [ -n "$EXISTING_FILES" ]; then
     # Run dprint format on the staged files directly
     echo "$EXISTING_FILES" | xargs dprint fmt
-    
+
     # Store dprint exit code
     DPRINT_STATUS=$?
-    
+
     # If dprint made changes to any files
     if [ $DPRINT_STATUS -ne 0 ]; then
       echo "dprint formatted files. Adding changes to commit..."
