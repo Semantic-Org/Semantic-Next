@@ -124,6 +124,6 @@
     "examples/*"
   ],
   "lint-staged": {
-    "**/*.js": "npx dprint fmt"
+    "**/*.{js,ts,tsx,jsx,json,md}": "npx dprint fmt"
   }
 }
