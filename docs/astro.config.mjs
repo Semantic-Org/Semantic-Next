@@ -5,8 +5,6 @@ import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
 
-import vercel from '@astrojs/vercel';
-
 // Load the custom language definition
 const sui = {
   id: 'sui',
