@@ -44,10 +44,10 @@
       ]
     },
     "build:minified": {
-      "command": "node ../internal-scripts/src/do-build-minified.js"
+      "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
     },
     "build:cdn": {
-      "command": "node ../internal-scripts/src/do-build-cdn.js"
+      "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"
     }
   }
 }
