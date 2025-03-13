@@ -1,3 +1,1 @@
-if (one == two) {
-  console.log('hello');
-}
+function test() { return   true;  }
