@@ -20,7 +20,6 @@ export interface IterationCallback<TValue, TKey = number | string> {
   (value: TValue, key: TKey, collection: any): boolean | void;
 }
 
-
 /**
  * Iterates over a collection (array or object), calling the iteratee for each element.
  * Returns false from the iteratee to break the iteration early.
@@ -48,12 +47,12 @@ export interface IterationCallback<TValue, TKey = number | string> {
 export function each<T>(
   obj: T[],
   func: IterationCallback<T, number>,
-  context?: any
+  context?: any,
 ): T[];
 export function each<T extends object>(
   obj: T,
   func: IterationCallback<T[keyof T], keyof T>,
-  context?: any
+  context?: any,
 ): T;
 
 /**
@@ -68,12 +67,12 @@ export function each<T extends object>(
 export function asyncEach<T>(
   obj: T[],
   func: (value: T, index: number, array: T[]) => Promise<boolean | void>,
-  context?: any
+  context?: any,
 ): Promise<T[]>;
 export function asyncEach<T extends object>(
   obj: T,
   func: (value: T[keyof T], key: keyof T, obj: T) => Promise<boolean | void>,
-  context?: any
+  context?: any,
 ): Promise<T>;
 
 /**
@@ -89,10 +88,10 @@ export function asyncEach<T extends object>(
 export function asyncMap<T, U>(
   obj: T[],
   func: (value: T, index: number, array: T[]) => Promise<U>,
-  context?: any
+  context?: any,
 ): Promise<U[]>;
 export function asyncMap<T extends object, U>(
   obj: T,
   func: (value: T[keyof T], key: keyof T, obj: T) => Promise<U>,
-  context?: any
-): Promise<{ [K in keyof T]: U }>;
+  context?: any,
+): Promise<{ [K in keyof T]: U; }>;

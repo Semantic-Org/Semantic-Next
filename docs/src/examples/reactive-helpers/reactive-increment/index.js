@@ -1,10 +1,10 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 const counter = new Signal(0);
 
 Reaction.create((reaction) => {
   const count = counter.get();
-  if(!reaction.firstRun) {
+  if (!reaction.firstRun) {
     console.log(`Counter: ${count}`);
   }
 });

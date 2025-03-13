@@ -1,6 +1,6 @@
-import { get } from './objects.js';
-import { each } from './looping.js';
 import { isEqual } from './equality.js';
+import { each } from './looping.js';
+import { get } from './objects.js';
 import { isFunction } from './types.js';
 
 /*-------------------
@@ -26,7 +26,7 @@ export const filterEmpty = (arr) => {
 */
 export const last = (array = [], number = 1) => {
   const { length } = array;
-  if (!length) return;
+  if (!length) { return; }
 
   if (number === 1) {
     // Return the last element
@@ -42,7 +42,7 @@ export const last = (array = [], number = 1) => {
 */
 export const first = (array, number = 1) => {
   const { length } = array;
-  if (!length) return;
+  if (!length) { return; }
 
   if (number === 1) {
     // Return the first element
@@ -113,9 +113,7 @@ export const sum = (values = []) => {
 };
 
 export const where = (array = [], properties) => {
-  return array.filter((obj) =>
-    Object.keys(properties).every((key) => obj[key] === properties[key])
-  );
+  return array.filter((obj) => Object.keys(properties).every((key) => obj[key] === properties[key]));
 };
 
 export const flatten = (arr = []) => {
@@ -127,26 +125,27 @@ export const flatten = (arr = []) => {
 export const some = (collection, predicate) => {
   return (collection?.some)
     ? collection.some(predicate)
-    : false
-  ;
+    : false;
 };
 export const any = some;
 
-export const sortBy = function (arr = [], key, comparator) {
+export const sortBy = function(arr = [], key, comparator) {
   const compare = (a, b) => {
     const valA = get(a, key);
     const valB = get(b, key);
 
-    if (valA === undefined && valB === undefined) return 0;
-    if (valA === undefined) return 1; // Place undefined values at the end
-    if (valB === undefined) return -1; // Place undefined values at the end
+    if (valA === undefined && valB === undefined) { return 0; }
+    if (valA === undefined) { return 1; // Place undefined values at the end
+     }
+    if (valB === undefined) { return -1; // Place undefined values at the end
+     }
 
     if (comparator) {
       return comparator(valA, valB, a, b);
     }
 
-    if (valA < valB) return -1;
-    if (valA > valB) return 1;
+    if (valA < valB) { return -1; }
+    if (valA > valB) { return 1; }
     return 0;
   };
 
@@ -180,9 +179,11 @@ export const moveItem = (array = [], callbackOrValue, index) => {
   let targetIndex;
   if (index === 'first') {
     targetIndex = 0;
-  } else if (index === 'last') {
+  }
+  else if (index === 'last') {
     targetIndex = array.length - 1;
-  } else {
+  }
+  else {
     targetIndex = Math.min(Math.max(0, index), array.length - 1);
   }
 
@@ -204,7 +205,6 @@ export const moveToBack = (array = [], callbackOrValue) => {
   return moveItem(array, callbackOrValue, 'last');
 };
 
-
 /* In perf testing in Chrome 131
   this seems like a reasonable crossover
   lodash puts this at 120
@@ -214,8 +214,8 @@ const ARRAY_SIZE_THRESHOLD = 58;
 
 /* Returns the common items between two arrays */
 export const intersection = (...arrays) => {
-  if (arrays.length === 0) return [];
-  if (arrays.length === 1) return [...new Set(arrays[0])];
+  if (arrays.length === 0) { return []; }
+  if (arrays.length === 1) { return [...new Set(arrays[0])]; }
 
   const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
   const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
@@ -233,8 +233,8 @@ export const intersection = (...arrays) => {
 
 /* Returns the difference between two arrays */
 export const difference = (...arrays) => {
-  if (arrays.length === 0) return [];
-  if (arrays.length === 1) return [...new Set(arrays[0])];
+  if (arrays.length === 0) { return []; }
+  if (arrays.length === 1) { return [...new Set(arrays[0])]; }
 
   const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
   const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
@@ -252,7 +252,7 @@ export const difference = (...arrays) => {
 
 /* Returns only items unique to an array */
 export const uniqueItems = (...arrays) => {
-  if (arrays.length <= 1) return [];
+  if (arrays.length <= 1) { return []; }
 
   const totalSize = arrays.reduce((sum, arr) => sum + arr.length, 0);
   const useSet = totalSize >= ARRAY_SIZE_THRESHOLD;
@@ -260,15 +260,11 @@ export const uniqueItems = (...arrays) => {
   if (useSet) {
     const sets = arrays.map(arr => new Set(arr));
     return arrays.flatMap((arr, i) =>
-      [...new Set(arr)].filter(item =>
-        !sets.some((set, j) => i !== j && set.has(item))
-      )
+      [...new Set(arr)].filter(item => !sets.some((set, j) => i !== j && set.has(item)))
     );
   }
 
   return arrays.flatMap((arr, i) =>
-    [...new Set(arr)].filter(item =>
-      !arrays.some((otherArr, j) => i !== j && otherArr.includes(item))
-    )
+    [...new Set(arr)].filter(item => !arrays.some((otherArr, j) => i !== j && otherArr.includes(item)))
   );
 };

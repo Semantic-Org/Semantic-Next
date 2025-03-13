@@ -7,7 +7,7 @@ const defaultSettings = {
   src: '',
   title: '',
   description: '',
-  price: 0
+  price: 0,
 };
 
 defineComponent({

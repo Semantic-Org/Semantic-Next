@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '@semantic-ui/core';
 
-import template from './CodeExample.html?raw';
 import css from './CodeExample.css?raw';
+import template from './CodeExample.html?raw';
 import pageCSS from './CodeExamplePage.css?raw';
 
 import CodeSample from '../CodeSample/CodeSample.js';
@@ -25,7 +25,7 @@ const createComponent = ({ $, isServer, reaction, state, settings, self }) => ({
   initialize() {
     self.calculateCodeVisible();
     state.displayedCode.set(settings.code);
-    if(settings.showCode) {
+    if (settings.showCode) {
       state.codeVisible.set(true);
     }
   },
@@ -56,17 +56,14 @@ const createComponent = ({ $, isServer, reaction, state, settings, self }) => ({
   },*/
 });
 
-
-const onRendered = function({self}) {
-  //self.setSlottedContent();
+const onRendered = function({ self }) {
+  // self.setSlottedContent();
 };
 
-
-
 const events = {
-  'click ui-icon.toggle'({state}) {
+  'click ui-icon.toggle'({ state }) {
     state.codeVisible.toggle();
-  }
+  },
 };
 
 const CodeExample = defineComponent({

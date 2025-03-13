@@ -7,7 +7,4 @@ const InputComponentSpec = reader.getWebComponentSpec(InputSpec);
 
 export default InputSpec;
 
-export {
-  InputSpec,
-  InputComponentSpec,
-};
+export { InputComponentSpec, InputSpec };

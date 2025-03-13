@@ -7,7 +7,7 @@ const createComponent = ({ self, data, signal, findParent, $ }) => ({
   getClasses() {
     return {
       completed: data.todo.completed,
-      editing: self.editing.get()
+      editing: self.editing.get(),
     };
   },
   getTodos() {

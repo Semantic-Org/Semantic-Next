@@ -4,7 +4,24 @@
  */
 
 type DatePreset = 'LT' | 'LTS' | 'L' | 'l' | 'LL' | 'll' | 'LLL' | 'lll' | 'LLLL' | 'llll';
-type DateToken = 'YYYY' | 'YY' | 'MMMM' | 'MMM' | 'MM' | 'M' | 'DD' | 'D' | 'Do' | 'dddd' | 'ddd' | 'HH' | 'hh' | 'h' | 'mm' | 'ss' | 'a';
+type DateToken =
+  | 'YYYY'
+  | 'YY'
+  | 'MMMM'
+  | 'MMM'
+  | 'MM'
+  | 'M'
+  | 'DD'
+  | 'D'
+  | 'Do'
+  | 'dddd'
+  | 'ddd'
+  | 'HH'
+  | 'hh'
+  | 'h'
+  | 'mm'
+  | 'ss'
+  | 'a';
 type TimezonePreset =
   | 'UTC'
   | 'local'

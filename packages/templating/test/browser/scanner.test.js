@@ -1,10 +1,8 @@
 import { StringScanner } from '@semantic-ui/templating';
-import { describe, it, expect, test, vi } from 'vitest';
+import { describe, expect, it, test, vi } from 'vitest';
 
 describe('string scanner', () => {
-  
   describe('fatal', () => {
-
     it('fatal should log error to page in debug mode', () => {
       StringScanner.debugMode = true;
       const scanner = new StringScanner(`
@@ -25,11 +23,11 @@ describe('string scanner', () => {
       try {
         expect(scanner.fatal('Unclosed if tag')).toThrow('Unclosed if tag');
       }
-      catch(e) {
+      catch (e) {
         // nothing
       }
       expect(console.error).toHaveBeenCalled();
-      
+
       const html = document.body.innerHTML;
       expect(html.search('h3')).toBeGreaterThan(-1);
 
@@ -37,6 +35,4 @@ describe('string scanner', () => {
       StringScanner.debugMode = false;
     });
   });
-
-
 });

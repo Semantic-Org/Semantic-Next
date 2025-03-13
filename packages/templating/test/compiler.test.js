@@ -616,7 +616,10 @@ describe('TemplateCompiler', () => {
       const ast = compiler.compile(template);
       const expectedAST = [
         { type: 'html', html: '<div>\n          ' },
-        { type: 'expression', value: 'processItems([ { type: \'user\', data: { id: 1 } }, { type: \'admin\', data: { id: 2 } } ])' },
+        {
+          type: 'expression',
+          value: "processItems([ { type: 'user', data: { id: 1 } }, { type: 'admin', data: { id: 2 } } ])",
+        },
         { type: 'html', html: '\n        </div>' },
       ];
       expect(ast).toEqual(expectedAST);
@@ -815,7 +818,7 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-    
+
     it('should compile a template with custom item and index names using comma syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -841,7 +844,7 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-    
+
     it('should handle expressions within the comma syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -867,7 +870,7 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-    
+
     it('should handle expressions in both item and index positions', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -893,7 +896,7 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-    
+
     it('should handle various whitespace patterns in the each syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -919,7 +922,7 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-    
+
     it('should work with else blocks when using custom item and index names', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -1103,8 +1106,8 @@ describe('TemplateCompiler', () => {
                     { type: 'html', html: '\n            <p>Inactive: ' },
                     { type: 'expression', value: 'name' },
                     { type: 'html', html: '</p>\n          ' },
-                  ]
-                }
+                  ],
+                },
               ],
             },
             { type: 'html', html: '\n        ' },
@@ -1119,7 +1122,7 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-    
+
     it('should handle complex nested conditions with multiple levels of if/each/else', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -1168,9 +1171,9 @@ describe('TemplateCompiler', () => {
           </div>
         {{/each}}
       `;
-      
+
       const ast = compiler.compile(template);
-      
+
       // Verify the structure through assertions on specific parts rather than comparing the entire AST
       // This makes the test more maintainable and easier to debug
       expect(ast.length).toBe(1);
@@ -1178,61 +1181,49 @@ describe('TemplateCompiler', () => {
       expect(ast[0].over).toBe('sections');
       expect(ast[0].else).toBeDefined();
       expect(ast[0].else.type).toBe('else');
-      
+
       const sectionsContent = ast[0].content;
-      
+
       // Find the if hasFilters node
-      const hasFiltersIf = sectionsContent.find(node => 
-        node.type === 'if' && node.condition === 'hasFilters'
-      );
+      const hasFiltersIf = sectionsContent.find(node => node.type === 'if' && node.condition === 'hasFilters');
       expect(hasFiltersIf).toBeDefined();
-      
+
       // Find the each filters node inside hasFilters
-      const filtersDiv = hasFiltersIf.content.find(node => 
-        node.type === 'html' && node.html.includes('filters')
-      );
+      const filtersDiv = hasFiltersIf.content.find(node => node.type === 'html' && node.html.includes('filters'));
       expect(filtersDiv).toBeDefined();
-      
+
       const filtersContent = hasFiltersIf.content;
       const filtersEach = filtersContent.find(node => node.type === 'each' && node.over === 'filters');
       expect(filtersEach).toBeDefined();
       expect(filtersEach.else).toBeDefined();
       expect(filtersEach.else.type).toBe('else');
-      
+
       // Find the isActive if inside filters each
-      const isActiveIf = filtersEach.content.find(node => 
-        node.type === 'if' && node.condition === 'isActive'
-      );
+      const isActiveIf = filtersEach.content.find(node => node.type === 'if' && node.condition === 'isActive');
       expect(isActiveIf).toBeDefined();
       expect(isActiveIf.branches.length).toBe(1);
       expect(isActiveIf.branches[0].type).toBe('else');
-      
+
       // Find the each items node
-      const itemsEach = sectionsContent.find(node => 
-        node.type === 'each' && node.over === 'items'
-      );
+      const itemsEach = sectionsContent.find(node => node.type === 'each' && node.over === 'items');
       expect(itemsEach).toBeDefined();
       expect(itemsEach.else).toBeDefined();
       expect(itemsEach.else.type).toBe('else');
-      
+
       // Find the featured if inside items each
-      const featuredIf = itemsEach.content.find(node => 
-        node.type === 'if' && node.condition === 'featured'
-      );
+      const featuredIf = itemsEach.content.find(node => node.type === 'if' && node.condition === 'featured');
       expect(featuredIf).toBeDefined();
       expect(featuredIf.branches.length).toBe(1);
       expect(featuredIf.branches[0].type).toBe('else');
-      
+
       // Find the hasImage if inside featured if
       const featuredContent = featuredIf.content;
-      const hasImageIf = featuredContent.find(node => 
-        node.type === 'if' && node.condition === 'hasImage'
-      );
+      const hasImageIf = featuredContent.find(node => node.type === 'if' && node.condition === 'hasImage');
       expect(hasImageIf).toBeDefined();
       expect(hasImageIf.branches.length).toBe(1);
       expect(hasImageIf.branches[0].type).toBe('else');
     });
-    
+
     it('should verify that multiple else-if can work correctly after if blocks', () => {
       const compiler = new TemplateCompiler();
       const template = `
@@ -1250,22 +1241,22 @@ describe('TemplateCompiler', () => {
           {{/if}}
         {{/each}}
       `;
-      
+
       const ast = compiler.compile(template);
-      
+
       // Verify the correct structure
       expect(ast.length).toBe(1);
       expect(ast[0].type).toBe('each');
       expect(ast[0].over).toBe('items');
       expect(ast[0].else).toBeDefined();
       expect(ast[0].else.type).toBe('else');
-      
+
       // Find the if inside the else block
       const ifNode = ast[0].else.content.find(node => node.type === 'if');
       expect(ifNode).toBeDefined();
       expect(ifNode.type).toBe('if');
       expect(ifNode.condition).toBe("reason === 'loading'");
-      
+
       // Check that the if has the correct number of branches (3 branches: 2 else-if and 1 else)
       expect(ifNode.branches.length).toBe(3);
       expect(ifNode.branches[0].type).toBe('elseif');
@@ -1273,7 +1264,7 @@ describe('TemplateCompiler', () => {
       expect(ifNode.branches[1].type).toBe('elseif');
       expect(ifNode.branches[1].condition).toBe("reason === 'empty'");
       expect(ifNode.branches[2].type).toBe('else');
-      
+
       // Verify the content of each branch to ensure complete AST correctness
       expect(ifNode.content.length).toBeGreaterThan(0);
       expect(ifNode.branches[0].content.length).toBeGreaterThan(0);
@@ -1421,7 +1412,6 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
-
   });
 
   describe('slots', () => {
@@ -1492,9 +1482,6 @@ describe('TemplateCompiler', () => {
         { type: 'html', html: '>' },
       ];
     });
-
-
-
   });
 
   describe('error conditions', () => {
@@ -1510,7 +1497,8 @@ describe('TemplateCompiler', () => {
         console.error = vi.fn();
         expect(() => compiler.compile(template)).toThrow();
         console.error = consoleError;
-      } catch (e) {}
+      }
+      catch (e) {}
     });
 
     it('should throw an error when an elseif included outside an if', () => {
@@ -1525,7 +1513,8 @@ describe('TemplateCompiler', () => {
         console.error = vi.fn();
         expect(() => compiler.compile(template)).toThrow();
         console.error = consoleError;
-      } catch (e) {}
+      }
+      catch (e) {}
     });
 
     it('should throw an error when closing if tag is included without an if', () => {
@@ -1540,7 +1529,8 @@ describe('TemplateCompiler', () => {
         console.error = vi.fn();
         expect(() => compiler.compile(template)).toThrow();
         console.error = consoleError;
-      } catch (e) {}
+      }
+      catch (e) {}
     });
   });
 });

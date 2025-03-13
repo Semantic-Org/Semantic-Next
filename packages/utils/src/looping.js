@@ -1,4 +1,4 @@
-import { isArray, isObject, isFunction } from './types.js';
+import { isArray, isFunction, isObject } from './types.js';
 
 /*-------------------
       Looping
@@ -89,4 +89,3 @@ export const asyncMap = async (obj, func, context) => {
   }
   return result;
 };
-

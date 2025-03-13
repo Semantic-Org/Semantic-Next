@@ -9,6 +9,6 @@ defineComponent({
   css,
   defaultState: {
     currentImage: '/images/avatar/jenny.jpg',
-    caption: 'Jenny'
-  }
+    caption: 'Jenny',
+  },
 });

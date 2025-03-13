@@ -6,18 +6,18 @@ import template from './component.html?raw';
 const defaultSettings = {
   value: 1,
   date: new Date(),
-  timezone: 'PST'
+  timezone: 'PST',
 };
 
 const createComponent = ({ settings }) => ({
-  //initialize: () => setInterval(() => settings.date = new Date(), 1000),
+  // initialize: () => setInterval(() => settings.date = new Date(), 1000),
   isTrue: () => true,
   addOne(value = 0, value2 = 0) {
     return value + value2 + 1;
   },
   getValue(obj = {}, prop) {
     return obj[prop];
-  }
+  },
 });
 
 export const TestComponent = defineComponent({
@@ -25,6 +25,5 @@ export const TestComponent = defineComponent({
   template,
   css,
   defaultSettings,
-  createComponent
+  createComponent,
 });
-

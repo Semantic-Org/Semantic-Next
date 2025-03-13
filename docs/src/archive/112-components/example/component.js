@@ -13,6 +13,6 @@ defineComponent({
     role: '',
     joined: 2024,
     image: '',
-    gender: 'female'
-  }
+    gender: 'female',
+  },
 });

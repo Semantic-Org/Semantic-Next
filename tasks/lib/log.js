@@ -5,14 +5,14 @@ export const log = (header, text) => {
   console.log(chalk.red(header), chalk.blue(`(${text})`), chalk.grey(time.toLocaleTimeString()));
 };
 
-export const logPlugin = (text ='') => {
+export const logPlugin = (text = '') => {
   return {
     name: 'log-build',
     setup(build) {
       let count = 0;
       build.onEnd(result => {
         let time = new Date();
-        if(count++ === 0) {
+        if (count++ === 0) {
           log('Initial Build', text);
         }
         else {

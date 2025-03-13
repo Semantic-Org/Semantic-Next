@@ -5,15 +5,13 @@ import { debounce } from '@semantic-ui/utils';
 import CSS from './css/input-shadow.css?raw';
 import Template from './input.html?raw';
 
-
 const defaultState = {
   focused: false,
 };
 
-const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
-
+const createComponent = ({ $, el, self, state, dispatchEvent, settings }) => ({
   initialize() {
-    if(settings.search) {
+    if (settings.search) {
       self.configureSearch();
     }
   },
@@ -36,17 +34,16 @@ const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
 
   getStateClasses() {
     return {
-      focus: state.focused.get()
+      focus: state.focused.get(),
     };
   },
 
   getIcon() {
-    if(settings.clearable && self.hasValue()) {
+    if (settings.clearable && self.hasValue()) {
       return 'x';
     }
-    return settings.icon
+    return settings.icon;
   },
-
 
   setValue(value) {
     el.value = value;
@@ -57,12 +54,11 @@ const createComponent = ({$, el, self, state, dispatchEvent, settings}) => ({
   setValueDebounced: debounce((value) => {
     self.setValue(value);
   }, { delay: settings.debounceInterval }),
-
 });
 
 const events = {
   'click ui-icon'({ $, self }) {
-    if(self.isClearable()) {
+    if (self.isClearable()) {
       self.setValue('');
     }
   },
@@ -74,7 +70,7 @@ const events = {
     dispatchEvent('change', { value: el.value });
   },
   'input input'({ el, self, value, settings }) {
-    if(settings.debounced) {
+    if (settings.debounced) {
       self.setValueDebounced(value);
     }
     else {

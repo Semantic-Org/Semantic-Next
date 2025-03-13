@@ -1,3 +1,3 @@
 export const defaultSettings = {
-  number: 0
+  number: 0,
 };

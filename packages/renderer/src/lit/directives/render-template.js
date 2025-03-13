@@ -1,13 +1,12 @@
-import { nothing, noChange } from 'lit';
-import { directive } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { isString, isEqual, mapObject } from '@semantic-ui/utils';
 import { Template } from '@semantic-ui/templating';
+import { isEqual, isString, mapObject } from '@semantic-ui/utils';
+import { noChange, nothing } from 'lit';
+import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 
 // Define directive
 export class RenderTemplateDirective extends AsyncDirective {
-
   constructor(partInfo) {
     super(partInfo);
     this.renderRoot = partInfo.options?.host?.renderRoot;
@@ -32,11 +31,11 @@ export class RenderTemplateDirective extends AsyncDirective {
         return;
       }
       // first run handled by main path
-      if(computation.firstRun) {
+      if (computation.firstRun) {
         return;
       }
       // this is an empty template
-      if(!this.template || this.template?.ast.length == 0) {
+      if (!this.template || this.template?.ast.length == 0) {
         return;
       }
 
@@ -47,7 +46,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.maybeCreateTemplate();
 
     // this is an empty template
-    if(!this.template || this.template?.ast.length == 0) {
+    if (!this.template || this.template?.ast.length == 0) {
       return nothing;
     }
     return this.renderTemplate();
@@ -55,7 +54,7 @@ export class RenderTemplateDirective extends AsyncDirective {
 
   renderTemplate(dataContext) {
     this.attachTemplate();
-    if(!dataContext) {
+    if (!dataContext) {
       dataContext = this.unpackData(this.data);
     }
     this.template.setDataContext(dataContext);
@@ -70,11 +69,11 @@ export class RenderTemplateDirective extends AsyncDirective {
 
     const templateOrName = this.getTemplate();
     // find template to render
-    if(isString(templateOrName)) {
+    if (isString(templateOrName)) {
       templateName = templateOrName;
       template = this.subTemplates[templateName];
     }
-    else if(templateOrName instanceof Template) {
+    else if (templateOrName instanceof Template) {
       // support passing in full templates using expressions
       template = templateOrName;
       templateName = template.templateName;
@@ -90,7 +89,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.template = template.clone({
       templateName,
       subTemplates: this.subTemplates,
-      data: this.unpackData(this.data)
+      data: this.unpackData(this.data),
     });
   }
 

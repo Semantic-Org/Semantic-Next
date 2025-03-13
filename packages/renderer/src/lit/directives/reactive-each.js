@@ -1,10 +1,10 @@
-import { nothing } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
-import { directive } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
 import { Reaction } from '@semantic-ui/reactivity';
+import { nothing } from 'lit';
+import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-import { isPlainObject, isArray, isString, arrayFromObject } from '@semantic-ui/utils';
+import { arrayFromObject, isArray, isPlainObject, isString } from '@semantic-ui/utils';
 
 export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -41,30 +41,30 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   renderItems() {
     let items = this.getItems(this.eachCondition);
-    if(!items?.length > 0 && this.eachCondition.else) {
+    if (!items?.length > 0 && this.eachCondition.else) {
       // this is necessary to avoid lit errors
       return repeat(
         [1],
         () => 'else-case',
-        () => this.eachCondition.else()
+        () => this.eachCondition.else(),
       );
     }
     // this turns { a: 'b'} to [{key: 'a', value: 'b'}]
     // for use with repeat
     const collectionType = this.getCollectionType(items);
-    if(collectionType == 'object') {
+    if (collectionType == 'object') {
       items = arrayFromObject(items);
       console.log(items);
     }
     return repeat(
       items,
       (item, indexOrKey) => this.getItemID(item, indexOrKey, collectionType),
-      (item, indexOrKey) => this.getTemplate(item, indexOrKey, collectionType)
+      (item, indexOrKey) => this.getTemplate(item, indexOrKey, collectionType),
     );
   }
 
   getCollectionType(items) {
-    if(isArray(items)) {
+    if (isArray(items)) {
       return 'array';
     }
     return 'object';
@@ -84,8 +84,7 @@ export class ReactiveEachDirective extends AsyncDirective {
       // if this is an object we want to prefer the object key as an id
       const key = (collectionType == 'object')
         ? indexOrKey
-        : undefined
-      ;
+        : undefined;
       return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
     if (isString(item)) {
@@ -98,14 +97,13 @@ export class ReactiveEachDirective extends AsyncDirective {
     let { as, indexAs } = eachCondition;
 
     // add default index/key values
-    if(!indexAs) {
+    if (!indexAs) {
       indexAs = (collectionType == 'array')
         ? 'index'
-        : 'key'
-      ;
+        : 'key';
     }
     // handle conversion of object to array
-    if(collectionType == 'object') {
+    if (collectionType == 'object') {
       indexOrKey = item.key;
       item = item.value;
     }
@@ -116,7 +114,6 @@ export class ReactiveEachDirective extends AsyncDirective {
       ? { [as]: item, [indexAs]: indexOrKey }
       : { ...item, this: item, [indexAs]: indexOrKey };
   }
-
 
   disconnected() {
     if (this.reaction) {

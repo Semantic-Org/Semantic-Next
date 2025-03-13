@@ -1,15 +1,25 @@
 import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { each, mapObject, hashCode, wrapFunction, fatal, isArray, filterObject, isPlainObject, isString, isFunction } from '@semantic-ui/utils';
+import {
+  each,
+  fatal,
+  filterObject,
+  hashCode,
+  isArray,
+  isFunction,
+  isPlainObject,
+  isString,
+  mapObject,
+  wrapFunction,
+} from '@semantic-ui/utils';
 
-import { reactiveData } from './directives/reactive-data.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
+import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
 import { renderTemplate } from './directives/render-template.js';
 
 export class LitRenderer {
-
   static html = html;
 
   static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
@@ -57,7 +67,7 @@ export class LitRenderer {
   }
 
   cachedRender(data) {
-    if(data) {
+    if (data) {
       this.updateData(data);
     }
     return this.litTemplate;
@@ -100,7 +110,7 @@ export class LitRenderer {
           break;
 
         case 'slot':
-          if(node.name) {
+          if (node.name) {
             this.addHTML(`<slot name="${node.name}"></slot>`);
           }
           else {
@@ -118,18 +128,18 @@ export class LitRenderer {
   */
   evaluateConditional(node, data) {
     const directiveMap = (value, key) => {
-      if(key == 'branches') {
+      if (key == 'branches') {
         return value.map((branch) => {
-          if(branch.condition) {
+          if (branch.condition) {
             branch.expression = branch.condition;
           }
           return mapObject(branch, directiveMap);
         });
       }
-      if(key == 'condition') {
+      if (key == 'condition') {
         return () => this.evaluateExpression(value, data);
       }
-      if(key == 'content') {
+      if (key == 'content') {
         return () => this.renderContent({ ast: value, data });
       }
       return value;
@@ -146,13 +156,13 @@ export class LitRenderer {
   */
   evaluateEach(node, data) {
     const directiveMap = (value, key) => {
-      if(key == 'over') {
+      if (key == 'over') {
         return (expressionString) => {
           const computedValue = this.evaluateExpression(value, data);
           return computedValue;
         };
       }
-      if(key == 'content') {
+      if (key == 'content') {
         return (eachData) => {
           // each data is (index, this, as) from curent position
           data = { ...this.data, ...eachData };
@@ -162,7 +172,7 @@ export class LitRenderer {
           });
         };
       }
-      if(key == 'else') {
+      if (key == 'else') {
         return (data) => {
           return this.renderContent({
             ast: value.content,
@@ -178,7 +188,7 @@ export class LitRenderer {
 
   evaluateTemplate(node, data = {}) {
     const templateName = this.lookupExpressionValue(node.name, data);
-    if(this.snippets[templateName]) {
+    if (this.snippets[templateName]) {
       return this.evaluateSnippet(node, data);
     }
     else {
@@ -190,7 +200,7 @@ export class LitRenderer {
     return this.renderContent({
       isSVG: true,
       ast: svg,
-      data
+      data,
     });
   }
 
@@ -202,8 +212,7 @@ export class LitRenderer {
     };
     return (reactive)
       ? () => getValue(expression)
-      : () => Reaction.nonreactive(() => getValue(expression))
-    ;
+      : () => Reaction.nonreactive(() => getValue(expression));
   };
 
   getPackedNodeData(node, data, { inheritParent = false } = {}) {
@@ -211,15 +220,14 @@ export class LitRenderer {
       let packedData = {};
       // this is a data object like {> someTemplate data=getData }
       // we need to get the data first before we can wrap it
-      if(isString(unpackedData)) {
+      if (isString(unpackedData)) {
         // note this is currently not reactive on the 'getData' expression
         // so it will be locked in when evaluated
         const expression = unpackedData; // this is an expression like data=getData
         unpackedData = this.evaluateExpression(expression, data, options);
         packedData = mapObject(unpackedData, wrapFunction);
-
       }
-      else if(isPlainObject(unpackedData)) {
+      else if (isPlainObject(unpackedData)) {
         // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
         packedData = mapObject(unpackedData, (expression) => this.getPackedValue(expression, data, options));
       }
@@ -232,7 +240,7 @@ export class LitRenderer {
     data = {
       ...(inheritParent) ? this.data : {},
       ...packedStaticData,
-      ...packedReactiveData
+      ...packedReactiveData,
     };
     return data;
   }
@@ -240,7 +248,7 @@ export class LitRenderer {
   evaluateSnippet(node, data = {}) {
     const snippetName = this.lookupExpressionValue(node.name, data);
     const snippet = this.snippets[snippetName];
-    if(!snippet) {
+    if (!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
     const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
@@ -265,13 +273,13 @@ export class LitRenderer {
   evaluateExpression(
     expression,
     data = this.data,
-    { asDirective = false, ifDefined = false, unsafeHTML = false } = {}
+    { asDirective = false, ifDefined = false, unsafeHTML = false } = {},
   ) {
-    if(typeof expression === 'string') {
-      if(asDirective) {
+    if (typeof expression === 'string') {
+      if (asDirective) {
         const dataArguments = {
           expression,
-          value: () => this.lookupExpressionValue(expression, this.data)
+          value: () => this.lookupExpressionValue(expression, this.data),
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
       }
@@ -289,11 +297,13 @@ export class LitRenderer {
       const result = [];
       while (tokens.length > 0) {
         const token = tokens.shift();
-        if(token === '(') {
+        if (token === '(') {
           result.push(parse(tokens));
-        } else if(token === ')') {
+        }
+        else if (token === ')') {
           return result;
-        } else {
+        }
+        else {
           result.push(token);
         }
       }
@@ -305,7 +315,7 @@ export class LitRenderer {
   // evaluate javascript expressions
   evaluateJavascript(code, context = {}, { includeHelpers = true } = {}) {
     let result;
-    if(includeHelpers) {
+    if (includeHelpers) {
       context = {
         ...this.helpers,
         ...context,
@@ -339,14 +349,14 @@ export class LitRenderer {
               return value();
             },
             configurable: true,
-            enumerable: true
+            enumerable: true,
           });
         }
       });
       result = new Function(...keys, `return ${code}`)(...values);
     }
     catch (e) {
-      // this token is not valid javascript 
+      // this token is not valid javascript
     }
     return result;
   }
@@ -354,7 +364,6 @@ export class LitRenderer {
   // this evaluates an expression from right determining if something is an argument or a function
   // then looking up the value
   lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
-
     // detect recursion
     if (visited.has(expression)) {
       // throw new Error(`Cyclical expression detected: "${expression}"`);
@@ -365,38 +374,37 @@ export class LitRenderer {
     // short circuit - check if whole expression is available in data context
     // this will avoid overhead of evaluating as javascript
     const simpleExpression = !expression.includes(' ');
-    if(simpleExpression) {
+    if (simpleExpression) {
       const value = this.lookupTokenValue(expression, data);
-      if(value !== undefined) {
+      if (value !== undefined) {
         return wrapFunction(value)();
       }
     }
 
     // check if whole expression is JS before tokenizing
     const jsValue = this.evaluateJavascript(expression, data);
-    if(jsValue !== undefined) {
+    if (jsValue !== undefined) {
       const value = this.accessTokenValue(jsValue, expression, data);
       visited.delete(expression);
       return wrapFunction(value)();
     }
 
     // wrap {} or [] in parens
-    if(isString(expression)) {
+    if (isString(expression)) {
       expression = this.addParensToExpression(expression);
     }
 
     const expressionArray = isArray(expression)
       ? expression
-      : this.getExpressionArray(expression)
-    ;
+      : this.getExpressionArray(expression);
 
     let funcArguments = [];
     let result;
 
     let index = expressionArray.length;
-    while(index--) {
+    while (index--) {
       const token = expressionArray[index];
-      if(isArray(token)) {
+      if (isArray(token)) {
         result = this.lookupExpressionValue(token.join(' '), data, visited);
         funcArguments.unshift(result);
       }
@@ -404,8 +412,7 @@ export class LitRenderer {
         const tokenValue = this.lookupTokenValue(token, data);
         result = isFunction(tokenValue)
           ? tokenValue(...funcArguments)
-          : tokenValue
-        ;
+          : tokenValue;
         funcArguments.unshift(result);
       }
     }
@@ -414,47 +421,46 @@ export class LitRenderer {
   }
 
   lookupTokenValue(token = '', data) {
-    if(isArray(token)) {
+    if (isArray(token)) {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
     }
 
     // check if this is a value not requiring lookup
     const literalValue = this.getLiteralValue(token);
-    if(literalValue !== undefined) {
+    if (literalValue !== undefined) {
       return literalValue;
     }
 
     // retrieve token value from data context
     let dataValue = this.getDeepDataValue(data, token);
     let value = this.accessTokenValue(dataValue, token, data);
-    if(value !== undefined) {
+    if (value !== undefined) {
       return value;
     }
 
     // if undefined check if global helper
     const helper = this.helpers[token];
-    if(isFunction(helper)) {
+    if (isFunction(helper)) {
       return helper;
     }
   }
 
   getDeepDataValue(obj, path) {
     return path.split('.').reduce((acc, part) => {
-      if(acc === undefined) {
+      if (acc === undefined) {
         return undefined;
       }
       const current = (acc instanceof Signal)
         ? acc.get()
-        : wrapFunction(acc)()
-      ;
-      if(current == undefined) {
+        : wrapFunction(acc)();
+      if (current == undefined) {
         return undefined;
         /* erroring on intermediate undefined
            feels better not as an error state
           but this may change
         */
-        //fatal(`Error evaluating expression "${path}"`);
+        // fatal(`Error evaluating expression "${path}"`);
       }
       return current[part];
     }, obj);
@@ -462,23 +468,21 @@ export class LitRenderer {
 
   // retrieve token value accessing getter for reactive vars
   accessTokenValue(tokenValue, token, data) {
-
     const getThisContext = (token, data) => {
       const path = token.split('.').slice(0, -1).join('.');
       return this.getDeepDataValue(data, path);
     };
 
     // bind context for functions with '.'
-    if(isFunction(tokenValue) && token.search('.') !== -1) {
+    if (isFunction(tokenValue) && token.search('.') !== -1) {
       const thisContext = getThisContext(token, data);
       tokenValue = tokenValue.bind(thisContext);
     }
-    
-    if(tokenValue !== undefined) {
+
+    if (tokenValue !== undefined) {
       return (tokenValue instanceof Signal)
         ? tokenValue.value
-        : tokenValue
-      ;
+        : tokenValue;
     }
     return undefined;
   }
@@ -491,27 +495,26 @@ export class LitRenderer {
   }
 
   getLiteralValue(token) {
-
     // Check if this is a string literal (single or double quotes)
-    if(token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
+    if (token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
       return token.slice(1, -1).replace(/\\(['"])/g, '$1');
     }
 
     // check if this is a boolean
     const boolString = { true: true, false: false };
-    if(boolString[token] !== undefined) {
+    if (boolString[token] !== undefined) {
       return boolString[token];
     }
 
     // check if this is a number
-    if(!Number.isNaN(parseFloat(token))) {
+    if (!Number.isNaN(parseFloat(token))) {
       return Number(token);
     }
   }
 
   addHTML(html) {
     // we want to concat all html added consecutively
-    if(this.lastHTML) {
+    if (this.lastHTML) {
       const lastHTML = this.html.pop();
       html = `${lastHTML}${html}`;
     }
@@ -533,7 +536,7 @@ export class LitRenderer {
 
   // subtrees are rendered as separate contexts stored as weakrefs for gc
   renderContent({ ast, data, isSVG = this.isSVG } = {}) {
-    const contentID = LitRenderer.getID({ast, data, isSVG});
+    const contentID = LitRenderer.getID({ ast, data, isSVG });
     const treeRef = this.renderTrees[contentID];
     const existingTree = treeRef ? treeRef.deref() : undefined;
     // disabled for now
@@ -566,7 +569,7 @@ export class LitRenderer {
   updateSubtreeData(newData) {
     each(this.renderTrees, (ref, contentID) => {
       const tree = ref.deref();
-      if(tree) {
+      if (tree) {
         tree.updateData(newData);
       }
     });
@@ -581,7 +584,7 @@ export class LitRenderer {
       delete this.data[name];
     });
     each(newData, (value, name) => {
-      if(this.data[name] !== value) {
+      if (this.data[name] !== value) {
         this.data[name] = value;
       }
     });

@@ -7,7 +7,4 @@ const RailComponentSpec = reader.getWebComponentSpec(RailSpec);
 
 export default RailSpec;
 
-export {
-  RailSpec,
-  RailComponentSpec,
-};
+export { RailComponentSpec, RailSpec };

@@ -1,17 +1,17 @@
 export { SpecReader } from './spec-reader.js';
 
 /* Structural */
-export { ContainerSpec, ContainerComponentSpec } from './specs/container/index.js';
-export { RailSpec, RailComponentSpec } from './specs/rail/index.js';
+export { ContainerComponentSpec, ContainerSpec } from './specs/container/index.js';
+export { RailComponentSpec, RailSpec } from './specs/rail/index.js';
 
 /* Primitives */
-export { ButtonSpec, ButtonPluralComponentSpec, ButtonComponentSpec } from './specs/button/index.js';
-export { IconSpec, IconComponentSpec } from './specs/icon/index.js';
-export { MenuSpec, MenuComponentSpec, MenuItemSpec, MenuItemComponentSpec } from './specs/menu/index.js';
-export { LabelSpec, LabelComponentSpec } from './specs/label/index.js';
-export { InputSpec, InputComponentSpec } from './specs/input/index.js';
-export { SegmentSpec, SegmentComponentSpec } from './specs/segment/index.js';
-export { CardSpec, CardPluralComponentSpec, CardComponentSpec } from './specs/card/index.js';
+export { ButtonComponentSpec, ButtonPluralComponentSpec, ButtonSpec } from './specs/button/index.js';
+export { CardComponentSpec, CardPluralComponentSpec, CardSpec } from './specs/card/index.js';
+export { IconComponentSpec, IconSpec } from './specs/icon/index.js';
+export { InputComponentSpec, InputSpec } from './specs/input/index.js';
+export { LabelComponentSpec, LabelSpec } from './specs/label/index.js';
+export { MenuComponentSpec, MenuItemComponentSpec, MenuItemSpec, MenuSpec } from './specs/menu/index.js';
+export { SegmentComponentSpec, SegmentSpec } from './specs/segment/index.js';
 
 /* Components */
-export { ModalSpec, ModalComponentSpec } from './specs/modal/index.js';
+export { ModalComponentSpec, ModalSpec } from './specs/modal/index.js';

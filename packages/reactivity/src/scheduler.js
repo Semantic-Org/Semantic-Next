@@ -4,7 +4,6 @@ export class Scheduler {
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
 
-
   static scheduleReaction(reaction) {
     Scheduler.pendingReactions.add(reaction);
     Scheduler.scheduleFlush();
@@ -15,7 +14,8 @@ export class Scheduler {
       Scheduler.isFlushScheduled = true;
       if (typeof queueMicrotask === 'function') {
         queueMicrotask(() => Scheduler.flush());
-      } else {
+      }
+      else {
         Promise.resolve().then(() => Scheduler.flush());
       }
     }

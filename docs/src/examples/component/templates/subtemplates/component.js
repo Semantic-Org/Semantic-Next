@@ -16,7 +16,7 @@ const createComponent = ({ settings }) => ({
     ['Jane', 'Fonda', '55', 'Female'],
     ['Matt', 'Stone', '23', 'Male'],
     ['Tory', 'Mcguiness', '25', 'Female'],
-  ]
+  ],
 });
 
 defineComponent({
@@ -27,6 +27,6 @@ defineComponent({
   createComponent,
   // subtemplates are passed in explicitly
   subTemplates: {
-    row
-  }
+    row,
+  },
 });

@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './GlobalSearch.html?raw';
 import css from './GlobalSearch.css?raw';
+import template from './GlobalSearch.html?raw';
 
 import { UIModal } from '@semantic-ui/core';
 
@@ -11,7 +11,7 @@ const defaultSettings = {
   importPath: 'pagefind.js',
   openKey: 'ctrl + k',
   resultsPerPage: 20,
-  debounceTime: 200
+  debounceTime: 200,
 };
 
 const defaultState = {
@@ -26,10 +26,9 @@ const defaultState = {
   modalOpen: false,
 };
 
-const createComponent = ({self, el, bindKey, reaction, state, isRendered, settings, isServer, $}) => ({
-
+const createComponent = ({ self, el, bindKey, reaction, state, isRendered, settings, isServer, $ }) => ({
   initialize() {
-    if(isServer) {
+    if (isServer) {
       return;
     }
     bindKey(settings.openKey, self.openModal);
@@ -52,7 +51,7 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
     reaction(async (reaction) => {
       const { Instance } = await import('@pagefind/modular-ui');
       this.search = new Instance({
-        bundlePath: settings.bundlePath
+        bundlePath: settings.bundlePath,
       });
       this.search.on('search', (term) => {
         state.searchTerm.set(term);
@@ -72,17 +71,16 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
       const rawResults = state.rawResults.get();
       const startIndex = state.resultOffset.get();
       const endIndex = startIndex + settings.resultsPerPage;
-      if(reaction.firstRun) {
+      if (reaction.firstRun) {
         return;
       }
       const results = await Promise.all(rawResults.results.slice(startIndex, endIndex).map(r => r.data()));
       state.results.set(results);
       const displayResults = results
         .map(result => self.mapResult(result))
-        .filter(result => result.title)
-      ;
+        .filter(result => result.title);
       state.selectedIndex.set(0);
-      if(displayResults.length == 0 && state.searchTerm.get()) {
+      if (displayResults.length == 0 && state.searchTerm.get()) {
         state.noResults.set(true);
       }
       state.displayResults.set(displayResults);
@@ -99,12 +97,12 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
   },
 
   scrollIntoView(index) {
-    if(!isRendered()) {
+    if (!isRendered()) {
       return;
     }
     const element = $('.results .result').get(index);
     const container = $('.results').get(0);
-    if(!element) {
+    if (!element) {
       return;
     }
     const elementRect = element.getBoundingClientRect();
@@ -121,13 +119,13 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
     const title = primaryResult.title;
     let tags = [];
     let subtitle;
-    if(result.meta.title && primaryResult.title !== result.meta.title) {
+    if (result.meta.title && primaryResult.title !== result.meta.title) {
       subtitle = result.meta.title;
     }
-    if(result.meta.tab) {
-      tags.push({ text: result.meta.tab});
+    if (result.meta.tab) {
+      tags.push({ text: result.meta.tab });
     }
-    if(result.meta.pageType) {
+    if (result.meta.pageType) {
       const colors = {
         'Guide': 'orange',
         'Example': 'purple',
@@ -136,12 +134,12 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
       const text = result.meta.pageType;
       const color = colors[text];
       tags.push({ text, color });
-      if(text == 'Example') {
-        if(result.meta.category) {
-          tags.push({text: result.meta.category});
+      if (text == 'Example') {
+        if (result.meta.category) {
+          tags.push({ text: result.meta.category });
         }
-        if(result.meta.subcategory) {
-          tags.push({text: result.meta.subcategory});
+        if (result.meta.subcategory) {
+          tags.push({ text: result.meta.subcategory });
         }
       }
     }
@@ -154,66 +152,65 @@ const createComponent = ({self, el, bindKey, reaction, state, isRendered, settin
       meta: result.meta,
       excerpt: result.excerpt,
       subResults: otherResults,
-      rawResult: result
+      rawResult: result,
     };
     return displayResult;
   },
 
   selectPrevious() {
-    if(state.selectedIndex.get() > 0) {
+    if (state.selectedIndex.get() > 0) {
       state.selectedIndex.decrement();
     }
   },
   selectNext() {
-    if(state.selectedIndex.get() < state.displayResults.peek().length - 1) {
+    if (state.selectedIndex.get() < state.displayResults.peek().length - 1) {
       state.selectedIndex.increment();
     }
   },
   visitResult() {
-    let result =  state.selectedResult.get();
+    let result = state.selectedResult.get();
     window.location.href = result.url;
     self.hideModal();
-  }
-
+  },
 });
 
 const keys = {
-  'up'({self, state}) {
-    if(!state.modalOpen.get()) {
+  'up'({ self, state }) {
+    if (!state.modalOpen.get()) {
       return;
     }
     self.selectPrevious();
   },
-  'down'({self, state}) {
-    if(!state.modalOpen.get()) {
+  'down'({ self, state }) {
+    if (!state.modalOpen.get()) {
       return;
     }
     self.selectNext();
   },
-  'enter'({self, state}) {
-    if(!state.modalOpen.get()) {
+  'enter'({ self, state }) {
+    if (!state.modalOpen.get()) {
       return;
     }
     self.visitResult();
-  }
+  },
 };
 
 const events = {
-  'input, click .inline-search'({self}) {
+  'input, click .inline-search'({ self }) {
     self.openModal();
   },
-  'input .search ui-input'({self, settings, value}) {
-    if(self.doSearch) {
+  'input .search ui-input'({ self, settings, value }) {
+    if (self.doSearch) {
       self.doSearch.cancel();
     }
     self.search.triggerSearch(value);
   },
-  'show ui-modal'({state}) {
+  'show ui-modal'({ state }) {
     state.modalOpen.set(true);
   },
-  'hide ui-modal'({state}) {
+  'hide ui-modal'({ state }) {
     state.modalOpen.set(false);
-  }
+  },
 };
 
 const GlobalSearch = defineComponent({

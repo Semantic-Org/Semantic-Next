@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
-import { logPlugin } from './log.js';
-import { BROWSER_TARGET, JS_LOADER_CONFIG, CSS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './config.js';
 import * as fs from 'fs';
+import { BROWSER_TARGET, CSS_LOADER_CONFIG, JS_LOADER_CONFIG, TS_COMPILER_OPTIONS } from './config.js';
+import { logPlugin } from './log.js';
 
 export const buildProject = async ({
   watch = false, // watch for changes
@@ -21,7 +21,6 @@ export const buildProject = async ({
   let tasks = [];
 
   if (includeJavascript) {
-
     /*
       Export Concat Components
     */
@@ -42,7 +41,6 @@ export const buildProject = async ({
   }
 
   if (includeComponents) {
-
     /*
       Exports Individual Components
     */
@@ -77,11 +75,9 @@ export const buildProject = async ({
       target: BROWSER_TARGET,
     });
     tasks.push(cssBuild);
-
   }
 
   if (includeThemes) {
-
     /*
       Exports themes as separate css
     */
@@ -117,7 +113,7 @@ export const buildProject = async ({
     });
     tasks.push(exampleBuild);
   }
-  if(serveDir) {
+  if (serveDir) {
     let { host, port } = await tasks[0].serve({
       servedir: serveDir,
     });

@@ -9,12 +9,12 @@ const defaultState = {
 };
 
 const events = {
-  'click'({state}) {
+  'click'({ state }) {
     state.text.set('Clicked');
   },
-  'global click body'({state}) {
+  'global click body'({ state }) {
     state.counter.increment();
-  }
+  },
 };
 
 defineComponent({
@@ -22,5 +22,5 @@ defineComponent({
   template,
   defaultState,
   events,
-  pageCSS
+  pageCSS,
 });

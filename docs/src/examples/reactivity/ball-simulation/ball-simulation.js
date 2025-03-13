@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { each, clone, generateID } from '@semantic-ui/utils';
+import { clone, each, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -17,8 +17,7 @@ const defaultState = {
   which has a reactive reference to state.time()
 */
 
-const createComponent = ({self, $, reaction, signal, state}) => ({
-
+const createComponent = ({ self, $, reaction, signal, state }) => ({
   startTime() {
     self.tick();
   },
@@ -36,13 +35,12 @@ const createComponent = ({self, $, reaction, signal, state}) => ({
   },
 
   createBalls(count) {
-    while(count--) {
-      self.createBall({x: 250, y: 250});
+    while (count--) {
+      self.createBall({ x: 250, y: 250 });
     }
   },
 
-  createBall({x, y}) {
-
+  createBall({ x, y }) {
     // create ball
     const ball = signal({
       _id: generateID(),
@@ -58,7 +56,6 @@ const createComponent = ({self, $, reaction, signal, state}) => ({
       vy: Math.random() * 1.2,
     });
 
-
     // we add it to balls array
     state.balls.push(ball);
 
@@ -67,7 +64,6 @@ const createComponent = ({self, $, reaction, signal, state}) => ({
   },
 
   updateBallPosition(ball) {
-
     // check time reactively
     const t = state.time.get() - state.lastTime;
 
@@ -120,24 +116,23 @@ const createComponent = ({self, $, reaction, signal, state}) => ({
     const scaleY = canvas.height / rect.height;
     return {
       x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY
+      y: (event.clientY - rect.top) * scaleY,
     };
-  }
-
+  },
 });
 
-const onRendered = ({self}) => {
+const onRendered = ({ self }) => {
   self.startTime();
   self.draw();
   self.createBalls(25);
 };
 
 const events = {
-  'pointerdown canvas'({self, event}) {
+  'pointerdown canvas'({ self, event }) {
     const position = self.getPointerPosition(event);
     self.createBall(position);
   },
-  'touchstart, touchmove canvas'({event}) {
+  'touchstart, touchmove canvas'({ event }) {
     // prevent highlight/scroll on mobile
     event.preventDefault();
   },
@@ -150,5 +145,5 @@ export const BallSimulation = defineComponent({
   createComponent,
   onRendered,
   events,
-  defaultState
+  defaultState,
 });

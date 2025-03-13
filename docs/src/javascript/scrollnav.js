@@ -14,7 +14,7 @@ class ScrollNav {
       hideVelocity: 10,
       showVelocity: 20,
       hideClass: 'hidden',
-      ...options
+      ...options,
     };
 
     // State
@@ -49,14 +49,19 @@ class ScrollNav {
     const delta = this.currentScrollY - this.lastScrollY;
     const velocity = Math.abs(delta);
 
-    if (delta > 0) {  // Scrolling down
-      if (velocity > this.options.hideVelocity &&
-          Math.abs(delta) > this.options.hideThreshold) {
+    if (delta > 0) { // Scrolling down
+      if (
+        velocity > this.options.hideVelocity
+        && Math.abs(delta) > this.options.hideThreshold
+      ) {
         this.hide();
       }
-    } else {  // Scrolling up
-      if (velocity > this.options.showVelocity &&
-          Math.abs(delta) > this.options.showThreshold) {
+    }
+    else { // Scrolling up
+      if (
+        velocity > this.options.showVelocity
+        && Math.abs(delta) > this.options.showThreshold
+      ) {
         this.show();
       }
     }

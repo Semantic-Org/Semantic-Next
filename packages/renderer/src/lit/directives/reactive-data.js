@@ -1,11 +1,11 @@
 import { nothing } from 'lit';
-import { directive } from 'lit/directive.js';
 import { AsyncDirective } from 'lit/async-directive.js';
+import { directive } from 'lit/directive.js';
 
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Reaction } from '@semantic-ui/reactivity';
-import { isArray, isObject, inArray } from '@semantic-ui/utils';
+import { inArray, isArray, isObject } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 export class ReactiveDataDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -28,7 +28,7 @@ export class ReactiveDataDirective extends AsyncDirective {
     // Create a new reaction to rerun the computation function if reactive data updates
     // that dont trigger rerender occur
 
-    if(this.reaction) {
+    if (this.reaction) {
       // if reaction already set up just return value for rerender
       return this.getReactiveValue();
     }
@@ -37,12 +37,12 @@ export class ReactiveDataDirective extends AsyncDirective {
       // that dont trigger rerender occur
       let value;
       this.reaction = Reaction.create((computation) => {
-        if(!this.isConnected) {
+        if (!this.isConnected) {
           computation.stop();
           return;
         }
         value = this.getReactiveValue();
-        if(this.settings.unsafeHTML) {
+        if (this.settings.unsafeHTML) {
           value = unsafeHTML(value);
         }
         if (!computation.firstRun) {
@@ -58,15 +58,15 @@ export class ReactiveDataDirective extends AsyncDirective {
 
     // useful for things like <input checked="{{isChecked}}">
     // template compiler does this automatically for boolean attrs
-    if(this.settings.ifDefined) {
-      if(inArray(reactiveValue, [undefined, null, false, 0])) {
+    if (this.settings.ifDefined) {
+      if (inArray(reactiveValue, [undefined, null, false, 0])) {
         return ifDefined(undefined);
       }
     }
 
     // arrays and objects are serialized for use in web component attributes
     // maybe should check part?
-    if(isArray(reactiveValue) || isObject(reactiveValue)) {
+    if (isArray(reactiveValue) || isObject(reactiveValue)) {
       reactiveValue = JSON.stringify(reactiveValue);
     }
     return reactiveValue;

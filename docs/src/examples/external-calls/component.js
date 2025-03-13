@@ -3,15 +3,15 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultSettings = {
-  startingNumber: 0
+  startingNumber: 0,
 };
 
 const defaultState = {
   counter: 0,
-  running: true
+  running: true,
 };
 
-const createComponent = ({self, state, settings}) => ({
+const createComponent = ({ self, state, settings }) => ({
   initialize() {
     self.setCounter(settings.startingNumber);
     self.startCounter();
@@ -28,7 +28,6 @@ const createComponent = ({self, state, settings}) => ({
     clearInterval(self.interval);
   },
 });
-
 
 defineComponent({
   tagName: 'ui-counter',

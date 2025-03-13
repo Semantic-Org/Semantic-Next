@@ -13,12 +13,11 @@ export const hideMarkerEnd = `/* playground-hide-end */`;
 export const foldMarkerStart = `/* playground-fold */`;
 export const foldMarkerEnd = `/* playground-fold-end */`;
 
-
 export const hideCode = ({ text = '', isHTML = false, removeLines = true } = {}) => {
   const start = (isHTML) ? htmlHideMarkerStart : hideMarkerStart;
   const end = (isHTML) ? htmlHideMarkerEnd : hideMarkerEnd;
   let html = `${start}${text}${end}`;
-  if(removeLines) {
+  if (removeLines) {
     html = html.replace(/[\r\n]+/g, '');
   }
   return html;
@@ -27,7 +26,7 @@ export const foldCode = ({ text = '', isHTML = false, removeLines = true } = {})
   const start = (isHTML) ? htmlFoldMarkerStart : foldMarkerStart;
   const end = (isHTML) ? htmlFoldMarkerEnd : foldMarkerEnd;
   let html = `${start}${text}${end}`;
-  if(removeLines) {
+  if (removeLines) {
     html = html.replace(/[\r\n]+/g, '');
   }
   return html;
@@ -53,13 +52,11 @@ export const isStaticBuild = Boolean(process.env.VERCEL_URL);
 // instead of tagged npm versions
 export const packageBase = isStaticBuild
   ? 'https://unpkg.com'
-  : `${import.meta.env.SITE}/node_modules`
-;
+  : `${import.meta.env.SITE}/node_modules`;
 
 const suiBase = isStaticBuild
   ? `${packageBase}/@semantic-ui/core@latest`
-  : `${packageBase}/@semantic-ui/core`
-;
+  : `${packageBase}/@semantic-ui/core`;
 
 export const errorJS = `
   const ErrorInterceptor = {
@@ -186,7 +183,6 @@ function formatJSON(value, skipFormat = false) {
 }
 ${hideMarkerEnd}`;
 
-
 export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -257,7 +253,7 @@ export const errorCSS = `
       color: var(--standard-70);
     }
   }
-`
+`;
 
 export const logCSS = `
   #log-container {
@@ -284,19 +280,17 @@ export const logCSS = `
   }
 `;
 
-
 /*
   Handles files that should be included in iframe
   for injecting scripts
 */
 
 export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
-
   // page styling always first
   const pageScripts = ['page.css'];
 
   // log always next
-  if(includeLog) {
+  if (includeLog) {
     pageScripts.push('log.js');
     pageScripts.push('log.css');
   }
@@ -306,10 +300,10 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   pageScripts.push('error.css');
 
   // components always last
-  if(files['index.js']) {
+  if (files['index.js']) {
     pageScripts.push('index.js');
   }
-  if(files['component.js']) {
+  if (files['component.js']) {
     pageScripts.push('component.js');
   }
 
@@ -319,16 +313,16 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
   const getScriptCode = function() {
     let html = '';
     each(pageScripts, (src) => {
-      if(files[src]?.generated) {
+      if (files[src]?.generated) {
         html += `${htmlHideMarkerStart}`;
       }
-      if(src.search('.js') >= 0) {
+      if (src.search('.js') >= 0) {
         html += `   <script src="./${src}" type="module"></script>\n`;
       }
-      else if(src.search('.css') >= 0) {
+      else if (src.search('.css') >= 0) {
         html += `   <link href="./${src}" rel="stylesheet">\n`;
       }
-      if(files[src]?.generated) {
+      if (files[src]?.generated) {
         html += `${htmlHideMarkerEnd}`;
       }
     });
@@ -342,7 +336,6 @@ ${hideCode({ text: headLibraryJS, isHTML: true })} ${getScriptCode()}  </head>
 `;
 };
 
-
 export const pageHTMLAfter = `
   </body>
 </html>`;
@@ -353,14 +346,13 @@ export const pageJSAfter = ``;
 export const pageCSSBefore = ``;
 export const pageCSSAfter = ``;
 
-
 /*
   Provides content injections that should appear
   before and after file contents for playground
   based off filename
 */
 export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
-  const pageHTMLBefore = getIndexHTMLBefore({ files, includeLog});
+  const pageHTMLBefore = getIndexHTMLBefore({ files, includeLog });
   let injections = {
     'component.js': {
       before: componentJSBefore,
@@ -368,7 +360,7 @@ export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
     },
     'component.html': {
       before: componentHTMLBefore,
-      after: componentHTMLAfter
+      after: componentHTMLAfter,
     },
     'component.css': {
       before: componentCSSBefore,
@@ -380,7 +372,7 @@ export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
     },
     'page.html': {
       before: pageHTMLBefore,
-      after: pageHTMLAfter
+      after: pageHTMLAfter,
     },
     'page.css': {
       before: pageCSSBefore,
@@ -390,7 +382,6 @@ export const getPlaygroundInjections = ({ files, includeLog } = {}) => {
   return injections;
 };
 
-
 /*
   Adds file injections to files
 */
@@ -399,11 +390,11 @@ export const addPlaygroundInjections = (files, {
 } = {}) => {
   const fileInjections = getPlaygroundInjections({ files, includeLog });
   each(files, (file, name) => {
-    if(fileInjections[name]) {
+    if (fileInjections[name]) {
       const { before = '', after = '' } = fileInjections[name];
       let content = files[name].content.trim();
       // html will be inside <body> tag so we need to indent
-      if(name == 'page.html') {
+      if (name == 'page.html') {
         content = indentLines(content, 4);
       }
       files[name].content = `${before}${content}${after}`;
@@ -411,4 +402,3 @@ export const addPlaygroundInjections = (files, {
   });
   return files;
 };
-

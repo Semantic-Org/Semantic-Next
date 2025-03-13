@@ -7,7 +7,4 @@ const SegmentComponentSpec = reader.getWebComponentSpec(SegmentSpec);
 
 export default SegmentSpec;
 
-export {
-  SegmentSpec,
-  SegmentComponentSpec,
-};
+export { SegmentComponentSpec, SegmentSpec };

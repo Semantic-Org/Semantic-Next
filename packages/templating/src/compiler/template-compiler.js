@@ -3,7 +3,6 @@ import { each, isString, last } from '@semantic-ui/utils';
 import { StringScanner } from './string-scanner.js';
 
 class TemplateCompiler {
-
   constructor(templateString) {
     this.templateString = templateString || '';
     this.snippets = {};
@@ -70,7 +69,6 @@ class TemplateCompiler {
     SINGLE_QUOTES: /\'/g,
   };
 
-
   /*
     Creates an AST representation of a template
     from a template string
@@ -90,21 +88,17 @@ class TemplateCompiler {
     const syntax = TemplateCompiler.detectSyntax(templateString);
     const tagRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketRegExp
-      : TemplateCompiler.singleBracketRegExp
-    ;
+      : TemplateCompiler.singleBracketRegExp;
     const parserRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketParserRegExp
-      : TemplateCompiler.singleBracketParserRegExp
-    ;
+      : TemplateCompiler.singleBracketParserRegExp;
 
     const parseTag = (scanner) => {
-
       // if this expression contains nested expressions like { one { two } }
       // we want tag content to include all nested expressions
       let getTagContent = () => {
-
         // break if we are already at the end of the expr
-        if(scanner.peek() == '}') {
+        if (scanner.peek() == '}') {
           scanner.consumeUntil(parserRegExp.EXPRESSION_END);
           return;
         }
@@ -113,15 +107,15 @@ class TemplateCompiler {
         // stopping when the final sub expression completes
         let openTags = 1;
         let content = scanner.peek();
-        while(openTags > 0 && !scanner.isEOF()) {
+        while (openTags > 0 && !scanner.isEOF()) {
           scanner.step();
-          if(scanner.peek() == '{') {
+          if (scanner.peek() == '{') {
             openTags++;
           }
-          if(scanner.peek() == '}') {
+          if (scanner.peek() == '}') {
             openTags--;
           }
-          if(openTags == 0) {
+          if (openTags == 0) {
             // we need to rewind as it is at '}'
             scanner.rewind();
             break;
@@ -206,7 +200,7 @@ class TemplateCompiler {
             if (!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSEIF);
               scanner.fatal(
-                '{{elseif}} encountered without matching if condition'
+                '{{elseif}} encountered without matching if condition',
               );
             }
             contentStack.pop();
@@ -223,7 +217,7 @@ class TemplateCompiler {
             if (!conditionTarget) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered without matching if or each condition'
+                '{{else}} encountered without matching if or each condition',
               );
               break;
             }
@@ -245,7 +239,7 @@ class TemplateCompiler {
             else {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered with unknown condition type: ' + conditionTarget.type
+                '{{else}} encountered with unknown condition type: ' + conditionTarget.type,
               );
             }
             break;
@@ -346,7 +340,8 @@ class TemplateCompiler {
                 // We have both item and index specified
                 iterateAs = iteratorPart.substring(0, commaIndex).trim();
                 indexAs = iteratorPart.substring(commaIndex + 1).trim();
-              } else {
+              }
+              else {
                 // Only item is specified
                 iterateAs = iteratorPart;
               }
@@ -354,7 +349,7 @@ class TemplateCompiler {
             else if (asParts.length > 1) {
               // We have 'each...as' syntax
               iterateOver = asParts[0].trim();
-              
+
               // Check for comma in the second part (for index)
               const iteratorPart = asParts[1].trim();
               const commaIndex = iteratorPart.indexOf(',');
@@ -362,7 +357,8 @@ class TemplateCompiler {
                 // We have both item and index specified
                 iterateAs = iteratorPart.substring(0, commaIndex).trim();
                 indexAs = iteratorPart.substring(commaIndex + 1).trim();
-              } else {
+              }
+              else {
                 // Only item is specified
                 iterateAs = iteratorPart;
               }
@@ -500,7 +496,7 @@ class TemplateCompiler {
     // look for first expression
     const doubleIndex = templateString.search(/{{\s*/);
     const singleIndex = templateString.search(/{[^{]\s*/);
-    if(doubleIndex !== -1 && doubleIndex < singleIndex) {
+    if (doubleIndex !== -1 && doubleIndex < singleIndex) {
       return 'doubleBracket';
     }
     return 'singleBracket';
@@ -518,7 +514,7 @@ class TemplateCompiler {
       TemplateCompiler.preprocessRegExp.WEB_COMPONENT_SELF_CLOSING,
       (match, tagName, attributes) => {
         return `<${tagName}${attributes}></${tagName}>`;
-      }
+      },
     );
     return templateString;
   }
@@ -532,11 +528,13 @@ class TemplateCompiler {
       if (node.type === 'html') {
         if (currentHtmlNode) {
           currentHtmlNode.html += node.html;
-        } else {
+        }
+        else {
           currentHtmlNode = { ...node };
           optimizedAST.push(currentHtmlNode);
         }
-      } else {
+      }
+      else {
         if (currentHtmlNode) {
           currentHtmlNode = null;
         }

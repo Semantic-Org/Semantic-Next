@@ -8,8 +8,7 @@ $('rating-slider')
     const rating = event.detail.rating;
     updateFeedbackMessage(rating);
     console.log('Final rating:', rating);
-  })
-;
+  });
 
 function updateFeedbackMessage(value) {
   const $message = $('.message');
@@ -17,11 +16,11 @@ function updateFeedbackMessage(value) {
   // You could also use Query to add classes
   $message.removeClass('negative neutral positive');
   let ratingClass;
-  if(value <= 2) {
+  if (value <= 2) {
     $message.text(`We're sorry to hear that. How can we improve?`);
     ratingClass = 'negative';
   }
-  else if(value <= 4) {
+  else if (value <= 4) {
     ratingClass = 'neutral';
     $message.text('Thanks for your feedback!');
   }

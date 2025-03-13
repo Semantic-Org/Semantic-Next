@@ -1,9 +1,9 @@
 import { defineComponent, getText } from '@semantic-ui/component';
 import { each } from '@semantic-ui/utils';
 
-import { todoItem } from './todo-item.js';
-import { todoHeader } from './todo-header.js';
 import { todoFooter } from './todo-footer.js';
+import { todoHeader } from './todo-header.js';
+import { todoItem } from './todo-item.js';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -45,7 +45,6 @@ const createComponent = ({ self, signal, $ }) => ({
     self.todos.setArrayProperty('completed', false);
   },
 
-
   // handle state
   getRouteFilter() {
     return window.location.hash.substring(2) || 'all'; // #/foo
@@ -79,7 +78,7 @@ const events = {
   // toggle all checkbox is in the main html although its functionality is in the header
   // this is per todo-mvc spec
   'change .toggle-all'({ self, target }) {
-    if(target.checked) {
+    if (target.checked) {
       self.markAllComplete();
     }
     else {

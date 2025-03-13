@@ -3,7 +3,7 @@ import { buildProject } from './lib/build-project.js';
 
 // build once
 await buildDeps({
-  watch: false
+  watch: false,
 });
 
 await buildProject({

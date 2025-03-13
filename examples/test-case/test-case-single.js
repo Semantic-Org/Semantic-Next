@@ -3,7 +3,7 @@ import { defineComponent } from '@semantic-ui/component';
 const template = `{{getValue}}`;
 
 const createComponent = (self) => ({
-   getValue: () => 'test'
+  getValue: () => 'test',
 });
 
 defineComponent({
@@ -12,5 +12,5 @@ defineComponent({
   createComponent,
   onCreated: function() {
     console.log('created');
-  }
+  },
 });
