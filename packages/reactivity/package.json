@@ -5,12 +5,10 @@
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
-
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
   "sideEffects": false,
-
   "exports": {
     ".": {
       "types": "./types/index.d.ts",

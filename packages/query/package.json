@@ -5,18 +5,16 @@
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
-
   "main": "dist/index.min.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
   "sideEffects": false,
-
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
       "node": "./src/node-wrapper.js",
       "importmap": "./dist/cdn/index.min.js",
-      "import": "./src/index.js", 
+      "import": "./src/index.js",
       "require": "./dist/index.min.js"
     }
   },
