@@ -7,7 +7,6 @@
     "quoteStyle": "preferSingle", // default setting
     "bracePosition": "sameLine", // same line for if{} (default)
     "useBraces": "always", // dont allow single line if without braces
-    "quoteProps": "consistent", // if all props dont need quotes okay to omit
     "nextControlFlowPosition": "nextLine", // newline for else
     "trailingCommas": "onlyMultiLine", // only use trailing commas if content is multiline
     "operatorPosition": "nextLine", // operator position on next line
@@ -22,9 +21,9 @@
     "importDeclaration.preferSingleLine": true,
     "exportDeclaration.preferSingleLine": true,
     "importDeclaration.sortNamedImports": "caseInsensitive",
-    "exportDeclaration.sortNamedExports": "caseInsensitive",
-
+    "exportDeclaration.sortNamedExports": "caseInsensitive"
     /* these were historically preferred but phasing out for "standard js"
+      "quoteProps": "consistent", // if all props dont need quotes okay to omit
       "forInStatement.spaceAfterForKeyword": false, // for(const prop of props)
       "ifStatement.spaceAfterIfKeyword": false, // if(foo) vs if (foo)
       "whileStatement.spaceAfterWhileKeyword": false
@@ -48,7 +47,7 @@
     "**/*-lock.json"
   ],
   "plugins": [
-    //"https://plugins.dprint.dev/typescript-0.89.0.wasm",
+    // "https://plugins.dprint.dev/typescript-0.89.0.wasm",
     "https://github.com/jlukic/dprint-plugin-typescript/releases/download/0.94.0-tern/dprint_plugin_typescript.wasm",
     "https://plugins.dprint.dev/json-0.19.1.wasm",
     "https://plugins.dprint.dev/markdown-0.16.3.wasm",
