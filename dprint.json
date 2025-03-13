@@ -34,6 +34,7 @@
     "dev/",
     "dist/",
     "tests/",
+    "docs/public",
     "LICENSE.md",
     "docs/public",
     "README.md",
