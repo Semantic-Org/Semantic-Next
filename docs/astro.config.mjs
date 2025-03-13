@@ -22,8 +22,8 @@ const isProduction = process.env.VERCEL_ENV === 'production';
 const site = isProduction
   ? 'https://next.semantic-ui.com' // Your production URL
   : process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}` // Vercel preview URL
-  : 'https://dev.semantic-ui.com' // Local development URL
+    ? `https://${process.env.VERCEL_URL}` // Vercel preview URL
+    : 'https://dev.semantic-ui.com' // Local development URL
 ;
 
 export default defineConfig({
