@@ -1,10 +1,19 @@
-import { asyncEach, tokenize, inArray, get, camelToKebab, filterObject, isString, each } from '@semantic-ui/utils';
+import { asyncEach, camelToKebab, each, filterObject, get, inArray, isString, tokenize } from '@semantic-ui/utils';
 
-import { addPlaygroundInjections, errorJS, errorCSS, logJS, logCSS, isStaticBuild, foldMarkerStart, foldMarkerEnd } from './injections.js';
+import {
+  addPlaygroundInjections,
+  errorCSS,
+  errorJS,
+  foldMarkerEnd,
+  foldMarkerStart,
+  isStaticBuild,
+  logCSS,
+  logJS,
+} from './injections.js';
 
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 import { packageJSON } from '../pages/examples/package.json.js';
-import { makeBase64UrlSafe, fromBase64UrlSafe, encodeObject, decodeObject } from './link-encoder.js';
+import { decodeObject, encodeObject, fromBase64UrlSafe, makeBase64UrlSafe } from './link-encoder.js';
 
 /*
   Helper to add code folding for import export statements
@@ -34,7 +43,7 @@ export const hideComponentBoilerplate = (code) => {
   this is used in the learn and examples section to load
   examples
 */
-export const getExampleFiles = async({
+export const getExampleFiles = async ({
   contentID, // content id
   allFiles = {}, // import.meta.glob cannot be used here so you must pass in file collection
   basePath = '../../examples/', // base path to content collection from file location
@@ -49,7 +58,7 @@ export const getExampleFiles = async({
   includeImportMap = !isStaticBuild, // whether to map imports to node_modules
   includePackageJSON = true, // whether to include a package.json file defining project deps
 } = {}) => {
-  if(!contentID) {
+  if (!contentID) {
     return;
   }
   let hasComponent = false;
@@ -68,83 +77,82 @@ export const getExampleFiles = async({
         const contentTypes = {
           html: 'text/html',
           css: 'text/css',
-          js: 'text/javascript'
+          js: 'text/javascript',
         };
         return get(contentTypes, extension) || 'text/html';
       };
 
-      if(inArray(fileName, ['page.html'])) {
+      if (inArray(fileName, ['page.html'])) {
         const fileContent = await file();
         exampleFiles['page.html'] = {
           contentType: 'text/html',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
-      else if(inArray(fileName, ['page.css'])) {
+      else if (inArray(fileName, ['page.css'])) {
         const fileContent = await file();
         exampleFiles['page.css'] = {
           contentType: 'text/css',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
-      else if(inArray(fileName, ['page.js'])) {
+      else if (inArray(fileName, ['page.js'])) {
         const fileContent = await file();
         exampleFiles['page.js'] = {
           contentType: 'text/javascript',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
-      else if(inArray(fileName, ['component.js', `${contentID}.js`])) {
+      else if (inArray(fileName, ['component.js', `${contentID}.js`])) {
         const fileContent = await file();
         let fileText = fileContent.default;
         hasComponent = fileText.search('defineComponent') > -1;
-        if(hideBoilerplate) {
+        if (hideBoilerplate) {
           fileText = hideComponentBoilerplate(fileText);
         }
         exampleFiles['component.js'] = {
           contentType: 'text/javascript',
-          content: fileText
+          content: fileText,
         };
       }
-      else if(includeFolder) {
+      else if (includeFolder) {
         const fileContent = await file();
         exampleFiles[fileName] = {
           contentType: getContentType(fileName),
-          content: fileContent.default
+          content: fileContent.default,
         };
         return;
       }
-      else if(inArray(fileName, ['component.html', `${contentID}.html`])) {
+      else if (inArray(fileName, ['component.html', `${contentID}.html`])) {
         const fileContent = await file();
         exampleFiles['component.html'] = {
           contentType: 'text/html',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
-      else if(inArray(fileName, ['component.css', `${contentID}.css`])) {
+      else if (inArray(fileName, ['component.css', `${contentID}.css`])) {
         const fileContent = await file();
         exampleFiles['component.css'] = {
           contentType: 'text/css',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
-      if(includeLog && inArray(fileName, ['index.js', `${contentID}.js`])) {
+      if (includeLog && inArray(fileName, ['index.js', `${contentID}.js`])) {
         const fileContent = await file();
         exampleFiles['index.js'] = {
           contentType: 'text/javascript',
-          content: fileContent.default
+          content: fileContent.default,
         };
       }
     }
   });
   // auto generate page.html if not specified for component
-  if(!exampleFiles['page.html']?.content) {
-
+  if (!exampleFiles['page.html']?.content) {
     // get tag name from contents
     let tagName;
-    if(hasComponent) {
+    if (hasComponent) {
       let matches = exampleFiles['component.js'].content.match(/tagName: '(.*)'/);
-      if(matches?.length > 1) {
+      if (matches?.length > 1) {
         tagName = matches[1];
       }
       else {
@@ -157,88 +165,87 @@ export const getExampleFiles = async({
       generated: true,
       content: (tagName)
         ? `<${tagName}></${tagName}>`
-        : ``
+        : ``,
     };
   }
 
-  if(includeError) {
+  if (includeError) {
     exampleFiles['error.js'] = {
       contentType: 'text/javascript',
       generated: true,
       hidden: true,
-      content: errorJS
+      content: errorJS,
     };
     exampleFiles['error.css'] = {
       contentType: 'text/css',
       generated: true,
       hidden: true,
-      content: errorCSS
+      content: errorCSS,
     };
   }
 
-  if(includeLog) {
+  if (includeLog) {
     exampleFiles['log.js'] = {
       contentType: 'text/javascript',
       generated: true,
       hidden: true,
-      content: logJS
+      content: logJS,
     };
     exampleFiles['log.css'] = {
       contentType: 'text/css',
       generated: true,
       hidden: true,
-      content: logCSS
+      content: logCSS,
     };
   }
 
   // auto generate page.css/js if not specified for component
-  if(!exampleFiles['page.css']?.content) {
+  if (!exampleFiles['page.css']?.content) {
     exampleFiles['page.css'] = {
       contentType: 'text/css',
       generated: true,
-      content: ''
+      content: '',
     };
   }
-  if(!exampleFiles['component.js']?.content) {
+  if (!exampleFiles['component.js']?.content) {
     exampleFiles['component.js'] = {
       contentType: 'text/javascript',
       generated: true,
-      content: ''
+      content: '',
     };
   }
-  if(!exampleFiles['page.js']?.content) {
+  if (!exampleFiles['page.js']?.content) {
     exampleFiles['page.js'] = {
       contentType: 'text/javascript',
       generated: true,
-      content: ''
+      content: '',
     };
   }
 
-
-  if(includePlaygroundInjections) {
+  if (includePlaygroundInjections) {
     addPlaygroundInjections(exampleFiles, { includeLog });
   }
 
-  if(emptyIfAllGenerated) {
+  if (emptyIfAllGenerated) {
     let allGenerated = true;
     each(exampleFiles, (file, name) => {
-      if(file.generated !== true) {
+      if (file.generated !== true) {
         allGenerated = false;
         return;
       }
     });
-    if(allGenerated) {
+    if (allGenerated) {
       return {};
     }
   }
-  if(!includeLog && exampleFiles['page.js'].generated && exampleFiles['page.css']) {
+  if (!includeLog && exampleFiles['page.js'].generated && exampleFiles['page.css']) {
     exampleFiles['page.html'].generated = false;
   }
-  if(includeLog) {
+  if (includeLog) {
     exampleFiles['page.html'].hidden = true;
   }
 
-  if(useTypescript) {
+  if (useTypescript) {
     const typescriptExampleFiles = {};
     each(exampleFiles, (content, filename) => {
       filename = filename.replace('.js', '.ts');
@@ -247,15 +254,14 @@ export const getExampleFiles = async({
     exampleFiles = typescriptExampleFiles;
   }
 
-  if(includeImportMap) {
+  if (includeImportMap) {
     exampleFiles['import-map.js'] = getImportMap();
   }
-  if(includePackageJSON) {
+  if (includePackageJSON) {
     exampleFiles['package.json'] = getPackageJSON();
   }
 
   return exampleFiles;
-
 };
 
 /*
@@ -290,12 +296,11 @@ export const getEmptyProjectFiles = ({
       content: '',
     },
   };
-  if(withInjections) {
+  if (withInjections) {
     emptyFiles = addPlaygroundInjections(emptyFiles);
   }
   return emptyFiles;
 };
-
 
 /*
   Returns default horizontal panel index for file types
@@ -303,7 +308,7 @@ export const getEmptyProjectFiles = ({
 */
 export const getPanelIndexes = (files = {}, { type } = {}) => {
   let indexes;
-  if(type == 'log') {
+  if (type == 'log') {
     indexes = {
       'page.js': 0,
       'page.ts': 0,
@@ -327,13 +332,13 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
   }
   // filter out generated and absent files
   indexes = filterObject(indexes, (value, key) => {
-    if(!files[key] || files[key]?.generated) {
+    if (!files[key] || files[key]?.generated) {
       return false;
     }
     return true;
   });
   // use right pane for css if no index files
-  if(!indexes['page.html'] && !indexes['page.css'] && !indexes['page.js']) {
+  if (!indexes['page.html'] && !indexes['page.css'] && !indexes['page.js']) {
     indexes['component.css'] = 1;
   }
   return indexes;
@@ -344,23 +349,22 @@ export const getSandboxURL = () => {
 };
 
 export const getExampleID = (example) => {
-  if(isString(example)) {
+  if (isString(example)) {
     return example;
   }
-  if(example.data) {
+  if (example.data) {
     example = example.data;
   }
   const exampleID = example?.id || tokenize(example?.title);
   return exampleID;
 };
 
-
 export const getPackageJSON = () => {
   return {
     contentType: 'text/json',
     hidden: true,
     generated: true,
-    content: packageJSON
+    content: packageJSON,
   };
 };
 
@@ -369,7 +373,7 @@ export const getImportMap = () => {
     contentType: 'text/importmap',
     hidden: true,
     generated: true,
-    content: importMapJSON
+    content: importMapJSON,
   };
 };
 
@@ -393,12 +397,11 @@ export const getPlaygroundLink = (params, baseUrl = '/playground') => {
 export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
   const params = {
     files: {
-      'page.html': code
-    }
+      'page.html': code,
+    },
   };
   return getPlaygroundLink(params);
 };
-
 
 // Read the query string and return the decoded parameters.
 // The 'files' parameter is decoded using decodeFiles.

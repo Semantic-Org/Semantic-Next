@@ -6,7 +6,7 @@ const template = await getText('./row.html');
 const createComponent = ({ findParent }) => ({
   getTitle() {
     return findParent('ui-table').getTitle();
-  }
+  },
 });
 
 // if no tagName is provided a template will be returned for export

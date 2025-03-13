@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { Signal } from '@semantic-ui/reactivity';
-import template from './basic.html?raw';
 import css from './basic.css?raw';
+import template from './basic.html?raw';
 
 const createComponent = ({ self, $, signal, findParent }) => ({
   date: signal(new Date()),

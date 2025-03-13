@@ -1,16 +1,16 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import { any, isFunction, first, isArray } from '@semantic-ui/utils';
+import { UIIcon } from '@semantic-ui/core';
 import { Signal } from '@semantic-ui/reactivity';
-import template from './TopbarMenu.html?raw';
+import { any, first, isArray, isFunction } from '@semantic-ui/utils';
 import css from './TopbarMenu.css?raw';
+import template from './TopbarMenu.html?raw';
 
 const defaultSettings = {
   menu: [],
   activeURL: '',
 };
 
-const createComponent = function ({ self, settings }) {
+const createComponent = function({ self, settings }) {
   return {
     url: new Signal(settings.activeURL),
     getMenu() {
@@ -18,7 +18,7 @@ const createComponent = function ({ self, settings }) {
     },
     getItemStates(item) {
       return {
-        active: self.isActiveItem(item)
+        active: self.isActiveItem(item),
       };
     },
     shouldShow(item) {
@@ -39,10 +39,10 @@ const createComponent = function ({ self, settings }) {
     },
     isActiveItem(item) {
       let activeURL = self.url.get();
-      if(isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
+      if (isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
         return true;
       }
-      if(item.baseURL && activeURL.startsWith(item.baseURL)) {
+      if (item.baseURL && activeURL.startsWith(item.baseURL)) {
         return true;
       }
       if (item?.url === activeURL) {
@@ -53,11 +53,10 @@ const createComponent = function ({ self, settings }) {
     // the current url is the link from this topbar menu
     isCurrentItem(item) {
       const url = self.url.get();
-      if(item.activeURL) {
+      if (item.activeURL) {
         return isArray(item.activeURL)
           ? any(item.activeURL, (activeURL) => url.startsWith(activeURL))
-          : url.startsWith(item.activeURL)
-        ;
+          : url.startsWith(item.activeURL);
       }
       if (item?.url === self.url.get()) {
         return true;
@@ -65,19 +64,17 @@ const createComponent = function ({ self, settings }) {
     },
     onPageChange() {
       self.url.set(window.location.pathname);
-    }
+    },
   };
 };
 
-
-const onRendered = function ({ $, self, attachEvent, isClient }) {
-  if(isClient) {
+const onRendered = function({ $, self, attachEvent, isClient }) {
+  if (isClient) {
     attachEvent(document, 'astro:after-swap', self.onPageChange);
   }
 };
 
-const events = {
-};
+const events = {};
 
 const TopbarMenu = defineComponent({
   tagName: 'topbar-menu',

@@ -1,18 +1,24 @@
-import { QueryOptions, EventHandler, EventOptions, CSSOptions, Query } from './query';
+import { CSSOptions, EventHandler, EventOptions, Query, QueryOptions } from './query';
 
 /**
  * The main function for creating a Query instance.  This is often aliased as `$`.
  * @param selector - The selector (string, element, NodeList, etc.).
  * @param args - Optional arguments, including `root` and `pierceShadow`.
  */
-declare function $(selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions): Query;
+declare function $(
+  selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
+  args?: QueryOptions,
+): Query;
 
 /**
  * A function for creating a Query instance that pierces the shadow DOM by default. Often aliased as `$$`.
  * @param selector - The selector.
  * @param args - Optional arguments, including `root`.
  */
-declare function $$(selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: Omit<QueryOptions, 'pierceShadow'>): Query;
+declare function $$(
+  selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
+  args?: Omit<QueryOptions, 'pierceShadow'>,
+): Query;
 
 interface ExportGlobalsOptions {
   dollar?: boolean;
@@ -27,7 +33,7 @@ interface ExportGlobalsOptions {
 declare function exportGlobals(options?: ExportGlobalsOptions): void;
 
 interface RestoreGlobalsOptions {
-    removeQuery?: boolean;
+  removeQuery?: boolean;
 }
 
 /**
@@ -39,9 +45,9 @@ declare function restoreGlobals(settings?: RestoreGlobalsOptions): typeof $;
  * Creates a Query instance with different alias function.
  */
 
-declare function useAlias(selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy, args?: QueryOptions): Query;
+declare function useAlias(
+  selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
+  args?: QueryOptions,
+): Query;
 
-export { 
-  Query, QueryOptions, EventHandler, EventOptions, CSSOptions, 
-  $, $$, exportGlobals, restoreGlobals, useAlias 
-};
+export { $, $$, CSSOptions, EventHandler, EventOptions, exportGlobals, Query, QueryOptions, restoreGlobals, useAlias };

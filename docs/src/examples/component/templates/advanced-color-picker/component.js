@@ -12,37 +12,34 @@ const defaultState = {
   hoveredColor: '',
 };
 
-const createComponent = ({self, settings, $, dispatchEvent}) => ({
+const createComponent = ({ self, settings, $, dispatchEvent }) => ({
   selectColor(color) {
     settings.color = color;
     dispatchEvent('colorselected', { color });
-  }
+  },
 });
 
 const events = {
-
   'click .option'({ target, $, self }) {
     const color = $(target).computedStyle('background-color');
     self.selectColor(color);
   },
 
-  'mouseover, mouseleave .option'({event, data, state}) {
+  'mouseover, mouseleave .option'({ event, data, state }) {
     const color = (event.type == 'mouseover')
       ? data.color
-      : undefined
-    ;
+      : undefined;
     state.hoveredColor.set(color);
   },
 
-  'click ui-button'({$, self}) {
+  'click ui-button'({ $, self }) {
     const color = $('.custom-color').val();
     self.selectColor(color);
   },
 
-  'input .custom-color'({event, state }) {
+  'input .custom-color'({ event, state }) {
     state.hoveredColor.set(event.target.value);
   },
-
 };
 
 defineComponent({
@@ -52,5 +49,5 @@ defineComponent({
   css,
   defaultSettings,
   defaultState,
-  createComponent
+  createComponent,
 });

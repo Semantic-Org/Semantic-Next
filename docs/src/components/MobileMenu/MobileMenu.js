@@ -1,9 +1,8 @@
-import { UIIcon } from '@semantic-ui/core';
 import { defineComponent } from '@semantic-ui/component';
-import { noop, each } from '@semantic-ui/utils';
-import template from './MobileMenu.html?raw';
+import { UIIcon } from '@semantic-ui/core';
+import { each, noop } from '@semantic-ui/utils';
 import css from './MobileMenu.css?raw';
-
+import template from './MobileMenu.html?raw';
 
 import { NavMenu } from '../NavMenu/NavMenu.js';
 
@@ -11,7 +10,7 @@ const defaultSettings = {
   menu: [],
   activeURL: '',
   stickyHeaders: true,
-  navIcon: 'right-chevron'
+  navIcon: 'right-chevron',
 };
 
 const defaultState = {
@@ -21,15 +20,14 @@ const defaultState = {
   nextMenu: {},
 };
 
-const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEvent}) => ({
-
+const createComponent = ({ tpl, settings, $, state, flush, afterFlush, dispatchEvent }) => ({
   initialize() {
     tpl.setMenusFromURL(settings.activeURL);
   },
 
   getClasses() {
     return {
-      sticky: settings.stickyHeaders
+      sticky: settings.stickyHeaders,
     };
   },
 
@@ -45,12 +43,12 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     let result = {
       menu: null,
       parentMenu: null,
-      depth: 0
+      depth: 0,
     };
-    const searchMenu = ({header, menu}, depth, parentMenu) => {
+    const searchMenu = ({ header, menu }, depth, parentMenu) => {
       each(menu, (item) => {
         // for topbar menu we dont want to count it a match if url is matched
-        if(depth > 0 && tpl.isSameURL(item.url, url)) {
+        if (depth > 0 && tpl.isSameURL(item.url, url)) {
           result = {
             menu: { header, menu },
             depth,
@@ -62,16 +60,16 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
         // hence repetitive logic here
         if (item.pages) {
           each(item.pages, (page) => {
-            if(tpl.isSameURL(page.url, url)) {
+            if (tpl.isSameURL(page.url, url)) {
               result = {
                 menu: { header, menu },
                 depth,
                 parentMenu,
               };
             }
-            else if(page.pages) {
+            else if (page.pages) {
               each(page.pages, (subPage) => {
-                if(tpl.isSameURL(subPage.url, url)) {
+                if (tpl.isSameURL(subPage.url, url)) {
                   result = {
                     menu: { header, menu },
                     depth,
@@ -83,16 +81,16 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
           });
         }
         if (item.menu && !result.menu) {
-          searchMenu({ header: item.name, menu: item.menu}, depth + 1, { header, menu });
+          searchMenu({ header: item.name, menu: item.menu }, depth + 1, { header, menu });
         }
       });
     };
 
     // top level has no header
-    searchMenu({header: undefined, menu }, 0);
+    searchMenu({ header: undefined, menu }, 0);
 
     // always return top level if no result
-    if(!result.menu ) {
+    if (!result.menu) {
       result.menu = { header: undefined, menu };
     }
     result.parentMenu = tpl.addNavIcons(result.parentMenu);
@@ -102,11 +100,11 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
 
   // add -> icon if the menu has a sub menu
   addNavIcons(menu) {
-    if(!settings.navIcon) {
+    if (!settings.navIcon) {
       return menu;
     }
     (menu?.menu || []).map(item => {
-      if(item.menu) {
+      if (item.menu) {
         item.navIcon = settings.navIcon;
       }
       return item;
@@ -116,11 +114,10 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
   addTrailingSlash(url) {
     return (url.substr(-1) === '/')
       ? url
-      : `${url}/`
-    ;
+      : `${url}/`;
   },
   isSameURL(url1 = '', url2 = '') {
-    if(!url1 || !url2) {
+    if (!url1 || !url2) {
       return false;
     }
     return tpl.addTrailingSlash(url1) == tpl.addTrailingSlash(url2);
@@ -134,7 +131,7 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     const $activeContent = $('.active.content');
     const $current = $$('.active.content nav-menu .current.item');
     const el = $current.first().el();
-    if(el) {
+    if (el) {
       const rect = el.getBoundingClientRect();
       console.log(rect);
     }
@@ -161,8 +158,7 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
       .addClass('animate left')
       .find('.previous.content').one('transitionend', () => {
         requestAnimationFrame(tpl.moveToPreviousMenu);
-      })
-    ;
+      });
   },
 
   // use the menu index to find the next menu
@@ -171,7 +167,7 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     const activeItem = activeMenu?.menu[index];
     const menu = {
       header: activeItem.name,
-      menu: tpl.addNavIcons(activeItem.menu)
+      menu: tpl.addNavIcons(activeItem.menu),
     };
     state.previousMenu.set(state.activeMenu.get());
     state.nextMenu.set(menu);
@@ -183,16 +179,14 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
       .addClass('animate right')
       .find('.next.content').one('transitionend', () => {
         requestAnimationFrame(tpl.moveToNextMenu);
-      })
-    ;
+      });
   },
 
   setMenuHeight(name) {
     const height = $('.container .content')
       .filter(`.${name}`)
-      .height()
-    ;
-    $('.container').css({height: `${height}px`});
+      .height();
+    $('.container').css({ height: `${height}px` });
   },
 
   resetAnimation() {
@@ -208,11 +202,11 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     const previousMenu = state.previousMenu.value;
     const depth = state.depth.get() - 1;
     // if we are at top level we know no previous menu
-    if(depth == 0) {
+    if (depth == 0) {
       state.activeMenu.set(previousMenu);
       state.previousMenu.set({});
     }
-    else if(previousMenu.length) {
+    else if (previousMenu.length) {
       // otherwise just use the first menu item url to get the menu
       const activeURL = previousMenu.menu[0].url;
       tpl.setMenusFromURL(activeURL);
@@ -229,19 +223,19 @@ const createComponent = ({tpl, settings, $, state, flush, afterFlush, dispatchEv
     state.depth.set(depth);
     afterFlush(tpl.resetAnimation);
     flush();
-  }
+  },
 });
 
 const events = {
-  'click dialog'({event, tpl}) {
-    if($(event.target).is('dialog')) {
+  'click dialog'({ event, tpl }) {
+    if ($(event.target).is('dialog')) {
       tpl.hide();
     }
   },
   'pointerdown .return'({ state, tpl }) {
     tpl.showPreviousMenu();
   },
-  'deep pointerdown .nav-icon'({tpl, target, state, event, $, afterFlush}) {
+  'deep pointerdown .nav-icon'({ tpl, target, state, event, $, afterFlush }) {
     const $title = $(target).closest('.title');
     const index = $title.index('.title');
 
@@ -251,10 +245,10 @@ const events = {
     // wait for web component to update before animating
     $('.next.content nav-menu').one('updated', tpl.showNextMenu);
   },
-  'deep click .nav-icon'({tpl, target, state, event, $, afterFlush}) {
+  'deep click .nav-icon'({ tpl, target, state, event, $, afterFlush }) {
     event.preventDefault();
     event.stopImmediatePropagation();
-  }
+  },
 };
 
 const MobileMenu = defineComponent({
@@ -264,7 +258,7 @@ const MobileMenu = defineComponent({
   createComponent,
   defaultSettings,
   events,
-  defaultState
+  defaultState,
 });
 
 export default MobileMenu;

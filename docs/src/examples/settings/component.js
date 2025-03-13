@@ -5,11 +5,11 @@ const template = await getText('./component.html');
 
 const defaultSettings = {
   startingNumber: 0,
-  incrementBy: 1
+  incrementBy: 1,
 };
 
 const defaultState = {
-  counter: 0
+  counter: 0,
 };
 
 const createComponent = ({ self, settings, state }) => ({
@@ -17,7 +17,7 @@ const createComponent = ({ self, settings, state }) => ({
     state.counter.set(settings.startingNumber);
     setInterval(() => state.counter.increment(settings.incrementBy), 1000);
   },
-  isEven: (number) => (number % 2 == 0)
+  isEven: (number) => (number % 2 == 0),
 });
 
 defineComponent({

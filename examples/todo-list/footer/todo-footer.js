@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
-import template from './todo-footer.html?raw';
 import css from './todo-footer.css?raw';
+import template from './todo-footer.html?raw';
 
 const createComponent = ({ self, findParent, $ }) => ({
   filters: ['all', 'active', 'complete'],

@@ -1,7 +1,7 @@
+import { CallParams, Template } from '@semantic-ui/templating';
 import { CSSResult } from 'lit';
-import { Template, CallParams } from '@semantic-ui/templating';
-import { WebComponentBase } from './web-component';
 import { PropertyValues } from 'lit';
+import { WebComponentBase } from './web-component';
 
 /**
  * Extended call parameters for event handlers, including event-specific data.
@@ -19,7 +19,7 @@ export interface EventCallParams<
   TState extends Record<string, any> = Record<string, any>,
   TSettings extends Record<string, any> = Record<string, any>,
   TComponentInstance extends Record<string, any> = Record<string, any>,
-  TProperties extends Record<string, any> = Record<string, any>
+  TProperties extends Record<string, any> = Record<string, any>,
 > extends CallParams<TState, TSettings, TComponentInstance, TProperties> {
   /**
    * The original DOM event that triggered the handler.
@@ -99,7 +99,7 @@ export interface KeyCallParams<
   TState extends Record<string, any> = Record<string, any>,
   TSettings extends Record<string, any> = Record<string, any>,
   TComponentInstance extends Record<string, any> = Record<string, any>,
-  TProperties extends Record<string, any> = Record<string, any>
+  TProperties extends Record<string, any> = Record<string, any>,
 > extends CallParams<TState, TSettings, TComponentInstance, TProperties> {
   /**
    * The original keyboard DOM event that triggered the handler.
@@ -161,10 +161,10 @@ export interface DefineComponentOptions<
   TState extends Record<string, any>,
   TSettings extends Record<string, any>,
   TCreateComponent extends () => any,
-  TProperties extends Record<string, any>
+  TProperties extends Record<string, any>,
 > {
   /**
-   * The HTML tag name for the custom element (e.g., 'my-component'). 
+   * The HTML tag name for the custom element (e.g., 'my-component').
    * Note: If you do not pass in a tag name the template instance will be returned for use as a subtemplate
    * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
    */
@@ -220,7 +220,10 @@ export interface DefineComponentOptions<
    * @see {@link https://next.semantic-ui.com/components/events Events} for more details.
    * @see {@link https://next.semantic-ui.com/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
    */
-  events?: Record<string, (params: EventCallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void>;
+  events?: Record<
+    string,
+    (params: EventCallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void
+  >;
 
   /**
    * An object mapping key sequences (e.g., "Ctrl+A") to handler functions.
@@ -244,7 +247,10 @@ export interface DefineComponentOptions<
    * @see {@link https://next.semantic-ui.com/components/keys Keys} for more details.
    * @see {@link https://next.semantic-ui.com/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
    */
-  keys?: Record<string, (params: KeyCallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void | boolean>;
+  keys?: Record<
+    string,
+    (params: KeyCallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void | boolean
+  >;
 
   /**
    * Lifecycle callback - invoked after the component is created.
@@ -327,7 +333,6 @@ export interface DefineComponentOptions<
    * from a plural component to the singular component.
    */
   singularTag?: string;
-
 }
 
 /**
@@ -342,8 +347,15 @@ export function defineComponent<
   TSettings extends Record<string, any> = Record<string, any>,
   TCreateComponent extends () => any = () => any,
   TProperties extends Record<string, any> = Record<string, any>,
-  TOptions extends DefineComponentOptions<TState, TSettings, TCreateComponent, TProperties> = DefineComponentOptions<TState, TSettings, TCreateComponent, TProperties>
->(options: TOptions): string | typeof HTMLElement | (WebComponentBase & { new(): (WebComponentBase & TOptions['properties']) }); // Improved return type
+  TOptions extends DefineComponentOptions<TState, TSettings, TCreateComponent, TProperties> = DefineComponentOptions<
+    TState,
+    TSettings,
+    TCreateComponent,
+    TProperties
+  >,
+>(
+  options: TOptions,
+): string | typeof HTMLElement | (WebComponentBase & { new(): WebComponentBase & TOptions['properties']; }); // Improved return type
 
 /**
  * The base class for the generated web components.
@@ -352,7 +364,6 @@ export function defineComponent<
  * See {@link https://next.semantic-ui.com/components Components} for more details.
  */
 export declare class UIWebComponent extends WebComponentBase {
-
   /**
    * Styles.
    * See {@link https://next.semantic-ui.com/components/create#css CSS} for more details.

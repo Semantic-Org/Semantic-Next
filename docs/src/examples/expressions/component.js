@@ -6,7 +6,7 @@ const template = await getText('./component.html');
 const defaultSettings = {
   value: 1,
   date: new Date(),
-  timezone: 'PST'
+  timezone: 'PST',
 };
 
 const createComponent = ({ settings }) => ({
@@ -17,7 +17,7 @@ const createComponent = ({ settings }) => ({
   },
   getValue(obj = {}, prop) {
     return obj[prop];
-  }
+  },
 });
 
 export const TestComponent = defineComponent({
@@ -25,6 +25,5 @@ export const TestComponent = defineComponent({
   template,
   css,
   defaultSettings,
-  createComponent
+  createComponent,
 });
-

@@ -32,7 +32,7 @@ export const formatDate = function(date, format = 'LLL', {
     minute: 'numeric',
     second: 'numeric',
     hour12: hour12,
-    ...additionalOptions
+    ...additionalOptions,
   };
 
   // Create an Intl.DateTimeFormat instance with the specified timezone or user's local timezone

@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
-import { sum, isClient } from '@semantic-ui/utils';
+import { isClient, sum } from '@semantic-ui/utils';
 
-import template from './Panel.html?raw';
 import css from './Panel.css?raw';
+import template from './Panel.html?raw';
 
 const defaultSettings = {
   direction: 'vertical',
@@ -17,10 +17,10 @@ const defaultSettings = {
   minimized: false,
   getNaturalSize: (panel, { direction, minimized }) => {
     return panel?.component.getNaturalSize(panel, { direction, minimized });
-  }
+  },
 };
 
-const createComponent = ({el, self, state, isServer, signal, findParent, settings, dispatchEvent, $}) => ({
+const createComponent = ({ el, self, state, isServer, signal, findParent, settings, dispatchEvent, $ }) => ({
   resizing: signal(false),
   initialized: signal(false),
 
@@ -28,7 +28,7 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
     return {
       resizing: self.resizing.get(),
       minimized: settings.minimized,
-      initialized: self.isSafari() || self.initialized.get()
+      initialized: self.isSafari() || self.initialized.get(),
     };
   },
 
@@ -44,7 +44,7 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
   },
 
   getNaturalSize(panel, { direction, minimized }) {
-    if(settings.naturalSize) {
+    if (settings.naturalSize) {
       const panels = self.getPanels();
       return panels.getPixelSettingSize(settings.naturalSize);
     }
@@ -54,14 +54,13 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
         ? sum($children.width())
         : $children.width()
       : ($children.length > 1)
-        ? sum($children.height())
-        : $children.height()
-    ;
+      ? sum($children.height())
+      : $children.height();
   },
 
   getHandleClassMap: () => ({
     initialized: self.initialized.get(),
-    disabled: !self.isResizable()
+    disabled: !self.isResizable(),
   }),
 
   getCurrentFlex() {
@@ -70,8 +69,7 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
   getResizeCursor() {
     return (settings.direction == 'horizontal')
       ? 'w-resize'
-      : 'ns-resize'
-    ;
+      : 'ns-resize';
   },
   getIndex() {
     return $(el).index();
@@ -86,12 +84,10 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
   getPointerPosition(event) {
     const positionObj = event.touches
       ? event.touches[0]
-      : event
-    ;
+      : event;
     return (settings.direction == 'horizontal')
       ? positionObj.pageX
-      : positionObj.pageY
-    ;
+      : positionObj.pageY;
   },
   startResize(event) {
     self.resizing.set(true);
@@ -107,18 +103,15 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
       .on('mousemove', (event) => {
         self.resizeDrag(event);
       })
-      .on('touchmove', self.resizeDrag)
-    ;
+      .on('touchmove', self.resizeDrag);
     $$('iframe')
       .one('pointerenter', (event) => {
         self.endResize(event);
-      })
-    ;
+      });
     $('body')
       .one('pointerup mouseleave', (event) => {
         self.endResize(event);
-      })
-    ;
+      });
   },
   resizeDrag(event) {
     dispatchEvent('resizeDrag', {
@@ -130,15 +123,14 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
     $('body')
       .off('pointerup mouseleave mousemove touchmove')
       .removeClass('resizing')
-      .css('cursor', '')
-    ;
+      .css('cursor', '');
     $$('iframe').off('pointerenter');
     self.resizing.set(false);
     delete self.initialPosition;
     delete self.initialSize;
     dispatchEvent('resizeEnd', {
       initialSize: self.initialSize,
-      finalSize: self.getCurrentFlex()
+      finalSize: self.getCurrentFlex(),
     });
   },
   setPreviousNaturalSize() {
@@ -152,7 +144,7 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
     panels.setNaturalPanelSize(index);
   },
   toggleMinimize() {
-    if(settings.minimized) {
+    if (settings.minimized) {
       self.maximize();
     }
     else {
@@ -163,7 +155,7 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
     const panels = self.getPanels();
     settings.minimized = true;
     // confirm not all panels are minimized at once as this is not possible
-    if(panels.panels.every((panel, index) => panels.isMinimized(index))) {
+    if (panels.panels.every((panel, index) => panels.isMinimized(index))) {
       settings.minimized = false;
       return;
     }
@@ -178,7 +170,7 @@ const createComponent = ({el, self, state, isServer, signal, findParent, setting
     const panels = self.getPanels();
     const index = panels.getPanelIndex(el);
     panels.setPanelMaximized(index, self.lastPanelSize);
-  }
+  },
 });
 
 const events = {
@@ -191,7 +183,7 @@ const events = {
   'dblclick .handle': function({ self }) {
     self.setPreviousNaturalSize();
   },
-  'mousedown, touchstart .handle'({event, self}) {
+  'mousedown, touchstart .handle'({ event, self }) {
     self.startResize(event);
     event.preventDefault();
   },

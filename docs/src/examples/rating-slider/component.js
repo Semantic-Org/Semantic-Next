@@ -7,7 +7,7 @@ const defaultSettings = {
   min: 1,
   max: 10,
   initialValue: 5,
-  showLabels: true
+  showLabels: true,
 };
 
 const defaultState = {
@@ -17,20 +17,19 @@ const defaultState = {
 };
 
 const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
-
   initialize() {
     state.rating.set(settings.initialValue);
   },
 
   getSliderStyles() {
     return {
-      dragging: state.dragging.get()
+      dragging: state.dragging.get(),
     };
   },
 
   getLabelStyles(number) {
     return {
-      current: state.rating.get() == number
+      current: state.rating.get() == number,
     };
   },
 
@@ -41,14 +40,14 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
   },
 
   getPercentage() {
-    if(state.currentPercentage.get()) {
+    if (state.currentPercentage.get()) {
       return state.currentPercentage.get();
     }
     return self.getRatingPercentage();
   },
 
   getGuidePercentage() {
-    if(!state.currentPercentage.get()) {
+    if (!state.currentPercentage.get()) {
       return;
     }
     return self.getRatingPercentage();
@@ -65,7 +64,7 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
       dispatchEvent('change', {
         rating: newValue,
         min: settings.min,
-        max: settings.max
+        max: settings.max,
       });
     }
   },
@@ -83,7 +82,7 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
     const value = Math.round(min + position * (max - min));
     state.currentPercentage.set(percentage);
     self.setRating(value);
-  }
+  },
 });
 
 const events = {
@@ -94,26 +93,26 @@ const events = {
   },
 
   'global pointermove body'({ self, state, event }) {
-    if(!state.dragging.get()) {
+    if (!state.dragging.get()) {
       return;
     }
     self.updateRatingFromEvent(event);
   },
 
   'global pointerup body'({ state, dispatchEvent }) {
-    if(!state.dragging.get()) {
+    if (!state.dragging.get()) {
       return;
     }
     state.currentPercentage.set(0);
     state.dragging.set(false);
     dispatchEvent('finalized', {
-      rating: state.rating.get()
+      rating: state.rating.get(),
     });
   },
 
   'click .reset'({ self }) {
     self.resetRating();
-  }
+  },
 };
 
 // Define and export the component
@@ -124,5 +123,5 @@ defineComponent({
   defaultSettings,
   defaultState,
   createComponent,
-  events
+  events,
 });

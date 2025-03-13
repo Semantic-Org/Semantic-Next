@@ -1,22 +1,22 @@
 import * as esbuild from 'esbuild';
-import { resolve } from 'path';
 import fs from 'fs/promises';
+import { resolve } from 'path';
 
 /**
  * Builds a CDN-ready version with resolved imports
  */
 export async function build(options = {}) {
   const {
-    baseDir = process.cwd(),   // Root directory of the package
-    target = ['esnext'],       // JavaScript target
-    minify = false,             // Whether to minify
-    sourcemap = true,          // Whether to generate sourcemaps
-    format = 'esm',            // Module format
-    outDir = 'dist/',          // Output directory
-    outFile = `index.min.js`,  // Output filename
-    entrypoint = null,         // Custom entrypoint override
-    platform = 'neutral',      // Target platform
-    logLevel = 'info',         // log level
+    baseDir = process.cwd(), // Root directory of the package
+    target = ['esnext'], // JavaScript target
+    minify = false, // Whether to minify
+    sourcemap = true, // Whether to generate sourcemaps
+    format = 'esm', // Module format
+    outDir = 'dist/', // Output directory
+    outFile = `index.min.js`, // Output filename
+    entrypoint = null, // Custom entrypoint override
+    platform = 'neutral', // Target platform
+    logLevel = 'info', // log level
   } = options;
 
   try {
@@ -85,14 +85,14 @@ export async function build(options = {}) {
       success: true,
       path: outputPath,
       size,
-      meta: result.metafile
+      meta: result.metafile,
     };
-
-  } catch (error) {
+  }
+  catch (error) {
     console.error('❌ Build failed:', error);
     return {
       success: false,
-      error
+      error,
     };
   }
 }
@@ -102,11 +102,11 @@ export default build;
 // Handle direct execution of this script
 if (import.meta.url === `file://${process.argv[1]}`) {
   console.log('DEBUG: build.js is being run directly from command line');
-  
+
   // Wrap in async function to handle top-level await
   (async function() {
     const result = await build();
-    
+
     if (!result.success) {
       process.exit(1);
     }

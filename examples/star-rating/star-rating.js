@@ -8,16 +8,16 @@ const defaultSettings = {
   maxValue: 5,
   locked: false,
   showValue: true,
-  size: 'medium'
+  size: 'medium',
 };
 
 const defaultState = {
   rating: 0,
   hoveredIndex: -1,
-  starArray: []
+  starArray: [],
 };
 
-const createComponent = ({dispatchEvent, data, state, settings}) => ({
+const createComponent = ({ dispatchEvent, data, state, settings }) => ({
   initialize() {
     console.log(data);
     state.rating.set(settings.value);
@@ -27,14 +27,14 @@ const createComponent = ({dispatchEvent, data, state, settings}) => ({
   getStarClasses(index) {
     return {
       hovered: index <= state.hoveredIndex.get(),
-      filled: index < state.rating.get()
+      filled: index < state.rating.get(),
     };
   },
 
   getRatingClasses() {
     return {
       locked: settings.locked,
-      [settings.size]: true
+      [settings.size]: true,
     };
   },
 
@@ -43,20 +43,20 @@ const createComponent = ({dispatchEvent, data, state, settings}) => ({
       state.rating.set(rating);
       dispatchEvent('change', { rating });
     }
-  }
+  },
 });
 
 const events = {
-  'mouseenter div.star'({state, data}) {
+  'mouseenter div.star'({ state, data }) {
     state.hoveredIndex.set(+data.index);
   },
-  'mouseleave div.star'({state, data}) {
+  'mouseleave div.star'({ state, data }) {
     state.hoveredIndex.clear();
   },
-  'click div.star'({self, data}) {
+  'click div.star'({ self, data }) {
     const rating = Number(data.index) + 1;
     self.setRating(rating);
-  }
+  },
 };
 
 export const StarRating = defineComponent({
@@ -66,5 +66,5 @@ export const StarRating = defineComponent({
   createComponent,
   defaultSettings,
   defaultState,
-  events
+  events,
 });

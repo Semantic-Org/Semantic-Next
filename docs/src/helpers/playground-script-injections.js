@@ -10,7 +10,6 @@ export const componentHTMLAfter = ``;
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
-
 export const indexHTMLBeforeStandard = `<!-- playground-hide -->
 <html>
 <head>
@@ -38,18 +37,18 @@ export const indexHTMLBeforeUI = `<!-- playground-hide -->
 
 export const indexHTMLAfter = `<!-- playground-hide --></body></html><!-- playground-hide-end -->`;
 
-export const indexJSBefore = `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
+export const indexJSBefore =
+  `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
 export const indexJSAfter = ``;
 
-export const indexCSSBefore = `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
+export const indexCSSBefore =
+  `/* playground-fold */ body { padding 1rem; font-family: Lato; } /* playground-fold-end */`;
 export const indexCSSAfter = ``;
-
 
 export const getPlaygroundInjections = (type) => {
   const indexHTMLBefore = (type == 'ui')
     ? indexHTMLBeforeUI
-    : indexHTMLBeforeStandard
-  ;
+    : indexHTMLBeforeStandard;
   return {
     'component.js': {
       before: componentJSBefore,
@@ -57,7 +56,7 @@ export const getPlaygroundInjections = (type) => {
     },
     'component.html': {
       before: componentHTMLBefore,
-      after: componentHTMLAfter
+      after: componentHTMLAfter,
     },
     'component.css': {
       before: componentCSSBefore,
@@ -69,7 +68,7 @@ export const getPlaygroundInjections = (type) => {
     },
     'index.html': {
       before: indexHTMLBefore,
-      after: indexHTMLAfter
+      after: indexHTMLAfter,
     },
     'index.css': {
       before: indexCSSBefore,
@@ -80,11 +79,10 @@ export const getPlaygroundInjections = (type) => {
 export const addPlaygroundInjections = (files, type) => {
   const fileInjections = getPlaygroundInjections(type);
   each(files, (file, name) => {
-    if(fileInjections[name]) {
+    if (fileInjections[name]) {
       const { before, after } = fileInjections[name];
       file[name].content = before + file[name].content + after;
     }
   });
   return files;
 };
-

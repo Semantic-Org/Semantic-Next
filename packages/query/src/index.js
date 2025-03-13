@@ -1,7 +1,7 @@
 import { isClient } from '@semantic-ui/utils';
 import { Query } from './query.js';
 
-const $ = function (selector, args = {}) {
+const $ = function(selector, args = {}) {
   const isClient = typeof window !== 'undefined';
   if (!args?.root && isClient) {
     args.root = document;
@@ -9,7 +9,7 @@ const $ = function (selector, args = {}) {
   return new Query(selector, args);
 };
 
-const $$ = function (selector, args = {}) {
+const $$ = function(selector, args = {}) {
   args.pierceShadow = true;
   return $(selector, args);
 };
@@ -17,10 +17,9 @@ const $$ = function (selector, args = {}) {
 let originalDollar;
 let originalDoubleDollar;
 
-const exportGlobals = function({ dollar = true, doubleDollar = true, query = true} = {}) {
+const exportGlobals = function({ dollar = true, doubleDollar = true, query = true } = {}) {
   if (isClient) {
-
-    if(dollar) {
+    if (dollar) {
       originalDollar = window.$;
       window.$ = $;
     }
@@ -55,4 +54,4 @@ const useAlias = function() {
   return new Query(...arguments);
 };
 
-export { Query, $, $$, exportGlobals, restoreGlobals, useAlias };
+export { $, $$, exportGlobals, Query, restoreGlobals, useAlias };

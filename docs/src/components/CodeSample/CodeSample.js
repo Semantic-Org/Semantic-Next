@@ -2,12 +2,11 @@ import pretty from 'pretty';
 import { codeToHtml } from 'shiki';
 
 import { defineComponent } from '@semantic-ui/component';
-import template from './CodeSample.html?raw';
 import css from './CodeSample.css?raw';
+import template from './CodeSample.html?raw';
 
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 import { copyText } from '@semantic-ui/utils';
-
 
 const defaultSettings = {
   language: 'html',
@@ -16,24 +15,23 @@ const defaultSettings = {
   copyable: true,
   segment: true,
   attached: false,
-  onCodeVisible: function(){},
+  onCodeVisible: function() {},
 };
 
 const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
-
   // internal
-  code          : new Signal(false),
-  language      : new Signal(''),
-  languages     : new Signal([]),
-  slottedCode   : new Signal(false),
-  formattedCode : new Signal(''),
+  code: new Signal(false),
+  language: new Signal(''),
+  languages: new Signal([]),
+  slottedCode: new Signal(false),
+  formattedCode: new Signal(''),
 
   getCode() {
     let code;
-    if(settings.code) {
+    if (settings.code) {
       code = settings.code;
     }
-    else if(tpl.slottedCode.get()) {
+    else if (tpl.slottedCode.get()) {
       code = tpl.slottedCode.get();
     }
     return code;
@@ -43,8 +41,8 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
     reaction(async () => {
       tpl.language.get(); // reactivity source
       const code = tpl.getCode();
-      if(code) {
-        if(settings.language == 'html') {
+      if (code) {
+        if (settings.language == 'html') {
           tpl.formatHTML(code);
         }
         tpl.code.set(code);
@@ -54,8 +52,7 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
   },
 
   async highlight(code = tpl.getCode(), darkModeOverride) {
-    let
-      useDarkMode = (darkModeOverride !== undefined)
+    let useDarkMode = (darkModeOverride !== undefined)
         ? darkModeOverride
         : darkMode,
       language = tpl.language.get(),
@@ -74,9 +71,8 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
           // light mode
           '#22863a': '#777',
           '#24292e': '#777',
-        }
-      })
-    ;
+        },
+      });
     tpl.formattedCode.set(formattedCode);
     Reaction.afterFlush(function() {
       settings.onCodeVisible(formattedCode.value, tpl.code.get());
@@ -89,59 +85,54 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
 
   get: {
     languages() {
-      let
-        languages
-      ;
-      if(settings.languageMenu !== 'auto') {
+      let languages;
+      if (settings.languageMenu !== 'auto') {
         languages = settings.languageMenu;
       }
-      else if(settings.language == 'html') {
+      else if (settings.language == 'html') {
         languages = ['html', 'astro'];
       }
       else {
-        languages = [ settings.language ];
+        languages = [settings.language];
       }
       return languages;
     },
   },
 
-
   formatHTML: function(html) {
-    return pretty(html, {ocd: true});
+    return pretty(html, { ocd: true });
   },
 
   set: {
     language() {
-      if(settings.language) {
+      if (settings.language) {
         tpl.language.set(settings.language);
       }
     },
     slottedCode() {
       let slottedCode = el.innerHTML;
-      if(slottedCode) {
+      if (slottedCode) {
         tpl.slottedCode.set(slottedCode);
       }
-    }
+    },
   },
-
 });
 
-const onCreated = function({tpl }) {
+const onCreated = function({ tpl }) {
   tpl.set.slottedCode();
   tpl.set.language();
   tpl.configureHighlighting();
   tpl.watchCode();
 };
 
-
-const onThemeChanged = function({tpl, isClient, darkMode, settings}) {
+const onThemeChanged = function({ tpl, isClient, darkMode, settings }) {
   tpl.highlight(tpl.getCode(), darkMode);
 };
 
 const events = {
-  'click ui-icon[copy]'({event, tpl}) {
+  'click ui-icon[copy]'({ event, tpl }) {
     copyText(tpl.code.get());
-  }
+  },
 };
 
 const CodeSample = defineComponent({

@@ -1,13 +1,13 @@
-import { describe, beforeEach, afterEach, expect, it, vi } from 'vitest';
 import {
+  any,
   arrayFromObject,
   asyncEach,
   asyncMap,
-  any,
   camelToKebab,
   capitalizeWords,
   clone,
   debounce,
+  difference,
   each,
   escapeHTML,
   escapeRegExp,
@@ -26,19 +26,19 @@ import {
   hasProperty,
   inArray,
   intersection,
-  difference,
-  uniqueItems,
   isArguments,
   isArray,
-  isEmpty,
   isBinary,
+  isClassInstance,
+  isClient,
+  isEmpty,
   isEqual,
   isFunction,
-  isClassInstance,
   isNumber,
   isObject,
   isPlainObject,
   isPromise,
+  isServer,
   isString,
   joinWords,
   kebabToCamel,
@@ -47,10 +47,10 @@ import {
   mapObject,
   memoize,
   moveItem,
-  moveToFront,
   moveToBack,
-  onlyKeys,
+  moveToFront,
   noop,
+  onlyKeys,
   pick,
   prettifyID,
   proxyObject,
@@ -59,21 +59,20 @@ import {
   reverseKeys,
   roundNumber,
   some,
-  isServer,
-  isClient,
   sortBy,
   sum,
-  toTitleCase,
   tokenize,
+  toTitleCase,
   unique,
+  uniqueItems,
   values,
   weightedObjectSearch,
   where,
-  wrapFunction
+  wrapFunction,
 } from '@semantic-ui/utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Array Utilities', () => {
-
   it('unique should remove duplicates', () => {
     const arr = [1, 2, 2, 3, 4, 4, 5];
     const result = unique(arr);
@@ -199,13 +198,10 @@ describe('Array Utilities', () => {
       expect(isEmpty({ a: 1, b: 2 })).toBe(false);
     });
   });
-
 });
 
 describe('Number Utilities', () => {
-
   describe('roundNumber', () => {
-
     it('should round numbers to the specified number of significant digits', () => {
       expect(roundNumber(123.456789, 4)).toBe(123.5);
       expect(roundNumber(0.00123456789, 3)).toBe(0.00123);
@@ -248,8 +244,6 @@ describe('Number Utilities', () => {
 
 describe('Browser Utilities', () => {
   describe('getKeyFromEvent', () => {
-
-
     it('should return an empty string if the event.key is not defined', () => {
       const event = { ctrlKey: true };
       expect(getKeyFromEvent(event)).toBe('');
@@ -314,10 +308,7 @@ describe('Browser Utilities', () => {
   });
 });
 
-
-
 describe('Type Checking Utilities', () => {
-
   it('isObject should correctly identify objects', () => {
     expect(isObject({})).toBe(true);
     expect(isObject(new Date())).toBe(true);
@@ -502,7 +493,6 @@ describe('Type Checking Utilities', () => {
       const expected = {};
       expect(groupBy(array, 'city')).toEqual(expected);
     });
-
   });
 
   describe('moveItem', () => {
@@ -527,13 +517,13 @@ describe('Type Checking Utilities', () => {
       const arr = [
         { id: 1, name: 'John' },
         { id: 2, name: 'Jane' },
-        { id: 3, name: 'Bob' }
+        { id: 3, name: 'Bob' },
       ];
       expect(moveItem(arr, item => item.name === 'Jane', 0))
         .toEqual([
           { id: 2, name: 'Jane' },
           { id: 1, name: 'John' },
-          { id: 3, name: 'Bob' }
+          { id: 3, name: 'Bob' },
         ]);
     });
 
@@ -580,13 +570,13 @@ describe('Type Checking Utilities', () => {
       const arr = [
         { id: 1, name: 'John' },
         { id: 2, name: 'Jane' },
-        { id: 3, name: 'Bob' }
+        { id: 3, name: 'Bob' },
       ];
       expect(moveToFront(arr, item => item.name === 'Jane'))
         .toEqual([
           { id: 2, name: 'Jane' },
           { id: 1, name: 'John' },
-          { id: 3, name: 'Bob' }
+          { id: 3, name: 'Bob' },
         ]);
     });
   });
@@ -607,13 +597,13 @@ describe('Type Checking Utilities', () => {
       const arr = [
         { id: 1, name: 'John' },
         { id: 2, name: 'Jane' },
-        { id: 3, name: 'Bob' }
+        { id: 3, name: 'Bob' },
       ];
       expect(moveToBack(arr, item => item.name === 'Jane'))
         .toEqual([
           { id: 1, name: 'John' },
           { id: 3, name: 'Bob' },
-          { id: 2, name: 'Jane' }
+          { id: 2, name: 'Jane' },
         ]);
     });
   });
@@ -642,7 +632,6 @@ describe('Type Checking Utilities', () => {
     it('maintains element order from first array', () => {
       expect(intersection([3, 1, 2], [2, 3, 1], [1, 2, 3])).toEqual([3, 1, 2]);
     });
-
   });
 
   describe('difference', () => {
@@ -669,7 +658,6 @@ describe('Type Checking Utilities', () => {
     it('maintains element order', () => {
       expect(difference([3, 1, 2], [2], [3])).toEqual([1]);
     });
-
   });
 
   describe('uniqueItems', () => {
@@ -688,58 +676,52 @@ describe('Type Checking Utilities', () => {
     it('handles arrays with duplicates', () => {
       expect(uniqueItems([1, 1, 2], [2, 2, 3], [3, 3, 4])).toEqual([1, 4]);
     });
-
   });
-
 
   describe('sortBy', () => {
     it('should sort by a simple key', () => {
-      const input = [{a: 2}, {a: 3}, {a: 1}];
-      const expected = [{a: 1}, {a: 2}, {a: 3}];
+      const input = [{ a: 2 }, { a: 3 }, { a: 1 }];
+      const expected = [{ a: 1 }, { a: 2 }, { a: 3 }];
       expect(sortBy(input, 'a')).toEqual(expected);
     });
 
     it('should sort by a nested key', () => {
-      const input = [{a: {b: 2}}, {a: {b: 3}}, {a: {b: 1}}];
-      const expected = [{a: {b: 1}}, {a: {b: 2}}, {a: {b: 3}}];
+      const input = [{ a: { b: 2 } }, { a: { b: 3 } }, { a: { b: 1 } }];
+      const expected = [{ a: { b: 1 } }, { a: { b: 2 } }, { a: { b: 3 } }];
       expect(sortBy(input, 'a.b')).toEqual(expected);
     });
 
     it('should handle custom comparator', () => {
-      const input = [{a: 1}, {a: 2}, {a: 3}];
-      const expected = [{a: 3}, {a: 2}, {a: 1}];
+      const input = [{ a: 1 }, { a: 2 }, { a: 3 }];
+      const expected = [{ a: 3 }, { a: 2 }, { a: 1 }];
       const reverseComparator = (a, b) => b - a;
       expect(sortBy(input, 'a', reverseComparator)).toEqual(expected);
     });
 
     it('should handle sorting with additional object context in comparator', () => {
-      const input = [{a: 1, b: 2}, {a: 1, b: 1}];
-      const expected = [{a: 1, b: 1}, {a: 1, b: 2}];
+      const input = [{ a: 1, b: 2 }, { a: 1, b: 1 }];
+      const expected = [{ a: 1, b: 1 }, { a: 1, b: 2 }];
       const comparator = (valA, valB, objA, objB) => objA.b - objB.b;
       expect(sortBy(input, 'a', comparator)).toEqual(expected);
     });
 
     it('should return a new array and not mutate the original', () => {
-      const input = [{a: 1}, {a: 2}];
+      const input = [{ a: 1 }, { a: 2 }];
       const result = sortBy(input, 'a');
       expect(result).not.toBe(input);
-      expect(result).toEqual([{a: 1}, {a: 2}]);
+      expect(result).toEqual([{ a: 1 }, { a: 2 }]);
     });
 
     it('should sort objects with undefined values last', () => {
-      const input = [{a: 1}, {a: undefined}, {a: 2}];
-      const expected = [{a: 1}, {a: 2}, {a: undefined}];
+      const input = [{ a: 1 }, { a: undefined }, { a: 2 }];
+      const expected = [{ a: 1 }, { a: 2 }, { a: undefined }];
       expect(sortBy(input, 'a')).toEqual(expected);
     });
   });
-
 });
 
 describe('Date Utilities', () => {
-
   describe('formatDate', () => {
-
-
     it('should format dates correctly with predefined formats', () => {
       const testCases = [
         {
@@ -880,7 +862,6 @@ describe('Date Utilities', () => {
             timezone: 'America/New_York',
           },
         },
-
       ];
 
       testCases.forEach(({ date, formats, options }) => {
@@ -909,7 +890,7 @@ describe('Date Utilities', () => {
     it('should format date with custom timezone', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'America/New_York' })).toBe('2023-05-18 11:34:56');
     });
-/*
+    /*
     it('should format date with local timezone', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'local' })).toBe('2023-05-18 ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     });*/
@@ -973,7 +954,6 @@ describe('Date Utilities', () => {
 });
 
 describe('Object Utilities', () => {
-
   describe('keys', () => {
     it('keys should return the keys of an object', () => {
       expect(keys({ a: 1, b: 2 })).toEqual(['a', 'b']);
@@ -1041,8 +1021,12 @@ describe('Object Utilities', () => {
     it('extend should merge properties from source into target, including getters and setters', () => {
       const target = { a: 1 };
       const source = {
-        get b() { return 2; },
-        set b(val) { this.c = val; }
+        get b() {
+          return 2;
+        },
+        set b(val) {
+          this.c = val;
+        },
       };
       extend(target, source);
       expect(target.b).toBe(2);
@@ -1050,8 +1034,6 @@ describe('Object Utilities', () => {
       expect(target.c).toBe(3);
     });
   });
-
-
 
   describe('pick', () => {
     it('pick should create an object composed of the picked properties', () => {
@@ -1172,7 +1154,6 @@ describe('Object Utilities', () => {
   });
 
   describe('get', () => {
-
     it('get should support array like "arr.1.value" notation in lookup', () => {
       const obj = { arr: [{ value: 1 }, { value: 2 }] };
       expect(get(obj, 'arr.1.value')).toBe(2);
@@ -1183,7 +1164,6 @@ describe('Object Utilities', () => {
       expect(get(obj, 'a.b.c')).toBe(1);
       expect(get(obj, 'a.b.c.d')).toBeUndefined();
     });
-
 
     it('get should support files with "." in the key', () => {
       const obj = { 'a.b': 1 };
@@ -1226,7 +1206,7 @@ describe('Object Utilities', () => {
   });
 
   describe('reverseKeys', () => {
-    it('reverseKeys should reverse a lookup object\'s keys and values', () => {
+    it("reverseKeys should reverse a lookup object's keys and values", () => {
       const obj = { a: 1, b: [1, 2], c: 2 };
       const reversed = reverseKeys(obj);
       expect(reversed).toEqual({ '1': ['a', 'b'], '2': ['b', 'c'] });
@@ -1258,12 +1238,9 @@ describe('Object Utilities', () => {
       expect(any).toBe(some);
     });
   });
-
 });
 
-
 describe('isEqual', () => {
-
   describe('Various types', () => {
     // Primitives
     it('should return true for equal strings', () => {
@@ -1407,8 +1384,6 @@ describe('isEqual', () => {
   it('should return false for == values that arent equal', () => {
     expect(isEqual('5', 5)).toBe(false);
   });
-
-
 });
 
 describe('function utilities', () => {
@@ -1513,15 +1488,15 @@ describe('function utilities', () => {
       const customHash = (args) => args[0].id;
       const memoizedFunction = memoize(originalFunction, customHash);
 
-      const result1 = memoizedFunction({id: 1, a: 2, b: 3});
+      const result1 = memoizedFunction({ id: 1, a: 2, b: 3 });
       expect(result1).toBe(5);
       expect(originalFunction).toHaveBeenCalledTimes(1);
 
-      const result2 = memoizedFunction({id: 1, a: 3, b: 4});
+      const result2 = memoizedFunction({ id: 1, a: 3, b: 4 });
       expect(result2).toBe(5);
       expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same id
 
-      const result3 = memoizedFunction({id: 2, a: 2, b: 3});
+      const result3 = memoizedFunction({ id: 2, a: 2, b: 3 });
       expect(result3).toBe(5);
       expect(originalFunction).toHaveBeenCalledTimes(2); // Should be called again due to different id
     });
@@ -1623,7 +1598,9 @@ describe('function utilities', () => {
     it('should maintain correct context', () => {
       const obj = {
         value: 'test',
-        method: vi.fn(function() { return this.value; })
+        method: vi.fn(function() {
+          return this.value;
+        }),
       };
       const debouncedMethod = debounce(obj.method, { delay: 1000 });
 
@@ -1634,7 +1611,6 @@ describe('function utilities', () => {
       expect(obj.method.mock.results[0].value).toBe('test');
     });
   });
-
 });
 
 describe('String Utilities', () => {
@@ -1653,8 +1629,6 @@ describe('String Utilities', () => {
   it('should convert a string to title case', () => {
     expect(toTitleCase('a simple test')).toBe('A Simple Test');
   });
-
-
 
   describe('joinWords', () => {
     it('should join words with default settings', () => {
@@ -1707,7 +1681,7 @@ describe('String Utilities', () => {
         lastSeparator: ' or ',
         oxford: false,
         quotes: true,
-        transform: (word) => word.charAt(0).toUpperCase() + word.slice(1)
+        transform: (word) => word.charAt(0).toUpperCase() + word.slice(1),
       };
       expect(joinWords(words, options)).toBe('"Apple"; "Banana"; "Cherry" or "Date"');
     });
@@ -1724,8 +1698,6 @@ describe('String Utilities', () => {
 });
 
 describe('ID/Hashing Functions', () => {
-
-
   describe('tokenize', () => {
     it('should convert a string to a token', () => {
       expect(tokenize('Hello World')).toBe('hello-world');
@@ -1761,8 +1733,8 @@ describe('ID/Hashing Functions', () => {
     });
 
     it('should hash objects', () => {
-      const input1 = { one: 'one', two: { one: 'one', two:'two' }};
-      const input2 = { one: 'one', two: { one: 'two', two:'two' }};
+      const input1 = { one: 'one', two: { one: 'one', two: 'two' } };
+      const input2 = { one: 'one', two: { one: 'two', two: 'two' } };
       expect(hashCode(input1)).not.toBe(hashCode(input2));
     });
 
@@ -1884,7 +1856,6 @@ describe('ID/Hashing Functions', () => {
 });
 
 describe('clone', () => {
-
   it('should clone dates', () => {
     const originalDate = new Date(2020, 0, 1);
     const clonedDate = clone(originalDate);
@@ -1942,10 +1913,10 @@ describe('clone', () => {
       level1: {
         level2: {
           level3: {
-            value: 'deep value'
-          }
-        }
-      }
+            value: 'deep value',
+          },
+        },
+      },
     };
     const clonedObject = clone(originalObject);
     expect(clonedObject).toEqual(originalObject);
@@ -1965,13 +1936,9 @@ describe('clone', () => {
     expect(clonedObject).not.toBe(originalObject);
     expect(clonedObject.circularRef).toBe(clonedObject);
   });
-
-
 });
 
-
 describe('regular expression utilities', () => {
-
   describe('escapeRegExp', () => {
     it('should escape characters that have special meaning in regex', () => {
       const specialChars = '. * + ? ^ $ { } ( ) | [ ] \\';
@@ -1992,13 +1959,10 @@ describe('regular expression utilities', () => {
       expect(escapeHTML(input)).toBe(input);
     });
   });
-
 });
 
 describe('iterators', () => {
-
   describe('each', () => {
-
     describe('Array iteration', () => {
       it('should iterate over all elements', () => {
         const array = [1, 2, 3];
@@ -2049,7 +2013,6 @@ describe('iterators', () => {
         expect(spy).toHaveBeenCalledWith(2, 'b', obj);
         expect(spy).not.toHaveBeenCalledWith(3, 'c', obj); // ensure 'c' is not iterated
       });
-
     });
 
     it('should handle null/undefined gracefully', () => {
@@ -2058,7 +2021,6 @@ describe('iterators', () => {
       each(undefined, spy);
       expect(spy).not.toHaveBeenCalled();
     });
-
   });
 
   describe('asyncEach', () => {
@@ -2100,5 +2062,4 @@ describe('iterators', () => {
       expect(result2).toBeUndefined();
     });
   });
-
 });

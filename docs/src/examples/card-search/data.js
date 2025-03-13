@@ -6,7 +6,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/jenny.jpg',
     gender: 'female',
-    contacts: 234
+    contacts: 234,
   },
   {
     name: 'Steve Wilson',
@@ -15,7 +15,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/steve.jpg',
     gender: 'male',
-    contacts: 189
+    contacts: 189,
   },
   {
     name: 'Matt Thompson',
@@ -24,7 +24,7 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/matt.jpg',
     gender: 'male',
-    contacts: 342
+    contacts: 342,
   },
   {
     name: 'Molly Chen',
@@ -33,7 +33,7 @@ export const friends = [
     joined: '2022',
     image: '/images/avatar/molly.png',
     gender: 'female',
-    contacts: 156
+    contacts: 156,
   },
   {
     name: 'Christian Lee',
@@ -42,7 +42,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/christian.jpg',
     gender: 'male',
-    contacts: 278
+    contacts: 278,
   },
   {
     name: 'Helen Park',
@@ -51,7 +51,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/helen.jpg',
     gender: 'female',
-    contacts: 198
+    contacts: 198,
   },
   {
     name: 'Daniel Cohen',
@@ -60,7 +60,7 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/daniel.jpg',
     gender: 'male',
-    contacts: 245
+    contacts: 245,
   },
   {
     name: 'Lindsay Silva',
@@ -69,7 +69,7 @@ export const friends = [
     joined: '2022',
     image: '/images/avatar/lindsay.png',
     gender: 'female',
-    contacts: 167
+    contacts: 167,
   },
   {
     name: 'Tom Mueller',
@@ -78,7 +78,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/tom.jpg',
     gender: 'male',
-    contacts: 289
+    contacts: 289,
   },
   {
     name: 'Ade Johnson',
@@ -87,7 +87,7 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/ade.jpg',
     gender: 'male',
-    contacts: 315
+    contacts: 315,
   },
   {
     name: 'Cassie Brown',
@@ -96,7 +96,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/cassie.png',
     gender: 'female',
-    contacts: 193
+    contacts: 193,
   },
   {
     name: 'Chris Nguyen',
@@ -105,7 +105,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/chris.jpg',
     gender: 'male',
-    contacts: 212
+    contacts: 212,
   },
   {
     name: 'Elliot Foster',
@@ -114,7 +114,7 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/elliot.jpg',
     gender: 'male',
-    contacts: 278
+    contacts: 278,
   },
   {
     name: 'Elyse Thompson',
@@ -123,7 +123,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/elyse.png',
     gender: 'female',
-    contacts: 150
+    contacts: 150,
   },
   {
     name: 'Eve Smith',
@@ -132,7 +132,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/eve.png',
     gender: 'female',
-    contacts: 204
+    contacts: 204,
   },
   {
     name: 'Joe Garcia',
@@ -141,7 +141,7 @@ export const friends = [
     joined: '2022',
     image: '/images/avatar/joe.jpg',
     gender: 'male',
-    contacts: 186
+    contacts: 186,
   },
   {
     name: 'Justen Peters',
@@ -150,7 +150,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/justen.jpg',
     gender: 'male',
-    contacts: 238
+    contacts: 238,
   },
   {
     name: 'Kristy Lee',
@@ -159,7 +159,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/kristy.png',
     gender: 'female',
-    contacts: 194
+    contacts: 194,
   },
   {
     name: 'Laura Davis',
@@ -168,7 +168,7 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/laura.jpg',
     gender: 'female',
-    contacts: 263
+    contacts: 263,
   },
   {
     name: 'Lena Ivanova',
@@ -177,7 +177,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/lena.png',
     gender: 'female',
-    contacts: 176
+    contacts: 176,
   },
   {
     name: 'Mark Zhao',
@@ -186,7 +186,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/mark.png',
     gender: 'male',
-    contacts: 251
+    contacts: 251,
   },
   {
     name: 'Matthew Allen',
@@ -195,7 +195,7 @@ export const friends = [
     joined: '2022',
     image: '/images/avatar/matthew.png',
     gender: 'male',
-    contacts: 169
+    contacts: 169,
   },
   {
     name: 'Nan Zhu',
@@ -204,7 +204,7 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/nan.jpg',
     gender: 'male',
-    contacts: 220
+    contacts: 220,
   },
   {
     name: 'Nom Phan',
@@ -213,7 +213,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/nom.jpg',
     gender: 'female',
-    contacts: 147
+    contacts: 147,
   },
   {
     name: 'Patrick Stewart',
@@ -222,7 +222,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/patrick.png',
     gender: 'male',
-    contacts: 187
+    contacts: 187,
   },
   {
     name: 'Rachel Green',
@@ -231,7 +231,7 @@ export const friends = [
     joined: '2022',
     image: '/images/avatar/rachel.png',
     gender: 'female',
-    contacts: 179
+    contacts: 179,
   },
   {
     name: 'Stevie Mack',
@@ -240,7 +240,7 @@ export const friends = [
     joined: '2020',
     image: '/images/avatar/stevie.jpg',
     gender: 'male',
-    contacts: 210
+    contacts: 210,
   },
   {
     name: 'Veronika Koval',
@@ -249,7 +249,7 @@ export const friends = [
     joined: '2021',
     image: '/images/avatar/veronika.jpg',
     gender: 'female',
-    contacts: 160
+    contacts: 160,
   },
   {
     name: 'Zoe Martinez',
@@ -258,6 +258,6 @@ export const friends = [
     joined: '2019',
     image: '/images/avatar/zoe.jpg',
     gender: 'female',
-    contacts: 202
-  }
+    contacts: 202,
+  },
 ];

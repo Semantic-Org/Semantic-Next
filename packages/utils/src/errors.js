@@ -9,7 +9,7 @@ export const fatal = (
     metadata = {},
     onError = null,
     removeStackLines = 1,
-  } = {}
+  } = {},
 ) => {
   const error = new errorType(message);
   Object.assign(error, metadata);

@@ -6,13 +6,12 @@ export const tokenize = (str = '') => {
   return (str || '').replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, '')
     .replace(/_/g, '-')
-    .toLowerCase()
-  ;
+    .toLowerCase();
 };
 
 export const prettifyID = (num) => {
   num = parseInt(num, 10);
-  if (num === 0) return '0';
+  if (num === 0) { return '0'; }
   let result = '';
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   while (num > 0) {

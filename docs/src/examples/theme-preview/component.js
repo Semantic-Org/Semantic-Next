@@ -8,32 +8,32 @@ const defaultSettings = {
     {
       name: 'Ocean',
       primary: 'oklch(0.56 0.21 251)',
-      secondary: 'oklch(0.65 0.14 188.03)'
+      secondary: 'oklch(0.65 0.14 188.03)',
     },
     {
       name: 'Sunset',
       primary: 'oklch(0.59 0.27 29)',
-      secondary: 'oklch(0.65 0.2 44.37)'
+      secondary: 'oklch(0.65 0.2 44.37)',
     },
     {
       name: 'Forest',
       primary: 'oklch(0.62 0.26 145.53)',
-      secondary: 'oklch(0.69 0.19 119.53)'
+      secondary: 'oklch(0.69 0.19 119.53)',
     },
     {
       name: 'Berry',
       primary: 'oklch(0.54 0.26 314.43)',
-      secondary: 'oklch(0.46 0.26 283.29)'
-    }
-  ]
+      secondary: 'oklch(0.46 0.26 283.29)',
+    },
+  ],
 };
 
 const defaultState = {
   activeTheme: null,
-  customizing: false
+  customizing: false,
 };
 
-const createComponent = ({self, el, $, state, settings}) => ({
+const createComponent = ({ self, el, $, state, settings }) => ({
   initialize() {
     if (settings.presets?.[0]) {
       self.applyTheme(settings.presets[0]);
@@ -43,7 +43,7 @@ const createComponent = ({self, el, $, state, settings}) => ({
   getThemeClasses() {
     return {
       picker: true,
-      customizing: state.customizing.get()
+      customizing: state.customizing.get(),
     };
   },
 
@@ -51,7 +51,7 @@ const createComponent = ({self, el, $, state, settings}) => ({
     const activeTheme = state.activeTheme.get();
     return {
       preset: true,
-      active: activeTheme && activeTheme.name === preset.name
+      active: activeTheme && activeTheme.name === preset.name,
     };
   },
 
@@ -59,8 +59,7 @@ const createComponent = ({self, el, $, state, settings}) => ({
     state.activeTheme.set(theme);
     $(el)
       .cssVar('button-primary-color', theme.primary)
-      .cssVar('button-secondary-color', theme.secondary)
-    ;
+      .cssVar('button-secondary-color', theme.secondary);
   },
 
   startCustomizing() {
@@ -71,18 +70,18 @@ const createComponent = ({self, el, $, state, settings}) => ({
     const theme = state.activeTheme.get() || {};
     theme[type] = color;
     self.applyTheme(theme);
-  }
+  },
 });
 
 const events = {
-  'click .preset'({self, settings, data}) {
+  'click .preset'({ self, settings, data }) {
     const preset = settings.presets[+data.index];
     self.applyTheme(preset);
   },
 
-  'input .color-input'({self, event, data}) {
+  'input .color-input'({ self, event, data }) {
     self.updateThemeColor(data.type, event.target.value);
-  }
+  },
 };
 
 defineComponent({
@@ -92,5 +91,5 @@ defineComponent({
   createComponent,
   defaultSettings,
   defaultState,
-  events
+  events,
 });

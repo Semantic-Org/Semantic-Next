@@ -4,15 +4,14 @@ import { MenuItemComponentSpec } from '@semantic-ui/specs';
 import MenuItemCSS from './menu-item.css?raw';
 import MenuItemTemplate from './menu-item.html?raw';
 
-const onCreated = ({data}) => {
-
+const onCreated = ({ data }) => {
 };
 
 const events = {
-  'touchstart .menu'({event, tpl, $}) {
+  'touchstart .menu'({ event, tpl, $ }) {
     $(this).addClass('pressed');
   },
-  'touchend .menu'({event, tpl, $}) {
+  'touchend .menu'({ event, tpl, $ }) {
     $(this).removeClass('pressed');
   },
 };

@@ -7,7 +7,4 @@ const ContainerComponentSpec = reader.getWebComponentSpec(ContainerSpec);
 
 export default ContainerSpec;
 
-export {
-  ContainerSpec,
-  ContainerComponentSpec,
-};
+export { ContainerComponentSpec, ContainerSpec };

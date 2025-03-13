@@ -1,20 +1,19 @@
-
 /*-------------------
       Equality
 --------------------*/
 
 // adapted from <https://github.com/epoberezkin/fast-deep-equal/>
 export const isEqual = (a, b, options = {}) => {
-  if (a === b) return true;
+  if (a === b) { return true; }
 
   if (a && b && typeof a == 'object' && typeof b == 'object') {
-    if (a.constructor !== b.constructor) return false;
+    if (a.constructor !== b.constructor) { return false; }
 
     let length, i, keys;
     if (Array.isArray(a)) {
       length = a.length;
-      if (length != b.length) return false;
-      for (i = length; i-- !== 0; ) {
+      if (length != b.length) { return false; }
+      for (i = length; i-- !== 0;) {
         if (!isEqual(a[i], b[i])) {
           return false;
         }
@@ -23,7 +22,7 @@ export const isEqual = (a, b, options = {}) => {
     }
 
     if (a instanceof Map && b instanceof Map) {
-      if (a.size !== b.size) return false;
+      if (a.size !== b.size) { return false; }
       for (i of a.entries()) {
         if (!b.has(i[0])) {
           return false;
@@ -38,7 +37,7 @@ export const isEqual = (a, b, options = {}) => {
     }
 
     if (a instanceof Set && b instanceof Set) {
-      if (a.size !== b.size) return false;
+      if (a.size !== b.size) { return false; }
       for (i of a.entries()) {
         if (!b.has(i[0])) {
           return false;
@@ -49,8 +48,8 @@ export const isEqual = (a, b, options = {}) => {
 
     if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
       length = a.length;
-      if (length != b.length) return false;
-      for (i = length; i-- !== 0; ) {
+      if (length != b.length) { return false; }
+      for (i = length; i-- !== 0;) {
         if (a[i] !== b[i]) {
           return false;
         }
@@ -70,15 +69,15 @@ export const isEqual = (a, b, options = {}) => {
 
     keys = Object.keys(a);
     length = keys.length;
-    if (length !== Object.keys(b).length) return false;
+    if (length !== Object.keys(b).length) { return false; }
 
-    for (i = length; i-- !== 0; ) {
-      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+    for (i = length; i-- !== 0;) {
+      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) { return false; }
     }
 
-    for (i = length; i-- !== 0; ) {
+    for (i = length; i-- !== 0;) {
       let key = keys[i];
-      if (!isEqual(a[key], b[key])) return false;
+      if (!isEqual(a[key], b[key])) { return false; }
     }
 
     return true;

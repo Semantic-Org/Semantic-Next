@@ -3,7 +3,6 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./todo-footer.css');
 const template = await getText('./todo-footer.html');
 
-
 const createComponent = ({ self, findParent, $ }) => ({
   filters: ['all', 'active', 'complete'],
 

@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { TemplateCompiler } from '@semantic-ui/templating';
-import template from './CodePlaygroundPreview.html?raw';
 import css from './CodePlaygroundPreview.css?raw';
+import template from './CodePlaygroundPreview.html?raw';
 import './lib/pretty-json.js';
 
 const defaultState = {
@@ -10,10 +10,9 @@ const defaultState = {
   template: '',
 };
 
-const createComponent = ({self, findParent, data, state, $, $$}) => ({
-
+const createComponent = ({ self, findParent, data, state, $, $$ }) => ({
   showMenu() {
-    if(data.showMenu == false) {
+    if (data.showMenu == false) {
       return false;
     }
     return true;
@@ -22,9 +21,9 @@ const createComponent = ({self, findParent, data, state, $, $$}) => ({
   getMenu: () => {
     let menu = [
       { label: 'Preview', value: 'preview' },
-      //{ label: 'Console', value: 'console' },
+      // { label: 'Console', value: 'console' },
     ];
-    if(self.getFile()) {
+    if (self.getFile()) {
       menu.push({ label: 'AST', value: 'ast' });
     }
     return menu;
@@ -32,7 +31,7 @@ const createComponent = ({self, findParent, data, state, $, $$}) => ({
 
   getFile() {
     let parent = findParent('codePlayground');
-    if(!parent?.files) {
+    if (!parent?.files) {
       return;
     }
     return parent.files['component.html']?.content;
@@ -43,17 +42,16 @@ const createComponent = ({self, findParent, data, state, $, $$}) => ({
     const compiler = new TemplateCompiler(template);
     const ast = compiler.compile();
     return JSON.stringify(ast);
-  }
-
+  },
 });
 
-const onRendered = ({self, state}) => {
+const onRendered = ({ self, state }) => {
   const fileContent = self.getFile();
   state.template.set(fileContent);
 };
 
 const events = {
-  'change ui-menu'({state, data}) {
+  'change ui-menu'({ state, data }) {
     state.tab.set(data.value);
   },
 };

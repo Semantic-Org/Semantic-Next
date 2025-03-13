@@ -5,7 +5,4 @@ const IconComponentSpec = reader.getWebComponentSpec(IconSpec);
 
 export default IconSpec;
 
-export {
-  IconSpec,
-  IconComponentSpec
-};
+export { IconComponentSpec, IconSpec };

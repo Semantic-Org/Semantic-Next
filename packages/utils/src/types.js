@@ -1,4 +1,3 @@
-
 /*-------------------
         Types
 --------------------*/
@@ -39,7 +38,7 @@ export const isPromise = (x) => {
   return x && isFunction(x.then);
 };
 
-export const isArguments = function (obj) {
+export const isArguments = function(obj) {
   return Object.prototype.toString.call(obj) === '[object Arguments]';
 };
 
@@ -48,10 +47,10 @@ export const isDOM = (element) => {
     return true; // ssr or not a browser
   }
   return (
-    element instanceof Element ||
-    element instanceof Document ||
-    element === window ||
-    element instanceof DocumentFragment
+    element instanceof Element
+    || element instanceof Document
+    || element === window
+    || element instanceof DocumentFragment
   );
 };
 

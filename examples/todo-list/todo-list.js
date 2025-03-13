@@ -1,12 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
 import { each } from '@semantic-ui/utils';
 
-import { todoItem } from './item/todo-item.js';
-import { todoHeader } from './header/todo-header.js';
 import { todoFooter } from './footer/todo-footer.js';
+import { todoHeader } from './header/todo-header.js';
+import { todoItem } from './item/todo-item.js';
 
-import template from './todo-list.html?raw';
 import css from './todo-list.css?raw';
+import template from './todo-list.html?raw';
 
 const createComponent = ({ self, signal, $ }) => ({
   // global state
@@ -68,7 +68,6 @@ const onDestroyed = ({ self }) => {
 };
 
 const events = {
-
   'global hashchange window'({ self }) {
     self.setRouteFilter();
   },

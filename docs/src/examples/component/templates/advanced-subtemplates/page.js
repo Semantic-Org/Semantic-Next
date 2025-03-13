@@ -7,16 +7,16 @@ import { Users } from './users.js';
 
 const setTableData = function() {
   $('dynamic-table.one').settings({
-    rows: Users.slice(0, 5)
+    rows: Users.slice(0, 5),
   });
   $('dynamic-table.two').settings({
-    rows: Users.slice(5, 10)
+    rows: Users.slice(5, 10),
   });
 };
 
 const setSummaryView = function() {
   $('dynamic-table').settings({
-    headers: ['Name', 'ID', 'Age', 'Gender' ],
+    headers: ['Name', 'ID', 'Age', 'Gender'],
     rowTemplate: Row,
   });
   $('.summary').addClass('disabled');

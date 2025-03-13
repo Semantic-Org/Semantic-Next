@@ -1,12 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import template from './test-element.html?raw';
 import css from './test-element.css?raw';
+import template from './test-element.html?raw';
 
 import { basicTab } from './tabs/basic.js';
 import { eventsTab } from './tabs/events.js';
 
-const createComponent = function ({ self, signal, $ }) {
+const createComponent = function({ self, signal, $ }) {
   return {
     tab: signal('basic'),
     morningActivity: signal('running'),

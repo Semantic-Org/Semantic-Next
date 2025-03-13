@@ -1,4 +1,4 @@
-import { escapeRegExp, each } from '@semantic-ui/utils';
+import { each, escapeRegExp } from '@semantic-ui/utils';
 
 // A StringScanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
@@ -27,13 +27,13 @@ export class StringScanner {
   }
 
   step(step = 1) {
-    if(!this.isEOF()) {
+    if (!this.isEOF()) {
       this.pos = this.pos + step;
     }
   }
 
   rewind(step = 1) {
-    if(this.pos !== 0) {
+    if (this.pos !== 0) {
       this.pos = this.pos - step;
     }
   }
@@ -48,10 +48,9 @@ export class StringScanner {
   }
 
   consume(pattern) {
-    const regex =
-      typeof pattern === 'string'
-        ? new RegExp(escapeRegExp(pattern))
-        : new RegExp(pattern);
+    const regex = typeof pattern === 'string'
+      ? new RegExp(escapeRegExp(pattern))
+      : new RegExp(pattern);
 
     // Match from the current position
     const substring = this.input.substring(this.pos);
@@ -65,10 +64,9 @@ export class StringScanner {
   }
 
   consumeUntil(pattern) {
-    const regex =
-      typeof pattern === 'string'
-        ? new RegExp(escapeRegExp(pattern))
-        : new RegExp(pattern);
+    const regex = typeof pattern === 'string'
+      ? new RegExp(escapeRegExp(pattern))
+      : new RegExp(pattern);
     const match = regex.exec(this.input.substring(this.pos));
     if (!match) {
       const consumedText = this.input.substr(this.pos);
@@ -84,10 +82,9 @@ export class StringScanner {
     if (!pattern) {
       return;
     }
-    const regex =
-      typeof pattern === 'string'
-        ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
-        : new RegExp(pattern, 'gm');
+    const regex = typeof pattern === 'string'
+      ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
+      : new RegExp(pattern, 'gm');
 
     let lastMatch = null;
     let match;
@@ -113,7 +110,8 @@ export class StringScanner {
 
     // Step 1: Search backwards to confirm we're inside a tag.
     while (i >= 0) {
-      if (this.input[i] === '>') break; // Stop if we find the end of a previous tag
+      if (this.input[i] === '>') { break; // Stop if we find the end of a previous tag
+       }
       if (this.input[i] === '<') {
         insideTag = true; // Confirm we're inside a tag
         tagPos = i; // Save the position of the tag
@@ -218,10 +216,9 @@ export class StringScanner {
       if (globalThis.document) {
         let errorHTML = '';
         each(contextLines, (line, index) => {
-          const style =
-            index < linesBefore || index > linesBefore
-              ? normalStyle
-              : errorStyle;
+          const style = index < linesBefore || index > linesBefore
+            ? normalStyle
+            : errorStyle;
           errorHTML += `<div style="${style}">${line}</div>`;
         });
         const html = `
@@ -235,9 +232,7 @@ export class StringScanner {
       }
       console.error(
         msg + '\n' + consoleMsg,
-        ...contextLines.map((_, idx) =>
-          lineNumber - startLine === idx ? errorStyle : normalStyle
-        )
+        ...contextLines.map((_, idx) => lineNumber - startLine === idx ? errorStyle : normalStyle),
       );
 
       const e = new Error(msg);
@@ -245,4 +240,3 @@ export class StringScanner {
     }
   }
 }
-

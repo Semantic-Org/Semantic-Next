@@ -10,8 +10,8 @@ const defaultState = {
 
 const createComponent = ({ state, self }) => ({
   delta: 50,
-  increaseWidth: () =>  state.width.increment(self.delta),
-  decreaseWidth: () =>  state.width.decrement(self.delta),
+  increaseWidth: () => state.width.increment(self.delta),
+  decreaseWidth: () => state.width.decrement(self.delta),
   increaseHeight: () => state.height.increment(self.delta),
   decreaseHeight: () => state.height.decrement(self.delta),
   getStyle() {
@@ -21,7 +21,7 @@ const createComponent = ({ state, self }) => ({
       width: ${width > 0 ? width : 0}px;
       height: ${height > 0 ? height : 0}px;
     `;
-  }
+  },
 });
 
 const events = {

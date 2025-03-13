@@ -1,4 +1,16 @@
-import { isPlainObject, isString, isArray, isDOM, isFunction, findIndex, camelToKebab, inArray, isClient, isObject, each } from '@semantic-ui/utils';
+import {
+  camelToKebab,
+  each,
+  findIndex,
+  inArray,
+  isArray,
+  isClient,
+  isDOM,
+  isFunction,
+  isObject,
+  isPlainObject,
+  isString,
+} from '@semantic-ui/utils';
 
 /*
 A minimal toolkit for querying and performing modifications
@@ -6,7 +18,6 @@ across DOM nodes based off a selector
 */
 
 export class Query {
-
   /*
     This avoids keeping a copy of window/globalThis in
     memory when an element references the global object
@@ -33,7 +44,10 @@ export class Query {
     if (!root) {
       return;
     }
-    if((selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis']) || selector == Query.globalThisProxy) {
+    if (
+      (selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])
+      || selector == Query.globalThisProxy
+    ) {
       // We dont want to store a copy of globalThis in each query instance
       elements = [Query.globalThisProxy];
       this.isBrowser = isClient;
@@ -75,8 +89,7 @@ export class Query {
   chain(elements) {
     return (this.isGlobal && !elements)
       ? new Query(globalThis, this.options)
-      : new Query(elements, this.options)
-    ;
+      : new Query(elements, this.options);
   }
 
   /* we will add all elements across shadow root boundaries while matching
@@ -88,22 +101,21 @@ export class Query {
     let domFound = false;
     let queriedRoot;
 
-
     // add root if required
     if (includeRoot) {
-      if(domSelector && root == selector) {
+      if (domSelector && root == selector) {
         elements.push(root);
       }
-      else if(root.matches && root.matches(selector)) {
+      else if (root.matches && root.matches(selector)) {
         elements.push(root);
       }
     }
 
     // query from root
-    if(domSelector) {
+    if (domSelector) {
       queriedRoot = true;
     }
-    else if(root.querySelectorAll) {
+    else if (root.querySelectorAll) {
       elements.push(...root.querySelectorAll(selector));
       queriedRoot = true;
     }
@@ -112,14 +124,13 @@ export class Query {
     }
 
     const addElements = (node, selector) => {
-      if(domSelector && (node === selector || node.contains)) {
-        if(node.contains(selector)) {
+      if (domSelector && (node === selector || node.contains)) {
+        if (node.contains(selector)) {
           elements.push(selector);
           domFound = true;
-
         }
       }
-      else if(node.querySelectorAll) {
+      else if (node.querySelectorAll) {
         elements.push(...node.querySelectorAll(selector));
       }
     };
@@ -130,7 +141,7 @@ export class Query {
       let remainingSelector;
       each(parts, (part, index) => {
         partialSelector = parts.slice(0, index + 1).join(' ');
-        if(el.matches(partialSelector)) {
+        if (el.matches(partialSelector)) {
           remainingSelector = parts.slice(index + 1).join(' ');
           return;
         }
@@ -139,15 +150,14 @@ export class Query {
     };
 
     const findElements = (node, selector, query) => {
-
       // if we are querying for a DOM element we can stop searching once we've found it
-      if(domFound) {
+      if (domFound) {
         return;
       }
 
       // if root element did not support querySelectorAll
       // we query each child node then stop
-      if(query === true) {
+      if (query === true) {
         addElements(node, selector);
         queriedRoot = true;
       }
@@ -159,7 +169,7 @@ export class Query {
         findElements(node.shadowRoot, selector, !queriedRoot);
       }
 
-      if(node.assignedNodes) {
+      if (node.assignedNodes) {
         selector = getRemainingSelector(node, selector);
         node.assignedNodes().forEach((node) => findElements(node, selector, queriedRoot));
       }
@@ -206,9 +216,7 @@ export class Query {
 
   children(selector) {
     // Get all children of each element in the Query object
-    const allChildren = Array.from(this).flatMap((el) =>
-      Array.from(el.children)
-    );
+    const allChildren = Array.from(this).flatMap((el) => Array.from(el.children));
 
     // If a selector is provided, filter the children
     const filteredChildren = selector
@@ -220,7 +228,7 @@ export class Query {
 
   siblings(selector) {
     const siblings = Array.from(this).flatMap((el) => {
-      if(!el.parentNode) {
+      if (!el.parentNode) {
         return;
       }
       return Array.from(el.parentNode.children).filter((child) => child !== el);
@@ -231,7 +239,7 @@ export class Query {
   // returns the index of element only including siblings that match a filter
   index(siblingFilter) {
     const el = this.el();
-    if(!el?.parentNode) {
+    if (!el?.parentNode) {
       return -1;
     }
     const $siblings = this.chain(el.parentNode.children).filter(siblingFilter);
@@ -248,7 +256,7 @@ export class Query {
   }
 
   filter(filter) {
-    if(!filter) {
+    if (!filter) {
       return this;
     }
     let filteredElements = [];
@@ -259,7 +267,7 @@ export class Query {
     else {
       // If a CSS selector is provided, use it with the matches method
       filteredElements = Array.from(this).filter((el) => {
-        if(isString(filter)) {
+        if (isString(filter)) {
           return el.matches && el.matches(filter);
         }
         else if (filter instanceof Query) {
@@ -269,8 +277,7 @@ export class Query {
         else {
           let els = isArray(filter)
             ? filter
-            : [ filter]
-          ;
+            : [filter];
           return inArray(el, els);
         }
       });
@@ -283,7 +290,7 @@ export class Query {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
       }
-      else if(this.isGlobal) {
+      else if (this.isGlobal) {
         return inArray(selector, ['window', 'globalThis']);
       }
       else {
@@ -300,7 +307,7 @@ export class Query {
       if (typeof selector === 'string') {
         return !el.matches || (el.matches && !el.matches(selector));
       }
-      else if(this.isGlobal) {
+      else if (this.isGlobal) {
         return !inArray(selector, ['window', 'globalThis']);
       }
       else {
@@ -316,10 +323,10 @@ export class Query {
       if (this.options.pierceShadow) {
         return this.closestDeep(el, selector);
       }
-      else if(selector && el?.closest) {
+      else if (selector && el?.closest) {
         return el.closest(selector);
       }
-      else if(this.isGlobal) {
+      else if (this.isGlobal) {
         return inArray(selector, ['window', 'globalThis']);
       }
     }).filter(Boolean);
@@ -349,7 +356,7 @@ export class Query {
   }
 
   ready(handler) {
-    if(this.is(document) && document.readyState == 'loading') {
+    if (this.is(document) && document.readyState == 'loading') {
       this.on('ready', handler);
     }
     else {
@@ -361,7 +368,7 @@ export class Query {
   getEventAlias(eventName) {
     // support some more friendly names
     const aliases = {
-      ready: 'DOMContentLoaded'
+      ready: 'DOMContentLoaded',
     };
     return aliases[eventName] || eventName;
   }
@@ -369,8 +376,7 @@ export class Query {
   getEventArray(eventNames) {
     return eventNames.split(' ')
       .map(name => this.getEventAlias(name))
-      .filter(Boolean)
-    ;
+      .filter(Boolean);
   }
 
   on(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
@@ -447,7 +453,7 @@ export class Query {
     }
     Query.eventHandlers.push(...eventHandlers);
 
-    if(options?.returnHandler) {
+    if (options?.returnHandler) {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
     }
     return this;
@@ -472,31 +478,29 @@ export class Query {
     options = options || {};
     const abortController = new AbortController();
     options.abortController = abortController;
-    const wrappedHandler = function (...args) {
+    const wrappedHandler = function(...args) {
       abortController.abort();
       handler.apply(this, args);
     };
     return (targetSelector)
       ? this.on(eventName, targetSelector, wrappedHandler, options)
-      : this.on(eventName, wrappedHandler, options)
-    ;
+      : this.on(eventName, wrappedHandler, options);
   }
 
   off(eventNames, handler) {
     const events = this.getEventArray(eventNames);
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       if (
-        (!eventNames ||
-          inArray(eventHandler.eventName, events)
-        ) &&
-        (!handler ||
-          handler?.eventListener == eventHandler.eventListener ||
-          eventHandler.eventListener === handler ||
-          eventHandler.handler === handler)
+        (!eventNames
+          || inArray(eventHandler.eventName, events))
+        && (!handler
+          || handler?.eventListener == eventHandler.eventListener
+          || eventHandler.eventListener === handler
+          || eventHandler.handler === handler)
       ) {
         // global this uses proxy object will cause illegal invocation
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
-        if(el.removeEventListener) {
+        if (el.removeEventListener) {
           el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
         }
         return false;
@@ -512,7 +516,7 @@ export class Query {
         return;
       }
       const event = new Event(eventName, { bubbles: true, cancelable: true });
-      if(eventParams) {
+      if (eventParams) {
         Object.assign(event, eventParams);
       }
       el.dispatchEvent(event);
@@ -523,14 +527,13 @@ export class Query {
     return this.trigger('click', eventParams);
   }
 
-
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
     const eventOptions = {
       bubbles: true,
       cancelable: true,
       composed: true,
       detail: eventData,
-      ...eventSettings
+      ...eventSettings,
     };
     this.each(el => {
       const event = new CustomEvent(eventName, eventOptions);
@@ -590,9 +593,7 @@ export class Query {
           ? el.assignedNodes({ flatten: true })
           : el.childNodes;
       };
-      const values = this.map((el) =>
-        this.getTextContentRecursive(childNodes(el))
-      );
+      const values = this.map((el) => this.getTextContentRecursive(childNodes(el)));
       return values.length > 1 ? values : values[0];
     }
   }
@@ -638,9 +639,9 @@ export class Query {
       // Set the value for each element
       return this.each((el) => {
         if (
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLSelectElement ||
-          el instanceof HTMLTextAreaElement
+          el instanceof HTMLInputElement
+          || el instanceof HTMLSelectElement
+          || el instanceof HTMLTextAreaElement
         ) {
           el.value = newValue;
         }
@@ -650,9 +651,9 @@ export class Query {
       // Get the value of each element
       const values = this.map((el) => {
         if (
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLSelectElement ||
-          el instanceof HTMLTextAreaElement
+          el instanceof HTMLInputElement
+          || el instanceof HTMLSelectElement
+          || el instanceof HTMLTextAreaElement
         ) {
           return el.value;
         }
@@ -667,13 +668,13 @@ export class Query {
   }
 
   focus() {
-    if(this.length) {
+    if (this.length) {
       this[0].focus();
     }
     return this;
   }
   blur() {
-    if(this.length) {
+    if (this.length) {
       this[0].blur();
     }
     return this;
@@ -733,9 +734,7 @@ export class Query {
       this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = this.map((el) =>
-        el.getAttribute(attribute)
-      );
+      const attributes = this.map((el) => el.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
     return;
@@ -779,7 +778,7 @@ export class Query {
     }
     else {
       // Get the property value from elements
-      if(this.length == 0) {
+      if (this.length == 0) {
         return undefined;
       }
       else if (this.length === 1) {
@@ -869,7 +868,7 @@ export class Query {
         target.insertAdjacentElement(position, el);
       }
       else {
-        switch(position) {
+        switch (position) {
           case 'beforebegin':
             target.parentNode?.insertBefore(el, target);
             break;
@@ -929,8 +928,7 @@ export class Query {
           display: 'block',
           transform: 'translate(-9999px, -9999px)',
           zIndex: '-1',
-        })
-      ;
+        });
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -948,8 +946,7 @@ export class Query {
           display: 'block',
           transform: 'translate(-9999px, -9999px)',
           zIndex: '-1',
-        })
-      ;
+        });
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
@@ -964,23 +961,22 @@ export class Query {
   offsetParent({ calculate = true } = {}) {
     return Array.from(this)
       .map((el) => {
-        if(!calculate) {
+        if (!calculate) {
           return el.offsetParent;
         }
         let $el, isPositioned, isTransformed, isBody;
         let parentNode = el?.parentNode;
-        while(parentNode && !isPositioned && !isTransformed && !isBody) {
+        while (parentNode && !isPositioned && !isTransformed && !isBody) {
           parentNode = parentNode?.parentNode;
-          if(parentNode) {
+          if (parentNode) {
             $el = $(parentNode);
-            isPositioned = ($el.computedStyle('position') !== 'static');
-            isTransformed = ($el.computedStyle('transform') !== 'none');
+            isPositioned = $el.computedStyle('position') !== 'static';
+            isTransformed = $el.computedStyle('transform') !== 'none';
             isBody = $el.is('body');
           }
         }
         return parentNode;
-      })
-    ;
+      });
   }
 
   // alias

@@ -10,13 +10,7 @@ import { buttons } from './buttons.js';
   portions of a component into separate files
   for "enterprisification"
 */
-import {
-  createComponent,
-  onCreated,
-  onDestroyed,
-  onThemeChanged,
-  onAttributeChanged
-} from './lifecycle.js';
+import { createComponent, onAttributeChanged, onCreated, onDestroyed, onThemeChanged } from './lifecycle.js';
 
 import { defaultSettings } from './config.js';
 

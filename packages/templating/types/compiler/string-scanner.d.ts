@@ -91,7 +91,7 @@ export class StringScanner {
    *  Context includes `insideTag`, `attribute`, `booleanAttribute` to aid parsing
    *  @returns Object with context or InsideTag
    */
-  getContext(): { insideTag: boolean; attribute?: string; booleanAttribute?: boolean };
+  getContext(): { insideTag: boolean; attribute?: string; booleanAttribute?: boolean; };
 
   /**
    * Throws an error indicating a parsing issue at the current position.

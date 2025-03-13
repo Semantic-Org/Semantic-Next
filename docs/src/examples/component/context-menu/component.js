@@ -19,33 +19,33 @@ const defaultState = {
 const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
   initialize() {
   },
-  
+
   showMenu(event) {
     // Position menu at cursor
     const x = event.clientX;
     const y = event.clientY;
-    
+
     state.position.set({ x, y });
     state.visible.set(true);
     state.activeIndex.set(-1);
-    
+
     // Prevent default context menu
     event.preventDefault();
-    
+
     // Adjust position if menu would go off-screen
     requestAnimationFrame(() => self.adjustMenuPosition());
     dispatchEvent('show');
   },
-  
+
   hideMenu() {
-    if (!state.visible.get()) return;
+    if (!state.visible.get()) { return; }
     state.visible.set(false);
     dispatchEvent('hide');
   },
-  
+
   adjustMenuPosition() {
     const menu = $('.menu').el();
-    if (!menu) return;
+    if (!menu) { return; }
 
     const position = state.position.peek();
     const rect = menu.getBoundingClientRect();
@@ -69,32 +69,32 @@ const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
       state.position.set({ x, y });
     }
   },
-  
+
   selectItem(item, index) {
     // Execute item action if available
     if (isFunction(item.action)) {
       item.action();
     }
-    
+
     // Dispatch event with item data
     dispatchEvent('select', { item, index });
-    
+
     // Hide menu
     self.hideMenu();
   },
-  
+
   navigateNext() {
     const items = settings.items;
     const newIndex = (state.activeIndex.get() + 1) % settings.items.length;
     state.activeIndex.set(newIndex);
   },
-  
+
   navigatePrevious() {
     const items = settings.items;
     const newIndex = (state.activeIndex.get() - 1 + items.length) % items.length;
     state.activeIndex.set(newIndex);
   },
-  
+
   selectCurrent() {
     const items = settings.items;
     const index = state.activeIndex.get();
@@ -105,14 +105,14 @@ const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
 
   getMenuStates() {
     return {
-      visible: state.visible.get()
+      visible: state.visible.get(),
     };
   },
-  
+
   getMenuStyle() {
     const position = state.position.get();
     const visible = state.visible.get();
-    
+
     return `
       left: ${position.x}px;
       top: ${position.y}px;
@@ -122,25 +122,25 @@ const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
 
   getItemStates(index) {
     return {
-      active: self.isItemActive(index)
-    }
+      active: self.isItemActive(index),
+    };
   },
-  
+
   isItemActive(index) {
     return state.activeIndex.get() === index;
   },
-  
+
   isDivider(item) {
     return item.divider === true;
   },
-  
+
   hasIcon(item) {
     return item.icon && item.icon.length > 0;
   },
-  
+
   hasShortcut(item) {
     return item.shortcut && item.shortcut.length > 0;
-  }
+  },
 });
 
 const keys = {
@@ -171,12 +171,11 @@ const keys = {
     }
     self.selectCurrent();
     return true;
-  }
+  },
 };
 
 const events = {
-
-  'deep contextmenu .trigger'({self, event}) {
+  'deep contextmenu .trigger'({ self, event }) {
     self.showMenu(event);
     event.preventDefault();
     event.stopPropagation();
@@ -187,7 +186,7 @@ const events = {
   },
 
   'global show context-menu'({ self, el, target }) {
-    if(el == target) {
+    if (el == target) {
       return;
     }
     self.hideMenu();
@@ -196,25 +195,25 @@ const events = {
   'global click body'({ self }) {
     self.hideMenu();
   },
-  
+
   'mousedown .item'({ event }) {
     event.stopPropagation();
   },
-  
+
   'click .item'({ self, settings, event, data }) {
     const index = parseInt(data.index, 10);
     const item = settings.items[index];
-    
+
     self.selectItem(item, index);
     event.stopPropagation();
   },
-  
+
   'mouseenter .item'({ state, data }) {
     if (data.divider === 'true') {
       return;
     }
     state.activeIndex.set(parseInt(data.index, 10));
-  }
+  },
 };
 
 defineComponent({
@@ -225,5 +224,5 @@ defineComponent({
   defaultState,
   events,
   createComponent,
-  keys
+  keys,
 });

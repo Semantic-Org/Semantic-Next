@@ -1,4 +1,3 @@
-
 /*-------------------
         Cloning
 --------------------*/
@@ -8,9 +7,9 @@
 */
 // adapted from nanoclone <https://github.com/Kelin2025/nanoclone>
 export const clone = (src, seen = new Map()) => {
-  if (!src || typeof src !== 'object') return src;
+  if (!src || typeof src !== 'object') { return src; }
 
-  if (seen.has(src)) return seen.get(src);
+  if (seen.has(src)) { return seen.get(src); }
 
   let copy;
   if (src.nodeType && 'cloneNode' in src) {
@@ -31,25 +30,25 @@ export const clone = (src, seen = new Map()) => {
     // Array
     copy = new Array(src.length);
     seen.set(src, copy);
-    for (let i = 0; i < src.length; i++) copy[i] = clone(src[i], seen);
+    for (let i = 0; i < src.length; i++) { copy[i] = clone(src[i], seen); }
   }
   else if (src instanceof Map) {
     // Map
     copy = new Map();
     seen.set(src, copy);
-    for (const [k, v] of src.entries()) copy.set(k, clone(v, seen));
+    for (const [k, v] of src.entries()) { copy.set(k, clone(v, seen)); }
   }
   else if (src instanceof Set) {
     // Set
     copy = new Set();
     seen.set(src, copy);
-    for (const v of src) copy.add(clone(v, seen));
+    for (const v of src) { copy.add(clone(v, seen)); }
   }
   else if (src instanceof Object) {
     // Object
     copy = {};
     seen.set(src, copy);
-    for (const [k, v] of Object.entries(src)) copy[k] = clone(v, seen);
+    for (const [k, v] of Object.entries(src)) { copy[k] = clone(v, seen); }
   }
 
   return copy;

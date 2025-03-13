@@ -15,12 +15,11 @@ export const escapeHTML = (string) => {
     '<': '&lt',
     '>': '&gt',
     '"': '&quot',
-    "\'": '&#39'
+    "'": '&#39',
   };
   const htmlRegExp = /[&<>"']/g;
   const hasHTML = RegExp(htmlRegExp.source);
   return (string && hasHTML.test(string))
     ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
-    : string
-  ;
+    : string;
 };

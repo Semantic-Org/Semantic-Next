@@ -16,7 +16,6 @@ const defaultState = {
 };
 
 const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, $ }) => ({
-
   initialize() {
     self.calculateResults();
     self.calculateKeybindings();
@@ -31,7 +30,7 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
     reaction(() => {
       const selectedIndex = state.selectedIndex.get();
       unbindKey('enter');
-      if(selectedIndex > -1) {
+      if (selectedIndex > -1) {
         bindKey('enter', () => self.selectResult());
       }
     });
@@ -49,7 +48,7 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
       let results = settings.options;
 
       // if search term filter results
-      if(searchTerm) {
+      if (searchTerm) {
         const matchResult = (result) => result.toLowerCase().includes(searchTerm.toLowerCase());
         results = results.filter(matchResult);
       }
@@ -62,16 +61,16 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
   },
 
   selectPrevious() {
-    if(state.selectedIndex.get() == -1) {
+    if (state.selectedIndex.get() == -1) {
       state.selectedIndex.set(state.results.get().length - 1);
     }
-    else if(state.selectedIndex.get() > 0) {
+    else if (state.selectedIndex.get() > 0) {
       state.selectedIndex.decrement();
     }
   },
 
   selectNext() {
-    if(state.selectedIndex.get() < state.results.get().length - 1) {
+    if (state.selectedIndex.get() < state.results.get().length - 1) {
       state.selectedIndex.increment();
     }
   },
@@ -79,7 +78,7 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
   selectResult(selectedIndex = state.selectedIndex.get()) {
     const results = state.results.get();
     const selectedResult = results[selectedIndex];
-    if(selectedResult) {
+    if (selectedResult) {
       state.selectedResult.set(selectedResult);
       self.clearSearch();
     }
@@ -90,7 +89,6 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
     state.searchTerm.set('');
     state.selectedIndex.set(-1);
   },
-
 });
 
 /*
@@ -110,7 +108,7 @@ const keys = {
   },
   'esc'({ self }) {
     self.clearSearch();
-  }
+  },
 };
 
 const events = {
@@ -119,7 +117,7 @@ const events = {
   },
   'click .result'({ self, data }) {
     self.selectResult(data.index);
-  }
+  },
 };
 
 defineComponent({
@@ -130,5 +128,5 @@ defineComponent({
   events,
   createComponent,
   defaultSettings,
-  defaultState
+  defaultState,
 });

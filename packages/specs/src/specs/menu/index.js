@@ -1,6 +1,6 @@
 import { SpecReader } from '../../spec-reader.js';
-import MenuSpec from './menu.json';
 import MenuItemSpec from './menu-item.json';
+import MenuSpec from './menu.json';
 
 const reader = new SpecReader();
 
@@ -9,9 +9,4 @@ const MenuItemComponentSpec = reader.getWebComponentSpec(MenuItemSpec);
 
 export default MenuSpec;
 
-export {
-  MenuSpec,
-  MenuComponentSpec,
-  MenuItemSpec,
-  MenuItemComponentSpec,
-};
+export { MenuComponentSpec, MenuItemComponentSpec, MenuItemSpec, MenuSpec };

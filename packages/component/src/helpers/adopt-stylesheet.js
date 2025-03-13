@@ -1,19 +1,19 @@
+import { hashCode, isServer } from '@semantic-ui/utils';
 import { scopeStyles } from './scope-styles.js';
-import { isServer, hashCode } from '@semantic-ui/utils';
 
 export const adoptStylesheet = (css, adoptedElement, { scopeSelector } = {}) => {
-  if(isServer) {
+  if (isServer) {
     return;
   }
-  if(!adoptedElement) {
+  if (!adoptedElement) {
     adoptedElement = document;
   }
 
   const hash = hashCode(css);
-  if(!adoptedElement.cssHashes) {
+  if (!adoptedElement.cssHashes) {
     adoptedElement.cssHashes = [];
   }
-  if(adoptedElement.cssHashes.includes(hash)) {
+  if (adoptedElement.cssHashes.includes(hash)) {
     // already added
     return;
   }
@@ -24,7 +24,7 @@ export const adoptStylesheet = (css, adoptedElement, { scopeSelector } = {}) => 
 
   // allow selectors to be scoped if passed in
   // i.e .foo => .scope .foo
-  if(scopeSelector) {
+  if (scopeSelector) {
     css = scopeStyles(css, scopeSelector);
   }
   stylesheet.id = hash;

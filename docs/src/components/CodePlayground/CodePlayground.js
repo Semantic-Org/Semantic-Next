@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
-import { firstMatch, isFunction, get, each, moveToFront, inArray, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
 
-import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
+import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 import '@semantic-ui/core/src/components/button';
@@ -10,8 +10,8 @@ import '@semantic-ui/core/src/components/button';
 import '../Panels/Panels.js';
 import '../Panels/Panel.js';
 
-import template from './CodePlayground.html?raw';
 import css from './CodePlayground.css?raw';
+import template from './CodePlayground.html?raw';
 
 import { addSearch } from './lib/codemirror-search.js';
 import { addSimpleMode } from './lib/codemirror-simple.js';
@@ -22,7 +22,6 @@ import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
 
 const defaultSettings = {
-
   // an object containing the files for the project
   files: {},
 
@@ -109,7 +108,6 @@ const defaultSettings = {
     'page.css': 'page.css',
     'page.js': 'page.js',
     'page.ts': 'page.js',
-
   },
 
   // which panel should code appear in 0 is left and 1 is right
@@ -145,7 +143,7 @@ const defaultSettings = {
   additionalPageFiles: [],
 
   // default left right panel width
-  panelGroupWidth: [50, 50]
+  panelGroupWidth: [50, 50],
 };
 
 const defaultState = {
@@ -167,8 +165,7 @@ const defaultState = {
   layout: 'tabs',
 };
 
-const createComponent = ({afterFlush, self, isServer, reaction, state, data, settings, $, $$}) => ({
-
+const createComponent = ({ afterFlush, self, isServer, reaction, state, data, settings, $, $$ }) => ({
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
@@ -178,19 +175,19 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     // select first file for left tabs
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
-      filter: 'main'
+      filter: 'main',
     });
     state.activeFile.set(initialFile);
 
     // select first file for right tabs
     const initialPageFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
-      filter: 'page'
+      filter: 'page',
     });
     state.activePageFile.set(initialPageFile);
 
     // only allow layout swap on pages that panels would work
-    if(settings.allowLayoutSwap) {
+    if (settings.allowLayoutSwap) {
       settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
     }
 
@@ -200,7 +197,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   addPanelSettings() {
     $('ui-panel').settings({
-      getNaturalSize: self.getNaturalPanelSize
+      getNaturalSize: self.getNaturalPanelSize,
     });
   },
 
@@ -211,11 +208,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   calculateLayout() {
     let layout = settings.useTabs
       ? 'tabs'
-      : 'panels'
-    ;
+      : 'panels';
     // force tabs for small screens or inline examples
     const displayMode = state.displayMode.get();
-    if(inArray(displayMode, ['tablet', 'mobile']) || settings.inline) {
+    if (inArray(displayMode, ['tablet', 'mobile']) || settings.inline) {
       layout = 'tabs';
     }
     self.setLayout(layout);
@@ -235,13 +231,13 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     };
     const mobileView = state.mobileView.get();
     const displayMode = state.displayMode.get();
-    if(displayMode == 'mobile') {
+    if (displayMode == 'mobile') {
       classMap[`mobile-${mobileView}`] = true;
     }
     return classMap;
   },
   getStyle() {
-    if(settings.maxHeight > 0) {
+    if (settings.maxHeight > 0) {
       return `height: ${settings.maxHeight}px;`;
     }
   },
@@ -252,13 +248,13 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   canShowPageFiles() {
     let pageFiles = self.getFileArray({ filter: 'page' });
-    if(pageFiles.length == 0) {
+    if (pageFiles.length == 0) {
       return false;
     }
-    if(pageFiles.every(file => file.generated)) {
+    if (pageFiles.every(file => file.generated)) {
       return false;
     }
-    if(self.shouldCombineMenus()) {
+    if (self.shouldCombineMenus()) {
       return false;
     }
     return true;
@@ -266,7 +262,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   getNaturalPanelSize(panel, { direction, minimized }) {
     const extraSpacing = 2; // rounding
-    if(direction == 'horizontal') {
+    if (direction == 'horizontal') {
       const scrollbarWidth = $$(panel).find('.CodeMirror-vscrollbar').width() ? 17 : 0;
       const minWidths = [200];
       $$(panel).find('.CodeMirror-sizer').each(sizer => {
@@ -280,7 +276,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     else {
       const labelHeight = $$(panel).find('.label').first().height() || 0;
       const menuHeight = $$(panel).find('.menu').first().height() || 0;
-      if(minimized) {
+      if (minimized) {
         return labelHeight;
       }
       else {
@@ -296,7 +292,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   },
   getPanelSize(file) {
     let size = get(settings.panelSizes, file.filename);
-    if(size == 'natural' && !file.content) {
+    if (size == 'natural' && !file.content) {
       size = 'grow';
     }
     return size;
@@ -304,10 +300,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   getTabPanelsClass() {
     const classes = {
       inline: settings.inline,
-      tabs: state.layout.get() == 'tabs'
+      tabs: state.layout.get() == 'tabs',
     };
     // defer to preference unless its tablet
-    if(state.displayMode.value == 'tablet') {
+    if (state.displayMode.value == 'tablet') {
       classes.vertical = true;
     }
     else {
@@ -316,10 +312,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     return classes;
   },
   getTabDirection() {
-    if(state.displayMode.value == 'tablet') {
+    if (state.displayMode.value == 'tablet') {
       return 'vertical';
     }
-    if(settings.inline) {
+    if (settings.inline) {
       return settings.inlineDirection;
     }
     return 'horizontal';
@@ -327,19 +323,19 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   shouldCombineMenus() {
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
-  getFileArray({filter} = {}) {
+  getFileArray({ filter } = {}) {
     let files = [];
     const isPageFile = (filename) => {
       return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));
     };
     each(settings.files, (file, filename) => {
       const fileData = self.getFile(file, filename);
-      if(!self.shouldCombineMenus()) {
+      if (!self.shouldCombineMenus()) {
         // only have left/right menus when its horizontally stacked
-        if(filter == 'main' && isPageFile(fileData?.filename)) {
+        if (filter == 'main' && isPageFile(fileData?.filename)) {
           return;
         }
-        if(filter == 'page' && !isPageFile(fileData?.filename)) {
+        if (filter == 'page' && !isPageFile(fileData?.filename)) {
           return;
         }
       }
@@ -355,7 +351,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
       scriptType: self.getScriptType(file.contentType),
       panelIndex: self.getPanelIndex(filename),
       sortIndex: self.getSort(filename),
-      label: self.getFileLabel(filename)
+      label: self.getFileLabel(filename),
     };
   },
   getPanelIndex(filename) {
@@ -372,28 +368,27 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     return settings.panelGroupWidth[index];
   },
   canShowMenu() {
-    if(settings.inline && self.getFileMenuItems().length <= 1) {
+    if (settings.inline && self.getFileMenuItems().length <= 1) {
       return false;
     }
     return true;
   },
   getFileMenuItems({ filter } = {}) {
-    let menu = self.getFileArray({filter}).map(file => {
-      if(!settings.includeGeneratedInline && file?.generated) {
+    let menu = self.getFileArray({ filter }).map(file => {
+      if (!settings.includeGeneratedInline && file?.generated) {
         return;
       }
       const label = (settings.hideTypescriptExtensions)
         ? file.filename.replace('ts', 'js')
-        : file.filename
-      ;
+        : file.filename;
       return {
         label: label,
         value: file.filename,
       };
-    }).filter(({value} = {}) => {
+    }).filter(({ value } = {}) => {
       return Boolean(value);
     });
-    if(settings.selectedFile) {
+    if (settings.selectedFile) {
       menu = moveToFront(menu, file => file.value == settings.selectedFile);
     }
     return menu;
@@ -401,13 +396,12 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   getFirstFile({ selectedFile = '', filter } = {}) {
     const files = self.getFileArray({ filter });
     const matchingFile = firstMatch(files, file => (file.filename == selectedFile));
-    if(matchingFile) {
+    if (matchingFile) {
       return matchingFile?.filename;
     }
     return firstMatch(files, file => !file.hidden)?.filename;
   },
   getFirstPageFile() {
-
   },
   getSaveID(group, index) {
     return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
@@ -416,10 +410,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     let panels = [[], []];
     let files = self.getFileArray().filter(file => !file.hidden);
     each(files, file => {
-      if(file.panelIndex >= 0) {
+      if (file.panelIndex >= 0) {
         panels[file.panelIndex].push({
           type: 'file',
-          ...file
+          ...file,
         });
       }
     });
@@ -433,7 +427,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   reloadPreview() {
     const iframe = $$('playground-preview').find('iframe').get(0);
-    if(iframe) {
+    if (iframe) {
       iframe.contentWindow.location.reload();
     }
   },
@@ -441,8 +435,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   toggleTabs() {
     const newLayout = (state.layout.get() == 'tabs')
       ? 'panels'
-      : 'tabs'
-    ;
+      : 'tabs';
     state.layout.set(newLayout);
     afterFlush(() => {
       self.addPanelSettings();
@@ -454,15 +447,15 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
 
   selectFile(number) {
     const menu = $('ui-menu.component').component();
-    if(menu) {
+    if (menu) {
       menu.selectIndex(number - 1);
     }
   },
   selectFilename(filename) {
-    if(state.layout.get() == 'tabs') {
+    if (state.layout.get() == 'tabs') {
       const menu = self.getFileMenuItems();
       each(menu, (item, index) => {
-        if(item.value == filename) {
+        if (item.value == filename) {
           self.selectFile(index + 1);
           return false;
         }
@@ -478,10 +471,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   setDisplayMode() {
     const width = $('window').width();
     let displayMode = 'computer';
-    if(width < 1200) {
+    if (width < 1200) {
       displayMode = 'tablet';
     }
-    if(width < 768) {
+    if (width < 768) {
       displayMode = 'mobile';
     }
     state.displayMode.set(displayMode);
@@ -491,8 +484,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     const doCallback = (callback) => {
       return isFunction(window.requestIdleCallback)
         ? requestIdleCallback(callback)
-        : setTimeout(callback, 1)
-      ;
+        : setTimeout(callback, 1);
     };
     doCallback(() => {
       state.resizing.set(false);
@@ -501,7 +493,7 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
   },
 
   setNaturalHeight() {
-    if(isServer) {
+    if (isServer) {
       return;
     }
     const codeHeight = $$('.CodeMirror-sizer').first().height();
@@ -511,11 +503,10 @@ const createComponent = ({afterFlush, self, isServer, reaction, state, data, set
     panelHeight = Math.min(panelHeight, 600);
     panelHeight = Math.max(panelHeight, 30);
     $('ui-panels').first().css('height', `${panelHeight}px`);
-  }
-
+  },
 });
 
-const onCreated = ({self, attachEvent}) => {
+const onCreated = ({ self, attachEvent }) => {
   self.setDisplayMode();
 };
 
@@ -528,48 +519,48 @@ const onRendered = ({ isClient, self, state, $, settings }) => {
   self.addPanelSettings();
   self.setupComponents();
 
-  if(settings.inline && settings.maxHeight == 'natural') {
+  if (settings.inline && settings.maxHeight == 'natural') {
     self.setNaturalHeight();
   }
 };
 
-const onThemeChanged = ({self}) => {
+const onThemeChanged = ({ self }) => {
   self.reloadPreview();
 };
 
 const keys = {
   // select file with keyboard
-  'ctrl + 1': ({self}) => self.selectFile(1),
-  'ctrl + 2': ({self}) => self.selectFile(2),
-  'ctrl + 3': ({self}) => self.selectFile(3),
-  'ctrl + 4': ({self}) => self.selectFile(4),
-  'ctrl + 5': ({self}) => self.selectFile(5),
-  'ctrl + 6': ({self}) => self.selectFile(6),
-  'ctrl + 7': ({self}) => self.selectFile(7),
-  'ctrl + 8': ({self}) => self.selectFile(8),
-  'ctrl + 9': ({self}) => self.selectFile(9),
+  'ctrl + 1': ({ self }) => self.selectFile(1),
+  'ctrl + 2': ({ self }) => self.selectFile(2),
+  'ctrl + 3': ({ self }) => self.selectFile(3),
+  'ctrl + 4': ({ self }) => self.selectFile(4),
+  'ctrl + 5': ({ self }) => self.selectFile(5),
+  'ctrl + 6': ({ self }) => self.selectFile(6),
+  'ctrl + 7': ({ self }) => self.selectFile(7),
+  'ctrl + 8': ({ self }) => self.selectFile(8),
+  'ctrl + 9': ({ self }) => self.selectFile(9),
 };
 
 const events = {
-  'global resize window'({self, state}) {
+  'global resize window'({ self, state }) {
     requestAnimationFrame(self.setDisplayMode);
   },
-  'change ui-menu.component.files'({state, data}) {
+  'change ui-menu.component.files'({ state, data }) {
     state.activeFile.set(data.value);
   },
-  'change ui-menu.page.files'({state, data}) {
+  'change ui-menu.page.files'({ state, data }) {
     state.activePageFile.set(data.value);
   },
-  'change ui-menu.mobile'({self, data}) {
+  'change ui-menu.mobile'({ self, data }) {
     self.setMobileView(data.value);
   },
-  'click ui-button.tabs'({self}) {
+  'click ui-button.tabs'({ self }) {
     self.toggleTabs();
   },
-  'resizeStart ui-panel'({state}) {
+  'resizeStart ui-panel'({ state }) {
     state.resizing.set(true);
   },
-  'resizeEnd ui-panel'({state}) {
+  'resizeEnd ui-panel'({ state }) {
     state.resizing.set(false);
   },
 };
@@ -591,7 +582,7 @@ const CodePlayground = defineComponent({
     CodePlaygroundPanel,
     CodePlaygroundPreview,
     CodePlaygroundFile,
-  }
+  },
 });
 
 export default CodePlayground;

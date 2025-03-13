@@ -1,9 +1,9 @@
+import { Template, TemplateCompiler } from '@semantic-ui/templating';
+import { camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
-import { each, noop, isServer, isClient, camelToKebab, kebabToCamel } from '@semantic-ui/utils';
-import { TemplateCompiler, Template } from '@semantic-ui/templating';
 
-import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
+import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { WebComponentBase } from './web-component.js';
 
 export const defineComponent = ({
@@ -38,10 +38,8 @@ export const defineComponent = ({
   plural = false,
   singularTag,
 } = {}) => {
-
-
   // AST shared across instances
-  if(!ast) {
+  if (!ast) {
     const compiler = new TemplateCompiler(template);
     ast = compiler.compile();
   }
@@ -55,7 +53,7 @@ export const defineComponent = ({
 
   // allow component to assign page css associated with the component
   // this will only be added once when the component is defined
-  if(pageCSS) {
+  if (pageCSS) {
     adoptStylesheet(pageCSS);
   }
 
@@ -88,7 +86,6 @@ export const defineComponent = ({
       doesnt change based off component configuration
     */
     webComponent = class UIWebComponent extends WebComponentBase {
-
       static get styles() {
         return unsafeCSS(css);
       }
@@ -107,8 +104,8 @@ export const defineComponent = ({
         super();
         this.css = css;
         this.componentSpec = componentSpec;
-        this.settings = this.createSettingsProxy({componentSpec, properties: webComponent.properties});
-        this.setDefaultSettings({defaultSettings, componentSpec});
+        this.settings = this.createSettingsProxy({ componentSpec, properties: webComponent.properties });
+        this.setDefaultSettings({ defaultSettings, componentSpec });
       }
 
       // callback when added to dom
@@ -123,7 +120,7 @@ export const defineComponent = ({
           let newValue = this[property];
           // this is necessary to handle how lit handles boolean attributes
           // otherwise you get <ui-button primary="true">
-          if(!propSettings.alias && attribute && newValue === true) {
+          if (!propSettings.alias && attribute && newValue === true) {
             this.setAttribute(attribute, '');
           }
           adjustPropertyFromAttribute({
@@ -131,24 +128,24 @@ export const defineComponent = ({
             attribute,
             properties: webComponent.properties,
             attributeValue: newValue,
-            componentSpec
+            componentSpec,
           });
         });
       }
 
       willUpdate() {
-        if(isServer) {
+        if (isServer) {
           // property change callbacks wont call on SSR
           // we need this to get proper settings for server render
           this.triggerAttributeChange();
         }
-        if(!this.template) {
+        if (!this.template) {
           this.template = litTemplate.clone({
             data: this.getData(),
             element: this,
             renderRoot: this.renderRoot,
           });
-          if(!this.template.initialized) {
+          if (!this.template.initialized) {
             this.template.initialize();
           }
           // make this easier to access in dom
@@ -169,7 +166,7 @@ export const defineComponent = ({
       // callback if removed from dom
       disconnectedCallback() {
         super.disconnectedCallback();
-        if(this.template) {
+        if (this.template) {
           this.template.onDestroyed(); // destroy instance
         }
         litTemplate.onDestroyed(); // destroy prototype
@@ -189,18 +186,17 @@ export const defineComponent = ({
           attributeValue: newValue,
           properties: webComponent.properties,
           oldValue,
-          componentSpec
+          componentSpec,
         });
-        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue], });
+        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
       }
 
       /*******************************
                   Settings
       *******************************/
 
-
       getSettings() {
-        return this.getSettingsFromConfig({componentSpec, properties: webComponent.properties });
+        return this.getSettingsFromConfig({ componentSpec, properties: webComponent.properties });
       }
       setSetting(name, value) {
         this[name] = value;
@@ -215,9 +211,9 @@ export const defineComponent = ({
           data.darkMode = this.isDarkMode();
         }
         if (componentSpec) {
-          data.ui = this.getUIClasses({componentSpec, properties: webComponent.properties });
+          data.ui = this.getUIClasses({ componentSpec, properties: webComponent.properties });
         }
-        if(plural === true) {
+        if (plural === true) {
           data.plural = true;
         }
         return data;
@@ -232,7 +228,7 @@ export const defineComponent = ({
         return html;
       }
     };
-    if(isClient && customElements.get(tagName)) {
+    if (isClient && customElements.get(tagName)) {
       return webComponent;
     }
     customElements.define(tagName, webComponent);
