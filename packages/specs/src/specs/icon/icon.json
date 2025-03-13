@@ -455,6 +455,12 @@
       "type": "string",
       "attribute": "href",
       "description": "Link to a page"
+    },
+    {
+      "name": "target",
+      "type": "string",
+      "attribute": "target",
+      "description": "The target for a link"
     }
   ],
   "supportsPlural": true,
