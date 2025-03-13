@@ -23,9 +23,13 @@
     "exportDeclaration.preferSingleLine": true,
     "importDeclaration.sortNamedImports": "caseInsensitive",
     "exportDeclaration.sortNamedExports": "caseInsensitive",
-    "forInStatement.spaceAfterForKeyword": false, // for(const prop of props)
-    "ifStatement.spaceAfterIfKeyword": false, // if(foo) vs if (foo)
-    "whileStatement.spaceAfterWhileKeyword": false
+
+    /* these were historically preferred but phasing out for "standard js"
+      "forInStatement.spaceAfterForKeyword": false, // for(const prop of props)
+      "ifStatement.spaceAfterIfKeyword": false, // if(foo) vs if (foo)
+      "whileStatement.spaceAfterWhileKeyword": false
+      "trailingCommas": "never", // only use trailing commas if content is multiline
+    */
   },
   "json": {},
   "markdown": {},
