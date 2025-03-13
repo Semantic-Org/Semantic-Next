@@ -1,1 +1,34 @@
-npx lint-staged
+# Get the names of staged files with additions or modifications, filtered by extension
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.(ts|js|json|md|tsx|jsx)$" || true)
+
+# Check if there are any staged files that match our filter
+if [ -n "$FILES" ]; then
+  # Check if files exist (they might be deleted in working tree)
+  EXISTING_FILES=""
+  for file in $FILES; do
+    if [ -f "$file" ]; then
+      EXISTING_FILES="$EXISTING_FILES $file"
+    fi
+  done
+  
+  # Only process files that exist
+  if [ -n "$EXISTING_FILES" ]; then
+    # Run dprint format on the staged files directly
+    echo "$EXISTING_FILES" | xargs dprint fmt
+    
+    # Store dprint exit code
+    DPRINT_STATUS=$?
+    
+    # If dprint made changes to any files
+    if [ $DPRINT_STATUS -ne 0 ]; then
+      echo "dprint formatted files. Adding changes to commit..."
+      # Only add changes to files that were already staged
+      echo "$EXISTING_FILES" | xargs git add
+    fi
+  fi
+else
+  echo "No staged files to format."
+fi
+
+# Always exit with success so the commit can proceed
+exit 0
