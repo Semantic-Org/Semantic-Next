@@ -5,8 +5,6 @@ import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
 
-import vercel from '@astrojs/vercel';
-
 // Load the custom language definition
 const sui = {
   id: 'sui',
@@ -22,8 +20,8 @@ const isProduction = process.env.VERCEL_ENV === 'production';
 const site = isProduction
   ? 'https://next.semantic-ui.com' // Your production URL
   : process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}` // Vercel preview URL
-    : 'https://dev.semantic-ui.com' // Local development URL
+  ? `https://${process.env.VERCEL_URL}` // Vercel preview URL
+  : 'https://dev.semantic-ui.com' // Local development URL
 ;
 
 export default defineConfig({
