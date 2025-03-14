@@ -115,6 +115,24 @@ const events = {
 };
 ```
 
+### Bound events
+
+You can use the `bind` keyword to attach an event directly to matching selectors instead of using an event delegation pattern.
+
+Event handling in Semantic uses event delegation, which assigns event handlers to the shadow root.
+
+This is helpful to allow the events to continue to fire even if an element is added or removed from the DOM matching a selector, but may not be ideal in all cases.
+
+> Some web components use `new CustomEvent()` which unlike most native events do not bubble by default. To attach events to these components you may need to use `bind`.
+
+```javascript
+const events = {
+  'bind customevent some-component'() => {
+    // customevent fired on some-component
+  }
+};
+```
+
 ## Event Arguments
 
 In addition to the [standard arguments](/components/lifecycle) that are passed to all component callbacks, event handlers get access to a few extra arguments.
