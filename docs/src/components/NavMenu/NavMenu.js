@@ -273,7 +273,7 @@ const events = {
   'click .nav-icon'({ event }) {
     event.preventDefault();
   },
-  'change ui-input'({ state, value }) {
+  'input ui-input'({ state, value }) {
     state.searchTerm.set(value);
   },
 };
