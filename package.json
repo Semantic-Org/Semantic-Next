@@ -28,8 +28,7 @@
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
-    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
-    "prepare": "husky"
+    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
   },
   "wireit": {
     "build": {
@@ -103,10 +102,10 @@
     "chalk": "^5.4.1",
     "dprint": "^0.49.0",
     "esbuild": "^0.25.1",
-    "husky": "^9.1.7",
     "inquirer": "^12.4.3",
     "jsdom": "^26.0.0",
     "playwright": "^1.51.0",
+    "simple-git-hooks": "^2.10.0",
     "underscore": "^1.13.7",
     "vitest": "^3.0.8",
     "wireit": "^0.14.11"
@@ -121,5 +120,8 @@
     "packages/*",
     "docs/*",
     "examples/*"
-  ]
+  ],
+  "simple-git-hooks": {
+    "pre-commit": "npx dprint fmt --staged"
+  }
 }
