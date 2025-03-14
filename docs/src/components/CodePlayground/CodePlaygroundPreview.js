@@ -21,7 +21,6 @@ const createComponent = ({ self, findParent, data, state, $, $$ }) => ({
   getMenu: () => {
     let menu = [
       { label: 'Preview', value: 'preview' },
-      // { label: 'Console', value: 'console' },
     ];
     if (self.getFile()) {
       menu.push({ label: 'AST', value: 'ast' });

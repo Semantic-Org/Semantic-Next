@@ -191,9 +191,11 @@ const createComponent = ({ afterFlush, self, isServer, reaction, state, data, se
       settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
     }
 
+
     // adjust layout when details of components change
     reaction(self.calculateLayout);
   },
+
 
   addPanelSettings() {
     $('ui-panel').settings({
@@ -563,6 +565,9 @@ const events = {
   'resizeEnd ui-panel'({ state }) {
     state.resizing.set(false);
   },
+  'compileStart playground-project'({target}) {
+    console.log(target._files);
+  }
 };
 
 const CodePlayground = defineComponent({

@@ -25,9 +25,7 @@ export const localPackages = [
   '@semantic-ui/core/packages/query',
   '@semantic-ui/core/packages/specs',
   '@semantic-ui/core/packages/utils',
-  /*
   '@semantic-ui/core/packages/reactivity',
-  */
 ];
 
 const importPackages = (isStaticBuild)
