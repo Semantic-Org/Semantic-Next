@@ -48,6 +48,6 @@
   "private": true,
   "dependencies": {
     "@semantic-ui/esbuild-resolve-bare-imports": "^1.0.0",
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.25.1"
   }
 }
