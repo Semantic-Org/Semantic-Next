@@ -1,14 +1,8 @@
-// click ellipsus to show imports /* playground-fold */
-// click ellipsus to show imports
-// click canvas to continuously launch rockets /* playground-fold */
 import { defineComponent, getText } from '@semantic-ui/component';
 import { generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
-/* playground-fold-end */
-
-/* playground-fold-end */
 
 const defaultState = {
   particles: [],
