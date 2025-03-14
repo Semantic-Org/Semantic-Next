@@ -28,6 +28,10 @@
     fill: currentColor;
     speak: none;
   }
+  .icon.activity {
+    -webkit-mask-image: var(--icon-activity-svg);
+    mask-image: var(--icon-activity-svg);
+  }
   .icon.airplay {
     -webkit-mask-image: var(--icon-airplay-svg);
     mask-image: var(--icon-airplay-svg);
@@ -72,10 +76,6 @@
     -webkit-mask-image: var(--icon-archive-svg);
     mask-image: var(--icon-archive-svg);
   }
-  .icon.arrow-down {
-    -webkit-mask-image: var(--icon-arrow-down-svg);
-    mask-image: var(--icon-arrow-down-svg);
-  }
   .icon.arrow-down-circle {
     -webkit-mask-image: var(--icon-arrow-down-circle-svg);
     mask-image: var(--icon-arrow-down-circle-svg);
@@ -88,25 +88,25 @@
     -webkit-mask-image: var(--icon-arrow-down-right-svg);
     mask-image: var(--icon-arrow-down-right-svg);
   }
-  .icon.arrow-left {
-    -webkit-mask-image: var(--icon-arrow-left-svg);
-    mask-image: var(--icon-arrow-left-svg);
+  .icon.arrow-down {
+    -webkit-mask-image: var(--icon-arrow-down-svg);
+    mask-image: var(--icon-arrow-down-svg);
   }
   .icon.arrow-left-circle {
     -webkit-mask-image: var(--icon-arrow-left-circle-svg);
     mask-image: var(--icon-arrow-left-circle-svg);
   }
-  .icon.arrow-right {
-    -webkit-mask-image: var(--icon-arrow-right-svg);
-    mask-image: var(--icon-arrow-right-svg);
+  .icon.arrow-left {
+    -webkit-mask-image: var(--icon-arrow-left-svg);
+    mask-image: var(--icon-arrow-left-svg);
   }
   .icon.arrow-right-circle {
     -webkit-mask-image: var(--icon-arrow-right-circle-svg);
     mask-image: var(--icon-arrow-right-circle-svg);
   }
-  .icon.arrow-up {
-    -webkit-mask-image: var(--icon-arrow-up-svg);
-    mask-image: var(--icon-arrow-up-svg);
+  .icon.arrow-right {
+    -webkit-mask-image: var(--icon-arrow-right-svg);
+    mask-image: var(--icon-arrow-right-svg);
   }
   .icon.arrow-up-circle {
     -webkit-mask-image: var(--icon-arrow-up-circle-svg);
@@ -120,6 +120,10 @@
     -webkit-mask-image: var(--icon-arrow-up-right-svg);
     mask-image: var(--icon-arrow-up-right-svg);
   }
+  .icon.arrow-up {
+    -webkit-mask-image: var(--icon-arrow-up-svg);
+    mask-image: var(--icon-arrow-up-svg);
+  }
   .icon.at-sign {
     -webkit-mask-image: var(--icon-at-sign-svg);
     mask-image: var(--icon-at-sign-svg);
@@ -128,29 +132,29 @@
     -webkit-mask-image: var(--icon-award-svg);
     mask-image: var(--icon-award-svg);
   }
-  .icon.bar-chart {
-    -webkit-mask-image: var(--icon-bar-chart-svg);
-    mask-image: var(--icon-bar-chart-svg);
-  }
   .icon.bar-chart-2 {
     -webkit-mask-image: var(--icon-bar-chart-2-svg);
     mask-image: var(--icon-bar-chart-2-svg);
   }
-  .icon.battery {
-    -webkit-mask-image: var(--icon-battery-svg);
-    mask-image: var(--icon-battery-svg);
+  .icon.bar-chart {
+    -webkit-mask-image: var(--icon-bar-chart-svg);
+    mask-image: var(--icon-bar-chart-svg);
   }
   .icon.battery-charging {
     -webkit-mask-image: var(--icon-battery-charging-svg);
     mask-image: var(--icon-battery-charging-svg);
   }
-  .icon.bell {
-    -webkit-mask-image: var(--icon-bell-svg);
-    mask-image: var(--icon-bell-svg);
+  .icon.battery {
+    -webkit-mask-image: var(--icon-battery-svg);
+    mask-image: var(--icon-battery-svg);
   }
   .icon.bell-off {
     -webkit-mask-image: var(--icon-bell-off-svg);
     mask-image: var(--icon-bell-off-svg);
+  }
+  .icon.bell {
+    -webkit-mask-image: var(--icon-bell-svg);
+    mask-image: var(--icon-bell-svg);
   }
   .icon.bluetooth {
     -webkit-mask-image: var(--icon-bluetooth-svg);
@@ -160,17 +164,17 @@
     -webkit-mask-image: var(--icon-bold-svg);
     mask-image: var(--icon-bold-svg);
   }
-  .icon.book {
-    -webkit-mask-image: var(--icon-book-svg);
-    mask-image: var(--icon-book-svg);
+  .icon.bookmark {
+    -webkit-mask-image: var(--icon-bookmark-svg);
+    mask-image: var(--icon-bookmark-svg);
   }
   .icon.book-open {
     -webkit-mask-image: var(--icon-book-open-svg);
     mask-image: var(--icon-book-open-svg);
   }
-  .icon.bookmark {
-    -webkit-mask-image: var(--icon-bookmark-svg);
-    mask-image: var(--icon-bookmark-svg);
+  .icon.book {
+    -webkit-mask-image: var(--icon-book-svg);
+    mask-image: var(--icon-book-svg);
   }
   .icon.box {
     -webkit-mask-image: var(--icon-box-svg);
@@ -184,21 +188,17 @@
     -webkit-mask-image: var(--icon-calendar-svg);
     mask-image: var(--icon-calendar-svg);
   }
-  .icon.camera {
-    -webkit-mask-image: var(--icon-camera-svg);
-    mask-image: var(--icon-camera-svg);
-  }
   .icon.camera-off {
     -webkit-mask-image: var(--icon-camera-off-svg);
     mask-image: var(--icon-camera-off-svg);
   }
+  .icon.camera {
+    -webkit-mask-image: var(--icon-camera-svg);
+    mask-image: var(--icon-camera-svg);
+  }
   .icon.cast {
     -webkit-mask-image: var(--icon-cast-svg);
     mask-image: var(--icon-cast-svg);
-  }
-  .icon.check {
-    -webkit-mask-image: var(--icon-check-svg);
-    mask-image: var(--icon-check-svg);
   }
   .icon.check-circle {
     -webkit-mask-image: var(--icon-check-circle-svg);
@@ -207,6 +207,10 @@
   .icon.check-square {
     -webkit-mask-image: var(--icon-check-square-svg);
     mask-image: var(--icon-check-square-svg);
+  }
+  .icon.check {
+    -webkit-mask-image: var(--icon-check-svg);
+    mask-image: var(--icon-check-svg);
   }
   .icon.chevron-down {
     -webkit-mask-image: var(--icon-chevron-down-svg);
@@ -219,10 +223,6 @@
   .icon.chevron-right {
     -webkit-mask-image: var(--icon-chevron-right-svg);
     mask-image: var(--icon-chevron-right-svg);
-  }
-  .icon.chevron-up {
-    -webkit-mask-image: var(--icon-chevron-up-svg);
-    mask-image: var(--icon-chevron-up-svg);
   }
   .icon.chevrons-down {
     -webkit-mask-image: var(--icon-chevrons-down-svg);
@@ -240,6 +240,10 @@
     -webkit-mask-image: var(--icon-chevrons-up-svg);
     mask-image: var(--icon-chevrons-up-svg);
   }
+  .icon.chevron-up {
+    -webkit-mask-image: var(--icon-chevron-up-svg);
+    mask-image: var(--icon-chevron-up-svg);
+  }
   .icon.chrome {
     -webkit-mask-image: var(--icon-chrome-svg);
     mask-image: var(--icon-chrome-svg);
@@ -255,10 +259,6 @@
   .icon.clock {
     -webkit-mask-image: var(--icon-clock-svg);
     mask-image: var(--icon-clock-svg);
-  }
-  .icon.cloud {
-    -webkit-mask-image: var(--icon-cloud-svg);
-    mask-image: var(--icon-cloud-svg);
   }
   .icon.cloud-drizzle {
     -webkit-mask-image: var(--icon-cloud-drizzle-svg);
@@ -280,9 +280,9 @@
     -webkit-mask-image: var(--icon-cloud-snow-svg);
     mask-image: var(--icon-cloud-snow-svg);
   }
-  .icon.code {
-    -webkit-mask-image: var(--icon-code-svg);
-    mask-image: var(--icon-code-svg);
+  .icon.cloud {
+    -webkit-mask-image: var(--icon-cloud-svg);
+    mask-image: var(--icon-cloud-svg);
   }
   .icon.codepen {
     -webkit-mask-image: var(--icon-codepen-svg);
@@ -291,6 +291,10 @@
   .icon.codesandbox {
     -webkit-mask-image: var(--icon-codesandbox-svg);
     mask-image: var(--icon-codesandbox-svg);
+  }
+  .icon.code {
+    -webkit-mask-image: var(--icon-code-svg);
+    mask-image: var(--icon-code-svg);
   }
   .icon.coffee {
     -webkit-mask-image: var(--icon-coffee-svg);
@@ -372,10 +376,6 @@
     -webkit-mask-image: var(--icon-disc-svg);
     mask-image: var(--icon-disc-svg);
   }
-  .icon.divide {
-    -webkit-mask-image: var(--icon-divide-svg);
-    mask-image: var(--icon-divide-svg);
-  }
   .icon.divide-circle {
     -webkit-mask-image: var(--icon-divide-circle-svg);
     mask-image: var(--icon-divide-circle-svg);
@@ -384,17 +384,21 @@
     -webkit-mask-image: var(--icon-divide-square-svg);
     mask-image: var(--icon-divide-square-svg);
   }
+  .icon.divide {
+    -webkit-mask-image: var(--icon-divide-svg);
+    mask-image: var(--icon-divide-svg);
+  }
   .icon.dollar-sign {
     -webkit-mask-image: var(--icon-dollar-sign-svg);
     mask-image: var(--icon-dollar-sign-svg);
   }
-  .icon.download {
-    -webkit-mask-image: var(--icon-download-svg);
-    mask-image: var(--icon-download-svg);
-  }
   .icon.download-cloud {
     -webkit-mask-image: var(--icon-download-cloud-svg);
     mask-image: var(--icon-download-cloud-svg);
+  }
+  .icon.download {
+    -webkit-mask-image: var(--icon-download-svg);
+    mask-image: var(--icon-download-svg);
   }
   .icon.dribbble {
     -webkit-mask-image: var(--icon-dribbble-svg);
@@ -404,10 +408,6 @@
     -webkit-mask-image: var(--icon-droplet-svg);
     mask-image: var(--icon-droplet-svg);
   }
-  .icon.edit {
-    -webkit-mask-image: var(--icon-edit-svg);
-    mask-image: var(--icon-edit-svg);
-  }
   .icon.edit-2 {
     -webkit-mask-image: var(--icon-edit-2-svg);
     mask-image: var(--icon-edit-2-svg);
@@ -416,17 +416,21 @@
     -webkit-mask-image: var(--icon-edit-3-svg);
     mask-image: var(--icon-edit-3-svg);
   }
+  .icon.edit {
+    -webkit-mask-image: var(--icon-edit-svg);
+    mask-image: var(--icon-edit-svg);
+  }
   .icon.external-link {
     -webkit-mask-image: var(--icon-external-link-svg);
     mask-image: var(--icon-external-link-svg);
   }
-  .icon.eye {
-    -webkit-mask-image: var(--icon-eye-svg);
-    mask-image: var(--icon-eye-svg);
-  }
   .icon.eye-off {
     -webkit-mask-image: var(--icon-eye-off-svg);
     mask-image: var(--icon-eye-off-svg);
+  }
+  .icon.eye {
+    -webkit-mask-image: var(--icon-eye-svg);
+    mask-image: var(--icon-eye-svg);
   }
   .icon.facebook {
     -webkit-mask-image: var(--icon-facebook-svg);
@@ -444,10 +448,6 @@
     -webkit-mask-image: var(--icon-figma-svg);
     mask-image: var(--icon-figma-svg);
   }
-  .icon.file {
-    -webkit-mask-image: var(--icon-file-svg);
-    mask-image: var(--icon-file-svg);
-  }
   .icon.file-minus {
     -webkit-mask-image: var(--icon-file-minus-svg);
     mask-image: var(--icon-file-minus-svg);
@@ -455,6 +455,10 @@
   .icon.file-plus {
     -webkit-mask-image: var(--icon-file-plus-svg);
     mask-image: var(--icon-file-plus-svg);
+  }
+  .icon.file {
+    -webkit-mask-image: var(--icon-file-svg);
+    mask-image: var(--icon-file-svg);
   }
   .icon.file-text {
     -webkit-mask-image: var(--icon-file-text-svg);
@@ -472,10 +476,6 @@
     -webkit-mask-image: var(--icon-flag-svg);
     mask-image: var(--icon-flag-svg);
   }
-  .icon.folder {
-    -webkit-mask-image: var(--icon-folder-svg);
-    mask-image: var(--icon-folder-svg);
-  }
   .icon.folder-minus {
     -webkit-mask-image: var(--icon-folder-minus-svg);
     mask-image: var(--icon-folder-minus-svg);
@@ -483,6 +483,10 @@
   .icon.folder-plus {
     -webkit-mask-image: var(--icon-folder-plus-svg);
     mask-image: var(--icon-folder-plus-svg);
+  }
+  .icon.folder {
+    -webkit-mask-image: var(--icon-folder-svg);
+    mask-image: var(--icon-folder-svg);
   }
   .icon.framer {
     -webkit-mask-image: var(--icon-framer-svg);
@@ -492,9 +496,33 @@
     -webkit-mask-image: var(--icon-frown-svg);
     mask-image: var(--icon-frown-svg);
   }
+  .icon.gift {
+    -webkit-mask-image: var(--icon-gift-svg);
+    mask-image: var(--icon-gift-svg);
+  }
+  .icon.git-branch {
+    -webkit-mask-image: var(--icon-git-branch-svg);
+    mask-image: var(--icon-git-branch-svg);
+  }
+  .icon.git-commit {
+    -webkit-mask-image: var(--icon-git-commit-svg);
+    mask-image: var(--icon-git-commit-svg);
+  }
+  .icon.github {
+    -webkit-mask-image: var(--icon-github-svg);
+    mask-image: var(--icon-github-svg);
+  }
   .icon.gitlab {
     -webkit-mask-image: var(--icon-gitlab-svg);
     mask-image: var(--icon-gitlab-svg);
+  }
+  .icon.git-merge {
+    -webkit-mask-image: var(--icon-git-merge-svg);
+    mask-image: var(--icon-git-merge-svg);
+  }
+  .icon.git-pull-request {
+    -webkit-mask-image: var(--icon-git-pull-request-svg);
+    mask-image: var(--icon-git-pull-request-svg);
   }
   .icon.globe {
     -webkit-mask-image: var(--icon-globe-svg);
@@ -568,17 +596,17 @@
     -webkit-mask-image: var(--icon-life-buoy-svg);
     mask-image: var(--icon-life-buoy-svg);
   }
-  .icon.linkify {
-    -webkit-mask-image: var(--icon-linkify-svg);
-    mask-image: var(--icon-linkify-svg);
-  }
-  .icon.linkify-2 {
-    -webkit-mask-image: var(--icon-linkify-2-svg);
-    mask-image: var(--icon-linkify-2-svg);
+  .icon.link-2 {
+    -webkit-mask-image: var(--icon-link-2-svg);
+    mask-image: var(--icon-link-2-svg);
   }
   .icon.linkedin {
     -webkit-mask-image: var(--icon-linkedin-svg);
     mask-image: var(--icon-linkedin-svg);
+  }
+  .icon.link {
+    -webkit-mask-image: var(--icon-link-svg);
+    mask-image: var(--icon-link-svg);
   }
   .icon.list {
     -webkit-mask-image: var(--icon-list-svg);
@@ -604,21 +632,21 @@
     -webkit-mask-image: var(--icon-mail-svg);
     mask-image: var(--icon-mail-svg);
   }
-  .icon.map {
-    -webkit-mask-image: var(--icon-map-svg);
-    mask-image: var(--icon-map-svg);
-  }
   .icon.map-pin {
     -webkit-mask-image: var(--icon-map-pin-svg);
     mask-image: var(--icon-map-pin-svg);
   }
-  .icon.maximize {
-    -webkit-mask-image: var(--icon-maximize-svg);
-    mask-image: var(--icon-maximize-svg);
+  .icon.map {
+    -webkit-mask-image: var(--icon-map-svg);
+    mask-image: var(--icon-map-svg);
   }
   .icon.maximize-2 {
     -webkit-mask-image: var(--icon-maximize-2-svg);
     mask-image: var(--icon-maximize-2-svg);
+  }
+  .icon.maximize {
+    -webkit-mask-image: var(--icon-maximize-svg);
+    mask-image: var(--icon-maximize-svg);
   }
   .icon.meh {
     -webkit-mask-image: var(--icon-meh-svg);
@@ -636,25 +664,21 @@
     -webkit-mask-image: var(--icon-message-square-svg);
     mask-image: var(--icon-message-square-svg);
   }
-  .icon.mic {
-    -webkit-mask-image: var(--icon-mic-svg);
-    mask-image: var(--icon-mic-svg);
-  }
   .icon.mic-off {
     -webkit-mask-image: var(--icon-mic-off-svg);
     mask-image: var(--icon-mic-off-svg);
   }
-  .icon.minimize {
-    -webkit-mask-image: var(--icon-minimize-svg);
-    mask-image: var(--icon-minimize-svg);
+  .icon.mic {
+    -webkit-mask-image: var(--icon-mic-svg);
+    mask-image: var(--icon-mic-svg);
   }
   .icon.minimize-2 {
     -webkit-mask-image: var(--icon-minimize-2-svg);
     mask-image: var(--icon-minimize-2-svg);
   }
-  .icon.minus {
-    -webkit-mask-image: var(--icon-minus-svg);
-    mask-image: var(--icon-minus-svg);
+  .icon.minimize {
+    -webkit-mask-image: var(--icon-minimize-svg);
+    mask-image: var(--icon-minimize-svg);
   }
   .icon.minus-circle {
     -webkit-mask-image: var(--icon-minus-circle-svg);
@@ -663,6 +687,10 @@
   .icon.minus-square {
     -webkit-mask-image: var(--icon-minus-square-svg);
     mask-image: var(--icon-minus-square-svg);
+  }
+  .icon.minus {
+    -webkit-mask-image: var(--icon-minus-svg);
+    mask-image: var(--icon-minus-svg);
   }
   .icon.monitor {
     -webkit-mask-image: var(--icon-monitor-svg);
@@ -692,13 +720,13 @@
     -webkit-mask-image: var(--icon-music-svg);
     mask-image: var(--icon-music-svg);
   }
-  .icon.navigation {
-    -webkit-mask-image: var(--icon-navigation-svg);
-    mask-image: var(--icon-navigation-svg);
-  }
   .icon.navigation-2 {
     -webkit-mask-image: var(--icon-navigation-2-svg);
     mask-image: var(--icon-navigation-2-svg);
+  }
+  .icon.navigation {
+    -webkit-mask-image: var(--icon-navigation-svg);
+    mask-image: var(--icon-navigation-svg);
   }
   .icon.octagon {
     -webkit-mask-image: var(--icon-octagon-svg);
@@ -712,13 +740,13 @@
     -webkit-mask-image: var(--icon-paperclip-svg);
     mask-image: var(--icon-paperclip-svg);
   }
-  .icon.pause {
-    -webkit-mask-image: var(--icon-pause-svg);
-    mask-image: var(--icon-pause-svg);
-  }
   .icon.pause-circle {
     -webkit-mask-image: var(--icon-pause-circle-svg);
     mask-image: var(--icon-pause-circle-svg);
+  }
+  .icon.pause {
+    -webkit-mask-image: var(--icon-pause-svg);
+    mask-image: var(--icon-pause-svg);
   }
   .icon.pen-tool {
     -webkit-mask-image: var(--icon-pen-tool-svg);
@@ -727,10 +755,6 @@
   .icon.percent {
     -webkit-mask-image: var(--icon-percent-svg);
     mask-image: var(--icon-percent-svg);
-  }
-  .icon.phone {
-    -webkit-mask-image: var(--icon-phone-svg);
-    mask-image: var(--icon-phone-svg);
   }
   .icon.phone-call {
     -webkit-mask-image: var(--icon-phone-call-svg);
@@ -756,21 +780,21 @@
     -webkit-mask-image: var(--icon-phone-outgoing-svg);
     mask-image: var(--icon-phone-outgoing-svg);
   }
+  .icon.phone {
+    -webkit-mask-image: var(--icon-phone-svg);
+    mask-image: var(--icon-phone-svg);
+  }
   .icon.pie-chart {
     -webkit-mask-image: var(--icon-pie-chart-svg);
     mask-image: var(--icon-pie-chart-svg);
-  }
-  .icon.play {
-    -webkit-mask-image: var(--icon-play-svg);
-    mask-image: var(--icon-play-svg);
   }
   .icon.play-circle {
     -webkit-mask-image: var(--icon-play-circle-svg);
     mask-image: var(--icon-play-circle-svg);
   }
-  .icon.plus {
-    -webkit-mask-image: var(--icon-plus-svg);
-    mask-image: var(--icon-plus-svg);
+  .icon.play {
+    -webkit-mask-image: var(--icon-play-svg);
+    mask-image: var(--icon-play-svg);
   }
   .icon.plus-circle {
     -webkit-mask-image: var(--icon-plus-circle-svg);
@@ -779,6 +803,10 @@
   .icon.plus-square {
     -webkit-mask-image: var(--icon-plus-square-svg);
     mask-image: var(--icon-plus-square-svg);
+  }
+  .icon.plus {
+    -webkit-mask-image: var(--icon-plus-svg);
+    mask-image: var(--icon-plus-svg);
   }
   .icon.pocket {
     -webkit-mask-image: var(--icon-pocket-svg);
@@ -848,21 +876,21 @@
     -webkit-mask-image: var(--icon-settings-svg);
     mask-image: var(--icon-settings-svg);
   }
-  .icon.share {
-    -webkit-mask-image: var(--icon-share-svg);
-    mask-image: var(--icon-share-svg);
-  }
   .icon.share-2 {
     -webkit-mask-image: var(--icon-share-2-svg);
     mask-image: var(--icon-share-2-svg);
   }
-  .icon.shield {
-    -webkit-mask-image: var(--icon-shield-svg);
-    mask-image: var(--icon-shield-svg);
+  .icon.share {
+    -webkit-mask-image: var(--icon-share-svg);
+    mask-image: var(--icon-share-svg);
   }
   .icon.shield-off {
     -webkit-mask-image: var(--icon-shield-off-svg);
     mask-image: var(--icon-shield-off-svg);
+  }
+  .icon.shield {
+    -webkit-mask-image: var(--icon-shield-svg);
+    mask-image: var(--icon-shield-svg);
   }
   .icon.shopping-bag {
     -webkit-mask-image: var(--icon-shopping-bag-svg);
@@ -924,10 +952,6 @@
     -webkit-mask-image: var(--icon-stop-circle-svg);
     mask-image: var(--icon-stop-circle-svg);
   }
-  .icon.sun {
-    -webkit-mask-image: var(--icon-sun-svg);
-    mask-image: var(--icon-sun-svg);
-  }
   .icon.sunrise {
     -webkit-mask-image: var(--icon-sunrise-svg);
     mask-image: var(--icon-sunrise-svg);
@@ -935,6 +959,10 @@
   .icon.sunset {
     -webkit-mask-image: var(--icon-sunset-svg);
     mask-image: var(--icon-sunset-svg);
+  }
+  .icon.sun {
+    -webkit-mask-image: var(--icon-sun-svg);
+    mask-image: var(--icon-sun-svg);
   }
   .icon.table {
     -webkit-mask-image: var(--icon-table-svg);
@@ -980,13 +1008,13 @@
     -webkit-mask-image: var(--icon-tool-svg);
     mask-image: var(--icon-tool-svg);
   }
-  .icon.trash {
-    -webkit-mask-image: var(--icon-trash-svg);
-    mask-image: var(--icon-trash-svg);
-  }
   .icon.trash-2 {
     -webkit-mask-image: var(--icon-trash-2-svg);
     mask-image: var(--icon-trash-2-svg);
+  }
+  .icon.trash {
+    -webkit-mask-image: var(--icon-trash-svg);
+    mask-image: var(--icon-trash-svg);
   }
   .icon.trello {
     -webkit-mask-image: var(--icon-trello-svg);
@@ -1036,17 +1064,13 @@
     -webkit-mask-image: var(--icon-unlock-svg);
     mask-image: var(--icon-unlock-svg);
   }
-  .icon.upload {
-    -webkit-mask-image: var(--icon-upload-svg);
-    mask-image: var(--icon-upload-svg);
-  }
   .icon.upload-cloud {
     -webkit-mask-image: var(--icon-upload-cloud-svg);
     mask-image: var(--icon-upload-cloud-svg);
   }
-  .icon.user {
-    -webkit-mask-image: var(--icon-user-svg);
-    mask-image: var(--icon-user-svg);
+  .icon.upload {
+    -webkit-mask-image: var(--icon-upload-svg);
+    mask-image: var(--icon-upload-svg);
   }
   .icon.user-check {
     -webkit-mask-image: var(--icon-user-check-svg);
@@ -1060,29 +1084,29 @@
     -webkit-mask-image: var(--icon-user-plus-svg);
     mask-image: var(--icon-user-plus-svg);
   }
-  .icon.user-x {
-    -webkit-mask-image: var(--icon-user-x-svg);
-    mask-image: var(--icon-user-x-svg);
-  }
   .icon.users {
     -webkit-mask-image: var(--icon-users-svg);
     mask-image: var(--icon-users-svg);
   }
-  .icon.video {
-    -webkit-mask-image: var(--icon-video-svg);
-    mask-image: var(--icon-video-svg);
+  .icon.user {
+    -webkit-mask-image: var(--icon-user-svg);
+    mask-image: var(--icon-user-svg);
+  }
+  .icon.user-x {
+    -webkit-mask-image: var(--icon-user-x-svg);
+    mask-image: var(--icon-user-x-svg);
   }
   .icon.video-off {
     -webkit-mask-image: var(--icon-video-off-svg);
     mask-image: var(--icon-video-off-svg);
   }
+  .icon.video {
+    -webkit-mask-image: var(--icon-video-svg);
+    mask-image: var(--icon-video-svg);
+  }
   .icon.voicemail {
     -webkit-mask-image: var(--icon-voicemail-svg);
     mask-image: var(--icon-voicemail-svg);
-  }
-  .icon.volume {
-    -webkit-mask-image: var(--icon-volume-svg);
-    mask-image: var(--icon-volume-svg);
   }
   .icon.volume-1 {
     -webkit-mask-image: var(--icon-volume-1-svg);
@@ -1092,6 +1116,10 @@
     -webkit-mask-image: var(--icon-volume-2-svg);
     mask-image: var(--icon-volume-2-svg);
   }
+  .icon.volume {
+    -webkit-mask-image: var(--icon-volume-svg);
+    mask-image: var(--icon-volume-svg);
+  }
   .icon.volume-x {
     -webkit-mask-image: var(--icon-volume-x-svg);
     mask-image: var(--icon-volume-x-svg);
@@ -1100,21 +1128,17 @@
     -webkit-mask-image: var(--icon-watch-svg);
     mask-image: var(--icon-watch-svg);
   }
-  .icon.wifi {
-    -webkit-mask-image: var(--icon-wifi-svg);
-    mask-image: var(--icon-wifi-svg);
-  }
   .icon.wifi-off {
     -webkit-mask-image: var(--icon-wifi-off-svg);
     mask-image: var(--icon-wifi-off-svg);
   }
+  .icon.wifi {
+    -webkit-mask-image: var(--icon-wifi-svg);
+    mask-image: var(--icon-wifi-svg);
+  }
   .icon.wind {
     -webkit-mask-image: var(--icon-wind-svg);
     mask-image: var(--icon-wind-svg);
-  }
-  .icon.x {
-    -webkit-mask-image: var(--icon-x-svg);
-    mask-image: var(--icon-x-svg);
   }
   .icon.x-circle {
     -webkit-mask-image: var(--icon-x-circle-svg);
@@ -1128,17 +1152,21 @@
     -webkit-mask-image: var(--icon-x-square-svg);
     mask-image: var(--icon-x-square-svg);
   }
+  .icon.x {
+    -webkit-mask-image: var(--icon-x-svg);
+    mask-image: var(--icon-x-svg);
+  }
   .icon.youtube {
     -webkit-mask-image: var(--icon-youtube-svg);
     mask-image: var(--icon-youtube-svg);
   }
-  .icon.zap {
-    -webkit-mask-image: var(--icon-zap-svg);
-    mask-image: var(--icon-zap-svg);
-  }
   .icon.zap-off {
     -webkit-mask-image: var(--icon-zap-off-svg);
     mask-image: var(--icon-zap-off-svg);
+  }
+  .icon.zap {
+    -webkit-mask-image: var(--icon-zap-svg);
+    mask-image: var(--icon-zap-svg);
   }
   .icon.zoom-in {
     -webkit-mask-image: var(--icon-zoom-in-svg);

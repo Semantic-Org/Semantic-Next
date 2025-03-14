@@ -30,8 +30,6 @@ if [ -n "$FILES" ]; then
       echo "$EXISTING_FILES" | xargs git add
     fi
   fi
-else
-  echo "No staged files to format."
 fi
 
 # Always exit with success so the commit can proceed
