@@ -162,6 +162,12 @@ export const Template = class Template {
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
+      // allow a single hook for after render
+      // this is used for binding events that cant use event delegation
+      if(isFunction(this.onRenderOnce)) {
+        this.onRenderOnce();
+        delete this.onRenderOnce;
+      }
       this.dispatchEvent('rendered', { component: this.instance }, {}, { triggerCallback: false });
     };
     this.onUpdated = () => {
@@ -284,8 +290,8 @@ export const Template = class Template {
     // 'deep eventType selector' - attach event to an
     // 'global eventType selector' - attach event to an element on the page
     // 'eventType selector' - bind to an element inside the web component
-    let eventType = 'delegated';
-    let keywords = ['deep', 'global'];
+    let eventType = 'delegate';
+    let keywords = ['deep', 'global', 'bind'];
     each(keywords, (keyword) => {
       if (eventString.startsWith(keyword)) {
         eventString = eventString.replace(keyword, '');
@@ -433,9 +439,16 @@ export const Template = class Template {
 
         const eventSettings = { abortController: this.eventController };
 
+        // allow user to bind to global selectors if they opt in using the 'global' keyword
+        // also allow events to be directly bound when opted in
         if (eventType == 'global') {
-          // allow user to bind to global selectors if they opt in using the 'global' keyword
           $(selector).on(eventName, eventHandler, eventSettings);
+        }
+        else if (eventType == 'bind') {
+          this.onRenderOnce = () => {
+            this.$(selector).on(eventName, eventHandler, eventSettings);
+            wrapFunction(this.onRenderOnce);
+          };
         }
         else {
           // otherwise use event delegation at the components shadow root
