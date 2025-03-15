@@ -35,7 +35,7 @@
   {/if}
   {#if exists files}
     <playground-project id="source" sandbox-base-url="{sandboxURL}">
-      {#each file in getFileArray}
+      {#each file in getProjectFiles}
         <script type="{file.scriptType}" filename="{file.filename}">{#if is file.type 'text/html'}{#html escapeHTML file.content}{else}{file.content}{/if}</script>
       {/each}
     </playground-project>

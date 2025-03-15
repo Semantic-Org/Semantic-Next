@@ -159,19 +159,26 @@ const defaultState = {
   resizing: true,
 
   // current display mode
-  displayMode: 'desktop',
+  displayMode: 'computer',
 
   // whether to use panels or tabs
   layout: 'tabs',
+
+  currentFiles: [],
+
+  initialFiles: [],
 };
 
-const createComponent = ({ afterFlush, self, isServer, reaction, state, data, settings, $, $$ }) => ({
+const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, state, data, settings, $, $$ }) => ({
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
   ],
 
   initialize() {
+    state.initialFiles.set(settings.files);
+    state.currentFiles.set(settings.files);
+
     // select first file for left tabs
     const initialFile = self.getFirstFile({
       selectedFile: settings.selectedFile,
@@ -193,6 +200,7 @@ const createComponent = ({ afterFlush, self, isServer, reaction, state, data, se
 
     // adjust layout when details of components change
     reaction(self.calculateLayout);
+    reaction(self.calculateLayoutChange);
   },
 
   addPanelSettings() {
@@ -215,6 +223,29 @@ const createComponent = ({ afterFlush, self, isServer, reaction, state, data, se
       layout = 'tabs';
     }
     self.setLayout(layout);
+  },
+
+  calculateLayoutChange(reaction) {
+    // if the layout changes from tabs to panels
+    // or we change to mobile layout
+    // we will need update layout configuration
+    const displayMode = state.displayMode.get();
+    const layout = state.layout.get();
+    if(!reaction.firstRun) {
+      afterFlush(self.configureLayout);
+    }
+  },
+
+  configureLayout() {
+    // this will update <playground-project> to reference current file values
+    // this wil be read by playground-elements causing values to be reset otherwise
+    state.initialFiles.set(state.currentFiles.peek());
+
+    // we will need to rerun code editor config on each file
+    const playgroundFiles = findChildren('CodePlaygroundFile');
+    each(playgroundFiles, (component) => {
+      component.configureCodeEditors();
+    });
   },
 
   getLayout() {
@@ -323,12 +354,15 @@ const createComponent = ({ afterFlush, self, isServer, reaction, state, data, se
   shouldCombineMenus() {
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
-  getFileArray({ filter } = {}) {
-    let files = [];
+  getProjectFiles() {
+    return self.getFileArray({files: state.initialFiles.get() });
+  },
+  getFileArray({ files = settings.files, filter } = {}) {
+    let fileArray = [];
     const isPageFile = (filename) => {
       return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));
     };
-    each(settings.files, (file, filename) => {
+    each(files, (file, filename) => {
       const fileData = self.getFile(file, filename);
       if (!self.shouldCombineMenus()) {
         // only have left/right menus when its horizontally stacked
@@ -339,9 +373,9 @@ const createComponent = ({ afterFlush, self, isServer, reaction, state, data, se
           return;
         }
       }
-      files.push(fileData);
+      fileArray.push(fileData);
     });
-    return sortBy(files, 'sortIndex');
+    return sortBy(fileArray, 'sortIndex');
   },
   getFile(file, filename) {
     return {
@@ -504,6 +538,16 @@ const createComponent = ({ afterFlush, self, isServer, reaction, state, data, se
     panelHeight = Math.max(panelHeight, 30);
     $('ui-panels').first().css('height', `${panelHeight}px`);
   },
+
+  updateCurrentFiles(currentFilesArray = []) {
+    const currentFiles = state.currentFiles.peek();
+    each(currentFilesArray, (file) => {
+      if(currentFiles[file.name]) {
+        currentFiles[file.name].content = file.content;
+      }
+    });
+    state.currentFiles.set(currentFiles);
+  },
 });
 
 const onCreated = ({ self, attachEvent }) => {
@@ -563,8 +607,9 @@ const events = {
   'resizeEnd ui-panel'({ state }) {
     state.resizing.set(false);
   },
-  'compileStart playground-project'({ target }) {
-    console.log(target._files);
+  'bind compileStart playground-project'({ self, target }) {
+    const currentFilesArray = target._files;
+    self.updateCurrentFiles(currentFilesArray);
   },
 };
 
