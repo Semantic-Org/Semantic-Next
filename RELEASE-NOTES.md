@@ -6,12 +6,18 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.10.2
 
+## New
+* Added `idleCallback` to `@semantic-ui/utils` for wrapping browser's requestIdleCallback (not fully supported in Safari)
+
 ## Improvements
 * Added new keyword `bind` that will let you directly bind events without event delegation. This can be useful for attaching to events that do not bubble.
 * Templates now have a `destroyed` flag to determine if it is destroyed
 
 ## Bugs
 * Fixed bug where subtemplates did not properly remove themselves when destroyed from `findChildren`
+
+## Docs
+* AST display is now reactive on template changes. Content changes are no longer lost when you change from mobile/tablet view to computer view.
 
 # Version 0.10.1
 

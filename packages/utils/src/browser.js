@@ -1,3 +1,5 @@
+import { isClient } from './ssr.js';
+
 /*-------------------
        Browser
 --------------------*/
@@ -46,6 +48,16 @@ export const getKeyFromEvent = (event) => {
   key += specialKeys[pressedKey] || pressedKey.toLowerCase();
   return key;
 };
+
+/* Wrapper for requestIdleCallback which does not have safari support */
+export const idleCallback = (callback) => {
+  if(isClient && window.requestIdleCallback) {
+    requestIdleCallback(callback);
+  }
+  else {
+    setTimeout(callback, 1);
+  }
+}
 
 /*-------------------
          XHR
