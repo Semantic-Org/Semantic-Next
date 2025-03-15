@@ -603,6 +603,7 @@ export const Template = class Template {
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
     this.rendered = true;
+    this.destroyed = false;
     setTimeout(this.onUpdated, 0);
     return this.html;
   }
