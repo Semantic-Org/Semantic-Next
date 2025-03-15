@@ -49,6 +49,9 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
 
   getTemplate() {
     let parent = findParent('codePlayground');
+    if(!parent) {
+      return;
+    }
     let files = parent.currentFiles.get();
     if (!files) {
       return;
