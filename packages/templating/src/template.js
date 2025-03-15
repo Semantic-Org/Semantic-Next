@@ -28,6 +28,9 @@ export const Template = class Template {
 
   static isServer = isServer;
 
+  rendered = false;
+  destroyed = false;
+
   constructor({
     templateName,
     ast,
@@ -129,7 +132,16 @@ export const Template = class Template {
     parentTemplate._childTemplates.push(this);
 
     // add parent template to this element for searching with getParent
-    this._parentTemplate = parentTemplate;
+    this.parentTemplate = parentTemplate;
+  }
+
+  removeParent() {
+    if(!this.parentTemplate?._childTemplates) {
+      return;
+    }
+    this.parentTemplate._childTemplates = this.parentTemplate._childTemplates.filter(template => {
+      return template.id !== this.id;
+    });
   }
 
   setElement(element) {
@@ -179,8 +191,10 @@ export const Template = class Template {
     this.onDestroyed = () => {
       Template.removeTemplate(this);
       this.rendered = false;
+      this.destroyed = true;
       this.clearReactions();
       this.removeEvents();
+      this.removeParent();
       this.call(this.onDestroyedCallback);
       this.dispatchEvent('destroyed', { component: this.instance }, {}, { triggerCallback: false });
     };
