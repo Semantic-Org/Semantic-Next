@@ -808,7 +808,7 @@ export const Template = class Template {
     }
     // this matches on nested partials (less common)
     while (template) {
-      template = template._parentTemplate;
+      template = template.parentTemplate;
       if (isMatch(template)) {
         match = {
           ...template.instance,
