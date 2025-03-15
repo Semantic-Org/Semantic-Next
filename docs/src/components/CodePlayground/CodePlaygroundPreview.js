@@ -7,10 +7,11 @@ import './lib/pretty-json.js';
 const defaultState = {
   tab: 'preview',
   useTabs: true,
-  template: '',
+  ast: [],
 };
 
-const createComponent = ({ self, findParent, data, state, $, $$ }) => ({
+const createComponent = ({ self, afterFlush, reaction, findParent, data, state, $, $$ }) => ({
+
   showMenu() {
     if (data.showMenu == false) {
       return false;
@@ -22,31 +23,43 @@ const createComponent = ({ self, findParent, data, state, $, $$ }) => ({
     let menu = [
       { label: 'Preview', value: 'preview' },
     ];
-    if (self.getFile()) {
+    if (self.getTemplate()) {
       menu.push({ label: 'AST', value: 'ast' });
     }
     return menu;
   },
 
-  getFile() {
+  calculateAST() {
+    let template = self.getTemplate();
+    if(template !== undefined) {
+      const compiler = new TemplateCompiler(template);
+      const ast = compiler.compile();
+      state.ast.set(ast);
+      afterFlush(self.updateJSON);
+    }
+  },
+
+  // sadly the pretty-json web component will not automatically respond to slotted content
+  updateJSON() {
+    const prettyJSON = $('pretty-json').el();
+    if(prettyJSON) {
+      prettyJSON.connectedCallback();
+    }
+  },
+
+  getTemplate() {
     let parent = findParent('codePlayground');
-    if (!parent?.files) {
+    let files = parent.currentFiles.get();
+    if (!files) {
       return;
     }
-    return parent.files['component.html']?.content;
+    return files['component.html']?.content;
   },
 
-  getAST() {
-    const template = state.template.get();
-    const compiler = new TemplateCompiler(template);
-    const ast = compiler.compile();
-    return JSON.stringify(ast);
-  },
 });
 
-const onRendered = ({ self, state }) => {
-  const fileContent = self.getFile();
-  state.template.set(fileContent);
+const onRendered = ({reaction, self}) => {
+  reaction(self.calculateAST);
 };
 
 const events = {
@@ -59,9 +72,9 @@ const CodePlaygroundPreview = defineComponent({
   template,
   css,
   createComponent,
-  events,
-  defaultState,
   onRendered,
+  events,
+  defaultState
 });
 
 export default CodePlaygroundPreview;

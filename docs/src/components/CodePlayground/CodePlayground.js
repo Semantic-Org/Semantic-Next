@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, firstMatch, get, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, inArray, isFunction, idleCallback, moveToFront, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -515,12 +515,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   },
 
   setupComponents() {
-    const doCallback = (callback) => {
-      return isFunction(window.requestIdleCallback)
-        ? requestIdleCallback(callback)
-        : setTimeout(callback, 1);
-    };
-    doCallback(() => {
+    idleCallback(() => {
       state.resizing.set(false);
       self.addPanelSettings();
     });

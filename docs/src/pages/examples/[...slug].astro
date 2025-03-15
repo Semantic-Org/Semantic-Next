@@ -42,10 +42,7 @@ let files = await getExampleFiles({
   allFiles: allExampleFiles,
   basePath: '../../examples/',
   includeFolder: isFolder,
-  /*
-    to debug unpkg usage
     includeImportMap: false,
-  */
   hideBoilerplate: example.fold !== false,
   includePlaygroundInjections: true,
   includeLog: example.exampleType == 'log',
