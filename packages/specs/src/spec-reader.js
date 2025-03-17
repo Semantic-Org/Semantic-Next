@@ -308,7 +308,7 @@ export class SpecReader {
       ? this.getTagName({ plural })
       : this.getComponentName({ plural, lang });
     // use the modifier as text or component name i.e. 'primary', 'emphasis' etc
-    if (!text && !html) {
+    if (text === undefined && html === undefined) {
       const baseText = modifiers || String(componentName).replace(/^ui-/, '');
       text = String(baseText).replace(/\-/mg, ' ');
       html = toTitleCase(text);

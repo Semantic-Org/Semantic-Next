@@ -11,13 +11,6 @@
       "subcomponent": "true",
       "description": "can include a menu item",
       "usageLevel": 1
-    },
-    {
-      "name": "Menu Content",
-      "attribute": "menu",
-      "description": "can define its menu contents programatically",
-      "usageLevel": 1,
-      "exampleCode": "<ui-menu value=\"3\" items='[{\"label\":\"One\",\"value\":\"1\"},{\"label\":\"Two\",\"value\":\"2\"},{\"label\":\"Three\",\"value\":\"3\"}]'></ui-menu>"
     }
   ],
   "types": [

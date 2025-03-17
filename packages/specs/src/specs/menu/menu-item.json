@@ -16,6 +16,18 @@
       "exampleCode": "<menu-item icon=\"home\">Home</menu-item>"
     },
     {
+      "name": "label",
+      "type": "string",
+      "attribute": "label",
+      "description": "can specify a text label"
+    },
+    {
+      "name": "badge",
+      "type": "string",
+      "attribute": "badge",
+      "description": "can specify a badge to appear next to text"
+    },
+    {
       "name": "Href",
       "type": "string",
       "attribute": "href",

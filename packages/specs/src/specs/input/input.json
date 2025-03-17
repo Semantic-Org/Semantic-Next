@@ -140,8 +140,7 @@
   ],
   "examples": {
     "defaultAttributes": {
-      "icon": "check-circle",
-      "placeholder": "Enter text..."
-    }
+    },
+    "defaultContent": ""
   }
 }
