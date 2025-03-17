@@ -47,6 +47,7 @@
       "attribute": "size",
       "usageLevel": 1,
       "description": "vary in size",
+      "separateExamples": true,
       "options": [
         {
           "name": "Mini",
@@ -131,12 +132,6 @@
       "description": "can show an icon to reset the inputted value"
     },
     {
-      "name": "Placeholder",
-      "type": "string",
-      "attribute": "placeholder",
-      "description": "can specify placeholder text"
-    },
-    {
       "name": "Value",
       "type": "string",
       "attribute": "value",
@@ -145,7 +140,8 @@
   ],
   "examples": {
     "defaultAttributes": {
-      "icon": "check-circle"
+      "icon": "check-circle",
+      "placeholder": "Enter text..."
     }
   }
 }

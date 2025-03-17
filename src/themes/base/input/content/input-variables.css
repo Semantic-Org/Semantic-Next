@@ -2,7 +2,7 @@
 
   --input-background: var(--inverted-color);
 
-  --input-width: 150px;
+  --input-width: 12em;
   --input-vertical-padding: var(--relative-10px);
   --input-horizontal-padding: var(--relative-12px);
   --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);

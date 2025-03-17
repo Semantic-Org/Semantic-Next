@@ -1,3 +1,4 @@
+/* Note link is changed to linkify for compatibility */
 :root {
   --icon-activity-svg: url('./assets/activity.svg');
   --icon-airplay-svg: url('./assets/airplay.svg');
@@ -141,9 +142,9 @@
   --icon-layers-svg: url('./assets/layers.svg');
   --icon-layout-svg: url('./assets/layout.svg');
   --icon-life-buoy-svg: url('./assets/life-buoy.svg');
-  --icon-link-2-svg: url('./assets/link-2.svg');
+  --icon-linkify-2-svg: url('./assets/link-2.svg');
   --icon-linkedin-svg: url('./assets/linkedin.svg');
-  --icon-link-svg: url('./assets/link.svg');
+  --icon-linkify-svg: url('./assets/link.svg');
   --icon-list-svg: url('./assets/list.svg');
   --icon-loader-svg: url('./assets/loader.svg');
   --icon-lock-svg: url('./assets/lock.svg');

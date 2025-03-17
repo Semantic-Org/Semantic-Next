@@ -596,17 +596,17 @@
     -webkit-mask-image: var(--icon-life-buoy-svg);
     mask-image: var(--icon-life-buoy-svg);
   }
-  .icon.link-2 {
-    -webkit-mask-image: var(--icon-link-2-svg);
-    mask-image: var(--icon-link-2-svg);
+  .icon.linkify-2 {
+    -webkit-mask-image: var(--icon-linkify-2-svg);
+    mask-image: var(--icon-linkify-2-svg);
   }
   .icon.linkedin {
     -webkit-mask-image: var(--icon-linkedin-svg);
     mask-image: var(--icon-linkedin-svg);
   }
-  .icon.link {
-    -webkit-mask-image: var(--icon-link-svg);
-    mask-image: var(--icon-link-svg);
+  .icon.linkify {
+    -webkit-mask-image: var(--icon-linkify-svg);
+    mask-image: var(--icon-linkify-svg);
   }
   .icon.list {
     -webkit-mask-image: var(--icon-list-svg);

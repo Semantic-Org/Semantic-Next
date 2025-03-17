@@ -23,6 +23,7 @@
   fill: currentColor;
   speak: none;
 }
+/* Note link is changed to linkify for compatibility */
 .icon.activity { mask-image: var(--icon-activity-svg); }
 .icon.airplay { mask-image: var(--icon-airplay-svg); }
 .icon.alert-circle { mask-image: var(--icon-alert-circle-svg); }
@@ -165,9 +166,9 @@
 .icon.layers { mask-image: var(--icon-layers-svg); }
 .icon.layout { mask-image: var(--icon-layout-svg); }
 .icon.life-buoy { mask-image: var(--icon-life-buoy-svg); }
-.icon.link-2 { mask-image: var(--icon-link-2-svg); }
+.icon.linkify-2 { mask-image: var(--icon-linkify-2-svg); }
 .icon.linkedin { mask-image: var(--icon-linkedin-svg); }
-.icon.link { mask-image: var(--icon-link-svg); }
+.icon.linkify { mask-image: var(--icon-linkify-svg); }
 .icon.list { mask-image: var(--icon-list-svg); }
 .icon.loader { mask-image: var(--icon-loader-svg); }
 .icon.lock { mask-image: var(--icon-lock-svg); }
