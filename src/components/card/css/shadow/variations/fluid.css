@@ -1,4 +1,5 @@
-
+:host([fluid]),
 .fluid.card {
   width: 100%;
+  --card-image-max-width: none;
 }

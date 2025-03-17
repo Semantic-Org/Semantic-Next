@@ -7,7 +7,6 @@
   ::slotted(ui-image),
   .image {
     margin: var(--card-reverse-padding);
-    margin-bottom: 0;
     max-width: var(--card-horizontal-image-max-width);
   }
 

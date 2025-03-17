@@ -16,6 +16,7 @@
     box-shadow: var(--card-box-shadow);
     background: var(--card-background);
     padding: var(--card-padding);
+    width: var(--card-width);
   }
   .card > :first-child {
     border-radius: inherit;
@@ -176,8 +177,10 @@
 
 /* src/components/card/css/shadow/variations/fluid.css */
 @layer component.card.variations.fluid {
+  :host([fluid]),
   .fluid.card {
     width: 100%;
+    --card-image-max-width: none;
   }
 }
 
@@ -192,7 +195,6 @@
   .horizontal ::slotted(ui-image),
   .horizontal .image {
     margin: var(--card-reverse-padding);
-    margin-bottom: 0;
     max-width: var(--card-horizontal-image-max-width);
   }
   .horizontal ::slotted(ui-icon),

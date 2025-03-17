@@ -15,6 +15,8 @@
   box-shadow: var(--card-box-shadow);
   background: var(--card-background);
   padding: var(--card-padding);
+  width: var(--card-width);
+
   > :first-child {
     border-radius: inherit;
     border-bottom-left-radius: 0;
