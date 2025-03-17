@@ -1,0 +1,51 @@
+/*-------------------
+        Sizing
+--------------------*/
+
+.mini.label {
+  font-size: var(--label-mini);
+}
+.tiny.label {
+  font-size: var(--label-tiny);
+}
+.small.label {
+  font-size: var(--label-small);
+}
+/* Allow override */
+:host {
+  font-size: var(--label-medium);
+}
+.large.label {
+  font-size: var(--label-large);
+}
+.big.label {
+  font-size: var(--label-big);
+}
+.huge.label {
+  font-size: var(--label-huge);
+}
+.massive.label {
+  font-size: var(--label-massive);
+}
+
+.mini.labels {
+  --label-medium: var(--label-mini);
+}
+.tiny.labels {
+  --label-medium: var(--label-tiny);
+}
+.small.labels {
+  --label-medium: var(--label-small);
+}
+.large.labels {
+  --label-medium: var(--label-large);
+}
+.big.labels {
+  --label-medium: var(--label-big);
+}
+.huge.labels {
+  --label-medium: var(--label-huge);
+}
+.massive.labels {
+  --label-medium: var(--label-massive);
+}

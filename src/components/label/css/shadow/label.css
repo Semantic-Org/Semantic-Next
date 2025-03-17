@@ -2,4 +2,9 @@
 @import url('./content/label.css') layer(component.label.content.label);
 
 /* Types */
+@import url('./types/emphasis.css') layer(component.label.types.emphasis);
+@import url('./types/badge.css') layer(component.label.types.badge);
+
+/* Variations */
+@import url('./variations/sizing.css') layer(component.label.variations.sizing);
 @import url('./variations/aligned.css') layer(component.label.variations.aligned);

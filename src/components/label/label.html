@@ -1,3 +1,10 @@
-<div class="label">
-  {{>slot}}
+<div class="{ui}label">
+  {#if text}
+    {text}
+  {else}
+    {>slot}
+  {/if}
+  {#if detail}
+    <span class="detail">{detail}</span>
+  {/if}
 </div>

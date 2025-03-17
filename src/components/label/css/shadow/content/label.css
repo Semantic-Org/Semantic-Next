@@ -1,0 +1,18 @@
+:host {
+  display: inline-flex;
+  margin: var(--label-margin);
+}
+
+:host::last-child {
+  margin-right: 0rem;
+}
+
+.label {
+  display: inline-flex;
+  padding: var(--label-padding);
+  background: var(--label-background);
+  color: var(--label-color);
+  border-radius: var(--label-border-radius);
+  font-weight: var(--label-font-weight);
+  min-width: var(--label-min-width);
+}

@@ -1,0 +1,8 @@
+:root {
+  --label-secondary-background: var(--standard-10);
+  --label-secondary-text-color: var(--standard-90);
+
+  --label-outline-background: transparent;
+  --label-outline-border: var(--border);
+  --label-outline-text-color: var(--standard-90);
+}

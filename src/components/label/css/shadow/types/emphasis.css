@@ -1,0 +1,10 @@
+.secondary.label {
+  background: var(--label-secondary-background);
+  color: var(--label-secondary-text-color);
+}
+
+.outline.label {
+  background: var(--label-outline-background);
+  border: var(--label-outline-border);
+  color: var(--label-outline-text-color);
+}
