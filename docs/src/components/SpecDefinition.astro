@@ -20,30 +20,34 @@ const getSandboxLink = function(code) {
 };
 ---
 {sections.map((section) => (
-  <>
-    <h2>{toTitleCase(section)}</h2>
-    {definition[section].map((type) => (
-      <>
-        {type.examples.map((example, index) => (
+  definition[section]?.length > 0 && (
+    <>
+      <h2>{toTitleCase(section)}</h2>
+      {definition[section].map((type) => (
+        type.examples?.length > 0 && (
           <>
-            <CodeExample client:load
-              title={(index == 0) ? type.title : undefined }
-              description={getDescription(type.description)}
-              code={example.code}
-              sandboxLink={getCodePlaygroundLink(example.code)}
-              showCode={example.showCode}
-              class={tokenize(type.title)}
-              id={tokenize(type.title) + '-example'}
-            >
-              {example.components.map((component) => (
-                (component.componentName)
-                  ? (<UIComponent name={componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
-                  : (<Fragment set:html={component.html} />)
-              ))}
-            </CodeExample>
+            {type.examples.map((example, index) => (
+              <>
+                <CodeExample client:load
+                  title={(index == 0) ? type.title : undefined }
+                  description={getDescription(type.description)}
+                  code={example.code}
+                  sandboxLink={getCodePlaygroundLink(example.code)}
+                  showCode={example.showCode}
+                  class={tokenize(type.title)}
+                  id={tokenize(type.title) + '-example'}
+                >
+                  {example.components.map((component) => (
+                    (component.componentName)
+                      ? (<UIComponent name={componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
+                      : (<Fragment set:html={component.html} />)
+                  ))}
+                </CodeExample>
+              </>
+            ))}
           </>
-        ))}
-      </>
-    ))}
-  </>
+        )
+      ))}
+    </>
+  )
 ))}

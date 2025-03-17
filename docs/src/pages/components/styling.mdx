@@ -34,7 +34,7 @@ Page CSS is CSS scoped to the page. This can be used to assign styles globally w
 
 This is useful to apply styles to your component based on where it is rendered, or work  around the necessary limitations of scoped css.
 
-> *Layout Shift* - Be cautious using page css to define rules as they will not be present during server side rendering and can cause layout shift in your component.
+> *Layout Shift* - Be cautious using page css to define rules as they will not be present during server side rendering and can cause layout shifts until your component is defined.
 
 ```javascript
 const pageCSS = `

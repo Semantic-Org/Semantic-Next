@@ -23,9 +23,11 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
     let menu = [
       { label: 'Preview', value: 'preview' },
     ];
-    if (self.getTemplate()) {
-      menu.push({ label: 'AST', value: 'ast' });
+    const ast = state.ast.get();
+    if (ast) {
+      menu.push({ label: 'AST', value: 'ast', badge: ast.length });
     }
+    console.log(menu);
     return menu;
   },
 
