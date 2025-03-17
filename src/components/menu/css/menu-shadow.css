@@ -50,6 +50,7 @@
 
 /* src/components/menu/css/shadow/variations/fitted.css */
 @layer component.variations.fitted {
+  :host([fitted]),
   .fitted.menu {
     margin: 0;
   }
