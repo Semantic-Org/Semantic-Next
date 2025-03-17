@@ -38,12 +38,14 @@ class PrettyJSON extends HTMLElement {
       --bracket-color: #444444;
       --null-color: #444444;
       --comma-color: #444444;
+      --ellipsus-color: #444444;
       --key-color: #C69FF1;
       --ellipsis-color: #444444;
       --ellipsis-color-hover: #58C1FE;
       --string-color: #58C1FE;
       --number-color: #58a6ff;
       --boolean-color: #656565;
+      --summary-color: #656565;
 
       --indent: 18px;
     }
@@ -83,6 +85,9 @@ class PrettyJSON extends HTMLElement {
     }
     .brace {
       color: var(--brace-color);
+    }
+    .ellipsus {
+      color: var(--ellipsus-color);
     }
     .string,
     .url {
@@ -129,6 +134,36 @@ class PrettyJSON extends HTMLElement {
     .row > span {
       display: inline-block;
     }
+    .summary-container {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .summary-type {
+      color: var(--summary-color);
+      margin-right: 4px;
+    }
+    .summary-content {
+      display: inline-block;
+    }
+    .preview-item {
+      display: inline-block;
+    }
+    .preview-key {
+      color: var(--key-color);
+    }
+    .preview-string {
+      color: var(--string-color);
+    }
+    .preview-number {
+      color: var(--number-color);
+    }
+    .preview-boolean {
+      color: var(--boolean-color);
+    }
+    .preview-null {
+      color: var(--null-color);
+    }
   `;
 
   constructor() {
@@ -166,6 +201,244 @@ class PrettyJSON extends HTMLElement {
       this.#isExpanded ? String(this.#expandAttributeValue + 1) : "0"
     );
     this.#render();
+  }
+
+ /**
+ * Creates a summary view for objects and arrays when collapsed
+ * @param {Record<any, any> | any[]} object
+ * @param {boolean} isArray
+ * @returns {HTMLElement}
+ */
+
+#createSummaryView(object, isArray) {
+  const MAX_PREVIEW_ITEMS = 2;
+  const container = document.createElement("span");
+  container.className = "summary-container";
+  container.addEventListener("click", this.#toggle.bind(this));
+
+
+  // Create the summary content
+  const summaryContent = document.createElement("span");
+  summaryContent.className = "summary-content";
+
+  let previewItems;
+  let hasMore;
+
+  if (isArray) {
+    // For arrays, just take the items directly without creating [index, item] pairs
+    previewItems = object.slice(0, MAX_PREVIEW_ITEMS);
+    hasMore = object.length > MAX_PREVIEW_ITEMS;
+  } else {
+    // For objects, use Object.entries as before
+    const entries = Object.entries(object);
+    previewItems = entries.slice(0, MAX_PREVIEW_ITEMS);
+    hasMore = entries.length > MAX_PREVIEW_ITEMS;
+  }
+
+  if (previewItems.length > 0) {
+    previewItems.forEach((item, index) => {
+      const previewItem = document.createElement("span");
+      previewItem.className = "preview-item";
+
+      if (isArray) {
+        // Handle array items directly without destructuring
+        const value = item;
+        const valueType = this.#getValueType(value);
+        const valueElement = document.createElement("span");
+        valueElement.className = `preview-${valueType}`;
+
+        if (valueType === "string") {
+          valueElement.textContent = `"${this.#truncatePreviewString(value)}"`;
+        } else if (valueType === "object") {
+          if (value === null) {
+            valueElement.textContent = "null";
+          } else {
+            // Show preview of object content with proper styling
+            const keys = Object.keys(value);
+            if (keys.length > 0) {
+              // Create empty container first
+              valueElement.textContent = "";
+
+              // Add opening brace with proper styling
+              const openBrace = document.createElement("span");
+              openBrace.className = "brace";
+              openBrace.textContent = "{";
+              valueElement.appendChild(openBrace);
+              valueElement.appendChild(document.createTextNode(" "));
+
+              // Add first key-value pair with proper styling
+              const firstKey = keys[0];
+              const firstValue = value[firstKey];
+              const firstValueType = this.#getValueType(firstValue);
+
+              // Create and append key with proper styling
+              const keySpan = document.createElement("span");
+              keySpan.className = "preview-key";
+              keySpan.textContent = firstKey;
+              valueElement.appendChild(keySpan);
+
+              // Add colon
+              valueElement.appendChild(document.createTextNode(": "));
+
+              // Create and append value with proper styling
+              const valueSpan = document.createElement("span");
+              valueSpan.className = `preview-${firstValueType}`;
+
+              if (firstValueType === "string") {
+                valueSpan.textContent = `"${this.#truncatePreviewString(firstValue)}"`;
+              } else if (firstValueType === "object") {
+                valueSpan.textContent = firstValue === null ? "null" : "{}";
+              } else if (firstValueType === "array") {
+                valueSpan.textContent = "[]";
+              } else {
+                valueSpan.textContent = String(firstValue);
+              }
+              valueElement.appendChild(valueSpan);
+
+              // Add ellipsis if more keys exist
+              if (keys.length > 1) {
+                const ellipsis = document.createElement("span");
+                ellipsis.className = "ellipsis";
+                ellipsis.textContent = "";
+                valueElement.appendChild(ellipsis);
+              }
+
+              // Add closing brace with proper styling
+              valueElement.appendChild(document.createTextNode(" "));
+              const closeBrace = document.createElement("span");
+              closeBrace.className = "brace";
+              closeBrace.textContent = "}";
+              valueElement.appendChild(closeBrace);
+            } else {
+              valueElement.textContent = "{}";
+            }
+          }
+        } else if (valueType === "array") {
+          valueElement.textContent = "";
+          // Add opening bracket with proper styling
+          const openBracket = document.createElement("span");
+          openBracket.className = "brace"; // Use same class as braces for styling
+          openBracket.textContent = "[";
+          valueElement.appendChild(openBracket);
+
+          if (value.length > 0) {
+            const ellipsis = document.createElement("span");
+            ellipsis.className = "ellipsis";
+            ellipsis.textContent = ""
+            valueElement.appendChild(ellipsis);
+          }
+
+          // Add closing bracket with proper styling
+          const closeBracket = document.createElement("span");
+          closeBracket.className = "brace"; // Use same class as braces for styling
+          closeBracket.textContent = "]";
+          valueElement.appendChild(closeBracket);
+        } else {
+          valueElement.textContent = String(value);
+        }
+
+        previewItem.appendChild(valueElement);
+      } else {
+        // Handle object entries with destructuring
+        const [key, value] = item;
+        const keyElement = document.createElement("span");
+        keyElement.className = "preview-key";
+        keyElement.textContent = `${key}: `;
+        previewItem.appendChild(keyElement);
+
+        const valueType = this.#getValueType(value);
+        const valueElement = document.createElement("span");
+        valueElement.className = `preview-${valueType}`;
+
+        if (valueType === "string") {
+          valueElement.textContent = `"${this.#truncatePreviewString(value)}"`;
+        } else if (valueType === "object") {
+          if (value === null) {
+            valueElement.textContent = "null";
+          } else {
+            valueElement.textContent = "{ ... }";
+          }
+        } else if (valueType === "array") {
+          valueElement.textContent = `[${value.length > 0 ? "..." : ""}]`;
+        } else {
+          valueElement.textContent = String(value);
+        }
+
+        previewItem.appendChild(valueElement);
+      }
+
+      // Add comma if not the last item
+      if (index < previewItems.length - 1 || hasMore) {
+        const comma = document.createElement("span");
+        comma.className = "comma";
+        comma.textContent = ", ";
+        previewItem.appendChild(comma);
+      }
+
+      summaryContent.appendChild(previewItem);
+    });
+
+    // Add ellipsis if there are more items
+    if (hasMore) {
+      const ellipsis = document.createElement("span");
+      ellipsis.className = "ellipsis";
+      summaryContent.appendChild(ellipsis);
+    }
+  }
+
+  container.appendChild(summaryContent);
+  return container;
+}
+  /**
+   * Helper method to get preview text for a value
+   * @param {any} value
+   * @param {string} type
+   * @returns {string}
+   */
+  #getPreviewTextForValue(value, type) {
+    console.log('here');
+    if (type === "string") {
+      return `"${this.#truncatePreviewString(value)}"`;
+    } else if (type === "object") {
+      if (value === null) return "null";
+      return `{${Object.keys(value).length > 0 ? "..." : ""}}`;
+    } else if (type === "array") {
+      return `[${value.length > 0 ? "..." : ""}]`;
+    } else {
+      return String(value);
+    }
+  }
+
+
+  /**
+   * Truncates a string for preview display
+   * @param {string} str
+   * @returns {string}
+   */
+  #truncatePreviewString(str) {
+    const MAX_PREVIEW_LENGTH = 50;
+    if (str.length <= MAX_PREVIEW_LENGTH) {
+      return str;
+    }
+    return str.substring(0, MAX_PREVIEW_LENGTH) + "…";
+  }
+
+  /**
+   * Gets the type of a value for preview formatting
+   * @param {any} value
+   * @returns {string}
+   */
+  #getValueType(value) {
+    if (value === null) {
+      return "null";
+    }
+    if (Array.isArray(value)) {
+      return "array";
+    }
+    if (typeof value === "object") {
+      return "object";
+    }
+    return typeof value;
   }
 
   /**
@@ -304,10 +577,9 @@ class PrettyJSON extends HTMLElement {
     closingBrace.textContent = isArray ? "]" : "}";
 
     if (!this.#isExpanded) {
-      const ellipsis = document.createElement("button");
-      ellipsis.className = "ellipsis";
-      container.appendChild(ellipsis);
-      ellipsis.addEventListener("click", this.#toggle.bind(this));
+      // Instead of just an ellipsis, add a summary view for objects and arrays
+      const summaryView = this.#createSummaryView(object, isArray);
+      container.appendChild(summaryView);
       container.appendChild(closingBrace);
       return container;
     }
@@ -327,7 +599,7 @@ class PrettyJSON extends HTMLElement {
         if (!isLast) {
           const comma = document.createElement("span");
           comma.className = "comma";
-          comma.textContent = ",";
+          comma.textContent = ", ";
           rowContainer.appendChild(comma);
         }
         return;

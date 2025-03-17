@@ -13,8 +13,14 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * Added new keyword `bind` that will let you directly bind events without event delegation. This can be useful for attaching to events that do not bubble.
 * Templates now have a `destroyed` flag to determine if it is destroyed
 
+## UI
+* Add basic definition of label including secondary, outline, badge
+
 ## Bugs
 * Fixed bug where subtemplates did not properly remove themselves when destroyed from `findChildren`
+* Fixed card fluid variation, fix card min width
+* Fixed fitted menu variation
+* Fix issue with link and link icon from feather-icons (link icon now `linkify`)
 
 ## Docs
 * AST display is now reactive on template changes. Content changes are no longer lost when you change from mobile/tablet view to computer view.

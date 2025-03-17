@@ -27,7 +27,7 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
     if (ast) {
       menu.push({ label: 'AST', value: 'ast', badge: ast.length });
     }
-    console.log(menu);
+    console.log(ast);
     return menu;
   },
 
