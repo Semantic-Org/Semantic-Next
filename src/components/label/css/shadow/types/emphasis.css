@@ -5,6 +5,6 @@
 
 .outline.label {
   background: var(--label-outline-background);
-  border: var(--label-outline-border);
+  outline: var(--label-outline);
   color: var(--label-outline-text-color);
 }
