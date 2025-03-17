@@ -149,6 +149,9 @@
 
 /* src/components/card/css/shadow/variations/count.css */
 @layer component.card.variations.count {
+  .cards {
+    --card-width: none;
+  }
   .cards.one {
     grid-template-columns: 1fr;
   }

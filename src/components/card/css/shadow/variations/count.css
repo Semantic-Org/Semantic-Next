@@ -1,4 +1,7 @@
 .cards {
+
+  --card-width: none;
+
   &.one {
     grid-template-columns: 1fr;
   }
