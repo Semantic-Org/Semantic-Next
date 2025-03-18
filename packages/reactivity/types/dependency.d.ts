@@ -1,5 +1,3 @@
-import type { Reaction } from './reaction';
-
 /**
  * Tracks dependencies for reactive computations.
  * Manages the relationship between reactive values and their dependent computations.
@@ -13,7 +11,7 @@ export class Dependency {
    * Set of reactions that depend on this dependency.
    * Each reaction in this set will be notified when the dependency changes.
    */
-  readonly subscribers: Set<Reaction>;
+  readonly subscribers: Set<any>;
 
   /**
    * Creates a new dependency tracker.
@@ -54,7 +52,7 @@ export class Dependency {
    * @param reaction - The reaction to remove
    * @internal This method is called internally by the reactivity system.
    */
-  cleanUp(reaction: Reaction): void;
+  cleanUp(reaction: any): void;
 
   /**
    * Unsubscribes a reaction from this dependency.
@@ -64,5 +62,5 @@ export class Dependency {
    * @param reaction - The reaction to unsubscribe
    * @internal This method is called internally by the reactivity system.
    */
-  unsubscribe(reaction: Reaction): void;
+  unsubscribe(reaction: any): void;
 }
