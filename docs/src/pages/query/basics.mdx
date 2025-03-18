@@ -1,0 +1,202 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Query Basics"
+icon: search
+description: "Getting started with Query's core functionality"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Getting Started with Query
+
+Query provides a familiar, jQuery-like API for working with the DOM. The core function `$()` lets you select elements and perform operations on them using a chainable interface.
+
+### Installation
+
+```bash
+npm install @semantic-ui/query
+```
+
+### Import and Usage
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// Select elements
+const divs = $('div');
+
+// Chain operations
+$('.content')
+  .addClass('active')
+  .css('color', 'blue')
+  .on('click', function() {
+    $(this).removeClass('active');
+  });
+```
+
+## Core Functionality
+
+### Selecting Elements
+
+You can use Query to select elements in several different ways:
+
+Find elements using CSS selectors, just like you would with `document.querySelector`:
+```javascript
+// Find all buttons with the 'primary' class
+$('button.primary');
+
+// Find all inputs in a form
+$('form input');
+```
+
+Create new DOM elements from HTML strings:
+```javascript
+// Create a new div with some content and classes
+$('<div class="notification">Operation completed</div>');
+```
+
+Wrap existing DOM nodes to use Query's methods on them:
+```javascript
+// Turn a DOM element into a Query object
+const element = document.getElementById('app');
+$(element).addClass('initialized');
+```
+
+Work with collections of elements:
+```javascript
+// Convert a NodeList to a Query object
+const listItems = document.querySelectorAll('li');
+$(listItems).addClass('listed');
+```
+
+### Basic Traversal
+
+Query makes it easy to navigate through the DOM tree in any direction:
+
+Going down the tree to find child elements:
+```javascript
+// Find direct children
+$('ul').children('li');
+
+// Find any descendant matching the selector
+$('.container').find('.item');
+```
+
+Moving up the tree to find parent elements:
+```javascript
+// Get the immediate parent
+$('.button').parent();
+
+// Find the nearest ancestor that matches a selector
+$('.button').closest('.card');
+```
+
+Finding elements at the same level:
+```javascript
+// Get all siblings
+$('.tab').siblings();
+
+// Get all siblings matching a selector
+$('.tab').siblings('.active');
+```
+
+### Manipulation
+
+Query provides simple methods to change elements:
+
+Change content inside elements:
+```javascript
+// Set or get text content
+$('.greeting').text('Hello World');
+
+// Set or get HTML content
+$('.content').html('<span>New content</span>');
+```
+
+Work with CSS classes:
+```javascript
+// Add one or more classes
+$('.item').addClass('active highlighted');
+
+// Remove classes
+$('.item').removeClass('disabled');
+
+// Toggle classes on or off
+$('.item').toggleClass('selected');
+```
+
+Modify attributes:
+```javascript
+// Set a single attribute
+$('.link').attr('href', 'https://example.com');
+
+// Set multiple attributes at once
+$('.image').attr({
+  src: 'image.jpg',
+  alt: 'Description',
+  loading: 'lazy'
+});
+```
+
+### Events
+
+Attach event handlers to elements:
+
+Basic event binding:
+```javascript
+// Respond to clicks
+$('.button').on('click', function() {
+  console.log('Button clicked!');
+});
+```
+
+Event delegation (handling events on children that might not exist yet):
+```javascript
+// Handle clicks on any current or future list items
+$('.list').on('click', 'li', function() {
+  console.log('List item clicked!');
+});
+```
+
+Clean up event handlers when needed:
+```javascript
+// Remove all click handlers
+$('.button').off('click');
+```
+
+## When to Use $
+
+The `$` function is your go-to tool when:
+
+1. You're working with regular DOM elements (not inside shadow DOM)
+2. You want to perform operations on multiple elements at once
+3. You need to chain several operations together
+
+```javascript
+// Standard DOM query and manipulation
+$('button.primary')
+  .addClass('highlight')
+  .attr('aria-pressed', 'true');
+```
+
+When you need to access elements within shadow DOM (inside web components), use the [`$$` function](/query/shadow-dom) instead.
+
+## Performance Tips
+
+> **Performance** Query is designed to be fast by using native DOM APIs under the hood. To get the best performance, try to be specific with your selectors and narrow the search area when possible. Remember that `$` is faster than `$$`, so only use `$$` when you need to access shadow DOM.
+
+```javascript
+// Less efficient - searches the entire DOM
+$('li');
+
+// More efficient - limits the search to a specific container
+$('.my-list').find('li');
+```
+
+## Next Steps
+
+Now that you understand the basics of Query, learn about:
+
+- [Working with Shadow DOM](/query/shadow-dom) using the `$$` function
+- [Integrating Query with components](/query/components)
+- [Effective chaining techniques](/query/chaining)
+- [Browser usage](/query/browser)

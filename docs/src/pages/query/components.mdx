@@ -1,0 +1,189 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Component Integration"
+icon: box
+description: "Using Query within Component lifecycle"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Query in Components
+
+One of Query's greatest strengths is how seamlessly it integrates with Semantic UI components. When you're writing component code, you don't need to import Query - it's automatically available in all lifecycle callbacks and event handlers.
+
+## Accessing Query in Lifecycle Methods
+
+Every component lifecycle method receives `$` and `$$` as destructured parameters, making DOM manipulation straightforward:
+
+```javascript
+const createComponent = ({ $, $$ }) => ({
+  // The $ function is scoped to this component's shadow DOM
+  initialize() {
+    $('.content').addClass('ready');
+    
+    // $$ can find elements in nested shadow DOM trees
+    const nestedButtons = $$('ui-card button');
+  }
+});
+```
+
+The same applies to all other lifecycle methods:
+
+```javascript
+const onCreated = ({ $, $$ }) => {
+  // Access DOM before it's visible
+  $('div').data('initialized', true);
+};
+
+const onRendered = ({ $, $$ }) => {
+  // DOM is now accessible in the browser
+  $('.animation').addClass('fade-in');
+};
+```
+
+## Using Query in Event Handlers
+
+Event handlers also receive `$` and `$$` automatically:
+
+```javascript
+const events = {
+  'click .toggle'({ $, $$, self, target }) {
+    // Toggle state
+    $(target).toggleClass('active');
+    
+    // Access other elements in the component
+    $('.content').toggleClass('visible');
+  }
+};
+```
+
+## Working with Components
+
+### Accessing Component DOM
+
+Use `$` to query elements within your component's shadow DOM:
+
+```javascript
+const createComponent = ({ $ }) => ({
+  openPanel() {
+    $('.panel').addClass('open');
+  },
+  
+  closePanel() {
+    $('.panel').removeClass('open');
+  }
+});
+```
+
+If you need to access the component element itself, use the `el` parameter:
+
+```javascript
+const createComponent = ({ el, $ }) => ({
+  getComponentWidth() {
+    return $(el).width();
+  },
+  
+  addExternalClass(className) {
+    // Adds class to the component's host element
+    $(el).addClass(className);
+  }
+});
+```
+
+### Accessing Nested Components
+
+When you need to access elements within nested components, use `$$`:
+
+```javascript
+const createComponent = ({ $$ }) => ({
+  highlightAllButtons() {
+    // Find buttons in any nested components
+    $$('button').addClass('highlighted');
+  },
+  
+  updateNestedLabel(text) {
+    // Update text in a deeply nested element
+    $$('ui-card ui-label').text(text);
+  }
+});
+```
+
+> **Component Access** When you need to access component instances rather than just their DOM elements, use component traversal methods like `getChild` instead of Query. Query is for DOM manipulation, not component state management.
+
+## Using Query with SSR
+
+When your components render on the server, you need to be careful with DOM-related operations. Use the `isClient` flag to check the environment:
+
+```javascript
+const onRendered = function({ isClient, $, settings }) {
+  // Only run browser-specific code on the client
+  if(isClient) {
+    $('.theme-container').addClass(settings.theme);
+    $('img').on('load', handleImageLoad);
+  }
+};
+```
+
+## Working with External Components
+
+Query provides special methods to help you interact with components from outside:
+
+### getComponent
+
+The `getComponent` method lets you access a component's instance from anywhere in your application:
+
+```javascript
+// Get the menu component from anywhere in your code
+const menu = $('ui-menu').getComponent();
+
+// Now you can call its methods directly
+if(menu) {
+  menu.selectItem(3);
+  menu.collapseAll();
+}
+```
+
+### settings
+
+Use `settings` to configure a component that's already in the DOM:
+
+```javascript
+// Update settings on an existing component
+$('ui-panel').settings({
+  collapsible: true,
+  theme: 'dark',
+  getNaturalSize: (panel, { direction }) => {
+    // Calculate dynamic size
+    return direction === 'horizontal' ? 250 : 400;
+  }
+});
+```
+
+### initialize
+
+The `initialize` method is especially powerful because it works even before a component is in the DOM:
+
+```html
+<script>
+  // Configure components before they even exist in the DOM
+  $('ui-panel').initialize({
+    theme: 'light',
+    animationSpeed: 300
+  });
+</script>
+
+<!-- Later in the HTML -->
+<ui-panels>
+  <ui-panel>First Panel</ui-panel>
+  <ui-panel>Second Panel</ui-panel>
+</ui-panels>
+```
+
+> **Settings vs Initialize** Use `settings` when working with components that are already rendered in the DOM. Use `initialize` when you need to configure components before they're added to the page - especially useful with frameworks that might process script blocks out of order.
+
+## Next Steps
+
+Now that you understand how to use Query with components, you might want to explore:
+
+- [Working with Shadow DOM](/query/shadow-dom)
+- [Chaining techniques](/query/chaining)
+- [Browser usage](/query/browser)
