@@ -8,12 +8,14 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Browser Usage
 
-In a browser environment you can use `exportGlobals` to export $ and $$ for use in your page. For more fine grained control see the [browser helpers](#browser-helpers) section below.
+In a browser environment you can use `exportGlobals` to export `$` and `$$` for use in your page. 
+
+> **Browser Helpers** For more fine-grained control see the [browser helpers](#browser-helpers) section below.
 
 ```javascript
 import { exportGlobals } from '@semantic-ui/query';
 
-// make $ and $$ available globally
+// make `$` and `$$` available globally
 exportGlobals();
 ```
 
@@ -23,7 +25,7 @@ This makes Query's functions available globally in your browser environment, sim
 
 A few additional helpers are provided specifically for using Query in browser environments.
 
-For more information see the [API reference](/api/query/basic).
+> **Browser API** For more information see the [API reference](/api/query/basic).
 
 ### Restoring Globals
 
@@ -31,10 +33,10 @@ If you need to restore the previous values before calling export globals.
 ```javascript
 import { exportGlobals, restoreGlobals } from '@semantic-ui/query';
 
-// $ and $$ are defined
+// `$` and `$$` are defined
 exportGlobals();
 
-// $ and $$ are now their original values
+// `$` and `$$` are now their original values
 restoreGlobals();
 ```
 
@@ -66,7 +68,7 @@ Query allows you to opt-in to exporting globals in a browser environment. You ca
     Query: false
   });
 
-  // Use $ and $$ globally
+  // Use `$` and `$$` globally
   $('selector');
   $$('selector');
 </script>
@@ -84,7 +86,7 @@ You can use `$.noConflict()` to restore the original values of `$` and `$$` and 
 
   const myQuery = $.noConflict();
 
-  // Use myQuery instead of $
+  // Use myQuery instead of `$`
   myQuery('div').addClass('active');
 </script>
 ```

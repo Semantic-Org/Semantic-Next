@@ -47,7 +47,9 @@ Query methods generally fall into three categories:
 
 ### Traversal Methods
 
-These methods change which elements you're working with:
+These methods change which elements you're working with. Think of traversal methods as moving your selection around the DOM tree.
+
+> **Traversal API References** See the API references for [filter](/api/query/iterators#filter), [find](/api/query/dom-traversal#find), [parent](/api/query/dom-traversal#parent), and more in the [DOM Traversal](/api/query/dom-traversal) section.
 
 ```javascript
 // Start with all divs in the document
@@ -59,11 +61,11 @@ $('div')
   // Now we're working with the paragraphs
 ```
 
-Think of traversal methods as moving your selection around the DOM tree.
-
 ### Manipulation Methods
 
-These methods change something about the selected elements but keep the same selection:
+These methods change something about the selected elements but keep the same selection. These are great for applying multiple changes to the same elements.
+
+> **Manipulation API References** See the API references for [addClass](/api/query/css#addclass), [attr](/api/query/attributes#attr), [css](/api/query/css#css), and similar methods in the [CSS](/api/query/css) and [Attributes](/api/query/attributes) sections.
 
 ```javascript
 $('button')
@@ -72,11 +74,11 @@ $('button')
   .css('opacity', '0.5')  // Still working with those buttons
 ```
 
-These are great for applying multiple changes to the same elements.
-
 ### Terminating Methods
 
-Some methods break the chain by returning something other than a Query object:
+Some methods break the chain by returning something other than a Query object. Terminating methods are typically used at the end of a chain when you need to get a value.
+
+> **Terminating References** See the API references for [text](/api/query/content#text), [get](/api/query/utilities#get), and [hasClass](/api/query/css#hasclass).
 
 ```javascript
 // This returns a string, not a Query object
@@ -89,11 +91,11 @@ const buttonElement = $('button').get(0);
 const hasClass = $('div').hasClass('active');
 ```
 
-Terminating methods are typically used at the end of a chain when you need to get a value.
-
 ## Using .end() to Return to Previous Selection
 
-Sometimes you need to go back up the chain to a previous selection. The `.end()` method lets you return to the selection before the last traversal method:
+Sometimes you need to go back up the chain to a previous selection. The `.end()` method lets you return to the selection before the last traversal method. This saves you from having to make multiple separate selections.
+
+> **DOM API Reference** For more on DOM manipulation methods like [html](/api/query/content#html) and DOM traversal, see the [API reference](/api/query).
 
 ```javascript
 $('.card')
@@ -104,8 +106,6 @@ $('.card')
   .find('.content')                // Now find content within cards
     .html('<p>New content</p>');   // Change the HTML
 ```
-
-This saves you from having to make multiple separate selections.
 
 ## Practical Examples
 
@@ -139,7 +139,7 @@ $('<div>')
   });
 ```
 
-> **Efficiency** When building chains, think about the most efficient order of operations. For example, filtering elements before manipulating them is usually more efficient than manipulating first and then filtering.
+> When building chains, think about the most efficient order of operations. For example, filtering elements before manipulating them is usually more efficient than manipulating first and then filtering.
 
 ## Next Steps
 

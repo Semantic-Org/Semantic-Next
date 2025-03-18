@@ -6,38 +6,12 @@ description: "Getting started with Query's core functionality"
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Getting Started with Query
-
-Query provides a familiar, jQuery-like API for working with the DOM. The core function `$()` lets you select elements and perform operations on them using a chainable interface.
-
-### Installation
-
-```bash
-npm install @semantic-ui/query
-```
-
-### Import and Usage
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-// Select elements
-const divs = $('div');
-
-// Chain operations
-$('.content')
-  .addClass('active')
-  .css('color', 'blue')
-  .on('click', function() {
-    $(this).removeClass('active');
-  });
-```
 
 ## Core Functionality
 
 ### Selecting Elements
 
-You can use Query to select elements in several different ways:
+You can use [Query](/api/query/basic#constructor) to select elements in several different ways:
 
 Find elements using CSS selectors, just like you would with `document.querySelector`:
 ```javascript
@@ -61,11 +35,17 @@ const element = document.getElementById('app');
 $(element).addClass('initialized');
 ```
 
-Work with collections of elements:
+Work with DOM nodelists
 ```javascript
 // Convert a NodeList to a Query object
 const listItems = document.querySelectorAll('li');
 $(listItems).addClass('listed');
+```
+
+Adding in existing Query collections
+```javascript
+const $li = $('li');
+$($li).addClass('listed');
 ```
 
 ### Basic Traversal
@@ -98,6 +78,8 @@ $('.tab').siblings();
 // Get all siblings matching a selector
 $('.tab').siblings('.active');
 ```
+
+> **DOM Traversal** For more on DOM traversal methods, see the API reference for [find](/api/query/dom-traversal#find), [children](/api/query/dom-traversal#children), [parent](/api/query/dom-traversal#parent), [closest](/api/query/dom-traversal#closest), and [siblings](/api/query/dom-traversal#siblings).
 
 ### Manipulation
 
@@ -163,7 +145,9 @@ Clean up event handlers when needed:
 $('.button').off('click');
 ```
 
-## When to Use $
+> **Events** For details on event methods, see the API reference for [on](/api/query/events#on), [off](/api/query/events#off), [one](/api/query/events#one), and [dispatchEvent](/api/query/events#dispatchevent).
+
+## Using $ vs $$
 
 The `$` function is your go-to tool when:
 
@@ -178,18 +162,20 @@ $('button.primary')
   .attr('aria-pressed', 'true');
 ```
 
-When you need to access elements within shadow DOM (inside web components), use the [`$$` function](/query/shadow-dom) instead.
+> **Shadow DOM** When you need to access elements within shadow DOM (inside web components), use the [`$$` function](/query/shadow-dom) instead.
 
-## Performance Tips
+### Performance
 
-> **Performance** Query is designed to be fast by using native DOM APIs under the hood. To get the best performance, try to be specific with your selectors and narrow the search area when possible. Remember that `$` is faster than `$$`, so only use `$$` when you need to access shadow DOM.
+> **Query Speed** Underneath the hood `$` uses the native `querySelectorAll`. This means any query will be as fast as it will run natively in the browser. This will almost always be fractions of `1ms`
 
 ```javascript
-// Less efficient - searches the entire DOM
 $('li');
+```
 
-// More efficient - limits the search to a specific container
-$('.my-list').find('li');
+> **Shadow DOM Search** When you are using `$$` it will recursively look through document for any possible shadow DOMs to search. This can in some complex cases be `1-5ms` depending on the DOM tree being traversed.
+
+```javascript
+$$('li');
 ```
 
 ## Next Steps

@@ -12,9 +12,11 @@ Web components use Shadow DOM to encapsulate their internal structure, styles, a
 
 The `$$` function is designed specifically to help you work with elements across shadow DOM boundaries.
 
+> **API Details** For detailed API information, see the [query constructor with pierceShadow option](/api/query/basic#constructor).
+
 ## The $$ Function
 
-While `$` works with the regular DOM, `$$` allows you to reach into the shadow DOM of web components:
+While `$` works with the regular DOM, `$$` allows you to reach into the shadow DOM of web components. Behind the scenes, `$$` traverses through shadow roots and slot boundaries to find all matching elements, regardless of how deeply they're nested in the component hierarchy.
 
 ```javascript
 import { $$ } from '@semantic-ui/query';
@@ -22,8 +24,6 @@ import { $$ } from '@semantic-ui/query';
 // Select elements inside a web component's shadow DOM
 $$('ui-dropdown .option');
 ```
-
-Behind the scenes, `$$` traverses through shadow roots and slot boundaries to find all matching elements, regardless of how deeply they're nested in the component hierarchy.
 
 ## Crossing Shadow Boundaries
 

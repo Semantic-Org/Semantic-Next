@@ -20,7 +20,34 @@ Web components are built around encapsulating portions of the DOM in the Shadow 
 
 Many common usage patterns for developers require traversing the DOM, but with native APIs these will stop at shadow DOM root or slotted content boundaries. Doing this deeply or recursively is basically impossible without writing your own helpers.
 
-Query helps give you all the utilities like [`closest`](/api/query/dom-traversal#closest), [`find`](/api/query/dom-traversal#find), [`siblings`](/api/query/dom-traversal#siblings) but while giving you options for traversing these boundaries.
+Query gives you all the utilities like [`closest`](/api/query/dom-traversal#closest), [`find`](/api/query/dom-traversal#find), [`siblings`](/api/query/dom-traversal#siblings) across multiple web components or shadow DOM boundaries.
+
+## Getting Started with Query
+
+Query provides a familiar, jQuery-like API for working with the DOM. The core function `$()` lets you select elements and perform operations on them using a chainable interface.
+
+### Installation
+
+```bash
+npm install @semantic-ui/query
+```
+
+### Import and Usage
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// Select elements
+const divs = $('div');
+
+// Chain operations
+$('.content')
+  .addClass('active')
+  .css('color', 'blue')
+  .on('click', function() {
+    $(this).removeClass('active');
+  });
+```
 
 ## Core Concepts
 
@@ -53,11 +80,11 @@ Query is integrated into the Semantic UI component system. Both `$` and `$$` are
 const createComponent = ({ $, $$ }) => ({
   initialize() {
     $('div').addClass('initialized');
-    
+
     // Access elements deep in shadow DOM
     const nestedElements = $$('.nested-content');
   }
 });
 ```
 
-Learn more about using Query with components in the [Components integration guide](/query/components).
+> Learn more about using Query with components in the [Components integration guide](/query/components).
