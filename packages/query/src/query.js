@@ -38,7 +38,7 @@ export class Query {
   */
   static eventHandlers = [];
 
-  constructor(selector, { root = document, pierceShadow = false } = {}) {
+  constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
 
     if (!root) {
@@ -83,13 +83,18 @@ export class Query {
     this.selector = selector;
     this.length = elements.length;
     this.options = { root, pierceShadow };
+    this.prevObject = prevObject;
     Object.assign(this, elements);
   }
 
   chain(elements) {
     return (this.isGlobal && !elements)
       ? new Query(globalThis, this.options)
-      : new Query(elements, this.options);
+      : new Query(elements, { ...this.options, prevObject: this });
+  }
+  
+  end() {
+    return this.prevObject || this;
   }
 
   /* we will add all elements across shadow root boundaries while matching
