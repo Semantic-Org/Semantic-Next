@@ -252,7 +252,28 @@ export const sidebarMenuFramework = [
     description: 'DOM Helpers',
     url: '/query',
     icon: 'mouse-pointer',
-    pages: [],
+    pages: [
+      {
+        name: 'Basics',
+        url: '/query/basics',
+      },
+      {
+        name: 'Shadow DOM',
+        url: '/query/shadow-dom',
+      },
+      {
+        name: 'Components',
+        url: '/query/components',
+      },
+      {
+        name: 'Chaining',
+        url: '/query/chaining',
+      },
+      {
+        name: 'Browser Usage',
+        url: '/query/browser',
+      },
+    ],
   }, /*
   {
     name: 'Errata',

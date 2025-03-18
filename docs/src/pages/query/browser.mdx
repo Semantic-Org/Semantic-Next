@@ -1,0 +1,117 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Browser Usage"
+icon: globe
+description: "Using Query in browser environments"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Browser Usage
+
+In a browser environment you can use `exportGlobals` to export `$` and `$$` for use in your page. 
+
+> **Browser Helpers** For more fine-grained control see the [browser helpers](#browser-helpers) section below.
+
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+// make `$` and `$$` available globally
+exportGlobals();
+```
+
+This makes Query's functions available globally in your browser environment, similar to how jQuery works when included in a page.
+
+## Browser Helpers
+
+A few additional helpers are provided specifically for using Query in browser environments.
+
+> **Browser API** For more information see the [API reference](/api/query/basic).
+
+### Restoring Globals
+
+If you need to restore the previous values before calling export globals.
+```javascript
+import { exportGlobals, restoreGlobals } from '@semantic-ui/query';
+
+// `$` and `$$` are defined
+exportGlobals();
+
+// `$` and `$$` are now their original values
+restoreGlobals();
+```
+
+This is particularly useful if you're working with other libraries that might also use `$` or `$$` as global variables.
+
+### Custom Aliases
+
+You can also choose to use Query as a custom alias:
+```javascript
+import { useAlias } from '@semantic-ui/query';
+
+const myQuery = useAlias();
+const $div = myQuery('div');
+```
+
+This approach helps avoid conflicts with other libraries while still using Query's functionality.
+
+## Global Export Options
+
+Query allows you to opt-in to exporting globals in a browser environment. You can use the `exportGlobals` function to attach `$`, `$$`, and `Query` to the global scope.
+
+```html
+<script>
+  import { exportGlobals } from 'https://unpkg.com/@semantic-ui/query';
+
+  exportGlobals({
+    $: true,
+    $$: true,
+    Query: false
+  });
+
+  // Use `$` and `$$` globally
+  $('selector');
+  $$('selector');
+</script>
+```
+
+> **Library Conflicts** If you're using multiple libraries that might use `$` as a global variable (like jQuery), you can use `$.noConflict()` to restore the original global variables and use a custom name for Query.
+
+You can use `$.noConflict()` to restore the original values of `$` and `$$` and assign Query to a different variable:
+
+```html
+<script>
+  import { exportGlobals } from 'https://unpkg.com/@semantic-ui/query';
+
+  exportGlobals();
+
+  const myQuery = $.noConflict();
+
+  // Use myQuery instead of `$`
+  myQuery('div').addClass('active');
+</script>
+```
+
+## Integration with Browser Scripts
+
+You can include Query in a browser script tag directly from a CDN:
+
+```html
+<script type="module">
+  import { $, $$ } from 'https://unpkg.com/@semantic-ui/query';
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    $('body').addClass('loaded');
+    $$('ui-component .button').on('click', () => {
+      console.log('Button clicked!');
+    });
+  });
+</script>
+```
+
+## Next Steps
+
+Now that you understand how to use Query in browser environments, you might want to explore:
+
+- [Working with Shadow DOM](/query/shadow-dom)
+- [Using Query within Components](/query/components)
+- [Chaining techniques](/query/chaining)

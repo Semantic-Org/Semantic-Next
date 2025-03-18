@@ -1,0 +1,146 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Component Integration"
+icon: box
+description: "Using Query within Component lifecycle"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Query in Components
+
+One of Query's greatest strengths is how seamlessly it integrates with Semantic UI components. This page provides a brief overview of this integration, focusing on Query-specific features.
+
+> For more detailed information about working with components and DOM manipulation, see the [Components DOM Access](/components/dom) guide.
+
+## Automatic Query Access
+
+When you're writing component code, you don't need to import Query - it's automatically available in all lifecycle callbacks and event handlers as destructured parameters.
+
+```javascript
+const createComponent = ({ $, $$ }) => ({
+  initialize() {
+    // $ and $$ are already available
+    $('.content').addClass('ready');
+  }
+});
+```
+
+## Query in Different Contexts
+
+Query is available throughout the component lifecycle.
+
+> **Lifecycle Details** For complete details about component lifecycle methods, see the [Component Lifecycle](/components/lifecycle) documentation.
+
+### Lifecycle Methods
+
+Every component lifecycle method receives `$` and `$$` automatically:
+
+```javascript
+// Component creation
+const createComponent = ({ $, $$ }) => ({
+  // $ is scoped to this component's shadow DOM
+  initialize() {
+    $('.content').addClass('ready');
+  }
+});
+
+// Other lifecycle methods
+const onCreated = ({ $, $$ }) => {
+  // Access DOM before it's visible
+  $('div').data('initialized', true);
+};
+
+const onRendered = ({ $, $$, isClient }) => {
+  // Only run DOM manipulation on the client
+  if(isClient) {
+    $('.animation').addClass('fade-in');
+  }
+};
+```
+
+### Event Handlers
+
+Event handlers also receive `$` and `$$` automatically:
+
+```javascript
+const events = {
+  'click .toggle'({ $, target }) {
+    // Toggle state
+    $(target).toggleClass('active');
+  }
+};
+```
+
+## When to Use $ vs $$
+
+Within components, the decision of when to use `$` vs `$$` follows the same principles as elsewhere:
+
+- Use `$` when querying within the component's own shadow DOM (more efficient)
+- Use `$$` when you need to query across shadow boundaries (e.g., nested components)
+
+> **Shadow DOM Examples** For a detailed explanation and examples of the differences, see the [Shadow DOM documentation](/query/shadow-dom) and the [$ vs $$ example](/components/dom#example-of--vs-) in the Components DOM guide.
+
+## Working with External Components
+
+Query provides special methods to help you interact with components from outside. These methods bridge the gap between regular DOM querying and component state management.
+
+### Accessing Component Instances
+
+The `getComponent()` method gives you direct access to a component's instance:
+
+```javascript
+// Get the menu component from anywhere in your code
+const menu = $('ui-menu').getComponent();
+
+// Now you can call its methods directly
+if(menu) {
+  menu.select(3);
+  menu.open();
+}
+```
+
+> **Component Access** For more details on this approach, see the [Accessing Components](/components/dom#accessing-components) section of the Components DOM guide.
+
+### Component Configuration Methods
+
+Query provides two key methods for configuring components:
+
+#### settings()
+
+For configuring components that already exist in the DOM:
+
+```javascript
+$('ui-panel').settings({
+  resizable: true,
+  minSize: '100px',
+  canMinimize: true,
+  direction: 'horizontal'
+});
+```
+
+#### initialize()
+
+For configuring components before they're added to the DOM:
+
+```javascript
+// Configure components before they exist
+$('ui-panel').initialize({
+  naturalSize: '200px',
+  canMinimize: false,
+  getNaturalSize: (panel, { direction }) => {
+    // Calculate dynamic size based on direction
+    return direction === 'horizontal' ? '300px' : '150px';
+  }
+});
+```
+
+> **Component Settings** For more details on these methods, see the [settings](/components/dom#settings) and [initialize](/components/dom#initialize) sections in the Components DOM guide. Each component has its own specific settings - always check the component's documentation for available options.
+
+## Next Steps
+
+Now that you understand how Query integrates with components, you might want to explore:
+
+- [Complete Component DOM guide](/components/dom) for more details on DOM manipulation in components
+- [Working with Shadow DOM](/query/shadow-dom) for more on accessing elements in shadow DOMs
+- [Chaining techniques](/query/chaining) for efficient query operations
+- [Browser usage](/query/browser) for using Query outside of components

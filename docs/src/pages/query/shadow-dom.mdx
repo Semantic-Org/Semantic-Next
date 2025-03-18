@@ -1,0 +1,91 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Shadow DOM"
+icon: layers
+description: "Working with Shadow DOM using the $$ function"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Working with Shadow DOM
+
+Web components use Shadow DOM to encapsulate their internal structure, styles, and behavior. This encapsulation is great for building reusable components, but it creates a challenge when you need to select or manipulate elements inside them.
+
+The `$$` function is designed specifically to help you work with elements across shadow DOM boundaries.
+
+> **API Details** For detailed API information, see the [query constructor with pierceShadow option](/api/query/basic#constructor).
+
+## The $$ Function
+
+While `$` works with the regular DOM, `$$` allows you to reach into the shadow DOM of web components. Behind the scenes, `$$` traverses through shadow roots and slot boundaries to find all matching elements, regardless of how deeply they're nested in the component hierarchy.
+
+```javascript
+import { $$ } from '@semantic-ui/query';
+
+// Select elements inside a web component's shadow DOM
+$$('ui-dropdown .option');
+```
+
+## Crossing Shadow Boundaries
+
+Standard DOM selection methods stop at shadow boundaries, but `$$` can see through them:
+
+```javascript
+// This won't find elements inside the shadow DOM
+let buttonInsideShadow = document.querySelector('ui-button .button');
+// buttonInsideShadow will be null
+
+// This will find elements inside the shadow DOM
+let shadowButton = $$('ui-button .button');
+// shadowButton will contain the button element
+```
+
+## Crossing Slotted Boundaries
+
+Web components can also use slots to allow content to be inserted from outside. When querying from inside a component, `$$` can help you access slotted content:
+
+```javascript
+// Inside a component's method
+function updateContentInSlot() {
+  // This won't work - can't see through slot
+  const slottedContent = this.shadowRoot.querySelector('slot .content');
+  
+  // This works - can access content in slots
+  const slottedContent = $$('slot .content', { root: this.shadowRoot });
+}
+```
+
+## Shadow DOM Example
+
+This example shows the difference between `$` and `$$` when used inside a web component:
+
+<PlaygroundExample height="475" id="shadow-dom" direction="horizontal"></PlaygroundExample>
+
+## How $$ Works
+
+The `$$` function works by recursively traversing the DOM tree, including:
+- Regular DOM elements
+- Shadow roots of web components
+- Slotted content elements
+
+This allows you to write simple selector queries that work across all types of DOM boundaries, making it much easier to work with complex web component hierarchies.
+
+## When to Use $$
+
+> **Performance** Because `$$` needs to recursively search through shadow DOM trees, it's more resource-intensive than `$`. For most applications, this difference is negligible, but in performance-critical code or when working with very large DOM trees, be mindful of this trade-off.
+
+Use `$$` when:
+
+1. You need to select elements inside web components
+2. You're working with nested component structures 
+3. You need to access content distributed via slots
+4. You're unsure about the DOM structure and need a reliable query
+
+Otherwise, stick with the regular `$` function for better performance.
+
+## Next Steps
+
+Now that you understand how to work with shadow DOM using `$$`, you might want to explore:
+
+- [Using Query within Components](/query/components)
+- [Chaining techniques](/query/chaining)
+- [Browser usage](/query/browser)

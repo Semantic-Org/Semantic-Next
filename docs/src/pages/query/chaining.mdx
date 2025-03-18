@@ -1,0 +1,150 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Chaining"
+icon: link
+description: "Efficiently chaining Query methods"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Chaining Methods
+
+One of Query's most powerful features is method chaining. Instead of storing intermediate results in variables, you can connect multiple operations in a single fluid sequence:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// Without chaining
+const divs = $('div');
+divs.addClass('active');
+divs.css('color', 'blue');
+
+// With chaining
+$('div')
+  .addClass('active')
+  .css('color', 'blue');
+```
+
+This approach leads to more concise and readable code, especially when performing several operations on the same set of elements.
+
+## How Chaining Works
+
+Most Query methods return the Query object itself, allowing you to call another method right away:
+
+```javascript
+$('button')
+  .addClass('active')     // Returns the Query object
+  .css('color', 'white')  // Called on the returned object
+  .on('click', function() {
+    // Do something when clicked
+  });
+```
+
+Each method in the chain operates on the result of the previous method, creating a pipeline of operations.
+
+## Types of Methods in a Chain
+
+Query methods generally fall into three categories:
+
+### Traversal Methods
+
+These methods change which elements you're working with. Think of traversal methods as moving your selection around the DOM tree.
+
+> **Traversal API References** See the API references for [filter](/api/query/iterators#filter), [find](/api/query/dom-traversal#find), [parent](/api/query/dom-traversal#parent), and more in the [DOM Traversal](/api/query/dom-traversal) section.
+
+```javascript
+// Start with all divs in the document
+$('div')
+  // Narrow down to only those with the 'container' class
+  .filter('.container')
+  // Find all paragraphs inside those containers
+  .find('p')
+  // Now we're working with the paragraphs
+```
+
+### Manipulation Methods
+
+These methods change something about the selected elements but keep the same selection. These are great for applying multiple changes to the same elements.
+
+> **Manipulation API References** See the API references for [addClass](/api/query/css#addclass), [attr](/api/query/attributes#attr), [css](/api/query/css#css), and similar methods in the [CSS](/api/query/css) and [Attributes](/api/query/attributes) sections.
+
+```javascript
+$('button')
+  .addClass('primary')    // Still selecting buttons
+  .attr('disabled', true) // Still the same buttons
+  .css('opacity', '0.5')  // Still working with those buttons
+```
+
+### Terminating Methods
+
+Some methods break the chain by returning something other than a Query object. Terminating methods are typically used at the end of a chain when you need to get a value.
+
+> **Terminating References** See the API references for [text](/api/query/content#text), [get](/api/query/utilities#get), and [hasClass](/api/query/css#hasclass).
+
+```javascript
+// This returns a string, not a Query object
+const text = $('p').text();
+
+// This returns a DOM element, not a Query object
+const buttonElement = $('button').get(0);
+
+// This returns a boolean, not a Query object
+const hasClass = $('div').hasClass('active');
+```
+
+## Using .end() to Return to Previous Selection
+
+Sometimes you need to go back up the chain to a previous selection. The `.end()` method lets you return to the selection before the last traversal method. This saves you from having to make multiple separate selections.
+
+> **DOM API Reference** For more on DOM manipulation methods like [html](/api/query/content#html) and DOM traversal, see the [API reference](/api/query).
+
+```javascript
+$('.card')
+  .addClass('highlighted')         // Add class to cards
+  .find('.title')                  // Switch to titles within cards
+    .css('font-weight', 'bold')    // Bold the titles
+  .end()                           // Go back to the card selection
+  .find('.content')                // Now find content within cards
+    .html('<p>New content</p>');   // Change the HTML
+```
+
+## Practical Examples
+
+### Example 1: Form Validation
+
+```javascript
+$('form')
+  .on('submit', function(e) {
+    e.preventDefault();
+    
+    $(this)
+      .find('input')
+        .filter(':invalid')
+        .addClass('error')
+      .end()
+      .filter(':valid')
+        .addClass('success');
+  });
+```
+
+### Example 2: Creating UI Components
+
+```javascript
+// Create a notification and add it to the page
+$('<div>')
+  .addClass('notification')
+  .html('<p>Operation successful!</p><button class="close">×</button>')
+  .appendTo('body')
+  .on('click', '.close', function() {
+    $(this).closest('.notification').remove();
+  });
+```
+
+> When building chains, think about the most efficient order of operations. For example, filtering elements before manipulating them is usually more efficient than manipulating first and then filtering.
+
+## Next Steps
+
+Now that you understand Query's chaining capabilities, you might want to explore:
+
+- [Working with Shadow DOM](/query/shadow-dom)
+- [Using Query within Components](/query/components)
+- [Browser usage](/query/browser)
