@@ -36,7 +36,7 @@ export const topbarDisplayMenu = [
 export const topbarMenu = [
   {
     _id: 'framework',
-    name: 'Authoring Guide',
+    name: 'Guide',
     url: '/introduction',
   },
   {
