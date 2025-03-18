@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/reactivity",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "A signals based reactive state management system",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
@@ -22,7 +22,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@semantic-ui/utils": "^0.10.1"
+    "@semantic-ui/utils": "^0.10.2"
   },
   "devDependencies": {
     "vitest": "^3.0.4",

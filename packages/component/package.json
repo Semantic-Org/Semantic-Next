@@ -3,7 +3,7 @@
   "description": "A framework for creating web components.",
   "author": "Jack Lukic",
   "license": "ISC",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "sideEffects": false,
   "main": "src/index.js",
   "module": "src/index.js",
@@ -32,11 +32,11 @@
     "lit": "^3.0.0"
   },
   "dependencies": {
-    "@semantic-ui/query": "^0.10.1",
-    "@semantic-ui/reactivity": "^0.10.1",
-    "@semantic-ui/renderer": "^0.10.1",
-    "@semantic-ui/templating": "^0.10.1",
-    "@semantic-ui/utils": "^0.10.1"
+    "@semantic-ui/query": "^0.10.2",
+    "@semantic-ui/reactivity": "^0.10.2",
+    "@semantic-ui/renderer": "^0.10.2",
+    "@semantic-ui/templating": "^0.10.2",
+    "@semantic-ui/utils": "^0.10.2"
   },
   "devDependencies": {
     "esbuild": "^0.25.1",
