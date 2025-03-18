@@ -97,6 +97,10 @@ function updateDependencyVersions(packageJson, newVersion) {
 // Async function to publish a package
 async function publishPackage(dir) {
   const packageJsonPath = join(dir, 'package.json');
+  // second failsafe check for internal packages
+  if(dir.includes('internal-packages')) {
+    return;
+  }
   if (existsSync(packageJsonPath)) {
     const packageJson = loadJsonFile(packageJsonPath);
     packageJson.version = newVersion; // Update the package version
@@ -121,8 +125,8 @@ async function publishPackage(dir) {
 }
 
 // Read workspaces to publish from main package
-const workspaceGlobs = mainPackageJson.workspaces;
-
+// ignoring internal packages
+const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('internal-packages'));
 (async () => {
   await handleVersionBump();
 
