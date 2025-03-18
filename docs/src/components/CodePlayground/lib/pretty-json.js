@@ -34,12 +34,13 @@ class PrettyJSON extends HTMLElement {
     :host {
       --arrow-color: #444444;
       --arrow-color-hover: #888888;
-      --brace-color: #444444;
+      --brace-color: transparent;
       --bracket-color: #444444;
       --null-color: #444444;
       --comma-color: #444444;
       --ellipsus-color: #444444;
-      --key-color: #C69FF1;
+      --key-color: #444444;
+      --key-name-color: #C69FF1;
       --ellipsis-color: #444444;
       --ellipsis-color-hover: #58C1FE;
       --string-color: #58C1FE;
@@ -66,24 +67,29 @@ class PrettyJSON extends HTMLElement {
       margin-right: 0.5rem;
       padding: 0;
     }
+    .key-name {
+      color: var(--key-name-color);
+    }
     .key .arrow {
       width: 10px;
-      height: 7px;
-      margin-left: -15px;
-      padding-right: 6px;
-      vertical-align: 2px;
+      height: 10px;
+      margin-left: -18px;
+      padding-right: 7px;
+      padding-top: 0px;
+      vertical-align: 0px;
+      color: var(--arrow-color);
+    }
+    .key:hover .arrow {
+      color: var(--arrow-color-hover);
     }
     .arrow .triangle {
-      fill: var(--arrow-color);
       transition: all 0.3s ease;
-    }
-    .arrow:hover .triangle {
-      fill: var(--arrow-color-hover);
     }
     .comma {
       color: var(--comma-color);
     }
     .brace {
+      display: none !important; /* this is stylistic trying it out */
       color: var(--brace-color);
     }
     .ellipsus {
@@ -106,7 +112,7 @@ class PrettyJSON extends HTMLElement {
 
     .ellipsis {
       width: 1rem;
-      padding: 0;
+      padding: 0 5px;
       font-size: 16px;
       color: var(--ellipsis-color);
     }
@@ -492,10 +498,13 @@ class PrettyJSON extends HTMLElement {
       } else if (input.length > this.#truncateStringAttributeValue) {
         container.appendChild(this.#createTruncatedStringElement(input));
       } else {
-        container.textContent = JSON.stringify(input);
+        container.textContent = input.includes("'")
+          ? `"${input}"`
+          : `'${input}'`
+        ;
       }
     } else {
-      container.textContent = JSON.stringify(input);
+      container.textContent = `${input}`;
     }
     return container;
   }
@@ -621,27 +630,34 @@ class PrettyJSON extends HTMLElement {
    * @param {{ expanded?: boolean }} [options]
    * @returns {SVGElement}
    */
-  #createArrowElement({ expanded = false } = {}) {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "100");
-    svg.setAttribute("height", "100");
-    svg.setAttribute("viewBox", "0 0 100 100");
-    svg.setAttribute("class", "arrow");
-    const polygon = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "polygon"
-    );
+  #createArrowElement({
+    expanded = false,
+    color = "currentColor",
+    size = 12
+  } = {}) {
+    // Create the SVG element
+    const svg = document.createElement('div');
 
-    polygon.setAttribute("class", "triangle");
-    polygon.setAttribute("points", "0,0 100,50 0,100");
+    // Calculate rotation based on expanded state
+    const rotation = expanded ? 90 : 0;
 
-    if (expanded) {
-      polygon.setAttribute("transform", "rotate(90 50 50)");
-    }
+    // Set the innerHTML with all attributes inline
+    svg.innerHTML = `
+      <svg
+        width="${size}"
+        height="${size}"
+        viewBox="0 0 10 10"
+        class="arrow"
+        aria-hidden="true"
+        data-expanded="${expanded}"
+        fill="${color}"
+      >
+        <path d="M3.5 1L8.5 5L3.5 9V1Z" transform="${rotation ? `rotate(${rotation} 6 6)` : ''}" />
+      </svg>
+    `;
 
-    svg.appendChild(polygon);
-
-    return svg;
+    // Return the actual SVG element, not the div container
+    return svg.firstElementChild;
   }
 
   /**
@@ -658,7 +674,7 @@ class PrettyJSON extends HTMLElement {
     }
     const keyName = document.createElement("span");
     keyName.className = "key-name";
-    keyName.textContent = JSON.stringify(key);
+    keyName.textContent = JSON.stringify(key).slice(1, -1);
     keyElement.appendChild(keyName);
     const colon = document.createElement("span");
     colon.className = "colon";
