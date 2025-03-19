@@ -13,8 +13,7 @@
         "production": "./dist/index.min.js"
       },
       "browser": "./dist/browser/index.min.js",
-      "importmap": "./dist/cdn/index.min.js",
-      "require": "./dist/index.min.js"
+      "importmap": "./dist/cdn/index.min.js"
     }
   },
   "scripts": {
