@@ -22,8 +22,6 @@ const mainPackageJsonPath = join(process.cwd(), 'package.json');
 const mainPackageJson = loadJsonFile(mainPackageJsonPath);
 let newVersion = mainPackageJson.version;
 
-const updatedFiles = [];
-
 // Async function to publish a package
 async function publishPackage(dir) {
   // second failsafe check for internal packages
@@ -45,12 +43,6 @@ async function publishPackage(dir) {
 const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('internal-packages'));
 (async () => {
 
-  // Update the root package-lock.json to reflect updated sub-package versions.
-  if (!dryRun) {
-    console.log('Updating root package-lock.json...');
-    await execAsync('npm install', { cwd: process.cwd() });
-  }
-
   // publishing packages
   const publishPromises = [];
   workspaceGlobs.forEach(workspaceGlob => {
@@ -61,6 +53,12 @@ const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('i
   });
   await Promise.all(publishPromises);
   console.log('All packages have been processed.');
+
+  // Update the root package-lock.json to reflect updated sub-package versions.
+  if (!dryRun) {
+    console.log('Updating root package-lock.json...');
+    await execAsync('npm install', { cwd: process.cwd() });
+  }
 
   // committing package-lock changes and tagging
   if (!dryRun) {

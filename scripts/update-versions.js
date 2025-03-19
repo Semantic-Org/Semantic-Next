@@ -25,15 +25,30 @@ const getCurrentVersionFromNpm = async (packageName) => {
   }
 };
 
-// Load the main package.json to determine the version to set
-const mainPackageJsonPath = join(process.cwd(), 'package.json');
-const mainPackageJson = loadJsonFile(mainPackageJsonPath);
-const versionArg = process.argv[2];
-const dryRun = process.argv.includes('--dry-run');
-const ciOverride = process.argv.includes('--ci');
+// determine if this dependency should have its version number updated
+const isUpdateableDep = function(dep) {
+  const specialDeps = ['@semantic-ui/astro-lit'];
+  if(specialDeps.indexOf(dep) > -1) {
+    return false;
+  }
+  return dep.startsWith('@semantic-ui/');
+}
 
-let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
-let newVersion = mainPackageJson.version;
+// Function to update dependency versions in package.json
+function updateDependencyVersions(packageJson, newVersion) {
+  console.log(`Checking deps for ${packageJson.name}`);
+  ['dependencies', 'peerDependencies'].forEach(depType => {
+    if (packageJson[depType]) {
+      Object.keys(packageJson[depType]).forEach(dep => {
+        const depVersion = `^${newVersion}`;
+        if (isUpdateableDep(dep) && packageJson[depType][dep] !== depVersion) { // Simple scope check
+          packageJson[depType][dep] = depVersion;
+          console.log(`Updated ${dep} in ${packageJson.name} to ${depVersion}`)
+        }
+      });
+    }
+  });
+}
 
 // Handle version bump
 const handleVersionBump = async () => {
@@ -69,40 +84,6 @@ const handleVersionBump = async () => {
   }
 };
 
-const updatedFiles = [];
-
-// Update the version in the main package.json if a new version is set
-if (newVersion !== mainPackageJson.version) {
-  mainPackageJson.version = newVersion;
-  if (!dryRun) {
-    writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
-  }
-  console.log(`Updated main package version to ${newVersion}`);
-  updatedFiles.push(mainPackageJsonPath);
-}
-
-// determine if this dependency should have its version number updated
-const isUpdateableDep = function(dep) {
-  const specialDeps = ['@semantic-ui/astro-lit'];
-  if(specialDeps.indexOf(dep) > -1) {
-    return false;
-  }
-  return dep.startsWith('@semantic-ui/');
-}
-
-// Function to update dependency versions in package.json
-function updateDependencyVersions(packageJson, newVersion) {
-  ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depType => {
-    if (packageJson[depType]) {
-      Object.keys(packageJson[depType]).forEach(dep => {
-        if (isUpdateableDep(dep)) { // Simple scope check
-          packageJson[depType][dep] = `^${newVersion}`;
-        }
-      });
-    }
-  });
-}
-
 // Async function to publish a package
 async function updatePackageVersion(dir) {
   const packageJsonPath = join(dir, 'package.json');
@@ -125,6 +106,31 @@ async function updatePackageVersion(dir) {
     updatedFiles.push(packageJsonPath);
   }
 }
+
+// Load the main package.json to determine the version to set
+const mainPackageJsonPath = join(process.cwd(), 'package.json');
+const mainPackageJson = loadJsonFile(mainPackageJsonPath);
+const versionArg = process.argv[2];
+const dryRun = process.argv.includes('--dry-run');
+const ciOverride = process.argv.includes('--ci');
+
+let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
+let newVersion = mainPackageJson.version;
+
+const updatedFiles = [];
+
+// Update the version in the main package.json if a new version is set
+if (newVersion !== mainPackageJson.version) {
+  mainPackageJson.version = newVersion;
+  updateDependencyVersions(mainPackageJson, newVersion); // Update dependency versions
+  if (!dryRun) {
+    writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
+  }
+  console.log(`Updated main package version to ${newVersion}`);
+  updatedFiles.push(mainPackageJsonPath);
+}
+
+
 
 // Read workspaces to publish from main package
 // ignoring internal packages
