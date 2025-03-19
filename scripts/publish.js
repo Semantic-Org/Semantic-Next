@@ -13,114 +13,30 @@ const loadJsonFile = (filePath) => {
   return JSON.parse(readFileSync(filePath, { encoding: 'utf8' }));
 };
 
-// Get the current version from npm
-const getCurrentVersionFromNpm = async (packageName) => {
-  try {
-    const { stdout } = await execAsync(`npm show ${packageName} version`);
-    return stdout.trim();
-  }
-  catch (error) {
-    console.error(`Failed to get current version from npm: ${error.message}`);
-    process.exit(1);
-  }
-};
-
 // Load the main package.json to determine the version to set
-const mainPackageJsonPath = join(process.cwd(), 'package.json');
-const mainPackageJson = loadJsonFile(mainPackageJsonPath);
 const versionArg = process.argv[2];
 const dryRun = process.argv.includes('--dry-run');
 const ciOverride = process.argv.includes('--ci');
 
-let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
+const mainPackageJsonPath = join(process.cwd(), 'package.json');
+const mainPackageJson = loadJsonFile(mainPackageJsonPath);
 let newVersion = mainPackageJson.version;
-
-// Handle version bump
-const handleVersionBump = async () => {
-  if (['patch', 'minor', 'major'].includes(versionArg)) {
-    if (!ciOverride && (versionArg === 'minor' || versionArg === 'major')) {
-      const confirmation = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'confirm',
-          message: `You are about to perform a ${versionArg} version bump. Do you want to proceed?`,
-          default: false,
-          when: (answers) => answers.confirm,
-        },
-      ]);
-
-      if (!confirmation.confirm) {
-        console.log('Version bump canceled.');
-        process.exit(1);
-      }
-    }
-    newVersion = semver.inc(mainPackageJson.version, versionArg);
-    if (npmVersion == newVersion || semver.gt(npmVersion, newVersion)) {
-      console.error(`NPM version of ${npmVersion} is greater or equal to new version ${newVersion}`);
-      process.exit(1);
-    }
-  }
-  else if (semver.valid(versionArg)) {
-    newVersion = versionArg;
-  }
-  else if (versionArg) {
-    console.error(`Invalid version argument: ${versionArg}`);
-    process.exit(1);
-  }
-};
 
 const updatedFiles = [];
 
-// Update the version in the main package.json if a new version is set
-if (newVersion !== mainPackageJson.version) {
-  mainPackageJson.version = newVersion;
-  if (!dryRun) {
-    writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
-  }
-  console.log(`Updated main package version to ${newVersion}`);
-  updatedFiles.push(mainPackageJsonPath);
-}
-
-// Function to update dependency versions in package.json
-function updateDependencyVersions(packageJson, newVersion) {
-  ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depType => {
-    if (packageJson[depType]) {
-      Object.keys(packageJson[depType]).forEach(dep => {
-        if (dep.startsWith('@semantic-ui/')) { // Simple scope check
-          packageJson[depType][dep] = `^${newVersion}`;
-        }
-      });
-    }
-  });
-}
-
 // Async function to publish a package
 async function publishPackage(dir) {
-  const packageJsonPath = join(dir, 'package.json');
   // second failsafe check for internal packages
-  if(dir.includes('internal-packages')) {
+  if(dryRun || dir.includes('internal-packages')) {
     return;
   }
-  if (existsSync(packageJsonPath)) {
-    const packageJson = loadJsonFile(packageJsonPath);
-    packageJson.version = newVersion; // Update the package version
-    updateDependencyVersions(packageJson, newVersion); // Update dependency versions
-    if (!dryRun) {
-      writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
-    }
-    console.log(`Updated package version and dependencies in ${dir} to ${newVersion}`);
-    updatedFiles.push(packageJsonPath);
-
-    if (!dryRun) {
-      try {
-        console.log(`Publishing package in ${dir}...`);
-        await execAsync('npm publish', { cwd: dir });
-        console.log(`Successfully published package from ${dir}.`);
-      }
-      catch (error) {
-        console.error(`Failed to publish package from ${dir}: ${error.message}`);
-      }
-    }
+  try {
+    console.log(`Publishing package in ${dir}...`);
+    await execAsync('npm publish', { cwd: dir });
+    console.log(`Successfully published package from ${dir}.`);
+  }
+  catch (error) {
+    console.error(`Failed to publish package from ${dir}: ${error.message}`);
   }
 }
 
@@ -128,17 +44,6 @@ async function publishPackage(dir) {
 // ignoring internal packages
 const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('internal-packages'));
 (async () => {
-  await handleVersionBump();
-
-  const publishPromises = [];
-  workspaceGlobs.forEach(workspaceGlob => {
-    const workspaceDirs = globSync(workspaceGlob, { realpath: true });
-    workspaceDirs.forEach(dir => {
-      publishPromises.push(publishPackage(dir));
-    });
-  });
-
-  await Promise.all(publishPromises);
 
   // Update the root package-lock.json to reflect updated sub-package versions.
   if (!dryRun) {
@@ -146,11 +51,23 @@ const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('i
     await execAsync('npm install', { cwd: process.cwd() });
   }
 
-  if (!dryRun && updatedFiles.length > 0) {
+  // publishing packages
+  const publishPromises = [];
+  workspaceGlobs.forEach(workspaceGlob => {
+    const workspaceDirs = globSync(workspaceGlob, { realpath: true });
+    workspaceDirs.forEach(dir => {
+      publishPromises.push(publishPackage(dir));
+    });
+  });
+  await Promise.all(publishPromises);
+  console.log('All packages have been processed.');
+
+  // committing package-lock changes and tagging
+  if (!dryRun) {
     try {
       // Stage changes
       console.log('Staging changes...');
-      await execAsync('git add ' + updatedFiles.join(' '));
+      await execAsync('git add package-lock.json');
 
       // Check if there are changes to commit
       const statusOutput = await execAsync('git status --porcelain');
@@ -179,5 +96,4 @@ const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('i
     }
   }
 
-  console.log('All packages have been processed.');
 })();

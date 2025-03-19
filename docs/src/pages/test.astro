@@ -6,9 +6,9 @@ import { TestComponent } from '@components/Test/component.js';
 ---
 <Body padded>
   <script>
-    import { $ } from 'https://unpkg.com/@semantic-ui/query'
-        $('#target').prepend('<p>Test</p>');
-        $('#target2').prepend('<span>First</span>', '<div>Second</div>', $('<p>Third</p>'));
+    import { $ } from 'https://cdn.jsdelivr.net/npm/@semantic-ui/query@latest'
+    $('#target').prepend('<p>Test</p>');
+    $('#target2').prepend('<span>First</span>', '<div>Second</div>', $('<p>Third</p>'));
   </script>
   <div id="target"></div>
   <div id="target2"></div>

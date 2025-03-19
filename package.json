@@ -20,6 +20,7 @@
     "serve": "wireit",
     "watch": "wireit",
     "publish": "wireit",
+    "update-version": "wireit",
     "test:case": "wireit",
     "prettify": "prettierx ./ --write --ignore-unknown",
     "format": "npx dprint fmt",
@@ -81,8 +82,12 @@
     "publish": {
       "command": "node ./scripts/publish.js",
       "dependencies": [
+        "update-version",
         "build"
       ]
+    },
+    "update-version": {
+      "command": "node ./scripts/update-versions.js"
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
@@ -118,8 +123,8 @@
   "workspaces": [
     "internal-packages/*",
     "packages/*",
-    "docs/*",
-    "examples/*"
+    "docs/",
+    "examples/"
   ],
   "simple-git-hooks": {
     "pre-commit": "npx dprint fmt --staged"
