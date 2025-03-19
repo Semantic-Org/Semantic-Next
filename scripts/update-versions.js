@@ -120,15 +120,13 @@ let newVersion = mainPackageJson.version;
 const updatedFiles = [];
 
 // Update the version in the main package.json if a new version is set
-if (newVersion !== mainPackageJson.version) {
-  mainPackageJson.version = newVersion;
-  updateDependencyVersions(mainPackageJson, newVersion); // Update dependency versions
-  if (!dryRun) {
-    writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
-  }
-  console.log(`Updated main package version to ${newVersion}`);
-  updatedFiles.push(mainPackageJsonPath);
+mainPackageJson.version = newVersion;
+updateDependencyVersions(mainPackageJson, newVersion); // Update dependency versions
+if (!dryRun) {
+  writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
 }
+console.log(`Updated main package version to ${newVersion}`);
+updatedFiles.push(mainPackageJsonPath);
 
 
 
@@ -149,5 +147,4 @@ const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('i
 
   await Promise.all(updatePromises);
 
-  console.log(`Updated versions of all packages to ${newVersion}`);
 })();

@@ -54,6 +54,7 @@ const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('i
   await Promise.all(publishPromises);
   console.log('All packages have been processed.');
 
+  console.log(`Updated versions of all packages to ${newVersion}`);
   // Update the root package-lock.json to reflect updated sub-package versions.
   if (!dryRun) {
     console.log('Updating root package-lock.json...');
@@ -65,7 +66,7 @@ const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('i
     try {
       // Stage changes
       console.log('Staging changes...');
-      await execAsync('git add package-lock.json');
+      await execAsync('git add ./');
 
       // Check if there are changes to commit
       const statusOutput = await execAsync('git status --porcelain');
