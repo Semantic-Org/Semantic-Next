@@ -6,85 +6,170 @@ description: "Working with Shadow DOM using the $$ function"
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Working with Shadow DOM
+## Working Across Boundaries
 
-Web components use Shadow DOM to encapsulate their internal structure, styles, and behavior. This encapsulation is great for building reusable components, but it creates a challenge when you need to select or manipulate elements inside them.
+Shadow DOM provides built in encapsulation for styles and DOM structures, which is what makes it great for building UI components that work the same regardless of environment. While this encapsulation creates modular, reusable components, it also introduces a challenge: **how do you work with elements across shadow boundaries?**
 
-The `$$` function is designed specifically to help you work with elements across shadow DOM boundaries.
+Query's `$$` solves this by recursively piercing shadow DOM and slot roots to look for a selector.
 
-> **API Details** For detailed API information, see the [query constructor with pierceShadow option](/api/query/basic#constructor).
+## Understanding the Challenge
 
-## The $$ Function
+Web components can often be deeply nested in complex applications, with multiple shadow DOM trees.
 
-While `$` works with the regular DOM, `$$` allows you to reach into the shadow DOM of web components. Behind the scenes, `$$` traverses through shadow roots and slot boundaries to find all matching elements, regardless of how deeply they're nested in the component hierarchy.
+```
+document
+└── ui-menu (shadow root)
+    └── .items
+        └── ui-button (shadow root)
+            └── .label
+```
+
+Native APIs can't see past the first shadow boundary, making it nearly impossible to access deeply nested elements without complex, brittle code.
+
+```javascript
+// Standard DOM query stops at shadow boundaries
+const button = document.querySelector('ui-button .label'); // Returns null
+
+// The element exists but is hidden inside shadow DOM
+```
+
+## The $$ Solution
+
+The `$$` function provides a unified way to query elements regardless of shadow boundaries:
 
 ```javascript
 import { $$ } from '@semantic-ui/query';
 
-// Select elements inside a web component's shadow DOM
-$$('ui-dropdown .option');
+// Query crosses shadow boundaries
+const buttonLabels = $$('ui-menu .items ui-button .label');
 ```
 
-## Crossing Shadow Boundaries
 
-Standard DOM selection methods stop at shadow boundaries, but `$$` can see through them:
+## How It Works
+
+Under the hood, `$$` performs a recursive search through:
+
+1. Regular DOM elements
+2. Shadow roots of web components
+3. Slotted content elements
+
+
+## Real-World Examples
+
+### Finding Nested UI Elements
+
+Access elements inside UI components:
 
 ```javascript
-// This won't find elements inside the shadow DOM
-let buttonInsideShadow = document.querySelector('ui-button .button');
-// buttonInsideShadow will be null
-
-// This will find elements inside the shadow DOM
-let shadowButton = $$('ui-button .button');
-// shadowButton will contain the button element
+// Find all buttons inside components
+$$('ui-menu ui-button')
+  .addClass('discovered')
+  .on('click', function() {
+    console.log('Clicked button:', $(this).text());
+  });
 ```
 
-## Crossing Slotted Boundaries
+### Working with Slotted Content
 
-Web components can also use slots to allow content to be inserted from outside. When querying from inside a component, `$$` can help you access slotted content:
+Access content that's been slotted into a component:
 
 ```javascript
-// Inside a component's method
-function updateContentInSlot() {
-  // This won't work - can't see through slot
-  const slottedContent = this.shadowRoot.querySelector('slot .content');
-  
-  // This works - can access content in slots
-  const slottedContent = $$('slot .content', { root: this.shadowRoot });
+// From outside the component
+$$('ui-card slot .title').text('Updated Card Title');
+
+// From inside the component's method
+function updateSlottedContent() {
+  // From within a component's method (using this.shadowRoot as context)
+  $$('slot .content', { root: this.shadowRoot })
+    .addClass('processed');
 }
+```
+
+### Navigating Component Hierarchies
+
+Move through component trees:
+
+```javascript
+// Find items in a menu structure
+$$('ui-menu .item.active')
+  .forEach(item => {
+    console.log('Active menu item:', item.textContent);
+  });
 ```
 
 ## Shadow DOM Example
 
-This example shows the difference between `$` and `$$` when used inside a web component:
+This interactive example demonstrates the difference between `$` and `$$` when working with web components:
 
 <PlaygroundExample height="475" id="shadow-dom" direction="horizontal"></PlaygroundExample>
 
-## How $$ Works
-
-The `$$` function works by recursively traversing the DOM tree, including:
-- Regular DOM elements
-- Shadow roots of web components
-- Slotted content elements
-
-This allows you to write simple selector queries that work across all types of DOM boundaries, making it much easier to work with complex web component hierarchies.
-
 ## When to Use $$
 
-> **Performance** Because `$$` needs to recursively search through shadow DOM trees, it's more resource-intensive than `$`. For most applications, this difference is negligible, but in performance-critical code or when working with very large DOM trees, be mindful of this trade-off.
+The `$$` function is powerful but comes with performance considerations:
+
+```javascript
+// Fast but limited to regular DOM
+$('button.primary');
+
+// More powerful but requires more processing
+$$('ui-button .label');
+```
 
 Use `$$` when:
 
-1. You need to select elements inside web components
-2. You're working with nested component structures 
-3. You need to access content distributed via slots
-4. You're unsure about the DOM structure and need a reliable query
+1. **You need to access elements inside web components**
+   ```javascript
+   $$('ui-modal .close-button').on('click', closeModal);
+   ```
 
-Otherwise, stick with the regular `$` function for better performance.
+2. **Working with nested component structures**
+   ```javascript
+   $$('ui-menu ui-button.active').css('font-weight', 'bold');
+   ```
+
+3. **Accessing elements distributed via slots**
+   ```javascript
+   $$('ui-card slot p').addClass('card-paragraph');
+   ```
+
+4. **When you're unsure about the DOM structure**
+   ```javascript
+   // This works regardless of shadow DOM boundaries
+   $$('.important-element');
+   ```
+
+## Performance Optimization
+
+When performance is critical:
+
+1. **Be specific with your selectors** to minimize the search space
+   ```javascript
+   // Better performance with more specific selector
+   $$('ui-menu.main .item');
+   ```
+
+2. **Cache results** when querying the same elements repeatedly
+   ```javascript
+   // Store for reuse
+   const $mainMenu = $$('ui-menu.main');
+
+   // Reuse the cached result
+   $mainMenu.find('.item').addClass('styled');
+   $mainMenu.find('.item.active').addClass('highlighted');
+   ```
+
+3. **Use `$` when possible** if you know you're not crossing shadow boundaries
+   ```javascript
+   // Use $ for regular DOM when you can
+   $('.sidebar').addClass('expanded');
+
+   // Use $$ only when needed
+   $$('ui-button .label');
+   ```
 
 ## Next Steps
 
-Now that you understand how to work with shadow DOM using `$$`, you might want to explore:
+Now that you understand how to work with Shadow DOM using `$$`, explore these related topics:
 
 - [Using Query within Components](/query/components)
 - [Chaining techniques](/query/chaining)

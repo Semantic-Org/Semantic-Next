@@ -6,112 +6,272 @@ description: "Using Query in browser environments"
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Browser Usage
+## Using Query in Browser Environments
 
-In a browser environment you can use `exportGlobals` to export `$` and `$$` for use in your page. 
+While Query is designed to integrate seamlessly with Semantic UI components, it's equally powerful as a standalone utility for DOM manipulation in any browser environment. This guide explains how to use Query independently in your web projects.
 
-> **Browser Helpers** For more fine-grained control see the [browser helpers](#browser-helpers) section below.
+## Global Exports
+
+The simplest way to use Query in a browser is to make the `$` and `$$` functions globally available using the `exportGlobals` function:
 
 ```javascript
 import { exportGlobals } from '@semantic-ui/query';
 
-// make `$` and `$$` available globally
+// Make Query's functions available globally
 exportGlobals();
+
+// Now you can use $ and $$ directly
+$('.button').on('click', () => console.log('Clicked!'));
+$$('ui-component .content').text('Updated content');
 ```
 
-This makes Query's functions available globally in your browser environment, similar to how jQuery works when included in a page.
+This approach allows you to use Query's functions anywhere in your code, similar to how jQuery works when included in a page.
 
-## Browser Helpers
+### Controlling What Gets Exported
 
-A few additional helpers are provided specifically for using Query in browser environments.
+You can customize which functions are exported to the global scope:
 
-> **Browser API** For more information see the [API reference](/api/query/basic).
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
 
-### Restoring Globals
+// Only export $ (not $$ or Query)
+exportGlobals({
+  $: true,
+  $$: false,
+  Query: false
+});
+```
 
-If you need to restore the previous values before calling export globals.
+This flexibility helps avoid conflicts with other libraries while still leveraging Query's capabilities.
+
+## Managing Library Conflicts
+
+If you're working in an environment with multiple libraries that use the `$` symbol (like jQuery), Query provides ways to avoid conflicts.
+
+### Restoring Global Variables
+
+You can temporarily use Query and then restore the original global variables:
+
 ```javascript
 import { exportGlobals, restoreGlobals } from '@semantic-ui/query';
 
-// `$` and `$$` are defined
+// Save the original globals and use Query globally
 exportGlobals();
 
-// `$` and `$$` are now their original values
+// Do some work with Query
+$('div').addClass('processed');
+
+// When finished, restore the original globals
 restoreGlobals();
+
+// $ and $$ now refer back to their original values
 ```
 
-This is particularly useful if you're working with other libraries that might also use `$` or `$$` as global variables.
+### No-Conflict Mode
 
-### Custom Aliases
+Similar to jQuery, Query provides a `noConflict` method to yield control of the global variables:
 
-You can also choose to use Query as a custom alias:
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+// Export Query to global scope
+exportGlobals();
+
+// Store a reference and release the global variables
+const $q = $.noConflict();
+
+// Now use $q instead of $
+$q('.content').addClass('active');
+```
+
+## Custom Aliases
+
+For maximum flexibility, you can create your own alias for Query without touching the global scope:
+
 ```javascript
 import { useAlias } from '@semantic-ui/query';
 
-const myQuery = useAlias();
-const $div = myQuery('div');
+// Create a custom alias
+const $q = useAlias();
+
+// Use your custom alias
+const $elements = $q('.element');
+$elements.addClass('selected');
 ```
 
-This approach helps avoid conflicts with other libraries while still using Query's functionality.
+This approach is ideal for modern JavaScript applications where you want to avoid global variables altogether.
 
-## Global Export Options
+## CDN Integration
 
-Query allows you to opt-in to exporting globals in a browser environment. You can use the `exportGlobals` function to attach `$`, `$$`, and `Query` to the global scope.
-
-```html
-<script>
-  import { exportGlobals } from 'https://unpkg.com/@semantic-ui/query';
-
-  exportGlobals({
-    $: true,
-    $$: true,
-    Query: false
-  });
-
-  // Use `$` and `$$` globally
-  $('selector');
-  $$('selector');
-</script>
-```
-
-> **Library Conflicts** If you're using multiple libraries that might use `$` as a global variable (like jQuery), you can use `$.noConflict()` to restore the original global variables and use a custom name for Query.
-
-You can use `$.noConflict()` to restore the original values of `$` and `$$` and assign Query to a different variable:
-
-```html
-<script>
-  import { exportGlobals } from 'https://unpkg.com/@semantic-ui/query';
-
-  exportGlobals();
-
-  const myQuery = $.noConflict();
-
-  // Use myQuery instead of `$`
-  myQuery('div').addClass('active');
-</script>
-```
-
-## Integration with Browser Scripts
-
-You can include Query in a browser script tag directly from a CDN:
+Query can be loaded directly from a CDN for quick prototyping or small projects:
 
 ```html
 <script type="module">
+  // Import from CDN
   import { $, $$ } from 'https://unpkg.com/@semantic-ui/query';
   
+  // Use Query when the DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
-    $('body').addClass('loaded');
-    $$('ui-component .button').on('click', () => {
-      console.log('Button clicked!');
-    });
+    $('.content').html('<p>Ready to go!</p>');
   });
 </script>
 ```
 
+## Integration Patterns
+
+### Stand-alone Usage
+
+Use Query as a lightweight jQuery alternative:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// DOM ready equivalent
+document.addEventListener('DOMContentLoaded', () => {
+  // Traditional DOM manipulation
+  $('.tabs')
+    .on('click', '.tab', function() {
+      // Handle tab clicks
+      $(this)
+        .addClass('active')
+        .siblings()
+        .removeClass('active');
+    });
+});
+```
+
+### Within Module Systems
+
+Use Query inside a modern JavaScript module:
+
+```javascript
+// ui-manager.js
+import { $, $$ } from '@semantic-ui/query';
+
+export class UIManager {
+  initialize() {
+    this.setupEventHandlers();
+    this.setupComponents();
+  }
+  
+  setupEventHandlers() {
+    $('.toggle-button').on('click', () => this.toggleContent());
+  }
+  
+  setupComponents() {
+    $$('ui-menu').settings({
+      vertical: true,
+      active: 0
+    });
+  }
+  
+  toggleContent() {
+    $('.content-panel').toggleClass('visible');
+  }
+}
+```
+
+### With Web Components
+
+Use Query to enhance your custom web components:
+
+```javascript
+import { $, $$ } from '@semantic-ui/query';
+
+class ExpandablePanel extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.innerHTML = `
+      <div class="panel">
+        <header class="panel-header">
+          <h3><slot name="title">Panel</slot></h3>
+          <button class="expand-toggle">+</button>
+        </header>
+        <div class="panel-content">
+          <slot></slot>
+        </div>
+      </div>
+      <style>
+        /* Styles here */
+      </style>
+    `;
+    
+    // Use $ with this.shadowRoot as the context
+    $(this.shadowRoot)
+      .find('.expand-toggle')
+      .on('click', () => this.toggleExpand());
+  }
+  
+  toggleExpand() {
+    $(this.shadowRoot)
+      .find('.panel')
+      .toggleClass('expanded');
+  }
+}
+
+customElements.define('expandable-panel', ExpandablePanel);
+```
+
+## Best Practices
+
+1. **Import Only What You Need**
+   
+   For modern applications using bundlers like webpack or Rollup, import only the specific functions you need:
+   
+   ```javascript
+   // Import only the $ function if you don't need $$
+   import { $ } from '@semantic-ui/query';
+   ```
+
+2. **Avoid Global Pollution**
+   
+   For larger applications, avoid exporting to globals and instead use modules:
+   
+   ```javascript
+   // Better for larger applications
+   import { $ } from '@semantic-ui/query';
+   
+   function setupUI() {
+     $('.content').addClass('ready');
+   }
+   ```
+
+3. **Combine with Native APIs When Appropriate**
+   
+   Query works well alongside native DOM APIs:
+   
+   ```javascript
+   // Use native methods when convenient
+   const mainElement = document.getElementById('main');
+   
+   // Then enhance with Query
+   $(mainElement)
+     .find('.content')
+     .addClass('visible');
+   ```
+
+4. **Use Performance Optimizations**
+   
+   Cache Query objects when reusing them:
+   
+   ```javascript
+   // Cache for reuse
+   const $sidebar = $('.sidebar');
+   
+   function expandSidebar() {
+     $sidebar.addClass('expanded');
+   }
+   
+   function collapseSidebar() {
+     $sidebar.removeClass('expanded');
+   }
+   ```
+
 ## Next Steps
 
-Now that you understand how to use Query in browser environments, you might want to explore:
+Now that you understand how to use Query in browser environments, explore:
 
-- [Working with Shadow DOM](/query/shadow-dom)
-- [Using Query within Components](/query/components)
-- [Chaining techniques](/query/chaining)
+- [Query basics](/query/basics) for core functionality
+- [Working with Shadow DOM](/query/shadow-dom) for advanced component interactions
+- [Method chaining techniques](/query/chaining) for efficient DOM operations
