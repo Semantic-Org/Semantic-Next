@@ -1542,12 +1542,22 @@ describe('query', () => {
         $('#target').prepend('<p>Test</p>');
         expect(document.getElementById('target').innerHTML).toBe('<p>Test</p>');
       });
+
+      it('should prepend multiple content items to the target', () => {
+        $('#target2').prepend('<span>First</span>', '<div>Second</div>', $('<em>Third</em>'));
+        expect(document.getElementById('target2').innerHTML).toBe('<em>Third</em><div>Second</div><span>First</span>');
+      });
     });
 
     describe('append', () => {
       it('should append content to the target', () => {
         $('#target').append('<p>Test</p>');
         expect(document.getElementById('target').innerHTML).toBe('<p>Test</p>');
+      });
+
+      it('should append multiple content items to the target', () => {
+        $('#target2').append('<span>First</span>', '<div>Second</div>', $('<em>Third</em>'));
+        expect(document.getElementById('target2').innerHTML).toBe('<span>First</span><div>Second</div><em>Third</em>');
       });
     });
 

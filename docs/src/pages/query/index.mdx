@@ -8,83 +8,109 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Introduction
 
-Query is a library built to make it easy to interact with a page's DOM and shadow DOM in a chainable way. Query was custom built to make it easy to handle web components and access their inner DOM trees using a single jQuery-like syntax.
+Query is a lightweight (3kb) DOM manipulation library designed to seamlessly work with both standard DOM and Shadow DOM. It provides a familiar, chainable API inspired by jQuery, while addressing the unique challenges of modern web component architecture.
 
-Query includes many helpers which make it easy to interact with web components, emit and consume events, traverse the DOM tree, retrieve common values and much more - all in a tiny 3kb package!
+Query excels at traversing and manipulating elements across component boundaries, solving one of the most common pain points when working with web components.
 
-> **API Reference** For a comprehensive explanation of all functions, visit the [API reference guide](/api/query).
+> **API Reference:** For comprehensive documentation of all functions, visit the [API reference guide](/api/query).
 
-### Why Create a Library
+### The Shadow DOM Challenge
 
-Web components are built around encapsulating portions of the DOM in the Shadow DOM, which prevent easy access or reference from other scopes.
+Web components encapsulate their internal structure using Shadow DOM, creating clear boundaries that standard DOM APIs cannot cross. This encapsulation is powerful for building isolated components, but presents challenges when you need to:
 
-Many common usage patterns for developers require traversing the DOM, but with native APIs these will stop at shadow DOM root or slotted content boundaries. Doing this deeply or recursively is basically impossible without writing your own helpers.
+- Select elements across multiple component boundaries
+- Traverse from one component into another's shadow DOM
+- Access slotted content from parent components
 
-Query gives you all the utilities like [`closest`](/api/query/dom-traversal#closest), [`find`](/api/query/dom-traversal#find), [`siblings`](/api/query/dom-traversal#siblings) across multiple web components or shadow DOM boundaries.
+With native DOM APIs, these operations stop at shadow boundaries. Query solves this by providing intuitive tools that work consistently across all DOM boundaries.
 
-## Getting Started with Query
+```javascript
+// Native APIs stop at shadow boundaries
+document.querySelector('ui-dropdown .option'); // Returns null
 
-Query provides a familiar, jQuery-like API for working with the DOM. The core function `$()` lets you select elements and perform operations on them using a chainable interface.
+// Query seamlessly crosses boundaries
+$$('ui-dropdown .option'); // Returns all matching elements
+```
 
-### Installation
+## Getting Started
+
+Install Query via npm:
 
 ```bash
 npm install @semantic-ui/query
 ```
 
-### Import and Usage
+Import and use the core functions:
 
 ```javascript
-import { $ } from '@semantic-ui/query';
+import { $, $$ } from '@semantic-ui/query';
 
-// Select elements
-const divs = $('div');
-
-// Chain operations
+// Select and manipulate standard DOM elements
 $('.content')
   .addClass('active')
   .css('color', 'blue')
   .on('click', function() {
     $(this).removeClass('active');
   });
+
+// Work with elements inside shadow DOM
+$$('ui-dropdown .option')
+  .filter(':not(.disabled)')
+  .on('click', function() {
+    console.log('Option selected:', $(this).text());
+  });
 ```
 
 ## Core Concepts
 
-Query provides two main functions:
+Query provides two powerful functions tailored to different use cases:
 
-- **[$](/query/basics)** - For querying the standard DOM tree
-- **[$$](/query/shadow-dom)** - For querying across shadow DOM boundaries
+- **[$](/query/basics)** - Efficiently queries the standard DOM tree using native DOM APIs
+- **[$$](/query/shadow-dom)** - Seamlessly queries across shadow DOM boundaries
 
-This provides you with the right tool for different scenarios.
-
-> **Performance** The `$` function uses the standard DOM APIs directly, making it faster for regular DOM queries. The `$$` function traverses shadow DOM boundaries recursively, which requires more processing. When you don't need to access shadow DOM content, using `$` will be more efficient.
+This dual approach gives you optimal performance for your specific needs. Use `$` for standard DOM operations (faster), and `$$` when you need to work across shadow DOM boundaries.
 
 ```javascript
-import { $, $$ } from '@semantic-ui/query';
+// Fast standard DOM query
+$('.card').addClass('highlighted');
 
-// Standard DOM query
-const regularDivs = $('div');
-
-// Shadow DOM query
-const shadowDivs = $$('ui-button div');
+// Cross-boundary shadow DOM query
+$$('ui-card .title').text('Updated Title');
 ```
 
-Query uses the concept of [chaining](/query/chaining), where method calls can be connected in sequence for more concise code.
+Query embraces [method chaining](/query/chaining), allowing you to perform multiple operations in a fluent, readable sequence:
+
+```javascript
+$('.user-profile')
+  .find('.avatar')
+    .attr('src', '/images/new-avatar.png')
+    .addClass('updated')
+  .end()
+  .find('.username')
+    .text('Updated Username');
+```
 
 ## Integration with Components
 
-Query is integrated into the Semantic UI component system. Both `$` and `$$` are available in all [component lifecycle callbacks](/components/lifecycle).
+Query is deeply integrated into the Semantic UI component system. Both `$` and `$$` are automatically available in all [component lifecycle methods](/components/lifecycle) and event handlers:
 
 ```javascript
 const createComponent = ({ $, $$ }) => ({
   initialize() {
-    $('div').addClass('initialized');
-
-    // Access elements deep in shadow DOM
-    const nestedElements = $$('.nested-content');
+    // Handle elements within this component
+    $('.tooltip').hide();
+    
+    // Access elements across component boundaries
+    $$('.global-notification').addClass('visible');
+  },
+  
+  events: {
+    'click .button'({ $, target }) {
+      // Easily reference the clicked element
+      $(target).addClass('clicked');
+    }
   }
 });
 ```
 
-> Learn more about using Query with components in the [Components integration guide](/query/components).
+> Explore the [Components integration guide](/query/components) to learn more about using Query within Semantic UI components.

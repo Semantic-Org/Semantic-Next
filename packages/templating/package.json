@@ -11,9 +11,9 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "development": "./src/index.js",
-      "importmap": "./dist/cdn/index.min.js",
-      "default": "./dist/index.min.js"
+      "import": "./src/index.js",
+      "browser": "./dist/browser/index.min.js",
+      "importmap": "./dist/cdn/index.min.js"
     }
   },
   "scripts": {
@@ -41,11 +41,15 @@
     "build": {
       "dependencies": [
         "build:minified",
+        "build:browser",
         "build:cdn"
       ]
     },
     "build:minified": {
       "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
+    },
+    "build:browser": {
+      "command": "node ../../internal-packages/scripts/src/do-build-browser.js"
     },
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"

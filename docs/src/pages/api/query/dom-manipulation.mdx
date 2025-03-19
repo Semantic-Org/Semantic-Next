@@ -13,13 +13,13 @@ Insert content to the end of each element in the set of matched elements.
 
 ### Syntax
 ```javascript
-$('selector').append(content)
+$('selector').append(...content)
 ```
 
 ### Parameters
 | Name    | Type                | Description                           |
 |---------|---------------------|---------------------------------------|
-| content | string, DOM Element, or Query object | The content to insert |
+| ...content | string, DOM Element, or Query object | One or more elements to insert |
 
 ### Returns
 [Query object](/query/basic#the-query-object) (for chaining).
@@ -28,8 +28,15 @@ $('selector').append(content)
 
 #### Standard
 ```javascript
-// Append a new paragraph to a div
+// Append a single element to a div
 $('div').append('<p>New content</p>');
+
+// Append multiple elements to a div
+$('div').append(
+  '<p>First paragraph</p>', 
+  '<p>Second paragraph</p>', 
+  $('<button>Click me</button>')
+);
 ```
 
 #### Shadow DOM
@@ -44,13 +51,13 @@ Insert content to the beginning of each element in the set of matched elements.
 
 ### Syntax
 ```javascript
-$('selector').prepend(content)
+$('selector').prepend(...content)
 ```
 
 ### Parameters
 | Name    | Type                | Description                           |
 |---------|---------------------|---------------------------------------|
-| content | string, DOM Element, or Query object | The content to insert |
+| ...content | string, DOM Element, or Query object | One or more elements to insert |
 
 ### Returns
 [Query object](/query/basic#the-query-object) (for chaining).
@@ -59,8 +66,15 @@ $('selector').prepend(content)
 
 #### Standard
 ```javascript
-// Prepend a new heading to a section
+// Prepend a single element to a section
 $('section').prepend('<h2>New Section Title</h2>');
+
+// Prepend multiple elements to a section
+$('section').prepend(
+  '<h2>Main Title</h2>', 
+  '<div class="subtitle">Subtitle text</div>', 
+  $('<hr>')
+);
 ```
 
 #### Shadow DOM

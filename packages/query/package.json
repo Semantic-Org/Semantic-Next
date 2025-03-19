@@ -13,8 +13,9 @@
     ".": {
       "types": "./types/index.d.ts",
       "node": "./src/node-wrapper.js",
-      "importmap": "./dist/cdn/index.min.js",
       "import": "./src/index.js",
+      "importmap": "./dist/cdn/index.min.js",
+      "browser": "./dist/browser/index.min.js",
       "require": "./dist/index.min.js"
     }
   },
@@ -40,11 +41,15 @@
     "build": {
       "dependencies": [
         "build:minified",
+        "build:browser",
         "build:cdn"
       ]
     },
     "build:minified": {
       "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
+    },
+    "build:browser": {
+      "command": "node ../../internal-packages/scripts/src/do-build-browser.js"
     },
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"
