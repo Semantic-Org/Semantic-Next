@@ -5,5 +5,11 @@ import TopBar from '@components/TopBar.astro';
 import { TestComponent } from '@components/Test/component.js';
 ---
 <Body padded>
-  <TestComponent client:only="lit"></TestComponent>
+  <script>
+    import { $ } from '@semantic-ui/query'
+        $('#target').prepend('<p>Test</p>');
+        $('#target2').prepend('<span>First</span>', '<div>Second</div>', $('<p>Third</p>'));
+  </script>
+  <div id="target"></div>
+  <div id="target2"></div>
 </Body>

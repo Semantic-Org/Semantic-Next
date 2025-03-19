@@ -212,3 +212,31 @@ $('h2').prev().css('color', 'red');
 $$('my-component').find('.shadow-heading').prev().css('margin-bottom', '5px');
 ```
 
+## end
+
+Returns to the previous set of elements in the traversal chain.
+
+### Syntax
+```javascript
+$('selector').find('childSelector').end()
+```
+
+### Parameters
+None
+
+### Returns
+[Query object](/query/basic#the-query-object) that was active before the last traversal method was used.
+
+### Usage
+
+```javascript
+// Allows working with different levels in the DOM without making multiple selections
+$('.card')
+  .addClass('highlighted')         // Add class to cards
+  .find('.title')                  // Switch to titles within cards
+    .css('font-weight', 'bold')    // Bold the titles
+    .end()                         // Go back to the card selection
+  .find('.content')                // Now find content within cards
+    .html('<p>New content</p>');   // Change the HTML
+```
+

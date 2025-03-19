@@ -8,7 +8,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## The Power of Method Chaining
 
-Method chaining is one of Query's most elegant features, allowing you to transform verbose, repetitive DOM operations into concise, readable sequences. This pattern helps you write more maintainable code while reducing the need for intermediate variables.
+Method chaining is a type of [pipe and filter](https://www.geeksforgeeks.org/pipe-and-filter-architecture-system-design/) architecture, originally pioneered by [jQuery](https://www.jquery.com) lets you manipulate a DOM element by chaining calls.
 
 ```javascript
 // Without chaining
@@ -26,17 +26,16 @@ $('button')
   .on('click', handleClick);
 ```
 
-This fluent interface creates a natural flow from one operation to the next, making your code easier to read, write, and maintain.
 
 ## How Chaining Works
 
-Method chaining works because most Query methods return the Query object itself, allowing immediate invocation of another method on the result:
+Method chaining works because the `return` of many methods in Query is the [Query Object](/api/query/) which can be passed through to another function.
 
 ```javascript
 $('.card')
-  .addClass('highlighted')  // Returns the Query object
-  .find('.title')           // Returns a new Query object with new elements
-  .css('font-weight', 'bold'); // Continues the chain
+  .addClass('highlighted')         // Returns the Query object
+  .find('.title')                  // Returns a new Query object with new elements
+    .css('font-weight', 'bold');   // Continues the chain
 ```
 
 Each method in the chain operates on the current set of elements, creating a pipeline of transformations.
@@ -51,9 +50,9 @@ These methods *change which elements you're working with*. They modify the selec
 
 ```javascript
 $('article')
-  .find('p')          // Now working with paragraphs inside articles
-  .filter(':first-child') // Now only first paragraphs
-  .next()             // Now siblings after first paragraphs
+  .find('p')                  // Now working with paragraphs inside articles
+    .filter(':first-child')   // Now only first paragraphs
+      .next()                 // Now siblings after first paragraphs
 ```
 
 Common accessor methods include:
@@ -70,9 +69,9 @@ These methods *modify the current elements* but maintain the same selection. The
 
 ```javascript
 $('button.primary')
-  .addClass('important')  // Still working with buttons
-  .attr('disabled', false) // Same buttons
-  .css('border-color', 'blue') // Still the same buttons
+  .addClass('important')         // Still working with buttons
+  .attr('disabled', false)       // Same buttons
+  .css('border-color', 'blue')   // Still the same buttons
 ```
 
 Common manipulation methods include:
@@ -91,16 +90,16 @@ These methods break the chain by returning something other than a Query object. 
 
 ```javascript
 // These return values, not Query objects
-const text = $('p').text(); // Returns a string
-const hasClass = $('div').hasClass('active'); // Returns a boolean
-const htmlContent = $('.content').html(); // Returns a string
-const element = $('button').get(0); // Returns a DOM element
+const text = $('p').text();                     // Returns a string
+const hasClass = $('div').hasClass('active');   // Returns a boolean
+const htmlContent = $('.content').html();       // Returns a string
+const element = $('button').get(0);             // Returns a DOM element
 ```
 
 Common terminating methods include:
 - [`text()`](/api/query/content#text) (when getting text)
 - [`html()`](/api/query/content#html) (when getting HTML)
-- [`attr()`](/api/query/attributes#attr) (when getting one attribute)
+- [`attr()`](/api/query/attributes#attr) (when getting an attribute)
 - [`hasClass()`](/api/query/css#hasclass)
 - [`is()`](/api/query/utilities#is)
 - [`get()`](/api/query/utilities#get)
@@ -111,11 +110,11 @@ One of the most powerful features in Query's chaining system is the `.end()` met
 
 ```javascript
 $('.card')
-  .addClass('processed')      // Add class to cards
-  .find('.title')             // Now working with titles
-    .css('color', 'blue')     // Style the titles
-  .end()                      // Go back to the card selection
-  .find('.body')              // Now find the body elements
+  .addClass('processed')        // Add class to cards
+  .find('.title')               // Now working with titles
+    .css('color', 'blue')       // Style the titles
+  .end()                        // Go back to the card selection
+  .find('.body')                // Now find the body elements
     .css('line-height', '1.5'); // Style the body
 ```
 
@@ -129,12 +128,12 @@ You can chain multiple `.end()` calls to go back multiple steps:
 $('.article')
   .addClass('featured')          // Style articles
   .find('h2')                    // Move to headings
-    .addClass('article-title')   // Style headings
+    .addClass('title')           // Style headings
   .end()                         // Back to articles
   .find('p')                     // Move to paragraphs
-    .addClass('article-text')    // Style paragraphs
+    .addClass('text')            // Style paragraphs
     .find('a')                   // Move to links in paragraphs
-      .addClass('article-link')  // Style links
+      .addClass('link')          // Style links
     .end()                       // Back to paragraphs
   .end()                         // Back to articles
   .addClass('processed');        // Add another class to articles
@@ -169,13 +168,13 @@ $('<div>')
   .addClass('notification')
   .append(
     $('<h3>')
-      .addClass('notification-title')
-      .text('Update Available'),
+      .addClass('title')
+      .text('Update Available').html(),
     $('<p>')
-      .addClass('notification-body')
+      .addClass('body')
       .text('A new version is available. Please update.'),
     $('<button>')
-      .addClass('notification-close')
+      .addClass('close')
       .text('×')
       .on('click', function() {
         $(this).closest('.notification').remove();
@@ -200,82 +199,6 @@ $('.item')
       $item.addClass('attention');
     }
   });
-```
-
-## Practical Examples
-
-### Example 1: Tabbed Interface
-
-```javascript
-// Set up a tabbed interface with chaining
-$('.tab-container')
-  // Set up tabs
-  .find('.tab')
-    .on('click', function() {
-      const $tab = $(this);
-      const tabId = $tab.attr('data-tab');
-      
-      // Update tabs
-      $tab.siblings().removeClass('active');
-      $tab.addClass('active');
-      
-      // Update content
-      $tab
-        .closest('.tab-container')
-        .find('.tab-content')
-          .removeClass('active')
-        .end()
-        .find(`.tab-content[data-tab="${tabId}"]`)
-          .addClass('active');
-    })
-  .end()
-  // Activate the first tab by default
-  .find('.tab:first-child')
-    .addClass('active')
-  .end()
-  .find('.tab-content:first-child')
-    .addClass('active');
-```
-
-### Example 2: Dynamic Form Validation
-
-```javascript
-$('form')
-  // Set up validation behavior
-  .on('submit', function(e) {
-    const $form = $(this);
-    let isValid = true;
-    
-    // Validate each required field
-    $form
-      .find('[required]')
-        .each(function() {
-          const $field = $(this);
-          if (!$field.val().trim()) {
-            $field.addClass('error');
-            isValid = false;
-          } else {
-            $field.removeClass('error');
-          }
-        })
-      .end()
-      .find('.error-message')
-        .toggle(!isValid);
-    
-    if (!isValid) {
-      e.preventDefault();
-    }
-  })
-  // Set up live validation on blur
-  .find('input, select, textarea')
-    .on('blur', function() {
-      const $field = $(this);
-      if ($field.prop('required') && !$field.val().trim()) {
-        $field.addClass('error');
-      } else {
-        $field.removeClass('error');
-      }
-    });
 ```
 
 ## Chain Optimization Tips

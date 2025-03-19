@@ -8,47 +8,42 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Core Functionality
 
-Query provides a fluent, jQuery-inspired API for working with the DOM. The `$` function is your gateway to powerful DOM operations without the bulk of larger libraries.
+Query provides a fluent, chaining API for letting you get values from and update the DOM.
 
-### Selecting Elements
+> **API Reference** For a full look at available APIs in query please see the [query API docs](/api/query/)
 
-Query offers flexible ways to select and create DOM elements:
+### Query Elements
+
+Query elements can either be retrieved from the DOM using selectors, passed through from other query collections, DOM fragments, Nodelists, or just generated on the fly from stringified html.
 
 #### CSS Selectors
 
-Use familiar CSS selectors to find elements in the document:
+You can use any valid selector that would work in `document.querySelector`
 
 ```javascript
-// Select by element type
-const buttons = $('button');
+// basic
+const $buttons = $('ui-button');
 
-// Use class, ID, or attribute selectors
-const primaryButtons = $('button.primary');
-const mainHeader = $('#main-header');
-const requiredInputs = $('input[required]');
+// standard
+const $primaryButtons = $('ui-button.primary');
+const $requiredInputs = $('input[required]');
 
-// Combine selectors for more specific matching
-const navLinks = $('nav.main-nav a:not(.disabled)');
+// complex
+const $navLinks = $('nav.main-nav a:not(.disabled)');
 ```
 
 #### Creating Elements
 
-Create new DOM elements on the fly with HTML strings:
+You can specify stringified html to generate new HTML nodes on the fly to insert or manipulate.
 
 ```javascript
-// Create a simple element
-const newDiv = $('<div>');
+// simple
+const $div = $('<div>');
 
-// Create elements with attributes and content
-const notification = $('<div class="notification success">Operation completed!</div>');
-
-// Create complex nested structures
-const card = $(`
+// advanced
+const $card = $(`
   <div class="card">
-    <div class="card-header">
-      <h3>New Feature</h3>
-    </div>
-    <div class="card-body">
+    <div class="body">
       <p>This feature helps you do amazing things.</p>
       <button class="primary">Learn More</button>
     </div>
@@ -56,27 +51,42 @@ const card = $(`
 `);
 ```
 
-#### Wrapping DOM Nodes
+#### Esoteria
 
-Convert native DOM elements or collections into Query objects:
+You can use `nodeList`, `DocumentFragment` and other more advanced collections with Query
+
+```javascript title="DOM Fragment"
+const fragment = document.createDocumentFragment();
+fragment.appendChild(document.createElement('div'));
+const $fragmentContent = $(fragment);
+```
+
+```javascript title="Nodelist"
+const nodeList = document.querySelectorAll('p');
+const $paragraphs = $(nodeList);
+```
+
+#### Globals
+
+Query can also work with globals in a memory efficient way
 
 ```javascript
-// Wrap a single element
-const app = document.getElementById('app');
-$(app).addClass('initialized');
+const $window = $(window); // we dont store a copy of window
+```
 
-// Wrap multiple elements
-const listItems = document.querySelectorAll('li');
-$(listItems).addClass('listed');
+#### Existing Query Collections
 
-// Enhance an existing Query collection
-const $paragraphs = $('p');
-$($paragraphs).addClass('processed');
+You can pass query collections back into `$` to create new selectors.
+
+```javascript
+
+const $div = $('div');
+const $copy = $($div);
 ```
 
 ### Traversing the DOM
 
-Query makes DOM navigation intuitive with methods that work exactly as you'd expect:
+Query provides standard methods for querying up and down the DOM to find related DOM elements to thee one that matches a query.
 
 #### Moving Down
 
@@ -243,7 +253,7 @@ Use `$` for most cases when you're working with regular DOM elements:
 ```javascript
 // Regular DOM queries
 $('button.primary').addClass('highlighted');
-$('.sidebar').find('.widget').show();
+$('.sidebar').find('.widget').addClass('visible');
 ```
 
 The `$` function is fast and efficient, as it leverages native DOM APIs under the hood. When you don't need to access shadow DOM content, this should be your go-to tool.

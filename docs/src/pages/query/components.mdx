@@ -10,85 +10,61 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 Query is deeply woven into the fabric of Semantic UI components, giving you powerful DOM manipulation capabilities at every stage of the component lifecycle. This integration eliminates the need for manual DOM querying and simplifies common component operations.
 
-## Automatic Query Access
+## Integrated Component Framework
 
-When building Semantic UI components, you don't need to import or initialize Query — it's automatically available throughout your component code:
-
-```javascript
-// No imports needed - Query is injected automatically
-const createComponent = ({ $, $$ }) => ({
-  initialize() {
-    // Start using Query right away
-    $('.content').addClass('initialized');
-    
-    // Access elements across shadow DOM boundaries
-    $$('ui-button .label').text('Ready');
-  }
-});
-```
-
-This automatic injection reduces boilerplate and ensures consistent access to DOM utilities throughout your components.
+When building Semantic UI components, you don't need to import or initialize Query — it's automatically available throughout your component code from the [destructured lifecycle arguments](/components/lifecycle#standard-arguments)
 
 ## Component Lifecycle Integration
 
-Query is available at every stage of a component's lifecycle, enabling you to handle DOM manipulation exactly when you need it.
+You can use `$` and `$$` to access the DOM and shadow DOM in any function in your component.
 
-### Initialization Phase
-
-Set up your component when it's first created:
+### Component Instance
 
 ```javascript
-const createComponent = ({ $, $$ }) => ({
-  initialize() {
-    // Initialize component state
-    $('.tabs').each((index, tab) => {
-      $(tab).data('tab-index', index);
-    });
-    
-    // Set initial state
-    $('.tab:first-child').addClass('active');
-    $('.tab-content:first-child').show();
+const createComponent = ({ $ }) => ({
+
+  // Imperatively update the DOM in your component
+  activateTab(index) {
+    $('.tab')
+      .removeClass('active')
+      .find(`[data-index="${index}]`)
+        .addClass('active');
   }
+
+  // rest of your component
+
 });
 ```
 
-### Creation Phase
-
-Handle elements before they're connected to the DOM:
+### Rendering
 
 ```javascript
-const onCreated = ({ $, $$ }) => {
-  // Prepare component before it's visible
-  $('input').prop('disabled', true);
-  $('.placeholder').show();
+// access DOM after component is in page
+const onRendered = ({ $, isClient }) => {
+  if (isClient) {
+    const $activeTab = $('.active.tab');
+    const height = $activeTab.height();
+    $activeTab.css('min-height', `${height}px`);
+  }
 };
 ```
 
-### Rendering Phase
-
-Manipulate the DOM after rendering is complete:
+### Key Bindings
 
 ```javascript
-const onRendered = ({ $, $$, isClient }) => {
-  // Only run DOM manipulation in browser environments
-  if (isClient) {
-    // Initialize animations after rendering
-    $('.fade-in').addClass('visible');
-    
-    // Measure and position elements
-    const height = $('.content').height();
-    $('.sidebar').css('min-height', `${height}px`);
+// close tab on escape key
+const keys = {
+  'esc'({ $ }) {
+    $('.active.tab').removeClass('active');
   }
 };
 ```
 
 ### Event Handling
 
-Query is also available in all event handlers:
-
 ```javascript
 const events = {
-  'click .tab'({ $, $$, target }) {
+  'click .tab'({ $, target, self }) {
     // Deactivate all tabs
     $('.tab').removeClass('active');
     
@@ -96,9 +72,8 @@ const events = {
     $(target).addClass('active');
     
     // Show corresponding content
-    const index = $(target).data('tab-index');
-    $('.tab-content').hide();
-    $(`.tab-content[data-index="${index}"]`).show();
+    self.activateTab(index);
+
   }
 };
 ```
@@ -139,7 +114,7 @@ Choose the right tool for your use case:
    - When you're unsure about the DOM structure
 
    ```javascript
-   $$('ui-menu .item').each((i, item) => {
+   $$('ui-menu .item').each((el, index) => {
      // Work with all menu items, wherever they are
    });
    ```
@@ -150,31 +125,25 @@ Query provides special methods for working with components from the outside, bri
 
 ### Accessing Component Instances
 
-The `getComponent()` method gives you direct access to a component's API:
+The `getComponent()` method gives you direct access to a component's instance.
 
 ```javascript
 // Get a reference to the button component
-const button = $('ui-button.primary').getComponent();
+const tabs = $('ui-tabs').getComponent();
 
-// Now you can call its methods directly
-if (button) {
-  // Access the underlying component instance
-  console.log('Button is disabled:', button.isDisabled());
-  
-  // Update settings
-  button.settings.icon = 'arrow-right';
+if (tabs) {
+  const newIndex = 2;
+  tabs.setActive(newIndex);
 }
 ```
 
-This approach lets you integrate with component APIs while maintaining a clean separation of concerns.
-
 ### Component Configuration
 
-Query provides two main methods for configuring components:
+Query can also be used to modify a components [settings](/components/settings) at run time.
 
 #### settings()
 
-Configure existing components immediately:
+`settings`
 
 ```javascript
 // Configure all buttons on the page
@@ -184,95 +153,32 @@ $('ui-button').settings({
   state: 'active'
 });
 ```
+This is necessary to pass in settings that can't be serialized as attributes.
 
 #### initialize()
 
-Pre-configure components before they exist:
+`initialize` will pass in the settings after `DOMContentLoaded` which means it can be used before the component is in the page.
 
 ```javascript
-// Set up configuration that will apply to future components
-$('ui-modal').initialize({
-  icon: 'close',
+const $modal = $('ui-modal').initialize({
   closable: true,
-  state: 'active',
-  onRendered: (modal) => {
-    console.log('Modal rendered:', modal);
-  }
 });
-```
-
-This approach lets you implement configuration patterns like:
-
-```javascript
-// Configure all components at once
-$('ui-button').initialize({ icon: 'checkmark' });
-$('ui-menu').initialize({ vertical: true });
-$('ui-modal').initialize({ closable: true });
-```
-
-## Advanced Component Examples
-
-### Managing Component State
-
-```javascript
-// Component definition
-const createComponent = ({ $, $$, state }) => ({
-  initialize() {
-    // Set up using the initial state
-    this.activateTab(state.activeTab.value);
-  },
-  
-  // Component methods can use Query too
-  activateTab(index) {
-    // Update state
-    state.activeTab.set(index);
-    
-    // Update UI
-    $('.tab').removeClass('active');
-    $(`.tab[data-index="${index}"]`).addClass('active');
-    
-    // Show correct content
-    $('.content').removeClass('visible');
-    $(`.content[data-index="${index}"]`).addClass('visible');
-  }
-});
-
-// Define component with state
-defineComponent({
-  tagName: 'ui-tabs',
-  template: '...template code...',
-  defaultState: {
-    activeTab: 0
-  },
-  createComponent,
-  // Event handlers for tab clicks
-  events: {
-    'click .tab'({ $, state, self, target }) {
-      const index = $(target).data('index');
-      self.activateTab(index);
-    }
-  }
-});
-```
-
-### Using Event Handlers
-
-```javascript
-const events = {
-  'click .tab'({ $, target }) {
-    // Get tab index from data attribute
-    const index = $(target).data('index');
-    
-    // Update active tab
-    $('.tab').removeClass('active');
-    $(target).addClass('active');
-    
-    // Show corresponding content
-    $('.content').hide();
-    $(`.content[data-index="${index}"]`).show();
-  }
+showModal = () => {
+  $modal.getComponent().show();
 };
 ```
+
+This is particular useful to declaratively update the settings of many components across an app.
+
+```javascript
+// every button now has a checkmark icon
+$('ui-button').settings({ icon: 'checkmark' });
+```
+## Example
+
+The following example creates a `context-menu` on right click and positions it using `$` in the `adjustMenuPosition` method.
+
+<PlaygroundExample id="context-menu"></PlaygroundExample>
 
 ## Next Steps
 
