@@ -10,11 +10,12 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "development": "./src/index.js",
-      "import": "./src/index.js",
+      "import": {
+        "development": "./src/index.js",
+        "production": "./dist/index.min.js"
+      },
       "browser": "./dist/browser/index.min.js",
       "importmap": "./dist/cdn/index.min.js",
-      "require": "./dist/index.min.js"
     }
   },
   "scripts": {
