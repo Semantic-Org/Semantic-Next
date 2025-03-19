@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/templating",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "HTML templating system with compiler and runtime for components",
   "author": "Jack Lukic",
   "homepage": "https://next.semantic-ui.com",
@@ -28,10 +28,10 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@semantic-ui/renderer": "^0.10.2",
-    "@semantic-ui/query": "^0.10.2",
-    "@semantic-ui/reactivity": "^0.10.2",
-    "@semantic-ui/utils": "^0.10.2"
+    "@semantic-ui/renderer": "^0.10.3",
+    "@semantic-ui/query": "^0.10.3",
+    "@semantic-ui/reactivity": "^0.10.3",
+    "@semantic-ui/utils": "^0.10.3"
   },
   "devDependencies": {
     "vitest": "^3.0.4",
