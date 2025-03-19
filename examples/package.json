@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/examples",
-  "version": "0.10.3",
+  "version": "0.10.5",
   "title": "Semantic UI Next Examples",
   "description": "Sample components written using SUI",
   "homepage": "http://www.semantic-ui.com",
@@ -9,7 +9,7 @@
   "type": "module",
   "module": "./examples.js",
   "dependencies": {
-    "@semantic-ui/core": "^0.10.3",
-    "@semantic-ui/components": "^0.10.3"
+    "@semantic-ui/core": "^0.10.5",
+    "@semantic-ui/components": "^0.10.5"
   }
 }
