@@ -11,10 +11,7 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": {
-        "development": "./src/index.js",
-        "production": "./dist/index.min.js"
-      },
+      "import": "./src/index.js",
       "browser": "./dist/browser/index.min.js",
       "importmap": "./dist/cdn/index.min.js",
       "require": "./dist/index.min.js"

@@ -13,10 +13,7 @@
     ".": {
       "types": "./types/index.d.ts",
       "node": "./src/node-wrapper.js",
-      "import": {
-        "development": "./src/index.js",
-        "production": "./dist/index.min.js"
-      },
+      "import": "./src/index.js",
       "importmap": "./dist/cdn/index.min.js",
       "browser": "./dist/browser/index.min.js",
       "require": "./dist/index.min.js"
