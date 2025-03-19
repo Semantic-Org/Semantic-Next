@@ -292,10 +292,11 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   },
 
   getNaturalPanelSize(panel, { direction, minimized }) {
-    const extraSpacing = 2; // rounding
     if (direction == 'horizontal') {
+      const extraSpacing = 5; // rounding
       const scrollbarWidth = $$(panel).find('.CodeMirror-vscrollbar').width() ? 17 : 0;
-      const minWidths = [200];
+      const menuWidth = $$(panel).find('ui-menu .menu').first().width() + 11 || 0;
+      const minWidths = [200, menuWidth];
       $$(panel).find('.CodeMirror-sizer').each(sizer => {
         const sizerMargin = parseFloat($(sizer).css('margin-left'));
         const sizerWidth = parseFloat($(sizer).css('min-width'));
@@ -305,6 +306,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
       return size;
     }
     else {
+      const extraSpacing = 2; // rounding
       const labelHeight = $$(panel).find('.label').first().height() || 0;
       const menuHeight = $$(panel).find('.menu').first().height() || 0;
       if (minimized) {
