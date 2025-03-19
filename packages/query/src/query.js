@@ -44,6 +44,12 @@ export class Query {
     if (!root) {
       return;
     }
+
+    // this is an existing query object
+    if(selector instanceof Query) {
+      elements = selector;
+    }
+
     if (
       (selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])
       || selector == Query.globalThisProxy
@@ -87,6 +93,7 @@ export class Query {
     Object.assign(this, elements);
   }
 
+  /* Returns a copy of current DOM Object */
   chain(elements) {
     return (this.isGlobal && !elements)
       ? new Query(globalThis, this.options)
@@ -891,15 +898,19 @@ export class Query {
     });
   }
 
-  prepend(content) {
+  prepend(...allContent) {
     return this.each((el) => {
-      this.insertContent(el, content, 'afterbegin');
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterbegin');
+      });
     });
   }
 
-  append(content) {
+  append(...allContent) {
     return this.each((el) => {
-      this.insertContent(el, content, 'beforeend');
+      each(allContent, content => {
+        this.insertContent(el, content, 'beforeend');
+      });
     });
   }
 
