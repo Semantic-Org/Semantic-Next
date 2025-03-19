@@ -9,7 +9,10 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## New
 * Added `end()` to query to return to previous selections when chaining
+* `prepend` and `append` now can add multiple content like `$('div').prepend('<p>Hello</p>', '<p>World</p>');
 
+## Bugs
+* Fix issue when chaining using query collections made of other query collections
 
 # Version 0.10.2
 
