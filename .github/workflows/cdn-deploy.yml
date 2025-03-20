@@ -184,6 +184,12 @@ jobs:
             gsub(/LIT_VERSION/, version); 
             print
           }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template > cdn/lit/index.html
+          
+          # Create JavaScript redirect file for importmap compatibility
+          awk -v version="$LIT_VERSION" '{
+            gsub(/\${VERSION}/, version);
+            print
+          }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-root-js.template > cdn/lit/index.js
 
           # Get Lit dependencies using the script
           echo "Processing Lit dependencies..."
@@ -219,6 +225,12 @@ jobs:
                 gsub(/\${PACKAGE_NAME}/, pkgname);
                 print
               }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/index.html"
+              
+              # Create JavaScript redirect file for importmap compatibility
+              awk -v version="$DEP_VERSION" '{
+                gsub(/\${VERSION}/, version);
+                print
+              }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-root-js.template > "cdn/$dep/index.js"
             fi
           done
 
@@ -300,6 +312,12 @@ jobs:
             gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/index.html
+          
+          # Create JavaScript redirect file for importmap compatibility
+          awk -v version="$CORE_VERSION" '{
+            gsub(/\${VERSION}/, version);
+            print
+          }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-root-js.template > cdn/@semantic-ui/core/index.js
 
           # Create redirects for each package
           cd packages
@@ -316,6 +334,12 @@ jobs:
               gsub(/\${PACKAGE_NAME}/, pkgname);
               print
             }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/index.html"
+            
+            # Create JavaScript redirect file for importmap compatibility
+            awk -v version="$pkg_version" '{
+              gsub(/\${VERSION}/, version);
+              print
+            }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-root-js.template > "../cdn/@semantic-ui/$package_name/index.js"
           done
           cd ..
 
