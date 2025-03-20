@@ -7,16 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <script>
-    // By default, redirect to JS file unless ?info is in the URL
-    (function() {
-      var urlParams = new URLSearchParams(window.location.search);
-      // Only show the info page if ?info is explicitly set
-      if (!urlParams.has('info')) {
-        window.location.href = 'CORE_ENTRY';
-      }
-    })();
-  </script>
   <style>
     :root {
       --primary: #2185d0;
@@ -119,7 +109,7 @@
   <p>Or use the bare import (which will use the main entry point):</p>
   <pre><code>import { ... } from 'https://cdn.semantic-ui.com/@semantic-ui/core/CORE_VERSION/';</code></pre>
   
-  <p class="info-note"><strong>Note:</strong> By default, all paths redirect to JavaScript files. Add <code>?info</code> to URLs to see package information and directory listings.</p>
+  <p class="info-note"><strong>Note:</strong> By default, all paths redirect to JavaScript files. Add <code>?list</code> to URLs to see package information and directory listings.</p>
 
   <h2>Files</h2>
   <p>Main entry point: <a href="./CORE_ENTRY">./CORE_ENTRY</a></p>
