@@ -6,7 +6,7 @@ on:
       - 'v*'  # Push events to tags matching v*, i.e. v1.0, v20.15.10
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -82,6 +82,9 @@ jobs:
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
           mkdir -p cdn/@semantic-ui/core/latest
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION/development
+          
+          # Create a file (not directory) for version-specific redirect without trailing slash
+          touch "cdn/@semantic-ui/core/$CORE_VERSION"
 
           # Get core entry point using resolution script
           core_entry=$(node scripts/helpers/resolve-package-entry.js)
@@ -126,10 +129,17 @@ jobs:
 
           # Create latest redirect for core with proper escaping
           awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
-            gsub(/\\${VERSION}/, version); 
-            gsub(/\\${PACKAGE_NAME}/, pkgname); 
+            gsub(/\${VERSION}/, version);
+            gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/latest/index.html
+          
+          # Create version-specific redirect without trailing slash (pointing to JS file)
+          awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
+            gsub(/\${VERSION}/, version); 
+            gsub(/\${PACKAGE_NAME}/, pkgname); 
+            print
+          }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/$CORE_VERSION
 
           # Get Lit version using the script
           echo "Determining Lit version..."
@@ -146,8 +156,8 @@ jobs:
 
           # Create latest redirect for Lit with proper escaping
           awk -v version="$LIT_VERSION" -v pkgname="lit" '{
-            gsub(/\\${VERSION}/, version); 
-            gsub(/\\${PACKAGE_NAME}/, pkgname); 
+            gsub(/\${VERSION}/, version);
+            gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/lit/latest/index.html
 
@@ -180,15 +190,15 @@ jobs:
 
               # Create latest redirect with proper escaping
               awk -v version="$DEP_VERSION" -v pkgname="$dep" '{
-                gsub(/\\${VERSION}/, version);
-                gsub(/\\${PACKAGE_NAME}/, pkgname);
+                gsub(/\${VERSION}/, version);
+                gsub(/\${PACKAGE_NAME}/, pkgname);
                 print
               }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/latest/index.html"
 
               # Create root redirect with proper escaping
               awk -v version="$DEP_VERSION" -v pkgname="$dep" '{
-                gsub(/\\${VERSION}/, version);
-                gsub(/\\${PACKAGE_NAME}/, pkgname);
+                gsub(/\${VERSION}/, version);
+                gsub(/\${PACKAGE_NAME}/, pkgname);
                 print
               }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/index.html"
             fi
@@ -208,6 +218,10 @@ jobs:
             # Create directory in CDN structure including latest
             mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
             mkdir -p "../cdn/@semantic-ui/$package_name/latest"
+            
+            # Create a file (not directory) for version-specific redirect without trailing slash
+            # Using touch to create an empty file that we'll populate later
+            touch "../cdn/@semantic-ui/$package_name/$pkg_version"
 
             # Copy entire package directory
             cp -R "./$package_name/"* "../cdn/@semantic-ui/$package_name/$pkg_version/"
@@ -228,10 +242,18 @@ jobs:
 
             # Create latest redirect with proper escaping
             awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
-              gsub(/\\${VERSION}/, version);
-              gsub(/\\${PACKAGE_NAME}/, pkgname);
+              gsub(/\${VERSION}/, version);
+              gsub(/\${PACKAGE_NAME}/, pkgname);
               print
             }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/latest/index.html"
+            
+            # Create version-specific redirect without trailing slash (pointing to JS file)
+            # Using the same template as latest redirect
+            awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
+              gsub(/\${VERSION}/, version);
+              gsub(/\${PACKAGE_NAME}/, pkgname);
+              print
+            }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/$pkg_version"
           done
           cd ..
 
@@ -293,8 +315,12 @@ jobs:
 
           # Create redirects for core package
           mkdir -p cdn/@semantic-ui/core
-          # Process core-redirect template with proper escaping
-          awk -v version="$CORE_VERSION" '{gsub(/CORE_VERSION/, version); print}' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-redirect.html.template > cdn/@semantic-ui/core/index.html
+          # Use latest-redirect template instead of core-redirect to point to JS file
+          awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
+            gsub(/\${VERSION}/, version); 
+            gsub(/\${PACKAGE_NAME}/, pkgname); 
+            print
+          }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/index.html
 
           # Create redirects for each package
           cd packages
@@ -305,12 +331,12 @@ jobs:
             echo "Creating redirect for @semantic-ui/$package_name to version $pkg_version"
 
             mkdir -p "../cdn/@semantic-ui/$package_name"
-            # Create package redirect with proper escaping
-            awk -v pkgname="@semantic-ui/$package_name" -v version="$pkg_version" '{
-              gsub(/PACKAGE_NAME/, pkgname);
-              gsub(/PACKAGE_VERSION/, version);
+            # Create package redirect with proper escaping - using the same template as latest to point to JS file
+            awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
+              gsub(/\${VERSION}/, version);
+              gsub(/\${PACKAGE_NAME}/, pkgname);
               print
-            }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-redirect.html.template > "../cdn/@semantic-ui/$package_name/index.html"
+            }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/index.html"
           done
           cd ..
 
