@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/query",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "description": "DOM querying and manipulation library for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
@@ -35,7 +35,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@semantic-ui/utils": "^0.10.6"
+    "@semantic-ui/utils": "^0.10.7"
   },
   "devDependencies": {
     "vitest": "^3.0.4",
