@@ -9,7 +9,7 @@ export async function build(options = {}) {
   const {
     baseDir = process.cwd(), // Root directory of the package
     target = ['esnext'], // JavaScript target
-    minify = false, // Whether to minify
+    minify = true, // Whether to minify
     sourcemap = true, // Whether to generate sourcemaps
     format = 'esm', // Module format
     outDir = 'dist/', // Output directory
