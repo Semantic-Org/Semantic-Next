@@ -4,14 +4,12 @@ Thank you for your interest in contributing to **Semantic UI**! Contributions of
 
 ## Project Structure
 
-Semantic UI is organized as a monorepo containing multiple discrete packages:
+Semantic UI uses npm workspaces and is organized as a monorepo containing multiple discrete packages:
 
 - **`packages/`** – Core components and utilities, each published separately.
-- **`internal-packages/`** – Internal utilities and build tools.
+- **`internal-packages/`** – Scripts for building packages and forked packages used by the project.
 - **`docs/`** – Documentation website built with Astro.
-- **`examples/`** – Example projects demonstrating usage.
-
-All these packages are managed using npm workspaces.
+- **`examples/`** – Basic examples demonstrating usage. Note: for more robust examples see the docs examples in `docs/src/examples`
 
 ## Development Environment Setup
 
