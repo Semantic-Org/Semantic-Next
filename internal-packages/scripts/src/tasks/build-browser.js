@@ -8,14 +8,14 @@ import { resolve } from 'path';
 export async function build(options = {}) {
   const {
     baseDir = process.cwd(), // Root directory of the package
-    target = ['esnext'], // JavaScript target
+    target = ['chrome80', 'edge80', 'firefox78','safari14', 'ios14', 'opera67'], // JavaScript target
     minify = true, // Whether to minify
     sourcemap = true, // Whether to generate sourcemaps
     format = 'esm', // Module format
     outDir = 'dist/browser', // Output directory
     outFile = `index.min.js`, // Output filename
     entrypoint = null, // Custom entrypoint override
-    platform = 'neutral', // Target platform
+    platform = 'browser', // Target platform
     logLevel = 'info', // log level
   } = options;
 
