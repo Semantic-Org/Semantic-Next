@@ -318,5 +318,5 @@ jobs:
         with:
           folder: cdn
           branch: gh-pages
-          clean: true # One time flush
+          clean: false # when cdn deploys should preserve other tagged versions
           commit-message: "Deploy CDN for version"
