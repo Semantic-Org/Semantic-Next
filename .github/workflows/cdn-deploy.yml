@@ -235,18 +235,8 @@ jobs:
           # Run the importmap generation script
           node scripts/helpers/generate-importmap.js
 
-          # Create development importmap
-          node scripts/helpers/create-dev-importmap.js
-
           # Copy the enhanced importmap loader to CDN root
           cp scripts/helpers/importmap-loader.js cdn/importmap.js
-
-          # Create development loader
-          node scripts/helpers/create-dev-loader.js
-
-          # Copy the development importmap loader to CDN root
-          cp scripts/helpers/importmap-dev-loader.js cdn/importmap-dev.js
-
 
           ###------------------------------------###
           ###     Add Redirects for latest       ###
