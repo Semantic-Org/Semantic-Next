@@ -282,12 +282,12 @@ jobs:
           # Create README.md for the CDN using the gh-pages README
           cp $GITHUB_WORKSPACE/scripts/cdn/gh-pages/README.md cdn/README.md
           # Update the version references in the README
-          sed -i "s/\${VERSION}/$VERSION/g" cdn/README.md
+          sed -i "s/\${VERSION}/$CORE_VERSION/g" cdn/README.md
 
           # Create index file for the CDN root
           cp $GITHUB_WORKSPACE/scripts/cdn/gh-pages/index.html cdn/index.html
           # Update version references
-          sed -i "s/\${VERSION}/$VERSION/g" cdn/index.html
+          sed -i "s/\${VERSION}/$CORE_VERSION/g" cdn/index.html
           # Fix the CDN link reference
           sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
           sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
