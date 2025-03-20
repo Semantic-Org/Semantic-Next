@@ -8,10 +8,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script>
-    // Check if URL doesn't have a trailing slash and redirect to JS file
+    // By default, redirect to JS file unless ?info is in the URL
     (function() {
-      var path = window.location.pathname;
-      if (path.slice(-1) !== '/' && !path.includes('.')) {
+      var urlParams = new URLSearchParams(window.location.search);
+      // Only show the info page if ?info is explicitly set
+      if (!urlParams.has('info')) {
         window.location.href = 'PACKAGE_ENTRY';
       }
     })();
@@ -117,6 +118,8 @@
   
   <p>Or use the bare import (which will use the main entry point):</p>
   <pre><code>import { ... } from 'https://cdn.semantic-ui.com/@semantic-ui/PACKAGE_NAME/PACKAGE_VERSION/';</code></pre>
+  
+  <p class="info-note"><strong>Note:</strong> By default, all paths redirect to JavaScript files. Add <code>?info</code> to URLs to see package information and directory listings.</p>
 
   <h2>Files</h2>
   <p>Main entry point: <a href="./PACKAGE_ENTRY">./PACKAGE_ENTRY</a></p>

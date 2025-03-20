@@ -4,9 +4,11 @@
   <title>Redirecting to latest version</title>
   <script>
     // Add the appropriate meta refresh tag dynamically based on path
-    document.write('<meta http-equiv="refresh" content="0;URL=' + 
-      (window.location.pathname.includes('/latest') ? '../' : '') + 
-      '${VERSION}/index.js">');
+    var isLatestPath = window.location.pathname.includes('/latest');
+    var prefix = isLatestPath ? '../' : '';
+    var hasInfo = window.location.search.indexOf('info') !== -1;
+    var target = hasInfo ? (prefix + '${VERSION}/?info') : (prefix + '${VERSION}/index.js');
+    document.write('<meta http-equiv="refresh" content="0;URL=' + target + '">');
   </script>
   <!-- Fallback for when JavaScript is disabled -->
   <noscript>
@@ -16,17 +18,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script>
-    // Redirect to JS file directly or directory based on URL pattern
+    // Redirect to JS file by default, unless ?info is in URL
     (function() {
       var path = window.location.pathname;
-      var isLatestPath = path.includes('/latest'); 
+      var isLatestPath = path.includes('/latest');
       var prefix = isLatestPath ? '../' : '';
+      var urlParams = new URLSearchParams(window.location.search);
       
-      if (path.endsWith('/')) {
-        // Redirect to directory listing
-        window.location.href = prefix + '${VERSION}/';
+      if (urlParams.has('info')) {
+        // Show directory listing if ?info is present
+        window.location.href = prefix + '${VERSION}/?info';
       } else {
-        // Redirect to JS file
+        // Default behavior: redirect to JS file
         window.location.href = prefix + '${VERSION}/index.js';
       }
     })();
