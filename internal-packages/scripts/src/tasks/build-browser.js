@@ -8,7 +8,7 @@ import { resolve } from 'path';
 export async function build(options = {}) {
   const {
     baseDir = process.cwd(), // Root directory of the package
-    target = ['chrome80', 'edge80', 'firefox78','safari14', 'ios14', 'opera67'], // JavaScript target
+    target = ['chrome80', 'edge80', 'firefox78', 'safari14', 'ios14', 'opera67'], // JavaScript target
     minify = true, // Whether to minify
     sourcemap = true, // Whether to generate sourcemaps
     format = 'esm', // Module format
