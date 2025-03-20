@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --primary: #2185d0;
@@ -108,7 +109,7 @@
   
   <p>Or use the bare import (which will use the main entry point):</p>
   <pre><code>import { ... } from 'https://cdn.semantic-ui.com/@semantic-ui/PACKAGE_NAME/PACKAGE_VERSION/';</code></pre>
-
+  
   <h2>Files</h2>
   <p>Main entry point: <a href="./PACKAGE_ENTRY">./PACKAGE_ENTRY</a></p>
   

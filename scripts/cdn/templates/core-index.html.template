@@ -108,6 +108,8 @@
   
   <p>Or use the bare import (which will use the main entry point):</p>
   <pre><code>import { ... } from 'https://cdn.semantic-ui.com/@semantic-ui/core/CORE_VERSION/';</code></pre>
+  
+  <p class="info-note"><strong>Note:</strong> By default, all paths redirect to JavaScript files. Add <code>?list</code> to URLs to see package information and directory listings.</p>
 
   <h2>Files</h2>
   <p>Main entry point: <a href="./CORE_ENTRY">./CORE_ENTRY</a></p>

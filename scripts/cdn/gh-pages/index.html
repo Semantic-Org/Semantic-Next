@@ -300,7 +300,7 @@
 &lt;script type="importmap"&gt;
 {
   "imports": {
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/${VERSION}/src/index.js"
   }
 }
 &lt;/script&gt;
@@ -330,49 +330,49 @@
       <div class="package-grid">
         <a href="/@semantic-ui/core/" class="package-card">
           <span class="package-name">@semantic-ui/core</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">Core package with all UI components and styles</p>
         </a>
         
         <a href="/@semantic-ui/reactivity/" class="package-card">
           <span class="package-name">@semantic-ui/reactivity</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">Reactive state management primitives</p>
         </a>
         
         <a href="/@semantic-ui/component/" class="package-card">
           <span class="package-name">@semantic-ui/component</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">Web component creation utilities</p>
         </a>
         
         <a href="/@semantic-ui/query/" class="package-card">
           <span class="package-name">@semantic-ui/query</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">DOM querying and traversal utilities</p>
         </a>
         
         <a href="/@semantic-ui/templating/" class="package-card">
           <span class="package-name">@semantic-ui/templating</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">HTML templating engine</p>
         </a>
         
         <a href="/@semantic-ui/utils/" class="package-card">
           <span class="package-name">@semantic-ui/utils</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">Common utility functions</p>
         </a>
         
         <a href="/@semantic-ui/renderer/" class="package-card">
           <span class="package-name">@semantic-ui/renderer</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">Rendering utilities</p>
         </a>
         
         <a href="/@semantic-ui/specs/" class="package-card">
           <span class="package-name">@semantic-ui/specs</span>
-          <span class="package-version">v0.10.0</span>
+          <span class="package-version">v${VERSION}</span>
           <p class="package-desc">Component specifications</p>
         </a>
       </div>
@@ -387,14 +387,14 @@
         <pre><code>&lt;script type="importmap"&gt;
 {
   "imports": {
-    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js",
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js",
-    "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/0.10.0/src/index.js",
-    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js",
-    "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/0.10.0/src/index.js",
-    "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/0.10.0/src/index.js",
-    "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/0.10.0/src/index.js",
-    "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/0.10.0/src/index.js",
+    "@semantic-ui/core": "https://cdn.semantic-ui.com/@semantic-ui/core/${VERSION}/src/semantic-ui.js",
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/${VERSION}/src/index.js",
+    "@semantic-ui/query": "https://cdn.semantic-ui.com/@semantic-ui/query/${VERSION}/src/index.js",
+    "@semantic-ui/reactivity": "https://cdn.semantic-ui.com/@semantic-ui/reactivity/${VERSION}/src/index.js",
+    "@semantic-ui/renderer": "https://cdn.semantic-ui.com/@semantic-ui/renderer/${VERSION}/src/index.js",
+    "@semantic-ui/specs": "https://cdn.semantic-ui.com/@semantic-ui/specs/${VERSION}/src/index.js",
+    "@semantic-ui/templating": "https://cdn.semantic-ui.com/@semantic-ui/templating/${VERSION}/src/index.js",
+    "@semantic-ui/utils": "https://cdn.semantic-ui.com/@semantic-ui/utils/${VERSION}/src/index.js",
     "lit": "https://cdn.semantic-ui.com/lit/3.0.0/index.js",
   }
 }
@@ -426,8 +426,8 @@
       <div class="card">
         <h3>3. Direct URL Imports</h3>
         <p>Import directly with full paths if you don't want to use importmaps:</p>
-        <pre><code>import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.10.0/src/index.js';
-import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src/semantic-ui.js';</code></pre>
+        <pre><code>import { createSignal } from 'https://cdn.semantic-ui.com/@semantic-ui/reactivity/${VERSION}/src/index.js';
+import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/${VERSION}/src/semantic-ui.js';</code></pre>
       </div>
     </div>
     
@@ -444,7 +444,7 @@ import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src
   &lt;script type="importmap"&gt;
   {
     "imports": {
-      "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
+      "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/${VERSION}/src/index.js"
     }
   }
   &lt;/script&gt;
@@ -499,7 +499,7 @@ import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src
 &lt;script type="importmap"&gt;
 {
   "imports": {
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/${VERSION}/src/index.js"
   }
 }
 &lt;/script&gt;
@@ -543,7 +543,7 @@ import { Button } from 'https://cdn.semantic-ui.com/@semantic-ui/core/0.10.0/src
             content.innerHTML = `<pre><code>&lt;!-- Add this to your HTML head --&gt;
 &lt;script type="module"&gt;
   // Import directly with full URLs
-  import { defineComponent } from 'https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js';
+  import { defineComponent } from 'https://cdn.semantic-ui.com/@semantic-ui/component/${VERSION}/src/index.js';
   
   // Use the components directly
   defineComponent({

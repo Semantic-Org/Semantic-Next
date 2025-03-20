@@ -1,11 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="refresh" content="0;URL=../${VERSION}/">
   <title>Redirecting to latest version</title>
+  <script>
+    // Add the appropriate meta refresh tag dynamically based on path
+    var isLatestPath = window.location.pathname.includes('/latest');
+    var prefix = isLatestPath ? '../' : '';
+    var hasJS = window.location.search.indexOf('js') !== -1;
+    var target = hasJS ? (prefix + '${VERSION}/index.js') : (prefix + '${VERSION}/');
+    document.write('<meta http-equiv="refresh" content="0;URL=' + target + '">');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script>
+    // Redirect to JS file by default, unless ?info is in URL
+    (function() {
+      var path = window.location.pathname;
+      var isLatestPath = path.includes('/latest');
+      var prefix = isLatestPath ? '../' : '';
+      var urlParams = new URLSearchParams(window.location.search);
+      
+      if (urlParams.has('js')) {
+        // Redirect to JS file (note this will not work with importmaps because of mime type)
+        window.location.href = prefix + '${VERSION}/index.js';
+      } else {
+        // HTML list redirect behavior
+        window.location.href = prefix + '${VERSION}/';
+      }
+    })();
+  </script>
   <style>
     :root {
       --primary: #2185d0;
