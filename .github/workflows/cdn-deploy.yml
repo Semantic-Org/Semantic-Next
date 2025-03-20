@@ -1,3 +1,27 @@
+
+# CDN Deployment Workflow Summary:
+# 1. Triggered on tag push (v*)
+# 2. Sets up build environment (Node.js, dependencies)
+# 3. Creates CDN directory structure for current version
+# 4. Processes core package
+#    - Creates versioned directory and redirects
+#    - Copies package files to CDN structure
+# 5. Processes Lit and its dependencies
+#    - Creates versioned directories for each dependency
+#    - Sets up proper redirects (latest -> JS entry point)
+# 6. Processes each @semantic-ui/* package
+#    - Creates versioned directories with package contents
+#    - Sets up redirects at multiple levels:
+#      * /package/latest/ -> redirects to JS entry point
+#      * /package/latest (no slash) -> redirects to JS entry point
+#      * /package/version/ -> directory listing (HTML)
+#      * /package/version (no slash) -> redirects to JS entry point
+#      * /package/ -> redirects to JS entry point
+# 7. Rewrites imports in all packages to use absolute CDN URLs
+# 8. Generates importmaps for regular and development use
+# 9. Creates index files and supporting documentation
+# 10. Deploys to gh-pages branch with clean=false to preserve previous versions
+
 name: Deploy CDN
 
 on:
@@ -82,7 +106,7 @@ jobs:
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
           mkdir -p cdn/@semantic-ui/core/latest
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION/development
-          
+
           # Create a file (not directory) for version-specific redirect without trailing slash
           touch "cdn/@semantic-ui/core/$CORE_VERSION"
 
@@ -133,11 +157,11 @@ jobs:
             gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/latest/index.html
-          
+
           # Create version-specific redirect without trailing slash (pointing to JS file)
           awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
-            gsub(/\${VERSION}/, version); 
-            gsub(/\${PACKAGE_NAME}/, pkgname); 
+            gsub(/\${VERSION}/, version);
+            gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/$CORE_VERSION
 
@@ -218,7 +242,7 @@ jobs:
             # Create directory in CDN structure including latest
             mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
             mkdir -p "../cdn/@semantic-ui/$package_name/latest"
-            
+
             # Create a file (not directory) for version-specific redirect without trailing slash
             # Using touch to create an empty file that we'll populate later
             touch "../cdn/@semantic-ui/$package_name/$pkg_version"
@@ -246,7 +270,7 @@ jobs:
               gsub(/\${PACKAGE_NAME}/, pkgname);
               print
             }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/latest/index.html"
-            
+
             # Create version-specific redirect without trailing slash (pointing to JS file)
             # Using the same template as latest redirect
             awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
@@ -317,8 +341,8 @@ jobs:
           mkdir -p cdn/@semantic-ui/core
           # Use latest-redirect template instead of core-redirect to point to JS file
           awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
-            gsub(/\${VERSION}/, version); 
-            gsub(/\${PACKAGE_NAME}/, pkgname); 
+            gsub(/\${VERSION}/, version);
+            gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/index.html
 
@@ -383,19 +407,10 @@ jobs:
             ls -la cdn/@semantic-ui/ | head -n 10
           fi
 
-      # Upload CDN artifact for deployment
-      - name: Upload CDN artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./cdn
-          name: github-pages
-          # Don't clean up existing files - this is critical for maintaining previous versions
-          # The GitHub Pages action will merge the content with existing files
-          # rather than replacing everything
-
-      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        # This deployment preserves files not included in this artifact
-        # which allows us to maintain all historical package versions
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: cdn
+          branch: gh-pages
+          clean: false # Needed to preserve old versions on CDN
+          commit-message: "Deploy CDN for version ${GITHUB_REF#refs/tags/v}"
