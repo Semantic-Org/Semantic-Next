@@ -5,12 +5,28 @@ import TopBar from '@components/TopBar.astro';
 import { TestComponent } from '@components/Test/component.js';
 ---
 <Body padded>
-  <script>
-    import { $ } from 'https://unpkg.com/@semantic-ui/query';
-    console.log($);
-    $('#target').prepend('<p>Test</p>');
-    $('#target2').prepend('<span>First</span>', '<div>Second</div>', $('<p>Third</p>'));
-  </script>
-  <div id="target"></div>
-  <div id="target2"></div>
+<!-- Add this to your HTML head -->
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.6/dist/browser/index.min.js"
+  }
+}
+</script>
+
+<!-- Then import anywhere in your code -->
+<script type="module">
+  import { defineComponent } from '@semantic-ui/component';
+
+  defineComponent({
+    tagName: 'current-time',
+    template: `Time is <b>{formatDate time "h:mm:ss a"}</b>`,
+    css: 'b { color: blue; }',
+    defaultState: { time: new Date() },
+    onCreated({state}) {
+      setInterval(() => state.time.now(), 1000);
+    }
+  });
+</script>
+<current-time></current-time>
 </Body>
