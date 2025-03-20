@@ -98,21 +98,9 @@ jobs:
           # redirects /latest to tagged folder
           cp $GITHUB_WORKSPACE/scripts/cdn/templates/latest-redirect.html.template scripts/helpers/latest-redirect.html.template
 
-          # find entrypoint for package from package.json
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/resolve-entry.js.template scripts/helpers/resolve-entry.js
-
-          # gets dep version from node_modules
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/get-dependency-version.js.template scripts/helpers/get-dependency-version.js
-
-          # currently using bundled deps. will consider revisiting cdnized bare module imports
-          # get lit deps
-          #cp $GITHUB_WORKSPACE/scripts/cdn/templates/get-lit-dependencies.js.template scripts/helpers/get-lit-dependencies.js
-          # get lit version
-          #cp $GITHUB_WORKSPACE/scripts/cdn/templates/get-lit-version.js.template scripts/helpers/get-lit-version.js
-
-
           # gets package files to copy
           cp $GITHUB_WORKSPACE/scripts/cdn/templates/get-package-files.js.template scripts/helpers/get-package-files.js
+
           ## get package.json
           cp $GITHUB_WORKSPACE/scripts/cdn/templates/resolve-package-entry.js.template scripts/helpers/resolve-package-entry.js
 

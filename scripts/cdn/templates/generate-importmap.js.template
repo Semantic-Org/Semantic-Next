@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 // Access environment variables
 const coreVersion = process.env.CORE_VERSION;
 const version = process.env.VERSION;
-const litVersion = process.env.LIT_VERSION;
 const mode = process.env.BUILD_ENV || 'production';
 
 // Import the entry resolver
@@ -19,8 +18,7 @@ import { resolveEntry } from './resolve-entry.js';
 // Since we're rewriting imports directly in files, we only need top-level package mappings
 const importmap = {
   imports: {
-    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/index.js`,
-    'lit': `https://cdn.semantic-ui.com/lit/${litVersion}/index.js`
+    '@semantic-ui/core': `https://cdn.semantic-ui.com/@semantic-ui/core/${coreVersion}/index.js`
   }
 };
 
@@ -52,74 +50,6 @@ try {
   }
 } catch (err) {
   console.error('Error reading packages directory:', err.message);
-}
-
-// Add Lit dependencies to importmap
-try {
-  // Get Lit dependencies directly from node_modules directory contents
-  const litDepsDirPath = './node_modules/lit/node_modules';
-  if (fs.existsSync(litDepsDirPath)) {
-    const potentialDeps = fs.readdirSync(litDepsDirPath)
-      .filter(dir => fs.statSync(path.join(litDepsDirPath, dir)).isDirectory())
-      .filter(dir => !dir.startsWith('.'));
-
-    console.log(`Found potential direct Lit dependencies: ${potentialDeps.join(', ')}`);
-
-    for (const dep of potentialDeps) {
-      try {
-        const depPath = path.join(litDepsDirPath, dep, 'package.json');
-        if (fs.existsSync(depPath)) {
-          const depPkgText = fs.readFileSync(depPath, 'utf8');
-          const depPkg = JSON.parse(depPkgText);
-
-          const depVersion = depPkg.version;
-          const depEntry = resolveEntry(depPkg, mode);
-
-          importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
-          console.log(`Added direct Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
-        }
-      } catch (err) {
-        console.error(`Error processing direct dependency ${dep}:`, err.message);
-      }
-    }
-  } else {
-    console.log('Lit dependencies not found in node_modules subdirectory, trying package.json');
-  }
-
-  // Also check package.json in case dependencies are hoisted
-  const litPkgPath = './node_modules/lit/package.json';
-  if (fs.existsSync(litPkgPath)) {
-    const litPkgText = fs.readFileSync(litPkgPath, 'utf8');
-    const litPkg = JSON.parse(litPkgText);
-
-    if (litPkg.dependencies) {
-      console.log(`Found dependencies in lit package.json: ${Object.keys(litPkg.dependencies).join(', ')}`);
-
-      for (const [dep, depVersionReq] of Object.entries(litPkg.dependencies)) {
-        try {
-          // Try to find at root node_modules first (hoisted dependencies)
-          const depRootPath = path.join('./node_modules', dep, 'package.json');
-          if (fs.existsSync(depRootPath)) {
-            const depPkgText = fs.readFileSync(depRootPath, 'utf8');
-            const depPkg = JSON.parse(depPkgText);
-
-            const depVersion = depPkg.version;
-            const depEntry = resolveEntry(depPkg, mode);
-
-            // Only add if not already in importmap
-            if (!importmap.imports[dep]) {
-              importmap.imports[dep] = `https://cdn.semantic-ui.com/${dep}/${depVersion}/${depEntry}`;
-              console.log(`Added hoisted Lit dependency: ${dep}@${depVersion} (${depEntry}) to importmap`);
-            }
-          }
-        } catch (err) {
-          console.error(`Error processing dependency ${dep}:`, err.message);
-        }
-      }
-    }
-  }
-} catch (err) {
-  console.error('Error processing Lit dependencies:', err.message);
 }
 
 // Write the importmap to the version-specific file
