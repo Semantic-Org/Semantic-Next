@@ -101,8 +101,10 @@ jobs:
           # gets package files to copy
           cp $GITHUB_WORKSPACE/scripts/cdn/templates/get-package-files.js.template scripts/helpers/get-package-files.js
 
-          ## get package.json
+          ## get entrypoint from package.json based on conditions
           cp $GITHUB_WORKSPACE/scripts/cdn/templates/resolve-package-entry.js.template scripts/helpers/resolve-package-entry.js
+          ## actual helper that gets entrypoint
+          cp $GITHUB_WORKSPACE/scripts/cdn/templates/resolve-entry.js.template scripts/helpers/resolve-entry.js
 
           ###----------------------------------------###
           ###    Create CDN Copy of Core Package     ###
@@ -232,6 +234,7 @@ jobs:
 
           # Create redirects for core package
           mkdir -p cdn/@semantic-ui/core
+
           # Use latest-redirect template instead of core-redirect to point to JS file
           awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
             gsub(/\${VERSION}/, version);
