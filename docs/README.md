@@ -1,54 +1,75 @@
-# Astro Starter Kit: Basics
+Semantic UI’s documentation uses Astro and can run locally:
 
-```sh
-npm create astro@latest -- --template basics
+
+```bash
+# from project root not docs root
+npm run dev
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+> Only run `npm run dev` from project root. If you run `npm run dev` from docs it will not find linked packages from monorepo.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+This command:
+- Builds and watches core packages.
+- Runs the Astro dev server at [http://localhost:4321](http://localhost:4321) with live reload.
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+To build a static copy of the docs you can run
+```bash
+npm build-docs
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+This is used during the Vercel deploy, and has slightly different behavior than the local server.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Setup dev.semantic-ui.com for Playground
 
-Any static assets, like images, can be placed in the `public/` directory.
+It is recommended to install the dummy SSL cert and modify your host files to redirect `https://dev.semantic-ui.com` for lcoal testing.
 
-## 🧞 Commands
+This will allow you to use the playground with CORS and prevetn other errors from your browser not liking you using insecure connections.
 
-All commands are run from the root of the project, from a terminal:
+### Install the SSL Certificate
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- **Windows:**
+  1. Double-click the certificate file (`cert.pem`) located in the project’s `cert` directory.
+  2. Click "Install Certificate," then choose "Local Machine" and click "Next."
+  3. Select "Place all certificates in the following store," choose "Trusted Root Certification Authorities," then click "Next" and "Finish."
 
-## 👀 Want to learn more?
+- **macOS:**
+  1. Double-click the certificate file (`cert.pem`) from the project’s `cert` directory.
+  2. Keychain Access will open. Choose "System" from the dropdown and click "Add."
+  3. Find the certificate in Keychain Access, double-click it, and set "When using this certificate" to "Always Trust."
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- **Linux (Ubuntu/Debian):**
+  1. Copy the certificate file (`cert.pem`) to `/usr/local/share/ca-certificates/`:
+
+  ```bash
+  sudo cp cert/cert.pem /usr/local/share/ca-certificates/dev-semantic-ui.crt
+  ```
+
+  2. Update the certificates:
+
+  ```bash
+  sudo update-ca-certificates
+  ```
+
+### Modify Hosts File
+
+Add a host entry to redirect `dev.semantic-ui.com` to localhost:
+
+- **Windows:** Open `Notepad` as Administrator, then open `C:\Windows\System32\drivers\etc\hosts` and add:
+
+```
+127.0.0.1 dev.semantic-ui.com
+```
+
+- **macOS/Linux:** Edit `/etc/hosts`:
+
+```bash
+sudo nano /etc/hosts
+```
+
+Then add the line:
+
+```
+127.0.0.1 dev.semantic-ui.com
+```
+
+Now, when running the docs server (`npm run dev`), you can visit [https://dev.semantic-ui.com](https://dev.semantic-ui.com) to test HTTPS locally.
