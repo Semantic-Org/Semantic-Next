@@ -25,12 +25,12 @@
       var prefix = isLatestPath ? '../' : '';
       var urlParams = new URLSearchParams(window.location.search);
       
-      if (urlParams.has('info')) {
-        // Show directory listing if ?info is present
-        window.location.href = prefix + '${VERSION}/?info';
-      } else {
-        // Default behavior: redirect to JS file
+      if (urlParams.has('js')) {
+        // Default behavior: show listing
         window.location.href = prefix + '${VERSION}/index.js';
+      } else {
+        // JS redirect behavior (note this will not work with importmaps because of mime-type)
+        window.location.href = prefix + '${VERSION}/?info';
       }
     })();
   </script>

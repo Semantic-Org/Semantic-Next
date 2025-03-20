@@ -67,6 +67,11 @@ jobs:
           # Extract version from the tag (remove the 'v' prefix)
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "Preparing CDN for version $VERSION"
+
+
+          ###----------------------------------------###
+          ###        Copy Scripts and Prepare        ###
+          ###----------------------------------------###
           
           # Create CDN directory structure
           mkdir -p cdn
@@ -86,28 +91,41 @@ jobs:
           # Create scripts/helpers directory for script templates
           mkdir -p scripts/helpers
 
-          # Copy the template files to the helpers directory
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/resolve-entry.js.template scripts/helpers/resolve-entry.js
+          # generate the importmap
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/create-dev-importmap.js.template scripts/helpers/create-dev-importmap.js
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/generate-importmap.js.template scripts/helpers/generate-importmap.js
+
+          # create importmap-loaders
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-loader.js.template scripts/helpers/importmap-loader.js
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/importmap-dev-loader.js.template scripts/helpers/importmap-dev-loader.js
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/generate-importmap.js.template scripts/helpers/generate-importmap.js
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/create-dev-importmap.js.template scripts/helpers/create-dev-importmap.js
+
+          # create importmap loader js for dev
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/create-dev-loader.js.template scripts/helpers/create-dev-loader.js
+
+          # redirects /latest to tagged folder
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/latest-redirect.html.template scripts/helpers/latest-redirect.html.template
 
-          # Copy script templates for package handling (all ESM versions)
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-version.js.template scripts/helpers/get-lit-version.js
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-dependencies.js.template scripts/helpers/get-lit-dependencies.js
+          # find entrypoint for package from package.json
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/resolve-entry.js.template scripts/helpers/resolve-entry.js
+
+          # gets dep version from node_modules
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-dependency-version.js.template scripts/helpers/get-dependency-version.js
+          # get lit deps
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-dependencies.js.template scripts/helpers/get-lit-dependencies.js
+          # get lit version
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-lit-version.js.template scripts/helpers/get-lit-version.js
+          # gets package files to copy
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/get-package-files.js.template scripts/helpers/get-package-files.js
+          ## get package.json
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/resolve-package-entry.js.template scripts/helpers/resolve-package-entry.js
+
+          ###----------------------------------------###
+          ###    Create CDN Copy of Core Package     ###
+          ###----------------------------------------###
 
           # Create core package directories
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
           mkdir -p cdn/@semantic-ui/core/latest
-          mkdir -p cdn/@semantic-ui/core/$CORE_VERSION/development
-
-          # We'll handle version-specific redirects without trailing slash via JavaScript in the HTML templates
 
           # Get core entry point using resolution script
           core_entry=$(node scripts/helpers/resolve-package-entry.js)
@@ -140,6 +158,7 @@ jobs:
 
           # Create index.js and index.html files for the core package using templates
           cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/core-index.js.template cdn/@semantic-ui/core/$CORE_VERSION/index.js
+
           # Use perl instead of sed for better handling of special characters
           perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.js
 
@@ -157,82 +176,9 @@ jobs:
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/latest/index.html
 
-          # We'll use the index.html in the directory to handle path-based redirects via JavaScript
-
-          # Get Lit version using the script
-          echo "Determining Lit version..."
-          LIT_VERSION=$(node scripts/helpers/get-lit-version.js)
-          echo "Using Lit version: $LIT_VERSION"
-
-          # Create directories for Lit
-          mkdir -p cdn/lit/$LIT_VERSION
-          mkdir -p cdn/lit/latest
-
-          # Copy Lit from node_modules (entire directory)
-          echo "Copying Lit from node_modules..."
-          cp -R ./node_modules/lit/* cdn/lit/$LIT_VERSION/
-
-          # Create latest redirect for Lit with proper escaping
-          awk -v version="$LIT_VERSION" -v pkgname="lit" '{
-            gsub(/\${VERSION}/, version);
-            gsub(/\${PACKAGE_NAME}/, pkgname);
-            print
-          }' scripts/helpers/latest-redirect.html.template > cdn/lit/latest/index.html
-
-          # Also create root redirect for Lit with proper escaping
-          awk -v version="$LIT_VERSION" '{
-            gsub(/LIT_VERSION/, version); 
-            print
-          }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template > cdn/lit/index.html
-
-          # Create JavaScript redirect file for importmap compatibility
-          awk -v version="$LIT_VERSION" '{
-            gsub(/\${VERSION}/, version);
-            print
-          }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-root-js.template > cdn/lit/index.js
-
-          # Get Lit dependencies using the script
-          echo "Processing Lit dependencies..."
-          LIT_DEPS=$(node scripts/helpers/get-lit-dependencies.js)
-
-          # Process each Lit dependency
-          for dep in $LIT_DEPS; do
-            echo "Processing Lit dependency: $dep"
-
-            # Get the dependency version using the script
-            DEP_VERSION=$(node scripts/helpers/get-dependency-version.js $dep)
-
-            if [ "$DEP_VERSION" != "unknown" ]; then
-              echo "Found dependency: $dep@$DEP_VERSION"
-
-              # Create directory structure
-              mkdir -p "cdn/$dep/$DEP_VERSION"
-              mkdir -p "cdn/$dep/latest"
-
-              # Copy entire dependency directory
-              cp -R "./node_modules/$dep/"* "cdn/$dep/$DEP_VERSION/"
-
-              # Create latest redirect with proper escaping
-              awk -v version="$DEP_VERSION" -v pkgname="$dep" '{
-                gsub(/\${VERSION}/, version);
-                gsub(/\${PACKAGE_NAME}/, pkgname);
-                print
-              }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/latest/index.html"
-
-              # Create root redirect with proper escaping
-              awk -v version="$DEP_VERSION" -v pkgname="$dep" '{
-                gsub(/\${VERSION}/, version);
-                gsub(/\${PACKAGE_NAME}/, pkgname);
-                print
-              }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/index.html"
-
-              # Create JavaScript redirect file for importmap compatibility
-              awk -v version="$DEP_VERSION" '{
-                gsub(/\${VERSION}/, version);
-                print
-              }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/package-root-js.template > "cdn/$dep/index.js"
-            fi
-          done
+          ###------------------------------------###
+          ###    Create CDN Copy of Packages     ###
+          ###------------------------------------###
 
           # Process each package in packages directory
           cd packages
@@ -248,8 +194,6 @@ jobs:
             # Create directory in CDN structure including latest
             mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
             mkdir -p "../cdn/@semantic-ui/$package_name/latest"
-
-            # We'll handle version-specific redirects without trailing slash via JavaScript in the HTML templates
 
             # Copy entire package directory
             cp -R "./$package_name/"* "../cdn/@semantic-ui/$package_name/$pkg_version/"
@@ -275,42 +219,12 @@ jobs:
               print
             }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/latest/index.html"
 
-            # We'll use the index.html in the directory to handle path-based redirects via JavaScript
           done
           cd ..
 
-
-          # Rewrite imports to use absolute CDN URLs
-          echo "Rewriting imports for CDN compatibility..."
-          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/esbuild/rewrite-imports.js.template scripts/helpers/rewrite-imports.js
-
-          # esbuild and glob are already installed as devDependencies
-
-          # Process each package directory to rewrite imports
-          export CDN_URL="https://cdn.semantic-ui.com"
-          export VERSION=$VERSION
-          export LIT_VERSION=$LIT_VERSION
-
-          echo "Starting import rewriting process..."
-          echo "Using: VERSION=$VERSION, LIT_VERSION=$LIT_VERSION"
-
-          # Process packages in order
-          echo "Processing @semantic-ui packages..."
-          node scripts/helpers/rewrite-imports.js ./cdn/@semantic-ui
-
-          echo "Processing lit package..."
-          node scripts/helpers/rewrite-imports.js ./cdn/lit
-
-          # Process Lit dependencies
-          echo "Processing Lit dependencies..."
-          for dep in $LIT_DEPS; do
-            if [ -d "./cdn/$dep" ]; then
-              echo "Processing $dep..."
-              node scripts/helpers/rewrite-imports.js "./cdn/$dep"
-            fi
-          done
-
-          echo "Import rewriting completed."
+          ###------------------------------------###
+          ###     Create Import Maps & Loader    ###
+          ###------------------------------------###
 
           # Generate production importmap
           echo "Generating importmaps for version $VERSION"
@@ -320,7 +234,6 @@ jobs:
           export VERSION=$VERSION
           export CORE_VERSION=$CORE_VERSION
           export CORE_ENTRY=$core_entry
-          export LIT_VERSION=$LIT_VERSION
 
           # Run the importmap generation script
           node scripts/helpers/generate-importmap.js
@@ -336,6 +249,11 @@ jobs:
 
           # Copy the development importmap loader to CDN root
           cp scripts/helpers/importmap-dev-loader.js cdn/importmap-dev.js
+
+
+          ###------------------------------------###
+          ###     Add Redirects for latest       ###
+          ###------------------------------------###
 
           # Create redirects for core package
           mkdir -p cdn/@semantic-ui/core
@@ -376,6 +294,10 @@ jobs:
           done
           cd ..
 
+          ###------------------------------------###
+          ###        Add Readme and CNAME        ###
+          ###------------------------------------###
+
           # Create CNAME file for GitHub Pages
           echo "cdn.semantic-ui.com" > cdn/CNAME
 
@@ -384,19 +306,13 @@ jobs:
           # Update the version references in the README
           sed -i "s/\${VERSION}/$VERSION/g" cdn/README.md
 
-          # Add development information to README
-          sed -i '/## Usage/a\\n### Development Mode\n\nFor development, use our dev import maps:\n\n```html\n<!-- Development version -->\n<script src="https://cdn.semantic-ui.com/importmap-dev.js"></script>\n\n<!-- Or manually -->\n<script type="importmap" src="https://cdn.semantic-ui.com/importmap-latest-dev.json"></script>\n```\n\nThis will load the development version of all packages, which includes more helpful warnings and debugging information.\n' cdn/README.md
-
           # Create index file for the CDN root
           cp $GITHUB_WORKSPACE/scripts/assets/gh-pages/index.html cdn/index.html
           # Update version references
-          sed -i "s/0.10.0/${VERSION}/g" cdn/index.html
+          sed -i "s/\${VERSION}/$VERSION/g" cdn/index.html
           # Fix the CDN link reference
           sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
           sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
-
-          # Add development mode information to the index page
-          sed -i '/<div class="message-header">New importmap loader available!<\/div>/a\<p>Development mode: <code>&lt;script src="https://cdn.semantic-ui.com/importmap-dev.js"&gt;&lt;/script&gt;</code> for debugging.</p>' cdn/index.html
 
           # Clean up scripts directory
           rm -rf scripts/helpers
