@@ -11,6 +11,17 @@ Semantic UI uses npm workspaces and is organized as a monorepo containing multip
 - **`docs/`** – Documentation website built with Astro.
 - **`examples/`** – Basic examples demonstrating usage. Note: for more robust examples see the docs examples in `docs/src/examples`
 
+## Tooling
+
+Tooling in development was selected for speed (Rust based when possible), and simplicity.
+
+- **Vitest** - Test runner that allows E2E Browser Testing via Playwright and Unit Testing. Pairs well with Vite
+- **Esbuild** - Rust based compilation tool, fast and elegant.
+- **Astro** - SSG used for docs. Simple and fast. Allows for running multiple frameworks (Svelte, React, Vue) inside one server which is necessary for testing web components.
+- **Vite** - Used internally by Astro
+- **Dprint** - Fast Rust based code formatter with more options than prettify
+- **simple-git-hooks** - Used to run formatters on commit. Preferred over husky for speed.
+
 ## Development Environment Setup
 
 **Prerequisites:** Ensure you have **Node.js 18+** and **npm v7+** installed.
