@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="refresh" content="0;URL=../${VERSION}/index.js">
   <title>Redirecting to latest version</title>
+  <script>
+    // Add the appropriate meta refresh tag dynamically based on path
+    document.write('<meta http-equiv="refresh" content="0;URL=' + 
+      (window.location.pathname.includes('/latest') ? '../' : '') + 
+      '${VERSION}/index.js">');
+  </script>
+  <!-- Fallback for when JavaScript is disabled -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;URL=${VERSION}/index.js">
+  </noscript>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script>
-    // Redirect to JS file directly instead of directory
+    // Redirect to JS file directly or directory based on URL pattern
     (function() {
       var path = window.location.pathname;
+      var isLatestPath = path.includes('/latest'); 
+      var prefix = isLatestPath ? '../' : '';
+      
       if (path.endsWith('/')) {
-        window.location.href = '../${VERSION}/';
+        // Redirect to directory listing
+        window.location.href = prefix + '${VERSION}/';
       } else {
-        window.location.href = '../${VERSION}/index.js';
+        // Redirect to JS file
+        window.location.href = prefix + '${VERSION}/index.js';
       }
     })();
   </script>
