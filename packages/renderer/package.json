@@ -27,6 +27,7 @@
   },
   "files": [
     "src",
+    "types",
     "dist",
     "README.md",
     "LICENSE"
