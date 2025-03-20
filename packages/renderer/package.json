@@ -5,9 +5,15 @@
   "author": "Jack Lukic",
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+
   "main": "src/index.js",
   "module": "src/index.js",
+
   "browser": "dist/browser/index.min.js",
+  "unpkg": "dist/browser/index.min.js",
+  "jsdelivr": "dist/browser/index.min.js",
+  "cdn": "dist/browser/index.min.js",
+
   "sideEffects": false,
   "types": "types/index.d.ts",
   "exports": {
