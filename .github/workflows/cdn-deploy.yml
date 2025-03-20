@@ -184,7 +184,7 @@ jobs:
             gsub(/LIT_VERSION/, version); 
             print
           }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/lit-redirect.html.template > cdn/lit/index.html
-          
+
           # Create JavaScript redirect file for importmap compatibility
           awk -v version="$LIT_VERSION" '{
             gsub(/\${VERSION}/, version);
@@ -225,7 +225,7 @@ jobs:
                 gsub(/\${PACKAGE_NAME}/, pkgname);
                 print
               }' scripts/helpers/latest-redirect.html.template > "cdn/$dep/index.html"
-              
+
               # Create JavaScript redirect file for importmap compatibility
               awk -v version="$DEP_VERSION" '{
                 gsub(/\${VERSION}/, version);
@@ -279,6 +279,39 @@ jobs:
           done
           cd ..
 
+
+          # Rewrite imports to use absolute CDN URLs
+          echo "Rewriting imports for CDN compatibility..."
+          cp $GITHUB_WORKSPACE/scripts/assets/templates/cdn/esbuild/rewrite-imports.js.template scripts/helpers/rewrite-imports.js
+
+          # esbuild and glob are already installed as devDependencies
+
+          # Process each package directory to rewrite imports
+          export CDN_URL="https://cdn.semantic-ui.com"
+          export VERSION=$VERSION
+          export LIT_VERSION=$LIT_VERSION
+
+          echo "Starting import rewriting process..."
+          echo "Using: VERSION=$VERSION, LIT_VERSION=$LIT_VERSION"
+
+          # Process packages in order
+          echo "Processing @semantic-ui packages..."
+          node scripts/helpers/rewrite-imports.js ./cdn/@semantic-ui
+
+          echo "Processing lit package..."
+          node scripts/helpers/rewrite-imports.js ./cdn/lit
+
+          # Process Lit dependencies
+          echo "Processing Lit dependencies..."
+          for dep in $LIT_DEPS; do
+            if [ -d "./cdn/$dep" ]; then
+              echo "Processing $dep..."
+              node scripts/helpers/rewrite-imports.js "./cdn/$dep"
+            fi
+          done
+
+          echo "Import rewriting completed."
+
           # Generate production importmap
           echo "Generating importmaps for version $VERSION"
 
@@ -312,7 +345,7 @@ jobs:
             gsub(/\${PACKAGE_NAME}/, pkgname);
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/index.html
-          
+
           # Create JavaScript redirect file for importmap compatibility
           awk -v version="$CORE_VERSION" '{
             gsub(/\${VERSION}/, version);
@@ -334,7 +367,7 @@ jobs:
               gsub(/\${PACKAGE_NAME}/, pkgname);
               print
             }' $GITHUB_WORKSPACE/scripts/assets/templates/cdn/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/index.html"
-            
+
             # Create JavaScript redirect file for importmap compatibility
             awk -v version="$pkg_version" '{
               gsub(/\${VERSION}/, version);
