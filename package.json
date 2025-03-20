@@ -92,8 +92,8 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.10.7",
-    "@semantic-ui/specs": "^0.10.7"
+    "@semantic-ui/component": "^0.10.8",
+    "@semantic-ui/specs": "^0.10.8"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",

@@ -10,10 +10,8 @@ const execAsync = promisify(exec);
 
 // Helper function to load JSON
 const loadJsonFile = (filePath) => {
-  const file = readFileSync(filePath, { encoding: 'utf8' });
-  return (file) ? JSON.parse(file) : {};
+  return JSON.parse(readFileSync(filePath, { encoding: 'utf8' }));
 };
-
 
 // Get the current version from npm
 const getCurrentVersionFromNpm = async (packageName) => {
@@ -26,29 +24,6 @@ const getCurrentVersionFromNpm = async (packageName) => {
     process.exit(1);
   }
 };
-// Load the main package.json to determine the version to set
-const mainPackageJsonPath = join(process.cwd(), 'package.json');
-const mainPackageJson = loadJsonFile(mainPackageJsonPath);
-const versionArg = process.argv[2];
-const dryRun = process.argv.includes('--dry-run');
-const ciOverride = process.argv.includes('--ci');
-
-let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
-let newVersion = mainPackageJson.version;
-
-const updatedFiles = [];
-
-
-// Update the version in the main package.json if a new version is set
-mainPackageJson.version = newVersion;
-updateDependencyVersions(mainPackageJson, newVersion); // Update dependency versions
-if (!dryRun) {
-  writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
-}
-console.log(`Updated main package version to ${newVersion}`);
-updatedFiles.push(mainPackageJsonPath);
-
-
 
 // determine if this dependency should have its version number updated
 const isUpdateableDep = function(dep) {
@@ -131,6 +106,29 @@ async function updatePackageVersion(dir) {
     updatedFiles.push(packageJsonPath);
   }
 }
+
+// Load the main package.json to determine the version to set
+const mainPackageJsonPath = join(process.cwd(), 'package.json');
+const mainPackageJson = loadJsonFile(mainPackageJsonPath);
+const versionArg = process.argv[2];
+const dryRun = process.argv.includes('--dry-run');
+const ciOverride = process.argv.includes('--ci');
+
+let npmVersion = await getCurrentVersionFromNpm(mainPackageJson.name);
+let newVersion = mainPackageJson.version;
+
+const updatedFiles = [];
+
+// Update the version in the main package.json if a new version is set
+mainPackageJson.version = newVersion;
+updateDependencyVersions(mainPackageJson, newVersion); // Update dependency versions
+if (!dryRun) {
+  writeFileSync(mainPackageJsonPath, JSON.stringify(mainPackageJson, null, 2) + '\n');
+}
+console.log(`Updated main package version to ${newVersion}`);
+updatedFiles.push(mainPackageJsonPath);
+
+
 
 // Read workspaces to publish from main package
 // ignoring internal packages
