@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="refresh" content="0;URL=../${VERSION}/">
+  <meta http-equiv="refresh" content="0;URL=../${VERSION}/index.js">
   <title>Redirecting to latest version</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script>
+    // Redirect to JS file directly instead of directory
+    (function() {
+      var path = window.location.pathname;
+      if (path.endsWith('/')) {
+        window.location.href = '../${VERSION}/';
+      } else {
+        window.location.href = '../${VERSION}/index.js';
+      }
+    })();
+  </script>
   <style>
     :root {
       --primary: #2185d0;

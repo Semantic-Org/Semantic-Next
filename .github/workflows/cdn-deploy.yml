@@ -107,8 +107,7 @@ jobs:
           mkdir -p cdn/@semantic-ui/core/latest
           mkdir -p cdn/@semantic-ui/core/$CORE_VERSION/development
 
-          # Create a file (not directory) for version-specific redirect without trailing slash
-          touch "cdn/@semantic-ui/core/$CORE_VERSION"
+          # We'll handle version-specific redirects without trailing slash via JavaScript in the HTML templates
 
           # Get core entry point using resolution script
           core_entry=$(node scripts/helpers/resolve-package-entry.js)
@@ -158,12 +157,7 @@ jobs:
             print
           }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/latest/index.html
 
-          # Create version-specific redirect without trailing slash (pointing to JS file)
-          awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
-            gsub(/\${VERSION}/, version);
-            gsub(/\${PACKAGE_NAME}/, pkgname);
-            print
-          }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/$CORE_VERSION
+          # We'll use the index.html in the directory to handle path-based redirects via JavaScript
 
           # Get Lit version using the script
           echo "Determining Lit version..."
@@ -243,9 +237,7 @@ jobs:
             mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
             mkdir -p "../cdn/@semantic-ui/$package_name/latest"
 
-            # Create a file (not directory) for version-specific redirect without trailing slash
-            # Using touch to create an empty file that we'll populate later
-            touch "../cdn/@semantic-ui/$package_name/$pkg_version"
+            # We'll handle version-specific redirects without trailing slash via JavaScript in the HTML templates
 
             # Copy entire package directory
             cp -R "./$package_name/"* "../cdn/@semantic-ui/$package_name/$pkg_version/"
@@ -271,13 +263,7 @@ jobs:
               print
             }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/latest/index.html"
 
-            # Create version-specific redirect without trailing slash (pointing to JS file)
-            # Using the same template as latest redirect
-            awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
-              gsub(/\${VERSION}/, version);
-              gsub(/\${PACKAGE_NAME}/, pkgname);
-              print
-            }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/$pkg_version"
+            # We'll use the index.html in the directory to handle path-based redirects via JavaScript
           done
           cd ..
 
