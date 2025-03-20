@@ -398,5 +398,5 @@ jobs:
         with:
           folder: cdn
           branch: gh-pages
-          clean: false # Needed to preserve old versions on CDN
-          commit-message: "Deploy CDN for version ${GITHUB_REF#refs/tags/v}"
+          clean: true # One time flush
+          commit-message: "Deploy CDN for version"
