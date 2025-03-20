@@ -14,13 +14,12 @@ Semantic UI uses npm workspaces and is organized as a monorepo containing multip
 ## Tooling
 
 Tooling in development was selected for speed (Rust based when possible), and simplicity.
-
-- **Vitest** - Test runner that allows E2E Browser Testing via Playwright and Unit Testing. Pairs well with Vite
-- **Esbuild** - Rust based compilation tool, fast and elegant.
-- **Astro** - SSG used for docs. Simple and fast. Allows for running multiple frameworks (Svelte, React, Vue) inside one server which is necessary for testing web components.
-- **Vite** - Used internally by Astro
-- **Dprint** - Fast Rust based code formatter with more options than prettify
-- **simple-git-hooks** - Used to run formatters on commit. Preferred over husky for speed.
+- [**Vitest**](https://github.com/vitest-dev/vitest) - Test runner that allows E2E Browser Testing via Playwright and Unit Testing. Pairs well with Vite
+- [**Esbuild**](https://github.com/evanw/esbuild) - Rust based compilation tool, fast and elegant.
+- [**Astro**](https://github.com/withastro/astro) - SSG used for docs. Simple and fast. Allows for running multiple frameworks (Svelte, React, Vue) inside one server which is necessary for testing web components.
+- [**Vite**](https://github.com/vitejs/vite) - Used internally by Astro to compile project files in docs.
+- [**Dprint**](https://github.com/dprint/dprint) - Fast Rust based code formatter with more options than prettify
+- [**simple-git-hooks**](https://github.com/toplenboren/simple-git-hooks) - Used to run formatters on commit. Preferred over husky for speed.
 
 ## Development Environment Setup
 
