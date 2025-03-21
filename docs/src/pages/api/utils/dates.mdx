@@ -19,8 +19,46 @@ Formats a date according to the specified format string and options.
 
 > **International Support** This function uses `Intl.DateTimeFormat` internally, please refer to the [associated docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat) for details on timezone and formatting usage.
 
+> **Timezone Lookup** You can use [IANA.org's guide](https://www.iana.org/time-zones) to look up supported timezones.
+
 > **Local Timezone Usage** When the 'local' keyword is used for the timezone option, the function will use the local timezone of the environment where the code is running. This is particularly useful for displaying dates in the user's local time without needing to detect the timezone programmatically.
 
+#### Timezone Shorthand
+
+`formatDate` provides additional shorthand timezones that can be used instead of their city counterparts.
+
+```javascript
+const shorthand = reverseKeys({
+    // North America
+    'America/New_York': ['ET'],
+    'America/Chicago': ['CT'],
+    'America/Denver': ['MT'],
+    'America/Los_Angeles': ['PT'],
+    'America/Anchorage': ['AKT'],
+    'Pacific/Honolulu': ['HT'],
+    'America/Halifax': ['AT'],
+
+    // South America
+    'America/Sao_Paulo': ['BRT'],
+
+    // Europe
+    'Europe/London': ['UK', 'WET'],
+    'Europe/Paris': ['CET', 'ECT'],
+    'Europe/Helsinki': ['EET'],
+    'Europe/Dublin': ['IRST'], // Note disambiguation with India
+
+    // Australia/Oceania
+    'Australia/Sydney': ['AET'],
+    'Australia/Adelaide': ['ACT'],
+    'Australia/Perth': ['AWT'],
+    'Pacific/Auckland': ['NZT'],
+
+    // Asia
+    'Asia/Kolkata': ['IST', 'INST'], // Note disambiguation with Ireland
+    'Asia/Tokyo': ['JST'],
+    'Asia/Singapore': ['SGT']
+});
+```
 
 #### Parameters
 
