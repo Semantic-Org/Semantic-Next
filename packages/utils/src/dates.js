@@ -1,3 +1,5 @@
+import { reverseKeys } from './objects.js';
+
 /*-------------------
         Dates
 --------------------*/
@@ -21,6 +23,42 @@ export const formatDate = function(date, format = 'LLL', {
   }
 
   const pad = (n) => (n < 10 ? `0${n}` : n);
+
+  // standard timezone abbreviations for convenience
+  const shorthand = reverseKeys({
+    // North America
+    'America/New_York': ['ET'],
+    'America/Chicago': ['CT'],
+    'America/Denver': ['MT'],
+    'America/Los_Angeles': ['PT'],
+    'America/Anchorage': ['AKT'],
+    'Pacific/Honolulu': ['HT'],
+    'America/Halifax': ['AT'],
+
+    // Europe
+    'Europe/London': ['UK', 'WET'],
+    'Europe/Paris': ['CET', 'ECT'],
+    'Europe/Helsinki': ['EET'],
+    'Europe/Dublin': ['IRST'], // Note disambiguation with India
+
+    // Australia/Oceania
+    'Australia/Sydney': ['AET'],
+    'Australia/Adelaide': ['ACT'],
+    'Australia/Perth': ['AWT'],
+    'Pacific/Auckland': ['NZT'],
+
+    // South America
+    'America/Sao_Paulo': ['BRT'],
+
+    // Asia
+    'Asia/Kolkata': ['IST', 'INST'], // Note disambiguation with Ireland
+    'Asia/Tokyo': ['JST'],
+    'Asia/Singapore': ['SGT']
+  });
+
+  if(timezone && shorthand[timezone]) {
+    timezone = shorthand[timezone];
+  }
 
   const localeOptions = {
     timeZone: timezone,
