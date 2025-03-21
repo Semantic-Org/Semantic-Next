@@ -129,6 +129,10 @@ const createComponent = ({ $, $$, data, self, state, reaction, isRendered, setti
   openFile(filename) {
     self.getPlayground().selectFilename(filename);
   },
+  updatePlaygroundFiles(files) {
+    const playground = $('code-playground').component();
+    playground.setFiles(files);
+  }
 });
 
 const events = {
@@ -140,9 +144,8 @@ const events = {
       self.hideNavMenu();
     }
   },
-  'click .solve'({ settings, data, state }) {
-    console.log(settings.solutionFiles);
-    state.currentFiles.set(settings.solutionFiles);
+  'click .solve'({ settings, self }) {
+    self.updatePlaygroundFiles(settings.solutionFiles);
   },
   'click .toggle-menu'({ self }) {
     self.toggleNavMenu();

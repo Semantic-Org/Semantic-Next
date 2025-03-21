@@ -176,6 +176,24 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   ],
 
   initialize() {
+    self.setFiles();
+
+    // only allow layout swap on pages that panels would work
+    if (settings.allowLayoutSwap) {
+      settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
+    }
+
+    // adjust layout when details of components change
+    reaction(self.calculateLayout);
+    reaction(self.calculateLayoutChange);
+  },
+
+  setFiles(files = settings.files) {
+    // project files tracks changes in files setting
+    state.projectFiles.set(files);
+
+    // current files tracks file modifications
+    state.currentFiles.set(files);
 
     // select first file for left tabs
     const initialFile = self.getFirstFile({
@@ -190,23 +208,6 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
       filter: 'page',
     });
     state.activePageFile.set(initialPageFile);
-
-    // only allow layout swap on pages that panels would work
-    if (settings.allowLayoutSwap) {
-      settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
-    }
-
-    // adjust layout when details of components change
-    reaction(self.calculateFiles);
-    reaction(self.calculateLayout);
-    reaction(self.calculateLayoutChange);
-  },
-
-  calculateFiles() {
-    // whenever new files are passed in we need to update current files to match
-    const settingFiles = settings.files;
-    state.projectFiles.set(settingFiles);
-    state.currentFiles.set(settingFiles);
   },
 
   addPanelSettings() {
