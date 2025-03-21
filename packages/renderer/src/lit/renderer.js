@@ -328,32 +328,37 @@ export class LitRenderer {
     }
 
     try {
-      const keys = Object.keys(context);
-      let values = Object.values(context);
-      // unbundle subtemplate/snippet data bundled in getPackedNodeData
-      // functions with no parameters are safe to evaluate
-      each(values, (value, index) => {
-        /* Rollback change until fix reactivity issues
-        if (value instanceof Signal) {
-          Object.defineProperty(values, index, {
-            get() {
-              return value.get();
-            },
-            configurable: true,
-            enumerable: true
-          });
-        }*/
-        if (isFunction(value) && value.length === 0 && !value.name) {
-          Object.defineProperty(values, index, {
-            get() {
-              return value();
-            },
-            configurable: true,
-            enumerable: true,
-          });
+      // Create a proxy handler that automatically resolves signals and functions
+      const proxyHandler = {
+        has(target, key) {
+          // Allow access to globals
+          if (key in globalThis) {
+            return false;
+          }
+          // trap anything not in context
+          return key in target || true;
+        },
+        get(target, prop) {
+          const value = target[prop];
+          if (value instanceof Signal) {
+            return value.get();
+          }
+          if (typeof value === 'function' && value.length === 0) {
+            return value();
+          }
+          return value;
         }
-      });
-      result = new Function(...keys, `return ${code}`)(...values);
+      };
+
+      // Create a proxy for the context
+      const proxiedContext = new Proxy({...context}, proxyHandler);
+
+      // Use with statement to set the evaluation scope to our proxy
+      result = new Function('ctx', `
+        with (ctx) {
+          return ${code};
+        }
+      `)(proxiedContext);
     }
     catch (e) {
       // this token is not valid javascript
