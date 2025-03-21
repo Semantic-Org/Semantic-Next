@@ -93,7 +93,7 @@ const defaultSettings = {
     'text/css': 'sample/css',
     'text/importmap': 'sample/importmap',
     'text/html': 'sample/html',
-    'text/javascript': 'sample/ts',
+    'text/javascript': 'sample/js',
   },
 
   // titles to appear to users
