@@ -9,6 +9,10 @@ const defaultSettings = {
   timezone: 'PST',
 };
 
+const defaultState = {
+  fruit: 'cherry'
+};
+
 const createComponent = ({ settings }) => ({
   initialize: () => setInterval(() => settings.date = new Date(), 1000),
   isTrue: () => true,
