@@ -1,0 +1,61 @@
+---
+title: Component Structure
+category: 'Basic Guide'
+subcategory: 'Getting Started'
+description: Learn how to structure components with separate files
+sort: '2.1.2'
+references:
+  - title: Component File Organization
+    link: /components/organization
+  - title: Template Loading
+    link: /templates/loading
+  - title: CSS in Components
+    link: /components/styling
+---
+
+## Component Structure
+
+While inline templates and styles work well for small components, larger ones benefit from separate files. This lesson shows how to organize your component code across multiple files for better maintainability.
+
+## File Organization
+
+A typical component consists of three files:
+
+1. `component.js` - Component definition and logic
+2. `component.html` - HTML template
+3. `component.css` - Component styles
+
+This separation makes your code more maintainable and allows for better tooling support.
+
+## Loading Templates and Styles
+
+The [`getText`](/components/create#organizing-code) function loads external files at build time as shown in [component.js](#component.js). Notice these key points:
+
+- We import both [`defineComponent`](/components/create#defining-components) and `getText`
+- External files are loaded with `await getText('./filename')`
+- The loaded content is passed to the component definition
+
+## Understanding Templates
+
+The [component.html](#component.html) file contains our markup with expressions:
+
+- User data is accessed with [expressions](/templates/expressions) like `{user.name}`
+- Attributes can contain expressions: `src="{user.avatar}"`
+- The template is completely separate from the JavaScript logic
+
+## Component Styling
+
+In [component.css](#component.css), we define styles that are scoped to our component:
+
+- Selectors are simple (like `.profile`, `.name`) without needing prefixes
+- [CSS variables](/components/styling#using-css-variables) like `var(--standard-5)` enable theming
+- Styles are automatically encapsulated via [Shadow DOM](/components/styling#css)
+
+## Try It Yourself
+
+Extend the user profile to include additional information like email and location.
+
+Hint:
+1. Add the new properties to the user object in `defaultState`
+2. Update the HTML template to display the new information
+3. Add appropriate styles for the new elements

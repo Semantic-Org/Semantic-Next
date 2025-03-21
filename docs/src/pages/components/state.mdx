@@ -70,7 +70,7 @@ In some cases you might want to use initialize to have `state` shadow a `setting
 const createComponent = ({state}) => ({
   incrementCounter() {
     // Modify state with .value - triggers re-renders
-    state.counter.value += 1;
+    state.counter.increment();
   },
 
   getCount() {
@@ -152,12 +152,16 @@ defineComponent({
 
 ### Basic Updates
 
-Update state by modifying the `.value` property:
+Update state by using `set()` or modifying the `.value` property.
+
+There are also many helpers to make updating signals easier like `now()`
 
 ```js
 const onButtonClick = ({state}) => {
   state.counter.increment(1);
-  state.lastClicked.value = new Date();
+  state.lastClicked.value = new Date(); // equivalent
+  state.lastClicked.set(new Date()); // equivalent
+  state.lastClicked.now(); // helper equivalent
 };
 ```
 
@@ -168,7 +172,7 @@ const onButtonClick = ({state}) => {
 When multiple state changes need to happen together, you can use `afterFlush` to run code after all reactive updates are processed:
 
 ```js
-const createComponent = ({state, afterFlush}) => ({
+const createComponent = ({$, state, afterFlush}) => ({
   resetForm() {
     // Make multiple state changes
     state.username.value = '';
@@ -180,40 +184,10 @@ const createComponent = ({state, afterFlush}) => ({
     afterFlush(() => {
       console.log('Form reset complete');
       // Focus the first field
-      document.querySelector('input[name="username"]').focus();
+      $('input[name="username"]').focus();
     });
   }
 });
-```
-
-### Derived Values
-
-> Learn more in the [Reactivity Computations](/reactivity/computations) guide.
-
-Create derived values from state using reactive computations:
-
-```js
-const createComponent = ({state, signal, reaction}) => {
-  // Create signals for derived values
-  const fullName = signal('');
-  const isValid = signal(false);
-  
-  // Create a reaction that updates when dependencies change
-  reaction(() => {
-    // Reading state.firstName.value and state.lastName.value 
-    // automatically creates dependencies
-    fullName.value = `${state.firstName.value} ${state.lastName.value}`;
-    
-    isValid.value = 
-      state.email.value.includes('@') && 
-      state.password.value.length >= 8;
-  });
-  
-  return {
-    fullName,
-    isValid
-  };
-};
 ```
 
 Derived values automatically update when their dependencies change.

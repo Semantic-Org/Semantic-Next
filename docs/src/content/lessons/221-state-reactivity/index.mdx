@@ -1,0 +1,58 @@
+---
+title: State and Reactivity
+category: 'Basic Guide'
+subcategory: 'Core Concepts'
+description: Learn how to use reactive state in your components
+sort: '2.2.1'
+references:
+  - title: Reactivity System
+    link: /reactivity
+  - title: Signal API
+    link: /api/reactivity/signal
+  - title: Working with Arrays
+    link: /api/reactivity/arrays
+---
+
+## State and Reactivity
+
+Reactivity is the heart of Semantic UI components. This lesson introduces you to reactive state management using signals - automatically updating your UI when data changes.
+
+## Understanding State
+
+The [`defaultState`](/components/state#declaring-state) object defines your component's reactive properties. When these values change, your template automatically updates to reflect the new data.
+
+## Reactive Properties
+
+Looking at [component.js](#component.js), you'll notice:
+
+- `defaultState` initializes a counter and toggle property
+- We use [`.set()`](/components/state#updating-state) to update values in event handlers
+- We use [`.get()`](/components/state#accessing-state) to access values in JavaScript code
+- The template updates automatically when state changes
+
+## State Operators
+
+The framework provides special methods for common state operations:
+
+- [`.increment()`](/reactivity/variables#number-methods) and `.decrement()` for numbers
+- [`.toggle()`](/reactivity/variables#boolean-methods) for booleans
+- [`.now()`](/reactivity/variables#date-methods) for dates (updates to current time)
+- Array methods like [`.push()`](/reactivity/variables#array-methods), `.pop()`, `.remove()`
+
+## Template Access
+
+In the [component.html](#component.html) template:
+
+- State is accessed [directly without using `.get()`](/components/state#in-templates): `{count}`
+- The UI automatically updates when state changes
+- Methods can be called from templates: `{isEven(count)}`
+
+## Try It Yourself
+
+Enhance the counter component to include:
+
+1. A reset button that sets the counter back to zero
+2. A "step" feature that increments by a configurable amount
+3. Visual indicators when reaching milestone numbers (like 10, 20, etc.)
+
+Hint: You'll need to add a new state property and method, and update the template to use them.
