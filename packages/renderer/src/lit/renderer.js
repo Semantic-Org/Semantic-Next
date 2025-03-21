@@ -377,6 +377,7 @@ export class LitRenderer {
     if (simpleExpression) {
       const value = this.lookupTokenValue(expression, data);
       if (value !== undefined) {
+        visited.delete(expression);
         return wrapFunction(value)();
       }
     }
