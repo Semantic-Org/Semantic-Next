@@ -166,7 +166,7 @@ const defaultState = {
 
   currentFiles: [],
 
-  initialFiles: [],
+  projectFiles: [],
 };
 
 const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, state, data, settings, $, $$ }) => ({
@@ -176,8 +176,6 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   ],
 
   initialize() {
-    state.initialFiles.set(settings.files);
-    state.currentFiles.set(settings.files);
 
     // select first file for left tabs
     const initialFile = self.getFirstFile({
@@ -199,8 +197,16 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
     }
 
     // adjust layout when details of components change
+    reaction(self.calculateFiles);
     reaction(self.calculateLayout);
     reaction(self.calculateLayoutChange);
+  },
+
+  calculateFiles() {
+    // whenever new files are passed in we need to update current files to match
+    const settingFiles = settings.files;
+    state.projectFiles.set(settingFiles);
+    state.currentFiles.set(settingFiles);
   },
 
   addPanelSettings() {
@@ -239,7 +245,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   configureLayout() {
     // this will update <playground-project> to reference current file values
     // this wil be read by playground-elements causing values to be reset otherwise
-    state.initialFiles.set(state.currentFiles.peek());
+    state.projectFiles.set(state.currentFiles.peek());
 
     // we will need to rerun code editor config on each file
     const playgroundFiles = findChildren('CodePlaygroundFile');
@@ -357,7 +363,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
   getProjectFiles() {
-    return self.getFileArray({files: state.initialFiles.get() });
+    return self.getFileArray({files: state.projectFiles.get() });
   },
   getFileArray({ files = settings.files, filter } = {}) {
     let fileArray = [];

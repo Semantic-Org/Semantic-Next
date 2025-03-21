@@ -141,6 +141,7 @@ const events = {
     }
   },
   'click .solve'({ settings, data, state }) {
+    console.log(settings.solutionFiles);
     state.currentFiles.set(settings.solutionFiles);
   },
   'click .toggle-menu'({ self }) {
@@ -160,7 +161,7 @@ const events = {
   },
   'click a[href]'({ self, target, event }) {
     const href = $(target).attr('href');
-    const file = href.replace(/^#/, '');
+    const file = href.replace(/^(\/#|#)/, '');
     if (self.isFile(file)) {
       self.openFile(file);
       event.preventDefault();

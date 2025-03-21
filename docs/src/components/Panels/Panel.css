@@ -5,7 +5,6 @@
   overflow: hidden;
   will-change: flex;
   container: panel / inline-size;
-  transition: var(--transition);
 }
 
 ::slotted(*) {
