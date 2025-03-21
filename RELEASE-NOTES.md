@@ -4,7 +4,12 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.10.4-8
+# Version 0.10.9
+
+## New
+* `formatDate` now supports timezone abbreviations like `ET` and `PT`
+
+# Version 0.10.4-0.10.8
 
 ## New
 * Add `cdn` links to package.json for jsdelivr and unpkg
