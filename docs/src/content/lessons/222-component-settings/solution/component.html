@@ -1,0 +1,19 @@
+<div class="card">
+  <div class="header">
+    <img class="avatar" src="{avatar}" alt="{username}'s Avatar">
+    <div class="indicator {isActive ? 'active' : ''}"></div>
+  </div>
+  <div class="content">
+    <h3 class="username">{username}</h3>
+    <div class="role">{role}</div>
+    <div class="count">Login count: {counter}</div>
+    {#if lastUpdated}
+      <div class="updated">Last updated: {formatDate lastUpdated}</div>
+    {/if}
+  </div>
+  <div class="footer">
+    {#if isAdmin}
+      <div class="badge">Admin</div>
+    {/if}
+  </div>
+</div>

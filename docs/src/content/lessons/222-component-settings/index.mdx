@@ -1,0 +1,58 @@
+---
+title: Component Settings
+category: 'Basic Guide'
+subcategory: 'Core Concepts'
+description: Learn how to use settings to configure components
+sort: '2.2.2'
+references:
+  - title: Component Settings API
+    link: /components/settings
+  - title: Query API (component() method)
+    link: /api/query
+  - title: Accessing Components
+    link: /api/query/component-method
+---
+
+## Component Settings
+
+Settings allow you to configure your components with default and custom values. This lesson explains how to define settings, access them in your code, and modify them from outside the component.
+
+## Defining Settings
+
+In [component.js](#component.js), you'll notice:
+
+- The `defaultSettings` object defines initial values for settings
+- Settings are passed to `createComponent` as a parameter
+- Settings are reactive by default, but aren't Signal instances like state values
+
+## Using Settings in Components
+
+Looking at our code:
+
+- Settings are accessible in the `createComponent` function
+- Use them to customize component behavior without changing code
+- Settings can be any type: strings, numbers, objects, or functions
+
+## Passing Settings via HTML
+
+Settings can be provided when using your component:
+
+- Basic settings as HTML attributes
+- Complex settings (objects, arrays) via JavaScript
+- Settings are great for making components reusable
+
+## Accessing Component Methods
+
+The [component()](/api/query/component-method) method provides access to a component instance:
+
+- Access methods defined in `createComponent`
+- Call component methods from outside the component
+- Modify settings at runtime with `settings()`
+
+## Try It Yourself
+
+Enhance the profile component to:
+
+1. Make the avatar image configurable via settings
+2. Add methods to update user information after creation
+3. Create a form that uses `component()` to update the profile

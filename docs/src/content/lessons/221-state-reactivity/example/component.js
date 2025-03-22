@@ -5,7 +5,7 @@ const css = await getText('./component.css');
 
 const defaultState = {
   count: 0,
-  active: false
+  isActive: false
 };
 
 const createComponent = ({ state }) => ({
@@ -18,11 +18,7 @@ const createComponent = ({ state }) => ({
   },
   
   toggleActive() {
-    state.active.toggle();
-  },
-
-  isActive() {
-    return state.active.get();
+    state.isActive.toggle();
   },
   
   isEven(number) {

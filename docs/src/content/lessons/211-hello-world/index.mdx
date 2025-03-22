@@ -23,11 +23,11 @@ This lesson introduces your first Semantic UI web component. We'll create a simp
 
 2. **Template**: The template contains HTML with [expressions](/templates/expressions) in curly braces `{}` that display reactive data.
 
-3. **State**: The [`defaultState`](/components/state) object defines reactive properties that automatically update the UI when changed.
+3. **State**: The [`defaultState`](/components/state#declaring-state) object defines reactive properties that automatically update the UI when changed.
 
 4. **Lifecycle**: The [`onCreated`](/components/lifecycle) function runs when the component is initialized, perfect for setup code.
 
-5. **Reactivity**: Using [`state.time.now()`](/components/reactivity) updates the time and automatically refreshes the display.
+5. **Reactivity**: Using [`state.time.now()`](/api/reactivity/date-helpers#now) updates the time and automatically refreshes the display.
 
 ## Understanding the Code
 
@@ -35,7 +35,7 @@ Looking at [component.js](#component.js), notice how:
 
 - We import `defineComponent` from the framework
 - The `tagName` property specifies the HTML element name
-- The template uses `{formatDate time "h:mm:ss a"}` to display formatted time
+- The template uses [`{formatDate time "h:mm:ss a"}`](/templates/expressions#format-date) to display formatted time
 - `defaultState` initializes our reactive data
 - `onCreated` sets up a timer that updates every second
 

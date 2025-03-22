@@ -29,7 +29,7 @@ This separation makes your code more maintainable and allows for better tooling 
 
 ## Loading Templates and Styles
 
-The [`getText`](/components/create#organizing-code) function loads external files at build time as shown in [component.js](#component.js). Notice these key points:
+The [`getText`](/components/create#organizing-code) function loads external files at build time as shown in [component.js](#component.js). Although in practice with a [build tool like Vite](https://vite.dev) you can import the files directly using `import` statements.
 
 - We import both [`defineComponent`](/components/create#defining-components) and `getText`
 - External files are loaded with `await getText('./filename')`
@@ -47,9 +47,9 @@ The [component.html](#component.html) file contains our markup with expressions:
 
 In [component.css](#component.css), we define styles that are scoped to our component:
 
-- Selectors are simple (like `.profile`, `.name`) without needing prefixes
+- All your CSS is scoped via [Shadow DOM](/components/styling#css) to your component, so you can use simple selectors (like `.profile`, `.name`) without needing prefixes.
 - [CSS variables](/components/styling#using-css-variables) like `var(--standard-5)` enable theming
-- Styles are automatically encapsulated via [Shadow DOM](/components/styling#css)
+- Remember styles are encapsulated so use them however you want.
 
 ## Try It Yourself
 
