@@ -114,9 +114,6 @@ export class Query {
     let domFound = false;
     let queriedRoot = false;
 
-    // Simple object to cache selector parsing results within this function call
-    const selectorParseCache = {};
-
     // Add root if required
     if (includeRoot) {
       if ((domSelector && root == selector) ||
@@ -134,26 +131,17 @@ export class Query {
     }
 
     const getRemainingSelector = (el, selector) => {
-      // Use a simple caching mechanism that's only valid for this function call
-      const cacheKey = el.tagName + selector;
-      if (selectorParseCache[cacheKey]) {
-        return selectorParseCache[cacheKey];
-      }
-
       const parts = selector.split(' ');
       let partialSelector;
       let remainingSelector;
-
-      for (let i = 0; i < parts.length; i++) {
-        partialSelector = parts.slice(0, i + 1).join(' ');
-        if (el.matches && el.matches(partialSelector)) {
-          remainingSelector = parts.slice(i + 1).join(' ');
-          break;
+      each(parts, (part, index) => {
+        partialSelector = parts.slice(0, index + 1).join(' ');
+        if (el.matches(partialSelector)) {
+          remainingSelector = parts.slice(index + 1).join(' ');
+          return;
         }
-      }
-
-      selectorParseCache[cacheKey] = remainingSelector || selector;
-      return selectorParseCache[cacheKey];
+      });
+      return remainingSelector || selector;
     };
 
     const addElements = (node, selector) => {
