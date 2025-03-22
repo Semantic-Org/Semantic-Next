@@ -328,6 +328,7 @@ export class LitRenderer {
     }
     try {
       // Create a proxy handler that automatically resolves signals and functions
+      // <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with#creating_dynamic_namespaces_using_the_with_statement_and_a_proxy>
       const proxyHandler = {
         has(target, key) {
           // Allow access to globals
