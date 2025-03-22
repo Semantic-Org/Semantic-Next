@@ -326,7 +326,6 @@ export class LitRenderer {
         return !reservedWords.includes(name) && LitRenderer.VAR_NAME_REGEXP.test(name);
       });
     }
-
     try {
       // Create a proxy handler that automatically resolves signals and functions
       const proxyHandler = {
