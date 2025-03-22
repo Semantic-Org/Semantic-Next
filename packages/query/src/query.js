@@ -108,89 +108,105 @@ export class Query {
      intermediate selectors at shadow boundaries
   */
   querySelectorAllDeep(root, selector, includeRoot = true) {
-    let elements = [];
-    let domSelector = isDOM(selector);
+    // Use a Set for automatic deduplication
+    const elements = new Set();
+    const domSelector = isDOM(selector);
     let domFound = false;
-    let queriedRoot;
+    let queriedRoot = false;
 
-    // add root if required
+    // Simple object to cache selector parsing results within this function call
+    const selectorParseCache = {};
+
+    // Add root if required
     if (includeRoot) {
-      if (domSelector && root == selector) {
-        elements.push(root);
-      }
-      else if (root.matches && root.matches(selector)) {
-        elements.push(root);
+      if ((domSelector && root == selector) ||
+          (!domSelector && root.matches && root.matches(selector))) {
+        elements.add(root);
       }
     }
 
-    // query from root
+    // Query from root
     if (domSelector) {
       queriedRoot = true;
-    }
-    else if (root.querySelectorAll) {
-      elements.push(...root.querySelectorAll(selector));
+    } else if (root.querySelectorAll) {
+      root.querySelectorAll(selector).forEach(el => elements.add(el));
       queriedRoot = true;
     }
-    else {
-      queriedRoot = false;
-    }
+
+    const getRemainingSelector = (el, selector) => {
+      // Use a simple caching mechanism that's only valid for this function call
+      const cacheKey = el.tagName + selector;
+      if (selectorParseCache[cacheKey]) {
+        return selectorParseCache[cacheKey];
+      }
+
+      const parts = selector.split(' ');
+      let partialSelector;
+      let remainingSelector;
+
+      for (let i = 0; i < parts.length; i++) {
+        partialSelector = parts.slice(0, i + 1).join(' ');
+        if (el.matches && el.matches(partialSelector)) {
+          remainingSelector = parts.slice(i + 1).join(' ');
+          break;
+        }
+      }
+
+      selectorParseCache[cacheKey] = remainingSelector || selector;
+      return selectorParseCache[cacheKey];
+    };
 
     const addElements = (node, selector) => {
       if (domSelector && (node === selector || node.contains)) {
         if (node.contains(selector)) {
-          elements.push(selector);
+          elements.add(selector);
           domFound = true;
         }
+      } else if (node.querySelectorAll) {
+        // Directly add to Set without intermediate array
+        node.querySelectorAll(selector).forEach(el => elements.add(el));
       }
-      else if (node.querySelectorAll) {
-        elements.push(...node.querySelectorAll(selector));
-      }
-    };
-
-    const getRemainingSelector = (el, selector) => {
-      const parts = selector.split(' ');
-      let partialSelector;
-      let remainingSelector;
-      each(parts, (part, index) => {
-        partialSelector = parts.slice(0, index + 1).join(' ');
-        if (el.matches(partialSelector)) {
-          remainingSelector = parts.slice(index + 1).join(' ');
-          return;
-        }
-      });
-      return remainingSelector || selector;
     };
 
     const findElements = (node, selector, query) => {
-      // if we are querying for a DOM element we can stop searching once we've found it
-      if (domFound) {
-        return;
-      }
+      // Early termination condition for DOM selector search
+      if (domSelector && domFound) return;
 
-      // if root element did not support querySelectorAll
-      // we query each child node then stop
+      // If root element didn't support querySelectorAll, query each child node
       if (query === true) {
         addElements(node, selector);
         queriedRoot = true;
       }
 
-      // query at each shadow root
+      // Process shadow roots
       if (node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
-        selector = getRemainingSelector(node, selector);
-        addElements(node.shadowRoot, selector);
-        findElements(node.shadowRoot, selector, !queriedRoot);
+        const newSelector = getRemainingSelector(node, selector);
+        addElements(node.shadowRoot, newSelector);
+        findElements(node.shadowRoot, newSelector, !queriedRoot);
       }
 
+      // Process assigned nodes with direct for loop
       if (node.assignedNodes) {
-        selector = getRemainingSelector(node, selector);
-        node.assignedNodes().forEach((node) => findElements(node, selector, queriedRoot));
+        const newSelector = getRemainingSelector(node, selector);
+        const nodes = node.assignedNodes();
+        for (let i = 0; i < nodes.length; i++) {
+          findElements(nodes[i], newSelector, queriedRoot);
+        }
       }
-      if (node.childNodes.length) {
-        node.childNodes.forEach((node) => findElements(node, selector, queriedRoot));
+
+      // Process child nodes with direct for loop
+      if (node.childNodes && node.childNodes.length) {
+        const childCount = node.childNodes.length;
+        for (let i = 0; i < childCount; i++) {
+          findElements(node.childNodes[i], selector, queriedRoot);
+        }
       }
     };
+
     findElements(root, selector);
-    return [...new Set(elements)];
+
+    // Convert Set to Array for return
+    return Array.from(elements);
   }
 
   each(callback) {
