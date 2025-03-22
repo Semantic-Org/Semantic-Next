@@ -299,28 +299,38 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   },
 
   getNaturalPanelSize(panel, { direction, minimized }) {
+    const $scrollbar = $$(panel).find('.CodeMirror-vscrollbar');
+    const $sizer = $$(panel).find('.CodeMirror-sizer');
+    console.log(panel);
     if (direction == 'horizontal') {
+      const $menu = $$(panel).find('ui-menu .menu').first();
       const extraSpacing = 5; // rounding
-      const scrollbarWidth = $$(panel).find('.CodeMirror-vscrollbar').width() ? 17 : 0;
-      const menuWidth = $$(panel).find('ui-menu .menu').first().width() + 11 || 0;
+      const scrollbarWidth = $scrollbar.width() ? 17 : 0;
+      const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
-      $$(panel).find('.CodeMirror-sizer').each(sizer => {
-        const sizerMargin = parseFloat($(sizer).css('margin-left'));
-        const sizerWidth = parseFloat($(sizer).css('min-width'));
+      $sizer.each(sizer => {
+        const $sizer = $(sizer);
+        const sizerMargin = parseFloat($sizer.css('margin-left'));
+        const sizerWidth = parseFloat($sizer.css('min-width'));
         minWidths.push(sizerMargin + sizerWidth + scrollbarWidth);
       });
       const size = Math.max(...minWidths) + extraSpacing;
       return size;
     }
     else {
+      const $label = $$(panel).find('.label').first();
+      const $menu = $$(panel).find('.menu').first();
+
       const extraSpacing = 2; // rounding
-      const labelHeight = $$(panel).find('.label').first().height() || 0;
-      const menuHeight = $$(panel).find('.menu').first().height() || 0;
+      const labelHeight = $label.height() || 0;
+      const menuHeight = $menu.height() || 0;
       if (minimized) {
         return labelHeight;
       }
       else {
-        const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
+        const $sizer = $$(panel).find('.CodeMirror-sizer').first();
+
+        const codeHeight = parseFloat($sizer.css('min-height'));
         const height = codeHeight + labelHeight + menuHeight + extraSpacing;
         return Math.max(height, 100);
       }
