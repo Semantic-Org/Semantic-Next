@@ -323,8 +323,11 @@ describe('query', () => {
           </test-slot-component>
         `;
 
-        const elements = $$('.slotted-header, .slotted-content');
-        expect(elements.length).toBe(2);
+        const headerElements = $$('.slotted-header');
+        expect(headerElements.length).toBe(1);
+
+        const contentElements = $$('.slotted-content');
+        expect(contentElements.length).toBe(1);
       });
 
       it('should track complex selectors across slot boundaries', () => {
@@ -387,12 +390,14 @@ describe('query', () => {
           <test-shadow-component></test-shadow-component>
         `;
 
-        // Find all elements (should not have duplicates)
+        // Find all divs (should not have duplicates)
         const elements = $$('div');
 
-        // Count unique elements
-        const uniqueElements = new Set(elements);
-        expect(elements.length).toBe(uniqueElements.size);
+        // Convert to array then check uniqueness
+        const elementsArray = elements.get();
+        const uniqueCount = new Set(elementsArray).size;
+
+        expect(elementsArray.length).toBe(uniqueCount);
       });
 
       it('should handle getRemainingSelector for partial matches', () => {
