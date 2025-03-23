@@ -308,10 +308,10 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
 };
 
 /* Adds links for prev/next page used at bottom of guide pages */
-export const getPageTraversalLinks = async ({ url }) => {
+export const getPageTraversalLinks = async ({ url = '' }) => {
+  url = url.replace(/\/$/, '');
   const menu = await await getFlattenedSidebarMenu({ url });
   const currentIndex = findIndex(menu, item => item.url == url);
-
   let next;
   let previous;
   if (currentIndex >= 0) {
