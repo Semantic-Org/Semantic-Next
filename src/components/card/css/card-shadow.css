@@ -182,7 +182,7 @@
 @layer component.card.variations.fluid {
   :host([fluid]),
   .fluid.card {
-    width: 100%;
+    --card-width: auto;
     --card-image-max-width: none;
   }
 }
