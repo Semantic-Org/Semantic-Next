@@ -29,5 +29,6 @@ export const TestComponent = defineComponent({
   template,
   css,
   defaultSettings,
+  defaultState,
   createComponent,
 });
