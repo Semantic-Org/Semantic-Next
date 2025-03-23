@@ -343,8 +343,15 @@ export class LitRenderer {
           if (value instanceof Signal) {
             return value.get();
           }
-          if (typeof value === 'function' && value.length === 0) {
-            return value();
+          // we need a second internal proxy
+          // to correctly pass through args for case getValue(a,b,c)
+          // since we also need to convert getValue to getValue()
+          if (isFunction(value)) {
+            return new Proxy(value, {
+              apply(targetFn, thisArg, args) {
+                return targetFn.apply(thisArg, args);
+              }
+            });
           }
           return value;
         }
