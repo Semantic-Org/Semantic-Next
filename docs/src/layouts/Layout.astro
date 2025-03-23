@@ -2,7 +2,7 @@
 import '../css/layers.css';
 import '../css/fonts.css';
 
-import { UIIcon } from '@semantic-ui/core';
+import { UICard, UIIcon } from '@semantic-ui/core';
 import Body from './Body.astro';
 import Sidebar from '@components/Sidebar.astro';
 import DocsMasthead from '@components/DocsMasthead.astro';
@@ -69,7 +69,7 @@ const activeURL = Astro.url.pathname;
 					<div class="traversal">
 						<ui-container>
 							{pageTraversal.previous && (
-								<ui-card href={pageTraversal.previous.url} previous>
+								<UICard fluid href={pageTraversal.previous.url} previous>
 		              <div class="label">
 		                <ui-icon icon="left chevron"></ui-icon>
 		                Previous
@@ -77,10 +77,10 @@ const activeURL = Astro.url.pathname;
 		              <div class="header">
 		                {pageTraversal.previous.name}
 		              </div>
-								</ui-card>
+								</UICard>
 							)}
 							{pageTraversal.next && (
-								<ui-card href={pageTraversal.next.url} next>
+								<UICard fluid href={pageTraversal.next.url} next>
 		              <div class="label">
 		                Next
 		                <ui-icon icon="right chevron"></ui-icon>
@@ -88,7 +88,7 @@ const activeURL = Astro.url.pathname;
 		              <div class="header">
 		                {pageTraversal.next.name}
 		              </div>
-								</ui-card>
+								</UICard>
 							)}
 						</ui-container>
 					</div>

@@ -76,31 +76,32 @@
 
       ui-container {
         display: flex;
-
+        gap: 2rem;
       }
 
       ui-card {
         text-align: left;
-        min-width: 300px;
+        width: 50%;
+
+        flex-grow: 1;
         .label {
           color: var(--primary-text-color);
           font-weight: bold;
-          font-size: var(--small);
+          font-size: var(--large);
           transition: var(--transition);
         }
         .header {
           color: var(--standard-60);
-          font-size: var(--large);
+          font-size: var(--huge);
           font-weight: var(--bold);
           transition: var(--transition);
         }
       }
 
       [previous] {
-        margin-right: auto;
+        text-align: left;
       }
       [next]{
-        margin-left: auto;
         text-align: right;
       }
     }
