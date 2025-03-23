@@ -1,4 +1,4 @@
-import { defineComponent } from '@semantic-ui/component';
+import { defineComponent, getText } from '@semantic-ui/component';
 
 import css from './component.css?raw';
 import template from './component.html?raw';
@@ -9,8 +9,12 @@ const defaultSettings = {
   timezone: 'PST',
 };
 
+const defaultState = {
+  fruit: 'cherry'
+};
+
 const createComponent = ({ settings }) => ({
-  // initialize: () => setInterval(() => settings.date = new Date(), 1000),
+  initialize: () => setInterval(() => settings.date = new Date(), 1000),
   isTrue: () => true,
   addOne(value = 0, value2 = 0) {
     return value + value2 + 1;
@@ -25,5 +29,6 @@ export const TestComponent = defineComponent({
   template,
   css,
   defaultSettings,
+  defaultState,
   createComponent,
 });
