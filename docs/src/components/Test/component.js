@@ -14,7 +14,18 @@ const defaultState = {
 };
 
 const createComponent = ({ settings }) => ({
-  initialize: () => setInterval(() => settings.date = new Date(), 1000),
+  buttonSize: 'large',
+  name: 'Alice',
+  itemId: 42,
+  isSelected: (id) => id === 42,
+  numberVal: 10,
+  innerFn: (val) => {
+    return `Inner(${val})`;
+  },
+  outerFn: (a, b) => {
+    return `Outer(${a}, ${b.foo})`;
+  },
+  //initialize: () => setInterval(() => settings.date = new Date(), 1000),
   isTrue: () => true,
   addOne(value = 0, value2 = 0) {
     return value + value2 + 1;
