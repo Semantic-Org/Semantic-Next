@@ -403,11 +403,10 @@ export class LitRenderer {
       const value = this.lookupTokenValue(expression, data);
 
       if (value !== undefined) {
-
         // if we found a value and we are recursing we will need to return the function
         // to pass through arguments
+        visited.delete(expression);
         if(visited.size > 0) {
-          visited.delete(expression);
           return value;
         }
 
