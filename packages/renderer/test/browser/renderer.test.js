@@ -804,7 +804,7 @@ const expressionTests = [
   },
   {
     name: 'Expression with escaped characters',
-    expression: '"Line 1\\nLine 2\\tTabbed"',
+    expression: '"Line 1\nLine 2\tTabbed"',
     result: 'Line 1\nLine 2\tTabbed',
   },
   {

@@ -22,8 +22,8 @@ import { renderTemplate } from './directives/render-template.js';
 export class LitRenderer {
   static html = html;
 
-  static PARENS_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
-  static STRING_REGEXP = /^\'(.*)\'$/;
+  static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g; // match `(one () )` and [`(one)`, `(two)`]
+  static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g // match "" '', \b for token groups in Lisp style expr
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
 
@@ -291,8 +291,24 @@ export class LitRenderer {
   }
 
   // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
+  // parse parensed expression like `outerFunc (innerJS ? trueCond : falseCond)` -> [outerFunc, jsExpr]
   getExpressionArray(expr) {
-    const tokens = expr.match(LitRenderer.PARENS_REGEXP) || [];
+    // Storage for extracted parenthetical groups
+    const groups = [];
+
+    // Replace parenthetical groups with placeholders
+    const processedExpr = expr.replace(LitRenderer.PARENS_REGEXP, match => {
+      const placeholder = `__GROUP${groups.length}__`;
+      groups.push(match.slice(1,-1)); // remove parens ()
+      return placeholder;
+    });
+
+    // Split into groups based off Lisp style tokens preserving "" and '' groups
+    const tokens = processedExpr.match(LitRenderer.TOKEN_REGEXP) || [];
+    const getValue = (token) => {
+      const match = token.match(/__GROUP(\d+)__/);
+      return match ? groups[parseInt(match[1])] : token;
+    }
     const parse = (tokens) => {
       const result = [];
       while (tokens.length > 0) {
@@ -304,12 +320,13 @@ export class LitRenderer {
           return result;
         }
         else {
-          result.push(token);
+          result.push( getValue(token) );
         }
       }
       return result;
     };
-    return parse(tokens);
+    const expressions = parse(tokens);
+    return expressions;
   }
 
   // evaluate javascript expressions
@@ -331,12 +348,10 @@ export class LitRenderer {
       // <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with#creating_dynamic_namespaces_using_the_with_statement_and_a_proxy>
       const proxyHandler = {
         has(target, key) {
-          // Allow access to globals
-          if (key in globalThis) {
-            return false;
+          if(key in target) {
+            return true;
           }
-          // trap anything not in context
-          return key in target || true;
+          return false;
         },
         get(target, prop) {
           const value = target[prop];
@@ -383,33 +398,34 @@ export class LitRenderer {
     }
     visited.add(expression);
 
-    // short circuit - check if whole expression is available in data context
-    // this will avoid overhead of evaluating as javascript
-    const simpleExpression = !expression.includes(' ');
-    if (simpleExpression) {
+    // lets try to evaluate this expression directly if possible
+    if (isString(expression)) {
       const value = this.lookupTokenValue(expression, data);
+
       if (value !== undefined) {
-        visited.delete(expression);
+
+        // if we found a value and we are recursing we will need to return the function
+        // to pass through arguments
+        if(visited.size > 0) {
+          visited.delete(expression);
+          return value;
+        }
+
+        // otherwise it is safe to call it directly
         return wrapFunction(value)();
       }
     }
 
-    // check if whole expression is JS before tokenizing
-    const jsValue = this.evaluateJavascript(expression, data);
-    if (jsValue !== undefined) {
-      const value = this.accessTokenValue(jsValue, expression, data);
-      visited.delete(expression);
-      return wrapFunction(value)();
-    }
-
-    // wrap {} or [] in parens
-    if (isString(expression)) {
+    // we will need to parse this expression by token
+    let expressionArray;
+    if(!isArray(expression)) {
+      // wrap {} or [] in parens if used in lisp style like `getValue { foo: 'baz' }`
       expression = this.addParensToExpression(expression);
+      expressionArray = this.getExpressionArray(expression);
     }
-
-    const expressionArray = isArray(expression)
-      ? expression
-      : this.getExpressionArray(expression);
+    else {
+      expressionArray = expression;
+    }
 
     let funcArguments = [];
     let result;
@@ -418,11 +434,13 @@ export class LitRenderer {
     while (index--) {
       const token = expressionArray[index];
       if (isArray(token)) {
+        // this expression is itself a Lisp style expression
         result = this.lookupExpressionValue(token.join(' '), data, visited);
         funcArguments.unshift(result);
       }
       else {
-        const tokenValue = this.lookupTokenValue(token, data);
+        // this expression might be a single token
+        const tokenValue = this.lookupExpressionValue(token, data, visited);
         result = isFunction(tokenValue)
           ? tokenValue(...funcArguments)
           : tokenValue;
@@ -438,7 +456,6 @@ export class LitRenderer {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
     }
-
     // check if this is a value not requiring lookup
     const literalValue = this.getLiteralValue(token);
     if (literalValue !== undefined) {
@@ -450,6 +467,12 @@ export class LitRenderer {
     let value = this.accessTokenValue(dataValue, token, data);
     if (value !== undefined) {
       return value;
+    }
+
+    // check if whole token is JS before tokenizing
+    const jsValue = this.evaluateJavascript(token, data);
+    if (jsValue !== undefined) {
+      return this.accessTokenValue(jsValue, token, data);
     }
 
     // if undefined check if global helper
@@ -520,7 +543,7 @@ export class LitRenderer {
     }
 
     // check if this is a number
-    if (!Number.isNaN(parseFloat(token))) {
+    if (Number.isFinite(+token)) {
       return Number(token);
     }
   }
