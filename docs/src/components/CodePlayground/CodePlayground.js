@@ -301,7 +301,6 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   getNaturalPanelSize(panel, { direction, minimized }) {
     const $scrollbar = $$(panel).find('.CodeMirror-vscrollbar');
     const $sizer = $$(panel).find('.CodeMirror-sizer');
-    console.log(panel);
     if (direction == 'horizontal') {
       const $menu = $$(panel).find('ui-menu .menu').first();
       const extraSpacing = 5; // rounding
