@@ -8,6 +8,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## New
 * `formatDate` now supports timezone abbreviations like `ET` and `PT`
+* Query now includes `getSlot()` and `setSlot` methods for getting/setting slotted content for a web component
 
 ## Improvements
 * Expression evaluation has been improved to support additional cases with mixed Lisp and JS style function callbacks
