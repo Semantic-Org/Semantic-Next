@@ -619,7 +619,7 @@ export class Query {
           if (!$slottedElement.exists()) {
             // Slot element does not exist, create a new one
             this.chain(el).append(`<span slot="${slotName}"></span>`);
-            $slottedElement = $newEl;
+            $slottedElement = this.chain(el).find(slotSelector);
           }
 
           $slottedElement.html(newHTML);
