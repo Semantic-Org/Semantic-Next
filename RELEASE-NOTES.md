@@ -9,6 +9,13 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ## New
 * `formatDate` now supports timezone abbreviations like `ET` and `PT`
 
+## Improvements
+* Expression evaluation has been improved to support additional cases with mixed Lisp and JS style function callbacks
+
+For instance you can now pass js to Lisp style arguments
+```javascript
+{concat 'my' 'friend' (isDog ? 'simon dog' : 'pookie cat') }
+
 # Version 0.10.4-0.10.8
 
 ## New
