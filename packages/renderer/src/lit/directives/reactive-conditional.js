@@ -56,10 +56,11 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       }
       return html;
     });
+    /* Commented out until can resolve mobile menu
     if(this.matchIndex == matchIndex) {
       return noChange;
     }
-    this.matchIndex = matchIndex;
+    */
     return html;
   }
 
