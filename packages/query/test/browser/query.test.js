@@ -40,6 +40,7 @@ describe('query', () => {
     });
   });
 
+
   describe('window and globalThisProxy', () => {
     beforeEach(() => {
       // Clear any existing global variables before each test
@@ -145,6 +146,181 @@ describe('query', () => {
     it('should allow setting global properties', () => {
       $('window').prop('testProp', 'testValue');
       expect(globalThis.testProp).toBe('testValue');
+    });
+  });
+
+  describe('slot methods', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    beforeAll(() => {
+      // Component with basic slots
+      if (!customElements.get('test-slot-basic')) {
+        class TestSlotBasic extends HTMLElement {
+          constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            shadow.innerHTML = `
+              <div class="wrapper">
+                <slot name="header">Default header</slot>
+                <slot>Default content</slot>
+                <slot name="footer">Default footer</slot>
+              </div>
+            `;
+          }
+        }
+        customElements.define('test-slot-basic', TestSlotBasic);
+      }
+
+      // Component with nested slots
+      if (!customElements.get('test-slot-nested')) {
+        class TestSlotNested extends HTMLElement {
+          constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            shadow.innerHTML = `
+              <div class="outer">
+                <slot name="outer">
+                  <div class="inner-container">
+                    <slot name="inner">Inner default</slot>
+                  </div>
+                </slot>
+              </div>
+            `;
+          }
+        }
+        customElements.define('test-slot-nested', TestSlotNested);
+      }
+    });
+
+    describe('getSlot', () => {
+      it('should get content from a named slot', () => {
+        // Create and setup test component
+        const component = document.createElement('test-slot-basic');
+        const headerContent = document.createElement('h1');
+        headerContent.slot = 'header';
+        headerContent.textContent = 'Test Header';
+        component.appendChild(headerContent);
+        document.body.appendChild(component);
+
+        // Get the content of the 'header' slot
+        const slotContent = $(component).getSlot('header');
+        expect(slotContent).toBe('Test Header');
+      });
+
+      it('should get content from the default slot', () => {
+        // Create and setup test component
+        const component = document.createElement('test-slot-basic');
+        const defaultContent = document.createElement('p');
+        defaultContent.textContent = 'Default Content';
+        component.appendChild(defaultContent);
+        document.body.appendChild(component);
+
+        // Get the content of the default slot
+        const slotContent = $(component).getSlot();
+        expect(slotContent).toBe('Default Content');
+      });
+
+      it('should get content directly from a slot element', () => {
+        // Create and setup component
+        const component = document.createElement('test-slot-basic');
+        const headerContent = document.createElement('h1');
+        headerContent.slot = 'header';
+        headerContent.textContent = 'Direct Slot Test';
+        component.appendChild(headerContent);
+        document.body.appendChild(component);
+
+        // Get the slot element and then its content
+        const slot = component.shadowRoot.querySelector('slot[name="header"]');
+        const slotContent = $(slot).getSlot();
+        expect(slotContent).toBe('Direct Slot Test');
+      });
+
+      it('should handle multiple slotted elements', () => {
+        // Create and setup test component with multiple slotted elements
+        const component = document.createElement('test-slot-basic');
+        
+        const item1 = document.createElement('p');
+        item1.textContent = 'Item 1';
+        
+        const item2 = document.createElement('p');
+        item2.textContent = 'Item 2';
+        
+        component.appendChild(item1);
+        component.appendChild(item2);
+        document.body.appendChild(component);
+
+        // Get all default slotted content
+        const slotContent = $(component).getSlot();
+        expect(slotContent).toContain('Item 1');
+        expect(slotContent).toContain('Item 2');
+      });
+    });
+
+    describe('setSlot', () => {
+      it('should set content in a named slot', () => {
+        // Create test component
+        const component = document.createElement('test-slot-basic');
+        document.body.appendChild(component);
+
+        // Set content in the 'header' slot
+        $(component).setSlot('header', '<span>New Header</span>');
+
+        // Verify the content was set correctly
+        const headerSlot = component.querySelector('[slot="header"]');
+        expect(headerSlot).not.toBeNull();
+        expect(headerSlot.innerHTML).toBe('<span>New Header</span>');
+      });
+
+      it('should set content in the default slot', () => {
+        // Create test component
+        const component = document.createElement('test-slot-basic');
+        document.body.appendChild(component);
+
+        // Set content in the default slot
+        $(component).setSlot('<div>New Default Content</div>');
+
+        // Verify the content was set correctly (should not have a slot attribute)
+        const defaultContent = component.querySelector(':not([slot])');
+        expect(defaultContent).not.toBeNull();
+        expect(defaultContent.textContent).toBe('New Default Content');
+      });
+
+      it('should update existing slotted content', () => {
+        // Create component with existing slot content
+        const component = document.createElement('test-slot-basic');
+        const existingHeader = document.createElement('h2');
+        existingHeader.slot = 'header';
+        existingHeader.textContent = 'Existing Header';
+        component.appendChild(existingHeader);
+        document.body.appendChild(component);
+
+        // Update the existing header slot
+        $(component).setSlot('header', '<h3>Updated Header</h3>');
+
+        // Verify the content was updated
+        const updatedHeader = component.querySelector('[slot="header"]');
+        expect(updatedHeader.innerHTML).toBe('<h3>Updated Header</h3>');
+      });
+
+      it('should set content via parent when working with a slot element', () => {
+        // Create and setup component
+        const component = document.createElement('test-slot-basic');
+        document.body.appendChild(component);
+
+        // Get the slot element directly
+        const headerSlot = component.shadowRoot.querySelector('slot[name="header"]');
+        expect(headerSlot).not.toBeNull();
+        
+        // Set content for the header slot via the component
+        $(component).setSlot('header', '<strong>Set Via Component</strong>');
+
+        // Verify the content was set correctly
+        const slottedContent = component.querySelector('[slot="header"]');
+        expect(slottedContent).not.toBeNull();
+        expect(slottedContent.innerHTML).toBe('<strong>Set Via Component</strong>');
+      });
     });
   });
 
