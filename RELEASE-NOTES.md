@@ -12,6 +12,10 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## Improvements
 * Expression evaluation has been improved to support additional cases with mixed Lisp and JS style function callbacks
+* Improved the performance characteristics of reactive conditionals in templates
+
+## Bugs
+* Fix `pick` in utils to work with proxy objects
 
 For instance you can now pass js to Lisp style arguments
 ```javascript
