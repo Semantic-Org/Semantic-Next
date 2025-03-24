@@ -70,7 +70,7 @@ export const getExampleFiles = async ({
   const pathRegExp = new RegExp(pathRegExpString);
   await asyncEach(allFiles, async (file, path) => {
     if (path.match(pathRegExp)) {
-      const fileName = path.replace(pathRegExp, '').replace('/', '');
+      const fileName = path.replace(pathRegExp, '').replace('/', '').trim();
 
       const getContentType = (filename) => {
         const extension = filename.split('.').pop();

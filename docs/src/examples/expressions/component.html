@@ -46,9 +46,15 @@
       <td>Current time PST</td>
     </tr>
     <tr>
+      <td>Using inline javascript inside Lisp style function calls</td>
+      <td>concat 'my' 'friend' (isDog ? 'simon dog' : 'pookie cat')</td>
+      <td>{concat 'my ' 'friend ' (isDog ? 'simon dog' : 'pookie cat') }</td>
+      <td>my friend simon dog</td>
+    </tr>
+    <tr>
       <td>Using signal in js scope</td>
-      <td>{#html "{ fruit.get() == 'cherry' ? 'yum' : 'yuck' }"}</td>
-      <td>{ fruit.get() == 'cherry' ? 'yum' : 'yuck' }</td>
+      <td>{#html "{ fruit == 'cherry' ? 'yum' : 'yuck' }"}</td>
+      <td>{ fruit == 'cherry' ? 'yum' : 'yuck' }</td>
       <td>yum</td>
     </tr>
     <tr>

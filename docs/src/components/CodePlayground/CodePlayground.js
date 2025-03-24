@@ -166,7 +166,7 @@ const defaultState = {
 
   currentFiles: [],
 
-  initialFiles: [],
+  projectFiles: [],
 };
 
 const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, state, data, settings, $, $$ }) => ({
@@ -176,8 +176,24 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   ],
 
   initialize() {
-    state.initialFiles.set(settings.files);
-    state.currentFiles.set(settings.files);
+    self.setFiles(settings.files);
+
+    // only allow layout swap on pages that panels would work
+    if (settings.allowLayoutSwap) {
+      settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
+    }
+
+    // adjust layout when details of components change
+    reaction(self.calculateLayout);
+    reaction(self.calculateLayoutChange);
+  },
+
+  setFiles(files) {
+    // project files tracks changes in files setting
+    state.projectFiles.set(files);
+
+    // current files tracks file modifications
+    state.currentFiles.set(files);
 
     // select first file for left tabs
     const initialFile = self.getFirstFile({
@@ -192,15 +208,6 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
       filter: 'page',
     });
     state.activePageFile.set(initialPageFile);
-
-    // only allow layout swap on pages that panels would work
-    if (settings.allowLayoutSwap) {
-      settings.useTabs = localStorage.getItem('codeplayground-tabs') !== 'no';
-    }
-
-    // adjust layout when details of components change
-    reaction(self.calculateLayout);
-    reaction(self.calculateLayoutChange);
   },
 
   addPanelSettings() {
@@ -239,7 +246,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   configureLayout() {
     // this will update <playground-project> to reference current file values
     // this wil be read by playground-elements causing values to be reset otherwise
-    state.initialFiles.set(state.currentFiles.peek());
+    state.projectFiles.set(state.currentFiles.peek());
 
     // we will need to rerun code editor config on each file
     const playgroundFiles = findChildren('CodePlaygroundFile');
@@ -292,28 +299,37 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   },
 
   getNaturalPanelSize(panel, { direction, minimized }) {
+    const $scrollbar = $$(panel).find('.CodeMirror-vscrollbar');
+    const $sizer = $$(panel).find('.CodeMirror-sizer');
     if (direction == 'horizontal') {
+      const $menu = $$(panel).find('ui-menu .menu').first();
       const extraSpacing = 5; // rounding
-      const scrollbarWidth = $$(panel).find('.CodeMirror-vscrollbar').width() ? 17 : 0;
-      const menuWidth = $$(panel).find('ui-menu .menu').first().width() + 11 || 0;
+      const scrollbarWidth = $scrollbar.width() ? 17 : 0;
+      const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
-      $$(panel).find('.CodeMirror-sizer').each(sizer => {
-        const sizerMargin = parseFloat($(sizer).css('margin-left'));
-        const sizerWidth = parseFloat($(sizer).css('min-width'));
+      $sizer.each(sizer => {
+        const $sizer = $(sizer);
+        const sizerMargin = parseFloat($sizer.css('margin-left'));
+        const sizerWidth = parseFloat($sizer.css('min-width'));
         minWidths.push(sizerMargin + sizerWidth + scrollbarWidth);
       });
       const size = Math.max(...minWidths) + extraSpacing;
       return size;
     }
     else {
+      const $label = $$(panel).find('.label').first();
+      const $menu = $$(panel).find('.menu').first();
+
       const extraSpacing = 2; // rounding
-      const labelHeight = $$(panel).find('.label').first().height() || 0;
-      const menuHeight = $$(panel).find('.menu').first().height() || 0;
+      const labelHeight = $label.height() || 0;
+      const menuHeight = $menu.height() || 0;
       if (minimized) {
         return labelHeight;
       }
       else {
-        const codeHeight = parseFloat($$(panel).find('.CodeMirror-sizer').first().css('min-height'));
+        const $sizer = $$(panel).find('.CodeMirror-sizer').first();
+
+        const codeHeight = parseFloat($sizer.css('min-height'));
         const height = codeHeight + labelHeight + menuHeight + extraSpacing;
         return Math.max(height, 100);
       }
@@ -357,9 +373,9 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
   getProjectFiles() {
-    return self.getFileArray({files: state.initialFiles.get() });
+    return self.getFileArray({files: state.projectFiles.get() });
   },
-  getFileArray({ files = settings.files, filter } = {}) {
+  getFileArray({ files = state.currentFiles.value, filter } = {}) {
     let fileArray = [];
     const isPageFile = (filename) => {
       return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));

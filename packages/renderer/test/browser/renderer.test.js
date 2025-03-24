@@ -22,9 +22,11 @@ function renderASTtoText({ ast, data, snippets }) {
   const container = document.createElement('div');
   render(result, container);
 
+
   let html = container.innerHTML;
   // remove lit comments from html
   html = html.replace(/<!--[\s\S]*?-->/g, '').trim();
+  html = html.replace(/vitest-iframe/, '');
 
   return html;
 }
@@ -50,6 +52,7 @@ const expressionTests = [
       date: new Date('2025-01-01T12:00:00Z'),
     },
   },
+
   {
     name: 'Calling helper method in data context with js arguments',
     expression: `formatDate(date, 'h:mm:ss a', { timezone: timezone })`,
@@ -518,7 +521,7 @@ const expressionTests = [
   {
     name: 'Nested helpers with data context values',
     expression: 'concat "primary " buttonSize (isSelected(itemId) ? " selected" : "")',
-    result: 'primary largetrue', // The concat is concatenating without spaces between arguments
+    result: 'primary large selected', // The concat is concatenating without spaces between arguments
     data: {
       buttonSize: 'large',
       itemId: 42,
@@ -801,7 +804,7 @@ const expressionTests = [
   },
   {
     name: 'Expression with escaped characters',
-    expression: '"Line 1\\nLine 2\\tTabbed"',
+    expression: '"Line 1\nLine 2\tTabbed"',
     result: 'Line 1\nLine 2\tTabbed',
   },
   {

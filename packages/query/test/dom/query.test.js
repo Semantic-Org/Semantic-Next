@@ -1162,6 +1162,8 @@ describe('query', () => {
     });
   });
 
+  // Slotted tests moved to browser tests
+
   describe('text', () => {
     it('text should return the textContent of an element', () => {
       const div = document.createElement('div');

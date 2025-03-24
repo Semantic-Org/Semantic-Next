@@ -1,0 +1,53 @@
+---
+title: Hello World Component
+category: 'Basic Guide'
+subcategory: 'Getting Started'
+description: Create your first Semantic UI web component
+sort: '2.1.1'
+references:
+  - title: Component API Documentation
+    link: /components
+  - title: Formatting Date Values
+    link: /templates/expressions
+  - title: Component Lifecycle
+    link: /api/lifecycle
+---
+
+## Your First Component
+
+This lesson introduces your first UI component. We'll create a simple time display that updates every second. You'll learn the basics of component definition, templates, and reactivity.
+
+## Key Concepts
+
+1. **Component Definition**: The [`defineComponent`](/components/create#defining-components) function creates a web component with a specified tag name.
+
+2. **Template**: The template contains HTML with [expressions](/templates/expressions) in curly braces `{}` that display reactive data.
+
+3. **State**: The [`defaultState`](/components/state#declaring-state) object defines reactive properties that automatically update the UI when changed.
+
+4. **Lifecycle**: The [`onCreated`](/components/lifecycle) function runs when the component is initialized
+
+5. **Reactivity**: Using [`state.time.now()`](/api/reactivity/date-helpers#now) updates the time and automatically refreshes the display.
+
+## Understanding the Code
+
+Looking at [component.js](#component.js), notice how:
+
+- We use `defineComponent` to create a new web component with html tag `tagName`
+- `defaultState` specifies our internal state, in this example we track `time`
+- The template uses an expression [`{formatDate time "h:mm:ss a"}`](/templates/expressions#expression-syntax) to display formatted time with the time from `state`
+- We use [`css variables`](/components/styling) in our component styling to inherit from our page theme.
+- `onCreated` sets up a timer that updates every second
+
+## Using the Component
+
+We use [page.html](#page.html) to show how you might use your new component in a page. You can now use `<hello-world></hello-world>` anywhere you write code on the front end.
+
+## Try It Yourself
+
+Modify the component to include your name in the greeting and add the current date alongside the time.
+
+Hint: You'll need to:
+1. Add a new state property for your name
+2. Add a date display using the formatDate helper
+3. Update the CSS to style the new elements

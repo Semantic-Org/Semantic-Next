@@ -62,7 +62,7 @@ const createComponent = ({ state }) => ({
 });
 
 const events = {
-  'mousemove .container'({ event, target, self, state, $ }) {
+  'pointermove .container'({ event, target, self, state, $ }) {
     const rect = target.getBoundingClientRect();
     const width = $(target).width();
     const height = $(target).height();
@@ -71,8 +71,9 @@ const events = {
 
     self.createWave(x, y);
     state.amplitude.set((y - state.yOffset.value) * 0.2);
+    event.preventDefault();
   },
-  'mouseleave .container'({ state }) {
+  'pointerleave .container'({ state }) {
     state.waves.set([]);
     state.amplitude.set(0);
   },

@@ -17,7 +17,7 @@ Expressions are a reactive context meaning they will automatically update when t
 
 Expressions support two separate syntaxes, spaced arguments or "semantic style" and regular javascript style arguments.
 
-### Semantic Style
+### Semantic Expressions (Lisp)
 
 Spaced arguments do not require parenthesis or commas, simply include a space between arguments
 
@@ -31,7 +31,7 @@ If theres a preferred evaluation order you will need to add parenthesis
 {doSomething arg1 (doSomethingElse arg1) }
 ```
 
-### Javascript Style
+### Standard Expressions (JS)
 
 You can also simply specify any valid javascript inside an expression
 
@@ -52,7 +52,9 @@ Including nested objects
 
 ### Mixed Style
 
-It's okay to mix between Semantic and Javascript style expressions. If you need to embed a javascript expression inside a SUI one just wrap it in parenthesis.
+It's okay to mix between Semantic and Javascript style expressions.
+
+> If the javascript is more complex than a simple object or array, you will need to wrap the expression in parenthesis.
 
 ```sui
 { doSomething (arg1 + 2) (arg2 + 3) {a: 1, b: 2} }

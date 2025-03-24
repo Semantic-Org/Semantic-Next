@@ -214,3 +214,149 @@ The combined text content of immediate text node children.
 const immediateText = $('p').textNode();
 console.log(immediateText);
 ```
+
+## Slot Methods
+
+Query provides two methods for working with slots in Web Components: `getSlot` and `setSlot`. These methods work on both slot elements and web component elements.
+
+### getSlot
+
+The `getSlot` method gets the content of slots in Web Components.
+
+#### Syntax
+
+##### Get All Slotted Content
+```javascript
+// From a component (default slot)
+$(webComponent).getSlot()
+
+// From a slot element
+$(slot).getSlot()
+```
+
+##### Get Content for a Named Slot
+```javascript
+$(webComponent).getSlot(slotName)
+```
+
+| Name      | Type   | Description                    |
+|-----------|--------|--------------------------------|
+| slotName  | string | The name of the slot to access |
+
+#### Returns
+The combined HTML content of all elements assigned to the slot(s).
+
+#### Usage
+
+##### Getting All Slotted Content
+```javascript
+// Get all slotted content from a web component's default slot
+const myComponent = document.createElement('my-component');
+// ... add some slotted content ...
+const allSlottedContent = $(myComponent).getSlot();
+```
+
+##### Getting Content for a Specific Slot
+```javascript
+// Get content for just the "header" slot
+const headerContent = $(myComponent).getSlot('header');
+```
+
+##### Working with Slot Elements Directly
+```javascript
+// Get the content of a slot element
+const slotContent = $(element.shadowRoot).find('slot[name="header"]').getSlot();
+```
+
+### setSlot
+
+The `setSlot` method sets the content of slots in Web Components.
+
+#### Syntax
+
+##### Set Content for Default Slot
+```javascript
+$(webComponent).setSlot(content)
+```
+
+| Name       | Type                | Description                      |
+|------------|---------------------|----------------------------------|
+| content    | string or Element   | The content to add to the default slot |
+
+##### Set Content for Named Slot
+```javascript
+$(webComponent).setSlot(slotName, content)
+```
+
+| Name      | Type                | Description                      |
+|-----------|---------------------|----------------------------------|
+| slotName  | string              | The name of the slot to add content to |
+| content   | string or Element   | The content to add to the named slot |
+
+#### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+#### Usage
+
+##### Setting Content for Default Slot
+```javascript
+// Set content for the default (unnamed) slot
+$(myComponent).setSlot('<p>Default content</p>');
+```
+
+##### Setting Content for Named Slot
+```javascript
+// Set content for a named slot
+$(myComponent).setSlot('header', '<h1>Header content</h1>');
+```
+
+##### Working with Slot Elements Directly
+```javascript
+// Set content for a slot element (adds to parent component)
+$(element.shadowRoot).find('slot').setSlot('<div>New content</div>');
+```
+
+### Complete Component Example
+```javascript
+class MyComponent extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.innerHTML = `
+      <div>
+        <slot name="header">Default Header</slot>
+        <slot>Default Content</slot>
+      </div>
+    `;
+  }
+  
+  // Helper to set default content if none provided
+  setDefaultSlot(slotName, content) {
+    // Check if slot is empty
+    if (slotName) {
+      if (!this.querySelector(`[slot="${slotName}"]`)) {
+        $(this).setSlot(slotName, content);
+      }
+    } else {
+      if (!this.querySelector(':not([slot])')) {
+        $(this).setSlot(content);
+      }
+    }
+  }
+}
+
+customElements.define('my-component', MyComponent);
+
+// Usage
+const component = document.createElement('my-component');
+document.body.appendChild(component);
+
+// Set header slot content
+$(component).setSlot('header', '<h1>My Header</h1>');
+
+// Set default slot content
+$(component).setSlot('<p>Main content</p>');
+
+// Get all slotted content
+console.log($(component).getSlot());
+```

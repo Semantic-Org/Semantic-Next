@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { each } from '@semantic-ui/utils';
-import { nothing } from 'lit';
+import { nothing, noChange } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -11,6 +11,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   }
 
   render(conditional) {
+    let matchIndex = -1;
     // Ensure existing reaction is stopped
     if (this.reaction) {
       this.reaction.stop();
@@ -21,34 +22,45 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         comp.stop();
         return;
       }
+      let matchIndex = -1;
       if (conditional.condition()) {
         html = conditional.content();
+        matchIndex = 1000; // special index for if condition
       }
       else if (conditional.branches?.length) {
-        // evaluate each branch
-        let match = false;
-        each(conditional.branches, (branch) => {
-          if (!match && branch.type == 'elseif' && branch.condition()) {
-            match = true;
-            html = branch.content();
-          }
-          else if (!match && branch.type == 'else') {
-            match = true;
-            html = branch.content();
+        // evaluate each elseif/else branch
+        each(conditional.branches, (branch, index) => {
+          if(matchIndex === -1) {
+            if (branch.type == 'elseif' && branch.condition()) {
+              matchIndex = index;
+              html = branch.content();
+            }
+            else if (branch.type == 'else') {
+              matchIndex = index;
+              html = branch.content();
+            }
           }
         });
       }
       else {
         html = nothing;
+        delete this.matchIndex;
       }
       if (!html) {
         html = nothing;
+        delete this.matchIndex;
       }
-      if (!comp.firstRun) {
+      if (!comp.firstRun && this.matchIndex !== matchIndex) {
+        this.matchIndex = matchIndex;
         this.setValue(html);
       }
       return html;
     });
+    /* Commented out until can resolve mobile menu
+    if(this.matchIndex == matchIndex) {
+      return noChange;
+    }
+    */
     return html;
   }
 

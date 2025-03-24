@@ -1,0 +1,25 @@
+<div class="container {isActive ? 'active' : ''} {isMilestone(count) ? 'milestone' : ''}">
+  <h2>Counter: <span class="{isEven(count) ? 'even' : 'odd'}">{count}</span></h2>
+  
+  <div class="controls">
+    <button class="decrement">-</button>
+    <button class="increment">+</button>
+    <button class="reset">Reset</button>
+  </div>
+  
+  <div class="steps">
+    <span>Step: {step}</span>
+    <button class="decrease">-</button>
+    <button class="increase">+</button>
+  </div>
+  
+  <button class="toggle">{isActive ? 'Deactivate' : 'Activate'}</button>
+  
+  <div class="status">
+    Status: {isActive ? 'Active' : 'Inactive'} | 
+    Parity: {isEven(count) ? 'Even' : 'Odd'}
+    {#if isMilestone(count)}
+      <div class="badge">Milestone reached!</div>
+    {/if}
+  </div>
+</div>

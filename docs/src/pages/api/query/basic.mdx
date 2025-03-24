@@ -116,12 +116,16 @@ import { $$ } from '@semantic-ui/query';
 const $shadowContent = $$('my-component .shadow-content');
 ```
 
-### Selecting Slotted Content
+### Accessing Slotted Content
 
 ```javascript
-import { $$ } from '@semantic-ui/query';
+import { $, $$ } from '@semantic-ui/query';
 
-const $slottedContent = $$('my-component .slotted-content');
+// Find elements with slot attribute across shadow boundaries
+const $slottedElements = $$('my-component [slot="header"]');
+
+// Get content from slots
+const headerContent = $('my-component').getSlot('header');
 ```
 
 ## The Query Object

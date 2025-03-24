@@ -17,7 +17,6 @@ A basic each loop allows you to access properties of a collection inside the loo
 {/each}
 ```
 
-
 `each` loops can improve readability of templates in simple use-cases.
 ```sui
 {#each todos}
@@ -27,6 +26,27 @@ A basic each loop allows you to access properties of a collection inside the loo
   <span class="status">
     {maybe completed 'Completed' 'Incomplete'}
   </span>
+{/each}
+```
+
+You can use `this` to refer to the entire element in the loop
+```sui
+{#each number}
+  {this}
+{/each}
+```
+
+You can also use any JS to evaluate [expressions](/templates/expressions) in your data context
+```sui
+{#each [1, 2, 3]}
+  {this}
+{/each}
+```
+
+These [expressions](/templates/expressions) can also use variables
+```sui
+{#each [getFirst, getSecond, 3]}
+  {this}
 {/each}
 ```
 

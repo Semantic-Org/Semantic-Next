@@ -1,0 +1,32 @@
+<h1>Component Settings Example</h1>
+
+<!-- Default settings -->
+<ui-profile></ui-profile>
+
+<!-- Custom settings via attributes -->
+<ui-profile 
+  username="Alex Taylor" 
+  role="Developer" 
+  isAdmin="true" 
+  avatar="/images/avatar/elliot.jpg">
+</ui-profile>
+
+<!-- We'll add this profile through JavaScript -->
+<div id="js-profile-container"></div>
+
+<!-- Simple form to update settings -->
+<div class="settings-form">
+  <h2>Update Profile</h2>
+  <label>
+    Username:
+    <input id="username" type="text" value="Jamie Smith">
+  </label>
+  <br>
+  <label>
+    Role:
+    <input id="role" type="text" value="Manager">
+  </label>
+  <br>
+  <button id="update-profile">Update Profile</button>
+  <button id="toggle-active">Toggle Active Status</button>
+</div>

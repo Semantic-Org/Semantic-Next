@@ -108,44 +108,27 @@ export class Query {
      intermediate selectors at shadow boundaries
   */
   querySelectorAllDeep(root, selector, includeRoot = true) {
-    let elements = [];
-    let domSelector = isDOM(selector);
+    // Use a Set for automatic deduplication
+    const elements = new Set();
+    const domSelector = isDOM(selector);
     let domFound = false;
-    let queriedRoot;
+    let queriedRoot = false;
 
-    // add root if required
+    // Add root if required
     if (includeRoot) {
-      if (domSelector && root == selector) {
-        elements.push(root);
-      }
-      else if (root.matches && root.matches(selector)) {
-        elements.push(root);
+      if ((domSelector && root == selector) ||
+          (!domSelector && root.matches && root.matches(selector))) {
+        elements.add(root);
       }
     }
 
-    // query from root
+    // Query from root
     if (domSelector) {
       queriedRoot = true;
-    }
-    else if (root.querySelectorAll) {
-      elements.push(...root.querySelectorAll(selector));
+    } else if (root.querySelectorAll) {
+      root.querySelectorAll(selector).forEach(el => elements.add(el));
       queriedRoot = true;
     }
-    else {
-      queriedRoot = false;
-    }
-
-    const addElements = (node, selector) => {
-      if (domSelector && (node === selector || node.contains)) {
-        if (node.contains(selector)) {
-          elements.push(selector);
-          domFound = true;
-        }
-      }
-      else if (node.querySelectorAll) {
-        elements.push(...node.querySelectorAll(selector));
-      }
-    };
 
     const getRemainingSelector = (el, selector) => {
       const parts = selector.split(' ');
@@ -161,36 +144,57 @@ export class Query {
       return remainingSelector || selector;
     };
 
-    const findElements = (node, selector, query) => {
-      // if we are querying for a DOM element we can stop searching once we've found it
-      if (domFound) {
-        return;
+    const addElements = (node, selector) => {
+      if (domSelector && (node === selector || node.contains)) {
+        if (node.contains(selector)) {
+          elements.add(selector);
+          domFound = true;
+        }
+      } else if (node.querySelectorAll) {
+        // Directly add to Set without intermediate array
+        node.querySelectorAll(selector).forEach(el => elements.add(el));
       }
+    };
 
-      // if root element did not support querySelectorAll
-      // we query each child node then stop
+    const findElements = (node, selector, query) => {
+      // Early termination condition for DOM selector search
+      if (domSelector && domFound) return;
+
+      // If root element didn't support querySelectorAll, query each child node
       if (query === true) {
         addElements(node, selector);
         queriedRoot = true;
       }
 
-      // query at each shadow root
+      // Process shadow roots
       if (node.nodeType === Node.ELEMENT_NODE && node.shadowRoot) {
-        selector = getRemainingSelector(node, selector);
-        addElements(node.shadowRoot, selector);
-        findElements(node.shadowRoot, selector, !queriedRoot);
+        const newSelector = getRemainingSelector(node, selector);
+        addElements(node.shadowRoot, newSelector);
+        findElements(node.shadowRoot, newSelector, !queriedRoot);
       }
 
+      // Process assigned nodes with direct for loop
       if (node.assignedNodes) {
-        selector = getRemainingSelector(node, selector);
-        node.assignedNodes().forEach((node) => findElements(node, selector, queriedRoot));
+        const newSelector = getRemainingSelector(node, selector);
+        const nodes = node.assignedNodes();
+        for (let i = 0; i < nodes.length; i++) {
+          findElements(nodes[i], newSelector, queriedRoot);
+        }
       }
-      if (node.childNodes.length) {
-        node.childNodes.forEach((node) => findElements(node, selector, queriedRoot));
+
+      // Process child nodes with direct for loop
+      if (node.childNodes && node.childNodes.length) {
+        const childCount = node.childNodes.length;
+        for (let i = 0; i < childCount; i++) {
+          findElements(node.childNodes[i], selector, queriedRoot);
+        }
       }
     };
+
     findElements(root, selector);
-    return [...new Set(elements)];
+
+    // Convert Set to Array for return
+    return Array.from(elements);
   }
 
   each(callback) {
@@ -593,6 +597,63 @@ export class Query {
     else if (this.length) {
       return this.map(el => el.outerHTML).join('');
     }
+  }
+
+  getSlot(name) {
+    return this.map((el) => {
+      if(el.tagName.toLowerCase() == 'slot' && (!name || el.name == name)) {
+        // called directly on a matching slot
+        const nodes = el.assignedNodes({ flatten: true });
+        if(nodes) {
+          return this.chain(nodes).html();
+        }
+      }
+      else if (el.shadowRoot) {
+        // Component has shadow DOM, query assigned slot nodes
+        const slotSelector = name ? `slot[name="${name}"]` : 'slot:not([name])';
+        const slot = el.shadowRoot.querySelector(slotSelector);
+        const nodes = slot.assignedNodes({ flatten: true });
+        if(nodes) {
+          return this.chain(nodes).html();
+        }
+      } else {
+        // No shadow DOM, fallback to direct DOM querying
+        const slotSelector = name ? `[slot="${name}"]` : ':not([slot])';
+        return this.chain(el).find(slotSelector).html();
+      }
+    }).join('');
+  }
+
+  setSlot(nameOrHTML, newHTML) {
+
+    // Determine if we're dealing with a named slot or default slot based on arguments
+    let name;
+    if (newHTML) {
+      name = nameOrHTML;
+    } else {
+      newHTML = nameOrHTML;
+    }
+
+    return this.each((el) => {
+      // find host web component
+      if(el.tagName.toLowerCase() == 'slot') {
+        el = el.getRootNode().getRootNode()?.host;
+      }
+      const $el = this.chain(el);
+      if (name) {
+        const slotSelector = `[slot="${name}"]`;
+        let $slottedElement = this.chain(el).find(slotSelector);
+        if (!$slottedElement.exists()) {
+          // Slot element does not exist, create a new one
+          $el.append(`<span slot="${name}"></span>`);
+          $slottedElement = this.chain(el).find(slotSelector);
+        }
+        $slottedElement.html(newHTML);
+      } else {
+        // Default slot updates the entire element content
+        $el.html(newHTML);
+      }
+    });
   }
 
   text(newText) {

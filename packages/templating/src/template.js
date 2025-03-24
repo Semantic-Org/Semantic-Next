@@ -687,7 +687,7 @@ export const Template = class Template {
         // not yet implemented
         content: this.instance.content,
 
-        // on demand since requires  computing styles
+        // on demand since forces recalculateStyle on body
         get darkMode() {
           return element.isDarkMode();
         },

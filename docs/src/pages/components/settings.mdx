@@ -143,11 +143,10 @@ When passing complex types through attributes, serialize them with JSON:
 When using JavaScript properties, you can pass the values directly:
 
 ```javascript
-const userList = document.querySelector('user-list');
-userList.users = [
+const userList = $('user-list').setting(users, [
   { name: 'Alex', role: 'admin' },
   { name: 'Sam', role: 'user' }
-];
+]);
 ```
 
 ### Functions
@@ -155,8 +154,7 @@ userList.users = [
 Functions can only be passed through JavaScript:
 
 ```javascript
-const form = document.querySelector('user-form');
-form.onSubmit = (data) => {
+$('user-form').setting('onSubmit', (data) => {
   saveUserData(data);
 };
 ```

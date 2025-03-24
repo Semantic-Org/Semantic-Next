@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { inArray, isEmpty, openLink } from '@semantic-ui/utils';
+import { inArray, isEqual, isEmpty, openLink, pick, getJSON } from '@semantic-ui/utils';
 
 /* Sub Components */
 import { HintModal } from './subtemplates/HintModal.js';
@@ -33,32 +33,35 @@ const defaultSettings = {
   previousLesson: {},
   nextLesson: {},
 
-  // populates menu
+  // populates menu showing all lessons
   menu: [],
-
+  // used to select correct menu section
   activeURL: '',
+
   playgroundConfig: {
     files: [],
     example: '',
     sandboxURL: '',
     panelIndexes: {},
   },
+
+  lessonEndpoint: '/content-api/lessons/{id}.json',
 };
 
 const defaultState = {
-  currentFiles: [],
   layout: 'tabs',
   mobileView: 'lesson',
+  currentFiles: [],
 };
 
-const createComponent = ({ $, $$, data, self, state, reaction, isRendered, settings }) => ({
+const createComponent = ({ $, $$, el, data, self, state, reaction, isRendered, settings }) => ({
   mobileMenu: [
     { label: 'Lesson', value: 'lesson' },
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
   ],
   initialize() {
-    state.currentFiles.set(settings.files);
+    self.setFiles(settings.files);
     self.calculateMobileView();
   },
   calculateMobileView() {
@@ -126,12 +129,48 @@ const createComponent = ({ $, $$, data, self, state, reaction, isRendered, setti
       }
     });
   },
+  getLessonURL(id) {
+    return settings.lessonEndpoint.replace('{id}', id);
+  },
+  changeLesson(newLesson) {
+    const lesson = newLesson.lesson;
+    settings.lesson = lesson;
+    settings.previousLesson = newLesson.previousLesson;
+    settings.nextLesson = newLesson.nextLesson;
+    settings.solutionFiles = newLesson.solutionFiles;
+    // use state to avoid rerender
+    self.setFiles(newLesson.files);
+    // markdown is in slotted content
+    $(el).setSlot(newLesson.lessonHTML);
+  },
   openFile(filename) {
     self.getPlayground().selectFilename(filename);
   },
+  setFiles(files) {
+    state.currentFiles.set(files);
+    if(isRendered()) {
+      const playground = $('code-playground').component();
+      playground.setFiles(files);
+    }
+  },
+  setStartingState() {
+    const state = pick(settings, 'lesson', 'previousLesson', 'nextLesson', 'files', 'solutionFiles');
+    window.history.replaceState(state, document.title, window.location.pathname);
+  },
+  updateState(newLesson) {
+    window.history.pushState(newLesson, `${newLesson.lesson.title} - Semantic UI`, newLesson.lesson.url);
+  }
 });
 
+const onCreated = ({self}) => {
+  self.setStartingState();
+};
+
 const events = {
+  'global popstate window'({self, event}) {
+    const lesson = event.state;
+    self.changeLesson(lesson);
+  },
   'click'({ self, event, $ }) {
     if ($(event.target).closest('.toggle-menu').exists()) {
       return;
@@ -140,8 +179,8 @@ const events = {
       self.hideNavMenu();
     }
   },
-  'click .solve'({ settings, data, state }) {
-    state.currentFiles.set(settings.solutionFiles);
+  'click .solve'({ settings, self }) {
+    self.setFiles(settings.solutionFiles);
   },
   'click .toggle-menu'({ self }) {
     self.toggleNavMenu();
@@ -158,9 +197,23 @@ const events = {
   'change ui-menu.mobile'({ state, data }) {
     state.mobileView.set(data.value);
   },
+  async 'click .previous'({event, self, settings}) {
+    event.preventDefault();
+    const lessonURL = self.getLessonURL(settings.previousLesson.id);
+    const newLesson = await getJSON(lessonURL)
+    self.changeLesson(newLesson);
+    self.updateState(newLesson);
+  },
+  async 'click .next'({event, self, settings}) {
+    event.preventDefault();
+    const lessonURL = self.getLessonURL(settings.nextLesson.id);
+    const newLesson = await getJSON(lessonURL)
+    self.changeLesson(newLesson);
+    self.updateState(newLesson);
+  },
   'click a[href]'({ self, target, event }) {
     const href = $(target).attr('href');
-    const file = href.replace(/^#/, '');
+    const file = href.replace(/^(\/#|#)/, '');
     if (self.isFile(file)) {
       self.openFile(file);
       event.preventDefault();
@@ -179,7 +232,8 @@ const events = {
   },
 };
 
-const onRendered = ({ self }) => {
+const onRendered = ({ settings, self }) => {
+  self.setFiles(settings.files);
   self.calculateCodeLayout();
   self.linkifyFiles();
 };
@@ -190,6 +244,7 @@ const LearnExample = defineComponent({
   template,
   css,
   createComponent,
+  onCreated,
   onRendered,
   defaultSettings,
   events,

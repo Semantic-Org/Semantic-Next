@@ -1,0 +1,15 @@
+<div class="container {isActive ? 'active' : ''}">
+  <h2>Counter: <span class="{isEven(count) ? 'even' : 'odd'}">{count}</span></h2>
+  
+  <div class="controls">
+    <button class="decrement">-</button>
+    <button class="increment">+</button>
+  </div>
+  
+  <button class="toggle">{isActive ? 'Deactivate' : 'Activate'}</button>
+  
+  <div class="status">
+    Status: {isActive ? 'Active' : 'Inactive'} | 
+    Parity: {isEven(count) ? 'Even' : 'Odd'}
+  </div>
+</div>

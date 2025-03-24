@@ -25,10 +25,10 @@ Since we are using `tagName` our components `settings` can be configured by adju
 
 We are adding `city` and `timezone` which can now be used to modify the time display.
 
-You can see in [`index.html`](/#index.html)
+You can see in [`page.html`](/#page.html)
 ```html
-<current-time city="Norfolk" timezone="EST"></current-time>
-<current-time city="Los Angeles" timezone="PST"></current-time>
+<current-time city="Norfolk" timezone="ET"></current-time>
+<current-time city="Los Angeles" timezone="PT"></current-time>
 ```
 
 This adjusts the `settings` in `createComponent` to be a different `setting.city` and `setting.timezone` for each instance.
