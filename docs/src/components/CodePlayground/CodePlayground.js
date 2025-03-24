@@ -375,7 +375,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   getProjectFiles() {
     return self.getFileArray({files: state.projectFiles.get() });
   },
-  getFileArray({ files = settings.files, filter } = {}) {
+  getFileArray({ files = state.currentFiles.value, filter } = {}) {
     let fileArray = [];
     const isPageFile = (filename) => {
       return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));

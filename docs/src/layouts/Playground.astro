@@ -9,6 +9,9 @@ import SiteMobileMenu from '@components/SiteMobileMenu.astro';
 import './Layout.css';
 import './Playground.css';
 let { title, description, searchMeta } = Astro.props;
+if(!title) {
+  title = searchMeta?.title;
+}
 ---
 <Body title={title} description={description} searchMeta={searchMeta} >
   <layout id="playground">

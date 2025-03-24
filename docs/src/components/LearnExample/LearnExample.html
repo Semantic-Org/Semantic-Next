@@ -92,7 +92,7 @@
       {/if}
     </ui-panel>
     <ui-panel class="code" direction="horizontal">
-      {#if isEmpty files}
+      {#if isEmpty currentFiles}
         <div class="overlay">
           <div class="placeholder">
             <ui-icon info></ui-icon>
@@ -106,7 +106,7 @@
         </div>
       {else}
         <code-playground
-          files={files}
+          files={currentFiles}
           example={playgroundConfig.example}
           selectedFile={playgroundConfig.selectedFile}
           sandboxURL={playgroundConfig.sandboxURL}

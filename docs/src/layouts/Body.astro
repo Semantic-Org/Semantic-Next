@@ -4,6 +4,9 @@ let { title, description, searchMeta, bodyClass = '', padded } = Astro.props;
 if(!title) {
   title = 'Semantic UI';
 }
+else {
+  title += ' - Semantic UI';
+}
 
 if(padded) {
   bodyClass += ' padded';
