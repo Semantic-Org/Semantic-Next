@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { inArray, isEmpty, openLink } from '@semantic-ui/utils';
+import { inArray, isEmpty, openLink, getJSON } from '@semantic-ui/utils';
 
 /* Sub Components */
 import { HintModal } from './subtemplates/HintModal.js';
@@ -33,32 +33,34 @@ const defaultSettings = {
   previousLesson: {},
   nextLesson: {},
 
-  // populates menu
+  // populates menu showing all lessons
   menu: [],
-
+  // used to select correct menu section
   activeURL: '',
+
   playgroundConfig: {
     files: [],
     example: '',
     sandboxURL: '',
     panelIndexes: {},
   },
+
+  lessonEndpoint: '/content-api/lessons/{id}.json',
+  baseURL: '/learn',
 };
 
 const defaultState = {
-  currentFiles: [],
   layout: 'tabs',
   mobileView: 'lesson',
 };
 
-const createComponent = ({ $, $$, data, self, state, reaction, isRendered, settings }) => ({
+const createComponent = ({ $, $$, el, data, self, state, reaction, isRendered, settings }) => ({
   mobileMenu: [
     { label: 'Lesson', value: 'lesson' },
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
   ],
   initialize() {
-    state.currentFiles.set(settings.files);
     self.calculateMobileView();
   },
   calculateMobileView() {
@@ -126,6 +128,19 @@ const createComponent = ({ $, $$, data, self, state, reaction, isRendered, setti
       }
     });
   },
+  getLessonJSON(id) {
+    return settings.lessonEndpoint.replace('{id}', id);
+  },
+  changeLesson(newLesson) {
+    settings.lesson = newLesson.lesson;
+    settings.previousLesson = newLesson.previousLesson;
+    settings.nextLesson = newLesson.nextLesson;
+    settings.files = newLesson.files;
+    settings.solutionFiles = newLesson.solutionFiles;
+    $(el).setSlot(newLesson.lessonHTML);
+    console.log('setting state to', newLesson.lesson.id);
+    window.history.pushState(newLesson, `Semantic UI`, `${settings.baseURL}/${newLesson.lesson.id}`);
+  },
   openFile(filename) {
     self.getPlayground().selectFilename(filename);
   },
@@ -136,6 +151,11 @@ const createComponent = ({ $, $$, data, self, state, reaction, isRendered, setti
 });
 
 const events = {
+  'global popstate window'({self, event}) {
+    const lesson = event.state;
+    console.log(lesson.lesson.id);
+    self.changeLesson(lesson);
+  },
   'click'({ self, event, $ }) {
     if ($(event.target).closest('.toggle-menu').exists()) {
       return;
@@ -161,6 +181,11 @@ const events = {
   },
   'change ui-menu.mobile'({ state, data }) {
     state.mobileView.set(data.value);
+  },
+  async 'click .next'({event, self, settings}) {
+    event.preventDefault();
+    const newLesson = await getJSON(self.getLessonJSON(settings.nextLesson.id))
+    self.changeLesson(newLesson);
   },
   'click a[href]'({ self, target, event }) {
     const href = $(target).attr('href');

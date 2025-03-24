@@ -13,9 +13,9 @@ references:
     link: /api/lifecycle
 ---
 
-## Hello World Component
+## Your First Component
 
-This lesson introduces your first Semantic UI web component. We'll create a simple real-time clock that updates every second. You'll learn the basics of component definition, templates, and reactivity.
+This lesson introduces your first UI component. We'll create a simple time display that updates every second. You'll learn the basics of component definition, templates, and reactivity.
 
 ## Key Concepts
 
@@ -25,7 +25,7 @@ This lesson introduces your first Semantic UI web component. We'll create a simp
 
 3. **State**: The [`defaultState`](/components/state#declaring-state) object defines reactive properties that automatically update the UI when changed.
 
-4. **Lifecycle**: The [`onCreated`](/components/lifecycle) function runs when the component is initialized, perfect for setup code.
+4. **Lifecycle**: The [`onCreated`](/components/lifecycle) function runs when the component is initialized
 
 5. **Reactivity**: Using [`state.time.now()`](/api/reactivity/date-helpers#now) updates the time and automatically refreshes the display.
 
@@ -33,15 +33,15 @@ This lesson introduces your first Semantic UI web component. We'll create a simp
 
 Looking at [component.js](#component.js), notice how:
 
-- We import `defineComponent` from the framework
-- The `tagName` property specifies the HTML element name
-- The template uses [`{formatDate time "h:mm:ss a"}`](/templates/expressions#format-date) to display formatted time
-- `defaultState` initializes our reactive data
+- We use `defineComponent` to create a new web component with html tag `tagName`
+- `defaultState` specifies our internal state, in this example we track `time`
+- The template uses an expression [`{formatDate time "h:mm:ss a"}`](/templates/expressions#expression-syntax) to display formatted time with the time from `state`
+- We use [`css variables`](/components/styling) in our component styling to inherit from our page theme.
 - `onCreated` sets up a timer that updates every second
 
 ## Using the Component
 
-Once defined, you can use your component in HTML as shown in [page.html](#page.html). No additional setup is required!
+We use [page.html](#page.html) to show how you might use your new component in a page. You can now use `<hello-world></hello-world>` anywhere you write code on the front end.
 
 ## Try It Yourself
 

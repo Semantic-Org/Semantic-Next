@@ -2,30 +2,37 @@ import { defineComponent } from '@semantic-ui/component';
 
 defineComponent({
   tagName: 'hello-world',
+
+  defaultState: {
+    time: new Date()
+  },
   
   template: `<div class="container">
     Hello World!
-    <div class="time">Current time: <b>{formatDate time "h:mm:ss a"}</b></div>
+    <div class="date">Today is
+      <b>{formatDate time "MMMM DD, YYYY}</b>
+    </div>
   </div>`,
   
   css: `
     .container {
       padding: var(--padding);
       border-radius: var(--border-radius);
-      background-color: var(--primary-color);
-      color: var(--white-80);
-      text-align: center;
+      background: var(--standard-5);
+      border: var(--border);
+      color: var(--standard-20);
+      font-size: var(--small);
+      font-weight: var(--bold);
 
-      .date, .time {
-        var(--compact-spacing)
-        font-size: var(--small);
+      .time {
+        color: var(--standard-80);
+        font-size: var(--medium);
+      }
+      b {
+        color: var(--primary-text-color);
       }
     }
   `,
-  
-  defaultState: { 
-    time: new Date() 
-  },
   
   onCreated({ state }) {
     setInterval(() => state.time.now(), 1000);

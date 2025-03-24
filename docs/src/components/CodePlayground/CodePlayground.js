@@ -176,7 +176,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   ],
 
   initialize() {
-    self.setFiles();
+    self.setFiles(settings.files);
 
     // only allow layout swap on pages that panels would work
     if (settings.allowLayoutSwap) {
@@ -188,7 +188,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
     reaction(self.calculateLayoutChange);
   },
 
-  setFiles(files = settings.files) {
+  setFiles(files) {
     // project files tracks changes in files setting
     state.projectFiles.set(files);
 
