@@ -599,6 +599,60 @@ export class Query {
     }
   }
 
+  slotted(nameOrHTML, newHTML) {
+    let slotName;
+
+    // Determine if we're dealing with a named slot or default slot based on arguments
+    if (newHTML && nameOrHTML) {
+      slotName = nameOrHTML;
+    } else if (!newHTML && isString(nameOrHTML)) {
+      newHTML = nameOrHTML;
+    }
+
+    if (newHTML !== undefined) {
+      // Setter: Update or create the slot content
+      return this.each((el) => {
+        if (slotName) {
+          const slotSelector = `[slot="${slotName}"]`;
+          let $slottedElement = this.chain(el).find(slotSelector);
+
+          if (!$slottedElement.exists()) {
+            // Slot element does not exist, create a new one
+            this.chain(el).append(`<span slot="${slotName}"></span>`);
+            $slottedElement = $newEl;
+          }
+
+          $slottedElement.html(newHTML);
+        } else {
+          // Default slot updates the entire element content
+          this.chain(el).html(newHTML);
+        }
+      });
+    } else if (this.length) {
+      // Getter: Retrieve slot content
+      return this.map((el) => {
+        if (el.shadowRoot) {
+          // Component has shadow DOM, query assigned slot nodes
+          const slotSelector = slotName ? `slot[name="${slotName}"]` : 'slot:not([name])';
+          const slot = el.shadowRoot.querySelector(slotSelector);
+          const nodes = slot.assignedNodes({ flatten: true });
+          if(nodes) {
+            return this.chain(nodes).html();
+          }
+        } else {
+          // No shadow DOM, fallback to direct DOM querying
+          const slotSelector = slotName ? `[slot="${slotName}"]` : ':not([slot])';
+          return this.chain(el).find(slotSelector).html();
+        }
+      }).join('');
+    }
+  }
+
+  // alias
+  slot(...args) {
+    return this.slotted(...args);
+  }
+
   text(newText) {
     if (newText !== undefined) {
       return this.each((el) => (el.textContent = newText));
