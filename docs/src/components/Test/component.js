@@ -10,7 +10,8 @@ const defaultSettings = {
 };
 
 const defaultState = {
-  fruit: 'cherry'
+  fruit: 'cherry',
+  isDog: () => true
 };
 
 const createComponent = ({ settings }) => ({
