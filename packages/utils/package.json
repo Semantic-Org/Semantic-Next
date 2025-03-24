@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/utils",
-  "version": "0.10.8",
+  "version": "0.10.9",
   "description": "Utility functions for arrays, objects, strings, type checking and more",
   "author": "Jack Lukic",
   "homepage": "https://next.semantic-ui.com",
