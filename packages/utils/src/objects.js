@@ -60,7 +60,7 @@ export const extend = (obj, ...sources) => {
 export const pick = (obj, ...keys) => {
   let copy = {};
   each(keys, function(key) {
-    if (key in obj) {
+    if (obj[key] !== undefined) {
       copy[key] = obj[key];
     }
   });
