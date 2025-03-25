@@ -75,6 +75,7 @@
     nav-menu {
       margin-top: 0rem;
       --nav-menu-title-padding: 5px 0px 10px;
+      --nav-menu-title-font-size: 11px;
       --nav-menu-title-icon-font-size: 13px;
       --nav-menu-title-icon-width: 1rem;
       --nav-menu-title-icon-distance: 9px;

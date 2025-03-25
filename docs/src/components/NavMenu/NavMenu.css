@@ -92,6 +92,7 @@ a {
   text-transform: none;
   font-weight: bold;
   align-items: center;
+  padding: var(--nav-menu-title-padding);
   text-decoration: none;
   color: var(--nav-menu-title-color);
 

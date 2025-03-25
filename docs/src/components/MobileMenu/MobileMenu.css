@@ -30,6 +30,7 @@
 
 nav-menu {
   --nav-menu-title-font-size: 15px;
+  --nav-menu-title-padding: 4px 0px;
   --nav-menu-title-color: var(--mobile-menu-color);
   --nav-menu-dropdown-icon-font-size: 16px;
 }
