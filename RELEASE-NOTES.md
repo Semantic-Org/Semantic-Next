@@ -4,6 +4,14 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.10.10
+
+## New
+* Binding to `checked` or `input` will automatically update the element property if the value changes. Note this is a one way binding, updating the element attribute will not update a signal/setting passed into `value`.
+
+## Bug
+* Fix `value` / `val` in Query would not set value of custom elements because of too strict html element type checking.
+
 # Version 0.10.9
 
 ## New
