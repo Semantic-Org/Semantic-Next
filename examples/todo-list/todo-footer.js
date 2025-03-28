@@ -1,4 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
+
 import css from './todo-footer.css?raw';
 import template from './todo-footer.html?raw';
 
@@ -9,9 +10,9 @@ const createComponent = ({ self, findParent, $ }) => ({
     return findParent('todoList');
   },
 
-  getIncomplete() {
+  getIncompleteCount() {
     const todos = self.todoList().todos.get();
-    return todos.filter((todo) => !todo.completed);
+    return todos.filter((todo) => !todo.completed)?.length;
   },
 
   hasAnyCompleted() {
@@ -27,8 +28,8 @@ const createComponent = ({ self, findParent, $ }) => ({
   },
 
   scrollToBottom() {
-    const todoList = $('.todo-list')[0];
-    todoList.scrollTop = todoList.scrollHeight;
+    const listEl = $('.todo-list').get(0);
+    listEl.scrollTop = listEl.scrollHeight;
   },
 
   clearCompleted() {
