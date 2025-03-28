@@ -711,26 +711,13 @@ export class Query {
     if (newValue !== undefined) {
       // Set the value for each element
       return this.each((el) => {
-        if (
-          el instanceof HTMLInputElement
-          || el instanceof HTMLSelectElement
-          || el instanceof HTMLTextAreaElement
-        ) {
-          el.value = newValue;
-        }
+        el.value = newValue;
       });
     }
     else {
       // Get the value of each element
       const values = this.map((el) => {
-        if (
-          el instanceof HTMLInputElement
-          || el instanceof HTMLSelectElement
-          || el instanceof HTMLTextAreaElement
-        ) {
-          return el.value;
-        }
-        return undefined;
+        return el.value;
       });
       return values.length > 1 ? values : values[0];
     }
