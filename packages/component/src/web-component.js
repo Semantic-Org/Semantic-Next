@@ -14,7 +14,6 @@ import {
   unique,
 } from '@semantic-ui/utils';
 import { LitElement } from 'lit';
-import { scopeStyles } from './helpers/scope-styles.js';
 
 /*
   This extends the base Lit element class to include
@@ -103,6 +102,13 @@ class WebComponentBase extends LitElement {
           noAccessor: true,
           alias: true,
         };
+      }
+    });
+    // accessors can break certain special dom attrs
+    const specialAttrs = ['value', 'checked'];
+    each(specialAttrs, (attr) => {
+      if(properties[attr]) {
+        //properties[attr].noAccessor = true;
       }
     });
     return properties;

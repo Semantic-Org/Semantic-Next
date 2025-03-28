@@ -150,7 +150,9 @@ const createComponent = ({ $, $$, el, data, self, state, reaction, isRendered, s
     state.currentFiles.set(files);
     if(isRendered()) {
       const playground = $('code-playground').component();
-      playground.setFiles(files);
+      if(playground) {
+        playground.setFiles(files);
+      }
     }
   },
   setStartingState() {

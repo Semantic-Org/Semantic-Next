@@ -1,0 +1,93 @@
+{#snippet textField}
+  <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
+    <label for="{field.name}">
+      {field.label}
+      {#if field.required}<span class="required">*</span>{/if}
+    </label>
+    <input
+      type="text"
+      id="{field.name}"
+      name="{field.name}"
+      value="{getFieldValue field.name}"
+      placeholder="{field.placeholder || ''}"
+      data-name="{field.name}"
+    />
+    {#if shouldShowError field.name}
+      <div class="error-message">{getFieldError field.name}</div>
+    {/if}
+    {#if field.helpText}
+      <div class="help-text">{field.helpText}</div>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet selectField}
+  <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
+    <label for="{field.name}">
+      {field.label}
+      {#if field.required}<span class="required">*</span>{/if}
+    </label>
+    <select
+      id="{field.name}"
+      name="{field.name}"
+      data-name="{field.name}"
+    >
+      <option value="" {#if isEmpty (getFieldValue field.name)}selected{/if}>
+        {field.placeholder || 'Select...'}
+      </option>
+      {#each option in field.options}
+        <option
+          value="{option.value}"
+          {#if (getFieldValue field.name) == option.value}selected{/if}
+        >
+          {option.label}
+        </option>
+      {/each}
+    </select>
+    {#if shouldShowError field.name}
+      <div class="error-message">{getFieldError field.name}</div>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet textareaField}
+  <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
+    <label for="{field.name}">
+      {field.label}
+      {#if field.required}<span class="required">*</span>{/if}
+    </label>
+    <textarea
+      id="{field.name}"
+      name="{field.name}"
+      data-name="{field.name}"
+      placeholder="{field.placeholder || ''}"
+      value="{getFieldValue field.name}"></textarea>
+    {#if shouldShowError field.name}
+      <div class="error-message">{getFieldError field.name}</div>
+    {/if}
+  </div>
+{/snippet}
+
+<form class="{classMap getFormClasses}">
+  {#each field in schema}
+    {#if field.type == 'text'}
+      {>textField field=field}
+    {else if field.type == 'select'}
+      {>selectField field=field}
+    {else if field.type == 'textarea'}
+      {>textareaField field=field}
+    {/if}
+  {/each}
+  
+  <!-- Form actions -->
+  <div class="form-actions">
+    <button type="submit" class="submit-button" disabled={!valid || submitting}>
+      {#if submitting}
+        <ui-icon icon="loading" spin></ui-icon> Submitting...
+      {else}
+        {submitLabel}
+      {/if}
+    </button>
+    <button type="button" class="reset-button">Reset</button>
+  </div>
+</form>

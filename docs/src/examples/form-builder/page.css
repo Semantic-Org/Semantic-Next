@@ -1,0 +1,28 @@
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--padding);
+}
+
+.form-output {
+  margin-top: var(--spacing);
+  padding: var(--padding);
+  background-color: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+
+  h3 {
+    margin-top: 0;
+    color: var(--standard-70);
+  }
+
+  pre {
+    background-color: var(--inverted-100);
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+    overflow: auto;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: var(--small);
+  }
+}
