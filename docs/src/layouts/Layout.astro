@@ -41,7 +41,7 @@ const activeURL = Astro.url.pathname;
 <Body title={title} description={description} searchMeta={searchMeta}>
 	<TopBar></TopBar>
 	<layout id={id}>
-		<Sidebar/>
+		<Sidebar><slot name="sidebar"></slot></Sidebar>
 		<page class={textContent ? 'text-content' : ''}>
 			<slot name="masthead">
 				{inlineHeader != 'true' && (
