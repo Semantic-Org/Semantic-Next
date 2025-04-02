@@ -20,7 +20,7 @@ if(!title) {
       if ('serviceWorker' in navigator) {
         try {
           const registration = await navigator.serviceWorker.register(
-            '/cdn-redirector.js',
+            '/cdn-redirector.js?v=1',
             { scope: '/' }
           );
 

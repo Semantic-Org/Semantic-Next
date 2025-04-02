@@ -10,7 +10,8 @@ self.addEventListener('fetch', (event) => {
   // Check if this request is for a CDN we want to redirect
   if (newHost) {
     // Create a new URL using jsdelivr instead of unpkg
-    const newUrl = requestURL.replace(url.hostname, newHost) + '+esm';
+    let newUrl = requestURL.replace(url.hostname, newHost);
+    newUrl = requestURL.replace('package.json', '+esm');
     console.log(`CDN redirector: ${url} → ${newUrl}`);
     
     event.respondWith(
