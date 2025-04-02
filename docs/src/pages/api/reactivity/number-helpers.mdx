@@ -22,6 +22,7 @@ signal.increment(amount?)
 | Name | Type | Description |
 |------|------|-------------|
 | amount | Number | (Optional) The amount to increment by. Defaults to 1 if not specified. |
+| max | Number | (Optional) The maximum value allowed to increment to. |
 
 ### Usage
 
@@ -31,6 +32,7 @@ import { Signal } from '@semantic-ui/reactivity';
 const counter = new Signal(0);
 counter.increment(); // value is now 1
 counter.increment(5); // value is now 6
+counter.increment(1, 10); // value will not exceed 10
 ```
 
 ### Example
@@ -50,6 +52,7 @@ signal.decrement(amount?)
 | Name | Type | Description |
 |------|------|-------------|
 | amount | Number | (Optional) The amount to decrement by. Defaults to 1 if not specified. |
+| min | Number | (Optional) The minimum value allowed to increment to. |
 
 ### Usage
 
@@ -59,6 +62,7 @@ import { Signal } from '@semantic-ui/reactivity';
 const score = new Signal(100);
 score.decrement(); // value is now 99
 score.decrement(10); // value is now 89
+score.decrement(1, 0); // value will not reduce below 0
 ```
 
 ### Example

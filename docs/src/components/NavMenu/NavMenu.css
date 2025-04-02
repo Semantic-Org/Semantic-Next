@@ -57,31 +57,24 @@
 
   --nav-menu-message-color: var(--standard-40);
   --nav-menu-message-font-size: var(--small);
+
+  --nav-menu-selected-background: oklch(0.72 0.11 243.47 / 0.29);
+  --nav-menu-selected-vertical-padding: 3px;
+  --nav-menu-selected-horizontal-padding: 5px;
+  --nav-menu-selected-border-radius: var(--border-radius);
+  --nav-menu-selected-color: var(--primary-text-color);
 }
 
+*,
+:before,
+:after {
+  box-sizing: border-box;
+}
 
 a {
   outline: none;
 }
 
-.search {
-  display: block;
-  margin: var(--nav-menu-search-margin);
-}
-
-.message {
-  font-size: var(--nav-menu-message-font-size);
-  color: var(--nav-menu-message-color);
-  padding: var(--nav-menu-item-spacing) 0;
-  text-align: center;
-  font-style: italic;
-  margin-bottom: var(--compact-spacing);
-}
-
-.highlight {
-  color: var(--nav-menu-highlight-color);
-  box-shadow: 0px 1px 0px 0px var(--nav-menu-highlight-underline-color);
-}
 
 .title {
   cursor: auto;
@@ -198,6 +191,7 @@ a {
   }
 }
 
+
 /*******************************
             States
 *******************************/
@@ -279,4 +273,48 @@ a {
 }
 .aligned.menu {
   --nav-menu-content-icon-indent-distance: calc(var(--nav-menu-title-icon-width) + var(--nav-menu-title-icon-distance));
+}
+
+
+/* Search  */
+.search {
+  display: block;
+  margin: var(--nav-menu-search-margin);
+}
+
+.message {
+  font-size: var(--nav-menu-message-font-size);
+  color: var(--nav-menu-message-color);
+  padding: var(--nav-menu-item-spacing) 0;
+  text-align: center;
+  font-style: italic;
+  margin-bottom: var(--compact-spacing);
+}
+
+.highlight {
+  color: var(--nav-menu-highlight-color);
+  box-shadow: 0px 1px 0px 0px var(--nav-menu-highlight-underline-color);
+}
+
+.selected.selected.selected {
+  position: relative;
+  color: var(--nav-menu-selected-color);
+
+  &::before {
+    position: absolute;
+    z-index: -1;
+    content: '';
+    pointer-events: none;
+
+    top: 0px; /* uses line height */
+    height: 100%;
+    width: 100%;
+
+    left: calc(var(--nav-menu-selected-horizontal-padding) * -1);
+
+    padding: var(--nav-menu-selected-vertical-padding) var(--nav-menu-selected-horizontal-padding);
+    border-radius: var(--nav-menu-selected-border-radius);
+    background-color: var(--nav-menu-selected-background);
+  }
+
 }

@@ -1,4 +1,4 @@
-<div class="{classMap getMenuStyles}menu">
+<div class="{classMap getMenuClasses}menu">
   {#if searchable}
     <ui-input fluid tiny search dark class="search" placeholder="Search menu..."></ui-input>
   {/if}
@@ -11,7 +11,7 @@
         isItem=false
       }
       {#if section.pages}
-        <div class="{activeIf isActiveItem section}{classIf hasIcons 'indented'}content" part="content">
+        <div class="{classMap getContentClasses section}content" part="content">
           <div class="menu" part="menu">
             {#each page in section.pages}
               {#if page.pages}
@@ -22,7 +22,7 @@
                 <div class="{activeIf isActiveItem page} content" part="sub-content">
                   <div class="menu">
                     {#each page in page.pages}
-                      <a class="{classMap getPageStates page}item" href={getLink page} part="page link">
+                      <a class="{classMap getPageClasses page}item" href={getLink page} part="page link">
                         {>highlight
                           item=page
                         }
@@ -34,7 +34,7 @@
                   </div>
                 </div>
               {else}
-                <a class="{classMap getPageStates page}item" href={getLink page} part="page link">
+                <a class="{classMap getPageClasses page}item" href={getLink page} part="page link">
                   {>highlight
                     item=page
                   }
@@ -49,15 +49,15 @@
 </div>
 
 {#snippet highlight}
-  {#if item.highlightedName}
-    {item.highlightedName.before}<span class="highlight">{item.highlightedName.match}</span>{item.highlightedName.after}
+  {#if item.highlight}
+    {item.highlight.before}<span class="highlight">{item.highlight.match}</span>{item.highlight.after}
   {else}
     {item.name}
   {/if}
 {/snippet}
 
 {#snippet title}
-  <a class="{classMap getTitleStates title}title{isItem ? ' item' : ''}" href={getLink title} part="{isItem ? 'item-title' : 'title'}">
+  <a class="{classMap getTitleClasses title}title{isItem ? ' item' : ''}" href={getLink title} part="{isItem ? 'item-title' : 'title'}">
     {#if title.icon}
       <ui-icon icon={title.icon} class="icon" exportparts="icon:title-icon" />
     {else if title.image}

@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '@semantic-ui/core';
-import { any, clone, isArray, isFunction } from '@semantic-ui/utils';
+import { any, clone, isArray, isFunction, openLink } from '@semantic-ui/utils';
 import css from './NavMenu.css?raw';
 import template from './NavMenu.html?raw';
 
@@ -19,72 +19,152 @@ const defaultSettings = {
 
 const defaultState = {
   url: '',
-  searchTerm: undefined,
+  searchTerm: undefined, // search term when searching
+  selectedIndex: 0, // selected keyboard index when searching
+  maxIndex: 0,
 };
 
-const createComponent = function({ $, el, self, settings, state }) {
+const createComponent = function({ $, el, self, settings, state, reaction, isRendered }) {
   return {
+
     initialize() {
+      reaction(self.calculateURL); // track current url
+    },
+    calculateURL() {
       state.url.set(settings.activeURL);
     },
+
     getMenu() {
-      const search = state.searchTerm.get();
       let menu = clone(settings.menu);
       menu = self.filterVisibleSections(menu);
-      if (settings.searchable && search) {
-        menu = self.filterBySearchTerm(menu, search);
+      if (self.isSearching()) {
+        menu = self.filterBySearchTerm(menu);
       }
       return menu;
     },
-    getNoResultsMessage() {
-      return settings.noResultsMessage.replace('{search}', state.searchTerm.get());
+
+    filterVisibleSections(menu = []) {
+      return menu.reduce((visibleMenus, { pages, shouldShow, ...item }) => {
+        if (isFunction(shouldShow) && !shouldShow()) {
+          return visibleMenus;
+        }
+        // recursively filter pages
+        const filteredPages = isArray(pages)
+          ? self.filterVisibleSections(pages)
+          : [];
+        const result = filteredPages.length > 0 ? { ...item, pages: filteredPages } : item;
+        visibleMenus.push(result);
+        return visibleMenus;
+      }, []);
     },
-    getNavIcon(section) {
-      const defaultIcon = (settings.useAccordion && section?.pages && !settings.expandAll)
-        ? 'chevron-down'
-        : '';
-      return section?.navIcon || settings.navIcon || defaultIcon;
-    },
-    hasNoResults() {
-      return state.searchTerm.get() && self.getMenu()?.length == 0;
-    },
-    getMenuStyles() {
-      return {
-        accordion: settings.useAccordion,
-        dark: settings.dark,
-        aligned: settings.aligned,
-      };
-    },
-    getTitleStates(title) {
-      return {
-        expandable: self.isExpandable(title),
-        active: settings.useAccordion ? self.isActiveItem(title) : false,
-        current: self.isCurrentItem(title),
-      };
-    },
-    canShowNavIcon(section) {
-      return self.getNavIcon(section) !== undefined;
-    },
-    hasIcons() {
-      return any(settings.menu, section => section.icon);
-    },
-    getPageStates(page) {
-      return {
-        current: self.isCurrentItem(page),
-      };
-    },
-    shouldShow(item) {
-      if (isFunction(item.shouldShow)) {
-        return item.shouldShow || false;
+    filterBySearchTerm(menu = [], searchTerm = state.searchTerm.get()) {
+      if (!searchTerm) {
+        return menu;
       }
-      return true;
+
+      const matches = (a = '', b = searchTerm) => {
+        return a.toLowerCase().includes(b.toLowerCase());
+      }
+      menu = menu.reduce((menuAcc, section) => {
+
+        // Check if section name matches search term
+        const sectionMatches = matches(section.name);
+
+        // Add highlighted text for section if it matches
+        const highlightedSection = sectionMatches
+          ? {
+            ...section,
+            highlight: self.highlightMatch(section?.name, searchTerm),
+          }
+          : section;
+
+        // Filter pages that match search term
+        const matchingPages = isArray(section.pages)
+          ? section.pages.reduce((pageAcc, page) => {
+            // Check if page name matches
+            const pageMatches = matches(page.name);
+
+            // Add highlighted text for page if it matches
+            const highlightedPage = pageMatches
+              ? {
+                ...page,
+                highlight: self.highlightMatch(page?.name, searchTerm),
+              }
+              : page;
+
+            // Check if any subpages match
+            let filteredSubpages = [];
+            let subpagesMatch = false;
+
+            if (isArray(page.pages)) {
+              filteredSubpages = page.pages.filter(subpage => matches(subpage?.name)).map(
+                subpage => ({
+                  ...subpage,
+                  highlight: self.highlightMatch(subpage.name, searchTerm),
+                }),
+              );
+              subpagesMatch = filteredSubpages.length > 0;
+            }
+
+            // Include page if it matches or any of its subpages match
+            if (pageMatches || subpagesMatch) {
+              if (subpagesMatch && page.pages) {
+                pageAcc.push({
+                  ...highlightedPage,
+                  pages: filteredSubpages,
+                });
+              }
+              else {
+                pageAcc.push(highlightedPage);
+              }
+            }
+
+            return pageAcc;
+          }, [])
+          : [];
+
+        // Include section if it matches or any of its pages match
+        if (sectionMatches || matchingPages.length > 0) {
+          menuAcc.push({
+            ...highlightedSection,
+            pages: sectionMatches ? highlightedSection.pages : matchingPages,
+          });
+        }
+
+        return menuAcc;
+      }, []);
+
+      // add in keyboard indexes starting with first match
+      // then adding indexes to all items after
+      let selectedIndex = -1;
+      let firstMatch = false;
+      const addSelectedIndex = (item) => {
+        selectedIndex++;
+        item.selectedIndex = selectedIndex;
+        // start on first match
+        if(!firstMatch && item.highlight) {
+          state.selectedIndex.set(selectedIndex);
+          firstMatch = true;
+        }
+        return item;
+      }
+      // add selected index for each menu, pages and subpages (3 deep max)
+      menu = menu.map(currentMenu => {
+        currentMenu = addSelectedIndex(currentMenu);
+        (currentMenu?.pages || []).map(page => {
+          page = addSelectedIndex(page);
+          (page?.pages || []).map(subPage => addSelectedIndex(subPage));
+        });
+        return currentMenu;
+      });
+      state.maxIndex.set(selectedIndex);
+      return menu;
     },
+
     highlightMatch(text, searchTerm) {
       if (!searchTerm) { return text; }
 
-      const lowerText = text.toLowerCase();
-      const lowerSearchTerm = searchTerm.toLowerCase();
-      const index = lowerText.indexOf(lowerSearchTerm);
+      const index = text.toLowerCase().indexOf(searchTerm.toLowerCase());
 
       if (index === -1) { return text; }
 
@@ -95,106 +175,72 @@ const createComponent = function({ $, el, self, settings, state }) {
       return { before, match, after };
     },
 
-    filterBySearchTerm(menu = [], searchTerm) {
-      if (!searchTerm) {
-        return menu;
-      }
-
-      searchTerm = searchTerm.toLowerCase();
-
-      return menu.reduce((acc, section) => {
-        // Check if section name matches search term
-        const sectionMatches = section.name?.toLowerCase().includes(searchTerm);
-
-        // Add highlighted text for section if it matches
-        const highlightedSection = sectionMatches
-          ? {
-            ...section,
-            highlightedName: self.highlightMatch(section.name, searchTerm),
-          }
-          : section;
-
-        // Filter pages that match search term
-        const filteredPages = isArray(section.pages)
-          ? section.pages.reduce((pagesAcc, page) => {
-            // Check if page name matches
-            const pageMatches = page.name?.toLowerCase().includes(searchTerm);
-
-            // Add highlighted text for page if it matches
-            const highlightedPage = pageMatches
-              ? {
-                ...page,
-                highlightedName: self.highlightMatch(page.name, searchTerm),
-              }
-              : page;
-
-            // Check if any subpages match
-            let filteredSubpages = [];
-            let subpagesMatch = false;
-
-            if (isArray(page.pages)) {
-              filteredSubpages = page.pages.filter(subpage => subpage.name?.toLowerCase().includes(searchTerm)).map(
-                subpage => ({
-                  ...subpage,
-                  highlightedName: self.highlightMatch(subpage.name, searchTerm),
-                }),
-              );
-              subpagesMatch = filteredSubpages.length > 0;
-            }
-
-            // Include page if it matches or any of its subpages match
-            if (pageMatches || subpagesMatch) {
-              if (subpagesMatch && page.pages) {
-                pagesAcc.push({
-                  ...highlightedPage,
-                  pages: filteredSubpages,
-                });
-              }
-              else {
-                pagesAcc.push(highlightedPage);
-              }
-            }
-
-            return pagesAcc;
-          }, [])
-          : [];
-
-        // Include section if it matches or any of its pages match
-        if (sectionMatches || filteredPages.length > 0) {
-          acc.push({
-            ...highlightedSection,
-            pages: sectionMatches ? highlightedSection.pages : filteredPages,
-          });
-        }
-
-        return acc;
-      }, []);
-    },
-    filterVisibleSections(menu = []) {
-      return menu.reduce((acc, { pages, shouldShow, ...item }) => {
-        if (isFunction(shouldShow) && !shouldShow()) {
-          return acc;
-        }
-        // recursively filter pages
-        const filteredPages = isArray(pages)
-          ? self.filterVisibleSections(pages)
-          : [];
-        const result = filteredPages.length > 0 ? { ...item, pages: filteredPages } : item;
-        acc.push(result);
-        return acc;
-      }, []);
-    },
     getLink(item) {
       if (settings.linkCurrentPage || !self.isCurrentItem(item)) {
         return item?.url;
       }
       return;
     },
-    isLinkItem(item) {
-      return item.url && !self.isCurrentItem(item);
+    getNoResultsMessage() {
+      return settings.noResultsMessage.replace('{search}', state.searchTerm.get());
     },
-    isExpandable() {
-      return settings.useAccordion && !settings.expandAll;
+    getNavIcon(section) {
+      const defaultIcon = (settings.useAccordion && section?.pages && !settings.expandAll)
+        ? 'chevron-down'
+        : '';
+      return section?.navIcon || settings.navIcon || defaultIcon;
+    },
+
+    getContentClasses(section) {
+      return {
+        active: self.isActiveItem(section),
+        indented: self.hasIcons(),
+      }
+    },
+    getMenuClasses() {
+      return {
+        accordion: settings.useAccordion,
+        dark: settings.dark,
+        aligned: settings.aligned,
+      };
+    },
+    getTitleClasses(title) {
+      return {
+        expandable: self.isExpandable(title),
+        selected: state.selectedIndex.value == title?.selectedIndex,
+        active: settings.useAccordion ? self.isActiveItem(title) : false,
+        current: self.isCurrentItem(title),
+      };
+    },
+    getPageClasses(page) {
+      return {
+        selected: state.selectedIndex.value == page?.selectedIndex,
+        current: self.isCurrentItem(page),
+      };
+    },
+
+    canShowNavIcon(section) {
+      return self.getNavIcon(section) !== undefined;
+    },
+
+    shouldShow(item) {
+      if (isFunction(item.shouldShow)) {
+        return item.shouldShow || false;
+      }
+      return true;
+    },
+
+    isSameURL(url1 = '', url2 = '', startsWith = false) {
+      if (startsWith) {
+        return url2.startsWith(url1);
+      }
+      if (!url1 || !url2) {
+        return false;
+      }
+      return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
+    },
+    isCurrentItem(item) {
+      return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
     },
     isActiveItem(item) {
       if (settings.expandAll) {
@@ -208,27 +254,37 @@ const createComponent = function({ $, el, self, settings, state }) {
       }
       return false;
     },
+    isLinkItem(item) {
+      return item.url && !self.isCurrentItem(item);
+    },
+    isExpandable() {
+      return settings.useAccordion && !settings.expandAll;
+    },
+    isSearching() {
+      return settings.searchable && state.searchTerm.get();
+    },
+
+    hasNoResults() {
+      return state.searchTerm.get() && self.getMenu()?.length == 0;
+    },
+    hasIcons() {
+      return any(settings.menu, section => section.icon);
+    },
+
     addTrailingSlash(url) {
       return (url.substr(-1) === '/')
         ? url
         : `${url}/`;
     },
-    isSameURL(url1 = '', url2 = '', startsWith = false) {
-      if (startsWith) {
-        return url2.startsWith(url1);
-      }
-      if (!url1 || !url2) {
-        return false;
-      }
-      return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
-    },
-    isCurrentItem(item) {
-      return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
-    },
+
     onPageChange() {
       state.url.set(window.location.pathname);
     },
+
     scrollToActive() {
+      if(!isRendered) {
+        return;
+      }
       const el = $('.item.current').first().el();
       if (el) {
         const rect = el.getBoundingClientRect();
@@ -243,8 +299,31 @@ const createComponent = function({ $, el, self, settings, state }) {
         }
       }
     },
+
   };
 };
+
+const keys = {
+  'up'({self, state}) {
+    if(self.isSearching()) {
+      state.selectedIndex.decrement(1, 0);
+    }
+  },
+  'down'({self, state}) {
+    if(self.isSearching()) {
+      state.selectedIndex.increment(1, state.maxIndex.get());
+    }
+  },
+  'enter'({self, state, $}) {
+    if(self.isSearching()) {
+      const selectedIndex = state.selectedIndex.get();
+      const href = $('.selected').attr('href');
+      if(selectedIndex >= 0 && href) {
+        openLink(href);
+      }
+    }
+  }
+}
 
 const onRendered = ({ self, isClient, el, settings }) => {
   if (isClient) {
@@ -286,6 +365,7 @@ const NavMenu = defineComponent({
   defaultState,
   defaultSettings,
   onRendered,
+  keys,
   events,
 });
 
