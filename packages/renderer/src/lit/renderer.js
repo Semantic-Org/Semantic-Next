@@ -23,7 +23,7 @@ export class LitRenderer {
   static html = html;
 
   static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g; // match `(one () )` and [`(one)`, `(two)`]
-  static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g // match "" '', \b for token groups in Lisp style expr
+  static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g; // match "" '', \b for token groups in Lisp style expr
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
 
