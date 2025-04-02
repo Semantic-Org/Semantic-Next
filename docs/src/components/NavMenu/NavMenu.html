@@ -19,7 +19,7 @@
                   title=page
                   isItem=true
                 }
-                <div class="{activeIf isActiveItem page} content" part="sub-content">
+                <div class="{activeIf isActiveItem page}content" part="sub-content">
                   <div class="menu">
                     {#each page in page.pages}
                       <a class="{classMap getPageClasses page}item" href={getLink page} part="page link">

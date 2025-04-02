@@ -139,15 +139,17 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
       let selectedIndex = -1;
       let firstMatch = false;
       const addSelectedIndex = (item) => {
-        selectedIndex++;
-        item.selectedIndex = selectedIndex;
+        if(item?.url) {
+          selectedIndex++;
+          item.selectedIndex = selectedIndex;
+        }
         // start on first match
         if(!firstMatch && item.highlight) {
           state.selectedIndex.set(selectedIndex);
           firstMatch = true;
         }
         return item;
-      }
+      };
       // add selected index for each menu, pages and subpages (3 deep max)
       menu = menu.map(currentMenu => {
         currentMenu = addSelectedIndex(currentMenu);

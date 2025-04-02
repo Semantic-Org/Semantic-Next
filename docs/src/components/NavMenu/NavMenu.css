@@ -81,6 +81,7 @@ a {
   display: flex;
   flex-direction: row;
   text-align: left;
+  line-height: 1;
   font-size: var(--nav-menu-title-font-size);
   text-transform: none;
   font-weight: bold;
@@ -237,6 +238,7 @@ a {
 
   &.active {
     opacity: 1;
+    overflow: visible;
     height: auto;
   }
 
@@ -252,7 +254,7 @@ a {
       cursor: pointer;
     }
     .menu {
-      .item:not(:hover):not(.current):not(.active) {
+      .item:not(:hover):not(.current):not(.active):not(.selected) {
         color: var(--nav-menu-nested-item-color) !important;
       }
     }
@@ -296,9 +298,9 @@ a {
   box-shadow: 0px 1px 0px 0px var(--nav-menu-highlight-underline-color);
 }
 
-.selected.selected.selected {
+.selected {
   position: relative;
-  color: var(--nav-menu-selected-color);
+  color: var(--nav-menu-selected-color) !important;
 
   &::before {
     position: absolute;
@@ -306,13 +308,13 @@ a {
     content: '';
     pointer-events: none;
 
-    top: 0px; /* uses line height */
+    top: 0px; /* items have spacing as padding already */
     height: 100%;
-    width: 100%;
 
     left: calc(var(--nav-menu-selected-horizontal-padding) * -1);
+    width: calc(100% + var(--nav-menu-selected-horizontal-padding) * 2);
 
-    padding: var(--nav-menu-selected-vertical-padding) var(--nav-menu-selected-horizontal-padding);
+    padding: var(--nav-menu-selected-verptical-padding) var(--nav-menu-selected-horizontal-padding);
     border-radius: var(--nav-menu-selected-border-radius);
     background-color: var(--nav-menu-selected-background);
   }
