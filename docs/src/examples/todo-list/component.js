@@ -52,9 +52,6 @@ const createComponent = ({ self, signal, $ }) => ({
   setRouteFilter() {
     self.filter.set(self.getRouteFilter());
   },
-  removeRouter() {
-    $(window).off(self.hashEvent);
-  },
 });
 
 const onCreated = ({ self, isClient }) => {
@@ -66,9 +63,6 @@ const onRendered = ({ self, isClient }) => {
   }
 };
 
-const onDestroyed = ({ self }) => {
-  self.removeRouter();
-};
 
 const events = {
   'global hashchange window'({ self }) {
@@ -100,7 +94,6 @@ const TodoList = defineComponent({
   createComponent,
   onCreated,
   onRendered,
-  onDestroyed,
 });
 
 export { TodoList };

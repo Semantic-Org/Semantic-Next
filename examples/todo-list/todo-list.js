@@ -52,9 +52,6 @@ const createComponent = ({ self, signal, $ }) => ({
   setRouteFilter() {
     self.filter.set(self.getRouteFilter());
   },
-  removeRouter() {
-    $(window).off(self.hashEvent);
-  },
 });
 
 const onCreated = ({ self, isClient }) => {
@@ -64,10 +61,6 @@ const onRendered = ({ self, isClient }) => {
   if (isClient) {
     self.setRouteFilter();
   }
-};
-
-const onDestroyed = ({ self }) => {
-  self.removeRouter();
 };
 
 const events = {
@@ -100,7 +93,6 @@ const TodoList = defineComponent({
   createComponent,
   onCreated,
   onRendered,
-  onDestroyed,
 });
 
 export { TodoList };
