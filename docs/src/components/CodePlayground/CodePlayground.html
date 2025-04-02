@@ -113,6 +113,7 @@
           {>CodePlaygroundPanel
             panel={type: 'file', filename: activePageFile }
             size='natural'
+            maxSize='50%'
           }
           {>CodePlaygroundPanel
             panel={type: 'preview'}
@@ -152,6 +153,7 @@
           {#each panel in panelGroup}
             {>CodePlaygroundPanel
               panel=panel
+              maxSize='80%'
               size=(getPanelSize panel)
             }
           {/each}
