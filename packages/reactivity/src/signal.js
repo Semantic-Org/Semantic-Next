@@ -152,11 +152,19 @@ export class Signal {
     return this.set(!this.peek());
   }
 
-  increment(amount = 1) {
-    return this.set(this.peek() + amount);
+  increment(amount = 1, max) {
+    let newAmount = this.peek() + amount;
+    if(isNumber(max) && newAmount > max) {
+      newAmount = max;
+    }
+    return this.set(newAmount);
   }
-  decrement(amount = 1) {
-    return this.set(this.peek() - amount);
+  decrement(amount = 1, min) {
+    let newAmount = this.peek() - amount;
+    if(isNumber(min) && newAmount < min) {
+      newAmount = min;
+    }
+    return this.set(newAmount);
   }
 
   now() {
