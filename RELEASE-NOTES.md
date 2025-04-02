@@ -4,6 +4,11 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.10.11
+
+## New
+* Signals - `increment` and `decrement` now receive a max and min. This can be used to increment a value within a limit. This is particularly useful for keyboard controls that use a `selectedIndex`
+
 # Version 0.10.10
 
 ## New
