@@ -708,16 +708,30 @@ export class Query {
   }
 
   value(newValue) {
+    const usesValue = (el) => {
+      return
+        el instanceof HTMLInputElement
+        || el instanceof HTMLSelectElement
+        || el instanceof HTMLTextAreaElement
+        // web components may store value
+        || customElements.get(el.tagName.toLowerCase())
+      ;
+    };
     if (newValue !== undefined) {
       // Set the value for each element
       return this.each((el) => {
-        el.value = newValue;
+        if (usesValue(el)) {
+          el.value = newValue;
+        }
       });
     }
     else {
       // Get the value of each element
       const values = this.map((el) => {
-        return el.value;
+        if (usesValue(el)) {
+          return el.value;
+        }
+        return undefined;
       });
       return values.length > 1 ? values : values[0];
     }
