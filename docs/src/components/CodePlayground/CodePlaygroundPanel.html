@@ -7,7 +7,13 @@
     {>CodePlaygroundPreview}
   </ui-panel>
 {else if is panel.type 'file'}
-  <ui-panel class="{classIf minimized 'minimized' ''}code" size="{size}" label="{panel.label}" exportparts="panel, handle">
+  <ui-panel
+    class="{classIf minimized 'minimized' ''}code"
+    size="{size}"
+    max-size="50%"
+    label="{panel.label}"
+    exportparts="panel, handle"
+  >
     {>CodePlaygroundFile
       filename=panel.filename
     }

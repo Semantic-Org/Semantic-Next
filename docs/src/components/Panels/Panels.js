@@ -151,28 +151,19 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
   setPanelCalculatedSizes() {
     let exactPanels = self.getExactPanels();
-    each(exactPanels, (panel) => {
-      let index = self.panels.indexOf(panel);
-      const size = panel.settings.size;
-      let relativeSize = self.getRelativeSettingSize(size, index);
-      self.setPanelSize(index, relativeSize);
-      self.setPanelInitialized(panel);
-    });
 
-    // we have to perform grow stage after setting fixed size panels
-    let growPanels = self.getGrowingPanels();
-    const availableWidth = self.getAvailableGrowWidth();
+    // handle shared implementation of setting size
+    // relative to constraints
+    const setConstrainedSize = (panel, getRelativeSize) => {
+      const index = self.panels.indexOf(panel);
 
-    if (growPanels.length == 0 && availableWidth > 0) {
-      console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
-      growPanels = self.panels.slice(-1);
-    }
+      // get flex property of panel
+      // implementation varies for exact / grow
+      let relativeSize = getRelativeSize();
 
-    each(growPanels, (panel) => {
-      let relativeSize = availableWidth / growPanels.length;
-      let index = self.panels.indexOf(panel);
+      // constraints remain the same
       const minSize = self.getRelativeSettingSize(panel.settings.minSize);
-      const maxSize = self.getRelativeSettingSize(panel.settings.minSize);
+      const maxSize = self.getRelativeSettingSize(panel.settings.maxSize);
       if (relativeSize < minSize) {
         relativeSize = minSize;
       }
@@ -181,6 +172,32 @@ const createComponent = ({ self, el, settings, $ }) => ({
       }
       self.setPanelSize(index, relativeSize);
       self.setPanelInitialized(panel);
+    };
+
+    // set each panel with an exact size
+    each(exactPanels, (panel) => {
+      setConstrainedSize(panel, () => {
+        let index = self.panels.indexOf(panel);
+        const size = panel.settings.size;
+        return self.getRelativeSettingSize(size, index);
+      });
+    });
+
+    // get panels without a fixed size and extra pixels to share
+    let growPanels = self.getGrowingPanels();
+    const availableWidth = self.getAvailableGrowWidth();
+
+    if (growPanels.length == 0 && availableWidth > 0) {
+      console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
+      growPanels = self.panels.slice(-1);
+    }
+
+    // grow each panel that does not have a fixed width
+    // splitting available width
+    each(growPanels, (panel) => {
+      setConstrainedSize(panel, () => {
+        return availableWidth / growPanels.length;
+      });
     });
   },
 
