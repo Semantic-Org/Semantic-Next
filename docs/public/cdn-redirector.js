@@ -25,7 +25,7 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// This is important - fetch requests from the playground's service worker
+// fetch requests from the playground's service worker
 // will be made using this service worker, we need to let those through.
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
