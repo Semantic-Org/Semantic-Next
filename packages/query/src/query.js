@@ -709,8 +709,7 @@ export class Query {
 
   value(newValue) {
     const usesValue = (el) => {
-      return
-        el instanceof HTMLInputElement
+      return el instanceof HTMLInputElement
         || el instanceof HTMLSelectElement
         || el instanceof HTMLTextAreaElement
         // web components may store value
