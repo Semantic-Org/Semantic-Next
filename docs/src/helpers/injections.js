@@ -51,7 +51,7 @@ export const isStaticBuild = Boolean(process.env.VERCEL_URL);
 // this will let you check examples/playground against local versions of packages
 // instead of tagged npm versions
 export const packageBase = isStaticBuild
-  ? 'https://unpkg.com'
+  ? 'https://cdn.jsdelivr.net/npm'
   : `${import.meta.env.SITE}/node_modules`;
 
 const suiBase = isStaticBuild

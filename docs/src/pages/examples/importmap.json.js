@@ -28,6 +28,9 @@ export const localPackages = [
   '@semantic-ui/core/packages/reactivity',
 ];
 
+// note NPM packages is no longer used for static builds
+// and instead is short circuited with CDNized links
+// this is because of how Vite handles dep injection in static builds
 const importPackages = (isStaticBuild)
   ? npmPackages
   : localPackages;
@@ -36,6 +39,17 @@ const packageImports = { imports: {} };
 
 for (const pkg of importPackages) {
   try {
+
+    // use jsdelivr
+    if(isStaticBuild) {
+      let url = `${packageBase}/${pkg}/`;
+      if(packageBase.includes('jsdelivr')) {
+        url += '+esm';
+      }
+      packageImports.imports[pkg] = url;
+      continue;
+    }
+
     const pkgPath = path.resolve(
       process.cwd(),
       'node_modules',
@@ -44,7 +58,7 @@ for (const pkg of importPackages) {
     );
 
     if (!fs.existsSync(pkgPath)) {
-      console.warn(`Package not found: ${pkg}`);
+      console.warn(`Pkg not found: ${pkg}`);
       continue;
     }
 

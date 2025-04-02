@@ -55,7 +55,7 @@ export const getExampleFiles = async ({
   includePlaygroundInjections = false, // whether to inject values to make repl work
   useTypescript = false, // convert js files to ts files
   emptyIfAllGenerated = false, // if all files are generated return an empty object
-  includeImportMap = !isStaticBuild, // whether to map imports to node_modules
+  includeImportMap = true, // whether to map imports to node_modules
   includePackageJSON = true, // whether to include a package.json file defining project deps
 } = {}) => {
   if (!contentID) {
