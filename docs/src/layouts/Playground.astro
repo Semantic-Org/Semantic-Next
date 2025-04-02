@@ -20,7 +20,7 @@ if(!title) {
       if ('serviceWorker' in navigator) {
         try {
           const registration = await navigator.serviceWorker.register(
-            '/cdn-redirector.js?v=1',
+            '/cdn-redirector.js?v=3',
             { scope: '/' }
           );
 
@@ -55,8 +55,8 @@ if(!title) {
       return found;
     };
 
-    // Initialize
-    registerCdnRedirector();
+    // remove for now
+    unregisterCdnRedirector();
   </script>
   <layout id="playground">
     <TopBar noanimation/>
