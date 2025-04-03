@@ -9,10 +9,24 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 The two main ways to use Semantic UI
-* **Creating UI Components** - Semantic provides all the tools to build robust feature-rich UI with web components, whether your goal is to build an in-house design system, build a website, or contribute UI components to the open source community.
-* **Using UI Components** - Semantic provides an out of the box set of ui components similar to the original version or other UI frameworks
+* **Building with UI Primitives** - Semantic provides a [UI component library](/ui) with [buttons](/ui/button), [menus](/ui/menu), [inputs](/ui/input) and other essential components. These components are distributes as web components meaning they can be used anywhere on the web.
+* **Authoring Custom UI** - Semantic provides a [component framework](/components) to create custom reactive UI with web components that can be used to build a custom design system, a web application, website, or your own open source UI components.
 
-> Semantic UI's component framework is designed to provide the missing toolkit to make web components easy to author and ship at scale, with features like reactivity, templating, tools for events and keybindings, and a robust css framework for styling.
+> Semantic UI's component framework is designed to provide the missing toolkit to make web components easy to author and ship at scale, with features like [reactivity](/reactivity), [templating](/templates), tools for [events](/components/events) and [keybindings](/components/keys), and a robust [css framework](/components/styling) for styling.
+
+
+## Using UI Components
+
+Semantic ships a first-party UI framework in `@semantic-ui/core` with all the essential UI for building your website.
+
+<UICards two stackable horizontal>
+  <UICard horizontal
+    header="@semantic-ui/core"
+    icon="layers"
+    href="/usage"
+    description="A standard set of UI components to build your website like buttons, cards and inputs."
+  ></UICard>
+</UICards>
 
 
 ## Creating UI Components
@@ -24,7 +38,7 @@ Semantic provides several core libraries to make it easy to ship custom UI as we
     header="@semantic-ui/component"
     icon="package"
     href="/components"
-    description="A standardized system for creating UI with web components."
+    description="A framework for creating fully-featured UI with web components."
   ></UICard>
   <UICard horizontal
     header="@semantic-ui/templating"
@@ -36,7 +50,7 @@ Semantic provides several core libraries to make it easy to ship custom UI as we
     header="@semantic-ui/reactivity"
     icon="cpu"
     href="/components"
-    description="A signals based reactivity library built for ease of use."
+    description="A performant signals-based reactivity library designed for ease of use and debugging."
   ></UICard>
   <UICard horizontal
     header="@semantic-ui/query"
@@ -48,18 +62,6 @@ Semantic provides several core libraries to make it easy to ship custom UI as we
     header="@semantic-ui/utils"
     icon="tool"
     href="/api/utils"
-    description="A collection of utility functions designed to make your code more human readable."
+    description="A collection of essential javascript utilities designed for human readability."
   ></UICard>
 </UICards>
-
-
-## Using UI Components
-
-If you prefer to use Semantic UI purely as a UI framework and not author your own custom UI, you can simply use web components directly wherever you write your code from `@semantic-ui/core`
-
-<UICard horizontal
-  header="@semantic-ui/core"
-  icon="layers"
-  href="/usage"
-  description="A robust set of primitives that provide components like card, button, menu, input, modal and more."
-></UICard>
