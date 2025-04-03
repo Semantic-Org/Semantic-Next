@@ -280,6 +280,13 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
     }
   },
 
+  getPagePanel() {
+    return {
+      type: 'file',
+      filename: state.activePageFile // pass through signal
+    };
+  },
+
   canShowButtons() {
     return !settings.inline && state.displayMode.get() !== 'mobile';
   },
