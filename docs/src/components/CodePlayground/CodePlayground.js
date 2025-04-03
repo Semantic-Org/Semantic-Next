@@ -5,7 +5,7 @@ import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
-import '@semantic-ui/core/src/components/button';
+import '@semantic-ui/core/button';
 
 import '../Panels/Panels.js';
 import '../Panels/Panel.js';

@@ -1,24 +1,17 @@
-@layer baseTheme.global, baseTheme.color, baseTheme.derived, baseTheme.component;
-
 /* Globals */
-@import url("./global/derived-variables.css") layer(baseTheme.global.derived);
-@import url("./global/constant-variables.css") layer(baseTheme.global.constant);
-@import url("./global/site-variables.css") layer(baseTheme.global.site);
-@import url("./global/light-variables.css") layer(baseTheme.global.light);
-@import url("./global/dark-variables.css") layer(baseTheme.color.dark);
-@import url("./global/theme-variables.css") layer(baseTheme.derived.theme);
+@import url("./global/global-theme.css");
 
 /* Structural */
-@import url("./container/container-theme.css") layer(baseTheme.component.container);
-@import url("./rail/rail-theme.css") layer(baseTheme.component.rail);
+@import url("./container/container-theme.css");
+@import url("./rail/rail-theme.css");
 
 /* Primitives */
-@import url("./button/button-theme.css") layer(baseTheme.component.button);
-@import url("./icon/icon-theme.css") layer(baseTheme.component.icon);
-@import url("./menu/menu-theme.css") layer(baseTheme.component.menu);
-@import url("./input/input-theme.css") layer(baseTheme.component.input);
-@import url("./label/label-theme.css") layer(baseTheme.component.label);
-@import url("./card/card-theme.css") layer(baseTheme.component.card);
+@import url("./button/button-theme.css");
+@import url("./icon/icon-theme.css");
+@import url("./menu/menu-theme.css");
+@import url("./input/input-theme.css");
+@import url("./label/label-theme.css");
+@import url("./card/card-theme.css");
 
 /* Components */
-@import url("./modal/modal-theme.css") layer(baseTheme.component.modal);
+@import url("./modal/modal-theme.css");

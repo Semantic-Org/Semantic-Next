@@ -13,8 +13,131 @@
     "dist/**",
     "src/**"
   ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/semantic-ui.js",
+      "browser": "./dist/cdn/semantic-ui.min.js",
+      "bundled": "./dist/semantic-ui.min.js",
+      "default": "./src/semantic-ui.js"
+    },
+    "./examples": {
+      "import": "./examples/index.js",
+      "default": "./examples/index.js"
+    },
+    "./page": {
+      "import": "./src/semantic-ui.css",
+      "default": "./src/semantic-ui.css"
+    },
+    "./button": {
+      "import": "./src/components/button/index.js",
+      "browser": "./dist/cdn/button.min.js",
+      "bundled": "./dist/bundled/button.min.js",
+      "default": "./src/components/button/index.js"
+    },
+    "./card": {
+      "import": "./src/components/card/index.js",
+      "browser": "./dist/cdn/card.min.js",
+      "bundled": "./dist/bundled/card.min.js",
+      "default": "./src/components/card/index.js"
+    },
+    "./container": {
+      "import": "./src/components/container/index.js",
+      "browser": "./dist/cdn/container.min.js",
+      "bundled": "./dist/bundled/container.min.js",
+      "default": "./src/components/container/index.js"
+    },
+    "./icon": {
+      "import": "./src/components/icon/index.js",
+      "browser": "./dist/cdn/icon.min.js",
+      "bundled": "./dist/bundled/icon.min.js",
+      "default": "./src/components/icon/index.js"
+    },
+    "./input": {
+      "import": "./src/components/input/index.js",
+      "browser": "./dist/cdn/input.min.js",
+      "bundled": "./dist/bundled/input.min.js",
+      "default": "./src/components/input/index.js"
+    },
+    "./label": {
+      "import": "./src/components/label/index.js",
+      "browser": "./dist/cdn/label.min.js",
+      "bundled": "./dist/bundled/label.min.js",
+      "default": "./src/components/label/index.js"
+    },
+    "./menu": {
+      "import": "./src/components/menu/index.js",
+      "browser": "./dist/cdn/menu.min.js",
+      "bundled": "./dist/bundled/menu.min.js",
+      "default": "./src/components/menu/index.js"
+    },
+    "./modal": {
+      "import": "./src/components/modal/index.js",
+      "browser": "./dist/cdn/modal.min.js",
+      "bundled": "./dist/bundled/modal.min.js",
+      "default": "./src/components/modal/index.js"
+    },
+    "./rail": {
+      "import": "./src/components/rail/index.js",
+      "browser": "./dist/cdn/rail.min.js",
+      "bundled": "./dist/bundled/rail.min.js",
+      "default": "./src/components/rail/index.js"
+    },
+    "./segment": {
+      "import": "./src/components/segment/index.js",
+      "browser": "./dist/cdn/segment.min.js",
+      "bundled": "./dist/bundled/segment.min.js",
+      "default": "./src/components/segment/index.js"
+    },
+    "./theme": {
+      "import": "./src/themes/base/base.css",
+      "default": "./src/themes/base/base.css"
+    },
+    "./theme/global": {
+      "import": "./src/themes/base/global/global-theme.css",
+      "default": "./src/themes/base/global/global-theme.css"
+    },
+    "./theme/button": {
+      "import": "./src/themes/base/button/button-theme.css",
+      "default": "./src/themes/base/button/button-theme.css"
+    },
+    "./theme/card": {
+      "import": "./src/themes/base/card/card-theme.css",
+      "default": "./src/themes/base/card/card-theme.css"
+    },
+    "./theme/container": {
+      "import": "./src/themes/base/container/container-theme.css",
+      "default": "./src/themes/base/container/container-theme.css"
+    },
+    "./theme/icon": {
+      "import": "./src/themes/base/icon/icon-theme.css",
+      "default": "./src/themes/base/icon/icon-theme.css"
+    },
+    "./theme/input": {
+      "import": "./src/themes/base/input/input-theme.css",
+      "default": "./src/themes/base/input/input-theme.css"
+    },
+    "./theme/label": {
+      "import": "./src/themes/base/label/label-theme.css",
+      "default": "./src/themes/base/label/label-theme.css"
+    },
+    "./theme/menu": {
+      "import": "./src/themes/base/menu/menu-theme.css",
+      "default": "./src/themes/base/menu/menu-theme.css"
+    },
+    "./theme/modal": {
+      "import": "./src/themes/base/modal/modal-theme.css",
+      "default": "./src/themes/base/modal/modal-theme.css"
+    },
+    "./theme/rail": {
+      "import": "./src/themes/base/rail/rail-theme.css",
+      "default": "./src/themes/base/rail/rail-theme.css"
+    }
+  },
   "scripts": {
     "build": "wireit",
+    "build:deps": "wireit",
+    "build:cdn": "wireit",
     "dev": "wireit",
     "build-docs": "wireit",
     "serve": "wireit",
@@ -33,10 +156,18 @@
   },
   "wireit": {
     "build": {
-      "command": "node ./tasks/build.js",
+      "command": "node ./internal-packages/scripts/src/do-build-ui-framework.js",
       "dependencies": [
-        "build:packages"
+        "build:packages",
+        "build:ui-deps",
+        "build:ui-cdn"
       ]
+    },
+    "build:ui-deps": {
+      "command": "node ./internal-packages/scripts/src/do-build-ui-deps.js"
+    },
+    "build:ui-cdn": {
+      "command": "node ./internal-packages/scripts/src/do-build-ui-cdn.js"
     },
     "watch": {
       "command": "node ./tasks/watch.js",

@@ -7,13 +7,6 @@ body {
 
 @layer page {
 
-
-  :root {
-    --secondary-text-color: #EAB59F;
-    --glow-border: 1px solid oklch(0.22 0.02 277.72);
-
-  }
-
   body {
     text-wrap: pretty;
   }

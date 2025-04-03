@@ -3,7 +3,12 @@ import { defineComponent } from '@semantic-ui/component';
 import css from './GlobalSearch.css?raw';
 import template from './GlobalSearch.html?raw';
 
-import { UIModal } from '@semantic-ui/core';
+import { UIIcon, UIInput, UIModal } from '@semantic-ui/core';
+
+import '@semantic-ui/core/theme/icon';
+import '@semantic-ui/core/theme/input';
+import '@semantic-ui/core/theme/modal';
+
 
 const defaultSettings = {
   baseURL: '/',

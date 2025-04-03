@@ -1,0 +1,8 @@
+@layer baseTheme.global, baseTheme.color, baseTheme.derived, baseTheme.component;
+
+@import url("./categories/site-variables.css") layer(baseTheme.global.site);
+@import url("./categories/derived-variables.css") layer(baseTheme.global.derived);
+@import url("./categories/constant-variables.css") layer(baseTheme.global.constant);
+@import url("./categories/light-variables.css") layer(baseTheme.global.light);
+@import url("./categories/dark-variables.css") layer(baseTheme.color.dark);
+@import url("./categories/theme-variables.css") layer(baseTheme.derived.theme);
