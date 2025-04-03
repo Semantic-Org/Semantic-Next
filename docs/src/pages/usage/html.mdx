@@ -139,3 +139,27 @@ Some components support plurality, attributes assigned to the group pass through
     ```
   </TabItem>
 </Tabs>
+
+## Theming
+
+Semantic UI Web Components provides pre-defined themes that you can use out of the box. However, you can also customize the components by overriding their CSS variables.
+
+### All Instances
+
+Scope your theme css to `:root`, this will ensure they apply across nested components.
+
+```css
+:root {
+  --button-primary-color: var(--red);
+}
+```
+
+### Specific Instances
+
+Use any selector to scope css variables to a particular section of your page.
+
+```css
+#sidebar {
+  --button-primary-color: var(--red);
+}
+```

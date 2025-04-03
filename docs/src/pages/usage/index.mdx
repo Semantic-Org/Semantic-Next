@@ -4,33 +4,88 @@ icon: code
 title: Usage
 description: Learn how to setup Semantic UI
 ---
-import { Aside, TabItem, Tabs } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Installation
+Semantic UI's first party component framework includes many of the common UI components that are essential building blocks of a website. These can be used inside your own custom components to build [more complex components](/examples/card-search) or simply anywhere you use html.
 
-> **Note on Technical Preview** Semantic UI is in technical preview, the primary focus has been on authoring the [component framework](/components) which UI components will be written. It is recommended if you are looking to use Semantic UI primarily as a UI framework to check back in 2025 for more robust components.
+> **Note on Technical Preview** Semantic UI is in technical preview, the primary focus has been on authoring the [component framework](/components) which UI components will be written. It is recommended if you are looking to use Semantic UI primarily as a UI framework to check back later in 2025 for more robust components.
 
-
-To get started, install the package using npm:
-
-```bash
-npm install @semantic-ui/core
-```
-
-## Usage
+## Set up Guide
 
 <Tabs>
-  <TabItem label="JavaScript">
+  <TabItem label="Javascript">
 
-    If you're using a module bundler like webpack, Rollup, or Parcel, you can import the components and themes directly into your JavaScript files. Make sure your bundler is configured to handle CSS imports.
+  1. **Install the package** using a package manager:
 
-    ```javascript
-    import '@semantic-ui/core/components/button';
-    import '@semantic-ui/core/themes/button.css';
-    ```
+      <Tabs>
+        <TabItem label="NPM">
+          ```bash
+          npm install @semantic-ui/core
+          ```
+        </TabItem>
+        <TabItem label="PNPM">
+          ```bash
+          pnpm install @semantic-ui/core
+          ```
+        </TabItem>
+        <TabItem label="Yarn">
+          ```bash
+          yarn add @semantic-ui/core
+          ```
+        </TabItem>
+      </Tabs>
+
+  2.  **Import the javascript and css** from each component you would like to include once globally
+
+      ```javascript
+      import '@semantic-ui/core/components/button';
+      import '@semantic-ui/core/themes/button.css';
+      ```
+
+  3. **Use the web component** anywhere in your html:
+
+      ```html
+      <ui-button primary>Click me</ui-button>
+      ```
+
   </TabItem>
-  <TabItem label="HTML">
+  <TabItem label="Browser">
 
+  1. Import each components using `<script>` tag in your `<head>`
+
+      <Tabs>
+        <TabItem label="SUI">
+          ```html
+         <head>
+            <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/ui/components/button.js"></script>
+            <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/ui/components/input.js"></script>
+         </head>
+         ```
+        </TabItem>
+        <TabItem label="JSDelivr">
+          ```bash
+          pnpm install @semantic-ui/core
+          ```
+        </TabItem>
+        <TabItem label="Unpkg">
+          ```bash
+          yarn add @semantic-ui/core
+          ```
+        </TabItem>
+      </Tabs>
+
+  2. Import the javascript and css from each component you would like to include once anywhere on the client
+
+      ```javascript
+      import '@semantic-ui/core/components/button';
+      import '@semantic-ui/core/themes/button.css';
+      ```
+
+  3. You can now use that component in your html:
+
+      ```html
+      <ui-button primary>Click me</ui-button>
+      ```
     ```html title="index.html"
     <html>
     <head>
@@ -44,14 +99,3 @@ npm install @semantic-ui/core
     ```
   </TabItem>
 </Tabs>
-## Theming
-
-Semantic UI Web Components provides pre-defined themes that you can use out of the box. However, you can also customize the components by overriding their CSS variables.
-
-It's recommended to scope variables to `:root`, so they will pierce multiple shadow DOM boundaries.
-
-```css
-:root {
-  --button-primary-color: var(--red);
-}
-```
