@@ -8,7 +8,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Semantic UI's first party component framework includes many of the common UI components that are essential building blocks of a website. These can be used inside your own custom components to build [more complex components](/examples/card-search) or simply anywhere you use html.
 
-> **Note on Technical Preview** Semantic UI is in technical preview, the primary focus has been on authoring the [component framework](/components) which UI components will be written. It is recommended if you are looking to use Semantic UI primarily as a UI framework to check back later in 2025 for more robust components.
+> **Note on Technical Preview** Semantic UI is currently under heavy active development. The [component framework](/components) will be  **fully available Q2 2025**, and subsequently UI components will be **completed throughout 2025 and 2026**. It is recommended if you are looking to use Semantic UI primarily as a UI framework to check back later in 2025 for additional components.
 
 ## Set up Guide
 
@@ -35,14 +35,29 @@ Semantic UI's first party component framework includes many of the common UI com
         </TabItem>
       </Tabs>
 
-  2.  **Import the javascript and css** from each component you would like to include once globally
+  2.  **Import the global theme** to define global variables used across components
+
+      ```javascript
+      import '@semantic-ui/core/themes/base.css';
+      ```
+
+  3.  **Import the UI Components**
+
+      *Option 1* - Import only the components you would like to use.
 
       ```javascript
       import '@semantic-ui/core/components/button';
       import '@semantic-ui/core/themes/button.css';
       ```
 
-  3. **Use the web component** anywhere in your html:
+      *Option 2* - Import the entire framework to access every component.
+
+      ```javascript
+      import '@semantic-ui/semantic-ui.js';
+      import '@semantic-ui/semantic-ui.css';
+      ```
+
+  4. **Use UI components** wherever you write html:
 
       ```html
       <ui-button primary>Click me</ui-button>
@@ -51,51 +66,40 @@ Semantic UI's first party component framework includes many of the common UI com
   </TabItem>
   <TabItem label="Browser">
 
-  1. Import each components using `<script>` tag in your `<head>`
 
-      <Tabs>
-        <TabItem label="SUI">
+  2.  **Import the global theme** to define global variables used across components
+
           ```html
          <head>
-            <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/ui/components/button.js"></script>
-            <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/ui/components/input.js"></script>
+            <link href="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/theme/base.css" rel="stylesheet" />
          </head>
          ```
-        </TabItem>
-        <TabItem label="JSDelivr">
-          ```bash
-          pnpm install @semantic-ui/core
-          ```
-        </TabItem>
-        <TabItem label="Unpkg">
-          ```bash
-          yarn add @semantic-ui/core
-          ```
-        </TabItem>
-      </Tabs>
 
-  2. Import the javascript and css from each component you would like to include once anywhere on the client
+  3.  **Import the UI Components**
+
+      *Option 1* - Import only the components you would like to use.
 
       ```javascript
-      import '@semantic-ui/core/components/button';
-      import '@semantic-ui/core/themes/button.css';
+         <head>
+          <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/ui/components/button.js"></script>
+          <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/themes/button.css"></script>
+        </head>
       ```
 
-  3. You can now use that component in your html:
+      *Option 2* - Import the entire framework to access every component.
+
+        ```html
+       <head>
+        <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/semantic-ui.css"></script>
+        <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.10.9/dist/semantic-ui.js"></script>
+       </head>
+       ```
+
+  4. **Use UI components** wherever you write html:
 
       ```html
       <ui-button primary>Click me</ui-button>
       ```
-    ```html title="index.html"
-    <html>
-    <head>
-      <link rel="stylesheet" href="https://unpkg.com/@semantic-ui/core/dist/themes/button.css">
-      <script type="module" src="https://unpkg.com/@semantic-ui/core/components/button"></script>
-    </head>
-    <body>
-      <ui-button primary>Click me</ui-button>
-    </body>
-    </html>
-    ```
+
   </TabItem>
 </Tabs>

@@ -1,5 +1,11 @@
 @layer layout {
 
+  :root {
+    --secondary-text-color: #EAB59F;
+    --glow-border-color: oklch(0.22 0.02 277.72);
+    --glow-border: 1px solid var(--docs-border-color);
+  }
+
   body {
     --rail-width: 300px;
     --dividing-border: 1px solid rgba(0 0 0 / 10%);
@@ -396,11 +402,13 @@
         }
 
         blockquote p strong {
-          display: block;
-          font-size: 13px;
           font-style: normal;
           font-weight: bold;
           color: var(--standard-100);
+        }
+        blockquote p strong:first-of-type {
+          font-size: 13px;
+          display: block;
         }
 
         /* Header Position */
