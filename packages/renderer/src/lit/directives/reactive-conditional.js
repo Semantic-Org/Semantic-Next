@@ -17,6 +17,10 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       this.reaction.stop();
     }
     let html = nothing;
+    let context = {
+      message: `if/else statement: {#if ${conditional.expression}}`,
+      conditional: conditional,
+    };
     this.reaction = Reaction.create((comp) => {
       if (!this.isConnected) {
         comp.stop();
@@ -55,7 +59,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         this.setValue(html);
       }
       return html;
-    });
+    }, { context });
     /* Commented out until can resolve mobile menu
     if(this.matchIndex == matchIndex) {
       return noChange;

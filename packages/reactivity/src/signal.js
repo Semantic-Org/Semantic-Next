@@ -12,11 +12,17 @@ import {
 import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
 export class Signal {
-  constructor(initialValue, { equalityFunction, allowClone = true, cloneFunction } = {}) {
-    this.dependency = new Dependency();
+  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
+
+    // pass in some metadata for debugging
+    this.dependency = new Dependency({
+      firstRun: true,
+      value: initialValue
+    });
 
     // allow user to opt out of value cloning
     this.allowClone = allowClone;
+
 
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
@@ -27,7 +33,39 @@ export class Signal {
     this.clone = (cloneFunction)
       ? wrapFunction(cloneFunction)
       : Signal.cloneFunction;
+
     this.currentValue = this.maybeClone(initialValue);
+
+    // allow debugging context to be set
+    //this.setContext(context);
+  }
+
+  // set debugging context for signal
+  setContext(additionalContext = {}) {
+    const defaultContext = {
+      value: this.currentValue,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext
+    };
+  }
+
+  addContext(additionalContext = {}) {
+    this.context = {
+      ...this.context,
+      ...additionalContext
+    };
+  }
+
+  // set debugging stack trace for signal
+  setTrace() {
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this.context, this.setTrace);
+    }
+    else {
+      this.context.stack = new Error().stack;
+    }
   }
 
   static equalityFunction = isEqual;
@@ -61,7 +99,11 @@ export class Signal {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.maybeClone(newValue);
-      this.dependency.changed({ value: newValue, trace: new Error().stack }); // Pass context
+      if(!this.context) {
+        this.setContext();
+      }
+      this.setTrace();
+      this.dependency.changed(this.context);
     }
   }
 

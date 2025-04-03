@@ -23,6 +23,12 @@ export class ReactiveEachDirective extends AsyncDirective {
       this.reaction = null;
     }
 
+    let {as, over} = eachCondition.node;
+    let context = {
+      message: `reactive each: {#each ${as} in ${over}}`,
+      each: eachCondition.node,
+    };
+
     // Create a new reaction
     this.reaction = Reaction.create((computation) => {
       if (!this.isConnected) {
@@ -34,7 +40,7 @@ export class ReactiveEachDirective extends AsyncDirective {
         const rendered = this.renderItems();
         this.setValue(rendered);
       }
-    });
+    }, { context });
 
     return this.renderItems();
   }

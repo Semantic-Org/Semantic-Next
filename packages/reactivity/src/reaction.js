@@ -3,17 +3,64 @@ import { Dependency } from './dependency.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
-  constructor(callback) {
+
+  static create(callback, options = {}) {
+    const reaction = new Reaction(callback, options);
+    if(options.firstRun !== false) {
+      reaction.boundRun();
+    }
+    return reaction;
+  }
+
+  constructor(callback, { context } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.boundRun = this.run.bind(this);
     this.firstRun = true;
     this.active = true;
+    if(context) {
+      this.setContext(context);
+    }
+    this.boundRun = this.run.bind(this);
+  }
+
+  setContext(additionalContext = {}) {
+    const defaultContext = {
+      firstRun: this.firstRun,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext
+    };
+  }
+
+  setTrace() {
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this.context, this.setTrace);
+    }
+    else {
+      this.context.stack = new Error().stack;
+    }
+  }
+
+  addContext(additionalContext = {}) {
+    this.context = {
+      ...this.context,
+      ...additionalContext
+    };
   }
 
   run() {
+    // only run this reaction is marked as active
     if (!this.active) {
       return;
+    }
+    // pass through metadata even though no dependencies
+    // this can be used to debug first run in flush
+    this.addContext({
+      firstRun: this.firstRun
+    });
+    if(!this.context.trace) {
+      this.setTrace();
     }
     Scheduler.current = this;
     this.dependencies.forEach(dep => dep.cleanUp(this));
@@ -25,15 +72,22 @@ export class Reaction {
   }
 
   invalidate(context) {
+    // Set this reaction as active and about to be run
     this.active = true;
+
+    // Pass through trace for debugging
     if (context) {
-      this.context = context;
+      this.addContext(context);
     }
+
+    // Schedule this reaction to occur in the next flush
     Scheduler.scheduleReaction(this);
   }
 
   stop() {
-    if (!this.active) { return; }
+    if (!this.active) {
+      return;
+    }
     this.active = false;
     this.dependencies.forEach(dep => dep.unsubscribe(this));
   }
@@ -42,16 +96,12 @@ export class Reaction {
   static get current() {
     return Scheduler.current;
   }
+
+  // DX pass throughs
   static flush = Scheduler.flush;
   static scheduleFlush = Scheduler.scheduleFlush;
   static afterFlush = Scheduler.afterFlush;
   static getSource = Scheduler.getSource;
-
-  static create(callback) {
-    const reaction = new Reaction(callback);
-    reaction.run();
-    return reaction;
-  }
 
   static nonreactive(func) {
     const previousReaction = Scheduler.current;

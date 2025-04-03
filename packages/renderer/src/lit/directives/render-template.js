@@ -20,24 +20,33 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.subTemplates = subTemplates;
     this.data = data;
     this.ast = null;
-
-    this.reaction = Reaction.create((computation) => {
+    this.reaction = Reaction.create((reaction) => {
       this.maybeCreateTemplate(); // reactive reference to template
       const dataContext = this.unpackData(this.data); // reactive reference to data
 
-      // end computation if element destroyed
+      // end reaction if element destroyed
       if (!this.isConnected) {
-        computation.stop();
+        reaction.stop();
         return;
       }
       // first run handled by main path
-      if (computation.firstRun) {
+      if (reaction.firstRun) {
         return;
       }
+
+      const template = this.template;
+
       // this is an empty template
-      if (!this.template || this.template?.ast.length == 0) {
+      if (!template || template?.ast.length == 0) {
         return;
       }
+
+      // add debug context
+      reaction.addContext({
+        message: `template ${template?.templateName} data context`,
+        dataContext: dataContext,
+        template: template,
+      });
 
       const html = this.renderTemplate(dataContext);
       this.setValue(html);

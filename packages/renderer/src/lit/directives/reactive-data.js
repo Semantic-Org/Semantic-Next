@@ -36,6 +36,17 @@ export class ReactiveDataDirective extends AsyncDirective {
       // Create a new reaction to rerun the computation function if reactive data updates
       // that dont trigger rerender occur
       let value;
+
+      // pass through stack trace unless we are are debugging reactivity
+      if(expression.expression == 'debugReactivity') {
+        return this.expression.value();
+      }
+
+      const context = {
+        message: `expression: {${expression.expression}}`,
+        expression: expression.expression,
+      };
+
       this.reaction = Reaction.create((computation) => {
         if (!this.isConnected) {
           computation.stop();
@@ -48,7 +59,8 @@ export class ReactiveDataDirective extends AsyncDirective {
         if (!computation.firstRun) {
           this.setValue(value);
         }
-      });
+      }, { context });
+
       return value;
     }
   }

@@ -35,14 +35,40 @@ export class Scheduler {
   }
 
   static getSource() {
-    if (!Scheduler.current || !Scheduler.current.context || !Scheduler.current.context.trace) {
-      console.log('No source available or no current reaction.');
+    if (!Scheduler.current) {
+      console.log('No reactive flush is currently occurring.');
       return;
     }
-    let trace = Scheduler.current.context.trace;
-    trace = trace.split('\n').slice(2).join('\n');
-    trace = `Reaction triggered by:\n${trace}`;
-    console.info(trace);
-    return trace;
+    const { context } = Scheduler.current;
+    let stack = context.stack;
+    let message;
+    if(stack) {
+      if(context.message) {
+        message = context.message;
+      }
+      else if(context.firstRun) {
+        message = `First run of new reaction created at:`;
+      }
+      else if (context.value) {
+        message = `Reaction triggered by reactive update`;
+      }
+      else {
+        message = `Reaction triggered at:`;
+      }
+      console.groupCollapsed('🔁 Reaction Triggered');
+      console.log(message);
+      if(context.value) {
+        console.log('Reactive value change was:', context.value);
+      }
+      console.error(context.stack);
+      delete context.stack;
+      console.log('Metadata:', context);
+      console.groupEnd();
+    }
+    else {
+      console.error('Nothing found');
+      console.log(Scheduler.current.context);
+    }
+    return stack;
   }
 }
