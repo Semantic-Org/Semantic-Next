@@ -345,7 +345,6 @@ export class LitRenderer {
     }
     try {
 
-      /* Removing fancy solution until resolve reactivity issue
       // Create a proxy handler that automatically resolves signals and functions
       // <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with#creating_dynamic_namespaces_using_the_with_statement_and_a_proxy>
       const proxyHandler = {
@@ -383,32 +382,6 @@ export class LitRenderer {
           return ${code};
         }
       `)(proxiedContext);
-      */
-      const keys = Object.keys(context);
-      let values = Object.values(context);
-      // unbundle subtemplate/snippet data bundled in getPackedNodeData
-      // functions with no parameters are safe to evaluate
-      each(values, (value, index) => {
-        /* Rollback change until fix reactivity issues
-        if (value instanceof Signal) {
-          Object.defineProperty(values, index, {
-            get() {
-              return value.get();
-            },
-            configurable: true,
-            enumerable: true
-          });
-        }*/
-        if (isFunction(value) && value.length === 0 && !value.name) {
-          Object.defineProperty(values, index, {
-            get() {
-              return value();
-            },
-            configurable: true,
-            enumerable: true,
-          });
-        }
-      });
       result = new Function(...keys, `return ${code}`)(...values);
     }
     catch (e) {

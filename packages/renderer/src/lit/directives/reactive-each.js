@@ -23,11 +23,15 @@ export class ReactiveEachDirective extends AsyncDirective {
       this.reaction = null;
     }
 
-    let {as, over} = eachCondition.node;
-    let context = {
-      message: `reactive each: {#each ${as} in ${over}}`,
-      each: eachCondition.node,
-    };
+    // pass through context for debugging
+    let context;
+    if(eachCondition.node) {
+      let {as, over} = eachCondition.node;
+      let context = {
+        message: `reactive each: {#each ${as} in ${over}}`,
+        each: eachCondition.node,
+      };
+    }
 
     // Create a new reaction
     this.reaction = Reaction.create((computation) => {
