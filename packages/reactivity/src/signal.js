@@ -37,7 +37,7 @@ export class Signal {
     this.currentValue = this.maybeClone(initialValue);
 
     // allow debugging context to be set
-    //this.setContext(context);
+    this.setContext(context);
   }
 
   // set debugging context for signal
@@ -52,10 +52,12 @@ export class Signal {
   }
 
   addContext(additionalContext = {}) {
-    this.context = {
-      ...this.context,
-      ...additionalContext
-    };
+    if(!this.context) {
+      this.context = {};
+    }
+    for(const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
   }
 
   // set debugging stack trace for signal

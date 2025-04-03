@@ -39,8 +39,8 @@ export class Scheduler {
       console.log('No reactive flush is currently occurring.');
       return;
     }
-    const { context } = Scheduler.current;
-    let stack = context.stack;
+    const { context, dependencies } = Scheduler.current;
+    let stack = context.stack || dependencies?.values().next()?.value.context.stack;
     let message;
     if(stack) {
       if(context.message) {
@@ -60,7 +60,8 @@ export class Scheduler {
       if(context.value) {
         console.log('Reactive value change was:', context.value);
       }
-      console.error(context.stack);
+      console.log('Reaction was:', Scheduler.current);
+      console.error(stack);
       delete context.stack;
       console.log('Metadata:', context);
       console.groupEnd();

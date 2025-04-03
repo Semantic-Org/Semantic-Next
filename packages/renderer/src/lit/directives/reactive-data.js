@@ -18,12 +18,11 @@ export class ReactiveDataDirective extends AsyncDirective {
     this.expression = expression;
     this.settings = settings;
 
-    /*
-      We should be able to reuse reaction between renders
-    if (this.reaction) {
-      this.reaction.stop();
+    // debug reactivity is a special expression which should not
+    // trace itself or create its own reaction
+    if(expression.expression == 'debugReactivity') {
+      return this.expression.value();
     }
-    */
 
     // Create a new reaction to rerun the computation function if reactive data updates
     // that dont trigger rerender occur
@@ -36,11 +35,6 @@ export class ReactiveDataDirective extends AsyncDirective {
       // Create a new reaction to rerun the computation function if reactive data updates
       // that dont trigger rerender occur
       let value;
-
-      // pass through stack trace unless we are are debugging reactivity
-      if(expression.expression == 'debugReactivity') {
-        return this.expression.value();
-      }
 
       const context = {
         message: `expression: {${expression.expression}}`,

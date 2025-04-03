@@ -43,10 +43,12 @@ export class Reaction {
   }
 
   addContext(additionalContext = {}) {
-    this.context = {
-      ...this.context,
-      ...additionalContext
-    };
+    if(!this.context) {
+      this.context = {};
+    }
+    for(const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
   }
 
   run() {
@@ -59,9 +61,6 @@ export class Reaction {
     this.addContext({
       firstRun: this.firstRun
     });
-    if(!this.context.trace) {
-      this.setTrace();
-    }
     Scheduler.current = this;
     this.dependencies.forEach(dep => dep.cleanUp(this));
     this.dependencies.clear();

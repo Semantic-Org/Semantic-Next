@@ -6,10 +6,10 @@ const template = await getText('./component.html');
 const defaultSettings = {
   value: 1,
   date: new Date(),
-  timezone: 'PST',
 };
 
 const defaultState = {
+  timezone: 'PST',
   fruit: 'cherry'
 };
 
