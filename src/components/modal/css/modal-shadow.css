@@ -1,5 +1,5 @@
 /* src/components/modal/css/shadow/content/modal.css */
-@layer component.content.modal {
+@layer component.modal.content.modal {
   dialog {
     position: fixed;
     width: inherit;
@@ -75,7 +75,7 @@
 }
 
 /* src/components/modal/css/shadow/types/glass.css */
-@layer component.types.glass {
+@layer component.modal.types.glass {
   .glass.modal {
     backdrop-filter: var(--modal-glass-backdrop-filter);
     box-shadow: var(--modal-glass-box-shadow);
@@ -84,10 +84,10 @@
 }
 
 /* src/components/modal/css/shadow/variations/aligned.css */
-@layer component.variations.aligned;
+@layer component.modal.variations.aligned;
 
 /* src/components/modal/css/shadow/variations/sizing.css */
-@layer component.variations.sizing {
+@layer component.modal.variations.sizing {
   :host {
     width: var(--modal-medium);
   }

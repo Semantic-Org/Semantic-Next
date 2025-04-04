@@ -1,9 +1,9 @@
 /* Content */
-@import url('./content/modal.css') layer(component.content.modal);
+@import url('./content/modal.css') layer(component.modal.content.modal);
 
 /* Types */
-@import url('./types/glass.css') layer(component.types.glass);
+@import url('./types/glass.css') layer(component.modal.types.glass);
 
 /* Types */
-@import url('./variations/aligned.css') layer(component.variations.aligned);
-@import url('./variations/sizing.css') layer(component.variations.sizing);
+@import url('./variations/aligned.css') layer(component.modal.variations.aligned);
+@import url('./variations/sizing.css') layer(component.modal.variations.sizing);
