@@ -1,6 +1,7 @@
 {
   "name": "@semantic-ui/utils",
   "version": "0.10.9",
+  "title": "Semantic UI Utils",
   "description": "Utility functions for arrays, objects, strings, type checking and more",
   "author": "Jack Lukic",
   "homepage": "https://next.semantic-ui.com",
@@ -35,18 +36,18 @@
     "build": {
       "dependencies": [
         "build:minified",
-        "build:browser",
+        "build-bundle",
         "build:cdn"
       ]
     },
     "build:minified": {
-      "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
+      "command": "node ../../internal-packages/scripts/src/build-minified.js"
     },
-    "build:browser": {
-      "command": "node ../../internal-packages/scripts/src/do-build-browser.js"
+    "build-bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
     },
     "build:cdn": {
-      "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
     }
   }
 }

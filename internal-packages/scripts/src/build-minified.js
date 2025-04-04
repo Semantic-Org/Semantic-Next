@@ -1,12 +1,13 @@
-import { build } from './tasks/build-minified.js';
+import { build } from './lib/build.js';
 
-const baseDir = process.env.BASE_DIR;
 
 // This is called from npm script to build a package
 (async function() {
+
   const result = await build({
-    baseDir: baseDir,
+    minify: true,
   });
+
   if (!result.success) {
     process.exit(1);
   }

@@ -1,5 +1,6 @@
 {
   "name": "@semantic-ui/component",
+  "title": "Semantic UI Component",
   "description": "A framework for creating web components.",
   "author": "Jack Lukic",
   "license": "ISC",
@@ -45,19 +46,17 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "build:minified",
-        "build:browser",
-        "build:cdn"
+        "build-bundle"
       ]
     },
     "build:minified": {
-      "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
+      "command": "node ../../internal-packages/scripts/src/build-minified.js"
     },
-    "build:browser": {
-      "command": "node ../../internal-packages/scripts/src/do-build-browser.js"
+    "build-bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundled.js"
     },
     "build:cdn": {
-      "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
     }
   }
 }
