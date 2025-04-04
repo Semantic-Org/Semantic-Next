@@ -36,14 +36,14 @@
     "build": {
       "dependencies": [
         "build:minified",
-        "build-bundle",
+        "build:bundle",
         "build:cdn"
       ]
     },
     "build:minified": {
       "command": "node ../../internal-packages/scripts/src/build-minified.js"
     },
-    "build-bundle": {
+    "build:bundle": {
       "command": "node ../../internal-packages/scripts/src/build-bundle.js"
     },
     "build:cdn": {

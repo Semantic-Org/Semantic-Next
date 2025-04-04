@@ -71,6 +71,30 @@ resolveBareImports({
 })
 ```
 
+### Using Different CDNs with cdnRoot
+
+You can easily switch between popular CDNs by changing the `cdnRoot` option:
+
+| CDN | cdnRoot Value | Notes |
+|-----|---------------|-------|
+| jsDelivr | `'https://cdn.jsdelivr.net/npm'` | Default, optimized global CDN |
+| Unpkg | `'https://unpkg.com'` | Popular alternative CDN |
+| Skypack | `'https://cdn.skypack.dev'` | Modern ESM-focused CDN |
+| CDNJS | `'https://cdnjs.cloudflare.com/ajax/libs'` | Cloudflare's CDN (requires custom resolver) |
+| Google Hosted Libraries | `'https://ajax.googleapis.com/ajax/libs'` | Limited package selection (requires custom resolver) |
+| Custom CDN | `'https://your-cdn.example.com/packages'` | Your own CDN solution |
+
+Example with Unpkg:
+
+```javascript
+resolveBareImports({
+  packageJson,
+  cdnRoot: 'https://unpkg.com'
+})
+```
+
+**Note:** For CDNs with different path structures, you may need a custom resolver function.
+
 ## Advanced Usage
 
 ### Custom Resolver

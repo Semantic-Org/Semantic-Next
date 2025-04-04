@@ -46,13 +46,15 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "build-bundle"
+        "build:minified",
+        "build:bundle",
+        "build:cdn"
       ]
     },
     "build:minified": {
       "command": "node ../../internal-packages/scripts/src/build-minified.js"
     },
-    "build-bundle": {
+    "build:bundle": {
       "command": "node ../../internal-packages/scripts/src/build-bundled.js"
     },
     "build:cdn": {
