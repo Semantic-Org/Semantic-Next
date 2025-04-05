@@ -1,19 +1,21 @@
 import { build } from './lib/build.js';
 
-// Wrapped for cli consumption
+// Wrapped for NPM wireit consumption
 (async function() {
 
   const result = await build({
     esm: true,
-    minify: false,
+    minify: false
   });
 
-  const result = await build({
+  const minResult = await build({
     esm: true,
     minify: true,
   });
 
-  if (!result.success) {
+  process.exit(1);
+
+  if (!result?.success || !minResult?.success) {
     process.exit(1);
   }
 })();

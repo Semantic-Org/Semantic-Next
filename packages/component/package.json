@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "wireit",
-    "build:minified": "wireit",
+    "build:esm": "wireit",
     "build:cdn": "wireit",
     "test": "vitest"
   },
@@ -46,16 +46,16 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "build:minified",
+        "build:esm",
         "build:bundle",
         "build:cdn"
       ]
     },
-    "build:minified": {
-      "command": "node ../../internal-packages/scripts/src/build-minified.js"
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
     },
     "build:bundle": {
-      "command": "node ../../internal-packages/scripts/src/build-bundled.js"
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
     },
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/build-cdn.js"

@@ -17,22 +17,18 @@
       "import": "./src/index.js",
       "default": "./src/index.js"
     },
-    "./build": {
-      "import": "./src/tasks/build.js",
-      "default": "./src/tasks/build.js"
-    },
     "./build-bundle": {
-      "import": "./src/tasks/build-bundle.js",
-      "default": "./src/tasks/build-bundle.js"
+      "import": "./src/build-bundle.js",
+      "default": "./src/build-bundle.js"
     },
     "./build-cdn": {
-      "import": "./src/tasks/build-cdn.js",
-      "default": "./src/tasks/build-cdn.js"
+      "import": "./src/build-cdn.js",
+      "default": "./src/build-cdn.js"
     },
     "./build-esm": {
-      "import": "./src/tasks/build-esm.js",
-      "default": "./src/tasks/build-esm.js"
-    },
+      "import": "./src/build-esm.js",
+      "default": "./src/build-esm.js"
+    }
   },
   "private": true,
   "dependencies": {

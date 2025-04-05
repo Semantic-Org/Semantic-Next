@@ -41,13 +41,13 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "build:minified",
+        "build:esm",
         "build:bundle",
         "build:cdn"
       ]
     },
-    "build:minified": {
-      "command": "node ../../internal-packages/scripts/src/build-minified.js"
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
     },
     "build:bundle": {
       "command": "node ../../internal-packages/scripts/src/build-bundle.js"
