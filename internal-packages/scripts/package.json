@@ -32,8 +32,8 @@
   },
   "private": true,
   "dependencies": {
+    "@semantic-ui/esbuild-log": "^0.10.2",
     "@semantic-ui/esbuild-resolve-bare-imports": "^0.10.2",
-    "chalk": "^5.4.1",
     "esbuild": "^0.25.1"
   }
 }
