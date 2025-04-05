@@ -24,7 +24,7 @@ export const writeLog = ({
     args.push( chalk[colors.rebuild]('Rebuild') );
   }
   if(includeTime) {
-    const time = new Date().toLocaleTimeString()
+    const time = new Date().toLocaleTimeString();
     args.push( chalk[colors.time](time) );
   }
   console.log.apply(console, args);

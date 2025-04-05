@@ -13,8 +13,6 @@ import { build } from './lib/build.js';
     minify: true,
   });
 
-  process.exit(1);
-
   if (!result?.success || !minResult?.success) {
     process.exit(1);
   }

@@ -69,4 +69,4 @@ export const CDN_CONFIG = {
   directReplacements: {},
   cacheDir: '.cache',
   logging: 'normal',
-}
+};

@@ -7,10 +7,17 @@ import { log as logPlugin } from '@semantic-ui/esbuild-log';
 
 import { getBanner, JS_BUILD_CONFIG, CSS_BUILD_CONFIG, CDN_CONFIG } from './config.js';
 
+
 // resolve base dir relative to where script is run
 // this may be run from "npm run" so this is a common failure point
 // especially using tools like wireit or meta task runners
 const BASE_DIR = process.env.BASE_DIR || process.cwd();
+
+/* Gets package.json from current working directory */
+export const getPackageFile = async function(baseDir = BASE_DIR) {
+  const packageJsonPath = resolve(baseDir, 'package.json');
+  return JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+};
 
 /*
   Provides base build config but without entrpoints / in & out dirs
@@ -28,7 +35,7 @@ export const getESBuildConfig = async function({
   bundle = false, // whether to bundle deps
   outdir = '', // custom outdir
   outfile = '', // custom out file,
-  sourceMap = true, // whether to include source maps
+  sourcemap = true, // whether to include source maps
 
   // less commonly changed
   platform = 'browser', // target browser
@@ -46,13 +53,7 @@ export const getESBuildConfig = async function({
   }
 }) {
 
-  let config = {
-    sourceMap,
-    bundle,
-    minify,
-    metafile,
-    platform
-  };
+  let config = {};
 
   // default base config stored in config constants
   if(type == 'javascript') {
@@ -61,6 +62,15 @@ export const getESBuildConfig = async function({
   if(type == 'css') {
     config = CSS_BUILD_CONFIG;
   }
+
+  config = {
+    ...config,
+    sourcemap,
+    bundle,
+    minify,
+    metafile,
+    platform
+  };
 
   if((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
     packageFile = await getPackageFile();
@@ -124,14 +134,15 @@ export const getESBuildConfig = async function({
 
       // add package name as filename
       outfile += (packageFile.name || 'index')
-        .replace(/^\@.*\//, "") // remove org
+        .replace(/^\@.*\//, '') // remove org
         .replace(/\//g, '-') // hyphen spaces
         .replace(/[<>:"/\\|?*]/g, '') // remove chars not permissable in files
         .toLowerCase(); // lowercase
 
       // add file extension
       if(esm) {
-        outfile += '.esm';
+        // esm can be inferred skipping for now
+        // outfile += '.esm';
       }
       if(minify) {
         outfile += '.min';
@@ -163,6 +174,8 @@ export const getESBuildConfig = async function({
   }
 
   // Preserve ESM imports but as a single file
+  // The difference between this and bundle
+  // is bare module imports remain
   if(esm) {
     config.format = 'esm';
     config.bundle = true;
@@ -174,6 +187,7 @@ export const getESBuildConfig = async function({
         ...packageFile.peerDependencies,
       };
       config.external = Object.keys(externalDeps);
+      config.legalComments = 'none'; // we are not bundling external deps
     }
   }
 
@@ -184,9 +198,9 @@ export const getESBuildConfig = async function({
   if(outfile) {
     config.outfile = outfile;
   }
-
   return config;
 };
+
 
 /*
   Performs build with ESBuild
@@ -203,7 +217,6 @@ export const build = async ({
       return await esbuild.build(buildConfig).watch();
     }
     else {
-      console.log(buildConfig);
       // perform build
       const result = await esbuild.build(buildConfig);
 
@@ -247,11 +260,5 @@ export const watch = async (...args) => {
   return await build({
     watch: true,
     ...args
-  })
+  });
 };
-
-/* Gets package.json from current working directory */
-export const getPackageFile = async function(baseDir = BASE_DIR) {
-  const packageJsonPath = resolve(baseDir, 'package.json');
-  return JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-}

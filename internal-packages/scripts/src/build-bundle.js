@@ -1,6 +1,5 @@
 import { build } from './lib/build.js';
 
-
 // Wrapped for cli consumption
 (async function() {
 
@@ -13,7 +12,7 @@ import { build } from './lib/build.js';
     minify: true,
   });
 
-  if (!result?.success) {
+  if (!result?.success || !minResult?.success) {
     process.exit(1);
   }
 
