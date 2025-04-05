@@ -20,6 +20,7 @@ export const getESBuildConfig = async function({
   type = 'javascript',
 
   cdn = false, // whether to rewrite bare module imports for cdn
+  esm = false, // whether to rewrite as a single file minified esm import
   cdnConfig = CDN_CONFIG, // config for resolve-bare-imports plugin
 
   // most commonly changed
@@ -30,7 +31,7 @@ export const getESBuildConfig = async function({
   sourceMap = true, // whether to include source maps
 
   // less commonly changed
-  browser = true, // target browser
+  platform = 'browser', // target browser
   metafile = true, // whether to include metafile
   readEntrypoints = true, // read entrypoints from package.json
   addBanner = true, // add banner with details from package.json
@@ -45,7 +46,13 @@ export const getESBuildConfig = async function({
   }
 }) {
 
-  let config = {};
+  let config = {
+    sourceMap,
+    bundle,
+    minify,
+    metafile,
+    platform
+  };
 
   // default base config stored in config constants
   if(type == 'javascript') {
@@ -55,19 +62,7 @@ export const getESBuildConfig = async function({
     config = CSS_BUILD_CONFIG;
   }
 
-  if(minify) {
-    config.minify = true;
-  }
-
-  if(metafile) {
-    config.metafile = true;
-  }
-
-  if(browser) {
-    config.platform = 'browser';
-  }
-
-  if((readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
+  if((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
     packageFile = await getPackageFile();
   }
 
@@ -94,7 +89,10 @@ export const getESBuildConfig = async function({
 
     if(!log && addLog) {
       let header = 'Build';
-      if(bundle) {
+      if(cdn) {
+        header += ' CDN';
+      }
+      else if(bundle) {
         header += ' Bundled';
       }
       if(minify) {
@@ -116,6 +114,10 @@ export const getESBuildConfig = async function({
       else if(cdn) {
         outfile += outfileDir.cdn;
       }
+      else if(esm) {
+        // For ESM builds, use standard directory but with esm indication
+        outfile += outfileDir.standard;
+      }
       else {
         outfile += outfileDir.standard;
       }
@@ -128,6 +130,9 @@ export const getESBuildConfig = async function({
         .toLowerCase(); // lowercase
 
       // add file extension
+      if(esm) {
+        outfile += '.esm';
+      }
       if(minify) {
         outfile += '.min';
       }
@@ -138,7 +143,7 @@ export const getESBuildConfig = async function({
         outfile += '.css';
       }
     }
-  }
+
 
   // add plugins
   if(log || cdn) {
@@ -148,11 +153,27 @@ export const getESBuildConfig = async function({
       config.plugins.push( logPlugin(log) );
     }
     if(cdn) {
-      config.plugins.push( resolveBareImports(cdnConfig) );
+      config.bundle = true;
+      config.plugins.push( resolveBareImports({
+        packageJson: packageFile,
+        ...cdnConfig
+      }) );
     }
   }
-  if(log) {
-    config.plugins = [logPlugin(log)];
+
+  // Preserve ESM imports but as a single file
+  if(esm) {
+    config.format = 'esm';
+    config.bundle = true;
+
+    // Typically for ESM builds we want to exclude external dependencies
+    if(packageFile && (packageFile.dependencies || packageFile.peerDependencies)) {
+      const externalDeps = {
+        ...packageFile.dependencies,
+        ...packageFile.peerDependencies,
+      };
+      config.external = Object.keys(externalDeps);
+    }
   }
 
   if(outdir) {
@@ -181,7 +202,7 @@ export const build = async ({
       return await esbuild.build(buildConfig).watch();
     }
     else {
-      delete buildConfig.plugins;
+      console.log(buildConfig);
       // perform build
       const result = await esbuild.build(buildConfig);
 
@@ -189,7 +210,7 @@ export const build = async ({
       const outdir = dirname(outfile);
       // log filesize of outfile
       if(showLogs) {
-        let buildMessage = `\n✅ Build complete`;
+        let buildMessage = `✅ Build complete`;
         if(displayFilesize && buildConfig.outfile) {
           const stats = await fs.stat(outfile);
           const size = (stats.size / 1024).toFixed(2);
@@ -211,7 +232,7 @@ export const build = async ({
   }
   catch(error) {
     if(showLogs) {
-      console.error('\n❌ Build failed:', error);
+      console.error('❌ Build failed:', error);
     }
     return {
       success: false,

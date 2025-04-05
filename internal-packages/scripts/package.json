@@ -21,59 +21,18 @@
       "import": "./src/tasks/build.js",
       "default": "./src/tasks/build.js"
     },
+    "./build-bundle": {
+      "import": "./src/tasks/build-bundle.js",
+      "default": "./src/tasks/build-bundle.js"
+    },
     "./build-cdn": {
       "import": "./src/tasks/build-cdn.js",
       "default": "./src/tasks/build-cdn.js"
     },
-    "./build-ui-framework": {
-      "import": "./src/tasks/build-ui-framework.js",
-      "default": "./src/tasks/build-ui-framework.js"
+    "./build-esm": {
+      "import": "./src/tasks/build-esm.js",
+      "default": "./src/tasks/build-esm.js"
     },
-    "./build-ui-cdn": {
-      "import": "./src/tasks/build-ui-cdn.js",
-      "default": "./src/tasks/build-ui-cdn.js"
-    },
-    "./build-deps": {
-      "import": "./src/tasks/build-deps.js",
-      "default": "./src/tasks/build-deps.js"
-    },
-    "./utils": {
-      "import": "./src/utils/index.js",
-      "default": "./src/utils/index.js"
-    }
-  },
-  "scripts": {
-    "build": "wireit",
-    "build:minified": "wireit",
-    "build:cdn": "wireit",
-    "build:ui-framework": "wireit",
-    "build:ui-cdn": "wireit",
-    "build:deps": "wireit"
-  },
-  "wireit": {
-    "build": {
-      "dependencies": [
-        "build:minified",
-        "build:cdn",
-        "build:ui-framework",
-        "build:ui-cdn"
-      ]
-    },
-    "build:minified": {
-      "command": "node ./src/do-build-minified.js"
-    },
-    "build:cdn": {
-      "command": "node ./src/do-build-cdn.js"
-    },
-    "build:ui-framework": {
-      "command": "node ./src/do-build-ui-framework.js"
-    },
-    "build:ui-cdn": {
-      "command": "node ./src/do-build-ui-cdn.js"
-    },
-    "build:deps": {
-      "command": "node ./src/do-build-deps.js"
-    }
   },
   "private": true,
   "dependencies": {

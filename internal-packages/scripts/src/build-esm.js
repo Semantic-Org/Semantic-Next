@@ -1,20 +1,19 @@
 import { build } from './lib/build.js';
 
-
-// This is called from npm script to build a package
+// Wrapped for cli consumption
 (async function() {
 
   const result = await build({
-    bundle: true
+    esm: true,
+    minify: false,
   });
 
-  const minResult = await build({
-    bundle: true,
+  const result = await build({
+    esm: true,
     minify: true,
   });
 
-  if (!result?.success) {
+  if (!result.success) {
     process.exit(1);
   }
-
 })();
