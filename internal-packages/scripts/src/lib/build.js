@@ -143,6 +143,7 @@ export const getESBuildConfig = async function({
         outfile += '.css';
       }
     }
+  }
 
 
   // add plugins
