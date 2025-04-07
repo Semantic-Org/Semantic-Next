@@ -13,6 +13,9 @@ export const buildUIDeps = async ({
   */
   const cssShadowConcat = build({
     type: 'css',
+    addBanner: false,
+    metafile: false,
+    sourcemap: false,
     watch: watch,
     bundle: true,
     log: { header: 'UI Deps', message: 'Shadow CSS' },
@@ -24,41 +27,7 @@ export const buildUIDeps = async ({
     outdir: 'src',
   });
 
-  /*
-    component-scoped theming css
-  */
-  const cssThemeConcat = build({
-    type: 'css',
-    watch: watch,
-    bundle: true,
-    log: { header: 'UI Deps', message: 'Theme CSS' },
-    entryPoints: [
-      'src/**/css/theme/*.css',
-    ],
-    entryNames: '[dir]/../[name]-theme',
-    outbase: 'src',
-    outdir: 'src',
-  });
-
-  /*
-    page-scoped css
-  */
-  const cssPageConcat = build({
-    type: 'css',
-    watch: watch,
-    bundle: true,
-    log: { header: 'UI Deps', message: 'Page CSS' },
-    entryPoints: [
-      'src/**/css/page/*.css',
-    ],
-    entryNames: '[dir]/../[name]-page',
-    outbase: 'src',
-    outdir: 'src',
-  });
-
   return await Promise.all([
-    cssPageConcat,
-    cssThemeConcat,
     cssShadowConcat,
   ]);
 

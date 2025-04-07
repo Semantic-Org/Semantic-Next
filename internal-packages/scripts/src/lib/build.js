@@ -59,7 +59,8 @@ export const getESBuildConfig = async function({
     bundle: 'dist/bundle/',
     cdn: 'dist/cdn/',
     standard: 'dist/',
-  }
+  },
+  ...additionalConfig // allow any other config value to be passed through
 }) {
 
   let config = {};
@@ -70,6 +71,13 @@ export const getESBuildConfig = async function({
   }
   if(type == 'css') {
     config = CSS_BUILD_CONFIG;
+  }
+
+  if(additionalConfig) {
+    config = {
+      ...config,
+      ...additionalConfig
+    }
   }
 
   config = {
