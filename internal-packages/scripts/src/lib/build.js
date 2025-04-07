@@ -19,6 +19,14 @@ export const getPackageFile = async function(baseDir = BASE_DIR) {
   return JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 };
 
+/* Gets filesize of a file */
+export const getFileSize = async (src) => {
+  const stats = await fs.stat(src);
+  const size = (stats.size / 1024).toFixed(2);
+  return `${size}KB`;
+}
+
+
 /*
   Provides base build config but without entrpoints / in & out dirs
 */
@@ -35,12 +43,13 @@ export const getESBuildConfig = async function({
   bundle = false, // whether to bundle deps
   outdir = '', // custom outdir
   outfile = '', // custom out file,
+  entryPoints = [], // custom entrypionts
   sourcemap = true, // whether to include source maps
 
   // less commonly changed
   platform = 'browser', // target browser
   metafile = true, // whether to include metafile
-  readEntrypoints = true, // read entrypoints from package.json
+  readyEntryPoints = true, // read entrypoints from package.json
   addBanner = true, // add banner with details from package.json
   addLog = true, // automatically create log
   packageFile, // avoid grabbing package.json again
@@ -72,7 +81,7 @@ export const getESBuildConfig = async function({
     platform
   };
 
-  if((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
+  if((cdn || readyEntryPoints || addBanner || addLog || addOutfile) && !packageFile) {
     packageFile = await getPackageFile();
   }
 
@@ -91,10 +100,13 @@ export const getESBuildConfig = async function({
     }
 
     // naive main entrypoint evaluation
-    if(readEntrypoints) {
+    if(entryPoints.length) {
+      config.entryPoints = entryPoints;
+    }
+    else if(readyEntryPoints) {
       const entry = packageFile.module || packageFile.main;
-      const entrypointPath = resolve(baseDir, entry);
-      config.entryPoints = [entrypointPath];
+      const entryPointPath = resolve(baseDir, entry);
+      config.entryPoints = [entryPointPath];
     }
 
     if(!log && addLog) {
@@ -165,6 +177,9 @@ export const getESBuildConfig = async function({
       config.plugins.push( logPlugin(log) );
     }
     if(cdn) {
+      // this will resolve all bare module imports to a cdnized link
+      // i.e. import { defineComponent } from 'https://link-to-cdn/@semantic-ui/component/';
+      // this is used with import maps or direct browser usage
       config.bundle = true;
       config.plugins.push( resolveBareImports({
         packageJson: packageFile,
@@ -173,14 +188,16 @@ export const getESBuildConfig = async function({
     }
   }
 
-  // Preserve ESM imports but as a single file
-  // The difference between this and bundle
-  // is bare module imports remain
+  // ESM version is basically a single-file version
+  // it DOES NOT bundle dependendencies
+  // in many cases this is functionally equivalent to the module src
+  // i.e src/[entrypoint]
+  // however it might have some use in specialized builds
   if(esm) {
     config.format = 'esm';
     config.bundle = true;
 
-    // Typically for ESM builds we want to exclude external dependencies
+    // this will avoid bundling any dependencies
     if(packageFile && (packageFile.dependencies || packageFile.peerDependencies)) {
       const externalDeps = {
         ...packageFile.dependencies,
@@ -191,16 +208,16 @@ export const getESBuildConfig = async function({
     }
   }
 
+  // can only have outdir or outfile
   if(outdir) {
     config.outdir = outdir;
   }
-
-  if(outfile) {
+  else if(outfile) {
     config.outfile = outfile;
   }
+
   return config;
 };
-
 
 /*
   Performs build with ESBuild
@@ -213,22 +230,28 @@ export const build = async ({
 } = {}) => {
   try {
     const buildConfig = await getESBuildConfig(userConfig);
+
+    // watch has a different build endpoint
+    const builder = watch
+      ? esbuild.context
+      : esbuild.build
+    ;
+
     if(watch) {
-      return await esbuild.build(buildConfig).watch();
+      return await builder(buildConfig).watch();
     }
     else {
       // perform build
-      const result = await esbuild.build(buildConfig);
+      console.log(buildConfig);
+      const result = await builder(buildConfig);
 
-      const { outfile } = buildConfig;
-      const outdir = dirname(outfile);
+      let { outfile, outdir } = buildConfig;
+      outdir = outdir || dirname(outfile);
       // log filesize of outfile
-      if(showLogs) {
+      if(showLogs && outfile) {
         let buildMessage = `✅ Build complete`;
-        if(displayFilesize && buildConfig.outfile) {
-          const stats = await fs.stat(outfile);
-          const size = (stats.size / 1024).toFixed(2);
-          buildMessage+= `: ${size}KB`;
+        if(displayFilesize && outfile) {
+          buildMessage+= getFileSize(outfile);
         }
       }
 

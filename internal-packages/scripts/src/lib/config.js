@@ -11,10 +11,13 @@ export const getBanner = (packageFile) => `/**
  * LICENSE file in the root directory of this source tree.
  */`;
 
+ export const TARGET_BROWSERS = ['chrome80', 'edge80', 'firefox78', 'safari14', 'ios14', 'opera67'];
+
 export const JS_BUILD_CONFIG = {
 
   // target browser by default for dist
-  target: ['chrome80', 'edge80', 'firefox78', 'safari14', 'ios14', 'opera67'],
+  target: TARGET_BROWSERS,
+
   platform: 'browser',
 
   // source is in ESM
@@ -39,27 +42,20 @@ export const JS_BUILD_CONFIG = {
 export const CSS_BUILD_CONFIG = {
 
   // target browser by default for dist
-  target: ['chrome80', 'edge80', 'firefox78', 'safari14', 'ios14', 'opera67'],
+  target: TARGET_BROWSERS,
+
+  // build tools should log
+  platform: 'browser',
 
   // source is in ESM
   format: 'esm',
 
   // build tools should log
-  platform: 'browser',
-
-  // build tools should log
   logLevel: 'info',
 
-  // needed to load css and inline for web components
+  // loader settings for css
   loader: {
-    '.ts': 'ts',
-    '.html': 'text',
-    '.css': 'text',
-    '.png': 'file',
-    '.svg': 'file',
-    '.jpg': 'file',
-    '.jpeg': 'file',
-    '.gif': 'file',
+    '.css': 'css',
   },
 };
 

@@ -1,19 +1,26 @@
 import { build } from './lib/build.js';
 
-// Wrapped for NPM wireit consumption
-(async function() {
-
-  const result = await build({
+export const buildCDN = async ({watch = false, ...config} = {}) => {
+  const result = build({
+    ...config,
+    watch,
     cdn: true,
     minify: false
   });
 
-  const minResult = await build({
+  const minResult = build({
+    ...config,
+    watch,
     cdn: true,
     minify: true,
   });
 
-  if (!result?.success || !minResult?.success) {
-    process.exit(1);
-  }
-})();
+  return await Promise.all([result, minResult]);
+};
+
+// Handle direct execution of this script
+if (import.meta.url === `file://${process.argv[1]}`) {
+  (async function() {
+    await buildCDN();
+  })();
+}
