@@ -156,18 +156,22 @@
   },
   "wireit": {
     "build": {
-      "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
-      "dependencies": [
-        "build:packages",
-        "build:ui-deps",
-        "build:ui-cdn"
-      ]
+      "command": "node ./internal-packages/scripts/src/build-ui-deps.js"
     },
     "build:ui-deps": {
       "command": "node ./internal-packages/scripts/src/build-ui-deps.js"
     },
-    "build:ui-cdn": {
-      "command": "node ./internal-packages/scripts/src/build-ui-cdn.js"
+    "build:ui-components": {
+      "command": "node ./internal-packages/scripts/src/build-ui-components.js"
+    },
+    "build:esm": {
+      "command": "node ./internal-packages/scripts/src/build-esm.js"
+    },
+    "build:bundle": {
+      "command": "node ./internal-packages/scripts/src/build-bundle.js"
+    },
+    "build:cdn": {
+      "command": "node ./internal-packages/scripts/src/build-cdn.js"
     },
     "watch": {
       "command": "node ./tasks/watch.js",
@@ -195,9 +199,6 @@
         "./packages/templating:build",
         "./packages/utils:build"
       ]
-    },
-    "test:case": {
-      "command": "node ./tasks/test-case.js"
     },
     "serve:docs": {
       "command": "cd docs && npm run dev",
