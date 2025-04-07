@@ -4,20 +4,14 @@
   "version": "0.10.2",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "src/log.js",
+  "module": "src/log.js",
   "type": "module",
   "files": [
     "src",
     "LICENSE",
     "README.md"
   ],
-  "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "default": "./dist/index.min.js"
-    }
-  },
   "sideEffects": false,
   "scripts": {
     "test": "vitest run"

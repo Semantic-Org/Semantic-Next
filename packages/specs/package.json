@@ -28,7 +28,8 @@
     "@semantic-ui/utils": "^0.10.9"
   },
   "devDependencies": {
-    "esbuild": "^0.25.1"
+    "@semantic-ui/internal-scripts": "^0.10.2",
+    "vitest": "^3.0.4"
   },
   "wireit": {
     "build": {
