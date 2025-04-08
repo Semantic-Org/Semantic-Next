@@ -1,7 +1,8 @@
 ---
 import Body from '../layouts/Body.astro';
-import { TestComponent } from '../components/Test/component.js';
+import { UIButton } from '@semantic-ui/core';
 ---
 <Body padded>
- <TestComponent client:only></TestComponent>
+  <div style="background: var(--subtle-gradient); width: 100px; height: 100px; "></div>
+  <UIButton client:only primary>Primary</UIButton>
 </Body>
