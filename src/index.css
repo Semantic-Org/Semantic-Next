@@ -1,0 +1,15 @@
+@layer reset, site, theme, component, overrides, layout, page, responsive;
+
+
+/* Global CSS */
+@import url('./site/reset.css') layer(reset);
+@import url('./site/site.css') layer(site);
+
+/* Global Variables */
+@import url('./site/site-variables.css') layer(theme);
+@import url('./site/site-derived-variables.css') layer(theme.derived);
+
+/* Global Light/Dark Theme */
+@import url("./theme/theme-light-variables.css") layer(theme.light);
+@import url("./theme/theme-dark-variables.css") layer(theme.dark);
+@import url("./theme/theme-derived-variables.css") layer(theme.derived);

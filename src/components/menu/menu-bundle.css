@@ -75,6 +75,7 @@
     .selection.menu {
       gap: var(--menu-selection-gap);
     }
+    .selection.menu :slotted,
     .selection.menu menu-item::part(item) {
       --menu-item-padding: var(--menu-selection-item-padding);
       --menu-item-border-radius: var(--menu-selection-item-border-radius);
