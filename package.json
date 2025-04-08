@@ -94,6 +94,7 @@
     "build": "wireit",
     "dev": "wireit",
     "build:docs": "wireit",
+    "build-docs": "wireit",
     "build:packages": "wireit",
     "serve": "wireit",
     "watch": "wireit",
@@ -136,6 +137,13 @@
         "./packages/utils:build"
       ]
     },
+    "build-docs": {
+      "command": "cd docs && npm install && npx link ../ && npm run build",
+      "dependencies": [
+        "build"
+      ]
+    },
+
     "build:docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
