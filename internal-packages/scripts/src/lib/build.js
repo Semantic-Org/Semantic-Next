@@ -48,7 +48,7 @@ export const getESBuildConfig = async function({
 
   // less commonly changed
   platform = 'browser', // target browser
-  metafile = true, // whether to include metafile
+  metafile = false, // whether to include metafile
   readyEntryPoints = true, // read entrypoints from package.json
   addBanner = true, // add banner with details from package.json
   addLog = true, // automatically create log
@@ -130,7 +130,7 @@ export const getESBuildConfig = async function({
       }
       log = {
         header: header,
-        message: packageFile?.title || packageFile.name
+        text: packageFile?.title || packageFile.name
       };
     }
 
@@ -255,13 +255,6 @@ export const build = async ({
 
       let { outfile, outdir } = buildConfig;
       outdir = outdir || dirname(outfile);
-      // log filesize of outfile
-      if(showLogs && outfile) {
-        let buildMessage = `✅ Build complete`;
-        if(displayFilesize && outfile) {
-          buildMessage+= getFileSize(outfile);
-        }
-      }
 
       // create metafile on esbuild stats
       // this can be used to analyze build at https://esbuild.github.io/analyze/

@@ -16,8 +16,8 @@ export const buildUIComponents = async ({
     watch,
     type: 'javascript',
     entryPoints: ['./src/components/**/index.js'],
-    entryNames: 'ui/[dir]', // button/button.js
-    outbase: 'src',
+    entryNames: '[dir]', // button.js,
+    outbase: 'src/components',
   };
 
   /*
@@ -25,28 +25,23 @@ export const buildUIComponents = async ({
   */
   let esmBuild = buildESM({
     ...sharedConfig,
-    log: { header: 'UI Components', message: 'Build ESM' },
+    outdir: 'dist',
+    log: { header: 'UI Components', text: 'Build ESM' },
   });
 
-  let bundleBuild = buildESM({
+  let bundleBuild = buildBundle({
     ...sharedConfig,
-    esm: true,
-    minify: false,
-    log: { header: 'UI Components', message: 'Build Bundle' },
+    outdir: 'dist/bundle',
+    log: { header: 'UI Components', text: 'Build Bundle' },
   });
 
-  let cdnBuild = buildESM({
+  let cdnBuild = buildCDN({
     ...sharedConfig,
-    esm: true,
-    minify: false,
-    log: { header: 'UI Components', message: 'Build CDN' },
+    outdir: 'dist/cdn',
+    log: { header: 'UI Components', text: 'Build CDN' },
   });
 
-  /*
-    component-scoped theming css
-  */
-
-  return await Promise.all([
+  await Promise.all([
     esmBuild,
     bundleBuild,
     cdnBuild,
@@ -60,5 +55,4 @@ export const buildUIComponents = async ({
 
   const result = await buildUIComponents();
 
-  process.exit(1);
 })();

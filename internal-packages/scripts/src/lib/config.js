@@ -33,7 +33,7 @@ export const JS_BUILD_CONFIG = {
   format: 'esm',
 
   // build tools should log
-  logLevel: 'info',
+  logLevel: 'warning',
 
   // needed to load css and inline for web components
   loader: {
@@ -60,7 +60,7 @@ export const CSS_BUILD_CONFIG = {
   format: 'esm',
 
   // build tools should log
-  logLevel: 'info',
+  logLevel: 'warning',
 
   // loader settings for css
   loader: {

@@ -5,8 +5,8 @@
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
-  "main": "src/semantic-ui.js",
-  "module": "src/semantic-ui.js",
+  "main": "src/index.js",
+  "module": "src/index.js",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -19,7 +19,7 @@
       "import": "./src/index.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "./src/semantic-ui.js"
+      "default": "./src/index.js"
     },
     "./css": {
       "import": "./src/index.css",
@@ -92,10 +92,9 @@
   },
   "scripts": {
     "build": "wireit",
-    "build:deps": "wireit",
-    "build:cdn": "wireit",
     "dev": "wireit",
-    "build-docs": "wireit",
+    "build:docs": "wireit",
+    "build:packages": "wireit",
     "serve": "wireit",
     "watch": "wireit",
     "publish": "wireit",
@@ -111,9 +110,39 @@
     "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
   },
   "wireit": {
-    "build": {
-      "command": "node ./internal-packages/scripts/src/build-ui-deps.js"
+    "dev": {
+      "command": "cd docs && npm install && npx link ../ && npm run dev",
+      "dependencies": [
+        "watch"
+      ]
     },
+    "build": {
+      "command": "node ./internal-packages/scripts/src/build-esm.js",
+      "dependencies": [
+        "build:ui-deps",
+        "build:ui-components",
+        "build:bundle",
+        "build:cdn"
+      ]
+    },
+    "build:packages": {
+      "dependencies": [
+        "./packages/component:build",
+        "./packages/query:build",
+        "./packages/reactivity:build",
+        "./packages/renderer:build",
+        "./packages/specs:build",
+        "./packages/templating:build",
+        "./packages/utils:build"
+      ]
+    },
+    "build:docs": {
+      "command": "cd docs && npm install && npx link ../ && npm run build",
+      "dependencies": [
+        "build"
+      ]
+    },
+
     "build:ui-deps": {
       "command": "node ./internal-packages/scripts/src/build-ui-deps.js"
     },
@@ -133,40 +162,7 @@
       "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
     },
-    "dev": {
-      "command": "cd docs && npm install && npx link ../ && npm run dev",
-      "dependencies": [
-        "watch"
-      ]
-    },
-    "build-docs": {
-      "command": "cd docs && npm install && npx link ../ && npm run build",
-      "dependencies": [
-        "build"
-      ]
-    },
-    "build:packages": {
-      "dependencies": [
-        "./packages/component:build",
-        "./packages/query:build",
-        "./packages/reactivity:build",
-        "./packages/renderer:build",
-        "./packages/specs:build",
-        "./packages/templating:build",
-        "./packages/utils:build"
-      ]
-    },
-    "serve:docs": {
-      "command": "cd docs && npm run dev",
-      "service": true
-    },
-    "serve": {
-      "command": "node ./tasks/serve.js",
-      "service": true
-    },
-    "build:docs": {
-      "command": "cd docs && npm run build"
-    },
+
     "publish": {
       "command": "node ./scripts/publish.js",
       "dependencies": [

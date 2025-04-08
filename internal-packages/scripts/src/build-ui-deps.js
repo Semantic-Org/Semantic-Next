@@ -22,7 +22,7 @@ export const buildUIDeps = async ({
     sourcemap: false,
     watch: watch,
     bundle: true,
-    log: { header: 'UI Deps', message: 'Component CSS' },
+    log: { header: 'UI Deps', text: 'Component CSS' },
     entryPoints: [
       'src/**/css/*.css',
     ],

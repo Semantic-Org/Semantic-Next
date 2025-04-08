@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 // Performs actual log
-export const writeLog = ({
+export const displayLog = ({
   header,
   text,
   includeTime = true,
@@ -44,10 +44,10 @@ export const log = (config) => {
       let count = 0;
       build.onEnd(result => {
         if (count === 0) {
-          writeLog(config);
+          displayLog(config);
         }
         else {
-          writeLog({
+          displayLog({
             ...config, 
             isRebuild: true
           });
