@@ -3,13 +3,13 @@
 *******************************/
 
 /* Content */
-@import url('./content/modal-variables.css') layer(baseTheme.component.modal.content.modal);
+@import url('./content/modal-variables.css') layer(modal.theme.content.modal);
 
 /* Types */
-@import url('./types/glass-variables.css') layer(baseTheme.component.modal.types.glass);
+@import url('./types/glass-variables.css') layer(modal.theme.types.glass);
 
 /* Variations */
-@import url('./variations/aligned-variables.css') layer(baseTheme.component.modal.variations.aligned);
-@import url('./variations/sizing-variables.css') layer(baseTheme.component.modal.variations.sizing);
+@import url('./variations/aligned-variables.css') layer(modal.theme.variations.aligned);
+@import url('./variations/sizing-variables.css') layer(modal.theme.variations.sizing);
 
 

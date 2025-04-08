@@ -1,2 +1,2 @@
-@import url('./definition/menu-definition.css') layer(menu.definition);
-@import url('./theme/menu-theme.css') layer(menu.theme);
+@import url('./definition/menu-definition.css');
+@import url('./theme/menu-theme.css');

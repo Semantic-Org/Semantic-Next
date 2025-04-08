@@ -1,2 +1,2 @@
-@import url('./definition/icon-definition.css') layer(icon.definition);
-@import url('./theme/icon-theme.css') layer(icon.theme);
+@import url('./definition/icon-definition.css');
+@import url('./theme/icon-theme.css');

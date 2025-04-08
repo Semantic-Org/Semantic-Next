@@ -13,7 +13,7 @@ export const buildUIDeps = async ({
     component css
     (this includes theme and component css)
   */
-  const cssComponentConcat = build({
+  const cssComponentBundle = build({
     banner: { css: INTERNAL_CSS_BANNER },
     type: 'css',
     minify: false,
@@ -32,7 +32,7 @@ export const buildUIDeps = async ({
   });
 
   return await Promise.all([
-    cssComponentConcat,
+    cssComponentBundle,
   ]);
 
 };

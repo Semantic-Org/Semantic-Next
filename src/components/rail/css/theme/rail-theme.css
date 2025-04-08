@@ -3,11 +3,11 @@
 *******************************/
 
 /* Content */
-@import url('./content/rail-variables.css') layer(baseTheme.component.rail.content.rail);
+@import url('./content/rail-variables.css') layer(rail.theme.content.rail);
 
 /* Types */
 
 /* Variations */
-@import url('./variations/aligned-variables.css') layer(baseTheme.component.rail.variations.aligned);
+@import url('./variations/aligned-variables.css') layer(rail.theme.variations.aligned);
 
 

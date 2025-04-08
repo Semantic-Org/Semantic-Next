@@ -1,2 +1,2 @@
-@import url('./definition/input-definition.css') layer(input.definition);
-@import url('./theme/input-theme.css') layer(input.theme);
+@import url('./definition/input-definition.css');
+@import url('./theme/input-theme.css');

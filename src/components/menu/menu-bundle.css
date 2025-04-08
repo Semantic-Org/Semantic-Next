@@ -5,267 +5,236 @@
 **/
 
 /* src/components/menu/css/definition/content/menu.css */
-@layer menu.definition {
-  @layer component.content.menu {
-    ui-menu {
-      display: block;
-      margin: var(--menu-margin);
-      padding: var(--menu-padding);
-      box-shadow: var(--menu-box-shadow);
-      border: var(--menu-border);
-      font-size: var(--menu-font-size);
-    }
-    .menu {
-      display: flex;
-      flex-direction: row;
-      font-weight: var(--menu-font-weight);
-      gap: var(--menu-gap);
-      background: var(--menu-background);
-      align-items: var(--menu-align-items);
-      justify-content: var(--menu-justify-content);
-    }
+@layer menu.definition.content.menu {
+  ui-menu {
+    display: block;
+    margin: var(--menu-margin);
+    padding: var(--menu-padding);
+    box-shadow: var(--menu-box-shadow);
+    border: var(--menu-border);
+    font-size: var(--menu-font-size);
+  }
+  .menu {
+    display: flex;
+    flex-direction: row;
+    font-weight: var(--menu-font-weight);
+    gap: var(--menu-gap);
+    background: var(--menu-background);
+    align-items: var(--menu-align-items);
+    justify-content: var(--menu-justify-content);
   }
 }
 
 /* src/components/menu/css/definition/content/item.css */
-@layer menu.definition {
-  @layer component.content.item {
-    .item {
-      display: block;
-      cursor: pointer;
-      background: var(--menu-item-background);
-      margin: var(--menu-item-margin);
-      padding: var(--menu-item-padding);
-      border: var(--menu-item-border);
-      color: var(--menu-item-color);
-      font-weight: var(--menu-item-font-weight);
-      line-height: var(--menu-item-line-height);
-      box-shadow: var(--menu-item-box-shadow);
-      border-radius: var(--menu-item-border-radius);
-      text-align: var(--menu-item-text-align);
-      text-decoration: var(--menu-item-text-decoration);
-    }
-    .item:hover,
-    .item.hover {
-      background: var(--menu-item-hover-background);
-      margin: var(--menu-item-hover-margin);
-      padding: var(--menu-item-hover-padding);
-      border: var(--menu-item-hover-border);
-      color: var(--menu-item-hover-color);
-      box-shadow: var(--menu-item-hover-box-shadow);
-      border-radius: var(--menu-item-hover-border-radius);
-    }
-    .active.item {
-      cursor: default;
-      background: var(--menu-item-active-background);
-      margin: var(--menu-item-active-margin);
-      padding: var(--menu-item-active-padding);
-      border: var(--menu-item-active-border);
-      box-shadow: var(--menu-item-active-box-shadow);
-      font-weight: var(--menu-item-active-font-weight);
-      color: var(--menu-item-active-color);
-      border-radius: var(--menu-item-active-border-radius);
-    }
+@layer menu.definition.content.item {
+  .item {
+    display: block;
+    cursor: pointer;
+    background: var(--menu-item-background);
+    margin: var(--menu-item-margin);
+    padding: var(--menu-item-padding);
+    border: var(--menu-item-border);
+    color: var(--menu-item-color);
+    font-weight: var(--menu-item-font-weight);
+    line-height: var(--menu-item-line-height);
+    box-shadow: var(--menu-item-box-shadow);
+    border-radius: var(--menu-item-border-radius);
+    text-align: var(--menu-item-text-align);
+    text-decoration: var(--menu-item-text-decoration);
+  }
+  .item:hover,
+  .item.hover {
+    background: var(--menu-item-hover-background);
+    margin: var(--menu-item-hover-margin);
+    padding: var(--menu-item-hover-padding);
+    border: var(--menu-item-hover-border);
+    color: var(--menu-item-hover-color);
+    box-shadow: var(--menu-item-hover-box-shadow);
+    border-radius: var(--menu-item-hover-border-radius);
+  }
+  .active.item {
+    cursor: default;
+    background: var(--menu-item-active-background);
+    margin: var(--menu-item-active-margin);
+    padding: var(--menu-item-active-padding);
+    border: var(--menu-item-active-border);
+    box-shadow: var(--menu-item-active-box-shadow);
+    font-weight: var(--menu-item-active-font-weight);
+    color: var(--menu-item-active-color);
+    border-radius: var(--menu-item-active-border-radius);
   }
 }
 
 /* src/components/menu/css/definition/types/selection.css */
-@layer menu.definition {
-  @layer component.types.selection {
-    .selection.menu {
-      gap: var(--menu-selection-gap);
-    }
-    .selection.menu :slotted,
-    .selection.menu menu-item::part(item) {
-      --menu-item-padding: var(--menu-selection-item-padding);
-      --menu-item-border-radius: var(--menu-selection-item-border-radius);
-      --menu-item-color: var(--menu-selection-item-color);
-      --menu-item-hover-background: var(--menu-selection-item-hover-background);
-      --menu-item-hover-border-radius: var(--menu-selection-item-border-radius);
-      --menu-item-hover-color: var(--menu-selection-item-hover-color);
-      --menu-item-hover-box-shadow: var(--menu-selection-item-hover-box-shadow);
-      --menu-item-active-background: var(--menu-selection-item-active-background);
-      --menu-item-active-border-radius: var(--menu-selection-item-border-radius);
-      --menu-item-active-padding: var(--menu-selection-item-active-padding);
-      --menu-item-active-color: var(--menu-selection-item-active-color);
-      --menu-item-active-box-shadow: var(--menu-selection-item-active-box-shadow);
-    }
+@layer menu.definition.types.selection {
+  .selection.menu {
+    gap: var(--menu-selection-gap);
+    --menu-item-padding: var(--menu-selection-item-padding);
+    --menu-item-border-radius: var(--menu-selection-item-border-radius);
+    --menu-item-color: var(--menu-selection-item-color);
+    --menu-item-hover-background: var(--menu-selection-item-hover-background);
+    --menu-item-hover-border-radius: var(--menu-selection-item-border-radius);
+    --menu-item-hover-color: var(--menu-selection-item-hover-color);
+    --menu-item-hover-box-shadow: var(--menu-selection-item-hover-box-shadow);
+    --menu-item-active-background: var(--menu-selection-item-active-background);
+    --menu-item-active-border-radius: var(--menu-selection-item-border-radius);
+    --menu-item-active-padding: var(--menu-selection-item-active-padding);
+    --menu-item-active-color: var(--menu-selection-item-active-color);
+    --menu-item-active-box-shadow: var(--menu-selection-item-active-box-shadow);
   }
 }
 
 /* src/components/menu/css/definition/variations/evenly-spaced.css */
-@layer menu.definition {
-  @layer component.variations.equalWidth {
-    .evenly-spaced.menu {
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(0, 1fr);
-      --menu-item-text-align: var(--menu-evenly-spaced-item-text-align) ;
-    }
+@layer menu.definition.variations.equalWidth {
+  .evenly-spaced.menu {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    --menu-item-text-align: var(--menu-evenly-spaced-item-text-align) ;
   }
 }
 
 /* src/components/menu/css/definition/variations/fitted.css */
-@layer menu.definition {
-  @layer component.variations.fitted {
-    :host([fitted]),
-    .fitted.menu {
-      margin: 0;
-    }
+@layer menu.definition.variations.fitted {
+  :host([fitted]),
+  .fitted.menu {
+    margin: 0;
   }
 }
 
 /* src/components/menu/css/definition/variations/inset.css */
-@layer menu.definition {
-  @layer component.variations.inset {
-    .inset.menu {
-      border: var(--menu-inset-border);
-      border-radius: var(--menu-inset-border-radius);
-      padding: var(--menu-inset-padding);
-      background: var(--menu-inset-background);
-    }
+@layer menu.definition.variations.inset {
+  .inset.menu {
+    border: var(--menu-inset-border);
+    border-radius: var(--menu-inset-border-radius);
+    padding: var(--menu-inset-padding);
+    background: var(--menu-inset-background);
   }
 }
 
 /* src/components/menu/css/definition/variations/vertical.css */
-@layer menu.definition {
-  @layer component.variations.vertical {
-    .vertical.menu {
-      flex-direction: column;
-      align-items: var(--menu-vertical-align-items);
-      text-align: var(--menu-vertical-text-align);
-    }
+@layer menu.definition.variations.vertical {
+  .vertical.menu {
+    flex-direction: column;
+    align-items: var(--menu-vertical-align-items);
+    text-align: var(--menu-vertical-text-align);
   }
 }
 
 /* src/components/menu/css/definition/menu-definition.css */
-@layer menu.definition;
 
 /* src/components/menu/css/theme/content/menu-variables.css */
-@layer menu.theme {
-  @layer baseTheme.component.menu.content.menu {
-    :host {
-      --menu-margin: var(--vertically-spaced);
-      --menu-font-weight: var(--normal);
-      --menu-gap: var(--4px);
-      --menu-align-items: flex-start;
-      --menu-font-size: var(--medium);
-      --menu-justify-content: flex-start;
-      --menu-padding: 0;
-      --menu-box-shadow: none;
-      --menu-background: none;
-      --menu-border: none;
-    }
+@layer menu.theme.content.menu {
+  :host {
+    --menu-margin: var(--vertically-spaced);
+    --menu-font-weight: var(--normal);
+    --menu-gap: var(--4px);
+    --menu-align-items: flex-start;
+    --menu-font-size: var(--medium);
+    --menu-justify-content: flex-start;
+    --menu-padding: 0;
+    --menu-box-shadow: none;
+    --menu-background: none;
+    --menu-border: none;
   }
 }
 
 /* src/components/menu/css/theme/content/menu-item-variables.css */
-@layer menu.theme {
-  @layer baseTheme.component.menu.content.menuItem {
-    :host {
-      --menu-item-background-color: transparent;
-      --menu-item-background-image: none;
-      --menu-item-background: var(--menu-item-background-color) var(--menu-item-background-image);
-      --menu-item-margin: 0;
-      --menu-item-line-height: 1;
-      --menu-item-font-weight: var(--normal);
-      --menu-item-padding: var(--7px) var(--6px);
-      --menu-item-border: none;
-      --menu-item-border-radius: none;
-      --menu-item-color: var(--standard-60);
-      --menu-item-text-align: inherit;
-      --menu-item-box-shadow: none;
-      --menu-item-text-decoration: none;
-      --menu-item-hover-background-color: var(--menu-item-background-color);
-      --menu-item-hover-background-image: var(--menu-item-background-image);
-      --menu-item-hover-background: var(--menu-item-hover-background-color) var(--menu-item-hover-background-image);
-      --menu-item-hover-margin: var(--menu-item-margin);
-      --menu-item-hover-padding: var(--menu-item-padding);
-      --menu-item-hover-color: var(--standard-100);
-      --menu-item-hover-border: var(--menu-item-border);
-      --menu-item-hover-box-shadow: var(--menu-item-box-shadow);
-      --menu-item-hover-border-radius: var(--menu-item-border-radius);
-      --menu-item-active-background-color: var(--menu-item-active-background-color);
-      --menu-item-active-background-image: var(--menu-item-active-background-image);
-      --menu-item-active-font-weight: var(--bold);
-      --menu-item-active-background: var(--menu-item-background);
-      --menu-item-active-margin: var(--menu-item-margin);
-      --menu-item-active-padding: var(--menu-item-padding);
-      --menu-item-active-color: var(--primary-text-color);
-      --menu-item-active-border: var(--menu-item-border);
-      --menu-item-active-box-shadow: var(--menu-item-box-shadow);
-      --menu-item-active-border-radius: var(--menu-item-border-radius);
-    }
-    html.dark {
-      --menu-item-color: var(--standard-30);
-      --menu-item-hover-color: var(--standard-100);
-      --menu-item-active-color: var(--primary-text-color);
-    }
+@layer menu.theme.content.menuItem {
+  :host {
+    --menu-item-background-color: transparent;
+    --menu-item-background-image: none;
+    --menu-item-background: var(--menu-item-background-color) var(--menu-item-background-image);
+    --menu-item-margin: 0;
+    --menu-item-line-height: 1;
+    --menu-item-font-weight: var(--normal);
+    --menu-item-padding: var(--7px) var(--6px);
+    --menu-item-border: none;
+    --menu-item-border-radius: none;
+    --menu-item-color: var(--standard-60);
+    --menu-item-text-align: inherit;
+    --menu-item-box-shadow: none;
+    --menu-item-text-decoration: none;
+    --menu-item-hover-background-color: var(--menu-item-background-color);
+    --menu-item-hover-background-image: var(--menu-item-background-image);
+    --menu-item-hover-background: var(--menu-item-hover-background-color) var(--menu-item-hover-background-image);
+    --menu-item-hover-margin: var(--menu-item-margin);
+    --menu-item-hover-padding: var(--menu-item-padding);
+    --menu-item-hover-color: var(--standard-100);
+    --menu-item-hover-border: var(--menu-item-border);
+    --menu-item-hover-box-shadow: var(--menu-item-box-shadow);
+    --menu-item-hover-border-radius: var(--menu-item-border-radius);
+    --menu-item-active-background-color: var(--menu-item-active-background-color);
+    --menu-item-active-background-image: var(--menu-item-active-background-image);
+    --menu-item-active-font-weight: var(--bold);
+    --menu-item-active-background: var(--menu-item-background);
+    --menu-item-active-margin: var(--menu-item-margin);
+    --menu-item-active-padding: var(--menu-item-padding);
+    --menu-item-active-color: var(--primary-text-color);
+    --menu-item-active-border: var(--menu-item-border);
+    --menu-item-active-box-shadow: var(--menu-item-box-shadow);
+    --menu-item-active-border-radius: var(--menu-item-border-radius);
+  }
+  html.dark {
+    --menu-item-color: var(--standard-30);
+    --menu-item-hover-color: var(--standard-100);
+    --menu-item-active-color: var(--primary-text-color);
   }
 }
 
 /* src/components/menu/css/theme/types/selection-variables.css */
-@layer menu.theme {
-  @layer baseTheme.component.menu.type.selection {
+@layer menu.theme.type.selection {
+  :host {
+    --menu-selection-gap: 6px;
+    --menu-selection-item-padding: 7px 6px;
+    --menu-selection-item-border-radius: var(--border-radius);
+    --menu-selection-item-color: var(--standard-60);
+    --menu-selection-item-hover-padding: var(--menu-selection-item-padding);
+    --menu-selection-item-hover-background: var(--standard-10);
+    --menu-selection-item-hover-color: #013A4F;
+    --menu-selection-item-hover-box-shadow: none;
+    --menu-selection-item-active-padding: var(--menu-selection-item-padding);
+    --menu-selection-item-active-background: #D0EBF3;
+    --menu-selection-item-active-color: #013A4F;
+    --menu-selection-item-active-box-shadow: 0px 1px 6px rgb(85 147 167 / 77%) inset;
+  }
+  @container style(--dark-mode: true) {
     :host {
-      --menu-selection-gap: 6px;
-      --menu-selection-item-padding: 7px 6px;
-      --menu-selection-item-border-radius: var(--border-radius);
-      --menu-selection-item-color: var(--standard-60);
-      --menu-selection-item-hover-padding: var(--menu-selection-item-padding);
-      --menu-selection-item-hover-background: var(--standard-10);
-      --menu-selection-item-hover-color: #013A4F;
-      --menu-selection-item-hover-box-shadow: none;
-      --menu-selection-item-active-padding: var(--menu-selection-item-padding);
-      --menu-selection-item-active-background: #D0EBF3;
-      --menu-selection-item-active-color: #013A4F;
-      --menu-selection-item-active-box-shadow: 0px 1px 6px rgb(85 147 167 / 77%) inset;
-    }
-    @container style(--dark-mode: true) {
-      :host {
-        --menu-selection-item-color: var(--standard-30);
-        --menu-selection-item-hover-background: var(--transparent-black);
-        --menu-selection-item-hover-color: var(--standard-90);
-        --menu-selection-item-active-background: #35B7F1;
-        --menu-selection-item-active-color: #002A47;
-        --menu-selection-item-active-box-shadow: 0px 0px 10px rgb(0 92 165) inset;
-      }
+      --menu-selection-item-color: var(--standard-30);
+      --menu-selection-item-hover-background: var(--transparent-black);
+      --menu-selection-item-hover-color: var(--standard-90);
+      --menu-selection-item-active-background: #35B7F1;
+      --menu-selection-item-active-color: #002A47;
+      --menu-selection-item-active-box-shadow: 0px 0px 10px rgb(0 92 165) inset;
     }
   }
 }
 
 /* src/components/menu/css/theme/variations/evenly-spaced-variables.css */
-@layer menu.theme {
-  @layer baseTheme.component.menu.variations.evenlySpaced {
-    :host {
-      --menu-evenly-spaced-item-text-align: center;
-    }
+@layer menu.theme.variations.evenlySpaced {
+  :host {
+    --menu-evenly-spaced-item-text-align: center;
   }
 }
 
 /* src/components/menu/css/theme/variations/vertical-variables.css */
-@layer menu.theme {
-  @layer baseTheme.component.menu.variations.vertical {
-    :host {
-      --menu-vertical-align-items: stretch;
-      --menu-vertical-text-align: center;
-    }
+@layer menu.theme.variations.vertical {
+  :host {
+    --menu-vertical-align-items: stretch;
+    --menu-vertical-text-align: center;
   }
 }
 
 /* src/components/menu/css/theme/variations/inset-variables.css */
-@layer menu.theme {
-  @layer baseTheme.component.menu.variations.inset {
-    :host {
-      --menu-inset-padding: 3px 4px;
-      --menu-inset-border-radius: var(--border-radius);
-      --menu-inset-border: var(--internal-border);
-      --menu-inset-background: var(--inverted-15);
-    }
+@layer menu.theme.variations.inset {
+  :host {
+    --menu-inset-padding: 3px 4px;
+    --menu-inset-border-radius: var(--border-radius);
+    --menu-inset-border: var(--internal-border);
+    --menu-inset-background: var(--inverted-15);
   }
 }
 
 /* src/components/menu/css/theme/menu-theme.css */
-@layer menu.theme;
 
 /* src/components/menu/css/menu.css */

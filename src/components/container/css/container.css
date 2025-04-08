@@ -1,2 +1,2 @@
-@import url('./definition/container-definition.css') layer(container.definition);
-@import url('./theme/container-theme.css') layer(container.theme);
+@import url('./definition/container-definition.css');
+@import url('./theme/container-theme.css');

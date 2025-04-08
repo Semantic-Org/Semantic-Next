@@ -6,7 +6,7 @@
 
 /* src/components/card/css/definition/content/card.css */
 @layer card.definition {
-  @layer component.card.content.card {
+  @layer card.definition.content.card {
     :host {
       display: inline-block;
       text-align: var(--card-text-align);
@@ -40,7 +40,7 @@
 
 /* src/components/card/css/definition/content/description.css */
 @layer card.definition {
-  @layer component.card.content.description {
+  @layer card.definition.content.description {
     ::slotted(.description),
     .description {
       color: var(--card-description-color);
@@ -53,7 +53,7 @@
 
 /* src/components/card/css/definition/content/header.css */
 @layer card.definition {
-  @layer component.card.content.header {
+  @layer card.definition.content.header {
     ::slotted(.header),
     .header {
       color: var(--card-header-color);
@@ -66,7 +66,7 @@
 
 /* src/components/card/css/definition/content/subheader.css */
 @layer card.definition {
-  @layer component.card.content.subheader {
+  @layer card.definition.content.subheader {
     ::slotted(.subheader),
     .subheader {
       color: var(--card-subheader-color);
@@ -79,7 +79,7 @@
 
 /* src/components/card/css/definition/content/image.css */
 @layer card.definition {
-  @layer component.card.content.image {
+  @layer card.definition.content.image {
     .image {
       overflow: hidden;
       margin: var(--card-reverse-padding) var(--card-reverse-padding) 1em;
@@ -97,7 +97,7 @@
 
 /* src/components/card/css/definition/content/icon.css */
 @layer card.definition {
-  @layer component.card.content.icon {
+  @layer card.definition.content.icon {
     ::slotted(ui-icon),
     ::slotted(.icon),
     .icon ui-icon {
@@ -110,7 +110,7 @@
 
 /* src/components/card/css/definition/content/meta.css */
 @layer card.definition {
-  @layer component.card.content.meta {
+  @layer card.definition.content.meta {
     ::slotted(.meta),
     .meta {
       margin-top: var(--card-meta-margin);
@@ -128,7 +128,7 @@
 
 /* src/components/card/css/definition/states/disabled.css */
 @layer card.definition {
-  @layer component.states.disabled {
+  @layer card.definition.states.disabled {
     .disabled {
       pointer-events: none;
       opacity: var(--disabled-opacity);
@@ -141,7 +141,7 @@
 
 /* src/components/card/css/definition/plural/cards.css */
 @layer card.definition {
-  @layer component.card.plural {
+  @layer card.definition.plural {
     :host(ui-cards) {
       display: block;
       container: host / inline-size;
@@ -164,7 +164,7 @@
 
 /* src/components/card/css/definition/variations/basic.css */
 @layer card.definition {
-  @layer component.card.variations.basic {
+  @layer card.definition.variations.basic {
     .basic.card {
       background: var(--card-basic-background);
       box-shadow: var(--card-basic-box-shadow);
@@ -175,7 +175,7 @@
 
 /* src/components/card/css/definition/variations/count.css */
 @layer card.definition {
-  @layer component.card.variations.count {
+  @layer card.definition.variations.count {
     .cards {
       --card-width: none;
     }
@@ -208,7 +208,7 @@
 
 /* src/components/card/css/definition/variations/fluid.css */
 @layer card.definition {
-  @layer component.card.variations.fluid {
+  @layer card.definition.variations.fluid {
     :host([fluid]),
     .fluid.card {
       --card-width: auto;
@@ -219,7 +219,7 @@
 
 /* src/components/card/css/definition/variations/horizontal.css */
 @layer card.definition {
-  @layer component.card.variations.horizontal {
+  @layer card.definition.variations.horizontal {
     .horizontal {
       flex-direction: var(--card-horizontal-flex-direction);
       gap: var(--card-horizontal-gap);
@@ -256,7 +256,7 @@
 
 /* src/components/card/css/definition/variations/link.css */
 @layer card.definition {
-  @layer component.card.variations.link {
+  @layer card.definition.variations.link {
     .link.card,
     a.card {
       cursor: pointer;
@@ -287,7 +287,7 @@
 
 /* src/components/card/css/definition/variations/spaced.css */
 @layer card.definition {
-  @layer component.card.variations.spaced {
+  @layer card.definition.variations.spaced {
     .cards.spaced {
       gap: var(--cards-spaced-gap);
     }
@@ -299,7 +299,7 @@
 
 /* src/components/card/css/definition/variations/doubling.css */
 @layer card.definition {
-  @layer component.card.variations.doubling {
+  @layer card.definition.variations.doubling {
     @container component (max-width: var(--card-doubling-breakpoint)) {
       .doubling.cards {
       }
@@ -309,7 +309,7 @@
 
 /* src/components/card/css/definition/variations/stackable.css */
 @layer card.definition {
-  @layer component.card.variations.stackable {
+  @layer card.definition.variations.stackable {
     .component {
       --card-stackable-comparison: max(calc(100cqi - var(--card-stackable-breakpoint)), 0px);
     }
@@ -327,7 +327,7 @@
 
 /* src/components/card/css/theme/content/card-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.card {
+  @layer card.theme.content.card {
     :host {
       --card-margin: 0px 5px 5px 0px;
       --card-text-align: center;
@@ -348,7 +348,7 @@
 
 /* src/components/card/css/theme/content/description-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.description {
+  @layer card.theme.content.description {
     :host {
       --card-description-font-size: var(--relative-15px);
       --card-description-color: var(--standard-60);
@@ -360,7 +360,7 @@
 
 /* src/components/card/css/theme/content/header-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.header {
+  @layer card.theme.content.header {
     :host {
       --card-header-font-size: var(--relative-20px);
       --card-header-font-weight: var(--bold);
@@ -372,7 +372,7 @@
 
 /* src/components/card/css/theme/content/subheader-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.subheader {
+  @layer card.theme.content.subheader {
     :host {
       --card-subheader-font-size: var(--relative-16px);
       --card-subheader-font-weight: var(--bold);
@@ -384,7 +384,7 @@
 
 /* src/components/card/css/theme/content/image-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.image {
+  @layer card.theme.content.image {
     :host {
       --card-image-margin: -1.5em -1.5em 1.5em;
       --card-image-width: 100%;
@@ -395,7 +395,7 @@
 
 /* src/components/card/css/theme/content/icon-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.icon {
+  @layer card.theme.content.icon {
     :host {
       --card-icon-font-size: var(--relative-32px);
       --card-icon-color: var(--standard-40);
@@ -406,7 +406,7 @@
 
 /* src/components/card/css/theme/content/meta-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.content.meta {
+  @layer card.theme.content.meta {
     :host {
       --card-meta-margin: var(--compact-spacing) 0 0;
       --card-meta-padding: var(--compact-spacing) 0 0;
@@ -419,7 +419,7 @@
 
 /* src/components/card/css/theme/plural/cards-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.plural {
+  @layer card.theme.plural {
     :host {
       --cards-gap: var(--spacing);
       --cards-margin: var(--vertical-spacing);
@@ -429,7 +429,7 @@
 
 /* src/components/card/css/theme/variations/basic-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.basic {
+  @layer card.theme.variations.basic {
     :host {
       --card-basic-background: transparent;
       --card-basic-box-shadow: var(--floating-shadow);
@@ -440,12 +440,12 @@
 
 /* src/components/card/css/theme/variations/count-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.count;
+  @layer card.theme.variations.count;
 }
 
 /* src/components/card/css/theme/variations/fluid-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.fluid {
+  @layer card.theme.variations.fluid {
     :host {
     }
   }
@@ -453,7 +453,7 @@
 
 /* src/components/card/css/theme/variations/horizontal-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.horizontal {
+  @layer card.theme.variations.horizontal {
     :host {
       --card-horizontal-flex-direction: row;
       --card-horizontal-gap: var(--padding);
@@ -468,7 +468,7 @@
 
 /* src/components/card/css/theme/variations/link-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.link {
+  @layer card.theme.variations.link {
     :host {
       --card-link-hover-background: oklch(0.98 0.01 227.13);
       --card-link-hover-box-shadow: 0px 0px 5px var(--standard-5);
@@ -488,7 +488,7 @@
 
 /* src/components/card/css/theme/variations/spaced-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.spaced {
+  @layer card.theme.variations.spaced {
     :host {
       --cards-spaced-gap: 2rem;
       --cards-very-spaced-gap: 3rem;
@@ -498,7 +498,7 @@
 
 /* src/components/card/css/theme/variations/doubling-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.doubling {
+  @layer card.theme.variations.doubling {
     :host {
     }
   }
@@ -506,7 +506,7 @@
 
 /* src/components/card/css/theme/variations/stackable-variables.css */
 @layer card.theme {
-  @layer baseTheme.component.card.variations.stackable {
+  @layer card.theme.variations.stackable {
     @property --card-stackable-comparison { syntax: "<length>"; inherits: true; initial-value: 1px; }
     :host {
       --card-stackable-breakpoint: var(--largest-mobile-screen);

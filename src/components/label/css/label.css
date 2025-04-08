@@ -1,2 +1,2 @@
-@import url('./definition/label-definition.css') layer(label.definition);
-@import url('./theme/label-theme.css') layer(label.theme);
+@import url('./definition/label-definition.css');
+@import url('./theme/label-theme.css');

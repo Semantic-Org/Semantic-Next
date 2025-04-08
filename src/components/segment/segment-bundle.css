@@ -6,12 +6,12 @@
 
 /* src/components/segment/css/definition/content/segment.css */
 @layer segment.definition {
-  @layer component.segment.content.segment;
+  @layer segment.definition.content.segment;
 }
 
 /* src/components/segment/css/definition/variations/aligned.css */
 @layer segment.definition {
-  @layer component.segment.variations.aligned;
+  @layer segment.definition.variations.aligned;
 }
 
 /* src/components/segment/css/definition/segment-definition.css */

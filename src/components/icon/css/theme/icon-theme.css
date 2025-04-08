@@ -3,21 +3,21 @@
 *******************************/
 
 /* Content */
-@import url('./content/icon-variables.css') layer(baseTheme.component.icon.content.icon);
+@import url('./content/icon-variables.css') layer(icon.theme.content.icon);
 
 /* Group */
-@import url('./group/icons-variables.css') layer(baseTheme.component.icon.plural);
+@import url('./group/icons-variables.css') layer(icon.theme.plural);
 
 /* Types */
 
 /* States */
-@import url('./states/disabled-variables.css') layer(baseTheme.component.icon.states.disabled);
-@import url('./states/loading-variables.css') layer(baseTheme.component.icon.states.loading);
+@import url('./states/disabled-variables.css') layer(icon.theme.states.disabled);
+@import url('./states/loading-variables.css') layer(icon.theme.states.loading);
 
 /* Variations */
-@import url('./variations/link-variables.css') layer(baseTheme.component.icon.variations.link);
-@import url('./variations/colored-variables.css') layer(baseTheme.component.icon.variations.colored);
-@import url('./variations/sizing-variables.css') layer(baseTheme.component.icon.variations.sizing);
+@import url('./variations/link-variables.css') layer(icon.theme.variations.link);
+@import url('./variations/colored-variables.css') layer(icon.theme.variations.colored);
+@import url('./variations/sizing-variables.css') layer(icon.theme.variations.sizing);
 
 /* Overrides */
-@import url('./overrides/feather-icons.css') layer(baseTheme.component.icon.overrides.feather);
+@import url('./overrides/feather-icons.css') layer(icon.theme.overrides.feather);

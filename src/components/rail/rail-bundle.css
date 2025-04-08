@@ -5,35 +5,25 @@
 **/
 
 /* src/components/rail/css/definition/content/rail.css */
-@layer rail.definition {
-  @layer component.rail.content.rail;
-}
+@layer rail.definition.content.rail;
 
 /* src/components/rail/css/definition/variations/aligned.css */
-@layer rail.definition {
-  @layer component.rail.variations.aligned;
-}
+@layer rail.definition.variations.aligned;
 
 /* src/components/rail/css/definition/rail-definition.css */
-@layer rail.definition;
 
 /* src/components/rail/css/theme/content/rail-variables.css */
-@layer rail.theme {
-  @layer baseTheme.component.rail.content.rail {
-    :host {
-    }
+@layer rail.theme.content.rail {
+  :host {
   }
 }
 
 /* src/components/rail/css/theme/variations/aligned-variables.css */
-@layer rail.theme {
-  @layer baseTheme.component.rail.variations.aligned {
-    :host {
-    }
+@layer rail.theme.variations.aligned {
+  :host {
   }
 }
 
 /* src/components/rail/css/theme/rail-theme.css */
-@layer rail.theme;
 
 /* src/components/rail/css/rail.css */

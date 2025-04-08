@@ -5,178 +5,156 @@
 **/
 
 /* src/components/label/css/definition/content/label.css */
-@layer label.definition {
-  @layer component.label.content.label {
-    :host {
-      display: inline-flex;
-      margin: var(--label-margin);
-    }
-    :host::last-child {
-      margin-right: 0rem;
-    }
-    .label {
-      display: inline-flex;
-      padding: var(--label-padding);
-      background: var(--label-background);
-      color: var(--label-color);
-      border-radius: var(--label-border-radius);
-      font-weight: var(--label-font-weight);
-      min-width: var(--label-min-width);
-    }
+@layer label.definition.content.label {
+  :host {
+    display: inline-flex;
+    margin: var(--label-margin);
+  }
+  :host::last-child {
+    margin-right: 0rem;
+  }
+  .label {
+    display: inline-flex;
+    padding: var(--label-padding);
+    background: var(--label-background);
+    color: var(--label-color);
+    border-radius: var(--label-border-radius);
+    font-weight: var(--label-font-weight);
+    min-width: var(--label-min-width);
   }
 }
 
 /* src/components/label/css/definition/types/emphasis.css */
-@layer label.definition {
-  @layer component.label.types.emphasis {
-    .secondary.label {
-      background: var(--label-secondary-background);
-      color: var(--label-secondary-text-color);
-    }
-    .outline.label {
-      background: var(--label-outline-background);
-      outline: var(--label-outline);
-      color: var(--label-outline-text-color);
-    }
+@layer label.definition.types.emphasis {
+  .secondary.label {
+    background: var(--label-secondary-background);
+    color: var(--label-secondary-text-color);
+  }
+  .outline.label {
+    background: var(--label-outline-background);
+    outline: var(--label-outline);
+    color: var(--label-outline-text-color);
   }
 }
 
 /* src/components/label/css/definition/types/badge.css */
-@layer label.definition {
-  @layer component.label.types.badge {
-    .badge.label {
-      padding: var(--label-badge-padding);
-    }
+@layer label.definition.types.badge {
+  .badge.label {
+    padding: var(--label-badge-padding);
   }
 }
 
 /* src/components/label/css/definition/variations/sizing.css */
-@layer label.definition {
-  @layer component.label.variations.sizing {
-    .mini.label {
-      font-size: var(--label-mini);
-    }
-    .tiny.label {
-      font-size: var(--label-tiny);
-    }
-    .small.label {
-      font-size: var(--label-small);
-    }
-    :host {
-      font-size: var(--label-medium);
-    }
-    .large.label {
-      font-size: var(--label-large);
-    }
-    .big.label {
-      font-size: var(--label-big);
-    }
-    .huge.label {
-      font-size: var(--label-huge);
-    }
-    .massive.label {
-      font-size: var(--label-massive);
-    }
-    .mini.labels {
-      --label-medium: var(--label-mini);
-    }
-    .tiny.labels {
-      --label-medium: var(--label-tiny);
-    }
-    .small.labels {
-      --label-medium: var(--label-small);
-    }
-    .large.labels {
-      --label-medium: var(--label-large);
-    }
-    .big.labels {
-      --label-medium: var(--label-big);
-    }
-    .huge.labels {
-      --label-medium: var(--label-huge);
-    }
-    .massive.labels {
-      --label-medium: var(--label-massive);
-    }
+@layer label.definition.variations.sizing {
+  .mini.label {
+    font-size: var(--label-mini);
+  }
+  .tiny.label {
+    font-size: var(--label-tiny);
+  }
+  .small.label {
+    font-size: var(--label-small);
+  }
+  :host {
+    font-size: var(--label-medium);
+  }
+  .large.label {
+    font-size: var(--label-large);
+  }
+  .big.label {
+    font-size: var(--label-big);
+  }
+  .huge.label {
+    font-size: var(--label-huge);
+  }
+  .massive.label {
+    font-size: var(--label-massive);
+  }
+  .mini.labels {
+    --label-medium: var(--label-mini);
+  }
+  .tiny.labels {
+    --label-medium: var(--label-tiny);
+  }
+  .small.labels {
+    --label-medium: var(--label-small);
+  }
+  .large.labels {
+    --label-medium: var(--label-large);
+  }
+  .big.labels {
+    --label-medium: var(--label-big);
+  }
+  .huge.labels {
+    --label-medium: var(--label-huge);
+  }
+  .massive.labels {
+    --label-medium: var(--label-massive);
   }
 }
 
 /* src/components/label/css/definition/variations/aligned.css */
-@layer label.definition {
-  @layer component.label.variations.aligned;
-}
+@layer label.definition.variations.aligned;
 
 /* src/components/label/css/definition/label-definition.css */
-@layer label.definition;
 
 /* src/components/label/css/theme/content/label-variables.css */
-@layer label.theme {
-  @layer baseTheme.component.label.content.label {
-    :host {
-      --label-vertical-padding: var(--relative-3px);
-      --label-horizontal-padding: var(--relative-6px);
-      --label-padding: var(--label-vertical-padding) var(--label-horizontal-padding);
-      --label-color: var(--inverted-90);
-      --label-background: var(--standard-90);
-      --label-border-radius: var(--relative-5px);
-      --label-min-width: 0px;
-      --label-font-weight: var(--bold);
-      --label-vertical-margin: calc(var(--label-vertical-padding) * -1);
-      --label-horizontal-margin: 4px;
-      --label-margin: var(--label-vertical-margin) var(--label-horizontal-margin);
-    }
+@layer label.theme.content.label {
+  :host {
+    --label-vertical-padding: var(--relative-3px);
+    --label-horizontal-padding: var(--relative-6px);
+    --label-padding: var(--label-vertical-padding) var(--label-horizontal-padding);
+    --label-color: var(--inverted-90);
+    --label-background: var(--standard-90);
+    --label-border-radius: var(--relative-5px);
+    --label-min-width: 0px;
+    --label-font-weight: var(--bold);
+    --label-vertical-margin: calc(var(--label-vertical-padding) * -1);
+    --label-horizontal-margin: 4px;
+    --label-margin: var(--label-vertical-margin) var(--label-horizontal-margin);
   }
 }
 
 /* src/components/label/css/theme/types/emphasis-variables.css */
-@layer label.theme {
-  @layer baseTheme.component.label.types.emphasis {
-    :host {
-      --label-secondary-background: var(--standard-10);
-      --label-secondary-text-color: var(--standard-90);
-      --label-outline-background: transparent;
-      --label-outline: var(--internal-border);
-      --label-outline-text-color: var(--standard-90);
-    }
+@layer label.theme.types.emphasis {
+  :host {
+    --label-secondary-background: var(--standard-10);
+    --label-secondary-text-color: var(--standard-90);
+    --label-outline-background: transparent;
+    --label-outline: var(--internal-border);
+    --label-outline-text-color: var(--standard-90);
   }
 }
 
 /* src/components/label/css/theme/types/badge-variables.css */
-@layer label.theme {
-  @layer baseTheme.component.label.types.badge {
-    :host {
-      --label-badge-vertical-padding: var(--label-vertical-padding);
-      --label-badge-horizontal-padding: var(--relative-4px);
-      --label-badge-padding: var(--label-badge-vertical-padding) var(--label-badge-horizontal-padding);
-    }
+@layer label.theme.types.badge {
+  :host {
+    --label-badge-vertical-padding: var(--label-vertical-padding);
+    --label-badge-horizontal-padding: var(--relative-4px);
+    --label-badge-padding: var(--label-badge-vertical-padding) var(--label-badge-horizontal-padding);
   }
 }
 
 /* src/components/label/css/theme/variations/sizing-variables.css */
-@layer label.theme {
-  @layer baseTheme.component.label.variations.sizing {
-    :host {
-      --label-mini: var(--9px);
-      --label-tiny: var(--10px);
-      --label-small: var(--11px);
-      --label-medium: inherit;
-      --label-large: var(--15px);
-      --label-big: var(--16px);
-      --label-huge: var(--18px);
-      --label-massive: var(--24px);
-    }
+@layer label.theme.variations.sizing {
+  :host {
+    --label-mini: var(--9px);
+    --label-tiny: var(--10px);
+    --label-small: var(--11px);
+    --label-medium: inherit;
+    --label-large: var(--15px);
+    --label-big: var(--16px);
+    --label-huge: var(--18px);
+    --label-massive: var(--24px);
   }
 }
 
 /* src/components/label/css/theme/variations/aligned-variables.css */
-@layer label.theme {
-  @layer baseTheme.component.label.variations.aligned {
-    :host {
-    }
+@layer label.theme.variations.aligned {
+  :host {
   }
 }
 
 /* src/components/label/css/theme/label-theme.css */
-@layer label.theme;
 
 /* src/components/label/css/label.css */

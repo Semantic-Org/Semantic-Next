@@ -1,5 +1,5 @@
 /* Content */
-@import url('./content/rail.css') layer(component.rail.content.rail);
+@import url('./content/rail.css') layer(rail.definition.content.rail);
 
 /* Types */
-@import url('./variations/aligned.css') layer(component.rail.variations.aligned);
+@import url('./variations/aligned.css') layer(rail.definition.variations.aligned);

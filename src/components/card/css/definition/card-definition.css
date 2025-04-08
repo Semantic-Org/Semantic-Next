@@ -1,28 +1,28 @@
 
 /* Content */
-@import url('./content/card.css') layer(component.card.content.card);
-@import url('./content/description.css') layer(component.card.content.description);
-@import url('./content/header.css') layer(component.card.content.header);
-@import url('./content/subheader.css') layer(component.card.content.subheader);
-@import url('./content/image.css') layer(component.card.content.image);
-@import url('./content/icon.css') layer(component.card.content.icon);
-@import url('./content/meta.css') layer(component.card.content.meta);
+@import url('./content/card.css') layer(card.definition.content.card);
+@import url('./content/description.css') layer(card.definition.content.description);
+@import url('./content/header.css') layer(card.definition.content.header);
+@import url('./content/subheader.css') layer(card.definition.content.subheader);
+@import url('./content/image.css') layer(card.definition.content.image);
+@import url('./content/icon.css') layer(card.definition.content.icon);
+@import url('./content/meta.css') layer(card.definition.content.meta);
 
 /* States */
-@import url('./states/disabled.css') layer(component.states.disabled);
+@import url('./states/disabled.css') layer(card.definition.states.disabled);
 
 /* Group */
-@import url('./plural/cards.css') layer(component.card.plural);
+@import url('./plural/cards.css') layer(card.definition.plural);
 
 /* Variations */
-@import url('./variations/basic.css') layer(component.card.variations.basic);
-@import url('./variations/count.css') layer(component.card.variations.count);
-@import url('./variations/fluid.css') layer(component.card.variations.fluid);
-@import url('./variations/horizontal.css') layer(component.card.variations.horizontal);
-@import url('./variations/link.css') layer(component.card.variations.link);
-@import url('./variations/spaced.css') layer(component.card.variations.spaced);
+@import url('./variations/basic.css') layer(card.definition.variations.basic);
+@import url('./variations/count.css') layer(card.definition.variations.count);
+@import url('./variations/fluid.css') layer(card.definition.variations.fluid);
+@import url('./variations/horizontal.css') layer(card.definition.variations.horizontal);
+@import url('./variations/link.css') layer(card.definition.variations.link);
+@import url('./variations/spaced.css') layer(card.definition.variations.spaced);
 
 /* Responsive Variations */
-@import url('./variations/doubling.css') layer(component.card.variations.doubling);
-@import url('./variations/stackable.css') layer(component.card.variations.stackable);
+@import url('./variations/doubling.css') layer(card.definition.variations.doubling);
+@import url('./variations/stackable.css') layer(card.definition.variations.stackable);
 

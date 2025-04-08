@@ -16,18 +16,18 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./src/semantic-ui.js",
+      "import": "./src/index.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
       "default": "./src/semantic-ui.js"
     },
+    "./css": {
+      "import": "./src/index.css",
+      "default": "./src/index.css"
+    },
     "./examples": {
       "import": "./examples/index.js",
       "default": "./examples/index.js"
-    },
-    "./page": {
-      "import": "./src/semantic-ui.css",
-      "default": "./src/semantic-ui.css"
     },
     "./button": {
       "import": "./src/components/button/index.js",
@@ -88,50 +88,6 @@
       "browser": "./dist/cdn/segment.min.js",
       "bundled": "./dist/bundled/segment.min.js",
       "default": "./src/components/segment/index.js"
-    },
-    "./theme": {
-      "import": "./src/themes/base/base.css",
-      "default": "./src/themes/base/base.css"
-    },
-    "./theme/global": {
-      "import": "./src/themes/base/global/global-theme.css",
-      "default": "./src/themes/base/global/global-theme.css"
-    },
-    "./theme/button": {
-      "import": "./src/themes/base/button/button-theme.css",
-      "default": "./src/themes/base/button/button-theme.css"
-    },
-    "./theme/card": {
-      "import": "./src/themes/base/card/card-theme.css",
-      "default": "./src/themes/base/card/card-theme.css"
-    },
-    "./theme/container": {
-      "import": "./src/themes/base/container/container-theme.css",
-      "default": "./src/themes/base/container/container-theme.css"
-    },
-    "./theme/icon": {
-      "import": "./src/themes/base/icon/icon-theme.css",
-      "default": "./src/themes/base/icon/icon-theme.css"
-    },
-    "./theme/input": {
-      "import": "./src/themes/base/input/input-theme.css",
-      "default": "./src/themes/base/input/input-theme.css"
-    },
-    "./theme/label": {
-      "import": "./src/themes/base/label/label-theme.css",
-      "default": "./src/themes/base/label/label-theme.css"
-    },
-    "./theme/menu": {
-      "import": "./src/themes/base/menu/menu-theme.css",
-      "default": "./src/themes/base/menu/menu-theme.css"
-    },
-    "./theme/modal": {
-      "import": "./src/themes/base/modal/modal-theme.css",
-      "default": "./src/themes/base/modal/modal-theme.css"
-    },
-    "./theme/rail": {
-      "import": "./src/themes/base/rail/rail-theme.css",
-      "default": "./src/themes/base/rail/rail-theme.css"
     }
   },
   "scripts": {
@@ -174,7 +130,7 @@
       "command": "node ./internal-packages/scripts/src/build-cdn.js"
     },
     "watch": {
-      "command": "node ./tasks/watch.js",
+      "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
     },
     "dev": {

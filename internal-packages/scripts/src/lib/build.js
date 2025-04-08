@@ -246,11 +246,11 @@ export const build = async ({
     ;
 
     if(watch) {
-      return await builder(buildConfig).watch();
+      const context = await builder(buildConfig);
+      return context.watch();
     }
     else {
       // perform build
-      console.log(buildConfig);
       const result = await builder(buildConfig);
 
       let { outfile, outdir } = buildConfig;
