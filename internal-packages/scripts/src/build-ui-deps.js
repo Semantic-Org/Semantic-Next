@@ -1,4 +1,5 @@
 import { build } from './lib/build.js';
+import { INTERNAL_CSS_BANNER } from './lib/config.js';
 
 /*
   We need to flatten css imported by the web components
@@ -9,26 +10,29 @@ export const buildUIDeps = async ({
 } = {}) => {
 
   /*
-    component-scoped shadow-dom css
+    component css
+    (this includes theme and component css)
   */
-  const cssShadowConcat = build({
+  const cssComponentConcat = build({
+    banner: { css: INTERNAL_CSS_BANNER },
     type: 'css',
+    minify: false,
     addBanner: false,
     metafile: false,
     sourcemap: false,
     watch: watch,
     bundle: true,
-    log: { header: 'UI Deps', message: 'Shadow CSS' },
+    log: { header: 'UI Deps', message: 'Component CSS' },
     entryPoints: [
-      'src/**/css/shadow/*.css',
+      'src/**/css/*.css',
     ],
-    entryNames: '[dir]/../[name]-shadow',
+    entryNames: '[dir]/../[name]-bundle',
     outbase: 'src',
     outdir: 'src',
   });
 
   return await Promise.all([
-    cssShadowConcat,
+    cssComponentConcat,
   ]);
 
 };
