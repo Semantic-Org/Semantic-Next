@@ -1,7 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { MenuItemComponentSpec } from '@semantic-ui/specs';
 
-import MenuItemCSS from './menu-item.css?raw';
+import MenuItemCSS from '../../menu-bundle.css?raw';
+console.log(MenuItemCSS);
 import MenuItemTemplate from './menu-item.html?raw';
 
 const onCreated = ({ data }) => {

@@ -2,6 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 import { MenuComponentSpec } from '@semantic-ui/specs';
 
 import CSS from './menu-bundle.css?raw';
+import PageCSS from './menu-page.css?raw';
 import Template from './menu.html?raw';
 
 const createComponent = ({ settings, self, $, dispatchEvent }) => ({

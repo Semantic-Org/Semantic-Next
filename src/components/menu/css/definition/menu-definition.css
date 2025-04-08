@@ -1,5 +1,6 @@
 /* Content */
 @import url('./content/menu.css') layer(component.content.menu);
+@import url('./content/item.css') layer(component.content.item);
 
 /* Types */
 @import url('./types/selection.css') layer(component.types.selection);
