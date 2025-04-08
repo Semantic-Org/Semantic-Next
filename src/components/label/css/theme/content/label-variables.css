@@ -1,0 +1,14 @@
+:host {
+  --label-vertical-padding: var(--relative-3px);
+  --label-horizontal-padding: var(--relative-6px);
+  --label-padding: var(--label-vertical-padding) var(--label-horizontal-padding);
+  --label-color: var(--inverted-90);
+  --label-background: var(--standard-90);
+  --label-border-radius: var(--relative-5px);
+  --label-min-width: 0px;
+  --label-font-weight: var(--bold);
+
+  --label-vertical-margin: calc(var(--label-vertical-padding) * -1);
+  --label-horizontal-margin: 4px;
+  --label-margin: var(--label-vertical-margin) var(--label-horizontal-margin);
+}

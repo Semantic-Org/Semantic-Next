@@ -1,11 +1,7 @@
 :root {
 
-  --input-background: var(--inverted-color);
-
+  --input-background: var(--inverted-100);
   --input-width: 12em;
-  --input-vertical-padding: var(--relative-10px);
-  --input-horizontal-padding: var(--relative-12px);
-  --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
 
 
   /* Input Text Color */
@@ -37,7 +33,7 @@
   --input-label-right: var(--input-horizontal-padding);
   --input-label-font-size: var(--relative-11px);
   --input-label-font-weight: var(--bold);
-  --input-label-padding: 2px 3px;
+  --input-label-padding: var(--relative-2px) var(--relative-3px);
   --input-label-color: var(--standard-20);
   --input-label-border: var(--border);
   --input-label-border-radius: var(--border-radius);

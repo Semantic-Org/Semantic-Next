@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { RailComponentSpec } from '@semantic-ui/specs';
 
-import CSS from './css/rail-shadow.css?raw';
+import CSS from './rail-bundle.css?raw';
 import Template from './rail.html?raw';
 
 const createComponent = ({ $ }) => ({});

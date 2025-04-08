@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { LabelComponentSpec } from '@semantic-ui/specs';
 
-import CSS from './css/label-shadow.css?raw';
+import CSS from './label-bundle.css?raw';
 import Template from './label.html?raw';
 
 const createComponent = ({ $ }) => ({});

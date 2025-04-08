@@ -1,0 +1,3 @@
+:host {
+  --inputSearchBorderRadius: var(--circular-radius);
+}

@@ -1,0 +1,16 @@
+/*******************************
+            Button
+*******************************/
+
+/* Content */
+@import url('./content/label-variables.css') layer(baseTheme.component.label.content.label);
+
+/* Types */
+@import url('./types/emphasis-variables.css') layer(baseTheme.component.label.types.emphasis);
+@import url('./types/badge-variables.css') layer(baseTheme.component.label.types.badge);
+
+/* Variations */
+@import url('./variations/sizing-variables.css') layer(baseTheme.component.label.variations.sizing);
+@import url('./variations/aligned-variables.css') layer(baseTheme.component.label.variations.aligned);
+
+

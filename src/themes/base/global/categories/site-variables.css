@@ -82,6 +82,15 @@
   --circular-radius: 500rem;
 
   /* -------------------
+          Input
+  -------------------- */
+
+  /* This is essential to make sure inputs are the same size when used inside each component */
+  --input-vertical-padding: var(--relative-10px);
+  --input-horizontal-padding: var(--relative-12px);
+  --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+
+  /* -------------------
        Transitions
   -------------------- */
 

@@ -1,0 +1,42 @@
+
+/* Content */
+@import url('./content/button.css') layer(button.definition.content.button);
+@import url('./content/icon.css') layer(button.definition.content.icon);
+@import url('./content/label.css') layer(button.definition.content.label);
+
+/* Group */
+@import url('./plural/buttons.css') layer(button.definition.plural);
+
+/* States */
+@import url('./states/hover.css') layer(button.definition.states.hover);
+@import url('./states/focus.css') layer(button.definition.states.focus);
+@import url('./states/pressed.css') layer(button.definition.states.pressed);
+@import url('./states/active.css') layer(button.definition.states.active);
+@import url('./states/disabled.css') layer(button.definition.states.disabled);
+@import url('./states/loading.css') layer(button.definition.states.loading);
+
+/* Types */
+@import url('./types/animated.css') layer(button.definition.types.animated);
+@import url('./types/emphasis.css') layer(button.definition.types.emphasis);
+@import url('./types/icon.css') layer(button.definition.types.icon);
+@import url('./types/labeled.css') layer(button.definition.types.labeled);
+@import url('./types/labeled-icon.css') layer(button.definition.types.labeled-icon);
+@import url('./types/transparent.css') layer(button.definition.types.transparent);
+@import url('./types/toggle.css') layer(button.definition.types.toggle);
+
+/* Variations */
+@import url('./variations/basic.css') layer(button.definition.variations.basic);
+@import url('./variations/attached.css') layer(button.definition.variations.attached);
+@import url('./variations/circular.css') layer(button.definition.variations.circular);
+@import url('./variations/colored.css') layer(button.definition.variations.colored);
+@import url('./variations/compact.css') layer(button.definition.variations.compact);
+@import url('./variations/floated.css') layer(button.definition.variations.floated);
+@import url('./variations/fluid.css') layer(button.definition.variations.fluid);
+@import url('./variations/negative.css') layer(button.definition.variations.negative);
+@import url('./variations/positive.css') layer(button.definition.variations.positive);
+@import url('./variations/warning.css') layer(button.definition.variations.warning);
+@import url('./variations/info.css') layer(button.definition.variations.info);
+@import url('./variations/sizing.css') layer(button.definition.variations.sizing);
+@import url('./variations/social.css') layer(button.definition.variations.social);
+@import url('./variations/vertical.css') layer(button.definition.variations.vertical);
+

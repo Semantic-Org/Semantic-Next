@@ -2,7 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 import { ContainerComponentSpec } from '@semantic-ui/specs';
 
 import Template from './container.html?raw';
-import CSS from './css/container-shadow.css?raw';
+import CSS from './container-bundle.css?raw';
 
 const createComponent = ({ $ }) => ({});
 

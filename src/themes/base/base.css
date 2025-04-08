@@ -1,17 +1,2 @@
 /* Globals */
 @import url("./global/global-theme.css");
-
-/* Structural */
-@import url("./container/container-theme.css");
-@import url("./rail/rail-theme.css");
-
-/* Primitives */
-@import url("./button/button-theme.css");
-@import url("./icon/icon-theme.css");
-@import url("./menu/menu-theme.css");
-@import url("./input/input-theme.css");
-@import url("./label/label-theme.css");
-@import url("./card/card-theme.css");
-
-/* Components */
-@import url("./modal/modal-theme.css");

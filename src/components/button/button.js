@@ -3,7 +3,7 @@ import { ButtonComponentSpec } from '@semantic-ui/specs';
 import { get } from '@semantic-ui/utils';
 
 import ButtonTemplate from './button.html?raw' assert { type: 'txt' };
-import ButtonCSS from './css/button-shadow.css?raw' assert { type: 'css' };
+import ButtonCSS from './button-bundle.css?raw' assert { type: 'css' };
 
 const createComponent = ({ self, settings, data, el, $ }) => ({
   isIconBefore() {

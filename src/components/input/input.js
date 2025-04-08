@@ -2,7 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 import { InputComponentSpec } from '@semantic-ui/specs';
 import { debounce } from '@semantic-ui/utils';
 
-import CSS from './css/input-shadow.css?raw';
+import CSS from './input-bundle.css?raw';
 import Template from './input.html?raw';
 
 const defaultState = {

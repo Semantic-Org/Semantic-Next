@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { SegmentComponentSpec } from '@semantic-ui/specs';
 
-import CSS from './css/segment-shadow.css?raw';
+import CSS from './segment-bundle.css?raw';
 import Template from './segment.html?raw';
 
 const createComponent = ({ $ }) => ({});

@@ -2,7 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 import { ModalComponentSpec } from '@semantic-ui/specs';
 import { noop } from '@semantic-ui/utils';
 
-import CSS from './css/modal-shadow.css?raw';
+import CSS from './modal-bundle.css?raw';
 import Template from './modal.html?raw';
 
 const createComponent = ({ $, dispatchEvent }) => ({

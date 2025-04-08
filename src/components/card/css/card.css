@@ -1,0 +1,2 @@
+@import url('./definition/card-definition.css') layer(card.definition);
+@import url('./theme/card-theme.css') layer(card.theme);

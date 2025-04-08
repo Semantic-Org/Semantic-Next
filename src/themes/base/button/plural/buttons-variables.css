@@ -1,7 +1,0 @@
-:root {
-  --button-group-box-shadow: none;
-  --button-group-button-box-shadow: var(--button-box-shadow);
-  --button-vertical-box-shadow: none;
-  --button-group-button-offset: 0px 0px 0px 0px;
-  --button-vertical-group-offset: 0px 0px 0px 0px;
-}
