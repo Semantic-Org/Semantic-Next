@@ -2,12 +2,15 @@
           Dark Theme
 *******************************/
 
+
+/* CSS specificity is required here to make sure override theme applies */
 html.dark,
-.dark.theme,
-[dark],
-[theme="dark"] {
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
 
   --dark-mode: true;
+  --light-mode: false;
   --page-background: #000000;
 
   /* -------------------

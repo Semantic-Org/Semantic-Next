@@ -3,10 +3,8 @@
   --input-background: var(--inverted-100);
   --input-width: 12em;
 
-
   /* Input Text Color */
   --input-font-family: var(--page-font);
-  --input-text-color: var(--standard-100);
   --input-font-weight: var(--normal);
 
   /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */

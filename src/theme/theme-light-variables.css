@@ -2,10 +2,14 @@
           Light Theme
 *******************************/
 
+/* CSS specificity is required here to make sure override theme applies */
 html,
-.light.theme,
-[light],
-[theme="light"] {
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  --dark-mode: false;
+  --light-mode: true;
 
   /* -------------------
       Brand Colors
