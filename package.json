@@ -118,8 +118,9 @@
       ]
     },
     "build": {
-      "command": "node ./internal-packages/scripts/src/build-esm.js",
+      "command": "node ./internal-packages/scripts/src/build-ui-components.js",
       "dependencies": [
+        "build:clean-directory",
         "build:ui-deps",
         "build:ui-components",
         "build:bundle",
@@ -151,6 +152,9 @@
       ]
     },
 
+    "build:clean-directory": {
+      "command": "node ./internal-packages/scripts/src/clean-directory.js"
+    },
     "build:ui-deps": {
       "command": "node ./internal-packages/scripts/src/build-ui-deps.js"
     },
