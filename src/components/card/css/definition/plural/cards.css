@@ -4,8 +4,7 @@
 
 :host(ui-cards) {
   display: block;
-  contain: content;
-  content-visibility: auto;
+  container: host / inline-size;
   margin: var(--cards-margin);
 }
 

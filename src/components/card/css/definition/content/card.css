@@ -1,7 +1,5 @@
 :host {
   display: inline-block;
-  contain: content;
-  content-visibility: auto;
   text-align: var(--card-text-align);
   margin: var(--card-margin);
 }

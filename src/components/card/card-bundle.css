@@ -4,14 +4,10 @@
   This is to allow for js import with @import links which will not be followed
 **/
 
-@layer site, card;
-
 /* src/components/card/css/definition/content/card.css */
 @layer card.definition.content.card {
   :host {
     display: inline-block;
-    contain: content;
-    content-visibility: auto;
     text-align: var(--card-text-align);
     margin: var(--card-margin);
   }
@@ -131,8 +127,7 @@
 @layer card.definition.plural {
   :host(ui-cards) {
     display: block;
-    contain: content;
-    content-visibility: auto;
+    container: host / inline-size;
     margin: var(--cards-margin);
   }
   .component {
@@ -160,8 +155,8 @@
 
 /* src/components/card/css/definition/variations/count.css */
 @layer card.definition.variations.count {
-  .cards {
-    --card-width: none !important;
+  .cards ::slotted(*) {
+    --card-width: none;
   }
   .cards.one {
     grid-template-columns: 1fr;
@@ -175,16 +170,16 @@
   .cards.four {
     grid-template-columns: repeat(4, 1fr);
   }
-  .cards.five {
+  .cards.five.five {
     grid-template-columns: repeat(5, 1fr);
   }
-  .cards.six {
+  .cards.five.six {
     grid-template-columns: repeat(6, 1fr);
   }
-  .cards.seven {
+  .cards.five.seven {
     grid-template-columns: repeat(7, 1fr);
   }
-  .cards.eight {
+  .cards.five.eight {
     grid-template-columns: repeat(8, 1fr);
   }
 }
@@ -284,6 +279,7 @@
 @layer card.definition.variations.stackable {
   .component {
     --card-stackable-comparison: max(calc(100cqi - var(--card-stackable-breakpoint)), 0px);
+    width: --card-stackable-comparison;
   }
   @container component style(--card-stackable-comparison: 0) {
     .stackable.cards {

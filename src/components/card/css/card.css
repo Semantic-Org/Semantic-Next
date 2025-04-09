@@ -1,5 +1,2 @@
-@layer site, card;
-
-
 @import url('./definition/card-definition.css');
 @import url('./theme/card-theme.css');
