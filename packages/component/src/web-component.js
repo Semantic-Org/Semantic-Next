@@ -284,7 +284,7 @@ class WebComponentBase extends LitElement {
       if (value) {
         const allowedValues = componentSpec.allowedValues[attribute];
         const propertyType = componentSpec.propertyTypes[attribute];
-        if (propertyType == Boolean) {
+        if (propertyType == 'boolean') {
           // this is a variation like active=true
           // it receives the class "active"
           classes.push(attribute);
