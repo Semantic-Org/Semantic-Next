@@ -6,6 +6,7 @@
   "author": "Jack Lukic",
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
