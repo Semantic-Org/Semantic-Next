@@ -1,10 +1,12 @@
 {
   "name": "@semantic-ui/specs",
-  "version": "0.10.9",
   "title": "Semantic UI Specs",
   "description": "Component specifications and definitions for UI components",
   "author": "Jack Lukic",
   "license": "ISC",
+  "version": "0.10.9",
+  "sideEffects": false,
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "exports": {

@@ -1,6 +1,6 @@
 import { SpecReader } from '../../spec-reader.js';
-import MenuItemSpec from './menu-item.json';
-import MenuSpec from './menu.json';
+import MenuItemSpec from './menu-item.json' with { type: 'json' };
+import MenuSpec from './menu.json' with { type: 'json' };
 
 const reader = new SpecReader();
 

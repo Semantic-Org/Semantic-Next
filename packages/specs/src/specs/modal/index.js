@@ -1,5 +1,5 @@
 import { SpecReader } from '../../spec-reader.js';
-import ModalSpec from './modal.json';
+import ModalSpec from './modal.json' with { type: 'json' };
 
 const reader = new SpecReader();
 

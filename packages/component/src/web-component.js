@@ -9,6 +9,7 @@ import {
   isEqual,
   isFunction,
   isServer,
+  isString,
   kebabToCamel,
   keys,
   unique,
@@ -55,7 +56,10 @@ class WebComponentBase extends LitElement {
       each(componentSpec.attributes, (attributeName) => {
         const propertyType = componentSpec.propertyTypes[attributeName];
         const propertyName = kebabToCamel(attributeName);
-        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
+        properties[propertyName] = WebComponentBase.getPropertySettings({
+          name: attributeName,
+          type: propertyType,
+        });
       });
 
       // these are values that can only be set on the DOM el as properties
@@ -63,7 +67,10 @@ class WebComponentBase extends LitElement {
       each(componentSpec.properties, (attributeName) => {
         const propertyType = componentSpec.propertyTypes[attributeName];
         const propertyName = kebabToCamel(attributeName);
-        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
+        properties[propertyName] = WebComponentBase.getPropertySettings({
+          name: attributeName,
+          type: propertyType,
+        });
       });
 
       // this handles syntax where allowed value is used as attribute
@@ -78,15 +85,13 @@ class WebComponentBase extends LitElement {
         // this can either be a settings object or a default value
         // i.e. { foo: 'baz' } // basic
         // or { foo: { type: String, defaultValue: 'baz' } // expert
-
-        // we cant serialize custom classes
-        const propertySettings = {
-          propertyOnly: isClassInstance(defaultValue),
-        };
-
         properties[propertyName] = (defaultValue?.type)
           ? defaultSettings
-          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings);
+          : WebComponentBase.getPropertySettings({
+              name: propertyName,
+              type: defaultValue?.constructor,
+              propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
+            });
       });
     }
 
@@ -114,7 +119,20 @@ class WebComponentBase extends LitElement {
     return properties;
   }
 
-  static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {}) {
+  static getPropertySettings({name, type = String, propertyOnly = false }) {
+    // allow prop types like 'string' or String
+    if(isString(type)) {
+      const types = {
+        string: String,
+        number: Number,
+        boolean: Boolean,
+        object: Object,
+        array: Array,
+        function: Function,
+      };
+      type = types[type] || String;
+    }
+
     let property = {
       type,
       attribute: true,

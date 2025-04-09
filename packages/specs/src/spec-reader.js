@@ -510,7 +510,7 @@ export class SpecReader {
         }
 
         // find native type of this property i.e. String
-        const propertyType = this.getPropertyType(spec, section, allowedValues);
+        const propertyType = this.getPropertyType({spec, section, allowedValues});
         if (propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
@@ -637,7 +637,7 @@ export class SpecReader {
         }
 
         // find native type of this property i.e. String
-        const propertyType = this.getPropertyType(spec, section, allowedValues);
+        const propertyType = this.getPropertyType({spec, section, allowedValues});
         if (propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
@@ -716,28 +716,42 @@ export class SpecReader {
     }
   }
 
-  getPropertyType(spec, section, allowedValues = []) {
+  getPropertyType({spec, section, allowedValues = [], withPrototype = false} = {}) {
     let types = {
-      string: String,
-      boolean: Boolean,
-      object: Object,
-      array: Array,
-      function: Function,
+      string: 'string',
+      boolean: 'boolean',
+      object: 'object',
+      array: 'array',
+      function: 'function',
     };
+    /*
+      If we want to allow component spec to be JSON we cant store prototypes
+    */
+    if(withPrototype) {
+      types = {
+        string: String,
+        number: Number,
+        boolean: Boolean,
+        object: Object,
+        array: Array,
+        function: Function,
+      };
+    }
+
     let type;
     let stringType;
     if (section == 'events') {
       // events are always functions
-      type = Function;
+      type = types.function;
     }
     else if (inArray(section, ['types', 'states', 'variations'])) {
       // visual modifications (types, states, variations) default to boolean attrs
       // unless they have allowed values
-      type = Boolean;
+      type = types.boolean;
     }
     else if (inArray(section, ['content'])) {
       // content defaults to string type
-      type = String;
+      type = types.string;
     }
 
     if (spec.type && types[spec.type]) {

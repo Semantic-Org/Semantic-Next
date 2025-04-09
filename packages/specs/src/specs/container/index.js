@@ -1,5 +1,5 @@
 import { SpecReader } from '../../spec-reader.js';
-import ContainerSpec from './container.json';
+import ContainerSpec from './container.json' with { type: 'json' };
 
 const reader = new SpecReader();
 

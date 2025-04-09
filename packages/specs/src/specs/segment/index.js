@@ -1,5 +1,5 @@
 import { SpecReader } from '../../spec-reader.js';
-import SegmentSpec from './segment.json';
+import SegmentSpec from './segment.json' with { type: 'json' };
 
 const reader = new SpecReader();
 

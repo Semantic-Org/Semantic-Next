@@ -1,6 +1,6 @@
 import { SpecReader } from '../../spec-reader.js';
 
-import ButtonSpec from './button.json';
+import ButtonSpec from './button.json' with { type: 'json' };
 
 const ButtonComponentSpec = new SpecReader(ButtonSpec).getWebComponentSpec();
 const ButtonPluralComponentSpec = new SpecReader(ButtonSpec, { plural: true }).getWebComponentSpec();
