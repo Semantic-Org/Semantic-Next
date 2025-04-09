@@ -1,6 +1,5 @@
 import { promises as fs } from 'fs';
 
-
 /**
   * esbuild plugin that executes a callback function when a build completes.
   * Useful with watch: true and write: false to perform additional actions
