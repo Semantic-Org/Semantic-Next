@@ -1,5 +1,6 @@
 import { build } from './lib/build.js';
 import { INTERNAL_CSS_BANNER } from './lib/config.js';
+import { SpecReader } from '@semantic-ui/specs';
 
 /*
   We need to flatten css imported by the web components

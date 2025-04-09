@@ -4,6 +4,7 @@ import * as esbuild from 'esbuild';
 
 import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
 import { log as logPlugin } from '@semantic-ui/esbuild-log';
+import { callback as callbackPlugin } from '@semantic-ui/esbuild-callback';
 
 import { getBanner, JS_BUILD_CONFIG, CSS_BUILD_CONFIG, CDN_CONFIG } from './config.js';
 
@@ -44,7 +45,10 @@ export const getESBuildConfig = async function({
   outdir = '', // custom outdir
   outfile = '', // custom out file,
   entryPoints = [], // custom entrypionts
+  plugins = [], // custom additional plugins
   sourcemap = true, // whether to include source maps
+  onLoad = null, // callback function after build
+  onComplete = null, // callback function after build
 
   // less commonly changed
   platform = 'browser', // target browser
@@ -176,11 +180,10 @@ export const getESBuildConfig = async function({
     }
   }
 
+  config.plugins = plugins;
 
   // add plugins
   if(log || cdn) {
-    config.plugins = [];
-
     if(log) {
       config.plugins.push( logPlugin(log) );
     }
@@ -193,6 +196,16 @@ export const getESBuildConfig = async function({
         packageJson: packageFile,
         ...cdnConfig
       }) );
+    }
+    if(onLoad || onComplete) {
+      const callbackConfig = {};
+      if(onLoad) {
+        callbackConfig.onLoad = onLoad;
+      }
+      if(onComplete) {
+        callbackConfig.onComplete = onComplete;
+      }
+      config.plugins.push( callbackPlugin(callbackConfig) );
     }
   }
 
