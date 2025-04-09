@@ -166,14 +166,20 @@ describe('Component', () => {
     });
 
     it('should handle String property type correctly', () => {
-      const strProp = WebComponentBase.getPropertySettings('testProp', String);
+      const strProp = WebComponentBase.getPropertySettings({
+        name: 'testProp',
+        type: String
+      });
       expect(strProp.type).toBe(String);
       expect(strProp.attribute).toBe(true);
       expect(strProp.hasChanged).toBeDefined();
     });
 
     it('should handle Boolean property type correctly', () => {
-      const boolProp = WebComponentBase.getPropertySettings('testProp', Boolean);
+      const boolProp = WebComponentBase.getPropertySettings({
+        name: 'testProp',
+        type: Boolean
+      });
       expect(boolProp.type).toBe(Boolean);
       expect(boolProp.attribute).toBe(true);
       expect(boolProp.converter).toBeDefined();
@@ -193,7 +199,10 @@ describe('Component', () => {
     });
 
     it('should handle Function property type correctly', () => {
-      const funcProp = WebComponentBase.getPropertySettings('testProp', Function);
+      const funcProp = WebComponentBase.getPropertySettings({
+        name: 'testProp',
+        type: Function
+      });
       expect(funcProp.type).toBe(Function);
       expect(funcProp.attribute).toBe(false); // Functions can't be serialized to attributes
     });
@@ -203,7 +212,11 @@ describe('Component', () => {
       class CustomClass {}
       const instance = new CustomClass();
 
-      const classProp = WebComponentBase.getPropertySettings('testProp', CustomClass, { propertyOnly: true });
+      const classProp = WebComponentBase.getPropertySettings({
+        name: 'testProp',
+        type: CustomClass,
+        propertyOnly: true
+      });
       expect(classProp.attribute).toBe(false);
       expect(classProp.hasChanged).toBeDefined();
 
@@ -344,10 +357,10 @@ describe('Component', () => {
       const componentSpec = {
         attributes: ['emphasis', 'active', 'disabled', 'icon'],
         propertyTypes: {
-          emphasis: String,
-          active: Boolean,
-          disabled: String,
-          icon: String,
+          emphasis: 'string',
+          active: 'boolean',
+          disabled: 'string',
+          icon: 'string',
         },
         allowedValues: {
           emphasis: ['primary', 'secondary', 'tertiary'],
