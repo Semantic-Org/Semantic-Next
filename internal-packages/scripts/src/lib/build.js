@@ -170,6 +170,10 @@ export const getESBuildConfig = async function({
       }
       if(minify) {
         outfile += '.min';
+        config.outExtension = {
+          '.js': '.min.js',
+          '.css': '.min.css',
+        };
       }
       if(type == 'javascript') {
         outfile += '.js';

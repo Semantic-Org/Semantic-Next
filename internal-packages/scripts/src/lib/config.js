@@ -78,5 +78,5 @@ export const CDN_CONFIG = {
   cdnRoot: 'https://cdn.jsdelivr.net/npm',
   directReplacements: {},
   cacheDir: '.cache',
-  logging: 'normal',
+  logging: 'silent',
 };

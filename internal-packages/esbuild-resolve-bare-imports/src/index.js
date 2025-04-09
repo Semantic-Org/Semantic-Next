@@ -13,7 +13,7 @@ export function resolveBareImports(options = {}) {
     onlyDependencies = null, // If provided, only transform these dependencies
     cacheDir = '.cache',
     cdnRoot = 'https://cdn.jsdelivr.net/npm',
-    logging = 'normal', // 'silent', 'minimal', 'normal', 'verbose'
+    logging = 'silent', // 'silent', 'minimal', 'normal', 'verbose'
     // Custom resolver function (packageName, version, entrypoint) => string
     resolver = null,
     // Direct replacements for packages - bypasses resolution
