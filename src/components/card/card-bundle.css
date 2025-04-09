@@ -155,9 +155,6 @@
 
 /* src/components/card/css/definition/variations/count.css */
 @layer card.definition.variations.count {
-  .cards ::slotted(*) {
-    --card-width: none;
-  }
   .cards.one {
     grid-template-columns: 1fr;
   }
@@ -170,17 +167,20 @@
   .cards.four {
     grid-template-columns: repeat(4, 1fr);
   }
-  .cards.five.five {
+  .cards.five {
     grid-template-columns: repeat(5, 1fr);
   }
-  .cards.five.six {
+  .cards.six {
     grid-template-columns: repeat(6, 1fr);
   }
-  .cards.five.seven {
+  .cards.seven {
     grid-template-columns: repeat(7, 1fr);
   }
-  .cards.five.eight {
+  .cards.eight {
     grid-template-columns: repeat(8, 1fr);
+  }
+  .cards ::slotted(*) {
+    --card-width: none;
   }
 }
 

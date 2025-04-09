@@ -1,9 +1,5 @@
 .cards {
 
-  ::slotted(*) {
-    --card-width: none;
-  }
-
   &.one {
     grid-template-columns: 1fr;
   }
@@ -21,7 +17,6 @@
   }
 
   &.five {
-  &.five {
     grid-template-columns: repeat(5, 1fr);
   }
 
@@ -36,4 +31,9 @@
   &.eight {
     grid-template-columns: repeat(8, 1fr);
   }
+
+  ::slotted(*) {
+    --card-width: none;
+  }
+
 }
