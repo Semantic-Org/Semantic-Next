@@ -1,0 +1,209 @@
+/*******************************
+      Global Site Variables
+*******************************/
+
+/*
+  These are global variables that might be adjusted by your theme that
+  are not related to light/dark mode.
+
+  For light/dark mode values like colors etc see "light/dark-variables.css"
+*/
+
+:root {
+
+  /* -------------------
+          Fonts
+  -------------------- */
+
+  --font-name: 'Lato';
+  --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+  --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+  --bold: bold;
+  --normal: normal;
+
+  --header-font-weight: var(--bold);
+  --header-line-height: var(--relative-18px);
+
+  --link-text-decoration: none;
+  --link-hover-text-decoration: var(--link-text-decoration);
+
+  --h1: 28px;
+  --h2: 24px;
+  --h3: 18px;
+  --h4: 15px;
+  --h5: 14px;
+
+  /* -------------------
+          Sizes
+  -------------------- */
+
+  --box-sizing: border-box;
+
+  /*
+
+    For em sizes to resolve to exact pixels you will need to adjust the scaling values below
+    to be whole numbers that are above/below the base em size.
+
+    For instance you might reset medium to "13" and small to "12"
+
+  */
+  --em-size: var(--medium-size-px);
+
+  --mini-size-px: 11;
+  --tiny-size-px: 12;
+  --small-size-px: 13;
+  --medium-size-px: 14;
+  --large-size-px: 16;
+  --big-size-px: 18;
+  --huge-size-px: 20;
+  --massive-size-px: 24;
+
+  --line-height: calc(20 / var(--medium-size-px));
+
+  /* -------------------
+          Page
+  -------------------- */
+
+  --page-overflow-x: hidden;
+
+  /* -------------------
+        Paragraph
+  -------------------- */
+
+  --paragraph-margin: 0em 0em 1em;
+  --paragraph-line-height: var(--line-height);
+
+  /* -------------------
+         Spacing
+  -------------------- */
+
+  --spacing: 1rem;
+  --compact-spacing: 0.5rem;
+
+  /* -------------------
+      Border Radius
+  -------------------- */
+
+  --border-radius: 4px;
+  --circular-radius: 500rem;
+
+  /* -------------------
+          Input
+  -------------------- */
+
+  /* This is essential to make sure inputs are the same size when used inside each component */
+  --input-vertical-padding: var(--relative-10px);
+  --input-horizontal-padding: var(--relative-12px);
+  --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+
+  /* -------------------
+       Transitions
+  -------------------- */
+
+  --duration: 0.15s;
+  --easing: ease;
+
+  /* --------------
+       States
+  --------------- */
+
+  /* How to handle dimming recessed/disabled UI */
+  --recessed-opacity: 0.4;
+  --disabled-opacity: 0.4;
+
+  /* How much to adjust base colors for various states */
+  --hover-lightness: 0.05;
+  --focus-lightness: -0.05;
+  --down-lightness: -0.08;
+  --active-lightness: -0.08;
+  --link-opacity: 0.6;
+
+
+  /* --------------
+    Focus Outline
+  --------------- */
+
+  --focused-ring: 0px 0px 1px 3px var(--standard-100);
+  --focused-outline-color: var(--inverted-100);
+  --focused-ring-color: var(--primary-color);
+  --focused-ring-outline-width: 1px;
+  --focused-ring-width: 3px;
+  --focused-ring-shadow:
+    0px 0px 0px var(--focused-ring-outline-width) var(--focused-outline-color),
+    0px 0px 0px var(--focused-ring-width) var(--focused-ring-color)
+  ;
+
+  /* -------------------
+      Scroll Bars
+  -------------------- */
+
+  --use-custom-scrollbars: true;
+  --scrollbar-width: 9px;
+  --scrollbar-height: 5px;
+  --track-border-radius: 0px;
+  --thumb-border-radius: 0px;
+  --thumb-transition: color 0.2s ease;
+
+  /* -------------------
+         Loader
+  -------------------- */
+
+  --loader-size: var(--13px);
+  --loader-speed: 0.6s;
+  --loader-line-width: var(--2px);
+
+  /* -------------------
+          Grid
+  -------------------- */
+
+  --column-count: 16;
+
+  /* -------------------
+          Brands
+  -------------------- */
+
+  --facebook-color: #1877F2;
+  --twitter-color: #55ACEE;
+  --linked-in-color: #1F88BE;
+  --youtube-color: #FF0000;
+  --pinterest-color: #BD081C;
+  --instagram-color: #FD1D1D;
+  --instagram-gradient: linear-gradient(45deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%);
+
+  /* -------------------
+       Breakpoints
+  -------------------- */
+
+  --mobile-breakpoint: 320px;
+  --tablet-breakpoint: 768px;
+  --computer-breakpoint: 992px;
+  --large-monitor-breakpoint: 1200px;
+  --widescreen-monitor-breakpoint: 1920px;
+
+  /* -------------------
+         Z-Index
+  -------------------- */
+
+  --page-layer: 1;
+  --page-layer-1: 1;
+  --page-layer-2: 2;
+  --page-layer-3: 3;
+  --page-layer-4: 4;
+  --page-layer-5: 5;
+
+  --float-layer: 100;
+  --float-layer-1: 101;
+  --float-layer-2: 102;
+  --float-layer-3: 103;
+  --float-layer-4: 104;
+  --float-layer-5: 105;
+
+  --overlay-layer: 1000;
+  --overlay-layer-1: 1001;
+  --overlay-layer-2: 1002;
+  --overlay-layer-3: 1003;
+  --overlay-layer-4: 1004;
+  --overlay-layer-5: 1005;
+
+}
+
