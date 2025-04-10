@@ -118,13 +118,10 @@
       ]
     },
     "build": {
-      "command": "node ./internal-packages/scripts/src/build-ui-components.js",
+      "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
       "dependencies": [
-        "build:clean-directory",
         "build:ui-deps",
-        "build:ui-components",
-        "build:bundle",
-        "build:cdn"
+        "build:ui-components"
       ]
     },
     "build:packages": {
@@ -161,14 +158,8 @@
     "build:ui-components": {
       "command": "node ./internal-packages/scripts/src/build-ui-components.js"
     },
-    "build:esm": {
-      "command": "node ./internal-packages/scripts/src/build-esm.js"
-    },
-    "build:bundle": {
-      "command": "node ./internal-packages/scripts/src/build-bundle.js"
-    },
-    "build:cdn": {
-      "command": "node ./internal-packages/scripts/src/build-cdn.js"
+    "build:ui-framework": {
+      "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
     },
     "watch": {
       "command": "node ./internal-packages/scripts/src/watch.js",
