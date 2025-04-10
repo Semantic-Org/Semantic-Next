@@ -88,6 +88,12 @@ export const buildUIDeps = async ({
         spec: contents,
         path: path.replace('button.json', 'button-component.json')
       });
+      if(contents?.supportsPlural) {
+        writeComponentSpec({
+          spec: contents,
+          path: path.replace('button.json', 'button-plural-component.json')
+        });
+      }
       return;
     },
   });

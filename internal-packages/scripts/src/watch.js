@@ -1,5 +1,10 @@
 import { build } from './lib/build.js';
+
 import { buildUIDeps } from './build-ui-deps.js';
+import { buildESM } from './build-esm.js';
+import { buildBundle } from './build-bundle.js';
+import { buildCDN } from './build-cdn.js';
+import { buildUIComponents } from './build-ui-components.js';
 
 /*
   This watch script will watch for changes in internal deps
@@ -11,13 +16,32 @@ export const watch = async ({
 } = {}) => {
 
 
-  // watch for changes
-  const buildDeps = buildUIDeps({
+  const watch1 = buildUIDeps({
+    watch: true
+  });
+
+  const watch2 = buildESM({
+    watch: true
+  });
+
+  const watch3 = buildBundle({
+    watch: true
+  });
+
+  const watch4 = buildCDN({
+    watch: true
+  });
+
+  const watch5 = buildUIComponents({
     watch: true
   });
 
   return await Promise.all([
-    buildDeps,
+    watch1,
+    watch2,
+    watch3,
+    watch4,
+    watch5,
   ]);
 
 };
