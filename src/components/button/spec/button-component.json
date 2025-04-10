@@ -35,13 +35,11 @@
     "disabled",
     "loading"
   ],
-  "events": [],
   "settings": [
     "icon-only",
     "icon-after",
     "href"
   ],
-  "properties": [],
   "attributes": [
     "icon",
     "emphasis",
@@ -243,11 +241,6 @@
     "attached",
     "social"
   ],
-  "defaultValues": {
-    "icon-only": false,
-    "icon-after": false,
-    "href": ""
-  },
   "inheritedPluralVariations": [
     "inverted",
     "size",
