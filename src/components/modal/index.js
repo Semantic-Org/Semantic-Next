@@ -1,4 +1,5 @@
-export { UIModal } from './modal.js';
+import ModalSpec from './specs/modal.json';
+import ModalComponentSpec from './specs/modal-component.json';
 
-export ModalSpec from './specs/modal.json';
-export ModalComponentSpec from './specs/modal-component.json';
+export { UIModal } from './modal.js';
+export { ModalSpec, ModalComponentSpec };

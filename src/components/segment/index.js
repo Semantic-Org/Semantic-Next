@@ -1,4 +1,5 @@
-export { UISegment } from './segment.js';
+import SegmentSpec from './specs/segment.json';
+import SegmentComponentSpec from './specs/segment-component.json';
 
-export SegmentSpec from './specs/segment.json';
-export SegmentComponentSpec from './specs/segment-component.json';
+export { UISegment } from './segment.js';
+export { SegmentSpec, SegmentComponentSpec };
