@@ -1,5 +1,4 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ContainerComponentSpec } from '@semantic-ui/specs';
 
 import componentSpec from './spec/container-component.json' assert { type: 'json' };
 import template from './container.html?raw';

@@ -20,5 +20,6 @@
 }
 
 ::slotted(ui-card) {
+  display: contents;
   margin: 0;
 }

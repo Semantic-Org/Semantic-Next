@@ -1,5 +1,4 @@
 import { defineComponent } from '@semantic-ui/component';
-import { MenuItemComponentSpec } from '@semantic-ui/specs';
 
 import componentSpec from '../../spec/menu-item-component.json';
 import css from '../../menu-bundle.css?raw';

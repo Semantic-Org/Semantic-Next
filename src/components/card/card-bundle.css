@@ -140,6 +140,7 @@
     width: 100%;
   }
   ::slotted(ui-card) {
+    display: contents;
     margin: 0;
   }
 }
