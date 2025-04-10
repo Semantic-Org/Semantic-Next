@@ -83,7 +83,7 @@ export const buildUIDeps = async ({
     watch: watch,
     write: false,
     log: { header: 'UI Components', text: 'Component Spec JSON' },
-    entryPoints: entryPoints,
+    entryPoints,
     outdir: '/dev/null',
     // Use onLoad to intercept JSON spec files during load
     async onLoad({path, contents}) {

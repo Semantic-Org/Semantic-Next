@@ -8,7 +8,7 @@
     {
       "name": "Icon",
       "attribute": "icon",
-      "description": "An icon can specify what icon should appear",
+      "description": "specify what icon should appear",
       "usageLevel": 1,
       "options": [
         "airplay",
@@ -300,97 +300,97 @@
     {
       "name": "Disabled",
       "attribute": "disabled",
-      "description": "can appear disabled",
+      "description": "appear disabled",
       "usageLevel": 1
     },
     {
       "name": "Loading",
       "attribute": "loading",
-      "description": "can be used as a simple loader",
+      "description": "be used as a simple loader",
       "usageLevel": 1
     }
   ],
   "variations": [
     {
       "name": "Link",
-      "description": "can be formatted as a link",
+      "description": "be formatted as a link",
       "usageLevel": 1
     },
     {
       "name": "Fitted",
-      "description": "can be fitted without any space to the left or right of it.",
+      "description": "be fitted without any space to the left or right of it.",
       "usageLevel": 1
     },
     {
       "name": "Colored",
       "value": "color",
-      "description": "can be colored",
+      "description": "be colored",
       "usageLevel": 2,
       "options": [
         {
           "name": "Red",
           "value": "red",
-          "description": "A button can be red"
+          "description": "be red"
         },
         {
           "name": "Orange",
           "value": "orange",
-          "description": "A button can be orange"
+          "description": "be orange"
         },
         {
           "name": "Yellow",
           "value": "yellow",
-          "description": "A button can be yellow"
+          "description": "be yellow"
         },
         {
           "name": "Olive",
           "value": "olive",
-          "description": "A button can be olive"
+          "description": "be olive"
         },
         {
           "name": "Green",
           "value": "green",
-          "description": "A button can be green"
+          "description": "be green"
         },
         {
           "name": "Teal",
           "value": "teal",
-          "description": "A button can be teal"
+          "description": "be teal"
         },
         {
           "name": "Blue",
           "value": "blue",
-          "description": "A button can be blue"
+          "description": "be blue"
         },
         {
           "name": "Violet",
           "value": "violet",
-          "description": "A button can be violet"
+          "description": "be violet"
         },
         {
           "name": "Purple",
           "value": "purple",
-          "description": "A button can be purple"
+          "description": "be purple"
         },
         {
           "name": "Pink",
           "value": "pink",
-          "description": "A button can be pink"
+          "description": "be pink"
         },
         {
           "name": "Brown",
           "value": "brown",
-          "description": "A button can be brown"
+          "description": "be brown"
         },
         {
           "name": "Grey",
           "value": "grey",
-          "description": "A button can be grey"
+          "description": "be grey"
         },
         {
           "name": "Black",
           "value": "black",
-          "description": "A button can be black"
+          "description": "be black"
         }
       ]
     },
@@ -398,53 +398,53 @@
       "name": "Size",
       "value": "size",
       "usageLevel": 1,
-      "description": "can vary in size",
+      "description": "vary in size",
       "options": [
         {
           "name": "Mini",
           "value": "mini",
-          "description": "An element can appear extremely small"
+          "description": "appear extremely small"
         },
         {
           "name": "Tiny",
           "value": "tiny",
-          "description": "An element can appear very small"
+          "description": "appear very small"
         },
         {
           "name": "Small",
           "value": "small",
-          "description": "An element can appear small"
+          "description": "appear small"
         },
         {
           "name": "Medium",
           "value": "medium",
-          "description": "An element can appear normal sized"
+          "description": "appear normal sized"
         },
         {
           "name": "Large",
           "value": "large",
-          "description": "An element can appear larger than normal"
+          "description": "appear larger than normal"
         },
         {
           "name": "Big",
           "value": "big",
-          "description": "An element can appear much larger than normal"
+          "description": "appear much larger than normal"
         },
         {
           "name": "Huge",
           "value": "huge",
-          "description": "An element can appear very much larger than normal"
+          "description": "appear very much larger than normal"
         },
         {
           "name": "Massive",
           "value": "massive",
-          "description": "An element can appear extremely larger than normal"
+          "description": "appear extremely larger than normal"
         }
       ]
     },
     {
       "name": "Inverted",
-      "description": "can be formatted to appear on dark backgrounds",
+      "description": "be formatted to appear on dark backgrounds",
       "usageLevel": 2,
       "attribute": "inverted"
     }
@@ -466,7 +466,7 @@
   "supportsPlural": true,
   "pluralName": "Icons",
   "pluralTagName": "ui-icons",
-  "pluralDescription": "Icons can exist together as a group",
+  "pluralDescription": "Icons exist together as a group",
   "pluralVariations": [
     "colored",
     "size"
