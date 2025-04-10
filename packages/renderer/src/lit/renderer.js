@@ -457,7 +457,8 @@ export class LitRenderer {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
     }
-    // check if this is a value not requiring lookup
+
+    // check if this is a serialized literal value like a Number/Boolean/String
     const literalValue = this.getLiteralValue(token);
     if (literalValue !== undefined) {
       return literalValue;
