@@ -2,8 +2,10 @@ import {
   capitalize,
   clone,
   each,
+  filterObject,
   flatten,
   get,
+  isEmpty,
   inArray,
   isArray,
   isString,
@@ -445,7 +447,7 @@ export class SpecReader {
     }
 
     let componentSpec = {
-      tagName: spec.tagName,
+      tagName: this.getTagName(),
       content: [],
       contentAttributes: [],
 
@@ -548,6 +550,7 @@ export class SpecReader {
           componentSpec.attributeClasses.push(propertyName);
         }
       });
+
     };
 
     // Only process necessary parts of the spec
@@ -581,6 +584,9 @@ export class SpecReader {
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
+
+    // filter out empty arrays and objects to reduce filesize further
+    componentSpec = filterObject(componentSpec, (value) => !isEmpty(value));
 
     this.componentSpec = componentSpec;
 
