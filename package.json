@@ -120,7 +120,7 @@
   },
   "wireit": {
     "dev": {
-      "command": "npm run build && cd docs && npm install && npx link ../ && npm run dev",
+      "command": "cd docs && npm install && npx link ../ && npm run dev",
       "dependencies": [
         "watch"
       ]
