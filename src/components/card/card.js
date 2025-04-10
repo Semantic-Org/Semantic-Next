@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './spec/card-component.json' assert { type: 'json' };
+import componentSpec from './specs/card-component.json' assert { type: 'json' };
 import template from './card.html?raw';
 import css from './card-bundle.css?raw';
 import pageCSS from './card-page.css?raw';

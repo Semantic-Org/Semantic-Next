@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './spec/rail-component.json' assert { type: 'json' };
+import componentSpec from './specs/rail-component.json' assert { type: 'json' };
 import template from './rail.html?raw' assert { type: 'txt' };
 import css from './rail-bundle.css?raw' assert { type: 'css' };
 

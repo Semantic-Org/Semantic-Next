@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
 
-import componentSpec from './spec/button-component.json' assert { type: 'json' };
+import componentSpec from './specs/button-component.json' assert { type: 'json' };
 import template from './button.html?raw' assert { type: 'txt' };
 import css from './button-bundle.css?raw' assert { type: 'css' };
 

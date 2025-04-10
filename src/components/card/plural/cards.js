@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from '../spec/cards-component.json';
+import componentSpec from '../specs/cards-component.json';
 import template from './cards.html?raw';
 import css from '../card-bundle.css?raw';
 

@@ -73,7 +73,7 @@ export const buildUIDeps = async ({
   // we unfortunately have to use external glob
   // because built in glob does not support negation
   // and we dont want our writes to trigger rerun
-  const allFiles = await glob('src/**/spec/*.json');
+  const allFiles = await glob('src/**/specs/*.json');
   const entryPoints = allFiles.filter(path => !path.includes('component.json'));
   const createComponentSpecs = build({
     minify: false,

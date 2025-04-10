@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './spec/icon-component.json' assert { type: 'json' };
+import componentSpec from './specs/icon-component.json' assert { type: 'json' };
 import css from './icon-bundle.css?raw';
 import template from './icon.html?raw';
 

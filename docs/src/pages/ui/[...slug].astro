@@ -3,7 +3,8 @@ import { getCollection } from 'astro:content';
 import { each, toTitleCase, inArray } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
-import * as SpecExports from '@semantic-ui/specs';
+import { SpecReader } from '@semantic-ui/specs';
+import * as SpecExports from '@semantic-ui/core/specs';
 
 const { entry, tab } = Astro.props;
 export async function getStaticPaths() {

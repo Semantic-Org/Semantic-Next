@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './spec/menu-component.json' assert { type: 'json' };
+import componentSpec from './specs/menu-component.json' assert { type: 'json' };
 import template from './menu.html?raw' assert { type: 'txt' };
 import css from './menu-bundle.css?raw' assert { type: 'css' };
 import pageCSS from './menu-page.css?raw' assert { type: 'css' };
