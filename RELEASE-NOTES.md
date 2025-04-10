@@ -4,7 +4,7 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-Version 0.11.0
+# Version 0.11.0
 
 ## Major Changes
 * Theming has been reworked inside the UI framework. CSS variables are now attached to `:host` inside the shadow dom instead of globally to `:root`. This means you can no longer access globally component css variables.
@@ -30,22 +30,20 @@ Will render the page as `dark` mode, the `nav-menu` as light mode and the `ui-in
 - Component variables need to be scoped to the component and will not inherit
 
 ```css
-/* works
-   value is defined in same scope as component
+/* works - value is defined in same scope as component
 */
 ui-button {
   --primary-text-color: red;
 }
-/* works
-   value is computed for each component from primary-color
+
+/* works - value is computed for each component from primary-color
 */
 .parent {
   --primary-color: red;
 }
 
 /*
-  doesnt work
-  value will be redefined in the component
+  doesnt work - value will be redefined in the component
 */
 .parent {
   --primary-text-color: red;
