@@ -1,4 +1,4 @@
-@layer reset, site, theme, layout, page, responsive;
+@layer reset, site, theme, component, layout, page, responsive;
 
 
 /* Global CSS */
