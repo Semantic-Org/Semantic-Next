@@ -9,8 +9,8 @@ import { buildUIDeps } from './build-ui-deps.js';
 */
 export const watch = async ({
   watchDeps = true,
-  watchComponents = false,
-  watchFramework = false,
+  watchComponents = true,
+  watchFramework = true,
 } = {}) => {
 
   const watches = [];

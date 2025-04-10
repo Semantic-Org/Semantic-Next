@@ -1,11 +1,11 @@
 /* entry point for component specs */
-export { ButtonComponentSpec, ButtonsComponentSpec } from './components/button';
-export { CardComponentSpec, CardsComponentSpec } from './components/card';
-export { ContainerComponentSpec } from './components/container';
-export { IconComponentSpec } from './components/icon';
-export { InputComponentSpec } from './components/input';
-export { LabelComponentSpec } from './components/label';
-export { MenuComponentSpec, MenuItemComponentSpec } from './components/menu';
-export { ModalComponentSpec } from './components/modal';
-export { RailComponentSpec } from './components/rail';
-export { SegmentComponentSpec } from './components/segment';
+export { ButtonComponentSpec, ButtonsComponentSpec } from './components/button/specs.js';
+export { CardComponentSpec, CardsComponentSpec } from './components/card/specs.js';
+export { ContainerComponentSpec } from './components/container/specs.js';
+export { IconComponentSpec, IconsComponentSpec } from './components/icon/specs.js';
+export { InputComponentSpec } from './components/input/specs.js';
+export { LabelComponentSpec } from './components/label/specs.js';
+export { MenuComponentSpec, MenuItemComponentSpec } from './components/menu/specs.js';
+export { ModalComponentSpec } from './components/modal/specs.js';
+export { RailComponentSpec } from './components/rail/specs.js';
+export { SegmentComponentSpec } from './components/segment/specs.js';
