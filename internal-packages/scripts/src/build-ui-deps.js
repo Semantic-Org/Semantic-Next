@@ -27,7 +27,6 @@ export const writeComponentSpec = async ({
   const json = JSON.stringify(componentSpec, null, 2);
   let result;
   try {
-    console.log('write to', path);
     result = await writeFileSync(path, json);
   } catch (err) {
     console.log(err);
@@ -83,7 +82,7 @@ export const buildUIDeps = async ({
     sourcemap: false,
     watch: watch,
     write: false,
-    log: { header: 'UI Components', text: 'Create Component Specs' },
+    log: { header: 'UI Components', text: 'Component Spec JSON' },
     entryPoints: entryPoints,
     outdir: '/dev/null',
     // Use onLoad to intercept JSON spec files during load
