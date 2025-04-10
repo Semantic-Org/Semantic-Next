@@ -4,16 +4,65 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.10.11
+Version 0.11.0
+
+## Major Changes
+* Theming has been reworked inside the UI framework. CSS variables are now attached to `:host` inside the shadow dom instead of globally to `:root`. This means you can no longer access globally component css variables.
+
+### Positive Trade Offs
+- You no longer need to include a separate css theme file in your page for each component you use. You can just import the component and all css will be defined. Note: You still need to include the global theme in the page to define global variables.
+- `dark` and `light` can now be added to ANY component to trigger that specific component to be rendered as light or dark mode
+
+For instance this example:
+```html
+<html class="dark">
+  <nav-menu light>
+    <ui-input dark></ui-input>
+  </nav-menu>
+</html>
+```
+
+Will render the page as `dark` mode, the `nav-menu` as light mode and the `ui-input` as dark mode. This can be used for complex layouts that might use light or dark sections.
+
+### Trade Offs
+
+- You can no longer reference variables like `button-primary-text-color` in your css. These will only be defined inside the component. This is because the theme is now scoped to the component.
+- Component variables need to be scoped to the component and will not inherit
+
+```css
+/* works
+   value is defined in same scope as component
+*/
+ui-button {
+  --primary-text-color: red;
+}
+/* works
+   value is computed for each component from primary-color
+*/
+.parent {
+  --primary-color: red;
+}
+
+/*
+  doesnt work
+  value will be redefined in the component
+*/
+.parent {
+  --primary-text-color: red;
+}
+```
+
+### Additional Changes
+Some paths have shifted
+* Global theme variables are now included in `semantic-ui.css` instead of a separate `theme/base.css` file.
+* Themes/Specs are now included in each component folder
+* Component CSS variables are now included in the Shadow DOM scope and NOT global scope. This should vastly improve the global dev tools experience by reducing the number of defined variables in scope.
+
 
 ## New
 * Signals - `increment` and `decrement` now receive a max and min. This can be used to increment a value within a limit. This is particularly useful for keyboard controls that use a `selectedIndex`
 * Signals - `debugReactivity` has been greatly improved. You can now pass debug context with signals and reactions and read them during flush.
 * Component - Added reactivity debugging metadata for all reactive template features like each, if, expressions. This will now appear when using `{debugReactivity}` in a template.
-
-# Version 0.10.10
-
-## New
 * Binding to `checked` or `input` will automatically update the element property if the value changes. Note this is a one way binding, updating the element attribute will not update a signal/setting passed into `value`.
 
 ## Bug
