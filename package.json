@@ -25,6 +25,14 @@
       "import": "./src/index.css",
       "default": "./src/index.css"
     },
+    "./specs": {
+      "import": "./src/specs.js",
+      "default": "./src/specs.js"
+    },
+    "./component-specs": {
+      "import": "./src/component-specs.js",
+      "default": "./src/component-specs.js"
+    },
     "./examples": {
       "import": "./examples/index.js",
       "default": "./examples/index.js"
