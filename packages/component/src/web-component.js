@@ -279,7 +279,7 @@ class WebComponentBase extends LitElement {
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
       const property = kebabToCamel(attribute);
-      const value = this[property];
+      const value = this[property] || this[attribute];
       if (value) {
         const allowedValues = componentSpec.allowedValues[attribute];
         const propertyType = componentSpec.propertyTypes[attribute];
