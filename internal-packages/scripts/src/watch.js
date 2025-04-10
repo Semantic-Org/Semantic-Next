@@ -1,8 +1,6 @@
 import { build } from './lib/build.js';
 
 import { buildUIDeps } from './build-ui-deps.js';
-import { buildUIComponents } from './build-ui-components.js';
-import { buildUIFramework } from './build-ui-framework.js';
 
 /*
   This watch script will watch for changes in internal deps

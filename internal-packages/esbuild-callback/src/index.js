@@ -8,6 +8,8 @@ import { promises as fs } from 'fs';
 export function callback({
   loadConfig = { filter: /.*/ },
   loadContents = true,
+  parseJSON = true,
+  onStart = () => {},
   onLoad = () => {},
   onComplete = () => {},
 } = {}) {
@@ -15,13 +17,12 @@ export function callback({
     name: 'callback',
     setup(build) {
       let count = 0;
+      build.onStart(() => {
+        onStart();
+      });
       build.onLoad(loadConfig, async (args) => {
         if(loadContents) {
-          let contents = await fs.readFile(args.path, 'utf8');
-          if(args.path.endsWith('.json')) {
-            contents = JSON.parse(contents);
-          }
-          args.contents = contents;
+          args.contents = await fs.readFile(args.path, 'utf8');
         }
         return onLoad(args)
       });

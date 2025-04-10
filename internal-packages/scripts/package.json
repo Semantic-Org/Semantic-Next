@@ -32,10 +32,11 @@
   },
   "private": true,
   "dependencies": {
-    "@semantic-ui/esbuild-log": "^0.10.2",
-    "@semantic-ui/specs": "^0.10.9",
     "@semantic-ui/esbuild-callback": "^0.10.9",
+    "@semantic-ui/esbuild-log": "^0.10.2",
     "@semantic-ui/esbuild-resolve-bare-imports": "^0.10.9",
-    "esbuild": "^0.25.1"
+    "@semantic-ui/specs": "^0.10.9",
+    "esbuild": "^0.25.1",
+    "tiny-glob": "^0.2.9"
   }
 }

@@ -1,8 +1,9 @@
+import { dirname, resolve } from 'path';
 import { build } from './lib/build.js';
 import { INTERNAL_CSS_BANNER } from './lib/config.js';
 import { SpecReader } from '@semantic-ui/specs';
-import { writeFile } from 'fs/promises';
-
+import { writeFileSync } from 'fs';
+import glob from 'tiny-glob';
 /*
   Write a component spec file to JSON
 
@@ -17,15 +18,17 @@ export const writeComponentSpec = async ({
   plural = false,
   specSettings = {}
 } = {}) => {
-  const reader = new SpecReader(spec, {
+  const readerSettings = {
     plural,
     ...specSettings
-  });
+  };
+  const reader = new SpecReader(spec, readerSettings);
   const componentSpec = reader.getWebComponentSpec();
   const json = JSON.stringify(componentSpec, null, 2);
   let result;
   try {
-    result = await writeFile(path, json);;
+    console.log('write to', path);
+    result = await writeFileSync(path, json);
   } catch (err) {
     console.log(err);
   }
@@ -64,35 +67,48 @@ export const buildUIDeps = async ({
   });
 
   /*
+    Create component specs which are used to outline
+    specs for component attributes and settings
   */
 
+  // we unfortunately have to use external glob
+  // because built in glob does not support negation
+  // and we dont want our writes to trigger rerun
+  const allFiles = await glob('src/**/spec/*.json');
+  const entryPoints = allFiles.filter(path => !path.includes('component.json'));
   const createComponentSpecs = build({
-    type: 'css',
     minify: false,
     addBanner: false,
-    metafile: false, // We don't need metafile anymore as we're using onLoad
+    metafile: false,
     sourcemap: false,
     watch: watch,
     write: false,
     log: { header: 'UI Components', text: 'Create Component Specs' },
-    entryPoints: [
-      'src/**/spec/*.json',
-    ],
+    entryPoints: entryPoints,
     outdir: '/dev/null',
     // Use onLoad to intercept JSON spec files during load
     async onLoad({path, contents}) {
       if(path.includes('component.json')) {
         return;
       }
-      writeComponentSpec({
-        spec: contents,
-        path: path.replace('button.json', 'button-component.json')
-      });
-      if(contents?.supportsPlural) {
-        writeComponentSpec({
-          spec: contents,
-          path: path.replace('button.json', 'button-plural-component.json')
+      try {
+        const spec = JSON.parse(contents);
+        await writeComponentSpec({
+          spec,
+          path: path.replace('.json', '-component.json')
         });
+        if(spec?.supportsPlural) {
+          const pluralName = spec?.pluralTagName.replace('ui-', '');
+          const pluralPath = resolve(dirname(path), `${pluralName}-component.json`);
+          await writeComponentSpec({
+            spec,
+            plural: true,
+            path: pluralPath
+          });
+        }
+      }
+      catch(e) {
+        // invalid json
       }
       return;
     },

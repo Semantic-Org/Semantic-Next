@@ -234,11 +234,11 @@ export const getESBuildConfig = async function({
   }
 
   // can only have outdir or outfile
-  if(outfile) {
-    config.outfile = outfile;
-  }
-  else if(outdir) {
+  if(outdir) {
     config.outdir = outdir;
+  }
+  else if(outfile) {
+    config.outfile = outfile;
   }
 
   return config;
