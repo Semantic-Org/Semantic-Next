@@ -337,7 +337,7 @@ export class SpecReader {
     const attributes = {};
     const modifierArray = String(modifiers).split(' ');
     each(modifierArray, (modifier) => {
-      const parentAttribute = componentSpec.optionAttributes[modifier];
+      const parentAttribute = componentSpec.optionAttributes?.[modifier];
       if (parentAttribute) {
         attributes[parentAttribute] = modifier;
       }
