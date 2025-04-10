@@ -6,6 +6,7 @@
   /* Input Text Color */
   --input-font-family: var(--page-font);
   --input-font-weight: var(--normal);
+  --input-text-color: var(--text-color);
 
   /* Line Height Default For Inputs in Browser (Descenders are 17px at 14px base em) */
   --input-line-height: var(--relative-17px);

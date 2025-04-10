@@ -242,6 +242,7 @@
     --input-width: 12em;
     --input-font-family: var(--page-font);
     --input-font-weight: var(--normal);
+    --input-text-color: var(--text-color);
     --input-line-height: var(--relative-17px);
     --input-text-align: left;
     --input-box-shadow: var(--subtle-inset-shadow);
