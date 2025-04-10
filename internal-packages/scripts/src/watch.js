@@ -10,9 +10,9 @@ import { buildUIFramework } from './build-ui-framework.js';
   in the docs have the latest css
 */
 export const watch = async ({
-  watchDeps = true,
-  watchComponents = true,
-  watchFramework = false,
+  watchDeps = true, // this is included so you can modify source code while developing
+  watchFramework = true, // this is included because the playground uses this build in dev
+  watchComponents = false, // this is not necessary unless consuming individual components
 } = {}) => {
 
   const watches = [];
@@ -29,6 +29,7 @@ export const watch = async ({
     watches.push(
       buildUIComponents({
         watch: true,
+        includeESM: true,
         includeBundle: false,
         includeCDN: false,
       })
@@ -39,6 +40,7 @@ export const watch = async ({
     watches.push(
       buildUIFramework({
         watch: true,
+        includeESM: true,
         includeBundle: false,
         includeCDN: false,
       })
