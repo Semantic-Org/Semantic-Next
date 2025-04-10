@@ -1,10 +1,8 @@
 import { build } from './lib/build.js';
 
 import { buildUIDeps } from './build-ui-deps.js';
-import { buildESM } from './build-esm.js';
-import { buildBundle } from './build-bundle.js';
-import { buildCDN } from './build-cdn.js';
 import { buildUIComponents } from './build-ui-components.js';
+import { buildUIFramework } from './build-ui-framework.js';
 
 /*
   This watch script will watch for changes in internal deps
@@ -12,37 +10,38 @@ import { buildUIComponents } from './build-ui-components.js';
   in the docs have the latest css
 */
 export const watch = async ({
-  watch = false,
+  watchDeps = true,
+  watchComponents = false,
+  watchFramework = false,
 } = {}) => {
 
+  const watches = [];
 
-  const watch1 = buildUIDeps({
-    watch: true
-  });
+  if(watchDeps) {
+    watches.push(
+      buildUIDeps({
+        watch: true
+      })
+    );
+  }
 
-  const watch2 = buildESM({
-    watch: true
-  });
+  if(watchComponents) {
+    watches.push(
+      buildUIComponents({
+        watch: true
+      })
+    );
+  }
 
-  const watch3 = buildBundle({
-    watch: true
-  });
+  if(watchFramework) {
+    watches.push(
+      buildUIFramework({
+        watch: true
+      })
+    );
+  }
 
-  const watch4 = buildCDN({
-    watch: true
-  });
-
-  const watch5 = buildUIComponents({
-    watch: true
-  });
-
-  return await Promise.all([
-    watch1,
-    watch2,
-    watch3,
-    watch4,
-    watch5,
-  ]);
+  return await Promise.all(watches);
 
 };
 

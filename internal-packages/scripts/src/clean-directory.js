@@ -42,8 +42,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const base = process.env.BASE_DIR || process.cwd();
       targetDir = path.resolve(base, 'dist');
     }
-    console.log('target dir', targetDir);
     await cleanDirectory(targetDir);
-    process.exit();
   })();
 }

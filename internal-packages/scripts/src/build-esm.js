@@ -1,21 +1,34 @@
 import { build } from './lib/build.js';
 
-export const buildESM = async ({watch = false, ...config} = {}) => {
-  const result = await build({
-    ...config,
-    watch,
-    esm: true,
-    minify: false
-  });
+export const buildESM = async ({
+  watch = false,
+  minify = true,
+  ...config
+} = {}) => {
 
-  const minResult = await build({
-    ...config,
-    watch,
-    esm: true,
-    minify: true,
-  });
+  const tasks = [];
 
-  return Promise.all([result, minResult]);
+  tasks.push(
+    build({
+      ...config,
+      watch,
+      esm: true,
+      minify: false
+    })
+  );
+
+  if(minify){
+    tasks.push(
+      build({
+        ...config,
+        watch,
+        esm: true,
+        minify: true
+      })
+    );
+  }
+
+  return Promise.all(tasks);
 };
 
 // Handle direct execution of this script

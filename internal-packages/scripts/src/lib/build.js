@@ -130,7 +130,7 @@ export const getESBuildConfig = async function({
         header += ' Bundled';
       }
       if(minify) {
-        header += ' Minified';
+        header += ' (Min)';
       }
       log = {
         header: header,
@@ -234,11 +234,11 @@ export const getESBuildConfig = async function({
   }
 
   // can only have outdir or outfile
-  if(outdir) {
-    config.outdir = outdir;
-  }
-  else if(outfile) {
+  if(outfile) {
     config.outfile = outfile;
+  }
+  else if(outdir) {
+    config.outdir = outdir;
   }
 
   return config;

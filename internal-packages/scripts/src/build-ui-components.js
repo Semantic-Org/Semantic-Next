@@ -3,15 +3,15 @@ import { buildBundle } from './build-bundle.js';
 import { buildCDN } from './build-cdn.js';
 
 /*
-  Web component javascript reads css imports as a file
-  and will not process import links. So we need to
-  bundle nested css files for the web component to consume
+  This exports each individual component from framework
+  as a separate file for consuming as standalone components
 */
 export const buildUIComponents = async ({
   watch = false,
 } = {}) => {
 
-  /* Export each component individually */
+  const tasks = [];
+
   const sharedConfig = {
     watch,
     type: 'javascript',
@@ -20,32 +20,31 @@ export const buildUIComponents = async ({
     outbase: 'src/components',
   };
 
-  /*
-    Exports Individual Components
-  */
-  let esmBuild = buildESM({
-    ...sharedConfig,
-    outdir: 'dist',
-    log: { header: 'UI Components', text: 'Build ESM' },
-  });
+  tasks.push(
+    buildESM({
+      ...sharedConfig,
+      outdir: 'dist',
+      log: { header: 'UI Components', text: 'Build ESM' },
+    })
+  );
 
-  let bundleBuild = buildBundle({
-    ...sharedConfig,
-    outdir: 'dist/bundle',
-    log: { header: 'UI Components', text: 'Build Bundle' },
-  });
+  tasks.push(
+    buildBundle({
+      ...sharedConfig,
+      outdir: 'dist/bundle',
+      log: { header: 'UI Components', text: 'Build Bundle' },
+    })
+  );
 
-  let cdnBuild = buildCDN({
-    ...sharedConfig,
-    outdir: 'dist/cdn',
-    log: { header: 'UI Components', text: 'Build CDN' },
-  });
+  tasks.push(
+    buildCDN({
+      ...sharedConfig,
+      outdir: 'dist/cdn',
+      log: { header: 'UI Components', text: 'Build CDN' },
+    })
+  );
 
-  await Promise.all([
-    esmBuild,
-    bundleBuild,
-    cdnBuild,
-  ]);
+  await Promise.all(tasks);
 
 };
 
@@ -54,5 +53,6 @@ export const buildUIComponents = async ({
 (async function() {
 
   const result = await buildUIComponents();
+  process.exit();
 
 })();

@@ -1,23 +1,35 @@
 import { build } from './lib/build.js';
 
-export const buildCDN = async ({watch = false, ...config} = {}) => {
-  const result = build({
-    ...config,
-    watch,
-    cdn: true,
-    minify: false
-  });
+export const buildCDN = async ({
+  watch = false,
+  minify = true,
+  ...config
+} = {}) => {
 
-  const minResult = build({
-    ...config,
-    watch,
-    cdn: true,
-    minify: true,
-  });
+  const tasks = [];
 
-  return await Promise.all([result, minResult]);
+  tasks.push(
+    build({
+      ...config,
+      watch,
+      cdn: true,
+      minify: false
+    })
+  );
+
+  if(minify){
+    tasks.push(
+      build({
+        ...config,
+        watch,
+        cdn: true,
+        minify: true
+      })
+    );
+  }
+
+  return Promise.all(tasks);
 };
-
 // Handle direct execution of this script
 if (import.meta.url === `file://${process.argv[1]}`) {
   (async function() {
