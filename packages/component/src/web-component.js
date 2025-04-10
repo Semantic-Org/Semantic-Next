@@ -283,8 +283,8 @@ class WebComponentBase extends LitElement {
       const property = kebabToCamel(attribute);
       const value = this[property] || this[attribute];
       if (value) {
-        const allowedValues = componentSpec.allowedValues[attribute];
-        const propertyType = componentSpec.propertyTypes[attribute];
+        const allowedValues = componentSpec.allowedValues?.[attribute];
+        const propertyType = componentSpec.propertyTypes?.[attribute];
         if (propertyType == 'boolean') {
           // this is a variation like active=true
           // it receives the class "active"
@@ -302,7 +302,7 @@ class WebComponentBase extends LitElement {
 
         // components can opt-in to including the attribute if it has a value set
         // for instance "icon" if it has an icon set
-        if (componentSpec.attributeClasses.includes(attribute)) {
+        if ((componentSpec.attributeClasses || []).includes(attribute)) {
           classes.push(attribute);
         }
       }
