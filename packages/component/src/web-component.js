@@ -119,7 +119,7 @@ class WebComponentBase extends LitElement {
     return properties;
   }
 
-  static getPropertySettings({name, type = String, propertyOnly = false }) {
+  static getPropertySettings({name, type = String, propertyOnly = false } = {}) {
     // allow prop types like 'string' or String
     if(isString(type)) {
       const types = {
@@ -280,7 +280,6 @@ class WebComponentBase extends LitElement {
     each(componentSpec.attributes, (attribute) => {
       const property = kebabToCamel(attribute);
       const value = this[property];
-
       if (value) {
         const allowedValues = componentSpec.allowedValues[attribute];
         const propertyType = componentSpec.propertyTypes[attribute];
