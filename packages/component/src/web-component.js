@@ -120,7 +120,9 @@ class WebComponentBase extends LitElement {
   }
 
   static getPropertySettings({name, type = String, propertyOnly = false } = {}) {
-    // allow prop types like 'string' or String
+
+    // converts type = 'string' -> String
+    // this is because compont spec cannot serialize prototypes in JSON
     if(isString(type)) {
       const types = {
         string: String,
