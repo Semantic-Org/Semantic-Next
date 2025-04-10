@@ -1,0 +1,12 @@
+{
+  "tagName": "ui-menu",
+  "types": [
+    "placeholder"
+  ],
+  "attributes": [
+    "placeholder"
+  ],
+  "propertyTypes": {
+    "placeholder": "boolean"
+  }
+}

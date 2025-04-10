@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
-import { InputComponentSpec } from '@semantic-ui/specs';
 import { debounce } from '@semantic-ui/utils';
 
-import CSS from './input-bundle.css?raw';
-import Template from './input.html?raw';
+import componentSpec from './spec/input-component.json' assert { type: 'json' };
+import template from './input.html?raw' assert { type: 'txt' };
+import css from './input-bundle.css?raw' assert { type: 'css' };
 
 const defaultState = {
   focused: false,
@@ -81,9 +81,9 @@ const events = {
 
 const UIInput = defineComponent({
   tagName: 'ui-input',
-  componentSpec: InputComponentSpec,
-  template: Template,
-  css: CSS,
+  componentSpec,
+  template,
+  css,
   createComponent,
   events,
   defaultState,

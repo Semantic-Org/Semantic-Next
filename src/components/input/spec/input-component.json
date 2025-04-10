@@ -1,0 +1,85 @@
+{
+  "tagName": "ui-input",
+  "content": [
+    "placeholder",
+    "icon",
+    "label"
+  ],
+  "contentAttributes": [
+    "placeholder",
+    "icon",
+    "label"
+  ],
+  "types": [
+    "search"
+  ],
+  "variations": [
+    "fluid",
+    "size"
+  ],
+  "settings": [
+    "name",
+    "debounced",
+    "debounce-interval",
+    "clearable",
+    "value"
+  ],
+  "attributes": [
+    "placeholder",
+    "icon",
+    "label",
+    "search",
+    "fluid",
+    "size",
+    "name",
+    "debounced",
+    "debounce-interval",
+    "clearable",
+    "value"
+  ],
+  "optionAttributes": {
+    "mini": "size",
+    "tiny": "size",
+    "small": "size",
+    "medium": "size",
+    "large": "size",
+    "big": "size",
+    "huge": "size",
+    "massive": "size"
+  },
+  "propertyTypes": {
+    "placeholder": "string",
+    "icon": "string",
+    "label": "string",
+    "search": "boolean",
+    "fluid": "boolean",
+    "size": "string",
+    "name": "string",
+    "debounced": "boolean",
+    "clearable": "string",
+    "value": "string"
+  },
+  "allowedValues": {
+    "size": [
+      "mini",
+      "tiny",
+      "small",
+      "medium",
+      "large",
+      "big",
+      "huge",
+      "massive"
+    ]
+  },
+  "attributeClasses": [
+    "icon",
+    "label"
+  ],
+  "defaultValues": {
+    "name": "",
+    "debounced": false,
+    "debounce-interval": 150,
+    "clearable": "",
+    "value": ""
+  }
+}

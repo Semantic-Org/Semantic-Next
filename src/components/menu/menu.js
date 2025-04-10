@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
-import { MenuComponentSpec } from '@semantic-ui/specs';
 
-import CSS from './menu-bundle.css?raw';
-import PageCSS from './menu-page.css?raw';
-import Template from './menu.html?raw';
+import componentSpec from './spec/menu-component.json' assert { type: 'json' };
+import template from './menu.html?raw' assert { type: 'txt' };
+import css from './menu-bundle.css?raw' assert { type: 'css' };
+import pageCSS from './menu-page.css?raw' assert { type: 'css' };
 
 const createComponent = ({ settings, self, $, dispatchEvent }) => ({
   setValue(value) {
@@ -47,9 +47,10 @@ const events = {
 
 const UIMenu = defineComponent({
   tagName: 'ui-menu',
-  componentSpec: MenuComponentSpec,
-  template: Template,
-  css: CSS,
+  componentSpec,
+  template,
+  css,
+  pageCSS,
   createComponent,
   events,
   onCreated,
