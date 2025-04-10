@@ -9,6 +9,9 @@ import { buildCDN } from './build-cdn.js';
 */
 export const buildUIFramework = async ({
   watch = false,
+  includeESM = true,
+  includeCDN = true,
+  includeBundle = true,
 } = {}) => {
 
   const tasks = [];
@@ -24,29 +27,35 @@ export const buildUIFramework = async ({
     type: 'javascript',
   };
 
-  tasks.push(
-    buildESM({
-      ...jsConfig,
-      outdir: 'dist',
-      log: { header: 'Framework JS', text: 'Build ESM' },
-    })
-  );
+  if(includeESM) {
+    tasks.push(
+      buildESM({
+        ...jsConfig,
+        outdir: 'dist',
+        log: { header: 'Framework JS', text: 'Build ESM' },
+      })
+    );
+  }
 
-  tasks.push(
-    buildBundle({
-      ...jsConfig,
-      outdir: 'dist/bundle',
-      log: { header: 'Framework JS', text: 'Build Bundle' },
-    })
-  );
+  if(includeBundle) {
+    tasks.push(
+      buildBundle({
+        ...jsConfig,
+        outdir: 'dist/bundle',
+        log: { header: 'Framework JS', text: 'Build Bundle' },
+      })
+    );
+  }
 
-  tasks.push(
-    buildCDN({
-      ...jsConfig,
-      outdir: 'dist/cdn',
-      log: { header: 'Framework JS', text: 'Build CDN' },
-    })
-  );
+  if(includeCDN) {
+    tasks.push(
+      buildCDN({
+        ...jsConfig,
+        outdir: 'dist/cdn',
+        log: { header: 'Framework JS', text: 'Build CDN' },
+      })
+    );
+  }
 
   /*
     Exports CSS Bundle
@@ -61,37 +70,43 @@ export const buildUIFramework = async ({
     entryNames: 'semantic-ui',
   };
 
-  tasks.push(
-    buildESM({
-      ...cssConfig,
-      outdir: 'dist',
-      log: { header: 'Framework CSS', text: 'Build ESM' },
-    })
-  );
+  if(includeESM) {
+    tasks.push(
+      buildESM({
+        ...cssConfig,
+        outdir: 'dist',
+        log: { header: 'Framework CSS', text: 'Build ESM' },
+      })
+    );
+  }
 
-  tasks.push(
-    buildBundle({
-      ...cssConfig,
-      outdir: 'dist/bundle',
-      log: { header: 'Framework CSS', text: 'Build Bundle' },
-    })
-  );
+  if(includeBundle) {
+    tasks.push(
+      buildBundle({
+        ...cssConfig,
+        outdir: 'dist/bundle',
+        log: { header: 'Framework CSS', text: 'Build Bundle' },
+      })
+    );
+  }
 
-  tasks.push(
-    buildCDN({
-      ...cssConfig,
-      outdir: 'dist/cdn',
-      log: { header: 'Framework CSS', text: 'Build CDN' },
-    })
-  );
+  if(includeCDN) {
+    tasks.push(
+      buildCDN({
+        ...cssConfig,
+        outdir: 'dist/cdn',
+        log: { header: 'Framework CSS', text: 'Build CDN' },
+      })
+    );
+  }
 
   await Promise.all(tasks);
 
 };
 
 // Wrapped for NPM wireit consumption
-(async function() {
-
-  const result = await buildUIFramework();
-
-})();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  (async function() {
+    const result = await buildUIFramework();
+  })();
+}

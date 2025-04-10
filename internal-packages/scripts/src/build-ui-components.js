@@ -8,6 +8,9 @@ import { buildCDN } from './build-cdn.js';
 */
 export const buildUIComponents = async ({
   watch = false,
+  includeESM = true,
+  includeCDN = true,
+  includeBundle = true,
 } = {}) => {
 
   const tasks = [];
@@ -20,29 +23,35 @@ export const buildUIComponents = async ({
     outbase: 'src/components',
   };
 
-  tasks.push(
-    buildESM({
-      ...sharedConfig,
-      outdir: 'dist',
-      log: { header: 'UI Components', text: 'Build ESM' },
-    })
-  );
+  if(includeESM) {
+    tasks.push(
+      buildESM({
+        ...sharedConfig,
+        outdir: 'dist',
+        log: { header: 'UI Components', text: 'Build ESM' },
+      })
+    );
+  }
 
-  tasks.push(
-    buildBundle({
-      ...sharedConfig,
-      outdir: 'dist/bundle',
-      log: { header: 'UI Components', text: 'Build Bundle' },
-    })
-  );
+  if(includeBundle) {
+    tasks.push(
+      buildBundle({
+        ...sharedConfig,
+        outdir: 'dist/bundle',
+        log: { header: 'UI Components', text: 'Build Bundle' },
+      })
+    );
+  }
 
-  tasks.push(
-    buildCDN({
-      ...sharedConfig,
-      outdir: 'dist/cdn',
-      log: { header: 'UI Components', text: 'Build CDN' },
-    })
-  );
+  if(includeCDN) {
+    tasks.push(
+      buildCDN({
+        ...sharedConfig,
+        outdir: 'dist/cdn',
+        log: { header: 'UI Components', text: 'Build CDN' },
+      })
+    );
+  }
 
   await Promise.all(tasks);
 
@@ -50,9 +59,11 @@ export const buildUIComponents = async ({
 
 
 // Wrapped for NPM wireit consumption
-(async function() {
+if (import.meta.url === `file://${process.argv[1]}`) {
+  (async function() {
 
-  const result = await buildUIComponents();
-  process.exit();
+    const result = await buildUIComponents();
+    process.exit();
 
-})();
+  })();
+}

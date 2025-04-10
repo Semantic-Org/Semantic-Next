@@ -1,6 +1,8 @@
 import { build } from './lib/build.js';
 
 import { buildUIDeps } from './build-ui-deps.js';
+import { buildUIComponents } from './build-ui-components.js';
+import { buildUIFramework } from './build-ui-framework.js';
 
 /*
   This watch script will watch for changes in internal deps
@@ -10,7 +12,7 @@ import { buildUIDeps } from './build-ui-deps.js';
 export const watch = async ({
   watchDeps = true,
   watchComponents = true,
-  watchFramework = true,
+  watchFramework = false,
 } = {}) => {
 
   const watches = [];
@@ -26,7 +28,9 @@ export const watch = async ({
   if(watchComponents) {
     watches.push(
       buildUIComponents({
-        watch: true
+        watch: true,
+        includeBundle: false,
+        includeCDN: false,
       })
     );
   }
@@ -34,7 +38,9 @@ export const watch = async ({
   if(watchFramework) {
     watches.push(
       buildUIFramework({
-        watch: true
+        watch: true,
+        includeBundle: false,
+        includeCDN: false,
       })
     );
   }
@@ -47,6 +53,6 @@ export const watch = async ({
 // Handle direct execution of this script
 if (import.meta.url === `file://${process.argv[1]}`) {
   (async function() {
-    await watch();
+    return watch();
   })();
 }
