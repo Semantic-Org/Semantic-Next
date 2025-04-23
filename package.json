@@ -16,7 +16,7 @@
   "scripts": {
     "build": "wireit",
     "dev": "wireit",
-    "build-docs": "wireit",
+    "build:docs": "wireit",
     "serve": "wireit",
     "watch": "wireit",
     "publish": "wireit",
