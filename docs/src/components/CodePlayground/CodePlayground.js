@@ -555,7 +555,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
     const offset = 5; // from trial & error avoids tiny scrollbars
     let panelHeight = menuHeight + codeHeight + offset;
     panelHeight = Math.min(panelHeight, 600);
-    panelHeight = Math.max(panelHeight, 30);
+    panelHeight = Math.max(panelHeight, 50);
     $('ui-panels').first().css('height', `${panelHeight}px`);
   },
 
@@ -584,7 +584,7 @@ const onRendered = ({ isClient, self, state, $, settings }) => {
   self.setupComponents();
 
   if (settings.inline && settings.maxHeight == 'natural') {
-    self.setNaturalHeight();
+    requestAnimationFrame(() => self.setNaturalHeight());
   }
 };
 
