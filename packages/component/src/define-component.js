@@ -4,6 +4,7 @@ import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
+import { addCascadeVariables } from './helpers/add-cascade-variables.js';
 import { WebComponentBase } from './web-component.js';
 
 export const defineComponent = ({
@@ -36,6 +37,7 @@ export const defineComponent = ({
   // only used by components that provide a spec
   componentSpec = false,
   plural = false,
+  addCascade = true,
   singularTag,
 } = {}) => {
   // AST shared across instances
@@ -55,6 +57,10 @@ export const defineComponent = ({
   // this will only be added once when the component is defined
   if (pageCSS) {
     adoptStylesheet(pageCSS);
+  }
+
+  if(false &&addCascade) {
+    css = addCascadeVariables(css);
   }
 
   /*
