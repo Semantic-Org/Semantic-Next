@@ -7,17 +7,17 @@ description: An overview of component features
 ## Creating Components
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic UI is a reactive framework to make it easier to build websites with web components by providing a robust set of tools that help avoid the common pitfalls that people experience when trying to leave front end frameworks like React, or Vue and "go native" with web components.
+Semantic UI components are standard Web Components that are enhanced with built-in features designed to simplify common UI development tasks like managing state, rendering templates, handling events, and styling.
 
 > **Getting Started** It's recommended to check out our [interactive tutorial](/learn/selection) to introduce yourself to the features of Semantic UI before digging into the tech guides.
 
 Core features of Semantic UI
 
-* [Templating](/components/rendering) - A reactive templating system to render web components with [reactive expressions](/templates/expressions), [snippets](/templates/snippets), [subtemplating](/templates/subtemplates), [template helpers](templates/helpers), [loops](/templates/loops), [conditionals](/templates/conditionals), and more. An integrated [signals based reactivity system](/components/reactivity) make for precision updates. Supports [full composable components](api/component/define-component#using-subtemplates) in a similar fashion to React, Vue, Svelte or other front end frameworks.
+* [Templating](/components/rendering) - A reactive templating system to render web components with [reactive expressions](/templates/expressions), [snippets](/templates/snippets), [subtemplating](/templates/subtemplates), [template helpers](templates/helpers), [loops](/templates/loops), [conditionals](/templates/conditionals), and more. An integrated [signals based reactivity system](/components/reactivity) make for precision updates. Supports [full composable components](/templates/subtemplates#basic-example) in a similar fashion to React, Vue, Svelte or other front end frameworks.
 * [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
-* [DOM Manipulation](/query) - A jQuery like chainable DOM library that is built to handle the encapsulation of the shadow DOM.
-* [Events](/components/events) - Built in systems for handling event listeners, dispatching events and passing data through the DOM.
-* [Keybindings](/components/keys) - Fully featured keybinding library that makes every component fully accessible.
+* [DOM Manipulation](/query) - Use a chainable DOM querying library that is built to harness the encapsulation of the shadow DOM.
+* [Events](/components/events) - Define events that occur inside your component, attach to the page, attach to deeply nested components and more. Dispatching events to passing data through the DOM to other components.
+* [Keybindings](/components/keys) - Add keybindings directly to your components using a simple declarative format that supports key sequences, key combinations and more.
 * [Lifecycle Events](/components/lifecycle) - Feature packaged lifecycle events, built to make server side rendering robust and easy.
 * [Reactivity](/components/reactivity) - A powerful reactivity system based on signals but with [helpers to make your life easier](/api/reactivity).
 
@@ -33,11 +33,11 @@ Components provides everything you'd expect from other modern front end framewor
 
 UI component can attach themselves to an html tags that can be used immediately in your site, or be used as partials inside other components.
 
-> **Web Components vs Frameworks (Svelte/React/Vue)** - Web components can render without compilation in the browser making them extremely potent and portable. All major frameworks support web components making them accessible and portable if you choose to write part or all of your stack using a major framework.
+> **Using Frameworks like React, Vue, Svelte**  All major frameworks support web components meaning you can use them directly in any framework. Web components can also render in the browser natively without compilation.
 
 ## Key Features
 
-### Portable
+### Use In Any Framework
 
 Components are defined using [`defineComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
 
