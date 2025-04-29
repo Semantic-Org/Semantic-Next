@@ -1,0 +1,75 @@
+---
+layout: '@layouts/Guide.astro'
+icon: refresh-cw
+title: Reactions & Subscriptions
+description: Running code automatically when Signals change
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Reactive code execution in Semantic UI is primarily handled by **Reactions**. A Reaction is a function that automatically re-runs whenever any [Signal](/reactivity/signals) it depends on changes.
+
+## Reactions
+
+A dependency is created when a Signal's value is accessed (using `.get()` or `.value`) inside the function passed to `Reaction.create()`.
+
+### Creating a Reaction
+
+Use the static `Reaction.create()` method from the [`@semantic-ui/reactivity`](/api/reactivity) package to define a reaction. The reaction runs immediately upon creation and then again after any of its dependencies change (following the [flush cycle](/reactivity/flush)).
+
+```javascript
+import { Signal, Reaction } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+
+// Create a reaction that logs the counter's value
+const reactionInstance = Reaction.create(() => {
+  // Accessing counter.get() creates a dependency
+  console.log('counter:', counter.get());
+});
+
+// Update the signal, triggering the reaction
+counter.set(1); // Output: counter: 1
+counter.set(2); // Output: counter: 2
+```
+
+Reactions are the foundation for reactivity within [component templates](/templates) and can also be used directly in component logic, often tied to the [component lifecycle](/components/lifecycle). See [Component Reactivity](/components/reactivity) and [Reactive Computations](/reactivity/computations) for more details on controlling reactions.
+
+### Reactivity Example
+
+This example demonstrates how accessing a `Signal` within `Reaction.create()` establishes reactivity. The reaction runs initially and then again each time `counter` is updated.
+
+<PlaygroundExample id="basic-reactivity"></PlaygroundExample>
+
+## Subscriptions
+
+As an alternative to Reactions, you can use a Signal's `.subscribe()` method to execute a specific callback *only* when that particular Signal changes.
+
+Unlike a Reaction, a subscription callback does *not* automatically track dependencies on other signals accessed within it. It simply runs in response to changes in the subscribed Signal.
+
+### Creating a Subscription
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const name = new Signal('Alice');
+
+const subscription = name.subscribe((newValue, oldValue) => {
+  console.log(`Name changed from ${oldValue} to ${newValue}`);
+});
+
+name.set('Bob'); // Output: Name changed from Alice to Bob
+name.set('Charlie'); // Output: Name changed from Bob to Charlie
+```
+
+### Stopping a Subscription
+
+The `.subscribe()` method returns a subscription object with a `.stop()` method, allowing you to manually unsubscribe and prevent the callback from running on future changes.
+
+```javascript
+// Stop the subscription created above
+subscription.stop();
+
+name.set('David'); // No output, subscription was stopped
+```
+
+Subscriptions are useful for triggering side effects directly in response to a specific state change without the overhead or complexity of a full reactive context.

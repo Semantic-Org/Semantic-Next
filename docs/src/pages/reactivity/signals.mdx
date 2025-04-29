@@ -1,0 +1,59 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Signals
+description: Creating and managing reactive state primitives (Signals)
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+[Signals](/api/reactivity/signal) are the core primitive for reactive state in Semantic UI. They hold a value and automatically track dependencies, notifying dependent computations ([Reactions](/reactivity/reactions)) when their value changes.
+
+## Creating Signals
+
+To create a reactive variable (a Signal), instantiate the `Signal` class from the [`@semantic-ui/reactivity`](/api/reactivity) package with an initial value.
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+// Create signals for different data types
+const counter = new Signal(0);
+const userName = new Signal('Alice');
+const isActive = new Signal(true);
+const items = new Signal(['apple', 'banana']);
+const userProfile = new Signal({ id: 1, name: 'Bob' });
+```
+
+## Accessing Signal Values
+
+To access the current value of a Signal *within a reactive context* (like a [Reaction](/reactivity/reactions) or a [template expression](/templates/expressions)) and establish a dependency, use the `.get()` method or the `.value` property accessor.
+
+```javascript
+console.log(counter.get()); // Output: 0
+console.log(userName.value); // Output: Alice
+```
+
+> **Nonreactive Usage** In some cases you might want to access a reactive value without creating a reaction. To access a Signal's value *without* creating a dependency use the `.peek()` method. See [Controlling Reactivity](/reactivity/controls).
+
+## Updating Signal Values
+
+Update a Signal's value using the `.set()` method or by directly assigning to the `.value` property. This will notify any dependent Reactions to re-run.
+
+```javascript
+// Using .set()
+counter.set(1);
+console.log(counter.get()); // Output: 1
+
+// Using .value assignment
+userName.value = 'Charlie';
+console.log(userName.value); // Output: Charlie
+```
+
+Semantic UI also provides convenient [mutation helpers](/reactivity/mutation-helpers) directly on Signal instances for common update patterns, especially for arrays and objects.
+
+```javascript
+// Using a mutation helper
+counter.increment(); // Equivalent to counter.set(counter.peek() + 1)
+console.log(counter.get()); // Output: 2
+```
+
+> For advanced configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.

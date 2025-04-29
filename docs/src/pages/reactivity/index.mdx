@@ -7,21 +7,21 @@ description: Learn how Semantic UI uses signals to produce reactivity
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 
-> See the [Reactivity API Reference](/api/reactivity) for a full reference guide to the reactivity library.
+> See the [Reactivity API Reference](/api/reactivity) for a full reference guide to the reactivity library (`@semantic-ui/reactivity`).
 
 ## Understanding Reactivity
 
-Reactivity put simply is **values changing causes stuff to happen**.
+Reactivity is the mechanism by which changes in data automatically propagate to update dependent code or UI elements. Semantic UI implements reactivity using **Signals**.
 
 ### Signals
 
-Signals are a **mechanism for implementing reactivity** that works by tracking what functions reference a variable. These references are called [dependencies](/api/reactivity/dependency) and are used to track references to update when an underyling value is updated.
+[Signals](/reactivity/variables) are reactive primitives that hold a value and track dependencies. When a signal's value changes, it notifies any dependent computations ([Reactions](#reactions)) that they need to re-run.
 
-To ensure dependencies are properly tracked signals are accessed using a `value` (accessor) or a `get()` function.
+Signals track dependencies automatically when their value is accessed (e.g., via `.value` or `.get()`) within a reactive context. Learn more about [Signal dependencies](/api/reactivity/dependency).
 
 ### Reactions
 
-The function that re-runs when a signal is changed is called a `Reaction`. When a signal is referenced inside a reaction it will cause the `reaction` to rerun when the value changes.
+A [Reaction](/api/reactivity/reaction) is a function designed to re-run automatically whenever any signal it depends on changes. Accessing a signal's value inside a reaction creates this dependency.
 
 
 > **Naming Conventions** Signals implementations vary in their naming conventions a reactive context is called ***watcher***  in the [signals proposal](https://github.com/tc39/proposal-signals), a **computation** in [Preact](https://preactjs.com/guide/v10/signals/) and `watch` in [Lit](https://lit.dev/docs/data/signals/).
@@ -30,8 +30,8 @@ The function that re-runs when a signal is changed is called a `Reaction`. When 
 ## Usage
 
 
-### Standalone
-Semantic UI includes a package [`@semantic-ui/reactivity`](/api/reactivity) which exports [`Signal`](/api/reactivity/reactive-var), [`Reaction`](/api/reactivity/reaction), and [`Dependency`](/api/reactivity/dependency) and can be used as a standalone package without using [Semantic UI components](/components).
+### Standalone Usage
+The [`@semantic-ui/reactivity`](/api/reactivity) package can be used independently from the component framework. It exports core classes like [`Signal`](/api/reactivity/signal), [`Reaction`](/api/reactivity/reaction), and [`Dependency`](/api/reactivity/dependency).
 
 ```javascript
 import { Signal, Reaction } from '@semantic-ui/reactivity';
@@ -45,13 +45,15 @@ Reaction.create(() => {
 counter.increment();
 ```
 
-### Component
+### Component Integration
 
-If you are using `@semantic-ui/component`, reactivity is [built into templating](/api/templates) and available directly from [lifecycle callbacks](/components/lifecycle#callback-arguments).
+When building [Semantic UI components](/components), the reactivity system is seamlessly integrated:
 
-You can use `reaction` and `signal` directly from all lifecycle callbacks. Reactions created this way will automatically be tied to the component lifecycle.
+*   Reactive state is managed using [Signals](/components/state).
+*   [Templates](/templates) automatically react to state changes.
+*   [Lifecycle callbacks](/components/lifecycle#callback-arguments) provide access to reactivity primitives like `signal` (to create new signals) and `reaction` (to create reactive computations scoped to the component's lifecycle).
 
-> Learn more about reactivity in components in the dedicated [component reactivity](/components/reactivity) section.
+> Learn more about using reactivity within components in the dedicated [Component Reactivity](/components/reactivity) guide.
 
 
 ```javascript
@@ -68,13 +70,11 @@ const createComponent = ({ self, reaction, signal }) => ({
 
 ## Example
 
-### Birthday Calendar
+### Example: Birthday Calendar
 
-Imagine keeping a birthday calendar for your friends birthdays.
+This conceptual example illustrates how Signals and Reactions work:
 
-In a signal based reactivity system the current day could be thought of as a **signal**.
-
-Each day you might wake up and notice that the `day` has updated. You can then run a `reaction` to check if any of your friends' birthdays are today.
+Imagine tracking the current day using a `Signal`. A `Reaction` can then depend on this signal to automatically check for birthdays whenever the day changes.
 
 ```javascript
 const today = new Signal( new Date() );
@@ -98,5 +98,3 @@ const checkBirthdays = Reaction(() => {
 ```
 
 <PlaygroundExample id="birthday" direction="horizontal"></PlaygroundExample>
-
-

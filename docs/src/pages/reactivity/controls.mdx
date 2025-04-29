@@ -20,6 +20,35 @@ It can be used to make sure a subcalculation does not trigger a parent calculati
 <PlaygroundExample id="guard" direction="horizontal"></PlaygroundExample>
 
 
-### Nonreactive
+### Reaction.nonreactive
 
-Nonreactive lets you create a special enclosure where all reactivity will be ignored. This can let you reference several reactive sources without triggering reactivity.
+The static method [`Reaction.nonreactive(callback)`](/api/reactivity/reaction#nonreactive) executes the provided `callback` function immediately but prevents any signals accessed *within* that callback from creating a dependency with the surrounding reactive context (if one exists).
+
+This is useful when you need to read a signal's value inside a `Reaction` for a side-effect or calculation, but you don't want changes to *that specific signal* to trigger the outer `Reaction` to re-run.
+
+```javascript
+import { Signal, Reaction } from '@semantic-ui/reactivity';
+
+const nameSignal = new Signal('Alice');
+const statusSignal = new Signal('Online');
+
+Reaction.create(() => {
+  // Dependency created on nameSignal
+  const name = nameSignal.get();
+
+  // Read statusSignal without creating a dependency
+  const status = Reaction.nonreactive(() => statusSignal.get());
+
+  // This reaction will re-run if nameSignal changes,
+  // but NOT if only statusSignal changes.
+  console.log(`${name} is currently ${status}`);
+});
+
+// This will trigger the reaction above
+nameSignal.set('Bob');
+
+// This will NOT trigger the reaction above
+statusSignal.set('Offline');
+```
+
+Use `Reaction.nonreactive` when you need to conditionally prevent dependency tracking for specific signal reads within JavaScript logic. For preventing dependencies on reads within templates, use the [`nonreactive` template helper](/api/helpers/reactivity#nonreactive). For simply reading a signal's current value outside any reactive context or without establishing a dependency, use the signal's `.peek()` method.

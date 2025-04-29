@@ -1,8 +1,11 @@
 body {
   --dark-mode: true;
-  --card-padding: 1.5rem 2rem;
-  --card-description-line-height: 1.6;
-  --cards-gap: 2rem;
+
+  ui-card {
+    --card-padding: 1.5rem 2rem;
+    --card-description-line-height: 1.6;
+    --cards-gap: 2rem;
+  }
 }
 
 @layer page {

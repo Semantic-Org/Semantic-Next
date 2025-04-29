@@ -221,9 +221,19 @@ export const sidebarMenuFramework = [
     icon: 'cpu',
     pages: [
       {
-        name: 'Basics',
-        description: 'Signal',
-        url: '/reactivity/variables',
+        name: 'Signals',
+        description: 'Reactive state primitive',
+        url: '/reactivity/signals',
+      },
+      {
+        name: 'Reactions',
+        description: 'Reactive computations',
+        url: '/reactivity/reactions',
+      },
+      {
+        name: 'Signal Options',
+        description: 'Equality & Cloning',
+        url: '/reactivity/signal-options',
       },
       {
         name: 'Mutations',

@@ -1,0 +1,107 @@
+---
+layout: '@layouts/Guide.astro'
+icon: settings
+title: Signal Options & Configuration
+description: Customizing Signal behavior for equality checks and value cloning
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+While Signals work effectively with default settings, Semantic UI provides options to customize their behavior for specific needs, particularly concerning equality checks and value cloning. These options are passed in the second argument to the [`Signal` constructor](/api/reactivity/signal#constructor).
+
+## Equality Comparison
+
+By default, Signals use a deep equality comparison (`deepEqual` from `@semantic-ui/utils`) to determine if a newly set value is actually different from the current value. Updates ([Reactions](/reactivity/reactions)) are only triggered if the values are considered different according to this check.
+
+This means setting a Signal with an object or array that is structurally identical to the current value will *not* trigger an update.
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const person = new Signal({ name: 'John', age: 30 });
+
+// No reactive update triggered (objects are deep equal)
+person.set({ name: 'John', age: 30 });
+
+// Reactive update triggered (objects differ)
+person.set({ name: 'Jane', age: 30 });
+```
+
+### Custom Equality Function (`equalityFunction`)
+
+You can provide a custom equality comparison function via the `equalityFunction` option in the `Signal` constructor if the default deep equality is not suitable for your use case (e.g., if you need shallow comparison, reference equality, or domain-specific logic).
+
+```javascript
+const customEquality = (a, b) => {
+  // Custom comparison logic (e.g., shallow compare, reference compare)
+  return a === b; // Example: strict reference equality
+};
+
+// Signal using custom equality check
+const customVar = new Signal(initialValue, { equalityFunction: customEquality });
+```
+
+## Value Cloning
+
+By default, Signals automatically clone object and array values during `get` and `set` operations.
+
+*   **On Get:** Accessing `.value` or `.get()` returns a clone of the stored object or array.
+*   **On Set:** Using `.set()` or assigning to `.value` stores a clone of the provided object or array.
+
+This default behavior prevents accidental mutation of the Signal's internal state and ensures reliable [equality checks](#equality-comparison). Cloning uses the [`clone` utility](/api/utils/cloning/#clonee) from `@semantic-ui/utils` by default.
+
+### Opting Out of Cloning (`allowClone`)
+
+Cloning can be disabled for performance optimization or when direct reference storage is required by passing `{ allowClone: false }` in the Signal's constructor options:
+
+```javascript
+// Signal that stores direct references (no cloning)
+const referenceSignal = new Signal({ count: 0 }, { allowClone: false });
+
+const obj = { count: 0 };
+const anotherRefSignal = new Signal(obj, { allowClone: false });
+
+// Modifying the object obtained via .get() WILL affect the signal's internal state
+const internalRef = referenceSignal.get();
+internalRef.count = 5;
+console.log(referenceSignal.peek().count); // Output: 5
+
+// Setting the signal stores the reference, not a clone
+anotherRefSignal.set(obj);
+obj.count = 10;
+console.log(anotherRefSignal.peek().count); // Output: 10
+```
+
+Disabling cloning requires careful management to avoid unintended state mutations.
+
+### Exception: Class Instances
+
+**Class instances are not cloned** by default, regardless of the `allowClone` setting. Signals always store and return direct references to class instances.
+
+```javascript
+class MyData {
+  constructor(value) { this.value = value; }
+}
+
+const instanceSignal = new Signal(new MyData(10)); // allowClone defaults to true
+
+const instance1 = instanceSignal.get();
+const instance2 = instanceSignal.get();
+
+console.log(instance1 === instance2); // Output: true (same instance reference)
+
+instance1.value = 20;
+console.log(instance2.value); // Output: 20 (modification affects the shared instance)
+```
+
+### Custom Cloning Function (`cloneFunction`)
+
+Similar to the equality check, the cloning function itself can be customized by providing a `cloneFunction` in the constructor options, although this is less common.
+
+```javascript
+const customClone = (value) => {
+  // Custom cloning logic
+  return JSON.parse(JSON.stringify(value)); // Example: Simple JSON-based clone
+};
+
+// Signal using custom clone function
+const customCloneSignal = new Signal({ data: 1 }, { cloneFunction: customClone });
