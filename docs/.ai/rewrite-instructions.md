@@ -31,7 +31,9 @@
 
 *   **Language:** Simple, direct vocabulary. Avoid subjective/evaluative adjectives (robust, powerful, easy, simple, seamless). Focus on *what it does* and *how it works*.
 *   **Show, Don't Tell:** Demonstrate benefits via concrete descriptions/features.
-*   **Code Examples:** Reproduce *exactly* as found in source/codebase. **Do not modify** unless explicitly tasked. Be aware of framework abstractions (e.g., `dispatchEvent` helper).
+*   **Code Examples:**
+    *   Reproduce *exactly* as found in source/codebase. **Do not modify** unless explicitly tasked. Be aware of framework abstractions (e.g., `dispatchEvent` helper).
+    *   **Prioritize Practicality:** Choose examples that illustrate common, real-world use cases over purely abstract demonstrations. Ensure examples are clear and directly support the concept being explained.
 *   **Technical Accuracy:** Verify technical statements against codebase or ask author if unsure. **Do not change technical details.**
 *   **Linking (CRITICAL):**
     *   Preserve all existing internal links.

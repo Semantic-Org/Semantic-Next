@@ -231,11 +231,6 @@ export const sidebarMenuFramework = [
         url: '/reactivity/reactions',
       },
       {
-        name: 'Signal Options',
-        description: 'Equality & Cloning',
-        url: '/reactivity/signal-options',
-      },
-      {
         name: 'Mutations',
         url: '/reactivity/mutation-helpers',
       },
@@ -244,16 +239,21 @@ export const sidebarMenuFramework = [
         url: '/reactivity/flush',
       },
       {
-        name: 'Controls',
-        url: '/reactivity/computations',
+        name: 'Reactive Controls',
+        url: '/reactivity/controls',
       },
       {
         name: 'Performance',
-        url: '/reactivity/controls',
+        url: '/reactivity/performance',
       },
       {
         name: 'Debugging',
         url: '/reactivity/debugging',
+      },
+      {
+        name: 'Advanced Options',
+        description: 'Equality & Cloning',
+        url: '/reactivity/signal-options',
       },
     ],
   },

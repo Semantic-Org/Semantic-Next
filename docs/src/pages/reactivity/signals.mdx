@@ -6,11 +6,11 @@ description: Creating and managing reactive state primitives (Signals)
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-[Signals](/api/reactivity/signal) are the core primitive for reactive state in Semantic UI. They hold a value and automatically track dependencies, notifying dependent computations ([Reactions](/reactivity/reactions)) when their value changes.
+[Signals](/api/reactivity/signal) are the core primitive for reactive state in Semantic UI. They hold a value and automatically track dependencies, notifying dependent computations--[Reactions](/reactivity/reactions)--when their value changes.
 
 ## Creating Signals
 
-To create a reactive variable (a Signal), instantiate the `Signal` class from the [`@semantic-ui/reactivity`](/api/reactivity) package with an initial value.
+To create a Signal (a reactive variable) instantiate the `Signal` class from the [`@semantic-ui/reactivity`](/api/reactivity) package with an initial value.
 
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
@@ -23,16 +23,27 @@ const items = new Signal(['apple', 'banana']);
 const userProfile = new Signal({ id: 1, name: 'Bob' });
 ```
 
-## Accessing Signal Values
+## Triggering Reactivity
 
-To access the current value of a Signal *within a reactive context* (like a [Reaction](/reactivity/reactions) or a [template expression](/templates/expressions)) and establish a dependency, use the `.get()` method or the `.value` property accessor.
 
-```javascript
+A Signal's value can be accessed using `.get()` or `.value`.
+
+```javascript title="Accessing Reactive Values"
 console.log(counter.get()); // Output: 0
 console.log(userName.value); // Output: Alice
 ```
 
+If this occurs *within a reactive context* (like a [Reaction](/reactivity/reactions) or a [template expression](/templates/expressions)) it will establish a reactive dependency and rerun the function whenever the value is updated.
+
+
+```javascript title="Triggering Reactivity"
+reaction(() => {
+  console.log(counter.get()); // outputs log whenever value changes
+});
+```
+
 > **Nonreactive Usage** In some cases you might want to access a reactive value without creating a reaction. To access a Signal's value *without* creating a dependency use the `.peek()` method. See [Controlling Reactivity](/reactivity/controls).
+
 
 ## Updating Signal Values
 
@@ -57,3 +68,4 @@ console.log(counter.get()); // Output: 2
 ```
 
 > For advanced configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.
+
