@@ -235,7 +235,7 @@
           counter-increment: steps-counter;
           position: relative;
           padding-inline-start: calc(var(--bullet-size) + 1rem);
-          padding-bottom: 3rem;
+          padding-bottom: 1rem;
 
           &&.basic {
             &&:after {
@@ -406,7 +406,7 @@
           font-weight: bold;
           color: var(--standard-100);
         }
-        blockquote p strong:first-of-type {
+        blockquote p :not(em) > strong:first-of-type {
           font-size: 13px;
           display: block;
         }
