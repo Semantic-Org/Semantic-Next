@@ -9,11 +9,11 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Overview
 
-Settings are values which you want users of your component to be able to modify. They act as the public API for your component, allowing developers to configure it for different use cases.
+Settings define the configurable public API for a component, allowing users to modify its behavior or appearance for different use cases without altering its internal code.
 
 ## Defining Settings
 
-To specify settings for a component, pass in a settings object when [defining a component](/api/component/define-component):
+Default settings are specified by passing a `defaultSettings` object when [creating a component](/components/create) using [`defineComponent`](/api/component/define-component):
 
 ```javascript
 const defaultSettings = {
@@ -41,10 +41,10 @@ For example, in a dropdown component:
 
 ## Specifying Settings
 
-Your component can have its default settings modified by an end user in several different ways.
+Users can override a component's default settings in several ways:
 
 
-### Pure HTML
+### HTML Attributes
 
 The most common way to override settings is through HTML attributes:
 
@@ -52,9 +52,9 @@ The most common way to override settings is through HTML attributes:
 <name-card name="Sally" color="red" size="large" count="10"></name-card>
 ```
 
-### Pure Javascript
+### JavaScript Properties
 
-You can also set settings directly by modifying the properties of a component
+Settings can also be set directly as properties on the component's DOM element:
 
 ```javascript
 const el = document.querySelector('name-card');
@@ -62,9 +62,9 @@ el.name = 'Sam';
 el.color = 'green';
 ```
 
-### Query
+### Using the Query Library
 
-You can use [Query](/query) to access your component and update settings.
+The [Query library](/query) provides convenient methods for accessing components and updating their settings programmatically.
 
 #### The settings() Method
 
@@ -118,7 +118,7 @@ $('name-card').initialize({
 
 This is especially useful for passing function references that can't be serialized as HTML attributes.
 
-<PlaygroundExample height="265" id="settings" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="settings" direction="horizontal"></PlaygroundExample>
 
 ## Data Types
 
@@ -126,7 +126,7 @@ Different data types require different handling when passed as settings:
 
 ### Strings and Numbers
 
-Pass strings and numbers directly through attributes or properties:
+Pass strings and numbers directly via HTML attributes or JavaScript properties:
 
 ```html
 <price-display amount="99.99" currency="USD"></price-display>
@@ -134,13 +134,13 @@ Pass strings and numbers directly through attributes or properties:
 
 ### Complex Types (Objects, Arrays, Dates)
 
-When passing complex types through attributes, serialize them with JSON:
+When passing complex types via HTML attributes, serialize them using JSON:
 
 ```html
 <user-list users='[{"name":"Alex","role":"admin"},{"name":"Sam","role":"user"}]'></user-list>
 ```
 
-When using JavaScript properties, you can pass the values directly:
+When setting complex types via JavaScript properties, pass the object or array directly:
 
 ```javascript
 const userList = $('user-list').setting(users, [
@@ -151,12 +151,24 @@ const userList = $('user-list').setting(users, [
 
 ### Functions
 
-Functions can only be passed through JavaScript:
+Functions cannot be serialized as HTML attributes and must be passed via JavaScript properties:
 
 ```javascript
 $('user-form').setting('onSubmit', (data) => {
   saveUserData(data);
 };
 ```
+
+### Putting It All Together
+
+In the following example, Query is used to modify the runtime settings of a component using [`settings()`](/api/query/components#settings)
+
+* Several settings are overridden with properties in `page.js`.
+  * `getName()` is overridden to return `Sam` instead of `Jill`
+  * Birthday is overridden to `January 2`
+* Several settings are overridden in attributes in `page.html`
+  * Siblings is modified to be `["Tom", "Jerry"]`
+  * `Job` `Age` and `Married `are also modified
+* `page.js` also attaches an event listener to a link to modify the settings again when the "change birthday" link is clicked
 
 <PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>
