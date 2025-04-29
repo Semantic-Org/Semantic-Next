@@ -7,11 +7,11 @@ description: Running code automatically when Signals change
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 
-A `Reaction` is a function that automatically re-runs whenever any [Signal](/reactivity/signals) it depends on changes.
+A [`Reaction`](/api/reactivity/reaction) is a function that automatically re-runs whenever any [Signal](/reactivity/signals) it depends on changes.
 
 ## Reactions
 
-A dependency is created when a Signal's value is accessed (using `.get()` or `.value`) inside the function passed to `Reaction.create()`.
+A dependency is created when a Signal's value is accessed (using [`.get()`](/api/reactivity/signal#get) or [`.value`](/api/reactivity/signal#value)) inside the function passed to `Reaction.create()`.
 
 ### Creating a Reaction
 
@@ -39,7 +39,7 @@ counter.set(1);
 
 ### Stopping a Reaction
 
-You can use the `.stop()` method of a reaction to stop it from running.
+You can use the [`.stop()`](/api/reactivity/reaction#stop) method of a reaction to stop it from running.
 
 ```javascript
 // Stop the subscription created above
@@ -67,7 +67,7 @@ The following example shows the difference between a reactive variable (Signal) 
 
 ## Subscriptions
 
-As an alternative to Reactions, you can use a Signal's `.subscribe()` method to execute a specific callback *only* when that particular Signal changes.
+As an alternative to [Reactions](/reactivity/reactions), you can use a [Signal's](/reactivity/signals) [`.subscribe()`](/api/reactivity/signal#subscribe) method to execute a specific callback *only* when that particular Signal changes.
 
 Unlike a Reaction, a subscription callback does *not* automatically track dependencies on other signals accessed within it. It simply runs in response to changes in the subscribed [Signal](/reactivity/signals).
 
@@ -88,7 +88,7 @@ name.set('Charlie'); // Output: Name changed from Bob to Charlie
 
 ### Stopping a Subscription
 
-The `.subscribe()` method returns a subscription object with a `.stop()` method, allowing you to manually unsubscribe and prevent the callback from running on future changes.
+The [`.subscribe()`](/api/reactivity/signal#subscribe) method returns a subscription object with a [`.stop()`](/api/reactivity/signal#subscribe) method, allowing you to manually unsubscribe and prevent the callback from running on future changes.
 
 ```javascript
 // Stop the subscription created above

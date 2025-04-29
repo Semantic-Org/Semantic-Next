@@ -17,7 +17,7 @@ Complex reactive patterns can sometimes cause performance overhead from spurious
 
 This prevents downstream updates if an intermediate calculation result remains the same despite underlying [Signal](/reactivity/signals) changes.
 
-> **When To Use** Use `guard` when you want a dependency to only trigger reactivity under certain conditions.
+> **When To Use** Use [`guard`](/api/reactivity/reaction#guard) when you want a dependency to only trigger reactivity under certain conditions.
 
 <PlaygroundExample id="guard" direction="horizontal"></PlaygroundExample>
 
@@ -26,7 +26,7 @@ This prevents downstream updates if an intermediate calculation result remains t
 
 [`Reaction.nonreactive()`](/api/reactivity/reaction#nonreactive) allows you access reactive values without creating reactive [dependencies](/api/reactivity/dependency) inside the specified closure.
 
-> **When To Use**  Use `nonreactive` when you want to prevent portions of a `Reaction` from being reactive.
+> **When To Use**  Use [`nonreactive`](/api/reactivity/reaction#nonreactive) when you want to prevent portions of a [Reaction](/reactivity/reactions) from being reactive.
 
 ```javascript
 const nameSignal = new Signal('Alice');
@@ -46,9 +46,9 @@ statusSignal.set('Offline'); // Does NOT trigger reaction
 
 ### Peek
 
-[`peek()`](/api/reactivity/signal#peek) accesses a [signal's](/reactivity/signals) current value without creating a reactive [dependency](/api/reactivity/dependency) in the current context. This is similar to `nonreactive` but scoped to a single retrieved value.
+[`peek()`](/api/reactivity/signal#peek) accesses a [signal's](/reactivity/signals) current value without creating a reactive [dependency](/api/reactivity/dependency) in the current context. This is similar to [`nonreactive`](/api/reactivity/reaction#nonreactive) but scoped to a single retrieved value.
 
-> **When To Use** Use `peek()` when you want to access a reactive value without reactivity.
+> **When To Use** Use [`peek()`](/api/reactivity/signal#peek) when you want to access a reactive value without reactivity.
 
 ```javascript
 const counter = new Signal(0);
@@ -68,7 +68,7 @@ trigger.set(true); // DOES trigger reaction
 
 [`.subscribe()`](/api/reactivity/signal#subscribe) runs a callback *only* when the specific [signal](/reactivity/signals) it's called on changes, bypassing the broader [dependency tracking](/api/reactivity/dependency) of [`Reaction.create()`](/api/reactivity/reaction#create). This can be slightly more performant for side effects tied to a single signal.
 
-> **When To Use** Use subscribe when you want to set up a reaction that will only rerun if a single reactivity source changes.
+> **When To Use** Use [`subscribe`](/api/reactivity/signal#subscribe) when you want to set up a reaction that will only rerun if a single reactivity source changes.
 
 ```javascript
 const userId = new Signal(1);

@@ -26,7 +26,7 @@ const userProfile = new Signal({ id: 1, name: 'Bob' });
 ## Triggering Reactivity
 
 
-A Signal's value can be accessed using `.get()` or `.value`.
+A Signal's value can be accessed using [`.get()`](/api/reactivity/signal#get) or [`.value`](/api/reactivity/signal#value).
 
 ```javascript title="Accessing Reactive Values"
 console.log(counter.get()); // Output: 0
@@ -42,12 +42,12 @@ reaction(() => {
 });
 ```
 
-> **Controlling Reactivity** There are many ways to control the reactivity of signals in your app. For instance to access a Signal's value *without* creating a dependency use the [`.peek()`](/reactivity/performance#peek) method. See [Reactive Performance](/reactivity/performance) and [Controlling Reactivity](/reactivity/controls) for more information.
+> **Controlling Reactivity** There are many ways to control the reactivity of signals in your app. For instance to access a Signal's value *without* creating a dependency use the [`.peek()`](/api/reactivity/signal#peek) method. See [Reactive Performance](/reactivity/performance) and [Reactive Controls](/reactivity/controls) for more information.
 
 
 ## Updating Signal Values
 
-Update a Signal's value using the `.set()` method or by directly assigning to the `.value` property. This will notify any dependent Reactions to re-run.
+Update a Signal's value using the [`.set()`](/api/reactivity/signal#set) method or by directly assigning to the [`.value`](/api/reactivity/signal#value) property. This will notify any dependent Reactions to re-run.
 
 ```javascript
 // Using .set()
@@ -68,4 +68,3 @@ console.log(counter.get()); // Output: 2
 ```
 
 > **Advanced Usage** For more configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.
-

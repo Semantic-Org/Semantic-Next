@@ -26,7 +26,7 @@ For example you might have several reactive values that all update the same UI c
 
 ### Synchronous Updates
 
-If you need your updates to propogate immediately you can use [`Reaction.flush()`](/api/reactivity/reaction#flush).
+If you need your updates to propagate immediately you can use [`Reaction.flush()`](/api/reactivity/reaction#flush).
 
 This processes all pending reactions, and runs a flush cycle immediately. This ensures any code after a flush will occur after all dependencies have been rerun.
 
@@ -37,6 +37,6 @@ This processes all pending reactions, and runs a flush cycle immediately. This e
 
 To schedule a function to run *after* the next asynchronous flush completes, pass a callback to  [`Reaction.afterFlush()`](/api/reactivity/reaction#afterflush).
 
-This is often used when reactive updates might cause changes in the DOM. If you naively Query for them immediately after the update, the results will not have propogated.
+This is often used when reactive updates might cause changes in the DOM. If you naively query for them immediately after the update, the results will not have propagated.
 
 <PlaygroundExample id="after-flush" direction="horizontal"></PlaygroundExample>
