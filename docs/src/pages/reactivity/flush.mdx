@@ -1,34 +1,42 @@
 ---
 layout: '@layouts/Guide.astro'
-icon: cpu
-title: Reactive Flush
-description: Flushing reactive changes
+icon: clock # Using 'clock' icon for scheduling/timing
+title: Reactive Flushing
+description: Understanding how and when reactive changes are processed.
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { Reaction } from '@semantic-ui/reactivity'; // Added import
 
-Reactivity changes do not happen immediately when values change but are "flushed" together with other changes. This is performed as a [`microtask` in the browser](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide).
+Changes to [Signals](/reactivity/signals) do not cause dependent [Reactions](/reactivity/reactions) to run immediately. Instead, updates are queued and "flushed" together asynchronously. This batching process uses the browser's [microtask queue](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide).
 
-### Async Behavior
+### Asynchronous Updates
 
-Flushes occur asynchronously when the microtask queue is processed. This means if multiple updates occur in sequence the reaction will only trigger once with the final value.
+When you update a value using `value` or `.set()`, dependencies are not immediately rerun but instead are marked to rerun during the next flush cycle.
 
-> Flushes are performed asynchronously to avoid performance issues when updating UI, ensuring that the UI only renders once with the final value of a reactive variable.
+The flush cycle is an asynchronous process that is added to the microtask queue when a dependency is updated.
+
+#### Purpose of Flush
+Flushes ensure that all reactive updates are processed at once, and that reactivity only occurs for the final value if a value updates multiple times.
+
+
+For example you might have several reactive values that all update the same UI component. If each update occurred independently they could each trigger their own `repaint` `reflow` or `style calculation` in the browser which are expensive multiple millisecond operations. Joining them together into one flush ensures these updates all contribute to a single update to the component.
+
 
 <PlaygroundExample id="reactive-async" direction="horizontal"></PlaygroundExample>
 
-### Forcing Flush
+### Synchronous Updates
 
-You can trigger the queue to be immediately flushed to prevent this by using the `Reaction.flush()`.
+If you need your updates to propogate immediately you can use [`Reaction.flush()`](/api/reactivity/reaction#flush).
 
-This can make sure intermediate values trigger reactive updates.
+This processes all pending reactions, and runs a flush cycle immediately. This ensures any code after a flush will occur after all dependencies have been rerun.
 
 <PlaygroundExample id="reactive-flush" direction="horizontal"></PlaygroundExample>
 
 
 ### After Flush Callback
 
-You can use `Reaction.afterFlush` to trigger a callback once after all reactions have been flushed.
+To schedule a function to run *after* the next asynchronous flush completes, pass a callback to  [`Reaction.afterFlush()`](/api/reactivity/reaction#afterflush).
 
-This can be useful in cases where you want to query the DOM, trigger focus or other actions that should only occur after the UI has been updated.
+This is often used when reactive updates might cause changes in the DOM. If you naively Query for them immediately after the update, the results will not have propogated.
 
 <PlaygroundExample id="after-flush" direction="horizontal"></PlaygroundExample>

@@ -5,16 +5,15 @@ title: Reactive Controls
 description: Controlling the behavior of Reactions using the instance passed to the callback.
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-Creating a [Reaction](/reactivity/reactions) using [`Reaction.create()`](/api/reactivity/reaction#create) will provide the `reaction` instance itself as the first argument.
+Creating a [Reaction](/reactivity/reactions) using [`Reaction.create()`](/api/reactivity/reaction#create) will provide the `Reaction` instance itself as the first argument.
 
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
 const mySignal = new Signal(0);
 
-Reaction.create((reaction) => {
+Reaction.create((reaction) => { // reaction is the Reaction instance
   console.log('Current value:', mySignal.get());
   // do something with reaction
 });
@@ -22,24 +21,26 @@ Reaction.create((reaction) => {
 
 The `reaction` instance can be used to control the execution of your reaction after it runs under certain conditions.
 
-## Manipulating Reactions
+## Controlling Reactions
 
 ### Stopping a Reaction
 
-You can permanently stop a reaction from running again, even if its [Signal](/reactivity/signals) dependencies change, by calling the `reaction.stop()` method.
+You can permanently stop a reaction from running again, even if its [Signal](/reactivity/signals) dependencies change, by calling the [`reaction.stop()`](/api/reactivity/reaction#stop) method.
 
-Once stopped, the reaction will no longer track dependencies or execute its callback.
+Once stopped, the reaction will no longer track [dependencies](/api/reactivity/dependency) or execute its callback.
 
 ```javascript
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 const percentComplete = new Signal(0);
 Reaction.create((reaction) => {
-  const percentComplete = percentComplete.get();
-  if(percentComplete < 100) {
-    updateProgress(percentComplete);
+  const currentPercent = percentComplete.get();
+  if(currentPercent < 100) {
+    // updateProgress(currentPercent);
+    console.log('Progress:', currentPercent);
   }
   else {
+    console.log('Progress complete, stopping reaction.');
     reaction.stop();
   }
 });
@@ -51,7 +52,7 @@ progress.increment(50); // over 100 no longer updating
 
 ### Adjusting First Execution
 
-The `reaction.firstRun` property can be used to determine if the reaction is on its first execution.
+The [`reaction.firstRun`](/api/reactivity/reaction#firstrun) property (boolean) can be used to determine if the reaction is on its first execution.
 
 This can be useful if you have special conditions for the initial run, or would like to prevent some side effects from running the first time code runs.
 
@@ -60,7 +61,7 @@ import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 const score = new Signal(0);
 
-// dont show the score unless the user has scored points
+// Don't show the score unless the user has scored points
 Reaction.create((reaction) => {
   const currentScore = score.get();
   if (!reaction.firstRun) {
@@ -70,18 +71,17 @@ Reaction.create((reaction) => {
 ```
 
 #### Common Pitfalls
-Be sure that any reactive references necessary for your function are reachable in your first run, otherwise they will not be tracked as dependencies.
+Be sure that any [Signal](/reactivity/signals) accesses (`.get()` or `.value`) necessary for your function are reachable during the first run, otherwise they will not be tracked as [dependencies](/api/reactivity/dependency).
 
 ```javascript title="Special Conditions"
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
 const score = new Signal(0);
 
-// This will never rerrun because get() is never reached on first run
+// This will never rerun because score.get() is never reached on first run
 Reaction.create((reaction) => {
   if (!reaction.firstRun) {
     console.log(`Score: ${score.get()}`);
   }
 });
 ```
-

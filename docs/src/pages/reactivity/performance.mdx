@@ -7,13 +7,15 @@ description: Optimize reactivity by preventing unnecessary updates.
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-Complex reactive patterns can sometimes cause performance overhead from spurious updates. Semantic UI provides several utilities to control dependency tracking and prevent unnecessary [Reaction](/reactivity/reactions) runs.
+Complex reactive patterns can sometimes cause performance overhead from spurious updates. Semantic UI provides several utilities to control [dependency tracking](/api/reactivity/dependency) and prevent unnecessary reactivity.
 
 ## Reaction Performance
 
 ### Guard
 
-[`Reaction.guard()`](/api/reactivity/reaction#guard) creates a nested reaction that only triggers updates in the outer reaction if its *returned value* changes. This prevents downstream updates if an intermediate calculation result remains the same despite underlying [Signal](/reactivity/signals) changes.
+[`Reaction.guard()`](/api/reactivity/reaction#guard) creates a nested reaction that only triggers updates in the outer reaction if its *returned value* changes. '
+
+This prevents downstream updates if an intermediate calculation result remains the same despite underlying [Signal](/reactivity/signals) changes.
 
 > **When To Use** Use `guard` when you want a dependency to only trigger reactivity under certain conditions.
 
@@ -22,9 +24,9 @@ Complex reactive patterns can sometimes cause performance overhead from spurious
 
 ### Nonreactive
 
-[`Reaction.nonreactive()`](/api/reactivity/reaction#nonreactive) allows you access reactive values without creating reactive dependencies inside the specified closure.
+[`Reaction.nonreactive()`](/api/reactivity/reaction#nonreactive) allows you access reactive values without creating reactive [dependencies](/api/reactivity/dependency) inside the specified closure.
 
-> **When To Use**  Use `nonreactive` when you want to prevent portions of a `Reaction` from being reactive
+> **When To Use**  Use `nonreactive` when you want to prevent portions of a `Reaction` from being reactive.
 
 ```javascript
 const nameSignal = new Signal('Alice');
@@ -44,7 +46,7 @@ statusSignal.set('Offline'); // Does NOT trigger reaction
 
 ### Peek
 
-[`peek()`](/api/reactivity/signal#peek) accesses a signal's current value without creating a reactive dependency in the current context. This is similar to `nonreactive` but scoped to a single retrieved value.
+[`peek()`](/api/reactivity/signal#peek) accesses a [signal's](/reactivity/signals) current value without creating a reactive [dependency](/api/reactivity/dependency) in the current context. This is similar to `nonreactive` but scoped to a single retrieved value.
 
 > **When To Use** Use `peek()` when you want to access a reactive value without reactivity.
 
@@ -64,7 +66,7 @@ trigger.set(true); // DOES trigger reaction
 
 ### Subscribe
 
-[`.subscribe()`](/api/reactivity/signal#subscribe) runs a callback *only* when the specific signal it's called on changes, bypassing the broader dependency tracking of `Reaction.create()`. This can be slightly more performant for side effects tied to a single signal.
+[`.subscribe()`](/api/reactivity/signal#subscribe) runs a callback *only* when the specific [signal](/reactivity/signals) it's called on changes, bypassing the broader [dependency tracking](/api/reactivity/dependency) of [`Reaction.create()`](/api/reactivity/reaction#create). This can be slightly more performant for side effects tied to a single signal.
 
 > **When To Use** Use subscribe when you want to set up a reaction that will only rerun if a single reactivity source changes.
 

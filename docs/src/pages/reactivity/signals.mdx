@@ -10,7 +10,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Creating Signals
 
-To create a Signal (a reactive variable) instantiate the `Signal` class from the [`@semantic-ui/reactivity`](/api/reactivity) package with an initial value.
+To create a signal import `Signal` from the [`@semantic-ui/reactivity`](/api/reactivity) package then initialize it with a value.
 
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
@@ -42,7 +42,7 @@ reaction(() => {
 });
 ```
 
-> **Nonreactive Usage** In some cases you might want to access a reactive value without creating a reaction. To access a Signal's value *without* creating a dependency use the `.peek()` method. See [Controlling Reactivity](/reactivity/controls).
+> **Controlling Reactivity** There are many ways to control the reactivity of signals in your app. For instance to access a Signal's value *without* creating a dependency use the [`.peek()`](/reactivity/performance#peek) method. See [Reactive Performance](/reactivity/performance) and [Controlling Reactivity](/reactivity/controls) for more information.
 
 
 ## Updating Signal Values
@@ -67,5 +67,5 @@ counter.increment(); // Equivalent to counter.set(counter.peek() + 1)
 console.log(counter.get()); // Output: 2
 ```
 
-> For advanced configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.
+> **Advanced Usage** For more configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.
 
