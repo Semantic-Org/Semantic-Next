@@ -9,6 +9,7 @@ const defaultState = {
 };
 
 const createComponent = ({ self, state }) => ({
+
   majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
   minorMarkers: [1, 2, 3, 4],
   viewBox: '-50 -50 100 100',
@@ -18,6 +19,7 @@ const createComponent = ({ self, state }) => ({
   },
 
   startClock: () => setInterval(() => state.time.now(), 1000),
+
   getTime() {
     const time = state.time.get();
     return {
@@ -26,6 +28,7 @@ const createComponent = ({ self, state }) => ({
       seconds: time.getSeconds(),
     };
   },
+
   getMarkerRotation(name, ...offsets) {
     const offset = sum(offsets);
     const degreeMap = {
@@ -35,6 +38,7 @@ const createComponent = ({ self, state }) => ({
     const degrees = degreeMap[name];
     return `rotate(${degrees})`;
   },
+
   getTimeRotation(name) {
     const { hours, minutes, seconds } = self.getTime();
     const degreeMap = {
@@ -45,13 +49,11 @@ const createComponent = ({ self, state }) => ({
     const degrees = degreeMap[name];
     return `rotate(${degrees})`;
   },
+
 });
 
 const onDestroyed = ({ self }) => {
   clearInterval(self.interval);
-};
-
-const onRendered = ({ $ }) => {
 };
 
 defineComponent({
@@ -60,6 +62,5 @@ defineComponent({
   template,
   defaultState,
   css,
-  onRendered,
   onDestroyed,
 });
