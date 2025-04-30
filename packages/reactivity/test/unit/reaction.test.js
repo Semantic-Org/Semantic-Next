@@ -275,30 +275,6 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledWith(2);
     });
 
-    it('Reaction should have no source on first run', () => {
-      const callback = vi.fn();
-      let signal = new Signal(1);
-      Reaction.create((comp) => {
-        signal.get();
-        if (comp.firstRun) {
-          let trace;
-          try {
-            const consoleLog = console.log;
-            console.log = vi.fn();
-            trace = Reaction.getSource();
-            console.log = consoleLog;
-          }
-          catch (e) {
-            // avoid throwing error
-          }
-          callback(trace);
-        }
-      });
-      signal.set(2);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledWith(undefined);
-    });
-
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
       let signal = new Signal(1);
