@@ -115,6 +115,7 @@ export class Signal {
 
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.addContext({ value: newValue });
       this.value = newValue;
     }
   }
