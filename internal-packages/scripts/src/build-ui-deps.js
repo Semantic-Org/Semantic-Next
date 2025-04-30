@@ -58,7 +58,7 @@ export const buildUIDeps = async ({
     bundle: true,
     log: { header: 'UI Components', text: 'CSS Bundle' },
     entryPoints: [
-      'src/**/css/*.css',
+      'src/components/**/css/*.css',
     ],
     entryNames: '[dir]/../[name]-bundle',
     outbase: 'src',
@@ -73,7 +73,7 @@ export const buildUIDeps = async ({
   // we unfortunately have to use external glob
   // because built in glob does not support negation
   // and we dont want our writes to trigger rerun
-  const allFiles = await glob('src/**/specs/*.json');
+  const allFiles = await glob('src/components/**/specs/*.json');
   const entryPoints = allFiles.filter(path => !path.includes('component.json'));
   const createComponentSpecs = build({
     minify: false,

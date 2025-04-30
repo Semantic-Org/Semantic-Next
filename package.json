@@ -22,16 +22,28 @@
       "default": "./src/index.js"
     },
     "./css": {
-      "import": "./src/index.css",
-      "default": "./src/index.css"
+      "import": "./src/css/all.css",
+      "default": "./src/css/all.css"
+    },
+    "./css/reset": {
+      "import": "./src/css/global/reset.css",
+      "default": "./src/css/global/reset.css"
+    },
+    "./css/global": {
+      "import": "./src/css/global/global.css",
+      "default": "./src/css/global/global.css"
+    },
+    "./css/tokens": {
+      "import": "./src/css/tokens.css",
+      "default": "./src/css/tokens.css"
     },
     "./specs": {
-      "import": "./src/specs.js",
-      "default": "./src/specs.js"
+      "import": "./src/specs/specs.js",
+      "default": "./src/specs/specs.js"
     },
     "./component-specs": {
-      "import": "./src/component-specs.js",
-      "default": "./src/component-specs.js"
+      "import": "./src/specs/component-specs.js",
+      "default": "./src/specs/component-specs.js"
     },
     "./examples": {
       "import": "./examples/index.js",

@@ -22,7 +22,7 @@ export const buildUIFramework = async ({
   */
   const jsConfig = {
     watch,
-    entryPoints: ['src/index.js'],
+    entryPoints: ['src/components/index.js'],
     entryNames: 'semantic-ui',
     type: 'javascript',
   };
@@ -66,7 +66,7 @@ export const buildUIFramework = async ({
   const cssConfig = {
     watch,
     type: 'css',
-    entryPoints: ['src/index.css'],
+    entryPoints: ['src/css/all.css'],
     entryNames: 'semantic-ui',
   };
 
