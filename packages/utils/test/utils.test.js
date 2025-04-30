@@ -2065,6 +2065,25 @@ describe('Color Utilities', () => {
        // A blue that results in single-digit hex components (verified from oklch.com)
        expect(oklchToHex('oklch(0.1 0.01 270)')).toBe('#030306');
     });
+
+    it('should return input string if it is already a valid hex code', () => {
+      expect(oklchToHex('#ff0000')).toBe('#ff0000');
+      expect(oklchToHex('#f00')).toBe('#f00');
+      expect(oklchToHex('#FF000080')).toBe('#FF000080');
+      expect(oklchToHex('#F008')).toBe('#F008');
+      expect(oklchToHex('#abcdef')).toBe('#abcdef');
+    });
+
+    it('should return empty string for invalid hex codes if not oklch', () => {
+       expect(oklchToHex('#ff00fg')).toBe(''); // Invalid hex char 'g'
+       expect(oklchToHex('#ff00')).toBe(''); // Invalid length
+       expect(oklchToHex('ff0000')).toBe(''); // Missing #
+    });
+
+     it('should return empty string for empty input', () => {
+       expect(oklchToHex('')).toBe('');
+       expect(oklchToHex()).toBe(''); // Test default parameter
+     });
   });
 });
 

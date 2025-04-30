@@ -1,6 +1,7 @@
 export * from './arrays';
 export * from './browser';
 export * from './cloning';
+export * from './colors';
 export * from './crypto';
 export * from './dates';
 export * from './equality';

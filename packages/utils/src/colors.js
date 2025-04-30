@@ -133,22 +133,30 @@ function rgbComponentToHex(component) {
 }
 
 /**
- * Converts an OKLCH color string to a hex color string (e.g., "#RRGGBB").
+ * Converts an OKLCH color string to a hex color string (e.g., "#RRGGBB"),
+ * or returns the input if it's already a valid hex color string.
  *
- * @param {string} oklchString - The color string in the format "oklch(L C H)" or "oklch(L, C, H)".
- * @returns {string | null} The hex color string (e.g., "#FF0000") or null if the input is invalid.
+ * @param {string} colorString - The color string, either OKLCH format "oklch(L C H)" or a hex code.
+ * @returns {string} The hex color string (e.g., "#FF0000") or an empty string if the input is invalid or empty.
  */
-export function oklchToHex(oklchString) {
-  if(!oklchString) {
+export function oklchToHex(colorString = '') {
+  if(!colorString) {
     return '';
   }
-  const rgb = oklchToRgb(oklchString);
-  if (!rgb) {
-    return '';
+
+  // Regex to check for valid hex codes: #rgb, #rgba, #rrggbb, #rrggbbaa
+  const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+  if (hexRegex.test(colorString)) {
+    return colorString; // Return directly if it's already a valid hex code
+  }
+
+  // If not a hex code, attempt OKLCH conversion
+  const rgb = oklchToRgb(colorString);
+  if (!rgb || typeof rgb !== 'object') { // Check if oklchToRgb returned a valid object
+    return ''; // Return empty string if OKLCH conversion failed
   }
   const hexR = rgbComponentToHex(rgb.r);
   const hexG = rgbComponentToHex(rgb.g);
   const hexB = rgbComponentToHex(rgb.b);
   return `#${hexR}${hexG}${hexB}`;
 }
-
