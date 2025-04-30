@@ -1,0 +1,10 @@
+@layer tokens.global, tokens.computed, theme.palette, theme.computed;
+
+/* Global Tokens */
+@import url('./tokens/global.css') layer(tokens.global);
+@import url('./tokens/computed.css') layer(tokens.computed);
+
+/* Theme Tokens  */
+@import url('./tokens/themes/light.css') layer(theme.palette);
+@import url('./tokens/themes/dark.css') layer(theme.palette);
+@import url('./tokens/themes/computed.css') layer(theme.computed);
