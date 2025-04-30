@@ -6,6 +6,7 @@ const template = await getText('./component.html');
 
 const defaultSettings = {
   colors: ['blue', 'purple', 'green', 'red', 'orange', 'teal'],
+  fftSize: 2048,
 };
 
 const defaultState = {
@@ -19,7 +20,7 @@ const createComponent = ({ self, state, $, el, settings }) => ({
     if (!self.audioContext) {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048;
+      analyser.fftSize = settings.fftSize;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const source = audioContext.createMediaStreamSource(stream);
@@ -61,29 +62,32 @@ const createComponent = ({ self, state, $, el, settings }) => ({
     const context = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
-    const barWidth = width / self.analyser.frequencyBinCount;
+    const binCount = self.analyser.frequencyBinCount;
+    if (!binCount) return;
+    const barWidth = width / binCount;
 
     context.clearRect(0, 0, width, height);
 
-    const rgb = self.getColor(state.colorIndex.value);
+    const { r, g, b } = self.getColor(state.colorIndex.get());
 
     self.dataArray.forEach((value, i) => {
       const x = i * barWidth;
       const barHeight = (value / 255) * height;
+      if (!Number.isFinite(barHeight) || barHeight < 0) {
+        return;
+      }
       const y = height - barHeight;
 
-      // Create gradient for each bar using computed color and proper alpha
       const gradient = context.createLinearGradient(x, y, x, height);
-
-      if (rgb) {
-        const { r, g, b } = rgb;
-        gradient.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
-        gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, 1)`);
-        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.5)`);
-      }
-
+      gradient.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
+      gradient.addColorStop(0.1, `rgba(${r}, ${g}, ${b}, 1)`);
+      gradient.addColorStop(0.2, `rgba(${r}, ${g}, ${b}, 0)`);
+      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.2)`);
       context.fillStyle = gradient;
-      context.fillRect(x, y, barWidth - 1, barHeight);
+
+      //prevent negative bar width if calculated width is < 0.
+      const effectiveWidth = Math.max(1, barWidth);
+      context.fillRect(x, y, effectiveWidth, barHeight);
     });
   },
 
