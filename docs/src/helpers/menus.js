@@ -479,6 +479,10 @@ export const sidebarMenuAPI = [
         url: '/api/utils/cloning',
       },
       {
+        name: 'Colors',
+        url: '/api/utils/colors',
+      },
+      {
         name: 'Crypto',
         url: '/api/utils/crypto',
       },

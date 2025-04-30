@@ -1,5 +1,6 @@
 export * from './arrays.js';
 export * from './browser.js';
+export * from './colors.js';
 export * from './cloning.js';
 export * from './crypto.js';
 export * from './dates.js';
