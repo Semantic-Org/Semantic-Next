@@ -58,6 +58,7 @@ Some paths have shifted
 
 
 ## New
+* Utils - Added color utils for oklch conversion to hex and rgb. These are essential to use oklch in javascript.
 * Signals - `increment` and `decrement` now receive a max and min. This can be used to increment a value within a limit. This is particularly useful for keyboard controls that use a `selectedIndex`
 * Signals - `debugReactivity` has been greatly improved. You can now pass debug context with signals and reactions and read them during flush.
 * Component - Added reactivity debugging metadata for all reactive template features like each, if, expressions. This will now appear when using `{debugReactivity}` in a template.
