@@ -2,7 +2,7 @@
 const { sidebarMenu, expandAll } = Astro.props;
 import './Sidebar.css';
 import NavMenu from '@components/NavMenu/NavMenu.js';
-import { getSidebarMenu, getActiveSidebarSection, getSidebarItems } from '@helpers/navigation.js';
+import { getSidebarMenu, getActiveSidebarSection, getSidebarNavMenu } from '@helpers/navigation.js';
 import { UIMenu } from '@semantic-ui/core'
 
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
@@ -12,7 +12,7 @@ const canExpand = true;
 
 const currentPath = Astro.url.pathname;
 const activeSection = getActiveSidebarSection(currentPath);
-const items = getSidebarItems(activeSection, currentPath);
+const items = getSidebarNavMenu(activeSection, currentPath);
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
