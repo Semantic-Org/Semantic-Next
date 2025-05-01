@@ -1,4 +1,7 @@
 import { getCollection } from 'astro:content';
+
+
+/* UI Component pages are generated dynamically */
 const components = await getCollection('components');
 const componentPages = components.map(page => ({
   name: page.data.title,
@@ -9,44 +12,15 @@ const componentPages = components.map(page => ({
 /* Topbar Menu */
 export const topbarDisplayMenu = [
   {
-    _ids: ['framework', 'api', 'ui'],
+    /* This is the ids of the submenu in sidebar */
+    _ids: ['framework', 'api'],
+
     name: 'Documentation',
     url: '/introduction',
   },
   {
-    _id: 'learn',
-    name: 'Learn',
-    url: '/learn/selection',
-    baseURL: '/learn',
-  },
-  {
-    _id: 'examples',
-    name: 'Examples',
-    url: '/examples/counter',
-    baseURL: '/examples',
-  },
-  {
-    _id: 'playground',
-    name: 'Playground',
-    url: '/playground',
-  },
-];
-
-/* The menu including all menu groupings for secondary menus */
-export const topbarMenu = [
-  {
-    _id: 'framework',
-    name: 'Guide',
-    url: '/introduction',
-  },
-  {
-    _id: 'api',
-    name: 'API Docs',
-    url: '/api',
-  },
-  {
     _id: 'ui',
-    name: 'UI Library',
+    name: 'UI Components',
     url: '/usage',
   },
   {
@@ -60,12 +34,48 @@ export const topbarMenu = [
     name: 'Examples',
     url: '/examples/counter',
     baseURL: '/examples',
-  },
+  },/*
   {
     _id: 'playground',
     name: 'Playground',
     url: '/playground',
+  },*/
+];
+
+/* These are all site sections topbar and sidebar together  */
+export const topbarMenu = [
+  {
+    _id: 'framework',
+    name: 'User Guide',
+    url: '/introduction',
   },
+  {
+    _id: 'api',
+    name: 'API Reference',
+    url: '/api',
+  },
+  {
+    _id: 'ui',
+    name: 'UI Components',
+    url: '/usage',
+  },
+  {
+    _id: 'learn',
+    name: 'Learn',
+    url: '/learn/selection',
+    baseURL: '/learn',
+  },
+  {
+    _id: 'examples',
+    name: 'Examples',
+    url: '/examples/counter',
+    baseURL: '/examples',
+  },/*
+  {
+    _id: 'playground',
+    name: 'Playground',
+    url: '/playground',
+  },*/
 ];
 
 /* UI Component Sidebar */
@@ -94,12 +104,14 @@ export const sidebarMenuUI = [
     url: '/ui',
     icon: 'layers',
     pages: componentPages,
-  }, /*
+  },
+  /*
   {
     name: 'Test',
     url: '/test',
     icon: 'code',
-  },*/
+  },
+  */
 ];
 
 /* Component Framework Sidebar */

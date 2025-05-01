@@ -238,8 +238,8 @@ export const getActiveSidebarSection = (currentPath) => {
   return activeSection;
 };
 
-/* Generates sidebar items based on active section */
-export const getSidebarItems = (activeSection, currentPath) => {
+/* Gets items for the top-level navigation in sidebar above sidebar items  */
+export const getSidebarNavMenu = (activeSection, currentPath) => {
   if (!activeSection) { return []; }
   currentPath = removeTrailingSlash(currentPath);
 
@@ -284,25 +284,20 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
   });
 
   // If section is part of a group (like Documentation), get the appropriate menu
-  if (section?._ids) {
-    if (topbarSection === 'ui') {
-      menu = sidebarMenuUI;
-    }
-    else if (topbarSection === 'framework') {
-      menu = sidebarMenuFramework;
-    }
-    else if (topbarSection === 'api') {
-      menu = sidebarMenuAPI;
-    }
+  if (topbarSection === 'ui') {
+    menu = sidebarMenuUI;
   }
-  else {
-    // Handle individual sections
-    if (topbarSection === 'examples') {
-      menu = sidebarMenuExamples;
-    }
-    else if (topbarSection === 'learn') {
-      menu = sidebarMenuLearn;
-    }
+  else if (topbarSection === 'framework') {
+    menu = sidebarMenuFramework;
+  }
+  else if (topbarSection === 'api') {
+    menu = sidebarMenuAPI;
+  }
+  else if (topbarSection === 'examples') {
+    menu = sidebarMenuExamples;
+  }
+  else if (topbarSection === 'learn') {
+    menu = sidebarMenuLearn;
   }
   return menu;
 };
