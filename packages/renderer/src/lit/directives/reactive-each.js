@@ -53,6 +53,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     let items = this.getItems(this.eachCondition);
     if (!items?.length > 0 && this.eachCondition.else) {
       // this is necessary to avoid lit errors
+      // when returned lit html structure changes
       return repeat(
         [1],
         () => 'else-case',
@@ -64,7 +65,6 @@ export class ReactiveEachDirective extends AsyncDirective {
     const collectionType = this.getCollectionType(items);
     if (collectionType == 'object') {
       items = arrayFromObject(items);
-      console.log(items);
     }
     return repeat(
       items,
