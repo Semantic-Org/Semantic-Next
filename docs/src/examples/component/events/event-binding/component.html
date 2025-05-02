@@ -5,4 +5,7 @@
 <ui-button class="decrease height">-</ui-button>
 <ui-button class="increase height">+</ui-button>
 <hr/>
-<div class="circle" style="{getStyle}"></div>
+<div class="circle" style="
+  width: { width > 0 ? width : 0 }px;
+  height: { height > 0 ? height : 0 }px;
+"></div>
