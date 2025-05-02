@@ -168,6 +168,24 @@
       ]
     },
     {
+      "name": "Type",
+      "attribute": "type",
+      "description": "be a standard html button type",
+      "usageLevel": 3,
+      "options": [
+        {
+          "name": "Submit",
+          "value": "submit",
+          "description": "submit the surrounding form"
+        },
+        {
+          "name": "Reset",
+          "value": "reset",
+          "description": "reset the surrounding form"
+        }
+      ]
+    },
+    {
       "name": "Circular",
       "attribute": "circular",
       "description": "be rounded like a circle",

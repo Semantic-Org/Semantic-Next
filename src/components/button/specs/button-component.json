@@ -14,6 +14,7 @@
   "variations": [
     "attached",
     "basic",
+    "type",
     "circular",
     "color",
     "compact",
@@ -52,6 +53,7 @@
     "loading",
     "attached",
     "basic",
+    "type",
     "circular",
     "color",
     "compact",
@@ -84,6 +86,8 @@
     "right-attached": "attached",
     "basic": "basic",
     "very-basic": "basic",
+    "submit": "type",
+    "reset": "type",
     "red": "color",
     "orange": "color",
     "yellow": "color",
@@ -135,6 +139,7 @@
     "loading": "boolean",
     "attached": "string",
     "basic": "string",
+    "type": "string",
     "circular": "boolean",
     "color": "string",
     "compact": "string",
@@ -176,6 +181,10 @@
     "basic": [
       "basic",
       "very-basic"
+    ],
+    "type": [
+      "submit",
+      "reset"
     ],
     "color": [
       "red",
