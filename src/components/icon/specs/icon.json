@@ -447,7 +447,7 @@
       "description": "be formatted to spin like a loader",
       "usageLevel": 3,
       "attribute": "spin"
-    }
+    },
     {
       "name": "Inverted",
       "description": "be formatted to appear on dark backgrounds",
