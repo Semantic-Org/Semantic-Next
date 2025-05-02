@@ -38,8 +38,11 @@ label {
 input[type="text"],
 textarea,
 select {
-  width: 100%;
-  padding: var(--padding);
+  width: 12em;
+  background: var(--inverted-100);
+  color: var(--input-text-color);
+  padding: var(--input-padding);
+  color: var(--text-color);
   border: var(--border);
   border-radius: var(--border-radius);
   font-family: inherit;
@@ -47,8 +50,7 @@ select {
   transition: var(--transition);
 
   &:focus {
-    border-color: var(--blue);
-    box-shadow: var(--subtle-shadow);
+    border-color: var(--form-focused-border-color);
     outline: none;
   }
 }
