@@ -19,6 +19,7 @@
   ],
   "settings": [
     "name",
+    "type",
     "debounced",
     "debounce-interval",
     "clearable",
@@ -32,6 +33,7 @@
     "fluid",
     "size",
     "name",
+    "type",
     "debounced",
     "debounce-interval",
     "clearable",
@@ -55,6 +57,7 @@
     "fluid": "boolean",
     "size": "string",
     "name": "string",
+    "type": "string",
     "debounced": "boolean",
     "clearable": "string",
     "value": "string"
@@ -77,6 +80,7 @@
   ],
   "defaultValues": {
     "name": "",
+    "type": "text",
     "debounced": false,
     "debounce-interval": 150,
     "clearable": "",

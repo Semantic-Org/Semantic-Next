@@ -56,8 +56,12 @@ Some paths have shifted
 * Themes/Specs are now included in each component folder
 * Component CSS variables are now included in the Shadow DOM scope and NOT global scope. This should vastly improve the global dev tools experience by reducing the number of defined variables in scope.
 
+## New UI
+- **Input** - Added `type` property for inputs
+- **Buttton** - Added `type` property for buttons
 
 ## New
+* Query - Added `$('form').submit()` shorthand for `$('form').trigger('submit');`
 * Utils - Added color utils for oklch conversion to hex and rgb. These are essential to use oklch in javascript.
 * Signals - `increment` and `decrement` now receive a max and min. This can be used to increment a value within a limit. This is particularly useful for keyboard controls that use a `selectedIndex`
 * Signals - `debugReactivity` has been greatly improved. You can now pass debug context with signals and reactions and read them during flush.
