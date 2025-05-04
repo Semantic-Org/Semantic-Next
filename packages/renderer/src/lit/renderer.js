@@ -577,10 +577,12 @@ export class LitRenderer {
     const contentID = LitRenderer.getID({ ast, data, isSVG });
     const treeRef = this.renderTrees[contentID];
     const existingTree = treeRef ? treeRef.deref() : undefined;
-    // disabled for now
+
+    // this is disabled globally currently as it is experimental
     if (LitRenderer.useSubtreeCache && existingTree) {
       return existingTree.cachedRender(data);
     }
+
     const tree = new LitRenderer({
       ast,
       data,
