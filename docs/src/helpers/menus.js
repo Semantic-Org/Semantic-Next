@@ -24,12 +24,12 @@ export const topbarDisplayMenu = [
     name: 'Examples',
     url: '/examples/counter',
     baseURL: '/examples',
-  },
+  },/*
   {
     _id: 'playground',
     name: 'Playground',
     url: '/playground',
-  },
+  },*/
 ];
 
 /* The menu including all menu groupings for secondary menus */
