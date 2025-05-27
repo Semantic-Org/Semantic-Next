@@ -5,7 +5,7 @@ import { isClient } from './ssr.js';
 --------------------*/
 
 export const copyText = (text) => {
-  navigator.clipboard.writeText(text);
+  return navigator.clipboard.writeText(text);
 };
 
 export const openLink = (url, { newWindow = false, settings, target, event } = {}) => {
