@@ -6,7 +6,48 @@ description: Using helpers for common template operations
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 
+## Usage
+
 [Template helpers](/api/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat` `stringify` that can be used to format values for output.
+
+
+### Literate Coding
+
+Helpers can often mimic the functionality of simple javascript expressions but can be used to improve the readability of your templates, or reduce their reliance on inlined javascript.
+
+```sui title="Using Helper"
+{#if hasAny arrayItems}
+  ...
+{/if}
+```
+
+```sui title="Identical Javascript"
+{#if arrayItems.length > 0}
+  ...
+{/if}
+```
+
+### Shared Utilities
+
+Helpers also provide common utilities from [utils](/api/utils) which make it easier to manipulate data without writing additional methods in your component
+
+#### With Helper
+```sui title="Using Stringify"
+{stringify complexData}
+```
+
+#### Without Helper
+```sui title="Using Data Context"
+{outputString complexData}
+```
+
+```javascript title="Custom Stringify"
+const createComponent = ({  }) => ({
+  outputString(value) {
+    return JSON.stringify(value);
+  }
+});
+```
 
 ### Helper Example
 

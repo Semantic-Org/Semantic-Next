@@ -10,28 +10,64 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 Semantic UI templates provide a declarative syntax for generating the HTML structure of your [Web Components](/introduction). They integrate features like [looping](/templates/loops), [conditionals](/templates/conditionals), [expressions](/templates/expressions), and access to a component's [data context](/components/rendering#data-context) to simplify rendering dynamic views.
 
-## Template Syntax
+## Writing Templates
 
-Templates all support either single or double bracket syntax and are whitespace insensitive. Use what style you and your team prefer.
+### Flexible Syntax
 
-#### Single Bracket
-```sui
+Template syntax is designed to be adaptable to your team's preferences and to help components feel more natural across codebases of different languages.
+
+#### Brackets
+
+Bracket syntax supports either single or double bracket as long as it is consistent across the file.
+
+```sui title="Single Bracket"
 Welcome, { getFirstName }
 ```
 
-#### Double Bracket
-```sui
+```sui title="Double Bracket"
 Welcome, {{ getFirstName }}
 ```
 
-> **Flexible Dialects:** Templates support both `{ expression }` and `{{ expression }}` syntax, chosen for developer preference (e.g., familiarity from JSX/Svelte vs. Handlebars/Rails). Both compile identically and efficiently.
+#### Expressions
 
-### Template Compilation and Usage
+Expressions can use Lisp style spaced expressions or javascript style expressions. You can also include any inlined javascript.
+
+```sui title="Lisp Simple"
+{ formatDate date 'h:mm a' timezone }
+```
+
+```sui title="Javascript"
+{ formatDate(date, 'h:mm a') }
+```
+
+```sui title="Lisp Nested"
+{ formatDate date, 'h:mm a' (getTimezone user) }
+```
+
+```sui title="Javascript Nested"
+{ formatDate(date, 'h:mm a', getTimezone(user)) }
+```
+```sui title="Lisp Evaluated"
+{ formatDate date, ('h:mm + 'a') (getTimezone user) }
+```
+
+```sui title="Javascript Evaluated"
+{ formatDate(date, 'h:mm + 'a', getTimezone(user)) }
+```
+
+### Compiles to AST
 
 Semantic UI templates compile to an Abstract Syntax Tree (AST). This AST is used to efficiently render the component's [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) and perform targeted updates only when underlying [reactive data sources](/reactivity) change.
 
 > See the [Templates & Data Context](/components/rendering) guide for details on how templates integrate with component data.
 
+## Binding Data
+
+Templates are bound to a [data context](/components/rendering) which is used for evaluating expressions.
+
+You can think of the data context as "all the variables defined in the scope of your template".
+
+When using the component framework these will come from sources in your component like their [settings](/components/settings), and [internal state](/components/state).
 
 <PlaygroundExample id="advanced-color-picker" height="480"></PlaygroundExample>
 
