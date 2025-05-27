@@ -59,7 +59,8 @@
   background-image: var(--angled-gradient);
   
   &:hover {
-    transform: translateY(-2px);
+    z-index: 2;
+    transform: scale(1.02);
     box-shadow: var(--floating-shadow);
     border-color: var(--selected-border-color);
   }
