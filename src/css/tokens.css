@@ -1,7 +1,8 @@
-@layer tokens.global, tokens.computed, theme.palette, theme.computed;
+@layer tokens.global, tokens.colors, tokens.computed, theme.palette, theme.computed;
 
 /* Global Tokens */
 @import url('./tokens/global.css') layer(tokens.global);
+@import url('./tokens/colors.css') layer(tokens.colors);
 @import url('./tokens/computed.css') layer(tokens.computed);
 
 /* Theme Tokens  */

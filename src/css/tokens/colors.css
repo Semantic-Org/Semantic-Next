@@ -1,0 +1,274 @@
+/*******************************
+        Color System
+*******************************/
+
+/*
+  Comprehensive color scale system inspired by Uchu palette design.
+  Each color gets a 0-100 scale with customizable lightness and chroma values.
+  
+  Base colors are treated as "50" values and can be overridden in themes.
+  Lightness and chroma scaling can be customized per color or globally.
+*/
+
+:root {
+
+  /* -------------------
+      Base Colors (50)
+  -------------------- */
+  
+  /* These are your existing color values, treated as the "50" anchor point */
+  --red-color: oklch(0.59 0.27 29);
+  --orange-color: oklch(0.65 0.2 44.37);
+  --yellow-color: oklch(0.78 0.18 81.24);
+  --olive-color: oklch(0.69 0.19 119.53);
+  --green-color: oklch(0.62 0.26 145.53);
+  --teal-color: oklch(0.66 0.14 188.03);
+  --blue-color: oklch(0.56 0.21 251);
+  --violet-color: oklch(0.46 0.26 283.29);
+  --purple-color: oklch(0.54 0.26 314.43);
+  --pink-color: oklch(0.59 0.27 358.33);
+  --brown-color: oklch(0.5 0.11 51.34);
+  --grey-color: oklch(0.57 0 0);
+
+  /* -------------------
+    Global Lightness Scale
+  -------------------- */
+  
+  /* Perceptual lightness distribution (inspired by Uchu) */
+  /* Larger gaps in lighter ranges, smaller gaps in darker ranges */
+  --lightness-0: 0.98;   /* Near white */
+  --lightness-5: 0.95;   /* Very light */
+  --lightness-10: 0.90;  /* Light backgrounds */
+  --lightness-20: 0.82;  /* Subtle UI */
+  --lightness-30: 0.74;  /* Muted elements */
+  --lightness-40: 0.65;  /* Secondary elements */
+  --lightness-50: 1.0;   /* Base color (uses original L value) */
+  --lightness-60: 0.93;  /* Slight darkening */
+  --lightness-70: 0.86;  /* Gradual darkening */
+  --lightness-80: 0.79;  /* More darkening */
+  --lightness-90: 0.72;  /* Dark shades */
+  --lightness-100: 0.15; /* Near black */
+
+  /* -------------------
+    Global Chroma Scale
+  -------------------- */
+  
+  /* Bell curve chroma distribution - peaks in middle, reduces at extremes */
+  --chroma-0: 0.15;   /* Very light = very low chroma */
+  --chroma-5: 0.25;   /* Light = low chroma */
+  --chroma-10: 0.35;  /* Subtle = medium-low chroma */
+  --chroma-20: 0.55;  /* UI elements = medium chroma */
+  --chroma-30: 0.75;  /* Muted = high-medium chroma */
+  --chroma-40: 0.90;  /* Secondary = near-full chroma */
+  --chroma-50: 1.0;   /* Base = full chroma */
+  --chroma-60: 0.95;  /* Slight chroma reduction */
+  --chroma-70: 0.88;  /* Gradual chroma reduction */
+  --chroma-80: 0.80;  /* More chroma reduction */
+  --chroma-90: 0.72;  /* Dark = lower chroma */
+  --chroma-100: 0.60; /* Near black = reduced chroma */
+
+  /* -------------------
+      Color-Specific Overrides
+  -------------------- */
+  
+  /* Yellow: Compressed lightness range for readability */
+  --yellow-lightness-0: 0.97;
+  --yellow-lightness-10: 0.92;
+  --yellow-lightness-20: 0.88;
+  --yellow-lightness-50: 0.87;  /* Yellow base is lighter than others */
+  --yellow-lightness-70: 0.75;
+  --yellow-lightness-80: 0.65;
+  --yellow-lightness-90: 0.55;
+  --yellow-lightness-100: 0.25;
+
+  /* Red: Slight hue adjustments in darker ranges to prevent muddiness */
+  --red-hue-shift-70: 2;
+  --red-hue-shift-80: 3;
+  --red-hue-shift-90: 4;
+  --red-hue-shift-100: 5;
+
+  /* -------------------
+        Red Scale
+  -------------------- */
+
+  /* Individual customizable lightness values for red */
+  --red-lightness-0: var(--lightness-0);
+  --red-lightness-5: var(--lightness-5);
+  --red-lightness-10: var(--lightness-10);
+  --red-lightness-20: var(--lightness-20);
+  --red-lightness-30: var(--lightness-30);
+  --red-lightness-40: var(--lightness-40);
+  --red-lightness-50: var(--lightness-50);
+  --red-lightness-60: var(--lightness-60);
+  --red-lightness-70: var(--lightness-70);
+  --red-lightness-80: var(--lightness-80);
+  --red-lightness-90: var(--lightness-90);
+  --red-lightness-100: var(--lightness-100);
+
+  /* Individual customizable chroma values for red */
+  --red-chroma-0: var(--chroma-0);
+  --red-chroma-5: var(--chroma-5);
+  --red-chroma-10: var(--chroma-10);
+  --red-chroma-20: var(--chroma-20);
+  --red-chroma-30: var(--chroma-30);
+  --red-chroma-40: var(--chroma-40);
+  --red-chroma-50: var(--chroma-50);
+  --red-chroma-60: var(--chroma-60);
+  --red-chroma-70: var(--chroma-70);
+  --red-chroma-80: var(--chroma-80);
+  --red-chroma-90: var(--chroma-90);
+  --red-chroma-100: var(--chroma-100);
+
+  /* Generated red scale - pre-computed for browser compatibility */
+  --red-0: oklch(0.98 0.04 29);   /* Very light, low chroma */
+  --red-5: oklch(0.95 0.07 29);   /* Light */
+  --red-10: oklch(0.90 0.09 29);  /* Light background */
+  --red-20: oklch(0.82 0.15 29);  /* Subtle UI */
+  --red-30: oklch(0.74 0.20 29);  /* Muted */
+  --red-40: oklch(0.65 0.24 29);  /* Secondary */
+  --red-50: var(--red-color);     /* Base: oklch(0.59 0.27 29) */
+  --red-60: oklch(0.55 0.26 29);  /* Slight darkening */
+  --red-70: oklch(0.51 0.24 31);  /* Darker + hue shift */
+  --red-80: oklch(0.47 0.22 32);  /* Much darker + hue shift */
+  --red-90: oklch(0.43 0.19 33);  /* Very dark + hue shift */
+  --red-100: oklch(0.38 0.17 34); /* Dark but not near black */
+
+  /* -------------------
+        Blue Scale
+  -------------------- */
+
+  /* Individual customizable lightness values for blue */
+  --blue-lightness-0: var(--lightness-0);
+  --blue-lightness-5: var(--lightness-5);
+  --blue-lightness-10: var(--lightness-10);
+  --blue-lightness-20: var(--lightness-20);
+  --blue-lightness-30: var(--lightness-30);
+  --blue-lightness-40: var(--lightness-40);
+  --blue-lightness-50: var(--lightness-50);
+  --blue-lightness-60: var(--lightness-60);
+  --blue-lightness-70: var(--lightness-70);
+  --blue-lightness-80: var(--lightness-80);
+  --blue-lightness-90: var(--lightness-90);
+  --blue-lightness-100: var(--lightness-100);
+
+  /* Individual customizable chroma values for blue */
+  --blue-chroma-0: var(--chroma-0);
+  --blue-chroma-5: var(--chroma-5);
+  --blue-chroma-10: var(--chroma-10);
+  --blue-chroma-20: var(--chroma-20);
+  --blue-chroma-30: var(--chroma-30);
+  --blue-chroma-40: var(--chroma-40);
+  --blue-chroma-50: var(--chroma-50);
+  --blue-chroma-60: var(--chroma-60);
+  --blue-chroma-70: var(--chroma-70);
+  --blue-chroma-80: var(--chroma-80);
+  --blue-chroma-90: var(--chroma-90);
+  --blue-chroma-100: var(--chroma-100);
+
+  /* Generated blue scale - pre-computed for browser compatibility */
+  --blue-0: oklch(0.98 0.03 251);   /* Very light, low chroma */
+  --blue-5: oklch(0.95 0.05 251);   /* Light */
+  --blue-10: oklch(0.90 0.07 251);  /* Light background */
+  --blue-20: oklch(0.82 0.12 251);  /* Subtle UI */
+  --blue-30: oklch(0.74 0.16 251);  /* Muted */
+  --blue-40: oklch(0.65 0.19 251);  /* Secondary */
+  --blue-50: var(--blue-color);     /* Base: oklch(0.56 0.21 251) */
+  --blue-60: oklch(0.52 0.20 251);  /* Slight darkening */
+  --blue-70: oklch(0.48 0.18 251);  /* Darker */
+  --blue-80: oklch(0.44 0.17 251);  /* Much darker */
+  --blue-90: oklch(0.40 0.15 251);  /* Very dark */
+  --blue-100: oklch(0.36 0.14 251); /* Dark but not near black */
+
+  /* -------------------
+        Green Scale
+  -------------------- */
+
+  /* Individual customizable lightness values for green */
+  --green-lightness-0: var(--lightness-0);
+  --green-lightness-5: var(--lightness-5);
+  --green-lightness-10: var(--lightness-10);
+  --green-lightness-20: var(--lightness-20);
+  --green-lightness-30: var(--lightness-30);
+  --green-lightness-40: var(--lightness-40);
+  --green-lightness-50: var(--lightness-50);
+  --green-lightness-60: var(--lightness-60);
+  --green-lightness-70: var(--lightness-70);
+  --green-lightness-80: var(--lightness-80);
+  --green-lightness-90: var(--lightness-90);
+  --green-lightness-100: var(--lightness-100);
+
+  /* Individual customizable chroma values for green */
+  --green-chroma-0: var(--chroma-0);
+  --green-chroma-5: var(--chroma-5);
+  --green-chroma-10: var(--chroma-10);
+  --green-chroma-20: var(--chroma-20);
+  --green-chroma-30: var(--chroma-30);
+  --green-chroma-40: var(--chroma-40);
+  --green-chroma-50: var(--chroma-50);
+  --green-chroma-60: var(--chroma-60);
+  --green-chroma-70: var(--chroma-70);
+  --green-chroma-80: var(--chroma-80);
+  --green-chroma-90: var(--chroma-90);
+  --green-chroma-100: var(--chroma-100);
+
+  /* Generated green scale - pre-computed for browser compatibility */
+  --green-0: oklch(0.98 0.04 145.53);   /* Very light, low chroma */
+  --green-5: oklch(0.95 0.07 145.53);   /* Light */
+  --green-10: oklch(0.90 0.09 145.53);  /* Light background */
+  --green-20: oklch(0.82 0.14 145.53);  /* Subtle UI */
+  --green-30: oklch(0.74 0.19 145.53);  /* Muted */
+  --green-40: oklch(0.65 0.23 145.53);  /* Secondary */
+  --green-50: var(--green-color);       /* Base: oklch(0.62 0.26 145.53) */
+  --green-60: oklch(0.58 0.25 145.53);  /* Slight darkening */
+  --green-70: oklch(0.53 0.23 145.53);  /* Darker */
+  --green-80: oklch(0.49 0.21 145.53);  /* Much darker */
+  --green-90: oklch(0.45 0.19 145.53);  /* Very dark */
+  --green-100: oklch(0.40 0.17 145.53); /* Dark but not near black */
+
+  /* -------------------
+        Yellow Scale
+  -------------------- */
+
+  /* Individual customizable lightness values for yellow (using yellow-specific values) */
+  --yellow-lightness-0: var(--yellow-lightness-0, var(--lightness-0));
+  --yellow-lightness-5: var(--lightness-5);
+  --yellow-lightness-10: var(--yellow-lightness-10, var(--lightness-10));
+  --yellow-lightness-20: var(--yellow-lightness-20, var(--lightness-20));
+  --yellow-lightness-30: var(--lightness-30);
+  --yellow-lightness-40: var(--lightness-40);
+  --yellow-lightness-50: var(--yellow-lightness-50, var(--lightness-50));
+  --yellow-lightness-60: var(--lightness-60);
+  --yellow-lightness-70: var(--yellow-lightness-70, var(--lightness-70));
+  --yellow-lightness-80: var(--yellow-lightness-80, var(--lightness-80));
+  --yellow-lightness-90: var(--yellow-lightness-90, var(--lightness-90));
+  --yellow-lightness-100: var(--yellow-lightness-100, var(--lightness-100));
+
+  /* Individual customizable chroma values for yellow */
+  --yellow-chroma-0: var(--chroma-0);
+  --yellow-chroma-5: var(--chroma-5);
+  --yellow-chroma-10: var(--chroma-10);
+  --yellow-chroma-20: var(--chroma-20);
+  --yellow-chroma-30: var(--chroma-30);
+  --yellow-chroma-40: var(--chroma-40);
+  --yellow-chroma-50: var(--chroma-50);
+  --yellow-chroma-60: var(--chroma-60);
+  --yellow-chroma-70: var(--chroma-70);
+  --yellow-chroma-80: var(--chroma-80);
+  --yellow-chroma-90: var(--chroma-90);
+  --yellow-chroma-100: var(--chroma-100);
+
+  /* Generated yellow scale - pre-computed for browser compatibility */
+  --yellow-0: oklch(0.97 0.03 81.24);   /* Very light, low chroma */
+  --yellow-5: oklch(0.94 0.05 81.24);   /* Light */
+  --yellow-10: oklch(0.90 0.06 81.24);  /* Light background */
+  --yellow-20: oklch(0.86 0.10 81.24);  /* Subtle UI */
+  --yellow-30: oklch(0.82 0.14 81.24);  /* Muted */
+  --yellow-40: oklch(0.80 0.16 81.24);  /* Secondary */
+  --yellow-50: var(--yellow-color);     /* Base: oklch(0.78 0.18 81.24) */
+  --yellow-60: oklch(0.74 0.17 81.24);  /* Slight darkening */
+  --yellow-70: oklch(0.68 0.16 81.24);  /* Darker (readable) */
+  --yellow-80: oklch(0.60 0.14 81.24);  /* Much darker */
+  --yellow-90: oklch(0.50 0.13 81.24);  /* Very dark */
+  --yellow-100: oklch(0.45 0.12 81.24); /* Dark but readable */
+
+}
