@@ -36,7 +36,7 @@ new Template(options)
 | css            | string   | CSS styles associated with the template    |
 | events         | Object   | Event handlers for the template            |
 | keys           | Object   | Key bindings for the template              |
-| stateConfig    | Object   | Configuration for reactive state           |
+| defaultState   | Object   | Configuration for reactive state           |
 | subTemplates   | Object   | Sub-templates used within this template    |
 | createComponent| Function | Function to create the component instance  |
 | parentTemplate | Template | The parent template when nested            |
@@ -93,7 +93,7 @@ const template = new Template({
   events: {
     'click .update': ({ self }) => self.updateUser()
   },
-  stateConfig: {
+  defaultState: {
     user: { name: 'John Doe', email: 'john@example.com' }
   },
   createComponent: ({ state }) => ({
