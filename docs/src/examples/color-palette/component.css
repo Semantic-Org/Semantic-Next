@@ -30,7 +30,7 @@
   }
 }
 
-.scale {
+.colors {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -46,7 +46,7 @@
 }
 
 .swatch {
-  aspect-ratio: 2 / 5;
+  aspect-ratio: 2 / 3;
   cursor: pointer;
   position: relative;
   transition: var(--transition);
@@ -95,37 +95,27 @@
 
   .copy {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--positive-color);
-    color: var(--inverted-100);
-    padding: var(--compact-spacing) var(--spacing);
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    gap: calc(var(--spacing) * 0.25);
-    font-size: var(--small);
-    font-weight: var(--bold);
-    box-shadow: var(--floating-shadow);
+    top: 10px;
+    right: 5px;
     animation: copyPulse 0.3s ease-out;
-    
-    .icon {
-      font-size: var(--medium);
+
+    &::part(label) {
+      background-color: var(--green);
+      color: var(--white);
     }
   }
 }
 
 @keyframes copyPulse {
   0% {
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: scale(0.8);
     opacity: 0;
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: scale(1.1);
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
     opacity: 1;
   }
 }

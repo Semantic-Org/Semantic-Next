@@ -20,8 +20,8 @@ const defaultSettings = {
     'brown',
     'grey',
   ],
-  // Color scale steps to show
-  steps: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+  // Color scale shades to show
+  shades: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
   // Whether to show color values
   showValues: true,
   // Whether to show copy functionality
@@ -30,55 +30,50 @@ const defaultSettings = {
 
 const defaultState = {
   copiedColor: '',
-  copyTimeout: null
 };
 
 const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) => ({
   
   // Get all color data for display
-  getColorData() {
-    const colors = settings.colors;
-    const steps = settings.steps;
-    return colors.map(colorName => ({
+  getColors() {
+    const { colors, shades } = settings;
+    const val = colors.map(colorName => ({
       name: colorName,
       displayName: colorName.charAt(0).toUpperCase() + colorName.slice(1),
-      steps: steps.map(step => ({
-        step,
-        cssVar: `--${colorName}-${step}`,
-        textVar: (step < 50) ? `--${colorName}-90`: `--${colorName}-10`,
-        value: self.getColorValue(colorName, step)
+      shades: shades.map(shade => ({
+        name: shade,
+        cssVar: `--${colorName}-${shade}`,
+        // change text color depending on shade
+        textVar: (shade < 50)
+          ? `--${colorName}-90`
+          : `--${colorName}-10`,
+        value: self.getColorValue(colorName, shade)
       }))
     }));
+    return val;
   },
 
   // Get computed color value from CSS
-  getColorValue(colorName, step) {
+  getColorValue(colorName, shade) {
     if(isServer) {
       return;
     }
-    const cssVar = `--${colorName}-${step}`;
+    const cssVar = `--${colorName}-${shade}`;
     const computed = getComputedStyle(document.documentElement);
     return computed.getPropertyValue(cssVar).trim();
-    console.log(`--${colorName}-${step}`, $('.color-palette').cssVar(`${colorName}-${step}`));
-    return $('.color-palette').cssVar(`${colorName}-${step}`)
+    console.log(`--${colorName}-${shade}`, $('.color-palette').cssVar(`${colorName}-${shade}`));
+    return $('.color-palette').cssVar(`${colorName}-${shade}`)
   },
 
   // Copy color value to clipboard
-  async copyColor(colorName, step) {
-    const cssVar = `--${colorName}-${step}`;
-    const value = self.getColorValue(colorName, step);
+  async copyColor(colorName, shade) {
+    const cssVar = `--${colorName}-${shade}`;
+    const value = self.getColorValue(colorName, shade);
     await copyText(value || cssVar);
 
-    // Clear existing timeout
-    const currentTimeout = state.copyTimeout.get();
-    if (currentTimeout) {
-      clearTimeout(currentTimeout);
-    }
+    state.copiedColor.set(`${colorName}-${shade}`);
 
-    // Set copied feedback
-    state.copiedColor.set(`${colorName}-${step}`);
-
-    // Clear feedback after 2 seconds
+    clearTimeout(self.timeout);
     self.timeout = setTimeout(() => {
       state.copiedColor.set(null);
       delete self.timeout;
@@ -86,24 +81,24 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) 
 
     dispatchEvent('colorCopied', {
       colorName,
-      step,
+      shade,
       cssVar,
       value
     });
   },
 
   // Check if a color is currently copied
-  isColorCopied(colorName, step) {
+  isColorCopied(colorName, shade) {
     const copied = state.copiedColor.get();
-    return copied === `${colorName}-${step}`;
+    return copied === `${colorName}-${shade}`;
   }
 });
 
 const events = {
   'click .swatch'({ self, settings, data, event }) {
-    const { color, step } = data;
-    if (settings.showCopy && color && step) {
-      self.copyColor(color, step);
+    const { color, shade } = data;
+    if (settings.showCopy && color && shade) {
+      self.copyColor(color, shade);
     }
   }
 };

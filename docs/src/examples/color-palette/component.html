@@ -1,33 +1,33 @@
 <div class="palette">
-  {#each colorData in getColorData}
+  {#each getColors}
     <div class="group">
-      <h3 class="name">{colorData.displayName}</h3>
+      <h3 class="name">{displayName}</h3>
       
-      <div class="scale">
-        {#each step in colorData.steps}
-          <div 
-            class="swatch {isColorCopied(colorData.name, step.step) ? 'copied' : ''}"
-            style="background-color: var({step.cssVar}); --overlay-color: var({step.textVar});"
-            data-color="{colorData.name}"
-            data-step="{step.step}"
-            title="{step.cssVar}: {step.value}"
+      <div class="colors">
+        {#each shade in shades}
+          <div
+            class="swatch {isColorCopied(name, shade.name) ? 'copied' : ''}"
+            style="background-color: var({shade.cssVar}); --overlay-color: var({shade.textVar});"
+            data-color="{name}"
+            data-shade="{shade.name}"
+            title="{shade.cssVar}: {shade.value}"
           >
-            <div class="step">{step.step}</div>
-            
+            <div class="shade">{shade.name}</div>
+
             {#if showValues}
               <div class="info">
-                <div class="var">{step.cssVar}</div>
-                {#if step.value}
-                  <div class="value">{step.value}</div>
+                <div class="var">{shade.cssVar}</div>
+                {#if shade.value}
+                  <div class="value">{shade.value}</div>
                 {/if}
               </div>
             {/if}
-            
-            {#if showCopy && isColorCopied(colorData.name, step.step) }
-              <div class="copy">
-                <span class="icon">✓</span>
-                <span>Copied!</span>
-              </div>
+
+            {#if showCopy && isColorCopied(name, shade.name) }
+              <ui-label mini class="copy">
+                <ui-icon check></ui-icon>
+                Copied
+              </ui-label>
             {/if}
           </div>
         {/each}
