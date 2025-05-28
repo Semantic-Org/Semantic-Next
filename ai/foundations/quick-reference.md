@@ -92,7 +92,11 @@ Event handlers receive all standard arguments plus:
   // Event-specific arguments
   event,          // Native event object
   target,         // Element matching the selector (may differ from event.target)
-  data,           // data-* attributes + event.detail (type converted)
+  data,           // An object containing merged data. It includes properties from the
+                  // element's `dataset` attributes (with values type-converted, e.g., "true" to true)
+                  // and properties from the `event.detail` object (if the event is a CustomEvent).
+                  // In case of key collisions between `dataset` and `event.detail`,
+                  // properties from `event.detail` will overwrite those from `dataset`.
   value,          // Input value (for input events)
   isDeep,         // Event from nested component/slot
 }
