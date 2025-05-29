@@ -14,14 +14,12 @@ html,
   /* Used on inputs, textarea etc */
   --form-focused-border-color: var(--primary-text-color);
 
-  /* Used on dropdowns, other larger blocks */
-  --form-focused-muted-border-color: #96C8DA;
+  /* Used on dropdowns, other larger blocks - moved to computed/interaction.css */
 
   /* -------------------
     Highlighted Text
   -------------------- */
-
-  --highlight-background: #CCE2FF;
+  /* Moved to computed/interaction.css */
   --highlight-color: var(--text-color);
 
   --input-highlight-background: rgb(100 100 100 / 40%);
@@ -48,6 +46,8 @@ html,
        Border Colors
   -------------------- */
 
+  /* Note these are hand-tuned to improve contrast */
+
   /* color base */
   --black-border-lch: 0.2 0.01 279.32;
   --white-border-lch: 0.96 0.01 279.32;
@@ -67,7 +67,7 @@ html,
   /* solids */
   --solid-internal-border-color: var(--standard-solid-5);
   --solid-border-color: var(--standard-solid-10);
-  --solid-black-border-color: var(--black-solid-10);
-  --solid-white-border-color: var(--white-solid-10);
+  --solid-black-border-color: var(--black-solid-90);
+  --solid-white-border-color: var(--white-solid-90);
 
 }

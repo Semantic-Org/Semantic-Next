@@ -10,7 +10,7 @@ html.dark,
 
   --dark-mode: true;
   --light-mode: false;
-  --page-background: #000000;
+  --page-background: var(--black);
 
   /* -------------------
       Invert Colors

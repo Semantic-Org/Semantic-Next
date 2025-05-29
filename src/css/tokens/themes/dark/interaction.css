@@ -7,13 +7,14 @@ html.dark,
 [dark][dark],
 [theme][theme="dark"] {
 
+  /* Note these are hand-tuned to improve contrast */
+
   /* -------------------
           Text
   -------------------- */
 
   --text-color: var(--standard-90);
   --header-color: var(--standard-100);
-  --primary-text-color: var(--primary-light-text-color);
 
   /* -------------------
          Links
@@ -23,11 +24,9 @@ html.dark,
   --link-hover-color: oklch(0.7 0.18 250.31);
 
   /* -------------------
-         Borders
+       Border Colors
   -------------------- */
 
-  --solid-border-color: #222222;
-  --border: 1px solid var(--border-color);
-  --solid-border: 1px solid var(--solid-border-color);
+  --solid-border-color: var(--black-solid-75);
 
 }

@@ -58,6 +58,6 @@ html,
           Page
   -------------------- */
 
-  --page-background: #FFFFFF;
+  --page-background: var(--white);
 
 }

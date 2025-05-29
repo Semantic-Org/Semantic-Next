@@ -617,4 +617,20 @@
   --brown-90: oklch(from var(--brown) var(--brown-lightness-90) calc(c * var(--brown-chroma-90)) h);
   --brown-100: oklch(from var(--brown) var(--brown-lightness-100) calc(c * var(--brown-chroma-100)) h);
 
+  /* -------------------
+      Colored Backgrounds
+  -------------------- */
+
+  --red-background: var(--red-5);
+  --orange-background: var(--orange-5);
+  --yellow-background: var(--yellow-5);
+  --olive-background: var(--olive-5);
+  --green-background: var(--green-5);
+  --teal-background: var(--teal-5);
+  --blue-background: var(--blue-5);
+  --violet-background: var(--violet-5);
+  --purple-background: var(--purple-5);
+  --pink-background: var(--pink-5);
+  --brown-background: var(--brown-5);
+
 }

@@ -26,33 +26,7 @@ html,
   --grey: oklch(0.57 0 0);
   --black: oklch(0.23 0 0);
 
-  /* ---  Light Colors  --- */
-  --light-red: #FF695E;
-  --light-orange: #FF851B;
-  --light-yellow: #FFE21F;
-  --light-olive: #D9E778;
-  --light-green: #2ECC40;
-  --light-teal: #6DFFFF;
-  --light-blue: #58C1FE;
-  --light-violet: #A291FB;
-  --light-purple: #DC73FF;
-  --light-pink: #FF8EDF;
-  --light-brown: #D67C1C;
-  --light-grey: #DCDDDE;
-  --light-black: #545454;
 
-  /* --- Colored BGs --- */
-  --red-background: #FFE8E6;
-  --orange-background: #FFEDDE;
-  --yellow-background: #FFF8DB;
-  --olive-background: #FBFDEF;
-  --green-background: #E5F9E7;
-  --teal-background: #E1F7F7;
-  --blue-background: #DFF0FF;
-  --violet-background: #EAE7FF;
-  --purple-background: #F6E7FF;
-  --pink-background: #FFE3FB;
-  --brown-background: #F1E2D3;
 
   /* -------------------
        Alpha Colors
