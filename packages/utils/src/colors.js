@@ -55,7 +55,7 @@ export function oklchToRgb(oklchString = '') {
   );
 
   if (!match) {
-    return '';
+    return null;
   }
 
   // Extract and convert L, C, H to numbers

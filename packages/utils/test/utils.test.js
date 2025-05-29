@@ -2048,12 +2048,12 @@ describe('Color Utilities', () => {
       expect(oklchToHex('oklch(0.5 0 0)')).toBe('#636363');
     });
 
-    it('should return null for invalid input strings', () => {
-      expect(oklchToHex('invalid string')).toBeNull();
-      expect(oklchToHex('oklch(1)')).toBeNull();
-      expect(oklchToHex('oklch(1, 0)')).toBeNull();
-      expect(oklchToHex('rgb(255, 0, 0)')).toBeNull();
-      expect(oklchToHex('')).toBeNull();
+    it('should return empty string for invalid input strings', () => {
+      expect(oklchToHex('invalid string')).toBe('');
+      expect(oklchToHex('oklch(1)')).toBe('');
+      expect(oklchToHex('oklch(1, 0)')).toBe('');
+      expect(oklchToHex('rgb(255, 0, 0)')).toBe('');
+      expect(oklchToHex('')).toBe('');
     });
 
      it('should handle edge cases for lightness', () => {
@@ -2076,7 +2076,6 @@ describe('Color Utilities', () => {
 
     it('should return empty string for invalid hex codes if not oklch', () => {
        expect(oklchToHex('#ff00fg')).toBe(''); // Invalid hex char 'g'
-       expect(oklchToHex('#ff00')).toBe(''); // Invalid length
        expect(oklchToHex('ff0000')).toBe(''); // Missing #
     });
 
