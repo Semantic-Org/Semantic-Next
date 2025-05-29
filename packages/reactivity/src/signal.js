@@ -101,9 +101,7 @@ export class Signal {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.maybeClone(newValue);
-      if(!this.context) {
-        this.setContext();
-      }
+      this.setContext();
       this.setTrace();
       this.dependency.changed(this.context);
     }
