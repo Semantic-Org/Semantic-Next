@@ -23,7 +23,7 @@ html.dark,
   --pink: oklch(0.7929 0.1661 338.7);
   --brown: oklch(0.671 0.1485 60.18);
   --grey: oklch(0.8971 0.0017 247.84);
-  --black: oklch(0.4459 0 0);
+  --slate: oklch(0.4459 0 0);
 
   /* -------------------
         UI Colors

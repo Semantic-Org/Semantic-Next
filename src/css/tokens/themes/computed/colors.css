@@ -619,6 +619,52 @@
   --grey-100: oklch(from var(--grey) var(--grey-lightness-100) calc(c * var(--grey-chroma-100)) h);
 
   /* -------------------
+          slate
+  -------------------- */
+
+  /* Lightness */
+  --slate-lightness-0: var(--lightness-0);
+  --slate-lightness-5: var(--lightness-5);
+  --slate-lightness-10: var(--lightness-10);
+  --slate-lightness-20: var(--lightness-20);
+  --slate-lightness-30: var(--lightness-30);
+  --slate-lightness-40: var(--lightness-40);
+  --slate-lightness-50: var(--lightness-50);
+  --slate-lightness-60: var(--lightness-60);
+  --slate-lightness-70: var(--lightness-70);
+  --slate-lightness-80: var(--lightness-80);
+  --slate-lightness-90: var(--lightness-90);
+  --slate-lightness-100: var(--lightness-100);
+
+  /* Chrome */
+  --slate-chroma-0: var(--chroma-0);
+  --slate-chroma-5: var(--chroma-5);
+  --slate-chroma-10: var(--chroma-10);
+  --slate-chroma-20: var(--chroma-20);
+  --slate-chroma-30: var(--chroma-30);
+  --slate-chroma-40: var(--chroma-40);
+  --slate-chroma-50: var(--chroma-50);
+  --slate-chroma-60: var(--chroma-60);
+  --slate-chroma-70: var(--chroma-70);
+  --slate-chroma-80: var(--chroma-80);
+  --slate-chroma-90: var(--chroma-90);
+  --slate-chroma-100: var(--chroma-100);
+
+  /* Color */
+  --slate-0: oklch(from var(--slate) var(--slate-lightness-0) calc(c * var(--slate-chroma-0)) h);
+  --slate-5: oklch(from var(--slate) var(--slate-lightness-5) calc(c * var(--slate-chroma-5)) h);
+  --slate-10: oklch(from var(--slate) var(--slate-lightness-10) calc(c * var(--slate-chroma-10)) h);
+  --slate-20: oklch(from var(--slate) var(--slate-lightness-20) calc(c * var(--slate-chroma-20)) h);
+  --slate-30: oklch(from var(--slate) var(--slate-lightness-30) calc(c * var(--slate-chroma-30)) h);
+  --slate-40: oklch(from var(--slate) var(--slate-lightness-40) calc(c * var(--slate-chroma-40)) h);
+  --slate-50: var(--slate);
+  --slate-60: oklch(from var(--slate) var(--slate-lightness-60) calc(c * var(--slate-chroma-60)) h);
+  --slate-70: oklch(from var(--slate) var(--slate-lightness-70) calc(c * var(--slate-chroma-70)) h);
+  --slate-80: oklch(from var(--slate) var(--slate-lightness-80) calc(c * var(--slate-chroma-80)) h);
+  --slate-90: oklch(from var(--slate) var(--slate-lightness-90) calc(c * var(--slate-chroma-90)) h);
+  --slate-100: oklch(from var(--slate) var(--slate-lightness-100) calc(c * var(--slate-chroma-100)) h);
+
+  /* -------------------
     Background Colors
   -------------------- */
 
@@ -634,6 +680,8 @@
   --purple-background: var(--purple-5);
   --pink-background: var(--pink-5);
   --brown-background: var(--brown-5);
+  --grey-background: var(--grey-5);
+  --slate-background: var(--slate-5);
 
   /* --- Colored Text --- */
   --red-text-color: var(--red);
@@ -647,6 +695,9 @@
   --purple-text-color: var(--purple);
   --pink-text-color: var(--pink);
   --brown-text-color: var(--brown);
+  --grey-text-color: var(--grey);
+  --slate-text-color: var(--slate);
+
 
   /* --- Colored Headers --- */
   --red-header-color: oklch(from var(--red-text-color) calc(l - 0.05) c h);
@@ -660,5 +711,7 @@
   --purple-header-color: oklch(from var(--purple-text-color) calc(l - 0.05) c h);
   --orange-header-color: oklch(from var(--orange-text-color) calc(l - 0.05) c h);
   --brown-header-color: oklch(from var(--brown-text-color) calc(l - 0.05) c h);
+  --grey-header-color: oklch(from var(--grey-text-color) calc(l - 0.05) c h);
+  --slate-header-color: oklch(from var(--slate-text-color) calc(l - 0.05) c h);
 
 }
