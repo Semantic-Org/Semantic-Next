@@ -67,6 +67,7 @@ Some paths have shifted
 * Signals - `debugReactivity` has been greatly improved. You can now pass debug context with signals and reactions and read them during flush.
 * Component - Added reactivity debugging metadata for all reactive template features like each, if, expressions. This will now appear when using `{debugReactivity}` in a template.
 * Binding to `checked` or `input` will automatically update the element property if the value changes. Note this is a one way binding, updating the element attribute will not update a signal/setting passed into `value`.
+* Template Helpers - Added `isNot` helper
 
 ## Bug
 * Fix `value` / `val` in Query would not set value of custom elements because of too strict html element type checking.
