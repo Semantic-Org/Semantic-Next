@@ -17,7 +17,6 @@
 @import url('./tokens/themes/light/brand.css') layer(tokens.themes.light.brand);
 @import url('./tokens/themes/light/colors.css') layer(tokens.themes.light.colors);
 @import url('./tokens/themes/light/interaction.css') layer(tokens.themes.light.interaction);
-@import url('./tokens/themes/light/messages.css') layer(tokens.themes.light.messages);
 
 /* Dark Theme Tokens */
 @import url('./tokens/themes/dark/base.css') layer(tokens.themes.dark.base);
@@ -31,4 +30,5 @@
 @import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
 @import url('./tokens/themes/computed/layout.css') layer(tokens.themes.computed.layout);
 @import url('./tokens/themes/computed/effects.css') layer(tokens.themes.computed.effects);
+@import url('./tokens/themes/computed/messages.css') layer(tokens.themes.computed.messages);
 @import url('./tokens/themes/computed/interaction.css') layer(tokens.themes.computed.interaction);
