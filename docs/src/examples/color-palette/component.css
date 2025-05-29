@@ -93,13 +93,15 @@
 
   .copy {
     position: absolute;
-    top: 10px;
-    right: 5px;
+    top: 50%;
+    left: 50%;
+    margin: -8px 0px 0px -25px;
     animation: copyPulse 0.3s ease-out;
 
     &::part(label) {
       background-color: var(--green);
       color: var(--white);
+      box-shadow: var(--floating-shadow);
     }
   }
 }
