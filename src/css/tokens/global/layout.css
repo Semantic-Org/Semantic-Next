@@ -1,0 +1,49 @@
+/*******************************
+          Layout
+*******************************/
+
+:root {
+
+  /* -------------------
+        Box Model
+  -------------------- */
+
+  --box-sizing: border-box;
+
+  /* -------------------
+          Page
+  -------------------- */
+
+  --page-overflow-x: hidden;
+
+  /* -------------------
+         Spacing
+  -------------------- */
+
+  --spacing: 1rem;
+  --compact-spacing: 0.5rem;
+
+  /* -------------------
+      Border Radius
+  -------------------- */
+
+  --border-radius: 4px;
+  --circular-radius: 500rem;
+
+  /* -------------------
+          Grid
+  -------------------- */
+
+  --column-count: 16;
+
+  /* -------------------
+       Breakpoints
+  -------------------- */
+
+  --mobile-breakpoint: 320px;
+  --tablet-breakpoint: 768px;
+  --computer-breakpoint: 992px;
+  --large-monitor-breakpoint: 1200px;
+  --widescreen-monitor-breakpoint: 1920px;
+
+}

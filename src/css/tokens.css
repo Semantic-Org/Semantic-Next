@@ -1,11 +1,21 @@
-@layer tokens.global, tokens.colors, tokens.computed, theme.palette, theme.computed;
-
 /* Global Tokens */
-@import url('./tokens/global.css') layer(tokens.global);
+@import url('./tokens/global.css') layer(tokens.global.base);
+@import url('./tokens/global/typography.css') layer(tokens.global.typography);
+@import url('./tokens/global/layout.css') layer(tokens.global.layout);
+@import url('./tokens/global/interaction.css') layer(tokens.global.interaction);
+@import url('./tokens/global/visual.css') layer(tokens.global.visual);
+@import url('./tokens/global/brands.css') layer(tokens.global.brands);
+
+/* Computed Tokens */
+@import url('./tokens/computed/typography.css') layer(tokens.computed.typography);
+@import url('./tokens/computed/layout.css') layer(tokens.computed.layout);
+@import url('./tokens/computed/colors.css') layer(tokens.computed.colors);
+@import url('./tokens/computed/interaction.css') layer(tokens.computed.interaction);
+
+/* Semantic Color Tokens */
 @import url('./tokens/colors.css') layer(tokens.colors);
-@import url('./tokens/computed.css') layer(tokens.computed);
 
 /* Theme Tokens  */
-@import url('./tokens/themes/light.css') layer(theme.palette);
-@import url('./tokens/themes/dark.css') layer(theme.palette);
-@import url('./tokens/themes/computed.css') layer(theme.computed);
+@import url('./tokens/themes/light.css') layer(tokens.themes.light);
+@import url('./tokens/themes/dark.css') layer(tokens.themes.dark);
+@import url('./tokens/themes/computed.css') layer(tokens.themes.computed);
