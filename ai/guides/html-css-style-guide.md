@@ -88,6 +88,33 @@ Your approach to HTML and CSS reflects a deep understanding of how natural langu
 </div>
 ```
 
+### Class-Based Element References ⚠️ **CRITICAL PATTERN**
+
+**Avoid ID attributes - use class names for element targeting:**
+
+```html
+<!-- ✅ CORRECT: Use class names for element targeting -->
+<ui-button class="submit" emphasis="primary">Submit</ui-button>
+<select class="size">
+  <option value="small">Small</option>
+  <option value="large">Large</option>
+</select>
+<ui-input class="email" type="email" placeholder="Email">
+
+<!-- ❌ WRONG: Using ID attributes -->
+<ui-button id="submitBtn" emphasis="primary">Submit</ui-button>
+<select id="sizeSelect">
+  <option value="small">Small</option>
+</select>
+<ui-input id="emailInput" type="email">
+```
+
+**Why avoid IDs:**
+- **Reusability**: Classes allow multiple instances, IDs enforce uniqueness
+- **Maintainability**: Class-based queries are more flexible and consistent
+- **Component isolation**: Classes work better with Shadow DOM encapsulation
+- **Semantic clarity**: Element purpose described by class name, not arbitrary ID
+
 ### Data Attributes for State
 
 **Use data attributes for component state and interaction:**

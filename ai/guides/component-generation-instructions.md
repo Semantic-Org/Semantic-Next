@@ -19,6 +19,12 @@
 - Using prefixed class names like `.size-large` instead of `.large`
 - Using `this.method()` instead of `self.method()` 
 - Using hardcoded CSS values instead of design tokens like `var(--large)`
+- Not prefixing query variables with `$` (use `const $div = $('div')`)
+- Creating components in wrong directory structure
+- Forgetting to create the required content metadata file
+- **Not following HTML/CSS style guide for page files** (page.css and page.html must ALSO follow design token and semantic naming patterns)
+- **Accessing internal component state directly** instead of using public API methods
+- **Using regular HTML elements** instead of available UI components (ui-button, ui-input, etc.)
 
 ---
 
@@ -34,6 +40,36 @@ For comprehensive information beyond this guide:
 
 **Rule**: When you need information beyond basic component creation, consult these canonical sources rather than guessing or duplicating information.
 
+## 🚨 **MANDATORY: Component File Structure & Paths**
+
+When creating a new component example, you **MUST** follow this exact structure:
+
+### **Required Directory Structure**
+```
+/docs/src/examples/your-component-name/
+├── component.js     # Main component definition (REQUIRED)
+├── component.html   # Component template (REQUIRED)
+├── component.css    # Component styles (REQUIRED)
+├── page.html        # Custom demo (optional - auto-generated if missing)
+├── page.css         # Demo styling (optional)
+└── page.js          # Demo interactions (optional)
+
+/docs/src/content/examples/
+└── your-component-name.mdx  # Metadata file (REQUIRED)
+```
+
+### **Critical Requirements**
+1. **Component files** MUST go in `/docs/src/examples/your-component-name/`
+2. **Metadata file** MUST go in `/docs/src/content/examples/your-component-name.mdx`
+3. **Both locations are REQUIRED** - the component will not work without both
+4. **Folder name and metadata filename MUST match** (e.g., `loader/` folder → `loader.mdx` file)
+5. **Title in metadata MUST match folder name** (e.g., folder `loader` → title `'Loader'`)
+
+### **❌ Wrong Paths (DO NOT USE)**
+- `/examples/your-component/` (this is for standalone examples, not docs)
+- `/docs/src/examples/your-component.mdx` (metadata goes in content/examples/)
+- Missing either component files OR metadata file
+
 ## Component Structure
 
 **Core component files:**
@@ -45,6 +81,13 @@ For comprehensive information beyond this guide:
 - `page.html` - Custom usage example (auto-generated if not provided)
 - `page.css` - Demo page styling (use design tokens, not hardcoded values)
 - `page.js` - Demo interactions (for complex demo functionality)
+
+**🚨 CRITICAL: Page File Standards**
+**page.html and page.css MUST follow the same HTML/CSS style guide as component files:**
+- **page.css** must use design tokens (`var(--spacing)`, `var(--text-color)`) not hardcoded values
+- **page.html** must use terse, semantic class names (`.container`, `.grid`, `.item`) not hyphenated names (`.demo-container`, `.loader-grid`)
+- **page.css** must use CSS nesting and natural hierarchy patterns
+- **page.js** must prefix all query variables with `$` (`const $button = $('#btn')`)
 
 **Subcomponent files:**
 - Use hyphenated names like `todo-item.js`, `todo-item.html`, `todo-item.css`
@@ -586,20 +629,103 @@ const events = {
 };
 ```
 
-### Query Strategies
+### Query Strategies ⚠️ **CRITICAL NAMING CONVENTION**
+
+**🚨 MANDATORY**: All variables holding query results MUST be prefixed with `$`
+
 ```javascript
 const createComponent = ({ $, $$ }) => ({
-  // Standard queries (within component)
+  // ✅ CORRECT: $ prefix for query variables
   updateLocalElement() {
-    $('.local-button').addClass('active');
+    const $button = $('.local-button');
+    $button.addClass('active');
   },
 
-  // Deep queries (across shadow DOM)
+  // ✅ CORRECT: $ prefix for multiple elements
   findGlobalElements() {
-    return $$('ui-dropdown .option');  // Finds options inside dropdowns
+    const $dropdowns = $$('ui-dropdown');
+    const $options = $$('ui-dropdown .option');
+    return { $dropdowns, $options };
+  },
+
+  // ✅ CORRECT: $ prefix in method parameters
+  highlightElement($element) {
+    $element.addClass('highlighted');
+  },
+
+  // ❌ WRONG: Missing $ prefix
+  badExample() {
+    const button = $('.button');        // DON'T DO THIS
+    const elements = $$('.item');       // DON'T DO THIS
   }
 });
 ```
+
+**Why $ prefix is required**:
+- Clearly distinguishes Query collection results from other variables
+- Makes code more readable and maintainable
+- Prevents confusion between DOM elements and regular data
+- Follows established convention for query-based variables
+
+### Component Encapsulation & DOM Access ⚠️ **CRITICAL PATTERNS**
+
+#### **Public API Design**
+**🚨 MANDATORY**: Components must expose public API methods and hide internal state
+
+```javascript
+const createComponent = ({ self, state, settings }) => ({
+  // ✅ CORRECT: Expose public methods for external access
+  start() {
+    state.isAnimating.set(true);
+  },
+
+  stop() {
+    state.isAnimating.set(false);
+  },
+
+  toggle() {
+    state.isAnimating.toggle();
+  },
+
+  isAnimating() {
+    return state.isAnimating.get();           // Public getter, not direct state access
+  }
+});
+```
+
+#### **DOM Querying & Component Access**
+**For imperative DOM updates or access to component instances from page scope, see [`../specialized/query-system-guide.md`](../specialized/query-system-guide.md) - Complete Query API reference**
+
+**🚨 MANDATORY Query Variable Naming**: All variables holding query results MUST be prefixed with `$`:
+```javascript
+// ✅ CORRECT
+const $button = $('.button');
+const $loader = $('#dynamicLoader');
+const loaderComponent = $loader.eq(0).component();
+
+// ❌ WRONG  
+const button = $('.button');                 // Missing $ prefix
+```
+
+#### **UI Component Preference**
+**🚨 MANDATORY**: Use existing UI components instead of regular HTML elements
+
+```html
+<!-- ✅ CORRECT: Use framework UI components -->
+<ui-button emphasis="primary">Toggle</ui-button>
+<ui-input value="text" type="text"></ui-input>
+
+<!-- ❌ WRONG: Regular HTML when UI components exist -->
+<button>Toggle</button>                      <!-- Use ui-button instead -->
+<input type="text" value="text">             <!-- Use ui-input instead -->
+```
+
+**Available UI Components** (check `/src/components/` for complete list):
+- `ui-button` - Interactive buttons with emphasis, colors, sizes
+- `ui-input` - Form inputs with validation and styling  
+- `ui-card` - Content containers
+- `ui-modal` - Dialog overlays
+- `ui-menu` - Navigation menus
 
 ### Template-as-Settings Pattern ⭐ **FUNDAMENTAL**
 ```javascript
