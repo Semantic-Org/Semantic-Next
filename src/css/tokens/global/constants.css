@@ -1,0 +1,16 @@
+/*******************************
+      Global Constants
+*******************************/
+
+/*
+  Fundamental color definitions that other tokens depend on.
+  These LCH channel values are the foundation for all color calculations.
+*/
+
+:root {
+
+  /* Absolute Color Definitions */
+  --white-lch: 1 0 0;
+  --black-lch: 0 0 0;
+
+}

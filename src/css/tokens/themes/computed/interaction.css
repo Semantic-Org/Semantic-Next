@@ -1,0 +1,36 @@
+/*******************************
+      Computed - Interaction
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+     Messages / Text
+  -------------------- */
+
+  --success-background-color: var(--positive-background-color);
+  --success-color: var(--positive-color);
+  --success-border-color: var(--positive-border-color);
+  --success-header-color: var(--positive-header-color);
+  --success-text-color: var(--positive-text-color);
+
+  --error-background-color: var(--negative-background-color);
+  --error-color: var(--negative-color);
+  --error-border-color: var(--negative-border-color);
+  --error-header-color: var(--negative-header-color);
+  --error-text-color: var(--negative-text-color);
+
+  /* -------------------
+         Loader
+  -------------------- */
+
+  --loader-fill-color: rgb(var(--standard-color) / 10%);
+  --loader-line-color: var(--grey);
+  --inverted-loader-fill-color: rgb(var(--inverted-color) / 15%);
+  --inverted-loader-line-color: var(--white);
+
+}

@@ -1,5 +1,5 @@
 /* Global Tokens */
-@import url('./tokens/global.css') layer(tokens.global.base);
+@import url('./tokens/global/constants.css') layer(tokens.global.constants);
 @import url('./tokens/global/typography.css') layer(tokens.global.typography);
 @import url('./tokens/global/layout.css') layer(tokens.global.layout);
 @import url('./tokens/global/interaction.css') layer(tokens.global.interaction);
@@ -12,10 +12,23 @@
 @import url('./tokens/computed/colors.css') layer(tokens.computed.colors);
 @import url('./tokens/computed/interaction.css') layer(tokens.computed.interaction);
 
-/* Semantic Color Tokens */
-@import url('./tokens/colors.css') layer(tokens.colors);
+/* Light Theme Tokens */
+@import url('./tokens/themes/light/base.css') layer(tokens.themes.light.base);
+@import url('./tokens/themes/light/brand.css') layer(tokens.themes.light.brand);
+@import url('./tokens/themes/light/colors.css') layer(tokens.themes.light.colors);
+@import url('./tokens/themes/light/interaction.css') layer(tokens.themes.light.interaction);
+@import url('./tokens/themes/light/messages.css') layer(tokens.themes.light.messages);
 
-/* Theme Tokens  */
-@import url('./tokens/themes/light.css') layer(tokens.themes.light);
-@import url('./tokens/themes/dark.css') layer(tokens.themes.dark);
-@import url('./tokens/themes/computed.css') layer(tokens.themes.computed);
+/* Dark Theme Tokens */
+@import url('./tokens/themes/dark/base.css') layer(tokens.themes.dark.base);
+@import url('./tokens/themes/dark/colors.css') layer(tokens.themes.dark.colors);
+@import url('./tokens/themes/dark/interaction.css') layer(tokens.themes.dark.interaction);
+@import url('./tokens/themes/dark/effects.css') layer(tokens.themes.dark.effects);
+
+/* Computed Theme Tokens */
+@import url('./tokens/themes/computed/base.css') layer(tokens.themes.computed.base);
+@import url('./tokens/themes/computed/colors.css') layer(tokens.themes.computed.colors);
+@import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
+@import url('./tokens/themes/computed/layout.css') layer(tokens.themes.computed.layout);
+@import url('./tokens/themes/computed/effects.css') layer(tokens.themes.computed.effects);
+@import url('./tokens/themes/computed/interaction.css') layer(tokens.themes.computed.interaction);

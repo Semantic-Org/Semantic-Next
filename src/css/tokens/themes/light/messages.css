@@ -1,0 +1,42 @@
+/*******************************
+       Light Theme - Messages
+*******************************/
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /*--------------
+      Messages
+  ---------------*/
+
+  /* Positive */
+  --positive-color: var(--green);
+  --positive-background-color: #F0F7F3;
+  --positive-border-color: #CCEAD9;
+  --positive-header-color: #1A531B;
+  --positive-text-color: var(--green-text-color);
+
+  /* Negative */
+  --negative-color: var(--red);
+  --negative-background-color: #F9F1F1;
+  --negative-border-color: #E6D9D9;
+  --negative-header-color: #C55250;
+  --negative-text-color: var(--red-text-color);
+
+  /* Info */
+  --info-color: #318291;
+  --info-background-color: #FAFDFD;
+  --info-border-color: #B0D8D8;
+  --info-header-color: #0E566C;
+  --info-text-color: #276F86;
+
+  /* Warning */
+  --warning-color: #D7922E;
+  --warning-border-color: #CAC09D;
+  --warning-background-color: #FFFAF8;
+  --warning-header-color: #794B02;
+  --warning-text-color: var(--orange-text-color);
+
+}

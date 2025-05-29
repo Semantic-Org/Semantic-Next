@@ -1,0 +1,27 @@
+/*******************************
+        Dark Theme - Colors
+*******************************/
+
+html.dark,
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
+
+  /* -------------------
+        UI Colors
+  -------------------- */
+  --ui-emphasis-strong: oklch(0.16 0.02 266.69);
+  --ui-emphasis: oklch(0.13 0.02 266.79);
+
+  /* boost some black colors to be noticable in dark mode */
+  --subtle-transparent-black: oklch(var(--black-lch) / 5%);
+  --transparent-black: oklch(var(--black-lch) / 15%);
+  --strong-transparent-black: oklch(var(--black-lch) / 20%);
+  --very-strong-transparent-black: oklch(var(--black-lch) / 20%);
+
+  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
+
+}

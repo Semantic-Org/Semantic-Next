@@ -1,0 +1,107 @@
+/*******************************
+        Computed - Effects
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+         Gradients
+  -------------------- */
+
+  /* Differentiating Neutrals */
+  --very-subtle-gradient: linear-gradient(var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-gradient: linear-gradient(var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
+  --strong-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-gradient: linear-gradient(var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* Reverse Direction */
+  --very-subtle-inverted-gradient: linear-gradient(var(--very-subtle-transparent-black), var(--very-subtle-transparent-white));
+  --subtle-inverted-gradient: linear-gradient(var(--subtle-transparent-black), var(--subtle-transparent-white));
+  --inverted-gradient: linear-gradient(var(--transparent-black), var(--transparent-white));
+  --strong-inverted-gradient: linear-gradient(var(--strong-transparent-black), var(--strong-transparent-white));
+  --very-strong-inverted-gradient: linear-gradient(var(--very-strong-transparent-black), var(--very-strong-transparent-white));
+
+  /* Angled */
+  --very-subtle-angled-gradient: linear-gradient(45deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-angled-gradient: linear-gradient(45deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --angled-gradient: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+  --strong-angled-gradient: linear-gradient(45deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-angled-gradient: linear-gradient(45deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  --very-subtle-horizontal-gradient: linear-gradient(90deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-horizontal-gradient: linear-gradient(90deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --horizontal-gradient: linear-gradient(90deg, var(--transparent-white), var(--transparent-black));
+  --strong-horizontal-gradient: linear-gradient(90deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-horizontal-gradient: linear-gradient(90deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* -------------------
+         Shadows
+  -------------------- */
+
+  --text-shadow: 0px 1px 1px var(--strong-transparent-black);
+
+  /* Differentiating Layers */
+  --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
+
+  /* Pressed or inset */
+  --subtle-inset-shadow: 0px 1px 2px 0 var(--transparent-black) inset;
+  --inset-shadow: 0px 2px 3px 0 var(--strong-transparent-black) inset;
+
+  /* Lip Shadow */
+  --subtle-lip-distance: 2px;
+  --subtle-lip-distance-inverse: calc(var(--subtle-lip-distance) * -1);
+  --subtle-lip-spread: 10px;
+  --subtle-lip-reduce: -6px;
+
+  --subtle-top-lip-shadow:
+    0px var(--subtle-lip-distance) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+  --subtle-bottom-lip-shadow:
+    0px var(--subtle-lip-distance-inverse) var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+  --subtle-left-lip-shadow:
+    var(--subtle-lip-distance) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+  --subtle-right-lip-shadow:
+    var(--subtle-lip-distance-inverse) 0px var(--subtle-lip-spread) var(--subtle-lip-reduce) var(--strong-transparent-black) inset
+  ;
+
+  --floating-shadow:
+    0px 2px 4px 0px rgb(34 36 38 / 12%),
+    0px 2px 10px 0px rgb(34 36 38 / 15%)
+  ;
+
+  /* -------------------
+       Scroll Bars
+  -------------------- */
+
+  --track-background: oklch(var(--standard-color) / 10%);
+  --thumb-background: oklch(var(--standard-color) / 15%);
+
+  --thumb-inactive-background: oklch(var(--standard-color) / 15%);
+  --thumb-hover-background: oklch(var(--standard-color) / 20%);
+
+  /* Inverted */
+  --track-inverted-background: oklch(var(--inverted-color) / 5%);
+  --thumb-inverted-background: oklch(var(--inverted-color) / 10%);
+  --thumb-inverted-inactive-background: oklch(var(--inverted-color) / 5%);
+  --thumb-inverted-hover-background: oklch(var(--inverted-color) / 15%);
+
+  /* -------------------
+       UI BG Colors
+  -------------------- */
+
+  /* UI BG Subtle */
+  --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
+  --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
+  --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
+
+  /* UI BG Emphasis */
+  --ui-background-emphasis: linear-gradient(140deg, var(--ui-emphasis-strong), var(--inverted-100), var(--ui-emphasis));
+
+}

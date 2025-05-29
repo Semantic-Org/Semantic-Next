@@ -1,0 +1,67 @@
+/*******************************
+      Computed - Typography
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+        Text Color
+  -------------------- */
+
+  --header-color: var(--standard-90);
+  --text-color: var(--standard-80);
+
+  /* -------------------
+       Neutral Text
+  -------------------- */
+
+  --dark-text-color: rgb(var(--standard-color) / 85%);
+  --muted-text-color: rgb(var(--standard-color) / 60%);
+  --light-text-color: rgb(var(--standard-color) / 40%);
+
+  --unselected-text-color: rgb(var(--standard-color) / 40%);
+  --hovered-text-color: rgb(var(--standard-color) / 80%);
+  --pressed-text-color: rgb(var(--standard-color) / 90%);
+  --selected-text-color: rgb(var(--standard-color) / 95%);
+  --disabled-text-color: rgb(var(--standard-color) / 20%);
+
+  --inverted-text-color: rgb(var(--inverted-color) / 90%);
+  --inverted-muted-text-color: rgb(var(--inverted-color) / 80%);
+  --inverted-light-text-color: rgb(var(--inverted-color) / 70%);
+  --inverted-unselected-text-color: rgb(var(--inverted-color) / 50%);
+  --inverted-hovered-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-pressed-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-selected-text-color: rgb(var(--inverted-color) / 100%);
+  --inverted-disabled-text-color: rgb(var(--inverted-color) / 20%);
+
+  /* --- Colored Text --- */
+  --red-text-color: var(--red);
+  --orange-text-color: var(--orange);
+  --yellow-text-color: #B58105; /* Yellow text is difficult to read */
+  --olive-text-color: #8ABC1E; /* Olive is difficult to read */
+  --green-text-color: #1EBC30; /* Green is difficult to read */
+  --teal-text-color: #10A3A3; /* Teal text is difficult to read */
+  --blue-text-color: #208BD7;
+  --violet-text-color: var(--violet);
+  --purple-text-color: var(--purple);
+  --pink-text-color: var(--pink);
+  --brown-text-color: var(--brown);
+
+  /* --- Colored Headers --- */
+  --red-header-color: oklch(from var(--red-text-color) calc(l - 0.05) c h);
+  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 0.05) c h);
+  --green-header-color: oklch(from var(--green-text-color) calc(l - 0.05) c h);
+  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 0.05) c h);
+  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 0.05) c h);
+  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 0.05) c h);
+  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 0.05) c h);
+  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 0.05) c h);
+  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 0.05) c h);
+  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 0.05) c h);
+  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 0.05) c h);
+
+}

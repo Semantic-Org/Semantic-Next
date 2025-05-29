@@ -14,15 +14,6 @@
           >
             <div class="shade">{shade.name}</div>
 
-            {#if showValues}
-              <div class="info">
-                <div class="var">{shade.cssVar}</div>
-                {#if shade.value}
-                  <div class="value">{shade.value}</div>
-                {/if}
-              </div>
-            {/if}
-
             {#if showCopy && isColorCopied(name, shade.name) }
               <ui-label mini class="copy">
                 <ui-icon check></ui-icon>

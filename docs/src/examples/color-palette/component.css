@@ -1,6 +1,7 @@
 .palette {
   max-width: 1200px;
   margin: 0 auto;
+  container: component / inline-size;
 }
 
 .header {
@@ -32,9 +33,9 @@
 
 .colors {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 0;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  gap: 1rem;
   
   @container (max-width: 600px) {
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -46,7 +47,8 @@
 }
 
 .swatch {
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 1;
+  border-radius: var(--border-radius);
   cursor: pointer;
   position: relative;
   transition: var(--transition);
@@ -54,8 +56,8 @@
   padding: var(--compact-spacing);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  
+  justify-content: center;
+  box-shadow: 0px 0px 0px 1px inset var(--white-10);
   background-image: var(--angled-gradient);
   
   &:hover {
@@ -69,15 +71,11 @@
     transform: scale(1.05);
   }
 
-  .step {
-    align-self: flex-start;
+  .shade {
     font-weight: var(--bold);
     font-size: var(--large);
-    color: var(--overlay-color);
-    padding: calc(var(--spacing) * 0.25) var(--compact-spacing);
-    border-radius: var(--border-radius);
-    min-width: 24px;
     text-align: center;
+    color: var(--overlay-color);
   }
 
   .info {
@@ -121,8 +119,8 @@
 }
 
 /* Hide color info on small swatches */
-@container (max-width: 400px) {
-  .info {
+@container component (max-width: 400px) {
+  .shade {
     display: none;
   }
 }

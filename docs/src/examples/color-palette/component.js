@@ -61,8 +61,6 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) 
     const cssVar = `--${colorName}-${shade}`;
     const computed = getComputedStyle(document.documentElement);
     return computed.getPropertyValue(cssVar).trim();
-    console.log(`--${colorName}-${shade}`, $('.color-palette').cssVar(`${colorName}-${shade}`));
-    return $('.color-palette').cssVar(`${colorName}-${shade}`)
   },
 
   // Copy color value to clipboard

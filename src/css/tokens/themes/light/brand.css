@@ -1,0 +1,32 @@
+/*******************************
+        Light Theme - Brand
+*******************************/
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /* -------------------
+      Brand Colors
+  -------------------- */
+
+  --primary-color: var(--blue);
+  --secondary-color: var(--black-solid-80);
+
+  --light-primary-color: var(--light-blue);
+  --light-secondary-color: var(--light-black);
+
+  /* Used to emphasize text  */
+  --primary-text-color: var(--blue-text-color);
+  --primary-light-text-color: var(--light-blue);
+
+  /* -------------------
+        UI Colors
+  -------------------- */
+
+  --ui-emphasis-strong: oklch(0.98 0.01 282.32);
+  --ui-emphasis: oklch(0.98 0.01 272.79);
+  --ui-background-emphasis: linear-gradient(140deg, var(--ui-emphasis-strong), var(--inverted-100), var(--ui-emphasis));
+
+}
