@@ -7,12 +7,28 @@
 
 ---
 
-## 📚 **Canonical Reference Sources**
+## 🚨 **CRITICAL: Read This Before Creating Components**
 
-For comprehensive information beyond this guide, refer to these authoritative sources:
+**MANDATORY READING BEFORE COMPONENT CREATION:**
 
-- **🧠 Mental Model & Architecture**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Core concepts and design philosophy
-- **📖 Patterns & Recipes**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed implementation patterns
+1. **CSS & Design Patterns**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - Essential for CSS class naming and design token usage
+2. **Method References**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Critical `self.methodName()` patterns 
+3. **Component Communication**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Parent-child patterns and event handling
+
+**⚠️ Common Mistakes**: 
+- Using prefixed class names like `.size-large` instead of `.large`
+- Using `this.method()` instead of `self.method()` 
+- Using hardcoded CSS values instead of design tokens like `var(--large)`
+
+---
+
+## 📚 **Complete Reference Sources**
+
+For comprehensive information beyond this guide:
+
+- **🎨 HTML/CSS Style Guide**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - **ESSENTIAL** CSS class naming and design token usage
+- **🧠 Mental Model & Architecture**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Core concepts, method references, component tree navigation
+- **📖 Patterns & Recipes**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed implementation patterns and communication
 - **⚡ Quick API Reference**: [`../foundations/quick-reference.md`](../foundations/quick-reference.md) - Complete API syntax and options
 - **🗺️ Codebase Navigation**: [`../foundations/codebase-navigation-guide.md`](../foundations/codebase-navigation-guide.md) - Finding documentation and examples
 
@@ -20,9 +36,20 @@ For comprehensive information beyond this guide, refer to these authoritative so
 
 ## Component Structure
 
-- Create files named: `component.js`, `component.html`, `component.css` for the main component
-- For subtemplates, use hyphenated names like `todo-item.js`, `todo-item.html`, `todo-item.css`
-- Include a usage example in `page.html` (and optionally `page.js` and `page.css` if needed)
+**Core component files:**
+- `component.js` - Main component definition
+- `component.html` - Component template  
+- `component.css` - Component styles (scoped to component)
+
+**Demo page files (all optional):**
+- `page.html` - Custom usage example (auto-generated if not provided)
+- `page.css` - Demo page styling (use design tokens, not hardcoded values)
+- `page.js` - Demo interactions (for complex demo functionality)
+
+**Subcomponent files:**
+- Use hyphenated names like `todo-item.js`, `todo-item.html`, `todo-item.css`
+
+**Important**: Never use inline styles in `page.html` - use `page.css` for demo page styling
 
 ## Component Definition Pattern
 
@@ -67,6 +94,14 @@ const createComponent = ({ self, state, settings, $, $$, findParent, findChild, 
     // Access state with .get() in JavaScript code
     const stateValue = state.someValue.get();
     return stateValue * 2;
+  },
+  
+  // Example method calling another method
+  getDisplayText() {
+    if (!settings.showLabel) return '';
+    // ✅ CRITICAL: Use self.methodName() for internal method calls
+    const percentage = self.getComputedValue();
+    return `${percentage}%`;
   },
   
   // Example method for setup
@@ -217,31 +252,75 @@ Templates have a flattened data context with automatic reactivity. Key patterns:
 
 > **📚 For complete template syntax**: See `/ai/semantic-ui-quick-reference.md` → Template Syntax Reference
 
-## CSS Guidelines
+## CSS Guidelines ⚠️ **CRITICAL PATTERNS**
 
-Shadow DOM provides style encapsulation - use simple, semantic class names:
+**🚨 MANDATORY**: Read [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) for complete CSS patterns.
+
+### Essential Class Naming Rules
+
+```css
+/* ✅ CORRECT: Use semantic class names directly (no prefixes) */
+.small { --progress-height: 0.5rem; }
+.medium { --progress-height: 1rem; }  
+.large { --progress-height: 1.5rem; }
+
+.primary { --progress-color: var(--primary-color); }
+.success { --progress-color: var(--positive-color); }
+.danger { --progress-color: var(--negative-color); }
+
+/* ❌ WRONG: Don't use prefixed class names */
+.size-small { /* DON'T DO THIS */ }
+.theme-primary { /* DON'T DO THIS */ }
+.progress-bar-large { /* DON'T DO THIS */ }
+```
+
+### Essential Design Token Usage
 
 ```css
 :host {
-  /* Component-level custom properties for theming */
-  --component-spacing: 1rem;
-  --primary-color: var(--primary-color, #007bff);
+  /* ✅ CORRECT: Use provided design tokens */
+  --progress-height: 1rem;
+  border-radius: var(--border-radius);    /* Use design token */
+  transition: var(--transition);          /* Use design token */
+}
+
+.label {
+  font-size: var(--small);               /* Use design token */
+  font-weight: var(--bold);              /* Use design token */
+  color: var(--text-color);              /* Use design token */
+  margin-top: var(--compact-spacing);    /* Use design token */
+}
+
+/* ❌ WRONG: Don't hardcode values that exist as design tokens */
+.bad-label {
+  font-size: 0.75rem;                    /* DON'T: Use var(--small) */
+  font-weight: 500;                      /* DON'T: Use var(--bold) */
+  color: #495057;                        /* DON'T: Use var(--text-color) */
+  transition: all 0.3s ease;             /* DON'T: Use var(--transition) */
+}
+```
+
+### Shadow DOM Benefits & Pattern
+
+```css
+:host {
+  /* Component-specific measurements only */
+  --component-height: 2rem;
+  --handle-size: 24px;
 }
 
 .container {
   display: flex;
-  padding: var(--component-spacing);
+  padding: var(--spacing);              /* Use design token */
+  border-radius: var(--border-radius); /* Use design token */
   
   .header {
-    font-weight: bold;
+    font-size: var(--large);           /* Use design token */
+    font-weight: var(--bold);          /* Use design token */
     
     .title {
-      color: var(--text-color);
+      color: var(--text-color);        /* Use design token */
     }
-  }
-  
-  .content {
-    margin-top: 1rem;
   }
 }
 
@@ -414,6 +493,54 @@ const events = {
 
 > **📚 For complete communication patterns**: See `/ai/semantic-ui-patterns-cookbook.md` → Component Communication Patterns
 
+## ⚠️ **CRITICAL Method Reference Pattern**
+
+**🚨 MANDATORY**: Always use `self.methodName()` when calling component methods from within other methods:
+
+```javascript
+const createComponent = ({ self, state, settings }) => ({
+  getPercentage() {
+    const { value, min, max } = settings;
+    const range = max - min;
+    const adjustedValue = Math.max(min, Math.min(max, value));
+    return ((adjustedValue - min) / range) * 100;
+  },
+
+  getDisplayText() {
+    if (!settings.showLabel) return '';
+    // ✅ CRITICAL: Use self.methodName() for internal method calls
+    const percentage = self.getPercentage();
+    return `${percentage}%`;
+  },
+
+  // ❌ WRONG: Using this.methodName()
+  getBadDisplayText() {
+    const percentage = this.getPercentage(); // DON'T DO THIS
+    return `${percentage}%`;
+  }
+});
+```
+
+**Why `self.` is required**: The component methods are bound to the `self` object, not `this`. See [`../foundations/mental-model.md`](../foundations/mental-model.md) for complete explanation.
+
+## ⚠️ **CRITICAL HTML Attribute Naming**
+
+**HTML attributes don't automatically convert to camelCase - they remain lowercase:**
+
+```javascript
+// Settings definition
+const defaultSettings = {
+  showLabel: true    // camelCase in JavaScript
+};
+
+// Template usage (reactive)  
+{#if showLabel}     // camelCase in templates
+
+// HTML usage (lowercase)
+<progress-bar showlabel="false">  // lowercase in HTML attributes
+<progress-bar show-label="false"> // kebab-case also works but converts to camelCase
+```
+
 ## Essential Component Patterns
 
 ### Lifecycle Initialization
@@ -446,7 +573,7 @@ const events = {
   'click .button': ({ self }) => self.toggle(),
 
   // Deep: Parent managing child components
-  'deep click ui-button': ({ data }) => this.handleChild(data),
+  'deep click ui-button': ({ self, data }) => self.handleChild(data),
 
   // Global: Page-level events
   'global scroll window': ({ self }) => self.updatePosition(),
@@ -500,7 +627,19 @@ $('data-table').settings({
 
 > **📚 For comprehensive patterns**: See `/ai/semantic-ui-patterns-cookbook.md`
 
-## Important Notes
+## Important Notes ⚠️ **REVIEW BEFORE CODING**
+
+### Critical Reminders
+
+**🚨 Method References**: Always use `self.methodName()` when calling component methods from within other methods (NOT `this.methodName()`)
+
+**🚨 CSS Class Names**: Use semantic class names like `.large`, `.primary` (NOT `.size-large`, `.theme-primary`)
+
+**🚨 Design Tokens**: Use `var(--large)`, `var(--primary-color)` instead of hardcoded values like `16px`, `#007bff`
+
+**🚨 HTML Attributes**: Use lowercase `showlabel="false"` in HTML (NOT `showLabel="false"`)
+
+### Framework Behavior
 
 - The framework uses a batched update system - multiple state changes may be coalesced
   - Use `flush()` to manually force immediate updates if needed
@@ -515,6 +654,7 @@ $('data-table').settings({
 - Keep class names simple and semantic (e.g., `.menu` instead of `.context-menu-container`)
 - No need for namespacing or prefixing since Shadow DOM provides encapsulation
 - Example: Use `.item`, `.divider`, `.header` instead of `.component-item`, etc.
+- **CRITICAL**: Use `.large`, `.primary` NOT `.size-large`, `.theme-primary`
 
 ### State vs Settings
 - `settings`: Use for configurable properties that typically don't change after initialization
