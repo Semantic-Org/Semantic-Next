@@ -47,6 +47,7 @@
 
   /* Differentiating Layers */
   --subtle-shadow: 0px 1px 2px 0 var(--strong-transparent-black);
+  --shadow: 0px 1px 2px 0 var(--very-strong-transparent-black);
 
   /* Pressed or inset */
   --subtle-inset-shadow: 0px 1px 2px 0 var(--transparent-black) inset;

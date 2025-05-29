@@ -43,6 +43,13 @@ html,
   --link-hover-color: oklch(0.62 0.22 252.98);
 
   /* -------------------
+        UI Colors
+  -------------------- */
+
+  --ui-emphasis-strong: oklch(0.98 0.01 282.32);
+  --ui-emphasis: oklch(0.98 0.01 272.79);
+
+  /* -------------------
        Border Colors
   -------------------- */
 
