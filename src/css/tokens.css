@@ -8,6 +8,7 @@
 
 /* Computed Tokens */
 @import url('./tokens/computed/typography.css') layer(tokens.computed.typography);
+@import url('./tokens/computed/em-sizing.css') layer(tokens.computed.emSizing);
 @import url('./tokens/computed/layout.css') layer(tokens.computed.layout);
 @import url('./tokens/computed/colors.css') layer(tokens.computed.colors);
 @import url('./tokens/computed/interaction.css') layer(tokens.computed.interaction);
@@ -26,8 +27,8 @@
 /* Computed Theme Tokens */
 @import url('./tokens/themes/computed/base.css') layer(tokens.themes.computed.base);
 @import url('./tokens/themes/computed/colors.css') layer(tokens.themes.computed.colors);
-@import url('./tokens/themes/computed/brand.css') layer(tokens.themes.computed.colors);
 @import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
+@import url('./tokens/themes/computed/brand.css') layer(tokens.themes.computed.brand);
 @import url('./tokens/themes/computed/layout.css') layer(tokens.themes.computed.layout);
 @import url('./tokens/themes/computed/effects.css') layer(tokens.themes.computed.effects);
 @import url('./tokens/themes/computed/messages.css') layer(tokens.themes.computed.messages);

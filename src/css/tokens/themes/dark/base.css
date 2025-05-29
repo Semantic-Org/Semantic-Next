@@ -19,6 +19,10 @@ html.dark,
   --standard-color: var(--white-lch);
   --inverted-color: var(--black-lch);
 
+  /* For color-mix */
+  --standard-hex: var(--white-hex);
+  --inverted-hex: var(--black-hex);
+
   --standard-border-color: var(--white-border-lch);
   --inverted-border-color: var(--black-border-lch);
 

@@ -17,8 +17,13 @@ html,
 
   /* Generally light swaps to dark and vice versa, we do this by swapping standard/inverted color */
 
+  /* For relative colors */
   --standard-color: var(--black-lch);
   --inverted-color: var(--white-lch);
+
+  /* For color-mix */
+  --standard-hex: var(--black-hex);
+  --inverted-hex: var(--white-hex);
 
   --standard-solid-100: var(--black-solid-100);
   --standard-solid-95: var(--black-solid-95);

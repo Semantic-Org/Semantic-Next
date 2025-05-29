@@ -15,6 +15,49 @@
   --header-color: var(--standard-90);
   --text-color: var(--standard-80);
 
+
+  /* -------------------
+        Text Colors
+  -------------------- */
+
+  /* Text will either increase in lightness of decrease from bg for light/dark */
+  --text-lighten-amount: 40%;
+  --header-lighten-amount: 50%;
+
+  --white-text-color: var(--white-80);
+  --black-text-color: var(--black-80);
+
+  /* --- Colored Text --- */
+  --red-text-color: color-mix(in hsl, var(--red), var(--standard-hex) var(--text-lighten-amount));
+  --olive-text-color: color-mix(in hsl, var(--olive), var(--standard-hex) var(--text-lighten-amount));
+  --green-text-color: color-mix(in hsl, var(--green), var(--standard-hex) var(--text-lighten-amount));
+  --yellow-text-color: color-mix(in hsl, var(--yellow), var(--standard-hex) var(--text-lighten-amount));
+  --blue-text-color: color-mix(in hsl, var(--blue), var(--standard-hex) var(--text-lighten-amount));
+  --teal-text-color: color-mix(in hsl, var(--teal), var(--standard-hex) var(--text-lighten-amount));
+  --pink-text-color: color-mix(in hsl, var(--pink), var(--standard-hex) var(--text-lighten-amount));
+  --violet-text-color: color-mix(in hsl, var(--violet), var(--standard-hex) var(--text-lighten-amount));
+  --purple-text-color: color-mix(in hsl, var(--purple), var(--standard-hex) var(--text-lighten-amount));
+  --orange-text-color: color-mix(in hsl, var(--orange), var(--standard-hex) var(--text-lighten-amount));
+  --brown-text-color: color-mix(in hsl, var(--brown), var(--standard-hex) var(--text-lighten-amount));
+  --grey-text-color: color-mix(in hsl, var(--grey), var(--standard-hex) var(--text-lighten-amount));
+  --slate-text-color: color-mix(in hsl, var(--slate), var(--standard-hex) var(--text-lighten-amount));
+
+  /* --- Colored Headers --- */
+  --olive-header-color: color-mix(in hsl, var(--olive), var(--standard-hex) var(--header-lighten-amount));
+  --green-header-color: color-mix(in hsl, var(--green), var(--standard-hex) var(--header-lighten-amount));
+  --yellow-header-color: color-mix(in hsl, var(--yellow), var(--standard-hex) var(--header-lighten-amount));
+  --blue-header-color: color-mix(in hsl, var(--blue), var(--standard-hex) var(--header-lighten-amount));
+  --teal-header-color: color-mix(in hsl, var(--teal), var(--standard-hex) var(--header-lighten-amount));
+  --pink-header-color: color-mix(in hsl, var(--pink), var(--standard-hex) var(--header-lighten-amount));
+  --violet-header-color: color-mix(in hsl, var(--violet), var(--standard-hex) var(--header-lighten-amount));
+  --purple-header-color: color-mix(in hsl, var(--purple), var(--standard-hex) var(--header-lighten-amount));
+  --orange-header-color: color-mix(in hsl, var(--orange), var(--standard-hex) var(--header-lighten-amount));
+  --brown-header-color: color-mix(in hsl, var(--brown), var(--standard-hex) var(--header-lighten-amount));
+  --grey-header-color: color-mix(in hsl, var(--grey), var(--standard-hex) var(--header-lighten-amount));
+  --slate-header-color: color-mix(in hsl, var(--slate), var(--standard-hex) var(--header-lighten-amount));
+
+
+
   /* -------------------
        Neutral Text
   -------------------- */
@@ -38,37 +81,5 @@
   --inverted-selected-text-color: rgb(var(--inverted-color) / 100%);
   --inverted-disabled-text-color: rgb(var(--inverted-color) / 20%);
 
-  /* --- Colored Text --- */
-  --red-text-color: var(--red);
-  --orange-text-color: var(--orange);
-  --yellow-text-color: var(--yellow-80); /* Yellow text is difficult to read */
-  --olive-text-color: var(--olive-70); /* Olive is difficult to read */
-  --green-text-color: var(--green-70); /* Green is difficult to read */
-  --teal-text-color: var(--teal-70); /* Teal text is difficult to read */
-  --blue-text-color: var(--blue);
-  --violet-text-color: var(--violet);
-  --purple-text-color: var(--purple);
-  --pink-text-color: var(--pink);
-  --brown-text-color: var(--brown);
-
-  /* --- Colored Headers --- */
-  --red-header-color: oklch(from var(--red-text-color) calc(l - 0.05) c h);
-  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 0.05) c h);
-  --green-header-color: oklch(from var(--green-text-color) calc(l - 0.05) c h);
-  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 0.05) c h);
-  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 0.05) c h);
-  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 0.05) c h);
-  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 0.05) c h);
-  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 0.05) c h);
-  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 0.05) c h);
-  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 0.05) c h);
-  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 0.05) c h);
-
-  /* -------------------
-        Brand
-  -------------------- */
-
-  --primary-text-color: var(--blue-text-color);
-  --secondary-color: var(--black-solid-80);
 
 }

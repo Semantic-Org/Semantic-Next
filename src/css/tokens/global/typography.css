@@ -26,6 +26,10 @@
   --h4: 15px;
   --h5: 14px;
 
+  /* Header Spacing */
+  --header-top-margin: 2rem;
+  --header-bottom-margin: 1rem;
+
   /* -------------------
           Sizes
   -------------------- */

@@ -8,10 +8,9 @@ html,
 [theme][theme="light"] {
 
   /* -------------------
-        Site Colors
+          Colors
   -------------------- */
 
-  /* ---  Colors  --- */
   --red: oklch(0.59 0.27 29);
   --orange: oklch(0.65 0.2 44.37);
   --yellow: oklch(0.78 0.18 81.24);
@@ -25,8 +24,6 @@ html,
   --brown: oklch(0.5 0.11 51.34);
   --grey: oklch(0.57 0 0);
   --slate: oklch(0.23 0 0);
-
-
 
   /* -------------------
        Alpha Colors

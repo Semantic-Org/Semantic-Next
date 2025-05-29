@@ -6,50 +6,7 @@
 
   --primary-color: var(--blue);
   --primary-text-color: var(--blue-text-color);
-  --secondary-color: var(--black-solid-80);
-  --secondary-text-color: var(--white-solid-80);
-
-  /* -------------------
-    Background Colors
-  -------------------- */
-
-  /* --- Colored Backgrounds --- */
-  --red-background: var(--red-5);
-  --orange-background: var(--orange-5);
-  --yellow-background: var(--yellow-5);
-  --olive-background: var(--olive-5);
-  --green-background: var(--green-5);
-  --teal-background: var(--teal-5);
-  --blue-background: var(--blue-5);
-  --violet-background: var(--violet-5);
-  --purple-background: var(--purple-5);
-  --pink-background: var(--pink-5);
-  --brown-background: var(--brown-5);
-
-  /* --- Colored Text --- */
-  --red-text-color: var(--red);
-  --orange-text-color: var(--orange);
-  --yellow-text-color: var(--yellow-80); /* Yellow text is difficult to read */
-  --olive-text-color: var(--olive-70); /* Olive is difficult to read */
-  --green-text-color: var(--green-70); /* Green is difficult to read */
-  --teal-text-color: var(--teal-70); /* Teal text is difficult to read */
-  --blue-text-color: var(--blue);
-  --violet-text-color: var(--violet);
-  --purple-text-color: var(--purple);
-  --pink-text-color: var(--pink);
-  --brown-text-color: var(--brown);
-
-  /* --- Colored Headers --- */
-  --red-header-color: oklch(from var(--red-text-color) calc(l - 0.05) c h);
-  --olive-header-color: oklch(from var(--olive-text-color) calc(l - 0.05) c h);
-  --green-header-color: oklch(from var(--green-text-color) calc(l - 0.05) c h);
-  --yellow-header-color: oklch(from var(--yellow-text-color) calc(l - 0.05) c h);
-  --blue-header-color: oklch(from var(--blue-text-color) calc(l - 0.05) c h);
-  --teal-header-color: oklch(from var(--teal-text-color) calc(l - 0.05) c h);
-  --pink-header-color: oklch(from var(--pink-text-color) calc(l - 0.05) c h);
-  --violet-header-color: oklch(from var(--violet-text-color) calc(l - 0.05) c h);
-  --purple-header-color: oklch(from var(--purple-text-color) calc(l - 0.05) c h);
-  --orange-header-color: oklch(from var(--orange-text-color) calc(l - 0.05) c h);
-  --brown-header-color: oklch(from var(--brown-text-color) calc(l - 0.05) c h);
+  --secondary-color: var(--slate);
+  --secondary-text-color: var(--slate-text-color);
 
 }
