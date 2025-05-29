@@ -62,7 +62,7 @@
   --huge-size-px: 20;
   --massive-size-px: 24;
 
-  --line-height: calc(20 / var(--medium-size-px));
+  --line-height: calc(20 / 14);
 
   /* -------------------
           Page

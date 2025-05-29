@@ -1,25 +1,3 @@
-/*******************************
-      Semantic UI Next
-    Dynamic Color System
-*******************************/
-
-/*
-  OKLCH-based color system providing perceptually uniform color scales.
-  
-  Features:
-  - Dynamic color generation from base colors using CSS relative color syntax
-  - Customizable lightness and chroma scaling per color or globally
-  - Perceptual uniformity across all color variations
-  - Color-specific optimizations (yellow compression, red hue shifting)
-  - Full theme customization support
-
-  Usage:
-  Override any base color (e.g., --red-color) and the entire scale regenerates.
-  Customize scaling by overriding lightness/chroma variables per color.
-
-  Browser Support: Chrome 101+, Firefox 113+, Safari 16.4+
-*/
-
 :root {
 
   /* -------------------
@@ -78,17 +56,58 @@
   --chroma-100: 0.50; /* Near black = reduced chroma */
 
   /* -------------------
-      Color-Specific
+        Grey Scale
   -------------------- */
-  
-  /* Red: Slight hue adjustments in darker ranges to prevent muddiness */
-  --red-hue-shift-70: 2;
-  --red-hue-shift-80: 3;
-  --red-hue-shift-90: 4;
-  --red-hue-shift-100: 5;
+
+  /* Lightness */
+  --grey-lightness-0: var(--lightness-0);
+  --grey-lightness-5: var(--lightness-5);
+  --grey-lightness-10: var(--lightness-10);
+  --grey-lightness-20: var(--lightness-20);
+  --grey-lightness-30: var(--lightness-30);
+  --grey-lightness-40: var(--lightness-40);
+  --grey-lightness-50: var(--lightness-50);
+  --grey-lightness-60: var(--lightness-60);
+  --grey-lightness-70: var(--lightness-70);
+  --grey-lightness-80: var(--lightness-80);
+  --grey-lightness-90: var(--lightness-90);
+  --grey-lightness-100: var(--lightness-100);
+
+  /* Chrome */
+  --grey-chroma-0: var(--chroma-0);
+  --grey-chroma-5: var(--chroma-5);
+  --grey-chroma-10: var(--chroma-10);
+  --grey-chroma-20: var(--chroma-20);
+  --grey-chroma-30: var(--chroma-30);
+  --grey-chroma-40: var(--chroma-40);
+  --grey-chroma-50: var(--chroma-50);
+  --grey-chroma-60: var(--chroma-60);
+  --grey-chroma-70: var(--chroma-70);
+  --grey-chroma-80: var(--chroma-80);
+  --grey-chroma-90: var(--chroma-90);
+  --grey-chroma-100: var(--chroma-100);
+
+  /* Color */
+  --grey-0: oklch(from var(--grey-color) var(--grey-lightness-0) calc(c * var(--grey-chroma-0)) h);
+  --grey-5: oklch(from var(--grey-color) var(--grey-lightness-5) calc(c * var(--grey-chroma-5)) h);
+  --grey-10: oklch(from var(--grey-color) var(--grey-lightness-10) calc(c * var(--grey-chroma-10)) h);
+  --grey-20: oklch(from var(--grey-color) var(--grey-lightness-20) calc(c * var(--grey-chroma-20)) h);
+  --grey-30: oklch(from var(--grey-color) var(--grey-lightness-30) calc(c * var(--grey-chroma-30)) h);
+  --grey-40: oklch(from var(--grey-color) var(--grey-lightness-40) calc(c * var(--grey-chroma-40)) h);
+  --grey-50: var(--grey-color);
+  --grey-60: oklch(from var(--grey-color) var(--grey-lightness-60) calc(c * var(--grey-chroma-60)) h);
+  --grey-70: oklch(from var(--grey-color) var(--grey-lightness-70) calc(c * var(--grey-chroma-70)) h);
+  --grey-80: oklch(from var(--grey-color) var(--grey-lightness-80) calc(c * var(--grey-chroma-80)) h);
+  --grey-90: oklch(from var(--grey-color) var(--grey-lightness-90) calc(c * var(--grey-chroma-90)) h);
+  --grey-100: oklch(from var(--grey-color) var(--grey-lightness-100) calc(c * var(--grey-chroma-100)) h);
 
   /* -------------------
-        Red Scale
+         Colors
+  -------------------- */
+
+
+  /* -------------------
+          Red
   -------------------- */
 
   /* Lightness */
@@ -119,6 +138,12 @@
   --red-chroma-90: var(--chroma-90);
   --red-chroma-100: var(--chroma-100);
 
+  /* Red: Slight hue adjustments in darker ranges to prevent muddiness */
+  --red-hue-shift-70: 2;
+  --red-hue-shift-80: 3;
+  --red-hue-shift-90: 4;
+  --red-hue-shift-100: 5;
+
   /* Color */
   --red-0: oklch(from var(--red-color) var(--red-lightness-0) calc(c * var(--red-chroma-0)) h);
   --red-5: oklch(from var(--red-color) var(--red-lightness-5) calc(c * var(--red-chroma-5)) h);
@@ -134,7 +159,7 @@
   --red-100: oklch(from var(--red-color) var(--red-lightness-100) calc(c * var(--red-chroma-100)) calc(h + var(--red-hue-shift-100, 0)));
 
   /* -------------------
-        Blue Scale
+          Blue
   -------------------- */
 
   /* Lightness */
@@ -180,7 +205,7 @@
   --blue-100: oklch(from var(--blue-color) var(--blue-lightness-100) calc(c * var(--blue-chroma-100)) h);
 
   /* -------------------
-        Green Scale
+          Green
   -------------------- */
 
   /* Lightness */
@@ -226,7 +251,7 @@
   --green-100: oklch(from var(--green-color) var(--green-lightness-100) calc(c * var(--green-chroma-100)) h);
 
   /* -------------------
-        Yellow Scale
+          Yellow
   -------------------- */
 
   /* Yellow: Compressed lightness range for readability */
@@ -285,7 +310,7 @@
   --yellow-100: oklch(from var(--yellow-color) var(--yellow-lightness-100) calc(c * var(--yellow-chroma-100)) h);
 
   /* -------------------
-        Orange Scale
+          Orange
   -------------------- */
 
   /* Lightness */
@@ -331,7 +356,7 @@
   --orange-100: oklch(from var(--orange-color) var(--orange-lightness-100) calc(c * var(--orange-chroma-100)) h);
 
   /* -------------------
-        Olive Scale
+          Olive
   -------------------- */
 
   /* Lightness */
@@ -377,7 +402,7 @@
   --olive-100: oklch(from var(--olive-color) var(--olive-lightness-100) calc(c * var(--olive-chroma-100)) h);
 
   /* -------------------
-        Teal Scale
+          Teal
   -------------------- */
 
   /* Lightness */
@@ -423,7 +448,7 @@
   --teal-100: oklch(from var(--teal-color) var(--teal-lightness-100) calc(c * var(--teal-chroma-100)) h);
 
   /* -------------------
-        Violet Scale
+          Violet
   -------------------- */
 
   /* Lightness */
@@ -469,7 +494,7 @@
   --violet-100: oklch(from var(--violet-color) var(--violet-lightness-100) calc(c * var(--violet-chroma-100)) h);
 
   /* -------------------
-        Purple Scale
+          Purple
   -------------------- */
 
   /* Lightness */
@@ -515,7 +540,7 @@
   --purple-100: oklch(from var(--purple-color) var(--purple-lightness-100) calc(c * var(--purple-chroma-100)) h);
 
   /* -------------------
-        Pink Scale
+          Pink
   -------------------- */
 
   /* Lightness */
@@ -561,7 +586,7 @@
   --pink-100: oklch(from var(--pink-color) var(--pink-lightness-100) calc(c * var(--pink-chroma-100)) h);
 
   /* -------------------
-        Brown Scale
+          Brown
   -------------------- */
 
   /* Lightness */
@@ -605,51 +630,5 @@
   --brown-80: oklch(from var(--brown-color) var(--brown-lightness-80) calc(c * var(--brown-chroma-80)) h);
   --brown-90: oklch(from var(--brown-color) var(--brown-lightness-90) calc(c * var(--brown-chroma-90)) h);
   --brown-100: oklch(from var(--brown-color) var(--brown-lightness-100) calc(c * var(--brown-chroma-100)) h);
-
-  /* -------------------
-        Grey Scale
-  -------------------- */
-
-  /* Lightness */
-  --grey-lightness-0: var(--lightness-0);
-  --grey-lightness-5: var(--lightness-5);
-  --grey-lightness-10: var(--lightness-10);
-  --grey-lightness-20: var(--lightness-20);
-  --grey-lightness-30: var(--lightness-30);
-  --grey-lightness-40: var(--lightness-40);
-  --grey-lightness-50: var(--lightness-50);
-  --grey-lightness-60: var(--lightness-60);
-  --grey-lightness-70: var(--lightness-70);
-  --grey-lightness-80: var(--lightness-80);
-  --grey-lightness-90: var(--lightness-90);
-  --grey-lightness-100: var(--lightness-100);
-
-  /* Chrome */
-  --grey-chroma-0: var(--chroma-0);
-  --grey-chroma-5: var(--chroma-5);
-  --grey-chroma-10: var(--chroma-10);
-  --grey-chroma-20: var(--chroma-20);
-  --grey-chroma-30: var(--chroma-30);
-  --grey-chroma-40: var(--chroma-40);
-  --grey-chroma-50: var(--chroma-50);
-  --grey-chroma-60: var(--chroma-60);
-  --grey-chroma-70: var(--chroma-70);
-  --grey-chroma-80: var(--chroma-80);
-  --grey-chroma-90: var(--chroma-90);
-  --grey-chroma-100: var(--chroma-100);
-
-  /* Color */
-  --grey-0: oklch(from var(--grey-color) var(--grey-lightness-0) calc(c * var(--grey-chroma-0)) h);
-  --grey-5: oklch(from var(--grey-color) var(--grey-lightness-5) calc(c * var(--grey-chroma-5)) h);
-  --grey-10: oklch(from var(--grey-color) var(--grey-lightness-10) calc(c * var(--grey-chroma-10)) h);
-  --grey-20: oklch(from var(--grey-color) var(--grey-lightness-20) calc(c * var(--grey-chroma-20)) h);
-  --grey-30: oklch(from var(--grey-color) var(--grey-lightness-30) calc(c * var(--grey-chroma-30)) h);
-  --grey-40: oklch(from var(--grey-color) var(--grey-lightness-40) calc(c * var(--grey-chroma-40)) h);
-  --grey-50: var(--grey-color);
-  --grey-60: oklch(from var(--grey-color) var(--grey-lightness-60) calc(c * var(--grey-chroma-60)) h);
-  --grey-70: oklch(from var(--grey-color) var(--grey-lightness-70) calc(c * var(--grey-chroma-70)) h);
-  --grey-80: oklch(from var(--grey-color) var(--grey-lightness-80) calc(c * var(--grey-chroma-80)) h);
-  --grey-90: oklch(from var(--grey-color) var(--grey-lightness-90) calc(c * var(--grey-chroma-90)) h);
-  --grey-100: oklch(from var(--grey-color) var(--grey-lightness-100) calc(c * var(--grey-chroma-100)) h);
 
 }
