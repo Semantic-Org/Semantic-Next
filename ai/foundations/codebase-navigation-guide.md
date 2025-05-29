@@ -187,6 +187,48 @@ packages/
 
 ---
 
+## Semantic UI Search Patterns
+
+### **Common Grep Patterns**
+
+```bash
+# Find all defineComponent usages
+pattern="defineComponent" include="*.js" path="/docs/src/examples/"
+
+# Find parent-child communication patterns
+pattern="findParent|findChild" include="*.js" path="/docs/src/examples/"
+
+# Find reactivity patterns
+pattern="signal|reaction" include="*.js" path="/packages/reactivity/"
+
+# Find design token usage
+pattern="var\\(--" include="*.css" path="/src/"
+
+# Find event handling patterns
+pattern="events.*:" include="*.js" path="/docs/src/examples/"
+
+# Find CSS class patterns
+pattern="\\.[a-z-]+\\s*{" include="*.css" path="/src/components/"
+```
+
+### **Common Glob Patterns**
+
+```bash
+# Component examples
+pattern="*component.js" path="/docs/src/examples/"
+
+# All CSS files in components
+pattern="*.css" path="/src/components/"
+
+# Test files
+pattern="*.test.js" path="/tests/"
+
+# Token definition files
+pattern="*.css" path="/src/css/tokens/"
+```
+
+---
+
 ## Tool Usage Strategies
 
 ### 🎯 **When to Use Each Tool**

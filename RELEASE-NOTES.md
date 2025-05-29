@@ -7,6 +7,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.11.0
 
 ## Major Changes
+* New [**AI**](https://github.com/Semantic-Org/Semantic-Next/tree/main/ai) folder with detailed instructions for AI models working with Semantic UI, including guides for each package and instruction sets for writing components.
 * Theming has been reworked inside the UI framework. CSS variables are now attached to `:host` inside the shadow dom instead of globally to `:root`. This means you can no longer access globally component css variables.
 
 ### Positive Trade Offs
