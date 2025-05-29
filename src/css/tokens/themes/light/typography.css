@@ -1,0 +1,11 @@
+/*******************************
+         Light Theme - Base
+*******************************/
+
+/* CSS specificity is required here to make sure override theme applies */
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+}

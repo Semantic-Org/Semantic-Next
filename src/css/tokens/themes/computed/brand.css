@@ -9,4 +9,97 @@
   --secondary-color: var(--slate);
   --secondary-text-color: var(--slate-text-color);
 
+
+  /* -------------------
+         Primary
+  -------------------- */
+
+  /* Lightness */
+  --primary-lightness-0: var(--lightness-0);
+  --primary-lightness-5: var(--lightness-5);
+  --primary-lightness-10: var(--lightness-10);
+  --primary-lightness-20: var(--lightness-20);
+  --primary-lightness-30: var(--lightness-30);
+  --primary-lightness-40: var(--lightness-40);
+  --primary-lightness-50: var(--lightness-50);
+  --primary-lightness-60: var(--lightness-60);
+  --primary-lightness-70: var(--lightness-70);
+  --primary-lightness-80: var(--lightness-80);
+  --primary-lightness-90: var(--lightness-90);
+  --primary-lightness-100: var(--lightness-100);
+
+  /* Chrome */
+  --primary-chroma-0: var(--chroma-0);
+  --primary-chroma-5: var(--chroma-5);
+  --primary-chroma-10: var(--chroma-10);
+  --primary-chroma-20: var(--chroma-20);
+  --primary-chroma-30: var(--chroma-30);
+  --primary-chroma-40: var(--chroma-40);
+  --primary-chroma-50: var(--chroma-50);
+  --primary-chroma-60: var(--chroma-60);
+  --primary-chroma-70: var(--chroma-70);
+  --primary-chroma-80: var(--chroma-80);
+  --primary-chroma-90: var(--chroma-90);
+  --primary-chroma-100: var(--chroma-100);
+
+  /* Color */
+  --primary-0: oklch(from var(--primary-color) var(--primary-lightness-0) calc(c * var(--primary-chroma-0)) h);
+  --primary-5: oklch(from var(--primary-color) var(--primary-lightness-5) calc(c * var(--primary-chroma-5)) h);
+  --primary-10: oklch(from var(--primary-color) var(--primary-lightness-10) calc(c * var(--primary-chroma-10)) h);
+  --primary-20: oklch(from var(--primary-color) var(--primary-lightness-20) calc(c * var(--primary-chroma-20)) h);
+  --primary-30: oklch(from var(--primary-color) var(--primary-lightness-30) calc(c * var(--primary-chroma-30)) h);
+  --primary-40: oklch(from var(--primary-color) var(--primary-lightness-40) calc(c * var(--primary-chroma-40)) h);
+  --primary-50: var(--primary-color);
+  --primary-60: oklch(from var(--primary-color) var(--primary-lightness-60) calc(c * var(--primary-chroma-60)) h);
+  --primary-70: oklch(from var(--primary-color) var(--primary-lightness-70) calc(c * var(--primary-chroma-70)) h);
+  --primary-80: oklch(from var(--primary-color) var(--primary-lightness-80) calc(c * var(--primary-chroma-80)) h);
+  --primary-90: oklch(from var(--primary-color) var(--primary-lightness-90) calc(c * var(--primary-chroma-90)) h);
+  --primary-100: oklch(from var(--primary-color) var(--primary-lightness-100) calc(c * var(--primary-chroma-100)) h);
+
+  /* -------------------
+        Secondary
+  -------------------- */
+
+  /* Lightness */
+  --secondary-lightness-0: var(--lightness-0);
+  --secondary-lightness-5: var(--lightness-5);
+  --secondary-lightness-10: var(--lightness-10);
+  --secondary-lightness-20: var(--lightness-20);
+  --secondary-lightness-30: var(--lightness-30);
+  --secondary-lightness-40: var(--lightness-40);
+  --secondary-lightness-50: var(--lightness-50);
+  --secondary-lightness-60: var(--lightness-60);
+  --secondary-lightness-70: var(--lightness-70);
+  --secondary-lightness-80: var(--lightness-80);
+  --secondary-lightness-90: var(--lightness-90);
+  --secondary-lightness-100: var(--lightness-100);
+
+  /* Chrome */
+  --secondary-chroma-0: var(--chroma-0);
+  --secondary-chroma-5: var(--chroma-5);
+  --secondary-chroma-10: var(--chroma-10);
+  --secondary-chroma-20: var(--chroma-20);
+  --secondary-chroma-30: var(--chroma-30);
+  --secondary-chroma-40: var(--chroma-40);
+  --secondary-chroma-50: var(--chroma-50);
+  --secondary-chroma-60: var(--chroma-60);
+  --secondary-chroma-70: var(--chroma-70);
+  --secondary-chroma-80: var(--chroma-80);
+  --secondary-chroma-90: var(--chroma-90);
+  --secondary-chroma-100: var(--chroma-100);
+
+  /* Color */
+  --secondary-0: oklch(from var(--secondary-color) var(--secondary-lightness-0) calc(c * var(--secondary-chroma-0)) h);
+  --secondary-5: oklch(from var(--secondary-color) var(--secondary-lightness-5) calc(c * var(--secondary-chroma-5)) h);
+  --secondary-10: oklch(from var(--secondary-color) var(--secondary-lightness-10) calc(c * var(--secondary-chroma-10)) h);
+  --secondary-20: oklch(from var(--secondary-color) var(--secondary-lightness-20) calc(c * var(--secondary-chroma-20)) h);
+  --secondary-30: oklch(from var(--secondary-color) var(--secondary-lightness-30) calc(c * var(--secondary-chroma-30)) h);
+  --secondary-40: oklch(from var(--secondary-color) var(--secondary-lightness-40) calc(c * var(--secondary-chroma-40)) h);
+  --secondary-50: var(--secondary-color);
+  --secondary-60: oklch(from var(--secondary-color) var(--secondary-lightness-60) calc(c * var(--secondary-chroma-60)) h);
+  --secondary-70: oklch(from var(--secondary-color) var(--secondary-lightness-70) calc(c * var(--secondary-chroma-70)) h);
+  --secondary-80: oklch(from var(--secondary-color) var(--secondary-lightness-80) calc(c * var(--secondary-chroma-80)) h);
+  --secondary-90: oklch(from var(--secondary-color) var(--secondary-lightness-90) calc(c * var(--secondary-chroma-90)) h);
+  --secondary-100: oklch(from var(--secondary-color) var(--secondary-lightness-100) calc(c * var(--secondary-chroma-100)) h);
+
 }
