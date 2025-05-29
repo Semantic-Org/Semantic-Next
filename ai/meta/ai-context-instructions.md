@@ -6,6 +6,24 @@
 
 ---
 
+## Semantic UI Context Optimization
+
+### **Framework-Specific Considerations**
+This documentation is structured around Semantic UI's unique architecture:
+- **Signals-based reactivity** requiring understanding of reactive vs non-reactive contexts
+- **Component tree navigation** as the primary state sharing mechanism
+- **Shadow DOM encapsulation** affecting query strategies
+- **Design token system** with specific CSS custom property patterns
+
+### **Context Loading for Semantic UI**
+The framework's complexity requires strategic context loading:
+- **Start with mental model** for architectural foundation
+- **Task-specific guides** provide implementation patterns
+- **Specialized packages** can be used independently
+- **Examples are canonical** - they demonstrate best practices
+
+---
+
 ## Context Loading Optimization
 
 ### Document Size Guidelines
@@ -13,12 +31,25 @@
 - Cross-references minimize duplication
 - Sections tagged with use cases for targeted loading
 
-### Hierarchical Information Access
+### **Progressive Context Building**
 ```
-Quick Lookup → foundations/quick-reference.md
-Implementation → guides/ documents  
-Deep Understanding → foundations/mental-model.md
-Specialized Packages → specialized/ documents
+Level 1: Foundation
+├── Read: 00-START-HERE.md (navigation)
+├── Read: mental-model.md (architecture)
+└── Decision: What type of task?
+
+Level 2: Task-Specific
+├── Component Creation → component-generation-instructions.md
+├── Implementation Patterns → patterns-cookbook.md  
+├── API Reference → quick-reference.md
+├── Codebase Navigation → codebase-navigation-guide.md
+└── Specialized Packages → specialized/ documents
+
+Level 3: Implementation
+├── Grep: Find relevant examples
+├── Read: Selected examples
+├── Glob: Find related files
+└── Read: Implementation details
 ```
 
 ### Context Window Management
