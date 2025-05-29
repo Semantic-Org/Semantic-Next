@@ -38,7 +38,7 @@ label {
 input[type="text"],
 textarea,
 select {
-  width: 12em;
+  width: 100%;
   background: var(--inverted-100);
   color: var(--input-text-color);
   padding: var(--input-padding);
