@@ -6,42 +6,76 @@ description: Using template features in Semantic UI
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 
-## What is Templating
+## Overview
 
-Templates provide a syntax for generating html that can be used to power your components. They allow for looping, conditionals, expressions, and a data context to make it easier to retrieve data when rendering web components.
+Semantic UI templates provide a declarative syntax for generating the HTML structure of your [Web Components](/introduction). They integrate features like [looping](/templates/loops), [conditionals](/templates/conditionals), [expressions](/templates/expressions), and access to a component's [data context](/components/rendering#data-context) to simplify rendering dynamic views.
 
-## Template Syntax
+## Writing Templates
 
-Templates all support either single or double bracket syntax and are whitespace insensitive. Use what style you and your team prefer.
+### Flexible Syntax
 
-#### Single Bracket
-```sui
+Template syntax is designed to be adaptable to your team's preferences and to help components feel more natural across codebases of different languages.
+
+#### Brackets
+
+Bracket syntax supports either single or double bracket as long as it is consistent across the file.
+
+```sui title="Single Bracket"
 Welcome, { getFirstName }
 ```
 
-#### Double Bracket
-```sui
+```sui title="Double Bracket"
 Welcome, {{ getFirstName }}
 ```
 
-> **Flexible Dialects** Compiling templates is inexpensive so supporting additional syntaxes comes at little cost. For people coming from a `jsx` or `svelte` background single bracket notation might feel more familiar. For those coming from `meteor`, `rails`, or `php` using double brackets might be more at home. Both achieve the same results, but allow for developer and team preference.
+#### Expressions
 
-### Template Usage
+Expressions can use Lisp style spaced expressions or javascript style expressions. You can also include any inlined javascript.
 
-Templates compile to an `ast` that is used to create the Shadow DOM of web components. This makes sure that only the parts that need updating in your component are modified when [reactive changes](/components/reactivity) occur.
+```sui title="Lisp Simple"
+{ formatDate date 'h:mm a' timezone }
+```
 
-Components include a custom templating language built for web components. This language compiles to an Abstract Syntax Tree or `AST` that is used to render your component and surgically update portions of the DOM when reactive data sources change.
+```sui title="Javascript"
+{ formatDate(date, 'h:mm a') }
+```
 
-> For more information about how templates are used inside components see the [dedicated section for component templates](/components/rendering)
+```sui title="Lisp Nested"
+{ formatDate date, 'h:mm a' (getTimezone user) }
+```
 
+```sui title="Javascript Nested"
+{ formatDate(date, 'h:mm a', getTimezone(user)) }
+```
+```sui title="Lisp Evaluated"
+{ formatDate date, ('h:mm + 'a') (getTimezone user) }
+```
+
+```sui title="Javascript Evaluated"
+{ formatDate(date, 'h:mm + 'a', getTimezone(user)) }
+```
+
+### Compiles to AST
+
+Semantic UI templates compile to an Abstract Syntax Tree (AST). This AST is used to efficiently render the component's [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) and perform targeted updates only when underlying [reactive data sources](/reactivity) change.
+
+> See the [Templates & Data Context](/components/rendering) guide for details on how templates integrate with component data.
+
+## Binding Data
+
+Templates are bound to a [data context](/components/rendering) which is used for evaluating expressions.
+
+You can think of the data context as "all the variables defined in the scope of your template".
+
+When using the component framework these will come from sources in your component like their [settings](/components/settings), and [internal state](/components/state).
 
 <PlaygroundExample id="advanced-color-picker" height="480"></PlaygroundExample>
 
 ## Template Features
 
-### Expressions
+### [Expressions](/templates/expressions)
 
-[Expressions](templates/expressions) allow values to be ouput and functions to be executed from the template's data context.
+Allow values to be output and functions executed from the template's [data context](/components/rendering#data-context).
 
 #### Value Output
 ```sui
@@ -68,9 +102,9 @@ Components include a custom templating language built for web components. This l
 {#html someHTML}
 ```
 
-### Conditionals
+### [Conditionals](/templates/conditionals)
 
-If / elseif / else
+Control flow using `#if`, `#else if`, and `#else`.
 ```sui
 {#if isColor 'red'}
   Red
@@ -81,9 +115,9 @@ If / elseif / else
 {/if}
 ```
 
-### Loops
+### [Loops](/templates/loops)
 
-With intermediate value
+Iterate over collections using `#each`.
 ```sui
 {#each row in someCollection}
   {row.name}
@@ -113,7 +147,9 @@ With else
 {/each}
 ```
 
-### Content Slots
+### [Slots](/templates/slots)
+
+Define areas for external content injection.
 
 Default Slot
 ```sui
@@ -124,17 +160,18 @@ Named Slot
 {>slot icon}
 ```
 
-### Global Helpers
+### [Global Helpers](/templates/helpers)
 
-
-Built-in helpers
+Access built-in utility functions for common tasks like formatting or logic.
 ```sui
 {stringify someObject}
 {formatDate someDate}
 {log 'Hello World'}
 ```
 
-### Subtemplates
+### [Subtemplates](/templates/subtemplates)
+
+Compose components by rendering other component templates.
 
 Named Templates
 ```sui
@@ -165,7 +202,9 @@ Reactive Data Controls
 }
 ```
 
-### Snippets
+### [Snippets](/templates/snippets)
+
+Define and reuse inline template fragments within the same file.
 
 ```sui
 {#snippet fullName}

@@ -1,0 +1,152 @@
+:host {
+  --progress-height: 1rem;
+  --progress-bg: var(--standard-10);
+  --progress-color: var(--primary-color);
+  --progress-transition: width 0.3s ease, background 1s ease;
+  --progress-min-width: 2.5rem;
+  --label-spacing: var(--5px);
+  
+  display: block;
+  width: 100%;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.track {
+  background-color: var(--progress-bg);
+  border-radius: var(--border-radius);
+  height: var(--progress-height);
+  box-shadow: var(--inset-shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+.label {
+  font-size: var(--small);
+  font-weight: var(--bold);
+  text-align: center;
+  margin-top: var(--label-spacing);
+  color: color: var(--text-color);
+}
+
+.fill {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: var(--progress-min-width);
+  background-color: var(--progress-color);
+  background-image: var(--gradient);
+  transition: var(--progress-transition);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+
+  .label {
+    margin: 0 var(--label-spacing) 0px 0px;
+    font-size: var(--8px);
+    color: var(--white-80);
+    text-shadow: var(--text-shadow);
+  }
+
+  &::after {
+    content: '';
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    border-radius: inherit;
+  }
+}
+
+@keyframes active {
+  0% {
+    opacity: .3;
+    width: 0
+  }
+
+  100% {
+    opacity: 0;
+    width: 100%
+  }
+}
+
+/* States */
+.active .fill::after {
+  animation: active 2s ease infinite
+}
+
+.complete {
+  .fill {
+    background-color: var(--standard-5);
+    background-image: var(--subtle-gradient);
+
+    &:after {
+      animation: none;
+    }
+  }
+}
+
+
+/* Size variants */
+.mini {
+  --progress-height: 4px;
+  .label {
+    font-size: 10px;
+  }
+}
+.small {
+  --progress-height: 8px;
+  .label {
+    font-size: 10px;
+  }
+}
+.small {
+  --progress-height: 14px;
+  .label {
+    font-size: 10px;
+  }
+}
+.medium {
+  --progress-height: 16px;
+  .label {
+    font-size: 12px;
+  }
+}
+
+.large {
+  --progress-height: 2rem;
+  .label {
+    font-size: 13px;
+  }
+}
+
+
+/* Theme variants */
+.primary {
+  --progress-color: var(--primary-color);
+}
+.secondary {
+  --progress-color: var(--secondary-color);
+}
+
+.success {
+  --progress-color: var(--positive-color);
+}
+.danger {
+  --progress-color: var(--negative-color);
+}
+.warning {
+  --progress-color: var(--warning-color);
+}
+.info {
+  --progress-color: var(--info-color);
+}

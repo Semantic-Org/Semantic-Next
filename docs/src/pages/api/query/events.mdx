@@ -51,7 +51,7 @@ $(target).on(eventName, selector, handler, options)
 ### Returns
 
 #### Standard
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 #### Return Handler
 
@@ -192,7 +192,7 @@ $('selector').off(eventName, handler)
 | handler   | function | The function to remove from the event handlers |
 
 ### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 ```javascript
@@ -221,7 +221,7 @@ $('selector').one(eventName, handler)
 | handler   | function | The function to execute when the event occurs |
 
 ### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 ```javascript
@@ -245,7 +245,7 @@ $('selector').trigger(eventName)
 | eventName | string | The type of event to trigger |
 
 ### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 ```javascript
@@ -271,7 +271,7 @@ $('selector').dispatchEvent(eventName, eventData, eventSettings)
 | eventSettings  | object | Additional event settings              |
 
 ### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 
@@ -291,8 +291,9 @@ Gives focus to the first element in the set of matched elements.
 $('selector').focus()
 ```
 
+
 ### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 ```javascript
@@ -310,10 +311,28 @@ $('selector').blur()
 ```
 
 ### Returns
-[Query object](/query/basic#the-query-object) (for chaining).
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 ```javascript
 // Remove focus from whatever is focused
 $(document.activeElement).blur();
+```
+```
+## click
+
+Triggers click event for all elements
+
+### Syntax
+```javascript
+$('selector').click()
+```
+
+## submit
+
+Triggers submit event for all elements
+
+### Syntax
+```javascript
+$('selector').submit()
 ```

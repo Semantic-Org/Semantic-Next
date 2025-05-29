@@ -7,17 +7,21 @@ description: Reactive data storage for your component's internal behavior
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-## Introduction
+## Overview
 
-State is a [reactive data store](/reactivity) that manages the dynamic, internal data of your component. Unlike [settings](/components/settings) which are passed in from outside, state is maintained within the component and typically changes as users interact with it.
+Component state represents the dynamic, internal data managed within a component, often changing in response to user interaction or other events.
+
+Unlike [settings](/components/settings), which act as the external configuration API, state is private to the component instance.
+
+Semantic UI uses its [Signals-based reactivity system](/reactivity) to manage state.
 
 > For a deeper understanding of reactivity concepts, see the [Reactivity Guide](/reactivity).
 
 ## Declaring State
 
-When [defining a component](/api/component/define-component) you can provide default state values:
+Default state values are provided via the `defaultState` object when [creating a component](/components/create) using [`defineComponent`](/create#defining-components).
 
-When a component is initialized the state object will be mapped to a [Signal](/components/reactivity) that will let you update and modify the state for that instance.
+When a component instance is initialized, each property in the `defaultState` object is automatically converted into a reactive [Signal](/reactivity/variables), allowing its value to be tracked and updated.
 
 ```js
 const defaultState = {
@@ -35,11 +39,9 @@ defineComponent({
 
 ## Accessing State
 
-### In Components
+### Accessing in Component Logic
 
-Each component has its own state object with a copy of the default state defined from your component.
-
-You can access state from [lifecycle events](/components/lifecycle) like `createComponent` by destructuring it from the callback arguments.
+The `state` object is passed as an argument to [lifecycle callbacks](/components/lifecycle#callback-arguments) (like `createComponent`, `onRendered`, etc.) and handlers for [events](/components/events) or [key bindings](/components/keys). You can destructure `state` to access individual state signals within these functions.
 
 
 
@@ -59,32 +61,11 @@ const createComponent = ({state}) => ({
 });
 ```
 
-### Initialize
+> **Flexible Syntax** Both `.value` and `.get()` can be used to read a signal's current value within component logic. See [Reactivity Basics](/reactivity/variables) for details. Note that accessing state within a [Reaction](/reactivity) establishes a dependency.
 
-In some cases you might want to use initialize to have `state` shadow a `setting` or to initialize state based off of another state value.
+### Accessing in Templates
 
-> Both `.value` and `.get()` can be used to read state values. For more information see [basic reactivity](/reactivity/variables)
-
-```javascript
-
-const createComponent = ({state}) => ({
-  incrementCounter() {
-    // Modify state with .value - triggers re-renders
-    state.counter.increment();
-  },
-
-  getCount() {
-    // Read state using .value
-    return state.counter.value;
-    // Or using .get() method
-    // return state.counter.get();
-  }
-});
-
-
-### In Templates
-
-When working inside a template you can access state, settings, and other values in the data context directly.
+Within a component's [template](/templates), state signals can be accessed directly by their property name from the [data context](/components/rendering#data-context). You do not need to use `.value` or `.get()` here.
 
 > As an added convenience state values in templates can be accessed by name directly without using `.value` or `.get()`
 
@@ -120,9 +101,9 @@ const defaultState = {
 {/each}
 ```
 
-## Event Handlers & Keybindings
+## Accessing in Event Handlers & Keybindings
 
-All component methods can access state from the destructured arguments to make changes to values.
+As mentioned, the `state` object is available within declarative [event handlers](/components/events) and [key binding](/components/keys) callbacks, allowing direct state manipulation in response to user input.
 
 ```js
 defineComponent({
@@ -150,11 +131,9 @@ defineComponent({
 
 ## Updating State
 
-### Basic Updates
+### Basic Updates & Helpers
 
-Update state by using `set()` or modifying the `.value` property.
-
-There are also many helpers to make updating signals easier like `now()`
+Update a state signal's value using its `.set()` method, by assigning to its `.value` property, or by using convenient built-in [mutation helpers](/reactivity/mutation-helpers) (like `.increment()`, `.toggle()`, `.now()`, etc.) where available.
 
 ```js
 const onButtonClick = ({state}) => {
@@ -167,9 +146,7 @@ const onButtonClick = ({state}) => {
 
 ### Controlling Update Timing
 
-> For details on how the reactivity system processes updates, see the [Flushing Guide](/reactivity/flush).
-
-When multiple state changes need to happen together, you can use `afterFlush` to run code after all reactive updates are processed:
+Reactive updates are typically batched and [flushed asynchronously](/reactivity/flush). When multiple state changes need to occur together atomically, or you need to run code *after* the DOM has been updated based on state changes, you can use the `afterFlush` callback available in [lifecycle methods](/components/lifecycle#callback-arguments).
 
 ```js
 const createComponent = ({$, state, afterFlush}) => ({
@@ -190,13 +167,11 @@ const createComponent = ({$, state, afterFlush}) => ({
 });
 ```
 
-Derived values automatically update when their dependencies change.
-
 ## Working with Collections
 
-> See the [Reactivity Variables](/reactivity/variables) guide for more details on Signal methods.
+State signals wrapping arrays or objects provide built-in [mutation helpers](/reactivity/mutation-helpers) (like `.push()`, `.removeIndex()`, `.setProperty()`) that simplify common update operations while automatically handling reactivity.
 
-State provides built-in methods for working with arrays and objects that handle reactivity for you:
+> See the [Mutation Helpers](/reactivity/mutation-helpers) guide and the [Reactivity API Reference](/api/reactivity) (specifically collection and array helpers) for more details.
 
 ```js
 const createComponent = ({state}) => ({
@@ -239,9 +214,14 @@ These helper methods automatically handle reactivity updates and trigger re-rend
 
 ## Lifecycle Integration
 
-> See the [Reactivity Controls](/reactivity/computations) guide for more information on creating reactive effects that respond to state changes.
+State management is often closely tied to the [component lifecycle](/components/lifecycle). Common patterns include:
 
-State often needs to be initialized or updated at specific points in a [component's lifecycle](/components/lifecycle):
+*   Initializing state based on [settings](/components/settings) in `createComponent` or `onCreated`.
+*   Fetching data and updating state in `onCreated` or `onRendered`.
+*   Setting up reactive effects (using `reaction`) that respond to state changes within `createComponent` or `onCreated`.
+*   Cleaning up resources (e.g., timers, subscriptions stored in state) in `onDestroyed`.
+
+> See the [Reactive Computations](/reactivity/computations) guide for more information on creating reactive effects.
 
 ```js
 // Initialize state after component rendering

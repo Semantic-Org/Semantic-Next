@@ -1,11 +1,11 @@
 import { defineComponent } from '@semantic-ui/component';
-import { get } from '@semantic-ui/utils';
+import { get, inArray } from '@semantic-ui/utils';
 
 import componentSpec from './specs/button-component.json' assert { type: 'json' };
 import template from './button.html?raw' assert { type: 'txt' };
 import css from './button-bundle.css?raw' assert { type: 'css' };
 
-const createComponent = ({ self, settings, data, el, $ }) => ({
+const createComponent = ({ el, self, settings, data, $ }) => ({
   isIconBefore() {
     return settings.icon && !settings.iconAfter;
   },
@@ -18,6 +18,18 @@ const createComponent = ({ self, settings, data, el, $ }) => ({
       32: 'Enter',
     };
     return get(submitKeys, String(keyCode));
+  },
+  performAction() {
+    const formActions = ['submit', 'reset'];
+    if(inArray(settings.type, formActions)) {
+      const form = self.getForm();
+      if(form) {
+        $(form).trigger(settings.type);
+      }
+    }
+  },
+  getForm() {
+    return $(el).closest('form').el();
   },
   isDisabled() {
     return settings.state == 'disabled';
@@ -32,12 +44,14 @@ const events = {
     $(this).removeClass('pressed');
   },
   'click .button'({ event, self, $ }) {
+    self.performAction();
     $(this).blur();
   },
   'keydown .button'({ event, self, $ }) {
     let $button = $(this);
     if (self.isSubmitKey(event.keyCode)) {
       $button.addClass('pressed');
+      self.performAction();
       event.preventDefault();
     }
     if (event.key == 'Escape') {

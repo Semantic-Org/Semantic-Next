@@ -1,0 +1,66 @@
+/*******************************
+        Computed - Layout
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+         Borders
+  -------------------- */
+
+  /* border colors swap on dark mode theme */
+  --border-color: oklch(var(--standard-border-color) / 15%);
+  --internal-border-color: oklch(var(--standard-border-color) / 10%);
+  --subtle-border-color: oklch(var(--standard-border-color) / 8%);
+  --very-subtle-border-color: oklch(var(--standard-border-color) / 5%);
+  --strong-border-color: oklch(var(--standard-border-color) / 22%);
+  --selected-border-color: oklch(var(--standard-border-color) / 35%);
+  --strong-selected-border-color: oklch(var(--standard-border-color) / 50%);
+  --disabled-border-color: oklch(var(--standard-border-color) / 5%);
+
+  /* dark / light theme - variant */
+  --border-color: oklch(var(--standard-border-color) / 15%);
+  --border: 1px solid var(--border-color);
+
+  /* black - theme invariant */
+  --black-border: 1px solid var(--black-border-color);
+  --selected-black-border: 1px solid var(--selected-black-border-color);
+  --internal-border: 1px solid var(--internal-border-color);
+
+  /* white - theme invariant */
+  --white-border: 1px solid var(--white-border-color);
+  --selected-white-border: 1px solid var(--selected-white-border-color);
+
+  /* strength */
+  --very-subtle-border: 1px solid var(--very-subtle-border-color);
+  --subtle-border: 1px solid var(--subtle-border-color);
+  --strong-border: 1px solid var(--strong-border-color);
+
+  /* states */
+  --selected-border: 1px solid var(--selected-border-color);
+  --strong-selected-border: 1px solid var(--strong-selected-border-color);
+  --disabled-border: 1px solid var(--disabled-border-color);
+
+  /* solids */
+  --solid-border: 1px solid var(--solid-border-color);
+  --solid-black-border: 1px solid var(--solid-black-border-color);
+  --solid-white-border: 1px solid var(--solid-white-border-color);
+
+  /* --- Colored Border --- */
+  --red-border-color: var(--red-text-color);
+  --orange-border-color: var(--orange-text-color);
+  --yellow-border-color: var(--yellow-text-color);
+  --olive-border-color: var(--olive-text-color);
+  --green-border-color: var(--green-text-color);
+  --teal-border-color: var(--teal-text-color);
+  --blue-border-color: var(--blue-text-color);
+  --violet-border-color: var(--violet-text-color);
+  --purple-border-color: var(--purple-text-color);
+  --pink-border-color: var(--pink-text-color);
+  --brown-border-color: var(--brown-text-color);
+
+}

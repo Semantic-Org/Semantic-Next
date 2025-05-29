@@ -1,5 +1,5 @@
-{#snippet textField}
-  <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
+{#snippet textInput}
+  <div class="field {classMap getFieldClasses field}" data-name="{field.name}">
     <label for="{field.name}">
       {field.label}
       {#if field.required}<span class="required">*</span>{/if}
@@ -9,20 +9,20 @@
       id="{field.name}"
       name="{field.name}"
       value="{getFieldValue field.name}"
-      placeholder="{field.placeholder || ''}"
+      placeholder="{field.placeholder}"
       data-name="{field.name}"
     />
     {#if shouldShowError field.name}
-      <div class="error-message">{getFieldError field.name}</div>
+      <div class="error">{getFieldError field.name}</div>
     {/if}
     {#if field.helpText}
-      <div class="help-text">{field.helpText}</div>
+      <div class="help">{field.helpText}</div>
     {/if}
   </div>
 {/snippet}
 
-{#snippet selectField}
-  <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
+{#snippet selectInput}
+  <div class="field {classMap getFieldClasses field}" data-name="{field.name}">
     <label for="{field.name}">
       {field.label}
       {#if field.required}<span class="required">*</span>{/if}
@@ -50,7 +50,7 @@
   </div>
 {/snippet}
 
-{#snippet textareaField}
+{#snippet textareaInput}
   <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
     <label for="{field.name}">
       {field.label}
@@ -70,24 +70,24 @@
 
 <form class="{classMap getFormClasses}">
   {#each field in schema}
-    {#if field.type == 'text'}
-      {>textField field=field}
-    {else if field.type == 'select'}
-      {>selectField field=field}
-    {else if field.type == 'textarea'}
-      {>textareaField field=field}
+    {#if is field.type 'text'}
+      {>textInput field=field}
+    {else if is field.type 'select'}
+      {>selectInput field=field}
+    {else if is field.type 'textarea'}
+      {>textareaInput field=field}
     {/if}
   {/each}
   
   <!-- Form actions -->
-  <div class="form-actions">
-    <button type="submit" class="submit-button" disabled={!valid || submitting}>
+  <div class="actions">
+    <ui-button type="submit" primary class="submit" >
       {#if submitting}
-        <ui-icon icon="loading" spin></ui-icon> Submitting...
+        <ui-icon loader></ui-icon> Submitting...
       {else}
         {submitLabel}
       {/if}
-    </button>
-    <button type="button" class="reset-button">Reset</button>
+    </ui-button>
+    <ui-button class="reset">Reset</button>
   </div>
 </form>

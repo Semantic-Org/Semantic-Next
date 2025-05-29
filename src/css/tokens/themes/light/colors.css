@@ -1,0 +1,47 @@
+/*******************************
+        Light Theme - Colors
+*******************************/
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /* -------------------
+        Site Colors
+  -------------------- */
+
+  /* ---  Colors  --- */
+  --red: oklch(0.59 0.27 29);
+  --orange: oklch(0.65 0.2 44.37);
+  --yellow: oklch(0.78 0.18 81.24);
+  --olive: oklch(0.69 0.19 119.53);
+  --green: oklch(0.62 0.26 145.53);
+  --teal: oklch(0.66 0.14 188.03);
+  --blue: oklch(0.56 0.21 251);
+  --violet: oklch(0.46 0.26 283.29);
+  --purple: oklch(0.54 0.26 314.43);
+  --pink: oklch(0.59 0.27 358.33);
+  --brown: oklch(0.5 0.11 51.34);
+  --grey: oklch(0.57 0 0);
+  --black: oklch(0.23 0 0);
+
+
+
+  /* -------------------
+       Alpha Colors
+  -------------------- */
+
+  --very-subtle-transparent-black: oklch(var(--black-lch) / 2%);
+  --subtle-transparent-black: oklch(var(--black-lch) / 3%);
+  --transparent-black: oklch(var(--black-lch) / 5%);
+  --strong-transparent-black: oklch(var(--black-lch) / 8%);
+  --very-strong-transparent-black: oklch(var(--black-lch) / 15%);
+
+  --very-subtle-transparent-white: oklch(var(--white-lch) / 3%);
+  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--black-lch) / 18%);
+
+}

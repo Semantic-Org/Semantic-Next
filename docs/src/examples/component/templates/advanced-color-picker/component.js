@@ -1,4 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
+import { oklchToHex } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -15,8 +16,16 @@ const defaultState = {
 const createComponent = ({ self, settings, $, dispatchEvent }) => ({
   selectColor(color) {
     settings.color = color;
-    dispatchEvent('colorselected', { color });
+    const hexcode = self.getHexcode(color);
+    dispatchEvent('colorselected', {
+      color,
+      hexcode
+    });
+    $('.custom-color').value(hexcode);
   },
+  getHexcode(oklch) {
+    return oklchToHex(oklch);
+  }
 });
 
 const events = {

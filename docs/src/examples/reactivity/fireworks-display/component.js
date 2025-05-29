@@ -31,6 +31,10 @@ const defaultSettings = {
 const createComponent = ({ self, $, reaction, settings, state }) => ({
   render: { lastTime: 0, fps: 0 },
 
+  initialize() {
+    self.startAnimation();
+  },
+
   startAnimation() {
     self.render.lastTime = performance.now() * 0.001;
     reaction(() => {
@@ -199,10 +203,6 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   },
 });
 
-const onRendered = ({ self, state, settings }) => {
-  self.startAnimation();
-};
-
 const events = {
   'pointerdown canvas'({ self, event, state, $ }) {
     let emitter = state.emitter.get();
@@ -224,8 +224,8 @@ const events = {
     emitter.active = false;
     state.emitter.set(emitter);
   },
+  // prevent highlight/scroll on mobile
   'touchstart, touchmove canvas'({ event }) {
-    // prevent highlight/scroll on mobile
     event.preventDefault();
   },
 };
@@ -235,7 +235,6 @@ export const FireworksDisplay = defineComponent({
   template,
   css,
   createComponent,
-  onRendered,
   events,
   defaultState,
   defaultSettings,

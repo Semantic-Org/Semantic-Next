@@ -106,8 +106,11 @@ export const TemplateHelpers = {
   is(a, b) {
     return a == b;
   },
-  notEqual(a, b) {
+  isNot(a, b) {
     return a !== b;
+  },
+  notEqual(a, b) {
+    return TemplateHelpers.isNot(a, b);
   },
   isExactly(a, b) {
     return a === b;

@@ -59,7 +59,7 @@ export const defineComponent = ({
     adoptStylesheet(pageCSS);
   }
 
-  if(false &&addCascade) {
+  if(false && addCascade) {
     css = addCascadeVariables(css);
   }
 

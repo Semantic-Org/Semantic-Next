@@ -218,7 +218,7 @@ a {
   }
   &.current {
     cursor: default;
-    color: var(--primary-light-text-color);
+    color: var(--primary-text-color);
 
     &[href] {
       cursor: pointer;

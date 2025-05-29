@@ -112,6 +112,13 @@
       "description": "can specify the form field name"
     },
     {
+      "name": "Type",
+      "type": "string",
+      "attribute": "type",
+      "defaultValue": "text",
+      "description": "can specify the form html input type"
+    },
+    {
       "name": "Debounced",
       "type": "boolean",
       "attribute": "debounced",

@@ -112,8 +112,8 @@ const keys = {
 };
 
 const events = {
-  'input .search'({ event, state }) {
-    state.searchTerm.set(event.target.value);
+  'input .search'({ event, state, value }) {
+    state.searchTerm.set(value);
   },
   'click .result'({ self, data }) {
     self.selectResult(data.index);

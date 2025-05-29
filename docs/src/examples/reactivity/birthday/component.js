@@ -52,12 +52,12 @@ const onCreated = ({ state, self }) => {
 };
 
 const events = {
-  'change .date-picker'({ self }) {
+  'change .date-picker'({ state }) {
     const newDay = new Date(this.value);
-    self.today.set(self.getDisplayDate(newDay));
+    state.today.set(self.getDisplayDate(newDay));
   },
-  'click a.birthday'({ self, data }) {
-    self.today.set(data.birthday);
+  'click a.birthday'({ state, data }) {
+    state.today.set(data.birthday);
   },
 };
 

@@ -5,8 +5,8 @@
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "src/components/index.js",
+  "module": "src/components/index.js",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -16,22 +16,34 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./src/index.js",
+      "import": "./src/components/index.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "./src/index.js"
+      "default": "./src/components/index.js"
     },
     "./css": {
-      "import": "./src/index.css",
-      "default": "./src/index.css"
+      "import": "./src/css/all.css",
+      "default": "./src/css/all.css"
+    },
+    "./css/reset": {
+      "import": "./src/css/global/reset.css",
+      "default": "./src/css/global/reset.css"
+    },
+    "./css/global": {
+      "import": "./src/css/global/global.css",
+      "default": "./src/css/global/global.css"
+    },
+    "./css/tokens": {
+      "import": "./src/css/tokens.css",
+      "default": "./src/css/tokens.css"
     },
     "./specs": {
-      "import": "./src/specs.js",
-      "default": "./src/specs.js"
+      "import": "./src/specs/specs.js",
+      "default": "./src/specs/specs.js"
     },
     "./component-specs": {
-      "import": "./src/component-specs.js",
-      "default": "./src/component-specs.js"
+      "import": "./src/specs/component-specs.js",
+      "default": "./src/specs/component-specs.js"
     },
     "./examples": {
       "import": "./examples/index.js",

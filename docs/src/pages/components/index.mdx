@@ -4,42 +4,46 @@ title: Components
 icon: package
 description: An overview of component features
 ---
-## Creating Components
+## Creating UI Components
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic UI components are standard Web Components that are enhanced with built-in features designed to simplify common UI development tasks like managing state, rendering templates, handling events, and styling.
+Semantic UI components are standard [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with an integrated authoring framework that simplifies common UI development tasks like managing state, rendering templates, handling events, and styling.
 
-> **Getting Started** It's recommended to check out our [interactive tutorial](/learn/selection) to introduce yourself to the features of Semantic UI before digging into the tech guides.
+> **Getting Started:** Before diving into the technical guides, consider the [interactive tutorial](/learn/selection) for a hands-on introduction to Semantic UI features.
 
-Core features of Semantic UI
+The component framework includes:
 
-* [Templating](/components/rendering) - A reactive templating system to render web components with [reactive expressions](/templates/expressions), [snippets](/templates/snippets), [subtemplating](/templates/subtemplates), [template helpers](templates/helpers), [loops](/templates/loops), [conditionals](/templates/conditionals), and more. An integrated [signals based reactivity system](/components/reactivity) make for precision updates. Supports [full composable components](/templates/subtemplates#basic-example) in a similar fashion to React, Vue, Svelte or other front end frameworks.
-* [CSS Design System](/components/styling) - Robust design system based off CSS variables, CSS layers, and HDR colorspaces.
-* [DOM Manipulation](/query) - Use a chainable DOM querying library that is built to harness the encapsulation of the shadow DOM.
-* [Events](/components/events) - Define events that occur inside your component, attach to the page, attach to deeply nested components and more. Dispatching events to passing data through the DOM to other components.
-* [Keybindings](/components/keys) - Add keybindings directly to your components using a simple declarative format that supports key sequences, key combinations and more.
-* [Lifecycle Events](/components/lifecycle) - Feature packaged lifecycle events, built to make server side rendering robust and easy.
-* [Reactivity](/components/reactivity) - A powerful reactivity system based on signals but with [helpers to make your life easier](/api/reactivity).
+*   **[Declarative Templating](/templates):** A reactive AST-based templating system for rendering component views using [expressions](/templates/expressions), [conditionals](/templates/conditionals), [loops](/templates/loops), [subtemplates](/templates/subtemplates), [snippets](/templates/snippets), and [helpers](/templates/helpers). Integrates with a [Signals-based reactivity system](/reactivity) for efficient DOM updates and supports component composition similar to other modern frameworks.
+*   **[Reactivity System](/reactivity):** A performant [Signals](/reactivity/variables)-based system for managing component [state](/components/state) and derived computations, including convenient [mutation helpers](/reactivity/mutation-helpers).
+*   **[Scoped Styling](/components/styling):** An integrated system using CSS variables and layers, leveraging [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) encapsulation for reliable styling.
+*   **[DOM Querying](/query):** A chainable DOM querying library ([`@semantic-ui/query`](/query)) specifically designed to work effectively with [Shadow DOM](/query/shadow-dom) boundaries.
+*   **[Event Handling](/components/events):** A declarative system for binding event listeners within the component, including support for custom events and event delegation.
+*   **[Key Bindings](/components/keys):** A declarative format for defining keyboard shortcuts scoped to your component, supporting sequences and combinations.
+*   **[Lifecycle Management](/components/lifecycle):** Enhanced lifecycle callbacks providing granular control during component initialization, rendering (client and server-side), and destruction.
 
 ### Minimal Example
-The following is a minimal example to get you familiar with how components are defined.
+The following example demonstrates the basic structure for defining a component using [`defineComponent`](/components/create).
 
 <PlaygroundExample id="minimal"></PlaygroundExample>
 
 ### Developer Experience
 
+Web components can be notoriously difficult to integrate using vanilla js. Semantic UI seeks to improve the experience working with web standards by providing all the modern tooling that developers expect to build things quickly, but **without a compilation step** or **developer magic**.
 
-Components provides everything you'd expect from other modern front end frameworks, but is developed specifically for web components.
+*   Reducing boilerplate for common tasks like [state management](/components/state) and [event handling](/components/events).
+*   Providing a consistent API across different features ([templating](/templates), [reactivity](/reactivity), [querying](/query)).
+*   Simplifying interaction with the [Shadow DOM](/query/shadow-dom) through the tailored [query library](/query).
+*   Offering declarative approaches for features like [key bindings](/components/keys) and [templating logic](/templates).
 
-UI component can attach themselves to an html tags that can be used immediately in your site, or be used as partials inside other components.
+Components defined using [`defineComponent`](/components/create) can be registered with a `tagName` for direct use in HTML or exported without a `tagName` for use as [subtemplates](/templates/subtemplates) within other components.
 
-> **Using Frameworks like React, Vue, Svelte**  All major frameworks support web components meaning you can use them directly in any framework. Web components can also render in the browser natively without compilation.
+> **Framework Integration:** As standard [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components), elements created with Semantic UI can be used directly within applications built with <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">React</a>, <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue</a>, <a href="https://angular.io/" target="_blank" rel="noopener noreferrer">Angular</a>, or any other framework that supports custom elements. They render natively in the browser without requiring framework-specific compilation.
 
 ## Key Features
 
 ### Use In Any Framework
 
-Components are defined using [`defineComponent`](/components/create) which exports a web components which can be used natively in the browser, or in React, Vue, Svelte and other frameworks.
+Components are defined using [`defineComponent`](/components/create), which registers a standard custom element (if `tagName` is provided) usable natively in the browser or within other frameworks.
 
 ```javascript
 defineComponent({
@@ -54,9 +58,9 @@ defineComponent({
   onDestroyed: () => { ... },
 });
 ```
-### Robust Templating
+### Declarative Templating
 
-Components use a [built-in templating system](/components/rendering) that supports expressions, slots, conditionals, snippets, loops, and more.
+Components use a [built-in templating system](/templates) that supports [expressions](/templates/expressions), [slots](/templates/slots), [conditionals](/templates/conditionals), [snippets](/templates/snippets), [loops](/templates/loops), and more for rendering views from component data.
 
 ```sui
 {#each user in users}
@@ -71,9 +75,9 @@ Components use a [built-in templating system](/components/rendering) that suppor
 {/each}
 ```
 
-### Design System
+### Integrated Styling
 
-Components provides an [integrated design system](/components/styling) powered by css layers and variables with native encapsulation provided by the Shadow DOM.
+Components utilize an [integrated styling system](/components/styling) leveraging CSS layers and variables, with style encapsulation provided by the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
 
 ```css
 
@@ -93,9 +97,9 @@ Components provides an [integrated design system](/components/styling) powered b
 }
 ```
 
-### Events & Keybindings
+### Events
 
-Components include a [built in event management](/components/events) built around [native DOM events](/components/events#creating-events), making it easy to dispatch events
+Components include built-in [event management](/components/events) using a declarative syntax, simplifying the process of handling user interactions and dispatching custom events.
 
 ```javascript
 const createComponent = ({state, dispatchEvent}) => ({
@@ -123,7 +127,7 @@ const createComponent = ({state, dispatchEvent}) => ({
 });
 ```
 
-[Listen to events](/components/events) and trigger functionality.
+Listen to [internal events](/events#binding-event-handlers) and trigger component functionality.
 
 ```javascript
 const events = {
@@ -132,7 +136,25 @@ const events = {
 };
 ```
 
-Or [bind keybindings](/components/keys) scoped to your component.
+Or listen to [external dispatched events](/components/events#custom-event-data) from other components.
+```javascript
+const events = {
+  // listen to the increment, decrement event from another component
+  'increment ui-counter, decrement ui-counter': ({ self }) => self.logValue(),
+};
+```
+
+Or bind [global events](/components/events#global-events) tied to your components lifecycle.
+```javascript
+// listen to global hashchange, teardown when component is destroyed
+const events = {
+  'global hashchange window': ({ self }) => self.updateSomething(),
+};
+```
+
+### Keybindings
+
+Bind [key bindings](/components/keys) scoped to your component that include key combinations or sequences.
 ```javascript
 const keys = {
   'up': ({ self }) => self.decrement(),

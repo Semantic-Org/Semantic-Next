@@ -1,0 +1,27 @@
+/*******************************
+       Light Theme - Messages
+*******************************/
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /*--------------
+      Messages
+  ---------------*/
+
+  /* Positive */
+  --positive-color: var(--green);
+  --positive-text-color: var(--green-text-color);
+
+  /* Negative */
+  --negative-color: var(--red);
+  --negative-text-color: var(--red-text-color);
+
+  /* Info - base color only, computed variants moved to themes/computed/interaction.css */
+
+  /* Warning - base color only, computed variants moved to themes/computed/interaction.css */
+  --warning-text-color: var(--orange-text-color);
+
+}

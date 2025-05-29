@@ -1,0 +1,45 @@
+/*******************************
+        Dark Theme - Colors
+*******************************/
+
+html.dark,
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
+
+  /* -------------------
+     Base Colors (Higher Saturation for Dark Mode)
+  -------------------- */
+
+  --red: oklch(0.7068 0.1852 27.01);
+  --orange: oklch(0.7402 0.179468 53.4788);
+  --yellow: oklch(0.9092 0.1839 99.53);
+  --olive: oklch(0.8944 0.1367 115.14);
+  --green: oklch(0.7396 0.2204 144.29);
+  --teal: oklch(0.9214 0.1248 195.21);
+  --blue: oklch(0.774 0.1301 237.33);
+  --violet: oklch(0.716 0.1515 289.36);
+  --purple: oklch(0.7289 0.216072 316.9847);
+  --pink: oklch(0.7929 0.1661 338.7);
+  --brown: oklch(0.671 0.1485 60.18);
+  --grey: oklch(0.8971 0.0017 247.84);
+  --black: oklch(0.4459 0 0);
+
+  /* -------------------
+        UI Colors
+  -------------------- */
+  --ui-emphasis-strong: oklch(0.16 0.02 266.69);
+  --ui-emphasis: oklch(0.13 0.02 266.79);
+
+  /* boost some black colors to be noticable in dark mode */
+  --subtle-transparent-black: oklch(var(--black-lch) / 5%);
+  --transparent-black: oklch(var(--black-lch) / 15%);
+  --strong-transparent-black: oklch(var(--black-lch) / 20%);
+  --very-strong-transparent-black: oklch(var(--black-lch) / 20%);
+
+  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
+
+}

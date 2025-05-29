@@ -1,4 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
+import { oklchToHex } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -34,11 +35,6 @@ const defaultState = {
 };
 
 const createComponent = ({ self, el, $, state, settings }) => ({
-  initialize() {
-    if (settings.presets?.[0]) {
-      self.applyTheme(settings.presets[0]);
-    }
-  },
 
   getThemeClasses() {
     return {
@@ -60,10 +56,17 @@ const createComponent = ({ self, el, $, state, settings }) => ({
     $(el)
       .cssVar('primary-color', theme.primary)
       .cssVar('secondary-color', theme.secondary);
+
+    $('input.primary').value(self.getHexcode(theme.primary));
+    $('input.secondary').value(self.getHexcode(theme.secondary));
   },
 
   startCustomizing() {
     state.customizing.set(true);
+  },
+
+  getHexcode(oklch) {
+    return oklchToHex(oklch);
   },
 
   updateThemeColor(type, color) {
@@ -73,9 +76,13 @@ const createComponent = ({ self, el, $, state, settings }) => ({
   },
 });
 
+const onRendered = ({ self, settings }) => {
+  self.applyTheme(settings.presets[0]);
+};
+
 const events = {
   'click .preset'({ self, settings, data }) {
-    const preset = settings.presets[+data.index];
+    const preset = settings.presets[data.index];
     self.applyTheme(preset);
   },
 
@@ -91,5 +98,6 @@ defineComponent({
   createComponent,
   defaultSettings,
   defaultState,
+  onRendered,
   events,
 });

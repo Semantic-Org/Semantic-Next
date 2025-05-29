@@ -274,8 +274,7 @@ describe('Reaction', () => {
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(2);
     });
-
-
+    
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
       let signal = new Signal(1);

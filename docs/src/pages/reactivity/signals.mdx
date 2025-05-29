@@ -1,0 +1,70 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Signals
+description: Creating and managing reactive state primitives (Signals)
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+[Signals](/api/reactivity/signal) are the core primitive for reactive state in Semantic UI. They hold a value and automatically track dependencies, notifying dependent computations--[Reactions](/reactivity/reactions)--when their value changes.
+
+## Creating Signals
+
+To create a signal import `Signal` from the [`@semantic-ui/reactivity`](/api/reactivity) package then initialize it with a value.
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+// Create signals for different data types
+const counter = new Signal(0);
+const userName = new Signal('Alice');
+const isActive = new Signal(true);
+const items = new Signal(['apple', 'banana']);
+const userProfile = new Signal({ id: 1, name: 'Bob' });
+```
+
+## Triggering Reactivity
+
+
+A Signal's value can be accessed using [`.get()`](/api/reactivity/signal#get) or [`.value`](/api/reactivity/signal#value).
+
+```javascript title="Accessing Reactive Values"
+console.log(counter.get()); // Output: 0
+console.log(userName.value); // Output: Alice
+```
+
+If this occurs *within a reactive context* (like a [Reaction](/reactivity/reactions) or a [template expression](/templates/expressions)) it will establish a reactive dependency and rerun the function whenever the value is updated.
+
+
+```javascript title="Triggering Reactivity"
+reaction(() => {
+  console.log(counter.get()); // outputs log whenever value changes
+});
+```
+
+> **Controlling Reactivity** There are many ways to control the reactivity of signals in your app. For instance to access a Signal's value *without* creating a dependency use the [`.peek()`](/api/reactivity/signal#peek) method. See [Reactive Performance](/reactivity/performance) and [Reactive Controls](/reactivity/controls) for more information.
+
+
+## Updating Signal Values
+
+Update a Signal's value using the [`.set()`](/api/reactivity/signal#set) method or by directly assigning to the [`.value`](/api/reactivity/signal#value) property. This will notify any dependent Reactions to re-run.
+
+```javascript
+// Using .set()
+counter.set(1);
+console.log(counter.get()); // Output: 1
+
+// Using .value assignment
+userName.value = 'Charlie';
+console.log(userName.value); // Output: Charlie
+```
+
+Semantic UI also provides convenient [mutation helpers](/reactivity/mutation-helpers) directly on Signal instances for common update patterns, especially for arrays and objects.
+
+```javascript
+// Using a mutation helper
+counter.increment(); // Equivalent to counter.set(counter.peek() + 1)
+console.log(counter.get()); // Output: 2
+```
+
+> **Advanced Usage** For more configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.

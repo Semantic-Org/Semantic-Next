@@ -139,3 +139,16 @@ and if `isChecked == false` it will omit the attribute altogether
 ```html
 <input type="checkbox" />
 ```
+
+## Reactivity
+
+Template expressions are [reactive contexts](/reactivity/reactions) meaning that they will re-evaluate automatically if a [Signal](/reactivity/signals) is updated.
+
+```sui title="component.html"
+Hello {getFullName}
+```
+```javascript title="component.js"
+const createComponent = ({ state }) => ({
+  getFullName() => `${state.firstName.value} ${state.lastName.value}`;
+});
+```

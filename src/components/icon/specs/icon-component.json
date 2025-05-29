@@ -11,6 +11,7 @@
     "fitted",
     "colored",
     "size",
+    "spin",
     "inverted"
   ],
   "states": [
@@ -29,6 +30,7 @@
     "fitted",
     "colored",
     "size",
+    "spin",
     "inverted",
     "href",
     "target"
@@ -346,6 +348,7 @@
     "fitted": "boolean",
     "colored": "string",
     "size": "string",
+    "spin": "boolean",
     "inverted": "boolean",
     "href": "string",
     "target": "string"

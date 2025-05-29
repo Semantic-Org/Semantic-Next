@@ -1,10 +1,12 @@
 import { defineComponent, getText } from '@semantic-ui/component';
+import { oklchToRgb, memoize } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultSettings = {
   colors: ['blue', 'purple', 'green', 'red', 'orange', 'teal'],
+  fftSize: 2048,
 };
 
 const defaultState = {
@@ -13,15 +15,12 @@ const defaultState = {
 };
 
 const createComponent = ({ self, state, $, el, settings }) => ({
-  getColor() {
-    return settings.colors[state.colorIndex.value];
-  },
 
   async startAnalyzer() {
     if (!self.audioContext) {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048;
+      analyser.fftSize = settings.fftSize;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const source = audioContext.createMediaStreamSource(stream);
@@ -63,67 +62,50 @@ const createComponent = ({ self, state, $, el, settings }) => ({
     const context = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
-    const barWidth = width / self.analyser.frequencyBinCount;
+    const binCount = self.analyser.frequencyBinCount;
+    if (!binCount) return;
+    const barWidth = width / binCount;
 
     context.clearRect(0, 0, width, height);
 
-    // Get the computed color value from the current theme variable
-    const colorVar = `--${self.getColor()}`;
-    const okLCHColor = $(el).computedStyle(colorVar);
-    const rgb = self.convertToRGB(okLCHColor);
+    const { r, g, b } = self.getColor(state.colorIndex.get());
 
     self.dataArray.forEach((value, i) => {
       const x = i * barWidth;
       const barHeight = (value / 255) * height;
+      if (!Number.isFinite(barHeight) || barHeight < 0) {
+        return;
+      }
       const y = height - barHeight;
 
-      // Create gradient for each bar using computed color and proper alpha
       const gradient = context.createLinearGradient(x, y, x, height);
-
-      // Get RGB components and create more vibrant gradient
-      if (rgb) {
-        const { r, g, b } = rgb;
-        gradient.addColorStop(0, `rgb(${r}, ${g}, ${b})`); // Full color at top
-        gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, 0.5)`); // Maintain more color intensity
-        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.1)`); // Fade out at bottom
-      }
-
+      gradient.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
+      gradient.addColorStop(0.1, `rgba(${r}, ${g}, ${b}, 1)`);
+      gradient.addColorStop(0.2, `rgba(${r}, ${g}, ${b}, 0)`);
+      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.2)`);
       context.fillStyle = gradient;
-      context.fillRect(x, y, barWidth - 1, barHeight);
+
+      //prevent negative bar width if calculated width is < 0.
+      const effectiveWidth = Math.max(1, barWidth);
+      context.fillRect(x, y, effectiveWidth, barHeight);
     });
   },
+
+  // get the computed color value from the current theme variable
+  // we only need to look this up once so lets memoize
+  getColor: memoize((index) => {
+    const colorName = settings.colors[index];
+    const colorVar = `--${colorName}`;
+    const okLCHColor = $(el).computedStyle(colorVar);
+    const rgb = oklchToRgb(okLCHColor);
+    return rgb;
+  }),
 
   changeColor() {
     const nextIndex = (state.colorIndex.get() + 1) % settings.colors.length;
     state.colorIndex.set(nextIndex);
   },
 
-  // convert oklch to rgb for canvas since canvas does not support
-  convertToRGB(str) {
-    const m = str.match(/oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/i);
-    if (!m) { return null; }
-    const [, L, C, h] = m.map(Number),
-      rad = h * Math.PI / 180,
-      a = Math.cos(rad) * C,
-      b = Math.sin(rad) * C,
-      L_ = L + 0.3963377774 * a + 0.2158037573 * b,
-      M_ = L - 0.1055613458 * a - 0.0638541728 * b,
-      S_ = L - 0.0894841775 * a - 1.2914855480 * b,
-      l = L_ * L_ * L_,
-      m_ = M_ * M_ * M_,
-      s = S_ * S_ * S_,
-      rLin = 4.0767416621 * l - 3.3077115913 * m_ + 0.2309699292 * s,
-      gLin = -1.2684380046 * l + 2.6097574011 * m_ - 0.3413193965 * s,
-      bLin = -0.0041960863 * l - 0.7034186147 * m_ + 1.7076147010 * s,
-      // Clamp values to [0,1] to avoid negatives (out‐of‐gamut)
-      clamp = x => Math.max(0, Math.min(x, 1)),
-      gamma = c => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
-    return {
-      r: Math.round(gamma(clamp(rLin)) * 255),
-      g: Math.round(gamma(clamp(gLin)) * 255),
-      b: Math.round(gamma(clamp(bLin)) * 255),
-    };
-  },
 });
 
 const events = {
