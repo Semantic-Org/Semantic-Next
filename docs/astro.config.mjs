@@ -5,6 +5,10 @@ import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
 
+// Load the package version from parent package.json
+const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'));
+const packageVersion = packageJson.version;
+
 // Load the custom language definition
 const sui = {
   id: 'sui',
@@ -37,6 +41,9 @@ export default defineConfig({
   },
 
   vite: {
+    define: {
+      PACKAGE_VERSION: JSON.stringify(packageVersion),
+    },
     assetsInclude: ['**/*.html'],
     server: {
       // SSL for localhost and dev.semantic-ui.com
