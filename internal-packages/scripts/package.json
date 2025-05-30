@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/internal-scripts",
-  "version": "0.10.9",
+  "version": "0.11.0",
   "description": "Internal build scripts for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
@@ -32,10 +32,10 @@
   },
   "private": true,
   "dependencies": {
-    "@semantic-ui/esbuild-callback": "^0.10.9",
-    "@semantic-ui/esbuild-log": "^0.10.2",
-    "@semantic-ui/esbuild-resolve-bare-imports": "^0.10.9",
-    "@semantic-ui/specs": "^0.10.9",
+    "@semantic-ui/esbuild-callback": "^0.11.0",
+    "@semantic-ui/esbuild-log": "^0.11.0",
+    "@semantic-ui/esbuild-resolve-bare-imports": "^0.11.0",
+    "@semantic-ui/specs": "^0.11.0",
     "esbuild": "^0.25.1",
     "tiny-glob": "^0.2.9"
   }

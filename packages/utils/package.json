@@ -23,7 +23,7 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.10.2",
+    "@semantic-ui/internal-scripts": "^0.11.0",
     "vitest": "^3.0.4"
   },
   "files": [
