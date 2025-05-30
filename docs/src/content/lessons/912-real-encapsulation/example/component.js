@@ -9,9 +9,9 @@ defineComponent({
   css,
   defaultState: { time: new Date() },
   defaultSettings: {
-    theme: 'default'
+    theme: 'default',
   },
   onCreated({ state }) {
     setInterval(() => state.time.now(), 1000);
-  }
+  },
 });

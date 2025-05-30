@@ -10,5 +10,5 @@ defineComponent({
   defaultState: { time: new Date() },
   onCreated({ state }) {
     setInterval(() => state.time.now(), 1000);
-  }
+  },
 });

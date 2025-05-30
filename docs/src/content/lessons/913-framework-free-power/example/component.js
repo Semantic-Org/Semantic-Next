@@ -10,10 +10,10 @@ defineComponent({
   defaultSettings: {
     city: 'Local',
     timezone: 'local',
-    format: '12h'
+    format: '12h',
   },
   defaultState: { time: new Date() },
   onCreated({ state }) {
     setInterval(() => state.time.now(), 1000);
-  }
+  },
 });
