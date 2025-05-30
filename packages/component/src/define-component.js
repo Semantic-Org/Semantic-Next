@@ -37,7 +37,6 @@ export const defineComponent = ({
   // only used by components that provide a spec
   componentSpec = false,
   plural = false,
-  addCascade = true,
   singularTag,
 } = {}) => {
   // AST shared across instances
@@ -59,9 +58,6 @@ export const defineComponent = ({
     adoptStylesheet(pageCSS);
   }
 
-  if(false && addCascade) {
-    css = addCascadeVariables(css);
-  }
 
   /*
     Create Component Returns Either a Template or WebComponent
