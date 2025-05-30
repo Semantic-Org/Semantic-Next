@@ -154,14 +154,12 @@
         "./packages/utils:build"
       ]
     },
-
     "build:docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
         "build"
       ]
     },
-
     "build:clean-directory": {
       "command": "node ./internal-packages/scripts/src/clean-directory.js"
     },
@@ -178,7 +176,6 @@
       "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
     },
-
     "publish": {
       "command": "node ./scripts/publish.js",
       "dependencies": [
@@ -192,9 +189,9 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.10.9",
-    "@semantic-ui/esbuild-log": "^0.0.1",
-    "@semantic-ui/specs": "^0.10.9"
+    "@semantic-ui/component": "^0.11.0",
+    "@semantic-ui/esbuild-log": "^0.11.0",
+    "@semantic-ui/specs": "^0.11.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
