@@ -2,7 +2,7 @@ import { dirname, resolve } from 'path';
 import { build } from './lib/build.js';
 import { INTERNAL_CSS_BANNER } from './lib/config.js';
 import { SpecReader } from '@semantic-ui/specs';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import glob from 'tiny-glob';
 /*
   Write a component spec file to JSON
@@ -27,7 +27,7 @@ export const writeComponentSpec = async ({
   const json = JSON.stringify(componentSpec, null, 2);
   let result;
   try {
-    result = await writeFileSync(path, json);
+    result = writeFileSync(path, json);
   } catch (err) {
     console.log(err);
   }
@@ -75,30 +75,23 @@ export const buildUIDeps = async ({
   // and we dont want our writes to trigger rerun
   const allFiles = await glob('src/components/**/specs/*.json');
   const entryPoints = allFiles.filter(path => !path.includes('component.json'));
-  const createComponentSpecs = build({
-    minify: false,
-    addBanner: false,
-    metafile: false,
-    sourcemap: false,
-    watch: watch,
-    write: false,
-    log: { header: 'UI Components', text: 'Component Spec JSON' },
-    entryPoints,
-    outdir: '/dev/null',
-    // Use onLoad to intercept JSON spec files during load
-    async onLoad({path, contents}) {
-      if(path.includes('component.json')) {
-        return;
+
+  // Process spec files directly without esbuild
+  const createComponentSpecs = (async () => {
+    for (const entryPath of entryPoints) {
+      if(entryPath.includes('component.json')) {
+        continue;
       }
       try {
+        const contents = readFileSync(entryPath, 'utf8');
         const spec = JSON.parse(contents);
         await writeComponentSpec({
           spec,
-          path: path.replace('.json', '-component.json')
+          path: entryPath.replace('.json', '-component.json')
         });
         if(spec?.supportsPlural) {
           const pluralName = spec?.pluralTagName.replace('ui-', '');
-          const pluralPath = resolve(dirname(path), `${pluralName}-component.json`);
+          const pluralPath = resolve(dirname(entryPath), `${pluralName}-component.json`);
           await writeComponentSpec({
             spec,
             plural: true,
@@ -109,9 +102,9 @@ export const buildUIDeps = async ({
       catch(e) {
         // invalid json
       }
-      return;
-    },
-  });
+    }
+    return { success: true };
+  })();
 
   return await Promise.all([
     cssComponentBundle,

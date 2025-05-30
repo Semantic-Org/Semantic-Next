@@ -4,7 +4,7 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.11.0
+# Version 0.11.0-1
 
 ## Major Changes
 * New [**AI**](https://github.com/Semantic-Org/Semantic-Next/tree/main/ai) folder with detailed instructions for AI models working with Semantic UI, including guides for each package and instruction sets for writing components.

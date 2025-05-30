@@ -1,7 +1,7 @@
 {
   "name": "@semantic-ui/esbuild-callback",
   "description": "ESBuild plugin that executes a callback when a build completes",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
   "main": "src/index.js",

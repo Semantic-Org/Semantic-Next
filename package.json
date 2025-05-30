@@ -189,9 +189,9 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.11.0",
-    "@semantic-ui/esbuild-log": "^0.11.0",
-    "@semantic-ui/specs": "^0.11.0"
+    "@semantic-ui/component": "^0.11.1",
+    "@semantic-ui/esbuild-log": "^0.11.1",
+    "@semantic-ui/specs": "^0.11.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
