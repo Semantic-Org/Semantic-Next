@@ -24,7 +24,7 @@ export const indexHTMLBeforeUI = `<!-- playground-hide -->
 <html>
 <head>
 <!-- This defines the component tag and makes it available on your page !-->
-<script src="/node_modules/@semantic-ui/core/src/components/index.js" type="module"></script>
+<script src="/node_modules/@semantic-ui/core/src/semantic-ui.js" type="module"></script>
 <link rel="stylesheet" href="/node_modules/@semantic-ui/core/dist/semantic-ui.css"></link>
 <script src="./component.js" type="module"></script>
 <link href="./index.css" rel="stylesheet">

@@ -55,7 +55,7 @@ export const packageBase = isStaticBuild
   : `${import.meta.env.SITE}/node_modules`;
 
 const suiBase = isStaticBuild
-  ? `${packageBase}/@semantic-ui/core@latest`
+  ? `${packageBase}/@semantic-ui/core@${PACKAGE_VERSION}`
   : `${packageBase}/@semantic-ui/core`;
 
 export const errorJS = `
@@ -187,8 +187,8 @@ export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<script src="${suiBase}/src/components/index.js" type="module"></script>
-<link rel="stylesheet" href="${suiBase}/src/css/all.css"></link>
+<script src="${suiBase}/dist/bundle/semantic-ui.js" type="module"></script>
+<link rel="stylesheet" href="${suiBase}/dist/bundle/semantic-ui.css"></link>
 <script>
   document.querySelector('html').removeAttribute('style');
   if(localStorage.getItem('theme') == 'dark') {
