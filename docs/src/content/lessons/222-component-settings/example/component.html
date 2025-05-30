@@ -8,9 +8,9 @@
     <div class="role">{role}</div>
     <div class="count">Login count: {counter}</div>
   </div>
+  {#if isAdmin}
   <div class="footer">
-    {#if isAdmin}
-      <div class="badge">Admin</div>
-    {/if}
+    <div class="badge">Admin</div>
   </div>
+  {/if}
 </div>

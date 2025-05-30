@@ -1,11 +1,13 @@
 .card {
   border-radius: var(--border-radius);
-  background-color: var(--ui-background-emphasis);
+  background: var(--ui-background-emphasis);
   box-shadow: var(--subtle-shadow);
   padding: var(--spacing);
   max-width: 300px;
   cursor: pointer;
   transition: transform var(--duration), box-shadow var(--duration);
+  border: var(--border);
+  margin: var(--vertically-spaced);
   
   &:hover {
     transform: translateY(-5px);
@@ -58,8 +60,8 @@
     }
     
     .count {
-      font-size: var(--tiny-size-px);
-      color: var(--muted-text-color);
+      font-size: var(--tiny);
+      color: var(--standard-20);
     }
   }
 
