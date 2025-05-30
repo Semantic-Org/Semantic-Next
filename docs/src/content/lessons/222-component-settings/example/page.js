@@ -2,7 +2,9 @@ import '@semantic-ui/component';
 import { $ } from '@semantic-ui/query';
 
 // Create a profile with query
-const $profile = $('<ui-profile/>').settings({
+const $profile = $('<ui-profile/>');
+
+$profile.settings({
   username: 'Jamie Smith',
   role: 'Manager',
   avatar: '/images/avatar/daniel.jpg',
