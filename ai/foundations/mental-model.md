@@ -205,37 +205,63 @@ DESTRUCTION PHASE
 
 **Key Insight**: Most cleanup is automatic thanks to AbortController usage and reaction tracking. Manual cleanup in `onDestroyed` should be rare.
 
-### Settings vs State Mental Model
+### Settings vs State vs Component Props Mental Model
 
 This distinction is fundamental to component design:
 
 ```
-SETTINGS (Configuration)
-├── Passed at component creation
-├── Mutable during lifecycle via settings.property
-├── Controls component behavior
-├── Reactive in templates
-├── Think: "component API"
-└── Examples: size, variant, disabled
+SETTINGS (Public API - Reactive Configuration)
+├── Public interface for component consumers
+├── Passed at component creation or modified during lifecycle
+├── Controls component behavior and appearance
+├── Fully reactive everywhere (proxy-based)
+├── Think: "component's public API"
+└── Examples: theme, size, disabled, variant, maxItems
 
-STATE (Dynamic Data)
-├── Created during component lifecycle  
-├── Reactive and mutable
-├── Represents current condition
-├── Think: "component memory"
-└── Examples: isOpen, currentValue, errors
+STATE (Internal Reactive Data)
+├── Internal component memory and conditions
+├── Created and managed within component lifecycle  
+├── Reactive signals for internal state tracking
+├── Not directly accessible from outside
+├── Think: "component's private memory"
+└── Examples: isOpen, currentValue, validationErrors, loading
+
+COMPONENT PROPS (Non-Reactive Data)
+├── Properties on the object returned from createComponent
+├── Accessible as self.propName and directly in templates
+├── Non-reactive data for performance optimization
+├── Static values, snapshots, utilities, timers
+├── Think: "component's static utilities"
+└── Examples: apiEndpoint, cachedCalculations, debounceTimer
 ```
 
-**Key Pattern**: Settings can be modified during component lifecycle:
+**Key Patterns**: 
 ```javascript
-const createComponent = ({ settings, state }) => ({
+const createComponent = ({ settings, state, self }) => ({
+  // Component props - direct instance properties
+  apiEndpoint: '/api/users',        // Non-reactive static data
+  validationRules: getRules(),      // Cached calculation
+  debounceTimer: null,              // Mutable non-reactive
+  
   updateTheme(newTheme) {
-    settings.theme = newTheme; // Settings are mutable
+    settings.theme = newTheme;      // Settings are mutable and reactive
+  },
+  
+  toggleOpen() {
+    state.isOpen.toggle();          // State uses signal API
+  },
+  
+  makeApiCall() {
+    fetch(self.apiEndpoint)         // Access component props via self
+      .then(data => state.data.set(data));
   }
 });
 ```
 
-**Decision Rule**: If it configures how the component behaves → Settings. If it represents changing internal state → State.
+**Decision Rules**: 
+- **Settings** → External consumers should configure this (public API)
+- **State** → Internal reactive data that drives UI updates
+- **Component Props** → Static, cached, or non-reactive data
 
 ---
 
@@ -247,14 +273,30 @@ Templates operate within a "data context" - think of it as "all variables availa
 
 ```
 Component Data Context:
-├── State signals (reactive)
-├── Settings (mutable, reactive in templates)
+├── State signals (reactive, automatic .get() in templates)
+├── Settings (fully reactive, direct access)
+├── Component props (non-reactive, direct access via self.propName)
 ├── Local template variables
-├── Helper functions
+├── Helper functions (only for complex logic or external API)
 └── Parent context (in sub-templates)
 ```
 
-**Mental Model**: The data context is like the scope chain in JavaScript - templates can access variables from their context and parent contexts.
+**Template Access Patterns**:
+```html
+<!-- State signals (automatic .get()) -->
+{value}              <!-- state.value.get() -->
+{items.length}       <!-- state.items.get().length -->
+
+<!-- Settings (direct access) -->
+{theme}              <!-- settings.theme -->
+{size}               <!-- settings.size -->
+
+<!-- Component props (direct access) -->
+{apiEndpoint}        <!-- self.apiEndpoint -->
+{maxRetries}         <!-- self.maxRetries -->
+```
+
+**Mental Model**: The data context provides direct access to all component data without needing getter methods. Templates automatically handle reactivity for state and settings.
 
 ### Settings Reactivity Implementation
 

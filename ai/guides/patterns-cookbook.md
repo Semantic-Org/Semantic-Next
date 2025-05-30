@@ -1353,6 +1353,48 @@ const createComponent = ({ state, reaction, afterFlush }) => ({
 
 ## Performance Patterns
 
+### Component Props for Non-Reactive Data
+
+Use component props instead of state for data that doesn't need reactivity:
+
+```javascript
+const createComponent = ({ state, settings, self }) => ({
+  // ✅ Component props - non-reactive, performance optimized
+  apiEndpoint: settings.apiUrl,           // Snapshot of setting
+  validationRules: getValidationRules(),  // Cached calculation  
+  debounceTimer: null,                    // Mutable non-reactive
+  constants: { MAX_RETRIES: 3 },          // Static values
+  retryCount: 0,                          // Non-reactive counter
+  
+  // Methods can access props directly
+  makeApiCall() {
+    fetch(self.apiEndpoint)               // No signal overhead
+      .then(data => state.data.set(data)); // Update reactive state only when needed
+  },
+  
+  debouncedUpdate(value) {
+    clearTimeout(self.debounceTimer);     // Direct prop access
+    self.debounceTimer = setTimeout(() => {
+      state.value.set(value);             // Reactive only when necessary
+    }, 300);
+  }
+});
+```
+
+**Performance benefits**:
+- No signal creation overhead for static data
+- Direct property access (faster than `.get()/.set()`)
+- Reduced memory usage for non-reactive data
+- Template access without signal dependency tracking
+
+**Use component props for**:
+- API endpoints and URLs
+- Cached expensive calculations
+- Timers and intervals
+- Static configurations and constants
+- Non-reactive counters and flags
+- Utility functions and references
+
 ### Lazy Loading Pattern
 
 ```javascript
@@ -1657,6 +1699,63 @@ const createComponent = ({ state, $, settings }) => ({
 ---
 
 ## Anti-Patterns to Avoid
+
+### ❌ Unnecessary Getter Methods for Template Data
+
+```javascript
+// DON'T DO THIS - Redundant getter methods
+const createComponent = ({ state, settings }) => ({
+  // These are anti-patterns - data is already available in templates
+  getTheme() { return settings.theme; },           // settings.theme already available
+  getCurrentValue() { return state.value.get(); }, // value already available  
+  getApiUrl() { return settings.apiEndpoint; },    // apiEndpoint already available
+  isOpen() { return state.open.get(); },          // open already available
+});
+```
+
+```html
+<!-- DON'T DO THIS -->
+<div class="{getTheme}">                <!-- Unnecessary method call -->
+  Current value: {getCurrentValue}      <!-- Unnecessary method call -->
+  API: {getApiUrl}                      <!-- Unnecessary method call -->
+  {#if isOpen}Content{/if}              <!-- Unnecessary method call -->
+</div>
+```
+
+**Why this is wrong**: Template data context already provides direct access to all component data.
+
+```html
+<!-- DO THIS INSTEAD - Direct access in templates -->
+<div class="{theme}">                    <!-- settings.theme -->
+  Current value: {value}                 <!-- state.value -->
+  API: {apiEndpoint}                     <!-- settings.apiEndpoint -->
+  {#if open}Content{/if}                 <!-- state.open -->
+</div>
+```
+
+**When to create getter methods**: Only for external API access or complex logic:
+
+```javascript
+// DO THIS - Only when providing external API or complex logic
+const createComponent = ({ state, settings }) => ({
+  // ✅ GOOD - External API for query library access
+  getCurrentSelection() {
+    return state.items.get().filter(item => item.selected);
+  },
+  
+  // ✅ GOOD - Complex logic not suitable for templates  
+  getFormData() {
+    return {
+      values: state.values.get(),
+      isValid: this.validateAll()
+    };
+  }
+});
+
+// External access via query library
+const component = $('my-component').getComponent();
+const selection = component.getCurrentSelection(); // ✅ Useful external API
+```
 
 ### ❌ Direct DOM Manipulation Without Reactivity
 

@@ -117,17 +117,54 @@ Key binding handlers receive all standard arguments plus:
 
 ---
 
-## State Management API
+## Component Data Management
 
-### State Definition
+### Settings - Public API (Fully Reactive)
+
+```javascript
+const defaultSettings = {
+  theme: 'light',        // Public configuration
+  size: 'medium',        // User-controllable
+  disabled: false,       // External API
+  maxItems: 10          // Public limits
+};
+
+// Settings are reactive everywhere (no .get()/.set() needed)
+settings.theme = 'dark';               // Triggers reactivity
+settings.size = 'large';               // Template updates automatically
+```
+
+### State - Internal Reactive Data
 
 ```javascript
 const defaultState = {
-  counter: 0,                    // Becomes Signal(0)
-  items: [],                     // Becomes Signal([])
-  user: { name: 'Jack' },       // Becomes Signal({ name: 'Jack' })
-  isActive: false,               // Becomes Signal(false)
+  isOpen: false,         // Internal conditions
+  currentValue: null,    // Internal reactive data
+  items: [],            // Internal collections
+  errors: {}            // Internal state tracking
 };
+
+// State uses explicit signal API in component logic
+state.isOpen.set(true);               // Explicit in logic
+// {isOpen} in templates              // Automatic in templates
+```
+
+### Component Props - Non-Reactive Data
+
+```javascript
+const createComponent = ({ state, settings, self }) => ({
+  // Component props - direct instance properties
+  apiEndpoint: '/api/users',          // Static data
+  validationRules: getRules(),        // Cached calculation
+  debounceTimer: null,               // Mutable non-reactive
+  constants: { MAX_RETRIES: 3 },     // Static values
+  
+  // Methods have access to all data types
+  makeApiCall() {
+    fetch(self.apiEndpoint)           // Access via self
+      .then(data => state.data.set(data));
+  }
+});
 ```
 
 ### State Access Patterns
@@ -947,22 +984,43 @@ const createComponent = ({ findParent }) => ({
 
 ## Decision Flowcharts
 
-### When to Use State vs Settings
+### Component Data Type Decision Guide
 
 ```
-Is this data configuration that controls component behavior?
-├── YES → Use Settings
-│   ├── Should it change during component lifetime?
-│   │   ├── YES → Modify via settings.property (reactive everywhere)
-│   │   └── NO → Set once via attributes
-│   └── Examples: theme, size, disabled, variant
-└── NO → Use State
-    ├── Does it represent internal component condition?
-    │   ├── YES → Use reactive State
-    │   └── Examples: isOpen, currentValue, errors
-    └── Should it be shared with parent/children?
-        ├── YES → Expose on component instance
-        └── NO → Keep as internal state
+What type of data is this?
+
+├── Should external consumers configure this?
+│   ├── YES → Use Settings (Public API)
+│   │   ├── settings.theme = 'dark' (reactive everywhere)
+│   │   └── Examples: theme, size, disabled, onSelect callback
+│   
+├── Does this data drive UI updates internally?
+│   ├── YES → Use State (Internal Reactive)
+│   │   ├── state.isOpen.set(true) (explicit in logic)
+│   │   └── Examples: isOpen, selectedItem, validationErrors
+│   
+└── Is this static, cached, or non-reactive data?
+    ├── YES → Use Component Props (Non-Reactive)
+    │   ├── Access via self.propName or directly in templates
+    │   └── Examples: apiEndpoint, constants, timers, cached values
+```
+
+### When to Create Methods That Return Values
+
+```
+Should I create a method that returns data?
+
+├── Is this for external API consumers?
+│   ├── YES → Create the method (external access via query library)
+│   └── Examples: getFormData(), getCurrentSelection(), exportData()
+│
+├── Is this complex logic unsuitable for templates?
+│   ├── YES → Create the method 
+│   └── Examples: getFilteredResults(), calculateTotals()
+│
+└── Is this just returning existing state/settings/props?
+    ├── YES → DON'T create the method (use direct access)
+    └── Templates already have access to all data context
 ```
 
 ### When to Use $ vs $$

@@ -24,7 +24,7 @@
 - Forgetting to create the required content metadata file
 - **Not following HTML/CSS style guide for page files** (page.css and page.html must ALSO follow design token and semantic naming patterns)
 - **Accessing internal component state directly** instead of using public API methods
-- **Using regular HTML elements** instead of available UI components (ui-button, ui-input, etc.)
+- **🚨 CRITICAL: Using HTML elements instead of first-party UI components** (see First-Party Components section below)
 
 ---
 
@@ -39,6 +39,70 @@ For comprehensive information beyond this guide:
 - **🗺️ Codebase Navigation**: [`../foundations/codebase-navigation-guide.md`](../foundations/codebase-navigation-guide.md) - Finding documentation and examples
 
 **Rule**: When you need information beyond basic component creation, consult these canonical sources rather than guessing or duplicating information.
+
+## 🚨 **CRITICAL: Use First-Party UI Components**
+
+### **ALWAYS Use Available Components from `/src/components/`**
+
+Semantic UI provides comprehensive first-party components that **MUST** be used instead of creating custom HTML elements. Each component has a specification file at `/src/components/{component}/specs/{component}.json` that defines its exact API.
+
+**Available Components**: `ui-button`, `ui-input`, `ui-label`, `ui-icon`, `ui-menu`, `ui-card`, `ui-container`, `ui-modal`, `ui-segment`, `ui-rail`
+
+### **Essential Rule: Read Component Specs First**
+
+**Before using any first-party component, read its specification:**
+- **Button**: `/src/components/button/specs/button.json`
+- **Input**: `/src/components/input/specs/input.json`  
+- **Icon**: `/src/components/icon/specs/icon.json`
+- **[Component]**: `/src/components/[component]/specs/[component].json`
+
+### **Standard Usage Pattern**
+
+```html
+<!-- ❌ DON'T DO THIS - Custom HTML/CSS -->
+<button class="my-custom-button primary large">Click Me</button>
+<input type="text" class="my-styled-input" />
+
+<!-- ✅ DO THIS - Use First-Party Components (based on actual specs) -->
+<ui-button primary large>Click Me</ui-button>
+<ui-input type="text" placeholder="Enter value..." />
+<ui-icon icon="search" large />
+```
+
+### **Component Composition Example**
+
+```javascript
+// component.js - Standard pattern
+import { defineComponent, getText } from '@semantic-ui/component';
+
+const template = await getText('./component.html');
+const css = await getText('./component.css');
+
+defineComponent({
+  tagName: 'user-profile',
+  template,
+  css,
+  // ... component definition
+});
+```
+
+```html
+<!-- component.html - Compose with first-party components (based on specs) -->
+<ui-container>
+  <ui-segment>
+    <ui-card>
+      <ui-icon icon="user" large />
+      <ui-button primary>Edit Profile</ui-button>
+    </ui-card>
+  </ui-segment>
+</ui-container>
+```
+
+**Critical Rules**: 
+1. **Read the spec file first** - never guess component APIs
+2. **Use exact attribute names** from the specification
+3. **Check available variations and types** in the spec
+4. **Verify icon names** against the icon spec options list
 
 ## 🚨 **MANDATORY: Component File Structure & Paths**
 
