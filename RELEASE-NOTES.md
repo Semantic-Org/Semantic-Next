@@ -4,6 +4,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.11.2
+
+* **Query** - Fix `setting()` and `settings()` not returning dom element for chaining.
+
 # Version 0.11.0-1
 
 ## Major Changes

@@ -1076,7 +1076,7 @@ export class Query {
   }
 
   settings(settings) {
-    this.each((el) => {
+    return this.each((el) => {
       each(settings, (value, setting) => {
         el[setting] = value;
       });
@@ -1084,7 +1084,7 @@ export class Query {
   }
 
   setting(setting, value) {
-    this.each((el) => {
+    return this.each((el) => {
       el[setting] = value;
     });
   }
