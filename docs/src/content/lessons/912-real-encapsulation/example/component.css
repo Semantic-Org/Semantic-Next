@@ -1,0 +1,31 @@
+.time {
+  font-family: var(--page-font);
+  font-size: var(--large);
+  font-weight: var(--bold);
+  padding: var(--compact-spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  display: inline-block;
+  margin: var(--compact-spacing);
+  color: var(--primary-color);
+
+  /* Settings data automatically becomes CSS classes */
+  &.red {
+    color: var(--red-text-color);
+    border-color: var(--red-border-color);
+    background: var(--red-5);
+  }
+
+  &.blue {
+    color: var(--blue-text-color);
+    border-color: var(--blue-border-color);
+    background: var(--blue-5);
+  }
+
+  &.minimal {
+    color: var(--standard-60);
+    font-weight: var(--normal);
+    border: none;
+    background: transparent;
+  }
+}

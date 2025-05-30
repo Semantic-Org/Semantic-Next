@@ -1,0 +1,49 @@
+---
+title: Framework-Free Power
+category: 'Getting Started'
+subcategory: 'Components'
+description: HTML attributes become reactive component settings
+sort: '9.1.3'
+references:
+  - title: Component Settings
+    link: /components/settings
+  - title: HTML Attributes
+    link: /components/attributes
+---
+
+### HTML Attributes = Component Settings
+
+No props, no complex state management. Just HTML attributes that work like you'd expect:
+
+```html
+<world-clock 
+  city="Tokyo" 
+  timezone="Asia/Tokyo"
+  format="24h">
+</world-clock>
+```
+
+The example shows how `defaultSettings` automatically maps HTML attributes to component data. The `city`, `timezone`, and `format` attributes become reactive settings available in your template.
+
+### Settings vs State: The Key Difference
+
+- **Settings**: Configuration from HTML attributes (static-ish)
+- **State**: Internal reactive data (changes frequently)
+
+```html
+<!-- Settings come from attributes -->
+<weather-widget city="Paris" units="metric"></weather-widget>
+
+<!-- State changes automatically based on API calls -->
+<!-- No manual prop drilling or state lifting -->
+```
+
+### Framework Agnostic Benefits
+
+Your components work everywhere because they're just HTML:
+
+- **No build step required** for basic usage
+- **No framework lock-in** - works with React, Vue, Angular, or vanilla JS
+- **Progressive enhancement** - starts working immediately, adds features gradually
+
+**Next**: See reactive updates without any boilerplate.

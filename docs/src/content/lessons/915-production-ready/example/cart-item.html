@@ -1,0 +1,18 @@
+<div class="item-content">
+  <img src="{image}" alt="{name}" class="item-image">
+  
+  <div class="item-details">
+    <h4 class="item-name">{name}</h4>
+    <div class="item-price">${price}</div>
+  </div>
+  
+  <div class="quantity-controls">
+    <ui-button class="quantity-decrease" circular compact>-</ui-button>
+    <span class="quantity">{quantity}</span>
+    <ui-button class="quantity-increase" circular compact>+</ui-button>
+  </div>
+  
+  <div class="item-subtotal">${getSubtotal}</div>
+  
+  <ui-button class="remove" circular compact negative>×</ui-button>
+</div>

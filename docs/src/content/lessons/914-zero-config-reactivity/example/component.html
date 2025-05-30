@@ -1,0 +1,25 @@
+<div class="header">
+  <h3>Shopping Cart</h3>
+  <div class="summary">
+    {items.length} items • Total: ${getTotal}
+  </div>
+</div>
+
+<div class="items">
+  {#each items}
+    <div class="item" data-id="{id}">
+      <span class="name">{name}</span>
+      <span class="price">${price}</span>
+      <ui-button class="remove" circular compact negative>×</ui-button>
+    </div>
+  {/each}
+  
+  {#if is items.length 0}
+    <div class="empty">Your cart is empty</div>
+  {/if}
+</div>
+
+<div class="actions">
+  <ui-button class="add-btn" primary>Add Random Item</ui-button>
+  <ui-button class="clear-btn" basic>Clear Cart</ui-button>
+</div>

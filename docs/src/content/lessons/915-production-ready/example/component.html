@@ -1,0 +1,40 @@
+<div class="cart-container">
+  <div class="cart-header">
+    <h2>Shopping Cart</h2>
+    <div class="cart-summary">
+      {getItemCount} items • ${getTotal}
+    </div>
+  </div>
+
+  <div class="cart-items">
+    {#if items.length === 0}
+      <div class="empty-cart">
+        <p>Your cart is empty</p>
+        <ui-button class="add-sample" primary>Add Sample Item</ui-button>
+      </div>
+    {else}
+      {#each item in items}
+        {>template
+          name='cartItem'
+          data=item
+        }
+      {/each}
+    {/if}
+  </div>
+
+  {#if not isEmpty items}
+    <div class="cart-footer">
+      <div class="cart-total">
+        <strong>Total: ${getTotal}</strong>
+      </div>
+      
+      <div class="cart-actions">
+        <ui-button class="clear-cart" basic>Clear Cart</ui-button>
+        <ui-button class="add-sample">Add Item</ui-button>
+        {#if showCheckout}
+          <ui-button class="checkout" primary>Checkout</ui-button>
+        {/if}
+      </div>
+    </div>
+  {/if}
+</div>

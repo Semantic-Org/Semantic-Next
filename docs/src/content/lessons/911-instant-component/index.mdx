@@ -1,0 +1,42 @@
+---
+title: Instant Component
+category: 'Getting Started'
+subcategory: 'Components'
+description: Create a live-updating web component in one line
+sort: '9.1.1'
+references:
+  - title: Component Introduction
+    link: /components
+  - title: What are Web Components
+    link: /web-components
+---
+
+### Your First Web Component in Seconds
+
+Web components don't have to be complex. Look at the example to see a complete component that updates every second.
+
+**That's it.** You now have a `<live-clock>` element that works in any HTML page.
+
+### What Just Happened?
+
+- **`tagName`**: Creates a new HTML element `<live-clock>`
+- **`template`**: What gets rendered (updates automatically when data changes)  
+- **`defaultState`**: Reactive data that triggers re-renders
+- **`onCreated()`**: Runs when the component starts up
+
+### Web Standards, Not Framework Magic
+
+This isn't framework-specific syntax - it's built on web standards. Your `<live-clock>` element works everywhere:
+
+```html
+<!-- Works in any HTML -->
+<live-clock></live-clock>
+
+<!-- Works in React -->
+<live-clock />
+
+<!-- Works in Vue -->
+<live-clock></live-clock>
+```
+
+**Next**: See how true encapsulation makes styling bulletproof.

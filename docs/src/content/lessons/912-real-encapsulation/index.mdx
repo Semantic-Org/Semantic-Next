@@ -1,0 +1,38 @@
+---
+title: Real Encapsulation
+category: 'Getting Started'
+subcategory: 'Components'
+description: See how shadow DOM provides bulletproof styling
+sort: '9.1.2'
+references:
+  - title: Component Styling
+    link: /components/styling
+  - title: CSS Design Tokens
+    link: /theming
+---
+
+### Styling That Actually Works
+
+Ever had CSS conflicts ruin your day? Web components solve this with **shadow DOM encapsulation**. Check out the example to see how CSS is completely isolated to each component.
+
+### HTML Attributes Become Reactive Styling
+
+Unlike CSS frameworks, Semantic UI makes HTML attributes control component styling automatically:
+
+```html
+<live-clock theme="red"></live-clock>
+<live-clock theme="blue"></live-clock>
+<live-clock theme="minimal"></live-clock>
+```
+
+**Each one looks completely different** based on the `theme` attribute - no CSS class conflicts, no specificity wars, no `!important` hacks.
+
+### Design Tokens for Consistency
+
+Use design tokens (`var(--primary-color)`) to maintain consistency while allowing customization:
+
+- **Global theming**: Change tokens, update everywhere
+- **Component isolation**: Styles never leak out
+- **Framework agnostic**: Works with any CSS methodology
+
+**Next**: See how HTML attributes become component settings.

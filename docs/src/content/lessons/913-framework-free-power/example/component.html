@@ -1,0 +1,8 @@
+<div class="location">{city}</div>
+<div class="time">
+  {#if is format '24h'}
+    {formatDate time 'HH:mm:ss'}
+  {else}
+    {formatDate time 'h:mm:ss a'}
+  {/if}
+</div>

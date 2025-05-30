@@ -1,0 +1,53 @@
+---
+title: Zero-Config Reactivity
+category: 'Getting Started'
+subcategory: 'Components'
+description: Automatic updates without setState or complex hooks
+sort: '9.1.4'
+references:
+  - title: Reactive State
+    link: /components/state
+  - title: Template Expressions
+    link: /components/templates
+---
+
+### Updates That Just Work
+
+No `useState`, no `setState`, no reducers. Just change the data:
+
+```javascript
+// This automatically updates the UI
+state.count.increment();
+state.user.name.set('Alice');
+state.items.push(newItem);
+```
+
+### Smart Templates
+
+Templates automatically track dependencies and update only what changed:
+
+```html
+<!-- Only updates when count changes -->
+<div>Count: {count}</div>
+
+<!-- Only updates when user.name changes -->
+<div>Hello {user.name}!</div>
+
+<!-- Only re-renders changed items -->
+{#each items}
+  <div>{name} - {price}</div>
+{/each}
+```
+
+### Example: Shopping Cart
+
+The example shows a complete shopping cart with automatic reactivity. Notice how the total updates automatically when items are added or removed - no manual state management needed.
+
+### No Mental Overhead
+
+- **Push to array?** UI updates automatically
+- **Change object property?** Only that part re-renders  
+- **Delete array item?** List updates, counters recalculate
+- **Computed properties?** Just use getters - they're automatically reactive
+
+**Next**: See how this scales to production applications.

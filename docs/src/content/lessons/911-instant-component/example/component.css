@@ -1,0 +1,9 @@
+:host {
+  font-family: monospace;
+  font-size: 1.2em;
+  color: var(--primary-color);
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  display: inline-block;
+}

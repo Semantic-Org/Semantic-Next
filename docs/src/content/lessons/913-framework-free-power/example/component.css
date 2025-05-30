@@ -1,0 +1,21 @@
+:host {
+  display: inline-block;
+  padding: var(--spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  text-align: center;
+  margin: var(--compact-spacing);
+}
+
+.location {
+  font-size: var(--small);
+  color: var(--standard-60);
+  margin-bottom: var(--compact-spacing);
+}
+
+.time {
+  font-family: var(--page-font);
+  font-size: var(--big);
+  color: var(--primary-color);
+  font-weight: var(--bold);
+}
