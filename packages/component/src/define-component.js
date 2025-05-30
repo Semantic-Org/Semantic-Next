@@ -4,7 +4,6 @@ import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
-import { addCascadeVariables } from './helpers/add-cascade-variables.js';
 import { WebComponentBase } from './web-component.js';
 
 export const defineComponent = ({
