@@ -1,6 +1,37 @@
 <div class="container">
-  <h2>UI Loader Component</h2>
-  <p>Click any loader to toggle animation on/off</p>
+
+  <div class="controls">
+    <div class="panel">
+      <label>
+        Animation Type:
+        <select class="type">
+          <option value="liquid">Liquid Morph</option>
+          <option value="glitch">Glitch Text</option>
+          <option value="emoji">Emoji Cycle</option>
+          <option value="ascii">ASCII Spinner</option>
+          <option value="sweep">Gradient Sweep</option>
+        </select>
+      </label>
+
+      <label>
+        Size:
+        <select class="size">
+          <option value="small">Small</option>
+          <option value="medium" selected>Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </label>
+
+      <label>
+        Text (for glitch):
+        <ui-input class="text" value="LOADING" type="text"></ui-input>
+      </label>
+
+      <ui-button class="toggle" emphasis="primary">Toggle Animation</ui-button>
+    </div>
+
+    <ui-loader class="dynamic" type="liquid" size="medium"></ui-loader>
+  </div>
   
   <div class="grid">
     <div class="example">
@@ -47,39 +78,5 @@
         <ui-loader type="liquid" size="large"></ui-loader>
       </div>
     </div>
-  </div>
-  
-  <div class="controls">
-    <h3>Dynamic Control</h3>
-    <div class="panel">
-      <label>
-        Animation Type:
-        <select class="type">
-          <option value="liquid">Liquid Morph</option>
-          <option value="glitch">Glitch Text</option>
-          <option value="emoji">Emoji Cycle</option>
-          <option value="ascii">ASCII Spinner</option>
-          <option value="sweep">Gradient Sweep</option>
-        </select>
-      </label>
-      
-      <label>
-        Size:
-        <select class="size">
-          <option value="small">Small</option>
-          <option value="medium" selected>Medium</option>
-          <option value="large">Large</option>
-        </select>
-      </label>
-      
-      <label>
-        Text (for glitch):
-        <ui-input class="text" value="LOADING" type="text"></ui-input>
-      </label>
-      
-      <ui-button class="toggle" emphasis="primary">Toggle Animation</ui-button>
-    </div>
-    
-    <ui-loader class="dynamic" type="liquid" size="medium"></ui-loader>
   </div>
 </div>
