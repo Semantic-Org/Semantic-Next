@@ -1,0 +1,82 @@
+<div class="container">
+
+  <div class="controls">
+    <div class="panel">
+      <label>
+        Animation Type:
+        <select class="type">
+          <option value="liquid">Liquid Morph</option>
+          <option value="glitch">Glitch Text</option>
+          <option value="emoji">Emoji Cycle</option>
+          <option value="ascii">ASCII Spinner</option>
+          <option value="sweep">Gradient Sweep</option>
+        </select>
+      </label>
+
+      <label>
+        Size:
+        <select class="size">
+          <option value="small">Small</option>
+          <option value="medium" selected>Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </label>
+
+      <label>
+        Text (for glitch):
+        <ui-input class="text" value="LOADING" type="text"></ui-input>
+      </label>
+
+      <ui-button class="toggle" emphasis="primary">Toggle Animation</ui-button>
+    </div>
+
+    <ui-loader class="dynamic" type="liquid" size="medium"></ui-loader>
+  </div>
+  
+  <div class="grid">
+    <div class="example">
+      <h3>Liquid Morph</h3>
+      <ui-loader type="liquid" size="medium"></ui-loader>
+    </div>
+    
+    <div class="example">
+      <h3>Glitch Text</h3>
+      <ui-loader type="glitch" size="medium" text="LOADING"></ui-loader>
+    </div>
+    
+    <div class="example">
+      <h3>Emoji Cycle</h3>
+      <ui-loader type="emoji" size="medium"></ui-loader>
+    </div>
+    
+    <div class="example">
+      <h3>ASCII Spinner</h3>
+      <ui-loader type="ascii" size="medium"></ui-loader>
+    </div>
+    
+    <div class="example">
+      <h3>Gradient Sweep</h3>
+      <ui-loader type="sweep" size="medium"></ui-loader>
+    </div>
+  </div>
+  
+  <div class="sizes">
+    <h3>Size Variants</h3>
+    <div class="row">
+      <div class="item">
+        <h4>Small</h4>
+        <ui-loader type="liquid" size="small"></ui-loader>
+      </div>
+      
+      <div class="item">
+        <h4>Medium</h4>
+        <ui-loader type="liquid" size="medium"></ui-loader>
+      </div>
+      
+      <div class="item">
+        <h4>Large</h4>
+        <ui-loader type="liquid" size="large"></ui-loader>
+      </div>
+    </div>
+  </div>
+</div>

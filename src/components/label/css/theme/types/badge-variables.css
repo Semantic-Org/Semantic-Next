@@ -1,0 +1,5 @@
+:host {
+  --label-badge-vertical-padding: var(--label-vertical-padding);
+  --label-badge-horizontal-padding: var(--relative-4px);
+  --label-badge-padding: var(--label-badge-vertical-padding) var(--label-badge-horizontal-padding);
+}

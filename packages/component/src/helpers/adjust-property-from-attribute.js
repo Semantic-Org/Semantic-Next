@@ -117,7 +117,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     const isBooleanType = componentSpec.propertyTypes[attribute] == Boolean;
 
     // handles complex booleans where one value of allowed values is a identity, i.e. disabled, clickable-disabled
-    const isIdentityBoolean = componentSpec.optionAttributes[attribute] == attribute;
+    const isIdentityBoolean = componentSpec.optionAttributes?.[attribute] == attribute;
 
     // this is a scenario where a grouping has a default styling like `animated`
     const isAttributeClass = inArray(attribute, componentSpec.attributeClasses);

@@ -1,16 +1,18 @@
 import { defineComponent } from '@semantic-ui/component';
-import { CardComponentSpec } from '@semantic-ui/specs';
 
-import Template from './card.html?raw';
-import CSS from './css/card-shadow.css?raw';
+import componentSpec from './specs/card-component.json' assert { type: 'json' };
+import template from './card.html?raw';
+import css from './card-bundle.css?raw';
+import pageCSS from './card-page.css?raw';
 
 const createComponent = ({ $ }) => ({});
 
 const UICard = defineComponent({
   tagName: 'ui-card',
-  componentSpec: CardComponentSpec,
-  template: Template,
-  css: CSS,
+  componentSpec,
+  template,
+  css,
+  pageCSS,
   createComponent,
 });
 

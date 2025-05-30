@@ -1,18 +1,17 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ButtonPluralComponentSpec } from '@semantic-ui/specs';
 
-import ButtonPageCSS from '../css/button-page.css?raw';
-import ButtonShadowCSS from '../css/button-shadow.css?raw';
-
-import ButtonsTemplate from './buttons.html?raw';
+import componentSpec from '../specs/button-component.json' assert { type: 'json' };
+import template from './buttons.html?raw';
+import css from '../button-bundle.css?raw';
+import pageCSS from '../button-page.css?raw';
 
 export const UIButtons = defineComponent({
   tagName: 'ui-buttons',
-  plural: true,
   singularTag: 'ui-button',
+  plural: true,
   delegateFocus: true,
-  componentSpec: ButtonPluralComponentSpec,
-  template: ButtonsTemplate,
-  css: ButtonShadowCSS,
-  pageCSS: ButtonPageCSS,
+  componentSpec,
+  template,
+  css,
+  pageCSS,
 });

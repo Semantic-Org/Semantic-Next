@@ -2,66 +2,82 @@
 layout: ../layouts/Guide.astro
 icon: open book
 title: Introduction
-description: Learn About Semantic UI
+description: Overview of the Semantic UI Web Component Ecosystem
 ---
 import { UICards, UICard } from '@semantic-ui/core';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The two main ways to use Semantic UI
-* **Building with UI Primitives** - Semantic provides a [UI component library](/ui) with [buttons](/ui/button), [menus](/ui/menu), [inputs](/ui/input) and other essential components. These components are distributes as web components meaning they can be used anywhere on the web.
-* **Authoring Custom UI** - Semantic provides a [component framework](/components) to create custom reactive UI with web components that can be used to build a custom design system, a web application, website, or your own open source UI components.
+Semantic UI is a framework for authoring **standard W3C [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components)** that work natively in modern browsers, integrate readily with frameworks like [React](https://react.dev/), [Vue](https://vuejs.org/), [Angular](https://angular.io/), or others supporting Web Components, and offer long-term maintainability with reduced framework lock-in.
 
-> Semantic UI's component framework is designed to provide the missing toolkit to make web components easy to author and ship at scale, with features like [reactivity](/reactivity), [templating](/templates), tools for [events](/components/events) and [keybindings](/components/keys), and a robust [css framework](/components/styling) for styling.
+### Design System vs Component Framework
 
+* Semantic UI provides a **[first-party design system](/usage)** to handle common primitives like [buttons](/ui/button), [menus](/ui/menu), and [inputs](/ui/input) that can be used anywhere you write html.
+
+* Semantic UI provides **[tools for authoring custom UI components](/components)**. Write your own design system, or create open source UI components to share with others.
+
+> To see examples of custom components check out our [examples gallery](/examples/advanced-ball-simulation).
+
+### Key Add-ons to Web Components
+
+*   [Signals-based reactivity](/reactivity) for state management.
+*   [Declarative templating](/templates) for rendering component views.
+*   [DOM querying](/query) tailored for [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) encapsulation.
+*   Robust CSS token framework for [dark/light mode styling and theming](/components/styling).
+*   Integrated [event handling](/components/events) tools.
+*   Declarative [keybinding management](/components/keys).
 
 ## Using UI Components
 
-Semantic ships a first-party UI framework in `@semantic-ui/core` with all the essential UI for building your website.
+The [`@semantic-ui/core`](/usage) package provides a collection of essential, pre-built UI components that can be used as a basis to build your website, or other higher-order UI components.
 
 <UICards two stackable horizontal>
-  <UICard horizontal
-    header="@semantic-ui/core"
-    icon="layers"
-    href="/usage"
-    description="A standard set of UI components to build your website like buttons, cards and inputs."
-  ></UICard>
+ <UICard horizontal
+   header="@semantic-ui/core"
+   icon="layers"
+   href="/usage"
+   description="Standard UI components like buttons, cards, inputs, etc., for building applications."
+ ></UICard>
 </UICards>
 
 
-## Creating UI Components
+## Creating Custom Components
 
-Semantic provides several core libraries to make it easy to ship custom UI as web components.
+For building custom UI elements, Semantic UI providesthe [component authoring framework](/components) a set of composable libraries to create your own custom web components.
 
 <UICards two stackable horizontal>
-  <UICard horizontal
-    header="@semantic-ui/component"
-    icon="package"
-    href="/components"
-    description="A framework for creating fully-featured UI with web components."
-  ></UICard>
-  <UICard horizontal
-    header="@semantic-ui/templating"
-    icon="table"
-    href="/components"
-    description="A reactive templating language that compiles to an AST for rendering your component."
-  ></UICard>
-  <UICard horizontal
-    header="@semantic-ui/reactivity"
-    icon="cpu"
-    href="/components"
-    description="A performant signals-based reactivity library designed for ease of use and debugging."
-  ></UICard>
-  <UICard horizontal
-    header="@semantic-ui/query"
-    icon="mouse-pointer"
-    href="/query"
-    description="A modern standards-based chainable DOM querying API built for the shadow DOM."
-  ></UICard>
-  <UICard horizontal
-    header="@semantic-ui/utils"
-    icon="tool"
-    href="/api/utils"
-    description="A collection of essential javascript utilities designed for human readability."
-  ></UICard>
+ <UICard horizontal
+   header="@semantic-ui/component"
+   icon="package"
+   href="/components"
+   description="Core library for defining and managing Web Component lifecycle, state, and behavior."
+ ></UICard>
+ <UICard horizontal
+   header="@semantic-ui/templating"
+   icon="table"
+   href="/templates"
+   description="Reactive templating language with AST compilation for rendering component views."
+ ></UICard>
+ <UICard horizontal
+   header="@semantic-ui/reactivity"
+   icon="cpu"
+   href="/reactivity"
+   description="Performant signals-based reactivity library for managing component state."
+ ></UICard>
+ <UICard horizontal
+   header="@semantic-ui/query"
+   icon="mouse-pointer"
+   href="/query"
+   description="Chainable DOM querying API adapted for Shadow DOM encapsulation."
+ ></UICard>
+ <UICard horizontal
+   header="@semantic-ui/utils"
+   icon="tool"
+   href="/api/utils"
+   description="General-purpose JavaScript functions focused on readability."
+ ></UICard>
 </UICards>
+
+
+> **Modular Architecture**
+> Each core library, [`@semantic-ui/query`](/query), [`@semantic-ui/reactivity`](/reactivity), [`@semantic-ui/templating`](/templates), [`@semantic-ui/utils`](/api/utils) are each designed to be standalone and can be used without adoping the full component framework.

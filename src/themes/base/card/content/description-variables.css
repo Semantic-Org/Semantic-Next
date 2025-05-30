@@ -1,7 +1,0 @@
-:root {
-  --card-description-font-size: var(--relative-15px);
-  --card-description-color: var(--standard-60);
-  --card-description-line-height: inherit;
-  --card-description-transition: var(--transition);
-}
-

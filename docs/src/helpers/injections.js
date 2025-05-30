@@ -189,7 +189,6 @@ export const headLibraryJS = `
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <script src="${suiBase}/dist/semantic-ui.js" type="module"></script>
 <link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
-<link rel="stylesheet" href="${suiBase}/dist/theme/base.css"></link>
 <script>
   document.querySelector('html').removeAttribute('style');
   if(localStorage.getItem('theme') == 'dark') {

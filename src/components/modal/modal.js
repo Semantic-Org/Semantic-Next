@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
-import { ModalComponentSpec } from '@semantic-ui/specs';
 import { noop } from '@semantic-ui/utils';
 
-import CSS from './css/modal-shadow.css?raw';
-import Template from './modal.html?raw';
+import componentSpec from './specs/modal-component.json' assert { type: 'json' };
+import template from './modal.html?raw' assert { type: 'txt' };
+import css from './modal-bundle.css?raw' assert { type: 'css' };
 
 const createComponent = ({ $, dispatchEvent }) => ({
   show(callback = noop) {
@@ -39,9 +39,9 @@ const events = {
 
 const UIModal = defineComponent({
   tagName: 'ui-modal',
-  componentSpec: ModalComponentSpec,
-  template: Template,
-  css: CSS,
+  componentSpec,
+  template,
+  css,
   createComponent,
   events,
   onCreated,

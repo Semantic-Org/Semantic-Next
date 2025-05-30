@@ -7,7 +7,7 @@
     </tr>
   </thead>
   <tbody>
-    {#each row in rows}
+    {#each rows as row}
       {> template
         name=rowTemplate
         data=row

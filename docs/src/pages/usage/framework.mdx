@@ -26,10 +26,8 @@ In React, you can use web components directly since version 19.
 
 ```jsx
 import React from 'react';
-import '@semantic-ui/core/components/button';
-import '@semantic-ui/core/components/icon';
-import '@semantic-ui/core/themes/button.css';
-import '@semantic-ui/core/themes/icon.css';
+import '@semantic-ui/core/button';
+import '@semantic-ui/core/icon';
 
 function MyComponent() {
   return (
@@ -46,10 +44,8 @@ In Angular, you can use web components directly in your templates. Import the ne
 
 ```typescript title='js'
 import { Component } from '@angular/core';
-import '@semantic-ui/core/components/button';
-import '@semantic-ui/core/components/icon';
-import '@semantic-ui/core/themes/button.css';
-import '@semantic-ui/core/themes/icon.css';
+import '@semantic-ui/core/button';
+import '@semantic-ui/core/icon';
 
 @Component({
   selector: 'app-root',
@@ -79,8 +75,8 @@ In Vue, you can use web components directly in your templates. Import the necess
 </template>
 
 <script setup>
-import '@semantic-ui/core/components/button';
-import '@semantic-ui/core/components/icon';
+import '@semantic-ui/core/button';
+import '@semantic-ui/core/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -95,8 +91,8 @@ In Svelte, you can use web components directly in your templates. Import the nec
 
 ```html
 <script>
-  import '@semantic-ui/core/components/button';
-  import '@semantic-ui/core/components/icon';
+  import '@semantic-ui/core/button';
+  import '@semantic-ui/core/icon';
   import '@semantic-ui/core/themes/button.css';
   import '@semantic-ui/core/themes/icon.css';
 
@@ -158,8 +154,8 @@ React 19 introduced native support for web components, you can directly use the 
 
 ```jsx
 import React from 'react';
-import '@semantic-ui/core/components/button';
-import '@semantic-ui/core/components/icon';
+import '@semantic-ui/core/button';
+import '@semantic-ui/core/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -172,8 +168,8 @@ In React, you can create a generic wrapper component that handles passing proper
 
 ```jsx
 import React from 'react';
-import '@semantic-ui/core/components/button';
-import '@semantic-ui/core/components/icon';
+import '@semantic-ui/core/button';
+import '@semantic-ui/core/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
@@ -200,7 +196,7 @@ In Angular, you can create individual wrapper components for each web component 
 
 ```typescript
 import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
-import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/button';
 import '@semantic-ui/core/themes/button.css';
 
 @Component({
@@ -224,7 +220,7 @@ export class UIButtonComponent {
 
 ```typescript
 import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
-import '@semantic-ui/core/components/icon';
+import '@semantic-ui/core/icon';
 import '@semantic-ui/core/themes/icon.css';
 
 @Component({
@@ -257,7 +253,7 @@ In Vue, you can create individual wrapper components for each web component you 
 </template>
 
 <script setup>
-import '@semantic-ui/core/components/button';
+import '@semantic-ui/core/button';
 import '@semantic-ui/core/themes/button.css';
 </script>
 ```
@@ -270,7 +266,7 @@ import '@semantic-ui/core/themes/button.css';
 </template>
 
 <script setup>
-import '@semantic-ui/core/components/icon';
+import '@semantic-ui/core/icon';
 import '@semantic-ui/core/themes/icon.css';
 </script>
 ```
@@ -280,7 +276,7 @@ In Svelte, you can create individual wrapper components for each web component y
 
 ```html
 <script>
-  import '@semantic-ui/core/components/button';
+  import '@semantic-ui/core/button';
   import '@semantic-ui/core/themes/button.css';
 
   export let properties = {};
@@ -293,7 +289,7 @@ In Svelte, you can create individual wrapper components for each web component y
 
 ```html
 <script>
-  import '@semantic-ui/core/components/icon';
+  import '@semantic-ui/core/icon';
   import '@semantic-ui/core/themes/icon.css';
 
   export let properties = {};

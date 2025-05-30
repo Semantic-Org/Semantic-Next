@@ -47,13 +47,13 @@ const createComponent = ({ dispatchEvent, state, settings }) => ({
 
 const events = {
   'mouseenter div.star'({ state, data }) {
-    state.hoveredIndex.set(+data.index);
+    state.hoveredIndex.set(data.index);
   },
   'mouseleave div.star'({ state, data }) {
     state.hoveredIndex.clear();
   },
   'click div.star'({ self, data }) {
-    const rating = Number(data.index) + 1;
+    const rating = data.index + 1;
     self.setRating(rating);
   },
 };

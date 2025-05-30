@@ -539,8 +539,12 @@ export class Query {
     });
   }
 
+  // shorthand for most common trigger() uses
   click(eventParams) {
     return this.trigger('click', eventParams);
+  }
+  submit(eventParams) {
+    return this.trigger('submit', eventParams);
   }
 
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {

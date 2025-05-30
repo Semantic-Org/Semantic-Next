@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/internal-scripts",
-  "version": "0.10.2",
+  "version": "0.10.9",
   "description": "Internal build scripts for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "homepage": "https://next.semantic-ui.com",
@@ -14,40 +14,29 @@
   ],
   "exports": {
     ".": {
-      "import": "./src/tasks/index.js",
-      "default": "./src/tasks/index.js"
+      "import": "./src/index.js",
+      "default": "./src/index.js"
     },
-    "./build": {
-      "import": "./src/tasks/build.js",
-      "default": "./src/tasks/build.js"
+    "./build-bundle": {
+      "import": "./src/build-bundle.js",
+      "default": "./src/build-bundle.js"
     },
     "./build-cdn": {
-      "import": "./src/tasks/build-cdn.js",
-      "default": "./src/tasks/build-cdn.js"
-    }
-  },
-  "scripts": {
-    "build": "wireit",
-    "build:minified": "wireit",
-    "build:cdn": "wireit"
-  },
-  "wireit": {
-    "build": {
-      "dependencies": [
-        "build:minified",
-        "build:cdn"
-      ]
+      "import": "./src/build-cdn.js",
+      "default": "./src/build-cdn.js"
     },
-    "build:minified": {
-      "command": "node ./src/do-build.js"
-    },
-    "build:cdn": {
-      "command": "node ./src/do-build-cdn.js"
+    "./build-esm": {
+      "import": "./src/build-esm.js",
+      "default": "./src/build-esm.js"
     }
   },
   "private": true,
   "dependencies": {
-    "@semantic-ui/esbuild-resolve-bare-imports": "^0.10.2",
-    "esbuild": "^0.25.1"
+    "@semantic-ui/esbuild-callback": "^0.10.9",
+    "@semantic-ui/esbuild-log": "^0.10.2",
+    "@semantic-ui/esbuild-resolve-bare-imports": "^0.10.9",
+    "@semantic-ui/specs": "^0.10.9",
+    "esbuild": "^0.25.1",
+    "tiny-glob": "^0.2.9"
   }
 }

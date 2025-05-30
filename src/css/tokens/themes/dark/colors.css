@@ -1,0 +1,63 @@
+/*******************************
+        Dark Theme - Colors
+*******************************/
+
+html.dark,
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
+
+  /* -------------------
+        Text Colors
+  -------------------- */
+
+  --white-text-color: var(--white-80);
+  --black-text-color: var(--black-80);
+
+  --red-text-color: var(--red-30);
+  --olive-text-color: var(--olive-30);
+  --green-text-color: var(--green-30);
+  --yellow-text-color: var(--yellow-30);
+  --blue-text-color: var(--blue-30);
+  --teal-text-color: var(--teal-30);
+  --pink-text-color: var(--pink-30);
+  --violet-text-color: var(--violet-30);
+  --purple-text-color: var(--purple-30);
+  --orange-text-color: var(--orange-30);
+  --brown-text-color: var(--brown-30);
+  --grey-text-color: var(--grey-30);
+  --slate-text-color: var(--slate-30);
+
+  --red-header-color: var(--red-20);
+  --olive-header-color: var(--olive-20);
+  --green-header-color: var(--green-20);
+  --yellow-header-color: var(--yellow-20);
+  --blue-header-color: var(--blue-20);
+  --teal-header-color: var(--teal-20);
+  --pink-header-color: var(--pink-20);
+  --violet-header-color: var(--violet-20);
+  --purple-header-color: var(--purple-20);
+  --orange-header-color: var(--orange-20);
+  --brown-header-color: var(--brown-20);
+  --grey-header-color: var(--grey-20);
+  --slate-header-color: var(--slate-20);
+
+  /* -------------------
+        UI Colors
+  -------------------- */
+
+  --ui-emphasis-strong: oklch(0.16 0.02 266.69);
+  --ui-emphasis: oklch(0.13 0.02 266.79);
+
+  /* boost some black colors to be noticable in dark mode */
+  --subtle-transparent-black: oklch(var(--black-lch) / 5%);
+  --transparent-black: oklch(var(--black-lch) / 15%);
+  --strong-transparent-black: oklch(var(--black-lch) / 20%);
+  --very-strong-transparent-black: oklch(var(--black-lch) / 20%);
+
+  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
+
+}

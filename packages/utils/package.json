@@ -1,10 +1,12 @@
 {
   "name": "@semantic-ui/utils",
   "version": "0.10.9",
+  "title": "Semantic UI Utils",
   "description": "Utility functions for arrays, objects, strings, type checking and more",
   "author": "Jack Lukic",
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -21,8 +23,8 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "vitest": "^3.0.4",
-    "esbuild": "^0.25.1"
+    "@semantic-ui/internal-scripts": "^0.10.2",
+    "vitest": "^3.0.4"
   },
   "files": [
     "src",
@@ -34,19 +36,19 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "build:minified",
-        "build:browser",
+        "build:esm",
+        "build:bundle",
         "build:cdn"
       ]
     },
-    "build:minified": {
-      "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
     },
-    "build:browser": {
-      "command": "node ../../internal-packages/scripts/src/do-build-browser.js"
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
     },
     "build:cdn": {
-      "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
     }
   }
 }

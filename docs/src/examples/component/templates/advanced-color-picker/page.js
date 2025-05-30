@@ -1,5 +1,6 @@
 import { $ } from '@semantic-ui/query';
 
 $('advanced-color-picker').on('colorselected', (event) => {
-  console.log(`You selected ${event.detail.color}`);
+  const { color, hexcode } = event.detail;
+  console.log(`You selected ${color}, or hexcode ${hexcode}`);
 });

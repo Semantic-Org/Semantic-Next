@@ -1,0 +1,37 @@
+{
+  "name": "@semantic-ui/esbuild-log",
+  "description": "Simple logging plugin for esbuild",
+  "version": "0.10.9",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "main": "src/log.js",
+  "module": "src/log.js",
+  "type": "module",
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/semantic-org/esbuild-resolve-bare-imports.git"
+  },
+  "keywords": [
+    "esbuild",
+    "plugin",
+    "cdn",
+    "jsdelivr",
+    "unpkg",
+    "imports",
+    "resolve",
+    "modules",
+    "semantic-ui"
+  ],
+  "peerDependencies": {
+    "esbuild": ">=0.15.0"
+  }
+}

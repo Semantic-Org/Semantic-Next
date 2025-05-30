@@ -236,7 +236,7 @@
           ui-icon {
             display: block;
             font-size: 32px;
-            color: var(--primary-light-text-color);
+            color: var(--primary-text-color);
             margin-bottom: var(--compact-spacing);
           }
           .header {

@@ -57,6 +57,16 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
     if (!files) {
       return;
     }
+    if(!files['component.html']) {
+      const js = files['component.js']?.content;
+      if(js) {
+        const regex = /template:\s*([`'"])((?:\\.|(?!\1).)*)\1/;
+        const match = js.match(regex);
+        if(match) {
+          return match[2];
+        }
+      }
+    }
     return files['component.html']?.content;
   },
 

@@ -23,9 +23,8 @@ const createComponent = ({ self, state, settings }) => ({
 });
 
 const events = {
-  'click .header'({ state, event }) {
-    const index = Number(event.target.dataset.index);
-    state.tabIndex.set(index);
+  'click .header'({ state, event, data }) {
+    state.tabIndex.set(data.index);
   },
 };
 

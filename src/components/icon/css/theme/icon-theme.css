@@ -1,0 +1,23 @@
+/*******************************
+            Button
+*******************************/
+
+/* Content */
+@import url('./content/icon-variables.css') layer(icon.theme.content.icon);
+
+/* Group */
+@import url('./group/icons-variables.css') layer(icon.theme.plural);
+
+/* Types */
+
+/* States */
+@import url('./states/disabled-variables.css') layer(icon.theme.states.disabled);
+@import url('./states/loading-variables.css') layer(icon.theme.states.loading);
+
+/* Variations */
+@import url('./variations/link-variables.css') layer(icon.theme.variations.link);
+@import url('./variations/colored-variables.css') layer(icon.theme.variations.colored);
+@import url('./variations/sizing-variables.css') layer(icon.theme.variations.sizing);
+
+/* Overrides */
+@import url('./overrides/feather-icons.css') layer(icon.theme.overrides.feather);

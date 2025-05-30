@@ -65,7 +65,7 @@ export class ReactiveDataDirective extends AsyncDirective {
     // useful for things like <input checked="{{isChecked}}">
     // template compiler does this automatically for boolean attrs
     if (this.settings.ifDefined) {
-      if (inArray(reactiveValue, [undefined, null, false, 0])) {
+      if (inArray(reactiveValue, ['', undefined, null, false, 0])) {
         return ifDefined(undefined);
       }
     }

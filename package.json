@@ -1,22 +1,120 @@
 {
   "name": "@semantic-ui/core",
   "version": "0.10.9",
-  "title": "Semantic UI Next",
+  "title": "Semantic UI Core",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
-  "main": "src/semantic-ui.js",
-  "module": "src/semantic-ui.js",
+  "main": "src/components/index.js",
+  "module": "src/components/index.js",
   "license": "MIT",
   "type": "module",
   "files": [
     "dist/**",
     "src/**"
   ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/components/index.js",
+      "browser": "./dist/cdn/semantic-ui.min.js",
+      "bundled": "./dist/semantic-ui.min.js",
+      "default": "./src/components/index.js"
+    },
+    "./css": {
+      "import": "./src/css/all.css",
+      "default": "./src/css/all.css"
+    },
+    "./css/reset": {
+      "import": "./src/css/global/reset.css",
+      "default": "./src/css/global/reset.css"
+    },
+    "./css/global": {
+      "import": "./src/css/global/global.css",
+      "default": "./src/css/global/global.css"
+    },
+    "./css/tokens": {
+      "import": "./src/css/tokens.css",
+      "default": "./src/css/tokens.css"
+    },
+    "./specs": {
+      "import": "./src/specs/specs.js",
+      "default": "./src/specs/specs.js"
+    },
+    "./component-specs": {
+      "import": "./src/specs/component-specs.js",
+      "default": "./src/specs/component-specs.js"
+    },
+    "./examples": {
+      "import": "./examples/index.js",
+      "default": "./examples/index.js"
+    },
+    "./button": {
+      "import": "./src/components/button/index.js",
+      "browser": "./dist/cdn/button.min.js",
+      "bundled": "./dist/bundled/button.min.js",
+      "default": "./src/components/button/index.js"
+    },
+    "./card": {
+      "import": "./src/components/card/index.js",
+      "browser": "./dist/cdn/card.min.js",
+      "bundled": "./dist/bundled/card.min.js",
+      "default": "./src/components/card/index.js"
+    },
+    "./container": {
+      "import": "./src/components/container/index.js",
+      "browser": "./dist/cdn/container.min.js",
+      "bundled": "./dist/bundled/container.min.js",
+      "default": "./src/components/container/index.js"
+    },
+    "./icon": {
+      "import": "./src/components/icon/index.js",
+      "browser": "./dist/cdn/icon.min.js",
+      "bundled": "./dist/bundled/icon.min.js",
+      "default": "./src/components/icon/index.js"
+    },
+    "./input": {
+      "import": "./src/components/input/index.js",
+      "browser": "./dist/cdn/input.min.js",
+      "bundled": "./dist/bundled/input.min.js",
+      "default": "./src/components/input/index.js"
+    },
+    "./label": {
+      "import": "./src/components/label/index.js",
+      "browser": "./dist/cdn/label.min.js",
+      "bundled": "./dist/bundled/label.min.js",
+      "default": "./src/components/label/index.js"
+    },
+    "./menu": {
+      "import": "./src/components/menu/index.js",
+      "browser": "./dist/cdn/menu.min.js",
+      "bundled": "./dist/bundled/menu.min.js",
+      "default": "./src/components/menu/index.js"
+    },
+    "./modal": {
+      "import": "./src/components/modal/index.js",
+      "browser": "./dist/cdn/modal.min.js",
+      "bundled": "./dist/bundled/modal.min.js",
+      "default": "./src/components/modal/index.js"
+    },
+    "./rail": {
+      "import": "./src/components/rail/index.js",
+      "browser": "./dist/cdn/rail.min.js",
+      "bundled": "./dist/bundled/rail.min.js",
+      "default": "./src/components/rail/index.js"
+    },
+    "./segment": {
+      "import": "./src/components/segment/index.js",
+      "browser": "./dist/cdn/segment.min.js",
+      "bundled": "./dist/bundled/segment.min.js",
+      "default": "./src/components/segment/index.js"
+    }
+  },
   "scripts": {
     "build": "wireit",
     "dev": "wireit",
     "build:docs": "wireit",
+    "build:packages": "wireit",
     "serve": "wireit",
     "watch": "wireit",
     "publish": "wireit",
@@ -32,26 +130,17 @@
     "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
   },
   "wireit": {
-    "build": {
-      "command": "node ./tasks/build.js",
-      "dependencies": [
-        "build:packages"
-      ]
-    },
-    "watch": {
-      "command": "node ./tasks/watch.js",
-      "service": true
-    },
     "dev": {
       "command": "cd docs && npm install && npx link ../ && npm run dev",
       "dependencies": [
         "watch"
       ]
     },
-    "build-docs": {
-      "command": "cd docs && npm install && npx link ../ && npm run build",
+    "build": {
+      "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
       "dependencies": [
-        "build"
+        "build:ui-deps",
+        "build:ui-components"
       ]
     },
     "build:packages": {
@@ -65,23 +154,31 @@
         "./packages/utils:build"
       ]
     },
-    "test:case": {
-      "command": "node ./tasks/test-case.js"
-    },
-    "serve:docs": {
-      "command": "cd docs && npm run dev",
-      "service": true
-    },
-    "serve": {
-      "command": "node ./tasks/serve.js",
-      "service": true
-    },
+
     "build:docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
         "build"
       ]
     },
+
+    "build:clean-directory": {
+      "command": "node ./internal-packages/scripts/src/clean-directory.js"
+    },
+    "build:ui-deps": {
+      "command": "node ./internal-packages/scripts/src/build-ui-deps.js"
+    },
+    "build:ui-components": {
+      "command": "node ./internal-packages/scripts/src/build-ui-components.js"
+    },
+    "build:ui-framework": {
+      "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
+    },
+    "watch": {
+      "command": "node ./internal-packages/scripts/src/watch.js",
+      "service": true
+    },
+
     "publish": {
       "command": "node ./scripts/publish.js",
       "dependencies": [
@@ -96,6 +193,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
     "@semantic-ui/component": "^0.10.9",
+    "@semantic-ui/esbuild-log": "^0.0.1",
     "@semantic-ui/specs": "^0.10.9"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@
       <ui-icon chevron-down></ui-icon>
     {/if}
   </div>
-  {#if section.items.length}
+  {#if hasAny section.items}
     <div class="{classMap getContentClasses index}content">
       <div class="menu">
         {#each item in section.items}

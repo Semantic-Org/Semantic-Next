@@ -1,9 +1,12 @@
 {
   "name": "@semantic-ui/specs",
-  "version": "0.10.9",
+  "title": "Semantic UI Specs",
   "description": "Component specifications and definitions for UI components",
   "author": "Jack Lukic",
   "license": "ISC",
+  "version": "0.10.9",
+  "sideEffects": false,
+  "type": "module",
   "main": "src/index.js",
   "module": "src/index.js",
   "exports": {
@@ -27,24 +30,25 @@
     "@semantic-ui/utils": "^0.10.9"
   },
   "devDependencies": {
-    "esbuild": "^0.25.1"
+    "@semantic-ui/internal-scripts": "^0.10.2",
+    "vitest": "^3.0.4"
   },
   "wireit": {
     "build": {
       "dependencies": [
-        "build:minified",
-        "build:browser",
+        "build:esm",
+        "build:bundle",
         "build:cdn"
       ]
     },
-    "build:minified": {
-      "command": "node ../../internal-packages/scripts/src/do-build-minified.js"
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
     },
-    "build:browser": {
-      "command": "node ../../internal-packages/scripts/src/do-build-browser.js"
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
     },
     "build:cdn": {
-      "command": "node ../../internal-packages/scripts/src/do-build-cdn.js"
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
     }
   }
 }

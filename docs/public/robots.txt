@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://next.semantic-ui.com/sitemap.xml
+
+# AI instruction files available at /ai-guides/
+# Comprehensive documentation for AI agents working with Semantic UI

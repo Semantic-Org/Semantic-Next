@@ -8,13 +8,13 @@ const defaultState = {
 };
 
 const keys = {
-  'up': ({ state }) => state.height.decrement(10),
-  'right': ({ state }) => state.width.increment(10),
-  'down': ({ state }) => state.height.increment(10),
-  'left': ({ state }) => state.width.decrement(10),
-  'esc': ({ state }) => {
-    state.width.set(250);
-    state.height.set(250);
+  up: ({ state }) => state.height.decrement(10, 0),
+  left: ({ state }) => state.width.decrement(10, 0),
+  right: ({ state }) => state.width.increment(10),
+  down: ({ state }) => state.height.increment(10),
+  esc: ({ settings, state }) => {
+    state.width.set(settings.width);
+    state.height.set(settings.height);
   },
 };
 

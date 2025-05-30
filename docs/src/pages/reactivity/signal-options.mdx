@@ -1,0 +1,103 @@
+---
+layout: '@layouts/Guide.astro'
+icon: settings
+title: Signal Options
+description: Customizing Signal behavior for equality checks and value cloning
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+To provide more granular control over reactivity, Semantic provides several options which let you control how values are updated and compared.
+
+The default options are designed to permit some minor performance overhead as a tradeoff for improved developer experience, but this might not fit all use-cases for [Signals](/reactivity/signals).
+
+Signal options are passed in the second argument to the [`Signal` constructor](/api/reactivity/signal#constructor).
+
+## Equality Comparison
+
+By default, Signals use a deep equality comparison, [`isEqual`](/api/utils/equality/#isequal), to determine if a new value is actually different from the current value. This prevents [Reactions](/reactivity/reactions) from rerunning if the updated value has not changed.
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const person = new Signal({ name: 'John', age: 30 });
+
+// No reactive update triggered (objects are deep equal)
+person.set({ name: 'John', age: 30 });
+
+// Reactive update triggered (objects differ)
+person.set({ name: 'Jane', age: 30 });
+```
+
+### Custom Equality Function
+
+You can provide a custom equality comparison function using the [`equalityFunction`](/api/reactivity/signal#options) option to modify how equality checks are performed. This can potentially speed up comparisons at the cost of potential additional reactivity.
+
+> **When To Use** Custom equality functions can be useful for extremely large objects or data structures where you want to avoid checking their values each time they are accessed.
+
+```javascript
+const customEquality = (a, b) => {
+  // Custom comparison logic (e.g., shallow compare, reference compare)
+  return a === b; // Example: strict reference equality
+};
+
+// Signal using custom equality check
+const customVar = new Signal(initialValue, { equalityFunction: customEquality });
+```
+
+## Value Cloning
+
+By default, Signals automatically clone object and array values during [`get`](/api/reactivity/signal#get) and [`set`](/api/reactivity/signal#set) operations.
+
+A very common issue when using naive Signals implementations is that it can be very easy to accidentally update an underlying signal value when modifying its value without using `set()` or `value`.
+
+```javascript
+const countObj = new Signal({ count: 0 });
+
+// by default this will not update the current count unless set() is called
+const newObj = countObj.get();
+newObj.count = 1;
+```
+
+Cloning prevents accidental mutation of the Signal's internal state and ensures reliable [equality checks](#equality-comparison).
+
+Disabling cloning (using the [`allowClone`](/api/reactivity/signal#options) option) will reduce the overhead of `set` and `get` calls but will potentially cause unexpected behaviors when modifying arrays and objects.
+```javascript title="Accidental Mutations"
+const countObj = new Signal({ count: 0 }, { allowClone: false });
+
+// this will not trigger reactivity, but the value will change in the next flush
+// this is because the underlying signal was accidentally mutated
+const newObj = countObj.get();
+newObj.count = 1;
+```
+
+### Custom Cloning Function
+
+Similar to the equality check, the cloning function itself can be customized by providing a [`cloneFunction`](/api/reactivity/signal#options) in the constructor options.
+
+```javascript
+// Simple JSON clone
+const customClone = (value) => {
+  return JSON.parse(JSON.stringify(value));
+};
+
+// Signal using custom clone function
+const customCloneSignal = new Signal({ data: 1 }, { cloneFunction: customClone });
+```
+
+### Uncloneable Content
+
+Some values do not have reliable ways to clone. For instance, there is no universal way to clone a custom class.
+
+**Class instances are not cloned** by default, regardless of the `allowClone` setting. Signals always store and return direct references to class instances.
+
+```javascript
+class MyData {
+  constructor(value) { this.value = value; }
+}
+
+const instanceSignal = new Signal(new MyData(10));
+
+const instance1 = instanceSignal.get();
+const instance2 = instanceSignal.get();
+console.log(instance1 === instance2);
+```

@@ -9,6 +9,7 @@ import {
   isEqual,
   isFunction,
   isServer,
+  isString,
   kebabToCamel,
   keys,
   unique,
@@ -55,7 +56,10 @@ class WebComponentBase extends LitElement {
       each(componentSpec.attributes, (attributeName) => {
         const propertyType = componentSpec.propertyTypes[attributeName];
         const propertyName = kebabToCamel(attributeName);
-        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
+        properties[propertyName] = WebComponentBase.getPropertySettings({
+          name: attributeName,
+          type: propertyType,
+        });
       });
 
       // these are values that can only be set on the DOM el as properties
@@ -63,7 +67,10 @@ class WebComponentBase extends LitElement {
       each(componentSpec.properties, (attributeName) => {
         const propertyType = componentSpec.propertyTypes[attributeName];
         const propertyName = kebabToCamel(attributeName);
-        properties[propertyName] = WebComponentBase.getPropertySettings(attributeName, propertyType);
+        properties[propertyName] = WebComponentBase.getPropertySettings({
+          name: attributeName,
+          type: propertyType,
+        });
       });
 
       // this handles syntax where allowed value is used as attribute
@@ -78,15 +85,13 @@ class WebComponentBase extends LitElement {
         // this can either be a settings object or a default value
         // i.e. { foo: 'baz' } // basic
         // or { foo: { type: String, defaultValue: 'baz' } // expert
-
-        // we cant serialize custom classes
-        const propertySettings = {
-          propertyOnly: isClassInstance(defaultValue),
-        };
-
         properties[propertyName] = (defaultValue?.type)
           ? defaultSettings
-          : WebComponentBase.getPropertySettings(propertyName, defaultValue?.constructor, propertySettings);
+          : WebComponentBase.getPropertySettings({
+              name: propertyName,
+              type: defaultValue?.constructor,
+              propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
+            });
       });
     }
 
@@ -114,7 +119,22 @@ class WebComponentBase extends LitElement {
     return properties;
   }
 
-  static getPropertySettings(propertyName, type = String, { propertyOnly = false } = {}) {
+  static getPropertySettings({name, type = String, propertyOnly = false } = {}) {
+
+    // converts type = 'string' -> String
+    // this is because compont spec cannot serialize prototypes in JSON
+    if(isString(type)) {
+      const types = {
+        string: String,
+        number: Number,
+        boolean: Boolean,
+        object: Object,
+        array: Array,
+        function: Function,
+      };
+      type = types[type] || String;
+    }
+
     let property = {
       type,
       attribute: true,
@@ -261,12 +281,11 @@ class WebComponentBase extends LitElement {
     // iterate through tracked attributes which can receive classes
     each(componentSpec.attributes, (attribute) => {
       const property = kebabToCamel(attribute);
-      const value = this[property];
-
+      const value = this[property] || this[attribute];
       if (value) {
-        const allowedValues = componentSpec.allowedValues[attribute];
-        const propertyType = componentSpec.propertyTypes[attribute];
-        if (propertyType == Boolean) {
+        const allowedValues = componentSpec.allowedValues?.[attribute];
+        const propertyType = componentSpec.propertyTypes?.[attribute];
+        if (propertyType == 'boolean') {
           // this is a variation like active=true
           // it receives the class "active"
           classes.push(attribute);
@@ -283,7 +302,7 @@ class WebComponentBase extends LitElement {
 
         // components can opt-in to including the attribute if it has a value set
         // for instance "icon" if it has an icon set
-        if (componentSpec.attributeClasses.includes(attribute)) {
+        if ((componentSpec.attributeClasses || []).includes(attribute)) {
           classes.push(attribute);
         }
       }

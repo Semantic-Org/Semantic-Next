@@ -457,7 +457,8 @@ export class LitRenderer {
       // Recursively evaluate nested expressions
       return this.lookupExpressionValue(token, data);
     }
-    // check if this is a value not requiring lookup
+
+    // check if this is a serialized literal value like a Number/Boolean/String
     const literalValue = this.getLiteralValue(token);
     if (literalValue !== undefined) {
       return literalValue;
@@ -576,10 +577,12 @@ export class LitRenderer {
     const contentID = LitRenderer.getID({ ast, data, isSVG });
     const treeRef = this.renderTrees[contentID];
     const existingTree = treeRef ? treeRef.deref() : undefined;
-    // disabled for now
+
+    // this is disabled globally currently as it is experimental
     if (LitRenderer.useSubtreeCache && existingTree) {
       return existingTree.cachedRender(data);
     }
+
     const tree = new LitRenderer({
       ast,
       data,

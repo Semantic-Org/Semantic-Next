@@ -1,0 +1,10 @@
+/* Content */
+@import url('./content/label.css') layer(label.definition.content.label);
+
+/* Types */
+@import url('./types/emphasis.css') layer(label.definition.types.emphasis);
+@import url('./types/badge.css') layer(label.definition.types.badge);
+
+/* Variations */
+@import url('./variations/sizing.css') layer(label.definition.variations.sizing);
+@import url('./variations/aligned.css') layer(label.definition.variations.aligned);

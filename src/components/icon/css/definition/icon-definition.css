@@ -1,0 +1,17 @@
+/* Content */
+@import url('./content/icon.css') layer(icon.definition.singular);
+
+/* Group */
+@import url('./group/icons.css') layer(icon.definition.plural);
+
+/* States */
+@import url('./states/disabled.css') layer(icon.definition.states.disabled);
+@import url('./states/loading.css') layer(icon.definition.states.loading);
+
+/* Variations */
+@import url('./variations/circular.css') layer(icon.definition.variations.circular);
+@import url('./variations/colored.css') layer(icon.definition.variations.colored);
+@import url('./variations/fitted.css') layer(icon.definition.variations.fitted);
+@import url('./variations/link.css') layer(icon.definition.variations.links);
+@import url('./variations/sizing.css') layer(icon.definition.variations.sizing);
+

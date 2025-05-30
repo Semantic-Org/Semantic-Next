@@ -164,9 +164,14 @@ const createComponent = ({ self, state, settings, reaction, flush, dispatchEvent
 });
 
 const events = {
+
   'submit form'({ event, self }) {
     event.preventDefault();
     self.submitForm();
+  },
+
+  'click .reset'({ self }) {
+    self.resetForm();
   },
   
   'input input, textarea'({ target, self, data }) {
@@ -176,10 +181,6 @@ const events = {
   'change select'({ target, self, data }) {
     self.setFieldValue(data.name, target.value);
   },
-  
-  'click .reset-button'({ self }) {
-    self.resetForm();
-  }
 };
 
 // Define component

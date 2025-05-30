@@ -11,7 +11,7 @@ Utility methods in Query allow you to get information about elements, access spe
 
 Get the number of elements in the Query object.
 
-> **Count Usage** `count()` is preferred although the [Query object](/query/basic#the-query-object) is `array-like` and `length` will also work. If it's really important to you -- you can still do that.
+> **Count Usage** `count()` is preferred although the [Query object](/api/query/basic#the-query-object) is `array-like` and `length` will also work. If it's really important to you -- you can still do that.
 
 ### Syntax
 ```javascript
@@ -19,7 +19,7 @@ $('selector').count()
 ```
 
 ### Returns
-`number` - The number of elements in the [Query object](/query/basic#the-query-object).
+`number` - The number of elements in the [Query object](/api/query/basic#the-query-object).
 
 ### Usage
 ```javascript
@@ -39,7 +39,7 @@ $('selector').index()
 ```
 
 ### Returns
-`number` - The index of the first element within the [Query object](/query/basic#the-query-object) relative to its sibling elements, or -1 if not found.
+`number` - The index of the first element within the [Query object](/api/query/basic#the-query-object) relative to its sibling elements, or -1 if not found.
 
 ### Usage
 ```javascript
@@ -65,7 +65,7 @@ $('selector').offsetParent(options)
 | options | Object | Configuration options for the method  |
 
 ### Returns
-[Query object](/query/basic#the-query-object) containing the offset parent element(s).
+[Query object](/api/query/basic#the-query-object) containing the offset parent element(s).
 
 ### Usage
 ```javascript

@@ -57,6 +57,7 @@ export const defineComponent = ({
     adoptStylesheet(pageCSS);
   }
 
+
   /*
     Create Component Returns Either a Template or WebComponent
     Templates are created as a prototype that can be cloned when instantiated
