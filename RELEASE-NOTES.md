@@ -7,7 +7,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.11.2
 
 * **Query** - Fix `setting()` and `settings()` not returning dom element for chaining.
-
+* **Template Helpers** - `guard` and `nonreactive` can now be passed in values and not just functions.
 # Version 0.11.0-1
 
 ## Major Changes

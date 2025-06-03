@@ -10,6 +10,7 @@ import {
   range,
   tokenize,
   toTitleCase,
+  wrapFunction,
 } from '@semantic-ui/utils';
 
 /*
@@ -163,6 +164,10 @@ export const TemplateHelpers = {
   escapeHTML(string) {
     return escapeHTML(string);
   },
-  guard: Reaction.guard,
-  nonreactive: Reaction.nonreactive,
+  guard: (value) => {
+    return Reaction.guard(wrapFunction(value));
+  }
+  nonreactive: (value) => {
+    return Reaction.nonReactive(wrapFunction(value));
+  }
 };
