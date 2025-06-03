@@ -169,7 +169,7 @@ const defaultState = {
   projectFiles: [],
 };
 
-const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, state, data, settings, $, $$ }) => ({
+const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, nonreactive, state, data, settings, $, $$ }) => ({
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
@@ -292,7 +292,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   },
 
   canShowPageFiles() {
-    let pageFiles = self.getFileArray({ filter: 'page' });
+    let pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
     if (pageFiles.length == 0) {
       return false;
     }
@@ -467,7 +467,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, s
   },
   getPanels() {
     let panels = [[], []];
-    let files = self.getFileArray().filter(file => !file.hidden);
+    let files = nonreactive(() => self.getFileArray().filter(file => !file.hidden));
     each(files, file => {
       if (file.panelIndex >= 0) {
         panels[file.panelIndex].push({
