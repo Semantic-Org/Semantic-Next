@@ -10,7 +10,7 @@ const searchMeta = {
 	title: frontmatter.title,
 	description: frontmatter.description,
 	icon: frontmatter.icon,
-	pageType: 'Guide'
+	pageType: frontmatter.pageType || 'Guide'
 }
 ---
 <Layout

@@ -128,6 +128,7 @@ const createComponent = ({ self, el, bindKey, reaction, state, isRendered, setti
     if (result.meta.pageType) {
       const colors = {
         'Guide': 'orange',
+        'API Reference': 'red'
         'Example': 'purple',
         'UI Components': 'blue',
       };
