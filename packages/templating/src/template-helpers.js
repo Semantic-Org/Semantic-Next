@@ -166,8 +166,8 @@ export const TemplateHelpers = {
   },
   guard: (value) => {
     return Reaction.guard(wrapFunction(value));
-  }
+  },
   nonreactive: (value) => {
     return Reaction.nonReactive(wrapFunction(value));
-  }
+  },
 };
