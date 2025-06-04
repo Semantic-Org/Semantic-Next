@@ -1,0 +1,331 @@
+---
+layout: '@layouts/Guide.astro'
+title: Workarounds
+description: Solutions to web component platform constraints
+---
+
+Common web component platform constraints and framework solutions.
+
+
+## CSS
+
+### Host Context Not Supported
+
+**Problem**
+
+Chrome supports [`:host-context()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:host-context) which solves context-aware styling entirely, but unfortunately it is not supported by other browsers because browser makers believe this breaks the encapsulation of web components.
+
+This means for common things like `dark mode` on a component you will have to rely on CSS variables.
+
+**Solution**
+
+Use [`pageCSS`](/components/events#pageCSS) for component relationship styling:
+
+```javascript title="my-component.js"
+defineComponent({
+  tagName: 'my-component',
+  template,
+  css,           // Shadow DOM styles
+  pageCSS,       // Global relationship styles
+});
+```
+
+```css title="my-component-page.css"
+.dark-mode my-component {
+  --component-background: var(--dark-background);
+  --component-text: var(--dark-text);
+}
+.light-mode my-component {
+  --component-background: var(--light-background);
+  --component-text: var(--light-text);
+}
+```
+
+Use [style queries](https://developer.chrome.com/docs/css-ui/style-queries) for responsive styling by setting CSS variables in context, then using them internally:
+
+```css title="style.css"
+/* Parent context sets the variable based on screen size */
+@media (max-width: 768px) {
+  .container {
+    --mobile-view: true;
+  }
+}
+
+/* Component uses style queries to detect the variable */
+@container component style(--mobile-view: true) {
+  .stackable.cards {
+    display: flex;
+    flex-direction: column;
+  }
+}
+```
+
+> **Note**: Style queries may eventually make context-aware styling easier but they are only currently supported in Chrome. Firefox should have it implemented within the next year.
+
+
+### Host Pseudo-Selectors Don't Work
+
+**Problem**
+
+You might want to use something like `:host:first-child` to remove margins on a web component if it's at the start of a block; however the `:host` pseudo selector does not work with other pseudo selectors like child selectors.
+
+This is annoying because you often want to expose margins on the host element so it's easy for a person upstream to change spacing, and it helps to default to reasonable standards like not adding space before the first item in a group.
+
+**Solution**
+
+Use [`pageCSS`](/components/styling#pageCSS) to style from outside with tag names:
+
+```css title="my-component-page.css"
+my-component:first-child {
+  margin-left: 0;
+  border-top-left-radius: var(--component-border-radius);
+}
+my-component:last-child {
+  margin-right: 0;
+  border-top-right-radius: var(--component-border-radius);
+}
+```
+
+### CSS Resets Don't Pierce Shadow DOM
+
+**Problem**
+
+CSS resets cannot pierce shadow DOM boundaries.
+
+**Solution**
+
+Include necessary resets in each component:
+
+```css title="component.css"
+:host {
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+```
+
+## Events
+
+### Custom Events Don't Bubble by Default
+
+**Problem**
+
+Custom events created with `new CustomEvent()` [don't bubble by default](https://developer.mozilla.org/en-US/docs/Web/Events/Creating_and_triggering_events#event_bubbling), unlike native events.
+
+Components use [event delegation](/components/events) to attach events - listeners are bound to the shadow root and rely on events bubbling up from child elements. If custom events don't bubble, they cannot be handled by other web components using event delegation patterns.
+
+**Solution**
+
+The [`dispatchEvent()`](/components/events#creating-events) utility automatically includes `{ bubbles: true, composed: true }`.
+
+```javascript title="component.js"
+const createComponent = ({ dispatchEvent }) => ({
+  notifyChange(value) {
+    dispatchEvent('valueChanged', { value });
+  }
+});
+```
+
+## HTML Attributes & Properties
+
+### Boolean Attributes Cannot Be False
+
+**Problem**
+
+Values like `visible="false"` are not possible when passing in values using HTML attributes. There are plenty of workarounds for this but it can be a bit annoying as you either need to flip all settings to only be overridable as true or parse the special case of stringified "0" or "false".
+
+**Solution**
+
+Use [template](/templates/expressions#boolean-attribute) boolean syntax without quotes:
+
+```html title="component.html"
+<input type="checkbox" checked={isChecked} />
+```
+
+Results:
+- `isChecked === true` → `<input checked />`
+- `isChecked === false` → `<input />` (attribute omitted)
+
+### Complex Data Must Be Serialized
+
+**Problem**
+
+Although it's not entirely difficult to pass in JavaScript objects or arrays into web components with properties it does require being serialized before being included.
+
+**Solution**
+
+[Templates](/templates/expressions) handle serialization automatically:
+
+```html title="component.html"
+<ui-menu items={menuItems} />
+```
+
+You can also use settings for cases where you're using pure HTML or the value is available in JavaScript:
+
+```javascript title="script.js"
+const items = [
+  { text: 'Home', url: '/' },
+  { text: 'About', url: '/about' },
+  { text: 'Contact', url: '/contact' }
+];
+
+$('ui-menu').settings({ items: items });
+```
+
+
+### Functions Cannot Be Passed Pre-DOM
+
+**Problem**
+
+You can pass functions to web components by setting properties on the DOM element, but this isn't possible when the component renders on the server. You can't use functions to generate content unless you give up SSR.
+
+**Solution**
+
+Use [`settings`](/query/components#settings) and [`initialize`](/query/components#initialize) from Query for imperative configuration after the component is in the page:
+
+```javascript title="script.js"
+import { $ } from '@semantic-ui/query';
+
+$('ui-dropdown').settings({
+  onChange: (value) => console.log(value)
+});
+```
+
+> **Note**: You can use this in an inline script tag directly after the component.
+
+Alternatively, use settings in parent components:
+
+```javascript title="parent-component.js"
+defineComponent({
+  // ... component definition
+  onRendered() {
+    $('ui-dropdown').settings({
+      onChange: (value) => this.handleDropdownChange(value)
+    });
+  }
+});
+```
+
+## Build Tools
+
+### ES Modules Cannot Import HTML/CSS
+
+**Problem**
+
+If you want your CSS or HTML to not be in the same file as your web component you might consider using something like `import ButtonCSS from './css/button-shadow.css'`. However this does not work natively with ES modules, you will have to use a build tool.
+
+You can use `fetch()` to grab the contents of text and CSS or special workarounds like `?raw` flag in Vite, or other build tools. There are some proposals on how to do this with assertions but this isn't fleshed out yet.
+
+> **See**: https://github.com/WICG/webcomponents/issues/870#issuecomment-1703247114
+
+**Solution**
+
+Use `getText()` for runtime file loading:
+
+```javascript title="component.js"
+import { getText } from '@semantic-ui/component';
+
+const template = await getText('./component.html');
+const css = await getText('./component.css');
+
+defineComponent({
+  tagName: 'my-component',
+  template,
+  css
+});
+```
+
+## Slotted Content
+
+### Slotted Parts Cannot Be Styled
+
+**Problem**
+
+Cannot combine `::slotted()` and `::part()` selectors to style parts of slotted web components.
+
+**Solution**
+
+Use first-party components with consistent APIs:
+
+```html title="page.html"
+<ui-card>
+  <ui-button primary>Action</ui-button>
+  <ui-icon name="star" large />
+</ui-card>
+```
+
+Override CSS variables for slotted content:
+
+```css title="component.css"
+::slotted(ui-button) {
+  --button-margin: var(--card-button-margin);
+}
+::slotted(ui-icon) {
+  --icon-color: var(--card-icon-color);
+}
+```
+
+Use [subtemplates](/templates/subtemplates) for shared shadow root styling:
+
+```html title="parent-component.html"
+<div class="container">
+  {> childPart data=itemData}
+</div>
+```
+
+### Empty Slots Cannot Be Styled
+
+**Problem**
+
+You may want to include [slots](/templates/slots) that may not always be filled in your web component. However, if these slots have styling they will always be present because `:blank` pseudoselector does not work with slots.
+
+> See https://github.com/WICG/webcomponents/issues/936 and https://github.com/w3c/csswg-drafts/issues/6867
+
+**Solution**
+
+Use settings instead of slots for conditional rendering:
+
+> **See**: [Settings vs Slots](/templates/slots#slots-vs-settings) for guidance on when to use each approach.
+
+```javascript title="component.js"
+const defaultSettings = {
+  items: []
+};
+```
+
+```html title="component.html"
+{#if hasAny items}
+  <div class="menu">
+    {#each items}
+      <menu-item>{text}</menu-item>
+    {/each}
+  </div>
+{#else}
+  <div class="empty-state">No items available</div>
+{/if}
+```
+
+### Slots Unavailable During SSR
+
+**Problem**
+
+Server-side rendering cannot know what content will be slotted. You cannot use `{#if slottedContent}` in templates because slotted content is not available during the server rendering phase.
+
+This occurs because SSR renders components in isolation using their shadow DOM template, but slotted content comes from the light DOM where the component is used. The server has no knowledge of this context until the component is hydrated on the client.
+
+> **See**: [Settings vs Slots](/templates/slots#slots-vs-settings) for the complete decision framework and https://github.com/WICG/webcomponents/issues/936 for related specification discussions.
+
+**Solution**
+
+Use settings instead of slots when it's essential for content to vary depending on what is slotted.
+
+**Use Settings When:**
+- Content needs to drive conditional rendering
+- SSR compatibility is required  
+- Component needs to respond to empty states
+
+**Use Slots When:**
+- Flexible HTML content is needed
+- Client-side rendering is acceptable
+- SEO benefits of slotted content are important

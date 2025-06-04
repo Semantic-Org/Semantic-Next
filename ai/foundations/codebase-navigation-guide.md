@@ -39,7 +39,7 @@ docs/
 │   ├── query/              ← Query library guides
 │   └── *.mdx               ← Top-level guides
 ├── src/examples/           ← **CANONICAL** examples (hand-written best practices)
-└── src/helpers/menus.js    ← **ESSENTIAL** Documentation menu structure
+└── src/helpers/menus.js    ← **🚨 CRITICAL** Documentation menu structure (MUST MODIFY for new pages)
 ```
 
 ### 🔧 **Core Framework**: `/packages/`
@@ -58,7 +58,7 @@ packages/
 
 ## Documentation Reading Order
 
-> **IMPORTANT**: Documentation should be read in menu order as defined in `/docs/src/helpers/menus.js`. This mirrors how human users navigate and learn the framework.
+> **🚨 CRITICAL FOR AI AGENTS**: Documentation should be read in menu order as defined in `/docs/src/helpers/menus.js`. This order represents the proper learning progression that builds context incrementally. Reading docs out of order will result in missing foundational concepts needed to understand advanced topics. **To add new documentation pages, you MUST modify the menu structure in this file.**
 
 ### 📖 **Framework Documentation** (`sidebarMenuFramework`)
 

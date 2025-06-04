@@ -1,6 +1,5 @@
 import { getCollection } from 'astro:content';
 
-
 /* UI Component pages are generated dynamically */
 const components = await getCollection('components');
 const componentPages = components.map(page => ({
@@ -34,7 +33,7 @@ export const topbarDisplayMenu = [
     name: 'Examples',
     url: '/examples/counter',
     baseURL: '/examples',
-  },/*
+  }, /*
   {
     _id: 'playground',
     name: 'Playground',
@@ -70,7 +69,7 @@ export const topbarMenu = [
     name: 'Examples',
     url: '/examples/counter',
     baseURL: '/examples',
-  },/*
+  }, /*
   {
     _id: 'playground',
     name: 'Playground',
@@ -169,6 +168,10 @@ export const sidebarMenuFramework = [
       {
         name: 'Key Bindings',
         url: '/components/keys',
+      },
+      {
+        name: 'Workarounds',
+        url: '/components/workarounds',
       },
     ],
   },
