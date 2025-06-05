@@ -50,7 +50,7 @@ const isUpdateableDep = function(dep) {
 // Function to update dependency versions in package.json
 function updateDependencyVersions(packageJson, newVersion) {
   console.log(`Checking deps for ${packageJson.name}`);
-  ['dependencies', 'peerDependencies'].forEach(depType => {
+  ['dependencies', 'peerDependencies', 'devDependencies'].forEach(depType => {
     if (packageJson[depType]) {
       Object.keys(packageJson[depType]).forEach(dep => {
         const depVersion = `^${newVersion}`;
@@ -97,13 +97,9 @@ const handleVersionBump = async () => {
   }
 };
 
-// Async function to publish a package
+// Async function to update package version
 async function updatePackageVersion(dir) {
   const packageJsonPath = join(dir, 'package.json');
-  // second failsafe check for internal packages
-  if(dir.includes('internal-packages')) {
-    return;
-  }
   if (existsSync(packageJsonPath)) {
     const packageJson = loadJsonFile(packageJsonPath);
     if(packageJson.version == newVersion) {
@@ -131,12 +127,12 @@ updatedFiles.push(mainPackageJsonPath);
 
 
 
-// Read workspaces to publish from main package
-// ignoring internal packages
-const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('internal-packages'));
+// Read all workspaces - we'll update versions for all packages
+const workspaceGlobs = mainPackageJson.workspaces;
 (async () => {
   await handleVersionBump();
 
+  console.log(`\n=== VERSION UPDATE PHASE ===`);
   console.log(`Updating all packages to ${newVersion}`);
   const updatePromises = [];
   workspaceGlobs.forEach(workspaceGlob => {

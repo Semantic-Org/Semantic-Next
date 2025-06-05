@@ -24,26 +24,38 @@ let newVersion = mainPackageJson.version;
 
 // Async function to publish a package
 async function publishPackage(dir) {
-  // second failsafe check for internal packages
-  if(dryRun || dir.includes('internal-packages')) {
+  if (dryRun) {
     return;
   }
+  
+  const packageJsonPath = join(dir, 'package.json');
+  if (!existsSync(packageJsonPath)) {
+    return;
+  }
+  
+  const packageJson = loadJsonFile(packageJsonPath);
+  if (packageJson.private) {
+    console.log(`Skipping private package: ${packageJson.name}`);
+    return;
+  }
+  
   try {
-    console.log(`Publishing package in ${dir}...`);
-    await execAsync('npm publish', { cwd: dir });
-    console.log(`Successfully published package from ${dir}.`);
+    console.log(`Publishing package: ${packageJson.name} from ${dir}...`);
+    // await execAsync('npm publish', { cwd: dir }); // COMMENTED OUT FOR TESTING
+    console.log(`[DRY RUN] Would publish: ${packageJson.name}`);
   }
   catch (error) {
-    console.error(`Failed to publish package from ${dir}: ${error.message}`);
+    console.error(`Failed to publish ${packageJson.name}: ${error.message}`);
   }
 }
 
-// Read workspaces to publish from main package
-// ignoring internal packages
-const workspaceGlobs = mainPackageJson.workspaces.filter(val => !val.includes('internal-packages'));
+// Read all workspaces - private packages will be filtered out during publishing
+const workspaceGlobs = mainPackageJson.workspaces;
 (async () => {
 
   // publishing packages
+  console.log(`\n=== PUBLISH PHASE ===`);
+  console.log(`Processing packages for publication...`);
   const publishPromises = [];
   workspaceGlobs.forEach(workspaceGlob => {
     const workspaceDirs = globSync(workspaceGlob, { realpath: true });
