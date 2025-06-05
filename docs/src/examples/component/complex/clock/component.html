@@ -1,5 +1,5 @@
 <svg viewBox="{viewBox}">
-  <circle class="clock-face" r="48" />
+  <circle class="clock" r="48" />
 
   <!-- markers -->
   {#each minute in majorMarkers}
@@ -18,6 +18,6 @@
   <!-- second hand -->
   <g transform="{getTimeRotation 'second'}">
     <line class="second" y1="10" y2="-38"></line>
-    <line class="second-counterweight" y1="10" y2="2"></line>
+    <line class="counterweight" y1="10" y2="2"></line>
   </g>
 </svg>

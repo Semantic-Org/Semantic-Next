@@ -7,7 +7,7 @@ svg {
   transform-origin: 0 0;
 }
 
-.clock-face {
+.clock {
   stroke: #333;
   fill: white;
 }
@@ -31,10 +31,10 @@ svg {
 }
 
 .second,
-.second-counterweight {
+.counterweight {
   stroke: rgb(180, 0, 0);
 }
 
-.second-counterweight {
+.counterweight {
   stroke-width: 3;
 }
