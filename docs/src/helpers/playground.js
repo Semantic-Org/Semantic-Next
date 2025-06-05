@@ -316,6 +316,14 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
       'index.ts': 0,
     };
   }
+  else if(type == 'page') {
+    indexes = {
+      'page.html': 0,
+      'page.css': 0,
+      'page.js': 0,
+      'page.ts': 0,
+    };
+  }
   else {
     indexes = {
       'index.js': 0,

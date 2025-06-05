@@ -43,7 +43,7 @@ let files = await getExampleFiles({
   basePath: '../../examples/',
   includeFolder: isFolder,
   hideBoilerplate: example.fold !== false,
-  includePlaygroundInjections: true,
+  includePlaygroundInjections: (example.exampleType !== 'page'),
   includeLog: example.exampleType == 'log',
 });
 
