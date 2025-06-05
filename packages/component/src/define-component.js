@@ -1,5 +1,5 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
+import { camelToKebab, each, isClient, isPlainObject, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
@@ -11,6 +11,7 @@ export const defineComponent = ({
   ast,
   css = '',
   pageCSS = '',
+  frameworkCSS = {},
   tagName,
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
@@ -57,6 +58,21 @@ export const defineComponent = ({
     adoptStylesheet(pageCSS);
   }
 
+  if (frameworkCSS) {
+    if (isPlainObject(frameworkCSS)) {
+      each(frameworkCSS, (css, id) => {
+        adoptStylesheet(css, {
+          hash: id,
+          cacheStylesheet: true,
+        });
+      });
+    }
+    else if (isString(frameworkCSS)) {
+      adoptStylesheet(frameworkCSS, {
+        cacheStylesheet: true,
+      });
+    }
+  }
 
   /*
     Create Component Returns Either a Template or WebComponent
