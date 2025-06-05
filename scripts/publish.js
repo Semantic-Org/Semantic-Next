@@ -23,7 +23,7 @@ const mainPackageJson = loadJsonFile(mainPackageJsonPath);
 let newVersion = mainPackageJson.version;
 
 // Async function to publish a package
-async function publishPackage(dir) {
+async function publishPackage(dir, isDryRun) {
   
   const packageJsonPath = join(dir, 'package.json');
   if (!existsSync(packageJsonPath)) {
@@ -38,7 +38,7 @@ async function publishPackage(dir) {
   
   try {
     console.log(`Publishing package: ${packageJson.name} from ${dir}...`);
-    if (dryRun) {
+    if (isDryRun) {
       console.log(`[DRY RUN] Would publish: ${packageJson.name}`);
     } else {
       await execAsync('npm publish', { cwd: dir });
@@ -61,7 +61,7 @@ const workspaceGlobs = mainPackageJson.workspaces;
   workspaceGlobs.forEach(workspaceGlob => {
     const workspaceDirs = globSync(workspaceGlob, { realpath: true });
     workspaceDirs.forEach(dir => {
-      publishPromises.push(publishPackage(dir));
+      publishPromises.push(publishPackage(dir, dryRun));
     });
   });
   await Promise.all(publishPromises);
@@ -81,34 +81,34 @@ const workspaceGlobs = mainPackageJson.workspaces;
 
   // committing package-lock changes and tagging
   try {
-      // Stage changes
-      console.log('Staging changes...');
-      await execAsync('git add ./');
+    // Stage changes
+    console.log('Staging changes...');
+    await execAsync('git add ./');
 
-      // Check if there are changes to commit
-      const statusOutput = await execAsync('git status --porcelain');
-      if (statusOutput.stdout.trim()) {
-        // Commit changes
-        console.log('Committing changes...');
-        await execAsync(`git commit -m "chore: bump versions to ${newVersion}"`);
+    // Check if there are changes to commit
+    const statusOutput = await execAsync('git status --porcelain');
+    if (statusOutput.stdout.trim()) {
+      // Commit changes
+      console.log('Committing changes...');
+      await execAsync(`git commit -m "chore: bump versions to ${newVersion}"`);
 
-        // Push changes
-        console.log('Pushing changes...');
-        await execAsync('git push');
+      // Push changes
+      console.log('Pushing changes...');
+      await execAsync('git push');
 
-        // Tag the new version
-        console.log('Tagging new version...');
-        await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
-        await execAsync('git push --tags');
+      // Tag the new version
+      console.log('Tagging new version...');
+      await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
+      await execAsync('git push --tags');
 
-        console.log('Committed and pushed version updates and created a new tag.');
-      }
-      else {
-        console.log('No changes to commit.');
-      }
+      console.log('Committed and pushed version updates and created a new tag.');
     }
-    catch (error) {
-      console.error(`Failed to commit and push changes: ${error.message}`);
+    else {
+      console.log('No changes to commit.');
     }
+  }
+  catch (error) {
+    console.error(`Failed to commit and push changes: ${error.message}`);
+  }
 
 })();
