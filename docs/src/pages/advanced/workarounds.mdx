@@ -1,45 +1,32 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Workarounds
+title: Web Component Workarounds
+shortTitle: WC Workarounds
 description: Solutions to web component platform constraints
 ---
 
-Common web component platform constraints and framework solutions.
+Semantic UI components are designed to make it easier to work with web components and to provide solutions for some of the sore points of the standard.
+
+However when working with web components it is still possible to run into some constraints that require using a a workaround. These include things like handling [empty slots](#slotted-content), using some new css pseudo selectors like [`:slotted`](#slotted-parts-cannot-be-styled)
 
 
 ## CSS
 
-### Host Context Not Supported
+### Cant Use :host-context
 
 **Problem**
 
 Chrome supports [`:host-context()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:host-context) which solves context-aware styling entirely, but unfortunately it is not supported by other browsers because browser makers believe this breaks the encapsulation of web components.
 
-This means for common things like `dark mode` on a component you will have to rely on CSS variables.
+
+```css title=component.css
+/* this will never work in all browsers */
+:host-content(.sidebar) {
+  background-color: var(--blue-5);
+}
+```
 
 **Solution**
-
-Use [`pageCSS`](/components/events#pageCSS) for component relationship styling:
-
-```javascript title="my-component.js"
-defineComponent({
-  tagName: 'my-component',
-  template,
-  css,           // Shadow DOM styles
-  pageCSS,       // Global relationship styles
-});
-```
-
-```css title="my-component-page.css"
-.dark-mode my-component {
-  --component-background: var(--dark-background);
-  --component-text: var(--dark-text);
-}
-.light-mode my-component {
-  --component-background: var(--light-background);
-  --component-text: var(--light-text);
-}
-```
 
 Use [style queries](https://developer.chrome.com/docs/css-ui/style-queries) for responsive styling by setting CSS variables in context, then using them internally:
 
@@ -47,15 +34,27 @@ Use [style queries](https://developer.chrome.com/docs/css-ui/style-queries) for 
 /* Parent context sets the variable based on screen size */
 @media (max-width: 768px) {
   .container {
-    --mobile-view: true;
+    --stackable: true;
   }
 }
+```
 
+```css title="component.css"
 /* Component uses style queries to detect the variable */
-@container component style(--mobile-view: true) {
-  .stackable.cards {
+@container component style(--stackable: true) {
+  .component {
     display: flex;
     flex-direction: column;
+  }
+}
+```
+
+the css framework also provides a `--dark-mode` token you can use for styling dark mode with style queries
+
+```css title="component.css"
+@container style(--dark-mode: true) {
+  .card {
+    --card-link-hover-background: var(--standard-10);
   }
 }
 ```
@@ -63,11 +62,19 @@ Use [style queries](https://developer.chrome.com/docs/css-ui/style-queries) for 
 > **Note**: Style queries may eventually make context-aware styling easier but they are only currently supported in Chrome. Firefox should have it implemented within the next year.
 
 
-### Host Pseudo-Selectors Don't Work
+### Cant Combine Pseudo Selectors on Host
 
 **Problem**
 
 You might want to use something like `:host:first-child` to remove margins on a web component if it's at the start of a block; however the `:host` pseudo selector does not work with other pseudo selectors like child selectors.
+
+```css title=component.css
+
+/* this doesnt work */
+:host:first-child {
+  margin-top: 0;
+}
+```
 
 This is annoying because you often want to expose margins on the host element so it's easy for a person upstream to change spacing, and it helps to default to reasonable standards like not adding space before the first item in a group.
 
@@ -94,7 +101,7 @@ CSS resets cannot pierce shadow DOM boundaries.
 
 **Solution**
 
-Include necessary resets in each component:
+You will need to apply any resets like a `box-sizing` reset inside your component css for it to apply to the shadow dom content.
 
 ```css title="component.css"
 :host {
@@ -111,9 +118,9 @@ Include necessary resets in each component:
 
 **Problem**
 
-Custom events created with `new CustomEvent()` [don't bubble by default](https://developer.mozilla.org/en-US/docs/Web/Events/Creating_and_triggering_events#event_bubbling), unlike native events.
+When creating web components its common to want to dispatch events from your component. However if you naively use `new CustomEvent()` this will [not bubble by default](https://developer.mozilla.org/en-US/docs/Web/Events/Creating_and_triggering_events#event_bubbling), unlike most native events like `click` or `mouseenter`.
 
-Components use [event delegation](/components/events) to attach events - listeners are bound to the shadow root and rely on events bubbling up from child elements. If custom events don't bubble, they cannot be handled by other web components using event delegation patterns.
+If a component is waiting for a bubbled event, like those that use [event delegation](/components/events) to attach events they will never 'see' the event being fired.
 
 **Solution**
 
@@ -133,11 +140,11 @@ const createComponent = ({ dispatchEvent }) => ({
 
 **Problem**
 
-Values like `visible="false"` are not possible when passing in values using HTML attributes. There are plenty of workarounds for this but it can be a bit annoying as you either need to flip all settings to only be overridable as true or parse the special case of stringified "0" or "false".
+Boolean attributes set to the string "false" or empty string are still considered truthy. This can be confusing if you want to naively do something like `checked="false"` or `checked="{isChecked}"`.
 
 **Solution**
 
-Use [template](/templates/expressions#boolean-attribute) boolean syntax without quotes:
+Templates provide a [special syntax for boolean expressions](/templates/expressions#boolean-attribute), without quotes. This means the attribute should be omitted entirely if the returned value is falsey.
 
 ```html title="component.html"
 <input type="checkbox" checked={isChecked} />
@@ -147,11 +154,11 @@ Results:
 - `isChecked === true` → `<input checked />`
 - `isChecked === false` → `<input />` (attribute omitted)
 
-### Complex Data Must Be Serialized
+### Attribute Data Must Be Serialized
 
 **Problem**
 
-Although it's not entirely difficult to pass in JavaScript objects or arrays into web components with properties it does require being serialized before being included.
+Arrays and objects passed into attribute need to be serialized using something like `JSON.stringify` to be read by your component.
 
 **Solution**
 
@@ -217,7 +224,7 @@ If you want your CSS or HTML to not be in the same file as your web component yo
 
 You can use `fetch()` to grab the contents of text and CSS or special workarounds like `?raw` flag in Vite, or other build tools. There are some proposals on how to do this with assertions but this isn't fleshed out yet.
 
-> **See**: https://github.com/WICG/webcomponents/issues/870#issuecomment-1703247114
+> **See**: [wicg/webcomponents/870](https://github.com/WICG/webcomponents/issues/870#issuecomment-1703247114)
 
 **Solution**
 
@@ -280,7 +287,7 @@ Use [subtemplates](/templates/subtemplates) for shared shadow root styling:
 
 You may want to include [slots](/templates/slots) that may not always be filled in your web component. However, if these slots have styling they will always be present because `:blank` pseudoselector does not work with slots.
 
-> See https://github.com/WICG/webcomponents/issues/936 and https://github.com/w3c/csswg-drafts/issues/6867
+> See [wicg/webcomponents/936](https://github.com/WICG/webcomponents/issues/936) and [w3c/csswg-drafts/6867](https://github.com/w3c/csswg-drafts/issues/6867)
 
 **Solution**
 
@@ -314,7 +321,7 @@ Server-side rendering cannot know what content will be slotted. You cannot use `
 
 This occurs because SSR renders components in isolation using their shadow DOM template, but slotted content comes from the light DOM where the component is used. The server has no knowledge of this context until the component is hydrated on the client.
 
-> **See**: [Settings vs Slots](/templates/slots#slots-vs-settings) for the complete decision framework and https://github.com/WICG/webcomponents/issues/936 for related specification discussions.
+> **See**: [Settings vs Slots](/templates/slots#slots-vs-settings) for the complete decision framework and [wicg/webcomponents/936](https://github.com/WICG/webcomponents/issues/936) for related specification discussions.
 
 **Solution**
 

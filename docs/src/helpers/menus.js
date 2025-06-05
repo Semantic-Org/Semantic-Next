@@ -209,26 +209,7 @@ export const sidebarMenuFramework = [
         url: '/templates/helpers',
       },
     ],
-  }, /*
-  {
-    name: 'Server Side Rendering',
-    url: '/ssr',
-    icon: 'server',
-    pages: [
-      {
-        name: 'Overview',
-        url: '/ssr/overview'
-      },
-      {
-        name: 'Best Practices',
-        url: '/ssr/best-practices'
-      },
-      {
-        name: 'Gotchas',
-        url: '/ssr/gotchas'
-      },
-    ]
-  },*/
+  },
   {
     name: 'Reactivity',
     description: 'Signals',
@@ -299,12 +280,22 @@ export const sidebarMenuFramework = [
         url: '/query/browser',
       },
     ],
-  }, /*
+  },
   {
-    name: 'Errata',
-    icon: 'book',
-    url: '/getting-started'
-  },*/
+    name: 'Advanced Usage',
+    url: '/advanced',
+    icon: 'server',
+    pages: [
+      {
+        name: 'WC Workarounds',
+        url: '/advanced/workarounds',
+      },
+      {
+        name: 'Server Side Rendering',
+        url: '/advanced/ssr',
+      },
+    ],
+  },
 ];
 
 export const sidebarMenuAPI = [
