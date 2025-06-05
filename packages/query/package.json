@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/query",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "title": "Semantic UI Query",
   "description": "DOM querying and manipulation library for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",
@@ -29,10 +29,10 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@semantic-ui/utils": "^0.11.1"
+    "@semantic-ui/utils": "^0.11.2"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.11.1",
+    "@semantic-ui/internal-scripts": "^0.11.2",
     "vitest": "^3.0.4"
   },
   "wireit": {
