@@ -25,7 +25,7 @@ export const getFileSize = async (src) => {
   const stats = await fs.stat(src);
   const size = (stats.size / 1024).toFixed(2);
   return `${size}KB`;
-}
+};
 
 
 /*
@@ -53,7 +53,7 @@ export const getESBuildConfig = async function({
   // less commonly changed
   platform = 'browser', // target browser
   metafile = false, // whether to include metafile
-  readyEntryPoints = true, // read entrypoints from package.json
+  readEntrypoints = true, // read entrypoints from package.json
   addBanner = true, // add banner with details from package.json
   addLog = true, // automatically create log
   packageFile, // avoid grabbing package.json again
@@ -93,7 +93,7 @@ export const getESBuildConfig = async function({
     platform
   };
 
-  if((cdn || readyEntryPoints || addBanner || addLog || addOutfile) && !packageFile) {
+  if((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
     packageFile = await getPackageFile();
   }
 
@@ -115,7 +115,7 @@ export const getESBuildConfig = async function({
     if(entryPoints.length) {
       config.entryPoints = entryPoints;
     }
-    else if(readyEntryPoints) {
+    else if(readEntrypoints) {
       const entry = packageFile.module || packageFile.main;
       const entryPointPath = resolve(baseDir, entry);
       config.entryPoints = [entryPointPath];
