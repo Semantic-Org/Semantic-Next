@@ -206,8 +206,8 @@ export const moveToBack = (array = [], callbackOrValue) => {
 };
 
 /* In perf testing in Chrome 131
-  this seems like a reasonable crossover
-  lodash puts this at 120
+  this seems like the highest performing crossover
+  lodash puts this at 120 but its unclear their testing
   <https://jsperf.app/quzoto/3>
 */
 const ARRAY_SIZE_THRESHOLD = 58;
