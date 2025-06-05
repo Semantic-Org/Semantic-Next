@@ -24,9 +24,6 @@ let newVersion = mainPackageJson.version;
 
 // Async function to publish a package
 async function publishPackage(dir) {
-  if (dryRun) {
-    return;
-  }
   
   const packageJsonPath = join(dir, 'package.json');
   if (!existsSync(packageJsonPath)) {
@@ -41,8 +38,12 @@ async function publishPackage(dir) {
   
   try {
     console.log(`Publishing package: ${packageJson.name} from ${dir}...`);
-    // await execAsync('npm publish', { cwd: dir }); // COMMENTED OUT FOR TESTING
-    console.log(`[DRY RUN] Would publish: ${packageJson.name}`);
+    if (dryRun) {
+      console.log(`[DRY RUN] Would publish: ${packageJson.name}`);
+    } else {
+      await execAsync('npm publish', { cwd: dir });
+      console.log(`Successfully published: ${packageJson.name}`);
+    }
   }
   catch (error) {
     console.error(`Failed to publish ${packageJson.name}: ${error.message}`);
@@ -67,15 +68,19 @@ const workspaceGlobs = mainPackageJson.workspaces;
   console.log('All packages have been processed.');
 
   console.log(`Updated versions of all packages to ${newVersion}`);
-  // Update the root package-lock.json to reflect updated sub-package versions.
-  if (!dryRun) {
-    console.log('Updating root package-lock.json...');
-    await execAsync('npm install', { cwd: process.cwd() });
+  
+  if (dryRun) {
+    console.log('[DRY RUN] Would update package-lock.json, commit changes, and create tag');
+    console.log('[DRY RUN] No git operations performed');
+    return;
   }
+  
+  // Update the root package-lock.json to reflect updated sub-package versions.
+  console.log('Updating root package-lock.json...');
+  await execAsync('npm install', { cwd: process.cwd() });
 
   // committing package-lock changes and tagging
-  if (!dryRun) {
-    try {
+  try {
       // Stage changes
       console.log('Staging changes...');
       await execAsync('git add ./');
@@ -105,6 +110,5 @@ const workspaceGlobs = mainPackageJson.workspaces;
     catch (error) {
       console.error(`Failed to commit and push changes: ${error.message}`);
     }
-  }
 
 })();
