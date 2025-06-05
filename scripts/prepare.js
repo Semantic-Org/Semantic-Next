@@ -1,0 +1,1 @@
+// Prepare script for npm lifecycle

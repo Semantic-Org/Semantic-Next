@@ -177,12 +177,15 @@
       "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
     },
-    "publish": {
-      "command": "node ./scripts/publish.js",
+    "prepare": {
+      "command": "node ./scripts/prepare.js",
       "dependencies": [
         "update-version",
         "build"
       ]
+    },
+    "publish": {
+      "command": "node ./scripts/publish.js"
     },
     "update-version": {
       "command": "node ./scripts/update-versions.js"
