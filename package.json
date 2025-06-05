@@ -139,6 +139,7 @@
     "build": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
       "dependencies": [
+        "build:packages",
         "build:ui-deps",
         "build:ui-components"
       ]

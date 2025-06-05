@@ -81,7 +81,7 @@ export const getESBuildConfig = async function({
     config = {
       ...config,
       ...additionalConfig
-    }
+    };
   }
 
   config = {
