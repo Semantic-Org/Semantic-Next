@@ -177,7 +177,7 @@
       "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
     },
-    "prepublishOnly ": {
+    "prepublishOnly": {
       "command": "node ./scripts/prepare.js",
       "dependencies": [
         "update-version",
