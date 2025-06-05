@@ -376,6 +376,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
     }
     return 'horizontal';
   },
+  // when inline or on mobile or stacked we want only one menu
   shouldCombineMenus() {
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
@@ -384,23 +385,51 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
   },
   getFileArray({ files = state.currentFiles.value, filter } = {}) {
     let fileArray = [];
-    const isPageFile = (filename) => {
-      return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));
-    };
+
+    // convert file object into an array of data
     each(files, (file, filename) => {
-      const fileData = self.getFile(file, filename);
+      fileArray.push(self.getFile(file, filename));
+    });
+    sortBy(fileArray, 'sortIndex');
+
+    // if we have only 'page' files this becomes the 'main' menu
+    // and the right pane is just the iframe preview
+    if(filter && self.onlyPageFiles(fileArray)) {
+      if(filter == 'main') {
+        return fileArray.filter(file => self.isPageFile(file.filename));
+      }
+      else if(filter == 'page') {
+        return [];
+      }
+    }
+
+    // filter by 'page' or 'main' filter
+    // 'main' menu generally appears on left and shows component
+    // 'page' menu appears above the iframe rendering content and shows the rendering page
+
+    fileArray = fileArray.filter((file) => {
+      if(filter && file.generated) {
+        return false;
+      }
+      // only have left/right menus if the menus arent conmbined
       if (!self.shouldCombineMenus()) {
-        // only have left/right menus when its horizontally stacked
-        if (filter == 'main' && isPageFile(fileData?.filename)) {
-          return;
+        if (filter == 'main' && self.isPageFile(file?.filename)) {
+          return false;
         }
-        if (filter == 'page' && !isPageFile(fileData?.filename)) {
-          return;
+        if (filter == 'page' && !self.isPageFile(file?.filename)) {
+          return false;
         }
       }
-      fileArray.push(fileData);
+      return true;
     });
-    return sortBy(fileArray, 'sortIndex');
+
+    return fileArray;
+  },
+  onlyPageFiles(fileArray) {
+    return fileArray.filter(file => !file.generated).every(file => self.isPageFile(file?.filename));
+  },
+  isPageFile(filename) {
+    return (filename.startsWith('page') || inArray(filename, settings.additionalPageFiles));
   },
   getFile(file, filename) {
     return {
