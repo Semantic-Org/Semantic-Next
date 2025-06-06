@@ -9,7 +9,7 @@
   color: var(--input-focused-color);
   box-shadow: var(--input-focused-box-shadow);
 }
-.input:focus-within > input:placeholder,
+.input:focus-within > input::placeholder,
 .input.focus > input::placeholder {
   color: var(--input-placeholder-focused-color);
 }

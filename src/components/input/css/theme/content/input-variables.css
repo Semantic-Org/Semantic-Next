@@ -18,8 +18,8 @@
 
   --input-item-spacing: 5px;
 
-  --input-placeholder-color: oklch(from var(--input-color) calc(l + 75) c h);
-  --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
+  --input-placeholder-color: var(--standard-15);
+  --input-placeholder-focused-color: var(--standard-20);
 
   --input-transition:
     box-shadow var(--duration) var(--easing),
@@ -28,6 +28,7 @@
 
   --input-icon-right: var(--input-horizontal-padding);
   --input-icon-width: 1em;
+  --input-icon-index: var(--page-layer-2);
 
   --input-label-right: var(--input-horizontal-padding);
   --input-label-font-size: var(--relative-11px);

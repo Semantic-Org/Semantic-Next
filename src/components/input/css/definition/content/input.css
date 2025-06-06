@@ -42,13 +42,13 @@
     z-index: var(--page-layer-1);
 
     &::placeholder {
-      color: var(--white-10);
+      color: var(--input-placeholder-color);
     }
   }
 
   .icon {
     position: absolute;
-    z-index: var(--page-layer-2);
+    z-index: var(--input-icon-index);
     right: var(--input-icon-right);
     width: var(--input-icon-width);
     pointer-events: none;

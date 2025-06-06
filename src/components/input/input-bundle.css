@@ -45,11 +45,11 @@
     z-index: var(--page-layer-1);
   }
   .input input::placeholder {
-    color: var(--white-10);
+    color: var(--input-placeholder-color);
   }
   .input .icon {
     position: absolute;
-    z-index: var(--page-layer-2);
+    z-index: var(--input-icon-index);
     right: var(--input-icon-right);
     width: var(--input-icon-width);
     pointer-events: none;
@@ -96,7 +96,7 @@
     color: var(--input-focused-color);
     box-shadow: var(--input-focused-box-shadow);
   }
-  .input:focus-within > input:placeholder,
+  .input:focus-within > input::placeholder,
   .input.focus > input::placeholder {
     color: var(--input-placeholder-focused-color);
   }
@@ -249,11 +249,12 @@
     --input-border: var(--border);
     --input-border-radius: var(--border-radius);
     --input-item-spacing: 5px;
-    --input-placeholder-color: oklch(from var(--input-color) calc(l + 75) c h);
-    --input-placeholder-focus-color: oklch(from var(--input-color), calc(l + 45) c h);
+    --input-placeholder-color: var(--standard-15);
+    --input-placeholder-focused-color: var(--standard-20);
     --input-transition: box-shadow var(--duration) var(--easing), border-color var(--duration) var(--easing) ;
     --input-icon-right: var(--input-horizontal-padding);
     --input-icon-width: 1em;
+    --input-icon-index: var(--page-layer-2);
     --input-label-right: var(--input-horizontal-padding);
     --input-label-font-size: var(--relative-11px);
     --input-label-font-weight: var(--bold);
@@ -307,6 +308,7 @@
     --input-focused-color: var(--input-text-color);
     --input-focused-placeholder-color: var(--white-15);
     --input-focused-box-shadow: none;
+    --input-placeholder-focused-color: var(--standard-20);
   }
 }
 

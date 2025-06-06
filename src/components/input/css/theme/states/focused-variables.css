@@ -4,4 +4,5 @@
   --input-focused-color: var(--input-text-color);
   --input-focused-placeholder-color: var(--white-15);
   --input-focused-box-shadow: none;
+  --input-placeholder-focused-color: var(--standard-20);
 }
