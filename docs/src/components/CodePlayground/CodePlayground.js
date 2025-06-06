@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, firstMatch, get, inArray, isFunction, idleCallback, moveToFront, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, idleCallback, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -169,7 +169,9 @@ const defaultState = {
   projectFiles: [],
 };
 
-const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, nonreactive, state, data, settings, $, $$ }) => ({
+const createComponent = (
+  { afterFlush, self, findChildren, isServer, reaction, nonreactive, state, data, settings, $, $$ },
+) => ({
   mobileMenu: [
     { label: 'Code', value: 'code' },
     { label: 'Preview', value: 'preview' },
@@ -238,7 +240,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
     // we will need update layout configuration
     const displayMode = state.displayMode.get();
     const layout = state.layout.get();
-    if(!reaction.firstRun) {
+    if (!reaction.firstRun) {
       afterFlush(self.configureLayout);
     }
   },
@@ -283,7 +285,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
   getPagePanel() {
     return {
       type: 'file',
-      filename: state.activePageFile // pass through signal
+      filename: state.activePageFile, // pass through signal
     };
   },
 
@@ -381,7 +383,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
   },
   getProjectFiles() {
-    return self.getFileArray({files: state.projectFiles.get() });
+    return self.getFileArray({ files: state.projectFiles.get() });
   },
   getFileArray({ files = state.currentFiles.value, filter } = {}) {
     let fileArray = [];
@@ -390,15 +392,16 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
     each(files, (file, filename) => {
       fileArray.push(self.getFile(file, filename));
     });
-    sortBy(fileArray, 'sortIndex');
+    fileArray = sortBy(fileArray, 'sortIndex');
 
     // if we have only 'page' files this becomes the 'main' menu
     // and the right pane is just the iframe preview
-    if(filter && self.onlyPageFiles(fileArray)) {
-      if(filter == 'main') {
+    if (filter && self.onlyPageFiles(fileArray)) {
+      if (filter == 'main') {
+        console.log(fileArray.filter(file => self.isPageFile(file.filename)));
         return fileArray.filter(file => self.isPageFile(file.filename));
       }
-      else if(filter == 'page') {
+      else if (filter == 'page') {
         return [];
       }
     }
@@ -408,7 +411,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
     // 'page' menu appears above the iframe rendering content and shows the rendering page
 
     fileArray = fileArray.filter((file) => {
-      if(filter && file.generated) {
+      if (filter && file.generated) {
         return false;
       }
       // only have left/right menus if the menus arent conmbined
@@ -591,7 +594,7 @@ const createComponent = ({ afterFlush, self, findChildren, isServer, reaction, n
   updateCurrentFiles(currentFilesArray = []) {
     const currentFiles = state.currentFiles.peek();
     each(currentFilesArray, (file) => {
-      if(currentFiles[file.name]) {
+      if (currentFiles[file.name]) {
         currentFiles[file.name].content = file.content;
       }
     });
