@@ -230,6 +230,6 @@
     "examples/*"
   ],
   "simple-git-hooks": {
-    "pre-commit": "npx dprint fmt --staged"
+    "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"
   }
 }
