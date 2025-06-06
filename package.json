@@ -115,7 +115,6 @@
     "dev": "wireit",
     "build:docs": "wireit",
     "build:packages": "wireit",
-    "serve": "wireit",
     "watch": "wireit",
     "publish": "wireit",
     "update-version": "wireit",
