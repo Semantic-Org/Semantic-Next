@@ -11,7 +11,7 @@
   "exports": {
     ".": {
       "import": "./src/index.js",
-      "browser": "./dist/browser/index.min.js",
+      "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
     }
   },
