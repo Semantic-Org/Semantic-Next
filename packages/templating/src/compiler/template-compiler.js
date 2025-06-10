@@ -417,7 +417,7 @@ class TemplateCompiler {
               type: 'html',
               html: '</svg>',
             };
-            (contentBranch || ast).push(newNode);
+            (contentTarget || ast).push(newNode);
             break;
         }
       }
