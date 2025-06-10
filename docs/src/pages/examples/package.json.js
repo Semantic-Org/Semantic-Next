@@ -17,7 +17,6 @@ export const packageFile = {
 };
 
 export const packageJSON = JSON.stringify(packageFile, null, 2);
-
 export const GET = async () => {
   return new Response(packageJSON, {
     headers: {
