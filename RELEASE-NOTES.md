@@ -4,6 +4,9 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.12.0
+* **Tailwinds** - Added a plugin for using tailwinds inside semantic ui components.
+
 # Version 0.11.3
 * **Input** - Fix placeholder focused color to be theme aware
 
