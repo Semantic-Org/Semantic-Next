@@ -398,7 +398,6 @@ const createComponent = (
     // and the right pane is just the iframe preview
     if (filter && self.onlyPageFiles(fileArray)) {
       if (filter == 'main') {
-        console.log(fileArray.filter(file => self.isPageFile(file.filename)));
         return fileArray.filter(file => self.isPageFile(file.filename));
       }
       else if (filter == 'page') {
