@@ -1,35 +1,44 @@
-// Type definitions for @semantic-ui/tailwinds
-
-export interface TailwindPluginConfig {
-  /** Tailwind CSS configuration object */
-  config?: object;
-  /** Whether to include Tailwind's base styles */
-  includeBase?: boolean;
-  /** Additional class patterns to always include */
-  safelist?: string[];
-}
+// Type definitions for @semantic-ui/tailwind
 
 export interface ComponentDefinition {
-  tagName?: string;
   template?: string;
   css?: string;
-  plugins?: Plugin[];
+  createComponent?: Function;
+  onCreated?: Function;
+  onRendered?: Function;
+  onDestroyed?: Function;
+  onThemeChanged?: Function;
+  onAttributeChanged?: Function;
+  events?: Record<string, Function>;
+  keys?: Record<string, Function>;
+  subTemplates?: Record<string, {
+    template?: string;
+    css?: string;
+  }>;
   [key: string]: any;
 }
 
-export interface Plugin {
-  name?: string;
-  beforeCompile?(definition: ComponentDefinition): ComponentDefinition;
-  afterTemplateCompile?(ast: any, definition: ComponentDefinition): void;
-  beforeStylesApply?(styles: string, definition: ComponentDefinition): string;
-  afterComponentCreate?(instance: any, definition: ComponentDefinition): void;
+export interface ContentCollection {
+  html: string;
+  js: string;
+  css: string;
+  content: string;
 }
 
-/** Main Tailwind plugin instance */
-export declare const TailwindPlugin: Plugin;
+export interface GenerateTailwindOptions {
+  content: string;
+  css?: string;
+  tailwindCSS?: string;
+  config?: object;
+}
 
-/** Create a Tailwind configuration for the plugin */
-export declare function createTailwindConfig(config?: object): TailwindPluginConfig;
+/** Transform component definition with Tailwind CSS */
+export declare function TailwindPlugin(
+  config?: object,
+): (definition: ComponentDefinition) => Promise<ComponentDefinition>;
 
-/** Scan component definition for Tailwind classes */
-export declare function scanForClasses(definition: ComponentDefinition): string[];
+/** Generate Tailwind CSS from component content */
+export declare function generateTailwindCSS(options: GenerateTailwindOptions): Promise<string>;
+
+/** Extract content from component definition for Tailwind scanning */
+export declare function collectContent(definition: ComponentDefinition): ContentCollection;

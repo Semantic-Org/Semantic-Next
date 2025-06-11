@@ -1,5 +1,5 @@
-// @semantic-ui/tailwinds - Browser entry point using WASM scanner
-// Provides JIT compilation of Tailwind classes for Shadow DOM components
+// @semantic-ui/tailwind - Browser entry point
+// Provides JIT compilation of Tailwind classes for Semantic UI components
 
 export { generateTailwindCSS } from './generator-browser.js';
 export { collectContent } from './scanner.js';

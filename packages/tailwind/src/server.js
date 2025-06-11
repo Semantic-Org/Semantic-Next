@@ -1,5 +1,5 @@
-// @semantic-ui/tailwinds - Server-side entry point using native Node.js scanner
-// Provides JIT compilation of Tailwind classes for Shadow DOM components
+// @semantic-ui/tailwind - Server entry point
+// Provides JIT compilation of Tailwind classes for Semantic UI components
 
 export { generateTailwindCSS } from './generator-server.js';
 export { collectContent } from './scanner.js';

@@ -1,5 +1,5 @@
 /**
- * Generates Tailwind CSS using tailwindcss core (browser-side with WASM scanner)
+ * Generates Tailwind CSS for browser environments using WASM scanner
  */
 
 import { compile, Features } from 'tailwindcss';
@@ -9,17 +9,17 @@ import themeCSS from 'tailwindcss/theme.css?raw';
 import utilitiesCSS from 'tailwindcss/utilities.css?raw';
 
 export async function generateTailwindCSS({ content, css = '', tailwindCSS, config = {} }) {
-  // Dynamic import of our custom single-threaded WASM scanner
-  let WasmScanner, WasmChangedContent;
+  // Load WASM-based scanner for browser environment
+  let Scanner, ChangedContent;
   try {
     const wasmModule = await import('../browser-wasm/tailwindcss_oxide.js');
-    await wasmModule.default(); // Initialize WASM
-    WasmScanner = wasmModule.WasmScanner;
-    WasmChangedContent = wasmModule.WasmChangedContent;
+    await wasmModule.default();
+    Scanner = wasmModule.WasmScanner;
+    ChangedContent = wasmModule.WasmChangedContent;
   }
   catch (error) {
     throw new Error(
-      'Failed to load single-threaded WASM scanner: ' + error.message,
+      'Failed to load WASM scanner: ' + error.message,
     );
   }
   // Build source CSS with Tailwind directives + existing component CSS
@@ -84,9 +84,9 @@ export async function generateTailwindCSS({ content, css = '', tailwindCSS, conf
     },
   });
 
-  // Extract candidates using our single-threaded WASM scanner
-  const scanner = new WasmScanner();
-  const changedContent = new WasmChangedContent(content, 'html');
+  // Extract candidates using WASM scanner
+  const scanner = new Scanner();
+  const changedContent = new ChangedContent(content, 'html');
   const candidatesWithPositions = scanner.getCandidatesWithPositions(changedContent);
   const candidates = candidatesWithPositions.map(item => item.candidate);
   // Build the CSS with the extracted candidates
