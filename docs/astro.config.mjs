@@ -63,7 +63,14 @@ export default defineConfig({
     },
     optimizeDeps: {
       force: true,
-      exclude: ['playground-elements'],
+      exclude: [
+        'playground-elements',
+        '@tailwindcss/node',
+        '@tailwindcss/oxide',
+        '@tailwindcss/oxide-wasm32-wasi',
+        'lightningcss',
+        'tailwindcss',
+      ],
     },
   },
 

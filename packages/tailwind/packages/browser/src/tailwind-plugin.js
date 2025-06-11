@@ -1,9 +1,9 @@
 /**
- * Tailwind CSS transformation function for Semantic UI components
+ * Tailwind CSS transformation function for Semantic UI components (Browser)
  * Scans component definition for Tailwind classes and generates JIT CSS
  */
 
-import { generateTailwindCSS } from './index.js';
+import { generateTailwindCSS } from './generator.js';
 import { collectContent } from './scanner.js';
 
 export default function TailwindPlugin(config = {}) {
@@ -16,7 +16,7 @@ export default function TailwindPlugin(config = {}) {
       return definition;
     }
 
-    // Generate CSS using jit-browser-tailwindcss with full component CSS
+    // Generate CSS using tailwindcss core with WASM scanner
     const tailwindCSS = await generateTailwindCSS({
       content,
       css,

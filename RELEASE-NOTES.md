@@ -5,7 +5,18 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.12.0
-* **Tailwinds** - Added a plugin for using tailwinds inside semantic ui components.
+* **Tailwinds** - Added a plugin for using tailwinds inside semantic ui components. This can be used alongside the css tokens provided by the css framework, or instead of it.
+
+
+```
+import { TailwindPlugin } from '@semantic-ui/tailwind';
+
+
+// Transform with Tailwind plugin
+const tailwindPlugin = TailwindPlugin();
+definition = await tailwindPlugin(definition);
+
+```
 
 # Version 0.11.3
 * **Input** - Fix placeholder focused color to be theme aware

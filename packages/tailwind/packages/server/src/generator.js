@@ -1,8 +1,9 @@
 /**
- * Generates Tailwind CSS using @tailwindcss/node
+ * Generates Tailwind CSS using @tailwindcss/node (server-side with native scanner)
  */
 
 import { compile, Features } from '@tailwindcss/node';
+import { Scanner } from '@tailwindcss/oxide';
 
 export async function generateTailwindCSS({ content, css = '', tailwindCSS, config = {} }) {
   // Build source CSS with Tailwind directives + existing component CSS
@@ -22,8 +23,12 @@ export async function generateTailwindCSS({ content, css = '', tailwindCSS, conf
     polyfills: Features.All, // Include all features
   });
 
-  // Build the CSS with the provided content
-  const result = compiler.build([content]);
+  // Extract candidates using native Node.js scanner
+  const scanner = new Scanner({ sources: [] }); // No file sources, we'll scan content directly
+  const candidates = [...scanner.scanText(content)];
 
-  return result.css; // returns stringified CSS ready to inject
+  // Build the CSS with the extracted candidates
+  const result = compiler.build(candidates);
+
+  return result; // returns stringified CSS ready to inject
 }

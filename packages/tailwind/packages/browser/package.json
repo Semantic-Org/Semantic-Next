@@ -1,21 +1,20 @@
 {
-  "name": "@semantic-ui/tailwind",
-  "title": "Semantic UI Tailwind Plugin",
-  "description": "A plugin for integrating Tailwind CSS with Semantic UI components.",
+  "name": "@semantic-ui/tailwind-browser",
+  "title": "Semantic UI Tailwind Plugin (Browser)",
+  "description": "A plugin for integrating Tailwind CSS with Semantic UI components (browser environments with WASM scanner).",
   "author": "Jack Lukic",
   "license": "ISC",
   "version": "0.11.2",
-  "sideEffects": false,
   "type": "module",
+  "sideEffects": false,
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "browser": "./src/browser.js",
-      "node": "./src/server.js",
-      "default": "./src/browser.js"
+      "import": "./src/index.js",
+      "default": "./src/index.js"
     }
   },
   "scripts": {
@@ -26,7 +25,6 @@
   },
   "files": [
     "src",
-    "dist",
     "types",
     "LICENSE"
   ],
@@ -36,10 +34,7 @@
   "dependencies": {
     "@semantic-ui/component": "^0.11.2",
     "@semantic-ui/utils": "^0.11.2",
-    "@tailwindcss/node": "^4.1.9",
-    "@tailwindcss/oxide": "^4.1.9"
-  },
-  "optionalDependencies": {
+    "tailwindcss": "^4.1.9",
     "@tailwindcss/oxide-wasm32-wasi": "^4.1.9"
   },
   "devDependencies": {
@@ -55,13 +50,13 @@
       ]
     },
     "build:esm": {
-      "command": "node ../../internal-packages/scripts/src/build-esm.js"
+      "command": "node ../../../../internal-packages/scripts/src/build-esm.js"
     },
     "build:bundle": {
-      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
+      "command": "node ../../../../internal-packages/scripts/src/build-bundle.js"
     },
     "build:cdn": {
-      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+      "command": "node ../../../../internal-packages/scripts/src/build-cdn.js"
     }
   }
 }
