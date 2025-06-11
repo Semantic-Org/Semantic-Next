@@ -13,7 +13,7 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "browser": "./src/browser.js",
+      "browser": "./dist/tailwind.js",
       "node": "./src/server.js",
       "default": "./src/server.js"
     }
@@ -39,8 +39,7 @@
   },
   "optionalDependencies": {
     "@tailwindcss/node": "^4.1.9",
-    "@tailwindcss/oxide": "^4.1.9",
-    "@tailwindcss/oxide-wasm32-wasi": "^4.1.9"
+    "@tailwindcss/oxide": "^4.1.9"
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.11.2",
