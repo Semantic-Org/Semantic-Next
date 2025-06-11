@@ -28,6 +28,8 @@ export default function TailwindPlugin(config = {}) {
       return definition;
     }
 
+    console.log(tailwindCSS);
+
     // Replace component CSS with Tailwind-enhanced version
     return {
       ...definition,
