@@ -3,7 +3,7 @@
  * Scans component definition for Tailwind classes and generates JIT CSS
  */
 
-import { generateTailwindCSS } from './generator.js';
+import { generateTailwindCSS } from './generator-server.js';
 import { collectContent } from './scanner.js';
 
 export default function TailwindPlugin(config = {}) {
@@ -16,7 +16,7 @@ export default function TailwindPlugin(config = {}) {
       return definition;
     }
 
-    // Generate CSS using @tailwindcss/node with full component CSS
+    // Generate CSS using @tailwindcss/node with native scanner
     const tailwindCSS = await generateTailwindCSS({
       content,
       css,

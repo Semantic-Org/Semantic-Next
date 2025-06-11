@@ -1,21 +1,35 @@
 // @semantic-ui/tailwinds - Tailwind CSS Plugin for Semantic UI Components
 // Provides JIT compilation of Tailwind classes for Shadow DOM components
-//
-// This is the fallback entry point for backward compatibility.
-// Conditional exports should automatically route to browser.js or server.js,
-// but this provides environment detection as a fallback.
 
-// Environment detection
-const isNode = typeof process !== 'undefined' && process.versions?.node;
+import { isClient, isServer } from '@semantic-ui/utils';
 
-// Top-level await for dynamic imports
-const { generateTailwindCSS } = isNode
-  ? await import('./generator-server.js')
-  : await import('./generator-browser.js');
+// Environment-specific imports using string literals to avoid static analysis
+let generateTailwindCSS, TailwindPlugin;
 
-// Static imports for shared modules
+if (isServer) {
+  const generatorPath = './generator-server.js';
+  const pluginPath = './tailwind-plugin-server.js';
+  const serverModule = await import(/* @vite-ignore */ generatorPath);
+  const pluginModule = await import(/* @vite-ignore */ pluginPath);
+  generateTailwindCSS = serverModule.generateTailwindCSS;
+  TailwindPlugin = pluginModule.default;
+}
+else if (isClient) {
+  const generatorPath = './generator-browser.js';
+  const pluginPath = './tailwind-plugin-browser.js';
+  const browserModule = await import(/* @vite-ignore */ generatorPath);
+  const pluginModule = await import(/* @vite-ignore */ pluginPath);
+  generateTailwindCSS = browserModule.generateTailwindCSS;
+  TailwindPlugin = pluginModule.default;
+}
+else {
+  throw new Error('Unknown environment - neither client nor server detected');
+}
+
+// Shared exports
 export { collectContent } from './scanner.js';
-export { default as TailwindPlugin } from './tailwind-plugin.js';
 
-// Re-export the environment-specific generator
+// Environment-specific exports
 export { generateTailwindCSS };
+export { TailwindPlugin };
+export default TailwindPlugin;

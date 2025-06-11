@@ -13,9 +13,8 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "browser": "./src/browser.js",
-      "node": "./src/server.js",
-      "default": "./src/browser.js"
+      "import": "./src/index.js",
+      "default": "./src/index.js"
     }
   },
   "scripts": {
@@ -35,11 +34,11 @@
   },
   "dependencies": {
     "@semantic-ui/component": "^0.11.2",
-    "@semantic-ui/utils": "^0.11.2",
-    "@tailwindcss/node": "^4.1.9",
-    "@tailwindcss/oxide": "^4.1.9"
+    "@semantic-ui/utils": "^0.11.2"
   },
   "optionalDependencies": {
+    "@tailwindcss/node": "^4.1.9",
+    "@tailwindcss/oxide": "^4.1.9",
     "@tailwindcss/oxide-wasm32-wasi": "^4.1.9"
   },
   "devDependencies": {

@@ -65,10 +65,12 @@ export default defineConfig({
       force: true,
       exclude: [
         'playground-elements',
+        '@semantic-ui/tailwind',
         '@tailwindcss/node',
         '@tailwindcss/oxide',
         '@tailwindcss/oxide-wasm32-wasi',
         'lightningcss',
+        'jiti',
         'tailwindcss',
       ],
     },
