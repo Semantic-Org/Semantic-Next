@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { collectContent } from '../src/scanner.js';
-import { TailwindPlugin as ServerPlugin } from '../src/server.js';
+import { TailwindPlugin as BrowserPlugin } from '../../src/browser.js';
+import { collectContent } from '../../src/scanner.js';
 
-describe('Server-Side Tailwind Plugin (Native)', () => {
-  it('should generate CSS using the native Node.js implementation', async () => {
-    const transform = ServerPlugin();
+describe('Browser-Side Tailwind Plugin (WASM)', () => {
+  it('should generate CSS using the WASM implementation', async () => {
+    const transform = BrowserPlugin();
     const definition = {
-      template: '<div class="p-4 bg-red-500"></div>',
+      template: '<div class="p-4 bg-blue-500"></div>',
     };
 
     const result = await transform(definition);
@@ -14,11 +14,11 @@ describe('Server-Side Tailwind Plugin (Native)', () => {
     // Verify that CSS was generated
     expect(result.css).toBeDefined();
     expect(result.css).toContain('.p-4');
-    expect(result.css).toContain('.bg-red-500');
+    expect(result.css).toContain('.bg-blue-500');
   });
 
   it('should return the original definition if no content is found', async () => {
-    const transform = ServerPlugin();
+    const transform = BrowserPlugin();
     const definition = { css: '.original {}' }; // No template or classes
     const result = await transform(definition);
     expect(result).toEqual(definition);
