@@ -1,0 +1,8 @@
+html {
+  /*
+    note tailwind base em size is 16px instead of semantic ui's 14px
+    this means to have everything sized the same as other tailwind projects
+    when using sui + tailwinds you will want to resize semantic components
+  */
+  --font-size: 16px;
+}
