@@ -1,238 +1,66 @@
-# Agent Context for @semantic-ui/tailwind
+# Agent Memory & Project Architecture
 
-This document provides context for AI agents working on this project, including key decisions, patterns, pitfalls, and architectural choices.
+This document outlines the core architectural decisions and technical implementation details for the `@semantic-ui/tailwind` package, an isomorphic Tailwind CSS compiler.
 
-## Project Overview
+## 1. Primary Goal & Core Problem
 
-This project provides Tailwind CSS integration for Semantic UI components, enabling JIT compilation of Tailwind classes for Shadow DOM components. The project has been split into two separate packages to handle different runtime environments.
+The primary objective is to create a utility that can compile Tailwind CSS from a string of content within any JavaScript environment, both on the server (Node.js) and in the browser.
 
-## Package Architecture
+This addresses a significant gap in the standard Tailwind CSS tooling:
 
-### Single Package with Conditional Exports
+* **Browser Limitations**: The official Tailwind JIT/CDN build works by observing the live DOM. There is no standard tool for compiling a string of arbitrary HTML/JS content to CSS purely in client-side JavaScript.
 
-**Decision**: One package with conditional exports for isomorphic components
-- `@semantic-ui/tailwind` - Universal package that works in both environments
-- Browser resolution: `./src/browser.js` 
-- Node.js resolution: `./src/server.js`
+* **Engine Constraints**: Tailwind's high-performance scanning engine, Oxide, is written in Rust and utilizes multi-threading. Standard WebAssembly (WASM) runtimes in web browsers do not support multi-threading, making a direct port impossible.
 
-**Rationale**: 
-- **Critical insight**: Web components need to be isomorphic (same code on server/client)
-- **Universal imports**: Same import statement must work regardless of environment
-- **Conditional exports**: Let bundlers/runtimes handle environment detection automatically
-- **No code changes**: Component code doesn't need to know its execution environment
-- **Future-proof**: Works with SSR, hydration, and other universal rendering patterns
+* **Environment Mismatch**: Node.js packages (`@tailwindcss/node`, `@tailwindcss/oxide`) rely on native APIs like `fs` and `path`, which will fail if included in a browser build.
 
-### Package Structure
-```
-plugin/
-├── src/
-│   ├── index.js              # Main entry with fallback
-│   ├── browser.js            # Browser-specific entry
-│   ├── server.js             # Server-specific entry
-│   ├── generator-browser.js  # Browser implementation
-│   ├── generator-server.js   # Server implementation
-│   ├── scanner.js            # Shared content scanner
-│   └── tailwind-plugin.js    # Main plugin function
-├── package.json              # Conditional exports configuration
-├── types/
-└── LICENSE
-```
+## 2. Architectural Solution: Isomorphic by Design
 
-## Key Technical Decisions
+To solve these problems, the package was designed to be "isomorphic," with two distinct execution paths that are resolved at build time, not runtime.
 
-### 1. Official Scanner Integration
-**Decision**: Use official Tailwind scanners only
-- Server: `@tailwindcss/oxide` (native Node.js addon)
-- Browser: `@tailwindcss/oxide-wasm32-wasi` (WASM)
+### 2.1. Conditional Exports: The Keystone
 
-**Avoided**: Custom regex-based candidate extraction
-**Rationale**: Only official scanners guarantee complete and accurate Tailwind class detection
+The entire architecture hinges on the `"exports"` map in `package.json`.
 
-### 2. Pure ESM
-**Decision**: All packages use `"type": "module"`
-**Avoided**: CommonJS support or dual-format packages
-**Rationale**: Simplifies build process and aligns with modern JavaScript practices
-
-### 3. No Dynamic Imports
-**Decision**: Avoid dynamic imports in favor of static, explicit imports
-**Avoided**: 
-```javascript
-// ❌ Don't do this
-const { Scanner } = await import(isNode ? '@tailwindcss/oxide' : '@tailwindcss/oxide-wasm32-wasi');
-```
-**Rationale**: Dynamic imports are unreliable, hurt bundling, and make code harder to analyze
-
-### 4. Environment-Specific APIs
-**Decision**: Use different Tailwind APIs per environment
-- Server: `@tailwindcss/node` (full Node.js integration)
-- Browser: `tailwindcss` core (browser-compatible)
-
-**Rationale**: `@tailwindcss/node` contains Node.js-specific dependencies (lightningcss, jiti) that break in browsers
-
-## Dependencies Structure
-
-### Core Dependencies (Always Available)
 ```json
-{
-  "dependencies": {
-    "tailwindcss": "^4.1.9"
+"exports": {
+  ".": {
+    "types": "./types/index.d.ts",
+    "browser": "./src/browser.js",
+    "node": "./src/server.js",
+    "default": "./src/server.js"
   }
 }
 ```
 
-### Optional Dependencies (Environment-Specific)
-```json
-{
-  "optionalDependencies": {
-    "@tailwindcss/node": "^4.1.9",        // Server environments
-    "@tailwindcss/oxide": "^4.1.9",       // Native Node.js scanner
-    "@tailwindcss/oxide-wasm32-wasi": "^4.1.9"  // Browser WASM scanner
-  }
-}
-```
+This is the most critical piece of the design. It instructs bundlers (like Vite, Webpack) and the Node.js runtime which file to use as the entry point based on the environment. This prevents Node.js-specific code from ever being included in a browser bundle, avoiding build-time errors. A runtime check (e.g., `if (isServer)`) is insufficient because bundlers would still try to resolve and bundle both paths.
 
-**Strategy**: Core package works everywhere, optional deps provide enhanced functionality where supported.
+### 2.2. The Server-Side Path (`src/server.js`)
 
-## Common Pitfalls & Solutions
+* **Implementation**: This path is straightforward. It uses the official `@tailwindcss/node` and `@tailwindcss/oxide` packages.
 
-### 1. Platform Dependency Conflicts
-**Problem**: `@tailwindcss/oxide-wasm32-wasi` has platform restrictions (`{"cpu": "wasm32"}`)
-**Previous Solution**: Optional dependencies (caused install failures)
-**Current Solution**: Separate packages with appropriate dependencies
+* **Execution**: It leverages the native Rust binaries provided by `@tailwindcss/oxide` for maximum performance in the Node.js environment.
 
-### 2. Bundler Issues with Node.js Dependencies
-**Problem**: Vite/esbuild tries to bundle Node.js native modules like `lightningcss`
-```
-ERROR: Could not resolve "../pkg" in lightningcss/node/index.js
-```
-**Previous Solution**: Complex Vite configuration with excludes
-**Current Solution**: Browser package doesn't include Node.js dependencies
+* **File**: `src/generator-server.js` contains this logic.
 
-### 3. jiti Import Errors in Browser
-**Problem**: `jiti` (from `@tailwindcss/node`) being imported in browser
-```
-ERROR: The requested module 'jiti.cjs' does not provide an export named 'default'
-```
-**Root Cause**: Conditional exports not working properly, or direct imports bypassing them
-**Solution**: Separate packages eliminate cross-contamination
+### 2.3. The Browser-Side Path (`src/browser.js`)
 
-### 4. Scanner API Differences
-**Both scanners use same API**:
-```javascript
-const scanner = new Scanner({ sources: [] });
-const candidates = [...scanner.scanText(content)];
-```
+This path required a more custom solution to overcome the browser's limitations.
 
-## API Patterns
+* **Custom WASM Build**: A custom, single-threaded version of the Oxide engine was compiled to WebAssembly. This allows the high-performance Rust-based scanner to run safely in any modern browser. The resulting files are stored in `/browser-wasm`.
 
-### Generator Function Signature
-```javascript
-export async function generateTailwindCSS({ 
-  content,     // HTML/JS content to scan
-  css = '',    // Existing component CSS
-  tailwindCSS, // Custom Tailwind directives (optional)
-  config = {}  // Tailwind config (optional)
-})
-```
+* **Lazy Loading**: The WASM module and its JavaScript glue code are loaded dynamically and asynchronously using `import()`. This is a crucial performance optimization, ensuring the WASM binary (which can be sizable) is only fetched and compiled when `generateTailwindCSS` is actually called, not on initial page load.
 
-### Plugin Usage Pattern (Isomorphic)
-```javascript
-// Same import works in both server and browser environments
-import { TailwindPlugin } from '@semantic-ui/tailwind';
+* **Bundled Base Styles**: The browser cannot access the file system to read Tailwind's base CSS files (`preflight.css`, etc.). To solve this, the `generator-browser.js` file imports these styles as raw text using a bundler feature (`?raw`). This effectively embeds the CSS content into the final JavaScript bundle, making it available at runtime without `fs` access.
 
-const transform = TailwindPlugin(config);
-const transformedDefinition = await transform(componentDefinition);
-```
+* **File**: `src/generator-browser.js` contains this logic.
 
-## Testing Environments
+## 3. API Design
 
-### Server Testing
-- Node.js environments
-- Build tools (Astro, Vite, etc.)
-- SSR contexts
+The public API is designed to be simple and consistent across both environments.
 
-### Browser Testing
-- Runtime compilation
-- Client-side bundlers
-- Development playgrounds
+* **Primary Function (`generateTailwindCSS`)**: The core function of the package, focused on the primary use case of compiling CSS from a string.
 
-## Migration Path
+* **Secondary Plugin (`TailwindPlugin`)**: A higher-order function that wraps `generateTailwindCSS` for the specific use case of transforming a component definition object, as used in the new Semantic UI project.
 
-### From Previous Version
-1. **No breaking changes**: Same import works everywhere
-2. **Enhanced functionality**: Automatic environment detection via conditional exports
-3. **Better dependency management**: Optional deps prevent installation failures
-
-### From Third-Party Package
-Previous: `@mhsdesign/jit-browser-tailwindcss`
-Current: Official Tailwind v4 integration with universal compatibility
-
-### Isomorphic Components
-```javascript
-// ✅ Works in both server and browser
-import { TailwindPlugin } from '@semantic-ui/tailwind';
-
-// Component definition works identically in both environments
-export const MyComponent = defineComponent({
-  // ... component definition
-});
-```
-
-## Build Process Notes
-
-### Conditional Exports Configuration
-**Key**: Proper export conditions order in package.json
-```json
-{
-  "exports": {
-    ".": {
-      "types": "./types/index.d.ts",
-      "browser": "./src/browser.js",     // Browser-specific entry
-      "node": "./src/server.js",         // Node.js-specific entry  
-      "import": "./src/index.js",        // Fallback for import
-      "default": "./src/index.js"        // Ultimate fallback
-    }
-  }
-}
-```
-
-### Optional Dependencies Handling
-- Install failures are non-fatal
-- Runtime detection provides helpful error messages
-- Graceful fallbacks where possible
-
-### Wireit Integration
-Package maintains existing Semantic UI build pipeline compatibility with custom `wireit` commands.
-
-## Environment Detection (Avoided)
-
-**Avoid**: Runtime environment detection
-```javascript
-// ❌ Don't do this
-const isNode = typeof process !== 'undefined';
-```
-**Reason**: Makes behavior unpredictable and complicates bundling
-
-## Future Considerations
-
-1. **WASM Improvements**: Monitor Tailwind's browser strategy for potential WASM distribution changes
-2. **API Alignment**: Keep both packages' APIs identical for potential future reunification
-3. **Performance**: Monitor scanner performance differences between native and WASM versions
-
-## Debugging Tips
-
-1. **Import Issues**: Check which package is being imported and verify it matches the environment
-2. **Scanner Errors**: Ensure content string contains actual HTML/JS, not just class names
-3. **CSS Generation**: Verify `compiler.build()` receives candidate array, not raw content
-4. **Platform Errors**: Double-check package.json dependencies match the intended environment
-
-## Key Learnings
-
-### Isomorphic Components Requirement
-**Critical Decision Point**: Initially considered separate packages for browser/server, but realized web components must be **isomorphic** - same code running in both environments without modification.
-
-**Solution**: Single package with conditional exports that automatically resolve to the correct implementation based on the runtime environment.
-
-## Contact Context
-
-This project is part of Semantic UI's component framework integration with Tailwind CSS v4. The focus is on Shadow DOM component styling with JIT compilation capabilities for universal/isomorphic web components.
+* **Shared Utilities**: Simple, environment-agnostic utilities like `scanner.js` are shared between both server and browser paths.
