@@ -24,6 +24,8 @@ defineComponent( await tailwindPlugin(definition) );
 
 ```
 
+* **Template Compiler** - Fixed an issue with nested conditionals inside svg.
+
 # Version 0.11.3
 * **Input** - Fix placeholder focused color to be theme aware
 
