@@ -5,16 +5,22 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.12.0
-* **Tailwinds** - Added a plugin for using tailwinds inside semantic ui components. This can be used alongside the css tokens provided by the css framework, or instead of it.
+* **Tailwinds** - Added a plugin for using tailwinds inside semantic ui components. This can be used alongside the css tokens provided by the css framework, or instead of it. This will scan your component javascript, html and css and attach only the tailwind styles used.
+
+> Note: the plugin code may be modified if `defineComponent` gets a formal 'Plugin API'. For now you will need to pass in the component to the plugin before defining the component.
 
 
-```
+```javascript
 import { TailwindPlugin } from '@semantic-ui/tailwind';
+const tailwindPlugin = TailwindPlugin();
 
 
 // Transform with Tailwind plugin
-const tailwindPlugin = TailwindPlugin();
-definition = await tailwindPlugin(definition);
+const definition = {
+  // your component definition
+  template: `<div class="p-4 bg-red-500"></div>`
+}
+defineComponent( await tailwindPlugin(definition) );
 
 ```
 
