@@ -27,9 +27,9 @@
     }
   },
   "scripts": {
-    "test": "vitest",
-    "test:server": "vitest --config vitest.config.js",
-    "test:browser": "vitest --config vitest.browser.config.js"
+    "test": "vitest --config test/configs/vitest.all.config.js",
+    "test:server": "vitest --config test/configs/vitest.config.js",
+    "test:browser": "vitest --config test/configs/vitest.browser.config.js"
   },
   "files": [
     "src",
