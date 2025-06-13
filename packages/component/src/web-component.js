@@ -88,10 +88,10 @@ class WebComponentBase extends LitElement {
         properties[propertyName] = (defaultValue?.type)
           ? defaultSettings
           : WebComponentBase.getPropertySettings({
-              name: propertyName,
-              type: defaultValue?.constructor,
-              propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
-            });
+            name: propertyName,
+            type: defaultValue?.constructor,
+            propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
+          });
       });
     }
 
@@ -112,18 +112,17 @@ class WebComponentBase extends LitElement {
     // accessors can break certain special dom attrs
     const specialAttrs = ['value', 'checked'];
     each(specialAttrs, (attr) => {
-      if(properties[attr]) {
-        //properties[attr].noAccessor = true;
+      if (properties[attr]) {
+        // properties[attr].noAccessor = true;
       }
     });
     return properties;
   }
 
-  static getPropertySettings({name, type = String, propertyOnly = false } = {}) {
-
+  static getPropertySettings({ name, type = String, propertyOnly = false } = {}) {
     // converts type = 'string' -> String
     // this is because compont spec cannot serialize prototypes in JSON
-    if(isString(type)) {
+    if (isString(type)) {
       const types = {
         string: String,
         number: Number,
@@ -318,7 +317,7 @@ class WebComponentBase extends LitElement {
   isDarkMode() {
     return (isServer)
       ? undefined
-      : $(this).cssVar('dark-mode') == 'true';
+      : $(this).cssVar('dark-mode') == 'true' || $('html').hasClass('dark');
   }
 
   /*******************************
