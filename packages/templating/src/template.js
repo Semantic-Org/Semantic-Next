@@ -60,6 +60,7 @@ export const Template = class Template {
       ast = compiler.compile();
     }
     this.events = events;
+    this.observers = [];
     this.keys = keys || {};
     this.ast = ast;
     this.css = css;
@@ -136,7 +137,7 @@ export const Template = class Template {
   }
 
   removeParent() {
-    if(!this.parentTemplate?._childTemplates) {
+    if (!this.parentTemplate?._childTemplates) {
       return;
     }
     this.parentTemplate._childTemplates = this.parentTemplate._childTemplates.filter(template => {
@@ -176,7 +177,7 @@ export const Template = class Template {
       this.call(this.onRenderedCallback);
       // allow a single hook for after render
       // this is used for binding events that cant use event delegation
-      if(isFunction(this.onRenderOnce)) {
+      if (isFunction(this.onRenderOnce)) {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
@@ -194,6 +195,7 @@ export const Template = class Template {
       this.destroyed = true;
       this.clearReactions();
       this.removeEvents();
+      this.removeObservers();
       this.removeParent();
       this.call(this.onDestroyedCallback);
       this.dispatchEvent('destroyed', { component: this.instance }, {}, { triggerCallback: false });
@@ -376,8 +378,17 @@ export const Template = class Template {
     // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
 
-    // This makes an assumption that a custom event will be emitted when a theme change occurs
     if (!Template.isServer && this.onThemeChangedCallback !== noop) {
+      // when the dark class is added or removed from <html>
+      // we will fire theme changed
+      const observer = new MutationObserver(this.onThemeChanged);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+      this.observers.push(observer);
+
+      // we will also fire the handler if onThemeChanged occurs on html
       $('html').on('themechange', (event) => {
         this.onThemeChanged({
           additionalData: {
@@ -476,6 +487,12 @@ export const Template = class Template {
     if (this.eventController) {
       this.eventController.abort('Template destroyed');
     }
+  }
+
+  removeObservers() {
+    each(this.observers, (observer) => {
+      observer.disconnect();
+    });
   }
 
   bindKeys(keys = this.keys) {
