@@ -1,66 +1,244 @@
 # Agent Memory & Project Architecture
 
-This document outlines the core architectural decisions and technical implementation details for the `@semantic-ui/tailwind` package, an isomorphic Tailwind CSS compiler.
+This document outlines the core architectural decisions and technical implementation details for the `@semantic-ui/tailwind` package, a Semantic UI component plugin for Tailwind CSS integration.
 
 ## 1. Primary Goal & Core Problem
 
-The primary objective is to create a utility that can compile Tailwind CSS from a string of content within any JavaScript environment, both on the server (Node.js) and in the browser.
+The primary objective is to provide seamless Tailwind CSS integration with Semantic UI web components. This plugin automatically scans component definitions for Tailwind classes and generates the appropriate CSS for shadow DOM encapsulation.
 
-This addresses a significant gap in the standard Tailwind CSS tooling:
+Key challenges addressed:
 
-* **Browser Limitations**: The official Tailwind JIT/CDN build works by observing the live DOM. There is no standard tool for compiling a string of arbitrary HTML/JS content to CSS purely in client-side JavaScript.
+* **Shadow DOM Compatibility**: Tailwind CSS needs to be scoped within web component shadow boundaries
+* **Component Definition Scanning**: Classes can appear in templates, JavaScript functions, CSS files, and sub-templates  
+* **Async Plugin Architecture**: Since WASM loading is async, plugins must be applied before `defineComponent()` rather than during
+* **Environment Consistency**: Must work identically in browser and Node.js environments
 
-* **Engine Constraints**: Tailwind's high-performance scanning engine, Oxide, is written in Rust and utilizes multi-threading. Standard WebAssembly (WASM) runtimes in web browsers do not support multi-threading, making a direct port impossible.
+## 2. Architectural Solution: Pre-Processing Plugin Pattern
 
-* **Environment Mismatch**: Node.js packages (`@tailwindcss/node`, `@tailwindcss/oxide`) rely on native APIs like `fs` and `path`, which will fail if included in a browser build.
+Instead of integrating into `defineComponent()` directly (which would require async support), the plugin transforms component definitions before they are passed to `defineComponent()`.
 
-## 2. Architectural Solution: Isomorphic by Design
+### 2.1. Plugin API Design
 
-To solve these problems, the package was designed to be "isomorphic," with two distinct execution paths that are resolved at build time, not runtime.
+The plugin follows a simple transformation pattern:
 
-### 2.1. Conditional Exports: The Keystone
+```javascript
+// Before
+let definition = {
+  tagName: 'my-component',
+  template: '<div class="px-4 py-2">Content</div>',
+  css: '@theme { --color-blue: #007bff; }'
+};
 
-The entire architecture hinges on the `"exports"` map in `package.json`.
+// Transform
+definition = await TailwindPlugin(definition);
+
+// After - CSS replaced with generated Tailwind CSS
+defineComponent(definition);
+```
+
+This approach:
+- Keeps `defineComponent()` synchronous for SSR compatibility
+- Allows chaining multiple async plugins
+- Provides clear transformation pipeline
+- Maintains component definition immutability
+
+### 2.2. Environment-Specific Implementations
+
+The package provides conditional exports that automatically select the correct Tailwind engine:
 
 ```json
 "exports": {
   ".": {
     "types": "./types/index.d.ts",
     "browser": "./src/browser.js",
-    "node": "./src/server.js",
+    "node": "./src/server.js", 
     "default": "./src/server.js"
   }
 }
 ```
 
-This is the most critical piece of the design. It instructs bundlers (like Vite, Webpack) and the Node.js runtime which file to use as the entry point based on the environment. This prevents Node.js-specific code from ever being included in a browser bundle, avoiding build-time errors. A runtime check (e.g., `if (isServer)`) is insufficient because bundlers would still try to resolve and bundle both paths.
+**Browser Implementation (`src/browser.js`)**:
+```javascript
+import { generateTailwindCSS } from 'tailwindcss-iso/browser';
+```
 
-### 2.2. The Server-Side Path (`src/server.js`)
+**Server Implementation (`src/server.js`)**:
+```javascript
+import { generateTailwindCSS } from 'tailwindcss-iso/server';
+```
 
-* **Implementation**: This path is straightforward. It uses the official `@tailwindcss/node` and `@tailwindcss/oxide` packages.
+Both implementations share identical logic but import from different `tailwindcss-iso` endpoints to ensure the correct engine is used.
 
-* **Execution**: It leverages the native Rust binaries provided by `@tailwindcss/oxide` for maximum performance in the Node.js environment.
+## 3. Component Scanning Strategy
 
-* **File**: `src/generator-server.js` contains this logic.
+The plugin comprehensively scans component definitions for Tailwind class usage:
 
-### 2.3. The Browser-Side Path (`src/browser.js`)
+### 3.1. Content Sources Scanned
 
-This path required a more custom solution to overcome the browser's limitations.
+* **Template HTML**: Primary source of Tailwind classes
+* **Component CSS**: @theme, @utility, and custom CSS with embedded classes
+* **JavaScript Functions**: All lifecycle and event handler functions converted to strings
+* **Sub-templates**: Recursive scanning of nested template definitions
 
-* **Custom WASM Build**: A custom, single-threaded version of the Oxide engine was compiled to WebAssembly. This allows the high-performance Rust-based scanner to run safely in any modern browser. The resulting files are stored in `/browser-wasm`.
+### 3.2. Content Extraction (`extract-definition-content.js`)
 
-* **Lazy Loading**: The WASM module and its JavaScript glue code are loaded dynamically and asynchronously using `import()`. This is a crucial performance optimization, ensuring the WASM binary (which can be sizable) is only fetched and compiled when `generateTailwindCSS` is actually called, not on initial page load.
+```javascript
+export function extractDefinitionContent(definition) {
+  // Scans:
+  // - definition.template
+  // - definition.css  
+  // - definition.createComponent.toString()
+  // - definition.events[key].toString()
+  // - definition.subTemplates recursively
+  
+  return { content, css };
+}
+```
 
-* **Bundled Base Styles**: The browser cannot access the file system to read Tailwind's base CSS files (`preflight.css`, etc.). To solve this, the `generator-browser.js` file imports these styles as raw text using a bundler feature (`?raw`). This effectively embeds the CSS content into the final JavaScript bundle, making it available at runtime without `fs` access.
+This comprehensive scanning ensures all Tailwind classes are detected regardless of where they appear in the component definition.
 
-* **File**: `src/generator-browser.js` contains this logic.
+## 4. CSS Generation & Replacement
 
-## 3. API Design
+### 4.1. Tailwind Compilation
 
-The public API is designed to be simple and consistent across both environments.
+The plugin uses `tailwindcss-iso` to generate CSS:
 
-* **Primary Function (`generateTailwindCSS`)**: The core function of the package, focused on the primary use case of compiling CSS from a string.
+```javascript
+const tailwindCSS = await generateTailwindCSS({
+  content, // Combined HTML + JS content
+  css,     // Component CSS with @theme/@utility
+});
+```
 
-* **Secondary Plugin (`TailwindPlugin`)**: A higher-order function that wraps `generateTailwindCSS` for the specific use case of transforming a component definition object, as used in the new Semantic UI project.
+### 4.2. Definition Transformation
 
-* **Shared Utilities**: Simple, environment-agnostic utilities like `scanner.js` are shared between both server and browser paths.
+The generated CSS completely replaces the component's original CSS:
+
+```javascript
+return {
+  ...definition,
+  css: tailwindCSS, // Replace with generated CSS
+};
+```
+
+This ensures:
+- All Tailwind utilities are available in shadow DOM
+- Component-specific @theme customizations are applied
+- Custom @utility definitions are compiled
+- Existing component CSS is preserved and enhanced
+
+## 5. Integration with Semantic UI Framework
+
+### 5.1. Component Lifecycle Integration
+
+```javascript
+import { defineComponent, getText } from '@semantic-ui/component';
+import { TailwindPlugin } from '@semantic-ui/tailwind';
+
+// Standard component definition
+const template = await getText('./component.html');
+const css = await getText('./component.css');
+
+let definition = {
+  tagName: 'my-component',
+  template,
+  css,
+  defaultSettings: { /* ... */ }
+};
+
+// Apply Tailwind transformation
+definition = await TailwindPlugin(definition);
+
+// Define component with enhanced CSS
+export const MyComponent = defineComponent(definition);
+```
+
+### 5.2. Shadow DOM Optimization
+
+The generated CSS is specifically optimized for shadow DOM:
+- Tailwind utilities are scoped to the component
+- No global style pollution
+- CSS custom properties work across shadow boundaries
+- @theme customizations respect component isolation
+
+## 6. Performance Considerations
+
+### 6.1. Async Pipeline
+
+Since the plugin is async, component modules must use top-level await or async initialization:
+
+```javascript
+// Top-level await (recommended)
+export const MyComponent = defineComponent(
+  await TailwindPlugin(definition)
+);
+
+// Or async factory pattern
+export async function createMyComponent() {
+  return defineComponent(await TailwindPlugin(definition));
+}
+```
+
+### 6.2. Build-Time Optimization
+
+For production builds, the plugin transformation can be moved to build time:
+- Pre-compile all component definitions
+- Generate static CSS bundles
+- Eliminate runtime WASM loading in browser
+
+## 7. Package Structure
+
+```
+@semantic-ui/tailwind/
+├── src/
+│   ├── browser.js                   # Browser-specific plugin (WASM)
+│   ├── server.js                    # Server-specific plugin (Native)
+│   └── extract-definition-content.js # Shared content extraction logic
+├── types/
+│   └── index.d.ts                   # TypeScript definitions
+└── package.json                     # Conditional exports + dependencies
+```
+
+### 7.1. Dependencies
+
+- **Runtime**: `tailwindcss-iso` (isomorphic Tailwind compiler)
+- **Shared**: `@semantic-ui/component`, `@semantic-ui/utils`
+- **Peer**: `tailwindcss` (for configuration and theme extensions)
+
+## 8. Usage Patterns
+
+### 8.1. Basic Component
+
+```javascript
+let definition = {
+  tagName: 'ui-button',
+  template: '<button class="px-4 py-2 bg-blue-500 text-white"><slot></slot></button>',
+  css: '@theme { --color-blue-500: #3b82f6; }'
+};
+
+definition = await TailwindPlugin(definition);
+export const Button = defineComponent(definition);
+```
+
+### 8.2. Complex Component with Sub-templates
+
+```javascript
+let definition = {
+  tagName: 'ui-card',
+  template: '<div class="bg-white shadow-lg">{>header}{>body}</div>',
+  css: '@utility shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.1); }',
+  subTemplates: {
+    header: {
+      template: '<header class="p-4 border-b"><slot name="header"></slot></header>'
+    },
+    body: {
+      template: '<div class="p-4"><slot></slot></div>'
+    }
+  }
+};
+
+definition = await TailwindPlugin(definition);
+export const Card = defineComponent(definition);
+```
+
+This architecture provides a clean, performant, and flexible way to integrate Tailwind CSS with Semantic UI components while maintaining the framework's design principles.

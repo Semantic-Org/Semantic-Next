@@ -4,7 +4,7 @@
   "description": "A plugin for generating tailwind css and extracting classes uniformly on the server and client.",
   "author": "Jack Lukic",
   "license": "ISC",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "sideEffects": false,
   "type": "module",
   "main": "src/server/index.js",

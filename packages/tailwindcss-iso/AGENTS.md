@@ -1,6 +1,6 @@
 # Agent Memory & Project Architecture
 
-This document outlines the core architectural decisions and technical implementation details for the `@semantic-ui/tailwind` package, an isomorphic Tailwind CSS compiler.
+This document outlines the core architectural decisions and technical implementation details for the `tailwindcss-iso` package, an isomorphic Tailwind CSS compiler.
 
 ## 1. Primary Goal & Core Problem
 
@@ -26,41 +26,116 @@ The entire architecture hinges on the `"exports"` map in `package.json`.
 "exports": {
   ".": {
     "types": "./types/index.d.ts",
-    "browser": "./src/browser.js",
-    "node": "./src/server.js",
-    "default": "./src/server.js"
+    "browser": "./src/browser/index.js",
+    "node": "./src/server/index.js",
+    "default": "./src/server/index.js"
+  },
+  "./browser": {
+    "types": "./types/index.d.ts",
+    "default": "./src/browser/index.js"
+  },
+  "./server": {
+    "types": "./types/index.d.ts",
+    "default": "./src/server/index.js"
   }
 }
 ```
 
-This is the most critical piece of the design. It instructs bundlers (like Vite, Webpack) and the Node.js runtime which file to use as the entry point based on the environment. This prevents Node.js-specific code from ever being included in a browser bundle, avoiding build-time errors. A runtime check (e.g., `if (isServer)`) is insufficient because bundlers would still try to resolve and bundle both paths.
+This design provides:
+- **Automatic Environment Detection**: Bundlers and Node.js automatically select the correct implementation
+- **Explicit Override Options**: Developers can force browser or server implementations via `/browser` and `/server` endpoints
+- **Build-Time Resolution**: Prevents Node.js-specific code from being included in browser bundles
 
-### 2.2. The Server-Side Path (`src/server.js`)
+### 2.2. The Server-Side Path (`src/server/`)
 
-* **Implementation**: This path is straightforward. It uses the official `@tailwindcss/node` and `@tailwindcss/oxide` packages.
+* **Implementation**: Uses the official `@tailwindcss/node` and `@tailwindcss/oxide` packages for maximum performance
+* **Execution**: Leverages native Rust binaries provided by `@tailwindcss/oxide`
+* **Files**: 
+  - `src/server/index.js` - Main exports
+  - `src/server/generate-tailwind-css.js` - CSS generation using native engine
+  - `src/server/get-tailwind-classes.js` - Class extraction using native scanner
 
-* **Execution**: It leverages the native Rust binaries provided by `@tailwindcss/oxide` for maximum performance in the Node.js environment.
+### 2.3. The Browser-Side Path (`src/browser/`)
 
-* **File**: `src/generator-server.js` contains this logic.
+This path required a custom solution to overcome browser limitations.
 
-### 2.3. The Browser-Side Path (`src/browser.js`)
-
-This path required a more custom solution to overcome the browser's limitations.
-
-* **Custom WASM Build**: A custom, single-threaded version of the Oxide engine was compiled to WebAssembly. This allows the high-performance Rust-based scanner to run safely in any modern browser. The resulting files are stored in `/browser-wasm`.
-
-* **Lazy Loading**: The WASM module and its JavaScript glue code are loaded dynamically and asynchronously using `import()`. This is a crucial performance optimization, ensuring the WASM binary (which can be sizable) is only fetched and compiled when `generateTailwindCSS` is actually called, not on initial page load.
-
-* **Bundled Base Styles**: The browser cannot access the file system to read Tailwind's base CSS files (`preflight.css`, etc.). To solve this, the `generator-browser.js` file imports these styles as raw text using a bundler feature (`?raw`). This effectively embeds the CSS content into the final JavaScript bundle, making it available at runtime without `fs` access.
-
-* **File**: `src/generator-browser.js` contains this logic.
+* **Custom WASM Build**: A custom, single-threaded version of the Oxide engine compiled to WebAssembly, stored in `src/browser/oxide/`
+* **Lazy Loading**: WASM module loaded dynamically via `import()` for performance optimization
+* **Bundled Base Styles**: Tailwind's base CSS files imported as raw text using bundler `?raw` feature
+* **Files**:
+  - `src/browser/index.js` - Main exports
+  - `src/browser/generate-tailwind-css.js` - CSS generation using WASM engine
+  - `src/browser/get-tailwind-classes.js` - Class extraction using WASM scanner
+  - `src/browser/load-tailwind-css.js` - Stylesheet loading for browser environment
+  - `src/browser/oxide/` - WASM binaries and TypeScript definitions
 
 ## 3. API Design
 
-The public API is designed to be simple and consistent across both environments.
+The public API is consistent across both environments:
 
-* **Primary Function (`generateTailwindCSS`)**: The core function of the package, focused on the primary use case of compiling CSS from a string.
+### Core Functions
 
-* **Secondary Plugin (`TailwindPlugin`)**: A higher-order function that wraps `generateTailwindCSS` for the specific use case of transforming a component definition object, as used in the new Semantic UI project.
+* **`generateTailwindCSS({ content, css, importCSS, candidates })`**: Compiles Tailwind CSS from content string
+* **`getTailwindClasses({ content, returnPositions })`**: Extracts candidate classes from content
+* **`loadTailwindCSS(id, base)`**: (Browser only) Loads Tailwind stylesheets
 
-* **Shared Utilities**: Simple, environment-agnostic utilities like `scanner.js` are shared between both server and browser paths.
+### Environment-Specific Imports
+
+```javascript
+// Automatic environment detection
+import { generateTailwindCSS } from 'tailwindcss-iso';
+
+// Force browser engine (WASM)
+import { generateTailwindCSS } from 'tailwindcss-iso/browser';
+
+// Force server engine (Native)
+import { generateTailwindCSS } from 'tailwindcss-iso/server';
+```
+
+## 4. Implementation Details
+
+### WASM Integration (Browser)
+
+The browser implementation uses a specially compiled single-threaded version of Tailwind's Oxide scanner:
+
+```javascript
+// Dynamic WASM loading
+const wasmModule = await import('./oxide/tailwindcss_oxide.js');
+await wasmModule.default();
+const Scanner = wasmModule.WasmScanner;
+```
+
+### Performance Considerations
+
+* **Server**: Native Rust performance with multi-threading support
+* **Browser**: Single-threaded WASM with lazy loading to minimize bundle impact
+* **Memory**: Automatic cleanup and garbage collection for both environments
+
+### Error Handling
+
+Both implementations provide consistent error handling:
+- WASM loading failures in browser
+- Missing optional dependencies in Node.js
+- Invalid content or configuration parameters
+
+## 5. Package Structure
+
+```
+tailwindcss-iso/
+├── src/
+│   ├── browser/
+│   │   ├── index.js                 # Browser exports
+│   │   ├── generate-tailwind-css.js # CSS generation (WASM)
+│   │   ├── get-tailwind-classes.js  # Class extraction (WASM)
+│   │   ├── load-tailwind-css.js     # Stylesheet loading
+│   │   └── oxide/                   # WASM binaries
+│   └── server/
+│       ├── index.js                 # Server exports
+│       ├── generate-tailwind-css.js # CSS generation (Native)
+│       └── get-tailwind-classes.js  # Class extraction (Native)
+├── types/
+│   └── index.d.ts                   # TypeScript definitions
+└── package.json                     # Conditional exports configuration
+```
+
+This architecture ensures the package works reliably across all JavaScript environments while providing optimal performance for each platform.

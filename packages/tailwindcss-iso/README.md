@@ -15,6 +15,29 @@ This package uses the official Tailwind CSS engine, including a custom single-th
 * **Zero Production Dependencies**: Clean and lightweight for your projects.
 * **Component Plugin Included**: Also includes a plugin for easy integration with a component definition structure.
 
+## Environment Selection
+
+By default, the package automatically selects the appropriate engine based on your environment (Node.js vs browser). However, you can explicitly force a specific implementation:
+
+### Force Browser Engine (WASM)
+```javascript
+import { generateTailwindCSS } from 'tailwindcss-iso/browser';
+
+// Will always use the WASM-based scanner, even in Node.js
+const tailwindCSS = await generateTailwindCSS({ content, css });
+```
+
+### Force Server Engine (Native)
+```javascript
+import { generateTailwindCSS } from 'tailwindcss-iso/server';
+
+// Will always use the native Node.js implementation
+// Note: This will fail in browser environments
+const tailwindCSS = await generateTailwindCSS({ content, css });
+```
+
+This is useful for testing, benchmarking, or when bundler environment detection isn't working as expected.
+
 ## Examples
 
 ### Generating CSS

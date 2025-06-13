@@ -10,7 +10,7 @@ dist/
 tests/results/
 tests/test-case/dist
 
-# dont ask
+# for my ai friends
 ai/meta/agent-guestbook.md
 
 # Numerous always-ignore extensions
