@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { TailwindPlugin as BrowserPlugin } from '../../src/browser.js';
 import { extractDefinitionContent } from '../../src/extract-definition-content.js';
 
-/* Disable until we fix wasm support in test runner
 describe('Browser-Side Tailwind Plugin (WASM)', () => {
+  /* Disable until we fix wasm support in test runner
+
   it('should generate CSS using the WASM implementation', async () => {
     const definition = {
       template: '<div class="p-4 bg-blue-500"></div>',
@@ -22,5 +23,5 @@ describe('Browser-Side Tailwind Plugin (WASM)', () => {
     const result = await BrowserPlugin(definition);
     expect(result).toEqual(definition);
   });
+  */
 });
-*/
