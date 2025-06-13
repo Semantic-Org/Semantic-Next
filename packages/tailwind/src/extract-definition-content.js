@@ -4,7 +4,7 @@
 
 import { each, isFunction, isObject } from '@semantic-ui/utils';
 
-export function collectContent(definition) {
+export function extractDefinitionContent(definition) {
   const htmlContent = [];
   const jsContent = [];
   const cssContent = [];

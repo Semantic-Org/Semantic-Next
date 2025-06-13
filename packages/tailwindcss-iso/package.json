@@ -1,10 +1,10 @@
 {
   "name": "tailwindcss-iso",
-  "title": "Semantic UI Tailwind Plugin",
-  "description": "A plugin for generating tailwind css and extracting classes on the server and client.",
+  "title": "Tailwind CSS - Isomorphic",
+  "description": "A plugin for generating tailwind css and extracting classes uniformly on the server and client.",
   "author": "Jack Lukic",
   "license": "ISC",
-  "version": "0.11.2",
+  "version": "1.0.0",
   "sideEffects": false,
   "type": "module",
   "main": "src/server/index.js",
@@ -32,10 +32,6 @@
   ],
   "peerDependencies": {
     "tailwindcss": "^3.0.0 || ^4.0.0"
-  },
-  "dependencies": {
-    "@semantic-ui/component": "^0.11.2",
-    "@semantic-ui/utils": "^0.11.2"
   },
   "optionalDependencies": {
     "@tailwindcss/node": "^4.1.9",

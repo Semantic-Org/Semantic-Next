@@ -1,10 +1,9 @@
 /**
- * Tailwind CSS transformation function for Semantic UI components (Server)
- * Scans component definition for Tailwind classes and generates JIT CSS
+ * This extracts html/css/js from a definition and then creates tailwind css
  */
 
-import { generateTailwindCSS } from './generator-server.js';
-import { collectContent } from './scanner.js';
+import { generateTailwindCSS } from 'tailwindcss-iso';
+import { extractDefinitionContent } from './extract-definition-content.js';
 
 export default function TailwindPlugin(config = {}) {
   return async function transformDefinition(definition) {

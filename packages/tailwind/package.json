@@ -7,17 +7,9 @@
   "version": "0.11.2",
   "sideEffects": false,
   "type": "module",
-  "main": "src/server.js",
-  "module": "src/browser.js",
+  "main": "src/index.js",
+  "module": "src/index.js",
   "types": "types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./types/index.d.ts",
-      "browser": "./dist/tailwind.js",
-      "node": "./src/server.js",
-      "default": "./src/server.js"
-    }
-  },
   "scripts": {
     "build": "wireit",
     "build:esm": "wireit",
@@ -35,11 +27,8 @@
   },
   "dependencies": {
     "@semantic-ui/component": "^0.11.2",
-    "@semantic-ui/utils": "^0.11.2"
-  },
-  "optionalDependencies": {
-    "@tailwindcss/node": "^4.1.9",
-    "@tailwindcss/oxide": "^4.1.9"
+    "@semantic-ui/utils": "^0.11.2",
+    "tailwindcss-iso": "^1.0.0"
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.11.2",
