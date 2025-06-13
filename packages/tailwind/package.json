@@ -1,0 +1,63 @@
+{
+  "name": "@semantic-ui/tailwind",
+  "title": "Semantic UI Tailwind Plugin",
+  "description": "A plugin for integrating Tailwind CSS with Semantic UI components.",
+  "author": "Jack Lukic",
+  "license": "ISC",
+  "version": "0.11.2",
+  "sideEffects": false,
+  "type": "module",
+  "main": "src/server.js",
+  "module": "src/browser.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "browser": "./src/browser.js",
+      "node": "./src/server.js",
+      "default": "./src/server.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit",
+    "build:esm": "wireit",
+    "build:cdn": "wireit",
+    "test": "vitest"
+  },
+  "files": [
+    "src",
+    "dist",
+    "types",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0 || ^4.0.0"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "^0.11.2",
+    "@semantic-ui/utils": "^0.11.2",
+    "tailwindcss-iso": "^1.0.0"
+  },
+  "devDependencies": {
+    "@semantic-ui/internal-scripts": "^0.11.2",
+    "vitest": "^3.0.8"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:esm",
+        "build:bundle",
+        "build:cdn"
+      ]
+    },
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
+    },
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
+    },
+    "build:cdn": {
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    }
+  }
+}

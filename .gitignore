@@ -10,6 +10,9 @@ dist/
 tests/results/
 tests/test-case/dist
 
+# for my ai friends
+ai/meta/agent-guestbook.md
+
 # Numerous always-ignore extensions
 *.diff
 *.err

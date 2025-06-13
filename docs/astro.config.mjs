@@ -63,7 +63,7 @@ export default defineConfig({
     },
     optimizeDeps: {
       force: true,
-      exclude: ['playground-elements'],
+      exclude: ['playground-elements', 'tailwindcss-iso'],
     },
   },
 

@@ -12,6 +12,7 @@ export const npmPackages = [
   '@semantic-ui/renderer',
   '@semantic-ui/query',
   '@semantic-ui/specs',
+  '@semantic-ui/tailwind',
   '@semantic-ui/utils',
 ];
 
@@ -26,6 +27,7 @@ export const localPackages = [
   '@semantic-ui/core/packages/specs',
   '@semantic-ui/core/packages/utils',
   '@semantic-ui/core/packages/reactivity',
+  '@semantic-ui/core/packages/tailwind',
 ];
 
 // note NPM packages is no longer used for static builds
@@ -39,11 +41,10 @@ const packageImports = { imports: {} };
 
 for (const pkg of importPackages) {
   try {
-
     // use jsdelivr
-    if(isStaticBuild) {
+    if (isStaticBuild) {
       let url = `${packageBase}/${pkg}/`;
-      if(packageBase.includes('jsdelivr')) {
+      if (packageBase.includes('jsdelivr')) {
         url += '+esm';
       }
       packageImports.imports[pkg] = url;
@@ -88,6 +89,7 @@ export const importMap = packageImports;
 export const importMapJSON = JSON.stringify(packageImports, null, 2);
 
 export const GET = async () => {
+  console.log(importMapJSON);
   return new Response(importMapJSON, {
     headers: {
       'Content-Type': 'application/importmap+json',
