@@ -16,7 +16,6 @@ let definition = {
 };
 
 // Transform with Tailwind plugin
-const transform = TailwindPlugin();
-definition = await transform(definition);
+definition = await TailwindPlugin(definition);
 
 export const TailwindDemo = defineComponent(definition);

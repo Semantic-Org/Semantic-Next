@@ -36,7 +36,7 @@ export async function getTailwindClasses({
   const candidatesWithPositions = scanner.getCandidatesWithPositions(changedContent);
 
   // allow either returning with positions or just array of classes
-  return (withPositions)
+  return (returnPositions)
     ? candidatesWithPositions
     : candidatesWithPositions.map(item => item.candidate);
 }
