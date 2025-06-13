@@ -1,0 +1,66 @@
+{
+  "name": "tailwindcss-iso",
+  "title": "Semantic UI Tailwind Plugin",
+  "description": "A plugin for generating tailwind css and extracting classes on the server and client.",
+  "author": "Jack Lukic",
+  "license": "ISC",
+  "version": "0.11.2",
+  "sideEffects": false,
+  "type": "module",
+  "main": "src/server/index.js",
+  "module": "src/browser/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "browser": "./dist/tailwind.js",
+      "node": "./src/server/index.js",
+      "default": "./src/server/index.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit",
+    "build:esm": "wireit",
+    "build:cdn": "wireit",
+    "test": "vitest"
+  },
+  "files": [
+    "src",
+    "dist",
+    "types",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0 || ^4.0.0"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "^0.11.2",
+    "@semantic-ui/utils": "^0.11.2"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/node": "^4.1.9",
+    "@tailwindcss/oxide": "^4.1.9"
+  },
+  "devDependencies": {
+    "@semantic-ui/internal-scripts": "^0.11.2",
+    "vitest": "^3.0.8"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:esm",
+        "build:bundle",
+        "build:cdn"
+      ]
+    },
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
+    },
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
+    },
+    "build:cdn": {
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    }
+  }
+}
