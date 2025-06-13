@@ -12,15 +12,13 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ```javascript
 import { TailwindPlugin } from '@semantic-ui/tailwind';
-const tailwindPlugin = TailwindPlugin();
-
 
 // Transform with Tailwind plugin
 const definition = {
   // your component definition
   template: `<div class="p-4 bg-red-500"></div>`
 }
-defineComponent( await tailwindPlugin(definition) );
+defineComponent( await TailwindPlugin(definition) );
 
 ```
 
