@@ -27,14 +27,10 @@
     }
   },
   "scripts": {
-    "build": "wireit",
-    "build:esm": "wireit",
-    "build:cdn": "wireit",
     "test": "vitest"
   },
   "files": [
     "src",
-    "dist",
     "types",
     "LICENSE"
   ],
@@ -46,25 +42,6 @@
     "@tailwindcss/oxide": "^4.1.9"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.11.2",
     "vitest": "^3.0.8"
-  },
-  "wireit": {
-    "build": {
-      "dependencies": [
-        "build:esm",
-        "build:bundle",
-        "build:cdn"
-      ]
-    },
-    "build:esm": {
-      "command": "node ../../internal-packages/scripts/src/build-esm.js"
-    },
-    "build:bundle": {
-      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
-    },
-    "build:cdn": {
-      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
-    }
   }
 }
