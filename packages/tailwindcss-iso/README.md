@@ -71,9 +71,9 @@ console.log(tailwindCSS);
 
 ### Getting Candidate Class Names
 
-Note: the official terminology is "candidate classes" as these may include false positives. This are filtered when compiling the tailwind css with `generateTailwindCSS`.
+Note: the official terminology is "candidate classes" as these may include false positives. These are filtered when compiling the tailwind css with `generateTailwindCSS`.
 
-#### As Array
+#### Basic Usage
 ```javascript
 import { getTailwindClasses } from 'tailwindcss-iso';
 
@@ -85,11 +85,12 @@ const content = `
 
 const classes = await getTailwindClasses({ content });
 
-// an array of classes as strings
+// Returns an array of classes as strings
 console.log(classes);
+// Output: ['p-4', 'bg-blue-500', 'text-white', 'rounded-md', 'hover:bg-blue-600']
 ```
 
-#### As Array With Position
+#### With Position Information
 
 ```javascript
 import { getTailwindClasses } from 'tailwindcss-iso';
@@ -100,11 +101,65 @@ const content = `
   </div>
 `;
 
-const classes = await getTailwindClasses({ content, returnPosition: true });
+const classes = await getTailwindClasses({ content, returnPositions: true });
 
-// an array of objects with position in content
+// Returns an array of objects with position information
 console.log(classes);
+// Output: [
+//   { candidate: 'p-4', position: 15 },
+//   { candidate: 'bg-blue-500', position: 19 },
+//   ...
+// ]
 ```
+
+#### Content Type Detection
+
+The scanner automatically detects classes based on the file extension hint. By default, it uses `'jsx'` which handles mixed HTML/JS content well:
+
+```javascript
+// Mixed HTML and JavaScript content (default: 'jsx')
+const mixedContent = `
+  // JSX component
+  <button className="px-4 py-2 bg-blue-500 text-white rounded">
+    Click me
+  </button>
+  
+  // JavaScript patterns
+  const dynamicClasses = "flex items-center space-x-2";
+  element.classList.add('hidden', 'sm:block');
+`;
+
+const classes = await getTailwindClasses({ content: mixedContent });
+```
+
+For specific content types, you can override the extension:
+
+```javascript
+// Pure HTML content
+const htmlContent = '<div class="container mx-auto p-4">Content</div>';
+const classes = await getTailwindClasses({ 
+  content: htmlContent, 
+  extension: 'html' 
+});
+
+// TypeScript/TSX content
+const tsxContent = `const Button: React.FC = () => <button className="btn-primary">Click</button>`;
+const classes = await getTailwindClasses({ 
+  content: tsxContent, 
+  extension: 'tsx' 
+});
+
+// Vue component
+const vueContent = `<template><div class="vue-component bg-red-500"></div></template>`;
+const classes = await getTailwindClasses({ 
+  content: vueContent, 
+  extension: 'vue' 
+});
+```
+
+**Extension Parameter:**
+
+The `extension` parameter provides a hint to the Tailwind scanner about how to parse the content. It defaults to `'jsx'`. You can pass different file extensions to potentially optimize class extraction for your specific content type.
 
 ## License
 

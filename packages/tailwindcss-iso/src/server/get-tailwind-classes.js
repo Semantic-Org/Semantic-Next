@@ -3,24 +3,26 @@
  * using WASM Oxide Engine
  */
 
-import { Scanner, ChangedContent } from '@tailwindcss/oxide';
+import { Scanner } from '@tailwindcss/oxide';
 
 export async function getTailwindClasses({
   content = '', // html and js content to scan
-  returnPositions = false // whether to return classes with positions
+  returnPositions = false, // whether to return classes with positions
+  extension = 'html' // file extension hint for parser ('html', 'js', 'jsx', 'tsx', 'vue', etc.)
 }) {
 
   // Scanner will let us extract content classes
-  const scanner = new Scanner();
+  const scanner = new Scanner({ sources: [] });
 
-  // Create "changed content" with passed in content
-  const changedContent = new ChangedContent(content, 'html');
-
-  // Scanner gives us classes and positions
+  // Scanner gives us classes and positions using the server API
+  const changedContent = {
+    content,
+    extension,
+  };
   const candidatesWithPositions = scanner.getCandidatesWithPositions(changedContent);
 
   // allow either returning with positions or just array of classes
-  return (withPositions)
+  return (returnPositions)
     ? candidatesWithPositions
     : candidatesWithPositions.map(item => item.candidate);
 }

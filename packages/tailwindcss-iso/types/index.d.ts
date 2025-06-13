@@ -37,6 +37,8 @@ export interface GetTailwindClassesOptions {
   content?: string;
   /** Whether to return classes with position information */
   returnPositions?: boolean;
+  /** File extension hint for parser ('html', 'js', 'jsx', 'tsx', 'vue', etc.) */
+  extension?: string;
 }
 
 /**

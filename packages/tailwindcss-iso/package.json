@@ -27,7 +27,9 @@
     }
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "test:server": "vitest --config vitest.config.js",
+    "test:browser": "vitest --config vitest.browser.config.js"
   },
   "files": [
     "src",
@@ -42,6 +44,8 @@
     "@tailwindcss/oxide": "^4.1.9"
   },
   "devDependencies": {
-    "vitest": "^3.0.8"
+    "vitest": "^3.0.8",
+    "@vitest/browser": "^3.0.8",
+    "playwright": "^1.40.0"
   }
 }

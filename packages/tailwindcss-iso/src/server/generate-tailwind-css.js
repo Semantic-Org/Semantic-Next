@@ -1,3 +1,4 @@
+import { compile } from '@tailwindcss/node';
 import { getTailwindClasses } from './get-tailwind-classes.js';
 
 export async function generateTailwindCSS({
@@ -12,18 +13,15 @@ export async function generateTailwindCSS({
     candidates = await getTailwindClasses({ content });
   }
 
-  // We want to import tailwind first then include any passed in css
+  // Build source CSS - put existing CSS first, then Tailwind directives
   const sourceCSS = css
-    ? `${importCSS}\n${css}`
-    : importCSS;
+    ? `${css}\n${importCSS}` // Add utilities to existing CSS
+    : importCSS; // Just utilities if no existing CSS
 
-  // Compile the CSS using tailwindcss core with browser-specific options
+  // Compile CSS using @tailwindcss/node with file system support
   const compiler = await compile(sourceCSS, {
-    base: '/',
-    loadStylesheet: loadTailwindCSS,
-    loadModule: () => {
-      throw new Error('External modules not supported in browser build');
-    },
+    base: process.cwd(),
+    onDependency: () => {}, // No-op dependency tracking for JIT use
   });
 
   // Build the CSS with the extracted candidates and return tailwind css

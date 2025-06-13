@@ -4,7 +4,8 @@
 
 export async function getTailwindClasses({
   content = '', // html and js content to scan
-  returnPositions = false // whether to return classes with positions
+  returnPositions = false, // whether to return classes with positions
+  extension = 'html' // file extension hint for parser ('html', 'js', 'jsx', 'tsx', 'vue', etc.)
 }) {
 
   /*
@@ -30,7 +31,7 @@ export async function getTailwindClasses({
   const scanner = new Scanner();
 
   // Create "changed content" with passed in content
-  const changedContent = new ChangedContent(content, 'html');
+  const changedContent = new ChangedContent(content, extension);
 
   // Scanner gives us classes and positions
   const candidatesWithPositions = scanner.getCandidatesWithPositions(changedContent);
