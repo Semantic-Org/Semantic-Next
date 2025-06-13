@@ -1,8 +1,4 @@
-/**
- * This extracts html/css/js from a definition and then creates tailwind css
- */
-
-import { generateTailwindCSS } from 'tailwindcss-iso';
+import { generateTailwindCSS } from 'tailwindcss-iso/browser';
 import { extractDefinitionContent } from './extract-definition-content.js';
 
 export async function TailwindPlugin(definition) {
@@ -14,7 +10,7 @@ export async function TailwindPlugin(definition) {
     return definition;
   }
 
-  // Generate CSS using tailwindcss-iso
+  // Generate CSS using tailwindcss-iso browser implementation
   const tailwindCSS = await generateTailwindCSS({
     content,
     css,
@@ -31,3 +27,5 @@ export async function TailwindPlugin(definition) {
     css: tailwindCSS,
   };
 }
+
+export { extractDefinitionContent } from './extract-definition-content.js';

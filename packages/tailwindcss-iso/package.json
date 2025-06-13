@@ -16,6 +16,14 @@
       "browser": "./src/browser/index.js",
       "node": "./src/server/index.js",
       "default": "./src/server/index.js"
+    },
+    "./browser": {
+      "types": "./types/index.d.ts",
+      "default": "./src/browser/index.js"
+    },
+    "./server": {
+      "types": "./types/index.d.ts",
+      "default": "./src/server/index.js"
     }
   },
   "scripts": {

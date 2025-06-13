@@ -7,9 +7,17 @@
   "version": "0.11.2",
   "sideEffects": false,
   "type": "module",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "src/server.js",
+  "module": "src/browser.js",
   "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "browser": "./src/browser.js",
+      "node": "./src/server.js",
+      "default": "./src/server.js"
+    }
+  },
   "scripts": {
     "build": "wireit",
     "build:esm": "wireit",
