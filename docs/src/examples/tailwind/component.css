@@ -1,0 +1,15 @@
+/*
+  Example using @theme inside a component
+
+*/
+
+@theme {
+  /* This changes the bluish grays to a monochrome color */
+  --color-gray-100: theme(colors.zinc.100);
+  --color-gray-300: theme(colors.zinc.300);
+  --color-gray-700: theme(colors.zinc.700);
+  --color-gray-950: theme(colors.zinc.950);
+}
+
+/* this allows us to add "dark" class to component to trigger dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
