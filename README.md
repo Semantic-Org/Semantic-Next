@@ -45,30 +45,6 @@ import { UIButton, UICard, UIMenu } from '@semantic-ui/core';
 import '@semantic-ui/core/theme';
 ```
 
-### CDN Usage
-
-For quick prototyping or projects without a build step, you can use the CDN:
-
-```html
-<!-- Import the entire framework -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@semantic-ui/core/dist/cdn/semantic-ui.min.js"></script>
-
-<!-- Import global theme CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@semantic-ui/core/dist/cdn/theme.min.css">
-```
-
-Or load individual components:
-
-```html
-<!-- Import just the button component -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@semantic-ui/core/dist/cdn/button.min.js"></script>
-
-<!-- Import global theme CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@semantic-ui/core/dist/cdn/theme.min.css">
-
-<!-- Or import component-specific theme (if needed) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@semantic-ui/core/dist/cdn/theme/button.min.css">
-```
 
 ## Contributing
 
