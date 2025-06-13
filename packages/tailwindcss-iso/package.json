@@ -13,7 +13,6 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "browser": "./dist/tailwind.js",
       "node": "./src/server/index.js",
       "default": "./src/server/index.js"
     }
