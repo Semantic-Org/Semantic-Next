@@ -21,16 +21,13 @@ npm install @semantic-ui/core
 For the most efficient imports, you can import individual components directly:
 
 ```js
+// Import global css tokens
+import '@semantic-ui/core/theme';
+
 // Import specific components
 import { UIButton } from '@semantic-ui/core/button';
 import { UICard } from '@semantic-ui/core/card';
 
-// Import global theme
-import '@semantic-ui/core/theme';
-
-// Or import component-specific themes (if needed)
-import '@semantic-ui/core/theme/button';
-import '@semantic-ui/core/theme/card';
 ```
 
 ### Full Framework Import
