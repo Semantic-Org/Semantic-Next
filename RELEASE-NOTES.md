@@ -4,7 +4,7 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.12.1
+# Version 0.12.1-2
 * **Tailwind** - `tailwindcss-iso` now has bundled CDN version to avoid issues importing css files in browser via esm. Modified `tailwind` package to accomodate this change.
 * **Tailwind** - Removed bundled `wasm` files, these are now part of the generic `tailwindcss-iso` package.
 
