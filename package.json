@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "title": "Semantic UI Core",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
@@ -193,9 +193,9 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.12.1",
-    "@semantic-ui/esbuild-log": "^0.12.1",
-    "@semantic-ui/specs": "^0.12.1"
+    "@semantic-ui/component": "^0.12.2",
+    "@semantic-ui/esbuild-log": "^0.12.2",
+    "@semantic-ui/specs": "^0.12.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
