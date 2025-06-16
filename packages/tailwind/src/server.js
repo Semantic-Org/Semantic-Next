@@ -1,4 +1,4 @@
-import { generateTailwindCSS } from 'tailwindcss-iso/server';
+import { generateTailwindCSS } from 'tailwindcss-iso';
 import { extractDefinitionContent } from './extract-definition-content.js';
 
 export async function TailwindPlugin(definition) {

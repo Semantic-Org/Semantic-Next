@@ -1,4 +1,4 @@
-import { generateTailwindCSS } from 'tailwindcss-iso/browser';
+import { generateTailwindCSS } from 'tailwindcss-iso';
 import { extractDefinitionContent } from './extract-definition-content.js';
 
 export async function TailwindPlugin(definition) {
@@ -20,7 +20,6 @@ export async function TailwindPlugin(definition) {
   if (!tailwindCSS.trim()) {
     return definition;
   }
-
   // Replace component CSS with Tailwind-enhanced version
   return {
     ...definition,
