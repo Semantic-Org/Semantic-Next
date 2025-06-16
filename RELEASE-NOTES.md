@@ -4,6 +4,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.12.1
+* **Tailwind** - `tailwindcss-iso` now has bundled CDN version to avoid issues importing css files in browser via esm. Modified `tailwind` package to accomodate this change.
+* **Tailwind** - Removed bundled `wasm` files, these are now part of the generic `tailwindcss-iso` package.
+
 # Version 0.12.0
 * **Template** - `onThemeChanged` now looks for either `themechange` event from `html` or the class `dark` being toggled on `html` using mutation observers.
 * **Tailwind** - Added a plugin for using Tailwind inside Semantic UI components. This can be used alongside the css tokens provided by the css framework, or instead of it. This will scan your component javascript, html and css and attach only the tailwind styles used.
