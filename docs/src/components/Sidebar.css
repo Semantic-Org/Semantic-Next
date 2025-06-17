@@ -25,6 +25,7 @@
     border: none;
     border-right: var(--very-subtle-border);
     scrollbar-width: thin;
+    overflow: hidden;
 
     ui-menu {
       margin: 1rem 1rem 0rem;
@@ -35,7 +36,24 @@
       --menu-item-active-box-shadow: 0px 0px 2px rgb(40 160 255 / 31%);
     }
     nav-menu {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    nav-menu::part(search) {
+      margin: 0.5rem 1rem 0rem;
+    }
+    nav-menu::part(menu) {
+      scrollbar-width: thin;
+      display: block;
       padding: 0rem 1rem;
+      flex-grow: 1;
+    }
+    nav-menu::part(menu) {
+      overflow-y: scroll;
+      border-top: var(--border);
+      margin-top: 1rem !important;
+      padding: 0.5rem 1rem;
     }
   }
 

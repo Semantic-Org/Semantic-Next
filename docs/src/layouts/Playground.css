@@ -71,7 +71,9 @@
     ui-button {
       margin: 0.5rem;
     }
-
+    nav-menu::part(search) {
+      margin: 0.75rem 1rem -0.25rem;
+    }
     nav-menu {
       margin-top: 0rem;
       --nav-menu-title-padding: 5px 0px 10px;

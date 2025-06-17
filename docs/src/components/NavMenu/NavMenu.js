@@ -15,6 +15,7 @@ const defaultSettings = {
   dark: false, // force dark mode
   aligned: false, // align submenus to headers
   noResultsMessage: `No sections match "{search}"`,
+  searchPlaceholder: 'Search menu...',
 };
 
 const defaultState = {
@@ -26,7 +27,6 @@ const defaultState = {
 
 const createComponent = function({ $, el, self, settings, state, reaction, isRendered }) {
   return {
-
     initialize() {
       reaction(self.calculateURL); // track current url
     },
@@ -64,9 +64,8 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
 
       const matches = (a = '', b = searchTerm) => {
         return a.toLowerCase().includes(b.toLowerCase());
-      }
+      };
       menu = menu.reduce((menuAcc, section) => {
-
         // Check if section name matches search term
         const sectionMatches = matches(section.name);
 
@@ -139,12 +138,12 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
       let selectedIndex = -1;
       let firstMatch = false;
       const addSelectedIndex = (item) => {
-        if(item?.url) {
+        if (item?.url) {
           selectedIndex++;
           item.selectedIndex = selectedIndex;
         }
         // start on first match
-        if(!firstMatch && item.highlight) {
+        if (!firstMatch && item.highlight) {
           state.selectedIndex.set(selectedIndex);
           firstMatch = true;
         }
@@ -197,7 +196,7 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
       return {
         active: self.isActiveItem(section),
         indented: self.hasIcons(),
-      }
+      };
     },
     getMenuClasses() {
       return {
@@ -284,7 +283,7 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
     },
 
     scrollToActive() {
-      if(!isRendered) {
+      if (!isRendered) {
         return;
       }
       const el = $('.item.current').first().el();
@@ -301,31 +300,30 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
         }
       }
     },
-
   };
 };
 
 const keys = {
-  'up'({self, state}) {
-    if(self.isSearching()) {
+  'up'({ self, state }) {
+    if (self.isSearching()) {
       state.selectedIndex.decrement(1, 0);
     }
   },
-  'down'({self, state}) {
-    if(self.isSearching()) {
+  'down'({ self, state }) {
+    if (self.isSearching()) {
       state.selectedIndex.increment(1, state.maxIndex.get());
     }
   },
-  'enter'({self, state, $}) {
-    if(self.isSearching()) {
+  'enter'({ self, state, $ }) {
+    if (self.isSearching()) {
       const selectedIndex = state.selectedIndex.get();
       const href = $('.selected').attr('href');
-      if(selectedIndex >= 0 && href) {
+      if (selectedIndex >= 0 && href) {
         openLink(href);
       }
     }
-  }
-}
+  },
+};
 
 const onRendered = ({ self, isClient, el, settings }) => {
   if (isClient) {

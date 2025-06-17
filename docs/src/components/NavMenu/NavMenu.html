@@ -1,7 +1,7 @@
-<div class="{classMap getMenuClasses}menu">
-  {#if searchable}
-    <ui-input fluid tiny search dark class="search" placeholder="Search menu..."></ui-input>
-  {/if}
+{#if searchable}
+  <ui-input fluid tiny search dark class="search" placeholder="{searchPlaceholder}" part="search"></ui-input>
+{/if}
+<div class="{classMap getMenuClasses}menu" part="menu">
   {#if hasNoResults}
     <div class="message">{getNoResultsMessage}</div>
   {else}
@@ -12,7 +12,7 @@
       }
       {#if section.pages}
         <div class="{classMap getContentClasses section}content" part="content">
-          <div class="menu" part="menu">
+          <div class="menu" part="sub-menu">
             {#each page in section.pages}
               {#if page.pages}
                 {>title

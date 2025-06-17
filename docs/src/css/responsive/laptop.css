@@ -3,8 +3,8 @@
 @layer responsive.laptop {
 
   layout {
-    --sidebar-width: 230px;
-    --rail-width: 220px;
+    --sidebar-width: 210px;
+    --rail-width: 0px;
   }
   layout masthead > ui-menu ui-container {
     margin-right: 0px;
