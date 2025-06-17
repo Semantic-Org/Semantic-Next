@@ -32,7 +32,12 @@ The framework's complexity requires strategic context loading:
 - Sections tagged with use cases for targeted loading
 
 ### **Progressive Context Building**
-```
+
+Level 0: Foundational Context
+├── Read: `ai/00-START-HERE.md` (Navigation hub)
+├── Read: `ai/foundations/mental-model.md` (Core architectural concepts)
+└── Confirm: Foundational context is loaded before proceeding to task-s
+
 Level 1: Foundation
 ├── Read: 00-START-HERE.md (navigation)
 ├── Read: mental-model.md (architecture)
@@ -50,7 +55,6 @@ Level 3: Implementation
 ├── Read: Selected examples
 ├── Glob: Find related files
 └── Read: Implementation details
-```
 
 Level 4: Verification & Refinement
 ├── Grep: Source code for key terms to find ground truth
