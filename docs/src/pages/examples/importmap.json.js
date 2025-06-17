@@ -86,7 +86,7 @@ for (const pkg of importPackages) {
 }
 
 // hardcode this for now
-packageImports['@semantic-ui/tailwind'] = 'https://cdn.jsdelivr.net/npm/@semantic-ui/tailwind/dist/bundle/tailwind.js';
+// packageImports['@semantic-ui/tailwind'] = 'https://cdn.jsdelivr.net/npm/@semantic-ui/tailwind/dist/bundle/tailwind.js';
 
 export const importMap = packageImports;
 export const importMapJSON = JSON.stringify(packageImports, null, 2);
