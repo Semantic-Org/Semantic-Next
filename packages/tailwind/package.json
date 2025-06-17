@@ -8,12 +8,12 @@
   "sideEffects": false,
   "type": "module",
   "main": "src/server.js",
-  "module": "src/browser.js",
+  "module": "dist/bundle/tailwind.js",
   "types": "types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "browser": "./src/browser.js",
+      "browser": "./dist/bundle/tailwind.js",
       "node": "./src/server.js",
       "default": "./src/server.js"
     }
@@ -36,7 +36,7 @@
   "dependencies": {
     "@semantic-ui/component": "^0.12.2",
     "@semantic-ui/utils": "^0.12.2",
-    "tailwindcss-iso": "^1.0.2"
+    "tailwindcss-iso": "file:../tailwindcss-iso"
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.12.2",
