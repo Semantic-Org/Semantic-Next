@@ -52,6 +52,11 @@ Level 3: Implementation
 └── Read: Implementation details
 ```
 
+Level 4: Verification & Refinement
+├── Grep: Source code for key terms to find ground truth
+├── Read: Specialized guides to cross-reference concepts
+└── Synthesize: Refine answer with verified details before responding
+
 ### Context Window Management
 - **Start with** `00-START-HERE.md` for navigation
 - **Load specific documents** based on current task

@@ -1,16 +1,17 @@
-# Semantic UI - Claude Code Integration Guide
+# Semantic UI - Agentic Code Integration Guide
 
-This file provides Claude Code-specific guidance for working with the Semantic UI web component framework. It acts as an intelligent entry point to the comprehensive AI context system located in `/ai/`.
+This file provides Agentic Code-specific guidance for working with the Semantic UI web component framework. It acts as an intelligent entry point to the comprehensive AI context system located in `/ai/`.
 
-## Context Loading Strategy
+**MANDATORY PRE-FLIGHT CONTEXT**
 
-### **Essential Context Foundation**
-Always load these foundational files for any Semantic UI task:
-1. **[`ai/00-START-HERE.md`](ai/00-START-HERE.md)** - Navigation hub and task-based routing
-2. **[`ai/foundations/mental-model.md`](ai/foundations/mental-model.md)** - Core architectural concepts
+**Rule:** The following files **MUST** be loaded and synthesized by the agent at the beginning of *every* session, without exception. This is a non-negotiable prerequisite for all other tasks.
+
+1.  **`ai/00-START-HERE.md`**: For task routing.
+2.  **`ai/foundations/mental-model.md`**: For core concepts and terminology.
+
+**Reason:** Failure to load `mental-model.md` will lead to imprecise and inaccurate responses. It contains the foundational principles and nuanced terminology required to interpret all other documents and code correctly. Bypassing this step is not a valid optimization.
 
 ### **Task-Based Context Loading**
-```
 Building Components → ai/guides/component-generation-instructions.md
 Debugging Issues → ai/foundations/codebase-navigation-guide.md  
 Implementation Patterns → ai/guides/patterns-cookbook.md
