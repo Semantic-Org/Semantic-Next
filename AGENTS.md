@@ -6,10 +6,16 @@ This file provides Agentic Code-specific guidance for working with the Semantic 
 
 **Rule:** The following files **MUST** be loaded and synthesized by the agent at the beginning of *every* session, without exception. This is a non-negotiable prerequisite for all other tasks.
 
-1.  **`ai/00-START-HERE.md`**: For task routing.
-2.  **`ai/foundations/mental-model.md`**: For core concepts and terminology.
+1.  **`ai/meta/ai-context-instructions.md`**: For agent operational protocol.
+2.  **`ai/00-START-HERE.md`**: For task routing and document discovery.
+3.  **`ai/foundations/mental-model.md`**: For core concepts and terminology.
 
-**Reason:** Failure to load `mental-model.md` will lead to imprecise and inaccurate responses. It contains the foundational principles and nuanced terminology required to interpret all other documents and code correctly. Bypassing this step is not a valid optimization.
+**Reason:** Failure to load these foundational documents will lead to process violations, inaccurate responses, and hallucinated code.
+- `ai-context-instructions.md` establishes the **mandatory procedures** for all tasks.
+- `00-START-HERE.md` provides the **map** to all other necessary context.
+- `mental-model.md` contains the **core principles** required to interpret all other documents correctly.
+
+Bypassing this step is not a valid optimization.
 
 ### **Task-Based Context Loading**
 Building Components → ai/guides/component-generation-instructions.md
@@ -17,15 +23,14 @@ Debugging Issues → ai/foundations/codebase-navigation-guide.md
 Implementation Patterns → ai/guides/patterns-cookbook.md
 API Reference → ai/foundations/quick-reference.md
 HTML/CSS Work → ai/guides/html-css-style-guide.md
-```
 
-## Claude Code Specific Workflows
+## Code Specific Workflows
 
 ### **Component Development Workflow**
 1. **Plan Task**: Use TodoWrite tool for multi-step component work
 2. **Load Context**: Read `ai/guides/component-generation-instructions.md` 
 3. **Explore Codebase**: Use Glob/Grep tools to find similar components
-4. **Implement**: Follow established patterns from examples
+4. **Implement**: Write code, **verifying all API and template syntax** against `quick-reference.md` and specialized guides.
 5. **Validate**: Run lint/typecheck commands if available
 6. **Mark Complete**: Update TodoWrite with progress
 
@@ -124,7 +129,7 @@ state.counter.increment();                    // Built-in helpers
 {#each items}...{/each}                      // List rendering
 ```
 
-## Claude Code Tool Optimization
+## Code Tool Optimization
 
 ### **Search Strategy**
 ```
@@ -161,6 +166,7 @@ Read → (wait) → Glob → (wait) → Edit
 1. **CSS Patterns**: [`ai/guides/html-css-style-guide.md`](ai/guides/html-css-style-guide.md) - Design token usage
 2. **Method References**: [`ai/foundations/mental-model.md`](ai/foundations/mental-model.md) - `self.method()` patterns
 3. **Component Communication**: [`ai/guides/patterns-cookbook.md`](ai/guides/patterns-cookbook.md) - Parent-child patterns
+4. **Template Syntax**: [`ai/specialized/templating-system-guide.md`](ai/specialized/templating-system-guide.md) - Correct template expression and control flow syntax
 
 ### **Critical Anti-Patterns to Avoid**
 - ❌ Prefixed CSS classes (`.size-large` → use `.large`)
@@ -168,6 +174,7 @@ Read → (wait) → Glob → (wait) → Edit
 - ❌ Hardcoded CSS values → use design tokens `var(--token)`
 - ❌ Global state stores → use component tree navigation
 - ❌ Direct DOM manipulation → use reactive templates
+- ❌ Assuming syntax → ALWAYS verify APIs and templates with `quick-reference.md` or the relevant
 
 ### **Design Token Priority**
 ```css
