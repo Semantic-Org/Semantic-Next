@@ -44,7 +44,7 @@ Enhanced Web Standards → Direct Platform Integration → DOM
 The framework embodies progressive enhancement at its core:
 
 1. **Static HTML** works without JavaScript
-2. **Enhanced HTML** gains interactivity when JavaScript loads  
+2. **Enhanced HTML** gains interactivity when JavaScript loads
 3. **Reactive HTML** becomes fully dynamic with the framework
 
 This isn't just about graceful degradation—it's about building components that naturally integrate into any environment.
@@ -73,7 +73,7 @@ Component Definition (Prototype)
 ├── Default Configuration
 └── Behavior Definitions
 
-     ↓ defineComponent() registers
+    ↓ defineComponent() registers
 
 Component Instance (Per DOM Element)
 ├── Shadow DOM Root
@@ -169,7 +169,7 @@ Understanding when reactivity happens is crucial:
 
 **Non-Reactive Contexts** (manual control):
 - Event handlers
-- Lifecycle callbacks  
+- Lifecycle callbacks
 - Component methods
 - External function calls
 
@@ -189,7 +189,7 @@ CREATION PHASE
 ├── createComponent() returns instance methods
 └── onCreated() for initialization
 
-RENDERING PHASE  
+RENDERING PHASE
 ├── Template compilation (once per component type)
 ├── Shadow DOM creation
 ├── Data context binding
@@ -198,7 +198,7 @@ RENDERING PHASE
 
 DESTRUCTION PHASE
 ├── Event handler cleanup (automatic)
-├── Reaction cleanup (automatic)  
+├── Reaction cleanup (automatic)
 ├── onDestroyed() for manual cleanup
 └── Shadow DOM removal
 ```
@@ -220,7 +220,7 @@ SETTINGS (Public API - Reactive Configuration)
 
 STATE (Internal Reactive Data)
 ├── Internal component memory and conditions
-├── Created and managed within component lifecycle  
+├── Created and managed within component lifecycle
 ├── Reactive signals for internal state tracking
 ├── Not directly accessible from outside
 ├── Think: "component's private memory"
@@ -235,22 +235,22 @@ COMPONENT PROPS (Non-Reactive Data)
 └── Examples: apiEndpoint, cachedCalculations, debounceTimer
 ```
 
-**Key Patterns**: 
+**Key Patterns**:
 ```javascript
 const createComponent = ({ settings, state, self }) => ({
   // Component props - direct instance properties
   apiEndpoint: '/api/users',        // Non-reactive static data
   validationRules: getRules(),      // Cached calculation
   debounceTimer: null,              // Mutable non-reactive
-  
+
   updateTheme(newTheme) {
     settings.theme = newTheme;      // Settings are mutable and reactive
   },
-  
+
   toggleOpen() {
     state.isOpen.toggle();          // State uses signal API
   },
-  
+
   makeApiCall() {
     fetch(self.apiEndpoint)         // Access component props via self
       .then(data => state.data.set(data));
@@ -258,7 +258,7 @@ const createComponent = ({ settings, state, self }) => ({
 });
 ```
 
-**Decision Rules**: 
+**Decision Rules**:
 - **Settings** → External consumers should configure this (public API)
 - **State** → Internal reactive data that drives UI updates
 - **Component Props** → Static, cached, or non-reactive data
@@ -361,11 +361,16 @@ settings.size = 'large';      // Template updates automatically
 
 Semantic UI provides three primary patterns for component communication, each suited for different scenarios. The choice of pattern depends on the relationship between components and the direction of data flow.
 
+
+## Component Communication Architecture
+
+Semantic UI provides three primary patterns for component communication, each suited for different scenarios. The choice of pattern depends on the relationship between components and the direction of data flow.
+
 ### 1. Event-Driven Notifications (Decoupled)
 
 **The preferred method for child-to-parent communication and notifying external consumers.**
 
-* **Pattern**: Components use the `dispatchEvent` helper to emit standard `CustomEvent`s. This helper ensures events bubble by default, making them easy to listen for.
+* **Pattern**: Components use the `dispatchEvent` helper to emit standard `CustomEvent`s. This helper ensures events **bubble by default**, making them easy to listen for from an ancestor.
 * **Use Case**: A child component needs to announce a state change (e.g., `'itemSelected'`, `'formSubmitted'`, `'panelToggled'`) without knowing who or what is listening. This keeps components loosely coupled and highly reusable.
 * **Mental Model**: "Fire-and-forget." The component broadcasts that something happened; it's up to parents or other parts of the application to listen and react.
 
@@ -382,35 +387,40 @@ const events = {
 }
 ```
 
-### 2. Imperative Control (Parent-to-Child)
+### 2. Imperative Control (External & Parent-to-Child)
 
-**The preferred method for a parent component or external script to command a child.**
+**The preferred method for an *external script* or a parent component to command a child from *outside* its own component instance.**
 
-* **Pattern**: Access the component's public API (the instance returned from `createComponent`) via the DOM element's `.component` property, often using the `$('selector').component()` helper.
+* **Pattern**: Access the component's public API (the instance returned from `createComponent`) via the DOM element's `.component` property. The query library's `$('selector').component()` is a convenient helper for this.
 * **Use Case**: An external script needs to open a modal, a parent form needs to tell a child field to validate itself, or a dashboard needs to tell a chart to refresh its data.
 * **Mental Model**: Direct, imperative control. The caller has a reference to the component instance and can invoke its public methods.
 
 ```javascript
 // External script controlling a counter component
-const counter = $('ui-counter').component();
-counter.setCounter(10);
-counter.startCounter();
+const counterComponent = $('ui-counter').component();
+
+// Call public methods on the instance. Note that a selector can
+// return multiple components, so you might need to iterate.
+counterComponent.each(instance => {
+  instance.setCounter(10);
+  instance.startCounter();
+});
 ```
 
-### 3. Hierarchical State Sharing (Tightly-Coupled Systems)
+### 3. Hierarchical Traversal (Tightly-Coupled Systems)
 
-**A specialized pattern for *systems* of components that are designed to work together and share state.**
+**A specialized pattern for *internal* communication within systems of components that are designed to work together and share state.**
 
-* **Pattern**: Use `findParent()` and `findChild()` / `getChildren()` to traverse the component tree and directly access a parent or child's state signals or methods.
-* **Use Case**: A `todo-list` managing its `todo-item` children, or an `accordion` coordinating its `accordion-panel`s. In these cases, the children are fundamentally part of the parent's functionality and direct state access is more efficient than a complex web of events.
+* **Pattern**: A parent uses `findChild()` or `findChildren()` to get instances of its direct children. A child uses `findParent()` to access its direct parent's instance.
+* **Use Case**: A `todo-list` managing its `todo-item` children, or an `accordion` coordinating its `accordion-panel`s. In these cases, the components are fundamentally part of a larger system, and direct state access is more efficient than a complex web of events.
 * **Mental Model**: "A single, distributed organism." Components are not independent but are parts of a larger whole. Use this pattern when components are not meant to be used separately.
 
 ```javascript
 // Child (todo-item) accessing parent's shared state
-const createComponent = ({ findParent }) => ({
+const createComponent = ({ findParent, data }) => ({
   toggleCompleted() {
     const todoList = findParent('todo-list');
-    todoList.todos.setProperty(this.id, 'completed', true);
+    todoList.todos.setProperty(data.todo._id, 'completed', true);
   }
 });
 ```
@@ -450,7 +460,7 @@ The `@semantic-ui/query` library solves the Shadow DOM traversal problem:
 // Standard query (stops at shadow boundaries)
 $('.button')              // Only light DOM
 
-// Deep query (crosses shadow boundaries)  
+// Deep query (crosses shadow boundaries)
 $$('.button')             // Light + Shadow DOM
 
 // Component boundary aware
@@ -467,7 +477,7 @@ Events in web components have complex bubbling behavior:
 Shadow DOM Event Flow:
 1. Event occurs in shadow DOM
 2. Bubbles to shadow root
-3. Re-targets to host element  
+3. Re-targets to host element
 4. Continues bubbling in light DOM
 ```
 
@@ -481,20 +491,20 @@ Semantic UI provides multiple event binding strategies through keywords:
 const events = {
   // Standard (default): Event delegation within component
   'click .button': () => {},
-  
+
   // Global: Bind to elements outside component
   'global scroll window': () => {},
   'global hashchange window': () => {},
-  
+
   // Deep: Access intentional child components (button-group -> button)
   'deep click ui-button .icon': () => {},  // Parent managing child component
-  
+
   // Bind: Direct binding (for non-bubbling events)
   'bind customevent some-component': () => {},
-  
+
   // Multiple events, single selector
   'mouseup, mouseleave .element': () => {},
-  
+
   // Single event, multiple selectors
   'click .btn1, click .btn2': () => {},
 };
@@ -518,7 +528,7 @@ Templates undergo a sophisticated compilation process:
 Template Source
     ↓ parse
 Abstract Syntax Tree (AST)
-    ↓ optimize  
+    ↓ optimize
 Reactive AST (with dependency tracking)
     ↓ render
 Live DOM + Reactive Bindings
@@ -534,7 +544,7 @@ Templates support dual expression syntax for flexibility:
 // Lisp-style (functional)
 {formatDate date 'YYYY-MM-DD' timezone}
 
-// JavaScript-style (familiar)  
+// JavaScript-style (familiar)
 {formatDate(date, 'YYYY-MM-DD', timezone)}
 
 // Nested expressions
@@ -551,7 +561,7 @@ Template Expression: {counter}
 Reactive Binding: () => context.counter
     ↓ creates
 Reaction: auto-updates DOM when counter changes
-    ↓ cleanup  
+    ↓ cleanup
 Automatic: reaction disposed when template unmounts
 ```
 
@@ -593,7 +603,7 @@ Asynchronous Updates (batched):
 Component Definition Time:
 └── Template → AST (compiled once)
 
-Component Instance Time:  
+Component Instance Time:
 ├── AST + Data Context → Rendered DOM
 ├── Shared AST across all instances
 └── Independent data contexts per instance
@@ -635,7 +645,7 @@ Components support three configuration dialects:
 <!-- Verbose (explicit) -->
 <ui-button size="large" variant="primary">
 
-<!-- Concise (boolean attributes) -->  
+<!-- Concise (boolean attributes) -->
 <ui-button large primary>
 
 <!-- Classic (class-based) -->
@@ -660,7 +670,7 @@ Browser Environment:
 
 Server Environment:
 ├── Static HTML generation
-├── Attribute processing  
+├── Attribute processing
 └── No JavaScript features
 
 Framework Integration:
@@ -677,7 +687,7 @@ Framework Integration:
 ```
 Enhancement Levels:
 1. Static HTML → Basic functionality
-2. + Custom Elements → Component lifecycle  
+2. + Custom Elements → Component lifecycle
 3. + JavaScript → Full reactivity
 4. + Framework → Advanced integration
 ```
@@ -705,7 +715,7 @@ Understanding these mental models enables effective use of Semantic UI and helps
 
 **Source References:**
 - Core implementation: `/packages/component/src/`
-- Reactivity system: `/packages/reactivity/src/`  
+- Reactivity system: `/packages/reactivity/src/`
 - Template compiler: `/packages/templating/src/compiler/`
 - Query system: `/packages/query/src/`
 - Component examples: `/docs/src/examples/todo-list/`

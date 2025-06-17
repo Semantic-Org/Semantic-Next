@@ -1,9 +1,9 @@
 # Semantic UI Component Development Guide
 
-> **For:** AI agents building Semantic UI components for any application  
-> **Prerequisites:** Basic understanding of web components and JavaScript  
-> **Scope:** Framework usage patterns, component architecture, implementation best practices  
-> **Related:** [Mental Model](../foundations/mental-model.md) • [Patterns Cookbook](../guides/patterns-cookbook.md) • [API Reference](../foundations/quick-reference.md)  
+> **For:** AI agents building Semantic UI components for any application
+> **Prerequisites:** Basic understanding of web components and JavaScript
+> **Scope:** Framework usage patterns, component architecture, implementation best practices
+> **Related:** [Mental Model](../foundations/mental-model.md) • [Patterns Cookbook](../guides/patterns-cookbook.md) • [API Reference](../foundations/quick-reference.md)
 > **Back to:** [Documentation Hub](../00-START-HERE.md)
 
 ---
@@ -21,19 +21,19 @@ This guide covers building Semantic UI components for **any application** - whet
 
 **Use this guide for:**
 - Components for your own applications
-- Library components  
+- Library components
 - Understanding framework patterns and architecture
 - General component development skills
 
 **MANDATORY READING BEFORE COMPONENT DEVELOPMENT:**
 
 1. **CSS & Design Patterns**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - Essential for CSS class naming and design token usage
-2. **Method References**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Critical `self.methodName()` patterns 
-3. **Component Communication**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Parent-child patterns and event handling
+2. **Method References**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Critical `self.methodName()` patterns
+3. **Component Communication**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed guide to communication patterns
 
-**⚠️ Common Mistakes**: 
+**⚠️ Common Mistakes**:
 - Using prefixed class names like `.size-large` instead of `.large`
-- Using `this.method()` instead of `self.method()` 
+- Using `this.method()` instead of `self.method()`
 - Using hardcoded CSS values instead of design tokens like `var(--large)`
 - Not prefixing query variables with `$` (use `const $div = $('div')`)
 - Creating components without proper file organization
@@ -47,7 +47,7 @@ This guide covers building Semantic UI components for **any application** - whet
 For comprehensive information beyond this guide:
 
 - **🎨 HTML/CSS Style Guide**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - **ESSENTIAL** CSS class naming and design token usage
-- **🧠 Mental Model & Architecture**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Core concepts, method references, component tree navigation
+- **🧠 Mental Model & Architecture**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Core concepts, method references, component communication
 - **📖 Patterns & Recipes**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed implementation patterns and communication
 - **⚡ Quick API Reference**: [`../foundations/quick-reference.md`](../foundations/quick-reference.md) - Complete API syntax and options
 - **🗺️ Codebase Navigation**: [`../foundations/codebase-navigation-guide.md`](../foundations/codebase-navigation-guide.md) - Finding documentation and examples
@@ -124,7 +124,7 @@ Semantic UI provides comprehensive first-party components that **MUST** be used 
 
 **Before using any first-party component, read its specification:**
 - **Button**: `/src/components/button/specs/button.json`
-- **Input**: `/src/components/input/specs/input.json`  
+- **Input**: `/src/components/input/specs/input.json`
 - **Icon**: `/src/components/icon/specs/icon.json`
 - **[Component]**: `/src/components/[component]/specs/[component].json`
 
@@ -156,8 +156,6 @@ defineComponent({
   css,
   // ... component definition
 });
-```
-
 ```html
 <!-- component.html - Compose with first-party components (based on specs) -->
 <ui-container>
@@ -170,7 +168,7 @@ defineComponent({
 </ui-container>
 ```
 
-**Critical Rules**: 
+**Critical Rules**:
 1. **Read the spec file first** - never guess component APIs
 2. **Use exact attribute names** from the specification
 3. **Check available variations and types** in the spec
@@ -234,14 +232,14 @@ const defaultState = {
 
 const createComponent = ({ self, state, settings, $, $$, findParent, findChild, reaction, dispatchEvent, signal }) => ({
   // Component instance methods
-  
+
   // Example computed property
   getComputedValue() {
     // Access state with .get() in JavaScript code
     const stateValue = state.someValue.get();
     return stateValue * 2;
   },
-  
+
   // Example method calling another method
   getDisplayText() {
     if (!settings.showLabel) return '';
@@ -249,7 +247,7 @@ const createComponent = ({ self, state, settings, $, $$, findParent, findChild, 
     const percentage = self.getComputedValue();
     return `${percentage}%`;
   },
-  
+
   // Example method for setup
   setupReactions() {
     reaction(() => {
@@ -407,7 +405,7 @@ Templates have a flattened data context with automatic reactivity. Key patterns:
 ```css
 /* ✅ CORRECT: Use semantic class names directly (no prefixes) */
 .small { --progress-height: 0.5rem; }
-.medium { --progress-height: 1rem; }  
+.medium { --progress-height: 1rem; }
 .large { --progress-height: 1.5rem; }
 
 .primary { --progress-color: var(--primary-color); }
@@ -459,11 +457,11 @@ Templates have a flattened data context with automatic reactivity. Key patterns:
   display: flex;
   padding: var(--spacing);              /* Use design token */
   border-radius: var(--border-radius); /* Use design token */
-  
+
   .header {
     font-size: var(--large);           /* Use design token */
     font-weight: var(--bold);          /* Use design token */
-    
+
     .title {
       color: var(--text-color);        /* Use design token */
     }
@@ -587,57 +585,59 @@ afterFlush(() => {
 
 ## Component Communication Patterns
 
-### For Intentional Parent-Child Relationships
-Component tree navigation is designed for components **meant to work together**:
+There are three primary ways for components to communicate, each with a specific purpose. Choosing the right one is crucial for building maintainable applications.
+
+### 1. Events (Primary Pattern)
+**Use `dispatchEvent` for child-to-parent notifications.** This is the most common and decoupled pattern. The framework's `dispatchEvent` helper ensures custom events bubble by default.
 
 ```javascript
-// Child accessing parent (button → button-group)
-const createComponent = ({ findParent }) => ({
-  updateSelection() {
-    const group = findParent('ui-button-group');
-    const mode = group.getSelectionMode();      // Get parent config
-    group.clearOtherSelections(this.id);       // Call parent method
-  }
-});
-
-// Parent managing children (accordion → panels)
-const createComponent = ({ getChildren }) => ({
-  closeAllPanels() {
-    const panels = getChildren('ui-accordion-panel');
-    panels.forEach(panel => panel.close());
-  }
-});
-```
-
-### Event-Based Notification
-```javascript
-// Child notifies parent of changes
+// Child component dispatches an event
 const createComponent = ({ dispatchEvent }) => ({
-  toggle() {
-    state.isOpen.toggle();
-    dispatchEvent('toggle', {
-      panelId: this.id,
-      isOpen: state.isOpen.get()
-    });
+  selectItem(item) {
+    // ...
+    dispatchEvent('itemSelected', { selectedItem: item });
   }
 });
 
-// Parent listens with deep events
+// Parent component listens for the event
 const events = {
-  'deep toggle ui-accordion-panel': ({ data, self }) => {
-    if (self.settings.exclusive && data.isOpen) {
-      self.closeOtherPanels(data.panelId);
-    }
+  'itemSelected ui-child-component': ({ data }) => {
+    // data.selectedItem is available here
+    console.log('An item was selected:', data.selectedItem);
   }
 };
 ```
 
-### Common Parent-Child Patterns
-- **Component Systems**: button-group ↔ button, accordion ↔ panel
-- **Container Components**: form ↔ form-field, table ↔ table-row
-- **Layout Components**: pane-group ↔ pane, tab-container ↔ tab
+### 2. Direct API Access (Parent-to-Child Control)
+**Use `$('selector').component()` when a parent needs to imperatively command a child.**
 
-> **📚 For complete communication patterns**: See `/ai/semantic-ui-patterns-cookbook.md` → Component Communication Patterns
+```javascript
+// In page.js or a parent component
+const childComponent = $('ui-child-component').component();
+childComponent.publicMethod(); // Call a method defined in the child's createComponent
+
+// In the child component (ui-child-component.js)
+const createComponent = ({ state }) => ({
+  publicMethod() {
+    state.internalValue.set('Updated by parent');
+  }
+});
+```
+
+### 3. Hierarchical Traversal (Tightly-Coupled Systems)
+**Use `findParent()` and `findChild()` only for systems of components that are designed to work together and are not intended to be used separately,** like `todo-list` and its `todo-item`s.
+
+```javascript
+// todo-item.js (Child)
+const createComponent = ({ findParent, data }) => ({
+  toggleCompleted() {
+    // Directly access and modify the parent's state
+    const parent = findParent('todo-list');
+    parent.todos.setProperty(data.todo._id, 'completed', !data.todo.completed);
+  }
+});
+```
+> **📚 For a detailed decision guide and more examples**: See [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) → Component Communication Patterns
 
 ## ⚠️ **CRITICAL Method Reference Pattern**
 
@@ -679,7 +679,7 @@ const defaultSettings = {
   showLabel: true    // camelCase in JavaScript
 };
 
-// Template usage (reactive)  
+// Template usage (reactive)
 {#if showLabel}     // camelCase in templates
 
 // HTML usage (lowercase)
@@ -806,7 +806,7 @@ const $button = $('.button');
 const $loader = $('#dynamicLoader');
 const loaderComponent = $loader.eq(0).component();
 
-// ❌ WRONG  
+// ❌ WRONG
 const button = $('.button');                 // Missing $ prefix
 ```
 
@@ -825,7 +825,7 @@ const button = $('.button');                 // Missing $ prefix
 
 **Available UI Components** (check `/src/components/` for complete list):
 - `ui-button` - Interactive buttons with emphasis, colors, sizes
-- `ui-input` - Form inputs with validation and styling  
+- `ui-input` - Form inputs with validation and styling
 - `ui-card` - Content containers
 - `ui-modal` - Dialog overlays
 - `ui-menu` - Navigation menus
@@ -1135,6 +1135,5 @@ The documentation system has specific requirements for file structure, metadata,
 
 ---
 
-**Last Updated:** Component implementation guidance  
+**Last Updated:** Component implementation guidance
 **Maintenance:** Update this file when component patterns or framework APIs change
-

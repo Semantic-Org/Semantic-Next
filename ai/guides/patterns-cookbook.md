@@ -22,755 +22,177 @@
 
 ---
 
-## Query Library Patterns
-
-### Component Configuration Patterns
-
-#### .initialize() Pattern (Before DOM Insertion)
-
-**Use when**: Component needs non-serializable settings or complex configuration before being added to DOM
-
-```javascript
-// Pattern: Pre-configure component with complex settings
-function createAdvancedDataTable(containerId, config) {
-  const container = $(`#${containerId}`);
-  
-  // Create component markup
-  container.html('<ui-data-table></ui-data-table>');
-  
-  // Initialize with complex settings before it's processed
-  container.find('ui-data-table').initialize({
-    // Function settings (not serializable to attributes)
-    dataProvider: config.getDataProvider(),
-    itemRenderer: (item, index) => config.renderItem(item, index),
-    onSelectionChange: (selected) => config.onSelect(selected),
-    
-    // Complex object settings
-    columns: [
-      { key: 'name', label: 'Name', sortable: true },
-      { key: 'date', label: 'Date', formatter: config.dateFormatter },
-      { key: 'status', label: 'Status', renderer: config.statusRenderer }
-    ],
-    
-    // Dynamic arrays from JavaScript
-    allowedActions: config.getActions(),
-    validationRules: config.getValidationSchema(),
-    
-    // Theme configuration
-    theme: {
-      headerStyle: config.theme.header,
-      rowStyle: config.theme.row,
-      colors: config.theme.palette
-    }
-  });
-}
-
-// Pattern: Dynamic component creation with initialization
-function addConfigurableComponent(parentSelector, componentType, settings) {
-  const parent = $(parentSelector);
-  const componentId = `component-${Date.now()}`;
-  
-  // Add component to DOM
-  parent.append(`<${componentType} id="${componentId}"></${componentType}>`);
-  
-  // Initialize with settings that can't be attributes
-  $(`#${componentId}`).initialize(settings);
-  
-  return componentId;
-}
-```
-
-#### .settings() Pattern (After DOM Insertion)
-
-**Use when**: Component is already in DOM and needs runtime configuration updates
-
-```javascript
-// Pattern: Runtime configuration updates
-function updateComponentConfiguration(selector, newConfig) {
-  $(selector).settings({
-    // Update callback functions
-    onDataChange: newConfig.dataChangeHandler,
-    onError: (error) => newConfig.handleError(error),
-    
-    // Update complex data structures
-    filterCriteria: newConfig.getFilters(),
-    sortOptions: newConfig.getSortOptions(),
-    
-    // Update validation
-    validationRules: {
-      required: newConfig.requiredFields,
-      custom: newConfig.customValidators
-    }
-  });
-}
-
-// Pattern: Conditional settings based on user permissions
-function configureComponentForUser(selector, user) {
-  const settings = {
-    readOnly: !user.canEdit,
-    availableActions: user.getAllowedActions(),
-    dataFilters: user.getDataFilters(),
-    onAction: (action) => user.canPerform(action) ? executeAction(action) : showError()
-  };
-  
-  $(selector).settings(settings);
-}
-
-// Pattern: Settings inheritance and override
-function setupComponentHierarchy(parentSelector, childComponents) {
-  const baseSettings = $(parentSelector).dataContext().settings;
-  
-  childComponents.forEach(child => {
-    $(child.selector).settings({
-      // Inherit from parent
-      theme: baseSettings.theme,
-      locale: baseSettings.locale,
-      
-      // Override specific settings
-      ...child.overrides,
-      
-      // Add child-specific functionality
-      onAction: (action) => {
-        child.handleAction(action);
-        // Notify parent
-        $(parentSelector).getComponent().childActionPerformed(child.id, action);
-      }
-    });
-  });
-}
-```
-
-#### .component() Pattern (Template Access)
-
-**Use when**: Need direct access to component's template instance and methods
-
-```javascript
-// Pattern: Direct component manipulation
-function controlComponent(selector) {
-  const template = $(selector).component();
-  
-  // Call template methods directly
-  template.openPanel();
-  template.selectItem(itemId);
-  template.validateForm();
-  
-  // Access template state
-  const currentValue = template.state.selectedValue.get();
-  template.state.isLoading.set(true);
-  
-  // Access template instance properties
-  const hasErrors = template.hasValidationErrors();
-  const isReady = template.isInitialized();
-  
-  return {
-    getValue: () => template.getCurrentValue(),
-    setValue: (value) => template.updateValue(value),
-    reset: () => template.resetToDefaults(),
-    validate: () => template.performValidation()
-  };
-}
-
-// Pattern: Component orchestration
-function orchestrateComponents(components) {
-  const controllers = components.map(selector => {
-    const template = $(selector).component();
-    return {
-      selector,
-      template,
-      isValid: () => template.validate(),
-      getData: () => template.getData(),
-      reset: () => template.reset()
-    };
-  });
-  
-  return {
-    validateAll: () => controllers.every(c => c.isValid()),
-    collectData: () => controllers.reduce((data, c) => ({
-      ...data,
-      [c.selector]: c.getData()
-    }), {}),
-    resetAll: () => controllers.forEach(c => c.reset())
-  };
-}
-```
-
-#### .dataContext() Pattern (Context Inspection)
-
-**Use when**: Need to inspect or debug component's internal state and data context
-
-```javascript
-// Pattern: Component debugging and inspection
-function debugComponent(selector) {
-  const context = $(selector).dataContext();
-  
-  console.group(`Component Debug: ${selector}`);
-  console.log('Current State:', context.state);
-  console.log('Settings:', context.settings);
-  console.log('Available Methods:', Object.keys(context.self));
-  console.log('Element:', context.el);
-  
-  // Inspect reactive state
-  Object.keys(context.state).forEach(key => {
-    const signal = context.state[key];
-    console.log(`State.${key}:`, signal.get());
-  });
-  
-  // Inspect settings
-  Object.keys(context.settings).forEach(key => {
-    console.log(`Settings.${key}:`, context.settings[key]);
-  });
-  
-  console.groupEnd();
-  
-  return context;
-}
-
-// Pattern: Dynamic component analysis
-function analyzeComponentCapabilities(selector) {
-  const context = $(selector).dataContext();
-  
-  return {
-    // Available methods
-    methods: Object.keys(context.self).filter(key => 
-      typeof context.self[key] === 'function'
-    ),
-    
-    // Current state values
-    stateSnapshot: Object.keys(context.state).reduce((snapshot, key) => {
-      snapshot[key] = context.state[key].get();
-      return snapshot;
-    }, {}),
-    
-    // Settings configuration
-    settings: { ...context.settings },
-    
-    // Component metadata
-    tagName: context.el.tagName.toLowerCase(),
-    isConnected: context.el.isConnected,
-    hasChildren: context.el.children.length > 0
-  };
-}
-
-// Pattern: Live component monitoring
-function monitorComponent(selector, onUpdate) {
-  const context = $(selector).dataContext();
-  
-  // Monitor state changes
-  Object.keys(context.state).forEach(key => {
-    context.reaction(() => {
-      const value = context.state[key].get();
-      onUpdate({
-        type: 'state',
-        key,
-        value,
-        timestamp: Date.now()
-      });
-    });
-  });
-  
-  // Monitor settings changes (if reactive)
-  Object.keys(context.settings).forEach(key => {
-    try {
-      context.reaction(() => {
-        const value = context.settings[key];
-        onUpdate({
-          type: 'settings',
-          key,
-          value,
-          timestamp: Date.now()
-        });
-      });
-    } catch (e) {
-      // Setting not reactive
-    }
-  });
-}
-```
-
-### Programmatic Component Patterns
-
-#### Component Factory Pattern
-
-```javascript
-// Pattern: Component factory with pre-configuration
-class ComponentFactory {
-  static createConfiguredComponent(type, config) {
-    const componentId = `${type}-${Date.now()}`;
-    const element = document.createElement(type);
-    element.id = componentId;
-    
-    // Pre-configure before adding to DOM
-    $(element).initialize(config.settings);
-    
-    // Add to configured parent
-    $(config.parent).append(element);
-    
-    // Apply additional configuration
-    if (config.styles) {
-      $(element).css(config.styles);
-    }
-    
-    if (config.classes) {
-      $(element).addClass(config.classes);
-    }
-    
-    // Return controller interface
-    return {
-      id: componentId,
-      element,
-      component: () => $(element).component(),
-      settings: (newSettings) => $(element).settings(newSettings),
-      remove: () => $(element).remove()
-    };
-  }
-  
-  static createDataBoundComponent(type, dataSource, config = {}) {
-    return this.createConfiguredComponent(type, {
-      ...config,
-      settings: {
-        ...config.settings,
-        dataProvider: () => dataSource.getData(),
-        onDataChange: (data) => dataSource.updateData(data),
-        onError: (error) => dataSource.handleError(error)
-      }
-    });
-  }
-}
-
-// Usage
-const dropdown = ComponentFactory.createConfiguredComponent('ui-dropdown', {
-  parent: '#container',
-  settings: {
-    items: getDropdownItems(),
-    onSelect: handleSelection,
-    filterFunction: customFilter
-  },
-  classes: 'fluid search',
-  styles: { width: '100%' }
-});
-```
-
-#### Batch Component Configuration Pattern
-
-```javascript
-// Pattern: Configure multiple components with shared settings
-function configureDashboardComponents(config) {
-  const components = [
-    'ui-chart[data-type="sales"]',
-    'ui-chart[data-type="traffic"]', 
-    'ui-chart[data-type="conversions"]'
-  ];
-  
-  // Apply shared configuration
-  const sharedSettings = {
-    theme: config.theme,
-    animations: config.animations,
-    onError: config.errorHandler,
-    locale: config.locale
-  };
-  
-  components.forEach(selector => {
-    $(selector).settings(sharedSettings);
-  });
-  
-  // Apply component-specific settings
-  $('ui-chart[data-type="sales"]').settings({
-    dataProvider: config.salesDataProvider,
-    refreshInterval: 60000,
-    alerts: config.salesAlerts
-  });
-  
-  $('ui-chart[data-type="traffic"]').settings({
-    dataProvider: config.trafficDataProvider,
-    refreshInterval: 30000,
-    realTime: true
-  });
-  
-  $('ui-chart[data-type="conversions"]').settings({
-    dataProvider: config.conversionsDataProvider,
-    refreshInterval: 300000,
-    historicalData: true
-  });
-}
-```
-
-#### Template-as-Settings Pattern ⭐ **FUNDAMENTAL**
-
-**The preferred pattern for building flexible components with user-configurable rendering**
-
-```javascript
-// Define custom template components
-// user-row.js
-export const UserRowTemplate = defineComponent({
-  template: `
-    <tr class="user-row">
-      <td><img src="{avatar}" alt="{name}" /></td>
-      <td>{name}</td>
-      <td>{email}</td>
-      <td><span class="role {role.toLowerCase()}">{role}</span></td>
-    </tr>
-  `,
-  css: `
-    .user-row img { width: 32px; height: 32px; border-radius: 50%; }
-    .role.admin { background: #e74c3c; color: white; }
-    .role.user { background: #3498db; color: white; }
-  `
-});
-
-// admin-row.js  
-export const AdminRowTemplate = defineComponent({
-  template: `
-    <tr class="admin-row">
-      <td>{name}</td>
-      <td>
-        {#each permission in permissions}
-          <span class="permission">{permission}</span>
-        {/each}
-      </td>
-      <td>{formatDate lastLogin 'MMM DD, YYYY'}</td>
-    </tr>
-  `,
-  css: `
-    .admin-row .permission { 
-      background: #2ecc71; 
-      color: white; 
-      padding: 2px 6px; 
-      margin: 0 2px; 
-      border-radius: 3px; 
-    }
-  `
-});
-
-// Parent component using template-as-settings
-const defaultSettings = {
-  rowTemplate: new Template(),  // `new Template()` here acts as a placeholder in defaultSettings,
-                               // indicating that `rowTemplate` is expected to be a `Template` instance.
-                               // This placeholder would typically be overridden at runtime with a specific
-                               // `Template` instance, often one returned by `defineComponent` (when called
-                               // without a `tagName`).
-  emptyTemplate: new Template(),
-  headers: [],
-  rows: []
-};
-
-// Component template uses the settings
-// Template: 
-// {#each rows as row}
-//   {>template name=rowTemplate data=row}
-// {else}
-//   {>template name=emptyTemplate}
-// {/each}
-
-// Runtime configuration
-function setupUserTable() {
-  $('dynamic-table').settings({
-    headers: ['Avatar', 'Name', 'Email', 'Role'],
-    rowTemplate: UserRowTemplate,
-    emptyTemplate: UserEmptyTemplate,
-    rows: userData
-  });
-}
-
-function setupAdminTable() {
-  $('dynamic-table').settings({
-    headers: ['Name', 'Permissions', 'Last Login'],
-    rowTemplate: AdminRowTemplate,  // Completely different rendering
-    emptyTemplate: AdminEmptyTemplate,
-    rows: adminData
-  });
-}
-```
-
-**Advanced Template-as-Settings Patterns**:
-
-```javascript
-// Pattern: Context-aware template selection
-function configureDataView(viewType, userRole) {
-  const templateMap = {
-    'user-summary': {
-      template: UserSummaryTemplate,
-      headers: ['Name', 'Email', 'Status']
-    },
-    'user-detailed': {
-      template: UserDetailedTemplate,
-      headers: ['Avatar', 'Full Name', 'Contact', 'Role', 'Last Active']
-    },
-    'admin-audit': {
-      template: AdminAuditTemplate,
-      headers: ['User', 'Action', 'Resource', 'Timestamp', 'IP']
-    }
-  };
-  
-  const config = templateMap[`${userRole}-${viewType}`] || templateMap['user-summary'];
-  
-  $('data-view').settings({
-    itemTemplate: config.template,
-    headers: config.headers,
-    emptyTemplate: getEmptyTemplate(viewType)
-  });
-}
-
-// Pattern: Conditional template rendering based on data
-const smartItemTemplate = defineComponent({
-  template: `
-    {#if type === 'user'}
-      {>template name=userTemplate data=this}
-    {else if type === 'product'}
-      {>template name=productTemplate data=this}
-    {else if type === 'order'}
-      {>template name=orderTemplate data=this}
-    {else}
-      {>template name=genericTemplate data=this}
-    {/if}
-  `,
-  
-  createComponent: ({ settings }) => ({
-    userTemplate: settings.userTemplate,
-    productTemplate: settings.productTemplate,
-    orderTemplate: settings.orderTemplate,
-    genericTemplate: settings.genericTemplate
-  })
-});
-
-// Usage with multiple sub-templates
-$('mixed-list').settings({
-  itemTemplate: smartItemTemplate,
-  userTemplate: UserCardTemplate,
-  productTemplate: ProductCardTemplate,
-  orderTemplate: OrderCardTemplate,
-  genericTemplate: DefaultCardTemplate
-});
-
-// Pattern: Template factory for dynamic generation
-class TemplateFactory {
-  static createFieldTemplate(fieldType, config) {
-    const templates = {
-      text: () => defineComponent({
-        template: `<input type="text" value="{value}" placeholder="{placeholder}" />`,
-        css: config.textFieldStyles
-      }),
-      
-      select: () => defineComponent({
-        template: `
-          <select value="{value}">
-            {#each option in options}
-              <option value="{option.value}">{option.label}</option>
-            {/each}
-          </select>
-        `,
-        css: config.selectFieldStyles
-      }),
-      
-      multiselect: () => defineComponent({
-        template: `
-          <div class="multiselect">
-            {#each option in options}
-              <label>
-                <input type="checkbox" value="{option.value}" checked="{isSelected option.value}" />
-                {option.label}
-              </label>
-            {/each}
-          </div>
-        `,
-        createComponent: ({ state }) => ({
-          isSelected: (value) => state.selectedValues.get().includes(value)
-        })
-      })
-    };
-    
-    return templates[fieldType]?.() || templates.text();
-  }
-}
-
-// Usage with template factory
-function setupDynamicForm(formConfig) {
-  const fieldTemplates = {};
-  
-  formConfig.fields.forEach(field => {
-    fieldTemplates[`${field.name}Template`] = TemplateFactory.createFieldTemplate(
-      field.type, 
-      formConfig.styling
-    );
-  });
-  
-  $('dynamic-form').settings({
-    formTemplate: DynamicFormTemplate,
-    fields: formConfig.fields,
-    ...fieldTemplates
-  });
-}
-```
-
-**Why Template-as-Settings is Fundamental**:
-
-1. **Maximum Flexibility**: Users can completely customize rendering without modifying core component
-2. **Type Safety**: Template components are actual JavaScript modules with proper imports
-3. **Reusability**: Templates can be shared across multiple component instances
-4. **Performance**: Templates are compiled once and reused
-5. **Maintainability**: Clear separation between data logic and presentation logic
-6. **Testability**: Templates can be tested independently
-
-**Common Use Cases**:
-- **Data Tables**: Row templates, cell templates, header templates, empty state templates
-- **Lists**: Item templates, group header templates, loading templates
-- **Cards**: Content templates based on card type, action templates
-- **Forms**: Field templates based on field type, validation message templates
-- **Modals**: Content templates, header templates, footer templates
-- **Menus**: Item templates, separator templates, group templates
-
----
-
 ## Component Communication Patterns
 
-### Parent-Child Communication Decision Tree
+The framework provides three distinct patterns for communication. Choosing the correct one is essential for creating robust, maintainable components.
+
+### Communication Pattern Decision Tree
 
 ```
-Child needs to communicate with Parent:
-├── One-way notification (child → parent) → Use dispatchEvent()
-│   ├── Examples: panel toggled, button clicked, field validated
-│   ├── Benefits: Web standards, decoupled, available to users
-│   └── Pattern: child.dispatchEvent('eventname', data)
-│
-├── Accessing parent data/methods → Use findParent()
-│   ├── Examples: get shared state, call parent utility methods
-│   ├── Benefits: Direct access, type safety, immediate
-│   └── Pattern: findParent('parent-tag').method()
-│
-└── Bi-directional data binding → Combination approach
-    ├── Parent exposes signals for direct access
-    ├── Child dispatches events for notifications
-    └── Use both patterns as appropriate
+How do your components need to relate to each other?
+
+├── A child needs to notify its parent or the outside world of a change?
+│   └── **Use Event-Driven Notifications with `dispatchEvent`**
+│       ├── **Why?** It's the most decoupled, reusable, and standards-compliant pattern.
+│       │   The child makes no assumptions about its parent.
+│       ├── **Example:** A button component dispatching a `click` or a field dispatching `valueChange`.
+│       └── **Key Feature:** The framework's `dispatchEvent` helper creates events that bubble by default.
+
+├── An external script or parent needs to command a child component?
+│   └── **Use Direct API Access with `$('selector').component()`**
+│       ├── **Why?** It provides imperative control over a child's public API from *outside* the parent component.
+│       ├── **Example:** A page script calling `modal.open()` or a form calling `field.validate()`.
+│       └── **Key Feature:** `el.component` stores a direct reference to the instance created by `createComponent`.
+
+├── You are building a tightly-coupled system and need to communicate *internally*?
+│   └── **Use Hierarchical Traversal with `findParent()` / `findChildren()`**
+│       ├── **Why?** For co-dependent components, direct state access is more efficient than a complex web of events and props.
+│       ├── **Example:** A `todo-list` managing the state of its `todo-item` children directly.
+│       └── **Key Feature:** This is a specialized tool for building component *systems*, not for general communication.
 ```
 
-### Child → Parent Notification Pattern (dispatchEvent)
+### 1. Child → Parent Notification Pattern (`dispatchEvent`)
 
-**Use when**: Child needs to notify parent of state changes, user interactions, or events
+**Use when**: A child needs to notify its parent or external consumers of state changes, user interactions, or internal events. This is the **default and preferred** pattern.
 
 ```javascript
-// Child component (ui-accordion-panel)
+// Child component (ui-accordion-panel) dispatches a bubbling event
 const createComponent = ({ dispatchEvent, state }) => ({
   toggle() {
     const wasOpen = state.isOpen.get();
     state.isOpen.toggle();
-    
-    // Notify parent and any listeners
+
+    // Notify any listener that this panel has toggled.
+    // The event bubbles up the DOM tree.
     dispatchEvent('toggle', {
       panelId: this.id,
       isOpen: state.isOpen.get(),
       wasOpen
     });
-  },
-  
-  onContentLoad() {
-    dispatchEvent('contentloaded', {
-      panelId: this.id,
-      contentHeight: this.getContentHeight()
-    });
   }
 });
 
-// Parent component (ui-accordion) listens via events
+// Parent component (ui-accordion) listens using standard event delegation
 const events = {
+  // The 'deep' keyword ensures the listener works across Shadow DOM boundaries
   'deep toggle ui-accordion-panel': ({ data, self }) => {
+    // data contains { panelId, isOpen, wasOpen }
     if (self.settings.exclusive && data.isOpen) {
       self.closeOtherPanels(data.panelId);
     }
-    
-    // Also dispatch to external listeners
-    self.dispatchEvent('paneltoggle', data);
   }
 };
 ```
 
-### Child → Parent Data Access Pattern (findParent)
+### 2. Imperative Control Pattern (`$('...').component()`)
 
-**Use when**: Child needs to access parent data, call parent methods, or get shared configuration
+**Use when**: An **external script** (outside the component's Shadow DOM) needs to call public methods on a component instance.
 
 ```javascript
-// Child component (ui-button) accessing parent (ui-button-group)
-const createComponent = ({ findParent, state }) => ({
-  updateSelection() {
-    const group = findParent('ui-button-group');
-    const mode = group.getSelectionMode();    // Get parent config
-    const selected = group.getSelected();     // Get parent state
-    
-    if (mode === 'single') {
-      group.clearOtherSelections(this.id);   // Call parent method
-    }
-    
-    // Still notify via event for external listeners
-    this.dispatchEvent('selected', { buttonId: this.id });
+// Child component (ui-counter) defines its public API in createComponent
+const createComponent = ({ self, state, settings }) => ({
+  // Public method
+  setCounter(number) {
+    state.counter.set(number);
   },
-  
-  getTheme() {
-    // Access parent's theme configuration
-    return findParent('ui-button-group').theme;
+  // Another public method
+  startCounter() {
+    state.running.set(true);
+    self.interval = setInterval(() => state.counter.increment(), 1000);
+  },
+  // Another public method
+  stopCounter() {
+    state.running.set(false);
+    clearInterval(self.interval);
+  },
+});
+
+// External script imperatively controls the component instance
+import { $ } from '@semantic-ui/query';
+
+// Get the component instance(s) from the DOM element(s)
+const $counters = $('ui-counter');
+
+// Call public methods on the instance.
+// Note: A selector can return multiple components, so iterate if necessary.
+$counters.each(component => {
+  component.setCounter(100);
+  component.stopCounter();
+});
+```
+
+### 3. Hierarchical Traversal Pattern (`findParent` / `findChildren`)
+
+**Use when**: Building a **tightly-coupled system** where child components are fundamentally dependent on a parent's state and are not intended to be used separately. This is for **internal** communication within such a system.
+
+```javascript
+// Parent (todo-list) exposes a reactive signal directly on its instance
+const createComponent = ({ signal }) => ({
+  todos: signal([
+    { _id: 'a', text: 'Learn framework', completed: true },
+    { _id: 'b', text: 'Write docs', completed: false }
+  ])
+});
+
+// Child (todo-item) directly accesses and mutates the parent's signal
+const createComponent = ({ findParent, data }) => ({
+  // data.todo is the specific todo object for this instance
+  toggleCompleted() {
+    const parent = findParent('todo-list');
+    // Directly find and modify the specific item in the parent's shared state
+    parent.todos.setProperty(data.todo._id, 'completed', !data.todo.completed);
+  }
+});
+
+// Parent controlling its children internally
+const createComponent = ({ self, findChildren }) => ({
+  markAllComplete() {
+    const children = findChildren('todo-item');
+    children.forEach(childInstance => {
+      childInstance.markAsCompleted();
+    });
   }
 });
 ```
 
-### Bi-directional Communication Pattern
+### Bi-directional Communication Pattern (Combined Approach)
 
-**Use when**: Parent and child need to share state and coordinate behavior
+**Use when**: A component system needs both notification and control pathways.
 
 ```javascript
-// Parent (ui-form) exposes signals and listens to events
-const createComponent = ({ signal }) => ({
-  formData: signal({}),           // Exposed for children
+// Parent (ui-form) uses both events and exposes a direct API
+const createComponent = ({ signal, state }) => ({
+  formData: signal({}),
   errors: signal({}),
-  
-  updateField(name, value) {
-    this.formData.setProperty(name, value);
-  },
-  
-  setFieldError(name, error) {
-    this.errors.setProperty(name, error);
+
+  // Public API method for external control
+  validate() {
+    // ... validation logic ...
+    return state.isValid.get();
   }
 });
 
 const events = {
-  // Listen to child field changes
-  'deep valuechange ui-form-field': ({ data, self }) => {
-    self.updateField(data.fieldName, data.value);
-    self.validateField(data.fieldName);
-  },
-  
-  // Listen to child validation events
-  'deep validation ui-form-field': ({ data, self }) => {
-    self.setFieldError(data.fieldName, data.error);
+  // Listens for notifications from children
+  'valuechange ui-form-field': ({ data, self }) => {
+    self.formData.setProperty(data.fieldName, data.value);
   }
 };
 
-// Child (ui-form-field) accesses parent data and dispatches events
-const createComponent = ({ findParent, dispatchEvent, state }) => ({
+// Child (ui-form-field) uses both dispatchEvent and can access parent via findParent
+const createComponent = ({ findParent, dispatchEvent, state, self }) => ({
+  // Notifies parent of value changes
   onValueChange(newValue) {
-    state.value.set(newValue);
-    
-    // Notify parent via event (web standards compliant)
-    dispatchEvent('valuechange', {
-      fieldName: this.name,
-      value: newValue,
-      oldValue: state.previousValue.get()
-    });
+    dispatchEvent('valuechange', { fieldName: self.name, value: newValue });
   },
-  
-  getFormData() {
-    // Access parent's shared state directly
-    return findParent('ui-form').formData.get();
-  },
-  
-  validate() {
-    const isValid = this.runValidation();
-    
-    // Notify parent of validation result
-    dispatchEvent('validation', {
-      fieldName: this.name,
-      isValid,
-      error: isValid ? null : this.getValidationError()
-    });
+
+  // Can also access parent for shared configuration/state
+  getParentConfig() {
+    return findParent('ui-form').settings;
   }
 });
 ```
+
 
 ---
 
@@ -792,7 +214,7 @@ const createComponent = ({ state }) => ({
     state.isExpanded.toggle();
     state.animation.set('expanding');
   },
-  
+
   onAnimationComplete() {
     state.animation.set('none');
   }
@@ -801,14 +223,14 @@ const createComponent = ({ state }) => ({
 
 ### Shared Parent-Child State Pattern
 
-**Use when**: Multiple related components need to coordinate state
+**Use when**: Multiple related components need to coordinate state, typically using the `findParent` pattern for tightly-coupled systems.
 
 ```javascript
 // Parent exposes shared signals
 const createComponent = ({ signal }) => ({
   selectedItems: signal(new Set()),
   selectionMode: signal('multiple'),
-  
+
   toggleSelection(itemId) {
     const selected = this.selectedItems.get();
     if (selected.has(itemId)) {
@@ -827,7 +249,7 @@ const createComponent = ({ signal }) => ({
 const createComponent = ({ findParent, reaction, state }) => ({
   onCreated() {
     const parent = findParent('item-list');
-    
+
     reaction(() => {
       const isSelected = parent.selectedItems.get().has(this.id);
       state.selected.set(isSelected);
@@ -862,7 +284,7 @@ const createComponent = ({ settings, state, reaction }) => ({
       }
     });
   },
-  
+
   addActiveItem(item) {
     const current = state.activeItems.get();
     if (settings.mode === 'single') {
@@ -876,7 +298,7 @@ const createComponent = ({ settings, state, reaction }) => ({
 
 ### Cross-Component State Synchronization Pattern
 
-**Use when**: Distant components need to share state through a common ancestor
+**Use when**: Distant components need to share state through a common ancestor, using `findParent`.
 
 ```javascript
 // Top-level data provider
@@ -884,7 +306,7 @@ const createComponent = ({ signal }) => ({
   globalSelection: signal(new Set()),
   currentUser: signal(null),
   theme: signal('light'),
-  
+
   updateSelection(items) {
     this.globalSelection.set(new Set(items));
   }
@@ -894,13 +316,13 @@ const createComponent = ({ signal }) => ({
 const createComponent = ({ findParent, reaction }) => ({
   onCreated() {
     const app = findParent('app-shell');
-    
+
     reaction(() => {
       const selected = app.globalSelection.get();
       this.updateUI(selected.has(this.itemId));
     });
   },
-  
+
   selectItem() {
     const app = findParent('app-shell');
     const selection = new Set(app.globalSelection.get());
@@ -926,7 +348,7 @@ const events = {
     const itemId = data.itemId;
     self.performAction(action, itemId);
   },
-  
+
   // Multiple event types on same elements
   'mouseenter, mouseleave .hover-item': ({ event, target, state }) => {
     const isEnter = event.type === 'mouseenter';
@@ -944,41 +366,41 @@ const events = {
   'global scroll window': ({ self }) => {
     self.updateScrollPosition();
   },
-  
+
   'global resize window': ({ self, afterFlush }) => {
     self.recalculateLayout();
     afterFlush(() => {
       self.adjustChildPositions();
     });
   },
-  
+
   'global keydown document': ({ event, self }) => {
     if (event.key === 'Escape' && self.isModalOpen()) {
       self.closeModal();
       event.preventDefault();
     }
   },
-  
+
   'global hashchange window': ({ self }) => {
     self.syncWithURLHash();
   }
 };
 ```
 
-### Deep Event Pattern (Parent-Child Components)
+### Child Event Pattern (Parent-Child Components)
 
-**Use when**: Parent component managing intentional child components
+**Use when**: Parent component needs to listen to events from intentional child components across Shadow DOM boundaries.
 
 ```javascript
 // Accordion managing panels
 const events = {
-  'deep toggle ui-accordion-panel': ({ data, self }) => {
+  'toggle ui-accordion-panel': ({ data, self }) => {
     if (self.settings.exclusive && data.isOpen) {
       self.closeOtherPanels(data.panelId);
     }
     self.updateActiveCount();
   },
-  
+
   'deep contentchange ui-accordion-panel': ({ data, self }) => {
     self.adjustPanelHeight(data.panelId, data.newHeight);
   }
@@ -991,18 +413,6 @@ const events = {
       self.clearOtherSelections();
     }
     self.setSelected(data.buttonId, true);
-  }
-};
-
-// Form managing fields
-const events = {
-  'deep valuechange ui-form-field': ({ data, self }) => {
-    self.setFieldValue(data.fieldName, data.value);
-    self.validateField(data.fieldName);
-  },
-  
-  'deep focus ui-form-field': ({ data, self }) => {
-    self.setActiveField(data.fieldName);
   }
 };
 ```
@@ -1027,7 +437,7 @@ const createComponent = ({ dispatchEvent }) => ({
 const events = {
   'deep itemaction ui-list-item': ({ data, self }) => {
     self.processItemAction(data);
-    
+
     // Re-dispatch for external listeners
     self.dispatchEvent('listchange', {
       type: 'itemaction',
@@ -1051,22 +461,20 @@ const events = {
 **Use when**: Converting data attributes to strongly typed event data
 
 ```html
-<button 
-  class="quantity-btn" 
-  data-action="increment" 
-  data-item-id="123" 
+<button
+  class="quantity-btn"
+  data-action="increment"
+  data-item-id="123"
   data-amount="5"
   data-allow-negative="false"
 >+</button>
-```
-
 ```javascript
 const events = {
   'click .quantity-btn': ({ data, self }) => {
     // data attributes auto-converted to proper types
     const { action, itemId, amount, allowNegative } = data;
     // amount = 5 (number), allowNegative = false (boolean)
-    
+
     self.updateQuantity(itemId, action === 'increment' ? amount : -amount, allowNegative);
   }
 };
@@ -1148,18 +556,18 @@ const events = {
 <div class="item-card">
   <h3>{title}</h3>
   <p>{description}</p>
-  
+
   <div class="item-meta">
     {>statusBadge status=item.status}
     <span class="date">{formatDate item.createdAt}</span>
   </div>
-  
+
   <div class="actions">
     {>actionButton variant="primary" action="{edit}"}
       <i class="edit icon">{>slot icon}</i>
       Edit
     {/actionButton}
-    
+
     {>actionButton variant="secondary" action="{delete}"}
       <i class="trash icon">{>slot icon}</i>
       Delete
@@ -1175,10 +583,10 @@ const events = {
   {#each field in formFields}
     <div class="field {#if errors[field.name]}error{/if}">
       <label>{field.label}</label>
-      
+
       {#if field.type === 'select'}
-        <select 
-          name="{field.name}" 
+        <select
+          name="{field.name}"
           value="{values[field.name]}"
           onchange="{updateField}"
         >
@@ -1187,31 +595,31 @@ const events = {
           {/each}
         </select>
       {else if field.type === 'textarea'}
-        <textarea 
-          name="{field.name}" 
+        <textarea
+          name="{field.name}"
           value="{values[field.name]}"
           placeholder="{field.placeholder}"
           onchange="{updateField}"
         ></textarea>
       {else}
-        <input 
-          type="{field.type || 'text'}" 
-          name="{field.name}" 
+        <input
+          type="{field.type || 'text'}"
+          name="{field.name}"
           value="{values[field.name]}"
           placeholder="{field.placeholder}"
           onchange="{updateField}"
         />
       {/if}
-      
+
       {#if errors[field.name]}
         <div class="error-message">{errors[field.name]}</div>
       {/if}
     </div>
   {/each}
-  
+
   <div class="actions">
-    <button 
-      type="submit" 
+    <button
+      type="submit"
       class="ui primary button"
       disabled="{!valid || submitting}"
       onclick="{submit}"
@@ -1236,17 +644,17 @@ const createComponent = ({ state, reaction }) => ({
     reaction(() => {
       const items = state.items.get();
       const filter = state.filter.get();
-      
+
       const filtered = items.filter(item => {
         if (filter === 'completed') return item.completed;
         if (filter === 'active') return !item.completed;
         return true;
       });
-      
+
       state.filteredItems.set(filtered);
       state.itemCount.set(filtered.length);
     });
-    
+
     // Validation reaction
     reaction(() => {
       const values = state.formValues.get();
@@ -1268,12 +676,12 @@ const createComponent = ({ settings, state, reaction, $ }) => ({
       const theme = settings.theme;
       $(':host').attr('data-theme', theme);
     });
-    
+
     reaction(() => {
       const size = settings.size;
       $(':host').toggleClass('compact', size === 'small');
     });
-    
+
     // Auto-adjust state when settings change
     reaction(() => {
       if (settings.maxItems && state.items.get().length > settings.maxItems) {
@@ -1297,7 +705,7 @@ const createComponent = ({ state, reaction, settings }) => ({
         this.debounceSearch(query);
       }
     });
-    
+
     // Sync with localStorage
     reaction(() => {
       const preferences = state.userPreferences.get();
@@ -1305,7 +713,7 @@ const createComponent = ({ state, reaction, settings }) => ({
         localStorage.setItem('preferences', JSON.stringify(preferences));
       }
     });
-    
+
     // Sync with URL
     reaction(() => {
       const filters = state.activeFilters.get();
@@ -1326,7 +734,7 @@ const createComponent = ({ state, reaction, afterFlush }) => ({
     reaction(() => {
       const items = state.items.get();
       const needsRecalc = state.needsRecalculation.get();
-      
+
       if (needsRecalc) {
         afterFlush(() => {
           this.recalculateLayout();
@@ -1335,7 +743,7 @@ const createComponent = ({ state, reaction, afterFlush }) => ({
         });
       }
     });
-    
+
     // Debounced reactions
     let timeout;
     reaction(() => {
@@ -1361,17 +769,17 @@ Use component props instead of state for data that doesn't need reactivity:
 const createComponent = ({ state, settings, self }) => ({
   // ✅ Component props - non-reactive, performance optimized
   apiEndpoint: settings.apiUrl,           // Snapshot of setting
-  validationRules: getValidationRules(),  // Cached calculation  
+  validationRules: getValidationRules(),  // Cached calculation
   debounceTimer: null,                    // Mutable non-reactive
   constants: { MAX_RETRIES: 3 },          // Static values
   retryCount: 0,                          // Non-reactive counter
-  
+
   // Methods can access props directly
   makeApiCall() {
     fetch(self.apiEndpoint)               // No signal overhead
       .then(data => state.data.set(data)); // Update reactive state only when needed
   },
-  
+
   debouncedUpdate(value) {
     clearTimeout(self.debounceTimer);     // Direct prop access
     self.debounceTimer = setTimeout(() => {
@@ -1401,7 +809,7 @@ const createComponent = ({ state, settings, self }) => ({
 const createComponent = ({ state, $, isClient }) => ({
   onRendered() {
     if (!isClient) return;
-    
+
     // Intersection Observer for lazy loading
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1411,12 +819,12 @@ const createComponent = ({ state, $, isClient }) => ({
         }
       });
     });
-    
+
     $('.lazy-load').each((el) => {
       observer.observe(el);
     });
   },
-  
+
   async loadContent(element) {
     const src = element.dataset.src;
     try {
@@ -1440,18 +848,18 @@ const createComponent = ({ state, reaction, $ }) => ({
       const scrollTop = state.scrollTop.get();
       const containerHeight = state.containerHeight.get();
       const itemHeight = 50; // Fixed height
-      
+
       const startIndex = Math.floor(scrollTop / itemHeight);
       const endIndex = Math.min(
         startIndex + Math.ceil(containerHeight / itemHeight) + 1,
         items.length
       );
-      
+
       state.visibleItems.set(items.slice(startIndex, endIndex));
       state.offsetY.set(startIndex * itemHeight);
     });
   },
-  
+
   onScroll(event) {
     state.scrollTop.set(event.target.scrollTop);
   }
@@ -1464,16 +872,16 @@ const createComponent = ({ state, reaction, $ }) => ({
 const createComponent = ({ state, reaction }) => ({
   observers: new Set(),
   timers: new Set(),
-  
+
   onCreated() {
     // Track external resources for cleanup
     const observer = new MutationObserver(this.handleMutation);
     this.observers.add(observer);
-    
+
     const timer = setInterval(this.updateTime, 1000);
     this.timers.add(timer);
   },
-  
+
   onDestroyed() {
     // Cleanup external resources
     this.observers.forEach(observer => observer.disconnect());
@@ -1502,7 +910,7 @@ const createBaseComponent = ({ state, settings }) => ({
 // Extended component
 const createComponent = ({ state, settings, ...args }) => ({
   ...createBaseComponent({ state, settings, ...args }),
-  
+
   // Extended functionality
   slideDown() {
     this.show();
@@ -1517,7 +925,7 @@ const createComponent = ({ state, settings, ...args }) => ({
 // Core component
 const createComponent = ({ state, settings, plugins = [] }) => ({
   // Core functionality
-  
+
   onCreated() {
     // Initialize plugins
     plugins.forEach(plugin => {
@@ -1533,7 +941,7 @@ const draggablePlugin = {
   onCreated() {
     this.makeDraggable();
   },
-  
+
   makeDraggable() {
     // Add drag functionality
   }
@@ -1558,12 +966,12 @@ const createListComponent = (config) => {
     selectionMode: 'multiple',
     sortable: false
   };
-  
+
   const settings = { ...defaults, ...config };
-  
+
   return defineComponent({
     defaultSettings: settings,
-    
+
     createComponent: ({ state, settings }) => ({
       addItem(item) {
         state.items.push({
@@ -1601,14 +1009,14 @@ const createComponent = ({ state, $, dispatchEvent }) => ({
     state.content.set(content);
     state.isOpen.set(true);
     $('body').addClass('modal-open');
-    
+
     dispatchEvent('modalopen');
   },
-  
+
   close() {
     state.isOpen.set(false);
     $('body').removeClass('modal-open');
-    
+
     dispatchEvent('modalclose');
   }
 });
@@ -1619,7 +1027,7 @@ const events = {
       self.close();
     }
   },
-  
+
   'global keydown document': ({ event, self, state }) => {
     if (event.key === 'Escape' && state.isOpen.get()) {
       self.close();
@@ -1635,10 +1043,10 @@ const createComponent = ({ state, $, dispatchEvent }) => ({
   onRendered() {
     this.makeDraggable();
   },
-  
+
   makeDraggable() {
     let dragData = null;
-    
+
     $('.draggable').on('dragstart', (event) => {
       dragData = {
         id: event.target.dataset.id,
@@ -1646,15 +1054,15 @@ const createComponent = ({ state, $, dispatchEvent }) => ({
       };
       event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
     });
-    
+
     $('.drop-zone').on('dragover', (event) => {
       event.preventDefault();
     });
-    
+
     $('.drop-zone').on('drop', (event) => {
       event.preventDefault();
       const data = JSON.parse(event.dataTransfer.getData('text/plain'));
-      
+
       dispatchEvent('itemdropped', {
         item: data,
         dropZone: event.target.dataset.zone
@@ -1675,14 +1083,14 @@ const createComponent = ({ state, $, settings }) => ({
         this.loadMore();
       }
     });
-    
+
     observer.observe(sentinel[0]);
   },
-  
+
   async loadMore() {
     if (state.hasMore.get()) {
       state.loading.set(true);
-      
+
       try {
         const newItems = await this.fetchItems(state.page.get());
         state.items.push(...newItems);
@@ -1707,12 +1115,10 @@ const createComponent = ({ state, $, settings }) => ({
 const createComponent = ({ state, settings }) => ({
   // These are anti-patterns - data is already available in templates
   getTheme() { return settings.theme; },           // settings.theme already available
-  getCurrentValue() { return state.value.get(); }, // value already available  
+  getCurrentValue() { return state.value.get(); }, // value already available
   getApiUrl() { return settings.apiEndpoint; },    // apiEndpoint already available
   isOpen() { return state.open.get(); },          // open already available
 });
-```
-
 ```html
 <!-- DON'T DO THIS -->
 <div class="{getTheme}">                <!-- Unnecessary method call -->
@@ -1742,8 +1148,8 @@ const createComponent = ({ state, settings }) => ({
   getCurrentSelection() {
     return state.items.get().filter(item => item.selected);
   },
-  
-  // ✅ GOOD - Complex logic not suitable for templates  
+
+  // ✅ GOOD - Complex logic not suitable for templates
   getFormData() {
     return {
       values: state.values.get(),
@@ -1826,12 +1232,12 @@ const createComponent = () => ({
 // DO THIS INSTEAD
 const createComponent = () => ({
   timers: new Set(),
-  
+
   startTimer() {
     const timer = setInterval(this.update, 1000);
     this.timers.add(timer);
   },
-  
+
   onDestroyed() {
     this.timers.forEach(timer => clearInterval(timer));
   }
@@ -1857,18 +1263,23 @@ const createComponent = ({ state }) => ({
 });
 ```
 
-### ❌ Overusing Deep Events
+### ❌ Overusing findParent/findChild
 
 ```javascript
-// DON'T DO THIS
-const events = {
-  'deep click random-component': () => {} // Unrelated components
-};
+// DON'T DO THIS for decoupled components
+const createComponent = ({ findParent }) => ({
+  onClick() {
+    const parent = findParent('some-container');
+    parent.doSomething(); // Creates tight coupling
+  }
+});
 
-// DO THIS INSTEAD
-const events = {
-  'deep click ui-button': () => {}  // Intentional parent-child relationship
-};
+// DO THIS INSTEAD for decoupled components
+const createComponent = ({ dispatchEvent }) => ({
+  onClick() {
+    dispatchEvent('action'); // Loose coupling
+  }
+});
 ```
 
 ---
