@@ -16,6 +16,9 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
+      "cdn": "./dist/bundle/tailwind.js",
+      "unpkg": "./dist/bundle/tailwind.js",
+      "jsdelivr": "./dist/bundle/tailwind.js",
       "browser": "./src/browser.js",
       "node": "./src/server.js",
       "default": "./src/server.js"
