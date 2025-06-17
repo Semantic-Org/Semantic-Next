@@ -450,6 +450,12 @@ z-index: var(--float-layer);           /* Not: var(--component-z-index) */
 
 ---
 
+## Tailwind CSS Integration
+
+**📚 For complete Tailwind integration details**: See [`component-generation-instructions.md#tailwind-css-integration`](./component-generation-instructions.md#tailwind-css-integration)
+
+**⚠️ IMPORTANT**: Use Tailwind CSS **only when explicitly requested**. Default to design tokens and semantic class patterns.
+
 ## Summary
 
 Your HTML and CSS style reflects a sophisticated understanding of how natural language concepts can be applied to web development. The key characteristics are:

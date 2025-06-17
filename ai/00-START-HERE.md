@@ -75,6 +75,9 @@ Context for building and modifying components:
 1. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Complete creation patterns
 2. [`guides/patterns-cookbook.md`](./guides/patterns-cookbook.md) - Communication and state patterns
 3. [`guides/html-css-style-guide.md`](./guides/html-css-style-guide.md) - Styling conventions
+4. **Tailwind Integration**:
+   - [`../packages/tailwind/README.md`](../packages/tailwind/README.md) - Plugin overview
+   - [`../packages/tailwind/AGENTS.md`](../packages/tailwind/AGENTS.md) - Technical implementation
 
 ### **Advanced Architecture Context**
 Context for complex implementation and debugging:

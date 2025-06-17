@@ -50,6 +50,9 @@ The package provides conditional exports that automatically select the correct T
 "exports": {
   ".": {
     "types": "./types/index.d.ts",
+    "cdn": "./dist/bundle/tailwind.js",
+    "unpkg": "./dist/bundle/tailwind.js",
+    "jsdelivr": "./dist/bundle/tailwind.js",
     "browser": "./src/browser.js",
     "node": "./src/server.js", 
     "default": "./src/server.js"
@@ -59,12 +62,12 @@ The package provides conditional exports that automatically select the correct T
 
 **Browser Implementation (`src/browser.js`)**:
 ```javascript
-import { generateTailwindCSS } from 'tailwindcss-iso/browser';
+import { generateTailwindCSS } from 'tailwindcss-iso';
 ```
 
 **Server Implementation (`src/server.js`)**:
 ```javascript
-import { generateTailwindCSS } from 'tailwindcss-iso/server';
+import { generateTailwindCSS } from 'tailwindcss-iso';
 ```
 
 Both implementations share identical logic but import from different `tailwindcss-iso` endpoints to ensure the correct engine is used.
@@ -78,6 +81,7 @@ The plugin comprehensively scans component definitions for Tailwind class usage:
 * **Template HTML**: Primary source of Tailwind classes
 * **Component CSS**: @theme, @utility, and custom CSS with embedded classes
 * **JavaScript Functions**: All lifecycle and event handler functions converted to strings
+* **Key Handlers**: Keyboard event handling functions in the keys object
 * **Sub-templates**: Recursive scanning of nested template definitions
 
 ### 3.2. Content Extraction (`extract-definition-content.js`)
@@ -88,10 +92,16 @@ export function extractDefinitionContent(definition) {
   // - definition.template
   // - definition.css  
   // - definition.createComponent.toString()
+  // - definition.onCreated.toString()
+  // - definition.onRendered.toString()
+  // - definition.onDestroyed.toString()
+  // - definition.onThemeChanged.toString()
+  // - definition.onAttributeChanged.toString()
   // - definition.events[key].toString()
+  // - definition.keys[key].toString()
   // - definition.subTemplates recursively
   
-  return { content, css };
+  return { html, js, css, content };
 }
 ```
 
@@ -194,8 +204,13 @@ For production builds, the plugin transformation can be moved to build time:
 │   ├── browser.js                   # Browser-specific plugin (WASM)
 │   ├── server.js                    # Server-specific plugin (Native)
 │   └── extract-definition-content.js # Shared content extraction logic
+├── dist/
+│   └── bundle/
+│       └── tailwind.js              # CDN bundle for browsers
 ├── types/
 │   └── index.d.ts                   # TypeScript definitions
+├── test/
+│   └── basic.test.js                # Test suite
 └── package.json                     # Conditional exports + dependencies
 ```
 
@@ -204,6 +219,7 @@ For production builds, the plugin transformation can be moved to build time:
 - **Runtime**: `tailwindcss-iso` (isomorphic Tailwind compiler)
 - **Shared**: `@semantic-ui/component`, `@semantic-ui/utils`
 - **Peer**: `tailwindcss` (for configuration and theme extensions)
+- **Dev**: `vitest` (testing framework)
 
 ## 8. Usage Patterns
 

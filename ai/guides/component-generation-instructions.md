@@ -40,6 +40,64 @@ For comprehensive information beyond this guide:
 
 **Rule**: When you need information beyond basic component creation, consult these canonical sources rather than guessing or duplicating information.
 
+## Tailwind CSS Integration
+
+**⚠️ IMPORTANT**: Use Tailwind CSS **only when explicitly requested**. Default to design tokens and semantic class patterns.
+
+### Using the Tailwind Plugin
+
+Semantic UI provides first-class Tailwind integration through `@semantic-ui/tailwind`:
+
+```javascript
+import { defineComponent, getText } from '@semantic-ui/component';
+import { TailwindPlugin } from '@semantic-ui/tailwind';
+
+let definition = {
+  tagName: 'my-button',
+  template: `<button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
+    <slot></slot>
+  </button>`,
+  css: `@theme { --color-blue-500: #3b82f6; }`
+};
+
+// Plugin scans for Tailwind classes and generates scoped CSS
+definition = await TailwindPlugin(definition);
+
+export const MyButton = defineComponent(definition);
+```
+
+**Key Benefits:**
+- Zero build step - Runs natively in browser via WASM
+- Shadow DOM scoped - No global CSS conflicts
+- Full Tailwind support - @theme, @utility, all features work
+
+### When to Use Tailwind vs Design Tokens
+
+**Use Tailwind for:**
+- Rapid prototyping and utility classes
+- Complex responsive layouts (`grid-cols-1 md:grid-cols-3`)
+- Team familiarity with Tailwind workflow
+
+**Use Design Tokens for:**
+- Consistent design system integration
+- Performance (no compilation overhead)
+- Simple styling needs
+
+**Combining Both:**
+```css
+:host {
+  /* Component-specific + design tokens */
+  --button-height: 2.5rem;
+  background: var(--primary-color);
+}
+/* Tailwind utilities in template */
+```
+
+**📚 Implementation Details:**
+- Plugin architecture: `../../packages/tailwind/AGENTS.md`
+- WASM compilation: `../../packages/tailwind/node_modules/tailwindcss-iso/README.md`
+- Browser engine: `../../packages/tailwind/node_modules/tailwindcss-iso/AGENTS.md` (if available)
+
 ## 🚨 **CRITICAL: Use First-Party UI Components**
 
 ### **ALWAYS Use Available Components from `/src/components/`**

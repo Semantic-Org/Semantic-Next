@@ -51,7 +51,8 @@ packages/
 ├── query/                  ← DOM querying library
 ├── renderer/               ← Lit integration
 ├── utils/                  ← Shared utilities
-└── specs/                  ← Component specifications
+├── specs/                  ← Component specifications
+└── tailwind/               ← Tailwind CSS integration
 ```
 
 ---
@@ -653,6 +654,15 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 3. Read: /docs/src/pages/api/reactivity/scheduler.mdx
 4. Read: /docs/src/examples/reactivity/ball-simulation/
 5. Grep: pattern="afterFlush|Reaction\.nonreactive" include="*.js" path="/packages/"
+```
+
+### 🎯 **Tailwind Integration**
+```bash
+1. Read: /packages/tailwind/README.md                    # Plugin overview
+2. Read: /packages/tailwind/AGENTS.md                    # Implementation details
+3. Read: /packages/tailwind/node_modules/tailwindcss-iso/README.md  # WASM engine
+4. Read: /ai/guides/component-generation-instructions.md#tailwind-css-integration
+5. Grep: pattern="TailwindPlugin" include="*.js" path="/docs/src/examples/"
 ```
 
 ---
