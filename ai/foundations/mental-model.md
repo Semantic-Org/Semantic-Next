@@ -14,7 +14,7 @@
 - [Reactivity Mental Model](#reactivity-mental-model)
 - [Component Lifecycle Model](#component-lifecycle-model)
 - [Data Flow Architecture](#data-flow-architecture)
-- [Component Tree Navigation](#component-tree-navigation)
+- [Component Communication Architecture](#component-communication-architecture)
 - [Shadow DOM & Encapsulation](#shadow-dom--encapsulation)
 - [Template Compilation Model](#template-compilation-model)
 - [Performance Architecture](#performance-architecture)
@@ -357,132 +357,68 @@ settings.size = 'large';      // Template updates automatically
 
 ---
 
-## Component Tree Navigation
+## Component Communication Architecture
 
-### The findParent/findChild Pattern
+Semantic UI provides three primary patterns for component communication, each suited for different scenarios. The choice of pattern depends on the relationship between components and the direction of data flow.
 
-`findParent(tagName)` searches for an ancestor component. The search mechanism prioritizes the DOM tree: it traverses upwards from the current component's host element (`template.element?.parentNode`), looking for an ancestor element that hosts a component matching the specified `tagName`. It will return the *closest* such DOM ancestor.
+### 1. Event-Driven Notifications (Decoupled)
 
-As a fallback for non-DOM-based nesting (e.g., logical template partials embedded directly within another template's render logic), it may also consult internal `parentTemplate` links established during template rendering. If no `tagName` is provided, `findParent` typically finds the closest component parent regardless of its tag name.
+**The preferred method for child-to-parent communication and notifying external consumers.**
 
-For finding multiple parents or searching more globally across all rendered templates by their developer-assigned `templateName`, utilities like `findParents(tagName)` (if available) or `Template.findTemplate(templateName)` (which accesses a map of all rendered templates by `templateName`) can be considered.
-
-Semantic UI provides a powerful component tree navigation system for **intentional parent-child component relationships**. This is the preferred method for sharing state between components designed to work together:
+* **Pattern**: Components use the `dispatchEvent` helper to emit standard `CustomEvent`s. This helper ensures events bubble by default, making them easy to listen for.
+* **Use Case**: A child component needs to announce a state change (e.g., `'itemSelected'`, `'formSubmitted'`, `'panelToggled'`) without knowing who or what is listening. This keeps components loosely coupled and highly reusable.
+* **Mental Model**: "Fire-and-forget." The component broadcasts that something happened; it's up to parents or other parts of the application to listen and react.
 
 ```javascript
-// Child component accessing its designed parent
-const createComponent = ({ findParent }) => ({
-  getTodos() {
-    // todo-item accessing its todo-list parent
-    return findParent('todoList').todos; // Access parent's todos signal
-  },
-  addTodo(todo) {
-    const parent = findParent('todoList');
-    parent.todos.push(todo); // Mutate parent state
+// Child (e.g., ui-form-field)
+dispatchEvent('valueChange', { field: 'email', value: 'new@test.com' });
+
+// Parent listens using standard event delegation
+const events = {
+  'valueChange ui-form-field': ({ data }) => {
+    // data.field === 'email'
+    // data.value === 'new@test.com'
   }
-});
-
-// Parent component managing its children
-const createComponent = ({ findChild, getChildren }) => ({
-  selectAllButtons() {
-    // button-group managing its button children
-    const buttons = getChildren('ui-button');
-    buttons.forEach(button => button.setSelected(true));
-  }
-});
-```
-
-**Use Cases for findParent/findChild**:
-- **Component Systems**: button-group ↔ button, accordion ↔ accordion-panel
-- **Container Components**: form ↔ form-field, table ↔ table-row  
-- **Layout Components**: pane-group ↔ pane, tab-container ↔ tab
-- **List Components**: todo-list ↔ todo-item, menu ↔ menu-item
-
-### Parent-Child Communication Patterns
-
-```
-PARENT → CHILD (Configuration)
-Parent sets child's settings via attributes/properties
-
-CHILD → PARENT (State Access)  
-Child uses findParent() to access parent's exposed properties
-
-PARENT → CHILD (Direct Access)
-Parent uses findChild() to access child components
-
-SIBLING ↔ SIBLING (Via Parent)
-Siblings communicate through shared parent state
-```
-
-### State Sharing Architecture
-
-**Local State** (single component):
-```javascript
-defaultState: {
-  isOpen: false,
-  selectedItem: null
 }
 ```
 
-**Shared State** (parent-child coordination):
-```javascript
-// Parent component exposes state
-createComponent: ({ signal }) => ({
-  todos: signal([]), // Exposed for children to access
-  
-  addTodo(todo) {
-    this.todos.push(todo);
-  }
-});
+### 2. Imperative Control (Parent-to-Child)
 
-// Child component accesses parent state  
-createComponent: ({ findParent }) => ({
-  getTodos() {
-    return findParent('todoList').todos;
-  }
-});
+**The preferred method for a parent component or external script to command a child.**
+
+* **Pattern**: Access the component's public API (the instance returned from `createComponent`) via the DOM element's `.component` property, often using the `$('selector').component()` helper.
+* **Use Case**: An external script needs to open a modal, a parent form needs to tell a child field to validate itself, or a dashboard needs to tell a chart to refresh its data.
+* **Mental Model**: Direct, imperative control. The caller has a reference to the component instance and can invoke its public methods.
+
+```javascript
+// External script controlling a counter component
+const counter = $('ui-counter').component();
+counter.setCounter(10);
+counter.startCounter();
 ```
 
-**Complex Tree Communication**:
+### 3. Hierarchical State Sharing (Tightly-Coupled Systems)
+
+**A specialized pattern for *systems* of components that are designed to work together and share state.**
+
+* **Pattern**: Use `findParent()` and `findChild()` / `getChildren()` to traverse the component tree and directly access a parent or child's state signals or methods.
+* **Use Case**: A `todo-list` managing its `todo-item` children, or an `accordion` coordinating its `accordion-panel`s. In these cases, the children are fundamentally part of the parent's functionality and direct state access is more efficient than a complex web of events.
+* **Mental Model**: "A single, distributed organism." Components are not independent but are parts of a larger whole. Use this pattern when components are not meant to be used separately.
+
 ```javascript
-// Deep nesting with multiple parents
+// Child (todo-item) accessing parent's shared state
 const createComponent = ({ findParent }) => ({
-  getAppContext() {
-    return findParent('app-shell'); // Skip intermediate parents
-  },
-  getFormData() {
-    return findParent('form-container').formData;
+  toggleCompleted() {
+    const todoList = findParent('todo-list');
+    todoList.todos.setProperty(this.id, 'completed', true);
   }
 });
 ```
 
-### Anti-Patterns to Avoid
+### Communication Anti-Patterns to Avoid
 
-❌ **Global State Stores** (use component tree instead):
-```javascript
-// Avoid: Global singletons
-import { globalStore } from './store.js';
-```
-
-✅ **Component Tree Navigation**:
-```javascript
-// Preferred: Component tree traversal
-const parent = findParent('data-provider');
-```
-
-❌ **Direct Child State Access**:
-```javascript
-// Avoid: Reaching into child state
-const child = findChild('todo-item');
-child.state.completed.set(true);
-```
-
-✅ **Child Method Invocation**:
-```javascript
-// Preferred: Call child methods
-const child = findChild('todo-item');
-child.markCompleted();
-```
+-   **Global State Stores**: The framework's architecture is designed to avoid the need for external state management libraries. Use the three patterns above instead.
+-   **Direct Child State Manipulation**: A parent should not reach into a child's internal `state` object (e.g., `child.state.isOpen.set(true)`). It should instead call a public method on the child's instance (e.g., `child.open()`).
 
 ---
 
@@ -568,7 +504,7 @@ const events = {
 - **Default**: Event delegation within your component's template
 - **Global**: Page-level events (scroll, hashchange, resize)
 - **Deep**: Parent component managing its intentional child components (button-group → button, pane-group → pane)
-- **Bind**: Custom events that don't bubble by default
+- **Bind**: Custom events from 3rd-party components that don't bubble by default
 
 ---
 
@@ -752,16 +688,16 @@ This allows components to work in environments with varying JavaScript support l
 
 ## Key Mental Model Takeaways
 
-1. **Web Standards Foundation**: Everything builds on standard web platform APIs
-2. **Signals-First Reactivity**: Think in terms of reactive data flow, not imperative DOM updates
-3. **Component Tree Navigation**: Use `findParent()`/`findChild()` for state sharing, not global stores
-4. **Mutable Settings**: Settings can be modified during component lifecycle and are reactive in templates
-5. **Component Isolation**: Shadow DOM provides true encapsulation with controlled communication
-6. **Template Compilation**: Templates are compiled once, executed many times with different data
-7. **Automatic Resource Management**: Most cleanup happens automatically through careful API design
-8. **Progressive Enhancement**: Components work at multiple levels of JavaScript support
-9. **Design System Integration**: CSS custom properties enable consistent theming
-10. **Framework Agnostic**: Components integrate with any framework supporting custom elements
+1. **Web Standards Foundation**: Everything builds on standard web platform APIs.
+2. **Signals-First Reactivity**: Think in terms of reactive data flow, not imperative DOM updates.
+3. **Hierarchy of Communication**: Prefer `dispatchEvent` > `$('...').component()` > `findParent()` based on the level of coupling required. Avoid global state stores.
+4. **Mutable Settings**: Settings can be modified during component lifecycle and are reactive in templates.
+5. **Component Isolation**: Shadow DOM provides true encapsulation with controlled communication.
+6. **Template Compilation**: Templates are compiled once, executed many times with different data.
+7. **Automatic Resource Management**: Most cleanup happens automatically through careful API design.
+8. **Progressive Enhancement**: Components work at multiple levels of JavaScript support.
+9. **Design System Integration**: CSS custom properties enable consistent theming.
+10. **Framework Agnostic**: Components integrate with any framework supporting custom elements.
 
 Understanding these mental models enables effective use of Semantic UI and helps explain the "why" behind its design decisions.
 

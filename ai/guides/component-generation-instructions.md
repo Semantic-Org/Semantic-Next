@@ -1,15 +1,31 @@
-# Semantic UI Component Generation Instructions
+# Semantic UI Component Development Guide
 
-> **For:** AI agents creating Semantic UI components  
+> **For:** AI agents building Semantic UI components for any application  
 > **Prerequisites:** Basic understanding of web components and JavaScript  
+> **Scope:** Framework usage patterns, component architecture, implementation best practices  
 > **Related:** [Mental Model](../foundations/mental-model.md) • [Patterns Cookbook](../guides/patterns-cookbook.md) • [API Reference](../foundations/quick-reference.md)  
 > **Back to:** [Documentation Hub](../00-START-HERE.md)
 
 ---
 
-## 🚨 **CRITICAL: Read This Before Creating Components**
+## 🚨 **CRITICAL: Read This Before Building Components**
 
-**MANDATORY READING BEFORE COMPONENT CREATION:**
+This guide covers building Semantic UI components for **any application** - whether for your own projects, libraries, or documentation examples.
+
+### **📋 Are You Creating a Documentation Example?**
+
+**If you were asked to create an "example component" or "component example":**
+- **STOP** - You likely need the **[Example Creation Guide](../docs/example-creation-guide.md)** instead
+- Documentation examples have specific metadata, file structure, and playground requirements
+- **When in doubt, clarify with the user:** "Are you building a component for an application, or creating a documentation example?"
+
+**Use this guide for:**
+- Components for your own applications
+- Library components  
+- Understanding framework patterns and architecture
+- General component development skills
+
+**MANDATORY READING BEFORE COMPONENT DEVELOPMENT:**
 
 1. **CSS & Design Patterns**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - Essential for CSS class naming and design token usage
 2. **Method References**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Critical `self.methodName()` patterns 
@@ -20,9 +36,7 @@
 - Using `this.method()` instead of `self.method()` 
 - Using hardcoded CSS values instead of design tokens like `var(--large)`
 - Not prefixing query variables with `$` (use `const $div = $('div')`)
-- Creating components in wrong directory structure
-- Forgetting to create the required content metadata file
-- **Not following HTML/CSS style guide for page files** (page.css and page.html must ALSO follow design token and semantic naming patterns)
+- Creating components without proper file organization
 - **Accessing internal component state directly** instead of using public API methods
 - **🚨 CRITICAL: Using HTML elements instead of first-party UI components** (see First-Party Components section below)
 
@@ -162,59 +176,26 @@ defineComponent({
 3. **Check available variations and types** in the spec
 4. **Verify icon names** against the icon spec options list
 
-## 🚨 **MANDATORY: Component File Structure & Paths**
+## 📁 **Component File Organization**
 
-When creating a new component example, you **MUST** follow this exact structure:
+Components are built using a consistent three-file pattern that provides separation of concerns and optimal development experience.
 
-### **Required Directory Structure**
-```
-/docs/src/examples/your-component-name/
-├── component.js     # Main component definition (REQUIRED)
-├── component.html   # Component template (REQUIRED)
-├── component.css    # Component styles (REQUIRED)
-├── page.html        # Custom demo (optional - auto-generated if missing)
-├── page.css         # Demo styling (optional)
-└── page.js          # Demo interactions (optional)
-
-/docs/src/content/examples/
-└── your-component-name.mdx  # Metadata file (REQUIRED)
-```
-
-### **Critical Requirements**
-1. **Component files** MUST go in `/docs/src/examples/your-component-name/`
-2. **Metadata file** MUST go in `/docs/src/content/examples/your-component-name.mdx`
-3. **Both locations are REQUIRED** - the component will not work without both
-4. **Folder name and metadata filename MUST match** (e.g., `loader/` folder → `loader.mdx` file)
-5. **Title in metadata MUST match folder name** (e.g., folder `loader` → title `'Loader'`)
-
-### **❌ Wrong Paths (DO NOT USE)**
-- `/examples/your-component/` (this is for standalone examples, not docs)
-- `/docs/src/examples/your-component.mdx` (metadata goes in content/examples/)
-- Missing either component files OR metadata file
-
-## Component Structure
+### **Standard Component Structure**
 
 **Core component files:**
-- `component.js` - Main component definition
-- `component.html` - Component template  
-- `component.css` - Component styles (scoped to component)
-
-**Demo page files (all optional):**
-- `page.html` - Custom usage example (auto-generated if not provided)
-- `page.css` - Demo page styling (use design tokens, not hardcoded values)
-- `page.js` - Demo interactions (for complex demo functionality)
-
-**🚨 CRITICAL: Page File Standards**
-**page.html and page.css MUST follow the same HTML/CSS style guide as component files:**
-- **page.css** must use design tokens (`var(--spacing)`, `var(--text-color)`) not hardcoded values
-- **page.html** must use terse, semantic class names (`.container`, `.grid`, `.item`) not hyphenated names (`.demo-container`, `.loader-grid`)
-- **page.css** must use CSS nesting and natural hierarchy patterns
-- **page.js** must prefix all query variables with `$` (`const $button = $('#btn')`)
+- **`component.js`** - Main component definition with `defineComponent`
+- **`component.html`** - Component template with reactive expressions
+- **`component.css`** - Component styles (scoped via Shadow DOM)
 
 **Subcomponent files:**
 - Use hyphenated names like `todo-item.js`, `todo-item.html`, `todo-item.css`
+- Import and reference in parent component
 
-**Important**: Never use inline styles in `page.html` - use `page.css` for demo page styling
+### **Component File Benefits**
+- **Separation of concerns** - Logic, markup, and styling cleanly separated
+- **Shadow DOM scoping** - CSS automatically scoped to component
+- **Hot reloading** - Each file can be modified independently
+- **Reusability** - Components can be imported and used anywhere
 
 ## Component Definition Pattern
 
@@ -1143,311 +1124,17 @@ When implementing a new component, consider:
 
 Refer to these examples for practical implementations of the patterns described in these instructions.
 
-## Adding New Examples to Documentation
+## 📖 **Creating Documentation Examples**
 
-When creating examples to showcase your components, you need to add them to the documentation system. This involves two main parts: creating a metadata file and providing the actual component files.
+To showcase your components in the Semantic UI documentation system:
 
-### 1. Create Example Metadata (.mdx file)
+- **📋 Example Creation Guide**: [`../docs/example-creation-guide.md`](../docs/example-creation-guide.md) - Complete documentation system requirements, metadata, and playground behavior
+- **📦 Package Examples**: [`../docs/package-example-guide.md`](../docs/package-example-guide.md) - Creating examples for reactivity, utils, and query packages
 
-Create a `.mdx` file in `/docs/src/content/examples/` with frontmatter metadata:
+The documentation system has specific requirements for file structure, metadata, and organization that are separate from general component development.
 
-```markdown
 ---
-title: 'Your Component Name'
-exampleType: 'component'
-category: 'Components'
-subcategory: 'UI Components'  # or 'CSS Tokens', 'Form Elements', etc.
-tags: ['component', 'ui', 'interaction']
-description: A brief description of what your component does
-tip: Optional helpful tip about implementation details
----
-```
 
-**Common subcategories:**
-- `UI Components` - Interactive interface elements
-- `Form Elements` - Input, validation, and form-related components
-- `Layout` - Containers, grids, positioning components
-- `CSS Tokens` - Design system and theming examples
-- `Data Display` - Tables, lists, charts, visualization
-- `Navigation` - Menus, tabs, breadcrumbs
-- `Feedback` - Modals, alerts, progress indicators
+**Last Updated:** Component implementation guidance  
+**Maintenance:** Update this file when component patterns or framework APIs change
 
-### 2. Create Component Files
-
-Add your component files in `/docs/src/examples/your-component-name/`:
-
-**Required files:**
-- `component.js` - Main component definition
-- `component.html` - Component template
-- `component.css` - Component styles
-
-**Optional files:**
-- `page.html` - Custom usage example (auto-generated if not provided)
-- `page.js` - Page-level JavaScript for complex demos
-- `page.css` - Page-specific styling
-- Additional subcomponent files (e.g., `sub-item.js`, `sub-item.html`, `sub-item.css`)
-
-### 3. Understanding Auto-Generated page.html
-
-If you don't provide a `page.html` file, the system automatically generates one using your component's tag name (e.g., `<your-component></your-component>`). This auto-generation relies on the `tagName` being defined in your `component.js` via `defineComponent`.
-
-**For template-only components** (defined using `defineComponent` but without a `tagName`), auto-generation of `page.html` is not applicable as there's no tag to render. In such cases, you **must** provide a custom `page.html`. This custom page should demonstrate how to programmatically create an instance of the template and render it (e.g., by importing the template definition and calling its `render()` method, then appending the result to the DOM or integrating it with a host component).
-
-**Auto-generated structure:**
-```html
-<your-component></your-component>
-```
-
-**When to provide custom page.html:**
-- Your component needs specific configuration or settings
-- You want to demonstrate multiple usage patterns
-- The component requires surrounding context or container elements
-- You need to show component composition or interaction
-
-**Example custom page.html:**
-```html
-<div class="demo-container">
-  <h3>Basic Usage</h3>
-  <my-component size="small"></my-component>
-
-  <h3>With Custom Settings</h3>
-  <my-component size="large" theme="dark"></my-component>
-</div>
-```
-
-### 4. Playground Script Injection System
-
-The documentation system includes a sophisticated script injection system for the interactive playground. Understanding this helps you write better examples.
-
-#### Code Folding and Hiding (Special Cases Only)
-
-The playground supports code folding and hiding markers, but these should **only be used in extremely special cases** for specific pedagogical purposes (like learning examples where you want to focus attention on specific concepts).
-
-**⚠️ Avoid using these markers in regular component examples** - they create an anti-pattern that hides implementation details that users should see and understand.
-
-```javascript
-/* playground-hide */
-// Only use for debugging code or pedagogical examples
-/* playground-hide */
-
-/* playground-fold */
-// Only use when you specifically want to hide complexity for learning purposes
-/* playground-fold */
-```
-
-#### How Auto-Generated HTML Works
-
-The playground system automatically wraps your component in a complete HTML document:
-
-**Generated wrapper structure:**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Component Example</title>
-  <script type="importmap">
-    {
-      "imports": {
-        "@semantic-ui/component": "/dist/@semantic-ui/component.js",
-        // ... other imports
-      }
-    }
-  </script>
-  <script>
-    // Error handling and debugging setup
-    window.addEventListener('error', (e) => {
-      console.error('Playground Error:', e.error);
-    });
-  </script>
-</head>
-<body>
-  <!-- Your component code gets injected here -->
-  <script type="module">
-    // Your JavaScript code with imports resolved
-  </script>
-</body>
-</html>
-```
-
-**Key features:**
-- **Import map resolution** - Framework imports are automatically resolved
-- **Error handling** - Runtime errors are caught and displayed
-- **Hot reloading** - Changes trigger automatic updates
-- **CSS injection** - Component styles are automatically included
-
-#### Best Practices for Examples
-
-**1. Keep code visible and transparent:**
-- Show all relevant implementation details
-- Avoid hiding code with playground markers unless absolutely necessary for pedagogical purposes
-- Let users see and learn from complete, real implementations
-
-**2. Provide meaningful examples:**
-- Show real-world usage patterns
-- Include edge cases and error states
-- Demonstrate accessibility features
-- Use realistic data and content
-
-**3. Consider progressive complexity:**
-- Start with basic usage in auto-generated `page.html`
-- Add custom `page.html` for advanced scenarios
-- Use `page.js` for complex interactive demos
-
-### 5. File Organization Examples
-
-**Simple component (auto-generated page):**
-```
-/docs/src/examples/simple-button/
-├── component.js     # Main component
-├── component.html   # Template
-├── component.css    # Styles
-└── (page.html auto-generated)
-```
-
-**Complex component with custom demo:**
-```
-/docs/src/examples/advanced-table/
-├── component.js     # Main table component
-├── component.html   # Table template
-├── component.css    # Table styles
-├── row.js          # Row subcomponent
-├── row.html        # Row template
-├── row.css         # Row styles
-├── page.html       # Custom demo page
-├── page.js         # Demo interactions
-└── page.css        # Demo styling
-```
-
-**Multi-component system:**
-```
-/docs/src/examples/todo-list/
-├── component.js     # Main todo-list
-├── component.html   # List template
-├── component.css    # List styles
-├── todo-item.js    # Item subcomponent
-├── todo-item.html  # Item template
-├── todo-item.css   # Item styles
-├── todo-header.js  # Header subcomponent
-├── todo-header.html # Header template
-├── todo-header.css # Header styles
-├── todo-footer.js  # Footer subcomponent
-├── todo-footer.html # Footer template
-├── todo-footer.css # Footer styles
-├── page.html       # Complete demo
-└── page.css        # Demo styling
-```
-
-## Creating Package Examples (Non-Component)
-
-For examples that demonstrate core packages like `@semantic-ui/reactivity` or `@semantic-ui/query` rather than full components, use a simpler structure with just an `index.js` file.
-
-### Package Example Structure
-
-**Simple package example:**
-```
-/docs/src/examples/reactive-helpers/reactive-now/
-└── index.js     # Complete example code
-```
-
-**Package example with supporting files:**
-```
-/docs/src/examples/query/dom/shadow-dom/
-├── component.js     # Component definition (if needed)
-├── component.html   # Template (if needed)
-├── component.css    # Styles (if needed)
-├── page.html       # Demo page
-├── page.js         # Demo interactions
-└── page.css        # Demo styling
-```
-
-### Package Example Patterns
-
-**1. Reactivity Examples** - Demonstrating Signal and Reaction APIs:
-```javascript
-import { Reaction, Signal } from '@semantic-ui/reactivity';
-
-const counter = new Signal(0);
-
-Reaction.create((reaction) => {
-  console.log(`Counter value: ${counter.get()}`);
-  if (reaction.firstRun) {
-    console.log('First run - setting up reaction');
-  }
-});
-
-// Demonstrate the specific API feature
-counter.increment(1);   // For reactive-increment example
-counter.now();          // For reactive-now example
-counter.removeIndex(0); // For reactive-remove-index example
-```
-
-**2. Query Examples** - Demonstrating DOM querying and manipulation:
-```javascript
-import { $, $$ } from '@semantic-ui/query';
-
-// Demonstrate specific query features
-const elements = $$('ui-component .selector');
-elements.forEach(el => {
-  el.classList.add('processed');
-});
-```
-
-**3. Utility Examples** - Demonstrating helper functions and utilities:
-```javascript
-import { helper, utility } from '@semantic-ui/utilities';
-
-// Show practical usage of utility functions
-const result = helper(inputData);
-console.log('Processed result:', result);
-```
-
-### Package Example Guidelines
-
-**Focus on specific APIs:**
-- Each example should demonstrate one specific feature or method
-- Keep examples minimal and focused
-- Use clear, descriptive console logging to show results
-- Include comments explaining what the code demonstrates
-
-**Common patterns:**
-```javascript
-// 1. Import the specific package
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-// 2. Set up initial state
-const data = new Signal(['item1', 'item2', 'item3']);
-
-// 3. Create reaction to observe changes
-Reaction.create((reaction) => {
-  const currentData = data.get();
-  if (!reaction.firstRun) {
-    console.log('Data changed:', currentData);
-  }
-});
-
-// 4. Demonstrate the specific feature
-data.push('item4');  // Shows reactive array mutation
-```
-
-**Naming conventions for package examples:**
-- `reactive-[method-name]` - For reactivity API demonstrations
-- `query-[feature]` - For query API demonstrations  
-- `[package]-[feature]` - For other package demonstrations
-
-### When to Use Package Examples vs Component Examples
-
-**Use package examples (index.js) for:**
-- Demonstrating core API features like Signal methods
-- Showing utility function usage
-- Teaching fundamental concepts
-- Simple code snippets that don't need UI
-
-**Use component examples (component.js/html/css) for:**
-- Interactive UI demonstrations
-- Complete component implementations
-- Complex user interactions
-- Visual demonstrations of functionality
-
-Package examples are ideal for teaching the building blocks and core APIs that developers will use when creating their own components.

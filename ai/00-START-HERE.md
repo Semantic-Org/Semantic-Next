@@ -16,9 +16,19 @@ Semantic UI is a modern web component framework built on web standards with sign
 ## Quick Task Resolution
 
 ### 🚀 **Building Components**
-**Need to:** Create, modify, or understand components  
+**Need to:** Create, modify, or understand components for any application  
 **Start with:** [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md)  
-**Contains:** Complete component creation patterns, lifecycle, templates, events
+**Contains:** Framework usage patterns, component architecture, implementation best practices
+
+### 📚 **Creating Documentation Examples**
+**Need to:** Add examples to the documentation system  
+**Start with:** [`docs/example-creation-guide.md`](./docs/example-creation-guide.md)  
+**Contains:** Metadata system, playground behavior, file organization, step-by-step workflows
+
+### 📦 **Creating Package Examples**
+**Need to:** Demonstrate package APIs (reactivity, utils, query)  
+**Start with:** [`docs/package-example-guide.md`](./docs/package-example-guide.md)  
+**Contains:** Package demo patterns, console logging, API demonstrations
 
 ### 🧠 **Understanding Architecture** 
 **Need to:** Grasp framework concepts, mental models, design decisions  
@@ -71,13 +81,19 @@ Essential context for understanding Semantic UI architecture and patterns:
 3. [`foundations/quick-reference.md`](./foundations/quick-reference.md) - API reference
 
 ### **Component Development Context**
-Context for building and modifying components:
-1. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Complete creation patterns
+Context for building components for any application:
+1. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Framework usage and architecture patterns
 2. [`guides/patterns-cookbook.md`](./guides/patterns-cookbook.md) - Communication and state patterns
 3. [`guides/html-css-style-guide.md`](./guides/html-css-style-guide.md) - Styling conventions
 4. **Tailwind Integration**:
    - [`../packages/tailwind/README.md`](../packages/tailwind/README.md) - Plugin overview
    - [`../packages/tailwind/AGENTS.md`](../packages/tailwind/AGENTS.md) - Technical implementation
+
+### **Documentation Creation Context**
+Context for creating examples and documentation:
+1. [`docs/example-creation-guide.md`](./docs/example-creation-guide.md) - Complete example metadata system and docs requirements
+2. [`docs/package-example-guide.md`](./docs/package-example-guide.md) - Package API demonstrations
+3. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Component implementation patterns
 
 ### **Advanced Architecture Context**
 Context for complex implementation and debugging:
