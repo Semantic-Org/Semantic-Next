@@ -13,9 +13,14 @@ class TemplateCompiler {
     ELSEIF: /^{\s*else\s*if\s+/,
     ELSE: /^{\s*else\s*/,
     EACH: /^{\s*#each\s+/,
+    DEFINE: /^{\s*#(define|load)\s+/,
+    BEFORE: /^{\s*before\s*/,
+    LOADING: /^{\s*loading\s*/,
+    ERROR: /^{\s*error\b/,
     SNIPPET: /^{\s*#snippet\s+/,
     CLOSE_IF: /^{\s*\/(if)\s*/,
     CLOSE_EACH: /^{\s*\/(each)\s*/,
+    CLOSE_DEFINE: /^{\s*\/(define|load)\s*/,
     CLOSE_SNIPPET: /^{\s*\/(snippet)\s*/,
     SLOT: /^{>\s*slot\s*/,
     TEMPLATE: /^{>\s*/,
@@ -35,9 +40,14 @@ class TemplateCompiler {
     ELSEIF: /^{{\s*else\s*if\s+/,
     ELSE: /^{{\s*else\s*/,
     EACH: /^{{\s*#each\s+/,
+    DEFINE: /^{{\s*#(define|load)\s+/,
+    BEFORE: /^{{\s*before\s*/,
+    LOADING: /^{{\s*loading\s*/,
+    ERROR: /^{{\s*error\b/,
     SNIPPET: /^{{\s*#snippet\s+/,
     CLOSE_IF: /^{{\s*\/(if)\s*/,
     CLOSE_EACH: /^{{\s*\/(each)\s*/,
+    CLOSE_DEFINE: /^{{\s*\/(define|load)\s*/,
     CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
     SLOT: /^{{>\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
@@ -140,7 +150,25 @@ class TemplateCompiler {
           const rawContent = getTagContent();
           scanner.consume(parserRegExp.EXPRESSION_END);
           const content = this.getValue(rawContent);
-          return { type, content, ...context }; // Include context in the return value
+          
+          // Parse common 'as' patterns once for all blocks
+          let alias = null;
+          if (content && typeof content === 'string') {
+            if (content.includes(' as ')) {
+              const parts = content.split(' as ');
+              if (parts.length > 1) {
+                alias = parts[1].trim();
+              }
+            } else if (type === 'ERROR' && content && content.startsWith('as ')) {
+              // Handle ERROR blocks where content is "as alias"
+              alias = content.substring(3).trim();
+            } else if (type === 'ERROR' && !content) {
+              // Handle ERROR blocks with no content - default alias
+              alias = null;
+            }
+          }
+          
+          return { type, content, alias, ...context };
         }
       }
 
@@ -231,6 +259,13 @@ class TemplateCompiler {
             }
             else if (conditionTarget.type === 'each') {
               // Handling for each/else
+              contentStack.pop();
+              contentStack.push(newNode);
+              conditionTarget.else = newNode;
+              contentBranch = newNode;
+            }
+            else if (conditionTarget.type === 'define') {
+              // Handling for define/else
               contentStack.pop();
               contentStack.push(newNode);
               conditionTarget.else = newNode;
@@ -395,6 +430,84 @@ class TemplateCompiler {
             contentBranch = last(contentStack); // Reset current branch
             break;
 
+          case 'DEFINE':
+            let expression = tag.content.includes(' as ') ? tag.content.split(' as ')[0].trim() : tag.content.trim();
+            let alias = tag.alias;
+            let destructuring = null;
+            
+            // Check for destructuring in alias
+            if (alias && alias.startsWith('{') && alias.endsWith('}')) {
+              destructuring = this.parseDestructuring(alias);
+              alias = null;
+            }
+
+            newNode = {
+              ...newNode,
+              type: 'define',
+              expression,
+              alias,
+              destructuring,
+              content: [],
+              pending: null,
+              error: null,
+              errorAlias: null,
+              else: null,
+            };
+
+            contentTarget.push(newNode);
+            conditionStack.push(newNode);
+            contentStack.push(newNode);
+            contentBranch = newNode;
+            break;
+
+          case 'BEFORE':
+          case 'LOADING':
+            if (!conditionTarget || conditionTarget.type !== 'define') {
+              scanner.returnTo(tagRegExp[tag.type]);
+              scanner.fatal(
+                `{${tag.type.toLowerCase()}} encountered without matching define/load block`,
+              );
+            }
+            newNode = {
+              type: 'pending',
+              content: [],
+            };
+            contentStack.pop();
+            contentStack.push(newNode);
+            conditionTarget.pending = newNode;
+            contentBranch = newNode;
+            break;
+
+          case 'ERROR':
+            if (!conditionTarget || conditionTarget.type !== 'define') {
+              scanner.returnTo(tagRegExp.ERROR);
+              scanner.fatal(
+                '{error} encountered without matching define/load block',
+              );
+            }
+            
+            newNode = {
+              type: 'error',
+              content: [],
+            };
+            contentStack.pop();
+            contentStack.push(newNode);
+            conditionTarget.error = newNode;
+            conditionTarget.errorAlias = tag.alias || 'error';
+            contentBranch = newNode;
+            break;
+
+          case 'CLOSE_DEFINE':
+            if (conditionStack.length == 0) {
+              scanner.returnTo(tagRegExp.CLOSE_DEFINE);
+              scanner.fatal('{/define} close tag found without open define tag');
+            }
+            stack.pop();
+            contentStack.pop();
+            conditionStack.pop();
+            contentBranch = last(contentStack);
+            break;
+
           case 'SVG_OPEN':
             // AST inside <svg> open tag is not included
             contentTarget.push({ type: 'html', html: '<svg ' });
@@ -417,7 +530,7 @@ class TemplateCompiler {
               type: 'html',
               html: '</svg>',
             };
-            (contentTarget || ast).push(newNode);
+            contentTarget.push(newNode);
             break;
         }
       }
@@ -446,6 +559,29 @@ class TemplateCompiler {
       return Number(expression);
     }
     return expression;
+  }
+
+  parseDestructuring(destructuringString) {
+    // Parse { prop1, prop2, ...rest } destructuring syntax
+    const content = destructuringString.slice(1, -1).trim(); // Remove { }
+    const parts = [];
+    let restParameter = null;
+
+    // Simple parsing - split by comma and handle ...rest
+    const tokens = content.split(',').map(t => t.trim()).filter(t => t.length > 0);
+    
+    for (const token of tokens) {
+      if (token.startsWith('...')) {
+        restParameter = token.slice(3).trim();
+      } else {
+        parts.push(token);
+      }
+    }
+
+    return {
+      properties: parts,
+      rest: restParameter
+    };
   }
   parseTemplateString(expression = '') {
     // quicker to compile regexp once
