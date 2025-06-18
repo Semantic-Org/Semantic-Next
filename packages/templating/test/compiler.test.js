@@ -1719,6 +1719,36 @@ describe('TemplateCompiler', () => {
     });
   });
 
+  describe('keyword expressions', () => {
+    it('should parse expressions with keyword-like names as expressions, not blocks', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          {{errorMessage}}
+          {{loadingSpinner}}
+          {{beforeHook}}
+          {{error.message}}
+          {{loading.state}}
+          {{before.action}}
+          {{errorMessage ? 'Error' : 'Success'}}
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      
+      // Find the expressions in the AST
+      const expressions = ast.filter(node => node.type === 'expression');
+      expect(expressions.length).toBe(7);
+      
+      expect(expressions[0].value).toBe('errorMessage');
+      expect(expressions[1].value).toBe('loadingSpinner');
+      expect(expressions[2].value).toBe('beforeHook');
+      expect(expressions[3].value).toBe('error.message');
+      expect(expressions[4].value).toBe('loading.state');
+      expect(expressions[5].value).toBe('before.action');
+      expect(expressions[6].value).toBe("errorMessage ? 'Error' : 'Success'");
+    });
+  });
+
   describe('error conditions', () => {
     it('should throw an error when an else included outside an if', () => {
       const compiler = new TemplateCompiler();
