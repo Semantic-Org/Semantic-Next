@@ -13,15 +13,14 @@ class TemplateCompiler {
     ELSEIF: /^{\s*else\s*if\s+/,
     ELSE: /^{\s*else\s*/,
     EACH: /^{\s*#each\s+/,
-    DEFINE: /^{\s*#(define|load)\s+/,
-    BEFORE: /^{\s*before(\s+|(?=}}))/,
-    LOADING: /^{\s*loading(\s+|(?=}}))/,
-    ERROR: /^{\s*error(\s+|(?=}}))/,
     SNIPPET: /^{\s*#snippet\s+/,
+    ASYNC: /^{\s*#(async)\s+/,
+    ASYNC_BEFORE: /^{\s*(before|loading)(\s+|(?=}}))/,
+    ASYNC_ERROR: /^{\s*(error|catch)(\s+|(?=}}))/,
     CLOSE_IF: /^{\s*\/(if)\s*/,
     CLOSE_EACH: /^{\s*\/(each)\s*/,
-    CLOSE_DEFINE: /^{\s*\/(define|load)\s*/,
     CLOSE_SNIPPET: /^{\s*\/(snippet)\s*/,
+    CLOSE_ASYNC: /^{\s*\/(async)\s*/,
     SLOT: /^{>\s*slot\s*/,
     TEMPLATE: /^{>\s*/,
     HTML_EXPRESSION: /^{\s*#html\s*/,
@@ -40,14 +39,9 @@ class TemplateCompiler {
     ELSEIF: /^{{\s*else\s*if\s+/,
     ELSE: /^{{\s*else\s*/,
     EACH: /^{{\s*#each\s+/,
-    DEFINE: /^{{\s*#(define|load)\s+/,
-    BEFORE: /^{{\s*before(\s+|(?=}}))/,
-    LOADING: /^{{\s*loading(\s+|(?=}}))/,
-    ERROR: /^{{\s*error(\s+|(?=}}))/,
     SNIPPET: /^{{\s*#snippet\s+/,
     CLOSE_IF: /^{{\s*\/(if)\s*/,
     CLOSE_EACH: /^{{\s*\/(each)\s*/,
-    CLOSE_DEFINE: /^{{\s*\/(define|load)\s*/,
     CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
     SLOT: /^{{>\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
@@ -150,25 +144,7 @@ class TemplateCompiler {
           const rawContent = getTagContent();
           scanner.consume(parserRegExp.EXPRESSION_END);
           const content = this.getValue(rawContent);
-          
-          // Parse common 'as' patterns once for all blocks
-          let alias = null;
-          if (content && typeof content === 'string') {
-            if (content.includes(' as ')) {
-              const parts = content.split(' as ');
-              if (parts.length > 1) {
-                alias = parts[1].trim();
-              }
-            } else if (type === 'ERROR' && content && content.startsWith('as ')) {
-              // Handle ERROR blocks where content is "as alias"
-              alias = content.substring(3).trim();
-            } else if (type === 'ERROR' && !content) {
-              // Handle ERROR blocks with no content - default alias
-              alias = null;
-            }
-          }
-          
-          return { type, content, alias, ...context };
+          return { type, content, ...context }; // Include context in the return value
         }
       }
 
@@ -187,18 +163,53 @@ class TemplateCompiler {
       return null;
     };
 
+    // the entire AST being generaetd
     const ast = [];
-    const stack = [];
 
-    let contentBranch = null; // Track the current node to add content
-    let conditionStack = []; // Track the current condition stack
-    let contentStack = []; // Track the current content target stack
+    // a stack containing if/else/elseif targets, latest on top
+    let conditionStack = [];
+
+    // a stack containing nodes that can receive nodes in their subtree
+    let contentStack = [];
 
     while (!scanner.isEOF()) {
+      // extract details from inside {tag}
       const tag = parseTag(scanner);
 
-      const conditionTarget = last(conditionStack);
+      // the current open conditional node
+      const conditionBranch = last(conditionStack);
+
+      // the node which receive this content in its subtree
+      const contentBranch = last(contentStack);
+
+      // the actual array which will receive the subtree
       const contentTarget = contentBranch?.content || ast;
+
+      /*
+        These are aliased to avoid confusion from the various
+        push/pop stack that are necessary inside the compiler
+      */
+
+      /* This changes the node receiving content in AST */
+      const setCurrentContent = (...contentNodes) => {
+        contentStack.push(...contentNodes);
+      };
+      const returnToLastContent = () => {
+        contentStack.pop();
+      };
+
+      /* This changes the node receiving conditions in AST */
+      const setCurrentCondition = (...conditionNodes) => {
+        conditionStack.push(...conditionNodes);
+      };
+      const returnToLastCondition = () => {
+        conditionStack.pop();
+      };
+
+      /* This adds the current node to the AST */
+      const addToAST = (...nodes) => {
+        contentTarget.push(...nodes);
+      };
 
       if (tag) {
         let newNode = {
@@ -206,91 +217,82 @@ class TemplateCompiler {
         };
 
         switch (tag.type) {
-          case 'IF':
+          case 'IF': {
             newNode = {
               ...newNode,
               condition: tag.content,
               content: [],
               branches: [],
             };
-            contentTarget.push(newNode);
-            conditionStack.push(newNode);
-            contentStack.push(newNode);
-            contentBranch = newNode;
+            setCurrentContent(newNode);
+            setCurrentCondition(newNode);
+            addToAST(newNode);
             break;
+          }
 
-          case 'ELSEIF':
+          case 'ELSEIF': {
             newNode = {
               ...newNode,
               condition: tag.content,
               content: [],
             };
-            if (!conditionTarget) {
+            if (!conditionBranch) {
               scanner.returnTo(tagRegExp.ELSEIF);
               scanner.fatal(
-                '{{elseif}} encountered without matching if condition',
+                '{elseif} encountered without matching if condition',
               );
             }
-            contentStack.pop();
-            contentStack.push(newNode);
-            conditionTarget.branches.push(newNode);
-            contentBranch = newNode;
+            returnToLastContent();
+            setCurrentContent(newNode);
+            conditionBranch.branches.push(newNode);
             break;
+          }
 
-          case 'ELSE':
+          case 'ELSE': {
             newNode = {
               ...newNode,
               content: [],
             };
-            if (!conditionTarget) {
+            if (!conditionBranch) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered without matching if or each condition',
+                '{else} encountered without matching if or each condition',
               );
               break;
             }
 
-            if (conditionTarget.type === 'if') {
-              // Handling for if/else
-              contentStack.pop();
-              contentStack.push(newNode);
-              conditionTarget.branches.push(newNode);
-              contentBranch = newNode;
+            if (conditionBranch.type === 'if') {
+              // Handling for if/else pushes to branches: []
+              returnToLastContent();
+              setCurrentContent(newNode);
+              conditionBranch.branches.push(newNode);
             }
-            else if (conditionTarget.type === 'each') {
-              // Handling for each/else
-              contentStack.pop();
-              contentStack.push(newNode);
-              conditionTarget.else = newNode;
-              contentBranch = newNode;
-            }
-            else if (conditionTarget.type === 'define') {
-              // Handling for define/else
-              contentStack.pop();
-              contentStack.push(newNode);
-              conditionTarget.else = newNode;
-              contentBranch = newNode;
+            else if (conditionBranch.type === 'each') {
+              // Handling for each/else pushes to else: []
+              returnToLastContent();
+              setCurrentContent(newNode);
+              conditionBranch.else = newNode;
             }
             else {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{{else}} encountered with unknown condition type: ' + conditionTarget.type,
+                '{else} encountered with unknown condition type: ' + conditionBranch.type,
               );
             }
             break;
+          }
 
-          case 'CLOSE_IF':
+          case 'CLOSE_IF': {
             if (conditionStack.length == 0) {
               scanner.returnTo(tagRegExp.CLOSE_IF);
-              scanner.fatal('{{/if}} close tag found without open if tag');
+              scanner.fatal('{/if} close tag found without open if tag');
             }
-            stack.pop();
-            contentStack.pop();
+            returnToLastContent();
             conditionStack.pop();
-            contentBranch = last(contentStack); // Reset current branch
             break;
+          }
 
-          case 'SNIPPET':
+          case 'SNIPPET': {
             newNode = {
               ...newNode,
               type: 'snippet',
@@ -298,34 +300,34 @@ class TemplateCompiler {
               content: [],
             };
             this.snippets[tag.content] = newNode;
-            contentTarget.push(newNode);
-            conditionStack.push(newNode);
-            contentStack.push(newNode);
-            contentBranch = newNode;
+            setCurrentCondition(newNode);
+            setCurrentContent(newNode);
+            addToAST(newNode);
             break;
+          }
 
-          case 'CLOSE_SNIPPET':
+          case 'CLOSE_SNIPPET': {
             if (conditionStack.length == 0) {
               scanner.returnTo(tagRegExp.CLOSE_IF);
-              scanner.fatal('{{/snippet}} close tag found without open if tag');
+              scanner.fatal('{/snippet} close tag found without open if tag');
             }
-            stack.pop();
-            contentStack.pop();
-            contentBranch = last(contentStack); // Reset current branch
+            returnToLastContent();
             break;
+          }
 
-          case 'HTML_EXPRESSION':
+          case 'HTML_EXPRESSION': {
             newNode = {
               ...newNode,
               type: 'expression',
               unsafeHTML: true,
               value: tag.content,
             };
-            contentTarget.push(newNode);
+            addToAST(newNode);
             scanner.consume('}'); // got an extra }
             break;
+          }
 
-          case 'EXPRESSION':
+          case 'EXPRESSION': {
             newNode = {
               ...newNode,
               value: tag.content,
@@ -333,214 +335,149 @@ class TemplateCompiler {
             if (tag.booleanAttribute) {
               newNode.ifDefined = true;
             }
-            contentTarget.push(newNode);
+            addToAST(newNode);
             break;
+          }
 
-          case 'TEMPLATE':
+          case 'TEMPLATE': {
             const templateInfo = this.parseTemplateString(tag.content);
             newNode = {
               ...newNode,
               ...templateInfo,
             };
-            contentTarget.push(newNode);
+            addToAST(newNode);
             break;
+          }
 
-          case 'SLOT':
+          case 'SLOT': {
             newNode = {
               ...newNode,
               name: tag.content,
             };
-            contentTarget.push(newNode);
+            addToAST(newNode);
             break;
+          }
 
-          case 'EACH':
-            let iterateOver;
-            let iterateAs;
-            let indexAs;
-
-            // Check for 'each...in' syntax first
-            const inParts = tag.content.split(' in ');
-            // Check for 'each...as' syntax
-            const asParts = tag.content.split(' as ');
-
-            if (inParts.length > 1) {
-              // We have 'each...in' syntax
-              // Get the iterator variables (item and possibly index)
-              let iteratorPart = inParts[0].trim();
-              iterateOver = inParts[1].trim();
-
-              // Look for comma separator in the iterator part
-              const commaIndex = iteratorPart.indexOf(',');
-              if (commaIndex !== -1) {
-                // We have both item and index specified
-                iterateAs = iteratorPart.substring(0, commaIndex).trim();
-                indexAs = iteratorPart.substring(commaIndex + 1).trim();
-              }
-              else {
-                // Only item is specified
-                iterateAs = iteratorPart;
-              }
-            }
-            else if (asParts.length > 1) {
-              // We have 'each...as' syntax
-              iterateOver = asParts[0].trim();
-
-              // Check for comma in the second part (for index)
-              const iteratorPart = asParts[1].trim();
-              const commaIndex = iteratorPart.indexOf(',');
-              if (commaIndex !== -1) {
-                // We have both item and index specified
-                iterateAs = iteratorPart.substring(0, commaIndex).trim();
-                indexAs = iteratorPart.substring(commaIndex + 1).trim();
-              }
-              else {
-                // Only item is specified
-                iterateAs = iteratorPart;
-              }
-            }
-            else {
-              // Simple each without 'in' or 'as'
-              iterateOver = tag.content.trim();
-            }
+          case 'EACH': {
+            // support each..in and each..as with aliases
+            const { indexAs, as, over } = TemplateCompiler.parseIteratorString(tag.content);
 
             newNode = {
               ...newNode,
-              over: iterateOver,
+              over,
               content: [],
             };
 
-            if (iterateAs) {
-              newNode.as = iterateAs;
+            if (as) {
+              newNode.as = as;
             }
 
             if (indexAs) {
               newNode.indexAs = indexAs;
             }
 
-            contentStack.push(newNode);
-            conditionStack.push(newNode); // Add to condition stack to support else condition
-            contentTarget.push(newNode);
-            contentBranch = newNode;
+            setCurrentContent(newNode);
+            setCurrentCondition(newNode); // Add to condition stack to support else condition
+            addToAST(newNode);
             break;
+          }
 
-          case 'CLOSE_EACH':
-            stack.pop();
-            contentStack.pop();
+          case 'CLOSE_EACH': {
+            returnToLastContent();
             conditionStack.pop(); // Pop from condition stack
-            contentBranch = last(contentStack); // Reset current branch
             break;
+          }
 
-          case 'DEFINE':
-            let expression = tag.content.includes(' as ') ? tag.content.split(' as ')[0].trim() : tag.content.trim();
-            let alias = tag.alias;
-            let destructuring = null;
-            
-            // Check for destructuring in alias
-            if (alias && alias.startsWith('{') && alias.endsWith('}')) {
-              destructuring = this.parseDestructuring(alias);
-              alias = null;
-            }
+          case 'ASYNC': {
+            // support each..in and each..as with aliases or destructuring
+            const { as, parts, rest } = TemplateCompiler.parseAsyncString(tag.content);
 
             newNode = {
               ...newNode,
-              type: 'define',
-              expression,
-              alias,
-              destructuring,
               content: [],
-              pending: null,
-              error: null,
-              errorAlias: null,
-              else: null,
+              loadingContent: [],
+              errorContent: [],
             };
 
-            contentTarget.push(newNode);
-            conditionStack.push(newNode);
-            contentStack.push(newNode);
-            contentBranch = newNode;
-            break;
+            if (as) {
+              newNode.as = as;
+            }
+            if (parts) {
+              newNode.parts = parts;
+            }
+            if (rest) {
+              newNode.rest = rest;
+            }
 
-          case 'BEFORE':
-          case 'LOADING':
-            if (!conditionTarget || conditionTarget.type !== 'define') {
-              scanner.returnTo(tagRegExp[tag.type]);
+            setCurrentContent(newNode);
+            addToAST(newNode);
+            break;
+          }
+
+          case 'ASYNC_BEFORE': {
+            if (contentBranch.type !== 'async') {
+              scanner.returnTo(tagRegExp.ASYNC_BEFORE);
               scanner.fatal(
-                `{${tag.type.toLowerCase()}} encountered without matching define/load block`,
+                '{before} encountered without matching {async} condition',
               );
             }
-            newNode = {
-              type: 'pending',
-              content: [],
-            };
-            contentStack.pop();
-            contentStack.push(newNode);
-            conditionTarget.pending = newNode;
-            contentBranch = newNode;
+            returnToLastContent();
+            setCurrentContent(contentTarget.beforeContent);
+            contentBranch = contentTarget.beforeContent;
             break;
+          }
 
-          case 'ERROR':
-            if (!conditionTarget || conditionTarget.type !== 'define') {
-              scanner.returnTo(tagRegExp.ERROR);
+          case 'ASYNC_ERROR': {
+            if (contentBranch.type !== 'async') {
+              scanner.returnTo(tagRegExp.ASYNC_ERROR);
               scanner.fatal(
-                '{error} encountered without matching define/load block',
+                '{error} encountered without matching {async} condition',
               );
             }
-            
-            newNode = {
-              type: 'error',
-              content: [],
-            };
-            contentStack.pop();
-            contentStack.push(newNode);
-            conditionTarget.error = newNode;
-            conditionTarget.errorAlias = tag.alias || 'error';
-            contentBranch = newNode;
+            returnToLastContent();
+            setCurrentContent(contentTarget.errorContent);
+            contentBranch = contentTarget.errorContent;
             break;
+          }
 
-          case 'CLOSE_DEFINE':
-            if (conditionStack.length == 0) {
-              scanner.returnTo(tagRegExp.CLOSE_DEFINE);
-              scanner.fatal('{/define} close tag found without open define tag');
-            }
-            stack.pop();
-            contentStack.pop();
-            conditionStack.pop();
-            contentBranch = last(contentStack);
+          case 'CLOSE_ASYNC': {
+            returnToLastContent();
             break;
+          }
 
-          case 'SVG_OPEN':
+          case 'SVG_OPEN': {
             // AST inside <svg> open tag is not included
-            contentTarget.push({ type: 'html', html: '<svg ' });
-            contentTarget.push(...this.compile(tag.content));
-            contentTarget.push({ type: 'html', html: '>' });
+            addToAST({ type: 'html', html: '<svg ' });
+            addToAST(...this.compile(tag.content));
+            addToAST({ type: 'html', html: '>' });
             newNode = {
               type: 'svg',
               content: [],
             };
-            contentStack.push(newNode);
-            contentTarget.push(newNode);
-            contentBranch = newNode;
+            setCurrentContent(newNode);
+            addToAST(newNode);
             break;
+          }
 
-          case 'SVG_CLOSE':
-            stack.pop();
-            contentStack.pop();
-            contentBranch = last(contentStack); // Reset current branch
+          case 'SVG_CLOSE': {
+            returnToLastContent();
             newNode = {
               type: 'html',
               html: '</svg>',
             };
-            contentTarget.push(newNode);
+            (contentTarget || ast).push(newNode);
             break;
+          }
         }
       }
       else {
-        // advanced to next expression or open svg tag
-        // this advances the scanner adding html
+        // advances to next expression
         const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
+
+        // if we consumed any html add it as an html node
         if (html) {
           const htmlNode = { type: 'html', html };
-          contentTarget.push(htmlNode);
+          addToAST(htmlNode);
         }
       }
     }
@@ -561,28 +498,7 @@ class TemplateCompiler {
     return expression;
   }
 
-  parseDestructuring(destructuringString) {
-    // Parse { prop1, prop2, ...rest } destructuring syntax
-    const content = destructuringString.slice(1, -1).trim(); // Remove { }
-    const parts = [];
-    let restParameter = null;
-
-    // Simple parsing - split by comma and handle ...rest
-    const tokens = content.split(',').map(t => t.trim()).filter(t => t.length > 0);
-    
-    for (const token of tokens) {
-      if (token.startsWith('...')) {
-        restParameter = token.slice(3).trim();
-      } else {
-        parts.push(token);
-      }
-    }
-
-    return {
-      properties: parts,
-      rest: restParameter
-    };
-  }
+  /* Parses the various syntax for embedding subtemplates */
   parseTemplateString(expression = '') {
     // quicker to compile regexp once
     const regExp = TemplateCompiler.templateRegExp;
@@ -636,6 +552,111 @@ class TemplateCompiler {
       return 'doubleBracket';
     }
     return 'singleBracket';
+  }
+
+  static parseAsyncString(asyncString = '') {
+    // Check for 'each...as' syntax if present
+    const asParts = asyncString.split(' as ');
+    if (asParts.length > 1) {
+      const asString = asParts[1].trim();
+      return TemplateCompiler.parseDestructuring(asString);
+    }
+    return { as: null, parts: null, rest: null };
+  }
+
+  /* Allows for templates to include destructuring (used by async) */
+  static parseDestructuring(destructuringString = '') {
+    destructuringString = destructuringString.trim();
+
+    // no destructuring
+    if (destructuringString[0] != '{') {
+      return {
+        as: destructuringString,
+        properties: null,
+        rest: null,
+      };
+    }
+
+    // Remove "{}"
+    const content = destructuringString.slice(1, -1).trim();
+
+    const properties = [];
+    let rest = null;
+
+    // Simple parsing - split by comma and handle ...rest
+    const tokens = content
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    // grab properties
+    each(tokens, token => {
+      if (token.startsWith('...')) {
+        rest = token.slice(3).trim();
+      }
+      else {
+        properties.push(token);
+      }
+    });
+
+    return {
+      as: null,
+      properties,
+      rest,
+    };
+  }
+
+  /* Extracts parts of an iterator like each..as each..in */
+  static parseIteratorString(iteratorString = '') {
+    let as, over, indexAs;
+
+    // Check for 'each...in' syntax first
+    const inParts = iteratorString.split(' in ');
+
+    // Check for 'each...as' syntax
+    const asParts = iteratorString.split(' as ');
+
+    if (inParts.length > 1) {
+      // We have 'each...in' syntax
+      // Get the iterator variables (item and possibly index)
+      let iteratorPart = inParts[0].trim();
+      over = inParts[1].trim();
+
+      // Look for comma separator in the iterator part
+      const commaIndex = iteratorPart.indexOf(',');
+      if (commaIndex !== -1) {
+        // We have both item and index specified
+        as = iteratorPart.substring(0, commaIndex).trim();
+        indexAs = iteratorPart.substring(commaIndex + 1).trim();
+      }
+      else {
+        // Only item is specified
+        as = iteratorPart;
+      }
+    }
+    else if (asParts.length > 1) {
+      // We have 'each...as' syntax
+      over = asParts[0].trim();
+
+      // Check for comma in the second part (for index)
+      const iteratorPart = asParts[1].trim();
+      const commaIndex = iteratorPart.indexOf(',');
+      if (commaIndex !== -1) {
+        // We have both item and index specified
+        as = iteratorPart.substring(0, commaIndex).trim();
+        indexAs = iteratorPart.substring(commaIndex + 1).trim();
+      }
+      else {
+        // Only item is specified
+        as = iteratorPart;
+      }
+    }
+    else {
+      // Simple each without 'in' or 'as'
+      over = iteratorString.trim();
+    }
+
+    return { as, over, indexAs };
   }
 
   static preprocessTemplate(templateString = '') {
