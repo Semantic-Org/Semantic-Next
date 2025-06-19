@@ -423,7 +423,6 @@ class TemplateCompiler {
             }
             returnToLastContent();
             setCurrentContent(contentTarget.beforeContent);
-            contentBranch = contentTarget.beforeContent;
             break;
           }
 
@@ -436,7 +435,6 @@ class TemplateCompiler {
             }
             returnToLastContent();
             setCurrentContent(contentTarget.errorContent);
-            contentBranch = contentTarget.errorContent;
             break;
           }
 
