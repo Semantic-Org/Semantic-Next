@@ -1,8 +1,10 @@
-import { Reaction } from '@semantic-ui/reactivity';
 import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import { Reaction } from '@semantic-ui/reactivity';
+import { isEmpty } from '@semantic-ui/utils';
 
 import { arrayFromObject, isArray, isPlainObject, isString } from '@semantic-ui/utils';
 
@@ -27,7 +29,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     let context;
     if(eachCondition.node) {
       let {as, over} = eachCondition.node;
-      let context = {
+      context = {
         message: `reactive each: {#each ${as} in ${over}}`,
         each: eachCondition.node,
       };
@@ -51,7 +53,9 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   renderItems() {
     let items = this.getItems(this.eachCondition);
-    if (!items?.length > 0 && this.eachCondition.else) {
+
+    // if iterable is empty (no keys or length 0) trigger else conditions
+    if (this.eachCondition.elseContent && isEmpty(items)) {
       // this is necessary to avoid lit errors
       // when returned lit html structure changes
       return repeat(

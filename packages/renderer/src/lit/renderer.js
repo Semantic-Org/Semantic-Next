@@ -172,10 +172,10 @@ export class LitRenderer {
           });
         };
       }
-      if (key == 'else') {
+      if (key == 'elseContent') {
         return (data) => {
           return this.renderContent({
-            ast: value.content,
+            ast: value,
             data: this.data,
           });
         };

@@ -166,24 +166,24 @@ class TemplateCompiler {
     // the entire AST being generaetd
     const ast = [];
 
-    // a stack containing if/else/elseif targets, latest on top
-    let conditionStack = [];
-
     // a stack containing nodes that can receive nodes in their subtree
     let contentStack = [];
+
+    // a stack containing nodes that support elseif/else. this includes if but also each and async
+    let conditionStack = [];
 
     while (!scanner.isEOF()) {
       // extract details from inside {tag}
       const tag = parseTag(scanner);
 
-      // the current open conditional node
-      const conditionBranch = last(conditionStack);
-
       // the node which receive this content in its subtree
-      const contentBranch = last(contentStack);
+      const currentContentNode = last(contentStack);
 
       // the actual array which will receive the subtree
-      const contentTarget = contentBranch?.content || ast;
+      const contentTarget = currentContentNode?.content || ast;
+
+      // the current open conditional node
+      const currentConditionNode = last(conditionStack);
 
       /*
         These are aliased to avoid confusion from the various
@@ -194,8 +194,19 @@ class TemplateCompiler {
       const setCurrentContent = (...contentNodes) => {
         contentStack.push(...contentNodes);
       };
+
+      /* this removes content target from stack.
+         this occurs if a content block is closed or a same-level condition like {async} -> {error} or {if} -> {else}
+      */
       const returnToLastContent = () => {
         contentStack.pop();
+      };
+
+      // this allows swapping contentTarget based off node conditions
+      // for instance if a node can have multiple AST targets (each/else) (async/error) etc.
+      const setContentTarget = (target) => {
+        setCurrentContent(target);
+        contentTarget = target;
       };
 
       /* This changes the node receiving conditions in AST */
@@ -208,6 +219,9 @@ class TemplateCompiler {
 
       /* This adds the current node to the AST */
       const addToAST = (...nodes) => {
+        if(contentTarget == undefined) {
+          contentTarget = [];
+        }
         contentTarget.push(...nodes);
       };
 
@@ -217,6 +231,7 @@ class TemplateCompiler {
         };
 
         switch (tag.type) {
+
           case 'IF': {
             newNode = {
               ...newNode,
@@ -236,7 +251,7 @@ class TemplateCompiler {
               condition: tag.content,
               content: [],
             };
-            if (!conditionBranch) {
+            if (!currentConditionNode) {
               scanner.returnTo(tagRegExp.ELSEIF);
               scanner.fatal(
                 '{elseif} encountered without matching if condition',
@@ -244,7 +259,7 @@ class TemplateCompiler {
             }
             returnToLastContent();
             setCurrentContent(newNode);
-            conditionBranch.branches.push(newNode);
+            currentConditionNode.branches.push(newNode);
             break;
           }
 
@@ -253,7 +268,7 @@ class TemplateCompiler {
               ...newNode,
               content: [],
             };
-            if (!conditionBranch) {
+            if (!currentConditionNode) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
                 '{else} encountered without matching if or each condition',
@@ -261,22 +276,21 @@ class TemplateCompiler {
               break;
             }
 
-            if (conditionBranch.type === 'if') {
+            if (currentConditionNode.type === 'if') {
               // Handling for if/else pushes to branches: []
               returnToLastContent();
               setCurrentContent(newNode);
-              conditionBranch.branches.push(newNode);
+              currentConditionNode.branches.push(newNode);
             }
-            else if (conditionBranch.type === 'each') {
-              // Handling for each/else pushes to else: []
+            else if (currentConditionNode?.elseContent) {
+              // some conditions might have elseContent like #each instead of branches array
               returnToLastContent();
-              setCurrentContent(newNode);
-              conditionBranch.else = newNode;
+              setContentTarget(currentConditionNode.elseContent);
             }
             else {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{else} encountered with unknown condition type: ' + conditionBranch.type,
+                '{else} encountered with unknown condition type: ' + currentConditionNode.type,
               );
             }
             break;
@@ -288,7 +302,7 @@ class TemplateCompiler {
               scanner.fatal('{/if} close tag found without open if tag');
             }
             returnToLastContent();
-            conditionStack.pop();
+            returnToLastCondition();
             break;
           }
 
@@ -376,15 +390,15 @@ class TemplateCompiler {
               newNode.indexAs = indexAs;
             }
 
-            setCurrentContent(newNode);
-            setCurrentCondition(newNode); // Add to condition stack to support else condition
+            setCurrentContent(newNode); // node can receive child nodes
+            setCurrentCondition(newNode); // any node that supports {else} is a condition
             addToAST(newNode);
             break;
           }
 
           case 'CLOSE_EACH': {
             returnToLastContent();
-            conditionStack.pop(); // Pop from condition stack
+            returnToLastCondition(); // Pop from condition stack
             break;
           }
 
@@ -415,26 +429,26 @@ class TemplateCompiler {
           }
 
           case 'ASYNC_BEFORE': {
-            if (contentBranch.type !== 'async') {
+            if (currentContentNode.type !== 'async') {
               scanner.returnTo(tagRegExp.ASYNC_BEFORE);
               scanner.fatal(
                 '{before} encountered without matching {async} condition',
               );
             }
             returnToLastContent();
-            setCurrentContent(contentTarget.beforeContent);
+            setContentTarget(contentTarget.beforeContent);
             break;
           }
 
           case 'ASYNC_ERROR': {
-            if (contentBranch.type !== 'async') {
+            if (currentContentNode.type !== 'async') {
               scanner.returnTo(tagRegExp.ASYNC_ERROR);
               scanner.fatal(
                 '{error} encountered without matching {async} condition',
               );
             }
             returnToLastContent();
-            setCurrentContent(contentTarget.errorContent);
+            setContentTarget(contentTarget.errorContent);
             break;
           }
 
