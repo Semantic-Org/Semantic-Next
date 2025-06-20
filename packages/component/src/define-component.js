@@ -44,6 +44,10 @@ export const defineComponent = ({
     ast = compiler.compile();
   }
 
+  if(tagName == 'load-basic') {
+    console.log(ast[1]);
+  }
+
   // to support SSR we need to include all subtemplate css in base template
   each(subTemplates, (template) => {
     if (template.css) {

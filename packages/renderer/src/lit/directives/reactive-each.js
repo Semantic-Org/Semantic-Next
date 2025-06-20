@@ -61,7 +61,7 @@ export class ReactiveEachDirective extends AsyncDirective {
       return repeat(
         [1],
         () => 'else-case',
-        () => this.eachCondition.else(),
+        () => this.eachCondition.elseContent(),
       );
     }
     // this turns { a: 'b'} to [{key: 'a', value: 'b'}]
