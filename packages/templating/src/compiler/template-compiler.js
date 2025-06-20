@@ -416,11 +416,12 @@ class TemplateCompiler {
           }
 
           case 'ASYNC': {
-            // support each..in and each..as with aliases or destructuring
-            const { as, parts, rest } = TemplateCompiler.parseAsyncString(tag.content);
+            // support async expression with aliases or destructuring
+            const { expression, as, parts, rest } = TemplateCompiler.parseAsyncString(tag.content);
 
             newNode = {
               ...newNode,
+              expression,
               content: [],
               loadingContent: [],
               errorContent: [],
@@ -582,13 +583,29 @@ class TemplateCompiler {
   }
 
   static parseAsyncString(asyncString = '') {
-    // Check for 'each...as' syntax if present
-    const asParts = asyncString.split('as ');
+
+    // Check for 'async...as' syntax if present
+    const asParts = asyncString.split(' as ');
+
+    // {#async fetchUsers as user} syntax
     if (asParts.length > 1) {
+      const expression = asParts[0].trim();
       const asString = asParts[1].trim();
-      return TemplateCompiler.parseDestructuring(asString);
+      const destructuring = TemplateCompiler.parseDestructuring(asString);
+      return {
+        expression,
+        ...destructuring
+      };
     }
-    return { as: null, parts: null, rest: null };
+
+    // No 'as' clause - {#async fetchUser}
+    const expression = asyncString.trim();
+    return {
+      expression,
+      as: null,
+      parts: null,
+      rest: null
+    };
   }
 
   /* Allows for templates to include destructuring (used by async) */
