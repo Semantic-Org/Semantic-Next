@@ -444,7 +444,7 @@ class TemplateCompiler {
           }
 
           case 'ASYNC_LOADING': {
-            if (currentContentNode.type !== 'async') {
+            if (currentContentNode?.type !== 'async') {
               scanner.returnTo(tagRegExp.ASYNC_LOADING);
               scanner.fatal(
                 '{before} encountered without matching {async} condition',
@@ -456,7 +456,7 @@ class TemplateCompiler {
           }
 
           case 'ASYNC_ERROR': {
-            if (currentContentNode.type !== 'async') {
+            if (currentContentNode?.type !== 'async') {
               scanner.returnTo(tagRegExp.ASYNC_ERROR);
               scanner.fatal(
                 `{error} encountered without matching {async} condition in "${currentContent}"`,
