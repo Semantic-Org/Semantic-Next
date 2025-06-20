@@ -621,7 +621,7 @@ class TemplateCompiler {
     if (destructuringString[0] != '{') {
       return {
         as: destructuringString,
-        properties: null,
+        parts: null,
         rest: null,
       };
     }
@@ -629,7 +629,7 @@ class TemplateCompiler {
     // Remove "{}"
     const content = destructuringString.slice(1, -1).trim();
 
-    const properties = [];
+    const parts = [];
     let rest = null;
 
     // Simple parsing - split by comma and handle ...rest
@@ -638,19 +638,19 @@ class TemplateCompiler {
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
-    // grab properties
+    // grab parts
     each(tokens, token => {
       if (token.startsWith('...')) {
         rest = token.slice(3).trim();
       }
       else {
-        properties.push(token);
+        parts.push(token);
       }
     });
 
     return {
       as: null,
-      properties,
+      parts,
       rest,
     };
   }
