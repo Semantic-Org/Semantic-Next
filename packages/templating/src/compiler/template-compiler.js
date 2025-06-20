@@ -416,6 +416,7 @@ class TemplateCompiler {
           }
 
           case 'ASYNC': {
+
             // support async expression with aliases or destructuring
             const { expression, as, parts, rest } = TemplateCompiler.parseAsyncString(tag.content);
 
@@ -584,7 +585,11 @@ class TemplateCompiler {
 
   static parseAsyncString(asyncString = '') {
 
-    // Check for 'async...as' syntax if present
+    // support string like 'as foo' without leading space
+    // tag content does will not match ' as ' split
+    asyncString = asyncString.replace('as', ' as');
+
+    // split as string
     const asParts = asyncString.split(' as ');
 
     // {#async fetchUsers as user} syntax
