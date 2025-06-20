@@ -8,57 +8,60 @@ class TemplateCompiler {
     this.snippets = {};
   }
 
-  static singleBracketRegExp = {
-    IF: /^{\s*#if\s+/,
-    ELSEIF: /^{\s*else\s*if\s+/,
-    ELSE: /^{\s*else\s*/,
-    EACH: /^{\s*#each\s+/,
-    SNIPPET: /^{\s*#snippet\s+/,
-    ASYNC: /^{\s*#(async)\s+/,
-    ASYNC_LOADING: /^{\s*(before|loading)(\s+|(?=}))/,
-    ASYNC_ERROR: /^{\s*(error|catch)(\s+|(?=}))/,
-    CLOSE_IF: /^{\s*\/(if)\s*/,
-    CLOSE_EACH: /^{\s*\/(each)\s*/,
-    CLOSE_SNIPPET: /^{\s*\/(snippet)\s*/,
-    CLOSE_ASYNC: /^{\s*\/(async)\s*/,
-    SLOT: /^{>\s*slot\s*/,
-    TEMPLATE: /^{>\s*/,
-    HTML_EXPRESSION: /^{\s*#html\s*/,
-    EXPRESSION: /^{\s*/,
+  // Base patterns used to generate both single and double bracket versions
+  static basePatterns = {
+    IF: '^{OPEN}\\s*#if\\s+',
+    ELSEIF: '^{OPEN}\\s*else\\s*if\\s+',
+    ELSE: '^{OPEN}\\s*else\\s*',
+    EACH: '^{OPEN}\\s*#each\\s+',
+    SNIPPET: '^{OPEN}\\s*#snippet\\s+',
+    ASYNC: '^{OPEN}\\s*#(async)\\s+',
+    ASYNC_LOADING: '^{OPEN}\\s*(before|loading)(\\s+|(?={CLOSE}))',
+    ASYNC_ERROR: '^{OPEN}\\s*(error|catch)(\\s+|(?={CLOSE}))',
+    CLOSE_IF: '^{OPEN}\\s*\\/(if)\\s*',
+    CLOSE_EACH: '^{OPEN}\\s*\\/(each)\\s*',
+    CLOSE_SNIPPET: '^{OPEN}\\s*\\/(snippet)\\s*',
+    CLOSE_ASYNC: '^{OPEN}\\s*\\/(async)\\s*',
+    SLOT: '^{OPEN}>\\s*slot\\s*',
+    TEMPLATE: '^{OPEN}>\\s*',
+    HTML_EXPRESSION: '^{OPEN}\\s*#html\\s*',
+    EXPRESSION: '^{OPEN}\\s*',
   };
 
-  static singleBracketParserRegExp = {
-    NEXT_TAG: /(\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
-    EXPRESSION_START: /\{/,
-    EXPRESSION_END: /\}/,
-    TAG_CLOSE: /\>/,
+  static baseParserPatterns = {
+    NEXT_TAG: '({OPEN}|\\<svg|\\<\\/svg)', // used to advance scanner to either a parseable expression or svg tag
+    EXPRESSION_START: '{OPEN}',
+    EXPRESSION_END: '{CLOSE}',
+    TAG_CLOSE: '\\>',
   };
 
-  static doubleBracketRegExp = {
-    IF: /^{{\s*#if\s+/,
-    ELSEIF: /^{{\s*else\s*if\s+/,
-    ELSE: /^{{\s*else\s*/,
-    EACH: /^{{\s*#each\s+/,
-    SNIPPET: /^{{\s*#snippet\s+/,
-    ASYNC: /^{\s*#(async)\s+/,
-    ASYNC_LOADING: /^{{\s*(before|loading)(\s+|(?=}}))/,
-    ASYNC_ERROR: /^{{\s*(error|catch)(\s+|(?=}}))/,
-    CLOSE_IF: /^{{\s*\/(if)\s*/,
-    CLOSE_EACH: /^{{\s*\/(each)\s*/,
-    CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
-    CLOSE_ASYNC: /^{{\s*\/(async)\s*/,
-    SLOT: /^{{>\s*slot\s*/,
-    TEMPLATE: /^{{>\s*/,
-    HTML_EXPRESSION: /^{{\s*#html\s*/,
-    EXPRESSION: /^{{\s*/,
-  };
+  // Generate regex patterns for both single and double bracket syntax
+  static generateRegExpPatterns(open, close) {
+    const patterns = {};
+    for (const [key, pattern] of Object.entries(this.basePatterns)) {
+      const regexPattern = pattern
+        .replace(/{OPEN}/g, open)
+        .replace(/{CLOSE}/g, close);
+      patterns[key] = new RegExp(regexPattern);
+    }
+    return patterns;
+  }
 
-  static doubleBracketParserRegExp = {
-    NEXT_TAG: /(\{\{|\<svg|\<\/svg)/, // used to advance scanner to either a parseable expression or svg tag
-    EXPRESSION_START: /\{\{/,
-    EXPRESSION_END: /\}\}/,
-    TAG_CLOSE: /\>/,
-  };
+  static generateParserRegExpPatterns(open, close) {
+    const patterns = {};
+    for (const [key, pattern] of Object.entries(this.baseParserPatterns)) {
+      const regexPattern = pattern
+        .replace(/{OPEN}/g, open.replace(/[{}]/g, '\\$&'))
+        .replace(/{CLOSE}/g, close.replace(/[{}]/g, '\\$&'));
+      patterns[key] = new RegExp(regexPattern);
+    }
+    return patterns;
+  }
+
+  static singleBracketRegExp = this.generateRegExpPatterns('{', '}');
+  static singleBracketParserRegExp = this.generateParserRegExpPatterns('{', '}');
+  static doubleBracketRegExp = this.generateRegExpPatterns('{{', '}}');
+  static doubleBracketParserRegExp = this.generateParserRegExpPatterns('{{', '}}');
 
   static htmlRegExp = {
     SVG_OPEN: /^\<svg\s*/i,
