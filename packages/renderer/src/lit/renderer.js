@@ -17,6 +17,7 @@ import {
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
+import { reactiveAsync } from './directives/reactive-async.js';
 import { renderTemplate } from './directives/render-template.js';
 
 export class LitRenderer {
@@ -101,6 +102,10 @@ export class LitRenderer {
           this.addValue(this.evaluateEach(node, data));
           break;
 
+        case 'async':
+          this.addValue(this.evaluateAsync(node, data));
+          break;
+
         case 'template':
           this.addValue(this.evaluateTemplate(node, data));
           break;
@@ -147,6 +152,49 @@ export class LitRenderer {
     node.expression = node.condition; // store original expression for debugging
     let conditionalArguments = mapObject(node, directiveMap);
     return reactiveConditional(conditionalArguments);
+  }
+
+  /*
+    The async directive takes an async expression and content blocks.
+    It needs to return reactive values from renderer.
+  */
+  evaluateAsync(node, data) {
+    const directiveMap = (value, key) => {
+      if (key == 'expression') {
+        return () => this.evaluateExpression(value, data);
+      }
+      if (key == 'content') {
+        return (asyncData) => {
+          // async data is the resolved value context
+          data = { ...this.data, ...asyncData };
+          return this.renderContent({
+            ast: value,
+            data,
+          });
+        };
+      }
+      if (key == 'loadingContent') {
+        return () => {
+          return this.renderContent({
+            ast: value,
+            data: this.data,
+          });
+        };
+      }
+      if (key == 'errorContent') {
+        return (errorData) => {
+          // error data contains the error context
+          data = { ...this.data, ...errorData };
+          return this.renderContent({
+            ast: value,
+            data,
+          });
+        };
+      }
+      return value;
+    };
+    let asyncArguments = mapObject(node, directiveMap);
+    return reactiveAsync(asyncArguments);
   }
 
   /*
