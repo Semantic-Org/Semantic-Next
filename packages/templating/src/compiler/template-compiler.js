@@ -15,8 +15,8 @@ class TemplateCompiler {
     EACH: /^{\s*#each\s+/,
     SNIPPET: /^{\s*#snippet\s+/,
     ASYNC: /^{\s*#(async)\s+/,
-    ASYNC_BEFORE: /^{\s*(before|loading)(\s+|(?=}}))/,
-    ASYNC_ERROR: /^{\s*(error|catch)(\s+|(?=}}))/,
+    ASYNC_LOADING: /^{\s*(before|loading)(\s+|(?=}))/,
+    ASYNC_ERROR: /^{\s*(error|catch)(\s+|(?=}))/,
     CLOSE_IF: /^{\s*\/(if)\s*/,
     CLOSE_EACH: /^{\s*\/(each)\s*/,
     CLOSE_SNIPPET: /^{\s*\/(snippet)\s*/,
@@ -40,9 +40,13 @@ class TemplateCompiler {
     ELSE: /^{{\s*else\s*/,
     EACH: /^{{\s*#each\s+/,
     SNIPPET: /^{{\s*#snippet\s+/,
+    ASYNC: /^{\s*#(async)\s+/,
+    ASYNC_LOADING: /^{{\s*(before|loading)(\s+|(?=}}))/,
+    ASYNC_ERROR: /^{{\s*(error|catch)(\s+|(?=}}))/,
     CLOSE_IF: /^{{\s*\/(if)\s*/,
     CLOSE_EACH: /^{{\s*\/(each)\s*/,
     CLOSE_SNIPPET: /^{{\s*\/(snippet)\s*/,
+    CLOSE_ASYNC: /^{{\s*\/(async)\s*/,
     SLOT: /^{{>\s*slot\s*/,
     TEMPLATE: /^{{>\s*/,
     HTML_EXPRESSION: /^{{\s*#html\s*/,
@@ -188,12 +192,7 @@ class TemplateCompiler {
         ? currentContent.node[currentContent?.property]
         : ast;
 
-      if(currentContent && currentContent?.property !== 'content') {
-        console.log('target is', currentContent);
-      }
-
       const currentContentNode = currentContent?.node;
-
 
       /*
         These simple functions make it less confusing to read AST blocks
@@ -442,9 +441,9 @@ class TemplateCompiler {
             break;
           }
 
-          case 'ASYNC_BEFORE': {
+          case 'ASYNC_LOADING': {
             if (currentContentNode.type !== 'async') {
-              scanner.returnTo(tagRegExp.ASYNC_BEFORE);
+              scanner.returnTo(tagRegExp.ASYNC_LOADING);
               scanner.fatal(
                 '{before} encountered without matching {async} condition',
               );
