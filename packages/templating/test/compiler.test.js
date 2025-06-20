@@ -1490,13 +1490,16 @@ describe('TemplateCompiler', () => {
     });
   });
 
-  describe('async blocks', () => {
+  describe.each([
+    { syntax: 'single', open: '{', close: '}' },
+    { syntax: 'double', open: '{{', close: '}}' }
+  ])('async blocks ($syntax brackets)', ({ syntax, open, close }) => {
     it('should compile basic async block with expression only', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData}
+        ${open}#async fetchData${close}
           <p>Data loaded!</p>
-        {/async}
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1516,9 +1519,9 @@ describe('TemplateCompiler', () => {
     it('should compile async block with alias', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchUsers as users}
-          <p>{users.length} users loaded</p>
-        {/async}
+        ${open}#async fetchUsers as users${close}
+          <p>${open}users.length${close} users loaded</p>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1541,10 +1544,10 @@ describe('TemplateCompiler', () => {
     it('should compile async block with destructuring', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchUser as { name, email, ...rest }}
-          <p>{name} ({email})</p>
-          <p>Other data: {rest.id}</p>
-        {/async}
+        ${open}#async fetchUser as { name, email, ...rest }${close}
+          <p>${open}name${close} (${open}email${close})</p>
+          <p>Other data: ${open}rest.id${close}</p>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
@@ -1557,11 +1560,11 @@ describe('TemplateCompiler', () => {
     it('should compile async block with loading state', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData as data}
-          <p>{data.message}</p>
-        {loading}
+        ${open}#async fetchData as data${close}
+          <p>${open}data.message${close}</p>
+        ${open}loading${close}
           <p>Loading...</p>
-        {/async}
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
@@ -1575,11 +1578,11 @@ describe('TemplateCompiler', () => {
     it('should compile async block with before alias for loading', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData as data}
-          <p>{data.message}</p>
-        {before}
+        ${open}#async fetchData as data${close}
+          <p>${open}data.message${close}</p>
+        ${open}before${close}
           <p>Please wait...</p>
-        {/async}
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
@@ -1591,11 +1594,11 @@ describe('TemplateCompiler', () => {
     it('should compile async block with error handling', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData as data}
-          <p>{data.message}</p>
-        {error}
-          <p>Error: {error.message}</p>
-        {/async}
+        ${open}#async fetchData as data${close}
+          <p>${open}data.message${close}</p>
+        ${open}error${close}
+          <p>Error: ${open}error.message${close}</p>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
@@ -1610,11 +1613,11 @@ describe('TemplateCompiler', () => {
     it('should compile async block with error alias', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData as data}
-          <p>{data.message}</p>
-        {error as e}
-          <p>Error: {e.message}</p>
-        {/async}
+        ${open}#async fetchData as data${close}
+          <p>${open}data.message${close}</p>
+        ${open}error as e${close}
+          <p>Error: ${open}e.message${close}</p>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
@@ -1629,11 +1632,11 @@ describe('TemplateCompiler', () => {
     it('should compile async block with catch alias for error', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData as data}
-          <p>{data.message}</p>
-        {catch as err}
-          <p>Caught: {err.message}</p>
-        {/async}
+        ${open}#async fetchData as data${close}
+          <p>${open}data.message${close}</p>
+        ${open}catch as err${close}
+          <p>Caught: ${open}err.message${close}</p>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
@@ -1643,17 +1646,17 @@ describe('TemplateCompiler', () => {
     it('should compile complete async block with all states', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchUsers as users}
+        ${open}#async fetchUsers as users${close}
           <ul>
-            {#each users as user}
-              <li>{user.name}</li>
-            {/each}
+            ${open}#each users as user${close}
+              <li>${open}user.name${close}</li>
+            ${open}/each${close}
           </ul>
-        {loading}
+        ${open}loading${close}
           <div class="spinner">Loading users...</div>
-        {error as e}
-          <div class="error">Failed to load: {e.message}</div>
-        {/async}
+        ${open}error as e${close}
+          <div class="error">Failed to load: ${open}e.message${close}</div>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
 
@@ -1684,15 +1687,15 @@ describe('TemplateCompiler', () => {
     it('should compile nested async blocks', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchUsers as users}
-          {#each users as user}
-            {#async fetchUserDetails(user.id) as details}
-              <p>{details.bio}</p>
-            {loading}
+        ${open}#async fetchUsers as users${close}
+          ${open}#each users as user${close}
+            ${open}#async fetchUserDetails(user.id) as details${close}
+              <p>${open}details.bio${close}</p>
+            ${open}loading${close}
               <p>Loading details...</p>
-            {/async}
-          {/each}
-        {/async}
+            ${open}/async${close}
+          ${open}/each${close}
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
 
@@ -1713,9 +1716,9 @@ describe('TemplateCompiler', () => {
     it('should handle complex expressions in async blocks', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchData({ userId: user.id, options: { detailed: true } }) as result}
-          <div>{result.data}</div>
-        {/async}
+        ${open}#async fetchData({ userId: user.id, options: { detailed: true } }) as result${close}
+          <div>${open}result.data${close}</div>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
 
@@ -1724,33 +1727,12 @@ describe('TemplateCompiler', () => {
       expect(ast[0].as).toBe('result');
     });
 
-    it('should compile async block with single bracket syntax', () => {
-      const compiler = new TemplateCompiler();
-      const template = `
-        {#async fetchData as data}
-          <p>{data.message}</p>
-        {loading}
-          <p>Loading...</p>
-        {error as e}
-          <p>Error: {e.message}</p>
-        {/async}
-      `;
-      const ast = compiler.compile(template);
-
-      expect(ast[0].type).toBe('async');
-      expect(ast[0].expression).toBe('fetchData');
-      expect(ast[0].as).toBe('data');
-      expect(ast[0].errorAs).toBe('e');
-      expect(ast[0].loadingContent.length).toBeGreaterThan(0);
-      expect(ast[0].errorContent.length).toBeGreaterThan(0);
-    });
-
     it('should handle async block with no alias using this', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {#async fetchMessage}
-          <p>{this}</p>
-        {/async}
+        ${open}#async fetchMessage${close}
+          <p>${open}this${close}</p>
+        ${open}/async${close}
       `;
       const ast = compiler.compile(template);
 
