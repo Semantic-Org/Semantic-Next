@@ -1,4 +1,4 @@
-import { each, isString, last } from '@semantic-ui/utils';
+import { each, isPlainObject, isString, last } from '@semantic-ui/utils';
 
 import { StringScanner } from './string-scanner.js';
 
@@ -177,22 +177,42 @@ class TemplateCompiler {
       const tag = parseTag(scanner);
 
       // the node which receive this content in its subtree
-      const currentContentNode = last(contentStack);
-
-      // the actual array which will receive the subtree
-      const contentTarget = currentContentNode?.content || ast;
+      const currentContent = last(contentStack);
 
       // the current open conditional node
-      const currentConditionNode = last(conditionStack);
+      const currentCondition = last(conditionStack);
+
+      // the actual array which will receive the subtree
+      // this can be stored like { property, node }
+      let contentTarget = isPlainObject(currentContent)
+        ? currentContent.node[currentContent?.property]
+        : ast;
+
+      if(currentContent && currentContent?.property !== 'content') {
+        console.log('target is', currentContent);
+      }
+
+      const currentContentNode = currentContent?.node;
+
 
       /*
-        These are aliased to avoid confusion from the various
-        push/pop stack that are necessary inside the compiler
+        These simple functions make it less confusing to read AST blocks
       */
 
-      /* This changes the node receiving content in AST */
-      const setCurrentContent = (...contentNodes) => {
-        contentStack.push(...contentNodes);
+      /*
+        This changes the node receiving content in AST.
+        We store both the node and the receiving property on the node
+        as some nodes might have multiple AST targets like 'elseContent', 'content' etc.
+      */
+      const setCurrentContent = (node, property = 'content') => {
+        // initialize empty AST if not present
+        if(!node[property]) {
+          node[property] = [];
+        }
+        contentStack.push({
+          node,
+          property
+        });
       };
 
       /* this removes content target from stack.
@@ -202,16 +222,15 @@ class TemplateCompiler {
         contentStack.pop();
       };
 
-      // this allows swapping contentTarget based off node conditions
-      // for instance if a node can have multiple AST targets (each/else) (async/error) etc.
-      const setContentTarget = (target) => {
-        setCurrentContent(target);
-        contentTarget = target;
+      // this allows us to swap what property on an active content node
+      // is receiving the AST, i.e. from 'content' -> 'elseContent'
+      const setContentTarget = (newProperty) => {
+        setCurrentContent(currentContentNode, newProperty);
       };
 
       /* This changes the node receiving conditions in AST */
-      const setCurrentCondition = (...conditionNodes) => {
-        conditionStack.push(...conditionNodes);
+      const setCurrentCondition = (conditionNode) => {
+        conditionStack.push(conditionNode);
       };
       const returnToLastCondition = () => {
         conditionStack.pop();
@@ -251,7 +270,7 @@ class TemplateCompiler {
               condition: tag.content,
               content: [],
             };
-            if (!currentConditionNode) {
+            if (!currentCondition) {
               scanner.returnTo(tagRegExp.ELSEIF);
               scanner.fatal(
                 '{elseif} encountered without matching if condition',
@@ -259,7 +278,7 @@ class TemplateCompiler {
             }
             returnToLastContent();
             setCurrentContent(newNode);
-            currentConditionNode.branches.push(newNode);
+            currentCondition.branches.push(newNode);
             break;
           }
 
@@ -268,7 +287,7 @@ class TemplateCompiler {
               ...newNode,
               content: [],
             };
-            if (!currentConditionNode) {
+            if (!currentCondition) {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
                 '{else} encountered without matching if or each condition',
@@ -276,21 +295,21 @@ class TemplateCompiler {
               break;
             }
 
-            if (currentConditionNode.type === 'if') {
+            if (currentCondition.type === 'if') {
               // Handling for if/else pushes to branches: []
               returnToLastContent();
               setCurrentContent(newNode);
-              currentConditionNode.branches.push(newNode);
+              currentCondition.branches.push(newNode);
             }
-            else if (currentConditionNode?.elseContent) {
+            else if (currentCondition?.type == 'each') {
               // some conditions might have elseContent like #each instead of branches array
               returnToLastContent();
-              setContentTarget(currentConditionNode.elseContent);
+              setContentTarget('elseContent');
             }
             else {
               scanner.returnTo(tagRegExp.ELSE);
               scanner.fatal(
-                '{else} encountered with unknown condition type: ' + currentConditionNode.type,
+                '{else} encountered with unknown condition type: ' + currentCondition.type,
               );
             }
             break;
@@ -314,17 +333,12 @@ class TemplateCompiler {
               content: [],
             };
             this.snippets[tag.content] = newNode;
-            setCurrentCondition(newNode);
             setCurrentContent(newNode);
             addToAST(newNode);
             break;
           }
 
           case 'CLOSE_SNIPPET': {
-            if (conditionStack.length == 0) {
-              scanner.returnTo(tagRegExp.CLOSE_IF);
-              scanner.fatal('{/snippet} close tag found without open if tag');
-            }
             returnToLastContent();
             break;
           }
@@ -436,7 +450,7 @@ class TemplateCompiler {
               );
             }
             returnToLastContent();
-            setContentTarget(contentTarget.beforeContent);
+            setContentTarget('loadingContent');
             break;
           }
 
@@ -444,11 +458,13 @@ class TemplateCompiler {
             if (currentContentNode.type !== 'async') {
               scanner.returnTo(tagRegExp.ASYNC_ERROR);
               scanner.fatal(
-                '{error} encountered without matching {async} condition',
+                `{error} encountered without matching {async} condition in "${currentContent}"`,
               );
             }
+            const { as } = TemplateCompiler.parseAsyncString(tag.content);
+            currentContentNode.errorAs = as;
             returnToLastContent();
-            setContentTarget(contentTarget.errorContent);
+            setContentTarget('errorContent');
             break;
           }
 
@@ -568,7 +584,7 @@ class TemplateCompiler {
 
   static parseAsyncString(asyncString = '') {
     // Check for 'each...as' syntax if present
-    const asParts = asyncString.split(' as ');
+    const asParts = asyncString.split('as ');
     if (asParts.length > 1) {
       const asString = asParts[1].trim();
       return TemplateCompiler.parseDestructuring(asString);
