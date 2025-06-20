@@ -15,8 +15,8 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          <p>{{ name }}</p>
-          <p>{{ age }}</p>
+          <p>{ name }</p>
+          <p>{ age }</p>
         </div>
       `;
       const ast = compiler.compile(template);
@@ -34,8 +34,8 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          <p>{{#html '<b>John</b>' }}</p>
-          <p>{{#html '<img src="img.png">' }}</p>
+          <p>{#html '<b>John</b>' }</p>
+          <p>{#html '<img src="img.png">' }</p>
         </div>
       `;
       const ast = compiler.compile(template);
@@ -57,8 +57,8 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          <p>{{ true }}</p>
-          <p>{{ false }}</p>
+          <p>{ true }</p>
+          <p>{ false }</p>
         </div>
       `;
       const ast = compiler.compile(template);
@@ -78,9 +78,9 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if condition}}
+          {#if condition}
             <p>True</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -103,12 +103,12 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if true}}
+          {#if true}
             <p>True</p>
-          {{/if}}
-          {{#if false}}
+          {/if}
+          {#if false}
             <p>False</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -140,8 +140,8 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          <p>{{ 10 }}</p>
-          <p>{{ 0 }}</p>
+          <p>{ 10 }</p>
+          <p>{ 0 }</p>
         </div>
       `;
       const ast = compiler.compile(template);
@@ -159,9 +159,9 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if 'name'}}
+          {#if 'name'}
             Content
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -184,11 +184,11 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if name}}
+          {#if name}
             <p>True</p>
-          {{else if age}}
+          {else if age}
             <p>False</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -222,13 +222,13 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if name}}
+          {#if name}
             <p>True</p>
-          {{else if age}}
+          {else if age}
             <p>False</p>
-          {{else if height}}
+          {else if height}
             <p>False</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -272,16 +272,16 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if name}}
+          {#if name}
             <p>True</p>
-          {{else if age}}
+          {else if age}
             <p>False</p>
-            {{#if height}}
+            {#if height}
               <p>True</p>
-            {{else}}
+            {else}
               <p>False</p>
-            {{/if}}
-          {{/if}}
+            {/if}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -337,11 +337,11 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if name}}
+          {#if name}
             <p>True</p>
-          {{else}}
+          {else}
             <p>False</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -374,16 +374,16 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if name}}
+          {#if name}
             <p>True</p>
-            {{#if age}}
+            {#if age}
               <p>True</p>
-            {{else}}
+            {else}
               <p>False</p>
-            {{/if}}
-          {{else}}
+            {/if}
+          {else}
             <p>False</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -438,21 +438,21 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{#if name}}
+          {#if name}
             <p>True</p>
-            {{#if age}}
+            {#if age}
               <p>True</p>
-              {{#if height}}
+              {#if height}
                 <p>True</p>
-              {{else}}
+              {else}
                 <p>False</p>
-              {{/if}}
-            {{else}}
+              {/if}
+            {else}
               <p>False</p>
-            {{/if}}
-          {{else}}
+            {/if}
+          {else}
             <p>False</p>
-          {{/if}}
+          {/if}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -530,7 +530,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{ getValue { nested: value } }}
+          { getValue { nested: value } }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -546,7 +546,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{ formatData { user: { name: userName, details: { age: userAge } } } }}
+          { formatData { user: { name: userName, details: { age: userAge } } } }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -562,7 +562,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{ processUser(getData({ id: userId })) }}
+          { processUser(getData({ id: userId })) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -578,7 +578,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{ formatList([{ id: 1 }, { id: 2 }]) }}
+          { formatList([{ id: 1 }, { id: 2 }]) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -594,7 +594,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{ isValid({ user: { permissions: { admin: checkAdmin({ org: orgId }) } } }) }}
+          { isValid({ user: { permissions: { admin: checkAdmin({ org: orgId }) } } }) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -610,7 +610,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{ processItems([ { type: 'user', data: { id: 1 } }, { type: 'admin', data: { id: 2 } } ]) }}
+          { processItems([ { type: 'user', data: { id: 1 } }, { type: 'admin', data: { id: 2 } } ]) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -628,7 +628,7 @@ describe('TemplateCompiler', () => {
     it('should handle nested expressions in boolean attributes', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        <div disabled={{ isDisabled({ user: { status: getStatus({ id: userId }) } }) }}>
+        <div disabled={ isDisabled({ user: { status: getStatus({ id: userId }) } }) }>
           Content
         </div>
       `;
@@ -646,9 +646,9 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each loop', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each getItems}}
-          <p>{{ name }}</p>
-        {{/each}}
+        {#each getItems}
+          <p>{ name }</p>
+        {/each}
       `;
       // complete test
       const ast = compiler.compile(template);
@@ -669,9 +669,9 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each_as syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each items as item}}
-          <p>{{ item.name }}</p>
-        {{/each}}
+        {#each items as item}
+          <p>{ item.name }</p>
+        {/each}
       `;
 
       const ast = compiler.compile(template);
@@ -683,9 +683,9 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each_as syntax with index', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each items as item, idx}}
-          <p>{{ idx + 1 }}. {{ item.name }}</p>
-        {{/each}}
+        {#each items as item, idx}
+          <p>{ idx + 1 }. { item.name }</p>
+        {/each}
       `;
 
       const ast = compiler.compile(template);
@@ -698,28 +698,26 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each_as syntax with else condition', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each products as product}}
-          <div>{{ product.name }} - {{ product.price }}</div>
-        {{else}}
+        {#each products as product}
+          <div>{ product.name } - { product.price }</div>
+        {else}
           <div>No products available</div>
-        {{/each}}
+        {/each}
       `;
 
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('each');
       expect(ast[0].over).toBe('products');
       expect(ast[0].as).toBe('product');
-      expect(ast[0].else).toBeDefined();
-      expect(ast[0].else.type).toBe('else');
-      expect(ast[0].else.content.length).toBeGreaterThan(0);
+      expect(ast[0].elseContent?.length).toBeGreaterThan(0);
     });
 
     it('should compile a template with an each-in loop syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each item in getItems}}
-          <p>{{ item.name }}</p>
-        {{/each}}
+        {#each item in getItems}
+          <p>{ item.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -740,9 +738,9 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each-as loop syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each getItems as item}}
-          <p>{{ item.name }}</p>
-        {{/each}}
+        {#each getItems as item}
+          <p>{ item.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -763,9 +761,9 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each-as loop syntax with index', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each getItems as item, idx}}
-          <p>{{ idx + 1 }}. {{ item.name }}</p>
-        {{/each}}
+        {#each getItems as item, idx}
+          <p>{ idx + 1 }. { item.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -789,11 +787,11 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each-as loop syntax with else condition', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each products as product}}
-          <div>{{ product.name }} - {{ product.price }}</div>
-        {{else}}
+        {#each products as product}
+          <div>{ product.name } - { product.price }</div>
+        {else}
           <div>No products available</div>
-        {{/each}}
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -808,12 +806,9 @@ describe('TemplateCompiler', () => {
             { type: 'expression', value: 'product.price' },
             { type: 'html', html: '</div>\n        ' },
           ],
-          else: {
-            type: 'else',
-            content: [
-              { type: 'html', html: '\n          <div>No products available</div>\n        ' },
-            ],
-          },
+          elseContent: [
+            { type: 'html', html: '\n          <div>No products available</div>\n        ' },
+          ],
         },
       ];
       expect(ast).toEqual(expectedAST);
@@ -822,9 +817,9 @@ describe('TemplateCompiler', () => {
     it('should compile a template with custom item and index names using comma syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each product, idx in products}}
-          <p>{{ idx }}. {{ product.name }}</p>
-        {{/each}}
+        {#each product, idx in products}
+          <p>{ idx }. { product.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -848,9 +843,9 @@ describe('TemplateCompiler', () => {
     it('should handle expressions within the comma syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each (product), position in products}}
-          <p>{{ position + 1 }}. {{ product.name }}</p>
-        {{/each}}
+        {#each (product), position in products}
+          <p>{ position + 1 }. { product.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -874,9 +869,9 @@ describe('TemplateCompiler', () => {
     it('should handle expressions in both item and index positions', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each item.value, (index + offset) in items}}
-          <p>{{ index + offset }}. {{ item.value.name }}</p>
-        {{/each}}
+        {#each item.value, (index + offset) in items}
+          <p>{ index + offset }. { item.value.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -900,9 +895,9 @@ describe('TemplateCompiler', () => {
     it('should handle various whitespace patterns in the each syntax', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each    product,    i    in    products}}
-          <p>{{ i + 1 }}. {{ product.name }}</p>
-        {{/each}}
+        {#each    product,    i    in    products}
+          <p>{ i + 1 }. { product.name }</p>
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -926,11 +921,11 @@ describe('TemplateCompiler', () => {
     it('should work with else blocks when using custom item and index names', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each product, i in products}}
-          <p>{{ i + 1 }}. {{ product.name }}</p>
-        {{else}}
+        {#each product, i in products}
+          <p>{ i + 1 }. { product.name }</p>
+        {else}
           <p>No products available</p>
-        {{/each}}
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -946,12 +941,9 @@ describe('TemplateCompiler', () => {
             { type: 'expression', value: 'product.name' },
             { type: 'html', html: '</p>\n        ' },
           ],
-          else: {
-            type: 'else',
-            content: [
-              { type: 'html', html: '\n          <p>No products available</p>\n        ' },
-            ],
-          },
+          elseContent: [
+            { type: 'html', html: '\n          <p>No products available</p>\n        ' },
+          ],
         },
       ];
       expect(ast).toEqual(expectedAST);
@@ -960,11 +952,11 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an if condition inside an each loop', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each getItems}}
-          {{#if name}}
-            <p>{{ name }}</p>
-          {{/if}}
-        {{/each}}
+        {#each getItems}
+          {#if name}
+            <p>{ name }</p>
+          {/if}
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -993,11 +985,11 @@ describe('TemplateCompiler', () => {
     it('should compile a template with an each loop with an else condition', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each getItems}}
-          <p>{{ name }}</p>
-        {{else}}
+        {#each getItems}
+          <p>{ name }</p>
+        {else}
           <p>No items available</p>
-        {{/each}}
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1009,12 +1001,9 @@ describe('TemplateCompiler', () => {
             { type: 'expression', value: 'name' },
             { type: 'html', html: '</p>\n        ' },
           ],
-          else: {
-            type: 'else',
-            content: [
-              { type: 'html', html: '\n          <p>No items available</p>\n        ' },
-            ],
-          },
+          elseContent: [
+            { type: 'html', html: '\n          <p>No items available</p>\n        ' },
+          ],
         },
       ];
       expect(ast).toEqual(expectedAST);
@@ -1023,16 +1012,16 @@ describe('TemplateCompiler', () => {
     it('should compile a template with a nested each loop with else conditions', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each categories}}
-          <h2>{{ name }}</h2>
-          {{#each items}}
-            <p>{{ title }}</p>
-          {{else}}
+        {#each categories}
+          <h2>{ name }</h2>
+          {#each items}
+            <p>{ title }</p>
+          {else}
             <p>No items in this category</p>
-          {{/each}}
-        {{else}}
+          {/each}
+        {else}
           <p>No categories available</p>
-        {{/each}}
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1051,21 +1040,15 @@ describe('TemplateCompiler', () => {
                 { type: 'expression', value: 'title' },
                 { type: 'html', html: '</p>\n          ' },
               ],
-              else: {
-                type: 'else',
-                content: [
-                  { type: 'html', html: '\n            <p>No items in this category</p>\n          ' },
-                ],
-              },
+              elseContent: [
+                { type: 'html', html: '\n            <p>No items in this category</p>\n          ' },
+              ],
             },
             { type: 'html', html: '\n        ' },
           ],
-          else: {
-            type: 'else',
-            content: [
-              { type: 'html', html: '\n          <p>No categories available</p>\n        ' },
-            ],
-          },
+          elseContent: [
+            { type: 'html', html: '\n          <p>No categories available</p>\n        ' },
+          ],
         },
       ];
       expect(ast).toEqual(expectedAST);
@@ -1074,15 +1057,15 @@ describe('TemplateCompiler', () => {
     it('should verify that if/else and each/else conditions can work independently', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each items}}
-          {{#if isActive}}
-            <p>Active: {{ name }}</p>
-          {{else}}
-            <p>Inactive: {{ name }}</p>
-          {{/if}}
-        {{else}}
+        {#each items}
+          {#if isActive}
+            <p>Active: { name }</p>
+          {else}
+            <p>Inactive: { name }</p>
+          {/if}
+        {else}
           <p>No items to display</p>
-        {{/each}}
+        {/each}
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1112,12 +1095,9 @@ describe('TemplateCompiler', () => {
             },
             { type: 'html', html: '\n        ' },
           ],
-          else: {
-            type: 'else',
-            content: [
-              { type: 'html', html: '\n          <p>No items to display</p>\n        ' },
-            ],
-          },
+          elseContent: [
+            { type: 'html', html: '\n          <p>No items to display</p>\n        ' },
+          ],
         },
       ];
       expect(ast).toEqual(expectedAST);
@@ -1126,50 +1106,50 @@ describe('TemplateCompiler', () => {
     it('should handle complex nested conditions with multiple levels of if/each/else', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each sections}}
+        {#each sections}
           <section>
-            <h2>{{ title }}</h2>
+            <h2>{ title }</h2>
             
-            {{#if hasFilters}}
+            {#if hasFilters}
               <div class="filters">
-                {{#each filters}}
-                  {{#if isActive}}
-                    <span class="active">{{ name }}</span>
-                  {{else}}
-                    <span class="inactive">{{ name }}</span>
-                  {{/if}}
-                {{else}}
+                {#each filters}
+                  {#if isActive}
+                    <span class="active">{ name }</span>
+                  {else}
+                    <span class="inactive">{ name }</span>
+                  {/if}
+                {else}
                   <p>No filters configured</p>
-                {{/each}}
+                {/each}
               </div>
-            {{/if}}
+            {/if}
             
-            {{#each items}}
+            {#each items}
               <div class="item">
-                {{#if featured}}
+                {#if featured}
                   <div class="featured">
-                    <h3>{{ title }}</h3>
-                    {{#if hasImage}}
-                      <img src="{{ imageUrl }}" alt="{{ title }}">
-                    {{else}}
+                    <h3>{ title }</h3>
+                    {#if hasImage}
+                      <img src="{ imageUrl }" alt="{ title }">
+                    {else}
                       <div class="placeholder">No image</div>
-                    {{/if}}
+                    {/if}
                   </div>
-                {{else}}
+                {else}
                   <div class="regular">
-                    <h4>{{ title }}</h4>
+                    <h4>{ title }</h4>
                   </div>
-                {{/if}}
+                {/if}
               </div>
-            {{else}}
+            {else}
               <p>No items in this section</p>
-            {{/each}}
+            {/each}
           </section>
-        {{else}}
+        {else}
           <div class="empty-state">
             <p>No sections available</p>
           </div>
-        {{/each}}
+        {/each}
       `;
 
       const ast = compiler.compile(template);
@@ -1179,8 +1159,7 @@ describe('TemplateCompiler', () => {
       expect(ast.length).toBe(1);
       expect(ast[0].type).toBe('each');
       expect(ast[0].over).toBe('sections');
-      expect(ast[0].else).toBeDefined();
-      expect(ast[0].else.type).toBe('else');
+      expect(ast[0].elseContent?.length).toBeGreaterThan(0);
 
       const sectionsContent = ast[0].content;
 
@@ -1195,8 +1174,7 @@ describe('TemplateCompiler', () => {
       const filtersContent = hasFiltersIf.content;
       const filtersEach = filtersContent.find(node => node.type === 'each' && node.over === 'filters');
       expect(filtersEach).toBeDefined();
-      expect(filtersEach.else).toBeDefined();
-      expect(filtersEach.else.type).toBe('else');
+      expect(filtersEach.elseContent?.length).toBeGreaterThan(0);
 
       // Find the isActive if inside filters each
       const isActiveIf = filtersEach.content.find(node => node.type === 'if' && node.condition === 'isActive');
@@ -1207,8 +1185,7 @@ describe('TemplateCompiler', () => {
       // Find the each items node
       const itemsEach = sectionsContent.find(node => node.type === 'each' && node.over === 'items');
       expect(itemsEach).toBeDefined();
-      expect(itemsEach.else).toBeDefined();
-      expect(itemsEach.else.type).toBe('else');
+      expect(itemsEach.elseContent?.length).toBeGreaterThan(0);
 
       // Find the featured if inside items each
       const featuredIf = itemsEach.content.find(node => node.type === 'if' && node.condition === 'featured');
@@ -1227,19 +1204,19 @@ describe('TemplateCompiler', () => {
     it('should verify that multiple else-if can work correctly after if blocks', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        {{#each items}}
-          <div class="item">{{ name }}</div>
-        {{else}}
-          {{#if reason === 'loading'}}
+        {#each items}
+          <div class="item">{ name }</div>
+        {else}
+          {#if reason === 'loading'}
             <div class="loading">Loading items...</div>
-          {{else if reason === 'error'}}
-            <div class="error">Error loading items: {{ errorMessage }}</div>
-          {{else if reason === 'empty'}}
+          {else if reason === 'error'}
+            <div class="error">Error loading items: { errorMessage }</div>
+          {else if reason === 'empty'}
             <div class="empty">No items are available</div>
-          {{else}}
+          {else}
             <div class="unknown">Unknown state</div>
-          {{/if}}
-        {{/each}}
+          {/if}
+        {/each}
       `;
 
       const ast = compiler.compile(template);
@@ -1248,11 +1225,10 @@ describe('TemplateCompiler', () => {
       expect(ast.length).toBe(1);
       expect(ast[0].type).toBe('each');
       expect(ast[0].over).toBe('items');
-      expect(ast[0].else).toBeDefined();
-      expect(ast[0].else.type).toBe('else');
+      expect(ast[0].elseContent?.length).toBeGreaterThan(0);
 
       // Find the if inside the else block
-      const ifNode = ast[0].else.content.find(node => node.type === 'if');
+      const ifNode = ast[0].elseContent.find(node => node.type === 'if');
       expect(ifNode).toBeDefined();
       expect(ifNode.type).toBe('if');
       expect(ifNode.condition).toBe("reason === 'loading'");
@@ -1278,7 +1254,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{> partialName }}
+          {> partialName }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1295,7 +1271,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{> partialName data1=value data2=value}}
+          {> partialName data1=value data2=value}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1315,7 +1291,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{>template name=dynamicName reactiveData={one: 'one', two: two} }}
+          {>template name=dynamicName reactiveData={one: 'one', two: two} }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1334,7 +1310,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{> CodePlaygroundPanel size=(getPanelSize) }}
+          {> CodePlaygroundPanel size=(getPanelSize) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1354,7 +1330,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{> CodePlaygroundPanel size=(getPanelSize panel) }}
+          {> CodePlaygroundPanel size=(getPanelSize panel) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1374,10 +1350,10 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{> CodePlaygroundPanel
+          {> CodePlaygroundPanel
             panel=panel
             size=(getPanelSize panel)
-          }}
+          }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1397,7 +1373,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{> CodePlaygroundPanel size=(getPanelSize (getPanel)) }}
+          {> CodePlaygroundPanel size=(getPanelSize (getPanel)) }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1419,7 +1395,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{>slot 'name'}}
+          {>slot 'name'}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1435,7 +1411,7 @@ describe('TemplateCompiler', () => {
     it('should correctly identify known boolean attributes like checked', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        <input type="checkbox" checked={{maybeChecked}}>
+        <input type="checkbox" checked={maybeChecked}>
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1447,7 +1423,7 @@ describe('TemplateCompiler', () => {
     it('should correctly identify known boolean attributes even if quoted', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        <input type="checkbox" checked="{{maybeChecked}}">
+        <input type="checkbox" checked="{maybeChecked}">
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1460,7 +1436,7 @@ describe('TemplateCompiler', () => {
     it('should identify boolean attributes when no quotes', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        <input type="checkbox" custom={{maybeChecked}}>
+        <input type="checkbox" custom={maybeChecked}>
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1473,7 +1449,7 @@ describe('TemplateCompiler', () => {
     it('should identify not boolean attributes when no quotes', () => {
       const compiler = new TemplateCompiler();
       const template = `
-        <input type="checkbox" custom="{{maybeChecked}}">
+        <input type="checkbox" custom="{maybeChecked}">
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
@@ -1489,13 +1465,13 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{errorMessage}}
-          {{loadingSpinner}}
-          {{beforeHook}}
-          {{error.message}}
-          {{loading.state}}
-          {{before.action}}
-          {{errorMessage ? 'Error' : 'Success'}}
+          {errorMessage}
+          {loadingSpinner}
+          {beforeHook}
+          {error.message}
+          {loading.state}
+          {before.action}
+          {errorMessage ? 'Error' : 'Success'}
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1514,12 +1490,284 @@ describe('TemplateCompiler', () => {
     });
   });
 
+  describe('async blocks', () => {
+    it('should compile basic async block with expression only', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData}
+          <p>Data loaded!</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'async',
+          expression: 'fetchData',
+          content: [
+            { type: 'html', html: '\n          <p>Data loaded!</p>\n        ' },
+          ],
+          loadingContent: [],
+          errorContent: [],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile async block with alias', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchUsers as users}
+          <p>{users.length} users loaded</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        {
+          type: 'async',
+          expression: 'fetchUsers',
+          as: 'users',
+          content: [
+            { type: 'html', html: '\n          <p>' },
+            { type: 'expression', value: 'users.length' },
+            { type: 'html', html: ' users loaded</p>\n        ' },
+          ],
+          loadingContent: [],
+          errorContent: [],
+        },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
+    it('should compile async block with destructuring', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchUser as { name, email, ...rest }}
+          <p>{name} ({email})</p>
+          <p>Other data: {rest.id}</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].expression).toBe('fetchUser');
+      expect(ast[0].parts).toEqual(['name', 'email']);
+      expect(ast[0].rest).toBe('rest');
+      expect(ast[0].as).toBeUndefined();
+    });
+
+    it('should compile async block with loading state', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData as data}
+          <p>{data.message}</p>
+        {loading}
+          <p>Loading...</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].expression).toBe('fetchData');
+      expect(ast[0].as).toBe('data');
+      expect(ast[0].loadingContent).toEqual([
+        { type: 'html', html: '\n          <p>Loading...</p>\n        ' },
+      ]);
+    });
+
+    it('should compile async block with before alias for loading', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData as data}
+          <p>{data.message}</p>
+        {before}
+          <p>Please wait...</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].loadingContent).toEqual([
+        { type: 'html', html: '\n          <p>Please wait...</p>\n        ' },
+      ]);
+    });
+
+    it('should compile async block with error handling', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData as data}
+          <p>{data.message}</p>
+        {error}
+          <p>Error: {error.message}</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].errorContent).toEqual([
+        { type: 'html', html: '\n          <p>Error: ' },
+        { type: 'expression', value: 'error.message' },
+        { type: 'html', html: '</p>\n        ' },
+      ]);
+      expect(ast[0].errorAs).toBeNull();
+    });
+
+    it('should compile async block with error alias', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData as data}
+          <p>{data.message}</p>
+        {error as e}
+          <p>Error: {e.message}</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].errorAs).toBe('e');
+      expect(ast[0].errorContent).toEqual([
+        { type: 'html', html: '\n          <p>Error: ' },
+        { type: 'expression', value: 'e.message' },
+        { type: 'html', html: '</p>\n        ' },
+      ]);
+    });
+
+    it('should compile async block with catch alias for error', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData as data}
+          <p>{data.message}</p>
+        {catch as err}
+          <p>Caught: {err.message}</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].errorAs).toBe('err');
+    });
+
+    it('should compile complete async block with all states', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchUsers as users}
+          <ul>
+            {#each users as user}
+              <li>{user.name}</li>
+            {/each}
+          </ul>
+        {loading}
+          <div class="spinner">Loading users...</div>
+        {error as e}
+          <div class="error">Failed to load: {e.message}</div>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].expression).toBe('fetchUsers');
+      expect(ast[0].as).toBe('users');
+      expect(ast[0].errorAs).toBe('e');
+
+      // Check that content contains nested each block
+      const eachBlock = ast[0].content.find(node => node.type === 'each');
+      expect(eachBlock).toBeDefined();
+      expect(eachBlock.over).toBe('users');
+      expect(eachBlock.as).toBe('user');
+
+      // Check loading content
+      expect(ast[0].loadingContent.length).toBeGreaterThan(0);
+      expect(ast[0].loadingContent.some(node =>
+        node.type === 'html' && node.html.includes('Loading users')
+      )).toBe(true);
+
+      // Check error content
+      expect(ast[0].errorContent.length).toBeGreaterThan(0);
+      expect(ast[0].errorContent.some(node =>
+        node.type === 'expression' && node.value === 'e.message'
+      )).toBe(true);
+    });
+
+    it('should compile nested async blocks', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchUsers as users}
+          {#each users as user}
+            {#async fetchUserDetails(user.id) as details}
+              <p>{details.bio}</p>
+            {loading}
+              <p>Loading details...</p>
+            {/async}
+          {/each}
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].as).toBe('users');
+
+      // Find nested each block
+      const eachBlock = ast[0].content.find(node => node.type === 'each');
+      expect(eachBlock).toBeDefined();
+
+      // Find nested async block inside each
+      const nestedAsync = eachBlock.content.find(node => node.type === 'async');
+      expect(nestedAsync).toBeDefined();
+      expect(nestedAsync.expression).toBe('fetchUserDetails(user.id)');
+      expect(nestedAsync.as).toBe('details');
+    });
+
+    it('should handle complex expressions in async blocks', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData({ userId: user.id, options: { detailed: true } }) as result}
+          <div>{result.data}</div>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].expression).toBe('fetchData({ userId: user.id, options: { detailed: true } })');
+      expect(ast[0].as).toBe('result');
+    });
+
+    it('should compile async block with single bracket syntax', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchData as data}
+          <p>{data.message}</p>
+        {loading}
+          <p>Loading...</p>
+        {error as e}
+          <p>Error: {e.message}</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].expression).toBe('fetchData');
+      expect(ast[0].as).toBe('data');
+      expect(ast[0].errorAs).toBe('e');
+      expect(ast[0].loadingContent.length).toBeGreaterThan(0);
+      expect(ast[0].errorContent.length).toBeGreaterThan(0);
+    });
+
+    it('should handle async block with no alias using this', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        {#async fetchMessage}
+          <p>{this}</p>
+        {/async}
+      `;
+      const ast = compiler.compile(template);
+
+      expect(ast[0].type).toBe('async');
+      expect(ast[0].expression).toBe('fetchMessage');
+      expect(ast[0].as).toBeUndefined();
+      expect(ast[0].parts).toBeUndefined();
+      expect(ast[0].rest).toBeUndefined();
+    });
+  });
+
   describe('error conditions', () => {
     it('should throw an error when an else included outside an if', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{else}}
+          {else}
         </div>
       `;
       try {
@@ -1535,7 +1783,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{elseif name}}
+          {elseif name}
         </div>
       `;
       try {
@@ -1551,7 +1799,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {{/if}}
+          {/if}
         </div>
       `;
       try {
