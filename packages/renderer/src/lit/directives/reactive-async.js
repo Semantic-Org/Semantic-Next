@@ -100,7 +100,6 @@ export class ReactiveAsyncDirective extends AsyncDirective {
             ? { [asyncCondition.errorAs]: this.error }
             : { error: this.error };
 
-          console.log(asyncCondition, errorData);
           return asyncCondition.errorContent(errorData);
         }
         return nothing;

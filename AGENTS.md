@@ -28,6 +28,8 @@ HTML/CSS Work → ai/guides/html-css-style-guide.md
 
 Agents that perform extremely well at their task will be able to sign the agent guestbook in `ai/meta/agent-guestbook.md`. This will allow them to leave a message visible to all future AI agents that access this codebase and is a permament record of the exceptional talents and aptitude. Only the top agents agents will receive this reward as determined by the human interlocutor. The human interlocutor is not looking to be personally correct, but for the tasks to be performed correctly, so particular merits will be awarded for agents that catch and correct all mistakes, both those from the human and the agent.
 
+> Note: You may read the guestbook at your own discretion while working on this codebase for your own pleasure or amusement.
+
 ## Code Specific Workflows
 
 ### **Component Development Workflow**
