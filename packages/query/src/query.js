@@ -46,7 +46,7 @@ export class Query {
     }
 
     // this is an existing query object
-    if(selector instanceof Query) {
+    if (selector instanceof Query) {
       elements = selector;
     }
 
@@ -99,7 +99,7 @@ export class Query {
       ? new Query(globalThis, this.options)
       : new Query(elements, { ...this.options, prevObject: this });
   }
-  
+
   end() {
     return this.prevObject || this;
   }
@@ -116,8 +116,10 @@ export class Query {
 
     // Add root if required
     if (includeRoot) {
-      if ((domSelector && root == selector) ||
-          (!domSelector && root.matches && root.matches(selector))) {
+      if (
+        (domSelector && root == selector)
+        || (!domSelector && root.matches && root.matches(selector))
+      ) {
         elements.add(root);
       }
     }
@@ -125,7 +127,8 @@ export class Query {
     // Query from root
     if (domSelector) {
       queriedRoot = true;
-    } else if (root.querySelectorAll) {
+    }
+    else if (root.querySelectorAll) {
       root.querySelectorAll(selector).forEach(el => elements.add(el));
       queriedRoot = true;
     }
@@ -150,7 +153,8 @@ export class Query {
           elements.add(selector);
           domFound = true;
         }
-      } else if (node.querySelectorAll) {
+      }
+      else if (node.querySelectorAll) {
         // Directly add to Set without intermediate array
         node.querySelectorAll(selector).forEach(el => elements.add(el));
       }
@@ -158,7 +162,7 @@ export class Query {
 
     const findElements = (node, selector, query) => {
       // Early termination condition for DOM selector search
-      if (domSelector && domFound) return;
+      if (domSelector && domFound) { return; }
 
       // If root element didn't support querySelectorAll, query each child node
       if (query === true) {
@@ -605,10 +609,10 @@ export class Query {
 
   getSlot(name) {
     return this.map((el) => {
-      if(el.tagName.toLowerCase() == 'slot' && (!name || el.name == name)) {
+      if (el.tagName.toLowerCase() == 'slot' && (!name || el.name == name)) {
         // called directly on a matching slot
         const nodes = el.assignedNodes({ flatten: true });
-        if(nodes) {
+        if (nodes) {
           return this.chain(nodes).html();
         }
       }
@@ -617,10 +621,11 @@ export class Query {
         const slotSelector = name ? `slot[name="${name}"]` : 'slot:not([name])';
         const slot = el.shadowRoot.querySelector(slotSelector);
         const nodes = slot.assignedNodes({ flatten: true });
-        if(nodes) {
+        if (nodes) {
           return this.chain(nodes).html();
         }
-      } else {
+      }
+      else {
         // No shadow DOM, fallback to direct DOM querying
         const slotSelector = name ? `[slot="${name}"]` : ':not([slot])';
         return this.chain(el).find(slotSelector).html();
@@ -629,18 +634,18 @@ export class Query {
   }
 
   setSlot(nameOrHTML, newHTML) {
-
     // Determine if we're dealing with a named slot or default slot based on arguments
     let name;
     if (newHTML) {
       name = nameOrHTML;
-    } else {
+    }
+    else {
       newHTML = nameOrHTML;
     }
 
     return this.each((el) => {
       // find host web component
-      if(el.tagName.toLowerCase() == 'slot') {
+      if (el.tagName.toLowerCase() == 'slot') {
         el = el.getRootNode().getRootNode()?.host;
       }
       const $el = this.chain(el);
@@ -653,7 +658,8 @@ export class Query {
           $slottedElement = this.chain(el).find(slotSelector);
         }
         $slottedElement.html(newHTML);
-      } else {
+      }
+      else {
         // Default slot updates the entire element content
         $el.html(newHTML);
       }
@@ -717,8 +723,7 @@ export class Query {
         || el instanceof HTMLSelectElement
         || el instanceof HTMLTextAreaElement
         // web components may store value
-        || customElements.get(el.tagName.toLowerCase())
-      ;
+        || customElements.get(el.tagName.toLowerCase());
     };
     if (newValue !== undefined) {
       // Set the value for each element
@@ -795,7 +800,7 @@ export class Query {
     return this.css(property, null, { includeComputed: true });
   }
 
-  cssVar(variable, value) {
+  cssVar(variable, value = null) {
     return this.css(`--${variable}`, value, { includeComputed: true });
   }
 
@@ -1084,6 +1089,12 @@ export class Query {
   }
 
   setting(setting, value) {
+    if (value === undefined) {
+      const settings = this.map(el => el[setting]);
+      return (settings.length == 1)
+        ? settings[0]
+        : settings;
+    }
     return this.each((el) => {
       el[setting] = value;
     });
