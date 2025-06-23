@@ -716,13 +716,20 @@ export class Query {
   naturalHeight(): number | number[];
 
   /**
-   * Gets the offset parent of each element in the current set, optionally calculating it accurately
-   * by considering transformed parent.
-   * @see https://next.semantic-ui.com/api/query/size-and-position#offsetParent
-   * @param options.calculate - Whether to calculate offset parent taking transform into account.
-   * @returns An array of the offset parent elements.
+   * Gets the clipping parent (overflow container) of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#clippingparent
+   * @returns A new Query instance containing the clipping parent elements.
    */
-  offsetParent(options?: { calculate?: boolean; }): (HTMLElement | null)[];
+  clippingParent(): Query;
+
+  /**
+   * Gets the containing parent (positioning context) of each element in the current set, optionally calculating it accurately
+   * by considering transform, filter, and other properties that create new positioning contexts.
+   * @see https://next.semantic-ui.com/api/query/dimensions#containingparent
+   * @param options.calculate - Whether to calculate containing parent taking modern CSS properties into account.
+   * @returns A new Query instance containing the containing parent elements.
+   */
+  containingParent(options?: { calculate?: boolean; }): Query;
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
