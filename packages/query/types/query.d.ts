@@ -641,6 +641,15 @@ export class Query {
   reverse(): Query;
 
   /**
+   * Returns a shallow copy of a portion of the elements into a new Query object.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#slice
+   * @param start - The beginning index of the specified portion of the collection.
+   * @param end - The end index of the specified portion of the collection (exclusive).
+   * @returns A new Query instance containing the sliced elements.
+   */
+  slice(start?: number, end?: number): Query;
+
+  /**
    * Inserts content at a specified position relative to a target element.
    * @see https://next.semantic-ui.com/api/query/internal#insertcontent
    * @param target - The target element.
@@ -758,6 +767,26 @@ export class Query {
    * @returns The component instance, or `undefined` if not found.
    */
   component(): any;
+
+  /**
+   * Gets or sets data attributes on elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/data#data
+   * @param key - The data attribute key.
+   * @param value - The value to set.
+   * @returns If setting, the Query instance for chaining. If getting, the value(s).
+   */
+  data(key: string, value: string): this;
+  /**
+   * Gets a data attribute from elements in the current set.
+   * @param key - The data attribute key to retrieve.
+   * @returns The value from the first element, or an array of values from all elements.
+   */
+  data(key: string): string | string[] | undefined;
+  /**
+   * Gets all data attributes from elements in the current set.
+   * @returns An object of data attributes from the first element, or an array of objects from all elements.
+   */
+  data(): PlainObject<string> | PlainObject<string>[] | undefined;
 
   /**
    * Gets the data context (if any) associated with the *first* element in the current set.

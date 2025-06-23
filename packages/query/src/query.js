@@ -2,6 +2,7 @@ import {
   camelToKebab,
   each,
   findIndex,
+  get,
   inArray,
   isArray,
   isClient,
@@ -10,6 +11,7 @@ import {
   isObject,
   isPlainObject,
   isString,
+  keys,
 } from '@semantic-ui/utils';
 
 /*
@@ -1053,13 +1055,13 @@ export class Query {
         let $el, isPositioned, isTransformed, isBody;
         let parentNode = el?.parentNode;
         while (parentNode && !isPositioned && !isTransformed && !isBody) {
-          parentNode = parentNode?.parentNode;
           if (parentNode) {
             $el = $(parentNode);
             isPositioned = $el.computedStyle('position') !== 'static';
             isTransformed = $el.computedStyle('transform') !== 'none';
             isBody = $el.is('body');
           }
+          parentNode = parentNode?.parentNode;
         }
         return parentNode;
       });
@@ -1098,6 +1100,56 @@ export class Query {
     return this.each((el) => {
       el[setting] = value;
     });
+  }
+
+  data(key, value) {
+
+    // Set data attribute
+    if (value !== undefined) {
+      return this.each(el => {
+        if (el.dataset) {
+          el.dataset[key] = value;
+        }
+      });
+    }
+
+    // Get single data attribute
+    if (key !== undefined) {
+      if (this.length === 0) {
+        return undefined;
+      }
+      const values = this.map(el => get(el, `dataset.${key}`));
+      return this.length === 1
+        ? values[0]
+        : values;
+    }
+
+    // Get all data attributes
+    if (this.length === 0) {
+      return undefined;
+    }
+    const allData = this.map(el => {
+      const data = {};
+      if (el.dataset) {
+        each(keys(el.dataset), k => {
+          data[k] = el.dataset[k];
+        });
+      }
+      return data;
+    });
+
+    // return array only if more than one el
+    return (this.length === 1)
+      ? allData[0]
+      : allData;
+  }
+
+  slice(start, end) {
+    if (this.length === 0) {
+      return this;
+    }
+    const slicedElements = Array.from(this).slice(start, end);
+    return this.chain(slicedElements);
   }
 
   // special helper for SUI components

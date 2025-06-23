@@ -4,6 +4,12 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.13.0
+
+* **Query** - `setting()` can now be used as a getter.
+* **Query** - Added `.data()` for getting and setting html data
+* **Query** - Added `.slice()` for returning a portion of the element collection
+
 # Version 0.12.4-1
 * **Tailwind** - `@semantic-ui/tailwind` and `tailwindcss-iso` now have bundled CDN version to avoid issues importing css files in browser via esm. Modified `tailwind` package to accomodate this change.
 * **Tailwind** - Removed bundled `wasm` files, these are now part of the generic `tailwindcss-iso` package.

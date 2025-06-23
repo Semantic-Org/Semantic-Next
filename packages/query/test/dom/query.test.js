@@ -1727,6 +1727,121 @@ describe('query', () => {
     });
   });
 
+  describe('data', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should set and get data attributes', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      
+      $('div').data('test', 'value');
+      expect($('div').data('test')).toBe('value');
+      expect(div.dataset.test).toBe('value');
+    });
+
+    it('should get all data attributes when no key provided', () => {
+      const div = document.createElement('div');
+      div.dataset.foo = 'bar';
+      div.dataset.baz = 'qux';
+      document.body.appendChild(div);
+      
+      const data = $('div').data();
+      expect(data).toEqual({ foo: 'bar', baz: 'qux' });
+    });
+
+    it('should return undefined for non-existent data attribute', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      
+      expect($('div').data('nonexistent')).toBe(undefined);
+    });
+
+    it('should return undefined when getting data on empty selection', () => {
+      expect($('.nonexistent').data('test')).toBe(undefined);
+      expect($('.nonexistent').data()).toBe(undefined);
+    });
+
+    it('should set data attributes on multiple elements', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      
+      $('div').data('test', 'value');
+      expect(div1.dataset.test).toBe('value');
+      expect(div2.dataset.test).toBe('value');
+    });
+
+    it('should get data attribute from single element', () => {
+      const div = document.createElement('div');
+      div.dataset.test = 'value';
+      document.body.appendChild(div);
+      
+      expect($('div').data('test')).toBe('value');
+    });
+
+    it('should get data attributes from multiple elements as array', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      div1.dataset.test = 'value1';
+      div2.dataset.test = 'value2';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      
+      expect($('div').data('test')).toEqual(['value1', 'value2']);
+    });
+
+    it('should get all data attributes from single element as object', () => {
+      const div = document.createElement('div');
+      div.dataset.foo = 'bar';
+      div.dataset.baz = 'qux';
+      document.body.appendChild(div);
+      
+      expect($('div').data()).toEqual({ foo: 'bar', baz: 'qux' });
+    });
+
+    it('should get all data attributes from multiple elements as array of objects', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      div1.dataset.foo = 'bar1';
+      div1.dataset.baz = 'qux1';
+      div2.dataset.foo = 'bar2';
+      div2.dataset.test = 'value2';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      
+      const result = $('div').data();
+      expect(result).toEqual([
+        { foo: 'bar1', baz: 'qux1' },
+        { foo: 'bar2', test: 'value2' }
+      ]);
+    });
+
+    it('should handle elements without dataset', () => {
+      const div = document.createElement('div');
+      // Remove dataset to simulate older browsers or non-HTML elements
+      Object.defineProperty(div, 'dataset', { value: null });
+      document.body.appendChild(div);
+      
+      expect($('div').data()).toEqual({});
+      expect($('div').data('test')).toBe(undefined);
+      
+      // Setting should not throw
+      expect(() => $('div').data('test', 'value')).not.toThrow();
+    });
+
+    it('should return the Query instance when setting data', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      
+      const result = $('div').data('test', 'value');
+      expect(result).toBeInstanceOf(Query);
+      expect(result[0]).toBe(div);
+    });
+  });
+
   describe('end', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
@@ -1863,6 +1978,145 @@ describe('query', () => {
       expect(middle.classList.contains('middle-class')).toBe(true);
       expect(inner.classList.contains('inner-class')).toBe(true);
       expect(result[0]).toBe(outer);
+    });
+  });
+
+  describe('slice', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should slice elements from the collection', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const div3 = document.createElement('div');
+      const div4 = document.createElement('div');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      div3.className = 'item';
+      div4.className = 'item';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(div3);
+      document.body.appendChild(div4);
+
+      const $items = $('.item');
+      const $sliced = $items.slice(1, 3);
+
+      expect($sliced.length).toBe(2);
+      expect($sliced[0]).toBe(div2);
+      expect($sliced[1]).toBe(div3);
+    });
+
+    it('should slice with only start parameter', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const div3 = document.createElement('div');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      div3.className = 'item';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(div3);
+
+      const $items = $('.item');
+      const $sliced = $items.slice(1);
+
+      expect($sliced.length).toBe(2);
+      expect($sliced[0]).toBe(div2);
+      expect($sliced[1]).toBe(div3);
+    });
+
+    it('should handle negative indices', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const div3 = document.createElement('div');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      div3.className = 'item';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(div3);
+
+      const $items = $('.item');
+      const $sliced = $items.slice(-2);
+
+      expect($sliced.length).toBe(2);
+      expect($sliced[0]).toBe(div2);
+      expect($sliced[1]).toBe(div3);
+    });
+
+    it('should return empty collection when start is beyond collection length', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'item';
+      document.body.appendChild(div1);
+
+      const $items = $('.item');
+      const $sliced = $items.slice(5);
+
+      expect($sliced.length).toBe(0);
+      expect($sliced).toBeInstanceOf(Query);
+    });
+
+    it('should return same instance when called on empty collection', () => {
+      const $empty = $('.nonexistent');
+      const $sliced = $empty.slice(0, 2);
+
+      expect($sliced).toBe($empty);
+      expect($sliced.length).toBe(0);
+    });
+
+    it('should return Query instance for chaining', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const $result = $('.item').slice(0, 1).addClass('sliced');
+
+      expect($result).toBeInstanceOf(Query);
+      expect($result.length).toBe(1);
+      expect(div1.classList.contains('sliced')).toBe(true);
+      expect(div2.classList.contains('sliced')).toBe(false);
+    });
+
+    it('should work with single element', () => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      document.body.appendChild(div);
+
+      const $items = $('.item');
+      const $sliced = $items.slice(0, 1);
+
+      expect($sliced.length).toBe(1);
+      expect($sliced[0]).toBe(div);
+    });
+
+    it('should handle zero slice', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const $items = $('.item');
+      const $sliced = $items.slice(1, 1);
+
+      expect($sliced.length).toBe(0);
+      expect($sliced).toBeInstanceOf(Query);
     });
   });
 });
