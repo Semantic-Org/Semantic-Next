@@ -1042,29 +1042,69 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
-  // offsetParent does not return the true offset parent
-  // in cases where there is a parent node with a transform context
-  // so we need to get that manually where finding the true offset parent is essential
-  // for instance when calculating position
-  offsetParent({ calculate = true } = {}) {
-    return Array.from(this)
-      .map((el) => {
-        if (!calculate) {
-          return el.offsetParent;
-        }
-        let $el, isPositioned, isTransformed, isBody;
-        let parentNode = el?.parentNode;
-        while (parentNode && !isPositioned && !isTransformed && !isBody) {
-          if (parentNode) {
-            $el = $(parentNode);
-            isPositioned = $el.computedStyle('position') !== 'static';
-            isTransformed = $el.computedStyle('transform') !== 'none';
-            isBody = $el.is('body');
+  // this is the element that clips current element
+  clippingParent() {
+    const parents = this.map((el) => {
+      let current = el.parentNode;
+      while (current) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            return current;
           }
-          parentNode = parentNode?.parentNode;
         }
-        return parentNode;
-      });
+        current = current.parentNode;
+      }
+      return document.documentElement;
+    });
+    return this.chain(parents);
+  }
+
+  // this is the parent element where top/left and offsetTop/left will be relative
+  containingParent({ calculate = true } = {}) {
+    const parents = this.map((el) => {
+
+      // return offset parent as reported by browser
+      if (!calculate) {
+        return el.offsetParent;
+      }
+
+      // fixed elements have no offset parent
+      if (window.getComputedStyle(el).position === 'fixed') {
+        return undefined;
+      }
+
+      let current = el.parentNode;
+      while (current) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+          // transformed elements create new positioning context
+          if (style.position !== 'static') {
+            return current;
+          }
+          // filter creates new positioning context
+          if (style.filter !== 'none') {
+            return current;
+          }
+          // transformed elements create new positioning context
+          if (style.transform !== 'none') {
+            return current;
+          }
+          // also creates positioning context
+          if(['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
+            return current;
+          }
+          // will change will trigger same context
+          // <https://issues.chromium.org/issues/41131675>
+          if (['filter', 'contain', 'transform'].includes(style.willChange)) {
+            return current;
+          }
+        }
+        current = current.parentNode;
+      }
+      return document.body;
+    });
+    return this.chain(parents);
   }
 
   // alias
