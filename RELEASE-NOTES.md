@@ -6,6 +6,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.13.0
 
+* **Query** - Added `clippingParent` to find closest ancestor which will clip the current element
 * **Query** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
 * **Query** - `setting()` can now be used as a getter.
 * **Query** - Added `.data()` for getting and setting html data
