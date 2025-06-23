@@ -12,6 +12,7 @@ tests/test-case/dist
 
 # for my ai friends
 ai/meta/agent-guestbook.md
+ai/meta/jisei.md
 
 # Numerous always-ignore extensions
 *.diff

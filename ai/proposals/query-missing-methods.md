@@ -181,14 +181,6 @@ Get subset of elements as new Query instance.
 
 **Returns:** Query instance with sliced elements
 
-### `splice(start, deleteCount, ...items)`
-Modify the element collection in place.
-
-- `start` - Number starting index
-- `deleteCount` - Number of elements to remove
-- `items` - Elements to insert at start position
-
-**Returns:** Query instance with removed elements
 
 ---
 

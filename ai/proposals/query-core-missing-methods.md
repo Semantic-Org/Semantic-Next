@@ -29,12 +29,7 @@ Modify the element collection in place.
 
 ## Enhanced Traversal
 
-### `parents(selector)`
-Get all ancestor elements, optionally filtered. Respects `this.options.pierceShadow`.
-
-- `selector` - String CSS selector to filter ancestors (optional)
-
-**Implementation:** Follow `parent()` pattern but collect all ancestors, not just immediate parent
+~~Enhanced traversal removed from core scope - `parents()` not commonly needed in practice~~
 
 ---
 
@@ -99,7 +94,7 @@ Check if elements contain targets. Automatically shadow DOM aware based on `this
 
 ## Implementation Notes
 
-- **File size impact:** < 2KB gzipped
-- **Complexity:** Low - mostly aliases and logical extensions
+- **File size impact:** < 1.5KB gzipped  
+- **Complexity:** Very low - mostly aliases and simple extensions
 - **Dependencies:** None - uses existing Query infrastructure
 - **Breaking changes:** None - all additions
