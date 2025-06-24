@@ -965,6 +965,239 @@ describe('query', () => {
     });
   });
 
+  describe('Namespaced Events', () => {
+    describe('on with namespaces', () => {
+      it('should bind events with namespaces', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.test', callback);
+        div.click();
+        expect(callback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should bind multiple namespaced events', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test1', callback1);
+        $('div').on('click.test2', callback2);
+        div.click();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should bind events with same namespace but different event types', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const clickCallback = vi.fn();
+        const mouseupCallback = vi.fn();
+
+        $('div').on('click.test', clickCallback);
+        $('div').on('mouseup.test', mouseupCallback);
+        
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(clickCallback).toHaveBeenCalledTimes(1);
+        expect(mouseupCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should support delegation with namespaces', () => {
+        const div = document.createElement('div');
+        const span = document.createElement('span');
+        div.appendChild(span);
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.test', 'span', callback);
+        span.click();
+        expect(callback).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('off with namespaces', () => {
+      it('should remove events by specific event.namespace', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test1', callback1);
+        $('div').on('click.test2', callback2);
+        
+        $('div').off('click.test1');
+        div.click();
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should remove all events in a namespace with .namespace', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const clickCallback = vi.fn();
+        const mouseupCallback = vi.fn();
+        const otherCallback = vi.fn();
+
+        $('div').on('click.test', clickCallback);
+        $('div').on('mouseup.test', mouseupCallback);
+        $('div').on('click.other', otherCallback);
+        
+        $('div').off('.test');
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(clickCallback).not.toHaveBeenCalled();
+        expect(mouseupCallback).not.toHaveBeenCalled();
+        expect(otherCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should remove specific handler with namespace', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test', callback1);
+        $('div').on('click.test', callback2);
+        
+        $('div').off('click.test', callback1);
+        div.click();
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should remove delegated events with namespaces', () => {
+        const div = document.createElement('div');
+        const span = document.createElement('span');
+        div.appendChild(span);
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test', 'span', callback1);
+        $('div').on('click.other', 'span', callback2);
+        
+        $('div').off('click.test');
+        span.click();
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle multiple namespace removals', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+        const callback3 = vi.fn();
+
+        $('div').on('click.test1', callback1);
+        $('div').on('click.test2', callback2);
+        $('div').on('mouseup.test1', callback3);
+        
+        $('div').off('.test1');
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback3).not.toHaveBeenCalled();
+      });
+
+      it('should not remove events without namespace when removing namespaced events', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const namespacedCallback = vi.fn();
+        const normalCallback = vi.fn();
+
+        $('div').on('click.test', namespacedCallback);
+        $('div').on('click', normalCallback);
+        
+        $('div').off('click.test');
+        div.click();
+        
+        expect(namespacedCallback).not.toHaveBeenCalled();
+        expect(normalCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle complex namespace scenarios', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+        const callback3 = vi.fn();
+        const callback4 = vi.fn();
+
+        $('div').on('click.foo.bar', callback1); // This creates namespace 'foo.bar' not nested namespaces
+        $('div').on('click.foo', callback2);
+        $('div').on('mouseup.foo', callback3);
+        $('div').on('click', callback4);
+        
+        // Remove only .foo namespace
+        $('div').off('.foo');
+        
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(callback1).not.toHaveBeenCalled();   // 'foo.bar' contains 'foo', so should be removed
+        expect(callback2).not.toHaveBeenCalled();   // 'foo' matches
+        expect(callback3).not.toHaveBeenCalled();   // 'foo' matches
+        expect(callback4).toHaveBeenCalledTimes(1); // no namespace
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle empty namespaces gracefully', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.', callback); // Empty namespace
+        $('div').off('click.');
+        div.click();
+        
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should handle multiple dots in event names', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.foo.bar', callback); // Multiple dots - all part of namespace
+        div.click();
+        expect(callback).toHaveBeenCalledTimes(1);
+        
+        $('div').off('click.foo.bar');
+        div.click();
+        expect(callback).toHaveBeenCalledTimes(1); // Should not be called again
+      });
+
+      it('should handle whitespace in namespaced event names', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test mouseup.test', callback1);
+        $('div').on('click.other', callback2);
+        
+        $('div').off('.test');
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
   describe('trigger', () => {
     it('should trigger a custom event on elements', () => {
       const div = document.createElement('div');

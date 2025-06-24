@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    watch: false,
+    watch: true,
     browser: {
       enabled: true,
       headless: true,

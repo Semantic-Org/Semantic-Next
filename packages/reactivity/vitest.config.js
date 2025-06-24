@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     watch: false,
+    reporter: ['default'],
     browser: {
       enabled: true,
       headless: true,
@@ -16,6 +17,6 @@ export default defineConfig({
     onConsoleLog (log) {
       if (log.includes('Lit is in dev mode.')) return false;
     },
-    workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
+    workspace: './vitest.workspace.js'
   },
 });

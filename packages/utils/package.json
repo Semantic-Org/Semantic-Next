@@ -20,7 +20,9 @@
   },
   "scripts": {
     "build": "wireit",
-    "test": "vitest"
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:watch": "vitest --watch"
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.12.4",

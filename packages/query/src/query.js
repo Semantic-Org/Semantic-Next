@@ -403,7 +403,18 @@ export class Query {
 
   getEventArray(eventNames) {
     return eventNames.split(' ')
-      .map(name => this.getEventAlias(name))
+      .map(name => {
+        const alias = this.getEventAlias(name);
+        if (alias.startsWith('.')) {
+          // Pure namespaces like '.foo' or '.foo.bar'
+          const namespaces = alias.slice(1).split('.');
+          return { eventName: null, namespaces };
+        }
+        const parts = alias.split('.');
+        const eventName = parts[0];
+        const namespaces = parts.slice(1);
+        return { eventName, namespaces: namespaces.length ? namespaces : null };
+      })
       .filter(Boolean);
   }
 
@@ -426,7 +437,7 @@ export class Query {
 
     const events = this.getEventArray(eventNames);
 
-    events.forEach(eventName => {
+    events.forEach(({ eventName, namespaces }) => {
       const abortController = options?.abortController || new AbortController();
       const eventSettings = options?.eventSettings || {};
       const signal = abortController.signal;
@@ -466,6 +477,7 @@ export class Query {
         const eventHandler = {
           el,
           eventName,
+          namespaces,
           eventListener,
           abortController,
           delegated: targetSelector !== undefined,
@@ -516,25 +528,59 @@ export class Query {
   }
 
   off(eventNames, handler) {
-    const events = this.getEventArray(eventNames);
-    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
-      if (
-        (!eventNames
-          || inArray(eventHandler.eventName, events))
-        && (!handler
-          || handler?.eventListener == eventHandler.eventListener
-          || eventHandler.eventListener === handler
-          || eventHandler.handler === handler)
-      ) {
-        // global this uses proxy object will cause illegal invocation
+    if (!eventNames) {
+      // Remove all events (existing behavior)
+      Query.eventHandlers.forEach(eventHandler => {
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if (el.removeEventListener) {
           el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
         }
-        return false;
+      });
+      Query.eventHandlers = [];
+      return this;
+    }
+
+    const events = this.getEventArray(eventNames);
+    
+    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
+      const shouldRemove = events.some(({ eventName, namespaces }) => {
+        // Match event name (if specified)
+        const eventMatches = !eventName || eventHandler.eventName === eventName;
+        
+        // Match namespaces (if specified) - any overlap removes the handler
+        let namespacesMatch = false;
+        if (namespaces && namespaces.length) {
+          if (eventHandler.namespaces && eventHandler.namespaces.length) {
+            // Check if any target namespace exists in handler's namespaces
+            namespacesMatch = namespaces.some(targetNs => 
+              inArray(targetNs, eventHandler.namespaces)
+            );
+          }
+        } else {
+          // No namespaces specified in removal, matches any
+          namespacesMatch = true;
+        }
+        
+        // Match handler (if specified)
+        const handlerMatches = !handler || 
+          handler?.eventListener === eventHandler.eventListener ||
+          eventHandler.eventListener === handler ||
+          eventHandler.handler === handler;
+        
+        return eventMatches && namespacesMatch && handlerMatches;
+      });
+
+      if (shouldRemove) {
+        // Remove the actual event listener
+        const el = (this.isGlobal) ? globalThis : eventHandler.el;
+        if (el.removeEventListener) {
+          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
+        }
+        return false; // Filter out this handler
       }
-      return true;
+      return true; // Keep this handler
     });
+    
     return this;
   }
 

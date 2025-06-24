@@ -40,6 +40,8 @@ export interface EventHandler {
   el: HTMLElement | typeof globalThis;
   /** The name of the event. */
   eventName: string;
+  /** The namespaces of the event, if any. */
+  namespaces: string[] | null;
   /** The event listener function. */
   eventListener: EventListener;
   /** The AbortController associated with the event listener. */
