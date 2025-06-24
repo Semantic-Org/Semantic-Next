@@ -44,7 +44,7 @@ export class Query {
     We keep an array to store registered plugins
     This allows an end user to see available extensions
   */
-  static plugins: [];
+  static plugins = new Map();
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];

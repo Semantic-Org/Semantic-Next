@@ -1,6 +1,6 @@
 import { noop } from '@semantic-ui/utils';
 import { Query } from './query.js';
-import { Plugin } from './plugin.js'
+import { Plugin } from './plugin.js';
 
 export const registerPlugin = function({
   name, // name of plugin
