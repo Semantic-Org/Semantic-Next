@@ -40,6 +40,12 @@ export class Query {
   */
   static eventHandlers = [];
 
+  /*
+    We keep an array to store registered plugins
+    This allows an end user to see available extensions
+  */
+  static plugins: [];
+
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
 
@@ -500,7 +506,7 @@ export class Query {
     options = options || {};
     const abortController = new AbortController();
     options.abortController = abortController;
-    const wrappedHandler = function(...args) {
+    const wrappedHandler = (...args) => {
       abortController.abort();
       handler.apply(this, args);
     };
