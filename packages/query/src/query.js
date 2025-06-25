@@ -346,29 +346,66 @@ export class Query {
     return this.chain(filteredElements);
   }
 
-  closest(selector) {
-    const closest = Array.from(this).map((el) => {
+  closest(selector, { returnAll = false } = {}) {
+    const allResults = [];
+    
+    Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
-        return this.closestDeep(el, selector);
+        const matches = this.closestDeep(el, selector, { returnAll });
+        if (returnAll) {
+          allResults.push(...matches);
+        } else if (matches) {
+          allResults.push(matches);
+        }
       }
       else if (selector && el?.closest) {
-        return el.closest(selector);
+        if (returnAll) {
+          // Walk up DOM tree using native closest() efficiently
+          let current = el.parentElement;
+          while (current) {
+            const match = current.closest(selector);
+            if (match) {
+              allResults.push(match);
+              // Continue from the parent of the match to find more ancestors
+              current = match.parentElement;
+            } else {
+              break;
+            }
+          }
+        } else {
+          const match = el.closest(selector);
+          if (match) {
+            allResults.push(match);
+          }
+        }
       }
-      else if (this.isGlobal) {
-        return inArray(selector, ['window', 'globalThis']);
+      else if (this.isGlobal && inArray(selector, ['window', 'globalThis'])) {
+        allResults.push(Query.globalThisProxy);
       }
-    }).filter(Boolean);
+    });
 
-    return this.chain(closest);
+    // Remove duplicates if returnAll is true
+    const results = returnAll ? Array.from(new Set(allResults)) : allResults;
+    return this.chain(results);
   }
 
-  closestDeep(element, selector) {
+  closestAll(selector) {
+    return this.closest(selector, { returnAll: true });
+  }
+
+  closestDeep(element, selector, { returnAll = false } = {}) {
     let currentElement = element;
     const domSelector = isDOM(selector);
     const stringSelector = isString(selector);
+    const matches = [];
+    
     while (currentElement) {
       if ((domSelector && currentElement === selector) || (stringSelector && currentElement.matches(selector))) {
-        return currentElement;
+        if (returnAll) {
+          matches.push(currentElement);
+        } else {
+          return currentElement;
+        }
       }
       if (currentElement.parentElement) {
         currentElement = currentElement.parentElement;
@@ -377,10 +414,11 @@ export class Query {
         currentElement = currentElement.parentNode.host;
       }
       else {
-        return;
+        break;
       }
     }
-    return;
+    
+    return returnAll ? matches : undefined;
   }
 
   ready(handler) {
@@ -1047,6 +1085,18 @@ export class Query {
   insertAfter(selector) {
     return this.chain(selector).each((el) => {
       this.insertContent(el, this.selector, 'afterend');
+    });
+  }
+
+  before(content) {
+    return this.each((el) => {
+      this.insertContent(el, content, 'beforebegin');
+    });
+  }
+
+  after(content) {
+    return this.each((el) => {
+      this.insertContent(el, content, 'afterend');
     });
   }
 

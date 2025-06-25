@@ -216,18 +216,30 @@ export class Query {
    * Gets the closest ancestor of each element in the current set (including the element itself) that matches the selector.
    * @see https://next.semantic-ui.com/api/query/dom-traversal#closest
    * @param selector - A CSS selector or a DOM element.
+   * @param options - Options to control the search behavior.
+   * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
    * @returns A new Query instance containing the closest ancestor elements.
    */
-  closest(selector: string | Element): Query;
+  closest(selector: string | Element, options?: { returnAll?: boolean }): Query;
+
+  /**
+   * Gets all ancestor elements that match the selector, traversing up the entire DOM tree.
+   * @see https://next.semantic-ui.com/api/query/dom-traversal#closestall
+   * @param selector - A CSS selector or a DOM element.
+   * @returns A new Query instance containing all matching ancestor elements.
+   */
+  closestAll(selector: string | Element): Query;
 
   /**
    * Gets the closest ancestor of the provided element (including the element itself) that matches the selector, traversing shadow DOM boundaries.
    * @see https://next.semantic-ui.com/api/query/internal#closestdeep
    * @param element - The element to start searching from.
    * @param selector - A CSS selector or a DOM element.
-   * @returns The closest ancestor element, or `undefined` if not found.
+   * @param options - Options to control the search behavior.
+   * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
+   * @returns The closest ancestor element, all matching ancestors, or `undefined` if not found.
    */
-  closestDeep(element: Element, selector: string | Element): Element | undefined;
+  closestDeep(element: Element, selector: string | Element, options?: { returnAll?: boolean }): Element | Element[] | undefined;
 
   /**
    * Attaches a handler to be executed when the DOM is fully loaded.
@@ -695,6 +707,22 @@ export class Query {
    *  @returns A new query object of elements inserted.
    */
   insertAfter(selector: string | Node | NodeList | HTMLCollection | Query): Query;
+
+  /**
+   * Inserts content before each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#before
+   * @param content - The content to insert before each element.
+   * @returns The Query instance for chaining.
+   */
+  before(content: string | Node | NodeList | HTMLCollection | Query): this;
+
+  /**
+   * Inserts content after each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#after
+   * @param content - The content to insert after each element.
+   * @returns The Query instance for chaining.
+   */
+  after(content: string | Node | NodeList | HTMLCollection | Query): this;
 
   /**
    * Removes each element in the current set from the DOM, but keeps event handlers.

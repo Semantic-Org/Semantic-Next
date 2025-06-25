@@ -11,6 +11,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `clippingParent` to find closest ancestor which will clip the current element
 * **Feature** - Added `.data()` for getting and setting html data
 * **Feature** - Added `.slice()` for returning a portion of the element collection
+* **Feature** - Added `closestAll()` for finding all ancestor elements matching a selector
+* **Feature** - Added `before()` and `after()` aliases for more intuitive content insertion
+* **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange

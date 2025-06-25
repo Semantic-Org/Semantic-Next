@@ -391,6 +391,105 @@ describe('query', () => {
     });
   });
 
+  describe('closestAll', () => {
+    it('should return all ancestor elements matching a selector', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const div3 = document.createElement('div');
+      const span = document.createElement('span');
+      
+      div1.classList.add('container');
+      div2.classList.add('container');
+      div3.classList.add('container');
+      
+      // Nested structure: div1 > div2 > div3 > span
+      div3.appendChild(span);
+      div2.appendChild(div3);
+      div1.appendChild(div2);
+      document.body.appendChild(div1);
+
+      const $span = $('span');
+      const $allContainers = $span.closestAll('.container');
+      
+      expect($allContainers.length).toBe(3);
+      expect($allContainers.get()).toContain(div1);
+      expect($allContainers.get()).toContain(div2);
+      expect($allContainers.get()).toContain(div3);
+    });
+
+    it('should return empty Query if no ancestors match', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $span = $('span');
+      const $ancestors = $span.closestAll('.nonexistent');
+      
+      expect($ancestors.length).toBe(0);
+    });
+
+    it('should work with multiple elements', () => {
+      const container1 = document.createElement('div');
+      const container2 = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      
+      container1.classList.add('container');
+      container2.classList.add('container');
+      
+      container1.appendChild(span1);
+      container2.appendChild(span2);
+      document.body.appendChild(container1);
+      document.body.appendChild(container2);
+
+      const $spans = $('span');
+      const $containers = $spans.closestAll('.container');
+      
+      expect($containers.length).toBe(2);
+      expect($containers.get()).toContain(container1);
+      expect($containers.get()).toContain(container2);
+    });
+
+    it('should remove duplicates when multiple elements have same ancestor', () => {
+      const sharedContainer = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      
+      sharedContainer.classList.add('container');
+      
+      sharedContainer.appendChild(span1);
+      sharedContainer.appendChild(span2);
+      document.body.appendChild(sharedContainer);
+
+      const $spans = $('span');
+      const $containers = $spans.closestAll('.container');
+      
+      expect($containers.length).toBe(1);
+      expect($containers.get(0)).toBe(sharedContainer);
+    });
+
+    it('should work with pierceShadow option', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const span = document.createElement('span');
+      
+      div1.classList.add('container');
+      div2.classList.add('container');
+      
+      div2.appendChild(span);
+      div1.appendChild(div2);
+      document.body.appendChild(div1);
+
+      const $span = $('span', { pierceShadow: true });
+      const $containers = $span.closestAll('.container');
+      
+      expect($containers.length).toBe(2);
+      expect($containers.get()).toContain(div1);
+      expect($containers.get()).toContain(div2);
+    });
+  });
+
   describe('filter', () => {
     it('filter should return elements that match a selector', () => {
       const div = document.createElement('div');
@@ -2350,6 +2449,30 @@ describe('query', () => {
 
       expect($sliced.length).toBe(0);
       expect($sliced).toBeInstanceOf(Query);
+    });
+  });
+
+  describe('before', () => {
+    it('should work as alias for insertBefore functionality', () => {
+      const div = document.createElement('div');
+      div.innerHTML = '<p>Original</p>';
+      document.body.appendChild(div);
+
+      $('p').before('<span>Before</span>');
+
+      expect(div.innerHTML).toBe('<span>Before</span><p>Original</p>');
+    });
+  });
+
+  describe('after', () => {
+    it('should work as alias for insertAfter functionality', () => {
+      const div = document.createElement('div');
+      div.innerHTML = '<p>Original</p>';
+      document.body.appendChild(div);
+
+      $('p').after('<span>After</span>');
+
+      expect(div.innerHTML).toBe('<p>Original</p><span>After</span>');
     });
   });
 });
