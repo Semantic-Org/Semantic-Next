@@ -12,20 +12,6 @@ This document consolidates essential missing methods for the Query library that 
 
 ---
 
-## Array-like Operations
-
-### `splice(start, deleteCount, ...items)`
-Modify the element collection in place.
-
-- `start` - Number starting index  
-- `deleteCount` - Number of elements to remove
-- `items` - Elements to insert at start position
-
-**Implementation:** Array.splice() with Query wrapping  
-**Returns:** Query instance for chaining
-
----
-
 ## Enhanced Traversal
 
 ### `closestAll(selector)`
@@ -99,32 +85,3 @@ Check if elements contain targets. Automatically Shadow DOM aware based on `this
 
 **Implementation:** Use DOM `.contains()` or deep traversal based on `this.options.pierceShadow`  
 **Returns:** Boolean true if any element contains the target
-
----
-
-## Implementation Notes
-
-### File Size Impact
-- **Total estimated size:** < 1KB gzipped
-- **Complexity level:** Very low - mostly aliases and simple extensions
-- **Dependencies:** None - uses existing Query infrastructure
-
-### API Consistency
-All methods follow existing Query patterns:
-- Chainable when setting/modifying
-- Return values when getting  
-- Accept same input types as existing methods
-- Use options objects for complex configuration
-- Maintain Shadow DOM awareness through existing piercing logic
-
-### Shadow DOM Considerations
-- All traversal methods respect the `$$` vs `$` distinction
-- Containment checking automatically adapts to shadow boundaries
-- Data attribute methods work consistently across shadow contexts
-
-### Breaking Changes
-None - all methods are purely additive to the existing API.
-
----
-
-**Priority:** High - These methods address the most commonly requested jQuery-like functionality with minimal implementation complexity and maximum compatibility with existing Query architecture.

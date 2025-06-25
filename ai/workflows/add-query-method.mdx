@@ -4,12 +4,13 @@ This workflow outlines the complete process for implementing a new method on the
 
 ## Overview
 
-Adding a new Query method involves 5 main steps:
+Adding a new Query method involves 6 main steps:
 1. **Implementation** - Add the method to the Query class
 2. **Testing** - Write comprehensive tests
 3. **Types** - Update TypeScript definitions
 4. **Documentation** - Add API documentation
-5. **Release Notes** - Update change log (if not already done)
+5. **AI Guide** - Update the AI package guide
+6. **Release Notes** - Update change log (if not already done)
 
 ## File Locations
 
@@ -19,6 +20,7 @@ packages/query/test/dom/query.test.js    # DOM-based unit tests
 packages/query/test/browser/query.test.js # Browser-only tests (window, custom elements, etc.)
 packages/query/types/query.d.ts         # TypeScript definitions
 docs/src/pages/api/query/*.mdx          # API documentation
+ai/packages/query.md                    # AI package guide
 RELEASE-NOTES.md                        # Change log
 ```
 
@@ -257,7 +259,42 @@ $('selector').methodName(key, value)
 - Related methods or concepts
 ```
 
-## Step 5: Release Notes
+## Step 5: AI Guide
+
+### Location
+Update `/ai/packages/query.md` to include the new method
+
+### Method Categories
+Add your method to the appropriate section in the "Query Methods Overview":
+
+- **Basic Operations** - Core Query functionality
+- **DOM Traversal** - Navigation methods
+- **Content Manipulation** - HTML/text content methods
+- **Attribute/Property Management** - Attribute and property methods
+- **CSS and Styling** - Styling and class methods
+- **Event Handling** - Event-related methods
+- **Dimensions and Positioning** - Size and position methods
+- **Component Integration** - Semantic UI component methods
+
+### Documentation Format
+```markdown
+- `methodName(params)` - Brief description of functionality
+```
+
+### Advanced Patterns Section
+If your method introduces new patterns or has complex usage, add examples to the appropriate advanced sections:
+
+- **Advanced DOM Querying** - For complex selector patterns
+- **Event Handling Patterns** - For event-related methods
+- **Integration Patterns** - For component integration methods
+
+### Usage Examples
+Include practical examples showing:
+- Basic usage patterns
+- Integration with existing Query methods
+- Component-specific usage (if applicable)
+
+## Step 6: Release Notes
 
 ### Location
 `RELEASE-NOTES.md` (may already be updated)
@@ -303,6 +340,7 @@ Add entry following the existing pattern:
 - [ ] Comprehensive tests added covering all usage patterns
 - [ ] TypeScript definitions added with proper overloads
 - [ ] Documentation added to appropriate category file
+- [ ] AI guide updated with method reference and examples
 - [ ] Release notes updated (if needed)
 - [ ] Tests pass (`npm test` in packages/query)
 - [ ] Method follows single/multiple element return patterns
