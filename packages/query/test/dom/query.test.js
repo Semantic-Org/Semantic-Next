@@ -2026,11 +2026,81 @@ describe('query', () => {
       it('should return undefined when getting height on non-existent element', () => {
         expect($('.non-existent').height()).toBe(undefined);
       });
+
+      it('should set height value and return Query instance', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        const $result = $('div').height(150);
+        
+        expect($result).toBeInstanceOf(Query);
+        expect(div.style.height).toBe('150px');
+        
+        document.body.removeChild(div);
+      });
+
+      it('should handle string height values', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        $('div').height('200px');
+        
+        expect(div.style.height).toBe('200px');
+        
+        document.body.removeChild(div);
+      });
     });
 
     describe('width', () => {
       it('should return undefined when getting width on non-existent element', () => {
         expect($('.non-existent').width()).toBe(undefined);
+      });
+
+      it('should set width value and return Query instance', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        const $result = $('div').width(300);
+        
+        expect($result).toBeInstanceOf(Query);
+        expect(div.style.width).toBe('300px');
+        
+        document.body.removeChild(div);
+      });
+
+      it('should handle string width values', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        $('div').width('250px');
+        
+        expect(div.style.width).toBe('250px');
+        
+        document.body.removeChild(div);
+      });
+    });
+
+    describe('innerWidth', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').innerWidth()).toBe(undefined);
+      });
+    });
+
+    describe('innerHeight', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').innerHeight()).toBe(undefined);
+      });
+    });
+
+    describe('outerWidth', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').outerWidth()).toBe(undefined);
+      });
+    });
+
+    describe('outerHeight', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').outerHeight()).toBe(undefined);
       });
     });
 

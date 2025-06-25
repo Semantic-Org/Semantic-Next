@@ -65,6 +65,24 @@ export interface CSSOptions {
 }
 
 /**
+ * Options for dimensional calculations (width/height).
+ */
+export interface DimensionOptions {
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include border in the calculation. Defaults to true.
+   */
+  includeBorder?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to true.
+   */
+  includePadding?: boolean;
+}
+
+/**
  * A minimal toolkit for querying and performing modifications
  * across DOM nodes based off a selector.
  */
@@ -593,18 +611,32 @@ export class Query {
   prev(selector?: string): Query;
 
   /**
-   * Gets or sets the height of each element in the current set. Uses `clientHeight` or `innerHeight` depending on presence of value.
+   * Gets the height of the first element in the current set with optional dimension calculations.
    * @see https://next.semantic-ui.com/api/query/dimensions#height
-   * @param value - height in pixels.
-   * @returns If setting, the Query instance for chaining.  If getting, the height of the *first* element or an array of heights.
+   * @param options - Options to control which parts of the box model to include.
+   * @returns The height of the first element.
+   */
+  height(options: DimensionOptions): number;
+  /**
+   * Gets or sets the height of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#height
+   * @param value - The height in pixels to set.
+   * @returns If setting, the Query instance for chaining. If getting, the height of the first element.
    */
   height(value?: number): number | this;
 
   /**
+   * Gets the width of the first element in the current set with optional dimension calculations.
+   * @see https://next.semantic-ui.com/api/query/dimensions#width
+   * @param options - Options to control which parts of the box model to include.
+   * @returns The width of the first element.
+   */
+  width(options: DimensionOptions): number;
+  /**
    * Gets or sets the width of each element in the current set.
    * @see https://next.semantic-ui.com/api/query/dimensions#width
-   * @param value - The width in pixels.
-   * @returns If setting, the Query instance for chaining.  If getting, the width of the *first* element.
+   * @param value - The width in pixels to set.
+   * @returns If setting, the Query instance for chaining. If getting, the width of the first element.
    */
   width(value?: number): number | this;
 
@@ -831,6 +863,36 @@ export class Query {
    * @returns The data context, or undefined.
    */
   dataContext(): any;
+
+  /**
+   * Gets the inner width (content + padding) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#innerWidth
+   * @returns The inner width of the first element.
+   */
+  innerWidth(): number;
+
+  /**
+   * Gets the inner height (content + padding) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#innerHeight
+   * @returns The inner height of the first element.
+   */
+  innerHeight(): number;
+
+  /**
+   * Gets the outer width (content + padding + border, optionally + margin) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#outerWidth
+   * @param includeMargin - Whether to include margin in the calculation. Defaults to false.
+   * @returns The outer width of the first element.
+   */
+  outerWidth(includeMargin?: boolean): number;
+
+  /**
+   * Gets the outer height (content + padding + border, optionally + margin) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#outerHeight
+   * @param includeMargin - Whether to include margin in the calculation. Defaults to false.
+   * @returns The outer height of the first element.
+   */
+  outerHeight(includeMargin?: boolean): number;
 }
 
 export default Query;
