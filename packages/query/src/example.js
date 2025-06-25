@@ -16,7 +16,6 @@ const defaultSettings =  {
   // whether EXACT animation can occur twice in a row
   allowRepeats: false,
 
-
   // Override final display type on visible
   displayType: false,
 

@@ -2,16 +2,18 @@ import { noop } from '@semantic-ui/utils';
 import { Query } from './query.js';
 import { Plugin } from './plugin.js';
 
-export const registerPlugin = function({
-  name, // name of plugin
+export const registerPlugin = function(plugin) {
 
-  defaultSettings = {}, // settings for plugin
-  namespace = `plugin${name}`,
+  const {
+    name, // name of plugin
 
-  onCreated = noop,
-  onDestroyed = noop,
-  createPlugin = noop,
-} = {}) {
+    defaultSettings = {}, // settings for plugin
+    namespace = `plugin${name}`,
+
+    onCreated = noop,
+    onDestroyed = noop,
+    createPlugin = noop,
+  } = plugin;
 
   if (name) {
     throw new Error('Plugin must have a name');
