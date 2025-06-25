@@ -22,17 +22,8 @@ export const registerPlugin = function(plugin) {
     throw new Error('Plugin name already in use', plugin.name);
   }
 
-  const plugin = new Plugin({
-    name,
-    defaultSettings,
-    namespace,
-    onCreated,
-    onDestroyed,
-    createPlugin
-  });
-
   Query.plugins.set(name, {
-    settings,
+    defaultSettings,
     plugin
   });
 
