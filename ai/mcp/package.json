@@ -1,0 +1,17 @@
+{
+  "name": "semantic-ui-agents-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP server for Semantic UI specialized agents",
+  "main": "agents-server.js",
+  "scripts": {
+    "start": "node agents-server.js",
+    "dev": "node --watch agents-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "keywords": ["mcp", "semantic-ui", "agents", "ai"],
+  "author": "Semantic UI Team",
+  "license": "MIT"
+}
