@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "sui": {
+      "command": "node",
+      "args": ["/home/jack/semantic/next/ai/mcp/agents-server.js"],
+      "env": {}
+    }
+  }
+}
