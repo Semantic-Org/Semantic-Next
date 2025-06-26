@@ -190,30 +190,50 @@ if (!isString(key)) {
 
 ## Expected Deliverables
 
-### Implementation Files
+### For COMPLETED Work
 ```javascript
 {
-  "files_changed": ["packages/query/src/query.js"],
-  "method_added": "methodName with getter/setter pattern",
-  "utils_used": ["array of semantic-ui utils leveraged"],
-  "patterns_followed": ["chaining", "single/multiple returns", "empty handling"]
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["packages/query/src/query.js"],
+    "files_created": [],
+    "summary": "Added methodName() with getter/setter pattern following Query conventions"
+  },
+  "handoff_context": {
+    "for_next_agent": {
+      "method_signature": "methodName(key?, value?)",
+      "test_scenarios_needed": ["empty selection", "single vs multiple elements", "parameter validation"],
+      "edge_cases_to_test": ["null/undefined values", "invalid parameters", "large collections"],
+      "performance_considerations": ["DOM access patterns", "Shadow DOM traversal"],
+      "patterns_used": ["chaining", "single/multiple returns", "semantic-ui utils"]
+    },
+    "concerns": ["any implementation compromises or limitations"],
+    "recommendations": ["suggestions for testing approach"]
+  },
+  "questions_about_previous_work": []
 }
 ```
 
-### Handoff Context for Next Agents
+### For BLOCKED Work (Example)
 ```javascript
 {
-  "for_testing_agent": {
-    "test_scenarios": ["specific scenarios to test"],
-    "edge_cases": ["empty selection", "single vs multiple", "invalid params"],
-    "performance_considerations": ["large collections", "DOM access patterns"],
-    "shadow_dom_tests": ["light DOM", "shadow DOM", "mixed contexts"]
+  "status": "blocked",
+  "reason": "Method signature conflicts with existing Query patterns",
+  "escalation_request": {
+    "question": "Should I prioritize consistency with existing patterns or the new requirement?",
+    "options": [
+      "Modify signature to match existing Query conventions",
+      "Keep new signature and update documentation", 
+      "Create alternative method name"
+    ],
+    "blocking_issue": "Requested signature breaks Query chaining expectations",
+    "agent_recommendation": "Modify signature to match existing conventions",
+    "impact_of_options": {
+      "option_1": "Maintains framework consistency, may not meet exact requirements",
+      "option_2": "Meets requirements but creates inconsistent API"
+    }
   },
-  "for_types_agent": {
-    "method_overloads": ["getter", "setter", "bulk operations"],
-    "return_types": "conditional based on selection size",
-    "parameter_types": "string keys, flexible values"
-  }
+  "questions_about_previous_work": []
 }
 ```
 

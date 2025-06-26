@@ -303,27 +303,51 @@ CONTEXT: ${JSON.stringify(context, null, 2)}
 ${packageName ? `PACKAGE: ${packageName}` : ''}
 
 Please complete this task following your specialized context and return a structured JSON response with:
+
+For COMPLETED work:
 {
-  "status": "complete|needs_input|blocked",
+  "status": "complete",
   "deliverables": {
     "files_changed": ["array of file paths"],
     "files_created": ["array of file paths"],
     "summary": "brief summary of work completed"
   },
   "handoff_context": {
-    "for_next_agent": "key information for the next agent in the workflow",
-    "concerns": ["any issues or concerns raised"],
+    "for_next_agent": "specific context for the NEXT agent in sequence",
+    "concerns": ["issues that might affect downstream agents"],
     "recommendations": ["suggestions for next steps"]
   },
-  "questions": [
+  "questions_about_previous_work": [
     {
-      "for_agent": "agent_name",
-      "question": "specific question"
+      "about": "previous_agent_work",
+      "question": "specific question about earlier work"
     }
   ]
 }
 
-Focus on your specialized domain expertise and provide clear, actionable deliverables.
+For BLOCKED work requiring human decision:
+{
+  "status": "blocked",
+  "reason": "clear explanation of why you cannot proceed",
+  "escalation_request": {
+    "question": "specific question for human decision",
+    "options": ["option 1", "option 2", "option 3"],
+    "blocking_issue": "technical details of the conflict",
+    "agent_recommendation": "your recommended solution",
+    "impact_of_options": {
+      "option_1": "consequences of this choice",
+      "option_2": "consequences of this choice"
+    }
+  },
+  "questions_about_previous_work": [
+    {
+      "about": "previous_agent_work",
+      "question": "clarification needed to proceed"
+    }
+  ]
+}
+
+Focus on your specialized domain expertise. If you encounter conflicts with previous work or need human guidance, use the escalation pattern.
 `;
   }
 
@@ -335,7 +359,31 @@ Focus on your specialized domain expertise and provide clear, actionable deliver
     }
     
     try {
-      return JSON.parse(jsonMatch[0]);
+      const response = JSON.parse(jsonMatch[0]);
+      
+      // Enhanced response categorization for orchestrator
+      if (response.status === 'blocked' && response.escalation_request) {
+        return {
+          type: 'escalation_needed',
+          escalation: response.escalation_request,
+          context: response,
+          agent_questions: response.questions_about_previous_work || []
+        };
+      }
+      
+      if (response.status === 'complete') {
+        return {
+          type: 'agent_complete',
+          result: response
+        };
+      }
+      
+      // Default case
+      return {
+        type: 'agent_response',
+        result: response
+      };
+      
     } catch (error) {
       throw new Error(`Invalid JSON in agent response: ${error.message}`);
     }

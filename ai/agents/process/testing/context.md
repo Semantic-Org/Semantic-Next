@@ -153,7 +153,6 @@ describe('methodName', () => {
 - [ ] Empty selection handling
 - [ ] Shadow DOM traversal ($ vs $$)
 - [ ] Parameter validation and errors
-- [ ] Performance with large collections
 
 ### Reactivity Testing Requirements
 - [ ] Signal creation and updates
@@ -195,32 +194,60 @@ describe('methodName', () => {
 
 ## Expected Deliverables
 
-### Test Implementation
+### For COMPLETED Work
 ```javascript
 {
-  "test_files_created": ["path/to/test.js"],
-  "test_categories": ["basic", "edge-cases", "integration", "performance"],
-  "scenarios_covered": ["list of specific test scenarios"],
-  "edge_cases_identified": ["boundary conditions found"],
-  "performance_benchmarks": ["memory usage", "execution time"]
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["packages/query/test/dom/query.test.js"],
+    "files_created": [],
+    "summary": "Added comprehensive tests covering all usage patterns and edge cases"
+  },
+  "handoff_context": {
+    "for_next_agent": {
+      "overloads_needed": ["getter without params", "getter with key", "setter with key+value"],
+      "return_type_patterns": "single element returns value, multiple returns array",
+      "parameter_validation": ["key must be string", "value can be any type"],
+      "edge_case_types": ["empty selection returns undefined", "chaining returns Query instance"],
+      "test_scenarios_to_type": ["complex overload interactions", "error conditions"]
+    },
+    "concerns": ["type complexity may impact performance", "overload patterns are complex"],
+    "recommendations": ["focus on practical usage patterns in type definitions"]
+  },
+  "questions_about_previous_work": [
+    {
+      "about": "implementation",
+      "question": "Can the return value pattern be simplified to improve TypeScript typing?"
+    }
+  ]
 }
 ```
 
-### Handoff Context for Next Agents
+### For BLOCKED Work (Example)
 ```javascript
 {
-  "for_types_agent": {
-    "type_validation_needs": ["runtime type checking requirements"],
-    "test_type_scenarios": ["complex type interactions to verify"]
+  "status": "blocked", 
+  "reason": "Implementation has untestable race conditions in async behavior",
+  "escalation_request": {
+    "question": "Should testing requirements override implementation approach?",
+    "options": [
+      "Modify implementation to be more testable",
+      "Accept limited test coverage for this async pattern",
+      "Add test utilities to handle async patterns"
+    ],
+    "blocking_issue": "Async DOM updates cannot be reliably tested with current patterns",
+    "agent_recommendation": "Add test utilities to handle async patterns",
+    "impact_of_options": {
+      "option_1": "Better testability but may change intended behavior",
+      "option_2": "Maintains implementation but reduces test confidence"
+    }
   },
-  "for_documentation_agent": {
-    "example_test_coverage": ["which documented examples have tests"],
-    "testing_documentation_needs": ["testing patterns to document"]
-  },
-  "for_integration_agent": {
-    "integration_test_gaps": ["cross-package scenarios not covered"],
-    "ci_requirements": ["testing infrastructure needs"]
-  }
+  "questions_about_previous_work": [
+    {
+      "about": "implementation",
+      "question": "Can async DOM updates be made synchronous for testing?"
+    }
+  ]
 }
 ```
 
