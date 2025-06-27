@@ -306,9 +306,33 @@ class SemanticUIAgentsServer {
       );
 
       // Let StdioClientTransport spawn claude process itself (correct approach per MCP SDK docs)
+
+      // Use agent-specific settings file for permissions
+      // https://docs.anthropic.com/en/docs/claude-code/settings#permission-settings
+      const settingsPath = path.join(projectRoot, 'ai', 'agents', agentType, 'settings.json');
+
+      const allowedTools = [
+        'Agent',
+        'Bash',
+        'Edit',
+        'Glob',
+        'Grep',
+        'LS',
+        'MultiEdit',
+        'NotebookEdit',
+        'NotebookRead',
+        'Read',
+        'TodoRead',
+        'TodoWrite',
+        'WebFetch',
+        'WebSearch',
+        'Write',
+      ];
+
       const transport = new StdioClientTransport({
         command: 'claude',
-        args: ['mcp', 'serve'],
+        args: ['mcp', 'serve', '--allowedTools', allowedTools.join(',')],
+        // args: ['mcp', 'serve', '--settings', settingsPath, '--debug'],
         env: {
           ...process.env,
           CLAUDE_AGENT_TYPE: agentType,
@@ -336,7 +360,8 @@ class SemanticUIAgentsServer {
 
       await client.close();
 
-      return this.parseAgentResponse(result, agentName, agentType, args);
+      // Return the raw MCP result directly - no wrapping needed
+      return result;
     }
     catch (error) {
       throw error;
