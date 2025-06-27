@@ -23,12 +23,13 @@ async function run() {
     console.log('Connected to server!');
 
     // Skip tool listing, go straight to tool call
-    console.log('Calling component_implementation_agent...');
+    console.log('Calling query_implementation_agent...');
     const result = await Promise.race([
       client.callTool({
-        name: 'component_implementation_agent',
+        name: 'query_implementation_agent',
         arguments: {
-          task: 'Test task: Just return a simple response to verify the connection works',
+          task:
+            'Implement the Query.contains(selector) method as outlined in ai/proposals/query-core.md. This method should check if elements contain targets and be automatically Shadow DOM aware based on this.options.pierceShadow. Please read the proposal file for the exact specification and implement it in the Query package.',
         },
       }),
       timeoutPromise,
