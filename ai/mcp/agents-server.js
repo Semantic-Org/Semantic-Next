@@ -201,6 +201,7 @@ class SemanticUIAgentsServer {
         const useStreaming = args.streaming === true;
 
         const result = await this.executeAgent(name, args, useStreaming);
+
         return {
           content: [
             {
@@ -237,14 +238,16 @@ class SemanticUIAgentsServer {
       return result;
     }
     catch (error) {
-      throw new Error(`Failed to execute agent: ${error.message}`);
+      throw error;
     }
   }
 
   async connectToClaudeCodeMCP(agentPrompt, agentName, agentType, args) {
-    // Debug test: verify Claude can be spawned with simple command
+    /*
+      Debug test: verify Claude can be spawned with simple command
+
     console.error(`[${agentName}] Testing Claude spawn with simple print...`);
-    const testProcess = spawn('claude', ['--print', '"Hello from MCP test!"'], {
+    const testProcess = spawn('claude', ['--dangerously-skip-permissions', '--print', 'Hello from MCP test!'], {
       stdio: ['inherit', 'pipe', 'pipe'],
       cwd: projectRoot,
     });
@@ -252,6 +255,14 @@ class SemanticUIAgentsServer {
     return new Promise((resolve, reject) => {
       let output = '';
       let errorOutput = '';
+      let timeout;
+
+      // Set up timeout to prevent indefinite hangs
+      const timeoutMs = 30000; // 30 seconds
+      timeout = setTimeout(() => {
+        testProcess.kill();
+        reject(new Error(`Claude spawn timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
 
       testProcess.stdout.on('data', (data) => {
         output += data.toString();
@@ -262,6 +273,7 @@ class SemanticUIAgentsServer {
       });
 
       testProcess.on('close', (code) => {
+        clearTimeout(timeout);
         console.error(`[${agentName}] Test spawn completed with code ${code}`);
         console.error(`[${agentName}] Test stdout: ${output}`);
         console.error(`[${agentName}] Test stderr: ${errorOutput}`);
@@ -275,37 +287,13 @@ class SemanticUIAgentsServer {
       });
 
       testProcess.on('error', (error) => {
+        clearTimeout(timeout);
         reject(new Error(`Test spawn failed: ${error.message}`));
       });
     });
-
-    // Original MCP code below (unreachable for now due to early return)
-    // Start Claude Code as MCP server
-    const claudeProcess = spawn('claude', ['mcp', 'serve'], {
-      cwd: projectRoot,
-      stdio: ['inherit', 'pipe', 'pipe'],
-      env: {
-        ...process.env,
-        CLAUDE_AGENT_TYPE: agentType,
-        CLAUDE_AGENT_NAME: agentName,
-      },
-    });
-
-    // Debug: Log process events
-    claudeProcess.on('error', (error) => {
-      console.error(`[${agentName}] Claude process error:`, error);
-    });
-
-    claudeProcess.on('exit', (code, signal) => {
-      console.error(`[${agentName}] Claude process exited with code ${code}, signal ${signal}`);
-    });
-
-    claudeProcess.stderr.on('data', (data) => {
-      console.error(`[${agentName}] Claude stderr:`, data.toString());
-    });
+    */
 
     try {
-      console.error('111');
       // Create MCP client to connect to Claude Code server
       const client = new Client(
         {
@@ -316,47 +304,42 @@ class SemanticUIAgentsServer {
           capabilities: {},
         },
       );
-      console.error('22');
 
-      // Connect to Claude Code MCP server via stdio
+      // Let StdioClientTransport spawn claude process itself (correct approach per MCP SDK docs)
       const transport = new StdioClientTransport({
-        stdin: claudeProcess.stdin,
-        stdout: claudeProcess.stdout,
+        command: 'claude',
+        args: ['mcp', 'serve'],
+        env: {
+          ...process.env,
+          CLAUDE_AGENT_TYPE: agentType,
+          CLAUDE_AGENT_NAME: agentName,
+        },
+        cwd: projectRoot,
       });
-      console.error('333');
 
       await client.connect(transport);
-      console.error('444');
-      return;
 
       // Get available tools from Claude Code
       const tools = await client.listTools();
-      console.error(`[${agentName}] Available tools:`, tools.tools.map(t => t.name));
 
-      // Early exit: return tool schema to debug Task tool parameters
-      const taskTool = tools.tools.find(t => t.name === 'Task');
-      if (taskTool) {
-        return {
-          debug: 'Task tool schema',
-          tool: taskTool,
-        };
-      }
+      // Create specialized prompt for the agent
+      const agentPrompt = await this.createAgentPrompt(agentName, agentType, args);
 
       // Use Claude Code's Task tool to execute the agent prompt
-      const result = await client.callTool('Task', {
-        description: `${agentType} agent work`,
-        prompt: agentPrompt,
-        file: projectRoot,
+      const result = await client.callTool({
+        name: 'Task',
+        arguments: {
+          description: `${agentType} agent work`,
+          prompt: agentPrompt,
+        },
       });
 
       await client.close();
-      claudeProcess.kill();
 
       return this.parseAgentResponse(result, agentName, agentType, args);
     }
     catch (error) {
-      claudeProcess.kill();
-      throw new Error(`Failed to connect to Claude Code MCP: ${error.message}`);
+      throw error;
     }
   }
 
