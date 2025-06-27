@@ -10,9 +10,9 @@ async function run() {
     args: ['agents-server.js'],
   });
 
-  // Set a 60 second timeout for Task tool calls
+  // Set a 2 minute timeout for Task tool calls
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Operation timed out after 60 seconds')), 60000);
+    setTimeout(() => reject(new Error('Operation timed out after 120 seconds')), 120000);
   });
 
   try {
@@ -29,7 +29,7 @@ async function run() {
         name: 'query_implementation_agent',
         arguments: {
           task:
-            'Implement the Query.contains(selector) method as outlined in ai/proposals/query-core.md. This method should check if elements contain targets and be automatically Shadow DOM aware based on this.options.pierceShadow. Please read the proposal file for the exact specification and implement it in the Query package.',
+            'Use the Read tool to read ai/proposals/query-core.md and tell me exactly what the contains() method specification says. Quote the exact text from the file.',
         },
       }),
       timeoutPromise,

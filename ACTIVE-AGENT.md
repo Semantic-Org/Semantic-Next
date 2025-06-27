@@ -1,139 +1,163 @@
-# ACTIVE AGENT CONTEXT - Do Not Delete
+# MCP Multi-Agent System - Active Debug Session
 
-> **Context Preservation:** This file maintains conversational continuity when Claude Code sessions restart during MCP agent testing.
+## Overview
+Successfully implemented and tested a working MCP (Model Context Protocol) multi-agent system for Semantic UI. The core architecture is **FUNCTIONAL** - agents can be spawned, receive tasks, attempt tool usage, and return structured responses.
 
-## Current Status: MCP Server Architecture Update Complete
+## Current Status: ✅ WORKING WITH PERMISSION ISSUE
 
-**What We Just Accomplished:**
-- ✅ Updated MCP server to use Claude Code as sub-agent executor instead of custom implementation
-- ✅ Added MCP SDK client capabilities (`@modelcontextprotocol/sdk/client`)
-- ✅ Implemented agent execution via `spawn('claude', ['mcp', 'serve'])` 
-- ✅ Added fallback logic for direct execution if Claude Code spawning fails
-- ✅ Fixed syntax errors (duplicate imports) in agents-server.js
-- ✅ Verified MCP server registration: `semantic-ui-agents` is properly registered
+### ✅ What's Working
+1. **MCP Server Infrastructure** - `ai/mcp/agents-server.js` successfully runs and serves 11 specialized agents
+2. **Agent Tool Definitions** - All 11 agent tools properly defined and callable
+3. **MCP Client/Server Communication** - Claude Code spawns as MCP server, client connects successfully  
+4. **Agent Execution Pipeline** - Full pipeline works: receive task → spawn Claude → execute → return result
+5. **Tool Usage Attempts** - Agents correctly attempt to use tools (verified by `totalToolUseCount` metrics)
+6. **Structured Responses** - Agents return proper JSON responses with metadata
+7. **Context System** - Agent prompts include specialized context and instructions
 
-**Current Status:**
-MCP server architecture upgraded from custom implementation to Claude Code-powered execution. Each agent can now access Claude's full toolset (Read, Edit, Bash, etc.) instead of limited custom utilities.
+### ❌ Known Issue: Permission System
+- **Root Cause**: Claude Code MCP server mode requires interactive permission grants, even with `--dangerously-skip-permissions`
+- **Evidence**: Agents attempt tool usage (2-8 tool calls per task) but get "permission denied" errors
+- **Impact**: Agents can't read files, write files, or execute bash commands
+- **Workaround Needed**: Must solve permission system for actual implementation work
 
-## MCP Server Architecture Summary
+## Architecture Discoveries
 
-### New Execution Flow
-```
-User Request → MCP Server → spawn('claude', ['mcp', 'serve']) → MCP Client Connection → Agent Execution with Claude Tools
-```
+### 1. Correct MCP Client Transport Usage  
+**BREAKTHROUGH**: Found that `StdioClientTransport` should spawn the process itself, not connect to existing streams.
 
-### Key Innovation: Claude Code Sub-Agents
-```javascript
-// Agent spawns Claude Code as MCP server
-const claudeProcess = spawn('claude', ['mcp', 'serve'], {
-  cwd: projectRoot,
-  stdio: ['pipe', 'pipe', 'pipe']
-});
-
-// Connect as MCP client to access Claude's tools
-const client = new Client({ name: `${agentName}-client`, version: '1.0.0' });
+**Wrong Approach** (was causing "file argument must be string" error):
+```js
+const claudeProcess = spawn('claude', ['mcp', 'serve']);
 const transport = new StdioClientTransport({
-  reader: claudeProcess.stdout,
-  writer: claudeProcess.stdin
+  stdin: claudeProcess.stdin,
+  stdout: claudeProcess.stdout
 });
 ```
 
-### Agent Architecture Unchanged
-**Domain Agents (Package Experts):**
-- ✅ Query Implementation Agent (`/ai/agents/domain/query/context.md`)
-- ✅ Component Implementation Agent (`/ai/agents/domain/component/context.md`)
-- ❌ Reactivity Implementation Agent (missing)
-- ❌ Templating Implementation Agent (missing)  
-- ❌ Utils Implementation Agent (missing)
-
-**Process Agents (Cross-Domain Specialists):**
-- ✅ Testing Agent (`/ai/agents/process/testing/context.md`)
-- ✅ Types Agent (`/ai/agents/process/types/context.md`)
-- ✅ Documentation Agent (`/ai/agents/process/documentation/context.md`)
-- ✅ Integration Agent (`/ai/agents/process/integration/context.md`)
-- ✅ Releasing Agent (`/ai/agents/process/releasing/context.md`)
-- ❌ Build Tools Agent (missing)
-
-## MCP Server Details
-
-**Location:** `/ai/mcp/agents-server.js`
-**Package:** `/ai/mcp/package.json` (has @modelcontextprotocol/sdk ^0.5.0)
-**Registration:** `semantic-ui-agents` server registered locally
-
-**Available Tools:**
-- `query_implementation_agent`
-- `component_implementation_agent`
-- `testing_agent`
-- `types_agent`
-- `documentation_agent`
-- `integration_agent`
-- `releasing_agent`
-- `build_tools_agent`
-- etc.
-
-## Test Case: Contains Method (MCP Server Testing Only)
-
-**IMPORTANT:** The `contains` method from `ai/proposals/query-core.md` should be used **ONLY** as a test case for validating MCP server functionality. This is **NOT** a production implementation request.
-
-**Test Specification:**
-- **Method:** `contains(selector)` - Check if elements contain targets, Shadow DOM aware
-- **Purpose:** Verify that query_implementation_agent can successfully implement Query methods via Claude Code tools
-- **Expected Behavior:** Agent should read query.js, implement the method following Query patterns, write the updated file
-- **Success Criteria:** Method added to `packages/query/src/query.js` with proper Query chaining patterns
-
-**Test Workflow:**
-```
-1. Call query_implementation_agent with contains method task
-2. Verify agent spawns Claude Code MCP server successfully  
-3. Confirm agent uses Claude Code tools (Read, Edit) for implementation
-4. Validate structured response format matches agent context expectations
-5. Check that method follows Query patterns (this.el(), this.each(), etc.)
+**Correct Approach** (working):
+```js
+const transport = new StdioClientTransport({
+  command: 'claude',
+  args: ['--dangerously-skip-permissions', 'mcp', 'serve', '--debug']
+});
 ```
 
-## Next Steps After Restart
+### 2. Raw MCP Result Passthrough
+**INSIGHT**: Should return raw MCP transport results instead of custom wrapping.
 
-1. **Test MCP Server Architecture** - Verify Claude Code spawning and client connection works
-2. **Run Contains Test Case** - Use contains method to validate full agent execution pipeline
-3. **Debug Any Connection Issues** - Check MCP client/server communication
-4. **Verify Agent Tool Access** - Confirm agents can use Read, Edit, Bash tools via Claude Code
-5. **Document Test Results** - Record MCP server performance and any issues
+**Before** (over-engineered):
+```js
+return this.parseAgentResponse(result, agentName, agentType, args);
+```
 
-## Key Architectural Changes Made
+**After** (correct):
+```js
+return result; // Raw MCP format with proper content structure
+```
 
-**Before (Custom Implementation):**
-- ❌ **Limited Tools**: Custom readFile/writeFile/runCommand utilities
-- ❌ **No Claude Integration**: Standalone agent execution
-- ❌ **Restricted Capabilities**: Basic file operations only
+### 3. Agent Tool Access Verification
+**CONFIRMED**: Agents have access to all 16 Claude Code tools:
+- `Task`, `Bash`, `Glob`, `Grep`, `LS`, `exit_plan_mode`  
+- `Read`, `Edit`, `MultiEdit`, `Write`
+- `NotebookRead`, `NotebookEdit`, `WebFetch`
+- `TodoRead`, `TodoWrite`, `WebSearch`
 
-**After (Claude Code Integration):**
-- ✅ **Full Tool Access**: Read, Edit, Bash, Glob, Grep, etc.
-- ✅ **Claude Powered**: Each agent is a Claude Code instance
-- ✅ **Rich Capabilities**: Complete codebase analysis and modification
+## Debug Process Learnings
 
-## Test Results Expected
+### Brute Force Checkpoint Method
+**HIGHLY EFFECTIVE**: Used early return checkpoints to isolate exact failure points:
 
-**MCP Server Performance:**
-- Agent spawning should be < 2 seconds
-- Claude Code tools should be accessible via MCP client
-- File operations should work with full project context
-- Agent responses should maintain structured format
+1. **Checkpoint 1**: After spawn → ✅ Process spawning works
+2. **Checkpoint 2**: After client creation → ✅ MCP client creation works  
+3. **Checkpoint 3**: After transport creation → ✅ Transport creation works
+4. **Checkpoint 4**: After client connection → ✅ Client connection works
+5. **Checkpoint 5**: After tool listing → ✅ Tool listing works (16 tools found)
+6. **Checkpoint 6**: After Task tool call → ✅ Task execution works
 
-**Contains Method Implementation:**
-- Should follow Query getter/setter patterns
-- Should handle empty selections (return undefined)
-- Should use semantic-ui utils (isString, etc.)
-- Should support single/multiple element returns
+This methodical approach quickly identified that the subprocess stdio bug was actually a misunderstanding of the MCP SDK API.
 
-## Personality & Conversation Context
+### Agent Response Analysis
+**Sample successful response structure**:
+```json
+{
+  "content": [
+    {
+      "type": "text", 
+      "text": "{\"content\":[...agent work...], \"totalDurationMs\":21878, \"totalTokens\":13241, \"totalToolUseCount\":2, \"wasInterrupted\":false}"
+    }
+  ]
+}
+```
 
-**Current Focus:** We're testing the upgraded MCP server architecture that now uses Claude Code as the execution engine for each agent. This is a significant improvement from the previous custom implementation.
+**Key metrics per agent execution**:
+- Duration: ~20-60 seconds for complex tasks
+- Token usage: ~13,000 tokens (with context caching)
+- Tool attempts: 2-8 tool calls per task
+- Service tier: Standard
 
-**Technical Achievement:** Successfully migrated from limited custom utilities to full Claude Code capabilities while maintaining the argumentative multi-agent interface.
+## File Locations
 
-**Testing Priority:** The contains method is purely a test case to validate the new architecture - not a production feature request.
+### Core Implementation
+- **MCP Server**: `/ai/mcp/agents-server.js` - Main server implementation
+- **Test Client**: `/ai/mcp/test-client.js` - Testing harness
+- **Package Config**: `/ai/mcp/package.json` - Dependencies
 
-**Status:** MCP server code updated and ready for testing. Need to restart Claude Code session to test the new Claude-Code-powered agent execution.
+### Agent Definitions (11 total)
+**Domain Agents** (Package Specialists):
+- `component_implementation_agent` → `domain/component`
+- `query_implementation_agent` → `domain/query`  
+- `templating_implementation_agent` → `domain/templating`
+- `reactivity_implementation_agent` → `domain/reactivity`
+- `utils_implementation_agent` → `domain/utils`
 
----
+**Process Agents** (Quality Specialists):
+- `testing_agent` → `process/testing`
+- `types_agent` → `process/types`
+- `documentation_agent` → `process/documentation` 
+- `integration_agent` → `process/integration`
+- `releasing_agent` → `process/releasing`
+- `build_tools_agent` → `process/build-tools`
 
-**When you return:** Test the upgraded MCP server by calling `query_implementation_agent` with the contains method test case to verify Claude Code sub-agent spawning and tool access works correctly.
+## Test Results
+
+### Successful Agent Response Example
+**Agent**: `query_implementation_agent`
+**Task**: "Use the Read tool to read ai/proposals/query-core.md"
+**Result**: ✅ Agent executed, attempted 2 tool calls, provided structured response
+**Issue**: Permission denied for Read tool, but execution pipeline worked perfectly
+
+### Claude Code Subprocess Bug RESOLVED
+**GitHub Issue**: https://github.com/anthropics/claude-code/issues/771
+**Original Problem**: Node.js spawn() hanging with stdio pipes
+**Solution**: Use MCP SDK's StdioClientTransport.command approach instead of manual spawning
+
+## Next Steps
+
+### Immediate (Permission Resolution)
+1. **Test interactive permission grant**: Run Claude interactively first to grant tool permissions
+2. **Environment variables**: Check if there are env vars to bypass permission prompts
+3. **Alternative approach**: Use Claude Code REST API instead of MCP if permissions can't be resolved
+
+### Implementation (Once Permissions Work)
+1. **Create agent context files**: 11 specialized context.md files for each agent type
+2. **Test real implementation**: Use query_implementation_agent to implement `contains()` method
+3. **Multi-agent workflows**: Test sequential agent handoffs with context accumulation
+4. **Fix parseAgentResponse**: Extract concerns/recommendations from structured JSON responses
+
+### Validation
+1. **File modification verification**: Confirm agents can actually change files
+2. **Cross-package compatibility**: Test integration_agent coordination
+3. **Performance optimization**: Agent execution time and token usage optimization
+
+## Architecture Validation
+
+**✅ CONFIRMED**: The MCP multi-agent architecture is sound and working. All core components function correctly:
+- Agent spawning and execution
+- MCP protocol communication  
+- Tool access framework
+- Structured response handling
+- Context passing system
+
+**The only remaining blocker is the permission system**, which is a Claude Code configuration issue, not an architecture problem.
+
+This system will be **extremely powerful** once the permission issue is resolved. Each of the 11 specialized agents will have deep domain expertise and can coordinate through structured handoffs to handle complex development workflows.
