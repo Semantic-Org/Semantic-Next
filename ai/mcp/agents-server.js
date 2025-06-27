@@ -242,6 +242,44 @@ class SemanticUIAgentsServer {
   }
 
   async connectToClaudeCodeMCP(agentPrompt, agentName, agentType, args) {
+    // Debug test: verify Claude can be spawned with simple command
+    console.error(`[${agentName}] Testing Claude spawn with simple print...`);
+    const testProcess = spawn('claude', ['--print', '"Hello from MCP test!"'], {
+      stdio: ['inherit', 'pipe', 'pipe'],
+      cwd: projectRoot,
+    });
+
+    return new Promise((resolve, reject) => {
+      let output = '';
+      let errorOutput = '';
+
+      testProcess.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      testProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      testProcess.on('close', (code) => {
+        console.error(`[${agentName}] Test spawn completed with code ${code}`);
+        console.error(`[${agentName}] Test stdout: ${output}`);
+        console.error(`[${agentName}] Test stderr: ${errorOutput}`);
+        resolve({
+          debug: 'Claude spawn test successful',
+          testOutput: output,
+          errorOutput: errorOutput,
+          exitCode: code,
+          message: 'Early return - Claude spawn with inherit stdio works!',
+        });
+      });
+
+      testProcess.on('error', (error) => {
+        reject(new Error(`Test spawn failed: ${error.message}`));
+      });
+    });
+
+    // Original MCP code below (unreachable for now due to early return)
     // Start Claude Code as MCP server
     const claudeProcess = spawn('claude', ['mcp', 'serve'], {
       cwd: projectRoot,
