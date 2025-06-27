@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(packages/**)",
+      "Edit(packages/*/src/**)",
+      "Write(packages/*/src/**)",
+      "MultiEdit(packages/*/src/**)",
+      "Read(src/**)",
+      "Edit(src/**)",
+      "Write(src/**)",
+      "MultiEdit(src/**)",
+      "Read(package.json)",
+      "Edit(package.json)",
+      "MultiEdit(package.json)",
+      "Read(tsconfig.json)",
+      "Edit(tsconfig.json)",
+      "MultiEdit(tsconfig.json)",
+      "Read(ai/**)",
+      "Bash(npm install)",
+      "Bash(npm run build)",
+      "Bash(npm test)"
+    ],
+    "deny": [],
+    "additionalDirectories": [],
+    "defaultMode": "default"
+  }
+}

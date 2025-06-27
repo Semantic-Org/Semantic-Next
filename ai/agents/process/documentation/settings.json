@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(docs/**)",
+      "Edit(docs/**)",
+      "Write(docs/**)",
+      "MultiEdit(docs/**)",
+      "Read(README.md)",
+      "Edit(README.md)",
+      "Write(README.md)",
+      "MultiEdit(README.md)",
+      "Read(*.md)",
+      "Edit(*.md)",
+      "Write(*.md)",
+      "MultiEdit(*.md)",
+      "Read(ai/guides/**)",
+      "Read(ai/foundations/**)"
+    ],
+    "deny": [],
+    "additionalDirectories": [],
+    "defaultMode": "default"
+  }
+}
