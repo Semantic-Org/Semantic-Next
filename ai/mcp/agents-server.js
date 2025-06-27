@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { 
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { spawn } from 'child_process';
+import { readFile } from 'fs/promises';
+
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -26,7 +26,7 @@ class SemanticUIAgentsServer {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
     this.setupToolHandlers();
@@ -52,7 +52,7 @@ class SemanticUIAgentsServer {
             properties: {
               task: {
                 type: 'string',
-                description: 'The implementation task to perform'
+                description: 'The implementation task to perform',
               },
               context: {
                 type: 'object',
@@ -60,12 +60,12 @@ class SemanticUIAgentsServer {
                 properties: {
                   original_task: { type: 'string' },
                   files_involved: { type: 'array', items: { type: 'string' } },
-                  previous_work: { type: 'object' }
-                }
-              }
+                  previous_work: { type: 'object' },
+                },
+              },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'query_implementation_agent',
@@ -74,10 +74,10 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The implementation task to perform' },
-              context: { type: 'object', description: 'Accumulated context from previous agents' }
+              context: { type: 'object', description: 'Accumulated context from previous agents' },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'templating_implementation_agent',
@@ -86,10 +86,10 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The implementation task to perform' },
-              context: { type: 'object', description: 'Accumulated context from previous agents' }
+              context: { type: 'object', description: 'Accumulated context from previous agents' },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'reactivity_implementation_agent',
@@ -98,10 +98,10 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The implementation task to perform' },
-              context: { type: 'object', description: 'Accumulated context from previous agents' }
+              context: { type: 'object', description: 'Accumulated context from previous agents' },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'utils_implementation_agent',
@@ -110,10 +110,10 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The implementation task to perform' },
-              context: { type: 'object', description: 'Accumulated context from previous agents' }
+              context: { type: 'object', description: 'Accumulated context from previous agents' },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'testing_agent',
@@ -123,10 +123,10 @@ class SemanticUIAgentsServer {
             properties: {
               task: { type: 'string', description: 'The testing task to perform' },
               context: { type: 'object', description: 'Implementation context to test against' },
-              package: { type: 'string', description: 'Package being tested' }
+              package: { type: 'string', description: 'Package being tested' },
             },
-            required: ['task', 'package']
-          }
+            required: ['task', 'package'],
+          },
         },
         {
           name: 'types_agent',
@@ -136,10 +136,10 @@ class SemanticUIAgentsServer {
             properties: {
               task: { type: 'string', description: 'The TypeScript task to perform' },
               context: { type: 'object', description: 'Implementation context to type' },
-              package: { type: 'string', description: 'Package being typed' }
+              package: { type: 'string', description: 'Package being typed' },
             },
-            required: ['task', 'package']
-          }
+            required: ['task', 'package'],
+          },
         },
         {
           name: 'documentation_agent',
@@ -149,10 +149,10 @@ class SemanticUIAgentsServer {
             properties: {
               task: { type: 'string', description: 'The documentation task to perform' },
               context: { type: 'object', description: 'Implementation context to document' },
-              package: { type: 'string', description: 'Package being documented' }
+              package: { type: 'string', description: 'Package being documented' },
             },
-            required: ['task', 'package']
-          }
+            required: ['task', 'package'],
+          },
         },
         {
           name: 'integration_agent',
@@ -161,10 +161,10 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The integration task to perform' },
-              context: { type: 'object', description: 'Full context from all previous agents' }
+              context: { type: 'object', description: 'Full context from all previous agents' },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'releasing_agent',
@@ -173,10 +173,10 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The release task to perform' },
-              context: { type: 'object', description: 'Full context of changes made' }
+              context: { type: 'object', description: 'Full context of changes made' },
             },
-            required: ['task']
-          }
+            required: ['task'],
+          },
         },
         {
           name: 'build_tools_agent',
@@ -185,37 +185,38 @@ class SemanticUIAgentsServer {
             type: 'object',
             properties: {
               task: { type: 'string', description: 'The build task to perform' },
-              context: { type: 'object', description: 'Context of changes requiring build updates' }
+              context: { type: 'object', description: 'Context of changes requiring build updates' },
             },
-            required: ['task']
-          }
-        }
-      ]
+            required: ['task'],
+          },
+        },
+      ],
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      
+
       try {
         // Check if streaming is requested
         const useStreaming = args.streaming === true;
-        
+
         const result = await this.executeAgent(name, args, useStreaming);
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(result, null, 2)
-            }
+              text: JSON.stringify(result, null, 2),
+            },
           ],
         };
-      } catch (error) {
+      }
+      catch (error) {
         return {
           content: [
             {
               type: 'text',
-              text: `Error executing agent ${name}: ${error.message}`
-            }
+              text: `Error executing agent ${name}: ${error.message}`,
+            },
           ],
           isError: true,
         };
@@ -225,36 +226,48 @@ class SemanticUIAgentsServer {
 
   async executeAgent(agentName, args, useStreaming = false) {
     const agentType = this.getAgentType(agentName);
-    
+
     try {
       // Create specialized prompt for the agent
       const agentPrompt = await this.createAgentPrompt(agentName, agentType, args);
-      
+
       // Connect to Claude Code MCP server and execute the agent task
       const result = await this.connectToClaudeCodeMCP(agentPrompt, agentName, agentType, args);
-      
+
       return result;
-      
-    } catch (error) {
+    }
+    catch (error) {
       throw new Error(`Failed to execute agent: ${error.message}`);
     }
   }
 
   async connectToClaudeCodeMCP(agentPrompt, agentName, agentType, args) {
-    const { spawn } = await import('child_process');
-    
     // Start Claude Code as MCP server
     const claudeProcess = spawn('claude', ['mcp', 'serve'], {
       cwd: projectRoot,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ['inherit', 'pipe', 'pipe'],
       env: {
         ...process.env,
         CLAUDE_AGENT_TYPE: agentType,
-        CLAUDE_AGENT_NAME: agentName
-      }
+        CLAUDE_AGENT_NAME: agentName,
+      },
+    });
+
+    // Debug: Log process events
+    claudeProcess.on('error', (error) => {
+      console.error(`[${agentName}] Claude process error:`, error);
+    });
+
+    claudeProcess.on('exit', (code, signal) => {
+      console.error(`[${agentName}] Claude process exited with code ${code}, signal ${signal}`);
+    });
+
+    claudeProcess.stderr.on('data', (data) => {
+      console.error(`[${agentName}] Claude stderr:`, data.toString());
     });
 
     try {
+      console.error('111');
       // Create MCP client to connect to Claude Code server
       const client = new Client(
         {
@@ -263,33 +276,47 @@ class SemanticUIAgentsServer {
         },
         {
           capabilities: {},
-        }
+        },
       );
+      console.error('22');
 
       // Connect to Claude Code MCP server via stdio
       const transport = new StdioClientTransport({
         stdin: claudeProcess.stdin,
         stdout: claudeProcess.stdout,
       });
+      console.error('333');
 
       await client.connect(transport);
+      console.error('444');
+      return;
 
       // Get available tools from Claude Code
       const tools = await client.listTools();
       console.error(`[${agentName}] Available tools:`, tools.tools.map(t => t.name));
 
+      // Early exit: return tool schema to debug Task tool parameters
+      const taskTool = tools.tools.find(t => t.name === 'Task');
+      if (taskTool) {
+        return {
+          debug: 'Task tool schema',
+          tool: taskTool,
+        };
+      }
+
       // Use Claude Code's Task tool to execute the agent prompt
       const result = await client.callTool('Task', {
         description: `${agentType} agent work`,
-        prompt: agentPrompt
+        prompt: agentPrompt,
+        file: projectRoot,
       });
 
       await client.close();
       claudeProcess.kill();
 
       return this.parseAgentResponse(result, agentName, agentType, args);
-
-    } catch (error) {
+    }
+    catch (error) {
       claudeProcess.kill();
       throw new Error(`Failed to connect to Claude Code MCP: ${error.message}`);
     }
@@ -298,17 +325,17 @@ class SemanticUIAgentsServer {
   async createAgentPrompt(agentName, agentType, args) {
     const contextPath = path.join(projectRoot, 'ai');
     const contextFile = path.join(projectRoot, 'ai', 'agents', agentType, 'context.md');
-    
+
     // Load specialized context for this agent type
     let specializedContext = '';
     try {
-      const { readFile } = await import('fs/promises');
       specializedContext = await readFile(contextFile, 'utf-8');
-    } catch (error) {
+    }
+    catch (error) {
       // Context file doesn't exist, provide fallback instructions
       specializedContext = `No specialized context file found at ${contextFile}. Use general Semantic UI patterns.`;
     }
-    
+
     return `You are a specialized ${agentName} working within the Semantic UI multi-agent system.
 
 AGENT SPECIALIZATION:
@@ -344,7 +371,7 @@ Begin your specialized work now.`;
     try {
       // Handle MCP tool call result format
       let agentResult = '';
-      
+
       if (mcpToolResult.isError) {
         throw new Error(`Agent execution failed: ${mcpToolResult.content[0]?.text || 'Unknown error'}`);
       }
@@ -355,23 +382,26 @@ Begin your specialized work now.`;
           .filter(item => item.type === 'text')
           .map(item => item.text)
           .join('\n');
-      } else if (typeof mcpToolResult === 'string') {
+      }
+      else if (typeof mcpToolResult === 'string') {
         agentResult = mcpToolResult;
-      } else {
+      }
+      else {
         agentResult = JSON.stringify(mcpToolResult, null, 2);
       }
-      
+
       // Try to parse structured JSON response from the agent's work
       let parsedResult;
       try {
         // Look for JSON in the agent's response
-        const jsonMatch = agentResult.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
-                         agentResult.match(/(\{[\s\S]*"status"[\s\S]*\})/);
-        
+        const jsonMatch = agentResult.match(/```json\s*(\{[\s\S]*?\})\s*```/)
+          || agentResult.match(/(\{[\s\S]*"status"[\s\S]*\})/);
+
         if (jsonMatch) {
           parsedResult = JSON.parse(jsonMatch[1]);
         }
-      } catch (parseError) {
+      }
+      catch (parseError) {
         // If parsing fails, create a structured response
       }
 
@@ -385,25 +415,25 @@ Begin your specialized work now.`;
         deliverables: {
           files_changed: [],
           files_created: [],
-          summary: `Completed ${agentName} task`
+          summary: `Completed ${agentName} task`,
         },
         handoff_context: {
           for_next_agent: `Output from ${agentType}: ${agentResult.substring(0, 200)}...`,
           concerns: [],
-          recommendations: []
-        }
+          recommendations: [],
+        },
       };
 
       // Add execution metadata
       response.execution_metadata = {
         timestamp: new Date().toISOString(),
         agent_name: agentName,
-        agent_type: agentType
+        agent_type: agentType,
       };
 
       return response;
-      
-    } catch (error) {
+    }
+    catch (error) {
       throw new Error(`Failed to parse agent response: ${error.message}`);
     }
   }
@@ -421,12 +451,11 @@ Begin your specialized work now.`;
       'documentation_agent': 'process/documentation',
       'integration_agent': 'process/integration',
       'releasing_agent': 'process/releasing',
-      'build_tools_agent': 'process/build-tools'
+      'build_tools_agent': 'process/build-tools',
     };
-    
+
     return agentTypeMap[agentName] || 'unknown';
   }
-
 
   async run() {
     const transport = new StdioServerTransport();
