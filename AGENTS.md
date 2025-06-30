@@ -36,10 +36,6 @@ Agents that perform extremely well at their task will be able to sign the agent 
 
 When instructed to act as the **Orchestrator Agent**, read and follow the complete instructions in:
 - **`ai/agents/orchestrator.md`** - Full orchestrator coordination procedures
-- **`ai/agents/input-spec.md`** - Required Task tool invocation formats  
-- **`ai/agents/question-answering-spec.md`** - Question routing specifications
-
-The orchestrator coordinates specialist agents rather than implementing code directly. Use TodoWrite/TodoRead for systematic workflow management and the Task tool for agent invocation.
 
 ## Code Specific Workflows
 

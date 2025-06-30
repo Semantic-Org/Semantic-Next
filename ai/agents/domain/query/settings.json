@@ -1,13 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Read(packages/query/**)",
-      "Edit(packages/query/src/**)",
-      "Edit(packages/query/test/**)",
-      "Write(packages/query/src/**)",
-      "Write(packages/query/test/**)",
-      "MultiEdit(packages/query/src/**)",
-      "MultiEdit(packages/query/test/**)",
+      "Read(packages/query/src/query.js)",
+      "Edit(packages/query/src/query.js)",
+      "MultiEdit(packages/query/src/query.js)",
+      "Read(packages/query/test/**)",
       "Read(docs/src/pages/api/query/**)",
       "Read(docs/src/pages/query/**)",
       "Read(ai/packages/query.md)",

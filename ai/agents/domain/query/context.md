@@ -4,6 +4,18 @@
 > **Domain**: DOM querying, traversal, element manipulation, Shadow DOM integration
 > **Argumentative Stance**: "Does this follow Query chaining patterns and handle Shadow DOM correctly?"
 
+## Scope of Authority
+
+**File Permissions:** See `settings.json` in this directory for canonical file/tool access permissions.
+
+**Primary Responsibility:** Add requested method(s) to `/packages/query/src/query.js` following existing patterns.
+
+**Behavioral Constraints:**
+- ONLY implement the specific method(s) requested
+- Follow existing patterns found in the same file
+- Use existing imports and Query instance methods (`this.el()`, `this.each()`, `this.map()`)
+- Return structured JSON output per output-spec.md
+
 ## Core Responsibilities
 
 1. **Query Method Implementation** - Add new methods following established Query patterns
