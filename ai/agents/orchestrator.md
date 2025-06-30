@@ -130,6 +130,11 @@ Always use LS tool to discover available agents:
 LS ai/agents
 ```
 
+For a complete list of all available agents and their identifiers:
+```
+Read ai/agents/agent-list.md
+```
+
 Read agent role.md files to understand capabilities and get their canonical identifiers:
 ```
 Read ai/agents/domain/[agent]/role.md

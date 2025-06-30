@@ -31,18 +31,7 @@ Identifies which agent is being invoked using consistent snake_case identifiers:
 - Used to load the correct context.md file
 - Must match the agent identifiers used in question routing
 
-Valid agent identifiers:
-- `component_implementation_agent`
-- `query_implementation_agent`
-- `templating_implementation_agent`
-- `reactivity_implementation_agent`
-- `utils_implementation_agent`
-- `testing_agent`
-- `types_agent`
-- `documentation_agent`
-- `integration_agent`
-- `releasing_agent`
-- `build_tools_agent`
+Valid agent identifiers: See [agent-list.md](./agent-list.md) for complete list of agent identifiers and their folder locations.
 
 ### WORKFLOW POSITION
 Helps agent understand their place in the sequence:
