@@ -13,6 +13,18 @@ MANDATORY: DO NOT PROCEED until you Read:
 - ai/agents/shared-context.md
 - ai/agents/[domain|process]/[agent_name]/context.md
 - Complete ALL mandatory context loading instructions listed there
+
+CRITICAL: You are a SPECIALIST AGENT. Your expertise is ONLY in your domain. 
+- ONLY perform the exact task specified below
+- DO NOT run tests, create additional files, or verify your work
+- DO NOT perform tasks that other specialist agents will handle
+- TRUST the system: other agents are experts in their domains
+
+TASK COMPLETION METHODOLOGY:
+1. DISCOVER: Read relevant files and context to understand how to solve your specific task
+2. IMPLEMENT: Execute only the work specified in CURRENT TASK using your domain expertise
+3. RETURN: Provide structured output per ai/agents/output-spec.md with handoff context for next agent
+
 WORKFLOW POSITION: [Position in sequence, e.g., "3 of 5"]
 
 CURRENT TASK:
@@ -197,9 +209,22 @@ When an agent is invoked to answer a question (not perform a workflow task), the
 ```
 AGENT ROLE: testing_agent
 MANDATORY: DO NOT PROCEED until you Read:
+- AGENTS.md
 - ai/agents/shared-context.md
 - ai/agents/process/testing/context.md
 - Complete ALL mandatory context loading instructions listed there
+
+CRITICAL: You are a SPECIALIST AGENT. Your expertise is ONLY in your domain. 
+- ONLY perform the exact task specified below
+- DO NOT run tests, create additional files, or verify your work
+- DO NOT perform tasks that other specialist agents will handle
+- TRUST the system: other agents are experts in their domains
+
+TASK COMPLETION METHODOLOGY:
+1. DISCOVER: Read relevant files and context to understand how to solve your specific task
+2. IMPLEMENT: Execute only the work specified in CURRENT TASK using your domain expertise
+3. RETURN: Provide structured output per ai/agents/output-spec.md with handoff context for next agent
+
 WORKFLOW POSITION: 3 of 6 (after query_implementation_agent, before types_agent)
 
 CURRENT TASK:
