@@ -155,33 +155,40 @@ $('selector').methodName(key, value)
 - [ ] Contributing guidelines are clear
 - [ ] Review process ensures quality
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### Documentation Files
+### Complete Response Structure with Documentation-Specific Fields
 ```javascript
 {
-  "api_docs_created": ["docs/src/pages/api/package/method.mdx"],
-  "examples_created": ["docs/src/examples/category/example/"],
-  "user_guides_updated": ["docs/src/pages/category/guide.mdx"],
-  "cross_references_added": ["internal links and navigation"]
-}
-```
-
-### Handoff Context for Next Agents
-```javascript
-{
-  "for_integration_agent": {
-    "documentation_dependencies": ["docs that depend on other packages"],
-    "integration_examples_needed": ["cross-package scenarios to document"]
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["docs/src/pages/api/query/data.mdx"],
+    "files_created": ["docs/src/examples/query/data-management/", "docs/src/pages/guide/data-handling.mdx"],
+    "files_deleted": [],
+    "summary": "Created comprehensive documentation for Query.data() method with working examples"
   },
-  "for_releasing_agent": {
-    "documentation_changes": ["docs that need version updates"],
-    "migration_docs_needed": ["breaking changes requiring documentation"]
+  "handoff_context": {
+    "for_next_agent": "Documentation includes API reference, practical examples, and integration guidance",
+    "concerns": ["Advanced usage patterns may need additional examples"],
+    "recommendations": ["Consider adding video tutorial for complex scenarios"],
+    "api_docs_created": ["docs/src/pages/api/query/data.mdx"],
+    "examples_created": ["docs/src/examples/query/data-management/"],
+    "user_guides_updated": ["docs/src/pages/guide/data-handling.mdx"],
+    "cross_references_added": ["links between API docs and examples"],
+    "for_integration_agent": {
+      "documentation_dependencies": ["component data binding examples"],
+      "integration_examples_needed": ["cross-package data flow scenarios"]
+    },
+    "for_releasing_agent": {
+      "documentation_changes": ["new API method documentation"],
+      "migration_docs_needed": []
+    },
+    "for_testing_agent": {
+      "example_test_coverage": ["all documented examples need automated testing"],
+      "documentation_testing": ["API accuracy verification against implementation"]
+    }
   },
-  "for_testing_agent": {
-    "example_test_coverage": ["examples that need automated testing"],
-    "documentation_testing": ["docs accuracy verification needed"]
-  }
+  "questions": []
 }
 ```
 

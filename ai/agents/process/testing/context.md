@@ -192,60 +192,73 @@ describe('methodName', () => {
 - [ ] Edge cases are documented in test descriptions
 - [ ] Performance expectations are documented
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### For COMPLETED Work
+### Complete Response Structure with Testing-Specific Fields
 ```javascript
 {
   "status": "complete",
   "deliverables": {
     "files_changed": ["packages/query/test/dom/query.test.js"],
     "files_created": [],
+    "files_deleted": [],
     "summary": "Added comprehensive tests covering all usage patterns and edge cases"
   },
   "handoff_context": {
-    "for_next_agent": {
-      "overloads_needed": ["getter without params", "getter with key", "setter with key+value"],
-      "return_type_patterns": "single element returns value, multiple returns array",
-      "parameter_validation": ["key must be string", "value can be any type"],
-      "edge_case_types": ["empty selection returns undefined", "chaining returns Query instance"],
-      "test_scenarios_to_type": ["complex overload interactions", "error conditions"]
-    },
-    "concerns": ["type complexity may impact performance", "overload patterns are complex"],
-    "recommendations": ["focus on practical usage patterns in type definitions"]
+    "for_next_agent": "Tests cover basic functionality, edge cases, and performance characteristics",
+    "concerns": ["Async behavior patterns may need additional utilities for reliable testing"],
+    "recommendations": ["Focus on practical usage patterns in type definitions"],
+    "overloads_needed": ["getter without params", "getter with key", "setter with key+value"],
+    "return_type_patterns": "single element returns value, multiple returns array",
+    "parameter_validation": ["key must be string", "value can be any type"],
+    "edge_case_types": ["empty selection returns undefined", "chaining returns Query instance"],
+    "test_scenarios_to_type": ["complex overload interactions", "error conditions"],
+    "test_coverage_areas": ["basic functionality", "edge cases", "error conditions", "performance"],
+    "performance_benchmarks": "established for DOM access patterns"
   },
-  "questions_about_previous_work": [
+  "questions": [
     {
-      "about": "implementation",
-      "question": "Can the return value pattern be simplified to improve TypeScript typing?"
+      "for_agent": "component_implementation_agent",
+      "question": "Can the return value pattern be simplified to improve TypeScript typing?",
+      "type": "free_form",
+      "context": "Current pattern creates complex overload scenarios that are difficult to test comprehensively"
     }
   ]
 }
 ```
 
-### For BLOCKED Work (Example)
+### Blocked Work Example with Testing-Specific Structure
 ```javascript
 {
-  "status": "blocked", 
-  "reason": "Implementation has untestable race conditions in async behavior",
-  "escalation_request": {
-    "question": "Should testing requirements override implementation approach?",
-    "options": [
-      "Modify implementation to be more testable",
-      "Accept limited test coverage for this async pattern",
-      "Add test utilities to handle async patterns"
-    ],
-    "blocking_issue": "Async DOM updates cannot be reliably tested with current patterns",
-    "agent_recommendation": "Add test utilities to handle async patterns",
-    "impact_of_options": {
-      "option_1": "Better testability but may change intended behavior",
-      "option_2": "Maintains implementation but reduces test confidence"
-    }
+  "status": "blocked",
+  "deliverables": {
+    "files_changed": [],
+    "files_created": [],
+    "files_deleted": [],
+    "summary": "Analysis completed, implementation has untestable race conditions"
   },
-  "questions_about_previous_work": [
+  "handoff_context": {
+    "for_next_agent": "Implementation has untestable race conditions in async behavior",
+    "concerns": ["Async DOM updates cannot be reliably tested with current patterns"],
+    "recommendations": ["Need architectural decision on testability vs implementation approach"]
+  },
+  "questions": [
     {
-      "about": "implementation",
-      "question": "Can async DOM updates be made synchronous for testing?"
+      "for_user": true,
+      "question": "Should testing requirements override implementation approach?",
+      "type": "multiple_choice",
+      "options": [
+        "Modify implementation to be more testable",
+        "Accept limited test coverage for this async pattern",
+        "Add test utilities to handle async patterns"
+      ],
+      "context": "Better testability vs maintaining intended behavior"
+    },
+    {
+      "for_agent": "component_implementation_agent",
+      "question": "Can async DOM updates be made synchronous for testing?",
+      "type": "free_form",
+      "context": "Current async patterns make it difficult to write reliable tests"
     }
   ]
 }

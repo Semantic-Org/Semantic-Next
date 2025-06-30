@@ -34,8 +34,7 @@ Agents answering questions return a simplified JSON structure:
 {
   "mode": "question_answer",
   "answer": {
-    "selected": "For multiple_choice: the exact option text chosen",
-    "value": "For yes_no: 'yes' or 'no', for free_form: the text answer",
+    "selected": "The exact option text chosen (for multiple_choice)",
     "rationale": "Explanation for the choice based on expertise"
   },
   "additional_recommendations": [
@@ -122,7 +121,7 @@ RELEVANT CONTEXT:
 {
   "mode": "question_answer",
   "answer": {
-    "value": "yes|no",
+    "selected": "yes|no",
     "rationale": "[The rationale for this yes/no choice]"
   },
   "additional_recommendations": [
@@ -155,7 +154,7 @@ RELEVANT CONTEXT:
 {
   "mode": "question_answer", 
   "answer": {
-    "value": "[The free-form answer text]",
+    "selected": "[The free-form answer text]",
     "rationale": "[The rationale for this approach/answer]"
   },
   "additional_recommendations": [

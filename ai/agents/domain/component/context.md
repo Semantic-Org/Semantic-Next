@@ -154,31 +154,37 @@ defineComponent({
 - [ ] Consistent with framework architectural principles
 - [ ] Follows semantic-ui naming and organization conventions
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### Implementation Files
+### Complete Response Structure with Component-Specific Fields
 ```javascript
 {
-  "files_created": ["component.js", "component.html", "component.css"],
-  "component_registered": "custom-element-tag-name",
-  "patterns_used": ["settings/state separation", "lifecycle hooks", "shadow DOM"],
-  "integrations": ["reactivity system", "template compiler", "event system"]
-}
-```
-
-### Handoff Context for Next Agents
-```javascript
-{
-  "for_testing_agent": {
-    "test_scenarios": ["component creation", "lifecycle events", "reactivity", "settings changes"],
-    "integration_tests": ["parent-child communication", "event handling", "DOM cleanup"],
-    "performance_tests": ["memory usage", "reaction cleanup", "template efficiency"]
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["src/components/existing-component.js"],
+    "files_created": ["component.js", "component.html", "component.css"],
+    "files_deleted": [],
+    "summary": "Implemented new component with Shadow DOM and reactive state",
+    "component_registered": "custom-element-tag-name",
+    "patterns_used": ["settings/state separation", "lifecycle hooks", "shadow DOM"],
+    "integrations": ["reactivity system", "template compiler", "event system"]
   },
-  "for_types_agent": {
-    "component_interface": "public methods and properties",
-    "settings_types": "configuration object schema",
-    "state_types": "internal reactive state schema"
-  }
+  "handoff_context": {
+    "for_next_agent": "Component uses defineComponent() with settings/state separation",
+    "concerns": ["Complex state management may need performance testing"],
+    "recommendations": ["Test memory cleanup in onDestroyed lifecycle"],
+    "for_testing_agent": {
+      "test_scenarios": ["component creation", "lifecycle events", "reactivity", "settings changes"],
+      "integration_tests": ["parent-child communication", "event handling", "DOM cleanup"],
+      "performance_tests": ["memory usage", "reaction cleanup", "template efficiency"]
+    },
+    "for_types_agent": {
+      "component_interface": "public methods and properties",
+      "settings_types": "configuration object schema",
+      "state_types": "internal reactive state schema"
+    }
+  },
+  "questions": []
 }
 ```
 

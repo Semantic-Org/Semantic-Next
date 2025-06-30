@@ -204,30 +204,37 @@ git commit -m "fix(component): resolve memory leak in lifecycle cleanup
 - [ ] Dependencies updated appropriately
 - [ ] Release timing coordinated with team
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### Release Preparation
+### Complete Response Structure with Releasing-Specific Fields
 ```javascript
 {
-  "version_impact": "patch|minor|major",
-  "branch_created": "feat/new-feature-name", 
-  "commits_prepared": ["conventional commit messages"],
-  "release_notes_entry": "formatted release notes content",
-  "breaking_changes": ["list of breaking changes with migration"]
-}
-```
-
-### Handoff Context for Next Agents
-```javascript
-{
-  "for_integration_agent": {
-    "release_branch": "branch ready for final integration testing",
-    "version_compatibility": "compatibility requirements for release"
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["CHANGELOG.md", "package.json"],
+    "files_created": ["releases/v2.1.0-notes.md"],
+    "files_deleted": [],
+    "summary": "Prepared v2.1.0 release with feature branch and conventional commit messages"
   },
-  "for_build_tools_agent": {
-    "build_requirements": "any build changes needed for release",
-    "deployment_considerations": "release deployment requirements"
-  }
+  "handoff_context": {
+    "for_next_agent": "Release v2.1.0 prepared with proper versioning and documentation",
+    "concerns": ["Large feature set may need extended testing period"],
+    "recommendations": ["Consider beta release for user feedback"],
+    "version_impact": "minor",
+    "branch_created": "feat/new-query-methods",
+    "commits_prepared": ["feat(query): add data() method with reactive updates", "feat(query): add closest() traversal method"],
+    "release_notes_entry": "Added Query.data() and Query.closest() methods for enhanced DOM manipulation",
+    "breaking_changes": [],
+    "for_integration_agent": {
+      "release_branch": "feat/new-query-methods",
+      "version_compatibility": "backwards compatible minor version"
+    },
+    "for_build_tools_agent": {
+      "build_requirements": "standard build process",
+      "deployment_considerations": "standard npm release"
+    }
+  },
+  "questions": []
 }
 ```
 

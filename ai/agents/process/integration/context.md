@@ -176,31 +176,38 @@ describe('Reactivity + All Packages', () => {
 - [ ] Compatibility matrix is maintained and up-to-date
 - [ ] Integration testing is automated and comprehensive
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### Integration Assessment
+### Complete Response Structure with Integration-Specific Fields
 ```javascript
 {
-  "integration_status": "compatible|breaking|needs_migration",
-  "affected_packages": ["list of packages impacted"],
-  "breaking_changes": ["list of breaking changes"],
-  "migration_required": ["migration steps needed"],
-  "test_coverage": ["integration scenarios tested"]
-}
-```
-
-### Handoff Context for Next Agents
-```javascript
-{
-  "for_releasing_agent": {
-    "version_impact": "patch|minor|major",
-    "breaking_changes": ["list for release notes"],
-    "migration_guides_needed": ["areas requiring migration docs"]
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["packages/integration/test/cross-package.test.js"],
+    "files_created": ["docs/integration/package-compatibility.md"],
+    "files_deleted": [],
+    "summary": "Verified cross-package compatibility and documented integration patterns"
   },
-  "for_build_tools_agent": {
-    "build_changes_required": ["build process modifications needed"],
-    "integration_test_setup": ["CI/CD changes for integration testing"]
-  }
+  "handoff_context": {
+    "for_next_agent": "All packages integrate smoothly with no breaking changes detected",
+    "concerns": ["Performance impact of cross-package reactivity needs monitoring"],
+    "recommendations": ["Add automated integration testing to CI pipeline"],
+    "integration_status": "compatible",
+    "affected_packages": ["component", "query", "reactivity"],
+    "breaking_changes": [],
+    "migration_required": [],
+    "test_coverage": ["cross-package component communication", "shared state management"],
+    "for_releasing_agent": {
+      "version_impact": "patch",
+      "breaking_changes": [],
+      "migration_guides_needed": []
+    },
+    "for_build_tools_agent": {
+      "build_changes_required": ["add integration test step"],
+      "integration_test_setup": ["CI/CD changes for integration testing"]
+    }
+  },
+  "questions": []
 }
 ```
 

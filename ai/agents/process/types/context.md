@@ -164,33 +164,36 @@ export type ComponentMethod<T> = (this: T, ...args: any[]) => any;
 - [ ] Type changes don't break existing code
 - [ ] Types can be tested and validated
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### Type Implementation
-```typescript
-{
-  "type_files_created": ["package/types/file.d.ts"],
-  "overloads_added": ["method signatures with overloads"],
-  "generic_patterns": ["reusable type patterns"],
-  "compatibility": "TypeScript version requirements"
-}
-```
-
-### Handoff Context for Next Agents
+### Complete Response Structure with Types-Specific Fields
 ```javascript
 {
-  "for_documentation_agent": {
-    "type_examples_needed": ["complex types requiring examples"],
-    "api_documentation_types": ["types to include in API docs"]
+  "status": "complete",
+  "deliverables": {
+    "files_changed": ["packages/query/types/index.d.ts"],
+    "files_created": ["packages/query/types/overloads.d.ts"],
+    "files_deleted": [],
+    "summary": "Added TypeScript definitions with method overloads for better developer experience"
   },
-  "for_integration_agent": {
-    "cross_package_types": ["types that span multiple packages"],
-    "breaking_changes": ["any type changes that affect compatibility"]
+  "handoff_context": {
+    "for_next_agent": "Types provide comprehensive overloads for getter/setter patterns",
+    "concerns": ["Complex overload scenarios may need runtime validation"],
+    "recommendations": ["Focus on practical usage patterns in documentation"],
+    "for_documentation_agent": {
+      "type_examples_needed": ["complex types requiring examples"],
+      "api_documentation_types": ["types to include in API docs"]
+    },
+    "for_integration_agent": {
+      "cross_package_types": ["types that span multiple packages"],
+      "breaking_changes": ["any type changes that affect compatibility"]
+    },
+    "for_testing_agent": {
+      "type_test_requirements": ["types that need runtime validation"],
+      "edge_case_types": ["complex type scenarios to test"]
+    }
   },
-  "for_testing_agent": {
-    "type_test_requirements": ["types that need runtime validation"],
-    "edge_case_types": ["complex type scenarios to test"]
-  }
+  "questions": []
 }
 ```
 

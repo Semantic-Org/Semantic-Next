@@ -130,15 +130,23 @@ Always use LS tool to discover available agents:
 LS ai/agents
 ```
 
-Read agent role.md files to understand capabilities:
+Read agent role.md files to understand capabilities and get their canonical identifiers:
 ```
 Read ai/agents/domain/[agent]/role.md
 Read ai/agents/process/[agent]/role.md
 ```
 
+Each role.md file contains the agent's canonical identifier used in Task tool invocation.
+
 ## Task Tool Invocation
 
+**IMPORTANT**: All Task tool prompts must follow the canonical formats defined in:
+- `ai/agents/input-spec.md` - For workflow tasks
+- `ai/agents/question-answering-spec.md` - For question routing
+
 ### Primary Workflow Task
+
+Construct prompts using the exact format from input-spec.md:
 
 ```javascript
 Task({
@@ -150,31 +158,32 @@ CURRENT TASK:
 [Specific task description]
 
 ACCUMULATED CONTEXT:
-[JSON object with previous agent outputs]
+${JSON.stringify(accumulatedContext, null, 2)}
 
 ANSWERED QUESTIONS:
-[Array of resolved questions with answers]
+${JSON.stringify(answeredQuestions, null, 2)}
 
 WORKFLOW STATUS:
 - Overall Goal: [High-level objective]
 - Progress: [Current status]
 - Blocking Issues: [Any issues]
-- Next Steps: [What comes after this agent]
-
-MANDATORY STEPS:
-1. Read your context: ai/agents/[domain|process]/[agent]/context.md
-2. Read output spec: ai/agents/output-spec.md
-3. Execute task following both specifications
-
-Begin your specialized work now.`
+- Next Steps: [What comes after this agent]`
 })
 ```
 
+**Key Requirements:**
+- Use `JSON.stringify()` for ACCUMULATED CONTEXT and ANSWERED QUESTIONS
+- Follow exact section headers from input-spec.md
+- Include WORKFLOW POSITION to help agent understand sequence
+- Agent will load their own context.md and output-spec.md per input-spec instructions
+
 ### Question Answering Task
+
+Construct prompts using the exact format from question-answering-spec.md:
 
 ```javascript
 Task({
-  description: "[Agent type] question response",
+  description: "[Agent type] question response", 
   prompt: `AGENT ROLE: [agent_identifier]
 MODE: QUESTION_ANSWERING
 
@@ -182,7 +191,7 @@ QUESTION FROM: [asking_agent_identifier]
 
 Question: [The question text]
 Type: [multiple_choice|yes_no|free_form]
-Options: [For multiple_choice only]
+Options:
 1. [Option 1]
 2. [Option 2]
 3. [Option 3]
@@ -191,16 +200,15 @@ Options: [For multiple_choice only]
 Question Context: [Context from asking agent]
 
 RELEVANT CONTEXT:
-[Orchestrator-curated context for answering this question]
-
-MANDATORY STEPS:
-1. Read your context: ai/agents/[domain|process]/[agent]/context.md
-2. Read question format: ai/agents/question-answering-spec.md
-3. Answer the question based on your specialized expertise
-
-Provide your answer now.`
+[Orchestrator-curated context for answering this question]`
 })
 ```
+
+**Key Requirements:**
+- Use exact section headers from question-answering-spec.md
+- Include MODE: QUESTION_ANSWERING to distinguish from workflow tasks
+- Curate RELEVANT CONTEXT - only include what's needed for the specific question
+- Agent will load their own context.md and question-answering-spec.md per spec instructions
 
 ## Context Accumulation
 
@@ -253,16 +261,9 @@ answeredQuestions.push({
 });
 ```
 
-## Agent Identifiers
+## Agent Discovery
 
-Valid agent_identifier values:
-- component_implementation_agent
-- query_implementation_agent  
-- testing_agent
-- types_agent
-- documentation_agent
-- integration_agent
-- releasing_agent
+Agents are discovered by reading their role.md files, which contain the canonical agent identifier.
 
 ## Common Workflows
 

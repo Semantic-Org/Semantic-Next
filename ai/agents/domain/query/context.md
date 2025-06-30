@@ -188,52 +188,60 @@ if (!isString(key)) {
 - Test performance with large element collections
 - Validate Shadow DOM traversal behavior
 
-## Expected Deliverables
+## Domain-Specific Output Examples
 
-### For COMPLETED Work
+### Complete Response Structure with Query-Specific Fields
 ```javascript
 {
   "status": "complete",
   "deliverables": {
     "files_changed": ["packages/query/src/query.js"],
     "files_created": [],
+    "files_deleted": [],
     "summary": "Added methodName() with getter/setter pattern following Query conventions"
   },
   "handoff_context": {
-    "for_next_agent": {
-      "method_signature": "methodName(key?, value?)",
-      "test_scenarios_needed": ["empty selection", "single vs multiple elements", "parameter validation"],
-      "edge_cases_to_test": ["null/undefined values", "invalid parameters", "large collections"],
-      "performance_considerations": ["DOM access patterns", "Shadow DOM traversal"],
-      "patterns_used": ["chaining", "single/multiple returns", "semantic-ui utils"]
-    },
-    "concerns": ["any implementation compromises or limitations"],
-    "recommendations": ["suggestions for testing approach"]
+    "for_next_agent": "Method follows Query chaining patterns with single/multiple element handling",
+    "concerns": ["Performance with large element collections needs verification"],
+    "recommendations": ["Test with both $ and $$ query contexts"],
+    "method_signature": "methodName(key?, value?)",
+    "test_scenarios_needed": ["empty selection", "single vs multiple elements", "parameter validation"],
+    "edge_cases_to_test": ["null/undefined values", "invalid parameters", "large collections"],
+    "performance_considerations": ["DOM access patterns", "Shadow DOM traversal"],
+    "patterns_used": ["chaining", "single/multiple returns", "semantic-ui utils"]
   },
-  "questions_about_previous_work": []
+  "questions": []
 }
 ```
 
-### For BLOCKED Work (Example)
+### Blocked Work Example with Question Structure
 ```javascript
 {
   "status": "blocked",
-  "reason": "Method signature conflicts with existing Query patterns",
-  "escalation_request": {
-    "question": "Should I prioritize consistency with existing patterns or the new requirement?",
-    "options": [
-      "Modify signature to match existing Query conventions",
-      "Keep new signature and update documentation", 
-      "Create alternative method name"
-    ],
-    "blocking_issue": "Requested signature breaks Query chaining expectations",
-    "agent_recommendation": "Modify signature to match existing conventions",
-    "impact_of_options": {
-      "option_1": "Maintains framework consistency, may not meet exact requirements",
-      "option_2": "Meets requirements but creates inconsistent API"
-    }
+  "deliverables": {
+    "files_changed": [],
+    "files_created": [],
+    "files_deleted": [],
+    "summary": "Analysis completed, cannot proceed due to pattern conflict"
   },
-  "questions_about_previous_work": []
+  "handoff_context": {
+    "for_next_agent": "Method signature conflicts with existing Query patterns",
+    "concerns": ["Requested signature breaks Query chaining expectations"],
+    "recommendations": ["Need architectural decision on API consistency vs requirements"]
+  },
+  "questions": [
+    {
+      "for_user": true,
+      "question": "Should I prioritize consistency with existing patterns or the new requirement?",
+      "type": "multiple_choice",
+      "options": [
+        "Modify signature to match existing Query conventions",
+        "Keep new signature and update documentation", 
+        "Create alternative method name"
+      ],
+      "context": "Maintains framework consistency vs meeting exact requirements"
+    }
+  ]
 }
 ```
 
