@@ -161,6 +161,32 @@ Each role.md file contains the agent's canonical identifier used in Task tool in
 - Set description to: "[Task summary] ([agent_identifier])" - e.g. "Add contains to query (query_implementation_agent)"
 - Agent will load their own context.md and output-spec.md per input-spec instructions
 
+**Parallelization Strategy:**
+- **Safe to parallelize** when agents only depend on the same accumulated context and not each other
+- **Avoid parallelizing** if one agent's output would be valuable context for another
+- **Example:** types_agent and documentation_agent can run parallel after implementation+testing complete
+- **Use multiple Task calls in single response** for parallel execution
+
+**Post-Task Validation:**
+- **MANDATORY:** After each Task completion, validate agent deliverables by reading claimed modified files
+- **Check git diff** to verify actual changes match reported changes  
+- **Sanity check changes** against claimed deliverables using "smell test":
+  - Verify that actual file changes align with the agent's claimed accomplishments
+  - Check if the scope and nature of changes match the assigned task
+  - Flag cases where changes appear minimal, unrelated, or excessive compared to claims
+  - Use domain knowledge to assess if changes would reasonably achieve stated goals
+- **Report discrepancies** to user if agent modified unexpected files or claimed false modifications
+- **Flag scope violations** if agent modified files outside their domain
+- **This prevents agent misbehavior and ensures deliverable accuracy**
+
+**Session Logging:**
+- **MANDATORY:** After each Task completion, append the complete agent JSON output to `ai/agents/current-session.md`
+- **Follow the exact format shown in `ai/agents/session/example.md`**
+- **Use the actual JSON returned by each agent - no reformatting needed**
+- **Add validation status and any issues discovered**
+- **This enables perfect session recovery using real agent outputs**
+- **Clear the session file at the start of new workflows**
+
 ### Question Answering Task
 
 Construct prompts using the exact format from question-answering-spec.md:
