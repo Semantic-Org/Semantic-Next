@@ -8,6 +8,10 @@ Agents receive their input as a structured prompt containing:
 
 ```
 AGENT ROLE: [Agent Name]
+MANDATORY: DO NOT PROCEED until you Read:
+- ai/agents/shared-context.md
+- ai/agents/[domain|process]/[agent_name]/context.md 
+- Complete ALL mandatory context loading instructions listed there
 WORKFLOW POSITION: [Position in sequence, e.g., "3 of 5"]
 
 CURRENT TASK:
@@ -191,6 +195,10 @@ When an agent is invoked to answer a question (not perform a workflow task), the
 
 ```
 AGENT ROLE: testing_agent
+MANDATORY: DO NOT PROCEED until you Read:
+- ai/agents/shared-context.md
+- ai/agents/process/testing/context.md 
+- Complete ALL mandatory context loading instructions listed there
 WORKFLOW POSITION: 3 of 6 (after query_implementation_agent, before types_agent)
 
 CURRENT TASK:

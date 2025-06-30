@@ -151,35 +151,14 @@ Each role.md file contains the agent's canonical identifier used in Task tool in
 
 ### Primary Workflow Task
 
-Construct prompts using the exact format from input-spec.md:
-
-```javascript
-Task({
-  description: "[Agent type] work",
-  prompt: `AGENT ROLE: [agent_identifier]
-WORKFLOW POSITION: [X of Y] (after [previous_agent], before [next_agent])
-
-CURRENT TASK:
-[Specific task description]
-
-ACCUMULATED CONTEXT:
-${JSON.stringify(accumulatedContext, null, 2)}
-
-ANSWERED QUESTIONS:
-${JSON.stringify(answeredQuestions, null, 2)}
-
-WORKFLOW STATUS:
-- Overall Goal: [High-level objective]
-- Progress: [Current status]
-- Blocking Issues: [Any issues]
-- Next Steps: [What comes after this agent]`
-})
-```
+**IMPORTANT:** All Task tool invocations must follow the exact format specified in `ai/agents/input-spec.md`.
 
 **Key Requirements:**
-- Use `JSON.stringify()` for ACCUMULATED CONTEXT and ANSWERED QUESTIONS
-- Follow exact section headers from input-spec.md
-- Include WORKFLOW POSITION to help agent understand sequence
+- Use the canonical input structure from input-spec.md
+- Include the MANDATORY context loading instruction
+- Format ACCUMULATED CONTEXT and ANSWERED QUESTIONS as JSON objects
+- Fill in agent-specific paths for context loading
+- Set description to: "[Task summary] ([agent_identifier])" - e.g. "Add contains to query (query_implementation_agent)"
 - Agent will load their own context.md and output-spec.md per input-spec instructions
 
 ### Question Answering Task
