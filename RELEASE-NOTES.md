@@ -13,6 +13,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `.slice()` for returning a portion of the element collection
 * **Feature** - Added `closestAll()` for finding all ancestor elements matching a selector
 * **Feature** - Added `before()` and `after()` aliases for more intuitive content insertion
+* **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support
 * **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
 * **Bug** - `setting()` can now be used as a getter.

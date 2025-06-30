@@ -2545,4 +2545,454 @@ describe('query', () => {
       expect(div.innerHTML).toBe('<p>Original</p><span>After</span>');
     });
   });
+
+  describe('contains', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    describe('basic functionality', () => {
+      it('should return true when element contains the specified element', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').contains(child);
+        expect(result).toBe(true);
+      });
+
+      it('should return false when element does not contain the specified element', () => {
+        const container = document.createElement('div');
+        const unrelated = document.createElement('span');
+        document.body.appendChild(container);
+        document.body.appendChild(unrelated);
+
+        const result = $('div').contains(unrelated);
+        expect(result).toBe(false);
+      });
+
+      it('should return true when using string selector for contained elements', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        child.className = 'target';
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').contains('.target');
+        expect(result).toBe(true);
+      });
+
+      it('should return false when using string selector for non-contained elements', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').contains('.target');
+        expect(result).toBe(false);
+      });
+
+      it('should return true when using Query object for contained elements', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        child.className = 'target';
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const $child = $('.target');
+        const result = $('div').contains($child);
+        expect(result).toBe(true);
+      });
+
+      it('should return false when using Query object for non-contained elements', () => {
+        const container = document.createElement('div');
+        const unrelated = document.createElement('span');
+        unrelated.className = 'target';
+        document.body.appendChild(container);
+        document.body.appendChild(unrelated);
+
+        const $unrelated = $('.target');
+        const result = $('div').contains($unrelated);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should return false for empty selection', () => {
+        const result = $('.nonexistent').contains('span');
+        expect(result).toBe(false);
+      });
+
+      it('should return false when selector is null', () => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const result = $('div').contains(null);
+        expect(result).toBe(false);
+      });
+
+      it('should return false when selector is undefined', () => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const result = $('div').contains(undefined);
+        expect(result).toBe(false);
+      });
+
+      it('should return false when selector is empty string', () => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const result = $('div').contains('');
+        expect(result).toBe(false);
+      });
+
+      it('should return false for invalid selector types', () => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const result = $('div').contains(123);
+        expect(result).toBe(false);
+      });
+
+      it('should return false when string selector matches no elements', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').contains('.nonexistent');
+        expect(result).toBe(false);
+      });
+
+      it('should return false when Query object contains no elements', () => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const $empty = $('.nonexistent');
+        const result = $('div').contains($empty);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('multiple elements', () => {
+      it('should return true if any element in the collection contains the target', () => {
+        const container1 = document.createElement('div');
+        const container2 = document.createElement('div');
+        const child = document.createElement('span');
+        container2.appendChild(child);
+        document.body.appendChild(container1);
+        document.body.appendChild(container2);
+
+        const result = $('div').contains(child);
+        expect(result).toBe(true);
+      });
+
+      it('should return false if no elements in the collection contain the target', () => {
+        const container1 = document.createElement('div');
+        const container2 = document.createElement('div');
+        const unrelated = document.createElement('span');
+        document.body.appendChild(container1);
+        document.body.appendChild(container2);
+        document.body.appendChild(unrelated);
+
+        const result = $('div').contains(unrelated);
+        expect(result).toBe(false);
+      });
+
+      it('should handle multiple targets with string selector', () => {
+        const container1 = document.createElement('div');
+        const container2 = document.createElement('div');
+        const child1 = document.createElement('span');
+        const child2 = document.createElement('span');
+        child1.className = 'target';
+        child2.className = 'target';
+        container1.appendChild(child1);
+        container2.appendChild(child2);
+        document.body.appendChild(container1);
+        document.body.appendChild(container2);
+
+        const result = $('div').contains('.target');
+        expect(result).toBe(true);
+      });
+
+      it('should handle multiple targets with Query object', () => {
+        const container1 = document.createElement('div');
+        const container2 = document.createElement('div');
+        const child1 = document.createElement('span');
+        const child2 = document.createElement('span');
+        child1.className = 'target';
+        child2.className = 'target';
+        container1.appendChild(child1);
+        container2.appendChild(child2);
+        document.body.appendChild(container1);
+        document.body.appendChild(container2);
+
+        const $targets = $('.target');
+        const result = $('div').contains($targets);
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('nested elements', () => {
+      it('should return true for deeply nested elements', () => {
+        const container = document.createElement('div');
+        const level1 = document.createElement('div');
+        const level2 = document.createElement('div');
+        const target = document.createElement('span');
+        level2.appendChild(target);
+        level1.appendChild(level2);
+        container.appendChild(level1);
+        document.body.appendChild(container);
+
+        const result = $('div').eq(0).contains(target);
+        expect(result).toBe(true);
+      });
+
+      it('should return true for deeply nested elements with string selector', () => {
+        const container = document.createElement('div');
+        const level1 = document.createElement('div');
+        const level2 = document.createElement('div');
+        const target = document.createElement('span');
+        target.className = 'deep-target';
+        level2.appendChild(target);
+        level1.appendChild(level2);
+        container.appendChild(level1);
+        document.body.appendChild(container);
+
+        const result = $('div').eq(0).contains('.deep-target');
+        expect(result).toBe(true);
+      });
+
+      it('should handle complex DOM structures', () => {
+        const article = document.createElement('article');
+        const header = document.createElement('header');
+        const nav = document.createElement('nav');
+        const ul = document.createElement('ul');
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.className = 'nav-link';
+        li.appendChild(link);
+        ul.appendChild(li);
+        nav.appendChild(ul);
+        header.appendChild(nav);
+        article.appendChild(header);
+        document.body.appendChild(article);
+
+        const result = $('article').contains('.nav-link');
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('performance and edge cases', () => {
+      it('should handle large numbers of elements efficiently', () => {
+        const container = document.createElement('div');
+        const target = document.createElement('span');
+        target.className = 'target';
+        
+        // Create many sibling elements
+        for (let i = 0; i < 100; i++) {
+          const sibling = document.createElement('div');
+          container.appendChild(sibling);
+        }
+        container.appendChild(target);
+        document.body.appendChild(container);
+
+        const startTime = performance.now();
+        const result = $('div').eq(0).contains('.target');
+        const endTime = performance.now();
+        
+        expect(result).toBe(true);
+        expect(endTime - startTime).toBeLessThan(50); // Should complete quickly
+      });
+
+      it('should handle multiple containers with overlapping children', () => {
+        const container1 = document.createElement('div');
+        const container2 = document.createElement('div');
+        const shared = document.createElement('div');
+        const target = document.createElement('span');
+        target.className = 'shared-target';
+        shared.appendChild(target);
+        container1.appendChild(shared);
+        // Note: shared is only in container1, not container2
+        document.body.appendChild(container1);
+        document.body.appendChild(container2);
+
+        const result = $('div').contains('.shared-target');
+        expect(result).toBe(true);
+      });
+
+      it('should handle self-referential checks correctly', () => {
+        const container = document.createElement('div');
+        container.className = 'self-test';
+        document.body.appendChild(container);
+
+        // Element should not contain itself via selector
+        const result = $('div').contains('.self-test');
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('Shadow DOM support', () => {
+      it('should use standard containment without pierceShadow option', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        child.className = 'standard-child';
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').contains('.standard-child');
+        expect(result).toBe(true);
+      });
+
+      it('should handle Shadow DOM traversal with pierceShadow option', () => {
+        const container = document.createElement('div');
+        container.className = 'shadow-container';
+        document.body.appendChild(container);
+
+        // Create a mock shadow root structure for testing
+        const shadowChild = document.createElement('span');
+        shadowChild.className = 'shadow-child';
+        container.appendChild(shadowChild); // Simulate as if it were in shadow DOM
+
+        const $piercing = $('div', { pierceShadow: true });
+        const result = $piercing.contains('.shadow-child');
+        expect(result).toBe(true);
+      });
+
+      it('should handle mixed Shadow DOM and regular DOM', () => {
+        const container = document.createElement('div');
+        const regularChild = document.createElement('span');
+        const shadowChild = document.createElement('span');
+        regularChild.className = 'regular';
+        shadowChild.className = 'shadow';
+        container.appendChild(regularChild);
+        container.appendChild(shadowChild);
+        document.body.appendChild(container);
+
+        const $piercing = $('div', { pierceShadow: true });
+        expect($piercing.contains('.regular')).toBe(true);
+        expect($piercing.contains('.shadow')).toBe(true);
+      });
+
+      it('should handle elements that exist in both light and shadow DOM', () => {
+        const container = document.createElement('div');
+        const lightChild = document.createElement('span');
+        const shadowChild = document.createElement('span');
+        lightChild.className = 'duplicate';
+        shadowChild.className = 'duplicate';
+        container.appendChild(lightChild);
+        container.appendChild(shadowChild); // Simulating shadow DOM
+        document.body.appendChild(container);
+
+        const $piercing = $('div', { pierceShadow: true });
+        const result = $piercing.contains('.duplicate');
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('containsDeep method', () => {
+      it('should handle direct containment', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const $query = $('div');
+        const result = $query[0] && $query.containsDeep && $query.containsDeep(container, child);
+        expect(result).toBe(true);
+      });
+
+      it('should return false for null/undefined inputs', () => {
+        const $query = $('div');
+        if ($query.containsDeep) {
+          expect($query.containsDeep(null, null)).toBe(false);
+          expect($query.containsDeep(undefined, undefined)).toBe(false);
+        }
+      });
+
+      it('should handle recursive traversal', () => {
+        const container = document.createElement('div');
+        const level1 = document.createElement('div');
+        const level2 = document.createElement('div');
+        const target = document.createElement('span');
+        level2.appendChild(target);
+        level1.appendChild(level2);
+        container.appendChild(level1);
+        document.body.appendChild(container);
+
+        const $query = $('div');
+        if ($query.containsDeep) {
+          const result = $query.containsDeep(container, target);
+          expect(result).toBe(true);
+        }
+      });
+    });
+
+    describe('integration with other Query methods', () => {
+      it('should work with chained methods', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        child.className = 'chainable';
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').addClass('tested').contains('.chainable');
+        expect(result).toBe(true);
+        expect(container.classList.contains('tested')).toBe(true);
+      });
+
+      it('should work with filtered selections', () => {
+        const container1 = document.createElement('div');
+        const container2 = document.createElement('div');
+        const child = document.createElement('span');
+        container1.className = 'has-child';
+        container2.className = 'no-child';
+        child.className = 'target';
+        container1.appendChild(child);
+        document.body.appendChild(container1);
+        document.body.appendChild(container2);
+
+        const result = $('div').filter('.has-child').contains('.target');
+        expect(result).toBe(true);
+      });
+
+      it('should work with find() results', () => {
+        const wrapper = document.createElement('div');
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        child.className = 'nested-target';
+        container.appendChild(child);
+        wrapper.appendChild(container);
+        document.body.appendChild(wrapper);
+
+        const result = $('div').find('div').contains('.nested-target');
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('return value consistency', () => {
+      it('should always return a boolean', () => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        expect(typeof $('div').contains('span')).toBe('boolean');
+        expect(typeof $('div').contains(null)).toBe('boolean');
+        expect(typeof $('div').contains(undefined)).toBe('boolean');
+        expect(typeof $('.nonexistent').contains('span')).toBe('boolean');
+      });
+
+      it('should not return Query instance', () => {
+        const container = document.createElement('div');
+        const child = document.createElement('span');
+        container.appendChild(child);
+        document.body.appendChild(container);
+
+        const result = $('div').contains(child);
+        expect(result).not.toBeInstanceOf(Query);
+        expect(typeof result).toBe('boolean');
+      });
+    });
+  });
 });

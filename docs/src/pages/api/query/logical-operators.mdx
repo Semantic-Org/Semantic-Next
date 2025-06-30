@@ -78,3 +78,69 @@ $('div').not('.ignore').addClass('highlight');
 ```
 
 > **Inverse Selection** `not()` is particularly useful for excluding specific elements from a larger set based on various criteria.
+
+## contains
+
+Checks if any element in the current set contains the specified target element or elements matching a selector.
+
+### Syntax
+
+#### Check by CSS Selector
+```javascript
+$('selector').contains(selectorString)
+```
+
+#### Check by Element Reference
+```javascript
+$('selector').contains(element)
+```
+
+#### Check by Query Object
+```javascript
+$('selector').contains(queryObject)
+```
+
+### Parameters
+| Name     | Type               | Description                      |
+|----------|--------------------|----------------------------------|
+| selector | String &#124; Element &#124; Query | A CSS selector string, DOM element, or Query object to check for containment |
+
+### Returns
+`boolean` - `true` if any element in the set contains the specified target, `false` otherwise.
+
+### Usage
+
+#### String Selector
+```javascript
+// Check if a container has elements matching a selector
+if ($('.container').contains('.highlight')) {
+  console.log('Container has highlighted elements');
+}
+
+```
+
+#### Element Reference
+```javascript
+// Check if a specific element is contained
+const button = document.querySelector('button');
+if ($('.toolbar').contains(button)) {
+  console.log('Button is inside the toolbar');
+}
+```
+
+#### Query Object
+```javascript
+// Check if any selected elements are contained
+const $inputs = $('input[required]');
+if ($('form').contains($inputs)) {
+  console.log('Form contains required inputs');
+}
+```
+
+#### Shadow DOM
+
+```javascript
+// check if element is in web component
+const result = $$('web-component').contains('.shadow-element');
+```
+
