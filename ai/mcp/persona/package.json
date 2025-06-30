@@ -1,12 +1,12 @@
 {
-  "name": "semantic-ui-agents-mcp",
+  "name": "semantic-ui-persona-mcp",
   "version": "1.0.0",
   "type": "module",
   "description": "MCP server for Semantic UI specialized agents",
-  "main": "agents-server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node agents-server.js",
-    "dev": "node --watch agents-server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0"

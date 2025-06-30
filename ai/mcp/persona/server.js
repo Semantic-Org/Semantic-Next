@@ -2,12 +2,18 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema
+} from '@modelcontextprotocol/sdk/types.js';
+
 import { spawn } from 'child_process';
 import { readFile } from 'fs/promises';
 
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -15,11 +21,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../..');
 
-class SemanticUIAgentsServer {
+class PersonaServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'semantic-ui-agents',
+        name: 'sui-persona',
         version: '1.0.0',
       },
       {
@@ -510,5 +516,5 @@ Begin your specialized work now.`;
   }
 }
 
-const server = new SemanticUIAgentsServer();
+const server = new PersonaServer();
 server.run().catch(console.error);

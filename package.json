@@ -238,7 +238,7 @@
     "packages/*",
     "docs/*",
     "examples/*",
-    "ai/mcp"
+    "ai/mcp/*"
   ],
   "simple-git-hooks": {
     "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"

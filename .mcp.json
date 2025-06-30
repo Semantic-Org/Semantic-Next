@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "sui": {
+    "sui-persona": {
       "command": "node",
-      "args": ["/home/jack/semantic/next/ai/mcp/agents-server.js"],
+      "args": ["/home/jack/semantic/next/ai/mcp/persona/server.js"],
       "env": {}
     }
   }
