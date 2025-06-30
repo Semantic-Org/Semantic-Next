@@ -8,9 +8,14 @@
       "Write(packages/reactivity/test/**)",
       "MultiEdit(packages/reactivity/src/**)",
       "MultiEdit(packages/reactivity/test/**)",
+      "Read(docs/src/examples/reactivity/**)",
+      "Edit(docs/src/examples/reactivity/**)",
+      "Write(docs/src/examples/reactivity/**)",
+      "MultiEdit(docs/src/examples/reactivity/**)",
       "Read(docs/src/pages/api/reactivity/**)",
       "Read(docs/src/pages/reactivity/**)",
-      "Read(ai/packages/reactivity.md)"
+      "Read(ai/packages/reactivity.md)",
+      "Read(ai/specialized/reactivity-system-guide.md)"
     ],
     "deny": [],
     "additionalDirectories": [],
