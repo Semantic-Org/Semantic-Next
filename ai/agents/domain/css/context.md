@@ -23,9 +23,11 @@
 3. `ai/foundations/mental-model.md`
 
 ### CSS-Specific Context (MANDATORY)
-**Read these guides before any CSS work:**
-1. **`ai/guides/css-guide.md`** - Complete CSS patterns, rules, and token system
-2. **`ai/guides/html-css-style-guide.md`** - HTML/CSS conventions and anti-patterns
+**Read these canonical guides before any CSS work:**
+1. **`ai/guides/html-guide.md`** - Semantic markup patterns and class naming
+2. **`ai/guides/css-guide.md`** - CSS architecture, nesting, and responsive design
+3. **`ai/guides/css-token-guide.md`** - Design token system and verification workflow
+4. **`ai/guides/primitive-usage-guide.md`** - Using existing primitives and composition patterns
 
 ### Token System Discovery
 **Use Read tool to examine:**
