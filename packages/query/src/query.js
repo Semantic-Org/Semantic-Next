@@ -40,6 +40,12 @@ export class Query {
   */
   static eventHandlers = [];
 
+  /*
+    We keep an array to store registered plugins
+    This allows an end user to see available extensions
+  */
+  static plugins = new Map();
+
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
 
@@ -340,29 +346,66 @@ export class Query {
     return this.chain(filteredElements);
   }
 
-  closest(selector) {
-    const closest = Array.from(this).map((el) => {
+  closest(selector, { returnAll = false } = {}) {
+    const allResults = [];
+    
+    Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
-        return this.closestDeep(el, selector);
+        const matches = this.closestDeep(el, selector, { returnAll });
+        if (returnAll) {
+          allResults.push(...matches);
+        } else if (matches) {
+          allResults.push(matches);
+        }
       }
       else if (selector && el?.closest) {
-        return el.closest(selector);
+        if (returnAll) {
+          // Walk up DOM tree using native closest() efficiently
+          let current = el.parentElement;
+          while (current) {
+            const match = current.closest(selector);
+            if (match) {
+              allResults.push(match);
+              // Continue from the parent of the match to find more ancestors
+              current = match.parentElement;
+            } else {
+              break;
+            }
+          }
+        } else {
+          const match = el.closest(selector);
+          if (match) {
+            allResults.push(match);
+          }
+        }
       }
-      else if (this.isGlobal) {
-        return inArray(selector, ['window', 'globalThis']);
+      else if (this.isGlobal && inArray(selector, ['window', 'globalThis'])) {
+        allResults.push(Query.globalThisProxy);
       }
-    }).filter(Boolean);
+    });
 
-    return this.chain(closest);
+    // Remove duplicates if returnAll is true
+    const results = returnAll ? Array.from(new Set(allResults)) : allResults;
+    return this.chain(results);
   }
 
-  closestDeep(element, selector) {
+  closestAll(selector) {
+    return this.closest(selector, { returnAll: true });
+  }
+
+  closestDeep(element, selector, { returnAll = false } = {}) {
     let currentElement = element;
     const domSelector = isDOM(selector);
     const stringSelector = isString(selector);
+    const matches = [];
+    
     while (currentElement) {
       if ((domSelector && currentElement === selector) || (stringSelector && currentElement.matches(selector))) {
-        return currentElement;
+        if (returnAll) {
+          matches.push(currentElement);
+        } else {
+          return currentElement;
+        }
       }
       if (currentElement.parentElement) {
         currentElement = currentElement.parentElement;
@@ -371,10 +414,11 @@ export class Query {
         currentElement = currentElement.parentNode.host;
       }
       else {
-        return;
+        break;
       }
     }
-    return;
+    
+    return returnAll ? matches : undefined;
   }
 
   ready(handler) {
@@ -397,7 +441,18 @@ export class Query {
 
   getEventArray(eventNames) {
     return eventNames.split(' ')
-      .map(name => this.getEventAlias(name))
+      .map(name => {
+        const alias = this.getEventAlias(name);
+        if (alias.startsWith('.')) {
+          // Pure namespaces like '.foo' or '.foo.bar'
+          const namespaces = alias.slice(1).split('.');
+          return { eventName: null, namespaces };
+        }
+        const parts = alias.split('.');
+        const eventName = parts[0];
+        const namespaces = parts.slice(1);
+        return { eventName, namespaces: namespaces.length ? namespaces : null };
+      })
       .filter(Boolean);
   }
 
@@ -420,7 +475,7 @@ export class Query {
 
     const events = this.getEventArray(eventNames);
 
-    events.forEach(eventName => {
+    events.forEach(({ eventName, namespaces }) => {
       const abortController = options?.abortController || new AbortController();
       const eventSettings = options?.eventSettings || {};
       const signal = abortController.signal;
@@ -460,6 +515,7 @@ export class Query {
         const eventHandler = {
           el,
           eventName,
+          namespaces,
           eventListener,
           abortController,
           delegated: targetSelector !== undefined,
@@ -500,7 +556,7 @@ export class Query {
     options = options || {};
     const abortController = new AbortController();
     options.abortController = abortController;
-    const wrappedHandler = function(...args) {
+    const wrappedHandler = (...args) => {
       abortController.abort();
       handler.apply(this, args);
     };
@@ -510,25 +566,59 @@ export class Query {
   }
 
   off(eventNames, handler) {
-    const events = this.getEventArray(eventNames);
-    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
-      if (
-        (!eventNames
-          || inArray(eventHandler.eventName, events))
-        && (!handler
-          || handler?.eventListener == eventHandler.eventListener
-          || eventHandler.eventListener === handler
-          || eventHandler.handler === handler)
-      ) {
-        // global this uses proxy object will cause illegal invocation
+    if (!eventNames) {
+      // Remove all events (existing behavior)
+      Query.eventHandlers.forEach(eventHandler => {
         const el = (this.isGlobal) ? globalThis : eventHandler.el;
         if (el.removeEventListener) {
           el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
         }
-        return false;
+      });
+      Query.eventHandlers = [];
+      return this;
+    }
+
+    const events = this.getEventArray(eventNames);
+    
+    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
+      const shouldRemove = events.some(({ eventName, namespaces }) => {
+        // Match event name (if specified)
+        const eventMatches = !eventName || eventHandler.eventName === eventName;
+        
+        // Match namespaces (if specified) - any overlap removes the handler
+        let namespacesMatch = false;
+        if (namespaces && namespaces.length) {
+          if (eventHandler.namespaces && eventHandler.namespaces.length) {
+            // Check if any target namespace exists in handler's namespaces
+            namespacesMatch = namespaces.some(targetNs => 
+              inArray(targetNs, eventHandler.namespaces)
+            );
+          }
+        } else {
+          // No namespaces specified in removal, matches any
+          namespacesMatch = true;
+        }
+        
+        // Match handler (if specified)
+        const handlerMatches = !handler || 
+          handler?.eventListener === eventHandler.eventListener ||
+          eventHandler.eventListener === handler ||
+          eventHandler.handler === handler;
+        
+        return eventMatches && namespacesMatch && handlerMatches;
+      });
+
+      if (shouldRemove) {
+        // Remove the actual event listener
+        const el = (this.isGlobal) ? globalThis : eventHandler.el;
+        if (el.removeEventListener) {
+          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
+        }
+        return false; // Filter out this handler
       }
-      return true;
+      return true; // Keep this handler
     });
+    
     return this;
   }
 
@@ -904,12 +994,161 @@ export class Query {
     return this.chain(prevSiblings);
   }
 
-  height(value) {
-    return this.prop('innerHeight', value) || this.prop('clientHeight', value);
+  height(value, options = {}) {
+    const defaultOptions = {
+      includeMargin: false,
+      includePadding: false,
+      includeBorder: false
+    };
+
+    // If first argument is an object (settings), treat it as options for getter
+    if (isPlainObject(value)) {
+      options = value;
+      value = undefined; // No value to set
+    }
+
+    // Merge with defaults
+    const { includeMargin, includePadding, includeBorder } = {
+      ...defaultOptions,
+      ...options
+    };
+
+    // Setter: ignore options, just set height
+    if (value !== undefined) {
+      return this.each(el => {
+        el.style.height = typeof value === 'number' ? `${value}px` : value;
+      });
+    }
+
+    // Getter: calculate height based on options
+    if (this.length === 0) {
+      return undefined;
+    }
+
+    const heights = this.map(el => {
+      // Handle window/global object special case
+      if (el === Query.globalThisProxy) {
+        return window.innerHeight;
+      }
+      
+      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
+      let height = el.offsetHeight; // content + padding + border (total height)
+      
+      // Get computed style for all calculations
+      const computedStyle = window.getComputedStyle(el);
+      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+      const marginTop = parseFloat(computedStyle.marginTop) || 0;
+      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+
+      // Start with total height and subtract what we don't want
+      height -= (borderTop + borderBottom); // Remove border to get content + padding
+      
+      if (!includePadding) {
+        height -= (paddingTop + paddingBottom); // Remove padding to get content only
+      }
+      
+      if (includeBorder) {
+        height += (borderTop + borderBottom); // Add border back
+      }
+      
+      if (includeMargin) {
+        height += (marginTop + marginBottom); // Add margin
+      }
+
+      return height;
+    });
+
+    return this.length === 1 ? heights[0] : heights;
   }
 
-  width(value) {
-    return this.prop('innerWidth', value) || this.prop('clientWidth', value);
+  width(value, options) {
+
+    const defaultOptions = {
+      includeMargin: false,
+      includePadding: false,
+      includeBorder: false
+    };
+
+    // If first argument is an object (settings), treat it as options for getter
+    if (isPlainObject(value)) {
+      options = value;
+      value = undefined; // No value to set
+    }
+
+    // Get settings
+    const { includeMargin, includePadding, includeBorder } = {
+      ...defaultOptions,
+      ...options
+    };
+
+    // Setter: ignore options, just set width
+    if (value !== undefined) {
+      return this.each(el => {
+        el.style.width = typeof value === 'number' ? `${value}px` : value;
+      });
+    }
+
+    // Getter: calculate width based on options
+    if (this.length === 0) {
+      return undefined;
+    }
+
+    const widths = this.map(el => {
+      // Handle window/global object special case
+      if (el === Query.globalThisProxy) {
+        return window.innerWidth;
+      }
+      
+      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
+      let width = el.offsetWidth; // content + padding + border (total width)
+      
+      // Get computed style for all calculations
+      const computedStyle = window.getComputedStyle(el);
+      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
+      const marginRight = parseFloat(computedStyle.marginRight) || 0;
+
+      // Start with total width and subtract what we don't want
+      width -= (borderLeft + borderRight); // Remove border to get content + padding
+      
+      if (!includePadding) {
+        width -= (paddingLeft + paddingRight); // Remove padding to get content only
+      }
+      
+      if (includeBorder) {
+        width += (borderLeft + borderRight); // Add border back
+      }
+      
+      if (includeMargin) {
+        width += (marginLeft + marginRight); // Add margin
+      }
+
+      return width;
+    });
+
+    return this.length === 1 ? widths[0] : widths;
+  }
+
+  innerWidth() {
+    return this.width({ includePadding: true });
+  }
+
+  innerHeight() {
+    return this.height({ includePadding: true });
+  }
+
+  outerWidth({ includeMargin = false } = {}) {
+    return this.width({ includePadding: true, includeBorder: true, includeMargin });
+  }
+
+  outerHeight({ includeMargin = false } = {}) {
+    return this.height({ includePadding: true, includeBorder: true, includeMargin });
   }
 
   scrollHeight(value) {
@@ -995,6 +1234,18 @@ export class Query {
   insertAfter(selector) {
     return this.chain(selector).each((el) => {
       this.insertContent(el, this.selector, 'afterend');
+    });
+  }
+
+  before(content) {
+    return this.each((el) => {
+      this.insertContent(el, content, 'beforebegin');
+    });
+  }
+
+  after(content) {
+    return this.each((el) => {
+      this.insertContent(el, content, 'afterend');
     });
   }
 

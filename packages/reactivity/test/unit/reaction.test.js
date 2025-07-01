@@ -275,6 +275,7 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledWith(2);
     });
     
+    /* This clutters the logs -- Lets remove even though it passes
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
       let signal = new Signal(1);
@@ -299,5 +300,8 @@ describe('Reaction', () => {
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(expect.any(String));
     });
+
+    */
+
   });
 });

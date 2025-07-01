@@ -391,6 +391,105 @@ describe('query', () => {
     });
   });
 
+  describe('closestAll', () => {
+    it('should return all ancestor elements matching a selector', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const div3 = document.createElement('div');
+      const span = document.createElement('span');
+      
+      div1.classList.add('container');
+      div2.classList.add('container');
+      div3.classList.add('container');
+      
+      // Nested structure: div1 > div2 > div3 > span
+      div3.appendChild(span);
+      div2.appendChild(div3);
+      div1.appendChild(div2);
+      document.body.appendChild(div1);
+
+      const $span = $('span');
+      const $allContainers = $span.closestAll('.container');
+      
+      expect($allContainers.length).toBe(3);
+      expect($allContainers.get()).toContain(div1);
+      expect($allContainers.get()).toContain(div2);
+      expect($allContainers.get()).toContain(div3);
+    });
+
+    it('should return empty Query if no ancestors match', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $span = $('span');
+      const $ancestors = $span.closestAll('.nonexistent');
+      
+      expect($ancestors.length).toBe(0);
+    });
+
+    it('should work with multiple elements', () => {
+      const container1 = document.createElement('div');
+      const container2 = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      
+      container1.classList.add('container');
+      container2.classList.add('container');
+      
+      container1.appendChild(span1);
+      container2.appendChild(span2);
+      document.body.appendChild(container1);
+      document.body.appendChild(container2);
+
+      const $spans = $('span');
+      const $containers = $spans.closestAll('.container');
+      
+      expect($containers.length).toBe(2);
+      expect($containers.get()).toContain(container1);
+      expect($containers.get()).toContain(container2);
+    });
+
+    it('should remove duplicates when multiple elements have same ancestor', () => {
+      const sharedContainer = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      
+      sharedContainer.classList.add('container');
+      
+      sharedContainer.appendChild(span1);
+      sharedContainer.appendChild(span2);
+      document.body.appendChild(sharedContainer);
+
+      const $spans = $('span');
+      const $containers = $spans.closestAll('.container');
+      
+      expect($containers.length).toBe(1);
+      expect($containers.get(0)).toBe(sharedContainer);
+    });
+
+    it('should work with pierceShadow option', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const span = document.createElement('span');
+      
+      div1.classList.add('container');
+      div2.classList.add('container');
+      
+      div2.appendChild(span);
+      div1.appendChild(div2);
+      document.body.appendChild(div1);
+
+      const $span = $('span', { pierceShadow: true });
+      const $containers = $span.closestAll('.container');
+      
+      expect($containers.length).toBe(2);
+      expect($containers.get()).toContain(div1);
+      expect($containers.get()).toContain(div2);
+    });
+  });
+
   describe('filter', () => {
     it('filter should return elements that match a selector', () => {
       const div = document.createElement('div');
@@ -962,6 +1061,239 @@ describe('query', () => {
       $('div').off('click', event);
       span.click();
       expect(callback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Namespaced Events', () => {
+    describe('on with namespaces', () => {
+      it('should bind events with namespaces', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.test', callback);
+        div.click();
+        expect(callback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should bind multiple namespaced events', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test1', callback1);
+        $('div').on('click.test2', callback2);
+        div.click();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should bind events with same namespace but different event types', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const clickCallback = vi.fn();
+        const mouseupCallback = vi.fn();
+
+        $('div').on('click.test', clickCallback);
+        $('div').on('mouseup.test', mouseupCallback);
+        
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(clickCallback).toHaveBeenCalledTimes(1);
+        expect(mouseupCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should support delegation with namespaces', () => {
+        const div = document.createElement('div');
+        const span = document.createElement('span');
+        div.appendChild(span);
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.test', 'span', callback);
+        span.click();
+        expect(callback).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('off with namespaces', () => {
+      it('should remove events by specific event.namespace', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test1', callback1);
+        $('div').on('click.test2', callback2);
+        
+        $('div').off('click.test1');
+        div.click();
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should remove all events in a namespace with .namespace', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const clickCallback = vi.fn();
+        const mouseupCallback = vi.fn();
+        const otherCallback = vi.fn();
+
+        $('div').on('click.test', clickCallback);
+        $('div').on('mouseup.test', mouseupCallback);
+        $('div').on('click.other', otherCallback);
+        
+        $('div').off('.test');
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(clickCallback).not.toHaveBeenCalled();
+        expect(mouseupCallback).not.toHaveBeenCalled();
+        expect(otherCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should remove specific handler with namespace', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test', callback1);
+        $('div').on('click.test', callback2);
+        
+        $('div').off('click.test', callback1);
+        div.click();
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should remove delegated events with namespaces', () => {
+        const div = document.createElement('div');
+        const span = document.createElement('span');
+        div.appendChild(span);
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test', 'span', callback1);
+        $('div').on('click.other', 'span', callback2);
+        
+        $('div').off('click.test');
+        span.click();
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle multiple namespace removals', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+        const callback3 = vi.fn();
+
+        $('div').on('click.test1', callback1);
+        $('div').on('click.test2', callback2);
+        $('div').on('mouseup.test1', callback3);
+        
+        $('div').off('.test1');
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback3).not.toHaveBeenCalled();
+      });
+
+      it('should not remove events without namespace when removing namespaced events', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const namespacedCallback = vi.fn();
+        const normalCallback = vi.fn();
+
+        $('div').on('click.test', namespacedCallback);
+        $('div').on('click', normalCallback);
+        
+        $('div').off('click.test');
+        div.click();
+        
+        expect(namespacedCallback).not.toHaveBeenCalled();
+        expect(normalCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle complex namespace scenarios', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+        const callback3 = vi.fn();
+        const callback4 = vi.fn();
+
+        $('div').on('click.foo.bar', callback1); // This creates namespace 'foo.bar' not nested namespaces
+        $('div').on('click.foo', callback2);
+        $('div').on('mouseup.foo', callback3);
+        $('div').on('click', callback4);
+        
+        // Remove only .foo namespace
+        $('div').off('.foo');
+        
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(callback1).not.toHaveBeenCalled();   // 'foo.bar' contains 'foo', so should be removed
+        expect(callback2).not.toHaveBeenCalled();   // 'foo' matches
+        expect(callback3).not.toHaveBeenCalled();   // 'foo' matches
+        expect(callback4).toHaveBeenCalledTimes(1); // no namespace
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle empty namespaces gracefully', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.', callback); // Empty namespace
+        $('div').off('click.');
+        div.click();
+        
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should handle multiple dots in event names', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback = vi.fn();
+
+        $('div').on('click.foo.bar', callback); // Multiple dots - all part of namespace
+        div.click();
+        expect(callback).toHaveBeenCalledTimes(1);
+        
+        $('div').off('click.foo.bar');
+        div.click();
+        expect(callback).toHaveBeenCalledTimes(1); // Should not be called again
+      });
+
+      it('should handle whitespace in namespaced event names', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const callback1 = vi.fn();
+        const callback2 = vi.fn();
+
+        $('div').on('click.test mouseup.test', callback1);
+        $('div').on('click.other', callback2);
+        
+        $('div').off('.test');
+        div.click();
+        div.dispatchEvent(new Event('mouseup'));
+        
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -1694,11 +2026,81 @@ describe('query', () => {
       it('should return undefined when getting height on non-existent element', () => {
         expect($('.non-existent').height()).toBe(undefined);
       });
+
+      it('should set height value and return Query instance', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        const $result = $('div').height(150);
+        
+        expect($result).toBeInstanceOf(Query);
+        expect(div.style.height).toBe('150px');
+        
+        document.body.removeChild(div);
+      });
+
+      it('should handle string height values', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        $('div').height('200px');
+        
+        expect(div.style.height).toBe('200px');
+        
+        document.body.removeChild(div);
+      });
     });
 
     describe('width', () => {
       it('should return undefined when getting width on non-existent element', () => {
         expect($('.non-existent').width()).toBe(undefined);
+      });
+
+      it('should set width value and return Query instance', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        const $result = $('div').width(300);
+        
+        expect($result).toBeInstanceOf(Query);
+        expect(div.style.width).toBe('300px');
+        
+        document.body.removeChild(div);
+      });
+
+      it('should handle string width values', () => {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        $('div').width('250px');
+        
+        expect(div.style.width).toBe('250px');
+        
+        document.body.removeChild(div);
+      });
+    });
+
+    describe('innerWidth', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').innerWidth()).toBe(undefined);
+      });
+    });
+
+    describe('innerHeight', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').innerHeight()).toBe(undefined);
+      });
+    });
+
+    describe('outerWidth', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').outerWidth()).toBe(undefined);
+      });
+    });
+
+    describe('outerHeight', () => {
+      it('should return undefined for non-existent element', () => {
+        expect($('.non-existent').outerHeight()).toBe(undefined);
       });
     });
 
@@ -2117,6 +2519,30 @@ describe('query', () => {
 
       expect($sliced.length).toBe(0);
       expect($sliced).toBeInstanceOf(Query);
+    });
+  });
+
+  describe('before', () => {
+    it('should work as alias for insertBefore functionality', () => {
+      const div = document.createElement('div');
+      div.innerHTML = '<p>Original</p>';
+      document.body.appendChild(div);
+
+      $('p').before('<span>Before</span>');
+
+      expect(div.innerHTML).toBe('<span>Before</span><p>Original</p>');
+    });
+  });
+
+  describe('after', () => {
+    it('should work as alias for insertAfter functionality', () => {
+      const div = document.createElement('div');
+      div.innerHTML = '<p>Original</p>';
+      document.body.appendChild(div);
+
+      $('p').after('<span>After</span>');
+
+      expect(div.innerHTML).toBe('<p>Original</p><span>After</span>');
     });
   });
 });

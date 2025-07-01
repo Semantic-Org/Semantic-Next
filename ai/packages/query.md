@@ -124,7 +124,8 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `parent(selector)` - Get parent elements
 - `children(selector)`, `siblings(selector)` - Get child/sibling elements
 - `next(selector)`, `prev(selector)` - Get adjacent siblings
-- `closest(selector)` - Find closest ancestor matching selector
+- `closest(selector, options)` - Find closest ancestor matching selector, optionally all ancestors
+- `closestAll(selector)` - Find all ancestor elements matching selector
 
 ### Content Manipulation
 - `html()`, `html(content)` - Get/set innerHTML
@@ -132,6 +133,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `val()`, `val(value)` - Get/set form element values
 - `append(content)`, `prepend(content)` - Add content to elements
 - `insertBefore(selector)`, `insertAfter(selector)` - Insert elements relative to targets
+- `before(content)`, `after(content)` - Insert content before/after elements (aliases)
 
 ### Attribute/Property Management
 - `attr(name)`, `attr(name, value)` - Get/set attributes
@@ -274,6 +276,23 @@ const deepInputs = new Query('input', {
   root: modal, 
   pierceShadow: true 
 });
+```
+
+### Ancestral Traversal Patterns
+
+```javascript
+// Find the closest ancestor
+$('.item').closest('.container');                 // Single closest container
+
+// Find all matching ancestors
+$('.item').closestAll('.container');              // All container ancestors
+$('.item').closest('.container', { returnAll: true }); // Equivalent syntax
+
+// Cross Shadow DOM boundaries
+$$('.shadow-item').closestAll('.container');      // Find containers across shadow DOM
+
+// Working with multiple elements
+$('.multiple-items').closestAll('.shared-ancestor'); // Automatically deduplicates
 ```
 
 ### Element Creation and Manipulation

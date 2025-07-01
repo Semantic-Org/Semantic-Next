@@ -881,4 +881,137 @@ describe('query', () => {
       expect($containingParent[0]).toBe(document.getElementById('inner'));
     });
   });
+
+  describe('Dimensional Methods (Browser-dependent)', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    describe('width and height with options', () => {
+      it('should get content-only dimensions by default', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').width();
+        const height = $('div').height();
+        
+        expect(width).toBe(200);
+        expect(height).toBe(100);
+      });
+
+      it('should get dimensions including padding with includePadding option', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').width({ includePadding: true });
+        const height = $('div').height({ includePadding: true });
+        
+        expect(width).toBe(220); // 200 + 20 padding
+        expect(height).toBe(120); // 100 + 20 padding
+      });
+
+      it('should get dimensions including border with includeBorder option', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').width({ includePadding: true, includeBorder: true });
+        const height = $('div').height({ includePadding: true, includeBorder: true });
+        
+        expect(width).toBe(230); // 200 + 20 padding + 10 border
+        expect(height).toBe(130); // 100 + 20 padding + 10 border
+      });
+
+      it('should get dimensions including margin with includeMargin option', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').width({ includePadding: true, includeBorder: true, includeMargin: true });
+        const height = $('div').height({ includePadding: true, includeBorder: true, includeMargin: true });
+        
+        expect(width).toBe(270); // 200 + 20 padding + 10 border + 40 margin
+        expect(height).toBe(170); // 100 + 20 padding + 10 border + 40 margin
+      });
+
+      it('should work with border-box sizing', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: border-box;';
+        document.body.appendChild(div);
+
+        // With border-box, width: 200px means total width including padding and border
+        // So content width should be 200 - 20 padding - 10 border = 170px
+        const contentWidth = $('div').width();
+        const contentHeight = $('div').height();
+        
+        expect(contentWidth).toBe(170); // 200 - 20 padding - 10 border
+        expect(contentHeight).toBe(70);  // 100 - 20 padding - 10 border
+
+        const totalWidth = $('div').width({ includePadding: true, includeBorder: true });
+        const totalHeight = $('div').height({ includePadding: true, includeBorder: true });
+        
+        expect(totalWidth).toBe(200);  // Total including padding and border
+        expect(totalHeight).toBe(100); // Total including padding and border
+      });
+
+      it('should work with multiple elements', () => {
+        const div1 = document.createElement('div');
+        const div2 = document.createElement('div');
+        div1.style.cssText = 'width: 200px; height: 100px; padding: 10px; box-sizing: content-box;';
+        div2.style.cssText = 'width: 300px; height: 150px; padding: 15px; box-sizing: content-box;';
+        div1.className = 'test';
+        div2.className = 'test';
+        document.body.appendChild(div1);
+        document.body.appendChild(div2);
+
+        const widths = $('.test').width();
+        const heights = $('.test').height();
+        
+        expect(widths).toEqual([200, 300]);
+        expect(heights).toEqual([100, 150]);
+      });
+    });
+
+    describe('innerWidth and innerHeight', () => {
+      it('should return content + padding dimensions', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').innerWidth();
+        const height = $('div').innerHeight();
+        
+        expect(width).toBe(220);  // 200 content + 20 padding
+        expect(height).toBe(120); // 100 content + 20 padding
+      });
+    });
+
+    describe('outerWidth and outerHeight', () => {
+      it('should return content + padding + border dimensions by default', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').outerWidth();
+        const height = $('div').outerHeight();
+        
+        expect(width).toBe(230);  // 200 content + 20 padding + 10 border
+        expect(height).toBe(130); // 100 content + 20 padding + 10 border
+      });
+
+      it('should include margin when specified', () => {
+        const div = document.createElement('div');
+        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        document.body.appendChild(div);
+
+        const width = $('div').outerWidth({ includeMargin: true });
+        const height = $('div').outerHeight({ includeMargin: true });
+        
+        expect(width).toBe(270);  // 200 content + 20 padding + 10 border + 40 margin
+        expect(height).toBe(170); // 100 content + 20 padding + 10 border + 40 margin
+      });
+    });
+  });
 });
