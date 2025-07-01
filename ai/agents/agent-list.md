@@ -14,6 +14,5 @@
 - `testing_agent` → `ai/agents/process/testing/`
 - `types_agent` → `ai/agents/process/types/`
 - `documentation_agent` → `ai/agents/process/documentation/`
-- `integration_agent` → `ai/agents/process/integration/`
 - `releasing_agent` → `ai/agents/process/releasing/`
 - `build_tools_agent` → `ai/agents/process/build-tools/`

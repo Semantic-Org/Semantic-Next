@@ -1,16 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "Read(packages/utils/**)",
-      "Edit(packages/utils/src/**)",
-      "Edit(packages/utils/test/**)",
-      "Write(packages/utils/src/**)",
-      "Write(packages/utils/test/**)",
-      "MultiEdit(packages/utils/src/**)",
-      "MultiEdit(packages/utils/test/**)",
-      "Read(docs/src/pages/api/utils/**)",
-      "Read(docs/src/pages/utils/**)",
-      "Read(ai/packages/utils.md)"
+      "Read(packages/**)",
+      "Edit(packages/*/src/**)",
+      "Edit(packages/*/test/**)",
+      "MultiEdit(packages/*/src/**)",
+      "MultiEdit(packages/*/test/**)",
+      "Read(src/components/**)",
+      "Edit(src/components/**)",
+      "MultiEdit(src/components/**)",
+      "Read(docs/src/examples/**)",
+      "Edit(docs/src/examples/**)",
+      "MultiEdit(docs/src/examples/**)",
+      "Read(ai/packages/utils.md)",
+      "Read(packages/utils/src/**)"
     ],
     "deny": [],
     "additionalDirectories": [],
