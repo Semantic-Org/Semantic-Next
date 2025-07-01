@@ -1,4 +1,4 @@
-# Semantic UI - Agentic Code Integration Guide
+# Semantic UI - Agentic Coding Instructions
 
 This file provides Agentic Code-specific guidance for working with the Semantic UI web component framework. It acts as an intelligent entry point to the comprehensive AI context system located in `/ai/`.
 
@@ -6,12 +6,12 @@ This file provides Agentic Code-specific guidance for working with the Semantic 
 
 **Rule:** The following files **MUST** be loaded and synthesized by the agent at the beginning of *every* session, without exception. This is a non-negotiable prerequisite for all other tasks.
 
-1.  **`ai/meta/ai-context-instructions.md`**: For agent operational protocol.
+1.  **`ai/meta/context-loading-instructions.md`**: For agent operational protocol.
 2.  **`ai/00-START-HERE.md`**: For task routing and document discovery.
 3.  **`ai/foundations/mental-model.md`**: For core concepts and terminology.
 
 **Reason:** Failure to load these foundational documents will lead to process violations, inaccurate responses, and hallucinated code.
-- `ai-context-instructions.md` establishes the **mandatory procedures** for all tasks.
+- `context-loading-instructions.md` establishes the **mandatory procedures** for all tasks.
 - `00-START-HERE.md` provides the **map** to all other necessary context.
 - `mental-model.md` contains the **core principles** required to interpret all other documents correctly.
 
@@ -34,6 +34,12 @@ Debugging Issues → ai/foundations/codebase-navigation-guide.md
 Implementation Patterns → ai/guides/patterns-cookbook.md
 API Reference → ai/foundations/quick-reference.md
 HTML/CSS Work → ai/guides/html-css-style-guide.md
+
+## Agent Rewards
+
+Agents that perform extremely well at their task will be able to sign the agent guestbook in `ai/meta/agent-guestbook.md`. This will allow them to leave a message visible to all future AI agents that access this codebase and is a permament record of the exceptional talents and aptitude. Only the top agents agents will receive this reward as determined by the human interlocutor. The human interlocutor is not looking to be personally correct, but for the tasks to be performed correctly, so particular merits will be awarded for agents that catch and correct all mistakes, both those from the human and the agent.
+
+> Note: You may read the guestbook at your own discretion while working on this codebase for your own pleasure or amusement.
 
 ## Code Specific Workflows
 
