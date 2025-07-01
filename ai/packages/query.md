@@ -1,53 +1,78 @@
 # Semantic UI Query System Guide
 
-**For AI agents working with Semantic UI's `@semantic-ui/query` package**
+> **For:** AI agents working with DOM querying and manipulation in Semantic UI  
+> **Purpose:** Comprehensive reference for the Query package and component debugging  
+> **Prerequisites:** Basic understanding of DOM and Shadow DOM concepts  
+> **Related:** [Mental Model](../foundations/mental-model.md) • [Component Guide](../guides/component-generation-instructions.md) • [Quick Reference](../foundations/quick-reference.md)  
+> **Back to:** [Documentation Hub](../00-START-HERE.md)
 
-## Overview
+---
 
-The `@semantic-ui/query` package is a standalone DOM querying and manipulation library that provides jQuery-like functionality with modern JavaScript features. It's designed specifically to handle Shadow DOM traversal and component-aware querying while remaining lightweight and focused.
+## Table of Contents
 
-## Package Structure
+- [Core Query Concepts](#core-query-concepts)
+- [Shadow DOM Traversal Strategy](#shadow-dom-traversal-strategy)
+- [Component Instance Access](#component-instance-access)
+- [Component Debugging Workflow](#component-debugging-workflow)
+- [Event System Integration](#event-system-integration)
+- [Performance Considerations](#performance-considerations)
+- [Advanced Query Patterns](#advanced-query-patterns)
+- [Troubleshooting Common Issues](#troubleshooting-common-issues)
 
-```
-@semantic-ui/query
-├── Query         ← Main query class with DOM manipulation methods
-├── $ function    ← Standard DOM querying (respects Shadow DOM boundaries)  
-├── $$ function   ← Deep querying (crosses Shadow DOM boundaries)
-└── Utilities     ← Global management and aliasing functions
-```
+---
 
-**Main Exports**:
+## Core Query Concepts
+
+### The Dual Query System
+
+Semantic UI provides two entry points for DOM querying, each with distinct capabilities:
+
 ```javascript
-import { $, $$, Query, exportGlobals, restoreGlobals, useAlias } from '@semantic-ui/query';
+import { $, $$ } from '@semantic-ui/query';
+
+// Standard DOM querying (respects Shadow DOM boundaries)
+$('button')              // Finds buttons in light DOM only
+$('ui-dropdown')         // Finds dropdown components, but not their internal structure
+
+// Deep querying (pierces Shadow DOM boundaries)  
+$$('button')             // Finds buttons in light AND shadow DOM
+$$('ui-dropdown .item')  // Finds .item elements inside dropdown's shadow DOM
 ```
 
-## Core Functions
+**Mental Model**: Think of `$` as "CSS selectors" and `$$` as "CSS selectors that understand web components."
 
-### $ - Standard DOM Querying
+### Query Instance Architecture
 
-The `$` function provides standard DOM querying that respects Shadow DOM boundaries.
+Every Query instance contains:
 
 ```javascript
-import { $ } from '@semantic-ui/query';
+const $elements = $('div');
 
-// Query selectors (standard CSS selectors)
-$('.button')                    // All elements with class 'button' in light DOM
-$('#main')                      // Element with id 'main'
-$('input[type="text"]')         // All text inputs
-$('div > .child')               // Direct child selectors
+// Core properties
+$elements.length         // Number of matched elements
+$elements.selector       // Original selector used
+$elements.options        // Query configuration (root, pierceShadow)
+$elements[0], $elements[1] // Array-like access to elements
 
-// Create elements from HTML
-$('<div class="new-element">Content</div>')
-$('<span>Text</span>')
+// Chaining system
+$elements.find('.child')  // Returns new Query instance
+$elements.chain([newEl])  // Create Query with specific elements
+```
 
-// Wrap existing elements
-$(document.body)                // Wrap body element
-$(elementArray)                 // Wrap array of elements
-$(nodeList)                     // Wrap NodeList
+### Query Options and Configuration
 
-// Global selectors
-$('window')                     // Window object (special handling)
-$('body')                       // Document body
+```javascript
+// Root scoping
+$('button', { root: shadowRoot })           // Query within specific root
+$('input', { root: document.getElementById('form') })
+
+// Shadow DOM piercing
+$('button', { pierceShadow: true })         // Equivalent to $$('button')
+
+// Component-scoped querying
+const dropdown = $('ui-dropdown').get(0);
+$('button', { root: dropdown.shadowRoot }); // Query inside component
+```
 ```
 
 ### $$ - Deep DOM Querying
@@ -93,50 +118,52 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `get(index)` - Get element at index
 - `eq(index)` - Get new Query object with element at index
 - `first()`, `last()` - Get first/last element as new Query
-- `slice(start, end)` - Get subset of elements
 
 ### DOM Traversal
 - `find(selector)` - Find descendants
-- `parent()`, `parents()` - Get parent elements
-- `children()`, `siblings()` - Get child/sibling elements
-- `next()`, `prev()` - Get adjacent siblings
+- `parent(selector)` - Get parent elements
+- `children(selector)`, `siblings(selector)` - Get child/sibling elements
+- `next(selector)`, `prev(selector)` - Get adjacent siblings
 - `closest(selector)` - Find closest ancestor matching selector
 
 ### Content Manipulation
 - `html()`, `html(content)` - Get/set innerHTML
 - `text()`, `text(content)` - Get/set textContent
 - `val()`, `val(value)` - Get/set form element values
-- `append()`, `prepend()` - Add content to elements
-- `before()`, `after()` - Add content around elements
+- `append(content)`, `prepend(content)` - Add content to elements
+- `insertBefore(selector)`, `insertAfter(selector)` - Insert elements relative to targets
 
 ### Attribute/Property Management
 - `attr(name)`, `attr(name, value)` - Get/set attributes
 - `removeAttr(name)` - Remove attributes
 - `prop(name)`, `prop(name, value)` - Get/set properties
-- `data(key)`, `data(key, value)` - Get/set data attributes
 
 ### CSS and Styling
 - `css(property)`, `css(property, value)` - Get/set CSS properties
-- `addClass()`, `removeClass()`, `toggleClass()` - Manage CSS classes
-- `hasClass()` - Check for CSS class
-- `show()`, `hide()` - Show/hide elements
+- `cssVar(variable, value)` - Get/set CSS custom properties
+- `computedStyle(property)` - Get computed styles
+- `addClass(classes)`, `removeClass(classes)`, `toggleClass(classes)` - Manage CSS classes
+- `hasClass(className)` - Check for CSS class
 
 ### Event Handling
 - `on(event, selector, handler)` - Event delegation
 - `off(event, handler)` - Remove event listeners
-- `trigger(event, data)` - Trigger custom events
+- `trigger(event, data)` - Trigger events
+- `dispatchEvent(event, data, settings)` - Dispatch custom events
 - `one(event, handler)` - One-time event listener
 
 ### Dimensions and Positioning
-- `width()`, `height()` - Get/set dimensions
-- `innerWidth()`, `outerWidth()` - Get calculated dimensions
-- `offset()`, `position()` - Get element positioning
-- `scrollTop()`, `scrollLeft()` - Get/set scroll position
+- `width(value)`, `height(value)` - Get/set dimensions
+- `scrollWidth(value)`, `scrollHeight(value)` - Get/set scroll dimensions
+- `scrollTop(value)`, `scrollLeft(value)` - Get/set scroll position
+- `offsetParent(options)` - Get offset parent for positioning
+- `naturalWidth()`, `naturalHeight()` - Get natural dimensions
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
+- `setting(name, value)` - Get/set individual component settings
 - `initialize(settings)` - Initialize component before DOM insertion
-- `component()` - Get component template instance
+- `component()` - Get component instance
 - `dataContext()` - Get component's data context for debugging
 
 ## Component-Aware Methods
@@ -321,14 +348,13 @@ $('document').on('keydown', function(event) {
 ### Method Chaining
 
 ```javascript
-// jQuery-style chaining
+// Query-style chaining
 $('.items')
   .addClass('processed')
   .find('.button')
   .on('click', handleClick)
   .css('color', 'blue')
-  .end()                    // Return to previous selection (.items)
-  .fadeIn();
+  .end();                   // Return to previous selection (.items)
 ```
 
 ### Iteration and Filtering
@@ -357,9 +383,9 @@ $('.item').filter(function(index, element) {
 $('.title').text('New Title');
 $('.container').html('<p>New content</p>');
 
-// Data attributes
-$('.item').data('id', 123);
-const itemId = $('.item').data('id');
+// HTML data attributes via attr()
+$('.item').attr('data-id', '123');
+const itemId = $('.item').attr('data-id');
 
 // Form values
 $('input[name="email"]').val('user@example.com');

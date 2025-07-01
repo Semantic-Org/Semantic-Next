@@ -2,6 +2,7 @@ import {
   camelToKebab,
   each,
   findIndex,
+  get,
   inArray,
   isArray,
   isClient,
@@ -10,6 +11,7 @@ import {
   isObject,
   isPlainObject,
   isString,
+  keys,
 } from '@semantic-ui/utils';
 
 /*
@@ -46,7 +48,7 @@ export class Query {
     }
 
     // this is an existing query object
-    if(selector instanceof Query) {
+    if (selector instanceof Query) {
       elements = selector;
     }
 
@@ -99,7 +101,7 @@ export class Query {
       ? new Query(globalThis, this.options)
       : new Query(elements, { ...this.options, prevObject: this });
   }
-  
+
   end() {
     return this.prevObject || this;
   }
@@ -116,8 +118,10 @@ export class Query {
 
     // Add root if required
     if (includeRoot) {
-      if ((domSelector && root == selector) ||
-          (!domSelector && root.matches && root.matches(selector))) {
+      if (
+        (domSelector && root == selector)
+        || (!domSelector && root.matches && root.matches(selector))
+      ) {
         elements.add(root);
       }
     }
@@ -125,7 +129,8 @@ export class Query {
     // Query from root
     if (domSelector) {
       queriedRoot = true;
-    } else if (root.querySelectorAll) {
+    }
+    else if (root.querySelectorAll) {
       root.querySelectorAll(selector).forEach(el => elements.add(el));
       queriedRoot = true;
     }
@@ -150,7 +155,8 @@ export class Query {
           elements.add(selector);
           domFound = true;
         }
-      } else if (node.querySelectorAll) {
+      }
+      else if (node.querySelectorAll) {
         // Directly add to Set without intermediate array
         node.querySelectorAll(selector).forEach(el => elements.add(el));
       }
@@ -158,7 +164,7 @@ export class Query {
 
     const findElements = (node, selector, query) => {
       // Early termination condition for DOM selector search
-      if (domSelector && domFound) return;
+      if (domSelector && domFound) { return; }
 
       // If root element didn't support querySelectorAll, query each child node
       if (query === true) {
@@ -605,10 +611,10 @@ export class Query {
 
   getSlot(name) {
     return this.map((el) => {
-      if(el.tagName.toLowerCase() == 'slot' && (!name || el.name == name)) {
+      if (el.tagName.toLowerCase() == 'slot' && (!name || el.name == name)) {
         // called directly on a matching slot
         const nodes = el.assignedNodes({ flatten: true });
-        if(nodes) {
+        if (nodes) {
           return this.chain(nodes).html();
         }
       }
@@ -617,10 +623,11 @@ export class Query {
         const slotSelector = name ? `slot[name="${name}"]` : 'slot:not([name])';
         const slot = el.shadowRoot.querySelector(slotSelector);
         const nodes = slot.assignedNodes({ flatten: true });
-        if(nodes) {
+        if (nodes) {
           return this.chain(nodes).html();
         }
-      } else {
+      }
+      else {
         // No shadow DOM, fallback to direct DOM querying
         const slotSelector = name ? `[slot="${name}"]` : ':not([slot])';
         return this.chain(el).find(slotSelector).html();
@@ -629,18 +636,18 @@ export class Query {
   }
 
   setSlot(nameOrHTML, newHTML) {
-
     // Determine if we're dealing with a named slot or default slot based on arguments
     let name;
     if (newHTML) {
       name = nameOrHTML;
-    } else {
+    }
+    else {
       newHTML = nameOrHTML;
     }
 
     return this.each((el) => {
       // find host web component
-      if(el.tagName.toLowerCase() == 'slot') {
+      if (el.tagName.toLowerCase() == 'slot') {
         el = el.getRootNode().getRootNode()?.host;
       }
       const $el = this.chain(el);
@@ -653,7 +660,8 @@ export class Query {
           $slottedElement = this.chain(el).find(slotSelector);
         }
         $slottedElement.html(newHTML);
-      } else {
+      }
+      else {
         // Default slot updates the entire element content
         $el.html(newHTML);
       }
@@ -717,8 +725,7 @@ export class Query {
         || el instanceof HTMLSelectElement
         || el instanceof HTMLTextAreaElement
         // web components may store value
-        || customElements.get(el.tagName.toLowerCase())
-      ;
+        || customElements.get(el.tagName.toLowerCase());
     };
     if (newValue !== undefined) {
       // Set the value for each element
@@ -795,7 +802,7 @@ export class Query {
     return this.css(property, null, { includeComputed: true });
   }
 
-  cssVar(variable, value) {
+  cssVar(variable, value = null) {
     return this.css(`--${variable}`, value, { includeComputed: true });
   }
 
@@ -1035,29 +1042,69 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
-  // offsetParent does not return the true offset parent
-  // in cases where there is a parent node with a transform context
-  // so we need to get that manually where finding the true offset parent is essential
-  // for instance when calculating position
-  offsetParent({ calculate = true } = {}) {
-    return Array.from(this)
-      .map((el) => {
-        if (!calculate) {
-          return el.offsetParent;
-        }
-        let $el, isPositioned, isTransformed, isBody;
-        let parentNode = el?.parentNode;
-        while (parentNode && !isPositioned && !isTransformed && !isBody) {
-          parentNode = parentNode?.parentNode;
-          if (parentNode) {
-            $el = $(parentNode);
-            isPositioned = $el.computedStyle('position') !== 'static';
-            isTransformed = $el.computedStyle('transform') !== 'none';
-            isBody = $el.is('body');
+  // this is the element that clips current element
+  clippingParent() {
+    const parents = this.map((el) => {
+      let current = el.parentNode;
+      while (current) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            return current;
           }
         }
-        return parentNode;
-      });
+        current = current.parentNode;
+      }
+      return document.documentElement;
+    });
+    return this.chain(parents);
+  }
+
+  // this is the parent element where top/left and offsetTop/left will be relative
+  containingParent({ calculate = true } = {}) {
+    const parents = this.map((el) => {
+
+      // return offset parent as reported by browser
+      if (!calculate) {
+        return el.offsetParent;
+      }
+
+      // fixed elements have no offset parent
+      if (window.getComputedStyle(el).position === 'fixed') {
+        return undefined;
+      }
+
+      let current = el.parentNode;
+      while (current) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+          // transformed elements create new positioning context
+          if (style.position !== 'static') {
+            return current;
+          }
+          // filter creates new positioning context
+          if (style.filter !== 'none') {
+            return current;
+          }
+          // transformed elements create new positioning context
+          if (style.transform !== 'none') {
+            return current;
+          }
+          // also creates positioning context
+          if(['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
+            return current;
+          }
+          // will change will trigger same context
+          // <https://issues.chromium.org/issues/41131675>
+          if (['filter', 'contain', 'transform'].includes(style.willChange)) {
+            return current;
+          }
+        }
+        current = current.parentNode;
+      }
+      return document.body;
+    });
+    return this.chain(parents);
   }
 
   // alias
@@ -1084,9 +1131,65 @@ export class Query {
   }
 
   setting(setting, value) {
+    if (value === undefined) {
+      const settings = this.map(el => el[setting]);
+      return (settings.length == 1)
+        ? settings[0]
+        : settings;
+    }
     return this.each((el) => {
       el[setting] = value;
     });
+  }
+
+  data(key, value) {
+
+    // Set data attribute
+    if (value !== undefined) {
+      return this.each(el => {
+        if (el.dataset) {
+          el.dataset[key] = value;
+        }
+      });
+    }
+
+    // Get single data attribute
+    if (key !== undefined) {
+      if (this.length === 0) {
+        return undefined;
+      }
+      const values = this.map(el => get(el, `dataset.${key}`));
+      return this.length === 1
+        ? values[0]
+        : values;
+    }
+
+    // Get all data attributes
+    if (this.length === 0) {
+      return undefined;
+    }
+    const allData = this.map(el => {
+      const data = {};
+      if (el.dataset) {
+        each(keys(el.dataset), k => {
+          data[k] = el.dataset[k];
+        });
+      }
+      return data;
+    });
+
+    // return array only if more than one el
+    return (this.length === 1)
+      ? allData[0]
+      : allData;
+  }
+
+  slice(start, end) {
+    if (this.length === 0) {
+      return this;
+    }
+    const slicedElements = Array.from(this).slice(start, end);
+    return this.chain(slicedElements);
   }
 
   // special helper for SUI components

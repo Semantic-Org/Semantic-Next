@@ -1,6 +1,6 @@
 # Semantic UI HTML & CSS Style Guide
 
-Based on analysis of canonical examples authored by Jack Lukic, this guide captures the distinctive patterns and philosophies for writing HTML and CSS within Semantic UI web components.
+This guide captures the distinctive patterns and philosophies for writing HTML and CSS within Semantic UI web components.
 
 ## Core Philosophy: Natural Language Applied to Markup
 

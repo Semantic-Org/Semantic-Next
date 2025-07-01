@@ -607,4 +607,278 @@ describe('query', () => {
       });
     });
   });
+
+  describe('clippingParent', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should find the clipping parent with overflow hidden', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: hidden; width: 200px; height: 200px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find the clipping parent with overflow scroll', () => {
+      document.body.innerHTML = `
+        <div id="outer">
+          <div id="scroller" style="overflow-y: scroll; height: 100px;">
+            <div id="inner">Inner content</div>
+          </div>
+        </div>
+      `;
+
+      const $inner = $('#inner');
+      const $clippingParent = $inner.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('scroller'));
+    });
+
+    it('should find the clipping parent with overflow auto', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: auto; width: 150px; height: 150px;">
+          <div id="content">Content</div>
+        </div>
+      `;
+
+      const $content = $('#content');
+      const $clippingParent = $content.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return document.documentElement when no clipping parent found', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: visible;">
+          <div id="inner" style="overflow: visible;">
+            <div id="target">Target</div>
+          </div>
+        </div>
+      `;
+
+      const $target = $('#target');
+      const $clippingParent = $target.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.documentElement);
+    });
+
+    it('should handle multiple elements', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: hidden;">
+          <div class="item" id="item1">Item 1</div>
+        </div>
+        <div id="container2" style="overflow: scroll;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const $items = $('.item');
+      const $clippingParents = $items.clippingParent();
+
+      expect($clippingParents.length).toBe(2);
+      expect($clippingParents[0]).toBe(document.getElementById('container1'));
+      expect($clippingParents[1]).toBe(document.getElementById('container2'));
+    });
+
+    it('should handle empty selection', () => {
+      const $empty = $('.nonexistent');
+      const $clippingParent = $empty.clippingParent();
+
+      expect($clippingParent.length).toBe(0);
+    });
+
+    it('should find nested clipping parents correctly', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: hidden;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: scroll;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const $target = $('#target');
+      const $clippingParent = $target.clippingParent();
+
+      // Should find the immediate clipping parent (inner), not the outer one
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('inner'));
+    });
+  });
+
+  describe('containingParent', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should find containing parent with position relative', () => {
+      document.body.innerHTML = `
+        <div id="container" style="position: relative;">
+          <div id="child" style="position: absolute;">Child</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $containingParent = $child.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find containing parent with transform', () => {
+      document.body.innerHTML = `
+        <div id="transformed" style="transform: translateX(10px);">
+          <div id="child">Child</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $containingParent = $child.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('transformed'));
+    });
+
+    it('should find containing parent with filter', () => {
+      document.body.innerHTML = `
+        <div id="filtered" style="filter: blur(1px);">
+          <div id="child">Child</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $containingParent = $child.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('filtered'));
+    });
+
+    it('should find containing parent with contain property', () => {
+      document.body.innerHTML = `
+        <div id="contained" style="contain: layout;">
+          <div id="child">Child</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $containingParent = $child.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('contained'));
+    });
+
+    it('should find containing parent with will-change', () => {
+      document.body.innerHTML = `
+        <div id="willchange" style="will-change: transform;">
+          <div id="child">Child</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $containingParent = $child.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('willchange'));
+    });
+
+    it('should return undefined for fixed position elements', () => {
+      document.body.innerHTML = `
+        <div id="container" style="position: relative;">
+          <div id="fixed" style="position: fixed;">Fixed element</div>
+        </div>
+      `;
+
+      const $fixed = $('#fixed');
+      const $containingParent = $fixed.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(undefined);
+    });
+
+    it('should return document.body when no containing parent found', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="position: static;">
+          <div id="inner" style="position: static;">
+            <div id="target">Target</div>
+          </div>
+        </div>
+      `;
+
+      const $target = $('#target');
+      const $containingParent = $target.containingParent();
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.body);
+    });
+
+    it('should use browser offsetParent when calculate is false', () => {
+      document.body.innerHTML = `
+        <div id="container" style="position: relative;">
+          <div id="child">Child</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $containingParent = $child.containingParent({ calculate: false });
+
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('child').offsetParent);
+    });
+
+    it('should handle multiple elements', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="position: relative;">
+          <div class="item" id="item1">Item 1</div>
+        </div>
+        <div id="container2" style="transform: scale(1);">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const $items = $('.item');
+      const $containingParents = $items.containingParent();
+
+      expect($containingParents.length).toBe(2);
+      expect($containingParents[0]).toBe(document.getElementById('container1'));
+      expect($containingParents[1]).toBe(document.getElementById('container2'));
+    });
+
+    it('should handle empty selection', () => {
+      const $empty = $('.nonexistent');
+      const $containingParent = $empty.containingParent();
+
+      expect($containingParent.length).toBe(0);
+    });
+
+    it('should find nearest containing parent in nested contexts', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="position: relative;">
+          <div id="middle" style="position: static;">
+            <div id="inner" style="transform: translateY(5px);">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const $target = $('#target');
+      const $containingParent = $target.containingParent();
+
+      // Should find the immediate containing parent (inner), not the outer one
+      expect($containingParent.length).toBe(1);
+      expect($containingParent[0]).toBe(document.getElementById('inner'));
+    });
+  });
 });

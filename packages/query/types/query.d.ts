@@ -641,6 +641,15 @@ export class Query {
   reverse(): Query;
 
   /**
+   * Returns a shallow copy of a portion of the elements into a new Query object.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#slice
+   * @param start - The beginning index of the specified portion of the collection.
+   * @param end - The end index of the specified portion of the collection (exclusive).
+   * @returns A new Query instance containing the sliced elements.
+   */
+  slice(start?: number, end?: number): Query;
+
+  /**
    * Inserts content at a specified position relative to a target element.
    * @see https://next.semantic-ui.com/api/query/internal#insertcontent
    * @param target - The target element.
@@ -707,13 +716,20 @@ export class Query {
   naturalHeight(): number | number[];
 
   /**
-   * Gets the offset parent of each element in the current set, optionally calculating it accurately
-   * by considering transformed parent.
-   * @see https://next.semantic-ui.com/api/query/size-and-position#offsetParent
-   * @param options.calculate - Whether to calculate offset parent taking transform into account.
-   * @returns An array of the offset parent elements.
+   * Gets the clipping parent (overflow container) of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#clippingparent
+   * @returns A new Query instance containing the clipping parent elements.
    */
-  offsetParent(options?: { calculate?: boolean; }): (HTMLElement | null)[];
+  clippingParent(): Query;
+
+  /**
+   * Gets the containing parent (positioning context) of each element in the current set, optionally calculating it accurately
+   * by considering transform, filter, and other properties that create new positioning contexts.
+   * @see https://next.semantic-ui.com/api/query/dimensions#containingparent
+   * @param options.calculate - Whether to calculate containing parent taking modern CSS properties into account.
+   * @returns A new Query instance containing the containing parent elements.
+   */
+  containingParent(options?: { calculate?: boolean; }): Query;
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
@@ -758,6 +774,26 @@ export class Query {
    * @returns The component instance, or `undefined` if not found.
    */
   component(): any;
+
+  /**
+   * Gets or sets data attributes on elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/data#data
+   * @param key - The data attribute key.
+   * @param value - The value to set.
+   * @returns If setting, the Query instance for chaining. If getting, the value(s).
+   */
+  data(key: string, value: string): this;
+  /**
+   * Gets a data attribute from elements in the current set.
+   * @param key - The data attribute key to retrieve.
+   * @returns The value from the first element, or an array of values from all elements.
+   */
+  data(key: string): string | string[] | undefined;
+  /**
+   * Gets all data attributes from elements in the current set.
+   * @returns An object of data attributes from the first element, or an array of objects from all elements.
+   */
+  data(): PlainObject<string> | PlainObject<string>[] | undefined;
 
   /**
    * Gets the data context (if any) associated with the *first* element in the current set.
