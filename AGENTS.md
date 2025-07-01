@@ -17,9 +17,20 @@ This file provides Agentic Code-specific guidance for working with the Semantic 
 
 Bypassing this step is not a valid optimization.
 
+### Critical Self-Correction Questions
+* Am I about to generate code based only on the foundational `mental-model.md`?
+* Does this task involve a specific implementation domain (components, styling, docs)?
+* If yes, an answer without the corresponding `guide` is likely to be a high-confidence hallucination. I must load the specific guide first.
+
+### Agent's Internal Checklist for New Tasks
+1.  **Task Type Identified:** What is the user's core request? (e.g., Component implementation).
+2.  **Hub Document Queried:** Which `ai/` document does `00-START-HERE.md` specify for this task?
+3.  **Context Loaded:** Have I loaded both the mandatory pre-flight documents AND the required task-specific guide?
+4.  **Proceed with Synthesis:** I can now formulate a response using the full, required context.
+
 ### **Task-Based Context Loading**
 Building Components → ai/guides/component-generation-instructions.md
-Debugging Issues → ai/foundations/codebase-navigation-guide.md  
+Debugging Issues → ai/foundations/codebase-navigation-guide.md
 Implementation Patterns → ai/guides/patterns-cookbook.md
 API Reference → ai/foundations/quick-reference.md
 HTML/CSS Work → ai/guides/html-css-style-guide.md
