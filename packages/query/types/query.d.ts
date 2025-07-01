@@ -893,6 +893,28 @@ export class Query {
    * @returns The outer height of the first element.
    */
   outerHeight(includeMargin?: boolean): number;
+
+  /**
+   * Checks if any element in the current set contains the specified target.
+   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @param selector - A CSS selector string to search for within the elements.
+   * @returns `true` if any element contains an element matching the selector, `false` otherwise.
+   */
+  contains(selector: string): boolean;
+  /**
+   * Checks if any element in the current set contains the specified element.
+   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @param element - A DOM element to check for containment.
+   * @returns `true` if any element contains the specified element, `false` otherwise.
+   */
+  contains(element: Element): boolean;
+  /**
+   * Checks if any element in the current set contains any element from the Query instance.
+   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @param query - A Query instance containing elements to check for containment.
+   * @returns `true` if any element contains any element from the Query instance, `false` otherwise.
+   */
+  contains(query: Query): boolean;
 }
 
 export default Query;

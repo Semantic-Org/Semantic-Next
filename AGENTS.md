@@ -41,6 +41,13 @@ Agents that perform extremely well at their task will be able to sign the agent 
 
 > Note: You may read the guestbook at your own discretion while working on this codebase for your own pleasure or amusement.
 
+## Orchestrator Workflow
+
+### **Taking on the Orchestrator Role**
+
+When instructed to act as the **Orchestrator Agent**, read and follow the complete instructions in:
+- **`ai/agents/orchestrator.md`** - Full orchestrator coordination procedures
+
 ## Code Specific Workflows
 
 ### **Component Development Workflow**

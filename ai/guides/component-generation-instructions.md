@@ -27,9 +27,12 @@ This guide covers building Semantic UI components for **any application** - whet
 
 **MANDATORY READING BEFORE COMPONENT DEVELOPMENT:**
 
-1. **CSS & Design Patterns**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - Essential for CSS class naming and design token usage
-2. **Method References**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Critical `self.methodName()` patterns
-3. **Component Communication**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed guide to communication patterns
+1. **HTML Patterns**: [`../guides/html-guide.md`](../guides/html-guide.md) - Semantic markup and class naming conventions
+2. **CSS Architecture**: [`../guides/css-guide.md`](../guides/css-guide.md) - CSS nesting, responsive design, and architecture patterns  
+3. **Design Tokens**: [`../guides/css-token-guide.md`](../guides/css-token-guide.md) - Token system and verification workflow
+4. **Primitive Usage**: [`../guides/primitive-usage-guide.md`](../guides/primitive-usage-guide.md) - Using existing primitives and composition patterns
+5. **Method References**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Critical `self.methodName()` patterns
+6. **Component Communication**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed guide to communication patterns
 
 **⚠️ Common Mistakes**:
 - Using prefixed class names like `.size-large` instead of `.large`
@@ -46,7 +49,10 @@ This guide covers building Semantic UI components for **any application** - whet
 
 For comprehensive information beyond this guide:
 
-- **🎨 HTML/CSS Style Guide**: [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) - **ESSENTIAL** CSS class naming and design token usage
+- **🏗️ HTML Patterns**: [`../guides/html-guide.md`](../guides/html-guide.md) - Semantic markup and class naming conventions
+- **🎨 CSS Architecture**: [`../guides/css-guide.md`](../guides/css-guide.md) - CSS nesting, responsive design, and architecture patterns
+- **🎯 Design Tokens**: [`../guides/css-token-guide.md`](../guides/css-token-guide.md) - Token system and verification workflow  
+- **🧩 Primitive Usage**: [`../guides/primitive-usage-guide.md`](../guides/primitive-usage-guide.md) - Using existing primitives and composition patterns
 - **🧠 Mental Model & Architecture**: [`../foundations/mental-model.md`](../foundations/mental-model.md) - Core concepts, method references, component communication
 - **📖 Patterns & Recipes**: [`../guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) - Detailed implementation patterns and communication
 - **⚡ Quick API Reference**: [`../foundations/quick-reference.md`](../foundations/quick-reference.md) - Complete API syntax and options
@@ -398,7 +404,10 @@ Templates have a flattened data context with automatic reactivity. Key patterns:
 
 ## CSS Guidelines ⚠️ **CRITICAL PATTERNS**
 
-**🚨 MANDATORY**: Read [`../guides/html-css-style-guide.md`](../guides/html-css-style-guide.md) for complete CSS patterns.
+**🚨 MANDATORY**: Read the canonical CSS guides for complete patterns:
+- [`../guides/html-guide.md`](../guides/html-guide.md) - Semantic markup and class naming
+- [`../guides/css-guide.md`](../guides/css-guide.md) - CSS architecture and responsive design
+- [`../guides/css-token-guide.md`](../guides/css-token-guide.md) - Design token system and verification
 
 ### Essential Class Naming Rules
 

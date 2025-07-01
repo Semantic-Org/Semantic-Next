@@ -346,6 +346,80 @@ export class Query {
     return this.chain(filteredElements);
   }
 
+  contains(selector) {
+    if (!selector || this.length === 0) {
+      return false;
+    }
+
+    // Get the target element(s) to check containment for
+    let targets = [];
+    if (isString(selector)) {
+      if (this.options.pierceShadow) {
+        // Use deep query to find targets across shadow boundaries
+        targets = Array.from(this).flatMap(el => 
+          this.querySelectorAllDeep(el, selector, false)
+        );
+      } else {
+        // Use standard query within each element
+        targets = Array.from(this).flatMap(el => 
+          Array.from(el.querySelectorAll(selector))
+        );
+      }
+    } else if (selector instanceof Query) {
+      targets = selector.get();
+    } else if (isDOM(selector)) {
+      targets = [selector];
+    } else {
+      return false;
+    }
+
+    if (targets.length === 0) {
+      return false;
+    }
+
+    // Check if any element in the Query collection contains any of the targets
+    return Array.from(this).some(el => {
+      return targets.some(target => {
+        if (this.options.pierceShadow) {
+          // Use deep containment check for Shadow DOM
+          return this.containsDeep(el, target);
+        } else {
+          // Use native contains method
+          return el.contains && el.contains(target);
+        }
+      });
+    });
+  }
+
+  containsDeep(container, target) {
+    if (!container || !target) {
+      return false;
+    }
+
+    // Check direct containment first
+    if (container.contains && container.contains(target)) {
+      return true;
+    }
+
+    // Check within shadow roots
+    if (container.shadowRoot) {
+      if (this.containsDeep(container.shadowRoot, target)) {
+        return true;
+      }
+    }
+
+    // Check children recursively
+    if (container.children) {
+      for (let child of container.children) {
+        if (this.containsDeep(child, target)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   closest(selector, { returnAll = false } = {}) {
     const allResults = [];
     
