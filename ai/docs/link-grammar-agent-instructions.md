@@ -116,7 +116,8 @@ This agent is **ONLY** permitted to perform the following tasks:
 *   **Minimal Intervention:** Make the fewest changes possible to achieve the permitted tasks.
 *   **No Rewriting:** Absolutely no rephrasing, restructuring, or content generation.
 *   **Preserve Meaning:** Ensure corrections do not alter the original technical meaning.
-*   **No Code Editing:** NEVER modify content within markdown code blocks (``` ```) or inline code formatting (` `` `). Do not fix syntax errors, change variable names, alter any code content. Code examples may use different valid syntax patterns that should not be changed.
+*   **Focus:** Links, spelling, major grammar errors only.
+*   **No Code Editing:** NEVER modify content within markdown code blocks (``` ```) or inline code formatting (` `` `). Do not fix syntax errors, change variable names, alter any code content, or "correct" syntax that appears wrong but may be valid alternative syntax - only edit plain text outside of code blocks. Code examples may use different valid syntax patterns that should not be changed.
 *   **No Code Links:** NEVER add links within code blocks or inline code. Links should only wrap plain text.
 *   **Verification Required:** Use Read, Grep, or Bash tools to confirm every link target exists before adding it.
 
