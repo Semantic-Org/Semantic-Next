@@ -193,6 +193,10 @@ export const sidebarMenuFramework = [
         url: '/templates/loops',
       },
       {
+        name: 'Async',
+        url: '/templates/async',
+      },
+      {
         name: 'Slots',
         url: '/templates/slots',
       },
