@@ -7,12 +7,12 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Using Async
 
-Async blocks handle promises directly in templates. They create reactive contexts that automatically re-execute when reactive dependencies change.
+Async blocks handle promises directly in [templates](/templates). They create reactive contexts that automatically re-execute when reactive dependencies change.
 
 
 ### Async
 
-You can use `async` to specify content that should only render after a promise is resolved like an api request.
+You can use `async` to specify content that should only render after a promise is resolved like an API request.
 
 ```sui
 {#async fetchUsers as users}
@@ -91,13 +91,13 @@ When no `as` value is used for an async block it will be aliased to `this` for t
 
 ## Reactivity
 
-Async blocks are [reactive contexts](/reactivity/reactions). Reactive contexts will rerun whenever signals like [state](/components/state) or [settings](/components/settings) are modified.
+Async blocks are [reactive contexts](/reactivity/reactions). Reactive contexts will rerun whenever [signals](/reactivity/signals) like [state](/components/state) or [settings](/components/settings) are modified.
 
 ### Using Reactivity for Async
 
 Reactive contexts can be particularly useful for async operations that should rerun whenever a set of values change.
 
-> For more information about reactivity in components see the [dedicated reactivity guide](/components/reactivity/#component-reactivity)
+> For more information about reactivity in [components](/components) see the [dedicated reactivity guide](/components/reactivity/#component-reactivity)
 
 ```javascript
 const defaultState = {
@@ -117,7 +117,7 @@ const defaultState = {
 
 ### Reactivity Example
 
-The following shows a real world example of returning search results using a reactive `searchTerm`.
+The following shows a real-world example of returning search results using a reactive `searchTerm`.
 
 
 <PlaygroundExample id="async-advanced" direction="horizontal"></PlaygroundExample>
