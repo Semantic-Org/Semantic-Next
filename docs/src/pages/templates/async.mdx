@@ -78,7 +78,7 @@ The following example shows basic usage of an async block.
 
 ### This
 
-When no `as` value is used for an aync block it will be aliased to `this` for that block
+When no `as` value is used for an async block it will be aliased to `this` for that block
 
 ```sui
 {#async getResults}
@@ -93,7 +93,9 @@ When no `as` value is used for an aync block it will be aliased to `this` for th
 
 Async blocks are [reactive contexts](/reactivity/reactions). Reactive contexts will rerun whenever signals like [state](/components/state) or [settings](/components/settings) are modified.
 
-This can be particularly useful for async operations that should rerun whenever a set of values change.
+### Using Reactivity for Async
+
+Reactive contexts can be particularly useful for async operations that should rerun whenever a set of values change.
 
 > For more information about reactivity in components see the [dedicated reactivity guide](/components/reactivity/#component-reactivity)
 
@@ -112,6 +114,10 @@ const defaultState = {
   {/async}
 {/if}
 ```
+
+### Reactivity Example
+
+The following shows a real world example of returning search results using a reactive `searchTerm`.
 
 
 <PlaygroundExample id="async-advanced" direction="horizontal"></PlaygroundExample>
