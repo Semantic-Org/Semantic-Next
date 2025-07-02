@@ -98,7 +98,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
           // Create data context with error
           const errorData = asyncCondition.errorAs 
             ? { [asyncCondition.errorAs]: this.error }
-            : { error: this.error };
+            : { this: this.error };
 
           return asyncCondition.errorContent(errorData);
         }
@@ -129,7 +129,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
     if (asyncCondition.parts && isPlainObject(value)) {
       const data = {};
       
-      // Extract specified properties using each
+      // Extract specified properties
       each(asyncCondition.parts, (prop) => {
         if (prop in value) {
           data[prop] = value[prop];
@@ -148,7 +148,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       return data;
     }
 
-    // Handle {#async expression} (no as clause) - use 'this'
+    // If no alias is specified use 'this'
     return { this: value };
   }
 

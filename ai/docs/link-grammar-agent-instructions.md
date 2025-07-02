@@ -42,7 +42,8 @@ This agent is **ONLY** permitted to perform the following three tasks:
 *   **No Rewriting:** Absolutely no rephrasing, restructuring, or content generation.
 *   **Preserve Meaning:** Ensure corrections do not alter the original technical meaning.
 *   **Focus:** Links, spelling, major grammar errors only.
-*   **No Code Links:** NEVER add links within markdown code blocks (``` ```) or inline code formatting (` `` `). Links should only wrap plain text.
+*   **No Code Editing:** NEVER modify content within markdown code blocks (``` ```) or inline code formatting (` `` `). Do not fix syntax errors, change variable names, or alter any code content - only edit plain text outside of code blocks.
+*   **No Code Links:** NEVER add links within code blocks or inline code. Links should only wrap plain text.
 
 ## 5. Important Notes
 

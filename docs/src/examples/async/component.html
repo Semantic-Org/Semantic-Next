@@ -1,4 +1,4 @@
-<h4>Simulate Success</h4>
+<h4>Async As (success)</h4>
 {#async fetchData as data}
   <p>✓ {data.message}</p>
   <p>Time: {data.timestamp}</p>
@@ -8,11 +8,18 @@
   <p>Error: {e.message}</p>
 {/async}
 
-<h4>Simulate Error</h4>
+<h4>Async as (error)</h4>
 {#async fetchError as errorData}
   <p>This should not show</p>
 {loading}
   <p>Loading (will fail)...</p>
 {error as e}
   <p class="error">✓ Caught error: {e.message}</p>
+{/async}
+
+
+<h4>Async (this)</h4>
+{#async fetchData}
+  <p>✓ {this.message}</p>
+  <p>Time: {this.timestamp}</p>
 {/async}
