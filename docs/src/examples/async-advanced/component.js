@@ -38,11 +38,6 @@ const createComponent = ({ $, state, settings, self }) => ({
       // simulate async search with occasional errors for testing
       clearTimeout(self.timer);
       self.timer = setTimeout(() => {
-        // Simulate 10% error rate for testing error states
-        if (Math.random() < 0.1) {
-          reject(new Error(`Search failed for "${term}"`));
-          return;
-        }
         const matchingResults = settings.searchItems.filter(matchResult);
         resolve(matchingResults);
       }, SIMULATED_DELAY);
