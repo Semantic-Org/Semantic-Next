@@ -10,10 +10,11 @@ import {
   isArray,
   isString,
   keys,
+  sortBy,
   unique,
 } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
-import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu } from './menus.js';
+import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu, subCategorySortOrder } from './menus.js';
 
 /* Used to sort lessons */
 import semverCompare from 'semver/functions/compare';
@@ -123,10 +124,21 @@ const createFilteredExampleMenu = (categoryFilter) => {
   
   // If the category has subcategories (pages with nested pages), return those subcategories as top-level sections
   if (categorySection.pages.length > 0 && categorySection.pages[0].pages) {
-    return categorySection.pages.map(subcategory => ({
+    const subcategories = categorySection.pages.map(subcategory => ({
       name: subcategory.name,
       pages: subcategory.pages
     }));
+    
+    // Sort subcategories based on predefined order
+    const sortOrder = subCategorySortOrder[categoryFilter] || [];
+    const subcategoriesWithOrder = subcategories.map(subcategory => ({
+      ...subcategory,
+      sortIndex: sortOrder.indexOf(subcategory.name)
+    }));
+    
+    const sorted = sortBy(subcategoriesWithOrder, 'sortIndex');
+    
+    return sorted.map(({ sortIndex, ...subcategory }) => subcategory);
   }
   
   // If no subcategories, return the pages directly as a single section

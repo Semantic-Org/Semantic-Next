@@ -74,13 +74,18 @@
     nav-menu::part(search) {
       margin: 0.75rem 1rem -0.25rem;
     }
+    ui-menu {
+      font-size: 13px;
+    }
     nav-menu {
       margin-top: 0rem;
-      --nav-menu-title-padding: 5px 0px 10px;
+      --nav-menu-title-padding: 5px 0px 5px;
       --nav-menu-title-font-size: 11px;
       --nav-menu-title-icon-font-size: 13px;
       --nav-menu-title-icon-width: 1rem;
       --nav-menu-title-icon-distance: 9px;
+      --nav-menu-item-font-size: 12px;
+      --nav-menu-item-spacing: 5px;
       --nav-menu-content-icon-indent-distance: 7px;
       --nav-menu-sub-content-indent-distance: 0px;
       --nav-menu-menu-item-font-size: 12px;
