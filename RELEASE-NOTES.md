@@ -10,6 +10,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ### Reactivity
 * **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
 * **Feature** - Added new `mutate` helper for mutating a value by a function
+* **Feature** - There is now `getItem(id)` and `getItemIndex(id)` as separate mutation helpers.
 * **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
 
 ### Query

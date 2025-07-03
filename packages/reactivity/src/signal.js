@@ -201,6 +201,9 @@ export class Signal {
       value = property;
       property = indexOrProperty;
     }
+    if(index === -1) {
+      return;
+    }
     const newValue = this.peek().map((object, currentIndex) => {
       if (index == 'all' || currentIndex == index) {
         object[property] = value;
@@ -250,12 +253,18 @@ export class Signal {
     return this.getID(item) === id;
   }
   getItem(id) {
+    const index = this.getItemIndex(id);
+    if(index !== -1) {
+      return this.getIndex(index);
+    }
+  }
+  getItemIndex(id) {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
   setProperty(idOrProperty, property, value) {
     if (arguments.length == 3) {
       const id = idOrProperty;
-      const index = this.getItem(id);
+      const index = this.getItemIndex(id);
       return this.setArrayProperty(index, property, value);
     }
     else {
@@ -267,9 +276,9 @@ export class Signal {
     }
   }
   replaceItem(id, item) {
-    return this.setIndex(this.getItem(id), item);
+    return this.setIndex(this.getItemIndex(id), item);
   }
   removeItem(id) {
-    return this.removeIndex(this.getItem(id));
+    return this.removeIndex(this.getItemIndex(id));
   }
 }
