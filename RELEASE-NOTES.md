@@ -7,6 +7,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.13.0
 
 
+
 ### Reactivity
 * **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
 * **Feature** - Added new `mutate` helper for mutating a value by a function
@@ -26,8 +27,12 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
 
-### Testing
 
+### Docs
+* **Examples** - Improved console log styling for examples
+* **Examples** - Added a large amount of Signal & Reactivity examples
+
+### Testing
 * **Improvement** - Vitest now runs without watch for `npm test`, vitest configs have been added for each package.
 
 # Version 0.12.4-1

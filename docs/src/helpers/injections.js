@@ -141,6 +141,7 @@ console.log = function() {
 
     // Create a container for logs
     logContainer = document.createElement('div');
+    logContainer.id = 'log-container';
 
     // Append the log container to the body
     body.appendChild(logContainer);
@@ -151,7 +152,6 @@ console.log = function() {
     const skipFormat = typeof arg == 'string';
     return formatJSON(arg, skipFormat);
   }).join(' ');
-
   // Create and append the formatted message to the log container
   const formattedMessage = document.createElement('div'); // Use div to replicate console line
   formattedMessage.innerHTML = \`\${messages}\`; // Use innerHTML to include styled spans
@@ -256,7 +256,8 @@ export const errorCSS = `
 
 export const logCSS = `
   #log-container {
-    font-family: system-ui,
+    font-family: monospace,
+    system-ui,
      -apple-system, BlinkMacSystemFont,
      "Segoe UI",
      "Roboto",
@@ -270,12 +271,23 @@ export const logCSS = `
     ;
     width: 100%;
     margin: 0;
-    color: var(--standard-60);
+    padding: 0 0.5rem;
+    color: var(--text-color);
 
-    .json-key { color: #656565; }
+    div {
+      border-top: var(--border);
+      line-height: 1.66;
+    }
+    div:first-child {
+      border-top: none;
+    }
+
+    .json-key { color: var(--text-color); }
     .json-string { color: var(--primary-text-color); }
     .json-number { color: var(--primary-text-color); }
     .json-boolean { color: var(--primary-text-color); }
+  }
+  html.dark #log-container {
   }
 `;
 
