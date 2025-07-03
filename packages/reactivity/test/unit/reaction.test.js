@@ -257,6 +257,26 @@ describe('Reaction', () => {
       // Includes the initial run plus each update
       expect(callback).toHaveBeenCalledTimes(3);
     });
+
+    it('should correctly manipulate array with helpers when allowClone is false', () => {
+      const items = new Signal([0, 1, 2], { allowClone: false });
+      const callback = vi.fn();
+
+      Reaction.create(() => {
+        callback(items.get().length);
+      });
+
+      // Initial flush to account for the setup of reactive computation
+      Reaction.flush();
+
+      items.push(3); // Expect length to be 4
+      Reaction.flush(); // Flush after push
+      items.removeIndex(0); // Expect length to be 3
+      Reaction.flush(); // Flush after removeIndex
+
+      // Includes the initial run plus each update
+      expect(callback).toHaveBeenCalledTimes(3);
+    });
   });
 
   describe('Debugging', () => {
@@ -274,7 +294,7 @@ describe('Reaction', () => {
       Reaction.flush();
       expect(callback).toHaveBeenCalledWith(2);
     });
-    
+
     /* This clutters the logs -- Lets remove even though it passes
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
@@ -302,6 +322,5 @@ describe('Reaction', () => {
     });
 
     */
-
   });
 });
