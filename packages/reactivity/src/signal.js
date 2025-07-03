@@ -9,8 +9,10 @@ import {
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
+
 import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
+
 export class Signal {
   constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
     // pass in some metadata for debugging
@@ -38,7 +40,7 @@ export class Signal {
     this.setContext(context);
   }
 
-  // set debugging context for signal
+  // set debugging context for signal removing any present context
   setContext(additionalContext = {}) {
     const defaultContext = {
       value: this.currentValue,
@@ -49,6 +51,7 @@ export class Signal {
     };
   }
 
+  // add context to signal
   addContext(additionalContext = {}) {
     if (!this.context) {
       this.context = {};
@@ -99,7 +102,7 @@ export class Signal {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.maybeClone(newValue);
-      this.setContext();
+      this.addContext({ value: newValue });
       this.setTrace();
       this.dependency.changed(this.context);
     }
@@ -111,7 +114,6 @@ export class Signal {
 
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.addContext({ value: newValue });
       this.value = newValue;
     }
   }

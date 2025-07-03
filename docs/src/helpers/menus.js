@@ -1,5 +1,5 @@
-import { getCollection } from 'astro:content';
 import { sortBy } from '@semantic-ui/utils';
+import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
 const components = await getCollection('components');
@@ -24,7 +24,7 @@ const exampleCategorySortOrder = [
   'UI Components',
   'Templates',
   'Reactivity',
-  'Query'
+  'Query',
 ];
 
 /* Define sort order for subcategories within each category */
@@ -54,11 +54,14 @@ const subCategorySortOrder = {
     'Async',
   ],
   'Reactivity': [
+    'Introduction',
     'Variables',
+    'Helpers',
+    'Controls',
   ],
   'Query': [
     // Add subcategories as they appear
-  ]
+  ],
 };
 
 /* Export subcategory sort order for use in navigation.js */
@@ -71,7 +74,7 @@ const getExampleCategories = () => {
   // Sort categories based on the predefined order using sortBy utility
   const categoriesWithOrder = categories.map(category => ({
     name: category,
-    sortIndex: exampleCategorySortOrder.indexOf(category)
+    sortIndex: exampleCategorySortOrder.indexOf(category),
   }));
 
   const sorted = sortBy(categoriesWithOrder, 'sortIndex');
