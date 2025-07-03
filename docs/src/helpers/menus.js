@@ -30,12 +30,14 @@ const exampleCategorySortOrder = [
 /* Define sort order for subcategories within each category */
 const subCategorySortOrder = {
   'Framework': [
-    'Lifecycle',
+    'Intro',
     'Usage',
+    'Lifecycle',
     'Events',
     'Styling',
     'Settings',
     'Keybinding',
+    'Comms',
   ],
   'UI Components': [
     'Interactive',

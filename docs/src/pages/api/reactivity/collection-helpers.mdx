@@ -221,8 +221,7 @@ users.hasID(users.value[0], 'wrongId'); // false
 users.hasID('user1', 'user1'); // true
 users.hasID('user1', 'user2'); // false
 ```
-
-## getItem
+## getItemIndex
 
 Gets the index of an object with the specified ID within the Signal's array value.
 
@@ -253,6 +252,37 @@ const users = new Signal([
   { id: 'user2', name: 'Bob' }
 ]);
 
-const indexOfBob = users.getItem('user2'); // 1
-const indexOfUnknown = users.getItem('user3'); // -1
+const indexOfBob = users.getItemIndex('user2'); // 1
+const indexOfUnknown = users.getItemIndex('user3'); // -1
+```
+
+
+## getItem
+
+Gets the index of an object with the specified ID within the Signal's array value.
+
+### Syntax
+```javascript
+signal.getItem(id)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | ID to look for |
+
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { id: 'user1', name: 'Alice' },
+  { id: 'user2', name: 'Bob' }
+]);
+
+const alice = users.getItem('user1'); // alice
+const bob = users.getItem('user2'); // bob
 ```
