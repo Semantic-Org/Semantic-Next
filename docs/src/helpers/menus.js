@@ -59,7 +59,9 @@ const subCategorySortOrder = {
     'Introduction',
     'Variables',
     'Helpers',
+    'Performance',
     'Controls',
+    'Advanced',
   ],
   'Query': [
     // Add subcategories as they appear
