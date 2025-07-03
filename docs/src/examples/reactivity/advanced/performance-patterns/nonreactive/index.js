@@ -1,4 +1,4 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 const nameSignal = new Signal('Alice');
 const statusSignal = new Signal('Online');

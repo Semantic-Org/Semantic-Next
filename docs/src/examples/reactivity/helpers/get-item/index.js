@@ -14,4 +14,3 @@ Reaction.create(() => {
 
 // Update user 2's status
 users.setProperty('user2', 'status', 'online');
-
