@@ -200,6 +200,8 @@ $('<p>New paragraph</p>').insertAfter('p');
 $$('<footer>Last updated: Today</footer>').insertAfter($$('user-profile').find('.user-bio'));
 ```
 
+> **Aliases** The `before(content)` and `after(content)` methods are available as more intuitive aliases for inserting content before and after the current selection.
+
 ## detach
 
 Remove the set of matched elements from the DOM, but keep all associated data and events.
@@ -256,4 +258,84 @@ A new [Query object](/api/query/basic#the-query-object) containing cloned elemen
 const $template = $('#item-template').clone();
 $('#container').append($template);
 ```
+
+## reverse
+
+Reverses the order of the elements in the current set.
+
+### Syntax
+```javascript
+$('selector').reverse()
+```
+
+### Returns
+A new [Query object](/api/query/basic#the-query-object) containing the reversed elements.
+
+### Usage
+```javascript
+// Reverse the order of list items
+const $reversed = $('ul li').reverse();
+$('ul').empty().append($reversed);
+```
+
+## slice
+
+Returns a shallow copy of a portion of the elements into a new Query object.
+
+### Syntax
+```javascript
+$('selector').slice(start, end)
+```
+
+### Parameters
+| Name  | Type   | Description                                                                 |
+|-------|--------|-----------------------------------------------------------------------------|
+| start | number | The beginning index of the specified portion of the collection (optional)  |
+| end   | number | The end index of the specified portion of the collection (optional, exclusive) |
+
+### Returns
+A new [Query object](/api/query/basic#the-query-object) containing the sliced elements.
+
+### Usage
+
+#### Basic Slicing
+```javascript
+// Get elements 2-4 from a list of items
+const $items = $('.item');
+const $sliced = $items.slice(1, 4); // Gets items at index 1, 2, 3
+
+// Get all elements from index 2 onwards
+const $fromIndex = $items.slice(2);
+
+// Get the last 2 elements using negative indices
+const $lastTwo = $items.slice(-2);
+```
+
+#### Working with Multiple Elements
+```javascript
+// Slice and manipulate a portion of elements
+$('.card').slice(0, 3).addClass('featured');
+
+// Process elements in batches
+const $allItems = $('.item');
+const firstBatch = $allItems.slice(0, 5);
+const secondBatch = $allItems.slice(5, 10);
+
+firstBatch.addClass('batch-one');
+secondBatch.addClass('batch-two');
+```
+
+#### Shadow DOM
+```javascript
+// Slice user posts in a user-profile component
+const $posts = $$('user-profile').find('.user-post');
+const $recentPosts = $posts.slice(0, 3);
+$recentPosts.addClass('recent');
+```
+
+### Notes
+- Returns the same instance when called on an empty collection
+- Supports negative indices like `Array.prototype.slice`
+- Creates a new Query object, enabling method chaining
+- Does not modify the original Query object
 

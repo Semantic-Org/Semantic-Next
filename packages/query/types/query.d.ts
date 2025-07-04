@@ -40,6 +40,8 @@ export interface EventHandler {
   el: HTMLElement | typeof globalThis;
   /** The name of the event. */
   eventName: string;
+  /** The namespaces of the event, if any. */
+  namespaces: string[] | null;
   /** The event listener function. */
   eventListener: EventListener;
   /** The AbortController associated with the event listener. */
@@ -60,6 +62,24 @@ export interface CSSOptions {
    * If true, retrieves computed styles instead of inline styles.
    */
   includeComputed?: boolean;
+}
+
+/**
+ * Options for dimensional calculations (width/height).
+ */
+export interface DimensionOptions {
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include border in the calculation. Defaults to true.
+   */
+  includeBorder?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to true.
+   */
+  includePadding?: boolean;
 }
 
 /**
@@ -214,18 +234,30 @@ export class Query {
    * Gets the closest ancestor of each element in the current set (including the element itself) that matches the selector.
    * @see https://next.semantic-ui.com/api/query/dom-traversal#closest
    * @param selector - A CSS selector or a DOM element.
+   * @param options - Options to control the search behavior.
+   * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
    * @returns A new Query instance containing the closest ancestor elements.
    */
-  closest(selector: string | Element): Query;
+  closest(selector: string | Element, options?: { returnAll?: boolean }): Query;
+
+  /**
+   * Gets all ancestor elements that match the selector, traversing up the entire DOM tree.
+   * @see https://next.semantic-ui.com/api/query/dom-traversal#closestall
+   * @param selector - A CSS selector or a DOM element.
+   * @returns A new Query instance containing all matching ancestor elements.
+   */
+  closestAll(selector: string | Element): Query;
 
   /**
    * Gets the closest ancestor of the provided element (including the element itself) that matches the selector, traversing shadow DOM boundaries.
    * @see https://next.semantic-ui.com/api/query/internal#closestdeep
    * @param element - The element to start searching from.
    * @param selector - A CSS selector or a DOM element.
-   * @returns The closest ancestor element, or `undefined` if not found.
+   * @param options - Options to control the search behavior.
+   * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
+   * @returns The closest ancestor element, all matching ancestors, or `undefined` if not found.
    */
-  closestDeep(element: Element, selector: string | Element): Element | undefined;
+  closestDeep(element: Element, selector: string | Element, options?: { returnAll?: boolean }): Element | Element[] | undefined;
 
   /**
    * Attaches a handler to be executed when the DOM is fully loaded.
@@ -579,18 +611,32 @@ export class Query {
   prev(selector?: string): Query;
 
   /**
-   * Gets or sets the height of each element in the current set. Uses `clientHeight` or `innerHeight` depending on presence of value.
+   * Gets the height of the first element in the current set with optional dimension calculations.
    * @see https://next.semantic-ui.com/api/query/dimensions#height
-   * @param value - height in pixels.
-   * @returns If setting, the Query instance for chaining.  If getting, the height of the *first* element or an array of heights.
+   * @param options - Options to control which parts of the box model to include.
+   * @returns The height of the first element.
+   */
+  height(options: DimensionOptions): number;
+  /**
+   * Gets or sets the height of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#height
+   * @param value - The height in pixels to set.
+   * @returns If setting, the Query instance for chaining. If getting, the height of the first element.
    */
   height(value?: number): number | this;
 
   /**
+   * Gets the width of the first element in the current set with optional dimension calculations.
+   * @see https://next.semantic-ui.com/api/query/dimensions#width
+   * @param options - Options to control which parts of the box model to include.
+   * @returns The width of the first element.
+   */
+  width(options: DimensionOptions): number;
+  /**
    * Gets or sets the width of each element in the current set.
    * @see https://next.semantic-ui.com/api/query/dimensions#width
-   * @param value - The width in pixels.
-   * @returns If setting, the Query instance for chaining.  If getting, the width of the *first* element.
+   * @param value - The width in pixels to set.
+   * @returns If setting, the Query instance for chaining. If getting, the width of the first element.
    */
   width(value?: number): number | this;
 
@@ -641,6 +687,15 @@ export class Query {
   reverse(): Query;
 
   /**
+   * Returns a shallow copy of a portion of the elements into a new Query object.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#slice
+   * @param start - The beginning index of the specified portion of the collection.
+   * @param end - The end index of the specified portion of the collection (exclusive).
+   * @returns A new Query instance containing the sliced elements.
+   */
+  slice(start?: number, end?: number): Query;
+
+  /**
    * Inserts content at a specified position relative to a target element.
    * @see https://next.semantic-ui.com/api/query/internal#insertcontent
    * @param target - The target element.
@@ -686,6 +741,22 @@ export class Query {
   insertAfter(selector: string | Node | NodeList | HTMLCollection | Query): Query;
 
   /**
+   * Inserts content before each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#before
+   * @param content - The content to insert before each element.
+   * @returns The Query instance for chaining.
+   */
+  before(content: string | Node | NodeList | HTMLCollection | Query): this;
+
+  /**
+   * Inserts content after each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#after
+   * @param content - The content to insert after each element.
+   * @returns The Query instance for chaining.
+   */
+  after(content: string | Node | NodeList | HTMLCollection | Query): this;
+
+  /**
    * Removes each element in the current set from the DOM, but keeps event handlers.
    * @see https://next.semantic-ui.com/api/query/dom-manipulation#detach
    * @returns The Query instance for chaining.
@@ -707,13 +778,20 @@ export class Query {
   naturalHeight(): number | number[];
 
   /**
-   * Gets the offset parent of each element in the current set, optionally calculating it accurately
-   * by considering transformed parent.
-   * @see https://next.semantic-ui.com/api/query/size-and-position#offsetParent
-   * @param options.calculate - Whether to calculate offset parent taking transform into account.
-   * @returns An array of the offset parent elements.
+   * Gets the clipping parent (overflow container) of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#clippingparent
+   * @returns A new Query instance containing the clipping parent elements.
    */
-  offsetParent(options?: { calculate?: boolean; }): (HTMLElement | null)[];
+  clippingParent(): Query;
+
+  /**
+   * Gets the containing parent (positioning context) of each element in the current set, optionally calculating it accurately
+   * by considering transform, filter, and other properties that create new positioning contexts.
+   * @see https://next.semantic-ui.com/api/query/dimensions#containingparent
+   * @param options.calculate - Whether to calculate containing parent taking modern CSS properties into account.
+   * @returns A new Query instance containing the containing parent elements.
+   */
+  containingParent(options?: { calculate?: boolean; }): Query;
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
@@ -760,11 +838,83 @@ export class Query {
   component(): any;
 
   /**
+   * Gets or sets data attributes on elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/data#data
+   * @param key - The data attribute key.
+   * @param value - The value to set.
+   * @returns If setting, the Query instance for chaining. If getting, the value(s).
+   */
+  data(key: string, value: string): this;
+  /**
+   * Gets a data attribute from elements in the current set.
+   * @param key - The data attribute key to retrieve.
+   * @returns The value from the first element, or an array of values from all elements.
+   */
+  data(key: string): string | string[] | undefined;
+  /**
+   * Gets all data attributes from elements in the current set.
+   * @returns An object of data attributes from the first element, or an array of objects from all elements.
+   */
+  data(): PlainObject<string> | PlainObject<string>[] | undefined;
+
+  /**
    * Gets the data context (if any) associated with the *first* element in the current set.
    * @see https://next.semantic-ui.com/api/query/components#datacontext
    * @returns The data context, or undefined.
    */
   dataContext(): any;
+
+  /**
+   * Gets the inner width (content + padding) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#innerWidth
+   * @returns The inner width of the first element.
+   */
+  innerWidth(): number;
+
+  /**
+   * Gets the inner height (content + padding) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#innerHeight
+   * @returns The inner height of the first element.
+   */
+  innerHeight(): number;
+
+  /**
+   * Gets the outer width (content + padding + border, optionally + margin) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#outerWidth
+   * @param includeMargin - Whether to include margin in the calculation. Defaults to false.
+   * @returns The outer width of the first element.
+   */
+  outerWidth(includeMargin?: boolean): number;
+
+  /**
+   * Gets the outer height (content + padding + border, optionally + margin) of the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#outerHeight
+   * @param includeMargin - Whether to include margin in the calculation. Defaults to false.
+   * @returns The outer height of the first element.
+   */
+  outerHeight(includeMargin?: boolean): number;
+
+  /**
+   * Checks if any element in the current set contains the specified target.
+   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @param selector - A CSS selector string to search for within the elements.
+   * @returns `true` if any element contains an element matching the selector, `false` otherwise.
+   */
+  contains(selector: string): boolean;
+  /**
+   * Checks if any element in the current set contains the specified element.
+   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @param element - A DOM element to check for containment.
+   * @returns `true` if any element contains the specified element, `false` otherwise.
+   */
+  contains(element: Element): boolean;
+  /**
+   * Checks if any element in the current set contains any element from the Query instance.
+   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @param query - A Query instance containing elements to check for containment.
+   * @returns `true` if any element contains any element from the Query instance, `false` otherwise.
+   */
+  contains(query: Query): boolean;
 }
 
 export default Query;

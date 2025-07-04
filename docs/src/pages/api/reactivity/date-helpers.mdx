@@ -5,6 +5,7 @@ icon: calendar
 title: Date Helpers
 description: API reference for Date Helpers in Semantic UI's reactivity system
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Date Helpers are methods available on Signal instances that contain Date objects. These helpers provide a convenient way to update the date value reactively.
 
@@ -34,6 +35,9 @@ console.log(currentTime.get()); // Output: current date and time
 currentTime.now();
 console.log(currentTime.get()); // Output: updated current date and time
 ```
+
+### Example
+<PlaygroundExample id="now" direction="horizontal"></PlaygroundExample>
 
 ### Notes
 
