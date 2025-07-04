@@ -9,20 +9,20 @@ import {
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
-
 import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
-
 export class Signal {
   constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
+
     // pass in some metadata for debugging
     this.dependency = new Dependency({
       firstRun: true,
-      value: initialValue,
+      value: initialValue
     });
 
     // allow user to opt out of value cloning
     this.allowClone = allowClone;
+
 
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
@@ -40,23 +40,22 @@ export class Signal {
     this.setContext(context);
   }
 
-  // set debugging context for signal removing any present context
+  // set debugging context for signal
   setContext(additionalContext = {}) {
     const defaultContext = {
       value: this.currentValue,
     };
     this.context = {
       ...defaultContext,
-      ...additionalContext,
+      ...additionalContext
     };
   }
 
-  // add context to signal
   addContext(additionalContext = {}) {
-    if (!this.context) {
+    if(!this.context) {
       this.context = {};
     }
-    for (const key in additionalContext) {
+    for(const key in additionalContext) {
       this.context[key] = additionalContext[key];
     }
   }
@@ -102,7 +101,7 @@ export class Signal {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.maybeClone(newValue);
-      this.addContext({ value: newValue });
+      this.setContext();
       this.setTrace();
       this.dependency.changed(this.context);
     }
@@ -114,6 +113,7 @@ export class Signal {
 
   set(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.addContext({ value: newValue });
       this.value = newValue;
     }
   }
@@ -132,62 +132,43 @@ export class Signal {
     return this.set(undefined);
   }
 
-  // mutate the current value by a mutation function
-  mutate(mutationFn) {
-    // we use clone in all cases to detect for changes only
-    const beforeClone = this.clone(this.currentValue);
-    const result = mutationFn(this.currentValue);
-
-    if (result !== undefined) {
-      // if the mutation returned a value just set it
-      this.value = result;
-    }
-    else {
-      // if no value returned check if the value changed from side effects
-      // in this case we want to trigger reactivity
-      if (!this.equalityFunction(beforeClone, this.currentValue)) {
-        this.setContext();
-        this.setTrace();
-        this.dependency.changed(this.context);
-      }
-    }
-  }
-
   // array helpers
   push(...args) {
-    return this.mutate(arr => {
-      arr.push(...args);
-    });
+    const arr = this.peek();
+    arr.push(...args);
+    this.set(arr);
   }
   unshift(...args) {
-    return this.mutate(arr => {
-      arr.unshift(...args);
-    });
+    const arr = this.peek();
+    arr.unshift(...args);
+    this.set(arr);
   }
   splice(...args) {
-    return this.mutate(arr => {
-      arr.splice(...args);
-    });
+    const arr = this.peek();
+    arr.splice(...args);
+    this.set(arr);
   }
   map(mapFunction) {
-    return this.mutate(arr => Array.prototype.map.call(arr, mapFunction));
+    const newValue = Array.prototype.map.call(this.peek(), mapFunction);
+    this.set(newValue);
   }
   filter(filterFunction) {
-    return this.mutate(arr => Array.prototype.filter.call(arr, filterFunction));
+    const newValue = Array.prototype.filter.call(this.peek(), filterFunction);
+    this.set(newValue);
   }
 
   getIndex(index) {
     return this.get()[index];
   }
   setIndex(index, value) {
-    return this.mutate(arr => {
-      arr[index] = value;
-    });
+    let arr = this.peek();
+    arr[index] = value;
+    this.set(arr);
   }
   removeIndex(index) {
-    return this.mutate(arr => {
-      arr.splice(index, 1);
-    });
+    let arr = this.peek();
+    arr.splice(index, 1);
+    this.set(arr);
   }
 
   // sets
@@ -201,9 +182,6 @@ export class Signal {
       value = property;
       property = indexOrProperty;
     }
-    if(index === -1) {
-      return;
-    }
     const newValue = this.peek().map((object, currentIndex) => {
       if (index == 'all' || currentIndex == index) {
         object[property] = value;
@@ -214,30 +192,26 @@ export class Signal {
   }
 
   toggle() {
-    return this.mutate(val => !val);
+    return this.set(!this.peek());
   }
 
   increment(amount = 1, max) {
-    return this.mutate(val => {
-      let newAmount = val + amount;
-      if (isNumber(max) && newAmount > max) {
-        newAmount = max;
-      }
-      return newAmount;
-    });
+    let newAmount = this.peek() + amount;
+    if(isNumber(max) && newAmount > max) {
+      newAmount = max;
+    }
+    return this.set(newAmount);
   }
   decrement(amount = 1, min) {
-    return this.mutate(val => {
-      let newAmount = val - amount;
-      if (isNumber(min) && newAmount < min) {
-        newAmount = min;
-      }
-      return newAmount;
-    });
+    let newAmount = this.peek() - amount;
+    if(isNumber(min) && newAmount < min) {
+      newAmount = min;
+    }
+    return this.set(newAmount);
   }
 
   now() {
-    return this.mutate(() => new Date());
+    return this.set(new Date());
   }
 
   getIDs(item) {
@@ -253,18 +227,12 @@ export class Signal {
     return this.getID(item) === id;
   }
   getItem(id) {
-    const index = this.getItemIndex(id);
-    if(index !== -1) {
-      return this.getIndex(index);
-    }
-  }
-  getItemIndex(id) {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
   setProperty(idOrProperty, property, value) {
     if (arguments.length == 3) {
       const id = idOrProperty;
-      const index = this.getItemIndex(id);
+      const index = this.getItem(id);
       return this.setArrayProperty(index, property, value);
     }
     else {
@@ -276,9 +244,9 @@ export class Signal {
     }
   }
   replaceItem(id, item) {
-    return this.setIndex(this.getItemIndex(id), item);
+    return this.setIndex(this.getItem(id), item);
   }
   removeItem(id) {
-    return this.removeIndex(this.getItemIndex(id));
+    return this.removeIndex(this.getItem(id));
   }
 }

@@ -34,9 +34,6 @@ const defaultSettings = {
   // whether a file marked as generated (needed to execute code) should appear to user
   includeGeneratedInline: false,
 
-  // text to use for preview tab
-  previewText: 'Preview',
-
   // the initial selected file
   selectedFile: '',
 
@@ -177,7 +174,7 @@ const createComponent = (
 ) => ({
   mobileMenu: [
     { label: 'Code', value: 'code' },
-    { label: settings.previewText, value: 'preview' },
+    { label: 'Preview', value: 'preview' },
   ],
 
   initialize() {

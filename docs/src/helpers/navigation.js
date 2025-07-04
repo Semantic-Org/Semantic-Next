@@ -10,11 +10,10 @@ import {
   isArray,
   isString,
   keys,
-  sortBy,
   unique,
 } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
-import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu, subCategorySortOrder } from './menus.js';
+import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu } from './menus.js';
 
 /* Used to sort lessons */
 import semverCompare from 'semver/functions/compare';
@@ -114,40 +113,6 @@ const createExampleMenu = () => {
 };
 export const sidebarMenuExamples = createExampleMenu();
 
-
-/* Create filtered example menus for each category */
-const createFilteredExampleMenu = (categoryFilter) => {
-  const categorySection = sidebarMenuExamples.find(section => section.name === categoryFilter);
-  if (!categorySection || !categorySection.pages) {
-    return [];
-  }
-  
-  // If the category has subcategories (pages with nested pages), return those subcategories as top-level sections
-  if (categorySection.pages.length > 0 && categorySection.pages[0].pages) {
-    const subcategories = categorySection.pages.map(subcategory => ({
-      name: subcategory.name,
-      pages: subcategory.pages
-    }));
-    
-    // Sort subcategories based on predefined order
-    const sortOrder = subCategorySortOrder[categoryFilter] || [];
-    const subcategoriesWithOrder = subcategories.map(subcategory => ({
-      ...subcategory,
-      sortIndex: sortOrder.indexOf(subcategory.name)
-    }));
-    
-    const sorted = sortBy(subcategoriesWithOrder, 'sortIndex');
-    
-    return sorted.map(({ sortIndex, ...subcategory }) => subcategory);
-  }
-  
-  // If no subcategories, return the pages directly as a single section
-  return [{
-    name: categorySection.name,
-    pages: categorySection.pages
-  }];
-};
-
 /* Gets Sidebar Menu for Examples Section */
 const createLearnMenu = () => {
   let menu = [];
@@ -224,19 +189,6 @@ const isInSectionMenu = (sectionId, currentPath) => {
   }
   else if (sectionId === 'examples') {
     menu = sidebarMenuExamples;
-  }
-  else if (sectionId?.startsWith('examples-')) {
-    // Extract category name from section ID by finding the original category
-    const categorySlug = sectionId.replace('examples-', '');
-    // Find the actual category name from examplePages that matches this slug
-    const categoryName = examplePages.find(example => {
-      const exampleSlug = example.category?.toLowerCase().replace(/\s+/g, '-');
-      return exampleSlug === categorySlug;
-    })?.category;
-    
-    if (categoryName) {
-      menu = createFilteredExampleMenu(categoryName);
-    }
   }
   else if (sectionId === 'learn') {
     menu = sidebarMenuLearn;
@@ -343,19 +295,6 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
   }
   else if (topbarSection === 'examples') {
     menu = sidebarMenuExamples;
-  }
-  else if (topbarSection?.startsWith('examples-')) {
-    // Extract category name from section ID by finding the original category
-    const categorySlug = topbarSection.replace('examples-', '');
-    // Find the actual category name from examplePages that matches this slug
-    const categoryName = examplePages.find(example => {
-      const exampleSlug = example.category?.toLowerCase().replace(/\s+/g, '-');
-      return exampleSlug === categorySlug;
-    })?.category;
-    
-    if (categoryName) {
-      menu = createFilteredExampleMenu(categoryName);
-    }
   }
   else if (topbarSection === 'learn') {
     menu = sidebarMenuLearn;

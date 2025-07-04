@@ -1,4 +1,3 @@
-import { sortBy } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
@@ -8,97 +7,6 @@ const componentPages = components.map(page => ({
   url: `/ui/${page.slug}`,
   matchSubPaths: true,
 }));
-
-/* Examples pages are generated dynamically */
-const examples = await getCollection('examples');
-const examplePages = examples
-  .filter(doc => !doc?.data?.hidden)
-  .map(doc => ({
-    ...doc.data,
-    url: `/examples/${doc.slug}`,
-  }));
-
-/* Define sort order for example categories */
-const exampleCategorySortOrder = [
-  'Framework',
-  'UI Components',
-  'Templates',
-  'Reactivity',
-  'Query',
-];
-
-/* Define sort order for subcategories within each category */
-const subCategorySortOrder = {
-  'Framework': [
-    'Intro',
-    'Usage',
-    'Lifecycle',
-    'Events',
-    'Styling',
-    'Settings',
-    'Keybinding',
-    'Comms',
-  ],
-  'UI Components': [
-    'Interactive',
-    'Data Display',
-    'Complex',
-    'Feedback',
-    'Form Elements',
-    'Canvas',
-    'SVG',
-  ],
-  'Templates': [
-    'Syntax',
-    'Subtemplates',
-    'Snippets',
-    'Helpers',
-    'Async',
-  ],
-  'Reactivity': [
-    'Introduction',
-    'Variables',
-    'Helpers',
-    'Performance',
-    'Controls',
-    'Advanced',
-  ],
-  'Query': [
-    // Add subcategories as they appear
-  ],
-};
-
-/* Export subcategory sort order for use in navigation.js */
-export { subCategorySortOrder };
-
-/* Dynamically get all unique categories from examples */
-const getExampleCategories = () => {
-  const categories = [...new Set(examplePages.map(example => example.category).filter(Boolean))];
-
-  // Sort categories based on the predefined order using sortBy utility
-  const categoriesWithOrder = categories.map(category => ({
-    name: category,
-    sortIndex: exampleCategorySortOrder.indexOf(category),
-  }));
-
-  const sorted = sortBy(categoriesWithOrder, 'sortIndex');
-
-  return sorted.map(item => item.name);
-};
-
-/* Create dynamic menu entries for examples based on actual categories */
-const exampleCategoryMenus = getExampleCategories().map(category => {
-  // Find the first example in this category
-  const firstExample = examplePages.find(example => example.category === category);
-  const firstExampleUrl = firstExample ? firstExample.url : `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`;
-
-  return {
-    _id: `examples-${category.toLowerCase().replace(/\s+/g, '-')}`,
-    name: category,
-    url: firstExampleUrl, // Link to first example
-    baseURL: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`, // Keep category path for URL matching
-  };
-});
 
 /* Topbar Menu */
 export const topbarDisplayMenu = [
@@ -121,8 +29,7 @@ export const topbarDisplayMenu = [
     baseURL: '/learn',
   },
   {
-    /* This is the ids of the submenu in sidebar */
-    _ids: exampleCategoryMenus.map(menu => menu._id),
+    _id: 'examples',
     name: 'Examples',
     url: '/examples/counter',
     baseURL: '/examples',
@@ -157,7 +64,12 @@ export const topbarMenu = [
     url: '/learn/selection',
     baseURL: '/learn',
   },
-  ...exampleCategoryMenus, /*
+  {
+    _id: 'examples',
+    name: 'Examples',
+    url: '/examples/counter',
+    baseURL: '/examples',
+  }, /*
   {
     _id: 'playground',
     name: 'Playground',
@@ -279,10 +191,6 @@ export const sidebarMenuFramework = [
       {
         name: 'Loops',
         url: '/templates/loops',
-      },
-      {
-        name: 'Async',
-        url: '/templates/async',
       },
       {
         name: 'Slots',

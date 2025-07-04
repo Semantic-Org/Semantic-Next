@@ -28,8 +28,7 @@
     "build": "wireit",
     "build:esm": "wireit",
     "build:cdn": "wireit",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test": "vitest"
   },
   "files": [
     "src",

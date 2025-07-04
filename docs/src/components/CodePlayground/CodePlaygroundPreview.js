@@ -11,6 +11,7 @@ const defaultState = {
 };
 
 const createComponent = ({ self, afterFlush, reaction, findParent, data, state, $, $$ }) => ({
+
   showMenu() {
     if (data.showMenu == false) {
       return false;
@@ -20,7 +21,7 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
 
   getMenu: () => {
     let menu = [
-      { label: data.previewText || 'Preview', value: 'preview' },
+      { label: 'Preview', value: 'preview' },
     ];
     const ast = state.ast.get();
     if (ast?.length) {
@@ -31,7 +32,7 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
 
   calculateAST() {
     let template = self.getTemplate();
-    if (template !== undefined) {
+    if(template !== undefined) {
       const compiler = new TemplateCompiler(template);
       const ast = compiler.compile();
       state.ast.set(ast);
@@ -42,35 +43,36 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
   // sadly the pretty-json web component will not automatically respond to slotted content
   updateJSON() {
     const prettyJSON = $('pretty-json').el();
-    if (prettyJSON) {
+    if(prettyJSON) {
       prettyJSON.connectedCallback();
     }
   },
 
   getTemplate() {
     let parent = findParent('codePlayground');
-    if (!parent) {
+    if(!parent) {
       return;
     }
     let files = parent.currentFiles.get();
     if (!files) {
       return;
     }
-    if (!files['component.html']) {
+    if(!files['component.html']) {
       const js = files['component.js']?.content;
-      if (js) {
+      if(js) {
         const regex = /template:\s*([`'"])((?:\\.|(?!\1).)*)\1/;
         const match = js.match(regex);
-        if (match) {
+        if(match) {
           return match[2];
         }
       }
     }
     return files['component.html']?.content;
   },
+
 });
 
-const onRendered = ({ reaction, self }) => {
+const onRendered = ({reaction, self}) => {
   reaction(self.calculateAST);
 };
 
@@ -86,7 +88,7 @@ const CodePlaygroundPreview = defineComponent({
   createComponent,
   onRendered,
   events,
-  defaultState,
+  defaultState
 });
 
 export default CodePlaygroundPreview;

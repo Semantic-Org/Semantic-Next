@@ -18,7 +18,7 @@
 
 ### 🏠 **Root Structure**
 ```
-/project-root-dir/
+/home/jack/semantic/next/
 ├── ai/                     ← AI context documentation (YOU ARE HERE)
 ├── docs/                   ← Documentation website and examples
 ├── packages/               ← Core framework source code

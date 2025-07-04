@@ -110,9 +110,8 @@ export class StringScanner {
 
     // Step 1: Search backwards to confirm we're inside a tag.
     while (i >= 0) {
-      if (this.input[i] === '>') {
-        break; // Stop if we find the end of a previous tag
-      }
+      if (this.input[i] === '>') { break; // Stop if we find the end of a previous tag
+       }
       if (this.input[i] === '<') {
         insideTag = true; // Confirm we're inside a tag
         tagPos = i; // Save the position of the tag

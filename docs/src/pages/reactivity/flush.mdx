@@ -22,7 +22,7 @@ Flushes ensure that all reactive updates are processed at once, and that reactiv
 For example you might have several reactive values that all update the same UI component. If each update occurred independently they could each trigger their own `repaint` `reflow` or `style calculation` in the browser which are expensive multiple millisecond operations. Joining them together into one flush ensures these updates all contribute to a single update to the component.
 
 
-<PlaygroundExample id="async-patterns" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="reactive-async" direction="horizontal"></PlaygroundExample>
 
 ### Synchronous Updates
 
@@ -30,7 +30,7 @@ If you need your updates to propagate immediately you can use [`Reaction.flush()
 
 This processes all pending reactions, and runs a flush cycle immediately. This ensures any code after a flush will occur after all dependencies have been rerun.
 
-<PlaygroundExample id="flush" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="reactive-flush" direction="horizontal"></PlaygroundExample>
 
 
 ### After Flush Callback
