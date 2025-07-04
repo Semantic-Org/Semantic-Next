@@ -1,0 +1,30 @@
+.colors {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.color {
+  padding: 15px;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.results {
+  margin: 20px 0;
+}
+
+.result-item {
+  margin: 10px 0;
+  padding: 10px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+}
+
+.result-item strong {
+  display: inline-block;
+  min-width: 200px;
+}

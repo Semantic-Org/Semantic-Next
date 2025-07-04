@@ -1,0 +1,30 @@
+.image {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  margin: 10px 0;
+}
+
+.link {
+  display: block;
+  padding: 10px;
+  margin: 10px 0;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.output {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  white-space: pre-line;
+}

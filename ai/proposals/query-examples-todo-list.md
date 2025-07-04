@@ -17,18 +17,18 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-addclass (Canonical pattern)
 - [x] query-removeclass (Canonical pattern)
 - [x] query-toggleclass (Canonical pattern)
-- [ ] query-hasclass
-- [ ] query-attr
+- [x] query-hasclass
+- [x] query-attr
 - [ ] query-removeattr
 - [ ] query-prop
 - [ ] query-data
 
 ## Content
 - [x] query-text (Canonical pattern)
-- [ ] query-html
+- [x] query-html
 - [ ] query-outerhtml
 - [ ] query-textnode
-- [ ] query-value
+- [x] query-value
 - [ ] query-getslot
 - [ ] query-setslot
 
@@ -99,14 +99,14 @@ This file tracks the implementation status of all Query method examples based on
 - [ ] query-get
 
 ## Logical Operators
-- [ ] query-eq
+- [x] query-eq
 - [ ] query-end
 - [ ] query-first
 - [ ] query-last
 - [ ] query-slice
 
 ## Utilities
-- [ ] query-exists
+- [x] query-exists
 - [ ] query-chain
 - [ ] query-el
 - [ ] query-settings

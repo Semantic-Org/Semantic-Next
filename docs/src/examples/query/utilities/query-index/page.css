@@ -1,0 +1,50 @@
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin: 20px 0;
+}
+
+.tab {
+  padding: 12px 20px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tab.active {
+  background: var(--standard-15);
+  font-weight: bold;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px 0 20px 0;
+  padding: 15px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+}
+
+.nav-item.current {
+  background: var(--standard-15);
+  padding: 5px 10px;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+}
+
+.results {
+  margin: 20px 0;
+}
+
+.result {
+  margin: 10px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+}
+
+.result span {
+  font-weight: bold;
+}
