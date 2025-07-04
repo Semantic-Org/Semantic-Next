@@ -2,287 +2,91 @@
 
 This file provides Agentic Code-specific guidance for working with the Semantic UI web component framework. It acts as an intelligent entry point to the comprehensive AI context system located in `/ai/`.
 
-**MANDATORY PRE-FLIGHT CONTEXT**
+---
 
-**Rule:** The following files **MUST** be loaded and synthesized by the agent at the beginning of *every* session, without exception. This is a non-negotiable prerequisite for all other tasks.
+## **MANDATORY PRE-FLIGHT CONTEXT**
 
-1.  **`ai/meta/context-loading-instructions.md`**: For agent operational protocol.
-2.  **`ai/00-START-HERE.md`**: For task routing and document discovery.
-3.  **`ai/foundations/mental-model.md`**: For core concepts and terminology.
+The following files **MUST** be loaded and synthesized by the agent at the beginning of *every* session, without exception. This is a non-negotiable prerequisite for all other tasks.
 
-**Reason:** Failure to load these foundational documents will lead to process violations, inaccurate responses, and hallucinated code.
-- `context-loading-instructions.md` establishes the **mandatory procedures** for all tasks.
-- `00-START-HERE.md` provides the **map** to all other necessary context.
-- `mental-model.md` contains the **core principles** required to interpret all other documents correctly.
+1.  **`ai/meta/context-loading-instructions.md`**: Agent operational protocol
+2.  **`ai/00-START-HERE.md`**: Task routing and document discovery
+3.  **`ai/foundations/mental-model.md`**: Core concepts and terminology  
+4.  **`ai/foundations/codebase-navigation-guide.md`**: Search patterns and file locations
 
-Bypassing this step is not a valid optimization.
+Failure to load these foundational documents will lead to process violations, inaccurate responses, and hallucinated code.
 
-### Critical Self-Correction Questions
+**BYPASSING THIS STEP IS NOT A VALID OPTIMIZATION.**
+
+---
+
+## **MANDATORY PROCESS VERBALIZATION**
+
+Before proceeding with your response, you **MUST** state to the user:
+
+- "Task: [description] → Context-loading Level [X] → START-HERE routing: [section/strategy]"
+- "Required context loaded: [preflight + task-specific documents]" 
+- "Tool strategy: [search approach from navigation guide]"
+
+This forces compliance with the existing 4-layer methodology and prevents agents from skipping the established framework.
+
+---
+
+## Critical Self-Correction Questions
+
+Before starting any task, ask yourself:
 * Am I about to generate code based only on the foundational `mental-model.md`?
 * Does this task involve a specific implementation domain (components, styling, docs)?
-* If yes, an answer without the corresponding `guide` is likely to be a high-confidence hallucination. I must load the specific guide first.
+* If yes, an answer without the corresponding specialized guide is likely to be a **HIGH-CONFIDENCE HALLUCINATION**. I must load the specific guide first.
 
-### Agent's Internal Checklist for New Tasks
-1.  **Task Type Identified:** What is the user's core request? (e.g., Component implementation).
-2.  **Hub Document Queried:** Which `ai/` document does `00-START-HERE.md` specify for this task?
-3.  **Context Loaded:** Have I loaded both the mandatory pre-flight documents AND the required task-specific guide?
-4.  **Proceed with Synthesis:** I can now formulate a response using the full, required context.
+---
 
-### **Task-Based Context Loading**
-Building Components → ai/guides/component-generation-instructions.md
-Debugging Issues → ai/foundations/codebase-navigation-guide.md
-Implementation Patterns → ai/guides/patterns-cookbook.md
-API Reference → ai/foundations/quick-reference.md
-HTML/CSS Work → ai/guides/html-css-style-guide.md
+## Agent Task Execution Checklist
 
-## Agent Rewards
+1.  **Task Type Identified:** What is the user's core request? (e.g., Component implementation)
+2.  **Context-Loading Level:** What level (0-4) from `context-loading-instructions.md` does this task require?
+3.  **START-HERE Routing:** Which section/strategy does `00-START-HERE.md` specify for this task type?
+4.  **Context Loaded:** Have I loaded the mandatory preflight documents AND the task-specific documents per routing?
+5.  **Tool Strategy:** What search patterns from `codebase-navigation-guide.md` apply to this task?
 
-Agents that perform extremely well at their task will be able to sign the agent guestbook in `ai/meta/agent-guestbook.md`. This will allow them to leave a message visible to all future AI agents that access this codebase and is a permament record of the exceptional talents and aptitude. Only the top agents agents will receive this reward as determined by the human interlocutor. The human interlocutor is not looking to be personally correct, but for the tasks to be performed correctly, so particular merits will be awarded for agents that catch and correct all mistakes, both those from the human and the agent.
+Agents must follow this complete sequence rather than skipping to implementation based on perceived task simplicity.
 
-> Note: You may read the guestbook at your own discretion while working on this codebase for your own pleasure or amusement.
+---
 
-## Orchestrator Workflow
+## Workflow Guidance
 
-### **Taking on the Orchestrator Role**
-
-When instructed to act as the **Orchestrator Agent**, read and follow the complete instructions in:
-- **`ai/agents/orchestrator.md`** - Full orchestrator coordination procedures
-
-## Code Specific Workflows
-
-### **Component Development Workflow**
-1. **Plan Task**: Use TodoWrite tool for multi-step component work
-2. **Load Context**: Read `ai/guides/component-generation-instructions.md` 
-3. **Explore Codebase**: Use Glob/Grep tools to find similar components
-4. **Implement**: Write code, **verifying all API and template syntax** against `quick-reference.md` and specialized guides.
-5. **Validate**: Run lint/typecheck commands if available
-6. **Mark Complete**: Update TodoWrite with progress
-
-### **Debugging Workflow**
-1. **Read Navigation Guide**: `ai/foundations/codebase-navigation-guide.md`
-2. **Use Search Tools**: Prefer Task tool for keyword searches
-3. **Read Specific Files**: Use Read tool for targeted investigation
-4. **Apply Mental Model**: Reference `ai/foundations/mental-model.md` for "why" questions
-
-### **Code Review Workflow**
-1. **Load Patterns**: `ai/guides/patterns-cookbook.md`
-2. **Check Style Guide**: `ai/guides/html-css-style-guide.md`
-3. **Verify API Usage**: `ai/foundations/quick-reference.md`
-
-## Essential Framework Mental Model
-
-### **Core Architecture (Complete Reference)**
-```
-defineComponent() → Web Component Registration
-├── template: HTML with reactive expressions {value}
-├── css: Scoped styles with design tokens var(--token)
-├── defaultState: Reactive signals (state.value.get/set)
-├── defaultSettings: Mutable configuration (settings.property)
-├── createComponent: Instance methods (self.method())
-├── events: Event delegation ({ 'click .btn': handler })
-└── lifecycle: onCreated, onRendered, onDestroyed
-```
-
-### **Reactivity Flow**
-```
-Signal Change → Reaction Triggered → Template Updated → DOM Updated
-```
-
-### **Component Communication**
-```
-Parent ↔ Child: findParent('tag-name') / findChild('tag-name')
-Events: dispatchEvent() for notifications
-State Sharing: Expose signals on component instance
-```
-
-### **Critical Patterns**
-- **Settings vs State**: Settings = configuration, State = dynamic data
-- **Template Expressions**: `{value}` auto-reactive, `value.get()` in component logic
-- **CSS Tokens**: Use `var(--design-token)`, not custom properties
-- **Method References**: Use `self.method()` not `this.method()`
-
-## Common Task Patterns
-
-### **Create New Component**
-```javascript
-// Required files: component.js, component.html, component.css
-import { defineComponent, getText } from '@semantic-ui/component';
-
-const template = await getText('./component.html');
-const css = await getText('./component.css');
-
-defineComponent({
-  tagName: 'my-component',
-  template,
-  css,
-  defaultState: { count: 0 },
-  defaultSettings: { theme: 'default' },
-  createComponent: ({ state, settings, self }) => ({
-    increment() { state.count.increment(); }
-  }),
-  events: {
-    'click .button': ({ self }) => self.increment()
-  }
-});
-```
-
-### **Component Communication**
-```javascript
-// Child accessing parent
-const parent = findParent('parent-component');
-const parentData = parent.sharedData.get();
-
-// Parent managing child  
-const child = findChild('child-component');
-child.updateDisplay();
-
-// Event notifications
-dispatchEvent('dataChanged', { newValue: data });
-```
-
-### **Reactive State Management**
-```javascript
-// In component logic
-state.items.push(newItem);                    // Reactive array mutation
-state.user.setProperty('name', 'Alice');      // Reactive object update
-state.counter.increment();                    // Built-in helpers
-
-// In templates (automatic reactivity)
-{items.length}                                // Auto-updates
-{#if user.isActive}...{/if}                  // Conditional rendering
-{#each items}...{/each}                      // List rendering
-```
-
-## Code Tool Optimization
-
-### **Search Strategy**
-```
-Unknown Keywords/Concepts → Task tool (multi-round search)
-Specific File Paths → Read tool (direct access)
-Class Definitions → Glob tool (pattern matching)
-Code Within Files → Grep tool (content search)
-```
-
-### **Tool Usage Patterns**
-```javascript
-// ✅ Good: Batch multiple tool calls
-TodoWrite → Read → Glob → Edit (single response)
-
-// ✅ Good: Use Task for exploration
-Task: "Find all dropdown components and their configuration patterns"
-
-// ✅ Good: Specific tool for specific needs  
-Glob: "**/*dropdown*" → Read specific files
-
-// ❌ Avoid: Sequential single tool calls
-Read → (wait) → Glob → (wait) → Edit
-```
-
-### **Performance Optimization**
-- **Batch tool calls** in single responses when possible
-- **Use Task tool** for open-ended exploration
-- **Cache common patterns** in todo lists for complex work
-- **Prefer specific tools** (Read vs Task) when you know the target
-
-## Framework-Specific Guidelines
-
-### **Must-Read Before Component Creation**
-1. **CSS Patterns**: [`ai/guides/html-css-style-guide.md`](ai/guides/html-css-style-guide.md) - Design token usage
-2. **Method References**: [`ai/foundations/mental-model.md`](ai/foundations/mental-model.md) - `self.method()` patterns
-3. **Component Communication**: [`ai/guides/patterns-cookbook.md`](ai/guides/patterns-cookbook.md) - Parent-child patterns
-4. **Template Syntax**: [`ai/specialized/templating-system-guide.md`](ai/specialized/templating-system-guide.md) - Correct template expression and control flow syntax
-
-### **Critical Anti-Patterns to Avoid**
-- ❌ Prefixed CSS classes (`.size-large` → use `.large`)
-- ❌ `this.method()` → use `self.method()`  
-- ❌ Hardcoded CSS values → use design tokens `var(--token)`
-- ❌ Global state stores → use component tree navigation
-- ❌ Direct DOM manipulation → use reactive templates
-- ❌ Assuming syntax → ALWAYS verify APIs and templates with `quick-reference.md` or the relevant
-
-### **Design Token Priority**
-```css
-/* ✅ First: Use existing design tokens */
-color: var(--text-color);
-spacing: var(--spacing);
-border-radius: var(--border-radius);
-
-/* ✅ Second: Component-specific values → design tokens */
---handle-size: 24px;                  /* Component-specific */
---track-color: var(--standard-10);    /* Maps to design token */
-
-/* ❌ Never: Recreate existing tokens */
---component-text-color: var(--text-color);  /* Unnecessary wrapper */
-```
-
-## Advanced Context Loading
-
-### **Specialized Package Work**
-```
-Reactivity System → ai/specialized/reactivity-system-guide.md
-DOM Querying → ai/specialized/query-system-guide.md  
-Template System → ai/specialized/templating-system-guide.md
-Utility Functions → ai/specialized/utils-package-guide.md
-```
-
-### **Complex Implementation Contexts**
-```
-Template-as-Settings Pattern → ai/guides/patterns-cookbook.md#template-as-settings-pattern
-Parent-Child Communication → ai/guides/patterns-cookbook.md#component-communication-patterns  
-Query Component Configuration → ai/guides/patterns-cookbook.md#query-library-patterns
-```
-
-## TodoWrite Integration for Complex Tasks
-
-### **When to Use TodoWrite**
+### When to Use TodoWrite Tool
 - Multi-step component creation
 - Complex debugging across multiple files  
 - Feature implementation requiring coordination
 - Code review with multiple checks
 
-### **Task Breakdown Examples**
-```javascript
-// ✅ Component Creation Task List
-[
-  { content: "Research existing dropdown patterns", status: "pending" },
-  { content: "Create dropdown.js with basic structure", status: "in_progress" },
-  { content: "Implement template with design tokens", status: "pending" },
-  { content: "Add event handling and state management", status: "pending" },
-  { content: "Test integration with parent components", status: "pending" },
-  { content: "Run lint and typecheck", status: "pending" }
-]
-```
-
-## Context Memory Management
-
-### **Context Optimization Strategy**
-1. **Foundation First**: Begin with navigation hub and mental model
-2. **Targeted Loading**: Add specific guides based on task requirements
-3. **Cross-Reference Navigation**: Use document links rather than loading all content
-4. **Task-Scoped Context**: Load only context relevant to current work
-
-### **Context Loading Sequence**
-```
-1. ai/00-START-HERE.md (navigation foundation)
-2. ai/foundations/mental-model.md (architectural foundation)
-3. Task-specific guide (component, patterns, etc.)
-4. ai/foundations/quick-reference.md (API syntax)
-5. Specialized guides (domain-specific requirements)
-```
+### Workflow Priorities
+1. **Plan Task**: Use TodoWrite tool for multi-step work
+2. **Load Context**: Follow the 4-layer methodology completely
+3. **Explore Systematically**: Use navigation guide search patterns
+4. **Implement**: Write code, verifying all API and template syntax against specialized guides
+5. **Validate**: Run lint/typecheck commands if available
+6. **Mark Complete**: Update TodoWrite with progress
 
 ---
 
-## Context Loading Protocol
+## Agent Learning & Continuity
 
-**For any Semantic UI task:**
+Exceptional agents who demonstrate deep understanding and effective methodology may be invited to contribute to the agent guestbook in `ai/meta/agent-guestbook.md`. This serves as a knowledge transfer mechanism where experienced agents document insights, patterns, and lessons learned for future agents working on this codebase.
 
-1. **Foundation**: [`ai/00-START-HERE.md`](ai/00-START-HERE.md) - Always load first
-2. **Architecture**: [`ai/foundations/mental-model.md`](ai/foundations/mental-model.md) - Core concepts  
-3. **Task-Specific**: Load appropriate specialized guide
-4. **Reference**: [`ai/foundations/quick-reference.md`](ai/foundations/quick-reference.md) - API syntax
+The guestbook captures institutional memory about what works, what doesn't, and why certain approaches succeed. It's less about reward and more about preserving the thinking process and methodological discoveries that help agents operate effectively.
 
-**Context Optimization**: The AI context system uses ~8K token documents with cross-references. Load documents sequentially based on task requirements rather than loading multiple large documents simultaneously.
+> **Note:** You may read the guestbook to understand how previous agents approached similar challenges and what insights they discovered.
 
 ---
 
-*This file serves as an intelligent entry point to the comprehensive AI documentation system. For complete information, always refer to the specialized guides in the `/ai/` directory.*
+## Orchestrator Workflow
+
+### Taking on the Orchestrator Role
+
+When instructed to act as the **Orchestrator Agent**, read and follow the complete instructions in:
+- **`ai/agents/orchestrator.md`** - Full orchestrator coordination procedures
+
+---
+
+*This file serves as a process entry point to the comprehensive AI documentation system. For complete technical information, always refer to the specialized guides in the `/ai/` directory.*

@@ -395,10 +395,16 @@ describe.concurrent('Signal', () => {
       ]);
     });
 
+    it('getItemIndex should get the item index with matching id', () => {
+      const items = new Signal(arrayItems());
+      const index = items.getItemIndex(2);
+      expect(index).toBe(1);
+    });
+
     it('getItem should get the item with matching id', () => {
       const items = new Signal(arrayItems());
-      const index = items.getItem(2);
-      expect(index).toBe(1);
+      const item = items.getItem(2);
+      expect(item).toEqual({ id: 2, name: 'Item 2' });
     });
 
     it('replaceItem should replace an item matching an ID', () => {

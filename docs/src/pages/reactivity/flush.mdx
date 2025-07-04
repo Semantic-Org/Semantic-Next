@@ -15,12 +15,15 @@ When you update a value using `value` or `.set()`, dependencies are not immediat
 
 The flush cycle is an asynchronous process that is added to the microtask queue when a dependency is updated.
 
-#### Purpose of Flush
-Flushes ensure that all reactive updates are processed at once, and that reactivity only occurs for the final value if a value updates multiple times.
+#### Reactive Flushes
 
 
-For example you might have several reactive values that all update the same UI component. If each update occurred independently they could each trigger their own `repaint` `reflow` or `style calculation` in the browser which are expensive multiple millisecond operations. Joining them together into one flush ensures these updates all contribute to a single update to the component.
+Flushes ensure that all reactive updates are processed at the same time with their current values.
 
+
+For example you might have several reactive values that all update the same UI component. If each update occurred independently they could each trigger their own `repaint` `reflow` or `style calculation` which can be expensive operations in the browser. Joining them together into one flush ensures these updates all contribute to a single update to the component.
+
+> Flushes use [`queueMicrotask`](https://developer.mozilla.org/en-US/docs/Web/API/Window/queueMicrotask) to have a flush occur on the next tick after all javascript is executed.
 
 <PlaygroundExample id="reactive-async" direction="horizontal"></PlaygroundExample>
 
@@ -28,7 +31,7 @@ For example you might have several reactive values that all update the same UI c
 
 If you need your updates to propagate immediately you can use [`Reaction.flush()`](/api/reactivity/reaction#flush).
 
-This processes all pending reactions, and runs a flush cycle immediately. This ensures any code after a flush will occur after all dependencies have been rerun.
+This processes all pending reactions, and runs a flush cycle immediately  ensuring any code after will occur after all dependencies have been rerun.
 
 <PlaygroundExample id="reactive-flush" direction="horizontal"></PlaygroundExample>
 
