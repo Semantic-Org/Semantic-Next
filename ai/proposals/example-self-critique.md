@@ -1,101 +1,111 @@
 # Example Creation Self-Critique Protocol
 
-This document establishes a **mandatory self-critique process** for creating Query library examples. After creating each example, the AI **MUST** ask itself the following questions and revise if any answer is "No".
+This document establishes a **mandatory verification process** for AI agents creating Query library examples. After creating each example, the agent **MUST** evaluate against all criteria and revise any failing elements.
 
-## Mandatory Post-Example Questions
+## Mandatory Verification Checklist
 
-After creating each example, you **MUST** ask yourself these questions:
+Execute this checklist after creating each example. **All criteria must pass.**
 
 ### 1. Uniqueness & Teaching Value
-- **Q: Does this example demonstrate something unique about this specific method?**
-- **Q: Am I just copying the same pattern from other examples?**
-- **Q: What makes THIS method different from others, and does my example show that?**
+- **VERIFY: This example demonstrates a unique aspect of the specific method**
+- **VERIFY: The implementation differs meaningfully from other examples**
+- **VERIFY: The example clearly shows what makes THIS method distinct**
 
 ### 2. Simplicity & Class Naming
-- **Q: Am I using dashed class names like `.nav-item`, `.result-container`, `.count-item`?**
-- **Q: Could I use simple one-word classes like `.item`, `.result`, `.count` instead?**
-- **Q: Are my class names descriptive without being verbose?**
+- **VERIFY: No dashed class names (`.nav-item`, `.result-container`, `.count-item`)**
+- **VERIFY: Using simple one-word classes (`.item`, `.result`, `.count`)**
+- **VERIFY: Class names are descriptive but not verbose**
 
 ### 3. Container Overuse
-- **Q: Do I have unnecessary wrapper divs like `.results`, `.controls`, `.items`?**
-- **Q: Can I simplify the HTML structure and remove container divs?**
-- **Q: Am I adding divs just to group things that don't need grouping?**
+- **VERIFY: No unnecessary wrapper divs (`.results`, `.controls`, `.items`)**
+- **VERIFY: HTML structure is simplified to essential elements only**
+- **VERIFY: No divs added solely for grouping**
 
 ### 4. Event Handler Complexity
-- **Q: Do I really need event handlers for this example?**
-- **Q: Could I demonstrate the method directly in page.js without click handlers?**
-- **Q: Am I making the example more complex than needed with unnecessary interactions?**
+- **VERIFY: Event handlers are essential for demonstration**
+- **VERIFY: Method can be demonstrated directly in page.js when possible**
+- **VERIFY: No unnecessary interactions that obscure the core method**
 
 ### 5. Pattern Matching vs. Understanding
-- **Q: Am I blindly following the structure of previous examples?**
-- **Q: Does this example teach the specific concept effectively?**
-- **Q: Would someone understand THIS method's purpose from my example?**
+- **VERIFY: Implementation is method-specific, not template copying**
+- **VERIFY: Example effectively teaches the specific concept**
+- **VERIFY: The method's purpose is clear from the example alone**
 
 ### 6. CSS Nesting Usage
-- **Q: Am I using nested CSS syntax where appropriate?**
-- **Q: Are my CSS selectors taking advantage of nesting for better organization?**
-- **Q: Am I writing flat CSS when I could use nested syntax like `.parent { .child { } }`?**
+- **VERIFY: Using nested CSS syntax where appropriate**
+- **VERIFY: CSS selectors utilize nesting for organization**
+- **VERIFY: No flat CSS when nesting would improve structure**
 
 ### 7. Block vs Inline Elements
-- **Q: Am I using `<span>` with `display: block` when I should use `<div>`?**
-- **Q: Am I using inline elements (span) for block-level content?**
+- **VERIFY: No `<span>` elements with `display: block`**
+- **VERIFY: No inline elements used for block-level content**
 
 ### 8. Shadow DOM & Web Component Context
-- **Q: Is this method primarily used inside web components (like getSlot, setSlot)?**
-- **Q: Would this method be most useful when working with shadow DOM or component internals?**
-- **Q: Should I create component.js/css/html files alongside page.js/css/html?**
-- **Q: Am I showing the method in its most natural context (e.g., getSlot inside a component)?**
+- **VERIFY: Methods requiring web components include component.js/css/html files**
+- **VERIFY: Shadow DOM methods (getSlot, setSlot) are shown in component context**
+- **VERIFY: Method is demonstrated in its most natural usage context**
 
-## Required Actions
+### 9. Variable Naming & Reuse
+- **VERIFY: Variables storing $ instances use $ prefix (`const $box = $('.box')`)**
+- **VERIFY: Intermediate variables created only when used 3+ times**
+- **VERIFY: Single/double-use selectors are inlined**
 
-If you answer "No" to any question above, you **MUST**:
+### 10. Documentation Compliance
+- **VERIFY: All mandatory pre-flight documents have been read**
+- **VERIFY: Following exact canonical template format from comprehensive plan**
+- **VERIFY: File locations verified against existing examples**
 
-1. **Stop and revise the example immediately**
-2. **Simplify the structure**
-3. **Focus on the unique aspect of the method**
-4. **Re-ask the questions until all answers are "Yes"**
+### 11. Verification Before Creation
+- **VERIFY: Read at least 2 existing examples of same type before creating**
+- **VERIFY: Metadata format copied exactly from canonical examples**
+- **VERIFY: File paths match established structure**
 
-## Example Self-Critique in Action
+### 12. Accuracy in Claims
+- **VERIFY: Variable usage counts are accurate (actually counted)**
+- **VERIFY: All statements based on actual code inspection**
+- **VERIFY: API behavior verified against documentation**
 
-### BAD Example Process:
-```
-Creates query-last example with:
-- `.result-container` div wrapper
-- `.get-button` click handler
-- Same highlighting pattern as query-first
-❌ Fails questions 1, 2, 3, 4, 5
-```
+### 13. Following Instructions
+- **VERIFY: Implementation matches exact user request**
+- **VERIFY: Focus maintained on specific task**
+- **VERIFY: Clarifying questions asked instead of assumptions made**
 
-### GOOD Example Process:
-```
-Creates query-last example:
-- Directly calls .last() in page.js
-- Shows last item automatically highlighted
-- Simple classes: `.item`, `.last`
-- No unnecessary containers
-✅ Passes all questions
-```
+## Failure Protocol
 
-## Core Principles
+**If ANY verification fails:**
 
-### DO:
-- Use simple, one-word class names
-- Demonstrate methods directly when possible
-- Show unique functionality of each method
-- Keep HTML structure minimal
-- Focus on educational clarity
-- Use nested CSS syntax for better organization
+1. **STOP immediately**
+2. **Identify the specific failure**
+3. **Fix the failing element**
+4. **Re-run complete verification checklist**
+5. **Repeat until ALL verifications pass**
 
-### DON'T:
-- Use dashed class names
-- Add unnecessary wrapper divs
-- Copy/paste patterns from other examples
-- Add complex interactions unless essential
-- Make examples that all look the same
-- Write flat CSS when nesting would improve organization
+## Quality Standards
 
-## Enforcement
+### Required Implementation:
+- Demonstrate ONE unique method capability clearly
+- Use minimal, semantic HTML structure
+- Apply consistent CSS nesting patterns
+- Follow exact metadata format from canonical examples
+- Create variables only when used 3+ times with $ prefix
+- Include component files only for shadow DOM methods
 
-This self-critique is **mandatory**. Skipping these questions or rushing through them will result in poor examples that don't effectively teach the Query library methods.
+### Prohibited Patterns:
+- Dashed class names or verbose selectors
+- Unnecessary wrapper divs or containers
+- Template copying without method-specific adaptation
+- Flat CSS when nesting improves organization
+- Variables without $ prefix for Query instances
+- File creation without verifying existing patterns
+- Claims without code verification
+- API assumptions without documentation check
 
-**Remember: Each method deserves an example that showcases what makes it special.**
+## Success Criteria
+
+**Example passes when:**
+- All 13 verification points return PASS
+- Implementation demonstrates unique method value
+- Code follows established patterns exactly
+- Educational goal is achieved with minimal complexity
+
+**Enforcement:** This verification is non-optional. Examples that skip verification or fail multiple criteria indicate insufficient preparation and must be rebuilt from canonical patterns.

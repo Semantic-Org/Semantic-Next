@@ -30,7 +30,7 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-textnode
 - [x] query-value
 - [x] query-getslot
-- [ ] query-setslot
+- [x] query-setslot
 
 ## CSS
 - [x] query-css
@@ -40,8 +40,8 @@ This file tracks the implementation status of all Query method examples based on
 ## Dimensions
 - [x] query-width
 - [x] query-height
-- [ ] query-innerwidth
-- [ ] query-innerheight
+- [x] query-innerwidth
+- [x] query-innerheight
 - [ ] query-outerwidth
 - [ ] query-outerheight
 - [ ] query-scrollheight
@@ -117,7 +117,7 @@ This file tracks the implementation status of all Query method examples based on
 
 ## Implementation Progress
 
-### Completed Examples: 32/78
+### Completed Examples: 36/78
 - query-shadow-dom (existing)
 - query-addclass
 - query-removeclass
