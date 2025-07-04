@@ -113,8 +113,6 @@
   "scripts": {
     "build": "wireit",
     "dev": "wireit",
-    "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
-    "mcp": "wireit",
     "build:docs": "wireit",
     "build:packages": "wireit",
     "watch": "wireit",
@@ -125,8 +123,7 @@
     "prettify": "prettierx ./ --write --ignore-unknown",
     "format": "npx dprint fmt",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
-    "test:watch": "vitest --c tests/configs/vitest/vitest-watch.config.js",
-    "test:all": "vitest --ui --c tests/configs/vitest/vitest-all.config.js",
+    "test:ui": "vitest --ui --c tests/configs/vitest/vitest-ui.config.js",
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
@@ -193,10 +190,6 @@
     },
     "update-version": {
       "command": "node ./scripts/update-versions.js"
-    },
-    "mcp": {
-      "command": "cd ai/mcp && node agents-server.js",
-      "service": true
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
@@ -225,8 +218,7 @@
     "simple-git-hooks": "^2.12.1",
     "underscore": "^1.13.7",
     "vitest": "^3.0.9",
-    "wireit": "^0.14.11",
-    "ws": "^8.18.2"
+    "wireit": "^0.14.11"
   },
   "ciDependencies": {
     "axios": "^1.6.8",
@@ -237,8 +229,7 @@
     "internal-packages/*",
     "packages/*",
     "docs/*",
-    "examples/*",
-    "ai/mcp/*"
+    "examples/*"
   ],
   "simple-git-hooks": {
     "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"

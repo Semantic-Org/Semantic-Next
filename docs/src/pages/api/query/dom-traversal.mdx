@@ -125,56 +125,11 @@ $$('my-component').find('.shadow-selected').siblings().addClass('shadow-dimmed')
 
 ## closest
 
-Finds the closest ancestor element that matches the selector, or optionally all matching ancestors.
+Finds the closest ancestor element that matches the selector.
 
 ### Syntax
-
-#### Get Closest Ancestor
 ```javascript
 $('selector').closest(ancestorSelector)
-```
-
-#### Get All Matching Ancestors
-```javascript
-$('selector').closest(ancestorSelector, { returnAll: true })
-```
-
-### Parameters
-| Name              | Type    | Description                           |
-|-------------------|---------|---------------------------------------|
-| ancestorSelector  | string  | A selector to match ancestor elements |
-| options           | object  | (Optional) Options to control behavior |
-| options.returnAll | boolean | If true, returns all matching ancestors instead of just the closest |
-
-### Returns
-[Query object](/api/query/basic#the-query-object) containing the closest matching ancestor, or all matching ancestors if `returnAll: true`.
-
-### Usage
-
-#### Standard - Closest Ancestor
-```javascript
-// Find the closest form ancestor
-$('input').closest('form').submit();
-```
-
-#### Get All Matching Ancestors
-```javascript
-// Find all div ancestors
-$('span').closest('div', { returnAll: true }).addClass('ancestor');
-```
-
-#### Shadow DOM
-```javascript
-$$('my-component').find('input').closest('.shadow-form').addClass('validated');
-```
-
-## closestAll
-
-Gets all ancestor elements that match the selector, traversing up the entire DOM tree. This is a convenient alias for `closest(selector, { returnAll: true })`.
-
-### Syntax
-```javascript
-$('selector').closestAll(ancestorSelector)
 ```
 
 ### Parameters
@@ -183,32 +138,20 @@ $('selector').closestAll(ancestorSelector)
 | ancestorSelector  | string | A selector to match ancestor elements |
 
 ### Returns
-[Query object](/api/query/basic#the-query-object) containing all matching ancestor elements.
+[Query object](/api/query/basic#the-query-object) containing the closest matching ancestor.
 
 ### Usage
 
-#### Basic Usage
+#### Standard
 ```javascript
-// Find all container ancestors
-$('span').closestAll('.container').addClass('highlight');
+// Find the closest form ancestor
+$('input').closest('form').submit();
 ```
 
-#### Working with Multiple Elements
+#### Shadow DOM
 ```javascript
-// Find all form ancestors for all inputs
-$('input').closestAll('form').addClass('has-inputs');
+$$('my-component').find('input').closest('.shadow-form').addClass('validated');
 ```
-
-#### Shadow DOM Aware
-```javascript
-// Find all shadow DOM containers
-$$('input').closestAll('.shadow-container').addClass('shadow-highlight');
-```
-
-### Notes
-- Returns elements in DOM order (closest to farthest)
-- Automatically removes duplicates when multiple elements share the same ancestor
-- Respects the `pierceShadow` option for shadow DOM traversal
 
 ## next
 

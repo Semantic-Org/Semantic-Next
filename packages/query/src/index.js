@@ -54,7 +54,4 @@ const useAlias = function() {
   return new Query(...arguments);
 };
 
-// Expose prototype for plugins
-$$.fn = $.fn = $$.plugin = $.plugin = Query.prototype;
-
 export { $, $$, exportGlobals, Query, restoreGlobals, useAlias };

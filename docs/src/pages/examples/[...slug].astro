@@ -47,9 +47,6 @@ let files = await getExampleFiles({
   includeLog: example.exampleType == 'log',
 });
 
-const previewText = example.exampleType == 'log' ? 'Console' : 'Preview';
-
-
 const panelIndexes = getPanelIndexes(files, {
   type: example.exampleType
 });
@@ -67,7 +64,7 @@ const searchMeta = {
     <Sidebar
       expandAll=true
     >
-    </Sidebar>
+    </SideBar>
     <CodePlayground client:only="lit"
       files={files}
       title={example.title}
@@ -76,7 +73,6 @@ const searchMeta = {
       useTabs={isFolder}
       allowLayoutSwap={!isFolder}
       sandboxURL={sandboxURL}
-      previewText={previewText}
       panelIndexes={panelIndexes}
       additionalPageFiles={example.additionalPageFiles}
       tip={tip}
