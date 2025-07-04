@@ -1,0 +1,34 @@
+.box {
+  padding: 20px;
+  background: var(--standard-5);
+  margin: 20px 0;
+  transition: all 500ms ease;
+  border: var(--border);
+
+
+  &.styled {
+    background-color: var(--standard-15);
+    background-image: var(--gradient);
+    box-shadow: var(--raised-shadow);
+  }
+
+  &.round {
+    border-radius: 100px;
+  }
+}
+
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+}
