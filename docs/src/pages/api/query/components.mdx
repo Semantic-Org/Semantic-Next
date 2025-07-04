@@ -119,18 +119,10 @@ $('ui-panel').initialize({
 
 > **Early Initialization** `initialize()` allows you to set up component settings even before the component is rendered, which can be useful in single-page applications or when working with dynamically loaded content.
 
-## Additional Information
-
-### Practical Usage
-
 While both `settings()` and `initialize()` are used to configure components, they have different use cases:
 
 - `settings()` is typically used after a component is already rendered in the DOM, allowing you to update its configuration dynamically.
 - `initialize()` is used to set up initial configurations, often before the component is fully rendered. It's particularly useful in scenarios where you need to set up components that haven't been added to the DOM yet.
-
-### Example
-
-Here's an example demonstrating how to interact with a [`circle-expand` sample component](/examples/event-binding) using these methods:
 
 ```javascript
 // Get the component instance
