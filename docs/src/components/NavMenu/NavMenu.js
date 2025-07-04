@@ -296,7 +296,7 @@ const createComponent = function({ $, el, self, settings, state, reaction, isRen
           && rect.right <= window.innerWidth
         );
         if (!isVisible) {
-          el.scrollIntoView();
+          //el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }
     },

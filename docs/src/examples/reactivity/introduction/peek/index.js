@@ -1,7 +1,5 @@
-// Peek: Reading signal values without creating dependencies
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-// Create signals
 const counter = new Signal(0);
 const multiplier = new Signal(2);
 
@@ -23,4 +21,3 @@ console.log('Multiplier changed but reaction did not run');
 
 // Update counter again - reaction runs with new multiplier value
 counter.set(7);
-Reaction.flush();

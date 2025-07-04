@@ -57,7 +57,10 @@ const subCategorySortOrder = {
   ],
   'Reactivity': [
     'Introduction',
-    'Variables',
+    'Signals',
+    'Reactions',
+    'Flushing',
+    'Settings',
     'Helpers',
     'Performance',
     'Controls',

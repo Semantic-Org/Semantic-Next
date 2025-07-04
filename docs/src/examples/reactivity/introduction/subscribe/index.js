@@ -1,4 +1,3 @@
-// Subscribe: A simpler way to observe signal changes
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 // Create a signal

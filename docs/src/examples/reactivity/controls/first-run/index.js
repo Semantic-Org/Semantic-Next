@@ -1,23 +1,19 @@
-// First Run: Detecting initial reaction execution
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const message = new Signal('Hello');
+const message = new Signal('Never shown');
 
-// Reaction that behaves differently on first run
+// Since reactions occur immediately
+// You might want to avoid triggering side effects until a value changes
 Reaction.create((reaction) => {
+
+  // To permit reactivity the value must be accessed before early exit
+  // Otherwise the dependency cannot be determined
   const text = message.get();
 
-  if (reaction.firstRun) {
-    console.log('Initial setup:', text);
-  }
-  else {
-    console.log('Update:', text);
+  if (!reaction.firstRun) {
+    console.log(text);
   }
 });
 
 // Update message - not first run anymore
-message.set('World');
-Reaction.flush();
-
-message.set('Universe');
-Reaction.flush();
+message.set('Hello World');
