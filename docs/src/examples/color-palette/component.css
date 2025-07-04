@@ -6,7 +6,7 @@
 
 .header {
   text-align: center;
-  margin-bottom: calc(var(--spacing) * 3);
+  margin-bottom: var(--spacing);
   
   h2 {
     color: var(--header-color);
@@ -25,16 +25,21 @@
   
   .name {
     color: var(--header-color);
-    font-size: var(--h3);
-    margin: 0 0 var(--spacing) 0;
     text-transform: capitalize;
+    text-align: right;
+
+    @container (max-width: 600px)  {
+      grid-column: 6;
+      text-align: center;
+    }
   }
 }
 
 .colors {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(13, 1fr);
   grid-template-rows: repeat(1, 1fr);
+  align-items: center;
   gap: 1rem;
   
   @container (max-width: 600px) {

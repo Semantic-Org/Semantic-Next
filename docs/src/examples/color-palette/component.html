@@ -1,9 +1,9 @@
 <div class="palette">
   {#each getColors}
     <div class="group">
-      <h3 class="name">{displayName}</h3>
       
       <div class="colors">
+        <h3 class="name" style="color: var(--{name});">{displayName}</h3>
         {#each shade in shades}
           <div
             class="swatch {isColorCopied(name, shade.name) ? 'copied' : ''}"
