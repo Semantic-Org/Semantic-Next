@@ -1,43 +1,21 @@
-.form {
-  margin: 20px 0;
-  padding: 20px;
-  background: var(--standard-5);
-  border-radius: var(--border-radius);
-}
-
-.form > * {
-  display: block;
-  margin: 15px 0;
-}
-
 .checkbox {
-  display: inline-block;
   margin-right: 8px;
 }
 
-label {
-  display: inline;
-}
-
 .input, .select {
+  display: block;
+  margin: 15px 0;
   padding: 8px;
   border: var(--border);
   border-radius: var(--border-radius);
   width: 200px;
 }
 
-.properties {
-  margin: 20px 0;
-}
-
-.prop-item {
-  margin: 8px 0;
-  padding: 8px;
-  background: var(--standard-10);
-  border-radius: var(--border-radius);
+p {
+  margin: 10px 0;
   font-family: monospace;
 }
 
-.prop-item span {
+p span {
   font-weight: bold;
 }
