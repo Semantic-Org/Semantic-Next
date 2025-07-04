@@ -38,7 +38,7 @@
     nav-menu {
       display: flex;
       flex-direction: column;
-      height: 100%;
+      height: 0px; /* confused on this but it works */
     }
     nav-menu::part(search) {
       margin: 0.5rem 1rem 0rem;

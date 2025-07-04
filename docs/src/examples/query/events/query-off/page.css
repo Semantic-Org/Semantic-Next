@@ -1,0 +1,12 @@
+ui-button {
+  margin: 10px 5px;
+}
+
+.status {
+  margin: 20px 0;
+  padding: 15px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+}

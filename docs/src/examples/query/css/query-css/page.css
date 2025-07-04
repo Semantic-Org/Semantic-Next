@@ -1,0 +1,26 @@
+.box {
+  padding: 20px;
+  margin: 15px 0;
+  background-color: lightblue;
+  color: darkblue;
+  border: 2px solid blue;
+  border-radius: var(--border-radius);
+}
+
+.target {
+  padding: 15px;
+  margin: 15px 0;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  width: 200px;
+}
+
+p {
+  margin: 8px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}

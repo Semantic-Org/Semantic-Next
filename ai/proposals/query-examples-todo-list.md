@@ -19,27 +19,27 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-toggleclass (Canonical pattern)
 - [x] query-hasclass
 - [x] query-attr
-- [ ] query-removeattr
-- [ ] query-prop
-- [ ] query-data
+- [x] query-removeattr
+- [x] query-prop
+- [x] query-data
 
 ## Content
 - [x] query-text (Canonical pattern)
 - [x] query-html
-- [ ] query-outerhtml
-- [ ] query-textnode
+- [x] query-outerhtml
+- [x] query-textnode
 - [x] query-value
-- [ ] query-getslot
+- [x] query-getslot
 - [ ] query-setslot
 
 ## CSS
-- [ ] query-css
-- [ ] query-cssvar
-- [ ] query-computedstyle
+- [x] query-css
+- [x] query-cssvar
+- [x] query-computedstyle
 
 ## Dimensions
-- [ ] query-width
-- [ ] query-height
+- [x] query-width
+- [x] query-height
 - [ ] query-innerwidth
 - [ ] query-innerheight
 - [ ] query-outerwidth
@@ -47,16 +47,16 @@ This file tracks the implementation status of all Query method examples based on
 - [ ] query-scrollheight
 - [ ] query-scrollwidth
 - [ ] query-scrollleft
-- [ ] query-scrolltop
+- [x] query-scrolltop
 - [ ] query-naturalwidth
 - [ ] query-naturalheight
 
 ## DOM Manipulation
-- [ ] query-remove
+- [x] query-remove
 - [ ] query-clone
 - [ ] query-insertafter
 - [ ] query-insertbefore
-- [ ] query-append
+- [x] query-append
 - [ ] query-prepend
 - [ ] query-detach
 - [ ] query-reverse
@@ -65,12 +65,12 @@ This file tracks the implementation status of all Query method examples based on
 - [ ] query-filter
 - [ ] query-children
 - [ ] query-parent
-- [ ] query-find
+- [x] query-find
 - [ ] query-not
-- [ ] query-closest
+- [x] query-closest
 - [ ] query-is
 - [ ] query-siblings
-- [ ] query-index
+- [x] query-index
 - [ ] query-indexof
 - [ ] query-next
 - [ ] query-prev
@@ -83,8 +83,8 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-on-delegate (Canonical pattern)
 - [x] query-on-abort (Canonical pattern)
 - [x] query-on-callback (Canonical pattern)
-- [ ] query-one
-- [ ] query-off
+- [x] query-one
+- [x] query-off
 - [ ] query-dispatchevent
 - [ ] query-trigger
 - [ ] query-focus
@@ -94,21 +94,21 @@ This file tracks the implementation status of all Query method examples based on
 - [ ] query-ready
 
 ## Iterators
-- [ ] query-each
-- [ ] query-map
-- [ ] query-get
+- [x] query-each
+- [x] query-map
+- [x] query-get
 
 ## Logical Operators
 - [x] query-eq
 - [ ] query-end
-- [ ] query-first
-- [ ] query-last
-- [ ] query-slice
+- [x] query-first
+- [x] query-last
+- [x] query-slice
 
 ## Utilities
 - [x] query-exists
 - [ ] query-chain
-- [ ] query-el
+- [x] query-el
 - [ ] query-settings
 - [ ] query-setting
 - [ ] query-initialize
@@ -117,7 +117,7 @@ This file tracks the implementation status of all Query method examples based on
 
 ## Implementation Progress
 
-### Completed Examples: 8/78
+### Completed Examples: 32/78
 - query-shadow-dom (existing)
 - query-addclass
 - query-removeclass

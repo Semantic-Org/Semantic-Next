@@ -71,9 +71,6 @@
     ui-button {
       margin: 0.5rem;
     }
-    nav-menu::part(search) {
-      margin: 0.75rem 1rem -0.25rem;
-    }
     ui-menu {
       font-size: 13px;
     }
@@ -94,13 +91,17 @@
       --nav-menu-sub-title-padding: 7px 0px 4px;
       --nav-menu-selected-vertical-padding: 0px;
       --nav-menu-selected-horizontal-padding: 6px;
-    }
-    nav-menu::part(content) {
-      padding-left: 5px;
-    }
-    nav-menu::part(item-title) {
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+
+      &::part(search) {
+        margin: 0.75rem 1rem -0.25rem;
+      }
+      &::part(content) {
+        padding-left: 5px;
+      }
+      &::part(item-title) {
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
     }
 
   }
