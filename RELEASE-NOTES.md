@@ -7,6 +7,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.13.0
 
 
+## CSS Tokens
+* **Colors** - Color variables like `red-0` -> `red-0` now automatically swap for dark mode. i.e. `red-0` = `red-100` in dark mode.
+* **Colors** - Added new invariant colors that do not change for dark mode, ie. `red-0-invariant` stays dark red.
 
 ### Reactivity
 * **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
