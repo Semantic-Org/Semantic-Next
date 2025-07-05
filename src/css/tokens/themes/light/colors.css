@@ -67,19 +67,20 @@ html,
       Base Lightness Scale
   -------------------- */
 
-  /* Base values - single source of truth for all lightness values */
-  --base-lightness-0: 0.98;   /* Near white */
-  --base-lightness-5: 0.95;   /* Very light */
-  --base-lightness-10: 0.90;  /* Light backgrounds */
-  --base-lightness-20: 0.82;  /* Subtle UI */
-  --base-lightness-30: 0.74;  /* Muted elements */
-  --base-lightness-40: 0.65;  /* Secondary elements */
-  --base-lightness-50: 1.0;   /* Base color (uses original L value) */
-  --base-lightness-60: 0.52;  /* Darker than base */
-  --base-lightness-70: 0.45;  /* Gradual darkening */
-  --base-lightness-80: 0.38;  /* More darkening */
-  --base-lightness-90: 0.31;  /* Dark shades */
-  --base-lightness-100: 0.15; /* Near black */
+  /* Base values - multipliers for relative lightness adjustment */
+  --base-lightness-0: 1.66;   /* Near white (166% of base) */
+  --base-lightness-5: 1.61;   /* Very light */
+  --base-lightness-10: 1.52;  /* Light backgrounds */
+  --base-lightness-20: 1.39;  /* Subtle UI */
+  --base-lightness-30: 1.25;  /* Muted elements */
+  --base-lightness-40: 1.10;  /* Secondary elements */
+  --base-lightness-50: 1.0;   /* Base color (100% - no change) */
+  --base-lightness-60: 0.88;  /* Darker than base */
+  --base-lightness-70: 0.76;  /* Gradual darkening */
+  --base-lightness-80: 0.64;  /* More darkening */
+  --base-lightness-90: 0.52;  /* Dark shades */
+  --base-lightness-95: 0.38;  /* Very dark shades */
+  --base-lightness-100: 0.25; /* Near black (25% of base) */
 
   /* -------------------
       Lightness Scale
@@ -97,6 +98,7 @@ html,
   --lightness-70: var(--base-lightness-70);
   --lightness-80: var(--base-lightness-80);
   --lightness-90: var(--base-lightness-90);
+  --lightness-95: var(--base-lightness-95);
   --lightness-100: var(--base-lightness-100);
 
   /* -------------------
@@ -115,6 +117,7 @@ html,
   --base-chroma-70: 0.88;  /* Gradual chroma reduction */
   --base-chroma-80: 0.80;  /* More chroma reduction */
   --base-chroma-90: 0.72;  /* Dark = lower chroma */
+  --base-chroma-95: 0.61;  /* Very dark = very low chroma */
   --base-chroma-100: 0.50; /* Near black = reduced chroma */
 
   /* -------------------
@@ -133,6 +136,7 @@ html,
   --chroma-70: var(--base-chroma-70);
   --chroma-80: var(--base-chroma-80);
   --chroma-90: var(--base-chroma-90);
+  --chroma-95: var(--base-chroma-95);
   --chroma-100: var(--base-chroma-100);
 
   /* -------------------
