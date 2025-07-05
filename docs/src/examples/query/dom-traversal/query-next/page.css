@@ -1,0 +1,19 @@
+.item {
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--standard-10);
+  cursor: pointer;
+  
+  &:hover {
+    background: var(--standard-20);
+  }
+  
+  &.special {
+    border-left: 4px solid var(--purple-50);
+  }
+  
+  &.highlighted {
+    background: var(--green-5);
+    color: var(--green-50);
+  }
+}

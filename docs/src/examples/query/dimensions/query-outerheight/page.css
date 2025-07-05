@@ -1,0 +1,28 @@
+.box {
+  width: 200px;
+  height: 80px;
+  padding: 15px;
+  margin: 20px 0;
+  background: var(--info-color);
+  color: white;
+  text-align: center;
+  line-height: 80px;
+  border: 4px solid var(--standard-30);
+  border-radius: var(--border-radius);
+}
+
+.measurements {
+  background: var(--standard-5);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  
+  p {
+    margin: 5px 0;
+    font-family: monospace;
+    
+    span {
+      font-weight: bold;
+      color: var(--info-color);
+    }
+  }
+}

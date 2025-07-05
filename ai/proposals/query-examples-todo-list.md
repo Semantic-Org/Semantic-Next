@@ -42,24 +42,24 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-height
 - [x] query-innerwidth
 - [x] query-innerheight
-- [ ] query-outerwidth
-- [ ] query-outerheight
-- [ ] query-scrollheight
-- [ ] query-scrollwidth
-- [ ] query-scrollleft
+- [x] query-outerwidth
+- [x] query-outerheight
+- [x] query-scrollheight
+- [x] query-scrollwidth
+- [x] query-scrollleft
 - [x] query-scrolltop
-- [ ] query-naturalwidth
-- [ ] query-naturalheight
+- [x] query-naturalwidth
+- [x] query-naturalheight
 
 ## DOM Manipulation
 - [x] query-remove
-- [ ] query-clone
-- [ ] query-insertafter
-- [ ] query-insertbefore
+- [x] query-clone
+- [x] query-insertafter
+- [x] query-insertbefore
 - [x] query-append
-- [ ] query-prepend
-- [ ] query-detach
-- [ ] query-reverse
+- [x] query-prepend
+- [x] query-detach
+- [x] query-reverse
 
 ## DOM Traversal
 - [ ] query-filter

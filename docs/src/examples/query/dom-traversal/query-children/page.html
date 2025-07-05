@@ -1,13 +1,13 @@
-<p>Get direct child elements</p>
-
 <div class="parent">
-  <span class="child">Child 1</span>
-  <div class="child">
-    Child 2
-    <span>Grandchild</span>
-  </div>
-  <p class="child">Child 3</p>
+  <div class="child item">Child Item 1</div>
+  <span class="child special">Child Span</span>
+  <div class="child item special">Child Item 2</div>
+  <p class="child">Child Paragraph</p>
+  <div class="child item">Child Item 3</div>
 </div>
 
-<p>Direct children count: <span class="count"></span></p>
-<p>Child types: <span class="types"></span></p>
+<ui-button class="all">Get All Children</ui-button>
+<ui-button class="items">Get .item Children</ui-button>
+<ui-button class="special">Get .special Children</ui-button>
+
+<div class="output">Found children: <span class="count">0</span></div>

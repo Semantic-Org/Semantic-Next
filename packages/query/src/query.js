@@ -1338,7 +1338,7 @@ export class Query {
 
   naturalWidth() {
     const widths = this.map((el) => {
-      const $clone = $(el).clone();
+      const $clone = this.chain(el.cloneNode(true));
       $clone
         .insertAfter(el)
         .css({
@@ -1356,7 +1356,7 @@ export class Query {
 
   naturalHeight() {
     const height = this.map((el) => {
-      const $clone = $(el).clone();
+      const $clone = this.chain(el).clone();
       $clone
         .insertAfter(el)
         .css({

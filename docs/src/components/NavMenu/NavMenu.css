@@ -48,7 +48,7 @@
   --nav-menu-nested-item-color: var(--standard-40);
 
   --nav-menu-item-hover-color: var(--standard-90);
-  --nav-menu-item-current-color: var(--primary-30);
+  --nav-menu-item-current-color: var(--primary-30-invariant);
 
   --nav-menu-search-margin: var(--compact-spacing) 0;
 

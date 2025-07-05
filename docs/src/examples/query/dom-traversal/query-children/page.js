@@ -1,8 +1,21 @@
 import { $ } from '@semantic-ui/query';
 
-// Get direct children
-const children = $('.parent').children();
-children.addClass('found');
+const $parent = $('.parent');
 
-$('.count').text(children.count());
-$('.types').text(children.map(el => el.tagName.toLowerCase()).join(', '));
+$('.all').on('click', () => {
+  $('.child').removeClass('highlighted');
+  $parent.children().addClass('highlighted');
+  $('.count').text($parent.children().length);
+});
+
+$('.items').on('click', () => {
+  $('.child').removeClass('highlighted');
+  $parent.children('.item').addClass('highlighted');
+  $('.count').text($parent.children('.item').length);
+});
+
+$('.special').on('click', () => {
+  $('.child').removeClass('highlighted');
+  $parent.children('.special').addClass('highlighted');
+  $('.count').text($parent.children('.special').length);
+});

@@ -1,0 +1,56 @@
+.container {
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  margin: 20px 0;
+  background: var(--background);
+  min-height: 150px;
+  
+  h3 {
+    margin: 0 0 15px 0;
+    color: var(--primary-color);
+  }
+  
+  p {
+    margin: 10px 0;
+    line-height: 1.4;
+  }
+  
+  .prepended {
+    background: var(--success-color);
+    color: white;
+    padding: 8px;
+    border-radius: var(--border-radius);
+    margin: 8px 0;
+    animation: slideDown 0.3s ease-out;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  
+  button {
+    padding: 8px 16px;
+    border: 1px solid var(--standard-20);
+    border-radius: var(--border-radius);
+    background: var(--background);
+    cursor: pointer;
+    
+    &:hover {
+      background: var(--standard-5);
+    }
+  }
+}
