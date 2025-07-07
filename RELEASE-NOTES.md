@@ -17,6 +17,11 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - There is now `getItem(id)` and `getItemIndex(id)` as separate mutation helpers.
 * **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
 
+### Component
+* **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component will not fire bubbled child component lifecycle events.
+
+
+
 ### Query
 * **Feature** - Added namespaced events to `on` and `off`
 * **Feature** - Added `clippingParent` to find closest ancestor which will clip the current element
@@ -29,7 +34,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
-
+* **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
 
 ### Docs
 * **Examples** - Improved console log styling for examples
