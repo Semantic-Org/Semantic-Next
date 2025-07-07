@@ -1,0 +1,9 @@
+.demo, .result {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: var(--vertically-spaced);
+  text-align: center;
+  font-weight: bold;
+}

@@ -1,0 +1,24 @@
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/query": "https://cdn.jsdelivr.net/npm/@semantic-ui/query/+esm"
+  }
+}
+</script>
+
+<script type="module">
+import { useAlias } from '@semantic-ui/query';
+
+// Assume existing $ library exists
+window.$ = () => 'Original $ library';
+
+// Create alias to avoid conflict
+const query = useAlias();
+
+// Use aliased Query instead of $
+query('.demo').text('Using Query alias');
+query('.result').text(`Original $ still works: ${$()}`);
+</script>
+
+<div class="demo">Loading...</div>
+<div class="result">Loading...</div>

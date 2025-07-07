@@ -1,0 +1,10 @@
+.demo {
+  border: var(--border);
+  background: var(--standard-5);
+  margin: var(--vertically-spaced);
+  padding: var(--compact-spacing);
+
+  .count {
+    margin-right: var(--spacing);
+  }
+}

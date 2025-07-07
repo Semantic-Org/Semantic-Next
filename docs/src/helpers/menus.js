@@ -67,7 +67,19 @@ const subCategorySortOrder = {
     'Advanced',
   ],
   'Query': [
-    // Add subcategories as they appear
+    'Setup',
+    'Introduction',
+    'Components',
+    'Attributes',
+    'Content',
+    'CSS',
+    'Dimensions',
+    'DOM Manipulation',
+    'DOM Traversal',
+    'Events',
+    'Iterators',
+    'Logical Operators',
+    'Utilities',
   ],
 };
 

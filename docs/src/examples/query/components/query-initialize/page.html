@@ -1,0 +1,25 @@
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/query": "https://cdn.jsdelivr.net/npm/@semantic-ui/query/+esm"
+  }
+}
+</script>
+
+<script type="module">
+import { $ } from '@semantic-ui/query';
+/*
+  This script runs immediately
+  but initialize makes sure the settings are added
+  after the component is initialized
+*/
+$('ui-greeting.one').initialize({
+  getName: () => 'Alice'
+});
+$('ui-greeting.two').initialize({
+  getName: () => 'John'
+});
+</script>
+
+<ui-greeting class="one"></ui-greeting>
+<ui-greeting class="two"></ui-greeting>

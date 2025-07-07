@@ -1,0 +1,16 @@
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/query": "https://cdn.jsdelivr.net/npm/@semantic-ui/query/+esm"
+  }
+}
+</script>
+
+<script type="module">
+import { $ } from '@semantic-ui/query';
+
+$('.demo').text('Query loaded from CDN!');
+$('.demo').addClass('success');
+</script>
+
+<div class="demo">Loading...</div>
