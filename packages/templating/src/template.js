@@ -168,10 +168,12 @@ export const Template = class Template {
     // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
+    const eventSettings = { composed: false };
+
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
-      this.dispatchEvent('created', { component: this.instance }, { bubbles: false, cancelable: false }, { triggerCallback: false });
+      this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
@@ -181,10 +183,10 @@ export const Template = class Template {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
-      this.dispatchEvent('rendered', { component: this.instance }, { bubbles: false, cancelable: false }, { triggerCallback: false });
+      this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
     this.onUpdated = () => {
-      this.dispatchEvent('updated', { component: this.instance }, { bubbles: false, cancelable: false }, { triggerCallback: false });
+      this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
     this.onThemeChanged = (...args) => {
       this.call(this.onThemeChangedCallback, ...args);
@@ -198,7 +200,7 @@ export const Template = class Template {
       this.removeObservers();
       this.removeParent();
       this.call(this.onDestroyedCallback);
-      this.dispatchEvent('destroyed', { component: this.instance }, { bubbles: false, cancelable: false }, { triggerCallback: false });
+      this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
 
     this.initialized = true;

@@ -99,6 +99,9 @@ export const defineComponent = ({
         defaultSettings,
       });
 
+      static shadowRootOptions = { ...this.shadowRootOptions, delegatesFocus };
+
+
       defaultSettings = {};
 
       constructor() {

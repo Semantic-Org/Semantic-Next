@@ -1,0 +1,16 @@
+.wrapper {
+  margin: var(--vertically-spaced);
+  label {
+    font-size: var(--small);
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  input {
+    border: var(--border);
+    background: var(--standard-5);
+    color: var(--text-color);
+    padding: var(--input-padding);
+
+    color: inherit;
+  }
+}

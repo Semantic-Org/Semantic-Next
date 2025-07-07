@@ -18,8 +18,8 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
 
 ### Component
-* **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component will not fire bubbled child component lifecycle events.
-
+* **Bug** - Fix issue where `delegatesFocus` was not working as expected
+* **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component are no longer `composed: true`
 
 ### Query
 * **Feature** - Added namespaced events to `on` and `off`
