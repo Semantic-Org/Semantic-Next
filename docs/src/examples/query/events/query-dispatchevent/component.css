@@ -1,6 +1,9 @@
-.listener {
+h4 {
+  font-size: 14px;
+  font-weight: bold;
+}
+.log {
   border: var(--border);
-  background: var(--standard-5);
   margin: var(--vertically-spaced);
-  padding: var(--compact-spacing);
+  padding: var(--spacing);
 }

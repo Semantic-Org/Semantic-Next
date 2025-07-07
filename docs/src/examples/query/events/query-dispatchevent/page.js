@@ -1,17 +1,25 @@
 import { $ } from '@semantic-ui/query';
+import { formatDate } from '@semantic-ui/utils';
 
-$('.ping-dispatcher')
-  .on('click', function() {
-    console.log('got here', this);
-    $(this).dispatchEvent('ping', { date: new Date() });
-  })
-;
+const addLog = (text) => {
+  $('.empty').remove();
+  $('.log').append(`<div>${text}</div>`);
+};
 
-$('.pong-dispatcher')
-  .on('pong', function() {
-    console.log('hereee');
-    setTimeout(() => {
-      $('.ping-dispatcher').dispatchEvent('ping', { date: new Date() });
-    }, 1000);
+// custom events can pass through data, like the current time
+const dispatchPingEvent = () => {
+  $('.ping-dispatcher').dispatchEvent('ping', { date: new Date() });
+};
+
+// ping dispatcher will start the ping/pong chain on first click
+// by sending a 'ping' event
+$('.ping-dispatcher').on('click', dispatchPingEvent);
+
+// pong dispatcher will emit a custom event which we can respond to
+$('pong-dispatcher')
+  .on('pong', function(event) {
+    const displayDate = formatDate(event.detail.date, 'h:mm:ss a', { timezone: 'local' });
+    addLog(`Pong received - ${displayDate}.`);
+    setTimeout(dispatchPingEvent, 1000);
   })
 ;

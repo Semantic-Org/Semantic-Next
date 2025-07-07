@@ -4,29 +4,25 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultState = {
-  log: '',
+  log: [],
 };
 
 const createComponent = ({ state, dispatchEvent }) => ({
 
-  appendLog(message) {
-    let logValue = state.log.get();
-    logValue += `\n${message}`;
-    state.log.set(logValue);
+  appendLog(message, date) {
+    state.log.push({message: message, date: date});
   },
 
-  sendPing() {
-    console.log('dispatching pong');
-    dispatchEvent('pong', { time: new Date() });
+  sendPong() {
+    dispatchEvent('pong', { date: new Date() });
   }
 
 });
 
 const events = {
   'global ping .ping-dispatcher': ({ self, data, dispatchEvent }) => {
-    console.log('Got here');
-    self.appendLog(`Pong received`, data.date);
-    setTimeout(self.sendPing, 1000);
+    self.appendLog(`Ping received`, data.date);
+    setTimeout(self.sendPong, 1000);
   },
 };
 
