@@ -21,7 +21,6 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component will not fire bubbled child component lifecycle events.
 
 
-
 ### Query
 * **Feature** - Added namespaced events to `on` and `off`
 * **Feature** - Added `clippingParent` to find closest ancestor which will clip the current element
@@ -32,6 +31,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support
 * **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
+* **Bug** - `dataContext()` now returns the entire data context including state
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
 * **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.

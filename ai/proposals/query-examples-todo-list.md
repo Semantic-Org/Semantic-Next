@@ -9,7 +9,7 @@ This file tracks the implementation status of all Query method examples based on
 
 ## Introduction
 - [ ] query-dom
-- [x] query-shadow-dom (Keep existing)
+- [x] query-shadow-dom (exists as shadow-dom.mdx)
 - [ ] query-chaining
 - [ ] query-creating-dom
 
@@ -62,17 +62,17 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-reverse
 
 ## DOM Traversal
-- [ ] query-filter
-- [ ] query-children
-- [ ] query-parent
+- [x] query-filter
+- [x] query-children
+- [x] query-parent
 - [x] query-find
-- [ ] query-not
+- [x] query-not
 - [x] query-closest
-- [ ] query-is
-- [ ] query-siblings
+- [x] query-is
+- [x] query-siblings
 - [x] query-index
 - [ ] query-indexof
-- [ ] query-next
+- [x] query-next
 - [ ] query-prev
 - [ ] query-contains
 - [ ] query-clippingparent
@@ -102,13 +102,14 @@ This file tracks the implementation status of all Query method examples based on
 - [x] query-eq
 - [ ] query-end
 - [x] query-first
-- [x] query-last
+- [ ] query-last
 - [x] query-slice
 
 ## Utilities
 - [x] query-exists
 - [ ] query-chain
 - [x] query-el
+- [x] query-count
 - [ ] query-settings
 - [ ] query-setting
 - [ ] query-initialize
@@ -117,16 +118,7 @@ This file tracks the implementation status of all Query method examples based on
 
 ## Implementation Progress
 
-### Completed Examples: 36/78
-- query-shadow-dom (existing)
-- query-addclass
-- query-removeclass
-- query-toggleclass
-- query-text
-- query-on
-- query-on-delegate
-- query-on-abort
-- query-on-callback
+### Completed Examples: 59/83
 
 ### Canonical Reference Examples
 These examples serve as the quality standard for all other implementations:
@@ -134,6 +126,32 @@ These examples serve as the quality standard for all other implementations:
 - **Getter/Setter**: query-text
 - **Basic Events**: query-on
 - **Advanced Events**: query-on-delegate, query-on-abort, query-on-callback
+
+### Remaining Examples to Implement: 24
+1. **Setup (3)**: query-esm-usage, query-browser-usage, query-noconflict
+2. **Introduction (3)**: query-dom, query-chaining, query-creating-dom
+3. **DOM Traversal (5)**: query-indexof, query-prev, query-contains, query-clippingparent, query-containingparent
+4. **Events (7)**: query-dispatchevent, query-trigger, query-focus, query-blur, query-click, query-submit, query-ready
+5. **Logical Operators (2)**: query-end, query-last
+6. **Utilities (5)**: query-chain, query-settings, query-setting, query-initialize, query-component, query-datacontext
+
+### Examples Requiring Web Components (7)
+
+These examples need SUI web components to demonstrate their functionality:
+
+1. **`query-settings`** - Update multiple settings at once: Change name and age on a simple profile component with `.settings({ name: 'Alice', age: 30 })`
+
+2. **`query-setting`** - Get or set one setting: Toggle a component's 'active' setting with `.setting('active', true)` and read it with `.setting('active')`
+
+3. **`query-initialize`** - Set properties before DOM insertion: Create a component, initialize it with a callback function, then add to DOM
+
+4. **`query-component`** - Call a component method: Access a counter component and call its `.increment()` method
+
+5. **`query-datacontext`** - Inspect component internals: Log the state, settings, and methods of a simple component for debugging
+
+6. **`query-focus`** - Focus a web component: Focus a custom input component that uses delegatesFocus to show how focus passes through
+
+7. **`query-dispatchevent`** - Send a custom event: Dispatch a simple 'ping' event from a button to a component that responds with 'pong'
 
 ### Priority Order
 1. **Phase 1: Core Methods** (Essential functionality)
