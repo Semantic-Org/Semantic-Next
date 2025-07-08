@@ -1,4 +1,3 @@
-import { sortBy } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
@@ -8,15 +7,6 @@ const componentPages = components.map(page => ({
   url: `/ui/${page.slug}`,
   matchSubPaths: true,
 }));
-
-/* Examples pages are generated dynamically */
-const examples = await getCollection('examples');
-const examplePages = examples
-  .filter(doc => !doc?.data?.hidden)
-  .map(doc => ({
-    ...doc.data,
-    url: `/examples/${doc.slug}`,
-  }));
 
 /* Define sort order for example categories */
 const exampleCategorySortOrder = [
@@ -86,34 +76,13 @@ const subCategorySortOrder = {
 /* Export subcategory sort order for use in navigation.js */
 export { subCategorySortOrder };
 
-/* Dynamically get all unique categories from examples */
-const getExampleCategories = () => {
-  const categories = [...new Set(examplePages.map(example => example.category).filter(Boolean))];
-
-  // Sort categories based on the predefined order using sortBy utility
-  const categoriesWithOrder = categories.map(category => ({
-    name: category,
-    sortIndex: exampleCategorySortOrder.indexOf(category),
-  }));
-
-  const sorted = sortBy(categoriesWithOrder, 'sortIndex');
-
-  return sorted.map(item => item.name);
-};
-
 /* Create dynamic menu entries for examples based on actual categories */
-const exampleCategoryMenus = getExampleCategories().map(category => {
-  // Find the first example in this category
-  const firstExample = examplePages.find(example => example.category === category);
-  const firstExampleUrl = firstExample ? firstExample.url : `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`;
-
-  return {
-    _id: `examples-${category.toLowerCase().replace(/\s+/g, '-')}`,
-    name: category,
-    url: firstExampleUrl, // Link to first example
-    baseURL: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`, // Keep category path for URL matching
-  };
-});
+const exampleCategoryMenus = exampleCategorySortOrder.map(category => ({
+  _id: `examples-${category.toLowerCase().replace(/\s+/g, '-')}`,
+  name: category,
+  url: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`, // Will be handled by navigation
+  baseURL: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`,
+}));
 
 /* Topbar Menu */
 export const topbarDisplayMenu = [

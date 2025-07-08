@@ -1,19 +1,12 @@
-.demo {
-  padding: var(--compact-spacing);
-  background: var(--standard-5);
+.status {
+  padding: var(--padding);
   border: var(--border);
   border-radius: var(--border-radius);
-  margin: var(--vertically-spaced);
-  text-align: center;
   font-weight: bold;
-}
+  transition: all 1s ease;
 
-.demo.success {
-  background: var(--positive-background);
-  color: var(--positive-text);
-  border-color: var(--positive-border);
-}
-
-ui-button {
-  margin: var(--vertically-spaced);
+  &.loaded {
+    background-color: var(--green-5);
+    color: var(--green-text-color);
+  }
 }

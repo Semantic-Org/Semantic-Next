@@ -7,10 +7,10 @@
 </script>
 
 <script type="module">
-import { $ } from '@semantic-ui/query';
-
-$('.demo').text('Query loaded from CDN!');
-$('.demo').addClass('success');
+  import { $ } from '@semantic-ui/query';
+  $('.status')
+    .text('Query loaded from CDN!')
+    .addClass('loaded');
 </script>
 
-<div class="demo">Loading...</div>
+<div class="status"></div>

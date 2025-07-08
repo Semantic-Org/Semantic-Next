@@ -14,7 +14,14 @@ import {
   unique,
 } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
-import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu, subCategorySortOrder } from './menus.js';
+import {
+  sidebarMenuAPI,
+  sidebarMenuFramework,
+  sidebarMenuUI,
+  subCategorySortOrder,
+  topbarDisplayMenu,
+  topbarMenu,
+} from './menus.js';
 
 /* Used to sort lessons */
 import semverCompare from 'semver/functions/compare';
@@ -114,37 +121,36 @@ const createExampleMenu = () => {
 };
 export const sidebarMenuExamples = createExampleMenu();
 
-
 /* Create filtered example menus for each category */
-const createFilteredExampleMenu = (categoryFilter) => {
+export const createFilteredExampleMenu = (categoryFilter) => {
   const categorySection = sidebarMenuExamples.find(section => section.name === categoryFilter);
   if (!categorySection || !categorySection.pages) {
     return [];
   }
-  
+
   // If the category has subcategories (pages with nested pages), return those subcategories as top-level sections
   if (categorySection.pages.length > 0 && categorySection.pages[0].pages) {
     const subcategories = categorySection.pages.map(subcategory => ({
       name: subcategory.name,
-      pages: subcategory.pages
+      pages: subcategory.pages,
     }));
-    
+
     // Sort subcategories based on predefined order
     const sortOrder = subCategorySortOrder[categoryFilter] || [];
     const subcategoriesWithOrder = subcategories.map(subcategory => ({
       ...subcategory,
-      sortIndex: sortOrder.indexOf(subcategory.name)
+      sortIndex: sortOrder.indexOf(subcategory.name),
     }));
-    
+
     const sorted = sortBy(subcategoriesWithOrder, 'sortIndex');
-    
+
     return sorted.map(({ sortIndex, ...subcategory }) => subcategory);
   }
-  
+
   // If no subcategories, return the pages directly as a single section
   return [{
     name: categorySection.name,
-    pages: categorySection.pages
+    pages: categorySection.pages,
   }];
 };
 
@@ -233,7 +239,7 @@ const isInSectionMenu = (sectionId, currentPath) => {
       const exampleSlug = example.category?.toLowerCase().replace(/\s+/g, '-');
       return exampleSlug === categorySlug;
     })?.category;
-    
+
     if (categoryName) {
       menu = createFilteredExampleMenu(categoryName);
     }
@@ -352,9 +358,26 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
       const exampleSlug = example.category?.toLowerCase().replace(/\s+/g, '-');
       return exampleSlug === categorySlug;
     })?.category;
-    
+
     if (categoryName) {
       menu = createFilteredExampleMenu(categoryName);
+
+      // Update the URL in topbarMenu to point to the first example
+      const topbarItem = topbarMenu.find(item => item._id === topbarSection);
+      if (topbarItem && menu.length > 0) {
+        const firstSection = menu[0];
+        if (firstSection.pages && firstSection.pages.length > 0) {
+          const firstPage = firstSection.pages[0];
+          if (firstPage.pages && firstPage.pages.length > 0) {
+            // Has subcategories
+            topbarItem.url = firstPage.pages[0].url;
+          }
+          else {
+            // No subcategories
+            topbarItem.url = firstPage.url;
+          }
+        }
+      }
     }
   }
   else if (topbarSection === 'learn') {

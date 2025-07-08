@@ -328,10 +328,10 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
         html += `${htmlHideMarkerStart}`;
       }
       if (src.search('.js') >= 0) {
-        html += `   <script src="./${src}" type="module"></script>\n`;
+        html += `    <script src="./${src}" type="module"></script>\n`;
       }
       else if (src.search('.css') >= 0) {
-        html += `   <link href="./${src}" rel="stylesheet">\n`;
+        html += `    <link href="./${src}" rel="stylesheet">\n`;
       }
       if (files[src]?.generated) {
         html += `${htmlHideMarkerEnd}`;
