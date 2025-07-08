@@ -488,21 +488,28 @@ An alias for `some`.
 function sortBy(arr, key, comparator)
 ```
 
-Sort an array of objects by a specific key.
+Sort an array of objects by one or more keys. Supports multi-key sorting by passing an array of keys, and uses proper internationalized string comparison.
 
 #### Parameters
 
-| Name       | Type     | Description |
-|------------|----------|-------------|
-| arr        | array    | The array to sort |
-| key        | string   | The key to sort by |
-| comparator | function | Optional custom comparison function |
+| Name       | Type              | Description |
+|------------|-------------------|-------------|
+| arr        | array             | The array to sort |
+| key        | string or array   | The key to sort by, or array of keys for multi-key sorting |
+| comparator | function          | Optional custom comparison function. For multi-key sorting, receives key index as fifth parameter |
+
+##### Comparator Function
+
+For single-key sorting: `(a, b, objA, objB) => number`
+For multi-key sorting: `(a, b, objA, objB, keyIndex) => number`
 
 #### Returns
 
 A new sorted array.
 
-#### Example
+#### Examples
+
+**Single Key Sorting**
 
 ```javascript
 import { sortBy } from '@semantic-ui/utils';
@@ -512,9 +519,40 @@ const people = [
   { name: 'Jane', age: 25 },
   { name: 'Bob', age: 35 }
 ];
-const sorted = sortBy(people, 'age');
-console.log(sorted);
+console.log(sortBy(people, 'age'));
 // [{ name: 'Jane', age: 25 }, { name: 'John', age: 30 }, { name: 'Bob', age: 35 }]
+
+// With custom comparator (descending)
+console.log(sortBy(people, 'age', (a, b) => b - a));
+// [{ name: 'Bob', age: 35 }, { name: 'John', age: 30 }, { name: 'Jane', age: 25 }]
+```
+
+**Multi-Key Sorting**
+
+```javascript
+import { sortBy } from '@semantic-ui/utils';
+
+const employees = [
+  { name: 'John', age: 30, department: 'IT' },
+  { name: 'Jane', age: 25, department: 'HR' },
+  { name: 'Bob', age: 30, department: 'IT' },
+  { name: 'Alice', age: 25, department: 'IT' }
+];
+
+// Sort by age first, then by name
+console.log(sortBy(employees, ['age', 'name']));
+// [
+//   { name: 'Alice', age: 25, department: 'IT' },
+//   { name: 'Jane', age: 25, department: 'HR' },
+//   { name: 'Bob', age: 30, department: 'IT' },
+//   { name: 'John', age: 30, department: 'IT' }
+// ]
+
+// Sort with custom comparator for multi-key
+console.log(sortBy(employees, ['age', 'name'], (a, b, objA, objB, keyIndex) => {
+  // Reverse sort for age (first key), normal sort for name (second key)
+  return keyIndex === 0 ? b - a : String(a).localeCompare(String(b));
+}));
 ```
 
 ### groupBy

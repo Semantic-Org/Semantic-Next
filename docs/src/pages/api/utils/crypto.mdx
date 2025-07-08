@@ -10,6 +10,33 @@ The Crypto utilities provide functions for generating unique identifiers and has
 
 ## Functions
 
+### tokenize
+
+```javascript
+function tokenize(str = '')
+```
+
+Converts a string to a URL-friendly token.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| str  | string | The input string |
+
+#### Returns
+
+The tokenized string.
+
+#### Example
+
+```javascript
+import { tokenize } from '@semantic-ui/utils';
+
+console.log(tokenize('Hello World')); // "hello-world"
+console.log(tokenize('A simple-test_string')); // "a-simple-test-string"
+```
+
 ### hashCode
 
 ```javascript
@@ -51,47 +78,86 @@ console.log(hashCode({ a: 1, b: [2, 3] })); // 3608339170
 ### generateID
 
 ```javascript
-function generateID()
+function generateID(seed = getRandomSeed())
 ```
 
-Generates a unique identifier.
+Generates a prettified ID using a random or custom seed.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| seed | number | Optional seed value. If not provided, uses getRandomSeed() |
 
 #### Returns
 
-A string representing a unique identifier.
+A prettified alphanumeric ID with default 6-character minimum length.
 
 #### Example
 
 ```javascript
 import { generateID } from '@semantic-ui/utils';
 
-console.log(generateID()); // "1A2B3C4D"
-console.log(generateID()); // "5E6F7G8H"
+console.log(generateID()); // "A7B3X9"
+console.log(generateID()); // "K2M8P4"
+console.log(generateID(12345)); // "00009IX"
+console.log(generateID(12345)); // "00009IX" (same seed produces same ID)
 ```
 
-### prettifyID
+### prettifyHash
 
 ```javascript
-function prettifyID(num)
+function prettifyHash(numericHash, { minLength = 6, padChar = '0' } = {})
 ```
 
-Converts a number into a more readable string representation.
+Converts a numeric hash value to a prettified alphanumeric string using base-36 encoding.
 
 #### Parameters
 
-| Name | Type   | Description |
-|------|--------|-------------|
-| num  | number | The number to convert |
+| Name        | Type   | Description |
+|-------------|--------|-------------|
+| numericHash | number | The numeric hash value to convert |
+| options     | object | Optional configuration |
+
+##### Options
+
+| Name      | Type   | Default | Description |
+|-----------|--------|---------|-------------|
+| minLength | number | 6       | Minimum length of the output string. Will pad with padChar if necessary |
+| padChar   | string | '0'     | Character to use for padding |
 
 #### Returns
 
-A string representation of the number using alphanumeric characters.
+The prettified hash string. Returns padded "0" if input parses to 0 or NaN.
 
 #### Example
 
 ```javascript
-import { prettifyID } from '@semantic-ui/utils';
+import { prettifyHash } from '@semantic-ui/utils';
 
-console.log(prettifyID(123456)); // "1E240"
-console.log(prettifyID(0)); // "0"
+console.log(prettifyHash(123)); // "00003F"
+console.log(prettifyHash(123, { minLength: 8 })); // "0000003F"
+console.log(prettifyHash(123, { minLength: 4, padChar: 'X' })); // "XX3F"
+console.log(prettifyHash(0)); // "000000"
+```
+
+### getRandomSeed
+
+```javascript
+function getRandomSeed()
+```
+
+Generates a cryptographically secure random seed value.
+
+#### Returns
+
+A random 32-bit unsigned integer. Uses crypto.getRandomValues when available, falls back to Math.random.
+
+#### Example
+
+```javascript
+import { getRandomSeed } from '@semantic-ui/utils';
+
+console.log(getRandomSeed()); // 2949673445
+console.log(getRandomSeed()); // 1234567890
 ```

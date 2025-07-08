@@ -6,6 +6,8 @@ icon: zap
 description: API reference for Query methods related to event handling
 ---
 
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
 The Event methods in Query provide tools for attaching event listeners, triggering custom events, removing them, and triggering events.
 
 ## On
@@ -176,6 +178,57 @@ $('button').on('click', function() {
 controller.abort();
 ```
 
+### Example
+<PlaygroundExample id="query-on" direction="horizontal"></PlaygroundExample>
+
+#### Event Delegation Example
+
+Example of using event delegation with dynamic content:
+
+```javascript
+// This event handler will work for buttons added later
+$('#container').on('click', 'button', function(event) {
+  console.log('Button clicked!', this);
+});
+```
+
+### Example
+<PlaygroundExample id="query-on-delegate" direction="horizontal"></PlaygroundExample>
+
+#### Abort Controller Example
+
+Example of using AbortController for event management:
+
+```javascript
+const controller = new AbortController();
+
+$('button').on('click', function() {
+  console.log('Button clicked!');
+}, { abortController: controller });
+
+// Later, to remove the event listener:
+controller.abort();
+```
+
+### Example
+<PlaygroundExample id="query-on-abort" direction="horizontal"></PlaygroundExample>
+
+#### Callback Handler Example
+
+Example of using the callback handler pattern:
+
+```javascript
+const handler = $('button').on('click', function() {
+  console.log('Button clicked!');
+}, { returnHandler: true });
+
+// Later, to remove the event listener:
+handler.abort();
+```
+
+### Example
+<PlaygroundExample id="query-on-callback" direction="horizontal"></PlaygroundExample>
+
 
 ## off
 
@@ -206,6 +259,9 @@ $('button').on('click', clickHandler);
 $('button').off('click', clickHandler);
 ```
 
+### Example
+<PlaygroundExample id="query-off" direction="horizontal"></PlaygroundExample>
+
 ## one
 
 Attaches a handler to an event for the elements. The handler is executed at most once per element per event type.
@@ -231,6 +287,9 @@ $('button').one('click', function(event) {
 });
 ```
 
+### Example
+<PlaygroundExample id="query-one" direction="horizontal"></PlaygroundExample>
+
 ## trigger
 
 Executes all handlers attached to the matched elements for the given event type.
@@ -252,6 +311,9 @@ $('selector').trigger(eventName)
 ```javascript
 $('button').trigger('click');
 ```
+
+### Example
+<PlaygroundExample id="query-trigger" direction="horizontal"></PlaygroundExample>
 
 ## dispatchEvent
 
@@ -283,6 +345,9 @@ const eventData = {
 }
 $('.container').dispatchEvent('resize', eventData);
 ```
+
+### Example
+<PlaygroundExample id="query-dispatchevent" direction="horizontal"></PlaygroundExample>
 ## focus
 
 Gives focus to the first element in the set of matched elements.
@@ -302,6 +367,9 @@ $('selector').focus()
 $('input.username').focus();
 ```
 
+### Example
+<PlaygroundExample id="query-focus" direction="horizontal"></PlaygroundExample>
+
 ## blur
 
 Removes focus from the first element in the set of matched elements.
@@ -319,6 +387,9 @@ $('selector').blur()
 // Remove focus from whatever is focused
 $(document.activeElement).blur();
 ```
+
+### Example
+<PlaygroundExample id="query-blur" direction="horizontal"></PlaygroundExample>
 ```
 ## click
 
@@ -329,6 +400,18 @@ Triggers click event for all elements
 $('selector').click()
 ```
 
+### Returns
+[Query object](/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Trigger click on all buttons
+$('button').click();
+```
+
+### Example
+<PlaygroundExample id="query-click" direction="horizontal"></PlaygroundExample>
+
 ## submit
 
 Triggers submit event for all elements
@@ -337,3 +420,44 @@ Triggers submit event for all elements
 ```javascript
 $('selector').submit()
 ```
+
+### Returns
+[Query object](/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Submit all forms
+$('form').submit();
+```
+
+### Example
+<PlaygroundExample id="query-submit" direction="horizontal"></PlaygroundExample>
+
+## ready
+
+Executes a function when the DOM is fully loaded.
+
+### Syntax
+```javascript
+$(document).ready(handler)
+```
+
+### Parameters
+| Name    | Type     | Description                              |
+|---------|----------|------------------------------------------|
+| handler | function | The function to execute when DOM is ready |
+
+### Returns
+[Query object](/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+// Execute code when DOM is ready
+$(document).ready(function() {
+  console.log('DOM is ready!');
+  // Initialize your application here
+});
+```
+
+### Example
+<PlaygroundExample id="query-ready" direction="horizontal"></PlaygroundExample>

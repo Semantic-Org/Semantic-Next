@@ -6,6 +6,8 @@ icon: edit-3
 description: API reference for Query methods related to DOM manipulation
 ---
 
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
 The DOM Manipulation methods in Query allow you to insert, remove, and modify elements in the DOM. These methods are crucial for creating dynamic and interactive user interfaces in your Semantic UI components.
 
 ## append
@@ -46,6 +48,9 @@ $('div').append(
 $$('user-profile').find('.action-buttons').append('<button>Follow</button>');
 ```
 
+### Example
+<PlaygroundExample id="query-append" direction="horizontal"></PlaygroundExample>
+
 ## prepend
 
 Insert content to the beginning of each element in the set of matched elements.
@@ -84,6 +89,9 @@ $('section').prepend(
 $$('user-profile').find('.user-name').prepend('<span class="badge">New</span>');
 ```
 
+### Example
+<PlaygroundExample id="query-prepend" direction="horizontal"></PlaygroundExample>
+
 ## remove
 
 Remove the set of matched elements from the DOM.
@@ -109,6 +117,9 @@ $('p.outdated').remove();
 // Remove the offline status indicator from a user-profile
 $$('user-profile').find('.status-indicator.offline').remove();
 ```
+
+### Example
+<PlaygroundExample id="query-remove" direction="horizontal"></PlaygroundExample>
 
 ## clone
 
@@ -137,6 +148,9 @@ $('#container').append($template);
 const $badge = $$('user-profile').find('.user-badge').clone();
 $$('user-profile').find('.badge-list').append($badge);
 ```
+
+### Example
+<PlaygroundExample id="query-clone" direction="horizontal"></PlaygroundExample>
 
 ## insertBefore
 
@@ -169,6 +183,9 @@ $('<p>New paragraph</p>').insertBefore('p');
 $$('<h3>User Details</h3>').insertBefore($$('user-profile').find('.user-info'));
 ```
 
+### Example
+<PlaygroundExample id="query-insertbefore" direction="horizontal"></PlaygroundExample>
+
 ## insertAfter
 
 Insert every element in the set of matched elements after the target.
@@ -199,6 +216,9 @@ $('<p>New paragraph</p>').insertAfter('p');
 // Insert a new footer after the user bio in a user-profile
 $$('<footer>Last updated: Today</footer>').insertAfter($$('user-profile').find('.user-bio'));
 ```
+
+### Example
+<PlaygroundExample id="query-insertafter" direction="horizontal"></PlaygroundExample>
 
 > **Aliases** The `before(content)` and `after(content)` methods are available as more intuitive aliases for inserting content before and after the current selection.
 
@@ -232,6 +252,21 @@ $posts.addClass('updated');
 $$('user-profile').find('.posts-container').append($posts);
 ```
 
+### Example
+<PlaygroundExample id="query-detach" direction="horizontal"></PlaygroundExample>
+
+## reverse
+
+Reverse the order of elements in the current set of matched elements.
+
+### Syntax
+```javascript
+$('selector').reverse()
+```
+
+### Returns
+[Query object](/api/query/basic#the-query-object) containing the elements in reverse order.
+
 ### Usage
 ```javascript
 // Reverse the order of list items
@@ -240,102 +275,5 @@ $('ul.my-list li').reverse().each((el, index) => {
 });
 ```
 
-## clone
-
-Creates a deep copy of the set of matched elements.
-
-### Syntax
-```javascript
-$('selector').clone()
-```
-
-### Returns
-A new [Query object](/api/query/basic#the-query-object) containing cloned elements.
-
-### Usage
-```javascript
-// Clone a template and append it to a container
-const $template = $('#item-template').clone();
-$('#container').append($template);
-```
-
-## reverse
-
-Reverses the order of the elements in the current set.
-
-### Syntax
-```javascript
-$('selector').reverse()
-```
-
-### Returns
-A new [Query object](/api/query/basic#the-query-object) containing the reversed elements.
-
-### Usage
-```javascript
-// Reverse the order of list items
-const $reversed = $('ul li').reverse();
-$('ul').empty().append($reversed);
-```
-
-## slice
-
-Returns a shallow copy of a portion of the elements into a new Query object.
-
-### Syntax
-```javascript
-$('selector').slice(start, end)
-```
-
-### Parameters
-| Name  | Type   | Description                                                                 |
-|-------|--------|-----------------------------------------------------------------------------|
-| start | number | The beginning index of the specified portion of the collection (optional)  |
-| end   | number | The end index of the specified portion of the collection (optional, exclusive) |
-
-### Returns
-A new [Query object](/api/query/basic#the-query-object) containing the sliced elements.
-
-### Usage
-
-#### Basic Slicing
-```javascript
-// Get elements 2-4 from a list of items
-const $items = $('.item');
-const $sliced = $items.slice(1, 4); // Gets items at index 1, 2, 3
-
-// Get all elements from index 2 onwards
-const $fromIndex = $items.slice(2);
-
-// Get the last 2 elements using negative indices
-const $lastTwo = $items.slice(-2);
-```
-
-#### Working with Multiple Elements
-```javascript
-// Slice and manipulate a portion of elements
-$('.card').slice(0, 3).addClass('featured');
-
-// Process elements in batches
-const $allItems = $('.item');
-const firstBatch = $allItems.slice(0, 5);
-const secondBatch = $allItems.slice(5, 10);
-
-firstBatch.addClass('batch-one');
-secondBatch.addClass('batch-two');
-```
-
-#### Shadow DOM
-```javascript
-// Slice user posts in a user-profile component
-const $posts = $$('user-profile').find('.user-post');
-const $recentPosts = $posts.slice(0, 3);
-$recentPosts.addClass('recent');
-```
-
-### Notes
-- Returns the same instance when called on an empty collection
-- Supports negative indices like `Array.prototype.slice`
-- Creates a new Query object, enabling method chaining
-- Does not modify the original Query object
-
+### Example
+<PlaygroundExample id="query-reverse" direction="horizontal"></PlaygroundExample>
