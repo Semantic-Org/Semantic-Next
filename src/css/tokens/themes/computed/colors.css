@@ -46,11 +46,13 @@
   --red-chroma-95: var(--chroma-95);
   --red-chroma-100: var(--chroma-100);
 
-  /* Red hue shifts */
-  --red-hue-shift-70: 2;
-  --red-hue-shift-80: 3;
-  --red-hue-shift-90: 4;
-  --red-hue-shift-100: 5;
+  /* Prevents reds from becoming orange */
+  --red-hue-shift-60: 4;
+  --red-hue-shift-70: 6;
+  --red-hue-shift-80: 8;
+  --red-hue-shift-90: 10;
+  --red-hue-shift-95: 13;
+  --red-hue-shift-100: 15;
 
   /* Blue mappings */
   --blue-lightness-0: var(--lightness-0);
@@ -411,12 +413,12 @@
   --red-30: oklch(from var(--red) calc(l * var(--red-lightness-30)) calc(c * var(--red-chroma-30)) h);
   --red-40: oklch(from var(--red) calc(l * var(--red-lightness-40)) calc(c * var(--red-chroma-40)) h);
   --red-50: var(--red);
-  --red-60: oklch(from var(--red) calc(l * var(--red-lightness-60)) calc(c * var(--red-chroma-60)) h);
-  --red-70: oklch(from var(--red) calc(l * var(--red-lightness-70)) calc(c * var(--red-chroma-70)) calc(h + var(--red-hue-shift-70, 0)));
-  --red-80: oklch(from var(--red) calc(l * var(--red-lightness-80)) calc(c * var(--red-chroma-80)) calc(h + var(--red-hue-shift-80, 0)));
-  --red-90: oklch(from var(--red) calc(l * var(--red-lightness-90)) calc(c * var(--red-chroma-90)) calc(h + var(--red-hue-shift-90, 0)));
-  --red-95: oklch(from var(--red) calc(l * var(--red-lightness-95)) calc(c * var(--red-chroma-95)) calc(h + var(--red-hue-shift-95, 0)));
-  --red-100: oklch(from var(--red) calc(l * var(--red-lightness-100)) calc(c * var(--red-chroma-100)) calc(h + var(--red-hue-shift-100, 0)));
+  --red-60: oklch(from var(--red) calc(l * var(--red-lightness-60)) calc(c * var(--red-chroma-60)) calc(h - var(--red-hue-shift-60, 0)));
+  --red-70: oklch(from var(--red) calc(l * var(--red-lightness-70)) calc(c * var(--red-chroma-70)) calc(h - var(--red-hue-shift-70, 0)));
+  --red-80: oklch(from var(--red) calc(l * var(--red-lightness-80)) calc(c * var(--red-chroma-80)) calc(h - var(--red-hue-shift-80, 0)));
+  --red-90: oklch(from var(--red) calc(l * var(--red-lightness-90)) calc(c * var(--red-chroma-90)) calc(h - var(--red-hue-shift-90, 0)));
+  --red-95: oklch(from var(--red) calc(l * var(--red-lightness-95)) calc(c * var(--red-chroma-95)) calc(h - var(--red-hue-shift-95, 0)));
+  --red-100: oklch(from var(--red) calc(l * var(--red-lightness-100)) calc(c * var(--red-chroma-100)) calc(h - var(--red-hue-shift-100, 0)));
 
   /* -------------------
           Blue

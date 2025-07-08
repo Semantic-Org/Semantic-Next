@@ -11,7 +11,7 @@ html,
           Colors
   -------------------- */
 
-  --red: oklch(0.59 0.27 29);
+  --red: oklch(0.59 0.27 28);
   --orange: oklch(0.65 0.2 44.37);
   --yellow: oklch(0.78 0.18 81.24);
   --olive: oklch(0.69 0.19 119.53);
@@ -106,8 +106,8 @@ html,
   -------------------- */
 
   /* Base values - single source of truth for all chroma values */
-  --base-chroma-0: 0.1;   /* Very light = very low chroma */
-  --base-chroma-5: 0.2;   /* Light = low chroma */
+  --base-chroma-0: 0.15;   /* Very light = very low chroma */
+  --base-chroma-5: 0.25;   /* Light = low chroma */
   --base-chroma-10: 0.35;  /* Subtle = medium-low chroma */
   --base-chroma-20: 0.55;  /* UI elements = medium chroma */
   --base-chroma-30: 0.75;  /* Muted = high-medium chroma */
@@ -117,8 +117,8 @@ html,
   --base-chroma-70: 0.75;  /* Gradual chroma reduction */
   --base-chroma-80: 0.55;  /* More chroma reduction */
   --base-chroma-90: 0.35;  /* Dark = lower chroma */
-  --base-chroma-95: 0.2;  /* Very dark = very low chroma */
-  --base-chroma-100: 0.1; /* Near black = reduced chroma */
+  --base-chroma-95: 0.25;  /* Very dark = very low chroma */
+  --base-chroma-100: 0.15; /* Near black = reduced chroma */
 
 
   /* -------------------
