@@ -301,28 +301,35 @@ export function some<T>(collection: T[], predicate: ArrayCallback<T>): boolean;
 export const any: typeof some;
 
 /**
- * Sorts an array of objects by a specific key with optional comparator
+ * Sorts an array of objects by one or more keys with optional comparator
  * @see {@link https://next.semantic-ui.com/api/utils/arrays#sortby sortBy}
+ * @see {@link https://next.semantic-ui.com/examples/utils-sortby Example}
  *
  * @param arr - Array to sort
- * @param key - Key to sort by
- * @param comparator - Optional custom comparison function
+ * @param key - Key or array of keys to sort by
+ * @param comparator - Optional custom comparison function. For multi-key sorting, receives key index as fifth parameter
  * @returns A new sorted array
  *
  * @example
  * ```ts
  * const users = [
- *   { name: 'John', age: 30 },
- *   { name: 'Jane', age: 25 }
+ *   { name: 'John', age: 30, dept: 'IT' },
+ *   { name: 'Jane', age: 25, dept: 'HR' },
+ *   { name: 'Bob', age: 30, dept: 'IT' }
  * ];
  * sortBy(users, 'age') // sorts by age ascending
  * sortBy(users, 'age', (a, b) => b - a) // sorts by age descending
+ * sortBy(users, ['age', 'name']) // sorts by age, then name
+ * sortBy(users, ['age', 'name'], (a, b, objA, objB, keyIndex) => {
+ *   // Custom comparison with key index
+ *   return keyIndex === 0 ? b - a : String(a).localeCompare(String(b));
+ * })
  * ```
  */
 export function sortBy<T>(
   arr: T[],
-  key: keyof T,
-  comparator?: (a: T[keyof T], b: T[keyof T], objA: T, objB: T) => number,
+  key: keyof T | (keyof T)[],
+  comparator?: (a: T[keyof T], b: T[keyof T], objA: T, objB: T, keyIndex?: number) => number,
 ): T[];
 
 /**

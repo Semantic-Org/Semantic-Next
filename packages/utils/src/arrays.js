@@ -130,23 +130,53 @@ export const some = (collection, predicate) => {
 export const any = some;
 
 export const sortBy = function(arr = [], key, comparator) {
+  const keys = Array.isArray(key) ? key : [key];
+
   const compare = (a, b) => {
-    const valA = get(a, key);
-    const valB = get(b, key);
+    let finalResult = 0;
 
-    if (valA === undefined && valB === undefined) { return 0; }
-    if (valA === undefined) { return 1; // Place undefined values at the end
-     }
-    if (valB === undefined) { return -1; // Place undefined values at the end
-     }
+    // Compare by each key in order until we find a difference
+    each(keys, (currentKey, i) => {
+      const valA = get(a, currentKey);
+      const valB = get(b, currentKey);
 
-    if (comparator) {
-      return comparator(valA, valB, a, b);
-    }
+      if (valA === undefined && valB === undefined) {
+        return; // Both undefined, check next key
+      }
+      if (valA === undefined) {
+        finalResult = 1; // Place undefined values at the end
+        return false;
+      }
+      if (valB === undefined) {
+        finalResult = -1; // Place undefined values at the end
+        return false;
+      }
 
-    if (valA < valB) { return -1; }
-    if (valA > valB) { return 1; }
-    return 0;
+      let result;
+      if (comparator) {
+        // Pass key index as fifth parameter for multi-key sorting
+        result = comparator(valA, valB, a, b, i);
+      }
+      else {
+        // Use localeCompare for strings, numeric comparison for numbers
+        if (typeof valA === 'string' && typeof valB === 'string') {
+          result = valA.localeCompare(valB, undefined, { numeric: true });
+        }
+        else {
+          if (valA < valB) { result = -1; }
+          else if (valA > valB) { result = 1; }
+          else { result = 0; }
+        }
+      }
+
+      if (result !== 0) {
+        finalResult = result;
+        return false; // Break out of each loop
+      }
+      // If values are equal, continue to next key
+    });
+
+    return finalResult;
   };
 
   return arr.slice().sort(compare);
