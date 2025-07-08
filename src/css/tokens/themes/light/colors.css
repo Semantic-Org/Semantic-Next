@@ -25,33 +25,33 @@ html,
   --grey: oklch(0.57 0 0);
   --slate: oklch(0.23 0 0);
 
-  --red-text-color: var(--red-50);
-  --olive-text-color: var(--olive-50);
-  --green-text-color: var(--green-50);
-  --yellow-text-color: var(--yellow-50);
-  --blue-text-color: var(--blue-50);
-  --teal-text-color: var(--teal-50);
-  --pink-text-color: var(--pink-50);
-  --violet-text-color: var(--violet-50);
-  --purple-text-color: var(--purple-50);
-  --orange-text-color: var(--orange-50);
-  --brown-text-color: var(--brown-50);
-  --grey-text-color: var(--grey-50);
-  --slate-text-color: var(--slate-50);
+  --red-text-color: var(--red-70);
+  --olive-text-color: var(--olive-70);
+  --green-text-color: var(--green-70);
+  --yellow-text-color: var(--yellow-70);
+  --blue-text-color: var(--blue-70);
+  --teal-text-color: var(--teal-70);
+  --pink-text-color: var(--pink-70);
+  --violet-text-color: var(--violet-70);
+  --purple-text-color: var(--purple-70);
+  --orange-text-color: var(--orange-70);
+  --brown-text-color: var(--brown-70);
+  --grey-text-color: var(--grey-70);
+  --slate-text-color: var(--slate-70);
 
-  --red-header-color: var(--red-50);
-  --olive-header-color: var(--olive-50);
-  --green-header-color: var(--green-50);
-  --yellow-header-color: var(--yellow-50);
-  --blue-header-color: var(--blue-50);
-  --teal-header-color: var(--teal-50);
-  --pink-header-color: var(--pink-50);
-  --violet-header-color: var(--violet-50);
-  --purple-header-color: var(--purple-50);
-  --orange-header-color: var(--orange-50);
-  --brown-header-color: var(--brown-50);
-  --grey-header-color: var(--grey-50);
-  --slate-header-color: var(--slate-50);
+  --red-header-color: var(--red-80);
+  --olive-header-color: var(--olive-80);
+  --green-header-color: var(--green-80);
+  --yellow-header-color: var(--yellow-80);
+  --blue-header-color: var(--blue-80);
+  --teal-header-color: var(--teal-80);
+  --pink-header-color: var(--pink-80);
+  --violet-header-color: var(--violet-80);
+  --purple-header-color: var(--purple-80);
+  --orange-header-color: var(--orange-80);
+  --brown-header-color: var(--brown-80);
+  --grey-header-color: var(--grey-80);
+  --slate-header-color: var(--slate-80);
 
 
   /* -------------------
@@ -106,19 +106,20 @@ html,
   -------------------- */
 
   /* Base values - single source of truth for all chroma values */
-  --base-chroma-0: 0.15;   /* Very light = very low chroma */
-  --base-chroma-5: 0.25;   /* Light = low chroma */
+  --base-chroma-0: 0.1;   /* Very light = very low chroma */
+  --base-chroma-5: 0.2;   /* Light = low chroma */
   --base-chroma-10: 0.35;  /* Subtle = medium-low chroma */
   --base-chroma-20: 0.55;  /* UI elements = medium chroma */
   --base-chroma-30: 0.75;  /* Muted = high-medium chroma */
   --base-chroma-40: 0.90;  /* Secondary = near-full chroma */
   --base-chroma-50: 1.0;   /* Base = full chroma */
-  --base-chroma-60: 0.95;  /* Slight chroma reduction */
-  --base-chroma-70: 0.88;  /* Gradual chroma reduction */
-  --base-chroma-80: 0.80;  /* More chroma reduction */
-  --base-chroma-90: 0.72;  /* Dark = lower chroma */
-  --base-chroma-95: 0.61;  /* Very dark = very low chroma */
-  --base-chroma-100: 0.50; /* Near black = reduced chroma */
+  --base-chroma-60: 0.90;  /* Slight chroma reduction */
+  --base-chroma-70: 0.75;  /* Gradual chroma reduction */
+  --base-chroma-80: 0.55;  /* More chroma reduction */
+  --base-chroma-90: 0.35;  /* Dark = lower chroma */
+  --base-chroma-95: 0.2;  /* Very dark = very low chroma */
+  --base-chroma-100: 0.1; /* Near black = reduced chroma */
+
 
   /* -------------------
       Chroma Scale
