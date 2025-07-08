@@ -982,16 +982,16 @@ export class Query {
       Object.entries(attribute).forEach(([attr, val]) => {
         this.each((el) => el.setAttribute(attr, val));
       });
+      return this;
     }
     else if (value !== undefined) {
       // Handle single attribute-value pair
-      this.each((el) => el.setAttribute(attribute, value));
+      return this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
       const attributes = this.map((el) => el.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
-    return;
   }
 
   removeAttr(attributeName) {
