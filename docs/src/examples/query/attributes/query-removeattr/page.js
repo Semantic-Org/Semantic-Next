@@ -1,13 +1,16 @@
 import { $ } from '@semantic-ui/query';
 
-// Show initial state
-$('.input').text($('.field').attr('disabled') || 'none');
-$('.button').text($('.btn').attr('disabled') || 'none');
-$('.width').text($('.pic').attr('width') || 'none');
-$('.data').text($('.pic').attr('data-temp') || 'none');
+// Toggle disabled
+$('.disable').on('click', () => {
+  $('ui-input').removeAttr('disabled');
+});
 
-// Remove attributes
-$('.field').removeAttr('disabled');
-$('.btn').removeAttr('disabled');
-$('.pic').removeAttr('width');
-$('.pic').removeAttr('data-temp');
+// Toggle large
+$('.large').on('click', () => {
+  $('ui-input').removeAttr('large');
+});
+
+// Toggle placeholder
+$('.placeholder').on('click', () => {
+  $('ui-input').removeAttr('placeholder');
+});

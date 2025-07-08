@@ -1,23 +1,19 @@
-.field, .btn {
-  display: block;
-  margin: 10px 0;
-  padding: 8px;
-  border: var(--border);
-  border-radius: var(--border-radius);
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
 }
 
-.pic {
-  display: block;
-  margin: 10px 0;
-  border: var(--border);
+.status {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-5);
   border-radius: var(--border-radius);
-}
-
-p {
-  margin: 8px 0;
   font-family: monospace;
-}
 
-p span {
-  font-weight: bold;
+  .classes {
+    color: var(--primary-color);
+    font-weight: bold;
+  }
 }

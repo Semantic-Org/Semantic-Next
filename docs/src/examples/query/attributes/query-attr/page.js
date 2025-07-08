@@ -17,9 +17,13 @@ Link target: "${linkTarget || ''}"`);
 });
 
 $('.set').on('click', () => {
-  $('.image').attr('src', '/images/avatar/jenny.jpg');
-  $('.image').attr('alt', 'Updated placeholder image');
-  $('.link').attr('href', 'https://example.com');
-  $('.link').attr('target', '_self');
+  $('.image')
+    .attr('src', '/images/avatar/jenny.jpg')
+    .attr('alt', 'Updated placeholder image');
+
+  $('.link')
+    .attr('href', 'https://example.com')
+    .attr('target', '_self');
+
   updateOutput('Attributes updated successfully');
 });

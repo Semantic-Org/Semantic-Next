@@ -2,36 +2,37 @@ import { $ } from '@semantic-ui/query';
 
 const initialClasses = $('.box').attr('class');
 
-const updateStatus = () => {
-  const classes = $('.box').attr('class');
-  $('.status').text(classes);
-};
-
 // Remove single class
 $('.remove.styled').on('click', function() {
   $('.box').removeClass('styled');
-  $(this).addClass('disabled');
-  updateStatus();
+  updateStatus(this);
 });
 $('.remove.round').on('click', function() {
   $('.box').removeClass('round');
-  $(this).addClass('disabled');
-  updateStatus();
+  updateStatus(this);
 });
 
 // Remove multiple classes
 $('.remove.all').on('click', function() {
   $('.box').removeClass('styled round');
-  $(this).addClass('disabled');
-  updateStatus();
+  updateStatus(this);
 });
 
 // Reset to initial state
 $('.reset').on('click', function() {
   $('.box').addClass(initialClasses);
-  $('ui-button').removeClass('disabled');
+  $('ui-button').removeAttr('disabled');
   updateStatus();
 });
 
+const updateStatus = (el) => {
+  // update text with classes
+  const classes = $('.box').attr('class');
+  $('.status').text(classes);
+  // disable button
+  if (el) {
+    $(el).attr('disabled', 'disabled');
+  }
+};
 // set initial classes
 updateStatus();
