@@ -14,3 +14,14 @@ export const roundNumber = (number, digits = 5) => {
   const factor = Math.pow(10, digits - Math.ceil(Math.log10(Math.abs(number))));
   return Math.round(number * factor) / factor;
 };
+
+export const roundDecimal = (number, decimals = 2) => {
+  if (number == 0) {
+    return 0;
+  }
+  if (!isNumber(number) || !Number.isFinite(number) || decimals < 0) {
+    return number;
+  }
+  const factor = Math.pow(10, decimals);
+  return Math.round(number * factor) / factor;
+};

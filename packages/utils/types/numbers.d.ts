@@ -22,3 +22,23 @@
  * ```
  */
 export function roundNumber(number: number, digits?: number): number;
+
+/**
+ * Rounds a number to a specified number of decimals.
+ * Handles very large and very small numbers correctly.
+ * Returns the original value if it's not a finite number.
+ * @see {@link https://next.semantic-ui.com/api/utils/numbers#decimals decimals}
+ *
+ * @param number - The number to round
+ * @param digits - Number of decimals (default: 2)
+ * @returns The rounded number
+ *
+ * @example
+ * ```ts
+ * roundDecimal(123.456789) // returns 123.45
+ * roundDecimal(0.00123456789, 3) // returns 0.001
+ * roundDecimal(123, 3) // returns 123.000
+ * roundDecimal(Infinity) // returns Infinity
+ * ```
+ */
+export function roundDecimal(number: number, digits?: number): number;
