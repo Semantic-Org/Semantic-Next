@@ -43,6 +43,18 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ### Testing
 * **Improvement** - Vitest now runs without watch for `npm test`, vitest configs have been added for each package.
 
+### Utils
+* **Breaking** - `prettifyID` has been renamed to `prettifyHash` to better reflect its purpose of converting numeric hash values to alphanumeric strings
+* **Feature** - `prettifyHash` now supports `minLength` and `padChar` options for customizing output format
+* **Feature** - Added `getRandomSeed()` function that uses `crypto.getRandomValues` when available for cryptographically secure random seeds
+* **Feature** - `generateID` now accepts an optional seed parameter for reproducible ID generation
+* **Feature** - `hashCode` now uses the renamed `prettifyHash` internally when `prettify: true` option is set
+* **Feature** - `sortBy` now supports multi-key sorting by accepting an array of keys
+* **Enhancement** - `sortBy` now uses `localeCompare` with `numeric: true` for proper string sorting (e.g., "item10" comes after "item2")
+* **Enhancement** - `sortBy` comparator function now receives key index as fifth parameter for multi-key sorting
+* **Enhancement** - `generateID` now uses `crypto.getRandomValues` via `getRandomSeed()` for better randomness
+* **Bug** - `isBinary` now detects all types of typed arrays including Int8Array, Float32Array, BigInt64Array, etc.
+
 # Version 0.12.4-1
 * **Tailwind** - `@semantic-ui/tailwind` and `tailwindcss-iso` now have bundled CDN version to avoid issues importing css files in browser via esm. Modified `tailwind` package to accomodate this change.
 * **Tailwind** - Removed bundled `wasm` files, these are now part of the generic `tailwindcss-iso` package.
@@ -50,8 +62,6 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.12.0
 * **Template** - `onThemeChanged` now looks for either `themechange` event from `html` or the class `dark` being toggled on `html` using mutation observers.
 * **Tailwind** - Added a plugin for using Tailwind inside Semantic UI components. This can be used alongside the css tokens provided by the css framework, or instead of it. This will scan your component javascript, html and css and attach only the tailwind styles used.
-
-> Note: the plugin code may be modified if `defineComponent` gets a formal 'Plugin API'. For now you will need to pass in the component to the plugin before defining the component.
 
 
 ```javascript
