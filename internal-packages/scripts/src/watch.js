@@ -1,7 +1,7 @@
 import { build } from './lib/build.js';
 
-import { buildUIDeps } from './build-ui-deps.js';
 import { buildUIComponents } from './build-ui-components.js';
+import { buildUIDeps } from './build-ui-deps.js';
 import { buildUIFramework } from './build-ui-framework.js';
 
 /*
@@ -14,43 +14,40 @@ export const watch = async ({
   watchFramework = true, // this is included because the playground uses this build in dev
   watchComponents = false, // this is not necessary unless consuming individual components
 } = {}) => {
-
   const watches = [];
 
-  if(watchDeps) {
+  if (watchDeps) {
     watches.push(
       buildUIDeps({
-        watch: true
-      })
+        watch: true,
+      }),
     );
   }
 
-  if(watchComponents) {
+  if (watchComponents) {
     watches.push(
       buildUIComponents({
         watch: true,
         includeESM: true,
-        includeBundle: false,
+        includeBundle: true,
         includeCDN: false,
-      })
+      }),
     );
   }
 
-  if(watchFramework) {
+  if (watchFramework) {
     watches.push(
       buildUIFramework({
         watch: true,
         includeESM: true,
-        includeBundle: false,
+        includeBundle: true,
         includeCDN: false,
-      })
+      }),
     );
   }
 
   return await Promise.all(watches);
-
 };
-
 
 // Handle direct execution of this script
 if (import.meta.url === `file://${process.argv[1]}`) {
