@@ -13,9 +13,11 @@ Expressions are a reactive context meaning they will automatically update when t
 
 ## Expression Syntax
 
-> It is recommended to [check out the expression evaluation example](/examples/expressions) to see expression evaluation in practice.
-
 Expressions support two separate syntaxes, spaced arguments or "semantic style" and regular javascript style arguments.
+
+> To play around with expressions [try out the expression evaluation example](/examples/expressions).
+
+
 
 ### Semantic Expressions (Lisp)
 
@@ -152,3 +154,10 @@ const createComponent = ({ state }) => ({
   getFullName() => `${state.firstName.value} ${state.lastName.value}`;
 });
 ```
+
+## Example
+
+The following example shows various ways you can use expressions using both lisp-like syntax and javascript
+
+
+<PlaygroundExample id="expressions" direction="horizontal"></PlaygroundExample>

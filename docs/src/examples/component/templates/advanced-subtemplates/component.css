@@ -4,11 +4,9 @@ table {
   border: var(--border);
 }
 th {
-  font-weight: var(--bold);
-}
-th {
   padding: 5px 8px;
   text-align: left;
+  font-weight: var(--bold);
   background-color: var(--standard-5);
 }
 td {

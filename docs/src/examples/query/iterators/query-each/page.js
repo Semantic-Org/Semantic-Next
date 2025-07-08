@@ -8,14 +8,14 @@ $('.iterate').on('click', () => {
   let results = [];
   $('.item').each((el, index) => {
     $(el).addClass('processed');
-    results.push(`Item ${index}: "${el.textContent}"`);
+    results.push(`Item ${index}: "${el.text()}"`);
   });
   updateOutput(results.join('\n'));
 });
 
 $('.number').on('click', () => {
   $('.item').each((el, index) => {
-    $(el).text(`${index + 1}. ${el.textContent.replace(/^\d+\.\s*/, '')}`);
+    $(el).text(`${index + 1}. ${el.text().replace(/^\d+\.\s*/, '')}`);
   });
   updateOutput('Added numbers to all items');
 });

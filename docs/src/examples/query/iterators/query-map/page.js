@@ -1,13 +1,13 @@
 import { $ } from '@semantic-ui/query';
 
 // Map to get original values
-const original = $('.number').map((el) => parseInt(el.textContent));
+const original = $('.number').map((el) => $(el).text());
 $('.original').text(original.join(', '));
 
 // Map to double the values
-const doubled = $('.number').map((el) => parseInt(el.textContent) * 2);
+const doubled = $('.number').map((el) => $(el).text() * 2);
 $('.doubled').text(doubled.join(', '));
 
 // Map to get text content with prefix
-const textArray = $('.number').map((el) => `Value: ${el.textContent}`);
-$('.text').text(textArray.join(' | '));
+const numbers = $('.number').map((el) => $(el).text()).join(' | ');
+$('.text').text(numbers);
