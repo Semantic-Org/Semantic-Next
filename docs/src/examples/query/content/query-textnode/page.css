@@ -1,16 +1,15 @@
 .parent {
-  padding: 15px;
-  margin: 15px 0;
-  background: var(--standard-5);
+  background: var(--blue-0);
   border: var(--border);
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
   border-radius: var(--border-radius);
-  line-height: 1.6;
 }
 
 .simple {
-  padding: 15px;
-  margin: 15px 0;
-  background: var(--standard-10);
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
+  background: var(--red-0);
   border: var(--border);
   border-radius: var(--border-radius);
 }

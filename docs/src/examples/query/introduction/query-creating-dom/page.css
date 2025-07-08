@@ -1,0 +1,16 @@
+.container {
+  padding: var(--spacing);
+  border: 2px dashed var(--standard-30);
+  border-radius: var(--border-radius);
+  margin: var(--vertically-spaced);
+  min-height: 60px;
+}
+
+.created {
+  padding: var(--compact-spacing);
+  background-color: var(--success-5);
+  border: var(--border);
+  border-color: var(--success-30);
+  border-radius: var(--border-radius);
+  color: var(--success-80);
+}

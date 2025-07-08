@@ -1,0 +1,18 @@
+.input {
+  padding: var(--compact-spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-size: inherit;
+  margin: var(--vertically-spaced);
+  transition: all 0.3s ease;
+  
+  &.focused {
+    border-color: var(--primary-30);
+    background-color: var(--primary-5);
+  }
+  
+  &.blurred {
+    border-color: var(--warning-30);
+    background-color: var(--warning-5);
+  }
+}

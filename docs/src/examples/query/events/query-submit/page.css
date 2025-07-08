@@ -1,0 +1,26 @@
+.form {
+  padding: var(--spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: var(--vertically-spaced);
+}
+
+.form input {
+  padding: var(--compact-spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-size: inherit;
+  margin-bottom: var(--compact-spacing);
+  width: 100%;
+}
+
+.status {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  
+  &.success {
+    background-color: var(--success-5);
+    color: var(--success-80);
+  }
+}
