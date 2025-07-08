@@ -388,14 +388,28 @@ roundToPlaces(123.456, 1);                         // 123.5
 
 ### ID Generation and Hashing
 ```javascript
-import { generateId, hashString } from '@semantic-ui/utils';
+import { generateID, hashCode, prettifyHash, getRandomSeed, tokenize } from '@semantic-ui/utils';
 
 // Generate unique IDs
-const uniqueId = generateId();                      // 'abc123def456'
-const prefixedId = generateId('user-');             // 'user-abc123def456'
+const uniqueId = generateID();                      // 'A7B3X9'
+const seededId = generateID(12345);                 // '00009IX' (reproducible)
 
-// String hashing
-const hash = hashString('input string');           // Consistent hash value
+// Get cryptographically secure random seed
+const seed = getRandomSeed();                      // 2949673445
+
+// String hashing using UMASH algorithm
+const hash = hashCode('input string');              // 3421556088
+const prettyHash = hashCode('input', { prettify: true }); // '2A8KG8'
+
+// Convert numeric hash to alphanumeric
+const pretty = prettifyHash(123456);                // '000U9C'
+const customPretty = prettifyHash(123, { 
+  minLength: 8, 
+  padChar: 'X' 
+});                                                 // 'XXXXXX3F'
+
+// Create URL-friendly tokens
+const token = tokenize('Hello World!');             // 'hello-world'
 ```
 
 ## Equality and Cloning (equality.js, cloning.js)
