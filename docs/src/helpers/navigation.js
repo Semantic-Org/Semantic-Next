@@ -95,6 +95,7 @@ const createExampleMenu = () => {
     if (keys(subcategories).length) {
       // has subcategories
       each(subcategories, (examples, subcategory) => {
+        examples = sortBy(examples, ['sortIndex', 'title']);
         pages.push({
           name: subcategory,
           pages: examples.map(example => ({

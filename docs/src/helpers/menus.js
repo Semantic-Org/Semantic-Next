@@ -15,6 +15,7 @@ const exampleCategorySortOrder = [
   'Templates',
   'Reactivity',
   'Query',
+  'Utils',
 ];
 
 /* Define sort order for subcategories within each category */
@@ -70,6 +71,25 @@ const subCategorySortOrder = {
     'Iterators',
     'Logical Operators',
     'Utilities',
+  ],
+  'Utils': [
+    'Setup',
+    'Looping',
+    'Arrays',
+    'Objects',
+    'Types',
+    'Strings',
+    'Functions',
+    'Colors',
+    'Browser',
+    'Dates',
+    'Numbers',
+    'Crypto',
+    'Equality',
+    'Cloning',
+    'Errors',
+    'SSR',
+    'Regex',
   ],
 };
 
