@@ -38,9 +38,6 @@ const createInstance = ({ self }) => ({
 {> userProfile data=(getData user)
 ```
 
-
-
-
 ### Verbose Syntax
 
 Verbose syntax uses the syntax `{> template name=templateName data=someData}` and allows you to more explicitly define the name and data for a subtemplate. When using verbose expressions you can use an inline object for data or an expression.
@@ -128,7 +125,6 @@ data = {
   company: company // company in table is pass into row
 };
 ```
-
 <PlaygroundExample id="subtemplates" height="800" direction="vertical"></PlaygroundExample>
 
 
@@ -159,5 +155,5 @@ The following example shows [exposing a setting](/components/rendering#settings)
 In `index.js` you can see where the template is imported and specified by the user who is consuming the component.
 
 
-<PlaygroundExample id="advanced-subtemplates" height="800" direction="vertical"></PlaygroundExample>
+<PlaygroundExample id="subtemplates-advanced" height="800" direction="vertical"></PlaygroundExample>
 
