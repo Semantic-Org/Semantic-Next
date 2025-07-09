@@ -1,0 +1,7 @@
+:host {
+  --icon-size: 20px;
+}
+
+.toggle {
+  font-size: var(--icon-size);
+}

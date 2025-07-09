@@ -15,7 +15,7 @@
   }
 
   sidebar {
-    position: static;
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--sidebar-background);
@@ -27,8 +27,22 @@
     scrollbar-width: thin;
     overflow: hidden;
 
+    sidebar-collapser {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+    }
+
+    .subheader {
+      font-size: 10px;
+      margin: 20px 0px -10px 14px;
+      text-transform: uppercase;
+      color: var(--white-20);
+    }
+
     ui-menu {
       margin: 1rem 1rem 0rem;
+      --menu-vertical-text-align: left;
     }
     ui-menu::part(item) {
       --menu-item-active-background: #080b12;

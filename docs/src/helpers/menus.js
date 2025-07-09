@@ -93,6 +93,21 @@ const subCategorySortOrder = {
   ],
 };
 
+/* Standardized Icons across Subsections for Sidebar Menu */
+export const standardMenuIcons = {
+  'Guides': 'home',
+  'User Guide': 'home',
+  'Templates': 'table',
+  'Framework': 'package',
+  'Components': 'layers',
+  'UI Components': 'layers',
+  'Reactivity': 'cpu',
+  'Query': 'mouse pointer',
+  'Advanced Usage': 'server',
+  'API Reference': 'text file',
+  'Utils': 'tool',
+};
+
 /* Export subcategory sort order for use in navigation.js */
 export { subCategorySortOrder };
 
@@ -142,7 +157,7 @@ export const topbarDisplayMenu = [
 export const topbarMenu = [
   {
     _id: 'framework',
-    name: 'User Guide',
+    name: 'Guides',
     url: '/introduction',
   },
   {
@@ -260,10 +275,6 @@ export const sidebarMenuFramework = [
       {
         name: 'Key Bindings',
         url: '/components/keys',
-      },
-      {
-        name: 'Workarounds',
-        url: '/components/workarounds',
       },
     ],
   },
@@ -383,8 +394,8 @@ export const sidebarMenuFramework = [
     icon: 'server',
     pages: [
       {
-        name: 'WC Workarounds',
-        url: '/advanced/workarounds',
+        name: 'Common Issues',
+        url: '/advanced/common-issues',
       },
       {
         name: 'Server Side Rendering',

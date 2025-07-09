@@ -18,6 +18,7 @@ import {
   sidebarMenuAPI,
   sidebarMenuFramework,
   sidebarMenuUI,
+  standardMenuIcons,
   subCategorySortOrder,
   topbarDisplayMenu,
   topbarMenu,
@@ -293,13 +294,23 @@ export const getActiveSidebarSection = (currentPath) => {
   return activeSection;
 };
 
+/* Add standard icons based off nav menu in sidebar */
+export const addStandardIcons = (items) => {
+  return items.map(item => {
+    if (item.label) {
+      item.icon = standardMenuIcons[item.label];
+    }
+    return item;
+  });
+};
+
 /* Gets items for the top-level navigation in sidebar above sidebar items  */
 export const getSidebarNavMenu = (activeSection, currentPath) => {
   if (!activeSection) { return []; }
   currentPath = removeTrailingSlash(currentPath);
 
   if (activeSection._ids) {
-    const items = activeSection._ids
+    let items = activeSection._ids
       .map(id => {
         const section = firstMatch(topbarMenu, m => m._id === id);
         return section
@@ -312,8 +323,11 @@ export const getSidebarNavMenu = (activeSection, currentPath) => {
       })
       .filter(Boolean);
 
-    // Don't show UIMenu if there's only one item
-    return items.length <= 1 ? [] : items;
+    // Only show menu with more than one item
+    if (items.length > 1) {
+      items = addStandardIcons(items);
+      return items;
+    }
   }
 
   if (activeSection._id) {

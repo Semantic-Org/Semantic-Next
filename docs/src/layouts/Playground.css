@@ -95,12 +95,19 @@
       &::part(search) {
         margin: 0.75rem 1rem -0.25rem;
       }
-      &::part(content) {
-        padding-left: 5px;
-      }
       &::part(item-title) {
         text-transform: uppercase;
         letter-spacing: 0.03em;
+        position: sticky;
+        top: -9px;
+        background: var(--black);
+        padding-top: var(--spacing);
+        z-index: 2;
+      }
+      &::part(content) {
+        padding-left: 9px;
+        border-left: 1px solid var(--white-10);
+        padding-top: 4px;
       }
     }
 
