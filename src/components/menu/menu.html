@@ -7,11 +7,13 @@
       exportparts="item"
     >
       {#if item.icon}
-        <ui-icon icon={item.icon}></ui-icon>
+        <ui-icon part="item-icon" icon={item.icon}></ui-icon>
       {/if}
-      {item.label}
+      <span part="item-label" class="label">{item.label}</span>
       {#if item.badge}
-        <ui-label outline badge>{item.badge}</ui-label>
+        <ui-label part="item-badge" outline badge>
+          {item.badge}
+        </ui-label>
       {/if}
     </menu-item>
   {else}

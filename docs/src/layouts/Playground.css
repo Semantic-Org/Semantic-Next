@@ -108,6 +108,7 @@
         padding-left: 9px;
         border-left: 1px solid var(--white-10);
         padding-top: 4px;
+        white-space: nowrap;
       }
     }
 

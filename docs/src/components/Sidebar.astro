@@ -2,7 +2,7 @@
 const { sidebarMenu, sidebarHeader, expandAll } = Astro.props;
 import './Sidebar.css';
 import NavMenu from '@components/NavMenu/NavMenu.js';
-import SidebarCollapser from '@components/SidebarCollapser/SidebarCollapser.js';
+import SidebarToggle from '@components/SidebarToggle/SidebarToggle.js';
 import { getSidebarMenu, getActiveSidebarSection, getSidebarNavMenu } from '@helpers/navigation.js';
 import { UIMenu } from '@semantic-ui/core'
 
@@ -19,7 +19,9 @@ const showSidebarNav = (sidebarNavMenu.length > 0);
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
-  <SidebarCollapser></SidebarCollapser>
+  <SidebarToggle client:load
+    sidebarSelector='sidebar'
+  />
   {
     showSidebarNav && (
       <div class="subheader">{sidebarHeader || 'Categories'}</div>

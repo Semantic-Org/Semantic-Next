@@ -20,7 +20,7 @@ export class ReactiveDataDirective extends AsyncDirective {
 
     // debug reactivity is a special expression which should not
     // trace itself or create its own reaction
-    if(expression.expression == 'debugReactivity') {
+    if (expression.expression == 'debugReactivity') {
       return this.expression.value();
     }
 
@@ -73,7 +73,12 @@ export class ReactiveDataDirective extends AsyncDirective {
     // arrays and objects are serialized for use in web component attributes
     // maybe should check part?
     if (isArray(reactiveValue) || isObject(reactiveValue)) {
-      reactiveValue = JSON.stringify(reactiveValue);
+      try {
+        reactiveValue = JSON.stringify(reactiveValue);
+      }
+      catch (e) {
+        // non serializable
+      }
     }
     return reactiveValue;
   }
