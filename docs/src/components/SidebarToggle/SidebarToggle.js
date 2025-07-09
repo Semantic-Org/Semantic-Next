@@ -6,7 +6,9 @@ import template from './SidebarToggle.html?raw';
 
 const defaultSettings = {
   collapsed: false,
-  sidebarSelector: '',
+  saveState: true,
+  classTarget: 'html',
+  sidebarClass: 'sidebar-collapsed',
   storeAs: 'sidebar-collapsed',
   collapseIcon: 'left chevron',
   showIcon: 'right chevron',
@@ -14,7 +16,7 @@ const defaultSettings = {
 
 const defaultState = {};
 
-const createComponent = ({ settings, self, $, dispatchEvent }) => ({
+const createComponent = ({ settings, self, $, isClient, dispatchEvent }) => ({
   toggleSidebar() {
     if (self.isCollapsed()) {
       self.openSidebar();
@@ -23,27 +25,50 @@ const createComponent = ({ settings, self, $, dispatchEvent }) => ({
       self.collapseSidebar();
     }
   },
+  getTarget() {
+    return $(settings.classTarget, { root: document });
+  },
+
   isCollapsed() {
     return settings.collapsed;
   },
-  getSidebar() {
-    return $(settings.sidebarSelector, { root: document });
-  },
   openSidebar() {
     settings.collapsed = false;
-    if (settings.sidebarSelector) {
-      self.getSidebar().removeClass('collapsed');
+    if (settings.classTarget) {
+      self.getTarget().removeClass(settings.sidebarClass);
     }
+    self.setSavedCollapsedState(false);
     dispatchEvent('open');
   },
   collapseSidebar() {
     settings.collapsed = true;
-    if (settings.sidebarSelector) {
-      self.getSidebar().addClass('collapsed');
+    if (settings.classTarget) {
+      console.log('adding to', self.getTarget()), self.getTarget().addClass(settings.sidebarClass);
     }
+    self.setSavedCollapsedState(true);
     dispatchEvent('collapse');
   },
+
+  canSaveState() {
+    return isClient && settings.saveState;
+  },
+  getSavedCollapsedState() {
+    const setting = localStorage.getItem(settings.storeAs);
+    return setting === 'true';
+  },
+  setSavedCollapsedState(state) {
+    if (!self.canSaveState()) {
+      return;
+    }
+    localStorage.setItem(settings.storeAs, state);
+  },
 });
+
+const onRendered = ({ self, settings }) => {
+  if (self.canSaveState()) {
+    settings.collapsed = self.getSavedCollapsedState();
+  }
+};
 
 const events = {
   'click .overlay': ({ self }) => {
@@ -56,6 +81,7 @@ const SidebarToggle = defineComponent({
   template,
   css,
   createComponent,
+  onRendered,
   defaultState,
   defaultSettings,
   events,

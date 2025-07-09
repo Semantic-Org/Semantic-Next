@@ -14,6 +14,26 @@
     }
   }
 
+  html.sidebar-collapsed sidebar,
+  sidebar.collapsed {
+    --sidebar-width: 50px;
+
+    > ui-menu {
+      transition: var(--transition);
+      margin: 46px 10px 0px;
+
+      &::part(item-icon) {
+        font-size: 18px;
+      }
+    }
+
+    ui-menu::part(item-label),
+    nav-menu,
+    .subheader {
+      display: none;
+    }
+  }
+
   sidebar {
     position: relative;
     display: flex;
@@ -27,25 +47,6 @@
     scrollbar-width: thin;
     overflow: hidden;
     transition: width 0.3s ease;
-
-    &.collapsed {
-      --sidebar-width: 50px;
-
-      > ui-menu {
-        transition: var(--transition);
-        margin: 46px 10px 0px;
-
-        &::part(item-icon) {
-          font-size: 18px;
-        }
-      }
-
-      ui-menu::part(item-label),
-      nav-menu,
-      .subheader {
-        display: none;
-      }
-    }
 
     sidebar-toggle {
       position: absolute;

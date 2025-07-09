@@ -17,11 +17,12 @@ const sidebarNavMenu = getSidebarNavMenu(activeSection, currentPath);
 
 const showSidebarNav = (sidebarNavMenu.length > 0);
 ---
+<script>
+
+</script>
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
-  <SidebarToggle client:load
-    sidebarSelector='sidebar'
-  />
+  <SidebarToggle client:load/>
   {
     showSidebarNav && (
       <div class="subheader">{sidebarHeader || 'Categories'}</div>

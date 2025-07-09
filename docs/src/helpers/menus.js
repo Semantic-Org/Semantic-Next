@@ -112,24 +112,27 @@ export const standardMenuIcons = {
 export { subCategorySortOrder };
 
 /* Create dynamic menu entries for examples based on actual categories */
-const exampleCategoryMenus = exampleCategorySortOrder.map(category => ({
-  _id: `examples-${category.toLowerCase().replace(/\s+/g, '-')}`,
-  name: category,
-  url: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`, // Will be handled by navigation
-  baseURL: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`,
-}));
+const exampleCategoryMenus = exampleCategorySortOrder.map(category => {
+  const categoryID = category.toLowerCase().replace(/\s+/g, '-');
+  return {
+    _id: `examples-${categoryID}`,
+    name: category,
+    url: `/examples/${categoryID}`, // handled by navigation
+    baseURL: `/examples/${categoryID}`,
+  };
+});
 
 /* Topbar Menu */
 export const topbarDisplayMenu = [
   {
     /* This is the ids of the submenu in sidebar */
     _ids: ['framework', 'api'],
-
     name: 'Documentation',
     url: '/introduction',
   },
   {
     _id: 'ui',
+    _ids: ['primitives', 'components'],
     name: 'UI Components',
     url: '/usage',
   },
