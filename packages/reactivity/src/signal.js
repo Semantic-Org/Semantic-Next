@@ -281,4 +281,36 @@ export class Signal {
   removeItem(id) {
     return this.removeIndex(this.getItemIndex(id));
   }
+
+  // derive a new signal from this signal's value
+  derive(computeFn, options = {}) {
+    const derivedSignal = new Signal(undefined, options);
+    
+    // Create reaction that updates the derived signal
+    const reaction = Reaction.create(() => {
+      const result = computeFn(this.get());
+      derivedSignal.set(result);
+    });
+    
+    // Store reaction reference for potential cleanup
+    derivedSignal._derivedReaction = reaction;
+    
+    return derivedSignal;
+  }
+
+  // static method for computing from multiple signals
+  static computed(computeFn, options = {}) {
+    const computedSignal = new Signal(undefined, options);
+    
+    // Create reaction that updates the computed signal
+    const reaction = Reaction.create(() => {
+      const result = computeFn();
+      computedSignal.set(result);
+    });
+    
+    // Store reaction reference for potential cleanup
+    computedSignal._computedReaction = reaction;
+    
+    return computedSignal;
+  }
 }

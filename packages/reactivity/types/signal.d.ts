@@ -343,4 +343,26 @@ export class Signal<T> {
    * @param predicate - Function to test each element
    */
   filter<U extends any[]>(this: Signal<U>, predicate: (value: U[number], index: number, array: U) => boolean): void;
+
+  /**
+   * Creates a new signal derived from this signal's value.
+   * The computation function receives the current value and returns the derived value.
+   * Updates automatically when this signal changes.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/signal#derive derive}
+   * @param computeFn - Function that transforms this signal's value
+   * @param options - Optional configuration for the derived signal
+   * @returns A new Signal containing the derived value
+   */
+  derive<U>(computeFn: (value: T) => U, options?: SignalOptions<U>): Signal<U>;
+
+  /**
+   * Creates a computed signal whose value is calculated from other signals.
+   * The computation function is re-run automatically whenever any signals
+   * it depends on change, storing the result in the returned signal.
+   * @see {@link https://next.semantic-ui.com/api/reactivity/signal#computed computed}
+   * @param computeFn - Function that computes the value from other signals
+   * @param options - Optional configuration for the computed signal
+   * @returns A new Signal containing the computed value
+   */
+  static computed<T>(computeFn: () => T, options?: SignalOptions<T>): Signal<T>;
 }

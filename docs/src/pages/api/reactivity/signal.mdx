@@ -272,3 +272,158 @@ counter.mutate(c => c.increment());
 console.log(counter.get().value); // 1
 ```
 
+## `Derive`
+
+Creates a new signal that derives its value from this signal. The derived signal automatically updates when the source signal changes.
+
+### Syntax
+```javascript
+signal.derive(computeFn, options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| computeFn | Function | Function that receives the current signal value and returns the derived value |
+| options | Object | (Optional) Same configuration options as Signal constructor |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| Signal | A new Signal containing the derived value |
+
+### Usage
+
+#### Basic Derivation
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const numbers = new Signal([1, 2, 3, 4, 5]);
+
+// Derive the array length
+const count = numbers.derive(arr => arr.length);
+
+console.log(count.get()); // 5
+
+// When numbers changes, count updates automatically
+numbers.push(6);
+console.log(count.get()); // 6
+```
+
+#### Object Property Extraction
+
+```javascript
+const user = new Signal({ name: 'Alice', age: 30, email: 'alice@example.com' });
+
+// Derive just the display name
+const displayName = user.derive(u => u.name.toUpperCase());
+
+console.log(displayName.get()); // "ALICE"
+```
+
+#### Array Filtering and Transformation
+
+```javascript
+const items = new Signal([
+  { id: 1, name: 'Apple', inStock: true },
+  { id: 2, name: 'Banana', inStock: false },
+  { id: 3, name: 'Orange', inStock: true }
+]);
+
+// Derive available items
+const availableItems = items.derive(list => 
+  list.filter(item => item.inStock)
+);
+
+console.log(availableItems.get().length); // 2
+```
+
+## `Signal.computed` (Static Method)
+
+Creates a computed signal whose value is calculated from multiple signals. The computed signal recalculates whenever any of its dependencies change.
+
+### Syntax
+```javascript
+Signal.computed(computeFn, options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| computeFn | Function | Function that accesses other signals and returns the computed value |
+| options | Object | (Optional) Same configuration options as Signal constructor |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| Signal | A new Signal containing the computed value |
+
+### Usage
+
+#### Basic Computation
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const firstName = new Signal('John');
+const lastName = new Signal('Doe');
+
+// Compute full name from multiple signals
+const fullName = Signal.computed(() => 
+  `${firstName.get()} ${lastName.get()}`
+);
+
+console.log(fullName.get()); // "John Doe"
+
+// When either signal changes, fullName updates automatically
+firstName.set('Jane');
+console.log(fullName.get()); // "Jane Doe"
+```
+
+#### Mathematical Calculations
+
+```javascript
+const quantity = new Signal(3);
+const price = new Signal(10.99);
+const taxRate = new Signal(0.08);
+
+// Compute total with tax from multiple sources
+const total = Signal.computed(() => {
+  const subtotal = quantity.get() * price.get();
+  const tax = subtotal * taxRate.get();
+  return Number((subtotal + tax).toFixed(2));
+});
+
+console.log(total.get()); // 35.64
+```
+
+#### Conditional Logic
+
+```javascript
+const user = new Signal({ role: 'admin', active: true });
+const permissions = new Signal(['read', 'write']);
+
+// Compute effective permissions based on multiple factors
+const effectivePermissions = Signal.computed(() => {
+  const currentUser = user.get();
+  const basePermissions = permissions.get();
+  
+  if (!currentUser.active) {
+    return [];
+  }
+  
+  if (currentUser.role === 'admin') {
+    return [...basePermissions, 'delete', 'manage'];
+  }
+  
+  return basePermissions;
+});
+
+console.log(effectivePermissions.get()); // ["read", "write", "delete", "manage"]
+```
+
