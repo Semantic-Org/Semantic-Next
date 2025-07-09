@@ -264,6 +264,94 @@ reaction.addContext({ lastRun: Date.now() });
 reaction.setTrace();
 ```
 
+## Signal Derived and Computed Values
+
+### Instance Method: derive()
+
+**Single-source transformation**: Creates a new signal that derives its value from this signal.
+
+```javascript
+const items = new Signal(['apple', 'banana', 'cherry']);
+const itemCount = items.derive(arr => arr.length);
+
+// itemCount automatically updates when items change
+items.push('orange');
+console.log(itemCount.get()); // 4
+```
+
+**Parameters**:
+- `computeFn`: Function - Receives the current signal value and returns the derived value
+- `options`: Object (optional) - Same options as Signal constructor
+
+**Use cases**:
+- Transform array to count, filtered subset, or mapped values
+- Extract properties from objects
+- Format data for display
+- Create calculated fields from single data sources
+
+### Static Method: Signal.computed()
+
+**Multi-source computation**: Creates a signal that computes its value from multiple signals.
+
+```javascript
+const quantity = new Signal(5);
+const price = new Signal(10.99);
+const taxRate = new Signal(0.08);
+
+const total = Signal.computed(() => {
+  const subtotal = quantity.get() * price.get();
+  return subtotal + (subtotal * taxRate.get());
+});
+
+// total automatically updates when any dependency changes
+quantity.set(3);
+console.log(total.get()); // Recalculated total
+```
+
+**Parameters**:
+- `computeFn`: Function - Accesses other signals with .get() and returns computed value
+- `options`: Object (optional) - Same options as Signal constructor
+
+**Use cases**:
+- Combine multiple signals into totals, averages, or complex calculations
+- Create conditional values based on multiple state signals
+- Aggregate data from different sources
+- Build reactive formulas and expressions
+
+### When to Use Each
+
+**Use `derive()` when:**
+- Transforming **one signal** into another format
+- Creating pipelines of single-source operations
+- The relationship is clearly "this derives from that"
+
+**Use `Signal.computed()` when:**
+- Combining **multiple signals** into one value
+- Dependencies come from different sources
+- Creating complex calculations or conditional logic
+
+### Advanced Patterns
+
+**Chaining derived signals:**
+```javascript
+const users = new Signal([...]);
+const activeUsers = users.derive(arr => arr.filter(u => u.active));
+const activeCount = activeUsers.derive(arr => arr.length);
+```
+
+**Mixed derive and computed:**
+```javascript
+const items = new Signal([...]);
+const subtotal = items.derive(arr => arr.reduce((sum, item) => sum + item.price, 0));
+const tax = Signal.computed(() => subtotal.get() * taxRate.get());
+const total = Signal.computed(() => subtotal.get() + tax.get());
+```
+
+**Performance considerations:**
+- For complex single-source transformations, do them in one derive() rather than chaining
+- Derived/computed signals inherit all Signal behavior (equality checking, cloning, etc.)
+- Each derive/computed creates a Reaction internally
+
 ## Static Reaction Methods
 
 ### Manual Scheduling Control
