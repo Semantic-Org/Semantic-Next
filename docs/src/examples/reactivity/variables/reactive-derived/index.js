@@ -1,42 +1,21 @@
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+// Derive: Transform a single signal into a new signal
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-// Example: E-commerce shopping cart with derived signals
-const cartItems = new Signal([
-  { id: 1, name: 'Laptop', price: 999.99, quantity: 1, category: 'electronics' },
-  { id: 2, name: 'Mouse', price: 29.99, quantity: 2, category: 'electronics' },
-  { id: 3, name: 'Notebook', price: 4.99, quantity: 5, category: 'office' }
-]);
+// Create a signal with an array
+const numbers = new Signal([1, 2, 3, 4, 5]);
 
-// Using derive() for single-source transformations
-const itemCount = cartItems.derive(items => 
-  items.reduce((sum, item) => sum + item.quantity, 0)
-);
+// Derive the array length
+const count = numbers.derive(arr => arr.length);
 
-const subtotal = cartItems.derive(items =>
-  items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-);
-
-const categoryBreakdown = cartItems.derive(items => {
-  const breakdown = {};
-  items.forEach(item => {
-    breakdown[item.category] = (breakdown[item.category] || 0) + item.quantity;
-  });
-  return breakdown;
-});
-
-// Display cart summary
+// Reaction to observe the count
 Reaction.create(() => {
-  console.log('Cart Summary:');
-  console.log(`Items: ${itemCount.get()}`);
-  console.log(`Subtotal: $${subtotal.get().toFixed(2)}`);
-  console.log(`Categories:`, categoryBreakdown.get());
-  console.log('');
+  console.log('Count:', count.get());
 });
 
-// Add new item to cart
-cartItems.push({ id: 4, name: 'Pen', price: 1.99, quantity: 10, category: 'office' });
+// Add a number - derived signal updates automatically
+numbers.push(6);
+Reaction.flush();
 
-// Modify quantity
-cartItems.setArrayProperty(0, 'quantity', 2);
-
-// The derived signals automatically update!
+// Remove numbers - count updates again
+numbers.splice(0, 2);
+Reaction.flush();
