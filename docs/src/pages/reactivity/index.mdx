@@ -23,6 +23,10 @@ Signals track dependencies automatically when their value is accessed (e.g., via
 
 A [Reaction](/reactivity/reactions) is a function designed to re-run automatically whenever any [signal](/reactivity/signals) it depends on changes. Accessing a signal's value inside a reaction creates this dependency.
 
+### Dependent Signals
+
+[Dependent signals](/reactivity/dependent-signals) let you create reactive values that automatically update based on other signals. Use `signal.derive()` to transform a single signal, or `Signal.computed()` to combine multiple signals into a computed value.
+
 
 > **Naming Reactivity** Signals implementations vary in their naming conventions for a reactive context. In Semantic UI it is called a [`reaction`](/reactivity/reactions),    in the [signals proposal](https://github.com/tc39/proposal-signals) a `watcher`, in [Preact](https://preactjs.com/guide/v10/signals/) a `computation` and in [Lit](https://lit.dev/docs/data/signals/) simply `watch`.
 

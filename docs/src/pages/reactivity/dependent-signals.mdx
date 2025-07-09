@@ -1,0 +1,127 @@
+---
+layout: '@layouts/Guide.astro'
+icon: cpu
+title: Dependent Signals
+description: Creating signals that depend on other signals for their values
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Dependent signals are [signals](/reactivity/signals) whose values automatically update when other signals change. Semantic UI provides two methods for creating dependent signals:
+
+- **[`signal.derive()`](/api/reactivity/signal#derive)** - Transform a single signal into a new signal
+- **[`Signal.computed()`](/api/reactivity/signal#computed)** - Combine multiple signals into a computed value
+
+## Derived Signals
+
+<PlaygroundExample id="reactive-derived" />
+
+Use [`derive()`](/api/reactivity/signal#derive) to create a new signal that transforms the value of a single source signal. The derived signal automatically updates whenever the source signal changes.
+
+```javascript title="Basic Derived Signal"
+import { Signal } from '@semantic-ui/reactivity';
+
+const numbers = new Signal([1, 2, 3, 4, 5]);
+
+// Derive the array length
+const count = numbers.derive(arr => arr.length);
+
+console.log(count.get()); // 5
+
+// When numbers changes, count updates automatically
+numbers.push(6);
+console.log(count.get()); // 6
+```
+
+### When to Use Derived Signals
+
+Use `derive()` when you need to:
+- Transform a single signal's value into a different format
+- Extract specific properties from objects or arrays
+- Create calculated values based on a single data source
+
+```javascript title="Common Derived Signal Patterns"
+const users = new Signal([
+  { name: 'Alice', active: true },
+  { name: 'Bob', active: false }
+]);
+
+// Extract active users
+const activeUsers = users.derive(list => 
+  list.filter(user => user.active)
+);
+
+// Get user names as a string
+const userNames = users.derive(list => 
+  list.map(user => user.name).join(', ')
+);
+```
+
+## Computed Signals
+
+<PlaygroundExample id="reactive-computed" />
+
+Use [`Signal.computed()`](/api/reactivity/signal#computed) to create a signal that depends on multiple other signals. The computed signal recalculates whenever any of its dependencies change.
+
+```javascript title="Basic Computed Signal"
+import { Signal } from '@semantic-ui/reactivity';
+
+const firstName = new Signal('John');
+const lastName = new Signal('Doe');
+
+// Compute full name from multiple signals
+const fullName = Signal.computed(() => 
+  `${firstName.get()} ${lastName.get()}`
+);
+
+console.log(fullName.get()); // "John Doe"
+
+// When either signal changes, fullName updates automatically
+firstName.set('Jane');
+console.log(fullName.get()); // "Jane Doe"
+```
+
+### When to Use Computed Signals
+
+Use `Signal.computed()` when you need to:
+- Combine values from multiple signals
+- Perform calculations that depend on several reactive sources
+- Create conditional values based on multiple state signals
+
+```javascript title="Common Computed Signal Patterns"
+const quantity = new Signal(3);
+const price = new Signal(10.99);
+const taxRate = new Signal(0.08);
+
+// Calculate total from multiple sources
+const total = Signal.computed(() => {
+  const subtotal = quantity.get() * price.get();
+  const tax = subtotal * taxRate.get();
+  return subtotal + tax;
+});
+
+// Conditional computation
+const isExpensive = Signal.computed(() => 
+  total.get() > 50
+);
+```
+
+## Integration with Reactions
+
+Both derived and computed signals work seamlessly with [reactions](/reactivity/reactions), allowing you to create reactive side effects based on dependent values.
+
+```javascript title="Reacting to Dependent Signals"
+import { Signal, Reaction } from '@semantic-ui/reactivity';
+
+const items = new Signal(['apple', 'banana']);
+const itemCount = items.derive(arr => arr.length);
+
+// React to changes in derived signal
+Reaction.create(() => {
+  console.log(`You have ${itemCount.get()} items`);
+});
+
+// Adding items triggers the reaction
+items.push('cherry'); // Logs: "You have 3 items"
+```
+
+> **Performance** Both `derive()` and `computed()` create efficient reactive dependencies that only update when their source values actually change, thanks to Semantic UI's built-in equality checking.

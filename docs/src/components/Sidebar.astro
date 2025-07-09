@@ -16,6 +16,7 @@ const activeSection = getActiveSidebarSection(currentPath);
 const sidebarNavMenu = getSidebarNavMenu(activeSection, currentPath);
 
 const showSidebarNav = (sidebarNavMenu.length > 0);
+const sidebarSubheader = sidebarHeader || (showSidebarNav) ? 'Categories' : 'Navigation';
 ---
 <script>
 
@@ -23,9 +24,9 @@ const showSidebarNav = (sidebarNavMenu.length > 0);
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
   <SidebarToggle client:load/>
+  <div class="subheader">{sidebarSubheader}</div>
   {
     showSidebarNav && (
-      <div class="subheader">{sidebarHeader || 'Categories'}</div>
       <UIMenu
         items={sidebarNavMenu}
         vertical

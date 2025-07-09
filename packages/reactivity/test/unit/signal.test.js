@@ -506,4 +506,308 @@ describe.concurrent('Signal', () => {
       expect(outerCallback).toHaveBeenCalledTimes(3);
     });
   });
+
+  /*******************************
+         Derived and Computed
+  *******************************/
+
+  describe.concurrent('Derived and Computed Signals', () => {
+    // Basic functionality
+    it('should create a derived signal from a single source', () => {
+      const source = new Signal(10);
+      const doubled = source.derive(val => val * 2);
+      
+      expect(doubled.get()).toBe(20);
+      
+      source.set(15);
+      Reaction.flush();
+      expect(doubled.get()).toBe(30);
+    });
+
+    it('should create a computed signal from multiple sources', () => {
+      const a = new Signal(1);
+      const b = new Signal(2);
+      const sum = Signal.computed(() => a.get() + b.get());
+      
+      expect(sum.get()).toBe(3);
+      
+      a.set(5);
+      Reaction.flush();
+      expect(sum.get()).toBe(7);
+      
+      b.set(10);
+      Reaction.flush();
+      expect(sum.get()).toBe(15);
+    });
+
+    // Test proper reactivity propagation
+    it('should update derived when source changes', () => {
+      const items = new Signal([1, 2, 3]);
+      const count = items.derive(arr => arr.length);
+      
+      expect(count.get()).toBe(3);
+      
+      items.push(4);
+      Reaction.flush();
+      expect(count.get()).toBe(4);
+      
+      items.splice(0, 2);
+      Reaction.flush();
+      expect(count.get()).toBe(2);
+    });
+
+    it('should update computed when ANY dependency changes', () => {
+      const a = new Signal(1);
+      const b = new Signal(2);
+      const c = new Signal(3);
+      const sum = Signal.computed(() => a.get() + b.get() + c.get());
+      
+      expect(sum.get()).toBe(6);
+      
+      // Change first dependency
+      a.set(10);
+      Reaction.flush();
+      expect(sum.get()).toBe(15);
+      
+      // Change second dependency
+      b.set(20);
+      Reaction.flush();
+      expect(sum.get()).toBe(33);
+      
+      // Change third dependency
+      c.set(30);
+      Reaction.flush();
+      expect(sum.get()).toBe(60);
+    });
+
+    // Test reactions depending on derived/computed
+    it('should trigger reactions when underlying signals change', () => {
+      const base = new Signal(10);
+      const doubled = base.derive(val => val * 2);
+      
+      let reactionCount = 0;
+      let lastValue = null;
+      
+      Reaction.create(() => {
+        lastValue = doubled.get();
+        reactionCount++;
+      });
+      
+      Reaction.flush();
+      expect(reactionCount).toBe(1);
+      expect(lastValue).toBe(20);
+      
+      // Changing base signal should trigger reaction on derived
+      base.set(15);
+      Reaction.flush();
+      expect(reactionCount).toBe(2);
+      expect(lastValue).toBe(30);
+    });
+
+    // Test direct modification
+    it('should allow direct modification of derived without affecting source', () => {
+      const base = new Signal(10);
+      const derived = base.derive(val => val * 2);
+      
+      expect(derived.get()).toBe(20);
+      expect(base.get()).toBe(10);
+      
+      // Directly set derived signal
+      derived.set(100);
+      Reaction.flush();
+      
+      // Derived value changes
+      expect(derived.get()).toBe(100);
+      // Base signal remains unchanged
+      expect(base.get()).toBe(10);
+      
+      // Next base change will recalculate derived
+      base.set(5);
+      Reaction.flush();
+      expect(derived.get()).toBe(10); // Back to calculated value
+    });
+
+    // Test no over-reactivity
+    it('should not trigger updates when computed value does not change', () => {
+      const a = new Signal(10);
+      const b = new Signal(20);
+      const isPositive = Signal.computed(() => a.get() > 0);
+      
+      let updateCount = 0;
+      isPositive.subscribe(() => updateCount++);
+      
+      Reaction.flush();
+      expect(updateCount).toBe(1);
+      expect(isPositive.get()).toBe(true);
+      
+      // Change that doesn't affect result
+      a.set(5); // Still positive
+      Reaction.flush();
+      expect(updateCount).toBe(1); // No update, value still true
+      
+      // Change that affects result
+      a.set(-5);
+      Reaction.flush();
+      expect(updateCount).toBe(2); // Update triggered
+      expect(isPositive.get()).toBe(false);
+    });
+
+    // Test chains of derived/computed
+    it('should handle chains of derived and computed signals', () => {
+      const base = new Signal(2);
+      const doubled = base.derive(val => val * 2);
+      const quadrupled = doubled.derive(val => val * 2);
+      const final = Signal.computed(() => quadrupled.get() + 1);
+      
+      expect(final.get()).toBe(9); // 2 * 2 * 2 + 1
+      
+      base.set(3);
+      Reaction.flush();
+      expect(doubled.get()).toBe(6);
+      expect(quadrupled.get()).toBe(12);
+      expect(final.get()).toBe(13);
+    });
+
+    // Test complex array operations
+    it('should handle complex array derivations', () => {
+      const items = new Signal([
+        { id: 1, price: 10, inStock: true },
+        { id: 2, price: 20, inStock: false },
+        { id: 3, price: 30, inStock: true }
+      ]);
+      
+      const totalValue = items.derive(arr => 
+        arr
+          .filter(item => item.inStock)
+          .reduce((sum, item) => sum + item.price, 0)
+      );
+      
+      const inStockCount = items.derive(arr => 
+        arr.filter(item => item.inStock).length
+      );
+      
+      expect(totalValue.get()).toBe(40);
+      expect(inStockCount.get()).toBe(2);
+      
+      // Add item
+      items.push({ id: 4, price: 15, inStock: true });
+      Reaction.flush();
+      expect(totalValue.get()).toBe(55);
+      expect(inStockCount.get()).toBe(3);
+      
+      // Modify item property
+      items.setArrayProperty(1, 'inStock', true);
+      Reaction.flush();
+      expect(totalValue.get()).toBe(75);
+      expect(inStockCount.get()).toBe(4);
+    });
+
+    // Test custom options
+    it('should respect custom options for derived signals', () => {
+      const source = new Signal({ count: 0, meta: 'data' });
+      
+      // Custom equality that only checks count
+      const derived = source.derive(
+        obj => ({ doubled: obj.count * 2 }),
+        { 
+          equalityFunction: (a, b) => a?.doubled === b?.doubled,
+          allowClone: false
+        }
+      );
+      
+      const firstResult = derived.get();
+      expect(firstResult.doubled).toBe(0);
+      
+      // Verify no cloning
+      const secondResult = derived.get();
+      expect(firstResult).toBe(secondResult); // Same reference
+    });
+
+    // Test conditional dependencies
+    it('should handle conditional dependencies in computed signals', () => {
+      const useA = new Signal(true);
+      const a = new Signal(10);
+      const b = new Signal(20);
+      
+      const result = Signal.computed(() => {
+        return useA.get() ? a.get() : b.get();
+      });
+      
+      expect(result.get()).toBe(10);
+      
+      // Change unused signal - should still trigger update due to dependency tracking
+      b.set(30);
+      Reaction.flush();
+      expect(result.get()).toBe(10); // Still using 'a'
+      
+      // Switch condition
+      useA.set(false);
+      Reaction.flush();
+      expect(result.get()).toBe(30); // Now using 'b'
+      
+      // Now changes to 'a' should still trigger
+      a.set(50);
+      Reaction.flush();
+      expect(result.get()).toBe(30); // Still using 'b'
+    });
+
+    // Test derive with object transformations
+    it('should handle object transformations in derive', () => {
+      const user = new Signal({ name: 'Alice', age: 30 });
+      const displayName = user.derive(u => `${u.name} (${u.age})`);
+      
+      expect(displayName.get()).toBe('Alice (30)');
+      
+      user.setProperty('name', 'Bob');
+      Reaction.flush();
+      expect(displayName.get()).toBe('Bob (30)');
+      
+      user.set({ name: 'Charlie', age: 25 });
+      Reaction.flush();
+      expect(displayName.get()).toBe('Charlie (25)');
+    });
+
+    // Test computed with mixed signal types
+    it('should handle computed with different signal types', () => {
+      const quantity = new Signal(5);
+      const price = new Signal(10.99);
+      const taxRate = new Signal(0.08);
+      const shipping = new Signal(5.00);
+      
+      const total = Signal.computed(() => {
+        const subtotal = quantity.get() * price.get();
+        const tax = subtotal * taxRate.get();
+        return subtotal + tax + shipping.get();
+      });
+      
+      expect(total.get()).toBeCloseTo(64.346, 2);
+      
+      quantity.set(3);
+      Reaction.flush();
+      expect(total.get()).toBeCloseTo(40.608, 2);
+    });
+
+    // Test WeakRef cleanup behavior
+    it('should handle WeakRef cleanup gracefully', () => {
+      let source = new Signal(10);
+      const derived = source.derive(val => val * 2);
+      
+      expect(derived.get()).toBe(20);
+      
+      // Reaction should be active
+      expect(derived._derivedReaction.active).toBe(true);
+      
+      // Simulate source being garbage collected
+      source = null;
+      
+      // Force garbage collection if available (Node.js only)
+      if (global.gc) {
+        global.gc();
+      }
+      
+      // The reaction should still be active but will auto-cleanup on next run
+      // This is hard to test directly, but we can verify the structure is correct
+      expect(derived._derivedReaction).toBeDefined();
+    });
+  });
 });

@@ -43,7 +43,7 @@ const createComponent = ({ settings, self, $, isClient, dispatchEvent }) => ({
   collapseSidebar() {
     settings.collapsed = true;
     if (settings.classTarget) {
-      console.log('adding to', self.getTarget()), self.getTarget().addClass(settings.sidebarClass);
+      self.getTarget().addClass(settings.sidebarClass);
     }
     self.setSavedCollapsedState(true);
     dispatchEvent('collapse');
