@@ -12,6 +12,8 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Colors** - Added new invariant colors that do not change for dark mode, ie. `red-0-invariant` stays dark red.
 
 ### Reactivity
+* **Feature** - Added `signal.derive()` method for creating derived signals that transform a single signal's value. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals).
+* **Feature** - Added `Signal.computed()` static method for creating computed signals that combine multiple signals. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals).
 * **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
 * **Feature** - Added new `mutate` helper for mutating a value by a function
 * **Feature** - There is now `getItem(id)` and `getItemIndex(id)` as separate mutation helpers.
