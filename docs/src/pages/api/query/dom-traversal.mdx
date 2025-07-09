@@ -6,6 +6,8 @@ icon: navigation
 description: API reference for Query methods related to DOM traversal
 ---
 
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
 The DOM Traversal methods allow you to get from one element to another based off their relationship. Query supports piercing shadow DOM boundaries when using `$$`
 
 ## find
@@ -38,6 +40,9 @@ $('div').find('p').addClass('highlight');
 $$('my-component').find('p').addClass('highlight');
 ```
 
+### Example
+<PlaygroundExample id="query-find" direction="horizontal"></PlaygroundExample>
+
 ## parent
 
 Gets the parent of each element in the current set of matched elements.
@@ -68,6 +73,9 @@ $('button').parent().addClass('button-group');
 $$('my-component menu-item').parent().addClass('menu-styling');
 ```
 
+### Example
+<PlaygroundExample id="query-parent" direction="horizontal"></PlaygroundExample>
+
 ## children
 
 Gets the children of each element in the set of matched elements.
@@ -91,6 +99,9 @@ $('selector').children(childSelector)
 // Get all direct child list items of an unordered list
 $('ul').children('li').css('color', 'red');
 ```
+
+### Example
+<PlaygroundExample id="query-children" direction="horizontal"></PlaygroundExample>
 
 
 ## siblings
@@ -122,6 +133,9 @@ $('.selected').siblings().addClass('dimmed');
 ```javascript
 $$('my-component').find('.shadow-selected').siblings().addClass('shadow-dimmed');
 ```
+
+### Example
+<PlaygroundExample id="query-siblings" direction="horizontal"></PlaygroundExample>
 
 ## closest
 
@@ -167,6 +181,9 @@ $('span').closest('div', { returnAll: true }).addClass('ancestor');
 ```javascript
 $$('my-component').find('input').closest('.shadow-form').addClass('validated');
 ```
+
+### Example
+<PlaygroundExample id="query-closest" direction="horizontal"></PlaygroundExample>
 
 ## closestAll
 
@@ -240,6 +257,9 @@ $('p').next().css('margin-top', '20px');
 $$('my-component').find('.shadow-paragraph').next().css('margin-top', '10px');
 ```
 
+### Example
+<PlaygroundExample id="query-next" direction="horizontal"></PlaygroundExample>
+
 ## prev
 
 Gets the immediately preceding sibling of each element in the set of matched elements.
@@ -270,6 +290,9 @@ $('h2').prev().css('color', 'red');
 $$('my-component').find('.shadow-heading').prev().css('margin-bottom', '5px');
 ```
 
+### Example
+<PlaygroundExample id="query-prev" direction="horizontal"></PlaygroundExample>
+
 ## end
 
 Returns to the previous set of elements in the traversal chain.
@@ -297,4 +320,205 @@ $('.card')
   .find('.content')                // Now find content within cards
     .html('<p>New content</p>');   // Change the HTML
 ```
+
+### Example
+<PlaygroundExample id="query-end" direction="horizontal"></PlaygroundExample>
+
+## filter
+
+Reduce the set of matched elements to those that match the selector or pass the function's test.
+
+### Syntax
+```javascript
+$('selector').filter(filterSelector)
+$('selector').filter(function)
+```
+
+### Parameters
+| Name           | Type     | Description                              |
+|----------------|----------|------------------------------------------|
+| filterSelector | string   | A selector to filter elements            |
+| function       | function | A function to test each element against  |
+
+### Returns
+[Query object](/api/query/basic#the-query-object) containing the filtered elements.
+
+### Usage
+
+#### Using Selector
+```javascript
+// Filter paragraphs to only those with class 'highlight'
+$('p').filter('.highlight').css('background', 'yellow');
+```
+
+#### Using Function
+```javascript
+// Filter list items to only those with text containing 'important'
+$('li').filter(function() {
+  return $(this).text().includes('important');
+}).addClass('priority');
+```
+
+### Example
+<PlaygroundExample id="query-filter" direction="horizontal"></PlaygroundExample>
+
+## not
+
+Remove elements from the set of matched elements that match the selector or pass the function's test.
+
+### Syntax
+```javascript
+$('selector').not(notSelector)
+$('selector').not(function)
+```
+
+### Parameters
+| Name        | Type     | Description                              |
+|-------------|----------|------------------------------------------|
+| notSelector | string   | A selector to exclude elements           |
+| function    | function | A function to test each element against  |
+
+### Returns
+[Query object](/api/query/basic#the-query-object) containing the remaining elements.
+
+### Usage
+
+#### Using Selector
+```javascript
+// Select all paragraphs except those with class 'exclude'
+$('p').not('.exclude').css('color', 'blue');
+```
+
+#### Using Function
+```javascript
+// Select all list items except empty ones
+$('li').not(function() {
+  return $(this).text().trim() === '';
+}).addClass('visible');
+```
+
+### Example
+<PlaygroundExample id="query-not" direction="horizontal"></PlaygroundExample>
+
+## is
+
+Check if any of the matched elements match the given selector.
+
+### Syntax
+```javascript
+$('selector').is(testSelector)
+$('selector').is(function)
+```
+
+### Parameters
+| Name         | Type     | Description                              |
+|--------------|----------|------------------------------------------|
+| testSelector | string   | A selector to test elements against      |
+| function     | function | A function to test each element against  |
+
+### Returns
+`true` if at least one element matches, `false` otherwise.
+
+### Usage
+
+#### Using Selector
+```javascript
+// Check if any paragraph has class 'active'
+if ($('p').is('.active')) {
+  console.log('At least one paragraph is active');
+}
+```
+
+#### Using Function
+```javascript
+// Check if any input is empty
+if ($('input').is(function() {
+  return $(this).val() === '';
+})) {
+  console.log('At least one input is empty');
+}
+```
+
+### Example
+<PlaygroundExample id="query-is" direction="horizontal"></PlaygroundExample>
+
+## index
+
+Return the position of the first element within the jQuery object relative to its sibling elements.
+
+### Syntax
+```javascript
+$('selector').index()
+$('selector').index(element)
+```
+
+### Parameters
+| Name    | Type                    | Description                              |
+|---------|-------------------------|------------------------------------------|
+| element | string/element/jQuery   | (Optional) Element to find index of      |
+
+### Returns
+The index position of the element(s).
+
+### Usage
+
+#### Get Index of First Element
+```javascript
+// Get the index of the first selected element
+const index = $('li.selected').index();
+console.log(`Selected item is at index: ${index}`);
+```
+
+#### Get Index of Specific Element
+```javascript
+// Get the index of a specific element within the selection
+const specificIndex = $('li').index($('li.highlight'));
+console.log(`Highlighted item is at index: ${specificIndex}`);
+```
+
+### Example
+<PlaygroundExample id="query-index" direction="horizontal"></PlaygroundExample>
+
+## contains
+
+Check if the first element contains the given element.
+
+### Syntax
+```javascript
+$('selector').contains(element)
+```
+
+### Parameters
+| Name    | Type          | Description                              |
+|---------|---------------|------------------------------------------|
+| element | DOM element   | The element to check for containment     |
+
+### Returns
+`true` if the element is contained, `false` otherwise.
+
+### Usage
+
+#### Basic Containment Check
+```javascript
+// Check if a div contains a specific paragraph
+const $div = $('#container');
+const $paragraph = $('#content-para');
+
+if ($div.contains($paragraph[0])) {
+  console.log('Container holds the paragraph');
+}
+```
+
+#### Dynamic Containment Check
+```javascript
+// Check if any card contains clicked element
+$('.card').each(function() {
+  if ($(this).contains(event.target)) {
+    console.log('Click happened inside this card');
+  }
+});
+```
+
+### Example
+<PlaygroundExample id="query-contains" direction="horizontal"></PlaygroundExample>
 

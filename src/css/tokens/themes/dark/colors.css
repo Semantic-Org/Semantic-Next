@@ -14,33 +14,39 @@ html.dark,
   --white-text-color: var(--white-80);
   --black-text-color: var(--black-80);
 
-  --red-text-color: var(--red-30);
-  --olive-text-color: var(--olive-30);
-  --green-text-color: var(--green-30);
-  --yellow-text-color: var(--yellow-30);
-  --blue-text-color: var(--blue-30);
-  --teal-text-color: var(--teal-30);
-  --pink-text-color: var(--pink-30);
-  --violet-text-color: var(--violet-30);
-  --purple-text-color: var(--purple-30);
-  --orange-text-color: var(--orange-30);
-  --brown-text-color: var(--brown-30);
-  --grey-text-color: var(--grey-30);
-  --slate-text-color: var(--slate-30);
+  /* -------------------
+        Inverted Base Scales
+  -------------------- */
 
-  --red-header-color: var(--red-20);
-  --olive-header-color: var(--olive-20);
-  --green-header-color: var(--green-20);
-  --yellow-header-color: var(--yellow-20);
-  --blue-header-color: var(--blue-20);
-  --teal-header-color: var(--teal-20);
-  --pink-header-color: var(--pink-20);
-  --violet-header-color: var(--violet-20);
-  --purple-header-color: var(--purple-20);
-  --orange-header-color: var(--orange-20);
-  --brown-header-color: var(--brown-20);
-  --grey-header-color: var(--grey-20);
-  --slate-header-color: var(--slate-20);
+  /* Invert lightness scale - reference inverted base values */
+  --lightness-0: var(--base-lightness-100);   /* Near black */
+  --lightness-5: var(--base-lightness-95);    /* Very dark shades */
+  --lightness-10: var(--base-lightness-90);   /* Dark shades */
+  --lightness-20: var(--base-lightness-80);   /* More darkening */
+  --lightness-30: var(--base-lightness-70);   /* Gradual darkening */
+  --lightness-40: var(--base-lightness-60);   /* Darker than base */
+  --lightness-50: var(--base-lightness-50);   /* Base color (100% - no change) */
+  --lightness-60: var(--base-lightness-40);   /* Secondary elements */
+  --lightness-70: var(--base-lightness-30);   /* Muted elements */
+  --lightness-80: var(--base-lightness-20);   /* Subtle UI */
+  --lightness-90: var(--base-lightness-10);   /* Light backgrounds */
+  --lightness-95: var(--base-lightness-5);    /* Very light */
+  --lightness-100: var(--base-lightness-0);   /* Near white */
+
+  /* Invert chroma scale - reference inverted base values */
+  --chroma-0: var(--base-chroma-100);   /* Near black = reduced chroma */
+  --chroma-5: var(--base-chroma-95);    /* Very dark = very low chroma */
+  --chroma-10: var(--base-chroma-90);   /* Dark = lower chroma */
+  --chroma-20: var(--base-chroma-80);   /* More chroma reduction */
+  --chroma-30: var(--base-chroma-70);   /* Gradual chroma reduction */
+  --chroma-40: var(--base-chroma-60);   /* Slight chroma reduction */
+  --chroma-50: var(--base-chroma-50);   /* Base = full chroma */
+  --chroma-60: var(--base-chroma-40);   /* Secondary = near-full chroma */
+  --chroma-70: var(--base-chroma-30);   /* Muted = high-medium chroma */
+  --chroma-80: var(--base-chroma-20);   /* UI elements = medium chroma */
+  --chroma-90: var(--base-chroma-10);   /* Subtle = medium-low chroma */
+  --chroma-95: var(--base-chroma-5);    /* Light = low chroma */
+  --chroma-100: var(--base-chroma-0);   /* Very light = very low chroma */
 
   /* -------------------
         UI Colors

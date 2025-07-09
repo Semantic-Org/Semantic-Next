@@ -188,7 +188,7 @@ export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <script src="${suiBase}/dist/bundle/semantic-ui.js" type="module"></script>
-<link rel="stylesheet" href="${suiBase}/dist/bundle/semantic-ui.css"></link>
+<link rel="stylesheet" href="${suiBase}/dist/semantic-ui.css"></link>
 <script>
   document.querySelector('html').removeAttribute('style');
   if(localStorage.getItem('theme') == 'dark') {
@@ -328,10 +328,10 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
         html += `${htmlHideMarkerStart}`;
       }
       if (src.search('.js') >= 0) {
-        html += `   <script src="./${src}" type="module"></script>\n`;
+        html += `    <script src="./${src}" type="module"></script>\n`;
       }
       else if (src.search('.css') >= 0) {
-        html += `   <link href="./${src}" rel="stylesheet">\n`;
+        html += `    <link href="./${src}" rel="stylesheet">\n`;
       }
       if (files[src]?.generated) {
         html += `${htmlHideMarkerEnd}`;

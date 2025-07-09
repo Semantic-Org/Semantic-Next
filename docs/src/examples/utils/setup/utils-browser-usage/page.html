@@ -1,0 +1,17 @@
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/utils": "https://cdn.jsdelivr.net/npm/@semantic-ui/utils/+esm"
+  }
+}
+</script>
+
+<script type="module">
+  import { unique } from '@semantic-ui/utils';
+  const numbers = [1, 2, 2, 3, 3, 4];
+  const uniqueNumbers = unique(numbers);
+  document.querySelector('.numbers').innerHTML = numbers;
+  document.querySelector('.unique').innerHTML = uniqueNumbers;
+</script>
+<div class="log numbers"></div>
+<div class="log unique"></div>

@@ -1,0 +1,20 @@
+
+::slotted([contenteditable]) {
+  padding: 20px;
+  background: var(--background);
+  border: 2px dashed var(--standard-20);
+  border-radius: var(--border-radius);
+  min-height: 100px;
+  outline: none;
+}
+
+.stats {
+  padding: var(--padding);
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+
+  p {
+    margin: 5px 0;
+    font-family: monospace;
+  }
+}

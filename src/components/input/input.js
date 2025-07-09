@@ -81,6 +81,7 @@ const events = {
 
 const UIInput = defineComponent({
   tagName: 'ui-input',
+  delegatesFocus: true,
   componentSpec,
   template,
   css,

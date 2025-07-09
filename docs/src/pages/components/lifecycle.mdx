@@ -162,8 +162,8 @@ Each component will also emit a DOM event when a lifecycle event fires. This can
 | event         | when fired                                              |
 |-------------------|--------------------------------------------------|
 | created|  Callback after your component instance is initialized but before it is attached to the DOM
-| onRendered|  Callback after your component is rendered to the DOM
-| onDestroyed|  Callback after your component is removed from the DOM
+| rendered |  Callback first time your component is rendered
+| destroyed |  Callback after your component is removed from the DOM
 
 These can be listened to from other components in the same way as other DOM or custom events.
 

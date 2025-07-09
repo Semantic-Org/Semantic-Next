@@ -54,8 +54,8 @@ describe('query', () => {
       it('should create a new Query instance with the provided arguments', () => {
         const div = document.createElement('div');
         document.body.appendChild(div);
-
-        const $alias = useAlias('div');
+        const $$$ = useAlias();
+        const $alias = $$$('div');
         expect($alias).toBeInstanceOf(Query);
         expect($alias[0]).toBe(div);
       });

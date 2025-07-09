@@ -1,0 +1,26 @@
+.box {
+  border: 2px solid var(--standard-20);
+  padding: 12px;
+  margin: 20px 0;
+  background: var(--standard-5);
+  
+  &.special {
+    border-color: var(--purple-50);
+    background: var(--purple-5);
+  }
+  
+  &.highlighted {
+    background: var(--blue-5);
+    border-color: var(--blue-50);
+  }
+}
+
+.child {
+  padding: 12px;
+  background: var(--standard-10);
+  cursor: pointer;
+  
+  &:hover {
+    background: var(--standard-20);
+  }
+}

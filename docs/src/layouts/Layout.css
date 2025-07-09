@@ -22,7 +22,7 @@
   }
 
   layout sidebar {
-    position: static;
+    position: relative;
 
     left: 0;
     top: auto;

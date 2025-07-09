@@ -6,6 +6,8 @@ icon: info
 description: Getting started with Query and its core functionality
 ---
 
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
 ## Constructor
 
 The Query constructor creates a new Query collection from a variety of input sources.
@@ -39,6 +41,9 @@ import { $ } from '@semantic-ui/query';
 const $divs = $('div');
 ```
 
+### Example
+<PlaygroundExample id="query-dom" direction="horizontal"></PlaygroundExample>
+
 ### HTML Strings
 
 You can pass through html directly into `$` to create new nodes.
@@ -48,6 +53,9 @@ import { $ } from '@semantic-ui/query';
 
 const $newElement = $('<div class="example">Hello, world!</div>');
 ```
+
+### Example
+<PlaygroundExample id="query-creating-dom" direction="horizontal"></PlaygroundExample>
 
 ### DOM Element
 
@@ -117,6 +125,9 @@ import { $$ } from '@semantic-ui/query';
 const $shadowContent = $$('my-component .shadow-content');
 ```
 
+### Example
+<PlaygroundExample id="shadow-dom" direction="horizontal"></PlaygroundExample>
+
 ### Accessing Slotted Content
 
 ```javascript
@@ -154,6 +165,9 @@ $('div')
     console.log('Clicked!');
   });
 ```
+
+### Example
+<PlaygroundExample id="query-chaining" direction="horizontal"></PlaygroundExample>
 
 ### Iteration
 
@@ -231,6 +245,9 @@ import { exportGlobals } from '@semantic-ui/query';
 // $ and $$ are defined in page
 exportGlobals();
 ```
+
+### Example
+<PlaygroundExample id="query-exportglobals" direction="horizontal"></PlaygroundExample>
 ### Restore Globals
 If you need to restore the previous values before calling export globals.
 ```javascript
@@ -275,3 +292,77 @@ export const MyClass = class MyClass {
 myQuery = new Query({ root: someEl, pierceShadow: true })
 const $elements = myQuery('div');
 ```
+
+## noConflict
+
+Restore the previous values of `$` and `$$` and return the Query function.
+
+### Syntax
+```javascript
+const myQuery = $.noConflict();
+```
+
+### Returns
+The Query function.
+
+### Usage
+```javascript
+import { $ } from '@semantic-ui/query';
+
+// If $ was previously defined, restore it and use a different alias
+const myQuery = $.noConflict();
+const $divs = myQuery('div');
+```
+
+### Example
+<PlaygroundExample id="query-noconflict" direction="horizontal"></PlaygroundExample>
+
+## ESM Usage
+
+Examples of using Query with ES modules.
+
+### Basic Import
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const $paragraphs = $('p');
+```
+
+### Named Imports
+```javascript
+import { $, $$, useAlias } from '@semantic-ui/query';
+
+const $domElements = $('div');
+const $shadowElements = $$('my-component .shadow-content');
+const customQuery = useAlias();
+```
+
+### Example
+<PlaygroundExample id="query-esm-usage" direction="horizontal"></PlaygroundExample>
+
+## Browser Usage
+
+Examples of using Query in browser environments.
+
+### Script Tag
+```html
+<script src="path/to/query.js"></script>
+<script>
+  const $elements = $('div');
+</script>
+```
+
+### With Global Export
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+// Make $ and $$ available globally
+exportGlobals();
+
+// Now you can use $ and $$ without importing
+$('div').addClass('global-access');
+$$('my-component').css('color', 'red');
+```
+
+### Example
+<PlaygroundExample id="query-browser-usage" direction="horizontal"></PlaygroundExample>

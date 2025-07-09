@@ -1,0 +1,15 @@
+.item {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  border: var(--border);
+  margin: var(--vertically-spaced);
+}
+
+.item.target {
+  background: var(--standard-10);
+}
+
+.item.highlighted {
+  background: var(--positive-background);
+  color: var(--positive-text);
+}

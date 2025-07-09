@@ -15,6 +15,7 @@ const examplesCollection = defineCollection({
   type: 'content',
   schema: z.object({
     id: z.optional(z.string()),
+    sortIndex: z.optional(z.number()),
     title: z.string(),
     hidden: z.optional(z.boolean()),
     exampleType: z.string(),

@@ -1,0 +1,21 @@
+.item {
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--standard-10);
+  transition: all 0.3s ease;
+  
+  &.target {
+    background: var(--blue-5);
+    border: 2px solid var(--blue-50);
+  }
+  
+  &.special {
+    border-left: 4px solid var(--purple-50);
+  }
+  
+  &.highlighted {
+    background: var(--orange-5);
+    color: var(--orange-50);
+    transform: scale(1.02);
+  }
+}

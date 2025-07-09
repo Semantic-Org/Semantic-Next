@@ -1,0 +1,14 @@
+.status {
+  padding: var(--spacing);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: var(--vertically-spaced);
+  background: var(--standard-5);
+  text-align: center;
+  
+  &.ready {
+    background-color: var(--success-5);
+    border-color: var(--success-30);
+    color: var(--success-80);
+  }
+}

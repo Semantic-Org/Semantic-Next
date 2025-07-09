@@ -1,0 +1,12 @@
+ui-button {
+  margin: var(--vertically-spaced);
+}
+h4 {
+  font-size: 14px;
+  font-weight: bold;
+}
+.log {
+  margin-top: var(--spacing);
+  border: var(--border);
+  padding: var(--padding);
+}

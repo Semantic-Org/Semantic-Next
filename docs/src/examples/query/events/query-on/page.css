@@ -1,0 +1,15 @@
+.buttons {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.log {
+  margin: 20px 0;
+  padding: 15px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  min-height: 40px;
+}

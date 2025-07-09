@@ -1,0 +1,27 @@
+.container {
+  padding: var(--spacing);
+  border: var(--border);
+  margin: var(--vertically-spaced);
+  
+  &.highlight {
+    background-color: var(--success-5);
+    border-color: var(--success-30);
+  }
+  
+  .target {
+    padding: var(--compact-spacing);
+    background: var(--standard-5);
+    border-radius: var(--border-radius);
+  }
+}
+
+.other {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  margin: var(--vertically-spaced);
+  
+  &.excluded {
+    background-color: var(--warning-5);
+    border: 1px solid var(--warning-30);
+  }
+}

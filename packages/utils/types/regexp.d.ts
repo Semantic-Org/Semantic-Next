@@ -19,19 +19,3 @@
  * ```
  */
 export function escapeRegExp(string: string): string;
-
-/**
- * Escapes HTML special characters in a string
- * Escapes: & < > " '
- * @see {@link https://next.semantic-ui.com/api/utils/regex#escapehtml escapeHTML}
- *
- * @param string - The string to escape
- * @returns The string with HTML special characters escaped
- *
- * @example
- * ```ts
- * escapeHTML('<div>Hello & "World"</div>')
- * // returns '&ltdiv&gtHello &amp &quotWorld&quot&lt/div&gt'
- * ```
- */
-export function escapeHTML(string: string): string;

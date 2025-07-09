@@ -1,0 +1,33 @@
+.list {
+  margin-bottom: var(--spacing);
+
+  .item {
+    cursor: pointer;
+    margin: 0 0 5px;
+    padding: 8px 10px;
+    border: var(--border);
+    background-color: var(--standard-5);
+    background-image: var(--subtle-gradient);
+    box-shadow: var(--subtle-shadow);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+
+    &:hover {
+      background-color: var(--standard-10);
+    }
+    &.clicked {
+      background-color: var(--primary-20);
+    }
+  }
+}
+
+
+.log {
+  margin: var(--vertically-spaced);
+  font-family: monospace;
+  color: var(--text-color);
+  background: var(--yellow-90);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing);
+}

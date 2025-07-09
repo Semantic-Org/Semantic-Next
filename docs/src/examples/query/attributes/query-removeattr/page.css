@@ -1,0 +1,19 @@
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.status {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+
+  .classes {
+    color: var(--primary-color);
+    font-weight: bold;
+  }
+}

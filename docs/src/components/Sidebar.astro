@@ -1,7 +1,8 @@
 ---
-const { sidebarMenu, expandAll } = Astro.props;
+const { sidebarMenu, sidebarHeader, expandAll } = Astro.props;
 import './Sidebar.css';
 import NavMenu from '@components/NavMenu/NavMenu.js';
+import SidebarToggle from '@components/SidebarToggle/SidebarToggle.js';
 import { getSidebarMenu, getActiveSidebarSection, getSidebarNavMenu } from '@helpers/navigation.js';
 import { UIMenu } from '@semantic-ui/core'
 
@@ -12,12 +13,27 @@ const canExpand = true;
 
 const currentPath = Astro.url.pathname;
 const activeSection = getActiveSidebarSection(currentPath);
-const items = getSidebarNavMenu(activeSection, currentPath);
-console.log(JSON.stringify(menu));
+const sidebarNavMenu = getSidebarNavMenu(activeSection, currentPath);
+
+const showSidebarNav = (sidebarNavMenu.length > 0);
 ---
+<script>
+
+</script>
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>
-  {items.length > 0 && <UIMenu items={items} vertical inset selection dark></UIMenu>}
+  <SidebarToggle client:load/>
+  {
+    showSidebarNav && (
+      <div class="subheader">{sidebarHeader || 'Categories'}</div>
+      <UIMenu
+        items={sidebarNavMenu}
+        vertical
+        selection
+        dark
+      />
+    )
+  }
   <NavMenu
     client:load
     menu={menu}

@@ -66,6 +66,13 @@ searchMeta = {
       const html = document.querySelectorAll('html')[0];
       html.classList.add(currentTheme);
       html.setAttribute('data-theme', currentTheme);
+
+      /* store sidebar collapse */
+      window.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') == 'true';
+      if(window.sidebarCollapsed) {
+        html.classList.add('sidebar-collapsed');
+      }
+
     </script>
     <SearchMeta {...searchMeta} />
     <slot />

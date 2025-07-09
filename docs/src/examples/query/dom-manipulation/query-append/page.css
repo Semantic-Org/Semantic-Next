@@ -1,0 +1,27 @@
+.container {
+  padding: 15px;
+  margin: 15px 0;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.list {
+  padding: 15px;
+  margin: 15px 0;
+  background: var(--standard-10);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.list div {
+  margin: 5px 0;
+  padding: 8px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+}
+
+.appended {
+  background: var(--standard-15) !important;
+  font-weight: bold;
+}

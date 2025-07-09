@@ -1,0 +1,30 @@
+.container {
+  width: 300px;
+  overflow-x: scroll;
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  background: var(--background);
+}
+
+.content {
+  padding: var(--padding);
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.measurements {
+  background: var(--standard-5);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  
+  p {
+    margin: 5px 0;
+    font-family: monospace;
+    
+    span {
+      font-weight: bold;
+      color: var(--secondary-color);
+    }
+  }
+}

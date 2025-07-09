@@ -1,0 +1,36 @@
+.container {
+  height: 100px;
+  overflow: hidden;
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  background: var(--background);
+}
+
+.element {
+  padding: var(--padding);
+  background: var(--success-color);
+  color: white;
+  font-size: 14px;
+  line-height: 1.4;
+  
+  p {
+    margin: 8px 0;
+  }
+}
+
+.measurements {
+  background: var(--standard-5);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  
+  p {
+    margin: 5px 0;
+    font-family: monospace;
+    
+    span {
+      font-weight: bold;
+      color: var(--success-color);
+    }
+  }
+}

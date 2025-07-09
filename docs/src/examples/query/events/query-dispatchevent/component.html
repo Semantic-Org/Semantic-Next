@@ -1,0 +1,11 @@
+<h4>Ping Log</h4>
+<div class="log">
+  {#each message in log}
+    <div class="message">
+      {message.message} -
+      {formatDate message.date 'h:mm:ss a'}
+    </div>
+  {else}
+    No pings received yet.
+  {/each}
+</div>

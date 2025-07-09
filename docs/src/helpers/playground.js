@@ -67,7 +67,7 @@ export const getExampleFiles = async ({
   let deepPath = `${basePath}.*/${contentID}/${subFolder}`;
   let shallowPath = `${basePath}${contentID}/${subFolder}`;
   let pathRegExpString = `${deepPath}|${shallowPath}`;
-  const pathRegExp = new RegExp(pathRegExpString);
+  const pathRegExp = new RegExp(pathRegExpString, 'i');
   await asyncEach(allFiles, async (file, path) => {
     if (path.match(pathRegExp)) {
       const fileName = path.replace(pathRegExp, '').replace('/', '').trim();
@@ -316,7 +316,7 @@ export const getPanelIndexes = (files = {}, { type } = {}) => {
       'index.ts': 0,
     };
   }
-  else if(type == 'page') {
+  else if (type == 'page') {
     indexes = {
       'page.html': 0,
       'page.css': 0,

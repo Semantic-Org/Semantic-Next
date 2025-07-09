@@ -108,7 +108,26 @@ export const getArticle = (word, settings = {}) => {
   const article = vowels.includes(firstLetter)
     ? 'an'
     : 'a';
-  return (settings.capitalize)
+  const finalArticle = (settings.capitalize)
     ? capitalize(article)
     : article;
+
+  return settings.includeWord
+    ? `${finalArticle} ${word}`
+    : finalArticle;
+};
+
+export const escapeHTML = (string) => {
+  const htmlEscapes = {
+    '&': '&amp',
+    '<': '&lt',
+    '>': '&gt',
+    '"': '&quot',
+    "'": '&#39',
+  };
+  const htmlRegExp = /[&<>"']/g;
+  const hasHTML = RegExp(htmlRegExp.source);
+  return (string && hasHTML.test(string))
+    ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
+    : string;
 };

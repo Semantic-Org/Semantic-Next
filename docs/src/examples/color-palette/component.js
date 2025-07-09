@@ -7,6 +7,8 @@ const template = await getText('./component.html');
 const defaultSettings = {
   // Available color names for display
   colors: [
+    'primary',
+    'secondary',
     'red',
     'orange',
     'yellow',
@@ -19,13 +21,14 @@ const defaultSettings = {
     'pink',
     'brown',
     'grey',
+    'slate',
   ],
   // Color scale shades to show
-  shades: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+  shades: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100],
   // Whether to show color values
   showValues: true,
   // Whether to show copy functionality
-  showCopy: true
+  showCopy: true,
 };
 
 const defaultState = {
@@ -33,7 +36,6 @@ const defaultState = {
 };
 
 const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) => ({
-  
   // Get all color data for display
   getColors() {
     const { colors, shades } = settings;
@@ -47,15 +49,15 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) 
         textVar: (shade < 50)
           ? `--${colorName}-90`
           : `--${colorName}-10`,
-        value: self.getColorValue(colorName, shade)
-      }))
+        value: self.getColorValue(colorName, shade),
+      })),
     }));
     return val;
   },
 
   // Get computed color value from CSS
   getColorValue(colorName, shade) {
-    if(isServer) {
+    if (isServer) {
       return;
     }
     const cssVar = `--${colorName}-${shade}`;
@@ -81,7 +83,7 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) 
       colorName,
       shade,
       cssVar,
-      value
+      value,
     });
   },
 
@@ -89,7 +91,7 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) 
   isColorCopied(colorName, shade) {
     const copied = state.copiedColor.get();
     return copied === `${colorName}-${shade}`;
-  }
+  },
 });
 
 const events = {
@@ -98,9 +100,8 @@ const events = {
     if (settings.showCopy && color && shade) {
       self.copyColor(color, shade);
     }
-  }
+  },
 };
-
 
 export const ColorPalette = defineComponent({
   tagName: 'color-palette',

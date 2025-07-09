@@ -1,0 +1,19 @@
+.item {
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--standard-10);
+  
+  &.special {
+    background: var(--red-5);
+    color: var(--red-50);
+  }
+  
+  &.selected {
+    background: var(--green-5);
+    color: var(--green-50);
+  }
+}
+
+ui-button {
+  margin: 20px 0;
+}

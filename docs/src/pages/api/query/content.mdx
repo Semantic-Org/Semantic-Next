@@ -5,6 +5,7 @@ title: Query - Content
 icon: file-text
 description: API reference for Query methods related to element content
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Content methods in Query allow you to manipulate content accessing form data, text and html.
 
@@ -61,6 +62,9 @@ console.log(inputValue);
 $('input').val('New value');
 ```
 
+### Example
+<PlaygroundExample id="query-value" direction="horizontal"></PlaygroundExample>
+
 ## Text
 Gets or sets the text content of elements.
 
@@ -103,6 +107,9 @@ console.log(buttonText);
 $('button').text('Click me!');
 ```
 
+### Example
+<PlaygroundExample id="query-text" direction="horizontal"></PlaygroundExample>
+
 ## HTML
 
 ### Syntax
@@ -143,6 +150,9 @@ console.log(containerHtml);
 // Set the HTML content
 $('.container').html('<p>New content</p>');
 ```
+
+### Example
+<PlaygroundExample id="query-html" direction="horizontal"></PlaygroundExample>
 
 ## Outer HTML
 
@@ -190,6 +200,9 @@ console.log(elementOuterHtml);
 $('.element').outerHTML('<div class="new-element">Replaced content</div>');
 ```
 
+### Example
+<PlaygroundExample id="query-outerhtml" direction="horizontal"></PlaygroundExample>
+
 
 ## Text Node
 
@@ -215,6 +228,9 @@ The combined text content of immediate text node children.
 const immediateText = $('p').textNode();
 console.log(immediateText);
 ```
+
+### Example
+<PlaygroundExample id="query-textnode" direction="horizontal"></PlaygroundExample>
 
 ## Slot Methods
 
@@ -269,6 +285,9 @@ const headerContent = $(myComponent).getSlot('header');
 const slotContent = $(element.shadowRoot).find('slot[name="header"]').getSlot();
 ```
 
+### Example
+<PlaygroundExample id="query-getslot" direction="horizontal"></PlaygroundExample>
+
 ### setSlot
 
 The `setSlot` method sets the content of slots in Web Components.
@@ -316,6 +335,9 @@ $(myComponent).setSlot('header', '<h1>Header content</h1>');
 // Set content for a slot element (adds to parent component)
 $(element.shadowRoot).find('slot').setSlot('<div>New content</div>');
 ```
+
+### Example
+<PlaygroundExample id="query-setslot" direction="horizontal"></PlaygroundExample>
 
 ### Complete Component Example
 ```javascript

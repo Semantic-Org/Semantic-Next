@@ -1,0 +1,20 @@
+h3 {
+  margin: 20px 0 10px 0;
+}
+
+.fruit, .vegetable {
+  display: inline-block;
+  margin: 5px;
+  padding: 5px 10px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+}
+
+p {
+  margin: 10px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}

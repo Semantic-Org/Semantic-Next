@@ -1,0 +1,9 @@
+h4 {
+  font-size: 14px;
+  font-weight: bold;
+}
+.log {
+  border: var(--border);
+  margin: var(--vertically-spaced);
+  padding: var(--spacing);
+}

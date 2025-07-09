@@ -1,6 +1,11 @@
+:host {
+  --swatch-spacing: 5px;
+}
+
 .palette {
   max-width: 1200px;
   margin: 0 auto;
+  padding: var(--spacing);
   container: component / inline-size;
 }
 
@@ -21,11 +26,13 @@
 }
 
 .group {
-  margin-bottom: calc(var(--spacing) * 3);
+  margin-bottom: var(--swatch-spacing);
   
   .name {
+    width: 90px; /* widest text */
     color: var(--header-color);
     text-transform: capitalize;
+    margin-right: 5px;
     text-align: right;
 
     @container (max-width: 600px)  {
@@ -37,10 +44,11 @@
 
 .colors {
   display: grid;
-  grid-template-columns: repeat(13, 1fr);
+  grid-template-columns: repeat(14, 1fr);
   grid-template-rows: repeat(1, 1fr);
   align-items: center;
-  gap: 1rem;
+  /*gap: 1rem;*/
+  gap: var(--swatch-spacing);
   
   @container (max-width: 600px) {
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -62,12 +70,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /*
   box-shadow: 0px 0px 0px 1px inset var(--white-10);
   background-image: var(--angled-gradient);
+  */
   
   &:hover {
     z-index: 2;
-    transform: scale(1.02);
+    transform: scale(1.1);
     box-shadow: var(--floating-shadow);
     border-color: var(--selected-border-color);
   }
@@ -78,7 +88,7 @@
 
   .shade {
     font-weight: var(--bold);
-    font-size: var(--large);
+    font-size: var(--tiny);
     text-align: center;
     color: var(--overlay-color);
   }

@@ -1,0 +1,33 @@
+.target {
+  padding: 20px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  text-align: center;
+  margin: 20px 0;
+  cursor: pointer;
+  transition: var(--transition);
+  
+  &:hover {
+    background: var(--standard-10);
+  }
+  
+  &.listening {
+    background: var(--standard-10);
+    border-color: var(--active-border-color);
+  }
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.status {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+}

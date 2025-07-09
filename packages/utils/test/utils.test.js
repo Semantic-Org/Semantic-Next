@@ -21,6 +21,7 @@ import {
   generateID,
   get,
   getKeyFromEvent,
+  getRandomSeed,
   groupBy,
   hashCode,
   hasProperty,
@@ -50,9 +51,11 @@ import {
   moveToBack,
   moveToFront,
   noop,
+  oklchToHex,
+  oklchToRgb,
   onlyKeys,
   pick,
-  prettifyID,
+  prettifyHash,
   proxyObject,
   range,
   remove,
@@ -69,8 +72,6 @@ import {
   weightedObjectSearch,
   where,
   wrapFunction,
-  oklchToRgb,
-  oklchToHex,
 } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -718,6 +719,121 @@ describe('Type Checking Utilities', () => {
       const input = [{ a: 1 }, { a: undefined }, { a: 2 }];
       const expected = [{ a: 1 }, { a: 2 }, { a: undefined }];
       expect(sortBy(input, 'a')).toEqual(expected);
+    });
+
+    it('should sort by multiple keys', () => {
+      const input = [
+        { sort: 2, name: 'c' },
+        { sort: 1, name: 'b' },
+        { sort: 1, name: 'a' },
+        { sort: 2, name: 'a' },
+      ];
+      const expected = [
+        { sort: 1, name: 'a' },
+        { sort: 1, name: 'b' },
+        { sort: 2, name: 'a' },
+        { sort: 2, name: 'c' },
+      ];
+      expect(sortBy(input, ['sort', 'name'])).toEqual(expected);
+    });
+
+    it('should handle undefined values in multi-key sorting', () => {
+      const input = [
+        { sort: undefined, name: 'c' },
+        { sort: 1, name: 'b' },
+        { sort: 1, name: 'a' },
+        { sort: undefined, name: 'a' },
+      ];
+      const expected = [
+        { sort: 1, name: 'a' },
+        { sort: 1, name: 'b' },
+        { sort: undefined, name: 'a' },
+        { sort: undefined, name: 'c' },
+      ];
+      expect(sortBy(input, ['sort', 'name'])).toEqual(expected);
+    });
+
+    it('should work with comparator and multi-key sorting', () => {
+      const input = [
+        { sort: 1, name: 'c' },
+        { sort: 2, name: 'b' },
+        { sort: 1, name: 'a' },
+      ];
+      const expected = [
+        { sort: 2, name: 'b' },
+        { sort: 1, name: 'a' },
+        { sort: 1, name: 'c' },
+      ];
+      const smartComparator = (a, b, objA, objB, keyIndex) => {
+        // For numbers, reverse sort, for strings, normal sort
+        if (typeof a === 'number' && typeof b === 'number') {
+          return b - a; // reverse for numbers
+        }
+        if (a < b) { return -1; }
+        if (a > b) { return 1; }
+        return 0;
+      };
+      expect(sortBy(input, ['sort', 'name'], smartComparator)).toEqual(expected);
+    });
+
+    it('should pass key index as fifth parameter to comparator', () => {
+      const input = [{ a: 1, b: 2 }, { a: 1, b: 1 }];
+      const keyIndexes = [];
+      const comparator = (valA, valB, objA, objB, keyIndex) => {
+        keyIndexes.push(keyIndex);
+        return valA - valB;
+      };
+      sortBy(input, ['a', 'b'], comparator);
+      expect(keyIndexes).toContain(0); // First key index
+      expect(keyIndexes).toContain(1); // Second key index
+    });
+
+    it('should handle navigation use case with sortIndex and name fallback', () => {
+      const input = [
+        { sortIndex: undefined, name: 'zebra' },
+        { sortIndex: 1, name: 'elephant' },
+        { sortIndex: undefined, name: 'apple' },
+        { sortIndex: 2, name: 'dog' },
+        { sortIndex: 1, name: 'banana' },
+        { sortIndex: undefined, name: 'cat' },
+        { sortIndex: 3, name: 'fish' },
+      ];
+      const expected = [
+        { sortIndex: 1, name: 'banana' },
+        { sortIndex: 1, name: 'elephant' },
+        { sortIndex: 2, name: 'dog' },
+        { sortIndex: 3, name: 'fish' },
+        { sortIndex: undefined, name: 'apple' },
+        { sortIndex: undefined, name: 'cat' },
+        { sortIndex: undefined, name: 'zebra' },
+      ];
+      expect(sortBy(input, ['sortIndex', 'name'])).toEqual(expected);
+    });
+
+    it('should handle accented characters and numeric strings correctly', () => {
+      const input = [
+        { name: 'café', version: 'v10' },
+        { name: 'apple', version: 'v2' },
+        { name: 'Café', version: 'v1' },
+        { name: 'naïve', version: 'v20' },
+        { name: 'resume', version: 'v3' },
+        { name: 'résumé', version: 'v11' },
+      ];
+
+      // Test single key with accented characters
+      const byName = sortBy(input, 'name');
+      expect(byName[0].name).toBe('apple');
+      expect(byName[1].name).toBe('café');
+      expect(byName[2].name).toBe('Café');
+
+      // Test numeric string sorting
+      const byVersion = sortBy(input, 'version');
+      expect(byVersion[0].version).toBe('v1');
+      expect(byVersion[1].version).toBe('v2');
+      expect(byVersion[2].version).toBe('v3');
+      expect(byVersion[3].version).toBe('v10');
+      expect(byVersion[4].version).toBe('v11');
+      expect(byVersion[5].version).toBe('v20');
     });
   });
 });
@@ -1707,18 +1823,47 @@ describe('ID/Hashing Functions', () => {
     });
   });
 
-  describe('prettifyID', () => {
-    it('should return "0" for input 0', () => {
-      expect(prettifyID(0)).toBe('0');
+  describe('prettifyHash', () => {
+    it('should return padded "0" for input 0 with default settings', () => {
+      expect(prettifyHash(0)).toBe('000000');
     });
 
     it('should convert a number to base 36 representation', () => {
-      expect(prettifyID(10)).toMatch(/^[0-9A-Z]+$/);
+      expect(prettifyHash(10)).toBe('00000A');
+      expect(prettifyHash(35)).toBe('00000Z');
+      expect(prettifyHash(36)).toBe('000010');
     });
 
     it('should handle large numbers correctly', () => {
       const largeNumber = 123456789012345;
-      expect(prettifyID(largeNumber)).toMatch(/^[0-9A-Z]+$/);
+      expect(prettifyHash(largeNumber)).toMatch(/^[0-9A-Z]+$/);
+    });
+
+    it('should respect custom minLength', () => {
+      expect(prettifyHash(123, { minLength: 8 })).toBe('0000003F');
+      expect(prettifyHash(123, { minLength: 3 })).toBe('03F');
+      expect(prettifyHash(123, { minLength: 1 })).toBe('3F');
+    });
+
+    it('should respect custom padChar', () => {
+      expect(prettifyHash(123, { minLength: 8, padChar: 'X' })).toBe('XXXXXX3F');
+      expect(prettifyHash(123, { minLength: 6, padChar: '-' })).toBe('----3F');
+    });
+
+    it('should handle negative numbers by returning padded 0', () => {
+      expect(prettifyHash(-123)).toBe('000000');
+    });
+
+    it('should handle decimal numbers by parsing as integers', () => {
+      expect(prettifyHash(123.456)).toBe('00003F');
+    });
+
+    it('should handle string inputs by parsing as numbers', () => {
+      expect(prettifyHash('123')).toBe('00003F');
+    });
+
+    it('should handle NaN by returning padded 0', () => {
+      expect(prettifyHash(NaN)).toBe('000000');
     });
   });
 
@@ -1842,6 +1987,42 @@ describe('ID/Hashing Functions', () => {
       const input = { a: { b: { c: { d: { e: 'nested' } } } } };
       expect(() => hashCode(input)).not.toThrow();
     });
+
+    it('should return prettified hash when prettify option is true', () => {
+      const result = hashCode('test', { prettify: true });
+      expect(result).toMatch(/^[0-9A-Z]{6,}$/);
+      expect(typeof result).toBe('string');
+    });
+
+    it('should return numeric hash when prettify option is false', () => {
+      const result = hashCode('test', { prettify: false });
+      expect(typeof result).toBe('number');
+    });
+
+    it('should accept custom seed', () => {
+      const result1 = hashCode('test', { seed: 0x12345678 });
+      const result2 = hashCode('test', { seed: 0x87654321 });
+      expect(result1).not.toBe(result2);
+    });
+  });
+
+  describe('getRandomSeed', () => {
+    it('should return a number', () => {
+      const seed = getRandomSeed();
+      expect(typeof seed).toBe('number');
+    });
+
+    it('should return different values on subsequent calls', () => {
+      const seed1 = getRandomSeed();
+      const seed2 = getRandomSeed();
+      expect(seed1).not.toBe(seed2);
+    });
+
+    it('should return values within expected range', () => {
+      const seed = getRandomSeed();
+      expect(seed).toBeGreaterThanOrEqual(0);
+      expect(seed).toBeLessThanOrEqual(0xFFFFFFFF);
+    });
   });
 
   describe('generateID', () => {
@@ -1853,6 +2034,24 @@ describe('ID/Hashing Functions', () => {
       const id1 = generateID();
       const id2 = generateID();
       expect(id1).not.toBe(id2);
+    });
+
+    it('should generate consistent ID with same seed', () => {
+      const seed = 12345;
+      const id1 = generateID(seed);
+      const id2 = generateID(seed);
+      expect(id1).toBe(id2);
+    });
+
+    it('should generate different IDs with different seeds', () => {
+      const id1 = generateID(12345);
+      const id2 = generateID(54321);
+      expect(id1).not.toBe(id2);
+    });
+
+    it('should generate IDs with default 6 character length', () => {
+      const id = generateID(123);
+      expect(id.length).toBeGreaterThanOrEqual(6);
     });
   });
 });
@@ -1988,7 +2187,7 @@ describe('Color Utilities', () => {
       expect(oklchToRgb('oklch(0.866 0.323 142.5)')).toEqual({ r: 0, g: 255, b: 0 });
       // Blue (Accepting implementation result due to floating point precision near gamut edge)
       expect(oklchToRgb('oklch(0.452 0.311 264.05)')).toEqual({ r: 0, g: 5, b: 254 });
-       // Yellow (Verified output from oklch.com, standard conversion results in some blue)
+      // Yellow (Verified output from oklch.com, standard conversion results in some blue)
       expect(oklchToRgb('oklch(0.968 0.191 109.01)')).toEqual({ r: 255, g: 254, b: 70 });
       // Cyan (Accepting implementation result)
       expect(oklchToRgb('oklch(0.9 0.3 180)')).toEqual({ r: 0, g: 255, b: 230 });
@@ -2013,7 +2212,7 @@ describe('Color Utilities', () => {
 
     it('should handle edge cases for lightness', () => {
       expect(oklchToRgb('oklch(1.1 0.1 180)')).toEqual({ r: 255, g: 255, b: 255 }); // L >= 1
-      expect(oklchToRgb('oklch(-0.1 0.1 180)')).toEqual({ r: 0, g: 0, b: 0 });     // L <= 0
+      expect(oklchToRgb('oklch(-0.1 0.1 180)')).toEqual({ r: 0, g: 0, b: 0 }); // L <= 0
     });
   });
 
@@ -2056,14 +2255,14 @@ describe('Color Utilities', () => {
       expect(oklchToHex('')).toBe('');
     });
 
-     it('should handle edge cases for lightness', () => {
+    it('should handle edge cases for lightness', () => {
       expect(oklchToHex('oklch(1.1 0.1 180)')).toBe('#ffffff'); // L >= 1
       expect(oklchToHex('oklch(-0.1 0.1 180)')).toBe('#000000'); // L <= 0 (Regex fixed)
     });
 
     it('should handle hex values needing padding', () => {
-       // A blue that results in single-digit hex components (verified from oklch.com)
-       expect(oklchToHex('oklch(0.1 0.01 270)')).toBe('#030306');
+      // A blue that results in single-digit hex components (verified from oklch.com)
+      expect(oklchToHex('oklch(0.1 0.01 270)')).toBe('#030306');
     });
 
     it('should return input string if it is already a valid hex code', () => {
@@ -2075,17 +2274,16 @@ describe('Color Utilities', () => {
     });
 
     it('should return empty string for invalid hex codes if not oklch', () => {
-       expect(oklchToHex('#ff00fg')).toBe(''); // Invalid hex char 'g'
-       expect(oklchToHex('ff0000')).toBe(''); // Missing #
+      expect(oklchToHex('#ff00fg')).toBe(''); // Invalid hex char 'g'
+      expect(oklchToHex('ff0000')).toBe(''); // Missing #
     });
 
-     it('should return empty string for empty input', () => {
-       expect(oklchToHex('')).toBe('');
-       expect(oklchToHex()).toBe(''); // Test default parameter
-     });
+    it('should return empty string for empty input', () => {
+      expect(oklchToHex('')).toBe('');
+      expect(oklchToHex()).toBe(''); // Test default parameter
+    });
   });
 });
-
 
 describe('iterators', () => {
   describe('each', () => {

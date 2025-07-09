@@ -6,9 +6,14 @@
       data-value={item.value}
       exportparts="item"
     >
-      {item.label}
+      {#if item.icon}
+        <ui-icon part="item-icon" icon={item.icon}></ui-icon>
+      {/if}
+      <span part="item-label" class="label">{item.label}</span>
       {#if item.badge}
-        <ui-label outline badge>{item.badge}</ui-label>
+        <ui-label part="item-badge" outline badge>
+          {item.badge}
+        </ui-label>
       {/if}
     </menu-item>
   {else}

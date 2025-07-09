@@ -1,0 +1,33 @@
+.container {
+  padding: 20px;
+  margin: 15px 0;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.content {
+  padding: 15px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  line-height: 1.6;
+}
+
+.box {
+  height: 100px;
+  padding: 15px;
+  margin: 15px 0;
+  background: var(--standard-15);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  transition: height 0.3s ease;
+}
+
+p {
+  margin: 8px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}
