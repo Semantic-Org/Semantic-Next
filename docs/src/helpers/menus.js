@@ -332,6 +332,11 @@ export const sidebarMenuFramework = [
         url: '/reactivity/signals',
       },
       {
+        name: 'Dependent Signals',
+        description: 'Derived and computed signals',
+        url: '/reactivity/dependent-signals',
+      },
+      {
         name: 'Reactions',
         description: 'Reactive computations',
         url: '/reactivity/reactions',
