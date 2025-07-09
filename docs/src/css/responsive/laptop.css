@@ -6,6 +6,9 @@
     --sidebar-width: 210px;
     --rail-width: 0px;
   }
+  rail.rail {
+    display: none;
+  }
   layout masthead > ui-menu ui-container {
     margin-right: 0px;
   }
