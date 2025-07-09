@@ -95,7 +95,6 @@ export const importMap = packageImports;
 export const importMapJSON = JSON.stringify(packageImports, null, 2);
 
 export const GET = async () => {
-  console.log(importMapJSON);
   return new Response(importMapJSON, {
     headers: {
       'Content-Type': 'application/importmap+json',
