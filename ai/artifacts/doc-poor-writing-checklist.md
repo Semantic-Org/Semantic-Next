@@ -8,18 +8,18 @@
 - [x] `/introduction` - Introduction page (7 issues fixed)
 
 #### Components (11 pages)
-- [x] `/components` - Overview (4 issues fixed)
-- [x] `/components/create` - Creating (5 issues fixed)
-- [x] `/components/instances` - Functionality (7 issues fixed)
-- [x] `/components/lifecycle` - Lifecycle (6 issues fixed)
-- [x] `/components/rendering` - Templates & Data (6 issues fixed)
-- [x] `/components/settings` - Settings (6 issues fixed)
-- [x] `/components/state` - State (6 issues fixed)
-- [ ] `/components/events` - Events
-- [ ] `/components/reactivity` - Reactivity
-- [ ] `/components/dom` - DOM
-- [ ] `/components/styling` - Styling
-- [ ] `/components/keys` - Key Bindings
+- [x] `/components` - Overview (4 issues fixed) ✅ VALIDATED
+- [x] `/components/create` - Creating (6 issues fixed) ✅ VALIDATED
+- [x] `/components/instances` - Functionality (10 issues fixed) ✅ VALIDATED
+- [x] `/components/lifecycle` - Lifecycle (6 issues fixed) ✅ VALIDATED
+- [x] `/components/rendering` - Templates & Data (6 issues fixed) ✅ VALIDATED
+- [x] `/components/settings` - Settings (6 issues fixed) ✅ VALIDATED
+- [x] `/components/state` - State (6 issues fixed) ✅ VALIDATED
+- [x] `/components/events` - Events (7 issues fixed) ✅ VALIDATED
+- [x] `/components/reactivity` - Reactivity (7 issues fixed) ✅ VALIDATED
+- [x] `/components/dom` - DOM (6 issues fixed) ✅ VALIDATED
+- [x] `/components/styling` - Styling (5 issues fixed) ✅ VALIDATED
+- [x] `/components/keys` - Key Bindings (4 issues fixed) ✅ VALIDATED
 
 #### Templates (8 pages)
 - [ ] `/templates` - Overview

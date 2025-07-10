@@ -3,6 +3,30 @@
 ## Core Principle
 **Remove problems without adding new ones.** It's better to delete 3 issues than to rewrite and introduce 2 new problems.
 
+## Mandatory Pre-Edit Verification Protocol
+
+Execute this validation sequence before any content modification:
+
+### 1. Technical Terminology Preservation
+- **IF** removing adverbs that describe implementation approach → **QUERY** user for confirmation
+- **PATTERN**: Words describing HOW systems work (directly, systematically, efficiently) may be technical precision
+- **PROCEDURE**: Flag rather than delete when uncertain about technical vs marketing usage
+
+### 2. API Behavior Accuracy Check  
+- **IF** modifying statements about reactivity, state, or data flow → **HALT** and verify with user
+- **CRITICAL EXAMPLE**: "settings are reactive" vs "settings are not reactive" 
+- **PROCEDURE**: Never invert boolean technical statements without explicit approval
+
+### 3. Logic Preservation Verification
+- **BEFORE** finalizing edits → **SCAN** for accidental meaning inversions
+- **TEST**: Does edited content maintain original technical assertions?
+- **PROCEDURE**: Compare pre/post edit for logical consistency
+
+### 4. Context-Dependent Evaluation
+- **IF** word appears to be "marketing fluff" → **CHECK** if it serves technical precision
+- **PATTERN**: Descriptors of system architecture or implementation details may be intentional
+- **PROCEDURE**: When in doubt, preserve and flag for human review
+
 ## Good Writing Reference
 See `doc-good-writing-examples.md` for concrete examples of excellent technical writing patterns to emulate. Key principles:
 - 1-2 sentence paragraphs
@@ -173,22 +197,71 @@ See `doc-good-writing-examples.md` for concrete examples of excellent technical 
 3. **Don't change technical meaning** - Only fix language, not content
 4. **Don't add your own style** - Match what exists
 
-## Post-Edit Validation
+## MANDATORY PER-PAGE VALIDATION CHECKLIST
 
-After editing any page, simulate and validate the InPageMenu:
+**CRITICAL**: Every agent MUST complete this checklist for EVERY page reviewed. Use tools to verify each step.
 
-### 1. Simulate Rail Menu Output
-Apply the rail menu logic to your headers:
-- **Step 1**: Find first heading level (H2, H3, etc.)
-- **Step 2**: If first is H3+, inject page title as parent for consecutive H3+ headings
-- **Step 3**: Find lowest remaining heading level = main groups
-- **Step 4**: Next level deeper = sub-items under groups
+### STEP 1: Extract All Headers (MANDATORY TOOL USE)
+**MUST USE**: Read tool to extract all headers (H1-H6) from the file
+- Record exact header text and level for each heading
+- Document line numbers for reference
 
-### 2. Validate Result
-- **Character Count**: Top-level headers <30 chars, sub-headers <35 chars
-- **Scannable Groups**: Can users quickly find main concepts in group names?
-- **Logical Nesting**: Do sub-items relate to their parent group?
-- **Complete Coverage**: Are all important concepts represented in the menu?
+### STEP 2: Simulate Rail Menu Logic (MANDATORY)
+**MUST APPLY** the rail menu algorithm step-by-step:
+1. **Find first heading level** (H2, H3, etc.)
+2. **Auto-inject check**: If first heading is H3+, page title becomes H2 parent
+3. **Determine groups**: Lowest heading level = main groups
+4. **Determine sub-items**: Next level deeper = sub-items under groups
+
+### STEP 3: Character Count Validation (MANDATORY TOOL USE)
+**MUST CHECK** character counts for each header:
+- **Top-level headers**: MUST be under 30 characters
+- **Sub-headers**: MUST be under 35 characters
+- **TOOL REQUIREMENT**: Use text counting to verify each header length
+
+### STEP 4: Logical Consistency Check (MANDATORY)
+**MUST VERIFY** each heading AND content against these criteria:
+- No contradictory statements within headers
+- Headers accurately reflect section content  
+- No "Outside X" containing "Inside X" type errors
+- Terminology is consistent throughout
+- **CRITICAL**: Check if your edits accidentally flipped technical meanings
+- **EXAMPLE**: Previous agent changed "settings ARE reactive" to "settings are NOT reactive" - would have broken developer understanding
+
+### STEP 5: Navigation Usability Test (MANDATORY)
+**MUST SIMULATE** user scanning behavior:
+- Can users find key concepts in main groups?
+- Do sub-items logically relate to their parent?
+- Are important topics represented in navigation?
+- Is the hierarchy intuitive for the content domain?
+
+### STEP 6: Documentation Requirements (MANDATORY TOOL USE)
+**MUST UPDATE** tracking artifacts:
+- Record any header changes in review list
+- Update checklist with validation status
+- Note any character limit violations found
+- Document any structural changes made
+
+## VALIDATION FAILURE PROTOCOL
+
+**IF ANY STEP FAILS**: Agent MUST:
+1. **STOP** all other work immediately
+2. **FIX** the failing validation issue
+3. **RE-RUN** entire validation checklist
+4. **DOCUMENT** what was changed and why
+5. **VERIFY** fix resolves the issue
+
+## ENFORCEMENT REQUIREMENT
+
+**NO PAGE** may be marked "completed" without:
+- ✅ All 6 validation steps completed
+- ✅ All character limits verified
+- ✅ Rail menu simulation documented
+- ✅ Logical consistency confirmed
+- ✅ Navigation usability tested
+- ✅ Tracking artifacts updated
+
+**AGENTS MUST NOT SKIP THIS PROCESS** - it is a mandatory requirement for quality assurance.
 
 ### Example Simulation:
 **Input Headers:**

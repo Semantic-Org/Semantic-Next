@@ -283,6 +283,50 @@ For each problematic passage found, record:
 **Text**: \"Reactive Computations\" (doesn't exist)  
 **Suggestion**: Change to \"Reactions\" - FIXED
 
+#### Components/events.mdx
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 5  
+**Issue**: Typo  
+**Text**: \"Usings events\"  
+**Suggestion**: Change to \"Using events\" - FIXED
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 73  
+**Issue**: Syntax Error  
+**Text**: Missing comma after event handler  
+**Suggestion**: Add comma - FIXED
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 168  
+**Issue**: Syntax Error  
+**Text**: Extra bracket in destructuring \"data]}\"  
+**Suggestion**: Remove extra bracket - FIXED
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 180  
+**Issue**: Syntax Error  
+**Text**: Missing \"=\" in arrow function  
+**Suggestion**: Add missing \"=\" - FIXED
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 213  
+**Issue**: Wrong Reference  
+**Text**: \"abortSignals\" should be \"abortController\"  
+**Suggestion**: Fix reference - FIXED
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 253  
+**Issue**: Wrong Link Path  
+**Text**: \"/component/settings\" missing \"s\"  
+**Suggestion**: Fix to \"/components/settings\" - FIXED
+
+**File**: `/docs/src/pages/components/events.mdx`  
+**Line**: 302  
+**Issue**: Grammar Error + Run-on Sentence  
+**Text**: \"similar to Components all emit\"  
+**Suggestion**: Split into two sentences - FIXED
+
 ### Templates Section
 
 *No issues recorded yet*
