@@ -6,21 +6,21 @@ description: Attaching keyboard events to components
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Keybindings can be attached to any component by passing in `keys` to `defineComponent`
+Key bindings can be attached to any component by passing in `keys` to `defineComponent`
 
 ```javascript
 defineComponent({
   keys: {
-    'ctrl + f'({ self }) {
+    'ctrl + f': ({ self }) {
       self.focusSearch()
     },
-    'up'({ self }) {
+    'up': ({ self }) {
       self.selectPreviousResult();
     },
-    'down'({ self }) {
+    'down': ({ self }) {
       self.selectNextResult();
     },
-    'esc'({ self }) {
+    'esc': ({ self }) {
       self.blurSearch();
     },
   }
@@ -36,7 +36,7 @@ Key bindings can be bound to any key by their common name. Multiple key bindings
 
 ```javascript
 const keys = {
-  't' () => {
+  't': () => {
     // handle "t" key
   }
 }
@@ -46,7 +46,7 @@ Special keys are mapped to their common names like `ctrl`, `alt`, `meta` `shift`
 
 ```javascript
 const keys = {
-  'meta' () => {
+  'meta': () => {
     // handle mac/win key
   }
 };
@@ -57,7 +57,7 @@ Multiple keys can be bound to the same event using a comma separated list.
 
 ```javascript
 const keys = {
-  'up, down, left, right' () => {
+  'up, down, left, right': () => {
     // handle all keyboard events together
   }
 }
@@ -69,10 +69,10 @@ Key combinations can be used by including a `+` between keys. Spacing is ignored
 
 ```javascript
 const keys = {
-  'ctrl + o' () => {
+  'ctrl + o': () => {
     // handle ctrl+o pressed together
-  }
-  'ctrl+s' () => {
+  },
+  'ctrl+s': () => {
     // handle ctrl+s pressed together
   }
 };
@@ -84,7 +84,7 @@ Key sequences can be used by leaving a space between each key. Keys will need to
 
 ```javascript
 const keys = {
-  'up up down down' () => {
+  'up up down down': () => {
     // 4 keys pressed in sequence
   }
 };
@@ -108,14 +108,14 @@ In addition to the standard callback data found in [lifecycle guide](/components
 
 All [lifecycle callbacks](/components/lifecycle) receive as a parameter two methods `bindKey` and `unbindKey` which can be used to dynamically add and remove keybindings as necessary.
 
-This is often used with [componet reactivity](/component/reactivity) to adjust key bindings when something significant has changed with a component.
+This is often used with [component reactivity](/components/reactivity) to adjust key bindings when something significant has changed with a component.
 
 ```javascript
 const createComponent = ({ reaction, bindKey, unbindKey }) => ({
   initialize() {
     reaction(() => {
       if(self.isSomeCondition()) {
-        bindKey('enter', self.submitForm());
+        bindKey('enter', self.submitForm);
       }
       else {
         unbindKey('enter');
@@ -126,6 +126,6 @@ const createComponent = ({ reaction, bindKey, unbindKey }) => ({
 ```
 
 
-<PlaygroundExample id="advanced-keybinding" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="advanced-keybinding" height="500" direction="horizontal"></PlaygroundExample>
 
 

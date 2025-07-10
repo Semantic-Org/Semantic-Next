@@ -32,7 +32,7 @@ const css = `
 
 Page CSS is CSS scoped to the page. This can be used to assign styles globally when your component is defined.
 
-This is useful to apply styles to your component based on where it is rendered, or work  around the necessary limitations of scoped css.
+This is useful to apply styles to your component based on where it is rendered, or work around the necessary limitations of scoped css.
 
 > *Layout Shift* - Be cautious using page css to define rules as they will not be present during server side rendering and can cause layout shifts until your component is defined.
 
@@ -67,7 +67,7 @@ const css = `
 
 ### onThemeChanged Callback
 
-When definining your component with `defineComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
+When defining your component with `defineComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
 
 ```javascript
 const onThemeChanged = ({darkMode}) => {
@@ -85,7 +85,7 @@ const onThemeChanged = ({darkMode}) => {
 Inside each [lifecycle callback](/components/lifecycle#callback-arguments), you can check the `darkMode` flag to determine if a dark mode theme is applied. This can be used to run different javascript for a dark mode theme.
 
 ```javascript
-const onCreated = ({darkMode}) {
+const onCreated = ({darkMode}) => {
   if(darkMode) {
     // do something
   }
@@ -94,7 +94,7 @@ const onCreated = ({darkMode}) {
 
 ### Triggering Theme Callback
 
-To cause `onThemeChanged` to fire on your components you will need to dipatch a `themechange` event from the page.
+To cause `onThemeChanged` to fire on your components you will need to dispatch a `themechange` event from the page.
 
 You can use the `theme-switcher` component to implement a standard 'dark-mode' theme switcher button, or manually dispatch this event from a custom component.
 
@@ -159,7 +159,7 @@ Web components also include an additional new standard for exposing [css parts](
 
 Unlike css variables which only expose particular css values as being modifiable, using a [`part`](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) will allow **any CSS property to be adjusted**.
 
-This will allow you apply arbitrary css not present in the original component.
+This will allow you to apply arbitrary css not present in the original component.
 
 ### Parts Example
 

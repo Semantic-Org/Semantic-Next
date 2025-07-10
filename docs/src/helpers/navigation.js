@@ -496,13 +496,71 @@ export const getTopbarDisplayMenu = async ({ includeURLS = true } = {}) => {
   Gets In Page Menu
   showing links to each header
 */
-export const getRailMenu = (headings) => {
+export const getRailMenu = (headings, pageTitle = null) => {
   let menu = [];
   let menuGroup;
+
+  if (!headings.length) return menu;
 
   const headingLevels = unique(headings.map(heading => heading.depth)).sort();
   const lowestHeadingLevel = headingLevels[0];
 
+  // If first heading is H3+ and we have a page title, inject it as H2 parent
+  if (headings.length > 0 && headings[0].depth > 2 && pageTitle) {
+    // Find consecutive H3+ headings at the start
+    let consecutiveSubheadings = [];
+    let i = 0;
+    while (i < headings.length && headings[i].depth > 2) {
+      consecutiveSubheadings.push(headings[i]);
+      i++;
+    }
+    
+    if (consecutiveSubheadings.length > 0) {
+      // Create parent group with page title for the initial subheadings
+      const pageGroup = {
+        id: 'page-title',
+        title: pageTitle,
+        items: consecutiveSubheadings.map(heading => ({
+          id: heading.slug,
+          title: heading.text,
+        })),
+      };
+      menu.push(pageGroup);
+      
+      // Process remaining headings with original logic
+      const remainingHeadings = headings.slice(i);
+      if (remainingHeadings.length > 0) {
+        const remainingLevels = unique(remainingHeadings.map(h => h.depth)).sort();
+        const remainingLowestLevel = remainingLevels[0];
+        
+        each(remainingHeadings, heading => {
+          if (heading.depth == remainingLowestLevel) {
+            if (menuGroup) {
+              menu.push(menuGroup);
+            }
+            menuGroup = {
+              id: heading.slug,
+              title: heading.text,
+              items: [],
+            };
+          }
+          else if (menuGroup && remainingLevels[1] && heading.depth == remainingLevels[1]) {
+            menuGroup.items.push({
+              id: heading.slug,
+              title: heading.text,
+            });
+          }
+        });
+        if (menuGroup) {
+          menu.push(menuGroup);
+        }
+      }
+      
+      return menu.filter(Boolean);
+    }
+  }
+
+  // Original logic for when first heading is H2 or when no page title provided
   each(headings, heading => {
     // new grouping
     if (heading.depth == lowestHeadingLevel) {
