@@ -95,16 +95,19 @@ const subCategorySortOrder = {
 
 /* Standardized Icons across Subsections for Sidebar Menu */
 export const standardMenuIcons = {
-  'Guides': 'home',
+  'Guides': 'book',
+  'Usage': 'code',
+  'CSS Tokens': 'droplet',
   'User Guide': 'home',
   'Templates': 'table',
   'Framework': 'package',
-  'Components': 'layers',
+  'Primitives': 'layers',
+  'Components': 'package',
   'UI Components': 'layers',
   'Reactivity': 'cpu',
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
-  'API Reference': 'text file',
+  'API Reference': 'code',
   'Utils': 'tool',
 };
 
@@ -132,9 +135,9 @@ export const topbarDisplayMenu = [
   },
   {
     _id: 'ui',
-    _ids: ['primitives', 'components'],
-    name: 'UI Components',
-    url: '/usage',
+    _ids: ['css', 'primitives', 'components', 'usage'],
+    name: 'UI Framework',
+    url: '/css',
   },
   {
     _id: 'learn',
@@ -169,8 +172,23 @@ export const topbarMenu = [
     url: '/api',
   },
   {
-    _id: 'ui',
-    name: 'UI Components',
+    _id: 'css',
+    name: 'CSS Tokens',
+    url: '/css',
+  },
+  {
+    _id: 'primitives',
+    name: 'Primitives',
+    url: '/primitives',
+  },
+  {
+    _id: 'components',
+    name: 'Components',
+    url: '/ui-components',
+  },
+  {
+    _id: 'usage',
+    name: 'Usage',
     url: '/usage',
   },
   {
@@ -188,9 +206,37 @@ export const topbarMenu = [
 ];
 
 /* UI Component Sidebar */
-export const sidebarMenuUI = [
+export const sidebarMenuCSS = [
   {
-    name: 'Usage',
+    name: 'CSS Tokens',
+    url: '/css',
+    icon: 'droplet',
+  },
+];
+
+/* UI Component Sidebar */
+export const sidebarMenuPrimitives = [
+  {
+    name: 'UI Primitives',
+    url: '/primitives',
+    icon: 'layers',
+    pages: componentPages,
+  },
+];
+
+/* UI Component Sidebar */
+export const sidebarMenuComponents = [
+  {
+    name: 'UI Components',
+    url: '/ui-components',
+    icon: 'package',
+    pages: [],
+  },
+];
+
+export const sidebarMenuUsage = [
+  {
+    name: 'Installation',
     url: '/usage',
     icon: 'open book',
     pages: [
@@ -201,26 +247,9 @@ export const sidebarMenuUI = [
       {
         name: 'Frameworks Usage',
         url: '/usage/framework',
-      }, /*
-      {
-        name: 'Web Components',
-        url: '/usage/web-components'
-      },*/
+      },
     ],
   },
-  {
-    name: 'UI Primitives',
-    url: '/ui',
-    icon: 'layers',
-    pages: componentPages,
-  },
-  /*
-  {
-    name: 'Test',
-    url: '/test',
-    icon: 'code',
-  },
-  */
 ];
 
 /* Component Framework Sidebar */
