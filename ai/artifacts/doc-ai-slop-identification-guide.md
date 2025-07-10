@@ -105,6 +105,14 @@ See `doc-good-writing-examples.md` for concrete examples of excellent technical 
 ### 16. Poor InPage Menu Structure
 **Pattern**: Header hierarchy that creates illogical or confusing navigation groups.
 
+### 17. Logical Inconsistencies
+**Pattern**: Statements that contradict themselves or defy basic logic.
+**Examples**: 
+- "Outside Component" containing "Inside your component"
+- "This is required" followed by "This is optional"
+- "Always use X" then "Never use X"
+**Fix**: Flag with user as "I see you said (X), did you mean (Y)?" and ask for clarification.
+
 **How Rail Menu Logic Works:**
 1. **If first heading is H3+**: Auto-inject page title as H2 parent for consecutive H3+ headings at start
 2. **Always show two consecutive levels**: Find lowest heading level, use it as groups, next level as sub-items

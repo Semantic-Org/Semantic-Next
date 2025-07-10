@@ -64,7 +64,7 @@ el.color = 'green';
 
 ### Using the Query Library
 
-The [Query library](/query) provides convenient methods for accessing components and updating their settings programmatically.
+The [Query library](/query) provides methods for accessing components and updating their settings programmatically.
 
 #### The settings() Method
 
@@ -104,7 +104,7 @@ $('user-form').setting('onSubmit', (data) => {
 
 #### The initialize() Method
 
-For components that need to be configured before they're used, the [`initialize()`](/api/query/components#initialize) method sets properties after the DOM is fully loaded:
+The [`initialize()`](/api/query/components#initialize) method sets properties after the DOM is fully loaded:
 
 ```javascript
 import { $ } from '@semantic-ui/query';
@@ -116,7 +116,7 @@ $('name-card').initialize({
 });
 ```
 
-This is especially useful for passing function references that can't be serialized as HTML attributes.
+Useful for passing function references that can't be serialized as HTML attributes.
 
 <PlaygroundExample id="settings" direction="horizontal"></PlaygroundExample>
 
@@ -143,7 +143,7 @@ When passing complex types via HTML attributes, serialize them using JSON:
 When setting complex types via JavaScript properties, pass the object or array directly:
 
 ```javascript
-const userList = $('user-list').setting(users, [
+const userList = $('user-list').setting('users', [
   { name: 'Alex', role: 'admin' },
   { name: 'Sam', role: 'user' }
 ]);
@@ -156,19 +156,11 @@ Functions cannot be serialized as HTML attributes and must be passed via JavaScr
 ```javascript
 $('user-form').setting('onSubmit', (data) => {
   saveUserData(data);
-};
+});
 ```
 
-### Putting It All Together
+### Example
 
-In the following example, Query is used to modify the runtime settings of a component using [`settings()`](/api/query/components#settings)
-
-* Several settings are overridden with properties in `page.js`.
-  * `getName()` is overridden to return `Sam` instead of `Jill`
-  * Birthday is overridden to `January 2`
-* Several settings are overridden in attributes in `page.html`
-  * Siblings is modified to be `["Tom", "Jerry"]`
-  * `Job` `Age` and `Married `are also modified
-* `page.js` also attaches an event listener to a link to modify the settings again when the "change birthday" link is clicked
+This example shows modifying component settings with Query:
 
 <PlaygroundExample id="setting-types" direction="horizontal"></PlaygroundExample>

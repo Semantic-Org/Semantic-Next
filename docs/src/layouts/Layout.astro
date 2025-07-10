@@ -57,7 +57,7 @@ const activeURL = Astro.url.pathname;
 					</rail>
 					<pageContent>
 						{inlineHeader == 'true' && header && (
-							<h1>
+							<h1 id="page-title">
 								{headerIcon !== undefined && (<UIIcon icon={headerIcon} disabled></UIIcon>)} <span class="text">{header}</span>
 							</h1>
 						)}

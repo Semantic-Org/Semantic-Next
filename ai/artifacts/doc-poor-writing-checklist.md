@@ -8,13 +8,13 @@
 - [x] `/introduction` - Introduction page (7 issues fixed)
 
 #### Components (11 pages)
-- [ ] `/components` - Overview
-- [ ] `/components/create` - Creating
-- [ ] `/components/instances` - Functionality
-- [ ] `/components/lifecycle` - Lifecycle
-- [ ] `/components/rendering` - Templates & Data
-- [ ] `/components/settings` - Settings
-- [ ] `/components/state` - State
+- [x] `/components` - Overview (4 issues fixed)
+- [x] `/components/create` - Creating (5 issues fixed)
+- [x] `/components/instances` - Functionality (7 issues fixed)
+- [x] `/components/lifecycle` - Lifecycle (6 issues fixed)
+- [x] `/components/rendering` - Templates & Data (6 issues fixed)
+- [x] `/components/settings` - Settings (6 issues fixed)
+- [x] `/components/state` - State (6 issues fixed)
 - [ ] `/components/events` - Events
 - [ ] `/components/reactivity` - Reactivity
 - [ ] `/components/dom` - DOM

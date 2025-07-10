@@ -23,11 +23,10 @@ Your template defines how your component's HTML is rendered:
 * [Reactive data](/templates/expressions) - State stored with your component that should update the page when it updates
 * [Function calls](/templates/expressions) - Methods on your component that allow you to access content and perform tasks
 * [Subtemplates](/templates/subtemplates) - Reusable pieces of HTML organized as a separate file
-* [Snippets](/templates/subtemplates) - Reusable pieces of HTML included elsewhere in a template
 * [Slots](/templates/slots) - Locations where content can be placed inside your component
 * [Snippets](/templates/snippets) - Reusable HTML structures inside a component
 
-> For more information on all the features of templates check our dedicated subsection [on templates](/templates).
+> For more information see [templates](/templates).
 
 ### Data Context
 
@@ -46,7 +45,7 @@ This will check for `name` in each of these locations and then return the first 
 * **[Subtemplate Data](/templates/subtemplates)** - Data passed in from a parent template called `name`
 * **[Global Helpers](#global-helpers)** - A global helper registered across templates called `name`
 
-> **Simplified Data Structures** - A template's data context is flat to make templates easier to read and to give flexibility when moving values between locations. For instance, you may initially have a value as a `property` on your component, then move it to `state` to make it reactive, then finally move it to `settings` to make it user-overridable without having to modify the underlying template.
+> **Simplified Data Structures** - The data context is flat, making it easy to move values between `property`, `state`, and `settings` without modifying templates.
 
 ## Settings
 
@@ -82,7 +81,7 @@ el.name = 'Sam';
 
 > For comprehensive details on state management, see the dedicated [State documentation](/components/state).
 
-State is a [reactive data store](/reactivity) that uses Signals to recompute references to a value when its underlying value is modified. State represents the internal, changing data of your component.
+State is a [data store](/reactivity) that uses Signals to recompute references to a value when its underlying value is modified. State represents the internal, changing data of your component.
 
 ```javascript
 const defaultState = {
@@ -170,7 +169,7 @@ When components are rendered as subtemplates, their data context is defined expl
 
 ## Global Helpers
 
-[Global helpers](/templates/helpers) are special utilities that are available across all templates and provide utilities like `classMap`, `formatDate`, `concat`, `stringify` that can be used to format values for output.
+[Global helpers](/templates/helpers) are utilities available in all templates and provide `classMap`, `formatDate`, `concat`, `stringify` to format values for output.
 
 > For a list of global helpers please visit the dedicated [global helper page](/templates/helpers) in templating.
 
@@ -184,7 +183,6 @@ In this example, `formatDate` is used to format the display of a date set in the
 
 <PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
 
-For a complete list of available global helpers see [global helpers](/templates/helpers).
 
 
 ## Order of Data Lookups
