@@ -5,7 +5,7 @@
 ### Framework Documentation (`sidebarMenuFramework`)
 
 #### Introduction
-- [ ] `/introduction` - Introduction page
+- [x] `/introduction` - Introduction page (7 issues fixed)
 
 #### Components (11 pages)
 - [ ] `/components` - Overview

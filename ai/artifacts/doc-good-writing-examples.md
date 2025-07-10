@@ -86,16 +86,20 @@ import { createServer } from 'vite'
 ## Header Structure Examples
 
 ### Good Header Lengths (InPageMenu-friendly)
-- "Installation" ✓
-- "Configuration" ✓  
-- "API Reference" ✓
-- "Performance" ✓
-- "Quick Start" ✓
+- "Installation" (12 chars) ✓
+- "Configuration" (13 chars) ✓  
+- "API Reference" (13 chars) ✓
+- "Performance" (11 chars) ✓
+- "Quick Start" (11 chars) ✓
 
 ### Bad Header Lengths (wrap in sidebar)
-- "Understanding the Complete Installation Process" ✗
-- "Comprehensive Configuration Guide for Advanced Users" ✗
-- "Detailed API Reference Documentation" ✗
+- "Understanding the Complete Installation Process" (47 chars) ✗
+- "Comprehensive Configuration Guide for Advanced Users" (52 chars) ✗
+- "Detailed API Reference Documentation" (36 chars) ✗
+
+### Character Limits
+- **Top-level headers**: Under 30 characters
+- **Sub-headers**: Under 35 characters
 
 ### Good Header Hierarchy (Vite style)
 ```

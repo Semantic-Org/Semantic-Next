@@ -95,15 +95,44 @@ See `doc-good-writing-examples.md` for concrete examples of excellent technical 
 
 ### 15. Overly Long Headers
 **Pattern**: Headers that wrap in the InPageMenu sidebar.
-**Bad**: "Understanding the Complete Lifecycle of Component Initialization"
-**Good**: "Component Lifecycle"
-**Fix**: Shorten to 2-4 words max, focusing on key terms users scan for.
+**Character Limits**: 
+- **Top-level headers**: Under 30 characters
+- **Sub-headers**: Under 35 characters
+**Bad**: "Understanding the Complete Lifecycle of Component Initialization" (64 chars)
+**Good**: "Component Lifecycle" (18 chars)
+**Fix**: Shorten to essential keywords users scan for.
 
-### 16. Poor Header Organization
-**Pattern**: Headers that don't form a scannable hierarchy.
-**Bad**: Mix of conceptual and technical headers at same level.
-**Good**: Consistent grouping (e.g., all H2s are concepts, all H3s are specifics).
-**Fix**: Reorganize headers to create logical groups for scanning.
+### 16. Poor InPage Menu Structure
+**Pattern**: Header hierarchy that creates illogical or confusing navigation groups.
+
+**How Rail Menu Logic Works:**
+1. **If first heading is H3+**: Auto-inject page title as H2 parent for consecutive H3+ headings at start
+2. **Always show two consecutive levels**: Find lowest heading level, use it as groups, next level as sub-items
+3. **Groups get expand/collapse**: Main level headings become collapsible sections
+4. **Sub-items show under groups**: One level deeper headings nest under their parent
+
+**Test Your Headers**: Simulate the rail menu:
+- What will be the main groups? (collapsible sections)
+- What will be the sub-items under each group?
+- Can users scan and find key concepts quickly?
+
+**Bad Example**:
+```
+### Overview  
+## Installation
+### Features (orphaned - no H2 parent, no H3 siblings)
+### Step 1
+```
+**Result**: "Installation" group only has orphaned H3s with no logical relationship
+
+**Good Example**:
+```
+### Overview (page title "API Reference" auto-injected as parent)
+### Features (under "API Reference")
+## Installation (second main group)
+### Step 1 (under Installation)
+```
+**Result**: "API Reference" and "Installation" as main groups with proper sub-items
 
 ## Removal Strategy
 
@@ -138,27 +167,40 @@ See `doc-good-writing-examples.md` for concrete examples of excellent technical 
 
 ## Post-Edit Validation
 
-After editing any page, validate the InPageMenu structure:
+After editing any page, simulate and validate the InPageMenu:
 
-1. **Header Length Check**: Do all headers fit on one line in the sidebar?
-2. **Scannable Keywords**: Can a user quickly find key concepts by scanning headers?
-3. **Logical Hierarchy**: Do H2s group related H3s meaningfully?
-4. **Menu Structure**: Does the resulting InPageMenu make sense for navigation?
+### 1. Simulate Rail Menu Output
+Apply the rail menu logic to your headers:
+- **Step 1**: Find first heading level (H2, H3, etc.)
+- **Step 2**: If first is H3+, inject page title as parent for consecutive H3+ headings
+- **Step 3**: Find lowest remaining heading level = main groups
+- **Step 4**: Next level deeper = sub-items under groups
 
-### Example Good Header Structure:
+### 2. Validate Result
+- **Character Count**: Top-level headers <30 chars, sub-headers <35 chars
+- **Scannable Groups**: Can users quickly find main concepts in group names?
+- **Logical Nesting**: Do sub-items relate to their parent group?
+- **Complete Coverage**: Are all important concepts represented in the menu?
+
+### Example Simulation:
+**Input Headers:**
 ```
-## Installation
-### Requirements
-### Quick Start
-
-## Configuration
-### Basic Setup
-### Advanced Options
-
+### Overview
+### Quick Start  
 ## API Reference
 ### Methods
 ### Properties
+## Examples
 ```
+
+**Rail Menu Output:**
+- **Page Title** (auto-injected)
+  - Overview
+  - Quick Start
+- **API Reference** 
+  - Methods
+  - Properties
+- **Examples** (no sub-items)
 
 ## Decision Framework
 
