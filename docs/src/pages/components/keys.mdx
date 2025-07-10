@@ -11,16 +11,16 @@ Key bindings can be attached to any component by passing in `keys` to `defineCom
 ```javascript
 defineComponent({
   keys: {
-    'ctrl + f'({ self }) {
+    'ctrl + f': ({ self }) {
       self.focusSearch()
     },
-    'up'({ self }) {
+    'up': ({ self }) {
       self.selectPreviousResult();
     },
-    'down'({ self }) {
+    'down': ({ self }) {
       self.selectNextResult();
     },
-    'esc'({ self }) {
+    'esc': ({ self }) {
       self.blurSearch();
     },
   }
@@ -36,7 +36,7 @@ Key bindings can be bound to any key by their common name. Multiple key bindings
 
 ```javascript
 const keys = {
-  't' () => {
+  't': () => {
     // handle "t" key
   }
 }
@@ -46,7 +46,7 @@ Special keys are mapped to their common names like `ctrl`, `alt`, `meta` `shift`
 
 ```javascript
 const keys = {
-  'meta' () => {
+  'meta': () => {
     // handle mac/win key
   }
 };
@@ -57,7 +57,7 @@ Multiple keys can be bound to the same event using a comma separated list.
 
 ```javascript
 const keys = {
-  'up, down, left, right' () => {
+  'up, down, left, right': () => {
     // handle all keyboard events together
   }
 }
@@ -69,10 +69,10 @@ Key combinations can be used by including a `+` between keys. Spacing is ignored
 
 ```javascript
 const keys = {
-  'ctrl + o' () => {
+  'ctrl + o': () => {
     // handle ctrl+o pressed together
   },
-  'ctrl+s' () => {
+  'ctrl+s': () => {
     // handle ctrl+s pressed together
   }
 };
@@ -84,7 +84,7 @@ Key sequences can be used by leaving a space between each key. Keys will need to
 
 ```javascript
 const keys = {
-  'up up down down' () => {
+  'up up down down': () => {
     // 4 keys pressed in sequence
   }
 };
