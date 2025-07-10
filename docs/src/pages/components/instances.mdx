@@ -55,7 +55,7 @@ For more information see [component lifecycle](/components/lifecycle#callback-ar
 
 Component instances are passed through to all other callbacks as `self` allowing you to reference methods and values directly from [events](/components/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
 
-##### Lifecycle
+#### Lifecycle
 ```javascript
 
 const onRendered = ({ self, isClient }) => {
@@ -65,7 +65,7 @@ const onRendered = ({ self, isClient }) => {
 });
 ```
 
-##### Keybindings
+#### Keybindings
 ```javascript
 const keys = {
   'f'({ self }) {
@@ -115,7 +115,7 @@ const events = {
 
 Your template's [data context](/components/rendering#data-context) can be used to access values from your component instance directly.
 
-##### Templates
+#### Templates
 ```html
 <p>Your name is {getName}</p>
 ```

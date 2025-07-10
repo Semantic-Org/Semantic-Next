@@ -6,7 +6,7 @@ description: Attaching keyboard events to components
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Keybindings can be attached to any component by passing in `keys` to `defineComponent`
+Key bindings can be attached to any component by passing in `keys` to `defineComponent`
 
 ```javascript
 defineComponent({
@@ -71,7 +71,7 @@ Key combinations can be used by including a `+` between keys. Spacing is ignored
 const keys = {
   'ctrl + o' () => {
     // handle ctrl+o pressed together
-  }
+  },
   'ctrl+s' () => {
     // handle ctrl+s pressed together
   }
@@ -108,14 +108,14 @@ In addition to the standard callback data found in [lifecycle guide](/components
 
 All [lifecycle callbacks](/components/lifecycle) receive as a parameter two methods `bindKey` and `unbindKey` which can be used to dynamically add and remove keybindings as necessary.
 
-This is often used with [componet reactivity](/component/reactivity) to adjust key bindings when something significant has changed with a component.
+This is often used with [component reactivity](/components/reactivity) to adjust key bindings when something significant has changed with a component.
 
 ```javascript
 const createComponent = ({ reaction, bindKey, unbindKey }) => ({
   initialize() {
     reaction(() => {
       if(self.isSomeCondition()) {
-        bindKey('enter', self.submitForm());
+        bindKey('enter', self.submitForm);
       }
       else {
         unbindKey('enter');
@@ -126,6 +126,6 @@ const createComponent = ({ reaction, bindKey, unbindKey }) => ({
 ```
 
 
-<PlaygroundExample id="advanced-keybinding" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="advanced-keybinding" height="500" direction="horizontal"></PlaygroundExample>
 
 
