@@ -1265,7 +1265,7 @@ export class Query {
 
   insertContent(target, content, position) {
     const $content = this.chain(content);
-    const insertElement =(el) => {
+    const insertElement = (el) => {
       if (target.insertAdjacentElement) {
         target.insertAdjacentElement(position, el);
       }
@@ -1457,6 +1457,7 @@ export class Query {
     document.addEventListener('DOMContentLoaded', () => {
       this.settings(settings);
     });
+    return this;
   }
 
   settings(settings) {

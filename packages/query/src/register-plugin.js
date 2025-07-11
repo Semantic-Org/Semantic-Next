@@ -1,10 +1,10 @@
-import { capitalize, noop } from '@semantic-ui/utils';
+import { capitalize, isString, noop } from '@semantic-ui/utils';
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
+// Register Plugin
 export const registerPlugin = (plugin) => {
   const {
-
     name,
 
     // settings for plugin
@@ -25,7 +25,6 @@ export const registerPlugin = (plugin) => {
     selectors = {},
     classNames = {},
     errors = {},
-
   } = plugin;
 
   if (!name) {
@@ -36,19 +35,21 @@ export const registerPlugin = (plugin) => {
     throw new Error(`Plugin '${name}' already registered`);
   }
 
-  const namespace = `plugin${capitalize(name)}`;
+  const pluginDefaults = {
+    namespace: `plugin${capitalize(name)}`,
+  };
 
-  const pluginDef = {
+  plugin = {
+    ...pluginDefaults,
     ...plugin,
-    namespace,
   };
 
   // Register this plugin
-  Query.plugins.set(name, pluginDef);
+  Query.plugins.set(name, plugin);
 
   // Create abstraction around plugin initialization
+  console.log('adding func name');
   Query.prototype[name] = function(settings) {
-
     // Retrieve the current defaults in case they are modified
     const {
       defaultSettings,
@@ -67,18 +68,15 @@ export const registerPlugin = (plugin) => {
 
     // check if we're calling a method
     let methodInvoked, methodArguments;
-    if (isString(settings[0])) {
+    if (isString(arguments[0])) {
       [methodInvoked, ...methodArguments] = arguments;
     }
 
     // value to store return
     let returnedValue;
 
-    $allElements.each(($el, el, index) => {
-      const element = this;
-
-      const instance = element[namespace];
-
+    $elements.each((element, index) => {
+      const instance = element[plugin.namespace];
       if (!instance) {
         // create plugin instance
       }
@@ -90,14 +88,13 @@ export const registerPlugin = (plugin) => {
         if (instance !== undefined) {
           instance.destroy();
         }
-
-        new PluginInstance(element, $element, plugin, settings);
+        // new Plugin(element, plugin);
       }
     });
 
     return (returnedValue !== undefined)
       ? returnedValue
-      : $allElements;
+      : $elements;
   };
 
   // Expose settings, class names and errors on the prototype
