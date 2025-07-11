@@ -35,20 +35,10 @@ export const registerPlugin = (plugin) => {
     throw new Error(`Plugin '${name}' already registered`);
   }
 
-  const pluginDefaults = {
-    namespace: `plugin${capitalize(name)}`,
-  };
-
-  plugin = {
-    ...pluginDefaults,
-    ...plugin,
-  };
-
   // Register this plugin
   Query.plugins.set(name, plugin);
 
   // Create abstraction around plugin initialization
-  console.log('adding func name');
   Query.prototype[name] = function(settings) {
     // Retrieve the current defaults in case they are modified
     const {
@@ -77,8 +67,11 @@ export const registerPlugin = (plugin) => {
 
     $elements.each((element, index) => {
       const instance = element[plugin.namespace];
+
+      // create plugin instance if not defined
+      // it auto attaches to element
       if (!instance) {
-        // create plugin instance
+        new Plugin({ element, ...plugin, settings });
       }
 
       if (methodInvoked) {
@@ -88,7 +81,6 @@ export const registerPlugin = (plugin) => {
         if (instance !== undefined) {
           instance.destroy();
         }
-        // new Plugin(element, plugin);
       }
     });
 

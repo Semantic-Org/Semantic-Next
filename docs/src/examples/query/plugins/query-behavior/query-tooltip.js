@@ -6,7 +6,7 @@ registerPlugin({
     duration: 200,
   },
   createPlugin: (params) => {
-    console.log('params are', params);
+    console.log('params are', params.settings.duration);
     return {};
   },
 });
