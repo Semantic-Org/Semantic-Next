@@ -38,6 +38,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
 * **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
+* **Bug** - Fixed `initialize` did not properly chain
 
 ### Docs
 * **Examples** - Improved console log styling for examples

@@ -62,6 +62,7 @@ const subCategorySortOrder = {
     'Introduction',
     'Selectors',
     'Components',
+    'Plugins',
     'Attributes',
     'Content',
     'CSS',
