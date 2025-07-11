@@ -4,15 +4,28 @@ import { Query } from './query.js';
 
 export const registerPlugin = (plugin) => {
   const {
+
     name,
+
+    // settings for plugin
     defaultSettings = {},
+
+    // returns plugin instance
     createPlugin = noop,
+
+    // event object
     events = {},
-    onCreate = noop,
-    onDestroy = noop,
+
+    // callbacks
+    onCreated = noop,
+    onMutated = noop,
+    onDestroyed = noop,
+
+    // standard
     selectors = {},
     classNames = {},
     errors = {},
+
   } = plugin;
 
   if (!name) {
@@ -33,9 +46,16 @@ export const registerPlugin = (plugin) => {
   // Register this plugin
   Query.plugins.set(name, pluginDef);
 
+  // Create abstraction around plugin initialization
   Query.prototype[name] = function(settings) {
-    // Retrieve the current defaults -- they might be overwritten by end user
-    const { defaultSettings, classNames, errors, selectors } = Query.prototype[name];
+
+    // Retrieve the current defaults in case they are modified
+    const {
+      defaultSettings,
+      classNames,
+      errors,
+      selectors,
+    } = Query.prototype[name];
 
     settings = {
       ...defaultSettings,
