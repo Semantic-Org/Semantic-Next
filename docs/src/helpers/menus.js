@@ -60,6 +60,7 @@ const subCategorySortOrder = {
   'Query': [
     'Setup',
     'Introduction',
+    'Selectors',
     'Components',
     'Attributes',
     'Content',

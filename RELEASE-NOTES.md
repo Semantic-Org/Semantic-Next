@@ -24,6 +24,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component are no longer `composed: true`
 
 ### Query
+* **Feature** - You can now use `documentFragment` with content manipulation like `append()` `prepend()`
 * **Feature** - Added namespaced events to `on` and `off`
 * **Feature** - Added `clippingParent` to find closest ancestor which will clip the current element
 * **Feature** - Added `.data()` for getting and setting html data
