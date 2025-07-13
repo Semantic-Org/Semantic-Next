@@ -700,25 +700,30 @@ export class Query {
     return this;
   }
 
-  trigger(eventName, eventParams) {
+  trigger(eventName, eventSettings) {
     return this.each(el => {
       if (typeof el.dispatchEvent !== 'function') {
         return;
       }
+      // trigger native handler
+      if (isFunction(el[eventName])) {
+        el[eventName]();
+        return;
+      }
       const event = new Event(eventName, { bubbles: true, cancelable: true });
-      if (eventParams) {
-        Object.assign(event, eventParams);
+      if (eventSettings) {
+        Object.assign(event, eventSettings);
       }
       el.dispatchEvent(event);
     });
   }
 
   // shorthand for most common trigger() uses
-  click(eventParams) {
-    return this.trigger('click', eventParams);
+  click(eventSettings) {
+    return this.trigger('click', eventSettings);
   }
-  submit(eventParams) {
-    return this.trigger('submit', eventParams);
+  submit(eventSettings) {
+    return this.trigger('requestSubmit', eventSettings);
   }
 
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
