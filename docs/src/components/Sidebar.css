@@ -80,10 +80,16 @@
       display: flex;
       flex-direction: column;
       height: 0px; /* confused on this but it works */
-
+      --nav-menu-title-font-size: 13px;
+      --nav-menu-item-font-size: 12px;
 
       &::part(search) {
         margin: 0.5rem 1rem 0rem;
+      }
+      &::part(content) {
+        border-left: var(--internal-border);
+        margin-left: 0.5rem;
+        padding-left: 1rem;
       }
       &::part(menu) {
         scrollbar-width: thin;

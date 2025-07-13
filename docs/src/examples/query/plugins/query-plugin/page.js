@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import './query-mask-input.js';
+import './mask-input-plugin.js';
 
 $('.alpha').maskInput({ type: 'alpha' });
 $('.numeric').maskInput({ type: 'numeric' });

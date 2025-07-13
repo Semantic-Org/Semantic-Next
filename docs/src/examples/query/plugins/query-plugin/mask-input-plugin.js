@@ -1,6 +1,7 @@
 import { $ } from '@semantic-ui/query';
 
-$.fn.maskInput = function({ type = 'alphanumeric' } = {}) {
+// Adds a new method called maskInput() to all query instances
+$.plugin.maskInput = function({ type = 'alphanumeric' } = {}) {
   this.on('keydown', (event) => {
     const presets = {
       alpha: /[a-z]/,
