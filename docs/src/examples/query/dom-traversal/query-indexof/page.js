@@ -1,6 +1,5 @@
 import { $ } from '@semantic-ui/query';
 
-const target = $('.target');
-const index = target.indexOf();
+const index = $('.item').indexOf('.target');
 
-target.text(`Position: ${index}`);
+$('.debug').text(`Target is index ${index}`);

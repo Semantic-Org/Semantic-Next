@@ -1,32 +1,22 @@
 .box {
-  padding: 15px;
-  margin: 15px 0;
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
   background: var(--standard-5);
   border: var(--border);
   border-radius: var(--border-radius);
 }
 
 .card {
-  padding: 15px;
-  margin: 15px 0;
-  background: var(--standard-10);
+  display: inline-block;
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
+  background: var(--standard-5);
   border: var(--border);
   border-radius: var(--border-radius);
 }
 
-.card h3 {
-  margin: 0 0 10px 0;
-}
-
-.card p {
-  margin: 0;
-}
 
 pre {
   background: var(--standard-5);
   padding: 10px;
-  border-radius: var(--border-radius);
-  font-size: 12px;
-  overflow-x: auto;
-  white-space: pre-wrap;
 }

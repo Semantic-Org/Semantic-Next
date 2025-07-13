@@ -1,16 +1,22 @@
-.user, .product {
-  padding: 15px;
-  margin: 10px 0;
+.user {
+  position: relative;
   background: var(--standard-5);
   border: var(--border);
+  padding: var(--padding);
   border-radius: var(--border-radius);
+  margin: var(--vertically-spaced);
+
+  &::after {
+    content: attr(data-id);
+    background-color: var(--blue);
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: right;
+    padding: 3px 5px;
+  }
 }
 
-p {
-  margin: 8px 0;
-  font-family: monospace;
-}
-
-p span {
-  font-weight: bold;
+.output {
+  margin: var(--vertically-spaced);
 }

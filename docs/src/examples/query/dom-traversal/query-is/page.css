@@ -4,46 +4,7 @@
   background: var(--standard-10);
   cursor: pointer;
   
-  &:hover {
-    background: var(--standard-20);
-  }
-  
-  &.active {
-    border-left: 4px solid var(--blue-50);
-  }
-  
   &.special {
     border-right: 4px solid var(--purple-50);
-  }
-  
-  &.clicked {
-    background: var(--green-5);
-    color: var(--green-50);
-  }
-}
-
-.output {
-  background: var(--standard-5);
-  padding: 12px;
-  margin: 20px 0;
-  
-  .result {
-    color: var(--blue-50);
-  }
-  
-  .details {
-    color: var(--standard-70);
-    
-    .test {
-      margin: 4px 0;
-      
-      &.pass {
-        color: var(--green-50);
-      }
-      
-      &.fail {
-        color: var(--red-50);
-      }
-    }
   }
 }
