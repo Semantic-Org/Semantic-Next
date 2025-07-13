@@ -53,6 +53,10 @@ const restoreGlobals = function(settings) {
 export const useAlias = () => $;
 
 // Expose prototype for plugins
-$$.fn = $.fn = Query.prototype;
+$$.fn =
+  $.fn =
+  $$.plugin =
+  $.plugin =
+    Query.prototype;
 
 export { $, $$, exportGlobals, restoreGlobals };
