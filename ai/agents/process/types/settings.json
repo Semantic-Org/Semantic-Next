@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(packages/*/types/**)",
+      "Edit(packages/*/types/**)",
+      "Write(packages/*/types/**)",
+      "MultiEdit(packages/*/types/**)",
+      "Read(packages/*/src/*.d.ts)",
+      "Edit(packages/*/src/*.d.ts)",
+      "Write(packages/*/src/*.d.ts)",
+      "MultiEdit(packages/*/src/*.d.ts)",
+      "Read(types/**)",
+      "Edit(types/**)",
+      "Write(types/**)",
+      "MultiEdit(types/**)",
+      "Read(*.d.ts)",
+      "Edit(*.d.ts)",
+      "Write(*.d.ts)",
+      "MultiEdit(*.d.ts)",
+      "Read(tsconfig.json)",
+      "Bash(tsc)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run build:types)"
+    ],
+    "deny": [],
+    "additionalDirectories": [],
+    "defaultMode": "default"
+  }
+}

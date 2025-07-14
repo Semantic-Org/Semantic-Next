@@ -17,7 +17,8 @@
   },
   "scripts": {
     "build": "wireit",
-    "test": "vitest"
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "files": [
     "src",

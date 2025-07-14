@@ -42,7 +42,8 @@ users.setProperty('user1', 'status', 'active');
 ```
 
 ### Example
-<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="set-property" direction="horizontal"></PlaygroundExample>
+
 
 ## replaceItem
 
@@ -74,7 +75,8 @@ users.replaceItem('user1', { id: 'user1', name: 'Alex' });
 ```
 
 ### Example
-<PlaygroundExample id="reactive-replace-item" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="replace-item" direction="horizontal"></PlaygroundExample>
+
 
 ## removeItem
 
@@ -105,7 +107,8 @@ users.removeItem('user1');
 ```
 
 ### Example
-<PlaygroundExample id="reactive-remove-item" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="remove-item" direction="horizontal"></PlaygroundExample>
+
 
 ## getIDs
 
@@ -216,13 +219,9 @@ const users = new Signal([
 users.hasID(users.value[0], '1'); // true
 users.hasID(users.value[0], 'user1'); // true
 users.hasID(users.value[0], 'wrongId'); // false
-
-// Check if a string has a specific ID
-users.hasID('user1', 'user1'); // true
-users.hasID('user1', 'user2'); // false
 ```
 
-## getItem
+## getItemIndex
 
 Gets the index of an object with the specified ID within the Signal's array value.
 
@@ -253,6 +252,87 @@ const users = new Signal([
   { id: 'user2', name: 'Bob' }
 ]);
 
-const indexOfBob = users.getItem('user2'); // 1
-const indexOfUnknown = users.getItem('user3'); // -1
+const indexOfBob = users.getItemIndex('user2'); // 1
+const indexOfUnknown = users.getItemIndex('user3'); // -1
 ```
+
+
+## getItem
+
+Gets the actual item/object with the specified ID from the Signal's array value.
+
+### Syntax
+```javascript
+signal.getItem(id)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | ID to look for |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| Object or undefined | The object with matching ID, or undefined if not found |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { id: 'user1', name: 'Alice' },
+  { id: 'user2', name: 'Bob' }
+]);
+
+const alice = users.getItem('user1'); // { id: 'user1', name: 'Alice' }
+const bob = users.getItem('user2'); // { id: 'user2', name: 'Bob' }
+const notFound = users.getItem('user3'); // undefined
+```
+
+### Example
+<PlaygroundExample id="get-item" direction="horizontal"></PlaygroundExample>
+
+## setArrayProperty
+
+Sets a property on one or all objects in an array. This is useful for batch updates of properties across multiple items.
+
+### Syntax
+```javascript
+// Set property on a specific item by index
+signal.setArrayProperty(index, property, value)
+
+// Set property on all items
+signal.setArrayProperty(property, value)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | (Optional) The index of the item to update. If omitted, updates all items |
+| property | string | The name of the property to set |
+| value | any | The value to set for the property |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const users = new Signal([
+  { id: 'user1', name: 'Alice', status: 'offline' },
+  { id: 'user2', name: 'Bob', status: 'offline' }
+]);
+
+// Set property on a specific item by index
+users.setArrayProperty(0, 'status', 'online');
+// Result: Alice is online, Bob is still offline
+
+// Set property on all items
+users.setArrayProperty('status', 'online');
+// Result: Both Alice and Bob are online
+```
+
