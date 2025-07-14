@@ -132,7 +132,6 @@ export const topbarDisplayMenu = [
   },
   {
     _id: 'ui',
-    _ids: ['primitives', 'components'],
     name: 'UI Components',
     url: '/usage',
   },
@@ -179,12 +178,15 @@ export const topbarMenu = [
     url: '/learn/selection',
     baseURL: '/learn',
   },
-  ...exampleCategoryMenus, /*
+
+  ...exampleCategoryMenus,
+  /*
   {
     _id: 'playground',
     name: 'Playground',
     url: '/playground',
-  },*/
+  },
+  */
 ];
 
 /* UI Component Sidebar */
@@ -201,11 +203,7 @@ export const sidebarMenuUI = [
       {
         name: 'Frameworks Usage',
         url: '/usage/framework',
-      }, /*
-      {
-        name: 'Web Components',
-        url: '/usage/web-components'
-      },*/
+      },
     ],
   },
   {
@@ -214,13 +212,6 @@ export const sidebarMenuUI = [
     icon: 'layers',
     pages: componentPages,
   },
-  /*
-  {
-    name: 'Test',
-    url: '/test',
-    icon: 'code',
-  },
-  */
 ];
 
 /* Component Framework Sidebar */
