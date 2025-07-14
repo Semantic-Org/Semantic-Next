@@ -6,6 +6,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.13.1 - 07.14.2025
+
+* **Bug** - Fixed a bug with SSR in reactive directives like conditional/data. If a reaction was long-lived (for example an interval is set up in onCreated) the reaction would not properly get gced and could rerun on the server causing an ssr error like (TypeError: this._$Ct._$AI is not a function at ReactiveDataDirective.setValue)
+
 # Version 0.13.0 - 07.14.2025
 
 ## CSS Tokens

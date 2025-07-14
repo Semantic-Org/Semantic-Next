@@ -3,7 +3,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { inArray, isArray, isObject } from '@semantic-ui/utils';
+import { inArray, isServer, isArray, isObject, isClient } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
@@ -26,7 +26,6 @@ export class ReactiveDataDirective extends AsyncDirective {
 
     // Create a new reaction to rerun the computation function if reactive data updates
     // that dont trigger rerender occur
-
     if (this.reaction) {
       // if reaction already set up just return value for rerender
       return this.getReactiveValue();
@@ -35,28 +34,39 @@ export class ReactiveDataDirective extends AsyncDirective {
       // Create a new reaction to rerun the computation function if reactive data updates
       // that dont trigger rerender occur
       let value;
-
-      const context = {
-        message: `expression: {${expression.expression}}`,
-        expression: expression.expression,
-      };
-
-      this.reaction = Reaction.create((computation) => {
-        if (!this.isConnected) {
-          computation.stop();
-          return;
-        }
+      if(isClient) {
+        value = this.watchChanges();
+      }
+      else {
         value = this.getReactiveValue();
-        if (this.settings.unsafeHTML) {
-          value = unsafeHTML(value);
-        }
-        if (!computation.firstRun) {
-          this.setValue(value);
-        }
-      }, { context });
-
+      }
       return value;
     }
+  }
+
+  watchChanges() {
+    const context = {
+      message: `expression: {${this.expression.expression}}`,
+      expression: this.expression.expression,
+    };
+    let value;
+    this.reaction = Reaction.create((computation) => {
+      if (!this.isConnected) {
+        computation.stop();
+        return;
+      }
+      value = this.getReactiveValue();
+      if (this.settings.unsafeHTML) {
+        value = unsafeHTML(value);
+      }
+      if (!computation.firstRun) {
+        this.setValue(value);
+      }
+    }, { context });
+
+    // this returns the value for perf
+    // otherwise we calculate twice on first run
+    return value;
   }
 
   getReactiveValue() {

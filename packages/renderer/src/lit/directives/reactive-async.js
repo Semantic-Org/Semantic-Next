@@ -21,13 +21,23 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       this.reaction = null;
     }
 
+    // Create a new reaction that watches for reactive changes on client
+    if(isClient) {
+      this.watchChanges();
+    }
+
+    // Return initial render
+    return this.renderCurrentState(asyncCondition);
+  }
+
+  watchChanges() {
+
     // pass through context for debugging
     let context = {
       message: `async block: {#async ${asyncCondition.expression}}`,
       async: asyncCondition,
     };
 
-    // Create a new reaction
     this.reaction = Reaction.create((computation) => {
       if (!this.isConnected) {
         computation.stop();
@@ -46,9 +56,6 @@ export class ReactiveAsyncDirective extends AsyncDirective {
         this.setValue(rendered);
       }
     }, { context });
-
-    // Return initial render
-    return this.renderCurrentState(asyncCondition);
   }
 
   handleExpressionResult(result, asyncCondition) {
