@@ -4,8 +4,7 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.13.0
-
+# Version 0.13.0 - 07.14.2025
 
 ## CSS Tokens
 * **Colors** - Color variables like `red-0` -> `red-0` now automatically swap for dark mode. i.e. `red-0` = `red-100` in dark mode.
